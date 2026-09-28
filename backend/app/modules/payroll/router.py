@@ -16,6 +16,7 @@ Endpoints (all manager-scoped + project-access checked):
     GET   /projects/{project_id}/labour-cost/     - live labour-cost rollup
 """
 
+import asyncio
 import csv
 import io
 import uuid
@@ -319,21 +320,8 @@ async def export_batch_json(
     )
 
 
-@router.get(
-    "/batches/{batch_id}/export.csv",
-    dependencies=[Depends(RequirePermission("payroll.read"))],
-)
-async def export_batch_csv(
-    batch_id: uuid.UUID,
-    user_id: CurrentUserId,
-    session: SessionDep,
-    service: PayrollService = Depends(_get_service),
-) -> StreamingResponse:
-    """Export a batch as CSV for ERP / payroll-provider handoff."""
-    batch = await service.get_batch(batch_id)
-    await verify_project_access(batch.project_id, user_id, session)
-    batch, rows = await service.export_rows(batch_id)
-
+def _render_batch_csv(rows: list[dict]) -> str:
+    """Render the payroll batch CSV from the plain export rows."""
     buf = io.StringIO()
     writer = csv.writer(buf)
     writer.writerow(
@@ -366,9 +354,30 @@ async def export_batch_csv(
             ]
         )
     buf.seek(0)
+    return buf.getvalue()
+
+
+@router.get(
+    "/batches/{batch_id}/export.csv",
+    dependencies=[Depends(RequirePermission("payroll.read"))],
+)
+async def export_batch_csv(
+    batch_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: PayrollService = Depends(_get_service),
+) -> StreamingResponse:
+    """Export a batch as CSV for ERP / payroll-provider handoff."""
+    batch = await service.get_batch(batch_id)
+    await verify_project_access(batch.project_id, user_id, session)
+    batch, rows = await service.export_rows(batch_id)
+
+    # Writing the file walks every entry of the batch and is pure CPU, so it
+    # runs in a worker thread; the rows are already plain dicts.
+    csv_text = await asyncio.to_thread(_render_batch_csv, rows)
     filename = f"payroll-batch-{batch.id}.csv"
     return StreamingResponse(
-        iter([buf.getvalue()]),
+        iter([csv_text]),
         media_type="text/csv",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )

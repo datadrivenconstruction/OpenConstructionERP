@@ -18,6 +18,7 @@ Endpoints:
 
 from __future__ import annotations
 
+import asyncio
 import csv
 import io
 import logging
@@ -288,10 +289,42 @@ async def export_tasks(
 ) -> StreamingResponse:
     """Export tasks for a project as Excel file."""
     await verify_project_access(project_id, user_id, session)
+    tasks, _ = await service.list_tasks(project_id, current_user_id=user_id, offset=0, limit=10000)
+
+    rows: list[list[object]] = []
+    for task in tasks:
+        # Checklist progress
+        checklist = task.checklist or []  # type: ignore[attr-defined]
+        total = len(checklist)
+        done = sum(1 for c in checklist if isinstance(c, dict) and c.get("completed"))
+        rows.append(
+            [
+                task.title,  # type: ignore[attr-defined]
+                task.task_type,  # type: ignore[attr-defined]
+                task.status,  # type: ignore[attr-defined]
+                task.priority,  # type: ignore[attr-defined]
+                str(task.responsible_id) if task.responsible_id else "",  # type: ignore[attr-defined]
+                task.due_date,  # type: ignore[attr-defined]
+                str(task.created_at) if task.created_at else "",  # type: ignore[attr-defined]
+                f"{done}/{total}" if total > 0 else "",
+            ]
+        )
+
+    # Writing the workbook walks every task and is pure CPU, so it runs in a
+    # worker thread instead of holding up every other request on the event loop.
+    output = await asyncio.to_thread(_render_tasks_xlsx, rows)
+
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": 'attachment; filename="tasks_export.xlsx"'},
+    )
+
+
+def _render_tasks_xlsx(rows: list[list[object]]) -> io.BytesIO:
+    """Build the tasks workbook from plain cell values (pure CPU, no DB)."""
     from openpyxl import Workbook
     from openpyxl.styles import Font
-
-    tasks, _ = await service.list_tasks(project_id, current_user_id=user_id, offset=0, limit=10000)
 
     wb = Workbook()
     ws = wb.active
@@ -311,31 +344,9 @@ async def export_tasks(
         cell = ws.cell(row=1, column=i, value=h)
         cell.font = Font(bold=True)
 
-    for row_idx, task in enumerate(tasks, 2):
-        ws.cell(row=row_idx, column=1, value=task.title)  # type: ignore[attr-defined]
-        ws.cell(row=row_idx, column=2, value=task.task_type)  # type: ignore[attr-defined]
-        ws.cell(row=row_idx, column=3, value=task.status)  # type: ignore[attr-defined]
-        ws.cell(row=row_idx, column=4, value=task.priority)  # type: ignore[attr-defined]
-        ws.cell(
-            row=row_idx,
-            column=5,
-            value=str(task.responsible_id) if task.responsible_id else "",  # type: ignore[attr-defined]
-        )
-        ws.cell(row=row_idx, column=6, value=task.due_date)  # type: ignore[attr-defined]
-        ws.cell(
-            row=row_idx,
-            column=7,
-            value=str(task.created_at) if task.created_at else "",  # type: ignore[attr-defined]
-        )
-        # Checklist progress
-        checklist = task.checklist or []  # type: ignore[attr-defined]
-        total = len(checklist)
-        done = sum(1 for c in checklist if isinstance(c, dict) and c.get("completed"))
-        ws.cell(
-            row=row_idx,
-            column=8,
-            value=f"{done}/{total}" if total > 0 else "",
-        )
+    for row_idx, values in enumerate(rows, 2):
+        for col, value in enumerate(values, 1):
+            ws.cell(row=row_idx, column=col, value=value)
 
     # Company letterhead above the table; a no-op without a company profile.
     # The importer finds the header under it, so the file re-imports as is.
@@ -348,12 +359,7 @@ async def export_tasks(
     output = io.BytesIO()
     wb.save(output)
     output.seek(0)
-
-    return StreamingResponse(
-        output,
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": 'attachment; filename="tasks_export.xlsx"'},
-    )
+    return output
 
 
 # ── Import template ─────────────────────────────────────────────────────────

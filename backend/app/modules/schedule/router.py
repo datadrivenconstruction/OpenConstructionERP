@@ -23,12 +23,14 @@ Endpoints:
     PATCH  /work-orders/{id}                    - Update work order
 """
 
+import asyncio
 import csv
 import io
 import logging
 import uuid
 import xml.etree.ElementTree as ET  # noqa: S405 - types + output tree building only; parsing routed through defusedxml below
 from decimal import Decimal
+from typing import Any
 
 import defusedxml.ElementTree as safe_ET
 from defusedxml.common import DefusedXmlException
@@ -2162,6 +2164,97 @@ async def import_msp_xml(
     )
 
 
+def _render_schedule_csv(
+    activity_rows: list[tuple[Any, ...]],
+    relationship_rows: list[tuple[str, str, Any, Any]],
+) -> str:
+    """Render the schedule CSV from plain activity and relationship values."""
+    # Build successor -> list of predecessor info
+    # Also map activity UUID -> activity_code for display
+    act_code_map: dict[str, str] = {}
+    for act_id, activity_code, wbs_code, *_rest in activity_rows:
+        act_code_map[act_id] = activity_code or wbs_code or act_id[:8]
+
+    predecessor_map: dict[str, list[str]] = {}
+    for succ_id, predecessor_id, lag_days, relationship_type in relationship_rows:
+        pred_code = act_code_map.get(predecessor_id, predecessor_id[:8])
+        lag_str = f"+{lag_days}d" if lag_days > 0 else ""
+        pred_label = f"{pred_code}{relationship_type}{lag_str}"
+        predecessor_map.setdefault(succ_id, []).append(pred_label)
+
+    # Also include inline dependencies
+    for act_id, *_rest, dependencies in activity_rows:
+        inline_deps = dependencies or []
+        for dep in inline_deps:
+            if isinstance(dep, dict):
+                pred_id = str(dep.get("activity_id", ""))
+                dep_type = dep.get("type", "FS")
+                lag = dep.get("lag_days", 0)
+                pred_code = act_code_map.get(pred_id, pred_id[:8])
+                lag_str = f"+{lag}d" if lag and lag > 0 else ""
+                pred_label = f"{pred_code}{dep_type}{lag_str}"
+                predecessor_map.setdefault(act_id, []).append(pred_label)
+
+    # Generate CSV
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(
+        [
+            "Activity Code",
+            "Name",
+            "WBS",
+            "Start",
+            "End",
+            "Duration (days)",
+            "Progress (%)",
+            "Total Float",
+            "Critical",
+            "Predecessors",
+        ]
+    )
+
+    for (
+        act_id,
+        activity_code,
+        wbs_code,
+        name,
+        start_date,
+        end_date,
+        duration_days,
+        progress_pct,
+        total_float,
+        is_critical,
+        _dependencies,
+    ) in activity_rows:
+        preds = predecessor_map.get(act_id, [])
+        # Deduplicate predecessors
+        preds = list(dict.fromkeys(preds))
+
+        # Neutralise every string-bearing cell so a value a user controls
+        # (activity name/code/WBS, or a derived predecessor label built from
+        # them) that starts with =, +, -, @, tab or CR cannot be interpreted as
+        # a formula when the CSV is opened in Excel / Sheets / LibreOffice
+        # (CSV/formula injection - OWASP). Numeric cells pass through unchanged.
+        writer.writerow(
+            [
+                neutralise_formula(activity_code or ""),
+                neutralise_formula(name),
+                neutralise_formula(wbs_code),
+                neutralise_formula(start_date),
+                neutralise_formula(end_date),
+                duration_days,
+                _str_to_float(progress_pct),
+                total_float if total_float is not None else "",
+                "Yes" if is_critical else "No",
+                neutralise_formula("; ".join(preds)),
+            ]
+        )
+
+    csv_content = output.getvalue()
+    output.close()
+    return csv_content
+
+
 @router.get(
     "/schedule/export/csv/",
     dependencies=[Depends(RequirePermission("schedule.read"))],
@@ -2195,80 +2288,31 @@ async def export_schedule_csv(
     rel_result = await session.execute(rel_stmt)
     relationships = list(rel_result.scalars().all())
 
-    # Build successor -> list of predecessor info
-    # Also map activity UUID -> activity_code for display
-    act_code_map: dict[str, str] = {}
-    for act in activities:
-        act_code_map[str(act.id)] = act.activity_code or act.wbs_code or str(act.id)[:8]
-
-    predecessor_map: dict[str, list[str]] = {}
-    for rel in relationships:
-        succ_id = str(rel.successor_id)
-        pred_code = act_code_map.get(str(rel.predecessor_id), str(rel.predecessor_id)[:8])
-        lag_str = f"+{rel.lag_days}d" if rel.lag_days > 0 else ""
-        pred_label = f"{pred_code}{rel.relationship_type}{lag_str}"
-        predecessor_map.setdefault(succ_id, []).append(pred_label)
-
-    # Also include inline dependencies
-    for act in activities:
-        act_id = str(act.id)
-        inline_deps = act.dependencies or []
-        for dep in inline_deps:
-            if isinstance(dep, dict):
-                pred_id = str(dep.get("activity_id", ""))
-                dep_type = dep.get("type", "FS")
-                lag = dep.get("lag_days", 0)
-                pred_code = act_code_map.get(pred_id, pred_id[:8])
-                lag_str = f"+{lag}d" if lag and lag > 0 else ""
-                pred_label = f"{pred_code}{dep_type}{lag_str}"
-                predecessor_map.setdefault(act_id, []).append(pred_label)
-
-    # Generate CSV
-    output = io.StringIO()
-    writer = csv.writer(output)
-    writer.writerow(
-        [
-            "Activity Code",
-            "Name",
-            "WBS",
-            "Start",
-            "End",
-            "Duration (days)",
-            "Progress (%)",
-            "Total Float",
-            "Critical",
-            "Predecessors",
-        ]
-    )
-
-    for act in activities:
-        act_id = str(act.id)
-        preds = predecessor_map.get(act_id, [])
-        # Deduplicate predecessors
-        preds = list(dict.fromkeys(preds))
-
-        # Neutralise every string-bearing cell so a value a user controls
-        # (activity name/code/WBS, or a derived predecessor label built from
-        # them) that starts with =, +, -, @, tab or CR cannot be interpreted as
-        # a formula when the CSV is opened in Excel / Sheets / LibreOffice
-        # (CSV/formula injection - OWASP). Numeric cells pass through unchanged.
-        writer.writerow(
-            [
-                neutralise_formula(act.activity_code or ""),
-                neutralise_formula(act.name),
-                neutralise_formula(act.wbs_code),
-                neutralise_formula(act.start_date),
-                neutralise_formula(act.end_date),
-                act.duration_days,
-                _str_to_float(act.progress_pct),
-                act.total_float if act.total_float is not None else "",
-                "Yes" if act.is_critical else "No",
-                neutralise_formula("; ".join(preds)),
-            ]
+    # Snapshot the ORM rows into plain values on the loop; the renderer below
+    # never touches the session or a live instance.
+    activity_rows = [
+        (
+            str(act.id),
+            act.activity_code,
+            act.wbs_code,
+            act.name,
+            act.start_date,
+            act.end_date,
+            act.duration_days,
+            act.progress_pct,
+            act.total_float,
+            act.is_critical,
+            act.dependencies,
         )
+        for act in activities
+    ]
+    relationship_rows = [
+        (str(rel.successor_id), str(rel.predecessor_id), rel.lag_days, rel.relationship_type) for rel in relationships
+    ]
 
-    csv_content = output.getvalue()
-    output.close()
+    # Writing the file walks every activity (up to 5000) and is pure CPU, so it
+    # runs in a worker thread and a large schedule does not stall other requests.
+    csv_content = await asyncio.to_thread(_render_schedule_csv, activity_rows, relationship_rows)
 
     schedule_name = schedule.name.replace(" ", "_")[:40]
     filename = f"schedule_{schedule_name}.csv"

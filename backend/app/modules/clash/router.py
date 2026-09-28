@@ -20,6 +20,7 @@ project can never read another project's clashes.
 
 from __future__ import annotations
 
+import asyncio
 import csv
 import io
 import logging
@@ -654,6 +655,66 @@ async def compare_runs(
     return ClashCompareResponse.model_validate(diff)
 
 
+def _render_clash_csv(rows: list[tuple[object, ...]]) -> str:
+    """Write the clash result CSV from plain rows already read from the database.
+
+    Pure: it touches no session, so the export route runs it in a worker thread.
+    """
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow(
+        [
+            "#",
+            "Element A",
+            "Discipline A",
+            "Element B",
+            "Discipline B",
+            "Type",
+            "Severity",
+            "Penetration (m)",
+            "Distance (m)",
+            "Status",
+            "Assigned To",
+            "Due Date",
+        ]
+    )
+    for i, (
+        a_name,
+        a_discipline,
+        b_name,
+        b_discipline,
+        clash_type,
+        severity,
+        penetration_m,
+        distance_m,
+        status_,
+        assigned_to,
+        due_date,
+    ) in enumerate(rows, start=1):
+        # ``neutralise_formula`` defends against CSV formula injection
+        # (BUG-CSV-INJECTION): a source-controlled element name / discipline
+        # / assignee like ``=cmd|'/c calc'!A0`` would otherwise be executed
+        # by Excel when a colleague opens the export. Numeric cells pass
+        # through unchanged (the helper only rewrites dangerous strings).
+        writer.writerow(
+            [
+                i,
+                neutralise_formula(a_name),
+                neutralise_formula(a_discipline),
+                neutralise_formula(b_name),
+                neutralise_formula(b_discipline),
+                neutralise_formula(clash_type),
+                neutralise_formula(severity),
+                penetration_m,
+                distance_m,
+                neutralise_formula(status_),
+                neutralise_formula(assigned_to),
+                neutralise_formula(due_date),
+            ]
+        )
+    return buf.getvalue()
+
+
 @router.get(
     "/projects/{project_id}/runs/{run_id}/export-csv",
     dependencies=[Depends(RequirePermission("clash.export"))],
@@ -702,47 +763,25 @@ async def export_csv(
         limit=_MAX_EXPORT_ROWS,
     )
 
-    buf = io.StringIO()
-    writer = csv.writer(buf)
-    writer.writerow(
-        [
-            "#",
-            "Element A",
-            "Discipline A",
-            "Element B",
-            "Discipline B",
-            "Type",
-            "Severity",
-            "Penetration (m)",
-            "Distance (m)",
-            "Status",
-            "Assigned To",
-            "Due Date",
-        ]
-    )
-    for i, r in enumerate(rows, start=1):
-        # ``neutralise_formula`` defends against CSV formula injection
-        # (BUG-CSV-INJECTION): a source-controlled element name / discipline
-        # / assignee like ``=cmd|'/c calc'!A0`` would otherwise be executed
-        # by Excel when a colleague opens the export. Numeric cells pass
-        # through unchanged (the helper only rewrites dangerous strings).
-        writer.writerow(
-            [
-                i,
-                neutralise_formula(r.a_name),
-                neutralise_formula(r.a_discipline),
-                neutralise_formula(r.b_name),
-                neutralise_formula(r.b_discipline),
-                neutralise_formula(r.clash_type),
-                neutralise_formula(getattr(r, "severity", "medium") or "medium"),
-                r.penetration_m,
-                r.distance_m,
-                neutralise_formula(r.status),
-                neutralise_formula(r.assigned_to or ""),
-                neutralise_formula(getattr(r, "due_date", None) or ""),
-            ]
+    plain = [
+        (
+            r.a_name,
+            r.a_discipline,
+            r.b_name,
+            r.b_discipline,
+            r.clash_type,
+            getattr(r, "severity", "medium") or "medium",
+            r.penetration_m,
+            r.distance_m,
+            r.status,
+            r.assigned_to or "",
+            getattr(r, "due_date", None) or "",
         )
-    csv_text = buf.getvalue()
+        for r in rows
+    ]
+    # Up to 25 000 rows through the formula guard and the CSV writer is pure
+    # CPU, so the file is written in a worker thread, not on the event loop.
+    csv_text = await asyncio.to_thread(_render_clash_csv, plain)
 
     safe_name = (
         "".join(c if c.isalnum() or c in (" ", "-", "_") else "_" for c in (run.name or "clash")).strip() or "clash"

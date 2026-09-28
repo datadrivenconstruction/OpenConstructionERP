@@ -30,6 +30,7 @@ Escrow data is read live from :class:`EscrowAccount` +
 
 from __future__ import annotations
 
+import asyncio
 import html
 import json
 import logging
@@ -582,7 +583,10 @@ async def generate_regulator_report_rera(
         ),
     ]
     qr_payload = f"RERA|{dev_meta['rera_number'] or dev_meta['code']}|{quarter}"
-    pdf_bytes = _render_pdf(
+    # Laying out the PDF is pure CPU, so it runs in a worker thread and the
+    # event loop keeps serving requests.
+    pdf_bytes = await asyncio.to_thread(
+        _render_pdf,
         title="RERA Quarterly Project Disclosure",
         subtitle=f"{dev_meta['name']} ({dev_meta['code']}) - {quarter}",
         sections=sections,
@@ -698,7 +702,10 @@ async def generate_regulator_report_maharera(
         ),
     ]
     qr_payload = f"MAHARERA|{dev_meta['maharera_number'] or dev_meta['code']}|{quarter}"
-    pdf_bytes = _render_pdf(
+    # Laying out the PDF is pure CPU, so it runs in a worker thread and the
+    # event loop keeps serving requests.
+    pdf_bytes = await asyncio.to_thread(
+        _render_pdf,
         title="MAHARERA Form 5 - Quarterly Progress Report",
         subtitle=f"{dev_meta['name']} ({dev_meta['code']}) - {quarter}",
         sections=sections,
@@ -834,7 +841,10 @@ async def generate_regulator_report_214fz(
         ),
     ]
     qr_payload = f"214FZ|{dev_meta['fz214_project_id'] or dev_meta['code']}|{quarter}"
-    pdf_bytes = _render_pdf(
+    # Laying out the PDF is pure CPU, so it runs in a worker thread and the
+    # event loop keeps serving requests.
+    pdf_bytes = await asyncio.to_thread(
+        _render_pdf,
         title="214-FZ - Quarterly Developer Report",
         subtitle=f"{dev_meta['name']} ({dev_meta['code']}) - {quarter}",
         sections=sections,
@@ -975,7 +985,10 @@ async def generate_regulator_report_cma(
         ),
     ]
     qr_payload = f"CMA|{dev_meta['cma_licence_no'] or dev_meta['code']}|{quarter}"
-    pdf_bytes = _render_pdf(
+    # Laying out the PDF is pure CPU, so it runs in a worker thread and the
+    # event loop keeps serving requests.
+    pdf_bytes = await asyncio.to_thread(
+        _render_pdf,
         title="CMA / Wafi - Quarterly Off-plan Disclosure",
         subtitle=f"{dev_meta['name']} ({dev_meta['code']}) - {quarter}",
         sections=sections,

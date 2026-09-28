@@ -8,6 +8,7 @@ Per-project access is enforced via :func:`verify_project_access`.
 
 from __future__ import annotations
 
+import asyncio
 import csv
 import io
 import logging
@@ -852,7 +853,9 @@ async def plan_compliance_export(
     except ValueError as exc:
         raise _bad(str(exc)) from exc
     if fmt == "csv":
-        body = _compliance_csv(export["records"])
+        # Writing the file walks every inspection of the plan and is pure CPU,
+        # so it runs in a worker thread; the records are already plain dicts.
+        body = await asyncio.to_thread(_compliance_csv, export["records"])
         return StreamingResponse(
             iter([body]),
             media_type="text/csv",

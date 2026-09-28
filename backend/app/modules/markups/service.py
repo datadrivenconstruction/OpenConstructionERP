@@ -10,6 +10,7 @@ Stateless service layer. Handles:
 - BOQ position linking for measurement markups
 """
 
+import asyncio
 import csv
 import io
 import logging
@@ -111,6 +112,31 @@ def _validate_geometry(geometry: dict[str, Any], markup_type: str) -> None:
                                 status_code=status.HTTP_400_BAD_REQUEST,
                                 detail=f"Geometry point[{i}].{coord_key} is out of range: {coord_val}",
                             )
+
+
+def _render_markups_csv(rows: list[list[Any]]) -> str:
+    """Render the markups CSV from plain, already-materialized cell values."""
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(
+        [
+            "id",
+            "document_id",
+            "page",
+            "type",
+            "text",
+            "label",
+            "color",
+            "status",
+            "measurement_value",
+            "measurement_unit",
+            "author_id",
+            "linked_boq_position_id",
+            "created_at",
+        ]
+    )
+    writer.writerows(rows)
+    return output.getvalue()
 
 
 class MarkupsService:
@@ -392,46 +418,30 @@ class MarkupsService:
             status_filter=status_filter,
         )
 
-        output = io.StringIO()
-        writer = csv.writer(output)
-        writer.writerow(
+        # Snapshot each markup into plain cell values on the loop, so the
+        # worker thread below never touches a live ORM instance.
+        rows = [
             [
-                "id",
-                "document_id",
-                "page",
-                "type",
-                "text",
-                "label",
-                "color",
-                "status",
-                "measurement_value",
-                "measurement_unit",
-                "author_id",
-                "linked_boq_position_id",
-                "created_at",
+                str(item.id),
+                item.document_id or "",
+                item.page,
+                item.type,
+                item.text or "",
+                item.label or "",
+                item.color,
+                item.status,
+                item.measurement_value if item.measurement_value is not None else "",
+                item.measurement_unit or "",
+                item.author_id,
+                item.linked_boq_position_id or "",
+                item.created_at.isoformat() if item.created_at else "",
             ]
-        )
+            for item in items
+        ]
 
-        for item in items:
-            writer.writerow(
-                [
-                    str(item.id),
-                    item.document_id or "",
-                    item.page,
-                    item.type,
-                    item.text or "",
-                    item.label or "",
-                    item.color,
-                    item.status,
-                    item.measurement_value if item.measurement_value is not None else "",
-                    item.measurement_unit or "",
-                    item.author_id,
-                    item.linked_boq_position_id or "",
-                    item.created_at.isoformat() if item.created_at else "",
-                ]
-            )
-
-        return output.getvalue()
+        # Writing the file walks every markup (up to 10000) and is pure CPU, so
+        # it runs in a worker thread and a large export does not stall the loop.
+        return await asyncio.to_thread(_render_markups_csv, rows)
 
     async def link_to_boq(self, markup_id: uuid.UUID, position_id: str) -> Markup:
         """Link a measurement markup to a BOQ position."""

@@ -17,10 +17,12 @@ falls back to the project's country.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import secrets
 import uuid
 from datetime import UTC, datetime
+from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
 from fastapi import HTTPException, status
@@ -98,8 +100,35 @@ def _build_cover_text(transmittal: FileTransmittal) -> bytes:
     return ("\n".join(lines) + "\n").encode("utf-8")
 
 
+def _cover_snapshot(transmittal: FileTransmittal) -> SimpleNamespace:
+    """Copy the fields the cover sheet reads into plain values.
+
+    The PDF is laid out in a worker thread, and no ORM row may cross into it,
+    so the send and read paths hand :func:`_build_cover_pdf` this snapshot.
+    """
+    return SimpleNamespace(
+        number=transmittal.number,
+        subject=transmittal.subject,
+        reason_code=transmittal.reason_code,
+        sent_at=transmittal.sent_at,
+        status=transmittal.status,
+        notes=transmittal.notes,
+        items=[
+            SimpleNamespace(
+                file_kind=it.file_kind,
+                canonical_name_snapshot=it.canonical_name_snapshot,
+                file_version_snapshot=it.file_version_snapshot,
+            )
+            for it in transmittal.items
+        ],
+        recipients=[
+            SimpleNamespace(email=r.email, display_name=r.display_name, role=r.role) for r in transmittal.recipients
+        ],
+    )
+
+
 def _build_cover_pdf(
-    transmittal: FileTransmittal,
+    transmittal: FileTransmittal | SimpleNamespace,
     pagesize: tuple[float, float],
 ) -> bytes | None:
     """Render a PDF cover sheet via ``reportlab``, or ``None`` if unavailable.
@@ -568,7 +597,11 @@ class TransmittalService:
         transmittal = await self.get(transmittal.id)
 
         # Generate cover sheet (PDF preferred, TXT fallback).
-        pdf_bytes = _build_cover_pdf(transmittal, await self.cover_page_size(transmittal))
+        # Laying out the PDF is pure CPU, so it runs in a worker thread on a plain
+        # snapshot of the transmittal and the event loop keeps serving requests.
+        pdf_bytes = await asyncio.to_thread(
+            _build_cover_pdf, _cover_snapshot(transmittal), await self.cover_page_size(transmittal)
+        )
         if pdf_bytes is not None:
             cover_bytes = pdf_bytes
             ext = "pdf"
@@ -641,7 +674,11 @@ class TransmittalService:
                     transmittal_id,
                 )
         # Fall back to live regeneration.
-        pdf = _build_cover_pdf(transmittal, await self.cover_page_size(transmittal))
+        # Laying out the PDF is pure CPU, so it runs in a worker thread on a plain
+        # snapshot of the transmittal and the event loop keeps serving requests.
+        pdf = await asyncio.to_thread(
+            _build_cover_pdf, _cover_snapshot(transmittal), await self.cover_page_size(transmittal)
+        )
         if pdf is not None:
             return pdf, "application/pdf"
         return _build_cover_text(transmittal), "text/plain; charset=utf-8"

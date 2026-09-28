@@ -22,6 +22,7 @@ Endpoints:
     GET    /observations/export         - Export observations as Excel
 """
 
+import asyncio
 import io
 import logging
 import uuid
@@ -249,6 +250,36 @@ async def create_incident(
     return _incident_to_response(incident)
 
 
+def _render_register_xlsx(title: str, headers: list[str], rows: list[list[object]]) -> io.BytesIO:
+    """Build a one-sheet register workbook from plain cell values (pure CPU, no DB)."""
+    from openpyxl import Workbook
+    from openpyxl.styles import Font
+
+    from app.core.xlsx_branding import apply_company_header
+    from app.core.xlsx_text import store_strings_as_text
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = title
+
+    for col, h in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=h)
+        cell.font = Font(bold=True)
+
+    for row_idx, values in enumerate(rows, 2):
+        for col, value in enumerate(values, 1):
+            ws.cell(row=row_idx, column=col, value=value)
+
+    # Company letterhead above the table; a no-op without a company profile.
+    store_strings_as_text(ws)
+    apply_company_header(ws, title=ws.title)
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return buf
+
+
 @router.get("/incidents/export/")
 async def export_incidents(
     project_id: uuid.UUID = Query(...),
@@ -258,12 +289,8 @@ async def export_incidents(
 ) -> StreamingResponse:
     """Export safety incidents for a project as Excel."""
     await verify_project_access(project_id, _user, session)
-    from openpyxl import Workbook
-    from openpyxl.styles import Font
     from sqlalchemy import select
 
-    from app.core.xlsx_branding import apply_company_header
-    from app.core.xlsx_text import store_strings_as_text
     from app.modules.safety.models import SafetyIncident
 
     result = await session.execute(
@@ -273,10 +300,6 @@ async def export_incidents(
         .limit(50000)
     )
     items = result.scalars().all()
-
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Safety Incidents"
 
     headers = [
         "Incident #",
@@ -291,30 +314,26 @@ async def export_incidents(
         "Status",
         "Reported to Regulator",
     ]
-    for col, h in enumerate(headers, 1):
-        cell = ws.cell(row=1, column=col, value=h)
-        cell.font = Font(bold=True)
+    rows = [
+        [
+            item.incident_number,
+            item.incident_date,
+            item.incident_type,
+            item.location or "",
+            item.description,
+            item.severity,
+            item.treatment_type or "",
+            item.days_lost,
+            item.root_cause or "",
+            item.status,
+            "Yes" if item.reported_to_regulator else "No",
+        ]
+        for item in items
+    ]
 
-    for row_idx, item in enumerate(items, 2):
-        ws.cell(row=row_idx, column=1, value=item.incident_number)
-        ws.cell(row=row_idx, column=2, value=item.incident_date)
-        ws.cell(row=row_idx, column=3, value=item.incident_type)
-        ws.cell(row=row_idx, column=4, value=item.location or "")
-        ws.cell(row=row_idx, column=5, value=item.description)
-        ws.cell(row=row_idx, column=6, value=item.severity)
-        ws.cell(row=row_idx, column=7, value=item.treatment_type or "")
-        ws.cell(row=row_idx, column=8, value=item.days_lost)
-        ws.cell(row=row_idx, column=9, value=item.root_cause or "")
-        ws.cell(row=row_idx, column=10, value=item.status)
-        ws.cell(row=row_idx, column=11, value="Yes" if item.reported_to_regulator else "No")
-
-    # Company letterhead above the table; a no-op without a company profile.
-    store_strings_as_text(ws)
-    apply_company_header(ws, title=ws.title)
-
-    buf = io.BytesIO()
-    wb.save(buf)
-    buf.seek(0)
+    # Writing the workbook walks every incident and is pure CPU, so it runs in a
+    # worker thread instead of holding up every other request on the event loop.
+    buf = await asyncio.to_thread(_render_register_xlsx, "Safety Incidents", headers, rows)
 
     return StreamingResponse(
         buf,
@@ -417,12 +436,8 @@ async def export_observations(
 ) -> StreamingResponse:
     """Export safety observations for a project as Excel."""
     await verify_project_access(project_id, _user, session)
-    from openpyxl import Workbook
-    from openpyxl.styles import Font
     from sqlalchemy import select
 
-    from app.core.xlsx_branding import apply_company_header
-    from app.core.xlsx_text import store_strings_as_text
     from app.modules.safety.models import SafetyObservation
     from app.modules.safety.service import _compute_risk_tier
 
@@ -433,10 +448,6 @@ async def export_observations(
         .limit(50000)
     )
     items = result.scalars().all()
-
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Safety Observations"
 
     headers = [
         "Observation #",
@@ -451,31 +462,27 @@ async def export_observations(
         "Status",
         "Corrective Action",
     ]
-    for col, h in enumerate(headers, 1):
-        cell = ws.cell(row=1, column=col, value=h)
-        cell.font = Font(bold=True)
+    rows = [
+        [
+            item.observation_number,
+            str(item.created_at) if item.created_at else "",
+            item.observation_type,
+            item.location or "",
+            item.description,
+            item.severity,
+            item.likelihood,
+            item.risk_score,
+            # Risk tier derived from risk score (same logic/casing as API responses)
+            _compute_risk_tier(item.risk_score),
+            item.status,
+            item.corrective_action or "",
+        ]
+        for item in items
+    ]
 
-    for row_idx, item in enumerate(items, 2):
-        ws.cell(row=row_idx, column=1, value=item.observation_number)
-        ws.cell(row=row_idx, column=2, value=str(item.created_at) if item.created_at else "")
-        ws.cell(row=row_idx, column=3, value=item.observation_type)
-        ws.cell(row=row_idx, column=4, value=item.location or "")
-        ws.cell(row=row_idx, column=5, value=item.description)
-        ws.cell(row=row_idx, column=6, value=item.severity)
-        ws.cell(row=row_idx, column=7, value=item.likelihood)
-        ws.cell(row=row_idx, column=8, value=item.risk_score)
-        # Risk tier derived from risk score (same logic/casing as API responses)
-        ws.cell(row=row_idx, column=9, value=_compute_risk_tier(item.risk_score))
-        ws.cell(row=row_idx, column=10, value=item.status)
-        ws.cell(row=row_idx, column=11, value=item.corrective_action or "")
-
-    # Company letterhead above the table; a no-op without a company profile.
-    store_strings_as_text(ws)
-    apply_company_header(ws, title=ws.title)
-
-    buf = io.BytesIO()
-    wb.save(buf)
-    buf.seek(0)
+    # Writing the workbook walks every observation and is pure CPU, so it runs in
+    # a worker thread instead of holding up every other request on the event loop.
+    buf = await asyncio.to_thread(_render_register_xlsx, "Safety Observations", headers, rows)
 
     return StreamingResponse(
         buf,

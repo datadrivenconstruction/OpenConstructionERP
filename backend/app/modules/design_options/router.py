@@ -27,6 +27,7 @@ comparison phase; they read the baseline and the per-option breakdown snapshots
 this module persists.
 """
 
+import asyncio
 import uuid
 
 from fastapi import APIRouter, Depends, Query, status
@@ -300,7 +301,9 @@ async def export_comparison_xlsx(
     option_set = await service.get_set(set_id)
     await verify_project_access(option_set.project_id, user_id, session)
     comparison = await DesignOptionComparator(session).build(option_set)
-    blob = build_option_appraisal_workbook(comparison)
+    # Writing the workbook is pure CPU over the already-built comparison DTO, so it
+    # runs in a worker thread instead of holding up every other request on the loop.
+    blob = await asyncio.to_thread(build_option_appraisal_workbook, comparison)
     filename = option_appraisal_filename(comparison.set_name)
     return StreamingResponse(
         io.BytesIO(blob),

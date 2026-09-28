@@ -12,6 +12,7 @@ Endpoints:
     POST   /{inspection_id}/complete - Mark inspection as completed
 """
 
+import asyncio
 import io
 import logging
 import uuid
@@ -133,32 +134,13 @@ async def create_inspection(
     return (await _to_response_many(session, [inspection]))[0]
 
 
-@router.get("/export/")
-async def export_inspections(
-    project_id: uuid.UUID = Query(...),
-    session: SessionDep = None,  # type: ignore[assignment]
-    _user: CurrentUserId = None,  # type: ignore[assignment]
-) -> StreamingResponse:
-    """Export inspections for a project as Excel."""
-    await verify_project_access(project_id, _user, session)
+def _render_inspections_xlsx(rows: list[list[object]]) -> io.BytesIO:
+    """Build the inspections workbook from plain cell values (pure CPU, no DB)."""
     from openpyxl import Workbook
     from openpyxl.styles import Font
-    from sqlalchemy import select
 
     from app.core.xlsx_branding import apply_company_header
     from app.core.xlsx_text import store_strings_as_text
-    from app.modules.inspections.models import QualityInspection
-
-    result = await session.execute(
-        select(QualityInspection)
-        .where(QualityInspection.project_id == project_id)
-        .order_by(QualityInspection.inspection_number)
-        .limit(50000)
-    )
-    items = result.scalars().all()
-    # The spreadsheet has an Inspector column too, and it was writing the same
-    # raw id the screen was. Resolve once for the whole export.
-    inspector_names = await resolve_party_names(session, [i.inspector_id for i in items])
 
     wb = Workbook()
     ws = wb.active
@@ -179,16 +161,46 @@ async def export_inspections(
         cell = ws.cell(row=1, column=col, value=h)
         cell.font = Font(bold=True)
 
-    for row_idx, item in enumerate(items, 2):
-        ws.cell(row=row_idx, column=1, value=item.inspection_number)
-        ws.cell(row=row_idx, column=2, value=item.title)
-        ws.cell(row=row_idx, column=3, value=item.inspection_type)
+    for row_idx, values in enumerate(rows, 2):
+        for col, value in enumerate(values, 1):
+            ws.cell(row=row_idx, column=col, value=value)
+
+    # Company letterhead above the table; a no-op without a company profile.
+    store_strings_as_text(ws)
+    apply_company_header(ws, title=ws.title)
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return buf
+
+
+@router.get("/export/")
+async def export_inspections(
+    project_id: uuid.UUID = Query(...),
+    session: SessionDep = None,  # type: ignore[assignment]
+    _user: CurrentUserId = None,  # type: ignore[assignment]
+) -> StreamingResponse:
+    """Export inspections for a project as Excel."""
+    await verify_project_access(project_id, _user, session)
+    from sqlalchemy import select
+
+    from app.modules.inspections.models import QualityInspection
+
+    result = await session.execute(
+        select(QualityInspection)
+        .where(QualityInspection.project_id == project_id)
+        .order_by(QualityInspection.inspection_number)
+        .limit(50000)
+    )
+    items = result.scalars().all()
+    # The spreadsheet has an Inspector column too, and it was writing the same
+    # raw id the screen was. Resolve once for the whole export.
+    inspector_names = await resolve_party_names(session, [i.inspector_id for i in items])
+
+    rows: list[list[object]] = []
+    for item in items:
         _insp = str(item.inspector_id) if item.inspector_id else ""
-        ws.cell(row=row_idx, column=4, value=inspector_names.get(_insp, _insp))
-        ws.cell(row=row_idx, column=5, value=item.inspection_date or "")
-        ws.cell(row=row_idx, column=6, value=item.location or "")
-        ws.cell(row=row_idx, column=7, value=item.status)
-        ws.cell(row=row_idx, column=8, value=item.result or "")
 
         # Checklist pass/fail count. Mirror the response-based checking used
         # by complete_inspection / create_defect_from_inspection: the schema
@@ -203,15 +215,23 @@ async def export_inspections(
         checklist = item.checklist_data or []
         passed = sum(1 for ci in checklist if isinstance(ci, dict) and _is_passed(ci))
         failed = len(checklist) - passed
-        ws.cell(row=row_idx, column=9, value=f"{passed}/{failed}")
+        rows.append(
+            [
+                item.inspection_number,
+                item.title,
+                item.inspection_type,
+                inspector_names.get(_insp, _insp),
+                item.inspection_date or "",
+                item.location or "",
+                item.status,
+                item.result or "",
+                f"{passed}/{failed}",
+            ]
+        )
 
-    # Company letterhead above the table; a no-op without a company profile.
-    store_strings_as_text(ws)
-    apply_company_header(ws, title=ws.title)
-
-    buf = io.BytesIO()
-    wb.save(buf)
-    buf.seek(0)
+    # Writing the workbook walks every inspection and is pure CPU, so it runs in
+    # a worker thread instead of holding up every other request on the event loop.
+    buf = await asyncio.to_thread(_render_inspections_xlsx, rows)
 
     return StreamingResponse(
         buf,

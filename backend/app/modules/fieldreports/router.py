@@ -18,6 +18,7 @@ Endpoints:
     GET    /reports/export?project_id=X    - Export all as Excel
 """
 
+import asyncio
 import csv
 import io
 import logging
@@ -708,25 +709,10 @@ async def import_field_reports_file(
 # ── Export all reports as Excel ────────────────────────────────────────────
 
 
-@router.get("/reports/export/")
-async def export_field_reports(
-    session: SessionDep,
-    project_id: uuid.UUID = Query(...),
-    _user_id: CurrentUserId = None,  # type: ignore[assignment]
-    _perm: None = Depends(RequirePermission("fieldreports.read")),
-    service: FieldReportService = Depends(_get_service),
-) -> StreamingResponse:
-    """Export all field reports for a project as an Excel file."""
-    await verify_project_access(project_id, _user_id, session)
+def _render_field_reports_xlsx(rows: list[list[object]]) -> io.BytesIO:
+    """Build the field reports workbook from plain cell values (pure CPU, no DB)."""
     from openpyxl import Workbook
     from openpyxl.styles import Font
-
-    # Export every report for the project. The previous ``limit=2000`` cap
-    # silently truncated the file for large projects, contradicting the
-    # "Export all field reports" contract. ``all_for_project`` fetches the
-    # full set; sort newest-first to match the list view's ordering.
-    reports = await service.repo.all_for_project(project_id)
-    reports.sort(key=lambda r: r.report_date, reverse=True)
 
     wb = Workbook()
     ws = wb.active
@@ -746,38 +732,9 @@ async def export_field_reports(
         cell = ws.cell(row=1, column=i, value=h)
         cell.font = Font(bold=True)
 
-    for row_idx, report in enumerate(reports, 2):
-        workforce = report.workforce or []  # type: ignore[attr-defined]
-        equipment = report.equipment_on_site or []  # type: ignore[attr-defined]
-        workforce_count = sum((e.get("count", 0) if isinstance(e, dict) else 0) for e in workforce)
-        ws.cell(
-            row=row_idx,
-            column=1,
-            value=str(report.report_date),  # type: ignore[attr-defined]
-        )
-        ws.cell(
-            row=row_idx,
-            column=2,
-            value=report.weather_condition,  # type: ignore[attr-defined]
-        )
-        ws.cell(
-            row=row_idx,
-            column=3,
-            value=report.temperature_c,  # type: ignore[attr-defined]
-        )
-        ws.cell(
-            row=row_idx,
-            column=4,
-            value=report.wind_speed,  # type: ignore[attr-defined]
-        )
-        ws.cell(
-            row=row_idx,
-            column=5,
-            value=report.work_performed,  # type: ignore[attr-defined]
-        )
-        ws.cell(row=row_idx, column=6, value=workforce_count)
-        ws.cell(row=row_idx, column=7, value=len(equipment))
-        ws.cell(row=row_idx, column=8, value=report.notes)  # type: ignore[attr-defined]
+    for row_idx, values in enumerate(rows, 2):
+        for col, value in enumerate(values, 1):
+            ws.cell(row=row_idx, column=col, value=value)
 
     # Company letterhead above the table; a no-op without a company profile.
     # The importer finds the header under it, so the file re-imports as is.
@@ -790,6 +747,48 @@ async def export_field_reports(
     output = io.BytesIO()
     wb.save(output)
     output.seek(0)
+    return output
+
+
+@router.get("/reports/export/")
+async def export_field_reports(
+    session: SessionDep,
+    project_id: uuid.UUID = Query(...),
+    _user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("fieldreports.read")),
+    service: FieldReportService = Depends(_get_service),
+) -> StreamingResponse:
+    """Export all field reports for a project as an Excel file."""
+    await verify_project_access(project_id, _user_id, session)
+
+    # Export every report for the project. The previous ``limit=2000`` cap
+    # silently truncated the file for large projects, contradicting the
+    # "Export all field reports" contract. ``all_for_project`` fetches the
+    # full set; sort newest-first to match the list view's ordering.
+    reports = await service.repo.all_for_project(project_id)
+    reports.sort(key=lambda r: r.report_date, reverse=True)
+
+    rows: list[list[object]] = []
+    for report in reports:
+        workforce = report.workforce or []  # type: ignore[attr-defined]
+        equipment = report.equipment_on_site or []  # type: ignore[attr-defined]
+        workforce_count = sum((e.get("count", 0) if isinstance(e, dict) else 0) for e in workforce)
+        rows.append(
+            [
+                str(report.report_date),  # type: ignore[attr-defined]
+                report.weather_condition,  # type: ignore[attr-defined]
+                report.temperature_c,  # type: ignore[attr-defined]
+                report.wind_speed,  # type: ignore[attr-defined]
+                report.work_performed,  # type: ignore[attr-defined]
+                workforce_count,
+                len(equipment),
+                report.notes,  # type: ignore[attr-defined]
+            ]
+        )
+
+    # Writing the workbook walks every report and is pure CPU, so it runs in a
+    # worker thread instead of holding up every other request on the event loop.
+    output = await asyncio.to_thread(_render_field_reports_xlsx, rows)
 
     return StreamingResponse(
         output,

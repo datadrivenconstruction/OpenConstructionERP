@@ -55,6 +55,7 @@ Decimal-as-string end to end. Every envelope still obeys §3.2 hard rule
 
 from __future__ import annotations
 
+import asyncio
 import io
 import logging
 import uuid
@@ -385,25 +386,9 @@ async def _run_gate_validation(ctx: NodeContext) -> dict[str, Any]:
 # ── action.export.excel ──────────────────────────────────────────────────
 
 
-async def _run_action_export_excel(ctx: NodeContext) -> dict[str, Any]:
-    """Export the upstream rows to an .xlsx using the EXISTING openpyxl dep.
-
-    No new dependency (LIGHTWEIGHT is a hard rule): ``openpyxl`` is already
-    used by ``boq.cad_import`` / ``requirements.excel_io`` / many routers.
-    ``side_effecting=False`` - it produces a downloadable file, it does not
-    mutate any DB row, so it does not require a preceding gate.
-    """
+def _render_export_xlsx(rows: list[dict[str, Any]], columns: list[Any]) -> int:
+    """Write the upstream rows to an in-memory .xlsx and return its size in bytes."""
     import openpyxl
-
-    upstream = ctx.first_input()
-    rows = list(upstream.get("rows") or [])
-    columns = ctx.params.get("columns") or [
-        "ordinal",
-        "description",
-        "unit",
-        "quantity",
-        "unit_rate",
-    ]
 
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -414,7 +399,30 @@ async def _run_action_export_excel(ctx: NodeContext) -> dict[str, Any]:
 
     buf = io.BytesIO()
     wb.save(buf)
-    size = buf.tell()
+    return buf.tell()
+
+
+async def _run_action_export_excel(ctx: NodeContext) -> dict[str, Any]:
+    """Export the upstream rows to an .xlsx using the EXISTING openpyxl dep.
+
+    No new dependency (LIGHTWEIGHT is a hard rule): ``openpyxl`` is already
+    used by ``boq.cad_import`` / ``requirements.excel_io`` / many routers.
+    ``side_effecting=False`` - it produces a downloadable file, it does not
+    mutate any DB row, so it does not require a preceding gate.
+    """
+    upstream = ctx.first_input()
+    rows = list(upstream.get("rows") or [])
+    columns = ctx.params.get("columns") or [
+        "ordinal",
+        "description",
+        "unit",
+        "quantity",
+        "unit_rate",
+    ]
+
+    # Building and zipping the workbook is pure CPU (the save alone costs a few
+    # milliseconds even for the capped sample), so it runs in a worker thread.
+    size = await asyncio.to_thread(_render_export_xlsx, rows, columns)
 
     # The bytes themselves are NOT put on the wire (§3.2). We return a
     # reference + metadata; a later phase persists the buffer to MinIO /

@@ -17,6 +17,7 @@ demand of a project they cannot see.
 
 from __future__ import annotations
 
+import asyncio
 import uuid
 
 from fastapi import APIRouter, Depends, Response
@@ -81,7 +82,9 @@ async def export_resource_statement_csv(
     """Download the procurement statement as a spreadsheet-friendly CSV."""
     await verify_project_access(project_id, user_id, session)
     statement, _generated_at = await _service(session).generate(project_id)
-    body = render_csv(statement)
+    # Writing the file walks every resource line and is pure CPU, so it runs in a
+    # worker thread; the statement is a plain dataclass tree, not ORM rows.
+    body = await asyncio.to_thread(render_csv, statement)
     filename = f"resource-statement-{project_id}.csv"
     return Response(
         content=body,

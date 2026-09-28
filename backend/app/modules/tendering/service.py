@@ -8,6 +8,7 @@ Stateless service layer. Handles:
 - Event publishing on key actions
 """
 
+import asyncio
 import logging
 import uuid
 from datetime import UTC, datetime
@@ -1448,7 +1449,10 @@ class TenderingService:
 
         project_name, _currency = await self._project_name_and_currency(package)
         meta = package.metadata_ or {}
-        pdf = generate_award_letter_pdf(
+        # The arguments are plain values read above. Laying out the PDF is pure CPU,
+        # so it runs in a worker thread and the event loop keeps serving requests.
+        pdf = await asyncio.to_thread(
+            generate_award_letter_pdf,
             package_name=package.name,
             package_ref=str(package_id)[:8],
             project_name=project_name,
@@ -1504,7 +1508,10 @@ class TenderingService:
             ):
                 winning_amount = winner.total_amount or None
 
-        pdf = generate_rejection_letter_pdf(
+        # The arguments are plain values read above. Laying out the PDF is pure CPU,
+        # so it runs in a worker thread and the event loop keeps serving requests.
+        pdf = await asyncio.to_thread(
+            generate_rejection_letter_pdf,
             package_name=package.name,
             package_ref=str(package_id)[:8],
             project_name=project_name,
@@ -1860,7 +1867,11 @@ class TenderingService:
         from app.modules.tendering.pdf_documents import generate_award_record_pdf
 
         record = await self.award_record(package_id)
-        pdf = generate_award_record_pdf(record=record.model_dump(), package_ref=str(package_id)[:8])
+        # The arguments are plain values from the record DTO. Laying out the PDF is pure CPU,
+        # so it runs in a worker thread and the event loop keeps serving requests.
+        pdf = await asyncio.to_thread(
+            generate_award_record_pdf, record=record.model_dump(), package_ref=str(package_id)[:8]
+        )
         return pdf, f"award_record_{self._slug(record.package_name)}.pdf"
 
     # ── Bid leveling ───────────────────────────────────────────────────────

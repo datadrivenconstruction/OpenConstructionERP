@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import csv
 import io
 import logging
@@ -630,6 +631,15 @@ async def _safe_audit(
         )
     except Exception:
         logger.debug("hse_advanced audit_log skipped: %s %s", entity_type, action)
+
+
+def _render_osha_300_csv(header: tuple[str, ...], rows: list[list[str]]) -> str:
+    """Render the OSHA 300 log CSV from plain, already-materialized rows."""
+    buf = io.StringIO()
+    writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
+    writer.writerow(header)
+    writer.writerows(rows)
+    return buf.getvalue()
 
 
 class HSEAdvancedService:
@@ -1922,10 +1932,9 @@ class HSEAdvancedService:
         year_prefix = f"{int(year):04d}-"
         rows = [r for r in rows if (r.incident_date or "").startswith(year_prefix)]
 
-        buf = io.StringIO()
-        writer = csv.writer(buf, quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(self._OSHA_300_HEADER)
-
+        # Snapshot each incident into plain cell values on the loop, so the
+        # worker thread below never touches a live ORM instance.
+        out_rows: list[list[str]] = []
         for r in rows:
             ipd = r.injured_person_details or {}
             employee_name = (ipd.get("name") if isinstance(ipd, dict) else None) or ""
@@ -1937,7 +1946,7 @@ class HSEAdvancedService:
             # days_away nor days_restricted nor job-transfer (we collapse
             # the latter two into the days_restricted column).
             other_recordable = not is_fatality and not (r.days_away or 0) and not (r.days_restricted or 0)
-            writer.writerow(
+            out_rows.append(
                 [
                     r.osha_case_number or r.incident_number or "",
                     employee_name,
@@ -1952,7 +1961,9 @@ class HSEAdvancedService:
                 ]
             )
 
-        return buf.getvalue()
+        # Writing the file walks every recordable incident of the project and
+        # is pure CPU, so it runs in a worker thread and does not stall the loop.
+        return await asyncio.to_thread(_render_osha_300_csv, self._OSHA_300_HEADER, out_rows)
 
     # ── Slim CorrectiveAction FSM (incident-scoped) ─────────────────────
 

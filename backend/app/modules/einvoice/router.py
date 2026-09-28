@@ -16,6 +16,7 @@ call, which is useful for integrations, pre-flight checks and testing.
 
 from __future__ import annotations
 
+import asyncio
 import io
 from typing import Any
 
@@ -155,9 +156,12 @@ async def generate_invoice(
     seller = body.seller.model_dump(mode="python") if body.seller else None
     buyer = body.buyer.model_dump(mode="python") if body.buyer else None
 
+    # Rendering the XML (and the hybrid PDF around it) is pure CPU, so it runs in
+    # a worker thread instead of holding up every other request on the event loop.
     try:
         if body.embed:
-            filename, media_type, data = render_einvoice_pdf(
+            filename, media_type, data = await asyncio.to_thread(
+                render_einvoice_pdf,
                 invoice=invoice_dict,
                 line_items=line_items,
                 profile=profile,
@@ -166,7 +170,8 @@ async def generate_invoice(
                 locale=body.locale,
             )
         else:
-            filename, media_type, data = render_einvoice(
+            filename, media_type, data = await asyncio.to_thread(
+                render_einvoice,
                 invoice=invoice_dict,
                 line_items=line_items,
                 profile=profile,

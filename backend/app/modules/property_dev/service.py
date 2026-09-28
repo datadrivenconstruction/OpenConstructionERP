@@ -3328,7 +3328,10 @@ class PropertyDevService:
             ],
         }
 
-        zip_bytes = build_handover_package_zip(
+        # Compressing every certificate, document and photo into the archive is
+        # pure CPU, so it runs in a worker thread off the event loop.
+        zip_bytes = await asyncio.to_thread(
+            build_handover_package_zip,
             plot_number=plot_number,
             date_iso=date_iso,
             manifest_text="\n".join(manifest) + "\n",

@@ -19,6 +19,7 @@ Endpoints:
     GET    /stats?project_id=X                        - Requirement statistics
 """
 
+import asyncio
 import csv
 import io
 import logging
@@ -445,6 +446,17 @@ async def export_requirements(
     return await _export_dispatch(set_id, ext, service, str(user_id), session)
 
 
+def _render_requirements_csv(rows: list[dict[str, Any]]) -> str:
+    """Write the already-fetched export rows as CSV text (pure CPU, no DB)."""
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow(_EXPORT_COLUMNS)
+    for r in rows:
+        writer.writerow([r.get(col, "") for col in _EXPORT_COLUMNS])
+    buf.seek(0)
+    return buf.getvalue()
+
+
 async def _export_dispatch(
     set_id: uuid.UUID,
     fmt: str,
@@ -473,7 +485,9 @@ async def _export_dispatch(
     if fmt == "xlsx":
         from app.modules.requirements.excel_io import export_xlsx
 
-        payload = export_xlsx(rows, title=safe_name)
+        # Writing the workbook walks every requirement and is pure CPU, so it runs
+        # in a worker thread instead of holding up every other request on the loop.
+        payload = await asyncio.to_thread(export_xlsx, rows, title=safe_name)
         return Response(
             content=payload,
             media_type=("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
@@ -482,15 +496,11 @@ async def _export_dispatch(
             },
         )
 
-    # csv
-    buf = io.StringIO()
-    writer = csv.writer(buf)
-    writer.writerow(_EXPORT_COLUMNS)
-    for r in rows:
-        writer.writerow([r.get(col, "") for col in _EXPORT_COLUMNS])
-    buf.seek(0)
+    # csv. Writing it walks every requirement and is pure CPU, so it runs in a
+    # worker thread as well.
+    content = await asyncio.to_thread(_render_requirements_csv, rows)
     return StreamingResponse(
-        iter([buf.getvalue()]),
+        iter([content]),
         media_type="text/csv",
         headers={
             "Content-Disposition": attachment_disposition(f"{safe_name}.csv"),

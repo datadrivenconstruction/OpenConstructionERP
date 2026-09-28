@@ -849,105 +849,98 @@ class PunchListService:
         """
         items = await self.repo.all_for_project(project_id)
         names = await self.resolve_party_names(item.assigned_to for item in items)
-
-        if _OPENPYXL_AVAILABLE:
-            import io
-
-            assert _openpyxl is not None  # for type-checkers
-            assert _OpenpyxlFont is not None
-            wb = _openpyxl.Workbook()
-            ws = wb.active
-            ws.title = "Punch List"
-
-            headers = [
-                "No.",
-                "Title",
-                "Status",
-                "Priority",
-                "Category",
-                "Trade",
-                "Assigned To",
-                "Due Date",
-                "Description",
-                "Resolution Notes",
-                "Created",
+        rows = [
+            [
+                item.title,
+                item.status,
+                item.priority,
+                item.category or "",
+                item.trade or "",
+                _party_label(item, names),
+                calendar_day_iso(item.due_date) or "",
+                (item.description or "")[:500],
+                (item.resolution_notes or "")[:500],
+                str(item.created_at) if item.created_at else "",
             ]
+            for item in items
+        ]
 
-            bold = _OpenpyxlFont(bold=True)
-            for col_idx, header in enumerate(headers, 1):
-                cell = ws.cell(row=1, column=col_idx, value=header)
-                cell.font = bold
-
-            for row_idx, item in enumerate(items, 2):
-                ws.cell(row=row_idx, column=1, value=row_idx - 1)
-                ws.cell(row=row_idx, column=2, value=item.title)
-                ws.cell(row=row_idx, column=3, value=item.status)
-                ws.cell(row=row_idx, column=4, value=item.priority)
-                ws.cell(row=row_idx, column=5, value=item.category or "")
-                ws.cell(row=row_idx, column=6, value=item.trade or "")
-                ws.cell(row=row_idx, column=7, value=_party_label(item, names))
-                ws.cell(row=row_idx, column=8, value=calendar_day_iso(item.due_date) or "")
-                ws.cell(row=row_idx, column=9, value=(item.description or "")[:500])
-                ws.cell(row=row_idx, column=10, value=(item.resolution_notes or "")[:500])
-                ws.cell(row=row_idx, column=11, value=str(item.created_at) if item.created_at else "")
-
-            # Company letterhead above the table; a no-op without a company profile.
-            from app.core.xlsx_branding import apply_company_header
-            from app.core.xlsx_text import store_strings_as_text
-
-            store_strings_as_text(ws)
-            apply_company_header(ws, title=ws.title)
-
-            output = io.BytesIO()
-            wb.save(output)
-            excel_bytes = output.getvalue()
+        # Writing the file walks every item and is pure CPU, so it runs in a
+        # worker thread instead of holding up every other request on the event loop.
+        if _OPENPYXL_AVAILABLE:
+            excel_bytes = await asyncio.to_thread(_render_punchlist_xlsx, rows)
 
             logger.info("Punch list Excel exported for project %s (%d items)", project_id, len(items))
             return excel_bytes
 
         # Fallback: return CSV bytes if openpyxl is not installed
-        import csv
-        import io as _io
-
-        output = _io.StringIO()
-        writer = csv.writer(output)
-        writer.writerow(
-            [
-                "No.",
-                "Title",
-                "Status",
-                "Priority",
-                "Category",
-                "Trade",
-                "Assigned To",
-                "Due Date",
-                "Description",
-                "Resolution Notes",
-                "Created",
-            ]
-        )
-        for idx, item in enumerate(items, 1):
-            writer.writerow(
-                [
-                    idx,
-                    item.title,
-                    item.status,
-                    item.priority,
-                    item.category or "",
-                    item.trade or "",
-                    _party_label(item, names),
-                    calendar_day_iso(item.due_date) or "",
-                    (item.description or "")[:500],
-                    (item.resolution_notes or "")[:500],
-                    str(item.created_at) if item.created_at else "",
-                ]
-            )
+        csv_bytes = await asyncio.to_thread(_render_punchlist_csv, rows)
         logger.info(
             "Punch list CSV exported (openpyxl not available) for project %s (%d items)",
             project_id,
             len(items),
         )
-        return output.getvalue().encode("utf-8")
+        return csv_bytes
+
+
+_PUNCHLIST_EXPORT_HEADERS = [
+    "No.",
+    "Title",
+    "Status",
+    "Priority",
+    "Category",
+    "Trade",
+    "Assigned To",
+    "Due Date",
+    "Description",
+    "Resolution Notes",
+    "Created",
+]
+
+
+def _render_punchlist_xlsx(rows: list[list[object]]) -> bytes:
+    """Build the punch list workbook from plain cell values (pure CPU, no DB)."""
+    import io
+
+    assert _openpyxl is not None  # for type-checkers
+    assert _OpenpyxlFont is not None
+    wb = _openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Punch List"
+
+    bold = _OpenpyxlFont(bold=True)
+    for col_idx, header in enumerate(_PUNCHLIST_EXPORT_HEADERS, 1):
+        cell = ws.cell(row=1, column=col_idx, value=header)
+        cell.font = bold
+
+    for row_idx, values in enumerate(rows, 2):
+        ws.cell(row=row_idx, column=1, value=row_idx - 1)
+        for col_idx, value in enumerate(values, 2):
+            ws.cell(row=row_idx, column=col_idx, value=value)
+
+    # Company letterhead above the table; a no-op without a company profile.
+    from app.core.xlsx_branding import apply_company_header
+    from app.core.xlsx_text import store_strings_as_text
+
+    store_strings_as_text(ws)
+    apply_company_header(ws, title=ws.title)
+
+    output = io.BytesIO()
+    wb.save(output)
+    return output.getvalue()
+
+
+def _render_punchlist_csv(rows: list[list[object]]) -> bytes:
+    """Write the punch list as UTF-8 CSV bytes, the fallback without openpyxl."""
+    import csv
+    import io as _io
+
+    output = _io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(_PUNCHLIST_EXPORT_HEADERS)
+    for idx, values in enumerate(rows, 1):
+        writer.writerow([idx, *values])
+    return output.getvalue().encode("utf-8")
 
 
 def _build_minimal_pdf(text: str) -> bytes:

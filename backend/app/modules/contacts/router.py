@@ -19,6 +19,7 @@ Module-bridge endpoints (see app.modules.contacts.bridge):
     GET    /{contact_id}/module-rows       - List all module rows linked
 """
 
+import asyncio
 import csv
 import io
 import logging
@@ -778,44 +779,13 @@ async def import_contacts_file(
 # ── Export contacts as Excel ─────────────────────────────────────────────────
 
 
-@router.get(
-    "/export/",
-    summary="Export contacts as Excel",
-    description="Download all active contacts as an Excel (.xlsx) file.",
-    response_description="Excel file stream (application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)",
-)
-async def export_contacts(
-    session: SessionDep,
-    user_id: CurrentUserId,
-    _perm: None = Depends(RequirePermission("contacts.read")),
-) -> StreamingResponse:
-    """Export the caller's active contacts as an Excel file.
+def _render_contacts_xlsx(rows: list[tuple[Any, ...]]) -> io.BytesIO:
+    """Write the contacts export from rows already read from the database.
 
-    Mirrors the tenant-scope filter used by ``list_contacts`` /
-    ``search_contacts`` / ``get_stats`` - admins see every row, everyone
-    else only sees contacts whose ``tenant_id`` matches their user id (with
-    a ``created_by`` fallback for pre-v2.3.1 rows). The earlier
-    implementation ran a plain ``select(Contact).where(is_active)`` with no
-    owner filter and exported every tenant's data to anyone with the
-    ``contacts.read`` permission.
+    Pure: it touches no session, so the route runs it in a worker thread.
     """
     from openpyxl import Workbook
     from openpyxl.styles import Font
-
-    stmt = select(Contact).where(Contact.is_active.is_(True))
-    if not await _is_admin(session, user_id):
-        caller = str(user_id)
-        stmt = stmt.where(
-            or_(
-                Contact.tenant_id == caller,
-                and_(
-                    Contact.tenant_id.is_(None),
-                    Contact.created_by == caller,
-                ),
-            )
-        )
-    result = await session.execute(stmt.limit(50000))
-    items = result.scalars().all()
 
     wb = Workbook()
     ws = wb.active
@@ -837,17 +807,9 @@ async def export_contacts(
         cell = ws.cell(row=1, column=i, value=h)
         cell.font = Font(bold=True)
 
-    for row_idx, item in enumerate(items, 2):
-        ws.cell(row=row_idx, column=1, value=item.company_name)
-        ws.cell(row=row_idx, column=2, value=item.first_name)
-        ws.cell(row=row_idx, column=3, value=item.last_name)
-        ws.cell(row=row_idx, column=4, value=item.contact_type)
-        ws.cell(row=row_idx, column=5, value=item.primary_email)
-        ws.cell(row=row_idx, column=6, value=item.primary_phone)
-        ws.cell(row=row_idx, column=7, value=item.country_code)
-        ws.cell(row=row_idx, column=8, value=item.vat_number)
-        ws.cell(row=row_idx, column=9, value=item.prequalification_status)
-        ws.cell(row=row_idx, column=10, value=item.payment_terms_days)
+    for row_idx, row in enumerate(rows, 2):
+        for col_idx, value in enumerate(row, 1):
+            ws.cell(row=row_idx, column=col_idx, value=value)
 
     # Company letterhead above the table; a no-op without a company profile.
     # The importer finds the header under it, so the file re-imports as is.
@@ -860,6 +822,62 @@ async def export_contacts(
     output = io.BytesIO()
     wb.save(output)
     output.seek(0)
+    return output
+
+
+@router.get(
+    "/export/",
+    summary="Export contacts as Excel",
+    description="Download all active contacts as an Excel (.xlsx) file.",
+    response_description="Excel file stream (application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)",
+)
+async def export_contacts(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("contacts.read")),
+) -> StreamingResponse:
+    """Export the caller's active contacts as an Excel file.
+
+    Mirrors the tenant-scope filter used by ``list_contacts`` /
+    ``search_contacts`` / ``get_stats`` - admins see every row, everyone
+    else only sees contacts whose ``tenant_id`` matches their user id (with
+    a ``created_by`` fallback for pre-v2.3.1 rows). The earlier
+    implementation ran a plain ``select(Contact).where(is_active)`` with no
+    owner filter and exported every tenant's data to anyone with the
+    ``contacts.read`` permission.
+    """
+    stmt = select(Contact).where(Contact.is_active.is_(True))
+    if not await _is_admin(session, user_id):
+        caller = str(user_id)
+        stmt = stmt.where(
+            or_(
+                Contact.tenant_id == caller,
+                and_(
+                    Contact.tenant_id.is_(None),
+                    Contact.created_by == caller,
+                ),
+            )
+        )
+    result = await session.execute(stmt.limit(50000))
+    rows = [
+        (
+            item.company_name,
+            item.first_name,
+            item.last_name,
+            item.contact_type,
+            item.primary_email,
+            item.primary_phone,
+            item.country_code,
+            item.vat_number,
+            item.prequalification_status,
+            item.payment_terms_days,
+        )
+        for item in result.scalars().all()
+    ]
+
+    # Up to 50 000 contacts written cell by cell is pure CPU, so the workbook
+    # is built in a worker thread rather than on the event loop.
+    output = await asyncio.to_thread(_render_contacts_xlsx, rows)
 
     return StreamingResponse(
         output,

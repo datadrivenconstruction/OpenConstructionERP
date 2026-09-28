@@ -17,6 +17,7 @@ Endpoints:
     GET    /{rfi_id}/attachments/{index}  - Download a stored reply attachment
 """
 
+import asyncio
 import io
 import logging
 import uuid
@@ -276,15 +277,9 @@ async def export_rfi_log(
     landscape, one page wide, with the header row repeated on every page.
     """
     await verify_project_access(project_id, _user, session)
-    from openpyxl import Workbook
-    from openpyxl.styles import Alignment, Font
-    from openpyxl.utils import get_column_letter
-    from openpyxl.worksheet.properties import PageSetupProperties
     from sqlalchemy import select
 
     from app.core.csv_safety import neutralise_formula
-    from app.core.xlsx_branding import apply_company_header
-    from app.core.xlsx_text import store_strings_as_text
     from app.modules.projects.models import Project
     from app.modules.rfi.intl import localize_status
     from app.modules.rfi.models import RFI
@@ -314,6 +309,71 @@ async def export_rfi_log(
         (await session.scalar(select(Project.currency).where(Project.id == project_id)) or "").strip().upper()
     )
 
+    # BUG-RFI-CSV-INJECTION: ``subject`` / ``official_response`` /
+    # ``cost_impact_value`` are user-controlled free text. The schema's
+    # HTML sanitiser leaves a spreadsheet-formula payload such as
+    # ``=cmd|'/c calc'!A0`` intact (it has no HTML), so without
+    # output-side neutralisation Excel would execute it when a colleague
+    # opens the downloaded log. Route every user-controlled string cell
+    # through ``neutralise_formula`` (OWASP CSV-injection defence),
+    # mirroring the BOQ exporter. Numbers / server-derived enums pass
+    # through unchanged.
+    # A user's display name is user-controlled free text too.
+    rows: list[list[object]] = []
+    for item in items:
+        # Days open: reuse the canonical helper so the export agrees with the
+        # list/detail figure. The previous inline version subtracted a naive
+        # ``datetime.fromisoformat(responded_at)`` from a tz-aware
+        # ``created_at``, which raised TypeError (swallowed) and emitted 0 for
+        # every answered/closed RFI. ``_compute_rfi_fields`` normalizes both
+        # sides to UTC before subtracting.
+        _, days_open = _compute_rfi_fields(item)
+        cost_cell = "No"
+        if item.cost_impact:
+            amount = item.cost_impact_value
+            if amount is not None and str(amount).strip():
+                suffix = f" {project_currency}" if project_currency else ""
+                cost_cell = f"Yes ({amount}{suffix})"
+            else:
+                cost_cell = "Yes"
+        rows.append(
+            [
+                neutralise_formula(item.rfi_number),
+                neutralise_formula(item.subject),
+                localize_status(item.status, "en"),
+                neutralise_formula(_who(item.raised_by)),
+                neutralise_formula(_who(item.assigned_to)),
+                neutralise_formula(_who(item.ball_in_court)),
+                item.date_required or "",
+                item.response_due_date or "",
+                days_open,
+                neutralise_formula(cost_cell),
+                f"Yes ({item.schedule_impact_days}d)" if item.schedule_impact else "No",
+                neutralise_formula(item.official_response or ""),
+            ]
+        )
+
+    # Writing the workbook walks every RFI and is pure CPU, so it runs in a
+    # worker thread instead of holding up every other request on the event loop.
+    buf = await asyncio.to_thread(_render_rfi_log_xlsx, rows)
+
+    return StreamingResponse(
+        buf,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": 'attachment; filename="rfi_log.xlsx"'},
+    )
+
+
+def _render_rfi_log_xlsx(rows: list[list[object]]) -> io.BytesIO:
+    """Build the print-ready RFI log workbook from plain cell values (pure CPU, no DB)."""
+    from openpyxl import Workbook
+    from openpyxl.styles import Alignment, Font
+    from openpyxl.utils import get_column_letter
+    from openpyxl.worksheet.properties import PageSetupProperties
+
+    from app.core.xlsx_branding import apply_company_header
+    from app.core.xlsx_text import store_strings_as_text
+
     wb = Workbook()
     ws = wb.active
     ws.title = "RFI Log"
@@ -336,48 +396,9 @@ async def export_rfi_log(
         cell = ws.cell(row=1, column=col, value=h)
         cell.font = Font(bold=True)
 
-    # BUG-RFI-CSV-INJECTION: ``subject`` / ``official_response`` /
-    # ``cost_impact_value`` are user-controlled free text. The schema's
-    # HTML sanitiser leaves a spreadsheet-formula payload such as
-    # ``=cmd|'/c calc'!A0`` intact (it has no HTML), so without
-    # output-side neutralisation Excel would execute it when a colleague
-    # opens the downloaded log. Route every user-controlled string cell
-    # through ``neutralise_formula`` (OWASP CSV-injection defence),
-    # mirroring the BOQ exporter. Numbers / server-derived enums pass
-    # through unchanged.
-    # A user's display name is user-controlled free text too.
-    for row_idx, item in enumerate(items, 2):
-        ws.cell(row=row_idx, column=1, value=neutralise_formula(item.rfi_number))
-        ws.cell(row=row_idx, column=2, value=neutralise_formula(item.subject))
-        ws.cell(row=row_idx, column=3, value=localize_status(item.status, "en"))
-        ws.cell(row=row_idx, column=4, value=neutralise_formula(_who(item.raised_by)))
-        ws.cell(row=row_idx, column=5, value=neutralise_formula(_who(item.assigned_to)))
-        ws.cell(row=row_idx, column=6, value=neutralise_formula(_who(item.ball_in_court)))
-        ws.cell(row=row_idx, column=7, value=item.date_required or "")
-        ws.cell(row=row_idx, column=8, value=item.response_due_date or "")
-        # Days open: reuse the canonical helper so the export agrees with the
-        # list/detail figure. The previous inline version subtracted a naive
-        # ``datetime.fromisoformat(responded_at)`` from a tz-aware
-        # ``created_at``, which raised TypeError (swallowed) and emitted 0 for
-        # every answered/closed RFI. ``_compute_rfi_fields`` normalizes both
-        # sides to UTC before subtracting.
-        _, days_open = _compute_rfi_fields(item)
-        ws.cell(row=row_idx, column=9, value=days_open)
-        cost_cell = "No"
-        if item.cost_impact:
-            amount = item.cost_impact_value
-            if amount is not None and str(amount).strip():
-                suffix = f" {project_currency}" if project_currency else ""
-                cost_cell = f"Yes ({amount}{suffix})"
-            else:
-                cost_cell = "Yes"
-        ws.cell(row=row_idx, column=10, value=neutralise_formula(cost_cell))
-        ws.cell(
-            row=row_idx,
-            column=11,
-            value=f"Yes ({item.schedule_impact_days}d)" if item.schedule_impact else "No",
-        )
-        ws.cell(row=row_idx, column=12, value=neutralise_formula(item.official_response or ""))
+    for row_idx, values in enumerate(rows, 2):
+        for col, value in enumerate(values, 1):
+            ws.cell(row=row_idx, column=col, value=value)
 
     # Print setup. Twelve columns at the default width ran across several
     # portrait sheets, with the subject and the response cut at the cell edge.
@@ -402,12 +423,7 @@ async def export_rfi_log(
     buf = io.BytesIO()
     wb.save(buf)
     buf.seek(0)
-
-    return StreamingResponse(
-        buf,
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": 'attachment; filename="rfi_log.xlsx"'},
-    )
+    return buf
 
 
 # ── Bulk operations (must be BEFORE parametric /{rfi_id}) ──────────────

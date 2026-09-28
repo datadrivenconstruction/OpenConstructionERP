@@ -3222,72 +3222,25 @@ async def create_boq_from_cad_qto(
 # ── Export grouped CAD QTO as Excel ───────────────────────────────────────
 
 
-@router.get(
-    "/cad-group/export/",
-    dependencies=[Depends(RequirePermission("takeoff.read"))],
-)
-async def export_cad_group(
-    session_id: str = Query(..., description="Session ID from /cad-columns"),
-    group_by: str = Query(default="", description="Comma-separated grouping columns"),
-    sum_columns: str = Query(default="", description="Comma-separated sum columns"),
-    format: str = Query(default="xlsx", pattern="^(xlsx)$"),
-    db_session: SessionDep = None,  # type: ignore[assignment]
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
-) -> StreamingResponse:
-    """Export grouped QTO results as an Excel spreadsheet.
+def _render_cad_group_xlsx(
+    elements: list[dict],
+    group_by_list: list[str],
+    sum_columns_list: list[str],
+) -> Any:
+    """Group the CAD elements and write the QTO workbook (pure CPU, no DB).
 
-    Retrieves the CAD session, runs grouping, and returns an xlsx file
-    with headers, data rows, and a bold grand-total row.
-
-    Audit B6 - was IDOR. Anyone with ``takeoff.read`` could download
-    another tenant's CAD QTO as XLSX (a one-click data-exfil path).
+    Returns the saved workbook as a rewound ``io.BytesIO``.
     """
     import io
 
+    import openpyxl
+    from openpyxl.styles import Font
+
     from app.modules.boq.cad_import import group_cad_elements_dynamic
-
-    cad_session = await _get_cad_session(db_session, session_id)
-    if not cad_session:
-        raise HTTPException(
-            status_code=404,
-            detail=("CAD session not found or expired. Please re-upload the CAD file."),
-        )
-
-    await _verify_cad_session_access(cad_session, str(user_id) if user_id else "", db_session)
-
-    elements: list[dict] = cad_session["elements"]
-
-    # Parse column lists
-    group_by_list = [c.strip() for c in group_by.split(",") if c.strip()] if group_by else []
-    sum_columns_list = [c.strip() for c in sum_columns.split(",") if c.strip()] if sum_columns else []
-
-    # Fall back to stored metadata
-    if not group_by_list:
-        stored = cad_session.get("columns_metadata", {})
-        group_by_list = stored.get("suggested_grouping", [])
-    if not sum_columns_list:
-        stored = cad_session.get("columns_metadata", {})
-        sum_columns_list = stored.get("suggested_quantities", [])
-
-    if not group_by_list:
-        raise HTTPException(
-            status_code=400,
-            detail="No grouping columns specified.",
-        )
 
     grouped = group_cad_elements_dynamic(elements, group_by_list, sum_columns_list)
     groups = grouped.get("groups", [])
     grand_totals = grouped.get("grand_totals", {})
-
-    # Build Excel workbook
-    try:
-        import openpyxl
-        from openpyxl.styles import Font
-    except ImportError:
-        raise HTTPException(
-            status_code=500,
-            detail="openpyxl is not installed. Cannot generate Excel export.",
-        )
 
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -3355,6 +3308,72 @@ async def export_cad_group(
     output = io.BytesIO()
     wb.save(output)
     output.seek(0)
+    return output
+
+
+@router.get(
+    "/cad-group/export/",
+    dependencies=[Depends(RequirePermission("takeoff.read"))],
+)
+async def export_cad_group(
+    session_id: str = Query(..., description="Session ID from /cad-columns"),
+    group_by: str = Query(default="", description="Comma-separated grouping columns"),
+    sum_columns: str = Query(default="", description="Comma-separated sum columns"),
+    format: str = Query(default="xlsx", pattern="^(xlsx)$"),
+    db_session: SessionDep = None,  # type: ignore[assignment]
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+) -> StreamingResponse:
+    """Export grouped QTO results as an Excel spreadsheet.
+
+    Retrieves the CAD session, runs grouping, and returns an xlsx file
+    with headers, data rows, and a bold grand-total row.
+
+    Audit B6 - was IDOR. Anyone with ``takeoff.read`` could download
+    another tenant's CAD QTO as XLSX (a one-click data-exfil path).
+    """
+    import asyncio
+
+    cad_session = await _get_cad_session(db_session, session_id)
+    if not cad_session:
+        raise HTTPException(
+            status_code=404,
+            detail=("CAD session not found or expired. Please re-upload the CAD file."),
+        )
+
+    await _verify_cad_session_access(cad_session, str(user_id) if user_id else "", db_session)
+
+    elements: list[dict] = cad_session["elements"]
+
+    # Parse column lists
+    group_by_list = [c.strip() for c in group_by.split(",") if c.strip()] if group_by else []
+    sum_columns_list = [c.strip() for c in sum_columns.split(",") if c.strip()] if sum_columns else []
+
+    # Fall back to stored metadata
+    if not group_by_list:
+        stored = cad_session.get("columns_metadata", {})
+        group_by_list = stored.get("suggested_grouping", [])
+    if not sum_columns_list:
+        stored = cad_session.get("columns_metadata", {})
+        sum_columns_list = stored.get("suggested_quantities", [])
+
+    if not group_by_list:
+        raise HTTPException(
+            status_code=400,
+            detail="No grouping columns specified.",
+        )
+
+    # Build Excel workbook
+    try:
+        import openpyxl  # noqa: F401
+    except ImportError:
+        raise HTTPException(
+            status_code=500,
+            detail="openpyxl is not installed. Cannot generate Excel export.",
+        )
+
+    # Grouping every element and writing the workbook is pure CPU, so it runs in
+    # a worker thread instead of holding up every other request on the event loop.
+    output = await asyncio.to_thread(_render_cad_group_xlsx, elements, group_by_list, sum_columns_list)
 
     filename_base = cad_session.get("filename", "export").rsplit(".", 1)[0]
     download_name = f"{filename_base}_qto.xlsx"
@@ -5882,6 +5901,21 @@ async def measurement_summary(
 # ── Export ───────────────────────────────────────────────────────────────
 
 
+def _render_measurements_csv(rows: list[dict[str, Any]]) -> str:
+    """Write the exported measurement rows as CSV text (pure CPU, no DB)."""
+    import csv
+    import io
+
+    output = io.StringIO()
+    writer = csv.DictWriter(output, fieldnames=list(rows[0].keys()))
+    writer.writeheader()
+    # Neutralise any string cell that would otherwise be parsed by Excel as
+    # a formula (BUG-CSV-INJECTION). Numeric values pass through unchanged.
+    safe_rows = [{k: neutralise_formula(v) for k, v in r.items()} for r in rows]
+    writer.writerows(safe_rows)
+    return output.getvalue()
+
+
 @router.get(
     "/measurements/export/",
     dependencies=[Depends(RequirePermission("takeoff.read"))],
@@ -5906,20 +5940,14 @@ async def export_measurements(
     rows = await service.export_measurements(project_id, fmt=format)
 
     if format == "csv":
-        import csv
-        import io
+        import asyncio
 
         if not rows:
             return {"csv": "", "count": 0}
 
-        output = io.StringIO()
-        writer = csv.DictWriter(output, fieldnames=list(rows[0].keys()))
-        writer.writeheader()
-        # Neutralise any string cell that would otherwise be parsed by Excel as
-        # a formula (BUG-CSV-INJECTION). Numeric values pass through unchanged.
-        safe_rows = [{k: neutralise_formula(v) for k, v in r.items()} for r in rows]
-        writer.writerows(safe_rows)
-        csv_text = output.getvalue()
+        # Writing the CSV walks every measurement and is pure CPU, so it runs in a
+        # worker thread instead of holding up every other request on the event loop.
+        csv_text = await asyncio.to_thread(_render_measurements_csv, rows)
         return {"csv": csv_text, "count": len(rows)}
 
     return {"measurements": rows, "count": len(rows)}

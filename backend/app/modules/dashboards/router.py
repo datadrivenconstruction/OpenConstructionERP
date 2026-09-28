@@ -9,6 +9,7 @@ router but at different paths.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import uuid
 from datetime import datetime
@@ -1262,7 +1263,10 @@ async def export_snapshot(
             limit=limit,
             offset=offset,
         )
-        payload_bytes, content_type, ext = export_to_format(
+        # Writing the file walks every row and is pure CPU, so it runs in a worker
+        # thread and the event loop keeps serving requests.
+        payload_bytes, content_type, ext = await asyncio.to_thread(
+            export_to_format,
             columns=result.columns,
             rows=result.rows,
             format=format,

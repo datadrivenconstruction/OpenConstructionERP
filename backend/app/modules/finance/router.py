@@ -26,6 +26,7 @@ registered BEFORE the parametric /{invoice_id} route so that FastAPI does not
 try to parse those path segments as UUIDs.
 """
 
+import asyncio
 import csv
 import io
 import logging
@@ -494,36 +495,15 @@ async def list_invoices_alias(
 # ── Export invoices as Excel ────────────────────────────────────────────────
 
 
-@router.get(
-    "/invoices/export/",
-    summary="Export invoices as Excel",
-    description="Download invoices for a project as an Excel (.xlsx) file. "
-    "Optionally filter by direction (payable/receivable).",
-    response_description="Excel file stream (application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)",
-)
-async def export_invoices(
-    session: SessionDep,
-    _user_id: CurrentUserId,
-    project_id: uuid.UUID = Query(...),
-    direction: str | None = Query(default=None),
-    _perm: None = Depends(RequirePermission("finance.read")),
-) -> StreamingResponse:
-    """Export invoices for a project as Excel file."""
+def _render_invoices_xlsx(rows: list[tuple[Any, ...]]) -> io.BytesIO:
+    """Build the invoices workbook from plain row tuples (pure CPU, no DB)."""
+    from decimal import InvalidOperation
+
     from openpyxl import Workbook
     from openpyxl.styles import Font
 
     from app.core.xlsx_branding import apply_company_header
     from app.core.xlsx_text import store_strings_as_text
-
-    await _require_project_access(session, project_id, _user_id)
-
-    stmt = select(Invoice).where(Invoice.project_id == project_id)
-    if direction:
-        stmt = stmt.where(Invoice.invoice_direction == direction)
-    stmt = stmt.limit(50000)
-
-    result = await session.execute(stmt)
-    items = result.scalars().all()
 
     wb = Workbook()
     ws = wb.active
@@ -544,8 +524,6 @@ async def export_invoices(
         cell = ws.cell(row=1, column=i, value=h)
         cell.font = Font(bold=True)
 
-    from decimal import Decimal, InvalidOperation
-
     def _safe_decimal(raw: Any) -> Decimal:
         """Coerce DB string to Decimal preserving precision; NaN/Inf → 0.
 
@@ -561,16 +539,16 @@ async def export_invoices(
             return Decimal("0")
         return d if d.is_finite() else Decimal("0")
 
-    for row_idx, inv in enumerate(items, 2):
-        ws.cell(row=row_idx, column=1, value=inv.invoice_number)
-        ws.cell(row=row_idx, column=2, value=inv.invoice_direction)
-        ws.cell(row=row_idx, column=3, value=inv.invoice_date)
-        ws.cell(row=row_idx, column=4, value=inv.due_date)
-        ws.cell(row=row_idx, column=5, value=inv.contact_id or "")
-        ws.cell(row=row_idx, column=6, value=_safe_decimal(inv.amount_subtotal))
-        ws.cell(row=row_idx, column=7, value=_safe_decimal(inv.tax_amount))
-        ws.cell(row=row_idx, column=8, value=_safe_decimal(inv.amount_total))
-        ws.cell(row=row_idx, column=9, value=inv.status)
+    for row_idx, (number, direction, inv_date, due, contact, subtotal, tax, total, inv_status) in enumerate(rows, 2):
+        ws.cell(row=row_idx, column=1, value=number)
+        ws.cell(row=row_idx, column=2, value=direction)
+        ws.cell(row=row_idx, column=3, value=inv_date)
+        ws.cell(row=row_idx, column=4, value=due)
+        ws.cell(row=row_idx, column=5, value=contact)
+        ws.cell(row=row_idx, column=6, value=_safe_decimal(subtotal))
+        ws.cell(row=row_idx, column=7, value=_safe_decimal(tax))
+        ws.cell(row=row_idx, column=8, value=_safe_decimal(total))
+        ws.cell(row=row_idx, column=9, value=inv_status)
 
     # Company letterhead above the table; a no-op without a company profile.
     store_strings_as_text(ws)
@@ -579,6 +557,51 @@ async def export_invoices(
     output = io.BytesIO()
     wb.save(output)
     output.seek(0)
+    return output
+
+
+@router.get(
+    "/invoices/export/",
+    summary="Export invoices as Excel",
+    description="Download invoices for a project as an Excel (.xlsx) file. "
+    "Optionally filter by direction (payable/receivable).",
+    response_description="Excel file stream (application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)",
+)
+async def export_invoices(
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    project_id: uuid.UUID = Query(...),
+    direction: str | None = Query(default=None),
+    _perm: None = Depends(RequirePermission("finance.read")),
+) -> StreamingResponse:
+    """Export invoices for a project as Excel file."""
+    await _require_project_access(session, project_id, _user_id)
+
+    stmt = select(Invoice).where(Invoice.project_id == project_id)
+    if direction:
+        stmt = stmt.where(Invoice.invoice_direction == direction)
+    stmt = stmt.limit(50000)
+
+    result = await session.execute(stmt)
+    items = result.scalars().all()
+    rows = [
+        (
+            inv.invoice_number,
+            inv.invoice_direction,
+            inv.invoice_date,
+            inv.due_date,
+            inv.contact_id or "",
+            inv.amount_subtotal,
+            inv.tax_amount,
+            inv.amount_total,
+            inv.status,
+        )
+        for inv in items
+    ]
+
+    # Writing the workbook walks every invoice and is pure CPU, so it runs in a
+    # worker thread instead of holding up every other request on the event loop.
+    output = await asyncio.to_thread(_render_invoices_xlsx, rows)
 
     return StreamingResponse(
         output,
@@ -649,7 +672,10 @@ async def export_invoice_br_pdf(
     }
     line_items: list[dict[str, Any]] = _line_item_dicts(fresh.line_items)
 
-    pdf_bytes = render_br_invoice_pdf(
+    # Building the PDF is pure CPU over the plain dicts above, so it runs in a
+    # worker thread instead of holding up every other request on the event loop.
+    pdf_bytes = await asyncio.to_thread(
+        render_br_invoice_pdf,
         invoice=invoice_dict,
         line_items=line_items,
         project=project_dict or None,
@@ -879,12 +905,15 @@ async def export_invoice_einvoice(
         }
 
     pdf_locale: str | None = None
+    # Rendering the XML (and the hybrid PDF around it) is pure CPU over the plain
+    # dicts above, so it runs in a worker thread instead of on the event loop.
     try:
         if embed:
             # The readable page follows the reader's language, the same
             # resolution the daily-diary PDF uses; the embedded XML does not.
             pdf_locale = resolve_pdf_locale(locale, accept_language)
-            filename, media_type, body = render_einvoice_pdf(
+            filename, media_type, body = await asyncio.to_thread(
+                render_einvoice_pdf,
                 invoice=invoice_dict,
                 line_items=line_items,
                 profile=profile,
@@ -892,7 +921,8 @@ async def export_invoice_einvoice(
                 locale=pdf_locale,
             )
         else:
-            filename, media_type, body = render_einvoice(
+            filename, media_type, body = await asyncio.to_thread(
+                render_einvoice,
                 invoice=invoice_dict,
                 line_items=line_items,
                 profile=profile,
@@ -1590,16 +1620,41 @@ async def export_budgets(
     _perm: None = Depends(RequirePermission("finance.read")),
 ) -> StreamingResponse:
     """Export budgets for a project as Excel file."""
+    await _require_project_access(session, project_id, _user_id)
+
+    result = await session.execute(select(ProjectBudget).where(ProjectBudget.project_id == project_id).limit(50000))
+    items = result.scalars().all()
+    rows = [
+        (
+            b.wbs_id or "",
+            b.category or "",
+            b.original_budget,
+            b.revised_budget,
+            b.committed,
+            b.actual,
+            b.forecast_final,
+        )
+        for b in items
+    ]
+
+    # Writing the workbook walks every budget line and is pure CPU, so it runs in
+    # a worker thread instead of holding up every other request on the event loop.
+    output = await asyncio.to_thread(_render_budgets_xlsx, rows)
+
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": 'attachment; filename="budgets_export.xlsx"'},
+    )
+
+
+def _render_budgets_xlsx(rows: list[tuple[Any, ...]]) -> io.BytesIO:
+    """Build the budgets workbook from plain row tuples (pure CPU, no DB)."""
     from openpyxl import Workbook
     from openpyxl.styles import Font
 
     from app.core.xlsx_branding import apply_company_header
     from app.core.xlsx_text import store_strings_as_text
-
-    await _require_project_access(session, project_id, _user_id)
-
-    result = await session.execute(select(ProjectBudget).where(ProjectBudget.project_id == project_id).limit(50000))
-    items = result.scalars().all()
 
     wb = Workbook()
     ws = wb.active
@@ -1619,9 +1674,9 @@ async def export_budgets(
         cell = ws.cell(row=1, column=i, value=h)
         cell.font = Font(bold=True)
 
-    for row_idx, b in enumerate(items, 2):
-        ws.cell(row=row_idx, column=1, value=b.wbs_id or "")
-        ws.cell(row=row_idx, column=2, value=b.category or "")
+    for row_idx, (wbs, category, raw_orig, raw_rev, raw_comm, raw_act, raw_fc) in enumerate(rows, 2):
+        ws.cell(row=row_idx, column=1, value=wbs)
+        ws.cell(row=row_idx, column=2, value=category)
         # BUG-069: use Decimal (not float) so large construction-budget values
         # (e.g. 123456789.99) don't suffer IEEE-754 rounding when Excel reads
         # them back - openpyxl stores Decimal natively as a NUMERIC cell.
@@ -1637,11 +1692,11 @@ async def export_budgets(
                 return _Dec("0")
             return d if d.is_finite() else _Dec("0")
 
-        original = _bd(b.original_budget)
-        revised = _bd(b.revised_budget)
-        committed = _bd(b.committed)
-        actual = _bd(b.actual)
-        forecast = _bd(b.forecast_final)
+        original = _bd(raw_orig)
+        revised = _bd(raw_rev)
+        committed = _bd(raw_comm)
+        actual = _bd(raw_act)
+        forecast = _bd(raw_fc)
         # The same rule the table on screen uses. A workbook that disagreed
         # with the page it was exported from would be the more expensive of
         # the two, because it travels.
@@ -1666,12 +1721,7 @@ async def export_budgets(
     output = io.BytesIO()
     wb.save(output)
     output.seek(0)
-
-    return StreamingResponse(
-        output,
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={"Content-Disposition": 'attachment; filename="budgets_export.xlsx"'},
-    )
+    return output
 
 
 @router.patch(

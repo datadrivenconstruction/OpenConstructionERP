@@ -29,6 +29,7 @@ forbidden) and the field_time RBAC permissions.
 
 from __future__ import annotations
 
+import asyncio
 import csv
 import io
 import uuid
@@ -293,27 +294,8 @@ async def get_working_time_record(
     return await _working_time_record(service, session, project_id, user_id, date_from, date_to, regime)
 
 
-@router.get("/timesheets/working-time.csv")
-async def export_working_time_record_csv(
-    session: SessionDep,
-    project_id: uuid.UUID = Query(...),
-    date_from: date = Query(...),
-    date_to: date = Query(...),
-    regime: str | None = Query(None),
-    user_id: CurrentUserId = None,  # type: ignore[assignment]
-    _perm: None = Depends(RequirePermission("field_time.read")),
-    service: FieldTimeService = Depends(_get_service),
-) -> StreamingResponse:
-    """The same record as a CSV file, which is what an inspector asks to be handed.
-
-    Every column an auditor needs is spelled out in the row itself, including
-    the worker's name beside the id: whoever opens this file has the file and
-    not the database. The durations are the ones the clock times produced and
-    are not put through any payroll rounding step, so a row can always be
-    checked by subtracting its own columns.
-    """
-    record = await _working_time_record(service, session, project_id, user_id, date_from, date_to, regime)
-
+def _render_working_time_csv(days: list[WorkingTimeWorkerDayOut]) -> str:
+    """Render the working-time record CSV from its plain per-day rows."""
     buf = io.StringIO()
     writer = csv.writer(buf)
     writer.writerow(
@@ -339,7 +321,7 @@ async def export_working_time_record_csv(
             "retain_until",
         ],
     )
-    for row in record.days:
+    for row in days:
         writer.writerow(
             [
                 row.date.isoformat(),
@@ -364,9 +346,36 @@ async def export_working_time_record_csv(
             ],
         )
     buf.seek(0)
+    return buf.getvalue()
+
+
+@router.get("/timesheets/working-time.csv")
+async def export_working_time_record_csv(
+    session: SessionDep,
+    project_id: uuid.UUID = Query(...),
+    date_from: date = Query(...),
+    date_to: date = Query(...),
+    regime: str | None = Query(None),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("field_time.read")),
+    service: FieldTimeService = Depends(_get_service),
+) -> StreamingResponse:
+    """The same record as a CSV file, which is what an inspector asks to be handed.
+
+    Every column an auditor needs is spelled out in the row itself, including
+    the worker's name beside the id: whoever opens this file has the file and
+    not the database. The durations are the ones the clock times produced and
+    are not put through any payroll rounding step, so a row can always be
+    checked by subtracting its own columns.
+    """
+    record = await _working_time_record(service, session, project_id, user_id, date_from, date_to, regime)
+
+    # Writing the file walks every worker-day of the record and is pure CPU,
+    # so it runs in a worker thread; the record is already a plain pydantic model.
+    csv_text = await asyncio.to_thread(_render_working_time_csv, record.days)
     filename = f"working-time-{project_id}-{record.date_from.isoformat()}-{record.date_to.isoformat()}.csv"
     return StreamingResponse(
-        iter([buf.getvalue()]),
+        iter([csv_text]),
         media_type="text/csv",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )

@@ -7,6 +7,7 @@ Mounted under the parent EAC router at ``/api/v1/eac/aliases``.
 
 from __future__ import annotations
 
+import asyncio
 import csv
 import io
 import json
@@ -537,6 +538,28 @@ async def resolve_alias_route(
 # ── Export ───────────────────────────────────────────────────────────────
 
 
+def _render_aliases_csv(rows: list[list[object]]) -> str:
+    """Render the alias export CSV from plain, already-materialized rows."""
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow(
+        [
+            "alias_name",
+            "value_type_hint",
+            "default_unit",
+            "synonym_pattern",
+            "kind",
+            "case_sensitive",
+            "priority",
+            "pset_filter",
+            "source_filter",
+            "unit_multiplier",
+        ]
+    )
+    writer.writerows(rows)
+    return buf.getvalue()
+
+
 @router.post(
     "/aliases:export",
     dependencies=[Depends(RequirePermission("eac.read"))],
@@ -575,39 +598,27 @@ async def export_aliases_route(
     if format == "json":
         return {"aliases": [EacParameterAliasRead.model_validate(a).model_dump(mode="json") for a in aliases]}
 
-    buf = io.StringIO()
-    writer = csv.writer(buf)
-    writer.writerow(
+    # Snapshot one plain row per synonym on the loop, so the worker thread
+    # below never touches a live ORM instance or its lazy relationship.
+    rows = [
         [
-            "alias_name",
-            "value_type_hint",
-            "default_unit",
-            "synonym_pattern",
-            "kind",
-            "case_sensitive",
-            "priority",
-            "pset_filter",
-            "source_filter",
-            "unit_multiplier",
+            alias.name,
+            alias.value_type_hint,
+            alias.default_unit or "",
+            syn.pattern,
+            syn.kind,
+            int(bool(syn.case_sensitive)),
+            syn.priority,
+            syn.pset_filter or "",
+            syn.source_filter,
+            str(syn.unit_multiplier),
         ]
-    )
-    for alias in aliases:
-        for syn in alias.synonyms or []:
-            writer.writerow(
-                [
-                    alias.name,
-                    alias.value_type_hint,
-                    alias.default_unit or "",
-                    syn.pattern,
-                    syn.kind,
-                    int(bool(syn.case_sensitive)),
-                    syn.priority,
-                    syn.pset_filter or "",
-                    syn.source_filter,
-                    str(syn.unit_multiplier),
-                ]
-            )
-    return buf.getvalue()
+        for alias in aliases
+        for syn in alias.synonyms or []
+    ]
+    # Writing the file walks every synonym of up to 10000 aliases and is pure
+    # CPU, so it runs in a worker thread and does not stall other requests.
+    return await asyncio.to_thread(_render_aliases_csv, rows)
 
 
 # ── Import ───────────────────────────────────────────────────────────────

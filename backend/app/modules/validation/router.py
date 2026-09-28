@@ -14,8 +14,10 @@ Endpoints:
     GET   /validation/rule-sets              - List available rule sets
 """
 
+import asyncio
 import logging
 import uuid
+from types import SimpleNamespace
 from typing import Any
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, Response, UploadFile, status
@@ -541,6 +543,22 @@ def _export_filename(report: ValidationReport, ext: str) -> str:
     return f"validation_{base or 'report'}.{ext}"
 
 
+def _report_snapshot(report: ValidationReport) -> SimpleNamespace:
+    """Detached copy of the report fields the CSV / XLSX exporters read.
+
+    The exporters run in a worker thread and duck-type the report, so they get
+    this plain copy instead of the live ORM row.
+    """
+    return SimpleNamespace(
+        id=getattr(report, "id", ""),
+        target_type=getattr(report, "target_type", ""),
+        target_id=getattr(report, "target_id", ""),
+        rule_set=getattr(report, "rule_set", ""),
+        created_at=getattr(report, "created_at", None),
+        results=list(getattr(report, "results", []) or []),
+    )
+
+
 @router.get(
     "/reports/{report_id}/export.csv",
     dependencies=[Depends(RequirePermission("validation.read"))],
@@ -558,7 +576,9 @@ async def export_report_csv(
     by the exporter.
     """
     report = await _require_report_access(session, report_id, user_id)
-    blob = report_to_csv(report)
+    # Writing the file walks every finding and is pure CPU, so it runs in a
+    # worker thread instead of holding up every other request on the event loop.
+    blob = await asyncio.to_thread(report_to_csv, _report_snapshot(report))
     filename = _export_filename(report, "csv")
     return Response(
         content=blob,
@@ -585,7 +605,9 @@ async def export_report_xlsx(
     only the serialisation differs.
     """
     report = await _require_report_access(session, report_id, user_id)
-    blob = report_to_xlsx(report)
+    # Writing the workbook walks every finding and is pure CPU, so it runs in a
+    # worker thread instead of holding up every other request on the event loop.
+    blob = await asyncio.to_thread(report_to_xlsx, _report_snapshot(report))
     filename = _export_filename(report, "xlsx")
     return Response(
         content=blob,

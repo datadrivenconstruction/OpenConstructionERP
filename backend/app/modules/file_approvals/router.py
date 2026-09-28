@@ -18,10 +18,12 @@ Endpoints
 
 from __future__ import annotations
 
+import asyncio
 import io
 import logging
 import uuid
 from datetime import datetime
+from types import SimpleNamespace
 
 from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import Response, StreamingResponse
@@ -173,6 +175,53 @@ def build_approvals_workbook(workflows: list[FileApprovalWorkflow]) -> Workbook:
     return wb
 
 
+def _plain_workflow(wf: FileApprovalWorkflow) -> SimpleNamespace:
+    """Copy the fields the register reads off a workflow and its steps.
+
+    The workbook is written in a worker thread, and a live ORM row must not
+    cross into it, so the builder gets these detached copies instead.
+    """
+    return SimpleNamespace(
+        file_kind=wf.file_kind,
+        file_id=wf.file_id,
+        file_version_snapshot=wf.file_version_snapshot,
+        submitted_by_id=wf.submitted_by_id,
+        submitted_at=wf.submitted_at,
+        status=wf.status,
+        final_decision_at=wf.final_decision_at,
+        final_decision_by_id=wf.final_decision_by_id,
+        notes=wf.notes,
+        steps=[
+            SimpleNamespace(
+                approver_id=getattr(s, "approver_id", None),
+                role_label=getattr(s, "role_label", None),
+                decision=getattr(s, "decision", None),
+                decision_note=getattr(s, "decision_note", None),
+                sort_order=getattr(s, "sort_order", 0),
+            )
+            for s in (getattr(wf, "steps", None) or [])
+        ],
+    )
+
+
+def _render_approvals_register(workflows: list[SimpleNamespace]) -> io.BytesIO:
+    """Build and save the register workbook with its letterhead (pure CPU, no DB)."""
+    wb = build_approvals_workbook(workflows)  # type: ignore[arg-type]
+    # Company letterhead above the register; a no-op without a company
+    # profile. Here rather than in the builder, which stays DB- and
+    # profile-free for the tests that read its cells.
+    from app.core.xlsx_branding import apply_company_header
+    from app.core.xlsx_text import store_strings_as_text
+
+    store_strings_as_text(wb.active)
+    apply_company_header(wb.active, title=wb.active.title)
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return buf
+
+
 # ── Stamp templates ───────────────────────────────────────────────────────
 
 
@@ -276,19 +325,10 @@ async def export_approvals_register(
     """
     await _require_project_access(session, project_id, user_id)
     workflows = await service.list_workflows(project_id)
-    wb = build_approvals_workbook(workflows)
-    # Company letterhead above the register; a no-op without a company
-    # profile. Here rather than in the builder, which stays DB- and
-    # profile-free for the tests that read its cells.
-    from app.core.xlsx_branding import apply_company_header
-    from app.core.xlsx_text import store_strings_as_text
-
-    store_strings_as_text(wb.active)
-    apply_company_header(wb.active, title=wb.active.title)
-
-    buf = io.BytesIO()
-    wb.save(buf)
-    buf.seek(0)
+    plain = [_plain_workflow(wf) for wf in workflows]
+    # Writing the workbook walks every workflow and is pure CPU, so it runs in a
+    # worker thread instead of holding up every other request on the event loop.
+    buf = await asyncio.to_thread(_render_approvals_register, plain)
     return StreamingResponse(
         buf,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

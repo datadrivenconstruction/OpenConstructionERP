@@ -9,6 +9,7 @@ Event publishing (slice E):
     reporting.report.generated     - new report rendered
 """
 
+import asyncio
 import html
 import logging
 import uuid
@@ -779,7 +780,10 @@ class ReportingService:
                 html_body = None
 
         try:
-            return export_report(
+            # The arguments are plain values read above. Rendering the file walks the
+            # whole snapshot and is pure CPU, so it runs in a worker thread.
+            return await asyncio.to_thread(
+                export_report,
                 fmt=fmt,
                 report_type=report.report_type,
                 title=report.title,

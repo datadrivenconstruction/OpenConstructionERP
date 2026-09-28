@@ -18,6 +18,7 @@ Endpoints:
 
 from __future__ import annotations
 
+import asyncio
 import csv
 import io
 import json
@@ -3314,13 +3315,14 @@ async def export_cost_catalog_excel(
         items = result.scalars().all()
         if not items:
             break
+        rows: list[list[object]] = []
         for item in items:
             try:
                 rate_val: object = float(item.rate)
             except (ValueError, TypeError):
                 rate_val = 0
             classification = json.dumps(item.classification, ensure_ascii=False) if item.classification else ""
-            ws.append(
+            rows.append(
                 [
                     _excel_safe(item.code),
                     _excel_safe(item.description),
@@ -3330,13 +3332,14 @@ async def export_cost_catalog_excel(
                     _excel_safe(classification),
                 ]
             )
+        # Serialising the rows into the sheet is pure CPU, so each batch is
+        # written in a worker thread while the next query waits on the loop.
+        await asyncio.to_thread(_append_rows, ws, rows)
         if len(items) < batch_size:
             break
         offset += batch_size
 
-    output = io.BytesIO()
-    wb.save(output)
-    output.seek(0)
+    output = await asyncio.to_thread(_save_workbook, wb)
 
     # ASCII slug as the legacy fallback plus RFC 5987 filename* so non-Latin
     # catalog names ("Моя смета 2026") keep their real name in the download.
@@ -6326,6 +6329,20 @@ async def clear_cost_database(
 # ── Export cost database as Excel ────────────────────────────────────────────
 
 
+def _append_rows(ws: Any, rows: list[list[object]]) -> None:
+    """Append plain rows to a write-only sheet. Pure, so it runs in a worker thread."""
+    for row in rows:
+        ws.append(row)
+
+
+def _save_workbook(wb: Any) -> io.BytesIO:
+    """Save a workbook into a rewound buffer. Pure, so it runs in a worker thread."""
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    return output
+
+
 def _excel_safe(value: object) -> object:
     """Neutralize spreadsheet formula injection in exported text cells.
 
@@ -6374,12 +6391,13 @@ async def export_cost_database(
         if not items:
             break
 
+        rows: list[list[object]] = []
         for item in items:
             try:
                 rate_val = float(item.rate)
             except (ValueError, TypeError):
                 rate_val = 0
-            ws.append(
+            rows.append(
                 [
                     _excel_safe(item.code),
                     _excel_safe(item.description),
@@ -6390,14 +6408,15 @@ async def export_cost_database(
                     _excel_safe(getattr(item, "region", "")),
                 ]
             )
+        # The whole active cost database can run to tens of thousands of rows;
+        # writing them into the sheet is pure CPU and goes to a worker thread.
+        await asyncio.to_thread(_append_rows, ws, rows)
 
         if len(items) < batch_size:
             break
         offset += batch_size
 
-    output = io.BytesIO()
-    wb.save(output)
-    output.seek(0)
+    output = await asyncio.to_thread(_save_workbook, wb)
 
     return StreamingResponse(
         output,

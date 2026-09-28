@@ -17,6 +17,7 @@ nothing - the request session dependency owns the transaction boundary.
 
 from __future__ import annotations
 
+import asyncio
 import base64
 import binascii
 import logging
@@ -405,7 +406,10 @@ class BCFService:
                 dto.viewpoints.append(pv)
             dto_topics.append(dto)
 
-        archive = bcf_xml.build_bcfzip(
+        # Building the archive walks every topic and zips the snapshots, pure CPU,
+        # so it runs in a worker thread and the event loop keeps serving requests.
+        archive = await asyncio.to_thread(
+            bcf_xml.build_bcfzip,
             version=version,
             project_id=str(project_id),
             project_name=project_name,
@@ -762,7 +766,9 @@ class BCFExportService:
                 topic.viewpoints.append(synthesize_viewpoint_from_centroid((cx, cy, cz)))
             writer.add_topic(topic)
 
-        return writer.build_bytes()
+        # The topics above are plain writer DTOs, not ORM rows. Serialising the XML and
+        # zipping it is pure CPU, so it runs in a worker thread off the event loop.
+        return await asyncio.to_thread(writer.build_bytes)
 
     # ── helpers ─────────────────────────────────────────────────────
 

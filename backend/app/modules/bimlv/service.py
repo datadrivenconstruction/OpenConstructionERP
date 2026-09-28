@@ -16,6 +16,7 @@ data model. It reuses the existing tables rather than adding any of its own:
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import uuid
 from dataclasses import dataclass, field
@@ -288,7 +289,10 @@ async def export_container(boq_id: uuid.UUID, db: AsyncSession) -> ContainerExpo
     project_name = project.name if project is not None else (boq.name or "")
     currency = (project.currency or "").strip()[:3].upper() if project is not None else ""
 
-    data = write_container(
+    # Writing the container walks every position and link and zips it, pure CPU,
+    # so it runs in a worker thread and the event loop keeps serving requests.
+    data = await asyncio.to_thread(
+        write_container,
         positions,
         mapping,
         model_ref,
