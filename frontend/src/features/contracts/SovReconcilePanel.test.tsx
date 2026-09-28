@@ -4,8 +4,8 @@
 //
 // The reconcile writes billable lines, so a person has to see the list and
 // confirm it. These pin that: nothing shows when nothing is missing, the
-// first press only asks, and the apply sends exactly the keys the preview
-// listed.
+// first press only asks, the apply sends exactly the ticked keys, and a
+// change can be set aside as already on the schedule and offered again.
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
@@ -14,6 +14,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 vi.mock('./api', () => ({
   getSovReconcilePreview: vi.fn(),
   applySovReconcile: vi.fn(),
+  setSovReconcileExclusion: vi.fn(),
 }));
 
 vi.mock('@/stores/useToastStore', () => ({
@@ -27,6 +28,7 @@ import type { SovReconcilePreview } from './api';
 
 const previewMock = vi.mocked(api.getSovReconcilePreview);
 const applyMock = vi.mocked(api.applySovReconcile);
+const exclusionMock = vi.mocked(api.setSovReconcileExclusion);
 
 const PREVIEW: SovReconcilePreview = {
   contract_id: 'c-1',
@@ -73,6 +75,7 @@ describe('SovReconcilePanel', () => {
   beforeEach(() => {
     previewMock.mockReset();
     applyMock.mockReset();
+    exclusionMock.mockReset();
   });
 
   it('renders nothing when every approved change is on the schedule', async () => {
@@ -99,6 +102,44 @@ describe('SovReconcilePanel', () => {
         'change_order:co-7',
         'variation_order:vo-3',
       ]),
+    );
+  });
+
+  it('posts only the ticked changes', async () => {
+    previewMock.mockResolvedValue(PREVIEW);
+    applyMock.mockResolvedValue({ ...PREVIEW, items: [PREVIEW.items[1]!], posted: 1 });
+    renderPanel();
+
+    fireEvent.click(await screen.findByRole('checkbox', { name: /VO-003/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Reconcile change orders/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+    await waitFor(() => expect(applyMock).toHaveBeenCalledWith('c-1', ['change_order:co-7']));
+  });
+
+  it('sets a change aside with a reason, and offers a set-aside change again', async () => {
+    previewMock.mockResolvedValue(PREVIEW);
+    const [co, vo] = PREVIEW.items;
+    exclusionMock.mockResolvedValueOnce({
+      ...PREVIEW,
+      items: [vo!],
+      excluded: [{ ...co!, excluded_by: 'u-1', excluded_at: null, reason: 'Line A-2' }],
+    });
+    renderPanel();
+
+    const [setAside] = await screen.findAllByRole('button', { name: 'Already on the schedule' });
+    fireEvent.click(setAside!);
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Line A-2' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Set aside' }));
+    await waitFor(() =>
+      expect(exclusionMock).toHaveBeenCalledWith('c-1', 'change_order:co-7', true, 'Line A-2'),
+    );
+    expect(await screen.findByText('Set aside as already on the schedule of values')).toBeInTheDocument();
+    expect(screen.getByText('Line A-2')).toBeInTheDocument();
+
+    exclusionMock.mockResolvedValueOnce({ ...PREVIEW, excluded: [] });
+    fireEvent.click(screen.getByRole('button', { name: /Offer again/ }));
+    await waitFor(() =>
+      expect(exclusionMock).toHaveBeenLastCalledWith('c-1', 'change_order:co-7', false, ''),
     );
   });
 

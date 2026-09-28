@@ -1588,8 +1588,21 @@ class ContractSigningSessionResponse(BaseModel):
 class SovReconcileConfirm(BaseModel):
     """Body for ``POST /contracts/{id}/sov/reconcile-change-orders``.
 
-    The source keys the person read in the preview and agreed to post. The
-    server posts only when they are exactly what it would post now.
+    The source keys the person ticked in the preview. The server posts only
+    when every one of them is still on offer; the ones left unticked stay on
+    offer.
     """
 
-    source_keys: list[str] = Field(default_factory=list, max_length=500)
+    source_keys: list[str] = Field(..., min_length=1, max_length=500)
+
+
+class SovReconcileExclusion(BaseModel):
+    """Body for ``POST /contracts/{id}/sov/reconcile-change-orders/exclusions``.
+
+    ``excluded=True`` sets the change aside as already on the schedule of
+    values (a line added by hand), ``False`` takes that decision back.
+    """
+
+    source_key: str = Field(..., min_length=1, max_length=120)
+    excluded: bool = True
+    reason: str = Field(default="", max_length=500)

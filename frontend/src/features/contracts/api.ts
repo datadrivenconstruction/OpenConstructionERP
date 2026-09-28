@@ -1456,8 +1456,17 @@ export interface SovReconcilePreview {
   scheduled_total: string;
   scheduled_total_after: string;
   items: SovReconcileItem[];
+  /** Changes a person set aside as already on the schedule of values. */
+  excluded?: SovReconcileExcludedItem[];
   /** Set on the apply response only. */
   posted?: number;
+}
+
+/** A change set aside from the reconcile, with who did it and why. */
+export interface SovReconcileExcludedItem extends SovReconcileItem {
+  excluded_by: string | null;
+  excluded_at: string | null;
+  reason: string;
 }
 
 /** Changes approved before they reached the schedule of values. */
@@ -1467,7 +1476,7 @@ export function getSovReconcilePreview(contractId: string): Promise<SovReconcile
   );
 }
 
-/** Post exactly the previewed changes; 409 when the preview is out of date. */
+/** Post the ticked changes; 409 when one of them is no longer on offer. */
 export function applySovReconcile(
   contractId: string,
   sourceKeys: string[],
@@ -1475,6 +1484,19 @@ export function applySovReconcile(
   return apiPost<SovReconcilePreview>(
     `/v1/contracts/contracts/${contractId}/sov/reconcile-change-orders`,
     { source_keys: sourceKeys },
+  );
+}
+
+/** Set a change aside as already on the schedule of values, or take that back. */
+export function setSovReconcileExclusion(
+  contractId: string,
+  sourceKey: string,
+  excluded: boolean,
+  reason = '',
+): Promise<SovReconcilePreview> {
+  return apiPost<SovReconcilePreview>(
+    `/v1/contracts/contracts/${contractId}/sov/reconcile-change-orders/exclusions`,
+    { source_key: sourceKey, excluded, reason },
   );
 }
 

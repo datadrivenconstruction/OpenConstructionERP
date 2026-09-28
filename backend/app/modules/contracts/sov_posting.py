@@ -19,7 +19,11 @@ second half of a mirrored pair posts nothing.
 Changes approved before the poster existed moved the contract sum and no line.
 They are not repaired at boot: rows injected into billable lines need a person
 to agree. :func:`plan_reconcile` lists them with the amounts it would post,
-and :func:`apply_reconcile` posts exactly the list a person confirmed.
+and :func:`apply_reconcile` posts the ones a person ticked. A change the
+person says is already on the schedule (a line someone added by hand before
+the poster existed) is set aside with :func:`set_reconcile_exclusion`, so it
+is neither offered again nor counted as missing, and the decision can be
+taken back.
 """
 
 from __future__ import annotations
@@ -45,6 +49,10 @@ POSTABLE_CONTRACT_STATUSES: frozenset[str] = frozenset({"active"})
 
 SOURCE_CHANGE_ORDER = "change_order"
 SOURCE_VARIATION_ORDER = "variation_order"
+
+#: ``Contract.metadata_`` key holding the changes a person set aside from the
+#: reconcile as already on the schedule: ``{source_key: {by, at, reason}}``.
+EXCLUSIONS_KEY = "sov_reconcile_excluded"
 
 
 def source_key(kind: str, source_id: object) -> str:
@@ -202,8 +210,26 @@ def _unpaid_ids(md: dict[str, Any]) -> tuple[set[str], set[str]]:
     return changes, variations
 
 
+def reconcile_exclusions(contract: Contract) -> dict[str, dict[str, Any]]:
+    """The changes a person said are already on the schedule, by source key."""
+    raw = (contract.metadata_ or {}).get(EXCLUSIONS_KEY)
+    if not isinstance(raw, dict):
+        return {}
+    return {str(key): dict(value) if isinstance(value, dict) else {} for key, value in raw.items()}
+
+
 async def plan_reconcile(session: AsyncSession, contract: Contract) -> list[ReconcileItem]:
     """The changes that moved this contract's sum and have no SoV line yet.
+
+    Changes a person set aside as already on the schedule are left out; see
+    :func:`unposted_changes` for the full list.
+    """
+    excluded = reconcile_exclusions(contract)
+    return [item for item in await unposted_changes(session, contract) if item.key not in excluded]
+
+
+async def unposted_changes(session: AsyncSession, contract: Contract) -> list[ReconcileItem]:
+    """Every change that moved this contract's sum and has no SoV adjustment.
 
     Read from the ids the subscribers recorded as applied, less those the
     currency guard stopped, and less every key that already has an adjustment.
@@ -272,8 +298,25 @@ async def scheduled_total(session: AsyncSession, contract_id: uuid.UUID) -> Deci
 
 
 async def reconcile_preview(session: AsyncSession, contract: Contract) -> dict[str, Any]:
-    """What the reconcile would post, and where it leaves the schedule."""
-    items = await plan_reconcile(session, contract)
+    """What the reconcile would post, and where it leaves the schedule.
+
+    ``items`` are the changes on offer. ``excluded`` are the ones a person set
+    aside as already on the schedule, with who did it and why, so the
+    decision stays visible and can be taken back.
+    """
+    exclusions = reconcile_exclusions(contract)
+    unposted = await unposted_changes(session, contract)
+    items = [item for item in unposted if item.key not in exclusions]
+    excluded = [
+        {
+            **item.as_dict(),
+            "excluded_by": exclusions[item.key].get("by"),
+            "excluded_at": exclusions[item.key].get("at"),
+            "reason": exclusions[item.key].get("reason") or "",
+        }
+        for item in unposted
+        if item.key in exclusions
+    ]
     scheduled = await scheduled_total(session, contract.id)
     adding = sum((item.amount for item in items), Decimal("0"))
     return {
@@ -285,6 +328,7 @@ async def reconcile_preview(session: AsyncSession, contract: Contract) -> dict[s
         "scheduled_total": str(scheduled),
         "scheduled_total_after": str(scheduled + adding),
         "items": [item.as_dict() for item in items],
+        "excluded": excluded,
     }
 
 
@@ -293,17 +337,19 @@ class ReconcileMismatchError(Exception):
 
 
 async def apply_reconcile(session: AsyncSession, contract: Contract, confirmed_keys: list[str]) -> list[SovAdjustment]:
-    """Post exactly the changes a person confirmed from the preview.
+    """Post the changes a person ticked in the preview, and nothing else.
 
-    The confirmed keys must equal the preview as it stands now. Anything else
-    means the preview the person read is out of date (another approval, or a
-    reconcile by someone else), and nothing is posted.
+    Every confirmed key must still be on offer now. One that is not means the
+    preview the person read is out of date (a reconcile by someone else, or a
+    change set aside in the meantime), and nothing is posted. The changes the
+    person left unticked stay on offer.
 
     Raises:
-        ReconcileMismatchError: the confirmed list differs from the plan.
+        ReconcileMismatchError: a confirmed key is not in the plan.
     """
-    items = await plan_reconcile(session, contract)
-    if sorted(set(confirmed_keys)) != sorted(item.key for item in items):
+    confirmed = set(confirmed_keys)
+    items = [item for item in await plan_reconcile(session, contract) if item.key in confirmed]
+    if len(items) != len(confirmed):
         raise ReconcileMismatchError
     posted: list[SovAdjustment] = []
     for item in items:
@@ -324,3 +370,37 @@ async def apply_reconcile(session: AsyncSession, contract: Contract, confirmed_k
             posted.append(adjustment)
     await session.flush()
     return posted
+
+
+async def set_reconcile_exclusion(
+    session: AsyncSession,
+    contract: Contract,
+    key: str,
+    *,
+    excluded: bool,
+    actor_id: str | None,
+    reason: str = "",
+) -> dict[str, Any]:
+    """Set a change aside as already on the schedule, or take that back.
+
+    Setting aside is allowed only for a change on offer now; taking back only
+    for one set aside and still without a line. Returns the exclusion record
+    that was added or removed, for the audit trail.
+
+    Raises:
+        ReconcileMismatchError: the change is not where the person saw it.
+    """
+    exclusions = reconcile_exclusions(contract)
+    if excluded:
+        if key in exclusions or key not in {item.key for item in await unposted_changes(session, contract)}:
+            raise ReconcileMismatchError
+        record: dict[str, Any] = {"by": actor_id, "at": datetime.now(UTC).isoformat(), "reason": reason.strip()}
+        exclusions[key] = record
+    else:
+        if key not in exclusions:
+            raise ReconcileMismatchError
+        record = exclusions.pop(key)
+    # A new dict, so the JSON column sees the change.
+    contract.metadata_ = {**(contract.metadata_ or {}), EXCLUSIONS_KEY: exclusions}
+    await session.flush()
+    return record

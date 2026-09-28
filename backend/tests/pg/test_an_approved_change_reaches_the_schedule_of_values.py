@@ -9,7 +9,8 @@ in the same transaction and under the same source key as the money, so a
 replay or the mirrored half of a variation posts nothing.
 
 Changes approved before that are reconciled by a person: the preview lists
-them, and the apply posts exactly what the person confirmed.
+them, and the apply posts the ones the person ticked. A change the person
+says is already on the schedule is set aside, and that can be taken back.
 
 The handlers are driven directly against a throwaway database, because they
 open and commit their own session, as in
@@ -236,11 +237,14 @@ async def test_the_reconcile_posts_exactly_what_its_preview_showed(world) -> Non
         keys = [item["source_key"] for item in preview["items"]]
         assert sorted(keys) == sorted([f"change_order:{order.id}", f"variation_order:{variation.id}"])
 
-        # A list that is not the preview posts nothing.
+        # A key that is not on offer posts nothing, not even the good ones.
         with pytest.raises(HTTPException) as stale:
-            await svc.sov_reconcile_apply(world.contract.id, keys[:1], actor_id=str(world.user.id))
+            await svc.sov_reconcile_apply(
+                world.contract.id, [*keys, f"change_order:{uuid.uuid4()}"], actor_id=str(world.user.id)
+            )
         assert stale.value.status_code == 409
         assert stale.value.detail["error"] == "reconcile_preview_stale"
+        assert (await svc.sov_reconcile_preview(world.contract.id))["items"] == preview["items"]
 
         after = await svc.sov_reconcile_apply(world.contract.id, keys, actor_id=str(world.user.id))
         assert after["posted"] == 2
@@ -343,3 +347,120 @@ async def test_a_contract_that_is_not_active_is_not_reconciled(world) -> None:
             await svc.sov_reconcile_apply(world.contract.id, [])
         assert refused.value.detail["error"] == "contract_not_reconcilable"
         await session.rollback()
+
+
+async def _audit(world, action: str) -> list[dict]:
+    from app.core.audit import AuditEntry  # noqa: PLC0415
+
+    async with world.factory() as session:
+        rows = await session.execute(
+            select(AuditEntry).where(AuditEntry.entity_id == str(world.contract.id), AuditEntry.action == action)
+        )
+        return [dict(row.details or {}) for row in rows.scalars().all()]
+
+
+async def test_the_preview_writes_nothing(world) -> None:
+    await _legacy_change(world)
+    before = await _state(world)
+    async with world.factory() as session:
+        md_before = dict((await session.get(Contract, world.contract.id)).metadata_ or {})
+        await ContractsService(session).sov_reconcile_preview(world.contract.id)
+        await session.commit()
+    after = await _state(world)
+    assert after[0] == before[0]
+    assert len(after[1]) == len(before[1]) == 1
+    assert after[2] == before[2] == []
+    async with world.factory() as session:
+        assert dict((await session.get(Contract, world.contract.id)).metadata_ or {}) == md_before
+
+
+async def test_the_reconcile_posts_only_the_ticked_changes_and_a_replay_posts_nothing(world) -> None:
+    order, variation = await _legacy_change(world)
+    co_key, vo_key = f"change_order:{order.id}", f"variation_order:{variation.id}"
+    async with world.factory() as session:
+        svc = ContractsService(session)
+        after = await svc.sov_reconcile_apply(world.contract.id, [co_key], actor_id=str(world.user.id))
+        assert after["posted"] == 1
+        # The unticked change is still on offer.
+        assert [item["source_key"] for item in after["items"]] == [vo_key]
+        await session.commit()
+
+    _, _, adjustments = await _state(world)
+    assert [a.source_key for a in adjustments] == [co_key]
+    [entry] = await _audit(world, "reconcile_sov")
+    assert entry["source_keys"] == [co_key]
+    assert entry["left_out"] == [vo_key]
+
+    # The same confirm again: the change is posted, so it is no longer on offer.
+    async with world.factory() as session:
+        with pytest.raises(HTTPException) as stale:
+            await ContractsService(session).sov_reconcile_apply(world.contract.id, [co_key])
+        assert stale.value.detail["error"] == "reconcile_preview_stale"
+    _, _, adjustments = await _state(world)
+    assert [a.source_key for a in adjustments] == [co_key]
+
+
+async def test_a_change_set_aside_is_neither_offered_nor_counted_and_can_be_taken_back(world) -> None:
+    register_contracts_validation_rules()
+    order, variation = await _legacy_change(world)
+    co_key, vo_key = f"change_order:{order.id}", f"variation_order:{variation.id}"
+    actor = str(world.user.id)
+    async with world.factory() as session:
+        svc = ContractsService(session)
+        preview = await svc.sov_reconcile_set_exclusion(
+            world.contract.id, co_key, excluded=True, reason="Line A-2 added by hand", actor_id=actor
+        )
+        assert [item["source_key"] for item in preview["items"]] == [vo_key]
+        [aside] = preview["excluded"]
+        assert aside["source_key"] == co_key
+        assert aside["reason"] == "Line A-2 added by hand"
+        assert aside["excluded_by"] == actor
+        # Only what is still on offer moves the schedule in the preview.
+        assert Decimal(preview["scheduled_total_after"]) == BASE - Decimal("2500")
+
+        # Set aside twice, or posted while set aside: the preview has moved on.
+        with pytest.raises(HTTPException) as twice:
+            await svc.sov_reconcile_set_exclusion(world.contract.id, co_key, excluded=True, actor_id=actor)
+        assert twice.value.status_code == 409
+        with pytest.raises(HTTPException) as posted:
+            await svc.sov_reconcile_apply(world.contract.id, [co_key], actor_id=actor)
+        assert posted.value.detail["error"] == "reconcile_preview_stale"
+        await session.commit()
+
+    # The claim warning no longer counts it as missing.
+    async with world.factory() as session:
+        claim = ProgressClaim(
+            contract_id=world.contract.id,
+            claim_number="PC-1",
+            currency="USD",
+            status="draft",
+            period_start="2026-05-01",
+            period_end="2026-05-31",
+            period_from=date(2026, 5, 1),
+            period_to=date(2026, 5, 31),
+        )
+        session.add(claim)
+        await session.flush()
+        schedule = (await ContractsService(session).validate_claim(claim.id))["warnings"]
+        [finding] = [w for w in schedule if w["rule_id"] == "pay_application.sov_reconciles_contract_sum"]
+        assert "1 approved change" in finding["suggestion"]
+        await session.rollback()
+
+    async with world.factory() as session:
+        svc = ContractsService(session)
+        preview = await svc.sov_reconcile_set_exclusion(world.contract.id, co_key, excluded=False, actor_id=actor)
+        assert sorted(item["source_key"] for item in preview["items"]) == sorted([co_key, vo_key])
+        assert preview["excluded"] == []
+        # Taking back what is not set aside is refused too.
+        with pytest.raises(HTTPException) as again:
+            await svc.sov_reconcile_set_exclusion(world.contract.id, co_key, excluded=False, actor_id=actor)
+        assert again.value.status_code == 409
+        await session.commit()
+
+    [set_aside] = await _audit(world, "reconcile_sov_exclude")
+    assert set_aside["source_key"] == co_key and set_aside["reason"] == "Line A-2 added by hand"
+    [taken_back] = await _audit(world, "reconcile_sov_include")
+    assert taken_back["source_key"] == co_key
+    # Nothing was posted by any of it.
+    _, _, adjustments = await _state(world)
+    assert adjustments == []

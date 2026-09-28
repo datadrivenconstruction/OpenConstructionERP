@@ -142,6 +142,7 @@ from app.modules.contracts.schemas import (
     RetentionScheduleUpdate,
     RetentionSummaryResponse,
     SovReconcileConfirm,
+    SovReconcileExclusion,
     TemplateCatalogueEntry,
     TemplateClauseSetRequest,
 )
@@ -1737,11 +1738,29 @@ async def sov_reconcile_apply(
 ) -> dict:
     """Post the previewed changes as schedule of values lines, once a person confirms them.
 
-    Nothing is posted unless ``source_keys`` is exactly the list the preview
-    gives now (409 ``reconcile_preview_stale`` otherwise).
+    Posts the ticked subset. Nothing is posted if any key in ``source_keys``
+    is no longer on offer (409 ``reconcile_preview_stale``).
     """
     await _verify_contract_access(session, contract_id, user_id)
     return await ContractsService(session).sov_reconcile_apply(contract_id, body.source_keys, actor_id=user_id)
+
+
+@router.post("/contracts/{contract_id}/sov/reconcile-change-orders/exclusions")
+async def sov_reconcile_set_exclusion(
+    contract_id: uuid.UUID,
+    body: SovReconcileExclusion,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("contracts.update")),
+) -> dict:
+    """Set a change aside as already on the schedule of values, or take that back.
+
+    Returns the preview as it stands after the decision.
+    """
+    await _verify_contract_access(session, contract_id, user_id)
+    return await ContractsService(session).sov_reconcile_set_exclusion(
+        contract_id, body.source_key, excluded=body.excluded, reason=body.reason, actor_id=user_id
+    )
 
 
 # ── Retention release ────────────────────────────────────────────────────

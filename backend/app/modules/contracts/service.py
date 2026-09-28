@@ -988,6 +988,17 @@ def generate_unit_price_claim(
 # ── Service class (DB-aware operations + event emission) ─────────────────
 
 
+def _reconcile_stale(translate: Any, locale: str) -> HTTPException:
+    """409 for a reconcile decision taken on a preview that has moved on."""
+    return HTTPException(
+        status_code=status.HTTP_409_CONFLICT,
+        detail={
+            "error": "reconcile_preview_stale",
+            "message": translate("sov_reconcile.errors.preview_stale", locale=locale),
+        },
+    )
+
+
 class ContractsService:
     """Business logic for the contracts module."""
 
@@ -4397,15 +4408,13 @@ class ContractsService:
     async def sov_reconcile_apply(
         self, contract_id: uuid.UUID, confirmed_keys: list[str], actor_id: str | None = None
     ) -> dict[str, Any]:
-        """Post the changes a person confirmed from the preview, and audit it.
+        """Post the changes a person ticked in the preview, and audit it.
 
         Raises:
             HTTPException: 409 ``contract_not_reconcilable`` for a contract
-                that is not active, 409 ``reconcile_preview_stale`` when the
-                confirmed list is not what the reconcile would post now.
+                that is not active, 409 ``reconcile_preview_stale`` when a
+                confirmed change is no longer on offer.
         """
-        from sqlalchemy import select  # noqa: PLC0415
-
         from app.core.audit import audit_log  # noqa: PLC0415
         from app.modules.contracts.messages import translate as contracts_translate  # noqa: PLC0415
         from app.modules.contracts.sov_posting import (  # noqa: PLC0415
@@ -4420,8 +4429,7 @@ class ContractsService:
         # never collides. Two confirms in parallel queue here, and the second
         # plans after the first has committed and finds the preview stale.
         # The wave-5 subscribers take the same lock before they post.
-        await self.session.execute(select(Contract).where(Contract.id == contract_id).with_for_update())
-        contract = await self.get_contract(contract_id)
+        contract = await self._lock_contract_for_reconcile(contract_id)
         locale = get_locale()
         if contract.status not in POSTABLE_CONTRACT_STATUSES:
             raise HTTPException(
@@ -4437,27 +4445,87 @@ class ContractsService:
         try:
             posted = await apply_reconcile(self.session, contract, confirmed_keys)
         except ReconcileMismatchError as exc:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail={
-                    "error": "reconcile_preview_stale",
-                    "message": contracts_translate("sov_reconcile.errors.preview_stale", locale=locale),
+            raise _reconcile_stale(contracts_translate, locale) from exc
+        preview = await reconcile_preview(self.session, contract)
+        if posted:
+            await audit_log(
+                self.session,
+                action="reconcile_sov",
+                entity_type="contract",
+                entity_id=str(contract.id),
+                user_id=actor_id,
+                details={
+                    "source_keys": [row.source_key for row in posted],
+                    "amounts": {row.source_key: str(row.delta_value) for row in posted},
+                    "contract_line_ids": [str(row.contract_line_id) for row in posted],
+                    # What the person saw and left unticked, still on offer.
+                    "left_out": [item["source_key"] for item in preview["items"]],
                 },
-            ) from exc
+            )
+        return {**preview, "posted": len(posted)}
+
+    async def sov_reconcile_set_exclusion(
+        self,
+        contract_id: uuid.UUID,
+        source_key: str,
+        *,
+        excluded: bool,
+        reason: str = "",
+        actor_id: str | None = None,
+    ) -> dict[str, Any]:
+        """Set a change aside as already on the schedule, or take that back, and audit it.
+
+        A change someone put on the schedule by hand before change orders
+        posted their own line would be billed twice if the reconcile added
+        another. Setting it aside takes it out of the offer and out of the
+        count the claim warning gives; the preview keeps showing it under
+        ``excluded`` so the decision can be undone.
+
+        Raises:
+            HTTPException: 409 ``reconcile_preview_stale`` when the change is
+                not on offer (to set aside) or not set aside (to take back).
+        """
+        from app.core.audit import audit_log  # noqa: PLC0415
+        from app.modules.contracts.messages import translate as contracts_translate  # noqa: PLC0415
+        from app.modules.contracts.sov_posting import (  # noqa: PLC0415
+            ReconcileMismatchError,
+            reconcile_preview,
+            set_reconcile_exclusion,
+        )
+
+        contract = await self._lock_contract_for_reconcile(contract_id)
+        try:
+            record = await set_reconcile_exclusion(
+                self.session, contract, source_key, excluded=excluded, actor_id=actor_id, reason=reason
+            )
+        except ReconcileMismatchError as exc:
+            raise _reconcile_stale(contracts_translate, get_locale()) from exc
         await audit_log(
             self.session,
-            action="reconcile_sov",
+            action="reconcile_sov_exclude" if excluded else "reconcile_sov_include",
             entity_type="contract",
             entity_id=str(contract.id),
             user_id=actor_id,
-            details={
-                "source_keys": [row.source_key for row in posted],
-                "amounts": {row.source_key: str(row.delta_value) for row in posted},
-                "contract_line_ids": [str(row.contract_line_id) for row in posted],
-            },
+            details={"source_key": source_key, **record},
         )
-        preview = await reconcile_preview(self.session, contract)
-        return {**preview, "posted": len(posted)}
+        return await reconcile_preview(self.session, contract)
+
+    async def _lock_contract_for_reconcile(self, contract_id: uuid.UUID) -> Contract:
+        """Lock the contract row and read it fresh.
+
+        The access check has usually loaded the contract already, and a plain
+        locking select leaves that copy as it was; ``populate_existing``
+        refreshes it, so the metadata written back is the one under the lock.
+        """
+        from sqlalchemy import select  # noqa: PLC0415
+
+        await self.session.execute(
+            select(Contract)
+            .where(Contract.id == contract_id)
+            .with_for_update()
+            .execution_options(populate_existing=True)
+        )
+        return await self.get_contract(contract_id)
 
     async def sov_status(self, contract_id: uuid.UUID) -> dict[str, Any]:
         """Build the Schedule-of-Values status: scheduled vs earned vs paid per line."""
