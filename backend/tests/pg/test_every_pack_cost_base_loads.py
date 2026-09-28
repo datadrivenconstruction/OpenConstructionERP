@@ -24,10 +24,12 @@ GitHub. ``OE_COST_BASE_SHARD`` (``"k/n"``) splits it, and ``OE_COST_BASE_IDS``
 
 from __future__ import annotations
 
+import contextlib
 import importlib.util
 import os
 import pathlib
 import sys
+import threading
 import uuid
 
 import pytest
@@ -88,7 +90,12 @@ DB_IDS = _db_ids() if os.environ.get("OE_COST_BASE_MATRIX", "") == "1" else []
 
 
 def _status_kib(pid: str, field: str) -> int:
-    for line in pathlib.Path(f"/proc/{pid}/status").read_text().splitlines():
+    """Read one ``/proc/<pid>/status`` field; 0 once the process has exited."""
+    try:
+        lines = pathlib.Path(f"/proc/{pid}/status").read_text().splitlines()
+    except OSError:
+        return 0
+    for line in lines:
         if line.startswith(field + ":"):
             return int(line.split()[1])
     return 0
@@ -113,6 +120,36 @@ def _reset_peaks(pids: list[str]) -> None:
             pathlib.Path(f"/proc/{pid}/clear_refs").write_text("5")
         except OSError:
             continue
+
+
+class _PostgresPeak:
+    """Largest ``VmHWM`` any postgres process reached while the probe ran.
+
+    The loader copies over a connection of its own that closes before the
+    import returns, so the backend doing the work is gone by the time a
+    before/after read could look at it. Sampling while it runs is the only
+    way to see it; a backend that lives shorter than one interval is missed.
+    """
+
+    def __init__(self, interval: float = 0.1) -> None:
+        self.peak_kib = 0
+        self._interval = interval
+        self._stop = threading.Event()
+        self._thread = threading.Thread(target=self._run, daemon=True)
+
+    def _run(self) -> None:
+        while not self._stop.is_set():
+            for pid in _postgres_pids():
+                self.peak_kib = max(self.peak_kib, _status_kib(pid, "VmHWM"))
+            self._stop.wait(self._interval)
+
+    def __enter__(self) -> _PostgresPeak:
+        self._thread.start()
+        return self
+
+    def __exit__(self, *_exc) -> None:
+        self._stop.set()
+        self._thread.join()
 
 
 # ── Fresh database per base ─────────────────────────────────────────────────
@@ -170,13 +207,14 @@ async def test_the_cost_base_loads_once_and_fits_the_floor(db_id: str, fresh_db)
         _reset_peaks(["self", *pg_pids])
         base_rss = _status_kib("self", "VmRSS")
 
-    async with factory() as s:
-        res = await load_cwicr_region(db_id, s)
-        await s.commit()
+    with _PostgresPeak() if linux else contextlib.nullcontext() as pg:
+        async with factory() as s:
+            res = await load_cwicr_region(db_id, s)
+            await s.commit()
 
     if linux:
         peak = _status_kib("self", "VmHWM")
-        pg_peak = max((_status_kib(p, "VmHWM") for p in pg_pids), default=0)
+        pg_peak = pg.peak_kib
         delta_mib = (peak - base_rss) / 1024
         print(
             f"\n[cost-base-memory] {db_id}: python rss before {base_rss / 1024:.0f} MiB, "
