@@ -3,8 +3,9 @@
 """Seed 3 showcase demo projects from Sample_Projects/test CAD files.
 
 End-to-end demo seed:
-  1. Delete every existing project (cascades into BOQs, BIM models, links, …).
-  2. Remove orphaned DAE/GLB files from data/bim/.
+  1. Only with --wipe-all-projects: delete every existing project (cascades
+     into BOQs, BIM models, links, …).
+  2. Only with --wipe-all-projects: remove every directory under data/bim/.
   3. Create 3 demo projects - German / English / Spanish - each with full
      currency + classification metadata.
   4. Upload 2 CAD files per project (RVT / IFC / DWG mix) via the real
@@ -19,14 +20,18 @@ End-to-end demo seed:
   9. Print a summary block with each project's viewer URL.
 
 Usage:
-    python -m app.scripts.seed_demo_showcase
+    python -m app.scripts.seed_demo_showcase [--wipe-all-projects]
 
-Assumes the backend is running on http://localhost:8000 and that an admin
-user already exists (or will be registered). Safe to re-run.
+Assumes the backend is running on http://localhost:8000. The seed account
+signs in with the role it already has: this script never changes a role, so
+an account that may not create projects gets a refusal from the API rather
+than a promotion. Without --wipe-all-projects nothing that already exists is
+deleted, and re-running adds a second set of the three projects.
 """
 
 from __future__ import annotations
 
+import argparse
 import asyncio
 import os
 import pathlib
@@ -256,15 +261,29 @@ async def login_or_register(client: httpx.AsyncClient) -> dict[str, str]:
     return {"Authorization": f"Bearer {token}"}
 
 
-def wipe_all_projects_direct() -> int:
+WIPE_FLAG = "--wipe-all-projects"
+
+
+class WipeNotConfirmedError(RuntimeError):
+    """A wipe was asked for without the operator's explicit flag."""
+
+
+def _require_wipe_confirmation(confirmed: bool, what: str) -> None:
+    if not confirmed:
+        raise WipeNotConfirmedError(f"Refusing to delete {what} without {WIPE_FLAG}")
+
+
+def wipe_all_projects_direct(*, confirmed: bool, db_path: pathlib.Path | None = None) -> int:
     """Delete every project via direct SQLite access.
 
-    The HTTP list endpoint filters projects by ownership for non-admin users,
-    so the API route misses 95 % of the stale demo/test projects. We want a
-    clean slate, so we wipe directly and rely on the ON DELETE CASCADE FKs
-    (BOQs, BIM models, links, documents, ...) to do the heavy lifting.
+    Every project, not only the showcase ones, so it refuses unless the
+    operator passed ``--wipe-all-projects``. The HTTP list endpoint filters
+    projects by ownership, so the wipe goes to the database directly and
+    relies on the ON DELETE CASCADE FKs (BOQs, BIM models, links, documents,
+    ...) to do the heavy lifting.
     """
-    db_path = REPO_ROOT / "backend" / "openestimate.db"
+    _require_wipe_confirmation(confirmed, "every project")
+    db_path = db_path or REPO_ROOT / "backend" / "openestimate.db"
     if not db_path.exists():
         return 0
     conn = sqlite3.connect(str(db_path))
@@ -291,29 +310,14 @@ def wipe_all_projects_direct() -> int:
         conn.close()
 
 
-async def promote_admin(headers_unused: dict) -> None:
-    """Promote the seed admin user to role='admin' so subsequent API calls
-    bypass per-user visibility filters (listing projects, deleting links)."""
-    db_path = REPO_ROOT / "backend" / "openestimate.db"
-    if not db_path.exists():
-        return
-    conn = sqlite3.connect(str(db_path))
-    try:
-        conn.execute(
-            "UPDATE oe_users_user SET role = 'admin' WHERE email = ?",
-            (ADMIN_EMAIL,),
-        )
-        conn.commit()
-    finally:
-        conn.close()
-
-
-def wipe_orphan_bim_files() -> int:
-    """Remove BIM data directories that no longer correspond to any project."""
-    if not BIM_DATA_DIR.exists():
+def wipe_orphan_bim_files(*, confirmed: bool, bim_dir: pathlib.Path | None = None) -> int:
+    """Remove every BIM data directory, which only the project wipe orphans."""
+    _require_wipe_confirmation(confirmed, "the BIM data directories")
+    bim_dir = bim_dir or BIM_DATA_DIR
+    if not bim_dir.exists():
         return 0
     removed = 0
-    for child in BIM_DATA_DIR.iterdir():
+    for child in bim_dir.iterdir():
         if child.is_dir():
             shutil.rmtree(child, ignore_errors=True)
             removed += 1
@@ -514,7 +518,19 @@ async def link_bim_sample(
 # ── Main orchestration ─────────────────────────────────────────────────────
 
 
-async def main() -> None:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Seed the three CAD showcase projects.")
+    parser.add_argument(
+        WIPE_FLAG,
+        dest="wipe_all_projects",
+        action="store_true",
+        help="Delete EVERY project and every BIM data directory before seeding.",
+    )
+    return parser.parse_args(argv)
+
+
+async def main(argv: list[str] | None = None) -> None:
+    args = parse_args(argv)
     if not CAD_SOURCE_DIR.exists():
         sys.exit(f"CAD source directory not found: {CAD_SOURCE_DIR}")
 
@@ -523,22 +539,23 @@ async def main() -> None:
         print("  OpenEstimate - Demo Showcase Seeder (3 projects, 6 CAD files)")
         print("=" * 70)
 
-        # ── Auth + promote to admin so ownership filters don't hide anything ──
+        # ── Auth, with whatever role the account already has ──
         headers = await login_or_register(client)
-        await promote_admin(headers)
-        # Re-login so the fresh JWT carries role='admin'
-        headers = await login_or_register(client)
-        print("\n[1/7] Authenticated as", ADMIN_EMAIL, "(promoted to admin)")
+        print("\n[1/7] Authenticated as", ADMIN_EMAIL)
         print("     ", describe_seed_login(ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_PASSWORD_GENERATED))
 
-        # ── Wipe ──
-        print("\n[2/7] Wiping existing projects (direct DB cascade)...")
-        deleted = wipe_all_projects_direct()
-        print(f"      Deleted {deleted} project(s) + cascaded children.")
+        # ── Wipe, only when asked for by name ──
+        if args.wipe_all_projects:
+            print("\n[2/7] Wiping existing projects (direct DB cascade)...")
+            deleted = wipe_all_projects_direct(confirmed=True)
+            print(f"      Deleted {deleted} project(s) + cascaded children.")
 
-        print("\n[3/7] Removing orphan BIM data directories...")
-        orphans = wipe_orphan_bim_files()
-        print(f"      Removed {orphans} orphan BIM data directory/ies.")
+            print("\n[3/7] Removing BIM data directories...")
+            removed = wipe_orphan_bim_files(confirmed=True)
+            print(f"      Removed {removed} BIM data directory/ies.")
+        else:
+            print(f"\n[2/7] Existing projects kept (pass {WIPE_FLAG} to delete them first).")
+            print("[3/7] BIM data directories kept.")
 
         # ── Create projects ──
         print("\n[4/7] Creating 3 demo projects...")
