@@ -20,7 +20,9 @@ MANIFEST = PartnerPackManifest(
         "conditions, NS 3451 building element table classification, "
         "NOK currency with 25% MVA. Norwegian and English interface."
     ),
-    default_locale="nb",
+    # The platform ships its Norwegian (Bokmal) bundle as "no". The BCP-47
+    # tag "nb" is not an offered code, so the resolver fell back to English.
+    default_locale="no",
     additional_locales={},
     cwicr_regions=[
         "cwicr-no-oslo",
