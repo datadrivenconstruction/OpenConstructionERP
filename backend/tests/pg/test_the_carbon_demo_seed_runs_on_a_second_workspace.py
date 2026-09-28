@@ -19,6 +19,8 @@ from sqlalchemy import func, select
 
 from app.modules.carbon.models import CarbonInventory, EPDRecord, MaterialCarbonFactor
 from app.modules.carbon.seed import seed_carbon_demo
+from app.modules.projects.models import Project
+from app.modules.users.models import User
 
 pytestmark = pytest.mark.asyncio
 
@@ -30,8 +32,18 @@ async def _count(session, model, *where) -> int:
     return (await session.execute(stmt)).scalar_one()
 
 
+async def _project_id(session) -> uuid.UUID:
+    owner = User(email=f"carbon-{uuid.uuid4().hex[:8]}@example.test", hashed_password="x", full_name="Owner")
+    session.add(owner)
+    await session.flush()
+    project = Project(name="Carbon demo", owner_id=owner.id, currency="EUR")
+    session.add(project)
+    await session.flush()
+    return project.id
+
+
 async def test_a_second_run_reuses_the_library_and_seeds_its_own_projects(pg_session) -> None:
-    first, second = uuid.uuid4(), uuid.uuid4()
+    first, second = await _project_id(pg_session), await _project_id(pg_session)
 
     await seed_carbon_demo(pg_session, [first])
     library = await _count(pg_session, EPDRecord)
