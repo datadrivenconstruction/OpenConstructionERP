@@ -46,6 +46,10 @@ _INAPP_DIGEST_INTERVAL_SEC = 5 * 60  # 5 minutes
 _CLEANUP_INTERVAL_SEC = 24 * 60 * 60  # 24 hours
 _CLEANUP_RETENTION_DAYS = 90
 
+# First retry after a transient failure; doubles on each consecutive one and
+# never waits longer than the task's own interval.
+_TRANSIENT_RETRY_BASE_SEC = 30.0
+
 
 # ── Task bodies ────────────────────────────────────────────────────────────
 
@@ -117,11 +121,28 @@ _RUNNING_TASKS: list[asyncio.Task[None]] = []
 _SHUTDOWN_EVENT: asyncio.Event | None = None
 
 
+def _is_transient_db_error(exc: BaseException) -> bool:
+    """True when ``exc`` means the database is not reachable yet, not a bug.
+
+    During a slow boot (migrations, a first seed holding the pool) a flush can
+    time out connecting or waiting for a pooled connection. That clears on its
+    own and is worth one line, not a traceback every five minutes.
+    """
+    from sqlalchemy.exc import InterfaceError, OperationalError
+    from sqlalchemy.exc import TimeoutError as PoolTimeoutError
+
+    return isinstance(
+        exc,
+        OperationalError | InterfaceError | PoolTimeoutError | ConnectionError | OSError | TimeoutError,
+    )
+
+
 async def _run_periodically(
     name: str,
     coro_factory: Callable[[], Awaitable[int]],
     interval_sec: float,
     shutdown: asyncio.Event,
+    retry_base_sec: float = _TRANSIENT_RETRY_BASE_SEC,
 ) -> None:
     """Run ``coro_factory()`` every ``interval_sec`` until ``shutdown`` is set.
 
@@ -129,18 +150,44 @@ async def _run_periodically(
     single bad iteration cannot kill the schedule.  The first run
     happens after the first interval - no startup race-condition with
     half-mounted modules.
+
+    A database that is not reachable yet is retried sooner, backing off
+    from ``retry_base_sec`` up to ``interval_sec``, and logged once per
+    streak without a traceback; any other error is still logged in full.
     """
+    delay = interval_sec
+    failures = 0
     while not shutdown.is_set():
         try:
-            await asyncio.wait_for(shutdown.wait(), timeout=interval_sec)
+            await asyncio.wait_for(shutdown.wait(), timeout=delay)
             # If wait returned without timeout, shutdown was requested.
             return
         except TimeoutError:
             pass
         try:
             await coro_factory()
-        except Exception:  # noqa: BLE001
-            logger.exception("notification_worker: %s iteration failed", name)
+        except Exception as exc:  # noqa: BLE001
+            if not _is_transient_db_error(exc):
+                failures = 0
+                delay = interval_sec
+                logger.exception("notification_worker: %s iteration failed", name)
+                continue
+            failures += 1
+            delay = min(retry_base_sec * 2 ** (failures - 1), interval_sec)
+            if failures == 1:
+                logger.warning(
+                    "notification_worker: %s could not reach the database (%s), retrying in %.0fs",
+                    name,
+                    type(exc).__name__,
+                    delay,
+                )
+            else:
+                logger.debug("notification_worker: %s still waiting for the database (attempt %d)", name, failures)
+            continue
+        if failures:
+            logger.info("notification_worker: %s reached the database after %d attempts", name, failures + 1)
+        failures = 0
+        delay = interval_sec
 
 
 def _is_scheduler_running() -> bool:
