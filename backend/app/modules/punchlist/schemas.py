@@ -72,6 +72,9 @@ class PunchItemCreate(BaseModel):
     # Rework cost as Decimal string (never float - avoids binary rounding on money).
     rework_cost: str | None = Field(default=None, max_length=40)
     rework_cost_currency: str = Field(default="USD", max_length=3)
+    # The contract this item belongs to. Must be a contract on the same
+    # project; omit it for an item that is not any one contract's.
+    contract_id: UUID | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     @field_validator("rework_cost")
@@ -130,6 +133,8 @@ class PunchItemUpdate(BaseModel):
     geo_lon: float | None = Field(default=None, ge=-180, le=180)
     rework_cost: str | None = Field(default=None, max_length=40)
     rework_cost_currency: str | None = Field(default=None, max_length=3)
+    # A contract on the item's project, or null to take the attribution off.
+    contract_id: UUID | None = None
     metadata: dict[str, Any] | None = None
 
     @field_validator("rework_cost")
@@ -183,6 +188,7 @@ class PunchItemResponse(BaseModel):
     geo_lon: float | None = None
     rework_cost: str | None = None
     rework_cost_currency: str = "USD"
+    contract_id: str | None = None
     resolution_notes: str | None = None
     resolved_at: datetime | None = None
     verified_at: datetime | None = None

@@ -95,8 +95,16 @@ back.
 #
 # Columns only the migrations add, absent from create_all under both of the
 # import sets above:
-#   oe_boq_boq.tax_rate            oe_projects_project.unit_system
+#   oe_boq_boq.tax_rate
 #   oe_tendering_bid.leveled_amount    oe_tendering_bid.leveling_notes
+#
+# ``oe_projects_project.unit_system`` stood in that list until 18.1.1, when the
+# project model declared it again, nullable and with no default, as the
+# measurement system a person states in the project settings.
+# ``v48_project_jurisdiction_unit_system`` relaxes the chain's NOT NULL
+# DEFAULT 'metric' and clears the values that default wrote, because nobody
+# chose them; the ``project_unit_system_chain_default`` data repair does the
+# same on the boot path.
 #
 # "Latent" above means no code reads them, and that holds: the ORM cannot
 # reference a column that is not on a model, and no raw SQL in ``app/`` names
@@ -104,8 +112,8 @@ back.
 # when its data cannot. ``BOQUnitSystemConsistencyRule`` spent its life
 # advising readers to "update the project's unit_system" - a setting on no
 # screen, in no schema and in no table on any supported install. It now names
-# what actually decides the value, the project's country through its regional
-# pack. ``tax_rate`` escaped the same way and was answered the same way at
+# what actually decides the value: the setting on the project when there is
+# one, else the project's country through its regional pack. ``tax_rate`` escaped the same way and was answered the same way at
 # ``app/modules/boq/schemas.py`` (TAX_RATE_NOT_STORED_MESSAGE).
 # ``leveled_amount`` and ``leveling_notes`` never escaped: every occurrence of
 # those names in ``app/`` belongs to the computed

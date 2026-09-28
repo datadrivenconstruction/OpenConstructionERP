@@ -530,6 +530,18 @@ export function RetentionReleasePanel({
                         without: preview.open_items_without_cost,
                       })}
                 </p>
+                {/* Items attributed to another contract are that contract's to
+                    hold for, so they are left out here - said out loud, or a
+                    count lower than the punch list shows would read as a bug. */}
+                {(preview.open_items_elsewhere ?? 0) > 0 && (
+                  <p className="mt-1 text-xs text-content-tertiary">
+                    {t('contracts.release_open_items_elsewhere', {
+                      defaultValue:
+                        '{{count}} more open items are attributed to other contracts and are held for there.',
+                      count: preview.open_items_elsewhere,
+                    })}
+                  </p>
+                )}
 
                 {preview.required_documents.length > 0 && (
                   <p className="mt-1 text-xs text-content-tertiary">

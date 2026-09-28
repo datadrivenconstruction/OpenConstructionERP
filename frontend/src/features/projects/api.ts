@@ -43,6 +43,14 @@ export interface Project {
   /** ISO 3166-1 alpha-2 country code (drives the AIA G702/G703 gate). */
   country_code?: string | null;
   /**
+   * Stated jurisdiction: an ISO 3166-1 country or an ISO 3166-2 subdivision
+   * (e.g. US-CA). Never filled from the country; null keeps every consumer on
+   * what it derives from `country_code`.
+   */
+  jurisdiction?: string | null;
+  /** Stated measurement system; null keeps the one the country's pack declares. */
+  unit_system?: ProjectUnitSystem | null;
+  /**
    * True when this project may use AIA G702/G703 payment applications
    * (US/CA/AU only). Computed server-side from the project country; the
    * front end keys the AIA UI off this so it never renders elsewhere.
@@ -88,8 +96,22 @@ export interface CreateProjectData {
   planned_end_date?: string | null;
 }
 
+export type ProjectUnitSystem = 'metric' | 'imperial';
+
+/** One code the project jurisdiction field accepts (GET /v1/projects/jurisdictions/). */
+export interface JurisdictionOption {
+  code: string;
+  country_code: string;
+  kind: 'country' | 'subdivision';
+  /** English name of a subdivision (data, not a UI string); null for a country. */
+  name: string | null;
+}
+
 /** Patch payload — every field is optional; only included keys are updated. */
 export interface UpdateProjectData extends Partial<CreateProjectData> {
+  /** null clears the stated value. */
+  jurisdiction?: string | null;
+  unit_system?: ProjectUnitSystem | null;
   fx_rates?: ProjectFxRate[];
   default_vat_rate?: string | null;
   custom_units?: string[];
@@ -266,6 +288,8 @@ export const projectsApi = {
    */
   listByStatus: (status: string) => fetchProjectListByStatus<Project[]>(status),
   get: (id: string) => apiGet<Project>(`/v1/projects/${id}`),
+  /** Every code the jurisdiction field accepts, countries then subdivisions. */
+  jurisdictions: () => apiGet<JurisdictionOption[]>('/v1/projects/jurisdictions/'),
   create: (data: CreateProjectData) => apiPost<Project>('/v1/projects/', data),
   update: (id: string, data: UpdateProjectData) =>
     apiPatch<Project>(`/v1/projects/${id}`, data),

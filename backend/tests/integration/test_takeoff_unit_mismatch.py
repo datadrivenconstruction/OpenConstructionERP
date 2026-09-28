@@ -14,21 +14,15 @@ rather than deleted, because the contract they describe is worth keeping in
 front of whoever decides the question, and strict means the mark turns red the
 day somebody implements it instead of quietly passing.
 
-The gap is wider than a missing keyword argument, which is why this is a
-product question and not a test fix. ``TakeoffService.create_measurement`` has
-no ``source_unit_system`` parameter, and ``unit_system_mismatch`` appears
-nowhere in ``app/``. Adding the parameter alone would still not satisfy the
-422 case: ``Project`` has no ``unit_system`` column, ``ProjectCreate`` declares
-no such field and sets no ``extra=``, so the ``"unit_system": "imperial"``
-this file posts is silently dropped, and the platform resolves a project's
-measurement system from its regional pack instead - see
-``resolve_measurement_system`` in ``app/core/regional_packs.py``, whose
-docstring says ``None`` means "no pack answered" and must not be defaulted. A
-project created with no country therefore resolves to ``None``, and there is
-nothing for a metric measurement to mismatch against. Passing these two tests
-needs a stored ``unit_system`` column and a migration, which is a different
-answer to "where does a project's measurement system live" than the one the
-validation layer already uses. That decision is not a test's to make.
+Half of the gap closed in 18.1.1 and half is still open. ``Project`` now
+stores ``unit_system`` (nullable, never filled from the country), and the
+``"unit_system": "imperial"`` this file posts is kept. What is still missing is
+the takeoff side: ``TakeoffService.create_measurement`` has no
+``source_unit_system`` parameter and ``unit_system_mismatch`` appears nowhere
+in ``app/``. When it is written, it should read the project's measurement
+system the way the validation layer does - the stated field first, else the
+system the country's regional pack declares - and stay silent where neither
+answers, rather than defaulting one.
 """
 
 from __future__ import annotations
@@ -45,10 +39,9 @@ from app.main import create_app
 # Both halves of the gap in one sentence, so a failure report carries the
 # reason without anyone having to open this file.
 _UNIT_SYSTEM_GAP = (
-    "TakeoffService.create_measurement takes no source_unit_system, and a project's measurement "
-    "system is derived from its regional pack rather than stored, so there is nothing to compare "
-    "against; satisfying this needs a stored unit_system column plus a migration, which is a "
-    "product decision - see this module's docstring"
+    "TakeoffService.create_measurement takes no source_unit_system and no takeoff gate compares it "
+    "with the project's measurement system; the project stores unit_system since 18.1.1, so what is "
+    "left is the takeoff side - see this module's docstring"
 )
 
 

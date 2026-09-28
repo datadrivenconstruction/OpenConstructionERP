@@ -134,6 +134,14 @@ class Project(Base):
         nullable=True,
         default=None,
     )
+    # Stated by a person, never filled from the country (see
+    # ``app.modules.projects.jurisdiction``). Empty keeps every consumer on
+    # the answer it derives from the country. ``jurisdiction`` is an ISO
+    # 3166-1 country or an ISO 3166-2 subdivision such as ``US-CA``;
+    # ``unit_system`` is ``metric`` or ``imperial`` and, when set, outranks
+    # the measurement system the country's regional pack declares.
+    jurisdiction: Mapped[str | None] = mapped_column(String(6), nullable=True)
+    unit_system: Mapped[str | None] = mapped_column(String(16), nullable=True)
 
     # ── Phase 12 expansion fields (all nullable for backward compat) ─────
     project_code: Mapped[str | None] = mapped_column(String(50), nullable=True)

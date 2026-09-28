@@ -50,7 +50,16 @@ PROJECT_RECORD_KEY = "project_record"
 #: Every key this module contributes. Named so a test can assert the property
 #: ("each surface reaches the engine with these") without repeating the list,
 #: and so adding a key here reaches every surface at once.
-PROJECT_CONTEXT_KEYS: tuple[str, ...] = ("project_unit_system", PROJECT_RECORD_KEY)
+PROJECT_CONTEXT_KEYS: tuple[str, ...] = ("project_unit_system", "project_unit_system_source", PROJECT_RECORD_KEY)
+
+#: Values of ``project_unit_system_source``: the system was set on the project,
+#: or derived from the regional pack that claims its country.
+UNIT_SYSTEM_FROM_PROJECT = "project"
+UNIT_SYSTEM_FROM_PACK = "regional_pack"
+
+#: What a project's ``unit_system`` column may hold. Anything else stored there
+#: is read as unset rather than passed to a rule that branches on it.
+_UNIT_SYSTEMS: frozenset[str] = frozenset({"metric", "imperial"})
 
 #: The contract party role that names the client. ``PARTY_ROLES`` in the
 #: contracts schemas spells the client side of a construction contract
@@ -71,24 +80,39 @@ def _as_uuid(project_id: uuid.UUID | str | None) -> uuid.UUID | None:
     return None
 
 
-async def _measurement_system(session: AsyncSession, project_id: uuid.UUID) -> str | None:
-    """Resolve the measurement system the project's regional pack declares.
+async def _measurement_system(session: AsyncSession, project_id: uuid.UUID) -> tuple[str | None, str | None]:
+    """Resolve the project's measurement system, and say where the answer came from.
+
+    A system somebody set on the project wins. Without one, the system the
+    project's regional pack declares answers, exactly as it did before the
+    project had a field for it: the field starts empty and is never filled
+    from the country, so an untouched project reads the same as ever.
 
     Args:
         session: Live session the caller owns.
         project_id: Project the validation run is scoped to.
 
     Returns:
-        ``"metric"`` or ``"imperial"`` when the project's country (or, as a
-        fallback, its region) resolves to a regional pack, otherwise ``None``.
+        ``(system, source)``. ``system`` is ``"metric"`` or ``"imperial"``, or
+        ``None`` when nothing answered. ``source`` is ``"project"`` for the
+        stated field, ``"regional_pack"`` for the derivation, ``None`` with a
+        ``None`` system.
     """
     from app.modules.projects.models import Project
 
-    row = (await session.execute(select(Project.country_code, Project.region).where(Project.id == project_id))).first()
+    row = (
+        await session.execute(
+            select(Project.unit_system, Project.country_code, Project.region).where(Project.id == project_id)
+        )
+    ).first()
     if row is None:
-        return None
-    country_code, region = row
-    return resolve_measurement_system(country_code=country_code, region=region)
+        return None, None
+    stated, country_code, region = row
+    stated = str(stated or "").strip().lower()
+    if stated in _UNIT_SYSTEMS:
+        return stated, UNIT_SYSTEM_FROM_PROJECT
+    derived = resolve_measurement_system(country_code=country_code, region=region)
+    return derived, (UNIT_SYSTEM_FROM_PACK if derived else None)
 
 
 async def _bills(session: AsyncSession, project_id: uuid.UUID) -> list[dict[str, Any]]:
@@ -174,6 +198,8 @@ async def _project_record(session: AsyncSession, project_id: uuid.UUID) -> dict[
                 Project.id,
                 Project.name,
                 Project.country_code,
+                Project.jurisdiction,
+                Project.unit_system,
                 Project.region,
                 Project.currency,
                 Project.classification_standard,
@@ -193,6 +219,8 @@ async def _project_record(session: AsyncSession, project_id: uuid.UUID) -> dict[
         "id": str(row.id),
         "name": row.name,
         "country_code": row.country_code,
+        "jurisdiction": row.jurisdiction,
+        "unit_system": row.unit_system,
         "region": row.region,
         "currency": row.currency,
         "classification_standard": row.classification_standard,
@@ -242,11 +270,12 @@ async def with_project_context(
         :data:`PROJECT_CONTEXT_KEYS`.
     """
     unit_system: str | None = None
+    unit_system_source: str | None = None
     record: dict[str, Any] | None = None
     scoped = _as_uuid(project_id)
     if session is not None and scoped is not None:
         try:
-            unit_system = await _measurement_system(session, scoped)
+            unit_system, unit_system_source = await _measurement_system(session, scoped)
         except Exception:  # noqa: BLE001 - a payload is still owed to the caller
             # Degrading to a null key is safe in a way that omitting it is not:
             # null still says the question was asked, so the rule skips rather
@@ -256,4 +285,9 @@ async def with_project_context(
             record = await _project_record(session, scoped)
         except Exception:  # noqa: BLE001 - same contract as the key above
             logger.warning("Could not load the project record for project=%s", scoped, exc_info=True)
-    return {**data, "project_unit_system": unit_system, PROJECT_RECORD_KEY: record}
+    return {
+        **data,
+        "project_unit_system": unit_system,
+        "project_unit_system_source": unit_system_source,
+        PROJECT_RECORD_KEY: record,
+    }

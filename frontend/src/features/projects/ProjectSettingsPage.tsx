@@ -34,6 +34,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import { useFxRatesStore, getFxRate } from '@/stores/useFxRatesStore';
 import { getErrorMessage } from '@/shared/lib/api';
 import { projectsApi, type Project, type ProjectFxRate } from './api';
+import { ProjectJurisdictionCard } from './ProjectJurisdictionCard';
 import { CURRENCY_GROUPS, CreateProjectModal } from './CreateProjectPage';
 import { getVatRate } from '../boq/boqHelpers';
 import { TranslationSettingsTab } from '../translation';
@@ -1171,6 +1172,9 @@ export function ProjectSettingsPage() {
 
       {/* ── Compliance rule packs (Item #27) ───────────────────────────── */}
       <ComplianceRulePacksCard project={project} />
+
+      {/* ── Stated jurisdiction + measurement system (unset = from country) ── */}
+      <ProjectJurisdictionCard project={project} />
 
       {/* ── Translation (#translation deep-link) ─────────────────────────
           Mounted as a Card section so the existing hash-pulse effect in

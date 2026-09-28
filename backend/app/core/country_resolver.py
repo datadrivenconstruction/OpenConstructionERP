@@ -464,3 +464,8 @@ def resolve_country_code(name: str) -> str | None:
     if not key:
         return None
     return _LOOKUP.get(key)
+
+
+def known_country_codes() -> frozenset[str]:
+    """Every ISO 3166-1 alpha-2 code this resolver can produce."""
+    return frozenset(_RAW_NAME_TO_CODE.values())

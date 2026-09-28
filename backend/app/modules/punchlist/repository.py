@@ -15,10 +15,14 @@ from sqlalchemy.orm.util import identity_key
 from sqlalchemy.sql.elements import ClauseElement
 
 from app.core.calendar_day import start_of_today_utc
+from app.modules.punchlist.intl import DONE_STATUSES
 from app.modules.punchlist.models import PunchItem
 
 #: Statuses that count as still-to-action work in the summary aggregates.
 LIVE_STATUSES = ("open", "in_progress")
+
+#: ``contract_id`` filter value that selects the items attributed to no contract.
+UNATTRIBUTED = "none"
 
 
 class PunchListRepository:
@@ -42,9 +46,23 @@ class PunchListRepository:
         assigned_to: str | None = None,
         category: str | None = None,
         trade: str | None = None,
+        contract_id: str | None = None,
+        open_only: bool = False,
     ) -> tuple[list[PunchItem], int]:
-        """List punch items for a project with pagination and filters."""
+        """List punch items for a project with pagination and filters.
+
+        ``contract_id`` narrows to the items attributed to that contract, and
+        the sentinel :data:`UNATTRIBUTED` to the items attributed to none.
+        ``open_only`` drops the done statuses, the same set the retention
+        withholding counts as closed.
+        """
         base = select(PunchItem).where(PunchItem.project_id == project_id)
+        if contract_id == UNATTRIBUTED:
+            base = base.where(PunchItem.contract_id.is_(None))
+        elif contract_id is not None:
+            base = base.where(PunchItem.contract_id == contract_id)
+        if open_only:
+            base = base.where(PunchItem.status.notin_(tuple(DONE_STATUSES)))
         if status is not None:
             base = base.where(PunchItem.status == status)
         if priority is not None:

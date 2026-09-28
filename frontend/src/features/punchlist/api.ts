@@ -82,6 +82,11 @@ export interface PunchItem {
   rework_cost: string | null;
   /** ISO code the cost is in. Rendered as stored, never relabelled. */
   rework_cost_currency: string;
+  /**
+   * The contract whose scope the item belongs to, or null for the project's.
+   * A retention release leaves out items attributed to another contract.
+   */
+  contract_id?: string | null;
 }
 
 export interface ReopenHistoryEntry {
@@ -131,6 +136,10 @@ export interface PunchFilters {
   status?: PunchStatus | '';
   category?: PunchCategory | '';
   assigned_to?: string;
+  /** A contract id, or 'none' for the items attributed to no contract. */
+  contract_id?: string;
+  /** Leave out verified and closed items (the retention withholding's open set). */
+  open_only?: boolean;
   /** Rows per page. Server default 50, hard cap 100. */
   limit?: number;
 }
@@ -153,6 +162,8 @@ export interface CreatePunchPayload {
   rework_cost?: string;
   /** Send the project's currency: the backend defaults to USD otherwise. */
   rework_cost_currency?: string;
+  /** A contract on the same project; omit for an item that is the project's. */
+  contract_id?: string;
 }
 
 export interface UpdatePunchPayload {
@@ -171,6 +182,8 @@ export interface UpdatePunchPayload {
   rework_cost?: string | null;
   /** Never null: the column is NOT NULL and the API refuses it. Omit to keep. */
   rework_cost_currency?: string;
+  /** null takes the item off its contract. */
+  contract_id?: string | null;
 }
 
 export interface TeamMember {
@@ -214,6 +227,8 @@ export async function fetchPunchItems(
   if (filters?.status) params.set('status', filters.status);
   if (filters?.category) params.set('category', filters.category);
   if (filters?.assigned_to) params.set('assigned_to', filters.assigned_to);
+  if (filters?.contract_id) params.set('contract_id', filters.contract_id);
+  if (filters?.open_only) params.set('open_only', 'true');
   if (filters?.limit != null) params.set('limit', String(filters.limit));
   return apiGet<Page<PunchItem>>(`/v1/punchlist/items/?${params.toString()}`);
 }
@@ -344,6 +359,32 @@ export async function fetchPunchDrawings(projectId: string): Promise<PunchDrawin
     id: r.id,
     filename: r.filename ?? r.name ?? '',
   }));
+}
+
+/** A contract a punch item can be attributed to. */
+export interface PunchContractOption {
+  id: string;
+  code: string;
+  title: string;
+}
+
+/**
+ * The project's contracts, for attributing a punch item and filtering by it.
+ * Read straight from the contracts route rather than through the contracts
+ * feature, so the punch list keeps working on an install without that module.
+ * A failed read (module absent, no access) reads as "no contracts": the picker
+ * and the filter stay hidden and the page behaves as it did before either existed.
+ */
+export async function fetchPunchContracts(projectId: string): Promise<PunchContractOption[]> {
+  if (!projectId) return [];
+  try {
+    const page = await apiGet<Page<{ id: string; code?: string; title?: string }>>(
+      `/v1/contracts/contracts/?project_id=${projectId}&limit=100`,
+    );
+    return page.items.map((c) => ({ id: c.id, code: c.code ?? '', title: c.title ?? '' }));
+  } catch {
+    return [];
+  }
 }
 
 /**

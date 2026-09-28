@@ -200,12 +200,57 @@ class PunchListService:
             logger.exception("punchlist: project currency lookup failed for %s", data.project_id)
         return "USD"
 
+    async def _assert_contract_on_project(self, contract_id: uuid.UUID | str, project_id: uuid.UUID) -> str:
+        """The contract id as stored, or 422 unless it names a contract on ``project_id``.
+
+        An item attributed to another project's contract would withhold that
+        contract's retention for a defect it has nothing to do with.
+        """
+        try:
+            from sqlalchemy import select  # noqa: PLC0415
+
+            from app.modules.contracts.models import Contract  # noqa: PLC0415
+        except ImportError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={
+                    "error": "contracts_unavailable",
+                    "message": "The contracts module is not installed, so an item cannot be attributed to a contract.",
+                },
+            ) from exc
+        try:
+            wanted = uuid.UUID(str(contract_id))
+        except ValueError:
+            wanted = None
+        owner = (
+            None
+            if wanted is None
+            else (
+                await self.session.execute(select(Contract.project_id).where(Contract.id == wanted))
+            ).scalar_one_or_none()
+        )
+        if owner is None or str(owner) != str(project_id):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={
+                    "error": "contract_not_on_project",
+                    "message": "The contract must be a contract on the same project as the punch item.",
+                    "contract_id": str(contract_id),
+                },
+            )
+        return str(wanted)
+
     async def create_item(
         self,
         data: PunchItemCreate,
         user_id: str | None = None,
     ) -> PunchItem:
         """Create a new punch list item."""
+        # getattr: other modules hand this method payloads of their own that
+        # predate the field.
+        contract_id = getattr(data, "contract_id", None)
+        if contract_id is not None:
+            contract_id = await self._assert_contract_on_project(contract_id, data.project_id)
         item = PunchItem(
             project_id=data.project_id,
             title=data.title,
@@ -224,6 +269,7 @@ class PunchListService:
             geo_lon=data.geo_lon,
             rework_cost=getattr(data, "rework_cost", None),
             rework_cost_currency=await self._rework_currency(data),
+            contract_id=contract_id,
             created_by=user_id,
             metadata_=data.metadata,
         )
@@ -291,6 +337,8 @@ class PunchListService:
         assigned_to: str | None = None,
         category_filter: str | None = None,
         trade_filter: str | None = None,
+        contract_filter: str | None = None,
+        open_only: bool = False,
     ) -> tuple[list[PunchItem], int]:
         """List punch items for a project."""
         return await self.repo.list_for_project(
@@ -302,6 +350,8 @@ class PunchListService:
             assigned_to=assigned_to,
             category=category_filter,
             trade=trade_filter,
+            contract_id=contract_filter,
+            open_only=open_only,
         )
 
     # ── Update ────────────────────────────────────────────────────────────
@@ -322,6 +372,17 @@ class PunchListService:
                 if isinstance(_incoming, dict)
                 else _incoming
             )
+
+        if "contract_id" in fields:
+            # Checked only when the attribution moves, so editing an item
+            # whose contract has since been deleted does not refuse the edit.
+            wanted = fields["contract_id"]
+            if wanted is None:
+                fields["contract_id"] = None
+            elif str(wanted) != (item.contract_id or ""):
+                fields["contract_id"] = await self._assert_contract_on_project(wanted, item.project_id)
+            else:
+                fields["contract_id"] = str(wanted)
 
         if not fields:
             return item

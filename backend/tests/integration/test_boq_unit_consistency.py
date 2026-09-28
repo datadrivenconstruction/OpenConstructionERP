@@ -45,16 +45,14 @@ from httpx import ASGITransport, AsyncClient
 from app.main import create_app
 
 #: The field the suggestion is allowed to send a reader to, and the one it is
-#: not. ``unit_system`` is the name the advice used to give: a column the
-#: migration chain adds and no supported install has, absent from ``Project``,
-#: from ``ProjectCreate`` and ``ProjectUpdate``, and from every screen. What
-#: actually decides the answer is the project's country, through the regional
-#: pack that claims it. Both halves are pinned because only the second one was
-#: ever wrong, and an unpinned field name is free to go wrong again.
-#:
-#: The banned spelling is the underscored column name. Prose that says a
-#: project has no "unit-system field" is the opposite claim and is welcome; it
-#: is the identifier that must not come back.
+#: not. ``unit_system`` is the name the advice used to give while it was a
+#: column the migration chain added and no screen offered. Since 18.1.1 the
+#: project does store it, and the reader reaches it as "the measurement system
+#: in the project settings" - still never as the underscored identifier. For a
+#: project that has not set it, what decides the answer is the project's
+#: country, through the regional pack that claims it, and the suggestion has to
+#: say so. Both halves are pinned because an unpinned field name is free to go
+#: wrong again.
 _DECIDING_FIELD = "country"
 _ABANDONED_FIELD = "unit_system"
 

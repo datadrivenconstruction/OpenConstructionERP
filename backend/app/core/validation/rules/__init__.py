@@ -2170,32 +2170,32 @@ class BOQUnitSystemConsistencyRule(ValidationRule):
             f"BOQ position(s) use {wrong_label} units (e.g. {first_unit} on "
             f"position {first_ordinal})."
         )
-        # The suggestion names the field the reader can actually go and look
-        # at. It used to say "update the project's unit_system", and no such
-        # field exists: not on ``Project``, not in ``ProjectCreate`` or
-        # ``ProjectUpdate``, and nowhere in the interface. The column of that
-        # name is added by the migration chain alone, which no supported
-        # install walks, so the advice sent the reader hunting for a setting
-        # that is not there on any install.
-        #
-        # What decides the value instead is the project's country: the payload
-        # key comes from ``project_context._measurement_system``, which asks
-        # ``regional_packs.resolve_measurement_system`` for the system the pack
-        # claiming ``Project.country_code`` declares, falling back to
-        # ``Project.region`` when no pack claims the country. So the derivation
-        # is stated as a fact rather than as an instruction to go and change
-        # the country: the country is chosen when the project is created and
-        # the project settings page does not offer it, and re-countrying a
-        # project to change its units would move its compliance pack and its
-        # payment-application gate with it. Converting the units is the action
-        # that is always available, so that is what leads.
-        suggestion = (
-            f"Convert the {wrong_label} units to {project_system} equivalents. A project has no "
-            f"unit-system field to switch instead: the measurement system is the one declared by "
-            f"the regional pack that claims the project's country, and its region is read only "
-            f"when no pack claims the country. So {wrong_label} units are intended here only if "
-            f"the project's country is wrong."
-        )
+        # The suggestion names what actually decided the value, because that
+        # is where the reader goes to change it. Two places can: the
+        # measurement system stated in the project settings, which wins when
+        # set, and otherwise the regional pack that claims the project's
+        # country (``project_context._measurement_system`` reports which one
+        # answered as ``project_unit_system_source``). The derived case still
+        # leads with converting the units and states the country derivation
+        # as a fact rather than an instruction: re-countrying a project to
+        # change its units would move its compliance pack and its
+        # payment-application gate with it. The advice used to send readers
+        # to a ``unit_system`` column no screen offered; the setting it
+        # names now is the one on the project settings page.
+        if data.get("project_unit_system_source") == "project":
+            suggestion = (
+                f"Convert the {wrong_label} units to {project_system} equivalents, or change the "
+                f"measurement system in the project settings if this project really is measured "
+                f"in {wrong_label} units. It was set there to {project_system}."
+            )
+        else:
+            suggestion = (
+                f"Convert the {wrong_label} units to {project_system} equivalents. The measurement "
+                f"system here is the one declared by the regional pack that claims the project's "
+                f"country (its region is read only when no pack claims the country). If this "
+                f"project really is measured in {wrong_label} units, set the measurement system "
+                f"in the project settings, which takes precedence over the country."
+            )
         return [
             RuleResult(
                 rule_id=self.rule_id,
@@ -2207,6 +2207,7 @@ class BOQUnitSystemConsistencyRule(ValidationRule):
                 suggestion=suggestion,
                 details={
                     "project_unit_system": project_system,
+                    "project_unit_system_source": data.get("project_unit_system_source"),
                     "wrong_system": wrong_label,
                     "mismatch_count": mismatch_count,
                     "mismatches": mismatches[:10],

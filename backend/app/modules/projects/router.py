@@ -69,6 +69,7 @@ from app.modules.projects.file_manager_service import (
 from app.modules.projects.file_manager_service import (
     resolve_storage_locations as fm_resolve_locations,
 )
+from app.modules.projects.jurisdiction import jurisdiction_options
 from app.modules.projects.member_schemas import (
     AddProjectMemberRequest,
     BulkAddProjectMembersRequest,
@@ -79,6 +80,7 @@ from app.modules.projects.module_presence import probe_project_modules
 from app.modules.projects.schemas import (
     ComplianceRulePacksUpdate,
     FocusModePatch,
+    JurisdictionOption,
     MatchProjectSettingsRead,
     MatchProjectSettingsUpdate,
     MilestoneCreate,
@@ -264,6 +266,22 @@ async def list_projects(
         is_admin=is_admin,
     )
     return [ProjectResponse.model_validate(p) for p in projects]
+
+
+# ── Jurisdiction options ──────────────────────────────────────────────────
+
+
+@router.get(
+    "/jurisdictions/",
+    response_model=list[JurisdictionOption],
+    summary="Jurisdictions a project can be set to",
+    description="Every code the project jurisdiction field accepts: ISO 3166-1 countries, then the "
+    "ISO 3166-2 subdivisions the platform carries rules for. The settings picker reads this list, "
+    "so it cannot offer a code the update would refuse.",
+)
+async def list_jurisdictions(_user_id: CurrentUserId) -> list[JurisdictionOption]:
+    """List the accepted jurisdiction codes."""
+    return [JurisdictionOption(**option) for option in jurisdiction_options()]
 
 
 # ── Get ───────────────────────────────────────────────────────────────────

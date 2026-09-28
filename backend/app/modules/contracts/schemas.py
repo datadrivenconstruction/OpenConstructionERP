@@ -425,6 +425,9 @@ class RetentionReleasePreviewResponse(BaseModel):
     open_items_count: int
     # Open punch items with no cost on them, which the withholding cannot see.
     open_items_without_cost: int
+    # Open punch items attributed to another contract on the project, which
+    # this contract's withholding leaves out.
+    open_items_elsewhere: int = 0
     # punch_list, request (the caller stated the value) or unavailable.
     open_items_source: str
     withheld_for_open_items: Decimal

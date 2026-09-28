@@ -82,6 +82,15 @@ class PunchItem(Base):
     # no server_default: absent means "not clash-sourced", not "0".
     clash_result_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
 
+    # ── Contract attribution (cross-module) ───────────────────────────────
+    # The contract whose scope this item belongs to, so a project with
+    # several contracts can hold each one's punch list apart and a retention
+    # release withholds only for items that could be its own. Plain string,
+    # no foreign key: the contracts tables belong to another module and the
+    # punch list must load without it. Null means "not attributed", which is
+    # every item raised before the column existed.
+    contract_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
+
     # ── Geo binding (cross-module) ────────────────────────────────────────
     # In addition to the sheet-pinned (page, location_x, location_y) drawing
     # coordinate, punch items can carry a world-space WGS84 pin so they

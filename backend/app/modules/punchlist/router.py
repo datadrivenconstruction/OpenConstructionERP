@@ -56,6 +56,9 @@ logger = logging.getLogger(__name__)
 # under Program Files.
 PHOTOS_DIR = module_uploads_dir("punchlist", "photos")
 
+#: A contract id, or ``none`` for the items attributed to no contract.
+CONTRACT_FILTER_PATTERN = r"^(none|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$"
+
 
 def _get_service(session: SessionDep) -> PunchListService:
     return PunchListService(session)
@@ -177,6 +180,12 @@ async def list_items(
     assigned_to: str | None = Query(default=None),
     category: str | None = Query(default=None),
     trade: str | None = Query(default=None),
+    contract_id: str | None = Query(
+        default=None,
+        pattern=CONTRACT_FILTER_PATTERN,
+        description="Items attributed to this contract, or 'none' for the items attributed to no contract.",
+    ),
+    open_only: bool = Query(default=False, description="Leave out verified and closed items."),
     _perm: None = Depends(RequirePermission("punchlist.read")),
     service: PunchListService = Depends(_get_service),
 ) -> PunchItemListResponse:
@@ -198,6 +207,8 @@ async def list_items(
         assigned_to=assigned_to,
         category_filter=category,
         trade_filter=trade,
+        contract_filter=contract_id.lower() if contract_id else None,
+        open_only=open_only,
     )
     return PunchItemListResponse(
         items=await _item_responses(service, items),
@@ -228,6 +239,12 @@ async def list_items_root_alias(
     assigned_to: str | None = Query(default=None),
     category: str | None = Query(default=None),
     trade: str | None = Query(default=None),
+    contract_id: str | None = Query(
+        default=None,
+        pattern=CONTRACT_FILTER_PATTERN,
+        description="Items attributed to this contract, or 'none' for the items attributed to no contract.",
+    ),
+    open_only: bool = Query(default=False, description="Leave out verified and closed items."),
     _perm: None = Depends(RequirePermission("punchlist.read")),
     service: PunchListService = Depends(_get_service),
 ) -> PunchItemListResponse:
@@ -243,6 +260,8 @@ async def list_items_root_alias(
         assigned_to=assigned_to,
         category=category,
         trade=trade,
+        contract_id=contract_id,
+        open_only=open_only,
         service=service,
     )
 

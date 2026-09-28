@@ -14,6 +14,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import uuid
+from collections.abc import Callable
 from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
@@ -104,6 +105,11 @@ async def _safe_publish(
         _logger_ev.debug("Event publish skipped: %s", name)
 
 
+from app.modules.projects.jurisdiction import (
+    jurisdiction_conflict,
+    normalise_jurisdiction,
+    normalise_unit_system,
+)
 from app.modules.projects.models import Project, ProjectStatusHistory
 from app.modules.projects.repository import ProjectRepository
 from app.modules.projects.schemas import (
@@ -114,6 +120,32 @@ from app.modules.projects.schemas import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _restorable(normalise: Callable[[str | None], str | None], value: str | None) -> str | None:
+    """``value`` through ``normalise``, or ``None`` where it would be refused."""
+    try:
+        return normalise(value)
+    except ValueError:
+        logger.warning("Restore: dropping %r, which this install does not accept", value)
+        return None
+
+
+def _refuse_jurisdiction_conflict(jurisdiction: str | None, country_code: str | None) -> None:
+    """422 when the jurisdiction lies in a country other than the project's."""
+    if jurisdiction_conflict(jurisdiction, country_code):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={
+                "error": "jurisdiction_outside_country",
+                "message": (
+                    f"The jurisdiction {jurisdiction} is not in the project's country {country_code}. "
+                    "Change one of the two, or clear the jurisdiction."
+                ),
+                "jurisdiction": jurisdiction,
+                "country_code": country_code,
+            },
+        )
 
 
 async def purge_project_children_without_cascade(
@@ -611,6 +643,8 @@ class ProjectService:
         except Exception:  # noqa: BLE001 - creation must never break on pack lookup
             _rule_sets = list(data.validation_rule_sets or [])
 
+        _refuse_jurisdiction_conflict(data.jurisdiction, country_code)
+
         project = Project(
             name=data.name,
             description=data.description,
@@ -629,6 +663,10 @@ class ProjectService:
             parent_project_id=data.parent_project_id,
             address=data.address,
             country_code=country_code,
+            # Taken as stated and never derived from ``country_code``: an
+            # empty field is what keeps every consumer on its old answer.
+            jurisdiction=data.jurisdiction,
+            unit_system=data.unit_system,
             contract_value=data.contract_value,
             planned_start_date=data.planned_start_date,
             planned_end_date=data.planned_end_date,
@@ -939,6 +977,14 @@ class ProjectService:
                     if _resolved:
                         fields["country_code"] = _resolved
 
+        # Judged on the pair the write leaves behind, and only when the write
+        # touches either half, so an unrelated edit never trips over it.
+        if "jurisdiction" in fields or "country_code" in fields:
+            _refuse_jurisdiction_conflict(
+                fields.get("jurisdiction", project.jurisdiction),
+                fields.get("country_code", project.country_code),
+            )
+
         await self.repo.update_fields(project_id, **fields)
 
         # Refresh the project object
@@ -1149,6 +1195,8 @@ class ProjectService:
             client_id=source.client_id,
             parent_project_id=source.parent_project_id,
             address=dict(source.address) if source.address else None,
+            jurisdiction=source.jurisdiction,
+            unit_system=source.unit_system,
             contract_value=source.contract_value,
             planned_start_date=source.planned_start_date,
             planned_end_date=source.planned_end_date,
@@ -1630,6 +1678,8 @@ class ProjectService:
             compliance_rule_packs=list(project.compliance_rule_packs or []),
             status=project.status,
             country_code=project.country_code,
+            jurisdiction=project.jurisdiction,
+            unit_system=project.unit_system,
             project_code=project.project_code,
             project_type=project.project_type,
             phase=project.phase,
@@ -1806,6 +1856,11 @@ class ProjectService:
             status="active",
             owner_id=owner_id,
             country_code=meta.country_code,
+            # A backup is a file anyone can edit, so the two stated fields go
+            # through the same check a request does; a code this install does
+            # not carry restores as unset rather than as a value nothing reads.
+            jurisdiction=_restorable(normalise_jurisdiction, meta.jurisdiction),
+            unit_system=_restorable(normalise_unit_system, meta.unit_system),
             project_code=None,  # auto-generated below
             project_type=meta.project_type,
             phase=meta.phase,

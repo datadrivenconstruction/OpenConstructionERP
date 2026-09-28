@@ -56,6 +56,11 @@ from app.modules.projects.file_manager_schemas import (
     ImportPreview,
     ImportResult,
 )
+from app.modules.projects.jurisdiction import (
+    jurisdiction_conflict,
+    normalise_jurisdiction,
+    normalise_unit_system,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -556,6 +561,24 @@ async def import_bundle(
             for r in rows:
                 if mode == "new_project" and new_project_name:
                     r["name"] = new_project_name
+                # The two stated fields go through the check a request does. A
+                # bundle is an editable file, and one written before they
+                # existed simply lacks them and imports as unset.
+                for field, normalise in (
+                    ("jurisdiction", normalise_jurisdiction),
+                    ("unit_system", normalise_unit_system),
+                ):
+                    try:
+                        r[field] = normalise(r.get(field))
+                    except ValueError:
+                        warnings.append(f"Project {field} {r.get(field)!r} is not accepted here - imported as unset")
+                        r[field] = None
+                if jurisdiction_conflict(r.get("jurisdiction"), r.get("country_code")):
+                    warnings.append(
+                        f"Project jurisdiction {r.get('jurisdiction')!r} lies outside its country "
+                        f"{r.get('country_code')!r} - imported as unset"
+                    )
+                    r["jurisdiction"] = None
                 # The project row's id is already remapped; just make sure
                 # we don't overwrite the merge-into target.
                 if mode == "merge_into_existing":

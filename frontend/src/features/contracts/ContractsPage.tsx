@@ -70,6 +70,7 @@ import {
   RetentionReleasePanel,
   retentionEventLabel,
 } from './RetentionReleasePanel';
+import { ContractPunchItemsPanel } from './ContractPunchItemsPanel';
 import { ContractAnalyticsPanels } from './ContractAnalyticsPanels';
 import { SovReconcilePanel } from './SovReconcilePanel';
 import { contractsGuide } from './contractsGuide';
@@ -2635,6 +2636,10 @@ export function ContractDetailDrawer({
             currency={contract.currency}
             contractStatus={contract.status}
           />
+
+          {/* The snags attributed to this contract that are still open: what
+              stands between it and the release above. */}
+          <ContractPunchItemsPanel contractId={contractId} projectId={contract.project_id} />
 
           {/* Analytics & close-out — four read-only endpoints surfaced as
               stacked panels (SoV status, completeness, EOT exposure, final-

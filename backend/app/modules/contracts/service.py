@@ -865,8 +865,9 @@ def _subdivision_caps_declared(country: str | None) -> bool:
 
     The prior question to "is this claim over the cap": are there caps to
     miss. ``resolve_progress_billing`` answers about a subdivision only when
-    it is handed an ISO 3166-2 code, and nothing on a project holds one, so
-    the state caps are unreachable from the contracts module today. This reads
+    it is handed an ISO 3166-2 code. A project holds one only when somebody
+    set its ``jurisdiction``, and the contracts module does not apply the
+    state caps even then, so they are unreachable from here today. This reads
     the pack listing directly to say whether that silence is costing anything
     on this contract's country, which it does in the United States and nowhere
     else so far.
@@ -3206,11 +3207,14 @@ class ContractsService:
         Two kinds of cap and only one of them is readable from here. The
         policy carries its own, written by the parties or by a national pack,
         and that is checkable on every claim. The other is state or province
-        law, which the subdivision packs hold: reading it needs an ISO 3166-2
-        code and a project has no field for one, so those caps cannot be
-        applied at all. That is worth saying out loud on a claim in a country
-        that has them rather than passing in silence, which is why the country
-        and whether it declares any travel with the figures.
+        law, which the subdivision packs hold. A project can name its state in
+        its ``jurisdiction`` (an ISO 3166-2 code such as ``US-CA``), and when
+        it does the state travels here as ``subdivision_code``; the statutory
+        caps themselves are still not applied to the claim. That is worth
+        saying out loud on a claim in a country that has them rather than
+        passing in silence, which is why the country, the state when one is
+        named, and whether the country declares any caps travel with the
+        figures.
 
         Unlike :meth:`_claim_retention_context` this answers for every claim,
         including the flat-retention shapes. A cost-plus claim holds retention
@@ -3226,8 +3230,20 @@ class ContractsService:
                 None if policy.cap_percent_of_contract_sum is None else str(policy.cap_percent_of_contract_sum)
             ),
             "country_code": country,
+            "subdivision_code": await self._project_subdivision(contract, country),
             "subdivision_caps_declared": _subdivision_caps_declared(country),
         }
+
+    async def _project_subdivision(self, contract: Contract, country: str | None) -> str | None:
+        """The state or province the project's jurisdiction names, when it lies in ``country``."""
+        from app.modules.projects.jurisdiction import jurisdiction_country, jurisdiction_subdivision  # noqa: PLC0415
+        from app.modules.projects.models import Project  # noqa: PLC0415
+
+        project = await self.session.get(Project, contract.project_id)
+        subdivision = jurisdiction_subdivision(getattr(project, "jurisdiction", None))
+        if subdivision is None or not country or jurisdiction_country(subdivision) != country.upper():
+            return None
+        return subdivision
 
     async def _claim_retention_context(self, claim: ProgressClaim, contract: Contract) -> dict[str, Any] | None:
         """What the claim stores for retention beside what its policy gives now.
@@ -5167,7 +5183,14 @@ class ContractsService:
         }
 
     async def _open_items(self, contract: Contract) -> dict[str, Any]:
-        """The open punch items on the contract's project and what they are estimated to cost.
+        """The open punch items that could be this contract's, and what they are estimated to cost.
+
+        An item attributed to this contract counts, and so does one attributed
+        to no contract: the scope of an unattributed item is the project's, so
+        it stays in every contract's withholding exactly as it always has. Only
+        an item attributed to another contract on the project is left out, which
+        means the figure can only shrink as items are attributed, never grow.
+        An attribution to a contract that no longer exists is read as none.
 
         Only items costed in the contract's currency are added up; the others
         are counted as without a cost, so the preview can say the withholding
@@ -5180,16 +5203,27 @@ class ContractsService:
             from app.modules.punchlist.intl import DONE_STATUSES  # noqa: PLC0415
             from app.modules.punchlist.models import PunchItem  # noqa: PLC0415
         except ImportError:
-            return {"value": DEC_ZERO, "count": 0, "without_cost": 0, "source": "unavailable"}
+            return {"value": DEC_ZERO, "count": 0, "without_cost": 0, "elsewhere": 0, "source": "unavailable"}
         result = await self.session.execute(
             select(PunchItem).where(
                 PunchItem.project_id == contract.project_id,
                 PunchItem.status.notin_(tuple(DONE_STATUSES)),
             )
         )
+        other_contracts = {
+            str(other_id)
+            for other_id in (
+                await self.session.execute(
+                    select(Contract.id).where(Contract.project_id == contract.project_id, Contract.id != contract.id)
+                )
+            ).scalars()
+        }
         currency = (contract.currency or "").upper()
-        value, count, without_cost = DEC_ZERO, 0, 0
+        value, count, without_cost, elsewhere = DEC_ZERO, 0, 0, 0
         for item in result.scalars().all():
+            if (getattr(item, "contract_id", None) or "") in other_contracts:
+                elsewhere += 1
+                continue
             count += 1
             item_currency = (item.rework_cost_currency or "").upper()
             try:
@@ -5200,7 +5234,13 @@ class ContractsService:
                 without_cost += 1
                 continue
             value += cost
-        return {"value": value, "count": count, "without_cost": without_cost, "source": "punch_list"}
+        return {
+            "value": value,
+            "count": count,
+            "without_cost": without_cost,
+            "elsewhere": elsewhere,
+            "source": "punch_list",
+        }
 
     async def _contract_is_bonded(self, contract: Contract) -> bool:
         """True when a performance or payment bond is active on the contract."""
@@ -5257,6 +5297,7 @@ class ContractsService:
                 "value": Decimal(str(data.open_items_value)),
                 "count": 0,
                 "without_cost": 0,
+                "elsewhere": 0,
                 "source": "request",
             }
         else:
@@ -5281,6 +5322,7 @@ class ContractsService:
             "open_items_value": Decimal(str(items["value"])),
             "open_items_count": items["count"],
             "open_items_without_cost": items["without_cost"],
+            "open_items_elsewhere": items["elsewhere"],
             "open_items_source": items["source"],
             "withheld_for_open_items": plan.withheld_for_open_items,
             "amount": plan.amount,

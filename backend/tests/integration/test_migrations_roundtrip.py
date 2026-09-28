@@ -229,13 +229,12 @@ CHAIN_ONLY_COLUMNS: dict[str, tuple[str, str]] = {
         "BOQTotals in app.modules.boq.schemas still carries tax_rate for wire compatibility "
         "and says outright that the service never populates it.",
     ),
-    "oe_projects_project.unit_system": (
-        "v3135_project_unit_system.py",
-        "The measurement system is derived from the project's country and region through "
-        "resolve_measurement_system in app.core.regional_packs, so the model dropped the "
-        "stored column and create_all stopped building it.",
-    ),
 }
+
+# ``oe_projects_project.unit_system`` sat in the dict above until 18.1.1, when
+# the project model declared it again - nullable, no default, the measurement
+# system a person states in the project settings - and
+# ``v48_project_jurisdiction_unit_system`` relaxed the shape v3135 gave it.
 
 
 # ``v41_contract_original_value`` used to sit in the dict above and no longer
@@ -270,8 +269,9 @@ CHAIN_ONLY_COLUMNS: dict[str, tuple[str, str]] = {
 #    statement that met them: v3234's ``CREATE EXTENSION pg_trgm`` on a cluster
 #    that does not ship pg_trgm, and v3273's side connection blocking on a lock
 #    its own migration held. Both repaired in their own bodies.
-# 4. Two columns the chain still creates that the models no longer carry,
-#    ``oe_boq_boq.tax_rate`` and ``oe_projects_project.unit_system``. Not an
+# 4. Two columns the chain still created that the models no longer carried,
+#    ``oe_boq_boq.tax_rate`` and ``oe_projects_project.unit_system`` (the
+#    second is back in the models since 18.1.1). Not an
 #    upgrade/downgrade fault: both bodies are correct and idempotent, and both
 #    revisions are simply older than the model decision that retired the column.
 #    Only a walk this long reaches that far back. They are recorded in

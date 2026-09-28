@@ -816,6 +816,8 @@ export interface RetentionReleasePreview {
   open_items_value: string;
   open_items_count: number;
   open_items_without_cost: number;
+  /** Open items attributed to another contract on the project, left out here. */
+  open_items_elsewhere?: number;
   /** punch_list, request, or unavailable when the module is not installed. */
   open_items_source: string;
   withheld_for_open_items: string;

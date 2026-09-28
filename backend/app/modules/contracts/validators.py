@@ -864,11 +864,13 @@ class ClaimRetentionAboveCapRule(_ClaimRule):
 
     The second branch is about a cap this module cannot read at all. Several
     states of the United States limit retainage by statute and the state packs
-    carry those limits, but reading one needs an ISO 3166-2 code and nothing
-    on a project holds one. On a contract in a country whose packs declare
-    such limits, that is said once per claim as information rather than
-    passed over: a check that is silent about the law it cannot see is
-    indistinguishable from a contract that has no law to meet.
+    carry those limits, but reading one needs an ISO 3166-2 code, which a
+    project holds only when somebody set its jurisdiction, and even then the
+    statutory caps are not applied here yet. On a contract in a country whose
+    packs declare such limits, that is said once per claim as information
+    rather than passed over, naming the state when the project names one: a
+    check that is silent about the law it cannot see is indistinguishable
+    from a contract that has no law to meet.
     """
 
     rule_id = "pay_application.retention_above_cap"
@@ -897,10 +899,15 @@ class ClaimRetentionAboveCapRule(_ClaimRule):
                     passed=False,
                     severity=Severity.INFO,
                     element_ref=ref,
-                    fail_key="pay_application.retention_above_cap.state_cap_unread",
+                    fail_key=(
+                        "pay_application.retention_above_cap.state_cap_not_applied"
+                        if cap.get("subdivision_code")
+                        else "pay_application.retention_above_cap.state_cap_unread"
+                    ),
                     suggestion_key="pay_application.retention_above_cap.state_cap_suggestion",
                     claim=_claim_label(claim),
                     country=str(cap.get("country_code") or ""),
+                    state=str(cap.get("subdivision_code") or ""),
                 )
             ]
         held = cap.get("held")

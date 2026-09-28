@@ -61,6 +61,7 @@ import {
   fetchPunchSummary,
   fetchTeamMembers,
   fetchPunchDrawings,
+  fetchPunchContracts,
   createPunchItem,
   deletePunchItem,
   transitionPunchStatus,
@@ -76,6 +77,7 @@ import type {
   TeamMember,
   CreatePunchPayload,
   PunchDrawing,
+  PunchContractOption,
 } from './api';
 import { punchlistGuide } from './punchlistGuide';
 import { PunchDetailDrawer } from './PunchDetailDrawer';
@@ -300,6 +302,12 @@ function PunchSourceBadge({
 
 /** Stable empty list, so an absent page does not re-run every memo below. */
 const EMPTY_ITEMS: PunchItem[] = [];
+const EMPTY_CONTRACTS: PunchContractOption[] = [];
+
+/** "C-001 Main works", or whichever half the contract has. */
+function contractLabel(c: PunchContractOption): string {
+  return [c.code, c.title].filter(Boolean).join(' ') || c.id.slice(0, 8);
+}
 
 /** Rows the pin board asks for. 100 is the server's hard cap on this route. */
 const PIN_BOARD_LIMIT = 100;
@@ -441,6 +449,8 @@ interface PunchFormData {
   location_y: string;
   /** Rework cost as typed, in the project's currency. Empty = not priced. */
   rework_cost: string;
+  /** Contract the item belongs to. Empty = the project's, no contract. */
+  contract_id: string;
 }
 
 const EMPTY_FORM: PunchFormData = {
@@ -456,6 +466,7 @@ const EMPTY_FORM: PunchFormData = {
   location_x: '',
   location_y: '',
   rework_cost: '',
+  contract_id: '',
 };
 
 /** Minimal drawing/document option for the punch-pin picker. */
@@ -492,6 +503,7 @@ function AddPunchModal({
   isPending,
   teamMembers,
   drawings,
+  contracts,
   currency,
 }: {
   onClose: () => void;
@@ -499,6 +511,7 @@ function AddPunchModal({
   isPending: boolean;
   teamMembers: TeamMember[];
   drawings: PunchDrawingOption[];
+  contracts: PunchContractOption[];
   /** The project's ISO currency, '' when the project has none set. */
   currency: string;
 }) {
@@ -763,6 +776,33 @@ function AddPunchModal({
             className={clsx(inputCls, 'tabular-nums disabled:opacity-60')}
           />
         </WideModalField>
+
+        {/* Only offered when the project has contracts. Left empty, the item
+            is the project's and every contract's retention release still
+            withholds for it, as all items did before attribution existed. */}
+        {contracts.length > 0 && (
+          <WideModalField
+            label={t('punch.field_contract', { defaultValue: 'Contract (optional)' })}
+            htmlFor="punch-contract"
+            span={2}
+          >
+            <select
+              id="punch-contract"
+              value={form.contract_id}
+              onChange={(e) => set('contract_id', e.target.value)}
+              className={inputCls}
+            >
+              <option value="">
+                {t('punch.no_contract', { defaultValue: 'No contract (whole project)' })}
+              </option>
+              {contracts.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {contractLabel(c)}
+                </option>
+              ))}
+            </select>
+          </WideModalField>
+        )}
 
         {/* ── Pin on drawing ──────────────────────────────────────────────
             Tie the snag to a sheet and an optional normalised pin so it can
@@ -1078,6 +1118,8 @@ export function PunchListPage() {
   const [filterStatus, setFilterStatus] = useState<PunchStatus | ''>('');
   const [filterCategory, setFilterCategory] = useState<PunchCategory | ''>('');
   const [filterAssignee, setFilterAssignee] = useState('');
+  // '' = every item, 'none' = items attributed to no contract, else a contract id.
+  const [filterContract, setFilterContract] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   // Item detail drawer (opened from a list row, a kanban card, or a pin).
@@ -1106,13 +1148,22 @@ export function PunchListPage() {
   const projectCurrency = projectCurrencyCode(projects.find((p) => p.id === projectId)?.currency);
 
   const { data: punchPage, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ['punchlist', projectId, filterPriority, filterStatus, filterCategory, filterAssignee],
+    queryKey: [
+      'punchlist',
+      projectId,
+      filterPriority,
+      filterStatus,
+      filterCategory,
+      filterAssignee,
+      filterContract,
+    ],
     queryFn: () =>
       fetchPunchItems(projectId, {
         priority: filterPriority || undefined,
         status: filterStatus || undefined,
         category: filterCategory || undefined,
         assigned_to: filterAssignee || undefined,
+        contract_id: filterContract || undefined,
       }),
     enabled: !!projectId,
     refetchOnWindowFocus: true,
@@ -1158,6 +1209,22 @@ export function PunchListPage() {
     enabled: !!projectId && (showAddModal || viewMode === 'pins'),
     staleTime: 60_000,
   });
+
+  const { data: contracts = EMPTY_CONTRACTS } = useQuery<PunchContractOption[]>({
+    queryKey: ['punchlist-contracts', projectId],
+    queryFn: () => fetchPunchContracts(projectId),
+    enabled: !!projectId,
+    staleTime: 60_000,
+  });
+
+  const anyFilter = !!(
+    searchQuery ||
+    filterPriority ||
+    filterStatus ||
+    filterCategory ||
+    filterAssignee ||
+    filterContract
+  );
 
   // Whether the register is currently showing rows, as opposed to the
   // loading skeleton, an error card, the empty state or the pin board.
@@ -1405,6 +1472,7 @@ export function PunchListPage() {
         // Sent even for an unpriced item, so a price added later from the
         // drawer is not the first place the row learns its currency.
         rework_cost_currency: projectCurrency || undefined,
+        contract_id: formData.contract_id || undefined,
       });
     },
     [createMut, projectId, projectCurrency],
@@ -1760,6 +1828,27 @@ export function PunchListPage() {
                 </option>
               ))}
           </select>
+
+          {contracts.length > 0 && (
+            <select
+              value={filterContract}
+              onChange={(e) => setFilterContract(e.target.value)}
+              aria-label={t('punch.all_contracts', { defaultValue: 'All Contracts' })}
+              className={inputCls + ' max-w-[200px]'}
+            >
+              <option value="">
+                {t('punch.all_contracts', { defaultValue: 'All Contracts' })}
+              </option>
+              <option value="none">
+                {t('punch.no_contract_filter', { defaultValue: 'Not attributed to a contract' })}
+              </option>
+              {contracts.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {contractLabel(c)}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
       )}
 
@@ -1806,12 +1895,12 @@ export function PunchListPage() {
           <EmptyState
             icon={<ListChecks size={28} strokeWidth={1.5} />}
             title={
-              searchQuery || filterPriority || filterStatus || filterCategory || filterAssignee
+              anyFilter
                 ? t('punch.no_results_title', { defaultValue: 'No matching items' })
                 : t('punch.empty_title', { defaultValue: 'No punch list items' })
             }
             description={
-              searchQuery || filterPriority || filterStatus || filterCategory || filterAssignee
+              anyFilter
                 ? t('punch.no_results_desc', {
                     defaultValue: 'Try adjusting your search or filter criteria.',
                   })
@@ -1821,7 +1910,7 @@ export function PunchListPage() {
                   })
             }
             action={
-              !(searchQuery || filterPriority || filterStatus || filterCategory || filterAssignee)
+              !anyFilter
                 ? {
                     label: t('punch.new_item', { defaultValue: 'New Item' }),
                     onClick: () => setShowAddModal(true),
@@ -1952,6 +2041,7 @@ export function PunchListPage() {
           isPending={createMut.isPending}
           teamMembers={teamMembers}
           drawings={drawings}
+          contracts={contracts}
           currency={projectCurrency}
         />
       )}

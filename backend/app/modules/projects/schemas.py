@@ -9,6 +9,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
 
+from app.modules.projects.jurisdiction import normalise_jurisdiction, normalise_unit_system
+
 _HTML_TAG_RE = re.compile(r"<[^>]+>")
 _CURRENCY_CODE_RE = re.compile(r"^[A-Z]{3}$")
 _DECIMAL_RE = re.compile(r"^[0-9]+(\.[0-9]+)?$")
@@ -364,6 +366,31 @@ class ProjectCreate(BaseModel):
         cc = v.strip().upper()
         return cc or None
 
+    jurisdiction: str | None = Field(
+        default=None,
+        max_length=16,
+        description="ISO 3166-1 country (DE) or an ISO 3166-2 subdivision the platform carries "
+        "rules for (US-CA, CA-ON). Optional and never filled from country_code: empty keeps "
+        "every consumer on what it derives from the country. Must lie in country_code when "
+        "both are set.",
+    )
+    unit_system: str | None = Field(
+        default=None,
+        max_length=16,
+        description="metric or imperial. Optional and never filled from country_code: empty "
+        "keeps the measurement system the country's regional pack declares.",
+    )
+
+    @field_validator("jurisdiction", mode="after")
+    @classmethod
+    def _normalise_jurisdiction(cls, v: str | None) -> str | None:
+        return normalise_jurisdiction(v)
+
+    @field_validator("unit_system", mode="after")
+    @classmethod
+    def _normalise_unit_system(cls, v: str | None) -> str | None:
+        return normalise_unit_system(v)
+
     contract_value: str | None = Field(default=None, max_length=50)
     planned_start_date: str | None = Field(default=None, max_length=20)
     planned_end_date: str | None = Field(default=None, max_length=20)
@@ -513,6 +540,31 @@ class ProjectUpdate(BaseModel):
         cc = v.strip().upper()
         return cc or None
 
+    jurisdiction: str | None = Field(
+        default=None,
+        max_length=16,
+        description="ISO 3166-1 country (DE) or an ISO 3166-2 subdivision the platform carries "
+        "rules for (US-CA, CA-ON). Optional and never filled from country_code: empty keeps "
+        "every consumer on what it derives from the country. Must lie in country_code when "
+        "both are set.",
+    )
+    unit_system: str | None = Field(
+        default=None,
+        max_length=16,
+        description="metric or imperial. Optional and never filled from country_code: empty "
+        "keeps the measurement system the country's regional pack declares.",
+    )
+
+    @field_validator("jurisdiction", mode="after")
+    @classmethod
+    def _normalise_jurisdiction(cls, v: str | None) -> str | None:
+        return normalise_jurisdiction(v)
+
+    @field_validator("unit_system", mode="after")
+    @classmethod
+    def _normalise_unit_system(cls, v: str | None) -> str | None:
+        return normalise_unit_system(v)
+
     contract_value: str | None = Field(default=None, max_length=50)
     planned_start_date: str | None = Field(default=None, max_length=20)
     planned_end_date: str | None = Field(default=None, max_length=20)
@@ -636,6 +688,8 @@ class ProjectResponse(BaseModel):
     parent_project_id: UUID | None = None
     address: dict[str, Any] | None = None
     country_code: str | None = None
+    jurisdiction: str | None = None
+    unit_system: str | None = None
     contract_value: str | None = None
     planned_start_date: str | None = None
     planned_end_date: str | None = None
@@ -676,6 +730,18 @@ class ProjectResponse(BaseModel):
         from app.modules.contracts.aia import is_aia_eligible
 
         return is_aia_eligible(self.country_code, self.address)
+
+
+class JurisdictionOption(BaseModel):
+    """One code the project jurisdiction field accepts."""
+
+    code: str
+    country_code: str
+    #: ``country`` or ``subdivision``.
+    kind: str
+    #: English name of a subdivision, as data for the picker; ``None`` for a
+    #: country, whose name the client takes from its own locale.
+    name: str | None = None
 
 
 # ── Status-history schemas ───────────────────────────────────────────────
@@ -1393,6 +1459,9 @@ class BackupProjectMetadata(BaseModel):
     compliance_rule_packs: list[str] = Field(default_factory=lambda: ["universal"])
     status: str = "active"
     country_code: str | None = None
+    # Absent from backups written before 18.1.1, so they restore as unset.
+    jurisdiction: str | None = None
+    unit_system: str | None = None
     project_code: str | None = None
     project_type: str | None = None
     phase: str | None = None

@@ -65,7 +65,8 @@
     "retention_above_cap": {
       "fail": "Claim {claim} holds {held} in retention, above the {percent}% cap its retention policy sets, which is {cap} on this contract",
       "suggestion": "Work the claim out again, or raise the cap on the contract's retention policy if the parties agreed a higher one",
-      "state_cap_unread": "Claim {claim}: its retention policy sets no cap, and {country} limits retainage by state law. No state could be resolved because the project carries no subdivision code, so no statutory cap was checked",
+      "state_cap_unread": "Claim {claim}: its retention policy sets no cap, and {country} limits retainage by state law. No state could be resolved because the project's jurisdiction carries no subdivision code, so no statutory cap was checked",
+      "state_cap_not_applied": "Claim {claim}: its retention policy sets no cap, and the project's state {state} limits retainage by statute. Statutory caps are not applied to claims automatically, so no statutory cap was checked",
       "state_cap_suggestion": "Write the state's limit into the contract's retention policy as a cap, and every claim on this contract is checked against it"
     },
     "retention_release_within_held": {

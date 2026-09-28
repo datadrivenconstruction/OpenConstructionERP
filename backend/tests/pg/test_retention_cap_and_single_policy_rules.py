@@ -9,10 +9,11 @@ draft, so the claim goes on holding what the contract no longer allows.
 
 The second branch of the cap rule is about a cap this module cannot read at
 all. Several states of the United States limit retainage by statute, the state
-packs carry those limits, and reading one needs an ISO 3166-2 code that no
-project has a field to hold. On a contract in such a country the check says so
-once, as information, instead of passing in silence. Passing would be a claim
-about the law rather than about this claim.
+packs carry those limits, and reading one needs an ISO 3166-2 code, which a
+project holds only when somebody set its jurisdiction - and the caps are not
+applied even then. On a contract in such a country the check says so once, as
+information, instead of passing in silence, naming the state when the project
+names one. Passing would be a claim about the law rather than about this claim.
 
 The policy count is the other half. The engine takes the newest schedule that
 carries tiers and ignores the rest with no word anywhere, which is how a
@@ -61,13 +62,20 @@ async def session():
         yield s
 
 
-async def _contract(session, *, country_code: str | None = "US", status: str = "active") -> Contract:
+async def _contract(
+    session,
+    *,
+    country_code: str | None = "US",
+    status: str = "active",
+    jurisdiction: str | None = None,
+) -> Contract:
     project = Project(
         id=uuid.uuid4(),
         name="Caps",
         owner_id=OWNER_ID,
         currency="USD",
         country_code=country_code,
+        jurisdiction=jurisdiction,
     )
     session.add(project)
     await session.flush()
@@ -211,6 +219,37 @@ async def test_a_united_states_claim_with_no_cap_says_the_state_limit_was_not_re
     assert not report.has_errors
     assert CAP_RULE not in {w.rule_id for w in report.warnings}
     assert CAP_RULE in {i.rule_id for i in report.infos}
+
+
+async def test_a_project_that_names_its_state_hears_the_state_and_that_its_cap_was_not_applied(session) -> None:
+    # The project says it is in California. The finding stops asking for a
+    # code the project already carries and says the true thing instead: the
+    # state is known and its statutory cap is still not applied to the claim.
+    svc = ContractsService(session)
+    contract = await _contract(session, jurisdiction="US-CA")
+    claim = await _claim_at(session, svc, contract, "60")
+
+    report = await _claim_report(svc, claim)
+    findings = _findings(report, CAP_RULE)
+    assert len(findings) == 1
+    assert findings[0].severity == Severity.INFO
+    assert "US-CA" in findings[0].message
+    assert "subdivision code" not in findings[0].message
+    assert not report.has_errors
+
+
+async def test_a_jurisdiction_in_another_country_is_not_read_as_the_state(session) -> None:
+    # Only a subdivision inside the contract's country counts. A pair the
+    # project API would refuse, written straight to the row, must not lend a
+    # Canadian province to a United States claim.
+    svc = ContractsService(session)
+    contract = await _contract(session, jurisdiction="CA-ON")
+    claim = await _claim_at(session, svc, contract, "60")
+
+    report = await _claim_report(svc, claim)
+    findings = _findings(report, CAP_RULE)
+    assert len(findings) == 1
+    assert "subdivision code" in findings[0].message
 
 
 async def test_a_country_with_no_state_retainage_law_hears_nothing_about_caps(session) -> None:
