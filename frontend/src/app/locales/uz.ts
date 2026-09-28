@@ -5652,7 +5652,7 @@ const resource = {
     "about.check_updates_available": "{{version}} versiyasi mavjud.",
     "about.check_updates_failed": "Hozir yangilanishlarni tekshirib boʻlmadi. Keyinroq qayta urinib koʻring.",
     "about.check_updates_disabled": "Bu kompyuterda yangilanishlarni tekshirish oʻchirilgan.",
-    "about.check_updates_hint": "PyPI va GitHub'dan qaysi versiya eng soʻnggi ekanligini soʻraydi. Siz haqingizda hech narsa yuborilmaydi.",
+    "about.check_updates_hint": "PyPI va GitHubʼdan qaysi versiya eng soʻnggi ekanligini soʻraydi. Siz haqingizda hech narsa yuborilmaydi.",
     "about.thanks_title": "Jamoatchiligimiz bilan qurilgan",
     "about.thanks_subtitle": "OpenConstructionERP jamoatchiligi tufayli oʻsishda davom etmoqda. Har bir savol, xato haqidagi xabar va funksiya gʻoyasi keyin nima qurishimizni shakllantiradi, har bir yulduzcha, ulashish va hissa platformani hamma uchun bepul va ochiq saqlaydi. Quyidagi odamlarga rahmat.",
     "about.thanks_sponsors_label": "Homiylar va xayrixoʻrlar",
