@@ -207,3 +207,22 @@ async def test_a_disabled_check_asks_nobody(ask, monkeypatch: pytest.MonkeyPatch
     assert data["update_available"] is False
     assert data["latest_version"] == data["current_version"]
     assert data["assets"] == []
+
+
+async def test_a_pressed_button_skips_the_cache(monkeypatch: pytest.MonkeyPatch) -> None:
+    """About's "Check for updates" must not be answered from this morning's cache."""
+    monkeypatch.setattr(update_check_policy, "update_check_disabled", lambda home=None: False)
+    app = create_app()
+    app.dependency_overrides[get_current_user_id] = lambda: "version-check-reader"
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        monkeypatch.setattr(httpx, "AsyncClient", _FakeClient)
+        _FakeClient.routes = {PYPI: _pypi_version("15.1.0"), GITHUB: _github_release("v15.1.0")}
+        first = (await client.get("/api/system/version-check")).json()
+        _FakeClient.routes = {PYPI: _pypi_version("15.2.0"), GITHUB: _github_release("v15.2.0")}
+        cached = (await client.get("/api/system/version-check")).json()
+        fresh = (await client.get("/api/system/version-check", params={"force": "true"})).json()
+
+    assert first["latest_version"] == "15.1.0"
+    assert cached["latest_version"] == "15.1.0"
+    assert fresh["latest_version"] == "15.2.0"

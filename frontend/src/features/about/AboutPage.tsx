@@ -19,7 +19,7 @@ import { Card, Button, Badge, Breadcrumb, DismissibleInfo, IntroRichText } from 
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { APP_VERSION } from '@/shared/lib/version';
-import { UpdateInlineNotice } from '@/shared/ui/UpdateChecker';
+import { CheckForUpdatesButton, UpdateInlineNotice } from '@/shared/ui/UpdateChecker';
 import { Changelog, getRecentReleases } from './Changelog';
 import { ThirdPartyLicenses } from './ThirdPartyLicenses';
 import { CONTRIBUTORS, SPONSORS, acknowledgedUrl, type Acknowledged } from './acknowledgments';
@@ -238,6 +238,7 @@ export function AboutPage() {
             the left identity block's height on wide screens. */}
         <div className="flex flex-col gap-3">
           <UpdateInlineNotice />
+          <CheckForUpdatesButton />
 
           {/* Recent releases — last 3 published versions with date so
               users can see the cadence at a glance without scrolling

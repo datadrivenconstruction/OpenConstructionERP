@@ -35,7 +35,7 @@
 import { useState, useEffect, useCallback, useMemo, type MouseEvent as ReactMouseEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Sparkles, X, ExternalLink, Copy, Check,
   Plus, Wrench, Palette, Loader2, Download, RotateCcw,
@@ -228,6 +228,9 @@ export interface VersionCheck {
   /** Why not, when it is not allowed: 'disabled' or 'demo_account'. */
   runtime_upgrade_blocked: 'disabled' | 'demo_account' | null;
   upgrade_command: string;
+  /** True when the user or an administrator turned update checks off, in
+   *  which case the server asked nobody and answers with its own version. */
+  check_disabled?: boolean;
 }
 
 /** One published installer: what it is called, where it is, how big it is. */
@@ -341,14 +344,15 @@ function pickInstaller(assets: ReleaseAsset[], platform: InstallerPlatform): Rel
  * whose shape moved - all of them are the same thing to a reader, which is
  * nothing to show.
  */
-async function fetchVersionCheck(): Promise<VersionCheck | null> {
+async function fetchVersionCheck(force = false): Promise<VersionCheck | null> {
   try {
     // The endpoint answers signed-in callers only, and this notice lives
     // inside the signed-in shell, so the session's token goes with it.
     const token = getAuthToken();
     const headers: Record<string, string> = { Accept: 'application/json' };
     if (token) headers.Authorization = `Bearer ${token}`;
-    const r = await fetch(VERSION_CHECK_URL, { headers });
+    // `force` skips the server's four-hour cache; only a pressed button sends it.
+    const r = await fetch(force ? `${VERSION_CHECK_URL}?force=true` : VERSION_CHECK_URL, { headers });
     if (!r.ok) return null;
     const data: unknown = await r.json();
     if (!data || typeof data !== 'object') return null;
@@ -379,6 +383,7 @@ async function fetchVersionCheck(): Promise<VersionCheck | null> {
             ? 'disabled'
             : null,
       upgrade_command: typeof body.upgrade_command === 'string' ? body.upgrade_command : '',
+      check_disabled: body.check_disabled === true,
     };
   } catch {
     return null;
@@ -532,7 +537,9 @@ function notesExcerpt(notes: string, limit = 320): string {
 export function useUpdateCheck(): VersionCheck | null {
   const { data } = useQuery<VersionCheck | null>({
     queryKey: ['system-version-check'],
-    queryFn: fetchVersionCheck,
+    // Wrapped: react-query passes its context as the first argument, which
+    // would otherwise land in `force`.
+    queryFn: () => fetchVersionCheck(),
     enabled: !UPDATE_CHECK_DISABLED,
     staleTime: VERSION_CHECK_TTL_MS,
     // No interval. A tab left open for days will not hear about a release
@@ -564,6 +571,81 @@ export function useUndismissedUpdate(): {
   }, [release, dismissVersion]);
   const shown = release && !isUpdateDismissed(dismissedVersion, release.latest_version) ? release : null;
   return { release: shown, dismiss };
+}
+
+type ManualCheckState = 'idle' | 'checking' | 'current' | 'available' | 'failed' | 'disabled';
+
+/**
+ * About's "Check for updates" button.
+ *
+ * Asks the server with `force`, so the answer is today's and not the cached
+ * one, and writes it into the same query the notices read, so a newer version
+ * found here also appears as the one-line notice above it. Says which of the
+ * four answers it got, because "nothing happened" after a click reads as a
+ * broken button: up to date, a newer version, could not ask, or turned off.
+ */
+export function CheckForUpdatesButton({ className = '' }: { className?: string }) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const [state, setState] = useState<ManualCheckState>('idle');
+  const [found, setFound] = useState('');
+
+  const check = useCallback(async () => {
+    setState('checking');
+    const data = await fetchVersionCheck(true);
+    queryClient.setQueryData(['system-version-check'], data);
+    if (!data) {
+      setState('failed');
+    } else if (data.check_disabled) {
+      setState('disabled');
+    } else if (data.update_available) {
+      setFound(data.latest_version);
+      setState('available');
+    } else {
+      setState('current');
+    }
+  }, [queryClient]);
+
+  if (UPDATE_CHECK_DISABLED) return null;
+
+  const message =
+    state === 'checking'
+      ? t('about.check_updates_checking', { defaultValue: 'Checking...' })
+      : state === 'current'
+        ? t('about.check_updates_current', { defaultValue: 'You have the latest version.' })
+        : state === 'available'
+          ? t('about.check_updates_available', {
+              defaultValue: 'Version {{version}} is available.',
+              version: found,
+            })
+          : state === 'failed'
+            ? t('about.check_updates_failed', {
+                defaultValue: 'Could not check for updates right now. Try again later.',
+              })
+            : state === 'disabled'
+              ? t('about.check_updates_disabled', {
+                  defaultValue: 'Update checks are turned off on this computer.',
+                })
+              : t('about.check_updates_hint', {
+                  defaultValue: 'Asks PyPI and GitHub which version is the latest. Nothing about you is sent.',
+                });
+
+  return (
+    <div className={`flex flex-wrap items-center gap-3 text-sm ${className}`}>
+      <button
+        type="button"
+        onClick={() => void check()}
+        disabled={state === 'checking'}
+        className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-content-primary hover:bg-surface-secondary disabled:opacity-60"
+      >
+        {state === 'checking' ? <Loader2 size={12} className="animate-spin" /> : <RotateCcw size={12} />}
+        {t('about.check_updates', { defaultValue: 'Check for updates' })}
+      </button>
+      <span className="text-xs text-content-tertiary" role="status" aria-live="polite">
+        {message}
+      </span>
+    </div>
+  );
 }
 
 /**

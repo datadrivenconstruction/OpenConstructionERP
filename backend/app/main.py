@@ -3397,6 +3397,7 @@ def create_app() -> FastAPI:
     @app.get("/api/system/version-check", tags=["System"])
     async def check_version(
         _user_id: str = Depends(get_current_user_id),
+        force: bool = False,
     ) -> dict:
         """Return current vs latest published version.
 
@@ -3414,6 +3415,10 @@ def create_app() -> FastAPI:
         are answered only when the GitHub release they were read from names
         the same version as ``latest_version``. Two sources that can
         legitimately be a release apart must not be spliced into one sentence.
+
+        ``force=true`` skips the four-hour cache. It is what About's "Check for
+        updates" button sends: a person who pressed it is owed today's answer,
+        not one from this morning.
 
         ``assets`` lists the published installers as ``{name, url, size}`` so
         a client can offer the one that fits the machine it is running on.
@@ -3452,7 +3457,7 @@ def create_app() -> FastAPI:
             }
 
         cached = getattr(app.state, cache_key, None)
-        if cached and (time.time() - cached["checked_at"]) < 14400:
+        if cached and not force and (time.time() - cached["checked_at"]) < 14400:
             return {**cached["data"], **await _runtime_upgrade_state(_user_id)}
 
         latest: str | None = None
