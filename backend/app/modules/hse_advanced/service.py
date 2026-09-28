@@ -555,6 +555,17 @@ def _refuse_capa_patch_past_its_actions(capa: Any, fields: dict[str, Any]) -> No
             status.HTTP_409_CONFLICT,
             f"The verification notes of a {current} CAPA are its closure record and cannot be edited.",
         )
+    # The root-cause category belongs to the same record; set_capa_five_whys
+    # refuses to rewrite it on a closed CAPA for the same reason.
+    if (
+        current in _CAPA_TERMINAL_STATUSES
+        and "root_cause_category" in fields
+        and (fields["root_cause_category"] or "") != (capa.root_cause_category or "")
+    ):
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            f"The root cause of a {current} CAPA is part of its closure record and cannot be rewritten.",
+        )
 
 
 def allowed_corrective_action_transitions(current: str) -> list[str]:
