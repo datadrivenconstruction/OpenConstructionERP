@@ -105,6 +105,13 @@ CODE_CSV_EMAIL_DUP = "csv_email_duplicate_in_dev"
 CODE_PRIMARY_MISSING = "primary_buyer_missing"
 CODE_DUP_NOT_FOUND = "duplicate_buyer_missing"
 CODE_CROSS_DEV_MERGE = "cross_development_merge_blocked"
+CODE_PARTY_LOCKED = "contract_party_locked"
+
+#: Buyer states a merge cannot soft-cancel: ``cancel_buyer`` refuses both.
+_MERGE_REFUSED_BUYER_STATES = frozenset({"cancelled", "completed"})
+#: Sales-contract states whose parties can still change, as in
+#: ``add_contract_party`` / ``remove_contract_party``.
+_PARTY_EDITABLE_SPA_STATES = frozenset({"draft", "sent_for_signature"})
 
 
 # ── Shared helpers ──────────────────────────────────────────────────────
@@ -993,7 +1000,10 @@ async def bulk_merge_buyers(
     Soft delete: duplicates get ``status='cancelled'``,
     ``cancelled_reason='merged_into:<primary_id>'`` and
     ``metadata_.merged_into=<primary_id>``. We do NOT hard-delete because
-    audit trails (ActivityLog entity_id) may reference these UUIDs.
+    audit trails (ActivityLog entity_id) may reference these UUIDs. A
+    duplicate that is already cancelled or completed, or whose party row
+    would be dropped from a contract past sent_for_signature, is recorded
+    as a per-item failure before anything is repointed.
 
     Atomicity: the entire operation runs inside one SAVEPOINT. If ANY
     repoint fails partway through, the SAVEPOINT rolls back the partial
@@ -1043,6 +1053,11 @@ async def bulk_merge_buyers(
                 user_id if is_admin else (await _project_owner_for_dev_id(session, primary.development_id))
             )
         }
+        # Contracts the primary is a party on once each accepted duplicate
+        # has been repointed. Tracked here rather than re-read per duplicate,
+        # so a dry run (which moves nothing) classifies the batch exactly as
+        # the real run does.
+        primary_contracts = await _party_contract_ids(session, data.primary_buyer_id)
 
         for dup_id in data.duplicate_buyer_ids:
             dup = await session.get(Buyer, dup_id)
@@ -1086,6 +1101,35 @@ async def bulk_merge_buyers(
                 )
                 continue
 
+            # The merge soft-cancels the duplicate, which cancel_buyer()
+            # refuses for a closed buyer: a completed sale would read as
+            # cancelled, a cancelled one would lose its own reason and date.
+            if dup.status in _MERGE_REFUSED_BUYER_STATES:
+                failed.append(
+                    BulkFailed(
+                        entity_id=str(dup_id),
+                        error_message=f"Buyer in status '{dup.status}' cannot be merged",
+                        error_code=CODE_FSM_REJECT,
+                    )
+                )
+                continue
+
+            # Where the primary is already a party, the repoint deletes the
+            # duplicate's party row. remove_contract_party() refuses that once
+            # the contract has left draft / sent_for_signature.
+            dup_contracts = await _party_contract_ids(session, dup_id)
+            locked = await _first_party_locked_contract(session, dup_contracts & primary_contracts)
+            if locked is not None:
+                failed.append(
+                    BulkFailed(
+                        entity_id=str(dup_id),
+                        error_message=f"SalesContract in status '{locked.status}' is locked - no party changes",
+                        error_code=CODE_PARTY_LOCKED,
+                    )
+                )
+                continue
+            primary_contracts |= dup_contracts
+
             if dry_run:
                 succeeded += 1
                 continue
@@ -1099,6 +1143,7 @@ async def bulk_merge_buyers(
                 await _repoint_buyer_fks(session, dup_id, data.primary_buyer_id)
 
                 # Soft-delete the duplicate
+                from_status = dup.status
                 dup.status = "cancelled"
                 dup.cancelled_reason = f"merged_into:{data.primary_buyer_id}"
                 dup.cancelled_at = datetime.now(UTC).date().isoformat()
@@ -1121,7 +1166,7 @@ async def bulk_merge_buyers(
                     entity_type="property_dev.buyer",
                     entity_id=str(dup_id),
                     action="bulk_merged_into",
-                    from_status=dup.status,
+                    from_status=from_status,
                     to_status="cancelled",
                     reason=data.reason or None,
                     metadata={
@@ -1172,6 +1217,32 @@ async def bulk_merge_buyers(
         failed=failed,
         dry_run=dry_run,
     )
+
+
+async def _party_contract_ids(session: AsyncSession, buyer_id: uuid.UUID) -> set[uuid.UUID]:
+    """Return the sales contracts ``buyer_id`` is a party on."""
+    from sqlalchemy import select
+
+    stmt = select(ContractParty.sales_contract_id).where(ContractParty.buyer_id == buyer_id)
+    return set((await session.execute(stmt)).scalars().all())
+
+
+async def _first_party_locked_contract(session: AsyncSession, contract_ids: set[uuid.UUID]) -> SalesContract | None:
+    """Return one of ``contract_ids`` whose parties can no longer change, or ``None``."""
+    if not contract_ids:
+        return None
+    from sqlalchemy import select
+
+    stmt = (
+        select(SalesContract)
+        .where(
+            SalesContract.id.in_(sorted(contract_ids)),
+            SalesContract.status.not_in(sorted(_PARTY_EDITABLE_SPA_STATES)),
+        )
+        .order_by(SalesContract.contract_number)
+        .limit(1)
+    )
+    return (await session.execute(stmt)).scalars().first()
 
 
 async def _repoint_buyer_fks(

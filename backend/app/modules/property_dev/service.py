@@ -4859,6 +4859,14 @@ class PropertyDevService:
 
     async def waive_instalment(self, ins_id: uuid.UUID, data: InstalmentWaiveRequest) -> Instalment:
         ins = await self.get_instalment(ins_id)
+        # Same conflict guard as cancel_reservation(): a repeat waive would
+        # otherwise overwrite waiver_reason/waived_at and publish
+        # instalment.waived twice for one waiver.
+        if ins.status == "waived":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Instalment in status '{ins.status}' cannot be waived",
+            )
         _ensure_transition(
             "instalment",
             ins.status,

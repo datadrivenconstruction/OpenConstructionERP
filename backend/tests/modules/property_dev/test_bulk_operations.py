@@ -810,6 +810,173 @@ async def test_bulk_buyer_merge_editor_blocked_403(client, admin_a, editor_user)
     assert res.status_code == 403, res.text
 
 
+# ── Merge refuses a duplicate it would rewrite ──────────────────────────
+#
+# A merge soft-cancels the duplicate and drops its contract party wherever the
+# primary is already a party. It used to do both unconditionally: a completed
+# buyer flipped to cancelled, an already cancelled one had its cancellation
+# reason and date overwritten, and a party row on a signed contract was deleted
+# although add/remove_contract_party refuse any party change once the contract
+# has left draft / sent_for_signature. Each of those duplicates is now a
+# per-item failure recorded before any repoint, and a dry run reports the same.
+
+
+async def _db_set_buyer(buyer_id: str, **values) -> None:
+    from sqlalchemy import update
+
+    from app.database import async_session_factory
+    from app.modules.property_dev.models import Buyer
+
+    async with async_session_factory() as session:
+        await session.execute(update(Buyer).where(Buyer.id == uuid.UUID(buyer_id)).values(**values))
+        await session.commit()
+
+
+async def _db_buyer(buyer_id: str):
+    from app.database import async_session_factory
+    from app.modules.property_dev.models import Buyer
+
+    async with async_session_factory() as session:
+        return await session.get(Buyer, uuid.UUID(buyer_id))
+
+
+async def _db_contract_with_parties(plot_id: str, status: str, buyer_ids: list[str]) -> str:
+    """Insert a sales contract in ``status`` with one party row per buyer."""
+    from decimal import Decimal
+
+    from app.database import async_session_factory
+    from app.modules.property_dev.models import ContractParty, SalesContract
+
+    async with async_session_factory() as session:
+        spa = SalesContract(
+            contract_number=f"SPA-M-{uuid.uuid4().hex[:6]}",
+            plot_id=uuid.UUID(plot_id),
+            currency="EUR",
+            status=status,
+        )
+        session.add(spa)
+        await session.flush()
+        share = Decimal("100") / len(buyer_ids)
+        for i, bid in enumerate(buyer_ids):
+            session.add(
+                ContractParty(
+                    sales_contract_id=spa.id,
+                    buyer_id=uuid.UUID(bid),
+                    ownership_pct=share,
+                    party_role="primary" if i == 0 else "co_owner",
+                )
+            )
+        await session.commit()
+        return str(spa.id)
+
+
+async def _db_party_buyers(spa_id: str) -> set[str]:
+    from sqlalchemy import select
+
+    from app.database import async_session_factory
+    from app.modules.property_dev.models import ContractParty
+
+    async with async_session_factory() as session:
+        rows = await session.execute(
+            select(ContractParty.buyer_id).where(ContractParty.sales_contract_id == uuid.UUID(spa_id))
+        )
+        return {str(b) for b in rows.scalars().all()}
+
+
+async def _merge(client: AsyncClient, ctx, primary_id: str, dup_ids: list[str], *, dry_run: bool = False):
+    res = await client.post(
+        f"{API}/bulk/buyers/bulk-merge/" + ("?dry_run=true" if dry_run else ""),
+        json={"primary_buyer_id": primary_id, "duplicate_buyer_ids": dup_ids},
+        headers=ctx["headers"],
+    )
+    assert res.status_code == 200, res.text
+    return res.json()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("dup_status", ["completed", "cancelled"])
+async def test_bulk_buyer_merge_refuses_a_closed_duplicate(client, admin_a, dup_status):
+    primary_id = await _make_buyer(client, admin_a)
+    dup_id = await _make_buyer(client, admin_a)
+    plot_id = await _make_plot(client, admin_a, status="planned")
+    res_id = await _make_reservation(client, admin_a, plot_id, buyer_id=dup_id)
+    await _db_set_buyer(dup_id, status=dup_status, cancelled_reason="buyer withdrew", cancelled_at="2026-08-01")
+
+    for dry_run in (True, False):
+        body = await _merge(client, admin_a, primary_id, [dup_id], dry_run=dry_run)
+        assert body["succeeded"] == 0
+        assert [(f["entity_id"], f["error_code"]) for f in body["failed"]] == [(dup_id, "fsm_invalid_transition")]
+        assert body["failed"][0]["error_message"] == f"Buyer in status '{dup_status}' cannot be merged"
+
+    dup = await _db_buyer(dup_id)
+    assert dup.status == dup_status
+    assert dup.cancelled_reason == "buyer withdrew"
+    assert dup.cancelled_at == "2026-08-01"
+    assert "merged_into" not in (dup.metadata_ or {})
+    cur_res = await client.get(f"{API}/reservations/{res_id}", headers=admin_a["headers"])
+    assert cur_res.json()["buyer_id"] == dup_id
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("spa_status", ["signed", "countersigned", "registered", "cancelled"])
+async def test_bulk_buyer_merge_refuses_dropping_a_party_of_a_locked_contract(client, admin_a, spa_status):
+    primary_id = await _make_buyer(client, admin_a)
+    dup_id = await _make_buyer(client, admin_a)
+    plot_id = await _make_plot(client, admin_a, status="planned")
+    spa_id = await _db_contract_with_parties(plot_id, spa_status, [primary_id, dup_id])
+
+    for dry_run in (True, False):
+        body = await _merge(client, admin_a, primary_id, [dup_id], dry_run=dry_run)
+        assert body["succeeded"] == 0
+        assert [(f["entity_id"], f["error_code"]) for f in body["failed"]] == [(dup_id, "contract_party_locked")]
+        assert body["failed"][0]["error_message"] == (
+            f"SalesContract in status '{spa_status}' is locked - no party changes"
+        )
+
+    assert await _db_party_buyers(spa_id) == {primary_id, dup_id}
+    assert (await _db_buyer(dup_id)).status == "lead"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("spa_status", ["draft", "sent_for_signature"])
+async def test_bulk_buyer_merge_drops_a_party_of_an_open_contract(client, admin_a, spa_status):
+    primary_id = await _make_buyer(client, admin_a)
+    dup_id = await _make_buyer(client, admin_a)
+    plot_id = await _make_plot(client, admin_a, status="planned")
+    spa_id = await _db_contract_with_parties(plot_id, spa_status, [primary_id, dup_id])
+
+    body = await _merge(client, admin_a, primary_id, [dup_id])
+
+    assert body["succeeded"] == 1, body
+    assert body["failed"] == []
+    assert await _db_party_buyers(spa_id) == {primary_id}
+    assert (await _db_buyer(dup_id)).status == "cancelled"
+
+
+@pytest.mark.asyncio
+async def test_bulk_buyer_merge_sees_a_party_moved_earlier_in_the_same_batch(client, admin_a):
+    """Two duplicates on one signed contract the primary is not on.
+
+    The first moves its party onto the primary, which is allowed. The second
+    would then be dropped as a second primary party, which is not. A dry run,
+    which moves nothing, must report the same split as the real run.
+    """
+    primary_id = await _make_buyer(client, admin_a)
+    dup_one = await _make_buyer(client, admin_a)
+    dup_two = await _make_buyer(client, admin_a)
+    plot_id = await _make_plot(client, admin_a, status="planned")
+    spa_id = await _db_contract_with_parties(plot_id, "signed", [dup_one, dup_two])
+
+    dry = await _merge(client, admin_a, primary_id, [dup_one, dup_two], dry_run=True)
+    real = await _merge(client, admin_a, primary_id, [dup_one, dup_two])
+
+    for body in (dry, real):
+        assert body["succeeded"] == 1
+        assert [(f["entity_id"], f["error_code"]) for f in body["failed"]] == [(dup_two, "contract_party_locked")]
+    assert await _db_party_buyers(spa_id) == {primary_id, dup_two}
+    assert (await _db_buyer(dup_two)).status == "lead"
+
+
 # ════════════════════════════════════════════════════════════════════════
 # Cross-cutting: atomicity, 500-cap, dry-run drift
 # ════════════════════════════════════════════════════════════════════════
