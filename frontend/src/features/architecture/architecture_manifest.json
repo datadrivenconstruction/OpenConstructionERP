@@ -54535,6 +54535,12 @@
         },
         {
           "method": "POST",
+          "path": "/contracts/{contract_id}/sov/reconcile-change-orders/exclusions",
+          "handler": "sov_reconcile_set_exclusion",
+          "request_schema": "SovReconcileExclusion"
+        },
+        {
+          "method": "POST",
           "path": "/contracts/{contract_id}/retention/release",
           "handler": "release_retention",
           "request_schema": "dict"
@@ -58756,11 +58762,33 @@
           "bases": [
             "BaseModel"
           ],
-          "docstring": "Body for ``POST /contracts/{id}/sov/reconcile-change-orders``.\n\nThe source keys the person read in the preview and agreed to post. The\nserver posts only when they are exactly what it would post now.",
+          "docstring": "Body for ``POST /contracts/{id}/sov/reconcile-change-orders``.\n\nThe source keys the person ticked in the preview. The server posts only\nwhen every one of them is still on offer; the ones left unticked stay on\noffer.",
           "fields": [
             {
               "name": "source_keys",
               "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "SovReconcileExclusion",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Body for ``POST /contracts/{id}/sov/reconcile-change-orders/exclusions``.\n\n``excluded=True`` sets the change aside as already on the schedule of\nvalues (a line added by hand), ``False`` takes that decision back.",
+          "fields": [
+            {
+              "name": "source_key",
+              "type": "str"
+            },
+            {
+              "name": "excluded",
+              "type": "bool",
+              "default": "True"
+            },
+            {
+              "name": "reason",
+              "type": "str"
             }
           ]
         }
@@ -233433,8 +233461,8 @@
     "total_models": 617,
     "total_columns": 7101,
     "total_relationships": 234,
-    "total_routes": 3703,
-    "total_schemas": 3485,
+    "total_routes": 3704,
+    "total_schemas": 3486,
     "total_python_files": 2209,
     "frontend_features": 190,
     "frontend_ts_files": 2755,

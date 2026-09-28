@@ -4506,7 +4506,14 @@ class ContractsService:
             entity_type="contract",
             entity_id=str(contract.id),
             user_id=actor_id,
-            details={"source_key": source_key, **record},
+            # The record names who set the change aside; the entry's user is
+            # whoever acted now, which differs when the decision is taken back.
+            details={
+                "source_key": source_key,
+                "excluded_by": record.get("by"),
+                "excluded_at": record.get("at"),
+                "reason": record.get("reason") or "",
+            },
         )
         return await reconcile_preview(self.session, contract)
 
