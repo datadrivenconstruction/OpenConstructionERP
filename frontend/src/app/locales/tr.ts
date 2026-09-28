@@ -43905,6 +43905,7 @@ const resource = {
     "boq.import_preview.drop_hint": "GAEB XML, Excel, PDF veya CSV",
     "boq.import_preview.drop_zone": "Dosyayı buraya bırakın veya göz atmak için tıklayın",
     "boq.import_preview.field_skip": "Atla",
+    "boq.import_preview.legacy_xls": "Bu bir Excel 97-2003 çalışma kitabıdır (.xls). Excel'de veya LibreOffice'te açın, Excel çalışma kitabı (.xlsx) olarak kaydedin ve o dosyayı yükleyin.",
     "boq.import_preview.import_success": "{{count}} poz içe aktarıldı",
     "boq.import_preview.import_timeout": "Sunucu 90 saniye içinde yanıt vermedi.",
     "boq.import_preview.parse_timeout": "Sunucu 90 saniye içinde yanıt vermedi. Dosya çok büyük olabilir.",

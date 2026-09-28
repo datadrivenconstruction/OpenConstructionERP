@@ -43040,6 +43040,7 @@ const resource = {
     "boq.import_preview.drop_hint": "GAEB XML, Excel, PDF ή CSV",
     "boq.import_preview.drop_zone": "Αποθέστε το αρχείο εδώ ή κάντε κλικ για αναζήτηση",
     "boq.import_preview.field_skip": "Παράλειψη",
+    "boq.import_preview.legacy_xls": "Αυτό είναι βιβλίο εργασίας Excel 97-2003 (.xls). Ανοίξτε το στο Excel ή στο LibreOffice, αποθηκεύστε το ως βιβλίο εργασίας Excel (.xlsx) και ανεβάστε αυτό το αρχείο.",
     "boq.import_preview.import_success": "Εισήχθησαν {{count}} θέσεις",
     "boq.import_preview.import_timeout": "Ο διακομιστής δεν απάντησε εντός 90 δευτερολέπτων.",
     "boq.import_preview.parse_timeout": "Ο διακομιστής δεν απάντησε εντός 90 δευτερολέπτων. Το αρχείο μπορεί να είναι πολύ μεγάλο.",

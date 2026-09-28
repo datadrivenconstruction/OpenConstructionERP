@@ -43976,6 +43976,7 @@ const resource = {
     "boq.import_preview.drop_hint": "GAEB XML, Excel, PDF nebo CSV",
     "boq.import_preview.drop_zone": "Přetáhněte soubor sem nebo klikněte pro výběr",
     "boq.import_preview.field_skip": "Přeskočit",
+    "boq.import_preview.legacy_xls": "Jde o sešit aplikace Excel 97-2003 (.xls). Otevřete jej v Excelu nebo LibreOffice, uložte jej jako sešit aplikace Excel (.xlsx) a nahrajte tento soubor.",
     "boq.import_preview.import_success": "Importováno {{count}} položek",
     "boq.import_preview.import_timeout": "Server nereagoval do 90 sekund.",
     "boq.import_preview.parse_timeout": "Server nereagoval do 90 sekund. Soubor může být příliš velký.",

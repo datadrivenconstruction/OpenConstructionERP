@@ -43685,6 +43685,7 @@ const resource = {
     "boq.import_preview.drop_hint": "GAEB XML, Excel, PDF eller CSV",
     "boq.import_preview.drop_zone": "Släpp fil här eller klicka för att bläddra",
     "boq.import_preview.field_skip": "Hoppa över",
+    "boq.import_preview.legacy_xls": "Det här är en Excel 97-2003-arbetsbok (.xls). Öppna den i Excel eller LibreOffice, spara den som Excel-arbetsbok (.xlsx) och ladda upp den filen.",
     "boq.import_preview.import_success": "Importerade {{count}} poster",
     "boq.import_preview.import_timeout": "Servern svarade inte inom 90 sekunder.",
     "boq.import_preview.parse_timeout": "Servern svarade inte inom 90 sekunder. Filen kan vara för stor.",

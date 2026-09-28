@@ -43220,6 +43220,7 @@ const resource = {
     "boq.import_preview.drop_hint": "GAEB XML, Excel, PDF ili CSV",
     "boq.import_preview.drop_zone": "Ispustite datoteku ovdje ili kliknite za pregled",
     "boq.import_preview.field_skip": "Preskoči",
+    "boq.import_preview.legacy_xls": "Ovo je radna knjiga programa Excel 97-2003 (.xls). Otvorite je u Excelu ili LibreOfficeu, spremite je kao radnu knjigu programa Excel (.xlsx) i prenesite tu datoteku.",
     "boq.import_preview.import_success": "Uvezeno {{count}} stavki",
     "boq.import_preview.import_timeout": "Poslužitelj nije odgovorio u roku od 90 sekundi.",
     "boq.import_preview.parse_timeout": "Poslužitelj nije odgovorio u roku od 90 sekundi. Datoteka je možda prevelika.",

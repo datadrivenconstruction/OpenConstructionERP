@@ -43218,6 +43218,7 @@ const resource = {
     "boq.import_preview.drop_hint": "GAEB XML, Excel, PDF sau CSV",
     "boq.import_preview.drop_zone": "Trageți fișierul aici sau faceți clic pentru a căuta",
     "boq.import_preview.field_skip": "Omitere",
+    "boq.import_preview.legacy_xls": "Acesta este un registru de lucru Excel 97-2003 (.xls). Deschideți-l în Excel sau LibreOffice, salvați-l ca registru de lucru Excel (.xlsx) și încărcați acel fișier.",
     "boq.import_preview.import_success": "{{count}} articole importate",
     "boq.import_preview.import_timeout": "Serverul nu a răspuns în 90 de secunde.",
     "boq.import_preview.parse_timeout": "Serverul nu a răspuns în 90 de secunde. Fișierul poate fi prea mare.",

@@ -42750,6 +42750,7 @@ const resource = {
     "boq.import_preview.warnings_title": "{{count}} анхааруулга",
     "boq.import_preview.column_mapping": "Баганын харьцуулалт ({{total}}-аас {{mapped}} харьцуулсан)",
     "boq.import_preview.field_skip": "Алгасах",
+    "boq.import_preview.legacy_xls": "Энэ бол Excel 97-2003 ажлын ном (.xls). Үүнийг Excel эсвэл LibreOffice-д нээж, Excel ажлын ном (.xlsx) болгон хадгалаад, тэр файлыг байршуулна уу.",
     "boq.import_preview.errors_title_one": "{{count}} алдаа",
     "boq.import_preview.errors_title_other": "{{count}} алдаа",
     "boq.list_projects_skipped": "Оруулаагүй: {{projects}}. Эдгээр төслийг архивласан эсвэл тантай хуваалцахаа больсон тул энд байгаа төсөв болон нийлбэрт оруулаагүй.",

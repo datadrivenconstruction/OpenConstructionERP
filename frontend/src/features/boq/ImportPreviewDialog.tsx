@@ -156,6 +156,19 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
       setFile(f);
       setFileFormat(detectFormat(f.name));
       setError(null);
+
+      // An Excel 97-2003 workbook is not read by any importer; say what to
+      // do in the user's language instead of uploading it to be refused.
+      if (f.name.toLowerCase().endsWith('.xls')) {
+        setError(
+          t('boq.import_preview.legacy_xls', {
+            defaultValue:
+              'This is an Excel 97-2003 workbook (.xls). Open it in Excel or LibreOffice, save it as an Excel workbook (.xlsx) and upload that file.',
+          }),
+        );
+        return;
+      }
+
       setParsing(true);
       setStep('upload'); // Stay on upload step while parsing
 

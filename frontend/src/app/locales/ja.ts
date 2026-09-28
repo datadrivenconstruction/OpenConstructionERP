@@ -44503,6 +44503,7 @@ const resource = {
     "boq.import_preview.warnings_title": "{{count}} 件の警告",
     "boq.import_preview.column_mapping": "列マッピング（{{total}} 列中 {{mapped}} 列対応済み）",
     "boq.import_preview.field_skip": "スキップ",
+    "boq.import_preview.legacy_xls": "これは Excel 97-2003 ブック (.xls) です。Excel または LibreOffice で開き、Excel ブック (.xlsx) として保存してから、そのファイルをアップロードしてください。",
     "boq.import_preview.errors_title_other": "{{count}} 件のエラー",
     "boq.import_preview.errors_title_one": "{{count}} 件のエラー",
     "boq.list_projects_skipped": "含まれていません: {{projects}}。これらのプロジェクトはアーカイブされたか、共有が解除されたため、ここの見積と合計には含まれません。",

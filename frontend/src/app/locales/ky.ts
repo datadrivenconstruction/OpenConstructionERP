@@ -43175,6 +43175,7 @@ const resource = {
     "boq.import_preview.drop_hint": "GAEB XML, Excel, PDF же CSV",
     "boq.import_preview.drop_zone": "Файлды бул жерге таштаңыз же чалгын үчүн чыкылдатыңыз",
     "boq.import_preview.field_skip": "Өткөрүп жиберүү",
+    "boq.import_preview.legacy_xls": "Бул Excel 97-2003 иш китеби (.xls). Аны Excel же LibreOffice программасында ачып, Excel иш китеби (.xlsx) катары сактап, ошол файлды жүктөңүз.",
     "boq.import_preview.import_success": "{{count}} позиция импортталды",
     "boq.import_preview.import_timeout": "Сервер 90 секунда ичинде жооп бербеди.",
     "boq.import_preview.parse_timeout": "Сервер 90 секунда ичинде жооп бербеди. Файл өтө чоң болушу мүмкүн.",

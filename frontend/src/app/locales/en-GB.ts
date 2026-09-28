@@ -68,6 +68,7 @@ const resource = {
     "boq.submitted_for_review": "Submitted for review",
     "boq.import_preview.column_mapping": "Column mapping ({{mapped}} of {{total}} mapped)",
     "boq.import_preview.field_skip": "Skip",
+    "boq.import_preview.legacy_xls": "This is an Excel 97-2003 workbook (.xls). Open it in Excel or LibreOffice, save it as an Excel workbook (.xlsx) and upload that file.",
     "auth.or": "or",
     "auth.sso_login": "Sign in with SSO",
     "schedule.activate": "Activate",

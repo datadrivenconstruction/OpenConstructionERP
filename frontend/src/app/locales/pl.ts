@@ -44205,6 +44205,7 @@ const resource = {
     "boq.import_preview.drop_hint": "GAEB XML, Excel, PDF lub CSV",
     "boq.import_preview.drop_zone": "Upuść plik tutaj lub kliknij, aby przeglądać",
     "boq.import_preview.field_skip": "Pomiń",
+    "boq.import_preview.legacy_xls": "To jest skoroszyt programu Excel 97-2003 (.xls). Otwórz go w programie Excel lub LibreOffice, zapisz jako skoroszyt programu Excel (.xlsx) i prześlij ten plik.",
     "boq.import_preview.import_success": "Zaimportowano {{count}} pozycji",
     "boq.import_preview.import_timeout": "Serwer nie odpowiedział w ciągu 90 sekund.",
     "boq.import_preview.parse_timeout": "Serwer nie odpowiedział w ciągu 90 sekund. Plik może być za duży.",

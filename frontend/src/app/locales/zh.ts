@@ -45440,6 +45440,7 @@ const resource = {
     "boq.import_preview.warnings_title": "{{count}} 条警告",
     "boq.import_preview.column_mapping": "列映射（共 {{total}} 列，已映射 {{mapped}} 列）",
     "boq.import_preview.field_skip": "跳过",
+    "boq.import_preview.legacy_xls": "这是 Excel 97-2003 工作簿 (.xls)。请在 Excel 或 LibreOffice 中打开，另存为 Excel 工作簿 (.xlsx)，然后上传该文件。",
     "boq.import_preview.errors_title_other": "{{count}} 个错误",
     "boq.import_preview.errors_title_one": "{{count}} 个错误",
     "boq.list_projects_skipped": "未包含：{{projects}}。这些项目已归档或不再与您共享，因此此处的估算和合计不包括它们。",

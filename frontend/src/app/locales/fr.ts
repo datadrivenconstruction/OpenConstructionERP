@@ -45793,6 +45793,7 @@ const resource = {
     "boq.import_preview.drop_hint": "GAEB XML, Excel, PDF ou CSV",
     "boq.import_preview.drop_zone": "Déposez le fichier ici ou cliquez pour parcourir",
     "boq.import_preview.field_skip": "Ignorer",
+    "boq.import_preview.legacy_xls": "Il s'agit d'un classeur Excel 97-2003 (.xls). Ouvrez-le dans Excel ou LibreOffice, enregistrez-le comme classeur Excel (.xlsx) et importez ce fichier.",
     "boq.import_preview.import_success": "{{count}} postes importés",
     "boq.import_preview.import_timeout": "Le serveur n'a pas répondu dans les 90 secondes.",
     "boq.import_preview.parse_timeout": "Le serveur n'a pas répondu dans les 90 secondes. Le fichier est peut-être trop volumineux.",

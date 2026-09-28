@@ -39954,6 +39954,7 @@ const resource = {
     "boq.import_preview.drop_hint": "GAEB XML, Excel, PDF ou CSV",
     "boq.import_preview.drop_zone": "Solte o arquivo aqui ou clique para procurar",
     "boq.import_preview.field_skip": "Pular",
+    "boq.import_preview.legacy_xls": "Esta é uma pasta de trabalho do Excel 97-2003 (.xls). Abra-a no Excel ou no LibreOffice, salve-a como pasta de trabalho do Excel (.xlsx) e envie esse arquivo.",
     "boq.import_preview.import_success": "{{count}} itens importados",
     "boq.import_preview.import_timeout": "O servidor não respondeu em 90 segundos.",
     "boq.import_preview.parse_timeout": "O servidor não respondeu em 90 segundos. O arquivo pode ser muito grande.",

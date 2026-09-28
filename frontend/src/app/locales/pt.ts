@@ -45782,6 +45782,7 @@ const resource = {
     "boq.import_preview.drop_hint": "GAEB XML, Excel, PDF ou CSV",
     "boq.import_preview.drop_zone": "Largue o ficheiro aqui ou clique para procurar",
     "boq.import_preview.field_skip": "Ignorar",
+    "boq.import_preview.legacy_xls": "Este é um livro do Excel 97-2003 (.xls). Abra-o no Excel ou no LibreOffice, guarde-o como livro do Excel (.xlsx) e carregue esse ficheiro.",
     "boq.import_preview.import_success": "{{count}} rubricas importadas",
     "boq.import_preview.import_timeout": "O servidor não respondeu em 90 segundos.",
     "boq.import_preview.parse_timeout": "O servidor não respondeu em 90 segundos. O ficheiro pode ser demasiado grande.",

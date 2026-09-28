@@ -43191,6 +43191,7 @@ const resource = {
     "boq.import_preview.drop_hint": "GAEB XML, Excel, PDF או CSV",
     "boq.import_preview.drop_zone": "גרור קובץ לכאן או לחץ לבחירה",
     "boq.import_preview.field_skip": "דלג",
+    "boq.import_preview.legacy_xls": "זוהי חוברת עבודה של Excel 97-2003 (.xls). פתחו אותה ב-Excel או ב-LibreOffice, שמרו אותה כחוברת עבודה של Excel (.xlsx) והעלו את הקובץ הזה.",
     "boq.import_preview.import_success": "יובאו {{count}} סעיפים",
     "boq.import_preview.import_timeout": "השרת לא הגיב תוך 90 שניות.",
     "boq.import_preview.parse_timeout": "השרת לא הגיב תוך 90 שניות. הקובץ עלול להיות גדול מדי.",

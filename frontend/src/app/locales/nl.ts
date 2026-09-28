@@ -43951,6 +43951,7 @@ const resource = {
     "boq.import_preview.drop_hint": "GAEB XML, Excel, PDF of CSV",
     "boq.import_preview.drop_zone": "Sleep bestand hierheen of klik om te bladeren",
     "boq.import_preview.field_skip": "Overslaan",
+    "boq.import_preview.legacy_xls": "Dit is een Excel 97-2003-werkmap (.xls). Open deze in Excel of LibreOffice, sla hem op als Excel-werkmap (.xlsx) en upload dat bestand.",
     "boq.import_preview.import_success": "{{count}} posten geïmporteerd",
     "boq.import_preview.import_timeout": "De server reageerde niet binnen 90 seconden.",
     "boq.import_preview.parse_timeout": "De server reageerde niet binnen 90 seconden. Het bestand is mogelijk te groot.",

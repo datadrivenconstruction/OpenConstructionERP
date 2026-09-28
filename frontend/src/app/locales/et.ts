@@ -43003,6 +43003,7 @@ const resource = {
     "boq.import_preview.drop_hint": "GAEB XML, Excel, PDF või CSV",
     "boq.import_preview.drop_zone": "Lohista fail siia või klõpsa sirvimiseks",
     "boq.import_preview.field_skip": "Jäta vahele",
+    "boq.import_preview.legacy_xls": "See on Excel 97-2003 töövihik (.xls). Avage see Excelis või LibreOffice'is, salvestage see Exceli töövihikuna (.xlsx) ja laadige see fail üles.",
     "boq.import_preview.import_success": "Imporditud {{count}} rida",
     "boq.import_preview.import_timeout": "Server ei vastanud 90 sekundi jooksul.",
     "boq.import_preview.parse_timeout": "Server ei vastanud 90 sekundi jooksul. Fail võib olla liiga suur.",

@@ -43055,6 +43055,7 @@ const resource = {
     "boq.import_preview.warnings_title": "{{count}} babala",
     "boq.import_preview.column_mapping": "Pagmamapa ng kolum ({{mapped}} sa {{total}} ang na-mapa)",
     "boq.import_preview.field_skip": "Laktawan",
+    "boq.import_preview.legacy_xls": "Ito ay isang Excel 97-2003 workbook (.xls). Buksan ito sa Excel o LibreOffice, i-save bilang Excel workbook (.xlsx) at i-upload ang file na iyon.",
     "boq.import_preview.errors_title_one": "{{count}} error",
     "boq.import_preview.errors_title_other": "{{count}} error",
     "boq.list_projects_skipped": "Hindi kasama: {{projects}}. Na-archive na ang mga proyektong ito o hindi na ibinabahagi sa iyo, kaya hindi sila isinasama ng mga tantiya at kabuuan dito.",

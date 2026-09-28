@@ -45712,6 +45712,7 @@ const resource = {
     "boq.import_preview.drop_hint": "GAEB XML, Excel, PDF oder CSV",
     "boq.import_preview.drop_zone": "Datei hier ablegen oder zum Durchsuchen klicken",
     "boq.import_preview.field_skip": "Überspringen",
+    "boq.import_preview.legacy_xls": "Dies ist eine Excel-97-2003-Arbeitsmappe (.xls). Öffnen Sie sie in Excel oder LibreOffice, speichern Sie sie als Excel-Arbeitsmappe (.xlsx) und laden Sie diese Datei hoch.",
     "boq.import_preview.import_success": "{{count}} Positionen importiert",
     "boq.import_preview.import_timeout": "Der Server hat nicht innerhalb von 90 Sekunden geantwortet.",
     "boq.import_preview.parse_timeout": "Der Server hat nicht innerhalb von 90 Sekunden geantwortet. Die Datei ist möglicherweise zu groß.",

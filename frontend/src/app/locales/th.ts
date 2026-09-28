@@ -42971,6 +42971,7 @@ const resource = {
     "boq.import_preview.warnings_title": "{{count}} คำเตือน",
     "boq.import_preview.column_mapping": "การแมปคอลัมน์ (แมปแล้ว {{mapped}} จาก {{total}} คอลัมน์)",
     "boq.import_preview.field_skip": "ข้าม",
+    "boq.import_preview.legacy_xls": "นี่คือเวิร์กบุ๊ก Excel 97-2003 (.xls) เปิดใน Excel หรือ LibreOffice บันทึกเป็นเวิร์กบุ๊ก Excel (.xlsx) แล้วอัปโหลดไฟล์นั้น",
     "boq.import_preview.errors_title_other": "{{count}} ข้อผิดพลาด",
     "boq.import_preview.errors_title_one": "{{count}} ข้อผิดพลาด",
     "boq.list_projects_skipped": "ไม่รวม: {{projects}} โครงการเหล่านี้ถูกเก็บถาวรหรือไม่ได้แชร์กับคุณแล้ว ประมาณการและยอดรวมที่นี่จึงไม่รวมไว้",

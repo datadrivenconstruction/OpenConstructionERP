@@ -43589,6 +43589,7 @@ const resource = {
     "boq.import_preview.warnings_title": "{{count}}개 경고",
     "boq.import_preview.column_mapping": "열 매핑 ({{total}}개 중 {{mapped}}개 매핑됨)",
     "boq.import_preview.field_skip": "건너뛰기",
+    "boq.import_preview.legacy_xls": "Excel 97-2003 통합 문서(.xls)입니다. Excel 또는 LibreOffice에서 열고 Excel 통합 문서(.xlsx)로 저장한 뒤 그 파일을 업로드하세요.",
     "boq.import_preview.errors_title_other": "{{count}}개 오류",
     "boq.import_preview.errors_title_one": "{{count}}개 오류",
     "boq.list_projects_skipped": "포함되지 않음: {{projects}}. 이 프로젝트는 보관되었거나 더 이상 공유되지 않아 여기의 견적과 합계에서 제외됩니다.",

@@ -42961,6 +42961,7 @@ const resource = {
     "boq.import_preview.warnings_title": "{{count}} peringatan",
     "boq.import_preview.column_mapping": "Pemetaan kolom ({{mapped}} dari {{total}} kolom dipetakan)",
     "boq.import_preview.field_skip": "Lewati",
+    "boq.import_preview.legacy_xls": "Ini adalah buku kerja Excel 97-2003 (.xls). Buka di Excel atau LibreOffice, simpan sebagai buku kerja Excel (.xlsx), lalu unggah file tersebut.",
     "boq.import_preview.errors_title_other": "{{count}} kesalahan",
     "boq.import_preview.errors_title_one": "{{count}} kesalahan",
     "boq.list_projects_skipped": "Tidak disertakan: {{projects}}. Proyek ini telah diarsipkan atau tidak lagi dibagikan kepada Anda, sehingga estimasi dan total di sini tidak menyertakannya.",

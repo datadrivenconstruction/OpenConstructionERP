@@ -40279,6 +40279,7 @@ const resource = {
     "boq.import_preview.warnings_title": "{{count}} advertencia(s)",
     "boq.import_preview.column_mapping": "Mapeo de columnas ({{mapped}} de {{total}} mapeadas)",
     "boq.import_preview.field_skip": "Omitir",
+    "boq.import_preview.legacy_xls": "Es un libro de Excel 97-2003 (.xls). Ábralo en Excel o LibreOffice, guárdelo como libro de Excel (.xlsx) y suba ese archivo.",
     "boq.list_projects_skipped": "No incluidos: {{projects}}. Estos proyectos se archivaron o ya no se comparten con usted, por lo que las estimaciones y los totales de aquí los excluyen.",
     "auth.or": "o",
     "auth.sso_login": "Iniciar sesión con SSO",

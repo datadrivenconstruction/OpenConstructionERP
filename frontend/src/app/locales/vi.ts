@@ -42979,6 +42979,7 @@ const resource = {
     "boq.import_preview.warnings_title": "{{count}} cảnh báo",
     "boq.import_preview.column_mapping": "Ánh xạ cột (đã ánh xạ {{mapped}} / {{total}} cột)",
     "boq.import_preview.field_skip": "Bỏ qua",
+    "boq.import_preview.legacy_xls": "Đây là sổ làm việc Excel 97-2003 (.xls). Hãy mở trong Excel hoặc LibreOffice, lưu thành sổ làm việc Excel (.xlsx) rồi tải tệp đó lên.",
     "boq.import_preview.errors_title_other": "{{count}} lỗi",
     "boq.import_preview.errors_title_one": "{{count}} lỗi",
     "boq.list_projects_skipped": "Không bao gồm: {{projects}}. Các dự án này đã được lưu trữ hoặc không còn được chia sẻ với bạn, nên dự toán và tổng ở đây không tính chúng.",

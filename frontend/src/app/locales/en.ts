@@ -3708,6 +3708,7 @@ const resource = {
     "boq.import_preview.drop_hint": "GAEB XML, Excel, PDF or CSV",
     "boq.import_preview.drop_zone": "Drop file here or click to browse",
     "boq.import_preview.field_skip": "Skip",
+    "boq.import_preview.legacy_xls": "This is an Excel 97-2003 workbook (.xls). Open it in Excel or LibreOffice, save it as an Excel workbook (.xlsx) and upload that file.",
     "boq.import_preview.import_success": "Imported {{count}} positions",
     "boq.import_preview.import_timeout": "Server did not respond within 90 seconds.",
     "boq.import_preview.parse_timeout": "Server did not respond within 90 seconds. The file may be too large.",

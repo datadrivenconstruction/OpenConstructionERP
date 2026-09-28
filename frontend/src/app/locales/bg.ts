@@ -43065,6 +43065,7 @@ const resource = {
     "boq.import_preview.drop_hint": "GAEB XML, Excel, PDF или CSV",
     "boq.import_preview.drop_zone": "Пуснете файл тук или кликнете за избор",
     "boq.import_preview.field_skip": "Пропускане",
+    "boq.import_preview.legacy_xls": "Това е работна книга на Excel 97-2003 (.xls). Отворете я в Excel или LibreOffice, запазете я като работна книга на Excel (.xlsx) и качете този файл.",
     "boq.import_preview.import_success": "Импортирани {{count}} позиции",
     "boq.import_preview.import_timeout": "Сървърът не отговори в рамките на 90 секунди.",
     "boq.import_preview.parse_timeout": "Сървърът не отговори в рамките на 90 секунди. Файлът може да е твърде голям.",

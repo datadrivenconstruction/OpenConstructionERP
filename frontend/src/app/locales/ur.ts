@@ -43049,6 +43049,7 @@ const resource = {
     "boq.import_preview.drop_hint": "GAEB XML, Excel, PDF یا CSV",
     "boq.import_preview.drop_zone": "فائل یہاں چھوڑیں یا براؤز کرنے کے لیے کلک کریں",
     "boq.import_preview.field_skip": "چھوڑیں",
+    "boq.import_preview.legacy_xls": "یہ Excel 97-2003 ورک بک (.xls) ہے۔ اسے Excel یا LibreOffice میں کھولیں، Excel ورک بک (.xlsx) کے طور پر محفوظ کریں اور وہی فائل اپ لوڈ کریں۔",
     "boq.import_preview.import_success": "{{count}} آئٹم درآمد ہوئے",
     "boq.import_preview.import_timeout": "سرور نے 90 سیکنڈ میں جواب نہیں دیا۔",
     "boq.import_preview.parse_timeout": "سرور نے 90 سیکنڈ میں جواب نہیں دیا۔ فائل بہت بڑی ہو سکتی ہے۔",

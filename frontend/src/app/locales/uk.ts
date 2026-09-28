@@ -44796,6 +44796,7 @@ const resource = {
     "boq.import_preview.drop_hint": "GAEB XML, Excel, PDF або CSV",
     "boq.import_preview.drop_zone": "Перетягніть файл сюди або натисніть для вибору",
     "boq.import_preview.field_skip": "Пропустити",
+    "boq.import_preview.legacy_xls": "Це книга Excel 97-2003 (.xls). Відкрийте її в Excel або LibreOffice, збережіть як книгу Excel (.xlsx) і завантажте цей файл.",
     "boq.import_preview.import_success": "Імпортовано {{count}} позицій",
     "boq.import_preview.import_timeout": "Сервер не відповів протягом 90 секунд.",
     "boq.import_preview.parse_timeout": "Сервер не відповів протягом 90 секунд. Можливо, файл занадто великий.",

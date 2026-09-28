@@ -45230,6 +45230,7 @@ const resource = {
     "boq.import_preview.drop_hint": "GAEB XML, Excel, PDF أو CSV",
     "boq.import_preview.drop_zone": "أسقط الملف هنا أو انقر للاستعراض",
     "boq.import_preview.field_skip": "تخطي",
+    "boq.import_preview.legacy_xls": "هذا مصنف Excel 97-2003 (.xls). افتحه في Excel أو LibreOffice، واحفظه كمصنف Excel (.xlsx)، ثم ارفع ذلك الملف.",
     "boq.import_preview.import_success": "تم استيراد {{count}} بند",
     "boq.import_preview.import_timeout": "لم يستجب الخادم خلال 90 ثانية.",
     "boq.import_preview.parse_timeout": "لم يستجب الخادم خلال 90 ثانية. قد يكون الملف كبيراً جداً.",

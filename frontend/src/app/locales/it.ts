@@ -44094,6 +44094,7 @@ const resource = {
     "boq.import_preview.drop_hint": "GAEB XML, Excel, PDF o CSV",
     "boq.import_preview.drop_zone": "Trascina il file qui o clicca per sfogliare",
     "boq.import_preview.field_skip": "Salta",
+    "boq.import_preview.legacy_xls": "Questa è una cartella di lavoro Excel 97-2003 (.xls). Aprila in Excel o LibreOffice, salvala come cartella di lavoro Excel (.xlsx) e carica quel file.",
     "boq.import_preview.import_success": "{{count}} voci importate",
     "boq.import_preview.import_timeout": "Il server non ha risposto entro 90 secondi.",
     "boq.import_preview.parse_timeout": "Il server non ha risposto entro 90 secondi. Il file potrebbe essere troppo grande.",

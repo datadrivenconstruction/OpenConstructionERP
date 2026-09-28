@@ -23,13 +23,15 @@ from __future__ import annotations
 
 import csv
 import io
+import itertools
 import logging
+import math
 import re
 import unicodedata
 from typing import Any, ClassVar, Literal
 
 from app.core.file_signature import detect as detect_signature
-from app.core.sheet_header import find_header_row
+from app.core.sheet_header import HEADER_SEARCH_ROWS, find_header_row
 from app.modules.boq.importers._base import (
     ImportedBOQ,
     ImportedPosition,
@@ -120,6 +122,13 @@ _HEADERS_BY_LANGUAGE: dict[str, dict[str, tuple[str, ...]]] = {
             "cost group",
             "class",
         ),
+        # A bill that prices material and labour apart carries two rates and
+        # two totals per line and no single rate at all. See
+        # :func:`_combine_split_columns` for how they become the one rate.
+        "material_rate": ("material rate", "material unit rate", "material unit price"),
+        "labour_rate": ("labour rate", "labor rate", "labour unit rate", "labor unit rate", "labour unit price"),
+        "material_total": ("material total", "material amount"),
+        "labour_total": ("labour total", "labor total", "labour amount", "labor amount"),
     },
     "de": {
         "ordinal": ("oz", "pos.-nr.", "lv-pos."),
@@ -236,13 +245,39 @@ _HEADERS_BY_LANGUAGE: dict[str, dict[str, tuple[str, ...]]] = {
         "unit_rate": ("birim fiyat", "birim fiyatı", "birim fiyati"),
         "total": ("tutar", "toplam", "toplam tutar"),
     },
+    # Hungarian költségvetés. The item number ("Tételszám") is the norm or
+    # catalogue code of the line, 21-003-5.1.1 and the like, not its running
+    # number, so it is read as the classification and "Ssz." stays the
+    # ordinal. Every priced line is quoted as material (anyag) plus fee (díj),
+    # which a two-row header writes as "Egységár" over "Anyag | Díj".
     "hu": {
-        "ordinal": ("sorszám", "sorszam", "tételszám", "tetelszam", "ssz", "ssz."),
+        "ordinal": ("sorszám", "sorszam", "ssz", "ssz.", "s.sz.", "sorsz."),
         "description": ("megnevezés", "megnevezes", "tétel szövege", "tetel szovege", "leírás", "leiras"),
-        "unit": ("egység", "egyseg", "m.e.", "mennyiségi egység", "mennyisegi egyseg"),
-        "quantity": ("mennyiség", "mennyiseg"),
+        "unit": (
+            "egység",
+            "egyseg",
+            "m.e.",
+            "mennyiségi egység",
+            "mennyisegi egyseg",
+            "mértékegység",
+            "mertekegyseg",
+            "m.egys.",
+        ),
+        "quantity": ("mennyiség", "mennyiseg", "menny.", "menny"),
         "unit_rate": ("egységár", "egysegar", "egység ár", "egyseg ar"),
         "total": ("összesen", "osszesen", "összeg", "osszeg", "mindösszesen", "mindosszesen"),
+        "classification": ("tételszám", "tetelszam", "tétel szám", "tetel szam", "normaszám", "normaszam"),
+        "material_rate": ("anyag egységár", "anyag egysegar", "anyag egységára", "anyag egysegara"),
+        "labour_rate": ("díj egységár", "dij egysegar", "munkadíj egységár", "munkadij egysegar"),
+        "material_total": ("anyag összesen", "anyag osszesen", "nettó anyag összesen", "netto anyag osszesen"),
+        "labour_total": (
+            "díj összesen",
+            "dij osszesen",
+            "munkadíj összesen",
+            "munkadij osszesen",
+            "nettó díj összesen",
+            "netto dij osszesen",
+        ),
     },
     "ro": {
         "ordinal": ("nr. crt.", "nr crt", "crt.", "poz."),
@@ -692,6 +727,144 @@ def _match_column(header: str) -> str | None:
     return _NORMALISED_COLUMN_INDEX.get(key) if key else None
 
 
+# ── Split rates, header language, two-row headers ──────────────────────────
+
+# The split columns and the single column each one feeds. A Hungarian bill
+# prices every line as material plus fee and has no single rate column at
+# all, so reading only ``unit_rate`` imported every line at zero, and reading
+# one half as the rate would halve the bill.
+_SPLIT_COLUMNS: dict[str, str] = {
+    "material_rate": "unit_rate",
+    "labour_rate": "unit_rate",
+    "material_total": "total",
+    "labour_total": "total",
+}
+
+# Languages whose CSV exports come out of Excel in Windows-1250. That code
+# page decodes as Windows-1252 without an error, so nothing fails: the
+# Hungarian ő and ű quietly become õ and û. The header row says which market
+# wrote the file, and its words are plain enough to read in either code page.
+_CP1250_LANGUAGES: frozenset[str] = frozenset({"hu", "cs", "sk", "pl", "hr", "sl", "sr", "ro"})
+
+_LANGUAGE_HEADER_KEYS: dict[str, frozenset[str]] = {
+    language: frozenset(_label_key(word) for words in headers.values() for word in words)
+    for language, headers in _HEADERS_BY_LANGUAGE.items()
+}
+
+
+def header_language(header: tuple[Any, ...] | list[Any] | None) -> str | None:
+    """The language whose table names the most cells of a header row.
+
+    Args:
+        header: The header row's cells.
+
+    Returns:
+        The language code, or ``None`` when no cell is a known header. A tie
+        goes to the language listed first in :data:`_HEADERS_BY_LANGUAGE`.
+    """
+    keys = [_label_key(str(cell)) for cell in header or () if cell is not None and str(cell).strip()]
+    best: str | None = None
+    best_count = 0
+    for language, known in _LANGUAGE_HEADER_KEYS.items():
+        count = sum(1 for key in keys if key and key in known)
+        if count > best_count:
+            best, best_count = language, count
+    return best
+
+
+def _cell_text(value: Any) -> str:
+    return "" if value is None else str(value).strip()
+
+
+def _compose_two_row_header(header: tuple[Any, ...], below: tuple[Any, ...]) -> tuple[str, ...] | None:
+    """Read a header written over two rows, or ``None`` when it is one row.
+
+    Split bills head their money columns twice: "Egységár" merged across the
+    two columns under it, which say "Anyag" and "Díj". A merged cell holds its
+    text in the first column only, so the parent label is carried right across
+    the empty cells of its span, and each column under it is named "<sub>
+    <parent>", which is what the alias table spells ("anyag egységár").
+
+    The composition is taken only when the row below holds no number and the
+    composed header names more columns than the first row alone. A first data
+    row that happens to be a text-only section heading composes into nothing
+    the table knows and is left alone.
+    """
+    if not any(_cell_text(cell) for cell in below):
+        return None
+    if any(not math.isnan(safe_float(cell, default=math.nan)) for cell in below):
+        return None
+    width = max(len(header), len(below))
+    composed: list[str] = []
+    parent = ""
+    for index in range(width):
+        top = _cell_text(header[index]) if index < len(header) else ""
+        sub = _cell_text(below[index]) if index < len(below) else ""
+        if top:
+            parent = top if sub else ""
+        elif not sub:
+            parent = ""
+        if sub and parent:
+            composed.append(f"{sub} {parent}")
+        else:
+            composed.append(top or sub)
+    known_before = sum(1 for cell in header if _cell_text(cell) and _match_column(_cell_text(cell)))
+    known_after = sum(1 for cell in composed if cell and _match_column(cell))
+    return tuple(composed) if known_after > known_before else None
+
+
+def _map_columns(header: tuple[Any, ...]) -> dict[int, str]:
+    """Column index -> canonical column for every header cell the table knows."""
+    column_map: dict[int, str] = {}
+    for index, cell in enumerate(header):
+        text = _cell_text(cell)
+        canonical = _match_column(text) if text else None
+        if canonical:
+            column_map[index] = canonical
+    return column_map
+
+
+def _combine_split_columns(row: dict[str, Any]) -> dict[str, Any]:
+    """Fold material and labour columns into ``unit_rate`` and ``total``.
+
+    Only when the file has no single column of its own for the target: a
+    bill that carries "Egységár" beside the split keeps its own figure. A
+    blank half counts as zero (a fee-only line is a correct line), an unread
+    half is handed on as text so the row reports it rather than importing at
+    a guessed rate, and a row where both halves are blank stays unpriced, so
+    a heading or a total line is still recognised as one.
+    """
+    for target in ("unit_rate", "total"):
+        halves = [key for key, feeds in _SPLIT_COLUMNS.items() if feeds == target and key in row]
+        if not halves or not _is_blank_value(row.get(target)):
+            continue
+        amount = 0.0
+        filled = False
+        for key in halves:
+            value = row[key]
+            if _is_blank_value(value):
+                continue
+            parsed, error = parse_numeric_cell(value)
+            if error is not None or parsed is None:
+                row[target] = value
+                break
+            amount += parsed
+            filled = True
+        else:
+            if filled:
+                row[target] = amount
+    return row
+
+
+def _is_blank_value(value: Any) -> bool:
+    return value is None or (isinstance(value, str) and not value.strip())
+
+
+def _report_mapping(column_map: dict[int, str]) -> dict[str, str]:
+    """The mapping as the import dialog shows it: a split column under the column it feeds."""
+    return {str(index): _SPLIT_COLUMNS.get(canonical, canonical) for index, canonical in column_map.items()}
+
+
 def _detect_file_format(content_head: bytes) -> Literal["xlsx", "csv", "parquet", "unknown"]:
     """Identify an upload by its magic bytes (BUG-UPLOAD01 from the legacy code).
 
@@ -791,72 +964,171 @@ def _infer_classification(
 # ── Row parsing helpers ─────────────────────────────────────────────────────
 
 
-def _parse_rows_from_csv(content_bytes: bytes) -> list[dict[str, Any]]:
-    """Decode + parse a CSV into a list of canonical-key dicts."""
-    text, _ = decode_text_bytes(content_bytes)
-    # Detect delimiter from the first 4 KB.
-    sniffer = csv.Sniffer()
-    try:
-        dialect = sniffer.sniff(text[:4096], delimiters=",;\t|")
-    except csv.Error:
-        dialect = csv.excel  # type: ignore[assignment]
+_CSV_DELIMITERS: tuple[str, ...] = (";", "\t", ",", "|")
 
-    reader = csv.reader(io.StringIO(text), dialect)
-    raw_headers = next(reader, None)
+
+def _sniff_delimiter(text: str) -> str:
+    """The delimiter that splits the most lines into the same number of fields.
+
+    ``csv.Sniffer`` reads the whole sample, title lines included, and a
+    semicolon file whose numbers carry decimal commas gives it two plausible
+    answers. Counting fields line by line with the csv reader itself (so a
+    quoted "125,5" stays one field) and taking the delimiter whose most common
+    field count is shared by the most lines picks the one the table is laid
+    out in, whatever sits above it. A tie goes to the earlier delimiter in
+    :data:`_CSV_DELIMITERS`, semicolon first, which is what Excel writes in
+    every locale that uses the decimal comma.
+    """
+    lines = [line for line in text[:16384].splitlines()[:60] if line.strip()]
+    best, best_score = ",", 0
+    for delimiter in _CSV_DELIMITERS:
+        counts: dict[int, int] = {}
+        for fields in csv.reader(lines, delimiter=delimiter):
+            if len(fields) > 1:
+                counts[len(fields)] = counts.get(len(fields), 0) + 1
+        score = max(counts.values(), default=0)
+        if score > best_score:
+            best, best_score = delimiter, score
+    return best
+
+
+def _locate_header(
+    rows_iter: Any,
+) -> tuple[tuple[Any, ...] | None, int, Any]:
+    """Find the header row and read a second header row under it if there is one.
+
+    Returns ``(header, number of the last header row, rows under it)``.
+    """
+    raw_headers, header_number, rows = find_header_row(iter(rows_iter), _match_column)
+    if not raw_headers:
+        return raw_headers, header_number, rows
+    below = next(rows, None)
+    if below is None:
+        return tuple(raw_headers), header_number, rows
+    composed = _compose_two_row_header(tuple(raw_headers), tuple(below))
+    if composed is not None:
+        return composed, header_number + 1, rows
+    return tuple(raw_headers), header_number, itertools.chain([below], rows)
+
+
+def _decode_csv(content_bytes: bytes) -> tuple[str, str]:
+    """Decode a CSV upload, reading Windows-1250 files as Windows-1250.
+
+    :func:`decode_text_bytes` answers Windows-1252 for any single-byte file,
+    and that answer is wrong for a Central European export without being an
+    error. When the first answer is a single-byte code page and the header
+    row reads in a language of :data:`_CP1250_LANGUAGES`, the bytes are
+    decoded again as Windows-1250. Kept to this reader: BC3 and the other
+    text formats share :data:`DEFAULT_ENCODINGS` and are Western by
+    convention.
+    """
+    text, encoding = decode_text_bytes(content_bytes)
+    if encoding not in ("cp1252", "latin-1"):
+        return text, encoding
+    try:
+        central = content_bytes.decode("cp1250")
+    except UnicodeDecodeError:
+        return text, encoding
+    if central == text:
+        return text, encoding
+    delimiter = _sniff_delimiter(text)
+    header, _, _ = find_header_row(csv.reader(io.StringIO(text), delimiter=delimiter), _match_column)
+    if header_language(header) in _CP1250_LANGUAGES:
+        return central, "cp1250"
+    return text, encoding
+
+
+def _parse_csv(content_bytes: bytes) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Decode + parse a CSV into canonical-key dicts and import metadata."""
+    text, encoding = _decode_csv(content_bytes)
+    delimiter = _sniff_delimiter(text)
+    reader = csv.reader(io.StringIO(text), delimiter=delimiter)
+    raw_headers, header_number, rows_iter = _locate_header(reader)
     if not raw_headers:
         raise ImporterParseError("CSV file is empty or has no header row")
 
-    column_map: dict[int, str] = {}
-    raw_header_strings: list[str] = []
-    for idx, hdr in enumerate(raw_headers):
-        raw_header_strings.append(str(hdr or ""))
-        canonical = _match_column(str(hdr or ""))
-        if canonical:
-            column_map[idx] = canonical
+    column_map = _map_columns(raw_headers)
 
     rows: list[dict[str, Any]] = []
-    for raw_row in reader:
+    row_numbers: list[int] = []
+    for line_number, raw_row in enumerate(rows_iter, start=header_number + 1):
         row: dict[str, Any] = {}
         for idx, val in enumerate(raw_row):
             canonical = column_map.get(idx)
             if canonical:
                 row[canonical] = val.strip() if isinstance(val, str) else val
         if row:
-            rows.append(row)
+            rows.append(_combine_split_columns(row))
+            row_numbers.append(line_number)
+
+    import_metadata = {
+        "original_columns": [_cell_text(h) for h in raw_headers],
+        "column_mapping": _report_mapping(column_map),
+        "header_language": header_language(raw_headers),
+        "encoding": encoding,
+        "delimiter": delimiter,
+        "total_rows": len(rows),
+        "row_numbers": row_numbers,
+    }
+    return rows, import_metadata
+
+
+def _parse_rows_from_csv(content_bytes: bytes) -> list[dict[str, Any]]:
+    """Decode + parse a CSV into a list of canonical-key dicts."""
+    rows, _ = _parse_csv(content_bytes)
     return rows
+
+
+def _pick_item_sheet(workbook: Any) -> Any:
+    """The worksheet the bill's lines are on.
+
+    The active sheet when it carries a header naming a description and a
+    quantity or a price. Otherwise the first sheet that does: exported bills
+    open on a cover or a summary sheet ("Záradék", "Összesítő") and keep the
+    lines on a later one, and reading only the active sheet found no rows at
+    all. When no sheet qualifies the active sheet is returned as before, so
+    the error the user sees is unchanged.
+    """
+    active = workbook.active
+    candidates = [active] + [workbook[name] for name in workbook.sheetnames if workbook[name] is not active]
+    for worksheet in candidates:
+        if worksheet is None:
+            continue
+        header, _, _ = _locate_header(worksheet.iter_rows(max_row=HEADER_SEARCH_ROWS + 1, values_only=True))
+        mapped = set(_map_columns(header or ()).values())
+        priced = mapped & {"quantity", "unit_rate", *_SPLIT_COLUMNS}
+        if "description" in mapped and priced:
+            return worksheet
+    return active
 
 
 def _parse_rows_from_excel(
     content_bytes: bytes,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    """Read an .xlsx file's first worksheet into canonical-key dicts.
+    """Read the item sheet of an .xlsx file into canonical-key dicts.
 
-    Returns ``(rows, import_metadata)``; metadata preserves the raw
-    column ordering so a later export can round-trip back to the
-    user's original spreadsheet layout, and ``row_numbers`` holds the
+    The item sheet is the active one unless it carries no bill header, see
+    :func:`_pick_item_sheet`. Returns ``(rows, import_metadata)``; metadata
+    preserves the raw column ordering so a later export can round-trip back
+    to the user's original spreadsheet layout, and ``row_numbers`` holds the
     sheet row each returned row came from, so a message about it names the
     row the user sees under a letterhead and past blank lines.
     """
     from openpyxl import load_workbook
 
     wb = load_workbook(io.BytesIO(content_bytes), read_only=True, data_only=True)
-    ws = wb.active
-    if ws is None:
+    if wb.active is None:
         raise ImporterParseError("Excel file has no worksheets")
+    ws = _pick_item_sheet(wb)
 
     sheet_names = wb.sheetnames
 
-    raw_headers, header_number, rows_iter = find_header_row(ws.iter_rows(values_only=True), _match_column)
+    raw_headers, header_number, rows_iter = _locate_header(ws.iter_rows(values_only=True))
     if not raw_headers:
         raise ImporterParseError("Excel file is empty or has no header row")
 
     original_columns = [str(h) if h is not None else "" for h in raw_headers]
-    column_map: dict[int, str] = {}
-    for idx, hdr in enumerate(raw_headers):
-        if hdr is not None:
-            canonical = _match_column(str(hdr))
-            if canonical:
-                column_map[idx] = canonical
+    column_map = _map_columns(raw_headers)
 
     rows: list[dict[str, Any]] = []
     row_numbers: list[int] = []
@@ -867,14 +1139,17 @@ def _parse_rows_from_excel(
             if canonical and val is not None:
                 row[canonical] = val
         if row:
-            rows.append(row)
+            rows.append(_combine_split_columns(row))
             row_numbers.append(sheet_row)
+    item_sheet = ws.title
     wb.close()
 
     import_metadata = {
         "original_columns": original_columns,
-        "column_mapping": {str(k): v for k, v in column_map.items()},
+        "column_mapping": _report_mapping(column_map),
+        "header_language": header_language(raw_headers),
         "sheet_names": sheet_names,
+        "item_sheet": item_sheet,
         "total_rows": len(rows),
         "row_numbers": row_numbers,
     }
@@ -976,10 +1251,17 @@ _SUMMARY_WORDS_BY_LANGUAGE: dict[str, dict[str, tuple[str, ...]]] = {
         "recap": ("rekapitulácia",),
     },
     "hu": {
-        "subtotal": ("összesen", "részösszeg"),
-        "tax": ("áfa",),
-        "grand_total": ("mindösszesen", "végösszeg"),
-        "recap": ("összesítő", "összesítés"),
+        "subtotal": ("összesen", "részösszeg", "nettó összesen", "összesen nettó"),
+        "tax": ("áfa", "általános forgalmi adó"),
+        "grand_total": (
+            "mindösszesen",
+            "végösszeg",
+            "bruttó összesen",
+            "összesen bruttó",
+            "mindösszesen bruttó",
+            "mindösszesen nettó",
+        ),
+        "recap": ("összesítő", "összesítés", "főösszesítő", "munkanem összesítő"),
     },
     "ro": {
         "subtotal": ("total capitol", "subtotal"),
@@ -1115,6 +1397,20 @@ def _build_summary_index(table: dict[str, dict[str, tuple[str, ...]]]) -> dict[s
 
 _SUMMARY_INDEX: dict[str, str] = _build_summary_index(_SUMMARY_WORDS_BY_LANGUAGE)
 
+# Languages that write the total word at the END of the line: Hungarian names
+# the chapter first, "Irtás, föld- és sziklamunka összesen:". Kept to the
+# languages that do it, because a trailing "sum" in English is a provisional
+# sum, which is work, and matching it everywhere would drop that line.
+_TRAILING_SUMMARY_LANGUAGES: tuple[str, ...] = ("hu",)
+
+_TRAILING_SUMMARY_INDEX: dict[str, str] = {
+    phrase: kind
+    for phrase, kind in _build_summary_index(
+        {language: _SUMMARY_WORDS_BY_LANGUAGE[language] for language in _TRAILING_SUMMARY_LANGUAGES}
+    ).items()
+    if kind != "recap"
+}
+
 
 def summary_label_kind(label: str) -> tuple[str, bool] | None:
     """Say whether a row label reads as a total, tax, grand-total or recap line.
@@ -1124,7 +1420,8 @@ def summary_label_kind(label: str) -> tuple[str, bool] | None:
 
     Returns:
         ``(kind, whole)`` where ``whole`` is True when the phrase is the entire
-        label and False when it only starts it; ``None`` when no phrase fits.
+        label and False when it only starts it, or ends it in a language of
+        :data:`_TRAILING_SUMMARY_LANGUAGES`; ``None`` when no phrase fits.
         A ``recap`` phrase counts only as the whole label.
     """
     normalised = normalise_label(label)
@@ -1137,6 +1434,10 @@ def summary_label_kind(label: str) -> tuple[str, bool] | None:
     for length in range(len(words) - 1, 0, -1):
         kind = _SUMMARY_INDEX.get(" ".join(words[:length]))
         if kind is not None and kind != "recap":
+            return kind, False
+    for length in range(len(words) - 1, 0, -1):
+        kind = _TRAILING_SUMMARY_INDEX.get(" ".join(words[-length:]))
+        if kind is not None:
             return kind, False
     return None
 
@@ -1255,6 +1556,31 @@ def summary_row_warning(report: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _split_metadata(row: dict[str, Any], language: str | None) -> dict[str, Any]:
+    """The material and labour halves of a line, keyed for where they are read."""
+    if not any(key in row for key in _SPLIT_COLUMNS):
+        return {}
+    halves = {key: safe_float(row.get(key), default=0.0) for key in _SPLIT_COLUMNS}
+    if language == "hu":
+        return {
+            "hu": {
+                "profile": "flat",
+                "material_unit_rate": halves["material_rate"],
+                "fee_unit_rate": halves["labour_rate"],
+                "material_total": halves["material_total"],
+                "fee_total": halves["labour_total"],
+            }
+        }
+    return {
+        "rate_split": {
+            "material_unit_rate": halves["material_rate"],
+            "labour_unit_rate": halves["labour_rate"],
+            "material_total": halves["material_total"],
+            "labour_total": halves["labour_total"],
+        }
+    }
+
+
 _IMPORT_MAX_QUANTITY = 1e9
 _IMPORT_MAX_UNIT_RATE = 1e8
 
@@ -1264,6 +1590,7 @@ def _rows_to_positions(
     *,
     source: str = "excel_import",
     row_numbers: list[int] | None = None,
+    header_language: str | None = None,
 ) -> ImportedBOQ:
     """Convert canonical rows into :class:`ImportedPosition` objects.
 
@@ -1271,6 +1598,11 @@ def _rows_to_positions(
     the legacy inline parser used. Per-row errors are collected on the
     returned :class:`ImportedBOQ` rather than raised so the dispatcher
     can return them as a structured list.
+
+    A line read from material and labour columns keeps the two halves in its
+    metadata. A Hungarian bill keeps them under ``hu`` with the keys the
+    workbook profile writes, which is where the Hungarian material and fee
+    rule reads them; any other bill keeps them under ``rate_split``.
     """
     result = ImportedBOQ(source_format="csv-or-xlsx")
     auto_ordinal = 1
@@ -1422,6 +1754,11 @@ def _rows_to_positions(
             class_value = str(row.get("classification", "")).strip()
             classification = _infer_classification(class_value, description)
 
+            metadata: dict[str, Any] = {"import_row_index": row_idx}
+            split = _split_metadata(row, header_language)
+            if split:
+                metadata.update(split)
+
             result.positions.append(
                 ImportedPosition(
                     description=description,
@@ -1431,7 +1768,7 @@ def _rows_to_positions(
                     unit_rate=unit_rate,
                     classification=classification,
                     source=source,
-                    metadata={"import_row_index": row_idx},
+                    metadata=metadata,
                     position_id=position_id,
                 )
             )
@@ -1492,7 +1829,7 @@ class ExcelImporter:
                 rows, import_meta = _parse_rows_from_excel(content)
                 source_format = "xlsx"
             elif fmt == "csv":
-                rows = _parse_rows_from_csv(content)
+                rows, import_meta = _parse_csv(content)
                 source_format = "csv"
             else:
                 raise ImporterParseError(f"Unsupported spreadsheet format: detected {fmt!r}")
@@ -1504,7 +1841,8 @@ class ExcelImporter:
         if not rows:
             raise ImporterParseError("No data rows found. Check that the header row names the columns.")
 
-        result = _rows_to_positions(rows, row_numbers=import_meta.get("row_numbers"))
+        language = import_meta.get("header_language")
+        result = _rows_to_positions(rows, row_numbers=import_meta.get("row_numbers"), header_language=language)
         result.source_format = source_format
         result.metadata = {
             **result.metadata,
@@ -1513,4 +1851,7 @@ class ExcelImporter:
             "sheet_names": import_meta.get("sheet_names", []),
             "total_rows_seen": len(rows),
         }
+        for key in ("header_language", "item_sheet", "encoding", "delimiter"):
+            if import_meta.get(key):
+                result.metadata[key] = import_meta[key]
         return result

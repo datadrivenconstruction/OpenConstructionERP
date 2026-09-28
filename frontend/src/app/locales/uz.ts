@@ -43973,6 +43973,7 @@ const resource = {
     "boq.import_preview.drop_hint": "GAEB XML, Excel, PDF yoki CSV",
     "boq.import_preview.drop_zone": "Faylni shu yerga tashlang yoki koʻrish uchun bosing",
     "boq.import_preview.field_skip": "Oʻtkazib yuborish",
+    "boq.import_preview.legacy_xls": "Bu Excel 97-2003 ishchi kitobi (.xls). Uni Excel yoki LibreOffice'da oching, Excel ishchi kitobi (.xlsx) sifatida saqlang va o'sha faylni yuklang.",
     "boq.import_preview.import_success": "{{count}} ta pozitsiya import qilindi",
     "boq.import_preview.import_timeout": "Server 90 soniya ichida javob bermadi.",
     "boq.import_preview.parse_timeout": "Server 90 soniya ichida javob bermadi. Fayl juda katta boʻlishi mumkin.",

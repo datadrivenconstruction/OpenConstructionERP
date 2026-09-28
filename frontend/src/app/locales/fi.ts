@@ -43065,6 +43065,7 @@ const resource = {
     "boq.import_preview.drop_hint": "GAEB XML, Excel, PDF tai CSV",
     "boq.import_preview.drop_zone": "Pudota tiedosto tähän tai selaa napsauttamalla",
     "boq.import_preview.field_skip": "Ohita",
+    "boq.import_preview.legacy_xls": "Tämä on Excel 97-2003 -työkirja (.xls). Avaa se Excelissä tai LibreOfficessa, tallenna se Excel-työkirjana (.xlsx) ja lataa se tiedosto.",
     "boq.import_preview.import_success": "Tuotu {{count}} nimikettä",
     "boq.import_preview.import_timeout": "Palvelin ei vastannut 90 sekunnin kuluessa.",
     "boq.import_preview.parse_timeout": "Palvelin ei vastannut 90 sekunnin kuluessa. Tiedosto saattaa olla liian suuri.",

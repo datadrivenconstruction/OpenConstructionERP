@@ -45659,6 +45659,7 @@ const resource = {
     "boq.import_preview.drop_hint": "GAEB XML, Excel, PDF vagy CSV",
     "boq.import_preview.drop_zone": "Húzza ide a fájlt, vagy kattintson a tallózáshoz",
     "boq.import_preview.field_skip": "Kihagyás",
+    "boq.import_preview.legacy_xls": "Ez egy Excel 97-2003 munkafüzet (.xls). Nyissa meg Excelben vagy LibreOffice-ban, mentse Excel-munkafüzetként (.xlsx), és azt a fájlt töltse fel.",
     "boq.import_preview.import_success": "{{count}} tétel importálva",
     "boq.import_preview.import_timeout": "A szerver 90 másodpercen belül nem válaszolt.",
     "boq.import_preview.parse_timeout": "A szerver 90 másodpercen belül nem válaszolt. A fájl esetleg túl nagy.",

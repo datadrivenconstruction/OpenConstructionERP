@@ -43049,6 +43049,7 @@ const resource = {
     "boq.import_preview.drop_hint": "GAEB XML, Excel, PDF یا CSV",
     "boq.import_preview.drop_zone": "فایل را اینجا رها کنید یا برای انتخاب کلیک کنید",
     "boq.import_preview.field_skip": "رد کردن",
+    "boq.import_preview.legacy_xls": "این یک کارپوشه Excel 97-2003 (.xls) است. آن را در Excel یا LibreOffice باز کنید، به‌صورت کارپوشه Excel (.xlsx) ذخیره کنید و همان فایل را بارگذاری کنید.",
     "boq.import_preview.import_success": "{{count}} ردیف وارد شد",
     "boq.import_preview.import_timeout": "سرور در ۹۰ ثانیه پاسخ نداد.",
     "boq.import_preview.parse_timeout": "سرور در ۹۰ ثانیه پاسخ نداد. فایل ممکن است خیلی بزرگ باشد.",

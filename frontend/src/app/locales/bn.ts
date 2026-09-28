@@ -43367,6 +43367,7 @@ const resource = {
     "boq.import_preview.warnings_title": "{{count}}টি সতর্কতা",
     "boq.import_preview.column_mapping": "কলাম ম্যাপিং ({{total}}টির মধ্যে {{mapped}}টি ম্যাপ করা হয়েছে)",
     "boq.import_preview.field_skip": "বাদ দিন",
+    "boq.import_preview.legacy_xls": "এটি একটি Excel 97-2003 ওয়ার্কবুক (.xls)। এটি Excel বা LibreOffice-এ খুলুন, Excel ওয়ার্কবুক (.xlsx) হিসেবে সংরক্ষণ করুন এবং সেই ফাইলটি আপলোড করুন।",
     "boq.import_preview.errors_title_one": "{{count}}টি ত্রুটি",
     "boq.import_preview.errors_title_other": "{{count}}টি ত্রুটি",
     "boq.list_projects_skipped": "অন্তর্ভুক্ত নয়: {{projects}}। এই প্রকল্পগুলি আর্কাইভ করা হয়েছে বা আর আপনার সাথে শেয়ার করা নেই, তাই এখানকার প্রাক্কলন ও মোট হিসাব এগুলি বাদ দেয়।",

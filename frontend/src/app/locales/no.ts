@@ -43070,6 +43070,7 @@ const resource = {
     "boq.import_preview.drop_hint": "GAEB XML, Excel, PDF eller CSV",
     "boq.import_preview.drop_zone": "Slipp fil her eller klikk for å bla gjennom",
     "boq.import_preview.field_skip": "Hopp over",
+    "boq.import_preview.legacy_xls": "Dette er en Excel 97-2003-arbeidsbok (.xls). Åpne den i Excel eller LibreOffice, lagre den som Excel-arbeidsbok (.xlsx) og last opp den filen.",
     "boq.import_preview.import_success": "Importerte {{count}} poster",
     "boq.import_preview.import_timeout": "Serveren svarte ikke innen 90 sekunder.",
     "boq.import_preview.parse_timeout": "Serveren svarte ikke innen 90 sekunder. Filen kan være for stor.",

@@ -113,7 +113,8 @@ from app.modules.boq.copilot_schemas import (
 )
 from app.modules.boq.exchange_formats import ExchangeCatalogue, build_catalogue
 from app.modules.boq.importers.excel import (
-    _match_column,
+    _parse_csv,
+    _parse_rows_from_csv,
     _parse_rows_from_excel,
     _rows_to_positions,
     partition_summary_rows,
@@ -5746,54 +5747,6 @@ def _parse_numeric_cell(value: Any) -> tuple[float | None, str | None]:
     return parsed, None
 
 
-def _parse_rows_from_csv(content_bytes: bytes) -> list[dict[str, Any]]:
-    """Parse rows from a CSV file.
-
-    Tries UTF-8 first, then Latin-1 as fallback (common for DACH region files).
-
-    Returns:
-        List of dicts mapping canonical column names to cell values.
-    """
-    for encoding in ("utf-8-sig", "utf-8", "latin-1"):
-        try:
-            text = content_bytes.decode(encoding)
-            break
-        except UnicodeDecodeError:
-            continue
-    else:
-        raise ValueError("Unable to decode CSV file - unsupported encoding")
-
-    # Detect delimiter by sniffing first 4KB
-    sniffer = csv.Sniffer()
-    try:
-        dialect = sniffer.sniff(text[:4096], delimiters=",;\t|")
-    except csv.Error:
-        dialect = csv.excel  # type: ignore[assignment]
-
-    reader = csv.reader(io.StringIO(text), dialect)
-    raw_headers = next(reader, None)
-    if not raw_headers:
-        raise ValueError("CSV file is empty or has no header row")
-
-    column_map: dict[int, str] = {}
-    for idx, hdr in enumerate(raw_headers):
-        canonical = _match_column(hdr)
-        if canonical:
-            column_map[idx] = canonical
-
-    rows: list[dict[str, Any]] = []
-    for raw_row in reader:
-        row: dict[str, Any] = {}
-        for idx, val in enumerate(raw_row):
-            canonical = column_map.get(idx)
-            if canonical:
-                row[canonical] = val.strip() if isinstance(val, str) else val
-        if row:
-            rows.append(row)
-
-    return rows
-
-
 # ── Round-trip apply (GitHub #360) ────────────────────────────────────────────
 #
 # Shared by every spreadsheet import path (legacy /import/excel/ and the
@@ -6945,6 +6898,7 @@ async def import_boq_auto(
             continue
 
     if chosen is None:
+        _refuse_legacy_xls(file_name, head)
         # No native importer claimed the file - fall back to smart_import
         # (LLM). Reset the upload buffer's position so smart_import can
         # re-read it. UploadFile's underlying SpooledTemporaryFile
@@ -7142,11 +7096,12 @@ async def import_preview(
             continue
 
     if chosen is None:
+        _refuse_legacy_xls(file_name, head)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=(
                 "No native importer recognised this file format. "
-                "Supported formats: GAEB XML, BC3 / FIEBDC-3, Excel (.xlsx/.xls), CSV."
+                "Supported formats: GAEB XML, BC3 / FIEBDC-3, Excel (.xlsx), CSV."
             ),
         )
 
@@ -7202,6 +7157,28 @@ async def import_preview(
     )
 
     return response.model_dump()
+
+
+def _refuse_legacy_xls(file_name: str, head: bytes) -> None:
+    """Refuse an Excel 97-2003 workbook with a message that says what to do.
+
+    A ``.xls`` is an OLE2 container and no importer here reads it: the
+    spreadsheet reader opens OOXML only. The preview used to answer with the
+    generic "no importer" message while listing ``.xls`` among the formats it
+    reads, and the auto import handed the file to the smart path, which fails
+    on it the same way.
+
+    Raises:
+        HTTPException: 400 when the upload is a legacy ``.xls`` workbook.
+    """
+    if file_name.lower().endswith(".xls") and detect_signature(head) == "ole":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                "This is an Excel 97-2003 workbook (.xls), which cannot be read directly. "
+                "Open it in Excel or LibreOffice, save it as an Excel workbook (.xlsx) and upload that file."
+            ),
+        )
 
 
 # ── Smart import helpers ─────────────────────────────────────────────────────
@@ -7273,7 +7250,13 @@ def _extract_from_excel_for_smart(content: bytes) -> dict[str, Any]:
             # Check if we have enough structure for a direct import
             has_description = any(r.get("description") for r in rows)
             if has_description:
-                return {"text": "", "structured": True, "rows": rows, "row_numbers": meta.get("row_numbers")}
+                return {
+                    "text": "",
+                    "structured": True,
+                    "rows": rows,
+                    "row_numbers": meta.get("row_numbers"),
+                    "header_language": meta.get("header_language"),
+                }
     except Exception:
         logger.debug("Smart import: structured Excel parsing failed, using raw text", exc_info=True)
 
@@ -7306,11 +7289,17 @@ def _extract_from_csv_for_smart(content: bytes) -> dict[str, Any]:
         Dict with ``text``, ``structured`` flag, and optionally ``rows``.
     """
     try:
-        rows = _parse_rows_from_csv(content)
+        rows, meta = _parse_csv(content)
         if rows:
             has_description = any(r.get("description") for r in rows)
             if has_description:
-                return {"text": "", "structured": True, "rows": rows}
+                return {
+                    "text": "",
+                    "structured": True,
+                    "rows": rows,
+                    "row_numbers": meta.get("row_numbers"),
+                    "header_language": meta.get("header_language"),
+                }
     except Exception:
         logger.debug("Smart import: structured CSV parsing failed, using raw text", exc_info=True)
 
@@ -7538,7 +7527,12 @@ async def smart_import(
         # position instead of duplicating it. This branch used to create every
         # row, headings and totals included, as a priced "pcs" line.
         rows = extracted["rows"]
-        imported_boq = _rows_to_positions(rows, source="smart_import", row_numbers=extracted.get("row_numbers"))
+        imported_boq = _rows_to_positions(
+            rows,
+            source="smart_import",
+            row_numbers=extracted.get("row_numbers"),
+            header_language=extracted.get("header_language"),
+        )
         apply_summary = await _persist_imported_boq(
             boq_id,
             imported_boq,
