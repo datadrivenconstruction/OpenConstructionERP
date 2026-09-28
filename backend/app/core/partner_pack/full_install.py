@@ -85,34 +85,47 @@ class FullInstallResponse(BaseModel):
 
 # ── §5.1 CWICR slug → db_id resolver ─────────────────────────────────────────
 
-# Aliases for city tokens that don't match the ``_REGION_CURRENCY`` suffix
-# exactly. Keys are the slug's last segment (lowercased); values are the
-# canonical ``load-cwicr`` db_id. Kept tiny and explicit so a reader can see
-# every fudge:
-#   * muenchen / munchen - German transliterations of the ``DE_MUNICH`` token.
-#   * gbp - the UK-wide ``cwicr-uk-gbp`` slug has no city; the live UK
-#     catalogue loads under ``GB_LONDON`` (DESIGN §5.1 "known live ids").
+# Aliases for city tokens that don't match the suffix of a loadable base id.
+# Keys are the slug's last segment (lowercased); values are ids the loader has
+# a file for (``_GITHUB_CWICR_FILES``). Kept tiny and explicit so a reader can
+# see every fudge:
+#   * gbp / london - the UK base is published under its currency, ``UK_GBP``,
+#     and it is the London price level. ``GB_LONDON`` is only a market id.
+#   * mexico - the Mexican base is published as ``MX_MEXICOCITY``.
+#   * madrid - the Spanish base is published under Barcelona, ``SP_BARCELONA``;
+#     Madrid exists only as a market. A Spanish pack gets the Spanish base.
+# Munich and Riyadh deliberately have no alias: no base is published for
+# either, and answering with a neighbour's prices would be a guess, so those
+# slugs resolve to nothing and the step lists them as skipped.
 _CITY_TOKEN_ALIASES: dict[str, str] = {
-    "muenchen": "DE_MUNICH",
-    "munchen": "DE_MUNICH",
-    "gbp": "GB_LONDON",
+    "gbp": "UK_GBP",
+    "london": "UK_GBP",
+    "mexico": "MX_MEXICOCITY",
+    "madrid": "SP_BARCELONA",
 }
 
 
 def _build_city_index() -> dict[str, str]:
-    """Build the ``{city_token: db_id}`` index from ``_REGION_CURRENCY`` (§5.1).
+    """Build the ``{city_token: db_id}`` index over the loadable bases (§5.1).
 
-    Each ``_REGION_CURRENCY`` key is ``<COUNTRY>_<CITY>``; we split on ``_`` and
-    take the segment *after* the country prefix as the city token (lowercased),
-    mapping it back to the full db_id. ``USA_USD`` → ``{"usd": "USA_USD"}``,
-    ``DE_BERLIN`` → ``{"berlin": "DE_BERLIN"}``, etc. On a (currently
-    non-existent) token collision the first key wins, which is deterministic
-    because the source map is a literal dict.
+    Each id is ``<COUNTRY>_<CITY>``; we split on ``_`` and take the segment
+    *after* the country prefix as the city token (lowercased), mapping it back
+    to the full db_id. ``USA_USD`` → ``{"usd": "USA_USD"}``, ``DE_BERLIN`` →
+    ``{"berlin": "DE_BERLIN"}``, etc. On a token collision the first id wins,
+    which is deterministic because both source maps are ordered.
     """
-    from app.modules.costs.router import _REGION_CURRENCY
+    from app.modules.costs.router import _GITHUB_CWICR_FILES, _REGION_CURRENCY
 
+    # Only ids the loader can load. The currency table also lists market ids
+    # (``AE_DUBAI``, ``IN_MUMBAI``, ``JP_TOKYO`` ...), a price level with no
+    # parquet behind it, and where a market shared a city token with a base
+    # the market won, so ten packs resolved to an id ``load_cwicr_region``
+    # refuses. The currency table's order is kept so a base listed under two
+    # names (``CA_TORONTO`` / ``ENG_TORONTO``) resolves as it always has.
     index: dict[str, str] = {}
-    for db_id in _REGION_CURRENCY:
+    for db_id in [*_REGION_CURRENCY, *_GITHUB_CWICR_FILES]:
+        if db_id not in _GITHUB_CWICR_FILES:
+            continue
         parts = db_id.split("_")
         if len(parts) < 2:
             continue
