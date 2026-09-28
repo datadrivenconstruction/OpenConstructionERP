@@ -170,6 +170,14 @@ _KNOWN_STARVED: dict[str, str] = {
     "_wave23_subscribers._on_constraint_cleared": "wants actor_id/commitment_owner_id; publisher sends user_id/constraint_id/task_ref",
     "_wave23_subscribers._on_diary_signed": "wants client_rep_user_id/project_owner_id; publisher sends diary_id/signer_role",
     "_wave23_subscribers._on_invitation_sent": "wants bidder_user_id; publisher sends count/package_id/sent_at",
+    # These two starved before they were listed. transition_claim passed its
+    # payload as ``data=``, a keyword this scan does not read, so both events
+    # were undecidable and dropped out of the population. Moving the publish
+    # to publish_after_commit made the payload positional and the verdict
+    # visible; the keys sent did not change. A claim stores no submitter and
+    # names no reviewer, so a real recipient needs a decision, not a key.
+    "_wave23_subscribers._on_claim_paid": "wants submitted_by/actor_id; publisher sends actor/claim_id/contract_id",
+    "_wave23_subscribers._on_claim_submitted": "wants reviewer_user_id/owner_user_id; publisher sends actor/claim_id",
     "events._on_boq_created": "wants created_by/user_id; publisher sends boq_id/project_id",
 }
 
