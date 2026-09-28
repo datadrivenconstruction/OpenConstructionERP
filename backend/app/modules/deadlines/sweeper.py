@@ -92,7 +92,8 @@ async def _project_manager_ids(session: AsyncSession, project_id: uuid.UUID) -> 
 
     Always includes the project owner (guaranteed present and accountable),
     plus any default-team member in a manager-ish role. Fail-soft: if the teams
-    module is unavailable the owner alone is returned.
+    module is unavailable the owner alone is returned. Deactivated accounts are
+    dropped, so the list can come back empty.
     """
     ids: list[uuid.UUID] = []
     seen: set[uuid.UUID] = set()
@@ -126,35 +127,57 @@ async def _project_manager_ids(session: AsyncSession, project_id: uuid.UUID) -> 
     except Exception:  # noqa: BLE001 - teams module missing -> owner-only fallback
         logger.debug("Deadline manager resolve fell back to owner for project %s", project_id)
 
-    return ids
+    return await _active_users(session, ids)
 
 
-async def _is_real_user(session: AsyncSession, user_id: uuid.UUID) -> bool:
-    """True when the id names a row that exists in the users table.
+async def _active_users(session: AsyncSession, user_ids: list[uuid.UUID]) -> list[uuid.UUID]:
+    """The ids, in order, that name an active, non-erased row in the users table.
 
     Parsing as a UUID says the value is well formed, not that anybody is behind
     it. ``owner_user_id`` is normalised from columns that carry no foreign key,
     so it can hold the id of a user who was never created or has since been
     removed. Notifying such an id violates the notification foreign key, and the
     failed flush poisons the session for the rest of the sweep.
+
+    Existing is not enough either. A deactivated account is someone who no
+    longer takes part, and the showcase kept piling overdue reminders on one,
+    dozens a day, that nobody would ever act on while the item sat unowned.
     """
-    found = await session.execute(select(User.id).where(User.id == user_id).limit(1))
-    return found.scalar_one_or_none() is not None
+    if not user_ids:
+        return []
+    rows = await session.execute(
+        select(User.id).where(
+            User.id.in_(user_ids),
+            User.is_active.is_(True),
+            User.deleted_at.is_(None),
+        )
+    )
+    active = set(rows.scalars().all())
+    return [uid for uid in user_ids if uid in active]
 
 
 async def _overdue_recipients(session: AsyncSession, item: DeadlineItem) -> list[uuid.UUID]:
-    """Who to nudge for an overdue item: the owner if a real user, else managers.
+    """Who to nudge for an overdue item: the owner if an active user, else managers.
 
-    "A real user" has to mean present in the table. An id that merely parses is
-    exactly the case the managers fallback exists to cover.
+    "An active user" has to mean present in the table and switched on. An id
+    that merely parses, or names a deactivated account, is exactly the case the
+    managers fallback exists to cover. With no active manager either, nobody
+    is nudged.
     """
     owner = _as_uuid(item.owner_user_id)
-    if owner is not None and await _is_real_user(session, owner):
+    if owner is not None and await _active_users(session, [owner]):
         return [owner]
     project_id = _as_uuid(item.project_id)
     if project_id is None:
         return []
-    return await _project_manager_ids(session, project_id)
+    managers = await _project_manager_ids(session, project_id)
+    if not managers:
+        logger.info(
+            "Overdue %s %s has no active owner or manager to notify; skipped",
+            item.entity_type,
+            item.entity_id,
+        )
+    return managers
 
 
 async def _already_notified(session: AsyncSession, item: DeadlineItem, now: datetime) -> bool:
@@ -223,11 +246,21 @@ def _overdue_context(item: DeadlineItem) -> dict[str, object]:
     return {"module": item.module, "title": item.title, "days_overdue": item.days_overdue}
 
 
-async def _notify_overdue(session: AsyncSession, item: DeadlineItem, recipients: list[uuid.UUID]) -> None:
+async def _notify_overdue(
+    session: AsyncSession,
+    item: DeadlineItem,
+    recipients: list[uuid.UUID],
+    outbox: list[tuple[str, dict[str, object]]],
+) -> None:
     """Create the in-app notification and fan the digest for each recipient.
 
     Called ONLY inside the renotify-dedup gate so a still-overdue item does not
     pile a fresh in-app row or digest row on every tick.
+
+    Realtime emails land in ``outbox`` rather than going out here. The in-app
+    row is the dedupe record, and it is written inside a savepoint that can
+    still roll back; an email sent before that is decided would be sent again
+    on the next tick, because the record of it is gone.
     """
     svc = NotificationService(session)
     context = _overdue_context(item)
@@ -258,6 +291,7 @@ async def _notify_overdue(session: AsyncSession, item: DeadlineItem, recipients:
                 "entity_id": item.entity_id,
             },
             channel="email",
+            deferred=outbox,
         )
 
 
@@ -323,24 +357,36 @@ async def sweep_overdue(session: AsyncSession, *, now: datetime | None = None) -
     session in a rollback-only state, and every later item would then raise
     ``PendingRollbackError`` instead of doing its work. That is how one
     unresolvable row silences deadline notifications for every project.
+
+    The nudge and the escalation get a savepoint each. They shared one, so an
+    escalation that raised rolled back the nudge's dedupe record after its
+    email had already been published, and every later tick sent it again.
     """
     now = now or _utc_now()
     overdue = await deadlines_service.collect_overdue_for_sweep(session, now=now)
     actioned = 0
     for item in overdue:
         notified = False
+        outbox: list[tuple[str, dict[str, object]]] = []
         try:
             async with session.begin_nested():
                 recipients = await _overdue_recipients(session, item)
                 if recipients and not await _already_notified(session, item, now):
-                    await _notify_overdue(session, item, recipients)
+                    await _notify_overdue(session, item, recipients, outbox)
                     notified = True
-                # Escalation is independently deduped (once per entity), so it
-                # runs every tick but fires at most once past the grace window.
-                await _maybe_escalate(session, item, now)
         except Exception:
             logger.exception("Deadline sweep failed for item %s", item.id)
             continue
+        try:
+            # Escalation is independently deduped (once per entity), so it
+            # runs every tick but fires at most once past the grace window.
+            async with session.begin_nested():
+                await _maybe_escalate(session, item, now)
+        except Exception:
+            logger.exception("Deadline escalation failed for item %s", item.id)
+        # The nudge's savepoint has released, so its record stands.
+        for name, data in outbox:
+            event_bus.publish_detached(name, data, source_module="oe_notifications")
         if notified:
             # Published only after the savepoint released, so the timeline never
             # announces a nudge whose write was rolled back.

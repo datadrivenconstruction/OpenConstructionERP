@@ -309,6 +309,54 @@ class TestEmailService:
         assert any("delivery failed" in rec.getMessage() for rec in caplog.records)
 
 
+class TestDeactivatedRecipient:
+    """A deactivated account is not mailed, whichever module is sending."""
+
+    @staticmethod
+    def _lookup(deactivated: set[str]):
+        async def is_deactivated(address: str) -> bool:
+            return address.strip().lower() in deactivated
+
+        return is_deactivated
+
+    @pytest.mark.asyncio
+    async def test_deactivated_account_is_refused(self):
+        mem = MemoryEmailBackend()
+        service = EmailService(mem, is_deactivated=self._lookup({"gone@example.com"}))
+        result = await service.send(EmailMessage(to=" Gone@Example.com ", subject="Overdue", html_body="<p/>"))
+        assert result.ok is False
+        assert mem.sent == []
+
+    @pytest.mark.asyncio
+    async def test_active_account_still_goes_out(self):
+        # The control: a guard that refuses everything passes the test above too.
+        mem = MemoryEmailBackend()
+        service = EmailService(mem, is_deactivated=self._lookup({"gone@example.com"}))
+        result = await service.send(EmailMessage(to="here@example.com", subject="Overdue", html_body="<p/>"))
+        assert result.ok is True
+        assert [m.to for m in mem.sent] == ["here@example.com"]
+
+    @pytest.mark.asyncio
+    async def test_a_failed_lookup_does_not_block_mail(self):
+        async def broken(address: str) -> bool:
+            raise RuntimeError("database unavailable")
+
+        mem = MemoryEmailBackend()
+        service = EmailService(mem, is_deactivated=broken)
+        result = await service.send(EmailMessage(to="here@example.com", subject="Reset", html_body="<p/>"))
+        assert result.ok is True
+        assert len(mem.sent) == 1
+
+    def test_the_app_wide_service_carries_the_lookup(self):
+        from app.core.email.service import _address_belongs_to_deactivated_account
+
+        reset_email_service_cache()
+        try:
+            assert get_email_service()._is_deactivated is _address_belongs_to_deactivated_account
+        finally:
+            reset_email_service_cache()
+
+
 # ---------------------------------------------------------------------------
 # Backend resolution from settings
 # ---------------------------------------------------------------------------

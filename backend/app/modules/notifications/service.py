@@ -294,6 +294,8 @@ class NotificationService:
         user_id: uuid.UUID | str,
         payload: dict[str, Any],
         channel: str = "inapp",
+        *,
+        deferred: list[tuple[str, dict[str, Any]]] | None = None,
     ) -> str:
         """Route an event for a user honouring their preference.
 
@@ -319,7 +321,7 @@ class NotificationService:
             cadence = pref.digest
 
         if cadence == "realtime":
-            await self._dispatch(event_type, uid, payload, channel)
+            await self._dispatch(event_type, uid, payload, channel, deferred=deferred)
             return "dispatched"
 
         # Queue for digest.
@@ -342,6 +344,8 @@ class NotificationService:
         user_id: uuid.UUID,
         payload: dict[str, Any],
         channel: str,
+        *,
+        deferred: list[tuple[str, dict[str, Any]]] | None = None,
     ) -> None:
         """Send a single notification through the requested channel.
 
@@ -364,15 +368,17 @@ class NotificationService:
             )
             return
 
-        await _safe_publish(
-            f"notifications.dispatch.{channel}",
-            {
-                "user_id": str(user_id),
-                "event_type": event_type,
-                "channel": channel,
-                "payload": payload,
-            },
-        )
+        name = f"notifications.dispatch.{channel}"
+        data = {
+            "user_id": str(user_id),
+            "event_type": event_type,
+            "channel": channel,
+            "payload": payload,
+        }
+        if deferred is not None:
+            deferred.append((name, data))
+            return
+        await _safe_publish(name, data)
 
     async def flush_digest_queue(
         self,

@@ -113,6 +113,39 @@ async def test_a_real_owner_is_still_notified_directly(pg_session):
     assert manager_id not in {n.user_id for n in notifications}
 
 
+async def test_a_deactivated_owner_falls_through_to_the_managers(pg_session):
+    """A row that exists but is switched off is not somebody to remind.
+
+    Measured on the showcase: a deactivated external account kept collecting
+    overdue reminders every day for items it would never touch again.
+    """
+    project_id, manager_id = await _a_project(pg_session)
+    gone = await _a_user(pg_session, "Former Subcontractor")
+    gone.is_active = False
+    pg_session.add(_punch_item(project_id, str(gone.id), title="Held by a departed account"))
+    await pg_session.flush()
+
+    actioned = await sweeper.sweep_overdue(pg_session, now=_NOW)
+
+    assert actioned == 1
+    notifications = await _overdue_notifications(pg_session)
+    assert [n.user_id for n in notifications] == [manager_id]
+
+
+async def test_with_no_active_owner_or_manager_nobody_is_nudged(pg_session):
+    """The fallback must not reach for a deactivated manager either."""
+    project_id, manager_id = await _a_project(pg_session)
+    manager = await pg_session.get(User, manager_id)
+    manager.is_active = False
+    gone = await _a_user(pg_session, "Former Subcontractor")
+    gone.is_active = False
+    pg_session.add(_punch_item(project_id, str(gone.id), title="Nobody left to tell"))
+    await pg_session.flush()
+
+    assert await sweeper.sweep_overdue(pg_session, now=_NOW) == 0
+    assert await _overdue_notifications(pg_session) == []
+
+
 async def test_one_unwritable_row_does_not_silence_the_rest_of_the_sweep(pg_session, monkeypatch):
     """The guarantee the docstring used to claim and the code did not provide.
 

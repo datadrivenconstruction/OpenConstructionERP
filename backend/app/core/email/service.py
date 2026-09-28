@@ -26,7 +26,10 @@ modules/users, modules/integrations, and any future consumer.
 from __future__ import annotations
 
 import logging
+from collections.abc import Awaitable, Callable
+from contextlib import AbstractAsyncContextManager
 from functools import lru_cache
+from typing import TYPE_CHECKING
 
 from app.config import Settings, get_settings
 from app.core.demo_accounts import is_non_mailbox_login
@@ -37,6 +40,9 @@ from .memory import MemoryEmailBackend
 from .noop import NoopEmailBackend
 from .smtp import SmtpEmailBackend
 from .templates import template_password_reset, wrap
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 
@@ -209,11 +215,52 @@ def _resolve_backend(settings: Settings) -> EmailBackend:
     raise ValueError(f"Unknown email backend: {name!r}")
 
 
+async def _address_belongs_to_deactivated_account(
+    address: str,
+    *,
+    session_factory: Callable[[], AbstractAsyncContextManager[AsyncSession]] | None = None,
+) -> bool:
+    """True when ``address`` is the login of a deactivated or erased account.
+
+    An address that belongs to nobody is not deactivated: tender bidders and
+    report recipients are mailed without ever having an account. Only a row
+    that exists and is switched off answers True.
+    """
+    normalized = (address or "").strip().lower()
+    if not normalized:
+        return False
+    # Imported here: the users module imports this package at load time.
+    from sqlalchemy import or_, select
+
+    from app.modules.users.models import User
+
+    if session_factory is None:
+        from app.database import async_session_factory as session_factory
+    async with session_factory() as session:
+        found = await session.execute(
+            select(User.id)
+            .where(
+                User.email == normalized,
+                or_(User.is_active.is_(False), User.deleted_at.is_not(None)),
+            )
+            .limit(1)
+        )
+        return found.scalar_one_or_none() is not None
+
+
 class EmailService:
     """High-level email operations used by feature modules."""
 
-    def __init__(self, backend: EmailBackend) -> None:
+    def __init__(
+        self,
+        backend: EmailBackend,
+        *,
+        is_deactivated: Callable[[str], Awaitable[bool]] | None = None,
+    ) -> None:
         self._backend = backend
+        # ``None`` for an explicitly injected backend (tests); the app-wide
+        # service from ``get_email_service()`` always carries the lookup.
+        self._is_deactivated = is_deactivated
 
     @property
     def backend_name(self) -> str:
@@ -239,6 +286,18 @@ class EmailService:
                 message.subject,
             )
             return DeliveryResult.failure(self._backend.name, "recipient is a seeded login, not a mailbox")
+        if await self._recipient_is_deactivated(message.to):
+            # Deactivating an account is how an administrator says this person
+            # no longer takes part. The deadline sweep kept addressing one on
+            # the showcase with dozens of overdue reminders a day. Checked here,
+            # not only in the dispatcher, for the same seven-paths reason as
+            # the seeded logins above.
+            logger.debug(
+                "email skipped: recipient account is deactivated: to=%s subject=%r",
+                message.to,
+                message.subject,
+            )
+            return DeliveryResult.failure(self._backend.name, "recipient account is deactivated")
         result = await self._backend.send(message)
         if not result.ok:
             logger.warning(
@@ -249,6 +308,16 @@ class EmailService:
                 message.subject,
             )
         return result
+
+    async def _recipient_is_deactivated(self, address: str) -> bool:
+        """Ask the lookup, failing open: a broken lookup must not stop a reset."""
+        if self._is_deactivated is None:
+            return False
+        try:
+            return await self._is_deactivated(address)
+        except Exception:  # noqa: BLE001
+            logger.debug("deactivated-recipient lookup failed, sending anyway: to=%s", address, exc_info=True)
+            return False
 
     async def send_password_reset(
         self,
@@ -336,7 +405,7 @@ def _cached_service(settings_id: int) -> EmailService:
     # ``settings_id`` is the cache key; we ignore it in the body - its only
     # job is to give lru_cache a distinct entry per Settings instance.
     _ = settings_id
-    return EmailService(_resolve_backend(settings))
+    return EmailService(_resolve_backend(settings), is_deactivated=_address_belongs_to_deactivated_account)
 
 
 def get_email_service(backend: EmailBackend | None = None) -> EmailService:
