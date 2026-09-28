@@ -24,7 +24,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.events import event_bus
+from app.core.events import event_bus, publish_after_commit
 from app.core.i18n import get_locale
 from app.core.json_merge import merge_metadata
 from app.core.validation.engine import ValidationReport, validation_engine
@@ -3424,11 +3424,16 @@ class ContractsService:
             counted = await self.claim_repo.prior_claims(claim.contract_id, before_claim_id=claim.id)
             fields["metadata_"] = {**(claim.metadata_ or {}), PRIOR_CLAIM_IDS_KEY: [str(c.id) for c in counted]}
         now = datetime.now(UTC).isoformat()
+        # Every claim event waits for the commit. Its subscribers read the
+        # claim from their own sessions, and published straight away they ran
+        # while this transaction was still open: finance read a claim being
+        # certified as still approved and refused to invoice it.
         if target_status == "submitted":
             fields["submitted_at"] = now
-            event_bus.publish_detached(
+            publish_after_commit(
+                self.session,
                 "contracts.claim.submitted",
-                data={
+                {
                     "claim_id": str(claim.id),
                     "contract_id": str(claim.contract_id),
                     "claim_number": claim.claim_number,
@@ -3439,9 +3444,10 @@ class ContractsService:
             )
         elif target_status == "approved":
             fields["approved_at"] = now
-            event_bus.publish_detached(
+            publish_after_commit(
+                self.session,
                 "contracts.claim.approved",
-                data={
+                {
                     "claim_id": str(claim.id),
                     "contract_id": str(claim.contract_id),
                     "net_due": str(claim.net_due),
@@ -3473,9 +3479,10 @@ class ContractsService:
                 completed, held = await self.claim_completed_and_held(claim)
                 fields["completed_stored_to_date"] = completed
                 fields["retention_held_to_date"] = held
-            event_bus.publish_detached(
+            publish_after_commit(
+                self.session,
                 "contracts.claim.certified",
-                data={
+                {
                     "claim_id": str(claim.id),
                     "contract_id": str(claim.contract_id),
                     "claim_number": claim.claim_number,
@@ -3486,9 +3493,10 @@ class ContractsService:
             )
         elif target_status == "paid":
             fields["paid_at"] = now
-            event_bus.publish_detached(
+            publish_after_commit(
+                self.session,
                 "contracts.claim.paid",
-                data={
+                {
                     "claim_id": str(claim.id),
                     "contract_id": str(claim.contract_id),
                     "net_due": str(claim.net_due),
