@@ -6100,7 +6100,10 @@ async def import_boq_excel(
 
     # Verify BOQ exists AND the caller owns its project (IDOR guard).
     await _verify_boq_owner(session, boq_id, _user_id, payload)
-    await service.get_boq(boq_id)
+    # Refuse a locked bill up front with the lock's own 409. Past this point
+    # every row write is caught and collected per row, so a lock found there
+    # came back as a row error (or a 200 with nothing imported) instead.
+    await service._ensure_boq_writable(boq_id)
 
     # Validate file type
     filename = (file.filename or "").lower()
@@ -6564,7 +6567,10 @@ async def import_boq_gaeb(
 
     # Verify BOQ exists AND the caller owns its project (IDOR guard).
     await _verify_boq_owner(session, boq_id, _user_id, payload)
-    await service.get_boq(boq_id)
+    # Refuse a locked bill up front with the lock's own 409. Past this point
+    # every row write is caught and collected per row, so a lock found there
+    # came back as a row error (or a 200 with nothing imported) instead.
+    await service._ensure_boq_writable(boq_id)
 
     filename = (file.filename or "").lower()
     if not filename.endswith((".x81", ".x83", ".x84", ".xml")):
@@ -6918,7 +6924,10 @@ async def import_boq_auto(
 
     # Verify BOQ exists AND the caller owns its project (IDOR guard).
     await _verify_boq_owner(session, boq_id, user_id, payload)
-    await service.get_boq(boq_id)
+    # Refuse a locked bill up front with the lock's own 409. Past this point
+    # every row write is caught and collected per row, so a lock found there
+    # came back as a row error (or a 200 with nothing imported) instead.
+    await service._ensure_boq_writable(boq_id)
 
     content = await file.read()
     if not content:
@@ -7476,6 +7485,10 @@ async def smart_import(
 
     # Verify BOQ exists AND the caller owns its project (IDOR guard).
     await _verify_boq_owner(session, boq_id, user_id, payload)
+    # Refuse a locked bill up front with the lock's own 409. Past this point
+    # every row write is caught and collected per row, so a lock found there
+    # came back as a row error (or a 200 with nothing imported) instead.
+    await service._ensure_boq_writable(boq_id)
 
     # Capture project currency for downstream LLM prompts.
     boq_obj = await service.get_boq(boq_id)
@@ -8243,9 +8256,11 @@ async def enrich_co2(
 
     Loops through positions, matches descriptions to the 77 EPD materials,
     calculates GWP totals, and stores results in position metadata.
-    Skips positions that already have manually assigned CO2 data.
+    Skips positions that already have manually assigned CO2 data. A locked
+    bill is refused with 409.
     """
     await _verify_boq_owner(session, boq_id, _user_id, payload)
+    await service._ensure_boq_writable(boq_id)
     boq_data = await service.get_boq_with_positions(boq_id)
     enriched = 0
     skipped = 0
@@ -8308,6 +8323,7 @@ async def assign_position_co2(
     """Manually assign an EPD material to a BOQ position.
 
     Updates the position's metadata with CO2 data from the specified EPD material.
+    A position in a locked bill is refused with 409.
     """
     from fastapi import HTTPException
 
@@ -8323,6 +8339,7 @@ async def assign_position_co2(
         raise HTTPException(status_code=404, detail=translate("errors.position_not_found", locale=get_locale()))
 
     await _verify_boq_owner(session, pos.boq_id, _user_id, auth_payload)
+    await service._ensure_boq_writable(pos.boq_id)
 
     meta = dict(pos.metadata_) if pos.metadata_ else {}
     qty = float(pos.quantity) if pos.quantity else 0.0
@@ -9279,8 +9296,10 @@ async def add_custom_column(
     """Add a custom column definition to a BOQ.
 
     Body: {"name": "supplier", "display_name": "Supplier", "column_type": "text", "options": []}
+    A locked bill is refused with 409.
     """
     await _verify_boq_owner(session, boq_id, _user_id, user_payload)
+    await service._ensure_boq_writable(boq_id)
     name = payload.name.strip().lower().replace(" ", "_")
     if not name or not name.isidentifier():
         raise HTTPException(400, "Invalid column name - use alphanumeric + underscore")
@@ -9373,10 +9392,14 @@ async def delete_custom_column(
     session: SessionDep,
     service: BOQService = Depends(_get_service),
 ) -> None:
-    """Remove a custom column definition (data in positions preserved)."""
+    """Remove a custom column definition (data in positions preserved).
+
+    A locked bill is refused with 409.
+    """
     from sqlalchemy.orm.attributes import flag_modified
 
     await _verify_boq_owner(session, boq_id, _user_id, payload)
+    await service._ensure_boq_writable(boq_id)
     boq = await service.get_boq(boq_id)
     existing_meta = boq.metadata_ if isinstance(boq.metadata_, dict) else {}
     existing_columns = list(existing_meta.get("custom_columns", []))
@@ -9487,9 +9510,11 @@ async def replace_boq_variables(
 
     The plan calls for whole-list replacement (vs per-row CRUD) - the
     list is small (≤50) and the editor UI sends the whole table back
-    on save, so a single round-trip keeps state simple.
+    on save, so a single round-trip keeps state simple. A locked bill is
+    refused with 409: its formulas resolve through these values.
     """
     await _verify_boq_owner(session, boq_id, _user_id, payload)
+    await service._ensure_boq_writable(boq_id)
     if len(variables) > _MAX_VARIABLES_PER_BOQ:
         raise HTTPException(
             400,

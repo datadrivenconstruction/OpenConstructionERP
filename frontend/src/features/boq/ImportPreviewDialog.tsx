@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useToastStore } from '@/stores/useToastStore';
-import { extractErrorMessageFromBody } from '@/shared/lib/api';
+import { activeLanguageTag, extractErrorMessageFromBody } from '@/shared/lib/api';
 import { fmtFixed } from '@/shared/lib/formatters';
 import { importIssueText, type ImportIssue } from './importIssueText';
 
@@ -219,9 +219,16 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
     const timeoutId = setTimeout(() => controller.abort(), 90_000);
 
     try {
+      // A raw fetch gets no Accept-Language from the api client, and the
+      // refusal it may bring back (a locked bill's 409) is worded by the
+      // server, so name the UI language or it comes in the browser's.
+      const lang = activeLanguageTag();
       const res = await fetch(`/api/v1/boq/boqs/${boqId}/import/auto/`, {
         method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...(lang ? { 'Accept-Language': lang } : {}),
+        },
         body: form,
         signal: controller.signal,
       });

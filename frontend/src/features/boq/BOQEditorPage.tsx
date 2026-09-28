@@ -9,7 +9,7 @@ import { Database, Download, ExternalLink, X, Sparkles, AlertTriangle as WarnTri
 import { Button, Badge, Breadcrumb, ModuleHelpButton, ModuleGuideButton, ConfirmDialog, DismissibleInfo, IntroRichText } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useProgressStore } from '@/shared/ui/GlobalProgress';
-import { apiGet, apiPost, apiPatch, triggerDownload, extractErrorMessageFromBody, getErrorMessage } from '@/shared/lib/api';
+import { activeLanguageTag, apiGet, apiPost, apiPatch, triggerDownload, extractErrorMessageFromBody, getErrorMessage } from '@/shared/lib/api';
 import {
   readVectorCount,
   pollVectorIndexLanded,
@@ -4389,9 +4389,16 @@ export function BOQEditorPage() {
       const timeoutId = setTimeout(() => controller.abort(), 90_000);
 
       try {
+        const lang = activeLanguageTag();
         const res = await fetch(endpoint, {
           method: 'POST',
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          // A raw fetch gets no Accept-Language from the api client, and the
+          // refusal it may bring back (a locked bill's 409) is worded by the
+          // server, so name the UI language or it comes in the browser's.
+          headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            ...(lang ? { 'Accept-Language': lang } : {}),
+          },
           body: form,
           signal: controller.signal,
         });
