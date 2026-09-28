@@ -8,6 +8,40 @@ The equivalent document for the other platform is `docs/desktop/MACOS_NOTARIZATI
 
 For where every published release actually stands across all four signature mechanisms, and how to check a download yourself, see `docs/desktop/RELEASE_SIGNATURE_INVENTORY.md`.
 
+## Smart App Control, and why the installer signature is not enough
+
+Windows 11 Smart App Control checks every executable file as the loader maps it, not only the file that was downloaded, and it offers no per-app exception. A file runs when Microsoft's cloud reputation service knows it, or when it carries a valid signature that chains to a CA in the Microsoft Trusted Root Program. Everything else is blocked. Smart App Control starts in an evaluation mode after a clean Windows install and later switches itself on, which is how a tester can run the app once and find it blocked on later starts with nothing changed on our side.
+
+The desktop sidecar is a PyInstaller onefile build that unpacks about 490 `.exe`, `.dll` and `.pyd` files at every start and runs them from `%LOCALAPPDATA%\OpenConstructionERP\extract`. Measured on a 17.x install, 409 of those 492 files carried no signature: every PostgreSQL program (`postgres.exe`, `initdb.exe`, `pg_ctl.exe` and the rest), and most of the native modules of scipy, scikit-learn, pandas, pyarrow and numpy. The launcher, the sidecar and the uninstaller were unsigned too. Signing only the installer, which is all the Key Vault job further down does, leaves every one of them blocked.
+
+So the release workflow signs from the inside out, in three places, all skipped unless the Artifact Signing secrets below are set:
+
+1. In `build-sidecar`, before PyInstaller runs, `scripts/sign_windows_binaries.py` signs every unsigned PE file in the Python environment the sidecar is built from. Files that already carry their publisher's signature (the Python Software Foundation, Microsoft, Intel) keep it. This has to happen before packing, because the onefile archive seals its members and no later pass can reach them.
+2. Right after PyInstaller, the onefile `openconstructionerp-server.exe` itself is signed, and the existing sidecar checks then run the signed file.
+3. In `build-tauri`, the bundled converters are signed, and Tauri receives `bundle.windows.signCommand` through `--config`, so it signs the launcher, its copy of the sidecar, the NSIS plugins, the uninstaller and the installer.
+
+`scripts/setup_windows_signing.py` decides whether any of this runs. With no secrets it writes a notice and changes nothing. With some but not all it fails the run and names the missing ones. It signs only when the run releases a version tag, so a branch build is never signed.
+
+### Artifact Signing secrets
+
+Azure Artifact Signing (formerly Trusted Signing) issues short-lived certificates under a Microsoft root and costs 9.99 USD a month on the Basic tier (5,000 signatures a month; one Windows release signs roughly 480 files). Public Trust is open to organisations in the EU, and to individual developers only in the US and Canada, so the account has to be opened in the company's name. Identity validation takes from one to twenty business days. Reputation for SmartScreen still builds over time, as with any certificate, but Smart App Control accepts the signature from the first release.
+
+Create these six repository secrets under Settings, Secrets and variables, Actions:
+
+`ARTIFACT_SIGNING_ENDPOINT` is the regional endpoint of the account, for example `https://weu.codesigning.azure.net` for West Europe. It must match the region the account and the certificate profile were created in.
+
+`ARTIFACT_SIGNING_ACCOUNT` is the Artifact Signing account name.
+
+`ARTIFACT_SIGNING_PROFILE` is the certificate profile name (Public Trust).
+
+`ARTIFACT_SIGNING_TENANT_ID`, `ARTIFACT_SIGNING_CLIENT_ID` and `ARTIFACT_SIGNING_CLIENT_SECRET` identify an Entra ID app registration that holds the "Artifact Signing Certificate Profile Signer" role on the profile. The workflow passes them to the signing library as `AZURE_TENANT_ID`, `AZURE_CLIENT_ID` and `AZURE_CLIENT_SECRET`, the names the Azure SDK reads, so the secret never appears on a command line.
+
+The timestamp authority is `http://timestamp.acs.microsoft.com`. Do not remove it: the certificates are valid for three days, and the timestamp is what keeps a signature valid after that.
+
+To check a release, install it on a test machine and run, in PowerShell, `Get-ChildItem "$env:LOCALAPPDATA\OpenConstructionERP\extract" -Recurse -Include *.exe,*.dll,*.pyd | Get-AuthenticodeSignature | Group-Object Status`. Every file should report `Valid`.
+
+The Key Vault path described in the rest of this document signs only the installers after they are published. It is kept for a certificate bought from a CA, but on its own it does not satisfy Smart App Control.
+
 ## What is unsigned today, and how you can tell
 
 Every Windows installer this project has published is unsigned. There is no partial state and no historical exception.
