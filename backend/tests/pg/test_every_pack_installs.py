@@ -225,6 +225,10 @@ async def fresh_db(pack_template_url, monkeypatch, tmp_path):
 
     _rebind(monkeypatch, app.database.async_session_factory, factory)
     _rebind(monkeypatch, app.database.engine, eng)
+    # Some writers (the cost base bulk copy among them) open a sync connection
+    # from DATABASE_SYNC_URL instead of using the session factory.
+    sync_url = base.set(drivername="postgresql+psycopg2", database=name)
+    monkeypatch.setenv("DATABASE_SYNC_URL", sync_url.render_as_string(hide_password=False))
     monkeypatch.setenv("OE_CLI_DATA_DIR", str(tmp_path))
     monkeypatch.delenv("OE_PARTNER_PACK", raising=False)
     reset_cache()

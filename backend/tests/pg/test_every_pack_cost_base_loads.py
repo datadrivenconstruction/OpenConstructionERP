@@ -137,6 +137,11 @@ async def fresh_db(pg_async_url, monkeypatch):
     sync.dispose()
     eng = create_async_engine(base.set(database=name), poolclass=NullPool)
     factory = async_sessionmaker(eng, class_=AsyncSession, expire_on_commit=False)
+    # The loader bulk-copies cost items over a sync connection of its own,
+    # built from DATABASE_SYNC_URL rather than from the session it is handed,
+    # so that is the URL that has to name this database.
+    sync_url = base.set(drivername="postgresql+psycopg2", database=name)
+    monkeypatch.setenv("DATABASE_SYNC_URL", sync_url.render_as_string(hide_password=False))
     try:
         yield factory
     finally:
