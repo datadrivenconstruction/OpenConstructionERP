@@ -56,7 +56,7 @@ def _validate_filter(value: str | None, allowed: tuple[str, ...], field: str) ->
         return None
     if value not in allowed:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Invalid {field}: {value!r}",
         )
     return value
@@ -70,7 +70,7 @@ def _parse_as_of(value: str | None) -> date | None:
         return date.fromisoformat(value)
     except (ValueError, TypeError) as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Invalid as_of date (expected YYYY-MM-DD): {value!r}",
         ) from exc
 

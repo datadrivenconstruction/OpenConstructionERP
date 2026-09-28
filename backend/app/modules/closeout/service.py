@@ -430,7 +430,7 @@ class CloseoutService:
         slot_key = str(data["slot_key"]).strip()
         if not slot_key:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="slot_key must not be empty",
             )
         existing = await self.repo.list_slots(package.id)
@@ -508,7 +508,7 @@ class CloseoutService:
         """
         if document_id is None and not (external_url or "").strip():
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Provide either document_id or external_url",
             )
 

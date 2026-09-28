@@ -283,7 +283,7 @@ async def update_system(
         obj, reprice = await service.update_system(system_id, data)
     except FieldNotNullableError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(exc),
         ) from exc
     assert obj is not None  # the load_or_404 above proved existence
@@ -412,7 +412,7 @@ async def create_assignment(
         ) from exc
     except ReuseCountExceedsMaxError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(exc),
         ) from exc
     return _assignment_to_response(obj)
@@ -515,7 +515,7 @@ async def push_assignment_to_boq(
         ) from exc
     except BoqProjectMismatchError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="The target BOQ belongs to a different project",
         ) from exc
     except OrdinalSpaceExhaustedError as exc:
@@ -547,7 +547,7 @@ async def derive_assignment_from_schedule(
         analysis, changed = await service.derive_from_schedule(obj, system)
     except LookupError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Formwork assignment has no pour schedule to derive from",
         ) from exc
     return FormworkDeriveResult(
@@ -595,12 +595,12 @@ async def update_assignment(
         ) from exc
     except ReuseCountExceedsMaxError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(exc),
         ) from exc
     except FieldNotNullableError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(exc),
         ) from exc
     if obj is None:  # defensive - load_or_404 already proved existence
@@ -703,7 +703,7 @@ async def update_schedule_line(
         obj = await service.update_schedule_line(line_id, data)
     except FieldNotNullableError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(exc),
         ) from exc
     assert obj is not None  # the access check above proved existence

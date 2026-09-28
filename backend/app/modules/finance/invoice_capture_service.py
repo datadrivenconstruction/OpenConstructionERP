@@ -716,7 +716,7 @@ class InvoiceCaptureService:
         errors = [f for f in findings if f.is_error]
         if errors:
             raise HTTPException(
-                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={"message": "Validation failed", "findings": logic.findings_to_dicts(findings)},
             )
 

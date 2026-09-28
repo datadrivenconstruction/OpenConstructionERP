@@ -67,7 +67,7 @@ def _conflict(detail: str) -> HTTPException:
 
 
 def _unprocessable(detail: str) -> HTTPException:
-    return HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=detail)
+    return HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=detail)
 
 
 async def _project_id_for_schedule(schedule_id: uuid.UUID, session: SessionDep) -> uuid.UUID:

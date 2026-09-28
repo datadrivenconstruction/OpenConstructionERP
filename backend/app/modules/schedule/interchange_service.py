@@ -127,7 +127,7 @@ class ScheduleInterchangeService:
         try:
             parsed = parse_document(raw_document)
         except InterchangeError as exc:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
 
         actions: list[CleanAction] = []
         stats: dict[str, int] = {}
@@ -140,7 +140,7 @@ class ScheduleInterchangeService:
             issues = validate_document(parsed)
             if issues:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail="document has unresolved problems; import with clean=true or fix: " + "; ".join(issues[:10]),
                 )
 

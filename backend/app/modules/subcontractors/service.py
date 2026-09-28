@@ -1696,7 +1696,7 @@ class SubcontractorService:
         gross = Decimal(str(data.gross_amount))
         if gross <= 0:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Payment application gross amount must be greater than zero",
             )
         # Can only claim against an agreement that has been signed off.
@@ -1813,7 +1813,7 @@ class SubcontractorService:
             gross = Decimal(str(fields["gross_amount"]))
             if gross <= 0:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail="Payment application gross amount must be greater than zero",
                 )
             agreement = await self.agreements.get_by_id(entity.agreement_id)
@@ -2000,7 +2000,7 @@ class SubcontractorService:
             line = lines.get(item.line_id)
             if line is None:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail={
                         "code": "line_not_on_payment_application",
                         "message": "That line is not on this payment application.",
@@ -2009,7 +2009,7 @@ class SubcontractorService:
                 )
             if item.line_id in amounts:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail={
                         "code": "line_named_twice",
                         "message": "A line may be approved only once per approval.",
@@ -2019,7 +2019,7 @@ class SubcontractorService:
             claimed = Decimal(str(line.claimed_amount or 0))
             if item.approved_amount > claimed:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail={
                         "code": "approved_above_claimed",
                         "message": "An approved amount cannot exceed what was claimed on the line.",
@@ -2236,13 +2236,13 @@ class SubcontractorService:
         contract = await PrimeContractReader(self.session).get_contract(contract_id)
         if contract is None or contract.project_id != project_id:
             raise self._refuse(
-                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status.HTTP_422_UNPROCESSABLE_CONTENT,
                 "prime_contract_not_on_project",
                 "The prime contract must be a contract on the same project as the agreement.",
             )
         if getattr(contract, "counterparty_type", "client") != "client":
             raise self._refuse(
-                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status.HTTP_422_UNPROCESSABLE_CONTENT,
                 "prime_contract_not_client",
                 "The prime contract must be the contract with the client, not another subcontract.",
             )
@@ -2257,13 +2257,13 @@ class SubcontractorService:
         contract = await PrimeContractReader(self.session).get_contract(contract_id)
         if contract is None or contract.project_id != project_id:
             raise self._refuse(
-                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status.HTTP_422_UNPROCESSABLE_CONTENT,
                 "subcontract_not_on_project",
                 "The linked contract must be a contract on the same project as the agreement.",
             )
         if getattr(contract, "counterparty_type", "client") != "subcontractor":
             raise self._refuse(
-                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status.HTTP_422_UNPROCESSABLE_CONTENT,
                 "linked_contract_not_subcontract",
                 "The linked contract must be a subcontract, not the contract with the client.",
             )
@@ -2285,7 +2285,7 @@ class SubcontractorService:
         lines = await reader.list_lines_by_ids([line_id])
         if not lines:
             raise self._refuse(
-                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status.HTTP_422_UNPROCESSABLE_CONTENT,
                 "contract_line_not_found",
                 "The schedule-of-values line does not exist.",
             )
@@ -2518,14 +2518,14 @@ class SubcontractorService:
             ref = {"payment_application_id": str(pay_app.id), "application_number": pay_app.application_number}
             if agreement is None or agreement.project_id != contract.project_id:
                 raise self._refuse(
-                    status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status.HTTP_422_UNPROCESSABLE_CONTENT,
                     "pay_application_other_project",
                     "This pay application belongs to a subcontract on another project.",
                     **ref,
                 )
             if agreement.prime_contract_id is not None and agreement.prime_contract_id != contract.id:
                 raise self._refuse(
-                    status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status.HTTP_422_UNPROCESSABLE_CONTENT,
                     "pay_application_other_prime_contract",
                     "This pay application's subcontract sits under a different prime contract.",
                     **ref,
@@ -2548,7 +2548,7 @@ class SubcontractorService:
             pay_currency = pay_app_currency(pay_app, agreement)
             if currencies_differ(pay_currency, claim_currency):
                 raise self._refuse(
-                    status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status.HTTP_422_UNPROCESSABLE_CONTENT,
                     "currency_mismatch",
                     "The pay application is in a different currency than the claim; currencies are never blended.",
                     pay_application_currency=pay_currency,

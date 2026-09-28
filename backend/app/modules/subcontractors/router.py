@@ -1423,7 +1423,7 @@ async def upload_lien_waiver(
         )
     if not raw:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="file body is empty",
         )
 
@@ -1451,7 +1451,7 @@ async def upload_lien_waiver(
         parsed_amount = Decimal(amount) if amount not in (None, "") else Decimal("0")
     except (InvalidOperation, ValueError):
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"amount is not a valid decimal: {amount!r}",
         )
     try:
@@ -1460,14 +1460,14 @@ async def upload_lien_waiver(
         parsed_signed = _date.fromisoformat(signed_date) if signed_date else None
     except ValueError:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"signed_date is not a valid ISO date: {signed_date!r}",
         )
     try:
         parsed_through = _date.fromisoformat(through_date) if through_date else None
     except ValueError:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"through_date is not a valid ISO date: {through_date!r}",
         )
     try:
@@ -1482,7 +1482,7 @@ async def upload_lien_waiver(
         )
     except Exception as exc:  # pydantic.ValidationError
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(exc),
         )
 
@@ -1513,7 +1513,7 @@ async def upload_lien_waiver(
         agreement = await svc.agreements.get_by_id(pay_app.agreement_id) if pay_app is not None else None
         if pay_app is None or agreement is None or agreement.subcontractor_id != sub_id:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={
                     "code": "payment_application_other_subcontractor",
                     "message": "The payment application does not belong to this subcontractor.",
@@ -1523,7 +1523,7 @@ async def upload_lien_waiver(
             form_payload = form_payload.model_copy(update={"currency": pay_app.currency})
         elif pay_app.currency and form_payload.currency != pay_app.currency:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={
                     "code": "currency_mismatch",
                     "message": "The waiver's currency differs from the payment application's.",

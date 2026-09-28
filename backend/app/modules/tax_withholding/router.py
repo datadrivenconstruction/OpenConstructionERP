@@ -123,7 +123,7 @@ def _blocked(findings: list, action: str) -> None:
     if not blocking:
         return
     raise HTTPException(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         detail={
             "message": action,
             "findings": [finding.model_dump() for finding in _to_findings(blocking)],
@@ -279,12 +279,12 @@ async def create_party_status(payload: PartyStatusCreateRequest, session: Sessio
     regime = await _regime_or_404(session, payload.regime_id)
     if payload.valid_to is not None and payload.valid_to < payload.valid_from:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="A verification cannot end before it starts.",
         )
     if service.find_band(regime, payload.band_code) is None:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Scheme {regime.scheme_code} defines no band '{payload.band_code}'.",
         )
     row = PartyTaxStatus()
@@ -346,12 +346,12 @@ async def replace_party_status(
     regime = await _regime_or_404(session, payload.regime_id)
     if payload.valid_to is not None and payload.valid_to < payload.valid_from:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="A verification cannot end before it starts.",
         )
     if service.find_band(regime, payload.band_code) is None:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Scheme {regime.scheme_code} defines no band '{payload.band_code}'.",
         )
     service.apply_party_status_body(row, payload)
@@ -541,7 +541,7 @@ async def _save_deduction(
     """
     if payload.period_end < payload.period_start:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="A return period cannot end before it starts.",
         )
     regime, party_status = await service.load_deduction_context(

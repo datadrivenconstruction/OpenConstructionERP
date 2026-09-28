@@ -131,7 +131,7 @@ class ActionError(Exception):
 class ActionValidationError(ActionError):
     """Arguments or edits that do not make a valid change (422)."""
 
-    status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+    status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
     default_code = "validation_error"
 
 

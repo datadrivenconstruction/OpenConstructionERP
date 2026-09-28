@@ -4126,12 +4126,12 @@ def create_app() -> FastAPI:
         # Rate-limit (above) gates volume; this gates content (BUG-159).
         if not subject or not description:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Both 'subject' and 'description' are required.",
             )
         if len(subject) < 3 or len(description) < 10:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="'subject' must be ≥3 chars and 'description' ≥10 chars.",
             )
 

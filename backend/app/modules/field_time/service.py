@@ -975,7 +975,7 @@ class FieldTimeService:
         except HTTPException as exc:
             if exc.status_code not in (
                 status.HTTP_400_BAD_REQUEST,
-                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status.HTTP_422_UNPROCESSABLE_CONTENT,
             ):
                 raise
             logger.info(
@@ -1253,7 +1253,7 @@ class FieldTimeService:
         report = await self._validate(timesheet, operation=operation)
         if report.has_errors:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={
                     "message": (
                         f"This timesheet has problems that must be fixed before you can {operation} it. "
@@ -1295,7 +1295,7 @@ class FieldTimeService:
         has_equipment = equipment_id is not None
         if has_resource == has_equipment:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(
                     "Each line records either a worker (labour) or a machine (plant), not both and "
                     "not neither. Pick one for this line and save again."
@@ -1351,7 +1351,7 @@ class FieldTimeService:
         derived = ft.derive_line_hours(started_at, ended_at, break_minutes, booked_hours=booked_hours)
         if derived.reason:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=_INTERVAL_MESSAGES.get(derived.reason, _INTERVAL_FALLBACK),
             )
         return derived.hours

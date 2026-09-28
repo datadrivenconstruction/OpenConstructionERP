@@ -31,19 +31,19 @@ def _validate_checklist_structure(checklist: list[dict[str, Any]]) -> None:
     for idx, item in enumerate(checklist):
         if not isinstance(item, dict):
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Checklist item {idx} must be a dict, got {type(item).__name__}",
             )
         question = item.get("question", "")
         if not question or not isinstance(question, str) or len(question.strip()) < 1:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Checklist item {idx} must have a non-empty 'question' field",
             )
         resp_type = item.get("response_type", "yes_no")
         if resp_type and resp_type not in valid_response_types:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(
                     f"Checklist item {idx} has invalid response_type '{resp_type}'. "
                     f"Valid types: {sorted(valid_response_types)}"
@@ -227,7 +227,7 @@ class InspectionService:
         """
         if result not in ("pass", "fail", "partial"):
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Result must be 'pass', 'fail', or 'partial', got '{result}'",
             )
 

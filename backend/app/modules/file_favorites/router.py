@@ -90,7 +90,7 @@ async def star_file(
     """
     if payload.file_kind not in FAVORITE_KINDS:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Unknown file_kind: {payload.file_kind!r}",
         )
     await verify_project_access(payload.project_id, user_id, session)
@@ -122,7 +122,7 @@ async def unstar_file(
     """Remove a favourite. Idempotent - missing rows return 204."""
     if file_kind not in FAVORITE_KINDS:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Unknown file_kind: {file_kind!r}",
         )
     await verify_project_access(project_id, user_id, session)

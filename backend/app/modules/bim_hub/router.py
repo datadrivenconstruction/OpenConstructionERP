@@ -3324,7 +3324,7 @@ async def get_model_geometry(
                 "message": (f"Geometry file is not a valid {ext} payload: {reason_serve}"),
             }
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=diagnostic,
                 headers={"X-Request-Id": request_id},
             )

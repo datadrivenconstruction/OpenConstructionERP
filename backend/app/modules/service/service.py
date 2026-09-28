@@ -352,7 +352,7 @@ class ServiceService:
         allowed_initial = {"draft", "active"}
         if data.status not in allowed_initial:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(
                     f"A contract cannot be created in '{data.status}' state. "
                     f"Allowed initial states: {sorted(allowed_initial)}."
@@ -360,7 +360,7 @@ class ServiceService:
             )
         if data.period_end < data.period_start:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="period_end must be on or after period_start.",
             )
         # Race-safe contract number allocation. Retry on the unique-index
@@ -447,7 +447,7 @@ class ServiceService:
         new_end = fields.get("period_end", contract.period_end)
         if ("period_start" in fields or "period_end" in fields) and new_end < new_start:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="period_end must be on or after period_start.",
             )
 
@@ -734,7 +734,7 @@ class ServiceService:
         """
         if not body.technician_id:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="technician_id is required for dispatch",
             )
         ticket = await self.get_ticket(ticket_id)
@@ -867,7 +867,7 @@ class ServiceService:
                 window_cutoff = datetime.now(UTC) - timedelta(days=TICKET_REOPEN_WINDOW_DAYS)
                 if closed_dt < window_cutoff:
                     raise HTTPException(
-                        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                         detail=(
                             f"Ticket was closed more than {TICKET_REOPEN_WINDOW_DAYS} days "
                             f"ago ({ticket.closed_at}). Please open a new ticket instead."
@@ -1042,7 +1042,7 @@ class ServiceService:
         allowed_initial = {"scheduled", "dispatched", "in_progress", "completed"}
         if data.status not in allowed_initial:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(
                     f"A work order cannot be created in '{data.status}' state. "
                     f"Allowed initial states: {sorted(allowed_initial)}."
@@ -1901,7 +1901,7 @@ class ServiceService:
             rule = rrulestr(rule_body, dtstart=after)
         except (ValueError, TypeError) as exc:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Invalid RRULE: {exc}",
             ) from exc
         candidate = rule.after(after, inc=False)
@@ -2039,7 +2039,7 @@ class ServiceService:
         contract_id_raw = template.get("contract_id") or (str(sched.contract_id) if sched.contract_id else None)
         if not contract_id_raw:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Schedule has no contract_id to materialise a ticket against",
             )
 
@@ -2056,7 +2056,7 @@ class ServiceService:
             )
         except (ValueError, TypeError) as exc:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Invalid template_ticket_data: {exc}",
             ) from exc
 

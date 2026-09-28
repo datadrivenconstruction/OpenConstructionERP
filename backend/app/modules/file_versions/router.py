@@ -65,7 +65,7 @@ async def list_versions(
     """
     if kind not in FILE_KINDS:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Unknown kind: {kind!r}",
         )
     seeds = await service.list_for_file(file_id=file_id, file_kind=kind)

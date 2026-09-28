@@ -591,7 +591,7 @@ async def get_forecast(
     try:
         forecast = await service.get_forecast(period, owner_user_id)
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
     return ForecastResponse.model_validate(forecast)
 
 
@@ -605,7 +605,7 @@ async def compute_forecast_endpoint(
     try:
         forecast = await service.compute_and_store_forecast(period, owner_user_id)
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
     return ForecastResponse.model_validate(forecast)
 
 

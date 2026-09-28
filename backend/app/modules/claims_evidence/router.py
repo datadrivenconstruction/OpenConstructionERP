@@ -108,7 +108,7 @@ async def reconstruct_change(
 
     if subject_type not in _RECONSTRUCT_KINDS:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Unknown subject type '{subject_type}'. Expected one of: {', '.join(_RECONSTRUCT_KINDS)}.",
         )
 
@@ -151,7 +151,7 @@ async def export_reconstructed_pack(
 
     if subject_type not in _RECONSTRUCT_KINDS:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Unknown subject type '{subject_type}'. Expected one of: {', '.join(_RECONSTRUCT_KINDS)}.",
         )
 
@@ -212,7 +212,7 @@ async def get_change_provability(
         )
     except UnknownSubjectKind as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Unknown subject kind '{subject_kind}'. Expected one of: {', '.join(_SUBJECT_KINDS)}.",
         ) from exc
     except SubjectNotFound as exc:

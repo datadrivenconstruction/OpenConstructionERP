@@ -174,7 +174,7 @@ class CertifiedPayrollService:
         election = data.fringe_election
         if election is not None and election not in ALL_FRINGE_ELECTIONS:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"fringe_election must be one of {', '.join(ALL_FRINGE_ELECTIONS)}",
             )
         return await self.assignment_repo.create(
@@ -223,7 +223,7 @@ class CertifiedPayrollService:
             week_days(data.week_ending)
         except ValueError as exc:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"week_ending must be an ISO date (YYYY-MM-DD): {exc}",
             ) from exc
 

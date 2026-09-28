@@ -1087,7 +1087,7 @@ async def check_sheet_completeness(
         msg = str(exc)
         # "not found" is an IDOR-safe 404 (missing or foreign index document);
         # every other ValueError is bad/unreadable input -> 422.
-        code = status.HTTP_404_NOT_FOUND if "not found" in msg.lower() else status.HTTP_422_UNPROCESSABLE_ENTITY
+        code = status.HTTP_404_NOT_FOUND if "not found" in msg.lower() else status.HTTP_422_UNPROCESSABLE_CONTENT
         raise HTTPException(status_code=code, detail=msg) from exc
     return SheetCompletenessResponse.model_validate(result)
 
@@ -1220,7 +1220,7 @@ async def list_bim_links(
     """
     if (element_id is None) == (document_id is None):
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Exactly one of 'element_id' or 'document_id' must be provided",
         )
 

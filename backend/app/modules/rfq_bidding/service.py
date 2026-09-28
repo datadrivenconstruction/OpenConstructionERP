@@ -726,7 +726,7 @@ class RFQService:
                 rfq.submission_deadline,
             )
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="RFQ submission_deadline is malformed; ask buyer to fix",
             ) from None
         if deadline.tzinfo is None:

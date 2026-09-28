@@ -504,13 +504,13 @@ async def resolve_position_cost_lines(
             continue
         if position_id not in resolved:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"No bill position {position_id} exists, so this line cannot be attributed to it.",
             )
         cost_line_id = resolved[position_id]
         if cost_line_id is None:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(
                     f"Bill position {position_id} is not on the cost spine, so an actual posted "
                     "against it would roll up nowhere. Generate the spine for the project first "
@@ -520,7 +520,7 @@ async def resolve_position_cost_lines(
             )
         if item.cost_line_id is not None and item.cost_line_id != cost_line_id:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(
                     f"This line names bill position {position_id}, which belongs to cost line "
                     f"{cost_line_id}, and cost line {item.cost_line_id} as well. Send one of them."
@@ -694,14 +694,14 @@ class FinanceService:
         """
         if direction != "payable":
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Only a supplier (payable) invoice can be linked to a purchase order.",
             )
         try:
             from app.modules.procurement.models import PurchaseOrder
         except ImportError as exc:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Purchase orders are not available: the procurement module is not installed.",
             ) from exc
         row = (
@@ -713,18 +713,18 @@ class FinanceService:
         ).first()
         if row is None or row[0] != project_id:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="The purchase order does not exist on this project.",
             )
         po_vendor, po_status = row[1], row[2]
         if po_status in ("draft", "cancelled"):
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"A {po_status} purchase order cannot be invoiced; approve it first.",
             )
         if contact_id and po_vendor and str(contact_id) != str(po_vendor):
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="The purchase order was placed with a different supplier than this invoice.",
             )
 
@@ -1962,7 +1962,7 @@ class FinanceService:
         # rather than mis-post it. Settle in the invoice currency.
         if data.currency_code and invoice.currency_code and data.currency_code != invoice.currency_code:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(
                     f"Payment currency {data.currency_code} does not match invoice "
                     f"currency {invoice.currency_code}; settle in the invoice currency."

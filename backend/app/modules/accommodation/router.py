@@ -83,7 +83,7 @@ def _parse_booking_status_filter(values: list[str] | None) -> list[str] | None:
     for v in values:
         if v not in _BOOKING_STATUS_VALUES:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Unknown booking status: {v!r}",
             )
         if v not in cleaned:

@@ -48,7 +48,7 @@ TRASH_KINDS: tuple[str, ...] = (
 def _validate_kind(kind: str) -> None:
     if kind not in TRASH_KINDS:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Unknown kind: {kind!r}",
         )
 
@@ -148,7 +148,7 @@ def _kind_model(kind: str) -> type:
 
         return Markup
     raise HTTPException(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         detail=f"Unsupported kind: {kind!r}",
     )
 
@@ -230,7 +230,7 @@ class FileTrashService:
             missing = _missing_required(model, snapshot)
             if missing:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail=(f"Snapshot for kind {kind!r} is missing required field(s): {', '.join(sorted(missing))}"),
                 )
 
@@ -323,7 +323,7 @@ class FileTrashService:
         missing = _missing_required(model, clean)
         if missing:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(
                     f"Cannot restore {row.original_kind!r}: snapshot is missing "
                     f"required field(s): {', '.join(sorted(missing))}"

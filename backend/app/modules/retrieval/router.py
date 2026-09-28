@@ -110,7 +110,7 @@ def _to_out(saved: SavedSearch) -> SavedSearchOut:
 def _invalid(exc: SavedSearchInvalid) -> HTTPException:
     """Turn a blocking validation failure into a 422 naming every reason."""
     return HTTPException(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         detail={"message": "The saved search did not pass validation", "findings": exc.findings},
     )
 

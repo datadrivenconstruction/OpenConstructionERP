@@ -67,7 +67,7 @@ async def import_container(
     try:
         parsed = read_container(payload)
     except BimLvContainerError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
 
     result = await service.materialize_links(project_id, parsed, session, user_id=user_id)
 

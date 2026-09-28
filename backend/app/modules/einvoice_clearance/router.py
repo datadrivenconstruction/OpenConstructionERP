@@ -111,7 +111,7 @@ def _refuse(exc: service.ClearanceError) -> HTTPException:
     if exc.findings:
         detail["findings"] = [f.model_dump() for f in _to_findings(exc.findings)]
     return HTTPException(
-        status_code=status.HTTP_409_CONFLICT if exc.conflict else status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=status.HTTP_409_CONFLICT if exc.conflict else status.HTTP_422_UNPROCESSABLE_CONTENT,
         detail=detail,
     )
 
@@ -199,7 +199,7 @@ async def create_registration(
     entry = get_country_regime(payload.country)
     if entry is None:  # pragma: no cover - the schema already rejects this
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"No e-invoicing regime is registered for country {payload.country!r}.",
         )
     profile = EInvoiceProfile(
@@ -252,7 +252,7 @@ async def replace_registration(
     entry = get_country_regime(payload.country)
     if entry is None:  # pragma: no cover - the schema already rejects this
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"No e-invoicing regime is registered for country {payload.country!r}.",
         )
     # The identity documents were filed under is the same record remove_registration

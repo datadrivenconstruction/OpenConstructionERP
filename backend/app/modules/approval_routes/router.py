@@ -166,7 +166,7 @@ async def list_routes(
     """
     if target_kind is not None and target_kind not in TARGET_KINDS:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Unknown target_kind: {target_kind!r}",
         )
     if project_id is not None:
@@ -508,12 +508,12 @@ async def get_project_analytics(
     """
     if target_kind is not None and target_kind not in TARGET_KINDS:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Unknown target_kind: {target_kind!r}",
         )
     if started_after is not None and started_before is not None and started_after > started_before:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="started_after must not be after started_before",
         )
     await verify_project_access(project_id, user_id, session)

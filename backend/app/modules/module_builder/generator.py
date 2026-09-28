@@ -769,7 +769,7 @@ async def create_record(
         record, _findings = await {spec.class_name}Service(db).create(payload)
     except ValidationRefused as exc:
         raise HTTPException(
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=[{{"code": f.code, "message": f.message, "field": f.field}} for f in exc.findings],
         ) from exc
     await db.commit()
@@ -792,7 +792,7 @@ async def update_record(
         record, _findings = await service.update(record, payload)
     except ValidationRefused as exc:
         raise HTTPException(
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=[{{"code": f.code, "message": f.message, "field": f.field}} for f in exc.findings],
         ) from exc
     await db.commit()

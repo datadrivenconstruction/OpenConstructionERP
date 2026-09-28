@@ -1640,24 +1640,24 @@ class ClashService:
         requested = [mid for mid in data.model_ids if mid in valid_ids]
         if not requested:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="None of the requested models belong to this project",
             )
         if data.mode not in ("cross_discipline", "all", "selected", "selection_sets"):
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Unknown clash mode '{data.mode}'",
             )
         if data.clash_type not in CLASH_TYPES:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Unknown clash type '{data.clash_type}' (expected one of {', '.join(CLASH_TYPES)})",
             )
         set_a = set_b = None
         if data.mode == "selection_sets":
             if data.set_a is None or data.set_b is None or data.set_a.is_empty or data.set_b.is_empty:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail="selection_sets mode requires a non-empty "
                     "Set A and Set B (pick at least one type or "
                     "discipline for each).",
@@ -2192,13 +2192,13 @@ class ClashService:
         sig = (signature_hash or "").strip()
         if not sig:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="signature_hash is required",
             )
         rsn = (reason or "").strip()
         if not rsn:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="reason is required",
             )
         existing = await self.repo.get_suppression(project_id, sig)
@@ -2241,7 +2241,7 @@ class ClashService:
         sig = (signature_hash or "").strip()
         if not sig:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="signature_hash is required",
             )
         existing = await self.repo.get_suppression(project_id, sig)
@@ -2327,7 +2327,7 @@ class ClashService:
         rsn = (reason or "").strip()
         if not rsn:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="reason is required",
             )
 
@@ -2464,7 +2464,7 @@ class ClashService:
         rsn = (reason or "").strip()
         if not rsn:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="reason is required",
             )
 
@@ -2487,7 +2487,7 @@ class ClashService:
                 unique_result_ids.append(rid)
         if len(unique_result_ids) > _MAX_RESULTS:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Bulk selection exceeds {_MAX_RESULTS} rows.",
             )
 
@@ -2536,7 +2536,7 @@ class ClashService:
         """Project-scoped list of smart issues with member counts."""
         if status_filter is not None and status_filter not in CLASH_ISSUE_STATUSES:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Invalid clash issue status '{status_filter}'",
             )
         return await self.repo.list_issues(
@@ -2631,12 +2631,12 @@ class ClashService:
         """
         if mode not in ("cross_discipline", "all", "selected", "selection_sets"):
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Unknown clash mode '{mode}'",
             )
         if clash_type not in CLASH_TYPES:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Unknown clash type '{clash_type}' (expected one of {', '.join(CLASH_TYPES)})",
             )
 
@@ -2655,7 +2655,7 @@ class ClashService:
         name = data.name.strip()
         if not name:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Profile name must not be empty.",
             )
         self._validate_profile_config(data.mode, data.clash_type)
@@ -2712,7 +2712,7 @@ class ClashService:
             new_name = (fields["name"] or "").strip()
             if not new_name:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail="Profile name must not be empty.",
                 )
             if new_name != profile.name:
@@ -2938,7 +2938,7 @@ class ClashService:
         await self.get_run(project_id, run_id)
         if target not in CLASH_ACTION_TARGETS:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Unknown action target '{target}' (expected one of {', '.join(CLASH_ACTION_TARGETS)})",
             )
         members = await self._cluster_members(run_id, cluster_id)
@@ -2987,7 +2987,7 @@ class ClashService:
         run = await self.get_run(project_id, run_id)
         if target not in CLASH_ACTION_TARGETS:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Unknown action target '{target}' (expected one of {', '.join(CLASH_ACTION_TARGETS)})",
             )
         members = await self._cluster_members(run_id, cluster_id)
@@ -3210,7 +3210,7 @@ class ClashService:
         db_ = (discipline_b or "").strip()
         if not da or not db_:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="discipline_a and discipline_b must be non-empty",
             )
         existing = _coerce_rules(run.rules)
@@ -3974,7 +3974,7 @@ class ClashService:
         if new_status is not None:
             if new_status not in CLASH_STATUSES:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail=f"Invalid clash status '{new_status}'",
                 )
             if result.status != new_status:
@@ -3984,7 +3984,7 @@ class ClashService:
         if severity is not None:
             if severity not in CLASH_SEVERITIES:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail=f"Invalid clash severity '{severity}'",
                 )
             if result.severity != severity:
@@ -4129,12 +4129,12 @@ class ClashService:
         # Validate once - a bad value fails the whole batch before any write.
         if new_status is not None and new_status not in CLASH_STATUSES:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Invalid clash status '{new_status}'",
             )
         if severity is not None and severity not in CLASH_SEVERITIES:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Invalid clash severity '{severity}'",
             )
         if new_status is None and severity is None and assigned_to is None:
@@ -4150,7 +4150,7 @@ class ClashService:
                 unique_ids.append(rid)
         if len(unique_ids) > _MAX_RESULTS:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Bulk selection exceeds {_MAX_RESULTS} rows.",
             )
 
@@ -4266,7 +4266,7 @@ class ClashService:
             parsed = parse_bcfzip(payload)
         except BCFParseError as exc:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Invalid BCF archive: {exc}",
             ) from exc
 

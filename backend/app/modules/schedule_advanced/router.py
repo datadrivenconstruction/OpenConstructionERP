@@ -572,7 +572,7 @@ async def create_constraint(
     # caller cannot pollute the table with rows that bypass project access.
     if data.look_ahead_id is None:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="look_ahead_id is required to create a constraint",
         )
     project_id = await _project_id_for_look_ahead(data.look_ahead_id, service)
@@ -2241,7 +2241,7 @@ async def schedule_quality_for_schedule(
         report = quality_report(network, options=options)
     except CycleError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(exc),
         ) from exc
 
@@ -2347,7 +2347,7 @@ async def schedule_risk_for_schedule(
     act_rows, rel_rows = await _load_schedule_rows(schedule_id, session)
     if not act_rows:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Schedule has no activities to analyse.",
         )
 
@@ -2402,7 +2402,7 @@ async def schedule_risk_for_schedule(
         )
     except CycleError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(exc),
         ) from exc
 
@@ -2668,7 +2668,7 @@ async def auto_delay_fragnet(
         raise _not_found("Delay event not found")
     if analysis.schedule_id is None:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Analysis has no schedule to synthesise a fragnet against.",
         )
     act_rows, rel_rows = await _load_schedule_rows(analysis.schedule_id, session)
@@ -2712,13 +2712,13 @@ async def compute_delay_analysis(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="An issued analysis is immutable.")
     if analysis.schedule_id is None:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Analysis has no schedule to compute against.",
         )
     act_rows, rel_rows = await _load_schedule_rows(analysis.schedule_id, session)
     if not act_rows:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Schedule has no activities to analyse.",
         )
     network = _build_str_network(act_rows, rel_rows)
@@ -2735,7 +2735,7 @@ async def compute_delay_analysis(
             snapshots=[baseline, baseline],
         )
     except CycleError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
     await svc.persist_compute(analysis, result)
     return await _delay_response(svc, analysis)
 

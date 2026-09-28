@@ -88,14 +88,14 @@ def _resolve_response_due_date(
                 resolved = compute_response_due_date(issued_date, period)
             except ValueError as exc:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail=str(exc),
                 ) from exc
 
     error = response_due_error(issued_date, resolved)
     if error is not None:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=error,
         )
     return resolved
@@ -266,7 +266,7 @@ class TransmittalService:
         date_error = response_due_error(effective_issued, effective_due)
         if date_error is not None:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=date_error,
             )
 
@@ -396,7 +396,7 @@ class TransmittalService:
         )
         if blockers:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Cannot issue this transmittal yet. " + " ".join(blockers),
             )
 

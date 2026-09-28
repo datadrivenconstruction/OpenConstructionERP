@@ -114,7 +114,7 @@ def _enforce_batch_cap(n: int) -> None:
     """Reject requests over the per-call cap. 422 (was 400) per RFC 9457."""
     if n > BULK_MAX_ITEMS:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=(
                 f"Batch size {n} exceeds the per-request cap of {BULK_MAX_ITEMS}. "
                 f"Split the request into smaller chunks."

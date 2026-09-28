@@ -416,7 +416,7 @@ async def generate_budget(
             boq_id = uuid.UUID(str(raw_boq_id))
         except (ValueError, TypeError) as e:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Invalid boq_id: {e}",
             )
     else:
@@ -977,7 +977,7 @@ async def generate_spine_from_boq(
             boq_id = uuid.UUID(str(raw_boq_id))
         except (ValueError, TypeError) as e:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Invalid boq_id: {e}",
             )
     return await service.generate_from_boq(project_id, boq_id)

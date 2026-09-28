@@ -301,7 +301,7 @@ class GeoHubService:
         if result is None:
             if address is None:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail={
                         "code": "address_missing",
                         "message": (
@@ -1537,7 +1537,7 @@ class GeoHubService:
             png_bytes, w, h, page_count = pdf_to_png(content, page=page)
         except (ValueError, RuntimeError) as exc:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"PDF rasterisation failed: {exc}",
             ) from exc
 
@@ -1611,7 +1611,7 @@ class GeoHubService:
             ) from exc
         except ValueError as exc:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Image not parseable: {exc}",
             ) from exc
 
@@ -1686,7 +1686,7 @@ class GeoHubService:
             png_bytes, w, h = dwg_top_view_to_png(canonical)
         except (ValueError, RuntimeError) as exc:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"DWG rasterisation failed: {exc}",
             ) from exc
 
@@ -1952,7 +1952,7 @@ class GeoHubService:
         anchor = await self.anchors.get_by_project(resolved_project_id)
         if anchor is None:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="no_anchor_for_project",
             )
 
@@ -1962,7 +1962,7 @@ class GeoHubService:
         )
         if not elements:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="canonical_elements_empty",
             )
 
@@ -2007,7 +2007,7 @@ class GeoHubService:
         # the upstream import.
         if build.feature_count == 0:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="canonical_elements_have_no_geometry",
             )
         tileset_id = uuid.uuid4()

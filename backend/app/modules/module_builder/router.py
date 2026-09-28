@@ -145,7 +145,7 @@ async def draft(
     try:
         spec = await service.draft_spec(db, user_id, payload.description)
     except service.DraftRefused as exc:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail=exc.reason) from exc
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, detail=exc.reason) from exc
     # Read off the spec rather than asserted again here: the envelope and the
     # artefact were two independent statements of the same fact, and only the
     # one on the spec survives to disk.

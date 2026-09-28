@@ -477,7 +477,7 @@ async def export_project_bcf(
     project_name = await _require_project_access(session, project_id, user_id)
     if version not in SUPPORTED_VERSIONS:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=translate(
                 "bcf.version_unsupported",
                 _locale_of(user_id),
@@ -489,7 +489,7 @@ async def export_project_bcf(
         archive, _count = await service.export_bcfzip(project_id, project_name or str(project_id), version)
     except BCFServiceError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(exc),
         ) from exc
     filename = f"project-{project_id}-bcf{version}.bcfzip"
@@ -523,7 +523,7 @@ async def export_project_bcf_selection(
     version = data.version
     if version not in SUPPORTED_VERSIONS:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=translate(
                 "bcf.version_unsupported",
                 _locale_of(user_id),
@@ -542,7 +542,7 @@ async def export_project_bcf_selection(
         # An explicit selection that matches nothing is a caller mistake, not
         # an empty archive - name it rather than shipping a hollow zip.
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=translate("bcf.selection_empty", _locale_of(user_id)),
         ) from exc
     scope = "selection" if data.topic_guids is not None else "all"
@@ -583,7 +583,7 @@ async def import_project_bcf(
     await _require_project_access(session, project_id, user_id)
     if version is not None and version not in SUPPORTED_VERSIONS:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=translate(
                 "bcf.version_unsupported",
                 _locale_of(user_id),
@@ -772,12 +772,12 @@ async def import_clashes_bcfzip(
     except BCFFormatError as exc:
         # Not a BCF zip / missing bcf.version → 422.
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(exc),
         ) from exc
     except BCFReaderError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(exc),
         ) from exc
 

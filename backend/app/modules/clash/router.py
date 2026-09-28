@@ -486,17 +486,17 @@ async def list_results(
     # whole filter contract is consistent.
     if status_filter is not None and status_filter not in CLASH_STATUSES:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Invalid clash status '{status_filter}'",
         )
     if clash_type is not None and clash_type not in CLASH_TYPES:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Invalid clash type '{clash_type}'",
         )
     if severity is not None and severity not in CLASH_SEVERITIES:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Invalid clash severity '{severity}'",
         )
     rows, total = await service.list_results(
@@ -679,17 +679,17 @@ async def export_csv(
     # is a 422, not a silently-empty CSV.
     if status_filter is not None and status_filter not in CLASH_STATUSES:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Invalid clash status '{status_filter}'",
         )
     if clash_type is not None and clash_type not in CLASH_TYPES:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Invalid clash type '{clash_type}'",
         )
     if severity is not None and severity not in CLASH_SEVERITIES:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Invalid clash severity '{severity}'",
         )
     rows, _ = await service.list_results(

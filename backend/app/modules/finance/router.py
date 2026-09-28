@@ -813,7 +813,7 @@ async def export_invoice_einvoice(
     profile = (fmt or "xrechnung").strip().lower()
     if profile not in SUPPORTED_PROFILES:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"unknown e-invoice format {fmt!r}; use one of {', '.join(SUPPORTED_PROFILES)}",
         )
 
@@ -900,7 +900,7 @@ async def export_invoice_einvoice(
             )
     except EInvoiceError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=(
                 f"invoice is not EN 16931 complete for {profile}: {exc}. "
                 "Seller identity and the bank account are set once under the "

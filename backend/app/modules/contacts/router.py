@@ -1147,7 +1147,7 @@ async def convert_contact_to_lead(
         from app.modules.property_dev.models import Development, Lead
     except ImportError as exc:  # pragma: no cover - install guard
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Property Development module not installed.",
         ) from exc
 
@@ -1241,7 +1241,7 @@ async def convert_contact_to_buyer(
         from app.modules.property_dev.models import Buyer, Development, Plot
     except ImportError as exc:  # pragma: no cover
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Property Development module not installed.",
         ) from exc
 

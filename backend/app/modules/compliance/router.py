@@ -118,7 +118,7 @@ async def validate_syntax(
 ) -> DSLValidateResponse:
     if (body.definition_yaml is None) == (body.definition is None):
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=("Provide exactly one of 'definition_yaml' or 'definition'."),
         )
 

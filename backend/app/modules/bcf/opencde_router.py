@@ -71,7 +71,7 @@ def _validate_guid(guid: str) -> str:
     norm = guid.strip().lower().strip("{}")
     if not _UUID_RE.match(norm):
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Invalid GUID: {guid}",
         )
     return norm

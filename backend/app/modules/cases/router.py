@@ -120,7 +120,7 @@ async def _validated(body: CaseCreateRequest | CaseUpdateRequest, case_id: str =
         blocking = blocking_findings(findings)
         if blocking:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={
                     "message": "This case cannot be shared until its errors are fixed.",
                     "findings": [f.model_dump() for f in _to_findings(blocking)],
@@ -170,7 +170,7 @@ async def pin_case(
             target = uuid.UUID(payload.case_id)
         except ValueError as exc:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="A custom case id must be the case UUID.",
             ) from exc
         if await get_case(session, case_id=target, user_id=uid) is None:

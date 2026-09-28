@@ -306,7 +306,7 @@ class PointCloudService:
         rejection = format_rejection_reason(fmt)
         if rejection is not None:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={
                     "reason": rejection,
                     "format": fmt,
@@ -325,7 +325,7 @@ class PointCloudService:
         tier = getattr(raw_tier, "value", raw_tier)
         if not is_valid_tier(tier):
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={
                     "reason": "invalid_accuracy_tier",
                     "tier": tier,
@@ -410,7 +410,7 @@ class PointCloudService:
         count = max(1, math.ceil(total_size_bytes / part_size_bytes))
         if count > _S3_MAX_PARTS:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={
                     "reason": "too_many_parts",
                     "part_count": count,
@@ -567,7 +567,7 @@ class PointCloudService:
         expected = list(range(1, len(ordered) + 1))
         if [p.part_number for p in ordered] != expected:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={
                     "reason": "parts_not_contiguous",
                     "message": "Multipart parts must be contiguous starting at part 1.",
@@ -586,7 +586,7 @@ class PointCloudService:
             stored = await self.storage.complete_multipart(session_obj, part_infos)
         except (ValueError, FileNotFoundError) as exc:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={
                     "reason": "multipart_complete_failed",
                     "message": (f"The upload could not be finalised. Re-upload any missing parts and retry. ({exc})"),
@@ -1009,7 +1009,7 @@ class PointCloudService:
                 ) from exc
             except PointDecodeError as exc:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail={"reason": "decode_failed", "message": str(exc)},
                 ) from exc
 

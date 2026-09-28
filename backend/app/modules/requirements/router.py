@@ -249,7 +249,7 @@ async def create_set(
     effective_project_id = data.project_id or project_id
     if effective_project_id is None:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="project_id is required (body or ?project_id= query parameter)",
         )
     # IDOR guard: this route reads no row, so the project is whatever the
@@ -262,7 +262,7 @@ async def create_set(
     effective_name = (data.name or "").strip()
     if not effective_name:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="name is required and must be at least 1 character",
         )
     try:
@@ -277,7 +277,7 @@ async def create_set(
         )
     except ValidationError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=exc.errors(include_url=False),
         ) from exc
     try:

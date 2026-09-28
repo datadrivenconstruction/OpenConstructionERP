@@ -411,7 +411,7 @@ class TransmittalService:
         """
         if data.reason_code not in TRANSMITTAL_REASONS:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Unknown reason_code '{data.reason_code}'",
             )
         number = await self._next_number(data.project_id)

@@ -1756,7 +1756,7 @@ class ContractsService:
         from app.modules.contracts.messages import translate as contracts_translate  # noqa: PLC0415
 
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=self._compliance_http_detail(
                 report,
                 pack_ids,
@@ -1913,7 +1913,7 @@ class ContractsService:
             len(report.errors),
         )
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=self._compliance_http_detail(
                 report,
                 [],
@@ -2121,7 +2121,7 @@ class ContractsService:
             # rather than a 500. Restating either rule in the contracts schema
             # would give the platform two lists that drift apart.
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={
                     "error": "invalid_signing_session",
                     "message": "The signing register refused this session.",
@@ -2470,7 +2470,7 @@ class ContractsService:
             and all(isinstance(k, str) and isinstance(v, str) for k, v in classification.items())
         ):
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="A classification is a map of standard to code, both text.",
             )
         raw = metadata.get(BOQ_POSITION_META_KEY)
@@ -2480,7 +2480,7 @@ class ContractsService:
             position_id = uuid.UUID(str(raw))
         except (ValueError, TypeError):
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="The BOQ position id is not a valid id.",
             ) from None
         from sqlalchemy import select  # noqa: PLC0415
@@ -2494,7 +2494,7 @@ class ContractsService:
         ).scalar_one_or_none()
         if project_id != contract.project_id:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="The BOQ position is not in this contract's project.",
             )
 
@@ -3298,7 +3298,7 @@ class ContractsService:
             "Payment application rules BLOCKED submission of claim %s (%d errors)", claim.id, len(report.errors)
         )
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=self._compliance_http_detail(
                 report,
                 [],
@@ -3680,7 +3680,7 @@ class ContractsService:
             # thing sends the reader into a door the server then holds shut.
             way_back = claim_way_back(claim.status)
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={
                     "error": "claim_not_editable",
                     "message": (
@@ -4773,7 +4773,7 @@ class ContractsService:
             policy_from_rule(rule, fallback_rate=contract.retention_percent or 0)
         except ValueError as exc:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={
                     "error": "retention_policy_unreadable",
                     "message": f"This retention policy cannot be applied: {exc}",
@@ -4805,7 +4805,7 @@ class ContractsService:
                 return policy_from_rule(rule, fallback_rate=contract.retention_percent or 0)
             except ValueError as exc:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail={
                         "error": "retention_policy_unreadable",
                         "message": f"The retention schedule of this contract cannot be applied: {exc}",
@@ -5239,7 +5239,7 @@ class ContractsService:
         event = canonical_release_event(data.event)
         if event not in RELEASE_ROW_EVENTS:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={
                     "error": "unknown_release_event",
                     "message": f"{data.event!r} is not a retention release event",
@@ -5265,7 +5265,7 @@ class ContractsService:
             plan = plan_release(held, event, rule, open_items_value=items["value"], amount=data.amount)
         except ValueError as exc:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={"error": "release_amount_required", "message": str(exc), "event": event},
             ) from exc
         bonded = await self._contract_is_bonded(contract)
@@ -5302,7 +5302,7 @@ class ContractsService:
         unknown = [i for i in wanted if i not in known]
         if unknown:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={
                     "error": "document_not_on_contract",
                     "message": "Attach documents registered on this contract",
@@ -5359,7 +5359,7 @@ class ContractsService:
             )
         if preview["amount"] <= DEC_ZERO:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={
                     "error": "nothing_to_release",
                     "message": "No retention is left to release for this event",
@@ -5483,7 +5483,7 @@ class ContractsService:
         if report.has_errors:
             heads = "; ".join(r.message for r in report.errors[:3])
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=self._compliance_http_detail(
                     report,
                     [],
@@ -5527,7 +5527,7 @@ class ContractsService:
             raise HTTPException(status_code=404, detail=translate("errors.claim_not_found", locale=get_locale()))
         if claim.contract_id != row.contract_id:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={
                     "error": "claim_on_other_contract",
                     "message": "A release is billed on a claim of its own contract",

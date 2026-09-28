@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 def _validate_kind(kind: str) -> None:
     if kind not in FILE_KINDS:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Unknown file_kind: {kind!r}",
         )
 

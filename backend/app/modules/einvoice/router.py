@@ -146,7 +146,7 @@ async def generate_invoice(
     profile = (body.profile or "xrechnung").strip().lower()
     if profile not in SUPPORTED_PROFILES:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"unknown e-invoice profile {body.profile!r}; use one of {', '.join(SUPPORTED_PROFILES)}",
         )
 
@@ -175,7 +175,7 @@ async def generate_invoice(
             )
     except EInvoiceError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"invoice is not EN 16931 complete for {profile}: {exc}",
         ) from exc
 

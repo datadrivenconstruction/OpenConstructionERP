@@ -229,7 +229,7 @@ async def open_clock(
     regime = await get_regime_by_code(session, code=payload.regime_code)
     if regime is None:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Unknown statutory regime {payload.regime_code!r}.",
         )
     application = await create_application(session, body=payload, regime=regime, created_by=str(user_id))

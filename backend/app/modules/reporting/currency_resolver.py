@@ -122,7 +122,7 @@ async def resolve_template_currency(
     # 4. Fallback.
     if require_resolved:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=(
                 "Cannot resolve currency for this document: the project has no "
                 "default_currency configured and no override_currency was supplied. "

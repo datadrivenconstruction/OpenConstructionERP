@@ -382,7 +382,7 @@ def _parse_import_decimal(raw: object, field: str, idx: int) -> Decimal:
         # bool is an int subclass - an explicit True/False is almost
         # certainly a malformed export, not "1".
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"components[{idx}].{field}: expected a number, got {type(raw).__name__}",
         )
     try:
@@ -400,23 +400,23 @@ def _parse_import_decimal(raw: object, field: str, idx: int) -> Decimal:
             dec = Decimal(text)
     except (InvalidOperation, ValueError, TypeError) as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"components[{idx}].{field}: '{raw}' is not a valid number",
         ) from exc
 
     if not dec.is_finite():
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"components[{idx}].{field}: non-finite values are not allowed",
         )
     if dec < 0:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"components[{idx}].{field}: must be >= 0",
         )
     if dec > _IMPORT_NUM_MAX:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"components[{idx}].{field}: exceeds the maximum of {_IMPORT_NUM_MAX:e}",
         )
     return dec
@@ -513,7 +513,7 @@ def _raise_param_errors(errors: list[ParamError]) -> None:
     """Raise a structured HTTP 422 from a list of ParamError (no-op when empty)."""
     if errors:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=[e.as_dict() for e in errors],
         )
 
@@ -1967,7 +1967,7 @@ class AssemblyService:
         for idx, comp_data in enumerate(data.components):
             if not isinstance(comp_data, dict):
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail=f"components[{idx}]: expected an object",
                 )
             factor_dec = _parse_import_decimal(comp_data.get("factor", 1.0), "factor", idx)

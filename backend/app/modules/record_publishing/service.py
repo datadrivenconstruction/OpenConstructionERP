@@ -219,7 +219,7 @@ async def _render_meeting_minutes(session: AsyncSession, source_id: uuid.UUID) -
     minutes = await MeetingService(session).get_minutes_row(source_id)
     if minutes is None:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="This meeting has no confirmed minutes to publish yet",
         )
 
@@ -295,7 +295,7 @@ class RecordPublishingService:
         source = _RECORD_SOURCES.get(req.source_kind)
         if source is None:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Unsupported record kind '{req.source_kind}'",
             )
 
@@ -309,7 +309,7 @@ class RecordPublishingService:
         recipients = await self._collect_recipients(req, user_id)
         if not recipients:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="At least one recipient is required to publish and distribute a record",
             )
 

@@ -481,7 +481,7 @@ async def propose_assignment(
         ) from exc
     except SkillMismatchError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail={"message": str(exc), "missing": exc.missing},
         ) from exc
     return AssignmentResponse.model_validate(assignment)
@@ -716,7 +716,7 @@ async def fulfill_request(
         ) from exc
     except SkillMismatchError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail={"message": str(exc), "missing": exc.missing},
         ) from exc
     return AssignmentResponse.model_validate(assignment)

@@ -1953,7 +1953,7 @@ class TakeoffService:
             doc_uuid = uuid.UUID(str(document_id))
         except (ValueError, AttributeError, TypeError) as exc:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(
                     "document_id must be a document UUID, not a filename. "
                     "Re-open the drawing from Project Files or the takeoff "
@@ -2535,7 +2535,7 @@ class TakeoffService:
         """
         if action not in {"accept", "reject"}:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="action must be 'accept' or 'reject'",
             )
 
@@ -2925,7 +2925,7 @@ class TakeoffService:
             position_uuid = uuid.UUID(str(boq_position_id))
         except (ValueError, AttributeError) as exc:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="boq_position_id is not a valid UUID",
             ) from exc
         boq_service = BOQService(self.session)

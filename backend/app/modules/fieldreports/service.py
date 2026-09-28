@@ -547,7 +547,7 @@ class FieldReportService:
                 bad.append(str(raw))
         if bad:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(f"document_ids reference documents that do not belong to project {project_id}: {bad}"),
             )
 

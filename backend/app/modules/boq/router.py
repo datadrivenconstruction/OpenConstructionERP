@@ -2061,7 +2061,7 @@ async def bulk_add_positions(
 
     if errors and not payloads:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"All {len(errors)} items failed validation. First error: {errors[0]['error']}",
         )
     if errors:
@@ -2080,7 +2080,7 @@ async def bulk_add_positions(
         raise
     except ValueError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(exc),
         ) from exc
 
@@ -2148,7 +2148,7 @@ async def update_position(
         # Probe-A scenario 11 - overflow cap and similar service-layer
         # validation failures are user-facing input errors, not 500s.
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(exc),
         ) from exc
     # Issue #127: master propagation count / unlink flag is on the
@@ -2194,7 +2194,7 @@ async def bulk_update_positions(
         raise
     except ValueError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(exc),
         ) from exc
 
@@ -2519,7 +2519,7 @@ async def apply_audit_fix(
         try:
             await service.update_position(data.position_id, update, actor_id=user_id)
         except ValueError as exc:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
         changed.append(str(data.position_id))
 
     elif data.fix_type == "merge_duplicate":
@@ -2545,7 +2545,7 @@ async def apply_audit_fix(
             try:
                 await service.update_position(dup_id, PositionUpdate(ordinal=new_ord), actor_id=user_id)
             except ValueError as exc:
-                raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+                raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
             changed.append(str(dup_id))
         result["kept_position_id"] = str(data.params.get("keep_position_id") or "")
 
@@ -8755,7 +8755,7 @@ async def compute_position_measurement(
         )
     except MeasurementError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"measurement error: {exc}",
         ) from exc
 

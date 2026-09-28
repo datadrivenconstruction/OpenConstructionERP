@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 def _raise_template_issues(issues: list) -> None:
     """Turn template-integrity issues into a 422 with a structured detail."""
     raise HTTPException(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         detail={
             "message": "The template has validation problems.",
             "issues": [i.as_dict() for i in issues],
@@ -241,7 +241,7 @@ class FormsService:
         check = validate_submission_answers(snapshot, final_answers)
         if not check.is_complete:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={
                     "message": "The form is not complete yet.",
                     "issues": [i.as_dict() for i in check.issues],

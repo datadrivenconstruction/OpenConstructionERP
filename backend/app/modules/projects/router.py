@@ -758,7 +758,7 @@ async def grant_folder_permission_endpoint(
         # Reduce to JSON-safe fields - pydantic's raw errors() can carry a
         # non-serialisable ``ctx`` (exception objects) that would itself 500.
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=[{"loc": list(e.get("loc", [])), "msg": e.get("msg"), "type": e.get("type")} for e in exc.errors()],
         ) from exc
 
@@ -3003,7 +3003,7 @@ async def post_import_bundle(
             target_uuid = uuid.UUID(target_project_id)
         except (ValueError, AttributeError) as exc:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="target_project_id is not a valid UUID",
             ) from exc
         await _verify_project_owner(service, target_uuid, user_id, payload)

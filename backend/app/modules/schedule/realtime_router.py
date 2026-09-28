@@ -199,7 +199,7 @@ async def guarded_update(
 def _unprocessable(detail: str):
     from fastapi import HTTPException
 
-    return HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=detail)
+    return HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=detail)
 
 
 # ── Event bridge: schedule activity events -> presence broadcasts ─────────────

@@ -132,7 +132,7 @@ async def _verify_result_access(
 def _validate_tier(tier: str | None) -> str | None:
     if tier and tier not in _TIER_VALUES:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"unknown tier '{tier}'; expected one of {', '.join(sorted(_TIER_VALUES))}",
         )
     return tier
@@ -141,7 +141,7 @@ def _validate_tier(tier: str | None) -> str | None:
 def _validate_decision_state(state: str | None) -> str | None:
     if state and state not in _DECISION_STATE_VALUES:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"unknown decision state '{state}'; expected one of {', '.join(sorted(_DECISION_STATE_VALUES))}",
         )
     return state
@@ -412,12 +412,12 @@ async def decide_result(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except NoSuggestionToConfirmError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(exc),
         ) from exc
     except DecisionPayloadError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(exc),
         ) from exc
     except LookupError as exc:

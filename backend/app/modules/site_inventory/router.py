@@ -56,7 +56,7 @@ def _parse_optional_decimal(value: str | None, field: str) -> Decimal | None:
         return Decimal(value)
     except (InvalidOperation, ValueError, TypeError) as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Invalid decimal for {field}: {value!r}",
         ) from exc
 

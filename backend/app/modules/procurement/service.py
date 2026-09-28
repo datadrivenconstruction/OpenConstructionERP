@@ -1586,7 +1586,7 @@ class ProcurementService:
         report = await self._validate_po(po, operation=operation)
         if report.has_errors:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={
                     "message": (
                         f"This purchase order has problems that must be fixed before you can "

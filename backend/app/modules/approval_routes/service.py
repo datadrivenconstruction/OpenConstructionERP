@@ -133,7 +133,7 @@ def step_holder(
 def _validate_target_kind(kind: str) -> None:
     if kind not in TARGET_KINDS:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Unknown target_kind: {kind!r}",
         )
 
@@ -141,7 +141,7 @@ def _validate_target_kind(kind: str) -> None:
 def _validate_step_mode(mode: str) -> None:
     if mode not in STEP_MODES:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Unknown step mode: {mode!r}",
         )
 
@@ -155,7 +155,7 @@ def _validate_step_quorum(step: StepCreate) -> None:
     """
     conflict = named_approver_quorum_conflict(step)
     if conflict is not None:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=conflict)
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=conflict)
 
 
 def _safe_publish(name: str, data: dict[str, object]) -> None:
@@ -650,7 +650,7 @@ class ApprovalRouteService:
             _validate_target_kind(target_kind)
         if instance_status is not None and instance_status not in INSTANCE_STATUSES:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Unknown status: {instance_status!r}",
             )
         return await self.repo.list_instances(
@@ -680,19 +680,19 @@ class ApprovalRouteService:
         route = await self.get_route(payload.route_id)
         if not route.is_active:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Route is not active",
             )
         if route.target_kind != payload.target_kind:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(f"Route target_kind {route.target_kind!r} does not match requested {payload.target_kind!r}"),
             )
 
         steps = await self.repo.list_steps(route.id)
         if not steps:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Route has no steps",
             )
 
@@ -812,7 +812,7 @@ class ApprovalRouteService:
         step = await self.repo.get_step(payload.step_id)
         if step is None or step.route_id != instance.route_id:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Step does not belong to this instance's route",
             )
         if step.ordinal != instance.current_step_ordinal:
@@ -1049,7 +1049,7 @@ class ApprovalRouteService:
         needed = min_approvals_to_clear(current_step) if current_step is not None else 1
         if needed > 1:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(
                     f"Step {instance.current_step_ordinal} needs {needed} approvals, so it "
                     f"cannot be reassigned to a single stand-in"
@@ -1065,7 +1065,7 @@ class ApprovalRouteService:
         route = await self.get_route(instance.route_id)
         if route.project_id is not None and not await self._user_can_access_project(route.project_id, to_user_id):
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Assignee does not have access to this route's project",
             )
 
@@ -1153,7 +1153,7 @@ class ApprovalRouteService:
         """Create an out-of-office hand-off of ``delegator_id``'s approvals."""
         if delegator_id == delegate_id:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Cannot delegate approvals to yourself",
             )
         delegation = Delegation(
@@ -1171,7 +1171,7 @@ class ApprovalRouteService:
         except IntegrityError as exc:
             await self.session.rollback()
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Unknown delegate user or project",
             ) from exc
         await log_activity(

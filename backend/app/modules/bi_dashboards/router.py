@@ -393,7 +393,7 @@ async def create_kpi(
         row = await service.create_custom_kpi(payload)
     except kpi_spec.KPISpecError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=exc.as_dict(),
         ) from exc
     except CustomKPICodeInUse as exc:
@@ -524,7 +524,7 @@ async def compute_kpi(
         )
     except KPIScopeUnavailable as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail={"error": "kpi_scope_unavailable", "code": exc.code, "message": str(exc)},
         ) from exc
     except CustomKPINotFound as exc:
@@ -1217,7 +1217,7 @@ async def create_alert(
         # looking at what they wrote. The message names the path into the
         # tree that was refused.
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail={"error": "invalid_alert_expression", "message": str(exc)},
         ) from exc
     return AlertRuleRead.model_validate(row)

@@ -79,12 +79,12 @@ def _validate_geo(lat: float | None, lon: float | None) -> None:
     """Raise 422 if lat/lon are out of WGS84 range (belt+braces on top of Pydantic)."""
     if lat is not None and not (-90.0 <= lat <= 90.0):
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"geo_lat {lat} is outside [-90, 90]",
         )
     if lon is not None and not (-180.0 <= lon <= 180.0):
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"geo_lon {lon} is outside [-180, 180]",
         )
 
@@ -242,7 +242,7 @@ class ProgressService:
         # Double-check pct (Pydantic schema should have already caught it)
         if not (0.0 <= data.percent_complete <= 100.0):
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"percent_complete {data.percent_complete} must be in [0, 100]",
             )
 
@@ -768,7 +768,7 @@ class ProgressService:
         """Create or update a planned S-curve point."""
         if not (0.0 <= data.planned_pct <= 100.0):
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"planned_pct {data.planned_pct} must be in [0, 100]",
             )
         plan = await self.repo.upsert_plan(

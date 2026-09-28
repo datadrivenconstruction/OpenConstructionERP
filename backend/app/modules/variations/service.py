@@ -1412,7 +1412,7 @@ class VariationsService:
         ok, errs = validate_variation_request(data)
         if not ok:
             raise HTTPException(
-                status_code=http_status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=http_status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={"errors": errs},
             )
         code = await self.vr_repo.next_code(data.project_id)
@@ -1613,7 +1613,7 @@ class VariationsService:
             agreed = _to_decimal(named_amount)
             if baseline is not None and abs(agreed - _to_decimal(baseline)) >= _MONEY_EPSILON and not note:
                 raise HTTPException(
-                    status_code=http_status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=http_status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail=(
                         "The amount being approved differs from the pricing state that was "
                         "submitted, so the approval needs a reason. Send agreed_variance_note "

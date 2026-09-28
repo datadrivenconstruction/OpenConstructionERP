@@ -201,7 +201,7 @@ async def get_current_weather(
     # is not enough. Reject explicitly to keep upstream params safe.
     if not (math.isfinite(lat) and math.isfinite(lon)):
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Coordinates must be finite numbers.",
         )
 

@@ -246,7 +246,7 @@ class ScheduleProgressService:
         activity = await self.get_activity(activity_id)
         if pct_type not in PERCENT_COMPLETE_TYPES:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Unknown percent_complete_type {pct_type!r}",
             )
         orm_steps = await self.list_steps(activity_id) if pct_type == "physical" else []

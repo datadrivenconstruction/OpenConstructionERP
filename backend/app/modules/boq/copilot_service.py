@@ -825,7 +825,7 @@ class BOQCopilotService:
         except ValueError as exc:
             # Structurally bad action (e.g. unknown type / missing payload key).
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Cannot apply action: {exc}",
             ) from exc
         except Exception as exc:  # noqa: BLE001 - capture apply failure on the action

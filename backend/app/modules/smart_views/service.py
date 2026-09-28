@@ -199,7 +199,7 @@ class SmartViewService:
             return
 
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Unknown scope_type: {scope_type!r}",
         )
 

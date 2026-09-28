@@ -100,7 +100,7 @@ async def preview(payload: AbsPreviewRequest, session: SessionDep) -> AbsPreview
     try:
         result = await _service(session).preview(payload.content, locale=payload.locale)
     except RebarScheduleError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
     return AbsPreviewResponse.model_validate(result)
 
 
@@ -145,7 +145,7 @@ async def import_schedule(
             detail=f"File exceeds the {MAX_UPLOAD_BYTES} byte limit",
         )
     if not content.strip():
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="File is empty")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="File is empty")
     try:
         result = await _service(session).import_file(
             project_id,
@@ -155,7 +155,7 @@ async def import_schedule(
             locale=locale,
         )
     except RebarScheduleError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
     await session.commit()
     return RebarImportResult(
         import_record=RebarImportResponse.model_validate(result["import_record"]),

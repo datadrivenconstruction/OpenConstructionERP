@@ -124,7 +124,7 @@ def _resolve_forecast_method(requested: str) -> str:
     if canonical is None:
         allowed = ", ".join(sorted(FORECAST_METHOD_ALIASES))
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Unknown forecast method '{requested}'. Choose one of: {allowed}.",
         )
     return canonical
@@ -1230,7 +1230,7 @@ class EVMBaselineService:
             )
         except ValueError as exc:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=str(exc),
             ) from exc
 

@@ -51,7 +51,7 @@ def _statuses(raw: str | None) -> list[str] | None:
     unknown = [v for v in values if v not in STATUSES]
     if unknown:
         raise HTTPException(
-            status_code=http_status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=http_status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail={
                 "code": "validation_error",
                 "message": f"Unknown status: {', '.join(unknown)}. Use {', '.join(STATUSES)}.",

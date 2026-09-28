@@ -237,7 +237,7 @@ async def update_threshold(
     await verify_project_access(project_id, user_id, session)
     if metric not in KNOWN_METRICS:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Unknown coordination metric '{metric}'.",
         )
     try:
@@ -250,7 +250,7 @@ async def update_threshold(
         )
     except ValueError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(exc),
         ) from exc
     # Re-evaluate to surface the updated row with current_value + level.

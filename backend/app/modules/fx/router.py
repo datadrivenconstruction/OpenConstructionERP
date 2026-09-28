@@ -67,7 +67,7 @@ def _get_fx_service(session: SessionDep) -> FxService:
 def _unknown_currency(exc: UnknownCurrencyError) -> HTTPException:
     """422 for a currency the active rates cannot price."""
     return HTTPException(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         detail=f"Unknown currency: {exc}",
     )
 
@@ -365,7 +365,7 @@ async def put_fx_policy(
     except RateSetUnavailableError as exc:
         raise _rate_set_unavailable(exc) from exc
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
     return FxPolicyResponse(**data)
 
 

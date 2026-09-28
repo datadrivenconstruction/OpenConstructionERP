@@ -84,13 +84,13 @@ def _parse_stored_rate(raw: str, from_code: str, to_code: str) -> Decimal:
         rate = Decimal(raw)
     except (InvalidOperation, ValueError) as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Stored exchange rate for {from_code}/{to_code} is not a valid number: '{raw}'",
         ) from exc
 
     if not rate.is_finite() or rate <= 0:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=(f"Stored exchange rate for {from_code}/{to_code} must be a positive finite number, got '{raw}'"),
         )
     return rate
@@ -672,7 +672,7 @@ class I18nFoundationService:
             )
         except TaxRuleError as exc:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={"code": exc.code, "message": exc.message},
             ) from exc
 
@@ -742,7 +742,7 @@ class I18nFoundationService:
             # mention the rate" - the two have to stay distinguishable, or a
             # patch that clears the rate would be validated as the old one.
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={
                     "code": "rate_required",
                     "message": "rate_pct cannot be cleared. Every tax row carries a rate; delete the row instead.",

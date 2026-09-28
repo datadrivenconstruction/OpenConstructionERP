@@ -67,9 +67,9 @@ def _raise_http(exc: Exception) -> None:
     if isinstance(exc, DuplicateViewName):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     if isinstance(exc, WhitelistError):
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
     if isinstance(exc, BudgetError):
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
     raise exc
 
 
@@ -354,7 +354,7 @@ async def export_view(
     service = SavedViewService(session)
     if fmt not in ("csv", "parquet"):
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="fmt must be 'csv' or 'parquet'",
         )
 

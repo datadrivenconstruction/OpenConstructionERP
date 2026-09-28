@@ -150,7 +150,7 @@ def _check_output_mode(value: str | None) -> None:
         return
     if value not in OUTPUT_MODES:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"output_mode must be one of {OUTPUT_MODES}, got '{value}'",
         )
 
@@ -160,7 +160,7 @@ def _check_ruleset_kind(value: str | None) -> None:
         return
     if value not in RULESET_KINDS:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"kind must be one of {RULESET_KINDS}, got '{value}'",
         )
 
@@ -694,7 +694,7 @@ async def dry_run_rule_endpoint(
         ) from exc
     except ExecutionError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(exc),
         ) from exc
 
@@ -814,7 +814,7 @@ async def run_ruleset_endpoint(
         elements = [bim_element_to_canonical(r) for r in rows]
     else:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Either elements or model_id must be supplied",
         )
 
@@ -860,7 +860,7 @@ async def run_ruleset_endpoint(
         )
     except ExecutionError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(exc),
         ) from exc
 
@@ -1031,7 +1031,7 @@ async def compile_rule_endpoint(
         )
     except ValidationError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"invalid rule definition: {exc.errors()[:3]}",
         ) from exc
 
@@ -1225,7 +1225,7 @@ async def diff_runs_endpoint(
         result = await diff_runs(session, run_id_a, run_id_b, tenant_id=tenant_id)
     except ExecutionError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(exc),
         ) from exc
     return EacRunDiffResponse(

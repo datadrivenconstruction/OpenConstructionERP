@@ -596,7 +596,7 @@ async def get_evm_summary(
             target = _date.fromisoformat(as_of_date[:10])
         except ValueError as exc:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"as_of_date must be ISO YYYY-MM-DD, got {as_of_date!r}",
             ) from exc
     else:
@@ -2573,7 +2573,7 @@ async def critical_path_activities(
 
     if project_id is None and schedule_id is None:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Either project_id or schedule_id must be provided.",
         )
 
@@ -2786,7 +2786,7 @@ async def diff_schedule(
         base_label = "provided"
     else:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Provide base_baseline_id or base_envelope.",
         )
 

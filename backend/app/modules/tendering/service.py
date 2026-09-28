@@ -349,7 +349,7 @@ class TenderingService:
                 # A pick that matches no top-level row of this bill would make
                 # an empty package that reads as a real one.
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail="None of the chosen sections is a top-level row of this BOQ",
                 )
 

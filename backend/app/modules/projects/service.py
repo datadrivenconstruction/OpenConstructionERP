@@ -411,7 +411,7 @@ class ProjectService:
             # instead of letting latency creep silently.
             if len(_PROJECT_CODE_RESERVED) >= _PROJECT_CODE_RESERVED_HARD_CAP:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail=(
                         f"Project-code reservation set exceeded "
                         f"{_PROJECT_CODE_RESERVED_HARD_CAP} entries; "
@@ -1051,7 +1051,7 @@ class ProjectService:
         unknown = [p for p in requested if p not in valid]
         if unknown:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail={
                     "error": "unknown_compliance_rule_packs",
                     "message": (

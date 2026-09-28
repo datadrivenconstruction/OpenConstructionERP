@@ -108,7 +108,7 @@ async def generate_estimate(request: RomEstimateRequest) -> RomEstimateResult:
     try:
         return build_rom_estimate(request)
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
 
 
 # ── Saved estimates (project-scoped) ─────────────────────────────────────────
@@ -179,7 +179,7 @@ async def create_estimate(
     try:
         row = await service.create_estimate(project_id, request, created_by)
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
     return _row_to_record(row)
 
 
@@ -212,7 +212,7 @@ async def create_boq_from_rom(
     try:
         return await service.create_boq_from_rom(project_id, request, created_by)
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
 
 
 @router.delete(

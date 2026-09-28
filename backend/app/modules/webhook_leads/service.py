@@ -525,12 +525,12 @@ class WebhookLeadsService:
         await self.get_source(source_id, user_id=user_id)  # 404 if missing / not owned
         if data.target_field not in ALLOWED_TARGET_FIELDS:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(f"target_field '{data.target_field}' is not a mappable CRM lead field"),
             )
         if data.transform is not None and data.transform not in ALLOWED_TRANSFORMS:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"transform '{data.transform}' is not supported",
             )
         mapping = PayloadMapping(
@@ -580,12 +580,12 @@ class WebhookLeadsService:
         fields = data.model_dump(exclude_unset=True)
         if "target_field" in fields and fields["target_field"] not in ALLOWED_TARGET_FIELDS:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="target_field is not a mappable CRM lead field",
             )
         if fields.get("transform") is not None and fields["transform"] not in ALLOWED_TRANSFORMS:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="transform is not supported",
             )
         if fields:
@@ -767,11 +767,11 @@ class WebhookLeadsService:
                 source_slug=source_slug,
                 remote_ip=remote_ip,
                 status_label="rejected",
-                http_status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                http_status=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 payload=parsed_payload,
                 error_message=msg,
             )
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=msg)
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=msg)
 
         # Create the CRM lead via the CRM service (no table duplication).
         try:

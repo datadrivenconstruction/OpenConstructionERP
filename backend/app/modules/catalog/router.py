@@ -683,7 +683,7 @@ async def adjust_prices(
     # Explicit validation - Query(gt=, le=) may not be enforced in all FastAPI versions
     if factor <= 0 or factor > 10:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Factor must be between 0 (exclusive) and 10 (inclusive), got {factor}",
         )
 

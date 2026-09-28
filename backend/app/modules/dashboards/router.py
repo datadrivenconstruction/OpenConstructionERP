@@ -144,7 +144,7 @@ async def create_snapshot(
     conversion process; there is no per-file size cap.
     """
     if not files:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="At least one file is required.")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="At least one file is required.")
     if len(files) > _MAX_UPLOAD_COUNT:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
@@ -351,7 +351,7 @@ async def get_snapshot_diff(
 
     if row_a.project_id != row_b.project_id:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=messages.translate(
                 SnapshotsNotInSameProjectError.message_key,
                 locale=locale,
@@ -684,7 +684,7 @@ async def post_cascade_values(
         ) from exc
     except InvalidSelectedColumnError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(exc),
         ) from exc
 
@@ -726,12 +726,12 @@ async def get_cascade_row_count(
         parsed = json.loads(selected) if selected else {}
     except json.JSONDecodeError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"selected is not valid JSON: {exc.msg}",
         ) from exc
     if not isinstance(parsed, dict):
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="selected must decode to an object/dict.",
         )
 
@@ -757,7 +757,7 @@ async def get_cascade_row_count(
         )
     except InvalidSelectedColumnError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(exc),
         ) from exc
 

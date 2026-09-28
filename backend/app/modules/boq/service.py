@@ -2303,7 +2303,7 @@ class BOQService:
         # parent-validation failures.
         if position_id is not None and new_parent_id == position_id:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Position cannot be its own parent (self-referencing parent_id).",
             )
 
@@ -2312,12 +2312,12 @@ class BOQService:
         parent = await self.position_repo.get_by_id(new_parent_id)
         if parent is None:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Parent position {new_parent_id} does not exist.",
             )
         if parent.boq_id != boq_id:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(
                     f"Parent position belongs to a different BOQ ({parent.boq_id}); cross-BOQ parents are not allowed."
                 ),
@@ -2424,7 +2424,7 @@ class BOQService:
         deepest_tier = base_tier + extra
         if deepest_tier > MAX_NESTING_DEPTH:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(
                     f"Maximum nesting depth of {MAX_NESTING_DEPTH} tiers "
                     f"reached - cannot place this item {deepest_tier} "
@@ -3411,12 +3411,12 @@ class BOQService:
             except Exception as exc:  # noqa: BLE001 - surface any DB failure as 422
                 logger.exception("add_position cost_item lookup failed for %s", data.cost_item_id)
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail=(f"cost_item_id does not reference an active CostItem ({type(exc).__name__})"),
                 ) from exc
             if cost_item is None or not getattr(cost_item, "is_active", False):
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail="cost_item_id does not reference an active CostItem",
                 )
             merged_metadata["cost_item_id"] = str(data.cost_item_id)
@@ -3824,7 +3824,7 @@ class BOQService:
                 cost_item = await cost_repo.get_by_id(data.cost_item_id)
                 if cost_item is None or not getattr(cost_item, "is_active", False):
                     raise HTTPException(
-                        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                         detail=(f"cost_item_id {data.cost_item_id} does not reference an active CostItem"),
                     )
                 merged_metadata["cost_item_id"] = str(data.cost_item_id)
@@ -4056,12 +4056,12 @@ class BOQService:
                     client_cost_item_id,
                 )
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail=(f"cost_item_id does not reference an active CostItem ({type(exc).__name__})"),
                 ) from exc
             if cost_item is None or not getattr(cost_item, "is_active", False):
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail="cost_item_id does not reference an active CostItem",
                 )
             # Merge into the metadata field that the rest of the function
@@ -4593,7 +4593,7 @@ class BOQService:
                     {k: type(v).__name__ for k, v in fields.items()},
                 )
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail=(
                         "Position update could not be applied. The row may have "
                         "been deleted or modified concurrently - reload and retry. "
@@ -5337,13 +5337,13 @@ class BOQService:
             )
         if source.target_id != position_id:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(f"Log entry {log_id} targets a different position ({source.target_id})"),
             )
         changes = source.changes if isinstance(source.changes, dict) else {}
         if field not in changes:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(
                     f"Field '{field}' has no recorded change in log entry "
                     f"{log_id}. Available fields: {sorted(changes.keys())}"
@@ -5358,7 +5358,7 @@ class BOQService:
                 payload_kwargs[field] = None if value is None or value == "" else float(value)
             except (TypeError, ValueError) as exc:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail=f"Cannot coerce {field}={value!r} to float",
                 ) from exc
         elif field in {"classification", "metadata", "cad_element_ids"}:
@@ -5370,7 +5370,7 @@ class BOQService:
             update_data = PositionUpdate(**payload_kwargs)
         except Exception as exc:  # noqa: BLE001 - schema rejections → 422
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(f"Cannot restore field '{field}': {exc!s}"),
             ) from exc
 
@@ -5449,12 +5449,12 @@ class BOQService:
         resources_raw = existing_meta.get("resources")
         if not isinstance(resources_raw, list):
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Position has no resources to re-pick a variant for",
             )
         if resource_idx < 0 or resource_idx >= len(resources_raw):
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(f"resource_idx {resource_idx} is out of range (position has {len(resources_raw)} resource(s))"),
             )
 
@@ -5464,14 +5464,14 @@ class BOQService:
         target_resource = resources[resource_idx]
         if not isinstance(target_resource, dict):
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Resource at index {resource_idx} is malformed",
             )
 
         available = target_resource.get("available_variants")
         if not isinstance(available, list) or not available:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(
                     "Resource has no cached variants to re-pick from. "
                     "Re-add the resource from the cost database to enable variant switching."
@@ -5488,7 +5488,7 @@ class BOQService:
                 break
         if chosen is None:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(
                     f"variant_code '{variant_code}' not found in available_variants "
                     f"({len(available)} option(s) cached on this resource)"
@@ -5499,7 +5499,7 @@ class BOQService:
             new_price = float(chosen.get("price", 0) or 0)
         except (TypeError, ValueError) as exc:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Selected variant has a malformed price",
             ) from exc
 
@@ -5587,7 +5587,7 @@ class BOQService:
                 resource_idx,
             )
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(
                     "Variant re-pick could not be applied. The position may have been "
                     f"modified concurrently - reload and retry. ({type(exc).__name__})"
@@ -5889,7 +5889,7 @@ class BOQService:
 
         if kind == "banded" and not _read_bands(meta):
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(
                     "A banded markup needs metadata.bands, a list of "
                     '{"up_to": <ceiling or null>, "percentage": <rate>} tranches.'
@@ -5903,7 +5903,7 @@ class BOQService:
             target_period = str(config.get("target_period") or "").strip() if isinstance(config, dict) else ""
             if series_id is None or not base_period or not target_period:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail=(
                         "An escalation markup needs metadata.escalation with series_id, "
                         "base_period and target_period as YYYY-MM."
@@ -6068,7 +6068,7 @@ class BOQService:
         """
         if overrides_id is not None and scope_position_id is None:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="A markup can only override another line inside a scope; set scope_position_id as well.",
             )
 
@@ -6076,25 +6076,25 @@ class BOQService:
             position = await self.position_repo.get_by_id(scope_position_id)
             if position is None or position.boq_id != boq_id:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail="scope_position_id must name a position on this BOQ.",
                 )
 
         if overrides_id is not None:
             if self_id is not None and overrides_id == self_id:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail="A markup cannot override itself.",
                 )
             target = await self.markup_repo.get_by_id(overrides_id)
             if target is None or target.boq_id != boq_id:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail="overrides_id must name a markup on this BOQ.",
                 )
             if target.scope_position_id is not None:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail="Only a bill-wide markup can be overridden; that line is itself scoped.",
                 )
 
@@ -7025,7 +7025,7 @@ class BOQService:
         role = getattr(position, "link_role", None)
         if group_id is None or role is None:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Position is not part of a linked-code group.",
             )
 

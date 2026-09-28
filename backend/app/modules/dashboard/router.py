@@ -295,7 +295,7 @@ async def _act_on_inbox_item(
         ) from exc
     except InboxActionInvalid as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail={"message": "The inbox action did not pass validation", "findings": exc.findings},
         ) from exc
     await session.commit()

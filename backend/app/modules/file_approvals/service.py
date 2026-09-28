@@ -140,7 +140,7 @@ class ApprovalService:
             tmpl = await self.session.get(FileStampTemplate, data.stamp_template_id)
             if tmpl is None:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail="Unknown stamp template",
                 )
             if tmpl.project_id is not None and tmpl.project_id != data.project_id:

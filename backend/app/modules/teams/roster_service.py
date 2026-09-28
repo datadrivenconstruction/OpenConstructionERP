@@ -457,7 +457,7 @@ class RosterService:
 
         if not display_name:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="[teams.validation.roster.no_name] Pick somebody the platform knows, or type a name",
             )
 

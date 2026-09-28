@@ -73,7 +73,7 @@ def _coerce_user_uuid(user_id: str) -> uuid.UUID | None:
 def _validate_kind(kind: str) -> None:
     if kind not in ALLOWED_FILE_KINDS:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Unknown file_kind: {kind!r}",
         )
 
@@ -81,7 +81,7 @@ def _validate_kind(kind: str) -> None:
 def _validate_target_type(t: str) -> None:
     if t not in ALLOWED_TARGET_TYPES:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"Unknown target_type: {t!r}",
         )
 
@@ -234,7 +234,7 @@ async def create_reference_route(
     try:
         return await create_reference(session, payload, actor)
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
 
 
 @router.delete(

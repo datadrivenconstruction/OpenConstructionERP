@@ -1453,7 +1453,7 @@ class PhotoService:
             )
         if detected_photo_type is None or detected_photo_type not in ALLOWED_PHOTO_TYPES:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="uploaded file content does not match an image format",
             )
 
@@ -2375,7 +2375,7 @@ class SheetService:
         except Exception as exc:
             logger.exception("Failed to process PDF: %s", safe_name)
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Failed to process PDF file: {exc}",
             )
 

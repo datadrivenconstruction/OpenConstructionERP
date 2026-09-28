@@ -561,7 +561,7 @@ class CostItemService:
             catalog = await self.session.get(CostCatalog, data.catalog_id)
             if catalog is None:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail=f"Cost catalog '{data.catalog_id}' does not exist",
                 )
             if not currency.strip():

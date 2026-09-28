@@ -150,7 +150,7 @@ class MeetingService:
                 bad.append(str(raw))
         if bad:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(f"document_ids reference documents that do not belong to project {project_id}: {bad}"),
             )
 
@@ -958,7 +958,7 @@ class MeetingService:
         problems = logic.validate_action_fields(data.owner_id, data.owner_name, data.due_date, data.status)
         if problems:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=" ".join(problems),
             )
         row = MeetingActionItem(
@@ -1005,7 +1005,7 @@ class MeetingService:
             problems = logic.validate_action_fields(new_owner_id, new_owner_name, new_due, new_status)
             if problems:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail=" ".join(problems),
                 )
 
@@ -1269,7 +1269,7 @@ class MeetingService:
         problems = logic.minutes_issue_problems(content)
         if problems:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=" ".join(problems),
             )
         row.status = "issued"

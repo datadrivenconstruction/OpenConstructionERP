@@ -729,7 +729,7 @@ class SupplierCatalogsService:
         scheme = payload.get("commodity_scheme")
         if scheme is not None and scheme not in VALID_COMMODITY_SCHEMES:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=(f"Unknown commodity scheme '{scheme}'. Expected one of: {', '.join(VALID_COMMODITY_SCHEMES)}."),
             )
         was_active = item.active
@@ -2415,7 +2415,7 @@ class SupplierCatalogsService:
             normalised = normalise_floor_currency(resulting_abs, resulting_currency)
         except ValueError as exc:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=str(exc),
             ) from exc
         if "currency" in updates:
