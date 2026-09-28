@@ -75,6 +75,17 @@ def test_the_project_wipe_runs_with_the_flag(tmp_path: Path) -> None:
     assert _project_count(db) == 0
 
 
+def test_a_rerun_without_the_wipe_does_not_duplicate_the_showcase() -> None:
+    specs = showcase.DEMO_PROJECTS
+    first_code = specs[0]["create"]["project_code"]
+
+    assert showcase.specs_not_yet_seeded(specs, []) == specs
+    remaining = showcase.specs_not_yet_seeded(specs, [{"project_code": first_code}, {"project_code": None}])
+    assert [s["create"]["project_code"] for s in remaining] == [s["create"]["project_code"] for s in specs[1:]]
+    everything = [{"project_code": s["create"]["project_code"]} for s in specs]
+    assert showcase.specs_not_yet_seeded(specs, everything) == []
+
+
 def test_the_bim_wipe_refuses_without_the_flag(tmp_path: Path) -> None:
     (tmp_path / "model-a").mkdir()
 

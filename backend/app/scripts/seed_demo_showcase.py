@@ -26,7 +26,8 @@ Assumes the backend is running on http://localhost:8000. The seed account
 signs in with the role it already has: this script never changes a role, so
 an account that may not create projects gets a refusal from the API rather
 than a promotion. Without --wipe-all-projects nothing that already exists is
-deleted, and re-running adds a second set of the three projects.
+deleted, and a re-run creates only the showcase projects (matched by project
+code) the account cannot already see.
 """
 
 from __future__ import annotations
@@ -324,6 +325,22 @@ def wipe_orphan_bim_files(*, confirmed: bool, bim_dir: pathlib.Path | None = Non
     return removed
 
 
+async def list_visible_projects(client: httpx.AsyncClient, headers: dict) -> list[dict]:
+    r = await client.get("/api/v1/projects/", params={"limit": 500}, headers=headers)
+    r.raise_for_status()
+    return r.json()
+
+
+def specs_not_yet_seeded(specs: list[dict], existing: list[dict]) -> list[dict]:
+    """Drop the specs whose project code the account can already see.
+
+    Without the wipe a re-run would otherwise add a second copy of each
+    showcase project next to the first.
+    """
+    codes = {p.get("project_code") for p in existing if p.get("project_code")}
+    return [spec for spec in specs if spec["create"]["project_code"] not in codes]
+
+
 async def create_project(
     client: httpx.AsyncClient,
     headers: dict,
@@ -558,9 +575,14 @@ async def main(argv: list[str] | None = None) -> None:
             print("[3/7] BIM data directories kept.")
 
         # ── Create projects ──
-        print("\n[4/7] Creating 3 demo projects...")
+        existing = await list_visible_projects(client, headers)
+        pending = specs_not_yet_seeded(DEMO_PROJECTS, existing)
+        if not pending:
+            print(f"\n      The showcase is already present. Pass {WIPE_FLAG} to rebuild it.")
+            return
+        print(f"\n[4/7] Creating {len(pending)} demo project(s)...")
         created_projects: list[dict] = []
-        for spec in DEMO_PROJECTS:
+        for spec in pending:
             p = await create_project(client, headers, spec["create"])
             created_projects.append({"project": p, "spec": spec})
             print(f"      [OK] [{spec['key']}] {p['name']} -- id={p['id'][:8]}")
