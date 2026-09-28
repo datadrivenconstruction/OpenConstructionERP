@@ -3408,15 +3408,16 @@ def create_app() -> FastAPI:
         Trusted-Publisher OIDC always produces a wheel, GitHub release
         creation is sometimes skipped on hotfixes). Falls back to GitHub
         releases if PyPI is unreachable. Both lookups are cached on
-        ``app.state`` for 4 hours so the settings panel can poll cheaply
-        without burning the unauthenticated GitHub rate limit.
+        ``app.state`` for a day (``VERSION_CHECK_TTL_S``), so the automatic
+        check asks the internet at most once a day and never burns the
+        unauthenticated GitHub rate limit.
 
         ``release_notes``, ``release_url``, ``published_at`` and ``assets``
         are answered only when the GitHub release they were read from names
         the same version as ``latest_version``. Two sources that can
         legitimately be a release apart must not be spliced into one sentence.
 
-        ``force=true`` skips the four-hour cache. It is what About's "Check for
+        ``force=true`` skips the day-long cache. It is what About's "Check for
         updates" button sends: a person who pressed it is owed today's answer,
         not one from this morning.
 
@@ -3428,7 +3429,7 @@ def create_app() -> FastAPI:
         """
         import httpx
 
-        from app.core.update_check_policy import update_check_disabled
+        from app.core.update_check_policy import VERSION_CHECK_TTL_S, update_check_disabled
 
         current = settings.app_version
         repo = "datadrivenconstruction/OpenConstructionERP"
@@ -3457,7 +3458,7 @@ def create_app() -> FastAPI:
             }
 
         cached = getattr(app.state, cache_key, None)
-        if cached and not force and (time.time() - cached["checked_at"]) < 14400:
+        if cached and not force and (time.time() - cached["checked_at"]) < VERSION_CHECK_TTL_S:
             return {**cached["data"], **await _runtime_upgrade_state(_user_id)}
 
         latest: str | None = None

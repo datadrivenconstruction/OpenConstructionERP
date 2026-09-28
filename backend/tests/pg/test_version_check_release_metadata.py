@@ -244,3 +244,27 @@ async def test_the_desktop_hears_about_a_release_without_a_button(ask, monkeypat
     assert data["update_available"] is True
     assert data["latest_version"] == "99.0.0"
     assert data.get("check_disabled", False) is False
+
+
+async def test_the_automatic_answer_is_held_for_a_day(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Asked again only once a day has passed, not after the old four hours."""
+    monkeypatch.setattr(update_check_policy, "update_check_disabled", lambda home=None: False)
+    app = create_app()
+    app.dependency_overrides[get_current_user_id] = lambda: "version-check-reader"
+    transport = ASGITransport(app=app)
+
+    def age_cache(seconds: float) -> None:
+        app.state._version_check_cache["checked_at"] -= seconds
+
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        monkeypatch.setattr(httpx, "AsyncClient", _FakeClient)
+        _FakeClient.routes = {PYPI: _pypi_version("15.1.0"), GITHUB: _github_release("v15.1.0")}
+        await client.get("/api/system/version-check")
+        _FakeClient.routes = {PYPI: _pypi_version("15.2.0"), GITHUB: _github_release("v15.2.0")}
+        age_cache(23 * 60 * 60)
+        within_the_day = (await client.get("/api/system/version-check")).json()
+        age_cache(60 * 60 + 1)
+        next_day = (await client.get("/api/system/version-check")).json()
+
+    assert within_the_day["latest_version"] == "15.1.0"
+    assert next_day["latest_version"] == "15.2.0"

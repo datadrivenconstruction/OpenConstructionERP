@@ -10,17 +10,18 @@
  * Implementation notes:
  *
  * - **Where the answer comes from.** The server asks PyPI, falls back to the
- *   GitHub release, compares versions itself and caches the result for four
- *   hours. This used to be a browser call straight to api.github.com, which
+ *   GitHub release, compares versions itself and caches the result for a
+ *   day. This used to be a browser call straight to api.github.com, which
  *   costs the anonymous rate limit — 60 requests an hour per IP, shared by
  *   everyone in an office — and cannot be answered at all on an air-gapped
  *   install, where it failed once an hour per tab and logged every attempt.
  *   The server also knows things the browser cannot see: which version is
  *   really installed, and whether this build can upgrade itself.
  *
- * - **Caching.** The query holds the answer for the same four hours the
- *   server caches it, so mounting the widget again costs nothing and a
- *   long-lived tab still notices a release that lands while it is open.
+ * - **Caching.** The query holds the answer for the same day the server
+ *   caches it and asks again once that day is over, so mounting the widget
+ *   again costs nothing and a desktop window left open for a week still
+ *   hears about a release within a day of it landing.
  *
  * - **Failure.** Anything other than a well-formed answer — offline, a proxy
  *   answering with its own page, a slow endpoint, an error — renders nothing
@@ -105,7 +106,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const VERSION_CHECK_URL = '/api/system/version-check';
 /** Matches the server's own cache window, so holding the answer here costs
  *  the server nothing and asking again inside it would gain nothing. */
-const VERSION_CHECK_TTL_MS = 4 * 60 * 60 * 1000;
+export const VERSION_CHECK_TTL_MS = 24 * 60 * 60 * 1000;
 // OC-16: dismiss state persists across sessions via localStorage so the
 // banner does not reappear on every page load. The guard is version-scoped:
 // dismissing v17.4.1 does not suppress a later v17.5.0 notification.
@@ -542,11 +543,13 @@ export function useUpdateCheck(): VersionCheck | null {
     queryFn: () => fetchVersionCheck(),
     enabled: !UPDATE_CHECK_DISABLED,
     staleTime: VERSION_CHECK_TTL_MS,
-    // No interval. A tab left open for days will not hear about a release
-    // until it is reloaded, and that is the trade this widget should make: a
-    // timer asks again forever, including on the install that can never be
-    // answered, which is the shape of the storm this change removed. A
-    // release is worth knowing about within the session that follows it.
+    // Once a day, also in a window left open for days, which is how the
+    // desktop app is used. The storm the old browser-side call produced was
+    // one request an hour per tab straight to GitHub; this is one request a
+    // day to our own server, which answers from its own day-long cache, and
+    // an install that can never be answered pays one failed call a day.
+    refetchInterval: VERSION_CHECK_TTL_MS,
+    refetchIntervalInBackground: true,
     refetchOnWindowFocus: false,
     retry: false,
   });
