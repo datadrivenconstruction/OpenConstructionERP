@@ -136,3 +136,23 @@ def test_the_declared_locale_survives_the_frontend_resolver(slug: str, expected:
     m = next((p for p in discover_packs() if p.slug == slug), None)
     assert m is not None, f"{slug} is not discoverable"
     assert _match_supported(m.default_locale, offered) == expected
+
+
+def test_no_pack_boots_in_english_unless_it_asks_for_english() -> None:
+    """A declared language the resolver cannot place falls back to English, silently.
+
+    Norway declared ``nb``, the BCP-47 tag for Bokmal, while the platform ships
+    its Norwegian bundle as ``no``. The resolver found nothing for ``nb`` and
+    answered ``en``, so the Norwegian pack opened in English with a complete
+    Norwegian translation on disk. Asked of every pack, because the fallback
+    is a plausible answer and nothing downstream can tell it from a choice.
+    """
+    offered = set(_offered_languages())
+    packs = discover_packs()
+    assert len(packs) > 30, f"only {len(packs)} packs discovered"
+    english_by_accident = {
+        m.slug: m.default_locale
+        for m in packs
+        if _match_supported(m.default_locale, offered) in (None, "en") and not m.default_locale.lower().startswith("en")
+    }
+    assert not english_by_accident, f"packs whose declared locale resolves to English: {english_by_accident}"
