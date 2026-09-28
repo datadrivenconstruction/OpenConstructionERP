@@ -2790,7 +2790,15 @@ class DwgTakeoffService:
         # body and the router only authorises the annotation's own project, so
         # without this gate a caller could link to - and, with push_quantity,
         # overwrite the quantity of - a foreign tenant's BOQ position.
-        await self._assert_position_in_project(position_id, item.project_id)
+        boq = await self._assert_position_in_project(position_id, item.project_id)
+        if push_quantity:
+            # A locked bill refuses every position write (BOQService._ensure_not_locked),
+            # and the push rewrites the quantity and total. Refuse before the link is
+            # written so a refused push leaves nothing half-done; a plain link is
+            # bookkeeping and stays allowed on a locked bill.
+            from app.modules.boq.service import BOQService
+
+            await BOQService(self.session)._ensure_boq_writable(boq.id)  # noqa: SLF001 - the BOQ lock guard
 
         await self.annotation_repo.update_fields(annotation_id, linked_boq_position_id=position_id)
         await self.session.refresh(item)
@@ -2805,13 +2813,16 @@ class DwgTakeoffService:
         self,
         position_id: str,
         project_id: uuid.UUID,
-    ) -> None:
+    ) -> Any:
         """Raise 404 unless ``position_id`` belongs to a BOQ in ``project_id``.
 
         Mirrors the read-side guard in :meth:`_resolve_position_rate`: a
         foreign-project (or missing) position is reported as "not found" so the
         endpoint never confirms the existence of, links to, or writes into
         another tenant's BOQ position.
+
+        Returns:
+            The position's BOQ, so the caller can check the bill's lock.
         """
         try:
             position_uuid = uuid.UUID(str(position_id))
@@ -2830,6 +2841,7 @@ class DwgTakeoffService:
             raise HTTPException(status_code=404, detail="BOQ position not found") from exc
         if boq is None or str(boq.project_id) != str(project_id):
             raise HTTPException(status_code=404, detail="BOQ position not found")
+        return boq
 
     async def _push_quantity_to_position(self, position_id: str, annotation: DwgAnnotation) -> None:
         """Copy an annotation's value into a BOQ position's quantity.

@@ -2896,7 +2896,15 @@ class TakeoffService:
         # project, so without this a caller could link to - and, with
         # push_quantity, overwrite the quantity of - a position in a project
         # they cannot access.
-        await self._assert_position_in_project(boq_position_id, item.project_id)
+        boq = await self._assert_position_in_project(boq_position_id, item.project_id)
+        if push_quantity:
+            # A locked bill refuses every position write (BOQService._ensure_not_locked),
+            # and the push rewrites the quantity and total. Refuse before the link is
+            # written so a refused push leaves nothing half-done; a plain link is
+            # bookkeeping and stays allowed on a locked bill.
+            from app.modules.boq.service import BOQService  # noqa: PLC0415 - avoid import cycle
+
+            await BOQService(self.session)._ensure_boq_writable(boq.id)  # noqa: SLF001 - the BOQ lock guard
         await self.measurement_repo.update_fields(measurement_id, linked_boq_position_id=boq_position_id)
         await self.session.refresh(item)
         logger.info(
@@ -2913,11 +2921,14 @@ class TakeoffService:
             await self.session.refresh(item)
         return item
 
-    async def _assert_position_in_project(self, boq_position_id: str, project_id: Any) -> None:
+    async def _assert_position_in_project(self, boq_position_id: str, project_id: Any) -> Any:
         """Raise 404 unless the BOQ position belongs to ``project_id``.
 
         IDOR defence for the takeoff→BOQ link: prevents linking/pushing a
         measurement onto a BOQ position in a project the caller cannot access.
+
+        Returns:
+            The position's BOQ, so the caller can check the bill's lock.
         """
         from app.modules.boq.service import BOQService  # noqa: PLC0415 - avoid import cycle
 
@@ -2938,6 +2949,7 @@ class TakeoffService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="BOQ position not found in this project",
             )
+        return boq
 
     async def _push_quantity_to_position(self, boq_position_id: str, measurement: Any) -> None:
         """Copy a measurement's value into a BOQ position's quantity.
