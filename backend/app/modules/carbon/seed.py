@@ -23,6 +23,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from typing import Iterable
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.carbon.models import (
@@ -384,13 +385,41 @@ async def seed_carbon_demo(
     """Insert deterministic demo data and return per-entity counts."""
     rng = random.Random(_SEED)
 
+    # The EPD library and its factors are shared by every project, and
+    # ``epd_id`` is unique. Enrichment runs this seed whenever no inventory
+    # exists, which is true again after a pack switch has deleted the previous
+    # pack's projects, so a second run reuses the library it wrote the first
+    # time instead of inserting it again and failing on the index. Both lists
+    # are still built, in the same order, so the generator reaches the project
+    # rows below at the same point and they stay deterministic.
     epds = _build_epd_records(rng)
-    session.add_all(epds)
-    await session.flush()
+    wanted = [e.epd_id for e in epds]
+    stored = {
+        e.epd_id: e
+        for e in (await session.execute(select(EPDRecord).where(EPDRecord.epd_id.in_(wanted)))).scalars().all()
+    }
+    reuse = len(stored) == len(wanted)
+    if reuse:
+        epds = [stored[epd_id] for epd_id in wanted]
+    else:
+        session.add_all(epds)
+        await session.flush()
 
     factors = _build_factors(rng, epds)
-    session.add_all(factors)
-    await session.flush()
+    if reuse:
+        notes = [f.notes for f in factors]
+        stored_factors = {
+            f.notes: f
+            for f in (
+                await session.execute(select(MaterialCarbonFactor).where(MaterialCarbonFactor.notes.in_(notes)))
+            ).scalars()
+        }
+        reuse = len(stored_factors) == len(notes)
+        if reuse:
+            factors = [stored_factors[n] for n in notes]
+    if not reuse:
+        session.add_all(factors)
+        await session.flush()
 
     inv_count = 0
     embodied_count = 0
