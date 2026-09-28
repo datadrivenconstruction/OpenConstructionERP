@@ -1241,3 +1241,153 @@ def test_detect_bid_outliers_skips_zero_totals() -> None:
     # All non-zero bids are within ±2σ of their mean.
     assert out["low_outliers"] == []
     assert out["high_outliers"] == []
+
+
+# ── Service: a decided package keeps its parts unchanged ──────────────────
+#
+# Deleting a line item, bidder or invitation of an awarded or cancelled
+# package is refused (``_assert_package_parts_deletable``). Adding or editing
+# them is refused the same way: a line added after award was never priced by
+# any bid, a bidder added or renamed after award rewrites who competed, and a
+# re-disqualified bidder rewrites why it lost. Each refusal is paired with the
+# same write on an undecided package, which still goes through. Bookkeeping
+# on invitations (opened, declined, resend) is left open on purpose.
+
+
+def _seed_parts(svc: BidManagementService, package_id: uuid.UUID) -> dict[str, Any]:
+    from app.modules.bid_management.models import Bidder, BidInvitation, BidPackageLineItem
+
+    line = BidPackageLineItem(
+        package_id=package_id, code="01", description="Concrete", unit="m3", quantity="5", order_index=0
+    )
+    bidder = Bidder(package_id=package_id, company_name="Seed Co", status="active")
+    inv = BidInvitation(package_id=package_id, invitee_email="seed@example.com", status="pending")
+    for repo, row in ((svc.line_repo, line), (svc.bidder_repo, bidder), (svc.invitation_repo, inv)):
+        row.id = uuid.uuid4()
+        repo.rows[row.id] = row
+    return {"line": line, "bidder": bidder, "invitation": inv}
+
+
+def _parts_snapshot(svc: BidManagementService) -> dict[str, Any]:
+    return {
+        name: {rid: {k: v for k, v in vars(row).items() if not k.startswith("_")} for rid, row in repo.rows.items()}
+        for name, repo in (
+            ("lines", svc.line_repo),
+            ("bidders", svc.bidder_repo),
+            ("invitations", svc.invitation_repo),
+        )
+    }
+
+
+def _boq_position_id() -> uuid.UUID:
+    return uuid.UUID("00000000-0000-0000-0000-00000000b0a0")
+
+
+async def _edit_add_lines_from_boq(svc: BidManagementService, pid: uuid.UUID, _parts: dict[str, Any]) -> Any:
+    from app.modules.bid_management.schemas import BidPackageLinesFromBOQ
+
+    pos = SimpleNamespace(ordinal="02", description="Rebar", unit="t", quantity="2", unit_rate="0")
+    svc._load_project_positions = AsyncMock(return_value={_boq_position_id(): pos})  # type: ignore[method-assign]
+    return await svc.add_lines_from_boq(pid, BidPackageLinesFromBOQ(position_ids=[_boq_position_id()]))
+
+
+async def _edit_create_line(svc: BidManagementService, pid: uuid.UUID, _parts: dict[str, Any]) -> Any:
+    from app.modules.bid_management.schemas import BidPackageLineItemCreate
+
+    return await svc.create_line(BidPackageLineItemCreate(package_id=pid, code="02", description="Rebar"))
+
+
+async def _edit_bulk_create_lines(svc: BidManagementService, pid: uuid.UUID, _parts: dict[str, Any]) -> Any:
+    from app.modules.bid_management.schemas import BidPackageLineItemCreate
+
+    return await svc.bulk_create_lines(pid, [BidPackageLineItemCreate(package_id=pid, code="02")])
+
+
+async def _edit_update_line(svc: BidManagementService, _pid: uuid.UUID, parts: dict[str, Any]) -> Any:
+    from app.modules.bid_management.schemas import BidPackageLineItemUpdate
+
+    return await svc.update_line(parts["line"].id, BidPackageLineItemUpdate(quantity=Decimal("50")))
+
+
+async def _edit_create_bidder(svc: BidManagementService, pid: uuid.UUID, _parts: dict[str, Any]) -> Any:
+    from app.modules.bid_management.schemas import BidderCreate
+
+    return await svc.create_bidder(BidderCreate(package_id=pid, company_name="Late Co"))
+
+
+async def _edit_update_bidder(svc: BidManagementService, _pid: uuid.UUID, parts: dict[str, Any]) -> Any:
+    from app.modules.bid_management.schemas import BidderUpdate
+
+    return await svc.update_bidder(parts["bidder"].id, BidderUpdate(company_name="Renamed Co"))
+
+
+async def _edit_disqualify_bidder(svc: BidManagementService, _pid: uuid.UUID, parts: dict[str, Any]) -> Any:
+    return await svc.disqualify_bidder(parts["bidder"].id, reason="After the fact")
+
+
+async def _edit_create_invitation(svc: BidManagementService, pid: uuid.UUID, _parts: dict[str, Any]) -> Any:
+    from app.modules.bid_management.schemas import BidInvitationCreate
+
+    return await svc.create_invitation(BidInvitationCreate(package_id=pid, invitee_email="late@example.com"))
+
+
+async def _edit_update_invitation(svc: BidManagementService, _pid: uuid.UUID, parts: dict[str, Any]) -> Any:
+    from app.modules.bid_management.schemas import BidInvitationUpdate
+
+    return await svc.update_invitation(parts["invitation"].id, BidInvitationUpdate(invitee_company_name="Other"))
+
+
+_PART_EDITS = {
+    # name: (edit(svc, package_id, seeded parts), plural in the detail)
+    "add_lines_from_boq": (_edit_add_lines_from_boq, "line items"),
+    "create_line": (_edit_create_line, "line items"),
+    "bulk_create_lines": (_edit_bulk_create_lines, "line items"),
+    "update_line": (_edit_update_line, "line items"),
+    "create_bidder": (_edit_create_bidder, "bidders"),
+    "update_bidder": (_edit_update_bidder, "bidders"),
+    "disqualify_bidder": (_edit_disqualify_bidder, "bidders"),
+    "create_invitation": (_edit_create_invitation, "invitations"),
+    "update_invitation": (_edit_update_invitation, "invitations"),
+}
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("package_status", ["awarded", "cancelled"])
+@pytest.mark.parametrize("edit", sorted(_PART_EDITS))
+async def test_editing_a_part_of_a_decided_package_is_refused(edit: str, package_status: str) -> None:
+    from fastapi import HTTPException
+
+    run, what = _PART_EDITS[edit]
+    svc = _make_service()
+    publish_mock = AsyncMock()
+    with patch("app.modules.bid_management.service.event_bus.publish_detached", publish_mock):
+        pkg = await svc.create_package(_pkg_data(code=f"BP-DE-{edit}"), user_id="u1")
+        parts = _seed_parts(svc, pkg.id)
+        pkg.status = package_status
+        before = _parts_snapshot(svc)
+        publish_mock.reset_mock()
+
+        with pytest.raises(HTTPException) as exc:
+            await run(svc, pkg.id, parts)
+
+    assert exc.value.status_code == 409
+    assert exc.value.detail == f"Package is '{package_status}' and its {what} can no longer be changed"
+    assert _parts_snapshot(svc) == before
+    publish_mock.assert_not_called()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("package_status", ["draft", "published", "open", "closed"])
+@pytest.mark.parametrize("edit", sorted(_PART_EDITS))
+async def test_editing_a_part_of_an_undecided_package_is_allowed(edit: str, package_status: str) -> None:
+    run, _what = _PART_EDITS[edit]
+    svc = _make_service()
+    with patch("app.modules.bid_management.service.event_bus.publish_detached"):
+        pkg = await svc.create_package(_pkg_data(code=f"BP-UE-{edit}"), user_id="u1")
+        parts = _seed_parts(svc, pkg.id)
+        pkg.status = package_status
+        before = _parts_snapshot(svc)
+
+        await run(svc, pkg.id, parts)
+
+    assert _parts_snapshot(svc) != before

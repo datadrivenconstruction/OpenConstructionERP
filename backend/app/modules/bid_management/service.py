@@ -1078,6 +1078,23 @@ class BidManagementService:
                 detail=f"Package is '{package.status}' and its {what} can no longer be deleted",
             )
 
+    async def _assert_package_parts_editable(self, package_id: uuid.UUID, what: str) -> None:
+        """Refuse adding or changing a line item, bidder or invitation of a decided package.
+
+        The sibling of ``_assert_package_parts_deletable``. Once a package is
+        awarded or cancelled its scope and its field of bidders are what the
+        decision was taken on: a line added afterwards was never priced by any
+        bid, and a bidder added, renamed or disqualified afterwards rewrites
+        who competed and why they lost. Bookkeeping on invitations (opened,
+        declined, sent, resend) stays open and does not go through here.
+        """
+        package = await self.package_repo.get_by_id(package_id)
+        if package is not None and package.status in DECIDED_PACKAGE_STATES:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Package is '{package.status}' and its {what} can no longer be changed",
+            )
+
     async def _transition_package(self, package: BidPackage, new_status: str) -> None:
         if new_status not in allowed_package_transitions(package.status):
             raise HTTPException(
@@ -1354,6 +1371,7 @@ class BidManagementService:
         from app.modules.boq.service import _is_section  # noqa: PLC0415
 
         package = await self.get_package(package_id)
+        await self._assert_package_parts_editable(package_id, "line items")
         positions = await self._load_project_positions(package.project_id, data.position_ids)
         existing = await self.line_repo.list_for_package(package_id)
         already = {line.boq_position_id for line in existing if line.boq_position_id is not None}
@@ -1380,6 +1398,7 @@ class BidManagementService:
 
     async def create_line(self, data: BidPackageLineItemCreate) -> BidPackageLineItem:
         package = await self.get_package(data.package_id)  # 404 if missing
+        await self._assert_package_parts_editable(data.package_id, "line items")
         if data.boq_position_id is not None:
             await self._load_project_positions(package.project_id, [data.boq_position_id])
         line = BidPackageLineItem(
@@ -1401,6 +1420,7 @@ class BidManagementService:
         self, package_id: uuid.UUID, items: list[BidPackageLineItemCreate]
     ) -> list[BidPackageLineItem]:
         package = await self.get_package(package_id)
+        await self._assert_package_parts_editable(package_id, "line items")
         await self._load_project_positions(
             package.project_id, [item.boq_position_id for item in items if item.boq_position_id is not None]
         )
@@ -1426,6 +1446,7 @@ class BidManagementService:
         line = await self.line_repo.get_by_id(line_id)
         if line is None:
             raise HTTPException(status_code=404, detail="Line not found")
+        await self._assert_package_parts_editable(line.package_id, "line items")
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
         if "quantity" in fields and fields["quantity"] is not None:
             fields["quantity"] = str(fields["quantity"])
@@ -1475,6 +1496,7 @@ class BidManagementService:
 
     async def create_bidder(self, data: BidderCreate) -> Bidder:
         await self.get_package(data.package_id)
+        await self._assert_package_parts_editable(data.package_id, "bidders")
         subcontractor_id, contact_id = await self._resolve_bidder_links(data.subcontractor_id, data.contact_id)
         bidder = Bidder(
             package_id=data.package_id,
@@ -1494,6 +1516,7 @@ class BidManagementService:
         bidder = await self.bidder_repo.get_by_id(bidder_id)
         if bidder is None:
             raise HTTPException(status_code=404, detail=translate("errors.bidder_not_found", locale=get_locale()))
+        await self._assert_package_parts_editable(bidder.package_id, "bidders")
         fields = data.model_dump(exclude_unset=True)
         if "subcontractor_id" in fields or "contact_id" in fields:
             # A new subcontractor brings its own contact unless one is given;
@@ -1523,6 +1546,7 @@ class BidManagementService:
         bidder = await self.bidder_repo.get_by_id(bidder_id)
         if bidder is None:
             raise HTTPException(status_code=404, detail=translate("errors.bidder_not_found", locale=get_locale()))
+        await self._assert_package_parts_editable(bidder.package_id, "bidders")
         bidder.status = "disqualified"
         bidder.disqualification_reason = reason
         await self.session.flush()
@@ -1543,6 +1567,7 @@ class BidManagementService:
 
     async def create_invitation(self, data: BidInvitationCreate) -> BidInvitation:
         await self.get_package(data.package_id)
+        await self._assert_package_parts_editable(data.package_id, "invitations")
         invitation = BidInvitation(
             package_id=data.package_id,
             bidder_ref_id=data.bidder_ref_id,
@@ -1576,6 +1601,7 @@ class BidManagementService:
         inv = await self.invitation_repo.get_by_id(invitation_id)
         if inv is None:
             raise HTTPException(status_code=404, detail=translate("errors.invitation_not_found", locale=get_locale()))
+        await self._assert_package_parts_editable(inv.package_id, "invitations")
         fields = data.model_dump(exclude_unset=True)
         new_status = fields.get("status")
         if new_status is not None and new_status != inv.status:
