@@ -385,3 +385,42 @@ async def test_stream_skips_resources_when_pack_has_no_regions(
         count = (await s.execute(select(func.count()).select_from(CostItem))).scalar_one()
     assert count == 0
     assert events[-1][0] == "done"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("stream", [True, False], ids=["stream", "batch"])
+async def test_a_cost_base_that_fails_to_load_is_an_error_not_a_skip(
+    monkeypatch: pytest.MonkeyPatch,
+    session_factory: async_sessionmaker[AsyncSession],
+    stream: bool,
+) -> None:
+    """A region whose import raises must fail the step, and with it the install.
+
+    ``skipped`` means the pack asked for nothing this step can do, which is
+    what a pack without ``cwicr_regions`` gets and what the dialog greys out.
+    A download that timed out or an import that raised is the opposite: the
+    pack asked for a cost base and did not get one. Reporting that as
+    ``skipped`` let the whole install finish with ``ok: true`` and an empty
+    cost database behind it.
+    """
+    _patch_orchestrator(monkeypatch, session_factory, demos_installed=[])
+
+    async def _broken_loader(db_id: str, _session: AsyncSession) -> dict[str, Any]:
+        raise RuntimeError(f"download of {db_id} timed out")
+
+    monkeypatch.setattr("app.modules.costs.router.load_cwicr_region", _broken_loader)
+
+    if stream:
+        result, loaded, _resources = await fi._step_cost_db_detailed(_PACK_SLUG)
+    else:
+        result, loaded = await fi._step_cost_db(_PACK_SLUG)
+    assert loaded == []
+    assert result.status == "error", result
+    assert result.detail["errors"][0]["db_id"] == _RESOLVED_DB_ID
+
+    if stream:
+        events = await _run_stream(
+            FullInstallRequest(slug=_PACK_SLUG, set_locale=True, install_cost_db=True, vectorize=False, demo_count=0)
+        )
+        assert events[-1][0] == "done"
+        assert events[-1][1]["ok"] is False, events[-1][1]
