@@ -27,6 +27,7 @@ Run:
 
 from __future__ import annotations
 
+import types
 import typing
 import uuid
 from decimal import Decimal
@@ -865,6 +866,13 @@ def test_is_human_decision_covers_the_whole_status_vocabulary():
     assert svc.is_human_decision(None) is False
 
 
+class _OpenRunRepo:
+    """update_group reads the group's run to refuse edits on a closed run."""
+
+    async def get_by_id(self, run_id):
+        return types.SimpleNamespace(id=run_id, status="review")
+
+
 @pytest.mark.parametrize("forged", ["confirmed", "overridden"])
 async def test_update_group_refuses_to_forge_a_human_decision(forged):
     """PATCH cannot stamp a human decision: it records no deciding user.
@@ -873,6 +881,7 @@ async def test_update_group_refuses_to_forge_a_human_decision(forged):
     only one that writes confirmed_by / confirmed_at.
     """
     service = AiEstimatorService.__new__(AiEstimatorService)
+    service.run_repo = _OpenRunRepo()
     grp = _FakeGroup()
     spec = schemas.GroupUpdate(status=forged)
 
@@ -887,6 +896,7 @@ async def test_update_group_still_accepts_a_workflow_status():
     """The guard is narrow: skipping a group is an ordinary edit, not a claim
     that someone approved a rate, so it must keep working."""
     service = AiEstimatorService.__new__(AiEstimatorService)
+    service.run_repo = _OpenRunRepo()
     grp = _FakeGroup()
     written = {}
 

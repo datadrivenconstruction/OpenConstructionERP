@@ -96,6 +96,7 @@ _INTAKE_PHASES: tuple[str, ...] = (
 # Vector-probe coverage thresholds (reuse the module's confidence bands).
 from app.modules.ai_estimator.service import (  # noqa: E402
     CONFIDENCE_MEDIUM_THRESHOLD,
+    _refuse_if_run_closed,
 )
 
 # A probe scoring below this floor is treated as no usable match (a gap).
@@ -208,6 +209,7 @@ class IntakeService:
         self, run: AiEstimatorRun, intake: AiEstimatorIntake, spec: schemas.IntakeAnswerRequest
     ) -> AiEstimatorIntake:
         """Record the current round's answers and (optionally) advance the FSM."""
+        _refuse_if_run_closed(run)
         pt = self._require_type(intake, spec.project_type)
         if spec.project_type and spec.project_type != intake.detected_type:
             # The user changed the type: re-seed the sheet from the raw text.
@@ -245,6 +247,7 @@ class IntakeService:
         self, run: AiEstimatorRun, intake: AiEstimatorIntake, spec: schemas.ConfirmParametersRequest
     ) -> AiEstimatorIntake:
         """Confirm the parameter sheet (checkpoint A) and compose the board."""
+        _refuse_if_run_closed(run)
         pt = self._require_type(intake)
         params = dict(intake.params or {})
         status = dict(intake.param_status or {})
@@ -273,6 +276,7 @@ class IntakeService:
         Removing a package deletes its composed groups; adding or toggling-on a
         package re-probes it (editing a package honestly re-probes it).
         """
+        _refuse_if_run_closed(run)
         pt = self._require_type(intake)
         board = {p["package_key"]: dict(p) for p in (intake.packages or [])}
 
@@ -330,6 +334,7 @@ class IntakeService:
         ``metadata_.intake_composed`` flag tells ``confirm_stage`` not to
         re-derive groups and wipe the composed ones.
         """
+        _refuse_if_run_closed(run)
         checkpoints = dict(run.checkpoints or {})
         checkpoints["source"] = {"accepted_at": _now_iso(), "by": str(user_id)}
         metadata = dict(run.metadata_ or {})

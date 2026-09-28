@@ -75,6 +75,19 @@ def is_human_decision(status: str | None) -> bool:
     return status in HUMAN_DECISION_STATUSES
 
 
+def _refuse_if_run_closed(run: AiEstimatorRun) -> None:
+    """Refuse any change to an applied or cancelled run.
+
+    An applied run's groups are already positions in a BOQ, and putting a group
+    back to ``confirmed`` would let a second apply write the same lines twice.
+    ``failed`` stays open: analysing again is how a failed run is retried.
+    """
+    if run.status == "applied":
+        raise HTTPException(status_code=409, detail="An applied run can no longer be changed.")
+    if run.status == "cancelled":
+        raise HTTPException(status_code=409, detail="A cancelled run can no longer be changed.")
+
+
 # Pass-2 (unit/scale reconcile) demotion penalty. A candidate whose unit
 # dimension is incompatible with the group's chosen-unit dimension keeps its
 # real rate but has its score multiplied by this factor so the dimensionally
@@ -338,6 +351,7 @@ class AiEstimatorService:
         checkpoint #1 (status ``analyzing``). Stage 2 grouping runs when the
         user accepts the ``source`` checkpoint.
         """
+        _refuse_if_run_closed(run)
         await self.run_repo.update_fields(run.id, status="analyzing", current_stage="source")
         await self._log(run.id, "source", "thought", {"text": "Reading and normalising the source."})
 
@@ -698,6 +712,7 @@ class AiEstimatorService:
         self, run: AiEstimatorRun, spec: schemas.StageConfirmRequest, user_id: uuid.UUID
     ) -> AiEstimatorRun:
         """Accept a checkpoint, apply stage edits, and advance the FSM."""
+        _refuse_if_run_closed(run)
         checkpoints = dict(run.checkpoints or {})
         checkpoints[spec.stage] = {"accepted_at": datetime.now(UTC).isoformat(), "by": str(user_id)}
 
@@ -915,6 +930,7 @@ class AiEstimatorService:
         unit/scale reconcile, rate sanity) via :meth:`_map_group`; the heavy
         retrieval imports live in :meth:`_pass_semantic`.
         """
+        _refuse_if_run_closed(run)
         # Bind the catalogue the user picked at stage 1 to the project's match
         # settings, because ``rank()`` resolves the catalogue from
         # ``MatchProjectSettings.cost_database_id`` (not from the request). The
@@ -1732,6 +1748,9 @@ class AiEstimatorService:
         not set a human-decision status directly: that would claim a person
         approved the rate while recording nobody.
         """
+        run = await self.run_repo.get_by_id(grp.run_id)
+        assert run is not None  # noqa: S101
+        _refuse_if_run_closed(run)
         fields: dict[str, Any] = {}
         if spec.description is not None:
             fields["description"] = spec.description
@@ -1791,6 +1810,7 @@ class AiEstimatorService:
         match is cleared (the merged group must be re-matched) so a stale
         candidate never carries over onto a changed quantity.
         """
+        _refuse_if_run_closed(run)
         if len(spec.group_ids) < 2:
             raise HTTPException(status_code=400, detail="Merging requires at least two groups.")
         wanted = {gid for gid in spec.group_ids}
@@ -1835,6 +1855,7 @@ class AiEstimatorService:
         creates a fresh unmatched group for them. Both groups lose any prior
         match so the changed quantities are re-grounded.
         """
+        _refuse_if_run_closed(run)
         wanted = {str(e) for e in spec.element_ids}
         if not wanted:
             raise HTTPException(status_code=400, detail="No element ids to split.")
@@ -1917,6 +1938,9 @@ class AiEstimatorService:
         self, grp: AiEstimatorGroup, spec: schemas.ConfirmGroupRequest, user_id: uuid.UUID
     ) -> AiEstimatorGroup:
         """Confirm a group's chosen candidate as the human decision."""
+        run = await self.run_repo.get_by_id(grp.run_id)
+        assert run is not None  # noqa: S101
+        _refuse_if_run_closed(run)
         fields: dict[str, Any] = {
             "status": "confirmed",
             "confirmed_by": user_id,
@@ -1962,6 +1986,7 @@ class AiEstimatorService:
         self, run: AiEstimatorRun, spec: schemas.BulkConfirmRequest, user_id: uuid.UUID
     ) -> schemas.BulkConfirmResponse:
         """Confirm every suggested group at/above the confidence threshold."""
+        _refuse_if_run_closed(run)
         groups = await self.group_repo.list_for_run(run.id)
         target_ids = {gid for gid in spec.group_ids} if spec.group_ids else None
         confirmed: list[uuid.UUID] = []
