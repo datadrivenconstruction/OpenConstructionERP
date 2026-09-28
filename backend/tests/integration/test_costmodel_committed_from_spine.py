@@ -7,8 +7,8 @@ contracts signed against the budget. They now read the Cost Spine documents.
 
 Scenario (project in EUR):
     * cost line CL1, budget line "subcontractor" planned 1000 with a stale
-      manual committed of 400; an issued PO item of 700 and an active contract
-      line of 600 point at CL1, plus a DRAFT contract line of 5000 that binds
+      manual committed of 400; an issued PO item of 700 and an active
+      subcontract line of 600 point at CL1, plus a DRAFT contract line of 5000 that binds
       nobody and must not count;
     * cost line CL2, budget line "material" planned 500 with a manual
       committed of 200 and no documents, so the manual value still counts.
@@ -165,6 +165,7 @@ async def scenario(http_client, admin_headers):
                 code=f"C-{uuid.uuid4().hex[:6]}",
                 title=f"Shell subcontract ({status_})",
                 contract_type="lump_sum",
+                counterparty_type="subcontractor",
                 project_id=project_id,
                 total_value=value,
                 currency="EUR",
@@ -300,6 +301,7 @@ async def _seed_contract(s, project_id, cost_line_id, *, value: str, status_: st
         code=f"C-{uuid.uuid4().hex[:6]}",
         title="Subcontract",
         contract_type="lump_sum",
+        counterparty_type="subcontractor",
         project_id=project_id,
         total_value=Decimal(value),
         currency="EUR",
