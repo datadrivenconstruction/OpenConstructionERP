@@ -54,7 +54,7 @@ vi.mock('@/app/layout/CustomBranding', () => ({
   CustomBranding: () => null,
   BrandingEditorModal: () => null,
 }));
-vi.mock('@/shared/ui/UpdateChecker', () => ({ UpdateNotification: () => null }));
+vi.mock('@/shared/ui/UpdateChecker', () => ({ UpdateNotification: () => null, UpdateBadge: () => null }));
 vi.mock('@/features/modules/RequestCustomModuleDialog', () => ({
   RequestCustomModuleDialog: () => null,
 }));
