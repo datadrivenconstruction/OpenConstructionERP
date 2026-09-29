@@ -5,9 +5,10 @@
 //
 // The application is built with redirect_slashes=False, so /rfq-bidding/{id}/issue
 // and /rfq-bidding/{id}/issue/ are two different URLs and only the second is
-// served. Eight calls here were written without the slash and every one of them
+// served. These calls were written without the slash and every one of them
 // answered 404: issuing an RFQ, validating it, reading and adding scope lines,
-// reading the award, listing and submitting bids, evaluating and awarding a bid.
+// reading the award, submitting a bid, evaluating and awarding it. The bid list
+// and the comparison are held back on purpose, see their comments in api.ts.
 // The component tests stub this module whole and cannot see the URL, which is
 // why the paths are pinned here.
 
@@ -28,7 +29,6 @@ import {
   fetchScopeLines,
   addScopeLine,
   fetchAward,
-  fetchBids,
   submitBid,
   evaluateBid,
   awardBid,
@@ -58,13 +58,6 @@ describe('RFQ bidding routes carry the trailing slash the server declares', () =
   it('reads the award', async () => {
     await fetchAward('r-1');
     expect(apiGet).toHaveBeenCalledWith('/v1/rfq-bidding/r-1/award/');
-  });
-
-  it('lists bids with and without a filter', async () => {
-    await fetchBids('r-1');
-    expect(apiGet).toHaveBeenCalledWith('/v1/rfq-bidding/bids/?rfq_id=r-1');
-    await fetchBids();
-    expect(apiGet).toHaveBeenCalledWith('/v1/rfq-bidding/bids/');
   });
 
   it('submits, evaluates and awards a bid', async () => {

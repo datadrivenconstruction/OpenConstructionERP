@@ -195,6 +195,10 @@ export async function addScopeLine(
 }
 
 export async function fetchComparison(rfqId: string): Promise<ComparisonMatrix> {
+  // Deliberately still without the slash of /comparison/. The server answers
+  // ranked and excluded quotes, not a ComparisonMatrix, and the page would
+  // throw on comparison.bids the moment this resolved. See ALLOWED in
+  // scripts/check_frontend_api_routes.py.
   return apiGet<ComparisonMatrix>(`/v1/rfq-bidding/${rfqId}/comparison`);
 }
 
@@ -206,7 +210,13 @@ export async function fetchBids(rfqId?: string): Promise<Page<Bid>> {
   const params = new URLSearchParams();
   if (rfqId) params.set('rfq_id', rfqId);
   const qs = params.toString();
-  return apiGet<Page<Bid>>(`/v1/rfq-bidding/bids/${qs ? `?${qs}` : ''}`);
+  // Deliberately still without the slash the route declares (/bids/), so this
+  // answers 404 and the awards panel stays empty. The server sends bid_amount
+  // and bidder_contact_id where Bid reads total_amount and vendor_name, and a
+  // resolved path would put a blank vendor and a missing amount on an award.
+  // It moves together with the comparison view, see ALLOWED in
+  // scripts/check_frontend_api_routes.py.
+  return apiGet<Page<Bid>>(`/v1/rfq-bidding/bids${qs ? `?${qs}` : ''}`);
 }
 
 export async function submitBid(payload: BidCreatePayload): Promise<Bid> {
