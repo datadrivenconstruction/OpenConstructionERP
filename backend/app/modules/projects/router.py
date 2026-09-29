@@ -2097,8 +2097,12 @@ async def analytics_overview(
     is_admin = bool(payload and payload.get("role") == "admin")
 
     # Per-project summary - owner + team-member projects for non-admins, scoped
-    # to the active partner pack's projects when one is active.
-    proj_stmt = scope_project_query(select(Project), Project).order_by(Project.name)
+    # to the active partner pack's projects when one is active. Deleting a
+    # project archives it, so archived rows are left out exactly as the
+    # projects list and the dashboard leave them out; otherwise a deleted
+    # project lingers in the comparison table and the budget chart and
+    # opening it answers "Project not found".
+    proj_stmt = scope_project_query(select(Project), Project).where(Project.status != "archived").order_by(Project.name)
     if not is_admin:
         from app.modules.teams.access import member_project_ids_subquery
 
