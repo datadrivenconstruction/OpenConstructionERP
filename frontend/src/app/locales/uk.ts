@@ -12068,6 +12068,8 @@ const resource = {
     "hse.advanced.go_to_safety": "Перейти до інцидентів з безпеки",
     "hse_advanced.add_finding": "Додати результат перевірки",
     "hse_advanced.tab_ppe": "ЗІЗ",
+    "hse_advanced.ppe_company_register": "Єдиний реєстр по компанії",
+    "hse_advanced.ppe_company_register_desc": "ЗІЗ видаються людям, а не проєкту, тому кожен проєкт показує той самий список.",
     "hse_advanced.tab_toolbox": "Інструктажі",
     "hse_advanced.tab_permits": "Допуски",
     "hse_advanced.tab_jsa": "АБР",

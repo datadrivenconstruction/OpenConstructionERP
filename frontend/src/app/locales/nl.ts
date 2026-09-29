@@ -12011,6 +12011,8 @@ const resource = {
     "hse.advanced.go_to_safety": "Naar Veiligheidsincidenten",
     "hse_advanced.add_finding": "Bevinding toevoegen",
     "hse_advanced.tab_ppe": "PBM",
+    "hse_advanced.ppe_company_register": "Bedrijfsbreed register",
+    "hse_advanced.ppe_company_register_desc": "PBM worden aan personen uitgegeven, niet aan een project, dus elk project toont dezelfde lijst.",
     "hse_advanced.tab_toolbox": "Toolbox",
     "hse_advanced.tab_permits": "Werkvergunningen",
     "hse_advanced.tab_jsa": "JSA's",

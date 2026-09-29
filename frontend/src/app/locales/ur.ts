@@ -7072,6 +7072,8 @@ const resource = {
     "collaboration.intro_more": "اپنے فعال پروجیکٹ کے لیے hub کھولیں اور تین لائیو پینلز نمودار ہوتے ہیں۔ **Project discussion** ایک thread شدہ comment feed ہے جس میں آپ پوسٹ، جواب، ترمیم اور حذف کرتے ہیں؛ وہی thread مقدار کا بل پوزیشنز، Documents، RFIs اور BIM ایلیمنٹس پر سیاق میں بھی دکھتا ہے۔ **Active now** ابھی پروجیکٹ سے منسلک لوگوں کا ایک لائیو presence roster ہے، ساتھ ہی آپ نے ذاتی طور پر ترمیم کے لیے کیا کھول رکھا ہے اس کی فہرست۔ **Viewpoints** ایک بات چیت موضوع کے لیے محفوظ نشانات ہیں؛ یہاں عنوان اور تفصیل کے ساتھ ایک شامل کریں، یا BIM ویور اور PDF takeoff سے camera-anchored viewpoints محفوظ کریں۔\n\nاپنا display name ایک بار طے کریں اور یہ آپ کے cursor اور presence کو ٹیم ساتھیوں کے لیے لیبل کرتا ہے۔ لائیو co-editing peer-to-peer WebRTC پر چلتی ہے، جسے پروڈکشن میں مستقل سرور-طرف sync کے لیے ایک WebSocket provider ترتیب شدہ چاہیے۔\n\n**اس سے زیادہ سے زیادہ فائدہ اٹھانا:**\n- BIM ویور سے ایک viewpoint محفوظ کر کے کسی بات چیت کو ماڈل میں ایک جگہ سے اینکر کریں۔\n- اپنا display name طے کریں تاکہ ٹیم ساتھی مقدار کا بل پر ساتھ کام کرتے ہوئے آپ کا cursor پہچانیں۔",
     "hse_advanced.intro_title": "ہر حفاظتی نتیجے کو صرف لاگ نہیں، بند کریں",
     "hse_advanced.tab_ppe": "PPE",
+    "hse_advanced.ppe_company_register": "کمپنی بھر کا رجسٹر",
+    "hse_advanced.ppe_company_register_desc": "PPE افراد کو جاری کیا جاتا ہے، پروجیکٹ کو نہیں، اس لیے ہر پروجیکٹ میں وہی فہرست دکھائی دیتی ہے۔",
     "hse_advanced.tab_toolbox": "ٹول باکس",
     "hse_advanced.tab_permits": "پرمٹس",
     "hse_advanced.tab_jsa": "جے ایس اے",

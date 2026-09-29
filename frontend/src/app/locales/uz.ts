@@ -12284,6 +12284,8 @@ const resource = {
     "hse.advanced.go_to_safety": "Xavfsizlik voqealariga oʻtish",
     "hse_advanced.add_finding": "Topilma qoʻshish",
     "hse_advanced.tab_ppe": "SHV",
+    "hse_advanced.ppe_company_register": "Kompaniya boʻyicha yagona reyestr",
+    "hse_advanced.ppe_company_register_desc": "SHV loyihaga emas, odamlarga beriladi, shuning uchun har bir loyihada bir xil roʻyxat koʻrsatiladi.",
     "hse_advanced.tab_toolbox": "Qisqa yigʻilish",
     "hse_advanced.tab_permits": "Ruxsatnomalar",
     "hse_advanced.tab_jsa": "JSA lar",

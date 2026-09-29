@@ -7740,6 +7740,8 @@ const resource = {
     "collaboration.intro_more": "Otvorite centar za svoj aktivni projekt i pojavljuju se tri živa panela. **Rasprava o projektu** nit je komentara u koju objavljujete, odgovarate, uređujete i brišete; ista se nit prikazuje i u kontekstu na stavkama troškovnika, Dokumentima, RFI-jevima i BIM elementima. **Aktivno sada** živi je popis prisutnosti tko je trenutno povezan s projektom, plus popis onoga što osobno imate otvoreno za uređivanje. **Gledišta** su spremljene oznake za temu rasprave; dodajte jedno s naslovom i opisom ovdje, ili spremite gledišta usidrena uz kameru iz BIM preglednika i PDF iskaza mjera.\n\nPostavite svoje prikazno ime jednom i ono označava vaš pokazivač i prisutnost suradnicima. Suuređivanje uživo vozi na peer-to-peer WebRTC-u, kojem za trajnu sinkronizaciju na strani poslužitelja treba WebSocket pružatelj konfiguriran u produkciji.\n\n**Kako najbolje iskoristiti:**\n- Usidrite raspravu uz mjesto u modelu spremanjem gledišta iz BIM preglednika.\n- Postavite svoje prikazno ime tako da suradnici prepoznaju vaš pokazivač kad zajedno uređujete troškovnik.",
     "hse_advanced.intro_title": "Zatvorite svaki sigurnosni nalaz, ne samo ga zabilježite",
     "hse_advanced.tab_ppe": "PPE",
+    "hse_advanced.ppe_company_register": "Registar na razini tvrtke",
+    "hse_advanced.ppe_company_register_desc": "PPE se izdaje osobama, a ne projektu, pa svaki projekt prikazuje isti popis.",
     "hse_advanced.tab_toolbox": "Sigurnosni sastanci",
     "hse_advanced.tab_permits": "Dozvole",
     "hse_advanced.tab_jsa": "JSA-ovi",

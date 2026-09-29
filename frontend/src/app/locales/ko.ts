@@ -7728,6 +7728,8 @@ const resource = {
     "collaboration.intro_more": "활성 프로젝트의 허브를 열면 세 개의 실시간 패널이 나타납니다. **프로젝트 토론**은 게시, 답글, 편집, 삭제하는 스레드형 댓글 피드입니다. 같은 스레드가 내역서 위치, 문서, RFI, BIM 요소에 맥락 속에서도 표시됩니다. **지금 활동**은 지금 프로젝트에 연결된 사람의 실시간 접속 명부와, 개인적으로 편집을 위해 연 것의 목록입니다. **뷰포인트**는 토론 주제를 위한 저장된 마커입니다. 여기서 제목과 설명으로 하나를 추가하거나, BIM 뷰어와 PDF 물량산출에서 카메라가 고정된 뷰포인트를 저장하세요.\n\n표시 이름을 한 번 설정하면 팀원에게 커서와 접속을 라벨링합니다. 실시간 공동 편집은 P2P WebRTC로 작동하며, 지속적인 서버 측 동기화에는 프로덕션에서 구성된 WebSocket 제공자가 필요합니다.\n\n**가장 잘 활용하는 법:**\n- BIM 뷰어에서 뷰포인트를 저장해 토론을 모델의 한 지점에 고정하세요.\n- 표시 이름을 설정해 내역서를 함께 편집할 때 팀원이 커서를 알아보게 하세요.",
     "hse_advanced.intro_title": "모든 안전 발견 사항을 기록만 하지 말고 마무리하기",
     "hse_advanced.tab_ppe": "PPE",
+    "hse_advanced.ppe_company_register": "회사 전체 등록부",
+    "hse_advanced.ppe_company_register_desc": "PPE는 프로젝트가 아니라 사람에게 지급되므로 모든 프로젝트에 동일한 목록이 표시됩니다.",
     "hse_advanced.tab_toolbox": "안전교육",
     "hse_advanced.tab_permits": "작업허가",
     "hse_advanced.tab_jsa": "JSA",

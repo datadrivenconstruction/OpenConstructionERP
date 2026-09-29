@@ -7902,6 +7902,8 @@ const resource = {
     "collaboration.intro_more": "Etkin projeniz için merkezi açın ve üç canlı panel belirir. **Proje tartışması**, yayınladığınız, yanıtladığınız, düzenlediğiniz ve sildiğiniz dizilenmiş bir yorum akışıdır; aynı dizi, iş kalemleri pozisyonlarında, Belgelerde, RFI'lerde ve BIM ögelerinde bağlam içinde de gösterilir. **Şimdi etkin**, projeye şu anda kimin bağlı olduğunun canlı bir varlık listesi, artı düzenlemek için kişisel olarak neyi açtığınızın bir listesidir. **Bakış açıları**, bir tartışma konusu için kaydedilmiş işaretçilerdir; buraya bir başlık ve açıklamayla bir tane ekleyin veya BIM görüntüleyicisinden ve PDF metrajından kamera-bağlantılı bakış açıları kaydedin.\n\nGörünen adınızı bir kez ayarlayın ve bu, imlecinizi ve varlığınızı ekip arkadaşlarınıza etiketler. Canlı eş zamanlı düzenleme, eşler arası WebRTC üzerinde gider, kalıcı sunucu tarafı eşitleme için üretimde yapılandırılmış bir WebSocket sağlayıcısı gerektirir.\n\n**En iyi şekilde yararlanmak için:**\n- BIM görüntüleyicisinden bir bakış açısı kaydederek bir tartışmayı modeldeki bir noktaya bağlayın.\n- Bir iş kalemleri listesini birlikte düzenlerken ekip arkadaşlarının imlecinizi tanıması için görünen adınızı ayarlayın.",
     "hse_advanced.intro_title": "Her güvenlik bulgusunu yalnızca kaydetmeyin, kapatın",
     "hse_advanced.tab_ppe": "PPE",
+    "hse_advanced.ppe_company_register": "Şirket geneli kayıt defteri",
+    "hse_advanced.ppe_company_register_desc": "PPE bir projeye değil kişilere verilir, bu yüzden her proje aynı listeyi gösterir.",
     "hse_advanced.tab_toolbox": "Toolbox",
     "hse_advanced.tab_permits": "İzinler",
     "hse_advanced.tab_jsa": "JSA'lar",
