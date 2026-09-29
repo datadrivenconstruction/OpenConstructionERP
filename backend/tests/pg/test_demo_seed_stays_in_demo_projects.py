@@ -30,6 +30,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 import app.database as app_database
+from app.config import get_settings
 from app.modules.accommodation.models import Accommodation
 from app.modules.bid_management.models import BidPackage
 from app.modules.bim_hub.models import BIMFederation
@@ -227,7 +228,7 @@ async def test_deleting_a_demo_project_records_that_it_was_retired(boot_factory)
 
     ids = await _estate(boot_factory)
     async with boot_factory() as s:
-        await ProjectService(s).delete_project(ids["demo"])
+        await ProjectService(s, get_settings()).delete_project(ids["demo"])
         await s.commit()
 
     async with boot_factory() as s:
@@ -241,7 +242,7 @@ async def test_a_purged_demo_is_not_reinstalled_by_the_next_boot(boot_factory) -
 
     ids = await _estate(boot_factory)
     async with boot_factory() as s:
-        await ProjectService(s).purge_demo_projects()
+        await ProjectService(s, get_settings()).purge_demo_projects()
         await s.commit()
 
     async with boot_factory() as s:
