@@ -472,9 +472,13 @@ function isAuthEndpoint(path: string): boolean {
  * must never reach this path; that distinction is what stops a single
  * incidental error from logging the whole session out.
  */
-function forceLogoutRedirect(path: string, statusText: string): void {
+function forceLogoutRedirect(path: string, statusText: string, everywhere = false): void {
   logApiError(path, 401, statusText);
-  useAuthStore.getState().logout();
+  // Only a refresh token the server refused ends the session for every tab.
+  // Any other 401 (one endpoint refusing a fresh token, a stray auth call)
+  // is this tab's problem, and the others carry on.
+  if (everywhere) useAuthStore.getState().logout();
+  else useAuthStore.getState().logoutThisTab();
   if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
     window.location.href = '/login';
   }
@@ -645,17 +649,26 @@ async function request<TResponse>(
       throw new ApiError(response.status, response.statusText, undefined);
     }
 
-    const newToken = await useAuthStore.getState().refreshAccessToken();
-    if (newToken) {
+    const refreshed = await useAuthStore.getState().refreshSession();
+    if (refreshed.token) {
       // Refresh succeeded — replay the original request with the fresh token.
       // buildHeaders() inside the recursive call reads the now-updated store,
       // so the retry carries the new Authorization header automatically.
       return request<TResponse>(method, path, body, init, true);
     }
 
+    // The server or the network did not answer the refresh (a deploy, a
+    // blip). The session may be perfectly good, and signing out now would
+    // sign out every open tab with it: fail this one request instead.
+    if (refreshed.reason === 'transient') {
+      logApiError(path, 401, response.statusText);
+      throw new ApiError(response.status, response.statusText, undefined);
+    }
+
     // No refresh token, or the refresh token is itself invalid/expired →
-    // the session is genuinely unrecoverable. Log out and redirect.
-    forceLogoutRedirect(path, response.statusText);
+    // the session is genuinely unrecoverable. Log out and redirect; a refused
+    // refresh token signs out every tab, since they all hold the same one.
+    forceLogoutRedirect(path, response.statusText, refreshed.reason === 'rejected');
     throw new ApiError(response.status, response.statusText, undefined);
   }
 
@@ -801,6 +814,36 @@ export async function apiDelete<TResponse = void>(
   init?: ApiRequestInit,
 ): Promise<TResponse> {
   return request<TResponse>('DELETE', path, body, init);
+}
+
+/**
+ * `fetch` with the bearer token and the same one silent refresh `request()`
+ * does, for callers that need the raw `Response` (a stream, a file upload
+ * with progress, a binary body).
+ *
+ * On a 401 it refreshes once and replays the call with the new token. When
+ * the refresh token itself is refused it signs out every tab and leaves for
+ * the login page, like `request()`; any other failure hands the 401 back to
+ * the caller untouched. The body must be replayable (a string, Blob,
+ * FormData or ArrayBuffer), not a one-shot ReadableStream.
+ *
+ * @param input - Absolute or API-relative URL.
+ * @param init - As for `fetch`; an `Authorization` header set here wins.
+ */
+export async function fetchWithAuth(input: string, init: RequestInit = {}): Promise<Response> {
+  const send = () => {
+    const headers = new Headers(init.headers);
+    const token = getToken();
+    if (token && !headers.has('Authorization')) headers.set('Authorization', `Bearer ${token}`);
+    return fetch(input, { ...init, headers });
+  };
+  const response = await send();
+  if (response.status !== 401 || new Headers(init.headers).has('Authorization')) return response;
+
+  const refreshed = await useAuthStore.getState().refreshSession();
+  if (refreshed.token) return send();
+  if (refreshed.reason === 'rejected') forceLogoutRedirect(input, response.statusText, true);
+  return response;
 }
 
 /**
