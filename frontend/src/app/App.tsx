@@ -1074,6 +1074,12 @@ export default function App() {
   // Dynamic routes from the module registry (lazy-loaded)
   const moduleRoutes = useModuleRouteElements({ Wrapper: P });
 
+  // A new tab is asking the open ones for their sign-in. Every route branches
+  // on isAuthenticated, so none renders yet: the login page would flash, and
+  // the desktop first-run check would read storage before the answer lands.
+  const authPending = useAuthStore((s) => s.authPending);
+  if (authPending) return <LoadingScreen />;
+
   return (
     <Suspense fallback={<LoadingScreen />}>
       {/* Route-transition pending feedback: a navigation commits inside a
