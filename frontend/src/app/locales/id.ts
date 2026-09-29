@@ -7698,6 +7698,8 @@ const resource = {
     "collaboration.intro_more": "Buka hub untuk proyek aktif Anda dan tiga panel langsung muncul. **Project discussion** adalah umpan komentar berutas tempat Anda memposting, membalas, menyunting dan menghapus; utas yang sama juga tampil dalam konteks pada posisi BOQ, Documents, RFIs dan elemen BIM. **Active now** adalah daftar kehadiran langsung tentang siapa yang terhubung ke proyek saat ini, plus daftar apa yang Anda sendiri buka untuk disunting. **Viewpoints** adalah penanda tersimpan untuk topik diskusi; tambahkan satu dengan judul dan deskripsi di sini, atau simpan viewpoint berjangkar-kamera dari viewer BIM dan PDF takeoff.\n\nAtur nama tampilan Anda sekali dan ia melabeli kursor dan kehadiran Anda untuk rekan tim. Penyuntingan-bersama langsung berjalan di atas WebRTC peer-to-peer, yang untuk sinkronisasi sisi-server persisten membutuhkan penyedia WebSocket yang dikonfigurasi di produksi.\n\n**Memaksimalkannya:**\n- Jangkar diskusi ke sebuah titik di model dengan menyimpan viewpoint dari viewer BIM.\n- Atur nama tampilan Anda agar rekan tim mengenali kursor Anda saat menyunting BOQ bersama.",
     "hse_advanced.intro_title": "Tuntaskan setiap temuan keselamatan, bukan sekadar mencatat",
     "hse_advanced.tab_ppe": "APD",
+    "hse_advanced.ppe_company_register": "Registrasi tingkat perusahaan",
+    "hse_advanced.ppe_company_register_desc": "APD diberikan kepada orang, bukan ke proyek, jadi setiap proyek menampilkan daftar yang sama.",
     "hse_advanced.tab_toolbox": "Toolbox",
     "hse_advanced.tab_permits": "Izin Kerja",
     "hse_advanced.tab_jsa": "JSA",

@@ -7728,6 +7728,8 @@ const resource = {
     "collaboration.intro_more": "为您的当前项目打开中心，三个实时面板便会出现。**项目讨论** 是一个串联评论流，您在其中发帖、回复、编辑和删除；同一线程也在工程量清单项、文档、RFI 和 BIM 构件上结合上下文显示。**当前在线** 是一份现在谁连接到该项目的实时在场名册，外加您个人正打开供编辑的内容列表。**视点** 是为一个讨论议题保存的标记；在此添加一个带标题和描述的视点，或从 BIM 查看器和 PDF 算量保存以相机为锚的视点。\n\n一次性设置您的显示名称，它会向队友标注您的光标和在场。实时协同编辑依托点对点 WebRTC，对于持久的服务端同步，需要在生产环境中配置一个 WebSocket 提供者。\n\n**用好它的窍门：**\n- 通过从 BIM 查看器保存一个视点，把一场讨论锚定到模型中的一个位置。\n- 设置您的显示名称，让队友在共同编辑一份工程量清单时认出您的光标。",
     "hse_advanced.intro_title": "把每条安全发现销项，而非仅仅记录",
     "hse_advanced.tab_ppe": "PPE",
+    "hse_advanced.ppe_company_register": "公司级登记册",
+    "hse_advanced.ppe_company_register_desc": "PPE 是发放给个人而非项目的，因此每个项目显示的都是同一份清单。",
     "hse_advanced.tab_toolbox": "班前会",
     "hse_advanced.tab_permits": "作业许可",
     "hse_advanced.tab_jsa": "JSAs",

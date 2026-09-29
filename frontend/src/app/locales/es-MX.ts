@@ -12064,6 +12064,8 @@ const resource = {
     "hse.advanced.go_to_safety": "Ir a Incidentes de seguridad",
     "hse_advanced.add_finding": "Añadir hallazgo",
     "hse_advanced.tab_ppe": "EPI",
+    "hse_advanced.ppe_company_register": "Registro a nivel de empresa",
+    "hse_advanced.ppe_company_register_desc": "El EPI se entrega a las personas, no a un proyecto, por lo que cada proyecto muestra la misma lista.",
     "hse_advanced.tab_toolbox": "Charlas de seguridad",
     "hse_advanced.tab_permits": "Permisos",
     "hse_advanced.tab_jsa": "JSAs",
