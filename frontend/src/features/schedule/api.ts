@@ -408,82 +408,88 @@ export type EvmWarningKey =
   | 'physical_manual_pct_is_subjective'
   | 'all_steps_zero_weight';
 
+/**
+ * The progress panel's view of one activity. No single progress response
+ * carries every field, so the panel merges each response into this view
+ * rather than replacing it.
+ */
 export interface TypedActivityView {
+  percent_complete_type: PercentCompleteType;
+  progress_pct: number;
+  remaining_duration: number | null;
+  status: string;
+  forecast_finish?: string | null;
+  /** Decimal-as-string unit quantities. */
+  installed_units?: string | null;
+  budgeted_units?: string | null;
+  suspended_at?: string | null;
+  suspend_reason?: string | null;
+}
+
+/** ProgressResultResponse: the typed-progress PATCH answers with this flat object. */
+export interface TypedProgressResponse {
+  activity_id: string;
+  percent_complete_type: PercentCompleteType;
+  percent_complete: number;
+  remaining_duration: number;
+  forecast_finish: string;
+  status: string;
+  evm_warnings: EvmWarningKey[];
+  installed_units: string | null;
+  budgeted_units: string | null;
+  suspended_at: string | null;
+  suspend_reason: string | null;
+}
+
+/** PercentTypePreviewResponse: both the preview and the committing PUT answer with it. */
+export interface PercentTypePreviewResponse {
+  activity_id: string;
+  percent_complete_type: PercentCompleteType;
+  evm_warnings: EvmWarningKey[];
+}
+
+/** ActivityProgressStateResponse: suspend, resume and calendar answer with it. */
+export interface ActivityProgressState {
   id: string;
   schedule_id: string;
-  name: string;
-  progress_pct: string | null;
+  status: string;
+  progress_pct: number;
   percent_complete_type: PercentCompleteType;
   remaining_duration: number | null;
-  budgeted_units: string | null;
-  installed_units: string | null;
+  start_date: string;
+  end_date: string;
   calendar_id: string | null;
-  status: string;
   suspended_at: string | null;
   resumed_at: string | null;
   suspend_reason: string | null;
-  start_date: string | null;
-  end_date: string | null;
-  forecast_finish?: string | null;
-}
-
-export interface TypedProgressResponse {
-  activity: TypedActivityView;
-  evm_warnings: EvmWarningKey[];
-  forecast_finish: string | null;
-  remaining_duration: number | null;
-}
-
-export interface PercentTypePreviewResponse {
-  percent_complete_type: PercentCompleteType;
-  evm_warnings: EvmWarningKey[];
-}
-
-export interface SuspendResumeResponse {
-  activity: TypedActivityView;
-  forecast_finish: string | null;
 }
 
 export interface ActivityStep {
   id: string;
   activity_id: string;
   name: string;
-  /** Decimal-as-string weight (>= 0). */
-  weight: string;
-  /** Decimal-as-string percent (0..100). */
-  percent_complete: string;
+  /** Weight (>= 0); a plain ratio, sent as a number. */
+  weight: number;
+  /** Percent (0..100); a plain ratio, sent as a number. */
+  percent_complete: number;
   is_milestone: boolean;
   sort_order: number;
 }
 
 export interface PlannedValuePreview {
+  schedule_id: string;
   as_of: string;
   /** Decimal-as-string time-phased PV. */
   planned_value: string;
+  /** Decimal-as-string method-aware EV. */
+  earned_value: string;
   /** Decimal-as-string BAC (Σ planned cost). */
   budget_at_completion: string;
-}
-
-export interface EvmSnapshotSummary {
-  snapshot_date: string;
-  bac: string;
-  pv: string;
-  ev: string;
-  ac: string;
-  sv: string;
-  cv: string;
-  spi: string;
-  cpi: string;
-}
-
-export interface DataDateAdvanceResponse {
-  schedule_id: string;
-  data_date: string;
-  snapshot: EvmSnapshotSummary;
+  activity_count: number;
 }
 
 export interface TypedProgressBody {
-  type?: PercentCompleteType;
+  percent_complete_type?: PercentCompleteType;
   percent?: number;
   installed_units?: number;
   budgeted_units?: number;
@@ -1021,31 +1027,31 @@ export const scheduleApi = {
     ),
   /** Preview the EVM-distortion warnings a percent-type change would raise. */
   previewPercentType: (activityId: string, type: PercentCompleteType) =>
-    apiPost<PercentTypePreviewResponse, { type: PercentCompleteType }>(
+    apiPost<PercentTypePreviewResponse, { percent_complete_type: PercentCompleteType }>(
       `/v1/schedule/activities/${encodeURIComponent(activityId)}/percent-type/preview/`,
-      { type },
+      { percent_complete_type: type },
     ),
-  /** Commit a percent-complete type change and recompute the activity. */
+  /** Commit a percent-complete type change; answers with the warnings it raised. */
   setPercentType: (activityId: string, type: PercentCompleteType) =>
-    apiPut<TypedProgressResponse, { type: PercentCompleteType }>(
+    apiPut<PercentTypePreviewResponse, { percent_complete_type: PercentCompleteType }>(
       `/v1/schedule/activities/${encodeURIComponent(activityId)}/percent-type/`,
-      { type },
+      { percent_complete_type: type },
     ),
   /** Set (calendarId) or clear (null) an activity's per-activity calendar. */
   setActivityCalendar: (activityId: string, calendarId: string | null) =>
-    apiPut<TypedProgressResponse, { calendar_id: string | null }>(
+    apiPut<ActivityProgressState, { calendar_id: string | null }>(
       `/v1/schedule/activities/${encodeURIComponent(activityId)}/calendar/`,
       { calendar_id: calendarId },
     ),
   /** Suspend an in_progress / not_started activity (freezes remaining duration). */
   suspendActivity: (activityId: string, reason: string, effectiveDate?: string) =>
-    apiPost<SuspendResumeResponse, { reason: string; effective_date?: string }>(
+    apiPost<ActivityProgressState, { reason: string; effective_date?: string }>(
       `/v1/schedule/activities/${encodeURIComponent(activityId)}/suspend/`,
       { reason, ...(effectiveDate ? { effective_date: effectiveDate } : {}) },
     ),
   /** Resume a suspended activity (reschedules from the frozen remaining duration). */
   resumeActivity: (activityId: string, effectiveDate?: string) =>
-    apiPost<SuspendResumeResponse, { effective_date?: string }>(
+    apiPost<ActivityProgressState, { effective_date?: string }>(
       `/v1/schedule/activities/${encodeURIComponent(activityId)}/resume/`,
       effectiveDate ? { effective_date: effectiveDate } : {},
     ),
@@ -1073,10 +1079,13 @@ export const scheduleApi = {
     apiGet<PlannedValuePreview>(
       `/v1/schedule/schedules/${encodeURIComponent(scheduleId)}/planned-value/?as_of=${encodeURIComponent(asOf)}`,
     ),
-  /** Advance the data date; refreshes the time-phased PV/EV snapshot. */
+  /**
+   * Advance the data date. There is no dedicated route: the schedule PATCH
+   * takes ``data_date`` and records the EVM snapshot when the date moves.
+   */
   advanceDataDate: (scheduleId: string, dataDate: string) =>
-    apiPut<DataDateAdvanceResponse, { data_date: string }>(
-      `/v1/schedule/schedules/${encodeURIComponent(scheduleId)}/data-date/`,
+    apiPatch<Schedule & { data_date: string | null }, { data_date: string }>(
+      `/v1/schedule/schedules/${encodeURIComponent(scheduleId)}`,
       { data_date: dataDate },
     ),
 

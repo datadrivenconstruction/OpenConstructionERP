@@ -8,8 +8,60 @@
 // roll-up below complete).
 
 import { toNum } from '@/shared/lib/money';
-import type { EvmWarningKey, PercentCompleteType } from './api';
+import type {
+  ActivityProgressState,
+  EvmWarningKey,
+  PercentCompleteType,
+  TypedActivityView,
+  TypedProgressBody,
+  TypedProgressResponse,
+} from './api';
 import { fmtPercent } from '@/shared/lib/formatters';
+
+/** The panel's view of an activity, built from a typed-progress response. */
+export function viewFromTyped(res: TypedProgressResponse): TypedActivityView {
+  return {
+    percent_complete_type: res.percent_complete_type,
+    progress_pct: res.percent_complete,
+    remaining_duration: res.remaining_duration,
+    status: res.status,
+    forecast_finish: res.forecast_finish,
+    installed_units: res.installed_units,
+    budgeted_units: res.budgeted_units,
+    suspended_at: res.suspended_at,
+    suspend_reason: res.suspend_reason,
+  };
+}
+
+/**
+ * Merge a suspend / resume / calendar answer into the view. That answer carries
+ * no unit quantities, so they are kept; the forecast finish is dropped because
+ * suspending or resuming moves it and the answer does not say where to.
+ */
+export function mergeProgressState(view: TypedActivityView, state: ActivityProgressState): TypedActivityView {
+  return {
+    ...view,
+    percent_complete_type: state.percent_complete_type,
+    progress_pct: state.progress_pct,
+    remaining_duration: state.remaining_duration,
+    status: state.status,
+    forecast_finish: null,
+    suspended_at: state.suspended_at,
+    suspend_reason: state.suspend_reason,
+  };
+}
+
+/**
+ * The typed-progress body for a units save. A blank input is left out rather
+ * than sent as 0: the server keeps the stored quantity for an omitted field,
+ * while a 0 would overwrite it.
+ */
+export function unitsProgressBody(installed: string, budgeted: string): TypedProgressBody {
+  const body: TypedProgressBody = { percent_complete_type: 'units' };
+  if (String(installed).trim() !== '') body.installed_units = toNum(installed);
+  if (String(budgeted).trim() !== '') body.budgeted_units = toNum(budgeted);
+  return body;
+}
 
 export interface StepLike {
   weight: string | number;
