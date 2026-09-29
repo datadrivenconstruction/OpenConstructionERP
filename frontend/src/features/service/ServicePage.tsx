@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useHasPermission } from '@/shared/lib/permissionGates';
 import { useNavigate, useParams } from 'react-router-dom';
 import clsx from 'clsx';
+import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import {
   Wrench,
   ClipboardList,
@@ -349,6 +350,11 @@ export function ServicePage() {
   // page first and filter after, so a project could show an empty tab while
   // its own records sat just past the page boundary.
   const { projectId: routeProjectId } = useParams<{ projectId: string }>();
+  // Opened from the sidebar the page has no project in its route; the active
+  // project then scopes the lists, as it does on the other project pages,
+  // instead of listing every project's contracts, tickets and work orders.
+  const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+  const listProjectId = routeProjectId || activeProjectId || undefined;
   const [tab, setTab] = useState<Tab>('tickets');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
@@ -360,20 +366,20 @@ export function ServicePage() {
   // when creating a work order — keep it enabled on the WO tab too, otherwise
   // the "New Work Order" modal renders an empty ticket dropdown.
   const ticketsQ = useQuery({
-    queryKey: ['service', 'tickets', routeProjectId ?? ''],
-    queryFn: () => listTickets({ project_id: routeProjectId, limit: 100 }),
+    queryKey: ['service', 'tickets', listProjectId ?? ''],
+    queryFn: () => listTickets({ project_id: listProjectId, limit: 100 }),
     enabled: tab === 'tickets' || tab === 'work_orders',
   });
   const workOrdersQ = useQuery({
-    queryKey: ['service', 'workOrders', routeProjectId ?? ''],
-    queryFn: () => listWorkOrders({ project_id: routeProjectId, limit: 100 }),
+    queryKey: ['service', 'workOrders', listProjectId ?? ''],
+    queryFn: () => listWorkOrders({ project_id: listProjectId, limit: 100 }),
     enabled: tab === 'work_orders',
   });
   // Contracts back the picker in the ticket/asset create modals, so they must
   // be loaded on every tab whose "New …" action needs to choose a contract.
   const contractsQ = useQuery({
-    queryKey: ['service', 'contracts', routeProjectId ?? ''],
-    queryFn: () => listContracts({ project_id: routeProjectId, limit: 100 }),
+    queryKey: ['service', 'contracts', listProjectId ?? ''],
+    queryFn: () => listContracts({ project_id: listProjectId, limit: 100 }),
     enabled: true,
   });
   const contracts = contractsQ.data ?? [];
