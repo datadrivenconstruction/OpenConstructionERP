@@ -7764,6 +7764,8 @@ const resource = {
     "collaboration.intro_more": "Avage oma aktiivse projekti keskus ja ilmub kolm reaalajas paneeli. **Projekti arutelu** on lõimeline kommentaarivoog, kuhu postitate, vastate, muudate ja kustutate; sama lõng kuvatakse kontekstis ka mahutabeli positsioonide, dokumentide, RFI-de ja BIM-elementide juures. **Aktiivsed praegu** on reaalajas kohaloleku nimekiri sellest, kes on hetkel projektiga ühendatud, pluss loetelu sellest, mida teie isiklikult olete muutmiseks avanud. **Vaatepunktid** on salvestatud markerid arutelu teema jaoks; lisage üks siin koos pealkirja ja kirjeldusega või salvestage kaameraga sidestatud vaatepunkte BIM-vaaturist ja PDF-mõõdistusest.\n\nMäärake oma kuvatav nimi üks kord ja see märgistab teie kursori ja kohaloleku meeskonnakaaslastele. Reaalajas ühisredigeerimine töötab võrdõiguslikul WebRTC-l, mis püsiva serveripoolse sünkroonimise jaoks vajab tootmiskeskkonnas konfigureeritud WebSocket-teenusepakkujat.\n\n**Kuidas sellest kõige rohkem kasu saada:**\n- Siduge arutelu mudeli konkreetse kohaga, salvestades vaatepunkti BIM-vaaturist.\n- Määrake oma kuvatav nimi, et meeskonnakaaslased tunneksid teie kursorit ära, kui redigeerite mahutabelit koos.",
     "hse_advanced.intro_title": "Sulgege iga ohutusleid, mitte ainult logige seda",
     "hse_advanced.tab_ppe": "Isikukaitsevahendid",
+    "hse_advanced.ppe_company_register": "Ettevõtteülene register",
+    "hse_advanced.ppe_company_register_desc": "Isikukaitsevahendid väljastatakse inimestele, mitte projektile, seega näitab iga projekt sama loendit.",
     "hse_advanced.tab_toolbox": "Ohutusinstruktaaž",
     "hse_advanced.tab_permits": "Load",
     "hse_advanced.tab_jsa": "Tööohutuse analüüsid",

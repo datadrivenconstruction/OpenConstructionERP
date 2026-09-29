@@ -7800,6 +7800,8 @@ const resource = {
     "collaboration.intro_more": "Åbn navet for dit aktive projekt, og tre levende paneler vises. **Projektdiskussion** er et trådet kommentarfeed, du poster, svarer, redigerer og sletter i; den samme tråd vises også i kontekst på tilbudsliste-positioner, Dokumenter, RFI'er og BIM-elementer. **Aktiv nu** er et levende tilstedeværelsesregister over, hvem der er forbundet til projektet lige nu, plus en liste over, hvad du personligt har åbent til redigering. **Synspunkter** er gemte markører for et diskussionsemne; tilføj et med en titel og beskrivelse her, eller gem kamera-forankrede synspunkter fra BIM-fremviseren og PDF-opmåling.\n\nSæt dit visningsnavn én gang, og det mærker din markør og tilstedeværelse for holdkammerater. Levende samtidig-redigering kører på peer-to-peer WebRTC, hvilket for vedvarende server-side-synkronisering kræver en WebSocket-udbyder konfigureret i produktion.\n\n**Få mest muligt ud af det:**\n- Forankre en diskussion til et sted i modellen ved at gemme et synspunkt fra BIM-fremviseren.\n- Sæt dit visningsnavn, så holdkammerater genkender din markør, når I redigerer en tilbudsliste sammen.",
     "hse_advanced.intro_title": "Luk hvert sikkerhedsfund, ikke bare log det",
     "hse_advanced.tab_ppe": "PPE",
+    "hse_advanced.ppe_company_register": "Virksomhedsdækkende register",
+    "hse_advanced.ppe_company_register_desc": "PPE udstedes til personer, ikke til et projekt, så hvert projekt viser den samme liste.",
     "hse_advanced.tab_toolbox": "Toolbox",
     "hse_advanced.tab_permits": "Tilladelser",
     "hse_advanced.tab_jsa": "JSAs",

@@ -7812,6 +7812,8 @@ const resource = {
     "collaboration.intro_more": "Deschideți centrul pentru proiectul activ și apar trei panouri vii. **Discuția proiectului** este un flux de comentarii cu fire în care postați, răspundeți, editați și ștergeți; același fir apare și în context pe pozițiile din deviz, Documente, RFI-uri și elemente BIM. **Activ acum** este o listă vie de prezență a cine este conectat la proiect chiar acum, plus o listă cu ce aveți dvs. personal deschis pentru editare. **Puncte de vedere** sunt marcaje salvate pentru un subiect de discuție; adăugați unul cu un titlu și o descriere aici, sau salvați puncte de vedere ancorate de cameră din vizualizatorul BIM și antemăsurătoarea PDF.\n\nSetați numele afișat o dată și etichetează cursorul și prezența dvs. pentru colegi. Co-editarea vie circulă pe WebRTC peer-to-peer, care pentru sincronizarea persistentă pe server are nevoie de un furnizor WebSocket configurat în producție.\n\n**Pentru a profita la maximum:**\n- Ancorați o discuție de un loc în model salvând un punct de vedere din vizualizatorul BIM.\n- Setați numele afișat, astfel încât colegii să vă recunoască cursorul când editați un deviz împreună.",
     "hse_advanced.intro_title": "Închideți fiecare constatare de securitate, nu doar înregistrați-o",
     "hse_advanced.tab_ppe": "EIP",
+    "hse_advanced.ppe_company_register": "Registru la nivelul companiei",
+    "hse_advanced.ppe_company_register_desc": "EIP este emis persoanelor, nu unui proiect, astfel încât fiecare proiect afișează aceeași listă.",
     "hse_advanced.tab_toolbox": "Instructaj",
     "hse_advanced.tab_permits": "Permise",
     "hse_advanced.tab_jsa": "JSA-uri",

@@ -12156,6 +12156,8 @@ const resource = {
     "hse.advanced.go_to_safety": "Zu Sicherheitsvorfällen wechseln",
     "hse_advanced.add_finding": "Befund hinzufügen",
     "hse_advanced.tab_ppe": "PSA",
+    "hse_advanced.ppe_company_register": "Unternehmensweites Register",
+    "hse_advanced.ppe_company_register_desc": "PSA wird an Personen ausgegeben, nicht an ein Projekt, daher zeigt jedes Projekt dieselbe Liste.",
     "hse_advanced.tab_toolbox": "Toolbox",
     "hse_advanced.tab_permits": "Genehmigungen",
     "hse_advanced.tab_jsa": "JSAs",

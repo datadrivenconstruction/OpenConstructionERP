@@ -17213,6 +17213,8 @@ const resource = {
     "hse.advanced.go_to_safety": "Go to Safety incidents",
     "hse_advanced.add_finding": "Add finding",
     "hse_advanced.tab_ppe": "PPE",
+    "hse_advanced.ppe_company_register": "Company-wide register",
+    "hse_advanced.ppe_company_register_desc": "PPE is issued to people, not to a project, so every project shows this same list.",
     "hse_advanced.tab_toolbox": "Toolbox",
     "hse_advanced.tab_permits": "Permits",
     "hse_advanced.tab_jsa": "JSAs",

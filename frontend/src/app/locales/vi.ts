@@ -7698,6 +7698,8 @@ const resource = {
     "collaboration.intro_more": "Mở trung tâm cho dự án đang hoạt động của bạn và ba bảng trực tiếp xuất hiện. **Thảo luận dự án** là một nguồn cấp bình luận theo chuỗi bạn đăng, trả lời, sửa và xóa trong đó; cùng chuỗi cũng hiển thị theo bối cảnh trên các vị trí BOQ, Tài liệu, RFI và các phần tử BIM. **Đang hoạt động** là một danh sách hiện diện trực tiếp về ai đang kết nối với dự án ngay lúc này, cùng một danh sách những gì cá nhân bạn đang mở để sửa. **Điểm nhìn** là các điểm đánh dấu đã lưu cho một chủ đề thảo luận; thêm một cái với một tiêu đề và mô tả ở đây, hoặc lưu các điểm nhìn neo theo máy quay từ trình xem BIM và bóc tách PDF.\n\nĐặt tên hiển thị của bạn một lần và nó gắn nhãn con trỏ và sự hiện diện của bạn với đồng đội. Đồng-sửa trực tiếp chạy trên WebRTC ngang hàng, vốn để đồng bộ phía máy chủ bền vững cần một nhà cung cấp WebSocket được cấu hình trong vận hành.\n\n**Tận dụng tối đa:**\n- Neo một thảo luận vào một điểm trong mô hình bằng cách lưu một điểm nhìn từ trình xem BIM.\n- Đặt tên hiển thị của bạn để đồng đội nhận ra con trỏ của bạn khi cùng sửa một BOQ.",
     "hse_advanced.intro_title": "Khắc phục dứt mọi phát hiện an toàn, không chỉ ghi nhận",
     "hse_advanced.tab_ppe": "PPE",
+    "hse_advanced.ppe_company_register": "Sổ đăng ký toàn công ty",
+    "hse_advanced.ppe_company_register_desc": "PPE được cấp cho người, không phải cho dự án, vì vậy mọi dự án đều hiển thị cùng một danh sách.",
     "hse_advanced.tab_toolbox": "Họp an toàn",
     "hse_advanced.tab_permits": "Giấy phép",
     "hse_advanced.tab_jsa": "JSAs",

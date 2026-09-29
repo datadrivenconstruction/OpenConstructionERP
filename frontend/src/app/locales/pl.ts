@@ -7904,6 +7904,8 @@ const resource = {
     "collaboration.intro_more": "Otwórz centrum dla swojego aktywnego projektu, a pojawiają się trzy żywe panele. **Dyskusja projektowa** to wątkowany strumień komentarzy, w którym piszesz, odpowiadasz, edytujesz i usuwasz; ten sam wątek pokazuje się też w kontekście na pozycjach przedmiaru, Dokumentach, RFI i elementach BIM. **Aktywni teraz** to żywa lista obecności tego, kto jest połączony z projektem właśnie teraz, plus lista tego, co ty osobiście masz otwarte do edycji. **Punkty widzenia** to zapisane znaczniki dla tematu dyskusji; dodaj jeden z tytułem i opisem tutaj albo zapisz punkty widzenia zakotwiczone w kamerze z przeglądarki BIM i przedmiaru PDF.\n\nUstaw swoją nazwę wyświetlaną raz, a etykietuje ona twój kursor i obecność dla kolegów z zespołu. Współedycja na żywo jedzie na peer-to-peer WebRTC, co dla trwałej synchronizacji po stronie serwera potrzebuje skonfigurowanego dostawcy WebSocket na produkcji.\n\n**Jak wykorzystać to najlepiej:**\n- Zakotwicz dyskusję w miejscu w modelu, zapisując punkt widzenia z przeglądarki BIM.\n- Ustaw swoją nazwę wyświetlaną, by koledzy z zespołu rozpoznawali twój kursor podczas wspólnej edycji przedmiaru.",
     "hse_advanced.intro_title": "Domykaj każde ustalenie BHP, a nie tylko je rejestruj",
     "hse_advanced.tab_ppe": "PPE",
+    "hse_advanced.ppe_company_register": "Rejestr obejmujący całą firmę",
+    "hse_advanced.ppe_company_register_desc": "PPE jest wydawane osobom, a nie projektowi, więc każdy projekt pokazuje tę samą listę.",
     "hse_advanced.tab_toolbox": "Instruktaże",
     "hse_advanced.tab_permits": "Pozwolenia",
     "hse_advanced.tab_jsa": "JSA",

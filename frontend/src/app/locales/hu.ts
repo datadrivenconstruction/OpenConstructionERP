@@ -12356,6 +12356,8 @@ const resource = {
     "hse.advanced.go_to_safety": "Ugrás a Munkavédelmi eseményekhez",
     "hse_advanced.add_finding": "Megállapítás hozzáadása",
     "hse_advanced.tab_ppe": "Egyéni védőeszköz",
+    "hse_advanced.ppe_company_register": "Vállalati szintű nyilvántartás",
+    "hse_advanced.ppe_company_register_desc": "Az egyéni védőeszközöket személyeknek adják ki, nem projektnek, ezért minden projekt ugyanazt a listát mutatja.",
     "hse_advanced.tab_toolbox": "Eligazítás",
     "hse_advanced.tab_permits": "Engedélyek",
     "hse_advanced.tab_jsa": "Munkabiztonsági elemzések",

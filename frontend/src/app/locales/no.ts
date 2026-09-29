@@ -7780,6 +7780,8 @@ const resource = {
     "collaboration.intro_more": "Åpne navet for det aktive prosjektet ditt og tre live paneler vises. **Prosjektdiskusjon** er en trådet kommentarstrøm du poster, svarer, redigerer og sletter i; den samme tråden vises også i kontekst på posisjoner i mengdebeskrivelsen, Dokumenter, RFI-er og BIM-elementer. **Aktiv nå** er en live tilstedeværelsesliste over hvem som er tilkoblet prosjektet akkurat nå, pluss en liste over hva du personlig har åpent for redigering. **Synspunkter** er lagrede markører for et diskusjonstema; legg til ett med en tittel og beskrivelse her, eller lagre kameraforankrede synspunkter fra BIM-visningen og PDF-oppmåling.\n\nSett visningsnavnet ditt én gang og det merker markøren og tilstedeværelsen din for lagkamerater. Live samredigering går på peer-til-peer WebRTC, som for vedvarende serversidesynkronisering trenger en WebSocket-leverandør konfigurert i produksjon.\n\n**Slik får du mest ut av det:**\n- Forankre en diskusjon til et sted i modellen ved å lagre et synspunkt fra BIM-visningen.\n- Sett visningsnavnet ditt slik at lagkamerater kjenner igjen markøren din når dere redigerer en mengdebeskrivelse sammen.",
     "hse_advanced.intro_title": "Lukk hvert sikkerhetsfunn, ikke bare logg det",
     "hse_advanced.tab_ppe": "PVU",
+    "hse_advanced.ppe_company_register": "Selskapsomfattende register",
+    "hse_advanced.ppe_company_register_desc": "PVU utstedes til personer, ikke til et prosjekt, så hvert prosjekt viser samme liste.",
     "hse_advanced.tab_toolbox": "Verktøykasse",
     "hse_advanced.tab_permits": "Tillatelser",
     "hse_advanced.tab_jsa": "JSA-er",

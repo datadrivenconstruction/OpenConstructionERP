@@ -7706,6 +7706,8 @@ const resource = {
     "collaboration.intro_more": "Avaa keskus aktiiviselle projektillesi ja kolme reaaliaikaista paneelia ilmestyy. **Projektikeskustelu** on ketjutettu kommenttisyöte johon postitat, vastaat, muokkaat ja poistat; sama ketju näkyy myös kontekstissa BOQ-nimikkeissä, Dokumenteissa, RFI:issä ja BIM-elementeissä. **Aktiivisena nyt** on reaaliaikainen läsnäololuettelo siitä kuka on yhdistettynä projektiin juuri nyt, sekä luettelo siitä mitä sinulla henkilökohtaisesti on auki muokattavana. **Näkökulmat** ovat tallennettuja merkkejä keskusteluaiheelle; lisää yksi otsikolla ja kuvauksella tässä, tai tallenna kamera-ankkuroituja näkökulmia BIM-katselimesta ja PDF-määrälaskennasta.\n\nAseta näyttönimesi kerran ja se merkitsee kohdistimesi ja läsnäolosi tiimitovereille. Reaaliaikainen yhteismuokkaus ratsastaa vertaisten-välisellä WebRTC:llä, joka pysyvään palvelinpuolen synkronointiin tarvitsee WebSocket-tarjoajan määritettynä tuotannossa.\n\n**Hyödynnä se täysin:**\n- Ankkuroi keskustelu kohtaan mallissa tallentamalla näkökulman BIM-katselimesta.\n- Aseta näyttönimesi, jotta tiimitoverit tunnistavat kohdistimesi kun muokkaatte BOQ:ta yhdessä.",
     "hse_advanced.intro_title": "Saata jokainen turvallisuushavainto loppuun, älä vain kirjaa sitä",
     "hse_advanced.tab_ppe": "PPE",
+    "hse_advanced.ppe_company_register": "Koko yrityksen rekisteri",
+    "hse_advanced.ppe_company_register_desc": "PPE myönnetään henkilöille, ei projektille, joten jokainen projekti näyttää saman listan.",
     "hse_advanced.tab_toolbox": "Aloituspalaverit",
     "hse_advanced.tab_permits": "Luvat",
     "hse_advanced.tab_jsa": "JSA:t",

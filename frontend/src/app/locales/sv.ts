@@ -7812,6 +7812,8 @@ const resource = {
     "collaboration.intro_more": "Öppna navet för ditt aktiva projekt så visas tre levande paneler. **Projektdiskussion** är ett trådat kommentarsflöde du postar, svarar, redigerar och raderar i; samma tråd visas också i sammanhang på positioner i mängdförteckningen, Dokument, RFI:er och BIM-element. **Aktiva nu** är en levande närvaroförteckning över vilka som är anslutna till projektet just nu, plus en lista över vad du personligen har öppet för redigering. **Vypunkter** är sparade markörer för ett diskussionsämne; lägg till en med en titel och beskrivning här, eller spara kameraförankrade vypunkter från BIM-visaren och PDF-mängdavtagningen.\n\nSätt ditt visningsnamn en gång så märker det din markör och närvaro till lagkamrater. Levande samredigering rider på peer-to-peer-WebRTC, vilket för beständig serversidessynk behöver en WebSocket-leverantör konfigurerad i produktion.\n\n**Få ut mesta möjliga av den:**\n- Förankra en diskussion till en punkt i modellen genom att spara en vypunkt från BIM-visaren.\n- Sätt ditt visningsnamn så att lagkamrater känner igen din markör när ni redigerar en mängdförteckning tillsammans.",
     "hse_advanced.intro_title": "Stäng varje säkerhetsfynd, inte bara logga det",
     "hse_advanced.tab_ppe": "PPE",
+    "hse_advanced.ppe_company_register": "Företagsövergripande register",
+    "hse_advanced.ppe_company_register_desc": "PPE utfärdas till personer, inte till ett projekt, så varje projekt visar samma lista.",
     "hse_advanced.tab_toolbox": "Skyddsronder",
     "hse_advanced.tab_permits": "Tillstånd",
     "hse_advanced.tab_jsa": "JSA:er",

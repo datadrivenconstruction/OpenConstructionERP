@@ -12257,6 +12257,8 @@ const resource = {
     "hse.advanced.go_to_safety": "Vai agli incidenti di sicurezza",
     "hse_advanced.add_finding": "Aggiungi rilevazione",
     "hse_advanced.tab_ppe": "DPI",
+    "hse_advanced.ppe_company_register": "Registro aziendale",
+    "hse_advanced.ppe_company_register_desc": "I DPI sono assegnati alle persone, non a un progetto, quindi ogni progetto mostra lo stesso elenco.",
     "hse_advanced.tab_toolbox": "Toolbox",
     "hse_advanced.tab_permits": "Permessi",
     "hse_advanced.tab_jsa": "JSA",

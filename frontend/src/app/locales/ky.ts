@@ -16390,6 +16390,8 @@ const resource = {
     "hse.advanced.go_to_safety": "Коопсуздук инциденттерине өтүү",
     "hse_advanced.add_finding": "Табылганды кошуу",
     "hse_advanced.tab_ppe": "ЖКК",
+    "hse_advanced.ppe_company_register": "Компания боюнча каттоо",
+    "hse_advanced.ppe_company_register_desc": "ЖКК долбоорго эмес, адамдарга берилет, ошондуктан ар бир долбоордо ошол эле тизме көрүнөт.",
     "hse_advanced.tab_toolbox": "Куралдар куттусу",
     "hse_advanced.tab_permits": "Уруксаттар",
     "hse_advanced.tab_jsa": "JSAлар",

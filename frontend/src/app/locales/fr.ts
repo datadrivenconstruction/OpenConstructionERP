@@ -11984,6 +11984,8 @@ const resource = {
   "fieldreports.intro_link_payroll": "Paie",
   "hse_advanced.whys_saved": "5 Pourquoi enregistrés",
   "hse_advanced.tab_ppe": "EPI",
+  "hse_advanced.ppe_company_register": "Registre à l'échelle de l'entreprise",
+  "hse_advanced.ppe_company_register_desc": "L'EPI est attribué aux personnes, pas à un projet, donc chaque projet affiche la même liste.",
   "hse_advanced.tab_toolbox": "Causerie sécurité",
   "hse_advanced.tab_permits": "Permis",
   "hse_advanced.tab_jsa": "JSA",

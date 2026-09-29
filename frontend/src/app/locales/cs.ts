@@ -7788,6 +7788,8 @@ const resource = {
     "collaboration.intro_more": "Otevřete centrum pro svůj aktivní projekt a objeví se tři živé panely. **Diskuse projektu** je vláknitý kanál komentářů, do kterého přispíváte, odpovídáte, upravujete a mažete; tatáž diskuse se také zobrazuje v kontextu na pozicích výkazu výměr, Dokumentech, RFI a prvcích BIM. **Aktivní nyní** je živý seznam přítomnosti toho, kdo je právě připojen k projektu, plus seznam toho, co osobně máte otevřené k úpravě. **Pohledy** jsou uložené značky pro diskusní téma; přidejte jeden s názvem a popisem zde, nebo uložte k pohledu kamery ukotvené pohledy z prohlížeče BIM a PDF odběru výměr.\n\nNastavte si zobrazované jméno jednou a označí váš kurzor a přítomnost spoluhráčům. Živé spolueditování jede na peer-to-peer WebRTC, které pro trvalou serverovou synchronizaci potřebuje v produkci nakonfigurovaného WebSocket poskytovatele.\n\n**Jak z toho vytěžit nejvíc:**\n- Ukotvěte diskusi k místu v modelu uložením pohledu z prohlížeče BIM.\n- Nastavte si zobrazované jméno, aby spoluhráči poznali váš kurzor při společné úpravě výkazu výměr.",
     "hse_advanced.intro_title": "Uzavřete každé bezpečnostní zjištění, nejen ho zaznamenejte",
     "hse_advanced.tab_ppe": "PPE",
+    "hse_advanced.ppe_company_register": "Celofiremní registr",
+    "hse_advanced.ppe_company_register_desc": "PPE se vydává lidem, ne projektu, proto každý projekt zobrazuje stejný seznam.",
     "hse_advanced.tab_toolbox": "Toolbox",
     "hse_advanced.tab_permits": "Povolení",
     "hse_advanced.tab_jsa": "JSA",
