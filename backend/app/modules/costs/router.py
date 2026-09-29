@@ -1260,8 +1260,32 @@ async def load_base_market(
     # language; the market card picks the language (its ``lang_code``). Text
     # follows the language, price follows the market - the two are orthogonal, so
     # the text swap runs first and the reprice below preserves the translated
-    # component names. No-op for English/untranslated markets.
-    await _ensure_region_text_language(base_region, base_registry.market_lang_code(market_token), session)
+    # component names.
+    #
+    # The language is a promise the card made, so it is checked, not assumed.
+    # When a file holds the base in that language and the swap still does not
+    # land (download refused, swap raised), the request fails before the
+    # reprice: answering "Priced into France" over Turkish text is the silent
+    # wrong-language load this used to be. When no file holds it (Turkiye has
+    # no English text), the base opens in its own language, which is what the
+    # card already says through ``text_lang_code``, never whatever language a
+    # previous market happened to leave behind.
+    requested_lang = base_registry.normalize_lang_code(base_registry.market_lang_code(market_token) or "")
+    source_region = base_registry.text_source_region(base_region, requested_lang)
+    if source_region is not None:
+        text_lang = await _ensure_region_text_language(base_region, requested_lang, session)
+        if text_lang != requested_lang:
+            reason = _LAST_DOWNLOAD_ERROR.get(source_region, "")
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=(
+                    f"The '{requested_lang}' text of '{base_region}' could not be loaded, so "
+                    f"'{market_token}' was not applied. {reason}"
+                ).strip(),
+            )
+    else:
+        home_lang = base_registry.home_language_code(base_region)
+        text_lang = await _ensure_region_text_language(base_region, home_lang, session) if home_lang else None
 
     from app.modules.catalog.router import fetch_market_catalog_rows
 
@@ -1275,6 +1299,10 @@ async def load_base_market(
 
     payload = result.as_dict()
     payload["active_market"] = market_token
+    # What the text is in now, next to what the card asked for, so the client
+    # can say so when they differ instead of implying the market's language.
+    payload["text_language"] = text_lang
+    payload["text_language_requested"] = requested_lang
     return payload
 
 
@@ -5403,32 +5431,38 @@ def _swap_region_text_sync(sync_url: str, lang_parquet: str, base_region: str, s
         engine.dispose()
 
 
-async def _ensure_region_text_language(base_region: str, lang_code: str | None, session: AsyncSession) -> None:
+async def _ensure_region_text_language(base_region: str, lang_code: str | None, session: AsyncSession) -> str | None:
     """Ensure an already-loaded national base renders its work items in ``lang_code``.
 
-    Swaps the region's text in place (see :func:`_swap_region_text_sync`). No-op
-    for a non-national base, a language we do not translate (e.g. ``en`` markets,
-    which keep the home English text), an unavailable translation parquet, or a
-    region already showing that language. Locales served by another language's
-    parquet, such as ``es-MX``, resolve through
-    :func:`~app.modules.costs.base_registry.normalize_lang_code` first.
+    Swaps the region's text in place (see :func:`_swap_region_text_sync`) from
+    the file :func:`~app.modules.costs.base_registry.text_source_region` names:
+    the translated parquet, or the home parquet when that is already in the
+    language (English for every base but Turkiye, so an English market brings a
+    base back from Chinese or French instead of keeping them). Locales served by
+    another language's parquet, such as ``es-MX``, are normalized first.
+
+    Returns the language the region is now shown in, or ``None`` when nothing
+    was swapped: a non-national base, a language no file holds, or a download or
+    swap that failed. ``None`` never means success, so a caller that promised a
+    language can tell it was not delivered.
     """
     if not lang_code:
-        return
-    lang_region = base_registry.national_language_region(base_region, lang_code)
+        return None
+    lang_code = base_registry.normalize_lang_code(lang_code)
+    lang_region = base_registry.text_source_region(base_region, lang_code)
     if lang_region is None:
-        return
+        return None
     if _REGION_ACTIVE_LANG.get(base_region) == lang_code:
-        return
+        return lang_code
 
     parquet = await _find_cwicr_file(lang_region)
     if not parquet:
-        logger.info(
-            "No %s translation parquet for base %s; keeping current work-item text",
+        logger.warning(
+            "No %s parquet for base %s; keeping current work-item text",
             lang_code,
             base_region,
         )
-        return
+        return None
 
     import asyncio
     import os as _os
@@ -5441,11 +5475,12 @@ async def _ensure_region_text_language(base_region: str, lang_code: str | None, 
         updated = await asyncio.to_thread(_swap_region_text_sync, target, str(parquet), base_region, staging_region)
     except Exception:
         logger.exception("Language swap to %s failed for %s (keeping current text)", lang_code, base_region)
-        return
+        return None
 
     _REGION_ACTIVE_LANG[base_region] = lang_code
     _invalidate_cost_cache()
     logger.info("Swapped %s work-item text to %s (%d items updated)", base_region, lang_code, updated)
+    return lang_code
 
 
 def _join_work_name_columns(
