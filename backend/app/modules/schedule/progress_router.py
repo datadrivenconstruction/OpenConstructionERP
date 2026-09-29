@@ -94,6 +94,10 @@ def _outcome_to_response(outcome: ProgressOutcome) -> ProgressResultResponse:
         forecast_finish=outcome.result.forecast_finish_iso,
         status=outcome.result.status,
         evm_warnings=outcome.warnings,
+        installed_units=outcome.activity.installed_units,
+        budgeted_units=outcome.activity.budgeted_units,
+        suspended_at=outcome.activity.suspended_at,
+        suspend_reason=outcome.activity.suspend_reason,
     )
 
 
@@ -165,6 +169,33 @@ async def set_percent_type(
     return PercentTypePreviewResponse(
         activity_id=activity.id,
         percent_complete_type=activity.percent_complete_type,
+        evm_warnings=warnings,
+    )
+
+
+@progress_router.post(
+    "/activities/{activity_id}/percent-type/preview/",
+    response_model=PercentTypePreviewResponse,
+    summary="Preview the EVM-distortion warnings of a percent-type change without applying it",
+    dependencies=[Depends(RequirePermission("schedule.update"))],
+)
+async def preview_percent_type(
+    activity_id: uuid.UUID,
+    body: PercentTypeRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: ScheduleProgressService = Depends(_get_service),
+) -> PercentTypePreviewResponse:
+    """Preview a type change's warnings without writing it.
+
+    The progress panel shows these while the user hovers a type, so the activity
+    must keep its current type until the PUT above commits one.
+    """
+    await _verify_activity(service, session, activity_id, user_id)
+    warnings = await service.preview_percent_type(activity_id, body.percent_complete_type)
+    return PercentTypePreviewResponse(
+        activity_id=activity_id,
+        percent_complete_type=body.percent_complete_type,
         evm_warnings=warnings,
     )
 

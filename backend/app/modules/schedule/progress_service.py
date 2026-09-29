@@ -241,8 +241,8 @@ class ScheduleProgressService:
         refreshed = await self.get_activity(activity_id)
         return ProgressOutcome(activity=refreshed, pct_type=pct_type, result=result, warnings=warnings)
 
-    async def change_percent_type(self, activity_id: uuid.UUID, pct_type: str) -> tuple[Activity, list[str]]:
-        """Change the percent-complete type; return the activity + warnings preview."""
+    async def preview_percent_type(self, activity_id: uuid.UUID, pct_type: str) -> list[str]:
+        """Return the EVM-distortion warnings a type change would raise, writing nothing."""
         activity = await self.get_activity(activity_id)
         if pct_type not in PERCENT_COMPLETE_TYPES:
             raise HTTPException(
@@ -251,7 +251,7 @@ class ScheduleProgressService:
             )
         orm_steps = await self.list_steps(activity_id) if pct_type == "physical" else []
         engine_steps = self._engine_steps(orm_steps)
-        warnings = evm_distortion_warnings(
+        return evm_distortion_warnings(
             pct_type=pct_type,
             budgeted_units=activity.budgeted_units,
             has_steps=bool(orm_steps),
@@ -259,6 +259,10 @@ class ScheduleProgressService:
             steps_total_weight=steps_total_weight(engine_steps) if engine_steps else 0,
             cost_is_nonlinear=False,
         )
+
+    async def change_percent_type(self, activity_id: uuid.UUID, pct_type: str) -> tuple[Activity, list[str]]:
+        """Change the percent-complete type; return the activity + warnings preview."""
+        warnings = await self.preview_percent_type(activity_id, pct_type)
         await self.base.activity_repo.update_fields(activity_id, percent_complete_type=pct_type)
         return await self.get_activity(activity_id), warnings
 

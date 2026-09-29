@@ -112,18 +112,6 @@ ALLOWED: dict[str, str] = {
         "and vendor_name: resolving the path would show an award with a blank vendor "
         "and no amount, which is worse than the empty panel the 404 gives today."
     ),
-    "MISSING POST /v1/schedule/activities/{encodeURIComponent(activityId)}/percent-type/preview/ "
-    "@ features/schedule/api.ts": (
-        "The progress rigor panel was written against endpoints the schedule module "
-        "never grew: there is no preview route (PUT /percent-type/ changes the type "
-        "and returns the warnings in one step, and wants percent_complete_type, not "
-        "type). Handed to the schedule work stream rather than patched here."
-    ),
-    "MISSING PUT /v1/schedule/schedules/{encodeURIComponent(scheduleId)}/data-date/ @ features/schedule/api.ts": (
-        "Same panel. No data-date route exists; the data date moves through the "
-        "schedule update, which records the EVM snapshot. Handed to the schedule "
-        "work stream with the entry above."
-    ),
 }
 
 

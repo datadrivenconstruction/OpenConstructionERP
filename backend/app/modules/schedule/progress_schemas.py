@@ -122,6 +122,17 @@ class ProgressResultResponse(BaseModel):
     forecast_finish: str
     status: str
     evm_warnings: list[str] = Field(default_factory=list)
+    # The stored unit quantities and suspension state, so the progress panel can
+    # prefill its inputs from this one response. Without the units a save that
+    # only edits "installed" would send an empty "budgeted" back as zero.
+    installed_units: Decimal | None = None
+    budgeted_units: Decimal | None = None
+    suspended_at: str | None = None
+    suspend_reason: str | None = None
+
+    @field_serializer("installed_units", "budgeted_units", when_used="json")
+    def _serialize_units(self, value: Decimal | None) -> str | None:
+        return None if value is None else str(value)
 
 
 class PercentTypePreviewResponse(BaseModel):

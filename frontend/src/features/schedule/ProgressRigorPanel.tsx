@@ -42,8 +42,18 @@ import {
   type PercentCompleteType,
   type EvmWarningKey,
   type TypedActivityView,
+  type TypedProgressResponse,
 } from './api';
-import { EVM_WARNING_DEFAULTS, PERCENT_TYPES, pvPercentOfBac, rollupSteps, totalWeight } from './progressRigor';
+import {
+  EVM_WARNING_DEFAULTS,
+  PERCENT_TYPES,
+  mergeProgressState,
+  pvPercentOfBac,
+  rollupSteps,
+  totalWeight,
+  unitsProgressBody,
+  viewFromTyped,
+} from './progressRigor';
 import { fmtPercent } from '@/shared/lib/formatters';
 
 interface ActivityLite {
@@ -129,7 +139,7 @@ export function ProgressRigorPanel({ scheduleId, activities, currency, dataDate 
         title: t('common.success', { defaultValue: 'Success' }),
         message: t('schedule.data_date_advanced', {
           defaultValue: 'Data date advanced to {{date}}; PV refreshed.',
-          date: res.data_date,
+          date: res.data_date ?? asOf,
         }),
       });
       qc.invalidateQueries({ queryKey: ['schedule', scheduleId, 'evm'] });
@@ -269,7 +279,7 @@ function ActivityProgressEditor({ scheduleId, activityId }: { scheduleId: string
     queryKey: ['schedule', 'typed-activity', activityId],
     queryFn: async () => {
       const res = await scheduleApi.updateProgressTyped(activityId, {});
-      if (res.activity) setView(res.activity);
+      setView(viewFromTyped(res));
       setWarnings(res.evm_warnings ?? []);
       return res;
     },
@@ -280,8 +290,8 @@ function ActivityProgressEditor({ scheduleId, activityId }: { scheduleId: string
   const pctType = (view?.percent_complete_type ?? 'physical') as PercentCompleteType;
   const hasSteps = (steps.data?.length ?? 0) > 0;
 
-  const applyResult = (res: { activity: TypedActivityView; evm_warnings: EvmWarningKey[] }) => {
-    setView(res.activity);
+  const applyResult = (res: TypedProgressResponse) => {
+    setView(viewFromTyped(res));
     setWarnings(res.evm_warnings);
     setPreviewWarnings([]);
     qc.invalidateQueries({ queryKey: ['schedule', scheduleId] });
@@ -296,7 +306,14 @@ function ActivityProgressEditor({ scheduleId, activityId }: { scheduleId: string
 
   const changeType = useMutation({
     mutationFn: (type: PercentCompleteType) => scheduleApi.setPercentType(activityId, type),
-    onSuccess: applyResult,
+    // The PUT answers with the new type and its warnings only, so merge rather
+    // than replace the view.
+    onSuccess: (res) => {
+      setView((v) => (v ? { ...v, percent_complete_type: res.percent_complete_type } : v));
+      setWarnings(res.evm_warnings);
+      setPreviewWarnings([]);
+      qc.invalidateQueries({ queryKey: ['schedule', scheduleId] });
+    },
   });
 
   const suspendResume = useMutation({
@@ -309,7 +326,7 @@ function ActivityProgressEditor({ scheduleId, activityId }: { scheduleId: string
       return scheduleApi.resumeActivity(activityId);
     },
     onSuccess: (res) => {
-      setView(res.activity);
+      setView((v) => (v ? mergeProgressState(v, res) : v));
       qc.invalidateQueries({ queryKey: ['schedule', scheduleId] });
     },
     onError: (e) => {
@@ -411,13 +428,13 @@ function ActivityProgressEditor({ scheduleId, activityId }: { scheduleId: string
 
       {/* per-type input */}
       {pctType === 'units' ? (
-        <UnitsInput view={view} onSave={(installed, budgeted) => typedUpdate.mutate({ type: 'units', installed_units: installed, budgeted_units: budgeted })} saving={typedUpdate.isPending} />
+        <UnitsInput view={view} onSave={(installed, budgeted) => typedUpdate.mutate(unitsProgressBody(installed, budgeted))} saving={typedUpdate.isPending} />
       ) : pctType === 'duration' ? (
         <PercentSlider
           label={t('schedule.progress', { defaultValue: 'Progress' })}
           value={toNum(view.progress_pct ?? '0')}
           remaining={view.remaining_duration}
-          onCommit={(p) => typedUpdate.mutate({ type: 'duration', percent: p })}
+          onCommit={(p) => typedUpdate.mutate({ percent_complete_type: 'duration', percent: p })}
           saving={typedUpdate.isPending}
         />
       ) : hasSteps ? (
@@ -433,7 +450,7 @@ function ActivityProgressEditor({ scheduleId, activityId }: { scheduleId: string
           value={toNum(view.progress_pct ?? '0')}
           remaining={view.remaining_duration}
           editableRemaining
-          onCommit={(p, rd) => typedUpdate.mutate({ type: 'physical', percent: p, ...(rd != null ? { remaining_duration: rd } : {}) })}
+          onCommit={(p, rd) => typedUpdate.mutate({ percent_complete_type: 'physical', percent: p, ...(rd != null ? { remaining_duration: rd } : {}) })}
           saving={typedUpdate.isPending}
         />
       )}
@@ -461,7 +478,7 @@ function UnitsInput({
   saving,
 }: {
   view: TypedActivityView;
-  onSave: (installed: number, budgeted: number) => void;
+  onSave: (installed: string, budgeted: string) => void;
   saving: boolean;
 }) {
   const { t } = useTranslation();
@@ -481,7 +498,7 @@ function UnitsInput({
         {t('schedule.derived_pct', { defaultValue: 'Derived %' })}
         <span className="mt-1 py-1.5 text-sm font-semibold text-content-primary">{view.progress_pct ?? '0'}%</span>
       </div>
-      <Button variant="secondary" onClick={() => onSave(Number(installed) || 0, Number(budgeted) || 0)} loading={saving}>
+      <Button variant="secondary" onClick={() => onSave(installed, budgeted)} loading={saving}>
         {t('common.save', { defaultValue: 'Save' })}
       </Button>
       {view.remaining_duration != null && (
