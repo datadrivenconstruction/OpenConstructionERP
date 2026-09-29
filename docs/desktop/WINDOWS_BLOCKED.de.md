@@ -25,6 +25,8 @@ Der Name in der Benachrichtigung kann irreführen. Die Sperre kommt aus der App 
 
 Prüfen Sie dann, ob Smart App Control eingeschaltet ist: In Windows-Sicherheit unter **App- & Browsersteuerung** (App & browser control) die **Smart App Control-Einstellungen** öffnen. Dort steht **Ein**, **Bewertung** oder **Aus**.
 
+Welche Datei genau abgewiesen wurde, sehen Sie in der **Ereignisanzeige** (Event Viewer) unter **Anwendungs- und Dienstprotokolle** > **Microsoft** > **Windows** > **CodeIntegrity** > **Operational**, Ereignis **3077**. Bei der Desktop-App liegt die Datei meist unter `%LOCALAPPDATA%\OpenConstructionERP\extract`, wo die App bei jedem Start ihre Hilfsdateien entpackt. Diese Sperre ist bei einem unsignierten Build zu erwarten und bedeutet nicht, dass die Datei ein Virus ist.
+
 ## Schritt 2a: SmartScreen ("Der Computer wurde durch Windows geschützt")
 
 Diese Warnung dürfen Sie gefahrlos übergehen, sobald Sie sicher sind, dass die Datei von uns stammt (siehe "Prüfen, ob der Download echt ist" weiter unten).
@@ -36,7 +38,7 @@ SmartScreen fragt nur bei Dateien, die aus dem Internet geladen wurden. Fragt es
 
 ## Schritt 2b: Smart App Control ist eingeschaltet
 
-Solange Smart App Control eingeschaltet ist, lässt sich keine einzelne App freigeben. Microsoft selbst rät, die Funktion auszuschalten oder den Herausgeber um eine Signatur zu bitten, und an der Signatur arbeiten wir. Bis dahin haben Sie zwei ehrliche Möglichkeiten.
+Solange Smart App Control eingeschaltet ist, lässt sich keine einzelne App freigeben. Microsoft selbst rät, die Funktion auszuschalten oder den Herausgeber um eine Signatur zu bitten, und unsere Windows-Builds sind derzeit nicht signiert. Damit bleiben zwei ehrliche Möglichkeiten.
 
 **Möglichkeit 1: Smart App Control eingeschaltet lassen und die App anders starten.** Das empfehlen wir, wenn Sie den Schutz behalten möchten. Docker und WSL führen OpenConstructionERP in einer kleinen Linux-Umgebung aus, und Linux-Programme prüft Smart App Control nicht. Beide Wege sind unten beschrieben.
 
