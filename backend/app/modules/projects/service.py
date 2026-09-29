@@ -1346,6 +1346,9 @@ class ProjectService:
         owner_id = str(project.owner_id)
         project_name = project.name
         prior_status = project.status
+        from app.core.demo_marker import demo_id_of
+
+        demo_id = demo_id_of(project.metadata_)
 
         # Cascade-delete child records that belong to this project.
         # These models all have project_id FK with ondelete=CASCADE, but
@@ -1413,6 +1416,13 @@ class ProjectService:
                 )
 
         await self.repo.update_fields(project_id, status="archived")
+
+        # A deleted demo project is recorded as retired, so a later purge of
+        # the archived row does not turn into a reinstall on the next boot.
+        if demo_id:
+            from app.core.demo_marker import retire_demo_ids
+
+            await retire_demo_ids(self.session, {demo_id: project_id}, reason="archived")
 
         # Status-history row for the archive transition (-> archived) so the
         # project's status timeline includes soft-deletes alongside ordinary
@@ -1497,6 +1507,17 @@ class ProjectService:
             p.metadata_["demo_id"] for p in rows if isinstance(p.metadata_, dict) and p.metadata_.get("demo_id")
         }
 
+        # Recorded before the rows go, because after the delete nothing in the
+        # database says these demos were ever installed, and a boot that finds
+        # no demo project installs the showcase again.
+        from app.core.demo_marker import demo_id_of, retire_demo_ids
+
+        await retire_demo_ids(
+            self.session,
+            {demo_id_of(p.metadata_): p.id for p in rows if demo_id_of(p.metadata_)},
+            reason="purged",
+        )
+
         # Children with bare/no-cascade FK columns first - otherwise the
         # deterministic-id demo installers PK-collide on a later re-seed.
         await purge_project_children_without_cascade(self.session, demo_pks)
@@ -1543,8 +1564,14 @@ class ProjectService:
             )
         owner_id = str(project.owner_id)
         prior_status = project.status
+        from app.core.demo_marker import demo_id_of, restore_demo_id
+
+        demo_id = demo_id_of(project.metadata_)
 
         await self.repo.update_fields(project_id, status="active")
+        # Bringing a demo project back is a person asking for the demo again.
+        if demo_id:
+            await restore_demo_id(self.session, demo_id)
 
         # Status-history row for the restore transition (archived -> active).
         await self._record_status_change(
