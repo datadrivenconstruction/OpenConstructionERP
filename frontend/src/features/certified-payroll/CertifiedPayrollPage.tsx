@@ -31,6 +31,8 @@ import {
   CollapsibleSection,
 } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
+import { NoAccessState } from '@/shared/ui/NoAccessState';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { useToastStore } from '@/stores/useToastStore';
 import { useActiveProjectId } from '@/shared/hooks/useActiveProjectId';
@@ -105,6 +107,9 @@ export function CertifiedPayrollPage() {
   const { t } = useTranslation();
   const projectId = useActiveProjectId();
   const [tab, setTab] = useState<TabKey>('weeks');
+  // Every tab reads through certified_payroll.read (manager and above). Below
+  // that the explainer stays and the tabs give way to a plain no-access note.
+  const canRead = useHasPermission('certified_payroll.read');
 
   return (
     <RequiresProject>
@@ -150,27 +155,31 @@ export function CertifiedPayrollPage() {
           </div>
         </CollapsibleSection>
 
-        <div className="flex gap-1 border-b border-border">
-          {(['weeks', 'determinations', 'workers'] as TabKey[]).map((key) => (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setTab(key)}
-              className={clsx(
-                'px-4 py-2 text-sm font-medium transition-colors',
-                tab === key
-                  ? 'border-b-2 border-primary text-foreground'
-                  : 'text-muted-foreground hover:text-foreground',
-              )}
-            >
-              {t(`certified_payroll.tab.${key}`)}
-            </button>
-          ))}
-        </div>
+        {!canRead && <NoAccessState />}
 
-        {projectId && tab === 'weeks' && <WeeksTab projectId={projectId} />}
-        {projectId && tab === 'determinations' && <DeterminationsTab projectId={projectId} />}
-        {projectId && tab === 'workers' && <WorkersTab projectId={projectId} />}
+        {canRead && (
+          <div className="flex gap-1 border-b border-border">
+            {(['weeks', 'determinations', 'workers'] as TabKey[]).map((key) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setTab(key)}
+                className={clsx(
+                  'px-4 py-2 text-sm font-medium transition-colors',
+                  tab === key
+                    ? 'border-b-2 border-primary text-foreground'
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                {t(`certified_payroll.tab.${key}`)}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {canRead && projectId && tab === 'weeks' && <WeeksTab projectId={projectId} />}
+        {canRead && projectId && tab === 'determinations' && <DeterminationsTab projectId={projectId} />}
+        {canRead && projectId && tab === 'workers' && <WorkersTab projectId={projectId} />}
       </div>
     </RequiresProject>
   );

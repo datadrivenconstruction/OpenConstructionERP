@@ -40,6 +40,8 @@ import {
 } from 'lucide-react';
 import { Card, Badge, Button, WideModal, Breadcrumb, ConfirmDialog, DismissibleInfo, IntroRichText, ModuleGuideButton } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
+import { NoAccessState } from '@/shared/ui/NoAccessState';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { usersGuide } from './usersGuide';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -753,6 +755,9 @@ export function UserManagementPage() {
   // Managers can view the page (users.list) but must not see the invite control,
   // since the call would 403. Server-side gate is authoritative regardless.
   const isAdmin = useAuthStore((s) => s.userRole) === 'admin';
+  // Below manager the directory itself is refused (users.list), so the page
+  // says so instead of firing the call and rendering an empty table.
+  const canListUsers = useHasPermission('users.list');
   const { confirm, ...confirmProps } = useConfirm();
   const [search, setSearch] = useState('');
   const [filterActive, setFilterActive] = useState<'all' | 'active' | 'inactive'>('all');
@@ -766,6 +771,7 @@ export function UserManagementPage() {
         is_active: filterActive === 'all' ? undefined : filterActive === 'active',
         limit: 100,
       }),
+    enabled: canListUsers,
   });
 
   // Identify the currently logged-in user so we can lock down self-demotion and
@@ -916,6 +922,17 @@ export function UserManagementPage() {
     admins: users.filter((u) => u.role === 'admin').length,
     managers: users.filter((u) => u.role === 'manager').length,
   };
+
+  if (!canListUsers) {
+    return (
+      <div className="space-y-5 animate-fade-in">
+        <Breadcrumb
+          items={[{ label: t('users.management', { defaultValue: 'User Management' }) }]}
+        />
+        <NoAccessState />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5 animate-fade-in">

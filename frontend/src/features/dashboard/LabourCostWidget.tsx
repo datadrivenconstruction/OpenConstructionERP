@@ -19,6 +19,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader } from '@/shared/ui';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { fetchLabourCost } from '@/features/payroll/api';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { costModelApi } from '@/features/costmodel/api';
 import { KpiStrip } from './KpiStrip';
 import { fmtFixed } from '@/shared/lib/formatters';
@@ -40,20 +41,23 @@ function money(value: number, currency?: string): string {
 export function LabourCostWidget() {
   const { t } = useTranslation();
   const projectId = useProjectContextStore((s) => s.activeProjectId) ?? '';
+  // The rollup is payroll data (payroll.read, manager and above). Below that
+  // the widget hides rather than showing a spent-to-date of zero it never read.
+  const canReadPayroll = useHasPermission('payroll.read');
 
   const labourQuery = useQuery({
     queryKey: ['payroll', 'labour-cost', projectId],
     queryFn: () => fetchLabourCost(projectId),
-    enabled: Boolean(projectId),
+    enabled: Boolean(projectId) && canReadPayroll,
   });
 
   const budgetQuery = useQuery({
     queryKey: ['costmodel', 'budget-summary', projectId],
     queryFn: () => costModelApi.getBudgetSummary(projectId),
-    enabled: Boolean(projectId),
+    enabled: Boolean(projectId) && canReadPayroll,
   });
 
-  if (!projectId) return null;
+  if (!projectId || !canReadPayroll) return null;
 
   const labour = labourQuery.data;
   const currency = labour?.currency || undefined;

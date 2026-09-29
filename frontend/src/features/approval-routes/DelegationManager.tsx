@@ -14,6 +14,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { Trash2, UserCheck, UserMinus } from 'lucide-react';
 
 import {
@@ -105,11 +106,12 @@ export function DelegationManager({ open, onClose }: DelegationManagerProps) {
   const delegations = delegationsQuery.data ?? [];
 
   // Same active-users source the route editor + reassign dialog use.
+  const canListUsers = useHasPermission('users.list');
   const { data: users = [] } = useQuery({
     queryKey: ['users-search'],
     queryFn: () => apiGet<UserResult[]>('/v1/users/?limit=100&is_active=true'),
     staleTime: 60_000,
-    enabled: open,
+    enabled: open && canListUsers,
   });
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],

@@ -3,6 +3,8 @@
 import { useState, useCallback, useMemo, Fragment, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useHasPermission } from '@/shared/lib/permissionGates';
+import { NoAccessState } from '@/shared/ui/NoAccessState';
 import clsx from 'clsx';
 import {
   Wallet,
@@ -431,6 +433,9 @@ export default function PayrollPage() {
   const activeProjectId = useActiveProjectId();
   const activeProjectName = useProjectContextStore((s) => s.activeProjectName);
   const projectId = activeProjectId ?? '';
+  // Every read on this page needs payroll.read (manager and above). Below
+  // that the page explains itself instead of firing calls that are refused.
+  const canReadPayroll = useHasPermission('payroll.read');
 
   const [selectedBatchId, setSelectedBatchId] = useState<string | null>(null);
   const [confirmFinalizeOpen, setConfirmFinalizeOpen] = useState(false);
@@ -441,13 +446,13 @@ export default function PayrollPage() {
   const batchesQuery = useQuery({
     queryKey: ['payroll', 'batches', projectId],
     queryFn: () => fetchPayrollBatches(projectId),
-    enabled: Boolean(projectId),
+    enabled: Boolean(projectId) && canReadPayroll,
   });
 
   const labourCostQuery = useQuery({
     queryKey: ['payroll', 'labour-cost', projectId],
     queryFn: () => fetchLabourCost(projectId),
-    enabled: Boolean(projectId),
+    enabled: Boolean(projectId) && canReadPayroll,
   });
 
   const batchDetailQuery = useQuery({
@@ -639,6 +644,22 @@ export default function PayrollPage() {
 
   const batches = batchesQuery.data ?? [];
   const labourCost = labourCostQuery.data ?? null;
+
+  if (!canReadPayroll) {
+    return (
+      <div className="space-y-5 animate-fade-in">
+        <Breadcrumb items={[{ label: t('nav.payroll', { defaultValue: 'Payroll' }) }]} />
+        <PageHeader
+          srTitle={t('payroll.title', { defaultValue: 'Payroll' })}
+          subtitle={t('payroll.subtitle', {
+            defaultValue: 'Aggregate field labour into pay batches, finalize and post to the cost model.',
+          })}
+          actions={<ModuleGuideButton content={payrollGuide} />}
+        />
+        <NoAccessState />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5 animate-fade-in">

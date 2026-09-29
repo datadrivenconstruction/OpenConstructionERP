@@ -26,6 +26,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { Ban, UserCog } from 'lucide-react';
 
 import { Badge, Button, SideDrawer, Skeleton } from '@/shared/ui';
@@ -182,10 +183,12 @@ export function ApprovalInstanceDetailDrawer({
       }),
   });
 
+  const canListUsers = useHasPermission('users.list');
   const { data: userList = [] } = useQuery<{ id: string; email: string; full_name: string }[]>({
     queryKey: ['users-search'],
     queryFn: () => apiGet('/v1/users/?limit=100&is_active=true'),
     staleTime: 60_000,
+    enabled: canListUsers,
   });
   const userMap = useMemo(
     () => new Map(userList.map((u) => [u.id, u.full_name || u.email])),

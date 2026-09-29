@@ -26,6 +26,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -135,6 +136,7 @@ function ModelReviewInner({ projectId }: { projectId: string }) {
   // Resolve user ids to names. Shares the ['users-search'] cache with the issue
   // register, so the queryFn must store the SAME raw-row shape other consumers
   // cache under this key; the member mapping happens in the memo below.
+  const canListUsers = useHasPermission('users.list');
   const { data: rawUsers = [] } = useQuery({
     queryKey: ['users-search'],
     queryFn: async () => {
@@ -145,6 +147,7 @@ function ModelReviewInner({ projectId }: { projectId: string }) {
     },
     staleTime: 60_000,
     retry: false,
+    enabled: canListUsers,
   });
   const members = useMemo<BcfMember[]>(
     () => rawUsers.map((u) => ({ id: u.id, name: (u.full_name ?? '').trim() || u.email })),

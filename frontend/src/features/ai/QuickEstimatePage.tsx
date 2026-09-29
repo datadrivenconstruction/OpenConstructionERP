@@ -5,6 +5,7 @@
 import React, { useState, useCallback, useRef, useEffect, useId, useMemo, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { useNavigate, useSearchParams, useLocation, Link } from 'react-router-dom';
 import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 import { useDisplayQuantity } from '@/shared/hooks/useDisplayQuantity';
@@ -335,11 +336,15 @@ function RecentEstimatesPanel({
   busy?: boolean;
 }) {
   const { t } = useTranslation();
+  // The history endpoint sits behind ai.estimate (editor and above); a role
+  // below that has no history to show and would only collect a 403.
+  const canEstimate = useHasPermission('ai.estimate');
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['ai-estimates-history', reloadKey],
     queryFn: () => aiApi.listEstimates({ limit: 8 }),
     retry: false,
     staleTime: 30_000,
+    enabled: canEstimate,
   });
 
   const fmtMoney = (v: number | string, currency: string): string => {
@@ -361,6 +366,7 @@ function RecentEstimatesPanel({
   // Hide the whole panel when there is genuinely nothing yet (keeps the
   // first-run page clean) but still surface load errors so a broken history
   // endpoint is not silent.
+  if (!canEstimate) return null;
   if (!isLoading && !isError && (!data || data.items.length === 0)) return null;
 
   return (

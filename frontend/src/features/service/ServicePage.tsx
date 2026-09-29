@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { useNavigate, useParams } from 'react-router-dom';
 import clsx from 'clsx';
 import {
@@ -298,6 +299,7 @@ function dateToIsoDatetime(date: string): string | undefined {
  * the picker migration.
  */
 function useUserNameResolver(): (id?: string | null) => string {
+  const canListUsers = useHasPermission('users.list');
   const { data: users = [] } = useQuery({
     queryKey: ['users-search'],
     queryFn: () =>
@@ -305,6 +307,7 @@ function useUserNameResolver(): (id?: string | null) => string {
         '/v1/users/?limit=100&is_active=true',
       ),
     staleTime: 60_000,
+    enabled: canListUsers,
   });
   return (id) => {
     if (!id) return '';

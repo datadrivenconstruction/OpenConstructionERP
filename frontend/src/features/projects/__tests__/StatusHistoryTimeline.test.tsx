@@ -4,6 +4,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StatusHistoryTimeline } from '../StatusHistoryTimeline';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 // Route apiGet by URL so the component's two queries (status-history +
 // users lookup) each get a deterministic payload.
@@ -58,6 +59,16 @@ describe('StatusHistoryTimeline', () => {
   beforeEach(() => {
     apiGet.mockReset();
     apiGet.mockImplementation(routeApiGet);
+    // Actor names come from the user directory, which needs users.list.
+    useAuthStore.setState({ userRole: 'manager' });
+  });
+
+  it('does not ask for the user directory for a viewer, who is refused it', async () => {
+    useAuthStore.setState({ userRole: 'viewer' });
+    renderTimeline();
+    await waitFor(() => expect(apiGet).toHaveBeenCalled());
+    await new Promise((r) => setTimeout(r, 20));
+    expect(apiGet.mock.calls.map(([url]) => String(url)).some((u) => u.includes('/v1/users/'))).toBe(false);
   });
 
   it('renders entries newest-first with resolved actor name and note', async () => {
