@@ -50,8 +50,12 @@ class OpenCDEService:
     # ── Projects ─────────────────────────────────────────────────────────
 
     async def list_projects(self) -> list[BCFProject]:
-        """List all projects in BCF format."""
-        stmt = select(Project).order_by(Project.created_at.desc())
+        """List all live projects in BCF format.
+
+        Deleting a project archives it, so archived projects are left out:
+        a BCF client must not offer a project the platform has deleted.
+        """
+        stmt = select(Project).where(Project.status != "archived").order_by(Project.created_at.desc())
         result = await self.session.execute(stmt)
         projects = result.scalars().all()
         return [BCFProject(project_id=str(p.id), name=p.name) for p in projects]
