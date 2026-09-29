@@ -31,7 +31,7 @@ import {
 import type { LucideIcon } from 'lucide-react';
 import { Button, Input, Logo, CountryFlag } from '@/shared/ui';
 import { safeNextPath } from './nextPath';
-import { useAuthStore } from '@/stores/useAuthStore';
+import { readRememberChoice, saveRememberChoice, useAuthStore } from '@/stores/useAuthStore';
 import { extractErrorMessageFromBody } from '@/shared/lib/api';
 import { loginFailureKindFromResponse } from './loginError';
 import { AuthBackground } from './AuthBackground';
@@ -71,9 +71,8 @@ export function LoginPageNext() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [rememberMe, setRememberMe] = useState(
-    () => localStorage.getItem('oe_remember') === '1',
-  );
+  // Checked unless the user unchecked it last time they signed in here.
+  const [rememberMe, setRememberMe] = useState(readRememberChoice);
   const [langOpen, setLangOpen] = useState(false);
   const [demoOpen, setDemoOpen] = useState(true);
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
@@ -164,6 +163,7 @@ export function LoginPageNext() {
         return;
       }
       const data = await res.json();
+      saveRememberChoice(rememberMe);
       setTokens(data.access_token, data.refresh_token, rememberMe, email);
       navigate(nextPath, { replace: true });
     } catch {
