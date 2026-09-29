@@ -45,6 +45,7 @@ import {
 import { Badge, Button, Card, CardContent, CardHeader, EmptyState, ErrorState } from '@/shared/ui';
 import { getErrorMessage, triggerDownload } from '@/shared/lib/api';
 import { formatCurrency } from '@/shared/lib/money';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { BasisHeadline } from './BasisHeadline';
 import { BasisProvenance } from './BasisProvenance';
 import {
@@ -154,6 +155,8 @@ export function EstimateBasisPanel({ projectId, boqId, currency, baseDate }: Est
   const [dirty, setDirty] = useState(false);
   /** OC-09: timestamp of last successful save, drives the "Saved" indicator. */
   const [savedAt, setSavedAt] = useState<number | null>(null);
+  const canGenerate = useHasPermission('estimate_basis.generate');
+  const canWrite = useHasPermission('estimate_basis.write');
 
   // OC-09: warn on page close/refresh with unsaved changes.
   useEffect(() => {
@@ -385,6 +388,13 @@ export function EstimateBasisPanel({ projectId, boqId, currency, baseDate }: Est
   }
 
   const generating = generateMutation.isPending;
+  // Drafting and saving are editor work (estimate_basis.generate / .write).
+  // A viewer still reads and exports the document; the two writes stay
+  // visible but disabled, with the reason on hover, instead of a 403 toast.
+  const forbiddenHint = t('errors.forbidden', {
+    defaultValue: "You don't have permission to perform this action.",
+  });
+  const generateHint = canGenerate ? undefined : forbiddenHint;
   const hasDocuments = (listQuery.data?.items.length ?? 0) > 0;
 
   // ── Render ───────────────────────────────────────────────────────────────
@@ -414,7 +424,11 @@ export function EstimateBasisPanel({ projectId, boqId, currency, baseDate }: Est
             'Draft the inclusions, exclusions and assumptions automatically from the estimate contents.',
         })}
         action={
-          <Button onClick={() => generateMutation.mutate()} disabled={generating}>
+          <Button
+            onClick={() => generateMutation.mutate()}
+            disabled={generating || !canGenerate}
+            title={generateHint}
+          >
             {t('estimateBasis.generate', { defaultValue: 'Draft basis of estimate' })}
           </Button>
         }
@@ -442,7 +456,8 @@ export function EstimateBasisPanel({ projectId, boqId, currency, baseDate }: Est
           <Button
             variant="secondary"
             onClick={() => generateMutation.mutate()}
-            disabled={generating}
+            disabled={generating || !canGenerate}
+            title={generateHint}
             icon={
               generating ? (
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
@@ -472,7 +487,8 @@ export function EstimateBasisPanel({ projectId, boqId, currency, baseDate }: Est
           </Button>
           <Button
             onClick={() => saveMutation.mutate()}
-            disabled={!dirty || saveMutation.isPending}
+            disabled={!dirty || saveMutation.isPending || !canWrite}
+            title={canWrite ? undefined : forbiddenHint}
             icon={
               saveMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden />

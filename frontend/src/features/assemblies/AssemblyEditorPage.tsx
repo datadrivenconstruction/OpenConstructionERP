@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Plus,
@@ -77,6 +78,14 @@ export function AssemblyEditorPage() {
   const [showTagEditor, setShowTagEditor] = useState(false);
   const [tagInput, setTagInput] = useState('');
   const addToast = useToastStore((s) => s.addToast);
+  // Every component write goes through assemblies.update (editor and up). A
+  // viewer reads the recipe: the add controls are disabled with the reason,
+  // the table's controls are disabled, and no handler sends a write the
+  // server refuses (drag reorder and inline edits used to, on every try).
+  const canEditAssembly = useHasPermission('assemblies.update');
+  const editHint = canEditAssembly
+    ? undefined
+    : t('errors.forbidden', { defaultValue: "You don't have permission to perform this action." });
 
   // Drag state for component reordering
   const dragIdx = useRef<number | null>(null);
@@ -245,7 +254,7 @@ export function AssemblyEditorPage() {
   }, [assemblyId, assembly?.code, addToast, t]);
 
   const handleDragEnd = useCallback((fromIndex: number, toIndex: number) => {
-    if (fromIndex === toIndex) return;
+    if (!canEditAssembly || fromIndex === toIndex) return;
     const comps = assembly?.components ?? [];
     if (fromIndex < 0 || fromIndex >= comps.length) return;
     const reordered = [...comps];
@@ -253,7 +262,7 @@ export function AssemblyEditorPage() {
     if (!moved) return;
     reordered.splice(toIndex, 0, moved);
     reorderMutation.mutate(reordered.map((c) => c.id));
-  }, [assembly?.components, reorderMutation]);
+  }, [assembly?.components, reorderMutation, canEditAssembly]);
 
   const handleAddTag = useCallback(() => {
     const tag = tagInput.trim().toLowerCase();
@@ -438,10 +447,14 @@ export function AssemblyEditorPage() {
             size="sm"
             icon={<Database size={15} />}
             onClick={() => setCostDbModalOpen(true)}
+            disabled={!canEditAssembly}
             className="border-purple-300/30 text-purple-600 hover:bg-purple-50"
-            title={t('assemblies.from_database_title', {
-              defaultValue: 'Pick a finished rate from the cost database (CWICR / …)',
-            })}
+            title={
+              editHint ??
+              t('assemblies.from_database_title', {
+                defaultValue: 'Pick a finished rate from the cost database (CWICR / …)',
+              })
+            }
           >
             {t('assemblies.from_database', { defaultValue: 'Cost DB' })}
           </Button>
@@ -450,10 +463,14 @@ export function AssemblyEditorPage() {
             size="sm"
             icon={<Boxes size={15} />}
             onClick={() => openCatalogPicker(null)}
+            disabled={!canEditAssembly}
             className="border-emerald-300/30 text-emerald-700 hover:bg-emerald-50"
-            title={t('assemblies.from_catalog_title', {
-              defaultValue: 'Pick a typed resource (material / labor / equipment) from the catalog',
-            })}
+            title={
+              editHint ??
+              t('assemblies.from_catalog_title', {
+                defaultValue: 'Pick a typed resource (material / labor / equipment) from the catalog',
+              })
+            }
           >
             {t('assemblies.from_catalog', { defaultValue: 'From Catalog' })}
           </Button>
@@ -469,6 +486,8 @@ export function AssemblyEditorPage() {
                 variant="primary"
                 icon={<Plus size={16} />}
                 onClick={() => handleAddComponent('material')}
+                disabled={!canEditAssembly}
+                title={editHint}
                 className="rounded-r-none"
               >
                 {t('assemblies.add_material', { defaultValue: 'Add material' })}
@@ -476,11 +495,13 @@ export function AssemblyEditorPage() {
               <button
                 type="button"
                 onClick={() => setAddMenuOpen((o) => !o)}
+                disabled={!canEditAssembly}
+                title={editHint}
                 aria-label={t('assemblies.add_other_aria', {
                   defaultValue: 'Choose a different resource type',
                 })}
                 aria-expanded={addMenuOpen}
-                className="px-2 rounded-r-lg border-l border-white/20 bg-oe-blue text-white hover:bg-oe-blue-hover transition-colors inline-flex items-center"
+                className="px-2 rounded-r-lg border-l border-white/20 bg-oe-blue text-white hover:bg-oe-blue-hover transition-colors inline-flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronDown size={14} />
               </button>
@@ -597,6 +618,10 @@ export function AssemblyEditorPage() {
       {/* Components Table */}
       <Card padding="none" className="overflow-hidden">
         <div className="overflow-x-auto">
+          {/* Disables every control in the table at once for a role that
+              cannot write; min-w-0 keeps the fieldset from widening the
+              scroll container past its content. */}
+          <fieldset disabled={!canEditAssembly} className="m-0 min-w-0 border-0 p-0">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border-light bg-surface-tertiary text-left">
@@ -661,13 +686,16 @@ export function AssemblyEditorPage() {
                   onMove={(delta) => handleDragEnd(idx, idx + delta)}
                   canMoveUp={idx > 0}
                   canMoveDown={idx < components.length - 1}
-                  onUpdate={(data) =>
+                  onUpdate={(data) => {
+                    if (!canEditAssembly) return;
                     updateComponentMutation.mutate({
                       componentId: component.id,
                       data,
-                    })
-                  }
-                  onDelete={() => deleteComponentMutation.mutate(component.id)}
+                    });
+                  }}
+                  onDelete={() => {
+                    if (canEditAssembly) deleteComponentMutation.mutate(component.id);
+                  }}
                   fmt={fmt}
                 />
               ))}
@@ -723,6 +751,7 @@ export function AssemblyEditorPage() {
               </tfoot>
             )}
           </table>
+          </fieldset>
         </div>
       </Card>
 

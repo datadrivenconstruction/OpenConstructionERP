@@ -32,6 +32,7 @@ import {
 } from './lib/measurement';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { getDateFnsLocale } from '@/shared/lib/dateFnsLocale';
@@ -1646,6 +1647,13 @@ export function DwgTakeoffPage() {
     },
   });
 
+  // Writing the scale needs the module's editor-level write permission
+  // (the PATCH route checks dwg_takeoff.create). A viewer keeps the scale in
+  // local state and still measures with it; the effect below fires on every
+  // drawing selection, so without this gate simply opening a drawing as a
+  // viewer sent a refused PATCH.
+  const canPersistScale = useHasPermission('dwg_takeoff.create');
+
   // Persist drawing scale + mode to the backend so a page reload on another
   // device restores exactly what the estimator picked. Kept separate from
   // the localStorage sync above so an offline user still gets instant UI
@@ -1664,7 +1672,7 @@ export function DwgTakeoffPage() {
   // Debounce backend sync so the user can type "1:50" one character at a time
   // without firing four PATCH requests.
   useEffect(() => {
-    if (!selectedDrawingId) return;
+    if (!selectedDrawingId || !canPersistScale) return;
     const handle = window.setTimeout(() => {
       updateScaleMutation.mutate({
         drawingId: selectedDrawingId,
@@ -1675,7 +1683,7 @@ export function DwgTakeoffPage() {
     return () => window.clearTimeout(handle);
     // intentionally excludes updateScaleMutation from deps - it's a stable ref
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDrawingId, drawingScale, scaleMode]);
+  }, [selectedDrawingId, drawingScale, scaleMode, canPersistScale]);
 
   // When the drawings list refreshes, hydrate local scale state from the
   // server-persisted fields (falling back to localStorage / defaults).
