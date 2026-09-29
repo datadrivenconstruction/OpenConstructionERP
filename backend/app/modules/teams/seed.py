@@ -180,3 +180,41 @@ async def seed_teams_roster(session: AsyncSession, *, project_id: uuid.UUID) -> 
     session.add_all(rows)
     await session.flush()
     return {"roster_members": len(rows)}
+
+
+async def seeded_row_ids(session: AsyncSession, project_ids: list[uuid.UUID]) -> list[tuple[type, list, str]]:
+    """Roster lines in ``project_ids`` that are exactly one of ``_DEMO_PEOPLE``.
+
+    A line matches only when name, firm, site role, trade and allocation all
+    equal one seeded person and it is linked to no login and no contact, which
+    the seed never sets. A real person who shares a demo name but works for a
+    different firm or in a different role is not matched.
+
+    Returns:
+        ``(model, ids, label)`` groups; ``label`` names the group in reports.
+    """
+    if not project_ids:
+        return []
+    people = {(p.name, p.company, p.site_role, p.trade, p.allocation) for p in _DEMO_PEOPLE}
+    rows = (
+        await session.execute(
+            select(
+                RosterMember.id,
+                RosterMember.display_name,
+                RosterMember.company_name,
+                RosterMember.site_role,
+                RosterMember.trade,
+                RosterMember.allocation_percent,
+                RosterMember.user_id,
+                RosterMember.contact_id,
+            ).where(RosterMember.project_id.in_(project_ids))
+        )
+    ).all()
+    ids = [
+        r.id
+        for r in rows
+        if (r.display_name, r.company_name, r.site_role, r.trade, r.allocation_percent) in people
+        and r.user_id is None
+        and r.contact_id is None
+    ]
+    return [(RosterMember, ids, "teams_roster")]
