@@ -39843,6 +39843,8 @@ const resource = {
     "rebar_schedule.invalid_file": "Only .abs files are supported.",
     "rebar_schedule.length": "Length (mm)",
     "rebar_schedule.member": "Member",
+    "rebar_schedule.drawing": "Сызба",
+    "rebar_schedule.steel_grade": "Болат маркасы",
     "rebar_schedule.no_project": "Select a project",
     "rebar_schedule.no_project_desc": "Choose a project from the header to manage its rebar schedules.",
     "rebar_schedule.or_browse": "or click to browse",
