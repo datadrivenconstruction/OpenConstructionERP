@@ -95,6 +95,19 @@ _CUSTOMER_CONTACT_EMAILS: dict[str, str] = {
 
 _CUSTOMER_NAMES: list[str] = list(_CUSTOMER_CONTACT_EMAILS)
 
+# How the seed names each contract. ``seed_service_demo`` writes contracts from
+# these and ``seeded_row_ids`` recognises them by the same helpers.
+_CONTRACT_DESCRIPTION = "Planned maintenance and reactive callout cover for the site plant."
+
+
+def _contract_number(idx: int) -> str:
+    return f"SC-{idx + 1:02d}"
+
+
+def _contract_title(idx: int) -> str:
+    return f"Service contract - {_CUSTOMER_NAMES[idx % len(_CUSTOMER_NAMES)]}"
+
+
 _ASSET_TYPES: list[str] = [
     "boiler",
     "chiller",
@@ -355,9 +368,9 @@ async def seed_service_demo(
         contract = ServiceContract(
             customer_id=customer_id,
             project_id=pid,
-            contract_number=f"SC-{idx + 1:02d}",
-            title=f"Service contract - {_CUSTOMER_NAMES[idx % len(_CUSTOMER_NAMES)]}",
-            description="Planned maintenance and reactive callout cover for the site plant.",
+            contract_number=_contract_number(idx),
+            title=_contract_title(idx),
+            description=_CONTRACT_DESCRIPTION,
             period_start=period_start.isoformat(),
             period_end=period_end.isoformat(),
             sla_definition_id=slas[idx % len(slas)].id,
@@ -777,3 +790,45 @@ async def seed_service_recurring_schedules(
     await session.flush()
     logger.info("Service recurring schedules seeded: %s", counters)
     return counters
+
+
+async def seeded_row_ids(session: AsyncSession, project_ids: list[uuid.UUID]) -> list[tuple[type, list, str]]:
+    """Service contracts in ``project_ids`` exactly as :func:`seed_service_demo` wrote them.
+
+    A contract matches on number, title and description of the seed contract
+    with the same index, all three at once. The seed numbers contracts
+    ``SC-01`` onwards by position in the project list, so the index is read
+    from the number and the title must be the customer that index names.
+
+    Assets, tickets, work orders with their items and debriefs, and asset
+    schedules hang off the contract with CASCADE and go with it.
+
+    Returns:
+        ``(model, ids, label)`` groups; ``label`` names the group in reports.
+    """
+    if not project_ids:
+        return []
+    rows = (
+        await session.execute(
+            select(
+                ServiceContract.id,
+                ServiceContract.contract_number,
+                ServiceContract.title,
+                ServiceContract.description,
+            ).where(ServiceContract.project_id.in_(project_ids))
+        )
+    ).all()
+    ids = []
+    for r in rows:
+        number = str(r.contract_number or "")
+        if not number.startswith("SC-") or not number[3:].isdigit():
+            continue
+        idx = int(number[3:]) - 1
+        if (
+            idx >= 0
+            and number == _contract_number(idx)
+            and r.title == _contract_title(idx)
+            and r.description == _CONTRACT_DESCRIPTION
+        ):
+            ids.append(r.id)
+    return [(ServiceContract, ids, "service_contracts")]
