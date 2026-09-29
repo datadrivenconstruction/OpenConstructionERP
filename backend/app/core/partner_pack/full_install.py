@@ -28,7 +28,7 @@ import json
 import logging
 import uuid
 from collections.abc import AsyncIterator
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
@@ -37,6 +37,9 @@ logger = logging.getLogger(__name__)
 
 
 # ── Request / response models ────────────────────────────────────────────────
+
+#: Step ids the streamed install can run, in the order it runs them.
+StreamStepName = Literal["apply_pack", "locale", "cost_db", "resources", "catalog", "vector_db", "demos"]
 
 
 class FullInstallRequest(BaseModel):
@@ -64,6 +67,27 @@ class FullInstallRequest(BaseModel):
         ge=0,
         le=10,
         description="Install up to N country demo projects (flagship first).",
+    )
+    install_catalog: bool = Field(
+        default=False,
+        description=(
+            "Streamed install only: also load the resource catalogue of every cost base the install "
+            "loaded. Off by default so callers that never asked for it keep their behaviour."
+        ),
+    )
+    cost_regions: list[str] | None = Field(
+        default=None,
+        description=(
+            "The pack's cost regions to load, as declared in its manifest. None loads every one of "
+            "them; an empty list loads none. A slug the pack does not declare is ignored."
+        ),
+    )
+    only_steps: list[StreamStepName] | None = Field(
+        default=None,
+        description=(
+            "Streamed install only: run just these steps, to retry the ones that failed. "
+            "``resources`` rides along with ``cost_db``. None runs the full install."
+        ),
     )
 
 
@@ -132,6 +156,61 @@ def _build_city_index() -> dict[str, str]:
         token = parts[-1].lower()
         index.setdefault(token, db_id)
     return index
+
+
+def describe_cost_bases(region_slugs: list[str]) -> list[dict[str, Any]]:
+    """What each of a pack's declared cost regions would load, before loading.
+
+    One entry per declared slug, in manifest order, so the activation dialog
+    can offer the country's bases with their size and say plainly which ones
+    have nothing published behind them instead of dropping them. Sizes are
+    work-item counts from the base registry; there is no per-file byte size to
+    quote, and a guessed one would be worse than none.
+
+    Args:
+        region_slugs: The pack's ``cwicr_regions``.
+
+    Returns:
+        ``[{slug, db_id, loadable, market, currency, lang_code, flag,
+        positions, has_catalog, reason_code}]``. ``db_id`` is None and
+        ``loadable`` False for a slug no published base resolves to.
+    """
+    from app.modules.catalog.router import REGION_MAP
+    from app.modules.costs import base_registry
+
+    out: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for slug in region_slugs:
+        db_id = resolve_cwicr_db_id(slug)
+        variant = base_registry.variant_by_region(db_id) if db_id else None
+        entry: dict[str, Any] = {
+            "slug": slug,
+            "db_id": db_id,
+            "loadable": db_id is not None,
+            "market": variant.market if variant else None,
+            "currency": variant.currency if variant else None,
+            "lang_code": variant.lang_code if variant else None,
+            "flag": variant.flag if variant else None,
+            "positions": variant.positions if variant else None,
+            "has_catalog": bool(db_id and db_id in REGION_MAP),
+            "reason_code": None if db_id else "no_published_base",
+        }
+        if db_id and db_id in seen:
+            # Two slugs naming one base load it once; the first one carries it.
+            entry["loadable"] = False
+            entry["reason_code"] = "duplicate_base"
+        if db_id:
+            seen.add(db_id)
+        out.append(entry)
+    return out
+
+
+def _selected_regions(declared: list[str], wanted: list[str] | None) -> list[str]:
+    """The declared regions the caller asked for, in manifest order."""
+    if wanted is None:
+        return list(declared)
+    chosen = set(wanted)
+    return [r for r in declared if r in chosen]
 
 
 def resolve_cwicr_db_id(slug: str) -> str | None:
@@ -244,7 +323,14 @@ async def _step_apply_pack(
     effects = res.get("effects", {})
     enabled = effects.get("modules_enabled", []) or []
     disabled = effects.get("modules_disabled", []) or []
-    detail: dict[str, Any] = {"modules_enabled": len(enabled), "modules_disabled": len(disabled)}
+    plan = res.get("plan") or {}
+    detail: dict[str, Any] = {
+        "modules_enabled": len(enabled),
+        "modules_disabled": len(disabled),
+        # The validation rule sets new projects get while this pack is active,
+        # so the result summary can name them instead of leaving them implied.
+        "rule_sets": list(plan.get("rule_sets_enabled") or []),
+    }
     if switched_from:
         detail["switched_from"] = switched_from
     return StepResult(
@@ -261,7 +347,11 @@ def _step_locale(slug: str) -> StepResult:
     m = get_pack_by_slug(slug)
     locale = m.default_locale if m else None
     if not locale:
-        return StepResult(step="locale", status="skipped", detail={"reason": "no default locale"})
+        return StepResult(
+            step="locale",
+            status="skipped",
+            detail={"reason": "no default locale", "reason_code": "no_default_locale"},
+        )
     return StepResult(step="locale", status="ok", detail={"locale": locale})
 
 
@@ -495,6 +585,16 @@ async def _step_demos(slug: str, demo_count: int) -> StepResult:
     from app.core.partner_pack.discovery import get_pack_by_slug
     from app.database import async_session_factory
 
+    # Zero is the activation dialog's unticked "install the sample project".
+    # The pinned-list rule below used to lift it back up to every pinned demo,
+    # so a pack that pins its demos installed them after the user said no.
+    if demo_count <= 0:
+        return StepResult(
+            step="demos",
+            status="skipped",
+            detail={"reason": "demo projects not requested", "reason_code": "not_requested", "installed": []},
+        )
+
     # A pack that explicitly pins its own demo_template_ids should install ALL
     # of them, even when the caller's demo_count default sits below that count.
     # Packs that rely on the flagship plus country-fill keep the requested cap.
@@ -506,7 +606,7 @@ async def _step_demos(slug: str, demo_count: int) -> StepResult:
         return StepResult(
             step="demos",
             status="skipped",
-            detail={"reason": "no demos mapped for pack", "installed": []},
+            detail={"reason": "no demos mapped for pack", "reason_code": "no_demos_mapped", "installed": []},
         )
 
     installed: list[str] = []
@@ -586,12 +686,13 @@ STREAM_STEPS: list[str] = [
     "locale",
     "cost_db",
     "resources",
+    "catalog",
     "vector_db",
     "demos",
 ]
 
 
-async def _step_cost_db_detailed(slug: str) -> tuple[StepResult, list[str], int]:
+async def _step_cost_db_detailed(slug: str, cost_regions: list[str] | None = None) -> tuple[StepResult, list[str], int]:
     """Load the CWICR cost DB and also return the embedded resource count.
 
     Same load path as :func:`_step_cost_db` (one parquet read per resolvable
@@ -599,50 +700,158 @@ async def _step_cost_db_detailed(slug: str) -> tuple[StepResult, list[str], int]
     ``resource_components`` each region reports so the streaming installer can
     render a distinct "Load resources" progress row. Returns
     ``(step_result, loaded_db_ids, resource_count)``.
+
+    ``cost_regions`` narrows the pack's declared regions to the ones the user
+    kept ticked in the dialog. ``detail.bases`` carries one row per declared
+    region with its own outcome, so the result summary can say which base
+    loaded how many items and which one failed and why.
     """
     from app.core.partner_pack.discovery import get_pack_by_slug
     from app.database import async_session_factory
     from app.modules.costs.router import load_cwicr_region
 
     m = get_pack_by_slug(slug)
-    regions = list(m.cwicr_regions or []) if m else []
+    declared = list(m.cwicr_regions or []) if m else []
+    regions = _selected_regions(declared, cost_regions)
 
     loaded: list[str] = []
     items = 0
     resources = 0
     skipped: list[str] = []
     errors: list[dict[str, str]] = []
+    bases: list[dict[str, Any]] = []
 
-    for region_slug in regions:
+    for region_slug in declared:
         db_id = resolve_cwicr_db_id(region_slug)
+        if region_slug not in regions:
+            bases.append({"slug": region_slug, "db_id": db_id, "status": "skipped", "reason_code": "not_selected"})
+            continue
         if not db_id:
             skipped.append(region_slug)
+            bases.append({"slug": region_slug, "db_id": None, "status": "skipped", "reason_code": "no_published_base"})
             continue
         if db_id in loaded:
             # Two slugs resolving to the same live id (e.g. both UK slugs) - load once.
+            bases.append({"slug": region_slug, "db_id": db_id, "status": "skipped", "reason_code": "duplicate_base"})
             continue
         try:
             async with async_session_factory() as session:
                 res = await load_cwicr_region(db_id, session)
                 await session.commit()
             count = int(res.get("total_items") or res.get("imported") or 0)
+            base_resources = int(res.get("resource_components") or 0)
             items += count
-            resources += int(res.get("resource_components") or 0)
+            resources += base_resources
             loaded.append(db_id)
+            bases.append(
+                {
+                    "slug": region_slug,
+                    "db_id": db_id,
+                    "status": "ok",
+                    "items": count,
+                    "resources": base_resources,
+                    "already_loaded": res.get("status") == "already_loaded",
+                }
+            )
         except Exception as exc:  # noqa: BLE001 - fail-soft per region
             logger.warning("full-install cost_db: region %s (%s) failed: %s", region_slug, db_id, exc)
             errors.append({"region": region_slug, "db_id": db_id, "error": str(exc)})
+            bases.append(
+                {
+                    "slug": region_slug,
+                    "db_id": db_id,
+                    "status": "error",
+                    "reason_code": "load_failed",
+                    "error": str(exc),
+                }
+            )
 
-    detail: dict[str, Any] = {"regions": loaded, "items": items, "resources": resources}
+    detail: dict[str, Any] = {"regions": loaded, "items": items, "resources": resources, "bases": bases}
     if skipped:
         detail["skipped"] = skipped
     if errors:
         detail["errors"] = errors
 
     status = _cost_db_status(loaded, errors)
-    if not regions:
+    if not declared:
         detail.setdefault("reason", "no cwicr_regions declared")
+        detail["reason_code"] = "no_regions_declared"
+    elif not regions:
+        detail["reason"] = "no cost base selected"
+        detail["reason_code"] = "none_selected"
+    elif status == "skipped":
+        detail["reason"] = "no published cost base for this pack"
+        detail["reason_code"] = "no_loadable_base"
     return StepResult(step="cost_db", status=status, detail=detail), loaded, resources
+
+
+async def _step_catalog(loaded_regions: list[str]) -> StepResult:
+    """Load the resource catalogue of each cost base the install loaded.
+
+    The ``resources`` row counts the labour, material and equipment lines that
+    ride inside the work items. The catalogue is a separate table, the one the
+    Catalog page and the resource picker read, and a country install that left
+    it empty sent the user off to import it by hand afterwards.
+
+    A region whose catalogue already holds rows is left alone rather than
+    reimported: the import replaces the region wholesale, and a second
+    activation must not wipe prices someone adjusted since the first.
+    """
+    from sqlalchemy import func, select
+
+    from app.database import async_session_factory
+    from app.modules.catalog.models import CatalogResource
+    from app.modules.catalog.router import REGION_MAP, import_region_catalog
+
+    if not loaded_regions:
+        return StepResult(
+            step="catalog",
+            status="skipped",
+            detail={"reason": "no cost database loaded", "reason_code": "no_cost_db", "resources": 0},
+        )
+
+    total = 0
+    loaded: list[str] = []
+    catalogs: list[dict[str, Any]] = []
+    errors: list[dict[str, str]] = []
+    for db_id in loaded_regions:
+        if db_id not in REGION_MAP:
+            catalogs.append({"db_id": db_id, "status": "skipped", "reason_code": "no_catalog"})
+            continue
+        try:
+            async with async_session_factory() as session:
+                present = (
+                    await session.execute(
+                        select(func.count()).select_from(CatalogResource).where(CatalogResource.region == db_id)
+                    )
+                ).scalar_one()
+                if present:
+                    count = int(present)
+                    already = True
+                else:
+                    res = await import_region_catalog(session, db_id)
+                    await session.commit()
+                    count = int(res.get("imported") or 0)
+                    already = False
+            total += count
+            loaded.append(db_id)
+            catalogs.append({"db_id": db_id, "status": "ok", "resources": count, "already_loaded": already})
+        except Exception as exc:  # noqa: BLE001 - fail-soft per region
+            logger.warning("full-install catalog: region %s failed: %s", db_id, exc)
+            errors.append({"db_id": db_id, "error": str(exc)})
+            catalogs.append({"db_id": db_id, "status": "error", "reason_code": "load_failed", "error": str(exc)})
+
+    detail: dict[str, Any] = {"regions": loaded, "resources": total, "catalogs": catalogs}
+    if errors:
+        detail["errors"] = errors
+        status = "error"
+    elif loaded:
+        status = "ok"
+    else:
+        status = "skipped"
+        detail["reason"] = "no resource catalogue is published for the loaded cost bases"
+        detail["reason_code"] = "no_catalog"
+    return StepResult(step="catalog", status=status, detail=detail)
 
 
 def _sse(event: str, data: dict[str, Any]) -> str:
@@ -679,9 +888,22 @@ async def full_install_stream(
         active_steps.append("locale")
     if req.install_cost_db:
         active_steps.extend(["cost_db", "resources"])
+        if req.install_catalog:
+            active_steps.append("catalog")
     if req.vectorize:
         active_steps.append("vector_db")
     active_steps.append("demos")
+    if req.only_steps is not None:
+        # A retry. ``resources`` only reports what ``cost_db`` loaded, and the
+        # catalogue and the vector index load for the regions ``cost_db``
+        # returns, so asking for any of them re-runs ``cost_db`` as well. The
+        # loader skips a base that is already in, so that costs a count query.
+        wanted: set[str] = set(req.only_steps)
+        if wanted & {"resources", "catalog", "vector_db"}:
+            wanted.add("cost_db")
+        if "cost_db" in wanted:
+            wanted.add("resources")
+        active_steps = [s for s in active_steps if s in wanted]
     total = len(active_steps)
 
     # Stable label keys so the frontend can localize; English fallbacks travel
@@ -691,6 +913,7 @@ async def full_install_stream(
         "locale": ("modules.pp_step_locale", "Install language"),
         "cost_db": ("modules.pp_step_cost_db", "Load work catalog"),
         "resources": ("modules.pp_step_resources", "Load resources"),
+        "catalog": ("modules.pp_step_catalog", "Load resource catalogue"),
         "vector_db": ("modules.pp_step_vector_db", "Build vector index"),
         "demos": ("modules.pp_step_demos", "Create demo project"),
     }
@@ -718,7 +941,7 @@ async def full_install_stream(
             elif step == "locale":
                 result = _step_locale(slug)
             elif step == "cost_db":
-                result, loaded_regions, cost_resources = await _step_cost_db_detailed(slug)
+                result, loaded_regions, cost_resources = await _step_cost_db_detailed(slug, req.cost_regions)
             elif step == "resources":
                 # Reporting-only: resources were imported with the work catalog.
                 if loaded_regions:
@@ -731,8 +954,10 @@ async def full_install_stream(
                     result = StepResult(
                         step="resources",
                         status="skipped",
-                        detail={"reason": "no cost database loaded", "resources": 0},
+                        detail={"reason": "no cost database loaded", "reason_code": "no_cost_db", "resources": 0},
                     )
+            elif step == "catalog":
+                result = await _step_catalog(loaded_regions)
             elif step == "vector_db":
                 result = await _step_vector_db(loaded_regions)
             elif step == "demos":
@@ -761,8 +986,10 @@ async def full_install_stream(
     # "partial". ``ok`` is therefore: apply succeeded AND no step ERRORED. A
     # gracefully skipped step (no regions, demos disabled, vector backend down)
     # is fine; only a real ``error`` (or a failed apply) makes it partial.
+    # A retry that leaves ``apply_pack`` out has nothing to say about it: the
+    # run being retried applied the pack.
     any_error = any(r.status == "error" for r in results)
-    ok = apply_ok and not any_error
+    ok = (apply_ok or "apply_pack" not in active_steps) and not any_error
 
     logger.info(
         "Partner-pack stream-install '%s': ok=%s steps=%s",

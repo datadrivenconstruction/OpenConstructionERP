@@ -44,6 +44,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import String
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.i18n import get_locale
 from app.core.validation.messages import translate
@@ -508,25 +509,48 @@ async def import_catalog_from_github(
     codeless coefficient bases VN_NATIONAL and ID_NATIONAL are recognised keys
     but have no resource catalog to import.
     """
-    import csv
-    import io
-
-    folder = REGION_MAP.get(region)
-    if folder is None:
+    if region not in REGION_MAP:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Unknown region '{region}'. Valid regions: {', '.join(sorted(REGION_MAP))}",
         )
-
-    # Offload blocking file/network I/O to a worker thread so the event loop
-    # stays responsive during the 60-second download window.
     try:
-        raw_bytes, csv_source = await asyncio.to_thread(_read_region_catalog_csv, region, folder)
+        return await import_region_catalog(session, region)
     except RuntimeError as exc:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=str(exc),
         ) from exc
+
+
+async def import_region_catalog(session: AsyncSession, region: str) -> dict[str, Any]:
+    """Replace the resource catalogue of ``region`` with the published CSV.
+
+    The body of ``POST /catalog/import/{region}``, taken out so the one-click
+    pack install can load a country's catalogue through the same code the
+    Catalog page uses. The caller owns the transaction.
+
+    Args:
+        session: Session the rows are flushed into; not committed here.
+        region: A key of ``REGION_MAP``.
+
+    Returns:
+        ``{"imported", "skipped", "region", "source"}``.
+
+    Raises:
+        ValueError: ``region`` has no catalogue in ``REGION_MAP``.
+        RuntimeError: The CSV could be neither found locally nor downloaded.
+    """
+    import csv
+    import io
+
+    folder = REGION_MAP.get(region)
+    if folder is None:
+        raise ValueError(f"Unknown catalogue region '{region}'")
+
+    # Offload blocking file/network I/O to a worker thread so the event loop
+    # stays responsive during the 60-second download window.
+    raw_bytes, csv_source = await asyncio.to_thread(_read_region_catalog_csv, region, folder)
     logger.info("Catalog CSV for %s resolved from %s (%d bytes)", region, csv_source, len(raw_bytes))
 
     text = raw_bytes.decode("utf-8-sig")
