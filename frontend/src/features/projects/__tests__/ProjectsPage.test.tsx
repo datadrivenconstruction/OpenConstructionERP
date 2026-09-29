@@ -17,8 +17,8 @@ import { CURATED_PROJECT_STATUSES } from '../ProjectStatusBadge';
  * regressed.
  */
 describe('isProjectFilterActive (#284 toolbar visibility)', () => {
-  it('is false for the default view (no search, status=all, region=all)', () => {
-    expect(isProjectFilterActive('', 'all', 'all')).toBe(false);
+  it('is false for the default view (no search, status=active, region=all)', () => {
+    expect(isProjectFilterActive('', 'active', 'all')).toBe(false);
   });
 
   it('is true in the Archived view so the toolbar survives an empty result', () => {
@@ -28,16 +28,16 @@ describe('isProjectFilterActive (#284 toolbar visibility)', () => {
     expect(isProjectFilterActive('', 'archived', 'all')).toBe(true);
   });
 
-  it('is true for the Active filter', () => {
-    expect(isProjectFilterActive('', 'active', 'all')).toBe(true);
+  it('is true for the All filter, which brings deleted projects back into view', () => {
+    expect(isProjectFilterActive('', 'all', 'all')).toBe(true);
   });
 
   it('is true when a search term is present', () => {
-    expect(isProjectFilterActive('tower', 'all', 'all')).toBe(true);
+    expect(isProjectFilterActive('tower', 'active', 'all')).toBe(true);
   });
 
   it('is true when a region filter is set', () => {
-    expect(isProjectFilterActive('', 'all', 'Bavaria')).toBe(true);
+    expect(isProjectFilterActive('', 'active', 'Bavaria')).toBe(true);
   });
 });
 

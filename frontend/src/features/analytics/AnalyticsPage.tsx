@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { apiGet } from '@/shared/lib/api';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { apiGet, ApiError } from '@/shared/lib/api';
+import { useToastStore } from '@/stores/useToastStore';
 import { fmtCurrency, fmtNumber, fmtPercent } from '@/shared/lib/formatters';
 import {
   FolderOpen,
@@ -111,6 +112,33 @@ export function AnalyticsPage() {
   // the user pauses for 300ms instead of on every keystroke.
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(0);
+  const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
+
+  // A row can outlive its project: another tab or another user may have
+  // deleted it since this list was fetched. Ask first, and on a 404 refresh
+  // the list and say what happened instead of opening "Project not found".
+  const openProject = useCallback(
+    async (projectId: string, suffix = '') => {
+      try {
+        await apiGet(`/v1/projects/${projectId}`);
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 404) {
+          void queryClient.invalidateQueries({ queryKey: ['analytics'] });
+          addToast({
+            type: 'info',
+            title: t('analytics.project_deleted_title', { defaultValue: 'Project was deleted' }),
+            message: t('analytics.project_deleted_message', {
+              defaultValue: 'This project no longer exists. The analytics list has been refreshed.',
+            }),
+          });
+          return;
+        }
+      }
+      navigate(`/projects/${projectId}${suffix}`);
+    },
+    [addToast, navigate, queryClient, t],
+  );
 
   const { data, isLoading, isError, refetch, isFetching } = useQuery<AnalyticsOverview>({
     queryKey: ['analytics', 'overview'],
@@ -642,11 +670,11 @@ export function AnalyticsPage() {
                       name: p.name,
                     })}
                     className="hover:bg-surface-secondary/30 transition-colors cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-oe-blue"
-                    onClick={() => navigate(`/projects/${p.id}`)}
+                    onClick={() => void openProject(p.id)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
-                        navigate(`/projects/${p.id}`);
+                        void openProject(p.id);
                       }
                     }}
                   >
@@ -714,7 +742,7 @@ export function AnalyticsPage() {
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/projects/${p.id}/finance`);
+                          void openProject(p.id, '/finance');
                         }}
                         title={t('analytics.open_finance', { defaultValue: 'Open Finance' })}
                         aria-label={t('analytics.open_finance_for', {
