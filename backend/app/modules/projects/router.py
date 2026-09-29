@@ -3356,7 +3356,10 @@ async def get_project_profile(
     payload: CurrentUserPayload,
     service: ProjectService = Depends(_get_service),
 ) -> ProjectProfileResult:
-    await _verify_project_owner(service, project_id, user_id, payload)
+    # A read: any project member may see the profile, not only the owner.
+    # The owner check here answered a member with 403 while the project
+    # itself opened for them, and the writes below keep the owner check.
+    await _verify_project_access(service, project_id, user_id, service.session, payload)
     result = await profile_service.get_profile(service.session, project_id)
     if result is None:
         # Auto-retrofit a default profile (same as /profile/focus-mode and
@@ -3453,7 +3456,8 @@ async def list_project_modules(
     payload: CurrentUserPayload,
     service: ProjectService = Depends(_get_service),
 ) -> list[ProjectModuleRead]:
-    await _verify_project_owner(service, project_id, user_id, payload)
+    # Read access, same as the profile it is derived from.
+    await _verify_project_access(service, project_id, user_id, service.session, payload)
     result = await profile_service.get_profile(service.session, project_id)
     if result is None:
         result = await profile_service.ensure_default_profile(
@@ -3489,11 +3493,11 @@ async def get_module_presence(
 ) -> ProjectModulePresence:
     """Return ``ProjectModulePresence`` for ``project_id``.
 
-    Auth: requires a valid JWT (``CurrentUserId``) plus project
-    ownership / admin (via :func:`_verify_project_owner`). The probe
-    itself runs against the request session - no extra connection.
+    Auth: requires a valid JWT (``CurrentUserId``) plus read access to the
+    project - owner, member or admin (via :func:`_verify_project_access`).
+    The probe itself runs against the request session - no extra connection.
     """
-    await _verify_project_owner(service, project_id, user_id, payload)
+    await _verify_project_access(service, project_id, user_id, session, payload)
     presence = await probe_project_modules(session, project_id)
     # ``probe_project_modules`` returns sidebar slugs (incl. "5d");
     # ``model_validate`` resolves the ``5d`` → ``five_d`` alias.
