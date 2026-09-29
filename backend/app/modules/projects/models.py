@@ -687,15 +687,18 @@ class DemoProjectTombstone(Base):
     and removed when a person installs that demo again. The boot installers
     read it and skip what it names; an explicit install from the app ignores
     it, because a person asking for the demo outranks the record of a person
-    removing it. ``project_id`` is the row that was removed and carries no
-    foreign key, since the project it names may no longer exist.
+    removing it. ``removed_project_id`` is the row that was removed and carries
+    no foreign key, since the project it names may no longer exist. It is not
+    called ``project_id`` on purpose: the demo purge sweeps every table with a
+    ``project_id`` column for the purged ids, and it would take this record
+    with the project it describes.
     """
 
     __tablename__ = "oe_projects_demo_tombstone"
     __table_args__ = (UniqueConstraint("demo_id", name="uq_oe_projects_demo_tombstone_demo_id"),)
 
     demo_id: Mapped[str] = mapped_column(String(100), nullable=False)
-    project_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    removed_project_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     # "archived" when the project was deleted, "purged" when demo data was removed.
     reason: Mapped[str] = mapped_column(String(16), nullable=False, default="archived")
 

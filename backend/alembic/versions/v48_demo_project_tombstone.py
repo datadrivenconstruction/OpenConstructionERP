@@ -64,7 +64,7 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column("demo_id", sa.String(100), nullable=False),
-        sa.Column("project_id", _GUID, nullable=True),
+        sa.Column("removed_project_id", _GUID, nullable=True),
         sa.Column("reason", sa.String(16), nullable=False),
         sa.PrimaryKeyConstraint("id", name="pk_oe_projects_demo_tombstone"),
         sa.UniqueConstraint("demo_id", name="uq_oe_projects_demo_tombstone_demo_id"),

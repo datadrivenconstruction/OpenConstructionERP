@@ -111,7 +111,7 @@ async def retire_demo_ids(
     for did, pid in wanted.items():
         if did in already:
             continue
-        session.add(DemoProjectTombstone(demo_id=did, project_id=pid, reason=reason))
+        session.add(DemoProjectTombstone(demo_id=did, removed_project_id=pid, reason=reason))
         added += 1
     if added:
         await session.flush()
