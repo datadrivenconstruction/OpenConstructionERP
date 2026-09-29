@@ -273,6 +273,7 @@ frontend/scripts/.howto-i18n/
 # Smoke-sweep E2E run artefacts (regenerable test output, not source).
 frontend/qa-smoke/
 frontend/qa-smoke-report/
+frontend/qa-routes/
 frontend/*.log.err
 frontend/*.log.out
 qa-tests/v275-probe/shots*/
