@@ -79,13 +79,21 @@ from app.modules.schedule.schemas import (
     WorkOrderCreate,
     WorkOrderUpdate,
 )
-from app.modules.schedule.wbs_numbering import insert_position_under, next_wbs_code
+from app.modules.schedule.wbs_numbering import (
+    order_with_block_under,
+    sort_order_changes,
+    subtree_ids,
+    suggest_code,
+)
 
 # PERT distribution factors (from DDC_Toolkit reference)
 _PERT_OPTIMISTIC = 0.75
 _PERT_PESSIMISTIC = 1.60
 
 logger = logging.getLogger(__name__)
+
+# Placeholder sort order for a row being placed; any value past the real ones.
+_INT32_LAST = 2**31 - 1
 
 
 def _str_to_float(value: str | None) -> float:
@@ -1059,7 +1067,7 @@ class ScheduleService:
 
     # ── Activity operations ────────────────────────────────────────────────
 
-    async def create_activity(self, data: ActivityCreate) -> Activity:
+    async def create_activity(self, data: ActivityCreate, actor_id: str | None = None) -> Activity:
         """Add a new activity to a schedule.
 
         Auto-calculates duration_days if start_date and end_date are provided.
@@ -1067,6 +1075,8 @@ class ScheduleService:
 
         Args:
             data: Activity creation payload.
+            actor_id: The caller. When given, an assignee must be a contact
+                the caller can see (admins see all).
 
         Returns:
             The newly created activity.
@@ -1093,13 +1103,12 @@ class ScheduleService:
         if data.parent_id is not None:
             self._assert_parent_in_outline(data.parent_id, outline)
         if data.assignee_id is not None:
-            await self._assert_assignee_exists(data.assignee_id)
+            await self._assert_assignee_exists(data.assignee_id, actor_id)
 
-        # A blank code under a section continues that section's numbering; a
-        # typed code is kept as typed but may not repeat one already in use.
-        wbs_code = data.wbs_code
-        if not wbs_code and data.parent_id is not None:
-            wbs_code = self._suggest_wbs_from_outline(data.parent_id, outline)
+        # A blank code continues the numbering of the section the activity
+        # goes into, or the top-level numbering; a typed code is kept as typed
+        # but may not repeat one already in use.
+        wbs_code = data.wbs_code or suggest_code(data.parent_id, outline)
         if wbs_code:
             self._assert_wbs_code_free(wbs_code, outline)
 
@@ -1107,12 +1116,17 @@ class ScheduleService:
         # before. Under a section it goes right after the section's last
         # descendant, so the flat order every list and export reads keeps the
         # child inside its section instead of at the bottom of the schedule.
+        # The id is minted here so the new row can take its place in that
+        # order before it exists.
+        new_id = uuid.uuid4()
         sort_order = data.sort_order
-        open_gap = False
+        reorder: dict[uuid.UUID, int] = {}
         if sort_order == 0:
             if data.parent_id is not None:
-                sort_order = insert_position_under(data.parent_id, outline)
-                open_gap = any(order >= sort_order for _i, _p, order, _c in outline)
+                planned = [*outline, (new_id, data.parent_id, _INT32_LAST, wbs_code)]
+                changes = sort_order_changes(order_with_block_under(new_id, data.parent_id, planned), planned)
+                sort_order = changes.pop(new_id)
+                reorder = changes
             else:
                 max_order = await self.activity_repo.get_max_sort_order(data.schedule_id)
                 sort_order = max_order + 1
@@ -1131,12 +1145,13 @@ class ScheduleService:
         boq_ids = [str(pid) for pid in data.boq_position_ids]
         await self._assert_positions_in_project(data.schedule_id, boq_ids)
 
-        # Shift only once every check has passed, so a rejected create leaves
-        # the order of the other activities alone.
-        if open_gap:
-            await self.activity_repo.shift_sort_order(data.schedule_id, sort_order)
+        # Move the other rows only once every check has passed, so a rejected
+        # create leaves the order of the schedule alone.
+        if reorder:
+            await self.activity_repo.bulk_update_fields([{"id": aid, "sort_order": o} for aid, o in reorder.items()])
 
         activity = Activity(
+            id=new_id,
             schedule_id=data.schedule_id,
             parent_id=data.parent_id,
             name=data.name,
@@ -1235,20 +1250,6 @@ class ScheduleService:
                     detail=f"WBS code '{code}' is already used by another activity in this schedule",
                 )
 
-    @staticmethod
-    def _suggest_wbs_from_outline(
-        parent_id: uuid.UUID | None,
-        outline: list[tuple[uuid.UUID, uuid.UUID | None, int, str]],
-    ) -> str:
-        parent_code = next((code for act_id, _p, _o, code in outline if act_id == parent_id), "")
-        siblings = [code for _i, pid, _o, code in outline if pid == parent_id]
-        return next_wbs_code(
-            parent_code,
-            siblings,
-            [code for _i, _p, _o, code in outline],
-            has_parent=parent_id is not None,
-        )
-
     async def suggest_wbs_code(self, schedule_id: uuid.UUID, parent_id: uuid.UUID | None) -> str:
         """Suggest the WBS code for a new activity under ``parent_id``.
 
@@ -1268,20 +1269,47 @@ class ScheduleService:
         outline = await self.activity_repo.list_outline(schedule_id)
         if parent_id is not None:
             self._assert_parent_in_outline(parent_id, outline)
-        return self._suggest_wbs_from_outline(parent_id, outline)
+        return suggest_code(parent_id, outline)
 
-    async def _assert_assignee_exists(self, assignee_id: uuid.UUID) -> None:
-        """Reject an assignee id that is not a contact.
+    async def _assert_assignee_exists(self, assignee_id: uuid.UUID, actor_id: str | None = None) -> None:
+        """Reject an assignee that is not a live contact the caller can see.
 
         The activity keeps the id without a foreign key (the contacts module is
-        a plugin), so a typo or a deleted contact would otherwise be stored and
-        render as an empty cell forever.
+        a plugin), so without this a typo or a deleted contact would be stored
+        and render as an empty cell forever, and a contact of another tenant
+        could be named. The rule is the contacts list's own, shared with the
+        task assignee in :mod:`app.modules.contacts.lookup`.
+
+        Raises:
+            HTTPException 404 if the contact does not exist or is not the
+            caller's; 422 if it has been deactivated.
         """
+        from app.modules.contacts.lookup import assignable_contact
+
+        await assignable_contact(self.session, assignee_id, actor_id)
+
+    async def resolve_assignee_names(self, assignee_ids: set[uuid.UUID]) -> dict[uuid.UUID, str]:
+        """Map contact ids to display names in one query.
+
+        The table shows the name from here rather than looking the id up in
+        the viewer's own contact list, which holds only that viewer's
+        contacts (and only the first page of them), so a colleague's pick
+        would otherwise read as unassigned.
+        """
+        if not assignee_ids:
+            return {}
         from app.modules.contacts.models import Contact
 
-        found = await self.session.scalar(select(Contact.id).where(Contact.id == assignee_id))
-        if found is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assignee contact not found")
+        rows = await self.session.execute(
+            select(
+                Contact.id, Contact.first_name, Contact.last_name, Contact.company_name, Contact.primary_email
+            ).where(Contact.id.in_(assignee_ids))
+        )
+        names: dict[uuid.UUID, str] = {}
+        for cid, first, last, company, email in rows.all():
+            person = " ".join(p for p in (first, last) if p)
+            names[cid] = person or company or email or ""
+        return names
 
     async def get_activity(self, activity_id: uuid.UUID) -> Activity:
         """Get activity by ID. Raises 404 if not found."""
@@ -1585,12 +1613,20 @@ class ScheduleService:
         )
         return {"edges_created": edges_created, "activities_resynced": activities_resynced}
 
-    async def update_activity(self, activity_id: uuid.UUID, data: ActivityUpdate) -> Activity:
+    async def update_activity(
+        self, activity_id: uuid.UUID, data: ActivityUpdate, actor_id: str | None = None
+    ) -> Activity:
         """Update an activity and recalculate duration if dates changed.
+
+        Moving the activity to another section (``parent_id``, or an explicit
+        null for the top level) also moves it, with its own children, to the
+        end of that section in the flat order, unless ``sort_order`` is sent.
 
         Args:
             activity_id: Target activity identifier.
             data: Partial update payload.
+            actor_id: The caller. When given, a new assignee must be a
+                contact the caller can see (admins see all).
 
         Returns:
             Updated activity.
@@ -1615,17 +1651,28 @@ class ScheduleService:
         # unchanged fields, and schedules from before the uniqueness check can
         # hold duplicate codes that must stay editable.
         if fields.get("assignee_id") is not None and fields["assignee_id"] != activity.assignee_id:
-            await self._assert_assignee_exists(fields["assignee_id"])
+            await self._assert_assignee_exists(fields["assignee_id"], actor_id)
         new_code = (fields.get("wbs_code") or "").strip()
         new_parent = fields.get("parent_id")
         code_changes = bool(new_code) and new_code != (activity.wbs_code or "").strip()
-        parent_changes = new_parent is not None and new_parent != activity.parent_id
+        parent_changes = "parent_id" in fields and new_parent != activity.parent_id
+        reorder: dict[uuid.UUID, int] = {}
         if code_changes or parent_changes:
             outline = await self.activity_repo.list_outline(schedule_id)
-            if parent_changes:
+            if parent_changes and new_parent is not None:
                 self._assert_parent_in_outline(new_parent, outline)
+                if new_parent in subtree_ids(activity_id, outline):
+                    raise HTTPException(
+                        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                        detail="An activity cannot be moved under itself or one of its own children",
+                    )
             if code_changes:
                 self._assert_wbs_code_free(new_code, outline, exclude_id=activity_id)
+            if parent_changes and "sort_order" not in fields:
+                planned = [
+                    (aid, new_parent if aid == activity_id else pid, order, code) for aid, pid, order, code in outline
+                ]
+                reorder = sort_order_changes(order_with_block_under(activity_id, new_parent, planned), planned)
 
         # Convert float values to strings for storage
         if "progress_pct" in fields:
@@ -1737,6 +1784,11 @@ class ScheduleService:
             )
             derived = await self._derive_dependencies_json(activity_id)
             await self.activity_repo.update_fields(activity_id, dependencies=derived)
+
+        # Last, because the bulk write expires every loaded instance and the
+        # code above still reads ``activity``.
+        if reorder:
+            await self.activity_repo.bulk_update_fields([{"id": aid, "sort_order": o} for aid, o in reorder.items()])
 
         # Re-fetch to return fresh data
         return await self.get_activity(activity_id)
@@ -2326,6 +2378,7 @@ class ScheduleService:
         today = datetime.now(UTC).date()
 
         activities, _ = await self.activity_repo.list_for_schedule(schedule_id)
+        assignee_names = await self.resolve_assignee_names({a.assignee_id for a in activities if a.assignee_id})
 
         gantt_activities: list[GanttActivity] = []
         completed = 0
@@ -2374,6 +2427,7 @@ class ScheduleService:
                     status=effective_status,
                     calendar_id=act.calendar_id,
                     assignee_id=act.assignee_id,
+                    assignee_name=assignee_names.get(act.assignee_id) if act.assignee_id else None,
                     metadata=act.metadata_ or {},
                 )
             )

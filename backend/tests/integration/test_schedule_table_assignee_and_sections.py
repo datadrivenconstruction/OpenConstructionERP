@@ -47,7 +47,7 @@ async def http_client(app_instance):
         yield ac
 
 
-async def _admin_headers(client: AsyncClient) -> dict[str, str]:
+async def _admin_headers(client: AsyncClient, role: str = "admin") -> dict[str, str]:
     from sqlalchemy import update
 
     from app.database import async_session_factory
@@ -61,7 +61,7 @@ async def _admin_headers(client: AsyncClient) -> dict[str, str]:
     )
     assert reg.status_code in (200, 201), reg.text
     async with async_session_factory() as s:
-        await s.execute(update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
+        await s.execute(update(User).where(User.email == email.lower()).values(role=role, is_active=True))
         await s.commit()
     login = await client.post("/api/v1/users/auth/login", json={"email": email, "password": password})
     assert login.status_code == 200, login.text
@@ -121,9 +121,12 @@ async def test_assignee_is_stored_and_read_back_where_the_table_reads_it(http_cl
     assert patched.status_code == 200, patched.text
     assert patched.json()["assignee_id"] == contact_id
 
-    # The grid renders the Gantt payload, not the activity response.
+    # The grid renders the Gantt payload, not the activity response. The
+    # name travels with it, so a colleague whose own contact list does not
+    # hold this contact still sees who is assigned.
     row = next(a for a in await _gantt(http_client, headers, schedule_id) if a["id"] == act["id"])
     assert row["assignee_id"] == contact_id
+    assert row["assignee_name"] == "Ana"
 
     cleared = await http_client.patch(
         f"/api/v1/schedule/activities/{act['id']}", json={"assignee_id": None}, headers=headers
@@ -197,3 +200,104 @@ async def test_wbs_code_must_be_unique_and_parent_must_be_in_the_schedule(http_c
         headers=headers,
     )
     assert foreign.status_code == 404, foreign.text
+
+
+async def _contact(client: AsyncClient, headers: dict[str, str], name: str) -> str:
+    resp = await client.post(
+        "/api/v1/contacts/",
+        json={"contact_type": "subcontractor", "company_name": name},
+        headers=headers,
+    )
+    assert resp.status_code in (200, 201), resp.text
+    return resp.json()["id"]
+
+
+async def _patch(client: AsyncClient, headers: dict[str, str], activity_id: str, body: dict):
+    return await client.patch(f"/api/v1/schedule/activities/{activity_id}", json=body, headers=headers)
+
+
+@pytest.mark.asyncio
+async def test_assignee_must_be_a_live_contact_of_the_callers_tenant(http_client):
+    from sqlalchemy import update
+
+    from app.database import async_session_factory
+    from app.modules.contacts.models import Contact
+
+    owner = await _admin_headers(http_client, role="manager")
+    stranger = await _admin_headers(http_client, role="manager")
+    schedule_id = await _schedule(http_client, owner)
+    act = await _activity(http_client, owner, schedule_id, name="Pour slab")
+
+    foreign = await _contact(http_client, stranger, "Other Tenant Ltd")
+    resp = await _patch(http_client, owner, act["id"], {"assignee_id": foreign})
+    assert resp.status_code == 404, resp.text
+
+    own = await _contact(http_client, owner, "Own Crew Ltd")
+    async with async_session_factory() as s:
+        await s.execute(update(Contact).where(Contact.id == uuid.UUID(own)).values(is_active=False))
+        await s.commit()
+    resp = await _patch(http_client, owner, act["id"], {"assignee_id": own})
+    assert resp.status_code == 422, resp.text
+
+    live = await _contact(http_client, owner, "Live Crew Ltd")
+    resp = await _patch(http_client, owner, act["id"], {"assignee_id": live})
+    assert resp.status_code == 200, resp.text
+
+
+@pytest.mark.asyncio
+async def test_a_schedule_with_every_sort_order_zero_still_files_the_new_row_in_its_section(http_client):
+    from sqlalchemy import update
+
+    from app.database import async_session_factory
+    from app.modules.schedule.models import Activity
+
+    headers = await _admin_headers(http_client)
+    schedule_id = await _schedule(http_client, headers)
+    s1 = await _activity(http_client, headers, schedule_id, name="Phase 1", wbs_code="1", activity_type="summary")
+    await _activity(http_client, headers, schedule_id, name="Phase 1 work", wbs_code="1.1", parent_id=s1["id"])
+    await _activity(http_client, headers, schedule_id, name="Phase 2", wbs_code="2", activity_type="summary")
+    # What seeded and imported schedules look like: the column default everywhere.
+    async with async_session_factory() as s:
+        await s.execute(update(Activity).where(Activity.schedule_id == uuid.UUID(schedule_id)).values(sort_order=0))
+        await s.commit()
+
+    new = await _activity(http_client, headers, schedule_id, name="Phase 1 more", parent_id=s1["id"])
+    assert new["wbs_code"] == "1.2"
+    names = [a["name"] for a in await _gantt(http_client, headers, schedule_id)]
+    assert names == ["Phase 1", "Phase 1 work", "Phase 1 more", "Phase 2"]
+
+
+@pytest.mark.asyncio
+async def test_moving_an_activity_to_another_section_moves_it_in_the_order(http_client):
+    headers = await _admin_headers(http_client)
+    schedule_id = await _schedule(http_client, headers)
+    s1 = await _activity(http_client, headers, schedule_id, name="S1", wbs_code="1", activity_type="summary")
+    a = await _activity(http_client, headers, schedule_id, name="A", wbs_code="1.1", parent_id=s1["id"])
+    await _activity(http_client, headers, schedule_id, name="A child", wbs_code="1.1.1", parent_id=a["id"])
+    s2 = await _activity(http_client, headers, schedule_id, name="S2", wbs_code="2", activity_type="summary")
+    await _activity(http_client, headers, schedule_id, name="B", wbs_code="2.1", parent_id=s2["id"])
+    await _activity(http_client, headers, schedule_id, name="Tail", wbs_code="3")
+
+    moved = await _patch(http_client, headers, a["id"], {"parent_id": s2["id"]})
+    assert moved.status_code == 200, moved.text
+    names = [x["name"] for x in await _gantt(http_client, headers, schedule_id)]
+    assert names == ["S1", "S2", "B", "A", "A child", "Tail"]
+
+    # Under one of its own children is refused.
+    loop = await _patch(http_client, headers, s2["id"], {"parent_id": a["id"]})
+    assert loop.status_code == 422, loop.text
+
+    # An explicit null moves it to the top level, at the end.
+    top = await _patch(http_client, headers, a["id"], {"parent_id": None})
+    assert top.status_code == 200, top.text
+    names = [x["name"] for x in await _gantt(http_client, headers, schedule_id)]
+    assert names == ["S1", "S2", "B", "Tail", "A", "A child"]
+
+
+@pytest.mark.asyncio
+async def test_a_blank_code_without_a_section_continues_the_top_level(http_client):
+    headers = await _admin_headers(http_client)
+    schedule_id = await _schedule(http_client, headers)
+    first = await _activity(http_client, headers, schedule_id, name="First")
+    second = await _activity(http_client, headers, schedule_id, name="Second")
+    assert (first["wbs_code"], second["wbs_code"]) == ("1", "2")

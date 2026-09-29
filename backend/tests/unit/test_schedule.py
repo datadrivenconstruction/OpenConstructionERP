@@ -147,6 +147,13 @@ class _StubActivityRepo:
     async def delete(self, activity_id: uuid.UUID) -> None:
         self.rows.pop(activity_id, None)
 
+    async def list_outline(self, schedule_id: uuid.UUID) -> list[tuple[uuid.UUID, uuid.UUID | None, int, str]]:
+        return [
+            (r.id, getattr(r, "parent_id", None), getattr(r, "sort_order", 0) or 0, getattr(r, "wbs_code", "") or "")
+            for r in self.rows.values()
+            if r.schedule_id == schedule_id
+        ]
+
     async def get_max_sort_order(self, schedule_id: uuid.UUID) -> int:
         rows = [r for r in self.rows.values() if r.schedule_id == schedule_id]
         if not rows:
