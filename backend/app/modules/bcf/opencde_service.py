@@ -471,11 +471,12 @@ class OpenCDEService:
         """Projects the caller can see, as OpenCDE Project records.
 
         Admin sees all; everyone else sees only owned projects (mirrors
-        the file-based BCF guard).
+        the file-based BCF guard). Archived projects are deleted ones and
+        are left out.
         """
         from app.modules.projects.models import Project
 
-        stmt = select(Project)
+        stmt = select(Project).where(Project.status != "archived")
         if role != "admin":
             stmt = stmt.where(Project.owner_id == uuid.UUID(str(user_id)))
         result = await self.session.execute(stmt)

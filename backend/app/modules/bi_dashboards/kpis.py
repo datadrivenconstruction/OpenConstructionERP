@@ -3438,7 +3438,9 @@ async def _projects_active_records(
     try:
         from app.modules.projects.models import Project  # type: ignore
 
-        stmt = select(Project)
+        # Archived projects are deleted ones: the count above never counts
+        # them, so the rows behind it must not list them either.
+        stmt = select(Project).where(Project.status != "archived")
         if project_id is not None:
             stmt = stmt.where(Project.id == project_id)
         elif allowed_project_ids is not None:
@@ -3894,7 +3896,13 @@ async def benchmark(
     try:
         from app.modules.projects.models import Project  # type: ignore
 
-        rows = (await session.execute(select(Project))).scalars().all()
+        # Deleted projects are archived and take no part in the portfolio
+        # median; the project being benchmarked is kept either way.
+        rows = (
+            (await session.execute(select(Project).where((Project.status != "archived") | (Project.id == project_id))))
+            .scalars()
+            .all()
+        )
     except ImportError:
         return {}
     except Exception:

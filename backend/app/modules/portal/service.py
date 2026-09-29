@@ -552,8 +552,8 @@ class PortalService:
 
         Resolves the caller's non-expired ``project`` access rules to real
         :class:`Project` rows so the portal can render a project picker by
-        name. A rule pointing at a project that no longer exists is silently
-        skipped.
+        name. A rule pointing at a project that no longer exists, or at one
+        that was deleted (archived), is silently skipped.
         """
         from sqlalchemy import select as _select
 
@@ -562,7 +562,7 @@ class PortalService:
         accessible = await self.list_accessible_resources(portal_user_id, "project")
         if not accessible:
             return []
-        stmt = _select(Project).where(Project.id.in_(accessible)).order_by(Project.name)
+        stmt = _select(Project).where(Project.id.in_(accessible), Project.status != "archived").order_by(Project.name)
         return list((await self.session.execute(stmt)).scalars().all())
 
     async def list_accessible_documents(
