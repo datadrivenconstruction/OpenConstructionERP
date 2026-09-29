@@ -128,6 +128,89 @@ _EOT_DESCRIPTIONS = (
     "Suspension of the affected work front pending the authority decision.",
 )
 
+# How many rows of each kind the generic sprinkle writes, and how each is named.
+# ``seed_variations_demo`` builds its rows from these and ``seeded_row_ids``
+# recognises them by the same helpers, so the demo cleanup cannot drift from
+# what the seed wrote.
+_NOTICE_COUNT = 30
+_VR_COUNT = 40
+_VO_COUNT = 25
+_SM_COUNT = 50
+_DW_COUNT = 80
+_DISRUPTION_COUNT = 10
+_EOT_COUNT = 5
+_SM_NOTES = "Joint measurement agreed with the owner's representative on site."
+_DISRUPTION_ROOT_CAUSE = "Access to the work area was released later than programmed."
+_FINAL_ACCOUNT_AMOUNTS: dict[str, Decimal] = {
+    "original_contract_value": Decimal("1500000"),
+    "variations_total": Decimal("125000"),
+    "daywork_total": Decimal("35000"),
+    "claims_total": Decimal("18000"),
+    "retention_held": Decimal("75000"),
+    "retention_released": Decimal("75000"),
+    "final_value": Decimal("1678000"),
+}
+
+
+def _notice_code(i: int) -> str:
+    return f"NOT-{i + 1:04d}"
+
+
+def _notice_title(i: int) -> str:
+    return f"Notice of variation {i + 1}"
+
+
+def _notice_description(recipient: str) -> str:
+    return f"Notice served on the {recipient} regarding a change to the works."
+
+
+def _notice_recipient_name(recipient: str) -> str:
+    return f"{recipient.title()} contact"
+
+
+def _vr_code(i: int) -> str:
+    return f"VR-{i + 1:04d}"
+
+
+def _vr_title(i: int) -> str:
+    return f"Variation request {i + 1}"
+
+
+def _vo_code(i: int) -> str:
+    return f"VO-{i + 1:04d}"
+
+
+def _vo_title(i: int) -> str:
+    return f"Variation order {i + 1}"
+
+
+def _sm_location(i: int) -> str:
+    return f"Block {chr(65 + (i % 6))} - L{i % 5}"
+
+
+def _sm_item(i: int) -> str:
+    return f"Quantity #{i + 1}"
+
+
+def _sm_signature(i: int) -> str:
+    return f"sig-{i + 1:04d}"
+
+
+def _dw_number(i: int) -> str:
+    return f"DW-{i + 1:04d}"
+
+
+def _dw_description(i: int) -> str:
+    return _DAYWORK_WORK_DESCRIPTIONS[i % len(_DAYWORK_WORK_DESCRIPTIONS)]
+
+
+def _dw_signature(i: int) -> str:
+    return f"dw-sig-{i + 1:04d}"
+
+
+def _disruption_evidence(i: int) -> list[str]:
+    return [f"diary-{i + 1}", f"rfi-{i + 1}"]
+
 
 async def _project_currencies(
     session: AsyncSession,
@@ -228,18 +311,18 @@ async def seed_variations_demo(
 
     # ── Notices ───────────────────────────────────────────────────────────
     notices: list[Notice] = []
-    for i in range(30):
+    for i in range(_NOTICE_COUNT):
         pid = rng.choice(projects)
         recipient = rng.choice(_NOTICE_RECIPIENTS)
         notice = Notice(
             project_id=pid,
-            code=f"NOT-{i + 1:04d}",
-            title=f"Notice of variation {i + 1}",
-            description=f"Notice served on the {recipient} regarding a change to the works.",
+            code=_notice_code(i),
+            title=_notice_title(i),
+            description=_notice_description(recipient),
             raised_at=_date_offset(rng),
             raised_by=None,
             recipient_type=recipient,
-            recipient_name=f"{recipient.title()} contact",
+            recipient_name=_notice_recipient_name(recipient),
             target_response_date=_short_date_offset(rng, days_back_max=30),
             status=rng.choice(["issued", "acknowledged", "responded", "closed"]),
         )
@@ -249,15 +332,15 @@ async def seed_variations_demo(
 
     # ── Variation Requests ────────────────────────────────────────────────
     vrs: list[VariationRequest] = []
-    for i in range(40):
+    for i in range(_VR_COUNT):
         pid = rng.choice(projects)
         notice_id = rng.choice(notices).id if notices and rng.random() < 0.4 else None
         classification = rng.choice(_VR_CLASSIFICATIONS)
         vr = VariationRequest(
             project_id=pid,
             notice_id=notice_id,
-            code=f"VR-{i + 1:04d}",
-            title=f"Variation request {i + 1}",
+            code=_vr_code(i),
+            title=_vr_title(i),
             description=_VR_DESCRIPTIONS.get(classification, _VR_DESCRIPTIONS["other"]),
             requested_at=_date_offset(rng),
             classification=classification,
@@ -273,7 +356,7 @@ async def seed_variations_demo(
 
     # ── Variation Orders ──────────────────────────────────────────────────
     vos: list[VariationOrder] = []
-    for i in range(25):
+    for i in range(_VO_COUNT):
         pid = rng.choice(projects)
         source_vr = (
             rng.choice([v for v in vrs if v.project_id == pid]) if any(v.project_id == pid for v in vrs) else None
@@ -281,8 +364,8 @@ async def seed_variations_demo(
         vo = VariationOrder(
             project_id=pid,
             variation_request_id=source_vr.id if source_vr else None,
-            code=f"VO-{i + 1:04d}",
-            title=f"Variation order {i + 1}",
+            code=_vo_code(i),
+            title=_vo_title(i),
             final_cost_impact=Decimal(str(rng.randint(1000, 80000))),
             final_schedule_days=rng.randint(0, 21),
             currency=currencies.get(pid, "EUR"),
@@ -331,20 +414,20 @@ async def seed_variations_demo(
     await session.flush()
 
     # ── Site Measurements (50) ────────────────────────────────────────────
-    for i in range(50):
+    for i in range(_SM_COUNT):
         pid = rng.choice(projects)
         sm = SiteMeasurement(
             project_id=pid,
             recorded_at=_date_offset(rng),
-            location=f"Block {chr(65 + (i % 6))} - L{i % 5}",
-            item_description=f"Quantity #{i + 1}",
+            location=_sm_location(i),
+            item_description=_sm_item(i),
             unit=rng.choice(["m2", "m3", "m", "pcs"]),
             measured_quantity=Decimal(str(rng.randint(5, 500))),
-            owner_signature_ref=f"sig-{i + 1:04d}",
+            owner_signature_ref=_sm_signature(i),
             # No invented image links: a URL on a host that does not exist is
             # a broken image the moment any screen renders this list.
             photos=[],
-            notes="Joint measurement agreed with the owner's representative on site.",
+            notes=_SM_NOTES,
             variation_order_id=rng.choice(vos).id if vos and rng.random() < 0.4 else None,
         )
         session.add(sm)
@@ -352,17 +435,17 @@ async def seed_variations_demo(
 
     # ── Daywork Sheets (80) ───────────────────────────────────────────────
     sheets: list[DayworkSheet] = []
-    for i in range(80):
+    for i in range(_DW_COUNT):
         pid = rng.choice(projects)
         ds = DayworkSheet(
             project_id=pid,
-            sheet_number=f"DW-{i + 1:04d}",
+            sheet_number=_dw_number(i),
             work_date=_short_date_offset(rng),
-            description=_DAYWORK_WORK_DESCRIPTIONS[i % len(_DAYWORK_WORK_DESCRIPTIONS)],
+            description=_dw_description(i),
             total_amount=Decimal("0"),
             currency=currencies.get(pid, "EUR"),
             status=rng.choice(_DW_STATUSES),
-            owner_signature_ref=f"dw-sig-{i + 1:04d}" if rng.random() < 0.5 else "",
+            owner_signature_ref=_dw_signature(i) if rng.random() < 0.5 else "",
         )
         session.add(ds)
         sheets.append(ds)
@@ -392,7 +475,7 @@ async def seed_variations_demo(
     await session.flush()
 
     # ── Disruption Claims (10) ────────────────────────────────────────────
-    for i in range(10):
+    for i in range(_DISRUPTION_COUNT):
         pid = rng.choice(projects)
         amount = Decimal(str(rng.randint(2000, 100_000)))
         st = rng.choice(_DISRUPTION_STATUSES)
@@ -402,11 +485,11 @@ async def seed_variations_demo(
             claim_period_start=_short_date_offset(rng, days_back_max=200),
             claim_period_end=_short_date_offset(rng, days_back_max=60),
             description=_DISRUPTION_DESCRIPTIONS[i % len(_DISRUPTION_DESCRIPTIONS)],
-            root_cause="Access to the work area was released later than programmed.",
+            root_cause=_DISRUPTION_ROOT_CAUSE,
             cost_amount=amount,
             schedule_days=rng.randint(0, 30),
             currency=currencies.get(pid, "EUR"),
-            evidence_refs=[f"diary-{i + 1}", f"rfi-{i + 1}"],
+            evidence_refs=_disruption_evidence(i),
             status=st,
             decided_amount=amount if st == "agreed" else None,
             decision_at=_date_offset(rng) if st in {"agreed", "rejected"} else None,
@@ -414,7 +497,7 @@ async def seed_variations_demo(
         session.add(claim)
 
     # ── EOT Claims (5) ────────────────────────────────────────────────────
-    for i in range(5):
+    for i in range(_EOT_COUNT):
         pid = rng.choice(projects)
         st = rng.choice(["draft", "submitted", "under_review", "granted", "rejected"])
         requested = rng.randint(5, 60)
@@ -441,13 +524,7 @@ async def seed_variations_demo(
             break
         fa = FinalAccount(
             project_id=pid,
-            original_contract_value=Decimal("1500000"),
-            variations_total=Decimal("125000"),
-            daywork_total=Decimal("35000"),
-            claims_total=Decimal("18000"),
-            retention_held=Decimal("75000"),
-            retention_released=Decimal("75000"),
-            final_value=Decimal("1678000"),
+            **_FINAL_ACCOUNT_AMOUNTS,
             currency=currencies.get(pid, "EUR"),
             status="closed",
             agreed_at=_date_offset(rng),
@@ -1993,3 +2070,126 @@ async def seed_variations_showcase_de(
     if counts["projects"]:
         logger.info("seed_variations_showcase_de: %s", counts)
     return counts
+
+
+async def seeded_row_ids(session: AsyncSession, project_ids: list[uuid.UUID]) -> list[tuple[type, list, str]]:
+    """Rows of the generic sprinkle in ``project_ids``, exactly as :func:`seed_variations_demo` wrote them.
+
+    Each row is compared with the seed row of the same index on several
+    fields at once: code and title together (both carry the index), the
+    measurement's item, location, signature and note, the daywork sheet's
+    number and description, the claims' fixed wording with their evidence
+    references, and all seven amounts of a final account. A person's own
+    notice that reuses a seeded code but has its own title is not matched.
+
+    Children (cost and schedule impacts, daywork lines, BOQ traces) go with
+    their parents by CASCADE; the links between notices, requests, orders and
+    measurements are SET NULL, so the order below is safe on PostgreSQL.
+
+    Returns:
+        ``(model, ids, label)`` groups; ``label`` names the group in reports.
+    """
+    if not project_ids:
+        return []
+
+    async def rows(*cols):
+        model = cols[0].class_
+        return (await session.execute(select(*cols).where(model.project_id.in_(project_ids)))).all()
+
+    notice_specs = {
+        (_notice_code(i), _notice_title(i), _notice_description(r), _notice_recipient_name(r))
+        for i in range(_NOTICE_COUNT)
+        for r in _NOTICE_RECIPIENTS
+    }
+    notices = [
+        r.id
+        for r in await rows(
+            Notice.id, Notice.code, Notice.title, Notice.description, Notice.recipient_name, Notice.raised_by
+        )
+        if (r.code, r.title, r.description, r.recipient_name) in notice_specs and r.raised_by is None
+    ]
+
+    vr_specs = {(_vr_code(i), _vr_title(i)) for i in range(_VR_COUNT)}
+    vr_descriptions = set(_VR_DESCRIPTIONS.values())
+    requests = [
+        r.id
+        for r in await rows(
+            VariationRequest.id, VariationRequest.code, VariationRequest.title, VariationRequest.description
+        )
+        if (r.code, r.title) in vr_specs and r.description in vr_descriptions
+    ]
+
+    vo_specs = {(_vo_code(i), _vo_title(i)) for i in range(_VO_COUNT)}
+    orders = [
+        r.id
+        for r in await rows(VariationOrder.id, VariationOrder.code, VariationOrder.title)
+        if (r.code, r.title) in vo_specs
+    ]
+
+    sm_specs = {(_sm_item(i), _sm_location(i), _sm_signature(i)) for i in range(_SM_COUNT)}
+    measurements = [
+        r.id
+        for r in await rows(
+            SiteMeasurement.id,
+            SiteMeasurement.item_description,
+            SiteMeasurement.location,
+            SiteMeasurement.owner_signature_ref,
+            SiteMeasurement.notes,
+        )
+        if (r.item_description, r.location, r.owner_signature_ref) in sm_specs and r.notes == _SM_NOTES
+    ]
+
+    dw_specs = {(_dw_number(i), _dw_description(i)): {"", _dw_signature(i)} for i in range(_DW_COUNT)}
+    sheets = [
+        r.id
+        for r in await rows(
+            DayworkSheet.id, DayworkSheet.sheet_number, DayworkSheet.description, DayworkSheet.owner_signature_ref
+        )
+        if r.owner_signature_ref in dw_specs.get((r.sheet_number, r.description), ())
+    ]
+
+    disruption_specs = {
+        (_DISRUPTION_DESCRIPTIONS[i % len(_DISRUPTION_DESCRIPTIONS)], tuple(_disruption_evidence(i)))
+        for i in range(_DISRUPTION_COUNT)
+    }
+    disruptions = [
+        r.id
+        for r in await rows(
+            DisruptionClaim.id, DisruptionClaim.description, DisruptionClaim.root_cause, DisruptionClaim.evidence_refs
+        )
+        if (r.description, tuple(r.evidence_refs or ())) in disruption_specs and r.root_cause == _DISRUPTION_ROOT_CAUSE
+    ]
+
+    eot_descriptions = {_EOT_DESCRIPTIONS[i % len(_EOT_DESCRIPTIONS)] for i in range(_EOT_COUNT)}
+    eots = [
+        r.id
+        for r in await rows(
+            ExtensionOfTimeClaim.id,
+            ExtensionOfTimeClaim.description,
+            ExtensionOfTimeClaim.root_cause_category,
+            ExtensionOfTimeClaim.raised_by,
+            ExtensionOfTimeClaim.affected_activity_ref,
+        )
+        if r.description in eot_descriptions
+        and r.root_cause_category in _EOT_CAUSES
+        and r.raised_by is None
+        and r.affected_activity_ref == ""
+    ]
+
+    amount_cols = [getattr(FinalAccount, name) for name in _FINAL_ACCOUNT_AMOUNTS]
+    accounts = [
+        r.id
+        for r in await rows(FinalAccount.id, *amount_cols)
+        if all(getattr(r, name) == value for name, value in _FINAL_ACCOUNT_AMOUNTS.items())
+    ]
+
+    return [
+        (SiteMeasurement, measurements, "variation_site_measurements"),
+        (VariationOrder, orders, "variation_orders"),
+        (VariationRequest, requests, "variation_requests"),
+        (Notice, notices, "variation_notices"),
+        (DayworkSheet, sheets, "variation_daywork_sheets"),
+        (DisruptionClaim, disruptions, "variation_disruption_claims"),
+        (ExtensionOfTimeClaim, eots, "variation_eot_claims"),
+        (FinalAccount, accounts, "variation_final_accounts"),
+    ]
