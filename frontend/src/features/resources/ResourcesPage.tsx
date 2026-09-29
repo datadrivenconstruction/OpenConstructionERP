@@ -8,6 +8,7 @@ import {
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import clsx from 'clsx';
 import {
   Users,
@@ -391,6 +392,9 @@ export function ResourcesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
   const [createOpen, setCreateOpen] = useState(false);
+  // Adding a resource is editor work (resources.create). A viewer browses the
+  // pool; the create button stays visible but disabled, with the reason.
+  const canCreateResource = useHasPermission('resources.create');
   const [proposeOpen, setProposeOpen] = useState(false);
   // Per-row edit / delete state. Lifted up here so the modal / confirm
   // dialog sit at page-root and survive table re-renders.
@@ -650,6 +654,14 @@ export function ResourcesPage() {
                 size="sm"
                 icon={<Plus size={14} />}
                 onClick={() => setCreateOpen(true)}
+                disabled={!canCreateResource}
+                title={
+                  canCreateResource
+                    ? undefined
+                    : t('errors.forbidden', {
+                        defaultValue: "You don't have permission to perform this action.",
+                      })
+                }
               >
                 {t('resources.new_resource', { defaultValue: 'New Resource' })}
               </Button>
@@ -1039,7 +1051,7 @@ export function ResourcesPage() {
                   onSelect={(id) => setSelectedId(id)}
                   onEdit={(r) => setEditTarget(r)}
                   onDelete={(r) => setDeleteTarget(r)}
-                  emptyAction={() => setCreateOpen(true)}
+                  emptyAction={canCreateResource ? () => setCreateOpen(true) : undefined}
                   onClearFilters={clearAllFilters}
                   onInlineRateSave={(id, rate) =>
                     inlineRateMut.mutate({ id, rate })
@@ -1308,7 +1320,7 @@ interface ResourceTableProps {
   onSelect: (id: string) => void;
   onEdit: (r: Resource) => void;
   onDelete: (r: Resource) => void;
-  emptyAction: () => void;
+  emptyAction?: () => void;
   onClearFilters: () => void;
   onInlineRateSave: (id: string, rate: number) => void;
   pendingRateId: string | null;
@@ -1346,10 +1358,14 @@ function ResourceTable({
             defaultValue:
               'Add people, crews and equipment to start planning their assignments. Click + New Resource to create your first one, or import an Excel file from the catalog page.',
           })}
-          action={{
-            label: t('resources.new_resource', { defaultValue: 'New Resource' }),
-            onClick: emptyAction,
-          }}
+          action={
+            emptyAction
+              ? {
+                  label: t('resources.new_resource', { defaultValue: 'New Resource' }),
+                  onClick: emptyAction,
+                }
+              : undefined
+          }
         />
       );
     }

@@ -10,6 +10,7 @@ import {
   useState,
 } from 'react';
 import { QueryClientContext } from '@tanstack/react-query';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import {
   takeoffApi,
   type MeasurementCreate,
@@ -826,6 +827,12 @@ export function useMeasurementPersistence({
   // must be present before we touch the server or use the composite local
   // key. Filename alone never qualifies.
   const canSync = Boolean(projectId && documentId);
+  // Writing the document's calibration needs takeoff.update (editor and up).
+  // A viewer still calibrates and measures in the browser; the scale just
+  // stays in the local copy instead of being pushed to a server that refuses
+  // it. Without this, opening an already calibrated drawing as a viewer fired
+  // the PATCH on load and failed.
+  const canPersistScales = useHasPermission('takeoff.update');
   // Local-storage key. With a server UUID this is the project+document
   // composite (shared with the server-load path). A freshly dropped local
   // file has no UUID yet, so it gets a stable local-only key derived from
@@ -1419,7 +1426,7 @@ export function useMeasurementPersistence({
   // so an uncalibrated default never writes an empty scale; every later change
   // is a genuine recalibration and always persists.
   useEffect(() => {
-    if (!canSync || !documentId) return;
+    if (!canSync || !documentId || !canPersistScales) return;
     const sig = JSON.stringify(pageScales);
     const firstRun = pageScalesSyncRef.current === null;
     if (pageScalesSyncRef.current === sig) return;
@@ -1436,7 +1443,7 @@ export function useMeasurementPersistence({
     return () => {
       if (pageScalesPutTimerRef.current) clearTimeout(pageScalesPutTimerRef.current);
     };
-  }, [canSync, documentId, pageScales]);
+  }, [canSync, documentId, pageScales, canPersistScales]);
 
   // Manual save (the toolbar Save button). Persists locally now AND triggers
   // the server sync immediately rather than waiting out the 3s debounce, so a
