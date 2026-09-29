@@ -23,6 +23,8 @@ The name in the notification can be confusing. The block comes from the Windows 
 
 Then check whether Smart App Control is on: in Windows Security go to **App & browser control** and open **Smart App Control settings**. It shows **On**, **Evaluation** or **Off**.
 
+To see exactly which file was refused, open **Event Viewer**, go to **Applications and Services Logs** > **Microsoft** > **Windows** > **CodeIntegrity** > **Operational**, and look for event **3077**. For the desktop app the file usually sits under `%LOCALAPPDATA%\OpenConstructionERP\extract`, where the app unpacks its helper files on every start. That block is expected for an unsigned build and does not mean the file is a virus.
+
 ## Step 2a: SmartScreen ("Windows protected your PC")
 
 This one is safe to get past once you are sure the file is ours (see "Check that the download is genuine" below).
@@ -34,7 +36,7 @@ SmartScreen only asks for files downloaded from the internet. If it keeps asking
 
 ## Step 2b: Smart App Control is on
 
-There is no way to allow a single app while Smart App Control stays on. Microsoft's own advice is to turn it off or to ask the publisher to sign the app, and we are working on signing. Until then you have two honest choices.
+There is no way to allow a single app while Smart App Control stays on. Microsoft's own advice is to turn it off or to ask the publisher to sign the app, and our Windows builds are not signed today. That leaves two honest choices.
 
 **Option 1: keep Smart App Control on and run the app another way.** This is what we recommend if you want to keep the protection. Docker and WSL both run OpenConstructionERP inside a small Linux environment, and Smart App Control does not check Linux programs. Both are described below.
 
