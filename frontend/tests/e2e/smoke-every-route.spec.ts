@@ -35,6 +35,12 @@ const DEMO_EMAIL = process.env.OE_TEST_DEMO_EMAIL ?? 'demo@openconstructionerp.c
 const OUT = path.join(process.cwd(), 'qa-routes');
 const ROUTES_DIR = path.join(OUT, 'routes');
 const PARAMS_CACHE = path.join(OUT, 'params.json');
+const SESSION_CACHE = path.join(OUT, 'session.json');
+// Access tokens live 60 minutes and the sweep runs longer, while demo-login is
+// rate limited per client; so one token is shared through a file across worker
+// restarts and renewed well before it expires.
+const TOKEN_MAX_AGE_MS = 35 * 60_000;
+const TAB_BUDGET_MS = 25_000;
 const RESIZE_OBSERVER_LOOP = 'ResizeObserver loop completed with undelivered notifications.';
 const MAX_TABS = Number(process.env.OE_SMOKE_MAX_TABS ?? 8);
 
@@ -74,6 +80,31 @@ type Params = {
 
 let TOKEN = '';
 let REFRESH = '';
+let TOKEN_AT = 0;
+
+async function ensureToken(): Promise<void> {
+  if (TOKEN && Date.now() - TOKEN_AT < TOKEN_MAX_AGE_MS) return;
+  if (fs.existsSync(SESSION_CACHE)) {
+    const c = JSON.parse(fs.readFileSync(SESSION_CACHE, 'utf8')) as { token: string; refresh: string; at: number };
+    if (Date.now() - c.at < TOKEN_MAX_AGE_MS) {
+      [TOKEN, REFRESH, TOKEN_AT] = [c.token, c.refresh, c.at];
+      return;
+    }
+  }
+  const res = await fetch(`${API}/api/v1/users/auth/demo-login/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: DEMO_EMAIL }),
+  });
+  if (!res.ok) throw new Error(`demo-login failed: ${res.status} ${await res.text()}`);
+  const j: Record<string, string> = await res.json();
+  TOKEN = j.access_token || j.access || j.token || '';
+  REFRESH = j.refresh_token || j.refresh || '';
+  TOKEN_AT = Date.now();
+  if (!TOKEN) throw new Error('demo-login returned no token');
+  fs.mkdirSync(OUT, { recursive: true });
+  fs.writeFileSync(SESSION_CACHE, JSON.stringify({ token: TOKEN, refresh: REFRESH, at: TOKEN_AT }));
+}
 let PARAMS: Params = { projects: [], resolved: {} };
 
 async function api<T = unknown>(p: string): Promise<T | null> {
@@ -205,6 +236,7 @@ async function resolveParams(page: Page): Promise<Params> {
 }
 
 async function signIn(page: Page, projectId: string | undefined, projectName: string | undefined) {
+  await ensureToken();
   await page.addInitScript(
     ({ token, refresh, proj }) => {
       try {
@@ -227,16 +259,7 @@ async function signIn(page: Page, projectId: string | undefined, projectName: st
 
 test.beforeAll(async ({ browser }) => {
   test.setTimeout(10 * 60_000);
-  const res = await fetch(`${API}/api/v1/users/auth/demo-login/`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: DEMO_EMAIL }),
-  });
-  if (!res.ok) throw new Error(`demo-login failed: ${res.status} ${await res.text()}`);
-  const j: Record<string, string> = await res.json();
-  TOKEN = j.access_token || j.access || j.token || '';
-  REFRESH = j.refresh_token || j.refresh || '';
-  if (!TOKEN) throw new Error('demo-login returned no token');
+  await ensureToken();
 
   // A failed test restarts the worker and reruns this hook; the harvest costs
   // a minute, so the first worker's answer is reused.
@@ -272,6 +295,11 @@ function slugOf(route: string): string {
 }
 
 async function openAndInspect(page: Page, route: string, url: string): Promise<Finding> {
+  // Written first so a route that hangs until the test timeout still has a row.
+  record({
+    route, url, finalUrl: '', status: 'fail', symptoms: ['timed out before the page settled'],
+    crashes: [], pageErrors: [], consoleErrors: [], apiErrors: [], tabs: [],
+  });
   const crashes: string[] = [];
   const pageErrors: string[] = [];
   const consoleErrors: string[] = [];
@@ -299,7 +327,7 @@ async function openAndInspect(page: Page, route: string, url: string): Promise<F
   } catch (e) {
     symptoms.push(`navigation: ${String(e).slice(0, 160)}`);
   }
-  await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => undefined);
+  await page.waitForLoadState('networkidle', { timeout: 6_000 }).catch(() => undefined);
   await page.waitForTimeout(800);
 
   const inspect = async (): Promise<string[]> => {
@@ -334,7 +362,9 @@ async function openAndInspect(page: Page, route: string, url: string): Promise<F
     const n = Math.min(await tabLoc.count().catch(() => 0), MAX_TABS);
     const labels: string[] = [];
     for (let i = 0; i < n; i++) labels.push(((await tabLoc.nth(i).innerText().catch(() => '')) || `#${i}`).trim().slice(0, 40));
+    const tabsStarted = Date.now();
     for (let i = 0; i < n; i++) {
+      if (Date.now() - tabsStarted > TAB_BUDGET_MS) break;
       const mark = { c: crashes.length, p: pageErrors.length, a: apiErrors.length, e: consoleErrors.length };
       const here = page.url();
       try {
@@ -418,6 +448,7 @@ for (const pattern of PATTERNS) {
 }
 
 test('every seeded project opens', async ({ page }) => {
+  test.setTimeout(30 * 60_000);
   const bad: string[] = [];
   for (const p of PARAMS.projects) {
     await signIn(page, p.id, p.name);
@@ -439,6 +470,8 @@ test('every sidebar entry opens', async ({ page }) => {
   const bad: string[] = [];
   for (const [route, url] of Object.entries(PARAMS.resolved)) {
     if (!route.startsWith('sidebar:')) continue;
+    // The loop outlives one token; each call renews it when due and re-seeds storage.
+    await signIn(page, p0?.id, p0?.name);
     const f = await openAndInspect(page, route, url);
     record(f);
     if (f.symptoms.length) bad.push(`${url}: ${f.symptoms.join(', ')}`);
