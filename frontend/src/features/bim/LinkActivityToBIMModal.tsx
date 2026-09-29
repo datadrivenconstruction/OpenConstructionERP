@@ -134,7 +134,7 @@ export default function LinkActivityToBIMModal({
       for (const el of elements) existing.add(el.id);
       const merged = Array.from(existing);
       await apiPatch<Activity, { bim_element_ids: string[] }>(
-        `/v1/schedule/activities/${encodeURIComponent(activity.id)}/bim-links`,
+        `/v1/schedule/activities/${encodeURIComponent(activity.id)}/bim-links/`,
         { bim_element_ids: merged },
       );
       return elements.length;
