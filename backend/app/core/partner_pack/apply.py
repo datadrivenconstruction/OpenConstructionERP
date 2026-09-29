@@ -384,10 +384,13 @@ def _plan(m: PartnerPackManifest, *, strict_rule_sets: bool = True) -> dict[str,
             f"Estimating methodology '{m.default_methodology}' will be activated on the pack's demo "
             "project and seeded on new projects created while the pack is active."
         )
-    if m.cwicr_regions:
-        warnings.append(
-            f"CWICR regions {', '.join(m.cwicr_regions)} are recorded; cost data is not downloaded automatically."
-        )
+    # What each declared cost region would load. This replaced a warning that
+    # said "cost data is not downloaded automatically", which was true of the
+    # bare ``/apply`` and false in the one screen that showed it: the Modules
+    # page activates through the streamed full install, and that downloads.
+    from app.core.partner_pack.full_install import describe_cost_bases
+
+    cost_bases = describe_cost_bases(list(m.cwicr_regions or []))
 
     return {
         "branding": {
@@ -409,6 +412,7 @@ def _plan(m: PartnerPackManifest, *, strict_rule_sets: bool = True) -> dict[str,
         "rule_sets_enabled": rule_sets,
         "rule_sets_severities": _rule_set_severities(rule_sets),
         "cwicr_regions": list(m.cwicr_regions or []),
+        "cost_bases": cost_bases,
         "default_tax_template": m.default_tax_template,
         "default_methodology": m.default_methodology,
         "demo_project": _pack_demo_info(m.slug),
