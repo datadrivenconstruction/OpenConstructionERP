@@ -11,7 +11,7 @@ from __future__ import annotations
 import uuid
 from typing import Any, Generic, TypeVar
 
-from sqlalchemy import func, select, update
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.orm.util import identity_key
@@ -77,6 +77,22 @@ class _BaseRepo(Generic[ModelT]):
 # ── Contract repository ───────────────────────────────────────────────────
 
 
+def _scope_to_projects(stmt: Any, allowed_project_ids: set[uuid.UUID] | None) -> Any:
+    """Keep contracts on the caller's projects plus those on no project.
+
+    ``allowed_project_ids`` is the caller's live project set from
+    ``accessible_project_ids(live_only=True)``; ``None`` leaves the query
+    as it was. A contract with no project is company-level and stays visible
+    to everyone who could see it before. ``stmt`` must already reach
+    ``ServiceContract``.
+    """
+    if allowed_project_ids is None:
+        return stmt
+    return stmt.where(
+        or_(ServiceContract.project_id.is_(None), ServiceContract.project_id.in_(allowed_project_ids)),
+    )
+
+
 class ContractRepository(_BaseRepo[ServiceContract]):
     """Data access for ServiceContract."""
 
@@ -93,8 +109,10 @@ class ContractRepository(_BaseRepo[ServiceContract]):
         offset: int = 0,
         limit: int = 50,
         status: str | None = None,
+        allowed_project_ids: set[uuid.UUID] | None = None,
     ) -> tuple[list[ServiceContract], int]:
         base = select(ServiceContract).where(ServiceContract.customer_id == customer_id)
+        base = _scope_to_projects(base, allowed_project_ids)
         if status is not None:
             base = base.where(ServiceContract.status == status)
         total = (await self.session.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
@@ -121,8 +139,9 @@ class ContractRepository(_BaseRepo[ServiceContract]):
         offset: int = 0,
         limit: int = 50,
         status: str | None = None,
+        allowed_project_ids: set[uuid.UUID] | None = None,
     ) -> tuple[list[ServiceContract], int]:
-        base = select(ServiceContract)
+        base = _scope_to_projects(select(ServiceContract), allowed_project_ids)
         if status is not None:
             base = base.where(ServiceContract.status == status)
         total = (await self.session.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
@@ -228,6 +247,7 @@ class TicketRepository(_BaseRepo[ServiceTicket]):
         limit: int = 50,
         status: str | None = None,
         priority: str | None = None,
+        allowed_project_ids: set[uuid.UUID] | None = None,
     ) -> tuple[list[ServiceTicket], int]:
         """List tickets across every contract (tenant-wide dispatcher view).
 
@@ -235,8 +255,15 @@ class TicketRepository(_BaseRepo[ServiceTicket]):
         where there is no contract or project to scope by. Mirrors the
         ``WorkOrderRepository.list_all`` / ``ContractRepository.list_all``
         shape so the page's three list tabs behave consistently.
+        ``allowed_project_ids`` narrows it to the caller's projects through
+        the ticket's contract.
         """
         base = select(ServiceTicket)
+        if allowed_project_ids is not None:
+            base = _scope_to_projects(
+                base.join(ServiceContract, ServiceContract.id == ServiceTicket.contract_id),
+                allowed_project_ids,
+            )
         if status is not None:
             base = base.where(ServiceTicket.status == status)
         if priority is not None:
@@ -331,8 +358,16 @@ class WorkOrderRepository(_BaseRepo[ServiceWorkOrder]):
         limit: int = 50,
         status: str | None = None,
         technician_id: str | None = None,
+        allowed_project_ids: set[uuid.UUID] | None = None,
     ) -> tuple[list[ServiceWorkOrder], int]:
         base = select(ServiceWorkOrder)
+        if allowed_project_ids is not None:
+            base = _scope_to_projects(
+                base.join(ServiceTicket, ServiceTicket.id == ServiceWorkOrder.ticket_id).join(
+                    ServiceContract, ServiceContract.id == ServiceTicket.contract_id
+                ),
+                allowed_project_ids,
+            )
         if status is not None:
             base = base.where(ServiceWorkOrder.status == status)
         if technician_id is not None:
