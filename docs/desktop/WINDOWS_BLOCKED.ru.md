@@ -40,13 +40,13 @@ SmartScreen спрашивает только о файлах, скачанны�
 
 **Вариант 1: оставить Smart App Control включённой и запускать приложение по-другому.** Его мы и советуем, если хотите сохранить защиту. Docker и WSL запускают OpenConstructionERP внутри небольшой среды Linux, а программы Linux Smart App Control не проверяет. Оба способа описаны ниже.
 
-**Вариант 2: выключить Smart App Control.** Это снижает защиту всего компьютера, а не только для нашего приложения, поэтому делайте так, только если вас это устраивает.
+**Вариант 2: выключить Smart App Control.** Это снижает защиту всего компьютера, а не только для нашего приложения, поэтому делайте так, только если вас это устраивает. В актуальных сборках Windows 11 функцию можно позже снова включить на той же странице, но в более старых сборках выключение окончательно до сброса или переустановки Windows. Если после выключения страница не даёт включить её обратно, у вас как раз такая сборка.
 
 1. Откройте **Безопасность Windows**, затем **Управление приложениями/браузером** и **Параметры интеллектуального управления приложениями**.
 2. Выберите **Выкл.** и подтвердите.
 3. Снова запустите OpenConstructionERP.
 
-В актуальных сборках Windows 11 Smart App Control можно позже снова включить на той же странице. В более старых сборках выключение было окончательным до сброса или переустановки Windows, и там настройка просто не даёт включить её обратно. Антивирус Microsoft Defender и SmartScreen в любом случае остаются включёнными.
+Антивирус Microsoft Defender и SmartScreen в любом случае остаются включёнными.
 
 Если в журнале защиты вместо этого видно срабатывание антивируса Microsoft Defender, а файл вы проверили, как описано ниже, можно открыть эту запись и выбрать **Действия** (Actions), затем **Разрешить на устройстве** (Allow on device). Если сомневаетесь, не разрешайте, а напишите нам.
 
@@ -92,8 +92,8 @@ python3 -m venv ~/openconstructionerp
 2. Откройте новое окно **Windows PowerShell** и выполните:
 
 ```powershell
-py -m pip install --upgrade openconstructionerp
-py -m openconstructionerp
+py -3.12 -m pip install --upgrade openconstructionerp
+py -3.12 -m openconstructionerp
 ```
 
 3. Первый запуск создаёт локальную базу данных и загружает демо-данные, это занимает около минуты. Дальше приложение работает на **http://localhost:8080**; вход `demo@openconstructionerp.com` / `DemoPass1234!`. В следующий раз нужна только вторая команда.
@@ -103,12 +103,12 @@ py -m openconstructionerp
 В каждом релизе рядом с установщиками лежит файл `SHA256SUMS`. Скачайте его в ту же папку, что и установщик, откройте там **Windows PowerShell** и выполните:
 
 ```powershell
-$exe = Get-ChildItem OpenConstructionERP_*_x64-setup.exe | Select-Object -First 1
+$exe = Get-ChildItem OpenConstructionERP_*_x64-setup.exe | Sort-Object LastWriteTime -Descending | Select-Object -First 1
 $line = Select-String -Path SHA256SUMS -Pattern $exe.Name -SimpleMatch
 (Get-FileHash $exe.FullName -Algorithm SHA256).Hash -eq $line.Line.Split(' ')[0]
 ```
 
-`True` значит, что файл в точности тот, который собрала наша релизная сборка. `False` значит, что по дороге он повреждён или изменён: не запускайте его, а скачайте заново со [страницы релиза на GitHub](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest). Проверка подтверждает, что файл цел. На решение SmartScreen или Smart App Control она не влияет. Для более строгой проверки у самого `SHA256SUMS` есть подпись Sigstore, она описана в [RELEASE_SIGNATURE_INVENTORY.md](RELEASE_SIGNATURE_INVENTORY.md).
+`True` значит, что файл в точности тот, который собрала наша релизная сборка. `False` значит, что по дороге он повреждён или изменён, и запускать его не надо. Красное сообщение об ошибке вместо `True` или `False` значит, что `SHA256SUMS` в папке из другого релиза, чем установщик: скачайте оба файла с одной и той же страницы релиза. Если остаётся `False`, скачайте файл заново со [страницы релиза на GitHub](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest). Проверка подтверждает, что файл цел. На решение SmartScreen или Smart App Control она не влияет. Для более строгой проверки у самого `SHA256SUMS` есть подпись Sigstore, она описана в [RELEASE_SIGNATURE_INVENTORY.md](RELEASE_SIGNATURE_INVENTORY.md).
 
 ## Если ничего не помогло
 
