@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
+import { normalizeListResponse } from '@/shared/lib/apiHelpers';
 
 // ---------------------------------------------------------------------------
 // Workflow types
@@ -89,7 +90,11 @@ export async function fetchWorkflows(params?: {
   if (params?.entity_type) qs.set('entity_type', params.entity_type);
   if (params?.is_active !== undefined) qs.set('is_active', String(params.is_active));
   const query = qs.toString();
-  return apiGet<Workflow[]>(`/v1/enterprise-workflows/${query ? '?' + query : ''}`);
+  // The server answers with a page envelope, {items, total, offset, limit}.
+  const page = await apiGet<Workflow[] | { items: Workflow[] }>(
+    `/v1/enterprise-workflows/${query ? '?' + query : ''}`,
+  );
+  return normalizeListResponse(page);
 }
 
 export async function fetchWorkflow(id: string): Promise<Workflow> {
@@ -122,7 +127,12 @@ export async function fetchApprovalRequests(params?: {
   if (params?.status) qs.set('status', params.status);
   if (params?.requester_id) qs.set('requester_id', params.requester_id);
   const query = qs.toString();
-  return apiGet<ApprovalRequest[]>(`/v1/enterprise-workflows/requests${query ? '?' + query : ''}`);
+  // The route is /requests/ with the slash (the app does not redirect slashes),
+  // and it answers with a page envelope rather than a bare array.
+  const page = await apiGet<ApprovalRequest[] | { items: ApprovalRequest[] }>(
+    `/v1/enterprise-workflows/requests/${query ? '?' + query : ''}`,
+  );
+  return normalizeListResponse(page);
 }
 
 export async function fetchApprovalRequest(id: string): Promise<ApprovalRequest> {
@@ -130,19 +140,19 @@ export async function fetchApprovalRequest(id: string): Promise<ApprovalRequest>
 }
 
 export async function submitApprovalRequest(body: SubmitApprovalBody): Promise<ApprovalRequest> {
-  return apiPost<ApprovalRequest, SubmitApprovalBody>('/v1/enterprise-workflows/requests', body);
+  return apiPost<ApprovalRequest, SubmitApprovalBody>('/v1/enterprise-workflows/requests/', body);
 }
 
 export async function approveRequest(id: string, body?: ApprovalActionBody): Promise<ApprovalRequest> {
   return apiPost<ApprovalRequest, ApprovalActionBody | undefined>(
-    `/v1/enterprise-workflows/requests/${id}/approve`,
+    `/v1/enterprise-workflows/requests/${id}/approve/`,
     body,
   );
 }
 
 export async function rejectRequest(id: string, body?: ApprovalActionBody): Promise<ApprovalRequest> {
   return apiPost<ApprovalRequest, ApprovalActionBody | undefined>(
-    `/v1/enterprise-workflows/requests/${id}/reject`,
+    `/v1/enterprise-workflows/requests/${id}/reject/`,
     body,
   );
 }
