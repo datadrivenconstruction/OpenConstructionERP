@@ -224,7 +224,8 @@ async function resolveParams(page: Page): Promise<Params> {
     );
     const known = new Set(Object.values(resolved));
     for (const h of nav) {
-      if (h && !known.has(h)) {
+      // /api/source is the AGPL source download, not a page.
+      if (h && !h.startsWith('/api/') && !known.has(h)) {
         resolved[`sidebar:${h}`] = h;
         known.add(h);
       }
@@ -288,6 +289,7 @@ type Finding = {
   consoleErrors: string[];
   apiErrors: string[];
   tabs: Array<{ tab: string; symptoms: string[]; details: string[] }>;
+  tabsClicked: number;
 };
 
 function slugOf(route: string): string {
@@ -298,7 +300,7 @@ async function openAndInspect(page: Page, route: string, url: string): Promise<F
   // Written first so a route that hangs until the test timeout still has a row.
   record({
     route, url, finalUrl: '', status: 'fail', symptoms: ['timed out before the page settled'],
-    crashes: [], pageErrors: [], consoleErrors: [], apiErrors: [], tabs: [],
+    crashes: [], pageErrors: [], consoleErrors: [], apiErrors: [], tabs: [], tabsClicked: 0,
   });
   const crashes: string[] = [];
   const pageErrors: string[] = [];
@@ -348,7 +350,15 @@ async function openAndInspect(page: Page, route: string, url: string): Promise<F
     return s;
   };
 
-  symptoms.push(...(await inspect()));
+  let first = await inspect();
+  // A <Navigate> route lands on its target a beat after networkidle, and the
+  // target's lazy chunk is still loading when main is first read. Blank is only
+  // a finding if it is still blank a few seconds later.
+  if (first.includes('blank main content')) {
+    await page.waitForTimeout(4_000);
+    first = await inspect();
+  }
+  symptoms.push(...first);
   const beforeTabs = {
     crashes: crashes.length,
     pageErrors: pageErrors.length,
@@ -357,6 +367,7 @@ async function openAndInspect(page: Page, route: string, url: string): Promise<F
   };
 
   const tabs: Finding['tabs'] = [];
+  let tabsClicked = 0;
   if (!symptoms.some((s) => s.startsWith('redirected') || s.startsWith('error boundary'))) {
     const tabLoc = page.locator('main [role="tab"]:visible');
     const n = Math.min(await tabLoc.count().catch(() => 0), MAX_TABS);
@@ -372,6 +383,7 @@ async function openAndInspect(page: Page, route: string, url: string): Promise<F
       } catch {
         continue;
       }
+      tabsClicked++;
       await page.waitForLoadState('networkidle', { timeout: 5_000 }).catch(() => undefined);
       await page.waitForTimeout(400);
       const s = (await inspect()).filter((x) => x !== 'blank main content');
@@ -417,6 +429,7 @@ async function openAndInspect(page: Page, route: string, url: string): Promise<F
     consoleErrors: loadConsole.slice(0, 10),
     apiErrors: loadApi.slice(0, 15),
     tabs,
+    tabsClicked,
   };
 }
 
@@ -434,7 +447,7 @@ for (const pattern of PATTERNS) {
     if (!url) {
       record({
         route: pattern, url: '', finalUrl: '', status: 'unresolved', symptoms: ['no seeded id for a parameter'],
-        crashes: [], pageErrors: [], consoleErrors: [], apiErrors: [], tabs: [],
+        crashes: [], pageErrors: [], consoleErrors: [], apiErrors: [], tabs: [], tabsClicked: 0,
       });
       test.skip(true, 'no seeded id for a parameter');
       return;
