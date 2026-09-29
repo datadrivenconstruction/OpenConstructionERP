@@ -9,39 +9,41 @@ that module's demo records on the next restart or upgrade. The gate that stops
 it now lives in ``app.core.demo_enrichment``; this module is for installs that
 ran the old code.
 
-A row is removed only when both of these hold:
+Only projects WITHOUT the ``demo_id`` marker are searched, and inside them a
+row is taken only when it is provably the seed's, in one of two ways:
 
-* it sits in a project WITHOUT the ``demo_id`` marker (a real project), and
-* it carries the seeder's own mark, the one no person or API write produces:
+* It carries the seeder's own mark, one no person or API write produces:
   ``metadata_["seed"]`` on a diary, ``{"seed": true, "demo": true}`` on a bid
   package, photo, accommodation or element group, ``created_by="demo-seed"`` on
   a clash run, ``metadata_["source"]="service_demo_seed"`` on a recurring
   service schedule.
+* Its content is exactly what the seeder writes. The seeders of quality plans,
+  rosters, HSE registers, variations, service contracts and field timesheets
+  left no mark, so each of them exposes ``seeded_row_ids``, which compares
+  several fields of a row at once with the constants the seeder itself writes
+  from. The fingerprint lives next to the seed and reads the same constants,
+  so the two cannot drift apart, and a single matching title is never enough.
 
-Several seeders wrote rows that carry no mark at all: the quality plans with
-their inspections, NCRs, punch items and audits, team rosters, field
-timesheets, HSE registers, variation notices, service contracts and the
-coordination federation. Those rows are indistinguishable from work a person
-recorded, so they are only COUNTED here, as candidates to review by hand, and
-never deleted. For the quality plan the count uses the seed's fixed content (a
-plan named "Concrete pour - slab on grade" under "WBS.03.30", created by
-nobody), which narrows it but still is not proof.
+The PPE register belongs to the company rather than to a project. Its seeded
+rows are removed only when no demo project is left installed, because while
+one is, they are part of that demo.
 
-The default is a dry run. Nothing is written unless ``apply=True``.
+The default is a dry run that lists what it would remove. Nothing is written
+unless ``apply=True``.
 """
 
 from __future__ import annotations
 
 import logging
 import uuid
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import Any
 
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.demo_marker import demo_id_of
+from app.core.demo_marker import demo_id_of, live_demo_projects
 
 logger = logging.getLogger(__name__)
 
@@ -73,7 +75,7 @@ class _Rule:
     orphans: Callable[[], list[tuple[Any, str]]] = field(default=lambda: [])
 
 
-def _rules() -> list[_Rule]:
+def _marker_rules() -> list[_Rule]:
     def diary():
         from app.modules.daily_diary.models import DailyDiary
 
@@ -131,38 +133,20 @@ def _rules() -> list[_Rule]:
     ]
 
 
-def _candidates() -> list[tuple[str, Any, Callable[[Any], Any] | None]]:
-    """Models the old seeding wrote without a mark: ``(name, model, extra where)``."""
-    from app.modules.bim_hub.models import BIMFederation
-    from app.modules.field_time.models import FieldTimesheet
-    from app.modules.hse_advanced.models import JobSafetyAnalysis, PermitToWork
-    from app.modules.qms.models import QMSNCR, ITPPlan, QMSAudit, QMSInspection, QMSPunchItem
-    from app.modules.service.models import ServiceContract
-    from app.modules.teams.models import RosterMember
-    from app.modules.variations.models import Notice
+def _fingerprinters() -> list[Callable[[AsyncSession, list[uuid.UUID]], Awaitable[list[tuple[type, list, str]]]]]:
+    """Each unmarked seeder's own recogniser, in the order their rows can be deleted.
 
-    return [
-        (
-            "qms_itp_plan_seed_fingerprint",
-            ITPPlan,
-            lambda m: (m.name == "Concrete pour - slab on grade") & (m.wbs_ref == "WBS.03.30") & m.created_by.is_(None),
-        ),
-        ("qms_inspections", QMSInspection, None),
-        ("qms_ncrs", QMSNCR, None),
-        ("qms_punch_items", QMSPunchItem, None),
-        ("qms_audits", QMSAudit, None),
-        ("teams_roster", RosterMember, None),
-        ("field_timesheets", FieldTimesheet, None),
-        ("hse_job_safety_analyses", JobSafetyAnalysis, None),
-        ("hse_permits_to_work", PermitToWork, None),
-        ("variation_notices", Notice, None),
-        ("service_contracts", ServiceContract, None),
-        (
-            "bim_coordination_federation",
-            BIMFederation,
-            lambda m: m.name == "Coordination Federation",
-        ),
-    ]
+    Field time goes before variations because its lines point at variation
+    orders; everything else is independent of the others.
+    """
+    from app.modules.field_time.seed import seeded_row_ids as field_time
+    from app.modules.hse_advanced.seed import seeded_row_ids as hse
+    from app.modules.qms.seed import seeded_row_ids as qms
+    from app.modules.service.seed import seeded_row_ids as service
+    from app.modules.teams.seed import seeded_row_ids as teams
+    from app.modules.variations.seed import seeded_row_ids as variations
+
+    return [field_time, variations, qms, hse, service, teams]
 
 
 @dataclass
@@ -171,14 +155,18 @@ class CleanupReport:
 
     real_projects: int = 0
     applied: bool = False
-    # rule name -> rows carrying the seed's mark (removed when ``applied``)
-    marked: dict[str, int] = field(default_factory=dict)
-    # model name -> rows with no mark, left alone, for a person to review
-    unmarked_candidates: dict[str, int] = field(default_factory=dict)
+    # group name -> ids of the rows proven to be the seed's (removed when ``applied``)
+    rows: dict[str, list[uuid.UUID]] = field(default_factory=dict)
+    # Why the company-wide PPE register was left alone, when it was.
+    ppe_kept_reason: str = ""
 
     @property
-    def total_marked(self) -> int:
-        return sum(self.marked.values())
+    def marked(self) -> dict[str, int]:
+        return {name: len(ids) for name, ids in self.rows.items()}
+
+    @property
+    def total(self) -> int:
+        return sum(len(ids) for ids in self.rows.values())
 
 
 async def _real_project_ids(session: AsyncSession) -> list[uuid.UUID]:
@@ -189,41 +177,47 @@ async def _real_project_ids(session: AsyncSession) -> list[uuid.UUID]:
 
 
 async def clean_leaked_demo_rows(session: AsyncSession, *, apply: bool = False) -> CleanupReport:
-    """Report, and with ``apply`` delete, seed-marked rows in real projects.
+    """Report, and with ``apply`` delete, the seed's rows in real projects.
 
     Flushes but does not commit; the caller commits, so a dry run followed by a
-    rollback leaves the database exactly as it was.
+    rollback leaves the database exactly as it was. Groups are deleted in the
+    order they are listed, children before the rows they point at.
 
     Args:
         session: Session to read and write through.
-        apply: Delete the marked rows. ``False`` (the default) only counts.
+        apply: Delete what was found. ``False`` (the default) only lists it.
     """
     report = CleanupReport(applied=apply)
     real = await _real_project_ids(session)
     report.real_projects = len(real)
-    if not real:
-        return report
 
-    for rule in _rules():
-        model = rule.model()
-        rows = (await session.execute(select(model).where(model.project_id.in_(real)))).scalars().all()
-        ids = [row.id for row in rows if rule.is_seeded(row)]
-        report.marked[rule.name] = len(ids)
+    async def take(label: str, model: Any, ids: list, orphans: list[tuple[Any, str]] = ()) -> None:
+        report.rows[label] = list(ids)
         if not apply or not ids:
-            continue
-        for child, column in rule.orphans():
+            return
+        for child, column in orphans:
             await session.execute(delete(child).where(getattr(child, column).in_(ids)))
         await session.execute(delete(model).where(model.id.in_(ids)))
         await session.flush()
-        logger.info("demo cleanup: removed %d seeded %s row(s) from real projects", len(ids), rule.name)
+        logger.info("demo cleanup: removed %d seeded %s row(s) from real projects", len(ids), label)
 
-    for name, model, extra in _candidates():
-        stmt = select(func.count()).select_from(model).where(model.project_id.in_(real))
-        if extra is not None:
-            stmt = stmt.where(extra(model))
-        count = int((await session.execute(stmt)).scalar_one())
-        if count:
-            report.unmarked_candidates[name] = count
+    if real:
+        for rule in _marker_rules():
+            model = rule.model()
+            rows = (await session.execute(select(model).where(model.project_id.in_(real)))).scalars().all()
+            await take(rule.name, model, [row.id for row in rows if rule.is_seeded(row)], rule.orphans())
+
+        for fingerprint in _fingerprinters():
+            for model, ids, label in await fingerprint(session, real):
+                await take(label, model, ids)
+
+    from app.modules.hse_advanced.models import PPEIssue
+    from app.modules.hse_advanced.seed import seeded_ppe_ids
+
+    if await live_demo_projects(session):
+        report.ppe_kept_reason = "demo projects are still installed; the seeded PPE issues belong to them"
+    else:
+        await take("hse_ppe_issues", PPEIssue, await seeded_ppe_ids(session))
 
     if apply:
         session.expire_all()
