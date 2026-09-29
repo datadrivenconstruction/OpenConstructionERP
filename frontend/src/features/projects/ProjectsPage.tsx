@@ -30,6 +30,8 @@ import { BIMConverterStatusBanner } from '../bim/BIMConverterStatusBanner';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { invalidateProjectLists } from './invalidateProjectLists';
 
+const LIVE_DEFAULT_MIGRATED_KEY = 'oe_projects_filters_live_default';
+
 interface ProjectBOQStats {
   projectId: string;
   boqCount: number;
@@ -97,7 +99,8 @@ export function isProjectFilterActive(
   statusFilter: StatusFilter,
   regionFilter: string,
 ): boolean {
-  return Boolean(searchQuery) || statusFilter !== 'all' || regionFilter !== 'all';
+  // 'active' is the default view, so it is not a filter the user applied.
+  return Boolean(searchQuery) || statusFilter !== 'active' || regionFilter !== 'all';
 }
 
 // Region tags + colours are derived from actual project data — no
@@ -152,11 +155,27 @@ export function ProjectsPage() {
   }, [location.state]);
 
   const [searchQuery, setSearchQuery] = useState('');
+  // The default view is the working projects. Deleting a project archives it,
+  // so a default that included archived rows showed every deleted project as a
+  // card that opened on "Project not found"; archived ones now appear only
+  // under the explicit Archived (or All) filter.
   const [filters, setFilters] = useLocalStorage('oe_projects_filters', {
-    status: 'all' as StatusFilter,
+    status: 'active' as StatusFilter,
     region: 'all',
     sort: 'newest' as SortOption,
   });
+  // One-time move for browsers that saved the old 'all' default: without it
+  // the deleted projects would stay on screen for every existing user.
+  useEffect(() => {
+    try {
+      if (window.localStorage.getItem(LIVE_DEFAULT_MIGRATED_KEY)) return;
+      window.localStorage.setItem(LIVE_DEFAULT_MIGRATED_KEY, '1');
+    } catch {
+      return;
+    }
+    if (filters.status === 'all') setFilters((p) => ({ ...p, status: 'active' }));
+    // Runs once on mount by design.
+  }, []);
   const statusFilter = filters.status;
   const regionFilter = filters.region;
   const sortOption = filters.sort;
@@ -412,6 +431,17 @@ export function ProjectsPage() {
   // back empty, so the user can always switch back to Active. Without this
   // guard an empty Archived view hid the toolbar and trapped the user (#284).
   const hasActiveFilter = isProjectFilterActive(searchQuery, statusFilter, regionFilter);
+
+  // With every project deleted, the default view is empty; the toolbar must
+  // still show so the Archived filter (and its Restore buttons) is reachable.
+  // Shares its cache with the Archived view itself.
+  const { data: archivedWhenEmpty } = useQuery({
+    queryKey: ['projects', 'archived'],
+    queryFn: () => projectsApi.listByStatus('archived'),
+    enabled: statusFilter === 'active' && !!projects && projects.length === 0,
+    staleTime: 5 * 60_000,
+  });
+  const hasArchivedOnly = (archivedWhenEmpty?.length ?? 0) > 0;
 
   /* ── Stats ────────────────────────────────────────────────────────── */
 
@@ -817,7 +847,7 @@ export function ProjectsPage() {
           filter/search is active: a filtered fetch (e.g. Archived) can return
           an empty list, and hiding the toolbar there would strand the user on
           the Archived view with no Active/Archived switch to get back. */}
-      {((projects && projects.length > 0) || hasActiveFilter) && (
+      {((projects && projects.length > 0) || hasActiveFilter || hasArchivedOnly) && (
         <Card padding="none" className="mb-6">
           <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
             {/* Search */}
@@ -1113,7 +1143,8 @@ export function ProjectsPage() {
   );
 }
 
-function ProjectCard({
+// Exported for the call-site tests of its delete / restore / archive paths.
+export function ProjectCard({
   project,
   boqStats,
   fileTypes,
@@ -1291,6 +1322,7 @@ function ProjectCard({
     return typeof v === 'number' && v > 0 ? v : 0;
   })();
 
+  const isArchived = project.status === 'archived';
   const mapEnabled = useWidgetSettingsStore((s) => s.projectMapEnabled);
   const weatherEnabled = useWidgetSettingsStore((s) => s.projectWeatherEnabled);
   const [cardCoords, setCardCoords] = useState<LatLng | null>(
@@ -1310,11 +1342,13 @@ function ProjectCard({
       // would also catch project-card-view-on-map on the button inside.
       data-testid="project-card"
       padding="none"
-      className="group cursor-pointer relative animate-card-in overflow-hidden rounded-xl bg-gradient-to-b from-surface-elevated to-surface-primary hover:shadow-xl hover:border-oe-blue/40 focus-within:ring-2 focus-within:ring-oe-blue/30 motion-safe:transition-all"
+      className={`group relative animate-card-in overflow-hidden rounded-xl bg-gradient-to-b from-surface-elevated to-surface-primary hover:shadow-xl hover:border-oe-blue/40 focus-within:ring-2 focus-within:ring-oe-blue/30 motion-safe:transition-all ${isArchived ? 'cursor-default opacity-90' : 'cursor-pointer'}`}
       style={style}
-      onClick={() => navigate(`/projects/${project.id}`)}
+      // An archived (deleted) project has no page to open: the project route
+      // answers 404 for it. Its card offers Restore instead.
+      onClick={isArchived ? undefined : () => navigate(`/projects/${project.id}`)}
     >
-      {mapEnabled && (
+      {mapEnabled && !isArchived && (
         <div className="relative" onClick={(e) => e.stopPropagation()}>
           <ProjectMap
             variant="card"
@@ -1393,15 +1427,17 @@ function ProjectCard({
             className="absolute top-14 right-4 z-20 w-44 rounded-lg border border-border bg-surface-elevated shadow-lg overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              onClick={() => {
-                navigate(`/projects/${project.id}`);
-                setMenuOpen(false);
-              }}
-              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
-            >
-              <ExternalLink size={14} /> {t('common.open', 'Open')}
-            </button>
+            {!isArchived && (
+              <button
+                onClick={() => {
+                  navigate(`/projects/${project.id}`);
+                  setMenuOpen(false);
+                }}
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
+              >
+                <ExternalLink size={14} /> {t('common.open', 'Open')}
+              </button>
+            )}
             <button
               onClick={() => {
                 duplicateMutation.mutate();
@@ -1483,6 +1519,27 @@ function ProjectCard({
         <h3 className="mt-4 text-base font-semibold tracking-tight text-content-primary truncate">
           {project.name}
         </h3>
+        {isArchived && (
+          <div
+            className="mt-2 flex items-center justify-between gap-2 rounded-lg border border-border-light bg-surface-secondary px-3 py-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span className="text-xs text-content-secondary">
+              {t('projects.archived_card_hint', {
+                defaultValue: 'Deleted. Restore it to open the project again.',
+              })}
+            </span>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => restoreMutation.mutate()}
+              loading={restoreMutation.isPending}
+              data-testid="project-card-restore"
+            >
+              {t('common.restore', { defaultValue: 'Restore' })}
+            </Button>
+          </div>
+        )}
         {project.description && (
           <p className="mt-1 text-xs leading-relaxed text-content-secondary line-clamp-2 transition-colors group-hover:text-content-primary/80">
             {project.description}
@@ -1512,7 +1569,7 @@ function ProjectCard({
           {/* Inline fallback: when the map widget is OFF we still want a
               discoverable jump-to-Geo affordance on geo-anchored projects.
               Hidden when the overlay version is already shown above. */}
-          {!mapEnabled && cardCoords && (
+          {!mapEnabled && cardCoords && !isArchived && (
             <Link
               to={`/projects/${project.id}/geo`}
               onClick={(e) => e.stopPropagation()}
