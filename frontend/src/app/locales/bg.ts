@@ -40685,6 +40685,7 @@ const resource = {
     "enterprise_workflows.status_approved": "Одобрен",
     "enterprise_workflows.status_pending": "Очакващ",
     "enterprise_workflows.status_rejected": "Отхвърлен",
+    "enterprise_workflows.status_cancelled": "Отменен",
     "enterprise_workflows.step": "Стъпка {{n}}",
     "enterprise_workflows.steps_count": "{{count}} стъпка(и)",
     "enterprise_workflows.subtitle": "Конфигурирайте работни процеси за одобрение и управлявайте чакащи заявки в проектите.",
