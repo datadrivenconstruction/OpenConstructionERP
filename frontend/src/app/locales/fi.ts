@@ -37540,6 +37540,8 @@ const resource = {
     "costs.market_priced_title": "Hinnoiteltu {{market}}",
     "costs.market_priced_msg": "{{items}} kohdetta hinnoiteltu uudelleen {{market}} ({{currency}})",
     "costs.market_failed_title": "Ei voitu hinnoitella {{market}}",
+    "costs.base_text_only_in": "Nimikkeiden kieli: {{language}}",
+    "costs.market_text_fallback": "Nimikkeiden kieli: {{language}}. Tällä tietokannalla ei ole versiota kielellä: {{requested}}.",
     "costs.base_loading_catalog": "Ladataan kustannuspohjia...",
     "costs.base_catalog_failed": "Kustannuspohjia ei voitu ladata",
     "costs.base_catalog_failed_hint": "Kustannuspohjien luettelo tulee palvelimelta. Tarkista, että backend on käynnissä ja tavoitettavissa, ja yritä uudelleen.",

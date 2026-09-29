@@ -23663,6 +23663,8 @@ const resource = {
     "costs.market_priced_title": "{{market}} рыногуна бааланган",
     "costs.market_priced_msg": "{{items}} нерсе {{market}} рыногуна кайра бааланды ({{currency}})",
     "costs.market_failed_title": "{{market}} рыногуна баалоо мүмкүн болгон жок",
+    "costs.base_text_only_in": "Позициялардын тили: {{language}}",
+    "costs.market_text_fallback": "Позициялардын тили: {{language}}. Бул базада төмөнкү тилдеги версия жок: {{requested}}.",
     "costs.base_loading_catalog": "Нарк базалары жүктөлүп жатат...",
     "costs.base_catalog_failed": "Нарк базаларын жүктөө мүмкүн болбоду",
     "costs.base_catalog_failed_hint": "Нарк базаларынын тизмеси серверден келет. Бэкенддин иштеп жатканын жана жеткиликтүү экенин текшерип, кайра аракет кылыңыз.",

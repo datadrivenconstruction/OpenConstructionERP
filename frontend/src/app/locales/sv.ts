@@ -37787,6 +37787,8 @@ const resource = {
     "costs.market_priced_title": "Prissatt i {{market}}",
     "costs.market_priced_msg": "{{items}} objekt omprissatta i {{market}} ({{currency}})",
     "costs.market_failed_title": "Kunde inte prissätta i {{market}}",
+    "costs.base_text_only_in": "Språk för poster: {{language}}",
+    "costs.market_text_fallback": "Språk för poster: {{language}}. Den här databasen saknar version på språket: {{requested}}.",
     "costs.base_loading_catalog": "Laddar kostnadsbaser...",
     "costs.base_catalog_failed": "Kostnadsbaser kunde inte läsas in",
     "costs.base_catalog_failed_hint": "Listan över kostnadsbaser kommer från servern. Kontrollera att backend körs och är nåbar, och försök sedan igen.",

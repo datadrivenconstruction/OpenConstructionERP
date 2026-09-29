@@ -48,7 +48,15 @@ import { fetchCostCatalogs, type CostCatalog } from './api';
 import { ResourcePriceSheetPanel } from './ResourcePriceSheetPanel';
 import { BaseCatalogBrowser } from './BaseCatalogBrowser';
 import { BaseCatalogError } from './BaseCatalogError';
-import { useBaseCatalog, flattenVariants, type BaseVariant } from './baseCatalog';
+import {
+  useBaseCatalog,
+  flattenVariants,
+  getActiveMarkets,
+  languageName,
+  loadBaseMarket,
+  textLanguageFallback,
+  type BaseVariant,
+} from './baseCatalog';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -173,29 +181,8 @@ function setActiveDatabase(dbId: string): void {
   }
 }
 
-// Which market each national base is currently repriced into. Keyed by
-// base_region -> market_catalog token (e.g. { ZH_CHINA: 'GB_LONDON_en' }). MVP
-// client-side tracking; a server table is a later hardening.
-const ACTIVE_MARKETS_KEY = 'oe_active_markets';
-
-function getActiveMarkets(): Record<string, string> {
-  try {
-    const raw = localStorage.getItem(ACTIVE_MARKETS_KEY);
-    return raw ? (JSON.parse(raw) as Record<string, string>) : {};
-  } catch {
-    return {};
-  }
-}
-
-function setActiveMarketFor(baseRegion: string, token: string): void {
-  try {
-    const current = getActiveMarkets();
-    current[baseRegion] = token;
-    localStorage.setItem(ACTIVE_MARKETS_KEY, JSON.stringify(current));
-  } catch {
-    // Storage unavailable -- ignore.
-  }
-}
+// Which market each national base is repriced into lives in ./baseCatalog, next
+// to the one call that changes it (loadBaseMarket), so every surface records it.
 
 // ── API helper for file upload ───────────────────────────────────────────────
 
@@ -418,7 +405,7 @@ function MiniFlag({ code }: { code: string }) {
 }
 
 function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState<string | null>(null);
   const [loaded, setLoaded] = useState<Set<string>>(() => new Set(getLoadedDatabases()));
@@ -504,14 +491,9 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
         setResult(null);
         setLastLoadedDb(variant);
         try {
-          const data = await apiPost<Record<string, unknown>>(
-            `/v1/costs/base-market/${baseRegion}/${variant.market_catalog}`,
-            undefined,
-            { longRunning: true },
-          );
+          const data = await loadBaseMarket(variant);
           setLoaded((prev) => new Set(prev).add(baseRegion));
           addLoadedDatabase(baseRegion);
-          setActiveMarketFor(baseRegion, variant.market_catalog);
           setActiveMarkets((prev) => ({ ...prev, [baseRegion]: variant.market_catalog }));
           // Make this base the working database if none is set yet (mirrors the
           // home-load behaviour - never steal an already-chosen active db).
@@ -519,20 +501,27 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
             setActiveDatabase(baseRegion);
             setActiveDb(baseRegion);
           }
-          const repriced = (data.items_repriced as number) ?? (data.items_total as number) ?? 0;
+          const repriced = data.items_repriced ?? data.items_total ?? 0;
           setResult({ id: variant.variant_id, imported: repriced, skipped: 0, file: '' });
+          const fellBackTo = textLanguageFallback(data);
           addToast({
-            type: 'success',
+            type: fellBackTo ? 'warning' : 'success',
             title: t('costs.market_priced_title', {
               defaultValue: 'Priced into {{market}}',
               market: variant.market,
             }),
-            message: t('costs.market_priced_msg', {
-              defaultValue: '{{items}} items repriced into {{market}} ({{currency}})',
-              items: repriced.toLocaleString(getNumberLocale()),
-              market: variant.market,
-              currency: variant.currency,
-            }),
+            message: fellBackTo
+              ? t('costs.market_text_fallback', {
+                  defaultValue: 'The work items are in {{language}}: this base has no {{requested}} version.',
+                  language: languageName(fellBackTo, i18n.language),
+                  requested: languageName(data.text_language_requested ?? variant.lang_code, i18n.language),
+                })
+              : t('costs.market_priced_msg', {
+                  defaultValue: '{{items}} items repriced into {{market}} ({{currency}})',
+                  items: repriced.toLocaleString(getNumberLocale()),
+                  market: variant.market,
+                  currency: variant.currency,
+                }),
           });
           queryClient.invalidateQueries({ queryKey: ['costs'] });
         } catch (err: unknown) {
@@ -714,7 +703,7 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
         if (mountedRef.current) setLoading(null);
       }
     },
-    [addToast, t, queryClient],
+    [addToast, t, i18n, queryClient],
   );
 
   return (

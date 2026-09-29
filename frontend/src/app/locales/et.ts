@@ -37468,6 +37468,8 @@ const resource = {
     "costs.market_priced_title": "Hinnastatud turul {{market}}",
     "costs.market_priced_msg": "{{items}} kirjet ümberhinnastatud turul {{market}} ({{currency}})",
     "costs.market_failed_title": "Turul {{market}} ei õnnestunud hinnastada",
+    "costs.base_text_only_in": "Tööüksuste keel: {{language}}",
+    "costs.market_text_fallback": "Tööüksuste keel: {{language}}. Sellel andmebaasil pole versiooni keeles: {{requested}}.",
     "costs.base_loading_catalog": "Kuluandmebaaside laadimine...",
     "costs.base_catalog_failed": "Kuluandmebaase ei õnnestunud laadida",
     "costs.base_catalog_failed_hint": "Kuluandmebaaside loend pärineb serverist. Kontrollige, kas backend töötab ja on kättesaadav, ning proovige uuesti.",

@@ -37719,6 +37719,8 @@ const resource = {
     "costs.market_priced_title": "Priset inn i {{market}}",
     "costs.market_priced_msg": "{{items}} elementer priset inn i {{market}} ({{currency}})",
     "costs.market_failed_title": "Kunne ikke prise inn i {{market}}",
+    "costs.base_text_only_in": "Språk for poster: {{language}}",
+    "costs.market_text_fallback": "Språk for poster: {{language}}. Denne databasen har ingen versjon på språket: {{requested}}.",
     "costs.base_loading_catalog": "Laster kostnadsbaser...",
     "costs.base_catalog_failed": "Kostnadsbaser kunne ikke lastes",
     "costs.base_catalog_failed_hint": "Listen over kostnadsbaser kommer fra serveren. Kontroller at backend kjører og er tilgjengelig, og prøv igjen.",

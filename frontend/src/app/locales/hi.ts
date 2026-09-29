@@ -37669,6 +37669,8 @@ const resource = {
     "costs.market_priced_title": "{{market}} में मूल्य निर्धारित",
     "costs.market_priced_msg": "{{items}} आइटम {{market}} ({{currency}}) में पुनर्मूल्यांकित",
     "costs.market_failed_title": "{{market}} में मूल्य निर्धारित नहीं किया जा सका",
+    "costs.base_text_only_in": "मदों की भाषा: {{language}}",
+    "costs.market_text_fallback": "मदों की भाषा: {{language}}। इस बेस में इस भाषा में कोई संस्करण नहीं है: {{requested}}।",
     "costs.base_loading_catalog": "लागत आधार लोड हो रहे हैं...",
     "costs.base_catalog_failed": "लागत आधार लोड नहीं किए जा सके",
     "costs.base_catalog_failed_hint": "लागत आधारों की सूची सर्वर से आती है। जाँच लें कि बैकएंड चल रहा है और पहुँच योग्य है, फिर पुनः प्रयास करें।",

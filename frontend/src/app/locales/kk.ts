@@ -36742,6 +36742,8 @@ const resource = {
     "costs.market_priced_title": "{{market}} дегенге бағаланды",
     "costs.market_priced_msg": "{{items}} позиция {{market}} дегенге ({{currency}}) қайта бағаланды",
     "costs.market_failed_title": "{{market}} дегенге бағалау мүмкін болмады",
+    "costs.base_text_only_in": "Жұмыс позицияларының тілі: {{language}}",
+    "costs.market_text_fallback": "Жұмыс позицияларының тілі: {{language}}. Бұл база мына тілде нұсқаға ие емес: {{requested}}.",
     "costs.base_loading_catalog": "Шығын базалары жүктелуде...",
     "costs.base_catalog_failed": "Шығын базаларын жүктеу мүмкін болмады",
     "costs.base_catalog_failed_hint": "Шығын базаларының тізімі серверден келеді. Backend іске қосылғанын және қолжетімді екенін тексеріп, қайта көріңіз.",

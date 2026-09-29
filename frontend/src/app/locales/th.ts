@@ -37377,6 +37377,8 @@ const resource = {
     "costs.market_priced_title": "กำหนดราคาใน {{market}}",
     "costs.market_priced_msg": "{{items}} รายการกำหนดราคาใหม่ใน {{market}} ({{currency}})",
     "costs.market_failed_title": "ไม่สามารถกำหนดราคาใน {{market}} ได้",
+    "costs.base_text_only_in": "ภาษาของรายการ: {{language}}",
+    "costs.market_text_fallback": "ภาษาของรายการ: {{language}} ฐานข้อมูลนี้ไม่มีเวอร์ชันภาษา: {{requested}}",
     "costs.base_loading_catalog": "กำลังโหลดฐานต้นทุน...",
     "costs.base_catalog_failed": "ไม่สามารถโหลดฐานต้นทุนได้",
     "costs.base_catalog_failed_hint": "รายการฐานต้นทุนมาจากเซิร์ฟเวอร์ ตรวจสอบว่า backend กำลังทำงานและเข้าถึงได้ แล้วลองอีกครั้ง",
