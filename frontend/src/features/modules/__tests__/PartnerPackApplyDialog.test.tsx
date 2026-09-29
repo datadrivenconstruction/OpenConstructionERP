@@ -41,11 +41,13 @@ const i18nMock = vi.hoisted(() => {
   return {
     inst,
     loadLocaleResource: vi.fn(async () => {}),
+    isLocaleLoaded: vi.fn((_code: string) => true),
   };
 });
 vi.mock('@/app/i18n', () => ({
   default: i18nMock.inst,
   loadLocaleResource: i18nMock.loadLocaleResource,
+  isLocaleLoaded: i18nMock.isLocaleLoaded,
   normalizePackLocale: (l: string | null | undefined) => (l ? l.split('-')[0]! : 'en'),
   SUPPORTED_LANGUAGES: [
     { code: 'en', name: 'English' },
@@ -161,6 +163,8 @@ function activate() {
 beforeEach(() => {
   authState.userRole = 'admin';
   i18nMock.inst.language = 'en';
+  i18nMock.isLocaleLoaded.mockImplementation(() => true);
+  window.localStorage.clear();
   packMock.useApplyPreview.mockReturnValue({ data: preview(), isLoading: false, isError: false });
 });
 
@@ -376,6 +380,50 @@ describe('a finished install is verifiable step by step', () => {
     );
     fireEvent.click(screen.getByRole('button', { name: /Retry/ }));
     await screen.findByText('Everything above is installed and ready to use.');
+  });
+});
+
+/* ── The language step ─────────────────────────────────────────────────── */
+
+describe('the language row says what the interface really did', () => {
+  const allOk = () =>
+    streamOf(
+      STEPS.map((st) => ({
+        step: st.step,
+        status: 'ok' as const,
+        detail: st.step === 'locale' ? { locale: 'de' } : {},
+      })),
+      true,
+    );
+
+  it('a language chunk that did not load is reported, and its retry can finish the install', async () => {
+    // The chunk import fails: loadLocaleResource swallows it, so only the
+    // store can tell.
+    i18nMock.isLocaleLoaded.mockImplementation(() => false);
+    streamMock.fullInstallPackStream.mockImplementation(allOk());
+    renderDialog();
+    activate();
+
+    await screen.findByText(/Could not switch the interface to Deutsch/);
+    const row = () =>
+      screen.getByTestId('pack-install-steps').querySelector('[data-step="locale"]') as HTMLElement;
+    expect(row().getAttribute('data-state')).toBe('error');
+    expect(i18nMock.inst.changeLanguage).not.toHaveBeenCalled();
+    // The marker waits for a switch that worked, so the app can try again.
+    expect(window.localStorage.getItem('oce-pack-locale-active')).toBeNull();
+    expect(screen.queryByText('Everything above is installed and ready to use.')).toBeNull();
+    expect(addToast).not.toHaveBeenCalledWith(expect.objectContaining({ title: 'Pack activated' }));
+
+    // The chunk loads on the second try.
+    i18nMock.isLocaleLoaded.mockImplementation(() => true);
+    fireEvent.click(within(row()).getByRole('button', { name: /Retry/ }));
+
+    await waitFor(() => expect(row().getAttribute('data-state')).toBe('ok'));
+    expect(screen.getByText('The interface is in Deutsch.')).toBeTruthy();
+    expect(window.localStorage.getItem('oce-pack-locale-active')).toBe('germany-de');
+    expect(screen.getByText('Everything above is installed and ready to use.')).toBeTruthy();
+    // A language retry is client-side; it does not rerun the install.
+    expect(streamMock.fullInstallPackStream).toHaveBeenCalledTimes(1);
   });
 });
 

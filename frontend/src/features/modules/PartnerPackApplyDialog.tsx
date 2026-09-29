@@ -32,7 +32,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
-import i18n, { loadLocaleResource, normalizePackLocale, SUPPORTED_LANGUAGES } from '@/app/i18n';
+import i18n, {
+  isLocaleLoaded,
+  loadLocaleResource,
+  normalizePackLocale,
+  SUPPORTED_LANGUAGES,
+} from '@/app/i18n';
 import {
   AlertTriangle,
   Boxes,
@@ -374,37 +379,65 @@ export function PartnerPackApplyDialog({
    * interface is actually in rather than the one it was asked to be in.
    * English packs do not force English on a reader who chose another
    * language, the same rule the hook follows.
+   *
+   * A locale chunk that fails to load is not an error anywhere below this:
+   * ``loadLocaleResource`` swallows it and ``changeLanguage`` happily switches
+   * to a language with no strings. So the bundle is checked before the switch,
+   * and the language and the pack marker are only written once it is there.
+   * Writing the marker first also stopped the AppLayout hook from ever trying
+   * again in this session.
    */
   const applyLanguage = useCallback(
-    async (rawLocale: string | null) => {
-      if (!rawLocale) return;
+    async (rawLocale: string | null): Promise<LanguageResult['outcome'] | null> => {
+      if (!rawLocale) return null;
       const target = normalizePackLocale(rawLocale);
       const before = i18n.language;
       if (target === before) {
         setLanguage({ target, current: before, outcome: 'already' });
-        return;
+        return 'already';
       }
       if (target === 'en') {
         setLanguage({ target, current: before, outcome: 'kept' });
-        return;
+        return 'kept';
       }
       try {
+        await loadLocaleResource(target);
+        if (isLocaleLoaded(target)) await i18n.changeLanguage(target);
+      } catch {
+        // Reported by the read-back below.
+      }
+      const after = i18n.language;
+      const outcome = after === target && isLocaleLoaded(target) ? 'switched' : 'failed';
+      if (outcome === 'switched') {
         try {
           window.localStorage.setItem('oce-pack-locale-active', slug);
           window.localStorage.setItem('i18nextLng', target);
         } catch {
           /* localStorage unavailable */
         }
-        await loadLocaleResource(target);
-        await i18n.changeLanguage(target);
-      } catch {
-        // A chunk that failed to load leaves the language where it was; the
-        // check below reports that instead of claiming the switch.
       }
-      const after = i18n.language;
-      setLanguage({ target, current: after, outcome: after === target ? 'switched' : 'failed' });
+      setLanguage({ target, current: after, outcome });
+      return outcome;
     },
     [slug],
+  );
+
+  /**
+   * The language step's row follows what the interface actually did: a pack
+   * whose language did not load gets a red row with its own Retry, and a retry
+   * that worked turns the row green and can finish the install.
+   */
+  const settleLanguageRow = useCallback(
+    (outcome: LanguageResult['outcome'] | null) => {
+      if (outcome === null || !('locale' in statesRef.current)) return;
+      const next = { ...statesRef.current, locale: outcome === 'failed' ? 'error' : 'ok' } as Record<
+        string,
+        StepUiState
+      >;
+      putStates(next);
+      setFinished({ ok: Object.values(next).every((st) => st === 'ok' || st === 'skipped') });
+    },
+    [putStates],
   );
 
   const runInstall = useCallback(
@@ -476,7 +509,13 @@ export function PartnerPackApplyDialog({
         void qc.invalidateQueries({ queryKey: ['catalog'] });
         // The pack is applied once its first step is, whatever the later steps
         // did, so its language follows even when a cost base failed.
-        if (applyOk) await applyLanguage(packLocale);
+        if (applyOk) {
+          const outcome = await applyLanguage(packLocale);
+          if (outcome === 'failed') {
+            settleLanguageRow(outcome);
+            ok = false;
+          }
+        }
         if (ok) {
           addToast({
             type: 'success',
@@ -514,7 +553,7 @@ export function PartnerPackApplyDialog({
         }
         putStates(swept);
         setFinished({ ok: false });
-        if (applyOk) await applyLanguage(packLocale);
+        if (applyOk) settleLanguageRow(await applyLanguage(packLocale));
         addToast({
           type: 'error',
           title: t('modules.pack_apply_failed', { defaultValue: 'Could not activate this pack' }),
@@ -543,6 +582,7 @@ export function PartnerPackApplyDialog({
       handleEvent,
       putStates,
       applyLanguage,
+      settleLanguageRow,
       qc,
       addToast,
       t,
@@ -852,7 +892,9 @@ export function PartnerPackApplyDialog({
       return;
     }
     if (step === 'locale') {
-      void applyLanguage(asString(stepDetail.locale?.locale) ?? plan?.default_locale ?? null);
+      void applyLanguage(asString(stepDetail.locale?.locale) ?? plan?.default_locale ?? null).then(
+        settleLanguageRow,
+      );
       return;
     }
     void runInstall([step]);
