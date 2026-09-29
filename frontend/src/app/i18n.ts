@@ -312,6 +312,19 @@ async function loadLocaleChunk(code: string): Promise<boolean> {
 }
 
 /**
+ * Whether a locale's own bundle is in the store.
+ *
+ * ``loadLocaleResource`` swallows a failed chunk and ``changeLanguage`` switches
+ * to a language with no strings without complaint, so neither tells a caller
+ * whether the switch it asked for will show anything. ``hasResourceBundle`` is
+ * no help either: module translations are added for every language at boot, so
+ * a bundle with a handful of keys exists even when the locale file never loaded.
+ */
+export function isLocaleLoaded(code: string): boolean {
+  return loadedLocales.has(code);
+}
+
+/**
  * Load a locale into i18next, together with the base language it falls back to.
  *
  * A regional variant carries only what its region words differently and leans on
