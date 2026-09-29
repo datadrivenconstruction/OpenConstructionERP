@@ -8,8 +8,8 @@ running concurrently.
 
 Coverage:
 
-1.  Auth gates — 401 without a user, 403 when the caller isn't the
-    project owner / admin.
+1.  Auth gates — 401 without a user, 404 when the caller cannot read the
+    project (owner, member or admin can), the same answer as a missing one.
 2.  Empty project — every field returns False, no exceptions.
 3.  Populated modules — inserting a row into a single module's table
     flips that module's bool to True and leaves the rest False.
@@ -245,17 +245,67 @@ async def test_module_presence_requires_authentication(
 
 @pytest.mark.tenant_isolation
 @pytest.mark.asyncio
-async def test_module_presence_403_for_non_owner(
+async def test_module_presence_404_for_a_stranger(
     client: AsyncClient,
     project_owned_by,
 ) -> None:
-    """Authenticated stranger (non-admin) → 403, not 200."""
+    """Authenticated stranger (non-admin) → 404, the same answer as a missing project."""
     _owner_id, project_id = await project_owned_by()
     stranger_id = uuid.uuid4()
     _set_acting_user(stranger_id, role="estimator")
 
     resp = await client.get(f"/api/v1/projects/{project_id}/module-presence")
-    assert resp.status_code == 403, resp.text
+    assert resp.status_code == 404, resp.text
+
+
+@pytest.mark.tenant_isolation
+@pytest.mark.asyncio
+async def test_project_reads_open_for_a_viewer_member(
+    client: AsyncClient,
+    project_owned_by,
+    temp_engine_and_factory,
+) -> None:
+    """A viewer on the project team reads the profile, modules and presence.
+
+    These three are reads the project page makes as it opens. They used the
+    owner check, so every member who was not the owner got 403 on a project
+    that otherwise opened for them. Membership is what grants read access
+    everywhere else in the module, and a stranger still gets 404.
+    """
+    from app.modules.teams.models import Team, TeamMembership
+    from app.modules.users.models import User
+
+    _owner_id, project_id = await project_owned_by()
+    _engine, factory = temp_engine_and_factory
+    member_id = uuid.uuid4()
+    async with factory() as session:
+        session.add(
+            User(
+                id=member_id,
+                email=f"member-{uuid.uuid4().hex[:6]}@presence.io",
+                hashed_password="x" * 60,
+                full_name="Presence Member",
+                role="viewer",
+                locale="en",
+                is_active=True,
+                metadata_={},
+            )
+        )
+        team = Team(id=uuid.uuid4(), project_id=project_id, name="Default", metadata_={})
+        session.add(team)
+        await session.flush()
+        session.add(TeamMembership(id=uuid.uuid4(), team_id=team.id, user_id=member_id, role="member"))
+        await session.commit()
+
+    _set_acting_user(member_id, role="viewer")
+    for path in ("module-presence", "profile", "modules"):
+        resp = await client.get(f"/api/v1/projects/{project_id}/{path}")
+        assert resp.status_code == 200, (path, resp.text)
+
+    _set_acting_user(uuid.uuid4(), role="viewer")
+    for path in ("module-presence", "profile", "modules"):
+        resp = await client.get(f"/api/v1/projects/{project_id}/{path}")
+        assert resp.status_code == 404, (path, resp.text)
 
 
 @pytest.mark.asyncio
