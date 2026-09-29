@@ -24,6 +24,7 @@ from ``_REGION_CURRENCY``); see :func:`resolve_cwicr_db_id`.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import uuid
@@ -859,6 +860,17 @@ def _sse(event: str, data: dict[str, Any]) -> str:
     return f"event: {event}\ndata: {json.dumps(data)}\n\n"
 
 
+# Seconds a step may run before the stream says something anyway. The docker
+# nginx closes an /api/ read that stays silent for 120 s, and loading a large
+# cost base takes minutes, so a stream that only spoke between steps was cut
+# in the middle of every big import. An SSE comment line is ignored by every
+# client (ours skips any line that is not ``event:`` or ``data:``) but it is
+# bytes on the wire, which is all a proxy's read timeout counts.
+STREAM_KEEPALIVE_SECONDS = 15.0
+
+_KEEPALIVE_FRAME = ": keepalive\n\n"
+
+
 async def full_install_stream(
     req: FullInstallRequest,
     *,
@@ -932,8 +944,8 @@ async def full_install_stream(
     apply_ok = False
     cost_resources = 0
 
-    for index, step in enumerate(active_steps):
-        yield _sse("step_start", {"step": step, "index": index, "total": total})
+    async def run_step(step: str) -> StepResult:
+        nonlocal apply_ok, loaded_regions, cost_resources
         try:
             if step == "apply_pack":
                 result = await _step_apply_pack(slug, app, actor, confirm_disables=req.confirm_disables)
@@ -966,6 +978,23 @@ async def full_install_stream(
                 result = StepResult(step=step, status="skipped", detail={})
         except Exception as exc:  # noqa: BLE001 - per-step fail-soft, never abort the stream
             result = _soft(step, exc)
+        return result
+
+    for index, step in enumerate(active_steps):
+        yield _sse("step_start", {"step": step, "index": index, "total": total})
+        task = asyncio.ensure_future(run_step(step))
+        try:
+            while True:
+                finished, _ = await asyncio.wait({task}, timeout=STREAM_KEEPALIVE_SECONDS)
+                if finished:
+                    break
+                yield _KEEPALIVE_FRAME
+        finally:
+            # The client went away mid-step: stop the step with the stream, as
+            # awaiting it inline did.
+            if not task.done():
+                task.cancel()
+        result = task.result()
 
         results.append(result)
         yield _sse(
