@@ -85,6 +85,13 @@ class TaskService:
         """Create a new task."""
         checklist = [entry.model_dump() for entry in data.checklist]
 
+        responsible_id = data.responsible_id
+        metadata = dict(data.metadata or {})
+        if data.assignee_contact_id is not None:
+            contact_fields = await self._contact_assignee(data.assignee_contact_id, user_id)
+            responsible_id = contact_fields.pop("responsible_id")
+            metadata.update(contact_fields)
+
         # Validate dependency: predecessor must exist in same project
         if data.depends_on:
             predecessor = await self.repo.get_by_id(data.depends_on)
@@ -117,7 +124,7 @@ class TaskService:
             title=data.title,
             description=data.description,
             checklist=checklist,
-            responsible_id=data.responsible_id,
+            responsible_id=responsible_id,
             persons_involved=data.persons_involved,
             due_date=data.due_date,
             milestone_id=data.milestone_id,
@@ -129,7 +136,7 @@ class TaskService:
             depends_on=data.depends_on,
             bim_element_ids=list(data.bim_element_ids or []),
             created_by=user_id,
-            metadata_=data.metadata,
+            metadata_=metadata,
         )
         task = await self.repo.create(task)
 
@@ -160,14 +167,14 @@ class TaskService:
         )
 
         # Publish task.assigned event so notification handlers fire
-        if data.responsible_id:
+        if responsible_id:
             await _safe_publish(
                 "task.assigned",
                 {
                     "project_id": str(data.project_id),
                     "task_id": str(task.id),
                     "title": data.title,
-                    "responsible_id": str(data.responsible_id),
+                    "responsible_id": str(responsible_id),
                     "assigned_by": user_id or "",
                 },
                 source_module="oe_tasks",
@@ -369,6 +376,27 @@ class TaskService:
             status=status_filter,
         )
 
+    async def _contact_assignee(self, contact_id: uuid.UUID, actor_id: str | None) -> dict[str, Any]:
+        """The fields a contact pick writes on a task.
+
+        A contact linked to a platform user makes that user the task's
+        ``responsible_id``, so my-tasks and the assignment notification follow
+        it. Any other contact is not a user: ``responsible_id`` is cleared and
+        the contact is kept by name and id in the metadata.
+
+        Raises:
+            HTTPException 404 for a missing or foreign contact, 422 for a
+            deactivated one.
+        """
+        from app.modules.contacts.lookup import assignable_contact, contact_display_name
+
+        contact = await assignable_contact(self.session, contact_id, actor_id)
+        return {
+            "responsible_id": str(contact.user_id) if contact.user_id else None,
+            "assignee_contact_id": str(contact.id),
+            "assignee_name": contact_display_name(contact),
+        }
+
     async def update_task(
         self,
         task_id: uuid.UUID,
@@ -378,6 +406,19 @@ class TaskService:
         task = await self.get_task(task_id, current_user_id=current_user_id)
 
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
+
+        # A contact pick decides the user link and the name together, so it is
+        # folded into ``responsible_id`` and the metadata patch before either
+        # is written. An explicit null only drops the contact link.
+        if "assignee_contact_id" in fields:
+            contact_id = fields.pop("assignee_contact_id")
+            if contact_id is None:
+                contact_fields: dict[str, Any] = {"assignee_contact_id": None}
+            else:
+                contact_fields = await self._contact_assignee(contact_id, current_user_id)
+                fields["responsible_id"] = contact_fields.pop("responsible_id")
+            incoming = fields.get("metadata")
+            fields["metadata"] = {**(incoming if isinstance(incoming, dict) else {}), **contact_fields}
 
         # A completed task is read-only EXCEPT for a valid reopening status
         # transition (completed → open / in_progress, per _TASK_STATUS_TRANSITIONS).

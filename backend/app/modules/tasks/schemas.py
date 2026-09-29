@@ -61,6 +61,14 @@ class TaskCreate(BaseModel):
         description="BIM element UUIDs spatially linked to this task (defects, inspections).",
     )
     metadata: dict[str, Any] = Field(default_factory=dict)
+    assignee_contact_id: UUID | None = Field(
+        default=None,
+        description=(
+            "Assign a contact. A contact linked to a platform user becomes the "
+            "task's responsible_id; any other contact is kept by name. Stored as "
+            "metadata.assignee_contact_id and metadata.assignee_name."
+        ),
+    )
 
 
 class TaskUpdate(BaseModel):
@@ -97,6 +105,8 @@ class TaskUpdate(BaseModel):
     is_private: bool | None = None
     depends_on: UUID | None = None
     metadata: dict[str, Any] | None = None
+    # See TaskCreate. An explicit null drops the contact link and its name.
+    assignee_contact_id: UUID | None = None
 
 
 class TaskCompleteRequest(BaseModel):
