@@ -71,6 +71,10 @@ CI_ONLY_BY_DESIGN = {
         "file's header still counts its own guards correctly'. A hook scoped by files: "
         "would never fire on the thing this watches."
     ),
+    "check_wheel_ships_every_pack.py": (
+        "Reads a built and installed wheel, which a commit does not produce. Step: "
+        "'Ask the installed wheel which packs it lists'."
+    ),
     "check_head_imports.py": (
         "Reads the committed tree. Step: 'Check every intra-app import against the "
         "committed tree'. At pre-commit time the commit it needs does not exist yet."
