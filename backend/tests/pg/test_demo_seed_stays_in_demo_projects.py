@@ -728,3 +728,30 @@ async def test_the_cleanup_removes_every_unmarked_seed_by_its_content(boot_facto
         second = await clean_leaked_demo_rows(s, apply=True)
         await s.commit()
     assert second.total == 0, second.marked
+
+
+async def test_a_second_removal_racing_the_first_does_not_fail(boot_factory, monkeypatch) -> None:
+    """Two removals of one demo, the second reading before the first wrote.
+
+    The losing request sees no record, exactly as if it had read a moment
+    earlier, and must still not fail on the unique demo id.
+    """
+    import app.core.demo_marker as demo_marker
+    from app.modules.projects.models import DemoProjectTombstone
+
+    async with boot_factory() as s:
+        await demo_marker.retire_demo_ids(s, {_DEMO_ID: uuid.uuid4()}, reason="archived")
+        await s.commit()
+
+    async def nothing_yet(_session):
+        return set()
+
+    monkeypatch.setattr(demo_marker, "retired_demo_ids", nothing_yet)
+    async with boot_factory() as s:
+        added = await demo_marker.retire_demo_ids(s, {_DEMO_ID: uuid.uuid4()}, reason="purged")
+        await s.commit()
+    assert added == 0
+
+    async with boot_factory() as s:
+        rows = (await s.execute(select(DemoProjectTombstone.reason))).scalars().all()
+    assert rows == ["archived"]
