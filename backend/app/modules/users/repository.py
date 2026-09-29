@@ -9,12 +9,13 @@ No business logic - pure data access.
 import uuid
 from datetime import UTC
 
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.orm.util import identity_key
 from sqlalchemy.sql.elements import ClauseElement
 
+from app.core.demo_accounts import DEMO_ACCOUNT_EMAILS
 from app.modules.users.models import APIKey, User
 
 # E-mail of the bootstrap workspace owner created by the desktop first-run
@@ -23,6 +24,14 @@ from app.modules.users.models import APIKey, User
 # install that has only auto-provisioned its own owner is still "fresh" from
 # the point of view of real, registered users.
 LOCAL_DESKTOP_OWNER_EMAIL = "owner@openestimate.local"
+
+# The seeded demo logins, excluded from every "real user / real admin" check
+# by exact address. This used to be the whole ``@openconstructionerp.com``
+# domain, which made anyone registering with an address on it invisible to the
+# bootstrap: on a fresh install each such registrant found no real admin and no
+# real user and was handed admin, the second as much as the first. Only the
+# seeded accounts are not real; the domain says nothing about who registered.
+_NOT_SEEDED_DEMO = func.lower(User.email).notin_(sorted(DEMO_ACCOUNT_EMAILS))
 
 
 class UserRepository:
@@ -135,12 +144,7 @@ class UserRepository:
         them active. Excluding it lets the first registrant claim admin
         like the bootstrap was always meant to.
         """
-        stmt = (
-            select(User.id)
-            .where(User.role == "admin", User.is_active.is_(True))
-            .where(~User.email.ilike("%@openconstructionerp.com"))
-            .limit(1)
-        )
+        stmt = select(User.id).where(User.role == "admin", User.is_active.is_(True)).where(_NOT_SEEDED_DEMO).limit(1)
         return (await self.session.execute(stmt)).scalar_one_or_none() is not None
 
     async def has_real_user(self) -> bool:
@@ -153,12 +157,7 @@ class UserRepository:
         deactivated or dormant account still means somebody got there first
         and the next public registrant must not be handed admin.
         """
-        stmt = (
-            select(User.id)
-            .where(~User.email.ilike("%@openconstructionerp.com"))
-            .where(User.email != LOCAL_DESKTOP_OWNER_EMAIL)
-            .limit(1)
-        )
+        stmt = select(User.id).where(_NOT_SEEDED_DEMO).where(User.email != LOCAL_DESKTOP_OWNER_EMAIL).limit(1)
         return (await self.session.execute(stmt)).scalar_one_or_none() is not None
 
     async def has_real_active_user(self) -> bool:
@@ -166,7 +165,7 @@ class UserRepository:
 
         "Real" deliberately excludes two populations:
 
-        * the seeded demo accounts (``*@openconstructionerp.com``) shipped on a
+        * the seeded demo accounts (``DEMO_ACCOUNT_EMAILS``) shipped on a
           fresh ``pip install`` / hosted demo, and
         * the desktop bootstrap owner (``owner@openestimate.local``) that the
           first-run flow auto-provisions.
@@ -180,7 +179,7 @@ class UserRepository:
         stmt = (
             select(User.id)
             .where(User.is_active.is_(True))
-            .where(~User.email.ilike("%@openconstructionerp.com"))
+            .where(_NOT_SEEDED_DEMO)
             .where(User.email != LOCAL_DESKTOP_OWNER_EMAIL)
             .limit(1)
         )
