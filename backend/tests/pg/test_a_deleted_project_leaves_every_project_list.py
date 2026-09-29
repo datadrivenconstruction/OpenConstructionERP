@@ -401,7 +401,12 @@ async def test_service_listings_keep_to_the_callers_live_projects(pg_session) ->
     customer = uuid.uuid4()
     contracts = {}
     for label, project_id in (("live", live.id), ("deleted", deleted.id), ("foreign", foreign.id), ("none", None)):
-        contract = ServiceContract(customer_id=customer, project_id=project_id, period_start="2026-01-01")
+        contract = ServiceContract(
+            customer_id=customer,
+            project_id=project_id,
+            contract_number=f"SC-{label}",
+            period_start="2026-01-01",
+        )
         pg_session.add(contract)
         await pg_session.flush()
         pg_session.add(
