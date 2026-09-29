@@ -13736,3 +13736,20 @@ async def install_demo_projects_at_boot(demo_ids: list[str], *, partner_pack: st
                 # seven of the twelve skipped left twelve identical causeless
                 # lines, and the cause had to be reconstructed from a second boot.
                 logger.warning("Failed to install boot demo %s (skipping)", demo_id, exc_info=True)
+
+
+async def install_flagship_at_boot(owner_id: str | uuid.UUID) -> dict:
+    """Install the flagship reference project at boot unless the user removed it.
+
+    The flagship installer looks its project up by a fixed id, so after a purge
+    it finds nothing and builds the flagship again. It runs once per app
+    version, which is why a purged flagship came back after every update.
+    """
+    from app.core.demo_marker import retired_demo_ids
+    from app.database import async_session_factory
+    from app.scripts.seed_flagship import FLAGSHIP_DEMO_ID, install_flagship
+
+    async with async_session_factory() as session:
+        if FLAGSHIP_DEMO_ID in await retired_demo_ids(session):
+            return {"status": "retired", "demo_id": FLAGSHIP_DEMO_ID}
+        return await install_flagship(session, owner_id)
