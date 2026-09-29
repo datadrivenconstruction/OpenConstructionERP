@@ -18,6 +18,8 @@ The app needs Microsoft's WebView2 runtime. If your machine does not already hav
 
 When it finishes you will find OpenConstructionERP in the Start Menu and as a shortcut, both named "OpenConstructionERP". Click either one to launch it.
 
+The Windows installer is not code signed yet, so Windows warns that it comes from an unknown publisher. If it shows "Windows protected your PC", or if Smart App Control blocks the app, even after it ran once, follow [Windows blocks the app](WINDOWS_BLOCKED.md).
+
 ### macOS
 
 Download the `.dmg`, open it, and drag OpenConstructionERP into your Applications folder. You need a Mac with Apple Silicon, since the `.dmg` will not start on an Intel Mac.
