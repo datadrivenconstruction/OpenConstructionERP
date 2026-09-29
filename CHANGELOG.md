@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [Unreleased]
+
+Demo data now stays in demo projects, and a demo project you deleted stays deleted through restarts and upgrades. For installs that ran the old seeding, `openconstructionerp demo-cleanup` lists the demo records it left in your own projects, recognised by the seed's mark or by content that exactly matches what the seed writes, and `demo-cleanup --apply` removes them; your own records are never touched.
+
 ## [18.2.0] - 2026-09-29
 
 The AI now suggests and a person decides, and the records other work relies on stay put. The position copilot no longer writes anything on its own, however sure it is: every suggestion arrives as a review list with the value before and after and a confidence score, each one can be accepted or rejected, Accept all and Reject all sit on top, the confident ones come preselected but nothing changes until Apply is pressed, and one Ctrl+Z takes the whole review back. A locked bill refuses the copilot, the custom columns, the variables, the CO2 enrichment, a quantity pushed from a drawing and every import, and the import says the bill is locked instead of failing quietly.
