@@ -626,7 +626,7 @@ async function downloadTenderComparisonReport(
         budget_total: number;
         bid_totals: Array<{ company_name: string; total: number; currency: string; deviation_pct: number; status: string }>;
         rows: Array<{ description: string; unit: string; budget_rate: number; bids: Array<{ company_name: string; unit_rate: number; total: number }> }>;
-      }>(`/v1/tendering/packages/${pkg.id}/comparison`);
+      }>(`/v1/tendering/packages/${pkg.id}/comparison/`);
 
       if (comparison.bid_totals.length > 0) {
         csvLines.push('');
