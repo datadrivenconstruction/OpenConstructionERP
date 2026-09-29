@@ -176,11 +176,14 @@ async def _accessible_project_ids(
     except Exception:
         logger.exception("Admin-role lookup failed during search scope resolution")
 
+    # Deleted projects are archived, not removed; their rows are not offered
+    # as hits that open onto "Project not found".
     stmt = select(Project.id).where(
         or_(
             Project.owner_id == uid,
             Project.id.in_(member_project_ids_subquery(uid)),
-        )
+        ),
+        Project.status != "archived",
     )
     rows = (await session.execute(stmt)).scalars().all()
     return set(rows)

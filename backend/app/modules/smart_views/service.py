@@ -129,7 +129,7 @@ class SmartViewService:
 
     # ── Helpers ────────────────────────────────────────────────────────
 
-    async def _accessible_project_ids(self, user_id: uuid.UUID) -> list[uuid.UUID]:
+    async def _accessible_project_ids(self, user_id: uuid.UUID, *, live_only: bool = False) -> list[uuid.UUID]:
         """Project IDs the user may read (owner-or-admin scope).
 
         We deliberately reuse the simple ownership model used across
@@ -138,8 +138,13 @@ class SmartViewService:
         the live JWT ``role`` claim, so we do not need to special-case
         admin here - they get the full list because the router skips
         the scoping check entirely.
+
+        ``live_only`` leaves out deleted (archived) projects, for the listing;
+        the read checks keep the plain ownership rule.
         """
         stmt = select(Project.id).where(Project.owner_id == user_id)
+        if live_only:
+            stmt = stmt.where(Project.status != "archived")
         return list((await self.session.execute(stmt)).scalars().all())
 
     async def _verify_scope(
@@ -336,8 +341,11 @@ class SmartViewService:
         scope_type: str | None = None,
         scope_id: uuid.UUID | None = None,
     ) -> list[SmartViewResponse]:
-        """Return every view the caller may see, newest first."""
-        project_ids = await self._accessible_project_ids(user_id)
+        """Return every view the caller may see, newest first.
+
+        Views scoped to a deleted (archived) project are not listed.
+        """
+        project_ids = await self._accessible_project_ids(user_id, live_only=True)
         rows = await self.repo.list_visible_to_user(
             user_id=user_id,
             accessible_project_ids=project_ids,

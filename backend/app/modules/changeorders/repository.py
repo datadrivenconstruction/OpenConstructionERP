@@ -134,7 +134,10 @@ class ChangeOrderRepository:
                 or_(
                     Project.owner_id == owner_id,
                     Project.id.in_(member_project_ids_subquery(owner_id)),
-                )
+                ),
+                # Change orders of a deleted (archived) project are not
+                # listed; the per-project route 404s on that project too.
+                Project.status != "archived",
             )
         )
         if status is not None:

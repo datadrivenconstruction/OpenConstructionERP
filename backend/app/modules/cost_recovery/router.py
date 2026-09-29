@@ -403,7 +403,8 @@ async def get_portfolio_recovery_performance(
     sees all. An empty accessible set yields an empty performance rather than an
     error - the safe default for a caller with no projects.
     """
-    accessible = await accessible_project_ids(session, user_id)
+    # A portfolio rollup: deleted (archived) projects are not part of it.
+    accessible = await accessible_project_ids(session, user_id, live_only=True)
     project_ids = await _resolve_project_ids(session, accessible)
     performance = await build_portfolio_recovery_performance(session, project_ids)
     return _performance_out(performance, project_id=None)

@@ -6681,7 +6681,8 @@ async def _list_accessible_dev_ids(
     Used by the cross-development analytics endpoints (cohort-retention,
     time-to-close, lead-source-attribution, broker-performance) to scope
     rollups to the caller's tenant without forcing them to pass a
-    dev_id. Admins see ALL developments.
+    dev_id. Admins see ALL developments of live projects; a development of
+    a deleted (archived) project is not part of any rollup.
     """
     from sqlalchemy import select as _select
 
@@ -6692,14 +6693,14 @@ async def _list_accessible_dev_ids(
     user_id = user_payload.get("sub") or user_payload.get("user_id")
 
     if is_admin:
-        stmt = _select(_Dev.id)
+        stmt = _select(_Dev.id).join(Project, Project.id == _Dev.project_id).where(Project.status != "archived")
     else:
         if not user_id:
             return []
         stmt = (
             _select(_Dev.id)
             .join(Project, Project.id == _Dev.project_id)
-            .where(Project.owner_id == uuid.UUID(str(user_id)))
+            .where(Project.owner_id == uuid.UUID(str(user_id)), Project.status != "archived")
         )
     return [row for (row,) in (await session.execute(stmt)).all()]
 

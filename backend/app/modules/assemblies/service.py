@@ -2189,7 +2189,7 @@ class AssemblyService:
                 stmt = (
                     stmt.join(BOQ, BOQ.id == BOQPosition.boq_id)
                     .join(Project, Project.id == BOQ.project_id)
-                    .where(Project.owner_id == owner_id)
+                    .where(Project.owner_id == owner_id, Project.status != "archived")
                 )
 
             result = await self.session.execute(stmt)

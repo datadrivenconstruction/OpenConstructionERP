@@ -913,6 +913,8 @@ async def verify_project_access(
 async def accessible_project_ids(
     session: AsyncSession,
     user_id: str | None,
+    *,
+    live_only: bool = False,
 ) -> set[_uuid.UUID] | None:
     """Set of project IDs the caller may access, or ``None`` for admins.
 
@@ -930,6 +932,13 @@ async def accessible_project_ids(
     of every project in the deployment. An empty set (non-admin with no
     projects, or a malformed user id) makes the query return nothing, which is
     the safe default - never fall back to "all rows".
+
+    ``live_only=True`` is for listings, not for access checks. Deleting a
+    project archives it and keeps the row, so the access rule alone still
+    reaches it; a list built from that set shows a project that opens as
+    "Project not found". With the flag archived projects are left out, and an
+    admin gets the set of every live project instead of ``None``, because
+    "do not filter" would let the archived ones back in.
     """
     from sqlalchemy import select
 
@@ -949,11 +958,16 @@ async def accessible_project_ids(
     try:
         user = await UserRepository(session).get_by_id(uid)
         if user is not None and getattr(user, "role", "") == "admin":
-            return None
+            if not live_only:
+                return None
+            live = (await session.execute(select(Project.id).where(Project.status != "archived"))).scalars().all()
+            return {r if isinstance(r, _uuid.UUID) else _uuid.UUID(str(r)) for r in live}
     except Exception:
         logger.exception("Admin-role lookup failed during accessible-projects scan")
 
     stmt = select(Project.id).where((Project.owner_id == uid) | (Project.id.in_(member_project_ids_subquery(uid))))
+    if live_only:
+        stmt = stmt.where(Project.status != "archived")
     rows = (await session.execute(stmt)).scalars().all()
     return {r if isinstance(r, _uuid.UUID) else _uuid.UUID(str(r)) for r in rows}
 

@@ -191,7 +191,8 @@ async def get_portfolio_summary(
     error - the safe default for a caller with no projects. The hours figure uses
     the tenant's admin-tuned minute factors.
     """
-    ids = await accessible_project_ids(session, user_id)
+    # A portfolio rollup: deleted (archived) projects are not part of it.
+    ids = await accessible_project_ids(session, user_id, live_only=True)
     project_ids = await _resolve_project_ids(session, ids)
     factors = await resolve_effective_factors(session, tenant_id)
     summary = await build_portfolio_summary(session, project_ids, factors=factors)
@@ -266,7 +267,8 @@ async def get_adoption_benchmark(
     high- and low-adoption cohorts on recovery rate, overrun and cycle time, with
     honest low-n confidence. Scoped to the caller's accessible projects.
     """
-    ids = await accessible_project_ids(session, user_id)
+    # A portfolio rollup: deleted (archived) projects are not part of it.
+    ids = await accessible_project_ids(session, user_id, live_only=True)
     project_ids = await _resolve_project_ids(session, ids)
     benchmark = await build_adoption_benchmark(session, project_ids)
     return AdoptionBenchmarkOut(

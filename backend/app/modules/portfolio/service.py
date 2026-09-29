@@ -368,7 +368,9 @@ class PortfolioService:
         nodes = (await self.session.execute(select(PortfolioNode))).scalars().all()
         memberships = (await self.session.execute(select(PortfolioMembership))).scalars().all()
         project_ids = self._subtree_project_ids(node_id, list(nodes), list(memberships))
-        scope = await accessible_project_ids(self.session, user_id)
+        # Deleted (archived) projects keep their membership rows; their
+        # schedules are not part of the programme's critical path.
+        scope = await accessible_project_ids(self.session, user_id, live_only=True)
         if scope is not None:
             project_ids &= {str(p) for p in scope}
         if not project_ids:

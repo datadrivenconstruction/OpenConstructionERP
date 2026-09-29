@@ -600,8 +600,9 @@ async def _evm_snapshot_portfolio(
         # Select only the PK column - a full ``select(Project)`` would
         # eager-load ``Project``'s ``lazy="selectin"`` relationships (WBS,
         # team, …), which is both wasteful here and brittle under partial
-        # test schemas. We only need each project's id to fan out.
-        stmt = select(Project.id)
+        # test schemas. We only need each project's id to fan out. A deleted
+        # project is archived, not removed, and takes no part in a rollup.
+        stmt = select(Project.id).where(Project.status != "archived")
         if allowed_project_ids is not None:
             stmt = stmt.where(Project.id.in_(allowed_project_ids))
         project_ids = (await session.execute(stmt)).scalars().all()
@@ -2759,7 +2760,8 @@ async def _cost_portfolio_project_ids(
     try:
         from app.modules.projects.models import Project  # type: ignore
 
-        stmt = select(Project.id)
+        # Deleted (archived) projects stay out, as in the EVM fan-out.
+        stmt = select(Project.id).where(Project.status != "archived")
         if allowed_project_ids is not None:
             stmt = stmt.where(Project.id.in_(allowed_project_ids))
         return list((await session.execute(stmt)).scalars().all())
