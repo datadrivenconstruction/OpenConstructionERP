@@ -40931,6 +40931,7 @@ const resource = {
     "enterprise_workflows.status_approved": "Согласовано",
     "enterprise_workflows.status_pending": "На рассмотрении",
     "enterprise_workflows.status_rejected": "Отклонено",
+    "enterprise_workflows.status_cancelled": "Отменено",
     "enterprise_workflows.step": "Шаг {{n}}",
     "enterprise_workflows.steps_count": "{{count}} шаг(а)",
     "enterprise_workflows.subtitle": "Настройка маршрутов согласования и управление заявками по всем проектам.",

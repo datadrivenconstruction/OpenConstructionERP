@@ -40712,6 +40712,7 @@ const resource = {
     "enterprise_workflows.status_approved": "Approved",
     "enterprise_workflows.status_pending": "Pending",
     "enterprise_workflows.status_rejected": "Rejected",
+    "enterprise_workflows.status_cancelled": "Avbruten",
     "enterprise_workflows.step": "Step {{n}}",
     "enterprise_workflows.steps_count": "{{count}} step(s)",
     "enterprise_workflows.subtitle": "Configure approval workflows and manage pending requests across your projects.",

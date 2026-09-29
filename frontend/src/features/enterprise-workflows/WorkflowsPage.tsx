@@ -49,6 +49,7 @@ const STATUS_BADGE: Record<ApprovalStatus, { variant: BadgeVariant; dot: boolean
   pending: { variant: 'warning', dot: true },
   approved: { variant: 'success', dot: true },
   rejected: { variant: 'error', dot: true },
+  cancelled: { variant: 'neutral', dot: false },
 };
 
 // ---------------------------------------------------------------------------
@@ -291,7 +292,7 @@ function ApprovalRequestRow({
   isActing: boolean;
 }) {
   const { t } = useTranslation();
-  const badge = STATUS_BADGE[request.status];
+  const badge = STATUS_BADGE[request.status] ?? STATUS_BADGE.cancelled;
 
   return (
     <div className="flex items-center gap-3 rounded-lg border border-border-light bg-surface-primary px-4 py-3
@@ -317,10 +318,10 @@ function ApprovalRequestRow({
           <span>
             {t('enterprise_workflows.step', { defaultValue: 'Step {{n}}', n: request.current_step })}
           </span>
-          {request.comments && (
+          {request.decision_notes && (
             <>
               <span aria-hidden>·</span>
-              <span className="truncate">{request.comments}</span>
+              <span className="truncate">{request.decision_notes}</span>
             </>
           )}
         </div>
