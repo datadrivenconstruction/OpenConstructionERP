@@ -1701,18 +1701,10 @@ async def _seed_demo_account() -> None:
             # self-healing on the next start.
             _backfill_ok = True
             try:
-                from app.core.demo_marker import retired_demo_ids
-                from app.scripts.seed_flagship import FLAGSHIP_DEMO_ID, install_flagship
+                from app.core.demo_projects import install_flagship_at_boot
 
-                async with async_session_factory() as fl_session:
-                    # The installer looks the project up by id, so after a purge
-                    # it finds nothing and builds the flagship again unless the
-                    # removal was recorded.
-                    if FLAGSHIP_DEMO_ID in await retired_demo_ids(fl_session):
-                        logger.info("Flagship seed skipped - removed by the user")
-                    else:
-                        fl_result = await install_flagship(fl_session, demo_user_id)
-                        logger.info("Flagship seed: %s", fl_result)
+                fl_result = await install_flagship_at_boot(demo_user_id)
+                logger.info("Flagship seed: %s", fl_result)
             except Exception:
                 _backfill_ok = False
                 logger.warning("Flagship seed skipped (non-fatal)", exc_info=True)
@@ -4028,6 +4020,10 @@ def create_app() -> FastAPI:
 
                 raise HTTPException(status_code=404, detail=f"Demo '{demo_id}' not installed")
 
+            # Recorded so the boot installers do not put the demo back.
+            from app.core.demo_marker import retire_demo_ids
+
+            await retire_demo_ids(session, {demo_id: targets[0].id}, reason="purged")
             for proj in targets:
                 await session.delete(proj)
             await session.commit()
@@ -4052,6 +4048,14 @@ def create_app() -> FastAPI:
             all_projects = (await session.execute(select(Project))).scalars().all()
             targets = [p for p in all_projects if isinstance(p.metadata_, dict) and p.metadata_.get("is_demo")]
 
+            # Recorded so the boot installers do not put these demos back.
+            from app.core.demo_marker import demo_id_of, retire_demo_ids
+
+            await retire_demo_ids(
+                session,
+                {demo_id_of(p.metadata_): p.id for p in targets if demo_id_of(p.metadata_)},
+                reason="purged",
+            )
             for proj in targets:
                 await session.delete(proj)
             await session.commit()
