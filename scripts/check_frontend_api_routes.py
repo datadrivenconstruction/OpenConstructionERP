@@ -106,6 +106,12 @@ ALLOWED: dict[str, str] = {
         "has to be rebuilt on the server's shape; fixing the slash alone turns an "
         "error state into a crash."
     ),
+    "SLASH GET /v1/rfq-bidding/bids{qs ? `?${qs}` : ''} @ features/rfq-bidding/api.ts": (
+        "Held back with the comparison. The route is /bids/ and answers RFQBidResponse "
+        "(bid_amount, bidder_contact_id), while the awards panel reads total_amount "
+        "and vendor_name: resolving the path would show an award with a blank vendor "
+        "and no amount, which is worse than the empty panel the 404 gives today."
+    ),
     "MISSING POST /v1/schedule/activities/{encodeURIComponent(activityId)}/percent-type/preview/ "
     "@ features/schedule/api.ts": (
         "The progress rigor panel was written against endpoints the schedule module "
@@ -137,6 +143,7 @@ class Call:
     parts: list[tuple[str, str]]
     verdict: str = "OK"
     closest: list[str] = field(default_factory=list)
+    as_prefix: bool = False
 
     @property
     def display(self) -> str:
@@ -629,6 +636,7 @@ def classify(call: Call, table: RouteTable) -> None:
     """
     samples, open_tail = _samples(call.parts)
     as_prefix = open_tail or call.callee is None
+    call.as_prefix = as_prefix
     method = None if as_prefix else call.method
 
     def serving(found: dict[str, frozenset[str]]) -> dict[str, frozenset[str]]:
@@ -704,6 +712,11 @@ def main(argv: list[str] | None = None) -> int:
         f"skipped (prefix from an imported name): {unresolved}"
     )
     print("verdicts: " + ", ".join(f"{k}={v}" for k, v in sorted(verdicts.items())) + f"; allowed: {len(ALLOWED)}")
+    # Stored literals (a const BASE, a URL builder's return) are only checked as
+    # a prefix of some route, so a missing slash in one of them passes here and
+    # is caught where the call extends it. Printed so the green line does not
+    # claim more than it read.
+    print(f"checked as a prefix only (not handed straight to a call): {sum(c.as_prefix for c in calls)}")
 
     if args.json:
         args.json.write_text(
