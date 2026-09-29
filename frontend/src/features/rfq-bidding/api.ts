@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 
 import { apiGet, apiPost, apiPatch, apiDelete, type Page } from '@/shared/lib/api';
+import { normalizeListResponse } from '@/shared/lib/apiHelpers';
 
 /* ── RFQ types ────────────────────────────────────────────────────────── */
 
@@ -173,22 +174,24 @@ export async function deleteRFQ(id: string): Promise<void> {
 }
 
 export async function issueRFQ(id: string): Promise<RFQ> {
-  return apiPost<RFQ>(`/v1/rfq-bidding/${id}/issue`);
+  return apiPost<RFQ>(`/v1/rfq-bidding/${id}/issue/`);
 }
 
 export async function validateRFQ(id: string): Promise<ValidationReport> {
-  return apiGet<ValidationReport>(`/v1/rfq-bidding/${id}/validate`);
+  return apiGet<ValidationReport>(`/v1/rfq-bidding/${id}/validate/`);
 }
 
 export async function fetchScopeLines(rfqId: string): Promise<ScopeLine[]> {
-  return apiGet<ScopeLine[]>(`/v1/rfq-bidding/${rfqId}/lines`);
+  // The server answers with {items, total}.
+  const page = await apiGet<ScopeLine[] | { items: ScopeLine[] }>(`/v1/rfq-bidding/${rfqId}/lines/`);
+  return normalizeListResponse(page);
 }
 
 export async function addScopeLine(
   rfqId: string,
   payload: ScopeLineCreatePayload,
 ): Promise<ScopeLine> {
-  return apiPost<ScopeLine, ScopeLineCreatePayload>(`/v1/rfq-bidding/${rfqId}/lines`, payload);
+  return apiPost<ScopeLine, ScopeLineCreatePayload>(`/v1/rfq-bidding/${rfqId}/lines/`, payload);
 }
 
 export async function fetchComparison(rfqId: string): Promise<ComparisonMatrix> {
@@ -196,24 +199,24 @@ export async function fetchComparison(rfqId: string): Promise<ComparisonMatrix> 
 }
 
 export async function fetchAward(rfqId: string): Promise<AwardDecision> {
-  return apiGet<AwardDecision>(`/v1/rfq-bidding/${rfqId}/award`);
+  return apiGet<AwardDecision>(`/v1/rfq-bidding/${rfqId}/award/`);
 }
 
 export async function fetchBids(rfqId?: string): Promise<Page<Bid>> {
   const params = new URLSearchParams();
   if (rfqId) params.set('rfq_id', rfqId);
   const qs = params.toString();
-  return apiGet<Page<Bid>>(`/v1/rfq-bidding/bids${qs ? `?${qs}` : ''}`);
+  return apiGet<Page<Bid>>(`/v1/rfq-bidding/bids/${qs ? `?${qs}` : ''}`);
 }
 
 export async function submitBid(payload: BidCreatePayload): Promise<Bid> {
-  return apiPost<Bid, BidCreatePayload>('/v1/rfq-bidding/bids', payload);
+  return apiPost<Bid, BidCreatePayload>('/v1/rfq-bidding/bids/', payload);
 }
 
 export async function evaluateBid(bidId: string): Promise<Bid> {
-  return apiPost<Bid>(`/v1/rfq-bidding/bids/${bidId}/evaluate`);
+  return apiPost<Bid>(`/v1/rfq-bidding/bids/${bidId}/evaluate/`);
 }
 
 export async function awardBid(bidId: string): Promise<Bid> {
-  return apiPost<Bid>(`/v1/rfq-bidding/bids/${bidId}/award`);
+  return apiPost<Bid>(`/v1/rfq-bidding/bids/${bidId}/award/`);
 }
