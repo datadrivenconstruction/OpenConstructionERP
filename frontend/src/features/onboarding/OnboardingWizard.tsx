@@ -86,7 +86,13 @@ import { useMeOnboardingQueryKey } from '@/app/layout/meOnboardingQuery';
 import { aiApi, type AIProvider } from '@/features/ai/api';
 import { companyThumbFor } from '@/features/cases/caseFaces';
 import { apiGet, apiPost } from '@/shared/lib/api';
-import { useBaseCatalog } from '@/features/costs/baseCatalog';
+import {
+  useBaseCatalog,
+  languageName,
+  loadBaseMarket,
+  textLanguageFallback,
+  type BaseVariant,
+} from '@/features/costs/baseCatalog';
 import { BaseCatalogBrowser } from '@/features/costs/BaseCatalogBrowser';
 import { BaseCatalogError } from '@/features/costs/BaseCatalogError';
 import {
@@ -3508,6 +3514,9 @@ export function StepDataSetup({
 
   // ── Cost Database state ──
   const [selectedRegion, setSelectedRegion] = useState(suggestedRegion);
+  // The national market card picked in the base browser, if any. Its region is
+  // the base's, so the region alone cannot tell it from the home card.
+  const [selectedMarket, setSelectedMarket] = useState<BaseVariant | null>(null);
   const [loadingDb, setLoadingDb] = useState(false);
   const [loadedDb, setLoadedDb] = useState<{ id: string; count: number } | null>(null);
   const [dbProgress, setDbProgress] = useState(0);
@@ -3653,9 +3662,40 @@ export function StepDataSetup({
   );
 
   // Region-grid (manual path) load button: load whatever region is selected.
-  const handleLoadDb = useCallback(() => {
-    void loadCostDb(selectedRegion);
-  }, [loadCostDb, selectedRegion]);
+  // A national market card then prices the loaded base into its market and
+  // switches the text to its language; the provisioning job only knows the
+  // region, so without this step the pick installed the plain home base.
+  const handleLoadDb = useCallback(async () => {
+    const market = selectedMarket;
+    const outcome = await loadCostDb(selectedRegion);
+    if (!market || (outcome !== 'completed' && outcome !== 'partial')) return;
+    setLoadingDb(true);
+    try {
+      const data = await loadBaseMarket(market);
+      const fellBackTo = textLanguageFallback(data);
+      addToast({
+        type: fellBackTo ? 'warning' : 'success',
+        title: t('costs.market_priced_title', { defaultValue: 'Priced into {{market}}', market: market.market }),
+        message: fellBackTo
+          ? t('costs.market_text_fallback', {
+              defaultValue: 'The work items are in {{language}}: this base has no {{requested}} version.',
+              language: languageName(fellBackTo, i18n.language),
+              requested: languageName(market.lang_code, i18n.language),
+            })
+          : undefined,
+      });
+    } catch {
+      addToast({
+        type: 'error',
+        title: t('costs.market_failed_title', {
+          defaultValue: 'Could not price into {{market}}',
+          market: market.market,
+        }),
+      });
+    } finally {
+      setLoadingDb(false);
+    }
+  }, [loadCostDb, selectedRegion, selectedMarket, addToast, t]);
 
   // Generalized demo installer. Installs an explicit ``demoId`` and returns
   // ``true`` on success. Built-in demo ids only — POST /api/demo/install/{id}.
@@ -3727,6 +3767,7 @@ export function StepDataSetup({
   const handlePackDb = useCallback(
     async (pack: CountryPack) => {
       setSelectedRegion(pack.region);
+      setSelectedMarket(null);
       setPackDbState('running');
       setPackDbState(packDbStateFor(await loadCostDb(pack.region)));
     },
@@ -3799,6 +3840,7 @@ export function StepDataSetup({
   const handleSelectPack = useCallback((pack: CountryPack) => {
     setSelectedPackId(pack.id);
     setSelectedRegion(pack.region);
+    setSelectedMarket(null);
     setPackLocaleState('idle');
     setPackDbState('idle');
     setPackDemoState('idle');
@@ -3861,7 +3903,7 @@ export function StepDataSetup({
       packDbState === 'idle' && packLocaleState === 'idle' && !loadedDb && !loadingDb;
     if (backgroundLoad && dbUntouched && selectedRegion) {
       // Fire and forget — don't await, just start in background.
-      handleLoadDb();
+      void handleLoadDb();
       // Apply the active preset's locale + classification too, so a one-tap
       // "Continue" still localizes the workspace.
       applyLocale(selectedPack.locale);
@@ -3961,11 +4003,15 @@ export function StepDataSetup({
                 <BaseCatalogBrowser
                   catalog={baseCatalog}
                   mode="select"
-                  selectedRegion={selectedRegion}
+                  selectedRegion={selectedMarket?.variant_id ?? selectedRegion}
                   onSelect={(v) => {
-                    if (!loadingDb) setSelectedRegion(v.region);
+                    if (loadingDb) return;
+                    // A market card shares its base's region; keep the card
+                    // itself, or the pick reads as (and loads) the home base.
+                    setSelectedRegion(v.base_region);
+                    setSelectedMarket(v.market_catalog ? v : null);
                   }}
-                  loadingRegion={loadingDb ? selectedRegion : null}
+                  loadingRegion={loadingDb ? (selectedMarket?.variant_id ?? selectedRegion) : null}
                 />
               </div>
             ) : baseCatalogError ? (

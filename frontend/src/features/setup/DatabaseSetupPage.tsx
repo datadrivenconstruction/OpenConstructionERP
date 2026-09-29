@@ -16,7 +16,16 @@ import { PageHeader } from '@/shared/ui/PageHeader';
 import { useToastStore } from '@/stores/useToastStore';
 import { apiGet, apiPost } from '@/shared/lib/api';
 import { reportBackgroundIndexFailure } from '@/features/costs/vectorIndex';
-import { useBaseCatalog, flattenVariants, type BaseVariant } from '@/features/costs/baseCatalog';
+import {
+  useBaseCatalog,
+  flattenVariants,
+  getActiveMarkets,
+  languageName,
+  loadBaseMarket,
+  textLanguageFallback,
+  type BaseMarketResult,
+  type BaseVariant,
+} from '@/features/costs/baseCatalog';
 import { BaseCatalogBrowser } from '@/features/costs/BaseCatalogBrowser';
 import { BaseCatalogError } from '@/features/costs/BaseCatalogError';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
@@ -217,7 +226,7 @@ function DemoCard({
 // ── Main Page ───────────────────────────────────────────────────────────────
 
 export function DatabaseSetupPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const addToast = useToastStore((s) => s.addToast);
   const queryClient = useQueryClient();
@@ -341,14 +350,22 @@ export function DatabaseSetupPage() {
     async (variant: BaseVariant) => {
       // Local alias so the load / progress / toast body below reads naturally.
       const db = { id: variant.region, name: variant.market };
-      setLoading(db.id);
+      // A national market card shares its base's region, so the spinner keys on
+      // the card, not the region, or it lands on the home card.
+      setLoading(variant.variant_id);
 
       try {
         // Run both imports in parallel. Catalog import is treated as
         // best-effort: not every region ships a priced catalogue file
         // and we still want the costs layer to count as success.
+        //
+        // A market card goes through the market load, which also switches the
+        // text to the card's language. load-cwicr on its region would install
+        // the plain home base in the home language.
         const [costsData, catalogData] = await Promise.all([
-          apiPost<Record<string, unknown>>(`/v1/costs/load-cwicr/${db.id}`),
+          variant.market_catalog
+            ? loadBaseMarket(variant)
+            : apiPost<BaseMarketResult>(`/v1/costs/load-cwicr/${db.id}`),
           apiPost<{ imported: number; skipped: number; region: string }>(
             `/v1/catalog/import/${db.id}`,
           ).catch((e: unknown) => {
@@ -358,7 +375,7 @@ export function DatabaseSetupPage() {
           }),
         ]);
 
-        const imported = (costsData.imported as number) ?? 0;
+        const imported = ((costsData.imported ?? costsData.items_repriced) as number) ?? 0;
         const totalItems = (costsData.total_items as number) ?? imported;
         const status = costsData.status as string | undefined;
         const catalogImported = catalogData?.imported ?? 0;
@@ -394,6 +411,25 @@ export function DatabaseSetupPage() {
           },
           { duration: 8000 },
         );
+
+        // The card asked for a language no published file holds (Turkiye has no
+        // English text): the base opened in its own. Say so rather than let the
+        // card's language stand.
+        const fellBackTo = variant.market_catalog ? textLanguageFallback(costsData) : null;
+        if (fellBackTo) {
+          addToast(
+            {
+              type: 'warning',
+              title: t('costs.market_priced_title', { defaultValue: 'Priced into {{market}}', market: db.name }),
+              message: t('costs.market_text_fallback', {
+                defaultValue: 'The work items are in {{language}}: this base has no {{requested}} version.',
+                language: languageName(fellBackTo, i18n.language),
+                requested: languageName(variant.lang_code, i18n.language),
+              }),
+            },
+            { duration: 10000 },
+          );
+        }
 
         // Partial success: the rates (load-cwicr) landed but the parallel
         // resource catalogue (catalog/import) returned nothing - usually the
@@ -475,7 +511,7 @@ export function DatabaseSetupPage() {
         setLoading(null);
       }
     },
-    [addToast, t, queryClient],
+    [addToast, t, i18n, queryClient],
   );
 
   // ── Load All bases sequentially ──
@@ -672,6 +708,8 @@ export function DatabaseSetupPage() {
               loadingRegion={loading}
               activeRegion={activeDb}
               onLoad={handleLoadRegion}
+              onReprice={handleLoadRegion}
+              activeMarkets={getActiveMarkets()}
               onSetActive={handleSetActive}
               elapsedSeconds={elapsed}
             />

@@ -37958,6 +37958,8 @@ const resource = {
     "costs.market_priced_title": "{{market}} içine fiyatlandırıldı",
     "costs.market_priced_msg": "{{market}} içine yeniden fiyatlandırılan {{items}} öğe ({{currency}})",
     "costs.market_failed_title": "{{market}} içine fiyatlandırılamadı",
+    "costs.base_text_only_in": "Poz dili: {{language}}",
+    "costs.market_text_fallback": "Poz dili: {{language}}. Bu veritabanının şu dilde sürümü yok: {{requested}}.",
     "costs.base_loading_catalog": "Maliyet tabanları yükleniyor...",
     "costs.base_catalog_failed": "Maliyet tabanları yüklenemedi",
     "costs.base_catalog_failed_hint": "Maliyet tabanları listesi sunucudan gelir. Backend'in çalıştığını ve erişilebilir olduğunu kontrol edin, ardından tekrar deneyin.",

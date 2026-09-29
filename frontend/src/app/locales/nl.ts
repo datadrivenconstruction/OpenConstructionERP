@@ -37716,6 +37716,8 @@ const resource = {
     "costs.market_priced_title": "Geprijsd in {{market}}",
     "costs.market_priced_msg": "{{items}} items opnieuw geprijsd in {{market}} ({{currency}})",
     "costs.market_failed_title": "Kon niet prijzen in {{market}}",
+    "costs.base_text_only_in": "Taal van de posten: {{language}}",
+    "costs.market_text_fallback": "Taal van de posten: {{language}}. Deze database heeft geen versie in de taal: {{requested}}.",
     "costs.base_loading_catalog": "Kostprijsbases laden...",
     "costs.base_catalog_failed": "Kostprijsbases konden niet worden geladen",
     "costs.base_catalog_failed_hint": "De lijst met kostprijsbases komt van de server. Controleer of de backend actief en bereikbaar is en probeer het opnieuw.",

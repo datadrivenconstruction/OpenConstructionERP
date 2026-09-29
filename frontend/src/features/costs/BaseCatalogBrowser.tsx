@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { Check, ChevronDown, Download, Loader2, Search } from 'lucide-react';
 import { CountryFlag, CountryFlagBackdrop } from '@/shared/ui';
 import type { BaseCatalog, BaseFamily, BaseVariant } from './baseCatalog';
-import { variantMatches } from './baseCatalog';
+import { languageName, variantMatches } from './baseCatalog';
 import { DEPTH_BANDS, baseDepthLevel } from './baseDepth';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 
@@ -84,9 +84,9 @@ interface BaseCatalogBrowserProps {
   /** Make a loaded base the active one (global family's set-active-database). */
   onSetActive?: (region: string) => void;
   /** National market card selected: load the base + reprice into that market,
-   *  or switch the active market when already loaded. Wire this on the import
-   *  page to enable the market cards; without it, market variants behave like a
-   *  plain "load this base" card. */
+   *  or switch the active market when already loaded. Without it, 'load' mode
+   *  hides the market cards: loading one as a plain base would install the
+   *  home language instead of the card's. */
   onReprice?: (variant: BaseVariant) => void;
   /** Active market token per base_region (e.g. { ZH_CHINA: 'GB_LONDON_en' }),
    *  used to show the "Active market" badge vs a "Switch to" action. */
@@ -178,7 +178,7 @@ function BaseVariantCard({
   onReprice,
   elapsedSeconds,
 }: CardProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const shownPositions = loaded && variant.loaded_positions > 0 ? variant.loaded_positions : variant.positions;
   // A national market card (reprice target). Only treat it as one when a
   // reprice handler is wired (the import page); on surfaces without it, market
@@ -203,6 +203,7 @@ function BaseVariantCard({
         disabled && !loading ? 'pointer-events-none opacity-40' : ''
       } ${clickable ? 'cursor-pointer' : ''}`}
       onClick={clickable ? () => onSelect?.(variant) : undefined}
+      data-testid="base-variant-card"
     >
       {/* Header: flag + title + top-right status badge */}
       <div className="flex items-start gap-2.5">
@@ -233,6 +234,18 @@ function BaseVariantCard({
           </span>
         )}
       </div>
+
+      {/* The card's language is a promise about the text. Where no published
+          file holds the base in it (Turkiye has no English text), say which
+          language the work items will really be in. */}
+      {variant.text_lang_code && variant.text_lang_code !== variant.lang_code && (
+        <div className="mt-1.5 text-[11px] font-medium text-semantic-warning" data-testid="base-text-lang-note">
+          {t('costs.base_text_only_in', {
+            defaultValue: 'Work items in {{language}} only',
+            language: languageName(variant.text_lang_code, i18n.language),
+          })}
+        </div>
+      )}
 
       {/* Count + currency + coefficient marker */}
       <div className="mt-2.5 flex items-end justify-between gap-2">
@@ -354,6 +367,13 @@ export function BaseCatalogBrowser({
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
 
+  // A national market card promises a market AND a language, and only a
+  // surface that runs the market load can keep that promise. In 'load' mode
+  // without onReprice the card used to fall back to a plain Load button that
+  // installed the home base in the home language, so it is not offered there.
+  // In 'select' mode the parent owns what the pick loads.
+  const offersMarkets = mode === 'select' || !!onReprice;
+
   // Loaded is a property of the BASE, not the card: every card of a base shares
   // its base_region, so once the base is loaded all its market cards read as
   // loaded (the active one is distinguished separately).
@@ -393,10 +413,12 @@ export function BaseCatalogBrowser({
       orderedFamilies
         .map((family) => ({
           family,
-          variants: family.variants.filter((v) => variantMatches(v, family, query)),
+          variants: family.variants.filter(
+            (v) => variantMatches(v, family, query) && (offersMarkets || v.market_catalog === ''),
+          ),
         }))
         .filter((row) => row.variants.length > 0),
-    [orderedFamilies, query],
+    [orderedFamilies, query, offersMarkets],
   );
 
   // Count DISTINCT loaded bases: every card of a base shares its base_region, so

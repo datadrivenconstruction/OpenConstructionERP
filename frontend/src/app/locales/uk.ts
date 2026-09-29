@@ -38226,6 +38226,8 @@ const resource = {
     "costs.market_priced_title": "Оцінено в {{market}}",
     "costs.market_priced_msg": "{{items}} позицій переоцінено в {{market}} ({{currency}})",
     "costs.market_failed_title": "Не вдалося оцінити в {{market}}",
+    "costs.base_text_only_in": "Мова позицій робіт: {{language}}",
+    "costs.market_text_fallback": "Мова позицій робіт: {{language}}. Ця база не має версії мовою: {{requested}}.",
     "costs.base_loading_catalog": "Завантаження цінових баз...",
     "costs.base_catalog_failed": "Не вдалося завантажити цінові бази",
     "costs.base_catalog_failed_hint": "Список цінових баз надходить із сервера. Перевірте, що бекенд запущено і він доступний, а потім спробуйте ще раз.",

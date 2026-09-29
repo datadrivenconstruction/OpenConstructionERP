@@ -37513,6 +37513,8 @@ const resource = {
     "costs.market_priced_title": "Dihargai ke dalam {{market}}",
     "costs.market_priced_msg": "{{items}} item dihargai ulang ke dalam {{market}} ({{currency}})",
     "costs.market_failed_title": "Tidak dapat menghargai ke dalam {{market}}",
+    "costs.base_text_only_in": "Bahasa item pekerjaan: {{language}}",
+    "costs.market_text_fallback": "Bahasa item pekerjaan: {{language}}. Basis data ini tidak memiliki versi dalam bahasa: {{requested}}.",
     "costs.base_loading_catalog": "Memuat basis biaya...",
     "costs.base_catalog_failed": "Basis biaya tidak dapat dimuat",
     "costs.base_catalog_failed_hint": "Daftar basis biaya berasal dari server. Periksa apakah backend berjalan dan dapat diakses, lalu coba lagi.",

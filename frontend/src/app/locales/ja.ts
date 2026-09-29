@@ -37707,6 +37707,8 @@ const resource = {
     "costs.market_priced_title": "{{market}} に価格設定済み",
     "costs.market_priced_msg": "{{items}} アイテムが {{market}} ({{currency}}) に再価格設定されました",
     "costs.market_failed_title": "{{market}} に価格設定できませんでした",
+    "costs.base_text_only_in": "工事項目の言語: {{language}}",
+    "costs.market_text_fallback": "工事項目の言語: {{language}}。このデータベースには次の言語版がありません: {{requested}}。",
     "costs.base_loading_catalog": "コストベースをロード中...",
     "costs.base_catalog_failed": "コストベースを読み込めませんでした",
     "costs.base_catalog_failed_hint": "コストベースの一覧はサーバーから取得されます。バックエンドが起動しており、到達可能であることを確認してから、再試行してください。",
