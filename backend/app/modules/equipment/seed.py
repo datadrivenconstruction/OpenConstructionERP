@@ -252,11 +252,12 @@ async def seed_equipment_demo(session: AsyncSession) -> dict[str, int]:
         counts["inspections"] += 1
     await session.flush()
 
-    # 7. Active rentals - 8 (only created if at least one project exists)
-    from app.modules.projects.models import Project
+    # 7. Active rentals - 8, on demo projects only. This used to take the first
+    # eight projects the table returned, which on a working install hires demo
+    # plant onto somebody's real job. No demo project means no rentals.
+    from app.core.demo_marker import live_demo_projects
 
-    proj_rows = (await session.execute(select(Project).limit(8))).scalars().all()
-    project_ids = [p.id for p in proj_rows]
+    project_ids = [pid for pid, _demo_id in (await live_demo_projects(session))[:8]]
     if project_ids:
         for i, e in enumerate(equipment_units[:8]):
             project_id = project_ids[i % len(project_ids)]

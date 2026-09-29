@@ -75,8 +75,12 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> None:
     call repeatedly: every seeder is either internally idempotent or gated on a
     marker table so a re-run never duplicates rows.
 
+    Only the demo projects among ``project_ids`` are enriched: a project
+    without the ``demo_id`` marker, or one the user deleted, is never handed to
+    any seeder (see ``app.core.demo_marker``).
+
     Args:
-        project_ids: The projects to enrich. Typically every project at boot,
+        project_ids: The projects to consider. Typically every project at boot,
             or the single project a partner-pack apply just installed.
     """
     if not project_ids:
@@ -124,7 +128,6 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> None:
         from app.modules.pointcloud.seed import seed_pointcloud_demo
         from app.modules.portal.seed import seed_portal_demo
         from app.modules.portfolio.seed import seed_portfolio_demo
-        from app.modules.projects.models import Project as _EProj
         from app.modules.qms.models import ITPPlan
         from app.modules.qms.seed import seed_qms
         from app.modules.reconciliation.seed import seed_reconciliation_demo
@@ -146,50 +149,45 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> None:
         # cover the project users land on.
         _all_pids = list(project_ids)
         _all_pids.sort(key=lambda _p: 0 if _p == _FLAGSHIP_ID else 1)
-        _first_pid = _all_pids[0] if _all_pids else None
 
-        # The demo projects only, for seeders that must never touch a customer's
-        # own work.
+        # The demo projects, and the only projects any seeder below is handed.
         #
-        # ``enrich_all`` hands this function every project in the database, and
-        # the backfill re-runs once per app version, so on a real installation a
-        # live project is offered to every seeder in the list on every upgrade.
-        # A seeder gated on "my own table is empty for this project" cannot
-        # refuse it: a real project that has recorded no permits, no hold gates
-        # and no allowances is empty by that test, and the first run is what
-        # does the damage rather than the second.
+        # ``enrich_all`` offers this function every project in the database, and
+        # the backfill re-runs at least once per app version, so on a working
+        # installation a live project reaches this list on every upgrade. A
+        # seeder gated on "my own table is empty for this project" cannot refuse
+        # it: a real project that has recorded no diary, no inspection plan and
+        # no photos yet is empty by that test, and the first run is what does
+        # the damage. That is how a self-hosted install found a quality plan,
+        # three inspections, two NCRs, eight punch items and an audit, ninety
+        # days of site diary, bid packages and a team roster in every project
+        # created after the demo, and why nothing afterwards can tell those
+        # rows from real ones.
         #
-        # Filtered here rather than in each seeder because a rule written once
-        # per caller is a rule the next caller forgets, and the cost of
-        # forgetting this one is invented safety records and fabricated audit
-        # entries in somebody's live project. The seeders written before this
-        # existed keep receiving ``_all_pids``; changing what they see is a
-        # separate decision from making the new ones safe.
-        #
-        # Read in Python rather than filtered in SQL: ``metadata_`` is a
-        # portable JSON column, and a containment query against it compiles to a
-        # string comparison on this type rather than to JSON containment.
+        # So the filter is applied here, once, for every seeder, rather than in
+        # each seeder: a rule written once per caller is a rule the next caller
+        # forgets. A demo project is one carrying the ``demo_id`` marker every
+        # installer writes, and one the user deleted (archived) is not one any
+        # more. See ``app.core.demo_marker``.
         _demo_pids: list[uuid.UUID] = []
         _by_demo_id: dict[str, uuid.UUID] = {}
         try:
+            from app.core.demo_marker import live_demo_projects
+
             async with async_session_factory() as _dm:
-                _rows = (await _dm.execute(_msel(_EProj.id, _EProj.metadata_).where(_EProj.id.in_(_all_pids)))).all()
-            _marked = {
-                _pid for _pid, _meta in _rows if isinstance(_meta, dict) and str(_meta.get("demo_id") or "").strip()
-            }
-            _marked.add(_FLAGSHIP_ID)
-            _demo_pids = [_p for _p in _all_pids if _p in _marked]
-            _by_demo_id = {
-                str(_meta.get("demo_id") or "").strip(): _pid
-                for _pid, _meta in _rows
-                if isinstance(_meta, dict) and str(_meta.get("demo_id") or "").strip()
-            }
+                _live = await live_demo_projects(_dm, _all_pids)
+            _live_ids = {_pid for _pid, _did in _live}
+            _demo_pids = [_p for _p in _all_pids if _p in _live_ids]
+            _by_demo_id = {_did: _pid for _pid, _did in _live}
         except Exception:
-            # Fail closed. An empty list means the demo-only seeders do nothing,
+            # Fail closed. An empty list means every seeder below does nothing,
             # which leaves a screen unfilled; the other branch writes invented
             # records into projects we could not prove are ours.
-            logger.warning("Demo project discovery failed - demo-only seeds skipped", exc_info=True)
+            logger.warning("Demo project discovery failed - demo seeds skipped", exc_info=True)
             _demo_pids = []
+        if not _demo_pids:
+            return
+        _first_pid = _demo_pids[0]
 
         # Which projects the seeders that fill a few projects rather than all of
         # them should land on. Each of them used to take a prefix of the list it
@@ -218,29 +216,29 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> None:
         # demo project. An instrument that returns a plausible result where it
         # should return none is the defect; the empty list is not.
         _curated_pids = [_by_demo_id[_did] for _did in _FOCUS_DEMO_IDS if _did in _by_demo_id]
-        _focus_pids: list[uuid.UUID] = [_p for _p in _all_pids if _p == _FLAGSHIP_ID] + _curated_pids
+        _focus_pids: list[uuid.UUID] = [_p for _p in _demo_pids if _p == _FLAGSHIP_ID] + _curated_pids
 
         # (name, marker model gating a restart-safe skip, coroutine builder).
         # A None marker means the seeder self-guards against duplicates.
         _module_seeders = [
             ("crm", None, lambda s: seed_crm_demo(s)),
-            ("service", None, lambda s: seed_service_demo(s, _all_pids)),
-            ("bid_management", None, lambda s: seed_bid_management_demo(s, _all_pids)),
-            ("hse_advanced", None, lambda s: seed_hse_advanced_demo(s, _all_pids)),
-            ("portal", None, lambda s: seed_portal_demo(s, _all_pids)),
+            ("service", None, lambda s: seed_service_demo(s, _demo_pids)),
+            ("bid_management", None, lambda s: seed_bid_management_demo(s, _demo_pids)),
+            ("hse_advanced", None, lambda s: seed_hse_advanced_demo(s, _demo_pids)),
+            ("portal", None, lambda s: seed_portal_demo(s, _demo_pids)),
             ("supplier_catalogs", None, lambda s: seed_supplier_catalogs(s, _first_pid)),
-            ("carbon", CarbonInventory, lambda s: seed_carbon_demo(s, _all_pids)),
+            ("carbon", CarbonInventory, lambda s: seed_carbon_demo(s, _demo_pids)),
             # A None marker rather than MasterSchedule: a table-wide marker
             # skipped the whole seeder as soon as any one project had a board,
             # so a project joining the curated set later was never filled. The
             # seeder guards per project itself now.
             ("schedule_advanced", None, lambda s: seed_schedule_advanced_demo(s, _focus_pids)),
-            ("variations", Notice, lambda s: seed_variations_demo(s, _all_pids)),
+            ("variations", Notice, lambda s: seed_variations_demo(s, _demo_pids)),
             # Field time runs after variations so a daywork booking can name an
             # open variation order, and after the equipment seed (which runs at
             # boot before this list) so plant hours price off a real rental.
             # Self-guards per project on an existing timesheet.
-            ("field_time", None, lambda s: seed_field_time_demo(s, _all_pids)),
+            ("field_time", None, lambda s: seed_field_time_demo(s, _demo_pids)),
             # ── Modules that shipped without any startup seeder at all ──
             # Each new seeder below is internally idempotent (it returns an
             # empty dict once its own marker rows already exist), so they are
@@ -251,10 +249,10 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> None:
             # table-wide count would skip the projects that are still empty.
             ("costmodel", None, lambda s: seed_costmodel(s, _focus_pids)),
             ("moc", None, lambda s: seed_moc(s, _focus_pids)),
-            ("takeoff", None, lambda s: seed_takeoff_demo(s, _all_pids)),
+            ("takeoff", None, lambda s: seed_takeoff_demo(s, _demo_pids)),
             ("accommodation", None, lambda s: seed_accommodation(s, _focus_pids)),
             ("markups", None, lambda s: seed_markups(s, _focus_pids)),
-            ("catalog", None, lambda s: seed_catalog(s, _all_pids)),
+            ("catalog", None, lambda s: seed_catalog(s, _demo_pids)),
             # Runs after the service seeder above, which is what writes the
             # contracts these rules stamp their tickets against. Demo
             # projects only, which is what lets it ask the question per
@@ -264,21 +262,22 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> None:
             # and the dashboard "latest photos" widget are never empty on a
             # fresh install. Self-guards per project on an existing seeded photo.
             # Runs BEFORE the diary: diary photos reference these files.
-            ("photos", None, lambda s: seed_photos(s, _all_pids)),
+            ("photos", None, lambda s: seed_photos(s, _demo_pids)),
             # The diary seeder was written complete and never wired, so the
             # module shipped with an empty register on every install. Ninety
             # days per project, so it self-guards per project rather than on a
             # table-wide count: a user writing one diary entry must not stop
             # the seed reaching the projects that are still empty.
-            ("daily_diary", None, lambda s: seed_daily_diary_demo(s, _all_pids)),
+            ("daily_diary", None, lambda s: seed_daily_diary_demo(s, _demo_pids)),
             # Installs seeded before diary photos pointed at real files still
             # hold a thousand photos on an invented host, and the seeder above
             # never runs twice to fix them. Touches only those placeholder
             # rows, so after one boot it finds nothing to do.
-            ("daily_diary_media", None, lambda s: repair_seeded_diary_media(s, _all_pids)),
-            # ── Modules seeded on the demo estate only ──
-            # Everything below receives ``_demo_pids`` rather than ``_all_pids``.
-            # These seeders write records a real project would have earned -
+            ("daily_diary_media", None, lambda s: repair_seeded_diary_media(s, _demo_pids)),
+            # ── Earned records ──
+            # Every seeder in this list receives ``_demo_pids`` now; the ones
+            # below were the first to, because they write records a real
+            # project would have earned -
             # signed permits, accepted inspections, released hold gates, a
             # basis of estimate - and writing those into a customer's live
             # project is a data-integrity problem, not a cosmetic one. See the
@@ -400,8 +399,8 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> None:
             # after it so its clash results reference the freshly grouped
             # models; clash also feeds the coordination_hub dashboard's clash
             # rollup.
-            ("bim_hub", None, lambda s: seed_bim_hub(s, _all_pids)),
-            ("clash", None, lambda s: seed_clash(s, _all_pids)),
+            ("bim_hub", None, lambda s: seed_bim_hub(s, _demo_pids)),
+            ("clash", None, lambda s: seed_clash(s, _demo_pids)),
             # Coordination topics derived from the clash run above carry that
             # run's real element names and centroids, so bcf follows clash. The
             # topics that are not clash-derived do not need it, but splitting
@@ -431,7 +430,7 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> None:
 
         # The project roster seeds one project at a time and guards itself on
         # the project already having roster lines, so a re-run is a no-op.
-        for _pid in _all_pids:
+        for _pid in _demo_pids:
             try:
                 from app.modules.teams.seed import seed_teams_roster
 
@@ -446,7 +445,7 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> None:
         # QMS seeds one project at a time and is not internally idempotent; loop
         # the projects, skipping any that already carry an ITP plan so a re-run
         # never duplicates.
-        for _pid in _all_pids:
+        for _pid in _demo_pids:
             try:
                 async with async_session_factory() as _qs:
                     _has = (
