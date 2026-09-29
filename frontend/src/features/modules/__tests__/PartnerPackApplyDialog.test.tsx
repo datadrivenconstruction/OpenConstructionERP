@@ -312,6 +312,71 @@ describe('a finished install is verifiable step by step', () => {
     const retryOpts = streamMock.fullInstallPackStream.mock.calls[1]![2];
     expect(retryOpts.onlySteps).toEqual(['cost_db']);
   });
+
+  it('a retry that fixes one of two failed steps does not call the install finished', async () => {
+    streamMock.fullInstallPackStream.mockImplementationOnce(
+      streamOf(
+        [
+          { step: 'apply_pack', status: 'ok', detail: { rule_sets: [] } },
+          { step: 'locale', status: 'ok', detail: { locale: 'de' } },
+          { step: 'cost_db', status: 'ok', detail: { items: 10, bases: [] } },
+          { step: 'resources', status: 'ok', detail: { resources: 5 } },
+          { step: 'catalog', status: 'error', detail: { error: 'csv unavailable', catalogs: [] } },
+          { step: 'demos', status: 'error', detail: { error: 'boom' } },
+        ],
+        false,
+      ),
+    );
+    renderDialog();
+    activate();
+    await screen.findByText(/Some steps failed/);
+    addToast.mockClear();
+
+    // The retry reruns demos only; the server's verdict covers that subset.
+    streamMock.fullInstallPackStream.mockImplementationOnce(
+      async (_s: string, onEvent: (e: StreamInstallEvent) => void) => {
+        onEvent({ type: 'start', slug: 'germany-de', total: 1, steps: [STEPS[5]] });
+        onEvent({ type: 'step_start', step: 'demos', index: 0, total: 1 });
+        onEvent({ type: 'step_done', step: 'demos', index: 0, total: 1, status: 'ok', detail: { installed: ['a'] } });
+        onEvent({ type: 'done', slug: 'germany-de', ok: true, steps: [] });
+      },
+    );
+    const demosRow = screen.getByTestId('pack-install-steps').querySelector('[data-step="demos"]') as HTMLElement;
+    fireEvent.click(within(demosRow).getByRole('button', { name: /Retry/ }));
+
+    await waitFor(() => expect(demosRow.getAttribute('data-state')).toBe('ok'));
+    await screen.findByText(/Some steps failed: Load resource catalogue\./);
+    const list = screen.getByTestId('pack-install-steps');
+    expect(list.querySelector('[data-step="catalog"]')?.getAttribute('data-state')).toBe('error');
+    expect(screen.queryByText('Everything above is installed and ready to use.')).toBeNull();
+    expect(screen.queryByText('Workspace ready')).toBeNull();
+    expect(addToast).not.toHaveBeenCalledWith(expect.objectContaining({ title: 'Pack activated' }));
+  });
+
+  it('a retry that clears the last failed step does call the install finished', async () => {
+    streamMock.fullInstallPackStream.mockImplementationOnce(
+      streamOf(
+        STEPS.map((st) =>
+          st.step === 'demos'
+            ? { step: st.step, status: 'error' as const, detail: { error: 'boom' } }
+            : { step: st.step, status: 'ok' as const, detail: {} },
+        ),
+        false,
+      ),
+    );
+    renderDialog();
+    activate();
+    await screen.findByText(/Some steps failed/);
+    streamMock.fullInstallPackStream.mockImplementationOnce(
+      async (_s: string, onEvent: (e: StreamInstallEvent) => void) => {
+        onEvent({ type: 'start', slug: 'germany-de', total: 1, steps: [STEPS[5]] });
+        onEvent({ type: 'step_done', step: 'demos', index: 0, total: 1, status: 'ok', detail: { installed: ['a'] } });
+        onEvent({ type: 'done', slug: 'germany-de', ok: true, steps: [] });
+      },
+    );
+    fireEvent.click(screen.getByRole('button', { name: /Retry/ }));
+    await screen.findByText('Everything above is installed and ready to use.');
+  });
 });
 
 /* ── Cost bases offered up front ───────────────────────────────────────── */
