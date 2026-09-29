@@ -14,6 +14,7 @@ import {
   PackInstallError,
   type StreamInstallEvent,
 } from '../partnerPacksApi';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 function sseResponse(frames: string[], init: ResponseInit = { status: 200 }): Response {
   const encoder = new TextEncoder();
@@ -30,8 +31,64 @@ function frame(event: string, data: unknown): string {
   return `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
 }
 
+const realRefresh = useAuthStore.getState().refreshAccessToken;
+
 afterEach(() => {
   vi.unstubAllGlobals();
+  useAuthStore.setState({ refreshAccessToken: realRefresh });
+});
+
+describe('fullInstallPackStream and an expired access token', () => {
+  const okStream = () =>
+    sseResponse([frame('start', { slug: 'x', total: 0, steps: [] }), frame('done', { slug: 'x', ok: true, steps: [] })]);
+  const unauthorized = () => new Response(JSON.stringify({ detail: 'Token expired' }), { status: 401 });
+  const authHeader = (call: unknown) =>
+    ((call as [string, RequestInit])[1].headers as Record<string, string>).Authorization;
+
+  it('refreshes once and replays, so an expired token is not a lost session', async () => {
+    const refresh = vi.fn(async () => 'fresh-token');
+    useAuthStore.setState({ refreshAccessToken: refresh });
+    const fetchMock = vi.fn().mockResolvedValueOnce(unauthorized()).mockResolvedValueOnce(okStream());
+    vi.stubGlobal('fetch', fetchMock);
+
+    const events: StreamInstallEvent[] = [];
+    await fullInstallPackStream('x', (ev) => events.push(ev));
+
+    expect(refresh).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(authHeader(fetchMock.mock.calls[1])).toBe('Bearer fresh-token');
+    expect(events.map((e) => e.type)).toEqual(['start', 'done']);
+  });
+
+  it('a refresh that fails reports the session as ended', async () => {
+    useAuthStore.setState({ refreshAccessToken: vi.fn(async () => null) });
+    const fetchMock = vi.fn().mockResolvedValueOnce(unauthorized());
+    vi.stubGlobal('fetch', fetchMock);
+
+    const e = (await fullInstallPackStream('x', () => {}).catch((x: unknown) => x)) as PackInstallError;
+    expect(e.kind).toBe('unauthenticated');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('a 401 that survives the refresh is not retried again', async () => {
+    useAuthStore.setState({ refreshAccessToken: vi.fn(async () => 'fresh-token') });
+    const fetchMock = vi.fn().mockResolvedValueOnce(unauthorized()).mockResolvedValueOnce(unauthorized());
+    vi.stubGlobal('fetch', fetchMock);
+
+    const e = (await fullInstallPackStream('x', () => {}).catch((x: unknown) => x)) as PackInstallError;
+    expect(e.kind).toBe('unauthenticated');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('a 403 is not a token problem and does not refresh', async () => {
+    const refresh = vi.fn(async () => 'fresh-token');
+    useAuthStore.setState({ refreshAccessToken: refresh });
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('{}', { status: 403 })));
+
+    const e = (await fullInstallPackStream('x', () => {}).catch((x: unknown) => x)) as PackInstallError;
+    expect(e.kind).toBe('forbidden');
+    expect(refresh).not.toHaveBeenCalled();
+  });
 });
 
 describe('fullInstallPackStream failures', () => {

@@ -17,6 +17,7 @@
  */
 
 import { apiGet, apiPost, API_BASE, getAuthToken } from '@/shared/lib/api';
+import { useAuthStore } from '@/stores/useAuthStore';
 import type { PackType } from '@/shared/hooks/usePartnerPack';
 import { packCountryCode } from '@/shared/lib/regionalPack';
 
@@ -334,37 +335,49 @@ export async function fullInstallPackStream(
     onlySteps,
     signal,
   } = opts;
-  const token = getAuthToken();
-  let response: Response;
-  try {
-    response = await fetch(`${API_BASE}/v1/partner-pack/full-install-stream`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'text/event-stream',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: JSON.stringify({
-        slug,
-        set_locale: true,
-        install_cost_db: true,
-        install_catalog: installCatalog,
-        vectorize,
-        confirm_disables: confirmDisables,
-        demo_count: demoCount,
-        ...(costRegions ? { cost_regions: costRegions } : {}),
-        ...(onlySteps ? { only_steps: onlySteps } : {}),
-      }),
-      signal,
-    });
-  } catch (err) {
-    if ((err as { name?: string })?.name === 'AbortError') throw err;
-    throw new PackInstallError(
-      'network',
-      null,
-      null,
-      'Could not reach the server to activate this pack. Check the connection and try again.',
-    );
+  const requestBody = JSON.stringify({
+    slug,
+    set_locale: true,
+    install_cost_db: true,
+    install_catalog: installCatalog,
+    vectorize,
+    confirm_disables: confirmDisables,
+    demo_count: demoCount,
+    ...(costRegions ? { cost_regions: costRegions } : {}),
+    ...(onlySteps ? { only_steps: onlySteps } : {}),
+  });
+  const open = async (token: string | null): Promise<Response> => {
+    try {
+      return await fetch(`${API_BASE}/v1/partner-pack/full-install-stream`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'text/event-stream',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: requestBody,
+        signal,
+      });
+    } catch (err) {
+      if ((err as { name?: string })?.name === 'AbortError') throw err;
+      throw new PackInstallError(
+        'network',
+        null,
+        null,
+        'Could not reach the server to activate this pack. Check the connection and try again.',
+      );
+    }
+  };
+
+  let response = await open(getAuthToken());
+  // A raw fetch misses the silent refresh the shared ``request()`` does, so an
+  // access token that merely expired (60 minutes, easily spent reading the
+  // preview) read as "your session has ended". Refresh once through the same
+  // single-flight store call and replay; only a 401 that survives it is one.
+  // The server answers 401 before it runs anything, so the replay is safe.
+  if (response.status === 401) {
+    const fresh = await useAuthStore.getState().refreshAccessToken();
+    if (fresh) response = await open(fresh);
   }
 
   if (!response.ok || !response.body) {
