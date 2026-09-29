@@ -234,6 +234,43 @@ _COMPANIES: tuple[str, ...] = (
     "Highland Painters",
 )
 
+# How many of each register the bulk seed writes, and how each row is named.
+# The seeder builds its rows from these and ``seeded_row_ids`` recognises the
+# rows by the same helpers, so the demo cleanup cannot drift from the seed.
+_JSA_COUNT = 50
+_PERMIT_COUNT = 40
+_PPE_COUNT = 80
+_JSA_TASKS: tuple[str, ...] = ("Cast slab", "Erect scaffold", "Install ductwork", "Pour foundation", "Install glazing")
+_PERMIT_CONDITIONS = "Comply with site SOP and applicable PPE matrix."
+
+
+def _jsa_task_description(idx: int, task: str) -> str:
+    return f"Task {idx + 1}: {task}"
+
+
+def _jsa_location(idx: int) -> str:
+    return f"Block {chr(65 + (idx % 6))} - Level {(idx % 5) + 1}"
+
+
+def _permit_number(idx: int) -> str:
+    return f"PTW-{2026}-{idx + 1:04d}"
+
+
+def _permit_type(idx: int) -> str:
+    return _PERMIT_TYPES[idx % len(_PERMIT_TYPES)]
+
+
+def _permit_description(idx: int) -> str:
+    return f"{_permit_type(idx).replace('_', ' ').title()} permit for routine site activity #{idx + 1}"
+
+
+def _permit_location(idx: int) -> str:
+    return f"Zone {chr(65 + (idx % 5))}"
+
+
+def _ppe_serial(idx: int) -> str:
+    return f"SN-{idx + 1000:05d}"
+
 
 async def _table_has_rows(session: AsyncSession, model: type) -> bool:
     """Return True if the given ORM model already has any rows."""
@@ -438,7 +475,7 @@ async def seed_hse_advanced_demo(
 
     # ── JSAs (50) ────────────────────────────────────────────────────────
     jsas: list[JobSafetyAnalysis] = []
-    for idx in range(50):
+    for idx in range(_JSA_COUNT):
         project_id = project_pool[idx % len(project_pool)]
         hazard_count = rng.randint(2, 6)
         hazards = [
@@ -466,8 +503,8 @@ async def seed_hse_advanced_demo(
         jsa = JobSafetyAnalysis(
             id=uuid.uuid4(),
             project_id=project_id,
-            task_description=f"Task {idx + 1}: {rng.choice(['Cast slab', 'Erect scaffold', 'Install ductwork', 'Pour foundation', 'Install glazing'])}",
-            location=f"Block {chr(65 + (idx % 6))} - Level {(idx % 5) + 1}",
+            task_description=_jsa_task_description(idx, rng.choice(list(_JSA_TASKS))),
+            location=_jsa_location(idx),
             work_date=(today + timedelta(days=(idx % 30) - 5)).isoformat(),
             prepared_by=None,
             status=status_choice,
@@ -485,9 +522,9 @@ async def seed_hse_advanced_demo(
 
     # ── Permits (40) ─────────────────────────────────────────────────────
     permits: list[PermitToWork] = []
-    for idx in range(40):
+    for idx in range(_PERMIT_COUNT):
         project_id = project_pool[idx % len(project_pool)]
-        permit_type = _PERMIT_TYPES[idx % len(_PERMIT_TYPES)]
+        permit_type = _permit_type(idx)
         status_choice = _PERMIT_STATUSES[idx % len(_PERMIT_STATUSES)]
         # Spread windows from -10d to +20d around today
         start_offset = rng.randint(-10, 20)
@@ -496,17 +533,17 @@ async def seed_hse_advanced_demo(
         permit = PermitToWork(
             id=uuid.uuid4(),
             project_id=project_id,
-            permit_number=f"PTW-{2026}-{idx + 1:04d}",
+            permit_number=_permit_number(idx),
             permit_type=permit_type,
-            description=(f"{permit_type.replace('_', ' ').title()} permit for routine site activity #{idx + 1}"),
-            location=f"Zone {chr(65 + (idx % 5))}",
+            description=_permit_description(idx),
+            location=_permit_location(idx),
             work_start=work_start,
             work_end=work_end,
             applicant_id=None,
             supervisor_id=None,
             jsa_id=jsas[idx % len(jsas)].id if jsas else None,
             status=status_choice,
-            conditions="Comply with site SOP and applicable PPE matrix.",
+            conditions=_PERMIT_CONDITIONS,
             closure_checklist_passed=(status_choice == "closed"),
             closure_notes=(
                 "Area cleared, debris removed, post-work inspection signed." if status_choice == "closed" else ""
@@ -565,7 +602,7 @@ async def seed_hse_advanced_demo(
 
     # ── PPE issues (80) ──────────────────────────────────────────────────
     ppe_issues: list[PPEIssue] = []
-    for idx in range(80):
+    for idx in range(_PPE_COUNT):
         status_choice = _PPE_STATUSES[idx % len(_PPE_STATUSES)]
         ppe = PPEIssue(
             id=uuid.uuid4(),
@@ -577,7 +614,7 @@ async def seed_hse_advanced_demo(
             ppe_type=_PPE_TYPES[idx % len(_PPE_TYPES)],
             size=rng.choice(["S", "M", "L", "XL", "XXL", None]),
             brand=rng.choice(["Wendlow", "Hulvert", "Kvindal", "Zerbholt", "Vaucrey", None]),
-            serial=f"SN-{idx + 1000:05d}",
+            serial=_ppe_serial(idx),
             valid_until=today + timedelta(days=rng.randint(30, 720)),
             status=status_choice,
             returned_at=(now - timedelta(days=rng.randint(1, 30)))
@@ -714,3 +751,107 @@ async def seed_hse_advanced_demo(
 
 
 __all__ = ["seed_hse_advanced_demo"]
+
+
+async def seeded_row_ids(session: AsyncSession, project_ids: list[uuid.UUID]) -> list[tuple[type, list, str]]:
+    """Job safety analyses and permits in ``project_ids`` exactly as the bulk seed wrote them.
+
+    A row is matched against the seed row with the same index, field by field:
+    a JSA on its numbered task text and its block and level, a permit on its
+    number, type, description, zone and conditions, both with nobody recorded
+    as author. A person's permit that reuses a seeded number but describes
+    other work is not matched.
+
+    Permits go first: they point at JSAs, with SET NULL, and a permit written
+    against a seeded JSA should not lose its link before it is itself checked.
+
+    Returns:
+        ``(model, ids, label)`` groups; ``label`` names the group in reports.
+    """
+    if not project_ids:
+        return []
+
+    jsa_specs = {
+        (_jsa_task_description(idx, task), _jsa_location(idx)) for idx in range(_JSA_COUNT) for task in _JSA_TASKS
+    }
+    jsa_rows = (
+        await session.execute(
+            select(
+                JobSafetyAnalysis.id,
+                JobSafetyAnalysis.task_description,
+                JobSafetyAnalysis.location,
+                JobSafetyAnalysis.created_by,
+                JobSafetyAnalysis.prepared_by,
+            ).where(JobSafetyAnalysis.project_id.in_(project_ids))
+        )
+    ).all()
+    jsas = [
+        r.id
+        for r in jsa_rows
+        if (r.task_description, r.location) in jsa_specs and r.created_by is None and r.prepared_by is None
+    ]
+
+    permit_specs = {
+        (_permit_number(idx), _permit_type(idx), _permit_description(idx), _permit_location(idx))
+        for idx in range(_PERMIT_COUNT)
+    }
+    permit_rows = (
+        await session.execute(
+            select(
+                PermitToWork.id,
+                PermitToWork.permit_number,
+                PermitToWork.permit_type,
+                PermitToWork.description,
+                PermitToWork.location,
+                PermitToWork.conditions,
+                PermitToWork.created_by,
+            ).where(PermitToWork.project_id.in_(project_ids))
+        )
+    ).all()
+    permits = [
+        r.id
+        for r in permit_rows
+        if (r.permit_number, r.permit_type, r.description, r.location) in permit_specs
+        and r.conditions == _PERMIT_CONDITIONS
+        and r.created_by is None
+    ]
+    return [(PermitToWork, permits, "hse_permits_to_work"), (JobSafetyAnalysis, jsas, "hse_job_safety_analyses")]
+
+
+async def seeded_ppe_ids(session: AsyncSession) -> list[uuid.UUID]:
+    """PPE issues exactly as the bulk seed wrote them.
+
+    The PPE register belongs to the company, not to a project, so this takes no
+    project list. A row matches on recipient, firm, PPE type and serial of the
+    seed row with the same index, with no linked recipient account and nobody
+    recorded as issuer.
+    """
+    specs = {
+        (
+            _NAMES[idx % len(_NAMES)],
+            _COMPANIES[idx % len(_COMPANIES)],
+            _PPE_TYPES[idx % len(_PPE_TYPES)],
+            _ppe_serial(idx),
+        )
+        for idx in range(_PPE_COUNT)
+    }
+    rows = (
+        await session.execute(
+            select(
+                PPEIssue.id,
+                PPEIssue.recipient_name,
+                PPEIssue.recipient_company,
+                PPEIssue.ppe_type,
+                PPEIssue.serial,
+                PPEIssue.recipient_user_id,
+                PPEIssue.issued_by,
+            )
+        )
+    ).all()
+    return [
+        r.id
+        for r in rows
+        if (r.recipient_name, r.recipient_company, r.ppe_type, r.serial) in specs
+        and r.recipient_user_id is None
+        and r.issued_by is None
+    ]
