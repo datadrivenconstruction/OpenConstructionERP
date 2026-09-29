@@ -85,6 +85,7 @@ jobs:
 
       - name: Open every route
         id: smoke
+        timeout-minutes: 100
         working-directory: frontend
         shell: bash
         env:
