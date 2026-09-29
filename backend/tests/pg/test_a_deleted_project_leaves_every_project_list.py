@@ -231,12 +231,12 @@ async def test_a_team_member_listing_scope_drops_a_deleted_project(pg_session) -
         pg_session.add(TeamMembership(team_id=team.id, user_id=member.id))
     await pg_session.flush()
 
-    every = set((await pg_session.execute(select(member_project_ids_subquery(member.id).element))).scalars())
-    assert every == {live.id, deleted.id}
-    live_only = set(
-        (await pg_session.execute(select(member_project_ids_subquery(member.id, live_only=True).element))).scalars()
-    )
-    assert live_only == {live.id}
+    async def _members(**kwargs) -> set[uuid.UUID]:
+        stmt = select(Project.id).where(Project.id.in_(member_project_ids_subquery(member.id, **kwargs)))
+        return set((await pg_session.execute(stmt)).scalars())
+
+    assert await _members() == {live.id, deleted.id}
+    assert await _members(live_only=True) == {live.id}
 
     assert await search_scope(pg_session, str(member.id)) == {live.id}
 
