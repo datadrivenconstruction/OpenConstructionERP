@@ -63,6 +63,17 @@ def test_text_source_region(base_region: str, lang: str, expected: str | None) -
     assert base_registry.text_source_region(base_region, lang) == expected
 
 
+def test_the_matrix_covers_every_market_card() -> None:
+    """Seven national bases with markets (Vietnam has none), 47 or 48 each."""
+    assert len(_MARKET_CARDS) == 334
+
+
+def test_greek_home_card_says_its_text_is_english() -> None:
+    """Greek is not an app language, so the Greek base opens in its English home text."""
+    home = base_registry.variant_by_region("GR_NATIONAL")
+    assert base_registry.variant_text_lang(home) == "en"
+
+
 def test_only_turkiye_english_cards_fall_back_and_they_say_turkish() -> None:
     """The one gap in the published data is English text for Turkiye."""
     fallbacks = {
@@ -70,7 +81,7 @@ def test_only_turkiye_english_cards_fall_back_and_they_say_turkish() -> None:
         for v in _MARKET_CARDS
         if base_registry.variant_text_lang(v) != base_registry.normalize_lang_code(v.lang_code)
     }
-    assert fallbacks, "expected the Turkiye English cards to fall back"
+    assert len(fallbacks) == 12, "expected exactly the twelve Turkiye English cards to fall back"
     for vid in fallbacks:
         v = next(x for x in _MARKET_CARDS if x.variant_id == vid)
         assert v.base_region == "TR_NATIONAL"

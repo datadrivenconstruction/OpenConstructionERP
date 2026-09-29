@@ -85,6 +85,16 @@ def test_english_card_brings_a_chinese_base_back_to_english(wired: dict[str, Any
     assert out["text_language"] == "en"
 
 
+def test_failed_fallback_swap_fails_before_the_reprice(wired: dict[str, Any]) -> None:
+    """Turkiye has no English text, so the card falls back to Turkish, and that must land too."""
+    wired["swap_result"] = {"tr": None}
+    with pytest.raises(HTTPException) as exc:
+        _call(wired, "TR_NATIONAL", "GB_LONDON_en")
+    assert exc.value.status_code == 502
+    assert wired["calls"] == [("TR_NATIONAL", "tr")]
+    assert wired["service"].applied == []
+
+
 def test_english_card_on_turkiye_opens_in_turkish_and_says_so(wired: dict[str, Any]) -> None:
     out = _call(wired, "TR_NATIONAL", "GB_LONDON_en")
     assert wired["calls"] == [("TR_NATIONAL", "tr")]
