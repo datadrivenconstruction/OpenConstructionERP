@@ -43,6 +43,7 @@ async def _project_with_budget(session, owner: User, name: str) -> Project:
     session.add(
         BudgetLine(
             project_id=project.id,
+            category="material",
             description="Structure",
             planned_amount="1000",
             actual_amount="400",
@@ -151,3 +152,28 @@ async def test_the_portal_project_picker_leaves_out_a_deleted_project(pg_session
 
     ids = {p.id for p in await service.list_accessible_projects(uuid.uuid4())}
     assert ids == {live.id}
+
+
+@pytest.mark.asyncio
+async def test_the_portfolio_tree_leaves_out_a_deleted_project(pg_session) -> None:
+    """The membership row outlives the soft delete; the tree must not list it."""
+    from app.modules.portfolio.models import PortfolioMembership, PortfolioNode
+    from app.modules.portfolio.service import PortfolioService
+
+    owner, live, deleted = await _live_and_deleted(pg_session)
+    node = PortfolioNode(name="Programme", owner_id=owner.id)
+    pg_session.add(node)
+    await pg_session.flush()
+    pg_session.add_all(
+        [
+            PortfolioMembership(node_id=node.id, project_id=live.id),
+            PortfolioMembership(node_id=node.id, project_id=deleted.id),
+        ]
+    )
+    await pg_session.flush()
+
+    tree = await PortfolioService(pg_session).get_tree(str(owner.id))
+
+    mine = [n for n in tree if n["id"] == str(node.id)]
+    assert len(mine) == 1
+    assert mine[0]["project_ids"] == [str(live.id)]
