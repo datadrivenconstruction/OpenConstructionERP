@@ -18,6 +18,7 @@
 
 import { apiGet, apiPost, API_BASE, getAuthToken } from '@/shared/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
+import type { TFunction } from 'i18next';
 import type { PackType } from '@/shared/hooks/usePartnerPack';
 import { packCountryCode } from '@/shared/lib/regionalPack';
 
@@ -232,6 +233,48 @@ export class PackInstallError extends Error {
     this.kind = kind;
     this.status = status;
     this.detail = detail;
+  }
+}
+
+/**
+ * The localized headline for a whole-install failure, one literal key per
+ * kind. Shared by the pack dialog and the onboarding picker, which used to
+ * toast ``err.message``: an English sentence built right here.
+ */
+export function packInstallFailureTitle(t: TFunction, kind: PackInstallFailureKind): string {
+  switch (kind) {
+    case 'forbidden':
+      return t('modules.pp_fail_forbidden_title', {
+        defaultValue: 'This account may not install packs',
+      });
+    case 'unauthenticated':
+      return t('modules.pp_fail_auth_title', { defaultValue: 'Your session has ended' });
+    case 'not_found':
+      return t('modules.pp_fail_not_found_title', {
+        defaultValue: 'This pack is no longer on the server',
+      });
+    case 'conflict':
+      return t('modules.pp_fail_conflict_title', {
+        defaultValue: 'The pack cannot be applied as it is',
+      });
+    case 'invalid':
+      return t('modules.pp_fail_invalid_title', {
+        defaultValue: 'The server rejected the install request',
+      });
+    case 'server':
+      return t('modules.pp_fail_server_title', {
+        defaultValue: 'The server failed while installing the pack',
+      });
+    case 'network':
+      return t('modules.pp_fail_network_title', { defaultValue: 'Could not reach the server' });
+    case 'incomplete':
+      return t('modules.pp_fail_incomplete_title', {
+        defaultValue: 'The connection dropped during the installation',
+      });
+    default:
+      return t('modules.pp_fail_http_title', {
+        defaultValue: 'The installation could not start',
+      });
   }
 }
 
