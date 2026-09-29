@@ -13,7 +13,7 @@ import {
   Sun, Moon, Monitor,
 } from 'lucide-react';
 import { Button, Input, Logo, LogoWithText, CountryFlag } from '@/shared/ui';
-import { useAuthStore } from '@/stores/useAuthStore';
+import { readRememberChoice, saveRememberChoice, useAuthStore } from '@/stores/useAuthStore';
 import { useBrandingStore } from '@/stores/useBrandingStore';
 import { BrandingEditorModal } from '@/app/layout/CustomBranding';
 import { extractErrorMessageFromBody } from '@/shared/lib/api';
@@ -100,9 +100,8 @@ export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [rememberMe, setRememberMe] = useState(
-    () => localStorage.getItem('oe_remember') === '1',
-  );
+  // Checked unless the user unchecked it last time they signed in here.
+  const [rememberMe, setRememberMe] = useState(readRememberChoice);
   const [langOpen, setLangOpen] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [brandOpen, setBrandOpen] = useState(false);
@@ -283,6 +282,7 @@ export function LoginPage() {
         return;
       }
       const data = await res.json();
+      saveRememberChoice(rememberMe);
       setTokens(data.access_token, data.refresh_token, rememberMe, email);
       navigate(nextPath, { replace: true });
     } catch {

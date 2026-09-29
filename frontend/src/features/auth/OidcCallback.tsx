@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { useAuthStore } from '@/stores/useAuthStore';
+import { readRememberChoice, useAuthStore } from '@/stores/useAuthStore';
 
 export function OidcCallback() {
   const [searchParams] = useSearchParams();
@@ -46,7 +46,7 @@ export function OidcCallback() {
         return res.json();
       })
       .then((data) => {
-        setTokens(data.access_token, data.refresh_token);
+        setTokens(data.access_token, data.refresh_token, readRememberChoice());
         navigate('/', { replace: true });
       })
       .catch((err) => {

@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { Button, Input, LogoWithText, CountryFlag } from '@/shared/ui';
 import { SUPPORTED_LANGUAGES, getLanguageByCode } from '@/app/i18n';
-import { useAuthStore } from '@/stores/useAuthStore';
+import { readRememberChoice, useAuthStore } from '@/stores/useAuthStore';
 import { AuthBackground } from './AuthBackground';
 
 export function RegisterPage() {
@@ -122,7 +122,7 @@ export function RegisterPage() {
 
       if (loginRes.ok) {
         const data = await loginRes.json();
-        setTokens(data.access_token, data.refresh_token);
+        setTokens(data.access_token, data.refresh_token, readRememberChoice(), email);
         navigate('/');
       } else {
         navigate('/login');
