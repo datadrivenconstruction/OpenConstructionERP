@@ -7316,6 +7316,7 @@ def _extract_from_excel_for_smart(content: bytes) -> dict[str, Any]:
                     "rows": rows,
                     "row_numbers": meta.get("row_numbers"),
                     "header_language": meta.get("header_language"),
+                    "sheet_notes": meta.get("sheet_notes"),
                 }
     except Exception:
         logger.debug("Smart import: structured Excel parsing failed, using raw text", exc_info=True)
@@ -7476,6 +7477,69 @@ _SMART_IMPORT_EXTS: frozenset[str] = frozenset(
 )
 
 
+async def _native_spreadsheet_import(content: bytes) -> "ImportedBOQ | None":
+    """The spreadsheet importer's reading of an upload, or ``None`` when it has none.
+
+    ``None`` means the file is not a workbook the importer can open at all;
+    a reading with no positions still comes back, carrying the errors that
+    say why.
+    """
+    from app.modules.boq.importers import ImporterParseError
+    from app.modules.boq.importers.excel import ExcelImporter
+
+    try:
+        return await ExcelImporter.parse(content, locale=get_locale())
+    except ImporterParseError:
+        return None
+    except Exception:  # noqa: BLE001 - the text extraction below still gets its chance
+        logger.debug("Smart import: native spreadsheet reading failed", exc_info=True)
+        return None
+
+
+async def _smart_native_result(
+    boq_id: uuid.UUID,
+    imported_boq: "ImportedBOQ",
+    file_name: str,
+    service: BOQService,
+    user_id: str,
+) -> dict[str, Any]:
+    """Persist a native spreadsheet reading and validate it, in the smart route's shape."""
+    apply_summary = await _persist_imported_boq(
+        boq_id,
+        imported_boq,
+        file_name=file_name,
+        service=service,
+        actor_id=user_id,
+    )
+    created = int(apply_summary["created"])
+    updated = int(apply_summary["updated"])
+    validation_report = None
+    if (created + updated) > 0:
+        validation_report = await _run_import_validation(boq_id, service, service.session)
+    logger.info(
+        "Smart import (native) for BOQ %s: created=%d, updated=%d, skipped=%d",
+        boq_id,
+        created,
+        updated,
+        imported_boq.skipped,
+    )
+    return {
+        "imported": created,
+        "updated": updated,
+        "unchanged": int(apply_summary["unchanged"]),
+        "skipped": imported_boq.skipped,
+        "errors": imported_boq.errors + apply_summary["apply_errors"],
+        "warnings": imported_boq.warnings,
+        "total_items": len(imported_boq.positions) + imported_boq.skipped,
+        "source_format": imported_boq.source_format,
+        "currency": imported_boq.currency,
+        "metadata": imported_boq.metadata,
+        "validation_report": validation_report,
+        "method": "direct",
+        "model_used": None,
+    }
+
+
 @router.post(
     "/boqs/{boq_id}/import/smart/",
     summary="Smart import: any file via AI (deprecated - use /import/auto/)",
@@ -7554,16 +7618,26 @@ async def smart_import(
     # No upload size cap - per product policy.
 
     # ── 1. Extract text/data based on file type ────────────────────────
+    native: ImportedBOQ | None = None
     if ext in _SMART_IMPORT_EXCEL_EXTS:
+        # An Excel 97-2003 workbook opens in nothing here: refuse it with what
+        # to do, as /import/auto/ does, instead of failing inside openpyxl.
+        _refuse_legacy_xls(file.filename or "upload", content[:4096])
         # BUG-UPLOAD01b: smart-import path used to skip the xlsx-bomb
         # guard that import_boq_excel calls - same DoS surface via this
         # endpoint. Apply the same defence here before parsing.
         from app.core.upload_guards import reject_if_xlsx_bomb
 
         reject_if_xlsx_bomb(content)
-        extracted = _extract_from_excel_for_smart(content)
+        native = await _native_spreadsheet_import(content)
+        extracted = (
+            {"structured": False} if native is not None and native.positions else _extract_from_excel_for_smart(content)
+        )
     elif ext == "csv":
-        extracted = _extract_from_csv_for_smart(content)
+        native = await _native_spreadsheet_import(content)
+        extracted = (
+            {"structured": False} if native is not None and native.positions else _extract_from_csv_for_smart(content)
+        )
     elif ext == "pdf":
         extracted = _extract_from_pdf(content)
     elif ext in _SMART_IMPORT_IMAGE_EXTS:
@@ -7583,6 +7657,16 @@ async def smart_import(
             detail=extracted["text"],
         )
 
+    # ── 2a. The spreadsheet reader /import/auto/ uses ─────────────────
+    # A spreadsheet goes through the same importer as /import/auto/, so the
+    # Hungarian workbook profiles, every item sheet of a workbook and the
+    # import's validation run here too. This route is what the project page's
+    # Import button posts to, and it read the item sheet on its own, so a
+    # Hungarian chapter workbook lost its item codes and its sections and was
+    # never validated.
+    if native is not None and native.positions:
+        return await _smart_native_result(boq_id, native, file.filename or "upload", service, user_id)
+
     # ── 2. Direct import for structured Excel/CSV ──────────────────────
     if extracted.get("structured") and extracted.get("rows"):
         # The same row reader ``/import/auto/`` uses: sections stay sections,
@@ -7596,6 +7680,7 @@ async def smart_import(
             source="smart_import",
             row_numbers=extracted.get("row_numbers"),
             header_language=extracted.get("header_language"),
+            sheet_notes=extracted.get("sheet_notes"),
         )
         apply_summary = await _persist_imported_boq(
             boq_id,
@@ -7645,6 +7730,12 @@ async def smart_import(
     try:
         provider, api_key, model_override = resolve_provider_key_model(ai_settings)
     except ValueError as exc:
+        if native is not None:
+            # No AI to hand the sheet to, and the spreadsheet reader has
+            # already said why it found no lines (a header it could not read,
+            # the sheets it left out). That report is what the user can act
+            # on; "configure an AI provider" is not.
+            return await _smart_native_result(boq_id, native, file.filename or "upload", service, user_id)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),
