@@ -2094,19 +2094,19 @@ def cmd_demo_cleanup(args: argparse.Namespace) -> None:
 
     report = asyncio.run(_run())
     print(f"Real projects checked: {report.real_projects}")
-    print("Demo rows carrying the seed's own mark:")
-    for name, count in report.marked.items():
-        print(f"  {name}: {count}")
-    if report.unmarked_candidates:
-        print("Rows the old seeding wrote WITHOUT a mark (not removed, review by hand):")
-        for name, count in report.unmarked_candidates.items():
-            print(f"  {name}: {count}")
+    print("Demo rows proven to be the seed's, by its mark or by content matching the seed exactly:")
+    for name, ids in report.rows.items():
+        print(f"  {name}: {len(ids)}")
+        for row_id in ids:
+            print(f"    {row_id}")
+    if report.ppe_kept_reason:
+        print(f"  hse_ppe_issues: kept ({report.ppe_kept_reason})")
     if args.apply:
-        print(_green(f"Removed {report.total_marked} marked demo row(s) from real projects."))
-    elif report.total_marked:
-        print(_yellow("Dry run, nothing changed. Run again with --apply to remove the marked rows."))
+        print(_green(f"Removed {report.total} demo row(s)."))
+    elif report.total:
+        print(_yellow("Dry run, nothing changed. Run again with --apply to remove the rows listed above."))
     else:
-        print(_green("No marked demo rows in real projects."))
+        print(_green("No demo rows found in real projects."))
 
 
 # ── Module management (install / list / uninstall) ─────────────────────────
@@ -2745,7 +2745,7 @@ def _build_parser() -> argparse.ArgumentParser:
     # demo-cleanup - remove demo rows the old boot seeding wrote into real projects
     demo_cleanup_p = subparsers.add_parser(
         "demo-cleanup",
-        help="Find demo rows in real projects (dry run); --apply removes the ones carrying the seed's mark",
+        help="List demo rows the old boot seeding left in real projects; --apply removes them",
     )
     demo_cleanup_p.add_argument(
         "--apply",
