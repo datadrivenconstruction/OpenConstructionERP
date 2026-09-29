@@ -769,6 +769,17 @@ class UserService:
                 ),
             )
 
+        if user.role == "admin" and await self.user_repo.has_admin():
+            # A password-free admin session is for an install nobody has taken
+            # over yet. Once a real administrator exists it would hand that
+            # role to anyone who can reach the port. See app.core.demo_admin.
+            from app.core.demo_admin import DEMO_ADMIN_SUPERSEDED, DEMO_ADMIN_SUPERSEDED_MESSAGE
+
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={"error": DEMO_ADMIN_SUPERSEDED, "message": DEMO_ADMIN_SUPERSEDED_MESSAGE},
+            )
+
         user_id = user.id
         prior_last_login = user.last_login_at
         now = datetime.now(UTC)

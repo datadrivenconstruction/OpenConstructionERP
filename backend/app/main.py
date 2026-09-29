@@ -1556,6 +1556,14 @@ async def _seed_demo_account() -> None:
                     "env" if not was_generated else "generated",
                 )
 
+            # The loop above never touches the role of a row that exists, which
+            # is what keeps the public demo's viewers as they are. The demo
+            # administrator on an install someone runs for themselves is the one
+            # exception, repaired here while no real admin exists.
+            from app.core.demo_admin import reconcile_demo_admin_role
+
+            await reconcile_demo_admin_role(session)
+
             # Persist generated passwords and say where they are. Operators
             # who set env vars never see this banner.
             if generated_creds:

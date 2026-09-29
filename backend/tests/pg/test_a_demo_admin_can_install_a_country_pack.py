@@ -126,6 +126,11 @@ async def self_installed(pg_async_url, monkeypatch, tmp_path):
     monkeypatch.setenv("DATABASE_SYNC_URL", sync_url.render_as_string(hide_password=False))
     get_settings.cache_clear()
     reset_cache()
+    # Every test here signs in several times from the same client address, and
+    # the per-address sign-in limit is not what any of them is about.
+    from app.core.rate_limiter import login_limiter
+
+    monkeypatch.setattr(login_limiter, "is_allowed", lambda _key: (True, 99))
 
     # The loader subscribes module handlers again; later tests count what the
     # bus delivers, so the handler lists go back exactly as they were.
@@ -290,3 +295,123 @@ async def test_the_demo_administrator_gets_a_cost_base_with_the_pack(self_instal
         items = (await s.execute(select(func.count()).select_from(CostItem))).scalar_one()
     assert items > 0, f"the cost step said {cost} and left no cost items"
     assert steps["resources"]["status"] != "error", f"resources step: {steps['resources']}"
+
+
+# ── The demo administrator on an install that already exists ────────────────
+
+
+async def _set_role(factory, email: str, role: str) -> None:
+    from app.modules.users.models import User
+
+    async with factory() as s:
+        user = (await s.execute(select(User).where(User.email == email))).scalar_one()
+        user.role = role
+        await s.commit()
+
+
+async def _role(factory, email: str) -> str:
+    from app.modules.users.models import User
+
+    async with factory() as s:
+        return (await s.execute(select(User.role).where(User.email == email))).scalar_one()
+
+
+async def _add_real_admin(factory) -> None:
+    from app.modules.users.models import User
+    from app.modules.users.service import hash_password
+
+    async with factory() as s:
+        s.add(
+            User(
+                id=uuid.uuid4(),
+                email=f"owner-{uuid.uuid4().hex[:6]}@example.com",
+                hashed_password=hash_password("RealAdmin1234!"),
+                full_name="Real Admin",
+                role="admin",
+                locale="en",
+                is_active=True,
+                metadata_={},
+            )
+        )
+        await s.commit()
+
+
+async def _restart() -> None:
+    """What the next start of the server does with the demo rows."""
+    from app.main import _seed_demo_account
+
+    await _seed_demo_account()
+
+
+async def test_an_older_install_gets_its_demo_administrator_back_on_the_next_start(self_installed) -> None:
+    """A demo@ row written as a viewer (older seeder scripts did) is an admin after a restart."""
+    client, factory = self_installed
+    await _set_role(factory, DEMO_ADMIN, "viewer")
+
+    await _restart()
+
+    assert await _role(factory, DEMO_ADMIN) == "admin"
+    headers = await _demo_login(client, DEMO_ADMIN)
+    r = await client.post("/api/v1/partner-pack/rescan", headers=headers)
+    assert r.status_code == 200, f"the repaired demo administrator was refused an admin action: {r.text}"
+
+
+@pytest.mark.parametrize("flag", ["OE_DEMO_MODE", "OE_DEMO_READ_ONLY"])
+async def test_the_public_demo_keeps_its_demo_rows_as_they_are(self_installed, monkeypatch, flag: str) -> None:
+    """On the hosted demo the demo accounts are viewers on purpose, and a restart leaves them so."""
+    from app.config import get_settings
+
+    _client, factory = self_installed
+    for email in _seeded_accounts():
+        await _set_role(factory, email, "viewer")
+    monkeypatch.setenv(flag, "true")
+    get_settings.cache_clear()
+    try:
+        await _restart()
+    finally:
+        monkeypatch.delenv(flag)
+        get_settings.cache_clear()
+
+    for email in _seeded_accounts():
+        assert await _role(factory, email) == "viewer", f"{flag}: a restart changed the role of {email}"
+
+
+async def test_a_real_administrator_ends_the_demo_administrator(self_installed) -> None:
+    """Once somebody real runs the install, no password-free admin session is handed out."""
+    client, factory = self_installed
+    await _add_real_admin(factory)
+
+    # A viewer row is not raised any more.
+    await _set_role(factory, DEMO_ADMIN, "viewer")
+    await _restart()
+    assert await _role(factory, DEMO_ADMIN) == "viewer", "promoted although a real administrator exists"
+
+    # And an admin row can no longer be opened without its password.
+    await _set_role(factory, DEMO_ADMIN, "admin")
+    r = await client.post("/api/v1/users/auth/demo-login/", json={"email": DEMO_ADMIN})
+    assert r.status_code == 403, f"the demo administrator still signs in without a password: {r.status_code}"
+    assert r.json()["detail"]["error"] == "demo_admin_superseded", r.text
+
+    # The other demo tiles are not administrators and keep working.
+    await _demo_login(client, "manager@openconstructionerp.com")
+
+
+async def test_the_public_demo_tiles_still_sign_in_next_to_a_real_administrator(self_installed, monkeypatch) -> None:
+    """The hosted demo has real administrators and viewer demo rows; its tiles must keep working."""
+    from app.config import get_settings
+
+    client, factory = self_installed
+    await _add_real_admin(factory)
+    for email in _seeded_accounts():
+        await _set_role(factory, email, "viewer")
+    monkeypatch.setenv("OE_DEMO_MODE", "true")
+    get_settings.cache_clear()
+    try:
+        await _restart()
+        for email in _seeded_accounts():
+            headers = await _demo_login(client, email)
+            me = await client.get("/api/v1/users/me/", headers=headers)
+            assert me.json()["role"] == "viewer", f"{email} signed in as {me.json()['role']}"
+    finally:
+        monkeypatch.delenv("OE_DEMO_MODE")
+        get_settings.cache_clear()
