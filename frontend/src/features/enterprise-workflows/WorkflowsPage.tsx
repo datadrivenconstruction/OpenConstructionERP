@@ -31,7 +31,11 @@ import {
   fetchApprovalRequests,
   approveRequest,
   rejectRequest,
+  WORKFLOW_ACTION_TYPES,
+  WORKFLOW_STEP_ROLES,
   type Workflow,
+  type WorkflowActionType,
+  type WorkflowStep,
   type CreateWorkflowBody,
   type ApprovalRequest,
   type ApprovalStatus,
@@ -68,6 +72,42 @@ function relativeTime(iso: string, t: (k: string, o?: Record<string, unknown>) =
   });
 }
 
+type TFn = (k: string, o?: Record<string, unknown>) => string;
+
+function roleLabel(role: string, t: TFn): string {
+  return t(`users.roles.${role}`, { defaultValue: role.charAt(0).toUpperCase() + role.slice(1) });
+}
+
+function actionLabel(action: WorkflowActionType, t: TFn): string {
+  switch (action) {
+    case 'approve':
+      return t('enterprise_workflows.approve', { defaultValue: 'Approve' });
+    case 'review':
+      return t('enterprise_workflows.action_review', { defaultValue: 'Review' });
+    case 'sign_off':
+      return t('enterprise_workflows.action_sign_off', { defaultValue: 'Sign-off' });
+    case 'notify':
+      return t('enterprise_workflows.action_notify', { defaultValue: 'Notify' });
+  }
+}
+
+/** "1. Manager · Approve" for a stored step; a step without a role is open to anyone. */
+function describeStep(step: WorkflowStep, index: number, t: TFn): string {
+  const who = step.role
+    ? roleLabel(step.role, t)
+    : t('enterprise_workflows.any_role', { defaultValue: 'Any role' });
+  const known = (WORKFLOW_ACTION_TYPES as readonly string[]).includes(step.action_type ?? '');
+  const action = actionLabel(known ? (step.action_type as WorkflowActionType) : 'approve', t);
+  return `${index + 1}. ${who} · ${action}`;
+}
+
+interface StepDraft {
+  role: string;
+  action_type: WorkflowActionType;
+}
+
+const EMPTY_STEP: StepDraft = { role: '', action_type: 'approve' };
+
 // ---------------------------------------------------------------------------
 // Create Workflow Dialog
 // ---------------------------------------------------------------------------
@@ -87,6 +127,11 @@ function CreateWorkflowDialog({
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [entityType, setEntityType] = useState('');
+  const [steps, setSteps] = useState<StepDraft[]>([EMPTY_STEP]);
+
+  const updateStep = useCallback((index: number, patch: Partial<StepDraft>) => {
+    setSteps((prev) => prev.map((s, i) => (i === index ? { ...s, ...patch } : s)));
+  }, []);
 
   const handleSubmit = useCallback(() => {
     if (!name.trim() || !entityType.trim()) return;
@@ -94,13 +139,18 @@ function CreateWorkflowDialog({
       name: name.trim(),
       description: description.trim() || null,
       entity_type: entityType.trim(),
-      steps: [],
+      // The keys the approval engine reads. A step with no role leaves the key
+      // out, which the engine treats as open to anyone.
+      steps: steps.map((s) =>
+        s.role ? { role: s.role, action_type: s.action_type } : { action_type: s.action_type },
+      ),
       is_active: true,
     });
     setName('');
     setDescription('');
     setEntityType('');
-  }, [name, description, entityType, onSubmit]);
+    setSteps([EMPTY_STEP]);
+  }, [name, description, entityType, steps, onSubmit]);
 
   if (!open) return null;
 
@@ -118,10 +168,11 @@ function CreateWorkflowDialog({
 
         <div className="space-y-3">
           <div>
-            <label className="mb-1 block text-xs font-medium text-content-secondary">
+            <label htmlFor="ew-create-name" className="mb-1 block text-xs font-medium text-content-secondary">
               {t('enterprise_workflows.workflow_name', { defaultValue: 'Workflow Name' })}
             </label>
             <input
+              id="ew-create-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -135,10 +186,11 @@ function CreateWorkflowDialog({
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-content-secondary">
+            <label htmlFor="ew-create-entity" className="mb-1 block text-xs font-medium text-content-secondary">
               {t('enterprise_workflows.entity_type', { defaultValue: 'Entity Type' })}
             </label>
             <input
+              id="ew-create-entity"
               type="text"
               value={entityType}
               onChange={(e) => setEntityType(e.target.value)}
@@ -167,6 +219,67 @@ function CreateWorkflowDialog({
                 focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
             />
           </div>
+
+          <fieldset>
+            <legend className="mb-1 block text-xs font-medium text-content-secondary">
+              {t('enterprise_workflows.steps_label', { defaultValue: 'Approval steps' })}
+            </legend>
+            <ol className="space-y-2">
+              {steps.map((step, i) => {
+                const stepName = t('enterprise_workflows.step', { defaultValue: 'Step {{n}}', n: i + 1 });
+                return (
+                  <li key={i} className="flex items-center gap-2">
+                    <span className="w-14 shrink-0 text-xs text-content-tertiary">{stepName}</span>
+                    <select
+                      value={step.role}
+                      onChange={(e) => updateStep(i, { role: e.target.value })}
+                      aria-label={`${stepName} ${t('enterprise_workflows.step_role', { defaultValue: 'Required role' })}`}
+                      className="min-w-0 flex-1 rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-sm
+                        text-content-primary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                    >
+                      <option value="">{t('enterprise_workflows.any_role', { defaultValue: 'Any role' })}</option>
+                      {WORKFLOW_STEP_ROLES.map((r) => (
+                        <option key={r} value={r}>
+                          {roleLabel(r, t)}
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      value={step.action_type}
+                      onChange={(e) => updateStep(i, { action_type: e.target.value as WorkflowActionType })}
+                      aria-label={`${stepName} ${t('enterprise_workflows.step_action', { defaultValue: 'Action' })}`}
+                      className="min-w-0 flex-1 rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-sm
+                        text-content-primary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+                    >
+                      {WORKFLOW_ACTION_TYPES.map((a) => (
+                        <option key={a} value={a}>
+                          {actionLabel(a, t)}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setSteps((prev) => prev.filter((_, j) => j !== i))}
+                      disabled={steps.length <= 1}
+                      aria-label={`${t('common.remove', { defaultValue: 'Remove' })} ${stepName}`}
+                      className="shrink-0 rounded-md p-1.5 text-content-tertiary hover:bg-semantic-error-bg
+                        hover:text-semantic-error disabled:opacity-30"
+                    >
+                      <X className="h-4 w-4" aria-hidden />
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+            <button
+              type="button"
+              onClick={() => setSteps((prev) => [...prev, EMPTY_STEP])}
+              className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-oe-blue-text hover:underline"
+            >
+              <Plus className="h-3.5 w-3.5" aria-hidden />
+              {t('enterprise_workflows.add_step', { defaultValue: 'Add step' })}
+            </button>
+          </fieldset>
         </div>
 
         <div className="mt-5 flex justify-end gap-2">
@@ -244,6 +357,15 @@ function WorkflowRow({
             })}
           </span>
         </div>
+        {workflow.steps.length > 0 && (
+          <ol className="mt-1 flex flex-wrap gap-1.5 text-2xs text-content-secondary">
+            {workflow.steps.map((step, i) => (
+              <li key={i} className="rounded bg-surface-secondary px-1.5 py-0.5">
+                {describeStep(step, i, t)}
+              </li>
+            ))}
+          </ol>
+        )}
       </div>
       <div className="flex shrink-0 items-center gap-1">
         <button
