@@ -230983,10 +230983,10 @@
     },
     {
       "name": "bim",
-      "ts_files": 94,
+      "ts_files": 95,
       "css_files": 0,
-      "test_files": 24,
-      "total_files": 94
+      "test_files": 25,
+      "total_files": 95
     },
     {
       "name": "bim_requirements",
@@ -231291,10 +231291,10 @@
     },
     {
       "name": "enterprise-workflows",
-      "ts_files": 3,
+      "ts_files": 4,
       "css_files": 0,
-      "test_files": 0,
-      "total_files": 3
+      "test_files": 1,
+      "total_files": 4
     },
     {
       "name": "equipment",
@@ -231865,10 +231865,10 @@
     },
     {
       "name": "requirements",
-      "ts_files": 3,
+      "ts_files": 4,
       "css_files": 0,
-      "test_files": 0,
-      "total_files": 3
+      "test_files": 1,
+      "total_files": 4
     },
     {
       "name": "resource-summary",
@@ -231907,10 +231907,10 @@
     },
     {
       "name": "rfq-bidding",
-      "ts_files": 4,
+      "ts_files": 5,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 4
+      "test_files": 2,
+      "total_files": 5
     },
     {
       "name": "risk",
@@ -233472,7 +233472,7 @@
     "total_schemas": 3486,
     "total_python_files": 2209,
     "frontend_features": 190,
-    "frontend_ts_files": 2757,
+    "frontend_ts_files": 2761,
     "frontend_backend_mapped": 169
   },
   "frontend_backend_mapping": {
