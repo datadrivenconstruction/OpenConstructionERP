@@ -9,8 +9,11 @@
 
 import { describe, it, expect, vi, afterEach } from 'vitest';
 
+import type { TFunction } from 'i18next';
+
 import {
   fullInstallPackStream,
+  packInstallFailureTitle,
   PackInstallError,
   type StreamInstallEvent,
 } from '../partnerPacksApi';
@@ -36,6 +39,15 @@ const realRefresh = useAuthStore.getState().refreshAccessToken;
 afterEach(() => {
   vi.unstubAllGlobals();
   useAuthStore.setState({ refreshAccessToken: realRefresh });
+});
+
+describe('packInstallFailureTitle', () => {
+  it('gives the onboarding toast a translatable headline instead of the English message', () => {
+    const t = vi.fn((key: string, opts?: { defaultValue?: string }) => `${key}|${opts?.defaultValue}`);
+    const title = packInstallFailureTitle(t as unknown as TFunction, 'incomplete');
+    expect(t).toHaveBeenCalledWith('modules.pp_fail_incomplete_title', expect.anything());
+    expect(title).toBe('modules.pp_fail_incomplete_title|The connection dropped during the installation');
+  });
 });
 
 describe('fullInstallPackStream and an expired access token', () => {

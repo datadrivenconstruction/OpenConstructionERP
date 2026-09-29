@@ -115,6 +115,8 @@ import {
   type InstalledPartnerPack,
   type FullInstallStepName,
   type FullInstallStepStatus,
+  packInstallFailureTitle,
+  PackInstallError,
 } from './partnerPacksApi';
 import {
   provisionOnboarding,
@@ -2950,7 +2952,12 @@ function PartnerPackInstaller({
           title: t('onboarding.pp_install_error', {
             defaultValue: 'Failed to install the country workspace',
           }),
-          message: err instanceof Error ? err.message : undefined,
+          message:
+            err instanceof PackInstallError
+              ? packInstallFailureTitle(t, err.kind)
+              : err instanceof Error
+                ? err.message
+                : undefined,
         });
       } finally {
         setInstalling(false);

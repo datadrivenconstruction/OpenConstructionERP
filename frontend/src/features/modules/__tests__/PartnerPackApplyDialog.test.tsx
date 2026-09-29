@@ -320,7 +320,9 @@ describe('a finished install is verifiable step by step', () => {
     activate();
 
     await screen.findByText(/Some steps failed: Load work catalog/);
-    expect(screen.getByText('DE_BERLIN: not loaded, download timed out')).toBeTruthy();
+    // The reason is the reader's language; the server's English stays, labelled.
+    expect(screen.getByText('DE_BERLIN: not loaded, the download or import failed')).toBeTruthy();
+    expect(screen.getByText('Server response: download timed out')).toBeTruthy();
 
     streamMock.fullInstallPackStream.mockImplementationOnce(async () => {});
     fireEvent.click(screen.getByRole('button', { name: /Retry/ }));
@@ -346,6 +348,9 @@ describe('a finished install is verifiable step by step', () => {
     renderDialog();
     activate();
     await screen.findByText(/Some steps failed/);
+    // A step's raw exception never stands alone as the explanation.
+    expect(screen.getAllByText('This step failed.').length).toBe(1);
+    expect(screen.getByText('Server response: boom')).toBeTruthy();
     addToast.mockClear();
 
     // The retry reruns demos only; the server's verdict covers that subset.
