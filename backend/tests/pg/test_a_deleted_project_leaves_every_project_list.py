@@ -316,3 +316,132 @@ async def test_a_purged_demo_project_leaves_the_analytics_overview(pg_session) -
         select(func.count()).select_from(BudgetLine).where(BudgetLine.project_id == demo_id)
     )
     assert orphans == 0
+
+
+# ── Delete and restore agree across the lists ──────────────────────────────
+
+
+async def _overview_ids(session, owner_id: uuid.UUID) -> set[str]:
+    from app.modules.projects.router import analytics_overview
+
+    overview = await analytics_overview(
+        session=session,
+        _user_id=str(owner_id),
+        payload={"sub": str(owner_id), "role": "editor"},
+    )
+    return {p["id"] for p in overview["projects"]}
+
+
+async def _project_list_ids(session, owner_id: uuid.UUID) -> set[str]:
+    """What the projects page and the header switcher list by default."""
+    from app.modules.projects.repository import ProjectRepository
+
+    projects, _total = await ProjectRepository(session).list_for_user(owner_id, offset=0, limit=100)
+    return {str(p.id) for p in projects}
+
+
+@pytest.mark.asyncio
+async def test_the_project_list_and_the_overview_agree_after_delete_and_restore(pg_session) -> None:
+    owner, live, deleted = await _live_and_deleted(pg_session)
+
+    after_delete = await _project_list_ids(pg_session, owner.id)
+    assert after_delete == {str(live.id)}
+    assert await _overview_ids(pg_session, owner.id) == after_delete
+
+    await ProjectService(pg_session, get_settings()).restore_project(deleted.id, changed_by=str(owner.id))
+    await pg_session.flush()
+
+    after_restore = await _project_list_ids(pg_session, owner.id)
+    assert after_restore == {str(live.id), str(deleted.id)}
+    assert await _overview_ids(pg_session, owner.id) == after_restore
+
+
+@pytest.mark.asyncio
+async def test_a_hard_deleted_demo_leaves_the_overview_and_no_orphans(pg_session) -> None:
+    """The demo uninstall and clear-all endpoints delete through this helper."""
+    from sqlalchemy import func, select
+
+    from app.modules.finance.models import ProjectBudget
+    from app.modules.projects.service import hard_delete_projects
+
+    owner = await _owner(pg_session)
+    live = await _project_with_budget(pg_session, owner, "Live project")
+    demo = await _project_with_budget(pg_session, owner, "Demo project")
+    # A finance budget links to its project by a bare project_id, no FK:
+    # a plain ORM delete of the project left it behind.
+    pg_session.add(ProjectBudget(project_id=demo.id, currency_code="EUR"))
+    await pg_session.flush()
+    demo_id, live_id, owner_id = demo.id, live.id, owner.id
+
+    await hard_delete_projects(pg_session, [demo])
+
+    assert await _overview_ids(pg_session, owner_id) == {str(live_id)}
+    left = await pg_session.scalar(
+        select(func.count()).select_from(ProjectBudget).where(ProjectBudget.project_id == demo_id)
+    )
+    assert left == 0
+
+
+# ── Service & maintenance, accommodation, photos ───────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_service_listings_keep_to_the_callers_live_projects(pg_session) -> None:
+    """Contracts on a deleted or a foreign project are not listed; unassigned ones are."""
+    from app.dependencies import accessible_project_ids
+    from app.modules.service.models import ServiceContract, ServiceTicket
+    from app.modules.service.repository import ContractRepository, TicketRepository
+
+    owner, live, deleted = await _live_and_deleted(pg_session)
+    stranger = await _owner(pg_session)
+    foreign = Project(name="Someone else's project", owner_id=stranger.id, currency="EUR")
+    pg_session.add(foreign)
+    await pg_session.flush()
+
+    customer = uuid.uuid4()
+    contracts = {}
+    for label, project_id in (("live", live.id), ("deleted", deleted.id), ("foreign", foreign.id), ("none", None)):
+        contract = ServiceContract(customer_id=customer, project_id=project_id, period_start="2026-01-01")
+        pg_session.add(contract)
+        await pg_session.flush()
+        pg_session.add(
+            ServiceTicket(
+                contract_id=contract.id,
+                ticket_number=f"T-{label}",
+                title=f"Leak on {label}",
+                reported_at="2026-01-02T08:00:00+00:00",
+            )
+        )
+        contracts[label] = contract.id
+    await pg_session.flush()
+
+    allowed = await accessible_project_ids(pg_session, str(owner.id), live_only=True)
+    want = {contracts["live"], contracts["none"]}
+
+    listed, _ = await ContractRepository(pg_session).list_all(limit=200, allowed_project_ids=allowed)
+    assert {c.id for c in listed} & set(contracts.values()) == want
+
+    by_customer, _ = await ContractRepository(pg_session).list_for_customer(customer, allowed_project_ids=allowed)
+    assert {c.id for c in by_customer} == want
+
+    tickets, _ = await TicketRepository(pg_session).list_all(limit=200, allowed_project_ids=allowed)
+    assert {t.contract_id for t in tickets} & set(contracts.values()) == want
+
+
+@pytest.mark.asyncio
+async def test_accommodation_and_recent_photos_leave_out_a_deleted_project(pg_session) -> None:
+    from app.modules.accommodation.service import _accessible_project_ids as accommodation_scope
+    from app.modules.documents.models import ProjectPhoto
+    from app.modules.documents.repository import PhotoRepository
+
+    owner, live, deleted = await _live_and_deleted(pg_session)
+
+    assert set(await accommodation_scope(pg_session, str(owner.id), live_only=True)) == {live.id}
+    assert set(await accommodation_scope(pg_session, str(owner.id))) == {live.id, deleted.id}
+
+    for project in (live, deleted):
+        pg_session.add(ProjectPhoto(project_id=project.id, filename="site.jpg", file_path="site.jpg"))
+    await pg_session.flush()
+
+    recent = await PhotoRepository(pg_session).recent_across_projects([live.id, deleted.id])
+    assert {photo.project_id for photo, _name in recent} == {live.id}
