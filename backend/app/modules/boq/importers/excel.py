@@ -28,6 +28,7 @@ import logging
 import math
 import re
 import unicodedata
+from collections.abc import Iterable, Iterator
 from typing import Any, ClassVar, Literal
 
 from app.core.file_signature import detect as detect_signature
@@ -39,6 +40,7 @@ from app.modules.boq.importers._base import (
 )
 from app.modules.boq.importers._encoding import (
     decode_text_bytes,
+    dot_groups_thousands,
     parse_numeric_cell,
     safe_float,
 )
@@ -252,11 +254,26 @@ _HEADERS_BY_LANGUAGE: dict[str, dict[str, tuple[str, ...]]] = {
     # which a two-row header writes as "Egységár" over "Anyag | Díj".
     "hu": {
         "ordinal": ("sorszám", "sorszam", "ssz", "ssz.", "s.sz.", "sorsz."),
-        "description": ("megnevezés", "megnevezes", "tétel szövege", "tetel szovege", "leírás", "leiras"),
+        "description": (
+            "megnevezés",
+            "megnevezes",
+            "tétel szövege",
+            "tetel szovege",
+            # The same heading written as one word, the way several estimating
+            # programs print it.
+            "tételszöveg",
+            "tetelszoveg",
+            "tétel megnevezése",
+            "tetel megnevezese",
+            "leírás",
+            "leiras",
+        ),
         "unit": (
             "egység",
             "egyseg",
             "m.e.",
+            # "Me." is how a narrow column abbreviates mennyiségi egység.
+            "me.",
             "mennyiségi egység",
             "mennyisegi egyseg",
             "mértékegység",
@@ -267,9 +284,43 @@ _HEADERS_BY_LANGUAGE: dict[str, dict[str, tuple[str, ...]]] = {
         "unit_rate": ("egységár", "egysegar", "egység ár", "egyseg ar"),
         "total": ("összesen", "osszesen", "összeg", "osszeg", "mindösszesen", "mindosszesen"),
         "classification": ("tételszám", "tetelszam", "tétel szám", "tetel szam", "normaszám", "normaszam"),
-        "material_rate": ("anyag egységár", "anyag egysegar", "anyag egységára", "anyag egysegara"),
-        "labour_rate": ("díj egységár", "dij egysegar", "munkadíj egységár", "munkadij egysegar"),
-        "material_total": ("anyag összesen", "anyag osszesen", "nettó anyag összesen", "netto anyag osszesen"),
+        # The split is headed three ways: "Anyag egységár", the same two words
+        # the other way round ("Egységár anyag", which is also what a two-row
+        # header grouped under "Anyag" composes to), and "Anyag egységre". A
+        # bill headed the second or third way used to import every line at a
+        # rate of zero without a word.
+        "material_rate": (
+            "anyag egységár",
+            "anyag egysegar",
+            "anyag egységára",
+            "anyag egysegara",
+            "egységár anyag",
+            "egysegar anyag",
+            "anyag egységre",
+            "anyag egysegre",
+        ),
+        "labour_rate": (
+            "díj egységár",
+            "dij egysegar",
+            "munkadíj egységár",
+            "munkadij egysegar",
+            "egységár díj",
+            "egysegar dij",
+            "díj egységre",
+            "dij egysegre",
+            "munkadíj egységre",
+            "munkadij egysegre",
+        ),
+        "material_total": (
+            "anyag összesen",
+            "anyag osszesen",
+            "nettó anyag összesen",
+            "netto anyag osszesen",
+            "anyag összege",
+            "anyag osszege",
+            "összesen anyag",
+            "osszesen anyag",
+        ),
         "labour_total": (
             "díj összesen",
             "dij osszesen",
@@ -277,6 +328,12 @@ _HEADERS_BY_LANGUAGE: dict[str, dict[str, tuple[str, ...]]] = {
             "munkadij osszesen",
             "nettó díj összesen",
             "netto dij osszesen",
+            "díj összege",
+            "dij osszege",
+            "munkadíj összege",
+            "munkadij osszege",
+            "összesen díj",
+            "osszesen dij",
         ),
     },
     "ro": {
@@ -824,7 +881,19 @@ def _map_columns(header: tuple[Any, ...]) -> dict[int, str]:
     return column_map
 
 
-def _combine_split_columns(row: dict[str, Any]) -> dict[str, Any]:
+# Languages whose bills write a decimal comma and, often enough, a dot between
+# thousands: "12.500 Ft" is twelve thousand five hundred forint. Read with a
+# dot as the decimal point it imported as 12.5, a thousandth of the price, and
+# nothing looked wrong. Kept to the languages where the reading has been
+# checked against real bills, because in an English file "12.500" is twelve
+# and a half.
+_DOT_THOUSANDS_LANGUAGES: frozenset[str] = frozenset({"hu"})
+
+# The numeric columns whose typed text is read with dot thousands.
+_NUMERIC_COLUMNS: tuple[str, ...] = ("quantity", "unit_rate", *_SPLIT_COLUMNS)
+
+
+def _combine_split_columns(row: dict[str, Any], language: str | None = None) -> dict[str, Any]:
     """Fold material and labour columns into ``unit_rate`` and ``total``.
 
     Only when the file has no single column of its own for the target: a
@@ -844,7 +913,7 @@ def _combine_split_columns(row: dict[str, Any]) -> dict[str, Any]:
             value = row[key]
             if _is_blank_value(value):
                 continue
-            parsed, error = parse_numeric_cell(value)
+            parsed, error = parse_numeric_cell(value, dot_thousands=language in _DOT_THOUSANDS_LANGUAGES)
             if error is not None or parsed is None:
                 row[target] = value
                 break
@@ -854,6 +923,80 @@ def _combine_split_columns(row: dict[str, Any]) -> dict[str, Any]:
             if filled:
                 row[target] = amount
     return row
+
+
+def header_report(headers: tuple[Any, ...] | list[Any], column_map: dict[int, str]) -> dict[str, Any]:
+    """What the header row said, what it was read as, and what a bill still needs.
+
+    ``recognised`` maps each header cell the table knows to the column it
+    feeds, ``unrecognised`` lists the cells it does not, and ``missing`` names
+    what the sheet lacks to be read as a bill at all: a description, and a
+    quantity, unit or rate. The import dialog shows all three, so a file that
+    imports nothing says which heading to rename instead of coming back empty.
+    """
+    recognised: dict[str, str] = {}
+    unrecognised: list[str] = []
+    for index, cell in enumerate(headers):
+        text = _cell_text(cell)
+        if not text:
+            continue
+        canonical = column_map.get(index)
+        if canonical:
+            recognised[text] = _SPLIT_COLUMNS.get(canonical, canonical)
+        else:
+            unrecognised.append(text)
+    mapped = set(column_map.values())
+    missing: list[str] = []
+    if "description" not in mapped:
+        missing.append("description")
+    if not mapped & _ITEM_SHEET_COLUMNS:
+        missing.append("quantity_or_rate")
+    return {"recognised": recognised, "unrecognised": unrecognised, "missing": missing}
+
+
+def _report_header(
+    headers: tuple[Any, ...] | list[Any], column_map: dict[int, str], top_rows: Iterable[tuple[Any, ...]]
+) -> dict[str, Any]:
+    """:func:`header_report` for the row that most looks like the header.
+
+    When fewer than two cells matched anywhere, the reader falls back to row
+    one, which is often a title ("Költségvetés"), and a report of that row
+    would tell the user their heading is the title. The widest row near the
+    top is what they wrote as headings, so that is the one reported.
+    """
+    if len(set(column_map.values())) >= 2:
+        return header_report(headers, column_map)
+    widest = max(
+        (tuple(row) for row in top_rows),
+        key=lambda row: sum(1 for cell in row if _cell_text(cell)),
+        default=tuple(headers),
+    )
+    if sum(1 for cell in widest if _cell_text(cell)) < 2:
+        widest = tuple(headers)
+    return header_report(widest, _map_columns(widest))
+
+
+def header_problem_error(report: dict[str, Any], sheet: str | None = None) -> dict[str, Any]:
+    """The import error for a header row that does not name a bill's columns."""
+    unrecognised = ", ".join(report["unrecognised"][:12]) or "-"
+    error: dict[str, Any] = {
+        "severity": "error",
+        "code": "header_not_recognised",
+        "missing": list(report["missing"]),
+        "unrecognised": list(report["unrecognised"]),
+        "recognised": dict(report["recognised"]),
+        "error": (
+            "The header row does not name "
+            + " and ".join(
+                "a description column" if item == "description" else "a quantity, unit or rate column"
+                for item in report["missing"]
+            )
+            + f". Headings not recognised: {unrecognised}."
+        ),
+    }
+    if sheet:
+        error["sheet"] = sheet
+    return error
 
 
 def _is_blank_value(value: Any) -> bool:
@@ -1048,6 +1191,7 @@ def _parse_csv(content_bytes: bytes) -> tuple[list[dict[str, Any]], dict[str, An
         raise ImporterParseError("CSV file is empty or has no header row")
 
     column_map = _map_columns(raw_headers)
+    language = header_language(raw_headers)
 
     rows: list[dict[str, Any]] = []
     row_numbers: list[int] = []
@@ -1058,13 +1202,18 @@ def _parse_csv(content_bytes: bytes) -> tuple[list[dict[str, Any]], dict[str, An
             if canonical:
                 row[canonical] = val.strip() if isinstance(val, str) else val
         if row:
-            rows.append(_combine_split_columns(row))
+            rows.append(_combine_split_columns(row, language))
             row_numbers.append(line_number)
 
     import_metadata = {
         "original_columns": [_cell_text(h) for h in raw_headers],
         "column_mapping": _report_mapping(column_map),
-        "header_language": header_language(raw_headers),
+        "header_language": language,
+        "header_report": _report_header(
+            raw_headers,
+            column_map,
+            itertools.islice(csv.reader(io.StringIO(text), delimiter=delimiter), HEADER_SEARCH_ROWS),
+        ),
         "encoding": encoding,
         "delimiter": delimiter,
         "total_rows": len(rows),
@@ -1079,57 +1228,76 @@ def _parse_rows_from_csv(content_bytes: bytes) -> list[dict[str, Any]]:
     return rows
 
 
-def _pick_item_sheet(workbook: Any) -> Any:
-    """The worksheet the bill's lines are on.
+# The columns that make a sheet a bill: it has to say what each line is and
+# carry at least one of these. Split *totals* alone do not count. A summary
+# sheet heads its money "Anyag összesen | Díj összesen" beside the chapter
+# names and has no quantity, unit or rate, and letting those two columns make
+# it an item sheet imported a workbook that opens on its summary as a handful
+# of empty chapter headings while every line of the bill sat unread behind it.
+_ITEM_SHEET_COLUMNS: frozenset[str] = frozenset({"quantity", "unit", "unit_rate", "material_rate", "labour_rate"})
 
-    The active sheet when it carries a header naming a description and a
-    quantity or a price. Otherwise the first sheet that does: exported bills
-    open on a cover or a summary sheet ("Záradék", "Összesítő") and keep the
-    lines on a later one, and reading only the active sheet found no rows at
-    all. When no sheet qualifies the active sheet is returned as before, so
-    the error the user sees is unchanged.
+
+def _sheet_columns(worksheet: Any) -> set[str]:
+    """The canonical columns a worksheet's header row names."""
+    header, _, _ = _locate_header(worksheet.iter_rows(max_row=HEADER_SEARCH_ROWS + 1, values_only=True))
+    return set(_map_columns(header or ()).values())
+
+
+def _is_item_sheet(columns: set[str]) -> bool:
+    return "description" in columns and bool(columns & _ITEM_SHEET_COLUMNS)
+
+
+def _sheet_is_hidden(worksheet: Any) -> bool:
+    return str(getattr(worksheet, "sheet_state", "visible") or "visible") != "visible"
+
+
+def _sheet_has_content(worksheet: Any) -> bool:
+    for row in worksheet.iter_rows(max_row=HEADER_SEARCH_ROWS + 1, values_only=True):
+        if any(_cell_text(cell) for cell in row):
+            return True
+    return False
+
+
+def _pick_item_sheets(workbook: Any) -> tuple[list[Any], list[dict[str, Any]]]:
+    """The worksheets the bill's lines are on, and why every other one was not read.
+
+    A sheet is an item sheet when its header names a description and a
+    quantity, unit or rate (see :data:`_ITEM_SHEET_COLUMNS`). Every visible item
+    sheet is read, in workbook order: a bill priced by trade keeps each trade on
+    a sheet of its own ("Építészet", "Épületgépészet", "Villamos") behind a cover
+    and a summary ("Záradék", "Főösszesítő"), and reading only the first one
+    lost every other trade without a word. A hidden sheet is left alone. When
+    no sheet qualifies the active sheet is returned, so the error the user sees
+    is the one it always was.
+
+    Returns:
+        ``(sheets, notes)``: the sheets to read, and one note per sheet that
+        holds something and was not read, with its name and the reason.
     """
-    active = workbook.active
-    candidates = [active] + [workbook[name] for name in workbook.sheetnames if workbook[name] is not active]
-    for worksheet in candidates:
-        if worksheet is None:
+    sheets: list[Any] = []
+    notes: list[dict[str, Any]] = []
+    for name in workbook.sheetnames:
+        worksheet = workbook[name]
+        if _sheet_is_hidden(worksheet):
+            if _sheet_has_content(worksheet):
+                notes.append({"sheet": name, "reason": "hidden"})
             continue
-        header, _, _ = _locate_header(worksheet.iter_rows(max_row=HEADER_SEARCH_ROWS + 1, values_only=True))
-        mapped = set(_map_columns(header or ()).values())
-        priced = mapped & {"quantity", "unit_rate", *_SPLIT_COLUMNS}
-        if "description" in mapped and priced:
-            return worksheet
-    return active
+        if _is_item_sheet(_sheet_columns(worksheet)):
+            sheets.append(worksheet)
+        elif _sheet_has_content(worksheet):
+            notes.append({"sheet": name, "reason": "no_item_header"})
+    if not sheets:
+        return [workbook.active], []
+    return sheets, notes
 
 
-def _parse_rows_from_excel(
-    content_bytes: bytes,
-) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    """Read the item sheet of an .xlsx file into canonical-key dicts.
-
-    The item sheet is the active one unless it carries no bill header, see
-    :func:`_pick_item_sheet`. Returns ``(rows, import_metadata)``; metadata
-    preserves the raw column ordering so a later export can round-trip back
-    to the user's original spreadsheet layout, and ``row_numbers`` holds the
-    sheet row each returned row came from, so a message about it names the
-    row the user sees under a letterhead and past blank lines.
-    """
-    from openpyxl import load_workbook
-
-    wb = load_workbook(io.BytesIO(content_bytes), read_only=True, data_only=True)
-    if wb.active is None:
-        raise ImporterParseError("Excel file has no worksheets")
-    ws = _pick_item_sheet(wb)
-
-    sheet_names = wb.sheetnames
-
-    raw_headers, header_number, rows_iter = _locate_header(ws.iter_rows(values_only=True))
+def _read_sheet_rows(worksheet: Any) -> dict[str, Any] | None:
+    """One item sheet's canonical rows, the sheet row of each, and its header."""
+    raw_headers, header_number, rows_iter = _locate_header(worksheet.iter_rows(values_only=True))
     if not raw_headers:
-        raise ImporterParseError("Excel file is empty or has no header row")
-
-    original_columns = [str(h) if h is not None else "" for h in raw_headers]
+        return None
     column_map = _map_columns(raw_headers)
-
+    language = header_language(raw_headers)
     rows: list[dict[str, Any]] = []
     row_numbers: list[int] = []
     for sheet_row, raw_row in enumerate(rows_iter, start=header_number + 1):
@@ -1139,19 +1307,124 @@ def _parse_rows_from_excel(
             if canonical and val is not None:
                 row[canonical] = val
         if row:
-            rows.append(_combine_split_columns(row))
+            rows.append(_combine_split_columns(row, language))
             row_numbers.append(sheet_row)
-    item_sheet = ws.title
+    return {
+        "title": worksheet.title,
+        "headers": tuple(raw_headers),
+        "header_row": header_number,
+        "column_map": column_map,
+        "header_report": _report_header(
+            raw_headers, column_map, worksheet.iter_rows(max_row=HEADER_SEARCH_ROWS, values_only=True)
+        ),
+        "rows": rows,
+        "row_numbers": row_numbers,
+    }
+
+
+def _sheet_fingerprint(rows: list[dict[str, Any]]) -> tuple[str, ...]:
+    """What a sheet's lines say, for telling a copy of a sheet from a new one."""
+    return tuple(str(row.get("description", "") or "").strip() for row in rows)
+
+
+def _join_sheets(read: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[int], list[str]]:
+    """Put several item sheets into one run of rows, a section per sheet.
+
+    Each sheet opens with a section named after it, so the trade a line was
+    priced under is still visible in the bill, and every row carries its sheet
+    under ``_sheet`` for the messages about it. The sheets number their lines
+    independently, so when any number occurs on two sheets every row is
+    prefixed with its sheet's position (``2.1`` for line 1 of the second sheet)
+    and the sheet's section carries that position; otherwise the numbers are
+    the file's own and are kept as they are.
+    """
+    seen: set[str] = set()
+    collide = False
+    for sheet in read:
+        ordinals = {str(row.get("ordinal", "") or "").strip() for row in sheet["rows"]} - {""}
+        if ordinals & seen:
+            collide = True
+        seen |= ordinals
+    rows: list[dict[str, Any]] = []
+    numbers: list[int] = []
+    sheets: list[str] = []
+    for position, sheet in enumerate(read, start=1):
+        section: dict[str, Any] = {"description": sheet["title"], "_sheet": sheet["title"]}
+        if collide:
+            section["ordinal"] = str(position)
+        rows.append(section)
+        numbers.append(sheet["header_row"])
+        sheets.append(sheet["title"])
+        for row, number in zip(sheet["rows"], sheet["row_numbers"], strict=True):
+            ordinal = str(row.get("ordinal", "") or "").strip()
+            joined = {**row, "_sheet": sheet["title"]}
+            if collide and ordinal:
+                joined["ordinal"] = f"{position}.{ordinal}"
+            rows.append(joined)
+            numbers.append(number)
+            sheets.append(sheet["title"])
+    return rows, numbers, sheets
+
+
+def _parse_rows_from_excel(
+    content_bytes: bytes,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Read the item sheets of an .xlsx file into canonical-key dicts.
+
+    Every item sheet is read, see :func:`_pick_item_sheets`. Returns
+    ``(rows, import_metadata)``; metadata preserves the raw column ordering of
+    the first item sheet so a later export can round-trip back to the user's
+    original spreadsheet layout, ``row_numbers`` holds the sheet row each
+    returned row came from and ``row_sheets`` its sheet, so a message about it
+    names the row the user sees under a letterhead and past blank lines, on the
+    sheet it is on. ``sheet_notes`` names every sheet that was not read and why.
+    """
+    from openpyxl import load_workbook
+
+    wb = load_workbook(io.BytesIO(content_bytes), read_only=True, data_only=True)
+    if wb.active is None:
+        raise ImporterParseError("Excel file has no worksheets")
+    sheet_names = wb.sheetnames
+    worksheets, notes = _pick_item_sheets(wb)
+
+    read: list[dict[str, Any]] = []
+    fingerprints: dict[tuple[str, ...], str] = {}
+    for worksheet in worksheets:
+        sheet = _read_sheet_rows(worksheet)
+        if sheet is None:
+            continue
+        fingerprint = _sheet_fingerprint(sheet["rows"])
+        if any(fingerprint) and fingerprint in fingerprints:
+            # A copy of a sheet already read (a priced and an unpriced copy of
+            # the same bill, "Költségvetés (2)") would import every line twice.
+            notes.append({"sheet": sheet["title"], "reason": "duplicate", "of": fingerprints[fingerprint]})
+            continue
+        fingerprints.setdefault(fingerprint, sheet["title"])
+        read.append(sheet)
     wb.close()
 
+    if not read:
+        raise ImporterParseError("Excel file is empty or has no header row")
+
+    first = read[0]
+    if len(read) == 1:
+        rows, row_numbers = first["rows"], first["row_numbers"]
+        row_sheets = [first["title"]] * len(rows)
+    else:
+        rows, row_numbers, row_sheets = _join_sheets(read)
+
     import_metadata = {
-        "original_columns": original_columns,
-        "column_mapping": _report_mapping(column_map),
-        "header_language": header_language(raw_headers),
+        "original_columns": [str(h) if h is not None else "" for h in first["headers"]],
+        "column_mapping": _report_mapping(first["column_map"]),
+        "header_language": header_language(first["headers"]),
+        "header_report": {**first["header_report"], "sheet": first["title"]},
         "sheet_names": sheet_names,
-        "item_sheet": item_sheet,
+        "item_sheet": first["title"],
+        "item_sheets": [sheet["title"] for sheet in read],
+        "sheet_notes": notes,
         "total_rows": len(rows),
         "row_numbers": row_numbers,
+        "row_sheets": row_sheets,
     }
     return rows, import_metadata
 
@@ -1520,6 +1793,7 @@ def partition_summary_rows(
         summary.append(
             {
                 "row": number,
+                **({"sheet": row["_sheet"]} if row.get("_sheet") else {}),
                 "ordinal": ordinal,
                 "description": description[:200],
                 "kind": kind,
@@ -1541,6 +1815,7 @@ def summary_row_warning(report: dict[str, Any]) -> dict[str, Any]:
     """The import warning that tells the user a summary line was left out."""
     return {
         "row": report["row"],
+        **({"sheet": report["sheet"]} if report.get("sheet") else {}),
         "ordinal": report["ordinal"],
         "severity": "info",
         "code": "summary_row_skipped",
@@ -1620,6 +1895,81 @@ def _contingency_amount(row: dict[str, Any], description: str) -> float | None:
     return amount if amount > 0 else None
 
 
+def _naming_the_sheet(
+    kept_rows: list[tuple[int, dict[str, Any]]], result: ImportedBOQ
+) -> Iterator[tuple[int, dict[str, Any]]]:
+    """Yield the rows, then name the sheet on every issue each one raised.
+
+    A row number alone is ambiguous in a workbook read across several sheets:
+    row 12 exists on every one of them. The issues are tagged after the loop
+    body has run, whichever way it left the row.
+    """
+    for row_idx, row in kept_rows:
+        errors_before, warnings_before = len(result.errors), len(result.warnings)
+        yield row_idx, row
+        sheet = row.get("_sheet")
+        if sheet:
+            for issue in (*result.errors[errors_before:], *result.warnings[warnings_before:]):
+                issue.setdefault("sheet", sheet)
+
+
+def _dot_thousands_warnings(row: dict[str, Any], row_idx: int, ordinal: str) -> list[dict[str, Any]]:
+    """One note per cell whose dots were read as thousands separators.
+
+    Only where that reading changed the number: "1.250.000" means the same
+    either way and is not worth a line. The note carries the cell as typed
+    and the number it became, so a reader who meant twelve and a half can see
+    at once which cell to correct.
+    """
+    notes: list[dict[str, Any]] = []
+    for column in _NUMERIC_COLUMNS:
+        text = row.get(column)
+        if not dot_groups_thousands(text):
+            continue
+        read, _ = parse_numeric_cell(text, dot_thousands=True)
+        plain, _ = parse_numeric_cell(text)
+        if read is None or read == plain:
+            continue
+        notes.append(
+            {
+                "row": row_idx,
+                "ordinal": ordinal,
+                "severity": "info",
+                "code": "dot_read_as_thousands",
+                "column": column,
+                "text": str(text).strip(),
+                "value": read,
+                "message": f"'{str(text).strip()}' was read as {read:g}: the dot separates thousands in this bill.",
+            }
+        )
+    return notes
+
+
+def sheet_note_warning(note: dict[str, Any]) -> dict[str, Any]:
+    """The import warning for a worksheet the reader did not read.
+
+    Carries a code and the sheet's name so the import dialog words it in the
+    reader's language; ``message`` is the English fallback.
+    """
+    reason = note["reason"]
+    if reason == "hidden":
+        because = "it is hidden"
+    elif reason == "duplicate":
+        because = f"it repeats the lines of sheet '{note.get('of', '')}'"
+    else:
+        because = "its header names no description with a quantity, unit or rate"
+    warning = {
+        "severity": "info",
+        "code": "sheet_not_read",
+        "sheet": note["sheet"],
+        "reason": reason,
+        "message": f"Sheet '{note['sheet']}' was not read: {because}.",
+    }
+    if note.get("of"):
+        warning["of"] = note["of"]
+    return warning
+
+
 _IMPORT_MAX_QUANTITY = 1e9
 _IMPORT_MAX_UNIT_RATE = 1e8
 
@@ -1630,6 +1980,8 @@ def _rows_to_positions(
     source: str = "excel_import",
     row_numbers: list[int] | None = None,
     header_language: str | None = None,
+    sheet_notes: list[dict[str, Any]] | None = None,
+    header: dict[str, Any] | None = None,
 ) -> ImportedBOQ:
     """Convert canonical rows into :class:`ImportedPosition` objects.
 
@@ -1642,13 +1994,34 @@ def _rows_to_positions(
     metadata. A Hungarian bill keeps them under ``hu`` with the keys the
     workbook profile writes, which is where the Hungarian material and fee
     rule reads them; any other bill keeps them under ``rate_split``.
+
+    A row read off one of several item sheets carries its sheet under
+    ``_sheet``; every issue about it names that sheet, and ``sheet_notes``
+    (the sheets the reader left out, see :func:`_pick_item_sheets`) become
+    one warning each, so a workbook that was only partly read says so.
+
+    ``header`` is the reader's :func:`header_report`. It is kept in the
+    result's metadata, and when it names a column the bill cannot do without
+    it becomes an error: rows read under a header that names no description
+    or no quantity, unit or rate import as nothing, and used to do so with no
+    error at all.
     """
     result = ImportedBOQ(source_format="csv-or-xlsx")
+    if header is not None:
+        result.metadata["header_report"] = header
+        if header.get("missing"):
+            result.errors.append(header_problem_error(header, header.get("sheet")))
+    result.warnings.extend(sheet_note_warning(note) for note in sheet_notes or ())
+    dot_thousands = header_language in _DOT_THOUSANDS_LANGUAGES
     auto_ordinal = 1
 
     # Pre-compute a median unit rate across the file so we can warn on
     # any single position that's >10× above (likely a tampered export).
-    rate_samples = sorted(v for v in (safe_float(r.get("unit_rate"), default=0.0) for r in rows) if v > 0)
+    rate_samples = sorted(
+        v
+        for v in ((parse_numeric_cell(r.get("unit_rate"), dot_thousands=dot_thousands)[0] or 0.0) for r in rows)
+        if v > 0
+    )
     median_rate = rate_samples[len(rate_samples) // 2] if rate_samples else 0.0
 
     kept_rows, summary_rows = partition_summary_rows(rows, row_numbers=row_numbers)
@@ -1663,7 +2036,7 @@ def _rows_to_positions(
     # and duplicate ordinals fail validation.
     explicit_ordinals = {str(row.get("ordinal", "")).strip() for _, row in kept_rows} - {""}
 
-    for row_idx, row in kept_rows:
+    for row_idx, row in _naming_the_sheet(kept_rows, result):
         try:
             description = str(row.get("description", "")).strip()
             if not description:
@@ -1697,8 +2070,10 @@ def _rows_to_positions(
             contingency = _contingency_amount(row, description)
             if contingency is not None:
                 unit_raw, quantity_raw, unit_rate_raw = "lsum", 1.0, contingency
-            quantity, q_err = parse_numeric_cell(quantity_raw)
-            unit_rate, r_err = parse_numeric_cell(unit_rate_raw)
+            quantity, q_err = parse_numeric_cell(quantity_raw, dot_thousands=dot_thousands)
+            unit_rate, r_err = parse_numeric_cell(unit_rate_raw, dot_thousands=dot_thousands)
+            if dot_thousands:
+                result.warnings.extend(_dot_thousands_warnings(row, row_idx, ordinal))
             if q_err is not None:
                 result.errors.append(
                     {
@@ -1738,6 +2113,7 @@ def _rows_to_positions(
                         metadata={
                             "import_row_index": row_idx,
                             "section_header": True,
+                            **({"import_sheet": row["_sheet"]} if row.get("_sheet") else {}),
                         },
                         is_section=True,
                         position_id=position_id,
@@ -1811,6 +2187,8 @@ def _rows_to_positions(
                 classification["tetelrend"] = classification["code"]
 
             metadata: dict[str, Any] = {"import_row_index": row_idx}
+            if row.get("_sheet"):
+                metadata["import_sheet"] = row["_sheet"]
             if contingency is not None:
                 metadata["contingency"] = True
             split = _split_metadata(row, header_language)
@@ -1896,11 +2274,21 @@ class ExcelImporter:
         except Exception as exc:  # noqa: BLE001
             raise ImporterParseError(f"Could not parse spreadsheet: {exc}") from exc
 
-        if not rows:
+        # A header that names no description or no quantity, unit or rate is
+        # reported as a coded error with what it did and did not recognise,
+        # which the import dialog words in the reader's language. Only a file
+        # whose header is fine and holds no rows is refused outright.
+        if not rows and not (import_meta.get("header_report") or {}).get("missing"):
             raise ImporterParseError("No data rows found. Check that the header row names the columns.")
 
         language = import_meta.get("header_language")
-        result = _rows_to_positions(rows, row_numbers=import_meta.get("row_numbers"), header_language=language)
+        result = _rows_to_positions(
+            rows,
+            row_numbers=import_meta.get("row_numbers"),
+            header_language=language,
+            sheet_notes=import_meta.get("sheet_notes"),
+            header=import_meta.get("header_report"),
+        )
         result.source_format = source_format
         result.metadata = {
             **result.metadata,
@@ -1909,7 +2297,7 @@ class ExcelImporter:
             "sheet_names": import_meta.get("sheet_names", []),
             "total_rows_seen": len(rows),
         }
-        for key in ("header_language", "item_sheet", "encoding", "delimiter"):
+        for key in ("header_language", "item_sheet", "item_sheets", "encoding", "delimiter"):
             if import_meta.get(key):
                 result.metadata[key] = import_meta[key]
         return result

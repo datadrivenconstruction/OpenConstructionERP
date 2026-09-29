@@ -163,3 +163,166 @@ def utf8_csv() -> bytes:
 def single_rate_xlsx() -> bytes:
     """The simpler layout: one rate and one total per line, "Mértékegység" for the unit."""
     return _xlsx([("Költségvetés", [SINGLE_RATE_HEADER, *_single_rate_rows()])])
+
+
+# ── A bill priced by trade, one sheet per trade ────────────────────────────
+#
+# Tender bills for a whole building come as one workbook with a sheet per
+# trade behind a cover and a summary. The summary heads its money the way the
+# item sheets head their totals ("Anyag összesen | Díj összesen") beside the
+# trade names, and has no quantity, unit or rate. Each trade sheet numbers its
+# lines from 1.
+
+SUMMARY_SHEET: list[list[object]] = [
+    ["Költségvetés főösszesítő"],
+    [],
+    ["Megnevezés", "Anyag összesen", "Díj összesen"],
+    ["Építészet", 5544680, 1630603],
+    ["Épületgépészet", 75600, 64800],
+    ["Villamos", 54000, 72000],
+    ["Mindösszesen", 5674280, 1767403],
+    ["ÁFA 27%", None, 1958208],
+    ["Bruttó összesen", None, 9399891],
+]
+
+MECHANICAL_ROWS: list[list[str]] = [
+    ["", "", "82 Épületgépészeti csővezeték szerelése", "", "", "", "", "", ""],
+    [
+        "1",
+        "82-001-1.1",
+        "Rézcső szerelése, 22 mm, forrasztott kötéssel",
+        "36",
+        "fm",
+        "2 100",
+        "1 800",
+        "75 600",
+        "64 800",
+    ],
+    ["", "", "Épületgépészeti csővezeték szerelése összesen:", "", "", "", "", "75 600", "64 800"],
+]
+
+ELECTRICAL_ROWS: list[list[str]] = [
+    ["1", "71-001-1.1", "Műanyag védőcső elhelyezése falhoronyba", "120", "m", "450", "600", "54 000", "72 000"],
+]
+
+# (sheet, ordinal, unit, quantity, rate) of every priced line across the trades.
+EXPECTED_TRADE_LINES: list[tuple[str, str, str, float, float]] = [
+    *[("Építészet", f"1.{ssz}", unit, qty, material + fee) for ssz, unit, qty, material, fee in EXPECTED_LINES],
+    ("Épületgépészet", "2.1", "fm", 36.0, 3900.0),
+    ("Villamos", "3.1", "m", 120.0, 1050.0),
+]
+
+
+def trade_workbook_xlsx(*, hidden: bool = False, copy: bool = False) -> bytes:
+    """Cover, summary, then one sheet per trade.
+
+    ``hidden`` adds a hidden working sheet that looks like a bill; ``copy``
+    appends a second copy of the architectural sheet, as a workbook that keeps
+    an earlier version of a trade does.
+    """
+    sheets: list[tuple[str, list[list[object]]]] = [
+        ("Záradék", [["Záradék"], ["A költségvetés a kiviteli terv alapján készült."]]),
+        ("Főösszesítő", SUMMARY_SHEET),
+        ("Építészet", [*TITLE_ROWS, HEADER, *ROWS]),
+        ("Épületgépészet", [HEADER, *MECHANICAL_ROWS]),
+        ("Villamos", [HEADER, *ELECTRICAL_ROWS]),
+    ]
+    if copy:
+        sheets.append(("Építészet (2)", [*TITLE_ROWS, HEADER, *ROWS]))
+    if hidden:
+        sheets.append(("Segéd", [HEADER, ["1", "", "Munkaanyag", "1", "db", "1", "1", "1", "1"]]))
+    workbook = Workbook()
+    workbook.remove(workbook.active)
+    for name, rows in sheets:
+        worksheet = workbook.create_sheet(name)
+        for row in rows:
+            worksheet.append(row)
+        if name == "Segéd":
+            worksheet.sheet_state = "hidden"
+    buffer = io.BytesIO()
+    workbook.save(buffer)
+    return buffer.getvalue()
+
+
+# ── Header variants ────────────────────────────────────────────────────────
+#
+# The same bill headed the other ways Hungarian exports head it: the item text
+# as one word, the unit as "Me.", the split rate with "Egységár" first or as
+# "... egységre", and the totals as "... összege".
+
+HEADER_VARIANTS: dict[str, list[str]] = {
+    "egysegar_first": [
+        "Ssz.",
+        "Tételszám",
+        "Tételszöveg",
+        "Menny.",
+        "Me.",
+        "Egységár anyag",
+        "Egységár díj",
+        "Anyag összege",
+        "Díj összege",
+    ],
+    "egysegre": [
+        "Ssz.",
+        "Tételszám",
+        "Tétel megnevezése",
+        "Mennyiség",
+        "Mennyiségi egység",
+        "Anyag egységre",
+        "Díj egységre",
+        "Anyag összesen",
+        "Díj összesen",
+    ],
+}
+
+
+def header_variant_xlsx(variant: str) -> bytes:
+    return _xlsx([("Költségvetés", [*TITLE_ROWS, HEADER_VARIANTS[variant], *ROWS])])
+
+
+# ── Numbers typed with dots between thousands ──────────────────────────────
+
+DOT_THOUSANDS_ROWS: list[list[str]] = [
+    ["1", "", "Beton szállítása", "12.500", "kg", "0", "1.200", "", ""],
+    ["2", "", "Előregyártott elem", "3", "db", "1.250.000", "12.500 Ft", "", ""],
+    ["3", "", "Zsaluzás", "96,4", "m2", "3.200", "4 150", "", ""],
+    ["4", "", "Vasszerelés", "2,35", "t", "420.000,00", "95 000", "", ""],
+]
+
+# (ordinal, quantity, rate) the rows above must import with.
+EXPECTED_DOT_THOUSANDS: list[tuple[str, float, float]] = [
+    ("1", 12500.0, 1200.0),
+    ("2", 3.0, 1262500.0),
+    ("3", 96.4, 7350.0),
+    ("4", 2.35, 515000.0),
+]
+
+
+def dot_thousands_csv() -> bytes:
+    return _csv([HEADER, *DOT_THOUSANDS_ROWS], "utf-8-sig")
+
+
+def dot_thousands_xlsx() -> bytes:
+    return _xlsx([("Költségvetés", [HEADER, *DOT_THOUSANDS_ROWS])])
+
+
+# ── Files that must be refused or reported, never imported as nothing ──────
+
+
+def unrecognised_header_xlsx() -> bytes:
+    """A table whose headings the importer does not know, under a title block."""
+    header = ["Sor", "Kód", "Munka", "Darab", "ME", "Ár"]
+    rows = [["1", "21-003-5.1.1", "Földkiemelés", "125,5", "m3", "1 850"]]
+    return _xlsx([("Munkalap", [*TITLE_ROWS, header, *rows])])
+
+
+def description_only_xlsx() -> bytes:
+    """A header that names the lines and their codes but nothing to price them by."""
+    header = ["Ssz.", "Tételszám", "Tétel szövege", "Darab", "Ár"]
+    rows = [["1", "21-003-5.1.1", "Földkiemelés", "125,5", "1 850"]]
+    return _xlsx([("Munkalap", [header, *rows])])
+
+
+def truncated_xlsx() -> bytes:
+    """A workbook cut off in transfer: a zip header and half an archive."""
+    return flat_xlsx()[:600]

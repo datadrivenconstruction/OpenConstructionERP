@@ -611,17 +611,29 @@ def test_an_unknown_column_beside_known_ones_is_ignored_and_the_rest_imports() -
     assert sorted(imported.metadata["column_mapping"]) == ["0", "1", "2", "3"]
 
 
-def test_a_sheet_headed_entirely_in_an_unknown_language_degrades_to_a_named_refusal() -> None:
-    # Nothing maps, so no row carries a canonical key and the parser has
-    # nothing to return. It has to say so as ``ImporterParseError``, which the
-    # dispatcher turns into a 400 naming the reason and, when it is the
-    # dispatcher's own detection that found no importer at all, into the smart
-    # import path. An untyped exception would be logged as a failure of ours
-    # instead of reported as a file we cannot read.
+def test_a_sheet_headed_entirely_in_an_unknown_language_reports_the_headings_it_could_not_read() -> None:
+    # Nothing maps, so no row carries a canonical key and there is nothing to
+    # import. That used to be an ``ImporterParseError`` reading "No data rows
+    # found", an English 400 that named neither the headings nor what was
+    # missing. It is now a coded error the import dialog words in the reader's
+    # language, carrying the headings as written, so the user can see which
+    # one to rename.
     content = _workbook(
         _UNKNOWN_MARKET_HEADERS,
         [["1", "Ukuta wa zege", "m3", 9.0, 410.0, 3690.0]],
     )
+
+    imported = _parse(content)
+
+    assert imported.positions == []
+    [error] = imported.errors
+    assert error["code"] == "header_not_recognised"
+    assert error["missing"] == ["description", "quantity_or_rate"]
+    assert error["unrecognised"] == _UNKNOWN_MARKET_HEADERS
+
+
+def test_a_known_header_over_no_rows_is_still_refused() -> None:
+    content = _workbook(["Description", "Unit", "Quantity", "Rate"], [])
 
     with pytest.raises(ImporterParseError) as excinfo:
         _parse(content)
