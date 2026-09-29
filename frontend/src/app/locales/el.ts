@@ -36775,6 +36775,7 @@ const resource = {
     "costs.market_failed_title": "Δεν ήταν δυνατή η τιμολόγηση σε {{market}}",
     "costs.base_text_only_in": "Γλώσσα στοιχείων εργασίας: {{language}}",
     "costs.market_text_fallback": "Γλώσσα στοιχείων εργασίας: {{language}}. Αυτή η βάση δεν έχει έκδοση στη γλώσσα: {{requested}}.",
+    "costs.base_text_swap_failed": "Τα στοιχεία εργασίας παρέμειναν στα {{language}}: δεν ήταν δυνατή η φόρτωση του κειμένου στα {{requested}}.",
     "costs.base_loading_catalog": "Φόρτωση βάσεων κόστους...",
     "costs.base_catalog_failed": "Δεν ήταν δυνατή η φόρτωση των βάσεων κόστους",
     "costs.base_catalog_failed_hint": "Η λίστα βάσεων κόστους προέρχεται από τον διακομιστή. Ελέγξτε ότι το backend εκτελείται και είναι προσβάσιμο και δοκιμάστε ξανά.",

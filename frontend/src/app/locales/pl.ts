@@ -38149,6 +38149,7 @@ const resource = {
     "costs.market_failed_title": "Nie udało się wycenić na {{market}}",
     "costs.base_text_only_in": "Język pozycji: {{language}}",
     "costs.market_text_fallback": "Język pozycji: {{language}}. Ta baza nie ma wersji w języku: {{requested}}.",
+    "costs.base_text_swap_failed": "Pozycje pozostały w języku {{language}}: nie udało się wczytać tekstu w języku {{requested}}.",
     "costs.base_loading_catalog": "Ładowanie baz kosztowych...",
     "costs.base_catalog_failed": "Nie udało się wczytać baz kosztowych",
     "costs.base_catalog_failed_hint": "Lista baz kosztowych pochodzi z serwera. Sprawdź, czy backend działa i jest dostępny, a następnie spróbuj ponownie.",

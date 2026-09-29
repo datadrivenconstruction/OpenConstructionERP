@@ -37604,6 +37604,7 @@ const resource = {
     "costs.market_failed_title": "Không thể định giá vào {{market}}",
     "costs.base_text_only_in": "Ngôn ngữ đầu việc: {{language}}",
     "costs.market_text_fallback": "Ngôn ngữ đầu việc: {{language}}. Cơ sở dữ liệu này không có phiên bản ngôn ngữ: {{requested}}.",
+    "costs.base_text_swap_failed": "Các đầu việc vẫn ở {{language}}: không thể tải văn bản {{requested}}.",
     "costs.base_loading_catalog": "Đang tải cơ sở chi phí...",
     "costs.base_catalog_failed": "Không thể tải cơ sở chi phí",
     "costs.base_catalog_failed_hint": "Danh sách cơ sở chi phí đến từ máy chủ. Kiểm tra xem backend có đang chạy và có thể truy cập được không, sau đó thử lại.",

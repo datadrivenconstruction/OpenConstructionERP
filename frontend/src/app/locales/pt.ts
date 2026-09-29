@@ -37751,6 +37751,7 @@ const resource = {
     "costs.market_failed_title": "Não foi possível precificar em {{market}}",
     "costs.base_text_only_in": "Idioma dos itens: {{language}}",
     "costs.market_text_fallback": "Idioma dos itens: {{language}}. Esta base não tem versão no idioma: {{requested}}.",
+    "costs.base_text_swap_failed": "Os itens permaneceram em {{language}}: não foi possível carregar o texto em {{requested}}.",
     "costs.base_loading_catalog": "A carregar bases de custo...",
     "costs.base_catalog_failed": "Não foi possível carregar as bases de custo",
     "costs.base_catalog_failed_hint": "A lista de bases de custo vem do servidor. Verifique se o backend está em execução e acessível e tente novamente.",

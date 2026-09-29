@@ -37734,6 +37734,7 @@ const resource = {
     "costs.market_failed_title": "Nu s-a putut stabili prețul în {{market}}",
     "costs.base_text_only_in": "Limba articolelor: {{language}}",
     "costs.market_text_fallback": "Limba articolelor: {{language}}. Această bază nu are o versiune în limba: {{requested}}.",
+    "costs.base_text_swap_failed": "Articolele au rămas în limba {{language}}: textul în limba {{requested}} nu a putut fi încărcat.",
     "costs.base_loading_catalog": "Se încarcă bazele de cost...",
     "costs.base_catalog_failed": "Bazele de cost nu au putut fi încărcate",
     "costs.base_catalog_failed_hint": "Lista bazelor de cost provine de la server. Verificați dacă backend-ul rulează și este accesibil, apoi încercați din nou.",

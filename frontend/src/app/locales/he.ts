@@ -36969,6 +36969,7 @@ const resource = {
     "costs.market_failed_title": "לא ניתן היה לתמחר ל-{{market}}",
     "costs.base_text_only_in": "שפת פריטי העבודה: {{language}}",
     "costs.market_text_fallback": "שפת פריטי העבודה: {{language}}. אין לבסיס זה גרסה בשפה: {{requested}}.",
+    "costs.base_text_swap_failed": "פריטי העבודה נשארו בשפה {{language}}: לא ניתן היה לטעון את הטקסט ב-{{requested}}.",
     "costs.base_loading_catalog": "טוען מאגרי עלות...",
     "costs.base_catalog_failed": "לא ניתן היה לטעון את מאגרי העלות",
     "costs.base_catalog_failed_hint": "רשימת מאגרי העלות מגיעה מהשרת. ודאו שה-Backend פועל וניתן לגישה, ולאחר מכן נסו שוב.",

@@ -37459,6 +37459,7 @@ const resource = {
     "costs.market_failed_title": "Nem sikerült beárazni ide: {{market}}",
     "costs.base_text_only_in": "Munkatételek nyelve: {{language}}",
     "costs.market_text_fallback": "Munkatételek nyelve: {{language}}. Ehhez az adatbázishoz nincs verzió ezen a nyelven: {{requested}}.",
+    "costs.base_text_swap_failed": "A munkatételek {{language}} nyelven maradtak: a {{requested}} nyelvű szöveget nem sikerült betölteni.",
     "costs.base_loading_catalog": "Költségadatbázisok betöltése...",
     "costs.regional_adjust.subtitle": "Ugyanaz az egységár egy másik régióban - előnézet",
     "daily_diary.badge_360": "360",

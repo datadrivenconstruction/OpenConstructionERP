@@ -38226,6 +38226,7 @@ const resource = {
     "costs.market_failed_title": "{{market}} bozoriga narxlab boʻlmadi",
     "costs.base_text_only_in": "Ish bandlari tili: {{language}}",
     "costs.market_text_fallback": "Ish bandlari tili: {{language}}. Bu bazada quyidagi tildagi versiya yoʻq: {{requested}}.",
+    "costs.base_text_swap_failed": "Ish bandlari {{language}} tilida qoldi: {{requested}} matni yuklanmadi.",
     "costs.base_loading_catalog": "Xarajat bazalari yuklanmoqda...",
     "costs.base_catalog_failed": "Xarajat bazalarini yuklab boʻlmadi",
     "costs.base_catalog_failed_hint": "Xarajat bazalari roʻyxati serverdan keladi. Backend ishlayotgani va unga ulanish mumkinligini tekshiring, soʻng qayta urinib koʻring.",

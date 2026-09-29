@@ -37872,6 +37872,7 @@ const resource = {
     "costs.market_failed_title": "Nelze ocenit do {{market}}",
     "costs.base_text_only_in": "Jazyk položek: {{language}}",
     "costs.market_text_fallback": "Jazyk položek: {{language}}. Tato databáze nemá verzi v jazyce: {{requested}}.",
+    "costs.base_text_swap_failed": "Položky zůstaly v jazyce {{language}}: text v jazyce {{requested}} se nepodařilo načíst.",
     "costs.base_loading_catalog": "Načítání nákladových základen...",
     "costs.base_catalog_failed": "Nákladové základny se nepodařilo načíst",
     "costs.base_catalog_failed_hint": "Seznam nákladových základen pochází ze serveru. Zkontrolujte, zda backend běží a je dostupný, a zkuste to znovu.",

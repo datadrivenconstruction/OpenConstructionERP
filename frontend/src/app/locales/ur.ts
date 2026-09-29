@@ -36886,6 +36886,7 @@ const resource = {
     "costs.market_failed_title": "{{market}} میں قیمت نہیں لگ سکی",
     "costs.base_text_only_in": "کام آئٹمز کی زبان: {{language}}",
     "costs.market_text_fallback": "کام آئٹمز کی زبان: {{language}}۔ اس بیس میں اس زبان میں کوئی ورژن نہیں ہے: {{requested}}۔",
+    "costs.base_text_swap_failed": "کام آئٹمز {{language}} زبان میں ہی رہے: {{requested}} متن لوڈ نہیں ہو سکا۔",
     "costs.base_loading_catalog": "لاگت بیسز لوڈ ہو رہے ہیں...",
     "costs.base_catalog_failed": "لاگت بیسز لوڈ نہیں ہو سکیں",
     "costs.base_catalog_failed_hint": "لاگت بیسز کی فہرست سرور سے حاصل ہوتی ہے۔ چیک کریں کہ Backend چل رہا ہے اور قابل رسائی ہے، پھر دوبارہ کوشش کریں۔",

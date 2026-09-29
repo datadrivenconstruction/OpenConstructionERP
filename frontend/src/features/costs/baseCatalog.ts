@@ -9,6 +9,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { apiGet, apiPost } from '@/shared/lib/api';
+import { ROLE_RANK, normalizeRole } from '@/shared/lib/roles';
 
 /** One loadable cost base: a full work-item catalogue for a single market. */
 export interface BaseVariant {
@@ -169,6 +170,16 @@ export async function loadBaseMarket(variant: BaseVariant): Promise<BaseMarketRe
   return data;
 }
 
+/**
+ * Whether a role may price a base into a market. The endpoint needs
+ * costs.update, which is editor and up; a viewer is not offered market cards
+ * rather than offered a button that answers 403.
+ */
+export function canPriceMarkets(role: string | null | undefined): boolean {
+  const rank = (ROLE_RANK as Record<string, number>)[normalizeRole(role)];
+  return rank !== undefined && rank >= ROLE_RANK.editor;
+}
+
 /** A language code's name in the reader's language, falling back to the code. */
 export function languageName(code: string, locale: string): string {
   try {
@@ -179,8 +190,10 @@ export function languageName(code: string, locale: string): string {
 }
 
 /**
- * The language a loaded market's text fell back to, or null when it is the one
- * the card asked for. Only Turkiye's English cards fall back today.
+ * The language a loaded base's text is really in, or null when it is the one
+ * that was asked for. A market load answers this for Turkiye's English cards,
+ * which have no English file; a fresh base load answers it when the switch to
+ * the base's own language did not land.
  */
 export function textLanguageFallback(data: BaseMarketResult): string | null {
   const shown = data.text_language;
