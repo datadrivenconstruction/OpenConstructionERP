@@ -36,6 +36,7 @@
 import { useState, useEffect, useCallback, useMemo, type MouseEvent as ReactMouseEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Sparkles, X, ExternalLink, Copy, Check,
@@ -648,6 +649,43 @@ export function CheckForUpdatesButton({ className = '' }: { className?: string }
         {message}
       </span>
     </div>
+  );
+}
+
+/**
+ * The update notice for the collapsed, icon-only sidebar.
+ *
+ * The sidebar card is too wide for the icon strip, and hiding it there meant
+ * a reader who keeps the sidebar collapsed never heard about a release. This
+ * is the same notice as one icon with a dot: it follows the same dismissal,
+ * names the version in its tooltip, and opens About, where the one-line notice
+ * and the Check for updates button live.
+ */
+export function UpdateBadge() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { release } = useUndismissedUpdate();
+  if (!release) return null;
+
+  const label = t('about.check_updates_available', {
+    defaultValue: 'Version {{version}} is available.',
+    version: release.latest_version,
+  });
+
+  return (
+    <button
+      type="button"
+      onClick={() => navigate('/about')}
+      title={label}
+      aria-label={label}
+      className="relative mx-auto mb-2 mt-3 flex h-8 w-8 items-center justify-center rounded-lg text-sky-600 hover:bg-sky-500/10 dark:text-sky-300"
+    >
+      <Sparkles size={16} strokeWidth={2.25} />
+      <span
+        className="absolute right-1 top-1 h-2 w-2 rounded-full bg-sky-500 ring-2 ring-surface-primary"
+        aria-hidden="true"
+      />
+    </button>
   );
 }
 

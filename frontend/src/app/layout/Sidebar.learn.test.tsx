@@ -38,7 +38,12 @@ vi.mock('react-i18next', () => ({
 
 vi.mock('@/shared/lib/useI18nReady', () => ({ useI18nReady: () => 0 }));
 vi.mock('./CustomBranding', () => ({ CustomBranding: () => null }));
-vi.mock('@/shared/ui/UpdateChecker', () => ({ UpdateNotification: () => null }));
+// Each notice renders its own name, so a test can read which one the sidebar
+// chose without the version check behind them (pinned in updateBadge.test.tsx).
+vi.mock('@/shared/ui/UpdateChecker', () => ({
+  UpdateNotification: () => 'update-card',
+  UpdateBadge: () => 'update-badge',
+}));
 vi.mock('@/features/modules/RequestCustomModuleDialog', () => ({
   RequestCustomModuleDialog: () => null,
 }));
@@ -339,5 +344,20 @@ describe('the flight between the menu and the top bar', () => {
     expect(ghost()).toBeNull();
     expect(animations.at(-1)!.frames).toEqual([{ opacity: 0 }, { opacity: 1 }]);
     expect(screen.getByTestId('header-learn-restore')).toBeTruthy();
+  });
+});
+
+describe('the update notice', () => {
+  it('shows as the card in the full sidebar', () => {
+    renderSidebar();
+    expect(screen.getByText('update-card')).toBeTruthy();
+    expect(screen.queryByText('update-badge')).toBeNull();
+  });
+
+  it('still shows in the icon-only sidebar, as the badge', () => {
+    useSidebarCollapseStore.getState().setIconified(true);
+    renderSidebar();
+    expect(screen.getByText('update-badge')).toBeTruthy();
+    expect(screen.queryByText('update-card')).toBeNull();
   });
 });

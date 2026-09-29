@@ -49,7 +49,7 @@ vi.mock('react-i18next', () => ({
 // Surfaces around the menu that make their own calls and decide nothing here.
 vi.mock('@/shared/lib/useI18nReady', () => ({ useI18nReady: () => 0 }));
 vi.mock('./CustomBranding', () => ({ CustomBranding: () => null }));
-vi.mock('@/shared/ui/UpdateChecker', () => ({ UpdateNotification: () => null }));
+vi.mock('@/shared/ui/UpdateChecker', () => ({ UpdateNotification: () => null, UpdateBadge: () => null }));
 vi.mock('@/features/modules/RequestCustomModuleDialog', () => ({
   RequestCustomModuleDialog: () => null,
 }));

@@ -43,7 +43,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useModuleStore } from '@/stores/useModuleStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { apiGet } from '@/shared/lib/api';
-import { UpdateNotification } from '@/shared/ui/UpdateChecker';
+import { UpdateBadge, UpdateNotification } from '@/shared/ui/UpdateChecker';
 import { useViewModeStore } from '@/stores/useViewModeStore';
 import { useNavPendingStore } from '@/shared/lib/navigationProgress';
 import { useRecentStore } from '@/stores/useRecentStore';
@@ -1724,11 +1724,13 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
 
         {/* Update notification — compact clickable card in the sidebar; the
             whole card opens a full-screen modal with highlights + install
-            commands when the user clicks it. Hidden in icon-only mode
-            because the card is text-heavy; users will still see it after
-            expanding the sidebar. `mt-3` breathes the card away from the
-            admin grid buttons above. */}
-        {!iconified && (
+            commands when the user clicks it. In icon-only mode the card is
+            too wide, so the same notice shows as one icon with a dot that
+            opens About. `mt-3` breathes it away from the admin grid buttons
+            above. */}
+        {iconified ? (
+          <UpdateBadge />
+        ) : (
           <div className="mt-3">
             <UpdateNotification />
           </div>
