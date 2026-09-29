@@ -66,6 +66,7 @@ import { aiApi, type AIProvider, type AIConnectionStatus, type AISettings } from
 import { BIMConverterStatusBanner } from '@/features/bim/BIMConverterStatusBanner';
 import { DataSecurityPanel } from '@/features/data-security';
 import { DeleteAccountDialog } from './DeleteAccountDialog';
+import { invalidateProjectLists } from '@/features/projects/invalidateProjectLists';
 
 // Audit log now lives as a Settings section (moved out of the sidebar admin
 // grid). We reuse the exact same page component - lazy-loaded so its filter /
@@ -1335,7 +1336,7 @@ export function SettingsPage() {
     mutationFn: () => apiPost<{ deleted: number }>('/v1/projects/demo-data/purge/', {}),
     onSuccess: (data) => {
       setShowPurgeDemo(false);
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      invalidateProjectLists(queryClient);
       queryClient.invalidateQueries({ queryKey: ['project'] });
       addToast({
         type: 'success',
