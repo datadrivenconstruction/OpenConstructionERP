@@ -20,10 +20,13 @@ vi.mock('../api', async () => {
   return {
     ...actual,
     fetchRFQs: (...args: unknown[]) => mocks.fetchRFQs(...args),
-    fetchBids: () => Promise.resolve({ items: [], total: 0 }),
     fetchComparison: () => Promise.resolve(null),
   };
 });
+
+vi.mock('@/features/contacts/api', () => ({
+  fetchContacts: () => Promise.resolve({ items: [], total: 0 }),
+}));
 
 vi.mock('@/shared/hooks/useActiveProjectId', () => ({
   useActiveProjectId: () => 'proj-1',
@@ -36,16 +39,19 @@ function rfq(id: string, status: RFQStatus): RFQ {
   return {
     id,
     project_id: 'proj-1',
+    rfq_number: `RFQ-${id}`,
     title: `RFQ ${id}`,
     description: '',
-    status,
-    due_date: null,
-    issued_at: null,
-    awarded_at: null,
+    scope_of_work: null,
+    submission_deadline: null,
     currency_code: 'EUR',
-    total_estimated: '0',
-    vendors_count: 2,
-    bids_count: 1,
+    status,
+    issued_to_contacts: ['c-1', 'c-2'],
+    evaluation_method: 'lowest_price',
+    technical_weight: '0',
+    require_full_scope: true,
+    lines: [],
+    bids: [],
     created_at: '2026-09-01T00:00:00Z',
     updated_at: '2026-09-01T00:00:00Z',
   };

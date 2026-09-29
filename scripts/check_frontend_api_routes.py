@@ -97,22 +97,7 @@ RAW_URL_CALLEES = frozenset({"fetch", "downloadWithAuth", "window.open", "EventS
 # Known unmatched calls that are right as they are. Key format:
 #   "<VERDICT> <METHOD|*> <path as written> @ <file under frontend/src>"
 # Every entry carries its reason; an entry that stops matching fails the run.
-ALLOWED: dict[str, str] = {
-    "SLASH GET /v1/rfq-bidding/{rfqId}/comparison @ features/rfq-bidding/api.ts": (
-        "Left on the 404 on purpose. The route is /{rfq_id}/comparison/ and answers "
-        "ComparisonResponse (ranked and excluded quotes), while the page reads a "
-        "ComparisonMatrix (bids, scope_lines, matrix) and would throw on "
-        "comparison.bids.length the moment the path resolved. The comparison view "
-        "has to be rebuilt on the server's shape; fixing the slash alone turns an "
-        "error state into a crash."
-    ),
-    "SLASH GET /v1/rfq-bidding/bids{qs ? `?${qs}` : ''} @ features/rfq-bidding/api.ts": (
-        "Held back with the comparison. The route is /bids/ and answers RFQBidResponse "
-        "(bid_amount, bidder_contact_id), while the awards panel reads total_amount "
-        "and vendor_name: resolving the path would show an award with a blank vendor "
-        "and no amount, which is worse than the empty panel the 404 gives today."
-    ),
-}
+ALLOWED: dict[str, str] = {}
 
 
 # --------------------------------------------------------------------------
