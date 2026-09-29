@@ -1452,7 +1452,7 @@ export async function updateTaskBIMLinks(
   bimElementIds: string[],
 ): Promise<unknown> {
   return apiPatch<unknown, TaskBimLinkRequest>(
-    `/v1/tasks/${encodeURIComponent(taskId)}/bim-links`,
+    `/v1/tasks/${encodeURIComponent(taskId)}/bim-links/`,
     { bim_element_ids: bimElementIds },
   );
 }
@@ -1482,7 +1482,7 @@ export async function updateActivityBIMLinks(
   bimElementIds: string[],
 ): Promise<unknown> {
   return apiPatch<unknown, ActivityBimLinkRequest>(
-    `/v1/schedule/activities/${encodeURIComponent(activityId)}/bim-links`,
+    `/v1/schedule/activities/${encodeURIComponent(activityId)}/bim-links/`,
     { bim_element_ids: bimElementIds },
   );
 }
