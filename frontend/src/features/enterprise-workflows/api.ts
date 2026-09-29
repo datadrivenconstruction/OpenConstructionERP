@@ -7,11 +7,29 @@ import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
 // Workflow types
 // ---------------------------------------------------------------------------
 
+/**
+ * The per-step action types the approval engine dispatches
+ * (``ALLOWED_ACTION_TYPES`` in backend/app/modules/enterprise_workflows/service.py).
+ */
+export const WORKFLOW_ACTION_TYPES = ['approve', 'review', 'sign_off', 'notify'] as const;
+export type WorkflowActionType = (typeof WORKFLOW_ACTION_TYPES)[number];
+
+/**
+ * Roles a step can require. The engine lets a user decide a step when their
+ * role ranks at or above the step's ``role``; the field roles are left out
+ * because they rank below viewer and carry no permissions yet.
+ */
+export const WORKFLOW_STEP_ROLES = ['viewer', 'editor', 'manager', 'admin'] as const;
+
+/**
+ * One approval step, stored by the backend as a plain dict. The engine reads
+ * exactly these keys: ``role`` gates who may decide the step, ``assignee_id``
+ * pins it to one user, and a step with neither is open to anyone.
+ */
 export interface WorkflowStep {
-  step_order: number;
-  approver_role: string;
-  approver_id: string | null;
-  action: string;
+  role?: string | null;
+  action_type?: WorkflowActionType;
+  assignee_id?: string | null;
 }
 
 export interface Workflow {
