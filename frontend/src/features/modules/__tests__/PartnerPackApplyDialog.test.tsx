@@ -55,8 +55,9 @@ vi.mock('@/app/i18n', () => ({
   ],
 }));
 
+const invalidateQueries = vi.hoisted(() => vi.fn());
 vi.mock('@tanstack/react-query', () => ({
-  useQueryClient: () => ({ invalidateQueries: vi.fn() }),
+  useQueryClient: () => ({ invalidateQueries }),
 }));
 
 const addToast = vi.hoisted(() => vi.fn());
@@ -274,6 +275,11 @@ describe('a finished install is verifiable step by step', () => {
     expect(screen.getByText(/Resource catalogue DE_BERLIN: .*resources loaded/)).toBeTruthy();
     expect(screen.getByText('Validation rules switched on for new projects: din276')).toBeTruthy();
     expect(screen.getByText(/Sample projects created: 2/)).toBeTruthy();
+    // Every picker that lists loaded bases is told they changed.
+    const keys = invalidateQueries.mock.calls.map((c) => JSON.stringify(c[0].queryKey));
+    for (const key of [['costs'], ['catalog'], ['cost-explorer', 'regions'], ['cost-match', 'regions']]) {
+      expect(keys).toContain(JSON.stringify(key));
+    }
   });
 
   it('a failed cost base is named with its reason and can be retried alone', async () => {
