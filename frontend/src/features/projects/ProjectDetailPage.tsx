@@ -69,7 +69,8 @@ import {
   ProjectWidgetsRollupProvider,
 } from './components/ProjectWidgets';
 import { useWidgetSettingsStore } from '@/stores/useWidgetSettingsStore';
-import { apiGet, apiPatch, ApiError, extractErrorMessageFromBody, type Page } from '@/shared/lib/api';
+import { activeLanguageTag, apiGet, apiPatch, ApiError, extractErrorMessageFromBody, type Page } from '@/shared/lib/api';
+import { importIssueText, type ImportIssue } from '@/features/boq/importIssueText';
 import clsx from 'clsx';
 import { projectsApi, type Project } from './api';
 import { PhotosTab } from './PhotosTab';
@@ -176,11 +177,14 @@ export function isSection(pos: Pick<PositionSummary, 'unit' | 'quantity' | 'unit
 
 interface ImportResult {
   imported: number;
+  updated?: number;
   skipped?: number;
-  errors: { row?: number; item?: string; error: string; data?: Record<string, string> }[];
+  errors: (ImportIssue & { item?: string; data?: Record<string, string> })[];
+  warnings?: ImportIssue[];
   total_rows?: number;
   total_items?: number;
-  method?: 'direct' | 'ai' | 'cad_ai';
+  /** `native` and `smart_fallback` come from /import/auto/, the others from the smart route it falls back to. */
+  method?: 'direct' | 'native' | 'smart_fallback' | 'ai' | 'cad_ai';
   model_used?: string | null;
   cad_format?: string;
   cad_elements?: number;
@@ -253,12 +257,20 @@ async function fetchBoqDetail(boqId: string): Promise<BOQDetail> {
   return apiGet<BOQDetail>(`/v1/boq/boqs/${boqId}`);
 }
 
-async function smartImportFile(boqId: string, file: File): Promise<ImportResult> {
+// The same route the bill editor's import dialog posts to. It tries the
+// native readers first (GAEB, BC3, the spreadsheet reader with the national
+// workbook profiles and every item sheet of a workbook), validates what it
+// imported, and only hands a file it cannot read to the AI path. This page
+// used to post to the deprecated smart route, which read a spreadsheet's item
+// sheet on its own: a Hungarian chapter workbook lost its item codes and its
+// sections, and nothing it imported was validated.
+async function importFileToBoq(boqId: string, file: File): Promise<ImportResult> {
   const form = new FormData();
   form.append('file', file);
-  const res = await fetch(`/api/v1/boq/boqs/${boqId}/import/smart/`, {
+  const lang = activeLanguageTag();
+  const res = await fetch(`/api/v1/boq/boqs/${boqId}/import/auto/`, {
     method: 'POST',
-    headers: getAuthHeaders(),
+    headers: { ...getAuthHeaders(), ...(lang ? { 'Accept-Language': lang } : {}) },
     body: form,
   });
   if (!res.ok) {
@@ -996,28 +1008,53 @@ function ImportDialog({
   ];
 
   const mutation = useMutation({
-    mutationFn: (file: File) => smartImportFile(boqId, file),
+    mutationFn: (file: File) => importFileToBoq(boqId, file),
     onSuccess: (data) => {
       setResult(data);
       onSuccess();
-      addToast({ type: 'success', title: t('toasts.import_success', { defaultValue: 'Import completed' }) });
+      // A file that imported nothing is not a success, whatever the status code.
+      const landed = (data.imported ?? 0) + (data.updated ?? 0) > 0;
+      addToast({
+        type: landed ? 'success' : 'warning',
+        title: landed
+          ? t('toasts.import_success', { defaultValue: 'Import completed' })
+          : t('import.nothing_imported', { defaultValue: 'Nothing was imported from this file' }),
+      });
     },
     onError: (error: Error) => {
       addToast({ type: 'error', title: t('toasts.import_failed', { defaultValue: 'Import failed' }), message: error.message });
     },
   });
 
+  const [rejected, setRejected] = useState<string | null>(null);
+
   const handleFileSelect = useCallback(
     (file: File) => {
       const name = file.name.toLowerCase();
       if (!SUPPORTED_EXTENSIONS.some((ext) => name.endsWith(ext))) {
+        // Dropping a file this dialog cannot take used to do nothing at all.
+        // An Excel 97-2003 workbook is the common case and has a fix.
+        setRejected(
+          name.endsWith('.xls')
+            ? t('import.legacy_xls', {
+                defaultValue:
+                  '{{name}} is an Excel 97-2003 workbook (.xls), which cannot be read directly. Open it in Excel or LibreOffice, save it as an Excel workbook (.xlsx) and upload that file.',
+                name: file.name,
+              })
+            : t('import.unsupported_type', {
+                defaultValue: '{{name}} is not a file type this import reads. Supported: {{types}}',
+                name: file.name,
+                types: SUPPORTED_EXTENSIONS.join(', '),
+              }),
+        );
         return;
       }
+      setRejected(null);
       setSelectedFile(file);
       setResult(null);
       mutation.reset();
     },
-    [mutation],
+    [mutation, t],
   );
 
   const handleImport = useCallback(() => {
@@ -1096,6 +1133,16 @@ function ImportDialog({
                 </div>
               )}
 
+              {rejected && (
+                <div
+                  role="alert"
+                  className="mt-3 flex items-start gap-2 rounded-lg bg-semantic-error-bg px-4 py-3 text-sm text-semantic-error"
+                >
+                  <AlertCircle size={16} className="shrink-0 mt-0.5 text-semantic-error" />
+                  <p>{rejected}</p>
+                </div>
+              )}
+
               {mutation.isError && (
                 <div className="mt-3 flex items-start gap-2 rounded-lg bg-semantic-error-bg px-4 py-3">
                   <AlertCircle size={16} className="shrink-0 mt-0.5 text-semantic-error" />
@@ -1154,7 +1201,7 @@ function ImportDialog({
                       : (result.model_used ?? 'AI')}
                   </span>
                 )}
-                {result.method === 'direct' && (
+                {(result.method === 'direct' || result.method === 'native') && (
                   <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-surface-secondary px-2 py-0.5 text-2xs font-medium text-content-tertiary">
                     {t('import.method_direct', { defaultValue: 'Direct' })}
                   </span>
@@ -1183,7 +1230,7 @@ function ImportDialog({
                 </div>
                 <div className="rounded-lg bg-surface-secondary px-3 py-2 text-center">
                   <p className="text-lg font-bold text-content-primary">
-                    {result.total_items ?? result.total_rows ?? 0}
+                    {result.total_items ?? result.total_rows ?? result.imported + (result.updated ?? 0) + (result.skipped ?? 0)}
                   </p>
                   <p className="text-2xs text-content-tertiary uppercase tracking-wide">
                     {t('import.stat_total_items', { defaultValue: 'Total items' })}
@@ -1202,8 +1249,25 @@ function ImportDialog({
                   <div className="max-h-32 overflow-y-auto space-y-1">
                     {result.errors.map((err, i) => (
                       <p key={`${err.row || err.item || ''}-${i}`} className="text-xs text-semantic-error">
-                        {err.row ? `${t('import.error_row', { defaultValue: 'Row {{row}}', row: err.row })}: ` : err.item ? `${err.item}: ` : ''}
-                        {err.error}
+                        {err.row == null && err.item ? `${err.item}: ` : ''}
+                        {importIssueText(err, t, (v) => fmtFixed(v, 2))}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* What the reader left out and why: sheets not read, total lines,
+                  numbers read with dot thousands. */}
+              {(result.warnings ?? []).length > 0 && (
+                <div className="rounded-lg border border-amber-200 dark:border-amber-900/40 bg-amber-50 dark:bg-amber-950/20 px-4 py-3">
+                  <p className="text-xs font-medium text-amber-800 dark:text-amber-300 mb-2">
+                    {t('import.notes_title', { defaultValue: 'Notes' })} ({(result.warnings ?? []).length})
+                  </p>
+                  <div className="max-h-32 overflow-y-auto space-y-1">
+                    {(result.warnings ?? []).map((w, i) => (
+                      <p key={`${w.sheet ?? ''}-${w.row ?? ''}-${i}`} className="text-xs text-amber-700 dark:text-amber-400">
+                        {importIssueText(w, t, (v) => fmtFixed(v, 2))}
                       </p>
                     ))}
                   </div>
