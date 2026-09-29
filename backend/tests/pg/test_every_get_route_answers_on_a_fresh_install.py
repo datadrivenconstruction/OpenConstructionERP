@@ -166,9 +166,24 @@ def _pick(row: dict[str, Any], param: str) -> str | None:
 
 
 def _query_fields(route: Any) -> list[Any]:
-    from fastapi.dependencies.utils import get_flat_dependant
+    """Every query parameter of the route, including those its dependencies declare.
 
-    return list(get_flat_dependant(route.dependant).query_params)
+    Walked by hand over ``Dependant.query_params`` and ``Dependant.dependencies``
+    rather than through FastAPI's flattening helper, which is private and has
+    changed shape between releases.
+    """
+    fields: dict[str, Any] = {}
+    stack = [route.dependant]
+    seen: set[int] = set()
+    while stack:
+        dependant = stack.pop()
+        if id(dependant) in seen:
+            continue
+        seen.add(id(dependant))
+        for f in getattr(dependant, "query_params", None) or []:
+            fields.setdefault(_alias(f), f)
+        stack.extend(getattr(dependant, "dependencies", None) or [])
+    return list(fields.values())
 
 
 def _is_required(field_: Any) -> bool:
