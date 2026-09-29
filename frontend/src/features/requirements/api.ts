@@ -169,7 +169,7 @@ export async function runGate(setId: string, gateNumber: number): Promise<GateRe
 
 export async function fetchGates(setId: string): Promise<GateResult[]> {
   const res = await apiGet<GateResult[] | { items: GateResult[] }>(
-    `/v1/requirements/${setId}/gates`,
+    `/v1/requirements/${setId}/gates/`,
   );
   return Array.isArray(res) ? res : res.items ?? [];
 }
