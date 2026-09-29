@@ -15,6 +15,8 @@ export default defineConfig({
   workers: 1,
   retries: 0,
   timeout: 120_000,
+  // Stops the sweep in time for the workflow to build and upload the report.
+  globalTimeout: 95 * 60_000,
   reporter: [['list'], ['html', { outputFolder: 'qa-routes/html', open: 'never' }]],
   outputDir: 'qa-routes/test-results',
   use: {
