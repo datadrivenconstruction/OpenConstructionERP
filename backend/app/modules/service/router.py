@@ -29,6 +29,7 @@ from app.dependencies import (
     CurrentUserPayload,
     RequirePermission,
     SessionDep,
+    accessible_project_ids,
     verify_project_access,
 )
 from app.modules.service.schemas import (
@@ -156,15 +157,22 @@ async def list_contracts(
     limit: int = Query(default=50, ge=1, le=200),
     service: ServiceService = Depends(_get_service),
 ) -> list[ServiceContractResponse]:
-    """List service contracts (optionally filtered by customer/project/status)."""
+    """List service contracts (optionally filtered by customer/project/status).
+
+    Without a project the listing covers the caller's live projects plus the
+    contracts on no project: a contract on a project the caller cannot open,
+    or on a deleted one, is not listed.
+    """
     if project_id is not None:
         await verify_project_access(project_id, user_id, session)
+    allowed = None if project_id is not None else await accessible_project_ids(session, user_id, live_only=True)
     if customer_id is not None:
         items, _ = await service.contract_repo.list_for_customer(
             customer_id,
             offset=offset,
             limit=limit,
             status=status_filter,
+            allowed_project_ids=allowed,
         )
     elif project_id is not None:
         items, _ = await service.contract_repo.list_for_project(
@@ -177,6 +185,7 @@ async def list_contracts(
             offset=offset,
             limit=limit,
             status=status_filter,
+            allowed_project_ids=allowed,
         )
     return [ServiceContractResponse.model_validate(it) for it in items]
 
@@ -403,11 +412,13 @@ async def list_tickets(
         # No contract/project scope ⇒ tenant-wide dispatcher view. Previously
         # this returned [] which left the default /service Tickets tab
         # permanently empty (and the WO-create ticket picker blank).
+        # Scoped to the caller's live projects plus contracts on no project.
         items, total = await service.ticket_repo.list_all(
             offset=offset,
             limit=limit,
             status=status_filter,
             priority=priority,
+            allowed_project_ids=await accessible_project_ids(session, user_id, live_only=True),
         )
     return ServiceTicketListResponse(
         items=[ServiceTicketResponse.model_validate(it) for it in items],
@@ -567,11 +578,13 @@ async def list_work_orders(
             technician_id=technician_id,
         )
     else:
+        # Scoped to the caller's live projects plus contracts on no project.
         items, total = await service.work_order_repo.list_all(
             offset=offset,
             limit=limit,
             status=status_filter,
             technician_id=technician_id,
+            allowed_project_ids=await accessible_project_ids(session, user_id, live_only=True),
         )
     return WorkOrderListResponse(
         items=[WorkOrderResponse.model_validate(it) for it in items],
