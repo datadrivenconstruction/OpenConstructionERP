@@ -507,6 +507,11 @@ export function PartnerPackApplyDialog({
         // Cost bases and catalogue rows just changed under the cost pages.
         void qc.invalidateQueries({ queryKey: ['costs'] });
         void qc.invalidateQueries({ queryKey: ['catalog'] });
+        // Cost Explorer and Cost Match keep their own base lists under their
+        // own prefixes, fresh for five minutes; without this a base that just
+        // loaded is missing from both pickers, which reads as "nothing installed".
+        void qc.invalidateQueries({ queryKey: ['cost-explorer', 'regions'] });
+        void qc.invalidateQueries({ queryKey: ['cost-match', 'regions'] });
         // The pack is applied once its first step is, whatever the later steps
         // did, so its language follows even when a cost base failed.
         if (applyOk) {
