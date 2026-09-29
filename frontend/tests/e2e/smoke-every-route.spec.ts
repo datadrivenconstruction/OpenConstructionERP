@@ -188,12 +188,17 @@ async function resolveParams(page: Page): Promise<Params> {
     assemblyId: (await firstId(['/v1/assemblies/'])) ?? fromLinks(new RegExp(`^/assemblies/${UUIDISH}$`)),
     rfiId: (await firstId([`/v1/rfi/?${q}`])) ?? fromLinks(new RegExp(`^/rfi/${UUIDISH}$`)),
     devId: (await firstId(['/v1/property-dev/developments/'])) ?? fromLinks(new RegExp(`^/property-dev/developments/${UUIDISH}/`)),
-    playbookId: fromLinks(new RegExp(`^/cases/${UUIDISH}$`)),
+    // Shipped playbooks are source files; the id is the file stem.
+    playbookId:
+      fs
+        .readdirSync(path.join(process.cwd(), 'src', 'features', 'cases', 'data'))
+        .find((f) => f.endsWith('.playbook.ts'))
+        ?.replace(/\.playbook\.ts$/, '') ?? fromLinks(new RegExp(`^/cases/${UUIDISH}$`)),
     eacId: fromLinks(new RegExp(`^/eac/blocks/${UUIDISH}$`)),
     moduleKey: fromLinks(new RegExp(`^/modules/(?!developer-guide$)${UUIDISH}$`)),
     key: fromLinks(new RegExp(`^/property-dev/dashboards/${UUIDISH}$`)),
     claimId:
-      (pid ? await firstId([`/v1/contracts/claims/?${q}`]) : null) ??
+      (pid ? await firstId([`/v1/contracts/progress-claims/?${q}`]) : null) ??
       fromLinks(new RegExp(`^/projects/[^/]+/contracts/claims/${UUIDISH}$`)),
   };
   const scheduleId = (await firstId([`/v1/schedule/schedules/?${q}`])) ?? fromLinks(new RegExp(`^/schedule/${UUIDISH}/cpm$`));
