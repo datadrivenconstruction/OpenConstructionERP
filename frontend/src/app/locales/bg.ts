@@ -37729,6 +37729,8 @@ const resource = {
     "costs.market_priced_title": "Оценено в {{market}}",
     "costs.market_priced_msg": "{{items}} артикула с нова цена в {{market}} ({{currency}})",
     "costs.market_failed_title": "Не може да се оцени в {{market}}",
+    "costs.base_text_only_in": "Език на позициите: {{language}}",
+    "costs.market_text_fallback": "Език на позициите: {{language}}. Тази база няма версия на език: {{requested}}.",
     "costs.base_loading_catalog": "Зареждане на бази разходи...",
     "costs.base_catalog_failed": "Базите разходи не можаха да бъдат заредени",
     "costs.base_catalog_failed_hint": "Списъкът с бази разходи идва от сървъра. Проверете дали backend работи и е достъпен, след което опитайте отново.",

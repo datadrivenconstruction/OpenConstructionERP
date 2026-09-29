@@ -38359,6 +38359,8 @@ const resource = {
     "costs.market_priced_title": "Bepreist in {{market}}",
     "costs.market_priced_msg": "{{items}} Elemente neu bepreist in {{market}} ({{currency}})",
     "costs.market_failed_title": "Konnte nicht bepreist werden in {{market}}",
+    "costs.base_text_only_in": "Sprache der Positionen: {{language}}",
+    "costs.market_text_fallback": "Sprache der Positionen: {{language}}. Für diese Basis gibt es keine Version in der Sprache: {{requested}}.",
     "costs.base_loading_catalog": "Kostenbasen werden geladen...",
     "costs.base_catalog_failed": "Kostenbasen konnten nicht geladen werden",
     "costs.base_catalog_failed_hint": "Die Liste der Kostenbasen stammt vom Server. Prüfen Sie, ob das Backend läuft und erreichbar ist, und versuchen Sie es erneut.",

@@ -8,7 +8,7 @@
 // source of truth (see backend app/modules/costs/base_registry.py).
 
 import { useQuery } from '@tanstack/react-query';
-import { apiGet } from '@/shared/lib/api';
+import { apiGet, apiPost } from '@/shared/lib/api';
 
 /** One loadable cost base: a full work-item catalogue for a single market. */
 export interface BaseVariant {
@@ -36,6 +36,10 @@ export interface BaseVariant {
   language: string;
   /** ISO 639-1 language code. */
   lang_code: string;
+  /** The language the loaded work-item text is really in. Differs from
+   *  `lang_code` only where no published file holds the base in the card's
+   *  language (Turkiye has no English text), so the card must say so. */
+  text_lang_code?: string;
   /** ISO 4217 currency code the rates are expressed in. */
   currency: string;
   /** ISO 3166-1 alpha-2 country code (lowercase) for the flag icon. */
@@ -111,4 +115,75 @@ export function variantMatches(variant: BaseVariant, family: BaseFamily, query: 
     family.name.toLowerCase().includes(q) ||
     family.norm_system.toLowerCase().includes(q)
   );
+}
+
+// Which market each national base is currently repriced into. Keyed by
+// base_region -> market_catalog token (e.g. { ZH_CHINA: 'GB_LONDON_en' }). MVP
+// client-side tracking; a server table is a later hardening.
+const ACTIVE_MARKETS_KEY = 'oe_active_markets';
+
+export function getActiveMarkets(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem(ACTIVE_MARKETS_KEY);
+    return raw ? (JSON.parse(raw) as Record<string, string>) : {};
+  } catch {
+    return {};
+  }
+}
+
+export function setActiveMarketFor(baseRegion: string, token: string): void {
+  try {
+    const current = getActiveMarkets();
+    current[baseRegion] = token;
+    localStorage.setItem(ACTIVE_MARKETS_KEY, JSON.stringify(current));
+  } catch {
+    // Storage unavailable -- ignore.
+  }
+}
+
+/** Server answer of POST /v1/costs/base-market/{base_region}/{market_token}. */
+export interface BaseMarketResult extends Record<string, unknown> {
+  items_repriced?: number;
+  items_total?: number;
+  /** Language the text is in after the call; null when it is unknown. */
+  text_language?: string | null;
+  /** Language the card asked for. */
+  text_language_requested?: string;
+}
+
+/**
+ * Load a national base and price it into a market card's market and language.
+ *
+ * Every surface that shows a national market card goes through here. Loading
+ * the card's `region` instead installs the plain home base in the home
+ * language, the silent wrong-language load this helper exists to stop. The
+ * server fails the call when the card's language cannot land.
+ */
+export async function loadBaseMarket(variant: BaseVariant): Promise<BaseMarketResult> {
+  const data = await apiPost<BaseMarketResult>(
+    `/v1/costs/base-market/${variant.base_region}/${variant.market_catalog}`,
+    undefined,
+    { longRunning: true },
+  );
+  setActiveMarketFor(variant.base_region, variant.market_catalog);
+  return data;
+}
+
+/** A language code's name in the reader's language, falling back to the code. */
+export function languageName(code: string, locale: string): string {
+  try {
+    return new Intl.DisplayNames([locale], { type: 'language' }).of(code) ?? code;
+  } catch {
+    return code;
+  }
+}
+
+/**
+ * The language a loaded market's text fell back to, or null when it is the one
+ * the card asked for. Only Turkiye's English cards fall back today.
+ */
+export function textLanguageFallback(data: BaseMarketResult): string | null {
+  const shown = data.text_language;
+  const asked = data.text_language_requested;
+  return shown && asked && shown !== asked ? shown : null;
 }

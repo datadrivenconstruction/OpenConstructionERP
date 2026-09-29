@@ -37891,6 +37891,8 @@ const resource = {
     "costs.market_priced_title": "Prissat i {{market}}",
     "costs.market_priced_msg": "{{items}} emner genprissat i {{market}} ({{currency}})",
     "costs.market_failed_title": "Kunne ikke prissætte i {{market}}",
+    "costs.base_text_only_in": "Sprog for poster: {{language}}",
+    "costs.market_text_fallback": "Sprog for poster: {{language}}. Denne database har ingen version på sproget: {{requested}}.",
     "costs.base_loading_catalog": "Indlæser omkostningsbaser...",
     "costs.base_catalog_failed": "Omkostningsbaser kunne ikke indlæses",
     "costs.base_catalog_failed_hint": "Listen over omkostningsbaser kommer fra serveren. Kontroller, at backend kører og er tilgængelig, og prøv igen.",

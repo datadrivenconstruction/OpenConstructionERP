@@ -37866,6 +37866,8 @@ const resource = {
     "costs.market_priced_title": "Cijenjeno u {{market}}",
     "costs.market_priced_msg": "{{items}} stavki ponovno cijenjeno u {{market}} ({{currency}})",
     "costs.market_failed_title": "Nije se moglo cijeniti u {{market}}",
+    "costs.base_text_only_in": "Jezik stavki: {{language}}",
+    "costs.market_text_fallback": "Jezik stavki: {{language}}. Ova baza nema verziju na jeziku: {{requested}}.",
     "authority_submission.how_intro": "Sastavite strukturirani dokument koji tijelo očekuje, provjerite ga prema njegovom profilu, zatim generirajte strojni XML i pošaljite ga nakon što provjere budu čiste.",
     "authority_submission.created": "Predaja stvorena",
     "authority_submission.updated": "Predaja ažurirana",

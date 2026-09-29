@@ -37842,6 +37842,8 @@ const resource = {
     "costs.market_priced_title": "Tarifié dans {{market}}",
     "costs.market_priced_msg": "{{items}} articles re-tarifiés dans {{market}} ({{currency}})",
     "costs.market_failed_title": "Impossible de tarifier dans {{market}}",
+    "costs.base_text_only_in": "Langue des postes: {{language}}",
+    "costs.market_text_fallback": "Langue des postes: {{language}}. Cette base n'a pas de version dans la langue: {{requested}}.",
     "costs.base_loading_catalog": "Chargement des bases de coûts...",
     "costs.base_catalog_failed": "Impossible de charger les bases de coûts",
     "costs.base_catalog_failed_hint": "La liste des bases de coûts provient du serveur. Vérifiez que le backend est en cours d'exécution et accessible, puis réessayez.",
