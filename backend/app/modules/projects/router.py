@@ -2057,10 +2057,7 @@ async def analytics_overview(
 
     # Per-project summary - owner + team-member projects for non-admins, scoped
     # to the active partner pack's projects when one is active.
-    # A deleted project is archived, not removed. Every other project list
-    # leaves it out, and the dashboard opens this one's rows as links, so a
-    # deleted project listed here opened on "Project not found".
-    proj_stmt = scope_project_query(select(Project).where(Project.status != "archived"), Project).order_by(Project.name)
+    proj_stmt = scope_project_query(select(Project), Project).order_by(Project.name)
     if not is_admin:
         from app.modules.teams.access import member_project_ids_subquery
 
