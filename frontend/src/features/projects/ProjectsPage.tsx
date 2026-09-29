@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import {
   FolderPlus, FolderOpen, ArrowRight, MoreHorizontal, Copy, Trash2, Archive, ArchiveRestore, ExternalLink,
@@ -28,16 +28,7 @@ import { projectsGuide } from './projectsGuide';
 import { ProjectStatusBadge, CURATED_PROJECT_STATUSES, useProjectStatusLabel } from './ProjectStatusBadge';
 import { BIMConverterStatusBanner } from '../bim/BIMConverterStatusBanner';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
-
-// Every list a project appears in. The dashboard's portfolio overview and
-// project cards are cached under their own keys, so refreshing only
-// ['projects'] after a delete left the deleted project on the dashboard
-// until the page was reloaded.
-function invalidateProjectLists(queryClient: QueryClient) {
-  queryClient.invalidateQueries({ queryKey: ['projects'] });
-  queryClient.invalidateQueries({ queryKey: ['portfolio-analytics'] });
-  queryClient.invalidateQueries({ queryKey: ['dashboard-project-cards'] });
-}
+import { invalidateProjectLists } from './invalidateProjectLists';
 
 interface ProjectBOQStats {
   projectId: string;
