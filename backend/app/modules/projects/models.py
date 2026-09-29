@@ -7,6 +7,7 @@ Tables:
     oe_projects_wbs              - work breakdown structure nodes
     oe_projects_milestone        - project milestones (payment, approval, handover)
     oe_projects_match_settings   - per-project element-to-CWICR auto-match settings
+    oe_projects_demo_tombstone   - demo projects the user removed, kept out of later boots
 """
 
 # ── Match-settings defaults (v2.8.0) ─────────────────────────────────────
@@ -670,3 +671,33 @@ class ProjectWizardDraft(Base):
 
     def __repr__(self) -> str:
         return f"<ProjectWizardDraft by={self.created_by}>"
+
+
+class DemoProjectTombstone(Base):
+    """A demo project the user removed, so no later boot puts it back.
+
+    Deleting a demo project archives the row, and an archived row already
+    stops the installer from creating the demo again. Purging demo data removes
+    the row itself, and after that nothing in the database remembered that the
+    demo had ever been there: an install whose demo-seed choice file did not
+    survive, or whose ``SEED_DEMO`` is set in the environment, reinstalled every
+    purged showcase project on the next boot.
+
+    One row per ``demo_id``, written when a demo project is deleted or purged
+    and removed when a person installs that demo again. The boot installers
+    read it and skip what it names; an explicit install from the app ignores
+    it, because a person asking for the demo outranks the record of a person
+    removing it. ``project_id`` is the row that was removed and carries no
+    foreign key, since the project it names may no longer exist.
+    """
+
+    __tablename__ = "oe_projects_demo_tombstone"
+    __table_args__ = (UniqueConstraint("demo_id", name="uq_oe_projects_demo_tombstone_demo_id"),)
+
+    demo_id: Mapped[str] = mapped_column(String(100), nullable=False)
+    project_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    # "archived" when the project was deleted, "purged" when demo data was removed.
+    reason: Mapped[str] = mapped_column(String(16), nullable=False, default="archived")
+
+    def __repr__(self) -> str:
+        return f"<DemoProjectTombstone {self.demo_id} ({self.reason})>"
