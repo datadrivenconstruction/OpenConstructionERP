@@ -3,6 +3,7 @@
 import { Fragment, useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Calendar,
@@ -2274,6 +2275,12 @@ function ProjectSchedules({
   const addToast = useToastStore((s) => s.addToast);
   const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
   const [showCreate, setShowCreate] = useState(false);
+  // Creating a schedule is editor work (schedule.create). A viewer reads the
+  // list; the create button stays visible but disabled, with the reason.
+  const canCreateSchedule = useHasPermission('schedule.create');
+  const createHint = canCreateSchedule
+    ? undefined
+    : t('errors.forbidden', { defaultValue: "You don't have permission to perform this action." });
   const [form, setForm] = useState<CreateScheduleForm>({
     name: '',
     description: '',
@@ -2300,7 +2307,7 @@ function ProjectSchedules({
     generateHandledRef.current = true;
     if (schedules.length > 0) {
       setSelectedSchedule(schedules[0]!);
-    } else {
+    } else if (canCreateSchedule) {
       setShowCreate(true);
       addToast({
         type: 'info',
@@ -2309,7 +2316,7 @@ function ProjectSchedules({
         }),
       });
     }
-  }, [generateBoqId, schedules, selectedSchedule, addToast, t]);
+  }, [generateBoqId, schedules, selectedSchedule, addToast, t, canCreateSchedule]);
 
   const createSchedule = useMutation({
     mutationFn: (data: CreateScheduleForm) =>
@@ -2371,6 +2378,8 @@ function ProjectSchedules({
           size="lg"
           icon={<Plus size={18} />}
           onClick={() => setShowCreate(true)}
+          disabled={!canCreateSchedule}
+          title={createHint}
         >
           {t('schedule.create_schedule', 'Create Schedule')}
         </Button>
@@ -2463,6 +2472,8 @@ function ProjectSchedules({
               size="lg"
               icon={<Plus size={18} />}
               onClick={() => setShowCreate(true)}
+              disabled={!canCreateSchedule}
+              title={createHint}
             >
               {t('schedule.create_schedule', { defaultValue: 'Create Schedule' })}
             </Button>

@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction Â· OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
  * Named permission gates for the calls a low-privilege role is refused.
@@ -32,6 +32,18 @@ export const PERMISSION_MIN_ROLE = {
   'certified_payroll.read': 'manager',
   'ai.estimate': 'editor',
   'audit.view': 'manager',
+  'estimate_basis.generate': 'editor',
+  'estimate_basis.write': 'editor',
+  'takeoff.update': 'editor',
+  'dwg_takeoff.create': 'editor',
+  'schedule.create': 'editor',
+  'qms.itp.write': 'editor',
+  'qms.inspection.write': 'editor',
+  'qms.ncr.write': 'editor',
+  'qms.punch.write': 'editor',
+  'qms.audit.write': 'manager',
+  'resources.create': 'editor',
+  'assemblies.update': 'editor',
 } as const satisfies Record<string, RankedRole>;
 
 export type GatedPermission = keyof typeof PERMISSION_MIN_ROLE;

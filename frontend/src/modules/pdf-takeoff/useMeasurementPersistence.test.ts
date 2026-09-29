@@ -7,6 +7,7 @@ import {
   removeFromStorage,
 } from './useMeasurementPersistence';
 import { emptyPageScales, type PageScales } from './data/page-scales';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 // Keep these unit tests hermetic: the hook now calls the server (gated on a
 // project + document UUID), so stub the API to return no rows. Each test then
@@ -1569,5 +1570,44 @@ describe('useMeasurementPersistence', () => {
     const next = updater!(concurrent);
     expect(next.find((m) => m.id === 'm1')!.value).toBe(9.9);
     expect(next.find((m) => m.id === 'm2')!.annotation).toBe('other edit');
+  });
+
+  describe('document calibration write follows takeoff.update', () => {
+    const calibrated: PageScales = { defaultScale: { pixelsPerUnit: 250, unitLabel: 'm' }, byPage: {} };
+
+    function renderCalibrated() {
+      return renderHook(() =>
+        useMeasurementPersistence({
+          fileName: 'plan.pdf',
+          documentId: DOC,
+          measurements: [],
+          setMeasurements: vi.fn(),
+          pageScales: calibrated,
+          setPageScales: vi.fn(),
+          scale: defaultScale,
+          projectId: PROJECT,
+        }),
+      );
+    }
+
+    afterEach(() => {
+      useAuthStore.setState({ userRole: null });
+    });
+
+    it('pushes an opened calibration to the document for an editor', async () => {
+      useAuthStore.setState({ userRole: 'editor' });
+      const { takeoffApi } = await import('@/features/takeoff/api');
+      renderCalibrated();
+      await waitFor(() => expect(takeoffApi.saveDocumentScales).toHaveBeenCalled(), { timeout: 3000 });
+    });
+
+    it('keeps a viewer calibration local instead of sending a write the server refuses', async () => {
+      useAuthStore.setState({ userRole: 'viewer' });
+      const { takeoffApi } = await import('@/features/takeoff/api');
+      renderCalibrated();
+      // Past the 800 ms debounce the editor case above resolves within.
+      await new Promise((r) => setTimeout(r, 1200));
+      expect(takeoffApi.saveDocumentScales).not.toHaveBeenCalled();
+    });
   });
 });
