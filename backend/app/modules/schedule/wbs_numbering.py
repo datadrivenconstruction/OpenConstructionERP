@@ -113,10 +113,11 @@ def next_wbs_code(
     return ""
 
 
-def subtree_ids(
-    root_id: uuid.UUID,
-    outline: Iterable[tuple[uuid.UUID, uuid.UUID | None, int, str]],
-) -> set[uuid.UUID]:
+Outline = list[tuple[uuid.UUID, uuid.UUID | None, int, str]]
+"""``(id, parent_id, sort_order, wbs_code)`` for every activity of a schedule."""
+
+
+def subtree_ids(root_id: uuid.UUID, outline: Iterable[tuple[uuid.UUID, uuid.UUID | None, int, str]]) -> set[uuid.UUID]:
     """Return ``root_id`` and every activity below it, at any depth."""
     children: dict[uuid.UUID, list[uuid.UUID]] = {}
     for act_id, parent_id, _order, _code in outline:
@@ -132,16 +133,124 @@ def subtree_ids(
     return seen
 
 
-def insert_position_under(
-    parent_id: uuid.UUID,
-    outline: Iterable[tuple[uuid.UUID, uuid.UUID | None, int, str]],
-) -> int:
-    """Return the ``sort_order`` that puts a new child last inside its section.
+def tree_order(outline: Outline) -> list[uuid.UUID]:
+    """Return the ids depth first: every activity followed by its children.
 
-    That is one past the highest ``sort_order`` in the section's subtree, so
-    the new row lands after the section's last descendant and before whatever
-    follows the section.
+    Siblings keep the order every list query uses (``sort_order``, then the
+    WBS code read naturally, then the id). A row whose parent is missing is
+    a root; rows caught in a parent cycle are appended rather than lost.
     """
-    rows = list(outline)
-    block = subtree_ids(parent_id, rows)
-    return max((order for act_id, _p, order, _c in rows if act_id in block), default=-1) + 1
+    present = {row[0] for row in outline}
+    children: dict[uuid.UUID | None, list[tuple[uuid.UUID, uuid.UUID | None, int, str]]] = {}
+    for row in outline:
+        act_id, parent_id = row[0], row[1]
+        key = parent_id if parent_id in present and parent_id != act_id else None
+        children.setdefault(key, []).append(row)
+    for rows in children.values():
+        rows.sort(key=lambda r: (r[2], _natural_key((r[3] or "").strip()), str(r[0])))
+
+    out: list[uuid.UUID] = []
+    seen: set[uuid.UUID] = set()
+
+    def visit(act_id: uuid.UUID) -> None:
+        stack = [act_id]
+        while stack:
+            cur = stack.pop()
+            if cur in seen:
+                continue
+            seen.add(cur)
+            out.append(cur)
+            stack.extend(r[0] for r in reversed(children.get(cur, [])))
+
+    for root in children.get(None, []):
+        visit(root[0])
+    for row in sorted(outline, key=lambda r: (r[2], str(r[0]))):
+        visit(row[0])
+    return out
+
+
+def effective_codes(outline: Outline) -> dict[uuid.UUID, str]:
+    """Every activity's own code, or its position in the tree when it has none.
+
+    A section typed without a code still has a place in the outline (the
+    third top-level section, the second child of it), and that position is
+    the implicit WBS number a scheduler reads off the screen: ``3``, ``3.2``.
+    It lets a codeless section hand its children a sequence.
+    """
+    by_id = {row[0]: row for row in outline}
+    siblings: dict[uuid.UUID | None, list[uuid.UUID]] = {}
+    for aid in tree_order(outline):
+        row = by_id[aid]
+        parent = row[1] if row[1] in by_id and row[1] != aid else None
+        siblings.setdefault(parent, []).append(aid)
+    position = {aid: i + 1 for ids in siblings.values() for i, aid in enumerate(ids)}
+
+    codes: dict[uuid.UUID, str] = {}
+    for aid in tree_order(outline):
+        row = by_id[aid]
+        own = (row[3] or "").strip()
+        if own:
+            codes[aid] = own
+            continue
+        parent = row[1] if row[1] in by_id and row[1] != aid else None
+        # Tree order visits a parent before its children, so its code is known;
+        # a row in a parent cycle falls back to its bare position.
+        head = codes.get(parent, "") if parent is not None else ""
+        codes[aid] = f"{head}.{position[aid]}" if head else str(position[aid])
+    return codes
+
+
+def effective_code(act_id: uuid.UUID, outline: Outline) -> str:
+    """One activity's code as :func:`effective_codes` reads it."""
+    return effective_codes(outline).get(act_id, "")
+
+
+def suggest_code(parent_id: uuid.UUID | None, outline: Outline) -> str:
+    """The code a new activity under ``parent_id`` (or at the top) should get.
+
+    Siblings without a code count at their implicit position, so the next
+    child after an uncoded ``2.1`` is ``2.2``, not a second ``2.1``.
+    """
+    codes = effective_codes(outline)
+    parent_code = codes.get(parent_id, "") if parent_id is not None else ""
+    siblings = [codes[aid] for aid, pid, _o, _c in outline if pid == parent_id]
+    return next_wbs_code(
+        parent_code,
+        siblings,
+        [code for _i, _p, _o, code in outline],
+        has_parent=parent_id is not None,
+    )
+
+
+def order_with_block_under(block_root: uuid.UUID, new_parent: uuid.UUID | None, outline: Outline) -> list[uuid.UUID]:
+    """Return the tree order with ``block_root`` and its subtree last under ``new_parent``.
+
+    Used both for a new activity (a block of one) and for an activity moved
+    to another section, which takes its own children along. ``new_parent``
+    of None puts the block at the very end of the schedule.
+
+    ``outline`` must already carry ``block_root`` with ``new_parent`` as its
+    parent; the caller rejects a parent inside the block beforehand.
+    """
+    block = subtree_ids(block_root, outline)
+    rest = [row for row in outline if row[0] not in block]
+    order = tree_order(rest)
+    block_order = [aid for aid in tree_order([row for row in outline if row[0] in block]) if aid in block]
+    # The block's own root comes first inside it.
+    block_order.sort(key=lambda aid: aid != block_root)
+    if new_parent is None or new_parent not in {row[0] for row in rest}:
+        return order + block_order
+    section = subtree_ids(new_parent, rest)
+    last = max(i for i, aid in enumerate(order) if aid in section)
+    return order[: last + 1] + block_order + order[last + 1 :]
+
+
+def sort_order_changes(order: list[uuid.UUID], outline: Outline) -> dict[uuid.UUID, int]:
+    """Map every id whose ``sort_order`` must change to its new value.
+
+    The new value is the position in ``order``, so a schedule whose rows all
+    carry the column default of 0 (older imports and seeds) is renumbered
+    once, and after that only the rows that actually moved are written.
+    """
+    current = {row[0]: row[2] for row in outline}
+    return {aid: i for i, aid in enumerate(order) if current.get(aid) != i}

@@ -646,6 +646,9 @@ class GanttActivity(BaseModel):
     calendar_id: UUID | None = None
     # Contact responsible for the activity, read by the table's assignee cell.
     assignee_id: UUID | None = None
+    # That contact's display name, resolved on the server so every project
+    # member sees it, not only the one whose contact list holds it.
+    assignee_name: str | None = None
     # Activity metadata passthrough. Generated activities carry provenance
     # markers here (e.g. duration_source/duration_method = "estimated_fallback"
     # when the duration was estimated from unit-based production rates), which

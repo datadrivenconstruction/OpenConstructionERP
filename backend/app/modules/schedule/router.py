@@ -374,7 +374,7 @@ async def create_activity(
     await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
     # Override body schedule_id with URL path parameter
     data.schedule_id = schedule_id
-    activity = await service.create_activity(data)
+    activity = await service.create_activity(data, actor_id=str(_user_id))
     return _activity_to_response(activity)
 
 
@@ -686,7 +686,7 @@ async def update_activity(
     """Update a schedule activity. Recalculates duration if dates changed."""
     existing = await service.get_activity(activity_id)
     await _verify_schedule_owner(service, session, existing.schedule_id, _user_id, payload)
-    activity = await service.update_activity(activity_id, data)
+    activity = await service.update_activity(activity_id, data, actor_id=str(_user_id))
     return _activity_to_response(activity)
 
 
