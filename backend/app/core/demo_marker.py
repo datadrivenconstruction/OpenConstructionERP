@@ -106,6 +106,29 @@ async def retire_demo_ids(
     wanted = {did.strip(): pid for did, pid in demo_projects.items() if did and did.strip()}
     if not wanted:
         return 0
+    # One statement that skips an existing record, rather than a read and then
+    # an insert: two removals of the same demo racing (a double-click, two
+    # tabs) would otherwise both pass the read and one would fail on the
+    # unique demo_id.
+    dialect = (await session.connection()).dialect.name
+    if dialect in ("postgresql", "sqlite"):
+        if dialect == "postgresql":
+            from sqlalchemy.dialects.postgresql import insert
+        else:
+            from sqlalchemy.dialects.sqlite import insert
+        await session.flush()
+        result = await session.execute(
+            insert(DemoProjectTombstone)
+            .values(
+                [
+                    {"id": uuid.uuid4(), "demo_id": did, "removed_project_id": pid, "reason": reason}
+                    for did, pid in wanted.items()
+                ]
+            )
+            .on_conflict_do_nothing(index_elements=["demo_id"])
+        )
+        return max(result.rowcount or 0, 0)
+
     already = await retired_demo_ids(session)
     added = 0
     for did, pid in wanted.items():
