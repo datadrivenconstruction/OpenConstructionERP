@@ -279,7 +279,12 @@ export interface FullInstallStreamOptions {
    * empty list loads none.
    */
   costRegions?: string[];
-  /** Load the resource catalogue of each loaded region. Default true. */
+  /**
+   * Load the resource catalogue of each loaded region. Default false, the
+   * server's own default: onboarding and the cases strip never asked for it,
+   * and a catalogue that fails to download would fail their install behind a
+   * checklist that has no catalogue row. The pack dialog asks for it.
+   */
   installCatalog?: boolean;
   /**
    * Run only these steps, for retrying the ones that failed. Omitted runs the
@@ -325,7 +330,7 @@ export async function fullInstallPackStream(
     confirmDisables = false,
     vectorize = false,
     costRegions,
-    installCatalog = true,
+    installCatalog = false,
     onlySteps,
     signal,
   } = opts;
