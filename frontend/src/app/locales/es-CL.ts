@@ -35733,6 +35733,7 @@ const resource = {
     "costs.market_failed_title": "No se pudo valorar en {{market}}",
     "costs.base_text_only_in": "Partidas solo en {{language}}",
     "costs.market_text_fallback": "Las partidas están en {{language}}: esta base no tiene versión en {{requested}}.",
+    "costs.base_text_swap_failed": "Las partidas permanecieron en {{language}}: no se pudo cargar el texto en {{requested}}.",
     "costs.base_loading_catalog": "Cargando bases de costo...",
     "costs.base_catalog_failed": "No se pudieron cargar las bases de costo",
     "costs.base_catalog_failed_hint": "La lista de bases de costo proviene del servidor. Verifique que el backend esté en ejecución y accesible, y vuelva a intentarlo.",

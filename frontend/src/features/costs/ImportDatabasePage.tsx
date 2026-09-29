@@ -55,6 +55,8 @@ import {
   languageName,
   loadBaseMarket,
   textLanguageFallback,
+  canPriceMarkets as roleCanPriceMarkets,
+  type BaseMarketResult,
   type BaseVariant,
 } from './baseCatalog';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
@@ -406,6 +408,8 @@ function MiniFlag({ code }: { code: string }) {
 
 function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
   const { t, i18n } = useTranslation();
+  // Pricing a base into a market rewrites the shared catalogue (costs.update).
+  const canPriceMarkets = roleCanPriceMarkets(useAuthStore((s) => s.userRole));
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState<string | null>(null);
   const [loaded, setLoaded] = useState<Set<string>>(() => new Set(getLoadedDatabases()));
@@ -564,7 +568,7 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
         // default abort. Opt into the 5-min long-running budget (see api.ts) so
         // the request waits for the backend instead of aborting mid-import and
         // showing a false "Request timed out" (GitHub #171).
-        const data = await apiPost<Record<string, unknown>>(
+        const data = await apiPost<BaseMarketResult>(
           `/v1/costs/load-cwicr/${db.id}`,
           undefined,
           { longRunning: true },
@@ -602,6 +606,20 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
             type: 'success',
             title: t('costs.db_installed', { defaultValue: 'Database installed successfully' }),
             message: `${imported.toLocaleString(getNumberLocale())} cost items imported`,
+          });
+        }
+
+        // A national base opens in its own language only if that swap landed.
+        const homeFellBackTo = textLanguageFallback(data);
+        if (homeFellBackTo) {
+          addToast({
+            type: 'warning',
+            title: db.name,
+            message: t('costs.base_text_swap_failed', {
+              defaultValue: 'The work items stayed in {{language}}: the {{requested}} text could not be loaded.',
+              language: languageName(homeFellBackTo, i18n.language),
+              requested: languageName(String(data.text_language_requested), i18n.language),
+            }),
           });
         }
 
@@ -718,7 +736,7 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
           activeRegion={activeDb}
           activeMarkets={activeMarkets}
           onLoad={handleLoad}
-          onReprice={handleLoad}
+          onReprice={canPriceMarkets ? handleLoad : undefined}
           onSetActive={handleSetActive}
           elapsedSeconds={elapsed}
         />

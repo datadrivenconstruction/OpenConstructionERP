@@ -37704,6 +37704,7 @@ const resource = {
     "costs.market_failed_title": "{{market}}에 가격 책정 불가",
     "costs.base_text_only_in": "항목 언어: {{language}}",
     "costs.market_text_fallback": "항목 언어: {{language}}. 이 데이터베이스에는 다음 언어 버전이 없습니다: {{requested}}.",
+    "costs.base_text_swap_failed": "항목이 {{language}}로 유지되었습니다: {{requested}} 텍스트를 불러올 수 없습니다.",
     "costs.base_loading_catalog": "비용 기준 로딩 중...",
     "costs.base_catalog_failed": "비용 기준을 불러올 수 없습니다",
     "costs.base_catalog_failed_hint": "비용 기준 목록은 서버에서 제공됩니다. 백엔드가 실행 중이고 접근 가능한지 확인한 후 다시 시도하세요.",

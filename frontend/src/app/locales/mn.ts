@@ -37303,6 +37303,7 @@ const resource = {
     "costs.market_failed_title": "{{market}} руу үнэ тогтоож чадаагүй",
     "costs.base_text_only_in": "Ажлын байрны хэл: {{language}}",
     "costs.market_text_fallback": "Ажлын байрны хэл: {{language}}. Энэ сан дараах хэл дээрх хувилбартай биш: {{requested}}.",
+    "costs.base_text_swap_failed": "Ажлын байрууд {{language}} хэл дээр үлдлээ: {{requested}} текстийг ачаалж чадсангүй.",
     "costs.base_loading_catalog": "Үнэ тогтоох суурь ачаалагдаж байна...",
     "costs.base_catalog_failed": "Үнэ тогтоох суурийг ачаалж чадсангүй",
     "costs.base_catalog_failed_hint": "Үнэ тогтоох суурийн жагсаалт серверээс ирдэг. Backend ажиллаж байгаа болон хүрч болохыг шалгаад дахин оролдоно уу.",

@@ -24460,6 +24460,7 @@ const resource = {
     "costs.market_failed_title": "Could not price into {{market}}",
     "costs.base_text_only_in": "Work items in {{language}} only",
     "costs.market_text_fallback": "The work items are in {{language}}: this base has no {{requested}} version.",
+    "costs.base_text_swap_failed": "The work items stayed in {{language}}: the {{requested}} text could not be loaded.",
     "costs.base_loading_catalog": "Loading cost bases...",
     "costs.base_catalog_failed": "Cost bases could not be loaded",
     "costs.base_catalog_failed_hint": "The list of cost bases comes from the server. Check that the backend is running and reachable, then try again.",

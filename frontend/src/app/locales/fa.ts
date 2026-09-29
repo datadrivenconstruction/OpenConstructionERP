@@ -36902,6 +36902,7 @@ const resource = {
     "costs.market_failed_title": "قیمت‌گذاری در {{market}} ممکن نشد",
     "costs.base_text_only_in": "زبان اقلام کاری: {{language}}",
     "costs.market_text_fallback": "زبان اقلام کاری: {{language}}. این پایگاه نسخه‌ای به این زبان ندارد: {{requested}}.",
+    "costs.base_text_swap_failed": "اقلام کاری به زبان {{language}} باقی ماند: متن {{requested}} بارگذاری نشد.",
     "costs.base_loading_catalog": "در حال بارگذاری پایگاه‌های هزینه...",
     "costs.base_catalog_failed": "پایگاه‌های هزینه بارگذاری نشدند",
     "costs.base_catalog_failed_hint": "فهرست پایگاه‌های هزینه از سرور دریافت می‌شود. بررسی کنید که بک‌اند در حال اجراست و در دسترس است، سپس دوباره تلاش کنید.",
