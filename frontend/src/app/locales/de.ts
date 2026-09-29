@@ -41398,6 +41398,8 @@ const resource = {
     "rebar_schedule.invalid_file": "Nur .abs-Dateien werden unterstützt.",
     "rebar_schedule.length": "Länge (mm)",
     "rebar_schedule.member": "Bauteil",
+    "rebar_schedule.drawing": "Plan",
+    "rebar_schedule.steel_grade": "Stahlsorte",
     "rebar_schedule.no_project": "Projekt auswählen",
     "rebar_schedule.no_project_desc": "Wählen Sie ein Projekt aus der Kopfzeile, um dessen Bewehrungslisten zu verwalten.",
     "rebar_schedule.or_browse": "oder klicken zum Durchsuchen",

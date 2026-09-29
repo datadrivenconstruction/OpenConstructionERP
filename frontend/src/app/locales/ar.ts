@@ -41188,6 +41188,8 @@ const resource = {
     "rebar_schedule.invalid_file": "يُدعم فقط ملفات .abs.",
     "rebar_schedule.length": "الطول (مم)",
     "rebar_schedule.member": "العنصر",
+    "rebar_schedule.drawing": "المخطط",
+    "rebar_schedule.steel_grade": "درجة الفولاذ",
     "rebar_schedule.no_project": "اختر مشروعاً",
     "rebar_schedule.no_project_desc": "اختر مشروعاً من الشريط العلوي لإدارة جداول حديده.",
     "rebar_schedule.or_browse": "أو انقر للتصفح",
