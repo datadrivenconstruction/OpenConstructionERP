@@ -60,6 +60,7 @@ import { DependencyEditor } from './DependencyEditor';
 import { BoqLinkEditor } from './BoqLinkEditor';
 import { generateInWindow, projectWindowDays, refreshAfterGenerate } from './generateWindow';
 import { ActivityGrid } from './ActivityGrid';
+import { ancestorsOf, hideCollapsed, orderAsTree, parentIdsOf } from './activityTree';
 import { WorkCalendarManager } from './WorkCalendarManager';
 import { scheduleGuide } from './scheduleGuide';
 import { fetchBIMModels } from '@/features/bim/api';
@@ -1158,6 +1159,27 @@ function ScheduleDetail({
     end_date: '',
     activity_type: 'task',
   });
+  // Set once the user types a WBS code of their own, so choosing a section
+  // afterwards does not overwrite it with the suggested one.
+  const wbsTouchedRef = useRef(false);
+  const chooseParentSection = useCallback(
+    (parentId: string | undefined) => {
+      setActivityForm((f) => ({ ...f, parent_id: parentId }));
+      if (wbsTouchedRef.current) return;
+      scheduleApi
+        .suggestWbsCode(schedule.id, parentId)
+        .then(({ wbs_code }) => {
+          if (wbsTouchedRef.current) return;
+          // A late answer for a section the user has since changed is dropped.
+          setActivityForm((f) => (f.parent_id === parentId ? { ...f, wbs_code } : f));
+        })
+        .catch(() => {
+          // No suggestion; the field stays editable and the server fills a
+          // blank code under a section on its own.
+        });
+    },
+    [schedule.id],
+  );
 
   // Fetch project data for region / work calendar / currency
   const { data: projectData } = useQuery({
@@ -1265,8 +1287,20 @@ function ScheduleDetail({
         activity_type: data.activity_type,
         ...(data.parent_id ? { parent_id: data.parent_id } : {}),
       }),
-    onSuccess: () => {
+    onSuccess: (_created, data) => {
       queryClient.invalidateQueries({ queryKey: ['gantt', schedule.id] });
+      // Open the section the activity went into (and every section above
+      // it), or the new row would be created out of sight.
+      if (data.parent_id) {
+        const open = ancestorsOf(data.parent_id, ganttData?.activities ?? []);
+        setCollapsedIds((prev) => {
+          if (!open.some((id) => prev.has(id))) return prev;
+          const next = new Set(prev);
+          for (const id of open) next.delete(id);
+          return next;
+        });
+      }
+      wbsTouchedRef.current = false;
       setShowAddActivity(false);
       setActivityForm({
         name: '',
@@ -1458,22 +1492,20 @@ function ScheduleDetail({
     } else if (activityFilter === 'in_progress') {
       activities = activities.filter((a) => a.status === 'in_progress');
     }
-    // Hide children of collapsed summary activities
-    if (collapsedIds.size > 0) {
-      const hidden = new Set<string>();
-      const parentOf = new Map<string, string>();
-      for (const a of activities) { if (a.parent_id) parentOf.set(a.id, a.parent_id); }
-      const isHidden = (id: string): boolean => {
-        if (hidden.has(id)) return true;
-        const pid = parentOf.get(id);
-        if (!pid) return false;
-        if (collapsedIds.has(pid) || isHidden(pid)) { hidden.add(id); return true; }
-        return false;
-      };
-      activities = activities.filter((a) => !isHidden(a.id));
-    }
-    return activities;
-  }, [ganttData, activityFilter, criticalActivityIds, collapsedIds]);
+    // Every child directly under its section, whatever its place in the
+    // flat server order.
+    return orderAsTree(activities);
+  }, [ganttData, activityFilter, criticalActivityIds]);
+
+  // Collapsing is a Table view control, so only the table hides the rows
+  // under a collapsed section; the Gantt views have no toggle to reopen it.
+  const gridActivities = useMemo(
+    () => hideCollapsed(filteredActivities, collapsedIds),
+    [filteredActivities, collapsedIds],
+  );
+  // Which rows can collapse is read from the whole schedule. Reading it from
+  // the rows left visible lost a collapsed section's chevron with its children.
+  const sectionIds = useMemo(() => parentIdsOf(ganttData?.activities ?? []), [ganttData]);
 
   // Map activities to SVG Gantt format
   const svgGanttActivities = useMemo<SVGGanttActivity[]>(() => {
@@ -1917,10 +1949,11 @@ function ScheduleDetail({
                 <ActivityGrid
                   scheduleId={schedule.id}
                   projectId={projectId}
-                  activities={filteredActivities}
+                  activities={gridActivities}
                   criticalActivityIds={criticalActivityIds}
                   onEditDependencies={(id) => setSelectedActivityId(id)}
                   onAddActivity={() => setShowAddActivity(true)}
+                  sectionIds={sectionIds}
                   collapsedIds={collapsedIds}
                   onToggleCollapse={toggleCollapse}
                 />
@@ -2036,11 +2069,43 @@ function ScheduleDetail({
             onChange={(e) => setActivityForm((f) => ({ ...f, name: e.target.value }))}
             required aria-required="true"
           />
+          {/* Parent section - insert under a summary */}
+          {(() => {
+            const summaries = orderAsTree(ganttData?.activities ?? []).filter((a) => a.activity_type === 'summary');
+            if (summaries.length === 0) return null;
+            return (
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-medium text-content-primary">
+                  {t('schedule.parent_section', { defaultValue: 'Parent section' })}
+                </label>
+                <select
+                  className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+                  value={activityForm.parent_id ?? ''}
+                  onChange={(e) => chooseParentSection(e.target.value || undefined)}
+                >
+                  <option value="">{t('schedule.no_parent', { defaultValue: 'Top level (no parent)' })}</option>
+                  {summaries.map((s) => (
+                    <option key={s.id} value={s.id}>{s.wbs_code ? `${s.wbs_code} ${s.name}` : s.name}</option>
+                  ))}
+                </select>
+              </div>
+            );
+          })()}
           <Input
             label={t('schedule.wbs_code', 'WBS Code')}
             placeholder={t('schedule.wbs_code_placeholder', 'e.g. 01.02.003')}
             value={activityForm.wbs_code}
-            onChange={(e) => setActivityForm((f) => ({ ...f, wbs_code: e.target.value }))}
+            onChange={(e) => {
+              wbsTouchedRef.current = e.target.value.trim() !== '';
+              setActivityForm((f) => ({ ...f, wbs_code: e.target.value }));
+            }}
+            hint={
+              activityForm.parent_id && !wbsTouchedRef.current
+                ? t('schedule.wbs_code_suggested_hint', {
+                    defaultValue: 'Continues the numbering of the chosen section. You can change it.',
+                  })
+                : undefined
+            }
           />
           <div className="grid grid-cols-2 gap-3">
             <Input
@@ -2058,28 +2123,6 @@ function ScheduleDetail({
               required aria-required="true"
             />
           </div>
-          {/* Parent section - insert under a summary */}
-          {(() => {
-            const summaries = (ganttData?.activities ?? []).filter((a) => a.activity_type === 'summary');
-            if (summaries.length === 0) return null;
-            return (
-              <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-content-primary">
-                  {t('schedule.parent_section', { defaultValue: 'Parent section' })}
-                </label>
-                <select
-                  className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
-                  value={activityForm.parent_id ?? ''}
-                  onChange={(e) => setActivityForm((f) => ({ ...f, parent_id: e.target.value || undefined }))}
-                >
-                  <option value="">{t('schedule.no_parent', { defaultValue: 'Top level (no parent)' })}</option>
-                  {summaries.map((s) => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
-                  ))}
-                </select>
-              </div>
-            );
-          })()}
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium text-content-primary">
               {t('schedule.activity_type', 'Type')}

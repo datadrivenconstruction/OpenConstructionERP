@@ -62,6 +62,7 @@ export function ActivityGrid({
   criticalActivityIds,
   onEditDependencies,
   onAddActivity,
+  sectionIds,
   collapsedIds,
   onToggleCollapse,
 }: {
@@ -71,6 +72,12 @@ export function ActivityGrid({
   criticalActivityIds?: Set<string>;
   onEditDependencies: (activityId: string) => void;
   onAddActivity: () => void;
+  /**
+   * Rows that have children anywhere in the schedule. Pass it whenever
+   * ``activities`` has collapsed rows removed: a collapsed section has no
+   * visible child, so the list alone cannot tell that it can be expanded.
+   */
+  sectionIds?: ReadonlySet<string>;
   collapsedIds?: Set<string>;
   onToggleCollapse?: (id: string) => void;
 }) {
@@ -97,10 +104,11 @@ export function ActivityGrid({
     return map;
   }, [activities]);
   const hasChildren = useMemo(() => {
+    if (sectionIds) return sectionIds;
     const set = new Set<string>();
     for (const a of activities) { if (a.parent_id) set.add(a.parent_id); }
     return set;
-  }, [activities]);
+  }, [activities, sectionIds]);
 
   // #348: the project's named work calendars, for the per-row calendar picker.
   // Keyed by projectId so the picker and the WorkCalendarManager share a cache.
@@ -437,10 +445,17 @@ export function ActivityGrid({
                     </td>
                     <td className="px-2 py-1.5 align-middle">
                       <div className="flex items-center gap-1.5" style={{ paddingLeft: `${(depthMap[a.id] ?? 0) * 16}px` }}>
-                        {isSummary && hasChildren.has(a.id) && onToggleCollapse ? (
+                        {isSummary && (hasChildren.has(a.id) || collapsedIds?.has(a.id)) && onToggleCollapse ? (
                           <button
                             type="button"
+                            data-testid={`grid-toggle-${a.id}`}
                             onClick={() => onToggleCollapse(a.id)}
+                            aria-expanded={!collapsedIds?.has(a.id)}
+                            aria-label={
+                              collapsedIds?.has(a.id)
+                                ? t('schedule.expand_section', { defaultValue: 'Expand section' })
+                                : t('schedule.collapse_section', { defaultValue: 'Collapse section' })
+                            }
                             className="shrink-0 rounded p-0.5 text-content-tertiary hover:bg-surface-secondary"
                           >
                             {collapsedIds?.has(a.id) ? <ChevronRight size={12} /> : <ChevronDown size={12} />}

@@ -862,6 +862,11 @@ export const scheduleApi = {
     apiGet<GanttData>(`/v1/schedule/schedules/${scheduleId}/gantt/`),
   createActivity: (scheduleId: string, data: Partial<Activity>) =>
     apiPost<Activity>(`/v1/schedule/schedules/${scheduleId}/activities/`, data),
+  /** The WBS code that continues the numbering under ``parentId`` (top level when omitted). */
+  suggestWbsCode: (scheduleId: string, parentId?: string) =>
+    apiGet<{ wbs_code: string }>(
+      `/v1/schedule/schedules/${scheduleId}/next-wbs-code/${parentId ? `?parent_id=${encodeURIComponent(parentId)}` : ''}`,
+    ),
   updateActivity: (activityId: string, data: Partial<Activity>) =>
     apiPatch<Activity>(`/v1/schedule/activities/${activityId}`, data),
   deleteActivity: (activityId: string) =>
