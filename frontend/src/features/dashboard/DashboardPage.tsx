@@ -10,6 +10,7 @@ import { APP_VERSION } from '@/shared/lib/version';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { useMeOnboardingQueryKey } from '@/app/layout/meOnboardingQuery';
 import { fmtList, fmtFixed } from '@/shared/lib/formatters';
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
@@ -1746,11 +1747,12 @@ function SystemStatusSummary({
     staleTime: 60_000,
   });
 
-  // `/v1/users/` requires the `users.list` permission which viewers don't
-  // have (v2.0.0 BUG-327/386 security hardening). Skip the fetch for them
-  // so the team-count badge doesn't log a red 403 in the browser console.
-  const userRole = useAuthStore((s) => s.userRole);
-  const canListUsers = userRole === 'admin' || userRole === 'editor';
+  // `/v1/users/` requires the `users.list` permission (manager and above
+  // since v2.0.0 BUG-327/386 security hardening). Skip the fetch for roles
+  // without it so the team-count badge doesn't log a red 403. This used to
+  // name admin and editor, which fired the call for editors, who are refused,
+  // and hid the count from managers, who are allowed.
+  const canListUsers = useHasPermission('users.list');
   const { data: usersList } = useQuery({
     queryKey: ['dashboard-users-count'],
     queryFn: () => apiGet<{ id: string }[]>('/v1/users/').catch(() => []),

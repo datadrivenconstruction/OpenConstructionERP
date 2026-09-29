@@ -23,6 +23,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 /* ── Toast store mock ─────────────────────────────────────────────── */
 
@@ -149,6 +150,8 @@ beforeEach(() => {
   cleanup();
   vi.clearAllMocks();
   useProjectContextStore.getState().setActiveProject('proj-1', 'Riverside HQ');
+  // Every read on the page needs payroll.read, which starts at manager.
+  useAuthStore.setState({ userRole: 'manager' });
   asMock(fetchPayrollBatches).mockResolvedValue([DRAFT_BATCH]);
   asMock(fetchLabourCost).mockResolvedValue(LABOUR_COST);
   asMock(fetchPayrollBatch).mockResolvedValue(DRAFT_DETAIL);
@@ -223,5 +226,14 @@ describe('<PayrollPage /> finalize flow', () => {
         expect.objectContaining({ type: 'error' }),
       ),
     );
+  });
+
+  it('a viewer is told the page is not for their role and nothing is fetched', async () => {
+    useAuthStore.setState({ userRole: 'viewer' });
+    renderPage();
+    expect(await screen.findByText(/don.t have access here/i)).toBeTruthy();
+    expect(fetchPayrollBatches).not.toHaveBeenCalled();
+    expect(fetchLabourCost).not.toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: /Generate draft batch/i })).toBeNull();
   });
 });

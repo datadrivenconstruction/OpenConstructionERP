@@ -9,6 +9,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { useTranslation } from 'react-i18next';
 import { X, User } from 'lucide-react';
 import { apiGet } from '@/shared/lib/api';
@@ -41,10 +42,12 @@ export function UserSearchInput({
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const canListUsers = useHasPermission('users.list');
   const { data: users = [] } = useQuery({
     queryKey: ['users-search'],
     queryFn: () => apiGet<UserResult[]>('/v1/users/?limit=100&is_active=true'),
     staleTime: 60_000,
+    enabled: canListUsers,
   });
 
   // Close dropdown on outside click

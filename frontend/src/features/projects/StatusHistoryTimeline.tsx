@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { ArrowRight, History, AlertTriangle } from 'lucide-react';
 import { Badge, Skeleton } from '@/shared/ui';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
@@ -47,10 +48,12 @@ export function StatusHistoryTimeline({
   // Resolve changed_by ids to display names. Mirrors the RFI detail page
   // pattern (GET /v1/users/?limit=100), keyed independently so React Query
   // dedupes the lookup across pages that need it.
+  const canListUsers = useHasPermission('users.list');
   const { data: users = [] } = useQuery({
     queryKey: ['users-search'],
     queryFn: () => apiGet<UserResult[]>('/v1/users/?limit=100&is_active=true'),
     staleTime: 60_000,
+    enabled: canListUsers,
   });
 
   const userById = useMemo(() => {

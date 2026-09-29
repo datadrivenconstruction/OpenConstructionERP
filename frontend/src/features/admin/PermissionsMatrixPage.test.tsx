@@ -308,6 +308,13 @@ describe('PermissionsMatrixPage', () => {
     expect(updatePermissionMinRole).not.toHaveBeenCalled();
   });
 
+  it('tells a viewer the matrix is not for their role without asking the server', async () => {
+    authState.userRole = 'viewer';
+    renderWithProviders();
+    expect(await screen.findByText(/don.t have access here/i)).toBeInTheDocument();
+    expect(fetchPermissionsMatrix).not.toHaveBeenCalled();
+  });
+
   it('shows the loading skeleton before data arrives', async () => {
     (fetchPermissionsMatrix as any).mockReturnValue(new Promise(() => {}));
     renderWithProviders();

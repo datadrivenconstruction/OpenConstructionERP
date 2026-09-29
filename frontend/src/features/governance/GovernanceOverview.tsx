@@ -29,6 +29,7 @@ import { type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { Network, ScrollText, ShieldCheck, Workflow, type LucideIcon } from 'lucide-react';
 import { Card } from '@/shared/ui';
 import { fetchPermissionsMatrix } from '@/features/admin/api';
@@ -170,11 +171,15 @@ function SummaryStats({ onJump }: { onJump: (tab: GovernanceTabId) => void }) {
 
   // Each query is byte-for-byte the same key + fetcher the delegated tab page
   // already runs, so React Query dedupes the request and shares the cache.
+  // The matrix needs audit.view (manager and above). Below that the roles
+  // tile shows no count rather than firing a call that is refused.
+  const canViewMatrix = useHasPermission('audit.view');
   const permQuery = useQuery({
     queryKey: ['admin', 'permissions-matrix'],
     queryFn: fetchPermissionsMatrix,
     retry: false,
     staleTime: 60_000,
+    enabled: canViewMatrix,
   });
   const routesQuery = useQuery({
     queryKey: approvalRoutesKeys.routes(null, null),

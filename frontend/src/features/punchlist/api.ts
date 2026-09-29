@@ -16,6 +16,8 @@ import {
   type Page,
 } from '@/shared/lib/api';
 import { listRoster, type RosterMember } from '@/features/teams/api';
+import { roleHasPermission } from '@/shared/lib/permissionGates';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -407,13 +409,19 @@ interface UserListEntry {
 export async function fetchTeamMembers(projectId: string): Promise<TeamMember[]> {
   if (!projectId) return [];
 
+  // The workspace directory needs users.list; a role without it would only
+  // collect a 403 here, so it gets the project roster alone.
+  const role = useAuthStore.getState().userRole;
+  const canListUsers = roleHasPermission(role, 'users.list');
   const [roster, users] = await Promise.all([
     listRoster(projectId, { includeInactive: false })
       .then((page) => page.items)
       .catch(() => [] as RosterMember[]),
-    apiGet<UserListEntry[] | { items: UserListEntry[] }>('/v1/users/?limit=100').catch(
-      () => [] as UserListEntry[],
-    ),
+    canListUsers
+      ? apiGet<UserListEntry[] | { items: UserListEntry[] }>('/v1/users/?limit=100').catch(
+          () => [] as UserListEntry[],
+        )
+      : Promise.resolve([] as UserListEntry[]),
   ]);
 
   const list = Array.isArray(users) ? users : users.items ?? [];

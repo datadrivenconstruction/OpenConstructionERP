@@ -86,6 +86,18 @@ TS_CONSUMER = FEATURE / "PropertyDevPage.tsx"
 # The one place the UI is allowed to hold the backend's role vocabulary.
 SHARED_ROLES_TS = FRONTEND_SRC / "shared" / "lib" / "roles.ts"
 
+# Named permission gates: each row names a backend permission and the lowest
+# role the UI believes passes it. Unlike the role lists below, a row states the
+# permission it mirrors, so every row can be checked, and every row is.
+PERMISSION_GATES_TS = FRONTEND_SRC / "shared" / "lib" / "permissionGates.ts"
+PERMISSION_GATES_CONST = "PERMISSION_MIN_ROLE"
+
+# A call that reads a named gate. The permission is the first string literal
+# argument of either helper, which is how every call site is written.
+_GATE_CALL = re.compile(
+    r"(?:useHasPermission|roleHasPermission)\(\s*(?:[^,()'\"]*,\s*)?['\"]([a-z_]+(?:\.[a-z_]+)+)['\"]"
+)
+
 # Each row pairs an exported TypeScript constant with the backend permission
 # it mirrors. Adding a fourth UI role list is a row here, not a rewrite.
 GATES: list[tuple[str, str]] = [
@@ -110,6 +122,10 @@ REGISTRY_SOURCE: list[Path] = []
 # How many files the duplicate scan looked at, printed with the verdict so a
 # clean result carries the population it was clean over.
 SCANNED: list[int] = []
+
+# Permission names read through a named gate somewhere under frontend/src,
+# collected by the same walk as the duplicate scan.
+GATES_READ: set[str] = set()
 
 
 def _backend_permissions():
@@ -284,6 +300,7 @@ def _duplicate_problems() -> list[str]:
             continue
 
         scanned += 1
+        GATES_READ.update(_GATE_CALL.findall(text))
         for label, shape in TABLE_SHAPES:
             if all(token in text for token in shape):
                 hits[label].append(path)
@@ -313,6 +330,121 @@ def _duplicate_problems() -> list[str]:
                 f"    A second copy drifts silently: nothing fails when the backend changes and "
                 f"only one copy is updated. Import it from the shared module instead."
             )
+
+    return problems
+
+
+def _register_for(permission: str) -> None:
+    """Register the permissions of the module that owns ``permission``.
+
+    The registry is filled by the module loader at startup, and nothing here
+    starts the application, so each module's own registration function is
+    called instead. ``audit.*`` and ``system.*`` belong to the core.
+    """
+    import importlib
+
+    core_permissions = _backend_permissions()
+    prefix = permission.split(".", 1)[0]
+    if prefix in {"audit", "system"}:
+        core_permissions.register_core_permissions()
+        return
+    try:
+        module = importlib.import_module(f"app.modules.{prefix}.permissions")
+    except ImportError as exc:
+        raise LookupError(f"no permissions module for {permission!r} ({exc})") from exc
+    for name in dir(module):
+        func = getattr(module, name)
+        if name.startswith("register_") and callable(func) and getattr(func, "__module__", "") == module.__name__:
+            func()
+
+
+def _permission_gate_problems() -> list[str]:
+    """Compare each named permission gate in the UI with the registry.
+
+    Both sides are compared as CLOSURES over every role string the request
+    path accepts, canonical and alias alike, for the reason given at the top
+    of this file: a gate that names ``editor`` admits ``estimator`` too, and
+    only the closure shows whether the backend does the same.
+    """
+    problems: list[str] = []
+    try:
+        core_permissions = _backend_permissions()
+    except LookupError as exc:
+        return [f"permission gates: {exc}"]
+
+    source = PERMISSION_GATES_TS.read_text(encoding="utf-8")
+    pattern = re.compile(
+        r"export\s+const\s+" + PERMISSION_GATES_CONST + r"\b[^=]*=\s*\{(?P<body>[^}]*)\}",
+        re.S,
+    )
+    found = pattern.findall(source)
+    if len(found) != 1:
+        return [
+            f"expected exactly one 'export const {PERMISSION_GATES_CONST}' object in "
+            f"{PERMISSION_GATES_TS.name}, found {len(found)}. A rename leaves this check reading "
+            f"an empty table, which is not a pass."
+        ]
+    rows = dict(re.findall(r"['\"]([a-z_.]+)['\"]\s*:\s*['\"]([a-z_]+)['\"]", found[0]))
+    if not rows:
+        return [f"{PERMISSION_GATES_CONST} parsed to zero rows, so nothing below was compared."]
+
+    ranks = core_permissions.ROLE_HIERARCHY
+    candidates = {r.value for r in core_permissions.Role} | set(core_permissions.ROLE_ALIASES)
+    registry = core_permissions.permission_registry
+
+    def resolved_rank(role: str) -> int:
+        canonical = core_permissions.ROLE_ALIASES.get(role, role)
+        try:
+            return ranks[core_permissions.Role(canonical)]
+        except (ValueError, KeyError):
+            return -999
+
+    for permission, min_role in sorted(rows.items()):
+        try:
+            _register_for(permission)
+        except LookupError as exc:
+            problems.append(f"{permission}: {exc}")
+            continue
+        if permission not in registry.list_all():
+            problems.append(
+                f"{permission} is gated in {PERMISSION_GATES_TS.name} but the backend does not "
+                f"register it. Either the name is misspelled or the module stopped registering it."
+            )
+            continue
+        try:
+            floor = ranks[core_permissions.Role(min_role)]
+        except (ValueError, KeyError):
+            problems.append(f"{permission}: {min_role!r} is not a backend role.")
+            continue
+
+        ui = {r for r in candidates if resolved_rank(r) >= floor}
+        backend = {r for r in candidates if registry.role_has_permission(r, permission)}
+        if ui == backend:
+            continue
+        problems.append(
+            f"{PERMISSION_GATES_CONST}[{permission!r}] = {min_role!r} does not match the backend.\n"
+            f"    backend admits ({len(backend)}): {sorted(backend)}\n"
+            f"    the UI admits  ({len(ui)}): {sorted(ui)}\n"
+            f"    admitted by the backend but hidden by the UI: {sorted(backend - ui) or 'none'}\n"
+            f"    offered by the UI but refused by the backend:  {sorted(ui - backend) or 'none'}"
+        )
+
+    # A row nothing reads is a gate that decides nothing. The walk that fills
+    # GATES_READ must have run first, or an empty set would mean nothing.
+    if not SCANNED:
+        problems.append("the permission gate wiring check ran before the frontend walk, so it read nothing.")
+        return problems
+    unread = sorted(set(rows) - GATES_READ)
+    if unread:
+        problems.append(
+            f"{len(unread)} row(s) of {PERMISSION_GATES_CONST} are never read through "
+            f"useHasPermission or roleHasPermission: {unread}. Remove the row or wire the gate."
+        )
+    unknown = sorted(GATES_READ - set(rows))
+    if unknown:
+        problems.append(
+            f"these permissions are read through a gate but have no row in {PERMISSION_GATES_CONST}: {unknown}."
+        )
 
     return problems
 
@@ -360,6 +492,7 @@ def check() -> list[str]:
     problems: list[str] = []
     problems.extend(_table_problems())
     problems.extend(_duplicate_problems())
+    problems.extend(_permission_gate_problems())
 
     source = TS_SOURCE.read_text(encoding="utf-8")
     problems.extend(_wiring_problems(TS_CONSUMER.read_text(encoding="utf-8")))
@@ -400,7 +533,8 @@ def main() -> int:
     scanned = SCANNED[0] if SCANNED else 0
     print(
         f"role mirrors: OK ({len(TABLE_SHAPES)} shared tables equal to the backend, "
-        f"{len(GATES)} role lists equal to the permission registry, every delete gate in "
+        f"{len(GATES)} role lists equal to the permission registry, every named permission gate "
+        f"equal to the registry and read under {len(GATES_READ)} name(s), every delete gate in "
         f"{TS_CONSUMER.name} reads one of them, and no second copy of either table "
         f"among {scanned} files under frontend/src)\n"
         f"  registry read from: {source}"

@@ -9,6 +9,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import {
   AlertTriangle,
   ArrowDown,
@@ -204,12 +205,13 @@ export function RouteEditor({
     staleTime: 5 * 60_000,
     enabled: open,
   });
+  const canListUsers = useHasPermission('users.list');
   const { data: users = [] } = useQuery({
     queryKey: ['users-search'],
     queryFn: () =>
       apiGet<UserResult[]>('/v1/users/?limit=100&is_active=true'),
     staleTime: 60_000,
-    enabled: open,
+    enabled: open && canListUsers,
   });
 
   const createMut = useMutation({
