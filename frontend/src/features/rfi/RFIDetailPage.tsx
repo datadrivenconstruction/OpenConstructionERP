@@ -17,6 +17,7 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import clsx from 'clsx';
 import {
   AlertTriangle,
@@ -281,10 +282,12 @@ export function RFIDetailPage() {
 
   // Lookup users so we can resolve raised_by / assigned_to / ball_in_court
   // to display names where possible. Falls back to the raw id when unknown.
+  const canListUsers = useHasPermission('users.list');
   const { data: users = [] } = useQuery({
     queryKey: ['users-search'],
     queryFn: () => apiGet<UserResult[]>('/v1/users/?limit=100&is_active=true'),
     staleTime: 60_000,
+    enabled: canListUsers,
   });
 
   // Activity journal (item #13) — the RFI's lifecycle history from

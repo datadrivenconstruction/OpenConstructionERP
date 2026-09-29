@@ -70,11 +70,12 @@ const apiMocks = vi.hoisted(() => ({
 }));
 vi.mock('@/shared/lib/api', () => apiMocks);
 
+// The pickers read the user directory, which needs users.list (manager).
 vi.mock('@/stores/useAuthStore', () => ({
   useAuthStore: Object.assign(
-    (selector: (s: { accessToken: string }) => unknown) =>
-      selector({ accessToken: 'test-token' }),
-    { getState: () => ({ accessToken: 'test-token' }) },
+    (selector: (s: { accessToken: string; userRole: string }) => unknown) =>
+      selector({ accessToken: 'test-token', userRole: 'manager' }),
+    { getState: () => ({ accessToken: 'test-token', userRole: 'manager' }) },
   ),
 }));
 

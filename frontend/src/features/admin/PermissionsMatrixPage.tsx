@@ -50,6 +50,8 @@ import { EmptyState } from '@/shared/ui';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { SkeletonTable } from '@/shared/ui/SkeletonLoader';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useHasPermission } from '@/shared/lib/permissionGates';
+import { NoAccessState } from '@/shared/ui/NoAccessState';
 import { useToastStore } from '@/stores/useToastStore';
 import {
   applyPermissionPreset,
@@ -526,6 +528,9 @@ export function PermissionsMatrixPage() {
   const queryClient = useQueryClient();
   const userRole = useAuthStore((s) => s.userRole);
   const isAdmin = userRole === 'admin' || userRole === 'superuser' || userRole === 'owner';
+  // Reading the matrix needs audit.view (manager and above). Below that the
+  // page says so up front instead of firing the call and toasting its 403.
+  const canViewMatrix = useHasPermission('audit.view');
 
   const [query, setQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<MatrixRole | 'all'>('all');
@@ -572,6 +577,7 @@ export function PermissionsMatrixPage() {
     queryFn: fetchPermissionsMatrix,
     retry: false,
     staleTime: 60_000,
+    enabled: canViewMatrix,
   });
 
   // Surface fetch errors as a toast (single fire per error message).
@@ -1034,6 +1040,14 @@ export function PermissionsMatrixPage() {
       return lvl < minLvl;
     });
   };
+
+  if (!canViewMatrix) {
+    return (
+      <div className="p-4">
+        <NoAccessState />
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

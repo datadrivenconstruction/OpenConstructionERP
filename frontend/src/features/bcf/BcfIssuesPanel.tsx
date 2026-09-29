@@ -16,6 +16,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import {
   AlertTriangle,
   BarChart3,
@@ -815,6 +816,7 @@ export function BcfIssuesPanel({
   // ['users-search'] cache, so the queryFn must store the SAME raw-row shape
   // other consumers (e.g. CommentThread) cache under this key; the BcfMember
   // mapping happens in a memo below. A failure degrades to showing the raw id.
+  const canListUsers = useHasPermission('users.list');
   const { data: rawUsers = [] } = useQuery({
     queryKey: ['users-search'],
     queryFn: async () => {
@@ -825,6 +827,7 @@ export function BcfIssuesPanel({
     },
     staleTime: 60_000,
     retry: false,
+    enabled: canListUsers,
   });
 
   const members = useMemo<BcfMember[]>(

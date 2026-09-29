@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { normalizeListResponse } from '@/shared/lib/apiHelpers';
 import { resolvePartyName } from '@/shared/lib/partyName';
 import {
@@ -987,10 +988,12 @@ function ApprovalChainBuilderDialog({
   // Fallback textarea state (only used when the directory query failed).
   const [raw, setRaw] = useState('');
 
+  const canListUsers = useHasPermission('users.list');
   const { data: users = [], isError: dirError } = useQuery({
     queryKey: ['users-directory'],
     queryFn: () => apiGet<DirectoryUser[]>('/v1/users/?limit=200&is_active=true'),
     staleTime: 60_000,
+    enabled: canListUsers,
   });
 
   const chosenIds = useMemo(() => new Set(chosen.map((u) => u.id)), [chosen]);
@@ -1044,7 +1047,9 @@ function ApprovalChainBuilderDialog({
     rawIds.length <= 20 &&
     rawIds.every((id) => /^[0-9a-f-]{32,36}$/i.test(id));
 
-  const usePicker = !dirError;
+  // A role without users.list never loads the directory, which is the same
+  // situation as a failed load: fall back to pasting ids.
+  const usePicker = canListUsers && !dirError;
   const canSubmit = usePicker ? chosen.length > 0 : rawLooksValid;
   const handleConfirm = () =>
     onConfirm(usePicker ? chosen.map((u) => u.id) : rawIds);
@@ -1453,11 +1458,12 @@ function DetailView({
   // Resolve approver UUIDs to display names for the timeline. Best-effort:
   // if the directory is unavailable (no users.list permission) the timeline
   // falls back to the id snippet on its own.
+  const canListUsers = useHasPermission('users.list');
   const { data: directory = [] } = useQuery<DirectoryUser[]>({
     queryKey: ['users-directory'],
     queryFn: () => apiGet<DirectoryUser[]>('/v1/users/?limit=200&is_active=true'),
     staleTime: 60_000,
-    enabled: approvals.length > 0,
+    enabled: approvals.length > 0 && canListUsers,
   });
   const approverNames = useMemo(() => {
     const map: Record<string, string> = {};

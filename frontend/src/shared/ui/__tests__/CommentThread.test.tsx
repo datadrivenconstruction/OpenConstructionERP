@@ -24,6 +24,7 @@ const apiMocks = vi.hoisted(() => ({
 vi.mock('@/shared/lib/api', () => apiMocks);
 
 import { CommentThread } from '../CommentThread';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 /* ── Helpers ──────────────────────────────────────────────────────────── */
 
@@ -81,6 +82,8 @@ function renderThread() {
 beforeEach(() => {
   cleanup();
   vi.clearAllMocks();
+  // The author directory is read through users.list, which starts at manager.
+  useAuthStore.setState({ userRole: 'manager' });
 });
 
 afterEach(() => {

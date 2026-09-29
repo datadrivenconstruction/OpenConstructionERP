@@ -16,6 +16,7 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { MessageSquare, Send, Reply, Pencil, Trash2, X, Check } from 'lucide-react';
 import clsx from 'clsx';
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
@@ -352,11 +353,13 @@ export function CommentThread({ entityType, entityId, className }: CommentThread
   // the users endpoint fails for this viewer -- it simply falls back to the
   // short id, never crashing the thread (root cause of issue #279: the author
   // id was printed raw because it was never mapped to a name).
+  const canListUsers = useHasPermission('users.list');
   const { data: users = [] } = useQuery({
     queryKey: ['users-search'],
     queryFn: () => apiGet<UserResult[]>('/v1/users/?limit=100&is_active=true'),
     staleTime: 60_000,
     retry: false,
+    enabled: canListUsers,
   });
 
   const userById = useMemo(() => {

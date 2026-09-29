@@ -3,6 +3,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { apiGet } from '@/shared/lib/api';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -215,10 +216,12 @@ export function TimelinePage() {
   const total = data?.total ?? 0;
 
   // Resolve actor UUIDs to display names (OC-15)
+  const canListUsers = useHasPermission('users.list');
   const { data: userList = [] } = useQuery<{ id: string; email: string; full_name: string }[]>({
     queryKey: ['users-search'],
     queryFn: () => apiGet('/v1/users/?limit=100&is_active=true'),
     staleTime: 60_000,
+    enabled: canListUsers,
   });
   const userMap = useMemo(
     () => new Map(userList.map((u) => [u.id, u.full_name || u.email])),
