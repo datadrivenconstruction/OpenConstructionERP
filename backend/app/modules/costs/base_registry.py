@@ -795,6 +795,52 @@ def home_language_code(base_region: str) -> str | None:
     return home.lang_code
 
 
+#: Language of the work-item text in each national base's HOME parquet, the one
+#: ``load-cwicr`` imports. Read off the published files rather than assumed:
+#: every home parquet is English except Turkiye's, which is Turkish. A base not
+#: listed here is English.
+_HOME_PARQUET_TEXT_LANG: dict[str, str] = {"TR_NATIONAL": "tr"}
+
+
+def home_parquet_text_lang(base_region: str) -> str | None:
+    """Language of a national base's home parquet text, or ``None`` if not national."""
+    if base_region not in _NATIONAL_REGIONS:
+        return None
+    return _HOME_PARQUET_TEXT_LANG.get(base_region, "en")
+
+
+def text_source_region(base_region: str, lang_code: str) -> str | None:
+    """Loader ``db_id`` whose parquet carries ``base_region``'s text in ``lang_code``.
+
+    The translated parquet (``ZH_CHINA_fr``) when one is published, the base's
+    own home parquet when that is already in the language (English for every
+    base but Turkiye), else ``None``: no file holds the base in that language,
+    so a caller must not claim to show it. English is the one language that
+    needs the second branch, because no ``EN___DDC_CWICR`` folder exists.
+    """
+    lang_code = normalize_lang_code(lang_code)
+    region = national_language_region(base_region, lang_code)
+    if region is not None:
+        return region
+    if home_parquet_text_lang(base_region) == lang_code:
+        return base_region
+    return None
+
+
+def variant_text_lang(v: BaseVariant) -> str:
+    """The language a card's work-item text is actually shown in once loaded.
+
+    A market card whose language no file holds falls back to the base's own
+    language (see ``load_base_market``), so the card must say that language,
+    not the market's. Global cards and non-national bases read as their own.
+    """
+    if v.base_region not in _NATIONAL_REGIONS:
+        return v.lang_code
+    if text_source_region(v.base_region, v.lang_code) is not None:
+        return normalize_lang_code(v.lang_code)
+    return home_language_code(v.base_region) or home_parquet_text_lang(v.base_region) or v.lang_code
+
+
 def national_language_workitems_files() -> dict[str, str]:
     """Map every ``<region>_<lang>`` pseudo-region to its language parquet path."""
     out: dict[str, str] = {}
@@ -832,6 +878,9 @@ def _variant_public(v: BaseVariant, loaded_counts: dict[str, int]) -> dict:
         "city": v.city,
         "language": v.language,
         "lang_code": v.lang_code,
+        # The language the loaded text is really in. Differs from ``lang_code``
+        # only where no file holds the base in the card's language.
+        "text_lang_code": variant_text_lang(v),
         "currency": v.currency,
         "flag": v.flag,
         "positions": v.positions,
