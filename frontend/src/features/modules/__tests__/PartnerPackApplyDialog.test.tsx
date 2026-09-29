@@ -56,8 +56,11 @@ vi.mock('@/app/i18n', () => ({
 }));
 
 const invalidateQueries = vi.hoisted(() => vi.fn());
+// ``demo_mode`` from /system/status: the public demo, or someone's own server.
+const serverState = vi.hoisted(() => ({ demoMode: false }));
 vi.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({ invalidateQueries }),
+  useQuery: () => ({ data: { demo_mode: serverState.demoMode } }),
 }));
 
 const addToast = vi.hoisted(() => vi.fn());
@@ -163,6 +166,7 @@ function activate() {
 
 beforeEach(() => {
   authState.userRole = 'admin';
+  serverState.demoMode = false;
   i18nMock.inst.language = 'en';
   i18nMock.isLocaleLoaded.mockImplementation(() => true);
   window.localStorage.clear();
@@ -178,6 +182,8 @@ afterEach(() => {
 
 describe('a failed install says what failed and why', () => {
   it('a 403 before the first frame explains the account may not install packs', async () => {
+    // The production report: a read-only account on the public demo.
+    serverState.demoMode = true;
     streamMock.fullInstallPackStream.mockRejectedValue(
       new PackInstallError('forbidden', 403, "Role 'admin' required", 'Activation failed (HTTP 403)'),
     );
@@ -469,6 +475,7 @@ describe('the country cost bases are offered before install', () => {
 
 describe('who may install', () => {
   it('a viewer sees why and cannot start the install', () => {
+    serverState.demoMode = true;
     authState.userRole = 'viewer';
     renderDialog();
     const note = screen.getByRole('note');
@@ -478,6 +485,24 @@ describe('who may install', () => {
     expect(button.disabled).toBe(true);
     fireEvent.click(button);
     expect(streamMock.fullInstallPackStream).not.toHaveBeenCalled();
+  });
+
+  it('an editor on a company server is sent to the administrator, not to a copy of their own', () => {
+    authState.userRole = 'editor';
+    renderDialog();
+    const note = screen.getByRole('note');
+    expect(within(note).getByText('Ask your administrator to install it.')).toBeTruthy();
+    expect(within(note).queryByRole('link')).toBeNull();
+  });
+
+  it('a 403 on a company server says ask an administrator once and offers no download', async () => {
+    streamMock.fullInstallPackStream.mockRejectedValue(new PackInstallError('forbidden', 403, null, 'x'));
+    renderDialog();
+    activate();
+    const alert = await screen.findByRole('alert');
+    expect(within(alert).getByText(/Ask an administrator to install it/)).toBeTruthy();
+    expect(within(alert).queryByRole('link')).toBeNull();
+    expect(within(alert).queryByTestId('pack-ask-admin')).toBeNull();
   });
 
   it('an owner, which the server ranks as admin, may install', () => {
