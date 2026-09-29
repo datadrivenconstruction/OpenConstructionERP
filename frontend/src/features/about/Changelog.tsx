@@ -53,7 +53,13 @@ interface ChangelogEntry {
  * claims to be, so anything numeric-looking here would be read as a release
  * that nothing else in the tree has been bumped to.
  */
-const UNRELEASED: ChangelogEntry | null = null;
+const UNRELEASED: ChangelogEntry | null = {
+  version: 'Unreleased',
+  date: '2026-09-30',
+  tag: 'FIX',
+  summary:
+    'Demo data stays in demo projects, and a deleted demo project stays deleted through restarts and upgrades. The demo-cleanup command lists the demo records an older version left in your own projects, and demo-cleanup --apply removes them.',
+};
 
 // Sorted newest to oldest. Sort is enforced at runtime below (semver-aware) so
 // out-of-order entries here still display correctly.
