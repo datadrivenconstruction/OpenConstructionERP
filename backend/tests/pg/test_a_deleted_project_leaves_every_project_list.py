@@ -177,3 +177,110 @@ async def test_the_portfolio_tree_leaves_out_a_deleted_project(pg_session) -> No
     mine = [n for n in tree if n["id"] == str(node.id)]
     assert len(mine) == 1
     assert mine[0]["project_ids"] == [str(live.id)]
+
+
+# ── Listing scopes built on the access rule ────────────────────────────────
+# The access rule itself still reaches an archived project (restore and the
+# per-project checks rely on it); the listings ask for ``live_only``.
+
+
+@pytest.mark.asyncio
+async def test_accessible_project_ids_keeps_its_contract_and_drops_deleted_when_live_only(pg_session) -> None:
+    from app.dependencies import accessible_project_ids
+
+    owner, live, deleted = await _live_and_deleted(pg_session)
+
+    everything = await accessible_project_ids(pg_session, str(owner.id))
+    assert {live.id, deleted.id} <= everything
+
+    listed = await accessible_project_ids(pg_session, str(owner.id), live_only=True)
+    assert live.id in listed
+    assert deleted.id not in listed
+
+
+@pytest.mark.asyncio
+async def test_an_admin_listing_scope_is_every_live_project(pg_session) -> None:
+    from app.dependencies import accessible_project_ids
+
+    owner, live, deleted = await _live_and_deleted(pg_session)
+    admin = User(email=f"admin-{uuid.uuid4().hex[:8]}@example.com", hashed_password="x", role="admin")
+    pg_session.add(admin)
+    await pg_session.flush()
+
+    assert await accessible_project_ids(pg_session, str(admin.id)) is None
+    listed = await accessible_project_ids(pg_session, str(admin.id), live_only=True)
+    assert listed is not None
+    assert live.id in listed
+    assert deleted.id not in listed
+
+
+@pytest.mark.asyncio
+async def test_a_team_member_listing_scope_drops_a_deleted_project(pg_session) -> None:
+    from sqlalchemy import select
+
+    from app.modules.search.service import _accessible_project_ids as search_scope
+    from app.modules.teams.access import member_project_ids_subquery
+    from app.modules.teams.models import Team, TeamMembership
+
+    _owner_row, live, deleted = await _live_and_deleted(pg_session)
+    member = await _owner(pg_session)
+    for project in (live, deleted):
+        team = Team(project_id=project.id, name="Site team")
+        pg_session.add(team)
+        await pg_session.flush()
+        pg_session.add(TeamMembership(team_id=team.id, user_id=member.id))
+    await pg_session.flush()
+
+    every = set((await pg_session.execute(select(member_project_ids_subquery(member.id).element))).scalars())
+    assert every == {live.id, deleted.id}
+    live_only = set(
+        (await pg_session.execute(select(member_project_ids_subquery(member.id, live_only=True).element))).scalars()
+    )
+    assert live_only == {live.id}
+
+    assert await search_scope(pg_session, str(member.id)) == {live.id}
+
+
+@pytest.mark.asyncio
+async def test_change_orders_across_projects_leave_out_a_deleted_project(pg_session) -> None:
+    from app.modules.changeorders.models import ChangeOrder
+    from app.modules.changeorders.repository import ChangeOrderRepository
+
+    owner, live, deleted = await _live_and_deleted(pg_session)
+    for project in (live, deleted):
+        pg_session.add(ChangeOrder(project_id=project.id, code="CO-001", title="Extra footing"))
+    await pg_session.flush()
+
+    rows, total = await ChangeOrderRepository(pg_session).list_for_owner(owner.id)
+    assert {r.project_id for r in rows} == {live.id}
+    assert total == 1
+
+
+@pytest.mark.asyncio
+async def test_file_search_and_smart_view_scopes_leave_out_a_deleted_project(pg_session) -> None:
+    from app.modules.file_distribution.router import _resolve_accessible_project_ids
+    from app.modules.smart_views.service import SmartViewService
+
+    owner, live, deleted = await _live_and_deleted(pg_session)
+
+    files_scope = set(await _resolve_accessible_project_ids(pg_session, owner.id))
+    assert live.id in files_scope
+    assert deleted.id not in files_scope
+
+    service = SmartViewService(pg_session)
+    assert set(await service._accessible_project_ids(owner.id, live_only=True)) == {live.id}
+    # Read checks keep the plain ownership rule.
+    assert set(await service._accessible_project_ids(owner.id)) == {live.id, deleted.id}
+
+
+@pytest.mark.asyncio
+async def test_portfolio_kpi_fan_out_leaves_out_a_deleted_project(pg_session) -> None:
+    from app.modules.bi_dashboards.kpis import _cost_portfolio_project_ids
+
+    _owner_row, live, deleted = await _live_and_deleted(pg_session)
+
+    scoped = set(await _cost_portfolio_project_ids(pg_session, {live.id, deleted.id}))
+    assert scoped == {live.id}
+    unrestricted = set(await _cost_portfolio_project_ids(pg_session, None))
+    assert live.id in unrestricted
+    assert deleted.id not in unrestricted
