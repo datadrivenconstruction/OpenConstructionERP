@@ -46,14 +46,40 @@ PACK_SLUG = "germany-de"
 DEMO_ADMIN = "demo@openconstructionerp.com"
 
 
-def _rebind(monkeypatch: pytest.MonkeyPatch, original: Any, replacement: Any) -> None:
-    """Point every ``app`` module attribute that IS ``original`` at ``replacement``."""
-    for mod in list(sys.modules.values()):
-        if mod is None or not getattr(mod, "__name__", "").startswith("app"):
-            continue
-        for attr, value in list(vars(mod).items()):
+class _Rebinder:
+    """Point module attributes at this test's database and put the real ones back.
+
+    Not ``monkeypatch``: the module loader imports modules after the first
+    rebind, and those take the replacement at import time. ``monkeypatch``
+    would record the replacement as their original and "restore" it, leaving
+    every later test in the session holding a factory for a database this
+    fixture has dropped. So the undo here always writes the true original.
+    """
+
+    def __init__(self) -> None:
+        self._pairs: list[tuple[Any, Any]] = []
+
+    def rebind(self, original: Any, replacement: Any) -> None:
+        if (original, replacement) not in self._pairs:
+            self._pairs.append((original, replacement))
+        for mod, attr, value in self._attrs():
             if value is original:
-                monkeypatch.setattr(mod, attr, replacement)
+                setattr(mod, attr, replacement)
+
+    def restore(self) -> None:
+        for original, replacement in self._pairs:
+            for mod, attr, value in self._attrs():
+                if value is replacement:
+                    setattr(mod, attr, original)
+
+    @staticmethod
+    def _attrs() -> list[tuple[Any, str, Any]]:
+        out = []
+        for mod in list(sys.modules.values()):
+            if mod is None or not getattr(mod, "__name__", "").startswith("app"):
+                continue
+            out.extend((mod, attr, value) for attr, value in list(vars(mod).items()))
+        return out
 
 
 @pytest_asyncio.fixture
@@ -72,6 +98,7 @@ async def self_installed(pg_async_url, monkeypatch, tmp_path):
 
     import app.database
     from app.config import get_settings
+    from app.core.events import event_bus
     from app.core.module_loader import module_loader
     from app.core.partner_pack.discovery import reset_cache
     from app.database import Base
@@ -100,29 +127,39 @@ async def self_installed(pg_async_url, monkeypatch, tmp_path):
     get_settings.cache_clear()
     reset_cache()
 
+    # The loader subscribes module handlers again; later tests count what the
+    # bus delivers, so the handler lists go back exactly as they were.
+    handlers_before = {k: list(v) for k, v in event_bus._handlers.items()}
+    wildcard_before = list(event_bus._wildcard_handlers)
+
+    rebinder = _Rebinder()
     original_factory, original_engine = app.database.async_session_factory, app.database.engine
-    _rebind(monkeypatch, original_factory, factory)
-    _rebind(monkeypatch, original_engine, eng)
-
-    from app.main import _seed_demo_account, create_app
-
-    application = create_app()
-    await module_loader.load_all(application)
-    # Modules imported by the loader may have taken their own reference.
-    _rebind(monkeypatch, original_factory, factory)
-    _rebind(monkeypatch, original_engine, eng)
-
-    async with factory() as s:
-        from app.modules.i18n_foundation.seed import seed_i18n_data
-
-        await seed_i18n_data(s)
-        await s.commit()
-    await _seed_demo_account()
-
     try:
+        rebinder.rebind(original_factory, factory)
+        rebinder.rebind(original_engine, eng)
+
+        from app.main import _seed_demo_account, create_app
+
+        application = create_app()
+        await module_loader.load_all(application)
+        # Modules imported by the loader before the rebind reached them.
+        rebinder.rebind(original_factory, factory)
+        rebinder.rebind(original_engine, eng)
+
+        async with factory() as s:
+            from app.modules.i18n_foundation.seed import seed_i18n_data
+
+            await seed_i18n_data(s)
+            await s.commit()
+        await _seed_demo_account()
+
         async with AsyncClient(transport=ASGITransport(app=application), base_url="http://test") as client:
             yield client, factory
     finally:
+        rebinder.restore()
+        event_bus._handlers.clear()
+        event_bus._handlers.update(handlers_before)
+        event_bus._wildcard_handlers[:] = wildcard_before
         reset_cache()
         get_settings.cache_clear()
         await eng.dispose()
