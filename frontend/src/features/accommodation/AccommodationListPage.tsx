@@ -127,9 +127,15 @@ export function AccommodationListPage() {
 
   const pageQueries = useQueries({
     queries: Array.from({ length: pageCount }, (_, i) => ({
-      queryKey: ['accommodation', 'list', i],
+      // Scoped to the active project like the rest of the project pages;
+      // without one the server lists what the caller can reach.
+      queryKey: ['accommodation', 'list', activeProjectId ?? '', i],
       queryFn: () =>
-        listAccommodations({ limit: PAGE_SIZE, offset: i * PAGE_SIZE }),
+        listAccommodations({
+          limit: PAGE_SIZE,
+          offset: i * PAGE_SIZE,
+          ...(activeProjectId ? { project_id: activeProjectId } : {}),
+        }),
     })),
   });
 
