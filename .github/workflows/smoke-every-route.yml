@@ -13,6 +13,11 @@ name: Smoke every route
 
 on:
   workflow_dispatch:
+  # TEMPORARY: GitHub dispatches only workflows known to the default branch,
+  # so until this file reaches main the wip branch runs it on push. Drop
+  # this trigger before merging.
+  push:
+    branches: [wip/smokeui]
 
 concurrency:
   group: smoke-every-route-${{ github.ref }}
