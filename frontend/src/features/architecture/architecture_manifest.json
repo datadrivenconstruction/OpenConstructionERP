@@ -186377,6 +186377,7 @@
         "service_4d.py",
         "snapshot_envelope.py",
         "validators.py",
+        "wbs_numbering.py",
         "xer_encoding.py"
       ],
       "manifest": {
@@ -187204,6 +187205,13 @@
         },
         {
           "method": "GET",
+          "path": "/schedules/{schedule_id}/next-wbs-code/",
+          "handler": "suggest_wbs_code",
+          "response_model": "WbsCodeSuggestion",
+          "request_schema": "ScheduleService"
+        },
+        {
+          "method": "GET",
           "path": "/schedules/{schedule_id}/activities/",
           "handler": "list_activities",
           "response_model": "ActivityListResponse",
@@ -187825,6 +187833,11 @@
               "type": "Decimal | None"
             },
             {
+              "name": "assignee_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
               "name": "metadata",
               "type": "dict[str, Any]"
             }
@@ -187937,6 +187950,11 @@
             {
               "name": "installed_units",
               "type": "Decimal | None"
+            },
+            {
+              "name": "assignee_id",
+              "type": "UUID | None",
+              "default": "None"
             },
             {
               "name": "metadata",
@@ -188089,6 +188107,11 @@
             },
             {
               "name": "calendar_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "assignee_id",
               "type": "UUID | None",
               "default": "None"
             },
@@ -188523,6 +188546,11 @@
             },
             {
               "name": "calendar_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "assignee_id",
               "type": "UUID | None",
               "default": "None"
             },
@@ -189653,12 +189681,26 @@
               "type": "DiffSummarySchema"
             }
           ]
+        },
+        {
+          "class_name": "WbsCodeSuggestion",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The WBS code that continues a section's numbering.\n\nEmpty when the section has no code of its own to continue from.",
+          "fields": [
+            {
+              "name": "wbs_code",
+              "type": "str"
+            }
+          ]
         }
       ],
       "import_dependencies": [
         "bim_hub",
         "boq",
         "collaboration_locks",
+        "contacts",
         "eac",
         "projects",
         "saved_views",
@@ -231942,10 +231984,10 @@
     },
     {
       "name": "schedule",
-      "ts_files": 39,
+      "ts_files": 42,
       "css_files": 0,
-      "test_files": 15,
-      "total_files": 39
+      "test_files": 17,
+      "total_files": 42
     },
     {
       "name": "schedule-advanced",
@@ -232075,10 +232117,10 @@
     },
     {
       "name": "tasks",
-      "ts_files": 6,
+      "ts_files": 9,
       "css_files": 0,
-      "test_files": 0,
-      "total_files": 6
+      "test_files": 1,
+      "total_files": 9
     },
     {
       "name": "tax-rates",
@@ -233282,6 +233324,7 @@
       "bim_hub",
       "boq",
       "collaboration_locks",
+      "contacts",
       "eac",
       "projects",
       "saved_views",
@@ -233468,11 +233511,11 @@
     "total_models": 617,
     "total_columns": 7101,
     "total_relationships": 234,
-    "total_routes": 3705,
-    "total_schemas": 3486,
-    "total_python_files": 2209,
+    "total_routes": 3706,
+    "total_schemas": 3487,
+    "total_python_files": 2210,
     "frontend_features": 190,
-    "frontend_ts_files": 2757,
+    "frontend_ts_files": 2763,
     "frontend_backend_mapped": 169
   },
   "frontend_backend_mapping": {
