@@ -11910,6 +11910,7 @@ async def install_demo_project(
     *,
     force_reinstall: bool = False,
     partner_pack: str | None = None,
+    respect_retirement: bool = False,
 ) -> dict:
     """Install a demo project with full BOQ, Schedule, Budget, and Tendering data.
 
@@ -11924,12 +11925,23 @@ async def install_demo_project(
     re-tagged in place (idempotent) so re-activating a pack scopes the existing
     sample too. Deactivating the pack clears the tag again.
 
+    ``respect_retirement`` is for the boot installers: a demo the user deleted
+    or purged is skipped with ``retired=True`` instead of installed. Every other
+    caller is a person asking for the demo, so the install goes ahead and the
+    record of the earlier removal is cleared.
+
     Raises ``ValueError`` if ``demo_id`` is not in the registry.
     """
+    from app.core.demo_marker import restore_demo_id, retired_demo_ids
+
     template = DEMO_TEMPLATES.get(demo_id)
     if template is None:
         valid = ", ".join(sorted(DEMO_TEMPLATES.keys()))
         raise ValueError(f"Unknown demo_id '{demo_id}'. Valid options: {valid}")
+
+    if respect_retirement and demo_id in await retired_demo_ids(session):
+        logger.info("Demo '%s' was removed by the user - not installing it again", demo_id)
+        return {"demo_id": demo_id, "retired": True, "already_installed": False}
 
     # ── 0. Duplicate check ────────────────────────────────────────────
     existing_rows = (await session.execute(select(Project))).scalars().all()
@@ -11956,6 +11968,9 @@ async def install_demo_project(
             "project_name": proj.name,
             "already_installed": True,
         }
+
+    if not respect_retirement:
+        await restore_demo_id(session, demo_id)
 
     # If force_reinstall, remove old demo projects for this demo_id first
     if existing_demo and force_reinstall:
@@ -13677,3 +13692,47 @@ except Exception:  # pragma: no cover - partner packs are optional
     import logging as _logging
 
     _logging.getLogger(__name__).warning("partner-pack demo templates not loaded", exc_info=True)
+
+
+async def install_demo_projects_at_boot(demo_ids: list[str], *, partner_pack: str | None = None) -> None:
+    """Install the boot showcase, one project per session, skipping retired demos.
+
+    One fresh session per project with its own commit and rollback: on
+    PostgreSQL a failure inside ``install_demo_project`` aborts the surrounding
+    transaction, so a shared session would let one bad demo roll back every
+    project that had already seeded.
+
+    A demo the user deleted or purged is not installed again. Boot decides
+    whether to run this from "the showcase owner has no projects", which is
+    exactly the state a purge leaves behind, so without the retirement check
+    every restart after a purge reinstalled the whole showcase.
+
+    Args:
+        demo_ids: The demos to install, in order.
+        partner_pack: Tag each project with this pack slug (pack mode).
+    """
+    from app.database import async_session_factory
+
+    for demo_id in demo_ids:
+        async with async_session_factory() as session:
+            try:
+                result = await install_demo_project(
+                    session, demo_id, partner_pack=partner_pack, respect_retirement=True
+                )
+                await session.commit()
+                if result.get("retired") or result.get("already_installed"):
+                    continue
+                logger.info(
+                    "Boot demo installed: %s%s (%s positions, %s %s)",
+                    demo_id,
+                    f" for pack {partner_pack}" if partner_pack else "",
+                    result.get("positions"),
+                    result.get("currency"),
+                    result.get("grand_total"),
+                )
+            except Exception:
+                await session.rollback()
+                # ``exc_info`` because this failure is intermittent: a run where
+                # seven of the twelve skipped left twelve identical causeless
+                # lines, and the cause had to be reconstructed from a second boot.
+                logger.warning("Failed to install boot demo %s (skipping)", demo_id, exc_info=True)

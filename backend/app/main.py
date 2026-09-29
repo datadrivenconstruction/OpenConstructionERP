@@ -1612,7 +1612,7 @@ async def _seed_demo_account() -> None:
                 from app.core.demo_projects import (
                     DEMO_TEMPLATES,
                     PACK_DEMO_PROJECT,
-                    install_demo_project,
+                    install_demo_projects_at_boot,
                 )
 
                 pack_ids: list[str] = []
@@ -1624,24 +1624,8 @@ async def _seed_demo_account() -> None:
                     if fallback:
                         pack_ids = [fallback]
 
-                for demo_id in pack_ids:
-                    async with async_session_factory() as pk_session:
-                        try:
-                            pk_result = await install_demo_project(pk_session, demo_id, partner_pack=active.slug)
-                            await pk_session.commit()
-                            logger.info(
-                                "Partner-pack demo installed: %s for pack %s (%s positions)",
-                                demo_id,
-                                active.slug,
-                                pk_result.get("positions"),
-                            )
-                        except Exception:
-                            await pk_session.rollback()
-                            logger.warning(
-                                "Failed to install partner-pack demo %s (skipping)",
-                                demo_id,
-                                exc_info=True,
-                            )
+                # Skips any demo the user deleted or purged; see the helper.
+                await install_demo_projects_at_boot(pack_ids, partner_pack=active.slug)
                 if not pack_ids:
                     logger.info(
                         "Partner pack %s is active but maps to no demo project; skipping demo seed.",
@@ -1668,38 +1652,13 @@ async def _seed_demo_account() -> None:
                         "OE_TEST_FAST_STARTUP" if _fast_startup else "OE_SKIP_SHOWCASE",
                     )
                 else:
-                    from app.core.demo_projects import SHOWCASE_DEMO_IDS, install_demo_project
+                    from app.core.demo_projects import SHOWCASE_DEMO_IDS, install_demo_projects_at_boot
 
-                    # One fresh session per project with its own commit/rollback,
-                    # mirroring PACK MODE above. On PostgreSQL a failure inside
-                    # install_demo_project aborts the surrounding transaction, so
-                    # a single shared session plus one trailing commit would let
-                    # one bad demo poison the txn and roll back every project that
-                    # had already seeded. Isolating each project prevents that.
-                    for demo_id in SHOWCASE_DEMO_IDS:
-                        async with async_session_factory() as sc_session:
-                            try:
-                                result = await install_demo_project(sc_session, demo_id)
-                                await sc_session.commit()
-                                logger.info(
-                                    "Showcase demo installed: %s (%s positions, %s %s)",
-                                    demo_id,
-                                    result.get("positions"),
-                                    result.get("currency"),
-                                    result.get("grand_total"),
-                                )
-                            except Exception:
-                                await sc_session.rollback()
-                                # ``exc_info`` because this failure is intermittent: a run
-                                # where seven of the twelve skipped left twelve identical
-                                # causeless lines, and the cause had to be reconstructed
-                                # from a second boot. Every other non-fatal skip below
-                                # already logs its traceback.
-                                logger.warning(
-                                    "Failed to install showcase demo %s (skipping)",
-                                    demo_id,
-                                    exc_info=True,
-                                )
+                    # This branch runs whenever the showcase owner has no
+                    # projects, which is also the state a purge of demo data
+                    # leaves behind. The helper skips every demo the user
+                    # removed, so a purge is not undone by the next restart.
+                    await install_demo_projects_at_boot(list(SHOWCASE_DEMO_IDS))
 
         # Flagship "Residential House" reference project - an ORM installer
         # running on PostgreSQL so the full CAD-to-BOQ showcase (real
@@ -1742,11 +1701,18 @@ async def _seed_demo_account() -> None:
             # self-healing on the next start.
             _backfill_ok = True
             try:
-                from app.scripts.seed_flagship import install_flagship
+                from app.core.demo_marker import retired_demo_ids
+                from app.scripts.seed_flagship import FLAGSHIP_DEMO_ID, install_flagship
 
                 async with async_session_factory() as fl_session:
-                    fl_result = await install_flagship(fl_session, demo_user_id)
-                    logger.info("Flagship seed: %s", fl_result)
+                    # The installer looks the project up by id, so after a purge
+                    # it finds nothing and builds the flagship again unless the
+                    # removal was recorded.
+                    if FLAGSHIP_DEMO_ID in await retired_demo_ids(fl_session):
+                        logger.info("Flagship seed skipped - removed by the user")
+                    else:
+                        fl_result = await install_flagship(fl_session, demo_user_id)
+                        logger.info("Flagship seed: %s", fl_result)
             except Exception:
                 _backfill_ok = False
                 logger.warning("Flagship seed skipped (non-fatal)", exc_info=True)
@@ -1764,9 +1730,9 @@ async def _seed_demo_account() -> None:
                     from app.core.demo_projects import install_demo_project as _install_demo
 
                     async with async_session_factory() as rh_session:
-                        rh_result = await _install_demo(rh_session, "retail-market-heilbronn")
+                        rh_result = await _install_demo(rh_session, "retail-market-heilbronn", respect_retirement=True)
                         await rh_session.commit()
-                        if not rh_result.get("already_installed"):
+                        if not rh_result.get("already_installed") and not rh_result.get("retired"):
                             logger.info(
                                 "Retail Market Heilbronn showcase seeded: %s (%s positions)",
                                 rh_result.get("project_id"),
@@ -1802,16 +1768,15 @@ async def _seed_demo_account() -> None:
             # period history) and the procurement prequalification badges /
             # award gate. Idempotent: skips when any subcontractor exists.
             try:
-                from sqlalchemy import select as _select
-
-                from app.modules.projects.models import Project as _Project
+                from app.core.demo_marker import first_live_demo_project_id
                 from app.modules.subcontractors.seed import seed_subcontractors_demo
 
                 async with async_session_factory() as sub_session:
-                    # Attach agreements to whatever demo project exists (the
-                    # flagship is installed above); None just skips agreements,
-                    # leaving the subs + ratings the scorecard needs.
-                    _proj_id = (await sub_session.execute(_select(_Project.id).limit(1))).scalars().first()
+                    # Attach agreements to a demo project, never to whichever
+                    # project the table returns first, which on a working
+                    # install is somebody's real one. None just skips the
+                    # agreements, leaving the subs + ratings the scorecard needs.
+                    _proj_id = await first_live_demo_project_id(sub_session)
                     sub_counts = await seed_subcontractors_demo(sub_session, project_id=_proj_id)
                     await sub_session.commit()
                     if any(sub_counts.values()):
