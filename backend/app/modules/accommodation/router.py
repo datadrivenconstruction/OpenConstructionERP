@@ -122,8 +122,11 @@ async def list_accommodations(
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
 ) -> list[AccommodationResponse]:
-    """List accommodations for projects the current user can access."""
-    accessible = await _accessible_project_ids(session, user_id)
+    """List accommodations for live projects the current user can access.
+
+    Accommodations of a deleted (archived) project are not listed.
+    """
+    accessible = await _accessible_project_ids(session, user_id, live_only=True)
 
     stmt = (
         select(Accommodation)

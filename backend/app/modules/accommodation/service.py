@@ -135,23 +135,33 @@ async def _verify_project_access(
 async def _accessible_project_ids(
     session: AsyncSession,
     user_id: str,
+    *,
+    live_only: bool = False,
 ) -> list[uuid.UUID] | None:
     """Return the project IDs the caller may see.
 
     Returns ``None`` for admins (meaning "no filter - see everything")
     and a list of UUIDs for regular users (their owned projects).
+
+    ``live_only`` is for listings: deleted (archived) projects are left out,
+    and an admin gets every live project instead of ``None``.
     """
-    if await _user_is_admin(session, user_id):
-        return None
     from app.modules.projects.models import Project
+
+    if await _user_is_admin(session, user_id):
+        if not live_only:
+            return None
+        live = await session.execute(select(Project.id).where(Project.status != "archived"))
+        return [r[0] for r in live.all()]
 
     try:
         uid = uuid.UUID(str(user_id))
     except (ValueError, TypeError):
         return []
-    rows = await session.execute(
-        select(Project.id).where(Project.owner_id == uid),
-    )
+    stmt = select(Project.id).where(Project.owner_id == uid)
+    if live_only:
+        stmt = stmt.where(Project.status != "archived")
+    rows = await session.execute(stmt)
     return [r[0] for r in rows.all()]
 
 
