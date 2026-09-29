@@ -63,7 +63,11 @@ export interface Activity {
    *  when it inherits the project default. A backend change surfaces this on
    *  the gantt/activity response; read it defensively (undefined == Default). */
   calendar_id?: string | null;
+  /** Contact responsible for the activity. */
   assignee_id?: string | null;
+  /** That contact's name, resolved by the server (Gantt payload), so it shows
+   *  for every viewer, not only one whose contact list holds it. */
+  assignee_name?: string | null;
   color: string;
   sort_order: number;
   /** Activity metadata passthrough. BOQ-generated activities carry

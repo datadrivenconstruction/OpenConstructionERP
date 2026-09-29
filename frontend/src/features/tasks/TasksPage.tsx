@@ -38,7 +38,7 @@ import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useCreateShortcut } from '@/shared/hooks/useCreateShortcut';
 import { extractErrorMessageFromBody, triggerDownload } from '@/shared/lib/api';
-import { AssigneePicker } from './AssigneePicker';
+import { AssigneePicker } from '@/features/contacts/AssigneePicker';
 import { assigneeFields } from './assignee';
 import { fetchProjectList } from '@/shared/lib/projectList';
 import { useToastStore } from '@/stores/useToastStore';
@@ -1146,18 +1146,23 @@ export function TasksPage() {
         return;
       }
       const assignee = assigneeFields(formData);
-      // A new task has no old metadata to clear, so only the keys in use go.
-      const assigneeMeta = Object.fromEntries(
-        Object.entries(assignee.metadata).filter(([, v]) => v !== null),
-      );
+      // A new task has nothing to clear, so only the keys in use go.
+      const assigneePart =
+        'metadata' in assignee
+          ? {
+              responsible_id: assignee.responsible_id ?? undefined,
+              metadata: assignee.metadata.assignee_name
+                ? { assignee_name: assignee.metadata.assignee_name }
+                : undefined,
+            }
+          : { assignee_contact_id: assignee.assignee_contact_id };
       createMut.mutate({
         project_id: projectId,
         title: formData.title,
         description: formData.description || undefined,
         task_type: formData.task_type,
         priority: formData.priority,
-        responsible_id: assignee.responsible_id ?? undefined,
-        metadata: Object.keys(assigneeMeta).length > 0 ? assigneeMeta : undefined,
+        ...assigneePart,
         due_date: formData.due_date || undefined,
       });
     },
@@ -1190,10 +1195,9 @@ export function TasksPage() {
         data.assignee_user_id !== base.assignee_user_id ||
         data.assignee_contact_id !== base.assignee_contact_id
       ) {
-        patch.responsible_id = assignee.responsible_id;
-        // Only the two assignee keys: the route merges metadata, so the
-        // task's other keys (source, DWG pins) stay as they are.
-        patch.metadata = assignee.metadata;
+        // The route merges metadata, so the task's other keys (source, DWG
+        // pins) stay as they are.
+        Object.assign(patch, assignee);
       }
       return updateTask(id, patch);
     },

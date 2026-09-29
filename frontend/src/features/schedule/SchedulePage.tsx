@@ -38,7 +38,7 @@ import { Button, Card, Badge, Input, SkeletonTable, Breadcrumb, DismissibleInfo,
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import type { GanttActivity as SVGGanttActivity, GanttViewMode } from '@/shared/ui';
-import { apiGet } from '@/shared/lib/api';
+import { ApiError, apiGet } from '@/shared/lib/api';
 import { fetchProjectList } from '@/shared/lib/projectList';
 import { fmtDate, getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
@@ -1109,7 +1109,8 @@ function RiskAnalysisCard({ data }: { data: RiskAnalysisResponse }) {
 
 /* ── Schedule Detail View ──────────────────────────────────────────────── */
 
-function ScheduleDetail({
+/** Exported for the page-level tests of the Table and Gantt views. */
+export function ScheduleDetail({
   schedule,
   projectId,
   onBack,
@@ -1162,9 +1163,12 @@ function ScheduleDetail({
   // Set once the user types a WBS code of their own, so choosing a section
   // afterwards does not overwrite it with the suggested one.
   const wbsTouchedRef = useRef(false);
+  // A WBS code the server refused as already used, shown next to the field.
+  const [wbsError, setWbsError] = useState<string | null>(null);
   const chooseParentSection = useCallback(
     (parentId: string | undefined) => {
       setActivityForm((f) => ({ ...f, parent_id: parentId }));
+      setWbsError(null);
       if (wbsTouchedRef.current) return;
       scheduleApi
         .suggestWbsCode(schedule.id, parentId)
@@ -1311,10 +1315,31 @@ function ScheduleDetail({
       });
       addToast({ type: 'success', title: t('toasts.activity_created', { defaultValue: 'Activity created' }) });
     },
-    onError: (error: Error) => {
+    onError: (error: Error, data) => {
+      // A code another activity already uses is the user's to fix in the
+      // field, so it is said there, in their language, not in a toast.
+      if (error instanceof ApiError && error.status === 409) {
+        setWbsError(wbsTakenMessage(data.wbs_code));
+        return;
+      }
       addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
     },
   });
+  const wbsTakenMessage = (code: string) =>
+    t('schedule.wbs_code_taken', {
+      defaultValue: 'WBS code {{code}} is already used by another activity in this schedule.',
+      code: code.trim(),
+    });
+
+  // Opening the dialog suggests the next code for the section it is set to
+  // (the top level when none), as long as the user has not typed their own.
+  useEffect(() => {
+    if (showAddActivity && !wbsTouchedRef.current && !activityForm.wbs_code) {
+      chooseParentSection(activityForm.parent_id);
+    }
+    // Only on opening; later section changes go through chooseParentSection.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showAddActivity]);
 
   const generateFromBOQ = useMutation({
     mutationFn: (boqId: string) => generateInWindow(schedule.id, boqId, generateStartDate, generateEndDate),
@@ -1954,6 +1979,7 @@ function ScheduleDetail({
                   onEditDependencies={(id) => setSelectedActivityId(id)}
                   onAddActivity={() => setShowAddActivity(true)}
                   sectionIds={sectionIds}
+                  allActivities={ganttData?.activities}
                   collapsedIds={collapsedIds}
                   onToggleCollapse={toggleCollapse}
                 />
@@ -2058,6 +2084,11 @@ function ScheduleDetail({
         <form
           onSubmit={(e) => {
             e.preventDefault();
+            const code = activityForm.wbs_code.trim();
+            if (code && (ganttData?.activities ?? []).some((a) => (a.wbs_code ?? '').trim() === code)) {
+              setWbsError(wbsTakenMessage(code));
+              return;
+            }
             addActivity.mutate(activityForm);
           }}
           className="space-y-4"
@@ -2097,8 +2128,10 @@ function ScheduleDetail({
             value={activityForm.wbs_code}
             onChange={(e) => {
               wbsTouchedRef.current = e.target.value.trim() !== '';
+              setWbsError(null);
               setActivityForm((f) => ({ ...f, wbs_code: e.target.value }));
             }}
+            error={wbsError ?? undefined}
             hint={
               activityForm.parent_id && !wbsTouchedRef.current
                 ? t('schedule.wbs_code_suggested_hint', {

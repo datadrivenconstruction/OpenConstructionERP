@@ -17,7 +17,7 @@ import { fetchContacts } from '@/features/contacts/api';
 import { apiGet } from '@/shared/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { AssigneePicker } from './AssigneePicker';
-import { assigneeFields } from './assignee';
+import { assigneeFields } from '@/features/tasks/assignee';
 
 let last;
 function Harness() {
@@ -54,9 +54,9 @@ describe('AssigneePicker', () => {
 
     fireEvent.click(option);
     expect(last).toEqual({ name: 'Ana Lopez', userId: '', contactId: 'k1' });
+    // A contact goes by id; the server links its user, if any, and its name.
     expect(assigneeFields({ assigned_to: last.name, assignee_user_id: '', assignee_contact_id: 'k1' })).toEqual({
-      responsible_id: null,
-      metadata: { assignee_name: 'Ana Lopez', assignee_contact_id: 'k1' },
+      assignee_contact_id: 'k1',
     });
   });
 
@@ -80,21 +80,43 @@ describe('AssigneePicker', () => {
 });
 
 describe('assigneeFields', () => {
-  it('links a user and clears both metadata keys', () => {
+  it('links a user and clears the contact link and the typed name', () => {
     expect(assigneeFields({ assigned_to: 'Max', assignee_user_id: 'u1', assignee_contact_id: '' })).toEqual({
       responsible_id: 'u1',
-      metadata: { assignee_name: null, assignee_contact_id: null },
+      assignee_contact_id: null,
+      metadata: { assignee_name: null },
     });
   });
 
   it('keeps a typed name as a name, and clears everything when emptied', () => {
     expect(assigneeFields({ assigned_to: ' John ', assignee_user_id: '', assignee_contact_id: '' })).toEqual({
       responsible_id: null,
-      metadata: { assignee_name: 'John', assignee_contact_id: null },
+      assignee_contact_id: null,
+      metadata: { assignee_name: 'John' },
     });
     expect(assigneeFields({ assigned_to: '', assignee_user_id: '', assignee_contact_id: '' })).toEqual({
       responsible_id: null,
-      metadata: { assignee_name: null, assignee_contact_id: null },
+      assignee_contact_id: null,
+      metadata: { assignee_name: null },
     });
+  });
+});
+
+describe('AssigneePicker search', () => {
+  it('finds a contact past the first page through the contacts search', async () => {
+    useAuthStore.setState({ userRole: 'editor' });
+    (fetchContacts as any).mockResolvedValue({ items: [], total: 500 });
+    (apiGet as any).mockImplementation(async (url: string) =>
+      url.startsWith('/v1/contacts/search/')
+        ? { items: [{ id: 'k9', first_name: 'Zoe', last_name: 'Late', company_name: null, primary_email: null }], total: 1 }
+        : [],
+    );
+    renderPicker();
+    const input = screen.getByTestId('task-assignee-input');
+    fireEvent.focus(input);
+    fireEvent.change(input, { target: { value: 'Zoe' } });
+    fireEvent.click(await screen.findByTestId('task-assignee-option-contact-k9'));
+    expect(last).toEqual({ name: 'Zoe Late', userId: '', contactId: 'k9' });
+    expect((apiGet as any).mock.calls.some(([u]) => String(u).startsWith('/v1/users/'))).toBe(false);
   });
 });

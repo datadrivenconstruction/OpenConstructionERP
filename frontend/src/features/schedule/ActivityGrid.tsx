@@ -1,6 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, RotateCcw, GitBranch, Diamond, Minus, Users, Trash2, ChevronRight, ChevronDown } from 'lucide-react';
@@ -8,8 +8,9 @@ import { Button, Badge, Card } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { listCalendars } from '@/features/schedule-advanced/api';
 import { listAssignmentsForActivity, listResources } from '@/features/resources/api';
-import { fetchContacts } from '@/features/contacts/api';
+import { AssigneePicker, type AssigneeValue } from '@/features/contacts/AssigneePicker';
 import { scheduleApi, type Activity } from './api';
+import { orderAsTree } from './activityTree';
 import { fmtList } from '@/shared/lib/formatters';
 
 const TYPES = ['task', 'milestone', 'summary'] as const;
@@ -63,6 +64,7 @@ export function ActivityGrid({
   onEditDependencies,
   onAddActivity,
   sectionIds,
+  allActivities,
   collapsedIds,
   onToggleCollapse,
 }: {
@@ -78,6 +80,12 @@ export function ActivityGrid({
    * visible child, so the list alone cannot tell that it can be expanded.
    */
   sectionIds?: ReadonlySet<string>;
+  /**
+   * Every activity of the schedule, for the section picker. ``activities``
+   * may be filtered or have collapsed rows removed, and a section hidden
+   * that way is still a place a row can be moved to.
+   */
+  allActivities?: Activity[];
   collapsedIds?: Set<string>;
   onToggleCollapse?: (id: string) => void;
 }) {
@@ -103,6 +111,42 @@ export function ActivityGrid({
     for (const a of activities) getDepth(a.id);
     return map;
   }, [activities]);
+  // Sections a row can be moved into, in outline order, and each row's own
+  // subtree, which it cannot be moved into.
+  const outline = allActivities ?? activities;
+  const sectionOptions = useMemo(
+    () => orderAsTree(outline).filter((a) => a.activity_type === 'summary'),
+    [outline],
+  );
+  const childrenOf = useMemo(() => {
+    const map = new Map<string, string[]>();
+    for (const a of outline) {
+      if (!a.parent_id) continue;
+      const list = map.get(a.parent_id);
+      if (list) list.push(a.id);
+      else map.set(a.parent_id, [a.id]);
+    }
+    return map;
+  }, [outline]);
+  const subtreeOf = (id: string): Set<string> => {
+    const seen = new Set<string>([id]);
+    const stack = [id];
+    while (stack.length) {
+      for (const c of childrenOf.get(stack.pop() as string) ?? []) {
+        if (!seen.has(c)) {
+          seen.add(c);
+          stack.push(c);
+        }
+      }
+    }
+    return seen;
+  };
+  const nameById = useMemo(() => {
+    const m = new Map<string, Activity>();
+    for (const a of outline) m.set(a.id, a);
+    return m;
+  }, [outline]);
+
   const hasChildren = useMemo(() => {
     if (sectionIds) return sectionIds;
     const set = new Set<string>();
@@ -118,21 +162,6 @@ export function ActivityGrid({
     enabled: !!projectId,
   });
 
-  // Contacts for the assignee picker
-  const { data: contactsPage } = useQuery({
-    queryKey: ['contacts', 'list'],
-    queryFn: () => fetchContacts({ limit: 200 }),
-    staleTime: 120_000,
-  });
-  const contacts = contactsPage?.items ?? [];
-  const contactNameById = useMemo(() => {
-    const m: Record<string, string> = {};
-    for (const c of contacts) {
-      const name = [c.first_name, c.last_name].filter(Boolean).join(' ') || c.company_name || c.email || c.id;
-      m[c.id] = name;
-    }
-    return m;
-  }, [contacts]);
 
   // Who is booked on each activity, fanned out through ``useQueries``.
   //
@@ -332,6 +361,7 @@ export function ActivityGrid({
       { key: 'wbs', label: t('schedule.wbs_code', { defaultValue: 'WBS' }), align: 'left' as const },
       { key: 'name', label: t('schedule.activity_name', { defaultValue: 'Activity' }), align: 'left' as const },
       { key: 'type', label: t('schedule.activity_type', { defaultValue: 'Type' }), align: 'left' as const },
+      { key: 'section', label: t('schedule.parent_section', { defaultValue: 'Parent section' }), align: 'left' as const },
       { key: 'start', label: t('schedule.start_date', { defaultValue: 'Start' }), align: 'left' as const },
       { key: 'end', label: t('schedule.end_date', { defaultValue: 'End' }), align: 'left' as const },
       { key: 'duration', label: t('schedule.duration', { defaultValue: 'Duration' }), align: 'right' as const },
@@ -503,6 +533,35 @@ export function ActivityGrid({
                       </select>
                     </td>
                     <td className="px-2 py-1.5 align-middle">
+                      {(() => {
+                        const own = subtreeOf(a.id);
+                        const choices = sectionOptions.filter((s) => !own.has(s.id));
+                        const current = a.parent_id ? nameById.get(a.parent_id) : undefined;
+                        // A parent that is not a summary (imported data) still has
+                        // to show as the value, or the cell would read top level.
+                        if (current && !choices.some((s) => s.id === current.id)) choices.unshift(current);
+                        return (
+                          <select
+                            data-testid={`grid-section-${a.id}`}
+                            aria-label={t('schedule.parent_section', { defaultValue: 'Parent section' })}
+                            className={CELL_INPUT_CLS}
+                            value={a.parent_id ?? ''}
+                            disabled={cellsDisabled}
+                            onChange={(e) =>
+                              updateMutation.mutate({ id: a.id, body: { parent_id: e.target.value || null } })
+                            }
+                          >
+                            <option value="">{t('schedule.no_parent', { defaultValue: 'Top level (no parent)' })}</option>
+                            {choices.map((s) => (
+                              <option key={s.id} value={s.id}>
+                                {s.wbs_code ? `${s.wbs_code} ${s.name}` : s.name}
+                              </option>
+                            ))}
+                          </select>
+                        );
+                      })()}
+                    </td>
+                    <td className="px-2 py-1.5 align-middle">
                       <input
                         type="date"
                         key={`start-${a.id}-${a.start_date}`}
@@ -576,20 +635,14 @@ export function ActivityGrid({
                         </span>
                       )}
                     </td>
-                    <td className="px-2 py-1.5 align-middle">
-                      <select
-                        data-testid={`grid-assignee-${a.id}`}
-                        aria-label={t('schedule.assignee', { defaultValue: 'Assignee' })}
-                        className={CELL_INPUT_CLS}
-                        value={a.assignee_id ?? ''}
+                    <td className="min-w-[180px] px-2 py-1.5 align-middle">
+                      <GridAssigneeCell
+                        activity={a}
                         disabled={cellsDisabled}
-                        onChange={(e) => updateMutation.mutate({ id: a.id, body: { assignee_id: e.target.value || null } as Partial<Activity> })}
-                      >
-                        <option value="">{t('schedule.no_assignee', { defaultValue: 'Unassigned' })}</option>
-                        {contacts.map((c) => (
-                          <option key={c.id} value={c.id}>{contactNameById[c.id]}</option>
-                        ))}
-                      </select>
+                        onCommit={(assigneeId) =>
+                          updateMutation.mutate({ id: a.id, body: { assignee_id: assigneeId } })
+                        }
+                      />
                     </td>
                     <td className="px-2 py-1.5 align-middle">
                       <button
@@ -625,5 +678,56 @@ export function ActivityGrid({
         </table>
       </div>
     </Card>
+  );
+}
+
+/**
+ * The assignee cell: a contact picked from the caller's contacts, searchable
+ * past the first page.
+ *
+ * The name shown for a stored assignee comes from the server
+ * (``assignee_name``), not from the viewer's own contact list, which holds
+ * only that viewer's contacts and only the first page of them: a colleague's
+ * pick used to fall out of that list and read as unassigned. Typing only
+ * filters; nothing is saved until a contact is picked or the cell is cleared.
+ */
+function GridAssigneeCell({
+  activity,
+  disabled,
+  onCommit,
+}: {
+  activity: Activity;
+  disabled: boolean;
+  onCommit: (assigneeId: string | null) => void;
+}) {
+  const { t } = useTranslation();
+  const stored = activity.assignee_id ?? '';
+  const storedName =
+    activity.assignee_name ||
+    (stored ? t('schedule.assignee_unknown_contact', { defaultValue: 'Contact not in your list' }) : '');
+  const [draft, setDraft] = useState<AssigneeValue | null>(null);
+  // The saved value has come back (or changed elsewhere): show it.
+  useEffect(() => setDraft(null), [stored, storedName]);
+  const value = draft ?? { name: storedName, userId: '', contactId: stored };
+
+  return (
+    <AssigneePicker
+      value={value}
+      includeUsers={false}
+      testIdPrefix={`grid-assignee-${activity.id}`}
+      ariaLabel={t('schedule.assignee', { defaultValue: 'Assignee' })}
+      placeholder={t('schedule.no_assignee', { defaultValue: 'Unassigned' })}
+      noMatchesText={t('schedule.assignee_no_matches', { defaultValue: 'No matching contacts.' })}
+      inputClassName={CELL_INPUT_CLS}
+      disabled={disabled}
+      onChange={(next) => {
+        setDraft(next);
+        if (next.contactId) {
+          if (next.contactId !== stored) onCommit(next.contactId);
+        } else if (!next.name && stored) {
+          onCommit(null);
+        }
+      }}
+    />
   );
 }
