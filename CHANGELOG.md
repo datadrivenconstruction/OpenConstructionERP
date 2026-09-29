@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [Unreleased]
+
+On an installation you run yourself with the demo accounts seeded, the demo administrator behind the Admin tile on the login page is an administrator again, so it can install a country pack, a cost base and modules. An installation created by an older release, or by a seeder script that wrote that account as a viewer, gets it back on the next start. This lasts only until a real administrator exists: from then on the account is no longer promoted, and the Admin tile no longer opens it without a password, because anyone who can reach the server could otherwise sign in as an administrator. The login page says the installation has an administrator and asks you to sign in with your own account. The public demo, which runs with its demo mode switched on, keeps its demo accounts exactly as they are. Registering with an address on the demo accounts' domain no longer makes a second registrant an administrator on a fresh installation: only the seeded demo addresses are left out when the installation asks whether it already has a real user.
+
 ## [18.2.0] - 2026-09-29
 
 The AI now suggests and a person decides, and the records other work relies on stay put. The position copilot no longer writes anything on its own, however sure it is: every suggestion arrives as a review list with the value before and after and a confidence score, each one can be accepted or rejected, Accept all and Reject all sit on top, the confident ones come preselected but nothing changes until Apply is pressed, and one Ctrl+Z takes the whole review back. A locked bill refuses the copilot, the custom columns, the variables, the CO2 enrichment, a quantity pushed from a drawing and every import, and the import says the bill is locked instead of failing quietly.
