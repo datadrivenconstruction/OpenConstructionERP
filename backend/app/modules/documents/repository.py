@@ -297,7 +297,9 @@ class PhotoRepository:
         stmt = (
             select(ProjectPhoto, Project.name)
             .join(Project, Project.id == ProjectPhoto.project_id)
-            .where(ProjectPhoto.project_id.in_(project_ids))
+            # A deleted project is archived, not removed; its photos are not
+            # "recent across projects" and would open onto "Project not found".
+            .where(ProjectPhoto.project_id.in_(project_ids), Project.status != "archived")
             .order_by(sort_instant.desc(), ProjectPhoto.created_at.desc())
             .limit(limit)
         )
