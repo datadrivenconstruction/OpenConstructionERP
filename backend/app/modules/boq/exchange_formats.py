@@ -314,7 +314,9 @@ _WORKBOOK_FORMATS: tuple[ExchangeFormat, ...] = (
         format_id="hu_koltsegvetes",
         name="Költségvetés",
         countries=("HU",),
-        extensions=(".xlsx", ".xls"),
+        # Not ".xls": an Excel 97-2003 workbook is refused with a request to
+        # save it as .xlsx, so listing it here promised a file nothing opens.
+        extensions=(".xlsx", ".csv"),
         summary="The Hungarian estimate workbook, read through its own column profile rather than the generic one.",
         reader="excel",
         writer="excel",
