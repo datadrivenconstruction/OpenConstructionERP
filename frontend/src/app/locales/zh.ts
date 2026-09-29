@@ -37617,6 +37617,7 @@ const resource = {
     "costs.market_failed_title": "无法定价至 {{market}}",
     "costs.base_text_only_in": "子目语言：{{language}}",
     "costs.market_text_fallback": "子目语言：{{language}}。此数据库没有该语言版本：{{requested}}。",
+    "costs.base_text_swap_failed": "子目仍保留 {{language}}：无法加载 {{requested}} 文本。",
     "costs.base_loading_catalog": "正在加载成本基准...",
     "costs.base_catalog_failed": "无法加载成本基准",
     "costs.base_catalog_failed_hint": "成本基准列表来自服务器。请检查后端是否正在运行且可访问，然后重试。",

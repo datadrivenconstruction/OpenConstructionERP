@@ -36876,6 +36876,7 @@ const resource = {
     "costs.market_failed_title": "Hindi mapresyo sa {{market}}",
     "costs.base_text_only_in": "Wika ng mga work item: {{language}}",
     "costs.market_text_fallback": "Wika ng mga work item: {{language}}. Walang bersyon ang batayang ito sa wikang: {{requested}}.",
+    "costs.base_text_swap_failed": "Nanatili sa {{language}} ang mga work item: hindi na-load ang tekstong {{requested}}.",
     "costs.base_loading_catalog": "Lino-load ang mga cost base...",
     "costs.base_catalog_failed": "Hindi na-load ang mga cost base",
     "costs.base_catalog_failed_hint": "Ang listahan ng mga cost base ay nanggagaling sa server. Tiyaking tumatakbo at naa-access ang backend, pagkatapos ay subukan muli.",

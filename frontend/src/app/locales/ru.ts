@@ -37966,6 +37966,7 @@ const resource = {
     "costs.market_failed_title": "Не удалось оценить в {{market}}",
     "costs.base_text_only_in": "Язык позиций: {{language}}",
     "costs.market_text_fallback": "Язык позиций: {{language}}. У этой базы нет версии на языке: {{requested}}.",
+    "costs.base_text_swap_failed": "Позиции остались на языке {{language}}: не удалось загрузить текст на языке {{requested}}.",
     "costs.base_loading_catalog": "Загрузка баз затрат...",
     "costs.base_catalog_failed": "Не удалось загрузить базы затрат",
     "costs.base_catalog_failed_hint": "Список баз затрат приходит с сервера. Проверьте, что бэкенд запущен и доступен, затем повторите попытку.",

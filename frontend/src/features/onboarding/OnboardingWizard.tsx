@@ -3517,6 +3517,12 @@ export function StepDataSetup({
   // The national market card picked in the base browser, if any. Its region is
   // the base's, so the region alone cannot tell it from the home card.
   const [selectedMarket, setSelectedMarket] = useState<BaseVariant | null>(null);
+  // The market step that runs after the base job, while it runs or once it failed.
+  const [marketStep, setMarketStep] = useState<{
+    variant: BaseVariant;
+    status: 'running' | 'failed';
+    reason?: string;
+  } | null>(null);
   const [loadingDb, setLoadingDb] = useState(false);
   const [loadedDb, setLoadedDb] = useState<{ id: string; count: number } | null>(null);
   const [dbProgress, setDbProgress] = useState(0);
@@ -3665,37 +3671,48 @@ export function StepDataSetup({
   // A national market card then prices the loaded base into its market and
   // switches the text to its language; the provisioning job only knows the
   // region, so without this step the pick installed the plain home base.
+  const priceMarket = useCallback(
+    async (market: BaseVariant) => {
+      setMarketStep({ variant: market, status: 'running' });
+      try {
+        const data = await loadBaseMarket(market);
+        setMarketStep(null);
+        const fellBackTo = textLanguageFallback(data);
+        addToast({
+          type: fellBackTo ? 'warning' : 'success',
+          title: t('costs.market_priced_title', { defaultValue: 'Priced into {{market}}', market: market.market }),
+          message: fellBackTo
+            ? t('costs.market_text_fallback', {
+                defaultValue: 'The work items are in {{language}}: this base has no {{requested}} version.',
+                language: languageName(fellBackTo, i18n.language),
+                requested: languageName(market.lang_code, i18n.language),
+              })
+            : undefined,
+        });
+      } catch (err: unknown) {
+        // The base is in, the market is not. Keep that visible with its
+        // reason and a retry: the Load button is gone once the base loaded.
+        const reason = err instanceof Error ? err.message : '';
+        setMarketStep({ variant: market, status: 'failed', reason });
+        addToast({
+          type: 'error',
+          title: t('costs.market_failed_title', {
+            defaultValue: 'Could not price into {{market}}',
+            market: market.market,
+          }),
+          message: reason || undefined,
+        });
+      }
+    },
+    [addToast, t],
+  );
+
   const handleLoadDb = useCallback(async () => {
     const market = selectedMarket;
     const outcome = await loadCostDb(selectedRegion);
     if (!market || (outcome !== 'completed' && outcome !== 'partial')) return;
-    setLoadingDb(true);
-    try {
-      const data = await loadBaseMarket(market);
-      const fellBackTo = textLanguageFallback(data);
-      addToast({
-        type: fellBackTo ? 'warning' : 'success',
-        title: t('costs.market_priced_title', { defaultValue: 'Priced into {{market}}', market: market.market }),
-        message: fellBackTo
-          ? t('costs.market_text_fallback', {
-              defaultValue: 'The work items are in {{language}}: this base has no {{requested}} version.',
-              language: languageName(fellBackTo, i18n.language),
-              requested: languageName(market.lang_code, i18n.language),
-            })
-          : undefined,
-      });
-    } catch {
-      addToast({
-        type: 'error',
-        title: t('costs.market_failed_title', {
-          defaultValue: 'Could not price into {{market}}',
-          market: market.market,
-        }),
-      });
-    } finally {
-      setLoadingDb(false);
-    }
-  }, [loadCostDb, selectedRegion, selectedMarket, addToast, t]);
+    await priceMarket(market);
+  }, [loadCostDb, selectedRegion, selectedMarket, priceMarket]);
 
   // Generalized demo installer. Installs an explicit ``demoId`` and returns
   // ``true`` on success. Built-in demo ids only — POST /api/demo/install/{id}.
@@ -4025,7 +4042,27 @@ export function StepDataSetup({
 
           {/* Load button / progress / success */}
           <div>
-            {loadedDb ? (
+            {loadedDb && marketStep?.status === 'running' ? (
+              <div className="flex items-center gap-2 text-sm text-content-secondary">
+                <Loader2 size={14} className="animate-spin text-oe-blue" />
+                <span>
+                  {t('costs.base_loading', { defaultValue: 'Loading' })} {marketStep.variant.market}
+                </span>
+              </div>
+            ) : loadedDb && marketStep?.status === 'failed' ? (
+              <div className="flex flex-col items-start gap-2" data-testid="onboarding-market-failed">
+                <p className="text-sm text-semantic-error">
+                  {t('costs.market_failed_title', {
+                    defaultValue: 'Could not price into {{market}}',
+                    market: marketStep.variant.market,
+                  })}
+                  {marketStep.reason ? `: ${marketStep.reason}` : ''}
+                </p>
+                <Button variant="secondary" size="sm" onClick={() => void priceMarket(marketStep.variant)}>
+                  {t('costs.load_failed_retry', { defaultValue: 'Retry' })}
+                </Button>
+              </div>
+            ) : loadedDb ? (
               <div className="flex items-center gap-2 text-sm text-semantic-success">
                 <CheckCircle2 size={16} />
                 <span className="font-medium">
