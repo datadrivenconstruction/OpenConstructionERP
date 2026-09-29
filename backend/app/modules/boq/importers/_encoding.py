@@ -17,12 +17,16 @@ re-implemented (and got slightly differently right) in ``router.py``:
   empty cells parse to ``0.0`` with ``error=None``; non-empty cells
   that can't be coerced return ``(None, error_message)`` so the
   caller can surface a per-row diagnostic.
+* ``dot_groups_thousands()`` - whether a typed number is written with dots
+  between groups of three and no comma (``"12.500"``), which a market
+  that writes a decimal comma means as twelve thousand five hundred.
 
 All helpers are pure / sync / no third-party deps.
 """
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 # Encoding probe order matters: BOM-tagged UTF-8 first (Excel exports),
@@ -146,14 +150,46 @@ def safe_float(value: Any, default: float = 0.0) -> float:
         return default
 
 
-def parse_numeric_cell(value: Any) -> tuple[float | None, str | None]:
+# One to three digits, then one or more groups of a dot and exactly three
+# digits, and nothing numeric after: "12.500", "1.250.000", "12.500 Ft".
+_DOT_GROUPS = re.compile(r"[+-]?\d{1,3}(?:\.\d{3})+(?![\d.,])")
+
+
+def dot_groups_thousands(value: Any) -> bool:
+    """Whether a typed cell writes its number with dots between groups of three.
+
+    ``"12.500"`` is twelve and a half to :func:`safe_float`, which reads a
+    lone dot as the decimal point, and twelve thousand five hundred to anyone
+    who writes a decimal comma: Hungarian prices are written ``12.500 Ft`` as
+    often as ``12 500 Ft``. Only text answers: a cell Excel holds as a number
+    carries no separators to misread. A comma anywhere in the number means the
+    writer used one as the decimal point, and :func:`safe_float` already reads
+    that shape correctly.
+    """
+    if not isinstance(value, str):
+        return False
+    text = value.strip().replace(" ", "").replace(" ", "")
+    match = _DOT_GROUPS.match(text)
+    return match is not None and "," not in text[: match.end() + 1]
+
+
+def parse_numeric_cell(value: Any, *, dot_thousands: bool = False) -> tuple[float | None, str | None]:
     """Strict numeric parse for spreadsheet imports.
 
     Empty cells parse to ``(0.0, None)`` - the column was simply blank.
     Non-empty cells that can't be coerced return ``(None, error_message)``
     so the caller can surface a per-row diagnostic instead of silently
     zero-filling.
+
+    Args:
+        value: The cell.
+        dot_thousands: Read ``"12.500"`` as 12500, see
+            :func:`dot_groups_thousands`. For a file whose header says it was
+            written in a decimal-comma market; the caller reports each cell it
+            read this way.
     """
+    if dot_thousands and dot_groups_thousands(value):
+        value = value.strip().replace(".", "")
     if value is None:
         return 0.0, None
     if isinstance(value, bool):
