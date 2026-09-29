@@ -69,6 +69,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { canInstallPacks, useApplyPreview, type PackCostBase } from './partnerPacks';
 import {
   fullInstallPackStream,
+  packInstallFailureTitle,
   PackInstallError,
   type FullInstallStepStatus,
   type PackInstallFailureKind,
@@ -627,40 +628,7 @@ export function PartnerPackApplyDialog({
 
   /** Headline for a whole-install failure, one literal key per kind. */
   function failureTitle(kind: PackInstallFailureKind): string {
-    switch (kind) {
-      case 'forbidden':
-        return t('modules.pp_fail_forbidden_title', {
-          defaultValue: 'This account may not install packs',
-        });
-      case 'unauthenticated':
-        return t('modules.pp_fail_auth_title', { defaultValue: 'Your session has ended' });
-      case 'not_found':
-        return t('modules.pp_fail_not_found_title', {
-          defaultValue: 'This pack is no longer on the server',
-        });
-      case 'conflict':
-        return t('modules.pp_fail_conflict_title', {
-          defaultValue: 'The pack cannot be applied as it is',
-        });
-      case 'invalid':
-        return t('modules.pp_fail_invalid_title', {
-          defaultValue: 'The server rejected the install request',
-        });
-      case 'server':
-        return t('modules.pp_fail_server_title', {
-          defaultValue: 'The server failed while installing the pack',
-        });
-      case 'network':
-        return t('modules.pp_fail_network_title', { defaultValue: 'Could not reach the server' });
-      case 'incomplete':
-        return t('modules.pp_fail_incomplete_title', {
-          defaultValue: 'The connection dropped during the installation',
-        });
-      default:
-        return t('modules.pp_fail_http_title', {
-          defaultValue: 'The installation could not start',
-        });
-    }
+    return packInstallFailureTitle(t, kind);
   }
 
   /** What to do about a whole-install failure, one literal key per kind. */
@@ -748,6 +716,8 @@ export function PartnerPackApplyDialog({
         });
       case 'no_default_locale':
         return t('modules.pp_reason_no_locale', { defaultValue: 'the pack sets no language' });
+      case 'load_failed':
+        return t('modules.pp_reason_load_failed', { defaultValue: 'the download or import failed' });
       default:
         return fallback;
     }
@@ -755,13 +725,22 @@ export function PartnerPackApplyDialog({
 
   const fmt = (n: number) => n.toLocaleString(getNumberLocale());
 
+  /**
+   * The server's own words for a failure, under a localized heading. The
+   * text is an English exception message; it is kept because it is what an
+   * administrator searches the log for, but it never stands in for the
+   * sentence the reader is meant to read.
+   */
+  const serverSaid = (detail: string) =>
+    t('modules.pp_fail_server_said', { defaultValue: 'Server response: {{detail}}', detail });
+
   /** One or more lines describing what a finished step did. */
   function resultLines(step: StreamStepName): string[] {
     const d = stepDetail[step] ?? {};
     const state = stepStates[step];
     const error = asString(d.error);
     if (state === 'error' && error && step !== 'cost_db' && step !== 'catalog') {
-      return [t('modules.pp_result_error', { defaultValue: 'Failed: {{reason}}', reason: error })];
+      return [t('modules.pp_result_failed', { defaultValue: 'This step failed.' }), serverSaid(error)];
     }
     const reason = reasonText(asString(d.reason_code), asString(d.reason));
     switch (step) {
@@ -824,7 +803,7 @@ export function PartnerPackApplyDialog({
       case 'cost_db': {
         const bases = asRecords(d.bases);
         if (bases.length === 0) return reason ? [reason] : [];
-        return bases.map((b) => {
+        return bases.flatMap((b) => {
           const name = asString(b.db_id) ?? asString(b.slug) ?? '';
           const status = asString(b.status);
           if (status === 'ok') {
@@ -841,11 +820,15 @@ export function PartnerPackApplyDialog({
                 });
           }
           if (status === 'error') {
-            return t('modules.pp_result_base_failed', {
+            const raw = asString(b.error);
+            const line = t('modules.pp_result_base_failed', {
               defaultValue: '{{base}}: not loaded, {{reason}}',
               base: name,
-              reason: asString(b.error) ?? '',
+              reason:
+                reasonText(asString(b.reason_code), null) ??
+                t('modules.pp_reason_load_failed', { defaultValue: 'the download or import failed' }),
             });
+            return raw ? [line, serverSaid(raw)] : [line];
           }
           return t('modules.pp_result_base_skipped', {
             defaultValue: '{{base}}: skipped, {{reason}}',
@@ -869,7 +852,7 @@ export function PartnerPackApplyDialog({
       case 'catalog': {
         const catalogs = asRecords(d.catalogs);
         if (catalogs.length === 0) return reason ? [reason] : [];
-        return catalogs.map((c) => {
+        return catalogs.flatMap((c) => {
           const name = asString(c.db_id) ?? '';
           const status = asString(c.status);
           if (status === 'ok') {
@@ -886,11 +869,15 @@ export function PartnerPackApplyDialog({
                 });
           }
           if (status === 'error') {
-            return t('modules.pp_result_catalog_failed', {
+            const raw = asString(c.error);
+            const line = t('modules.pp_result_catalog_failed', {
               defaultValue: 'Resource catalogue {{base}}: not loaded, {{reason}}',
               base: name,
-              reason: asString(c.error) ?? '',
+              reason:
+                reasonText(asString(c.reason_code), null) ??
+                t('modules.pp_reason_load_failed', { defaultValue: 'the download or import failed' }),
             });
+            return raw ? [line, serverSaid(raw)] : [line];
           }
           return t('modules.pp_result_catalog_skipped', {
             defaultValue: 'Resource catalogue {{base}}: skipped, {{reason}}',
@@ -950,12 +937,7 @@ export function PartnerPackApplyDialog({
         <p className="mt-1">{failureBody(failure.kind)}</p>
         {failure.kind === 'forbidden' && <PackOwnCopyHint askAdmin={false} />}
         {failure.detail && (
-          <p className="mt-1.5 break-words text-xs opacity-80">
-            {t('modules.pp_fail_server_said', {
-              defaultValue: 'Server response: {{detail}}',
-              detail: failure.detail,
-            })}
-          </p>
+          <p className="mt-1.5 break-words text-xs opacity-80">{serverSaid(failure.detail)}</p>
         )}
         {failure.status != null && (
           <p className="mt-0.5 text-2xs opacity-70">HTTP {failure.status}</p>
