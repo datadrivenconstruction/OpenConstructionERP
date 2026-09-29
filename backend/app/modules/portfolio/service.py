@@ -57,7 +57,21 @@ class PortfolioService:
     async def get_tree(self, user_id: str) -> list[dict]:
         scope = await accessible_project_ids(self.session, user_id)
         nodes = (await self.session.execute(select(PortfolioNode))).scalars().all()
-        memberships = (await self.session.execute(select(PortfolioMembership))).scalars().all()
+        # A deleted project is archived and keeps its membership row; leave it
+        # out, or the tree lists a project that opens as "Project not found".
+        from app.modules.projects.models import Project
+
+        memberships = (
+            (
+                await self.session.execute(
+                    select(PortfolioMembership)
+                    .join(Project, Project.id == PortfolioMembership.project_id)
+                    .where(Project.status != "archived")
+                )
+            )
+            .scalars()
+            .all()
+        )
 
         node_rows = [
             {
