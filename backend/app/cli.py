@@ -2072,6 +2072,43 @@ def cmd_promote_admin(args: argparse.Namespace) -> None:
     print(_green(message))
 
 
+def cmd_demo_cleanup(args: argparse.Namespace) -> None:
+    """Report, and with --apply remove, demo rows the old boot seeding left in real projects."""
+    data_dir = _data_dir_from_args(args)
+    _setup_env(data_dir, DEFAULT_HOST, DEFAULT_PORT)
+
+    import asyncio
+
+    async def _run():
+        from app.core.demo_cleanup import clean_leaked_demo_rows
+        from app.database import async_session_factory
+
+        _register_all_module_models()
+        async with async_session_factory() as session:
+            report = await clean_leaked_demo_rows(session, apply=args.apply)
+            if args.apply:
+                await session.commit()
+            else:
+                await session.rollback()
+            return report
+
+    report = asyncio.run(_run())
+    print(f"Real projects checked: {report.real_projects}")
+    print("Demo rows carrying the seed's own mark:")
+    for name, count in report.marked.items():
+        print(f"  {name}: {count}")
+    if report.unmarked_candidates:
+        print("Rows the old seeding wrote WITHOUT a mark (not removed, review by hand):")
+        for name, count in report.unmarked_candidates.items():
+            print(f"  {name}: {count}")
+    if args.apply:
+        print(_green(f"Removed {report.total_marked} marked demo row(s) from real projects."))
+    elif report.total_marked:
+        print(_yellow("Dry run, nothing changed. Run again with --apply to remove the marked rows."))
+    else:
+        print(_green("No marked demo rows in real projects."))
+
+
 # ── Module management (install / list / uninstall) ─────────────────────────
 # A module is a Python package under ``app/modules/`` that carries a
 # ``manifest.py`` exposing a module-level ``manifest = ModuleManifest(...)``.
@@ -2705,6 +2742,18 @@ def _build_parser() -> argparse.ArgumentParser:
     promote_p.add_argument("email", nargs="?", help="E-mail of the existing account to promote")
     _add_data_dir_arg(promote_p)
 
+    # demo-cleanup - remove demo rows the old boot seeding wrote into real projects
+    demo_cleanup_p = subparsers.add_parser(
+        "demo-cleanup",
+        help="Find demo rows in real projects (dry run); --apply removes the ones carrying the seed's mark",
+    )
+    demo_cleanup_p.add_argument(
+        "--apply",
+        action="store_true",
+        help="Delete the marked rows. Without it nothing is changed.",
+    )
+    _add_data_dir_arg(demo_cleanup_p)
+
     # module - install / list / uninstall business modules
     module_p = subparsers.add_parser(
         "module",
@@ -2811,6 +2860,8 @@ def main() -> None:
         cmd_seed(args)
     elif args.command == "promote-admin":
         cmd_promote_admin(args)
+    elif args.command == "demo-cleanup":
+        cmd_demo_cleanup(args)
     elif args.command == "module":
         cmd_module(args)
     elif args.command == "pack":
