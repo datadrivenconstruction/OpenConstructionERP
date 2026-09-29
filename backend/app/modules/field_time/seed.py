@@ -135,6 +135,18 @@ _WORKING_CODE_COUNT = 8
 _SUBMIT_AT = time(17, 30, tzinfo=UTC)
 _APPROVE_AT = time(8, 15, tzinfo=UTC)
 
+_REVERSAL_NOTE = "Hours booked to the wrong cost code; re-entered on the following sheet."
+
+
+def _submitted_stamp(day: date) -> datetime:
+    """When the seed says a sheet for ``day`` was sent: the same evening."""
+    return datetime.combine(day, _SUBMIT_AT)
+
+
+def _approved_stamp(day: date) -> datetime:
+    """When the seed says a sheet for ``day`` was approved: the next morning."""
+    return datetime.combine(day + timedelta(days=1), _APPROVE_AT)
+
 
 def _rng_for(project_id: uuid.UUID) -> random.Random:
     """A deterministic RNG per project, so a re-seed reproduces the register."""
@@ -477,9 +489,7 @@ async def _seed_project(
         if index == to_reverse and target == _APPROVED:
             reversal = await service.reverse_timesheet(
                 timesheet.id,
-                ReverseTimesheetRequest(
-                    note="Hours booked to the wrong cost code; re-entered on the following sheet.",
-                ),
+                ReverseTimesheetRequest(note=_REVERSAL_NOTE),
                 approver,
             )
             counts["reversals"] += 1
@@ -499,9 +509,9 @@ async def _backdate_signatures(
     """Move a sheet's submit / approve stamps onto the day it records."""
     fields: dict[str, object] = {}
     if target in (_SUBMITTED, _APPROVED):
-        fields["submitted_at"] = datetime.combine(day, _SUBMIT_AT)
+        fields["submitted_at"] = _submitted_stamp(day)
     if target == _APPROVED:
-        fields["approved_at"] = datetime.combine(day + timedelta(days=1), _APPROVE_AT)
+        fields["approved_at"] = _approved_stamp(day)
     if fields:
         await repo.update_fields(timesheet_id, **fields)
 
@@ -548,3 +558,108 @@ async def seed_field_time_demo(
         for key, value in counts.items():
             totals[key] += value
     return totals
+
+
+def _same_instant(value: datetime | None, expected: datetime) -> bool:
+    if value is None:
+        return False
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=UTC)
+    return value == expected
+
+
+async def seeded_row_ids(session: AsyncSession, project_ids: list[uuid.UUID]) -> list[tuple[type, list, str]]:
+    """Timesheets in ``project_ids`` exactly as :func:`seed_field_time_demo` wrote them, and what they caused.
+
+    Timesheet references come from the same per-project sequence a person's
+    sheets use, so they prove nothing. A sheet matches instead when its shift
+    note is one the seed picks from, its metadata is exactly one of the seed's
+    hour configurations, and its signatures sit where the seed backdates them
+    (sent at 17:30 on the day, approved at 08:15 the next morning; a draft
+    carries neither). A person's sheet with the same note but signed when it
+    was really signed is not matched. A reversal matches on the seed's reversal
+    note and on reversing a matched sheet.
+
+    Approving a sheet also wrote labour worker-days for the cost model and,
+    where hours were booked to a variation, a daywork sheet. Neither has a
+    foreign key back to the timesheet, so they are found through what they
+    carry (the worker-day's source reference is the sheet id, the daywork
+    description ends with the sheet reference) and listed before the sheets.
+
+    Returns:
+        ``(model, ids, label)`` groups; ``label`` names the group in reports.
+    """
+    if not project_ids:
+        return []
+    from app.modules.costmodel.models import LabourWorkerDay
+    from app.modules.variations.models import DayworkSheet
+
+    notes = set(_SHIFT_NOTES)
+    configs = [dict(c) for c in _HOURS_CONFIGS]
+    rows = (
+        await session.execute(
+            select(
+                FieldTimesheet.id,
+                FieldTimesheet.project_id,
+                FieldTimesheet.reference,
+                FieldTimesheet.date,
+                FieldTimesheet.status,
+                FieldTimesheet.note,
+                FieldTimesheet.metadata_,
+                FieldTimesheet.submitted_at,
+                FieldTimesheet.approved_at,
+                FieldTimesheet.reverses_id,
+            ).where(FieldTimesheet.project_id.in_(project_ids))
+        )
+    ).all()
+
+    def signed_like_the_seed(r) -> bool:
+        if r.submitted_at is None:
+            return r.approved_at is None
+        if not _same_instant(r.submitted_at, _submitted_stamp(r.date)):
+            return False
+        return r.approved_at is None or _same_instant(r.approved_at, _approved_stamp(r.date))
+
+    originals = {
+        r.id: r
+        for r in rows
+        if r.reverses_id is None and r.note in notes and dict(r.metadata_ or {}) in configs and signed_like_the_seed(r)
+    }
+    reversals = {r.id: r for r in rows if r.reverses_id in originals and r.note == _REVERSAL_NOTE}
+    sheets = {**originals, **reversals}
+
+    worker_days = []
+    if sheets:
+        worker_days = list(
+            (
+                await session.execute(
+                    select(LabourWorkerDay.id).where(
+                        LabourWorkerDay.project_id.in_(project_ids),
+                        LabourWorkerDay.source_module == "field_time",
+                        LabourWorkerDay.source_ref.in_([str(i) for i in sheets]),
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
+
+    suffixes = {(r.project_id, f"(timesheet {r.reference})") for r in sheets.values() if r.reference}
+    daywork = [
+        d.id
+        for d in (
+            await session.execute(
+                select(DayworkSheet.id, DayworkSheet.project_id, DayworkSheet.description).where(
+                    DayworkSheet.project_id.in_(project_ids)
+                )
+            )
+        ).all()
+        if any(d.project_id == pid and str(d.description or "").endswith(sfx) for pid, sfx in suffixes)
+    ]
+
+    return [
+        (LabourWorkerDay, worker_days, "field_time_labour_worker_days"),
+        (DayworkSheet, daywork, "field_time_daywork_sheets"),
+        (FieldTimesheet, list(reversals), "field_time_reversals"),
+        (FieldTimesheet, list(originals), "field_timesheets"),
+    ]
