@@ -284,3 +284,35 @@ async def test_portfolio_kpi_fan_out_leaves_out_a_deleted_project(pg_session) ->
     unrestricted = set(await _cost_portfolio_project_ids(pg_session, None))
     assert live.id in unrestricted
     assert deleted.id not in unrestricted
+
+
+@pytest.mark.asyncio
+async def test_a_purged_demo_project_leaves_the_analytics_overview(pg_session) -> None:
+    """The hard path: removing demo data deletes the row and its children."""
+    from sqlalchemy import func, select
+
+    from app.modules.projects.router import analytics_overview
+
+    owner = await _owner(pg_session)
+    live = await _project_with_budget(pg_session, owner, "Live project")
+    demo = await _project_with_budget(pg_session, owner, "Demo project")
+    demo.metadata_ = {"demo_id": f"demo-{uuid.uuid4().hex[:8]}"}
+    await pg_session.flush()
+    # The purge expires every instance in the session; read ids first.
+    demo_id, live_id, owner_id = demo.id, live.id, owner.id
+
+    await ProjectService(pg_session, get_settings()).purge_demo_projects()
+
+    overview = await analytics_overview(
+        session=pg_session,
+        _user_id=str(owner_id),
+        payload={"sub": str(owner_id), "role": "editor"},
+    )
+    ids = {p["id"] for p in overview["projects"]}
+    assert ids == {str(live_id)}
+    assert overview["total_planned"] == 1000.0
+    # No budget line is left behind for the purged project.
+    orphans = await pg_session.scalar(
+        select(func.count()).select_from(BudgetLine).where(BudgetLine.project_id == demo_id)
+    )
+    assert orphans == 0
