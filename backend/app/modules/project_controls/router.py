@@ -66,7 +66,9 @@ async def controls_snapshot(
     if project_id is not None:
         await verify_project_access(project_id, user_id, session)
     else:
-        allowed = await accessible_project_ids(session, user_id)
+        # Portfolio mode lists live projects only: a deleted (archived)
+        # project is not part of the rollup, for admins either.
+        allowed = await accessible_project_ids(session, user_id, live_only=True)
     result = await service.snapshot(
         project_id=project_id,
         period_start=_parse_date(period_start),
@@ -95,6 +97,8 @@ async def controls_drill(
     if project_id is not None:
         await verify_project_access(project_id, user_id, session)
     else:
-        allowed = await accessible_project_ids(session, user_id)
+        # Portfolio mode lists live projects only: a deleted (archived)
+        # project is not part of the rollup, for admins either.
+        allowed = await accessible_project_ids(session, user_id, live_only=True)
     result = await service.drill(kpi_code, project_id=project_id, limit=limit, allowed_project_ids=allowed)
     return ControlsDrillResponse(**result)

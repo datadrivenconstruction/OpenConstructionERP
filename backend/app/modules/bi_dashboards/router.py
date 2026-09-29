@@ -510,7 +510,9 @@ async def compute_kpi(
     if project_id is not None:
         await verify_project_access(project_id, user_id, session)
     else:
-        allowed = await accessible_project_ids(session, user_id)
+        # A portfolio KPI counts live projects only: a deleted (archived)
+        # project is not part of it, for admins either.
+        allowed = await accessible_project_ids(session, user_id, live_only=True)
     try:
         return await service.compute_kpi(
             code,
@@ -623,12 +625,12 @@ async def drill_down(
 ) -> DrillDownResponse:
     # Same portfolio IDOR scope as compute_kpi: a specific project is
     # access-checked; a project-less drill-down is scoped to the caller's
-    # accessible projects (admins get None = unrestricted).
+    # accessible live projects, the same set compute_kpi counts.
     allowed: set[uuid.UUID] | None = None
     if payload.project_id is not None:
         await verify_project_access(payload.project_id, user_id, session)
     else:
-        allowed = await accessible_project_ids(session, user_id)
+        allowed = await accessible_project_ids(session, user_id, live_only=True)
     result = await service.drill_down(
         code,
         project_id=payload.project_id,
