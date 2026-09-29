@@ -94,6 +94,21 @@ describe('fullInstallPackStream failures', () => {
     const body = JSON.parse((fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1].body as string);
     expect(body.cost_regions).toEqual(['cwicr-de-berlin']);
     expect(body.only_steps).toEqual(['cost_db']);
-    expect(body.install_catalog).toBe(true);
+  });
+
+  it('asks for the resource catalogue only when the caller does', async () => {
+    const fetchMock = vi.fn(async () =>
+      sseResponse([frame('start', { slug: 'x', total: 0, steps: [] }), frame('done', { slug: 'x', ok: true, steps: [] })]),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    // Onboarding and the cases strip pass no option: the catalogue step must
+    // not run for them, a failed download would fail their install unseen.
+    await fullInstallPackStream('x', () => {}, { demoCount: 2 });
+    await fullInstallPackStream('x', () => {}, { installCatalog: true });
+    const bodies = fetchMock.mock.calls.map((c) =>
+      JSON.parse((c as unknown as [string, RequestInit])[1].body as string),
+    );
+    expect(bodies[0].install_catalog).toBe(false);
+    expect(bodies[1].install_catalog).toBe(true);
   });
 });
