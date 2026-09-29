@@ -1270,31 +1270,39 @@ async def load_base_market(
     # no English text), the base opens in its own language, which is what the
     # card already says through ``text_lang_code``, never whatever language a
     # previous market happened to leave behind.
+    #
+    # Both branches are held to the same rule: the language they aim for must
+    # land, or nothing is repriced. The fallback branch used to swallow a failed
+    # swap and answer 200 with the text still in whatever language was there.
     requested_lang = base_registry.normalize_lang_code(base_registry.market_lang_code(market_token) or "")
-    source_region = base_registry.text_source_region(base_region, requested_lang)
-    if source_region is not None:
-        text_lang = await _ensure_region_text_language(base_region, requested_lang, session)
-        if text_lang != requested_lang:
-            reason = _LAST_DOWNLOAD_ERROR.get(source_region, "")
-            raise HTTPException(
-                status_code=status.HTTP_502_BAD_GATEWAY,
-                detail=(
-                    f"The '{requested_lang}' text of '{base_region}' could not be loaded, so "
-                    f"'{market_token}' was not applied. {reason}"
-                ).strip(),
-            )
+    if base_registry.text_source_region(base_region, requested_lang) is not None:
+        target_lang: str | None = requested_lang
     else:
-        home_lang = base_registry.home_language_code(base_region)
-        text_lang = await _ensure_region_text_language(base_region, home_lang, session) if home_lang else None
+        target_lang = base_registry.home_language_code(base_region) or base_registry.home_parquet_text_lang(base_region)
 
     from app.modules.catalog.router import fetch_market_catalog_rows
 
-    try:
-        rows = await fetch_market_catalog_rows(base_region, market_token)
-    except RuntimeError as exc:
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
+    # One text swap plus reprice per base at a time in this process: two market
+    # clicks on the same base interleaved could leave one market's text under
+    # the other's prices while each tab reports its own.
+    async with _base_market_lock(base_region):
+        text_lang = await _ensure_region_text_language(base_region, target_lang, session) if target_lang else None
+        if target_lang and text_lang != target_lang:
+            reason = _LAST_TEXT_SWAP_ERROR.pop(base_region, "")
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=(
+                    f"The '{target_lang}' text of '{base_region}' could not be loaded, so "
+                    f"'{market_token}' was not applied. {reason}"
+                ).strip(),
+            )
 
-    result = await service.apply_market_catalog(base_region, market_token, rows)
+        try:
+            rows = await fetch_market_catalog_rows(base_region, market_token)
+        except RuntimeError as exc:
+            raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
+
+        result = await service.apply_market_catalog(base_region, market_token, rows)
     _invalidate_cost_cache()
 
     payload = result.as_dict()
@@ -4686,6 +4694,23 @@ _GITHUB_CWICR_LANG_FILES: dict[str, str] = base_registry.national_language_worki
 # fresh (it reverts to the home English text at that point).
 _REGION_ACTIVE_LANG: dict[str, str] = {}
 
+# Why the last text swap of a base did not land, for the error a caller shows.
+# Set only by the swap that failed, so a stale download error from an unrelated
+# earlier attempt is never offered as the reason.
+_LAST_TEXT_SWAP_ERROR: dict[str, str] = {}
+
+# One market switch per base at a time. Process-local, like _REGION_ACTIVE_LANG:
+# it orders concurrent clicks inside one worker, which is how the app runs.
+_BASE_MARKET_LOCKS: dict[str, asyncio.Lock] = {}
+
+
+def _base_market_lock(base_region: str) -> asyncio.Lock:
+    lock = _BASE_MARKET_LOCKS.get(base_region)
+    if lock is None:
+        lock = _BASE_MARKET_LOCKS[base_region] = asyncio.Lock()
+    return lock
+
+
 # CostItem columns the language swap rewrites - the text-bearing ones only.
 # Deliberately excludes ``rate``/``currency`` (the market reprice owns those),
 # ``descriptions`` (the separate multilang map) and the identity columns.
@@ -5210,9 +5235,31 @@ async def load_cwicr_region(db_id: str, session: AsyncSession) -> dict:
     # it in its own language instead (China in Chinese, Brazil in Portuguese).
     # No-op for the global markets and for a base whose language has no parquet.
     if result_data.get("imported", 0) > 0:
-        await _ensure_region_text_language(db_id, base_registry.home_language_code(db_id), session)
+        result_data.update(await _open_in_home_language(db_id, session))
 
     return result_data
+
+
+async def _open_in_home_language(db_id: str, session: AsyncSession) -> dict[str, Any]:
+    """Switch a freshly loaded national base to its own language and say how it went.
+
+    Returns ``text_language`` (what the rows are in now) beside
+    ``text_language_requested`` (the base's own language), so a caller can warn
+    when the swap did not land instead of reporting the base ready in a language
+    it is not in. Empty for a base with nothing to swap. On failure the rows are
+    still in the home parquet's language, which is what ``text_language`` says.
+    """
+    home_lang = base_registry.home_language_code(db_id)
+    if not home_lang:
+        return {}
+    shown = await _ensure_region_text_language(db_id, home_lang, session)
+    if shown == home_lang:
+        return {"text_language": shown, "text_language_requested": home_lang}
+    return {
+        "text_language": base_registry.home_parquet_text_lang(db_id),
+        "text_language_requested": home_lang,
+        "text_language_error": _LAST_TEXT_SWAP_ERROR.pop(db_id, "") or "The language file could not be applied.",
+    }
 
 
 # Work items handed to PostgreSQL in one go while an import is running.
@@ -5455,6 +5502,7 @@ async def _ensure_region_text_language(base_region: str, lang_code: str | None, 
     if _REGION_ACTIVE_LANG.get(base_region) == lang_code:
         return lang_code
 
+    _LAST_TEXT_SWAP_ERROR.pop(base_region, None)
     parquet = await _find_cwicr_file(lang_region)
     if not parquet:
         logger.warning(
@@ -5462,6 +5510,7 @@ async def _ensure_region_text_language(base_region: str, lang_code: str | None, 
             lang_code,
             base_region,
         )
+        _LAST_TEXT_SWAP_ERROR[base_region] = _LAST_DOWNLOAD_ERROR.get(lang_region, "")
         return None
 
     import asyncio
@@ -5473,8 +5522,15 @@ async def _ensure_region_text_language(base_region: str, lang_code: str | None, 
     staging_region = f"__xlate_{base_region}_{lang_code}"
     try:
         updated = await asyncio.to_thread(_swap_region_text_sync, target, str(parquet), base_region, staging_region)
-    except Exception:
+    except Exception as exc:
         logger.exception("Language swap to %s failed for %s (keeping current text)", lang_code, base_region)
+        _LAST_TEXT_SWAP_ERROR[base_region] = f"The text swap failed: {exc.__class__.__name__}."
+        return None
+    if not updated:
+        # Nothing joined on code, so no row changed language. Recording the
+        # language here would claim a switch that did not happen.
+        logger.warning("Language swap to %s matched no rows of %s", lang_code, base_region)
+        _LAST_TEXT_SWAP_ERROR[base_region] = f"No work item of '{base_region}' matched the '{lang_code}' file."
         return None
 
     _REGION_ACTIVE_LANG[base_region] = lang_code
