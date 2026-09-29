@@ -31,7 +31,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import i18n, {
   isLocaleLoaded,
   loadLocaleResource,
@@ -77,6 +77,7 @@ import {
   type StreamStepName,
 } from '@/features/onboarding/partnerPacksApi';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { apiGet } from '@/shared/lib/api';
 import { fmtList } from '@/shared/lib/formatters';
 
 interface PartnerPackApplyDialogProps {
@@ -204,13 +205,42 @@ function baseCountry(flag: string | null | undefined, market: string | null | un
 export const PACK_INSTALL_DOWNLOAD_URL = 'https://openconstructionerp.com/download';
 
 /**
- * The second half of "this account may not install packs": where to go
- * instead. The public demo keeps its accounts read-only on purpose, so for
- * most readers of that message the answer is their own installation, where
- * they are the administrator.
+ * Whether this server is the public demo. Same shared ``['system-status']``
+ * query the demo banner reads, so it costs no extra request.
  */
-export function PackOwnCopyHint() {
+function usePublicDemo(): boolean {
+  const { data } = useQuery<{ demo_mode?: boolean }>({
+    queryKey: ['system-status'],
+    queryFn: () => apiGet<{ demo_mode?: boolean }>('/system/status'),
+    retry: false,
+    staleTime: Infinity,
+  });
+  return data?.demo_mode === true;
+}
+
+/**
+ * The second half of "this account may not install packs": where to go
+ * instead.
+ *
+ * On the public demo the accounts are read-only on purpose, and the answer is
+ * a copy of one's own, where one is the administrator. Anywhere else the
+ * reader is an estimator or a manager on their company's server, and sending
+ * them off to install a separate, disconnected copy is wrong: they should ask
+ * their administrator. ``askAdmin={false}`` is for a place that already says
+ * that in its own words.
+ */
+export function PackOwnCopyHint({ askAdmin = true }: { askAdmin?: boolean }) {
   const { t } = useTranslation();
+  const publicDemo = usePublicDemo();
+  if (!publicDemo) {
+    return askAdmin ? (
+      <span className="mt-1 block" data-testid="pack-ask-admin">
+        {t('modules.pp_ask_admin_hint', {
+          defaultValue: 'Ask your administrator to install it.',
+        })}
+      </span>
+    ) : null;
+  }
   return (
     <span className="mt-1 block">
       {t('modules.pp_own_copy_hint', {
@@ -918,7 +948,7 @@ export function PartnerPackApplyDialog({
       <div className="min-w-0 flex-1">
         <p className="font-semibold">{failureTitle(failure.kind)}</p>
         <p className="mt-1">{failureBody(failure.kind)}</p>
-        {failure.kind === 'forbidden' && <PackOwnCopyHint />}
+        {failure.kind === 'forbidden' && <PackOwnCopyHint askAdmin={false} />}
         {failure.detail && (
           <p className="mt-1.5 break-words text-xs opacity-80">
             {t('modules.pp_fail_server_said', {
