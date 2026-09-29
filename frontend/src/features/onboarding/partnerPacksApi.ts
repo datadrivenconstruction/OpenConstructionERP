@@ -167,6 +167,7 @@ export type StreamStepName =
   | 'locale'
   | 'cost_db'
   | 'resources'
+  | 'catalog'
   | 'vector_db'
   | 'demos';
 
@@ -194,6 +195,101 @@ export type StreamInstallEvent =
   | { type: 'done'; slug: string; ok: boolean; steps: FullInstallStep[] };
 
 /**
+ * Why a streamed install did not run to its ``done`` frame.
+ *
+ * ``forbidden`` is the one production hit first: a viewer account opened the
+ * dialog, the server answered 403 before the first frame, and the dialog had
+ * nothing to show but an empty checklist.
+ */
+export type PackInstallFailureKind =
+  | 'unauthenticated'
+  | 'forbidden'
+  | 'not_found'
+  | 'conflict'
+  | 'invalid'
+  | 'server'
+  | 'network'
+  | 'incomplete'
+  | 'http';
+
+/**
+ * A streamed install that failed as a whole, as opposed to one step of it.
+ *
+ * ``message`` stays a readable English sentence because the onboarding picker
+ * and the cases strip print it as is. ``kind`` is what a screen that can
+ * localize should branch on, and ``detail`` is the server's own ``detail``
+ * string when it sent one, never a raw HTML page from a proxy.
+ */
+export class PackInstallError extends Error {
+  readonly kind: PackInstallFailureKind;
+  readonly status: number | null;
+  readonly detail: string | null;
+
+  constructor(kind: PackInstallFailureKind, status: number | null, detail: string | null, message: string) {
+    super(message);
+    this.name = 'PackInstallError';
+    this.kind = kind;
+    this.status = status;
+    this.detail = detail;
+  }
+}
+
+/** Map an HTTP status to the failure kind the dialog explains. */
+export function packInstallFailureKind(status: number): PackInstallFailureKind {
+  if (status === 401) return 'unauthenticated';
+  if (status === 403) return 'forbidden';
+  if (status === 404) return 'not_found';
+  if (status === 409) return 'conflict';
+  if (status === 400 || status === 422) return 'invalid';
+  if (status >= 500) return 'server';
+  return 'http';
+}
+
+/**
+ * The ``detail`` of a FastAPI error body, or null.
+ *
+ * Only a JSON ``detail`` string is kept. A 502 from nginx is an HTML page, and
+ * printing that into a dialog is how a user ends up reading markup.
+ */
+function errorDetail(body: string): string | null {
+  if (!body) return null;
+  try {
+    const parsed = JSON.parse(body) as { detail?: unknown };
+    if (typeof parsed.detail === 'string' && parsed.detail.trim()) return parsed.detail.trim();
+    if (Array.isArray(parsed.detail)) {
+      const msgs = parsed.detail
+        .map((d) => (d && typeof d === 'object' && 'msg' in d ? String((d as { msg: unknown }).msg) : ''))
+        .filter(Boolean);
+      return msgs.length ? msgs.join('; ') : null;
+    }
+  } catch {
+    // Not JSON: a proxy page or plain text. Say nothing rather than markup.
+  }
+  return null;
+}
+
+/** Options for {@link fullInstallPackStream}. */
+export interface FullInstallStreamOptions {
+  demoCount?: number;
+  confirmDisables?: boolean;
+  vectorize?: boolean;
+  /**
+   * Which of the pack's declared cost regions to load. Omitted means all of
+   * them, which is what the onboarding picker and the cases strip want. An
+   * empty list loads none.
+   */
+  costRegions?: string[];
+  /** Load the resource catalogue of each loaded region. Default true. */
+  installCatalog?: boolean;
+  /**
+   * Run only these steps, for retrying the ones that failed. Omitted runs the
+   * full install.
+   */
+  onlySteps?: StreamStepName[];
+  signal?: AbortSignal;
+}
+
+/**
  * Activate a partner pack with live per-step progress.
  *
  * Calls ``POST /api/v1/partner-pack/full-install-stream`` (Server-Sent Events)
@@ -205,7 +301,11 @@ export type StreamInstallEvent =
  *
  * The endpoint is fail-soft: every step reports ``ok`` / ``skipped`` / ``error``
  * and the stream always reaches a ``done`` frame, so a single failed step never
- * throws here. Only a transport failure (network / auth / abort) rejects.
+ * throws here. What rejects is the install failing as a whole, and it rejects
+ * with a {@link PackInstallError} naming why: the server refused the request
+ * (401, 403, 404, 409, 422, 5xx), the network dropped before an answer, or the
+ * stream closed before its ``done`` frame. An abort rejects with the browser's
+ * own ``AbortError`` so callers can keep ignoring it.
  *
  * Uses raw ``fetch`` + a ``ReadableStream`` reader (not the native
  * ``EventSource``, which cannot send the ``Authorization`` header) - the same
@@ -214,51 +314,90 @@ export type StreamInstallEvent =
 export async function fullInstallPackStream(
   slug: string,
   onEvent: (event: StreamInstallEvent) => void,
-  opts: {
-    demoCount?: number;
-    confirmDisables?: boolean;
-    vectorize?: boolean;
-    signal?: AbortSignal;
-  } = {},
+  opts: FullInstallStreamOptions = {},
 ): Promise<void> {
   // ``vectorize`` defaults to false: the semantic index only powers AI fuzzy
   // search (graceful fallback when absent) and is the slowest step by far, so
   // building it inline made activation look stuck. Pass ``vectorize: true``
   // only from an explicit "build search index" action.
-  const { demoCount = 2, confirmDisables = false, vectorize = false, signal } = opts;
-  const token = getAuthToken();
-  const response = await fetch(`${API_BASE}/v1/partner-pack/full-install-stream`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'text/event-stream',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify({
-      slug,
-      set_locale: true,
-      install_cost_db: true,
-      vectorize,
-      confirm_disables: confirmDisables,
-      demo_count: demoCount,
-    }),
+  const {
+    demoCount = 2,
+    confirmDisables = false,
+    vectorize = false,
+    costRegions,
+    installCatalog = true,
+    onlySteps,
     signal,
-  });
+  } = opts;
+  const token = getAuthToken();
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE}/v1/partner-pack/full-install-stream`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'text/event-stream',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({
+        slug,
+        set_locale: true,
+        install_cost_db: true,
+        install_catalog: installCatalog,
+        vectorize,
+        confirm_disables: confirmDisables,
+        demo_count: demoCount,
+        ...(costRegions ? { cost_regions: costRegions } : {}),
+        ...(onlySteps ? { only_steps: onlySteps } : {}),
+      }),
+      signal,
+    });
+  } catch (err) {
+    if ((err as { name?: string })?.name === 'AbortError') throw err;
+    throw new PackInstallError(
+      'network',
+      null,
+      null,
+      'Could not reach the server to activate this pack. Check the connection and try again.',
+    );
+  }
 
   if (!response.ok || !response.body) {
-    const detail = await response.text().catch(() => '');
-    throw new Error(detail || `Activation failed (HTTP ${response.status})`);
+    const body = await response.text().catch(() => '');
+    const detail = errorDetail(body);
+    const kind = response.ok ? 'incomplete' : packInstallFailureKind(response.status);
+    throw new PackInstallError(
+      kind,
+      response.status,
+      detail,
+      detail
+        ? `Activation failed (HTTP ${response.status}): ${detail}`
+        : `Activation failed (HTTP ${response.status})`,
+    );
   }
 
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
   let currentEvent = '';
+  let sawDone = false;
 
   // Parse standard SSE frames: ``event:`` line names the frame, the following
   // ``data:`` line carries the JSON payload, a blank line terminates the frame.
   for (;;) {
-    const { done, value } = await reader.read();
+    let chunk: ReadableStreamReadResult<Uint8Array>;
+    try {
+      chunk = await reader.read();
+    } catch (err) {
+      if ((err as { name?: string })?.name === 'AbortError') throw err;
+      throw new PackInstallError(
+        'incomplete',
+        response.status,
+        null,
+        'The connection dropped while the pack was installing. Completed steps are kept.',
+      );
+    }
+    const { done, value } = chunk;
     if (done) break;
     buffer += decoder.decode(value, { stream: true });
     const lines = buffer.split('\n');
@@ -283,9 +422,22 @@ export async function fullInstallPackStream(
         continue;
       }
       if (currentEvent === 'start' || currentEvent === 'step_start' || currentEvent === 'step_done' || currentEvent === 'done') {
+        if (currentEvent === 'done') sawDone = true;
         onEvent({ type: currentEvent, ...payload } as StreamInstallEvent);
       }
     }
+  }
+
+  // A stream that ends without ``done`` was cut, by a proxy timeout or a
+  // server restart. Returning quietly here is what let a caller read the
+  // missing verdict as a finished install.
+  if (!sawDone) {
+    throw new PackInstallError(
+      'incomplete',
+      response.status,
+      null,
+      'The connection dropped while the pack was installing. Completed steps are kept.',
+    );
   }
 }
 

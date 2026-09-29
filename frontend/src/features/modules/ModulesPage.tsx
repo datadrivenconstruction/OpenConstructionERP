@@ -56,12 +56,13 @@ import {
   tallyModuleCategories,
   type ModuleSearchContext,
 } from './moduleSearch';
-import { PartnerPackApplyDialog } from './PartnerPackApplyDialog';
+import { PackOwnCopyHint, PartnerPackApplyDialog } from './PartnerPackApplyDialog';
 import { PartnerPackDeactivateDialog } from './PartnerPackDeactivateDialog';
 import {
   useAppliedPack,
   useInstallPack,
   useRescanPacks,
+  canInstallPacks,
   MAX_PACK_UPLOAD_BYTES,
 } from './partnerPacks';
 import type { PackType } from '@/shared/hooks/usePartnerPack';
@@ -976,6 +977,11 @@ function PartnerPacksTab() {
       {/* Install / rescan controls — admin only (gated inside the panel). */}
       <InstallPackPanel onChanged={() => void refetch()} />
 
+      {/* A read-only account (the public demo keeps every account a viewer)
+          sees the packs and why it cannot install them, once, above the grid,
+          rather than a button that ends in a 403. */}
+      <ViewerPackNotice />
+
       {isLoading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -1061,6 +1067,27 @@ function PartnerPacksTab() {
   );
 }
 
+/** Shown instead of the install controls to accounts that may only view packs. */
+function ViewerPackNotice() {
+  const { t } = useTranslation();
+  if (canInstallPacks(useAuthStore((s) => s.userRole))) return null;
+  return (
+    <div
+      role="note"
+      data-testid="pack-viewer-notice"
+      className="mb-4 flex items-start gap-2 rounded-lg border border-border-light bg-surface-secondary px-3.5 py-3 text-sm text-content-secondary"
+    >
+      <ShieldCheck size={16} className="mt-0.5 shrink-0" />
+      <span>
+        {t('modules.pp_viewer_notice', {
+          defaultValue: 'This account can view packs but not install them. Installing a pack needs an administrator.',
+        })}
+        <PackOwnCopyHint />
+      </span>
+    </div>
+  );
+}
+
 /* ── Install / Rescan panel ────────────────────────────────────────────── */
 
 /**
@@ -1078,7 +1105,7 @@ function PartnerPacksTab() {
 export function InstallPackPanel({ onChanged }: { onChanged: () => void }) {
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
-  const isAdmin = useAuthStore((s) => s.userRole) === 'admin';
+  const isAdmin = canInstallPacks(useAuthStore((s) => s.userRole));
 
   const install = useInstallPack();
   const rescan = useRescanPacks();
@@ -1325,6 +1352,9 @@ function PartnerPackCard({
 }: PartnerPackCardProps) {
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
+  // Activating and deactivating are RequireRole("admin") on the server. A
+  // viewer used to get the button, the dialog, and a 403 nobody explained.
+  const canInstall = canInstallPacks(useAuthStore((s) => s.userRole));
   const [applyOpen, setApplyOpen] = useState(false);
   const [deactivateOpen, setDeactivateOpen] = useState(false);
   // Addressed by id rather than by a ref: `Card` spreads its extra props onto
@@ -1544,6 +1574,7 @@ function PartnerPackCard({
                 size="sm"
                 icon={<Power size={14} />}
                 onClick={() => setDeactivateOpen(true)}
+                disabled={!canInstall}
               >
                 {t('modules.pack_deactivate', { defaultValue: 'Deactivate' })}
               </Button>
@@ -1554,11 +1585,23 @@ function PartnerPackCard({
               size="sm"
               icon={<Power size={14} />}
               onClick={handleActivateClick}
+              disabled={!canInstall}
             >
               {t('modules.pack_activate', { defaultValue: 'Activate pack' })}
             </Button>
           )}
         </div>
+        {!canInstall && !(isActive && activeSource === 'env') && (
+          <p
+            className="mt-1.5 inline-flex items-center gap-1.5 text-2xs text-content-tertiary"
+            data-testid="pack-admin-only"
+          >
+            <ShieldCheck size={12} className="shrink-0" />
+            {t('modules.pack_admin_only_card', {
+              defaultValue: 'Only an administrator can activate or deactivate a pack.',
+            })}
+          </p>
+        )}
       </div>
 
       <PartnerPackApplyDialog
