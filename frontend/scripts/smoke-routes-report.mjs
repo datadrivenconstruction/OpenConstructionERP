@@ -35,7 +35,7 @@ const evidence = (r) => {
 const lines = [
   '# Smoke every route',
   '',
-  `${rows.length} routes: ${count('fail')} fail, ${count('soft')} soft (4xx or console only), ${count('unresolved')} unresolved, ${count('ok')} ok.`,
+  `${rows.length} routes: ${count('fail')} fail, ${count('soft')} soft (4xx or console only), ${count('unresolved')} unresolved, ${count('ok')} ok. Tabs clicked: ${rows.reduce((n, r) => n + (r.tabsClicked ?? 0), 0)} on ${rows.filter((r) => r.tabsClicked).length} pages.`,
   '',
   '| status | route | opened | symptom | failing call / console message |',
   '|---|---|---|---|---|',
