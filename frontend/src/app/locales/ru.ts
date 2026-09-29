@@ -40980,6 +40980,8 @@ const resource = {
     "rebar_schedule.invalid_file": "Поддерживаются только файлы .abs.",
     "rebar_schedule.length": "Длина (мм)",
     "rebar_schedule.member": "Элемент",
+    "rebar_schedule.drawing": "Чертёж",
+    "rebar_schedule.steel_grade": "Класс стали",
     "rebar_schedule.no_project": "Выберите проект",
     "rebar_schedule.no_project_desc": "Выберите проект из шапки для управления ведомостями арматуры.",
     "rebar_schedule.or_browse": "или нажмите для выбора файла",

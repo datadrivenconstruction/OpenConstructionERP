@@ -40734,6 +40734,8 @@ const resource = {
     "rebar_schedule.invalid_file": "Поддържат се само .abs файлове.",
     "rebar_schedule.length": "Дължина (мм)",
     "rebar_schedule.member": "Елемент",
+    "rebar_schedule.drawing": "Чертеж",
+    "rebar_schedule.steel_grade": "Клас стомана",
     "rebar_schedule.no_project": "Изберете проект",
     "rebar_schedule.no_project_desc": "Изберете проект от заглавната лента, за да управлявате армировъчните му спецификации.",
     "rebar_schedule.or_browse": "или кликнете за преглед",

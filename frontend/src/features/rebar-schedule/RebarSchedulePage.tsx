@@ -41,7 +41,8 @@ import {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function formatDate(iso: string): string {
+function formatDate(iso: string | null): string {
+  if (!iso) return '-';
   return new Date(iso).toLocaleDateString(getIntlLocale(), {
     year: 'numeric',
     month: 'short',
@@ -51,7 +52,8 @@ function formatDate(iso: string): string {
   });
 }
 
-function formatWeight(kg: number): string {
+function formatWeight(kg: number | null): string {
+  if (kg === null) return '-';
   if (kg >= 1000) return `${fmtFixed(kg / 1000, 2)} t`;
   return `${fmtFixed(kg, 1)} kg`;
 }
@@ -60,7 +62,11 @@ function formatWeight(kg: number): string {
 // Sub-views
 // ---------------------------------------------------------------------------
 
-function ShapesTable({ shapes }: { shapes: RebarShape[] }) {
+function fmtOptional(v: number | null, decimals: number): string {
+  return v === null ? '-' : fmtFixed(v, decimals);
+}
+
+function ShapesTable({ shapes }: { shapes: Omit<RebarShape, 'id'>[] }) {
   const { t } = useTranslation();
   return (
     <div className="overflow-x-auto">
@@ -69,7 +75,8 @@ function ShapesTable({ shapes }: { shapes: RebarShape[] }) {
           <tr className="border-b border-border-light text-left text-2xs font-medium uppercase tracking-wide text-content-tertiary">
             <th className="px-3 py-2">{t('rebar_schedule.bar_mark', { defaultValue: 'Bar Mark' })}</th>
             <th className="px-3 py-2">{t('rebar_schedule.shape_code', { defaultValue: 'Shape' })}</th>
-            <th className="px-3 py-2">{t('rebar_schedule.member', { defaultValue: 'Member' })}</th>
+            <th className="px-3 py-2">{t('rebar_schedule.drawing', { defaultValue: 'Drawing' })}</th>
+            <th className="px-3 py-2">{t('rebar_schedule.steel_grade', { defaultValue: 'Grade' })}</th>
             <th className="px-3 py-2 text-right">{t('rebar_schedule.diameter', { defaultValue: 'Dia (mm)' })}</th>
             <th className="px-3 py-2 text-right">{t('rebar_schedule.length', { defaultValue: 'Length (mm)' })}</th>
             <th className="px-3 py-2 text-right">{t('rebar_schedule.quantity', { defaultValue: 'Qty' })}</th>
@@ -79,16 +86,17 @@ function ShapesTable({ shapes }: { shapes: RebarShape[] }) {
         <tbody>
           {shapes.map((s) => (
             <tr
-              key={s.id ?? `${s.bar_mark}-${s.shape_code}-${s.diameter}`}
+              key={s.line_no}
               className="border-b border-border-light last:border-0 hover:bg-surface-secondary/50 transition-colors"
             >
-              <td className="px-3 py-2 font-medium text-content-primary">{s.bar_mark}</td>
-              <td className="px-3 py-2 text-content-secondary">{s.shape_code}</td>
-              <td className="px-3 py-2 text-content-secondary">{s.member ?? '-'}</td>
-              <td className="px-3 py-2 text-right tabular-nums">{s.diameter}</td>
-              <td className="px-3 py-2 text-right tabular-nums">{s.length}</td>
-              <td className="px-3 py-2 text-right tabular-nums">{s.quantity}</td>
-              <td className="px-3 py-2 text-right tabular-nums">{fmtFixed(s.weight, 1)}</td>
+              <td className="px-3 py-2 font-medium text-content-primary">{s.position ?? '-'}</td>
+              <td className="px-3 py-2 text-content-secondary">{s.super_group}</td>
+              <td className="px-3 py-2 text-content-secondary">{s.drawing_ref ?? '-'}</td>
+              <td className="px-3 py-2 text-content-secondary">{s.steel_grade ?? '-'}</td>
+              <td className="px-3 py-2 text-right tabular-nums">{s.diameter_mm ?? '-'}</td>
+              <td className="px-3 py-2 text-right tabular-nums">{s.length_mm ?? '-'}</td>
+              <td className="px-3 py-2 text-right tabular-nums">{s.quantity ?? '-'}</td>
+              <td className="px-3 py-2 text-right tabular-nums">{fmtOptional(s.weight_kg, 1)}</td>
             </tr>
           ))}
         </tbody>
@@ -99,8 +107,8 @@ function ShapesTable({ shapes }: { shapes: RebarShape[] }) {
 
 function CuttingTable({ cutting }: { cutting: RebarCuttingEntry[] }) {
   const { t } = useTranslation();
-  const totalBars = cutting.reduce((s, c) => s + c.bar_count, 0);
-  const totalWeight = cutting.reduce((s, c) => s + c.total_weight, 0);
+  const totalBars = cutting.reduce((s, c) => s + c.bars, 0);
+  const totalWeight = cutting.reduce((s, c) => s + c.weight_kg, 0);
 
   return (
     <div className="overflow-x-auto">
@@ -115,12 +123,12 @@ function CuttingTable({ cutting }: { cutting: RebarCuttingEntry[] }) {
         <tbody>
           {cutting.map((c) => (
             <tr
-              key={c.diameter}
+              key={c.diameter_mm}
               className="border-b border-border-light last:border-0 hover:bg-surface-secondary/50 transition-colors"
             >
-              <td className="px-3 py-2 font-medium text-content-primary">{c.diameter}</td>
-              <td className="px-3 py-2 text-right tabular-nums">{c.bar_count}</td>
-              <td className="px-3 py-2 text-right tabular-nums">{fmtFixed(c.total_weight, 1)}</td>
+              <td className="px-3 py-2 font-medium text-content-primary">{c.diameter_mm}</td>
+              <td className="px-3 py-2 text-right tabular-nums">{c.bars}</td>
+              <td className="px-3 py-2 text-right tabular-nums">{fmtFixed(c.weight_kg, 1)}</td>
             </tr>
           ))}
         </tbody>
@@ -230,7 +238,7 @@ function RebarScheduleExplainer() {
 type View = 'list' | 'preview' | 'detail';
 
 export function RebarSchedulePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const activeProjectId = useProjectContextStore(
     (s: { activeProjectId: string | null }) => s.activeProjectId,
@@ -281,8 +289,8 @@ export function RebarSchedulePage() {
 
   const stats = useMemo(() => {
     const totalImports = imports.length;
-    const totalShapes = imports.reduce((s, i) => s + i.shape_count, 0);
-    const totalWeight = imports.reduce((s, i) => s + i.total_weight, 0);
+    const totalShapes = imports.reduce((s, i) => s + i.record_count, 0);
+    const totalWeight = imports.reduce((s, i) => s + (i.total_weight_kg ?? 0), 0);
     return { totalImports, totalShapes, totalWeight };
   }, [imports]);
 
@@ -301,7 +309,7 @@ export function RebarSchedulePage() {
       setUploadError(null);
       setUploading(true);
       try {
-        const data = await previewAbsFile(file);
+        const data = await previewAbsFile(file, i18n.language);
         setPreviewData(data);
         setPreviewFile(file);
         setView('preview');
@@ -311,7 +319,7 @@ export function RebarSchedulePage() {
         setUploading(false);
       }
     },
-    [t],
+    [t, i18n.language],
   );
 
   const handleDrop = useCallback(
@@ -338,18 +346,18 @@ export function RebarSchedulePage() {
     setImporting(true);
     setUploadError(null);
     try {
-      const created = await importAbsFile(previewFile, projectId);
+      const created = await importAbsFile(previewFile, projectId, i18n.language);
       await queryClient.invalidateQueries({ queryKey: ['rebar-imports', projectId] });
       setPreviewData(null);
       setPreviewFile(null);
-      setSelectedImportId(created.id);
+      setSelectedImportId(created.import_record.id);
       setView('detail');
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : 'Import failed');
     } finally {
       setImporting(false);
     }
-  }, [previewFile, projectId, queryClient]);
+  }, [previewFile, projectId, queryClient, i18n.language]);
 
   const handleCancelPreview = useCallback(() => {
     setPreviewData(null);
@@ -460,14 +468,17 @@ export function RebarSchedulePage() {
           </div>
         )}
 
-        {previewData.warnings.length > 0 && (
+        {previewData.validation.findings.length > 0 && (
           <div className="rounded-lg border border-semantic-warning/30 bg-semantic-warning-bg p-3 text-sm text-semantic-warning">
             <p className="font-medium mb-1">
               {t('rebar_schedule.warnings', { defaultValue: 'Warnings' })}
             </p>
             <ul className="list-disc list-inside space-y-0.5">
-              {previewData.warnings.map((w, i) => (
-                <li key={i}>{w}</li>
+              {previewData.validation.findings.map((f, i) => (
+                <li key={`${f.rule_id}-${f.element_ref ?? ''}-${i}`}>
+                  {f.element_ref ? `${f.element_ref}: ` : ''}
+                  {f.message}
+                </li>
               ))}
             </ul>
           </div>
@@ -476,18 +487,18 @@ export function RebarSchedulePage() {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <StatCard
             label={t('rebar_schedule.stat_filename', { defaultValue: 'File' })}
-            value={previewData.filename}
+            value={previewFile?.name ?? ''}
             icon={FileUp}
             tone="blue"
           />
           <StatCard
             label={t('rebar_schedule.stat_shapes', { defaultValue: 'Shapes' })}
-            value={previewData.shape_count}
+            value={previewData.record_count}
             icon={Shapes}
           />
           <StatCard
             label={t('rebar_schedule.stat_weight', { defaultValue: 'Total Weight' })}
-            value={formatWeight(previewData.total_weight)}
+            value={formatWeight(previewData.total_weight_kg)}
             icon={Weight}
           />
         </div>
@@ -500,17 +511,6 @@ export function RebarSchedulePage() {
           </div>
           <ShapesTable shapes={previewData.shapes} />
         </div>
-
-        {previewData.cutting.length > 0 && (
-          <div className="rounded-xl border border-border-light bg-surface-elevated/90 shadow-xs">
-            <div className="border-b border-border-light px-4 py-3">
-              <h2 className="text-sm font-semibold text-content-primary">
-                {t('rebar_schedule.cutting_list', { defaultValue: 'Cutting List' })}
-              </h2>
-            </div>
-            <CuttingTable cutting={previewData.cutting} />
-          </div>
-        )}
       </div>
     );
   }
@@ -565,12 +565,12 @@ export function RebarSchedulePage() {
           />
           <StatCard
             label={t('rebar_schedule.stat_shapes', { defaultValue: 'Shapes' })}
-            value={selectedImport.shape_count}
+            value={selectedImport.record_count}
             icon={Shapes}
           />
           <StatCard
             label={t('rebar_schedule.stat_weight', { defaultValue: 'Total Weight' })}
-            value={formatWeight(selectedImport.total_weight)}
+            value={formatWeight(selectedImport.total_weight_kg)}
             icon={Weight}
           />
           <StatCard
@@ -738,9 +738,9 @@ export function RebarSchedulePage() {
               </div>
               <div className="hidden items-center gap-4 text-xs text-content-secondary sm:flex">
                 <span className="tabular-nums">
-                  {imp.shape_count} {t('rebar_schedule.shapes_short', { defaultValue: 'shapes' })}
+                  {imp.record_count} {t('rebar_schedule.shapes_short', { defaultValue: 'shapes' })}
                 </span>
-                <span className="tabular-nums">{formatWeight(imp.total_weight)}</span>
+                <span className="tabular-nums">{formatWeight(imp.total_weight_kg)}</span>
               </div>
               <button
                 onClick={(e) => {
