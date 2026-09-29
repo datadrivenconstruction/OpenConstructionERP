@@ -85,6 +85,7 @@ import { translateManifestText } from '@/modules/_i18n';
 import { fmtList, fmtFixed } from '@/shared/lib/formatters';
 import { groupPacksByMarket, packNameSlug, packSummary, type PackMarketBand } from '@/shared/lib/regionalPack';
 import { PackEmblem } from '@/shared/ui/PackEmblem';
+import { invalidateProjectLists } from '@/features/projects/invalidateProjectLists';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -2010,7 +2011,7 @@ function DataPackagesTab() {
           }
           queryClient.invalidateQueries({ queryKey: ['demo-status'] });
           queryClient.invalidateQueries({ queryKey: ['marketplace'] });
-          queryClient.invalidateQueries({ queryKey: ['projects'] });
+          invalidateProjectLists(queryClient);
           navigate(`/projects/${result.project_id}`);
         } catch (err) {
           addToast({ type: 'error', title: t('marketplace.install_failed', { defaultValue: 'Install failed' }), message: err instanceof Error ? err.message : t('common.unknown_error', { defaultValue: 'Unknown error' }) });
@@ -2044,7 +2045,7 @@ function DataPackagesTab() {
       });
       queryClient.invalidateQueries({ queryKey: ['demo-status'] });
       queryClient.invalidateQueries({ queryKey: ['marketplace'] });
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      invalidateProjectLists(queryClient);
     } catch (err) {
       addToast({
         type: 'error',
@@ -2078,7 +2079,7 @@ function DataPackagesTab() {
       });
       queryClient.invalidateQueries({ queryKey: ['demo-status'] });
       queryClient.invalidateQueries({ queryKey: ['marketplace'] });
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      invalidateProjectLists(queryClient);
       navigate(`/projects/${result.project_id}`);
     } catch (err) {
       addToast({
@@ -2108,7 +2109,7 @@ function DataPackagesTab() {
       });
       queryClient.invalidateQueries({ queryKey: ['demo-status'] });
       queryClient.invalidateQueries({ queryKey: ['marketplace'] });
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      invalidateProjectLists(queryClient);
     } catch (err) {
       addToast({
         type: 'error',
