@@ -288,6 +288,8 @@ class ActivityCreate(BaseModel):
     remaining_duration: int | None = Field(default=None, ge=0, le=_MAX_SCHEDULE_DAYS)
     budgeted_units: Decimal | None = Field(default=None, ge=0)
     installed_units: Decimal | None = Field(default=None, ge=0)
+    # Contact responsible for the activity (id in the contacts module).
+    assignee_id: UUID | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     @field_validator("cost_planned", "cost_actual", "budgeted_units", "installed_units", mode="after")
@@ -349,6 +351,8 @@ class ActivityUpdate(BaseModel):
     remaining_duration: int | None = Field(default=None, ge=0, le=_MAX_SCHEDULE_DAYS)
     budgeted_units: Decimal | None = Field(default=None, ge=0)
     installed_units: Decimal | None = Field(default=None, ge=0)
+    # Contact responsible for the activity; an explicit null unassigns it.
+    assignee_id: UUID | None = None
     metadata: dict[str, Any] | None = None
 
     @field_validator("cost_planned", "cost_actual", "budgeted_units", "installed_units", mode="after")
@@ -419,6 +423,8 @@ class ActivityResponse(BaseModel):
     # dedicated PUT /activities/{id}/calendar/ endpoint; exposed here so the
     # grid can show and pick the activity's calendar. None -> schedule default.
     calendar_id: UUID | None = None
+    # Contact responsible for the activity. None -> unassigned.
+    assignee_id: UUID | None = None
 
     # ── Cost-loaded / progress-rigor columns ──────────────────────────────
     # ``cost_planned`` is the activity's share of BAC, so a client that cannot
@@ -638,6 +644,8 @@ class GanttActivity(BaseModel):
     # calendar picker can show and clear the current assignment. None -> the
     # activity uses the schedule default.
     calendar_id: UUID | None = None
+    # Contact responsible for the activity, read by the table's assignee cell.
+    assignee_id: UUID | None = None
     # Activity metadata passthrough. Generated activities carry provenance
     # markers here (e.g. duration_source/duration_method = "estimated_fallback"
     # when the duration was estimated from unit-based production rates), which
@@ -1161,3 +1169,12 @@ class ScheduleDiffResponse(BaseModel):
     relationships: list[DiffRelationshipChangeSchema] = Field(default_factory=list)
     calendars: list[DiffCalendarChangeSchema] = Field(default_factory=list)
     summary: DiffSummarySchema = Field(default_factory=DiffSummarySchema)
+
+
+class WbsCodeSuggestion(BaseModel):
+    """The WBS code that continues a section's numbering.
+
+    Empty when the section has no code of its own to continue from.
+    """
+
+    wbs_code: str

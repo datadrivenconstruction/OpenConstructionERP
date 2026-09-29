@@ -79,6 +79,7 @@ from app.modules.schedule.schemas import (
     WorkOrderCreate,
     WorkOrderUpdate,
 )
+from app.modules.schedule.wbs_numbering import insert_position_under, next_wbs_code
 
 # PERT distribution factors (from DDC_Toolkit reference)
 _PERT_OPTIMISTIC = 0.75
@@ -1088,11 +1089,33 @@ class ScheduleService:
         if duration is None:
             duration = 0
 
-        # Determine sort_order
+        outline = await self.activity_repo.list_outline(data.schedule_id)
+        if data.parent_id is not None:
+            self._assert_parent_in_outline(data.parent_id, outline)
+        if data.assignee_id is not None:
+            await self._assert_assignee_exists(data.assignee_id)
+
+        # A blank code under a section continues that section's numbering; a
+        # typed code is kept as typed but may not repeat one already in use.
+        wbs_code = data.wbs_code
+        if not wbs_code and data.parent_id is not None:
+            wbs_code = self._suggest_wbs_from_outline(data.parent_id, outline)
+        if wbs_code:
+            self._assert_wbs_code_free(wbs_code, outline)
+
+        # Determine sort_order. Without a section the activity goes last, as
+        # before. Under a section it goes right after the section's last
+        # descendant, so the flat order every list and export reads keeps the
+        # child inside its section instead of at the bottom of the schedule.
         sort_order = data.sort_order
+        open_gap = False
         if sort_order == 0:
-            max_order = await self.activity_repo.get_max_sort_order(data.schedule_id)
-            sort_order = max_order + 1
+            if data.parent_id is not None:
+                sort_order = insert_position_under(data.parent_id, outline)
+                open_gap = any(order >= sort_order for _i, _p, order, _c in outline)
+            else:
+                max_order = await self.activity_repo.get_max_sort_order(data.schedule_id)
+                sort_order = max_order + 1
 
         # Auto-generate activity_code if not provided
         activity_code = data.activity_code
@@ -1108,12 +1131,17 @@ class ScheduleService:
         boq_ids = [str(pid) for pid in data.boq_position_ids]
         await self._assert_positions_in_project(data.schedule_id, boq_ids)
 
+        # Shift only once every check has passed, so a rejected create leaves
+        # the order of the other activities alone.
+        if open_gap:
+            await self.activity_repo.shift_sort_order(data.schedule_id, sort_order)
+
         activity = Activity(
             schedule_id=data.schedule_id,
             parent_id=data.parent_id,
             name=data.name,
             description=data.description,
-            wbs_code=data.wbs_code,
+            wbs_code=wbs_code,
             start_date=data.start_date,
             end_date=data.end_date,
             duration_days=duration,
@@ -1136,6 +1164,7 @@ class ScheduleService:
             remaining_duration=data.remaining_duration,
             budgeted_units=data.budgeted_units,
             installed_units=data.installed_units,
+            assignee_id=data.assignee_id,
         )
         activity = await self.activity_repo.create(activity)
         activity_id = activity.id  # snapshot before update_fields() expires the instance
@@ -1158,13 +1187,101 @@ class ScheduleService:
             {
                 "activity_id": str(activity_id),
                 "schedule_id": str(data.schedule_id),
-                "wbs_code": data.wbs_code,
+                "wbs_code": wbs_code,
             },
             source_module="oe_schedule",
         )
 
         logger.info("Activity added: %s to schedule %s", data.name, data.schedule_id)
         return await self.get_activity(activity_id)
+
+    @staticmethod
+    def _assert_parent_in_outline(
+        parent_id: uuid.UUID,
+        outline: list[tuple[uuid.UUID, uuid.UUID | None, int, str]],
+    ) -> None:
+        """Reject a parent that is not an activity of the same schedule.
+
+        ``parent_id`` has no foreign key, so without this a section of another
+        schedule (or another project) could be named. Answers 404 for a foreign
+        id exactly as for a missing one.
+        """
+        if not any(act_id == parent_id for act_id, _p, _o, _c in outline):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Parent activity not found in this schedule",
+            )
+
+    @staticmethod
+    def _assert_wbs_code_free(
+        wbs_code: str,
+        outline: list[tuple[uuid.UUID, uuid.UUID | None, int, str]],
+        exclude_id: uuid.UUID | None = None,
+    ) -> None:
+        """Reject a WBS code that another activity of the schedule already uses.
+
+        Enforced here and not as a database constraint on purpose: schedules
+        imported or generated before this check can already hold duplicates,
+        and a constraint would fail every one of them. Only a code being
+        written is checked, so those schedules keep working.
+        """
+        code = wbs_code.strip()
+        if not code:
+            return
+        for act_id, _p, _o, other in outline:
+            if act_id != exclude_id and (other or "").strip() == code:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=f"WBS code '{code}' is already used by another activity in this schedule",
+                )
+
+    @staticmethod
+    def _suggest_wbs_from_outline(
+        parent_id: uuid.UUID | None,
+        outline: list[tuple[uuid.UUID, uuid.UUID | None, int, str]],
+    ) -> str:
+        parent_code = next((code for act_id, _p, _o, code in outline if act_id == parent_id), "")
+        siblings = [code for _i, pid, _o, code in outline if pid == parent_id]
+        return next_wbs_code(
+            parent_code,
+            siblings,
+            [code for _i, _p, _o, code in outline],
+            has_parent=parent_id is not None,
+        )
+
+    async def suggest_wbs_code(self, schedule_id: uuid.UUID, parent_id: uuid.UUID | None) -> str:
+        """Suggest the WBS code for a new activity under ``parent_id``.
+
+        Args:
+            schedule_id: Target schedule.
+            parent_id: The section the activity goes into, or None for the top
+                level.
+
+        Returns:
+            The next code in that section's sequence, or ``""`` when the
+            section has no code of its own to continue.
+
+        Raises:
+            HTTPException 404 if the schedule or the parent is not found.
+        """
+        await self.get_schedule(schedule_id)
+        outline = await self.activity_repo.list_outline(schedule_id)
+        if parent_id is not None:
+            self._assert_parent_in_outline(parent_id, outline)
+        return self._suggest_wbs_from_outline(parent_id, outline)
+
+    async def _assert_assignee_exists(self, assignee_id: uuid.UUID) -> None:
+        """Reject an assignee id that is not a contact.
+
+        The activity keeps the id without a foreign key (the contacts module is
+        a plugin), so a typo or a deleted contact would otherwise be stored and
+        render as an empty cell forever.
+        """
+        from app.modules.contacts.models import Contact
+
+        found = await self.session.scalar(select(Contact.id).where(Contact.id == assignee_id))
+        if found is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assignee contact not found")
 
     async def get_activity(self, activity_id: uuid.UUID) -> Activity:
         """Get activity by ID. Raises 404 if not found."""
@@ -1492,6 +1609,23 @@ class ScheduleService:
         current_status = activity.status
 
         fields = data.model_dump(exclude_unset=True)
+
+        # The assignee is checked only when it changes to a new contact, and
+        # the code only when it changes to a new value: clients resend
+        # unchanged fields, and schedules from before the uniqueness check can
+        # hold duplicate codes that must stay editable.
+        if fields.get("assignee_id") is not None and fields["assignee_id"] != activity.assignee_id:
+            await self._assert_assignee_exists(fields["assignee_id"])
+        new_code = (fields.get("wbs_code") or "").strip()
+        new_parent = fields.get("parent_id")
+        code_changes = bool(new_code) and new_code != (activity.wbs_code or "").strip()
+        parent_changes = new_parent is not None and new_parent != activity.parent_id
+        if code_changes or parent_changes:
+            outline = await self.activity_repo.list_outline(schedule_id)
+            if parent_changes:
+                self._assert_parent_in_outline(new_parent, outline)
+            if code_changes:
+                self._assert_wbs_code_free(new_code, outline, exclude_id=activity_id)
 
         # Convert float values to strings for storage
         if "progress_pct" in fields:
@@ -2239,6 +2373,7 @@ class ScheduleService:
                     activity_type=act.activity_type,
                     status=effective_status,
                     calendar_id=act.calendar_id,
+                    assignee_id=act.assignee_id,
                     metadata=act.metadata_ or {},
                 )
             )
