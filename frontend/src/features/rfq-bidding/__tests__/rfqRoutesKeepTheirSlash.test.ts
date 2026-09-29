@@ -7,8 +7,8 @@
 // and /rfq-bidding/{id}/issue/ are two different URLs and only the second is
 // served. These calls were written without the slash and every one of them
 // answered 404: issuing an RFQ, validating it, reading and adding scope lines,
-// reading the award, submitting a bid, evaluating and awarding it. The bid list
-// and the comparison are held back on purpose, see their comments in api.ts.
+// reading the award, listing, submitting, evaluating and awarding bids, and
+// reading the comparison.
 // The component tests stub this module whole and cannot see the URL, which is
 // why the paths are pinned here.
 
@@ -29,6 +29,8 @@ import {
   fetchScopeLines,
   addScopeLine,
   fetchAward,
+  fetchComparison,
+  fetchBids,
   submitBid,
   evaluateBid,
   awardBid,
@@ -55,14 +57,23 @@ describe('RFQ bidding routes carry the trailing slash the server declares', () =
     expect(apiPost).toHaveBeenCalledWith('/v1/rfq-bidding/r-1/lines/', expect.anything());
   });
 
-  it('reads the award', async () => {
+  it('reads the award and the comparison', async () => {
     await fetchAward('r-1');
     expect(apiGet).toHaveBeenCalledWith('/v1/rfq-bidding/r-1/award/');
+    await fetchComparison('r-1');
+    expect(apiGet).toHaveBeenCalledWith('/v1/rfq-bidding/r-1/comparison/');
+  });
+
+  it('lists the bids of one RFQ', async () => {
+    await fetchBids('r-1');
+    expect(apiGet).toHaveBeenCalledWith('/v1/rfq-bidding/bids/?rfq_id=r-1');
   });
 
   it('submits, evaluates and awards a bid', async () => {
-    await submitBid({ rfq_id: 'r-1', vendor_name: 'A', total_amount: 1 });
-    expect(apiPost).toHaveBeenCalledWith('/v1/rfq-bidding/bids/', expect.anything());
+    const bid = { rfq_id: 'r-1', bidder_contact_id: 'c-1', bid_amount: '1250.00', currency_code: 'EUR' };
+    await submitBid(bid);
+    // BidCreate requires bidder_contact_id and bid_amount and drops unknown keys.
+    expect(apiPost).toHaveBeenCalledWith('/v1/rfq-bidding/bids/', bid);
     await evaluateBid('b-1');
     expect(apiPost).toHaveBeenCalledWith('/v1/rfq-bidding/bids/b-1/evaluate/');
     await awardBid('b-1');

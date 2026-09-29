@@ -18,7 +18,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { fmtDate, getIntlLocale } from '@/shared/lib/formatters';
+import { fmtDate } from '@/shared/lib/formatters';
 import { Badge, CollapsibleSection, EmptyState, StatCard, Button } from '@/shared/ui';
 import type { BadgeVariant } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -27,13 +27,13 @@ import type { TabBarTab } from '@/shared/ui/TabBar';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { useActiveProjectId } from '@/shared/hooks/useActiveProjectId';
 import { useToastStore } from '@/stores/useToastStore';
+import { fetchContacts, type Contact } from '@/features/contacts/api';
 import {
   fetchRFQs,
   createRFQ,
   issueRFQ,
   deleteRFQ,
   fetchComparison,
-  fetchBids,
   awardBid,
   type RFQ,
   type RFQStatus,
@@ -41,9 +41,22 @@ import {
   RFQ_AWARDED_STATUSES,
   RFQ_FILTER_STATUSES,
   type RFQCreatePayload,
-  type Bid,
-  type ComparisonMatrix,
+  type ComparisonResponse,
+  type QuoteComparison,
 } from './api';
+
+/** A bidder is stored as a contact id; this is how the page names it. */
+type BidderName = (contactId: string) => string;
+
+function contactDisplayName(contact: Contact | undefined): string | null {
+  if (!contact) return null;
+  return (
+    contact.company_name ||
+    contact.legal_name ||
+    [contact.first_name, contact.last_name].filter(Boolean).join(' ') ||
+    null
+  );
+}
 
 /* ── Status badge mapping ─────────────────────────────────────────────── */
 
@@ -206,16 +219,21 @@ export function RFQBiddingPage() {
   const rfqs = rfqPage?.items ?? [];
   const rfqTotal = rfqPage?.total ?? 0;
 
-  const firstRfqId = rfqs[0]?.id;
-
-  const { data: bidsPage } = useQuery({
-    queryKey: ['rfq-bidding-bids', projectId, firstRfqId],
-    queryFn: () => fetchBids(firstRfqId!),
-    enabled: !!projectId && !!firstRfqId,
-    staleTime: 30_000,
+  // Every RFQ in the list carries its own bids, so the awards need no second
+  // request. Bidders are contact ids; one shared page of contacts names them,
+  // and an id that is not on it is shown as it is rather than hidden.
+  const { data: contactsPage } = useQuery({
+    queryKey: ['rfq-bidding', 'bidder-contacts'],
+    queryFn: () => fetchContacts({ limit: 500 }),
+    enabled: !!projectId,
+    staleTime: 5 * 60_000,
   });
 
-  const allBids = bidsPage?.items ?? [];
+  const bidderName = useCallback<BidderName>(
+    (contactId) =>
+      contactDisplayName((contactsPage?.items ?? []).find((c) => c.id === contactId)) ?? contactId,
+    [contactsPage],
+  );
 
   const { data: comparison, isLoading: comparisonLoading } = useQuery({
     queryKey: ['rfq-bidding-comparison', comparisonRfqId],
@@ -292,7 +310,7 @@ export function RFQBiddingPage() {
     mutationFn: (bidId: string) => awardBid(bidId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rfq-bidding'] });
-      queryClient.invalidateQueries({ queryKey: ['rfq-bidding-bids'] });
+      queryClient.invalidateQueries({ queryKey: ['rfq-bidding-comparison'] });
       addToast({ type: 'success', title: t('rfq_bidding.award_success', { defaultValue: 'Bid awarded successfully' }) });
     },
     onError: () => {
@@ -449,6 +467,7 @@ export function RFQBiddingPage() {
             isLoading={comparisonLoading}
             onAward={(bidId) => awardMutation.mutate(bidId)}
             awarding={awardMutation.isPending}
+            bidderName={bidderName}
             t={t}
           />
         </div>
@@ -462,7 +481,7 @@ export function RFQBiddingPage() {
         >
           <AwardsPanel
             rfqs={awardedRfqs}
-            bids={allBids}
+            bidderName={bidderName}
             t={t}
           />
         </div>
@@ -595,17 +614,20 @@ function RFQListPanel({
                   <p className="mt-0.5 truncate text-xs text-content-secondary">{rfq.description}</p>
                 )}
                 <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-content-tertiary">
-                  {rfq.due_date && (
+                  {rfq.submission_deadline && (
                     <span className="flex items-center gap-1">
                       <Clock className="h-3 w-3" aria-hidden />
-                      {t('rfq_bidding.due', { defaultValue: 'Due' })}: {fmtDate(rfq.due_date)}
+                      {t('rfq_bidding.due', { defaultValue: 'Due' })}: {fmtDate(rfq.submission_deadline)}
                     </span>
                   )}
                   <span>
-                    {t('rfq_bidding.vendors_count', { defaultValue: '{{count}} vendors', count: rfq.vendors_count })}
+                    {t('rfq_bidding.vendors_count', {
+                      defaultValue: '{{count}} vendors',
+                      count: rfq.issued_to_contacts?.length ?? 0,
+                    })}
                   </span>
                   <span>
-                    {t('rfq_bidding.bids_count', { defaultValue: '{{count}} bids', count: rfq.bids_count })}
+                    {t('rfq_bidding.bids_count', { defaultValue: '{{count}} bids', count: rfq.bids?.length ?? 0 })}
                   </span>
                 </div>
               </div>
@@ -663,21 +685,24 @@ function ComparisonPanel({
   isLoading,
   onAward,
   awarding,
+  bidderName,
   t,
 }: {
   rfqs: RFQ[];
   selectedRfqId: string | null;
   onSelectRfq: (id: string | null) => void;
-  comparison: ComparisonMatrix | null;
+  comparison: ComparisonResponse | null;
   isLoading: boolean;
   onAward: (bidId: string) => void;
   awarding: boolean;
+  bidderName: BidderName;
   t: (k: string, o?: Record<string, unknown>) => string;
 }) {
   // Only show RFQs that have bids to compare
   const comparableRfqs = rfqs.filter(
     (r) => RFQ_OPEN_STATUSES.has(r.status) || RFQ_AWARDED_STATUSES.has(r.status),
   );
+  const quoteCount = comparison ? comparison.ranked.length + comparison.excluded.length : 0;
 
   return (
     <div className="space-y-4">
@@ -718,18 +743,19 @@ function ComparisonPanel({
         </div>
       )}
 
-      {/* Comparison matrix */}
-      {selectedRfqId && !isLoading && comparison && (
+      {/* Ranked and excluded quotes */}
+      {selectedRfqId && !isLoading && comparison && quoteCount > 0 && (
         <ComparisonTable
           comparison={comparison}
           onAward={onAward}
           awarding={awarding}
+          bidderName={bidderName}
           t={t}
         />
       )}
 
       {/* No bids */}
-      {selectedRfqId && !isLoading && comparison && comparison.bids.length === 0 && (
+      {selectedRfqId && !isLoading && comparison && quoteCount === 0 && (
         <EmptyState
           icon={<BarChart3 className="h-12 w-12" />}
           title={t('rfq_bidding.no_bids', { defaultValue: 'No bids received yet' })}
@@ -744,112 +770,195 @@ function ComparisonPanel({
 
 /* ── Comparison table ─────────────────────────────────────────────────── */
 
+/**
+ * The server's comparison: every quote restated on the RFQ's basis currency,
+ * the comparable ones ranked, the rest listed with the reason they could not
+ * be ranked. Only a ranked quote can be awarded; the server refuses the others.
+ */
 function ComparisonTable({
   comparison,
   onAward,
   awarding,
+  bidderName,
   t,
 }: {
-  comparison: ComparisonMatrix;
+  comparison: ComparisonResponse;
   onAward: (bidId: string) => void;
   awarding: boolean;
+  bidderName: BidderName;
   t: (k: string, o?: Record<string, unknown>) => string;
 }) {
-  if (comparison.bids.length === 0) return null;
-
-  // Find lowest total for highlighting
-  const totals = comparison.bids.map((b) => Number(b.total_amount) || 0);
-  const lowestTotal = Math.min(...totals);
+  const showScore = comparison.ranked.some((q) => q.total_score != null);
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-border-light">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="bg-surface-secondary text-content-secondary">
-            <th className="px-4 py-3 text-left font-medium">
-              {t('rfq_bidding.scope_line', { defaultValue: 'Scope Line' })}
-            </th>
-            {comparison.bids.map((bid) => (
-              <th key={bid.id} className="px-4 py-3 text-right font-medium">
-                <div className="flex items-center justify-end gap-2">
-                  <span>{bid.vendor_name}</span>
-                  {Number(bid.total_amount) === lowestTotal && totals.length > 1 && (
-                    <Badge variant="success" size="sm">
-                      {t('rfq_bidding.lowest', { defaultValue: 'Lowest' })}
-                    </Badge>
-                  )}
-                </div>
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {comparison.scope_lines.map((line) => (
-            <tr key={line.id} className="border-t border-border-light">
-              <td className="px-4 py-2.5 text-content-primary">
-                <div>{line.description}</div>
-                <div className="text-xs text-content-tertiary">
-                  {line.quantity} {line.unit}
-                </div>
-              </td>
-              {comparison.bids.map((bid) => {
-                const price = comparison.matrix?.[line.id]?.[bid.id];
-                return (
-                  <td key={bid.id} className="px-4 py-2.5 text-right tabular-nums text-content-primary">
-                    {price != null ? (
-                      <MoneyDisplay amount={price} currency={bid.currency_code} />
-                    ) : (
-                      <span className="text-content-tertiary">-</span>
-                    )}
-                  </td>
-                );
+    <div className="space-y-4">
+      {comparison.ranked.length > 0 && (
+        <div className="overflow-x-auto rounded-xl border border-border-light">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-surface-secondary text-content-secondary">
+                <th className="px-4 py-3 text-left font-medium">
+                  {t('rfq_bidding.col_rank', { defaultValue: 'Rank' })}
+                </th>
+                <th className="px-4 py-3 text-left font-medium">
+                  {t('rfq_bidding.col_bidder', { defaultValue: 'Bidder' })}
+                </th>
+                <th className="px-4 py-3 text-right font-medium">
+                  {t('rfq_bidding.col_coverage', { defaultValue: 'Scope covered' })}
+                </th>
+                {showScore && (
+                  <th className="px-4 py-3 text-right font-medium">
+                    {t('rfq_bidding.col_score', { defaultValue: 'Score' })}
+                  </th>
+                )}
+                <th className="px-4 py-3 text-right font-medium">
+                  {t('rfq_bidding.total', { defaultValue: 'Total' })} ({comparison.basis_currency})
+                </th>
+                <th className="px-4 py-3" />
+              </tr>
+            </thead>
+            <tbody>
+              {comparison.ranked.map((quote) => (
+                <RankedQuoteRow
+                  key={quote.bid_id}
+                  quote={quote}
+                  basisCurrency={comparison.basis_currency}
+                  recommended={quote.bid_id === comparison.recommended_bid_id}
+                  showScore={showScore}
+                  onAward={onAward}
+                  awarding={awarding}
+                  bidderName={bidderName}
+                  t={t}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {comparison.excluded.length > 0 && (
+        <div className="rounded-xl border border-border-light">
+          <div className="border-b border-border-light bg-surface-secondary px-4 py-2.5">
+            <p className="text-sm font-medium text-content-primary">
+              {t('rfq_bidding.excluded_title', { defaultValue: 'Not comparable' })}
+            </p>
+            <p className="text-xs text-content-tertiary">
+              {t('rfq_bidding.excluded_desc', {
+                defaultValue: 'These quotes could not be put on the RFQ basis, so they are not ranked and cannot be awarded.',
               })}
-            </tr>
-          ))}
-
-          {/* Totals row */}
-          <tr className="border-t-2 border-border-light bg-surface-secondary/50 font-semibold">
-            <td className="px-4 py-3 text-content-primary">
-              {t('rfq_bidding.total', { defaultValue: 'Total' })}
-            </td>
-            {comparison.bids.map((bid) => {
-              const isLowest = Number(bid.total_amount) === lowestTotal && totals.length > 1;
-              return (
-                <td
-                  key={bid.id}
-                  className={clsx(
-                    'px-4 py-3 text-right tabular-nums',
-                    isLowest ? 'text-semantic-success' : 'text-content-primary',
-                  )}
-                >
-                  <MoneyDisplay amount={bid.total_amount} currency={bid.currency_code} />
-                </td>
-              );
-            })}
-          </tr>
-        </tbody>
-      </table>
-
-      {/* Award buttons */}
-      <div className="flex flex-wrap items-center gap-2 border-t border-border-light bg-surface-primary px-4 py-3">
-        <span className="text-xs font-medium text-content-tertiary">
-          {t('rfq_bidding.award_action', { defaultValue: 'Award to' })}:
-        </span>
-        {comparison.bids.map((bid) => (
-          <button
-            key={bid.id}
-            onClick={() => onAward(bid.id)}
-            disabled={awarding}
-            className="flex items-center gap-1 rounded-lg border border-border-light px-3 py-1.5 text-xs
-              font-medium text-content-secondary hover:border-semantic-success/40 hover:text-semantic-success
-              disabled:opacity-40 transition-colors"
-          >
-            <Trophy className="h-3 w-3" aria-hidden />
-            {bid.vendor_name}
-          </button>
-        ))}
-      </div>
+            </p>
+          </div>
+          <ul className="divide-y divide-border-light">
+            {comparison.excluded.map((quote) => (
+              <li key={quote.bid_id} className="flex flex-wrap items-baseline justify-between gap-2 px-4 py-2.5 text-sm">
+                <span className="font-medium text-content-primary">{bidderName(quote.bidder_contact_id)}</span>
+                <span className="text-xs text-content-tertiary">
+                  {quote.reasons.map((r) => exclusionReason(r, t)).join('; ')}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
+  );
+}
+
+/** The comparison's exclusion codes (REASON_* in rfq_bidding/comparison.py), in words. */
+function exclusionReason(code: string, t: (k: string, o?: Record<string, unknown>) => string): string {
+  const labels: Record<string, string> = {
+    withdrawn: t('rfq_bidding.reason_withdrawn', { defaultValue: 'Withdrawn by the bidder' }),
+    disqualified: t('rfq_bidding.reason_disqualified', { defaultValue: 'Disqualified' }),
+    late_not_admitted: t('rfq_bidding.reason_late_not_admitted', { defaultValue: 'Late and not admitted' }),
+    amount_unreadable: t('rfq_bidding.reason_amount_unreadable', { defaultValue: 'Amount could not be read' }),
+    currency_not_converted: t('rfq_bidding.reason_currency_not_converted', {
+      defaultValue: 'Other currency with no exchange rate recorded',
+    }),
+    adjustment_unreadable: t('rfq_bidding.reason_adjustment_unreadable', {
+      defaultValue: 'An adjustment could not be read',
+    }),
+    adjustment_currency_not_converted: t('rfq_bidding.reason_adjustment_currency_not_converted', {
+      defaultValue: 'An adjustment is in a currency with no exchange rate',
+    }),
+    unit_not_convertible: t('rfq_bidding.reason_unit_not_convertible', {
+      defaultValue: 'A line unit does not convert to the RFQ unit',
+    }),
+    scope_not_covered: t('rfq_bidding.reason_scope_not_covered', { defaultValue: 'Part of the scope is not priced' }),
+    normalised_total_not_positive: t('rfq_bidding.reason_normalised_total_not_positive', {
+      defaultValue: 'Restated total is zero or negative',
+    }),
+    technical_score_missing: t('rfq_bidding.reason_technical_score_missing', {
+      defaultValue: 'No technical score recorded',
+    }),
+  };
+  return labels[code] ?? code;
+}
+
+function RankedQuoteRow({
+  quote,
+  basisCurrency,
+  recommended,
+  showScore,
+  onAward,
+  awarding,
+  bidderName,
+  t,
+}: {
+  quote: QuoteComparison;
+  basisCurrency: string;
+  recommended: boolean;
+  showScore: boolean;
+  onAward: (bidId: string) => void;
+  awarding: boolean;
+  bidderName: BidderName;
+  t: (k: string, o?: Record<string, unknown>) => string;
+}) {
+  const name = bidderName(quote.bidder_contact_id);
+  return (
+    <tr className={clsx('border-t border-border-light', recommended && 'bg-semantic-success/5')}>
+      <td className="px-4 py-2.5 tabular-nums text-content-secondary">{quote.rank ?? '-'}</td>
+      <td className="px-4 py-2.5 text-content-primary">
+        <div className="flex flex-wrap items-center gap-2">
+          <span>{name}</span>
+          {recommended && (
+            <Badge variant="success" size="sm">
+              {t('rfq_bidding.recommended', { defaultValue: 'Recommended' })}
+            </Badge>
+          )}
+        </div>
+      </td>
+      <td className="px-4 py-2.5 text-right tabular-nums text-content-secondary">
+        {quote.lines_covered}/{quote.lines_required}
+      </td>
+      {showScore && (
+        <td className="px-4 py-2.5 text-right tabular-nums text-content-secondary">{quote.total_score ?? '-'}</td>
+      )}
+      <td
+        className={clsx(
+          'px-4 py-2.5 text-right font-semibold tabular-nums',
+          recommended ? 'text-semantic-success' : 'text-content-primary',
+        )}
+      >
+        {quote.normalised_amount != null ? (
+          <MoneyDisplay amount={quote.normalised_amount} currency={basisCurrency} />
+        ) : (
+          <span className="text-content-tertiary">-</span>
+        )}
+      </td>
+      <td className="px-4 py-2.5 text-right">
+        <button
+          onClick={() => onAward(quote.bid_id)}
+          disabled={awarding}
+          className="inline-flex items-center gap-1 rounded-lg border border-border-light px-3 py-1.5 text-xs
+            font-medium text-content-secondary hover:border-semantic-success/40 hover:text-semantic-success
+            disabled:opacity-40 transition-colors"
+          aria-label={`${t('rfq_bidding.award_action', { defaultValue: 'Award to' })} ${name}`}
+        >
+          <Trophy className="h-3 w-3" aria-hidden />
+          {t('rfq_bidding.award', { defaultValue: 'Award' })}
+        </button>
+      </td>
+    </tr>
   );
 }
 
@@ -857,16 +966,13 @@ function ComparisonTable({
 
 function AwardsPanel({
   rfqs,
-  bids,
+  bidderName,
   t,
 }: {
   rfqs: RFQ[];
-  bids: Bid[];
+  bidderName: BidderName;
   t: (k: string, o?: Record<string, unknown>) => string;
 }) {
-  // Match awarded RFQs with their winning bids
-  const awardedBids = bids.filter((b) => b.status === 'awarded');
-
   if (rfqs.length === 0) {
     return (
       <EmptyState
@@ -882,7 +988,7 @@ function AwardsPanel({
   return (
     <div className="space-y-3">
       {rfqs.map((rfq) => {
-        const winningBid = awardedBids.find((b) => b.rfq_id === rfq.id);
+        const winningBid = (rfq.bids ?? []).find((b) => b.is_awarded);
         return (
           <div
             key={rfq.id}
@@ -895,23 +1001,17 @@ function AwardsPanel({
                   <CheckCircle2 className="h-4 w-4 text-semantic-success" aria-hidden />
                   <span className="text-sm font-semibold text-content-primary">{rfq.title}</span>
                   <Badge variant="success" dot size="sm">
-                    {statusLabel('awarded', t)}
+                    {statusLabel(rfq.status, t)}
                   </Badge>
                 </div>
-                {rfq.awarded_at && (
-                  <p className="mt-1 text-xs text-content-tertiary">
-                    {t('rfq_bidding.awarded_on', { defaultValue: 'Awarded on' })}{' '}
-                    {new Date(rfq.awarded_at).toLocaleDateString(getIntlLocale())}
-                  </p>
-                )}
               </div>
               {winningBid && (
                 <div className="shrink-0 text-right">
                   <p className="text-xs font-medium text-content-secondary">
-                    {winningBid.vendor_name}
+                    {bidderName(winningBid.bidder_contact_id)}
                   </p>
                   <p className="mt-0.5 text-sm font-semibold tabular-nums text-semantic-success">
-                    <MoneyDisplay amount={winningBid.total_amount} currency={winningBid.currency_code} />
+                    <MoneyDisplay amount={winningBid.bid_amount} currency={winningBid.currency_code} />
                   </p>
                 </div>
               )}
@@ -976,7 +1076,7 @@ function CreateRFQDialog({
         project_id: projectId,
         title: title.trim(),
         description: description.trim() || undefined,
-        due_date: dueDate || undefined,
+        submission_deadline: dueDate || undefined,
       });
     },
     [projectId, title, description, dueDate, onSubmit],

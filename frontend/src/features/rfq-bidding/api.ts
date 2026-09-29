@@ -42,107 +42,182 @@ export const RFQ_FILTER_STATUSES: readonly RFQStatus[] = [
   'cancelled',
 ];
 
+/*
+ * Every shape below mirrors a response or request model in
+ * backend/app/modules/rfq_bidding/schemas.py. Decimal fields arrive as
+ * strings. The request models ignore unknown keys, so a misspelt field is not
+ * refused, it is silently dropped: keep the names exactly as the server has them.
+ */
+
+/** RFQResponse. The list embeds each RFQ's lines and bids. */
 export interface RFQ {
   id: string;
   project_id: string;
+  rfq_number: string;
   title: string;
-  description: string;
-  status: RFQStatus;
-  due_date: string | null;
-  issued_at: string | null;
-  awarded_at: string | null;
+  description: string | null;
+  scope_of_work: string | null;
+  submission_deadline: string | null;
   currency_code: string;
-  total_estimated: string | number;
-  vendors_count: number;
-  bids_count: number;
+  status: RFQStatus;
+  /** Contact ids the RFQ was sent to. */
+  issued_to_contacts: string[];
+  evaluation_method: string;
+  technical_weight: string;
+  require_full_scope: boolean;
+  lines: ScopeLine[];
+  bids: Bid[];
   created_at: string;
   updated_at: string;
 }
 
+/** RFQCreate. */
 export interface RFQCreatePayload {
   project_id: string;
   title: string;
   description?: string;
-  due_date?: string;
+  submission_deadline?: string;
   currency_code?: string;
 }
 
+/** RFQUpdate. */
 export interface RFQUpdatePayload {
   title?: string;
   description?: string;
-  due_date?: string;
+  submission_deadline?: string;
   status?: RFQStatus;
 }
 
 /* ── Scope lines ──────────────────────────────────────────────────────── */
 
+/** RFQLineResponse. */
 export interface ScopeLine {
   id: string;
   rfq_id: string;
+  line_no: number;
+  code: string | null;
   description: string;
-  quantity: number;
   unit: string;
-  estimated_rate: string | number;
-}
-
-export interface ScopeLineCreatePayload {
-  description: string;
-  quantity: number;
-  unit: string;
-  estimated_rate?: number;
-}
-
-/* ── Bids ─────────────────────────────────────────────────────────────── */
-
-export interface Bid {
-  id: string;
-  rfq_id: string;
-  vendor_name: string;
-  vendor_contact_id: string | null;
-  total_amount: string | number;
-  currency_code: string;
-  status: string;
-  submitted_at: string | null;
-  notes: string;
-  line_prices: Record<string, number>;
+  quantity: string;
+  is_optional: boolean;
+  cost_line_id: string | null;
+  notes: string | null;
   created_at: string;
   updated_at: string;
 }
 
+/** RFQLineCreate. */
+export interface ScopeLineCreatePayload {
+  description: string;
+  unit: string;
+  quantity?: string | number;
+  code?: string;
+  is_optional?: boolean;
+  notes?: string;
+}
+
+/* ── Bids ─────────────────────────────────────────────────────────────── */
+
+/** RFQBidResponse. The bidder is a contact id; the page resolves its name. */
+export interface Bid {
+  id: string;
+  rfq_id: string;
+  bidder_contact_id: string;
+  bid_amount: string;
+  currency_code: string;
+  submitted_at: string | null;
+  validity_days: number;
+  technical_score: string | null;
+  commercial_score: string | null;
+  notes: string | null;
+  is_awarded: boolean;
+  status: string;
+  is_late: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+/** BidCreate: bidder_contact_id and bid_amount are required, the rest defaults. */
 export interface BidCreatePayload {
   rfq_id: string;
-  vendor_name: string;
-  vendor_contact_id?: string;
-  total_amount: number;
+  bidder_contact_id: string;
+  bid_amount: string;
   currency_code?: string;
+  submitted_at?: string;
+  validity_days?: number;
+  technical_score?: string;
+  commercial_score?: string;
   notes?: string;
-  line_prices?: Record<string, number>;
 }
 
 /* ── Comparison & award ───────────────────────────────────────────────── */
 
-export interface ComparisonMatrix {
-  rfq_id: string;
-  scope_lines: ScopeLine[];
-  bids: Bid[];
-  matrix: Record<string, Record<string, number>>;
-}
-
-export interface AwardDecision {
-  rfq_id: string;
-  awarded_bid_id: string | null;
-  vendor_name: string | null;
-  total_amount: string | number | null;
+/** QuoteComparisonResponse: one quote restated on the RFQ's basis. */
+export interface QuoteComparison {
+  bid_id: string;
+  bidder_contact_id: string;
+  status: string;
+  is_late: boolean;
+  admitted: boolean;
   currency_code: string;
-  awarded_at: string | null;
-  reason: string;
+  headline_amount: string | null;
+  exchange_rate: string | null;
+  converted_amount: string | null;
+  adjustments_applied: string;
+  adjustments_included: number;
+  /** The amount the ranking compares, in the basis currency. */
+  normalised_amount: string | null;
+  lines_required: number;
+  lines_covered: number;
+  coverage: string;
+  uncovered_lines: string[];
+  excluded_lines: string[];
+  extra_lines: number;
+  line_total: string | null;
+  technical_score: string | null;
+  price_score: string | null;
+  total_score: string | null;
+  comparable: boolean;
+  /** Why a quote was excluded from the ranking. */
+  reasons: string[];
+  notes: string[];
+  rank: number | null;
 }
 
-export interface ValidationReport {
+/** ComparisonResponse: ranked quotes, and the ones that could not be ranked. */
+export interface ComparisonResponse {
   rfq_id: string;
-  valid: boolean;
-  issues: { field: string; message: string; severity: string }[];
+  rfq_number: string;
+  basis_currency: string;
+  method: string;
+  technical_weight: string;
+  require_full_scope: boolean;
+  as_of: string | null;
+  lines_required: number;
+  recommended_bid_id: string | null;
+  ranked: QuoteComparison[];
+  excluded: QuoteComparison[];
 }
+
+/** RFQAwardResponse. */
+export interface AwardDecision {
+  id: string;
+  rfq_id: string;
+  bid_id: string;
+  awarded_by: string | null;
+  awarded_at: string;
+  method: string;
+  reason: string | null;
+  recommended_bid_id: string | null;
+  is_override: boolean;
+  awarded_amount: string;
+  awarded_currency: string;
+  created_at: string;
+  updated_at: string;
+}
+
+/** The validate route answers a plain dict of findings; its keys vary by stage. */
+export type ValidationReport = Record<string, unknown>;
 
 /* ── API functions ────────────────────────────────────────────────────── */
 
@@ -194,12 +269,8 @@ export async function addScopeLine(
   return apiPost<ScopeLine, ScopeLineCreatePayload>(`/v1/rfq-bidding/${rfqId}/lines/`, payload);
 }
 
-export async function fetchComparison(rfqId: string): Promise<ComparisonMatrix> {
-  // Deliberately still without the slash of /comparison/. The server answers
-  // ranked and excluded quotes, not a ComparisonMatrix, and the page would
-  // throw on comparison.bids the moment this resolved. See ALLOWED in
-  // scripts/check_frontend_api_routes.py.
-  return apiGet<ComparisonMatrix>(`/v1/rfq-bidding/${rfqId}/comparison`);
+export async function fetchComparison(rfqId: string): Promise<ComparisonResponse> {
+  return apiGet<ComparisonResponse>(`/v1/rfq-bidding/${rfqId}/comparison/`);
 }
 
 export async function fetchAward(rfqId: string): Promise<AwardDecision> {
@@ -210,13 +281,7 @@ export async function fetchBids(rfqId?: string): Promise<Page<Bid>> {
   const params = new URLSearchParams();
   if (rfqId) params.set('rfq_id', rfqId);
   const qs = params.toString();
-  // Deliberately still without the slash the route declares (/bids/), so this
-  // answers 404 and the awards panel stays empty. The server sends bid_amount
-  // and bidder_contact_id where Bid reads total_amount and vendor_name, and a
-  // resolved path would put a blank vendor and a missing amount on an award.
-  // It moves together with the comparison view, see ALLOWED in
-  // scripts/check_frontend_api_routes.py.
-  return apiGet<Page<Bid>>(`/v1/rfq-bidding/bids${qs ? `?${qs}` : ''}`);
+  return apiGet<Page<Bid>>(`/v1/rfq-bidding/bids/${qs ? `?${qs}` : ''}`);
 }
 
 export async function submitBid(payload: BidCreatePayload): Promise<Bid> {
