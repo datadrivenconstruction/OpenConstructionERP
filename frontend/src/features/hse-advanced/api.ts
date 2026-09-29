@@ -353,8 +353,6 @@ export const updateInvestigation = (
   payload: Partial<CreateInvestigationPayload>,
 ) => apiPatch<IncidentInvestigation>(`${BASE}/investigations/${id}`, payload);
 
-export const deleteInvestigation = (id: string) => apiDelete(`${BASE}/investigations/${id}`);
-
 export const fetchJSAs = (projectId: string) =>
   apiGet<JobSafetyAnalysis[] | { items: JobSafetyAnalysis[] }>(
     `${BASE}/jsa/?project_id=${projectId}`,
