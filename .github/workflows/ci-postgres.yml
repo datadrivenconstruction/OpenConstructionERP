@@ -1989,3 +1989,54 @@ jobs:
         run: |
           cd "$RUNNER_TEMP"
           "$RUNNER_TEMP/wheel-venv/bin/python" "$GITHUB_WORKSPACE/scripts/check_wheel_ships_every_pack.py" "$GITHUB_WORKSPACE"
+
+  # Every GET route of a fresh install, called as the demo admin. The boot is
+  # the one a self-hosted user gets: demo seed on, the showcase and flagship
+  # projects installed, every module mounted, so a route that breaks only on
+  # seeded data or only with all modules loaded together goes red here. The
+  # report table (JSON and Markdown) is uploaded whatever the verdict, since
+  # a red run is read from it. The file skips itself unless OE_API_SMOKE is set,
+  # which keeps the full seed out of the main job's thirty minutes.
+  api-smoke:
+    name: API smoke on a fresh install
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      OE_TEST_DB: pg
+      OE_API_SMOKE: '1'
+      SEED_DEMO: 'true'
+      OE_TEST_FAST_STARTUP: '0'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
+      - name: Create empty frontend dist (hatchling force-include)
+        run: |
+          mkdir -p ../frontend/dist
+          touch ../frontend/dist/.gitkeep
+      - name: Install dependencies
+        id: install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,server]"
+      - name: Call every GET route as the demo admin
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        env:
+          OE_DATA_DIR: ${{ runner.temp }}/oe-data
+          OE_API_SMOKE_REPORT_DIR: ${{ runner.temp }}/api-smoke
+        run: >-
+          pytest tests/pg/test_every_get_route_answers_on_a_fresh_install.py -v -rA -p no:cacheprovider
+          --timeout=2700 --timeout-method=thread
+      - name: Upload the route report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-smoke-report
+          path: ${{ runner.temp }}/api-smoke/
+          if-no-files-found: warn
