@@ -160,4 +160,56 @@ describe('WorkflowsPage with the backend response shapes', () => {
       ),
     );
   });
+
+  it('creates a workflow with role-gated steps in the keys the backend checks and reads them back', async () => {
+    // What the server stores is what it returns: steps travel as plain dicts
+    // (``steps: list[dict]`` in WorkflowCreate/WorkflowResponse), and the
+    // approval engine reads ``role`` and ``action_type`` from each one.
+    let stored: Array<Record<string, unknown>> = [];
+    apiMocks.apiGet.mockImplementation(async (path: string) => {
+      const [route] = path.split('?');
+      if (route === '/v1/enterprise-workflows/') {
+        return {
+          items: stored.length ? [{ ...WORKFLOW, id: 'wf-new', name: 'Variation sign-off', steps: stored }] : [],
+          total: stored.length ? 1 : 0,
+          offset: 0,
+          limit: 50,
+        };
+      }
+      return routeGet(path);
+    });
+    apiMocks.apiPost.mockImplementation(async (path: string, body: { steps: Array<Record<string, unknown>> }) => {
+      if (path !== '/v1/enterprise-workflows/') throw new NotFound(`404 POST ${path}`);
+      stored = body.steps;
+      return { ...WORKFLOW, id: 'wf-new', name: 'Variation sign-off', steps: body.steps };
+    });
+
+    renderPage();
+    fireEvent.click((await screen.findAllByRole('button', { name: /New Workflow/ }))[0]!);
+
+    fireEvent.change(screen.getByLabelText('Workflow Name'), { target: { value: 'Variation sign-off' } });
+    fireEvent.change(screen.getByLabelText('Entity Type'), { target: { value: 'variation' } });
+    // Step 1: a manager approves. Step 2: a final sign-off by an admin.
+    fireEvent.change(screen.getByLabelText('Step 1 Required role'), { target: { value: 'manager' } });
+    fireEvent.click(screen.getByRole('button', { name: /Add step/ }));
+    fireEvent.change(screen.getByLabelText('Step 2 Required role'), { target: { value: 'admin' } });
+    fireEvent.change(screen.getByLabelText('Step 2 Action'), { target: { value: 'sign_off' } });
+    fireEvent.click(screen.getByRole('button', { name: /^Create$/ }));
+
+    await waitFor(() => expect(apiMocks.apiPost).toHaveBeenCalled());
+    const [, body] = apiMocks.apiPost.mock.calls[0]!;
+    expect(body.steps).toEqual([
+      { role: 'manager', action_type: 'approve' },
+      { role: 'admin', action_type: 'sign_off' },
+    ]);
+    for (const step of body.steps) {
+      expect(step).not.toHaveProperty('approver_role');
+      expect(step).not.toHaveProperty('action');
+    }
+
+    // Read-back: the list shows each step's role and action from the stored dicts.
+    expect(await screen.findByText('Variation sign-off')).toBeInTheDocument();
+    expect(screen.getByText(/1\. Manager · Approve/)).toBeInTheDocument();
+    expect(screen.getByText(/2\. Admin · Sign-off/)).toBeInTheDocument();
+  });
 });
