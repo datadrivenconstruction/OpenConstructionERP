@@ -236,12 +236,10 @@ async def test_the_demo_administrator_installs_a_pack_from_the_modules_page(self
     )
     assert applied.status_code == 200, f"/apply answered {applied.status_code}: {applied.text}"
 
-    # The cost base and the resource catalogue are fetched from the network, so
-    # here only the door is checked: whatever these answer, it must not be a
-    # refusal of the account. The download itself is the matrix test below.
-    for path in ("/api/v1/costs/load-cwicr/ZZ_NOT_A_BASE", "/api/v1/catalog/import/ZZ_NOT_A_REGION"):
-        r = await client.post(path, headers=headers)
-        assert r.status_code not in (401, 403), f"{path}: the demo administrator was refused: {r.text}"
+    # One more admin-only action that touches nothing on the network. The cost
+    # base download itself is the matrix test below.
+    rescan = await client.post("/api/v1/partner-pack/rescan", headers=headers)
+    assert rescan.status_code == 200, f"/rescan answered {rescan.status_code}: {rescan.text}"
 
 
 async def test_an_account_below_admin_is_refused_the_installer(self_installed) -> None:
@@ -251,17 +249,20 @@ async def test_an_account_below_admin_is_refused_the_installer(self_installed) -
 
     below = sorted(DEMO_ACCOUNT_EMAILS - {DEMO_ADMIN})
     assert below, "no seeded account below admin to act as the control"
+    refused = 0
     for email in below:
         headers = await _demo_login(client, email)
         me = (await client.get("/api/v1/users/me/", headers=headers)).json()
         if me["role"] == "admin":
             continue
+        refused += 1
         r = await client.post(
             "/api/v1/partner-pack/full-install-stream",
             json={"slug": PACK_SLUG, "install_cost_db": False, "vectorize": False, "demo_count": 0},
             headers=headers,
         )
         assert r.status_code == 403, f"{email} ({me['role']}) was not refused the installer: {r.status_code}"
+    assert refused > 0, "every seeded account signed in as admin, so the control refused nobody"
 
 
 @pytest.mark.allow_network
