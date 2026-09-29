@@ -3246,10 +3246,87 @@ async def _unreviewed_proposal_meta(
     return {UNREVIEWED_PROPOSALS_META_KEY: pending}
 
 
+# Classification standard -> the rule set that checks it. Module level so a
+# test can hold every value against the rule sets the engine registers.
+_STANDARD_RULE_SETS: dict[str, str] = {
+    "din276": "din276",
+    "nrm": "nrm",
+    "masterformat": "masterformat",
+    "sinapi": "sinapi",
+    # NBR 12721 (Brazil ABNT cost-group hierarchy) - picked up when a
+    # Brazilian project sets classification_standard="nbr" explicitly.
+    # SINAPI rules also fire via the BR region rules below; the two
+    # rule packs are complementary, not redundant.
+    "nbr": "nbr",
+    "gesn": "gesn",
+    "dpgf": "dpgf",
+    "onorm": "onorm",
+    "gbt50500": "gbt50500",
+    "cpwd": "cpwd",
+    "birimfiyat": "birimfiyat",
+    "sekisan": "sekisan",
+    "bc3": "bc3",
+    # Hungary. The classification is called ``tetelrend`` and the rule set
+    # that checks it is called ``hungary``: two names for one market, and a
+    # lookup keyed on the first that expects the second finds nothing. The
+    # engine logs an unknown rule set and carries on, so a Hungarian project
+    # validated without a single Hungarian rule and nothing said so.
+    "tetelrend": "hungary",
+}
+
+
+# Map country → additional rule sets. This is the rule-pack axis, not
+# the classification-standard axis, and it stays a table of its own on
+# purpose: a country reads exactly one classification standard but can
+# pull several rule packs, so Spain carries BC3 plus MasterFormat and
+# Germany carries GAEB plus DIN 276. Folding the two together would
+# lose that.
+#
+# What it does share with the standard registry is the normaliser. The
+# keys are ISO 3166-1 alpha-2 and the lookup goes through
+# ``normalise_region``, so ``DACH``, ``DE`` and ``DE_BERLIN`` all reach
+# the German row. Before that they did not: the region was upper-cased
+# and looked up verbatim, so a project keyed to a catalogue region such
+# as ``PL_WARSAW`` or ``DE_MUNICH`` picked up no regional rule pack at
+# all.
+#
+# Hispanophone markets pick up BC3 - FIEBDC-3 is the de-facto BOQ
+# format in Spain (AENOR-mandated for public tenders) and much of
+# LATAM. MasterFormat rides along on the US-/CA-leaning LATAM markets
+# that have historically adopted CSI classification alongside BC3.
+_COUNTRY_RULE_SETS: dict[str, list[str]] = {
+    "DE": ["gaeb", "din276"],
+    "AT": ["gaeb", "onorm"],
+    "CH": ["gaeb", "din276"],
+    "GB": ["nrm"],
+    "US": ["masterformat"],
+    "CA": ["masterformat"],
+    "FR": ["dpgf"],
+    "BR": ["sinapi"],
+    "RU": ["gesn"],
+    "CN": ["gbt50500"],
+    "IN": ["cpwd"],
+    "TR": ["birimfiyat"],
+    "JP": ["sekisan"],
+    "AE": ["nrm"],
+    "ES": ["bc3", "masterformat"],
+    "MX": ["bc3", "masterformat"],
+    "AR": ["bc3", "masterformat"],
+    "CL": ["bc3", "masterformat"],
+    "CO": ["bc3", "masterformat"],
+    "PE": ["bc3", "masterformat"],
+    # Without this row a Hungarian project created before the country pack
+    # was switched on, or on an install that never activated it, imported
+    # its bills with no Hungarian rule run at all.
+    "HU": ["hungary"],
+}
+
+
 def _build_rule_sets(
     project_rule_sets: list[str],
     classification_standard: str,
     region: str,
+    country_code: str | None = None,
 ) -> list[str]:
     """Determine which validation rule sets to apply based on project config.
 
@@ -3261,6 +3338,10 @@ def _build_rule_sets(
         classification_standard: e.g. "din276", "nrm", "masterformat".
         region: e.g. "DACH", "UK", "US", "PL_WARSAW". Reduced to a country
             through the classification registry before lookup.
+        country_code: The project's ISO 3166-1 alpha-2 column, read when the
+            region names no country. A project created while a country pack
+            is active gets its country from the pack and may carry a region
+            label that is only a city, or nothing at all.
 
     Returns:
         Deduplicated list of rule set names.
@@ -3269,73 +3350,13 @@ def _build_rule_sets(
 
     rule_sets = list(project_rule_sets)
 
-    # Map classification standard → rule set name
-    STANDARD_RULES: dict[str, str] = {
-        "din276": "din276",
-        "nrm": "nrm",
-        "masterformat": "masterformat",
-        "sinapi": "sinapi",
-        # NBR 12721 (Brazil ABNT cost-group hierarchy) - picked up when a
-        # Brazilian project sets classification_standard="nbr" explicitly.
-        # SINAPI rules also fire via the BR region rules below; the two
-        # rule packs are complementary, not redundant.
-        "nbr": "nbr",
-        "gesn": "gesn",
-        "dpgf": "dpgf",
-        "onorm": "onorm",
-        "gbt50500": "gbt50500",
-        "cpwd": "cpwd",
-        "birimfiyat": "birimfiyat",
-        "sekisan": "sekisan",
-        "bc3": "bc3",
-    }
-    std_rule = STANDARD_RULES.get(classification_standard)
+    # The classification standard's rule set, then the country's.
+    std_rule = _STANDARD_RULE_SETS.get(classification_standard)
     if std_rule and std_rule not in rule_sets:
         rule_sets.append(std_rule)
 
-    # Map country → additional rule sets. This is the rule-pack axis, not
-    # the classification-standard axis, and it stays a table of its own on
-    # purpose: a country reads exactly one classification standard but can
-    # pull several rule packs, so Spain carries BC3 plus MasterFormat and
-    # Germany carries GAEB plus DIN 276. Folding the two together would
-    # lose that.
-    #
-    # What it does share with the standard registry is the normaliser. The
-    # keys are ISO 3166-1 alpha-2 and the lookup goes through
-    # ``normalise_region``, so ``DACH``, ``DE`` and ``DE_BERLIN`` all reach
-    # the German row. Before that they did not: the region was upper-cased
-    # and looked up verbatim, so a project keyed to a catalogue region such
-    # as ``PL_WARSAW`` or ``DE_MUNICH`` picked up no regional rule pack at
-    # all.
-    #
-    # Hispanophone markets pick up BC3 - FIEBDC-3 is the de-facto BOQ
-    # format in Spain (AENOR-mandated for public tenders) and much of
-    # LATAM. MasterFormat rides along on the US-/CA-leaning LATAM markets
-    # that have historically adopted CSI classification alongside BC3.
-    COUNTRY_RULES: dict[str, list[str]] = {
-        "DE": ["gaeb", "din276"],
-        "AT": ["gaeb", "onorm"],
-        "CH": ["gaeb", "din276"],
-        "GB": ["nrm"],
-        "US": ["masterformat"],
-        "CA": ["masterformat"],
-        "FR": ["dpgf"],
-        "BR": ["sinapi"],
-        "RU": ["gesn"],
-        "CN": ["gbt50500"],
-        "IN": ["cpwd"],
-        "TR": ["birimfiyat"],
-        "JP": ["sekisan"],
-        "AE": ["nrm"],
-        "ES": ["bc3", "masterformat"],
-        "MX": ["bc3", "masterformat"],
-        "AR": ["bc3", "masterformat"],
-        "CL": ["bc3", "masterformat"],
-        "CO": ["bc3", "masterformat"],
-        "PE": ["bc3", "masterformat"],
-    }
-    country = normalise_region(region)
-    for rs in COUNTRY_RULES.get(country or "", []):
+    country = normalise_region(region) or normalise_region(country_code)
+    for rs in _COUNTRY_RULE_SETS.get(country or "", []):
         if rs not in rule_sets:
             rule_sets.append(rs)
 
@@ -3424,6 +3445,7 @@ async def _run_import_validation(
             project_rule_sets=project.validation_rule_sets or ["boq_quality"],
             classification_standard=project.classification_standard or "",
             region=project.region or "",
+            country_code=project.country_code,
         )
 
         report = await validation_engine.validate(
@@ -3603,6 +3625,7 @@ async def validate_boq(
         project_rule_sets=project.validation_rule_sets or ["boq_quality"],
         classification_standard=project.classification_standard or "",
         region=project.region or "",
+        country_code=project.country_code,
     )
 
     # Run validation. The rows are this endpoint's own projection; anything
