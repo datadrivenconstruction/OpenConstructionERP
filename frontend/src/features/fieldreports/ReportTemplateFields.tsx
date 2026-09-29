@@ -407,7 +407,7 @@ export function ReportAttachments({
                   className="flex items-center justify-between gap-2 rounded-lg border border-border-light px-3 py-1.5"
                 >
                   <a
-                    href={`/api/v1/documents/${d.id}/file`}
+                    href={`/api/v1/documents/${d.id}/download`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex min-w-0 flex-1 items-center gap-2 text-sm text-content-primary hover:text-oe-blue"
