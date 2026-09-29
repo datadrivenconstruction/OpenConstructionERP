@@ -44,12 +44,52 @@ export interface ApplyPlan {
   rule_packs_active: string[];
   rule_packs_documentation_only: string[];
   cwicr_regions: string[];
+  /** What each of ``cwicr_regions`` would load; absent on older backends. */
+  cost_bases?: PackCostBase[];
+  /** Engine rule sets switched on for new projects while the pack is active. */
+  rule_sets_enabled?: string[];
   default_tax_template?: string | null;
   /** Built-in estimating-methodology slug the pack activates on its demo
    *  project and seeds on projects created while the pack is active. */
   default_methodology?: string | null;
   demo_project?: PackDemoProject | null;
   warnings: string[];
+}
+
+/**
+ * Whether a role may activate, install or rescan packs.
+ *
+ * The endpoints sit behind ``RequireRole("admin")``, which compares ranks
+ * after resolving aliases, so ``owner`` and ``superuser`` pass as well. A
+ * plain ``=== 'admin'`` would lock those two out of a button the server lets
+ * them press. Keep the list in step with ``ROLE_ALIASES`` in
+ * ``backend/app/core/permissions.py``.
+ */
+export function canInstallPacks(role: string | null | undefined): boolean {
+  const r = (role ?? '').trim().toLowerCase();
+  return r === 'admin' || r === 'owner' || r === 'superuser';
+}
+
+/**
+ * One declared cost region of a pack, resolved before anything is loaded
+ * (``describe_cost_bases`` on the backend). ``loadable`` is false when no
+ * published base stands behind the slug (``reason_code: no_published_base``)
+ * or another slug of the same pack already loads that base
+ * (``duplicate_base``).
+ */
+export interface PackCostBase {
+  slug: string;
+  db_id: string | null;
+  loadable: boolean;
+  market: string | null;
+  currency: string | null;
+  lang_code: string | null;
+  flag: string | null;
+  /** Work items in the base. */
+  positions: number | null;
+  /** A resource catalogue is published for this base. */
+  has_catalog: boolean;
+  reason_code: string | null;
 }
 
 export interface PackDemoProject {

@@ -577,7 +577,7 @@ function bgStepDetail(step: string, detail: Record<string, unknown>): string | u
     const items = num('items');
     if (items && items > 0) return items.toLocaleString(getNumberLocale());
   }
-  if (step === 'resources') {
+  if (step === 'resources' || step === 'catalog') {
     const resources = num('resources');
     if (resources && resources > 0) return resources.toLocaleString(getNumberLocale());
   }
