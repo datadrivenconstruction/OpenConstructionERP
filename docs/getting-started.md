@@ -11,6 +11,8 @@ Download the installer for your platform:
 
 Run the installer, launch the app. First launch takes about one minute to set up the local database. No Python, no Docker, no terminal required.
 
+On Windows the installer is not code signed yet. If Windows warns about an unknown publisher or Smart App Control blocks the app, see [Windows blocks the app](desktop/WINDOWS_BLOCKED.md).
+
 ## Path B: pip install
 
 Requires **Python 3.12+**.
