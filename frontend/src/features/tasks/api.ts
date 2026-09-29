@@ -92,6 +92,9 @@ export interface CreateTaskPayload {
    *  takeoff page to pin a task to `dwg_drawing_id` + `dwg_entity_ids`
    *  without a dedicated backend column. */
   metadata?: Record<string, unknown>;
+  /** Assign a contact. The server links its platform user, if it has one,
+   *  as `responsible_id` and keeps the contact's name in the metadata. */
+  assignee_contact_id?: string;
 }
 
 export interface UpdateTaskPayload {
@@ -108,6 +111,8 @@ export interface UpdateTaskPayload {
   /** Free-form metadata (e.g. `{ assignee_name }` for typed, non-UUID
    *  assignees). Sent so editing a task doesn't wipe a typed name. */
   metadata?: Record<string, unknown>;
+  /** See CreateTaskPayload. `null` drops the contact link. */
+  assignee_contact_id?: string | null;
   checklist?: { id?: string | null; text: string; completed: boolean }[];
 }
 

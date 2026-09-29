@@ -9,7 +9,7 @@
  */
 import { useMemo, useState } from 'react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -48,6 +48,9 @@ const OTHER = {
   activity_type: 'task',
   parent_id: null,
   assignee_id: 'k2',
+  // Resolved by the server; k2 is deliberately not in the fetched contacts
+  // page below, the way a colleague's pick or the 201st contact is not.
+  assignee_name: 'Site Crew GmbH',
 };
 const ALL = [SECTION, CHILD, OTHER];
 
@@ -95,11 +98,8 @@ describe('ActivityGrid sections and assignee', () => {
     (listResources as any).mockResolvedValue({ items: [], total: 0, offset: 0, limit: 500 });
     (listAssignmentsForActivity as any).mockResolvedValue([]);
     (fetchContacts as any).mockResolvedValue({
-      items: [
-        { id: 'k1', first_name: 'Ana', last_name: 'Lopez', company_name: null },
-        { id: 'k2', first_name: null, last_name: null, company_name: 'Site Crew GmbH' },
-      ],
-      total: 2,
+      items: [{ id: 'k1', first_name: 'Ana', last_name: 'Lopez', company_name: null, primary_email: null }],
+      total: 500,
     });
   });
 
@@ -117,15 +117,42 @@ describe('ActivityGrid sections and assignee', () => {
     expect(screen.getByTestId('grid-row-c1')).toBeInTheDocument();
   });
 
-  it('shows the stored assignee and writes a new pick through the PATCH', async () => {
+  it('shows a stored assignee missing from the fetched contacts by its server name', async () => {
     renderHarness();
-    const select = screen.getByTestId('grid-assignee-o1') as HTMLSelectElement;
-    await waitFor(() => expect(select.value).toBe('k2'));
-    expect(select.selectedOptions[0].textContent).toBe('Site Crew GmbH');
+    const input = screen.getByTestId('grid-assignee-o1-input') as HTMLInputElement;
+    expect(input.value).toBe('Site Crew GmbH');
+  });
 
-    fireEvent.change(select, { target: { value: 'k1' } });
-    await waitFor(() =>
-      expect(scheduleApi.updateActivity).toHaveBeenCalledWith('o1', { assignee_id: 'k1' }),
-    );
+  it('writes a picked contact and a cleared cell through the PATCH', async () => {
+    renderHarness();
+    const input = screen.getByTestId('grid-assignee-o1-input');
+    fireEvent.focus(input);
+    fireEvent.click(await screen.findByTestId('grid-assignee-o1-option-contact-k1'));
+    await waitFor(() => expect(scheduleApi.updateActivity).toHaveBeenCalledWith('o1', { assignee_id: 'k1' }));
+
+    // Typing alone saves nothing.
+    (scheduleApi.updateActivity as any).mockClear();
+    fireEvent.change(screen.getByTestId('grid-assignee-c1-input'), { target: { value: 'An' } });
+    expect(scheduleApi.updateActivity).not.toHaveBeenCalled();
+
+    fireEvent.click(within(screen.getByTestId('grid-row-o1')).getByRole('button', { name: /Clear/i }));
+    await waitFor(() => expect(scheduleApi.updateActivity).toHaveBeenCalledWith('o1', { assignee_id: null }));
+  });
+
+  it('moves a row into a section, never into its own subtree', async () => {
+    renderHarness();
+    const own = screen.getByTestId('grid-section-s1') as HTMLSelectElement;
+    // A section is not offered as its own parent.
+    expect([...own.options].map((o) => o.value)).toEqual(['']);
+
+    const other = screen.getByTestId('grid-section-o1') as HTMLSelectElement;
+    expect([...other.options].map((o) => o.value)).toEqual(['', 's1']);
+    fireEvent.change(other, { target: { value: 's1' } });
+    await waitFor(() => expect(scheduleApi.updateActivity).toHaveBeenCalledWith('o1', { parent_id: 's1' }));
+
+    const child = screen.getByTestId('grid-section-c1') as HTMLSelectElement;
+    expect(child.value).toBe('s1');
+    fireEvent.change(child, { target: { value: '' } });
+    await waitFor(() => expect(scheduleApi.updateActivity).toHaveBeenCalledWith('c1', { parent_id: null }));
   });
 });
