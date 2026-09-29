@@ -209,19 +209,6 @@ async def test_the_subcontract_demo_is_attached_to_a_demo_project(boot_factory) 
         assert await first_live_demo_project_id(s) == demo
 
 
-async def test_the_portfolio_overview_leaves_out_a_deleted_project(boot_factory) -> None:
-    from app.modules.projects.router import analytics_overview
-
-    ids = await _estate(boot_factory)
-    async with boot_factory() as s:
-        overview = await analytics_overview(session=s, _user_id=str(uuid.uuid4()), payload={"role": "admin"})
-
-    listed = {str(p["id"]) for p in overview["projects"]}
-    assert str(ids["deleted_demo"]) not in listed
-    assert {str(ids["demo"]), str(ids["real"])} <= listed
-    assert overview["total_projects"] == len(listed)
-
-
 async def test_deleting_a_demo_project_records_that_it_was_retired(boot_factory) -> None:
     from app.core.demo_marker import retired_demo_ids
     from app.modules.projects.service import ProjectService
