@@ -56,7 +56,7 @@ You can also check a downloaded file directly. Right-click the `.exe`, choose Pr
 
 Windows SmartScreen inspects executables downloaded from the internet. An unsigned installer trips the "Windows protected your PC" dialog, which offers no obvious way forward: the user has to click "More info" and then "Run anyway", and most people do not. Some corporate environments block unsigned installers outright and the user never sees a choice at all.
 
-A signed installer carries a verifiable statement of who published it. With an Extended Validation certificate SmartScreen trusts the publisher immediately. With an Organization Validation certificate the publisher builds reputation over the first weeks of downloads and the warning fades. Either way the file stops being anonymous.
+A signed installer carries a verifiable statement of who published it. SmartScreen still warns on the first downloads, with an Organization Validation and an Extended Validation certificate alike, but it names the publisher, and the warning fades as the certificate builds reputation over the first weeks of downloads. Either way the file stops being anonymous.
 
 Signing does not change what the app does, what it installs, or where its data lives.
 
@@ -66,7 +66,7 @@ Signing does not change what the app does, what it installs, or where its data l
 
 Buy one from a public certificate authority. GlobalSign, DigiCert, Sectigo and SSL.com all issue them. Expect identity verification of the company, which takes days rather than minutes, so start early.
 
-Choose between Organization Validation and Extended Validation. EV costs more and grants SmartScreen reputation from the first signature. OV is cheaper and starts from zero reputation. For a product whose installers are downloaded by strangers, EV is worth the difference.
+Choose between Organization Validation and Extended Validation. For SmartScreen they now behave the same: both start without reputation and earn it through clean downloads over weeks. EV used to grant reputation from the first signature, and Microsoft's page "SmartScreen reputation for Windows app developers" (May 2026) says that no longer holds and that paying for EV only to avoid the warning is not justified. Take OV unless an enterprise buyer asks for EV.
 
 ### Why the certificate cannot simply be a file
 
@@ -136,7 +136,7 @@ One value in the workflow may need changing when the certificate arrives. The ti
 
 After the first release with the secrets in place, open the Desktop Release run for that tag. The job summary should read "Windows code signing: running against Azure Key Vault" followed by a line reporting how many installers were signed and verified. If it reads SKIPPED, the secrets are not being seen.
 
-Then download the published `.exe` and check it on a Windows machine. Right-click, Properties, Digital Signatures tab. The tab now exists, the signer name is the organisation on the certificate, and opening the entry shows a countersignature timestamp. Running the installer should no longer produce the "Windows protected your PC" dialog, immediately with an EV certificate, and after some download volume with an OV one.
+Then download the published `.exe` and check it on a Windows machine. Right-click, Properties, Digital Signatures tab. The tab now exists, the signer name is the organisation on the certificate, and opening the entry shows a countersignature timestamp. The first downloads may still show a SmartScreen prompt, now naming the organisation as publisher. It stops once the certificate has earned reputation through download volume, with an OV and an EV certificate alike.
 
 From a command line, `signtool verify /pa /v installer.exe` prints the chain and reports success. `signtool` ships with the Windows SDK.
 
@@ -155,6 +155,8 @@ AzureSignTool, the tool the workflow calls: https://github.com/vcsjones/AzureSig
 CA/Browser Forum baseline requirements for code signing, the source of the hardware key storage rule: https://cabforum.org/working-groups/code-signing/requirements/
 
 Microsoft, SmartScreen and application reputation: https://learn.microsoft.com/en-us/windows/security/operating-system-security/virus-and-threat-protection/microsoft-defender-smartscreen/
+
+Microsoft, SmartScreen reputation for Windows app developers, the source for EV no longer bypassing SmartScreen and for Smart App Control checking every executable: https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation
 
 Azure Key Vault certificates: https://learn.microsoft.com/en-us/azure/key-vault/certificates/
 
