@@ -297,3 +297,173 @@ async def test_the_cleanup_removes_only_seed_marked_rows_from_real_projects(boot
         left = (await s.execute(select(DailyDiary.metadata_).where(DailyDiary.project_id == ids["real"]))).scalars()
         assert list(left) == [{}]
     assert await _rows(boot_factory, DailyDiary, ids["demo"]) == 1
+
+
+_FLAGSHIP_PROJECT_ID = uuid.UUID("f1a95000-0001-4a00-8b00-000000000001")
+
+
+async def _boot_pass(owner_id: uuid.UUID) -> None:
+    """Everything a boot does with demo content, in boot order.
+
+    A restart and an upgrade run this same pass. The only thing an upgrade
+    changes is the version marker, and the marker only decides whether the
+    backfill half runs at all; after an upgrade it always does, so running the
+    pass is running the upgrade.
+    """
+    from app.core.demo_enrichment import enrich_all
+    from app.core.demo_projects import install_demo_projects_at_boot, install_flagship_at_boot
+
+    await install_demo_projects_at_boot([_DEMO_ID])
+    await install_flagship_at_boot(owner_id)
+    await enrich_all()
+
+
+async def _listed_ids(factory, owner_id: uuid.UUID) -> tuple[set[str], set[str]]:
+    """Project ids in the top-left switcher and in the dashboard project cards."""
+    from app.modules.projects.router import dashboard_cards, list_projects
+    from app.modules.projects.service import ProjectService
+
+    payload = {"role": "admin", "sub": str(owner_id)}
+    async with factory() as s:
+        dropdown = await list_projects(
+            user_id=str(owner_id),
+            payload=payload,
+            service=ProjectService(s, get_settings()),
+            offset=0,
+            limit=500,
+            status=None,
+        )
+        cards = await dashboard_cards(session=s, user_id=str(owner_id), payload=payload)
+    return {str(p.id) for p in dropdown}, {str(c.id) for c in cards}
+
+
+async def test_deleted_demos_stay_deleted_through_restart_and_upgrade(boot_factory) -> None:
+    from app.core.demo_projects import install_demo_project
+    from app.modules.projects.service import ProjectService
+
+    async with boot_factory() as s:
+        owner_id = await _owner(s)
+        real = await _project(s, owner_id, "Warehouse Extension Leipzig")
+        # A stand-in for the flagship at its fixed id: the boot installer finds
+        # its project by that id, which is what makes a purge undo itself.
+        s.add(
+            Project(
+                id=_FLAGSHIP_PROJECT_ID,
+                name="Flagship (demo)",
+                description="Demo seed boundary fixture",
+                currency="USD",
+                status="active",
+                owner_id=owner_id,
+                metadata_={"demo_id": "flagship-house"},
+            )
+        )
+        await s.commit()
+    async with boot_factory() as s:
+        installed = await install_demo_project(s, _DEMO_ID)
+        await s.commit()
+    demo = uuid.UUID(installed["project_id"])
+
+    # The tester's case: both demos deleted from the project list.
+    async with boot_factory() as s:
+        await ProjectService(s, get_settings()).delete_project(demo)
+        await ProjectService(s, get_settings()).delete_project(_FLAGSHIP_PROJECT_ID)
+        await s.commit()
+
+    for _ in ("restart", "upgrade"):
+        await _boot_pass(owner_id)
+
+    async with boot_factory() as s:
+        demos = [
+            (p.id, p.status)
+            for p in (await s.execute(select(Project))).scalars().all()
+            if isinstance(p.metadata_, dict) and p.metadata_.get("demo_id")
+        ]
+    assert sorted(demos) == sorted([(demo, "archived"), (_FLAGSHIP_PROJECT_ID, "archived")])
+
+    dropdown, cards = await _listed_ids(boot_factory, owner_id)
+    assert dropdown == cards
+    assert str(real) in dropdown
+    assert not {str(demo), str(_FLAGSHIP_PROJECT_ID)} & dropdown
+
+    leaked = {m.__name__: n for m in _PROJECT_SCOPED if (n := await _rows(boot_factory, m, real))}
+    assert leaked == {}, f"demo rows written into a real project: {leaked}"
+
+    # Then "Remove demo data", which deletes the rows outright, and the same
+    # two boots. Nothing may come back, not even under a fresh id.
+    async with boot_factory() as s:
+        await ProjectService(s, get_settings()).purge_demo_projects()
+        await s.commit()
+
+    for _ in ("restart", "upgrade"):
+        await _boot_pass(owner_id)
+
+    async with boot_factory() as s:
+        back = [
+            p.id
+            for p in (await s.execute(select(Project))).scalars().all()
+            if isinstance(p.metadata_, dict) and p.metadata_.get("demo_id")
+        ]
+    assert back == []
+    dropdown, cards = await _listed_ids(boot_factory, owner_id)
+    assert dropdown == cards
+    assert str(real) in dropdown
+
+
+async def test_the_cleanup_undoes_what_the_old_boot_wrote_and_keeps_user_records(boot_factory) -> None:
+    """An install polluted the way the tester's was, then ``demo-cleanup --apply``.
+
+    The seeders are called directly with the real project, which is exactly
+    what the old enrichment did. The user's own diary sits next to the leaked
+    rows and must survive; the modules whose seeds left no mark must be counted
+    and left alone.
+    """
+    from app.core.demo_cleanup import clean_leaked_demo_rows
+    from app.modules.bid_management.seed import seed_bid_management_demo
+    from app.modules.daily_diary.seed import seed_daily_diary_demo
+    from app.modules.documents.photos_seed import seed_photos
+    from app.modules.qms.seed import seed_qms
+
+    async with boot_factory() as s:
+        owner_id = await _owner(s)
+        real = await _project(s, owner_id, "Warehouse Extension Leipzig")
+        # Written before the seed, the way the tester's own work was.
+        s.add(DailyDiary(project_id=real, diary_date="2000-01-03", metadata_={}, notes="Poured the east footing"))
+        await s.commit()
+
+    async with boot_factory() as s:
+        # The diary seed stops at a project that already holds a real diary,
+        # so it runs against a second real project to reproduce the leak.
+        leaked_into = await _project(s, owner_id, "Depot Refurbishment Halle")
+        await s.commit()
+    for seed in (
+        lambda s: seed_daily_diary_demo(s, [leaked_into]),
+        lambda s: seed_bid_management_demo(s, [real]),
+        lambda s: seed_photos(s, [real]),
+        lambda s: seed_qms(s, project_id=real),
+    ):
+        async with boot_factory() as s:
+            await seed(s)
+            await s.commit()
+
+    before = {m: await _rows(boot_factory, m, real) for m in (BidPackage, ProjectPhoto, ITPPlan)}
+    assert before[BidPackage] > 0 and before[ProjectPhoto] > 0 and before[ITPPlan] == 1
+    assert await _rows(boot_factory, DailyDiary, leaked_into) > 0
+
+    async with boot_factory() as s:
+        report = await clean_leaked_demo_rows(s, apply=True)
+        await s.commit()
+
+    assert report.marked["bid_management"] == before[BidPackage]
+    assert report.marked["photos"] == before[ProjectPhoto]
+    assert await _rows(boot_factory, BidPackage, real) == 0
+    assert await _rows(boot_factory, ProjectPhoto, real) == 0
+    assert await _rows(boot_factory, DailyDiary, leaked_into) == 0
+
+    # The user's diary is untouched.
+    async with boot_factory() as s:
+        kept = (await s.execute(select(DailyDiary.notes).where(DailyDiary.project_id == real))).scalars().all()
+    assert kept == ["Poured the east footing"]
+
+    # No mark on the quality plan, so it is reported and not removed.
+    assert report.unmarked_candidates.get("qms_itp_plan_seed_fingerprint") == 1
+    assert await _rows(boot_factory, ITPPlan, real) == 1
