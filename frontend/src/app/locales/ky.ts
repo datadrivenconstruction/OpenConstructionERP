@@ -27083,7 +27083,7 @@ const resource = {
     "modules.pp_summary_partial": "Кээ бир кадамдар өткөрүлүп жиберилип, пакет иштетилди. Аяктаган кадамдар сакталат; кайра иштетүү үчүн кайра иштете аласыз.",
     "modules.pp_fail_forbidden_title": "Бул аккаунт пакеттерди орното албайт",
     "modules.pp_fail_auth_title": "Сеансыңыз аяктады",
-    "modules.pp_fail_not_found_title": "Бул пакет сервердe жок",
+    "modules.pp_fail_not_found_title": "Бул пакет серверде жок",
     "modules.pp_fail_conflict_title": "Пакетти учурдагы түрүндө колдонуу мүмкүн эмес",
     "modules.pp_fail_invalid_title": "Сервер орнотуу сурамжылоосун четке кагды",
     "modules.pp_fail_server_title": "Пакетти орнотуу учурунда сервер ишке ашкан жок",
