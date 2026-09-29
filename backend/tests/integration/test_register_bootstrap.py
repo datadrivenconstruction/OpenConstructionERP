@@ -148,3 +148,27 @@ async def test_demo_admin_seed_does_not_block_bootstrap(session):
     await session.commit()
     assert first.role == "admin", "First real user must claim admin even when demo seed is present"
     assert first.is_active is True, "Bootstrap admin must be is_active=True regardless of registration_mode"
+
+
+@pytest.mark.asyncio
+async def test_only_the_first_registrant_on_the_demo_domain_is_bootstrapped(session):
+    """An address on the demo accounts' domain is a real user like any other.
+
+    The carve-out above used to be the whole ``@openconstructionerp.com``
+    domain, so a registrant on it counted as neither a real user nor a real
+    admin, and on a fresh install every one of them was handed admin. Only the
+    seeded addresses themselves are exempt now.
+    """
+    from app.modules.users.repository import UserRepository
+
+    svc = _service(session)
+    first = await svc.register(_payload(f"first-{uuid.uuid4().hex[:6]}@openconstructionerp.com"))
+    await session.commit()
+    assert first.role == "admin", "the first registrant on a fresh install is still the bootstrap admin"
+
+    repo = UserRepository(session)
+    assert await repo.has_admin() is True, "an admin on the demo domain who is not a seeded login is real"
+
+    second = await svc.register(_payload(f"second-{uuid.uuid4().hex[:6]}@openconstructionerp.com"))
+    await session.commit()
+    assert second.role != "admin", "a second registrant on the demo domain must not be handed admin"
