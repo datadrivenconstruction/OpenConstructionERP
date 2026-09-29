@@ -1,0 +1,128 @@
+name: Smoke every route
+
+# Opens every <Route path> in frontend/src/app/App.tsx, every seeded project
+# and every sidebar entry as the demo admin on a freshly booted, demo-seeded
+# install, and reports pages that crash, show the 404 or "Project not found",
+# come up blank, lose the session or fire failing API calls. The table lands in
+# the job summary and in the "smoke-every-route" artifact.
+#
+# Boots the app exactly like e2e-cross-os.yml: backend on embedded PostgreSQL
+# serving the freshly built SPA on :8000. Linux + Chromium only, since the
+# question is "does the page open", not "does it render the same everywhere".
+# Manual-only (workflow_dispatch), runnable on any branch.
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: smoke-every-route-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    name: Smoke every route (chromium)
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend deps
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend (single-server SPA)
+        working-directory: frontend
+        # The heap ceiling lives in the build script in frontend/package.json.
+        run: npm run build
+
+      - name: Install backend (serves the built SPA + API on :8000)
+        working-directory: backend
+        run: pip install -e .
+
+      - name: Install Playwright chromium (with deps)
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Start backend (embedded PostgreSQL + demo seed)
+        working-directory: backend
+        shell: bash
+        env:
+          OE_DATA_DIR: ${{ runner.temp }}/oe-smoke-data
+          SEED_DEMO: "true"
+          APP_ENV: development
+        run: |
+          nohup python -m app.cli serve --port 8000 --data-dir "${{ runner.temp }}/oe-smoke-data" \
+            > "${{ runner.temp }}/backend.log" 2>&1 &
+          echo $! > "${{ runner.temp }}/backend.pid"
+
+      - name: Wait for backend health (seed can take a few minutes)
+        shell: bash
+        run: |
+          for i in $(seq 1 72); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000/api/health || true)
+            if [ "$code" = "200" ]; then echo "backend healthy after $((i*5))s"; exit 0; fi
+            sleep 5
+          done
+          echo "::error::backend never became healthy"
+          tail -80 "${{ runner.temp }}/backend.log" || true
+          exit 1
+
+      - name: Open every route
+        id: smoke
+        working-directory: frontend
+        shell: bash
+        env:
+          OE_TEST_BASE_URL: http://127.0.0.1:8000
+          OE_TEST_API_URL: http://127.0.0.1:8000
+        run: npx playwright test --config=playwright.smoke-routes.config.ts
+
+      - name: Build the report table
+        if: always()
+        working-directory: frontend
+        run: node scripts/smoke-routes-report.mjs qa-routes
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-every-route
+          path: |
+            frontend/qa-routes/report.md
+            frontend/qa-routes/report.json
+            frontend/qa-routes/params.json
+            frontend/qa-routes/routes/**
+            frontend/qa-routes/html/**
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Backend log tail
+        if: always()
+        shell: bash
+        run: |
+          grep -E "ERROR|Traceback" "${{ runner.temp }}/backend.log" | tail -60 || true
+          cp "${{ runner.temp }}/backend.log" frontend/qa-routes/backend.log 2>/dev/null || true
+
+      - name: Upload backend log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-every-route-backend-log
+          path: frontend/qa-routes/backend.log
+          retention-days: 14
+          if-no-files-found: ignore
