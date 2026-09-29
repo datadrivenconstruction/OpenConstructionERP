@@ -215,6 +215,32 @@ class ActivityRepository:
         result = (await self.session.execute(stmt)).scalar_one()
         return int(result)
 
+    async def list_outline(self, schedule_id: uuid.UUID) -> list[tuple[uuid.UUID, uuid.UUID | None, int, str]]:
+        """Return ``(id, parent_id, sort_order, wbs_code)`` for every activity in a schedule.
+
+        A column-only read, so placing a new activity or numbering it never
+        loads the full rows (JSON dependencies, resources, BIM ids).
+        """
+        stmt = select(Activity.id, Activity.parent_id, Activity.sort_order, Activity.wbs_code).where(
+            Activity.schedule_id == schedule_id
+        )
+        rows = (await self.session.execute(stmt)).all()
+        return [(r[0], r[1], int(r[2] or 0), r[3] or "") for r in rows]
+
+    async def shift_sort_order(self, schedule_id: uuid.UUID, from_order: int) -> None:
+        """Move every activity at or after ``from_order`` one slot down.
+
+        Opens a gap at ``from_order`` for an activity inserted in the middle
+        of the schedule, e.g. as the last child of a section.
+        """
+        stmt = (
+            update(Activity)
+            .where(Activity.schedule_id == schedule_id, Activity.sort_order >= from_order)
+            .values(sort_order=Activity.sort_order + 1)
+            .execution_options(synchronize_session=False)
+        )
+        await self.session.execute(stmt)
+
     async def get_max_activity_code_seq(self, schedule_id: uuid.UUID) -> int:
         """Get the highest numeric suffix from ACT-NNN activity codes in a schedule.
 

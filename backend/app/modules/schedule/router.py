@@ -10,6 +10,7 @@ Endpoints:
     DELETE /schedules/{id}                      - Delete schedule
     POST   /schedules/{id}/activities           - Add activity to schedule
     GET    /schedules/{id}/activities           - List activities for schedule
+    GET    /schedules/{id}/next-wbs-code        - Suggest the next WBS code in a section
     GET    /schedules/{id}/gantt                - Get Gantt chart data
     POST   /schedules/{id}/generate-from-boq   - Generate activities from BOQ
     POST   /schedules/{id}/calculate-cpm       - Calculate critical path
@@ -79,6 +80,7 @@ from app.modules.schedule.schemas import (
     ScheduleStatsResponse,
     ScheduleUpdate,
     SnapshotEnvelopeResponse,
+    WbsCodeSuggestion,
     WorkCalendarResponse,
     WorkOrderCreate,
     WorkOrderResponse,
@@ -192,6 +194,7 @@ def _activity_to_response(activity: object) -> ActivityResponse:
         bim_element_ids=getattr(activity, "bim_element_ids", None),
         # Per-activity work calendar (#348)
         calendar_id=getattr(activity, "calendar_id", None),
+        assignee_id=getattr(activity, "assignee_id", None),
         # Cost-loaded / progress-rigor columns. Built by hand like everything
         # else here, so a field added to ActivityResponse alone would still
         # come back null through every route that goes through this helper.
@@ -373,6 +376,29 @@ async def create_activity(
     data.schedule_id = schedule_id
     activity = await service.create_activity(data)
     return _activity_to_response(activity)
+
+
+@router.get(
+    "/schedules/{schedule_id}/next-wbs-code/",
+    response_model=WbsCodeSuggestion,
+    summary="Suggest the next WBS code in a section",
+    dependencies=[Depends(RequirePermission("schedule.read"))],
+)
+async def suggest_wbs_code(
+    schedule_id: uuid.UUID,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    parent_id: uuid.UUID | None = Query(default=None),
+    service: ScheduleService = Depends(_get_service),
+) -> WbsCodeSuggestion:
+    """Return the WBS code that continues the numbering under ``parent_id``.
+
+    The create dialog prefills this and the user may still change it. Without
+    ``parent_id`` the suggestion continues the top-level numbering.
+    """
+    await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
+    return WbsCodeSuggestion(wbs_code=await service.suggest_wbs_code(schedule_id, parent_id))
 
 
 @router.get(
