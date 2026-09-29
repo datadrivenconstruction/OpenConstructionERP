@@ -87,7 +87,7 @@ async def is_project_member(
         return False
 
 
-def member_project_ids_subquery(user_id: uuid.UUID):
+def member_project_ids_subquery(user_id: uuid.UUID, *, live_only: bool = False):
     """Return a SQLAlchemy scalar subquery of project_ids where *user_id* is a member.
 
     Intended for use in ORM ``WHERE`` clauses::
@@ -96,15 +96,23 @@ def member_project_ids_subquery(user_id: uuid.UUID):
 
     This is a *synchronous* factory - it returns a subquery object, not a
     coroutine.  The actual DB round-trip happens when the parent query executes.
+
+    ``live_only=True`` leaves out archived (deleted) projects. Use it when the
+    subquery scopes a listing of child rows by ``project_id``; an access check
+    keeps the default, which reaches archived projects as it always has.
     """
     from app.modules.teams.models import Team, TeamMembership
 
-    return (
+    stmt = (
         select(Team.project_id)
         .join(TeamMembership, TeamMembership.team_id == Team.id)
         .where(TeamMembership.user_id == user_id)
-        .scalar_subquery()
     )
+    if live_only:
+        from app.modules.projects.models import Project
+
+        stmt = stmt.join(Project, Project.id == Team.project_id).where(Project.status != "archived")
+    return stmt.scalar_subquery()
 
 
 # ── Record-level restriction ─────────────────────────────────────────────────

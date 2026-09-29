@@ -77,7 +77,8 @@ async def _resolve_accessible_project_ids(
     ownership is a separate concern handled by the documents module
     folder-permissions service - when that service is wired the
     callback used here can be expanded; for now ownership is the safe
-    minimum.
+    minimum. Deleted (archived) projects are left out: their files are not
+    offered in a search whose hits open a project that no longer exists.
     """
     from sqlalchemy import select as _select
 
@@ -87,10 +88,10 @@ async def _resolve_accessible_project_ids(
     user = await session.get(User, user_id)
     is_admin = bool(user is not None and getattr(user, "role", "") == "admin")
     if is_admin:
-        rows = await session.execute(_select(Project.id))
+        rows = await session.execute(_select(Project.id).where(Project.status != "archived"))
     else:
         rows = await session.execute(
-            _select(Project.id).where(Project.owner_id == user_id),
+            _select(Project.id).where(Project.owner_id == user_id, Project.status != "archived"),
         )
     return [r[0] for r in rows.all()]
 
