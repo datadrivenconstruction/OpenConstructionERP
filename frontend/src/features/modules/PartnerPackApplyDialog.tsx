@@ -253,6 +253,15 @@ export function PartnerPackApplyDialog({
   // A retry streams a narrower ``start`` frame. It must refresh the rows it
   // reruns, not replace the checklist with them.
   const retryRef = useRef(false);
+  // The step states as the last event left them, readable without waiting for
+  // a render. The verdict after a retry is read from here: the retry's own
+  // ``done.ok`` covers only the rows it reran. Every write goes through
+  // ``putStates`` so the ref and the rendered rows never disagree.
+  const statesRef = useRef<Record<string, StepUiState>>({});
+  const putStates = useCallback((next: Record<string, StepUiState>) => {
+    statesRef.current = next;
+    setStepStates(next);
+  }, []);
 
   // Reset everything whenever the dialog (re)opens for a (possibly different) pack.
   useEffect(() => {
@@ -264,14 +273,14 @@ export function PartnerPackApplyDialog({
       setFinished(null);
       setFailure(null);
       setSteps([]);
-      setStepStates({});
+      putStates({});
       setStepDetail({});
       setLanguage(null);
     } else {
       abortRef.current?.abort();
       abortRef.current = null;
     }
-  }, [open, slug]);
+  }, [open, slug, putStates]);
 
   // Abort any in-flight stream on unmount.
   useEffect(() => () => abortRef.current?.abort(), []);
@@ -336,27 +345,25 @@ export function PartnerPackApplyDialog({
   );
 
   const handleEvent = useCallback((evt: StreamInstallEvent) => {
+    let next: Record<string, StepUiState> | null = null;
     if (evt.type === 'start') {
       if (retryRef.current) {
-        setStepStates((prev) => {
-          const next = { ...prev };
-          for (const s of evt.steps) next[s.step] = 'pending';
-          return next;
-        });
+        next = { ...statesRef.current };
+        for (const s of evt.steps) next[s.step] = 'pending';
       } else {
         setSteps(evt.steps);
-        const init: Record<string, StepUiState> = {};
-        for (const s of evt.steps) init[s.step] = 'pending';
-        setStepStates(init);
+        next = {};
+        for (const s of evt.steps) next[s.step] = 'pending';
       }
     } else if (evt.type === 'step_start') {
-      setStepStates((prev) => ({ ...prev, [evt.step]: 'running' }));
+      next = { ...statesRef.current, [evt.step]: 'running' };
     } else if (evt.type === 'step_done') {
-      setStepStates((prev) => ({ ...prev, [evt.step]: evt.status }));
+      next = { ...statesRef.current, [evt.step]: evt.status };
       setStepDetail((prev) => ({ ...prev, [evt.step]: evt.detail }));
     }
+    if (next) putStates(next);
     // ``done`` is handled by the awaiting caller (it carries the overall ok).
-  }, []);
+  }, [putStates]);
 
   /**
    * Switch the interface to the pack's language and read back what stuck.
@@ -410,7 +417,7 @@ export function PartnerPackApplyDialog({
       setFailure(null);
       if (!isRetry) {
         setSteps([]);
-        setStepStates({});
+        putStates({});
         setStepDetail({});
         setLanguage(null);
       }
@@ -443,6 +450,9 @@ export function PartnerPackApplyDialog({
             signal: controller.signal,
           },
         );
+        // A retry's ``done.ok`` speaks for the rows it reran only; the
+        // install as a whole is ok when every row of the checklist finished.
+        if (isRetry) ok = Object.values(statesRef.current).every((st) => st === 'ok' || st === 'skipped');
         setFinished({ ok });
         // Refresh the pack queries so the card flips to "Active" + the boot-time
         // co-brand hook re-reads the now-applied pack.
@@ -498,13 +508,11 @@ export function PartnerPackApplyDialog({
             : { kind: 'network', status: null, detail: null, midStream: sawStart };
         setFailure(next);
         // Mark any still-running step as errored so nothing spins.
-        setStepStates((prev) => {
-          const out = { ...prev };
-          for (const k of Object.keys(out)) {
-            if (out[k] === 'running' || out[k] === 'pending') out[k] = 'error';
-          }
-          return out;
-        });
+        const swept = { ...statesRef.current };
+        for (const k of Object.keys(swept)) {
+          if (swept[k] === 'running' || swept[k] === 'pending') swept[k] = 'error';
+        }
+        putStates(swept);
         setFinished({ ok: false });
         if (applyOk) await applyLanguage(packLocale);
         addToast({
@@ -533,6 +541,7 @@ export function PartnerPackApplyDialog({
       selectedHaveCatalog,
       plan?.default_locale,
       handleEvent,
+      putStates,
       applyLanguage,
       qc,
       addToast,
