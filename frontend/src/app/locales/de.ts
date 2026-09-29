@@ -41349,6 +41349,7 @@ const resource = {
     "enterprise_workflows.status_approved": "Genehmigt",
     "enterprise_workflows.status_pending": "Ausstehend",
     "enterprise_workflows.status_rejected": "Abgelehnt",
+    "enterprise_workflows.status_cancelled": "Storniert",
     "enterprise_workflows.step": "Schritt {{n}}",
     "enterprise_workflows.steps_count": "{{count}} Schritt(e)",
     "enterprise_workflows.subtitle": "Konfigurieren Sie Genehmigungsworkflows und verwalten Sie ausstehende Anfragen projektübergreifend.",

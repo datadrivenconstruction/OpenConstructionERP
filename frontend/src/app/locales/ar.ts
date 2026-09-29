@@ -41139,6 +41139,7 @@ const resource = {
     "enterprise_workflows.status_approved": "معتمد",
     "enterprise_workflows.status_pending": "قيد الانتظار",
     "enterprise_workflows.status_rejected": "مرفوض",
+    "enterprise_workflows.status_cancelled": "ملغى",
     "enterprise_workflows.step": "الخطوة {{n}}",
     "enterprise_workflows.steps_count": "{{count}} خطوة",
     "enterprise_workflows.subtitle": "ضبط سير عمل الاعتماد وإدارة الطلبات المعلقة عبر مشاريعك.",
