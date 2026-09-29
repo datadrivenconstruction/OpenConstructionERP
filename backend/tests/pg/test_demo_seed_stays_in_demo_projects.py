@@ -280,3 +280,32 @@ async def test_an_explicit_install_brings_a_retired_demo_back(boot_factory) -> N
 
     async with boot_factory() as s:
         assert _DEMO_ID not in await retired_demo_ids(s)
+
+
+async def test_the_cleanup_removes_only_seed_marked_rows_from_real_projects(boot_factory) -> None:
+    from app.core.demo_cleanup import clean_leaked_demo_rows
+
+    ids = await _estate(boot_factory)
+    async with boot_factory() as s:
+        # What the old boot seeding left in the real project, next to a diary a
+        # person wrote in it, and the demo project's own seeded diary.
+        s.add(DailyDiary(project_id=ids["real"], diary_date="2026-09-01", metadata_={"seed": True}))
+        s.add(DailyDiary(project_id=ids["real"], diary_date="2026-09-02", metadata_={}))
+        s.add(DailyDiary(project_id=ids["demo"], diary_date="2026-09-01", metadata_={"seed": True}))
+        await s.commit()
+
+    async with boot_factory() as s:
+        dry = await clean_leaked_demo_rows(s)
+        await s.rollback()
+    assert dry.marked["daily_diary"] == 1
+    assert await _rows(boot_factory, DailyDiary, ids["real"]) == 2
+
+    async with boot_factory() as s:
+        done = await clean_leaked_demo_rows(s, apply=True)
+        await s.commit()
+    assert done.marked["daily_diary"] == 1
+
+    async with boot_factory() as s:
+        left = (await s.execute(select(DailyDiary.metadata_).where(DailyDiary.project_id == ids["real"]))).scalars()
+        assert list(left) == [{}]
+    assert await _rows(boot_factory, DailyDiary, ids["demo"]) == 1
