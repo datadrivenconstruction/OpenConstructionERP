@@ -526,7 +526,7 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
                     <div className="px-3 pb-2 space-y-1">
                       {preview.warnings.map((w, i) => (
                         <p key={i} className="text-2xs text-amber-700 dark:text-amber-400">
-                          {importIssueText(w, t)}
+                          {importIssueText(w, t, fmtNumber)}
                         </p>
                       ))}
                     </div>
@@ -553,7 +553,7 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
                     <div className="px-3 pb-2 space-y-1">
                       {preview.errors.map((e, i) => (
                         <p key={i} className="text-2xs text-red-700 dark:text-red-400">
-                          {importIssueText(e, t)}
+                          {importIssueText(e, t, fmtNumber)}
                         </p>
                       ))}
                     </div>
