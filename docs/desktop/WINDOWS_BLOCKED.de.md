@@ -40,13 +40,13 @@ Solange Smart App Control eingeschaltet ist, lässt sich keine einzelne App frei
 
 **Möglichkeit 1: Smart App Control eingeschaltet lassen und die App anders starten.** Das empfehlen wir, wenn Sie den Schutz behalten möchten. Docker und WSL führen OpenConstructionERP in einer kleinen Linux-Umgebung aus, und Linux-Programme prüft Smart App Control nicht. Beide Wege sind unten beschrieben.
 
-**Möglichkeit 2: Smart App Control ausschalten.** Das senkt den Schutz Ihres ganzen PCs, nicht nur für unsere App. Tun Sie es nur, wenn Sie damit einverstanden sind.
+**Möglichkeit 2: Smart App Control ausschalten.** Das senkt den Schutz Ihres ganzen PCs, nicht nur für unsere App. Tun Sie es nur, wenn Sie damit einverstanden sind. Auf aktuellen Builds von Windows 11 können Sie Smart App Control später auf derselben Seite wieder einschalten, auf älteren Builds ist das Ausschalten dagegen endgültig, bis Windows zurückgesetzt oder neu installiert wird. Bietet die Seite nach dem Ausschalten keinen Weg zurück, haben Sie einen solchen Build.
 
 1. Öffnen Sie **Windows-Sicherheit**, dann **App- & Browsersteuerung** und die **Smart App Control-Einstellungen**.
 2. Wählen Sie **Aus** und bestätigen Sie.
 3. Starten Sie OpenConstructionERP erneut.
 
-Auf aktuellen Builds von Windows 11 können Sie Smart App Control später auf derselben Seite wieder einschalten. Auf älteren Builds war das Ausschalten endgültig, bis Windows zurückgesetzt oder neu installiert wurde; dort lässt sich die Einstellung schlicht nicht mehr einschalten. Microsoft Defender Antivirus und SmartScreen bleiben in jedem Fall aktiv.
+Microsoft Defender Antivirus und SmartScreen bleiben in jedem Fall aktiv.
 
 Zeigt der Schutzverlauf stattdessen eine Erkennung durch Microsoft Defender Antivirus, und Sie haben die Datei wie unten beschrieben geprüft, können Sie den Eintrag öffnen und **Aktionen** (Actions), dann **Auf Gerät zulassen** (Allow on device) wählen. Wenn Sie unsicher sind, lassen Sie es und schreiben Sie uns.
 
@@ -92,8 +92,8 @@ Ist Smart App Control ausgeschaltet oder nie eingeschaltet worden, und Sie möch
 2. Öffnen Sie ein neues **Windows PowerShell**-Fenster und führen Sie aus:
 
 ```powershell
-py -m pip install --upgrade openconstructionerp
-py -m openconstructionerp
+py -3.12 -m pip install --upgrade openconstructionerp
+py -3.12 -m openconstructionerp
 ```
 
 3. Der erste Start richtet die lokale Datenbank ein und lädt Demodaten, das dauert etwa eine Minute. Danach läuft die App unter **http://localhost:8080**; Anmeldung mit `demo@openconstructionerp.com` / `DemoPass1234!`. Beim nächsten Mal genügt der zweite Befehl.
@@ -103,12 +103,12 @@ py -m openconstructionerp
 Jedes Release enthält neben den Installern eine Datei `SHA256SUMS`. Laden Sie sie in denselben Ordner wie den Installer, öffnen Sie dort **Windows PowerShell** und führen Sie aus:
 
 ```powershell
-$exe = Get-ChildItem OpenConstructionERP_*_x64-setup.exe | Select-Object -First 1
+$exe = Get-ChildItem OpenConstructionERP_*_x64-setup.exe | Sort-Object LastWriteTime -Descending | Select-Object -First 1
 $line = Select-String -Path SHA256SUMS -Pattern $exe.Name -SimpleMatch
 (Get-FileHash $exe.FullName -Algorithm SHA256).Hash -eq $line.Line.Split(' ')[0]
 ```
 
-`True` bedeutet, dass die Datei genau die ist, die unser Release-Build erzeugt hat. `False` bedeutet, dass sie unterwegs beschädigt oder verändert wurde. Starten Sie sie dann nicht, sondern laden Sie sie erneut von der [GitHub-Release-Seite](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest). Die Prüfung belegt, dass die Datei unverändert ist. An der Entscheidung von SmartScreen oder Smart App Control ändert sie nichts. Für eine stärkere Prüfung trägt `SHA256SUMS` selbst eine Sigstore-Signatur, beschrieben in [RELEASE_SIGNATURE_INVENTORY.md](RELEASE_SIGNATURE_INVENTORY.md).
+`True` bedeutet, dass die Datei genau die ist, die unser Release-Build erzeugt hat. `False` bedeutet, dass sie unterwegs beschädigt oder verändert wurde. Starten Sie sie dann nicht. Eine rote Fehlermeldung statt `True` oder `False` bedeutet, dass im Ordner eine `SHA256SUMS` aus einem anderen Release als der Installer liegt; laden Sie dann beide von derselben Release-Seite. Bleibt es bei `False`, laden Sie die Datei erneut von der [GitHub-Release-Seite](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest). Die Prüfung belegt, dass die Datei unverändert ist. An der Entscheidung von SmartScreen oder Smart App Control ändert sie nichts. Für eine stärkere Prüfung trägt `SHA256SUMS` selbst eine Sigstore-Signatur, beschrieben in [RELEASE_SIGNATURE_INVENTORY.md](RELEASE_SIGNATURE_INVENTORY.md).
 
 ## Es klappt immer noch nicht
 

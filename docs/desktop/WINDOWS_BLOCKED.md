@@ -38,13 +38,13 @@ There is no way to allow a single app while Smart App Control stays on. Microsof
 
 **Option 1: keep Smart App Control on and run the app another way.** This is what we recommend if you want to keep the protection. Docker and WSL both run OpenConstructionERP inside a small Linux environment, and Smart App Control does not check Linux programs. Both are described below.
 
-**Option 2: turn Smart App Control off.** This lowers the protection of your whole PC, not only for our app, so do it only if you are comfortable with that.
+**Option 2: turn Smart App Control off.** This lowers the protection of your whole PC, not only for our app, so do it only if you are comfortable with that. On current Windows 11 builds you can switch it back on later from the same page, but on older builds turning it off is permanent until you reset or reinstall Windows. If the page offers no way back on after you turn it off, you are on such a build.
 
 1. Open **Windows Security**, go to **App & browser control**, then **Smart App Control settings**.
 2. Select **Off** and confirm.
 3. Start OpenConstructionERP again.
 
-On current Windows 11 builds you can switch Smart App Control back on later from the same page. On older builds turning it off was permanent until you reset or reinstalled Windows, and on those builds the setting simply does not let you turn it on again. Microsoft Defender Antivirus and SmartScreen stay on either way.
+Microsoft Defender Antivirus and SmartScreen stay on either way.
 
 If Protection history shows a Microsoft Defender Antivirus detection instead, and you have checked the file as described below, you can open that entry and choose **Actions**, then **Allow on device**. If you are unsure, do not allow it and write to us instead.
 
@@ -90,8 +90,8 @@ If Smart App Control is off or never switched on, but you would rather not use t
 2. Open a new **Windows PowerShell** window and run:
 
 ```powershell
-py -m pip install --upgrade openconstructionerp
-py -m openconstructionerp
+py -3.12 -m pip install --upgrade openconstructionerp
+py -3.12 -m openconstructionerp
 ```
 
 3. The first run sets up the local database and loads demo data, which takes about a minute. The app then runs at **http://localhost:8080**; sign in with `demo@openconstructionerp.com` / `DemoPass1234!`. Next time only the second command is needed.
@@ -101,12 +101,12 @@ py -m openconstructionerp
 Every release lists a `SHA256SUMS` file next to the installers. Download it into the same folder as the installer, open **Windows PowerShell** in that folder, and run:
 
 ```powershell
-$exe = Get-ChildItem OpenConstructionERP_*_x64-setup.exe | Select-Object -First 1
+$exe = Get-ChildItem OpenConstructionERP_*_x64-setup.exe | Sort-Object LastWriteTime -Descending | Select-Object -First 1
 $line = Select-String -Path SHA256SUMS -Pattern $exe.Name -SimpleMatch
 (Get-FileHash $exe.FullName -Algorithm SHA256).Hash -eq $line.Line.Split(' ')[0]
 ```
 
-`True` means the file is exactly the one our release build produced. `False` means it was damaged or changed on the way, so do not run it; download it again from the [GitHub release page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest). The check proves the file is intact. It does not change what SmartScreen or Smart App Control decide. For a stronger check, `SHA256SUMS` itself carries a Sigstore signature, described in [RELEASE_SIGNATURE_INVENTORY.md](RELEASE_SIGNATURE_INVENTORY.md).
+`True` means the file is exactly the one our release build produced. `False` means it was damaged or changed on the way, so do not run it. A red error instead of `True` or `False` means the folder holds a `SHA256SUMS` from a different release than the installer, so download both from the same release page. If `False` persists, download it again from the [GitHub release page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases/latest). The check proves the file is intact. It does not change what SmartScreen or Smart App Control decide. For a stronger check, `SHA256SUMS` itself carries a Sigstore signature, described in [RELEASE_SIGNATURE_INVENTORY.md](RELEASE_SIGNATURE_INVENTORY.md).
 
 ## Still stuck
 
