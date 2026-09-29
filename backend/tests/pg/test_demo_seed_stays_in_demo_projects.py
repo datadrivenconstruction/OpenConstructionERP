@@ -334,7 +334,8 @@ async def _listed_ids(factory, owner_id: uuid.UUID) -> tuple[set[str], set[str]]
             status=None,
         )
         cards = await dashboard_cards(session=s, user_id=str(owner_id), payload=payload)
-    return {str(p.id) for p in dropdown}, {str(c.id) for c in cards}
+    # Called directly, the card endpoint hands back plain dicts, not the response model.
+    return {str(p.id) for p in dropdown}, {str(c["id"] if isinstance(c, dict) else c.id) for c in cards}
 
 
 async def test_deleted_demos_stay_deleted_through_restart_and_upgrade(boot_factory) -> None:
@@ -414,8 +415,7 @@ async def test_the_cleanup_undoes_what_the_old_boot_wrote_and_keeps_user_records
 
     The seeders are called directly with the real project, which is exactly
     what the old enrichment did. The user's own diary sits next to the leaked
-    rows and must survive; the modules whose seeds left no mark must be counted
-    and left alone.
+    rows and must survive.
     """
     from app.core.demo_cleanup import clean_leaked_demo_rows
     from app.modules.bid_management.seed import seed_bid_management_demo
@@ -464,6 +464,267 @@ async def test_the_cleanup_undoes_what_the_old_boot_wrote_and_keeps_user_records
         kept = (await s.execute(select(DailyDiary.notes).where(DailyDiary.project_id == real))).scalars().all()
     assert kept == ["Poured the east footing"]
 
-    # No mark on the quality plan, so it is reported and not removed.
-    assert report.unmarked_candidates.get("qms_itp_plan_seed_fingerprint") == 1
-    assert await _rows(boot_factory, ITPPlan, real) == 1
+    # The quality plan carries no mark; its content is the seed's, so it goes too.
+    assert report.marked["qms_itp_plans"] == 1
+    assert await _rows(boot_factory, ITPPlan, real) == 0
+
+
+# Groups every old seeding run fills. The field-time side effects (reversals,
+# the worker-days and daywork it books on approval) depend on the dice and on
+# rates, so they are checked for removal below but not required to exist.
+_FINGERPRINT_GROUPS = (
+    "qms_ncrs",
+    "qms_inspections",
+    "qms_itp_plans",
+    "qms_punch_items",
+    "qms_audits",
+    "teams_roster",
+    "hse_permits_to_work",
+    "hse_job_safety_analyses",
+    "hse_ppe_issues",
+    "variation_site_measurements",
+    "variation_orders",
+    "variation_requests",
+    "variation_notices",
+    "variation_daywork_sheets",
+    "variation_disruption_claims",
+    "variation_eot_claims",
+    "variation_final_accounts",
+    "service_contracts",
+    "field_timesheets",
+)
+
+
+async def _crew_and_bill(factory, project_id: uuid.UUID) -> None:
+    """What the timesheet seed needs before it books anything: a crew and a priced bill."""
+    from decimal import Decimal
+
+    from app.modules.boq.models import BOQ, Position
+    from app.modules.resources.models import Resource
+
+    async with factory() as s:
+        for name, kind in (("Marta Nowak", "person"), ("Jonas Weber", "person"), ("Formwork crew A", "crew")):
+            s.add(
+                Resource(
+                    code=f"FT-{uuid.uuid4().hex[:6]}",
+                    name=name,
+                    resource_type=kind,
+                    home_project_id=project_id,
+                    default_cost_rate=Decimal("42"),
+                    currency="EUR",
+                    status="active",
+                    metadata_={},
+                )
+            )
+        boq = BOQ(project_id=project_id, name="Main bill")
+        s.add(boq)
+        await s.flush()
+        for n, description in enumerate(("Excavation", "Blinding concrete", "Strip footings", "Blockwork"), start=1):
+            s.add(
+                Position(
+                    boq_id=boq.id,
+                    ordinal=f"01.{n:02d}",
+                    description=description,
+                    unit="m3",
+                    quantity="10",
+                    unit_rate="50",
+                    total="500",
+                )
+            )
+        await s.commit()
+
+
+async def _look_alike(factory, model, seeded_id: uuid.UUID, **changes) -> uuid.UUID:
+    """A person's own row: a copy of a seeded one that differs in the fields given."""
+    from sqlalchemy import inspect as sa_inspect
+
+    async with factory() as s:
+        row = await s.get(model, seeded_id)
+        values = {attr.key: getattr(row, attr.key) for attr in sa_inspect(model).column_attrs}
+        values.update(id=uuid.uuid4(), **changes)
+        s.add(model(**values))
+        await s.commit()
+    return values["id"]
+
+
+async def _present(factory, model, ids) -> int:
+    if not ids:
+        return 0
+    async with factory() as s:
+        return int((await s.execute(select(func.count()).select_from(model).where(model.id.in_(ids)))).scalar_one())
+
+
+async def test_the_cleanup_removes_every_unmarked_seed_by_its_content(boot_factory) -> None:
+    """The seeds that left no mark are recognised by what they wrote, and only by that.
+
+    Every seeder the old boot handed a real project runs against one here. Next
+    to each group sits a person's own row that shares the seed's title but not
+    a second field, the way a user who copied a demo record and changed it
+    would have it. The dry run lists the seed's rows and deletes nothing, the
+    apply removes every group on PostgreSQL's foreign keys, the look-alikes
+    survive, and a second pass finds nothing left.
+    """
+    from datetime import timedelta
+
+    from app.core.demo_cleanup import clean_leaked_demo_rows
+    from app.modules.costmodel.models import LabourWorkerDay
+    from app.modules.field_time.seed import seed_field_time_demo
+    from app.modules.hse_advanced.models import PPEIssue
+    from app.modules.hse_advanced.seed import seed_hse_advanced_demo
+    from app.modules.qms.seed import seed_qms
+    from app.modules.service.seed import seed_service_demo
+    from app.modules.teams.seed import seed_teams_roster
+    from app.modules.variations.models import (
+        DayworkSheet,
+        DisruptionClaim,
+        ExtensionOfTimeClaim,
+        FinalAccount,
+        SiteMeasurement,
+        VariationOrder,
+        VariationRequest,
+    )
+    from app.modules.variations.seed import seed_variations_demo
+
+    async with boot_factory() as s:
+        owner_id = await _owner(s)
+        real = await _project(s, owner_id, "Warehouse Extension Leipzig")
+        await s.commit()
+    await _crew_and_bill(boot_factory, real)
+
+    # The old boot's order: variations before field time, so hours can be
+    # booked against an open variation order.
+    for seed in (
+        lambda s: seed_qms(s, project_id=real),
+        lambda s: seed_teams_roster(s, project_id=real),
+        lambda s: seed_hse_advanced_demo(s, [real]),
+        lambda s: seed_variations_demo(s, [real]),
+        lambda s: seed_service_demo(s, [real]),
+        lambda s: seed_field_time_demo(s, [real]),
+    ):
+        async with boot_factory() as s:
+            await seed(s)
+            await s.commit()
+
+    async with boot_factory() as s:
+        dry = await clean_leaked_demo_rows(s)
+        await s.rollback()
+    empty = [g for g in _FINGERPRINT_GROUPS if not dry.rows.get(g)]
+    assert empty == [], f"seeded groups the fingerprint did not recognise: {empty}; found {dry.marked}"
+    assert dry.ppe_kept_reason == ""
+
+    models = {
+        "qms_ncrs": QMSNCR,
+        "qms_inspections": QMSInspection,
+        "qms_itp_plans": ITPPlan,
+        "qms_punch_items": QMSPunchItem,
+        "qms_audits": QMSAudit,
+        "teams_roster": RosterMember,
+        "hse_permits_to_work": PermitToWork,
+        "hse_job_safety_analyses": JobSafetyAnalysis,
+        "hse_ppe_issues": PPEIssue,
+        "variation_site_measurements": SiteMeasurement,
+        "variation_orders": VariationOrder,
+        "variation_requests": VariationRequest,
+        "variation_notices": Notice,
+        "variation_daywork_sheets": DayworkSheet,
+        "variation_disruption_claims": DisruptionClaim,
+        "variation_eot_claims": ExtensionOfTimeClaim,
+        "variation_final_accounts": FinalAccount,
+        "service_contracts": ServiceContract,
+        "field_timesheets": FieldTimesheet,
+        "field_time_reversals": FieldTimesheet,
+        "field_time_labour_worker_days": LabourWorkerDay,
+        "field_time_daywork_sheets": DayworkSheet,
+    }
+    # A dry run lists and leaves: every listed row is still there.
+    for group, model in models.items():
+        listed = dry.rows.get(group, [])
+        assert await _present(boot_factory, model, listed) == len(listed), group
+
+    # A person's rows: the seed's title, a different second field.
+    first = {group: ids[0] for group, ids in dry.rows.items() if ids}
+    async with boot_factory() as s:
+        signed = (
+            await s.execute(
+                select(FieldTimesheet.id, FieldTimesheet.submitted_at).where(
+                    FieldTimesheet.id.in_(dry.rows["field_timesheets"]), FieldTimesheet.submitted_at.is_not(None)
+                )
+            )
+        ).first()
+    assert signed is not None, "the seed signed none of its timesheets"
+    keep = {
+        QMSNCR: await _look_alike(
+            boot_factory, QMSNCR, first["qms_ncrs"], description="Found by our site engineer on the east wall."
+        ),
+        QMSPunchItem: await _look_alike(
+            boot_factory, QMSPunchItem, first["qms_punch_items"], description="Logged on our handover walk."
+        ),
+        ITPPlan: await _look_alike(boot_factory, ITPPlan, first["qms_itp_plans"], wbs_ref="WBS-OWN-01"),
+        QMSAudit: await _look_alike(boot_factory, QMSAudit, first["qms_audits"], audit_scope="Our own audit scope"),
+        RosterMember: await _look_alike(boot_factory, RosterMember, first["teams_roster"], company_name="Own Crew Ltd"),
+        JobSafetyAnalysis: await _look_alike(
+            boot_factory, JobSafetyAnalysis, first["hse_job_safety_analyses"], location="Basement B2"
+        ),
+        PermitToWork: await _look_alike(
+            boot_factory, PermitToWork, first["hse_permits_to_work"], description="Hot work on our own boiler."
+        ),
+        PPEIssue: await _look_alike(boot_factory, PPEIssue, first["hse_ppe_issues"], recipient_company="Own Crew Ltd"),
+        # Codes are unique per project, so the person's copy carries its own.
+        Notice: await _look_alike(boot_factory, Notice, first["variation_notices"], code="NOT-OWN-1"),
+        VariationOrder: await _look_alike(boot_factory, VariationOrder, first["variation_orders"], code="VO-OWN-1"),
+        ServiceContract: await _look_alike(
+            boot_factory, ServiceContract, first["service_contracts"], contract_number="SC-OWN-1"
+        ),
+        # The seed's note and hours, signed when it was really signed.
+        FieldTimesheet: await _look_alike(
+            boot_factory,
+            FieldTimesheet,
+            signed.id,
+            reference=f"TS-OWN-{uuid.uuid4().hex[:6]}",
+            submitted_at=signed.submitted_at + timedelta(minutes=7),
+            approved_at=None,
+            status="submitted",
+        ),
+    }
+
+    async with boot_factory() as s:
+        again = await clean_leaked_demo_rows(s)
+        await s.rollback()
+    assert again.marked == dry.marked, "a person's look-alike was taken for the seed's"
+
+    async with boot_factory() as s:
+        done = await clean_leaked_demo_rows(s, apply=True)
+        await s.commit()
+    assert done.marked == dry.marked
+
+    gone = {
+        group: n for group, model in models.items() if (n := await _present(boot_factory, model, done.rows.get(group)))
+    }
+    assert gone == {}, f"groups the apply left behind: {gone}"
+
+    survived = {model.__name__: await _present(boot_factory, model, [rid]) for model, rid in keep.items()}
+    assert survived == dict.fromkeys(survived, 1), f"a person's row was removed: {survived}"
+
+    # Nothing of the seed's kind is left in the real project but the person's rows.
+    per_project = {model: 1 for model in keep if model is not PPEIssue}
+    per_project.update(
+        dict.fromkeys(
+            (
+                QMSInspection,
+                VariationRequest,
+                SiteMeasurement,
+                DisruptionClaim,
+                ExtensionOfTimeClaim,
+                FinalAccount,
+                DayworkSheet,
+            ),
+            0,
+        )
+    )
+    left = {m.__name__: n for m, want in per_project.items() if (n := await _rows(boot_factory, m, real)) != want}
+    assert left == {}, f"seed rows still in the real project: {left}"
+
+    async with boot_factory() as s:
+        second = await clean_leaked_demo_rows(s, apply=True)
+        await s.commit()
+    assert second.total == 0, second.marked
