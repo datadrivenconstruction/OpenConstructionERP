@@ -1,6 +1,6 @@
 # Repo hygiene gate.
 #
-# Guards: 84. They run on every push and pull request, grouped into three
+# Guards: 85. They run on every push and pull request, grouped into three
 # jobs. A guard is a named step that is not a tooling install, and that rule is
 # not a matter of taste: it is the one that reproduces both counts this header
 # carried when it was written on 2026-08-24 - twenty-one guards, over jobs of
@@ -786,6 +786,20 @@ jobs:
       - name: Run the tests that live next to the scripts they cover
         if: ${{ !cancelled() }}
         run: python -m pytest -p no:cacheprovider $(ls scripts/test_*.py | grep -v '/test_cost_import\.py$')
+
+      # The frontend names its API paths as string literals and the backend
+      # mounts its routes at run time, and until 2026-09-29 nothing compared
+      # the two. The first comparison found 23 calls that no route answers,
+      # 19 of them a trailing slash: the app is built with
+      # redirect_slashes=False, so /issue and /issue/ are different URLs. The
+      # script builds the real route table with create_app() and the module
+      # routers mounted, which is why it sits below the backend install; it
+      # starts nothing and needs no database. ALLOWED in the script holds the
+      # calls known not to match, with the reason, and an entry that stops
+      # matching fails the run, so the list only shrinks.
+      - name: Check every frontend API call has a backend route
+        if: ${{ !cancelled() }}
+        run: python scripts/check_frontend_api_routes.py
 
       # Both kinds of file are already parsed on the way through CI, and stating
       # that precisely matters, because the first version of this finding said

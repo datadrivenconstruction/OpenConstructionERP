@@ -122,6 +122,13 @@ CI_ONLY_BY_DESIGN = {
         "scoped to locale files would miss a prose change, and a hook scoped to "
         "the docs would miss a locale addition; the gate needs both sides at once."
     ),
+    "check_frontend_api_routes.py": (
+        "Needs the backend installed, because it builds the real route table with "
+        "create_app() and every module router mounted, and that import takes minutes "
+        "on a developer machine against a minute on the runner. Step: 'Check every "
+        "frontend API call has a backend route', below the backend install in "
+        "repo-hygiene.yml. Its self-tests run with the other scripts/test_*.py there."
+    ),
 }
 
 # Invoked by a lane, declared by no hook, and carrying no reason on record. This
