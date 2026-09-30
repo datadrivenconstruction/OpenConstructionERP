@@ -737,8 +737,24 @@ async def _step_cost_db_detailed(slug: str, cost_regions: list[str] | None = Non
             continue
         try:
             async with async_session_factory() as session:
-                res = await load_cwicr_region(db_id, session)
+                # A retry after a cut import must finish the base, not call a
+                # fraction of it loaded.
+                res = await load_cwicr_region(db_id, session, resume_incomplete=True)
                 await session.commit()
+            if res.get("status") == "incomplete":
+                bases.append(
+                    {
+                        "slug": region_slug,
+                        "db_id": db_id,
+                        "status": "error",
+                        "reason_code": "incomplete_base",
+                        "items": int(res.get("total_items") or 0),
+                        "expected": int(res.get("expected_items") or 0),
+                        "currency": res.get("currency"),
+                    }
+                )
+                errors.append({"region": region_slug, "db_id": db_id, "error": "incomplete base"})
+                continue
             count = int(res.get("total_items") or res.get("imported") or 0)
             base_resources = int(res.get("resource_components") or 0)
             items += count
@@ -752,6 +768,7 @@ async def _step_cost_db_detailed(slug: str, cost_regions: list[str] | None = Non
                     "items": count,
                     "resources": base_resources,
                     "already_loaded": res.get("status") == "already_loaded",
+                    "resumed": bool(res.get("resumed")),
                 }
             )
         except Exception as exc:  # noqa: BLE001 - fail-soft per region
@@ -810,7 +827,7 @@ async def _step_catalog(loaded_regions: list[str]) -> StepResult:
     from app.modules.catalog.models import CatalogResource
     from app.modules.catalog.router import REGION_MAP, import_region_catalog
     from app.modules.costs import base_registry
-    from app.modules.costs.models import CostItem
+    from app.modules.costs.router import region_priced_in_other_currency
 
     if not loaded_regions:
         return StepResult(
@@ -836,20 +853,7 @@ async def _step_catalog(loaded_regions: list[str]) -> StepResult:
                 ).scalar_one()
                 variant = base_registry.variant_by_region(db_id)
                 home_currency = variant.currency if variant else ""
-                priced_in = None
-                if not present and home_currency:
-                    priced_in = (
-                        await session.execute(
-                            select(CostItem.currency)
-                            .where(
-                                CostItem.region == db_id,
-                                CostItem.is_active.is_(True),
-                                CostItem.currency != "",
-                                CostItem.currency != home_currency,
-                            )
-                            .limit(1)
-                        )
-                    ).scalar_one_or_none()
+                priced_in = None if present else await region_priced_in_other_currency(db_id, session)
                 if priced_in:
                     catalogs.append(
                         {
