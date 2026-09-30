@@ -62,6 +62,10 @@ Everything you do stays on your own machine. The app runs its own database local
 
 All of it lives in a single folder in your home directory, named `.openestimate`. On Windows that is `C:\Users\<your name>\.openestimate`, and on macOS and Linux it is `~/.openestimate`. That folder holds the local PostgreSQL database, every file you have uploaded, and your settings. It sits outside the program folder on purpose, so that installing, upgrading and removing the app never touch your work. To make a backup, close the app and copy that folder somewhere safe.
 
+## Removing the demo projects
+
+The demo projects can be deleted like any other project, or all at once under Settings, Danger Zone, Remove sample data, and they do not come back after a restart or an upgrade. If an earlier version put demo records into your own projects, Settings, Danger Zone, Find leftover demo records lists them by project and module and removes them after you confirm. This is the desktop counterpart of the `openconstructionerp demo-cleanup` command a server administrator runs.
+
 ## Upgrading to a new version
 
 Close the app before you start. On Windows, download the new installer and run it. It notices the version you already have and offers either to write the new files over it or to remove it first. Writing over it is the option already selected for you, and it is the one to take: the installer stops anything of the old version that is still running and then replaces the program files where they are. Above the two options that screen also carries a line of its own that still suggests removing the current version first. That line comes from the toolkit the installer is built with and we cannot change it, so go by the option that is already selected rather than by the sentence above it. Your `.openestimate` folder is not part of the upgrade, so your projects, users and settings are all still there when the new version starts. The first start after an upgrade can take longer than usual while the database brings itself up to date, and that is normal.

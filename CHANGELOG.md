@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Demo data now stays in demo projects, and a demo project you deleted stays deleted through restarts and upgrades. For installs that ran the old seeding, `openconstructionerp demo-cleanup` lists the demo records it left in your own projects, recognised by the seed's mark or by content that exactly matches what the seed writes, and `demo-cleanup --apply` removes them; your own records are never touched.
+Demo data now stays in demo projects, and a demo project you deleted stays deleted through restarts and upgrades. An install that removed its demos on an earlier version no longer gets the showcase back on the first start after the update, clearing all demos now takes the flagship project and the demos' own contacts too, and a project restored from a backup is no longer treated as a demo. For installs that ran the old seeding, Settings, Danger Zone, Find leftover demo records lists the demo records left in your own projects, grouped by project and module, and removes them after you confirm; on a server, `openconstructionerp demo-cleanup` prints the same list and `demo-cleanup --apply` removes it. A record is listed only when it carries the seed's mark or matches exactly what the seed writes, and one somebody has worked on since is kept. The PPE register is marked as company-wide, since every project shows the same list.
 
 ## [18.2.0] - 2026-09-29
 
