@@ -49,6 +49,7 @@ Backend (base install via `pip install openconstructionerp`):
   * pyarrow ............................. Apache-2.0
   * duckdb .............................. MIT
   * openpyxl ............................ MIT
+  * xlrd ................................ BSD-3-Clause
   * reportlab ........................... BSD-3-Clause (open-source edition)
   * pdfplumber .......................... MIT
   * pypdf ............................... BSD-3-Clause

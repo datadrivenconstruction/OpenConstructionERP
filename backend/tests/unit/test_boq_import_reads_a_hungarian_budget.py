@@ -23,7 +23,6 @@ import io
 from collections.abc import Callable
 
 import pytest
-from fastapi import HTTPException
 from openpyxl import Workbook
 
 from app.modules.boq.importers._base import ImportedBOQ
@@ -187,17 +186,11 @@ def test_hungarian_lump_sum_units_are_lump_sums(unit: str) -> None:
     assert is_lump_sum_unit(unit)
 
 
-def test_a_legacy_xls_upload_is_refused_with_what_to_do() -> None:
-    from app.modules.boq.router import _refuse_legacy_xls
-
+def test_a_legacy_xls_upload_is_claimed_by_the_spreadsheet_reader() -> None:
+    """An .xls used to be refused with a request to save it as .xlsx; it is read now."""
     ole_head = b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1" + b"\x00" * 504
-    with pytest.raises(HTTPException) as refused:
-        _refuse_legacy_xls("koltsegvetes.xls", ole_head)
-    assert refused.value.status_code == 400
-    assert ".xlsx" in str(refused.value.detail)
-
-    _refuse_legacy_xls("koltsegvetes.xlsx", b"PK\x03\x04" + b"\x00" * 60)
-    _refuse_legacy_xls("model.rvt", ole_head)
+    assert ExcelImporter.detect(ole_head, "koltsegvetes.xls")
+    assert not ExcelImporter.detect(ole_head, "model.rvt")
 
 
 def test_the_cp1250_fixture_really_is_not_utf8() -> None:

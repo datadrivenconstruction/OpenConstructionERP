@@ -348,3 +348,5 @@ watchfiles==1.2.0
     # via uvicorn
 websockets==16.0
     # via uvicorn
+xlrd==2.0.2
+    # via openconstructionerp (pyproject.toml)

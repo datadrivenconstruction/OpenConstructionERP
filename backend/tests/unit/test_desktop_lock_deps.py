@@ -94,6 +94,9 @@ _REQUIRED_BASE_DEPS = (
     "lazrs",
     "pypdf",
     "pandas",
+    # Read inside a function only when an .xls arrives, so a lock without it
+    # builds and starts fine and fails the first Excel 97-2003 bill imported.
+    "xlrd",
     "uharfbuzz",
 )
 
