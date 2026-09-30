@@ -69,7 +69,9 @@ describe('resolveGlobeImagery', () => {
 
 describe('fetchGlobeImagery', () => {
   it('reads the backend answer', async () => {
-    const fetchMock = vi.fn(async () => new Response(JSON.stringify(STREETS), { status: 200 }));
+    const fetchMock = vi.fn(
+      async (_input: RequestInfo | URL, _init?: RequestInit) => new Response(JSON.stringify(STREETS), { status: 200 }),
+    );
     vi.stubGlobal('fetch', fetchMock);
     const imagery = await fetchGlobeImagery();
     expect(imagery.streets).toBe(true);

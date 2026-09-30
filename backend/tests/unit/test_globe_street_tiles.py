@@ -137,3 +137,24 @@ def test_off_grid_and_too_deep_tiles_are_not_requested(settings: type[_Settings]
     assert asyncio.run(router.proxy_globe_street_tile(11, 0, 0, _Request())).body == router._BLANK_TILE
     assert asyncio.run(router.proxy_globe_street_tile(2, 4, 0, _Request())).body == router._BLANK_TILE
     assert upstream.calls == []
+
+
+def test_both_routes_answer_without_auth_through_routing(settings: type[_Settings], upstream: _Upstream) -> None:
+    """The globe's tile loader cannot attach a header, so both paths must be public."""
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+
+    _configure(settings)
+    app = FastAPI()
+    app.include_router(router.router, prefix="/api/v1/geo-hub")
+    client = TestClient(app)
+
+    answer = client.get("/api/v1/geo-hub/globe-imagery/")
+    assert answer.status_code == 200
+    tile_url = answer.json()["streets"]["tile_url"]
+    assert tile_url == "/api/v1/geo-hub/globe-streets/{z}/{x}/{y}.png"
+
+    tile = client.get(tile_url.format(z=4, x=8, y=5))
+    assert tile.status_code == 200
+    assert tile.content == _PNG
+    assert upstream.calls == ["https://tiles.example.internal/osm/4/8/5.png"]
