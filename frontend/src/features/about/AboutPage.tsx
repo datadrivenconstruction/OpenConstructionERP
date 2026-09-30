@@ -563,7 +563,7 @@ export function AboutPage() {
               {/* Author attribution — moved to the bottom of the bio per request. */}
               <div className="mt-5 flex items-center gap-3 border-t border-border-light pt-4">
                 <img
-                  src="/brand/ddc-logo-mark.svg"
+                  src="/brand/ddc-logo.webp"
                   alt={t('about.team_name', { defaultValue: 'DataDrivenConstruction' })}
                   className="h-12 w-12 shrink-0 rounded-xl object-cover bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-800 dark:to-slate-900 ring-1 ring-border-light shadow-sm p-1.5"
                   loading="lazy"
