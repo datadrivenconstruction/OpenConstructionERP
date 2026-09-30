@@ -2189,6 +2189,38 @@
     "n": 27,
     "reason": "Seeded when the leak guard was first split into three lists (ci(i18n): rebuild the leak guard as two separate lists plus a general scan). This entry's n is >=24/28, the shape the threshold scan actually flags; filed as ambiguous at guard rollout rather than triaged key by key. Backfilled 2026-08-25 when reason/added_by became mandatory fields on this list; this is commit-level and group-level context recovered from git history and this file's own n/differs_in fields, not a fresh per-key content review."
   },
+  "rebar_schedule.unit_kilograms": {
+    "added_by": "wip/listshape (2026-09-30)",
+    "differs_in": [
+      "ar",
+      "bg",
+      "bn",
+      "fa",
+      "he",
+      "hi",
+      "ru",
+      "uk"
+    ],
+    "en_value": "{{value}} kg",
+    "n": 34,
+    "reason": "A unit symbol template, '{{value}} kg' / '{{value}} t', kept as the SI symbol in most scripts and written with the native abbreviation where the locale writes it in its own script (ar, bg, bn, fa, he, hi, ru, uk). Not identical in every locale, so it cannot go on the allowlist, and it is not a leak to translate away; filed here unresolved on purpose. Added with the rebar schedule validation and error states (fix(rebar-schedule): show validation, errors and duplicates, and preview on the import decoder)."
+  },
+  "rebar_schedule.unit_tonnes": {
+    "added_by": "wip/listshape (2026-09-30)",
+    "differs_in": [
+      "ar",
+      "bg",
+      "bn",
+      "fa",
+      "he",
+      "hi",
+      "ru",
+      "uk"
+    ],
+    "en_value": "{{value}} t",
+    "n": 34,
+    "reason": "A unit symbol template, '{{value}} kg' / '{{value}} t', kept as the SI symbol in most scripts and written with the native abbreviation where the locale writes it in its own script (ar, bg, bn, fa, he, hi, ru, uk). Not identical in every locale, so it cannot go on the allowlist, and it is not a leak to translate away; filed here unresolved on purpose. Added with the rebar schedule validation and error states (fix(rebar-schedule): show validation, errors and duplicates, and preview on the import decoder)."
+  },
   "reporting.schedule_none": {
     "added_by": "03cc10968 (2026-08-08)",
     "differs_in": [
