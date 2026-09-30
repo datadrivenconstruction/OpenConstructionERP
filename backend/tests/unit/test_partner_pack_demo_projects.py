@@ -176,24 +176,34 @@ def test_mapped_demo_ids_resolve_to_templates() -> None:
         assert demo_id in DEMO_TEMPLATES, f"{slug} -> {demo_id} not in DEMO_TEMPLATES"
 
 
+#: Country packs whose market has one demo so far. They install that one: the
+#: second slot used to be filled with a neighbour's bill (a Tokyo office in the
+#: Korean pack, a Budapest block in the Polish one, a Rome block in the Spanish
+#: one, a Jeddah hospital in the Turkish one), in another currency and
+#: validated as another country, which is the opposite of the in-market
+#: guarantee this test exists for.
+PACKS_WITH_ONE_IN_MARKET_DEMO = frozenset({"japan-jp", "korea-kr", "poland-pl", "spain-es", "turkey-tr"})
+
+
 def test_every_pack_resolves_to_exactly_two_demos() -> None:
-    """Every discovered pack installs exactly two distinct, real demo projects.
+    """Every discovered pack installs two distinct, real, in-market demo projects.
 
     Some packs (the cross-region modular / renewables packs, and the small
     single-country ones) have no second demo that shares the flagship's country,
     so they pin an explicit ``demo_template_ids`` pair on the manifest. Whether a
     pack relies on the flagship + country-fill default or on an explicit list,
-    the one-click installer must always land two in-market projects. This guards
-    against the regression where ``aus`` / ``modular-prefab`` / ``renewables-epc``
-    seeded only a single demo.
+    the one-click installer must land two in-market projects, or the one its
+    market has. This guards against the regression where ``aus`` /
+    ``modular-prefab`` / ``renewables-epc`` seeded only a single demo.
     """
     from app.core.partner_pack.discovery import discover_packs
     from app.core.partner_pack.full_install import _demo_install_list
 
     for pack in discover_packs():
         install_ids = _demo_install_list(pack.slug, 2)
-        assert len(install_ids) == 2, f"{pack.slug} resolved {len(install_ids)} demo(s): {install_ids}"
-        assert len(set(install_ids)) == 2, f"{pack.slug} resolved duplicate demos: {install_ids}"
+        expected = 1 if pack.slug in PACKS_WITH_ONE_IN_MARKET_DEMO else 2
+        assert len(install_ids) == expected, f"{pack.slug} resolved {len(install_ids)} demo(s): {install_ids}"
+        assert len(set(install_ids)) == len(install_ids), f"{pack.slug} resolved duplicate demos: {install_ids}"
         for demo_id in install_ids:
             assert demo_id in DEMO_TEMPLATES, f"{pack.slug} -> {demo_id} not in DEMO_TEMPLATES"
 
@@ -360,7 +370,18 @@ def test_the_registry_and_its_labels_are_two_different_lists() -> None:
     known = set(KNOWN_CLASSIFICATION_STANDARDS)
     labelled = set(CLASSIFICATION_STANDARD_LABELS)
     assert known < labelled, "the labels no longer cover every storable standard, which is the wrong direction"
-    assert labelled - known == {"gaeb", "omniclass", "onorm", "uniclass", "uniformat"}, (
+    assert labelled - known == {
+        "bkp",
+        "bsab",
+        "gaeb",
+        "knr",
+        "ns3451",
+        "omniclass",
+        "onorm",
+        "sfb_ccs",
+        "uniclass",
+        "uniformat",
+    }, (
         "the set of labelled-but-unstorable standards changed: "
         f"{sorted(labelled - known)}. If one became storable, the picker should offer it."
     )
