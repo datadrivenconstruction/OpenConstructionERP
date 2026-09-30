@@ -609,27 +609,46 @@ This pipeline is the reason OpenConstructionERP can replace several commercial p
 
 ## Project growth
 
+<sub>Measured on 30 September 2026 from the GitHub API, PyPI and pypistats.org. The charts come from <a href="scripts/render_readme_growth_charts.py"><code>scripts/render_readme_growth_charts.py</code></a>, which reads the same API and can be re-run at any time.</sub>
+
+<table>
+<tr>
+<td align="center" width="12.5%"><b>878</b><br/><sub>stars</sub></td>
+<td align="center" width="12.5%"><b>278</b><br/><sub>forks</sub></td>
+<td align="center" width="12.5%"><b>16</b><br/><sub>watchers</sub></td>
+<td align="center" width="12.5%"><b>76</b><br/><sub>contributors</sub></td>
+<td align="center" width="12.5%"><b>291</b><br/><sub>releases</sub></td>
+<td align="center" width="12.5%"><b>18.2.0</b><br/><sub>latest&nbsp;release</sub></td>
+<td align="center" width="12.5%"><b>212</b><br/><sub>issues&nbsp;closed</sub></td>
+<td align="center" width="12.5%"><b>45,583</b><br/><sub>PyPI&nbsp;downloads</sub></td>
+</tr>
+</table>
+
+<sub>Contributors counts GitHub accounts with commits on <code>main</code>, bots excluded. PyPI downloads are every download since the first upload on 9 April 2026 as counted by pypistats.org, which leaves out mirrors; the pepy badge below counts mirrors too and reads higher.</sub>
+
 ### Release downloads
 
-<sub>GitHub release assets only, does not include <code>pip install</code> from PyPI, <code>docker pull</code> from GHCR, <code>git clone</code>, or direct downloads from <a href="https://openconstructionerp.com/download">openconstructionerp.com</a>.</sub>
+<sub>GitHub release assets only, does not include <code>pip install</code> from PyPI, <code>docker pull</code> from GHCR, <code>git clone</code>, or direct downloads from <a href="https://openconstructionerp.com/download">openconstructionerp.com</a>. GitHub keeps no daily history of asset downloads, so each step is the downloads so far of the releases published that day.</sub>
 
 [![Downloads (pepy · per month)](https://static.pepy.tech/personalized-badge/openconstructionerp?period=month&units=international_system&left_color=grey&right_color=blue&left_text=downloads%20(pepy%20%C2%B7%20per%20month))](https://pepy.tech/project/openconstructionerp)
 
 <a href="https://github.com/datadrivenconstruction/OpenConstructionERP/releases">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://openconstructionerp.com/assets/charts/download-history-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="https://openconstructionerp.com/assets/charts/download-history-light.svg">
-    <img alt="OpenConstructionERP release download history" src="https://openconstructionerp.com/assets/charts/download-history-light.svg" width="720">
+    <source media="(prefers-color-scheme: dark)" srcset="docs/readme-charts/download-history-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="docs/readme-charts/download-history-light.svg">
+    <img alt="OpenConstructionERP release downloads: 11,544 GitHub release asset downloads as of 30 September 2026, accumulated by release date" src="docs/readme-charts/download-history-light.svg" width="720">
   </picture>
 </a>
 
 ### Stars
 
+<sub>Every current stargazer on the day they starred, one step per day, with nothing smoothed or filled in between.</sub>
+
 <a href="https://github.com/datadrivenconstruction/OpenConstructionERP/stargazers">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://openconstructionerp.com/assets/charts/star-history-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="https://openconstructionerp.com/assets/charts/star-history-light.svg">
-    <img alt="OpenConstructionERP star history" src="https://openconstructionerp.com/assets/charts/star-history-light.svg" width="720">
+    <source media="(prefers-color-scheme: dark)" srcset="docs/readme-charts/star-history-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="docs/readme-charts/star-history-light.svg">
+    <img alt="OpenConstructionERP star history: 878 stars as of 30 September 2026, from 2 April 2026" src="docs/readme-charts/star-history-light.svg" width="720">
   </picture>
 </a>
 
