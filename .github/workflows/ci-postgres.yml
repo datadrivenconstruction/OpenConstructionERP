@@ -1188,6 +1188,7 @@ jobs:
           tests/integration/test_schedule_advanced_idor.py
           tests/integration/test_schedule_idor.py
           tests/integration/test_schedule_percent_type_preview.py
+          tests/integration/test_schedule_bim_links_add.py
           tests/integration/test_service_idor.py
           tests/integration/test_snag_warranty_idor.py
           tests/integration/test_subcontractors_idor.py

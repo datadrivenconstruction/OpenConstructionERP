@@ -14,7 +14,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { X, Search, Calendar, Link2, Loader2 } from 'lucide-react';
-import { apiGet, apiPatch, type Page } from '@/shared/lib/api';
+import { apiGet, type Page } from '@/shared/lib/api';
+import { updateActivityBIMLinks } from './api';
 import type { BIMElementData } from '@/shared/ui/BIMViewer';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { useToastStore } from '@/stores/useToastStore';
@@ -129,13 +130,13 @@ export default function LinkActivityToBIMModal({
 
   const linkMut = useMutation({
     mutationFn: async (activity: Activity) => {
-      // Append new element ids to whatever's already there (idempotent set)
-      const existing = new Set(activity.bim_element_ids || []);
-      for (const el of elements) existing.add(el.id);
-      const merged = Array.from(existing);
-      await apiPatch<Activity, { bim_element_ids: string[] }>(
-        `/v1/schedule/activities/${encodeURIComponent(activity.id)}/bim-links/`,
-        { bim_element_ids: merged },
+      // The server merges these ids into the links it has stored. Merging into
+      // this dialog's cached copy and sending the whole list back erased every
+      // link made since the copy was read, by this tab or another.
+      await updateActivityBIMLinks(
+        activity.id,
+        elements.map((el) => el.id),
+        'add',
       );
       return elements.length;
     },
@@ -149,6 +150,7 @@ export default function LinkActivityToBIMModal({
         }),
       });
       qc.invalidateQueries({ queryKey: ['bim-elements'] });
+      qc.invalidateQueries({ queryKey: ['activities-for-bim-link'] });
       onLinked?.();
       onClose();
     },

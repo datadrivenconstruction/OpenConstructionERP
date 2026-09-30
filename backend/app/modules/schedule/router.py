@@ -786,14 +786,14 @@ async def update_activity_bim_links(
     session: SessionDep,
     service: ScheduleService = Depends(_get_service),
 ) -> ActivityResponse:
-    """Replace the full ``bim_element_ids`` array on an activity (4D linking).
+    """Replace the ``bim_element_ids`` array on an activity, or add to it (4D linking).
 
-    The caller supplies the complete desired list; partial add/remove should
-    be handled client-side by reading the current value first.
+    With ``mode: "add"`` the ids are merged into the stored list here, so a
+    client never has to send back a list it read earlier.
     """
     activity = await service.get_activity(activity_id)
     await _verify_schedule_owner(service, session, activity.schedule_id, _user_id, payload)
-    updated = await service.update_bim_links(activity_id, body.bim_element_ids)
+    updated = await service.update_bim_links(activity_id, body.bim_element_ids, add=body.mode == "add")
     return _activity_to_response(updated)
 
 
