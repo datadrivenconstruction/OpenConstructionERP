@@ -100,6 +100,23 @@ _CUSTOMER_NAMES: list[str] = list(_CUSTOMER_CONTACT_EMAILS)
 _CONTRACT_DESCRIPTION = "Planned maintenance and reactive callout cover for the site plant."
 
 
+# (tier, response minutes, resolution minutes) of the seed's SLA definitions.
+_SLA_TIERS: tuple[tuple[str, int, int], ...] = (
+    ("gold", 60, 240),  # 1h response / 4h resolution
+    ("silver", 240, 1440),  # 4h / 24h
+    ("bronze", 480, 4320),  # 8h / 72h
+)
+_CHECKLIST_ASSET_TYPES = 5
+
+
+def _checklist_name(asset_type: str) -> str:
+    return f"{asset_type.title()} routine inspection"
+
+
+def _checklist_description(asset_type: str) -> str:
+    return f"Quarterly PPM checklist for {asset_type}"
+
+
 def _contract_number(idx: int) -> str:
     return f"SC-{idx + 1:02d}"
 
@@ -281,11 +298,7 @@ async def seed_service_demo(
 
     # ── SLA definitions ──────────────────────────────────────────────────
     slas: list[SLADefinition] = []
-    for tier, response, resolution in (
-        ("gold", 60, 240),  # 1h response / 4h resolution
-        ("silver", 240, 1440),  # 4h / 24h
-        ("bronze", 480, 4320),  # 8h / 72h
-    ):
+    for tier, response, resolution in _SLA_TIERS:
         sla = SLADefinition(
             name=tier,
             description=_SLA_TEXT[tier],
@@ -305,10 +318,10 @@ async def seed_service_demo(
 
     # ── Checklists ───────────────────────────────────────────────────────
     checklists: list[AssetInspectionChecklist] = []
-    for at in _ASSET_TYPES[:5]:
+    for at in _ASSET_TYPES[:_CHECKLIST_ASSET_TYPES]:
         cl = AssetInspectionChecklist(
-            name=f"{at.title()} routine inspection",
-            description=f"Quarterly PPM checklist for {at}",
+            name=_checklist_name(at),
+            description=_checklist_description(at),
             asset_type=at,
             items=[
                 {"question": "Visual inspection complete?", "type": "bool", "required": True},
@@ -832,3 +845,68 @@ async def seeded_row_ids(session: AsyncSession, project_ids: list[uuid.UUID]) ->
         ):
             ids.append(r.id)
     return [(ServiceContract, ids, "service_contracts")]
+
+
+async def seeded_global_ids(session: AsyncSession) -> list[tuple[type, list, str]]:
+    """Company-wide rows :func:`seed_service_demo` wrote: SLA tiers, checklists and customers.
+
+    None of them belongs to a project. An SLA tier matches on name, text and
+    both windows, a checklist on name, text and asset type, a customer contact
+    on firm name and address together, as a customer with nobody recorded as
+    its author. The caller decides whether they may go: while a demo project
+    or a person's contract still uses one, it stays.
+
+    Returns:
+        ``(model, ids, label)`` groups; ``label`` names the group in reports.
+    """
+    from app.modules.contacts.models import Contact
+
+    tiers = {(name, _SLA_TEXT[name], response, resolution) for name, response, resolution in _SLA_TIERS}
+    slas = [
+        r.id
+        for r in (
+            await session.execute(
+                select(
+                    SLADefinition.id,
+                    SLADefinition.name,
+                    SLADefinition.description,
+                    SLADefinition.response_time_minutes,
+                    SLADefinition.resolution_time_minutes,
+                )
+            )
+        ).all()
+        if (r.name, r.description, r.response_time_minutes, r.resolution_time_minutes) in tiers
+    ]
+    lists = {(_checklist_name(at), _checklist_description(at), at) for at in _ASSET_TYPES[:_CHECKLIST_ASSET_TYPES]}
+    checklists = [
+        r.id
+        for r in (
+            await session.execute(
+                select(
+                    AssetInspectionChecklist.id,
+                    AssetInspectionChecklist.name,
+                    AssetInspectionChecklist.description,
+                    AssetInspectionChecklist.asset_type,
+                )
+            )
+        ).all()
+        if (r.name, r.description, r.asset_type) in lists
+    ]
+    customers = [
+        r.id
+        for r in (
+            await session.execute(
+                select(Contact.id, Contact.company_name, Contact.primary_email).where(
+                    Contact.contact_type == "customer",
+                    Contact.company_name.in_(_CUSTOMER_NAMES),
+                    Contact.created_by.is_(None),
+                )
+            )
+        ).all()
+        if _CUSTOMER_CONTACT_EMAILS.get(r.company_name) == r.primary_email
+    ]
+    return [
+        (SLADefinition, slas, "service_sla_definitions"),
+        (AssetInspectionChecklist, checklists, "service_checklists"),
+        (Contact, customers, "service_customers"),
+    ]
