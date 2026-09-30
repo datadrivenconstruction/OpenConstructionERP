@@ -82,6 +82,7 @@ FRONTEND_SRC = REPO_ROOT / "frontend" / "src"
 # either has lost a source, not become clean.
 MIN_CALLS = 1000
 MIN_ROUTES = 2500
+MIN_BEARER_ROUTES = 1000
 
 API_PREFIXES = ("/v1/", "/v2/", "/api/v1/", "/api/v2/")
 HELPER_METHODS = {
@@ -93,6 +94,14 @@ HELPER_METHODS = {
 }
 # Callees that send the URL exactly as given, without request()'s "/api".
 RAW_URL_CALLEES = frozenset({"fetch", "downloadWithAuth", "window.open", "EventSource", "WebSocket", "href", "src"})
+# Of those, the ones the browser requests on its own: no code runs to add an
+# Authorization header, so a route that reads only the bearer header answers
+# 401 to every user. Verdict AUTH.
+NAVIGATION_CALLEES = frozenset({"href", "src", "window.open", "EventSource"})
+# Literals checked only as a prefix of some route, because nothing shows which
+# call sends them (a builder's return, a const handed to another module). A
+# ratchet, not a target: lower it when the count drops, never raise it to pass.
+MAX_PREFIX_ONLY = 228
 
 # Known unmatched calls that are right as they are. Key format:
 #   "<VERDICT> <METHOD|*> <path as written> @ <file under frontend/src>"
@@ -114,6 +123,7 @@ class Call:
     method: str | None
     callee: str | None
     parts: list[tuple[str, str]]
+    concat: bool = False
     verdict: str = "OK"
     closest: list[str] = field(default_factory=list)
     as_prefix: bool = False
@@ -180,8 +190,8 @@ def _scan_template(text: str, j: int) -> tuple[int, list[tuple[str, str]]]:
     return j, parts
 
 
-def scan_literals(text: str):
-    """Yield ``(start, parts)`` for every string and template literal outside comments.
+def scan_literal_spans(text: str):
+    """Yield ``(start, end, parts)`` for every string and template literal outside comments.
 
     Regex literals are not recognised, which is safe for what is looked for
     here: a regex body that happened to contain a quote could only shift where
@@ -196,12 +206,18 @@ def scan_literals(text: str):
         tok = m.group(0)
         if tok == "`":
             end, parts = _scan_template(text, m.end())
-            yield m.start(), parts
+            yield m.start(), end, parts
             pos = end
             continue
         if tok[0] in "'\"":
-            yield m.start(), [("lit", tok[1:-1])]
+            yield m.start(), m.end(), [("lit", tok[1:-1])]
         pos = m.end()
+
+
+def scan_literals(text: str):
+    """Yield ``(start, parts)`` for every string and template literal outside comments."""
+    for start, _end, parts in scan_literal_spans(text):
+        yield start, parts
 
 
 # Comments, single-line quoted strings, or the opening backtick of a template.
@@ -210,7 +226,6 @@ _TOKEN_RE = re.compile(r"//[^\n]*|/\*.*?(?:\*/|\Z)|'(?:\\.|[^'\\\n])*'?|\"(?:\\.
 
 
 _CONST_RE = re.compile(r"\bconst\s+([A-Za-z_$][\w$]*)\s*(?::\s*string\s*)?=\s*(['\"`])")
-_METHOD_RE = re.compile(r"\b(apiGet|apiPost|apiPatch|apiPut|apiDelete)\s*(?:<[^()]*?>)?\s*\(\s*$")
 # A leading substitution that is probably an API base imported from elsewhere.
 _BASE_NAME_RE = re.compile(r"(?i)(base|prefix|api|root|url)")
 _STRING_OPS = frozenset(
@@ -218,7 +233,71 @@ _STRING_OPS = frozenset(
 )
 # A URL written into a JSX attribute is fetched by the browser as written.
 _ATTR_RE = re.compile(r"\b(href|src)\s*=\s*\{?\s*$")
-_CALLEE_RE = re.compile(r"(?:new\s+)?([A-Za-z_$][\w$.]*)\s*(?:<[^()]*?>)?\s*\(\s*$")
+_IDENT_TAIL_RE = re.compile(r"(?:new\s+)?([A-Za-z_$][\w$.]*)\s*$")
+# ``const url = `...``` or ``let url: string = '...'`` right before a literal.
+_ASSIGN_RE = re.compile(r"\b(?:const|let)\s+([A-Za-z_$][\w$]*)\s*(?::[^=;\n]+)?=\s*$")
+_CLOSERS = {")": "(", "]": "[", "}": "{"}
+# A declaration at column 0 starts the next top-level function or constant.
+_TOP_LEVEL_DECL = re.compile(r"\n(?:export\s+)?(?:default\s+)?(?:async\s+)?(?:function|const|let|class)\b")
+
+
+def _callee_at(text: str, paren: int) -> str | None:
+    """The callee whose argument list opens at ``text[paren] == '('``.
+
+    Steps back over a type argument list of any length, ``apiDelete<{ cb: () =>
+    void }>(``, which a regex with a bounded window and no nesting could not.
+    """
+    j = paren - 1
+    while j >= 0 and text[j].isspace():
+        j -= 1
+    if j >= 0 and text[j] == ">" and not (j and text[j - 1] == "="):
+        depth = 0
+        while j >= 0:
+            c = text[j]
+            if c == ">" and not (j and text[j - 1] == "="):
+                depth += 1
+            elif c == "<":
+                depth -= 1
+                if depth == 0:
+                    j -= 1
+                    break
+            j -= 1
+        else:
+            return None
+    m = _IDENT_TAIL_RE.search(text, max(0, j - 200), j + 1)
+    return m.group(1) if m else None
+
+
+def _enclosing_call(text: str, start: int) -> str | None:
+    """The callee a literal at ``start`` is the first argument of, or None.
+
+    A literal counts as the first argument when nothing but a ternary head sits
+    between it and the open paren: ``apiGet(flag ? `/a/` : `/b`)`` hands either
+    branch to ``apiGet``. A comma, a semicolon or a brace at the top level first
+    means the literal is not that argument, and the scan gives up.
+    """
+    depth: list[str] = []
+    j = start - 1
+    lowest = max(0, start - 2000)
+    while j >= lowest:
+        c = text[j]
+        if c in _CLOSERS:
+            depth.append(_CLOSERS[c])
+        elif c in "([{":
+            if depth:
+                if depth.pop() != c:
+                    return None
+            elif c == "(":
+                between = text[j + 1 : start]
+                if between.strip() and "?" not in between:
+                    return None
+                return _callee_at(text, j)
+            else:
+                return None
+        elif not depth and c in ",;":
+            return None
+        j -= 1
+    return None
 
 
 _MAY_HOLD_API_RE = re.compile(r"/v[12]/|/api/|\bapi(?:Get|Post|Patch|Put|Delete)\b")
@@ -291,7 +370,7 @@ def extract_calls(text: str, rel: str) -> tuple[list[Call], int]:
     funcs = _url_functions(text)
     calls: list[Call] = []
     unresolved = 0
-    for start, parts in scan_literals(text):
+    for start, end, parts in scan_literal_spans(text):
         if not parts:
             continue
         if parts[0][0] == "sub":
@@ -314,30 +393,62 @@ def extract_calls(text: str, rel: str) -> tuple[list[Call], int]:
             else:
                 merged.append((k, v))
         before = text[max(0, start - 160) : start]
-        m = _METHOD_RE.search(before)
+        attr = _ATTR_RE.search(before)
+        callee = attr.group(1) if attr else _enclosing_call(text, start)
         head = merged[0][1]
         # A versioned path anywhere, an unversioned one under /api/ (/api/system/status),
         # or any path handed to a request helper, which puts /api in front of it.
         if not (
             head.startswith(API_PREFIXES)
             or (head.startswith("/api/") and len(head) > len("/api/"))
-            or (m and len(head) > 1 and head != "/api")
+            or (callee in HELPER_METHODS and len(head) > 1 and head != "/api")
         ):
             continue
-        cm = _ATTR_RE.search(before) or _CALLEE_RE.search(before)
-        if cm and cm.group(1).rsplit(".", 1)[-1] in _STRING_OPS:
+        if callee and callee.rsplit(".", 1)[-1] in _STRING_OPS:
             # url.includes('/api/v1/geo-hub/') tests a URL, it does not request one.
             continue
-        calls.append(
-            Call(
-                file=rel,
-                line=text.count("\n", 0, start) + 1,
-                method=HELPER_METHODS[m.group(1)] if m else None,
-                callee=cm.group(1) if cm else None,
-                parts=merged,
+        # ``'/v1/x/' + id + '/'`` is a base with a tail added at run time.
+        concat = text[end : end + 40].lstrip().startswith("+")
+        line = text.count("\n", 0, start) + 1
+        users = [] if callee else _variable_users(text, start, end)
+        for user in users or [callee]:
+            calls.append(
+                Call(
+                    file=rel,
+                    line=line,
+                    method=HELPER_METHODS.get(user) if user else None,
+                    callee=user,
+                    parts=merged,
+                    concat=concat,
+                )
             )
-        )
     return calls, unresolved
+
+
+def _variable_users(text: str, start: int, end: int) -> list[str]:
+    """The callees a literal stored in a local variable is handed to.
+
+    ``const url = `/v1/x/${id}/`; return apiGet(url);`` requests the literal as
+    surely as ``apiGet(`/v1/x/${id}/`)`` does, so it is checked the same way.
+    The search runs from the literal to the next declaration of the same name
+    or the next top-level declaration, whichever comes first, so two functions
+    that both call their URL ``url`` do not borrow each other's method.
+    """
+    m = _ASSIGN_RE.search(text, max(0, start - 200), start)
+    if not m:
+        return []
+    name = m.group(1)
+    redecl = re.compile(rf"\b(?:const|let|var)\s+{re.escape(name)}\b|{_TOP_LEVEL_DECL.pattern}")
+    stop_m = redecl.search(text, end)
+    stop = stop_m.start() if stop_m else len(text)
+    users = []
+    for use in re.finditer(rf"\(\s*{re.escape(name)}\s*[,)]", text[:stop]):
+        if use.start() < end:
+            continue
+        callee = _callee_at(text, use.start())
+        if callee and callee.rsplit(".", 1)[-1] not in _STRING_OPS:
+            users.append(callee)
+    return users
 
 
 def frontend_files() -> list[Path]:
@@ -446,10 +557,37 @@ def collect_backend_routes() -> list[tuple[str, frozenset[str]]]:
         app.include_router(getattr(importlib.import_module(module), attr), prefix=prefix)
 
     routes = []
+    bearer = set()
     for path, route in served_routes(app):
         methods = getattr(route, "methods", None) or {"WS"}
         routes.append((path, frozenset(methods)))
-    return routes
+        if _reads_only_the_bearer_header(route):
+            bearer.add(path)
+    return routes, frozenset(bearer)
+
+
+def _reads_only_the_bearer_header(route: object) -> bool:
+    """True when the route refuses a request that carries no Authorization header.
+
+    That is any route whose dependency tree reaches ``get_current_user_payload``
+    (401 "Not authenticated" when the header is absent), unless it also takes a
+    ``token`` query parameter, the one fallback a link can carry.
+    """
+    dependant = getattr(route, "dependant", None)
+    if dependant is None:
+        return False
+    stack, seen, required, token_query = [dependant], set(), False, False
+    while stack:
+        dep = stack.pop()
+        if id(dep) in seen:
+            continue
+        seen.add(id(dep))
+        if getattr(dep.call, "__name__", "") == "get_current_user_payload":
+            required = True
+        if any(p.name in ("token", "access_token") for p in dep.query_params):
+            token_query = True
+        stack.extend(dep.dependencies)
+    return required and not token_query
 
 
 # Stands for one template substitution inside a sample URL.
@@ -478,9 +616,11 @@ def _hole_regex(seg: str) -> re.Pattern[str]:
 class RouteTable:
     """Segment trie over route templates, so each lookup is a walk rather than a scan."""
 
-    def __init__(self, routes: list[tuple[str, frozenset[str]]]) -> None:
+    def __init__(self, routes: list[tuple[str, frozenset[str]]], bearer: frozenset[str] = frozenset()) -> None:
         self.root: dict = {}
         self.count = len(routes)
+        # Templates that answer 401 without an Authorization header.
+        self.bearer = bearer
         for path, methods in routes:
             node = self.root
             for seg in path.split("/")[1:]:
@@ -563,7 +703,8 @@ class RouteTable:
 
 # A closing substitution that builds a query string: ``${qs}``, ``${typesQs}``,
 # ``${query ? `?${query}` : ''}``, ``${params.toString()}``.
-_QUERY_EXPR_RE = re.compile(r"['\"`]\?|\b\w*(?:qs|Qs|QS)\b|[Qq]uery|toString\(\)|URLSearchParams")
+# Whole identifiers only: ``${queryId}`` and ``${subqueryType}`` are path segments.
+_QUERY_EXPR_RE = re.compile(r"['\"`]\?|\b\w*(?:qs|Qs|QS)\b|\b\w*[Qq]uery\b|toString\(\)|URLSearchParams")
 
 
 def _samples(parts: list[tuple[str, str]]) -> tuple[list[str], bool]:
@@ -591,9 +732,11 @@ def _samples(parts: list[tuple[str, str]]) -> tuple[list[str], bool]:
         if nxt == "" and prev and (prev[-1].isalnum() or prev[-1] in "-_"):
             open_tail = True
             break
-        # ``${qs}${typesQs}``: a substitution followed by another one may be empty too.
-        may_be_empty = nxt_kind == "sub" or nxt == "" or nxt[:1] in "?&"
         hole = HOLE_ID if _ID_EXPR_RE.search(value) else HOLE
+        # ``${qs}${typesQs}``: a substitution followed by another one may be empty
+        # too. An id never is: ``/x/${id}`` read as possibly ``/x/`` would let the
+        # list route answer for a missing or misspelt item route.
+        may_be_empty = hole == HOLE and (nxt_kind == "sub" or nxt == "" or nxt[:1] in "?&")
         samples = [s + hole for s in samples] + (list(samples) if may_be_empty else [])
         samples = samples[:64]
     return ["/api" + s.split("?", 1)[0].split("#", 1)[0] for s in samples], open_tail
@@ -608,7 +751,7 @@ def classify(call: Call, table: RouteTable) -> None:
     some route, and the calls that extend it are checked where they are made.
     """
     samples, open_tail = _samples(call.parts)
-    as_prefix = open_tail or call.callee is None
+    as_prefix = open_tail or call.concat or call.callee is None
     call.as_prefix = as_prefix
     method = None if as_prefix else call.method
 
@@ -638,6 +781,12 @@ def classify(call: Call, table: RouteTable) -> None:
         call.verdict = "PREFIX"
         call.closest = sorted(hits)[:3]
         return
+    served = serving(hits)
+    if call.callee in NAVIGATION_CALLEES and all(p in table.bearer for p in served):
+        # The browser opens these itself and sends no Authorization header.
+        call.verdict = "AUTH"
+        call.closest = sorted(served)[:3]
+        return
     call.verdict = "OK"
 
 
@@ -655,14 +804,19 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.routes:
-        routes = [(r["path"], frozenset(r["methods"])) for r in json.loads(args.routes.read_text())["routes"]]
+        dumped = json.loads(args.routes.read_text())["routes"]
+        routes = [(r["path"], frozenset(r["methods"])) for r in dumped]
+        bearer = frozenset(r["path"] for r in dumped if r.get("bearer"))
     else:
-        routes = collect_backend_routes()
+        routes, bearer = collect_backend_routes()
     if args.dump_routes:
         args.dump_routes.write_text(
-            json.dumps({"routes": [{"path": p, "methods": sorted(m)} for p, m in routes]}, indent=0)
+            json.dumps(
+                {"routes": [{"path": p, "methods": sorted(m), "bearer": p in bearer} for p, m in routes]},
+                indent=0,
+            )
         )
-    table = RouteTable(routes)
+    table = RouteTable(routes, bearer)
 
     calls: list[Call] = []
     unresolved = 0
@@ -689,7 +843,11 @@ def main(argv: list[str] | None = None) -> int:
     # a prefix of some route, so a missing slash in one of them passes here and
     # is caught where the call extends it. Printed so the green line does not
     # claim more than it read.
-    print(f"checked as a prefix only (not handed straight to a call): {sum(c.as_prefix for c in calls)}")
+    prefix_only = sum(c.as_prefix for c in calls)
+    print(
+        f"checked as a prefix only (not handed straight to a call): {prefix_only} "
+        f"(ratchet {MAX_PREFIX_ONLY}); routes that need the bearer header: {len(bearer)}"
+    )
 
     if args.json:
         args.json.write_text(
@@ -715,6 +873,17 @@ def main(argv: list[str] | None = None) -> int:
     if table.count < MIN_ROUTES or len(calls) < MIN_CALLS:
         print(
             f"FAIL: population below the floor (routes {table.count} < {MIN_ROUTES} or calls {len(calls)} < {MIN_CALLS})"
+        )
+        failed = True
+    if not args.routes and len(bearer) < MIN_BEARER_ROUTES:
+        # Nearly every route reads the bearer header; a count near zero means the
+        # dependency walk stopped finding it and AUTH went quiet with it.
+        print(f"FAIL: only {len(bearer)} routes read as needing the bearer header (< {MIN_BEARER_ROUTES})")
+        failed = True
+    if prefix_only > MAX_PREFIX_ONLY:
+        print(
+            f"FAIL: {prefix_only} literals are checked only as a prefix, above the ratchet of {MAX_PREFIX_ONLY}. "
+            "Hand the new ones straight to their call, or say why they cannot be."
         )
         failed = True
     if new:
