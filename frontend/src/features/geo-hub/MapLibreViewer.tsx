@@ -166,10 +166,10 @@ export function MapLibreViewer({
   const mapRef = useRef<MapRef>(null);
   const rafRef = useRef<number | null>(null);
   const meta = basemapMeta(basemap);
-  // Tile-backed basemaps follow the app theme (the dark street style in
-  // dark mode); the drawn offline canvases keep their own fixed colours.
+  // The streets basemap follows the app theme (the dark street style in
+  // dark mode); minimal and the drawn offline canvases keep their colours.
   const theme = useThemeStore((s) => s.resolved);
-  const darkStreets = theme === 'dark' && !meta.offline;
+  const darkStreets = theme === 'dark' && basemap === 'streets';
 
   const projects = pins?.projects ?? [];
   const isProject = mode === 'project';

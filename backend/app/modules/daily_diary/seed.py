@@ -8,8 +8,9 @@ Usage::
     await seed_daily_diary_demo(session, project_ids=[uuid1, uuid2, uuid3])
 
 Designed for the demo / QA dataset: produces 90 days of diaries per
-project with realistic weather, entries, photos, videos, drone surveys
-and reality-capture datasets.
+project with realistic weather, entries, photos (drawn from the project's
+real site photos), drone surveys and reality-capture datasets. No videos:
+there is no bundled footage to point them at.
 """
 
 from __future__ import annotations
@@ -418,7 +419,7 @@ async def repair_seeded_diary_media(
     keep a thousand photos aimed at a host that does not exist. This runs on
     every boot and touches only rows whose URL starts with
     ``_PLACEHOLDER_MEDIA_PREFIX``, so once they are repaired it finds nothing
-    and costs one indexed query per table.
+    and changes nothing; the cost is one project-scoped scan per table.
 
     Photos are re-pointed at the project's real site photos, the same pool the
     seeder now draws from; a project without site photos loses the
