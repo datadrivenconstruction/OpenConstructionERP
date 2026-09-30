@@ -29519,6 +29519,7 @@ const resource = {
     "geo_hub.hud.north": "الشمال",
     "geo_hub.hud.scale": "SCALE",
     "geo_hub.licenses_footer": "لا توجد قفل بائع. استضفت المكدس بالكامل بنفسك. لا يتم استخدام Cesium Ion ومزودي الصور التجارية عن قصد.",
+    "geo_hub.licenses_globe_streets": "صور الشوارع الأساسية على الكرة الأرضية",
     "geo_hub.licenses_heading": "البيانات المفتوحة والمصدر المفتوح",
     "geo_hub.licenses_pill": "بيانات مفتوحة",
     "geo_hub.licenses_title": "مكدس البيانات المفتوحة: انقر لعرض التراخيص",

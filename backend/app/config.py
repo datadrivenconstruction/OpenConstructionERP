@@ -397,6 +397,20 @@ class Settings(BaseSettings):
     # The browser never talks to it, so no CSP change is needed.
     # Env: ``OE_BASEMAP_UPSTREAM`` / ``BASEMAP_UPSTREAM``.
     basemap_upstream: str = ""
+    # Raster street tiles for the 3D globe. The globe can only draw raster
+    # XYZ imagery, and no keyless public raster street service permits app
+    # use, so by default it shows public-domain shaded relief. An operator
+    # with a raster tile server of their own (or a licensed provider) sets
+    # an XYZ template here, e.g. ``https://tiles.example.internal/{z}/{x}/{y}.png``,
+    # and the credit the provider requires. Both are needed: a template
+    # without an attribution is ignored, because a map must not ship
+    # uncredited. Tiles are proxied through ``/api/v1/geo-hub/globe-streets/``,
+    # so the browser never contacts the tile server and no CSP change is needed.
+    # Env: ``OE_GLOBE_STREET_TILES_URL``, ``OE_GLOBE_STREET_TILES_ATTRIBUTION``,
+    # ``OE_GLOBE_STREET_TILES_MAX_ZOOM``.
+    globe_street_tiles_url: str = ""
+    globe_street_tiles_attribution: str = ""
+    globe_street_tiles_max_zoom: int = 19
 
     # ── Point Cloud ingest ───────────────────────────────────────────────
     # Reality-capture scans are 5-200 GB. They are uploaded

@@ -849,6 +849,30 @@ class MapSummaryResponse(BaseModel):
     total_features: int = 0
 
 
+class GlobeStreetsSource(BaseModel):
+    """Raster street imagery the operator configured for the 3D globe."""
+
+    model_config = ConfigDict()
+
+    # Same-origin XYZ template; the backend proxies the operator's server.
+    tile_url: str
+    # The credit the tile provider requires, shown on the globe.
+    attribution: str
+    max_zoom: int
+
+
+class GlobeImageryResponse(BaseModel):
+    """What the 3D globe draws under the pins.
+
+    ``streets`` is ``None`` when no raster street source is configured, and
+    the globe then shows the built-in public-domain shaded relief.
+    """
+
+    model_config = ConfigDict()
+
+    streets: GlobeStreetsSource | None = None
+
+
 __all__ = [
     "AnchorFromAddressRequest",
     "AnchorFromAddressResponse",
@@ -871,6 +895,8 @@ __all__ = [
     "GeocodeCacheStatsResponse",
     "GeocodeSuggestResponse",
     "GeocodeSuggestionResponse",
+    "GlobeImageryResponse",
+    "GlobeStreetsSource",
     "RasterOverlayUploadResponse",
     "HSEPinResponse",
     "ImageryLayerCreate",

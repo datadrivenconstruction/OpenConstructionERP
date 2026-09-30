@@ -29324,6 +29324,7 @@ const resource = {
     "geo_hub.hud.north": "Sever",
     "geo_hub.hud.scale": "MĚŘÍTKO",
     "geo_hub.licenses_footer": "Bez uzamčení dodavatele. Hostujte celý zásobník sami. Cesium Ion + komerční poskytovatelé snímků se záměrně nepoužívají.",
+    "geo_hub.licenses_globe_streets": "základní obraz ulic na glóbu",
     "geo_hub.licenses_heading": "Otevřená data a open source",
     "geo_hub.licenses_pill": "Otevřená data",
     "geo_hub.licenses_title": "Zásobník otevřených dat: klikněte pro zobrazení licencí",

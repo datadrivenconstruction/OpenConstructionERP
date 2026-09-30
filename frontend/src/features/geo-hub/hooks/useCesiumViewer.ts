@@ -10,7 +10,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-import { PROXY_TILE_URL, RELIEF_ATTRIBUTION, RELIEF_MAX_ZOOM } from '@/shared/ui/ProjectMap/basemap';
+import { fetchGlobeImagery } from '@/shared/ui/ProjectMap/basemap';
 
 import type { MapConfig } from '../types';
 
@@ -47,6 +47,7 @@ export function useCesiumViewer(_mapConfig?: MapConfig) {
 
     (async () => {
       let cesium: CesiumLike | null = null;
+      const imageryPromise = fetchGlobeImagery();
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         cesium = (await import('cesium')) as any;
@@ -58,6 +59,8 @@ export function useCesiumViewer(_mapConfig?: MapConfig) {
         setStatus(cesium ? 'pending' : 'absent');
         return;
       }
+      const imagery = await imageryPromise;
+      if (disposed || !ref.current) return;
       try {
         viewer = new cesium.Viewer(ref.current, {
           terrainProvider: new cesium.EllipsoidTerrainProvider(),
@@ -66,17 +69,17 @@ export function useCesiumViewer(_mapConfig?: MapConfig) {
           // which silently 401s without a token. We must not hit the raw
           // OpenStreetMap servers (their policy forbids app use), and a
           // direct tile CDN is routinely blocked by browser ad/privacy
-          // blockers. The backend draws these PNGs from the OpenFreeMap
-          // vector tiles the 2D maps stream, so the globe works in any
-          // browser with no vendor lock-in and no second upstream.
+          // blockers. The imagery is public-domain shaded relief, or the
+          // raster street tiles an operator configured with
+          // OE_GLOBE_STREET_TILES_URL (see ``fetchGlobeImagery``).
           baseLayer: new cesium.ImageryLayer(
             new cesium.UrlTemplateImageryProvider({
-              url: PROXY_TILE_URL,
-              credit: RELIEF_ATTRIBUTION,
-              // The relief source has nothing deeper. Asking past it
-              // returns a blank tile, so let Cesium stretch the last
-              // real level instead of tiling holes over the site.
-              maximumLevel: RELIEF_MAX_ZOOM,
+              url: imagery.url,
+              credit: imagery.credit,
+              // The source has nothing deeper. Asking past it returns a
+              // blank tile, so let Cesium stretch the last real level
+              // instead of tiling holes over the site.
+              maximumLevel: imagery.maxZoom,
             }),
           ),
           baseLayerPicker: false,

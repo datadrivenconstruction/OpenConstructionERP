@@ -28409,6 +28409,7 @@ const resource = {
     "geo_hub.hud.north": "Хойд",
     "geo_hub.hud.scale": "ХЭМЖЭЭ",
     "geo_hub.licenses_footer": "Үйлчилгээлүүлэгч түгжүүлэлт байхгүй. Бүхэл стекийг өөрөө байруулна. Cesium Ion ба худалдаагийн дүрслэх үйлчилгээлүүд зориулаа ашигладаггүй.",
+    "geo_hub.licenses_globe_streets": "дэлхийн бөмбөрцөг дээрх гудамжны суурь зураг",
     "geo_hub.licenses_heading": "Нээлттэй мэдээлэл ба Нээлттэй эх сурвалж",
     "geo_hub.licenses_pill": "Нээлттэй мэдээлэл",
     "geo_hub.licenses_title": "Нээлттэй мэдээлэл стек: лицензийг үзэхийн тулд товших",

@@ -29319,6 +29319,7 @@ const resource = {
     "geo_hub.hud.north": "Nord",
     "geo_hub.hud.scale": "SCALA",
     "geo_hub.licenses_footer": "Nessun blocco del fornitore. Ospita autonomamente l'intero stack. Cesium Ion + provider di immagini commerciali non vengono utilizzati intenzionalmente.",
+    "geo_hub.licenses_globe_streets": "immagine di base delle strade sul globo",
     "geo_hub.licenses_heading": "Dati aperti e codice sorgente aperto",
     "geo_hub.licenses_pill": "Dati aperti",
     "geo_hub.licenses_title": "Stack di dati aperti: fai clic per visualizzare le licenze",

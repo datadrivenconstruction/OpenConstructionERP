@@ -31,7 +31,7 @@ import {
   pinTooltipLabel,
   type PinCluster,
 } from './projectPinUtils';
-import { PROXY_TILE_URL, RELIEF_ATTRIBUTION, RELIEF_MAX_ZOOM } from '@/shared/ui/ProjectMap/basemap';
+import { fetchGlobeImagery, type GlobeImagery } from '@/shared/ui/ProjectMap/basemap';
 
 import { geoAuthHeaders, tilesetArtifactUrl } from './api';
 import type { AnchoredProject, GeoPinBundle, MapConfig } from './types';
@@ -662,6 +662,9 @@ export function CesiumViewer({
   // status back to 'pending' first so the loading spinner replaces the
   // error card while the retry is in flight.
   const [reloadKey, setReloadKey] = useState<number>(0);
+  // Raster street tiles the operator configured, or null while unknown /
+  // when the globe shows the built-in relief. Drives the extra credit line.
+  const [globeImagery, setGlobeImagery] = useState<GlobeImagery | null>(null);
   const retryViewer = useCallback(() => {
     setCesiumStatus('pending');
     setReloadKey((k) => k + 1);
@@ -687,7 +690,10 @@ export function CesiumViewer({
     let lastMouseEmitWasNull = false;
 
     (async () => {
-      const cesium = await loadCesium();
+      // The imagery answer is fetched alongside the runtime so it adds no
+      // wait of its own; it never throws and falls back to relief.
+      const [cesium, imagery] = await Promise.all([loadCesium(), fetchGlobeImagery()]);
+      if (!disposed) setGlobeImagery(imagery);
       if (!cesium || disposed) {
         setCesiumStatus(cesium ? 'loaded' : 'absent');
         return;
@@ -704,9 +710,11 @@ export function CesiumViewer({
         // the map-config bundle for them.
         //
         // Base imagery: public-domain Natural Earth shaded relief, proxied
-        // by our own backend, via UrlTemplateImageryProvider. Not streets:
-        // every keyless raster street basemap has stopped being keyless,
-        // and the globe cannot read vector tiles.
+        // by our own backend, via UrlTemplateImageryProvider. Not streets
+        // by default: every keyless raster street basemap has stopped being
+        // keyless, and the globe cannot read vector tiles. An operator with
+        // a raster street server sets OE_GLOBE_STREET_TILES_URL and its
+        // attribution, and ``fetchGlobeImagery`` hands back that source.
         // Cesium >= 1.107 falls back to Ion-backed Bing Maps when
         // ``imageryProvider`` is unset, which silently 401s without an ion
         // token. The raw OpenStreetMap tile servers are not an option
@@ -742,18 +750,19 @@ export function CesiumViewer({
           // Tiles come from our own same-origin backend, not a public CDN.
           // A direct tile-host URL is routinely blocked by browser ad and
           // privacy blockers (shows up as a blank blue globe), and the raw
-          // OSM servers refuse app use outright. Above the vector source's
-          // Shaded relief, not streets: no keyless raster street basemap
-          // survives, and the globe cannot read the vector tiles the 2D
-          // maps use. Terrain under the pins beats a watermarked tile.
+          // OSM servers refuse app use outright. Shaded relief unless the
+          // operator configured raster street tiles: no keyless raster
+          // street basemap survives, and the globe cannot read the vector
+          // tiles the 2D maps use. Terrain under the pins beats a
+          // watermarked tile.
           baseLayer: new cesium.ImageryLayer(
             new cesium.UrlTemplateImageryProvider({
-              url: PROXY_TILE_URL,
-              credit: RELIEF_ATTRIBUTION,
-              // The relief source has nothing deeper. Asking past it
-              // returns a blank tile, so let Cesium stretch the last
-              // real level instead of tiling holes over the site.
-              maximumLevel: RELIEF_MAX_ZOOM,
+              url: imagery.url,
+              credit: imagery.credit,
+              // The source has nothing deeper. Asking past it returns a
+              // blank tile, so let Cesium stretch the last real level
+              // instead of tiling holes over the site.
+              maximumLevel: imagery.maxZoom,
             }),
           ),
           baseLayerPicker: false,
@@ -2148,6 +2157,16 @@ export function CesiumViewer({
               </a>{' '}
               <span className="text-slate-400">public domain · shaded relief base imagery</span>
             </li>
+            {globeImagery?.streets && (
+              <li data-testid="geo-hub-globe-streets-credit">
+                <span className="text-sky-300">{globeImagery.credit}</span>{' '}
+                <span className="text-slate-400">
+                  {t('geo_hub.licenses_globe_streets', {
+                    defaultValue: 'street base imagery on the globe',
+                  })}
+                </span>
+              </li>
+            )}
             <li>
               <a
                 href="https://nominatim.org/release-docs/latest/api/Search/"

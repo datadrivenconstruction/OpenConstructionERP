@@ -29623,6 +29623,7 @@ const resource = {
     "geo_hub.hud.north": "Północ",
     "geo_hub.hud.scale": "SKALA",
     "geo_hub.licenses_footer": "Brak blokady dostawcy. Samodzielnie hostuj cały stos. Cesium Ion + komercyjni dostawcy obrazów są celowo nie używani.",
+    "geo_hub.licenses_globe_streets": "podkładowe zdjęcia ulic na globusie",
     "geo_hub.licenses_heading": "Otwarte dane i otwarte źródło",
     "geo_hub.licenses_pill": "Otwarte dane",
     "geo_hub.licenses_title": "Stos danych otwartych: kliknij, aby wyświetlić licencje",

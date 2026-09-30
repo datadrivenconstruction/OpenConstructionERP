@@ -29078,6 +29078,7 @@ const resource = {
     "geo_hub.hud.north": "Bắc",
     "geo_hub.hud.scale": "TỶNH LỆ",
     "geo_hub.licenses_footer": "Không có nhà cung cấp khóa. Tự lưu trữ toàn bộ ngăn xếp. Cesium Ion + các nhà cung cấp hình ảnh thương mại không được sử dụng có ý định.",
+    "geo_hub.licenses_globe_streets": "hình ảnh nền đường phố trên quả địa cầu",
     "geo_hub.licenses_heading": "Dữ liệu mở & Mã nguồn mở",
     "geo_hub.licenses_pill": "Dữ liệu mở",
     "geo_hub.licenses_title": "Ngăn xếp dữ liệu mở: nhấp để xem giấy phép",

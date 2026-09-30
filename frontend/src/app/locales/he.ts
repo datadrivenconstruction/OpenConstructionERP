@@ -28499,6 +28499,7 @@ const resource = {
     "geo_hub.hud.north": "צפון",
     "geo_hub.hud.scale": "קנה מידה",
     "geo_hub.licenses_footer": "ללא נעילת ספק. אירוח עצמי של כל המחסנית. Cesium Ion וספקי דימות מסחריים אינם בשימוש בכוונה תחילה.",
+    "geo_hub.licenses_globe_streets": "תמונת בסיס של רחובות על הכדור",
     "geo_hub.licenses_heading": "נתונים פתוחים וקוד פתוח",
     "geo_hub.licenses_pill": "נתונים פתוחים",
     "geo_hub.licenses_title": "מחסנית נתונים פתוחה: לחצו לצפייה ברישיונות",

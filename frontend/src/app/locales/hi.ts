@@ -28853,6 +28853,7 @@ const resource = {
     "geo_hub.hud.north": "उत्तर",
     "geo_hub.hud.scale": "SCALE",
     "geo_hub.licenses_footer": "कोई विक्रेता लॉक-इन नहीं। पूरे स्टैक को स्वयं-होस्ट करें। Cesium Ion + वाणिज्यिक इमेजरी प्रदाता जानबूझकर उपयोग नहीं किए जाते हैं।",
+    "geo_hub.licenses_globe_streets": "ग्लोब पर सड़कों की आधार इमेजरी",
     "geo_hub.licenses_heading": "खुला डेटा और ओपन स्रोत",
     "geo_hub.licenses_pill": "खुला डेटा",
     "geo_hub.licenses_title": "खुला-डेटा स्टैक: लाइसेंस देखने के लिए क्लिक करें",

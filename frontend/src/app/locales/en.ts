@@ -26793,6 +26793,7 @@ const resource = {
     "geo_hub.licenses_pill": "Open Data",
     "geo_hub.licenses_heading": "Open Data & Open Source",
     "geo_hub.licenses_footer": "No vendor lock-in. Self-host the entire stack. Cesium Ion + commercial imagery providers are intentionally not used.",
+    "geo_hub.licenses_globe_streets": "street base imagery on the globe",
     "geo_hub.cesium_loading_hint": "Streaming the 3D globe runtime (~3 MB).",
     "geo_hub.cesium_not_installed_title": "CesiumJS is not installed",
     "geo_hub.cesium_init_failed_title": "Could not start the 3D globe",
