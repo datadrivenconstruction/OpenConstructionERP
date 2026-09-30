@@ -55,6 +55,16 @@ _PHOTOS_TOTAL = 1000
 _DRONE_SURVEYS = 6
 _REALITY_CAPTURES = 2
 
+# What the seed writes on rows that carry no seed mark of their own. The
+# cleanup of real projects (``seeded_child_ids``) recognises the rows by these,
+# so they are read from here by both sides rather than written twice.
+_SUNRISE = "06:30:00"
+_SUNSET = "20:15:00"
+_DRONE_NOTE = "Seed drone survey"
+_DRONE_URL = "https://seed.local/drone/"
+_REALITY_NOTE = "Seed reality capture"
+_REALITY_URL = "https://seed.local/reality/"
+
 # Realistic-ish lat/lng centres (Berlin, Frankfurt, Munich)
 _DEFAULT_CENTRES: tuple[tuple[float, float], ...] = (
     (52.5200, 13.4050),
@@ -239,8 +249,8 @@ async def seed_daily_diary_demo(
                         precipitation_mm=Decimal(str(round(rng.uniform(0, 25), 2))),
                         conditions_code=conditions[0],
                         conditions_text=conditions[1],
-                        sunrise="06:30:00",
-                        sunset="20:15:00",
+                        sunrise=_SUNRISE,
+                        sunset=_SUNSET,
                         location_lat=lat0,
                         location_lng=lng0,
                     )
@@ -359,7 +369,7 @@ async def seed_daily_diary_demo(
                     point_cloud_url=None,
                     elevation_min_m=Decimal(str(round(rng.uniform(0, 50), 2))),
                     elevation_max_m=Decimal(str(round(rng.uniform(50, 150), 2))),
-                    notes="Seed drone survey",
+                    notes=_DRONE_NOTE,
                 )
             )
         for r in range(reality_pool_remaining // max(len(project_ids), 1) + 1):
@@ -369,12 +379,12 @@ async def seed_daily_diary_demo(
                     project_id=project_id,
                     captured_at=base - timedelta(days=rng.randint(0, _DAYS - 1)),
                     capture_type=rng.choice(_CAPTURE_TYPES),
-                    file_url=f"https://seed.local/reality/{uuid.uuid4()}.e57",
+                    file_url=f"{_REALITY_URL}{uuid.uuid4()}.e57",
                     point_count_estimate=rng.randint(1_000_000, 200_000_000),
                     bbox_min={"x": 0.0, "y": 0.0, "z": 0.0},
                     bbox_max={"x": 100.0, "y": 100.0, "z": 25.0},
                     accuracy_mm=Decimal(str(round(rng.uniform(1, 25), 2))),
-                    notes="Seed reality capture",
+                    notes=_REALITY_NOTE,
                 )
             )
 
@@ -830,8 +840,8 @@ async def seed_daily_diary_showcase_de(
                         precipitation_mm=Decimal("4.2" if code == "rain" else "0.0"),
                         conditions_code=code,
                         conditions_text=weather_label,
-                        sunrise="06:30:00",
-                        sunset="20:15:00",
+                        sunrise=_SUNRISE,
+                        sunset=_SUNSET,
                         location_lat=None,
                         location_lng=None,
                     )
@@ -928,3 +938,76 @@ async def seed_daily_diary_showcase_de(
 
     logger.info("seed_daily_diary_showcase_de: %s", counts)
     return counts
+
+
+async def seeded_child_ids(
+    session: AsyncSession,
+    project_ids: list[uuid.UUID],
+    diary_ids: list[uuid.UUID],
+) -> list[tuple[type, list, str]]:
+    """Diary-side rows the seed wrote next to the diaries ``diary_ids`` in ``project_ids``.
+
+    Weather records, drone surveys and reality captures hang off the project,
+    not the diary, so removing a seeded diary leaves them behind. A weather
+    record matches when it sits in the same project on the day of a seeded
+    diary (or the morning after, where the four-hourly readings run past
+    midnight) and carries the seed's fixed sunrise and sunset. A drone survey
+    and a reality capture match on the seed's note and its placeholder file
+    address together.
+
+    Returns:
+        ``(model, ids, label)`` groups; ``label`` names the group in reports.
+    """
+    if not project_ids:
+        return []
+    days: set[tuple[uuid.UUID, str]] = set()
+    if diary_ids:
+        for pid, diary_date in (
+            await session.execute(
+                select(DailyDiary.project_id, DailyDiary.diary_date).where(DailyDiary.id.in_(diary_ids))
+            )
+        ).all():
+            start = date.fromisoformat(str(diary_date)[:10])
+            days.add((pid, start.isoformat()))
+            days.add((pid, (start + timedelta(days=1)).isoformat()))
+    weather = [
+        r.id
+        for r in (
+            await session.execute(
+                select(WeatherRecord.id, WeatherRecord.project_id, WeatherRecord.captured_at).where(
+                    WeatherRecord.project_id.in_(project_ids),
+                    WeatherRecord.sunrise == _SUNRISE,
+                    WeatherRecord.sunset == _SUNSET,
+                )
+            )
+        ).all()
+        if (r.project_id, r.captured_at.date().isoformat()) in days
+    ]
+    drones = [
+        r.id
+        for r in (
+            await session.execute(
+                select(DroneSurvey.id, DroneSurvey.ortho_file_url).where(
+                    DroneSurvey.project_id.in_(project_ids), DroneSurvey.notes == _DRONE_NOTE
+                )
+            )
+        ).all()
+        if str(r.ortho_file_url or "").startswith(_DRONE_URL)
+    ]
+    captures = [
+        r.id
+        for r in (
+            await session.execute(
+                select(RealityCaptureDataset.id, RealityCaptureDataset.file_url).where(
+                    RealityCaptureDataset.project_id.in_(project_ids),
+                    RealityCaptureDataset.notes == _REALITY_NOTE,
+                )
+            )
+        ).all()
+        if str(r.file_url or "").startswith(_REALITY_URL)
+    ]
+    return [
+        (WeatherRecord, weather, "daily_diary_weather"),
+        (DroneSurvey, drones, "daily_diary_drone_surveys"),
+        (RealityCaptureDataset, captures, "daily_diary_reality_captures"),
+    ]
