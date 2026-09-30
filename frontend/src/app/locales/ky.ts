@@ -42778,6 +42778,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "Аймактык пакет сиз үчүн бир рыноктун баасын, салык эрежелерин жана стандарттарын жөндөйт, ошондуктан аларды кол менен киргизүүнүн кереги жок.",
     "dashboard.regional_pack_choose": "Өлкө пакетин орнотуңуз",
     "dashboard.regional_pack_manage": "Өлкө пакетин өзгөртүңүз же кошуңуз",
+    "dashboard.regional_pack_error": "Аймактык пакетиңизди жүктөө мүмкүн болгон жок",
     "dashboard.market_cases.title": "Сиздин рыногуңуз үчүн мисалдар",
     "dashboard.market_cases.title_generic": "Рынок боюнча мисалдар",
     "dashboard.layout.w_cases_market_desc": "Сиз иштеген өлкө үчүн жазылган мисалдар, ар бир башка рынок бир басууда",

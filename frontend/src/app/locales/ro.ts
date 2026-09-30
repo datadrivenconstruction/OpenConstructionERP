@@ -42910,6 +42910,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "Un pachet regional configurează pentru dvs. prețurile, regulile fiscale și standardele unei piețe, ca să nu fie nevoie să le introduceți manual.",
     "dashboard.regional_pack_choose": "Instalați un pachet de țară",
     "dashboard.regional_pack_manage": "Schimbați sau adăugați un pachet de țară",
+    "dashboard.regional_pack_error": "Pachetul regional nu a putut fi încărcat",
     "dashboard.market_cases.title": "Cazuri pentru piața dvs.",
     "dashboard.market_cases.title_generic": "Cazuri după piață",
     "dashboard.layout.w_cases_market_desc": "Cazuri scrise pentru țara în care lucrați, cu orice altă piață la un clic distanță",

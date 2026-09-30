@@ -273,3 +273,126 @@ describe('RegionalPackCard, a pack already active', () => {
     expect(screen.queryByText('Install a country pack')).toBeNull();
   });
 });
+
+/** The label of every tile on screen, in order, read from the tile itself. */
+function tileLabels(): string[] {
+  return screen.getAllByTestId('regional-pack-tile').map((tile) => tile.querySelector('p')?.textContent ?? '');
+}
+
+function tileValue(label: string): HTMLElement {
+  const tile = screen
+    .getAllByTestId('regional-pack-tile')
+    .find((el) => el.querySelector('p')?.textContent === label);
+  if (!tile) throw new Error(`no tile labelled ${label}`);
+  return tile.querySelector('div > div:last-child') as HTMLElement;
+}
+
+describe('RegionalPackCard, the compact tile layout', () => {
+  afterEach(() => {
+    vi.mocked(apiGet).mockResolvedValue({ active: false });
+  });
+
+  it('draws one tile per fact the pack sets up, with the value beside each label', async () => {
+    vi.mocked(apiGet).mockResolvedValue(ACTIVE_PACK);
+    renderApp(<RegionalPackCard />);
+
+    await screen.findByTestId('regional-pack-active');
+    expect(tileLabels()).toEqual([
+      'Language',
+      'Currency',
+      'Local price databases',
+      'Validation rules',
+      'Local tax rules',
+      'Modules switched on',
+    ]);
+    expect(tileValue('Currency').textContent).toBe('EUR');
+    expect(tileValue('Local price databases').textContent).toBe('1');
+    expect(tileValue('Modules switched on').textContent).toBe('2');
+    // The market's own standard by name, and not the generic quality set that
+    // every pack switches on beside it.
+    expect(tileValue('Validation rules').textContent).toBe('DIN 276');
+    expect(screen.getByText('Germany (DIN 276)')).toBeTruthy();
+    expect(screen.getByText('Active')).toBeTruthy();
+  });
+
+  it('skips the tiles a pack is silent on instead of printing an empty value', async () => {
+    vi.mocked(apiGet).mockResolvedValue({
+      active: true,
+      manifest: {
+        ...ACTIVE_PACK.manifest,
+        cwicr_regions: [],
+        default_tax_template: null,
+        default_modules: [],
+        validation_rule_sets: ['boq_quality'],
+      },
+    });
+    renderApp(<RegionalPackCard />);
+
+    await screen.findByTestId('regional-pack-active');
+    expect(tileLabels()).toEqual(['Language', 'Currency', 'Validation rules']);
+    // Only the generic checks are on, so the tile says "on" with a tick that
+    // carries its own spoken label rather than naming a standard.
+    expect(tileValue('Validation rules').querySelector('[role="img"]')?.getAttribute('aria-label')).toBe(
+      'Validation rules',
+    );
+  });
+
+  it('shows the compact install prompt and no tiles when no pack is active', async () => {
+    renderApp(<RegionalPackCard />);
+
+    await screen.findByTestId('regional-pack-none');
+    expect(screen.getByText('No regional pack is active')).toBeTruthy();
+    expect(screen.queryAllByTestId('regional-pack-tile')).toHaveLength(0);
+  });
+
+  it('holds its frame with a skeleton while the answer is on its way', async () => {
+    vi.mocked(apiGet).mockReturnValue(new Promise(() => {}));
+    renderApp(<RegionalPackCard />);
+
+    expect(await screen.findByTestId('regional-pack-loading')).toBeTruthy();
+    expect(screen.queryByTestId('regional-pack-none')).toBeNull();
+  });
+
+  it('reports a failed request as a failure, not as "no pack", and retries on request', async () => {
+    vi.mocked(apiGet).mockRejectedValue(new Error('offline'));
+    renderApp(<RegionalPackCard />);
+
+    await screen.findByTestId('regional-pack-error');
+    expect(screen.queryByText('No regional pack is active')).toBeNull();
+    expect(screen.queryByText('Install a country pack')).toBeNull();
+
+    const callsBefore = vi.mocked(apiGet).mock.calls.length;
+    vi.mocked(apiGet).mockResolvedValue(ACTIVE_PACK);
+    fireEvent.click(screen.getByText('Retry'));
+    await screen.findByTestId('regional-pack-active');
+    expect(vi.mocked(apiGet).mock.calls.length).toBeGreaterThan(callsBefore);
+  });
+});
+
+describe('RegionalPackCard, strings', () => {
+  const CARD = resolve(HERE, '../RegionalPackCard.tsx');
+  const EN = resolve(HERE, '../../../app/locales/en.ts');
+
+  /** The card's source with comments removed, so prose about the UI does not
+   *  read as UI. */
+  function code(): string {
+    return readFileSync(CARD, 'utf8')
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .replace(/^\s*\/\/.*$/gm, '');
+  }
+
+  it('puts no literal text between JSX tags', () => {
+    const literals = (code().match(/>[^<>{}]*</g) ?? [])
+      .map((m) => m.slice(1, -1).trim())
+      .filter((text) => /\p{L}{2,}/u.test(text));
+    expect(literals).toEqual([]);
+  });
+
+  it('asks only for keys the English locale answers', () => {
+    const en = readFileSync(EN, 'utf8');
+    const keys = [...code().matchAll(/\bt\(\s*'([^'`]+)'/g)].map((m) => m[1]!);
+    expect(keys.length).toBeGreaterThan(8);
+    const missing = keys.filter((key) => !en.includes(`"${key}":`));
+    expect(missing).toEqual([]);
+  });
+});

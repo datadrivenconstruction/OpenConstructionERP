@@ -43698,6 +43698,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "Un pacchetto regionale configura per te i prezzi, le norme fiscali e gli standard di un mercato, così non devi inserirli manualmente.",
     "dashboard.regional_pack_choose": "Installa un pacchetto paese",
     "dashboard.regional_pack_manage": "Cambia o aggiungi un pacchetto paese",
+    "dashboard.regional_pack_error": "Impossibile caricare il tuo pacchetto regionale",
     "dashboard.market_cases.title": "Casi per il tuo mercato",
     "dashboard.market_cases.title_generic": "Casi per mercato",
     "dashboard.layout.w_cases_market_desc": "Casi scritti per il paese in cui lavori, con ogni altro mercato a un clic",

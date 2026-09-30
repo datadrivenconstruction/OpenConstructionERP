@@ -42838,6 +42838,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "Regionalni paket za vas postavlja cijene, porezna pravila i standarde jednog tržišta, kako ih ne biste morali unositi ručno.",
     "dashboard.regional_pack_choose": "Instalirajte paket za državu",
     "dashboard.regional_pack_manage": "Promijenite ili dodajte paket za državu",
+    "dashboard.regional_pack_error": "Vaš regionalni paket nije moguće učitati",
     "dashboard.market_cases.title": "Scenariji za vaše tržište",
     "dashboard.market_cases.title_generic": "Scenariji po tržištu",
     "dashboard.layout.w_cases_market_desc": "Scenariji napisani za zemlju u kojoj radite, uz svako drugo tržište na jedan klik",

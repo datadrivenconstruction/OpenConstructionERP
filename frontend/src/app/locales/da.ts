@@ -42758,6 +42758,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "En regional pakke sætter priser, skatteregler og standarder for ét marked op for dig, så du ikke skal indtaste dem manuelt.",
     "dashboard.regional_pack_choose": "Installer en landepakke",
     "dashboard.regional_pack_manage": "Skift eller tilføj en landepakke",
+    "dashboard.regional_pack_error": "Din regionale pakke kunne ikke indlæses",
     "dashboard.market_cases.title": "Cases for dit marked",
     "dashboard.market_cases.title_generic": "Cases efter marked",
     "dashboard.layout.w_cases_market_desc": "Cases skrevet til det land, du arbejder i, med alle andre markeder ét klik væk",

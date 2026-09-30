@@ -39707,6 +39707,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "Un paquete regional configura para ti los precios, las reglas fiscales y las normas de un mercado, para que no tengas que capturarlos a mano.",
     "dashboard.regional_pack_choose": "Instala un paquete de país",
     "dashboard.regional_pack_manage": "Cambia o agrega un paquete de país",
+    "dashboard.regional_pack_error": "No se pudo cargar tu paquete regional",
     "dashboard.market_cases.title": "Casos para tu mercado",
     "dashboard.market_cases.title_generic": "Casos por mercado",
     "dashboard.layout.w_cases_market_desc": "Casos prácticos para el país en el que trabajas, con cualquier otro mercado a un clic",

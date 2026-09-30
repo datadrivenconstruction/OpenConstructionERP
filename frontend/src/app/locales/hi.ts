@@ -42684,6 +42684,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "एक क्षेत्रीय पैक आपके लिए किसी एक बाज़ार की कीमतें, कर नियम और मानक सेट करता है, ताकि आपको उन्हें हाथ से दर्ज न करना पड़े।",
     "dashboard.regional_pack_choose": "एक देश पैक इंस्टॉल करें",
     "dashboard.regional_pack_manage": "देश पैक बदलें या जोड़ें",
+    "dashboard.regional_pack_error": "आपका क्षेत्रीय पैक लोड नहीं हो सका",
     "dashboard.market_cases.title": "आपके बाज़ार के केस",
     "dashboard.market_cases.title_generic": "बाज़ार के अनुसार केस",
     "dashboard.layout.w_cases_market_desc": "जिस देश में आप काम करते हैं उसके लिए लिखे गए केस, और हर दूसरा बाज़ार एक क्लिक दूर",

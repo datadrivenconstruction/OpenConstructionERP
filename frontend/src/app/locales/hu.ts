@@ -44621,6 +44621,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "Egy regionális csomag beállítja Önnek egy piac árait, adószabályait és szabványait, hogy ne kelljen kézzel megadnia őket.",
     "dashboard.regional_pack_choose": "Országcsomag telepítése",
     "dashboard.regional_pack_manage": "Országcsomag váltása vagy hozzáadása",
+    "dashboard.regional_pack_error": "Nem sikerült betölteni a regionális csomagot",
     "cases.regional_pack_for_market": "Regionális csomag: {{names}}",
     "onboarding.ready_pack_other_markets": "Vagy induljon egy piaci előbeállításból",
     "onboarding.ready_pack_set_up_here": "Állítsd be ezt nekem",

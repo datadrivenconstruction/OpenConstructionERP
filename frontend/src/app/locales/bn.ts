@@ -43029,6 +43029,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "একটি আঞ্চলিক প্যাক আপনার জন্য একটি বাজারের দাম, কর নিয়ম ও মানদণ্ড সেট করে দেয়, যাতে আপনাকে সেগুলো হাতে দিয়ে বসাতে না হয়।",
     "dashboard.regional_pack_choose": "একটি দেশের প্যাক ইনস্টল করুন",
     "dashboard.regional_pack_manage": "দেশের প্যাক পরিবর্তন বা যোগ করুন",
+    "dashboard.regional_pack_error": "আপনার আঞ্চলিক প্যাক লোড করা যায়নি",
     "dashboard.market_cases.title": "আপনার বাজারের কেস",
     "dashboard.market_cases.title_generic": "বাজার অনুযায়ী কেস",
     "dashboard.layout.w_cases_market_desc": "আপনি যে দেশে কাজ করেন তার জন্য লেখা কেস, আর প্রতিটি অন্য বাজার এক ক্লিক দূরে",

@@ -42731,6 +42731,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "Ένα περιφερειακό πακέτο ρυθμίζει για εσάς τις τιμές, τους φορολογικούς κανόνες και τα πρότυπα μιας αγοράς, ώστε να μη χρειάζεται να τα καταχωρίζετε χειροκίνητα.",
     "dashboard.regional_pack_choose": "Εγκαταστήστε ένα πακέτο χώρας",
     "dashboard.regional_pack_manage": "Αλλαγή ή προσθήκη πακέτου χώρας",
+    "dashboard.regional_pack_error": "Δεν ήταν δυνατή η φόρτωση του περιφερειακού σας πακέτου",
     "dashboard.market_cases.title": "Περιπτώσεις για την αγορά σας",
     "dashboard.market_cases.title_generic": "Περιπτώσεις ανά αγορά",
     "dashboard.layout.w_cases_market_desc": "Περιπτώσεις γραμμένες για τη χώρα στην οποία εργάζεστε, με κάθε άλλη αγορά ένα κλικ μακριά",

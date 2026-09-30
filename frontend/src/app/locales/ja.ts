@@ -44052,6 +44052,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "地域パックは、ある市場の価格、税制ルール、基準をあなたのために設定するので、手入力する必要がありません。",
     "dashboard.regional_pack_choose": "国別パックをインストール",
     "dashboard.regional_pack_manage": "国別パックを変更または追加",
+    "dashboard.regional_pack_error": "地域パックを読み込めませんでした",
     "dashboard.market_cases.title": "あなたの市場のケース",
     "dashboard.market_cases.title_generic": "市場別のケース",
     "dashboard.layout.w_cases_market_desc": "働いている国のケースと、ワンクリックで切り替えられる他のすべての市場",

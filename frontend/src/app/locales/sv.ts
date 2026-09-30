@@ -43373,6 +43373,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "Ett regionpaket ställer in priser, skatteregler och standarder för en marknad åt dig, så att du slipper ange dem manuellt.",
     "dashboard.regional_pack_choose": "Installera ett landspaket",
     "dashboard.regional_pack_manage": "Byt eller lägg till ett landspaket",
+    "dashboard.regional_pack_error": "Det gick inte att läsa in ditt regionala paket",
     "dashboard.market_cases.title": "Fall för din marknad",
     "dashboard.market_cases.title_generic": "Fall per marknad",
     "dashboard.layout.w_cases_market_desc": "Fall skrivna för landet du arbetar i, med alla andra marknader ett klick bort",

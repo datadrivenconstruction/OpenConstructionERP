@@ -74,8 +74,9 @@ export const DASHBOARD_WIDGETS: readonly DashboardWidgetMeta[] = [
   // purpose: it answers "is this product configured for the country I work
   // in", which is the question a new reader has before any number on the page
   // means anything, and which nothing on the dashboard answered at all until
-  // now. Narrow, because it is six short rows - the dense grid flow backfills
-  // the columns beside it.
+  // now. Narrow, because it is a handful of short fact tiles - the dense grid
+  // flow backfills the columns beside it, and the card keeps its own height
+  // rather than the row's (WIDGET_NO_STRETCH in DashboardPage).
   //
   // labelKey is the card's own heading key rather than a
   // dashboard.layout.w_* of its own. The layout manager lists this widget by

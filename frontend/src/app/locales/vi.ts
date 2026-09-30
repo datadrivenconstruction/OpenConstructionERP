@@ -42637,6 +42637,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "Một gói khu vực thiết lập sẵn giá cả, quy tắc thuế và tiêu chuẩn của một thị trường cho bạn, để bạn không phải nhập chúng bằng tay.",
     "dashboard.regional_pack_choose": "Cài đặt gói quốc gia",
     "dashboard.regional_pack_manage": "Thay đổi hoặc thêm gói quốc gia",
+    "dashboard.regional_pack_error": "Không thể tải gói khu vực của bạn",
     "dashboard.market_cases.title": "Tình huống cho thị trường của bạn",
     "dashboard.market_cases.title_generic": "Tình huống theo thị trường",
     "dashboard.layout.w_cases_market_desc": "Tình huống viết cho quốc gia bạn đang làm việc, mọi thị trường khác chỉ cách một cú nhấp",

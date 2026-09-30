@@ -42583,6 +42583,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "Alueellinen paketti määrittää puolestasi yhden markkina-alueen hinnat, verosäännöt ja standardit, jotta sinun ei tarvitse syöttää niitä käsin.",
     "dashboard.regional_pack_choose": "Asenna maapaketti",
     "dashboard.regional_pack_manage": "Vaihda tai lisää maapaketti",
+    "dashboard.regional_pack_error": "Alueellista pakettiasi ei voitu ladata",
     "dashboard.market_cases.title": "Oman markkinasi tapaukset",
     "dashboard.market_cases.title_generic": "Tapaukset markkinoittain",
     "dashboard.layout.w_cases_market_desc": "Tapaukset siitä maasta, jossa työskentelet, ja kaikki muut markkinat yhden klikkauksen päässä",
