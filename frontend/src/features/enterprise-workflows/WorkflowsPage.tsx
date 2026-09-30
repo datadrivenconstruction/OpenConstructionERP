@@ -31,8 +31,10 @@ import {
   fetchApprovalRequests,
   approveRequest,
   rejectRequest,
+  OFFERED_ACTION_TYPES,
   WORKFLOW_ACTION_TYPES,
   WORKFLOW_STEP_ROLES,
+  fetchPendingApprovalCount,
   type Workflow,
   type WorkflowActionType,
   type WorkflowStep,
@@ -251,7 +253,7 @@ function CreateWorkflowDialog({
                       className="min-w-0 flex-1 rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 text-sm
                         text-content-primary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
                     >
-                      {WORKFLOW_ACTION_TYPES.map((a) => (
+                      {OFFERED_ACTION_TYPES.map((a) => (
                         <option key={a} value={a}>
                           {actionLabel(a, t)}
                         </option>
@@ -602,6 +604,12 @@ export function WorkflowsPage() {
     staleTime: 30_000,
   });
 
+  const pendingCountQuery = useQuery({
+    queryKey: ['enterprise-workflow-requests', 'pending-count'],
+    queryFn: fetchPendingApprovalCount,
+    staleTime: 30_000,
+  });
+
   // ------- Derived data --------
 
   const workflows = workflowsQuery.data ?? [];
@@ -610,9 +618,11 @@ export function WorkflowsPage() {
   const stats = useMemo(() => {
     const totalWorkflows = workflows.length;
     const activeWorkflows = workflows.filter((w) => w.is_active).length;
-    const pendingApprovals = requests.filter((r) => r.status === 'pending').length;
+    // From the envelope's total, not from the page the list below happens to
+    // hold, which is filtered and capped at 50 rows.
+    const pendingApprovals = pendingCountQuery.data ?? 0;
     return { totalWorkflows, activeWorkflows, pendingApprovals };
-  }, [workflows, requests]);
+  }, [workflows, pendingCountQuery.data]);
 
   // ------- Mutations --------
 
@@ -880,6 +890,9 @@ export function WorkflowsPage() {
               </option>
               <option value="rejected">
                 {t('enterprise_workflows.status_rejected', { defaultValue: 'Rejected' })}
+              </option>
+              <option value="cancelled">
+                {t('enterprise_workflows.status_cancelled', { defaultValue: 'Cancelled' })}
               </option>
             </select>
             {statusFilter && (

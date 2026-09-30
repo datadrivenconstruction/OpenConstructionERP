@@ -11,7 +11,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -102,7 +102,13 @@ function routeGet(path: string): unknown {
   if (route === '/v1/enterprise-workflows/') {
     return { items: [WORKFLOW], total: 1, offset: 0, limit: 50 };
   }
-  if (route === '/v1/enterprise-workflows/requests/') return REQUESTS;
+  if (route === '/v1/enterprise-workflows/requests/') {
+    // The pending counter asks for one row and reads the envelope's total.
+    if (path.includes('status=pending') && path.includes('limit=1')) {
+      return { items: REQUESTS.items.slice(0, 1), total: 73, offset: 0, limit: 1 };
+    }
+    return REQUESTS;
+  }
   throw new NotFound(`404 GET ${path}`);
 }
 
@@ -150,7 +156,8 @@ describe('WorkflowsPage with the backend response shapes', () => {
 
     // decision_notes is what the backend calls the note on a request.
     expect(await screen.findByText('Please check the retention line')).toBeInTheDocument();
-    expect(screen.getByText('Cancelled')).toBeInTheDocument();
+    // The badge on the cancelled row, not the filter option of the same name.
+    expect(screen.getAllByText('Cancelled').some((el) => el.tagName !== 'OPTION')).toBe(true);
 
     fireEvent.click(screen.getByRole('button', { name: /Approve/ }));
     await waitFor(() =>
@@ -211,5 +218,33 @@ describe('WorkflowsPage with the backend response shapes', () => {
     expect(await screen.findByText('Variation sign-off')).toBeInTheDocument();
     expect(screen.getByText(/1\. Manager · Approve/)).toBeInTheDocument();
     expect(screen.getByText(/2\. Admin · Sign-off/)).toBeInTheDocument();
+  });
+
+  it('counts pending approvals from the envelope total, not from the page it shows', async () => {
+    renderPage();
+    await screen.findByText('Invoice sign-off');
+
+    // One pending request sits on the page; the backend says 73 exist.
+    expect((await screen.findAllByText('73')).length).toBeGreaterThan(0);
+  });
+
+  it('filters requests by every status the backend has, cancelled included', async () => {
+    renderPage();
+    await screen.findByText('Invoice sign-off');
+    fireEvent.click(screen.getByRole('tab', { name: /Approval Requests/ }));
+    await screen.findByText('Please check the retention line');
+
+    const options = screen.getAllByRole('option').map((o) => (o as HTMLOptionElement).value);
+    expect(options).toEqual(expect.arrayContaining(['pending', 'approved', 'rejected', 'cancelled']));
+  });
+
+  it('offers only step actions the engine enforces', async () => {
+    renderPage();
+    fireEvent.click((await screen.findAllByRole('button', { name: /New Workflow/ }))[0]!);
+
+    const actions = within(screen.getByLabelText('Step 1 Action'))
+      .getAllByRole('option')
+      .map((o) => (o as HTMLOptionElement).value);
+    expect(actions).toEqual(['approve', 'sign_off']);
   });
 });
