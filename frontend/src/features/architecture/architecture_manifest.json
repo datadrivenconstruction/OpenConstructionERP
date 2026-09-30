@@ -171150,6 +171150,13 @@
         },
         {
           "method": "POST",
+          "path": "/preview/file",
+          "handler": "preview_file",
+          "response_model": "AbsPreviewResponse",
+          "request_schema": "UploadFile"
+        },
+        {
+          "method": "POST",
           "path": "/imports",
           "handler": "import_schedule",
           "response_model": "RebarImportResult",
@@ -231291,10 +231298,10 @@
     },
     {
       "name": "enterprise-workflows",
-      "ts_files": 3,
+      "ts_files": 4,
       "css_files": 0,
-      "test_files": 0,
-      "total_files": 3
+      "test_files": 1,
+      "total_files": 4
     },
     {
       "name": "equipment",
@@ -231830,10 +231837,10 @@
     },
     {
       "name": "rebar-schedule",
-      "ts_files": 3,
+      "ts_files": 4,
       "css_files": 0,
-      "test_files": 0,
-      "total_files": 3
+      "test_files": 1,
+      "total_files": 4
     },
     {
       "name": "reconciliation",
@@ -233468,7 +233475,7 @@
     "total_models": 617,
     "total_columns": 7101,
     "total_relationships": 234,
-    "total_routes": 3705,
+    "total_routes": 3706,
     "total_schemas": 3486,
     "total_python_files": 2209,
     "frontend_features": 190,
