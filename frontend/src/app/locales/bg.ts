@@ -42770,6 +42770,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "Регионалният пакет настройва за вас цените, данъчните правила и стандартите на един пазар, за да не се налага да ги въвеждате ръчно.",
     "dashboard.regional_pack_choose": "Инсталирайте пакет за държава",
     "dashboard.regional_pack_manage": "Промяна или добавяне на пакет за държава",
+    "dashboard.regional_pack_error": "Регионалният ви пакет не можа да се зареди",
     "dashboard.market_cases.title": "Казуси за вашия пазар",
     "dashboard.market_cases.title_generic": "Казуси по пазар",
     "dashboard.layout.w_cases_market_desc": "Казуси, написани за държавата, в която работите, а всеки друг пазар е на един клик",

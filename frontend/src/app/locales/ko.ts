@@ -43171,6 +43171,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "지역 팩은 하나의 시장에 대한 가격, 세금 규정, 표준을 대신 설정해 주므로 직접 입력할 필요가 없습니다.",
     "dashboard.regional_pack_choose": "국가 팩을 설치하세요",
     "dashboard.regional_pack_manage": "국가 팩 변경 또는 추가",
+    "dashboard.regional_pack_error": "지역 팩을 불러오지 못했습니다",
     "dashboard.market_cases.title": "내 시장의 케이스",
     "dashboard.market_cases.title_generic": "시장별 케이스",
     "dashboard.layout.w_cases_market_desc": "일하는 국가에 맞춰 작성된 케이스, 다른 모든 시장은 클릭 한 번 거리",

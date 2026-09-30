@@ -42858,6 +42858,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "חבילת אזור מגדירה עבורך את המחירים, כללי המס והתקנים של שוק אחד, כדי שלא תצטרך להזין אותם ידנית.",
     "dashboard.regional_pack_choose": "התקן חבילת מדינה",
     "dashboard.regional_pack_manage": "החלף או הוסף חבילת מדינה",
+    "dashboard.regional_pack_error": "לא ניתן היה לטעון את החבילה האזורית שלך",
     "dashboard.market_cases.title": "תרחישים לשוק שלך",
     "dashboard.market_cases.title_generic": "תרחישים לפי שוק",
     "dashboard.layout.w_cases_market_desc": "תרחישים שנכתבו למדינה שבה אתם עובדים, וכל שוק אחר במרחק לחיצה",

@@ -42397,6 +42397,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "Бүсийн багц нь танд зориулж нэг зах зээлийн үнэ, татварын дүрэм, стандартыг тохируулж өгдөг тул та тэдгээрийг гараар оруулах шаардлагагүй.",
     "dashboard.regional_pack_choose": "Улсын багц суулгана уу",
     "dashboard.regional_pack_manage": "Улсын багцыг солих эсвэл нэмэх",
+    "dashboard.regional_pack_error": "Таны бүсийн багцыг ачаалж чадсангүй",
     "dashboard.market_cases.title": "Таны зах зээлд зориулсан тохиолдлууд",
     "dashboard.market_cases.title_generic": "Зах зээлээр ангилсан тохиолдлууд",
     "dashboard.layout.w_cases_market_desc": "Таны ажилладаг улсад зориулсан тохиолдлууд, бусад бүх зах зээл нэг товшилтын зайд",

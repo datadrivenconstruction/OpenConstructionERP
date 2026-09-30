@@ -45110,6 +45110,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "区域数据包会为您配置某一市场的价格、税务规则和标准，让您无需手动录入。",
     "dashboard.regional_pack_choose": "安装国家数据包",
     "dashboard.regional_pack_manage": "更改或添加国家数据包",
+    "dashboard.regional_pack_error": "无法加载您的区域包",
     "dashboard.market_cases.title": "适合您市场的案例",
     "dashboard.market_cases.title_generic": "按市场浏览案例",
     "dashboard.layout.w_cases_market_desc": "为您所在国家编写的案例，其他市场一键切换",

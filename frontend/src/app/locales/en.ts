@@ -37826,6 +37826,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "A regional pack sets up one market's prices, tax rules and standards for you, so you do not have to enter them by hand.",
     "dashboard.regional_pack_choose": "Install a country pack",
     "dashboard.regional_pack_manage": "Change or add a country pack",
+    "dashboard.regional_pack_error": "Could not load your regional pack",
     "dashboard.market_cases.title": "Cases for your market",
     "dashboard.market_cases.title_generic": "Cases by market",
     "dashboard.layout.w_cases_market_desc": "Worked cases for the country you work in, with every other market one click away",

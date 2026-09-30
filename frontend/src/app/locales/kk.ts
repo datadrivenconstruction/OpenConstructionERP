@@ -42658,6 +42658,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "Аймақтық пакет сіз үшін бір нарықтың бағаларын, салық ережелерін және стандарттарын баптайды, сондықтан оларды қолмен енгізудің қажеті жоқ.",
     "dashboard.regional_pack_choose": "Ел пакетін орнатыңыз",
     "dashboard.regional_pack_manage": "Ел пакетін өзгертіңіз немесе қосыңыз",
+    "dashboard.regional_pack_error": "Аймақтық пакетіңізді жүктеу мүмкін болмады",
     "dashboard.market_cases.title": "Сіздің нарығыңызға арналған кейстер",
     "dashboard.market_cases.title_generic": "Нарықтар бойынша кейстер",
     "dashboard.layout.w_cases_market_desc": "Сіз жұмыс істейтін елге арналған кейстер, кез келген басқа нарық бір басу қашықтықта",

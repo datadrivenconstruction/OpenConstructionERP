@@ -160,6 +160,15 @@ const WIDGET_NULL_FALLBACK = new Set<string>([
 ]);
 
 /**
+ * Widget ids whose card keeps its own height instead of taking the row's.
+ * Every other cell stretches to the tallest card in its grid row, which is
+ * right for cards that lay their content out to fill the height. A short fact
+ * card sharing a row with a tall one does not: stretched to the height of the
+ * market cases card beside it, the regional pack card was mostly empty frame.
+ */
+const WIDGET_NO_STRETCH = new Set<string>(['regional_pack']);
+
+/**
  * Placeholder shown in a widget's grid cell while its code-split chunk (and
  * first data) load, so the dashboard paints structure immediately instead of a
  * blank gap. Purely visual (no translated text), so it is safe to render before
@@ -2951,7 +2960,7 @@ function DashboardPageInner() {
           return (
             <div
               key={id}
-              className={`h-full [&>*]:h-full ${DASH_SPAN_CLASS[span] ?? 'lg:col-span-6'}`}
+              className={`${WIDGET_NO_STRETCH.has(id) ? 'self-start' : 'h-full [&>*]:h-full'} ${DASH_SPAN_CLASS[span] ?? 'lg:col-span-6'}`}
             >
               <Suspense fallback={WIDGET_NULL_FALLBACK.has(id) ? null : <WidgetSkeleton />}>
                 {node}

@@ -42708,6 +42708,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "Regionaalpakett seadistab teie jaoks ühe turu hinnad, maksureeglid ja standardid, et teil ei oleks vaja neid käsitsi sisestada.",
     "dashboard.regional_pack_choose": "Paigaldage riigipakett",
     "dashboard.regional_pack_manage": "Muutke või lisage riigipakett",
+    "dashboard.regional_pack_error": "Teie piirkondlikku paketti ei õnnestunud laadida",
     "dashboard.market_cases.title": "Teie turu juhtumid",
     "dashboard.market_cases.title_generic": "Juhtumid turgude kaupa",
     "dashboard.layout.w_cases_market_desc": "Juhtumid riigi kohta, kus te töötate, ja iga teine turg ühe klikiga",

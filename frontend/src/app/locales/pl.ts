@@ -43915,6 +43915,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "Pakiet regionalny konfiguruje dla Ciebie ceny, zasady podatkowe i standardy jednego rynku, żebyś nie musiał wprowadzać ich ręcznie.",
     "dashboard.regional_pack_choose": "Zainstaluj pakiet krajowy",
     "dashboard.regional_pack_manage": "Zmień lub dodaj pakiet krajowy",
+    "dashboard.regional_pack_error": "Nie udało się wczytać pakietu regionalnego",
     "dashboard.market_cases.title": "Scenariusze dla Twojego rynku",
     "dashboard.market_cases.title_generic": "Scenariusze według rynku",
     "dashboard.layout.w_cases_market_desc": "Scenariusze napisane dla kraju, w którym pracujesz, a każdy inny rynek o jedno kliknięcie",

@@ -43610,6 +43610,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "Bir bölgesel paket, elle girmenize gerek kalmasın diye sizin için bir pazarın fiyatlarını, vergi kurallarını ve standartlarını ayarlar.",
     "dashboard.regional_pack_choose": "Bir ülke paketi yükleyin",
     "dashboard.regional_pack_manage": "Ülke paketini değiştirin veya ekleyin",
+    "dashboard.regional_pack_error": "Bölgesel paketiniz yüklenemedi",
     "dashboard.market_cases.title": "Pazarınıza göre vakalar",
     "dashboard.market_cases.title_generic": "Pazara göre vakalar",
     "dashboard.layout.w_cases_market_desc": "Çalıştığınız ülke için yazılmış vakalar, diğer her pazar tek tıklama uzağınızda",

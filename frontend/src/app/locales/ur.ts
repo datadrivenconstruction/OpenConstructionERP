@@ -42751,6 +42751,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "علاقائی پیکج آپ کے لیے ایک مارکیٹ کی قیمتیں، ٹیکس قواعد اور معیارات سیٹ اپ کرتا ہے، تاکہ آپ کو انہیں دستی طور پر درج نہ کرنا پڑے۔",
     "dashboard.regional_pack_choose": "ملک کا پیکج انسٹال کریں",
     "dashboard.regional_pack_manage": "ملک کا پیکج تبدیل کریں یا شامل کریں",
+    "dashboard.regional_pack_error": "آپ کا علاقائی پیک لوڈ نہیں ہو سکا",
     "dashboard.market_cases.title": "آپ کی مارکیٹ کے کیسز",
     "dashboard.market_cases.title_generic": "مارکیٹ کے لحاظ سے کیسز",
     "dashboard.layout.w_cases_market_desc": "جس ملک میں آپ کام کرتے ہیں اس کے لیے لکھے گئے کیسز، اور ہر دوسری مارکیٹ ایک کلک کی دوری پر",

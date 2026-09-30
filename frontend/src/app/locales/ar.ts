@@ -44948,6 +44948,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "تُعِدّ الحزمة الإقليمية لك أسعار سوق واحد وقواعده الضريبية ومعاييره، حتى لا تضطر لإدخالها يدويًا.",
     "dashboard.regional_pack_choose": "ثبّت حزمة دولة",
     "dashboard.regional_pack_manage": "تغيير أو إضافة حزمة دولة",
+    "dashboard.regional_pack_error": "تعذّر تحميل حزمتك الإقليمية",
     "dashboard.market_cases.title": "حالات عملية لسوقك",
     "dashboard.market_cases.title_generic": "حالات عملية حسب السوق",
     "dashboard.layout.w_cases_market_desc": "حالات عملية للبلد الذي تعمل فيه، وكل سوق آخر على بُعد نقرة واحدة",

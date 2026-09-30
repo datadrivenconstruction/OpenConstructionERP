@@ -45414,6 +45414,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "Ein regionales Paket richtet für Sie die Preise, Steuerregeln und Standards eines Marktes ein, damit Sie sie nicht von Hand eingeben müssen.",
     "dashboard.regional_pack_choose": "Länderpaket installieren",
     "dashboard.regional_pack_manage": "Länderpaket wechseln oder hinzufügen",
+    "dashboard.regional_pack_error": "Ihr Regionalpaket konnte nicht geladen werden",
     "dashboard.market_cases.title": "Fallbeispiele für Ihren Markt",
     "dashboard.market_cases.title_generic": "Fallbeispiele nach Markt",
     "dashboard.layout.w_cases_market_desc": "Fallbeispiele für das Land, in dem Sie arbeiten, jeder andere Markt einen Klick entfernt",

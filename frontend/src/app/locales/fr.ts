@@ -45127,6 +45127,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "Un pack régional configure pour vous les prix, les règles fiscales et les normes d'un marché, afin que vous n'ayez pas à les saisir à la main.",
     "dashboard.regional_pack_choose": "Installez un pack pays",
     "dashboard.regional_pack_manage": "Changer ou ajouter un pack pays",
+    "dashboard.regional_pack_error": "Impossible de charger votre pack régional",
     "dashboard.market_cases.title": "Cas pour votre marché",
     "dashboard.market_cases.title_generic": "Cas par marché",
     "dashboard.layout.w_cases_market_desc": "Cas rédigés pour le pays où vous travaillez, chaque autre marché à un clic",

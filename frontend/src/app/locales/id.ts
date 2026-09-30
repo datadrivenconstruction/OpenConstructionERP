@@ -42546,6 +42546,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "Paket regional mengatur harga, aturan pajak, dan standar satu pasar untuk Anda, jadi Anda tidak perlu memasukkannya secara manual.",
     "dashboard.regional_pack_choose": "Instal paket negara",
     "dashboard.regional_pack_manage": "Ubah atau tambahkan paket negara",
+    "dashboard.regional_pack_error": "Paket regional Anda tidak dapat dimuat",
     "dashboard.market_cases.title": "Kasus untuk pasar Anda",
     "dashboard.market_cases.title_generic": "Kasus menurut pasar",
     "dashboard.layout.w_cases_market_desc": "Kasus yang ditulis untuk negara tempat Anda bekerja, dengan setiap pasar lain sejauh satu klik",

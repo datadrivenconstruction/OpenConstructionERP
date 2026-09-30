@@ -44509,6 +44509,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "Регіональний пакет налаштовує для вас ціни, податкові правила та стандарти одного ринку, щоб вам не довелося вводити їх вручну.",
     "dashboard.regional_pack_choose": "Встановіть пакет країни",
     "dashboard.regional_pack_manage": "Змінити або додати пакет країни",
+    "dashboard.regional_pack_error": "Не вдалося завантажити регіональний пакет",
     "dashboard.market_cases.title": "Кейси для вашого ринку",
     "dashboard.market_cases.title_generic": "Кейси за ринками",
     "dashboard.layout.w_cases_market_desc": "Кейси для країни, у якій ви працюєте, і будь-який інший ринок в один клік",

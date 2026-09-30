@@ -43964,6 +43964,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "Mintaqaviy paket siz uchun bitta bozorning narxlari, soliq qoidalari va standartlarini sozlaydi, shuning uchun ularni qoʻlda kiritishingiz shart emas.",
     "dashboard.regional_pack_choose": "Davlat paketini oʻrnating",
     "dashboard.regional_pack_manage": "Davlat paketini almashtiring yoki qoʻshing",
+    "dashboard.regional_pack_error": "Mintaqaviy paketingizni yuklab boʻlmadi",
     "dashboard.market_cases.title": "Sizning bozoringiz uchun keyslar",
     "dashboard.market_cases.title_generic": "Bozorlar boʻyicha keyslar",
     "dashboard.layout.w_cases_market_desc": "Siz ishlaydigan mamlakat uchun yozilgan keyslar, boshqa har bir bozor bir bosish masofasida",

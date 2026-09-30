@@ -42641,6 +42641,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "แพ็กภูมิภาคจะตั้งค่าราคา กฎภาษี และมาตรฐานของตลาดหนึ่งให้คุณ เพื่อที่คุณจะได้ไม่ต้องกรอกเองทีละรายการ",
     "dashboard.regional_pack_choose": "ติดตั้งแพ็กประเทศ",
     "dashboard.regional_pack_manage": "เปลี่ยนหรือเพิ่มแพ็กประเทศ",
+    "dashboard.regional_pack_error": "ไม่สามารถโหลดแพ็กภูมิภาคของคุณได้",
     "dashboard.market_cases.title": "เคสสำหรับตลาดของคุณ",
     "dashboard.market_cases.title_generic": "เคสตามตลาด",
     "dashboard.layout.w_cases_market_desc": "เคสที่เขียนขึ้นสำหรับประเทศที่คุณทำงานอยู่ และทุกตลาดอื่นอยู่ห่างเพียงคลิกเดียว",

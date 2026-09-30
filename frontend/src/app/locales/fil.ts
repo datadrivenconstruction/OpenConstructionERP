@@ -42600,6 +42600,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "Isinasaayos ng regional pack para sa inyo ang mga presyo, panuntunan sa buwis, at pamantayan ng isang market, para hindi na ninyo kailangang ilagay ang mga ito nang manu-mano.",
     "dashboard.regional_pack_choose": "I-install ang isang country pack",
     "dashboard.regional_pack_manage": "Palitan o magdagdag ng country pack",
+    "dashboard.regional_pack_error": "Hindi ma-load ang iyong regional pack",
     "dashboard.market_cases.title": "Mga kaso para sa inyong merkado",
     "dashboard.market_cases.title_generic": "Mga kaso ayon sa merkado",
     "dashboard.layout.w_cases_market_desc": "Mga kasong isinulat para sa bansang pinagtatrabahuhan ninyo, at isang pindot lang ang bawat ibang merkado",

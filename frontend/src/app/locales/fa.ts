@@ -42622,6 +42622,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "یک بسته منطقه‌ای قیمت‌ها، قوانین مالیاتی و استانداردهای یک بازار را برای شما تنظیم می‌کند، تا نیازی به وارد کردن دستی آن‌ها نباشد.",
     "dashboard.regional_pack_choose": "یک بسته کشوری نصب کنید",
     "dashboard.regional_pack_manage": "تغییر یا افزودن بسته کشوری",
+    "dashboard.regional_pack_error": "بسته منطقه‌ای شما بارگیری نشد",
     "dashboard.market_cases.title": "سناریوها برای بازار شما",
     "dashboard.market_cases.title_generic": "سناریوها بر اساس بازار",
     "dashboard.layout.w_cases_market_desc": "سناریوهایی برای کشوری که در آن کار می‌کنید، و هر بازار دیگر با یک کلیک",

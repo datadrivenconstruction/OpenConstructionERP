@@ -43565,6 +43565,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "Een regiopakket stelt voor u de prijzen, belastingregels en normen van één markt in, zodat u ze niet handmatig hoeft in te voeren.",
     "dashboard.regional_pack_choose": "Installeer een landpakket",
     "dashboard.regional_pack_manage": "Landpakket wijzigen of toevoegen",
+    "dashboard.regional_pack_error": "Je regionale pakket kon niet worden geladen",
     "dashboard.market_cases.title": "Cases voor uw markt",
     "dashboard.market_cases.title_generic": "Cases per markt",
     "dashboard.layout.w_cases_market_desc": "Cases geschreven voor het land waar u werkt, met elke andere markt op één klik",

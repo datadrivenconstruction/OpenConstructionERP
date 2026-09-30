@@ -43686,6 +43686,7 @@ const resource = {
     "dashboard.regional_pack_none_body": "Regionální balíček za vás nastaví ceny, daňová pravidla a normy jednoho trhu, abyste je nemuseli zadávat ručně.",
     "dashboard.regional_pack_choose": "Nainstalovat balíček pro zemi",
     "dashboard.regional_pack_manage": "Změnit nebo přidat balíček pro zemi",
+    "dashboard.regional_pack_error": "Váš regionální balíček se nepodařilo načíst",
     "dashboard.market_cases.title": "Případy pro váš trh",
     "dashboard.market_cases.title_generic": "Případy podle trhu",
     "dashboard.layout.w_cases_market_desc": "Případy napsané pro zemi, ve které pracujete, a každý další trh na jedno kliknutí",
