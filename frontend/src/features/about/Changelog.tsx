@@ -58,7 +58,7 @@ const UNRELEASED: ChangelogEntry | null = {
   date: '2026-09-30',
   tag: 'FIX',
   summary:
-    'Demo data stays in demo projects, and a deleted demo project stays deleted through restarts and upgrades. The demo-cleanup command lists the demo records an older version left in your own projects, and demo-cleanup --apply removes them.',
+    'Demo data stays in demo projects, and a deleted demo stays deleted through restarts and upgrades, including on installs that removed their demos before this version. Settings can now find the demo records an older version left in your own projects and remove them after you confirm; on a server, demo-cleanup does the same.',
 };
 
 // Sorted newest to oldest. Sort is enforced at runtime below (semver-aware) so

@@ -72,4 +72,10 @@ The app runs at [localhost:8080](http://localhost:8080).
 - Import your own cost data (GAEB XML, Excel, CSV) via the Import module.
 - Connect a CAD/BIM model through the 3D Viewer.
 
+## Removing the demo projects
+
+The demo projects are yours to delete. Delete them one by one from the project list, or remove them all at once under Settings, Danger Zone, Remove sample data. A demo you removed stays removed: restarts and upgrades do not bring it back, and installing it again from the demo catalog is the one way to get it back.
+
+Earlier versions could write demo records into your own projects on restart, such as a daily diary, bid packages, quality plans or a team roster. To find and remove them, an administrator opens Settings, Danger Zone, Find leftover demo records, looks through the list grouped by project and module, and confirms Remove. On a server, `openconstructionerp demo-cleanup` prints the same list without changing anything, and `openconstructionerp demo-cleanup --apply` removes it. Only records that carry the demo seed's mark or match exactly what the seed writes are listed, and a demo record somebody has worked on since is kept and shown with the reason.
+
 For building from source, running tests, or contributing, see [DEVELOPING.md](../DEVELOPING.md).
