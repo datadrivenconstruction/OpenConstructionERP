@@ -15523,6 +15523,7 @@ const resource = {
     "auth.demo_role_admin": "Διαχειριστής",
     "auth.demo_role_manager": "Διευθυντής",
     "auth.demo_login_failed": "Η δοκιμαστική σύνδεση απέτυχε. Παρακαλώ δοκιμάστε ξανά.",
+    "auth.demo_admin_superseded": "Αυτή η εγκατάσταση έχει ήδη διαχειριστή. Συνδεθείτε με τον δικό σας λογαριασμό.",
     "auth.hide_password": "Απόκρυψη κωδικού",
     "auth.show_password": "Εμφάνιση κωδικού",
     "auth.try_demo": "Δοκιμάστε demo (χωρίς εγγραφή)",

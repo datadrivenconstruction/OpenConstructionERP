@@ -15230,6 +15230,7 @@ const resource = {
     "auth.demo_role_admin": "Administrateur",
     "auth.demo_role_manager": "Responsable",
     "auth.demo_login_failed": "Échec de la connexion de démonstration. Veuillez réessayer.",
+    "auth.demo_admin_superseded": "Cette installation a déjà un administrateur. Veuillez vous connecter avec votre propre compte.",
     "auth.hide_password": "Masquer le mot de passe",
     "auth.show_password": "Afficher le mot de passe",
     "auth.try_demo": "Essayer la démo (sans inscription)",

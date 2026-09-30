@@ -15428,6 +15428,7 @@ const resource = {
     "auth.demo_role_admin": "Adminisztrátor",
     "auth.demo_role_manager": "Menedzser",
     "auth.demo_login_failed": "A demó bejelentkezés sikertelen. Próbálja újra.",
+    "auth.demo_admin_superseded": "Ennek a telepítésnek már van rendszergazdája. Kérjük, jelentkezzen be a saját fiókjával.",
     "auth.hide_password": "Jelszó elrejtése",
     "auth.show_password": "Jelszó megjelenítése",
     "auth.try_demo": "Demó kipróbálása (regisztráció nélkül)",

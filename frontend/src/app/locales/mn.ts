@@ -16332,6 +16332,7 @@ const resource = {
     "audit.severity_warning": "Анхааруулга",
     "audit.system": "Систем / арын процесс",
     "auth.demo_login_failed": "Демо нэвтрэлт амжилтгүй. Дахин оролдоно уу.",
+    "auth.demo_admin_superseded": "Энэ суулгацад администратор байна. Өөрийн бүртгэлээр нэвтэрнэ үү.",
     "auth.demo_role_admin": "Администратор",
     "auth.demo_role_manager": "Менежер",
     "auth.hide_password": "Нууц үгийг нуух",

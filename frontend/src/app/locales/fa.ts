@@ -15438,6 +15438,7 @@ const resource = {
     "auth.demo_role_admin": "مدیر سیستم",
     "auth.demo_role_manager": "مدیر",
     "auth.demo_login_failed": "ورود آزمایشی ناموفق بود. لطفاً دوباره امتحان کنید.",
+    "auth.demo_admin_superseded": "این نصب یک مدیر دارد. لطفاً با حساب کاربری خودتان وارد شوید.",
     "auth.hide_password": "پنهان‌کردن گذرواژه",
     "auth.show_password": "نمایش گذرواژه",
     "auth.try_demo": "امتحان نسخه آزمایشی (بدون ثبت‌نام)",

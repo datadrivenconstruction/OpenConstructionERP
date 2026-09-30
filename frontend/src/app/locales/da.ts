@@ -17499,6 +17499,7 @@ const resource = {
     "auth.demo_role_admin": "Administrator",
     "auth.demo_role_manager": "Leder",
     "auth.demo_login_failed": "Demo-login mislykkedes. Prøv venligst igen.",
+    "auth.demo_admin_superseded": "Denne installation har en administrator. Log ind med din egen konto.",
     "auth.hide_password": "Skjul adgangskode",
     "auth.show_password": "Vis adgangskode",
     "auth.try_demo": "Prøv demo (ingen tilmelding)",

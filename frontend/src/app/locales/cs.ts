@@ -17134,6 +17134,7 @@ const resource = {
     "accommodation.settings.general_hint": "Core metadata, název, adresa a odkazy na BIM model / Geo Centrum coordinates tento power right-rail shortcuts.",
     "auth.demo_role_manager": "Manažer",
     "auth.demo_login_failed": "Demo přihlášení selhalo. Prosím zkuste znovu.",
+    "auth.demo_admin_superseded": "Tato instalace už má správce. Přihlaste se prosím vlastním účtem.",
     "auth.hide_password": "Skrýt heslo",
     "auth.show_password": "Zobrazit heslo",
     "auth.try_demo": "Zkuste demo (ne signup)",

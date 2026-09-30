@@ -16460,6 +16460,7 @@ const resource = {
     "audit.severity_warning": "คำเตือน",
     "audit.system": "ระบบ / เบื้องหลัง",
     "auth.demo_login_failed": "เข้าสู่ระบบ demo ล้มเหลว กรุณาลองอีกครั้ง",
+    "auth.demo_admin_superseded": "การติดตั้งนี้มีผู้ดูแลระบบแล้ว โปรดลงชื่อเข้าใช้ด้วยบัญชีของคุณเอง",
     "auth.demo_role_admin": "ผู้ดูแลระบบ",
     "auth.demo_role_manager": "ผู้จัดการ",
     "auth.hide_password": "ซ่อนรหัสผ่าน",

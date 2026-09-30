@@ -18039,6 +18039,7 @@ const resource = {
     "audit.severity_warning": "Предупреждение",
     "audit.system": "Система / фонов процес",
     "auth.demo_login_failed": "Демо влизането се провали. Моля, опитайте отново.",
+    "auth.demo_admin_superseded": "Тази инсталация вече има администратор. Моля, влезте със собствения си акаунт.",
     "auth.demo_role_admin": "Администратор",
     "auth.demo_role_manager": "Мениджър",
     "auth.hide_password": "Скрий паролата",

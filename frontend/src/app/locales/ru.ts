@@ -17035,6 +17035,7 @@ const resource = {
     "auth.demo_role_admin": "Администратор",
     "auth.demo_role_manager": "Менеджер",
     "auth.demo_login_failed": "Демо-вход не выполнен. Попробуйте ещё раз.",
+    "auth.demo_admin_superseded": "У этой установки уже есть администратор. Войдите под своей учётной записью.",
     "auth.hide_password": "Скрыть пароль",
     "auth.show_password": "Показать пароль",
     "auth.try_demo": "Попробовать демо (без регистрации)",

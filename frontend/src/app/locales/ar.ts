@@ -16447,6 +16447,7 @@ const resource = {
     "auth.demo_role_admin": "مسؤول",
     "auth.demo_role_manager": "مدير",
     "auth.demo_login_failed": "فشل تسجيل الدخول التجريبي. يرجى المحاولة مرة أخرى.",
+    "auth.demo_admin_superseded": "يوجد مسؤول لهذا التثبيت. يرجى تسجيل الدخول بحسابك الخاص.",
     "auth.hide_password": "إخفاء كلمة المرور",
     "auth.show_password": "إظهار كلمة المرور",
     "auth.try_demo": "تجربة العرض التوضيحي (بدون تسجيل)",

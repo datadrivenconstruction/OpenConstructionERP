@@ -15936,6 +15936,7 @@ const resource = {
     "auth.demo_role_admin": "管理者",
     "auth.demo_role_manager": "マネージャー",
     "auth.demo_login_failed": "デモログインに失敗しました。もう一度お試しください。",
+    "auth.demo_admin_superseded": "このインストールには管理者がいます。ご自身のアカウントでサインインしてください。",
     "auth.hide_password": "パスワードを非表示",
     "auth.show_password": "パスワードを表示",
     "auth.try_demo": "デモを試す（登録不要）",

@@ -16964,6 +16964,7 @@ const resource = {
     "audit.page_of": "Näytetään {{start}}-{{end}}",
     "audit.raw_payload": "Raaka tietosisältö",
     "auth.demo_login_failed": "Demoon kirjautuminen epäonnistui. Yritä uudelleen.",
+    "auth.demo_admin_superseded": "Tällä asennuksella on jo pääkäyttäjä. Kirjaudu sisään omalla tililläsi.",
     "auth.demo_role_admin": "Ylläpitäjä",
     "auth.hide_password": "Piilota salasana",
     "auth.show_password": "Näytä salasana",
