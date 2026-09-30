@@ -224,3 +224,37 @@ def test_every_call_site_passes_the_helpers_arguments_in_order() -> None:
         assert isinstance(third, ast.Name) and third.id == "session", (
             f"line {call.lineno}: third argument must be session, not {ast.unparse(third)}"
         )
+
+
+async def test_the_upload_preview_decodes_like_an_import(app_factory, db_session) -> None:
+    """``POST /preview/file/`` takes the import's multipart part and its decoder."""
+    from app.modules.rebar_schedule.abs_format import compute_checksum
+    from tests.modules.rebar_schedule import abs_fixtures
+
+    base = abs_fixtures.RECORDS["bar-with-one-bend"]
+    record = base.replace("@r312@", "@rBügel@")
+    prefix = record[: record.rindex("@C") + 2]
+    data = (prefix + str(compute_checksum(prefix)) + "@\r\n").encode("cp1252")
+
+    user_id, _ = await _seed_user_and_project(db_session)
+    _override_payload(app_factory, user_id, perms=["rebar_schedule.read"])
+    try:
+        transport = ASGITransport(app=app_factory)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            response = await client.post(
+                f"{_PREFIX}/preview/file/",
+                files={"upload": ("buegel.abs", data, "application/octet-stream")},
+            )
+            empty = await client.post(
+                f"{_PREFIX}/preview/file/",
+                files={"upload": ("empty.abs", b"  \r\n", "application/octet-stream")},
+            )
+    finally:
+        app_factory.dependency_overrides.clear()
+
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body["encoding"] == "cp1252"
+    assert body["shapes"][0]["checksum_ok"] is True
+    assert body["shapes"][0]["drawing_ref"] == "Bügel"
+    assert empty.status_code == 422

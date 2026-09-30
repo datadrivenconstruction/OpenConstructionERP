@@ -245,11 +245,14 @@ class RebarScheduleService:
 
     # ── Import ────────────────────────────────────────────────────────────
 
-    async def preview(self, content: str, *, locale: str | None = None) -> dict[str, Any]:
+    async def preview(self, content: bytes | str, *, locale: str | None = None) -> dict[str, Any]:
         """Parse and validate without storing anything.
 
         Args:
-            content: The file's text.
+            content: The file's bytes, or already-decoded text. Pass bytes
+                whenever you have them: they go through the same decoder as an
+                import, so a cp1252 file previews with the checksums and the
+                text the import will store.
             locale: Locale for the rule messages.
 
         Returns:
