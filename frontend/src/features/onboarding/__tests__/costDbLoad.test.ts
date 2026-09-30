@@ -151,3 +151,31 @@ describe('a manual cost base load is followed to its end', () => {
     expect(result).toEqual({ outcome: 'failed', job: null });
   });
 });
+
+describe('costDbLoadReport, the language a base opened in', () => {
+  it('warns when the base stayed in another language than its own', () => {
+    const done = job({
+      state: 'success',
+      outcome: 'completed',
+      total: 10486,
+      text_language: 'en',
+      text_language_requested: 'zh',
+    });
+    const report = costDbLoadReport({ outcome: 'completed', job: done }, 'China');
+    expect(report.toast.type).toBe('warning');
+    expect(report.toast.message).toMatch(/English/);
+    expect(report.toast.message).toMatch(/Chinese/);
+    expect(report.queueLine).toMatch(/English/);
+  });
+
+  it('reports plain success when the base opened in its own language', () => {
+    const done = job({
+      state: 'success',
+      outcome: 'completed',
+      total: 10486,
+      text_language: 'zh',
+      text_language_requested: 'zh',
+    });
+    expect(costDbLoadReport({ outcome: 'completed', job: done }, 'China').toast.type).toBe('success');
+  });
+});

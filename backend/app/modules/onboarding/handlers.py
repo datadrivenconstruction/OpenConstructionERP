@@ -111,6 +111,7 @@ async def load_cwicr_handler(job_run: JobRun, payload: dict[str, Any]) -> dict[s
         # Which language the base opened in, beside the one it should have.
         "text_language": result.get("text_language"),
         "text_language_requested": result.get("text_language_requested"),
+        "text_language_error": result.get("text_language_error"),
         "status": result.get("status") or "loaded",
     }
 
