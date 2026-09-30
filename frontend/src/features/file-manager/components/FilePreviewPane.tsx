@@ -350,10 +350,15 @@ export function FilePreviewPane({ row, onClose, onEmail, onShare, onManageAccess
               </span>
             </button>
           ) : row.thumbnail_url ? (
-            <img
+            // The thumbnail routes (documents photos, drawing previews) sit
+            // behind the bearer token; a bare <img> answered 401 here while
+            // the grid next to it, which already used AuthImage, showed the
+            // same picture.
+            <AuthImage
               src={row.thumbnail_url}
               alt=""
               className="max-h-full max-w-full object-contain rounded-lg"
+              fallback={<Icon size={48} strokeWidth={1.5} className="text-content-tertiary" />}
             />
           ) : (
             <Icon size={48} strokeWidth={1.5} className="text-content-tertiary" />

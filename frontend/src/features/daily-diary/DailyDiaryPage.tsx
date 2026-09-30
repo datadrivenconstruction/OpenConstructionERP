@@ -2194,16 +2194,14 @@ function EntriesTimeline({
 }
 
 /**
- * Render a diary-photo thumbnail. Diary photos uploaded through the new file
- * input / file picker point at the platform's OWN bearer-protected endpoints
- * (``/api/v1/documents/...``); a bare <img> would 401 on those, so we route
- * same-origin API URLs through <AuthImage> (token fetch -> object URL).
- * Externally-hosted or public ``/files/...`` URLs keep the plain <img> path.
+ * Render a diary-photo thumbnail.
+ *
+ * ``AuthImage`` covers both shapes a diary photo URL takes: the platform's
+ * own bearer-protected routes (``/api/v1/documents/...``, which a bare <img>
+ * would 401 on) are fetched with the token, and anything else is loaded
+ * directly. Either way a URL that yields no picture shows the camera glyph
+ * instead of the browser's broken-image icon.
  */
-function isAuthAssetUrl(url: string | null | undefined): boolean {
-  return !!url && url.startsWith('/api/');
-}
-
 function DiaryPhotoThumb({
   url,
   alt,
@@ -2213,23 +2211,20 @@ function DiaryPhotoThumb({
   alt: string;
   className: string;
 }) {
-  if (isAuthAssetUrl(url)) {
-    return (
-      <AuthImage
-        src={url}
-        alt={alt}
-        className={className}
-        loading="lazy"
-        placeholder={<div className="h-full w-full animate-pulse bg-surface-secondary" />}
-        fallback={
-          <div className="flex h-full w-full items-center justify-center text-content-quaternary">
-            <Camera size={16} strokeWidth={1.5} />
-          </div>
-        }
-      />
-    );
-  }
-  return <img src={url} alt={alt} loading="lazy" className={className} />;
+  return (
+    <AuthImage
+      src={url}
+      alt={alt}
+      className={className}
+      loading="lazy"
+      placeholder={<div className="h-full w-full animate-pulse bg-surface-secondary" />}
+      fallback={
+        <div className="flex h-full w-full items-center justify-center text-content-quaternary">
+          <Camera size={16} strokeWidth={1.5} />
+        </div>
+      }
+    />
+  );
 }
 
 function PhotoGrid({

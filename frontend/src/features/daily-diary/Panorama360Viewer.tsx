@@ -13,13 +13,16 @@
  * The three.js lifecycle (one renderer per mount, WebGL try/catch fallback,
  * ResizeObserver, full disposal on unmount) mirrors the point-cloud viewer so
  * the two stay consistent. The image is the already-served photo ``file_url``
- * - no new endpoint, no re-upload.
+ * - no new endpoint, no re-upload. That URL is usually a bearer-protected API
+ * route, and ``TextureLoader`` requests it the way an ``<img>`` does, without
+ * the token, so it is resolved through ``useAuthedObjectUrl`` first.
  */
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { AlertCircle, Loader2, RotateCcw, X } from 'lucide-react';
+import { useAuthedObjectUrl } from '@/shared/ui/AuthImage';
 
 type Phase = 'loading' | 'ready' | 'error';
 
@@ -44,6 +47,11 @@ export function Panorama360Viewer({ imageUrl, label, onClose }: Panorama360Viewe
   const controlsRef = useRef<OrbitControls | null>(null);
   const [phase, setPhase] = useState<Phase>('loading');
   const [webglFailed, setWebglFailed] = useState(false);
+  const { url: textureUrl, failed: fetchFailed } = useAuthedObjectUrl(imageUrl);
+
+  useEffect(() => {
+    if (fetchFailed) setPhase('error');
+  }, [fetchFailed]);
 
   // Close on Escape from anywhere while the overlay is open.
   useEffect(() => {
@@ -60,7 +68,7 @@ export function Panorama360Viewer({ imageUrl, label, onClose }: Panorama360Viewe
   // ── Scene lifecycle: one renderer per mount, disposed on unmount ──────────
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return undefined;
+    if (!container || !textureUrl) return undefined;
 
     let renderer: THREE.WebGLRenderer;
     try {
@@ -122,7 +130,7 @@ export function Panorama360Viewer({ imageUrl, label, onClose }: Panorama360Viewe
     let disposed = false;
 
     loader.load(
-      imageUrl,
+      textureUrl,
       (tex) => {
         if (disposed) {
           tex.dispose();
@@ -180,7 +188,7 @@ export function Panorama360Viewer({ imageUrl, label, onClose }: Panorama360Viewe
       cameraRef.current = null;
       controlsRef.current = null;
     };
-  }, [imageUrl]);
+  }, [textureUrl]);
 
   const handleReset = () => {
     const camera = cameraRef.current;
