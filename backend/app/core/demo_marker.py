@@ -141,6 +141,52 @@ async def retire_demo_ids(
     return added
 
 
+async def backfill_removed_demo_records(
+    session: AsyncSession,
+    boot_demo_ids: Iterable[str],
+    *,
+    seeded_before: bool,
+) -> int:
+    """Record the removal of demos that an install before these records removed.
+
+    Versions before the removal record deleted or purged demo projects without
+    writing one, so the first boot on this version would find no demo project
+    and no record and install the showcase again. That is the install the
+    record exists for, so its state is recognised and written down first: the
+    demos were seeded here before (``seeded_before``: the backfill marker or
+    the first-run choice says so), not one project in the database carries a
+    ``demo_id`` any more, archived ones included, and no removal has been
+    recorded yet. Then every demo the boot would install is recorded as
+    removed.
+
+    Any demo project still present, or any record already written, means the
+    install is on the new bookkeeping or never removed its demos, and nothing
+    is written. A person can bring any demo back through an explicit install.
+
+    Args:
+        session: Session to read and write through; the caller commits.
+        boot_demo_ids: Every demo the boot installs on this install.
+        seeded_before: The demos were installed on this install before.
+
+    Returns:
+        How many removals were recorded.
+    """
+    from app.modules.projects.models import DemoProjectTombstone, Project
+
+    if not seeded_before:
+        return 0
+    if (await session.execute(select(DemoProjectTombstone.id).limit(1))).first() is not None:
+        return 0
+    metas = (await session.execute(select(Project.metadata_))).scalars().all()
+    if any(demo_id_of(meta) for meta in metas):
+        return 0
+    wanted = {did: None for did in boot_demo_ids if did}
+    written = await retire_demo_ids(session, wanted, reason="backfill")
+    if written:
+        logger.info("Recorded %d demo(s) removed before this version, so boot does not reinstall them", written)
+    return written
+
+
 async def restore_demo_id(session: AsyncSession, demo_id: str) -> None:
     """Forget that ``demo_id`` was removed; a person asked for it again."""
     from app.modules.projects.models import DemoProjectTombstone
