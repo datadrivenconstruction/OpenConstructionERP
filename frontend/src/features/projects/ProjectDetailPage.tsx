@@ -977,7 +977,7 @@ function DropZone({
       <input
         ref={inputRef}
         type="file"
-        accept=".xlsx,.csv,.pdf,.jpg,.jpeg,.png,.tiff,.rvt,.ifc,.dwg,.dgn"
+        accept=".xlsx,.xls,.csv,.pdf,.jpg,.jpeg,.png,.tiff,.rvt,.ifc,.dwg,.dgn"
         className="hidden"
         onChange={handleChange}
         disabled={disabled}
@@ -1003,7 +1003,7 @@ function ImportDialog({
   const [result, setResult] = useState<ImportResult | null>(null);
 
   const SUPPORTED_EXTENSIONS = [
-    '.xlsx', '.csv', '.pdf', '.jpg', '.jpeg', '.png', '.tiff',
+    '.xlsx', '.xls', '.csv', '.pdf', '.jpg', '.jpeg', '.png', '.tiff',
     '.rvt', '.ifc', '.dwg', '.dgn',
   ];
 
@@ -1033,19 +1033,12 @@ function ImportDialog({
       const name = file.name.toLowerCase();
       if (!SUPPORTED_EXTENSIONS.some((ext) => name.endsWith(ext))) {
         // Dropping a file this dialog cannot take used to do nothing at all.
-        // An Excel 97-2003 workbook is the common case and has a fix.
         setRejected(
-          name.endsWith('.xls')
-            ? t('import.legacy_xls', {
-                defaultValue:
-                  '{{name}} is an Excel 97-2003 workbook (.xls), which cannot be read directly. Open it in Excel or LibreOffice, save it as an Excel workbook (.xlsx) and upload that file.',
-                name: file.name,
-              })
-            : t('import.unsupported_type', {
-                defaultValue: '{{name}} is not a file type this import reads. Supported: {{types}}',
-                name: file.name,
-                types: fmtList(SUPPORTED_EXTENSIONS),
-              }),
+          t('import.unsupported_type', {
+            defaultValue: '{{name}} is not a file type this import reads. Supported: {{types}}',
+            name: file.name,
+            types: fmtList(SUPPORTED_EXTENSIONS),
+          }),
         );
         return;
       }

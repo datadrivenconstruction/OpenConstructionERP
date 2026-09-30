@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Excel (.xlsx) and CSV BOQ importer.
+"""Excel (.xlsx, .xls) and CSV BOQ importer.
 
 Generic spreadsheet ingester with three classification heuristics on top
 of the column-alias mapper:
@@ -44,6 +44,7 @@ from app.modules.boq.importers._encoding import (
     parse_numeric_cell,
     safe_float,
 )
+from app.modules.boq.importers._workbook import open_workbook
 from app.modules.boq.importers.hungary_workbook import parse_hungarian_workbook
 from app.modules.boq.roundtrip import ID_COLUMN_ALIASES, normalise_id
 from app.modules.boq.units import is_lump_sum_unit
@@ -1008,7 +1009,7 @@ def _report_mapping(column_map: dict[int, str]) -> dict[str, str]:
     return {str(index): _SPLIT_COLUMNS.get(canonical, canonical) for index, canonical in column_map.items()}
 
 
-def _detect_file_format(content_head: bytes) -> Literal["xlsx", "csv", "parquet", "unknown"]:
+def _detect_file_format(content_head: bytes) -> Literal["xlsx", "xls", "csv", "parquet", "unknown"]:
     """Identify an upload by its magic bytes (BUG-UPLOAD01 from the legacy code).
 
     A ``.exe`` renamed to ``.xlsx`` would otherwise be handed to
@@ -1020,6 +1021,8 @@ def _detect_file_format(content_head: bytes) -> Literal["xlsx", "csv", "parquet"
     sig = detect_signature(content_head)
     if sig == "zip":  # XLSX = OOXML zip
         return "xlsx"
+    if sig == "ole":  # XLS = Excel 97-2003, an OLE2 compound file
+        return "xls"
     if content_head[:4] == b"PAR1":
         return "parquet"
     if b"\x00" in content_head:
@@ -1369,7 +1372,7 @@ def _join_sheets(read: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list
 def _parse_rows_from_excel(
     content_bytes: bytes,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    """Read the item sheets of an .xlsx file into canonical-key dicts.
+    """Read the item sheets of an .xlsx or .xls file into canonical-key dicts.
 
     Every item sheet is read, see :func:`_pick_item_sheets`. Returns
     ``(rows, import_metadata)``; metadata preserves the raw column ordering of
@@ -1379,9 +1382,7 @@ def _parse_rows_from_excel(
     names the row the user sees under a letterhead and past blank lines, on the
     sheet it is on. ``sheet_notes`` names every sheet that was not read and why.
     """
-    from openpyxl import load_workbook
-
-    wb = load_workbook(io.BytesIO(content_bytes), read_only=True, data_only=True)
+    wb = open_workbook(content_bytes)
     if wb.active is None:
         raise ImporterParseError("Excel file has no worksheets")
     sheet_names = wb.sheetnames
@@ -2217,31 +2218,36 @@ def _rows_to_positions(
 
 
 class ExcelImporter:
-    """Generic Excel (.xlsx) / CSV importer with NRM + MasterFormat heuristics."""
+    """Generic Excel (.xlsx, .xls) / CSV importer with NRM + MasterFormat heuristics."""
 
     format_id: ClassVar[str] = "excel"
-    extensions: ClassVar[tuple[str, ...]] = (".xlsx", ".csv")
+    extensions: ClassVar[tuple[str, ...]] = (".xlsx", ".xls", ".csv")
     display_name: ClassVar[str] = "Excel / CSV BOQ"
     rule_packs: ClassVar[tuple[str, ...]] = ("boq_quality",)
 
     @classmethod
     def detect(cls, head_bytes: bytes, filename: str) -> bool:
-        """Detect by magic bytes (xlsx zip header / CSV text) + extension."""
+        """Detect by magic bytes (xlsx zip, xls compound file, CSV text) + extension."""
         if not head_bytes:
             return False
         name = filename.lower()
         if not any(name.endswith(ext) for ext in cls.extensions):
             return False
         fmt = _detect_file_format(head_bytes[:4096])
-        if name.endswith(".xlsx"):
-            return fmt == "xlsx"
+        # Either workbook extension takes either workbook format. Excel opens
+        # an .xlsx saved under .xls, and a password-protected .xlsx is a
+        # compound file rather than a zip: claimed here, it is refused with
+        # a message about the password instead of wandering off to the
+        # model-assisted reader.
+        if name.endswith((".xlsx", ".xls")):
+            return fmt in ("xlsx", "xls")
         if name.endswith(".csv"):
             return fmt == "csv"
         return False
 
     @classmethod
     async def parse(cls, content: bytes, *, locale: str = "en") -> ImportedBOQ:
-        """Parse an .xlsx or .csv BOQ into :class:`ImportedBOQ`."""
+        """Parse an .xlsx, .xls or .csv BOQ into :class:`ImportedBOQ`."""
         if not content:
             raise ImporterParseError("Spreadsheet upload is empty")
 
@@ -2254,16 +2260,17 @@ class ExcelImporter:
         # a workbook it recognises and hands everything else straight back, and
         # it has to be asked here rather than in ``detect`` because an xlsx is a
         # zip whose first four kilobytes say nothing about its contents.
-        if fmt == "xlsx":
+        if fmt in ("xlsx", "xls"):
             hungarian = parse_hungarian_workbook(content)
             if hungarian is not None and hungarian.positions:
+                hungarian.source_format = fmt
                 return hungarian
 
         import_meta: dict[str, Any] = {}
         try:
-            if fmt == "xlsx":
+            if fmt in ("xlsx", "xls"):
                 rows, import_meta = _parse_rows_from_excel(content)
-                source_format = "xlsx"
+                source_format = fmt
             elif fmt == "csv":
                 rows, import_meta = _parse_csv(content)
                 source_format = "csv"

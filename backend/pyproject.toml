@@ -108,6 +108,14 @@ dependencies = [
     "python-jose[cryptography]>=3.3.0,<4",
     "bcrypt>=4.0.0,<6",
     "openpyxl>=3.1.0,<4",
+    # Excel 97-2003 (.xls) for the BOQ import. openpyxl reads OOXML only, and
+    # estimating programs in several markets still export .xls, so a bill
+    # arrived as a file the import could only refuse. xlrd 2.x reads exactly
+    # this format and nothing else (it dropped .xlsx in 2.0), is pure Python
+    # with no dependencies of its own, and is BSD licensed. Pinned to the 2.0
+    # line: the format is frozen, so a new xlrd release can only change how
+    # we read it, and that is a change we want to make on purpose.
+    "xlrd>=2.0.1,<2.1",
     "reportlab>=4.0.0,<6",
     # Text shaping for Thai and Devanagari, the two bundled scripts a font alone
     # renders wrongly rather than not at all (app/core/pdf_fonts.py explains

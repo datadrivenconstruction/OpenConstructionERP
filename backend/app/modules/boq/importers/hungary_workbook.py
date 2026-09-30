@@ -38,7 +38,6 @@ what it holds and the value is carried through as
 
 from __future__ import annotations
 
-import io
 import logging
 import re
 from datetime import date, datetime
@@ -621,16 +620,16 @@ def detect_profile(workbook: Any) -> str | None:
 
 
 def parse_hungarian_workbook(content: bytes) -> ImportedBOQ | None:
-    """Parse an ``.xlsx`` upload if it is a Hungarian bill, else ``None``.
+    """Parse an ``.xlsx`` or ``.xls`` upload if it is a Hungarian bill, else ``None``.
 
     Never raises. A workbook that opens but is not one of the two shapes is
     not this module's, and one that will not open at all is the generic
     reader's problem to report, with its own error text.
     """
-    from openpyxl import load_workbook
+    from app.modules.boq.importers._workbook import open_workbook
 
     try:
-        workbook = load_workbook(io.BytesIO(content), read_only=True, data_only=True)
+        workbook = open_workbook(content)
     except Exception:  # noqa: BLE001 - the generic reader reports this properly
         return None
 

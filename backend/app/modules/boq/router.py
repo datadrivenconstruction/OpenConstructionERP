@@ -6958,7 +6958,6 @@ async def import_boq_auto(
             continue
 
     if chosen is None:
-        _refuse_legacy_xls(file_name, head)
         # No native importer claimed the file - fall back to smart_import
         # (LLM). Reset the upload buffer's position so smart_import can
         # re-read it. UploadFile's underlying SpooledTemporaryFile
@@ -7156,12 +7155,11 @@ async def import_preview(
             continue
 
     if chosen is None:
-        _refuse_legacy_xls(file_name, head)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=(
                 "No native importer recognised this file format. "
-                "Supported formats: GAEB XML, BC3 / FIEBDC-3, Excel (.xlsx), CSV."
+                "Supported formats: GAEB XML, BC3 / FIEBDC-3, Excel (.xlsx, .xls), CSV."
             ),
         )
 
@@ -7217,28 +7215,6 @@ async def import_preview(
     )
 
     return response.model_dump()
-
-
-def _refuse_legacy_xls(file_name: str, head: bytes) -> None:
-    """Refuse an Excel 97-2003 workbook with a message that says what to do.
-
-    A ``.xls`` is an OLE2 container and no importer here reads it: the
-    spreadsheet reader opens OOXML only. The preview used to answer with the
-    generic "no importer" message while listing ``.xls`` among the formats it
-    reads, and the auto import handed the file to the smart path, which fails
-    on it the same way.
-
-    Raises:
-        HTTPException: 400 when the upload is a legacy ``.xls`` workbook.
-    """
-    if file_name.lower().endswith(".xls") and detect_signature(head) == "ole":
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=(
-                "This is an Excel 97-2003 workbook (.xls), which cannot be read directly. "
-                "Open it in Excel or LibreOffice, save it as an Excel workbook (.xlsx) and upload that file."
-            ),
-        )
 
 
 # ── Smart import helpers ─────────────────────────────────────────────────────
@@ -7322,9 +7298,9 @@ def _extract_from_excel_for_smart(content: bytes) -> dict[str, Any]:
         logger.debug("Smart import: structured Excel parsing failed, using raw text", exc_info=True)
 
     # Fall back to extracting raw text from all cells
-    from openpyxl import load_workbook
+    from app.modules.boq.importers._workbook import open_workbook
 
-    wb = load_workbook(io.BytesIO(content), read_only=True, data_only=True)
+    wb = open_workbook(content)
     ws = wb.active
     text_parts: list[str] = []
     if ws is not None:
@@ -7620,9 +7596,6 @@ async def smart_import(
     # ── 1. Extract text/data based on file type ────────────────────────
     native: ImportedBOQ | None = None
     if ext in _SMART_IMPORT_EXCEL_EXTS:
-        # An Excel 97-2003 workbook opens in nothing here: refuse it with what
-        # to do, as /import/auto/ does, instead of failing inside openpyxl.
-        _refuse_legacy_xls(file.filename or "upload", content[:4096])
         # BUG-UPLOAD01b: smart-import path used to skip the xlsx-bomb
         # guard that import_boq_excel calls - same DoS surface via this
         # endpoint. Apply the same defence here before parsing.

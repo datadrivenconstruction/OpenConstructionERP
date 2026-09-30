@@ -7,7 +7,7 @@
 // a good result". That button posted to the deprecated smart route, which read
 // a spreadsheet's item sheet on its own: a Hungarian chapter workbook lost its
 // item codes and its sections, the import was never validated, and a dropped
-// .xls did nothing at all. The bill editor's import dialog already posted to
+// .xls did nothing at all. An .xls is read natively now, like an .xlsx. The bill editor's import dialog already posted to
 // /import/auto/, so the same file gave two different bills depending on which
 // button the user found first.
 //
@@ -44,9 +44,12 @@ describe('project page import', () => {
     expect(call).toContain("'Accept-Language'");
   });
 
-  it('refuses a file it cannot take with a message, and names an .xls as the one to resave', () => {
+  it('takes an .xls and refuses a file it cannot take with a message', () => {
     const source = page();
-    expect(source).toContain("t('import.legacy_xls'");
+    const list = source.slice(source.indexOf('const SUPPORTED_EXTENSIONS'), source.indexOf('];', source.indexOf('const SUPPORTED_EXTENSIONS')));
+    expect(list).toContain("'.xlsx'");
+    expect(list).toContain("'.xls'");
+    expect(source).not.toContain('import.legacy_xls');
     expect(source).toContain("t('import.unsupported_type'");
     expect(source).toContain('setRejected(');
   });

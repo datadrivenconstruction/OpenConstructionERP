@@ -36,7 +36,7 @@ type StartMode = 'empty' | 'import';
 const IMPORT_STANDARDS: { region: string; standard: string; exts: string[] }[] = [
   { region: 'Germany / Austria / Switzerland', standard: 'GAEB DA XML 3.3 (X81 / X83 / X84 / X86)', exts: ['.x81', '.x83', '.x84', '.x86', '.xml'] },
   { region: 'Spain / Latin America', standard: 'FIEBDC-3 (BC3)', exts: ['.bc3'] },
-  { region: 'United Kingdom / United States / universal', standard: 'Excel or CSV (NRM / MasterFormat / custom columns)', exts: ['.xlsx', '.csv'] },
+  { region: 'United Kingdom / United States / universal', standard: 'Excel or CSV (NRM / MasterFormat / custom columns)', exts: ['.xlsx', '.xls', '.csv'] },
   { region: 'Drawings and scans (AI takeoff)', standard: 'PDF, IFC, DWG, RVT, DGN, images', exts: ['.pdf', '.ifc', '.dwg', '.rvt', '.dgn', '.jpg', '.jpeg', '.png', '.tiff'] },
 ];
 
@@ -97,18 +97,10 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
     touched && !effectiveName
       ? t('validation.required', { defaultValue: 'This field is required' })
       : undefined;
-  // An Excel 97-2003 workbook is read by no importer. Refuse it here, before
-  // an empty BOQ is created and the upload is refused by the server in English.
-  const isLegacyXls = startMode === 'import' && !!file && file.name.toLowerCase().endsWith('.xls');
   const fileError =
     touched && startMode === 'import' && !file
       ? t('boq.import_needs_file', { defaultValue: 'Choose a file to import, or switch to an empty BOQ.' })
-      : isLegacyXls
-        ? t('boq.import_preview.legacy_xls', {
-            defaultValue:
-              'This is an Excel 97-2003 workbook (.xls). Open it in Excel or LibreOffice, save it as an Excel workbook (.xlsx) and upload that file.',
-          })
-        : undefined;
+      : undefined;
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -118,7 +110,6 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
 
     if (!selectedProjectId || !effectiveName) return;
     if (startMode === 'import' && !file) return;
-    if (isLegacyXls) return;
 
     setBusy(true);
     try {
