@@ -50,6 +50,15 @@ class JobState(BaseModel):
     imported: int | None = Field(default=None, description="Items the job added, when it reports them.")
     total: int | None = Field(default=None, description="Items now present for the job's subject.")
     failed_items: int = Field(default=0, description="Items the job had to leave out.")
+    text_language: str | None = Field(
+        default=None, description="Language a loaded cost base's work items are in, when the job reports it."
+    )
+    text_language_requested: str | None = Field(
+        default=None, description="Language the cost base should have opened in (its own)."
+    )
+    text_language_error: str | None = Field(
+        default=None, description="Why the base did not open in text_language_requested, when it did not."
+    )
     created_at: datetime | None = None
     completed_at: datetime | None = None
 

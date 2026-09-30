@@ -103,6 +103,9 @@ def _job_state(row: JobRun) -> JobState:
         imported=_as_int(result.get("imported")),
         total=_as_int(result.get("total_items")),
         failed_items=_as_int(result.get("failed")) or 0,
+        text_language=result.get("text_language"),
+        text_language_requested=result.get("text_language_requested"),
+        text_language_error=result.get("text_language_error"),
         created_at=row.created_at,
         completed_at=row.completed_at,
     )
