@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { WideModalSection, WideModalField, Badge } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
+import { downloadWithAuth } from '@/shared/lib/api';
 import { uploadDocument, uploadPhoto, deleteDocument } from '@/features/documents/api';
 import AttachExistingFileModal from './AttachExistingFileModal';
 import {
@@ -225,6 +226,20 @@ export function ReportAttachments({
   const [busy, setBusy] = useState(false);
   const [showExistingPicker, setShowExistingPicker] = useState(false);
 
+  const handleOpen = useCallback(
+    async (documentId: string, name: string) => {
+      try {
+        await downloadWithAuth(`/api/v1/documents/${documentId}/download`, name);
+      } catch {
+        addToast({
+          type: 'error',
+          title: t('common.download_failed', { defaultValue: 'Download failed' }),
+        });
+      }
+    },
+    [addToast, t],
+  );
+
   const { data: docs = [], isLoading } = useQuery({
     queryKey: ['fieldreports', 'documents', reportId],
     queryFn: () => fetchReportDocuments(reportId),
@@ -406,11 +421,12 @@ export function ReportAttachments({
                   key={d.id}
                   className="flex items-center justify-between gap-2 rounded-lg border border-border-light px-3 py-1.5"
                 >
-                  <a
-                    href={`/api/v1/documents/${d.id}/download`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex min-w-0 flex-1 items-center gap-2 text-sm text-content-primary hover:text-oe-blue"
+                  {/* A button, not a link: the download route reads only the bearer
+                      header, which a browser navigation never sends. */}
+                  <button
+                    type="button"
+                    onClick={() => handleOpen(d.id, d.name)}
+                    className="flex min-w-0 flex-1 items-center gap-2 text-left text-sm text-content-primary hover:text-oe-blue"
                   >
                     {d.mime_type.startsWith('image/') ? (
                       <ImageIcon size={14} className="shrink-0" />
@@ -423,7 +439,7 @@ export function ReportAttachments({
                         defaultValue: d.category.charAt(0).toUpperCase() + d.category.slice(1),
                       })}
                     </Badge>
-                  </a>
+                  </button>
                   <button
                     type="button"
                     disabled={busy}

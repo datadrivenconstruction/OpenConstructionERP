@@ -12,7 +12,8 @@ import { Button, Badge, EmptyState, Breadcrumb, RecoveryCard, ViewInBIMButton, M
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import SimilarItemsPanel from '@/shared/ui/SimilarItemsPanel';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
-import { apiGet, apiDelete, apiPatch, isTruncated, type Page } from '@/shared/lib/api';
+import { apiGet, apiDelete, apiPatch, downloadWithAuth, isTruncated, type Page } from '@/shared/lib/api';
+import { downloadDocumentBlob } from './api';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { uuid } from '@/shared/lib/browser';
 import { useToastStore } from '@/stores/useToastStore';
@@ -286,6 +287,23 @@ function PreviewModal({
     return () => document.removeEventListener('keydown', handler);
   }, [onClose]);
 
+  // GET /documents/{id}/download reads only the bearer header, and an <img>,
+  // <iframe>, <video> or <audio> fetching its src never sends one. Fetch the
+  // bytes with the token and hand the element an object URL instead.
+  const { data: previewUrl, isError: previewFailed } = useQuery({
+    queryKey: ['document-preview-blob', doc.id],
+    queryFn: async () => URL.createObjectURL(await downloadDocumentBlob(doc.id)),
+    enabled: !!kind,
+    staleTime: Infinity,
+    gcTime: 0,
+  });
+  useEffect(
+    () => () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    },
+    [previewUrl],
+  );
+
   // Reverse-direction lookup: every BIM element this document is linked to.
   // The endpoint may not exist on older deployments — we tolerate a 404 by
   // showing nothing instead of throwing.  Lazy-loaded only when the modal
@@ -320,13 +338,16 @@ function PreviewModal({
             <span className="text-xs text-content-tertiary shrink-0">{formatSize(doc.file_size)}</span>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <a
-              href={`/api/v1/documents/${doc.id}/download`}
+            <button
+              type="button"
+              onClick={() => {
+                downloadWithAuth(`/api/v1/documents/${doc.id}/download`, doc.name).catch(() => {});
+              }}
               className="flex h-8 w-8 items-center justify-center rounded-lg text-content-secondary hover:bg-surface-secondary hover:text-oe-blue transition-colors"
               aria-label={t('documents.download', { defaultValue: 'Download' })}
             >
               <Download size={16} />
-            </a>
+            </button>
             <button
               onClick={onClose}
               className="flex h-8 w-8 items-center justify-center rounded-lg text-content-secondary hover:bg-surface-secondary hover:text-content-primary transition-colors"
@@ -339,21 +360,29 @@ function PreviewModal({
 
         {/* Content */}
         <div className="flex-1 overflow-auto flex items-center justify-center bg-black/5 min-h-[400px]">
-          {kind === 'pdf' ? (
+          {kind && !previewUrl ? (
+            previewFailed ? (
+              <p className="text-sm text-content-tertiary">
+                {t('common.download_failed', { defaultValue: 'Download failed' })}
+              </p>
+            ) : (
+              <Loader2 size={24} className="animate-spin text-content-tertiary" />
+            )
+          ) : kind === 'pdf' ? (
             <iframe
-              src={`/api/v1/documents/${doc.id}/download`}
+              src={previewUrl}
               title={doc.name}
               className="w-full h-[80vh]"
             />
           ) : kind === 'image' ? (
             <img
-              src={`/api/v1/documents/${doc.id}/download`}
+              src={previewUrl}
               alt={doc.name}
               className="max-w-full max-h-[80vh] object-contain"
             />
           ) : kind === 'video' ? (
             <video
-              src={`/api/v1/documents/${doc.id}/download`}
+              src={previewUrl}
               controls
               autoPlay
               className="max-w-full max-h-[80vh] bg-black"
@@ -364,7 +393,7 @@ function PreviewModal({
             </video>
           ) : kind === 'audio' ? (
             <audio
-              src={`/api/v1/documents/${doc.id}/download`}
+              src={previewUrl}
               controls
               className="w-full max-w-xl"
             >
@@ -1485,15 +1514,19 @@ export function DocumentsPage() {
                                 {t('documents.open_in_bim', { defaultValue: 'Open in BIM Viewer' })}
                               </button>
                             )}
-                            <a
+                            <button
+                              type="button"
                               role="menuitem"
-                              href={`/api/v1/documents/${doc.id}/download`}
                               className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-content-primary hover:bg-surface-secondary transition-colors"
-                              onClick={() => setOpenMenuId(null)}
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                // A plain link would open without the bearer header.
+                                downloadWithAuth(`/api/v1/documents/${doc.id}/download`, doc.name).catch(() => {});
+                              }}
                             >
                               <Download size={14} className="text-content-tertiary" />
                               {t('documents.download', { defaultValue: 'Download' })}
-                            </a>
+                            </button>
                             <button
                               role="menuitem"
                               onClick={() => {

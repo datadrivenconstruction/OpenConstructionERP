@@ -71,6 +71,7 @@ import BIMRequirementsImport from './BIMRequirementsImport';
 import { RulePackLibrary } from '@/features/bim_requirements/RulePackLibrary';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
+import { downloadWithAuth } from '@/shared/lib/api';
 import {
   applyQuantityMaps,
   createQuantityMap,
@@ -2582,14 +2583,21 @@ function RequirementsTabContent({
 
           {/* Export current set */}
           {currentSetId && requirements.length > 0 && (
-            <a
-              href={`/api/v1/requirements/${currentSetId}/export.xlsx`}
+            <button
+              type="button"
+              // The export route reads only the bearer header, which a plain link never sends.
+              onClick={() =>
+                downloadWithAuth(`/api/v1/requirements/${currentSetId}/export.xlsx`, 'requirements.xlsx').catch(
+                  (e: Error) =>
+                    addToast({ type: 'error', title: t('common.download_failed', { defaultValue: 'Download failed' }), message: e.message }),
+                )
+              }
               className="flex items-center gap-1.5 rounded-lg border border-border-light bg-surface-primary px-2.5 py-1.5 text-[11px] font-medium text-content-secondary hover:border-oe-blue hover:text-oe-blue"
               title={t('bim_rules.req_export_xlsx', { defaultValue: 'Export as Excel' })}
             >
               <Download size={12} />
               {t('common.export')}
-            </a>
+            </button>
           )}
 
           {/* Validate against BIM model - the headline action */}
