@@ -36,6 +36,12 @@ export interface OnboardingJobState {
   total?: number | null;
   /** Items the job had to leave out. */
   failed_items?: number;
+  /** Language a loaded cost base's work items are in, when the job reports it. */
+  text_language?: string | null;
+  /** Language the base should have opened in (its own). */
+  text_language_requested?: string | null;
+  /** Why it did not, when it did not. For logs, not for the user. */
+  text_language_error?: string | null;
 }
 
 /** The truthful ending of a finished onboarding job. */

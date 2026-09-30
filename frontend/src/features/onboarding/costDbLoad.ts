@@ -11,6 +11,7 @@
 
 import i18n from 'i18next';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { languageName } from '@/features/costs/baseCatalog';
 import {
   fetchOnboardingStatus,
   provisionOnboarding,
@@ -124,6 +125,18 @@ export function costDbLoadReport(result: CostDbLoadResult, dbName: string): Cost
       items: formatCount(result.job?.failed_items ?? 0),
     });
     return { toast: { type: 'warning', title, message: leftOut }, queueLine: leftOut };
+  }
+  // The base is in, but its switch to its own language did not land: say
+  // which language the work items stayed in rather than report it ready.
+  const shown = result.job?.text_language;
+  const asked = result.job?.text_language_requested;
+  if (shown && asked && shown !== asked) {
+    const stayed = i18n.t('costs.base_text_swap_failed', {
+      defaultValue: 'The work items stayed in {{language}}: the {{requested}} text could not be loaded.',
+      language: languageName(shown, i18n.language),
+      requested: languageName(asked, i18n.language),
+    });
+    return { toast: { type: 'warning', title, message: `${available}. ${stayed}` }, queueLine: stayed };
   }
   return { toast: { type: 'success', title, message: available }, queueLine: available };
 }
