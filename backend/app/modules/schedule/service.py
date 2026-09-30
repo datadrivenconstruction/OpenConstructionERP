@@ -1909,14 +1909,17 @@ class ScheduleService:
         self,
         activity_id: uuid.UUID,
         bim_element_ids: list[str],
+        *,
+        add: bool = False,
     ) -> Activity:
-        """Replace the BIM element link set on an activity.
+        """Replace, or add to, the BIM element link set on an activity.
 
         Args:
             activity_id: Target activity identifier.
-            bim_element_ids: Full list of BIM element UUIDs (as strings) to
-                store on the activity. The existing list is replaced, not
-                merged.
+            bim_element_ids: BIM element UUIDs (as strings). Without ``add``
+                they become the whole stored list.
+            add: Merge the ids into the stored list instead, keeping its
+                order and skipping ids already there.
 
         Returns:
             The updated activity (re-fetched from the database).
@@ -1930,6 +1933,10 @@ class ScheduleService:
         # Normalise to a list of plain strings so we never write a dict to
         # the JSON column (legacy values may have been dict-shaped).
         normalised = [str(eid) for eid in bim_element_ids]
+        if add:
+            stored = [str(eid) for eid in (activity.bim_element_ids or []) if not isinstance(eid, dict)]
+            known = set(stored)
+            normalised = stored + [eid for eid in dict.fromkeys(normalised) if eid not in known]
 
         await self.activity_repo.update_fields(
             activity_id,

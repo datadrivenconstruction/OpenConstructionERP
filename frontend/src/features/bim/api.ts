@@ -1474,16 +1474,20 @@ export async function listTasksForElement(
 
 export interface ActivityBimLinkRequest {
   bim_element_ids: string[];
+  mode?: 'replace' | 'add';
 }
 
-/** Replace the bim_element_ids list on a schedule activity. */
+/** Replace the bim_element_ids list on a schedule activity, or add to it on the server. */
 export async function updateActivityBIMLinks(
   activityId: string,
   bimElementIds: string[],
+  mode: 'replace' | 'add' = 'replace',
 ): Promise<unknown> {
+  // ``add`` merges on the server. Merging into a cached copy and sending the
+  // whole list back erased every link made since the copy was read.
   return apiPatch<unknown, ActivityBimLinkRequest>(
     `/v1/schedule/activities/${encodeURIComponent(activityId)}/bim-links/`,
-    { bim_element_ids: bimElementIds },
+    { bim_element_ids: bimElementIds, mode },
   );
 }
 

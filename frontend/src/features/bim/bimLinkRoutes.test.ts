@@ -29,6 +29,12 @@ describe('BIM link routes', () => {
     await updateActivityBIMLinks('a-1', ['e-1']);
     expect(apiPatch).toHaveBeenCalledWith('/v1/schedule/activities/a-1/bim-links/', {
       bim_element_ids: ['e-1'],
+      mode: 'replace',
+    });
+    await updateActivityBIMLinks('a-1', ['e-2'], 'add');
+    expect(apiPatch).toHaveBeenLastCalledWith('/v1/schedule/activities/a-1/bim-links/', {
+      bim_element_ids: ['e-2'],
+      mode: 'add',
     });
   });
 });

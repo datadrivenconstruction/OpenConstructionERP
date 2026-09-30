@@ -457,16 +457,18 @@ class LinkPositionRequest(BaseModel):
 
 
 class ActivityBimLinkRequest(BaseModel):
-    """Request body for replacing the BIM element link set on an activity.
+    """Request body for the BIM element link set on an activity.
 
-    The full ``bim_element_ids`` list is replaced atomically - callers that
-    want to add/remove a single element should read the current list, mutate
-    it, then PATCH the whole array back.
+    ``replace`` (the default) stores ``bim_element_ids`` as the whole list.
+    ``add`` merges them into the stored list on the server. A client that
+    merged into a cached copy and sent the result back erased every link made
+    since that copy was read, by another tab, another user or itself.
     """
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
     bim_element_ids: list[str] = Field(default_factory=list)
+    mode: Literal["replace", "add"] = "replace"
 
 
 class ActivityBrief(BaseModel):
