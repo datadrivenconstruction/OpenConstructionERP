@@ -36,8 +36,8 @@ export type { EmptyStateProps } from './EmptyState';
 export { RecoveryCard } from './RecoveryCard';
 export type { RecoveryCardProps } from './RecoveryCard';
 
-export { AuthImage } from './AuthImage';
-export type { AuthImageProps } from './AuthImage';
+export { AuthImage, isAuthAssetUrl, useAuthedObjectUrl } from './AuthImage';
+export type { AuthImageProps, AuthedObjectUrl } from './AuthImage';
 
 export { Skeleton, SkeletonText } from './Skeleton';
 
