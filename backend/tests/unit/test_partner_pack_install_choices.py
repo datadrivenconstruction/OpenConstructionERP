@@ -82,7 +82,7 @@ def _patch(
 
     monkeypatch.setattr(fi, "_step_apply_pack", _fake_apply)
 
-    async def _fake_load(db_id: str, _session: AsyncSession) -> dict[str, Any]:
+    async def _fake_load(db_id: str, _session: AsyncSession, **_kwargs: Any) -> dict[str, Any]:
         if loads is not None:
             loads.append(db_id)
         return {"imported": 7, "resource_components": 21, "database": db_id}
@@ -355,6 +355,56 @@ async def test_a_base_in_its_home_currency_still_gets_its_catalogue(
 
     assert imports == [_LOADABLE_DB_ID]
     assert _dones(events)["catalog"]["status"] == "ok"
+
+
+# ── a cut-off base ─────────────────────────────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_the_installer_asks_the_loader_to_finish_a_cut_off_base(
+    monkeypatch: pytest.MonkeyPatch, session_factory: async_sessionmaker[AsyncSession]
+) -> None:
+    _patch(monkeypatch, session_factory, _manifest([_LOADABLE]))
+    seen: list[dict[str, Any]] = []
+
+    async def _resuming_load(db_id: str, _session: AsyncSession, **kwargs: Any) -> dict[str, Any]:
+        seen.append(kwargs)
+        return {"imported": 40, "total_items": 90, "resumed": True, "resource_components": 3, "database": db_id}
+
+    monkeypatch.setattr("app.modules.costs.router.load_cwicr_region", _resuming_load)
+
+    events = await _run(FullInstallRequest(slug=_PACK_SLUG, vectorize=False, demo_count=0, only_steps=["cost_db"]))
+    base = _dones(events)["cost_db"]["detail"]["bases"][0]
+
+    assert seen == [{"resume_incomplete": True}]
+    assert base["status"] == "ok"
+    assert base["resumed"] is True
+    assert base["already_loaded"] is False
+    assert base["items"] == 90
+
+
+@pytest.mark.asyncio
+async def test_a_cut_off_base_that_cannot_be_finished_fails_its_row(
+    monkeypatch: pytest.MonkeyPatch, session_factory: async_sessionmaker[AsyncSession]
+) -> None:
+    """Not 'already loaded, 12,000 work items': the row says it is incomplete."""
+    _patch(monkeypatch, session_factory, _manifest([_LOADABLE]))
+
+    async def _incomplete(db_id: str, _session: AsyncSession, **_kwargs: Any) -> dict[str, Any]:
+        return {"status": "incomplete", "total_items": 12000, "expected_items": 55719, "currency": "USD"}
+
+    monkeypatch.setattr("app.modules.costs.router.load_cwicr_region", _incomplete)
+
+    events = await _run(FullInstallRequest(slug=_PACK_SLUG, vectorize=False, demo_count=0, install_catalog=True))
+    dones = _dones(events)
+    base = dones["cost_db"]["detail"]["bases"][0]
+
+    assert dones["cost_db"]["status"] == "error"
+    assert base["reason_code"] == "incomplete_base"
+    assert (base["items"], base["expected"], base["currency"]) == (12000, 55719, "USD")
+    # Nothing downstream treats the fraction as a loaded base.
+    assert dones["catalog"]["status"] == "skipped"
+    assert events[-1][1]["ok"] is False
 
 
 # ── only_steps ──────────────────────────────────────────────────────────────
