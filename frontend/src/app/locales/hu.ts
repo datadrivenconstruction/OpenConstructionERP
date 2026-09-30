@@ -28971,6 +28971,7 @@ const resource = {
     "geo_hub.hud.north": "Észak",
     "geo_hub.hud.scale": "MÉRTÉK",
     "geo_hub.licenses_footer": "Nincs szállítói kizárólagosság. A teljes rendszer önállóan üzemeltethető. A Cesium Ion és a kereskedelmi térképszolgáltatók szándékosan nincsenek használva.",
+    "geo_hub.licenses_globe_streets": "utcai alaptérkép a földgömbön",
     "geo_hub.licenses_heading": "Nyílt adat és nyílt forráskód",
     "geo_hub.licenses_pill": "Nyílt adat",
     "geo_hub.licenses_title": "Nyíltadat-alapú rendszer: kattintson a licencek megtekintéséhez",

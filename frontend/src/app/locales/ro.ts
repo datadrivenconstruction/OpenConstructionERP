@@ -29248,6 +29248,7 @@ const resource = {
     "geo_hub.hud.north": "Nord",
     "geo_hub.hud.scale": "SCALĂ",
     "geo_hub.licenses_footer": "Fără blocare vendor. Auto-gazduit întreaga stivă. Cesium Ion + furnizori de imagini comerciale nu sunt utilizați intenționat.",
+    "geo_hub.licenses_globe_streets": "imagine de bază a străzilor pe glob",
     "geo_hub.licenses_heading": "Date deschise și sursă deschisă",
     "geo_hub.licenses_pill": "Date deschise",
     "geo_hub.licenses_title": "Stivă date deschise: faceți clic pentru a vizualiza licențele",

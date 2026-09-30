@@ -28600,6 +28600,7 @@ const resource = {
     "geo_hub.hud.north": "Norte",
     "geo_hub.hud.scale": "ESCALA",
     "geo_hub.licenses_footer": "Sin bloqueo de proveedor. Auto-hospeda toda la pila. Cesium Ion + proveedores de imágenes comerciales no se usan intencionalmente.",
+    "geo_hub.licenses_globe_streets": "imágenes base de calles en el globo",
     "geo_hub.licenses_heading": "Datos abiertos y código abierto",
     "geo_hub.licenses_pill": "Datos abiertos",
     "geo_hub.licenses_title": "Pila de datos abiertos: haz clic para ver licencias",

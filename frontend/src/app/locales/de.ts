@@ -29861,6 +29861,7 @@ const resource = {
     "geo_hub.hud.north": "Norden",
     "geo_hub.hud.scale": "MASSSTAB",
     "geo_hub.licenses_footer": "Keine Herstellerbindung. Hosten Sie den gesamten Stack selbst. Cesium Ion und kommerzielle Anbieter von Luftbildern werden absichtlich nicht verwendet.",
+    "geo_hub.licenses_globe_streets": "Straßen-Basiskarte auf dem Globus",
     "geo_hub.licenses_heading": "Offene Daten & Open Source",
     "geo_hub.licenses_pill": "Offene Daten",
     "geo_hub.licenses_title": "Open-Data-Stack: Klicken Sie, um Lizenzen anzuzeigen",

@@ -28925,6 +28925,7 @@ const resource = {
     "geo_hub.hud.north": "Utara",
     "geo_hub.hud.scale": "SCALE",
     "geo_hub.licenses_footer": "Tidak ada vendor lock-in. Hosting mandiri seluruh stack. Cesium Ion + penyedia citra komersial tidak digunakan.",
+    "geo_hub.licenses_globe_streets": "citra dasar jalan di globe",
     "geo_hub.licenses_heading": "Data Terbuka & Sumber Terbuka",
     "geo_hub.licenses_pill": "Data Terbuka",
     "geo_hub.licenses_title": "Stack data terbuka: klik untuk melihat lisensi",

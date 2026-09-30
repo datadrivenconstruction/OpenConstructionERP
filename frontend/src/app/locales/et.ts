@@ -29017,6 +29017,7 @@ const resource = {
     "geo_hub.hud.north": "Põhi",
     "geo_hub.hud.scale": "MÕÕTKAVA",
     "geo_hub.licenses_footer": "Ei mingit tarnijalukustust. Majuta kogu pinu ise. Cesium Ion ja kommertsiaalsed pildipakkujad on teadlikult kasutamata.",
+    "geo_hub.licenses_globe_streets": "tänavate baaskaart gloobusel",
     "geo_hub.licenses_heading": "Avaandmed ja avatud lähtekood",
     "geo_hub.licenses_pill": "Avaandmed",
     "geo_hub.licenses_title": "Avaandmete pinu: klõpsa litsentside vaatamiseks",

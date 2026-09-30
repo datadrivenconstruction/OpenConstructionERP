@@ -25916,6 +25916,7 @@ const resource = {
     "geo_hub.licenses_pill": "Ачык маалыматтар",
     "geo_hub.licenses_heading": "Ачык маалыматтар жана ачык булактар",
     "geo_hub.licenses_footer": "Эч кандай вендордук кулчулук жок. Бардык стекти өзүңүз хосттоңуз. Cesium Ion + коммерциялык сүрөттөрдү берүүчүлөр атайылап колдонулбайт.",
+    "geo_hub.licenses_globe_streets": "глобустагы көчөлөрдүн негизги сүрөтү",
     "geo_hub.cesium_loading_hint": "3D глобусту иштетүү убактысы (~3 МБ).",
     "geo_hub.cesium_not_installed_title": "CesiumJS орнотулган эмес",
     "geo_hub.cesium_init_failed_title": "3D глобусту баштоо мүмкүн болгон жок",

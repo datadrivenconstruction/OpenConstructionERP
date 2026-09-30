@@ -114902,6 +114902,18 @@
         },
         {
           "method": "GET",
+          "path": "/globe-imagery/",
+          "handler": "globe_imagery",
+          "response_model": "GlobeImageryResponse"
+        },
+        {
+          "method": "GET",
+          "path": "/globe-streets/{z}/{x}/{y}.png",
+          "handler": "proxy_globe_street_tile",
+          "request_schema": "Request"
+        },
+        {
+          "method": "GET",
           "path": "/basemap-style/{name}.json",
           "handler": "basemap_style",
           "request_schema": "Request"
@@ -117160,6 +117172,41 @@
               "name": "total_features",
               "type": "int",
               "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "GlobeStreetsSource",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Raster street imagery the operator configured for the 3D globe.",
+          "fields": [
+            {
+              "name": "tile_url",
+              "type": "str"
+            },
+            {
+              "name": "attribution",
+              "type": "str"
+            },
+            {
+              "name": "max_zoom",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "GlobeImageryResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What the 3D globe draws under the pins.\n\n``streets`` is ``None`` when no raster street source is configured, and\nthe globe then shows the built-in public-domain shaded relief.",
+          "fields": [
+            {
+              "name": "streets",
+              "type": "GlobeStreetsSource | None",
+              "default": "None"
             }
           ]
         }
@@ -171147,13 +171194,6 @@
           "handler": "preview",
           "response_model": "AbsPreviewResponse",
           "request_schema": "AbsPreviewRequest"
-        },
-        {
-          "method": "POST",
-          "path": "/preview/file",
-          "handler": "preview_file",
-          "response_model": "AbsPreviewResponse",
-          "request_schema": "UploadFile"
         },
         {
           "method": "POST",
@@ -231298,10 +231338,10 @@
     },
     {
       "name": "enterprise-workflows",
-      "ts_files": 4,
+      "ts_files": 3,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 4
+      "test_files": 0,
+      "total_files": 3
     },
     {
       "name": "equipment",
@@ -231648,10 +231688,10 @@
     },
     {
       "name": "modules",
-      "ts_files": 24,
+      "ts_files": 23,
       "css_files": 0,
-      "test_files": 11,
-      "total_files": 25
+      "test_files": 10,
+      "total_files": 24
     },
     {
       "name": "ncr",
@@ -231676,10 +231716,10 @@
     },
     {
       "name": "onboarding",
-      "ts_files": 23,
+      "ts_files": 22,
       "css_files": 0,
-      "test_files": 12,
-      "total_files": 23
+      "test_files": 11,
+      "total_files": 22
     },
     {
       "name": "payment-clock",
@@ -231837,10 +231877,10 @@
     },
     {
       "name": "rebar-schedule",
-      "ts_files": 4,
+      "ts_files": 3,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 4
+      "test_files": 0,
+      "total_files": 3
     },
     {
       "name": "reconciliation",
@@ -233475,11 +233515,11 @@
     "total_models": 617,
     "total_columns": 7101,
     "total_relationships": 234,
-    "total_routes": 3706,
-    "total_schemas": 3486,
+    "total_routes": 3707,
+    "total_schemas": 3488,
     "total_python_files": 2209,
     "frontend_features": 190,
-    "frontend_ts_files": 2759,
+    "frontend_ts_files": 2757,
     "frontend_backend_mapped": 169
   },
   "frontend_backend_mapping": {

@@ -12,6 +12,7 @@ import asyncio
 import base64
 import hashlib
 import json
+import logging
 import re
 import time
 import uuid
@@ -48,6 +49,8 @@ from app.modules.geo_hub.schemas import (
     GeoOverlayUpdate,
     GeoRasterOverlayResponse,
     GeoRasterOverlayUpdate,
+    GlobeImageryResponse,
+    GlobeStreetsSource,
     HSEPinResponse,
     ImageryLayerCreate,
     ImageryLayerResponse,
@@ -70,6 +73,8 @@ from app.modules.geo_hub.schemas import (
     ViewpointUpdate,
 )
 from app.modules.geo_hub.service import GeoHubService
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["geo_hub"])
 
@@ -610,6 +615,122 @@ async def proxy_natural_earth(z: int, x: int, y: int, request: Request) -> Respo
     client configured against it, keeps getting tiles instead of errors.
     """
     return await _relief_tile(z, x, y, request)
+
+
+# ── Globe street imagery (operator-supplied) ────────────────────────────────
+#
+# The 3D globe takes raster XYZ imagery only, and no keyless public raster
+# street service permits app use (see the section comment above), so by
+# default it draws shaded relief. An operator who runs a raster tile server,
+# or licenses one, sets ``OE_GLOBE_STREET_TILES_URL`` and the matching
+# ``OE_GLOBE_STREET_TILES_ATTRIBUTION`` and the globe shows streets. Nothing
+# about the upstream is hardcoded here, so the host policy gate has nothing
+# new to allow: the operator chose the server and answers for its terms.
+_GLOBE_STREETS_TILE_URL = "/api/v1/geo-hub/globe-streets/{z}/{x}/{y}.png"
+_GLOBE_STREETS_MAX_ZOOM_CEILING = 22
+_GLOBE_WARNED: set[str] = set()
+
+# Image signatures a raster tile may carry. Anything else (an HTML error
+# page, a JSON quota message) is a failure, not a tile.
+_IMAGE_SIGNATURES = (
+    (b"\x89PNG\r\n\x1a\n", "image/png"),
+    (b"\xff\xd8\xff", "image/jpeg"),
+)
+
+
+def _image_media_type(data: bytes) -> str | None:
+    """Media type of a PNG, JPEG or WebP body, ``None`` for anything else."""
+    for signature, media_type in _IMAGE_SIGNATURES:
+        if data.startswith(signature):
+            return media_type
+    if data[:4] == b"RIFF" and data[8:12] == b"WEBP":
+        return "image/webp"
+    return None
+
+
+def _globe_street_source() -> tuple[str, str, int] | None:
+    """The configured ``(template, attribution, max_zoom)``, or ``None``.
+
+    A template is used only when it is http(s), carries all of ``{z}``,
+    ``{x}`` and ``{y}``, and comes with an attribution. A half-configured
+    source falls back to relief rather than drawing an uncredited map or
+    requesting a URL that can never resolve.
+    """
+    settings = get_settings()
+    template = (settings.globe_street_tiles_url or "").strip()
+    attribution = (settings.globe_street_tiles_attribution or "").strip()
+    if not template:
+        return None
+    usable = (
+        template.startswith(("https://", "http://"))
+        and all(part in template for part in ("{z}", "{x}", "{y}"))
+        and bool(attribution)
+    )
+    if not usable:
+        # Once per value: this runs on every tile request.
+        if template not in _GLOBE_WARNED:
+            _GLOBE_WARNED.add(template)
+            logger.warning(
+                "OE_GLOBE_STREET_TILES_URL is set but ignored: it needs an http(s) {z}/{x}/{y} "
+                "template and OE_GLOBE_STREET_TILES_ATTRIBUTION; the globe shows relief instead",
+            )
+        return None
+    max_zoom = min(max(int(settings.globe_street_tiles_max_zoom), 0), _GLOBE_STREETS_MAX_ZOOM_CEILING)
+    return template, attribution, max_zoom
+
+
+@router.get(
+    "/globe-imagery/",
+    response_model=GlobeImageryResponse,
+    summary="Base imagery the 3D globe draws",
+)
+async def globe_imagery() -> GlobeImageryResponse:
+    """Say whether the globe has raster street tiles or shows relief.
+
+    Public like the tile routes: it names a same-origin tile path and a
+    credit, nothing about the upstream server.
+    """
+    source = _globe_street_source()
+    if source is None:
+        return GlobeImageryResponse()
+    _template, attribution, max_zoom = source
+    return GlobeImageryResponse(
+        streets=GlobeStreetsSource(tile_url=_GLOBE_STREETS_TILE_URL, attribution=attribution, max_zoom=max_zoom),
+    )
+
+
+@router.get(
+    "/globe-streets/{z}/{x}/{y}.png",
+    summary="Operator-configured raster street tile for the 3D globe",
+    response_class=Response,
+)
+async def proxy_globe_street_tile(z: int, x: int, y: int, request: Request) -> Response:
+    """Proxy one tile from ``OE_GLOBE_STREET_TILES_URL``.
+
+    Returns a transparent tile when nothing is configured, the coordinates
+    are off the grid, or the upstream answers with anything that is not an
+    image. Cached for a day rather than as immutable, so switching the
+    provider reaches browsers without a path change.
+    """
+    source = _globe_street_source()
+    if source is None:
+        return _blank_tile()
+    template, _attribution, max_zoom = source
+    if not _valid_xyz(z, x, y, max_zoom=max_zoom):
+        return _blank_tile()
+    # The template is in the key so a changed provider never serves the old one's tiles.
+    key = f"gs/{hashlib.sha1(template.encode()).hexdigest()[:12]}/{z}/{x}/{y}"  # noqa: S324 - cache key
+    hit = _TILE_CACHE.get(key)
+    if hit is not None:
+        media_type = _image_media_type(hit[0]) or "image/png"
+        return _cached_response(hit[0], hit[1], media_type, request, _ASSET_CACHE_CONTROL)
+    data = await _fetch_upstream(template.replace("{z}", str(z)).replace("{x}", str(x)).replace("{y}", str(y)))
+    media_type = _image_media_type(data) if data else None
+    if data is None or media_type is None:
+        return _blank_tile()
+    etag = _etag_for(data)
+    _TILE_CACHE.put(key, data, etag)
+    return _cached_response(data, etag, media_type, request, _ASSET_CACHE_CONTROL)
 
 
 def _request_origin(request: Request) -> str:

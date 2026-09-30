@@ -28379,6 +28379,7 @@ const resource = {
     "geo_hub.hud.north": "شمال",
     "geo_hub.hud.scale": "مقیاس",
     "geo_hub.licenses_footer": "بدون قفل‌شدن به فروشنده. کل پشته را خودتان میزبانی کنید. Cesium Ion و ارائه‌دهندگان تصویر تجاری عمداً استفاده نشده‌اند.",
+    "geo_hub.licenses_globe_streets": "تصاویر پایه خیابانی روی کره زمین",
     "geo_hub.licenses_heading": "داده باز و متن‌باز",
     "geo_hub.licenses_pill": "داده باز",
     "geo_hub.licenses_title": "پشته داده باز: برای مشاهده مجوزها کلیک کنید",

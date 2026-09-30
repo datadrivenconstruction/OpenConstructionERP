@@ -29013,6 +29013,7 @@ const resource = {
     "geo_hub.hud.north": "北",
     "geo_hub.hud.scale": "SCALE",
     "geo_hub.licenses_footer": "ベンダーロックインなし。スタック全体を自ホストします。Cesium Ionと商用画像提供業者は意図的に使用されていません。",
+    "geo_hub.licenses_globe_streets": "地球儀上の道路のベース画像",
     "geo_hub.licenses_heading": "オープンデータとオープンソース",
     "geo_hub.licenses_pill": "オープンデータ",
     "geo_hub.licenses_title": "オープンデータスタック：クリックしてライセンスを表示",

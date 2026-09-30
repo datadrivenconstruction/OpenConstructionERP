@@ -29067,6 +29067,7 @@ const resource = {
     "geo_hub.hud.north": "เหนือ",
     "geo_hub.hud.scale": "SCALE",
     "geo_hub.licenses_footer": "ไม่มีการล็อกอินผู้จำหน่าย โฮสต์ด้วยตนเอง แสตกทั้งหมด Cesium Ion + ผู้ให้บริการภาพเชิงพาณิชยจงใจไม่ใช้",
+    "geo_hub.licenses_globe_streets": "ภาพพื้นฐานถนนบนลูกโลก",
     "geo_hub.licenses_heading": "ข้อมูลเปิดและซอร์สเปิด",
     "geo_hub.licenses_pill": "ข้อมูลเปิด",
     "geo_hub.licenses_title": "แสตกข้อมูลเปิด: คลิกเพื่อดูใบอนุญาต",

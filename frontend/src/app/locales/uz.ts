@@ -29816,6 +29816,7 @@ const resource = {
     "geo_hub.hud.north": "Shimol",
     "geo_hub.hud.scale": "MASSH",
     "geo_hub.licenses_footer": "Sotuvchiga bogʻliqlik yoʻq. Butun stekni oʻzingiz joylashtiring. Cesium Ion va tijorat tasvir provayderlari ataylab ishlatilmaydi.",
+    "geo_hub.licenses_globe_streets": "globusdagi ko'chalarning asosiy tasviri",
     "geo_hub.licenses_heading": "Ochiq maʼlumot va ochiq manba",
     "geo_hub.licenses_pill": "Ochiq maʼlumot",
     "geo_hub.licenses_title": "Ochiq maʼlumot steki: litsenziyalarni koʻrish uchun bosing",
