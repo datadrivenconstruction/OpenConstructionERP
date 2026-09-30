@@ -5005,7 +5005,45 @@ async def load_cwicr_database(
     return await load_cwicr_region(db_id, session)
 
 
-async def load_cwicr_region(db_id: str, session: AsyncSession) -> dict:
+# Share of a base's published work-item count below which a region that
+# holds rows is treated as an import that was cut off, not a loaded base. The
+# registry count is the published figure, not the exact number of rows an
+# import keeps, so this leaves room for the few rows an import rejects while
+# still catching the realistic cut (a proxy timeout or a restart part-way
+# leaves a fraction of the base, not 95 % of it).
+_COMPLETE_BASE_SHARE = 0.9
+
+
+async def region_priced_in_other_currency(db_id: str, session: AsyncSession) -> str | None:
+    """The currency a base's work items carry when it is not the base's own.
+
+    A base repriced into another market (``/base-market``) has that market's
+    currency stamped onto every work item. Anything that would add the home
+    market's data to such a region, rows or a catalogue, would put one base in
+    two currencies. Returns ``None`` for an unknown base, an empty region, or a
+    region still in its home currency.
+    """
+    from sqlalchemy import select
+
+    from app.modules.costs.models import CostItem
+
+    variant = base_registry.variant_by_region(db_id)
+    if variant is None or not variant.currency:
+        return None
+    stmt = (
+        select(CostItem.currency)
+        .where(
+            CostItem.region == db_id,
+            CostItem.is_active.is_(True),
+            CostItem.currency != "",
+            CostItem.currency != variant.currency,
+        )
+        .limit(1)
+    )
+    return (await session.execute(stmt)).scalar_one_or_none()
+
+
+async def load_cwicr_region(db_id: str, session: AsyncSession, *, resume_incomplete: bool = False) -> dict:
     """Load one CWICR regional cost database into the relational store.
 
     Optimized: reads Parquet, deduplicates by rate_code (55K unique items
@@ -5019,6 +5057,17 @@ async def load_cwicr_region(db_id: str, session: AsyncSession) -> dict:
     the partner-pack ``full-install`` orchestrator. Raises ``HTTPException`` on
     a missing file (404) or an import failure (500); callers that need fail-soft
     behaviour must catch it. Returns the same body dict the route returns.
+
+    A region with more than a handful of rows counts as loaded. That is wrong
+    for an import that was cut off (every flush of 5 000 rows commits on its
+    own), and a retry then reported a quarter of a base as "already loaded".
+    ``resume_incomplete`` lets a caller that retries on the user's behalf, the
+    pack installer, ask for better: a region well short of the base's published
+    count carries on importing, and the per-flush ``ON CONFLICT DO NOTHING``
+    adds only what is missing. A short region that was already repriced into
+    another market is not topped up with home-currency rows; it comes back as
+    ``status="incomplete"`` for the caller to report. Off by default, so the
+    route and the market switch behave exactly as before.
     """
     import time
 
@@ -5033,7 +5082,37 @@ async def load_cwicr_region(db_id: str, session: AsyncSession) -> dict:
         select(func.count()).select_from(CostItem).where(CostItem.region == db_id, CostItem.is_active.is_(True))
     )
     existing_count = (await session.execute(existing_count_stmt)).scalar_one()
-    if existing_count > 10:
+    resuming = False
+    if existing_count > 10 and resume_incomplete:
+        variant = base_registry.variant_by_region(db_id)
+        expected = variant.positions if variant else 0
+        if expected and existing_count < expected * _COMPLETE_BASE_SHARE:
+            foreign = await region_priced_in_other_currency(db_id, session)
+            if foreign:
+                logger.warning(
+                    "CWICR %s holds %d of about %d items and is priced in %s; not topping it up",
+                    db_id,
+                    existing_count,
+                    expected,
+                    foreign,
+                )
+                return {
+                    "imported": 0,
+                    "region": db_id,
+                    "total_items": existing_count,
+                    "expected_items": expected,
+                    "currency": foreign,
+                    "status": "incomplete",
+                    "duration_seconds": round(time.monotonic() - start, 1),
+                }
+            logger.warning(
+                "CWICR %s holds %d of about %d items; resuming the interrupted import",
+                db_id,
+                existing_count,
+                expected,
+            )
+            resuming = True
+    if existing_count > 10 and not resuming:
         duration = round(time.monotonic() - start, 1)
         # Count the resource components already persisted for this region so the
         # partner-pack installer reports the embedded resource database on
@@ -5236,6 +5315,12 @@ async def load_cwicr_region(db_id: str, session: AsyncSession) -> dict:
     # No-op for the global markets and for a base whose language has no parquet.
     if result_data.get("imported", 0) > 0:
         result_data.update(await _open_in_home_language(db_id, session))
+
+    if resuming:
+        # ``imported`` counts only the rows this run added; the caller reports
+        # the base, so give it the size of the base.
+        result_data["resumed"] = True
+        result_data["total_items"] = (await session.execute(existing_count_stmt)).scalar_one()
 
     return result_data
 

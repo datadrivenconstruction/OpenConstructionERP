@@ -288,6 +288,43 @@ describe('a finished install is verifiable step by step', () => {
     }
   });
 
+  it('a base finished after a cut says so, and one that cannot be finished says why', async () => {
+    streamMock.fullInstallPackStream.mockImplementation(
+      streamOf(
+        [
+          { step: 'apply_pack', status: 'ok', detail: { rule_sets: [] } },
+          {
+            step: 'cost_db',
+            status: 'error',
+            detail: {
+              bases: [
+                { slug: 'cwicr-de-berlin', db_id: 'DE_BERLIN', status: 'ok', items: 55719, resumed: true },
+                {
+                  slug: 'cwicr-tr',
+                  db_id: 'TR_ISTANBUL',
+                  status: 'error',
+                  reason_code: 'incomplete_base',
+                  items: 12000,
+                  expected: 55719,
+                  currency: 'EUR',
+                },
+              ],
+            },
+          },
+        ],
+        false,
+      ),
+    );
+    renderDialog();
+    activate();
+    await screen.findByText(/DE_BERLIN: the interrupted load was finished, .*work items/);
+    expect(
+      screen.getByText(/TR_ISTANBUL: only .* of about .* work items are loaded, .*repriced into EUR/),
+    ).toBeTruthy();
+    // Not the line that used to call a fraction of a base loaded.
+    expect(screen.queryByText(/already loaded/)).toBeNull();
+  });
+
   it('a catalogue left out because the base was repriced says both currencies', async () => {
     streamMock.fullInstallPackStream.mockImplementation(
       streamOf(

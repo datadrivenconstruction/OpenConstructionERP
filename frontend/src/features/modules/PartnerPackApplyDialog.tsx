@@ -810,6 +810,24 @@ export function PartnerPackApplyDialog({
         return bases.flatMap((b) => {
           const name = asString(b.db_id) ?? asString(b.slug) ?? '';
           const status = asString(b.status);
+          if (status === 'ok' && b.resumed) {
+            return t('modules.pp_result_base_resumed', {
+              defaultValue: '{{base}}: the interrupted load was finished, {{items}} work items',
+              base: name,
+              items: fmt(asCount(b.items) ?? 0),
+            });
+          }
+          if (status === 'error' && asString(b.reason_code) === 'incomplete_base') {
+            // Topping it up would mix the home currency into a repriced base.
+            return t('modules.pp_result_base_incomplete', {
+              defaultValue:
+                '{{base}}: only {{items}} of about {{expected}} work items are loaded, and the database has been repriced into {{currency}}. Delete it on the cost database page and load it again.',
+              base: name,
+              items: fmt(asCount(b.items) ?? 0),
+              expected: fmt(asCount(b.expected) ?? 0),
+              currency: asString(b.currency) ?? '',
+            });
+          }
           if (status === 'ok') {
             return b.already_loaded
               ? t('modules.pp_result_base_present', {

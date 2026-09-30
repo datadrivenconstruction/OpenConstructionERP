@@ -86,7 +86,7 @@ def _fake_loader_factory(session_factory: async_sessionmaker[AsyncSession]):
     "already loaded, skipping" branch.
     """
 
-    async def _fake_load_cwicr_region(db_id: str, _session: AsyncSession) -> dict[str, Any]:
+    async def _fake_load_cwicr_region(db_id: str, _session: AsyncSession, **_kwargs: Any) -> dict[str, Any]:
         async with session_factory() as s:
             existing = (
                 await s.execute(select(func.count()).select_from(CostItem).where(CostItem.region == db_id))
@@ -405,7 +405,7 @@ async def test_a_cost_base_that_fails_to_load_is_an_error_not_a_skip(
     """
     _patch_orchestrator(monkeypatch, session_factory, demos_installed=[])
 
-    async def _broken_loader(db_id: str, _session: AsyncSession) -> dict[str, Any]:
+    async def _broken_loader(db_id: str, _session: AsyncSession, **_kwargs: Any) -> dict[str, Any]:
         raise RuntimeError(f"download of {db_id} timed out")
 
     monkeypatch.setattr("app.modules.costs.router.load_cwicr_region", _broken_loader)
