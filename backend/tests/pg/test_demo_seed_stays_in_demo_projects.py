@@ -962,12 +962,14 @@ async def test_the_boot_keeps_deleted_and_then_purged_demos_away(boot_factory, m
     """
     import app.main as main
     from app.modules.projects.service import ProjectService
+    from app.modules.users.service import hash_password
 
     _boot_as_a_desktop_install(monkeypatch)
     async with boot_factory() as s:
+        # A real hash: the boot checks the stored one against the env password.
         demo_user = User(
             email="demo@openconstructionerp.com",
-            hashed_password="x",
+            hashed_password=hash_password("demo-password-for-tests"),
             full_name="Demo",
             role="admin",
             locale="en",
