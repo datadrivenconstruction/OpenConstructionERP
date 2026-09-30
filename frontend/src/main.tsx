@@ -7,6 +7,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import { notifyQueryError } from '@/shared/lib/queryErrorToast';
 import { initialLocaleReady } from './app/i18n';
 import { applyStoredUiScale } from '@/shared/lib/uiScale';
+import { retireStaleCaches } from './pwa/retireStaleCaches';
 import './index.css';
 
 // Desktop only: put the saved text size back on the webview as early as
@@ -108,6 +109,12 @@ window.addEventListener('vite:preloadError', () => {
     window.location.reload();
   }
 });
+
+// Earlier builds let the service worker cache cross-origin images, failures
+// included, for 30 days (see pwa/staticAssetRoute.ts). The lane now has a new
+// name; dropping the old cache lets those visitors see the real images
+// without a hard reload. Fire and forget, it never throws.
+void retireStaleCaches();
 
 // The public demo is served under /demo (Caddy strips the prefix before it
 // reaches the backend, but the browser URL keeps it), so react-router needs a

@@ -12,6 +12,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
 import { cpSync, existsSync, readFileSync, readdirSync, createReadStream, statSync } from 'fs';
 import type { Plugin } from 'vite';
+import { STATIC_ASSETS_CACHE, isStaticAssetRequest } from './src/pwa/staticAssetRoute';
 
 const cesiumSource = path.resolve(__dirname, 'node_modules/cesium/Build/Cesium');
 const cesiumDirs = ['Workers', 'ThirdParty', 'Assets', 'Widgets'] as const;
@@ -203,8 +204,8 @@ export default defineConfig({
     // * Runtime caching is split into three deliberately-named lanes
     //   so each behaviour is independently verifiable in the SW unit
     //   tests:
-    //     - "oce-static-assets"  CacheFirst for fonts/images that are
-    //       hash-fingerprinted at build time.
+    //     - "oce-static-assets-v2"  CacheFirst for same-origin fonts,
+    //       images and /assets/ files, status 200 only.
     //     - "oce-i18n-locales"   StaleWhileRevalidate for the per-locale
     //       chunks under ``assets/i18n-*.js`` so a returning user gets
     //       an instant paint in their last language even when offline,
@@ -317,34 +318,31 @@ export default defineConfig({
         clientsClaim: true,
         runtimeCaching: [
           {
-            // Static assets (fonts, images shipped under /assets/) ─
-            // hashed at build time so a CacheFirst lookup is safe.
+            // Same-origin static files: fonts, images and /assets/ chunks.
             //
-            // EXCLUDES ``request.destination === 'worker'``: dedicated
-            // workers (pdf.worker.min, cesium/Workers/*) need the
-            // browser's own fetch with the exact MIME the server sent.
-            // A CacheFirst hit was occasionally serving a response whose
+            // SAME ORIGIN AND STATUS 200 ONLY. This lane used to take every
+            // image, cross-origin included, and cache status 0. A
+            // cross-origin <img> gets an opaque response, and an opaque 404
+            // looks exactly like an opaque 200, so failures were cached and
+            // served for 30 days: video covers stayed blank until a hard
+            // reload bypassed the worker. Cross-origin images now go to the
+            // browser's HTTP cache. The predicate and the reasoning live in
+            // src/pwa/staticAssetRoute.ts, with tests; the cache was renamed
+            // and main.tsx deletes the old one.
+            //
+            // Worker scripts (pdf.worker.min, cesium/Workers/*) are excluded
+            // there too: a CacheFirst hit could serve a response whose
             // module/script disposition tripped ``new Worker(url, {type:
-            // 'module'})`` into the "fake worker" fallback, which then
-            // failed dynamic import. Workers are not user-perceived
-            // chatty traffic — letting them bypass the SW costs nothing.
-            urlPattern: ({ url, request }) => {
-              if (url.pathname.startsWith('/api/')) return false;
-              if (request.destination === 'worker') return false;
-              return (
-                request.destination === 'font' ||
-                request.destination === 'image' ||
-                /\/assets\//.test(url.pathname)
-              );
-            },
+            // 'module'})`` into the "fake worker" fallback.
+            urlPattern: isStaticAssetRequest,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'oce-static-assets',
+              cacheName: STATIC_ASSETS_CACHE,
               expiration: {
                 maxEntries: 200,
                 maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
               },
-              cacheableResponse: { statuses: [0, 200] },
+              cacheableResponse: { statuses: [200] },
             },
           },
           {
