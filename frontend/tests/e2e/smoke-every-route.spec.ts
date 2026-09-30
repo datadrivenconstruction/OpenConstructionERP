@@ -295,6 +295,7 @@ type Finding = {
   apiErrors: string[];
   tabs: Array<{ tab: string; symptoms: string[]; details: string[] }>;
   tabsClicked: number;
+  brokenImages: string[];
 };
 
 function slugOf(route: string): string {
@@ -305,7 +306,7 @@ async function openAndInspect(page: Page, route: string, url: string): Promise<F
   // Written first so a route that hangs until the test timeout still has a row.
   record({
     route, url, finalUrl: '', status: 'fail', symptoms: ['timed out before the page settled'],
-    crashes: [], pageErrors: [], consoleErrors: [], apiErrors: [], tabs: [], tabsClicked: 0,
+    crashes: [], pageErrors: [], consoleErrors: [], apiErrors: [], tabs: [], tabsClicked: 0, brokenImages: [],
   });
   const crashes: string[] = [];
   const pageErrors: string[] = [];
@@ -364,6 +365,18 @@ async function openAndInspect(page: Page, route: string, url: string): Promise<F
     first = await inspect();
   }
   symptoms.push(...first);
+
+  // Images that finished loading and decoded to nothing: a dead URL or a 404
+  // behind an <img>. data: and blob: sources are local and skipped, as are
+  // images still in flight (complete === false) and lazy ones never scrolled to.
+  const brokenImages = await page
+    .$$eval('img', (imgs) =>
+      imgs
+        .filter((i) => i.complete && i.naturalWidth === 0 && i.loading !== 'lazy')
+        .map((i) => i.currentSrc || i.getAttribute('src') || '')
+        .filter((src) => src && !/^(data|blob):/.test(src)),
+    )
+    .catch(() => [] as string[]);
   const beforeTabs = {
     crashes: crashes.length,
     pageErrors: pageErrors.length,
@@ -422,7 +435,7 @@ async function openAndInspect(page: Page, route: string, url: string): Promise<F
   if (loadApi.some((a) => /^5\d\d /.test(a))) symptoms.push('api 5xx');
 
   const hard = symptoms.length > 0 || tabs.some((t) => t.symptoms.length > 0);
-  const soft = loadApi.length > 0 || loadConsole.length > 0 || tabs.length > 0;
+  const soft = loadApi.length > 0 || loadConsole.length > 0 || tabs.length > 0 || brokenImages.length > 0;
   return {
     route,
     url,
@@ -435,6 +448,7 @@ async function openAndInspect(page: Page, route: string, url: string): Promise<F
     apiErrors: loadApi.slice(0, 15),
     tabs,
     tabsClicked,
+    brokenImages: [...new Set(brokenImages)].slice(0, 10),
   };
 }
 
@@ -452,7 +466,7 @@ for (const pattern of PATTERNS) {
     if (!url) {
       record({
         route: pattern, url: '', finalUrl: '', status: 'unresolved', symptoms: ['no seeded id for a parameter'],
-        crashes: [], pageErrors: [], consoleErrors: [], apiErrors: [], tabs: [], tabsClicked: 0,
+        crashes: [], pageErrors: [], consoleErrors: [], apiErrors: [], tabs: [], tabsClicked: 0, brokenImages: [],
       });
       test.skip(true, 'no seeded id for a parameter');
       return;
