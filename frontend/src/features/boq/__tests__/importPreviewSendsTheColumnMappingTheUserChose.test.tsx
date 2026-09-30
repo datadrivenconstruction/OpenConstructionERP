@@ -133,6 +133,20 @@ describe('import preview column mapping', () => {
     expect(screen.queryByTestId('import-preview-apply-mapping')).toBeNull();
   });
 
+  it('holds Continue until a changed mapping has been previewed, so the counts confirmed are the bill imported', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(json(MAPPED));
+    open();
+
+    const next = await screen.findByRole('button', { name: 'Continue' });
+    await waitFor(() => expect(next).not.toBeDisabled());
+    fireEvent.click(screen.getByRole('button', { name: /Column mapping/ }));
+    fireEvent.change(screen.getByRole('combobox', { name: 'Sor' }), { target: { value: 'ordinal' } });
+
+    expect(next).toBeDisabled();
+    expect(screen.getByTestId('import-preview-apply-mapping')).toBeInTheDocument();
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
   it('does not offer a field the importer refuses', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(json(preview()));
     open();

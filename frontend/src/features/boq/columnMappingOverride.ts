@@ -18,10 +18,19 @@ export type ColumnMapping = Record<string, string>;
  * The mapping with `column` set to `target`. A field is fed by one column, so
  * any other column mapped to the same field is left out, which the user sees
  * in the dropdowns at once rather than as a refusal from the server.
+ *
+ * Putting a column back to what the importer read it as clears nothing: the
+ * two halves of a split rate both read as `unit_rate`, and restoring one half
+ * must not take the other away, or the bill imports at half its price.
  */
-export function chooseColumn(mapping: ColumnMapping, column: string, target: string): ColumnMapping {
+export function chooseColumn(
+  read: ColumnMapping,
+  mapping: ColumnMapping,
+  column: string,
+  target: string,
+): ColumnMapping {
   const next: ColumnMapping = { ...mapping, [column]: target };
-  if (!target) return next;
+  if (!target || (read[column] ?? '') === target) return next;
   for (const [other, value] of Object.entries(next)) {
     if (other !== column && value === target) next[other] = '';
   }
