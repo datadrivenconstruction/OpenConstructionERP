@@ -15936,6 +15936,7 @@ const resource = {
     "auth.demo_role_admin": "관리자",
     "auth.demo_role_manager": "매니저",
     "auth.demo_login_failed": "데모 로그인에 실패했습니다. 다시 시도해 주세요.",
+    "auth.demo_admin_superseded": "이 설치에는 이미 관리자가 있습니다. 본인 계정으로 로그인하세요.",
     "auth.hide_password": "비밀번호 숨기기",
     "auth.show_password": "비밀번호 표시",
     "auth.try_demo": "데모 체험하기 (가입 불필요)",

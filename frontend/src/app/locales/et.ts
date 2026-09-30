@@ -16170,6 +16170,7 @@ const resource = {
     "auth.demo_role_admin": "Administraator",
     "auth.demo_role_manager": "Juht",
     "auth.demo_login_failed": "Demo sisselogimine ebaõnnestus. Proovige uuesti.",
+    "auth.demo_admin_superseded": "Sellel paigaldusel on juba administraator. Palun logige sisse oma kontoga.",
     "auth.hide_password": "Peida parool",
     "auth.show_password": "Näita parooli",
     "auth.try_demo": "Proovi demoversiooni (registreerimiseta)",

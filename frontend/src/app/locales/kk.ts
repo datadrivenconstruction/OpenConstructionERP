@@ -15474,6 +15474,7 @@ const resource = {
     "auth.demo_role_admin": "Әкімші",
     "auth.demo_role_manager": "Менеджер",
     "auth.demo_login_failed": "Демо кіру сәтсіз аяқталды. Қайталап көріңіз.",
+    "auth.demo_admin_superseded": "Бұл орнатудың әкімшісі бар. Өз тіркелгіңізбен кіріңіз.",
     "auth.hide_password": "Құпия сөзді жасыру",
     "auth.show_password": "Құпия сөзді көрсету",
     "auth.try_demo": "Демоны байқау (тіркелусіз)",

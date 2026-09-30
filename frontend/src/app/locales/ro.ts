@@ -17151,6 +17151,7 @@ const resource = {
     "accommodation.calendar.no_rooms_title": "Nu camere la program încă",
     "accommodation.settings.general_hint": "Core metadata, nume, adresă și linkuri la BIM model / Geo Centru coordinates acel power right-rail shortcuts.",
     "auth.demo_login_failed": "Demo autentificare eșuat. Vă rugăm încercați din nou.",
+    "auth.demo_admin_superseded": "Această instalare are deja un administrator. Autentificați-vă cu propriul cont.",
     "auth.hide_password": "Ascunde parolă",
     "auth.show_password": "Arată parolă",
     "auth.try_demo": "încercați demo (nu signup)",

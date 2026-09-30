@@ -15466,6 +15466,7 @@ const resource = {
     "auth.demo_role_admin": "প্রশাসক",
     "auth.demo_role_manager": "ম্যানেজার",
     "auth.demo_login_failed": "ডেমো লগইন ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।",
+    "auth.demo_admin_superseded": "এই ইনস্টলেশনে একজন অ্যাডমিনিস্ট্রেটর আছেন। অনুগ্রহ করে নিজের অ্যাকাউন্ট দিয়ে সাইন ইন করুন।",
     "auth.hide_password": "পাসওয়ার্ড লুকান",
     "auth.show_password": "পাসওয়ার্ড দেখান",
     "auth.try_demo": "ডেমো চেষ্টা করুন (সাইনআপ ছাড়া)",

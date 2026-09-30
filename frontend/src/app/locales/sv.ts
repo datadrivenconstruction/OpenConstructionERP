@@ -17463,6 +17463,7 @@ const resource = {
     "auth.demo_role_admin": "Administratör",
     "auth.demo_role_manager": "Chef",
     "auth.demo_login_failed": "Demoinloggning misslyckades. Försök igen.",
+    "auth.demo_admin_superseded": "Den här installationen har redan en administratör. Logga in med ditt eget konto.",
     "auth.hide_password": "Dölj lösenord",
     "auth.show_password": "Visa lösenord",
     "auth.try_demo": "Prova demo (ingen registrering)",

@@ -16332,6 +16332,7 @@ const resource = {
     "auth.demo_role_admin": "Administrator",
     "auth.demo_role_manager": "Menedżer",
     "auth.demo_login_failed": "Logowanie demo nie powiodło się. Spróbuj ponownie.",
+    "auth.demo_admin_superseded": "Ta instalacja ma już administratora. Zaloguj się na własne konto.",
     "auth.hide_password": "Ukryj hasło",
     "auth.show_password": "Pokaż hasło",
     "auth.try_demo": "Wypróbuj demo (bez rejestracji)",
