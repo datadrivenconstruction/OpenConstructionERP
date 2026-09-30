@@ -56,7 +56,7 @@ describe('loadBaseMarket', () => {
     apiPost.mockResolvedValue({ text_language: 'fr', text_language_requested: 'fr' });
     await loadBaseMarket(PARIS);
     expect(apiPost).toHaveBeenCalledTimes(1);
-    expect(apiPost.mock.calls[0][0]).toBe('/v1/costs/base-market/TR_NATIONAL/FR_PARIS_fr');
+    expect(apiPost.mock.calls[0]?.[0]).toBe('/v1/costs/base-market/TR_NATIONAL/FR_PARIS_fr');
     expect(getActiveMarkets()).toEqual({ TR_NATIONAL: 'FR_PARIS_fr' });
   });
 
