@@ -43,8 +43,19 @@ ROUTES = [
     ("/api/v1/moc/{entry_id}/approve", frozenset({"POST"})),
     ("/api/v1/reports/{report_id}/export.{fmt}", frozenset({"GET"})),
     ("/api/system/status", frozenset({"GET"})),
+    ("/api/v1/foo/", frozenset({"GET", "POST"})),
+    ("/api/v1/foo/{foo_id}/", frozenset({"GET"})),
+    ("/api/v1/bar/", frozenset({"GET", "POST"})),
+    ("/api/v1/baz/{baz_id}/", frozenset({"GET"})),
+    ("/api/v1/qq/", frozenset({"GET"})),
+    ("/api/v1/rfi/archive/", frozenset({"GET"})),
+    ("/api/v1/saved-queries/", frozenset({"GET", "POST"})),
+    ("/api/v1/saved-queries/{query_id}", frozenset({"GET", "PATCH", "DELETE"})),
+    ("/api/v1/share/{token}/file", frozenset({"GET"})),
 ]
-TABLE = guard.RouteTable(ROUTES)
+# Every route but the share link reads only the bearer header, as in the app.
+BEARER = frozenset(p for p, _ in ROUTES if "/share/" not in p)
+TABLE = guard.RouteTable(ROUTES, BEARER)
 
 
 def verdicts(source: str) -> list[tuple[str, str]]:
@@ -78,8 +89,22 @@ class TestMissing:
 
     def test_an_id_does_not_stand_for_a_spelled_out_segment(self) -> None:
         # /documents/${d.id}/file must not match /documents/photos/{photo_id}/file/.
-        assert only("<a href={`/api/v1/documents/${d.id}/file`}>x</a>") == "MISSING"
-        assert only("<a href={`/api/v1/documents/${d.id}/download`}>x</a>") == "OK"
+        assert only("apiGet(`/v1/documents/${d.id}/file`);") == "MISSING"
+        assert only("apiGet(`/v1/documents/${d.id}/download`);") == "OK"
+
+    def test_an_item_call_does_not_pass_on_the_list_route(self) -> None:
+        # /x/${id} was also read as /x/, so the list route answered for the item.
+        assert only("apiGet(`/v1/foo/${id}`);") == "SLASH"
+        assert only("apiGet(`/v1/foo/${id}/`);") == "OK"
+        assert only("apiGet(`/v1/bar/${id}`);") == "MISSING"
+        assert only("apiPost(`/v1/bar/${id}`);") == "MISSING"
+        assert only("apiGet(`/v1/bar/`);") == "OK"
+
+    def test_an_id_named_after_a_query_is_still_a_segment(self) -> None:
+        assert only("apiDelete(`/v1/saved-queries/${encodeURIComponent(queryId)}`);") == "OK"
+        assert only("apiGet(`/v1/saved-queries/${subqueryType}`);") == "OK"
+        # A bare ${query} still reads as a query string that ends the path.
+        assert only("apiGet(`/v1/saved-queries/${query}`);") == "OK"
 
     def test_a_non_id_substitution_may_be_a_verb(self) -> None:
         assert only("apiPost(`/v1/moc/${id}/${action}`);") == "OK"
@@ -97,6 +122,33 @@ class TestMethod:
     def test_a_word_the_backend_spells_out_does_not_fall_through_to_a_param(self) -> None:
         # GET /workflows/requests would otherwise pass as GET /workflows/{workflow_id}.
         assert only("apiGet('/v1/workflows/requests');") == "SLASH"
+
+
+class TestAuth:
+    def test_a_link_to_a_bearer_only_route_is_refused(self) -> None:
+        # The browser opens an href itself and sends no Authorization header.
+        assert only("<a href={`/api/v1/documents/${d.id}/download`}>x</a>") == "AUTH"
+        assert only("window.open(`/api/v1/documents/${d.id}/download`);") == "AUTH"
+        assert only("fetch(`/api/v1/documents/${d.id}/download`);") == "OK"
+
+    def test_a_link_to_a_route_that_takes_its_token_in_the_url_passes(self) -> None:
+        assert only("<a href={`/api/v1/share/${token}/file`}>x</a>") == "OK"
+
+    def test_the_bearer_walk_follows_nested_dependencies(self) -> None:
+        class Dep:
+            def __init__(self, call, deps=(), query=()):
+                self.call, self.dependencies = call, list(deps)
+                self.query_params = [type("P", (), {"name": q})() for q in query]
+
+        def get_current_user_payload() -> None: ...
+        def require_permission() -> None: ...
+
+        secured = type("R", (), {"dependant": Dep(None, [Dep(require_permission, [Dep(get_current_user_payload)])])})
+        public = type("R", (), {"dependant": Dep(None, [Dep(require_permission)])})
+        linkable = type("R", (), {"dependant": Dep(None, [Dep(get_current_user_payload)], query=["token"])})
+        assert guard._reads_only_the_bearer_header(secured) is True
+        assert guard._reads_only_the_bearer_header(public) is False
+        assert guard._reads_only_the_bearer_header(linkable) is False
 
 
 class TestPrefix:
@@ -124,6 +176,32 @@ class TestReading:
     def test_comments_and_string_tests_are_not_requests(self) -> None:
         assert verdicts("// apiGet('/v1/nowhere/')\n/* '/v1/nowhere/' */") == []
         assert verdicts("if (url.includes('/api/v1/nowhere/')) {}") == []
+
+    def test_both_branches_of_a_ternary_are_the_calls_argument(self) -> None:
+        assert verdicts("apiGet(flag ? `/v1/qq/` : `/v1/qq`);") == [("OK", "/v1/qq/"), ("SLASH", "/v1/qq")]
+        assert ("SLASH", "/v1/rfi/archive") in verdicts("apiGet(isArchive ? `/v1/rfi/archive` : `/v1/qq/`);")
+
+    def test_a_url_stored_in_a_local_is_checked_where_it_is_sent(self) -> None:
+        assert only("const url = `/v1/baz/${id}`;\nreturn apiGet(url);") == "SLASH"
+        assert only("const url = `/v1/baz/${id}/`;\nreturn apiGet(url);") == "OK"
+        # The next declaration of the same name starts a new scope.
+        src = "const url = `/v1/baz/${id}/`;\napiGet(url);\nconst url = `/v1/qq/`;\napiDelete(url);"
+        assert verdicts(src) == [("OK", "/v1/baz/{id}/"), ("METHOD", "/v1/qq/")]
+
+    def test_a_local_does_not_bind_to_a_parameter_of_a_later_function(self) -> None:
+        # Without the top-level boundary the literal would reach this apiDelete
+        # and read as METHOD, although the two ``url`` names are unrelated.
+        src = "const url = `/v1/baz/${id}/`;\n\nfunction send(url: string) {\n  return apiDelete(url);\n}"
+        assert only(src) == "OK"
+
+    def test_a_long_type_argument_keeps_the_method(self) -> None:
+        generic = "<{ " + " ".join(f"f{i}: string;" for i in range(20)) + " cb: () => void }>"
+        assert only(f"apiDelete{generic}(`/v1/qq/`);") == "METHOD"
+        assert only(f"apiGet{generic}(`/v1/qq/`);") == "OK"
+
+    def test_a_concatenated_base_is_a_prefix(self) -> None:
+        assert only("apiGet('/v1/baz/' + id + '/');") == "OK"
+        assert only("apiGet('/v1/nope/' + id);") == "MISSING"
 
     def test_an_imported_base_is_counted_not_dropped(self) -> None:
         calls, skipped = guard.extract_calls("apiGet(`${API_ROOT}/v1/x/`);", "f.ts")
