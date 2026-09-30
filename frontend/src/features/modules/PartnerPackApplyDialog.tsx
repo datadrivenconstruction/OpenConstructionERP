@@ -718,6 +718,10 @@ export function PartnerPackApplyDialog({
         return t('modules.pp_reason_no_locale', { defaultValue: 'the pack sets no language' });
       case 'load_failed':
         return t('modules.pp_reason_load_failed', { defaultValue: 'the download or import failed' });
+      case 'repriced_market':
+        return t('modules.pp_reason_repriced_market', {
+          defaultValue: 'the cost database is priced in another market than its catalogue',
+        });
       default:
         return fallback;
     }
@@ -878,6 +882,17 @@ export function PartnerPackApplyDialog({
                 t('modules.pp_reason_load_failed', { defaultValue: 'the download or import failed' }),
             });
             return raw ? [line, serverSaid(raw)] : [line];
+          }
+          const repricedTo = asString(c.currency);
+          if (asString(c.reason_code) === 'repriced_market' && repricedTo) {
+            // One base in two currencies is worse than no catalogue: say which.
+            return t('modules.pp_result_catalog_repriced', {
+              defaultValue:
+                'Resource catalogue {{base}}: not loaded. The work items are priced in {{currency}}, the catalogue is in {{catalogCurrency}}.',
+              base: name,
+              currency: repricedTo,
+              catalogCurrency: asString(c.catalog_currency) ?? '',
+            });
           }
           return t('modules.pp_result_catalog_skipped', {
             defaultValue: 'Resource catalogue {{base}}: skipped, {{reason}}',
