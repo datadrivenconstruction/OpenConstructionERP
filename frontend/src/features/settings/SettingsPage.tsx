@@ -66,6 +66,7 @@ import { aiApi, type AIProvider, type AIConnectionStatus, type AISettings } from
 import { BIMConverterStatusBanner } from '@/features/bim/BIMConverterStatusBanner';
 import { DataSecurityPanel } from '@/features/data-security';
 import { DeleteAccountDialog } from './DeleteAccountDialog';
+import { DemoLeftoversPanel } from './DemoLeftoversPanel';
 import { invalidateProjectLists } from '@/features/projects/invalidateProjectLists';
 
 // Audit log now lives as a Settings section (moved out of the sidebar admin
@@ -1808,6 +1809,8 @@ export function SettingsPage() {
                       </Button>
                     </div>
                   )}
+
+                  {profile?.role === 'admin' && <DemoLeftoversPanel />}
 
                   {profile?.role === 'admin' && <DemoLoginAdminRow />}
 
