@@ -23,15 +23,17 @@ MANIFEST = PartnerPackManifest(
         "public-procurement and site-diary references, forint at zero "
         "decimals."
     ),
-    # English, deliberately. There is no Hungarian bundle among the UI
-    # languages the application ships, and a pack cannot conjure one: a
-    # default_locale the app has no strings for resolves back to English
-    # anyway, so declaring "hu" here would promise a Hungarian interface and
-    # deliver an English one with no signal that it had. The Hungarian
-    # vocabulary this pack does carry lives where it is actually read: the
-    # onboarding wizard's labels and the rule-pack documents. A Hungarian UI
-    # bundle is a separate piece of work with its own quality bar.
-    default_locale="en",
+    # Hungarian. The application ships and offers a Hungarian interface
+    # (frontend/src/app/locales/hu.ts, listed in SUPPORTED_LANGUAGES), so
+    # installing the pack switches the interface to it; the install dialog
+    # reads this value. It said "en" while no Hungarian bundle existed,
+    # because a locale the app has no strings for resolves back to English
+    # and would have promised an interface it could not deliver.
+    #
+    # additional_locales stays empty on purpose: a file listed there is
+    # merged over the shipped bundle for everyone on the installation, and
+    # the shipped Hungarian bundle is the one to improve.
+    default_locale="hu",
     additional_locales={},
     cwicr_regions=[],
     default_currency="HUF",
