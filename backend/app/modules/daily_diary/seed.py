@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import logging
 import random
+import re
 import uuid
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
@@ -62,6 +63,7 @@ _SUNRISE = "06:30:00"
 _SUNSET = "20:15:00"
 _DRONE_NOTE = "Seed drone survey"
 _DRONE_URL = "https://seed.local/drone/"
+_SEEDED_PILOT = re.compile(r"Pilot \d+\.\d+")
 _REALITY_NOTE = "Seed reality capture"
 _REALITY_URL = "https://seed.local/reality/"
 
@@ -987,12 +989,15 @@ async def seeded_child_ids(
         r.id
         for r in (
             await session.execute(
-                select(DroneSurvey.id, DroneSurvey.ortho_file_url).where(
+                select(DroneSurvey.id, DroneSurvey.ortho_file_url, DroneSurvey.pilot_name).where(
                     DroneSurvey.project_id.in_(project_ids), DroneSurvey.notes == _DRONE_NOTE
                 )
             )
         ).all()
-        if str(r.ortho_file_url or "").startswith(_DRONE_URL)
+        # Older seeds linked a placeholder orthophoto; current ones link none,
+        # so the seeded pilot name is what still tells them from a user's survey.
+        if (r.ortho_file_url is None or str(r.ortho_file_url).startswith(_DRONE_URL))
+        and _SEEDED_PILOT.fullmatch(r.pilot_name or "")
     ]
     captures = [
         r.id
