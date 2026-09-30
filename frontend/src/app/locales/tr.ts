@@ -29717,6 +29717,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "Başlık satırı miktar, birim veya birim fiyat sütununu belirtmiyor",
     "boq.import_issue.header_unrecognised": "Tanınmayan başlıklar: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}}, {{value}} olarak okundu: buradaki nokta binlik ayracıdır",
+    "boq.import_issue.comma_thousands": "{{text}}, {{value}} olarak okundu: buradaki virgül binlik ayracıdır",
     "import.nothing_imported": "Bu dosyadan hiçbir şey içe aktarılmadı",
     "import.unsupported_type": "{{name}}, bu içe aktarmanın okuyabildiği bir dosya türü değil. Desteklenen: {{types}}",
     "import.notes_title": "Notlar",

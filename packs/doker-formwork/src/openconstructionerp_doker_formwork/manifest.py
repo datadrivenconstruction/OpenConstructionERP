@@ -41,20 +41,21 @@ MANIFEST = PartnerPackManifest(
     partner_url="https://www.doka.com",
     pack_version="0.2.0",
     description=(
-        "Vorkonfiguriert für Schalungs- und Betonbau-Unternehmen in der DACH-Region: "
-        "DIN 18218 Frischbetondruck, DIN EN 12812 Traggerüste, DIN EN 13670 Ausführung, "
-        "DIN EN 206 Beton, VOB/C DIN 18331, DGUV 101-008 Arbeitssicherheit, "
-        "Schalungszyklus-Qualität und -Ökonomie. Inklusive Katalog gängiger "
-        "Schalungssysteme (Rahmenschalung in Stahl und Aluminium, Deckentische, "
-        "Stützenschalung, Kletterschalung, Traggerüste) mit Lastklassen und "
-        "Nutzungshäufigkeiten."
+        "Pre-configured for formwork and concrete contractors in Germany, Austria "
+        "and Switzerland: DIN 18218 fresh concrete pressure, DIN EN 12812 falsework, "
+        "DIN EN 13670 execution, DIN EN 206 concrete, VOB/C DIN 18331, DGUV 101-008 "
+        "site safety, formwork cycle quality and economics. Includes a catalogue of "
+        "common formwork systems (steel and aluminium panel formwork, table forms, "
+        "column formwork, climbing formwork, falsework) with load classes and "
+        "reuse counts."
     ),
     default_locale="de",
     additional_locales={"de": "locales/de.json"},
     cwicr_regions=[
+        # Only published bases are declared: a slug that resolves to nothing
+        # was listed on the activation dialog and then skipped at install.
+        # Berlin is the one German base; Munich and Duesseldorf follow.
         "cwicr-de-berlin",
-        "cwicr-de-muenchen",
-        "cwicr-de-duesseldorf",
     ],
     default_currency="EUR",
     default_tax_template="de_vat_19",

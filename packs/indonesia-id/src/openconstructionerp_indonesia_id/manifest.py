@@ -19,9 +19,9 @@ MANIFEST = PartnerPackManifest(
         "unit rate analysis and SNI standards, IDR currency with 11% "
         "PPN, RAB (Rencana Anggaran Biaya) estimating practice."
     ),
-    default_locale="en",
+    default_locale="id",
     additional_locales={},
-    cwicr_regions=[],
+    cwicr_regions=["cwicr-id-jakarta", "cwicr-id-national"],
     default_currency="IDR",
     default_tax_template="id_ppn_11",
     default_methodology="indonesia",

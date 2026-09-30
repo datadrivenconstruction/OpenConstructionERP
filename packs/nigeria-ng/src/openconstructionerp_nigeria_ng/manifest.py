@@ -19,9 +19,9 @@ MANIFEST = PartnerPackManifest(
         "measurement, NGN currency with 7.5% VAT, NBS standards, "
         "NIQS quantity surveying practice. English interface."
     ),
-    default_locale="en",
+    default_locale="en-NG",
     additional_locales={},
-    cwicr_regions=[],
+    cwicr_regions=["cwicr-eng-lagos"],
     default_currency="NGN",
     default_tax_template="ng_vat_7_5",
     default_methodology="nigeria",

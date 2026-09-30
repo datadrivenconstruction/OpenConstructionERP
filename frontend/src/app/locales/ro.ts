@@ -29601,6 +29601,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "Rândul de antet nu indică nicio coloană de cantitate, unitate sau preț",
     "boq.import_issue.header_unrecognised": "Anteturi nerecunoscute: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} a fost citit ca {{value}}: punctul separă aici miile",
+    "boq.import_issue.comma_thousands": "{{text}} a fost citit ca {{value}}: virgula separă aici miile",
     "import.nothing_imported": "Nu a fost importat nimic din acest fișier",
     "import.unsupported_type": "{{name}} nu este un tip de fișier pe care îl citește acest import. Acceptate: {{types}}",
     "import.notes_title": "Note",

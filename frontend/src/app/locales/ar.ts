@@ -29885,6 +29885,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "صف الرأس لا يسمي عمود كمية أو وحدة أو سعر",
     "boq.import_issue.header_unrecognised": "عناوين غير معروفة: {{headings}}",
     "boq.import_issue.dot_thousands": "تمت قراءة {{text}} كـ {{value}}: النقطة هنا فاصل الآلاف",
+    "boq.import_issue.comma_thousands": "تمت قراءة {{text}} كـ {{value}}: الفاصلة هنا فاصل الآلاف",
     "import.nothing_imported": "لم يتم استيراد أي شيء من هذا الملف",
     "import.unsupported_type": "{{name}} ليس نوع ملف يقرأه هذا الاستيراد. المدعوم: {{types}}",
     "import.notes_title": "ملاحظات",

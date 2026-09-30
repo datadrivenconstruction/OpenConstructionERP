@@ -58,7 +58,7 @@ steps:
       - { key: overhead_percent, label: "Накладные расходы, % / Overhead", type: select, required: true, default: "16%", options: ["12%", "16%", "20%", "Задавать по видам работ"] }
       - { key: profit_percent, label: "Сметная прибыль, % / Estimated profit", type: select, required: true, default: "7%", options: ["5%", "7%", "9%", "Задавать по видам работ"] }
       - { key: contingency_percent, label: "Непредвиденные затраты, % / Unforeseen costs", type: select, required: true, default: "2%", options: ["0% (не начислять)", "2%", "3%", "Задавать по проекту"] }
-      - { key: vat_rate, label: "НДС / VAT", type: radio, required: true, default: "20% (общий режим)", options: ["20% (общий режим)", "Без НДС (УСН), с компенсацией НДС в составе затрат"] }
+      - { key: vat_rate, label: "НДС / VAT", type: radio, required: true, default: "22% (общий режим)", options: ["22% (общий режим)", "Без НДС (УСН), с компенсацией НДС в составе затрат"] }
 
   - id: review
     title: "Проверка и завершение / Review and finish"
@@ -67,7 +67,7 @@ steps:
       label: "Создать рабочее пространство / Create my Russian workspace"
       apply:
         - set_default_currency: RUB
-        - set_tax_template: ru_nds_20
+        - set_tax_template: ru_nds_22
         - enable_rule_packs:
             - ru_gesn_fer_kody
             - ru_nakladnye_smetnaya_pribyl

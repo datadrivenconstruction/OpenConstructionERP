@@ -15,8 +15,8 @@ MANIFEST = PartnerPackManifest(
     pack_version="0.1.0",
     pack_type="country",
     description=(
-        "Pre-configured for Austrian Bautraeger, Baufirmen and "
-        "oeffentliche Auftraggeber: OENORM B 2061 tendering, "
+        "Pre-configured for Austrian developers, contractors and "
+        "public clients: OENORM B 2061 tendering, "
         "OENORM B 1801 cost planning, OENORM A 2063 data exchange, "
         "OENORM classification, EUR with 20 percent USt."
     ),

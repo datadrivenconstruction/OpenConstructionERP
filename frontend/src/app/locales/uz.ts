@@ -30154,6 +30154,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "Sarlavha qatorida miqdor, oʻlchov birligi yoki narx ustuni koʻrsatilmagan",
     "boq.import_issue.header_unrecognised": "Tanib boʻlmagan sarlavhalar: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} {{value}} sifatida oʻqildi: bu yerda nuqta minglikni ajratadi",
+    "boq.import_issue.comma_thousands": "{{text}} {{value}} sifatida oʻqildi: bu yerda vergul minglikni ajratadi",
     "import.nothing_imported": "Bu fayldan hech narsa import qilinmadi",
     "import.unsupported_type": "{{name}} — bu import oʻqiy oladigan fayl turi emas. Qoʻllab-quvvatlanadi: {{types}}",
     "import.notes_title": "Izohlar",

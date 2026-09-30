@@ -30036,6 +30036,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "Рядок заголовків не позначає стовпець кількості, одиниці виміру або розцінки",
     "boq.import_issue.header_unrecognised": "Нерозпізнані заголовки: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} прочитано як {{value}}: крапка тут розділяє тисячі",
+    "boq.import_issue.comma_thousands": "{{text}} прочитано як {{value}}: кома тут розділяє тисячі",
     "import.nothing_imported": "З цього файлу нічого не імпортовано",
     "import.unsupported_type": "{{name}} — не той тип файлу, який читає цей імпорт. Підтримується: {{types}}",
     "import.notes_title": "Примітки",

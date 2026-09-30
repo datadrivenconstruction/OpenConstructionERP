@@ -20,7 +20,7 @@ MANIFEST = PartnerPackManifest(
         "services, SCSI quantity surveying practice, RIAI contract "
         "forms, BCAR building control compliance. English interface."
     ),
-    default_locale="en",
+    default_locale="en-IE",
     additional_locales={},
     cwicr_regions=[],
     default_currency="EUR",

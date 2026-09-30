@@ -3,7 +3,7 @@
 # the OnboardingWizard React component in place of the default steps.
 
 version: 2
-locale: en
+locale: en-AE
 title: "Welcome to OpenConstructionERP — UAE Edition"
 title_ar: "OpenConstructionERP مرحبًا بك في — الإمارات"
 subtitle: "Three steps to align your workspace with UAE construction practice."

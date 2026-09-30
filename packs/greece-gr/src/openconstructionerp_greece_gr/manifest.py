@@ -27,7 +27,7 @@ MANIFEST = PartnerPackManifest(
     # No region token on purpose. The Greek cost base is registered as
     # GR_NATIONAL, and ``resolve_cwicr_db_id`` matches only the last token of a
     # slug, which ``national`` shares with several other countries' bases.
-    cwicr_regions=[],
+    cwicr_regions=["cwicr-gr-national"],
     default_currency="EUR",
     # Documentation only, as on every pack: the rate a bill is charged comes
     # from the dated tax seed for the project's country, and the methodology

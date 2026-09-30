@@ -29483,6 +29483,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "De koprij noemt geen hoeveelheid-, eenheid- of prijskolom",
     "boq.import_issue.header_unrecognised": "Niet herkende kopteksten: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} is gelezen als {{value}}: de punt scheidt hier duizendtallen",
+    "boq.import_issue.comma_thousands": "{{text}} is gelezen als {{value}}: de komma scheidt hier duizendtallen",
     "import.nothing_imported": "Er is niets geïmporteerd uit dit bestand",
     "import.unsupported_type": "{{name}} is geen bestandstype dat deze import kan lezen. Ondersteund: {{types}}",
     "import.notes_title": "Opmerkingen",

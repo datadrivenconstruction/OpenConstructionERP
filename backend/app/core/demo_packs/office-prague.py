@@ -26,7 +26,7 @@ TEMPLATE = DemoTemplate(
     region="CZ",
     classification_standard="din276",
     currency="CZK",
-    locale="en",
+    locale="cs",
     address={
         "street": "Thamova 18",
         "city": "Prague",

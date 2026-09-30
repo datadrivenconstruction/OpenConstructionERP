@@ -2,13 +2,13 @@
 # Streamed by /api/v1/partner-pack/onboarding-script and rendered by the
 # OnboardingWizard React component in place of the default steps.
 #
-# Labels are bilingual. The application ships no Hungarian interface bundle,
-# so this script is where a Hungarian estimator meets their own vocabulary,
-# and every label that names a domain term carries the Hungarian word next to
-# the English one rather than a translation of the English sentence.
+# Labels are bilingual: every label that names a domain term carries the
+# Hungarian word next to the English one rather than a translation of the
+# English sentence. The script declares Hungarian, the language the pack
+# opens the interface in.
 
 version: 2
-locale: en
+locale: hu
 title: "Welcome to OpenConstructionERP - Hungary"
 title_hu: "Üdvözöljük az OpenConstructionERP magyar kiadásában"
 subtitle: "Six steps to line the workspace up with Hungarian practice: item order, material and fee split, contingency, VAT. Hat lépés, és a munkaterület a magyar gyakorlat szerint áll be."

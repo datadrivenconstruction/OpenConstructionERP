@@ -29666,6 +29666,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "La ligne d'en-tête ne désigne aucune colonne de quantité, d'unité ou de prix",
     "boq.import_issue.header_unrecognised": "En-têtes non reconnus : {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} a été lu comme {{value}} : le point sépare ici les milliers",
+    "boq.import_issue.comma_thousands": "{{text}} a été lu comme {{value}} : la virgule sépare ici les milliers",
     "import.nothing_imported": "Rien n'a été importé de ce fichier",
     "import.unsupported_type": "{{name}} n'est pas un type de fichier que cet import peut lire. Pris en charge : {{types}}",
     "import.notes_title": "Remarques",

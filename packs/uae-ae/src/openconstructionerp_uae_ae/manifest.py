@@ -23,7 +23,7 @@ MANIFEST = PartnerPackManifest(
         "sustainable development. English interface with Arabic greeting "
         "in onboarding."
     ),
-    default_locale="en",
+    default_locale="en-AE",
     additional_locales={},
     cwicr_regions=[
         "cwicr-ar-dubai",  # resolves to AE_DUBAI

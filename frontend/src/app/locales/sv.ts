@@ -29503,6 +29503,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "Rubrikraden anger ingen mängd-, enhets- eller priskolumn",
     "boq.import_issue.header_unrecognised": "Okända rubriker: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} lästes som {{value}}: punkten separerar här tusental",
+    "boq.import_issue.comma_thousands": "{{text}} lästes som {{value}}: kommat separerar här tusental",
     "import.nothing_imported": "Inget importerades från den här filen",
     "import.unsupported_type": "{{name}} är inte en filtyp som den här importen läser. Stöds: {{types}}",
     "import.notes_title": "Anteckningar",

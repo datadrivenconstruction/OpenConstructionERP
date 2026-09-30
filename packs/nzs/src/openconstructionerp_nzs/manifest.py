@@ -21,9 +21,10 @@ MANIFEST = PartnerPackManifest(
         "en-NZ": "locales/en-NZ.json",
     },
     cwicr_regions=[
+        # Only published bases are declared: a slug that resolves to nothing
+        # was listed on the activation dialog and then skipped at install.
+        # Wellington and Christchurch follow when their bases are.
         "cwicr-eng-auckland",
-        "cwicr-eng-wellington",
-        "cwicr-eng-christchurch",
     ],
     default_currency="NZD",
     default_tax_template="nz_gst_15",

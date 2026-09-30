@@ -30212,6 +30212,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "Die Kopfzeile benennt keine Mengen-, Einheits- oder Preisspalte",
     "boq.import_issue.header_unrecognised": "Nicht erkannte Überschriften: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} wurde als {{value}} gelesen: der Punkt trennt hier Tausender",
+    "boq.import_issue.comma_thousands": "{{text}} wurde als {{value}} gelesen: das Komma trennt hier Tausender",
     "import.nothing_imported": "Aus dieser Datei wurde nichts importiert",
     "import.unsupported_type": "{{name}} ist kein Dateityp, den dieser Import liest. Unterstützt: {{types}}",
     "import.notes_title": "Hinweise",

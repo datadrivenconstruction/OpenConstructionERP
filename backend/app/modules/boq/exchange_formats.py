@@ -413,6 +413,16 @@ _WORKBOOK_FORMATS: tuple[ExchangeFormat, ...] = (
         header_language="ro",
     ),
     ExchangeFormat(
+        format_id="hr_troskovnik",
+        name="Troškovnik",
+        countries=("HR",),
+        extensions=(".xlsx", ".xls", ".csv"),
+        summary="The Croatian bill of quantities workbook every tender is priced in.",
+        reader="excel",
+        writer="excel",
+        header_language="hr",
+    ),
+    ExchangeFormat(
         format_id="bg_smetna_dokumentaciya",
         name="Количествено-стойностна сметка",
         countries=("BG",),

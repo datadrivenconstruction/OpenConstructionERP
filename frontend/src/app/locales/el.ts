@@ -28672,6 +28672,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "Η γραμμή επικεφαλίδων δεν ορίζει στήλη ποσότητας, μονάδας ή τιμής",
     "boq.import_issue.header_unrecognised": "Μη αναγνωρίσιμες επικεφαλίδες: {{headings}}",
     "boq.import_issue.dot_thousands": "Το {{text}} διαβάστηκε ως {{value}}: η τελεία εδώ διαχωρίζει τις χιλιάδες",
+    "boq.import_issue.comma_thousands": "Το {{text}} διαβάστηκε ως {{value}}: το κόμμα εδώ διαχωρίζει τις χιλιάδες",
     "import.nothing_imported": "Δεν έγινε εισαγωγή τίποτα από αυτό το αρχείο",
     "import.unsupported_type": "Το {{name}} δεν είναι τύπος αρχείου που διαβάζει αυτή η εισαγωγή. Υποστηρίζονται: {{types}}",
     "import.notes_title": "Σημειώσεις",

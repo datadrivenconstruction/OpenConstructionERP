@@ -12,7 +12,7 @@
 #   - RPS / NFS-e municipal (LC 116/2003)
 
 version: 2
-locale: pt
+locale: pt-BR
 title: "Bem-vindo ao OpenConstructionERP - Edicao Brasil"
 subtitle: "Sete passos rapidos para alinhar seu espaco de trabalho a pratica brasileira (SINAPI, ABNT, Lei 14.133/2021, RPS)."
 

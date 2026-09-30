@@ -27,7 +27,7 @@ TEMPLATE = DemoTemplate(
     region="BE",
     classification_standard="din276",
     currency="EUR",
-    locale="en",
+    locale="nl",
     address={
         "street": "Kattendijkdok Oostkaai 25",
         "city": "Antwerp",

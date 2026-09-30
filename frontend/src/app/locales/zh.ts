@@ -29408,6 +29408,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "表头行未标明工程量、单位或单价列",
     "boq.import_issue.header_unrecognised": "无法识别的表头：{{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} 被读取为 {{value}}：此处的小数点是千位分隔符",
+    "boq.import_issue.comma_thousands": "{{text}} 被读取为 {{value}}：此处的逗号是千位分隔符",
     "import.nothing_imported": "未从此文件导入任何内容",
     "import.unsupported_type": "{{name}} 不是此导入功能可读取的文件类型。支持：{{types}}",
     "import.notes_title": "备注",

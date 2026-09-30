@@ -53,7 +53,7 @@ MANIFEST = PartnerPackManifest(
         "country": "FR",
         "country_name_en": "France",
         "country_name_fr": "France",
-        "classification_standard": "dpgf",
+        "classification_standard": "untec",
         "measurement_system": "metric",
         "paper_size": "A4",
         "regulator_refs": [

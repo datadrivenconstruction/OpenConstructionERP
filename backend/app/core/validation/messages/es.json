@@ -825,5 +825,15 @@
       "whole_position_quantities": "Posición {ordinal}: las filas de recursos llevan cantidades de toda la posición en vez de rendimientos por unidad, por lo que el precio unitario no se volvió a derivar de ellas",
       "suggestion": "Revise el descompuesto - vuelva a derivar la posición desde su elemento de catálogo mediante la revisión de rendimientos de recursos, o corrija las filas a mano"
     }
+  },
+  "poland": {
+    "knr_reference_required": {
+      "fail": "La posición {ordinal} no cita ninguna tabla de catálogo KNR",
+      "suggestion": "Indique en la columna podstawa la tabla de catálogo de la que salen las normas, por ejemplo KNR 2-02 0201-01, o escriba kalkulacja indywidualna para una partida de cálculo propio"
+    },
+    "knr_reference_recognised": {
+      "fail": "La referencia '{code}' de la posición {ordinal} no nombra ninguna familia de catálogos KNR",
+      "suggestion": "Empiece la referencia por su familia de catálogo, como KNR, KNNR, KNR-W o KSNR, o marque la partida como kalkulacja indywidualna"
+    }
   }
 }

@@ -29367,6 +29367,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "Päiserida ei nimeta koguse-, ühiku- või hinnaveergu",
     "boq.import_issue.header_unrecognised": "Tundmatud päised: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} loeti väärtuseks {{value}}: punkt eraldab siin tuhandeid",
+    "boq.import_issue.comma_thousands": "{{text}} loeti väärtuseks {{value}}: koma eraldab siin tuhandeid",
     "import.nothing_imported": "Sellest failist ei imporditud midagi",
     "import.unsupported_type": "{{name}} ei ole failitüüp, mida see importija loeb. Toetatud: {{types}}",
     "import.notes_title": "Märkused",

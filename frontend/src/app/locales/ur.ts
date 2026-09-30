@@ -28783,6 +28783,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "ہیڈر قطار مقدار، اکائی یا قیمت کا کوئی کالم نہیں بتاتی",
     "boq.import_issue.header_unrecognised": "غیر شناخت شدہ عنوانات: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} کو {{value}} کے طور پر پڑھا گیا: یہاں نقطہ ہزاروں کو الگ کرتا ہے",
+    "boq.import_issue.comma_thousands": "{{text}} کو {{value}} کے طور پر پڑھا گیا: یہاں کوما ہزاروں کو الگ کرتا ہے",
     "import.nothing_imported": "اس فائل سے کچھ بھی درآمد نہیں ہوا",
     "import.unsupported_type": "{{name}} وہ فائل قسم نہیں جسے یہ درآمد پڑھ سکے۔ معاون: {{types}}",
     "import.notes_title": "نوٹس",

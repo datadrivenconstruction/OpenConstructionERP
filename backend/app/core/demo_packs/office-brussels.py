@@ -28,7 +28,7 @@ TEMPLATE = DemoTemplate(
     region="BE",
     classification_standard="din276",
     currency="EUR",
-    locale="en",
+    locale="nl",
     address={
         "street": "Rue de la Loi 200",
         "city": "Brussels",

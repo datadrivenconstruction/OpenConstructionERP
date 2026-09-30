@@ -28260,6 +28260,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "Аталыштар сабында сан, бирдик же баа мамычасы көрсөтүлгөн эмес",
     "boq.import_issue.header_unrecognised": "Таанылбаган аталыштар: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} {{value}} катары окулду: бул жерде чекит миңдикти бөлүп турат",
+    "boq.import_issue.comma_thousands": "{{text}} {{value}} катары окулду: бул жерде үтүр миңдикти бөлүп турат",
     "import.nothing_imported": "Бул файлдан эч нерсе импорттолгон жок",
     "import.unsupported_type": "{{name}} бул импорт окуй турган файл түрү эмес. Колдоого алынат: {{types}}",
     "import.notes_title": "Эскертүүлөр",

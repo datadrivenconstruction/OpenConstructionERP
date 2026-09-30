@@ -36,7 +36,7 @@ TEMPLATE = DemoTemplate(
     region="NO",
     classification_standard="ns3451",
     currency="NOK",
-    locale="nb",
+    locale="no",
     address={
         "street": "Dronning Eufemias gate 28",
         "city": "Oslo",

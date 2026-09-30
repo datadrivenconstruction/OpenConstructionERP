@@ -22,12 +22,12 @@ MANIFEST = PartnerPackManifest(
     default_locale="de",
     additional_locales={},
     cwicr_regions=[
-        # Two German CWICR catalogues exist: Berlin and Munich. Other metros
-        # (Frankfurt, Hamburg, Cologne, Stuttgart, Dusseldorf) are not yet
-        # published. BKI regional factors bridge the gap for projects outside
-        # Berlin and Munich.
+        # One German CWICR catalogue is published: Berlin. Munich has a price
+        # level in the currency table but no base behind it, so declaring it
+        # listed a region the install then skipped. Other metros (Munich,
+        # Frankfurt, Hamburg, Cologne, Stuttgart, Dusseldorf) follow when
+        # their bases are; regional factors bridge the gap meanwhile.
         "cwicr-de-berlin",
-        "cwicr-de-munich",
     ],
     default_currency="EUR",
     default_tax_template="de_ust_19",
