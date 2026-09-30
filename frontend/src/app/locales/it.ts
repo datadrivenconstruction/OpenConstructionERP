@@ -9432,6 +9432,7 @@ const resource = {
     "projects.no_tenders_desc": "Crea pacchetti di gara per gestire le offerte di questo progetto.",
     "projects.not_found": "Progetto non trovato",
     "projects.not_found_desc": "Il progetto che stai cercando non esiste o è stato eliminato.",
+    "projects.not_found_route_desc": "Questo progetto non esiste oppure non hai più accesso ad esso.",
     "projects.of": "di",
     "projects.open_tendering": "Apri gare d'appalto",
     "projects.overview": "Panoramica",

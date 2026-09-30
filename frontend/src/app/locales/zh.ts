@@ -10479,6 +10479,7 @@ const resource = {
     "projects.no_tenders_desc": "创建招标包以管理此项目的投标。",
     "projects.not_found": "项目未找到",
     "projects.not_found_desc": "您查找的项目不存在或已被删除。",
+    "projects.not_found_route_desc": "该项目不存在，或您不再拥有其访问权限。",
     "projects.of": "/",
     "projects.open_tendering": "打开招投标",
     "projects.overview": "概览",

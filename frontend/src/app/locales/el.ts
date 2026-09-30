@@ -13032,6 +13032,7 @@ const resource = {
     "projects.no_tenders_desc": "Δημιουργήστε πακέτα διαγωνισμού για να διαχειριστείτε τις προσφορές για αυτό το έργο.",
     "projects.not_found": "Το έργο δεν βρέθηκε",
     "projects.not_found_desc": "Το έργο που αναζητάτε δεν υπάρχει ή έχει διαγραφεί.",
+    "projects.not_found_route_desc": "Αυτό το έργο δεν υπάρχει ή δεν έχετε πλέον πρόσβαση σε αυτό.",
     "projects.of": "από",
     "projects.open_tendering": "Άνοιγμα Διαγωνισμού",
     "projects.overview": "Επισκόπηση",

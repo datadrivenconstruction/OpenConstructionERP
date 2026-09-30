@@ -8068,6 +8068,7 @@ const resource = {
     "projects.no_tenders_desc": "Create tender packages to manage bidding for this project.",
     "projects.not_found": "Project not found",
     "projects.not_found_desc": "The project you are looking for does not exist or has been deleted.",
+    "projects.not_found_route_desc": "This project does not exist or you no longer have access to it.",
     "projects.of": "of",
     "projects.open_tendering": "Open Tendering",
     "projects.overview": "Overview",

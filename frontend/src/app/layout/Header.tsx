@@ -34,6 +34,7 @@ import { SubscribeButton } from './SubscribeButton';
 import { ProjectJourneyButton } from './ProjectJourney';
 import { PresenceAvatarStack } from '@/features/global_presence';
 import { getRouteIcon } from './routeIcons';
+import { resolveStaleProject } from './staleProject';
 import { isModuleI18nKey } from '@/modules/_i18n';
 
 /**
@@ -1726,7 +1727,7 @@ function ProjectSwitcher() {
     }
   }, [open, projects]);
 
-  // Auto-clear a stale ``activeProjectId`` whose project no longer exists
+  // Replace a stale ``activeProjectId`` whose project no longer exists
   // on the server (hard-deleted by another session / admin cleanup). A
   // stale id kept pinging 404 on every module that accepts a project
   // context — the most visible one being BIM upload, which failed with
@@ -1753,11 +1754,12 @@ function ProjectSwitcher() {
     // tells us nothing about whether the stored selection still exists, so
     // decline to purge rather than guess.
     if (!Array.isArray(projects)) return;
-    const stillExists = projects.some((p) => p.id === activeProjectId);
-    if (!stillExists) {
-      clearProject();
-    }
-  }, [projects, activeProjectId, clearProject, isFetching, isError]);
+    // Fall back to a project the user can still open rather than an empty
+    // selection; clear only when none is left.
+    const action = resolveStaleProject(projects, activeProjectId);
+    if (action.kind === 'switch') setActiveProject(action.id, action.name);
+    else if (action.kind === 'clear') clearProject();
+  }, [projects, activeProjectId, clearProject, setActiveProject, isFetching, isError]);
 
   return (
     <div className="relative hidden sm:block min-w-0" ref={ref} data-testid="header-project-picker">

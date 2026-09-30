@@ -10947,6 +10947,7 @@ const resource = {
     "projects.no_tenders_desc": "Stvorite pakete nadmetanja za upravljanje ponudama za ovaj projekt.",
     "projects.not_found": "Projekt nije pronađen",
     "projects.not_found_desc": "Projekt koji tražite ne postoji ili je obrisan.",
+    "projects.not_found_route_desc": "Ovaj projekt ne postoji ili mu više nemate pristup.",
     "projects.of": "od",
     "projects.open_tendering": "Otvori nadmetanje",
     "projects.overview": "Pregled",

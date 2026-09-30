@@ -11010,6 +11010,7 @@ const resource = {
     "projects.no_tenders_desc": "Tạo gói thầu để quản lý đấu thầu cho dự án này.",
     "projects.not_found": "Không tìm thấy dự án",
     "projects.not_found_desc": "Dự án bạn đang tìm không tồn tại hoặc đã bị xóa.",
+    "projects.not_found_route_desc": "Dự án này không tồn tại hoặc bạn không còn quyền truy cập.",
     "projects.of": "trong",
     "projects.open_tendering": "Mở đấu thầu",
     "projects.overview": "Tổng quan",

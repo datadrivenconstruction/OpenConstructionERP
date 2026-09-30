@@ -10410,6 +10410,7 @@ const resource = {
     "projects.no_tenders_desc": "Luo tarjouspaketteja hallitaksesi tämän projektin tarjouskilpailua.",
     "projects.not_found": "Projektia ei löytynyt",
     "projects.not_found_desc": "Etsimääsi projektia ei ole olemassa tai se on poistettu.",
+    "projects.not_found_route_desc": "Tätä projektia ei ole olemassa tai sinulla ei ole enää pääsyä siihen.",
     "projects.of": "/",
     "projects.open_tendering": "Avaa tarjouskilpailu",
     "projects.overview": "Yhteenveto",

@@ -10424,6 +10424,7 @@ const resource = {
     "projects.no_tenders_desc": "Bu loyiha uchun tanlovni boshqarish uchun tender paketlarini yarating.",
     "projects.not_found": "Loyiha topilmadi",
     "projects.not_found_desc": "Siz qidirayotgan loyiha mavjud emas yoki oʻchirilgan.",
+    "projects.not_found_route_desc": "Bu loyiha mavjud emas yoki unga endi kirish huquqingiz yoʻq.",
     "projects.of": "dan",
     "projects.open_tendering": "Ochiq tender",
     "projects.overview": "Umumiy koʻrinish",

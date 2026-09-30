@@ -12947,6 +12947,7 @@ const resource = {
     "projects.no_tenders_desc": "برای مدیریت مناقصه این پروژه، بسته‌های مناقصه ایجاد کنید.",
     "projects.not_found": "پروژه یافت نشد",
     "projects.not_found_desc": "پروژه‌ای که دنبال آن هستید وجود ندارد یا حذف شده است.",
+    "projects.not_found_route_desc": "این پروژه وجود ندارد یا دیگر به آن دسترسی ندارید.",
     "projects.of": "از",
     "projects.open_tendering": "مناقصه‌گذاری باز",
     "projects.overview": "نمای کلی",

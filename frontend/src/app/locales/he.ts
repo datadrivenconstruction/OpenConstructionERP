@@ -13014,6 +13014,7 @@ const resource = {
     "projects.no_tenders_desc": "צרו חבילות מכרז לניהול ההצעות עבור פרויקט זה.",
     "projects.not_found": "הפרויקט לא נמצא",
     "projects.not_found_desc": "הפרויקט שאתם מחפשים אינו קיים או נמחק.",
+    "projects.not_found_route_desc": "פרויקט זה אינו קיים או שאין לכם עוד גישה אליו.",
     "projects.of": "מתוך",
     "projects.open_tendering": "מכרז פתוח",
     "projects.overview": "סקירה כללית",

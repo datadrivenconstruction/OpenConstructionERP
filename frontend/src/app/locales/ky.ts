@@ -8174,6 +8174,7 @@ const resource = {
     "projects.no_tenders_desc": "Бул долбоор үчүн тендер өткөрүүнү башкаруу үчүн тендер пакеттерин түзүңүз.",
     "projects.not_found": "Долбоор табылган жок",
     "projects.not_found_desc": "Издеп жаткан долбооруңуз жок же өчүрүлгөн.",
+    "projects.not_found_route_desc": "Бул долбоор жок же ага мындан ары кирүү укугуңуз жок.",
     "projects.of": "ичинен",
     "projects.open_tendering": "Тендерди ачуу",
     "projects.overview": "Жалпы көрүнүш",

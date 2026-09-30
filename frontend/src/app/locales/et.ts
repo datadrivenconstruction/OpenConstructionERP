@@ -13679,6 +13679,7 @@ const resource = {
     "projects.no_tenders_desc": "Loo hankepakette selle projekti pakkumiste haldamiseks.",
     "projects.not_found": "Projekti ei leitud",
     "projects.not_found_desc": "Otsitud projekti ei ole olemas või see on kustutatud.",
+    "projects.not_found_route_desc": "Seda projekti ei ole olemas või teil pole enam sellele juurdepääsu.",
     "projects.of": "/",
     "projects.open_tendering": "Ava hankemenetlus",
     "projects.overview": "Ülevaade",

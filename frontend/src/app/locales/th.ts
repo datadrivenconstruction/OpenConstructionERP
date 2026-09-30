@@ -11040,6 +11040,7 @@ const resource = {
     "projects.no_tenders_desc": "สร้างแพ็คเกจประกวดราคาเพื่อจัดการการประมูลสำหรับโครงการนี้",
     "projects.not_found": "ไม่พบโครงการ",
     "projects.not_found_desc": "โครงการที่คุณกำลังหาไม่มีอยู่หรือถูกลบไปแล้ว",
+    "projects.not_found_route_desc": "โครงการนี้ไม่มีอยู่ หรือคุณไม่มีสิทธิ์เข้าถึงแล้ว",
     "projects.of": "จาก",
     "projects.open_tendering": "เปิดการประกวดราคา",
     "projects.overview": "ภาพรวม",

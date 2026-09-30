@@ -10621,6 +10621,7 @@ const resource = {
     "projects.no_tenders_desc": "Vytvořte balíčky výběrových řízení pro správu nabídek tohoto projektu.",
     "projects.not_found": "Projekt nenalezen",
     "projects.not_found_desc": "Projekt, který hledáte, neexistuje nebo byl smazán.",
+    "projects.not_found_route_desc": "Tento projekt neexistuje nebo k němu již nemáte přístup.",
     "projects.of": "z",
     "projects.open_tendering": "Otevřít výběrové řízení",
     "projects.overview": "Přehled",

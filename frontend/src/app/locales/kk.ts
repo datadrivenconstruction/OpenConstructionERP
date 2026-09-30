@@ -12983,6 +12983,7 @@ const resource = {
     "projects.no_tenders_desc": "Осы жоба үшін тендерлеуді басқару үшін тендер пакеттерін құрыңыз.",
     "projects.not_found": "Жоба табылмады",
     "projects.not_found_desc": "Іздеп жатқан жобаңыз жоқ немесе жойылған.",
+    "projects.not_found_route_desc": "Бұл жоба жоқ немесе сізде оған енді қатынас жоқ.",
     "projects.of": "/",
     "projects.open_tendering": "Ашық Тендерлеу",
     "projects.overview": "Шолу",

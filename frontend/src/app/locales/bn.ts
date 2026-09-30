@@ -12986,6 +12986,7 @@ const resource = {
     "projects.no_tenders_desc": "এই প্রকল্পের জন্য বিডিং পরিচালনা করতে টেন্ডার প্যাকেজ তৈরি করুন।",
     "projects.not_found": "প্রকল্প খুঁজে পাওয়া যায়নি",
     "projects.not_found_desc": "আপনি যে প্রকল্পটি খুঁজছেন তা নেই বা মুছে ফেলা হয়েছে।",
+    "projects.not_found_route_desc": "এই প্রকল্পটি নেই অথবা আপনার আর এতে অ্যাক্সেস নেই।",
     "projects.of": "এর",
     "projects.open_tendering": "খোলা টেন্ডারিং",
     "projects.overview": "ওভারভিউ",

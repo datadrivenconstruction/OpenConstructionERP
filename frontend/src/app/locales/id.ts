@@ -11010,6 +11010,7 @@ const resource = {
     "projects.no_tenders_desc": "Buat paket tender untuk mengelola pengajuan proyek ini.",
     "projects.not_found": "Proyek tidak ditemukan",
     "projects.not_found_desc": "Proyek yang Anda cari tidak ada atau telah dihapus.",
+    "projects.not_found_route_desc": "Proyek ini tidak ada atau Anda tidak lagi memiliki akses ke proyek ini.",
     "projects.of": "dari",
     "projects.open_tendering": "Buka Tender",
     "projects.overview": "Ikhtisar",

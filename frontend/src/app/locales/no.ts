@@ -12594,6 +12594,7 @@ const resource = {
     "projects.no_tenders_desc": "Opprett anbudspakker for a administrere anbudsgivning for dette prosjektet.",
     "projects.not_found": "Prosjekt ikke funnet",
     "projects.not_found_desc": "Prosjektet du leter etter finnes ikke eller har blitt slettet.",
+    "projects.not_found_route_desc": "Dette prosjektet finnes ikke, eller du har ikke lenger tilgang til det.",
     "projects.of": "av",
     "projects.open_tendering": "Åpne anbud",
     "projects.overview": "Oversikt",

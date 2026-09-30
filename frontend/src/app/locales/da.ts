@@ -12690,6 +12690,7 @@ const resource = {
     "projects.no_tenders_desc": "Opret udbudspakker for at administrere licitation for dette projekt.",
     "projects.not_found": "Projekt ikke fundet",
     "projects.not_found_desc": "Projektet du leder efter, eksisterer ikke eller er blevet slettet.",
+    "projects.not_found_route_desc": "Dette projekt findes ikke, eller du har ikke længere adgang til det.",
     "projects.of": "af",
     "projects.open_tendering": "Åbn udbud",
     "projects.overview": "Oversigt",

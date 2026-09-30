@@ -12944,6 +12944,7 @@ const resource = {
     "projects.no_tenders_desc": "Gumawa ng mga tender package para pamahalaan ang bidding para sa proyektong ito.",
     "projects.not_found": "Hindi nahanap ang proyekto",
     "projects.not_found_desc": "Hindi umiiral o nabura na ang proyektong hinahanap mo.",
+    "projects.not_found_route_desc": "Hindi umiiral ang proyektong ito o wala ka nang access dito.",
     "projects.of": "ng",
     "projects.open_tendering": "Buksan ang Tendering",
     "projects.overview": "Pangkalahatang-ideya",

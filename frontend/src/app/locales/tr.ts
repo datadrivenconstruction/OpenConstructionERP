@@ -10827,6 +10827,7 @@ const resource = {
     "projects.no_tenders_desc": "Bu proje için ihale sürecini yönetmek üzere ihale paketleri oluşturun.",
     "projects.not_found": "Proje bulunamadı",
     "projects.not_found_desc": "Aradığınız proje mevcut değil veya silinmiş.",
+    "projects.not_found_route_desc": "Bu proje mevcut değil ya da artık erişiminiz yok.",
     "projects.of": "/",
     "projects.open_tendering": "İhaleyi Aç",
     "projects.overview": "Genel Bakış",

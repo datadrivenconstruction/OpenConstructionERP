@@ -13922,6 +13922,7 @@ const resource = {
     "projects.no_tenders_desc": "أنشئ حزم مناقصات لإدارة المزايدات لهذا المشروع.",
     "projects.not_found": "لم يتم العثور على المشروع",
     "projects.not_found_desc": "المشروع الذي تبحث عنه غير موجود أو تم حذفه.",
+    "projects.not_found_route_desc": "هذا المشروع غير موجود أو لم تعد لديك صلاحية الوصول إليه.",
     "projects.of": "من",
     "projects.open_tendering": "فتح المناقصات",
     "projects.overview": "نظرة عامة",
