@@ -23,6 +23,7 @@ from urllib.parse import quote
 import httpx
 from fastapi import APIRouter, Depends, File, Form, Query, Request, Response, UploadFile
 
+from app.config import get_settings
 from app.core.i18n import get_locale
 from app.core.validation.messages import translate
 from app.dependencies import CurrentUserPayload, RequirePermission, SessionDep
@@ -105,23 +106,45 @@ def _svc(session: SessionDep) -> GeoHubService:
 # reason for each written down.
 #
 #   * ``tile.openstreetmap.org`` is NOT an option however well it works
-#     today: the OSMF Tile Usage Policy forbids proxying and systematic or
-#     app use, and they enforce by User-Agent. It would work now and get us
-#     banned as installs grow.
+#     today. The OSMF Tile Usage Policy says "We generally do not recommend
+#     putting your own caching proxy in front of tile.openstreetmap.org",
+#     warns commercial services that "access may be withdrawn at any point",
+#     and blocks by User-Agent without notice. It would work now and could
+#     disappear under every install at once.
 #   * OpenFreeMap is keyless, quota-free, ODbL, and self-hostable, which is
 #     the property that matters most: an operator who outgrows the public
-#     endpoint points OE_BASEMAP_UPSTREAM at their own copy.
+#     endpoint points OE_BASEMAP_UPSTREAM at their own copy (see
+#     ``_basemap_upstream``).
 _BASEMAP_UPSTREAM = "https://tiles.openfreemap.org"
+# Paths below are relative to the upstream base so a self-hosted copy that
+# mirrors the OpenFreeMap layout is a one-variable switch.
+#
 # TileJSON that names the CURRENT planet build. The tile path carries a
 # version segment (``/planet/20260823_080002_pt/{z}/{x}/{y}.pbf``) that
 # rotates as OpenFreeMap re-imports the planet, so it is resolved at runtime
 # and never written into this file. Hardcoding it would reproduce the exact
 # defect class above: a stale segment answers 200 with an EMPTY body, and an
 # empty body is not distinguishable from "nothing here" by status alone.
-_PLANET_TILEJSON = f"{_BASEMAP_UPSTREAM}/planet"
-_NATURAL_EARTH_UPSTREAM = f"{_BASEMAP_UPSTREAM}/natural_earth/ne2sr/{{z}}/{{x}}/{{y}}.png"
-_GLYPH_UPSTREAM = f"{_BASEMAP_UPSTREAM}/fonts/{{fontstack}}/{{range}}.pbf"
-_SPRITE_UPSTREAM = f"{_BASEMAP_UPSTREAM}/sprites/ofm_f384/{{filename}}"
+_PLANET_TILEJSON_PATH = "/planet"
+_NATURAL_EARTH_PATH = "/natural_earth/ne2sr/{z}/{x}/{y}.png"
+_GLYPH_PATH = "/fonts/{fontstack}/{range}.pbf"
+_SPRITE_PATH = "/sprites/ofm_f384/{filename}"
+
+
+def _basemap_upstream() -> str:
+    """Base URL the proxy fetches from: ``OE_BASEMAP_UPSTREAM`` or OpenFreeMap.
+
+    Read per call rather than frozen into module constants at import, so a
+    test that swaps the settings object sees its value. An empty or non-http value
+    falls back to the public instance instead of producing URLs httpx would
+    reject on every tile.
+    """
+    configured = (get_settings().basemap_upstream or "").strip().rstrip("/")
+    if configured.startswith(("https://", "http://")):
+        return configured
+    return _BASEMAP_UPSTREAM
+
+
 # The vector source stops here. MapLibre overzooms past it client-side by
 # blowing up the z14 ancestor, so deep zooms stay populated.
 _MAX_SOURCE_ZOOM = 14
@@ -134,7 +157,7 @@ _TILE_HEADERS = {
 
 # Vendored MapLibre styles. Names are an allowlist, not a filesystem lookup.
 _STYLE_DIR = Path(__file__).resolve().parent / "data" / "basemap_styles"
-_STYLE_NAMES = frozenset({"liberty", "positron"})
+_STYLE_NAMES = frozenset({"liberty", "positron", "dark"})
 # The glyph range shape from the MapLibre style spec, e.g. ``0-255``.
 _GLYPH_RANGE_RE = re.compile(r"\d{1,5}-\d{1,5}")
 # The four names MapLibre derives from one ``sprite`` base.
@@ -350,7 +373,8 @@ async def _planet_tile_template(*, force: bool = False) -> str | None:
             and (time.monotonic() - _planet_resolved_at) < _PLANET_TTL_SECONDS
         ):
             return _planet_template
-        body = await _fetch_upstream(_PLANET_TILEJSON)
+        upstream = _basemap_upstream()
+        body = await _fetch_upstream(upstream + _PLANET_TILEJSON_PATH)
         if body is None:
             # Keep serving the previous template if we have one: a blip on
             # the metadata endpoint should not blank a map that was working.
@@ -360,7 +384,7 @@ async def _planet_tile_template(*, force: bool = False) -> str | None:
             template = str(tilejson["tiles"][0])
         except (ValueError, KeyError, IndexError, TypeError):
             return _planet_template
-        if not template.startswith(_BASEMAP_UPSTREAM):
+        if not template.startswith(upstream):
             # The TileJSON is upstream-controlled input. Refuse a template
             # that would send our fetches somewhere else entirely.
             return _planet_template
@@ -420,7 +444,7 @@ async def _relief_tile(z: int, x: int, y: int, request: Request) -> Response:
     hit = _TILE_CACHE.get(key)
     if hit is not None:
         return _cached_response(hit[0], hit[1], "image/png", request)
-    data = await _fetch_upstream(_NATURAL_EARTH_UPSTREAM.format(z=z, x=x, y=y))
+    data = await _fetch_upstream(_basemap_upstream() + _NATURAL_EARTH_PATH.format(z=z, x=x, y=y))
     if data is None:
         return _blank_tile()
     etag = _etag_for(data)
@@ -543,7 +567,7 @@ async def proxy_glyphs(fontstack: str, glyph_range: str, request: Request) -> Re
         return Response(status_code=404)
     return await _proxy_asset(
         f"glyph/{fontstack}/{glyph_range}",
-        _GLYPH_UPSTREAM.format(fontstack=quote(fontstack, safe=""), range=glyph_range),
+        _basemap_upstream() + _GLYPH_PATH.format(fontstack=quote(fontstack, safe=""), range=glyph_range),
         "application/x-protobuf",
         request,
     )
@@ -566,7 +590,7 @@ async def proxy_sprite(filename: str, request: Request) -> Response:
         return Response(status_code=404)
     return await _proxy_asset(
         f"sprite/{filename}",
-        _SPRITE_UPSTREAM.format(filename=filename),
+        _basemap_upstream() + _SPRITE_PATH.format(filename=filename),
         media_type,
         request,
     )
@@ -578,11 +602,12 @@ async def proxy_sprite(filename: str, request: Request) -> Response:
     response_class=Response,
 )
 async def proxy_natural_earth(z: int, x: int, y: int, request: Request) -> Response:
-    """Proxy the style's low-zoom relief raster (public-domain Natural Earth).
+    """Proxy the low-zoom relief raster (public-domain Natural Earth).
 
-    Same bytes as ``/basemap/``; kept as a separate path because the
-    vendored styles name it as their relief source and an XYZ client
-    pointed at ``/basemap/`` should not have to know that.
+    Same bytes as ``/basemap/``. The vendored styles no longer draw it (the
+    relief layer made zoomed-out street maps read as terrain maps), but the
+    path stays so a browser still holding an older cached style, or an XYZ
+    client configured against it, keeps getting tiles instead of errors.
     """
     return await _relief_tile(z, x, y, request)
 
@@ -633,8 +658,7 @@ async def basemap_style(name: str, request: Request) -> Response:
 
     The style is committed rather than fetched-and-rewritten at boot. A
     style JSON names the URLs the browser will go on to fetch - the vector
-    source, a second raster source for low-zoom relief, the glyph template
-    and the sprite base - and if any one of them keeps its upstream host the
+    source, the glyph template and the sprite base - and if any one of them keeps its upstream host the
     browser talks to that host directly while the map still renders, so the
     regression is invisible. Vendoring puts all of them in the diff.
     Refresh with ``backend/scripts/vendor_basemap_styles.py``.

@@ -98,16 +98,20 @@ ALLOWED_UPSTREAMS: dict[str, str] = {
 # measuring that it happens to answer today. ─────────────────────────────
 REFUSED_UPSTREAMS: dict[str, str] = {
     "tile.openstreetmap.org": (
-        "The OSMF Tile Usage Policy forbids systematic downloading, use as "
-        "an app or website basemap, and proxying, and is enforced by "
-        "User-Agent. That these tiles answer 200 today is not permission; "
-        "measuring the response answers a different question than reading "
-        "the terms."
+        "The OSMF Tile Usage Policy (operations.osmfoundation.org/policies/tiles) "
+        "says 'We generally do not recommend putting your own caching proxy in "
+        "front of tile.openstreetmap.org', warns that for commercial services "
+        "'access may be withdrawn at any point', forbids prefetch and offline "
+        "use, and blocks by User-Agent without notice. That these tiles answer "
+        "200 today is not permission; measuring the response answers a "
+        "different question than reading the terms."
     ),
     "basemaps.cartocdn.com": (
         "The upstream this whole change exists to remove. It now requires "
         "an API key and signals that by watermarking the image rather than "
-        "by returning an error status."
+        "by returning an error status. Its licence file states the hosted "
+        "tiles are 'restricted to CARTO enterprise customers and Non-Profit "
+        "GRANTS only and is not available for free public use'."
     ),
     "api.mapbox.com": "Requires an access token and bills per request.",
     "tiles.stadiamaps.com": "Requires an API key for non-local origins.",
@@ -292,8 +296,61 @@ def test_serving_a_style_rewrites_every_url_to_the_calling_origin() -> None:
             urls.extend(source.get("tiles") or [])
             if "url" in source:
                 urls.append(source["url"])
-        assert len(urls) >= 4, f"{style_path.name} yielded {len(urls)} URLs, too few to prove anything"
+        # glyphs, sprite and the vector source. The relief raster that used to
+        # make a fourth was removed on purpose, see the test below.
+        assert len(urls) >= 3, f"{style_path.name} yielded {len(urls)} URLs, too few to prove anything"
         for url in urls:
             assert url.startswith(f"{origin}/api/"), (
                 f"{style_path.name} serves {url!r}, which is neither absolute nor ours"
             )
+
+
+def test_the_street_styles_ship_and_include_a_dark_one() -> None:
+    """Light, minimal and dark street styles are all vendored and allowlisted."""
+    from app.modules.geo_hub.router import _STYLE_NAMES
+
+    names = {path.stem for path in _style_files()}
+    assert {"liberty", "positron", "dark"} <= names
+    assert names == set(_STYLE_NAMES), (
+        f"vendored files {sorted(names)} and the served allowlist {sorted(_STYLE_NAMES)} disagree; "
+        "a file nobody can request is dead weight, a name with no file is a 404 map"
+    )
+
+
+@pytest.mark.parametrize("style_path", _style_files(), ids=lambda p: p.name)
+def test_vendored_styles_draw_streets_not_relief(style_path: Path) -> None:
+    """No raster or hillshade layer may sit under the street cartography.
+
+    Upstream liberty blends Natural Earth shaded relief at 60 % opacity from
+    zoom 0 to 7. Zoomed out to fit a few projects, that relief was most of the
+    picture and the founder reported the maps as terrain maps. The vendor
+    script now strips it; this keeps a refresh from bringing it back.
+    """
+    style = json.loads(style_path.read_text(encoding="utf-8"))
+    kinds = {source.get("type") for source in (style.get("sources") or {}).values()}
+    assert kinds == {"vector"}, f"{style_path.name} declares non-vector sources: {kinds}"
+    offenders = [layer["id"] for layer in style["layers"] if layer.get("type") in {"raster", "hillshade"}]
+    assert not offenders, f"{style_path.name} still draws relief layers: {offenders}"
+    street_names = [
+        layer["id"]
+        for layer in style["layers"]
+        if layer.get("source-layer") == "transportation_name" and "text-field" in (layer.get("layout") or {})
+    ]
+    assert street_names, f"{style_path.name} has no labelled street layer, so it would not show street names"
+
+
+def test_the_upstream_can_be_pointed_at_a_self_hosted_copy(monkeypatch: pytest.MonkeyPatch) -> None:
+    """``OE_BASEMAP_UPSTREAM`` repoints every proxied fetch; junk falls back."""
+    from app.modules.geo_hub import router
+
+    class _Settings:
+        basemap_upstream = "https://tiles.example.internal/"
+
+    monkeypatch.setattr(router, "get_settings", lambda: _Settings())
+    assert router._basemap_upstream() == "https://tiles.example.internal"
+
+    _Settings.basemap_upstream = ""
+    assert router._basemap_upstream() == router._BASEMAP_UPSTREAM
+
+    _Settings.basemap_upstream = "file:///etc/passwd"
+    assert router._basemap_upstream() == router._BASEMAP_UPSTREAM

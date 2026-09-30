@@ -127,6 +127,31 @@ describe('the project card shows streets when it can', () => {
   });
 });
 
+describe('the project card does not show terrain while its snapshot is queued', () => {
+  it('shows a neutral placeholder, not the relief tile, until the snapshot resolves', async () => {
+    // Snapshots render one at a time, so the twelfth card on a page waits
+    // for eleven others. Painting relief in the meantime made every list of
+    // projects read as a terrain map, which is what was reported.
+    let resolveSnapshot: (value: string | null) => void = () => {};
+    renderStreetThumbnail.mockReturnValue(
+      new Promise<string | null>((resolve) => {
+        resolveSnapshot = resolve;
+      }),
+    );
+
+    render(<ProjectMap variant="card" lat={SITE.lat} lng={SITE.lng} label="Berlin, Germany" />);
+
+    await waitFor(() => expect(renderStreetThumbnail).toHaveBeenCalledTimes(1));
+    expect(screen.getByTestId('project-map-card-pending')).toBeTruthy();
+    expect(screen.queryByRole('img'), 'a picture was painted before the snapshot existed').toBeNull();
+    expect(screen.getByText('Berlin, Germany')).toBeTruthy();
+
+    resolveSnapshot(SNAPSHOT);
+    await waitFor(() => expect(cardImage().getAttribute('src')).toBe(SNAPSHOT));
+    expect(screen.queryByTestId('project-map-card-pending')).toBeNull();
+  });
+});
+
 describe('the project card falls back to terrain rather than to nothing', () => {
   it('keeps the relief tile and credits the relief source when no snapshot arrives', async () => {
     renderStreetThumbnail.mockResolvedValue(null);
@@ -139,7 +164,7 @@ describe('the project card falls back to terrain rather than to nothing', () => 
     await waitFor(() => expect(renderStreetThumbnail).toHaveBeenCalledTimes(1));
 
     // A picture, not an empty box: the point of keeping the raster path.
-    expect(cardImage().getAttribute('src')).toMatch(RELIEF_TILE);
+    await waitFor(() => expect(cardImage().getAttribute('src')).toMatch(RELIEF_TILE));
     expect(cardImage().getAttribute('src')).not.toContain('data:image');
 
     expect(creditText()).toBe(RELIEF_ATTRIBUTION);

@@ -388,6 +388,16 @@ class Settings(BaseSettings):
     s3_bucket: str = "openestimate"
     s3_region: str = "us-east-1"
 
+    # ── Basemap ──────────────────────────────────────────────────────────
+    # Base URL of the OpenFreeMap-compatible tile server the geo-hub proxy
+    # reads vector tiles, glyphs, sprites and relief from. Empty means the
+    # public OpenFreeMap instance. Point it at a self-hosted copy for an
+    # offline or high-volume install; the server must expose the same paths
+    # (``/planet`` TileJSON, ``/fonts``, ``/sprites``, ``/natural_earth``).
+    # The browser never talks to it, so no CSP change is needed.
+    # Env: ``OE_BASEMAP_UPSTREAM`` / ``BASEMAP_UPSTREAM``.
+    basemap_upstream: str = ""
+
     # ── Point Cloud ingest ───────────────────────────────────────────────
     # Reality-capture scans are 5-200 GB. They are uploaded
     # presigned-direct-to-MinIO so the 3 GB FastAPI core never proxies the
