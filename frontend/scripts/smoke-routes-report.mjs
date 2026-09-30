@@ -27,6 +27,7 @@ const evidence = (r) => {
     ...r.pageErrors,
     ...r.apiErrors,
     ...r.consoleErrors.map((c) => `console: ${c}`),
+    ...(r.brokenImages ?? []).map((src) => `broken img: ${src}`),
     ...r.tabs.flatMap((t) => [`tab "${t.tab}": ${[...t.symptoms, ...t.details].join('; ')}`]),
   ];
   return parts.slice(0, 4).map(cell).join('<br>');
