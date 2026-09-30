@@ -32,25 +32,19 @@ export function isAuthAssetUrl(url: string | null | undefined): url is string {
   return url.startsWith(`${window.location.origin}/api/`);
 }
 
-/**
- * How long an object URL outlives its last reader.
- *
- * A list that re-renders, a tab switch, a lightbox opening the image the grid
- * already showed: all of them release and re-acquire the same URL within a
- * moment. Keeping the blob briefly turns each of those into a cache hit
- * instead of a second download, and still frees the memory soon after the
- * image really leaves the screen.
- */
-const RELEASE_DELAY_MS = 30_000;
-
 interface CacheEntry {
   promise: Promise<string>;
   objectUrl: string | null;
   refs: number;
-  timer: ReturnType<typeof setTimeout> | null;
 }
 
-/** One entry per image URL, shared by every component showing it. */
+/**
+ * One entry per image URL, shared by every component showing it at the same
+ * time: a grid thumbnail and the lightbox opened on it, or the same photo in
+ * two widgets, download once. An entry lives exactly as long as somebody
+ * shows it. Holding blobs past their last reader would be a memory cost with
+ * no owner, and a stale entry would outlive a logout.
+ */
 const cache = new Map<string, CacheEntry>();
 
 async function fetchObjectUrl(src: string): Promise<string> {
@@ -65,7 +59,7 @@ async function fetchObjectUrl(src: string): Promise<string> {
 function acquire(src: string): CacheEntry {
   let entry = cache.get(src);
   if (!entry) {
-    const fresh: CacheEntry = { promise: Promise.resolve(''), objectUrl: null, refs: 0, timer: null };
+    const fresh: CacheEntry = { promise: Promise.resolve(''), objectUrl: null, refs: 0 };
     fresh.promise = fetchObjectUrl(src).then(
       (url) => {
         fresh.objectUrl = url;
@@ -81,29 +75,25 @@ function acquire(src: string): CacheEntry {
     cache.set(src, fresh);
     entry = fresh;
   }
-  if (entry.timer) {
-    clearTimeout(entry.timer);
-    entry.timer = null;
-  }
   entry.refs += 1;
   return entry;
 }
 
 function release(src: string, entry: CacheEntry) {
   entry.refs = Math.max(0, entry.refs - 1);
-  if (entry.refs > 0 || entry.timer) return;
-  entry.timer = setTimeout(() => {
-    entry.timer = null;
-    if (entry.refs > 0) return;
-    if (cache.get(src) === entry) cache.delete(src);
-    if (entry.objectUrl) URL.revokeObjectURL(entry.objectUrl);
-  }, RELEASE_DELAY_MS);
+  if (entry.refs > 0) return;
+  if (cache.get(src) === entry) cache.delete(src);
+  if (entry.objectUrl) {
+    URL.revokeObjectURL(entry.objectUrl);
+  } else {
+    // Still downloading: free the blob as soon as it arrives.
+    entry.promise.then((url) => URL.revokeObjectURL(url)).catch(() => {});
+  }
 }
 
 /** Drops every cached blob. For tests. */
 export function resetAuthImageCache() {
   for (const entry of cache.values()) {
-    if (entry.timer) clearTimeout(entry.timer);
     if (entry.objectUrl) URL.revokeObjectURL(entry.objectUrl);
   }
   cache.clear();
@@ -168,7 +158,8 @@ export function useAuthedObjectUrl(src: string | null | undefined): AuthedObject
  * ``<img>`` that works for every image URL the platform stores.
  *
  * Protected API images are fetched with the bearer token (see
- * ``useAuthedObjectUrl``) and shared through a small cache; public URLs are
+ * ``useAuthedObjectUrl``) and shared between components showing them at
+ * once; public URLs are
  * loaded directly. Either way a URL that does not produce a picture shows
  * ``fallback`` rather than the browser's broken-image icon.
  */
