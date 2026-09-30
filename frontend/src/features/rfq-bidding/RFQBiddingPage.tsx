@@ -19,7 +19,8 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { fmtDate } from '@/shared/lib/formatters';
-import { Badge, CollapsibleSection, EmptyState, StatCard, Button } from '@/shared/ui';
+import { Badge, CollapsibleSection, ConfirmDialog, EmptyState, StatCard, Button } from '@/shared/ui';
+import { useConfirm } from '@/shared/hooks/useConfirm';
 import type { BadgeVariant } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { TabBar, tabIds } from '@/shared/ui/TabBar';
@@ -353,6 +354,27 @@ export function RFQBiddingPage() {
     [createMutation],
   );
 
+  const { confirm, ...confirmProps } = useConfirm();
+
+  // Issuing cannot be undone: the server deletes only drafts. An RFQ with no
+  // scope lines gives vendors nothing to price, so it is not offered at all.
+  const handleIssue = useCallback(
+    async (rfq: RFQ) => {
+      if ((rfq.lines?.length ?? 0) === 0) return;
+      const ok = await confirm({
+        title: t('rfq_bidding.issue_confirm_title', { defaultValue: 'Issue this RFQ?' }),
+        message: t('rfq_bidding.issue_confirm_message', {
+          defaultValue:
+            'Vendors can bid once it is issued. An issued RFQ is no longer a draft and cannot be deleted.',
+        }),
+        confirmLabel: t('rfq_bidding.issue', { defaultValue: 'Issue' }),
+        variant: 'warning',
+      });
+      if (ok) issueMutation.mutate(rfq.id);
+    },
+    [confirm, issueMutation, t],
+  );
+
   // ── No-project guard (all hooks above) ────────────────────────────────
 
   if (!projectId) {
@@ -442,7 +464,7 @@ export function RFQBiddingPage() {
             onSearchChange={setSearch}
             statusFilter={statusFilter}
             onStatusFilterChange={setStatusFilter}
-            onIssue={(id) => issueMutation.mutate(id)}
+            onIssue={handleIssue}
             onDelete={(id) => deleteMutation.mutate(id)}
             onSelectForComparison={(id) => {
               setComparisonRfqId(id);
@@ -497,6 +519,8 @@ export function RFQBiddingPage() {
           t={t}
         />
       )}
+
+      <ConfirmDialog {...confirmProps} />
     </div>
   );
 }
@@ -523,7 +547,7 @@ function RFQListPanel({
   onSearchChange: (v: string) => void;
   statusFilter: RFQStatus | '';
   onStatusFilterChange: (v: RFQStatus | '') => void;
-  onIssue: (id: string) => void;
+  onIssue: (rfq: RFQ) => void;
   onDelete: (id: string) => void;
   onSelectForComparison: (id: string) => void;
   t: (k: string, o?: Record<string, unknown>) => string;
@@ -636,10 +660,19 @@ function RFQListPanel({
               <div className="flex shrink-0 items-center gap-1.5">
                 {rfq.status === 'draft' && (
                   <button
-                    onClick={() => onIssue(rfq.id)}
+                    onClick={() => onIssue(rfq)}
+                    // Issuing is one way: the RFQ can no longer be deleted, and
+                    // with no scope lines no vendor has anything to price.
+                    disabled={(rfq.lines?.length ?? 0) === 0}
                     className="flex items-center gap-1 rounded-lg bg-oe-blue px-2.5 py-1.5 text-xs font-medium text-white
-                      hover:bg-oe-blue/90 transition-colors"
-                    title={t('rfq_bidding.issue_action', { defaultValue: 'Issue to vendors' })}
+                      hover:bg-oe-blue/90 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+                    title={
+                      (rfq.lines?.length ?? 0) === 0
+                        ? t('rfq_bidding.issue_needs_scope', {
+                            defaultValue: 'Add at least one scope line before issuing',
+                          })
+                        : t('rfq_bidding.issue_action', { defaultValue: 'Issue to vendors' })
+                    }
                   >
                     <Send className="h-3 w-3" aria-hidden />
                     {t('rfq_bidding.issue', { defaultValue: 'Issue' })}
