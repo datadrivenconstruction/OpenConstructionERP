@@ -108,3 +108,27 @@ describe('importIssueText', () => {
     expect(text).toBe('The header row names no description column and no quantity, unit or rate column');
   });
 });
+
+describe('importIssueText for a column mapping the import could not use', () => {
+  it('names the sheet and the reason in the reader language', () => {
+    const text = importIssueText(
+      {
+        code: 'column_mapping_not_applied',
+        reason: 'different_header',
+        sheet: 'Villamos',
+        message: 'Sheet Villamos: The column mapping was not used on this sheet: its header differs from the first one.',
+      },
+      tFrom(hu.translation),
+    );
+    expect(text).toContain('Villamos');
+    expect(text).toContain(hu.translation['boq.import_issue.mapping_different_header']);
+    expect(text).not.toContain('was not used');
+  });
+
+  it('words each reason differently', () => {
+    const texts = ['profile', 'format', 'different_header'].map((reason) =>
+      importIssueText({ code: 'column_mapping_not_applied', reason }, tFrom({})),
+    );
+    expect(new Set(texts).size).toBe(3);
+  });
+});

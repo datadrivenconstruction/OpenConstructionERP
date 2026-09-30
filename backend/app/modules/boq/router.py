@@ -81,6 +81,7 @@ from fastapi import (
     Body,
     Depends,
     File,
+    Form,
     HTTPException,
     Query,
     Response,
@@ -6899,6 +6900,17 @@ async def import_boq_auto(
             "reports how many WOULD be deleted so nothing is removed silently."
         ),
     ),
+    column_mapping: str | None = Form(
+        None,
+        description=(
+            "Spreadsheets only. A JSON object of column index to the field the "
+            "column holds, for the columns the user changed in the import "
+            'preview: {"3": "quantity", "5": ""}. The indices are those of '
+            "metadata.original_columns in the preview; an empty string leaves "
+            "the column out; every column not named keeps the importer's own "
+            "reading."
+        ),
+    ),
 ) -> dict[str, Any]:
     """Auto-detect a BOQ upload's format and dispatch to the matching importer.
 
@@ -6940,6 +6952,9 @@ async def import_boq_auto(
             detail="Uploaded file is empty.",
         )
     file_name = file.filename or "upload"
+    from app.modules.boq.importers.excel import column_mapping_warning
+
+    overrides = _read_column_mapping(column_mapping)
 
     head = content[:4096]
     chosen: type | None = None
@@ -6983,10 +6998,12 @@ async def import_boq_auto(
         )
         result["method"] = "smart_fallback"
         result["format_id"] = "smart"
+        if overrides:
+            result["warnings"] = [*(result.get("warnings") or []), column_mapping_warning("format")]
         return result
 
     try:
-        imported_boq: ImportedBOQ = await chosen.parse(content, locale=get_locale())
+        imported_boq: ImportedBOQ = await _parse_with_mapping(chosen, content, overrides)
     except ImporterParseError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -7111,6 +7128,17 @@ async def import_preview(
             "JSON without persisting anything."
         ),
     ),
+    column_mapping: str | None = Form(
+        None,
+        description=(
+            "Spreadsheets only. A JSON object of column index to the field the "
+            "column holds, for the columns the user changed in the import "
+            'preview: {"3": "quantity", "5": ""}. The indices are those of '
+            "metadata.original_columns in the preview; an empty string leaves "
+            "the column out; every column not named keeps the importer's own "
+            "reading."
+        ),
+    ),
 ) -> dict[str, Any]:
     """Parse a BOQ upload and return positions without persisting to the database.
 
@@ -7137,6 +7165,7 @@ async def import_preview(
             detail="Uploaded file is empty.",
         )
     file_name = file.filename or "upload"
+    overrides = _read_column_mapping(column_mapping)
 
     head = content[:4096]
     chosen: type | None = None
@@ -7164,7 +7193,7 @@ async def import_preview(
         )
 
     try:
-        imported_boq: ImportedBOQ = await chosen.parse(content, locale=get_locale())
+        imported_boq: ImportedBOQ = await _parse_with_mapping(chosen, content, overrides)
     except ImporterParseError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -7215,6 +7244,36 @@ async def import_preview(
     )
 
     return response.model_dump()
+
+
+def _read_column_mapping(raw: str | None) -> dict[int, str] | None:
+    """The ``column_mapping`` form field, or a 422 that says what is wrong with it."""
+    from app.modules.boq.importers.excel import parse_column_mapping
+
+    try:
+        return parse_column_mapping(raw)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
+
+
+async def _parse_with_mapping(
+    chosen: type,
+    content: bytes,
+    overrides: dict[int, str] | None,
+) -> "ImportedBOQ":
+    """Parse with the importer the dispatcher chose, laying the user's column mapping over a spreadsheet.
+
+    Any other format has no columns to map, so the mapping is noted as not
+    used rather than dropped without a word.
+    """
+    from app.modules.boq.importers.excel import ExcelImporter, column_mapping_warning
+
+    if chosen is ExcelImporter:
+        return await ExcelImporter.parse(content, locale=get_locale(), column_mapping=overrides)
+    imported = await chosen.parse(content, locale=get_locale())
+    if overrides:
+        imported.warnings.append(column_mapping_warning("format"))
+    return imported
 
 
 # ── Smart import helpers ─────────────────────────────────────────────────────
