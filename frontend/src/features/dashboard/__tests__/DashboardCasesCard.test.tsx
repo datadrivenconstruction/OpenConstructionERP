@@ -286,12 +286,12 @@ describe('DashboardCasesCard video guides', () => {
     useVideosStore.setState({ role: 'estimator', market: 'any', started: {}, watched: {} });
   });
 
-  it('shows a row of video guides above the cases, Start here first, then picks for the role', async () => {
+  it('shows a row of video guides after the cases, Start here first, then picks for the role', async () => {
     renderCard();
     const strip = await screen.findByTestId('dashboard-videos', {}, { timeout: 30000 });
     const tiles = within(strip).getAllByTestId('dashboard-video');
-    const expected = dashboardVideos({ role: 'estimator', market: null, language: 'en' }, 4);
-    expect(tiles).toHaveLength(4);
+    const expected = dashboardVideos({ role: 'estimator', market: null, language: 'en' }, 5);
+    expect(tiles).toHaveLength(5);
     expect(expected[0]!.id).toBe(startHereVideo()!.id);
     expect(tiles.map((t) => t.getAttribute('aria-label'))).toEqual(expected.map((v) => `Play: ${v.title}`));
     expect(within(tiles[0]!).getByText('Start here')).toBeTruthy();
@@ -300,9 +300,10 @@ describe('DashboardCasesCard video guides', () => {
       expect(v.status).toBe('published');
       expect(v.cover).toMatch(/^https:\/\/i\.ytimg\.com\//);
     }
-    // Both halves are labelled, and the video half comes first.
+    // Both halves are labelled, and the cases come first: the videos are the
+    // quiet row under them, not the headline above them.
     const card = screen.getByTestId('dashboard-cases-card');
-    expect(strip.compareDocumentPosition(card.querySelector('div.grid')!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(strip.compareDocumentPosition(card.querySelector('div.grid')!) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy();
     expect(within(strip).getByText('Video guides')).toBeTruthy();
     expect(within(card).getByText('Use cases')).toBeTruthy();
   });
@@ -321,6 +322,23 @@ describe('DashboardCasesCard video guides', () => {
     renderCard();
     const strip = await screen.findByTestId('dashboard-videos', {}, { timeout: 30000 });
     expect(within(strip).getAllByTestId('dashboard-video')).toHaveLength(2);
+  });
+
+  it('keeps the row compact and quiet: one more column than before, small play mark, no lift', async () => {
+    renderCard();
+    const strip = await screen.findByTestId('dashboard-videos', {}, { timeout: 30000 });
+    // Five across at the default full width where four used to fill the row,
+    // so each thumbnail is a fifth smaller; three on a phone.
+    const grid = within(strip).getByTestId('dashboard-videos-grid');
+    expect(grid.className).toContain('sm:grid-cols-5');
+    expect(grid.className).toContain('grid-cols-3');
+    for (const tile of within(strip).getAllByTestId('dashboard-video')) {
+      expect(tile.className).not.toMatch(/hover:-translate-y|shadow-md|bg-oe-blue/);
+      // Nothing on the dashboard plays by itself.
+      expect(tile.querySelector('video, iframe')).toBeNull();
+    }
+    // The link to the library is there and is text, not a primary button.
+    expect(within(strip).getByRole('link', { name: /All videos/ }).className).not.toMatch(/bg-oe-blue/);
   });
 
 });

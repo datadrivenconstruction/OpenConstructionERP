@@ -57,8 +57,11 @@ import { DASHBOARD_WIDGET_BY_ID } from './widgetRegistry';
 // card and not with the dashboard's own chunk.
 const DashboardVideosStrip = lazy(() => import('@/features/videos/DashboardVideosStrip'));
 
-/** How many video thumbnails each width shows: one row, Start here first. */
-const VIDEOS_BY_SPAN: Record<SpanStep, number> = { 2: 2, 3: 3, 4: 4, 6: 4 };
+/** How many video thumbnails each width shows: one row, Start here first.
+ *  One more than a comfortable fit from a third of the page up, so each
+ *  thumbnail is about a fifth smaller and the row reads as a quiet index
+ *  rather than a second gallery. */
+const VIDEOS_BY_SPAN: Record<SpanStep, number> = { 2: 2, 3: 4, 4: 5, 6: 5 };
 
 /** This card's id in the dashboard widget registry. Its width and its
  *  visibility are both stored against it, so the id is the whole link between
@@ -350,12 +353,6 @@ export function DashboardCasesCard() {
         </div>
       </div>
 
-      {/* Video guides: Start here, then picks for the reader's role and
-          country. The fallback holds the row's height so nothing jumps. */}
-      <Suspense fallback={<div className="mt-3 h-28" aria-hidden="true" />}>
-        <DashboardVideosStrip count={VIDEOS_BY_SPAN[span]} />
-      </Suspense>
-
       {/* Quick-launch: jump straight into a case */}
       {picks.length > 0 && (
         <div className="mt-3">
@@ -498,6 +495,15 @@ export function DashboardCasesCard() {
           </div>
         </div>
       )}
+
+      {/* Video guides: Start here, then picks for the reader's role and
+          country. AFTER the cases, not above them: the cases are what this
+          card is for, and a row of bright thumbnails at its top pulled the eye
+          away from them. The fallback holds the row's height so nothing
+          jumps. */}
+      <Suspense fallback={<div className="mt-3 h-24" aria-hidden="true" />}>
+        <DashboardVideosStrip count={VIDEOS_BY_SPAN[span]} />
+      </Suspense>
     </div>
   );
 }
