@@ -23,6 +23,18 @@ describe('normalizePackLocale', () => {
     expect(normalizePackLocale('en-CA')).toBe('en'); // canada-ca: not day-first
   });
 
+  it('prints the day first for a day-first pack, which the unqualified entry does not', () => {
+    const fourteenthOfMarch = new Date(2026, 2, 14);
+    const format = (tag: string) =>
+      new Intl.DateTimeFormat(normalizePackLocale(tag), { year: 'numeric', month: '2-digit', day: '2-digit' }).format(
+        fourteenthOfMarch,
+      );
+    expect(format('en-AU')).toBe('14/03/2026');
+    expect(format('en-IE')).toBe('14/03/2026');
+    // The control: what the Australian pack printed before.
+    expect(format('en')).toBe('03/14/2026');
+  });
+
   it('keeps the region when the UI ships it, because the pack asked for it', () => {
     // A pack that names a region has named it deliberately. Stripping en-US left
     // commercial-denver asking for American English and being handed the British
