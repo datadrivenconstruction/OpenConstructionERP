@@ -32,6 +32,7 @@ import type { LucideIcon } from 'lucide-react';
 import { Breadcrumb, EmptyState, SkeletonGrid, ModuleGuideButton } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { reportsGuide } from './reportsGuide';
+import { bidTotalRow, csvCell, csvRow, tenderStatusLabel, type BidTotal } from './tenderCsv';
 import { DismissibleInfo, IntroRichText } from '@/shared/ui/DismissibleInfo';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -608,41 +609,43 @@ async function downloadTenderComparisonReport(
 
   const naLabel = t('reports.csv_na', { defaultValue: 'N/A' });
   const csvLines: string[] = [];
-  csvLines.push(t('reports.csv_tender_comparison', { defaultValue: 'Tender Comparison Report' }));
-  csvLines.push(`${t('reports.csv_project', { defaultValue: 'Project' })},${projectName}`);
-  csvLines.push(`${t('reports.csv_generated', { defaultValue: 'Generated' })},${new Date().toISOString()}`);
-  csvLines.push(`${t('reports.csv_total_packages', { defaultValue: 'Total Packages' })},${packages.length}`);
+  csvLines.push(csvCell(t('reports.csv_tender_comparison', { defaultValue: 'Tender Comparison Report' })));
+  csvLines.push(csvRow([t('reports.csv_project', { defaultValue: 'Project' }), projectName]));
+  csvLines.push(csvRow([t('reports.csv_generated', { defaultValue: 'Generated' }), new Date().toISOString()]));
+  csvLines.push(csvRow([t('reports.csv_total_packages', { defaultValue: 'Total Packages' }), packages.length]));
   csvLines.push('');
 
   for (const pkg of packages) {
-    csvLines.push(`${t('reports.csv_package', { defaultValue: 'Package' })}: ${pkg.name}`);
-    csvLines.push(`${t('reports.csv_status', { defaultValue: 'Status' })},${pkg.status}`);
-    csvLines.push(`${t('reports.csv_deadline', { defaultValue: 'Deadline' })},${pkg.deadline || naLabel}`);
-    csvLines.push(`${t('reports.csv_bids', { defaultValue: 'Bids' })},${pkg.bid_count}`);
+    csvLines.push(csvCell(`${t('reports.csv_package', { defaultValue: 'Package' })}: ${pkg.name}`));
+    csvLines.push(csvRow([t('reports.csv_status', { defaultValue: 'Status' }), tenderStatusLabel(pkg.status, t)]));
+    csvLines.push(csvRow([t('reports.csv_deadline', { defaultValue: 'Deadline' }), pkg.deadline || naLabel]));
+    csvLines.push(csvRow([t('reports.csv_bids', { defaultValue: 'Bids' }), pkg.bid_count]));
 
     try {
       const comparison = await apiGet<{
         bid_count: number;
         budget_total: number;
-        bid_totals: Array<{ company_name: string; total: number; currency: string; deviation_pct: number; status: string }>;
+        bid_totals: BidTotal[];
         rows: Array<{ description: string; unit: string; budget_rate: number; bids: Array<{ company_name: string; unit_rate: number; total: number }> }>;
       }>(`/v1/tendering/packages/${pkg.id}/comparison/`);
 
       if (comparison.bid_totals.length > 0) {
         csvLines.push('');
         csvLines.push(
-          [
+          csvRow([
             t('reports.csv_col_company', { defaultValue: 'Company' }),
             t('reports.csv_col_total', { defaultValue: 'Total' }),
             t('reports.csv_col_currency', { defaultValue: 'Currency' }),
             t('reports.csv_col_deviation_pct', { defaultValue: 'Deviation %' }),
             t('reports.csv_col_status', { defaultValue: 'Status' }),
-          ].join(','),
+          ]),
         );
         for (const bt of comparison.bid_totals) {
-          csvLines.push([bt.company_name, Number(bt.total).toFixed(2), bt.currency, `${Number(bt.deviation_pct).toFixed(1)}%`, bt.status].join(','));
+          csvLines.push(bidTotalRow(bt, comparison.budget_total, t, naLabel));
         }
-        csvLines.push(`${t('reports.csv_budget_total', { defaultValue: 'Budget Total' })},${Number(comparison.budget_total).toFixed(2)}`);
+        csvLines.push(
+          csvRow([t('reports.csv_budget_total', { defaultValue: 'Budget Total' }), Number(comparison.budget_total).toFixed(2)]),
+        );
       }
     } catch { /* skip comparison if unavailable */ }
 
@@ -652,7 +655,7 @@ async function downloadTenderComparisonReport(
   }
 
   if (packages.length === 0) {
-    csvLines.push(t('reports.csv_no_packages', { defaultValue: 'No tender packages found for this project.' }));
+    csvLines.push(csvCell(t('reports.csv_no_packages', { defaultValue: 'No tender packages found for this project.' })));
   }
 
   downloadBlob(csvLines.join('\n'), `${projectName}_tender_comparison.csv`, 'text/csv');

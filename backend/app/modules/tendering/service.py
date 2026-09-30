@@ -857,7 +857,10 @@ class TenderingService:
         bid_totals = []
         for bid in bids:
             total = _to_decimal(bid.total_amount)
-            if budget_total > 0 and _same_currency(bid):
+            # The 0.0 below is a placeholder, not a match; ``deviation_known``
+            # lets a reader print N/A instead of "0.0%".
+            deviation_known = budget_total > 0 and _same_currency(bid)
+            if deviation_known:
                 deviation = (total - budget_total) / budget_total * Decimal("100")
                 dev_val = round(float(deviation), 1)
             else:
@@ -869,6 +872,7 @@ class TenderingService:
                     "total": _round2(total),
                     "currency": bid.currency,
                     "deviation_pct": dev_val,
+                    "deviation_known": deviation_known,
                     "status": bid.status,
                 }
             )
