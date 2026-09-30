@@ -12981,6 +12981,7 @@ const resource = {
     "projects.no_tenders_desc": "اس پروجیکٹ کے لیے بولی منظم کرنے کے لیے ٹینڈر پیکجز بنائیں۔",
     "projects.not_found": "پروجیکٹ نہیں ملا",
     "projects.not_found_desc": "جو پروجیکٹ آپ تلاش کر رہے ہیں وہ موجود نہیں یا حذف ہو چکا ہے۔",
+    "projects.not_found_route_desc": "یہ پروجیکٹ موجود نہیں ہے یا اب آپ کے پاس اس تک رسائی نہیں۔",
     "projects.of": "از",
     "projects.open_tendering": "کھلی ٹینڈرنگ",
     "projects.overview": "جائزہ",

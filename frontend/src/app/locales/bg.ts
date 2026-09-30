@@ -10602,6 +10602,7 @@ const resource = {
     "projects.no_tenders_desc": "Създайте тръжни пакети за управление на офертирането по този проект.",
     "projects.not_found": "Проектът не е намерен",
     "projects.not_found_desc": "Проектът, който търсите, не съществува или е бил изтрит.",
+    "projects.not_found_route_desc": "Този проект не съществува или вече нямате достъп до него.",
     "projects.of": "от",
     "projects.open_tendering": "Отвори тръжна процедура",
     "projects.overview": "Обзор",

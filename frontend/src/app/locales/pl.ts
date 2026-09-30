@@ -10869,6 +10869,7 @@ const resource = {
     "projects.no_tenders_desc": "Utwórz pakiety przetargowe, aby zarządzać procesem ofertowym tego projektu.",
     "projects.not_found": "Nie znaleziono projektu",
     "projects.not_found_desc": "Projekt, którego szukasz, nie istnieje lub został usunięty.",
+    "projects.not_found_route_desc": "Ten projekt nie istnieje lub nie masz już do niego dostępu.",
     "projects.of": "z",
     "projects.open_tendering": "Otwórz przetargi",
     "projects.overview": "Przegląd",

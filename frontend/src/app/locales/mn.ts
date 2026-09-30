@@ -13223,6 +13223,7 @@ const resource = {
     "projects.no_tenders_desc": "Үүсгэх тендер packages хүртэл удирдах тендерийн санал -д зориулсан энэ төсөл.",
     "projects.not_found": "Төсөл олдсонгүй",
     "projects.not_found_desc": "төсөл та нь looking -д зориулсан хийдэг биш байх эсвэл байх байсан устгагдсан.",
+    "projects.not_found_route_desc": "Энэ төсөл байхгүй эсвэл та үүнд хандах эрхгүй болсон байна.",
     "projects.of": "/",
     "projects.open_tendering": "Нээх Тендер",
     "projects.overview": "Тойм",

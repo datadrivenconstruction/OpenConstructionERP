@@ -10501,6 +10501,7 @@ const resource = {
     "projects.no_tenders_desc": "इस परियोजना के लिए बोली प्रबंधित करने के लिए निविदा पैकेज बनाएँ।",
     "projects.not_found": "परियोजना नहीं मिली",
     "projects.not_found_desc": "आप जिस परियोजना की तलाश कर रहे हैं वह मौजूद नहीं है या हटा दी गई है।",
+    "projects.not_found_route_desc": "यह परियोजना मौजूद नहीं है या अब आपके पास इस तक पहुँच नहीं है।",
     "projects.of": "में से",
     "projects.open_tendering": "निविदा खोलें",
     "projects.overview": "अवलोकन",

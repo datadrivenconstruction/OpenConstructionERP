@@ -10458,6 +10458,7 @@ const resource = {
     "projects.no_tenders_desc": "이 프로젝트의 입찰을 관리하려면 입찰 패키지를 만드세요.",
     "projects.not_found": "프로젝트를 찾을 수 없습니다",
     "projects.not_found_desc": "찾고 있는 프로젝트가 존재하지 않거나 삭제되었습니다.",
+    "projects.not_found_route_desc": "이 프로젝트가 존재하지 않거나 더 이상 접근 권한이 없습니다.",
     "projects.of": "/",
     "projects.open_tendering": "입찰 열기",
     "projects.overview": "개요",

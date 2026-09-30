@@ -10293,6 +10293,7 @@ const resource = {
     "projects.no_tenders_desc": "Erstellen Sie Vergabepakete für die Ausschreibung dieses Projekts.",
     "projects.not_found": "Projekt nicht gefunden",
     "projects.not_found_desc": "Das gesuchte Projekt existiert nicht oder wurde gelöscht.",
+    "projects.not_found_route_desc": "Dieses Projekt existiert nicht oder Sie haben keinen Zugriff mehr darauf.",
     "projects.of": "von",
     "projects.open_tendering": "Ausschreibung öffnen",
     "projects.overview": "Übersicht",

@@ -9311,6 +9311,7 @@ const resource = {
     "projects.no_tenders_desc": "Créez des lots d'appel d'offres pour gérer les consultations de ce projet.",
     "projects.not_found": "Projet introuvable",
     "projects.not_found_desc": "Le projet que vous recherchez n'existe pas ou a été supprimé.",
+    "projects.not_found_route_desc": "Ce projet n'existe pas ou vous n'y avez plus accès.",
     "projects.of": "sur",
     "projects.open_tendering": "Ouvrir les appels d'offres",
     "projects.overview": "Vue d'ensemble",

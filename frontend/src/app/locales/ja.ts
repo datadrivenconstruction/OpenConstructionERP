@@ -10440,6 +10440,7 @@ const resource = {
     "projects.no_tenders_desc": "このプロジェクトの入札を管理するために入札パッケージを作成してください。",
     "projects.not_found": "プロジェクトが見つかりません",
     "projects.not_found_desc": "お探しのプロジェクトは存在しないか、削除されています。",
+    "projects.not_found_route_desc": "このプロジェクトは存在しないか、アクセス権がなくなりました。",
     "projects.of": "/",
     "projects.open_tendering": "入札を開く",
     "projects.overview": "概要",

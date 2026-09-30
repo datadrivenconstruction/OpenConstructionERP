@@ -10201,6 +10201,7 @@ const resource = {
     "projects.no_tenders_desc": "Створіть тендерні пакети, щоб керувати торгами для цього проєкту.",
     "projects.not_found": "Проєкт не знайдено",
     "projects.not_found_desc": "Проєкт, який ви шукаєте, не існує або був видалений.",
+    "projects.not_found_route_desc": "Цей проєкт не існує або у вас більше немає до нього доступу.",
     "projects.of": "з",
     "projects.open_tendering": "Відкритий тендер",
     "projects.overview": "Огляд",

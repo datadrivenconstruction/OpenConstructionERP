@@ -12652,6 +12652,7 @@ const resource = {
     "projects.no_tenders_desc": "Skapa upphandlingspaket för att hantera anbudsgivning för detta projekt.",
     "projects.not_found": "Projekt hittades inte",
     "projects.not_found_desc": "Projektet du söker finns inte eller har tagits bort.",
+    "projects.not_found_route_desc": "Det här projektet finns inte eller så har du inte längre åtkomst till det.",
     "projects.of": "av",
     "projects.open_tendering": "Öppna upphandling",
     "projects.overview": "Översikt",

@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { Suspense, lazy, useState, useCallback, useEffect, useLayoutEffect, useContext, createContext } from 'react';
-import { Routes, Route, Navigate, Outlet, useLocation, useParams } from 'react-router-dom';
+import { Routes, Route, Navigate, Outlet, useLocation, useMatch, useParams } from 'react-router-dom';
 import { AppLayout } from './layout';
 import { DashboardPage } from '@/features/dashboard';
 import { LoginPage, RegisterPage, ForgotPasswordPage, AuthedHome } from '@/features/auth';
@@ -37,6 +37,7 @@ import { ddcVerifyIntegrity, ddcInjectMeta, DDC_ORIGIN } from '@/shared/lib/ddc-
 import { NavigationProgress } from '@/shared/lib/navigationProgress';
 import { useKeyboardShortcuts } from '@/shared/hooks/useKeyboardShortcuts';
 import { useTranslation } from 'react-i18next';
+import { ProjectRouteGate } from './ProjectRouteGate';
 import { getLanguageByCode } from './i18n';
 import { initErrorLogger } from '@/shared/lib/errorLogger';
 import { installDesktopExternalLinks } from '@/shared/lib/desktop';
@@ -848,6 +849,12 @@ function P({ title, children }: { title: string; children: React.ReactNode }) {
   useLayoutEffect(() => {
     setTitle(title);
   }, [setTitle, title]);
+  // Pages under /projects/:projectId answer a gone project with one message.
+  // The project page itself keeps its own not-found state, which also cleans
+  // the recent-items list.
+  const { projectId } = useParams();
+  const isProjectPage = useMatch('/projects/:projectId') !== null;
+  if (projectId && !isProjectPage) return <ProjectRouteGate projectId={projectId}>{children}</ProjectRouteGate>;
   return <>{children}</>;
 }
 

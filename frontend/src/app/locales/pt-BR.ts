@@ -8923,6 +8923,7 @@ const resource = {
     "projects.no_tenders_desc": "Crie pacotes de licitação para gerenciar as propostas deste projeto.",
     "projects.not_found": "Projeto não encontrado",
     "projects.not_found_desc": "O projeto que você procura não existe ou foi excluído.",
+    "projects.not_found_route_desc": "Este projeto não existe ou você não tem mais acesso a ele.",
     "projects.of": "de",
     "projects.open_tendering": "Abrir Licitações",
     "projects.overview": "Visão Geral",

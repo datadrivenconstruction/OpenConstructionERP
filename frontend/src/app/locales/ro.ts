@@ -11016,6 +11016,7 @@ const resource = {
     "projects.no_tenders_desc": "Creați pachete de licitație pentru a gestiona ofertarea pentru acest proiect.",
     "projects.not_found": "Proiectul nu a fost găsit",
     "projects.not_found_desc": "Proiectul pe care îl căutați nu există sau a fost șters.",
+    "projects.not_found_route_desc": "Acest proiect nu există sau nu mai aveți acces la el.",
     "projects.of": "din",
     "projects.open_tendering": "Deschide licitația",
     "projects.overview": "Prezentare generală",

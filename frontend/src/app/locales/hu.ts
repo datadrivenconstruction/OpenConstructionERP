@@ -9188,6 +9188,7 @@ const resource = {
     "projects.no_tenders_desc": "Hozzon létre tendercsomagokat az ajánlatkérés kezeléséhez ehhez a projekthez.",
     "projects.not_found": "A projekt nem található",
     "projects.not_found_desc": "A keresett projekt nem létezik, vagy törölve lett.",
+    "projects.not_found_route_desc": "Ez a projekt nem létezik, vagy már nincs hozzáférése hozzá.",
     "projects.of": "/",
     "projects.open_tendering": "Nyílt versenyeztetés",
     "projects.overview": "Áttekintés",

@@ -9292,6 +9292,7 @@ const resource = {
     "projects.no_tenders_desc": "Maak aanbestedingspakketten om biedingen voor dit project te beheren.",
     "projects.not_found": "Project niet gevonden",
     "projects.not_found_desc": "Het project dat u zoekt bestaat niet of is verwijderd.",
+    "projects.not_found_route_desc": "Dit project bestaat niet of u hebt er geen toegang meer toe.",
     "projects.of": "van",
     "projects.open_tendering": "Aanbesteding openen",
     "projects.overview": "Overzicht",
