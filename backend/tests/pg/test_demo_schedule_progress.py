@@ -106,7 +106,9 @@ def _expected(activity: Activity, now: datetime) -> tuple[int | None, str]:
 async def test_a_seeded_programme_has_finished_and_unstarted_phases(pg_session, monkeypatch) -> None:
     """The two ends of the scale have to be reachable, or nothing is ever done."""
     activities = await _install_straddling(pg_session, monkeypatch)
-    assert len(activities) == 6, f"seeded {len(activities)} activities from a six-phase template"
+    # The phases sit under one project summary row, which is not a phase.
+    phases = [a for a in activities if a.activity_type != "summary"]
+    assert len(phases) == 6, f"seeded {len(phases)} phases from a six-phase template"
 
     progress = sorted(int(a.progress_pct) for a in activities)
     assert 100 in progress, f"no phase finished, on a programme whose first phase ended 400 days ago: {progress}"
@@ -171,3 +173,31 @@ async def test_the_section_derived_branch_agrees_with_its_dates_too(pg_session) 
             assert 0 < got < 100, f"{activity.name} is under way but reads {got}%"
         else:
             assert got == want_progress, f"{activity.name} reads {got}%, expected {want_progress}%"
+
+
+async def test_the_phases_sit_in_one_section_the_user_can_add_to(pg_session, monkeypatch) -> None:
+    """A demo schedule has a section, so adding an activity inside one can be tried.
+
+    One project summary holds every phase. Its codes continue under it, no two
+    rows of the schedule share a code, the summary spans its phases and
+    carries none of their links, and the rows are ordered summary first.
+    """
+    activities = await _install_straddling(pg_session, monkeypatch)
+    summaries = [a for a in activities if a.activity_type == "summary"]
+    phases = [a for a in activities if a.activity_type != "summary"]
+
+    assert len(summaries) == 1, f"expected one project summary, got {len(summaries)}"
+    summary = summaries[0]
+    assert summary.parent_id is None
+    assert summary.wbs_code == "1"
+    assert summary.boq_position_ids == [] and summary.dependencies == []
+
+    assert {a.parent_id for a in phases} == {summary.id}, "a phase sits outside the section"
+    codes = [a.wbs_code for a in activities]
+    assert len(codes) == len(set(codes)), f"a WBS code is used twice: {sorted(codes)}"
+    assert sorted(a.wbs_code for a in phases) == sorted(f"1.{i}" for i in range(1, 7))
+
+    assert summary.start_date == min(a.start_date for a in phases)
+    assert summary.end_date == max(a.end_date for a in phases)
+    assert summary.sort_order < min(a.sort_order for a in phases)
+    assert len({a.sort_order for a in activities}) == len(activities), "rows share a sort_order"
