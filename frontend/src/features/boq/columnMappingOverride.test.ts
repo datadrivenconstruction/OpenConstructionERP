@@ -22,27 +22,35 @@ describe('column mapping override', () => {
   });
 
   it('sends only the column the user changed, so the split rate is left as the importer read it', () => {
-    const chosen = chooseColumn(READ, '5', '');
+    const chosen = chooseColumn(READ, READ, '5', '');
     expect(columnMappingField(READ, chosen)).toBe('{"5":""}');
   });
 
+  it('restoring a split half keeps its partner, and nothing is sent', () => {
+    const skipped = chooseColumn(READ, READ, '5', '');
+    const restored = chooseColumn(READ, skipped, '5', 'unit_rate');
+    expect(restored['6']).toBe('unit_rate');
+    expect(columnMappingField(READ, restored)).toBeNull();
+  });
+
   it('names a column the importer left unmapped once the user maps it', () => {
-    expect(changedColumns({ '4': 'unit' }, chooseColumn({ '4': 'unit' }, '3', 'quantity'))).toEqual({ '3': 'quantity' });
+    const read = { '4': 'unit' };
+    expect(changedColumns(read, chooseColumn(read, read, '3', 'quantity'))).toEqual({ '3': 'quantity' });
   });
 
   it('takes a field away from the column that had it, and sends both', () => {
-    const chosen = chooseColumn(READ, '1', 'quantity');
+    const chosen = chooseColumn(READ, READ, '1', 'quantity');
     expect(chosen['3']).toBe('');
     expect(changedColumns(READ, chosen)).toEqual({ '1': 'quantity', '3': '' });
   });
 
-  it('choosing one rate column leaves both halves of the split out', () => {
-    const chosen = chooseColumn({ ...READ, '7': '' }, '7', 'unit_rate');
+  it('choosing one new rate column leaves both halves of the split out', () => {
+    const chosen = chooseColumn(READ, { ...READ, '7': '' }, '7', 'unit_rate');
     expect(changedColumns(READ, chosen)).toEqual({ '5': '', '6': '', '7': 'unit_rate' });
   });
 
   it('leaving a column out never clears another one', () => {
-    const chosen = chooseColumn(READ, '2', '');
+    const chosen = chooseColumn(READ, READ, '2', '');
     expect(Object.values(chosen).filter((v) => v === '')).toHaveLength(1);
   });
 });

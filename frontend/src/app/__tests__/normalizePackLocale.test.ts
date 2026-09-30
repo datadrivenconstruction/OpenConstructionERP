@@ -37,6 +37,10 @@ describe('normalizePackLocale', () => {
     expect(normalizePackLocale('pt')).toBe('pt'); // Portugal, no pack of its own
     expect(normalizePackLocale('ar')).toBe('ar'); // saudi-vision2030 (RTL)
     expect(normalizePackLocale('en')).toBe('en'); // india-cpwd, modular-prefab
+    // hungary-hu. The pack declared English while no Hungarian interface
+    // shipped; it declares hu now, and hu has to answer with itself or the
+    // pack is back to promising a language it cannot deliver.
+    expect(normalizePackLocale('hu')).toBe('hu');
   });
 
   it('is case-insensitive and trims', () => {

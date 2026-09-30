@@ -67,15 +67,13 @@ def open_workbook(content: bytes) -> Any:
 def _open_legacy(content: bytes) -> LegacyWorkbook:
     import xlrd
 
-    if _ENCRYPTED_PACKAGE in content:
-        raise ImporterParseError(
-            "This workbook is protected with a password. Open it, remove the password and save it again."
-        )
     try:
         book = xlrd.open_workbook(file_contents=content, on_demand=False)
     except xlrd.XLRDError as exc:
         text = str(exc)
-        if "encrypted" in text.lower():
+        # Asked only once xlrd has found no workbook: the bytes of a valid .xls
+        # can spell anything in a cell, the stream name included.
+        if "encrypted" in text.lower() or _ENCRYPTED_PACKAGE in content:
             raise ImporterParseError(
                 "This workbook is protected with a password. Open it, remove the password and save it again."
             ) from exc
