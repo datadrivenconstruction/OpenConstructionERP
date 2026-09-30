@@ -35,9 +35,11 @@ import socket
 import sys
 import webbrowser
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from sqlalchemy.ext.asyncio import AsyncSession
 
 # ── Console encoding hardening ────────────────────────────────────────────
@@ -2072,6 +2074,48 @@ def cmd_promote_admin(args: argparse.Namespace) -> None:
     print(_green(message))
 
 
+async def run_demo_cleanup(apply: bool, write: Callable[[str], None] = print) -> Any:
+    """The demo-cleanup pass itself: find, print and with ``apply`` remove and commit.
+
+    Opens its session from ``app.database`` at call time, so whatever database
+    the process is pointed at is the one cleaned.
+    """
+    from app.core.demo_cleanup import clean_leaked_demo_rows
+    from app.database import async_session_factory
+
+    async with async_session_factory() as session:
+        report = await clean_leaked_demo_rows(session, apply=apply)
+        if apply:
+            await session.commit()
+        else:
+            await session.rollback()
+
+    write(f"Real projects checked: {report.real_projects}")
+    if report.found:
+        write("Demo rows proven to be the seed's, by its mark or by content matching the seed exactly:")
+    for project, rows in report.by_project().items():
+        write(f"  {project or 'Company-wide (no project)'}")
+        for row in rows:
+            write(f"    {row.module} / {row.table}  {row.id}  {row.title}")
+    if report.kept:
+        write("Kept, although they came from the seed:")
+        for row in report.kept:
+            where = row.project_name or "company-wide"
+            write(f"    {row.module} / {row.table}  {row.id}  {row.title}  ({where}; {row.reason})")
+    if report.ppe_kept_reason:
+        write(f"  Company-wide seed rows kept: {report.ppe_kept_reason}")
+
+    if apply:
+        write(_green(f"Removed {report.total} demo row(s)."))
+    elif report.total:
+        write(_yellow("Dry run, nothing changed. Run again with --apply to remove the rows listed above."))
+    elif report.kept or report.ppe_kept_reason:
+        write(_yellow("Nothing to remove. The rows listed as kept stay; see the reason next to each."))
+    else:
+        write(_green("No demo rows found in real projects."))
+    return report
+
+
 def cmd_demo_cleanup(args: argparse.Namespace) -> None:
     """Report, and with --apply remove, demo rows the old boot seeding left in real projects."""
     data_dir = _data_dir_from_args(args)
@@ -2079,34 +2123,8 @@ def cmd_demo_cleanup(args: argparse.Namespace) -> None:
 
     import asyncio
 
-    async def _run():
-        from app.core.demo_cleanup import clean_leaked_demo_rows
-        from app.database import async_session_factory
-
-        _register_all_module_models()
-        async with async_session_factory() as session:
-            report = await clean_leaked_demo_rows(session, apply=args.apply)
-            if args.apply:
-                await session.commit()
-            else:
-                await session.rollback()
-            return report
-
-    report = asyncio.run(_run())
-    print(f"Real projects checked: {report.real_projects}")
-    print("Demo rows proven to be the seed's, by its mark or by content matching the seed exactly:")
-    for name, ids in report.rows.items():
-        print(f"  {name}: {len(ids)}")
-        for row_id in ids:
-            print(f"    {row_id}")
-    if report.ppe_kept_reason:
-        print(f"  hse_ppe_issues: kept ({report.ppe_kept_reason})")
-    if args.apply:
-        print(_green(f"Removed {report.total} demo row(s)."))
-    elif report.total:
-        print(_yellow("Dry run, nothing changed. Run again with --apply to remove the rows listed above."))
-    else:
-        print(_green("No demo rows found in real projects."))
+    _register_all_module_models()
+    asyncio.run(run_demo_cleanup(bool(args.apply)))
 
 
 # ── Module management (install / list / uninstall) ─────────────────────────
