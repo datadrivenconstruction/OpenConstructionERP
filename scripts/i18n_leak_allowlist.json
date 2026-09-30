@@ -1468,5 +1468,20 @@
     "en_value": "SINAPI",
     "note": "name of a national estimating standard or data format shown as a validation rule set label; written the same way in every locale we ship, Cyrillic and CJK ones included",
     "reason_category": "standard_code"
+  },
+  "boq.import_preview.col_total": {
+    "en_value": "Total",
+    "note": "Total is the ordinary word for this column in da, es (all variants), id, no, pt (both) and ro, so the translation equals English by design",
+    "reason_category": "cognate_loanword"
+  },
+  "boq.import_preview.field_total": {
+    "en_value": "Total",
+    "note": "Total is the ordinary word for this column in da, es (all variants), id, no, pt (both) and ro, so the translation equals English by design",
+    "reason_category": "cognate_loanword"
+  },
+  "preliminaries.subtotal": {
+    "en_value": "Subtotal",
+    "note": "Subtotal is the ordinary word for this column in da, es (all variants), id, no, pt (both) and ro, so the translation equals English by design",
+    "reason_category": "cognate_loanword"
   }
 }
