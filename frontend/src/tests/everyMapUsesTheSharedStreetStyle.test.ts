@@ -90,7 +90,9 @@ describe('the shared street style config', () => {
     expect(buildBasemapStyle('streets')).toBe(VECTOR_BASEMAP_STYLE_URL);
     expect(buildBasemapStyle('streets', 'dark')).toBe(DARK_VECTOR_BASEMAP_STYLE_URL);
     expect(buildBasemapStyle('minimal')).toBe(basemapStyleUrl('positron'));
-    expect(buildBasemapStyle('minimal', 'dark')).toBe(DARK_VECTOR_BASEMAP_STYLE_URL);
+    // Minimal is the light desaturated map in either theme, or it and
+    // streets would be two tabs showing one map in dark mode.
+    expect(buildBasemapStyle('minimal', 'dark')).toBe(basemapStyleUrl('positron'));
     // The drawn offline canvases carry no tiles in either theme.
     for (const id of ['paper', 'blueprint'] as const) {
       const style = buildBasemapStyle(id, 'dark');

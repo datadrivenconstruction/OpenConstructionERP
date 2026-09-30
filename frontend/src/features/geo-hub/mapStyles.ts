@@ -129,11 +129,12 @@ export function readBasemap(): BasemapId {
  * the style's glyphs rather than being burnt into the tile.
  */
 function vectorStyle(variant: 'streets' | 'minimal', theme: 'light' | 'dark'): string {
-  // In the dark theme both street variants resolve to the dark street style:
-  // a full-colour light map is the brightest thing on a dark screen, and
-  // OpenFreeMap ships exactly one dark cartography.
-  if (theme === 'dark') return streetBasemapStyleUrl('dark');
-  return variant === 'minimal' ? basemapStyleUrl('positron') : streetBasemapStyleUrl('light');
+  // Only ``streets`` follows the app theme: a full-colour light map is the
+  // brightest thing on a dark screen. ``minimal`` stays the light,
+  // desaturated map its picker entry promises, so the two tabs never show
+  // the same picture.
+  if (variant === 'minimal') return basemapStyleUrl('positron');
+  return streetBasemapStyleUrl(theme);
 }
 
 /**
