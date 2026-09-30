@@ -485,7 +485,7 @@ export function BOQToolbar({
               disabled={isImporting}
             />
           )}
-          <input ref={importInputRef as React.RefObject<HTMLInputElement>} type="file" accept=".xlsx,.csv,.pdf,.jpg,.jpeg,.png,.tiff,.rvt,.ifc,.dwg,.dgn,.x81,.x83,.x84,.x85,.x86,.xml,.bc3,.ods,.json,.yaml,.yml" className="hidden" onChange={onImportInputChange} aria-label={t('common.import')} />
+          <input ref={importInputRef as React.RefObject<HTMLInputElement>} type="file" accept=".xlsx,.xls,.csv,.pdf,.jpg,.jpeg,.png,.tiff,.rvt,.ifc,.dwg,.dgn,.x81,.x83,.x84,.x85,.x86,.xml,.bc3,.ods,.json,.yaml,.yml" className="hidden" onChange={onImportInputChange} aria-label={t('common.import')} />
           <div className="relative">
             <button
               ref={exportBtnRef}
