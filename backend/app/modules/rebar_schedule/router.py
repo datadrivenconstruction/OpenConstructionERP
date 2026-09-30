@@ -6,6 +6,7 @@ Mounted at ``/api/v1/rebar-schedule``.
 
     GET    /super-groups                     - the format's super-groups and rule set
     POST   /preview                          - parse and validate without storing
+    POST   /preview/file                     - dry-run an uploaded ABS file
     POST   /imports?project_id=X             - import an ABS file
     GET    /imports?project_id=X             - list a project's imports
     GET    /imports/{import_id}              - one import
@@ -99,6 +100,37 @@ async def preview(payload: AbsPreviewRequest, session: SessionDep) -> AbsPreview
     """
     try:
         result = await _service(session).preview(payload.content, locale=payload.locale)
+    except RebarScheduleError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
+    return AbsPreviewResponse.model_validate(result)
+
+
+@router.post("/preview/file", response_model=AbsPreviewResponse, include_in_schema=False, dependencies=[_READ])
+@router.post("/preview/file/", response_model=AbsPreviewResponse, dependencies=[_READ])
+async def preview_file(
+    session: SessionDep,
+    locale: str | None = Query(default=None, max_length=16),
+    upload: UploadFile = File(...),
+) -> AbsPreviewResponse:
+    """Dry-run an uploaded ABS file, reading its bytes exactly as an import would.
+
+    The text route above has to trust whoever decoded the file. A browser
+    decodes as UTF-8, which turns each cp1252 umlaut a German CAD system writes
+    into a replacement character and so breaks the checksum over that record.
+    Taking the same multipart upload as ``POST /imports/`` sends the bytes
+    through the one decoder the import uses, so the preview shows the
+    checksums and the text the import will store.
+    """
+    content = await upload.read()
+    if len(content) > MAX_UPLOAD_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"File exceeds the {MAX_UPLOAD_BYTES} byte limit",
+        )
+    if not content.strip():
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="File is empty")
+    try:
+        result = await _service(session).preview(content, locale=locale)
     except RebarScheduleError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
     return AbsPreviewResponse.model_validate(result)

@@ -267,3 +267,38 @@ async def test_the_dry_run_reports_the_one_finding_the_corpus_carries(session: A
     findings = preview["validation"]["findings"]
     assert [item["rule_id"] for item in findings] == ["bvbs_abs.header_field_order"]
     assert "e, v" in findings[0]["message"]
+
+
+def _cp1252_record() -> bytes:
+    """One record whose drawing field holds a cp1252 umlaut, with the checksum right for it."""
+    from app.modules.rebar_schedule.abs_format import compute_checksum
+
+    base = abs_fixtures.RECORDS["bar-with-one-bend"]
+    record = base.replace("@r312@", "@rBügel@")
+    prefix = record[: record.rindex("@C") + 2]
+    return (prefix + str(compute_checksum(prefix)) + "@\r\n").encode("cp1252")
+
+
+async def test_a_dry_run_on_bytes_reads_the_file_as_the_import_does(session: AsyncSession) -> None:
+    """Preview and import must decode one file the same way, or the preview lies about checksums.
+
+    A browser decoding these bytes as UTF-8 turns the umlaut into U+FFFD, whose
+    code point shifts the checksum sum, so the text preview flagged a record
+    the import stores as sound.
+    """
+    project_id = await _project(session)
+    service = RebarScheduleService(session)
+    data = _cp1252_record()
+
+    preview = await service.preview(data)
+    imported = await service.import_file(project_id, "buegel.abs", data)
+    shapes, _ = await service.list_shapes(imported["import_record"].id)
+
+    assert preview["encoding"] == imported["import_record"].encoding == "cp1252"
+    assert preview["shapes"][0]["checksum_ok"] is True
+    assert shapes[0].checksum_ok is True
+    assert preview["shapes"][0]["drawing_ref"] == shapes[0].drawing_ref == "Bügel"
+
+    # What the old browser-decoded path sent, kept here as the reason for the above.
+    garbled = await service.preview(data.decode("utf-8", errors="replace"))
+    assert garbled["shapes"][0]["checksum_ok"] is False

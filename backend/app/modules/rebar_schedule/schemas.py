@@ -123,7 +123,9 @@ class AbsPreviewRequest(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=False)
 
-    content: str = Field(min_length=1, description="The ABS file's text")
+    # Matches the router's upload cap, so the text route cannot take a file
+    # the upload routes would refuse.
+    content: str = Field(min_length=1, max_length=16 * 1024 * 1024, description="The ABS file's text")
     locale: str | None = Field(default=None, max_length=16)
 
 
