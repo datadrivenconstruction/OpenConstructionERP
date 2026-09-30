@@ -797,12 +797,20 @@ async def _step_catalog(loaded_regions: list[str]) -> StepResult:
     A region whose catalogue already holds rows is left alone rather than
     reimported: the import replaces the region wholesale, and a second
     activation must not wipe prices someone adjusted since the first.
+
+    A base that was repriced into another market is skipped too. The reprice
+    stamps the market's currency onto the work items (a Turkish base priced
+    into France reads EUR), while the region's catalogue file is the home
+    market's, in lira. Importing it would put a TRY catalogue next to EUR work
+    items, the same base in two currencies. The row says why instead.
     """
     from sqlalchemy import func, select
 
     from app.database import async_session_factory
     from app.modules.catalog.models import CatalogResource
     from app.modules.catalog.router import REGION_MAP, import_region_catalog
+    from app.modules.costs import base_registry
+    from app.modules.costs.models import CostItem
 
     if not loaded_regions:
         return StepResult(
@@ -826,6 +834,33 @@ async def _step_catalog(loaded_regions: list[str]) -> StepResult:
                         select(func.count()).select_from(CatalogResource).where(CatalogResource.region == db_id)
                     )
                 ).scalar_one()
+                variant = base_registry.variant_by_region(db_id)
+                home_currency = variant.currency if variant else ""
+                priced_in = None
+                if not present and home_currency:
+                    priced_in = (
+                        await session.execute(
+                            select(CostItem.currency)
+                            .where(
+                                CostItem.region == db_id,
+                                CostItem.is_active.is_(True),
+                                CostItem.currency != "",
+                                CostItem.currency != home_currency,
+                            )
+                            .limit(1)
+                        )
+                    ).scalar_one_or_none()
+                if priced_in:
+                    catalogs.append(
+                        {
+                            "db_id": db_id,
+                            "status": "skipped",
+                            "reason_code": "repriced_market",
+                            "currency": priced_in,
+                            "catalog_currency": home_currency,
+                        }
+                    )
+                    continue
                 if present:
                     count = int(present)
                     already = True
@@ -848,6 +883,10 @@ async def _step_catalog(loaded_regions: list[str]) -> StepResult:
         status = "error"
     elif loaded:
         status = "ok"
+    elif any(c.get("reason_code") == "repriced_market" for c in catalogs):
+        status = "skipped"
+        detail["reason"] = "the cost bases are priced in another market than their catalogue"
+        detail["reason_code"] = "repriced_market"
     else:
         status = "skipped"
         detail["reason"] = "no resource catalogue is published for the loaded cost bases"
