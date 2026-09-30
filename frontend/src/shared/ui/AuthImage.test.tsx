@@ -9,7 +9,7 @@
  * browser's broken-image icon. The cache is the part that keeps a photo grid
  * from downloading the same thumbnail again on every re-mount.
  */
-import { act, fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -31,7 +31,6 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  vi.useRealTimers();
   vi.unstubAllGlobals();
 });
 
@@ -98,16 +97,15 @@ describe('AuthImage', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it('revokes the object URL once nobody shows it any more', async () => {
-    vi.useFakeTimers({ shouldAdvanceTime: true });
-    const { unmount } = renderHook(() => useAuthedObjectUrl('/api/v1/documents/photos/4/thumb/'));
-    await waitFor(() => expect(URL.createObjectURL).toHaveBeenCalled());
+  it('keeps the blob while one reader remains and revokes it after the last', async () => {
+    const src = '/api/v1/documents/photos/4/thumb/';
+    const first = renderHook(() => useAuthedObjectUrl(src));
+    const second = renderHook(() => useAuthedObjectUrl(src));
+    await waitFor(() => expect(second.result.current.url).toBe('blob:test/1'));
 
-    unmount();
+    first.unmount();
     expect(URL.revokeObjectURL).not.toHaveBeenCalled();
-    await act(async () => {
-      vi.advanceTimersByTime(31_000);
-    });
+    second.unmount();
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:test/1');
   });
 
