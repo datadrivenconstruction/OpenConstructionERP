@@ -282,6 +282,81 @@ async def test_a_failed_catalogue_fails_the_step(
     assert events[-1][1]["ok"] is False
 
 
+@pytest.mark.asyncio
+async def test_a_base_repriced_into_another_market_gets_no_home_catalogue(
+    monkeypatch: pytest.MonkeyPatch, session_factory: async_sessionmaker[AsyncSession]
+) -> None:
+    """The home catalogue is in the home currency; the repriced items are not.
+
+    A base priced into another market carries that market's currency on its
+    work items. Its catalogue file is the home market's, so importing it would
+    show one base in two currencies. The step skips it and says why.
+    """
+    from app.modules.catalog.models import CatalogResource
+    from app.modules.costs.models import CostItem
+
+    imports: list[str] = []
+    _patch(monkeypatch, session_factory, _manifest([_LOADABLE]), catalog_imports=imports)
+    async with session_factory() as s:
+        for i in range(3):
+            s.add(
+                CostItem(
+                    code=f"R-{i}",
+                    description="Repriced work item",
+                    unit="m3",
+                    rate="10.00",
+                    currency="USD",
+                    region=_LOADABLE_DB_ID,
+                )
+            )
+        await s.commit()
+
+    events = await _run(FullInstallRequest(slug=_PACK_SLUG, vectorize=False, demo_count=0, install_catalog=True))
+    catalog = _dones(events)["catalog"]
+
+    assert imports == []
+    assert catalog["status"] == "skipped"
+    assert catalog["detail"]["reason_code"] == "repriced_market"
+    entry = catalog["detail"]["catalogs"][0]
+    assert entry["reason_code"] == "repriced_market"
+    assert entry["currency"] == "USD"
+    assert entry["catalog_currency"] == "EUR"
+    async with session_factory() as s:
+        count = (
+            await s.execute(
+                select(func.count()).select_from(CatalogResource).where(CatalogResource.region == _LOADABLE_DB_ID)
+            )
+        ).scalar_one()
+    assert count == 0
+
+
+@pytest.mark.asyncio
+async def test_a_base_in_its_home_currency_still_gets_its_catalogue(
+    monkeypatch: pytest.MonkeyPatch, session_factory: async_sessionmaker[AsyncSession]
+) -> None:
+    from app.modules.costs.models import CostItem
+
+    imports: list[str] = []
+    _patch(monkeypatch, session_factory, _manifest([_LOADABLE]), catalog_imports=imports)
+    async with session_factory() as s:
+        s.add(
+            CostItem(
+                code="H-1",
+                description="Home work item",
+                unit="m3",
+                rate="10.00",
+                currency="EUR",
+                region=_LOADABLE_DB_ID,
+            )
+        )
+        await s.commit()
+
+    events = await _run(FullInstallRequest(slug=_PACK_SLUG, vectorize=False, demo_count=0, install_catalog=True))
+
+    assert imports == [_LOADABLE_DB_ID]
+    assert _dones(events)["catalog"]["status"] == "ok"
+
+
 # ── only_steps ──────────────────────────────────────────────────────────────
 
 

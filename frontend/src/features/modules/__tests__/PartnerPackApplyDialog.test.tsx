@@ -288,6 +288,38 @@ describe('a finished install is verifiable step by step', () => {
     }
   });
 
+  it('a catalogue left out because the base was repriced says both currencies', async () => {
+    streamMock.fullInstallPackStream.mockImplementation(
+      streamOf(
+        [
+          { step: 'apply_pack', status: 'ok', detail: { rule_sets: [] } },
+          {
+            step: 'catalog',
+            status: 'skipped',
+            detail: {
+              reason_code: 'repriced_market',
+              catalogs: [
+                {
+                  db_id: 'TR_ISTANBUL',
+                  status: 'skipped',
+                  reason_code: 'repriced_market',
+                  currency: 'EUR',
+                  catalog_currency: 'TRY',
+                },
+              ],
+            },
+          },
+        ],
+        true,
+      ),
+    );
+    renderDialog();
+    activate();
+    await screen.findByText(
+      'Resource catalogue TR_ISTANBUL: not loaded. The work items are priced in EUR, the catalogue is in TRY.',
+    );
+  });
+
   it('a failed cost base is named with its reason and can be retried alone', async () => {
     streamMock.fullInstallPackStream.mockImplementationOnce(
       streamOf(
