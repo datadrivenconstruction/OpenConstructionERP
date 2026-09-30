@@ -479,13 +479,15 @@ async def test_install_is_end_to_end_and_idempotent() -> None:
         # VP-07 winning bid prices exactly to its 812,400 EUR net figure.
         assert Decimal("812400.00") in {Decimal(b.total_amount) for b in awarded_bids}
 
-        # 35 schedule activities are seeded on a single active schedule.
+        # 35 schedule phases are seeded on a single active schedule, under
+        # the one project summary row that makes them a section.
         activities = (
             (await session.execute(select(Activity).join(Schedule).where(Schedule.project_id == project.id)))
             .scalars()
             .all()
         )
-        assert len(activities) == 35
+        assert len([a for a in activities if a.activity_type != "summary"]) == 35
+        assert len([a for a in activities if a.activity_type == "summary"]) == 1
 
         # Idempotent re-run (the every-boot backfill path).
         again = await install_demo_project(session, DEMO_ID)

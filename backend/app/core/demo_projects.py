@@ -12195,6 +12195,35 @@ async def install_demo_project(
 
     sched_now = datetime.now()
 
+    # The phases sit under one summary for the whole project, the project
+    # summary row a programme opens with. Without a section a demo schedule
+    # could not show what adding an activity inside one does (the code that
+    # continues the section's numbering, the collapsed section opening). The
+    # phases themselves are unchanged apart from their parent and a code
+    # under the summary; the summary carries no positions, links or
+    # dependencies, and takes its dates from the phases below it.
+    summary = Activity(
+        id=_id(),
+        schedule_id=schedule.id,
+        name=template.project_name,
+        description="",
+        wbs_code="1",
+        activity_type="summary",
+        sort_order=0,
+        start_date=schedule.start_date,
+        end_date=schedule.end_date,
+        duration_days=0,
+        progress_pct="0",
+        status="planned",
+        color="#64748b",
+        dependencies=[],
+        boq_position_ids=[],
+        metadata_={"is_critical": False},
+    )
+    session.add(summary)
+    await session.flush()
+    phase_spans: list[tuple[datetime, datetime]] = []
+
     if template.schedule_activities:
         # Explicit schedule activities defined in template
         prev_id = None
@@ -12214,9 +12243,11 @@ async def install_demo_project(
             act = Activity(
                 id=_id(),
                 schedule_id=schedule.id,
+                parent_id=summary.id,
+                sort_order=i + 1,
                 name=act_name,
                 description=f"Phase {i + 1}: {act_name}",
-                wbs_code=str(i + 1),
+                wbs_code=f"1.{i + 1}",
                 start_date=act_start,
                 end_date=act_end,
                 duration_days=dur,
@@ -12232,6 +12263,7 @@ async def install_demo_project(
                 metadata_={"is_critical": i % 3 == 0},
             )
             session.add(act)
+            phase_spans.append((s_start, s_end))
             prev_id = act.id
     else:
         # Auto-generate schedule activities from BOQ sections
@@ -12258,9 +12290,13 @@ async def install_demo_project(
             act = Activity(
                 id=_id(),
                 schedule_id=schedule.id,
+                parent_id=summary.id,
+                sort_order=i + 1,
                 name=sec.description or f"Phase {i + 1}",
                 description=f"{len(sec_items)} pos, {sec_total:,.0f} {template.currency}",
-                wbs_code=sec.ordinal or str(i + 1),
+                # Numbered under the summary; the BOQ section the phase was
+                # built from stays readable in the metadata and the links.
+                wbs_code=f"1.{i + 1}",
                 start_date=current_start.strftime("%Y-%m-%d"),
                 end_date=end_date.strftime("%Y-%m-%d"),
                 duration_days=dur,
@@ -12269,11 +12305,27 @@ async def install_demo_project(
                 color="#ef4444" if i % 3 == 0 else "#0071e3",
                 dependencies=[str(prev_id)] if prev_id else [],
                 boq_position_ids=[str(p.id) for p in sec_items],
-                metadata_={"section_total": round(sec_total, 2), "is_critical": i % 3 == 0},
+                metadata_={
+                    "section_total": round(sec_total, 2),
+                    "boq_section_ordinal": sec.ordinal,
+                    "is_critical": i % 3 == 0,
+                },
             )
             session.add(act)
+            phase_spans.append((current_start, end_date))
             prev_id = act.id
             current_start = end_date
+
+    if phase_spans:
+        span_start = min(a for a, _b in phase_spans)
+        span_end = max(b for _a, b in phase_spans)
+        summary_prog, summary_status = _phase_progress(span_start, span_end, sched_now)
+        summary.start_date = span_start.strftime("%Y-%m-%d")
+        summary.end_date = span_end.strftime("%Y-%m-%d")
+        summary.duration_days = (span_end - span_start).days
+        summary.progress_pct = str(summary_prog)
+        summary.status = summary_status
+        summary.description = f"{len(phase_spans)} phases"
 
     # ── 6. Budget Lines (5D) ──────────────────────────────────────────
     for i, sec in enumerate(sections_list):
