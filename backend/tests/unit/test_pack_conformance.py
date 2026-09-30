@@ -354,11 +354,13 @@ def test_every_demo_a_pack_installs_clears_the_rules_it_is_validated_with(slug: 
     """The one behavioural C1 test, and the one that finds what a table cannot.
 
     The demo is validated the way the Validate button does it: its own rule
-    sets, its classification standard, its region and the country the
-    installer stamps from its address. Swiss BKP bills failed DIN 276 on every
+    sets, the classification standard the installer stores it under (which
+    is the registry's answer, not always the one the template declares), its
+    region and the country the installer stamps from its address. Swiss BKP bills failed DIN 276 on every
     line, the Vienna ÖNORM bill failed it because ``DACH`` beat Austria, the
     UAE flagship failed NRM, and the Mexican one failed BC3.
     """
+    from app.core.classification_registry import resolve_standard
     from app.core.demo_projects import DEMO_TEMPLATES, _country_code_for
     from app.core.validation.engine import validation_engine
     from app.core.validation.rules import register_builtin_rules
@@ -368,7 +370,7 @@ def test_every_demo_a_pack_installs_clears_the_rules_it_is_validated_with(slug: 
     assert template is not None, f"{slug} names the demo {demo_id!r}, which is not registered"
     rule_sets = _selected(
         _country_code_for(template) or "",
-        template.classification_standard or "",
+        resolve_standard(template.classification_standard or None, region=template.region).standard or "",
         list(template.validation_rule_sets or ["boq_quality"]),
         template.region or "",
     )
