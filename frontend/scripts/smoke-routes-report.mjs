@@ -28,6 +28,7 @@ const evidence = (r) => {
     ...r.apiErrors,
     ...r.consoleErrors.map((c) => `console: ${c}`),
     ...(r.brokenImages ?? []).map((src) => `broken img: ${src}`),
+    ...(r.lazyImagesNotLoaded ? [`${r.lazyImagesNotLoaded} lazy img never loaded`] : []),
     ...r.tabs.flatMap((t) => [`tab "${t.tab}": ${[...t.symptoms, ...t.details].join('; ')}`]),
   ];
   return parts.slice(0, 4).map(cell).join('<br>');
