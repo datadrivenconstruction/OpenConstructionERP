@@ -296,6 +296,7 @@ type Finding = {
   tabs: Array<{ tab: string; symptoms: string[]; details: string[] }>;
   tabsClicked: number;
   brokenImages: string[];
+  lazyImagesNotLoaded: number;
 };
 
 function slugOf(route: string): string {
@@ -306,7 +307,7 @@ async function openAndInspect(page: Page, route: string, url: string): Promise<F
   // Written first so a route that hangs until the test timeout still has a row.
   record({
     route, url, finalUrl: '', status: 'fail', symptoms: ['timed out before the page settled'],
-    crashes: [], pageErrors: [], consoleErrors: [], apiErrors: [], tabs: [], tabsClicked: 0, brokenImages: [],
+    crashes: [], pageErrors: [], consoleErrors: [], apiErrors: [], tabs: [], tabsClicked: 0, brokenImages: [], lazyImagesNotLoaded: 0,
   });
   const crashes: string[] = [];
   const pageErrors: string[] = [];
@@ -359,24 +360,42 @@ async function openAndInspect(page: Page, route: string, url: string): Promise<F
   let first = await inspect();
   // A <Navigate> route lands on its target a beat after networkidle, and the
   // target's lazy chunk is still loading when main is first read. Blank is only
-  // a finding if it is still blank a few seconds later.
-  if (first.includes('blank main content')) {
-    await page.waitForTimeout(4_000);
+  // a finding if it is still blank ten seconds later (a fixed 4 s wait still
+  // flaked on /change-orders -> /changeorders on a busy runner).
+  for (let waited = 0; first.includes('blank main content') && waited < 10_000; waited += 1_000) {
+    await page.waitForTimeout(1_000);
     first = await inspect();
   }
   symptoms.push(...first);
 
   // Images that finished loading and decoded to nothing: a dead URL or a 404
-  // behind an <img>. data: and blob: sources are local and skipped, as are
-  // images still in flight (complete === false) and lazy ones never scrolled to.
-  const brokenImages = await page
-    .$$eval('img', (imgs) =>
-      imgs
-        .filter((i) => i.complete && i.naturalWidth === 0 && i.loading !== 'lazy')
-        .map((i) => i.currentSrc || i.getAttribute('src') || '')
-        .filter((src) => src && !/^(data|blob):/.test(src)),
-    )
-    .catch(() => [] as string[]);
+  // behind an <img>. Lazy thumbnails below the fold (diary, photos) never
+  // start loading on their own, so every scroll container is walked to the
+  // bottom first; whatever lazy image still has not loaded is counted apart
+  // rather than silently passed. data: and blob: sources are local and skipped.
+  if ((await page.locator('img[loading="lazy"]').count().catch(() => 0)) > 0) {
+    await page
+      .evaluate(() => {
+        const boxes = [document.scrollingElement, ...Array.from(document.querySelectorAll('main, main *'))].filter(
+          (el): el is Element => !!el && el.scrollHeight > el.clientHeight + 40,
+        );
+        for (const el of boxes) el.scrollTop = el.scrollHeight;
+      })
+      .catch(() => undefined);
+    await page.waitForLoadState('networkidle', { timeout: 4_000 }).catch(() => undefined);
+    await page.waitForTimeout(600);
+  }
+  const imgState = await page
+    .$$eval('img', (imgs) => {
+      const local = (src: string) => !src || /^(data|blob):/.test(src);
+      const srcOf = (i: HTMLImageElement) => i.currentSrc || i.getAttribute('src') || '';
+      return {
+        broken: imgs.filter((i) => i.complete && i.naturalWidth === 0 && !local(srcOf(i))).map(srcOf),
+        lazyPending: imgs.filter((i) => !i.complete && i.loading === 'lazy' && !local(srcOf(i))).length,
+      };
+    })
+    .catch(() => ({ broken: [] as string[], lazyPending: 0 }));
+  const brokenImages = imgState.broken;
   const beforeTabs = {
     crashes: crashes.length,
     pageErrors: pageErrors.length,
@@ -449,6 +468,7 @@ async function openAndInspect(page: Page, route: string, url: string): Promise<F
     tabs,
     tabsClicked,
     brokenImages: [...new Set(brokenImages)].slice(0, 10),
+    lazyImagesNotLoaded: imgState.lazyPending,
   };
 }
 
@@ -466,7 +486,7 @@ for (const pattern of PATTERNS) {
     if (!url) {
       record({
         route: pattern, url: '', finalUrl: '', status: 'unresolved', symptoms: ['no seeded id for a parameter'],
-        crashes: [], pageErrors: [], consoleErrors: [], apiErrors: [], tabs: [], tabsClicked: 0, brokenImages: [],
+        crashes: [], pageErrors: [], consoleErrors: [], apiErrors: [], tabs: [], tabsClicked: 0, brokenImages: [], lazyImagesNotLoaded: 0,
       });
       test.skip(true, 'no seeded id for a parameter');
       return;
