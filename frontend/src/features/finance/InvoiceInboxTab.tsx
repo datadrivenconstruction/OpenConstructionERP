@@ -29,6 +29,7 @@ import {
   API_BASE,
   getAuthToken,
   extractErrorMessageFromBody,
+  downloadWithAuth,
 } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 
@@ -572,15 +573,19 @@ function CaptureDetail({
     <div className="flex flex-wrap items-center justify-between gap-2">
       <div className="flex flex-wrap items-center gap-2">
         {capture?.has_document && (
-          <a
-            href={`${API_BASE}/v1/finance/inbox/${captureId}/document`}
-            target="_blank"
-            rel="noreferrer"
+          <button
+            type="button"
+            // The document route reads only the bearer header, which a plain link never sends.
+            onClick={() =>
+              downloadWithAuth(`${API_BASE}/v1/finance/inbox/${captureId}/document`, 'invoice').catch((e: Error) =>
+                addToast({ type: 'error', title: t('common.download_failed', { defaultValue: 'Download failed' }), message: e.message }),
+              )
+            }
             className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-text-secondary hover:bg-surface-secondary"
           >
             <Download size={15} />
             {t('finance.inbox.view_original', { defaultValue: 'Original' })}
-          </a>
+          </button>
         )}
         {status === 'posted' && (
           <Button variant="secondary" onClick={() => verifyMut.mutate()} disabled={verifyMut.isPending}>
