@@ -143,6 +143,12 @@ def test_a_password_protected_workbook_is_refused_with_the_reason() -> None:
         _parse(content)
 
 
+def test_a_readable_workbook_is_not_taken_for_a_protected_one() -> None:
+    """The stream name can occur in a valid file's bytes; only an unreadable one is asked."""
+    content = _xls("hu_flat.xls") + "EncryptedPackage".encode("utf-16-le")
+    assert _parse(content).positions
+
+
 # ── The same validation ──────────────────────────────────────────────────
 
 
