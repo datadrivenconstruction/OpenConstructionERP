@@ -1,7 +1,7 @@
 /**
  * PWA service-worker test — verifies the generated ``dist/sw.js``
  * registers the three runtime cache lanes declared in vite.config.ts:
- *   * oce-static-assets   (CacheFirst, fonts/images/asset chunks)
+ *   * oce-static-assets-v2 (CacheFirst, same-origin fonts/images/asset chunks)
  *   * oce-i18n-locales    (StaleWhileRevalidate, per-locale chunks)
  *   * oce-api             (NetworkFirst, /api/v1/* GETs)
  *
@@ -31,6 +31,8 @@
 import { describe, it, expect } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+
+import { STATIC_ASSETS_CACHE } from '../../src/pwa/staticAssetRoute';
 
 const DIST = resolve(__dirname, '..', '..', 'dist');
 const SW = resolve(DIST, 'sw.js');
@@ -75,7 +77,14 @@ describe('PWA service worker (generateSW)', () => {
   });
 
   it('declares the oce-static-assets runtime cache', () => {
-    expect(serviceWorkerSource()).toContain('oce-static-assets');
+    expect(serviceWorkerSource()).toContain(STATIC_ASSETS_CACHE);
+  });
+
+  it('carries the same-origin guard into the static assets lane', () => {
+    // workbox copies the match callback into sw.js as source text. If the
+    // import were lost on the way, the lane would be matching something
+    // else, and cross-origin covers would be cached again.
+    expect(serviceWorkerSource()).toContain('sameOrigin');
   });
 
   it('declares the oce-i18n-locales runtime cache', () => {
@@ -110,7 +119,9 @@ describe('PWA service worker configuration', () => {
   const config = readFileSync(resolve(__dirname, '..', '..', 'vite.config.ts'), 'utf-8');
 
   it('configures oce-static-assets cache', () => {
-    expect(config).toContain("'oce-static-assets'");
+    expect(STATIC_ASSETS_CACHE).toBe('oce-static-assets-v2');
+    expect(config).toContain('cacheName: STATIC_ASSETS_CACHE');
+    expect(config).toContain('urlPattern: isStaticAssetRequest');
   });
 
   it('configures oce-i18n-locales cache', () => {
