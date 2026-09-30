@@ -406,6 +406,7 @@ async def test_service_listings_keep_to_the_callers_live_projects(pg_session) ->
             project_id=project_id,
             contract_number=f"SC-{label}",
             period_start="2026-01-01",
+            period_end="2026-12-31",
         )
         pg_session.add(contract)
         await pg_session.flush()
