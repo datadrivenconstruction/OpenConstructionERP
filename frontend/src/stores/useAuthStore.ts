@@ -58,7 +58,7 @@ function decodeTokenPayload(token: string | null): Record<string, unknown> | nul
  * refresh with.
  */
 export type RefreshResult =
-  | { token: string }
+  | { token: string; reason?: undefined }
   | { token: null; reason: 'none' | 'rejected' | 'transient' };
 
 interface AuthState {
