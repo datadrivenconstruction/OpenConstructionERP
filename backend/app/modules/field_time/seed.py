@@ -574,9 +574,9 @@ async def seeded_row_ids(session: AsyncSession, project_ids: list[uuid.UUID]) ->
     Timesheet references come from the same per-project sequence a person's
     sheets use, so they prove nothing. A sheet matches instead when its shift
     note is one the seed picks from, its metadata is exactly one of the seed's
-    hour configurations, and its signatures sit where the seed backdates them
-    (sent at 17:30 on the day, approved at 08:15 the next morning; a draft
-    carries neither). A person's sheet with the same note but signed when it
+    hour configurations (apart from the drafter the service records), and its
+    signatures sit where the seed backdates them (sent at 17:30 on the day,
+    approved at 08:15 the next morning; a draft carries neither). A person's sheet with the same note but signed when it
     was really signed is not matched. A reversal matches on the seed's reversal
     note and on reversing a matched sheet.
 
@@ -620,10 +620,18 @@ async def seeded_row_ids(session: AsyncSession, project_ids: list[uuid.UUID]) ->
             return False
         return r.approved_at is None or _same_instant(r.approved_at, _approved_stamp(r.date))
 
+    def seed_metadata(r) -> dict:
+        # The service records the drafter under ``created_by`` on every sheet it
+        # creates, the seed's included, so that key is not part of the seed's
+        # own configuration and is left out of the comparison.
+        meta = dict(r.metadata_ or {})
+        meta.pop("created_by", None)
+        return meta
+
     originals = {
         r.id: r
         for r in rows
-        if r.reverses_id is None and r.note in notes and dict(r.metadata_ or {}) in configs and signed_like_the_seed(r)
+        if r.reverses_id is None and r.note in notes and seed_metadata(r) in configs and signed_like_the_seed(r)
     }
     reversals = {r.id: r for r in rows if r.reverses_id in originals and r.note == _REVERSAL_NOTE}
     sheets = {**originals, **reversals}
