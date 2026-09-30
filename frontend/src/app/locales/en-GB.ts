@@ -56,6 +56,9 @@ const resource = {
     "rebar_schedule.shapes": "Shapes",
     "rebar_schedule.total_weight": "Weight (kg)",
     "rfq_bidding.issue": "Issue",
+    "rfq_bidding.issue_confirm_title": "Issue this RFQ?",
+    "rfq_bidding.issue_confirm_message": "Vendors can bid once it is issued. An issued RFQ is no longer a draft and cannot be deleted.",
+    "rfq_bidding.issue_needs_scope": "Add at least one scope line before issuing",
 
     "costs.labor": "Labour",
     "boq.add_scoped_markup": "Add markup for section",
