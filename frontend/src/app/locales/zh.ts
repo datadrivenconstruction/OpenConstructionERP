@@ -15920,6 +15920,7 @@ const resource = {
     "auth.demo_role_admin": "管理员",
     "auth.demo_role_manager": "项目经理",
     "auth.demo_login_failed": "演示登录失败，请重试。",
+    "auth.demo_admin_superseded": "此安装已有管理员。请使用您自己的账户登录。",
     "auth.hide_password": "隐藏密码",
     "auth.show_password": "显示密码",
     "auth.try_demo": "试用演示（无需注册）",

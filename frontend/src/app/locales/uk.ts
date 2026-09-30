@@ -16525,6 +16525,7 @@ const resource = {
     "auth.demo_role_admin": "Адміністратор",
     "auth.demo_role_manager": "Менеджер",
     "auth.demo_login_failed": "Демо-вхід не вдався. Спробуйте ще раз.",
+    "auth.demo_admin_superseded": "Ця інсталяція вже має адміністратора. Увійдіть під власним обліковим записом.",
     "auth.hide_password": "Приховати пароль",
     "auth.show_password": "Показати пароль",
     "auth.try_demo": "Спробувати демо (без реєстрації)",

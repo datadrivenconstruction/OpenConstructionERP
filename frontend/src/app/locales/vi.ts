@@ -16382,6 +16382,7 @@ const resource = {
     "audit.severity_warning": "Cảnh báo",
     "audit.system": "Hệ thống / nền",
     "auth.demo_login_failed": "Đăng nhập demo thất bại. Vui lòng thử lại.",
+    "auth.demo_admin_superseded": "Bản cài đặt này đã có quản trị viên. Vui lòng đăng nhập bằng tài khoản của bạn.",
     "auth.demo_role_admin": "Quản trị viên",
     "auth.demo_role_manager": "Quản lý",
     "auth.hide_password": "Ẩn mật khẩu",

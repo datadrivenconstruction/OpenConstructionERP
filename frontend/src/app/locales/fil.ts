@@ -15404,6 +15404,7 @@ const resource = {
     "auth.demo_role_admin": "Tagapangasiwa",
     "auth.demo_role_manager": "Tagapamahala",
     "auth.demo_login_failed": "Nabigo ang demo login. Subukan ulit.",
+    "auth.demo_admin_superseded": "May administrator na ang installation na ito. Mag-sign in gamit ang sarili mong account.",
     "auth.hide_password": "Itago ang password",
     "auth.show_password": "Ipakita ang password",
     "auth.try_demo": "Subukan ang demo (walang signup)",

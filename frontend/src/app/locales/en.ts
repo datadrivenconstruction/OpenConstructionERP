@@ -14446,6 +14446,7 @@ const resource = {
     "auth.demo_role_admin": "Administrator",
     "auth.demo_role_manager": "Manager",
     "auth.demo_login_failed": "Demo login failed. Please try again.",
+    "auth.demo_admin_superseded": "This installation has an administrator. Please sign in with your own account.",
     "auth.hide_password": "Hide password",
     "auth.show_password": "Show password",
     "auth.try_demo": "Try demo (no signup)",

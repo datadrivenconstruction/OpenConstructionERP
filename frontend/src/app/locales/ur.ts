@@ -15454,6 +15454,7 @@ const resource = {
     "auth.demo_role_admin": "ایڈمنسٹریٹر",
     "auth.demo_role_manager": "منیجر",
     "auth.demo_login_failed": "Demo لاگ اِن ناکام رہا۔ براہِ کرم دوبارہ کوشش کریں۔",
+    "auth.demo_admin_superseded": "اس انسٹالیشن کا ایک منتظم موجود ہے۔ براہ کرم اپنے اکاؤنٹ سے سائن ان کریں۔",
     "auth.hide_password": "پاس ورڈ چھپائیں",
     "auth.show_password": "پاس ورڈ دکھائیں",
     "auth.try_demo": "Demo آزمائیں (سائن اپ کے بغیر)",

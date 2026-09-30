@@ -16700,6 +16700,7 @@ const resource = {
     "auth.demo_role_admin": "Administrator",
     "auth.demo_role_manager": "Menejer",
     "auth.demo_login_failed": "Demo tizimga kirish muvaffaqiyatsiz. Qayta urinib koʻring.",
+    "auth.demo_admin_superseded": "Bu oʻrnatishda administrator bor. Iltimos, oʻz hisobingiz bilan kiring.",
     "auth.hide_password": "Parolni yashirish",
     "auth.show_password": "Parolni koʻrsatish",
     "auth.try_demo": "Demo versiyani sinab koʻring (roʻyxatdan oʻtmasdan)",

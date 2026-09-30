@@ -204,6 +204,12 @@ export function LoginPageNext() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => null);
+        // A real administrator exists, so the server no longer opens the
+        // demo administrator without a password (app.core.demo_admin).
+        if (data?.detail?.error === 'demo_admin_superseded') {
+          setError(t('auth.demo_admin_superseded', 'This installation has an administrator. Please sign in with your own account.'));
+          return;
+        }
         const parsed = extractErrorMessageFromBody(data);
         setError(parsed || t('auth.demo_login_failed', 'Demo login failed. Please try again.'));
         return;

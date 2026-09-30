@@ -15741,6 +15741,7 @@ const resource = {
     "audit.severity_warning": "Waarschuwing",
     "audit.system": "Systeem / achtergrond",
     "auth.demo_login_failed": "Demo-aanmelding mislukt. Probeer het opnieuw.",
+    "auth.demo_admin_superseded": "Deze installatie heeft al een beheerder. Meld u aan met uw eigen account.",
     "auth.demo_role_admin": "Beheerder",
     "auth.demo_role_manager": "Manager",
     "auth.hide_password": "Wachtwoord verbergen",

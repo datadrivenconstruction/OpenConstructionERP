@@ -16720,6 +16720,7 @@ const resource = {
     "audit.severity_warning": "Uyarı",
     "audit.system": "Sistem / arka plan",
     "auth.demo_login_failed": "Demo girişi başarısız oldu. Lütfen tekrar deneyin.",
+    "auth.demo_admin_superseded": "Bu kurulumun bir yöneticisi var. Lütfen kendi hesabınızla oturum açın.",
     "auth.demo_role_admin": "Yönetici",
     "auth.demo_role_manager": "Müdür",
     "auth.hide_password": "Parolayı gizle",

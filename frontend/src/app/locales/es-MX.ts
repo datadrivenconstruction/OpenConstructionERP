@@ -15149,6 +15149,7 @@ const resource = {
     "auth.demo_role_admin": "Administrador",
     "auth.demo_role_manager": "Gerente",
     "auth.demo_login_failed": "Error al iniciar sesión de demostración. Inténtalo de nuevo.",
+    "auth.demo_admin_superseded": "Esta instalación ya tiene un administrador. Inicia sesión con tu propia cuenta.",
     "auth.hide_password": "Ocultar contraseña",
     "auth.show_password": "Mostrar contraseña",
     "auth.try_demo": "Probar demo (sin registro)",

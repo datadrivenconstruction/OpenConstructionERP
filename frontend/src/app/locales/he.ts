@@ -15487,6 +15487,7 @@ const resource = {
     "auth.demo_role_admin": "מנהל מערכת",
     "auth.demo_role_manager": "מנהל",
     "auth.demo_login_failed": "ההתחברות לדמו נכשלה. נסו שוב.",
+    "auth.demo_admin_superseded": "להתקנה זו יש מנהל מערכת. נא להתחבר עם החשבון שלך.",
     "auth.hide_password": "הסתרת סיסמה",
     "auth.show_password": "הצגת סיסמה",
     "auth.try_demo": "נסו דמו (ללא הרשמה)",

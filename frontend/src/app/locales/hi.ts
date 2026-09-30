@@ -16501,6 +16501,7 @@ const resource = {
     "audit.severity_warning": "चेतावनी",
     "audit.system": "सिस्टम / पृष्ठभूमि",
     "auth.demo_login_failed": "डेमो लॉगिन विफल। कृपया पुनः प्रयास करें।",
+    "auth.demo_admin_superseded": "इस इंस्टॉलेशन में एक व्यवस्थापक है। कृपया अपने खाते से साइन इन करें।",
     "auth.demo_role_admin": "व्यवस्थापक",
     "auth.demo_role_manager": "प्रबंधक",
     "auth.hide_password": "पासवर्ड छुपाएं",

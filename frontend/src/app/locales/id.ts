@@ -16329,6 +16329,7 @@ const resource = {
     "audit.severity_warning": "Peringatan",
     "audit.system": "Sistem / latar belakang",
     "auth.demo_login_failed": "Login demo gagal. Silakan coba lagi.",
+    "auth.demo_admin_superseded": "Instalasi ini sudah memiliki administrator. Silakan masuk dengan akun Anda sendiri.",
     "auth.demo_role_admin": "Administrator",
     "auth.demo_role_manager": "Manajer",
     "auth.hide_password": "Sembunyikan kata sandi",

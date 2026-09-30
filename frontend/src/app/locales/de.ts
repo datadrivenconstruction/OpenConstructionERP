@@ -16646,6 +16646,7 @@ const resource = {
     "auth.demo_role_admin": "Administrator",
     "auth.demo_role_manager": "Projektleiter",
     "auth.demo_login_failed": "Demo-Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "auth.demo_admin_superseded": "Diese Installation hat bereits einen Administrator. Bitte melden Sie sich mit Ihrem eigenen Konto an.",
     "auth.hide_password": "Passwort verbergen",
     "auth.show_password": "Passwort anzeigen",
     "auth.try_demo": "Demo testen (ohne Anmeldung)",

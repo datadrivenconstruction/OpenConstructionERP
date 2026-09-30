@@ -17060,6 +17060,7 @@ const resource = {
     "accommodation.settings.general_hint": "Core metadata, naziv, adresa i poveznice na BIM model / Geo Centar coordinates taj power right-rail shortcuts.",
     "auth.demo_role_manager": "Upravitelj",
     "auth.demo_login_failed": "Demo prijava neuspjelo. Molim pokušajte ponovo.",
+    "auth.demo_admin_superseded": "Ova instalacija već ima administratora. Prijavite se vlastitim računom.",
     "auth.hide_password": "Sakrij lozinka",
     "auth.show_password": "Prikaži lozinka",
     "auth.try_demo": "Pokušajte demo (ne signup)",

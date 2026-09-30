@@ -13719,6 +13719,7 @@ const resource = {
     "auth.demo_role_admin": "Администратор",
     "auth.demo_role_manager": "Менеджер",
     "auth.demo_login_failed": "Демо кирүү ишке ашкан жок. Кайра аракет кылыңыз.",
+    "auth.demo_admin_superseded": "Бул орнотуунун администратору бар. Өз аккаунтуңуз менен кириңиз.",
     "auth.hide_password": "Сырсөздү жашыруу",
     "auth.show_password": "Сырсөздү көрсөтүү",
     "auth.try_demo": "Демону сынап көрүү (катталуусуз)",

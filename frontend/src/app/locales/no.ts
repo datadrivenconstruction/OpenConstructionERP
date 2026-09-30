@@ -17370,6 +17370,7 @@ const resource = {
     "auth.demo_role_admin": "Administrator",
     "auth.demo_role_manager": "Leder",
     "auth.demo_login_failed": "Demo-innlogging mislyktes. Prøv igjen.",
+    "auth.demo_admin_superseded": "Denne installasjonen har en administrator. Logg inn med din egen konto.",
     "auth.hide_password": "Skjul passord",
     "auth.show_password": "Vis passord",
     "auth.try_demo": "Prøv demo (ingen registrering)",
