@@ -30,7 +30,8 @@ from typing import Any
 import httpx
 
 UPSTREAM = "https://tiles.openfreemap.org"
-STYLES = ("liberty", "positron")
+# ``dark`` backs the maps when the app runs in its dark theme.
+STYLES = ("liberty", "positron", "dark")
 
 OUT_DIR = Path(__file__).resolve().parents[1] / "app" / "modules" / "geo_hub" / "data" / "basemap_styles"
 
@@ -48,8 +49,26 @@ ATTRIBUTION = (
 )
 
 
+def drop_relief(style: dict[str, Any]) -> dict[str, Any]:
+    """Remove the shaded-relief raster the upstream styles blend in at low zoom.
+
+    Upstream liberty draws Natural Earth relief at 60 % opacity from zoom 0
+    and fades it out by zoom 7. On a zoomed-out project map that is most of
+    what a reader sees, and the map reads as a terrain map rather than the
+    street map people asked for. Dropping the raster leaves the flat land,
+    water and road cartography of the vector source, which is also one
+    fewer source the map has to finish loading before it is idle.
+    """
+    raster = {name for name, source in style.get("sources", {}).items() if source.get("type") == "raster"}
+    style["layers"] = [layer for layer in style.get("layers", []) if layer.get("source") not in raster]
+    for name in raster:
+        del style["sources"][name]
+    return style
+
+
 def rewrite(style: dict[str, Any]) -> dict[str, Any]:
     """Point every fetchable URL in the style back at our own origin."""
+    style = drop_relief(style)
     style["glyphs"] = GLYPHS
     style["sprite"] = SPRITE
     for name, source in style.get("sources", {}).items():

@@ -74,7 +74,7 @@ import {
   RELIEF_MAX_ZOOM,
   TILE_ATTRIBUTION_HTML,
   TILE_ATTRIBUTION_TEXT,
-  VECTOR_BASEMAP_STYLE_URL,
+  useStreetBasemapStyleUrl,
 } from './basemap';
 import { renderStreetThumbnail } from './streetThumbnail';
 
@@ -140,8 +140,9 @@ function isFiniteNumber(v: unknown): v is number {
 //      ./streetThumbnail and handed over as a data URL. This is the normal
 //      case and the one a construction user is looking for: roads,
 //      junctions, building footprints.
-//   2. the relief tile below, painted immediately and left in place until
-//      (and unless) the snapshot arrives.
+//   2. the relief tile below, painted only once the snapshot is known not
+//      to come. Until then the card shows a neutral placeholder rather than
+//      a terrain patch that reads as the map.
 // Both come from our same-origin proxy (see ./basemap), so the card
 // renders even when a browser blocks public tile CDNs.
 //
@@ -308,9 +309,16 @@ export function ProjectMap({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [popupOpen, setPopupOpen] = useState(false);
-  // The street snapshot, once it exists. Null means "still showing relief",
-  // which is also the permanent answer wherever a snapshot cannot be made.
+  // The street snapshot, once it exists.
   const [streetThumb, setStreetThumb] = useState<string | null>(null);
+  // Set once the snapshot is known not to come (no WebGL, a timeout, an
+  // image that will not decode). Only then does the card show the relief
+  // tile. While the snapshot is still queued the card shows a neutral
+  // placeholder instead: painting relief first meant every card in a list
+  // read as a terrain map for as long as the one-at-a-time render queue
+  // took to reach it, which is what the founder saw and reported.
+  const [snapshotFailed, setSnapshotFailed] = useState(false);
+  const streetStyleUrl = useStreetBasemapStyleUrl();
   const cardRef = useRef<HTMLDivElement>(null);
 
   const query = useMemo(
@@ -371,9 +379,8 @@ export function ProjectMap({
   // a live map already, and rendering a picture of one for it would be
   // work with no reader.
   //
-  // Nothing here touches what is on screen until the snapshot resolves, so
-  // the relief tile is what the user sees in the meantime and what they
-  // keep if it never resolves. The abort matters: the list filters and
+  // The card shows a neutral placeholder until the snapshot resolves, and
+  // the relief tile only if it resolves to nothing. The abort matters: the list filters and
   // paginates, and a queued render whose card is gone must neither open a
   // GL context nor set state on an unmounted component.
   const thumbLat = resolved?.lat;
@@ -385,6 +392,7 @@ export function ProjectMap({
     const height = snapSize(box?.clientHeight ?? 0, THUMB_HEIGHT_STEP, DEFAULT_CARD_THUMB_HEIGHT);
     const controller = new AbortController();
     let live = true;
+    setSnapshotFailed(false);
     renderStreetThumbnail({
       lat: thumbLat,
       lng: thumbLng,
@@ -393,7 +401,9 @@ export function ProjectMap({
       height,
       signal: controller.signal,
     }).then((dataUrl) => {
-      if (live && dataUrl) setStreetThumb(dataUrl);
+      if (!live) return;
+      if (dataUrl) setStreetThumb(dataUrl);
+      else setSnapshotFailed(true);
     });
     return () => {
       live = false;
@@ -444,10 +454,38 @@ export function ProjectMap({
   }
 
   // Card variant: a still image, never a live map. Normally a street
-  // snapshot of the vector style; the relief tile until that arrives, and
-  // for good wherever it cannot be made.
+  // snapshot of the vector style; a neutral placeholder until that arrives,
+  // and the relief tile only where it cannot be made.
   if (isCard) {
     const showingStreets = streetThumb !== null;
+    if (!showingStreets && !snapshotFailed) {
+      return (
+        <div
+          ref={cardRef}
+          data-testid="project-map-card-pending"
+          className={clsx(
+            'relative overflow-hidden rounded-xl border border-border-light bg-gradient-to-br from-slate-100 via-slate-50 to-blue-50/30 dark:from-slate-900 dark:via-slate-900/60 dark:to-slate-800',
+            heightClass,
+            className,
+          )}
+        >
+          <div className="absolute inset-0 animate-pulse bg-slate-200/40 dark:bg-slate-700/30" aria-hidden="true" />
+          <div className="pointer-events-none absolute left-1/2 top-1/2 z-[1] flex h-6 w-6 -translate-x-1/2 -translate-y-full items-center justify-center" aria-hidden="true">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-oe-blue text-white shadow-md shadow-oe-blue/40 ring-2 ring-white">
+              <MapPin size={11} fill="currentColor" strokeWidth={0} />
+            </span>
+          </div>
+          {(label || query) && (
+            <div className="pointer-events-none absolute inset-x-2 bottom-2 flex items-center gap-1 rounded-md bg-surface-elevated/90 backdrop-blur-sm px-2 py-1 shadow-sm">
+              <MapPin size={11} className="shrink-0 text-oe-blue" />
+              <span className="truncate text-[11px] font-medium text-content-primary">
+                {label || query}
+              </span>
+            </div>
+          )}
+        </div>
+      );
+    }
     // The snapshot is centred on the coordinate, so its pin is dead-centre.
     // The relief tile is a whole z6 tile that merely CONTAINS the site, so
     // its pin sits at the coordinate's fractional offset inside that tile.
@@ -482,7 +520,14 @@ export function ProjectMap({
           // rather than blanking the card. Only a relief tile that also
           // fails is a real dead end, and that is the case the error state
           // was written for.
-          onError={() => (showingStreets ? setStreetThumb(null) : setError(true))}
+          onError={() => {
+            if (showingStreets) {
+              setStreetThumb(null);
+              setSnapshotFailed(true);
+            } else {
+              setError(true);
+            }
+          }}
         />
         {/* Marker, placed by the rule above for whichever image is shown. */}
         <div
@@ -530,7 +575,7 @@ export function ProjectMap({
           latitude: resolved.lat,
           zoom,
         }}
-        mapStyle={VECTOR_BASEMAP_STYLE_URL}
+        mapStyle={streetStyleUrl}
         style={{ width: '100%', height: '100%' }}
         dragRotate={false}
         attributionControl={false}
