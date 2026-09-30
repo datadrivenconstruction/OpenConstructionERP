@@ -35,7 +35,7 @@ TEMPLATE = DemoTemplate(
     region="HR",
     classification_standard="din276",
     currency="EUR",
-    locale="en",
+    locale="hr",
     address={
         "street": "Ozaljska ulica 112",
         "city": "Zagreb",

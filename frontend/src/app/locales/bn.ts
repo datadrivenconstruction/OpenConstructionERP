@@ -28703,6 +28703,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "হেডার সারিতে কোনো পরিমাণ, একক বা মূল্য কলাম নেই",
     "boq.import_issue.header_unrecognised": "অচেনা হেডিং: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} কে {{value}} হিসেবে পড়া হয়েছে: এখানে বিন্দুটি হাজারের বিভাজক",
+    "boq.import_issue.comma_thousands": "{{text}} কে {{value}} হিসেবে পড়া হয়েছে: এখানে কমাটি হাজারের বিভাজক",
     "import.nothing_imported": "এই ফাইল থেকে কিছুই আমদানি করা হয়নি",
     "import.unsupported_type": "{{name}} এই আমদানি প্রক্রিয়া যে ধরনের ফাইল পড়ে তার মধ্যে নেই। সমর্থিত: {{types}}",
     "import.notes_title": "নোট",

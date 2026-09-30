@@ -42,7 +42,7 @@ MANIFEST = PartnerPackManifest(
     validation_rule_sets=[],
     default_modules=[],  # empty = show all
     hidden_modules=[],
-    demo_template_ids=["mixed-use-istanbul", "hospital-jeddah"],
+    demo_template_ids=["mixed-use-istanbul"],
     branding=PartnerBranding(
         primary_color="#E30A17",  # Turkish red (flag crescent background)
         accent_color="#FFFFFF",  # white (flag crescent and star)

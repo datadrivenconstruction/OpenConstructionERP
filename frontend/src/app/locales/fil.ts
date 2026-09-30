@@ -28703,6 +28703,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "Ang hilera ng header ay walang column ng dami, yunit o presyo",
     "boq.import_issue.header_unrecognised": "Mga heading na hindi nakilala: {{headings}}",
     "boq.import_issue.dot_thousands": "Ang {{text}} ay binasa bilang {{value}}: ang tuldok dito ay panghati ng libo",
+    "boq.import_issue.comma_thousands": "Ang {{text}} ay binasa bilang {{value}}: ang kuwit dito ay panghati ng libo",
     "import.nothing_imported": "Walang na-import mula sa file na ito",
     "import.unsupported_type": "Ang {{name}} ay hindi isang uri ng file na nababasa ng pag-import na ito. Suportado: {{types}}",
     "import.notes_title": "Mga Tala",

@@ -47,7 +47,7 @@ TEMPLATE = DemoTemplate(
     region="HU",
     classification_standard="tetelrend",
     currency="HUF",
-    locale="en",
+    locale="hu",
     address={
         "street": "Váci út 152",
         "city": "Budapest",

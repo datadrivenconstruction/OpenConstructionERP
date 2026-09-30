@@ -29252,6 +29252,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "The header row names no quantity, unit or rate column",
     "boq.import_issue.header_unrecognised": "Headings not recognised: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} was read as {{value}}: the dot separates thousands",
+    "boq.import_issue.comma_thousands": "{{text}} was read as {{value}}: the comma separates thousands",
     "import.nothing_imported": "Nothing was imported from this file",
     "import.unsupported_type": "{{name}} is not a file type this import reads. Supported: {{types}}",
     "import.notes_title": "Notes",

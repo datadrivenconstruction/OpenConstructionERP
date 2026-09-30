@@ -28868,6 +28868,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "A linha de cabeçalho não indica nenhuma coluna de quantidade, unidade ou preço",
     "boq.import_issue.header_unrecognised": "Cabeçalhos não reconhecidos: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} foi lido como {{value}}: o ponto aqui separa milhares",
+    "boq.import_issue.comma_thousands": "{{text}} foi lido como {{value}}: a vírgula aqui separa milhares",
     "import.nothing_imported": "Nada foi importado deste arquivo",
     "import.unsupported_type": "{{name}} não é um tipo de arquivo que esta importação consegue ler. Suportados: {{types}}",
     "import.notes_title": "Notas",

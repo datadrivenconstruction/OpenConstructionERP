@@ -5,8 +5,8 @@ triggering the package ``__init__`` side-effects.
 
 This is DataDrivenConstruction's first African market pack. It is built
 entirely from public South African standards and regulations. The idea and
-a reference implementation were contributed by Aidan Koetaan
-(akoetaan@cut.ac.za); the implementation here is our own.
+a reference implementation were contributed by Aidan Koetaan.
+The implementation here is our own.
 """
 
 from __future__ import annotations
@@ -121,7 +121,7 @@ MANIFEST = PartnerPackManifest(
         # Credit for the proposal and reference implementation. The shipped pack
         # is written from the public standards (see CONTRIBUTORS.md).
         "acknowledgements": [
-            "Proposed by Aidan Koetaan (akoetaan@cut.ac.za)",
+            "Proposed by Aidan Koetaan",
         ],
     },
 )

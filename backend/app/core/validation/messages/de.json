@@ -825,5 +825,15 @@
       "whole_position_quantities": "Position {ordinal}: die Ressourcenzeilen tragen Gesamtmengen der Position statt Ansätzen je Einheit, daher wurde der Einheitspreis nicht aus ihnen neu abgeleitet",
       "suggestion": "Aufbau prüfen - die Position über die Ressourcenansatz-Prüfung aus ihrer Katalogposition neu ableiten oder die Zeilen von Hand korrigieren"
     }
+  },
+  "poland": {
+    "knr_reference_required": {
+      "fail": "Position {ordinal} nennt keine KNR-Katalogtabelle",
+      "suggestion": "In der Spalte podstawa die Katalogtabelle der Normen angeben, etwa KNR 2-02 0201-01, oder kalkulacja indywidualna für eine eigen kalkulierte Position schreiben"
+    },
+    "knr_reference_recognised": {
+      "fail": "Der Verweis '{code}' in Position {ordinal} nennt keine KNR-Katalogfamilie",
+      "suggestion": "Den Verweis mit seiner Katalogfamilie beginnen, etwa KNR, KNNR, KNR-W oder KSNR, oder die Position als kalkulacja indywidualna kennzeichnen"
+    }
   }
 }

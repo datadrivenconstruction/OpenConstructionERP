@@ -21,11 +21,11 @@ MANIFEST = PartnerPackManifest(
     pack_type="industry",
     pack_version="0.1.0",
     description=(
-        "Branchenpaket fuer den Lebensmittel-Discountmarkt im DACH-Raum: "
-        "drei vollstaendig bepreiste Beispielprojekte (Heilbronn, Heidelberg "
-        "und Karlsruhe) als Kostenberechnung nach DIN 276 mit komplettem "
-        "Leistungsverzeichnis ueber alle Gewerke, GAEB DA XML 3.3, "
-        "LV-Qualitaet und BKI-Plausibilitaetsbenchmarks. EUR, 19 % MwSt."
+        "Sector pack for discount grocery stores in Germany, Austria and "
+        "Switzerland: three fully priced sample projects (Heilbronn, Heidelberg "
+        "and Karlsruhe) as DIN 276 cost calculations with a complete bill of "
+        "quantities across all trades, GAEB DA XML 3.3, bill quality checks "
+        "and cost benchmark plausibility checks. EUR, 19% VAT."
     ),
     default_locale="de",
     cwicr_regions=["cwicr-de-berlin"],

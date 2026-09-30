@@ -52,8 +52,8 @@ fully editable; they are not an official index.
 
 ## Credit
 
-The idea and a reference implementation were contributed by Aidan Koetaan
-(akoetaan@cut.ac.za). This pack is our own implementation, written from the
+The idea and a reference implementation were contributed by Aidan Koetaan.
+This pack is our own implementation, written from the
 public standards listed above. See CONTRIBUTORS.md.
 
 ## License

@@ -29980,6 +29980,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "Wiersz nagłówka nie wskazuje kolumny ilości, jednostki lub ceny",
     "boq.import_issue.header_unrecognised": "Nierozpoznane nagłówki: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} odczytano jako {{value}}: kropka oddziela tu tysiące",
+    "boq.import_issue.comma_thousands": "{{text}} odczytano jako {{value}}: przecinek oddziela tu tysiące",
     "import.nothing_imported": "Z tego pliku nic nie zaimportowano",
     "import.unsupported_type": "{{name}} nie jest typem pliku odczytywanym przez ten import. Obsługiwane: {{types}}",
     "import.notes_title": "Uwagi",

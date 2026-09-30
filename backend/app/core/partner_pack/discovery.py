@@ -541,8 +541,23 @@ def discover_packs() -> list[PartnerPackManifest]:
     return manifests
 
 
+# Entry point names that load another pack's manifest. The deprecated
+# ``aus-nzs`` shim re-exports the Australia manifest, whose slug is ``aus``,
+# and promises that ``OE_PACK=aus-nzs`` keeps working. Activation matched on
+# manifest slugs only, so the promise activated nothing and logged that no
+# such pack was installed.
+PACK_SLUG_ALIASES: dict[str, str] = {"aus-nzs": "aus"}
+
+
+def resolve_pack_slug(slug: str) -> str:
+    """Return the manifest slug a requested pack name stands for."""
+    slug = (slug or "").strip()
+    return PACK_SLUG_ALIASES.get(slug, slug)
+
+
 def get_pack_by_slug(slug: str) -> PartnerPackManifest | None:
-    """Return the discovered pack whose slug matches, or None."""
+    """Return the discovered pack whose slug (or declared alias) matches, or None."""
+    slug = resolve_pack_slug(slug)
     for m in discover_packs():
         if m.slug == slug:
             return m

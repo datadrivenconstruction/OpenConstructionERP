@@ -29320,6 +29320,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "A fejlécsorban nincs mennyiség-, mértékegység- vagy egységár-oszlop",
     "boq.import_issue.header_unrecognised": "Fel nem ismert oszlopfejlécek: {{headings}}",
     "boq.import_issue.dot_thousands": "A(z) {{text}} értéket {{value}} számként olvastuk be: a pont itt ezres elválasztó",
+    "boq.import_issue.comma_thousands": "A(z) {{text}} értéket {{value}} számként olvastuk be: a vessző itt ezres elválasztó",
     "import.nothing_imported": "Ebből a fájlból semmi sem lett importálva",
     "import.unsupported_type": "A(z) {{name}} fájltípust ez az importálás nem olvassa. Támogatott: {{types}}",
     "import.notes_title": "Megjegyzések",

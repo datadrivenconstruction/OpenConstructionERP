@@ -37,7 +37,7 @@ PACK_CONFIG: dict[str, Any] = {
             "code": "TCPO",
             "name": "TCPO - Tabelas de Composições de Preços para Orçamentos",
             "country": "BR",
-            "description": "PINI cost composition tables for private-sector estimating",
+            "description": "Commercial cost composition tables for private-sector estimating",
         },
         {
             "code": "NBR",
@@ -65,8 +65,8 @@ PACK_CONFIG: dict[str, Any] = {
             "description": "Mexican voluntary technical standards for construction",
         },
         {
-            "code": "BIMSA",
-            "name": "BIMSA Reports - Cost Data Mexico",
+            "code": "MX_COST_INDEX",
+            "name": "Private construction cost indices - Mexico",
             "country": "MX",
             "description": "Construction cost indices and data for Mexico",
         },

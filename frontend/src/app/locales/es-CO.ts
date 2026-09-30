@@ -28943,6 +28943,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "La fila de encabezado no indica ninguna columna de cantidad, unidad o precio",
     "boq.import_issue.header_unrecognised": "Encabezados no reconocidos: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} se leyó como {{value}}: el punto separa aquí los miles",
+    "boq.import_issue.comma_thousands": "{{text}} se leyó como {{value}}: la coma separa aquí los miles",
     "import.nothing_imported": "No se importó nada de este archivo",
     "import.unsupported_type": "{{name}} no es un tipo de archivo que esta importación pueda leer. Admitidos: {{types}}",
     "import.notes_title": "Notas",

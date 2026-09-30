@@ -14,15 +14,13 @@ from app.core.demo_projects import DemoTemplate
 # is the catalogue, the table and the variant within the table. Every line
 # below carries one under the "knr" key.
 #
-# WHY THE CLASSIFICATION STANDARD SAYS DIN 276. Poland has no native
-# cost-group standard in the product yet, and the country table in
-# classification_registry.py maps PL onto DIN 276 as the nearest hierarchy its
-# tender documents map onto. That is a platform fallback for the section-path
-# renderer, not a claim that a Warsaw estimator works in DIN 276 cost groups;
-# they work in działy of a kosztorys and in KNR positions. The bill therefore
-# carries its real national codes under "knr" and lets the classification
-# standard stay what the registry says, which is the same split the Brazilian
-# pack makes between SINAPI codes and its MasterFormat fallback.
+# WHY THE CLASSIFICATION STANDARD SAYS KNR. A Warsaw estimator works in
+# działy of a kosztorys and in KNR positions, not in DIN 276 cost groups, and
+# every line below carries its KNR reference under "knr", which the "poland"
+# rule set checks. The standard used to say DIN 276, the registry's fallback
+# for the section-path renderer, and that made the Validate button fail every
+# line for a DIN 276 cost group the bill never claimed to carry. The renderer
+# still falls back to DIN 276 for Poland: KNR is not a cost-group hierarchy.
 #
 # WHAT IS INDICATIVE HERE, PLAINLY. The KNR catalogue numbers are right: 2-01
 # for earthworks, 2-02 for building structures and finishes, 2-15 for sanitary
@@ -94,7 +92,7 @@ TEMPLATE = DemoTemplate(
         "approx. PLN 65 million for the building works."
     ),
     region="PL",
-    classification_standard="din276",
+    classification_standard="knr",
     currency="PLN",
     locale="pl",
     project_code="WAW-WOL-2026-01",
@@ -106,7 +104,7 @@ TEMPLATE = DemoTemplate(
         "lat": 52.2296,
         "lng": 20.9603,
     },
-    validation_rule_sets=["boq_quality", "project_completeness"],
+    validation_rule_sets=["poland", "boq_quality", "project_completeness"],
     boq_name="Kosztorys inwestorski - roboty budowlane i instalacyjne (Investor's cost estimate)",
     boq_description=(
         "Kosztorys inwestorski w układzie działów robót, sporządzony metodą kalkulacji "

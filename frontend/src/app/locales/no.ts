@@ -29373,6 +29373,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "Overskriftsraden angir ingen mengde-, enhets- eller priskolonne",
     "boq.import_issue.header_unrecognised": "Ikke gjenkjente overskrifter: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} ble lest som {{value}}: punktumet skiller her tusener",
+    "boq.import_issue.comma_thousands": "{{text}} ble lest som {{value}}: kommaet skiller her tusener",
     "import.nothing_imported": "Ingenting ble importert fra denne filen",
     "import.unsupported_type": "{{name}} er ikke en filtype denne importen kan lese. Støttet: {{types}}",
     "import.notes_title": "Merknader",

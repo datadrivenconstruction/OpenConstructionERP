@@ -22,9 +22,10 @@ MANIFEST = PartnerPackManifest(
     ),
     default_locale="da",
     additional_locales={},
-    cwicr_regions=[
-        "cwicr-dk-copenhagen",
-    ],
+    # No Danish base is published yet, so none is declared; Copenhagen
+    # follows when it is. A declared slug that resolves to nothing was
+    # listed on the activation dialog and then skipped at install.
+    cwicr_regions=[],
     default_currency="DKK",
     default_tax_template="dk_moms_25",
     default_methodology="denmark",

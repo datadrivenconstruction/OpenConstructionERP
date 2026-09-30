@@ -137,12 +137,31 @@ export function normalizePackLocale(locale: string | null | undefined): string {
  * Brazilian first run opened in European Portuguese with pt-BR.ts sitting
  * unused a few lines away.
  */
+/**
+ * English-speaking regions that write the day before the month. Their
+ * English is answered with en-GB rather than the unqualified entry, whose
+ * dates print month first: an en-AU or en-IE pack, or browser, otherwise
+ * read 3/4/2026 as the fourth of March. The United States and Canada are
+ * deliberately absent, and so is every region whose English we do ship.
+ */
+const ENGLISH_DAY_FIRST_REGIONS: ReadonlySet<string> = new Set([
+  'AE', 'AU', 'BH', 'BW', 'CY', 'GH', 'HK', 'IE', 'IN', 'JM', 'KE', 'KW', 'MT', 'MY', 'NG', 'NZ', 'OM',
+  'PK', 'QA', 'SA', 'SG', 'TZ', 'UG', 'ZA', 'ZM', 'ZW',
+]);
+
 export function matchSupportedLanguage(raw: string | null | undefined): string | null {
   if (!raw) return null;
   const parts = raw.trim().split('-');
   if (parts.length >= 2 && parts[1]) {
     const regional = `${parts[0]!.toLowerCase()}-${parts[1]!.toUpperCase()}`;
     if (SUPPORTED_LANGUAGES.some((l) => l.code === regional)) return regional;
+    if (
+      parts[0]!.toLowerCase() === 'en' &&
+      ENGLISH_DAY_FIRST_REGIONS.has(parts[1]!.toUpperCase()) &&
+      SUPPORTED_LANGUAGES.some((l) => l.code === 'en-GB')
+    ) {
+      return 'en-GB';
+    }
   }
   const base = parts[0]!.toLowerCase();
   return SUPPORTED_LANGUAGES.some((l) => l.code === base) ? base : null;

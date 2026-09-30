@@ -18,7 +18,7 @@ rule packs, onboarding script).
 
 This is DataDrivenConstruction's first African market pack. It is written from
 public South African standards. The proposal and a reference implementation
-came from Aidan Koetaan (akoetaan@cut.ac.za); see CONTRIBUTORS.md.
+came from Aidan Koetaan; see CONTRIBUTORS.md.
 """
 
 from __future__ import annotations

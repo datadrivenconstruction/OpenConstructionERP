@@ -28853,6 +28853,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "שורת הכותרות אינה מציינת עמודת כמות, יחידה או מחיר",
     "boq.import_issue.header_unrecognised": "כותרות שלא זוהו: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} נקרא כ-{{value}}: הנקודה כאן מפרידה אלפים",
+    "boq.import_issue.comma_thousands": "{{text}} נקרא כ-{{value}}: הפסיק כאן מפריד אלפים",
     "import.nothing_imported": "לא יובא דבר מקובץ זה",
     "import.unsupported_type": "{{name}} אינו סוג קובץ שהייבוא הזה קורא. נתמכים: {{types}}",
     "import.notes_title": "הערות",

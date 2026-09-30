@@ -29683,6 +29683,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "Řádek záhlaví neurčuje sloupec s množstvím, jednotkou nebo cenou",
     "boq.import_issue.header_unrecognised": "Nerozpoznané záhlaví: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} bylo načteno jako {{value}}: tečka zde odděluje tisíce",
+    "boq.import_issue.comma_thousands": "{{text}} bylo načteno jako {{value}}: čárka zde odděluje tisíce",
     "import.nothing_imported": "Z tohoto souboru nebylo nic importováno",
     "import.unsupported_type": "{{name}} není typ souboru, který tento import čte. Podporované: {{types}}",
     "import.notes_title": "Poznámky",

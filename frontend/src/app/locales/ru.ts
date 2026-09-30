@@ -29693,6 +29693,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "Строка заголовков не обозначает столбец количества, единицы измерения или расценки",
     "boq.import_issue.header_unrecognised": "Нераспознанные заголовки: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} прочитано как {{value}}: точка здесь разделяет тысячи",
+    "boq.import_issue.comma_thousands": "{{text}} прочитано как {{value}}: запятая здесь разделяет тысячи",
     "import.nothing_imported": "Из этого файла ничего не импортировано",
     "import.unsupported_type": "{{name}} — не тот тип файла, который читает этот импорт. Поддерживаются: {{types}}",
     "import.notes_title": "Примечания",

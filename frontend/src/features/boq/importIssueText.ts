@@ -10,6 +10,7 @@
  * - `summary_row_skipped`: a total, tax or recap line left out of the positions;
  * - `sheet_not_read`: a worksheet the reader did not read, and why;
  * - `dot_read_as_thousands`: a typed number whose dots were read as thousands;
+ * - `comma_read_as_thousands`: the same for commas, in a decimal-point market;
  * - `header_not_recognised`: a header row that names no description, or nothing
  *   to price by, with the headings that were not recognised;
  * - `column_mapping_not_applied`: a column mapping chosen in the preview that
@@ -128,6 +129,12 @@ export function importIssueText(
   } else if (issue.code === 'dot_read_as_thousands' && issue.text != null && issue.value != null) {
     body = t('boq.import_issue.dot_thousands', {
       defaultValue: '{{text}} was read as {{value}}: the dot separates thousands',
+      text: issue.text,
+      value: formatNumber(issue.value),
+    });
+  } else if (issue.code === 'comma_read_as_thousands' && issue.text != null && issue.value != null) {
+    body = t('boq.import_issue.comma_thousands', {
+      defaultValue: '{{text}} was read as {{value}}: the comma separates thousands',
       text: issue.text,
       value: formatNumber(issue.value),
     });

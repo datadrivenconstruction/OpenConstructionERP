@@ -19,9 +19,9 @@ MANIFEST = PartnerPackManifest(
         "CZK currency with 21% DPH, TSKP classification for building "
         "works, Czech rozpocet (budget) estimating practice."
     ),
-    default_locale="en",
+    default_locale="cs",
     additional_locales={},
-    cwicr_regions=[],
+    cwicr_regions=["cwicr-cs-prague"],
     default_currency="CZK",
     default_tax_template="cz_dph_21",
     default_methodology="czechia",

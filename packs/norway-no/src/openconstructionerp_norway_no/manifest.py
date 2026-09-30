@@ -24,9 +24,10 @@ MANIFEST = PartnerPackManifest(
     # tag "nb" is not an offered code, so the resolver fell back to English.
     default_locale="no",
     additional_locales={},
-    cwicr_regions=[
-        "cwicr-no-oslo",
-    ],
+    # No Norwegian base is published yet, so none is declared; Oslo
+    # follows when it is. A declared slug that resolves to nothing was
+    # listed on the activation dialog and then skipped at install.
+    cwicr_regions=[],
     default_currency="NOK",
     default_tax_template="no_mva_25",
     default_methodology="norway",

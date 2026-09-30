@@ -29367,6 +29367,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "헤더 행에 수량·단위·단가 열이 지정되어 있지 않습니다",
     "boq.import_issue.header_unrecognised": "인식되지 않은 머리글: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}}을(를) {{value}}(으)로 읽었습니다: 여기서 마침표는 천 단위 구분 기호입니다",
+    "boq.import_issue.comma_thousands": "{{text}}을(를) {{value}}(으)로 읽었습니다: 여기서 쉼표는 천 단위 구분 기호입니다",
     "import.nothing_imported": "이 파일에서 가져온 항목이 없습니다",
     "import.unsupported_type": "{{name}}은(는) 이 가져오기에서 읽을 수 있는 파일 형식이 아닙니다. 지원 형식: {{types}}",
     "import.notes_title": "참고 사항",

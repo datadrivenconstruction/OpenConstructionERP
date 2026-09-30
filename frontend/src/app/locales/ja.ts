@@ -29360,6 +29360,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "ヘッダー行に数量・単位・単価の列が指定されていません",
     "boq.import_issue.header_unrecognised": "認識できない見出し: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} は {{value}} として読み込まれました: ここでは小数点が桁区切りとして扱われています",
+    "boq.import_issue.comma_thousands": "{{text}} は {{value}} として読み込まれました: ここではカンマが桁区切りとして扱われています",
     "import.nothing_imported": "このファイルからは何もインポートされませんでした",
     "import.unsupported_type": "{{name}} はこのインポートが読み込めるファイル形式ではありません。対応形式: {{types}}",
     "import.notes_title": "注記",

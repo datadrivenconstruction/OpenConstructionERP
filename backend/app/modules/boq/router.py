@@ -3273,6 +3273,38 @@ _STANDARD_RULE_SETS: dict[str, str] = {
     # engine logs an unknown rule set and carries on, so a Hungarian project
     # validated without a single Hungarian rule and nothing said so.
     "tetelrend": "hungary",
+    # China. The registry and the demos store the standard as ``gb50500``,
+    # the rule set is registered as ``gbt50500``: the same two-names shape as
+    # Hungary, reachable whenever a Chinese project's region names no country.
+    "gb50500": "gbt50500",
+    # Poland. A kosztorys cites the KNR catalogue table of every line under
+    # ``knr``; the rule set that checks it is ``poland``.
+    "knr": "poland",
+}
+
+
+# Rule sets that fail every line with an error unless it carries a code of
+# one classification standard, and the classification key they read. A country
+# row is added to every project of the country whatever standard it declares,
+# so a row that carried one of these for another standard failed a correctly
+# coded bill line by line: the Swiss BKP bill against DIN 276, the Emirati
+# MasterFormat bill against NRM, the Mexican and Spanish bills against BC3 and
+# MasterFormat. :func:`_build_rule_sets` drops such a set when the project
+# names a different standard. The import persistence reads the same table to
+# carry a line's raw code under the key the project's rules read.
+_CLASSIFICATION_CODE_SETS: dict[str, str] = {
+    "din276": "din276",
+    "nrm": "nrm",
+    "masterformat": "masterformat",
+    "sinapi": "sinapi",
+    "gesn": "gesn",
+    "gbt50500": "gb50500",
+    "cpwd": "cpwd",
+    "hungary": "tetelrend",
+    "birimfiyat": "birimfiyat",
+    "sekisan": "sekisan",
+    "bc3": "bc3_code",
+    "poland": "knr",
 }
 
 
@@ -3298,8 +3330,19 @@ _STANDARD_RULE_SETS: dict[str, str] = {
 _COUNTRY_RULE_SETS: dict[str, list[str]] = {
     "DE": ["gaeb", "din276"],
     "AT": ["gaeb", "onorm"],
-    "CH": ["gaeb", "din276"],
+    # Swiss bills are coded in BKP / eBKP-H, which has no rule set yet, so
+    # the row carries the GAEB structure checks and no DIN 276 cost group rule.
+    "CH": ["gaeb"],
     "GB": ["nrm"],
+    # The Commonwealth markets the registry maps onto NRM, which their packs
+    # declare too. Without a row a project created before the pack was active
+    # ran no national rule at all, the Hungarian defect of 5460729b7.
+    "IE": ["nrm"],
+    "AU": ["nrm"],
+    "NZ": ["nrm"],
+    "SG": ["nrm"],
+    "NG": ["nrm"],
+    "ZA": ["nrm"],
     "US": ["masterformat"],
     "CA": ["masterformat"],
     "FR": ["dpgf"],
@@ -3309,17 +3352,42 @@ _COUNTRY_RULE_SETS: dict[str, list[str]] = {
     "IN": ["cpwd"],
     "TR": ["birimfiyat"],
     "JP": ["sekisan"],
-    "AE": ["nrm"],
-    "ES": ["bc3", "masterformat"],
-    "MX": ["bc3", "masterformat"],
-    "AR": ["bc3", "masterformat"],
-    "CL": ["bc3", "masterformat"],
-    "CO": ["bc3", "masterformat"],
-    "PE": ["bc3", "masterformat"],
+    # The Gulf tenders against MasterFormat, which is what the registry, the
+    # UAE and Saudi packs and every Gulf demo say. The row said NRM for the
+    # Emirates and failed every line of a MasterFormat bill.
+    "AE": ["masterformat"],
+    "SA": ["masterformat"],
+    "QA": ["masterformat"],
+    "KW": ["masterformat"],
+    "BH": ["masterformat"],
+    "OM": ["masterformat"],
+    "ID": ["masterformat"],
+    # Spain tenders in BC3. MasterFormat was a second code rule no Spanish
+    # bill is written in.
+    "ES": ["bc3"],
+    # Mexico has its own rule set (APU, IVA, CFDI). BC3 is a Spanish exchange
+    # format, and its code rule failed every line of a catalogo de conceptos.
+    "MX": ["mexico"],
+    # The rest of Hispanophone Latin America reads MasterFormat in the
+    # registry. BC3 stays reachable for a BC3 bill through its standard.
+    "AR": ["masterformat"],
+    "CL": ["masterformat"],
+    "CO": ["masterformat"],
+    "PE": ["masterformat"],
     # Without this row a Hungarian project created before the country pack
     # was switched on, or on an install that never activated it, imported
     # its bills with no Hungarian rule run at all.
     "HU": ["hungary"],
+    # The same gap for the packs that map their bills onto DIN 276 beside a
+    # national code: each declares both, and a project without the pack ran
+    # neither.
+    "RO": ["romania", "din276"],
+    "GR": ["greece", "din276"],
+    "UA": ["ukraine", "din276"],
+    "HR": ["din276"],
+    "CZ": ["din276"],
+    "BE": ["din276"],
+    "PL": ["poland"],
 }
 
 
@@ -3347,17 +3415,29 @@ def _build_rule_sets(
     Returns:
         Deduplicated list of rule set names.
     """
-    from app.core.classification_registry import normalise_region
+    from app.core.classification_registry import is_macro_region, normalise_region
 
     rule_sets = list(project_rule_sets)
 
     # The classification standard's rule set, then the country's.
-    std_rule = _STANDARD_RULE_SETS.get(classification_standard)
+    standard = (classification_standard or "").strip().lower()
+    std_rule = _STANDARD_RULE_SETS.get(standard)
     if std_rule and std_rule not in rule_sets:
         rule_sets.append(std_rule)
 
-    country = normalise_region(region) or normalise_region(country_code)
+    # A region that names a country wins over the country column, so a
+    # project filed under ``DE`` validates as German whatever else it says. A
+    # macro label does not name one: ``DACH`` is anchored on Germany, and an
+    # Austrian or Swiss project filed under it was validated as German while
+    # its country column said where it is.
+    from_region = normalise_region(region)
+    from_column = normalise_region(country_code)
+    country = from_column if from_column and (from_region is None or is_macro_region(region)) else from_region
     for rs in _COUNTRY_RULE_SETS.get(country or "", []):
+        if standard and rs in _CLASSIFICATION_CODE_SETS and rs != std_rule:
+            # The project names its standard, and this row's code rule is
+            # for another one; it would fail every correctly coded line.
+            continue
         if rs not in rule_sets:
             rule_sets.append(rs)
 

@@ -3,7 +3,7 @@
 # the OnboardingWizard React component in place of the default steps.
 
 version: 2
-locale: en
+locale: en-IN
 title: "Welcome to OpenConstructionERP — India Edition"
 title_hi: "OpenConstructionERP में आपका स्वागत है — भारत संस्करण"
 subtitle: "Six quick steps to align your workspace with Indian practice (CPWD, IS codes, DSR 2023, NBC 2016, RERA, GST). छह सरल चरणों में अपना कार्यक्षेत्र भारतीय मानकों के अनुसार सेट करें।"

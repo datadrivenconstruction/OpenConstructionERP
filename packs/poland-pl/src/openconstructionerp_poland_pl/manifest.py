@@ -16,9 +16,9 @@ MANIFEST = PartnerPackManifest(
     pack_type="country",
     description=(
         "Pre-configured for Polish contractors, designers and public "
-        "clients: DIN 276 classification (Poland follows the German DIN "
-        "tradition for cost grouping), PLN currency with 23% VAT, KNR "
-        "and KNNR norm catalogues for labour and material norms, Prawo "
+        "clients: every priced line checked for the KNR or KNNR "
+        "catalogue table it cites (the podstawa of a kosztorys), PLN "
+        "currency with 23% VAT, Warsaw cost data, Prawo "
         "budowlane (Construction Law), Prawo zamowien publicznych (PZP) "
         "public procurement references, and the kosztorys inwestorski "
         "investor estimate format. Polish and English interface."
@@ -37,10 +37,10 @@ MANIFEST = PartnerPackManifest(
         "pkwiu_classification",
         "pzp_procurement",
     ],
-    validation_rule_sets=[],
+    validation_rule_sets=["poland"],
     default_modules=[],  # empty = show all
     hidden_modules=[],
-    demo_template_ids=["residential-warsaw", "residential-budapest"],
+    demo_template_ids=["residential-warsaw"],
     branding=PartnerBranding(
         primary_color="#DC143C",  # Polish crimson (flag)
         accent_color="#FFFFFF",  # white (flag)
@@ -53,7 +53,7 @@ MANIFEST = PartnerPackManifest(
         "country": "PL",
         "country_name_en": "Poland",
         "country_name_pl": "Polska",
-        "classification_standard": "din276",
+        "classification_standard": "knr",
         "regulator_refs": [
             "Prawo zamowien publicznych (PZP, Public Procurement Law)",
             "Prawo budowlane (Construction Law)",

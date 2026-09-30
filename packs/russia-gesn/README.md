@@ -50,7 +50,7 @@ part a reader from another market gets wrong most often.
 - **The twelve summary-estimate chapters** as the cost breakdown dimension, so
   temporary works, developer supervision and design fees each have a place to
   go instead of being folded into the building.
-- **Rouble at two decimals**, VAT at 20 percent, and a Russian interface,
+- **Rouble at two decimals**, VAT at 22 percent (the rate from 1 January 2026), and a Russian interface,
   because the application ships a Russian bundle and this pack selects it.
 - **A cost database to price against**: 55,719 St Petersburg items in roubles,
   already carrying the GESN/FER classification, available from the marketplace

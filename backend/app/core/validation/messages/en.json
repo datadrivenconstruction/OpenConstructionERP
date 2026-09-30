@@ -825,5 +825,15 @@
       "whole_position_quantities": "Position {ordinal}: the resource rows hold whole-position quantities instead of per-unit norms, so the unit rate was not re-derived from them",
       "suggestion": "Review the buildup - re-derive the position from its catalogue item through the resource norm review, or correct the rows by hand"
     }
+  },
+  "poland": {
+    "knr_reference_required": {
+      "fail": "Position {ordinal} cites no KNR catalogue table",
+      "suggestion": "Name the catalogue table the norms come from in the podstawa, for example KNR 2-02 0201-01, or write kalkulacja indywidualna for a line priced by own calculation"
+    },
+    "knr_reference_recognised": {
+      "fail": "Reference '{code}' on position {ordinal} names no KNR catalogue family",
+      "suggestion": "Start the reference with its catalogue family, such as KNR, KNNR, KNR-W or KSNR, or mark the line as kalkulacja indywidualna"
+    }
   }
 }
