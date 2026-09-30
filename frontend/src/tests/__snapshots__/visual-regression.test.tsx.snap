@@ -4781,7 +4781,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
         </div>
       </div>
       <div
-        class="h-full [&>*]:h-full lg:col-span-2"
+        class="self-start lg:col-span-2"
       >
         <div
           aria-hidden="true"
