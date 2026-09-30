@@ -29021,6 +29021,7 @@ const resource = {
     "geo_hub.hud.north": "북쪽",
     "geo_hub.hud.scale": "SCALE",
     "geo_hub.licenses_footer": "벤더 종속성 없음. 전체 스택을 자체 호스팅합니다. Cesium Ion 및 상용 이미지 제공자는 의도적으로 사용하지 않습니다.",
+    "geo_hub.licenses_globe_streets": "지구본의 도로 기본 이미지",
     "geo_hub.licenses_heading": "오픈 데이터 및 오픈 소스",
     "geo_hub.licenses_pill": "오픈 데이터",
     "geo_hub.licenses_title": "오픈 데이터 스택: 클릭하여 라이선스 보기",

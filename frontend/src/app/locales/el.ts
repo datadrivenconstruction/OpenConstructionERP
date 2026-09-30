@@ -28322,6 +28322,7 @@ const resource = {
     "geo_hub.hud.north": "Βορράς",
     "geo_hub.hud.scale": "ΚΛΙΜΑΚΑ",
     "geo_hub.licenses_footer": "Χωρίς vendor lock-in. Φιλοξενήστε ολόκληρη τη στοίβα οι ίδιοι. Το Cesium Ion και εμπορικοί πάροχοι εικόνων δεν χρησιμοποιούνται σκόπιμα.",
+    "geo_hub.licenses_globe_streets": "βασική εικόνα δρόμων στην υδρόγειο",
     "geo_hub.licenses_heading": "Ανοιχτά Δεδομένα & Ανοιχτός Κώδικας",
     "geo_hub.licenses_pill": "Ανοιχτά Δεδομένα",
     "geo_hub.licenses_title": "Στοίβα ανοιχτών δεδομένων: κάντε κλικ για προβολή αδειών",

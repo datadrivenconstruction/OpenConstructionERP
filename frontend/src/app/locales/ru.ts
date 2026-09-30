@@ -29335,6 +29335,7 @@ const resource = {
     "geo_hub.hud.north": "Север",
     "geo_hub.hud.scale": "SCALE",
     "geo_hub.licenses_footer": "Нет привязки к поставщику. Размещайте весь стек самостоятельно. Cesium Ion + коммерческие поставщики образов намеренно не используются.",
+    "geo_hub.licenses_globe_streets": "базовое изображение улиц на глобусе",
     "geo_hub.licenses_heading": "Открытые данные и открытый исходный код",
     "geo_hub.licenses_pill": "Открытые данные",
     "geo_hub.licenses_title": "Стек открытых данных: щелкните, чтобы просмотреть лицензии",

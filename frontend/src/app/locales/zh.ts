@@ -29062,6 +29062,7 @@ const resource = {
     "geo_hub.hud.north": "北",
     "geo_hub.hud.scale": "SCALE",
     "geo_hub.licenses_footer": "没有供应商锁定。自托管整个堆栈。Cesium Ion 和商业图像提供者有意不使用。",
+    "geo_hub.licenses_globe_streets": "地球仪上的街道底图",
     "geo_hub.licenses_heading": "开放数据和开源",
     "geo_hub.licenses_pill": "开放数据",
     "geo_hub.licenses_title": "开放数据堆栈：单击以查看许可证",

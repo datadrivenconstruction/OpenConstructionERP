@@ -29004,6 +29004,7 @@ const resource = {
     "geo_hub.hud.north": "Pohjoinen",
     "geo_hub.hud.scale": "SCALE",
     "geo_hub.licenses_footer": "Ei toimittajasidontaa. Isännöi koko pino itse. Cesium Ioni + kaupalliset kuvien tarjoajat eivät ole tarkoituksellisesti käytössä.",
+    "geo_hub.licenses_globe_streets": "katujen peruskuva maapallolla",
     "geo_hub.licenses_heading": "Avoin data & avoin lähdekoodi",
     "geo_hub.licenses_pill": "Avoin data",
     "geo_hub.licenses_title": "Avoin data-pino: napsauta nähdäksesi lisenssit",

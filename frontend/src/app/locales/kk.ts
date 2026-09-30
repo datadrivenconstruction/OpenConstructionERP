@@ -28291,6 +28291,7 @@ const resource = {
     "geo_hub.hud.north": "Солтүстік",
     "geo_hub.hud.scale": "МАСШТАБ",
     "geo_hub.licenses_footer": "Жеткізушіге тәуелділік жоқ. Толық стекті өзіңіз орналастырыңыз. Cesium Ion және коммерциялық кескін жеткізушілері әдейі пайдаланылмайды.",
+    "geo_hub.licenses_globe_streets": "жаһандағы көшелердің негізгі кескіні",
     "geo_hub.licenses_heading": "Ашық деректер мен ашық бастапқы код",
     "geo_hub.licenses_pill": "Ашық деректер",
     "geo_hub.licenses_title": "Ашық деректер стегі: лицензияларды көру үшін басыңыз",

@@ -29153,6 +29153,7 @@ const resource = {
     "geo_hub.hud.north": "Nord",
     "geo_hub.hud.scale": "SKALA",
     "geo_hub.licenses_footer": "Ingen leverantörslåsning. Själv-värd hela stacken. Cesium Ion + kommersiella bildleverantörer används avsiktligt inte.",
+    "geo_hub.licenses_globe_streets": "gatubaskarta på jordgloben",
     "geo_hub.licenses_heading": "Öppen data & Open Source",
     "geo_hub.licenses_pill": "Öppen data",
     "geo_hub.licenses_title": "Öppen-datakstäck: klicka för att visa licenser",

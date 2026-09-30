@@ -29141,6 +29141,7 @@ const resource = {
     "geo_hub.hud.north": "Sjever",
     "geo_hub.hud.scale": "SKALA",
     "geo_hub.licenses_footer": "Nema zaključavanja dobavljača. Samoodržavajte cijeli stack. Cesium Ion + komercijalni davatelji slika nisu namjerno korišteni.",
+    "geo_hub.licenses_globe_streets": "osnovna slika ulica na globusu",
     "geo_hub.licenses_heading": "Otvoreni podaci i otvoreni kod",
     "geo_hub.licenses_pill": "Otvoreni podaci",
     "geo_hub.licenses_title": "Stack otvorenih podataka: klikni da vidiš licence",

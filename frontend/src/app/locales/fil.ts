@@ -28353,6 +28353,7 @@ const resource = {
     "geo_hub.hud.north": "Hilaga",
     "geo_hub.hud.scale": "SCALE",
     "geo_hub.licenses_footer": "Walang vendor lock-in. I-self-host ang buong stack. Sinadyang hindi gamitin ang Cesium Ion + mga komersyal na provider ng imagery.",
+    "geo_hub.licenses_globe_streets": "batayang larawan ng kalye sa globo",
     "geo_hub.licenses_heading": "Open Data at Open Source",
     "geo_hub.licenses_pill": "Bukas na Datos",
     "geo_hub.licenses_title": "Open-data na stack: i-click para tingnan ang mga lisensya",

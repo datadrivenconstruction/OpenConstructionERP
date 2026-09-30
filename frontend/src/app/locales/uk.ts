@@ -29677,6 +29677,7 @@ const resource = {
     "geo_hub.hud.north": "Північ",
     "geo_hub.hud.scale": "МАСШТАБ",
     "geo_hub.licenses_footer": "Без прив'язки до постачальника. Розгортайте весь стек самостійно. Cesium Ion та комерційні постачальники знімків свідомо не використовуються.",
+    "geo_hub.licenses_globe_streets": "базове зображення вулиць на глобусі",
     "geo_hub.licenses_heading": "Відкриті дані та відкритий код",
     "geo_hub.licenses_pill": "Відкриті дані",
     "geo_hub.licenses_title": "Стек відкритих даних: клацніть, щоб переглянути ліцензії",

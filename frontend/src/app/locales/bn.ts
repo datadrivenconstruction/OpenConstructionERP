@@ -28353,6 +28353,7 @@ const resource = {
     "geo_hub.hud.north": "উত্তর",
     "geo_hub.hud.scale": "স্কেল",
     "geo_hub.licenses_footer": "কোনো ভেন্ডর লক-ইন নেই। সম্পূর্ণ স্ট্যাক নিজেই হোস্ট করুন। Cesium Ion + বাণিজ্যিক ইমেজারি প্রোভাইডার ইচ্ছাকৃতভাবে ব্যবহার করা হয়নি।",
+    "geo_hub.licenses_globe_streets": "গ্লোবে রাস্তার বেস ইমেজারি",
     "geo_hub.licenses_heading": "ওপেন ডেটা ও ওপেন সোর্স",
     "geo_hub.licenses_pill": "ওপেন ডেটা",
     "geo_hub.licenses_title": "ওপেন-ডেটা স্ট্যাক: লাইসেন্স দেখতে ক্লিক করুন",

@@ -28433,6 +28433,7 @@ const resource = {
     "geo_hub.hud.north": "شمال",
     "geo_hub.hud.scale": "SCALE",
     "geo_hub.licenses_footer": "کوئی vendor lock-in نہیں۔ پورا stack self-host کریں۔ Cesium Ion اور تجارتی imagery providers جان بوجھ کر استعمال نہیں ہوتے۔",
+    "geo_hub.licenses_globe_streets": "گلوب پر سڑکوں کی بنیادی تصویر",
     "geo_hub.licenses_heading": "Open Data اور Open Source",
     "geo_hub.licenses_pill": "کھلا ڈیٹا",
     "geo_hub.licenses_title": "Open-data stack: لائسنس دیکھنے کے لیے کلک کریں",

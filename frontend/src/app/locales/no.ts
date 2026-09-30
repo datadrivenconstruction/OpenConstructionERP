@@ -29023,6 +29023,7 @@ const resource = {
     "geo_hub.hud.north": "Nord",
     "geo_hub.hud.scale": "SKALA",
     "geo_hub.licenses_footer": "Ingen leverandørlåsing. Selfhost hele stabelen. Cesium Ion + kommersielle bildeprovere er bevisst ikke brukt.",
+    "geo_hub.licenses_globe_streets": "gatebasiskart på globusen",
     "geo_hub.licenses_heading": "Åpne data og åpen kildekode",
     "geo_hub.licenses_pill": "Åpne data",
     "geo_hub.licenses_title": "Åpen datastabel: klikk for å vise lisenser",

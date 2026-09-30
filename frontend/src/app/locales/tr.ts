@@ -29355,6 +29355,7 @@ const resource = {
     "geo_hub.hud.north": "Kuzey",
     "geo_hub.hud.scale": "ÖLÇ",
     "geo_hub.licenses_footer": "Satıcı kilitlemesi yok. Tüm yığını kendi barındırın. Cesium Ion + ticari görüntüleme sağlayıcıları kasıtlı olarak kullanılmamaktadır.",
+    "geo_hub.licenses_globe_streets": "küre üzerindeki sokak temel görüntüsü",
     "geo_hub.licenses_heading": "Açık Veri ve Açık Kaynak",
     "geo_hub.licenses_pill": "Açık Veri",
     "geo_hub.licenses_title": "Açık veri yığını: lisansları görüntülemek için tıklayın",

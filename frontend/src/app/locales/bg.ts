@@ -29122,6 +29122,7 @@ const resource = {
     "geo_hub.hud.north": "Север",
     "geo_hub.hud.scale": "SCALE",
     "geo_hub.licenses_footer": "Няма заключване към доставчик. Самоостинг на целия стек. Cesium Ion + търговски доставчици на снимки намерено не се използват.",
+    "geo_hub.licenses_globe_streets": "основно изображение на улиците на глобуса",
     "geo_hub.licenses_heading": "Отворени данни и Open Source",
     "geo_hub.licenses_pill": "Отворени данни",
     "geo_hub.licenses_title": "Open-data стек: кликни за преглед на лицензите",

@@ -29134,6 +29134,7 @@ const resource = {
     "geo_hub.hud.north": "Noord",
     "geo_hub.hud.scale": "SCHAAL",
     "geo_hub.licenses_footer": "Geen vendor lock-in. Host de volledige stack zelf. Cesium Ion + commerciële afbeeldingsproviders worden opzettelijk niet gebruikt.",
+    "geo_hub.licenses_globe_streets": "straatbasisbeeld op de globe",
     "geo_hub.licenses_heading": "Open Data en Open Source",
     "geo_hub.licenses_pill": "Open data",
     "geo_hub.licenses_title": "Open-data-stack: klik om licenties weer te geven",
