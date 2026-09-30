@@ -361,8 +361,8 @@ async def test_a_hard_deleted_demo_leaves_the_overview_and_no_orphans(pg_session
     """The demo uninstall and clear-all endpoints delete through this helper."""
     from sqlalchemy import func, select
 
+    from app.main import _delete_demo_projects
     from app.modules.finance.models import ProjectBudget
-    from app.modules.projects.service import hard_delete_projects
 
     owner = await _owner(pg_session)
     live = await _project_with_budget(pg_session, owner, "Live project")
@@ -373,7 +373,7 @@ async def test_a_hard_deleted_demo_leaves_the_overview_and_no_orphans(pg_session
     await pg_session.flush()
     demo_id, live_id, owner_id = demo.id, live.id, owner.id
 
-    await hard_delete_projects(pg_session, [demo])
+    await _delete_demo_projects(pg_session, [demo])
 
     assert await _overview_ids(pg_session, owner_id) == {str(live_id)}
     left = await pg_session.scalar(
