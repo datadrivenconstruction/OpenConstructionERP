@@ -18,6 +18,8 @@
  * sheet is prefixed with it.
  */
 
+import { fmtList } from '@/shared/lib/formatters';
+
 /** Minimal shape of the i18next `t` used here (repo convention). */
 type Translate = (key: string, opts?: Record<string, unknown>) => string;
 
@@ -87,7 +89,7 @@ function headerNotRecognised(issue: ImportIssue, t: Translate): string {
   if (unknown.length === 0) return needs;
   return `${needs}. ${t('boq.import_issue.header_unrecognised', {
     defaultValue: 'Headings not recognised: {{headings}}',
-    headings: unknown.slice(0, 12).join(', '),
+    headings: fmtList(unknown.slice(0, 12)),
   })}`;
 }
 

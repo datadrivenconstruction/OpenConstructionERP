@@ -3445,7 +3445,7 @@ async def _run_import_validation(
             project_rule_sets=project.validation_rule_sets or ["boq_quality"],
             classification_standard=project.classification_standard or "",
             region=project.region or "",
-            country_code=project.country_code,
+            country_code=getattr(project, "country_code", None),
         )
 
         report = await validation_engine.validate(
@@ -3625,7 +3625,7 @@ async def validate_boq(
         project_rule_sets=project.validation_rule_sets or ["boq_quality"],
         classification_standard=project.classification_standard or "",
         region=project.region or "",
-        country_code=project.country_code,
+        country_code=getattr(project, "country_code", None),
     )
 
     # Run validation. The rows are this endpoint's own projection; anything
