@@ -15,6 +15,14 @@ export const WORKFLOW_ACTION_TYPES = ['approve', 'review', 'sign_off', 'notify']
 export type WorkflowActionType = (typeof WORKFLOW_ACTION_TYPES)[number];
 
 /**
+ * The action types the step editor offers. ``approve_request`` does not read
+ * ``action_type`` yet, so every step blocks until someone decides it; offering
+ * "review" or "notify" would promise a step that lets the request through on
+ * its own. Stored steps of those types still display by their name.
+ */
+export const OFFERED_ACTION_TYPES: readonly WorkflowActionType[] = ['approve', 'sign_off'];
+
+/**
  * Roles a step can require. The engine lets a user decide a step when their
  * role ranks at or above the step's ``role``; the field roles are left out
  * because they rank below viewer and carry no permissions yet.
@@ -155,6 +163,17 @@ export async function fetchApprovalRequests(params?: {
     `/v1/enterprise-workflows/requests/${query ? '?' + query : ''}`,
   );
   return page.items;
+}
+
+/**
+ * How many approval requests are pending, across every page.
+ *
+ * Counted from the envelope's ``total`` with a one-row page, so the figure is
+ * right however many requests exist and whatever the list below is filtered to.
+ */
+export async function fetchPendingApprovalCount(): Promise<number> {
+  const page = await apiGet<Page<ApprovalRequest>>('/v1/enterprise-workflows/requests/?status=pending&limit=1');
+  return page.total;
 }
 
 export async function fetchApprovalRequest(id: string): Promise<ApprovalRequest> {
