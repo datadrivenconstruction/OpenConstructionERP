@@ -18,6 +18,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import { activeLanguageTag, extractErrorMessageFromBody } from '@/shared/lib/api';
 import { fmtFixed } from '@/shared/lib/formatters';
 import { importIssueText, type ImportIssue } from './importIssueText';
+import { chooseColumn, columnMappingField, type ColumnMapping } from './columnMappingOverride';
 
 /* ── Types ──────────────────────────────────────────────────────────── */
 
@@ -52,7 +53,7 @@ interface PreviewResponse {
   };
 }
 
-/** The canonical BOQ fields a column can map to. */
+/** The canonical BOQ fields a column can map to: the targets the importer accepts. */
 const CANONICAL_FIELDS = [
   { value: '', label: 'Skip' },
   { value: 'ordinal', label: 'Position number' },
@@ -61,7 +62,6 @@ const CANONICAL_FIELDS = [
   { value: 'quantity', label: 'Quantity' },
   { value: 'unit_rate', label: 'Unit rate' },
   { value: 'total', label: 'Total' },
-  { value: 'code', label: 'Code' },
   { value: 'classification', label: 'Classification' },
 ] as const;
 
@@ -120,7 +120,10 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
   const [warningsExpanded, setWarningsExpanded] = useState(false);
   const [errorsExpanded, setErrorsExpanded] = useState(false);
   const [dragOver, setDragOver] = useState(false);
-  const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
+  // What the importer read each column as, and what the user has chosen.
+  // Only the difference is sent, see columnMappingOverride.ts.
+  const [readMapping, setReadMapping] = useState<ColumnMapping>({});
+  const [columnMapping, setColumnMapping] = useState<ColumnMapping>({});
   const [mappingExpanded, setMappingExpanded] = useState(false);
 
   // Reset state when the dialog closes
@@ -136,6 +139,9 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
       setWarningsExpanded(false);
       setErrorsExpanded(false);
       setDragOver(false);
+      setReadMapping({});
+      setColumnMapping({});
+      setMappingExpanded(false);
     }
   }, [open]);
 
@@ -151,18 +157,23 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
 
   /* ── Step 1: Upload & parse ─────────────────────────────────────── */
 
+  // ``mapping`` previews the same file again with the columns the user
+  // changed, so a header the importer did not know can reach the import.
   const handleFile = useCallback(
-    async (f: File) => {
-      setFile(f);
-      setFileFormat(detectFormat(f.name));
+    async (f: File, mapping: string | null = null) => {
+      const again = mapping !== null;
+      if (!again) {
+        setFile(f);
+        setFileFormat(detectFormat(f.name));
+        setStep('upload'); // Stay on upload step while parsing
+      }
       setError(null);
-
       setParsing(true);
-      setStep('upload'); // Stay on upload step while parsing
 
       const token = useAuthStore.getState().accessToken;
       const form = new FormData();
       form.append('file', f);
+      if (mapping) form.append('column_mapping', mapping);
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 90_000);
@@ -183,7 +194,13 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
 
         const data: PreviewResponse = await res.json();
         setPreview(data);
-        setColumnMapping(data.metadata?.column_mapping ?? {});
+        if (!again) {
+          const read = data.metadata?.column_mapping ?? {};
+          setReadMapping(read);
+          setColumnMapping(read);
+          // A header the importer could not read is fixed here, so open it.
+          setMappingExpanded(data.errors.some((e) => e.code === 'header_not_recognised'));
+        }
         setStep('preview');
       } catch (err) {
         clearTimeout(timeoutId);
@@ -197,7 +214,7 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
               ? err.message
               : 'Unknown error',
         );
-        setStep('upload');
+        setStep(again ? 'preview' : 'upload');
       } finally {
         setParsing(false);
       }
@@ -215,6 +232,8 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
     const token = useAuthStore.getState().accessToken;
     const form = new FormData();
     form.append('file', file);
+    const mapping = columnMappingField(readMapping, columnMapping);
+    if (mapping) form.append('column_mapping', mapping);
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 90_000);
@@ -248,15 +267,18 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
         skipped?: number;
         source_format?: string;
         currency?: string;
+        warnings?: ImportIssue[];
       } = await res.json();
 
       const imported = result.imported ?? ((result.created ?? 0) + (result.updated ?? 0));
+      const unmapped = (result.warnings ?? []).filter((w) => w.code === 'column_mapping_not_applied');
       addToast({
-        type: imported > 0 ? 'success' : 'warning',
+        type: imported > 0 && unmapped.length === 0 ? 'success' : 'warning',
         title: t('boq.import_preview.import_success', {
           defaultValue: 'Imported {{count}} positions',
           count: imported,
         }),
+        message: unmapped.length > 0 ? unmapped.map((w) => importIssueText(w, t, fmtNumber)).join('\n') : undefined,
       });
 
       onImported();
@@ -276,7 +298,7 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
     } finally {
       setImporting(false);
     }
-  }, [file, boqId, addToast, t, onImported, onClose]);
+  }, [file, boqId, addToast, t, onImported, onClose, readMapping, columnMapping]);
 
   /* ── Drag & drop handlers ───────────────────────────────────────── */
 
@@ -478,8 +500,10 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
                           <select
                             className="flex-1 h-7 rounded border border-border-light bg-surface-primary px-2 text-2xs focus:outline-none focus:border-oe-blue"
                             value={columnMapping[String(idx)] ?? ''}
+                            aria-label={col || `Column ${idx + 1}`}
                             onChange={(e) => {
-                              setColumnMapping((m) => ({ ...m, [String(idx)]: e.target.value }));
+                              const target = e.target.value;
+                              setColumnMapping((m) => chooseColumn(m, String(idx), target));
                             }}
                           >
                             {CANONICAL_FIELDS.map((f) => (
@@ -490,6 +514,20 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
                           </select>
                         </div>
                       ))}
+                    </div>
+                  )}
+                  {mappingExpanded && file && columnMappingField(readMapping, columnMapping) !== null && (
+                    <div className="px-3 pb-3">
+                      <button
+                        type="button"
+                        data-testid="import-preview-apply-mapping"
+                        disabled={parsing}
+                        onClick={() => handleFile(file, columnMappingField(readMapping, columnMapping))}
+                        className="px-3 py-1 text-2xs font-medium rounded border border-oe-blue text-oe-blue hover:bg-oe-blue/10 disabled:opacity-50 flex items-center gap-1.5"
+                      >
+                        {parsing && <Loader2 size={10} className="animate-spin" />}
+                        {t('boq.import_preview.apply_mapping', { defaultValue: 'Preview with this mapping' })}
+                      </button>
                     </div>
                   )}
                 </div>

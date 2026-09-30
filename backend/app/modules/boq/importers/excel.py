@@ -24,6 +24,7 @@ from __future__ import annotations
 import csv
 import io
 import itertools
+import json
 import logging
 import math
 import re
@@ -955,26 +956,133 @@ def header_report(headers: tuple[Any, ...] | list[Any], column_map: dict[int, st
     return {"recognised": recognised, "unrecognised": unrecognised, "missing": missing}
 
 
-def _report_header(
-    headers: tuple[Any, ...] | list[Any], column_map: dict[int, str], top_rows: Iterable[tuple[Any, ...]]
-) -> dict[str, Any]:
-    """:func:`header_report` for the row that most looks like the header.
+def _display_header(
+    headers: tuple[Any, ...] | list[Any],
+    header_number: int,
+    column_map: dict[int, str],
+    top_rows: Iterable[tuple[Any, ...]],
+) -> tuple[tuple[Any, ...], int]:
+    """The row that most looks like the header, and its row number.
 
     When fewer than two cells matched anywhere, the reader falls back to row
-    one, which is often a title ("Költségvetés"), and a report of that row
-    would tell the user their heading is the title. The widest row near the
-    top is what they wrote as headings, so that is the one reported.
+    one, which is often a title ("Költségvetés"). The widest row near the top
+    is what the user wrote as headings, so that is the row the header report
+    names and the row the import dialog offers to map column by column.
     """
     if len(set(column_map.values())) >= 2:
-        return header_report(headers, column_map)
-    widest = max(
-        (tuple(row) for row in top_rows),
-        key=lambda row: sum(1 for cell in row if _cell_text(cell)),
-        default=tuple(headers),
-    )
-    if sum(1 for cell in widest if _cell_text(cell)) < 2:
-        widest = tuple(headers)
-    return header_report(widest, _map_columns(widest))
+        return tuple(headers), header_number
+    filled = [
+        (sum(1 for cell in row if _cell_text(cell)), number, tuple(row)) for number, row in enumerate(top_rows, start=1)
+    ]
+    best = max(filled, key=lambda item: (item[0], -item[1]), default=None)
+    if best is None or best[0] < 2:
+        return tuple(headers), header_number
+    return best[2], best[1]
+
+
+# ── A column mapping chosen by the user ─────────────────────────────────────
+
+#: What the import dialog lets a column be mapped to. An empty string leaves
+#: the column out. The split columns are not offered: a column the reader took
+#: as the material or the fee half keeps that reading until the user maps it
+#: to something else.
+COLUMN_MAPPING_TARGETS: frozenset[str] = frozenset(
+    {"", "ordinal", "description", "unit", "quantity", "unit_rate", "total", "classification"}
+)
+
+#: The widest header a mapping may address. A real bill has a few dozen
+#: columns; this only bounds what a request can make the reader look at.
+_MAX_MAPPED_COLUMN = 1000
+
+
+def parse_column_mapping(raw: str | None) -> dict[int, str] | None:
+    """Read the ``column_mapping`` form field: column index -> target column.
+
+    The indices are those of the header the preview reported
+    (``metadata.original_columns``), and only the columns the user changed
+    are sent: every other column keeps the reading the importer made of it.
+
+    Raises:
+        ValueError: when the field is not a JSON object of column indices to
+            targets from :data:`COLUMN_MAPPING_TARGETS`, with a message that
+            says which part is wrong.
+    """
+    if raw is None or not raw.strip():
+        return None
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise ValueError("column_mapping is not valid JSON") from exc
+    if not isinstance(data, dict):
+        raise ValueError("column_mapping must be an object of column index to column name")
+    mapping: dict[int, str] = {}
+    for key, value in data.items():
+        if not (isinstance(key, str) and key.isdigit() and int(key) < _MAX_MAPPED_COLUMN):
+            raise ValueError(f"column_mapping key {key!r} is not a column index")
+        if not isinstance(value, str) or value not in COLUMN_MAPPING_TARGETS:
+            allowed = ", ".join(sorted(target for target in COLUMN_MAPPING_TARGETS if target))
+            raise ValueError(
+                f"column_mapping maps column {key} to {value!r}; use one of: {allowed}, or an empty string"
+            )
+        mapping[int(key)] = value
+    targets = [value for value in mapping.values() if value]
+    for target in set(targets):
+        if targets.count(target) > 1:
+            raise ValueError(f"column_mapping maps more than one column to {target}")
+    return mapping or None
+
+
+def _apply_column_mapping(column_map: dict[int, str], overrides: dict[int, str], width: int) -> dict[int, str]:
+    """The importer's own reading of a header with the user's choices laid over it.
+
+    Raises:
+        ImporterParseError: when a choice addresses a column the header does
+            not have, or leaves two columns feeding the same field.
+    """
+    mapped = dict(column_map)
+    for index, target in overrides.items():
+        if index >= width:
+            raise ImporterParseError(
+                f"The column mapping names column {index + 1}, and the header row has {width} columns."
+            )
+        if target:
+            mapped[index] = target
+        else:
+            mapped.pop(index, None)
+    for target in {target for target in overrides.values() if target}:
+        columns = [index + 1 for index, canonical in mapped.items() if canonical == target]
+        if len(columns) > 1:
+            raise ImporterParseError(
+                f"The column mapping leaves columns {', '.join(map(str, columns))} all feeding {target}. "
+                "Map the others to something else or leave them out."
+            )
+    return mapped
+
+
+def column_mapping_warning(reason: str, sheet: str | None = None) -> dict[str, Any]:
+    """The note for a column mapping the import could not lay over the file.
+
+    ``reason`` is ``profile`` (the workbook was read through a national
+    profile, which has no generic columns), ``format`` (the file is not a
+    spreadsheet) or ``different_header`` (a further sheet is headed
+    differently from the one the mapping was chosen on, and was read with the
+    importer's own mapping).
+    """
+    messages = {
+        "profile": "The column mapping was not used: this workbook was read through its national profile.",
+        "format": "The column mapping was not used: it applies to spreadsheets only.",
+        "different_header": "The column mapping was not used on this sheet: its header differs from the first one.",
+    }
+    warning: dict[str, Any] = {
+        "severity": "warning",
+        "code": "column_mapping_not_applied",
+        "reason": reason,
+        "message": messages.get(reason, "The column mapping was not used."),
+    }
+    if sheet:
+        warning["sheet"] = sheet
+        warning["message"] = f"Sheet {sheet}: " + warning["message"]
+    return warning
 
 
 def header_problem_error(report: dict[str, Any], sheet: str | None = None) -> dict[str, Any]:
@@ -1184,16 +1292,38 @@ def _decode_csv(content_bytes: bytes) -> tuple[str, str]:
     return text, encoding
 
 
-def _parse_csv(content_bytes: bytes) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    """Decode + parse a CSV into canonical-key dicts and import metadata."""
+def _parse_csv(
+    content_bytes: bytes,
+    overrides: dict[int, str] | None = None,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Decode + parse a CSV into canonical-key dicts and import metadata.
+
+    ``overrides`` is the user's column mapping, see :func:`parse_column_mapping`.
+    """
     text, encoding = _decode_csv(content_bytes)
     delimiter = _sniff_delimiter(text)
+
+    def top_rows() -> Iterable[list[str]]:
+        return itertools.islice(csv.reader(io.StringIO(text), delimiter=delimiter), HEADER_SEARCH_ROWS)
+
     reader = csv.reader(io.StringIO(text), delimiter=delimiter)
     raw_headers, header_number, rows_iter = _locate_header(reader)
     if not raw_headers:
         raise ImporterParseError("CSV file is empty or has no header row")
 
     column_map = _map_columns(raw_headers)
+    display, display_row = _display_header(raw_headers, header_number, column_map, top_rows())
+    if overrides is not None:
+        if display_row != header_number:
+            found, rows_iter = _header_at(csv.reader(io.StringIO(text), delimiter=delimiter), display_row)
+            raw_headers, header_number = found or raw_headers, display_row
+        column_map = _apply_column_mapping(_map_columns(raw_headers), overrides, len(raw_headers))
+        display = tuple(raw_headers)
+        display_map = column_map
+        report = header_report(raw_headers, column_map)
+    else:
+        display_map = column_map if display == tuple(raw_headers) else _map_columns(display)
+        report = header_report(display, display_map)
     language = header_language(raw_headers)
 
     rows: list[dict[str, Any]] = []
@@ -1209,14 +1339,12 @@ def _parse_csv(content_bytes: bytes) -> tuple[list[dict[str, Any]], dict[str, An
             row_numbers.append(line_number)
 
     import_metadata = {
-        "original_columns": [_cell_text(h) for h in raw_headers],
-        "column_mapping": _report_mapping(column_map),
+        "original_columns": [_cell_text(h) for h in display],
+        "header_row": display_row if overrides is None else header_number,
+        "column_mapping": _report_mapping(display_map),
+        "column_mapping_applied": overrides is not None,
         "header_language": language,
-        "header_report": _report_header(
-            raw_headers,
-            column_map,
-            itertools.islice(csv.reader(io.StringIO(text), delimiter=delimiter), HEADER_SEARCH_ROWS),
-        ),
+        "header_report": report,
         "encoding": encoding,
         "delimiter": delimiter,
         "total_rows": len(rows),
@@ -1294,12 +1422,48 @@ def _pick_item_sheets(workbook: Any) -> tuple[list[Any], list[dict[str, Any]]]:
     return sheets, notes
 
 
-def _read_sheet_rows(worksheet: Any) -> dict[str, Any] | None:
-    """One item sheet's canonical rows, the sheet row of each, and its header."""
-    raw_headers, header_number, rows_iter = _locate_header(worksheet.iter_rows(values_only=True))
+def _header_at(rows_iter: Iterable[tuple[Any, ...]], header_row: int) -> tuple[tuple[Any, ...] | None, Iterator[Any]]:
+    """Row ``header_row`` (counted from 1) as the header, and the rows under it."""
+    rows = iter(rows_iter)
+    for number, row in enumerate(rows, start=1):
+        if number == header_row:
+            return tuple(row), rows
+    return None, rows
+
+
+def _read_sheet_rows(
+    worksheet: Any,
+    *,
+    header_row: int | None = None,
+    overrides: dict[int, str] | None = None,
+) -> dict[str, Any] | None:
+    """One item sheet's canonical rows, the sheet row of each, and its header.
+
+    ``header_row`` reads that row as the header instead of looking for one, and
+    ``overrides`` lays the user's column mapping over the importer's reading.
+    """
+    if header_row is None:
+        raw_headers, header_number, rows_iter = _locate_header(worksheet.iter_rows(values_only=True))
+    else:
+        raw_headers, rows_iter = _header_at(worksheet.iter_rows(values_only=True), header_row)
+        header_number = header_row
     if not raw_headers:
         return None
     column_map = _map_columns(raw_headers)
+    if overrides is not None:
+        column_map = _apply_column_mapping(column_map, overrides, len(raw_headers))
+        display, display_row = tuple(raw_headers), header_number
+        display_map = column_map
+        report = header_report(raw_headers, column_map)
+    else:
+        display, display_row = _display_header(
+            raw_headers,
+            header_number,
+            column_map,
+            worksheet.iter_rows(max_row=HEADER_SEARCH_ROWS, values_only=True),
+        )
+        display_map = column_map if display == tuple(raw_headers) else _map_columns(display)
+        report = header_report(display, display_map)
     language = header_language(raw_headers)
     rows: list[dict[str, Any]] = []
     row_numbers: list[int] = []
@@ -1316,13 +1480,18 @@ def _read_sheet_rows(worksheet: Any) -> dict[str, Any] | None:
         "title": worksheet.title,
         "headers": tuple(raw_headers),
         "header_row": header_number,
+        "display_headers": display,
+        "display_header_row": display_row,
         "column_map": column_map,
-        "header_report": _report_header(
-            raw_headers, column_map, worksheet.iter_rows(max_row=HEADER_SEARCH_ROWS, values_only=True)
-        ),
+        "display_column_map": display_map,
+        "header_report": report,
         "rows": rows,
         "row_numbers": row_numbers,
     }
+
+
+def _header_texts(headers: tuple[Any, ...]) -> tuple[str, ...]:
+    return tuple(_cell_text(cell) for cell in headers)
 
 
 def _sheet_fingerprint(rows: list[dict[str, Any]]) -> tuple[str, ...]:
@@ -1371,6 +1540,7 @@ def _join_sheets(read: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list
 
 def _parse_rows_from_excel(
     content_bytes: bytes,
+    overrides: dict[int, str] | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Read the item sheets of an .xlsx or .xls file into canonical-key dicts.
 
@@ -1381,6 +1551,11 @@ def _parse_rows_from_excel(
     returned row came from and ``row_sheets`` its sheet, so a message about it
     names the row the user sees under a letterhead and past blank lines, on the
     sheet it is on. ``sheet_notes`` names every sheet that was not read and why.
+
+    ``overrides`` is the user's column mapping, see :func:`parse_column_mapping`.
+    It is laid over the first item sheet and every further one headed the same
+    way; a sheet headed differently is read as before and named in
+    ``mapping_notes``.
     """
     wb = open_workbook(content_bytes)
     if wb.active is None:
@@ -1390,10 +1565,23 @@ def _parse_rows_from_excel(
 
     read: list[dict[str, Any]] = []
     fingerprints: dict[tuple[str, ...], str] = {}
+    mapped_header: tuple[str, ...] | None = None
+    mapping_notes: list[dict[str, Any]] = []
     for worksheet in worksheets:
         sheet = _read_sheet_rows(worksheet)
         if sheet is None:
             continue
+        if overrides is not None:
+            texts = _header_texts(sheet["display_headers"])
+            if mapped_header is None:
+                mapped_header = texts
+            if texts == mapped_header:
+                # The two-row header the reader composed is found again only by
+                # looking for it; a fallback row has to be named.
+                row = None if sheet["display_header_row"] == sheet["header_row"] else sheet["display_header_row"]
+                sheet = _read_sheet_rows(worksheet, header_row=row, overrides=overrides) or sheet
+            else:
+                mapping_notes.append({"sheet": sheet["title"], "reason": "different_header"})
         fingerprint = _sheet_fingerprint(sheet["rows"])
         if any(fingerprint) and fingerprint in fingerprints:
             # A copy of a sheet already read (a priced and an unpriced copy of
@@ -1415,8 +1603,11 @@ def _parse_rows_from_excel(
         rows, row_numbers, row_sheets = _join_sheets(read)
 
     import_metadata = {
-        "original_columns": [str(h) if h is not None else "" for h in first["headers"]],
-        "column_mapping": _report_mapping(first["column_map"]),
+        "original_columns": [str(h) if h is not None else "" for h in first["display_headers"]],
+        "header_row": first["display_header_row"],
+        "column_mapping": _report_mapping(first["display_column_map"]),
+        "column_mapping_applied": overrides is not None,
+        "mapping_notes": mapping_notes,
         "header_language": header_language(first["headers"]),
         "header_report": {**first["header_report"], "sheet": first["title"]},
         "sheet_names": sheet_names,
@@ -2246,8 +2437,19 @@ class ExcelImporter:
         return False
 
     @classmethod
-    async def parse(cls, content: bytes, *, locale: str = "en") -> ImportedBOQ:
-        """Parse an .xlsx, .xls or .csv BOQ into :class:`ImportedBOQ`."""
+    async def parse(
+        cls,
+        content: bytes,
+        *,
+        locale: str = "en",
+        column_mapping: dict[int, str] | None = None,
+    ) -> ImportedBOQ:
+        """Parse an .xlsx, .xls or .csv BOQ into :class:`ImportedBOQ`.
+
+        ``column_mapping`` is the user's choice of what each column holds, see
+        :func:`parse_column_mapping`; the columns it does not name keep the
+        importer's own reading.
+        """
         if not content:
             raise ImporterParseError("Spreadsheet upload is empty")
 
@@ -2264,15 +2466,17 @@ class ExcelImporter:
             hungarian = parse_hungarian_workbook(content)
             if hungarian is not None and hungarian.positions:
                 hungarian.source_format = fmt
+                if column_mapping:
+                    hungarian.warnings.append(column_mapping_warning("profile"))
                 return hungarian
 
         import_meta: dict[str, Any] = {}
         try:
             if fmt in ("xlsx", "xls"):
-                rows, import_meta = _parse_rows_from_excel(content)
+                rows, import_meta = _parse_rows_from_excel(content, column_mapping)
                 source_format = fmt
             elif fmt == "csv":
-                rows, import_meta = _parse_csv(content)
+                rows, import_meta = _parse_csv(content, column_mapping)
                 source_format = "csv"
             else:
                 raise ImporterParseError(f"Unsupported spreadsheet format: detected {fmt!r}")
@@ -2297,14 +2501,17 @@ class ExcelImporter:
             header=import_meta.get("header_report"),
         )
         result.source_format = source_format
+        for note in import_meta.get("mapping_notes", []):
+            result.warnings.append(column_mapping_warning(note["reason"], note.get("sheet")))
         result.metadata = {
             **result.metadata,
             "original_columns": import_meta.get("original_columns", []),
             "column_mapping": import_meta.get("column_mapping", {}),
             "sheet_names": import_meta.get("sheet_names", []),
             "total_rows_seen": len(rows),
+            "column_mapping_applied": bool(import_meta.get("column_mapping_applied")),
         }
-        for key in ("header_language", "item_sheet", "item_sheets", "encoding", "delimiter"):
+        for key in ("header_language", "item_sheet", "item_sheets", "encoding", "delimiter", "header_row"):
             if import_meta.get(key):
                 result.metadata[key] = import_meta[key]
         return result
