@@ -226,6 +226,10 @@ async def purge_demo_tagged_global_rows(
     _targets = (
         ("app.modules.equipment.models", "Equipment"),
         ("app.modules.subcontractors.models", "Subcontractor"),
+        # The demo's own parties. They are offered in every assignee picker
+        # and on the contacts register, so a purged demo must take them along;
+        # the rows that point at a contact do so with SET NULL or no key.
+        ("app.modules.contacts.models", "Contact"),
     )
     for module_path, attr in _targets:
         try:
@@ -247,6 +251,14 @@ async def purge_demo_tagged_global_rows(
         deleted[model.__tablename__] = len(pks)
 
     return deleted
+
+
+# Tags a seeded project carries that a new project made from it must not inherit.
+_SEED_WORKSPACE_TAGS = ("demo_id", "partner_pack")
+
+
+def _without_seed_tags(metadata: dict | None) -> dict:
+    return {k: v for k, v in dict(metadata or {}).items() if k not in _SEED_WORKSPACE_TAGS}
 
 
 def _compliance_pack_source(
@@ -1167,7 +1179,7 @@ class ProjectService:
             # showcase project to start real work must not inherit demo_id
             # (the demo-data purge hard-deletes everything tagged with it)
             # or the partner_pack workspace tag.
-            metadata_={k: v for k, v in dict(source.metadata_ or {}).items() if k not in ("demo_id", "partner_pack")},
+            metadata_=_without_seed_tags(source.metadata_),
             # v2.9.4 per-project storage override
             storage_path_override=source.storage_path_override,
             storage_uses_default=source.storage_uses_default,
@@ -1850,7 +1862,10 @@ class ProjectService:
             fx_rates=list(meta.fx_rates or []),
             default_vat_rate=meta.default_vat_rate,
             custom_units=list(meta.custom_units or []),
-            metadata_=dict(meta.metadata or {}),
+            # A restore makes a new project, so like a copy it must not carry
+            # the demo tag: the purge and the demo cleanup would take it for
+            # the demo, and a later delete would retire the demo it names.
+            metadata_=_without_seed_tags(meta.metadata),
         )
         # Auto-generate a project code for the restored project
         project.project_code = await self._generate_project_code()

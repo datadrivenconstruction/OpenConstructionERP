@@ -460,6 +460,47 @@ async def purge_demo_data(
     return {"deleted": deleted}
 
 
+@router.get(
+    "/demo-data/leftovers/",
+    dependencies=[Depends(RequireRole("admin"))],
+    summary="Find leftover demo records",
+    description=(
+        "List the demo records older versions wrote into real projects, project "
+        "by project: rows carrying the seed's mark or matching exactly what the "
+        "seed writes. Rows somebody changed since, and company-wide rows still "
+        "in use, are listed as kept with the reason. Reads only. Admin only."
+    ),
+)
+async def find_demo_leftovers(session: SessionDep) -> dict:
+    """Preview what the demo cleanup would remove."""
+    from app.core.demo_cleanup import clean_leaked_demo_rows
+
+    # A dry run only reads, so there is nothing for the request's commit to write.
+    report = await clean_leaked_demo_rows(session)
+    return report.as_dict()
+
+
+@router.post(
+    "/demo-data/leftovers/remove/",
+    dependencies=[Depends(RequireRole("admin"))],
+    summary="Remove leftover demo records",
+    description=(
+        "Remove the leftover demo records a person confirmed in the preview. Only "
+        "rows named in ``ids`` are removed, and only while they still match the "
+        "seed; anything changed since the preview stays. Admin only."
+    ),
+)
+async def remove_demo_leftovers(
+    session: SessionDep,
+    ids: list[uuid.UUID] = Body(..., embed=True),
+) -> dict:
+    """Delete the previewed demo rows that still match the seed."""
+    from app.core.demo_cleanup import clean_leaked_demo_rows
+
+    report = await clean_leaked_demo_rows(session, apply=True, only_ids=ids)
+    return report.as_dict()
+
+
 # ── Duplicate (deep clone) ───────────────────────────────────────────────
 
 
