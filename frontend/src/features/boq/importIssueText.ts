@@ -11,7 +11,9 @@
  * - `sheet_not_read`: a worksheet the reader did not read, and why;
  * - `dot_read_as_thousands`: a typed number whose dots were read as thousands;
  * - `header_not_recognised`: a header row that names no description, or nothing
- *   to price by, with the headings that were not recognised.
+ *   to price by, with the headings that were not recognised;
+ * - `column_mapping_not_applied`: a column mapping chosen in the preview that
+ *   the import could not lay over the file, and why.
  *
  * Any other issue keeps the server's message. A workbook is read across all its
  * item sheets, so a row number alone is ambiguous: an issue that names its
@@ -93,6 +95,22 @@ function headerNotRecognised(issue: ImportIssue, t: Translate): string {
   })}`;
 }
 
+function mappingNotApplied(issue: ImportIssue, t: Translate): string {
+  if (issue.reason === 'profile') {
+    return t('boq.import_issue.mapping_profile', {
+      defaultValue: 'The column mapping was not used: this workbook was read through its national profile',
+    });
+  }
+  if (issue.reason === 'different_header') {
+    return t('boq.import_issue.mapping_different_header', {
+      defaultValue: 'The column mapping was not used on this sheet: its header differs from the first one',
+    });
+  }
+  return t('boq.import_issue.mapping_format', {
+    defaultValue: 'The column mapping was not used: it applies to spreadsheets only',
+  });
+}
+
 export function importIssueText(
   issue: ImportIssue,
   t: Translate,
@@ -113,6 +131,11 @@ export function importIssueText(
       text: issue.text,
       value: formatNumber(issue.value),
     });
+  } else if (issue.code === 'column_mapping_not_applied') {
+    const where = issue.sheet
+      ? `${t('boq.import_issue.sheet', { defaultValue: 'Sheet {{sheet}}', sheet: issue.sheet })}: `
+      : '';
+    return where + mappingNotApplied(issue, t);
   } else if (issue.code === 'header_not_recognised') {
     const where = issue.sheet
       ? `${t('boq.import_issue.sheet', { defaultValue: 'Sheet {{sheet}}', sheet: issue.sheet })}: `
