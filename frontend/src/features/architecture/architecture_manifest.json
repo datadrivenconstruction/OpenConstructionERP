@@ -51713,6 +51713,7 @@
       "files": [
         "__init__.py",
         "bridge.py",
+        "lookup.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -188555,6 +188556,11 @@
               "default": "None"
             },
             {
+              "name": "assignee_name",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
               "name": "metadata",
               "type": "dict[str, Any]"
             }
@@ -215760,6 +215766,11 @@
             {
               "name": "metadata",
               "type": "dict[str, Any]"
+            },
+            {
+              "name": "assignee_contact_id",
+              "type": "UUID | None",
+              "description": "Assign a contact. A contact linked to a platform user becomes the task's responsible_id; any other contact is kept by name. Stored as metadata.assignee_contact_id and metadata.assignee_name."
             }
           ]
         },
@@ -215834,6 +215845,11 @@
             {
               "name": "metadata",
               "type": "dict[str, Any] | None",
+              "default": "None"
+            },
+            {
+              "name": "assignee_contact_id",
+              "type": "UUID | None",
               "default": "None"
             }
           ]
@@ -216101,6 +216117,7 @@
         }
       ],
       "import_dependencies": [
+        "contacts",
         "projects",
         "users"
       ]
@@ -231172,10 +231189,10 @@
     },
     {
       "name": "contacts",
-      "ts_files": 5,
+      "ts_files": 7,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 5
+      "test_files": 2,
+      "total_files": 7
     },
     {
       "name": "contracts",
@@ -231984,10 +232001,10 @@
     },
     {
       "name": "schedule",
-      "ts_files": 42,
+      "ts_files": 43,
       "css_files": 0,
-      "test_files": 17,
-      "total_files": 42
+      "test_files": 18,
+      "total_files": 43
     },
     {
       "name": "schedule-advanced",
@@ -232117,10 +232134,10 @@
     },
     {
       "name": "tasks",
-      "ts_files": 9,
+      "ts_files": 7,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 9
+      "test_files": 0,
+      "total_files": 7
     },
     {
       "name": "tax-rates",
@@ -233424,6 +233441,7 @@
       "variations"
     ],
     "tasks": [
+      "contacts",
       "projects",
       "users"
     ],
@@ -233513,9 +233531,9 @@
     "total_relationships": 234,
     "total_routes": 3706,
     "total_schemas": 3487,
-    "total_python_files": 2210,
+    "total_python_files": 2211,
     "frontend_features": 190,
-    "frontend_ts_files": 2763,
+    "frontend_ts_files": 2764,
     "frontend_backend_mapped": 169
   },
   "frontend_backend_mapping": {
