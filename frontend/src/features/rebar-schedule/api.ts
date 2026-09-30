@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 
-import { apiGet, apiDelete, apiPost } from '@/shared/lib/api';
+import { ApiError, apiGet, apiDelete, type Page } from '@/shared/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
 
 // ---------------------------------------------------------------------------
@@ -27,10 +27,13 @@ export interface RebarShape {
 }
 
 export interface RebarCuttingEntry {
-  diameter_mm: string;
+  diameter_mm: number | null;
   bars: number;
   weight_kg: number;
 }
+
+/** passed, info, warnings or errors: what the bvbs_abs rule set made of a file. */
+export type AbsValidationStatus = 'passed' | 'info' | 'warnings' | 'errors';
 
 export interface RebarImport {
   id: string;
@@ -39,7 +42,7 @@ export interface RebarImport {
   encoding: string;
   record_count: number;
   total_weight_kg: number | null;
-  validation_status: string;
+  validation_status: AbsValidationStatus;
   error_count: number;
   warning_count: number;
   created_at: string | null;
@@ -54,7 +57,7 @@ export interface AbsFinding {
 }
 
 export interface AbsValidationSummary {
-  status: string;
+  status: AbsValidationStatus;
   error_count: number;
   warning_count: number;
   info_count: number;
@@ -75,13 +78,6 @@ export interface RebarImportResult {
   validation: AbsValidationSummary;
   /** The same bytes were already imported into this project. */
   duplicate: boolean;
-}
-
-interface Page<T> {
-  items: T[];
-  total: number;
-  offset: number;
-  limit: number;
 }
 
 /** A model as it travels: the named Decimal columns are strings on the wire. */
@@ -116,32 +112,38 @@ function shapeDecimals(raw: WirePreviewShape): Pick<RebarShape, ShapeDecimals> {
 
 const BASE = '/v1/rebar-schedule';
 
+/** The most the list routes hand out in one page (``le=200`` / ``le=1000`` on the router). */
+export const IMPORTS_PAGE_LIMIT = 200;
+export const SHAPES_PAGE_LIMIT = 1000;
+
 /**
- * A project's imports, newest first.
+ * A project's imports, newest first, as the page the backend returned.
  *
- * The backend pages this list (at most 200 per call); one page is plenty for
- * the schedules a project realistically holds, and the envelope is unwrapped
- * here so the page keeps working with a plain array.
+ * The page keeps ``total`` so the screen can say when it shows fewer imports
+ * than the project holds (see ``isTruncated``).
  */
-export async function fetchImports(projectId: string): Promise<RebarImport[]> {
+export async function fetchImports(projectId: string): Promise<Page<RebarImport>> {
   const page = await apiGet<Page<WireImport>>(
-    `${BASE}/imports/?project_id=${encodeURIComponent(projectId)}&limit=200`,
+    `${BASE}/imports/?project_id=${encodeURIComponent(projectId)}&limit=${IMPORTS_PAGE_LIMIT}`,
   );
-  return page.items.map(toImport);
+  return { ...page, items: page.items.map(toImport) };
 }
 
 export async function fetchImport(importId: string): Promise<RebarImport> {
   return toImport(await apiGet<WireImport>(`${BASE}/imports/${importId}`));
 }
 
-export async function fetchShapes(importId: string): Promise<RebarShape[]> {
-  const page = await apiGet<Page<WireShape>>(`${BASE}/imports/${importId}/shapes?limit=1000`);
-  return page.items.map((s) => ({ ...s, ...shapeDecimals(s) }));
+export async function fetchShapes(importId: string): Promise<Page<RebarShape>> {
+  const page = await apiGet<Page<WireShape>>(`${BASE}/imports/${importId}/shapes?limit=${SHAPES_PAGE_LIMIT}`);
+  return { ...page, items: page.items.map((s) => ({ ...s, ...shapeDecimals(s) })) };
 }
 
 export async function fetchCutting(importId: string): Promise<RebarCuttingEntry[]> {
-  const rows = await apiGet<Wire<RebarCuttingEntry, 'weight_kg'>[]>(`${BASE}/imports/${importId}/cutting`);
-  return rows.map((r) => ({ ...r, weight_kg: num(r.weight_kg) ?? 0 }));
+  // diameter_mm is str(Decimal) off a Numeric(8,2) column, so '12.00'.
+  const rows = await apiGet<Wire<RebarCuttingEntry, 'diameter_mm' | 'weight_kg'>[]>(
+    `${BASE}/imports/${importId}/cutting`,
+  );
+  return rows.map((r) => ({ ...r, diameter_mm: num(r.diameter_mm), weight_kg: num(r.weight_kg) ?? 0 }));
 }
 
 export async function deleteImport(importId: string): Promise<void> {
@@ -149,23 +151,68 @@ export async function deleteImport(importId: string): Promise<void> {
 }
 
 /**
+ * POST an ABS file as the multipart part ``upload``.
+ *
+ * Raw fetch + FormData, because apiPost sets Content-Type to application/json,
+ * which breaks multipart uploads. It still behaves like the shared client
+ * where it matters: a 401 gets one silent token refresh, and a failure throws
+ * ``ApiError`` so ``getErrorMessage`` words it the same way as everywhere else.
+ * A timeout throws an ``AbortError``, which ``getErrorMessage`` also words.
+ */
+async function postAbsUpload<T>(path: string, file: File, params: URLSearchParams, retried = false): Promise<T> {
+  const token = useAuthStore.getState().accessToken;
+  const form = new FormData();
+  form.append('upload', file);
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 90_000);
+  let res: Response;
+  try {
+    const qs = params.toString();
+    res = await fetch(`/api${BASE}${path}${qs ? `?${qs}` : ''}`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: form,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+
+  if (res.status === 401 && !retried) {
+    const fresh = await useAuthStore.getState().refreshAccessToken();
+    if (fresh) return postAbsUpload<T>(path, file, params, true);
+  }
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    let body: unknown = text;
+    try {
+      body = JSON.parse(text);
+    } catch {
+      // A plain-text body is still something ApiError can word.
+    }
+    throw new ApiError(res.status, res.statusText, body);
+  }
+  return (await res.json()) as T;
+}
+
+type WirePreview = Omit<RebarPreviewResponse, 'total_weight_kg' | 'shapes'> & {
+  total_weight_kg: string | number | null;
+  shapes: WirePreviewShape[];
+};
+
+/**
  * Parse and validate an ABS file without storing it.
  *
- * The dry run takes the file's text as JSON rather than an upload; the format
- * is ASCII only, so reading it as text loses nothing a valid file can hold.
+ * The file goes up as bytes, to the same decoder the import uses. Decoding it
+ * in the browser read it as UTF-8, which turned each cp1252 umlaut a German
+ * CAD system writes into a replacement character and broke the checksum of
+ * every record holding one, so the preview reported errors the import did not.
  */
 export async function previewAbsFile(file: File, locale?: string): Promise<RebarPreviewResponse> {
-  const content = await file.text();
-  const raw = await apiPost<
-    Omit<RebarPreviewResponse, 'total_weight_kg' | 'shapes'> & {
-      total_weight_kg: string | number | null;
-      shapes: WirePreviewShape[];
-    }
-  >(
-    `${BASE}/preview/`,
-    { content, locale },
-    { timeoutMs: 90_000 },
-  );
+  const params = new URLSearchParams();
+  if (locale) params.set('locale', locale);
+  const raw = await postAbsUpload<WirePreview>('/preview/file/', file, params);
   return {
     ...raw,
     total_weight_kg: num(raw.total_weight_kg),
@@ -176,47 +223,17 @@ export async function previewAbsFile(file: File, locale?: string): Promise<Rebar
 /**
  * Import an ABS file into a project.
  *
- * Uses raw fetch + FormData because apiPost sets Content-Type to
- * application/json, which breaks multipart uploads. The backend reads the
- * part named ``upload`` and answers with the stored record nested under
- * ``import_record``, next to the validation findings.
+ * The backend answers with the stored record nested under ``import_record``,
+ * next to the validation findings, and sets ``duplicate`` when these bytes
+ * were already imported into the project.
  */
-export async function importAbsFile(
-  file: File,
-  projectId: string,
-  locale?: string,
-): Promise<RebarImportResult> {
-  const token = useAuthStore.getState().accessToken;
-  const form = new FormData();
-  form.append('upload', file);
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 90_000);
-
-  try {
-    const qs = new URLSearchParams({ project_id: projectId });
-    if (locale) qs.set('locale', locale);
-    const res = await fetch(`/api${BASE}/imports/?${qs.toString()}`, {
-      method: 'POST',
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      body: form,
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
-
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({ detail: res.statusText }));
-      const detail = typeof body?.detail === 'string' ? body.detail : 'Import failed';
-      throw new Error(detail);
-    }
-
-    const result = (await res.json()) as Omit<RebarImportResult, 'import_record'> & { import_record: WireImport };
-    return { ...result, import_record: toImport(result.import_record) };
-  } catch (err) {
-    clearTimeout(timeoutId);
-    if (err instanceof DOMException && err.name === 'AbortError') {
-      throw new Error('Server did not respond within 90 seconds. The file may be too large.');
-    }
-    throw err;
-  }
+export async function importAbsFile(file: File, projectId: string, locale?: string): Promise<RebarImportResult> {
+  const params = new URLSearchParams({ project_id: projectId });
+  if (locale) params.set('locale', locale);
+  const result = await postAbsUpload<Omit<RebarImportResult, 'import_record'> & { import_record: WireImport }>(
+    '/imports/',
+    file,
+    params,
+  );
+  return { ...result, import_record: toImport(result.import_record) };
 }
