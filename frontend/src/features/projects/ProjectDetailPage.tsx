@@ -81,7 +81,7 @@ import { useRecentStore } from '@/stores/useRecentStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { useModuleStore } from '@/stores/useModuleStore';
-import { fmtPercent, fmtFixed, formatDateValue } from '@/shared/lib/formatters';
+import { fmtList, fmtPercent, fmtFixed, formatDateValue } from '@/shared/lib/formatters';
 import { formatCurrency as formatMoney, toNum } from '@/shared/lib/money';
 
 // ---------------------------------------------------------------------------
@@ -1044,7 +1044,7 @@ function ImportDialog({
             : t('import.unsupported_type', {
                 defaultValue: '{{name}} is not a file type this import reads. Supported: {{types}}',
                 name: file.name,
-                types: SUPPORTED_EXTENSIONS.join(', '),
+                types: fmtList(SUPPORTED_EXTENSIONS),
               }),
         );
         return;
