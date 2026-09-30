@@ -260,6 +260,15 @@ RULE_PACKS: dict[str, dict[str, Any]] = {
     # nearest hierarchy the product renders, and files every line under its own
     # national structure as well; the engine set is the country name, which is
     # a different namespace from the classification key the rules read.
+    "pl_compliance": {
+        "id": "pl_compliance",
+        "name": "Poland Compliance",
+        "description": "Every priced line citing the KNR or KNNR catalogue table it is "
+        "priced from, or marked as an own calculation, plus the universal quality baseline.",
+        "jurisdiction": "PL",
+        "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
+        "rule_sets": ["boq_quality", "poland"],
+    },
     "ro_compliance": {
         "id": "ro_compliance",
         "name": "Romania Compliance",
@@ -347,7 +356,7 @@ DEFAULT_PACK_ID = "universal"
 #: * No rule set in the engine is about the country at all, so the universal
 #:   pack is the honest answer. Italy is the notable one - it ships a demo and
 #:   a case page, and nothing in the engine reads a DEI or computo metrico
-#:   code. Also NL, PL, KR, AE, ZA, SA, AU and NZ.
+#:   code. Also NL, KR, AE, ZA, SA, AU and NZ.
 #:
 #: The other used to read "a national rule set IS registered and no pack
 #: reaches it", and is now empty. Japan ("sekisan"), Turkey ("birimfiyat") and
@@ -412,6 +421,8 @@ PACK_BY_LABEL: dict[str, str] = {
     "méxico": "mx_compliance",
     "hungary": "hu_compliance",
     "magyarország": "hu_compliance",
+    "poland": "pl_compliance",
+    "polska": "pl_compliance",
     "china": "cn_compliance",
     "spain": "es_compliance",
     "españa": "es_compliance",
