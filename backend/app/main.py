@@ -1384,6 +1384,63 @@ def _write_demo_backfill_version(version: str) -> None:
         logger.debug("Could not write demo backfill marker", exc_info=True)
 
 
+async def _delete_demo_projects(session: Any, projects: list[Any]) -> None:
+    """Delete demo projects the way the demo purge does, children and tagged globals included.
+
+    Deleting the project rows alone fails on the tables that point at a
+    project without a cascading key, and leaves the demo's own fleet units,
+    vendors and contacts behind.
+    """
+    from sqlalchemy import delete as sa_delete
+
+    from app.core.demo_marker import demo_id_of
+    from app.modules.projects.models import Project
+    from app.modules.projects.service import (
+        purge_demo_tagged_global_rows,
+        purge_project_children_without_cascade,
+    )
+
+    ids = [p.id for p in projects]
+    if not ids:
+        return
+    await purge_project_children_without_cascade(session, ids)
+    await purge_demo_tagged_global_rows(session, {d for p in projects if (d := demo_id_of(p.metadata_))})
+    await session.execute(sa_delete(Project).where(Project.id.in_(ids)))
+    await session.flush()
+    session.expire_all()
+
+
+def _pack_demo_ids(active: Any) -> list[str]:
+    """The demo projects boot installs for an active partner pack.
+
+    The manifest's explicit ``demo_template_ids`` (those that resolve in
+    ``DEMO_TEMPLATES``), else the single ``PACK_DEMO_PROJECT`` flagship.
+    """
+    from app.core.demo_projects import DEMO_TEMPLATES, PACK_DEMO_PROJECT
+
+    pack_ids: list[str] = []
+    for demo_id in getattr(active, "demo_template_ids", None) or []:
+        if demo_id in DEMO_TEMPLATES and demo_id not in pack_ids:
+            pack_ids.append(demo_id)
+    if not pack_ids:
+        fallback = PACK_DEMO_PROJECT.get(active.slug)
+        if fallback:
+            pack_ids = [fallback]
+    return pack_ids
+
+
+def _boot_demo_ids(active: Any) -> list[str]:
+    """Every demo the boot below may install, read from the lists it installs from."""
+    from app.core.demo_projects import SHOWCASE_DEMO_IDS
+    from app.scripts.seed_flagship import FLAGSHIP_DEMO_ID
+
+    ids = _pack_demo_ids(active) if active is not None else list(SHOWCASE_DEMO_IDS)
+    return [*ids, FLAGSHIP_DEMO_ID, _HEILBRONN_DEMO_ID]
+
+
+_HEILBRONN_DEMO_ID = "retail-market-heilbronn"
+
+
 async def _seed_demo_account() -> None:
     """Create demo user + showcase projects if they don't exist yet.
 
@@ -1579,6 +1636,32 @@ async def _seed_demo_account() -> None:
             except Exception:
                 logger.warning("Labor rate starter library seed skipped (non-fatal)", exc_info=True)
 
+        from app.core.partner_pack.discovery import get_active_pack
+
+        active = None
+        try:
+            active = get_active_pack()
+        except Exception:
+            logger.debug("Active partner pack lookup failed (treating as none)", exc_info=True)
+
+        # ── 2c. Demos removed before removals were recorded ───────────
+        # An install that deleted its demos on an earlier version has no
+        # record of it, and the showcase would come back once below. Written
+        # first, so every installer after it sees the removal.
+        try:
+            from app.core.demo_marker import backfill_removed_demo_records
+            from app.core.demo_seed import read_demo_seed_choice
+
+            async with async_session_factory() as tb_session:
+                await backfill_removed_demo_records(
+                    tb_session,
+                    _boot_demo_ids(active),
+                    seeded_before=_read_demo_backfill_version() is not None or read_demo_seed_choice() is False,
+                )
+                await tb_session.commit()
+        except Exception:
+            logger.warning("Backfill of earlier demo removals skipped (non-fatal)", exc_info=True)
+
         # ── 3. Project seed (outside the user session) ────────────────
         # Two distinct seeding paths run on PostgreSQL, picked by whether a
         # partner pack is active:
@@ -1595,34 +1678,15 @@ async def _seed_demo_account() -> None:
         # Both paths install each project in its own try/except so one failure
         # never aborts the rest of the seed.
         if project_count == 0:
-            from app.core.partner_pack.discovery import get_active_pack
-
-            active = None
-            try:
-                active = get_active_pack()
-            except Exception:
-                logger.debug("Active partner pack lookup failed (treating as none)", exc_info=True)
-
             if active is not None:
                 # PACK MODE - seed only the active pack's project(s). Prefer the
                 # manifest's explicit demo_template_ids (filtered to ids that
                 # resolve in DEMO_TEMPLATES), then fall back to the single
                 # PACK_DEMO_PROJECT flagship mapping. Tag every row with the
                 # pack slug so scope_project_query keeps the workspace clean.
-                from app.core.demo_projects import (
-                    DEMO_TEMPLATES,
-                    PACK_DEMO_PROJECT,
-                    install_demo_projects_at_boot,
-                )
+                from app.core.demo_projects import install_demo_projects_at_boot
 
-                pack_ids: list[str] = []
-                for demo_id in getattr(active, "demo_template_ids", None) or []:
-                    if demo_id in DEMO_TEMPLATES and demo_id not in pack_ids:
-                        pack_ids.append(demo_id)
-                if not pack_ids:
-                    fallback = PACK_DEMO_PROJECT.get(active.slug)
-                    if fallback:
-                        pack_ids = [fallback]
+                pack_ids = _pack_demo_ids(active)
 
                 # Skips any demo the user deleted or purged; see the helper.
                 await install_demo_projects_at_boot(pack_ids, partner_pack=active.slug)
@@ -1722,7 +1786,7 @@ async def _seed_demo_account() -> None:
                     from app.core.demo_projects import install_demo_project as _install_demo
 
                     async with async_session_factory() as rh_session:
-                        rh_result = await _install_demo(rh_session, "retail-market-heilbronn", respect_retirement=True)
+                        rh_result = await _install_demo(rh_session, _HEILBRONN_DEMO_ID, respect_retirement=True)
                         await rh_session.commit()
                         if not rh_result.get("already_installed") and not rh_result.get("retired"):
                             logger.info(
@@ -1737,45 +1801,54 @@ async def _seed_demo_account() -> None:
                         exc_info=True,
                     )
 
-            # Equipment & fleet demo - a representative fleet with 90 days of
-            # telemetry so the predictive Health & Analytics tab and Fleet
-            # Intelligence panel arrive populated (gauge, anomalies, forecast,
-            # underutilised units, savings) rather than empty. Idempotent: the
-            # seed skips when EQ-0001 already exists.
-            try:
-                from app.modules.equipment.seed import seed_equipment_demo
+            # The fleet and the vendor register are company-wide demo content
+            # that only makes sense next to a demo project. An install whose
+            # demos were all removed gets neither back.
+            from app.core.demo_marker import first_live_demo_project_id
 
-                async with async_session_factory() as eq_session:
-                    eq_counts = await seed_equipment_demo(eq_session)
-                    await eq_session.commit()
-                    if any(eq_counts.values()):
-                        logger.info("Equipment demo seed: %s", eq_counts)
-            except Exception:
-                _backfill_ok = False
-                logger.warning("Equipment demo seed skipped (non-fatal)", exc_info=True)
+            async with async_session_factory() as probe_session:
+                _any_live_demo = await first_live_demo_project_id(probe_session) is not None
+            if not _any_live_demo:
+                logger.info("Equipment and subcontractor demo seeds skipped: no demo project is installed")
+            else:
+                # Equipment & fleet demo - a representative fleet with 90 days of
+                # telemetry so the predictive Health & Analytics tab and Fleet
+                # Intelligence panel arrive populated (gauge, anomalies, forecast,
+                # underutilised units, savings) rather than empty. Idempotent: the
+                # seed skips when EQ-0001 already exists.
+                try:
+                    from app.modules.equipment.seed import seed_equipment_demo
 
-            # Subcontractor demo - 50 firms with varied prequalification states
-            # and 24 months of rating rollups for the top 10, plus agreements on
-            # the flagship project. Feeds the vendor scorecard (rating dials +
-            # period history) and the procurement prequalification badges /
-            # award gate. Idempotent: skips when any subcontractor exists.
-            try:
-                from app.core.demo_marker import first_live_demo_project_id
-                from app.modules.subcontractors.seed import seed_subcontractors_demo
+                    async with async_session_factory() as eq_session:
+                        eq_counts = await seed_equipment_demo(eq_session)
+                        await eq_session.commit()
+                        if any(eq_counts.values()):
+                            logger.info("Equipment demo seed: %s", eq_counts)
+                except Exception:
+                    _backfill_ok = False
+                    logger.warning("Equipment demo seed skipped (non-fatal)", exc_info=True)
 
-                async with async_session_factory() as sub_session:
-                    # Attach agreements to a demo project, never to whichever
-                    # project the table returns first, which on a working
-                    # install is somebody's real one. None just skips the
-                    # agreements, leaving the subs + ratings the scorecard needs.
-                    _proj_id = await first_live_demo_project_id(sub_session)
-                    sub_counts = await seed_subcontractors_demo(sub_session, project_id=_proj_id)
-                    await sub_session.commit()
-                    if any(sub_counts.values()):
-                        logger.info("Subcontractor demo seed: %s", sub_counts)
-            except Exception:
-                _backfill_ok = False
-                logger.warning("Subcontractor demo seed skipped (non-fatal)", exc_info=True)
+                # Subcontractor demo - 50 firms with varied prequalification states
+                # and 24 months of rating rollups for the top 10, plus agreements on
+                # the flagship project. Feeds the vendor scorecard (rating dials +
+                # period history) and the procurement prequalification badges /
+                # award gate. Idempotent: skips when any subcontractor exists.
+                try:
+                    from app.modules.subcontractors.seed import seed_subcontractors_demo
+
+                    async with async_session_factory() as sub_session:
+                        # Attach agreements to a demo project, never to whichever
+                        # project the table returns first, which on a working
+                        # install is somebody's real one. None just skips the
+                        # agreements, leaving the subs + ratings the scorecard needs.
+                        _proj_id = await first_live_demo_project_id(sub_session)
+                        sub_counts = await seed_subcontractors_demo(sub_session, project_id=_proj_id)
+                        await sub_session.commit()
+                        if any(sub_counts.values()):
+                            logger.info("Subcontractor demo seed: %s", sub_counts)
+                except Exception:
+                    _backfill_ok = False
+                    logger.warning("Subcontractor demo seed skipped (non-fatal)", exc_info=True)
 
             # ── Remaining feature-module demos ──────────────────────────────
             # bid management, carbon, CRM, HSE-Advanced, portal, QMS, advanced
@@ -4024,8 +4097,7 @@ def create_app() -> FastAPI:
             from app.core.demo_marker import retire_demo_ids
 
             await retire_demo_ids(session, {demo_id: targets[0].id}, reason="purged")
-            for proj in targets:
-                await session.delete(proj)
+            await _delete_demo_projects(session, targets)
             await session.commit()
 
         return {"deleted_projects": len(targets), "demo_id": demo_id}
@@ -4046,18 +4118,24 @@ def create_app() -> FastAPI:
 
         async with async_session_factory() as session:
             all_projects = (await session.execute(select(Project))).scalars().all()
-            targets = [p for p in all_projects if isinstance(p.metadata_, dict) and p.metadata_.get("is_demo")]
+            # Every demo carries demo_id; is_demo is written by the showcase
+            # installer only, so matching on it left the flagship behind.
+            from app.core.demo_marker import demo_id_of, retire_demo_ids
+
+            targets = [
+                p
+                for p in all_projects
+                if demo_id_of(p.metadata_) or (isinstance(p.metadata_, dict) and p.metadata_.get("is_demo"))
+            ]
 
             # Recorded so the boot installers do not put these demos back.
-            from app.core.demo_marker import demo_id_of, retire_demo_ids
 
             await retire_demo_ids(
                 session,
                 {demo_id_of(p.metadata_): p.id for p in targets if demo_id_of(p.metadata_)},
                 reason="purged",
             )
-            for proj in targets:
-                await session.delete(proj)
+            await _delete_demo_projects(session, targets)
             await session.commit()
 
         return {"deleted_projects": len(targets)}
