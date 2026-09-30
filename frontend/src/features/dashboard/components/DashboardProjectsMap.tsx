@@ -10,7 +10,7 @@ import { buildGeocodeQuery } from '@/shared/ui/ProjectMap/geocode';
 import { geocodeSuggest } from '@/features/geo-hub/api';
 import {
   TILE_ATTRIBUTION_HTML,
-  VECTOR_BASEMAP_STYLE_URL,
+  useStreetBasemapStyleUrl,
 } from '@/shared/ui/ProjectMap/basemap';
 // maplibre-gl ships its canvas / control styles separately. The static
 // import lets Vite hoist the CSS into the dashboard chunk so markers
@@ -196,6 +196,7 @@ export function DashboardProjectsMap({ projects, className, heightClass: heightC
   const navigate = useNavigate();
   const [resolved, setResolved] = useState<ResolvedMarker[]>([]);
   const [mapLib, setMapLib] = useState<MapLibreModule | null>(null);
+  const streetStyleUrl = useStreetBasemapStyleUrl();
   const mapRef = useRef<MapRef | null>(null);
 
   // Pull the maplibre bundle once. Cached by Vite after first call so
@@ -361,7 +362,7 @@ export function DashboardProjectsMap({ projects, className, heightClass: heightC
             mapRef.current = instance;
           }}
           initialViewState={initialView}
-          mapStyle={VECTOR_BASEMAP_STYLE_URL}
+          mapStyle={streetStyleUrl}
           style={{ width: '100%', height: '100%' }}
           interactive
           dragRotate={false}

@@ -59,9 +59,11 @@ import type {
 } from './CesiumViewer';
 import type { AnchoredProject, GeoPinBundle, GeoRasterOverlay } from './types';
 import { TILE_ATTRIBUTION_HTML } from '@/shared/ui/ProjectMap/basemap';
+import { useThemeStore } from '@/stores/useThemeStore';
 
 import {
   BASEMAP_BACKDROP,
+  DARK_STREETS_BACKDROP,
   basemapMeta,
   buildBasemapStyle,
   type BasemapId,
@@ -164,6 +166,10 @@ export function MapLibreViewer({
   const mapRef = useRef<MapRef>(null);
   const rafRef = useRef<number | null>(null);
   const meta = basemapMeta(basemap);
+  // Tile-backed basemaps follow the app theme (the dark street style in
+  // dark mode); the drawn offline canvases keep their own fixed colours.
+  const theme = useThemeStore((s) => s.resolved);
+  const darkStreets = theme === 'dark' && !meta.offline;
 
   const projects = pins?.projects ?? [];
   const isProject = mode === 'project';
@@ -327,7 +333,7 @@ export function MapLibreViewer({
   return (
     <div
       className="relative h-full w-full"
-      style={{ backgroundColor: BASEMAP_BACKDROP[basemap] }}
+      style={{ backgroundColor: darkStreets ? DARK_STREETS_BACKDROP : BASEMAP_BACKDROP[basemap] }}
       data-testid="geo-maplibre-viewer"
       data-basemap={basemap}
       data-mode={mode}
@@ -336,7 +342,7 @@ export function MapLibreViewer({
       <Map
         ref={mapRef}
         initialViewState={initialView}
-        mapStyle={buildBasemapStyle(basemap)}
+        mapStyle={buildBasemapStyle(basemap, theme)}
         style={{ width: '100%', height: '100%' }}
         cursor={pickMode ? 'crosshair' : undefined}
         // The global view stays flat "like paper". A project map may tilt

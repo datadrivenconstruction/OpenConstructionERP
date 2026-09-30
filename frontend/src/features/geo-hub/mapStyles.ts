@@ -27,7 +27,7 @@
  */
 import type { StyleSpecification } from 'maplibre-gl';
 
-import { basemapStyleUrl } from '@/shared/ui/ProjectMap/basemap';
+import { basemapStyleUrl, streetBasemapStyleUrl } from '@/shared/ui/ProjectMap/basemap';
 
 /** Identifier for each selectable basemap. */
 export type BasemapId = 'streets' | 'minimal' | 'paper' | 'blueprint';
@@ -128,8 +128,12 @@ export function readBasemap(): BasemapId {
  * cartography instead of a filter over the other, and the labels come from
  * the style's glyphs rather than being burnt into the tile.
  */
-function vectorStyle(variant: 'streets' | 'minimal'): string {
-  return basemapStyleUrl(variant === 'minimal' ? 'positron' : 'liberty');
+function vectorStyle(variant: 'streets' | 'minimal', theme: 'light' | 'dark'): string {
+  // In the dark theme both street variants resolve to the dark street style:
+  // a full-colour light map is the brightest thing on a dark screen, and
+  // OpenFreeMap ships exactly one dark cartography.
+  if (theme === 'dark') return streetBasemapStyleUrl('dark');
+  return variant === 'minimal' ? basemapStyleUrl('positron') : streetBasemapStyleUrl('light');
 }
 
 /**
@@ -161,6 +165,9 @@ export const BASEMAP_BACKDROP: Record<BasemapId, string> = {
   blueprint: '#0e2a47',
 };
 
+/** Container colour behind the dark street style, before MapLibre paints. */
+export const DARK_STREETS_BACKDROP = '#0c0c0c';
+
 /**
  * Build the MapLibre style for a basemap id. Cheap + pure, so callers can
  * call it inline in render and memoise on ``id`` alone.
@@ -168,16 +175,19 @@ export const BASEMAP_BACKDROP: Record<BasemapId, string> = {
  * The tile-backed ids resolve to a style URL and the tile-free ones to an
  * inline style object; MapLibre's ``mapStyle`` accepts either.
  */
-export function buildBasemapStyle(id: BasemapId): StyleSpecification | string {
+export function buildBasemapStyle(
+  id: BasemapId,
+  theme: 'light' | 'dark' = 'light',
+): StyleSpecification | string {
   switch (id) {
     case 'minimal':
-      return vectorStyle('minimal');
+      return vectorStyle('minimal', theme);
     case 'paper':
       return flatStyle(BASEMAP_BACKDROP.paper);
     case 'blueprint':
       return flatStyle(BASEMAP_BACKDROP.blueprint);
     case 'streets':
     default:
-      return vectorStyle('streets');
+      return vectorStyle('streets', theme);
   }
 }

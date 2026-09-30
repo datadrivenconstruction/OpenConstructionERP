@@ -30,8 +30,9 @@
  * same vector style once into an offscreen MapLibre instance, reads the
  * canvas as a data URL and destroys the context, so the card shows real
  * street cartography from a still image with nothing left streaming. The
- * card therefore normally shows streets and building footprints, and falls
- * back to the relief tile below when the snapshot cannot be produced (no
+ * card therefore normally shows streets and building footprints, shows a
+ * neutral placeholder while the snapshot is queued, and falls back to the
+ * relief tile below only when the snapshot cannot be produced (no
  * WebGL, a blocked style, a render that times out). Which of the two it is
  * showing decides which credit it must carry, and both are exported from
  * this file.
@@ -51,6 +52,8 @@
  * about the tag: an image tag shows whatever bytes it is given, and the
  * bytes can be rendered on this side.
  */
+
+import { useThemeStore } from '@/stores/useThemeStore';
 
 /**
  * XYZ template for the raster relief basemap the backend proxies.
@@ -82,12 +85,39 @@ export const RELIEF_MAX_ZOOM = 6;
  * runtime would leave any field we forgot pointing at the tile host, and
  * the map would still render, so the leak would be invisible.
  */
-export function basemapStyleUrl(name: 'liberty' | 'positron'): string {
+export function basemapStyleUrl(name: BasemapStyleName): string {
   return `/api/v1/geo-hub/basemap-style/${name}.json`;
 }
 
+/**
+ * The vendored OpenFreeMap styles the backend serves. All three are street
+ * maps with named roads and place labels in the local script: ``liberty`` is
+ * full colour, ``positron`` light and desaturated, ``dark`` the same streets
+ * for the dark theme. None of them draws shaded relief; the backend strips
+ * that layer when vendoring, because blended under a zoomed-out map it made
+ * the street map read as a terrain map.
+ */
+export type BasemapStyleName = 'liberty' | 'positron' | 'dark';
+
 /** Full-colour street cartography. The default for every interactive map. */
 export const VECTOR_BASEMAP_STYLE_URL = basemapStyleUrl('liberty');
+
+/** The same streets for the dark theme. */
+export const DARK_VECTOR_BASEMAP_STYLE_URL = basemapStyleUrl('dark');
+
+/**
+ * The street style for a theme. Every interactive street map picks its style
+ * through this (or ``useStreetBasemapStyleUrl``) so a page never hardcodes a
+ * style of its own.
+ */
+export function streetBasemapStyleUrl(theme: 'light' | 'dark'): string {
+  return theme === 'dark' ? DARK_VECTOR_BASEMAP_STYLE_URL : VECTOR_BASEMAP_STYLE_URL;
+}
+
+/** ``streetBasemapStyleUrl`` for the theme the app is showing right now. */
+export function useStreetBasemapStyleUrl(): string {
+  return streetBasemapStyleUrl(useThemeStore((s) => s.resolved));
+}
 
 /**
  * Plain-text credit for the raster relief tiles, for consumers that render
