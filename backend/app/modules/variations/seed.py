@@ -341,7 +341,9 @@ async def seed_variations_demo(
             unit=rng.choice(["m2", "m3", "m", "pcs"]),
             measured_quantity=Decimal(str(rng.randint(5, 500))),
             owner_signature_ref=f"sig-{i + 1:04d}",
-            photos=[f"https://files.example/{i + 1}-{n}.jpg" for n in range(rng.randint(0, 3))],
+            # No invented image links: a URL on a host that does not exist is
+            # a broken image the moment any screen renders this list.
+            photos=[],
             notes="Joint measurement agreed with the owner's representative on site.",
             variation_order_id=rng.choice(vos).id if vos and rng.random() < 0.4 else None,
         )

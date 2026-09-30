@@ -76,7 +76,7 @@ import {
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { DocumentAppearancePanel } from './DocumentAppearancePanel';
 import { useToastStore } from '@/stores/useToastStore';
-import { getErrorMessage } from '@/shared/lib/api';
+import { downloadWithAuth, getErrorMessage } from '@/shared/lib/api';
 import {
   customDocumentTemplateDownloadUrl,
   deleteCustomDocumentTemplate,
@@ -1045,9 +1045,18 @@ function TemplateCard({
     }
   };
 
-  const downloadCustom = () => {
+  // Fetched with the bearer token: a new tab opened on this URL carries no
+  // Authorization header, so the route answered it with 401.
+  const downloadCustom = async () => {
     if (!template.id) return;
-    window.open(customDocumentTemplateDownloadUrl(template.id), '_blank');
+    setBusy(true);
+    try {
+      await downloadWithAuth(customDocumentTemplateDownloadUrl(template.id), template.filename || template.title);
+    } catch (err) {
+      addToast({ type: 'error', title: getErrorMessage(err) });
+    } finally {
+      setBusy(false);
+    }
   };
 
   const doDelete = async () => {

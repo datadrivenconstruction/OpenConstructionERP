@@ -103,7 +103,11 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> None:
         from app.modules.costmodel.seed import seed_costmodel
         from app.modules.crm.seed import seed_crm_demo
         from app.modules.cvr.seed import seed_cvr_demo
-        from app.modules.daily_diary.seed import seed_daily_diary_demo, seed_daily_diary_showcase_de
+        from app.modules.daily_diary.seed import (
+            repair_seeded_diary_media,
+            seed_daily_diary_demo,
+            seed_daily_diary_showcase_de,
+        )
         from app.modules.documents.documents_seed import seed_documents_demo
         from app.modules.documents.photos_seed import seed_photos
         from app.modules.dwg_takeoff.seed import seed_dwg_takeoff_demo
@@ -256,16 +260,22 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> None:
             # projects only, which is what lets it ask the question per
             # project instead of bailing on the first one.
             ("service_recurring", None, lambda s: seed_service_recurring_schedules(s, _demo_pids)),
+            # Site photos drop real JPEGs into the gallery so the Photos module
+            # and the dashboard "latest photos" widget are never empty on a
+            # fresh install. Self-guards per project on an existing seeded photo.
+            # Runs BEFORE the diary: diary photos reference these files.
+            ("photos", None, lambda s: seed_photos(s, _all_pids)),
             # The diary seeder was written complete and never wired, so the
             # module shipped with an empty register on every install. Ninety
             # days per project, so it self-guards per project rather than on a
             # table-wide count: a user writing one diary entry must not stop
             # the seed reaching the projects that are still empty.
             ("daily_diary", None, lambda s: seed_daily_diary_demo(s, _all_pids)),
-            # Site photos drop real JPEGs into the gallery so the Photos module
-            # and the dashboard "latest photos" widget are never empty on a
-            # fresh install. Self-guards per project on an existing seeded photo.
-            ("photos", None, lambda s: seed_photos(s, _all_pids)),
+            # Installs seeded before diary photos pointed at real files still
+            # hold a thousand photos on an invented host, and the seeder above
+            # never runs twice to fix them. Touches only those placeholder
+            # rows, so after one boot it finds nothing to do.
+            ("daily_diary_media", None, lambda s: repair_seeded_diary_media(s, _all_pids)),
             # ── Modules seeded on the demo estate only ──
             # Everything below receives ``_demo_pids`` rather than ``_all_pids``.
             # These seeders write records a real project would have earned -
