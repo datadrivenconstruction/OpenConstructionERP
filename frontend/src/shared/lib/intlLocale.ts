@@ -57,7 +57,10 @@ export const LOCALE_MAP: Record<string, string> = {
   nl: 'nl-NL',
   no: 'nb-NO',
   pl: 'pl-PL',
-  pt: 'pt-BR',
+  // `pt` is the European entry in the picker; Brazil has its own `pt-BR`
+  // entry, which reaches Intl unchanged. Mapping `pt` to Brazil printed
+  // Lisbon's dates and numbers the Brazilian way.
+  pt: 'pt-PT',
   ru: 'ru-RU',
   sv: 'sv-SE',
   tr: 'tr-TR',

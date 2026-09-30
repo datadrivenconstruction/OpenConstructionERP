@@ -24,9 +24,9 @@ MANIFEST = PartnerPackManifest(
     partner_url="https://bim-cluster-hessen.com",
     pack_version="0.2.0",
     description=(
-        "Vorkonfiguriert für deutsche BIM-Beratungs- und Ingenieurbüros: "
-        "DIN 276, GAEB X83/X84/X86, VOB/A+B+C, ISO 19650 CDE, BKI Benchmarks, "
-        "HOAI 2021 Leistungsphasen und LV-Qualitätsregeln."
+        "Pre-configured for German BIM consultancies and engineering firms: "
+        "DIN 276, GAEB X83/X84/X86, VOB/A+B+C, ISO 19650 CDE, cost benchmarks, "
+        "HOAI 2021 work stages and bill of quantities quality rules."
     ),
     default_locale="de",
     additional_locales={"de": "locales/de.json"},

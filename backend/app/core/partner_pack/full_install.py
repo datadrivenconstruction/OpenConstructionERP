@@ -148,6 +148,7 @@ def _build_city_index() -> dict[str, str]:
     # refuses. The currency table's order is kept so a base listed under two
     # names (``CA_TORONTO`` / ``ENG_TORONTO``) resolves as it always has.
     index: dict[str, str] = {}
+    shared: set[str] = set()
     for db_id in [*_REGION_CURRENCY, *_GITHUB_CWICR_FILES]:
         if db_id not in _GITHUB_CWICR_FILES:
             continue
@@ -155,7 +156,16 @@ def _build_city_index() -> dict[str, str]:
         if len(parts) < 2:
             continue
         token = parts[-1].lower()
+        # Two names for one file (CA_TORONTO / ENG_TORONTO) are one base.
+        if token in index and _GITHUB_CWICR_FILES[index[token]] != _GITHUB_CWICR_FILES[db_id]:
+            shared.add(token)
         index.setdefault(token, db_id)
+    # A token that names bases in more than one country (``national`` is
+    # Brazil, Greece, Indonesia, Turkey and Vietnam) answers for none of
+    # them: first-wins handed Turkey's base to every other country. Those
+    # bases are reached through their country, see resolve_cwicr_db_id.
+    for token in shared:
+        index.pop(token, None)
     return index
 
 
@@ -224,9 +234,19 @@ def resolve_cwicr_db_id(slug: str) -> str | None:
     live region (e.g. ``cwicr-fra-montreal``, ``cwicr-eng-wellington`` - no
     CWICR data yet); the caller reports those in ``detail.skipped``.
     """
-    token = (slug or "").strip().lower().rsplit("-", 1)[-1]
+    parts = (slug or "").strip().lower().split("-")
+    token = parts[-1]
     if not token:
         return None
+    # A country code before the city names the base outright
+    # (``cwicr-br-national`` -> ``BR_NATIONAL``). This is the only way to
+    # reach a base whose city token several countries share.
+    if len(parts) >= 3 and len(parts[-2]) == 2:
+        from app.modules.costs.router import _GITHUB_CWICR_FILES
+
+        exact = f"{parts[-2].upper()}_{token.upper()}"
+        if exact in _GITHUB_CWICR_FILES:
+            return exact
     # The alias map must win over the index: it exists precisely to override
     # an index entry that would otherwise answer for the same token (e.g.
     # "gbp" also matches the ordinary UK_GBP catalogue entry the index derives

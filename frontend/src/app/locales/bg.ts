@@ -29472,6 +29472,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "Редът със заглавия не посочва колона за количество, мярка или цена",
     "boq.import_issue.header_unrecognised": "Непознати заглавия: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} беше прочетено като {{value}}: точката тук разделя хилядите",
+    "boq.import_issue.comma_thousands": "{{text}} беше прочетено като {{value}}: запетаята тук разделя хилядите",
     "import.nothing_imported": "От този файл не беше импортирано нищо",
     "import.unsupported_type": "{{name}} не е тип файл, който този импорт чете. Поддържани: {{types}}",
     "import.notes_title": "Бележки",

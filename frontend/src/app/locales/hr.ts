@@ -29496,6 +29496,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "Redak zaglavlja ne navodi stupac količine, jedinice ili cijene",
     "boq.import_issue.header_unrecognised": "Neprepoznati nazivi stupaca: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} pročitano je kao {{value}}: točka ovdje odvaja tisućice",
+    "boq.import_issue.comma_thousands": "{{text}} pročitano je kao {{value}}: zarez ovdje odvaja tisućice",
     "import.nothing_imported": "Iz ove datoteke ništa nije uvezeno",
     "import.unsupported_type": "{{name}} nije vrsta datoteke koju ovaj uvoz čita. Podržano: {{types}}",
     "import.notes_title": "Napomene",

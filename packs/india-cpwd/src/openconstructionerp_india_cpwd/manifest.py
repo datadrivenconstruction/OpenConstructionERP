@@ -20,7 +20,7 @@ MANIFEST = PartnerPackManifest(
         "NBC 2016 with 2024 amendments, RERA 2016, GST + TDS u/s 194C + "
         "BOCW labour cess. English + Hindi UI."
     ),
-    default_locale="en",
+    default_locale="en-IN",
     additional_locales={
         "hi": "locales/hi.json",
     },

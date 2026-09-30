@@ -701,7 +701,9 @@ def get_applied_info() -> dict[str, Any]:
     """Current applied-pack status + whether an update is available."""
     state = load_applied_state()
     if not state:
-        env = os.environ.get("OE_PARTNER_PACK", "").strip()
+        # Same precedence as discovery: OE_PACK is the documented name and
+        # wins, OE_PARTNER_PACK is the older alias.
+        env = os.environ.get("OE_PACK", "").strip() or os.environ.get("OE_PARTNER_PACK", "").strip()
         return {
             "applied": bool(env),
             "source": "env" if env else None,

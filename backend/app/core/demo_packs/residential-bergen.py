@@ -35,7 +35,7 @@ TEMPLATE = DemoTemplate(
     region="NO",
     classification_standard="ns3451",
     currency="NOK",
-    locale="nb",
+    locale="no",
     address={
         "street": "Sandviksboder 42",
         "city": "Bergen",

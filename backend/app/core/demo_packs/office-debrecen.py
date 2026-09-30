@@ -42,7 +42,7 @@ TEMPLATE = DemoTemplate(
     region="HU",
     classification_standard="tetelrend",
     currency="HUF",
-    locale="en",
+    locale="hu",
     address={
         "street": "Északnyugati Ipari Park, Vezér utca 12",
         "city": "Debrecen",

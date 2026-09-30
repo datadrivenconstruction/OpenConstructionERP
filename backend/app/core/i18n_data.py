@@ -156,7 +156,7 @@ COUNTRY_DEFAULTS: dict[str, dict[str, str]] = {
         "measurement": "metric",
         "paper": "A4",
         "date_format": "DD.MM.YYYY",
-        "number_format": "1.234,56",
+        "number_format": "1'234.56",
         "locale": "de",
     },
     # UK / Ireland --------------------------------------------------------

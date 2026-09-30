@@ -2276,7 +2276,7 @@ DEMO_CATALOG: list[dict] = [
 PACK_DEMO_PROJECT: dict[str, str] = {
     "aus": "mixed-use-sydney",
     "nzs": "commercial-auckland",
-    "batimatech-ca": "condo-toronto",
+    "batimatech-ca": "office-montreal",
     "bimhessen-de": "residential-berlin",
     "brazil-sinapi": "residential-saopaulo",
     "china-gbt50500": "renovation-guangzhou",

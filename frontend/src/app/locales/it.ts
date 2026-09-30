@@ -29673,6 +29673,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "La riga di intestazione non indica una colonna di quantità, unità o prezzo",
     "boq.import_issue.header_unrecognised": "Intestazioni non riconosciute: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} è stato letto come {{value}}: qui il punto separa le migliaia",
+    "boq.import_issue.comma_thousands": "{{text}} è stato letto come {{value}}: qui la virgola separa le migliaia",
     "import.nothing_imported": "Non è stato importato nulla da questo file",
     "import.unsupported_type": "{{name}} non è un tipo di file che questa importazione può leggere. Supportati: {{types}}",
     "import.notes_title": "Note",

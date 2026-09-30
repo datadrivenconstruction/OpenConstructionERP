@@ -24,7 +24,9 @@ MANIFEST = PartnerPackManifest(
     default_locale="en",
     additional_locales={},
     cwicr_regions=[
-        "cwicr-eng-london",
+        # A euro base for a pack that prices in euros; London loaded a
+        # sterling catalogue into euro projects.
+        "cwicr-de-berlin",
     ],
     default_currency="EUR",
     default_tax_template=None,

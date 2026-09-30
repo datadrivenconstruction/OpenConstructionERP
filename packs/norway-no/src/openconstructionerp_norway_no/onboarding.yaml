@@ -4,7 +4,7 @@
 
 version: 2
 pack: norway-no
-locale: nb
+locale: "no"  # quoted: a bare no is the boolean false in YAML 1.1
 title: "Velkommen til OpenConstructionERP — Norge"
 title_en: "Welcome to OpenConstructionERP — Norway Edition"
 subtitle: "Fire steg for aa sette opp arbeidsomraadet ditt for norsk kalkulasjonspraksis (NS 3420, NS 3451, NS 8405). Four quick steps to align your workspace with Norwegian estimating practice."

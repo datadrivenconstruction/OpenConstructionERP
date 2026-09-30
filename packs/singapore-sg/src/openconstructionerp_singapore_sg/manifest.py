@@ -20,7 +20,7 @@ MANIFEST = PartnerPackManifest(
         "framework, CONQUAS quality benchmarks, SIA and PSSCOC contract "
         "forms. English interface."
     ),
-    default_locale="en",
+    default_locale="en-SG",
     additional_locales={},
     cwicr_regions=[],
     default_currency="SGD",

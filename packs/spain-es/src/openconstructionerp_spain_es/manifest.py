@@ -41,7 +41,7 @@ MANIFEST = PartnerPackManifest(
     validation_rule_sets=["bc3"],
     default_modules=[],  # empty = show all
     hidden_modules=[],
-    demo_template_ids=["mixed-use-barcelona", "residential-rome"],
+    demo_template_ids=["mixed-use-barcelona"],
     branding=PartnerBranding(
         primary_color="#AA151B",  # Spanish red (flag)
         accent_color="#F1BF00",  # Spanish gold (flag)

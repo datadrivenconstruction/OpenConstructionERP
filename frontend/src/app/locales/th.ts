@@ -29413,6 +29413,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "แถวส่วนหัวไม่ได้ระบุคอลัมน์จำนวน หน่วย หรือราคา",
     "boq.import_issue.header_unrecognised": "หัวข้อที่ไม่รู้จัก: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} ถูกอ่านเป็น {{value}}: จุดในที่นี้คือตัวคั่นหลักพัน",
+    "boq.import_issue.comma_thousands": "{{text}} ถูกอ่านเป็น {{value}}: เครื่องหมายจุลภาคในที่นี้คือตัวคั่นหลักพัน",
     "import.nothing_imported": "ไม่มีการนำเข้าสิ่งใดจากไฟล์นี้",
     "import.unsupported_type": "{{name}} ไม่ใช่ประเภทไฟล์ที่การนำเข้านี้อ่านได้ รองรับ: {{types}}",
     "import.notes_title": "หมายเหตุ",

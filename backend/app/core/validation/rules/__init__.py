@@ -3714,8 +3714,14 @@ class SINAPICodeRequired(ValidationRule):
         locale = _get_locale(context)
         results: list[RuleResult] = []
         for pos in _get_leaf_positions(context):
-            code = (pos.get("classification") or {}).get("sinapi", "")
-            passed = bool(code) and len(str(code)) >= 4
+            classification = pos.get("classification") or {}
+            code = classification.get("sinapi", "")
+            # An orçamento prices a line from SINAPI or from another price
+            # bank, and says which in its "banco" column: a line from the
+            # contractor's own composition (PRÓPRIO) or from a quotation has
+            # no SINAPI code to give, and naming its bank is the answer.
+            bank = str(classification.get("banco") or "").strip().upper()
+            passed = (bool(code) and len(str(code)) >= 4) or (bool(bank) and bank != "SINAPI")
             if passed:
                 message = _ok(locale)
                 suggestion = None
@@ -3744,6 +3750,9 @@ class SINAPICodeRequired(ValidationRule):
         return results
 
 
+_SINAPI_CODE_RE = re.compile(r"^\d{4,6}(/\d{1,3})?$")
+
+
 class SINAPIValidCode(ValidationRule):
     rule_id = "sinapi.valid_code"
     name = "Valid SINAPI Code Format"
@@ -3755,11 +3764,15 @@ class SINAPIValidCode(ValidationRule):
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
         locale = _get_locale(context)
         results: list[RuleResult] = []
-        for pos in _get_positions(context):
+        # Leaves only: a section row carries its chapter title under the same
+        # key ("SERV. PRELIMINARES"), which is not a composition code.
+        for pos in _get_leaf_positions(context):
             code = str((pos.get("classification") or {}).get("sinapi", ""))
             if not code:
                 continue
-            passed = code.isdigit() and 4 <= len(code) <= 6
+            # A composition code, optionally with the variant after a slash
+            # that the older compositions carry (74209/001).
+            passed = bool(_SINAPI_CODE_RE.match(code))
             message = (
                 _ok(locale)
                 if passed
@@ -5212,6 +5225,85 @@ class UkrainianZkrChapterRecognised(ValidationRule):
                     details={"chapter": code, "chapter_name": UA_ZKR_CHAPTERS.get(int(code), "") if passed else ""},
                     suggestion=(
                         None if passed else translate("ukraine.zkr_chapter_recognised.suggestion", locale=locale)
+                    ),
+                )
+            )
+        return results
+
+
+# ── Poland (kosztorys, KNR catalogue references) ────────────────────────
+#
+# A Polish kosztorys names on every line the catalogue table its norms come
+# from, the podstawa column: KNR 2-02 0201-01 is catalogue 2-02, table 0201,
+# variant 01. The catalogues come in families (KNR, KNNR, KNR-W, KSNR, KNP and
+# the others below), and a line priced outside them says so instead of citing
+# a table: kalkulacja indywidualna or wycena indywidualna.
+
+PL_CATALOGUE_FAMILIES: tuple[str, ...] = (
+    "KNR",
+    "KNNR",
+    "KNR-W",
+    "KNRW",
+    "KSNR",
+    "KNP",
+    "KNZ",
+    "KNNR-W",
+    "NNRNKB",
+    "KNR-AT",
+    "KNR AT",
+)
+
+_PL_OWN_CALCULATION = re.compile(r"^(kalk|kalkulacja|wycena)\b", re.IGNORECASE)
+_PL_KNR_REFERENCE = re.compile(
+    r"^(" + "|".join(re.escape(f) for f in sorted(PL_CATALOGUE_FAMILIES, key=len, reverse=True)) + r")\b[\s-]*\S",
+    re.IGNORECASE,
+)
+
+
+class PolishKnrReferenceRequired(_NationalCodeRequired):
+    rule_id = "poland.knr_reference_required"
+    name = "Polish Catalogue Reference Required"
+    standard = "poland"
+    description = "Priced lines must cite the KNR catalogue table (podstawa) their norms come from"
+    key = "knr"
+
+
+class PolishKnrReferenceRecognised(ValidationRule):
+    rule_id = "poland.knr_reference_recognised"
+    name = "Polish Catalogue Reference Is Recognised"
+    standard = "poland"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = "The podstawa must name a KNR catalogue family or say the line is priced by own calculation"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        results: list[RuleResult] = []
+        for pos in _get_leaf_positions(context):
+            code = _national_code(pos, "knr")
+            if not code:
+                continue
+            passed = bool(_PL_KNR_REFERENCE.match(code) or _PL_OWN_CALCULATION.match(code))
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=(
+                        _ok(locale)
+                        if passed
+                        else translate(
+                            "poland.knr_reference_recognised.fail",
+                            locale=locale,
+                            code=code,
+                            ordinal=pos.get("ordinal", "?"),
+                        )
+                    ),
+                    element_ref=pos.get("id"),
+                    suggestion=(
+                        None if passed else translate("poland.knr_reference_recognised.suggestion", locale=locale)
                     ),
                 )
             )
@@ -10207,6 +10299,9 @@ def register_builtin_rules() -> None:
         # Ukraine (summary estimate chapters, наказ Мінрегіону №281)
         (UkrainianZkrChapterRequired(), None),
         (UkrainianZkrChapterRecognised(), None),
+        # Poland (KNR catalogue references)
+        (PolishKnrReferenceRequired(), None),
+        (PolishKnrReferenceRecognised(), None),
         # Birim Fiyat (Turkey)
         (BirimFiyatCodeRequired(), None),
         (BirimFiyatValidPoz(), None),

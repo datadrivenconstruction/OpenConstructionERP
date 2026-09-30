@@ -41,7 +41,7 @@ TEMPLATE = DemoTemplate(
     region="HR",
     classification_standard="din276",
     currency="EUR",
-    locale="en",
+    locale="hr",
     address={
         "street": "Poljička cesta 45",
         "city": "Split",

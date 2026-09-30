@@ -40,6 +40,7 @@ from app.modules.boq.importers._base import (
     ImporterParseError,
 )
 from app.modules.boq.importers._encoding import (
+    comma_groups_thousands,
     decode_text_bytes,
     dot_groups_thousands,
     parse_numeric_cell,
@@ -805,6 +806,27 @@ _SPLIT_COLUMNS: dict[str, str] = {
 # wrote the file, and its words are plain enough to read in either code page.
 _CP1250_LANGUAGES: frozenset[str] = frozenset({"hu", "cs", "sk", "pl", "hr", "sl", "sr", "ro"})
 
+# Every Windows code page Excel saves a CSV in, with the languages whose
+# header row says a file came from it. Cyrillic, Greek, Hebrew, Arabic and
+# Thai files decode as Windows-1252 without an error too, into letters
+# nobody wrote; Turkish loses only its ı, ş and ğ, which is harder to see.
+# The multi-byte East Asian pages come last: they are strict enough to fail
+# on most Western bytes, but not on all of them.
+_CODE_PAGE_LANGUAGES: tuple[tuple[str, frozenset[str]], ...] = (
+    ("cp1250", _CP1250_LANGUAGES),
+    ("cp1251", frozenset({"ru", "uk", "bg", "kk", "ky", "sr", "mn"})),
+    ("cp1253", frozenset({"el"})),
+    ("cp1254", frozenset({"tr"})),
+    ("cp1257", frozenset({"et"})),
+    ("cp1255", frozenset({"he"})),
+    ("cp1256", frozenset({"ar", "fa", "ur"})),
+    ("cp874", frozenset({"th"})),
+    ("cp1258", frozenset({"vi"})),
+    ("cp932", frozenset({"ja"})),
+    ("gbk", frozenset({"zh"})),
+    ("cp949", frozenset({"ko"})),
+)
+
 _LANGUAGE_HEADER_KEYS: dict[str, frozenset[str]] = {
     language: frozenset(_label_key(word) for words in headers.values() for word in words)
     for language, headers in _HEADERS_BY_LANGUAGE.items()
@@ -886,10 +908,30 @@ def _map_columns(header: tuple[Any, ...]) -> dict[int, str]:
 # Languages whose bills write a decimal comma and, often enough, a dot between
 # thousands: "12.500 Ft" is twelve thousand five hundred forint. Read with a
 # dot as the decimal point it imported as 12.5, a thousandth of the price, and
-# nothing looked wrong. Kept to the languages where the reading has been
-# checked against real bills, because in an English file "12.500" is twelve
-# and a half.
-_DOT_THOUSANDS_LANGUAGES: frozenset[str] = frozenset({"hu"})
+# nothing looked wrong. This was first fixed for Hungarian alone; every
+# language below writes a decimal comma in CLDR, and a workbook headed in one
+# of them had the same thousandth. A file that shows a decimal point of its
+# own ("1,250.50", "12.5") is read the other way whatever its headers say, so
+# a Mexican bill headed in Spanish keeps its point.
+DECIMAL_COMMA_LANGUAGES: frozenset[str] = frozenset(
+    {
+        "bg", "cs", "da", "de", "el", "es", "et", "fi", "fr", "hr", "hu", "id", "it", "kk",
+        "ky", "nl", "no", "pl", "pt", "ro", "ru", "sk", "sl", "sr", "sv", "tr", "uk", "uz", "vi",
+    }
+)  # fmt: skip
+
+# The mirror image: languages that write a decimal point, where "12,500" is
+# twelve thousand five hundred and a single comma used to be read as the
+# decimal point, importing twelve and a half.
+DECIMAL_POINT_LANGUAGES: frozenset[str] = frozenset({"en", "ja", "ko", "zh", "th", "he", "hi", "bn", "ur", "ar"})
+
+# Kept under its old name for the readers that ask for it.
+_DOT_THOUSANDS_LANGUAGES: frozenset[str] = DECIMAL_COMMA_LANGUAGES
+
+# A number that can only be written with a decimal point ("1,250.50", "12.5")
+# or only with a decimal comma ("1.250,50", "12,5").
+_POINT_DECIMAL_SHAPE = re.compile(r"\d,\d{3}\.\d|\d\.\d{1,2}(?![\d.,])")
+_COMMA_DECIMAL_SHAPE = re.compile(r"\d\.\d{3},\d|\d,\d{1,2}(?![\d.,])")
 
 # The numeric columns whose typed text is read with dot thousands.
 _NUMERIC_COLUMNS: tuple[str, ...] = ("quantity", "unit_rate", *_SPLIT_COLUMNS)
@@ -915,7 +957,11 @@ def _combine_split_columns(row: dict[str, Any], language: str | None = None) -> 
             value = row[key]
             if _is_blank_value(value):
                 continue
-            parsed, error = parse_numeric_cell(value, dot_thousands=language in _DOT_THOUSANDS_LANGUAGES)
+            parsed, error = parse_numeric_cell(
+                value,
+                dot_thousands=language in DECIMAL_COMMA_LANGUAGES,
+                comma_thousands=language in DECIMAL_POINT_LANGUAGES,
+            )
             if error is not None or parsed is None:
                 row[target] = value
                 break
@@ -1279,16 +1325,17 @@ def _decode_csv(content_bytes: bytes) -> tuple[str, str]:
     text, encoding = decode_text_bytes(content_bytes)
     if encoding not in ("cp1252", "latin-1"):
         return text, encoding
-    try:
-        central = content_bytes.decode("cp1250")
-    except UnicodeDecodeError:
-        return text, encoding
-    if central == text:
-        return text, encoding
-    delimiter = _sniff_delimiter(text)
-    header, _, _ = find_header_row(csv.reader(io.StringIO(text), delimiter=delimiter), _match_column)
-    if header_language(header) in _CP1250_LANGUAGES:
-        return central, "cp1250"
+    for code_page, languages in _CODE_PAGE_LANGUAGES:
+        try:
+            candidate = content_bytes.decode(code_page)
+        except UnicodeDecodeError:
+            continue
+        if candidate == text:
+            continue
+        delimiter = _sniff_delimiter(candidate)
+        header, _, _ = find_header_row(csv.reader(io.StringIO(candidate), delimiter=delimiter), _match_column)
+        if header_language(header) in languages:
+            return candidate, code_page
     return text, encoding
 
 
@@ -2105,6 +2152,53 @@ def _naming_the_sheet(
                 issue.setdefault("sheet", sheet)
 
 
+def _grouping_conventions(rows: list[dict[str, Any]], header_language: str | None) -> tuple[bool, bool]:
+    """``(dot_thousands, comma_thousands)`` for one file.
+
+    The header's language proposes the convention, and the file's own
+    numbers can veto it: one cell that can only be written with a decimal
+    point switches dot grouping off, and one that can only be written with
+    a decimal comma switches comma grouping off.
+    """
+    dot = header_language in DECIMAL_COMMA_LANGUAGES
+    comma = header_language in DECIMAL_POINT_LANGUAGES
+    if not (dot or comma):
+        return False, False
+    veto = _POINT_DECIMAL_SHAPE if dot else _COMMA_DECIMAL_SHAPE
+    for row in rows:
+        for column in _NUMERIC_COLUMNS:
+            text = row.get(column)
+            if isinstance(text, str) and veto.search(text):
+                return False, False
+    return dot, comma
+
+
+def _comma_thousands_warnings(row: dict[str, Any], row_idx: int, ordinal: str) -> list[dict[str, Any]]:
+    """One note per cell whose comma was read as a thousands separator."""
+    notes: list[dict[str, Any]] = []
+    for column in _NUMERIC_COLUMNS:
+        text = row.get(column)
+        if not comma_groups_thousands(text):
+            continue
+        read, _ = parse_numeric_cell(text, comma_thousands=True)
+        plain, _ = parse_numeric_cell(text)
+        if read is None or read == plain:
+            continue
+        notes.append(
+            {
+                "row": row_idx,
+                "ordinal": ordinal,
+                "severity": "info",
+                "code": "comma_read_as_thousands",
+                "column": column,
+                "text": str(text).strip(),
+                "value": read,
+                "message": f"'{str(text).strip()}' was read as {read:g}: the comma separates thousands in this bill.",
+            }
+        )
+    return notes
+
+
 def _dot_thousands_warnings(row: dict[str, Any], row_idx: int, ordinal: str) -> list[dict[str, Any]]:
     """One note per cell whose dots were read as thousands separators.
 
@@ -2204,14 +2298,20 @@ def _rows_to_positions(
         if header.get("missing"):
             result.errors.append(header_problem_error(header, header.get("sheet")))
     result.warnings.extend(sheet_note_warning(note) for note in sheet_notes or ())
-    dot_thousands = header_language in _DOT_THOUSANDS_LANGUAGES
+    dot_thousands, comma_thousands = _grouping_conventions(rows, header_language)
     auto_ordinal = 1
 
     # Pre-compute a median unit rate across the file so we can warn on
     # any single position that's >10× above (likely a tampered export).
     rate_samples = sorted(
         v
-        for v in ((parse_numeric_cell(r.get("unit_rate"), dot_thousands=dot_thousands)[0] or 0.0) for r in rows)
+        for v in (
+            (
+                parse_numeric_cell(r.get("unit_rate"), dot_thousands=dot_thousands, comma_thousands=comma_thousands)[0]
+                or 0.0
+            )
+            for r in rows
+        )
         if v > 0
     )
     median_rate = rate_samples[len(rate_samples) // 2] if rate_samples else 0.0
@@ -2262,10 +2362,16 @@ def _rows_to_positions(
             contingency = _contingency_amount(row, description)
             if contingency is not None:
                 unit_raw, quantity_raw, unit_rate_raw = "lsum", 1.0, contingency
-            quantity, q_err = parse_numeric_cell(quantity_raw, dot_thousands=dot_thousands)
-            unit_rate, r_err = parse_numeric_cell(unit_rate_raw, dot_thousands=dot_thousands)
+            quantity, q_err = parse_numeric_cell(
+                quantity_raw, dot_thousands=dot_thousands, comma_thousands=comma_thousands
+            )
+            unit_rate, r_err = parse_numeric_cell(
+                unit_rate_raw, dot_thousands=dot_thousands, comma_thousands=comma_thousands
+            )
             if dot_thousands:
                 result.warnings.extend(_dot_thousands_warnings(row, row_idx, ordinal))
+            if comma_thousands:
+                result.warnings.extend(_comma_thousands_warnings(row, row_idx, ordinal))
             if q_err is not None:
                 result.errors.append(
                     {

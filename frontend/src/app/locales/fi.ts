@@ -29353,6 +29353,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "Otsikkorivi ei nimeä määrä-, yksikkö- tai hintasaraketta",
     "boq.import_issue.header_unrecognised": "Tunnistamattomat otsikot: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} luettiin muodossa {{value}}: piste erottaa tässä tuhannet",
+    "boq.import_issue.comma_thousands": "{{text}} luettiin muodossa {{value}}: pilkku erottaa tässä tuhannet",
     "import.nothing_imported": "Tästä tiedostosta ei tuotu mitään",
     "import.unsupported_type": "{{name}} ei ole tiedostotyyppi, jota tämä tuonti lukee. Tuetut: {{types}}",
     "import.notes_title": "Huomautukset",

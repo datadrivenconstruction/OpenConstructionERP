@@ -28760,6 +28760,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "Толгой мөр нь тоо хэмжээ, нэгж эсвэл үнийн баганыг заагаагүй байна",
     "boq.import_issue.header_unrecognised": "Танигдаагүй гарчгууд: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}}-г {{value}} гэж уншсан: энд цэг нь мянгатыг тусгаарлагч",
+    "boq.import_issue.comma_thousands": "{{text}}-г {{value}} гэж уншсан: энд таслал нь мянгатыг тусгаарлагч",
     "import.nothing_imported": "Энэ файлаас юу ч импортлоогүй",
     "import.unsupported_type": "{{name}} нь энэ импорт уншиж чадах файлын төрөл биш. Дэмждэг: {{types}}",
     "import.notes_title": "Тэмдэглэл",

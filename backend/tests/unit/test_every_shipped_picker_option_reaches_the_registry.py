@@ -667,10 +667,10 @@ def test_no_declared_label_token_has_quietly_become_resolvable() -> None:
     assert thin == [], f"these declarations carry no usable reason: {thin}"
 
 
-def test_the_five_unmapped_standards_are_labelled_and_unreachable_on_purpose() -> None:
+def test_the_unmapped_standards_are_labelled_and_unreachable_on_purpose() -> None:
     """Pin the scope decision so it is a decision and not an omission.
 
-    Five standards carry a display label so a CostItem encoded against them can
+    These standards carry a display label so a CostItem encoded against them can
     be named, and no country resolves to them, so the picker does not offer them
     and the assertions above do not reach them. If a country is ever mapped to
     one, it enters ``KNOWN_CLASSIFICATION_STANDARDS`` and the completeness test
@@ -678,7 +678,24 @@ def test_the_five_unmapped_standards_are_labelled_and_unreachable_on_purpose() -
     and the reason this is asserted rather than described in a comment.
     """
     unmapped = sorted(set(CLASSIFICATION_STANDARD_LABELS) - set(KNOWN_CLASSIFICATION_STANDARDS))
-    assert unmapped == ["gaeb", "omniclass", "onorm", "uniclass", "uniformat"], (
+    # bkp, bsab, knr, ns3451 and sfb_ccs are the national codings the Swiss,
+    # Swedish, Polish, Norwegian and Danish packs name as their own. They are
+    # labelled so a pack's metadata names a standard the platform can print,
+    # and deliberately left unmapped: which standard a country's projects
+    # default to is a product decision, and none of them ships a cost-group
+    # table the section renderer could use yet.
+    assert unmapped == [
+        "bkp",
+        "bsab",
+        "gaeb",
+        "knr",
+        "ns3451",
+        "omniclass",
+        "onorm",
+        "sfb_ccs",
+        "uniclass",
+        "uniformat",
+    ], (
         f"the set of labelled-but-countryless standards is now {unmapped}. If one gained a country "
         "it must also gain a picker row; if one was added, decide deliberately whether any country "
         "reads it.\n"

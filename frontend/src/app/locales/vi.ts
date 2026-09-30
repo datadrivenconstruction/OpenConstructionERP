@@ -29424,6 +29424,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "Hàng tiêu đề không nêu cột khối lượng, đơn vị hoặc đơn giá",
     "boq.import_issue.header_unrecognised": "Tiêu đề không được nhận dạng: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} được đọc thành {{value}}: dấu chấm ở đây phân tách hàng nghìn",
+    "boq.import_issue.comma_thousands": "{{text}} được đọc thành {{value}}: dấu phẩy ở đây phân tách hàng nghìn",
     "import.nothing_imported": "Không có gì được nhập từ tệp này",
     "import.unsupported_type": "{{name}} không phải là loại tệp mà chức năng nhập này đọc được. Hỗ trợ: {{types}}",
     "import.notes_title": "Ghi chú",

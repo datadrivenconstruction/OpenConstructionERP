@@ -43,12 +43,11 @@ MANIFEST = PartnerPackManifest(
     additional_locales={
         "ar": "locales/ar.json",
     },
-    cwicr_regions=[
-        # Riyadh is the seeded default; Jeddah, Dammam, NEOM/Tabuk, Makkah,
-        # Madinah, Khobar are surfaced in onboarding as opt-in regional
-        # catalogues. CWICR-eng-* slugs follow the v3 catalogue pattern.
-        "cwicr-eng-riyadh",
-    ],
+    # No Saudi base is published yet, so none is declared. Riyadh, then
+    # Jeddah, Dammam, NEOM/Tabuk, Makkah, Madinah and Khobar, follow when
+    # their bases are; a declared slug that resolves to nothing was listed
+    # on the activation dialog and then skipped at install.
+    cwicr_regions=[],
     default_currency="SAR",
     default_tax_template="sa_vat_15",
     # The GCC preliminaries-and-general cascade the catalogue builds for Saudi

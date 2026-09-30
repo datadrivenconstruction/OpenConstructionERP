@@ -28729,6 +28729,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "ردیف سرستون ستون مقدار، واحد یا قیمت را مشخص نمی‌کند",
     "boq.import_issue.header_unrecognised": "سرستون‌های شناسایی‌نشده: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} به‌صورت {{value}} خوانده شد: نقطه در اینجا جداکننده هزارگان است",
+    "boq.import_issue.comma_thousands": "{{text}} به‌صورت {{value}} خوانده شد: ویرگول در اینجا جداکننده هزارگان است",
     "import.nothing_imported": "چیزی از این فایل وارد نشد",
     "import.unsupported_type": "{{name}} نوع فایلی نیست که این وارد کردن بخواند. پشتیبانی‌شده: {{types}}",
     "import.notes_title": "یادداشت‌ها",

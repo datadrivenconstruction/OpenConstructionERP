@@ -29494,6 +29494,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "Overskriftsrækken angiver ingen mængde-, enheds- eller priskolonne",
     "boq.import_issue.header_unrecognised": "Ikke genkendte overskrifter: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} blev læst som {{value}}: punktummet adskiller her tusinder",
+    "boq.import_issue.comma_thousands": "{{text}} blev læst som {{value}}: kommaet adskiller her tusinder",
     "import.nothing_imported": "Der blev ikke importeret noget fra denne fil",
     "import.unsupported_type": "{{name}} er ikke en filtype, denne import kan læse. Understøttet: {{types}}",
     "import.notes_title": "Noter",

@@ -29203,6 +29203,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "हेडर पंक्ति कोई मात्रा, इकाई या दर कॉलम नहीं बताती",
     "boq.import_issue.header_unrecognised": "अपरिचित हेडिंग: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} को {{value}} के रूप में पढ़ा गया: यहां बिंदु हज़ारों को अलग करता है",
+    "boq.import_issue.comma_thousands": "{{text}} को {{value}} के रूप में पढ़ा गया: यहां अल्पविराम हज़ारों को अलग करता है",
     "import.nothing_imported": "इस फ़ाइल से कुछ भी आयात नहीं किया गया",
     "import.unsupported_type": "{{name}} ऐसा फ़ाइल प्रकार नहीं है जिसे यह आयात पढ़ता है। समर्थित: {{types}}",
     "import.notes_title": "टिप्पणियाँ",

@@ -25,11 +25,10 @@ MANIFEST = PartnerPackManifest(
         "en-AU": "locales/en-AU.json",
     },
     cwicr_regions=[
+        # Only published bases are declared: a slug that resolves to nothing
+        # was listed on the activation dialog and then skipped at install.
+        # Melbourne, Brisbane, Perth and Adelaide follow when their bases are.
         "cwicr-eng-sydney",
-        "cwicr-eng-melbourne",
-        "cwicr-eng-brisbane",
-        "cwicr-eng-perth",
-        "cwicr-eng-adelaide",
     ],
     default_currency="AUD",
     default_tax_template="au_gst_10",

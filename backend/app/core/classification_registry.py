@@ -96,6 +96,14 @@ CLASSIFICATION_STANDARD_LABELS: Mapping[str, str] = MappingProxyType(
         "gaeb": "GAEB",
         "tetelrend": "Tételrend",
         "nlsfb": "NL/SfB",
+        # National codings a country pack writes on every line, which no
+        # country maps to by default. Labelled so a line coded against them
+        # can be named, like ONORM and GAEB above.
+        "bkp": "BKP",
+        "sfb_ccs": "SfB/CCS",
+        "ns3451": "NS 3451",
+        "bsab": "BSAB",
+        "knr": "KNR",
     }
 )
 
@@ -354,6 +362,33 @@ REGION_ALIAS_TO_COUNTRY: Mapping[str, str] = MappingProxyType(
     }
 )
 
+# The alias tokens above that name a group of countries rather than one. Each
+# resolves to an anchor country so that a standard can be chosen, but the
+# anchor is a stand-in: an Austrian project filed under DACH is not German.
+# Callers that also hold a country column read it before the anchor.
+MACRO_REGION_TOKENS: frozenset[str] = frozenset(
+    {
+        "DACH",
+        "EU",
+        "BENELUX",
+        "NORDIC",
+        "SCANDINAVIA",
+        "LATAM",
+        "GULF",
+        "GCC",
+        "MIDDLE_EAST",
+        "ASIA_PAC",
+        "NORDICS",
+        "LATINAMERICA",
+        "MIDDLEEAST",
+        "GULFSTATES",
+        "NORTHAFRICA",
+        "EASTAFRICA",
+        "WESTAFRICA",
+        "SOUTHEASTASIA",
+    }
+)
+
 _TOKEN_SEPARATORS = re.compile(r"[^A-Z0-9]+")
 
 # Regions already reported as unresolvable, so a render loop over a
@@ -475,6 +510,19 @@ def normalise_region(raw: str | None) -> str | None:
             return None
         token = head
     return None
+
+
+def is_macro_region(raw: str | None) -> bool:
+    """Whether a region string names a group of countries rather than one.
+
+    Args:
+        raw: Region as stored on the project.
+
+    Returns:
+        True for ``DACH``, ``LATAM``, ``Middle East`` and the other macro
+        labels in :data:`MACRO_REGION_TOKENS`.
+    """
+    return _canonical_token(raw) in MACRO_REGION_TOKENS
 
 
 def standard_for_country(country: str | None) -> str | None:

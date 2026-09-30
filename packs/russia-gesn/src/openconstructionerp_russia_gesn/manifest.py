@@ -38,7 +38,7 @@ MANIFEST = PartnerPackManifest(
     # Documentation only, the way every other pack's tax template is: there
     # is no tax resolver behind this field yet. The rate itself lives in the
     # methodology template, which does drive the cascade.
-    default_tax_template="ru_nds_20",
+    default_tax_template="ru_nds_22",
     default_methodology="russia",
     validation_rule_packs=[
         # The norm base: what a code is and what stands behind it.

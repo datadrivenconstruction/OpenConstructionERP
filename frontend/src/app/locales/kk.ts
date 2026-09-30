@@ -28641,6 +28641,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "Тақырып жолында сан, бірлік немесе баға бағаны көрсетілмеген",
     "boq.import_issue.header_unrecognised": "Танылмаған тақырыптар: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} {{value}} ретінде оқылды: мұндағы нүкте мыңдықты бөледі",
+    "boq.import_issue.comma_thousands": "{{text}} {{value}} ретінде оқылды: мұндағы үтір мыңдықты бөледі",
     "import.nothing_imported": "Бұл файлдан ештеңе импортталмады",
     "import.unsupported_type": "{{name}} — бұл импорт оқи алатын файл түрі емес. Қолдау көрсетіледі: {{types}}",
     "import.notes_title": "Ескертпелер",

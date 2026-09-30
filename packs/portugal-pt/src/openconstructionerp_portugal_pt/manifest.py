@@ -19,7 +19,7 @@ MANIFEST = PartnerPackManifest(
         "currency with 23% IVA, ProNIC classification references, "
         "Portuguese orcamento (budget) estimating practice."
     ),
-    default_locale="en",
+    default_locale="pt",
     additional_locales={},
     cwicr_regions=[],
     default_currency="EUR",

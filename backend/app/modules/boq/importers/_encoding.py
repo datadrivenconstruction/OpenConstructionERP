@@ -20,6 +20,8 @@ re-implemented (and got slightly differently right) in ``router.py``:
 * ``dot_groups_thousands()`` - whether a typed number is written with dots
   between groups of three and no comma (``"12.500"``), which a market
   that writes a decimal comma means as twelve thousand five hundred.
+* ``comma_groups_thousands()`` - the mirror image: ``"12,500"``, which a
+  market that writes a decimal point means as twelve thousand five hundred.
 
 All helpers are pure / sync / no third-party deps.
 """
@@ -71,6 +73,25 @@ def decode_text_bytes(
     raise UnicodeDecodeError("decode_text_bytes", content, 0, 0, "no encodings supplied")
 
 
+# A currency written in front of the amount: a sign ("$", "₹", "¥"), a
+# dollar with its country ("US$", "C$", "R$"), the rupiah's "Rp", or an ISO
+# code ("AED ", "CHF "). Only in front of a number; a trailing "EUR" or "Ft"
+# is dropped by the numeric-run match already. Without this a rate typed as
+# "$1,234.56" was not a number at all, and "R$ 1.234,56" imported nothing.
+_CURRENCY_PREFIX = re.compile(
+    r"^(?:[A-Z]{3}(?=[\s\d])|(?:US|NZ|HK|A|C|S|R|MX|CA|AU)?\$|Rp\.?|[€£¥￥₹₽₺₩₴₦฿₫₪₱])\s*(?=[\d+-])"
+)
+
+# Group separators that are never a decimal point: the Swiss apostrophe in
+# both spellings, the space and its no-break and narrow no-break variants.
+_GROUP_ONLY = ("'", "\u2019", " ", "\t", "\u00a0", "\u202f")
+
+
+def strip_currency(text: str) -> str:
+    """``text`` without a currency written in front of its number."""
+    return _CURRENCY_PREFIX.sub("", text.strip(), count=1)
+
+
 def safe_float(value: Any, default: float = 0.0) -> float:
     """Parse ``value`` to ``float``, returning ``default`` on failure.
 
@@ -103,23 +124,23 @@ def safe_float(value: Any, default: float = 0.0) -> float:
     if not text:
         return default
 
-    # Strip optional sign prefix.
+    # Strip optional sign prefix, on either side of a leading currency.
     sign = 1.0
-    if text[0] in "+-":
+    text = strip_currency(text)
+    if text and text[0] in "+-":
         if text[0] == "-":
             sign = -1.0
-        text = text[1:].strip()
+        text = strip_currency(text[1:].strip())
 
     # Take only the leading numeric run plus separators - trailing
     # ``" EUR"`` / ``" m"`` is silently dropped.
-    import re
-
-    m = re.match(r"[0-9][0-9.,\s]*", text)
+    m = re.match(r"[0-9][0-9.,\s'\u2019\u00a0\u202f]*", text)
     if not m:
         return default
     numeric = m.group(0).strip()
-    # Collapse whitespace thousands separators ("1 234,56" → "1234,56").
-    for ws in (" ", "\t", " ", " "):
+    # Collapse group-only separators ("1 234,56" -> "1234,56", "1'250.50" ->
+    # "1250.50").
+    for ws in _GROUP_ONLY:
         numeric = numeric.replace(ws, "")
     if not numeric:
         return default
@@ -168,12 +189,35 @@ def dot_groups_thousands(value: Any) -> bool:
     """
     if not isinstance(value, str):
         return False
-    text = value.strip().replace(" ", "").replace(" ", "")
+    text = strip_currency(value).replace("\u00a0", "").replace("\u202f", "")
     match = _DOT_GROUPS.match(text)
     return match is not None and "," not in text[: match.end() + 1]
 
 
-def parse_numeric_cell(value: Any, *, dot_thousands: bool = False) -> tuple[float | None, str | None]:
+# One to three digits, then one or more groups of a comma and exactly three
+# digits, and no dot: "12,500", "1,250,000", "¥12,500".
+_COMMA_GROUPS = re.compile(r"[+-]?\d{1,3}(?:,\d{3})+(?![\d.,])")
+
+
+def comma_groups_thousands(value: Any) -> bool:
+    """Whether a typed cell writes its number with commas between groups of three.
+
+    The mirror of :func:`dot_groups_thousands`. :func:`safe_float` reads one
+    comma as the decimal point, which is right in Berlin and wrong in Sydney,
+    Beijing or Mumbai, where ``"12,500"`` is twelve thousand five hundred and
+    was imported as twelve and a half. More than one comma already reads as
+    grouping, so only the single-group shape changes meaning.
+    """
+    if not isinstance(value, str):
+        return False
+    text = strip_currency(value).replace(" ", "").replace("\u00a0", "")
+    match = _COMMA_GROUPS.match(text)
+    return match is not None and "." not in text[: match.end() + 1]
+
+
+def parse_numeric_cell(
+    value: Any, *, dot_thousands: bool = False, comma_thousands: bool = False
+) -> tuple[float | None, str | None]:
     """Strict numeric parse for spreadsheet imports.
 
     Empty cells parse to ``(0.0, None)`` - the column was simply blank.
@@ -187,9 +231,14 @@ def parse_numeric_cell(value: Any, *, dot_thousands: bool = False) -> tuple[floa
             :func:`dot_groups_thousands`. For a file whose header says it was
             written in a decimal-comma market; the caller reports each cell it
             read this way.
+        comma_thousands: Read ``"12,500"`` as 12500, see
+            :func:`comma_groups_thousands`. For a file written in a
+            decimal-point market; reported the same way.
     """
     if dot_thousands and dot_groups_thousands(value):
         value = value.strip().replace(".", "")
+    elif comma_thousands and comma_groups_thousands(value):
+        value = value.strip().replace(",", "")
     if value is None:
         return 0.0, None
     if isinstance(value, bool):

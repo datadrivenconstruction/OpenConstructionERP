@@ -29270,6 +29270,7 @@ const resource = {
     "boq.import_issue.header_needs_quantity": "Baris header tidak menyebutkan kolom kuantitas, satuan, atau harga",
     "boq.import_issue.header_unrecognised": "Judul kolom tidak dikenali: {{headings}}",
     "boq.import_issue.dot_thousands": "{{text}} dibaca sebagai {{value}}: titik di sini adalah pemisah ribuan",
+    "boq.import_issue.comma_thousands": "{{text}} dibaca sebagai {{value}}: koma di sini adalah pemisah ribuan",
     "import.nothing_imported": "Tidak ada yang diimpor dari file ini",
     "import.unsupported_type": "{{name}} bukan jenis file yang dapat dibaca oleh impor ini. Didukung: {{types}}",
     "import.notes_title": "Catatan",
