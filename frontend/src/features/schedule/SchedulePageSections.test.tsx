@@ -16,6 +16,18 @@ import { MemoryRouter } from 'react-router-dom';
 
 const state = vi.hoisted(() => ({ activities: [] as any[], created: [] as any[] }));
 
+// The queries below read the English labels, so render each string from the
+// default the page passes rather than from whatever the shared setup loaded.
+vi.mock('react-i18next', async () => {
+  const actual = await vi.importActual<typeof import('react-i18next')>('react-i18next');
+  const t = (key: string, a?: unknown, b?: unknown) => {
+    const opts = (typeof a === 'object' && a ? a : typeof b === 'object' && b ? b : {}) as Record<string, unknown>;
+    const text = typeof a === 'string' ? a : typeof opts.defaultValue === 'string' ? opts.defaultValue : key;
+    return text.replace(/\{\{\s*(\w+)\s*\}\}/g, (_m, k) => String(opts[k] ?? ''));
+  };
+  return { ...actual, useTranslation: () => ({ t, i18n: { language: 'en', changeLanguage: async () => {} } }) };
+});
+
 vi.mock('./api', async () => {
   const actual = await vi.importActual<typeof import('./api')>('./api');
   const known = {
