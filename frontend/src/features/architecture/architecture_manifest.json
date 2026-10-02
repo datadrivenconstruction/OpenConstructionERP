@@ -22560,6 +22560,7 @@
         "importers/__init__.py",
         "importers/_base.py",
         "importers/_encoding.py",
+        "importers/_workbook.py",
         "importers/bc3.py",
         "importers/excel.py",
         "importers/gaeb_xml.py",
@@ -91833,8 +91834,7 @@
       ],
       "import_dependencies": [
         "costmodel",
-        "field_time",
-        "projects"
+        "field_time"
       ]
     },
     {
@@ -114903,6 +114903,18 @@
         },
         {
           "method": "GET",
+          "path": "/globe-imagery/",
+          "handler": "globe_imagery",
+          "response_model": "GlobeImageryResponse"
+        },
+        {
+          "method": "GET",
+          "path": "/globe-streets/{z}/{x}/{y}.png",
+          "handler": "proxy_globe_street_tile",
+          "request_schema": "Request"
+        },
+        {
+          "method": "GET",
           "path": "/basemap-style/{name}.json",
           "handler": "basemap_style",
           "request_schema": "Request"
@@ -117161,6 +117173,41 @@
               "name": "total_features",
               "type": "int",
               "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "GlobeStreetsSource",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Raster street imagery the operator configured for the 3D globe.",
+          "fields": [
+            {
+              "name": "tile_url",
+              "type": "str"
+            },
+            {
+              "name": "attribution",
+              "type": "str"
+            },
+            {
+              "name": "max_zoom",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "GlobeImageryResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What the 3D globe draws under the pins.\n\n``streets`` is ``None`` when no raster street source is configured, and\nthe globe then shows the built-in public-domain shaded relief.",
+          "fields": [
+            {
+              "name": "streets",
+              "type": "GlobeStreetsSource | None",
+              "default": "None"
             }
           ]
         }
@@ -135978,6 +136025,21 @@
               "description": "Items the job had to leave out."
             },
             {
+              "name": "text_language",
+              "type": "str | None",
+              "description": "Language a loaded cost base's work items are in, when the job reports it."
+            },
+            {
+              "name": "text_language_requested",
+              "type": "str | None",
+              "description": "Language the cost base should have opened in (its own)."
+            },
+            {
+              "name": "text_language_error",
+              "type": "str | None",
+              "description": "Why the base did not open in text_language_requested, when it did not."
+            },
+            {
               "name": "created_at",
               "type": "datetime | None",
               "default": "None"
@@ -150766,6 +150828,32 @@
             }
           ],
           "relationships": []
+        },
+        {
+          "class_name": "DemoProjectTombstone",
+          "tablename": "oe_projects_demo_tombstone",
+          "docstring": "A demo project the user removed, so no later boot puts it back.\n\nDeleting a demo project archives the row, and an archived row already\nstops the installer from creating the demo again. Purging demo data removes\nthe row itself, and after that nothing in the database remembered that the\ndemo had ever been there: an install whose demo-seed choice file did not\nsurvive, or whose ``SEED_DEMO`` is set in the environment, reinstalled every\npurged showcase project on the next boot.\n\nOne row per ``demo_id``, written when a demo project is deleted or purged\nand removed when a person installs that demo again. The boot installers\nread it and skip what it names; an explicit install from the app ignores\nit, because a person asking for the demo outranks the record of a person\nremoving it. ``removed_project_id`` is the row that was removed and carries\nno foreign key, since the project it names may no longer exist. It is not\ncalled ``project_id`` on purpose: the demo purge sweeps every table with a\n``project_id`` column for the purged ids, and it would take this record\nwith the project it describes.",
+          "columns": [
+            {
+              "name": "demo_id",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "removed_project_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "reason",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            }
+          ],
+          "relationships": []
         }
       ],
       "routes": [
@@ -150822,6 +150910,16 @@
           "path": "/demo-data/purge/",
           "handler": "purge_demo_data",
           "request_schema": "ProjectService"
+        },
+        {
+          "method": "GET",
+          "path": "/demo-data/leftovers/",
+          "handler": "find_demo_leftovers"
+        },
+        {
+          "method": "POST",
+          "path": "/demo-data/leftovers/remove/",
+          "handler": "remove_demo_leftovers"
         },
         {
           "method": "POST",
@@ -171148,6 +171246,13 @@
           "handler": "preview",
           "response_model": "AbsPreviewResponse",
           "request_schema": "AbsPreviewRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/preview/file",
+          "handler": "preview_file",
+          "response_model": "AbsPreviewResponse",
+          "request_schema": "UploadFile"
         },
         {
           "method": "POST",
@@ -231056,10 +231161,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 149,
+      "ts_files": 152,
       "css_files": 0,
-      "test_files": 74,
-      "total_files": 149
+      "test_files": 76,
+      "total_files": 152
     },
     {
       "name": "buyer-portal",
@@ -231245,10 +231350,10 @@
     },
     {
       "name": "costs",
-      "ts_files": 39,
+      "ts_files": 41,
       "css_files": 0,
-      "test_files": 15,
-      "total_files": 39
+      "test_files": 17,
+      "total_files": 41
     },
     {
       "name": "credentials",
@@ -231350,10 +231455,10 @@
     },
     {
       "name": "enterprise-workflows",
-      "ts_files": 3,
+      "ts_files": 4,
       "css_files": 0,
-      "test_files": 0,
-      "total_files": 3
+      "test_files": 1,
+      "total_files": 4
     },
     {
       "name": "equipment",
@@ -231567,10 +231672,10 @@
     },
     {
       "name": "hse-advanced",
-      "ts_files": 4,
+      "ts_files": 6,
       "css_files": 0,
-      "test_files": 0,
-      "total_files": 4
+      "test_files": 1,
+      "total_files": 6
     },
     {
       "name": "inbound",
@@ -231700,10 +231805,10 @@
     },
     {
       "name": "modules",
-      "ts_files": 23,
+      "ts_files": 24,
       "css_files": 0,
-      "test_files": 10,
-      "total_files": 24
+      "test_files": 11,
+      "total_files": 25
     },
     {
       "name": "ncr",
@@ -231728,10 +231833,10 @@
     },
     {
       "name": "onboarding",
-      "ts_files": 22,
+      "ts_files": 24,
       "css_files": 0,
-      "test_files": 11,
-      "total_files": 22
+      "test_files": 13,
+      "total_files": 24
     },
     {
       "name": "payment-clock",
@@ -231854,10 +231959,10 @@
     },
     {
       "name": "projects",
-      "ts_files": 28,
+      "ts_files": 32,
       "css_files": 0,
-      "test_files": 10,
-      "total_files": 28
+      "test_files": 13,
+      "total_files": 32
     },
     {
       "name": "property-dev",
@@ -231889,10 +231994,10 @@
     },
     {
       "name": "rebar-schedule",
-      "ts_files": 3,
+      "ts_files": 4,
       "css_files": 0,
-      "test_files": 0,
-      "total_files": 3
+      "test_files": 1,
+      "total_files": 4
     },
     {
       "name": "reconciliation",
@@ -232029,17 +232134,17 @@
     },
     {
       "name": "settings",
-      "ts_files": 26,
+      "ts_files": 28,
       "css_files": 0,
-      "test_files": 8,
-      "total_files": 26
+      "test_files": 9,
+      "total_files": 28
     },
     {
       "name": "setup",
-      "ts_files": 2,
+      "ts_files": 3,
       "css_files": 0,
-      "test_files": 0,
-      "total_files": 2
+      "test_files": 1,
+      "total_files": 3
     },
     {
       "name": "signing",
@@ -232225,10 +232330,10 @@
     },
     {
       "name": "videos",
-      "ts_files": 26,
+      "ts_files": 27,
       "css_files": 0,
-      "test_files": 6,
-      "total_files": 26
+      "test_files": 7,
+      "total_files": 27
     },
     {
       "name": "voice",
@@ -233526,14 +233631,14 @@
   "statistics": {
     "backend_modules": 195,
     "modules_with_manifests": 193,
-    "total_models": 617,
-    "total_columns": 7101,
+    "total_models": 618,
+    "total_columns": 7104,
     "total_relationships": 234,
-    "total_routes": 3706,
-    "total_schemas": 3487,
-    "total_python_files": 2211,
+    "total_routes": 3711,
+    "total_schemas": 3489,
+    "total_python_files": 2212,
     "frontend_features": 190,
-    "frontend_ts_files": 2764,
+    "frontend_ts_files": 2784,
     "frontend_backend_mapped": 169
   },
   "frontend_backend_mapping": {
