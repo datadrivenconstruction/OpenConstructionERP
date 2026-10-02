@@ -1781,10 +1781,6 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
             </div>
           </div>
           <div
-            aria-hidden="true"
-            class="mt-3 h-28"
-          />
-          <div
             class="mt-3"
           >
             <div
@@ -4778,6 +4774,10 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
               </button>
             </div>
           </div>
+          <div
+            aria-hidden="true"
+            class="mt-3 h-24"
+          />
         </div>
       </div>
       <div
