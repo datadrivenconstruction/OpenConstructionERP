@@ -73,6 +73,13 @@ const UNRELEASED: ChangelogEntry | null = {
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '18.3.0',
+    date: '2026-10-02',
+    tag: 'NEW',
+    summary:
+      'The 4D schedule saves the assignee, files a new activity inside its section with the next WBS code, and reopens a collapsed section; tasks take their assignee from contacts. Deleted projects stay out of every list and analytics view, and demo data stays in demo projects through restarts and upgrades. Every country pack now validates with its own rules, switches to its own language and imports bills in its own number format, Excel 97-2003 included. Ctrl+click no longer asks you to sign in again, images and maps load with your session, and video covers no longer go blank until a hard reload.',
+  },
+  {
     version: '18.2.0',
     date: '2026-09-29',
     tag: 'NEW',
