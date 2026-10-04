@@ -68,6 +68,7 @@ import { CommentDrawer, type CommentEntry } from './CommentDrawer';
 import { PriceAnalysisPanel } from './PriceAnalysisPanel';
 import { PositionActualsDrawer } from '@/features/costmodel/PositionActualsDrawer';
 import { MeasurementDrawer } from './MeasurementDrawer';
+import { GaebSiteExchangeDialog } from './GaebSiteExchangeDialog';
 import { VariationTraceDrawer } from './VariationTraceDrawer';
 import type { VariationLineTraceBadge } from './grid/cellRenderers';
 import { getVariationRequestBOQ, type VariationBOQTrace } from '@/features/variations/api';
@@ -2144,6 +2145,9 @@ export function BOQEditorPage() {
   // Which GAEB phase the preview dialog is confirming. The dialog used to
   // export X83 whichever menu item opened it.
   const [gaebExportFormat, setGaebExportFormat] = useState<'gaeb' | 'gaeb_x84'>('gaeb');
+  // GAEB site phases (X31 measured quantities, X89 invoice check).
+  const [gaebSiteOpen, setGaebSiteOpen] = useState(false);
+  const [gaebSiteFile, setGaebSiteFile] = useState<File | null>(null);
 
   /* ── Computed data ─────────────────────────────────────────────────── */
 
@@ -4299,6 +4303,13 @@ export function BOQEditorPage() {
   const handleImportFile = useCallback(
     async (file: File) => {
       if (!boqId) return;
+      // An X31 measurement or an X89 invoice is read against this bill, not
+      // imported into it: hand it to the dialog that proposes and checks.
+      if (/\.x(31|89)$/i.test(file.name)) {
+        setGaebSiteFile(file);
+        setGaebSiteOpen(true);
+        return;
+      }
       setIsImporting(true);
       const token = useAuthStore.getState().accessToken;
       const form = new FormData();
@@ -5067,6 +5078,10 @@ export function BOQEditorPage() {
           isImporting={isImporting}
           importInputRef={importInputRef}
           onImportInputChange={handleImportInputChange}
+          onOpenGaebSiteExchange={() => {
+            setGaebSiteFile(null);
+            setGaebSiteOpen(true);
+          }}
           onPasteFromExcel={() => setExcelPasteOpen(true)}
           onExport={handleExport}
           onCarbonFootprint={() =>
@@ -6098,6 +6113,20 @@ export function BOQEditorPage() {
         boqId={boqId!}
         onImported={invalidateAll}
       />
+      {boqId && gaebSiteOpen && (
+        <GaebSiteExchangeDialog
+          open={gaebSiteOpen}
+          boqId={boqId}
+          boqName={boq?.name ?? 'boq'}
+          initialFile={gaebSiteFile}
+          readOnly={Boolean(boq?.is_locked)}
+          onClose={() => {
+            setGaebSiteOpen(false);
+            setGaebSiteFile(null);
+          }}
+          onApplied={invalidateAll}
+        />
+      )}
     </div>
   );
 }

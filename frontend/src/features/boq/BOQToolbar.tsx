@@ -61,6 +61,7 @@ import {
   UnfoldVertical,
   ListTree,
   ListCollapse,
+  Ruler,
 } from 'lucide-react';
 import { Button } from '@/shared/ui';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
@@ -97,6 +98,8 @@ export interface BOQToolbarProps {
   isImporting: boolean;
   importInputRef: React.RefObject<HTMLInputElement | null>;
   onImportInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  /** Opens the GAEB X31 measurement / X89 invoice dialog. Hidden when absent. */
+  onOpenGaebSiteExchange?: () => void;
   // Export
   onExport: (format: string) => void;
   /**
@@ -218,6 +221,7 @@ export function BOQToolbar({
   isImporting,
   importInputRef,
   onImportInputChange,
+  onOpenGaebSiteExchange,
   onExport,
   onCarbonFootprint,
   onValidate,
@@ -485,7 +489,15 @@ export function BOQToolbar({
               disabled={isImporting}
             />
           )}
-          <input ref={importInputRef as React.RefObject<HTMLInputElement>} type="file" accept=".xlsx,.xls,.csv,.pdf,.jpg,.jpeg,.png,.tiff,.rvt,.ifc,.dwg,.dgn,.x81,.x83,.x84,.x85,.x86,.xml,.bc3,.ods,.json,.yaml,.yml" className="hidden" onChange={onImportInputChange} aria-label={t('common.import')} />
+          <input ref={importInputRef as React.RefObject<HTMLInputElement>} type="file" accept=".xlsx,.xls,.csv,.pdf,.jpg,.jpeg,.png,.tiff,.rvt,.ifc,.dwg,.dgn,.x81,.x83,.x84,.x85,.x86,.x31,.x89,.xml,.bc3,.ods,.json,.yaml,.yml" className="hidden" onChange={onImportInputChange} aria-label={t('common.import')} />
+          {onOpenGaebSiteExchange && (
+            <IconBtn
+              icon={<Ruler size={15} />}
+              title={t('boq.gaeb_site.toolbar', { defaultValue: 'GAEB X31 / X89: measured quantities and invoices' })}
+              onClick={onOpenGaebSiteExchange}
+              testId="boq-gaeb-site-exchange"
+            />
+          )}
           <div className="relative">
             <button
               ref={exportBtnRef}

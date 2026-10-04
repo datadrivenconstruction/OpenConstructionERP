@@ -411,7 +411,22 @@ const DP_TO_PHASE: Record<string, string> = {
   '84': 'X84',
   '85': 'X85',
   '86': 'X86',
+  // Site phases. They share the BoQ tree but are not bills: X31 carries
+  // measured quantities for positions that already exist and X89 an invoice
+  // against them. Named here so an import can refuse them by name.
+  '31': 'X31',
+  '89': 'X89',
 };
+
+/**
+ * True for a GAEB phase that must not be imported as a bill (X31, X89).
+ *
+ * Read as a bill, an X31 yields empty sections and an X89 its invoiced lines
+ * as new positions. Both belong in the bill's own GAEB X31 / X89 dialog.
+ */
+export function isGAEBSitePhase(phase: string): boolean {
+  return phase === 'X31' || phase === 'X89';
+}
 
 /**
  * Detect the GAEB exchange phase (X80..X86) from the document itself.
@@ -491,6 +506,10 @@ export async function importGAEBToBOQ(file: File, boqId: string): Promise<GAEBIm
   // ISO-8859-1 / Windows-1252 GAEB exports — common in DACH AVA software.
   const buffer = await file.arrayBuffer();
   const xmlString = decodeXmlBuffer(buffer);
+  const phase = detectGAEBPhase(xmlString);
+  if (isGAEBSitePhase(phase)) {
+    throw new Error(`GAEB ${phase} is not a bill of quantities and is not imported as one.`);
+  }
   const positions = parseGAEBXML(xmlString);
 
   let imported = 0;

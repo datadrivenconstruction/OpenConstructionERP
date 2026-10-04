@@ -61,6 +61,7 @@ import { contractsTabHref } from './contractsTabs';
 import { PopulatePreviewModal } from './PopulatePreviewModal';
 import { ProgressClaimLineTable } from './ProgressClaimLineTable';
 import { AIAApplicationPanel } from './AIAApplicationPanel';
+import { GaebInvoicePanel } from './GaebInvoicePanel';
 import { SubRollupPanel } from './SubRollupPanel';
 import { ClaimInvoicePreview } from '@/features/finance';
 import { projectsApi } from '@/features/projects/api';
@@ -496,6 +497,10 @@ export function ProgressClaimDetailPage() {
       {aiaEligible && (
         <AIAApplicationPanel claimId={claimId as string} currency={claim.currency} />
       )}
+
+      {/* GAEB X89 invoice, collapsed until opened. */}
+      <GaebInvoicePanel claimId={claimId as string} claimNumber={claim.claim_number} />
+
 
       {populateOpen && (
         <PopulatePreviewModal

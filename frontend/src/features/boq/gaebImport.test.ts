@@ -16,6 +16,7 @@ import {
   importGAEBToBOQ,
   decodeXmlBuffer,
   detectGAEBPhase,
+  isGAEBSitePhase,
 } from './gaebImport';
 
 // ---------------------------------------------------------------------------
@@ -522,6 +523,37 @@ describe('detectGAEBPhase', () => {
     expect(detectGAEBPhase('<GAEB><Award><BoQ/></Award></GAEB>')).toBe('');
     expect(detectGAEBPhase('')).toBe('');
     expect(detectGAEBPhase('garbage <')).toBe('');
+  });
+
+  it('names a measurement and an invoice, which are not bills', () => {
+    const x31 = `<?xml version="1.0"?>
+<GAEB xmlns="http://www.gaeb.de/GAEB_DA_XML/DA31/3.3"><QtyDeterm><DP>31</DP><BoQ/></QtyDeterm></GAEB>`;
+    const x89 = `<?xml version="1.0"?>
+<GAEB xmlns="http://www.gaeb.de/GAEB_DA_XML/DA89/3.3"><Invoice><DP>89</DP></Invoice></GAEB>`;
+    expect(detectGAEBPhase(x31)).toBe('X31');
+    expect(detectGAEBPhase(x89)).toBe('X89');
+    expect(isGAEBSitePhase('X31')).toBe(true);
+    expect(isGAEBSitePhase('X89')).toBe(true);
+    expect(isGAEBSitePhase('X83')).toBe(false);
+    expect(isGAEBSitePhase('')).toBe(false);
+  });
+});
+
+describe('importGAEBToBOQ refuses the site phases', () => {
+  it('posts nothing for an X89 invoice', async () => {
+    const { boqApi } = await import('./api');
+    const addPosition = vi.spyOn(boqApi, 'addPosition');
+    const addSection = vi.spyOn(boqApi, 'addSection');
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<GAEB xmlns="http://www.gaeb.de/GAEB_DA_XML/DA89/3.3"><Invoice><DP>89</DP><BoQ><BoQBody><Itemlist>
+<Item RNoPart="0010"><BillQty>1</BillQty><QU>m3</QU><UP>10</UP><IT>10</IT></Item>
+</Itemlist></BoQBody></BoQ></Invoice></GAEB>`;
+    const file = new File([xml], 'rechnung.xml', { type: 'application/xml' });
+    await expect(importGAEBToBOQ(file, 'boq-1')).rejects.toThrow('X89');
+    expect(addPosition).not.toHaveBeenCalled();
+    expect(addSection).not.toHaveBeenCalled();
+    addPosition.mockRestore();
+    addSection.mockRestore();
   });
 });
 
