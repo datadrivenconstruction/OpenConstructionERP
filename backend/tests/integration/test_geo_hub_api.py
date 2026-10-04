@@ -1120,3 +1120,51 @@ class TestAnchoredProjects:
         assert row["anchor_id"] is None
         assert abs(float(row["lat"]) - 52.5173885) < 1e-6
         assert abs(float(row["lon"]) - 13.3951309) < 1e-6
+
+    @pytest.mark.asyncio
+    async def test_newer_projects_without_a_location_do_not_crowd_out_the_pins(self, http_client):
+        """``limit`` counts pins, not every project the caller can see.
+
+        It used to be applied before the projects without a location were
+        dropped, so a caller whose newest projects had none got fewer pins
+        than the limit, down to an empty map, while older located projects
+        existed. The admin view of a large install is where that bites; a
+        fresh account and a small limit show the same thing.
+        """
+        email, meta = await _register(http_client, "crowded")
+        await _set_role(email, "editor")
+        owner = {"headers": await _login(http_client, email, meta["_password"])}
+
+        async def _project(label: str) -> str:
+            res = await http_client.post(
+                "/api/v1/projects/",
+                json={"name": f"{label} {uuid.uuid4().hex[:6]}", "currency": "EUR"},
+                headers=owner["headers"],
+            )
+            assert res.status_code == 201, res.text
+            return res.json()["id"]
+
+        anchored = await _project("Anchored")
+        await _ensure_anchor(http_client, {**owner, "project_id": anchored})
+
+        address_only = await _project("AddrOnly")
+        from sqlalchemy import update
+
+        from app.database import async_session_factory
+        from app.modules.projects.models import Project
+
+        async with async_session_factory() as s:
+            await s.execute(
+                update(Project)
+                .where(Project.id == uuid.UUID(address_only))
+                .values(address={"city": "Munich", "lat": 48.1371, "lon": 11.5754})
+            )
+            await s.commit()
+
+        for _ in range(3):
+            await _project("Unlocated")
+
+        res = await http_client.get("/api/v1/geo-hub/projects?limit=2", headers=owner["headers"])
+        assert res.status_code == 200, res.text
+        ids = [r["project_id"] for r in res.json()]
+        assert ids == [address_only, anchored], f"the two located projects, newest first, got {ids}"
