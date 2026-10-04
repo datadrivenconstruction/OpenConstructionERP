@@ -462,7 +462,10 @@ export function maskTokenPath(pathname: string): string {
 /** Return the current page URL without query string or hash (to avoid leaking data). */
 function cleanUrl(): string {
   if (typeof window === 'undefined') return '';
-  return maskTokenPath(window.location.pathname);
+  // The logger runs inside componentDidCatch: it must not throw on a location
+  // that carries no pathname (embedded webviews, stubbed tests).
+  const pathname = window.location?.pathname;
+  return typeof pathname === 'string' ? maskTokenPath(pathname) : '';
 }
 
 function getLocale(): string {
