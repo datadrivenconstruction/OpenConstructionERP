@@ -10,6 +10,14 @@ those packs switched on nothing of their own. Their countries were not left
 unchecked, because the BOQ router's country row adds the national sets to any
 project filed under the country, but the pack's own preview said it switched
 on no rule set, and a project whose region names no country got nothing.
+Nine of them now name their sets. South Africa is left empty on purpose, see
+:data:`LEFT_TO_THE_COUNTRY_ROW`.
+
+A named set is not free. It is copied onto every project created under the
+pack, and the BOQ router drops a country row's "code required" set for a
+project coded in another standard but never drops a set the project carries.
+So the demos each pack installs are validated here with exactly what a project
+created under the pack would carry, and must clear it.
 
 ``test_pack_conformance`` already holds one direction: every set a pack names
 also runs without it. Nothing held the other one, so a pack could name
@@ -57,9 +65,20 @@ EXPECTED: dict[str, list[str]] = {
     "doker-formwork": ["formwork"],
     "austria-at": ["gaeb", "onorm"],
     "switzerland-ch": ["gaeb"],
-    "south-africa": ["nrm"],
     "us-california": ["masterformat"],
     "us-texas": ["masterformat"],
+}
+
+#: Country packs that deliberately name none of their country row's sets, with
+#: the reason. Self-cancelling: see
+#: :func:`test_a_pack_left_to_the_country_row_still_has_its_reason`.
+LEFT_TO_THE_COUNTRY_ROW: dict[str, str] = {
+    "south-africa": (
+        "The registry and the ZA row read South Africa as NRM, and the Johannesburg demo the pack "
+        "installs is coded in MasterFormat. A set the pack names reaches every project created under "
+        "it unfiltered, so either code set would fail one of the two bills on every line. The row "
+        "alone applies until the market's standard is settled."
+    ),
 }
 
 _PROBE = """
@@ -222,6 +241,8 @@ def test_a_country_pack_names_the_national_sets_its_country_row_runs(slug: str) 
     nothing on, and a project created under it with a region that names no
     country inherits nothing national.
     """
+    if slug in LEFT_TO_THE_COUNTRY_ROW:
+        pytest.skip(LEFT_TO_THE_COUNTRY_ROW[slug])
     manifest = _manifests()[slug]
     missing = _unnamed(manifest)
     assert missing == [], (
@@ -316,3 +337,124 @@ def test_an_invented_name_is_refused_without_a_classification_hint() -> None:
     message = _measured()["refusals"]["spurious_ruleset_for_this_test"]
     assert message is not None
     assert "classification standard, not a rule set" not in message
+
+
+def test_a_pack_left_to_the_country_row_still_has_its_reason() -> None:
+    """The exemption holds only while the two standards still disagree and the pack still names nothing."""
+    from app.core.classification_registry import resolve_standard, standard_for_country
+    from app.core.demo_projects import DEMO_TEMPLATES, PACK_DEMO_PROJECT
+
+    for slug in LEFT_TO_THE_COUNTRY_ROW:
+        manifest = _manifests()[slug]
+        assert _unnamed(manifest), f"{slug} names its country row's sets now; remove it from LEFT_TO_THE_COUNTRY_ROW"
+        demo = DEMO_TEMPLATES[PACK_DEMO_PROJECT[slug]]
+        demo_standard = resolve_standard(demo.classification_standard or None, region=demo.region).standard
+        assert demo_standard != standard_for_country(manifest.market_country_code), (
+            f"{slug}: the demo and the registry agree on {demo_standard!r} now, so the reason is gone"
+        )
+
+
+def _demo_payload(template: Any) -> dict[str, Any]:
+    positions: list[dict[str, Any]] = []
+    for ordinal, title, classification, items in template.sections:
+        positions.append(
+            {
+                "id": f"s-{ordinal}",
+                "ordinal": ordinal,
+                "description": title,
+                "classification": classification,
+                "type": "section",
+            }
+        )
+        for item_ordinal, description, unit, quantity, rate, item_classification in items:
+            positions.append(
+                {
+                    "id": f"p-{item_ordinal}",
+                    "parent_id": f"s-{ordinal}",
+                    "ordinal": item_ordinal,
+                    "description": description,
+                    "unit": unit,
+                    "quantity": float(quantity),
+                    "unit_rate": float(rate),
+                    "total": float(quantity) * float(rate),
+                    "classification": item_classification,
+                    "type": "position",
+                }
+            )
+    return {"positions": positions}
+
+
+def _demo_cases_with_code_sets() -> list[tuple[str, str]]:
+    """``(pack, demo)`` for every demo of a pack that names a "code required" set."""
+    from app.core.demo_projects import PACK_DEMO_PROJECT
+    from app.modules.boq.router import _CLASSIFICATION_CODE_SETS
+
+    cases: list[tuple[str, str]] = []
+    for slug, manifest in _manifests().items():
+        if not any(name in _CLASSIFICATION_CODE_SETS for name in manifest.validation_rule_sets):
+            continue
+        demos = [PACK_DEMO_PROJECT.get(slug), *manifest.demo_template_ids]
+        cases.extend((slug, demo) for demo in dict.fromkeys(demos) if demo)
+    return cases
+
+
+def test_the_inherited_demo_population_covers_the_repaired_code_set_packs() -> None:
+    """Control: the test below must actually reach the packs that now name a code set."""
+    packs = {slug for slug, _demo in _demo_cases_with_code_sets()}
+    for slug in ("aus", "nzs", "saudi-vision2030", "turkey-tr", "batimatech-ca", "us-california", "us-texas"):
+        assert slug in packs, f"{slug} has no demo the inherited-set check can validate"
+
+
+def _inherited_errors(manifest: PartnerPackManifest, demo_id: str) -> tuple[list[str], dict[str, int]]:
+    """Validate ``demo_id`` with the sets a project created under ``manifest`` carries; count errors per rule."""
+    import asyncio
+
+    from app.core.classification_registry import resolve_standard
+    from app.core.demo_projects import DEMO_TEMPLATES, _country_code_for
+    from app.core.partner_pack.apply import inherited_rule_sets
+    from app.core.validation.engine import validation_engine
+    from app.core.validation.rules import register_builtin_rules
+    from app.modules.boq.router import _build_rule_sets
+
+    register_builtin_rules()
+    template = DEMO_TEMPLATES[demo_id]
+    standard = resolve_standard(template.classification_standard or None, region=template.region).standard or ""
+    inherited = inherited_rule_sets(list(template.validation_rule_sets or []), manifest)
+    rule_sets = _build_rule_sets(inherited, standard, template.region or "", _country_code_for(template) or "")
+    runnable = [name for name in rule_sets if validation_engine.registry.has_rules(name)]
+    for name in manifest.validation_rule_sets:
+        assert name in runnable, f"{manifest.slug} names {name!r} and the in-process registry does not run it"
+    report = asyncio.run(
+        validation_engine.validate(
+            data=_demo_payload(template), rule_sets=runnable, target_type="boq", metadata={"locale": "en"}
+        )
+    )
+    errors: dict[str, int] = {}
+    for result in report.results:
+        if not result.passed and result.severity.value == "error":
+            errors[result.rule_id] = errors.get(result.rule_id, 0) + 1
+    return runnable, errors
+
+
+@pytest.mark.parametrize(("slug", "demo_id"), _demo_cases_with_code_sets())
+def test_a_demo_validated_with_what_a_pack_project_inherits_raises_no_error(slug: str, demo_id: str) -> None:
+    """The rule sets a project created under the pack carries, run on the pack's own demo bill.
+
+    ``test_pack_conformance`` validates a demo with the demo's own sets, which
+    is how the installed demo is validated. A project the user creates under
+    the pack inherits the pack's sets as well, unfiltered by its standard, and
+    that is the population a pack-declared "code required" set reaches.
+    """
+    runnable, errors = _inherited_errors(_manifests()[slug], demo_id)
+    assert errors == {}, (
+        f"a project created under {slug} carries {runnable}, and the pack's own {demo_id} bill fails {errors}"
+    )
+
+
+def test_the_inherited_check_fails_the_south_african_pack_if_it_names_nrm() -> None:
+    """Negative control: the declaration this file declines to make, made, is caught on the pack's demo."""
+    from app.core.demo_projects import PACK_DEMO_PROJECT
+
+    named = _manifests()["south-africa"].model_copy(update={"validation_rule_sets": ["nrm"]})
+    _runnable, errors = _inherited_errors(named, PACK_DEMO_PROJECT["south-africa"])
+    assert errors.get("nrm.classification_required", 0) > 0, errors

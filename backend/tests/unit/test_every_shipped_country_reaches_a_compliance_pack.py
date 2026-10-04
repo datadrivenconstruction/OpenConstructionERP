@@ -250,7 +250,10 @@ NO_NATIONAL_RULES_REGISTERED: dict[str, str] = {
     "SE": "No Swedish rule set is registered; nothing reads an AMA or BSAB code.",
     "SG": "No Singaporean rule set is registered; nothing reads a CONQUAS code.",
     "XX": "Not a country. The cross-region trade packs use it to mean 'no country'.",
-    "ZA": "No South African rule set is registered; the pack declares MasterFormat.",
+    "ZA": (
+        "No South African rule set is registered. The country pack names no code set either, because "
+        "the registry reads ZA as NRM while its Johannesburg demo is coded in MasterFormat."
+    ),
 }
 
 

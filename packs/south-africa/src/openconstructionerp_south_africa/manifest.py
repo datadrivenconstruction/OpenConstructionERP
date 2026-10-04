@@ -56,11 +56,15 @@ MANIFEST = PartnerPackManifest(
         "pppfa_preferential_procurement",
         "ipdm_procurement_gates",
     ],
-    # The documents above are reference text the engine never executes. This
-    # is the list that switches rules on. ASAQS measurement is in the NRM
-    # lineage, which is what the classification registry and the ZA country
-    # row already give a South African project.
-    validation_rule_sets=["nrm"],
+    # Deliberately empty, and the one country pack left so. The classification
+    # registry and the ZA country row say NRM, while the Johannesburg demo this
+    # pack installs is coded in MasterFormat. A set named here is copied onto
+    # every project created under the pack, where the BOQ router does not drop
+    # it for a project coded in another standard the way it drops the country
+    # row, so naming either code set would fail one of the two bills on every
+    # line. Until the market's standard is settled the country row alone
+    # applies, and it is filtered by the standard each project names.
+    validation_rule_sets=[],
     default_modules=[],  # empty = show all
     hidden_modules=[],
     # No bundled SA demo project yet: an empty list keeps the default

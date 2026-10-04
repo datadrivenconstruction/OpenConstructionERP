@@ -227,39 +227,88 @@ def test_a_turkish_section_row_may_carry_its_chapter_and_a_priced_line_may_not()
 # ── India and Japan: the unit lists ──────────────────────────────────────────
 
 
-@pytest.mark.parametrize(
-    "unit",
-    [
-        "m²",  # the India pack's own default area unit
-        "m³",
-        "cum",
-        "Cu.M.",
-        "cu m",
-        "sqm",
-        "Sq.M",
-        "sq m",
-        "RMT",
-        "metre",
-        "Nos.",
-        "No.",
-        "each",
-        "kg",
-        "Qtl",
-        "quintal",
-        "MT",  # the metric tonne as Indian bills write it
-        "tonne",
-        "litre",
-        "kL",
-        "point",
-        "Job",
-        "pair",
-        "set",
-        "km",
-        "hectare",
-        "day",
-        "LS",
-    ],
-)
+#: Units an Indian bill writes, as typed. Each must pass the CPWD rule as
+#: typed and again after the BOQ write path has normalised it.
+CPWD_ACCEPTED: list[str] = [
+    "m²",  # the India pack's own default area unit
+    "m³",
+    "cum",
+    "Cu.M.",
+    "cu m",
+    "sqm",
+    "Sq.M",
+    "sq m",
+    "RMT",
+    "metre",
+    "Nos.",
+    "No.",
+    "each",
+    "kg",
+    "Qtl",
+    "quintal",
+    "MT",  # the metric tonne as Indian bills write it
+    "tonne",
+    "litre",
+    "kL",
+    "point",
+    "Job",
+    "pair",
+    "set",
+    "km",
+    "hectare",
+    "day",
+    "hour",
+    "hours",
+    "h",
+    "hrs",
+    "LS",
+]
+
+#: Units a Japanese bill writes, as typed. The same two passes.
+SEKISAN_ACCEPTED: list[str] = [
+    "m2",
+    "㎡",  # the squared glyph
+    "ｍ２",  # full width
+    "㎥",
+    "ｍ３",
+    "ｍ",
+    "㎏",
+    "ｔ",
+    "基",
+    "面",
+    "本",
+    "枚",
+    "箇所",
+    "個所",
+    "ヶ所",
+    "カ所",
+    "か所",
+    "式",
+    "台",
+    "組",
+    "個",
+    "人",
+    "人工",
+    "日",
+    "回",
+    "袋",
+    "缶",
+    "対",
+    "巻",
+    "丁",
+    "坪",
+    "ℓ",
+    "L",
+    "トン",
+    "m2/回",
+    "each",
+    "hour",
+    "day",
+    "month",
+]
+
+
+@pytest.mark.parametrize("unit", CPWD_ACCEPTED)
 def test_a_cpwd_unit_written_as_an_indian_bill_writes_it_is_accepted(unit: str) -> None:
     assert _passes(CPWDMeasurementUnits(), _line(unit=unit)), unit
 
@@ -270,46 +319,7 @@ def test_an_imperial_unit_is_still_refused_under_cpwd(unit: str) -> None:
     assert not _passes(CPWDMeasurementUnits(), _line(unit=unit)), unit
 
 
-@pytest.mark.parametrize(
-    "unit",
-    [
-        "m2",
-        "㎡",  # the squared glyph
-        "ｍ２",  # full width
-        "㎥",
-        "ｍ３",
-        "ｍ",
-        "㎏",
-        "ｔ",
-        "基",
-        "面",
-        "本",
-        "枚",
-        "箇所",
-        "個所",
-        "ヶ所",
-        "カ所",
-        "か所",
-        "式",
-        "台",
-        "組",
-        "個",
-        "人",
-        "人工",
-        "日",
-        "回",
-        "袋",
-        "缶",
-        "対",
-        "巻",
-        "丁",
-        "坪",
-        "ℓ",
-        "L",
-        "トン",
-        "m2/回",
-    ],
-)
+@pytest.mark.parametrize("unit", SEKISAN_ACCEPTED)
 def test_a_sekisan_unit_written_as_a_japanese_bill_writes_it_is_accepted(unit: str) -> None:
     assert _passes(SekisanMetricUnits(), _line(unit=unit)), unit
 
@@ -317,6 +327,66 @@ def test_a_sekisan_unit_written_as_a_japanese_bill_writes_it_is_accepted(unit: s
 @pytest.mark.parametrize("unit", ["ft", "sqft", "yd", "lb", "gal", "cy", "坪坪", "kgs"])
 def test_a_unit_outside_the_japanese_list_is_still_refused(unit: str) -> None:
     assert not _passes(SekisanMetricUnits(), _line(unit=unit)), unit
+
+
+def _stored(unit: str) -> str:
+    """What the BOQ write path stores for ``unit``, which is what the rule reads in production."""
+    from app.modules.boq.units import normalise_unit
+
+    stored = normalise_unit(unit)
+    if stored is None:
+        pytest.skip(f"{unit!r} cannot be stored through the BOQ write path at all")
+    return stored
+
+
+@pytest.mark.parametrize("unit", CPWD_ACCEPTED)
+def test_a_cpwd_unit_is_still_accepted_after_the_write_path_normalises_it(unit: str) -> None:
+    stored = _stored(unit)
+    assert _passes(CPWDMeasurementUnits(), _line(unit=stored)), f"{unit!r} is stored as {stored!r}"
+
+
+@pytest.mark.parametrize("unit", SEKISAN_ACCEPTED)
+def test_a_sekisan_unit_is_still_accepted_after_the_write_path_normalises_it(unit: str) -> None:
+    stored = _stored(unit)
+    assert _passes(SekisanMetricUnits(), _line(unit=stored)), f"{unit!r} is stored as {stored!r}"
+
+
+#: Every token the BOQ unit normaliser emits for a metric, count, lump or time
+#: unit, with the answer each national list gives. "no" is the British count
+#: abbreviation, which a Japanese bill does not write; "wk" is a planning unit
+#: neither schedule of rates prices in; "lb" is the pound, refused by
+#: both because both lists are metric.
+_CANONICAL_TOKENS: dict[str, tuple[bool, bool]] = {
+    # token: (CPWD accepts, Sekisan accepts)
+    "m": (True, True),
+    "m2": (True, True),
+    "m3": (True, True),
+    "kg": (True, True),
+    "t": (True, True),
+    "pcs": (True, True),
+    "ea": (True, True),
+    "set": (True, True),
+    "lsum": (True, True),
+    "hr": (True, True),
+    "day": (True, True),
+    "month": (True, True),
+    "no": (True, False),
+    "wk": (False, False),
+    "lb": (False, False),
+    "ft2": (False, False),
+}
+
+
+@pytest.mark.parametrize(("token", "answers"), sorted(_CANONICAL_TOKENS.items()))
+def test_each_canonical_unit_token_gets_a_deliberate_answer_from_both_lists(
+    token: str, answers: tuple[bool, bool]
+) -> None:
+    from app.modules.boq.units import normalise_unit
+
+    assert normalise_unit(token) == token, f"{token!r} is no longer a canonical token of the normaliser"
+    cpwd, sekisan = answers
+    assert _passes(CPWDMeasurementUnits(), _line(unit=token)) is cpwd, token
+    assert _passes(SekisanMetricUnits(), _line(unit=token)) is sekisan, token
 
 
 # ── The shipped demos, which are what a user opens first ─────────────────────

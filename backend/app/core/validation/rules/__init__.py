@@ -4606,9 +4606,14 @@ class CPWDMeasurementUnits(ValidationRule):
             "ls",
             "l.s",
             "lumpsum",
-            # time, for hire and establishment items
+            # time, for hire and establishment items. "hr" is what the BOQ
+            # unit normaliser stores for "hour", "hours", "h" and "hrs".
             "day",
             "hour",
+            "hours",
+            "hr",
+            "hrs",
+            "h",
             "month",
         }
     )
@@ -5653,10 +5658,17 @@ class SekisanMetricUnits(ValidationRule):
             "時間",
             # area of a building as a client reads it
             "坪",
-            # the platform's own canonical tokens
+            # the platform's own canonical tokens, which is what the BOQ unit
+            # normaliser stores when a Japanese bill is typed in English
             "pcs",
+            "ea",
+            "each",
             "set",
             "lsum",
+            "hr",
+            "hour",
+            "day",
+            "month",
         }
     )
 
