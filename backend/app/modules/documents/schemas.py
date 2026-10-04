@@ -652,3 +652,55 @@ class DocumentReferencesResponse(BaseModel):
     unlinks: int = 0
     retains: int = 0
     references: list[DocumentReferenceItem] = Field(default_factory=list)
+
+
+#: Same ceiling as :class:`app.core.bulk_ops.BulkDeleteRequest`, so anything
+#: the batch delete accepts can be checked first in one call.
+_BATCH_MAX_IDS = 2000
+
+
+class DocumentBatchReferencesRequest(BaseModel):
+    """Documents a bulk delete is about to remove."""
+
+    ids: list[UUID] = Field(..., min_length=1, max_length=_BATCH_MAX_IDS)
+
+
+class DocumentBatchReferencesResponse(BaseModel):
+    """What still points at any document in a batch, for the bulk delete prompt.
+
+    The totals and ``references`` are summed over the batch so the prompt can
+    say what the whole delete costs in one panel; ``documents`` keeps the
+    per-document answer (only documents something points at) so a caller can
+    name the files responsible. ``checked`` is how many of the requested ids
+    the caller may read and were looked at; ids outside it are neither counted
+    nor named, so the answer never says more than reading those documents
+    would.
+    """
+
+    checked: int = 0
+    referenced_documents: int = 0
+    total: int = 0
+    strands: int = 0
+    unlinks: int = 0
+    retains: int = 0
+    references: list[DocumentReferenceItem] = Field(default_factory=list)
+    documents: list[DocumentReferencesResponse] = Field(default_factory=list)
+
+    @property
+    def severs(self) -> int:
+        """Rows the delete would strand or unlink, the ones that lose something."""
+        return self.strands + self.unlinks
+
+
+class DocumentBatchDeleteRequest(BaseModel):
+    """IDs to delete, plus the caller's word that the references were seen.
+
+    ``acknowledge_references`` defaults to false. A batch where any document is
+    still pointed at by a row that would be stranded or unlinked is refused
+    with 409 and the references report until the caller sends it as true,
+    the server-side form of the confirmation the single-document prompt asks
+    of the person.
+    """
+
+    ids: list[UUID] = Field(..., min_length=1, max_length=_BATCH_MAX_IDS)
+    acknowledge_references: bool = False

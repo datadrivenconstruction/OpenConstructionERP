@@ -53,12 +53,13 @@ Impacts are read off the model and its comments, never off the column name.
 
 from __future__ import annotations
 
+import json
 import logging
 import uuid
 from dataclasses import dataclass
 from typing import Literal
 
-from sqlalchemy import Text, cast, func, literal, select, union_all
+from sqlalchemy import Text, cast, func, literal, or_, select, union_all
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import Base
@@ -365,3 +366,71 @@ async def count_references(session: AsyncSession, document_id: uuid.UUID) -> dic
 
     result = await session.execute(statement)
     return {row.ref_key: int(row.hits) for row in result if row.hits}
+
+
+#: Ids per statement in :func:`count_references_many`. Bounds the ``IN`` list
+#: and the ``OR`` of array matches so one batch never builds a statement the
+#: driver chokes on; a full 2000-id batch is four rounds.
+_MANY_CHUNK = 500
+
+
+async def count_references_many(
+    session: AsyncSession,
+    document_ids: list[uuid.UUID],
+) -> dict[uuid.UUID, dict[str, int]]:
+    """:func:`count_references` for a batch, keyed by document id.
+
+    Answers exactly what calling :func:`count_references` once per id would,
+    and the tests hold it to that, but with one statement per reference and
+    chunk instead of one per document: a batch delete of a few hundred
+    drawings would otherwise be a few hundred round trips, each a union of
+    thirty-four mostly unindexed scans.
+
+    Scalar columns are grouped by value in SQL. The JSON array columns cannot
+    be (there is no portable unnest of a ``JSON`` column), so the rows matching
+    any id in the chunk come back and are attributed in Python with the same
+    quoted-id match the single-id predicate applies to the serialised array.
+    A row holding two ids of the batch therefore counts once against each,
+    as it would if each document were asked about on its own.
+
+    Documents nothing points at are absent from the result.
+    """
+    refs = resolved_references()
+    wanted = {str(doc_id): doc_id for doc_id in document_ids}
+    out: dict[uuid.UUID, dict[str, int]] = {}
+    if not refs or not wanted:
+        return out
+
+    def _add(doc_key: str, ref_key: str, hits: int) -> None:
+        doc_id = wanted.get(doc_key)
+        if doc_id is None or hits <= 0:
+            return
+        bucket = out.setdefault(doc_id, {})
+        bucket[ref_key] = bucket.get(ref_key, 0) + hits
+
+    keys = list(wanted)
+    for start in range(0, len(keys), _MANY_CHUNK):
+        chunk = keys[start : start + _MANY_CHUNK]
+        for ref in refs:
+            table = Base.metadata.tables[ref.table]
+            col = table.c[ref.column]
+            if ref.kind == "array":
+                clause = or_(*(cast(col, Text).contains(f'"{key}"') for key in chunk))
+                if ref.qualifier:
+                    clause = clause & (table.c[ref.qualifier[0]] == ref.qualifier[1])
+                rows = await session.execute(select(col).where(clause))
+                for (value,) in rows.all():
+                    serialised = json.dumps(value)
+                    for key in chunk:
+                        if f'"{key}"' in serialised:
+                            _add(key, ref.key, 1)
+            else:
+                clause = col.in_(chunk)
+                if ref.qualifier:
+                    clause = clause & (table.c[ref.qualifier[0]] == ref.qualifier[1])
+                rows = await session.execute(select(col, func.count()).where(clause).group_by(col))
+                for value, hits in rows.all():
+                    # GUID columns hand back a UUID, String columns the stored
+                    # text; both stringify to the key the IN list matched on.
+                    _add(str(value), ref.key, int(hits))
+    return out

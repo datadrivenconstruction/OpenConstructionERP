@@ -673,6 +673,7 @@
     "boq_not_found": "Leistungsverzeichnis nicht gefunden",
     "session_not_found": "Sitzung nicht gefunden",
     "document_not_found": "Dokument nicht gefunden",
+    "documents_batch_delete_referenced": "Andere Datensätze verweisen noch auf Dokumente in dieser Auswahl. Prüfen Sie, was das Löschen trennt, und bestätigen Sie mit acknowledge_references.",
     "invitation_not_found": "Einladung nicht gefunden",
     "agreement_not_found": "Vereinbarung nicht gefunden",
     "rejection_not_found": "Ablehnung nicht gefunden",

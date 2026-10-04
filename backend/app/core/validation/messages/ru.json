@@ -673,6 +673,7 @@
     "boq_not_found": "Смета не найдена",
     "session_not_found": "Сессия не найдена",
     "document_not_found": "Документ не найден",
+    "documents_batch_delete_referenced": "Другие записи всё ещё ссылаются на документы из этой выборки. Проверьте, какие связи разорвёт удаление, и подтвердите через acknowledge_references.",
     "invitation_not_found": "Приглашение не найдено",
     "agreement_not_found": "Соглашение не найдено",
     "rejection_not_found": "Отказ не найден",

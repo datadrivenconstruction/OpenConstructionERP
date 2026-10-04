@@ -39,6 +39,7 @@ from app.modules.documents.models import Document, DocumentBIMLink, ProjectPhoto
 from app.modules.documents.repository import DocumentRepository, PhotoRepository, SheetRepository
 from app.modules.documents.schemas import (
     PHOTO_CATEGORIES,
+    DocumentBatchReferencesResponse,
     DocumentBIMLinkCreate,
     DocumentReferenceItem,
     DocumentReferencesResponse,
@@ -434,6 +435,43 @@ def _generate_photo_thumbnail(
     except Exception:
         logger.exception("Failed to generate photo thumbnail for %s", dest_path)
         return False
+
+
+#: Heaviest consequence first, so a delete prompt leads with what cannot be
+#: repaired.
+_IMPACT_ORDER = {"strands": 0, "unlinks": 1, "retains": 2}
+
+
+def _summarise_reference_counts(
+    counts: dict[str, int],
+) -> tuple[list[DocumentReferenceItem], dict[str, int]]:
+    """Turn ``{reference key: hits}`` into sorted items plus per-impact totals.
+
+    Shared by the single-document and the batch references answers so the two
+    can never classify or order the same counts differently.
+    """
+    from app.modules.documents.references import resolved_references
+
+    by_key = {ref.key: ref for ref in resolved_references()}
+    items: list[DocumentReferenceItem] = []
+    totals = {"strands": 0, "unlinks": 0, "retains": 0}
+    for key, hits in counts.items():
+        ref = by_key.get(key)
+        if ref is None or hits <= 0:  # pragma: no cover - keys come from the resolved set
+            continue
+        totals[ref.impact] += hits
+        items.append(
+            DocumentReferenceItem(
+                key=key,
+                module=ref.module,
+                model=ref.model,
+                impact=ref.impact,
+                count=hits,
+            )
+        )
+    # Then biggest, then by key so the order is stable.
+    items.sort(key=lambda item: (_IMPACT_ORDER[item.impact], -item.count, item.key))
+    return items, totals
 
 
 class DocumentService:
@@ -1137,36 +1175,10 @@ class DocumentService:
         See :mod:`app.modules.documents.references` for how the set is
         curated and why it is not derived from column names.
         """
-        from app.modules.documents.references import (
-            count_references,
-            resolved_references,
-        )
+        from app.modules.documents.references import count_references
 
         counts = await count_references(self.session, document_id)
-        by_key = {ref.key: ref for ref in resolved_references()}
-
-        items: list[DocumentReferenceItem] = []
-        totals = {"strands": 0, "unlinks": 0, "retains": 0}
-        for key, hits in counts.items():
-            ref = by_key.get(key)
-            if ref is None:  # pragma: no cover - resolved set built above
-                continue
-            totals[ref.impact] += hits
-            items.append(
-                DocumentReferenceItem(
-                    key=key,
-                    module=ref.module,
-                    model=ref.model,
-                    impact=ref.impact,
-                    count=hits,
-                )
-            )
-
-        # Heaviest consequence first, then biggest, so the prompt leads with
-        # what cannot be repaired.
-        order = {"strands": 0, "unlinks": 1, "retains": 2}
-        items.sort(key=lambda item: (order[item.impact], -item.count, item.key))
-
+        items, totals = _summarise_reference_counts(counts)
         return DocumentReferencesResponse(
             document_id=document_id,
             total=sum(totals.values()),
@@ -1174,6 +1186,54 @@ class DocumentService:
             unlinks=totals["unlinks"],
             retains=totals["retains"],
             references=items,
+        )
+
+    async def get_references_batch(self, document_ids: list[uuid.UUID]) -> DocumentBatchReferencesResponse:
+        """:meth:`get_references` for every document of a bulk delete at once.
+
+        The caller has already narrowed ``document_ids`` to what the user may
+        read; this only counts. Per-document answers are the same as asking
+        about each document alone. The batch totals and ``references`` sum
+        them, so a module holding three of the selected drawings shows once
+        with the three rows together.
+        """
+        from app.modules.documents.references import count_references_many
+
+        unique_ids = list(dict.fromkeys(document_ids))
+        per_document = await count_references_many(self.session, unique_ids)
+
+        documents: list[DocumentReferencesResponse] = []
+        summed: dict[str, int] = {}
+        for doc_id in unique_ids:
+            counts = per_document.get(doc_id)
+            if not counts:
+                continue
+            items, totals = _summarise_reference_counts(counts)
+            documents.append(
+                DocumentReferencesResponse(
+                    document_id=doc_id,
+                    total=sum(totals.values()),
+                    strands=totals["strands"],
+                    unlinks=totals["unlinks"],
+                    retains=totals["retains"],
+                    references=items,
+                )
+            )
+            for key, hits in counts.items():
+                summed[key] = summed.get(key, 0) + hits
+
+        items, totals = _summarise_reference_counts(summed)
+        # The documents that would strand something lead, as the items do.
+        documents.sort(key=lambda d: (-d.strands, -d.unlinks, -d.total, str(d.document_id)))
+        return DocumentBatchReferencesResponse(
+            checked=len(unique_ids),
+            referenced_documents=len(documents),
+            total=sum(totals.values()),
+            strands=totals["strands"],
+            unlinks=totals["unlinks"],
+            retains=totals["retains"],
+            references=items,
+            documents=documents,
         )
 
     async def delete_document(

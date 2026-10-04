@@ -673,6 +673,7 @@
     "boq_not_found": "BOQ not found",
     "session_not_found": "Session not found",
     "document_not_found": "Document not found",
+    "documents_batch_delete_referenced": "Records elsewhere still point at documents in this batch. Review what the delete severs and confirm with acknowledge_references.",
     "invitation_not_found": "Invitation not found",
     "agreement_not_found": "Agreement not found",
     "rejection_not_found": "Rejection not found",

@@ -29,7 +29,6 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Query, Response, UploadFile, status
 from fastapi.responses import FileResponse
 
-from app.core.bulk_ops import BulkDeleteRequest
 from app.core.demo_placeholders import materialize_placeholder
 from app.core.i18n import get_locale
 from app.core.rate_limiter import upload_limiter
@@ -45,6 +44,9 @@ from app.dependencies import (
 from app.modules.documents.schemas import (
     DocumentActivityListResponse,
     DocumentActivityResponse,
+    DocumentBatchDeleteRequest,
+    DocumentBatchReferencesRequest,
+    DocumentBatchReferencesResponse,
     DocumentBIMLinkCreate,
     DocumentBIMLinkListResponse,
     DocumentBIMLinkResponse,
@@ -1354,17 +1356,112 @@ async def delete_bim_link(
 # ══════════════════════════════════════════════════════════════════════════
 
 
+async def _readable_document_ids(
+    session,  # type: ignore[no-untyped-def]
+    user_id: str,
+    ids: list[uuid.UUID],
+) -> list[uuid.UUID]:
+    """The subset of ``ids`` the caller could open one by one.
+
+    Applies the guard ``GET /{document_id}/references`` applies to a single
+    document - project membership, then folder read - so asking about a batch
+    never reveals more than asking about each document would. Ids the caller
+    cannot see are dropped silently, the batch analogue of that endpoint's
+    404. Membership and folder access are resolved once per project and
+    folder, not once per document.
+    """
+    from sqlalchemy import select as _select
+
+    from app.modules.documents.folder_permissions_service import (
+        folder_access_for,
+        kind_and_path_for_document,
+    )
+    from app.modules.documents.models import Document
+
+    rows = (
+        await session.execute(_select(Document.id, Document.project_id, Document.category).where(Document.id.in_(ids)))
+    ).all()
+
+    project_ok: dict[uuid.UUID, bool] = {}
+    folder_ok: dict[tuple[uuid.UUID, str, str | None], bool] = {}
+    caller = uuid.UUID(str(user_id))
+    readable: list[uuid.UUID] = []
+    for doc_id, project_id, category in rows:
+        if project_id not in project_ok:
+            try:
+                await _verify_project_membership_or_404(project_id, user_id, session)
+                project_ok[project_id] = True
+            except HTTPException:
+                project_ok[project_id] = False
+        if not project_ok[project_id]:
+            continue
+        kind, path = kind_and_path_for_document(category)
+        folder_key = (project_id, kind, path)
+        if folder_key not in folder_ok:
+            role = await folder_access_for(
+                session,
+                project_id=project_id,
+                user_id=caller,
+                scope_kind=kind,
+                scope_path=path,
+            )
+            folder_ok[folder_key] = role is not None
+        if folder_ok[folder_key]:
+            readable.append(doc_id)
+    # Keep the caller's order, which is the order the selection was made in.
+    order = {doc_id: index for index, doc_id in enumerate(ids)}
+    readable.sort(key=lambda doc_id: order.get(doc_id, len(order)))
+    return readable
+
+
+@router.post(
+    "/batch/references/",
+    response_model=DocumentBatchReferencesResponse,
+)
+async def batch_document_references(
+    body: DocumentBatchReferencesRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: DocumentService = Depends(_get_service),
+) -> DocumentBatchReferencesResponse:
+    """Report what still points at any document of a bulk delete.
+
+    The bulk counterpart of ``GET /{document_id}/references``, read before a
+    multi-file delete so its prompt can say what the whole delete severs.
+    Read-only, and guarded per document exactly like the single endpoint:
+    documents the caller cannot open are left out rather than refused, and
+    ``checked`` says how many were looked at.
+    """
+    readable = await _readable_document_ids(session, str(user_id), list(body.ids))
+    return await service.get_references_batch(readable)
+
+
 @router.post(
     "/batch/delete/",
     status_code=200,
     dependencies=[Depends(RequirePermission("documents.delete"))],
 )
 async def batch_delete_documents(
-    body: BulkDeleteRequest,
+    body: DocumentBatchDeleteRequest,
     user_id: CurrentUserId,
     session: SessionDep,
+    service: DocumentService = Depends(_get_service),
 ) -> dict:
-    """Delete multiple documents in one request."""
+    """Delete multiple documents in one request.
+
+    Before anything is removed the batch is checked for rows elsewhere in the
+    platform that still point at its documents, the same report
+    ``POST /batch/references/`` gives. If any of them would be stranded or
+    unlinked and the request did not set ``acknowledge_references``, nothing
+    is deleted and the answer is 409 with that report under
+    ``detail.references``. Rows that only retain the id (append-only audit,
+    takeoff's own copy of the file) are reported but do not need the
+    acknowledgement, because they lose nothing. A batch nothing points at is
+    deleted as before, so existing callers see no change there.
+
+    The report of what was severed is returned with the deletion count either
+    way, so the caller can say afterwards what the delete cost.
+    """
     from sqlalchemy import select as _select
 
     from app.core.bulk_ops import bulk_delete
@@ -1380,6 +1477,17 @@ async def batch_delete_documents(
     ).all()
     allowed = [r[0] for r in rows if str(r[1]) in owned_project_ids]
     name_by_id = {r[0]: r[2] for r in rows if str(r[1]) in owned_project_ids}
+
+    references = await service.get_references_batch(allowed)
+    if references.severs and not body.acknowledge_references:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "error": "document_references",
+                "message": translate("errors.documents_batch_delete_referenced", locale=get_locale()),
+                "references": references.model_dump(mode="json"),
+            },
+        )
 
     # Audit log BEFORE the bulk delete so the rows still reference a
     # live document_id. The FK cascade wipes them along with the parent,
@@ -1403,7 +1511,11 @@ async def batch_delete_documents(
         deleted,
         user_id,
     )
-    return {"requested": len(body.ids), "deleted": deleted}
+    return {
+        "requested": len(body.ids),
+        "deleted": deleted,
+        "references": references.model_dump(mode="json"),
+    }
 
 
 # ══════════════════════════════════════════════════════════════════════════

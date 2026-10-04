@@ -673,6 +673,7 @@
     "boq_not_found": "BOQ no encontrado",
     "session_not_found": "Sesión no encontrada",
     "document_not_found": "Documento no encontrado",
+    "documents_batch_delete_referenced": "Otros registros aún apuntan a documentos de este lote. Revise lo que la eliminación desvincula y confirme con acknowledge_references.",
     "invitation_not_found": "Invitación no encontrada",
     "agreement_not_found": "Contrato no encontrado",
     "rejection_not_found": "Rechazo no encontrado",
