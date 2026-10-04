@@ -391,8 +391,12 @@ def compute_retention(
     on_stored = _cents(stored_total * stored_rate / HUNDRED)
 
     capped = False
-    if policy.cap_percent_of_contract_sum is not None:
-        cap = _cents(max(total_sum, ZERO) * policy.cap_percent_of_contract_sum / HUNDRED)
+    # A ceiling is a percent of the contract sum, so a contract that states
+    # no sum (a cost-plus or T&M contract whose total was never entered) has
+    # no ceiling anyone can measure. Reading it as 0 percent of 0 would hold
+    # nothing at all, which is the opposite of what the cap is for.
+    if policy.cap_percent_of_contract_sum is not None and total_sum > ZERO:
+        cap = _cents(total_sum * policy.cap_percent_of_contract_sum / HUNDRED)
         if work + on_stored > cap:
             capped = True
             work = min(work, cap)

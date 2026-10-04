@@ -425,11 +425,16 @@ def flat_retention_within_cap(
     period N+1 holds nothing more, however large its gross. Checking each
     period against the cap on its own would let every month hold up to the
     whole ceiling again.
+
+    A contract with no sum (``contract_sum`` of 0, as a cost-plus or T&M
+    contract whose total nobody entered carries) has no ceiling to measure,
+    so the rate holds uncapped. Reading the cap as a percent of 0 would hold
+    nothing from the first claim on.
     """
     retention = (gross * rate / DEC_HUNDRED).quantize(Decimal("0.0001"))
-    if cap_percent is None or retention <= DEC_ZERO:
+    if cap_percent is None or retention <= DEC_ZERO or contract_sum <= DEC_ZERO:
         return retention
-    ceiling = (max(contract_sum, DEC_ZERO) * cap_percent / DEC_HUNDRED).quantize(Decimal("0.01"), ROUND_HALF_UP)
+    ceiling = (contract_sum * cap_percent / DEC_HUNDRED).quantize(Decimal("0.01"), ROUND_HALF_UP)
     room = max(ceiling - max(accrued_before, DEC_ZERO), DEC_ZERO)
     return min(retention, room)
 

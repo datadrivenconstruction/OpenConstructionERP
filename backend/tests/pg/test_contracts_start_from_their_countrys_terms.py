@@ -283,6 +283,41 @@ async def test_a_flat_contract_stops_holding_retention_at_the_gulf_ceiling(pg_se
     assert accruals == [Decimal("4000"), Decimal("1000"), Decimal("0")]
 
 
+async def test_a_cost_plus_contract_with_no_total_keeps_holding_its_rate(pg_session) -> None:
+    """German defaults (5 percent, capped at 5 percent of the sum) on a contract that states no sum.
+
+    The cap is a percent of the contract sum. Measured against a sum of 0 it
+    was 0, and every claim held nothing; before country defaults brought the
+    cap, the same contract held its 5 percent. Without a sum there is no
+    ceiling to measure, so every period holds its rate.
+    """
+    svc = ContractsService(pg_session)
+    contract = await _create(
+        svc,
+        await _project(pg_session, "DE"),
+        contract_type="cost_plus",
+        terms={"fee_percent": "0"},
+        total_value=Decimal("0"),
+    )
+    assert contract.retention_percent == Decimal("5")
+    assert contract.terms["payment_terms"]["retention_cap_percent"] == "5"
+    assert contract.total_value == Decimal("0")
+    contract.status = "active"
+    await pg_session.flush()
+
+    accruals = []
+    for month, cost in ((3, "20000"), (4, "20000"), (5, "40000")):
+        claim = await svc.auto_generate_claim_lines(
+            (await _claim(pg_session, contract, f"PC-{month}", month)).id,
+            AutoGenerateClaimRequest(actual_costs_total=Decimal(cost)),
+        )
+        accruals.append(claim.retention_amount)
+        assert claim.net_due == claim.gross_amount - claim.retention_amount
+        await svc.transition_claim(claim.id, "submitted", "cap-test")
+
+    assert accruals == [Decimal("1000"), Decimal("1000"), Decimal("2000")]
+
+
 async def test_a_schedule_of_values_contract_holds_the_cap_in_total(pg_session) -> None:
     svc = ContractsService(pg_session)
     contract = await _create(

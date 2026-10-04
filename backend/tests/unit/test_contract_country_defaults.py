@@ -369,6 +369,40 @@ def test_a_flat_claim_without_a_cap_holds_its_rate_every_period() -> None:
     assert accrual == Decimal("3000")
 
 
+@pytest.mark.parametrize("contract_sum", [Decimal("0"), Decimal("-1")])
+def test_a_flat_claim_on_a_contract_with_no_sum_holds_its_rate_every_period(contract_sum: Decimal) -> None:
+    """A cost-plus contract with no total under a 5 percent cap: no ceiling to measure, so 5 percent holds.
+
+    Read as 5 percent of 0, the ceiling would be 0 and every claim would hold
+    nothing, which is what a German cost-plus contract with no total did when
+    its country default brought a cap.
+    """
+    held = Decimal("0")
+    accruals = []
+    for gross in (Decimal("20000"), Decimal("20000"), Decimal("40000")):
+        accrual = flat_retention_within_cap(
+            gross, Decimal("5"), cap_percent=Decimal("5"), contract_sum=contract_sum, accrued_before=held
+        )
+        accruals.append(accrual)
+        held += accrual
+    assert accruals == [Decimal("1000"), Decimal("1000"), Decimal("2000")]
+
+
+def test_the_engine_holds_its_rate_when_the_contract_states_no_sum() -> None:
+    """A capped policy on a contract sum of 0 is uncapped, not capped at 0."""
+    policy = policy_from_rule(
+        {"tiers": [{"from_percent_complete": "0", "rate": "5"}], "cap": {"percent_of_contract_sum": "5"}},
+        fallback_rate=0,
+    )
+    position = compute_retention({"A": Decimal("20000")}, contract_sum=Decimal("0"), policy=policy)
+    assert position.total == Decimal("1000.00")
+    assert position.capped is False
+    # The same policy on a contract that states its sum is still held to it.
+    capped = compute_retention({"A": Decimal("200000")}, contract_sum=Decimal("100000"), policy=policy)
+    assert capped.total == Decimal("5000.00")
+    assert capped.capped is True
+
+
 def test_the_engine_holds_the_cap_across_periods_on_a_schedule_of_values() -> None:
     """Work to date 40k, 60k, 90k at 10 percent with a 5 percent cap: held 4000, 5000, 5000."""
     policy = policy_from_rule(
