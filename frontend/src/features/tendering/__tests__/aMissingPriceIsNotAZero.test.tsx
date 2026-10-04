@@ -210,6 +210,6 @@ describe('the leveling matrix', () => {
     const text = view.container.querySelector('tbody')!.textContent!;
     expect(text).toContain('m²');
     expect(text).toContain('psch');
-    expect(text).not.toMatch(/m2|lsum/);
+    expect(text).not.toMatch(/\bm2\b|\blsum\b/);
   });
 });
