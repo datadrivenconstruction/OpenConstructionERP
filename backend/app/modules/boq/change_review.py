@@ -1576,7 +1576,10 @@ class ChangeReviewService:
                     basis=basis,  # type: ignore[arg-type]
                     status=row_status,  # type: ignore[arg-type]
                     appliable=appliable,
-                    manual_override=basis == "model_change" and current_qty != previous,
+                    # A rule result over a quantity someone typed replaces their
+                    # figure, so it carries the same warning as a hand edit; an
+                    # empty target (0) has nothing to lose.
+                    manual_override=(current_qty != previous) if basis == "model_change" else current_qty != 0,
                     model_id=baseline_id,
                     new_model_id=tip.tip_id,
                     new_model_ids=tip_ids,

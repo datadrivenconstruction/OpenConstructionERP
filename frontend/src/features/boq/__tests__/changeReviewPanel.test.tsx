@@ -374,6 +374,24 @@ describe('ChangeReviewPanel model quantities', () => {
     expect(within(row).getByText(/never applied to this position/)).toBeTruthy();
     expect(within(row).queryByText(/Previous model version measured/)).toBeNull();
     expect(within(row).getByText('Quantity rule')).toBeTruthy();
+    // An empty target has nothing to lose, so no replace warning.
+    expect(within(row).queryByText(/Accepting replaces it/)).toBeNull();
+  });
+
+  it('warns before a rule result replaces a quantity someone typed', async () => {
+    openQuantities({}, [
+      proposal({
+        position_id: 'pos-typed',
+        description: 'Tiling',
+        method: 'rule',
+        basis: 'rule_result',
+        current_quantity: '45',
+        new_model_quantity: '30',
+        manual_override: true,
+      }),
+    ]);
+    const row = await screen.findByTestId('bim-proposal-row');
+    expect(within(row).getByText(/Accepting replaces it/)).toBeTruthy();
   });
 
   it('does not apply on a locked bill', async () => {

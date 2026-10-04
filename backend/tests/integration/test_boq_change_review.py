@@ -1294,6 +1294,70 @@ async def test_a_rule_aimed_at_an_existing_position_offers_its_result(client: As
 
 
 @pytest.mark.asyncio
+async def test_a_rule_result_over_a_typed_quantity_warns_and_reads_every_match(
+    client: AsyncClient, auth: dict[str, str]
+):
+    """A rule result would replace 45 m2 someone typed, so the row says so.
+
+    The rule is matched case-insensitively, with a property filter and an
+    underscore in its pattern, and a second rule names a Cyrillic type in
+    lower case against upper-case elements. Narrowing the read in SQL must not
+    lose any of those matches.
+    """
+    project_id = await _project(client, auth)
+    boq_id = await _boq(client, auth, project_id)
+    tag = uuid.uuid4().hex[:6]
+    typed = await _position(client, auth, boq_id, ordinal="9", description="Tiles", unit="m2", quantity=45, unit_rate=2)
+    cyr = await _position(client, auth, boq_id, ordinal="10", description="Плитка", unit="m2", unit_rate=1)
+
+    def el(sid: str, kind: str, area: float, finish: str) -> dict:
+        return {
+            "stable_id": sid,
+            "element_type": kind,
+            "quantities": {"area_m2": area},
+            "properties": {"finish": finish},
+            "geometry_hash": sid,
+        }
+
+    v1, _ = await _model(
+        client,
+        auth,
+        project_id,
+        version="1",
+        elements=[
+            el("A", f"Tile_{tag}_floor", 10, "glazed"),
+            el("B", f"TILE_{tag}_WALL", 5, "Glazed"),
+            el("C", f"tile_{tag}_roof", 7, "matt"),
+            el("D", f"carpet_{tag}", 100, "glazed"),
+            el("E", f"ПЛИТКА_{tag} пол", 4, "matt"),
+        ],
+    )
+    await _rule(
+        client,
+        auth,
+        project_id,
+        f"tile_{tag}_*",
+        {"position_id": typed["id"]},
+        property_filter={"finish": "glazed"},
+    )
+    await _rule(client, auth, project_id, f"плитка_{tag}*", {"position_id": cyr["id"]})
+    await _apply_rules(client, auth, v1, boq_id)
+
+    rows = {
+        r["position_id"]: r
+        for r in (await client.get(f"/api/v1/boq/boqs/{boq_id}/bim-quantity-proposals/", headers=auth)).json()["rows"]
+    }
+    typed_row = rows[typed["id"]]
+    assert typed_row["basis"] == "rule_result"
+    assert _d(typed_row["current_quantity"]) == Decimal("45")
+    assert _d(typed_row["new_model_quantity"]) == Decimal("15")
+    assert typed_row["manual_override"] is True
+    cyr_row = rows[cyr["id"]]
+    assert _d(cyr_row["new_model_quantity"]) == Decimal("4")
+    assert cyr_row["manual_override"] is False
+
+
+@pytest.mark.asyncio
 async def test_a_switched_off_rule_keeps_its_arithmetic_on_linked_elements(client: AsyncClient, auth: dict[str, str]):
     project_id = await _project(client, auth)
     boq_id = await _boq(client, auth, project_id)
