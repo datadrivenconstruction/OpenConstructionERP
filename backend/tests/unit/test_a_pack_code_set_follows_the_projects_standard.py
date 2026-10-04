@@ -321,6 +321,13 @@ async def test_a_texas_project_whose_standard_changes_to_uniformat_drops_masterf
     assert "masterformat" in project.validation_rule_sets, "the stored list is left as it was"
     assert "masterformat" not in _sets_of(project), "the changed standard did not reach the router"
 
+    # A settings save that carries metadata merges it, so the record survives.
+    project = await service.update_project(project.id, ProjectUpdate(metadata={"note": "kick-off"}))
+    await session.flush()
+    assert project.metadata_.get(PACK_RULE_SETS_METADATA_KEY) == ["masterformat"]
+    assert project.metadata_.get("note") == "kick-off"
+    assert "masterformat" not in _sets_of(project)
+
     # A copy keeps the record, so it is not promoted to a set someone asked for.
     copy = await service.duplicate_project(project.id, owner_id)
     await session.flush()
