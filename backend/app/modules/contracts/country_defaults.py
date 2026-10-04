@@ -86,6 +86,10 @@ PLATFORM_FALLBACK: dict[str, Any] = {
 #: Other spellings a project may carry for a country this table keys by ISO 3166-1.
 COUNTRY_ALIASES: dict[str, str] = {"UK": "GB"}
 
+#: Where the notes live in the client's locale files:
+#: ``contracts.country_defaults.<CC>.<field>.note``.
+NOTE_KEY_PREFIX = "contracts.country_defaults."
+
 
 def _figure(value: Any, source: str, reference: str, note: str) -> dict[str, Any]:
     return {"value": value, "source": source, "reference": reference, "note": note}
@@ -171,9 +175,11 @@ COUNTRY_CONTRACT_DEFAULTS: dict[str, dict[str, Any]] = {
         ),
         "payment_period_days": _figure(
             21,
-            "statute",
+            "standard_form",
             "§ 16 Abs. 1 Nr. 3 VOB/B",
-            "Interim payments fall due within 21 days of the client receiving the statement of work.",
+            "Where the contract incorporates VOB/B, interim payments fall due within 21 days of the client "
+            "receiving the statement of work. VOB/B binds only when agreed; a contract under the BGB alone "
+            "follows its rules instead.",
         ),
         "valuation_interval": _figure(
             "monthly",
@@ -183,7 +189,7 @@ COUNTRY_CONTRACT_DEFAULTS: dict[str, dict[str, Any]] = {
         ),
         "certificate_name": _figure(
             "Abschlagsrechnung",
-            "statute",
+            "standard_form",
             "§ 16 Abs. 1 VOB/B; § 632a BGB",
             "The interim invoice for work done, the basis of each interim payment.",
         ),
@@ -584,6 +590,17 @@ def _pack_release_split(country: str) -> list[dict[str, str]] | None:
         return None
 
 
+def note_key(country: str, field: str) -> str:
+    """The i18n key a figure's ``note`` is translated under.
+
+    ``note`` is English prose a person reads beside the figure, so it is
+    served with a key the client renders it through; the English here is that
+    key's ``en`` text, and a test holds the two equal. The reference (a clause,
+    a form, a law) is data and is shown as written.
+    """
+    return f"{NOTE_KEY_PREFIX}{country}.{field}.note"
+
+
 def resolve_contract_defaults(country_code: str | None) -> dict[str, Any] | None:
     """The usual payment terms of ``country_code``, or ``None`` when the table has no row.
 
@@ -592,7 +609,8 @@ def resolve_contract_defaults(country_code: str | None) -> dict[str, Any] | None
         Otherwise a new dict: ``country_code``, ``standard_form``, ``values``
         (one entry per :data:`CONTRACT_DEFAULT_FIELDS`, ``None`` where the
         market has no usual figure), ``sources`` (per field: ``source``,
-        ``reference`` and ``note``) and ``release_split_source``, which is
+        ``reference``, ``note`` in English and ``note_key``, the i18n key the
+        note is translated under) and ``release_split_source``, which is
         ``"regional_pack"`` when the split was read from the pack and
         ``"table"`` otherwise.
     """
@@ -610,7 +628,12 @@ def resolve_contract_defaults(country_code: str | None) -> dict[str, Any] | None
             value = _pack_release_split(country)
             split_source = FROM_REGIONAL_PACK
         values[field] = value
-        sources[field] = {"source": figure["source"], "reference": figure["reference"], "note": figure["note"]}
+        sources[field] = {
+            "source": figure["source"],
+            "reference": figure["reference"],
+            "note": figure["note"],
+            "note_key": note_key(country, field),
+        }
     return {
         "country_code": country,
         "standard_form": row.get("standard_form"),
@@ -740,6 +763,7 @@ __all__ = [
     "COUNTRY_CONTRACT_DEFAULTS",
     "DEFAULTS_STAMP_KEY",
     "FROM_REGIONAL_PACK",
+    "NOTE_KEY_PREFIX",
     "PAYMENT_TERMS_KEY",
     "PAYMENT_TERM_FIELDS",
     "PLATFORM_FALLBACK",
@@ -747,6 +771,7 @@ __all__ = [
     "apply_contract_defaults",
     "forget_overridden",
     "normalise_country",
+    "note_key",
     "resolve_contract_defaults",
     "subcontract_retention_default",
     "validate_release_split",

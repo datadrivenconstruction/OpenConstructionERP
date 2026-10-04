@@ -293,6 +293,7 @@ export function AgreementFormModal({
           {!retentionTouched && knownDefaults && countryRetention !== '' && (
             <DefaultHint
               field="retention_percent"
+              noteField={countryRetentionField}
               country={knownDefaults.country_code}
               source={knownDefaults.sources[countryRetentionField]}
             />

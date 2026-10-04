@@ -190,25 +190,46 @@ const SOURCE_LABELS: Record<string, string> = {
   regional_pack: 'Regional pack',
 };
 
-function sourceTitle(t: TFunction, source: CountryDefaultSource | undefined): string | undefined {
+/**
+ * What a default rests on, for the tooltip: the kind of source, the
+ * reference as written (a clause or a law is data) and the note in the
+ * reader's language. The server sends the note in English; the locale files
+ * carry it under `contracts.country_defaults.<CC>.<field>.note`, and the
+ * server's English is only the fallback.
+ */
+export function sourceTitle(
+  t: TFunction,
+  source: CountryDefaultSource | undefined,
+  country: string,
+  field: CountryDefaultField,
+): string | undefined {
   if (!source) return undefined;
   const kind = t(`contracts.payment_terms.source.${source.source}`, {
     defaultValue: SOURCE_LABELS[source.source] ?? source.source,
   });
-  return [kind, source.reference, source.note].filter(Boolean).join(' · ');
+  const note = source.note
+    ? t(`contracts.country_defaults.${country}.${field}.note`, { defaultValue: source.note })
+    : '';
+  return [kind, source.reference, note].filter(Boolean).join(' · ');
 }
 
 /**
  * "Default for Germany" under a field the country filled in, with what it
  * rests on in the tooltip. Renders nothing when the figure is not a default.
+ *
+ * `noteField` names the table figure whose note explains the value when that
+ * is not `field` itself: a subcontract's rate held to the country's cap is
+ * explained by the cap's note.
  */
 export function DefaultHint({
   field,
+  noteField,
   country,
   source,
   testId,
 }: {
   field: CountryDefaultField;
+  noteField?: CountryDefaultField;
   country: string | null | undefined;
   source: CountryDefaultSource | undefined;
   testId?: string;
@@ -218,7 +239,7 @@ export function DefaultHint({
   return (
     <p
       className="mt-1 text-xs text-content-tertiary"
-      title={sourceTitle(t, source)}
+      title={sourceTitle(t, source, country, noteField ?? field)}
       data-testid={testId ?? `default-hint-${field}`}
     >
       {t('contracts.payment_terms.default_for', {

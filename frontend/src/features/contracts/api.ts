@@ -498,8 +498,15 @@ export type CountryDefaultField =
 /** Where one default figure comes from. */
 export interface CountryDefaultSource {
   source: 'statute' | 'standard_form' | 'industry_practice' | 'regional_pack' | string;
+  /** A clause, form or law, shown as written. */
   reference: string;
+  /**
+   * The server's English sentence. Rendered through
+   * `contracts.country_defaults.<CC>.<field>.note` with this as the fallback.
+   */
   note: string;
+  /** That key, as the server spells it; stamps written before it existed lack it. */
+  note_key?: string;
 }
 
 /** What a new contract on a project starts from. Never another country's row. */

@@ -149,6 +149,19 @@ def test_the_german_rate_stays_within_the_vob_b_maximum_the_pack_states() -> Non
     assert Decimal(resolve_contract_defaults("DE")["values"]["retention_percent"]) <= maximum  # type: ignore[index]
 
 
+@pytest.mark.parametrize("field", ["payment_period_days", "certificate_name"])
+def test_a_vob_b_figure_is_not_passed_off_as_law(field: str) -> None:
+    """VOB/B binds only where the contract incorporates it; the BGB is the law.
+
+    The tooltip prints the source's label, and "Statute" beside a VOB/B clause
+    tells a German estimator that 21 days binds a contract that never agreed
+    VOB/B.
+    """
+    figure = COUNTRY_CONTRACT_DEFAULTS["DE"][field]
+    assert "VOB/B" in figure["reference"]
+    assert figure["source"] == "standard_form"
+
+
 def test_the_german_payment_period_is_the_payment_clocks() -> None:
     from app.modules.payment_clock.data import PAYMENT_REGIMES
 
