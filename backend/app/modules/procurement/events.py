@@ -10,6 +10,10 @@ modules and creates a draft Purchase Order pre-populated from the winner:
 * ``bid_management.package.awarded`` (oe_bid_management) - see
   :func:`_create_po_from_bid_award`.
 
+A third award path, ``rfq.awarded`` (oe_rfq_bidding), drafts its order in
+:mod:`app.modules.procurement.rfq_award` and is registered at the bottom of
+this file with the other two.
+
 Both close the long-standing workflow gap where an award updated the BOQ
 unit rates but left procurement empty, forcing the PM to retype the
 supplier and every line item by hand.
@@ -65,6 +69,7 @@ from app.modules.procurement.repository import (
     POItemRepository,
     PurchaseOrderRepository,
 )
+from app.modules.procurement.rfq_award import on_rfq_awarded
 from app.modules.tendering.models import TenderBid, TenderPackage
 
 logger = logging.getLogger(__name__)
@@ -704,6 +709,8 @@ PUBLISHED_EVENTS = (
 # automatically when ``oe_procurement`` is loaded.
 event_bus.subscribe_once("tendering.package.awarded", _on_tender_awarded)
 event_bus.subscribe_once("bid_management.package.awarded", _on_bid_management_awarded)
+# An awarded RFQ drafts its purchase order; see ``procurement/rfq_award.py``.
+event_bus.subscribe_once("rfq.awarded", on_rfq_awarded)
 event_bus.subscribe_once(
     "procurement.supplier_rating_update",
     _on_supplier_rating_update,
