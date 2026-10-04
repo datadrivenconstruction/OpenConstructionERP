@@ -89,8 +89,7 @@ export function EInvoiceModal({ open, onClose, invoiceId, invoiceNumber }: EInvo
     queryKey: ['finance', 'einvoice-dry-run', invoiceId, profile],
     queryFn: () =>
       apiGet<EInvoiceDryRun>(
-        `/api/v1/finance/invoices/${encodeURIComponent(invoiceId)}/einvoice` +
-          `?format=${encodeURIComponent(profile)}&dry_run=true`,
+        `/api/v1/finance/invoices/${encodeURIComponent(invoiceId)}/einvoice?format=${encodeURIComponent(profile)}&dry_run=true`,
       ),
     enabled: open,
   });
@@ -159,8 +158,7 @@ export function EInvoiceModal({ open, onClose, invoiceId, invoiceNumber }: EInvo
       // the XML inside the hybrid) is locale-independent by the standard.
       const localeParam = embed ? `&locale=${encodeURIComponent(i18n.language)}` : '';
       await downloadWithAuth(
-        `/api/v1/finance/invoices/${encodeURIComponent(invoiceId)}/einvoice` +
-          `?format=${encodeURIComponent(profile)}&embed=${embed ? 'true' : 'false'}${localeParam}`,
+        `/api/v1/finance/invoices/${encodeURIComponent(invoiceId)}/einvoice?format=${encodeURIComponent(profile)}&embed=${embed ? 'true' : 'false'}${localeParam}`,
         `einvoice_${invoiceNumber}_${profile}.${kind}`,
       );
     } catch (e: unknown) {

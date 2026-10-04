@@ -2113,8 +2113,7 @@ export const boqApi = {
    * was applied either way. */
   getPriceAnalysis: (positionId: string, preset?: PriceAnalysisPreset | null) =>
     apiGet<PriceAnalysisResponse>(
-      `/v1/boq/positions/${encodeURIComponent(positionId)}/price-analysis/` +
-        (preset ? `?preset=${encodeURIComponent(preset)}` : ''),
+      `/v1/boq/positions/${encodeURIComponent(positionId)}/price-analysis/${preset ? `?preset=${encodeURIComponent(preset)}` : ''}`,
     ),
 
   /* The same analysis as a Markdown document, which is how a German bidder
@@ -2132,9 +2131,7 @@ export const boqApi = {
   ) => {
     const safe = (positionRef || 'position').replace(/[/\s]/g, '_');
     return downloadWithAuth(
-      `${API_BASE}/v1/boq/positions/${encodeURIComponent(positionId)}/price-analysis/` +
-        `?format=markdown` +
-        (preset ? `&preset=${encodeURIComponent(preset)}` : ''),
+      `${API_BASE}/v1/boq/positions/${encodeURIComponent(positionId)}/price-analysis/?format=markdown${preset ? `&preset=${encodeURIComponent(preset)}` : ''}`,
       `price_analysis_${safe}.md`,
     );
   },
