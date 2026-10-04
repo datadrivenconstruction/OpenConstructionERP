@@ -347,3 +347,45 @@ async def test_batch_references_say_nothing_about_documents_the_caller_cannot_op
     # And the empty request is a validation error, not an empty answer.
     empty = await client.post("/api/v1/documents/batch/references/", json={"ids": []}, headers=auth_headers)
     assert empty.status_code == 422, empty.text
+
+
+@pytest.mark.asyncio
+async def test_batch_delete_removes_each_file_like_the_single_delete(
+    client: AsyncClient,
+    auth_headers: dict[str, str],
+    project_id: uuid.UUID,
+    tmp_path,  # type: ignore[no-untyped-def]
+) -> None:
+    """The batch used to drop the rows and leave every file on disk for good.
+
+    It now runs each document through ``DocumentService.delete_document``, so
+    the file goes with the row exactly as it does for a single delete. A file
+    another document still uses stays, which is the single path's rule too.
+    """
+    from app.database import async_session_factory
+    from app.modules.documents.models import Document
+
+    own_blob = tmp_path / "own.pdf"
+    own_blob.write_bytes(b"%PDF-1.4 own")
+    shared_blob = tmp_path / "shared.pdf"
+    shared_blob.write_bytes(b"%PDF-1.4 shared")
+
+    async with async_session_factory() as session:
+        own = Document(project_id=project_id, name="own.pdf", category="drawing", file_path=str(own_blob))
+        shared = Document(project_id=project_id, name="shared.pdf", category="drawing", file_path=str(shared_blob))
+        keeper = Document(project_id=project_id, name="keeper.pdf", category="drawing", file_path=str(shared_blob))
+        session.add_all([own, shared, keeper])
+        await session.commit()
+        own_id, shared_id, keeper_id = own.id, shared.id, keeper.id
+
+    resp = await client.post(
+        "/api/v1/documents/batch/delete/",
+        json={"ids": [str(own_id), str(shared_id)]},
+        headers=auth_headers,
+    )
+    assert resp.status_code == 200, resp.text
+    assert resp.json()["deleted"] == 2
+
+    assert await _still_there([own_id, shared_id, keeper_id]) == {keeper_id}
+    assert not own_blob.exists(), "the batch left the deleted document's file on disk"
+    assert shared_blob.exists(), "a file another document still uses must stay"

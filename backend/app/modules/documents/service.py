@@ -1240,12 +1240,20 @@ class DocumentService:
         self,
         document_id: uuid.UUID,
         user_id: str | None = None,
+        *,
+        batch: bool = False,
     ) -> None:
         """Delete a document and its file.
 
         DB record is deleted first so a failure there prevents orphan file removal.
         File removal failure is logged but not fatal - leaves an orphan file rather
         than an orphan DB record pointing to a missing file.
+
+        ``batch`` marks the activity entry as part of a bulk delete, which is
+        the only difference between the two paths: the batch endpoint runs
+        every document through here so it publishes the deleted event, hands
+        takeoff its copy of the blob and removes the file exactly as a single
+        delete does.
         """
         document = await self.get_document(document_id)
         file_path_str = document.file_path
@@ -1256,12 +1264,15 @@ class DocumentService:
         # together with the document itself, but the event-bus publish
         # downstream carries the same payload for any external audit
         # collector that wants to retain "deleted" hits.
+        details: dict[str, Any] = {"name": doc_name}
+        if batch:
+            details["batch"] = True
         await record_activity(
             self.session,
             document_id,
             user_id,
             "deleted",
-            {"name": doc_name},
+            details,
         )
 
         # Delete DB record FIRST - this is the authoritative state

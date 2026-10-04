@@ -1464,7 +1464,6 @@ async def batch_delete_documents(
     """
     from sqlalchemy import select as _select
 
-    from app.core.bulk_ops import bulk_delete
     from app.modules.documents.models import Document
     from app.modules.projects.repository import ProjectRepository
 
@@ -1472,11 +1471,8 @@ async def batch_delete_documents(
     owned_projects, _ = await proj_repo.list_for_user(owner_id=user_id, offset=0, limit=10000, exclude_archived=False)
     owned_project_ids = {str(p.id) for p in owned_projects}
 
-    rows = (
-        await session.execute(_select(Document.id, Document.project_id, Document.name).where(Document.id.in_(body.ids)))
-    ).all()
-    allowed = [r[0] for r in rows if str(r[1]) in owned_project_ids]
-    name_by_id = {r[0]: r[2] for r in rows if str(r[1]) in owned_project_ids}
+    rows = (await session.execute(_select(Document.id, Document.project_id).where(Document.id.in_(body.ids)))).all()
+    allowed = list(dict.fromkeys(r[0] for r in rows if str(r[1]) in owned_project_ids))
 
     references = await service.get_references_batch(allowed)
     if references.severs and not body.acknowledge_references:
@@ -1489,22 +1485,15 @@ async def batch_delete_documents(
             },
         )
 
-    # Audit log BEFORE the bulk delete so the rows still reference a
-    # live document_id. The FK cascade wipes them along with the parent,
-    # so retention is best-effort; the event-bus publish carries the
-    # same payload for external audit collectors.
-    from app.modules.documents.activity_service import record_activity
-
+    # Each document goes through the same delete the single endpoint uses.
+    # A bare bulk DELETE of the rows skipped everything around it: no
+    # ``documents.document.deleted`` (so the file-reference purge and the
+    # search index never heard of it), no takeoff copy of a blob it still
+    # reads, and the file left on disk for good.
+    actor = str(user_id) if user_id else None
     for doc_id in allowed:
-        await record_activity(
-            session,
-            doc_id,
-            str(user_id) if user_id else None,
-            "deleted",
-            {"name": name_by_id.get(doc_id, ""), "batch": True},
-        )
-
-    deleted = await bulk_delete(session, Document, allowed)
+        await service.delete_document(doc_id, user_id=actor, batch=True)
+    deleted = len(allowed)
     logger.info(
         "Bulk delete documents: requested=%d deleted=%d user=%s",
         len(body.ids),
