@@ -379,6 +379,11 @@
     "note": "bare technical/business acronym or initialism",
     "reason_category": "abbreviation"
   },
+  "contracts.gaeb_invoice.missing_field": {
+    "en_value": "{{who}}: {{what}}",
+    "note": "Pure template joining an already translated party label and field name; there are no words to translate.",
+    "reason_category": "template_only"
+  },
   "contracts.mod_crm": {
     "en_value": "CRM",
     "note": "bare technical/business acronym or initialism",
