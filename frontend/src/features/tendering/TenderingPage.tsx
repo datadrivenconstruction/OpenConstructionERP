@@ -31,6 +31,9 @@ import {
   Network,
   XCircle,
   CheckCircle2,
+  Table2,
+  Gavel,
+  ShoppingCart,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, RecoveryCard, DismissibleInfo, IntroRichText, SkeletonTable, Breadcrumb, ConfirmDialog, ModuleGuideButton, CollapsibleSection } from '@/shared/ui';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
@@ -72,6 +75,11 @@ import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/featur
 import { buildTenderingInsights } from './tenderingInsights';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { formatCurrency as formatMoney } from '@/shared/lib/money';
+import { RelatedRecordLink, RelatedRecordStrip } from '@/shared/ui/RelatedRecordLink';
+import { useAwardOutcome } from '@/shared/hooks/useAwardOutcome';
+import { contractDeepLink } from '@/shared/lib/changeChainLinks';
+import { bidPackageDeepLink, boqDeepLink, PROCUREMENT_LINK, RFQ_LINK } from '@/shared/lib/awardChainLinks';
+import { listPackages as listBidPackages } from '@/features/bid-management/api';
 
 // English fallbacks for the computed `tendering.prequal_*` keys. The default used to be
 // the raw value, so until the key lands in a locale the screen shows the bare
@@ -1352,6 +1360,37 @@ function PackageDetail({
     queryFn: () => getPackageScope(packageId),
   });
 
+  // Bid-management packages raised against this tender package (their
+  // `tender_id`). They hold the invitations, the Q&A and the leveling for the
+  // same scope, so the reader is offered the way there by name. A failed read
+  // draws no pill; it is not evidence that none exist.
+  const projectIdForLinks = pkg?.project_id ?? '';
+  const { data: bidPackages } = useQuery({
+    queryKey: ['tendering-linked-bid-packages', projectIdForLinks],
+    queryFn: () => listBidPackages({ project_id: projectIdForLinks, limit: 200 }),
+    enabled: !!projectIdForLinks,
+    retry: false,
+  });
+  const linkedBidPackages = useMemo(
+    () => (Array.isArray(bidPackages) ? bidPackages.filter((bp) => bp.tender_id === packageId) : []),
+    [bidPackages, packageId],
+  );
+
+  // What the award drafted. The award subscribers stamp this package's id on
+  // the contract and the purchase order they create; the lookup reads the
+  // stamp back. Linked bid packages count too, because the bid-management
+  // award path stamps its own key on the same records.
+  const awardOutcome = useAwardOutcome(
+    projectIdForLinks,
+    {
+      tender_package_id: packageId,
+      bid_package_ids: linkedBidPackages.map((bp) => bp.id),
+    },
+    pkg?.status === 'awarded',
+  );
+  const awardContract = awardOutcome.contract.state === 'found' ? awardOutcome.contract.record : null;
+  const awardOrder = awardOutcome.order.state === 'found' ? awardOutcome.order.record : null;
+
   // Fetch comparison
   const {
     data: comparison,
@@ -1626,6 +1665,65 @@ function PackageDetail({
                 })}
               </p>
             )}
+            <RelatedRecordStrip
+              className="mt-3"
+              label={t('tendering.related', { defaultValue: 'Related:' })}
+              data-testid="tender-related"
+            >
+              {pkg.boq_id && (
+                <RelatedRecordLink
+                  to={boqDeepLink(pkg.boq_id)}
+                  icon={<Table2 size={12} />}
+                  title={t('tendering.source_boq_hint', {
+                    defaultValue: 'Open the bill of quantities this package was raised from',
+                  })}
+                >
+                  {scope?.boq_name
+                    ? t('tendering.source_boq_named', { defaultValue: 'BOQ: {{name}}', name: scope.boq_name })
+                    : t('tendering.source_boq', { defaultValue: 'Source BOQ' })}
+                </RelatedRecordLink>
+              )}
+              {linkedBidPackages.map((bp) => (
+                <RelatedRecordLink
+                  key={bp.id}
+                  to={bidPackageDeepLink(bp.id)}
+                  icon={<Gavel size={12} />}
+                  title={t('tendering.bid_package_hint', {
+                    defaultValue: 'Open the bid-management package raised for this tender',
+                  })}
+                >
+                  {t('tendering.bid_package_named', { defaultValue: 'Bid package {{code}}', code: bp.code })}
+                </RelatedRecordLink>
+              ))}
+              {awardContract && (
+                <RelatedRecordLink
+                  to={contractDeepLink(awardContract.id)}
+                  icon={<FileText size={12} />}
+                  title={t('tendering.open_award_contract_title', {
+                    defaultValue: 'Open the contract drafted from this award',
+                  })}
+                >
+                  {t('tendering.award_contract_named', {
+                    defaultValue: 'Contract {{code}}',
+                    code: awardContract.code,
+                  })}
+                </RelatedRecordLink>
+              )}
+              {awardOrder && (
+                <RelatedRecordLink
+                  to={PROCUREMENT_LINK}
+                  icon={<ShoppingCart size={12} />}
+                  title={t('tendering.award_po_hint', {
+                    defaultValue: 'Open Procurement, where the purchase order drafted from this award is listed',
+                  })}
+                >
+                  {t('tendering.award_po_named', {
+                    defaultValue: 'Purchase order {{number}}',
+                    number: awardOrder.po_number,
+                  })}
+                </RelatedRecordLink>
+              )}
+            </RelatedRecordStrip>
           </div>
           <div className="flex items-center gap-2">
             {/* An awarded or closed tender is decided: the server refuses a
@@ -1696,17 +1794,30 @@ function PackageDetail({
             {/* CONN-40: once a tender is awarded, take the winning scope into
                 Contracts instead of dead-ending. The awarded rates already
                 live on the BOQ, so the contract is formalised downstream. */}
+            {/* The award drafts a contract; once it is found, the button
+                opens that contract instead of the bare register. */}
             {pkg.status === 'awarded' && (
               <Button
                 variant="primary"
                 size="sm"
                 icon={<ArrowRight size={14} />}
-                onClick={() => navigate('/contracts')}
-                title={t('tendering.formalise_contract_title', {
-                  defaultValue: 'Open Contracts to formalise the awarded scope',
-                })}
+                onClick={() => navigate(awardContract ? contractDeepLink(awardContract.id) : '/contracts')}
+                title={
+                  awardContract
+                    ? t('tendering.open_award_contract_title', {
+                        defaultValue: 'Open the contract drafted from this award',
+                      })
+                    : t('tendering.formalise_contract_title', {
+                        defaultValue: 'Open Contracts to formalise the awarded scope',
+                      })
+                }
               >
-                {t('tendering.formalise_contract', 'Formalise as Contract')}
+                {awardContract
+                  ? t('tendering.open_award_contract', {
+                      defaultValue: 'Open contract {{code}}',
+                      code: awardContract.code,
+                    })
+                  : t('tendering.formalise_contract', 'Formalise as Contract')}
               </Button>
             )}
             {(pkg.status === 'awarded' || pkg.status === 'evaluating') && (
@@ -2105,7 +2216,13 @@ function HowTenderingWorks() {
           {t('tendering.how_mod_contracts', { defaultValue: 'Contracts' })}
         </ModLink>{' '}
         ·{' '}
-        <ModLink to="/reports">{t('tendering.how_mod_reports', { defaultValue: 'Reports' })}</ModLink>
+        <ModLink to="/reports">{t('tendering.how_mod_reports', { defaultValue: 'Reports' })}</ModLink>{' '}
+        ·{' '}
+        <ModLink to="/bid-management">
+          {t('tendering.how_mod_bid_management', { defaultValue: 'Bid Management' })}
+        </ModLink>{' '}
+        ·{' '}
+        <ModLink to={RFQ_LINK}>{t('tendering.how_mod_rfq', { defaultValue: 'RFQ Bidding' })}</ModLink>
       </div>
     </CollapsibleSection>
   );
@@ -2287,6 +2404,10 @@ export function TenderingPage() {
           {
             label: t('nav.bid_management', { defaultValue: 'Bid Management' }),
             onClick: () => navigate('/bid-management'),
+          },
+          {
+            label: t('nav.rfq_bidding', { defaultValue: 'RFQ Bidding' }),
+            onClick: () => navigate(RFQ_LINK),
           },
         ]}
       >
