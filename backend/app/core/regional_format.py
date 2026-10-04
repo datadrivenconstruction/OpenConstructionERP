@@ -40,6 +40,7 @@ from datetime import date, datetime
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Final
 
+from app.core.classification_registry import is_macro_region, normalise_region
 from app.core.i18n_data import COUNTRY_DEFAULTS
 
 NBSP: Final = " "
@@ -112,6 +113,37 @@ _COMMA_DECIMAL_CURRENCIES: Final = frozenset(
 #: Currencies whose only home writes them spaced. Not in the old table: a
 #: hryvnia or a tenge amount fell through to the American default.
 _SPACED_CURRENCIES: Final = frozenset({"UAH", "KZT", "BYN"})
+
+
+def document_country(country_code: str | None, region: str | None = None) -> str:
+    """The country a project's documents are written for, ``""`` when nothing names one.
+
+    The project's own ``country_code`` wins. The create form does not always
+    send one: it posts ``region`` and fills the country only from a geocoded
+    address or an active country pack, so a project created by choosing
+    "Ireland" from the region list can reach an export with no country at
+    all and be written in the currency's style, which for the euro is German.
+    The region is read through the classification registry's normaliser,
+    the same reading that already decides the project's standard and rule
+    packs, so a document and a validation run agree on the country.
+
+    A macro region (``DACH``, ``Nordics``, ``LatinAmerica`` ...) is not read:
+    its anchor country is a convention for picking a standard, and writing a
+    Danish or Argentine bill in the anchor's separators would be a guess.
+
+    Args:
+        country_code: ``project.country_code``, any case, may be empty.
+        region: ``project.region``, free text, may be empty.
+
+    Returns:
+        ISO 3166-1 alpha-2 in upper case, or ``""``.
+    """
+    explicit = (country_code or "").strip().upper()
+    if explicit:
+        return explicit
+    if not region or is_macro_region(region):
+        return ""
+    return normalise_region(region) or ""
 
 
 def style_for_country(country_code: str | None) -> NumberStyle | None:
@@ -231,6 +263,7 @@ __all__ = [
     "TYPOGRAPHIC_APOSTROPHE",
     "NumberStyle",
     "date_format_for_country",
+    "document_country",
     "format_date",
     "format_number",
     "number_style",

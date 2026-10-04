@@ -25,6 +25,7 @@ from app.core.regional_format import (
     SPACED,
     SWISS,
     SWISS_APOSTROPHE,
+    document_country,
     format_date,
     format_number,
     number_style,
@@ -175,3 +176,39 @@ def test_every_country_default_pattern_is_described_in_number_formats() -> None:
 def test_the_spaced_markets_are_spaced(country: str) -> None:
     """These were filed with dots, which is German, not how any of them writes a number."""
     assert style_for_country(country) == SPACED
+
+
+# ── Which country a project's document is written for ────────────────────────
+
+
+@pytest.mark.parametrize(
+    ("country_code", "region", "expected"),
+    [
+        # The create form posts a region and often no country at all.
+        ("", "Ireland", "IE"),
+        (None, "UK", "GB"),
+        ("", "Russia", "RU"),
+        # The project's own country always wins over its region.
+        ("de", "Ireland", "DE"),
+        ("IE", None, "IE"),
+        # A macro region's anchor is a convention for picking a standard, not
+        # the country a Danish or Argentine bill is written in.
+        ("", "DACH", ""),
+        ("", "Nordics", ""),
+        ("", "LatinAmerica", ""),
+        # Nothing names a country.
+        ("", "", ""),
+        (None, None, ""),
+        ("", "Atlantis", ""),
+    ],
+)
+def test_document_country(country_code: str | None, region: str | None, expected: str) -> None:
+    assert document_country(country_code, region) == expected
+
+
+def test_an_irish_project_created_by_region_alone_is_written_irish() -> None:
+    """The path the create form takes: region "Ireland", no country, a euro bill."""
+    style = number_style(document_country(None, "Ireland"), "EUR")
+    assert format_number(Decimal("123456.78"), 2, style) == "123,456.78"
+    # What the same bill printed when the region was ignored.
+    assert format_number(Decimal("123456.78"), 2, number_style("", "EUR")) == "123.456,78"

@@ -156,11 +156,11 @@ def test_without_a_country_the_old_currency_answer_stands(currency: str, expecte
 
 
 def test_a_percentage_on_a_zero_decimal_bill_keeps_its_fraction() -> None:
-    """``Overhead (11%)`` for a 10.5 per cent markup is a different contract."""
+    """The old rounding printed ``Overhead (10%)`` for a 10.5 per cent markup, a different contract."""
     jp = _markup("Overhead", "overhead", 10.5, Decimal("1050"))
     rows = _texts(_build_boq_table(_boq("JPY", [jp]), "JPY", _build_styles(), "metric", "JP"))
     assert any("Overhead (10.5%)" in t for t in rows), rows
-    assert not any("Overhead (11%)" in t for t in rows)
+    assert not any("Overhead (10%)" in t for t in rows)
     # The money itself stays whole yen.
     assert any("1,050 JPY" in t for t in rows)
 

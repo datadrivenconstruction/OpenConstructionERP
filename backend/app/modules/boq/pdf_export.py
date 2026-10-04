@@ -484,7 +484,7 @@ def _fmt_rate(value: float, decimals: int, currency: str = "", country: str = ""
     """A percentage in the market's separators, never rounded to a currency's units.
 
     Routing a rate through :func:`_fmt` printed a Japanese 10.5 per cent
-    markup as ``11%`` and a Hungarian 13.5 per cent one as ``14%``, because
+    markup as ``10%`` and a Hungarian 13.5 per cent one as ``14%``, because
     the yen and the forint have no subunit and the rate inherited that.
     """
     return format_number(value, decimals, number_style(country, currency))

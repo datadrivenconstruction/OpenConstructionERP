@@ -5118,6 +5118,7 @@ async def export_boq_pdf(
     left invariant in the project currency, and the data-interchange exports
     are unaffected.
     """
+    from app.core.regional_format import document_country
     from app.modules.boq.pdf_export import (
         LARGE_BOQ_THRESHOLD,
         count_boq_positions,
@@ -5167,7 +5168,7 @@ async def export_boq_pdf(
             import asyncio
 
             _currency = (project.currency or "").strip()
-            _country = (project.country_code or "").strip()
+            _country = document_country(project.country_code, project.region)
             _locale = (project.locale or "en").strip()
             _page_format = "LETTER" if _country.upper() in {"US", "CA"} else "A4"
             pdf_bytes = await asyncio.to_thread(
@@ -5185,7 +5186,7 @@ async def export_boq_pdf(
             import asyncio
 
             _currency = (project.currency or "").strip()
-            _country = (project.country_code or "").strip()
+            _country = document_country(project.country_code, project.region)
             _locale = (project.locale or "en").strip()
             _page_format = "LETTER" if _country.upper() in {"US", "CA"} else "A4"
             pdf_bytes = await asyncio.to_thread(
