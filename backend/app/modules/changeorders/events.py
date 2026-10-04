@@ -53,6 +53,13 @@ VARIATION_FLAGGED = "variation.flagged"
 #: created. The change order page reads it to say where the draft came from.
 AUTO_DRAFTED_KEY = "auto_drafted"
 
+#: Set on a change order raised from an NCR whose written cost could not be read
+#: as one amount. The value is why: ``"ambiguous"`` (``"12.500"`` in a currency
+#: with three decimals) or ``"unreadable"`` (``"approx. 5000"``). The order then
+#: carries 0 and ``ncr_cost_impact_raw`` keeps what was written, so a person
+#: enters the amount instead of approving a guess.
+AMOUNT_NEEDS_REVIEW_KEY = "amount_needs_review"
+
 _SOURCE_TYPES = ("rfi", "ncr")
 _RFI_ANSWERED_STATES = ("answered", "closed")
 _TITLE_MAX = 255
@@ -153,21 +160,32 @@ def _rfi_order(rfi: Any) -> ChangeOrderCreate | None:
     )
 
 
-def _ncr_order(ncr: Any) -> ChangeOrderCreate | None:
-    from decimal import Decimal, InvalidOperation
+def _ncr_order(ncr: Any, *, project_currency: str | None = None) -> ChangeOrderCreate | None:
+    """The draft for a closed NCR, or ``None`` when it states no cost.
 
+    The cost is free text, read in the convention it was written in
+    (``"BRL 12.000,00"`` is twelve thousand). Text with no digit, and a zero
+    or negative amount, state no cost. Text with digits that do not make one
+    clear amount still drafts, at 0 and marked :data:`AMOUNT_NEEDS_REVIEW_KEY`:
+    a plausible wrong number is worse than an obvious blank, and dropping the
+    draft would lose the cost the NCR records.
+    """
+    from app.core.money import read_written_amount
     from app.modules.changeorders.schemas import ChangeOrderCreate
-    from app.modules.ncr.router import _parse_cost_impact
 
     if not ncr.cost_impact or ncr.status != "closed":
         return None
-    amount, currency = _parse_cost_impact(ncr.cost_impact)
-    try:
-        value = Decimal(amount)
-    except (InvalidOperation, ValueError, TypeError):
+    written = read_written_amount(ncr.cost_impact, currency_hint=project_currency)
+    if written.status == "blank":
         return None
-    if not value.is_finite() or value <= 0:
+    needs_review: str | None = None
+    if written.amount is None:
+        amount, needs_review = "0", written.status
+    elif written.amount <= 0:
         return None
+    else:
+        amount = str(written.amount)
+    currency = written.currency
     parts = [f"Variation from NCR {ncr.ncr_number}: {ncr.title}", "", "Description:", ncr.description or ""]
     if ncr.corrective_action:
         parts.extend(["", "Corrective Action:", ncr.corrective_action])
@@ -188,6 +206,7 @@ def _ncr_order(ncr: Any) -> ChangeOrderCreate | None:
             "ncr_cost_impact_raw": ncr.cost_impact,
             AUTO_DRAFTED_KEY: True,
             "drafted_from": "ncr.closed_with_cost_impact",
+            **({AMOUNT_NEEDS_REVIEW_KEY: needs_review} if needs_review else {}),
         },
     )
 
@@ -236,7 +255,15 @@ async def draft_change_order_from_source(
             return None
 
         try:
-            data = _rfi_order(source) if source_type == "rfi" else _ncr_order(source)
+            if source_type == "rfi":
+                data = _rfi_order(source)
+            else:
+                from sqlalchemy import select
+
+                from app.modules.projects.models import Project
+
+                project_currency = await session.scalar(select(Project.currency).where(Project.id == project_id))
+                data = _ncr_order(source, project_currency=project_currency)
         except ValidationError:
             logger.warning(
                 "variation.flagged: %s %s carries an amount a change order cannot hold, no draft created",
@@ -286,6 +313,7 @@ def register_changeorder_event_subscribers() -> None:
 
 
 __all__ = [
+    "AMOUNT_NEEDS_REVIEW_KEY",
     "AUTO_DRAFTED_KEY",
     "VARIATION_FLAGGED",
     "draft_change_order_from_source",

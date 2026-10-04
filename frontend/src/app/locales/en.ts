@@ -18328,6 +18328,7 @@ const resource = {
     "changeorders.source_kind_ncr": "NCR",
     "changeorders.source_hint_rfi": "Open the RFI this change order was raised from",
     "changeorders.source_hint_ncr": "Open the NCR this change order was raised from",
+    "changeorders.amount_unread": "The NCR gives the cost as \"{{written}}\", which could not be read as one amount. The amount stays at 0 until you enter it.",
     "chat.open_boq": "Open in BOQ",
     "chat.open_project": "Open project",
     "chat.open_projects": "Open in Projects",

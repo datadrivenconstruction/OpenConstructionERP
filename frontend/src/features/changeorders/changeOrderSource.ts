@@ -14,6 +14,12 @@
  *
  * `null` when the change order names no such source, so callers draw nothing
  * rather than a pill to a bare register.
+ *
+ * An NCR states its cost as free text. When that text holds digits but not one
+ * clear amount (`12.500` in a three-decimal currency, `approx. 5000`), the
+ * order is raised at 0 with `amount_needs_review` set and the text kept in
+ * `ncr_cost_impact_raw`; `amountUnread` hands that text to the view so a person
+ * sees what was written and enters the amount.
  */
 
 export type ChangeOrderSourceKind = 'rfi' | 'ncr';
@@ -27,6 +33,8 @@ export interface ChangeOrderSource {
   to: string;
   /** True when the change order was drafted by the platform, not by a person. */
   autoDrafted: boolean;
+  /** The cost as the NCR wrote it, when it could not be read as one amount; else null. */
+  amountUnread: string | null;
 }
 
 const encode = (id: string): string => encodeURIComponent(id);
@@ -44,17 +52,26 @@ export function changeOrderSource(
   if (source === 'rfi') {
     const id = str(metadata.rfi_id);
     if (!id) return null;
-    return { kind: 'rfi', id, number: str(metadata.rfi_number), to: `/rfi/${encode(id)}`, autoDrafted };
+    return {
+      kind: 'rfi',
+      id,
+      number: str(metadata.rfi_number),
+      to: `/rfi/${encode(id)}`,
+      autoDrafted,
+      amountUnread: null,
+    };
   }
   if (source === 'ncr') {
     const id = str(metadata.ncr_id);
     if (!id) return null;
+    const needsReview = str(metadata.amount_needs_review) !== '';
     return {
       kind: 'ncr',
       id,
       number: str(metadata.ncr_number),
       to: `/ncr?highlight=${encode(id)}`,
       autoDrafted,
+      amountUnread: needsReview ? str(metadata.ncr_cost_impact_raw) || null : null,
     };
   }
   return null;

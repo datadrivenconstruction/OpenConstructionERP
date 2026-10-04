@@ -1694,6 +1694,30 @@ function DetailView({
           );
         })()}
 
+        {/* The NCR wrote its cost in a way that is not one clear amount, so
+            the order carries 0. Show what was written so the reviewer enters
+            the amount instead of approving the zero. Drafts only, by hand or
+            automatic alike. */}
+        {(() => {
+          const src = changeOrderSource(order.metadata as Record<string, unknown> | undefined);
+          if (!src?.amountUnread || order.status !== 'draft') return null;
+          return (
+            <div
+              className="mb-4 flex items-start gap-2.5 rounded-lg border border-semantic-warning/30 bg-semantic-warning/5 p-3 text-sm text-content-secondary"
+              data-testid="co-amount-unread"
+            >
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-semantic-warning" />
+              <p className="min-w-0 flex-1">
+                {t('changeorders.amount_unread', {
+                  defaultValue:
+                    'The NCR gives the cost as "{{written}}", which could not be read as one amount. The amount stays at 0 until you enter it.',
+                  written: src.amountUnread,
+                })}
+              </p>
+            </div>
+          );
+        })()}
+
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-3">

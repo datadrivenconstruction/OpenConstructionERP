@@ -39,6 +39,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from app.core import event_handlers
 from app.core.events import Event, EventBus, event_bus
 from app.modules.changeorders.events import (
+    AMOUNT_NEEDS_REVIEW_KEY,
     AUTO_DRAFTED_KEY,
     VARIATION_FLAGGED,
     _on_variation_flagged,
@@ -308,6 +309,93 @@ async def test_a_plain_ncr_amount_takes_the_project_currency(factory: async_sess
 
 
 @pytest.mark.parametrize(
+    ("cost", "amount", "currency"),
+    [
+        # The old reader stripped commas only: 12.00, 12.5005, an exception and
+        # no match. Each would have been a draft off by a thousand, or none.
+        ("BRL 12.000,00", "12000.00", "BRL"),
+        ("EUR 12.500,50", "12500.50", "EUR"),
+        ("1.234.567", "1234567", "GBP"),
+        ("12000 EUR", "12000", "EUR"),
+        ("RUB 1 234 567,89", "1234567.89", "RUB"),
+    ],
+)
+async def test_an_ncr_cost_is_read_in_the_convention_it_was_written_in(
+    factory: async_sessionmaker[AsyncSession],
+    cost: str,
+    amount: str,
+    currency: str,
+) -> None:
+    project_id, _ = await _project(factory, currency="GBP")
+    ncr_id = await _ncr(factory, project_id, cost=cost)
+
+    await _on_variation_flagged(_flag("ncr", ncr_id, project_id))
+
+    (order,) = await _orders(factory, project_id)
+    assert (order.cost_impact, order.currency) == (Decimal(amount), currency)
+    assert AMOUNT_NEEDS_REVIEW_KEY not in order.metadata_
+
+
+@pytest.mark.parametrize(
+    ("project_currency", "cost", "why"),
+    [
+        # Twelve and a half dinar, or twelve thousand five hundred.
+        ("KWD", "12.500", "ambiguous"),
+        ("EUR", "KWD 1,250", "ambiguous"),
+        # Digits, but not one amount.
+        ("EUR", "approx. 5000", "unreadable"),
+        ("EUR", "5000-6000", "unreadable"),
+    ],
+)
+async def test_a_cost_that_cannot_be_read_drafts_at_zero_and_asks_for_the_amount(
+    factory: async_sessionmaker[AsyncSession],
+    project_currency: str,
+    cost: str,
+    why: str,
+) -> None:
+    """A blank a person must fill beats a plausible wrong number, and beats no draft."""
+    project_id, _ = await _project(factory, currency=project_currency)
+    ncr_id = await _ncr(factory, project_id, cost=cost)
+
+    await _on_variation_flagged(_flag("ncr", ncr_id, project_id))
+
+    (order,) = await _orders(factory, project_id)
+    assert order.status == "draft"
+    assert order.cost_impact == Decimal("0")
+    assert order.metadata_[AMOUNT_NEEDS_REVIEW_KEY] == why
+    assert order.metadata_["ncr_cost_impact_raw"] == cost
+
+
+async def test_the_ncr_action_reads_the_cost_the_same_way(factory: async_sessionmaker[AsyncSession]) -> None:
+    """Pressing "create variation" by hand must not still read 12.000,00 as twelve."""
+    from app.modules.ncr.router import create_variation_from_ncr
+    from app.modules.ncr.service import NCRService
+
+    project_id, user_id = await _project(factory, currency="EUR")
+    ncr_id = await _ncr(factory, project_id, cost="BRL 12.000,00")
+    ambiguous_id = await _ncr(factory, project_id, cost="approx. 5000")
+
+    async with factory() as s:
+        for source_id in (ncr_id, ambiguous_id):
+            await create_variation_from_ncr(
+                ncr_id=source_id,
+                session=s,
+                user_id=str(user_id),
+                _perm=None,
+                service=NCRService(s),
+            )
+        await s.commit()
+
+    by_ncr = {o.metadata_["ncr_id"]: o for o in await _orders(factory, project_id)}
+    read = by_ncr[str(ncr_id)]
+    assert (read.cost_impact, read.currency) == (Decimal("12000.00"), "BRL")
+    assert AMOUNT_NEEDS_REVIEW_KEY not in read.metadata_
+    unread = by_ncr[str(ambiguous_id)]
+    assert (unread.cost_impact, unread.currency) == (Decimal("0"), "EUR")
+    assert unread.metadata_[AMOUNT_NEEDS_REVIEW_KEY] == "unreadable"
+
+
+@pytest.mark.parametrize(
     ("status", "cost"),
     [("verification", "5000"), ("void", "5000"), ("closed", "to be assessed"), ("closed", "0"), ("closed", None)],
 )
@@ -556,6 +644,47 @@ async def test_ncr_closed_with_cost_impact_reaches_the_register(
 
     (order,) = await _orders(factory, project_id)
     assert order.cost_impact == Decimal("12000")
+
+
+async def test_an_ncr_cost_nobody_can_read_still_reaches_the_register(
+    factory: async_sessionmaker[AsyncSession],
+    chain: EventBus,
+) -> None:
+    """The flag must not drop a cost the draft would ask a person to enter."""
+    project_id, _ = await _project(factory, currency="KWD")
+    ncr_id = await _ncr(factory, project_id, cost="12.500")
+
+    await chain.publish(
+        "ncr.closed_with_cost_impact",
+        {
+            "ncr_id": str(ncr_id),
+            "project_id": str(project_id),
+            "ncr_number": "NCR-002",
+            "title": "Honeycombing in core wall",
+            "cost_impact": "12.500",
+        },
+    )
+
+    (order,) = await _orders(factory, project_id)
+    assert order.cost_impact == Decimal("0")
+    assert order.metadata_[AMOUNT_NEEDS_REVIEW_KEY] == "ambiguous"
+
+
+@pytest.mark.parametrize("cost", ["0", "to be assessed", "-500"])
+async def test_an_ncr_without_a_positive_cost_raises_no_flag(
+    factory: async_sessionmaker[AsyncSession],
+    chain: EventBus,
+    cost: str,
+) -> None:
+    project_id, _ = await _project(factory)
+    ncr_id = await _ncr(factory, project_id, cost=cost)
+
+    await chain.publish(
+        "ncr.closed_with_cost_impact",
+        {"ncr_id": str(ncr_id), "project_id": str(project_id), "cost_impact": cost},
+    )
+
+    assert await _orders(factory, project_id) == []
 
 
 async def test_rfi_design_change_reaches_the_register(

@@ -404,10 +404,13 @@ async def _handle_ncr_cost_impact(event: Event) -> None:
     publishes after its commit. It used to listen for ``ncr.cost_impact``, a
     name nothing publishes.
 
-    The NCR stores its cost as free text such as ``"BRL 12000"`` or
-    ``"12,000"``, so it is read with the same parser the NCR's own "create
-    variation" action uses. Reading it with ``float()`` turned every amount
-    that carried a currency code into zero and dropped the flag.
+    The NCR stores its cost as free text such as ``"BRL 12.000,00"`` or
+    ``"12,000"``, so it is read with ``read_written_amount``, the reader the
+    NCR's own "create variation" action uses. Reading it with ``float()``
+    turned every amount that carried a currency code into zero and dropped the
+    flag. Text with digits that do not make one clear amount is flagged too:
+    the change order drafted from it carries 0 and asks a person for the
+    amount, rather than the cost vanishing.
 
     Expected event.data:
         project_id: str (UUID)
@@ -418,22 +421,18 @@ async def _handle_ncr_cost_impact(event: Event) -> None:
         schedule_impact_days: int | None
     """
     try:
-        from decimal import Decimal, InvalidOperation
-
-        from app.modules.ncr.router import _parse_cost_impact
+        from app.core.money import read_written_amount
 
         data = event.data
         ncr_id = data.get("ncr_id")
         ncr_number = data.get("ncr_number", "")
         cost_impact = data.get("cost_impact", "0")
 
-        amount, _currency = _parse_cost_impact(str(cost_impact) if cost_impact is not None else None)
-        try:
-            cost_value = Decimal(amount)
-        except (InvalidOperation, ValueError, TypeError):
-            cost_value = Decimal("0")
-
-        if not ncr_id or not data.get("project_id") or not cost_value.is_finite() or cost_value <= 0:
+        written = read_written_amount(cost_impact)
+        states_a_cost = written.status in ("ambiguous", "unreadable") or (
+            written.amount is not None and written.amount > 0
+        )
+        if not ncr_id or not data.get("project_id") or not states_a_cost:
             logger.debug("ncr.closed_with_cost_impact: cost_impact=%s is not a positive amount, skipping", cost_impact)
             return
 

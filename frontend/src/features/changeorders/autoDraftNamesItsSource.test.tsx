@@ -182,7 +182,14 @@ describe('changeOrderSource', () => {
   it('reads an RFI source and opens the RFI itself', () => {
     expect(
       changeOrderSource({ source: 'rfi', rfi_id: 'r 1', rfi_number: 'RFI-012', auto_drafted: true }),
-    ).toEqual({ kind: 'rfi', id: 'r 1', number: 'RFI-012', to: '/rfi/r%201', autoDrafted: true });
+    ).toEqual({
+      kind: 'rfi',
+      id: 'r 1',
+      number: 'RFI-012',
+      to: '/rfi/r%201',
+      autoDrafted: true,
+      amountUnread: null,
+    });
   });
 
   it('reads an NCR source and opens the register on that NCR', () => {
@@ -192,7 +199,16 @@ describe('changeOrderSource', () => {
       number: 'NCR-004',
       to: '/ncr?highlight=n-4',
       autoDrafted: false,
+      amountUnread: null,
     });
+  });
+
+  it('hands over the written cost only when the amount could not be read', () => {
+    const base = { source: 'ncr', ncr_id: 'n-4', ncr_cost_impact_raw: 'KWD 12.500' };
+    expect(changeOrderSource({ ...base, amount_needs_review: 'ambiguous' })?.amountUnread).toBe('KWD 12.500');
+    // A cost that was read keeps its raw text for the audit, but asks nothing.
+    expect(changeOrderSource(base)?.amountUnread).toBeNull();
+    expect(changeOrderSource({ ...base, amount_needs_review: '' })?.amountUnread).toBeNull();
   });
 
   it('names nothing without a source id or with an unknown source', () => {
@@ -261,6 +277,40 @@ describe('the change order detail view of an automatic draft', () => {
     expect(screen.queryByTestId('co-auto-draft-banner')).toBeNull();
     // The provenance pill stays: where it came from is still true.
     expect(screen.getByTitle('Open the NCR this change order was raised from')).toBeTruthy();
+  });
+
+  it('shows the cost as the NCR wrote it when it could not be read', async () => {
+    setTransport(
+      order({
+        source: 'ncr',
+        ncr_id: 'ncr-4',
+        ncr_number: 'NCR-004',
+        auto_drafted: true,
+        amount_needs_review: 'ambiguous',
+        ncr_cost_impact_raw: 'KWD 12.500',
+      }),
+    );
+    renderDetail();
+
+    const note = await screen.findByTestId('co-amount-unread');
+    expect(note.textContent).toContain('"KWD 12.500"');
+    expect(note.textContent).toContain('stays at 0 until you enter it');
+  });
+
+  it('asks for no amount when the NCR cost was read', async () => {
+    setTransport(
+      order({
+        source: 'ncr',
+        ncr_id: 'ncr-4',
+        ncr_number: 'NCR-004',
+        auto_drafted: true,
+        ncr_cost_impact_raw: 'BRL 12.000,00',
+      }),
+    );
+    renderDetail();
+
+    await screen.findByText('Drafted automatically from NCR-004');
+    expect(screen.queryByTestId('co-amount-unread')).toBeNull();
   });
 
   it('shows no banner on a change order a person raised by hand', async () => {

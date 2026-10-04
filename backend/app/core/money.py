@@ -26,6 +26,7 @@ Usage::
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Any
 
@@ -36,11 +37,13 @@ from sqlalchemy.orm import mapped_column
 __all__ = [
     "CURRENCIES",
     "MoneyValue",
+    "WrittenAmount",
     "format_money",
     "minor_units",
     "money_columns",
     "money_quantum",
     "parse_money",
+    "read_written_amount",
 ]
 
 # ── Currency registry ─────────────────────────────────────────────────────────
@@ -363,3 +366,167 @@ def _format_de(d: Decimal, decimals: int) -> str:
     en = _format_en(d, decimals)
     # Swap: comma → TEMP, dot → comma, TEMP → dot.
     return en.replace(",", "\x00").replace(".", ",").replace("\x00", ".")
+
+
+# ── Reading an amount a person typed as text ──────────────────────────────────
+
+#: Currency symbols that name one currency. ``$`` and ``¥`` name several, so
+#: they are stripped without deciding the currency. Longest first, so ``R$``
+#: is not read as ``$``.
+_WRITTEN_SYMBOLS: tuple[tuple[str, str | None], ...] = (
+    ("R$", "BRL"),
+    ("€", "EUR"),
+    ("£", "GBP"),
+    ("₽", "RUB"),
+    ("₹", "INR"),
+    ("₺", "TRY"),
+    ("$", None),
+    ("¥", None),
+)
+
+#: Characters people put between digit groups: space, no-break space, narrow
+#: no-break space, thin space and the Swiss apostrophes.
+_WRITTEN_GROUP_SPACES = "    '’"
+
+_WRITTEN_LEADING_CODE_RE = re.compile(r"^([A-Za-z]{3})(?![A-Za-z])\s*")
+_WRITTEN_TRAILING_CODE_RE = re.compile(r"(?<![A-Za-z])\s*([A-Za-z]{3})$")
+_WRITTEN_BODY_RE = re.compile(r"\d+(?:[.,]\d+)*")
+_WRITTEN_SPACED_RE = re.compile(r"\d{1,3}(?: \d{3})+(?:[.,]\d+)?")
+
+
+@dataclass(frozen=True)
+class WrittenAmount:
+    """What :func:`read_written_amount` made of a piece of text.
+
+    ``status`` is one of:
+
+    * ``"read"``: ``amount`` holds the one amount the text can mean.
+    * ``"ambiguous"``: the text is a number but could mean two amounts, for
+      instance ``"12.500"`` in a currency with three decimals. ``amount`` is
+      ``None``; a person has to say which.
+    * ``"unreadable"``: there are digits, but not one clear amount
+      (``"approx. 5000"``, ``"5000-6000"``, ``"12.34.5"``).
+    * ``"blank"``: no digit at all, so no amount was written.
+
+    ``currency`` is the ISO code written with the amount, as a code or as a
+    symbol that names one currency. It is never the hint passed in.
+    """
+
+    amount: Decimal | None
+    currency: str | None
+    status: str
+
+
+def _valid_groups(parts: list[str], separator: str) -> bool:
+    """Whether ``parts`` (an integer split on ``separator``) are digit groups.
+
+    A lead of one to three digits followed by groups of three, or, for a
+    comma, the Indian layout: a lead of one or two digits, groups of two and a
+    final group of three.
+    """
+    if len(parts) < 2:
+        return False
+    lead, rest = parts[0], parts[1:]
+    if 1 <= len(lead) <= 3 and all(len(p) == 3 for p in rest):
+        return True
+    return separator == "," and 1 <= len(lead) <= 2 and len(rest[-1]) == 3 and all(len(p) == 2 for p in rest[:-1])
+
+
+def read_written_amount(raw: object, *, currency_hint: str | None = None) -> WrittenAmount:
+    """Read an amount a person typed as free text, in the convention they used.
+
+    Accepts an optional ISO code before or after the number (``"BRL 12.000,00"``,
+    ``"12000 EUR"``), a currency symbol, digit groups of dots, commas, spaces
+    or apostrophes, and a leading minus or accounting brackets.
+
+    The decimal separator is decided by the text, not by a locale guess:
+
+    * When both ``.`` and ``,`` appear, the last one is the decimal point and
+      the other must form proper digit groups.
+    * When one of them appears more than once, it is the group separator.
+    * When one of them appears once, it is the decimal point unless exactly
+      three digits follow and the part before could lead a group. Then it is a
+      group separator in a currency with fewer than three decimals
+      (``"12.000"`` euro is twelve thousand; nobody writes euro to the tenth of
+      a cent) and ``"ambiguous"`` in one with three (``"12.500"`` dinar).
+
+    The currency deciding that is the one written with the amount, else
+    ``currency_hint`` (typically the project currency), else the two-decimal
+    default.
+
+    Never raises. See :class:`WrittenAmount` for what comes back.
+    """
+    if isinstance(raw, Decimal | int) and not isinstance(raw, bool):
+        value = Decimal(raw)
+        if value.is_finite():
+            return WrittenAmount(amount=value, currency=None, status="read")
+        return WrittenAmount(amount=None, currency=None, status="unreadable")
+
+    text = str(raw if raw is not None else "").strip()
+    if not any(ch.isdigit() for ch in text):
+        return WrittenAmount(amount=None, currency=None, status="blank")
+
+    codes: list[str] = []
+    for pattern in (_WRITTEN_LEADING_CODE_RE, _WRITTEN_TRAILING_CODE_RE):
+        match = pattern.search(text)
+        if match is not None:
+            codes.append(match.group(1).upper())
+            text = (text[: match.start()] + text[match.end() :]).strip()
+    for symbol, code in _WRITTEN_SYMBOLS:
+        if text.startswith(symbol):
+            text = text[len(symbol) :].strip()
+        elif text.endswith(symbol):
+            text = text[: -len(symbol)].strip()
+        else:
+            continue
+        if code is not None:
+            codes.append(code)
+        break
+    if len(set(codes)) > 1 or any(code not in CURRENCIES for code in codes):
+        return WrittenAmount(amount=None, currency=None, status="unreadable")
+    currency = codes[0] if codes else None
+    unreadable = WrittenAmount(amount=None, currency=currency, status="unreadable")
+
+    negative = False
+    if text.startswith("(") and text.endswith(")"):
+        negative, text = True, text[1:-1].strip()
+    if text[:1] in ("+", "-"):
+        negative, text = text[0] == "-", text[1:].strip()
+
+    body = "".join(" " if ch in _WRITTEN_GROUP_SPACES else ch for ch in text)
+    if " " in body:
+        if not _WRITTEN_SPACED_RE.fullmatch(body):
+            return unreadable
+        body = body.replace(" ", "")
+    if not _WRITTEN_BODY_RE.fullmatch(body):
+        return unreadable
+
+    separators = [ch for ch in body if ch in ".,"]
+    if not separators:
+        digits = body
+    elif len(set(separators)) == 2:
+        decimal_sep = separators[-1]
+        group_sep = "," if decimal_sep == "." else "."
+        whole, fraction = body.rsplit(decimal_sep, 1)
+        if separators.count(decimal_sep) != 1 or not _valid_groups(whole.split(group_sep), group_sep):
+            return unreadable
+        digits = f"{whole.replace(group_sep, '')}.{fraction}"
+    elif len(separators) > 1:
+        if not _valid_groups(body.split(separators[0]), separators[0]):
+            return unreadable
+        digits = body.replace(separators[0], "")
+    else:
+        whole, fraction = body.split(separators[0])
+        could_be_group = len(fraction) == 3 and len(whole) <= 3 and whole.strip("0") != ""
+        if not could_be_group:
+            digits = f"{whole}.{fraction}"
+        elif minor_units(currency or currency_hint) >= 3:
+            return WrittenAmount(amount=None, currency=currency, status="ambiguous")
+        else:
+            digits = whole + fraction
+
+    try:
+        value = Decimal(digits)
+    except InvalidOperation:
+        return unreadable
+    return WrittenAmount(amount=-value if negative else value, currency=currency, status="read")
