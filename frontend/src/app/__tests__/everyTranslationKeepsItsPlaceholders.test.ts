@@ -239,6 +239,8 @@ describe('every translation keeps the placeholders its sentence needs', () => {
     // phrases off JavaScript two-arm branches onto i18next plurals; Arabic
     // states one and two in words ("شرط واحد", "شرطان") and Hebrew states one
     // ("תנאי אחד"), as each grammar does, which added 70 and made it 284.
+    // The 18.4 GAEB site exchange and resource-index counters brought it to
+    // 312 the same way, Arabic and Hebrew again stating one and two in words.
     let zeroForms = 0;
     let spelledOut = 0;
     for (const { key, missing } of comparisons) {
@@ -247,6 +249,6 @@ describe('every translation keeps the placeholders its sentence needs', () => {
       else if (missing.length === 1 && missing[0] === 'count') spelledOut += 1;
     }
     expect(zeroForms, 'zero forms dropping a placeholder').toBeLessThanOrEqual(60);
-    expect(spelledOut, 'singular or dual forms spelling the number out').toBeLessThanOrEqual(310);
+    expect(spelledOut, 'singular or dual forms spelling the number out').toBeLessThanOrEqual(320);
   });
 });

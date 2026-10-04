@@ -3092,5 +3092,78 @@
     "en_value": "RFQ",
     "n": 40,
     "reason": "Fallback label for a purchase order drafted from an RFQ that has no title, so the order names its source by the record type alone. RFQ is the acronym each locale already uses for the RFQ module; ar and he spell the request out, so it is filed for a native review rather than allowlisted."
+  },
+  "price_index.ri.fot_short": {
+    "added_by": "batch 18.4 integration (2026-10-04)",
+    "differs_in": [
+      "bg",
+      "ru",
+      "uk"
+    ],
+    "en_value": "FOT",
+    "n": 39,
+    "reason": "Short column label of the Russian resource-index method for the payroll fund (FOT). Cyrillic locales write the native abbreviation; the others keep the transliterated code of the method. Filed for a native review of whether each market reads the code or wants a local abbreviation."
+  },
+  "price_index.ri.nr_short": {
+    "added_by": "batch 18.4 integration (2026-10-04)",
+    "differs_in": [
+      "bg",
+      "ru",
+      "uk"
+    ],
+    "en_value": "NR",
+    "n": 39,
+    "reason": "Short column label of the Russian resource-index method for overheads (NR). Cyrillic locales write the native abbreviation; the others keep the method's code. Filed for native review, not a prose leak."
+  },
+  "price_index.ri.sp_short": {
+    "added_by": "batch 18.4 integration (2026-10-04)",
+    "differs_in": [
+      "bg",
+      "ru",
+      "uk"
+    ],
+    "en_value": "SP",
+    "n": 39,
+    "reason": "Short column label of the Russian resource-index method for estimated profit (SP). Cyrillic locales write the native abbreviation; the others keep the method's code. Filed for native review, not a prose leak."
+  },
+  "price_index.ri.nr_pct": {
+    "added_by": "batch 18.4 integration (2026-10-04)",
+    "differs_in": [
+      "bg",
+      "cs",
+      "da",
+      "et",
+      "fi",
+      "hr",
+      "hu",
+      "no",
+      "pl",
+      "ru",
+      "sv",
+      "uk"
+    ],
+    "en_value": "NR %",
+    "n": 30,
+    "reason": "Column label NR % of the Russian resource-index method (overheads as a percent of the payroll fund). Kept as the method code in most locales, native abbreviation where the script allows. Filed for native review."
+  },
+  "price_index.ri.sp_pct": {
+    "added_by": "batch 18.4 integration (2026-10-04)",
+    "differs_in": [
+      "bg",
+      "cs",
+      "da",
+      "et",
+      "fi",
+      "hr",
+      "hu",
+      "no",
+      "pl",
+      "ru",
+      "sv",
+      "uk"
+    ],
+    "en_value": "SP %",
+    "n": 30,
+    "reason": "Column label SP % of the Russian resource-index method (estimated profit as a percent of the payroll fund). Kept as the method code in most locales, native abbreviation where the script allows. Filed for native review."
   }
 }

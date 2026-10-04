@@ -154,6 +154,16 @@
     "note": "named open data / interchange standard or format code (CLAUDE.md: not translated)",
     "reason_category": "standard_code"
   },
+  "boq.gaeb_site.col_oz": {
+    "en_value": "OZ",
+    "note": "OZ (Ordnungszahl) is the GAEB DA XML position number element; the column names the field of the exchange format, written the same in every locale including ru",
+    "reason_category": "standard_code"
+  },
+  "boq.gaeb_site.title": {
+    "en_value": "GAEB X31 / X89",
+    "note": "names the two GAEB DA XML exchange phases X31 and X89 by their format codes; identical in every locale including ru (CLAUDE.md: open data standards are not translated)",
+    "reason_category": "standard_code"
+  },
   "boq.markup_percentage": {
     "en_value": "%",
     "note": "bare symbol/punctuation glyph, not a word",
