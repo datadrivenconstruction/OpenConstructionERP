@@ -54,6 +54,11 @@ SETTINGS_KEY = "ru_resource_index"
 #: Country whose tax tables price the VAT line.
 VAT_COUNTRY = "RU"
 
+#: Currency the method's base prices and regional indices are stated in. The
+#: FSNB-2022 base prices are roubles and an index is a rouble-to-rouble ratio, so
+#: a bill kept in another currency is not indexed with them.
+METHOD_CURRENCY = "RUB"
+
 #: How a BOQ resource ``type`` maps onto a resource kind of the method. A type
 #: that is not here (electricity, subcontractor, other, blank) has no group in
 #: the method, so its position is listed as excluded rather than guessed into
@@ -379,7 +384,7 @@ class ResourceIndexService:
             sources={m.position.ref: m.work_type_source for m in mapped},
             vat_name=vat_name,
             on_date=day,
-            currency="RUB",
+            currency=METHOD_CURRENCY,
             excluded=[],
         )
 
@@ -450,7 +455,7 @@ class ResourceIndexService:
             raise SettingsIncompleteError("choose the region and the quarter of the indices first")
 
         project = await self.session.get(Project, boq.project_id) if boq.project_id else None
-        currency = (getattr(project, "currency", "") or "RUB").strip().upper() or "RUB"
+        currency = (getattr(project, "currency", "") or METHOD_CURRENCY).strip().upper() or METHOD_CURRENCY
 
         rows = (
             (
@@ -468,6 +473,21 @@ class ResourceIndexService:
             default_work_type=request.default_work_type,
             resources_at_base_prices=request.resources_at_base_prices,
         )
+        if currency != METHOD_CURRENCY:
+            # The page is reachable for any bill. Rouble indices and Russian VAT
+            # over another currency's prices would print a confident, meaningless
+            # total, so a bill kept in another currency is listed, not priced.
+            excluded += [
+                ExcludedPositionOut(
+                    position_id=m.position.ref,
+                    ordinal=m.position.ordinal,
+                    description=m.position.description[:500],
+                    reason="foreign_currency",
+                    detail=currency,
+                )
+                for m in mapped
+            ]
+            mapped = []
         result, index_rows, norm_rows, _vat_pct, vat_name, day = await self._run(
             region=region, quarter=request.quarter, on_date=request.on_date, mapped=mapped
         )

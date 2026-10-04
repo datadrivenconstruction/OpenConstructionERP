@@ -572,6 +572,38 @@ async def test_boq_prices_to_the_hand_computed_figures(session: AsyncSession) ->
 
 
 @pytest.mark.asyncio
+async def test_a_bill_kept_in_another_currency_is_listed_not_priced(session: AsyncSession) -> None:
+    """The same hand-computed bill in a euro project gets no rouble indices and no Russian VAT."""
+    await _seed_ru_vat(session)
+    await _seed_reference(session)
+    owner = await _make_user(session)
+    boq, p1, p2 = await _hand_computed_boq(session, owner)
+    project = await session.get(Project, boq.project_id)
+    assert project is not None
+    project.currency = "EUR"
+    await session.flush()
+
+    result = await ResourceIndexService(session).compute_boq(
+        boq,
+        BOQResourceIndexComputeRequest(
+            region_code=REGION,
+            quarter=QUARTER,
+            work_types={str(p1.id): "t_concrete", str(p2.id): "t_earthworks"},
+            on_date=date(2026, 2, 15),
+            resources_at_base_prices=True,
+        ),
+    )
+    assert result.is_complete is False
+    assert result.priced_count == 0
+    assert {(e.position_id, e.reason, e.detail) for e in result.excluded} == {
+        (str(p1.id), "foreign_currency", "EUR"),
+        (str(p2.id), "foreign_currency", "EUR"),
+    }
+    assert result.totals.total == D("0")
+    assert result.totals.vat == D("0")
+
+
+@pytest.mark.asyncio
 async def test_same_boq_before_the_vat_change(session: AsyncSession) -> None:
     await _seed_ru_vat(session)
     await _seed_reference(session)
