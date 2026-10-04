@@ -208,6 +208,23 @@ jobs:
       - name: Run cost region currency table tests
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pytest tests/unit/costs/test_region_currency_fallback.py -q -p no:cacheprovider
+      # The streamed cost base import. A country base read into one pandas frame
+      # peaked at 2 to 8 GiB, on a server whose 3 GB floor leaves about 1.8 GiB
+      # for an import, so the loader reads the parquet a few thousand rows at a
+      # time. The unit file holds the stream to a frozen copy of the whole-frame
+      # import row for row and flush for flush, and bounds its traced memory
+      # against the base size, so a convenience read of the whole file fails
+      # here on the commit that brings it back. The integration file compares
+      # what PostgreSQL ends up holding through the real COPY. Attached for the
+      # same reason as the suites around it: tests/unit runs in no lane that
+      # blocks a merge, and the integration file only ran nightly. The real
+      # bases and their resident peak are measured in "Pack cost bases" below.
+      - name: Run streamed cost import tests
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: >-
+          pytest tests/unit/test_cwicr_import_streams_in_batches.py
+          tests/integration/costs/test_cwicr_streamed_import_on_postgres.py
+          -q -p no:cacheprovider --timeout=300 --timeout-method=thread
       # The AI rate limit on the compliance NL builder. Attached for the same
       # reason as the suites around it, and for a sharper one: the guard it
       # covers was written on the wrong endpoint. check_ai_rate_limit shipped
