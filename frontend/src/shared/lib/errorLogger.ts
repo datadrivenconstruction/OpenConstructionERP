@@ -443,10 +443,26 @@ function generateId(): string {
   return `err_${String(errorCounter).padStart(3, '0')}`;
 }
 
+/**
+ * Public routes whose path segment IS the login (App.tsx `:token` routes).
+ * Add a route here when App.tsx gains one.
+ */
+const TOKEN_PATH_PREFIXES: readonly string[] = ['/share/', '/buyer-portal/', '/tendering/bid/', '/field/'];
+
+/** A path with the credential taken out, so it never reaches an error report. */
+export function maskTokenPath(pathname: string): string {
+  const prefix = TOKEN_PATH_PREFIXES.find((p) => pathname.startsWith(p));
+  if (!prefix) return pathname;
+  const rest = pathname.slice(prefix.length);
+  const end = rest.search(/[/?#]/);
+  if (rest === '' || end === 0) return pathname;
+  return `${prefix}:token${end === -1 ? '' : rest.slice(end)}`;
+}
+
 /** Return the current page URL without query string or hash (to avoid leaking data). */
 function cleanUrl(): string {
   if (typeof window === 'undefined') return '';
-  return window.location.pathname;
+  return maskTokenPath(window.location.pathname);
 }
 
 function getLocale(): string {

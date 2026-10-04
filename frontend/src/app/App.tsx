@@ -339,6 +339,9 @@ const BuyerPortalPage = lazy(() =>
     default: m.BuyerPortalPage,
   }))
 );
+const BidPortalPage = lazy(() =>
+  import('@/features/bid-portal/BidPortalPage').then((m) => ({ default: m.BidPortalPage }))
+);
 // Field-worker mobile shell + PIN-redemption auth. See
 // docs/architecture/FIELD_WORKER_MOBILE_DESIGN.md. Lazy-loaded in its
 // own chunk so the desktop bundle is unaffected.
@@ -1124,6 +1127,19 @@ export default function App() {
 
         {/* Public buyer-portal landing page — magic-link auth only, no app shell */}
         <Route path="/buyer-portal/:token" element={<BuyerPortalPage />} />
+
+        {/* Public subcontractor price-entry link - the token is the credential,
+            no login, no app shell. Raw fetch only, never the JWT client. It
+            lives under /tendering/ because the production proxy forwards an
+            allowlist of top-level segments and `tendering` is already on it. */}
+        <Route
+          path="/tendering/bid/:token"
+          element={
+            <Suspense fallback={<LoadingScreen />}>
+              <BidPortalPage />
+            </Suspense>
+          }
+        />
 
         {/* Public subcontractor payment portal — magic-link session, no app
             shell. ?token=<magic-link> deep-links straight to the submit form

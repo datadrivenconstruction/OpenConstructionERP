@@ -1369,6 +1369,21 @@
     "note": "named open data / interchange standard or format code (CLAUDE.md: not translated)",
     "reason_category": "standard_code"
   },
+  "tendering.export_bidder_xlsx": {
+    "en_value": "Excel",
+    "note": "Microsoft Excel product name, identical in every script and locale",
+    "reason_category": "product_name"
+  },
+  "tendering.export_comparison_csv": {
+    "en_value": "CSV",
+    "note": "bare technical/business acronym or initialism",
+    "reason_category": "abbreviation"
+  },
+  "tendering.export_comparison_xlsx": {
+    "en_value": "Excel",
+    "note": "Microsoft Excel product name, identical in every script and locale",
+    "reason_category": "product_name"
+  },
   "tendering.export_gaeb": {
     "en_value": "GAEB X83",
     "note": "named open data / interchange standard or format code (CLAUDE.md: not translated)",

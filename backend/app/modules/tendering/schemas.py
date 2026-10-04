@@ -208,11 +208,17 @@ class BidComparisonRow(BaseModel):
     """
 
     position_id: str | None = None
+    # The bill's position number (OZ / item number), so a printed comparison
+    # can be read against the bill the bidders priced.
+    ordinal: str = ""
     description: str = ""
     unit: str = ""
     budget_quantity: float = 0.0
     budget_rate: Decimal = Decimal("0")
     budget_total: Decimal = Decimal("0")
+    # One entry per bid. ``priced`` is False when the bid has no rate for this
+    # line, so a reader can tell a missing price from one quoted at zero (an
+    # unpriced entry carries ``unit_rate`` and ``total`` null, not 0).
     bids: list[dict[str, Any]] = Field(default_factory=list)
 
     @field_serializer("budget_rate", "budget_total", when_used="json")
@@ -676,3 +682,107 @@ class LevelBidsResponse(BaseModel):
     bid_count: int = 0
     reference_line_count: int = 0
     bid_summaries: list[BidLevelingSummary] = Field(default_factory=list)
+
+
+# ── Bidder price-entry links (public bid portal) ─────────────────────────────
+# A firm on the distribution list gets a personal link that opens the bill
+# without an account. Staff schemas describe the links; the ``BidPortal*``
+# schemas are the only shapes the public routes read or write, and they carry
+# nothing of the buyer's own pricing: no rates, sums, markups, resources,
+# budget or other bidders. Field names avoid words such as ``rate`` and
+# ``total`` on purpose, so a test can assert on the keys of the payload.
+
+
+class BidInvitationResponse(BaseModel):
+    """One bidder link as staff see it (never the token itself)."""
+
+    id: UUID
+    package_id: UUID
+    recipient_id: str
+    company_name: str
+    email: str
+    # not_opened | opened | submitted | expired | revoked
+    status: str
+    expires_at: datetime
+    opened_at: datetime | None = None
+    draft_saved_at: datetime | None = None
+    submitted_at: datetime | None = None
+    revoked_at: datetime | None = None
+    bid_id: UUID | None = None
+    created_at: datetime
+
+
+class BidInvitationCreated(BidInvitationResponse):
+    """A freshly made link. ``url`` holds the token and is returned only here."""
+
+    url: str
+    # How many older links of this recipient the new one replaced (revoked).
+    replaced_count: int = 0
+
+
+class BidInvitationListResponse(BaseModel):
+    """Every bidder link of a package, newest first."""
+
+    items: list[BidInvitationResponse] = Field(default_factory=list)
+    total: int = 0
+
+
+class BidPortalLine(BaseModel):
+    """One row of the bill as the bidder sees it: text and quantity, no price."""
+
+    id: str
+    kind: str  # "section" | "item"
+    ordinal: str = ""
+    short_text: str = ""
+    long_text: str = ""
+    unit: str = ""
+    # Decimal as a string; empty for a section heading.
+    quantity: str = ""
+    depth: int = 0
+
+
+class BidPortalDraft(BaseModel):
+    """The bidder's own entries: unit prices per line id, as decimal strings."""
+
+    unit_prices: dict[str, str] = Field(default_factory=dict)
+    notes: str = ""
+    saved_at: datetime | None = None
+
+
+class BidPortalView(BaseModel):
+    """Everything the public bid page needs, and nothing else."""
+
+    # open | submitted | closed
+    state: str
+    package_name: str
+    package_description: str = ""
+    deadline: str | None = None
+    currency: str = ""
+    project_name: str = ""
+    buyer_name: str = ""
+    bidder_company: str = ""
+    expires_at: datetime
+    lines: list[BidPortalLine] = Field(default_factory=list)
+    draft: BidPortalDraft = Field(default_factory=BidPortalDraft)
+    submitted_at: datetime | None = None
+    # The bidder's own submitted sum, as a decimal string; set once submitted.
+    bid_amount: str | None = None
+    item_count: int = 0
+    unpriced_count: int = 0
+
+
+class BidPortalPricesRequest(BaseModel):
+    """Unit prices a bidder saves as a draft or submits.
+
+    Values are parsed on the server (decimal strings preferred, ``12.5`` and
+    ``12`` accepted); ``null`` or an empty string leaves a line unpriced.
+    ``currency``, when sent, must be the package currency.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    # Values are parsed by the service, so a JSON ``true`` stays a boolean and
+    # is refused rather than coerced to 1.
+    unit_prices: dict[str, Any] = Field(default_factory=dict, max_length=50_000)
+    notes: str = Field(default="", max_length=2000)
+    currency: str | None = Field(default=None, max_length=10)

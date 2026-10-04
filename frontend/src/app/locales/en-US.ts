@@ -499,7 +499,6 @@ const resource = {
     "takeoff.select_items_hint": "Select items to add to Bid Schedule",
     "takeoff.workflow_desc": "Upload a PDF drawing → AI analyzes pages and extracts elements (walls, slabs, doors, etc.) with quantities → Review results and adjust → Add selected items to your bid schedule. Confidence scores: green (>80%) = high confidence, yellow (50-80%) = review recommended, red (<50%) = manual verification needed.",
     "tendering.scope_partial": "Covers part of the bid schedule: {{sections}} ({{included}} of {{total}} positions)",
-    "tendering.export_gaeb_title": "Export the source bid schedule as GAEB XML 3.3 (X83)",
     "tendering.no_packages_description": "Create a tender from a Bid Schedule to start collecting bids",
     "tendering.select_boq": "Select a bid schedule...",
     "tendering.select_project_desc": "Select a project and create a tender from a Bid Schedule to get started",

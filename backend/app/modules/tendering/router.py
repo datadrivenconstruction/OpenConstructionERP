@@ -19,7 +19,7 @@ import logging
 import uuid
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, Response, status
 from fastapi.responses import StreamingResponse
 
 from app.core.content_disposition import attachment_disposition
@@ -30,6 +30,7 @@ from app.dependencies import (
     SessionDep,
     verify_project_access,
 )
+from app.modules.tendering.bid_portal import BidPortalService, enforce_rate_limit
 from app.modules.tendering.schemas import (
     AddendumAcknowledgeRequest,
     AddendumCreate,
@@ -39,6 +40,11 @@ from app.modules.tendering.schemas import (
     BidAnalysisResponse,
     BidComparisonResponse,
     BidCreate,
+    BidInvitationCreated,
+    BidInvitationListResponse,
+    BidInvitationResponse,
+    BidPortalPricesRequest,
+    BidPortalView,
     BidResponse,
     BidUpdate,
     CreatePackageFromBOQData,
@@ -492,6 +498,167 @@ async def compare_bids(
     return await service.compare_bids(package_id)
 
 
+_XLSX_MEDIA_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+
+async def _project_name_and_currency(session: SessionDep, project_id: uuid.UUID) -> tuple[str, str]:
+    from app.modules.projects.repository import ProjectRepository
+
+    project = await ProjectRepository(session).get_by_id(project_id)
+    if project is None:
+        return "", ""
+    return str(getattr(project, "name", "") or ""), (getattr(project, "currency", "") or "").strip().upper()
+
+
+@router.get("/packages/{package_id}/comparison/export/")
+async def export_bid_comparison_xlsx(
+    package_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.comparison.read")),
+    locale: str | None = Query(default=None, max_length=10, description="Sheet language, overrides Accept-Language"),
+    accept_language: str | None = Header(default=None, alias="accept-language"),
+) -> StreamingResponse:
+    """Download the price comparison as an Excel workbook.
+
+    The sheet is the comparison endpoint's answer laid out per bill line, with
+    the lowest unit price, missing prices and outliers marked, and each
+    bidder's submitted total. ``Content-Language`` names the language the
+    sheet's own text is written in.
+    """
+    import asyncio
+
+    from app.modules.tendering.workbooks import render_comparison_xlsx
+    from app.modules.tendering.xlsx_translations import resolve_xlsx_locale, xt
+
+    package = await _verify_package_owner(service, session, package_id, user_id, payload)
+    comparison = await service.compare_bids(package_id)
+    project_name, project_currency = await _project_name_and_currency(session, package.project_id)  # type: ignore[attr-defined]
+    if not project_currency:
+        # No project currency: rank in the currency most bids are quoted in,
+        # the same fallback the comparison uses for its deviations.
+        counts: dict[str, int] = {}
+        for bt in comparison.bid_totals:
+            code = str(bt.get("currency") or "").strip().upper()
+            if code:
+                counts[code] = counts.get(code, 0) + 1
+        project_currency = max(counts.items(), key=lambda kv: (kv[1], kv[0]))[0] if counts else ""
+    sheet_locale = resolve_xlsx_locale(locale, accept_language)
+    data = await asyncio.to_thread(
+        render_comparison_xlsx,
+        comparison,
+        project_name=project_name,
+        reporting_currency=project_currency,
+        locale=sheet_locale,
+    )
+    filename = f"{comparison.package_name} - {xt(sheet_locale, 'comparison_title')}.xlsx"
+    return StreamingResponse(
+        iter([data]),
+        media_type=_XLSX_MEDIA_TYPE,
+        headers={"Content-Disposition": attachment_disposition(filename), "Content-Language": sheet_locale},
+    )
+
+
+@router.get("/packages/{package_id}/export/bidder-xlsx/")
+async def export_bill_for_bidders_xlsx(
+    package_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.read")),
+    locale: str | None = Query(default=None, max_length=10, description="Sheet language, overrides Accept-Language"),
+    accept_language: str | None = Header(default=None, alias="accept-language"),
+) -> StreamingResponse:
+    """Download the package's lines as an Excel sheet for bidders to price.
+
+    Only the lines the package was raised over, with quantities and texts and
+    none of the contractor's own rates, totals or markups. Each line has an
+    open unit price cell and a line total formula.
+    """
+    import asyncio
+
+    from app.modules.boq.service import BOQService, exportable_positions
+    from app.modules.tendering.service import _positions_in_scope
+    from app.modules.tendering.workbooks import bidder_lines, render_bidder_xlsx
+    from app.modules.tendering.xlsx_translations import resolve_xlsx_locale, xt
+
+    package = await _verify_package_owner(service, session, package_id, user_id, payload)
+    boq_id = getattr(package, "boq_id", None)
+    if boq_id is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Package has no linked BOQ to send out")
+    boq_data = await BOQService(session).get_boq_with_positions(boq_id)
+    positions = exportable_positions(boq_data.positions)
+    lines = bidder_lines(positions, _positions_in_scope(positions, getattr(package, "metadata_", None)))
+    project_name, project_currency = await _project_name_and_currency(session, package.project_id)  # type: ignore[attr-defined]
+    deadline = getattr(package, "deadline", None)
+    sheet_locale = resolve_xlsx_locale(locale, accept_language)
+    data = await asyncio.to_thread(
+        render_bidder_xlsx,
+        lines,
+        project_name=project_name,
+        package_name=str(getattr(package, "name", "") or ""),
+        currency=project_currency,
+        deadline=str(deadline)[:10] if deadline else "",
+        locale=sheet_locale,
+    )
+    filename = f"{getattr(package, 'name', '') or 'tender'} - {xt(sheet_locale, 'bidder_title')}.xlsx"
+    return StreamingResponse(
+        iter([data]),
+        media_type=_XLSX_MEDIA_TYPE,
+        headers={"Content-Disposition": attachment_disposition(filename), "Content-Language": sheet_locale},
+    )
+
+
+@router.get("/packages/{package_id}/export/gaeb-x83/")
+async def export_package_gaeb_x83(
+    package_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.read")),
+) -> StreamingResponse:
+    """Download the package's lines as a GAEB DA XML 3.3 call for bids (X83).
+
+    The same positions as the Excel bill for bidders, written by the BOQ
+    module's GAEB writer: unpriced, as DP 83 is, and without the lines of the
+    bill the package was not raised over.
+    """
+    import asyncio
+
+    from app.modules.boq.router import build_gaeb_xml
+    from app.modules.boq.service import BOQService, exportable_positions
+    from app.modules.tendering.gaeb_package import package_bill, package_line_ids
+
+    package = await _verify_package_owner(service, session, package_id, user_id, payload)
+    boq_id = getattr(package, "boq_id", None)
+    if boq_id is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Package has no linked BOQ to send out")
+    boq_service = BOQService(session)
+    positions = exportable_positions((await boq_service.get_boq_with_positions(boq_id)).positions)
+    line_ids = package_line_ids(positions, getattr(package, "metadata_", None))
+    bill = package_bill(await boq_service.get_boq_structured_for_export(boq_id), line_ids)
+    if not bill.sections and not bill.positions:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Package has no lines to send out")
+    project_name, project_currency = await _project_name_and_currency(session, package.project_id)  # type: ignore[attr-defined]
+    xml_content = await asyncio.to_thread(
+        build_gaeb_xml,
+        bill,
+        project_name=project_name,
+        project_currency=project_currency[:3],
+        gaeb_format="x83",
+    )
+    filename = f"{getattr(package, 'name', '') or 'tender'}.X83"
+    return StreamingResponse(
+        iter([xml_content]),
+        media_type="application/xml; charset=utf-8",
+        headers={"Content-Disposition": attachment_disposition(filename)},
+    )
+
+
 @router.post("/packages/{package_id}/apply-winner/")
 async def apply_tender_winner(
     package_id: uuid.UUID,
@@ -589,6 +756,127 @@ async def distribute_package(
     """
     await _verify_package_owner(service, session, package_id, user_id, payload)
     return await service.distribute_package(package_id, data, actor_id=user_id)
+
+
+# ── Bidder price-entry links ──────────────────────────────────────────────────
+# Staff routes make, list and revoke a recipient's personal link; they are
+# guarded like every package route (permission + ``_verify_package_owner``).
+# The public routes below take no login: the token in the path is the
+# credential, see ``bid_portal.py`` for what that implies and what the public
+# payload is allowed to carry.
+
+
+def _get_bid_portal(session: SessionDep) -> BidPortalService:
+    return BidPortalService(session)
+
+
+@router.get("/packages/{package_id}/bid-invitations/", response_model=BidInvitationListResponse)
+async def list_bid_invitations(
+    package_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.read")),
+) -> BidInvitationListResponse:
+    """Every bidder link of a package with its status, newest first. Never the token."""
+    await _verify_package_owner(service, session, package_id, user_id, payload)
+    items = await _get_bid_portal(session).list_invitations(package_id)
+    return BidInvitationListResponse(items=items, total=len(items))
+
+
+@router.post(
+    "/packages/{package_id}/recipients/{recipient_id}/bid-link/",
+    response_model=BidInvitationCreated,
+    status_code=201,
+)
+async def create_bid_link(
+    package_id: uuid.UUID,
+    recipient_id: str,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.distribute")),
+    reopen: bool = Query(default=False, description="Let a firm that already submitted revise its bid"),
+) -> BidInvitationCreated:
+    """Make a new price-entry link for a recipient and return its URL once.
+
+    Any older link of the same recipient stops working; its draft, bid and
+    submitted state carry over to the new one, so a firm that submitted gets a
+    read-only receipt unless ``reopen`` is set.
+    """
+    await _verify_package_owner(service, session, package_id, user_id, payload)
+    return await _get_bid_portal(session).create_link(package_id, recipient_id, actor_id=user_id, reopen=reopen)
+
+
+@router.post(
+    "/packages/{package_id}/bid-invitations/{invitation_id}/revoke/",
+    response_model=BidInvitationResponse,
+)
+async def revoke_bid_invitation(
+    package_id: uuid.UUID,
+    invitation_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.distribute")),
+) -> BidInvitationResponse:
+    """Revoke one link. A submitted bid stays; only the link stops working."""
+    await _verify_package_owner(service, session, package_id, user_id, payload)
+    return await _get_bid_portal(session).revoke(package_id, invitation_id)
+
+
+def _public_headers(response: Response) -> None:
+    # The URL carries the credential: keep answers out of caches and indexes.
+    response.headers["Cache-Control"] = "no-store"
+    response.headers["X-Robots-Tag"] = "noindex, nofollow"
+    response.headers["Referrer-Policy"] = "no-referrer"
+
+
+@router.get("/bid-portal/{token}/", response_model=BidPortalView)
+async def bid_portal_view(
+    token: str,
+    request: Request,
+    response: Response,
+    session: SessionDep,
+) -> BidPortalView:
+    """Public: the bill to price, the package facts and the bidder's own draft.
+
+    No login. Unknown token 404, revoked or expired 410, each with a bare code.
+    """
+    enforce_rate_limit(request, write=False)
+    _public_headers(response)
+    return await _get_bid_portal(session).public_view(token)
+
+
+@router.put("/bid-portal/{token}/draft/", response_model=BidPortalView)
+async def bid_portal_save_draft(
+    token: str,
+    body: BidPortalPricesRequest,
+    request: Request,
+    response: Response,
+    session: SessionDep,
+) -> BidPortalView:
+    """Public: save the bidder's unit prices without submitting."""
+    enforce_rate_limit(request, write=True)
+    _public_headers(response)
+    return await _get_bid_portal(session).save_draft(token, body)
+
+
+@router.post("/bid-portal/{token}/submit/", response_model=BidPortalView)
+async def bid_portal_submit(
+    token: str,
+    body: BidPortalPricesRequest,
+    request: Request,
+    response: Response,
+    session: SessionDep,
+) -> BidPortalView:
+    """Public: submit the bid. The link is read-only afterwards."""
+    enforce_rate_limit(request, write=True)
+    _public_headers(response)
+    return await _get_bid_portal(session).submit(token, body)
 
 
 # ── Addenda Endpoints ────────────────────────────────────────────────────────

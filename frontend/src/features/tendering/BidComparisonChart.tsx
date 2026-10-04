@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { fmtList, fmtPercent } from '@/shared/lib/formatters';
 import { formatCompactCurrency } from '@/shared/lib/money';
+import { unpricedLineCount } from './analysis';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -15,6 +16,8 @@ interface BidTotal {
   currency: string;
   deviation_pct: number;
   status: string;
+  matched_lines?: number;
+  total_lines?: number;
 }
 
 interface BidComparisonChartProps {
@@ -31,6 +34,8 @@ const CHART_PADDING_LEFT = 80;
 const CHART_PADDING_RIGHT = 24;
 const BAR_GAP_RATIO = 0.3;
 const MIN_CHART_HEIGHT = 300;
+// The bottom strip the legend used to be drawn in, inside the SVG.
+const LEGEND_STRIP = 20;
 const TICK_COUNT = 5;
 
 function formatCompact(amount: number, currency: string): string {
@@ -176,7 +181,10 @@ export function BidComparisonChart({
 
   const { lowestTotal, highestTotal, yAxis, chartArea, bars, budgetY } = useMemo(() => {
     const allValues = plottedBids.map((b) => b.total);
-    const lowest = allValues.length > 0 ? Math.min(...allValues) : 0;
+    // Only a complete bid can be the lowest: one that left lines unpriced is
+    // cheaper by exactly what it left out. NaN matches no bar.
+    const completeValues = plottedBids.filter((b) => unpricedLineCount(b) === 0).map((b) => b.total);
+    const lowest = completeValues.length > 0 ? Math.min(...completeValues) : Number.NaN;
     const highest = allValues.length > 0 ? Math.max(...allValues) : 0;
 
     const maxVal = Math.max(highest, budgetTotal);
@@ -257,7 +265,7 @@ export function BidComparisonChart({
         <svg
           ref={svgRef}
           width={svgWidth}
-          height={MIN_CHART_HEIGHT}
+          height={MIN_CHART_HEIGHT - LEGEND_STRIP}
           className="select-none"
           role="img"
           aria-label={t('tendering.bid_comparison_chart_label', 'Bar chart comparing bid totals')}
@@ -413,62 +421,40 @@ export function BidComparisonChart({
             strokeWidth={1}
           />
 
-          {/* Legend */}
-          <g transform={`translate(${chartArea.x}, ${MIN_CHART_HEIGHT - 20})`}>
+        </svg>
+        {/* Legend. HTML rather than SVG text at fixed x offsets: a translated
+            label is as long as its language makes it ("Niedrigstes" ran into
+            "Höchstes"), and a flex row with a gap never overlaps. */}
+        {(plottedBids.length > 1 || budgetTotal > 0) && (
+          <div
+            className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-content-secondary"
+            style={{ paddingLeft: chartArea.x }}
+            data-testid="bid-chart-legend"
+          >
             {plottedBids.length > 1 && (
               <>
-                <rect x={0} y={0} width={10} height={10} rx={2} fill="var(--oe-success, #15803d)" />
-                <text
-                  x={14}
-                  y={9}
-                  className="text-[10px]"
-                  fill="var(--color-content-secondary, #6b7280)"
-                >
+                <span className="inline-flex items-center gap-1">
+                  <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: 'var(--oe-success, #15803d)' }} />
                   {t('tendering.lowest', 'Lowest')}
-                </text>
-                <rect x={60} y={0} width={10} height={10} rx={2} fill="var(--oe-error, #dc2626)" />
-                <text
-                  x={74}
-                  y={9}
-                  className="text-[10px]"
-                  fill="var(--color-content-secondary, #6b7280)"
-                >
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: 'var(--oe-error, #dc2626)' }} />
                   {t('tendering.highest', 'Highest')}
-                </text>
-                <rect x={130} y={0} width={10} height={10} rx={2} fill="var(--color-oe-blue, #3b82f6)" />
-                <text
-                  x={144}
-                  y={9}
-                  className="text-[10px]"
-                  fill="var(--color-content-secondary, #6b7280)"
-                >
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: 'var(--color-oe-blue, #3b82f6)' }} />
                   {t('tendering.other', 'Other')}
-                </text>
+                </span>
               </>
             )}
             {budgetTotal > 0 && (
-              <g transform={`translate(${plottedBids.length > 1 ? 200 : 0}, 0)`}>
-                <line
-                  x1={0}
-                  y1={5}
-                  x2={20}
-                  y2={5}
-                  stroke="var(--oe-warning, #f59e0b)"
-                  strokeWidth={1.5}
-                  strokeDasharray="4 3"
-                />
-                <text
-                  x={24}
-                  y={9}
-                  className="text-[10px]"
-                  fill="var(--color-content-secondary, #6b7280)"
-                >
-                  {t('tendering.budget_line', 'Budget')}
-                </text>
-              </g>
+              <span className="inline-flex items-center gap-1">
+                <span className="inline-block w-5 border-t-[1.5px] border-dashed" style={{ borderColor: 'var(--oe-warning, #f59e0b)' }} />
+                {t('tendering.budget_line', 'Budget')}
+              </span>
             )}
-          </g>
-        </svg>
+          </div>
+        )}
       </div>
     </div>
   );

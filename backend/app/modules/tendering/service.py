@@ -145,6 +145,24 @@ def _scope_position_ids(metadata: dict | None) -> set[str]:
     return scope
 
 
+def _is_bill_line(position: object) -> bool:
+    """Whether a bill row is a line a bidder prices.
+
+    Not a section header and not a blank placeholder (no text, no quantity):
+    the rows the bill for bidders carries, in Excel and in GAEB, so a count of
+    lines the winner left unpriced never includes a row the bidder was not
+    sent.
+
+    Args:
+        position: A BOQ position, or any row exposing ``unit``,
+            ``description``, ``quantity`` and ``unit_rate``.
+    """
+    from app.modules.boq.service import is_empty_position
+
+    unit = (getattr(position, "unit", "") or "").strip().lower()
+    return unit not in ("", "section") and not is_empty_position(position)
+
+
 def _scope_sections(positions: list, metadata: dict | None) -> dict:
     """Describe a package's scope in the bill's own terms.
 
@@ -763,6 +781,7 @@ class TenderingService:
                 "unit_rate": rate,
                 "total": total,
                 "ordinal": pos.ordinal or "",
+                "is_line": _is_bill_line(pos),
             }
             budget_total += total
 
@@ -806,12 +825,26 @@ class TenderingService:
 
         # Build comparison rows
         rows: list[BidComparisonRow] = []
+        # Priced lines per bid, section headers and blank placeholder rows not
+        # counted, so a bid total can say how complete it is (``matched_lines``
+        # of ``total_lines``) over the lines the bidders were sent.
+        line_count = 0
+        priced_lines: dict[str, int] = {str(b.id): 0 for b in bids}
         for pid, pdata in position_map.items():
             bid_entries = []
             budget_rate: Decimal = pdata["unit_rate"]
+            is_line = pdata["is_line"]
+            if is_line:
+                line_count += 1
             for bid in bids:
                 matching = bid_line_index.get(str(bid.id), {}).get(pid)
-                if matching:
+                # A line the bidder sent no rate for is not priced. It carries no
+                # figure at all (None, not 0), so no reader can rank it as the
+                # cheapest price on the line or sum it as a zero.
+                priced = bool(matching) and matching.get("unit_rate") not in (None, "")
+                if priced:
+                    if is_line:
+                        priced_lines[str(bid.id)] += 1
                     bid_rate = _to_decimal(matching.get("unit_rate", 0))
                     bid_total = _to_decimal(matching.get("total", 0))
                     if budget_rate > 0 and _same_currency(bid):
@@ -826,6 +859,7 @@ class TenderingService:
                             "unit_rate": _round2(bid_rate),
                             "total": _round2(bid_total),
                             "deviation_pct": dev_val,
+                            "priced": True,
                         }
                     )
                 else:
@@ -833,15 +867,17 @@ class TenderingService:
                         {
                             "company_name": bid.company_name,
                             "bid_id": str(bid.id),
-                            "unit_rate": 0.0,
-                            "total": 0.0,
+                            "unit_rate": None,
+                            "total": None,
                             "deviation_pct": 0.0,
+                            "priced": False,
                         }
                     )
 
             rows.append(
                 BidComparisonRow(
                     position_id=pid,
+                    ordinal=pdata["ordinal"],
                     description=pdata["description"],
                     unit=pdata["unit"],
                     budget_quantity=_round2(pdata["quantity"]),
@@ -874,6 +910,8 @@ class TenderingService:
                     "deviation_pct": dev_val,
                     "deviation_known": deviation_known,
                     "status": bid.status,
+                    "matched_lines": priced_lines[str(bid.id)],
+                    "total_lines": line_count,
                 }
             )
 
@@ -900,7 +938,9 @@ class TenderingService:
         A locked BOQ is never rewritten, and a bid priced as a lump sum has no
         line rates to write; the award still stands in both cases and the
         response names the reason in ``rates_skipped_reason`` (``boq_locked``
-        or ``no_line_rates``, ``None`` when rates were written).
+        or ``no_line_rates``, ``None`` when rates were written). A line the
+        bid left unpriced keeps the bill's rate, and ``positions_unpriced``
+        counts the package's lines that did.
         The package is transitioned to ``awarded``, the winning bid to
         ``accepted`` and every other bid to ``rejected``. An event is
         published for downstream budget / EVM modules.
@@ -1011,10 +1051,14 @@ class TenderingService:
         boq_locked = bool(
             (await self.session.execute(select(BOQ.is_locked).where(BOQ.id == package.boq_id))).scalar_one_or_none()
         )
+        # A line the winner sent no rate for (no key, null or empty) is not
+        # priced, and the bill keeps its own rate there: writing it would
+        # replace the estimate with 0. A rate of 0 that was sent is a price and
+        # is written.
         rate_lines = [
             item
             for item in (bid.line_items or [])
-            if isinstance(item, dict) and item.get("position_id") and "unit_rate" in item
+            if isinstance(item, dict) and item.get("position_id") and item.get("unit_rate") not in (None, "")
         ]
         rates_skipped_reason: str | None = None
         if boq_locked:
@@ -1022,6 +1066,26 @@ class TenderingService:
             rate_lines = []
         elif not rate_lines:
             rates_skipped_reason = "no_line_rates"
+
+        # How many of the package's lines keep the bill's rate because the
+        # winner did not price them, so the caller can say so. Section headers
+        # and blank placeholder rows are not lines (``_is_bill_line``); a
+        # locked bill keeps every rate for its own reason.
+        positions_unpriced = 0
+        if not boq_locked:
+            bill_rows = (
+                await self.session.execute(
+                    select(
+                        Position.id, Position.unit, Position.description, Position.quantity, Position.unit_rate
+                    ).where(Position.boq_id == package.boq_id)
+                )
+            ).all()
+            priced_ids = {str(item.get("position_id")) for item in rate_lines}
+            positions_unpriced = sum(
+                1
+                for row in _positions_in_scope(list(bill_rows), package.metadata_)
+                if _is_bill_line(row) and str(row.id) not in priced_ids
+            )
 
         updated = 0
         for item in rate_lines:
@@ -1084,6 +1148,7 @@ class TenderingService:
                 "bid_id": str(bid_id),
                 "company_name": bid.company_name,
                 "positions_updated": updated,
+                "positions_unpriced": positions_unpriced,
                 "rates_skipped_reason": rates_skipped_reason,
                 "boq_id": str(package.boq_id),
                 "awarded_by": str(awarded_by) if awarded_by else None,
@@ -1102,6 +1167,7 @@ class TenderingService:
             "package_id": str(package_id),
             "bid_id": str(bid_id),
             "positions_updated": updated,
+            "positions_unpriced": positions_unpriced,
             "rates_skipped_reason": rates_skipped_reason,
             "boq_id": str(package.boq_id),
         }
@@ -1179,6 +1245,10 @@ class TenderingService:
         meta = dict(package.metadata_ or {})
         meta["recipients"] = remaining
         await self.repo.update_package_fields(package_id, metadata_=meta)
+        # A firm taken off the list must not keep a working price-entry link.
+        from app.modules.tendering.bid_portal import BidPortalService
+
+        await BidPortalService(self.session).retire_others(package_id, str(recipient_id), keep=None)
         logger.info("Tender recipient removed: package=%s recipient=%s", package_id, recipient_id)
 
     async def distribute_package(
@@ -1225,18 +1295,22 @@ class TenderingService:
         service = get_email_service()
         backend_name = service.backend_name
 
-        # Build a stable link back to this tender for the email CTA. Falls back
-        # to the resolved frontend URL (which itself falls back to the first
-        # CORS origin), so a dev install still produces a working-looking link.
-        base_url = (settings.resolved_frontend_url or "").rstrip("/")
-        action_url = f"{base_url}/tendering?package={package_id}" if base_url else ""
+        # Each email carries the recipient's own price-entry link (made per
+        # send below): the bidder has no account, so the internal
+        # ``/tendering`` route would only show them a login page.
+        from app.modules.tendering.bid_portal import BidPortalService, bid_link_url, usable_recipient_id
+        from app.modules.tendering.invitation_email import email_locale, invitation_subject
+
+        portal = BidPortalService(self.session)
 
         # Resolve a reporting currency / project name once (tenant-correct:
-        # the project was already verified as accessible by the router).
+        # the project was already verified as accessible by the router). The
+        # email is written in the project's language, not the sender's.
         from app.modules.projects.repository import ProjectRepository
 
         project = await ProjectRepository(self.session).get_by_id(package.project_id)
         project_name = (getattr(project, "name", "") or "") if project is not None else ""
+        locale = email_locale(getattr(project, "locale", None) if project is not None else None)
 
         results: list[DistributeResultEntry] = []
         sent_count = 0
@@ -1279,14 +1353,37 @@ class TenderingService:
                     )
                 )
                 continue
+            if usable_recipient_id(r.get("id")) is None:
+                # A link is keyed on the recipient; one without an id would
+                # share its link with every other such entry.
+                failed_count += 1
+                r["status"] = "failed"
+                r["last_error"] = "missing recipient id"
+                results.append(
+                    DistributeResultEntry(
+                        recipient_id=rid,
+                        company_name=company,
+                        email=to_email,
+                        status="failed",
+                        detail="missing recipient id",
+                    )
+                )
+                continue
 
-            subject = f"Invitation to tender: {package.name}"
+            # A fresh link per send. A firm that already submitted gets a
+            # read-only receipt link (``mint`` carries the submitted state);
+            # only the buyer's explicit reopen makes it writable. The older
+            # link stays valid until this email is known to have gone out, so
+            # a failed send never leaves the firm with no working link.
+            invitation, token = await portal.mint(package, r, actor_id=actor_id)
+            subject = invitation_subject(locale, package.name)
             html_body = self._build_distribution_html(
-                company_name=company,
+                company_name=str(r.get("company_name", "") or "").strip(),
                 package=package,
                 project_name=project_name,
-                action_url=action_url,
+                action_url=bid_link_url(token),
                 custom_message=data.message,
+                locale=locale,
             )
 
             try:
@@ -1306,6 +1403,11 @@ class TenderingService:
                 logger.warning("Tender distribution send crashed: package=%s to=%s", package_id, to_email)
 
             now = datetime.now(UTC).isoformat()
+            if ok:
+                await portal.retire_others(package_id, rid, keep=invitation.id)
+            else:
+                await self.session.delete(invitation)
+                await self.session.flush()
             if ok:
                 sent_count += 1
                 any_sent = True
@@ -1394,40 +1496,25 @@ class TenderingService:
         project_name: str,
         action_url: str,
         custom_message: str | None,
+        locale: str = "en",
     ) -> str:
-        """Render the invitation-to-tender email body via the shared shell."""
-        import html as _html
+        """Render the invitation-to-tender email body in ``locale``.
 
-        from app.core.email import wrap
+        The strings live in :mod:`app.modules.tendering.invitation_email`; an
+        empty ``company_name`` reads as a generic salutation.
+        """
+        from app.modules.tendering.invitation_email import invitation_html
 
-        deadline = package.deadline or ""
-        desc = package.description or ""
-        parts = [f"<p>Dear {_html.escape(company_name)},</p>"]
-        proj = f" for <strong>{_html.escape(project_name)}</strong>" if project_name else ""
-        parts.append(
-            f"<p>You are invited to submit a bid for the tender package "
-            f"<strong>{_html.escape(package.name)}</strong>{proj}.</p>"
+        return invitation_html(
+            locale=locale,
+            company_name=company_name,
+            package_name=package.name,
+            project_name=project_name,
+            description=package.description or "",
+            deadline=package.deadline or "",
+            custom_message=custom_message,
+            action_url=action_url,
         )
-        if desc:
-            parts.append(
-                f"<blockquote style='border-left:3px solid #0071e3; padding-left:12px; "
-                f"margin:12px 0; color:#1d1d1f;'>{_html.escape(desc)}</blockquote>"
-            )
-        if deadline:
-            parts.append(f"<p><strong>Submission deadline:</strong> {_html.escape(deadline)}</p>")
-        if custom_message:
-            parts.append(
-                f"<blockquote style='border-left:3px solid #86868b; padding-left:12px; "
-                f"margin:12px 0; color:#444;'>{_html.escape(custom_message)}</blockquote>"
-            )
-        parts.append(
-            "<p style='font-size:13px; color:#6e6e73;'>Please review the package details and respond "
-            "with your offer before the deadline above.</p>"
-        )
-        body = "".join(parts)
-        if action_url:
-            return wrap("Invitation to Tender", body, action_url, "View tender package")
-        return wrap("Invitation to Tender", body)
 
     # ── Decision documents (award / rejection PDFs) ─────────────────────────
 

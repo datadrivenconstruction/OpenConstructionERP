@@ -52,9 +52,12 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { BidComparisonChart } from './BidComparisonChart';
 import { AddendumList } from './AddendumList';
 import { AwardRecordPanel } from './AwardRecordPanel';
+import { BidLinkCell, bidInvitationsQueryKey } from './BidLinkCell';
+import { BidPortalMarks } from './BidPortalMarks';
 import { LevelingMatrix } from './LevelingMatrix';
-import { classifyCell, recommend } from './analysis';
-import { awardRatesMessage, type AwardResult } from './awardRates';
+import { cellRate, classifyCell, pricedRates, recommend, unpricedLineCount } from './analysis';
+import { localizedUnitCode } from '@/shared/lib/unitLabels';
+import { awardPreview, awardPreviewMessage, awardRatesMessage, type AwardResult } from './awardRates';
 import { tenderingGuide } from './tenderingGuide';
 import {
   listRecipients,
@@ -152,6 +155,8 @@ interface PackageWithBids extends TenderPackage {
 
 interface BidComparisonRow {
   position_id: string | null;
+  /** The bill's position number. */
+  ordinal?: string;
   description: string;
   unit: string;
   budget_quantity: number;
@@ -160,9 +165,12 @@ interface BidComparisonRow {
   bids: {
     company_name: string;
     bid_id: string;
-    unit_rate: number;
-    total: number;
+    /** Null when the bidder gave no price for the line. */
+    unit_rate: number | null;
+    total: number | null;
     deviation_pct: number;
+    /** False when the bid has no price for the line. */
+    priced?: boolean;
   }[];
 }
 
@@ -180,6 +188,9 @@ interface BidComparison {
     currency: string;
     deviation_pct: number;
     status: string;
+    /** Lines this bid priced, of ``total_lines`` (section headers not counted). */
+    matched_lines?: number;
+    total_lines?: number;
   }[];
 }
 
@@ -798,21 +809,22 @@ function PackageCard({
 
 /* ── Bid Comparison Table ─────────────────────────────────────────────── */
 
-function BidComparisonTable({
+// Exported for its test: a missing price and the unit as the BOQ shows it.
+export function BidComparisonTable({
   comparison,
   currency,
 }: {
   comparison: BidComparison;
   currency: string;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [hideLowVariance, setHideLowVariance] = useState(false);
   const [varianceThreshold, setVarianceThreshold] = useState(5);
 
   const visibleRows = useMemo(() => {
     if (!hideLowVariance) return comparison.rows;
     return comparison.rows.filter((row) => {
-      const rates = row.bids.map((b) => b.unit_rate).filter((r) => r > 0);
+      const rates = pricedRates(row.bids).filter((r) => r > 0);
       if (rates.length < 2) return true;
       const mean = rates.reduce((s, r) => s + r, 0) / rates.length;
       if (mean === 0) return true;
@@ -910,14 +922,18 @@ function BidComparisonTable({
               >
                 <td className={`px-3 py-2.5 ${stickyColClass} z-20 group-hover:bg-surface-secondary/30`}>
                   <span className="text-content-primary">{row.description || '-'}</span>
-                  <span className="ml-2 text-xs text-content-tertiary">{row.unit}</span>
+                  <span className="ml-2 text-xs text-content-tertiary">
+                    {localizedUnitCode(row.unit, i18n.language)}
+                  </span>
                 </td>
                 <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-content-secondary">
                   {formatNumber(row.budget_rate)}
                 </td>
                 {row.bids.map((bid) => {
-                  const rates = row.bids.map((b) => b.unit_rate);
-                  const flag = classifyCell(bid.unit_rate, rates);
+                  // A missing price is not a price: it is never flagged, never
+                  // the low end of the line and never shown as 0.
+                  const rate = cellRate(bid);
+                  const flag = rate === null ? null : classifyCell(rate, pricedRates(row.bids));
                   const flagCls =
                     flag === 'high'
                       ? 'bg-semantic-error-bg/50'
@@ -934,16 +950,29 @@ function BidComparisonTable({
                     <td
                       key={`bid-${bid.bid_id}`}
                       className={`whitespace-nowrap px-3 py-2.5 text-right tabular-nums ${flagCls}`}
-                      title={flagLabel}
+                      title={
+                        rate === null
+                          ? t('tendering.not_priced_hint', {
+                              defaultValue: 'This bidder gave no price for this line.',
+                            })
+                          : flagLabel
+                      }
                       aria-label={flagLabel}
                     >
-                      <span className="text-content-primary">{formatNumber(bid.unit_rate)}</span>
+                      {rate === null ? (
+                        <span className="italic text-semantic-warning" data-testid="bid-cell-unpriced">
+                          {'- '}
+                          {t('tendering.not_priced', { defaultValue: 'not priced' })}
+                        </span>
+                      ) : (
+                        <span className="text-content-primary">{formatNumber(rate)}</span>
+                      )}
                       {flag && (
                         <span className="ml-1 text-xs" aria-hidden="true">
                           {flag === 'high' ? '▲' : '▼'}
                         </span>
                       )}
-                      {bid.unit_rate > 0 && (
+                      {rate !== null && rate > 0 && (
                         <span className="ml-1.5">
                           <DeviationBadge pct={bid.deviation_pct} />
                         </span>
@@ -975,6 +1004,16 @@ function BidComparisonTable({
                   <span className="ml-1.5">
                     <DeviationBadge pct={bt.deviation_pct} />
                   </span>
+                  {/* A total that leaves lines out is cheaper by what it
+                      left out, so it says so under the figure. */}
+                  {unpricedLineCount(bt) > 0 && (
+                    <div className="mt-0.5 text-2xs font-medium text-semantic-warning">
+                      {t('tendering.bid_incomplete', {
+                        defaultValue: 'Incomplete: {{count}} lines not priced',
+                        count: unpricedLineCount(bt),
+                      })}
+                    </div>
+                  )}
                 </td>
               ))}
             </tr>
@@ -1032,6 +1071,8 @@ function DistributionPanel({ packageId }: { packageId: string }) {
 
   const invalidate = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ['tendering-recipients', packageId] });
+    // Sending and removing both mint or revoke bidder links.
+    queryClient.invalidateQueries({ queryKey: bidInvitationsQueryKey(packageId) });
   }, [queryClient, packageId]);
 
   const addMutation = useMutation({
@@ -1188,6 +1229,7 @@ function DistributionPanel({ packageId }: { packageId: string }) {
                     )}
                   </div>
                   <RecipientStatusBadge status={r.status} />
+                  <BidLinkCell packageId={packageId} recipientId={r.id} />
                   <button
                     type="button"
                     aria-label={t('tendering.remove_recipient', { defaultValue: 'Remove recipient' })}
@@ -1331,7 +1373,7 @@ function PackageDetail({
   packageId: string;
   currency: string;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -1499,9 +1541,13 @@ function PackageDetail({
     ];
     const rows = comparison.rows.map(row => [
       row.description,
-      row.unit,
+      localizedUnitCode(row.unit, i18n.language),
       Number(row.budget_rate).toFixed(2),
-      ...row.bids.map(b => Number(b.unit_rate).toFixed(2)),
+      // An unpriced line stays an empty cell, never 0.00.
+      ...row.bids.map(b => {
+        const rate = cellRate(b);
+        return rate === null ? '' : rate.toFixed(2);
+      }),
     ]);
     const footer = [
       t('tendering.total', 'TOTAL'),
@@ -1518,7 +1564,7 @@ function PackageDetail({
     a.click();
     URL.revokeObjectURL(url);
     addToast({ type: 'success', title: t('tendering.exported', { defaultValue: 'Comparison exported' }) });
-  }, [comparison, pkg, addToast, t]);
+  }, [comparison, pkg, addToast, t, i18n.language]);
 
   // Smarter award recommendation: ranks by total but tags confidence so a
   // suspiciously low bid (>20% under the median) is flagged rather than
@@ -1581,7 +1627,8 @@ function PackageDetail({
     if (!pkg?.boq_id) return;
     try {
       const token = getAuthToken();
-      const r = await fetch(`/api/v1/boq/boqs/${pkg.boq_id}/export/gaeb/`, {
+      // The package's own lines, not the whole source bill.
+      const r = await fetch(`/api/v1/tendering/packages/${packageId}/export/gaeb-x83/`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!r.ok) {
@@ -1590,11 +1637,38 @@ function PackageDetail({
       }
       const blob = await r.blob();
       const name = pkg?.name?.replace(/[^a-z0-9_-]+/gi, '_') || 'tender';
-      triggerDownload(blob, `${name}.xml`);
+      triggerDownload(blob, `${name}.X83`);
     } catch {
       addToast({ type: 'error', title: t('tendering.export_failed', { defaultValue: 'Export failed' }) });
     }
-  }, [pkg?.boq_id, pkg?.name, addToast, t]);
+  }, [packageId, pkg?.boq_id, pkg?.name, addToast, t]);
+
+  // The two server-built workbooks: the package's lines for bidders to price,
+  // and the price comparison. The sheet text follows the app language, which
+  // fetch's own Accept-Language (the browser's) would not.
+  const handleDownloadWorkbook = useCallback(
+    async (kind: 'bidder' | 'comparison') => {
+      const path = kind === 'bidder' ? 'export/bidder-xlsx/' : 'comparison/export/';
+      const suffix = kind === 'bidder' ? 'for_bidders' : 'price_comparison';
+      try {
+        const token = getAuthToken();
+        const r = await fetch(
+          `/api/v1/tendering/packages/${packageId}/${path}?locale=${encodeURIComponent(i18n.language || 'en')}`,
+          { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+        );
+        if (!r.ok) {
+          addToast({ type: 'error', title: t('tendering.export_failed', { defaultValue: 'Export failed' }) });
+          return;
+        }
+        const blob = await r.blob();
+        const name = pkg?.name?.replace(/[^a-z0-9_-]+/gi, '_') || 'tender';
+        triggerDownload(blob, `${name}_${suffix}.xlsx`);
+      } catch {
+        addToast({ type: 'error', title: t('tendering.export_failed', { defaultValue: 'Export failed' }) });
+      }
+    },
+    [packageId, pkg?.name, i18n.language, addToast, t],
+  );
 
   if (pkgLoading || (!pkg && !pkgError)) {
     return (
@@ -1742,16 +1816,43 @@ function PackageDetail({
                 {t('tendering.add_bid', 'Add Bid')}
               </Button>
             )}
+            {/* The bill goes out to bidders in whichever format they work in:
+                a spreadsheet anyone can fill, or the GAEB exchange file. Both
+                are unpriced; neither is the default. */}
             {pkg.boq_id && (
-              <Button
-                variant="ghost"
-                size="sm"
-                icon={<Download size={14} />}
-                onClick={handleDownloadGaeb}
-                title={t('tendering.export_gaeb_title', 'Export the source BOQ as GAEB XML 3.3 (X83)')}
+              <div
+                role="group"
+                aria-label={t('tendering.send_out_label', { defaultValue: 'Bill for bidders' })}
+                className="flex items-center gap-0.5 rounded-lg border border-border-light pl-2"
               >
-                {t('tendering.export_gaeb', 'GAEB X83')}
-              </Button>
+                <span className="text-xs text-content-tertiary">
+                  {t('tendering.send_out_label', { defaultValue: 'Bill for bidders' })}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon={<Download size={14} />}
+                  onClick={() => handleDownloadWorkbook('bidder')}
+                  title={t('tendering.export_bidder_xlsx_title', {
+                    defaultValue:
+                      'Excel sheet of this package\'s lines with quantities and an empty unit price column. Your own rates and totals are not in it.',
+                  })}
+                >
+                  {t('tendering.export_bidder_xlsx', { defaultValue: 'Excel' })}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon={<Download size={14} />}
+                  onClick={handleDownloadGaeb}
+                  title={t('tendering.export_gaeb_unpriced_title', {
+                    defaultValue:
+                      'GAEB XML exchange file (X83, request for bids) of this package\'s lines. Unpriced: it carries no unit rates or totals.',
+                  })}
+                >
+                  {t('tendering.export_gaeb', 'GAEB X83')}
+                </Button>
+              </div>
             )}
             <Button
               variant="ghost"
@@ -1912,6 +2013,7 @@ function PackageDetail({
                       {bid.contact_email}
                     </span>
                   )}
+                  <BidPortalMarks metadata={bid.metadata} />
                 </div>
                 <span className="text-sm font-semibold tabular-nums text-content-primary">
                   {formatCurrency(bid.total_amount, bid.currency)}
@@ -1926,13 +2028,19 @@ function PackageDetail({
                     icon={<Award size={14} />}
                     loading={awardMutation.isPending}
                     onClick={async () => {
+                      // Say before the award what it does to the bill, with the
+                      // count the success toast reports afterwards.
+                      const preview = awardPreviewMessage(
+                        awardPreview(bid.line_items ?? [], comparison?.rows ?? []),
+                        t,
+                      );
                       const ok = await confirm({
                         title: t('tendering.award_confirm_title', { defaultValue: 'Award contract?' }),
-                        message: t('tendering.award_confirm_rates', {
+                        message: `${t('tendering.award_confirm_rates', {
                           defaultValue:
                             'Award this contract to {{company}}? The other bids are rejected. Where the winning bid is priced line by line and the BOQ is not locked, its rates are written into the BOQ. This action cannot be undone.',
                           company: bid.company_name,
-                        }),
+                        })} ${preview}`,
                         confirmLabel: t('tendering.award', 'Award'),
                         variant: 'warning',
                       });
@@ -1985,9 +2093,32 @@ function PackageDetail({
             <BarChart3 size={16} className="text-oe-blue" />
             {t('tendering.bid_comparison', 'Bid Comparison')}
           </h4>
-          <Button variant="ghost" size="sm" icon={<Download size={14} />} onClick={handleExport}>
-            {t('tendering.export_comparison', 'Export')}
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<Download size={14} />}
+              onClick={() => handleDownloadWorkbook('comparison')}
+              disabled={!comparison || comparison.bid_count === 0}
+              title={t('tendering.export_comparison_xlsx_title', {
+                defaultValue:
+                  'Excel workbook: every line with each bidder\'s unit price and line total, the lowest price marked, missing prices and outliers flagged, and each bid total.',
+              })}
+            >
+              {t('tendering.export_comparison_xlsx', { defaultValue: 'Excel' })}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={<Download size={14} />}
+              onClick={handleExport}
+              title={t('tendering.export_comparison_csv_title', {
+                defaultValue: 'Plain CSV of the unit prices, for other tools',
+              })}
+            >
+              {t('tendering.export_comparison_csv', { defaultValue: 'CSV' })}
+            </Button>
+          </div>
         </div>
         {comparisonLoading ? (
           <SkeletonTable rows={4} columns={4} />

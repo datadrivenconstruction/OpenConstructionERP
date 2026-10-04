@@ -127,8 +127,10 @@ class _StubSession:
                 setattr(self.positions[pk], k, v)
         self.executed.append(stmt)
         # ``apply_winner`` first reads ``BOQ.is_locked``; None reads as a bill
-        # that is not locked, so the award writes its rates back.
-        return SimpleNamespace(rowcount=1, scalar_one_or_none=lambda: None)
+        # that is not locked, so the award writes its rates back. It then lists
+        # the bill's lines to count the ones the winner left unpriced; an empty
+        # list counts none.
+        return SimpleNamespace(rowcount=1, scalar_one_or_none=lambda: None, all=lambda: [])
 
 
 def _make_service(session: _StubSession | None = None) -> TenderingService:

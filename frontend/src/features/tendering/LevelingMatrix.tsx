@@ -32,6 +32,7 @@ import {
 } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { useDisplayQuantity } from '@/shared/hooks/useDisplayQuantity';
+import { localizedUnitCode } from '@/shared/lib/unitLabels';
 import { getLevelingMatrix, levelBids } from './api';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { currencyFractionDigits, formatCurrency as formatMoney } from '@/shared/lib/money';
@@ -113,7 +114,7 @@ function statusBadge(
 }
 
 export function LevelingMatrix({ packageId, currency }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   // Issue #270: the reference quantity beside each line is a physical quantity;
@@ -363,7 +364,9 @@ export function LevelingMatrix({ packageId, currency }: Props) {
                         <span className="ml-2 text-xs text-content-tertiary">
                           {(() => {
                             const d = q.convert(row.reference_quantity, row.unit || '');
-                            return `${formatNumber(d.value)} ${row.unit ? d.unit : ''}`.trim();
+                            // The unit as the BOQ editor shows it (m², psch), not the stored token.
+                            const unit = row.unit ? localizedUnitCode(d.unit, i18n.language) : '';
+                            return `${formatNumber(d.value)} ${unit}`.trim();
                           })()}
                         </span>
                       </td>

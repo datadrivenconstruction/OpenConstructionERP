@@ -371,6 +371,9 @@ export default defineConfig({
             // by default).
             urlPattern: ({ url, request }) => {
               if (request.method !== 'GET') return false;
+              // A bidder link's token is its credential; never keep it, or
+              // the bill behind it, in a cache on a shared device.
+              if (url.pathname.startsWith('/api/v1/tendering/bid-portal/')) return false;
               return url.pathname.startsWith('/api/v1/');
             },
             handler: 'NetworkFirst',

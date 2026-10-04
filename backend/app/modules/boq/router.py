@@ -5441,13 +5441,14 @@ async def export_boq_gaeb(
 
     Phases:
     - **DP 83 - Angebotsaufforderung / Request for bid** (default,
-      ``?format=x83``). A priced LV is valid in DP 83 (the Einheitspreis is
-      optional in the schema, so carrying it does not break conformance).
+      ``?format=x83``). Unpriced: the call for bids goes out without prices,
+      so an ``Item`` carries no ``UP`` or ``IT``, and there are no markup
+      positions and no ``Totals``, whatever rates the bill holds.
     - **DP 84 - Angebotsabgabe / Bid submission** (``?format=x84``). A plain
       Hauptangebot by default; ``bid_type=alternate`` additionally writes the
       Nebenangebot rationale of flagged positions as ``BidComm`` elements.
 
-    Money: each ``Item`` carries ``UP`` (Einheitspreis, 3 dp) and ``IT``
+    Money (DP 84 only): each ``Item`` carries ``UP`` (Einheitspreis, 3 dp) and ``IT``
     (Gesamtbetrag, 2 dp) reconstructed so a consumer recomputing ``Qty x UP``
     lands exactly on ``IT``. Markups are not dropped - every active markup is
     written as a real GAEB ``MarkupItem`` (Zuschlagsposition) in its own
