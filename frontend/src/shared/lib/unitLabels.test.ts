@@ -57,6 +57,20 @@ describe('localizedUnitCode', () => {
     expect(localizedUnitCode('10 lsum', 'de')).toBe('10 psch');
   });
 
+  it('abbreviates time tokens the way each language does', () => {
+    expect(localizedUnitCode('month', 'de')).toBe('Mon.');
+    expect(localizedUnitCode('hr', 'de')).toBe('Std.');
+    expect(localizedUnitCode('month', 'ru')).toBe('мес.');
+    expect(localizedUnitCode('week', 'fr')).toBe('sem.');
+    expect(localizedUnitCode('month', 'en')).toBe('mth');
+    expect(localizedUnitCode('MONTHS', 'de-AT')).toBe('Mon.');
+  });
+
+  it('never spells a number into a time unit and leaves the SI hour alone', () => {
+    expect(localizedUnitCode('year', 'ar')).not.toMatch(/\s/);
+    expect(localizedUnitCode('h', 'de')).toBe('h');
+  });
+
   it('never modifies unknown tokens', () => {
     expect(localizedUnitCode('Stk', 'de')).toBe('Stk');
     expect(localizedUnitCode('', 'de')).toBe('');

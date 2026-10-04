@@ -96,7 +96,60 @@ export function localizedUnitCode(token: string, lang: string): string {
   }
   const localeMap = LOCALE_UNIT_CODES[(lang || '').split('-')[0] ?? ''];
   const localized = localeMap?.[trimmed.toLowerCase()];
-  return localized ?? getDisplayUnit(trimmed);
+  return localized ?? timeUnitCode(trimmed, lang) ?? getDisplayUnit(trimmed);
+}
+
+/**
+ * Time tokens as stored by cost bases and resource rows. Every language
+ * abbreviates them differently ("Std." / "Mon." in German, "мес." in Russian),
+ * so instead of a table per locale the short form comes from the browser's own
+ * CLDR data. The SI symbol "h" is left alone: it reads the same everywhere.
+ */
+const TIME_UNIT_TOKENS: Record<string, Intl.NumberFormatOptions['unit']> = {
+  hr: 'hour',
+  hrs: 'hour',
+  hour: 'hour',
+  hours: 'hour',
+  day: 'day',
+  days: 'day',
+  wk: 'week',
+  week: 'week',
+  weeks: 'week',
+  mo: 'month',
+  mth: 'month',
+  month: 'month',
+  months: 'month',
+  yr: 'year',
+  year: 'year',
+  years: 'year',
+};
+
+const timeUnitCache = new Map<string, string | null>();
+
+function timeUnitCode(token: string, lang: string): string | null {
+  const unit = TIME_UNIT_TOKENS[token.toLowerCase()];
+  if (!unit) return null;
+  const cacheKey = `${lang}|${unit}`;
+  const cached = timeUnitCache.get(cacheKey);
+  if (cached !== undefined) return cached;
+  let code: string | null = null;
+  try {
+    const partOf = (n: number) =>
+      new Intl.NumberFormat(lang || 'en', { style: 'unit', unit, unitDisplay: 'short' })
+        .formatToParts(n)
+        .filter((p) => p.type === 'unit')
+        .map((p) => p.value)
+        .join('')
+        .trim();
+    // The singular reads best as a column label; a language whose singular
+    // spells out the number ("one year") falls back to its general plural.
+    const one = partOf(1);
+    code = one && !/\s/.test(one) ? one : partOf(5) || null;
+  } catch {
+    code = null;
+  }
+  timeUnitCache.set(cacheKey, code);
+  return code;
 }
 
 /**
