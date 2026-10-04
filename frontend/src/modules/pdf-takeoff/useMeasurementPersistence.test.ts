@@ -47,6 +47,10 @@ type TestMeasurement = {
   groupColor?: string;
   text?: string;
   strokeWidthReal?: number;
+  /** Wall area inputs (linear rows): height and openings, canonical metres. */
+  wallHeight?: number;
+  openings?: { width: number; height: number; count: number }[];
+  wastagePct?: number;
 };
 const makeMeasurement = (id: string, page = 1): TestMeasurement => ({
   id,
@@ -900,6 +904,94 @@ describe('useMeasurementPersistence', () => {
     expect(body.group_color).toBe('#FF0000');
     expect(body.annotation).toBe('External wall');
     expect(body.metadata.text).toBe('note');
+
+    vi.useRealTimers();
+  });
+
+  /* ── Wall area: height and openings round-trip through the metadata ── */
+
+  it('loads a wall height and its openings back from the server row', async () => {
+    const { takeoffApi } = await import('@/features/takeoff/api');
+    (takeoffApi.list as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce([
+      serverRow({
+        id: 'w',
+        measurement_value: 12.5,
+        metadata: {
+          frontend_id: 'w',
+          wall_height: 2.8,
+          openings: [{ width: 0.9, height: 2.1, count: 1 }, 'garbage', { width: 1.2, height: 1.5 }],
+        },
+      }),
+      serverRow({ id: 'plain', metadata: { frontend_id: 'plain', wall_height: null, openings: null } }),
+    ]);
+    const setM = vi.fn();
+    renderHook(() =>
+      useMeasurementPersistence({
+        fileName: 'walls.pdf', documentId: DOC, measurements: [],
+        setMeasurements: setM, pageScales: basePageScales, setPageScales: vi.fn(),
+        scale: defaultScale, projectId: PROJECT,
+      }),
+    );
+    await waitFor(() => expect(setM).toHaveBeenCalled());
+    const rows = setM.mock.calls[0]![0] as TestMeasurement[];
+    const wall = rows.find((r) => r.id === 'w')!;
+    expect(wall.wallHeight).toBe(2.8);
+    // The malformed entry is dropped; a missing count reads as one opening.
+    expect(wall.openings).toEqual([
+      { width: 0.9, height: 2.1, count: 1 },
+      { width: 1.2, height: 1.5, count: 1 },
+    ]);
+    const plain = rows.find((r) => r.id === 'plain')!;
+    expect(plain.wallHeight).toBeUndefined();
+    expect(plain.openings).toBeUndefined();
+  });
+
+  it('PATCHes a wall height edit, and clears it with an explicit null', async () => {
+    vi.useFakeTimers();
+    const { takeoffApi } = await import('@/features/takeoff/api');
+    (takeoffApi.update as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+      measurement_value: 2.5, metadata: {},
+    });
+    const m1 = makeSyncedMeasurement('m1', 'srv-1');
+    let rows: TestMeasurement[] = [m1];
+    const { rerender } = renderHook(() =>
+      useMeasurementPersistence({
+        fileName: 'wall-edit.pdf', documentId: DOC, measurements: rows,
+        setMeasurements: vi.fn(), pageScales: basePageScales, setPageScales: vi.fn(),
+        scale: defaultScale, projectId: PROJECT,
+      }),
+    );
+    await act(async () => { await Promise.resolve(); });
+
+    // Typing a height (and an opening) changes no geometry, yet it changes the
+    // reported quantity, so it must mark the row dirty and reach the server.
+    rows = [{ ...m1, wallHeight: 2.8, openings: [{ width: 0.9, height: 2.1, count: 1 }], wastagePct: 10 }];
+    rerender();
+    await act(async () => {
+      vi.advanceTimersByTime(500);
+      await Promise.resolve();
+    });
+    const update = takeoffApi.update as unknown as ReturnType<typeof vi.fn>;
+    expect(update).toHaveBeenCalledTimes(1);
+    const first = update.mock.calls[0]![1];
+    expect(first.metadata.wall_height).toBe(2.8);
+    expect(first.metadata.openings).toEqual([{ width: 0.9, height: 2.1, count: 1 }]);
+    expect(first.metadata.wastage_pct).toBe(10);
+    // A height edit is not a geometry edit: the page scale must not be re-sent.
+    expect(first).not.toHaveProperty('scale_pixels_per_unit');
+
+    // Reset: the server MERGES metadata, so only an explicit null clears it.
+    rows = [{ ...m1 }];
+    rerender();
+    await act(async () => {
+      vi.advanceTimersByTime(500);
+      await Promise.resolve();
+    });
+    expect(update).toHaveBeenCalledTimes(2);
+    const second = JSON.parse(JSON.stringify(update.mock.calls[1]![1]));
+    expect(second.metadata).toHaveProperty('wall_height', null);
+    expect(second.metadata).toHaveProperty('openings', null);
+    expect(second.metadata).toHaveProperty('wastage_pct', null);
 
     vi.useRealTimers();
   });

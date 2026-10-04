@@ -353,6 +353,29 @@ export interface CreateVariationFromCompareResult {
 
 /* ── API functions ────────────────────────────────────────────────────── */
 
+/** Body of {@link takeoffApi.createBoqPosition}. */
+export interface CreateBoqPositionFromMeasurement {
+  boq_id: string;
+  /** Section to place the position in; omitted / null = top level. */
+  parent_id?: string | null;
+  description?: string;
+  /** Unit to state the position in; omitted = the measurement's own. */
+  unit?: string;
+  cost_item_id?: string | null;
+  unit_rate?: number | null;
+}
+
+/** Result of {@link takeoffApi.createBoqPosition}. */
+export interface CreateBoqPositionFromMeasurementResult {
+  position_id: string;
+  boq_id: string;
+  ordinal: string;
+  description: string;
+  unit: string;
+  quantity: number;
+  measurement: MeasurementResponse;
+}
+
 export const takeoffApi = {
   /** List ALL measurements for a project, optionally filtered by document.
    *  /markups page calls this on mount; returns empty when oe_takeoff
@@ -425,6 +448,16 @@ export const takeoffApi = {
       boq_position_id: boqPositionId,
       push_quantity: options?.pushQuantity ?? false,
     }),
+
+  /** Create a NEW BOQ position from a measurement and link the two in one
+   *  server transaction. The server computes the quantity (wall area with
+   *  openings, slope, wastage, multiplier) so the bill carries the ledger's
+   *  figure; ``unit`` restates it (e.g. ``ft2`` for an imperial bill). */
+  createBoqPosition: (id: string, body: CreateBoqPositionFromMeasurement) =>
+    apiPost<CreateBoqPositionFromMeasurementResult>(
+      `/v1/takeoff/measurements/${id}/create-boq-position/`,
+      body,
+    ),
 
   /** Recognize candidate measurements from a page's vector layer (offline,
    *  issue #194). Returns confidence-scored area/length/count candidates that

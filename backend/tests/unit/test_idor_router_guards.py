@@ -144,6 +144,7 @@ ROUTER_HANDLERS: dict[str, list[str]] = {
         "update_measurement",
         "delete_measurement",
         "link_measurement_to_boq",
+        "create_boq_position_from_measurement",
         "measurement_summary",
         "export_measurements",
         "create_measurement",

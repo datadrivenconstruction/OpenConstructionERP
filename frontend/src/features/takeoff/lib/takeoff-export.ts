@@ -37,7 +37,7 @@ import {
   toRealDistance,
 } from '../../../modules/pdf-takeoff/data/scale-helpers';
 import { ANNOTATION_TYPES } from './takeoff-groups';
-import { effectiveQuantity } from './takeoff-quantity';
+import { effectiveQuantity, effectiveUnit, isWallMeasurement, reportingType } from './takeoff-quantity';
 import type { MeasurementSystem } from '@/stores/usePreferencesStore';
 import {
   convertQuantity,
@@ -184,10 +184,12 @@ export function summariseByGroupType(
   >();
   for (const m of measurements) {
     const group = m.group || 'General';
-    const key = `${group}::${m.type}`;
+    // A wall reports area, so it totals under `area` rather than as a length.
+    const type = reportingType(m);
+    const key = `${group}::${type}`;
     const existing = byKey.get(key) ?? {
       group,
-      type: m.type,
+      type,
       count: 0,
       total: 0,
       units: {} as Record<string, number>,
@@ -198,7 +200,8 @@ export function summariseByGroupType(
       // opening-deduction sign, so the exported (group, type) total is the NET
       // reported figure, matching the legend and ledger.
       existing.total += effectiveQuantity(m);
-      if (m.unit) existing.units[m.unit] = (existing.units[m.unit] ?? 0) + 1;
+      const unit = effectiveUnit(m);
+      if (unit) existing.units[unit] = (existing.units[unit] ?? 0) + 1;
     }
     byKey.set(key, existing);
   }
@@ -845,11 +848,15 @@ export async function buildTakeoffWorkbook(
       // Reported (effective) quantity: slope / wastage / multiplier + the
       // deduction sign, so the sheet reconciles with the net subtotal below.
       const signed = effectiveQuantity(m);
-      const disp = convertQuantity(signed, m.unit || '', system);
+      const disp = convertQuantity(signed, effectiveUnit(m) || '', system);
       const cellValue = isAnno ? '' : disp.value;
       ws.addRow({
         group: groupName,
-        type: m.isDeduction ? `${m.type} (deduction)` : m.type,
+        type: m.isDeduction
+          ? `${m.type} (deduction)`
+          : isWallMeasurement(m)
+            ? `${m.type} (wall)`
+            : m.type,
         annotation: m.annotation,
         page: m.page,
         value: cellValue,
@@ -871,12 +878,13 @@ export async function buildTakeoffWorkbook(
       'count',
     ];
     for (const t of subtotalTypes) {
-      const subset = groupMs.filter((m) => m.type === t);
+      // Bucket by the REPORTED type: a wall's m² belongs with the areas.
+      const subset = groupMs.filter((m) => reportingType(m) === t);
       if (subset.length === 0) continue;
       // Sum the reported (effective) quantities so the subtotal folds slope /
       // wastage / multiplier and nets out deductions (gross - openings).
       const total = subset.reduce((s, m) => s + effectiveQuantity(m), 0);
-      const metricUnit = subset[0]!.unit;
+      const metricUnit = effectiveUnit(subset[0]!);
       // Counts are unitless tallies (kept as pcs, integer); length / area /
       // volume subtotals convert to the export measurement system.
       const disp = convertQuantity(total, metricUnit, system);

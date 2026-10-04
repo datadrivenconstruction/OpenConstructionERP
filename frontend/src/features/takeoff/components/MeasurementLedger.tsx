@@ -41,7 +41,13 @@ import { convertQuantity } from '../lib/takeoff-display-units';
 import { formatCountQuantity, formatQuantity } from '../lib/measurement-format';
 import { displayGroupName } from '../lib/group-labels';
 import { localizedUnitCode } from '@/shared/lib/unitLabels';
-import { effectiveQuantity, quantityAdjustmentLabel } from '../lib/takeoff-quantity';
+import {
+  effectiveQuantity,
+  effectiveUnit,
+  isWallMeasurement,
+  quantityAdjustmentLabel,
+  wallOpeningsCount,
+} from '../lib/takeoff-quantity';
 
 export interface MeasurementLedgerProps {
   measurements: Measurement[];
@@ -516,7 +522,10 @@ function GroupRows({
         // the net subtotal below and matches the export.
         const signed = effectiveQuantity(measurement);
         const adjustment = quantityAdjustmentLabel(measurement);
-        const disp = convertQuantity(signed, measurement.unit || '', measurementSystem);
+        // Paired with the REPORTED unit: a wall row reads m², not m.
+        const disp = convertQuantity(signed, effectiveUnit(measurement) || '', measurementSystem);
+        const isWall = isWallMeasurement(measurement);
+        const openingCount = isWall ? wallOpeningsCount(measurement) : 0;
         return (
           <tr
             key={measurement.id}
@@ -550,6 +559,22 @@ function GroupRows({
                   data-testid="ledger-deduction-badge"
                 >
                   {t('takeoff_viewer.deduction', { defaultValue: 'deduction' })}
+                </span>
+              )}
+              {isWall && (
+                <span
+                  className="ml-1 text-[9px] font-semibold uppercase text-oe-blue"
+                  data-testid="ledger-wall-badge"
+                  title={t('takeoff_wall.ledger_badge_hint', {
+                    defaultValue: 'Wall area: length x height, minus openings',
+                  })}
+                >
+                  {openingCount > 0
+                    ? t('takeoff_wall.ledger_badge_openings', {
+                        defaultValue: 'wall, {{count}} openings',
+                        count: openingCount,
+                      })
+                    : t('takeoff_wall.ledger_badge', { defaultValue: 'wall' })}
                 </span>
               )}
               {adjustment && (

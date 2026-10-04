@@ -46,6 +46,15 @@ export interface Point {
   y: number;
 }
 
+/** One opening (door, window, cut-out) deducted from a wall's gross area.
+ *  Width and height are canonical metres; `count` repeats the same opening
+ *  (three identical windows are one entry with count 3). */
+export interface WallOpening {
+  width: number;
+  height: number;
+  count: number;
+}
+
 export interface Measurement {
   id: string;
   type: MeasurementType;
@@ -87,6 +96,13 @@ export interface Measurement {
   /** Typical-multiplier: this measurement stands for N identical repeats
    *  (typical floors / bays). Effective qty = base x multiplier. Undefined = 1. */
   multiplier?: number;
+  /** Wall height in canonical metres for a LINEAR measurement (distance /
+   *  polyline). When set (> 0) the row reports wall area: length x height,
+   *  in m2. Undefined = a plain length, exactly as before. */
+  wallHeight?: number;
+  /** Openings deducted from the wall area (only read while `wallHeight` is
+   *  set). Undefined or empty = no deduction. */
+  openings?: WallOpening[];
   /** Where this row's captured scale ratio came from, as the server recorded
    *  it, or undefined when it was never recorded. Written together with the
    *  ratio it describes and never on its own, so the two always refer to the

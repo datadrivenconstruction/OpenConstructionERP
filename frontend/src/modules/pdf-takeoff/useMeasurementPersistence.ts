@@ -22,6 +22,8 @@ import {
   attributeScaleSource,
   inferredCalibrationPages,
 } from '@/features/takeoff/lib/scaleSource';
+import { normalizeOpening } from '@/features/takeoff/lib/takeoff-quantity';
+import type { WallOpening } from '@/features/takeoff/lib/takeoff-types';
 import {
   type PageScales,
   defaultScaleConfig,
@@ -82,6 +84,12 @@ interface Measurement {
   /** Typical-multiplier count of repeats (issue #332 wave). Round-trips via
    *  metadata; falls back to 1 when unset. */
   multiplier?: number;
+  /** Wall height (canonical metres) on a linear measurement; when set the row
+   *  reports wall area. Round-trips via metadata as ``wall_height``. */
+  wallHeight?: number;
+  /** Openings deducted from the wall area. Round-trips via metadata as
+   *  ``openings`` (``[{width, height, count}]`` in metres). */
+  openings?: WallOpening[];
   /** Custom colour of this measurement's GROUP (issue #313), distinct from the
    *  per-measurement `color` override. Round-trips via the metadata blob the
    *  same way `fillAlpha` / `strokeWidth` do, so a re-coloured group survives a
@@ -403,6 +411,10 @@ function toApiFormat(
       slope_factor: m.slopeFactor,
       wastage_pct: m.wastagePct,
       multiplier: m.multiplier,
+      // Wall area on a linear measurement: height and openings ride the same
+      // blob, so the reported wall area is reproduced after a server sync.
+      wall_height: m.wallHeight,
+      openings: m.openings,
       // Group colour (issue #313): mirrored onto each measurement so the group
       // colour scheme round-trips server-side like the per-measurement styles.
       group_custom_color: m.groupColor,
@@ -473,6 +485,14 @@ function syncSignature(m: Measurement): string {
     sf: m.slopeFactor ?? null,
     wp: m.wastagePct ?? null,
     mul: m.multiplier ?? null,
+    // Wall height / openings change the reported quantity (length -> area).
+    wh: m.wallHeight ?? null,
+    op: m.openings ?? null,
+    // The BOQ link: every PATCH carries linked_boq_position_id from local state,
+    // so a PATCH that raced a link would unlink the row on the server. Hashing
+    // the link makes the row dirty again once the link lands locally, and the
+    // next PATCH writes it back.
+    lp: m.linkedPositionId ?? null,
     // Group colour (issue #313): a group re-colour restyles every measurement
     // in the group, so include it here to trigger the PATCH that persists it.
     gc: m.groupColor ?? null,
@@ -545,11 +565,15 @@ function toApiUpdate(
     // because the server replaces the metadata blob wholesale.
     stroke_width_real: m.strokeWidthReal,
     stroke_alpha: m.strokeAlpha,
-    // Reported-quantity adjustments (issue #332 wave); re-sent on PATCH for
-    // the same reason (the server replaces the metadata blob wholesale).
-    slope_factor: m.slopeFactor,
-    wastage_pct: m.wastagePct,
-    multiplier: m.multiplier,
+    // Reported-quantity adjustments (issue #332 wave). Explicitly NULL when
+    // unset: the server MERGES metadata, so an omitted (undefined) key would
+    // keep the old factor and a reset would come back on the next load.
+    slope_factor: m.slopeFactor ?? null,
+    wastage_pct: m.wastagePct ?? null,
+    multiplier: m.multiplier ?? null,
+    // Wall height / openings: NULL on clear for the same merge reason.
+    wall_height: m.wallHeight ?? null,
+    openings: m.openings ?? null,
     // Group colour (issues #313/#397): re-sent on PATCH so a group re-colour /
     // rename persists server-side. Explicitly NULL when the row has no
     // mirrored colour, because the server merges metadata: omitting the key
@@ -617,6 +641,15 @@ function toApiUpdate(
   return body;
 }
 
+/** Read the stored openings list back, dropping anything malformed. */
+function readOpenings(raw: unknown): WallOpening[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const list = raw
+    .filter((o): o is Record<string, unknown> => o !== null && typeof o === 'object')
+    .map((o) => normalizeOpening(o as Partial<WallOpening>));
+  return list.length > 0 ? list : undefined;
+}
+
 function fromApiFormat(r: MeasurementResponse): Measurement {
   const meta = r.metadata || {};
   return {
@@ -659,6 +692,9 @@ function fromApiFormat(r: MeasurementResponse): Measurement {
     slopeFactor: (meta.slope_factor as number) ?? undefined,
     wastagePct: (meta.wastage_pct as number) ?? undefined,
     multiplier: (meta.multiplier as number) ?? undefined,
+    wallHeight:
+      typeof meta.wall_height === 'number' && meta.wall_height > 0 ? meta.wall_height : undefined,
+    openings: readOpenings(meta.openings),
     groupColor: (meta.group_custom_color as string) ?? undefined,
     groupBand: (meta.group_band as number) ?? undefined,
     order: (meta.order as number) ?? undefined,

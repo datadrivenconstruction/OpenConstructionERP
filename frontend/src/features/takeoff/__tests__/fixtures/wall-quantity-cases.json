@@ -1,0 +1,64 @@
+{
+  "_comment": "Shared case table for the reported takeoff quantity. Read by the frontend (takeoff-wall.test.ts, effectiveQuantity / effectiveUnit) AND the backend (tests/unit/test_takeoff_effective_quantity.py, effective_takeoff_quantity) so the two folds cannot drift. Inputs are the stored row: type, measurement value, canonical unit and the metadata blob. Lengths in metres, areas in m2.",
+  "cases": [
+    {
+      "name": "plain length without a height is unchanged",
+      "type": "distance", "value": 12.5, "unit": "m", "metadata": {},
+      "expected_value": 12.5, "expected_unit": "m"
+    },
+    {
+      "name": "wall: length x height",
+      "type": "distance", "value": 12.5, "unit": "m", "metadata": {"wall_height": 2.8},
+      "expected_value": 35.0, "expected_unit": "m2"
+    },
+    {
+      "name": "polyline wall with a door and three windows",
+      "type": "polyline", "value": 12.5, "unit": "m",
+      "metadata": {"wall_height": 2.8, "openings": [{"width": 0.9, "height": 2.1, "count": 1}, {"width": 1.2, "height": 1.5, "count": 3}]},
+      "expected_value": 27.71, "expected_unit": "m2"
+    },
+    {
+      "name": "openings, then wastage and a typical multiplier on the net area",
+      "type": "distance", "value": 12.5, "unit": "m",
+      "metadata": {"wall_height": 2.8, "openings": [{"width": 0.9, "height": 2.1, "count": 1}, {"width": 1.2, "height": 1.5, "count": 3}], "wastage_pct": 10, "multiplier": 3},
+      "expected_value": 91.443, "expected_unit": "m2"
+    },
+    {
+      "name": "openings larger than the wall clamp at zero",
+      "type": "distance", "value": 2.0, "unit": "m",
+      "metadata": {"wall_height": 2.5, "openings": [{"width": 2.0, "height": 2.0, "count": 2}]},
+      "expected_value": 0.0, "expected_unit": "m2"
+    },
+    {
+      "name": "a missing opening count means one, a fractional count is floored",
+      "type": "distance", "value": 10.0, "unit": "m",
+      "metadata": {"wall_height": 3.0, "openings": [{"width": 1.0, "height": 2.0}, {"width": 1.0, "height": 1.0, "count": 2.7}]},
+      "expected_value": 26.0, "expected_unit": "m2"
+    },
+    {
+      "name": "a zero height is no height",
+      "type": "distance", "value": 8.0, "unit": "m", "metadata": {"wall_height": 0, "wastage_pct": 5},
+      "expected_value": 8.4, "expected_unit": "m"
+    },
+    {
+      "name": "openings without a height are ignored",
+      "type": "distance", "value": 8.0, "unit": "m", "metadata": {"openings": [{"width": 1.0, "height": 1.0, "count": 1}]},
+      "expected_value": 8.0, "expected_unit": "m"
+    },
+    {
+      "name": "a height on an area row is ignored, slope and wastage apply",
+      "type": "area", "value": 50.0, "unit": "m2", "metadata": {"wall_height": 3.0, "slope_factor": 1.2, "wastage_pct": 5},
+      "expected_value": 63.0, "expected_unit": "m2"
+    },
+    {
+      "name": "count with a typical multiplier",
+      "type": "count", "value": 7, "unit": "pcs", "metadata": {"multiplier": 2},
+      "expected_value": 14.0, "expected_unit": "pcs"
+    },
+    {
+      "name": "a wall measured in feet reports square feet",
+      "type": "distance", "value": 40.0, "unit": "ft", "metadata": {"wall_height": 9.0},
+      "expected_value": 360.0, "expected_unit": "ft2"
+    }
+  ]
+}

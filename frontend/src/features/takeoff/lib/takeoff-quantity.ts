@@ -15,6 +15,15 @@
  *   - multiplier     : a "typical" detail repeats N times (typical floors,
  *                    identical bays) so one drawn shape stands for N.
  *
+ * A LINEAR measurement (distance / polyline) can also carry a wall height.
+ * It then reports wall AREA instead of length: `length x height`, minus the
+ * openings entered on it (`width x height x count` each), clamped at zero,
+ * and only then scaled by wastage and the multiplier (a typical floor repeats
+ * its openings too). The unit follows: a wall in `m` reports `m²`, see
+ * {@link effectiveUnit}. Openings live on the wall row rather than as separate
+ * deduction rows because the BOQ push is per measurement: only the wall row
+ * itself can carry its net figure into a linked position.
+ *
  * Every field is optional and its default is the identity value, so a
  * measurement with none of them set reports exactly its raw value - this whole
  * module is a no-op for existing data.
@@ -25,7 +34,7 @@
  * shared Measurement type), so it unit-tests without React or pdf.js.
  */
 
-import type { Measurement } from './takeoff-types';
+import type { Measurement, WallOpening } from './takeoff-types';
 
 /**
  * Clamp a user-entered slope/pitch FACTOR to a sane, finite multiplier.
@@ -95,25 +104,121 @@ export function quantityFactor(m: Measurement): number {
 }
 
 /**
- * Whether a measurement carries any active quantity adjustment (slope,
- * wastage or multiplier) that makes its reported quantity differ from its raw
- * geometry. Uses a small tolerance so float noise in the slope factor does not
- * read as "adjusted".
+ * Normalize a wall height (canonical metres). Non-finite or <= 0 means "no
+ * height", returned as 0, which leaves the measurement a plain length.
  */
-export function hasQuantityFactor(m: Measurement): boolean {
-  return Math.abs(quantityFactor(m) - 1) > 1e-9;
+export function normalizeWallHeight(raw: number | undefined | null): number {
+  if (raw == null || !Number.isFinite(raw) || raw <= 0) return 0;
+  return raw;
+}
+
+/** Whether a measurement is linear, i.e. measures a run in metres. */
+export function isLinearMeasurement(m: Pick<Measurement, 'type'>): boolean {
+  return m.type === 'distance' || m.type === 'polyline';
 }
 
 /**
- * Signed reported quantity for a measurement: the raw measured value scaled by
- * {@link quantityFactor}, negated when the measurement is an opening deduction
- * (area void, so net = gross - openings). This is the single source of truth
- * for the figure shown per-row in the ledger, summed into subtotals / grand
- * totals / the legend, written into exports, and pushed to a linked BOQ
- * position - so every surface reports the same number.
+ * Whether a measurement reports wall area: a linear run with a wall height
+ * set. Every other measurement keeps its legacy behaviour.
+ */
+export function isWallMeasurement(m: Pick<Measurement, 'type' | 'wallHeight'>): boolean {
+  return isLinearMeasurement(m) && normalizeWallHeight(m.wallHeight) > 0;
+}
+
+/**
+ * Normalize one opening: width and height are finite and >= 0 (else 0); the
+ * count is a whole number >= 0, and a missing / non-finite count means one
+ * opening, since an entry the user typed stands for at least itself.
+ */
+export function normalizeOpening(o: Partial<WallOpening> | null | undefined): WallOpening {
+  const dim = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) && v > 0 ? v : 0);
+  const rawCount = o?.count;
+  const count =
+    typeof rawCount === 'number' && Number.isFinite(rawCount) ? Math.max(0, Math.floor(rawCount)) : 1;
+  return { width: dim(o?.width), height: dim(o?.height), count };
+}
+
+/** Area of one opening entry, `width x height x count`, in m². */
+export function openingArea(o: Partial<WallOpening> | null | undefined): number {
+  const n = normalizeOpening(o);
+  return n.width * n.height * n.count;
+}
+
+/** Total opening area entered on a wall (m²). 0 when it is not a wall. */
+export function wallOpeningsArea(m: Pick<Measurement, 'type' | 'wallHeight' | 'openings'>): number {
+  if (!isWallMeasurement(m) || !Array.isArray(m.openings)) return 0;
+  return m.openings.reduce((sum, o) => sum + openingArea(o), 0);
+}
+
+/** Total number of openings on a wall (sum of the entry counts). */
+export function wallOpeningsCount(m: Pick<Measurement, 'type' | 'wallHeight' | 'openings'>): number {
+  if (!isWallMeasurement(m) || !Array.isArray(m.openings)) return 0;
+  return m.openings.reduce((sum, o) => sum + normalizeOpening(o).count, 0);
+}
+
+/** Gross wall area, `length x height` (m²), before openings. 0 when it is not a wall. */
+export function wallGrossArea(m: Pick<Measurement, 'type' | 'wallHeight' | 'value'>): number {
+  if (!isWallMeasurement(m)) return 0;
+  const length = Number.isFinite(m.value) ? m.value : 0;
+  return length * normalizeWallHeight(m.wallHeight);
+}
+
+/** Net wall area before wastage / multiplier: gross minus openings, never below 0. */
+export function wallNetArea(m: Pick<Measurement, 'type' | 'wallHeight' | 'value' | 'openings'>): number {
+  return Math.max(0, wallGrossArea(m) - wallOpeningsArea(m));
+}
+
+/**
+ * True when the openings entered on a wall add up to more than the wall
+ * itself. The reported quantity is clamped at 0 in that case, which would hide
+ * the size of the mistake, so the UI asks this separately and warns.
+ */
+export function openingsExceedGross(m: Pick<Measurement, 'type' | 'wallHeight' | 'value' | 'openings'>): boolean {
+  return isWallMeasurement(m) && wallOpeningsArea(m) > wallGrossArea(m) + 1e-9;
+}
+
+/**
+ * Unit of the REPORTED quantity. Equals the stored unit, except for a wall,
+ * whose length unit becomes the matching area unit (`m` -> `m²`). Every surface
+ * that prints or buckets {@link effectiveQuantity} pairs it with this, never
+ * with `m.unit`, or a wall's m² would be summed into metres.
+ */
+export function effectiveUnit(m: Pick<Measurement, 'type' | 'wallHeight' | 'unit'>): string {
+  if (!isWallMeasurement(m)) return m.unit;
+  const base = (m.unit || 'm').replace(/[²2]$/, '');
+  return `${base}²`;
+}
+
+/**
+ * The measurement type a row is TOTALLED under. A wall reports area, so it
+ * sums with areas; every other row keeps its own type.
+ */
+export function reportingType(m: Pick<Measurement, 'type' | 'wallHeight'>): Measurement['type'] {
+  return isWallMeasurement(m) ? 'area' : m.type;
+}
+
+/**
+ * Whether a measurement's reported quantity differs from its raw geometry:
+ * an active slope / wastage / multiplier factor, or a wall height (which turns
+ * a length into an area). Uses a small tolerance so float noise in the slope
+ * factor does not read as "adjusted". The link flow keys on this: the server
+ * push copies the RAW stored value, so an adjusted row must not be pushed.
+ */
+export function hasQuantityFactor(m: Measurement): boolean {
+  return isWallMeasurement(m) || Math.abs(quantityFactor(m) - 1) > 1e-9;
+}
+
+/**
+ * Signed reported quantity for a measurement: the raw measured value (or the
+ * net wall area for a wall) scaled by {@link quantityFactor}, negated when the
+ * measurement is an opening deduction (area void, so net = gross - openings).
+ * This is the single source of truth for the figure shown per-row in the
+ * ledger, summed into subtotals / grand totals / the legend, written into
+ * exports, and pushed to a linked BOQ position - so every surface reports the
+ * same number.
  */
 export function effectiveQuantity(m: Measurement): number {
-  const base = Number.isFinite(m.value) ? m.value : 0;
+  const base = isWallMeasurement(m) ? wallNetArea(m) : Number.isFinite(m.value) ? m.value : 0;
   const magnitude = base * quantityFactor(m);
   return m.isDeduction ? -magnitude : magnitude;
 }

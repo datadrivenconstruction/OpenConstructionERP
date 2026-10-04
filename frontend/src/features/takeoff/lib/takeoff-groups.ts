@@ -8,7 +8,7 @@
  */
 
 import type { Measurement } from './takeoff-types';
-import { effectiveQuantity } from './takeoff-quantity';
+import { effectiveQuantity, effectiveUnit } from './takeoff-quantity';
 import { formatCountQuantity, formatQuantity } from './measurement-format';
 import { compareNames } from '@/shared/lib/collator';
 
@@ -76,8 +76,10 @@ export function computeGroupSummaries(
       existing.total += effectiveQuantity(m);
       existing.quantified += 1;
       if (m.type === 'count') existing.countTyped += 1;
-      if (m.unit) {
-        existing.unitCounts[m.unit] = (existing.unitCounts[m.unit] ?? 0) + 1;
+      // The reported unit, so a wall group's legend reads m², not m.
+      const unit = effectiveUnit(m);
+      if (unit) {
+        existing.unitCounts[unit] = (existing.unitCounts[unit] ?? 0) + 1;
       }
     }
     byGroup.set(name, existing);

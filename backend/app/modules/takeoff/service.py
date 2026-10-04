@@ -31,6 +31,7 @@ from app.modules.takeoff.repository import (
     TakeoffRepository,
 )
 from app.modules.takeoff.schemas import (
+    CreateBoqPositionFromMeasurementRequest,
     PointSchema,
     TakeoffMeasurementCreate,
     TakeoffMeasurementUpdate,
@@ -633,6 +634,93 @@ def _pick_takeoff_value(measurement: Any) -> float | None:
         return float(value)
     except (ValueError, TypeError):
         return None
+
+
+def _meta_number(meta: dict[str, Any], key: str) -> float | None:
+    """Read a finite number from the metadata blob, or ``None``.
+
+    Booleans are refused even though Python treats them as ints: a stray
+    ``true`` must not read as a factor of 1.
+    """
+    raw = meta.get(key)
+    if isinstance(raw, bool) or not isinstance(raw, int | float):
+        return None
+    value = float(raw)
+    return value if math.isfinite(value) else None
+
+
+def _opening_area(opening: Any) -> float:
+    """Area of one wall opening entry, ``width x height x count`` (m2).
+
+    Mirrors ``normalizeOpening`` in the frontend ``takeoff-quantity.ts``:
+    width and height below or at zero count as 0, a missing count means one
+    opening, and a count is a whole number never below 0.
+    """
+    if not isinstance(opening, dict):
+        return 0.0
+    width = _meta_number(opening, "width") or 0.0
+    height = _meta_number(opening, "height") or 0.0
+    raw_count = _meta_number(opening, "count")
+    count = 1 if raw_count is None else max(0, math.floor(raw_count))
+    return max(width, 0.0) * max(height, 0.0) * count
+
+
+# A wall's length unit and the area unit its reported quantity is stated in.
+_WALL_AREA_UNIT: dict[str, str] = {"m": "m2", "lm": "m2", "ml": "m2", "ft": "ft2", "lf": "ft2"}
+
+
+def effective_takeoff_quantity(measurement: Any) -> tuple[float | None, str | None]:
+    """The quantity a measurement REPORTS, with the unit it is stated in.
+
+    The server-side mirror of ``effectiveQuantity`` / ``effectiveUnit`` in
+    ``frontend/src/features/takeoff/lib/takeoff-quantity.ts``; both sides run
+    the same case table in their tests so the two cannot drift. Starting from
+    the raw stored value (:func:`_pick_takeoff_value`), it folds the opt-in
+    adjustments the client keeps in the metadata blob:
+
+    * ``wall_height`` on a linear row (distance / polyline): the row reports
+      wall area, ``length x height`` minus every ``openings`` entry
+      (``width x height x count``), clamped at 0, in the matching area unit.
+    * ``slope_factor`` (area only, >= 1), ``wastage_pct`` (>= 0) and the
+      whole-number ``multiplier`` (>= 1), applied after the openings.
+
+    Every key is optional and defaults to its identity value, so a row with
+    none of them reports exactly its raw value. :func:`_pick_takeoff_value`
+    stays the raw geometry on purpose: DWG takeoff and the revision compare
+    read it. A deduction returns ``(None, None)`` for the same reason that
+    function refuses it: a hole is never a bill quantity on its own.
+
+    Returns:
+        ``(value, unit)``, or ``(None, None)`` when there is no usable value.
+        The value is rounded half-up to 4 decimals like the BOQ quantity.
+    """
+    raw = _pick_takeoff_value(measurement)
+    if raw is None:
+        return None, None
+    mtype = (getattr(measurement, "type", None) or "").strip().lower()
+    unit = getattr(measurement, "measurement_unit", None) or ""
+    meta_raw = getattr(measurement, "metadata_", None)
+    meta: dict[str, Any] = meta_raw if isinstance(meta_raw, dict) else {}
+
+    base = raw
+    wall_height = _meta_number(meta, "wall_height")
+    if mtype in {"distance", "polyline"} and wall_height is not None and wall_height > 0:
+        openings = meta.get("openings")
+        opening_area = sum(_opening_area(o) for o in openings) if isinstance(openings, list) else 0.0
+        base = max(0.0, raw * wall_height - opening_area)
+        length_unit = unit.strip().lower() or "m"
+        unit = _WALL_AREA_UNIT.get(length_unit, f"{length_unit}2")
+
+    slope = _meta_number(meta, "slope_factor") if mtype == "area" else None
+    slope_factor = slope if slope is not None and slope >= 1 else 1.0
+    wastage = _meta_number(meta, "wastage_pct")
+    wastage_factor = 1 + (wastage / 100 if wastage is not None and wastage >= 0 else 0.0)
+    raw_mult = _meta_number(meta, "multiplier")
+    mult = math.floor(raw_mult) if raw_mult is not None and math.floor(raw_mult) >= 1 else 1
+
+    value = base * slope_factor * wastage_factor * mult
+    rounded = Decimal(str(value)).quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)
+    return float(rounded), unit or None
 
 
 # Dimension groups for the push_quantity compatibility guard. A measurement
@@ -3035,6 +3123,177 @@ class TakeoffService:
         await self.session.refresh(position)
         await boq_service._recompute_position_total(position)  # noqa: SLF001 - reuse the canonical recompute path
         logger.info("push_quantity: BOQ position %s quantity set to %s", boq_position_id, value)
+
+    async def create_boq_position_from_measurement(
+        self,
+        measurement: TakeoffMeasurement,
+        data: CreateBoqPositionFromMeasurementRequest,
+    ) -> tuple[Any, float, str]:
+        """Create a BOQ position carrying a measurement's quantity, then link it.
+
+        Goes through ``BOQService.add_position`` so the new line gets the
+        bill's own lock check, parent / nesting validation, cost-item
+        validation, event and audit row, exactly like a line typed in the BOQ
+        editor. Both writes share the request's transaction, so a refused
+        link cannot leave an orphan position behind (the client-side path
+        this replaces created the position first and swallowed a failed
+        link).
+
+        The quantity is the measurement's REPORTED quantity
+        (:func:`effective_takeoff_quantity`), restated in ``data.unit`` when
+        the caller asks for one (an imperial bill in ft2).
+
+        Returns:
+            ``(position, quantity, unit)`` as written to the position.
+        """
+        from app.modules.boq.schemas import PositionCreate  # noqa: PLC0415 - avoid import cycle
+        from app.modules.boq.service import BOQService  # noqa: PLC0415 - avoid import cycle
+
+        boq_service = BOQService(self.session)
+        boq = await boq_service.get_boq(data.boq_id)
+        # IDOR: the router checked access to the measurement's project only.
+        if str(boq.project_id) != str(measurement.project_id):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BOQ not found in this project")
+
+        # An AI proposal nobody has accepted yet (or one somebody rejected) is
+        # not a quantity: every other quantity path keeps it out, and a priced
+        # bill line is the last place it may slip in.
+        if (getattr(measurement, "review_status", None) or "confirmed") != "confirmed":
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="Accept this suggested measurement before putting it into a bill",
+            )
+        if bool(getattr(measurement, "is_deduction", False)):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="An opening deduction subtracts from its group and cannot become a bill position on its own",
+            )
+        value, unit = effective_takeoff_quantity(measurement)
+        if value is None or not unit:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="This measurement has no quantity to put into a bill position",
+            )
+
+        target_unit = (data.unit or "").strip() or unit
+        if target_unit != unit:
+            from app.core.unit_conversion import convert_between  # noqa: PLC0415
+
+            converted = convert_between(value, unit, target_unit)
+            if converted is None:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    detail=f"A quantity in {unit} cannot be stated in {target_unit}",
+                )
+            value = float(converted.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP))
+
+        parent_ordinal: str | None = None
+        if data.parent_id is not None:
+            parent = await boq_service.position_repo.get_by_id(data.parent_id)
+            if parent is None or parent.boq_id != boq.id:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Section not found in this BOQ")
+            parent_ordinal = parent.ordinal
+        ordinal = await self._next_position_ordinal(boq_service, boq.id, data.parent_id, parent_ordinal)
+
+        description = (data.description or "").strip() or (measurement.annotation or "").strip()
+        if not description:
+            description = f"Takeoff {measurement.type}, page {measurement.page}"
+        position_meta: dict[str, Any] = {
+            "pdf_measurement_source": f"Takeoff: {measurement.annotation or measurement.type} (page {measurement.page})",
+            "pdf_measurement_id": str(measurement.id),
+            "pdf_page": measurement.page,
+        }
+        # The bill grid's "open in takeoff" badge links by FILE NAME
+        # (``/takeoff?name=...``, like the client-side link path writes), so
+        # resolve the takeoff document's name; the stable id rides alongside.
+        if measurement.document_id:
+            doc = None
+            with contextlib.suppress(ValueError, TypeError):
+                doc = await self.repo.get_by_id(uuid.UUID(str(measurement.document_id)))
+            if doc is not None and str(doc.project_id) == str(measurement.project_id):
+                position_meta["pdf_document_id"] = doc.filename
+                position_meta["pdf_takeoff_document_id"] = str(doc.id)
+
+        position = await boq_service.add_position(
+            PositionCreate(
+                boq_id=boq.id,
+                parent_id=data.parent_id,
+                ordinal=ordinal,
+                description=description[:5000],
+                unit=target_unit,
+                quantity=value,
+                unit_rate=data.unit_rate if data.unit_rate is not None else Decimal("0"),
+                source="takeoff",
+                cost_item_id=data.cost_item_id,
+                metadata=position_meta,
+            )
+        )
+
+        # Link like a normal link, plus the label keys the viewer reads back on
+        # reload, so the badge survives a refresh without a second PATCH.
+        existing_meta = measurement.metadata_ if isinstance(measurement.metadata_, dict) else {}
+        await self.measurement_repo.update_fields(
+            measurement.id,
+            linked_boq_position_id=str(position.id),
+            metadata_={
+                **existing_meta,
+                "linked_boq_id": str(boq.id),
+                "linked_position_ordinal": position.ordinal,
+                "linked_position_label": position.description,
+            },
+        )
+        await self.session.refresh(measurement)
+        logger.info(
+            "Measurement %s created BOQ position %s (%s %s) and linked to it",
+            measurement.id,
+            position.id,
+            value,
+            target_unit,
+        )
+        return position, value, target_unit
+
+    async def _next_position_ordinal(
+        self,
+        boq_service: Any,
+        boq_id: uuid.UUID,
+        parent_id: uuid.UUID | None,
+        parent_ordinal: str | None,
+    ) -> str:
+        """Next free ordinal, in the BOQ editor's gap-of-10 scheme.
+
+        Inside a section: ``<section>.NN``, ten above the largest sibling
+        suffix (``01.10``, ``01.20``). At top level: a four-digit multiple of
+        ten above the largest leading number (``0010``, ``0020``). A taken
+        candidate falls back to the BOQ service's collision-free suffixing.
+        """
+        from sqlalchemy import select  # noqa: PLC0415
+
+        from app.modules.boq.models import Position  # noqa: PLC0415 - avoid import cycle
+
+        rows = (
+            await self.session.execute(select(Position.ordinal, Position.parent_id).where(Position.boq_id == boq_id))
+        ).all()
+        if parent_id is not None and parent_ordinal:
+            prefix = f"{parent_ordinal}."
+            max_suffix = 0
+            for ordinal, row_parent in rows:
+                if row_parent != parent_id or not ordinal or not ordinal.startswith(prefix):
+                    continue
+                match = re.match(r"\d+", ordinal[len(prefix) :])
+                if match:
+                    max_suffix = max(max_suffix, int(match.group(0)))
+            candidate = f"{parent_ordinal}.{max_suffix + 10:02d}"
+        else:
+            max_top = 0
+            for ordinal, _row_parent in rows:
+                match = re.match(r"\d+", ordinal or "")
+                if match:
+                    max_top = max(max_top, int(match.group(0)))
+            candidate = f"{(max_top // 10 + 1) * 10:04d}"
+        candidate = candidate[:50]
+        if await boq_service.position_repo.ordinal_exists(boq_id, candidate):
+            return await boq_service._next_free_ordinal(boq_id, candidate)  # noqa: SLF001 - the BOQ ordinal helper
+        return candidate
 
     # ── Revision compare (Item 17) ───────────────────────────────────────
 

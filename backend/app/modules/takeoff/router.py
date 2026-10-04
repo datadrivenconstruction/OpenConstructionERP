@@ -84,6 +84,8 @@ from app.modules.takeoff.manifest_verifier import (
 from app.modules.takeoff.models import CadExtractionSession
 from app.modules.takeoff.schemas import (
     AiTakeoffRunResponse,
+    CreateBoqPositionFromMeasurementRequest,
+    CreateBoqPositionFromMeasurementResponse,
     CreateVariationFromCompareRequest,
     CreateVariationFromCompareResponse,
     DocumentPageScalesUpdate,
@@ -6198,3 +6200,38 @@ async def link_measurement_to_boq(
         push_quantity=data.push_quantity,
     )
     return _measurement_to_response(item)
+
+
+@router.post(
+    "/measurements/{measurement_id}/create-boq-position/",
+    response_model=CreateBoqPositionFromMeasurementResponse,
+    status_code=201,
+    dependencies=[Depends(RequirePermission("takeoff.update")), Depends(RequirePermission("boq.update"))],
+)
+async def create_boq_position_from_measurement(
+    measurement_id: _uuid.UUID,
+    data: CreateBoqPositionFromMeasurementRequest,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: TakeoffService = Depends(_get_service),
+    session: SessionDep = None,  # type: ignore[assignment]
+) -> CreateBoqPositionFromMeasurementResponse:
+    """Create a new BOQ position from a measurement and link it, in one go.
+
+    The position quantity is the measurement's reported quantity computed on
+    the server (wall area with openings deducted, slope, wastage, multiplier),
+    so the bill carries the same figure as the takeoff ledger. Access is gated
+    on the measurement's project; the service refuses a bill in any other
+    project with a 404.
+    """
+    existing = await service.get_measurement(measurement_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
+    position, quantity, unit = await service.create_boq_position_from_measurement(existing, data)
+    return CreateBoqPositionFromMeasurementResponse(
+        position_id=str(position.id),
+        boq_id=str(position.boq_id),
+        ordinal=position.ordinal,
+        description=position.description or "",
+        unit=unit,
+        quantity=quantity,
+        measurement=_measurement_to_response(existing),
+    )

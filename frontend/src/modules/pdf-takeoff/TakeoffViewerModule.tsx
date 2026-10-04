@@ -2,7 +2,7 @@
 // CAD2DATA Pipeline · PDF Takeoff Module
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 // DDC-CWICR-OE-2026
-import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { openPdf, type PDFDocumentProxy } from '@/shared/lib/pdfjs';
 import {
@@ -69,7 +69,7 @@ import { useToastStore } from '../../stores/useToastStore';
 import { useProjectContextStore } from '../../stores/useProjectContextStore';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { usePreferencesStore } from '../../stores/usePreferencesStore';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { boqApi, type CreatePositionData, type Position } from '../../features/boq/api';
 import { takeoffApi, type MeasurementResponse } from '../../features/takeoff/api';
 import {
@@ -164,6 +164,7 @@ import {
   formatCountQuantity,
   formatFixedDigits,
   formatMaxDigits,
+  quantityDigits,
 } from '../../features/takeoff/lib/measurement-format';
 import { localizedUnitCode } from '@/shared/lib/unitLabels';
 import {
@@ -190,11 +191,24 @@ import { seedAnnotationCounters } from '../../features/takeoff/lib/takeoff-label
 import { displayGroupName } from '../../features/takeoff/lib/group-labels';
 import {
   effectiveQuantity,
+  effectiveUnit,
   hasQuantityFactor,
+  isLinearMeasurement,
+  isWallMeasurement,
   reportedMagnitude,
+  reportingType,
   slopeFactorFromDegrees,
   degreesFromSlopeFactor,
 } from '../../features/takeoff/lib/takeoff-quantity';
+import type { WallOpening } from '../../features/takeoff/lib/takeoff-types';
+import { WallAreaPanel } from '../../features/takeoff/components/WallAreaPanel';
+import {
+  defaultSectionId,
+  positionQuantityFor,
+  positionUnitFor,
+  sectionOptions,
+} from '../../features/takeoff/lib/takeoff-create-position';
+import { linkedQuantityDrift } from '../../features/takeoff/lib/takeoff-linked-drift';
 import { replicateMeasurementsToPages } from '../../features/takeoff/lib/takeoff-replicate';
 import { CalibrationDialog } from '../../features/takeoff/components/CalibrationDialog';
 import { ScaleAutoDetect } from '../../features/takeoff/components/ScaleAutoDetect';
@@ -219,7 +233,14 @@ import { parseDecimalInput } from '@/shared/lib/parseDecimal';
 // Type-only: the scale-source vocabulary is a closed set owned by the backend
 // contract, so the viewer reuses it instead of restating it as a bare string.
 import type { ScaleSource } from '@/features/takeoff/api';
-import { fmtList, fmtPercent, getIntlLocale } from '@/shared/lib/formatters';
+import { fmtCurrency, fmtList, fmtPercent, getIntlLocale } from '@/shared/lib/formatters';
+
+// The BOQ editor's cost-database picker, reused (not rebuilt) to price a
+// position created from a measurement. Lazy so the viewer does not pull the
+// BOQ modal bundle until someone opens it.
+const CostDatabaseSearchModal = lazy(() =>
+  import('../../features/boq/BOQModals').then((m) => ({ default: m.CostDatabaseSearchModal })),
+);
 
 /* ── Types ─────────────────────────────────────────────────────────── */
 
@@ -277,11 +298,13 @@ const boqQuantity = (value: number): number => {
 /** Map a takeoff measurement to a canonical quantities dict for cost
  *  matching: area measurements feed area_m2, volumes feed volume_m3,
  *  lines/polylines feed length_m, counts feed count. */
-function pdfMeasurementQuantities(m: {
-  type: string;
-  value: number;
-}): Record<string, number> {
+function pdfMeasurementQuantities(m: Measurement): Record<string, number> {
   if (!Number.isFinite(m.value)) return {};
+  // A wall (linear run with a height) is matched as the wall surface it
+  // reports: net area, with its length and height alongside.
+  if (isWallMeasurement(m)) {
+    return { area_m2: reportedMagnitude(m), length_m: m.value, height_m: m.wallHeight ?? 0 };
+  }
   switch (m.type) {
     case 'area':
       return { area_m2: m.value };
@@ -406,6 +429,11 @@ interface Measurement {
   /** Typical-multiplier: this measurement stands for N identical repeats
    *  (typical floors / bays). Effective qty = base x multiplier. Undefined = 1. */
   multiplier?: number;
+  /** Wall height in canonical metres for a linear measurement; when set the
+   *  row reports wall area (length x height). See takeoff-types.ts. */
+  wallHeight?: number;
+  /** Openings deducted from the wall area (width x height x count, metres). */
+  openings?: WallOpening[];
   /** Custom colour of this measurement's GROUP (issue #313), mirrored onto the
    *  measurement so the group colour scheme round-trips server-side through the
    *  metadata blob (like fillAlpha/strokeWidth) instead of being localStorage-
@@ -1100,6 +1128,14 @@ export default function TakeoffViewerModule({
   const [linkingInProgress, setLinkingInProgress] = useState(false);
   const [linkPickerSearch, setLinkPickerSearch] = useState('');
   const [linkPickerMode, setLinkPickerMode] = useState<'pick' | 'create'>('pick');
+  // "Create new position" form. null section / description = not touched yet,
+  // so the defaults (last section, the measurement's name) apply.
+  const [linkCreateSectionId, setLinkCreateSectionId] = useState<string | null>(null);
+  const [linkCreateDescription, setLinkCreateDescription] = useState<string | null>(null);
+  const [linkCreateCost, setLinkCreateCost] = useState<
+    { id: string; code: string; description: string; unit: string; rate: number; currency?: string } | null
+  >(null);
+  const [linkCostPickerOpen, setLinkCostPickerOpen] = useState(false);
   // Bulk "Add all to BOQ" from the Ledger tab: the eligible (unlinked,
   // measurable, human-confirmed) measurements awaiting a target BOQ pick.
   // null = panel closed. Reuses the link-picker project/BOQ state above.
@@ -4716,7 +4752,7 @@ export default function TakeoffViewerModule({
         // Effective quantity folds slope / wastage / multiplier and the
         // deduction sign, so this CSV reconciles with the ledger + Excel.
         ms.reduce((s, m) => s + effectiveQuantity(m), 0),
-        ms[0]!.unit || '',
+        effectiveUnit(ms[0]!) || '',
         measurementSystem,
       );
     for (const [groupName, groupMs] of Object.entries(byGroup)) {
@@ -4727,8 +4763,12 @@ export default function TakeoffViewerModule({
         // exports: show the row value as negative and flag the type, so the
         // CSV rows and subtotals reconcile instead of reporting inflated gross.
         const signedValue = effectiveQuantity(m);
-        const disp = convertQuantity(signedValue, m.unit || '', measurementSystem);
-        const typeLabel = m.isDeduction ? `${m.type} (deduction)` : m.type;
+        const disp = convertQuantity(signedValue, effectiveUnit(m) || '', measurementSystem);
+        const typeLabel = m.isDeduction
+          ? `${m.type} (deduction)`
+          : isWallMeasurement(m)
+            ? `${m.type} (wall)`
+            : m.type;
         rows.push(
           [
             escapeCsv(groupName),
@@ -4741,8 +4781,10 @@ export default function TakeoffViewerModule({
         );
       }
       // Add subtotal row for group
-      const distMs = groupMs.filter((m) => m.type === 'distance' || m.type === 'polyline');
-      const areaMs = groupMs.filter((m) => m.type === 'area');
+      // Bucket by the REPORTED type: a wall (linear run with a height)
+      // reports m², so it subtotals with the areas, never with the lengths.
+      const distMs = groupMs.filter((m) => isLinearMeasurement(m) && reportingType(m) !== 'area');
+      const areaMs = groupMs.filter((m) => reportingType(m) === 'area');
       const volMs = groupMs.filter((m) => m.type === 'volume');
       const countMs = groupMs.filter((m) => m.type === 'count');
       // Subtotals net out opening deductions (gross - openings), matching the
@@ -5710,8 +5752,10 @@ export default function TakeoffViewerModule({
           boq_id: selectedBoqId,
           ordinal: `TK.${String(ordinalCounter++).padStart(3, '0')}`,
           description: m.annotation || `${m.type}: ${m.label}`,
-          unit: unitMap[m.unit] ?? m.unit,
-          quantity: boqQuantity(m.value),
+          // Reported unit + quantity (wall area, wastage, multiplier), the
+          // same figure the ledger shows, not the raw drawn geometry.
+          unit: unitMap[effectiveUnit(m)] ?? effectiveUnit(m),
+          quantity: boqQuantity(reportedMagnitude(m)),
           unit_rate: 0,
         };
         await boqApi.addPosition(posData);
@@ -5805,6 +5849,9 @@ export default function TakeoffViewerModule({
     setLinkingMeasurementId(measurementId);
     setLinkPickerSearch('');
     setLinkPickerMode('pick');
+    setLinkCreateSectionId(null);
+    setLinkCreateDescription(null);
+    setLinkCreateCost(null);
 
     // Seed picker selection.  Priority: export-dialog pick > active context.
     const seedProject = selectedProjectId || activeProjectId || '';
@@ -5843,6 +5890,8 @@ export default function TakeoffViewerModule({
   /** Picker: user picked a BOQ.  Load its positions. */
   const handlePickerBoqChange = useCallback(async (boqId: string) => {
     setLinkPickerBoqId(boqId);
+    // A section belongs to one bill; a new bill starts from its own default.
+    setLinkCreateSectionId(null);
     await loadPickerPositions(boqId);
   }, [loadPickerPositions]);
 
@@ -5851,7 +5900,7 @@ export default function TakeoffViewerModule({
    *  sides of the link (measurement.linked_boq_position_id +
    *  position.metadata.pdf_measurement_source).
    */
-  const handleLinkToPosition = useCallback(async (measurementId: string, position: Position) => {
+  const handleLinkToPosition = useCallback(async (measurementId: string, position: Position, serverPush = true) => {
     const measurement = measurements.find((m) => m.id === measurementId);
     if (!measurement) return;
 
@@ -5859,7 +5908,8 @@ export default function TakeoffViewerModule({
     // The server refuses a cross-dimension push SILENTLY (HTTP 200, BOQ
     // quantity untouched), so detect the mismatch up front and tell the
     // user why nothing would flow instead of leaving a stale total.
-    const mDim = measurementDimension(measurement.type, normalizeUnit(measurement.unit));
+    // The REPORTED dimension: a wall (linear run with a height) reports area.
+    const mDim = measurementDimension(reportingType(measurement), normalizeUnit(effectiveUnit(measurement)));
     const pDim = unitDimension(position.unit);
     if (mDim !== null && pDim !== null && mDim !== pDim) {
       const mLabel = t(DIMENSION_LABELS[mDim].key, { defaultValue: DIMENSION_LABELS[mDim].fallback });
@@ -5884,7 +5934,7 @@ export default function TakeoffViewerModule({
     setLinkingInProgress(true);
     try {
       const sourceLabel = `Takeoff: ${measurement.annotation || measurement.type} (page ${measurement.page})`;
-      const canonicalUnit = normalizeUnit(measurement.unit);
+      const canonicalUnit = normalizeUnit(effectiveUnit(measurement));
       const positionUnit = (position.unit ?? '').trim();
 
       // Reported (effective) quantity: folds slope / wastage / typical-
@@ -5950,7 +6000,10 @@ export default function TakeoffViewerModule({
       // like a hand-typed quantity); with no factor keep the server push,
       // byte-identical to before this wave.
       if (measurement.serverId) {
-        const pushQuantity = !hasQuantityFactor(measurement);
+        // ``serverPush=false`` (the "update bill" proposal): the person confirmed
+        // the figure on screen, so the server must not re-copy a stored value
+        // that a still-pending geometry PATCH has not reached yet.
+        const pushQuantity = serverPush && !hasQuantityFactor(measurement);
         try { await takeoffApi.linkToBoq(measurement.serverId, position.id, { pushQuantity }); } catch { /* non-critical */ }
       }
 
@@ -5971,6 +6024,7 @@ export default function TakeoffViewerModule({
       // the pushed quantity shows up there without a manual reload.
       queryClient.invalidateQueries({ queryKey: ['boq', position.boq_id] });
       queryClient.invalidateQueries({ queryKey: ['all-boqs'] });
+      queryClient.invalidateQueries({ queryKey: ['takeoff-linked-boq'] });
 
       addToast({
         type: 'success',
@@ -5989,8 +6043,54 @@ export default function TakeoffViewerModule({
     }
   }, [measurements, addToast, t, normalizeUnit, queryClient]);
 
+  // "Bill differs from the drawing": a linked measurement changed after its
+  // quantity went into the bill. Nothing re-pushes it (the position may have
+  // been edited by hand), so the properties pane shows both figures and the
+  // person confirms the update, which goes through the normal link path.
+  const selectedLinkedBoqId =
+    selectedMeasurement?.linkedPositionId && selectedMeasurement.linkedBoqId ? selectedMeasurement.linkedBoqId : '';
+  const selectedLinkedBoq = useQuery({
+    queryKey: ['takeoff-linked-boq', selectedLinkedBoqId],
+    queryFn: () => apiGet<{ positions: Position[] }>(`/v1/boq/boqs/${selectedLinkedBoqId}`),
+    enabled: !!selectedLinkedBoqId,
+    staleTime: 30_000,
+  });
+  const selectedLinkedDrift = useMemo(
+    () =>
+      selectedMeasurement && selectedLinkedBoq.data
+        ? linkedQuantityDrift(selectedMeasurement, selectedLinkedBoq.data.positions ?? [], measurements)
+        : null,
+    [selectedMeasurement, selectedLinkedBoq.data, measurements],
+  );
+  const handleUpdateLinkedQuantity = useCallback(async () => {
+    if (!selectedMeasurement || !selectedLinkedDrift) return;
+    // The link path refreshes ['takeoff-linked-boq'], which clears the proposal.
+    await handleLinkToPosition(selectedMeasurement.id, selectedLinkedDrift.position, false);
+  }, [selectedMeasurement, selectedLinkedDrift, handleLinkToPosition]);
+
+  /** Default text for a position created from a measurement. */
+  const defaultPositionDescription = useCallback(
+    (m: Measurement) =>
+      m.annotation ||
+      t('takeoff.position_default_desc', {
+        defaultValue: 'Takeoff · {{type}} page {{page}}',
+        type: m.type,
+        page: m.page,
+      }),
+    [t],
+  );
+
   /** Create a brand-new BOQ position from the measurement and link to it.
-   *  The ordinal is auto-generated as TK.NNN based on existing TK positions.
+   *
+   *  A synced measurement goes through the server route, which creates the
+   *  position through the BOQ service (lock check, ordinal in the editor's
+   *  gap-of-10 scheme under the chosen section, validation, audit) and links
+   *  it in ONE transaction, computing the quantity from the same fold the
+   *  ledger uses (wall area with openings, slope, wastage, multiplier). The
+   *  quantity-bearing metadata is written explicitly first, so a height or an
+   *  opening typed a moment ago (whose autosave PATCH is still debounced) is
+   *  what the server folds. A measurement that never synced (a local-only
+   *  drawing) has no server row to link, so it keeps the client-side create.
    */
   const handleCreateAndLink = useCallback(async (measurementId: string) => {
     const measurement = measurements.find((m) => m.id === measurementId);
@@ -6002,84 +6102,110 @@ export default function TakeoffViewerModule({
       });
       return;
     }
+    if (measurement.isDeduction) {
+      addToast({
+        type: 'error',
+        title: t('takeoff_create.deduction_title', { defaultValue: 'An opening is not a bill position' }),
+        message: t('takeoff_create.deduction_msg', {
+          defaultValue: 'This measurement is an opening deducted from its group. Create the position from the wall or area it is cut from.',
+        }),
+      });
+      return;
+    }
+    const sectionId = linkCreateSectionId ?? defaultSectionId(linkBoqPositions);
+    const description =
+      (linkCreateDescription ?? '').trim() || defaultPositionDescription(measurement);
+    const positionUnit = positionUnitFor(measurement, measurementSystem);
     setLinkingInProgress(true);
     try {
-      // Derive next TK.NNN ordinal from existing positions.
-      const takeoffOrdinals = linkBoqPositions
-        .map((p) => {
-          const match = /^TK\.(\d+)$/.exec(p.ordinal || '');
-          return match ? parseInt(match[1]!, 10) : 0;
-        })
-        .filter((n) => n > 0);
-      const nextNum = (takeoffOrdinals.length ? Math.max(...takeoffOrdinals) : 0) + 1;
-      const ordinal = `TK.${String(nextNum).padStart(3, '0')}`;
-
-      // Reported (effective) quantity: slope / wastage / multiplier folded in
-      // (issue #332 wave); equals the raw value for an unadjusted measurement.
-      const newQty = boqQuantity(reportedMagnitude(measurement));
-      const canonicalUnit = normalizeUnit(measurement.unit);
-      const description = measurement.annotation
-        || t('takeoff.position_default_desc', {
-          defaultValue: 'Takeoff · {{type}} page {{page}}',
-          type: measurement.type,
-          page: measurement.page,
-        });
-
-      const newPos = await boqApi.addPosition({
-        boq_id: linkPickerBoqId,
-        ordinal,
-        description,
-        unit: canonicalUnit,
-        quantity: newQty,
-        unit_rate: 0,
-      });
-
-      // Write measurement-source metadata via a follow-up patch so the BOQ
-      // cell renderers show the PDF source badge + can deep-link back.
-      try {
-        await boqApi.updatePosition(newPos.id, {
+      let created: { id: string; ordinal: string; boq_id: string; description: string };
+      let quantity: number;
+      let unit: string;
+      if (measurement.serverId) {
+        // Flush the reported-quantity inputs so the server folds what is on
+        // screen. Explicit nulls clear a reset value (the server merges).
+        await takeoffApi.update(measurement.serverId, {
           metadata: {
-            pdf_measurement_source: `Takeoff: ${measurement.annotation || measurement.type} (page ${measurement.page})`,
-            pdf_measurement_id: measurement.serverId ?? measurement.id,
-            pdf_document_id: fileName ?? undefined,
-            pdf_page: measurement.page,
+            wall_height: measurement.wallHeight ?? null,
+            openings: measurement.openings ?? null,
+            slope_factor: measurement.slopeFactor ?? null,
+            wastage_pct: measurement.wastagePct ?? null,
+            multiplier: measurement.multiplier ?? null,
           },
         });
-      } catch { /* metadata is non-critical */ }
-
-      if (measurement.serverId) {
-        // pushQuantity keeps the server authoritative on the value (it
-        // re-copies its own recomputed measurement into the new position). A
-        // frontend adjustment (slope / wastage / multiplier) would be dropped
-        // by that recompute, so skip the push when one is present and let the
-        // effective quantity we wrote above stand (issue #332 wave).
-        const pushQuantity = !hasQuantityFactor(measurement);
-        try { await takeoffApi.linkToBoq(measurement.serverId, newPos.id, { pushQuantity }); } catch { /* non-critical */ }
+        const result = await takeoffApi.createBoqPosition(measurement.serverId, {
+          boq_id: linkPickerBoqId,
+          parent_id: sectionId || null,
+          description,
+          unit: positionUnit,
+          cost_item_id: linkCreateCost?.id ?? null,
+          unit_rate: linkCreateCost?.rate ?? null,
+        });
+        created = {
+          id: result.position_id,
+          ordinal: result.ordinal,
+          boq_id: result.boq_id,
+          description: result.description,
+        };
+        quantity = result.quantity;
+        unit = result.unit;
+      } else {
+        // Local-only drawing: no server row to link, so create the position
+        // client-side with the same reported quantity, in the chosen section.
+        const takeoffOrdinals = linkBoqPositions
+          .map((p) => {
+            const match = /^TK\.(\d+)$/.exec(p.ordinal || '');
+            return match ? parseInt(match[1]!, 10) : 0;
+          })
+          .filter((n) => n > 0);
+        const nextNum = (takeoffOrdinals.length ? Math.max(...takeoffOrdinals) : 0) + 1;
+        quantity = boqQuantity(positionQuantityFor(measurement, measurementSystem));
+        unit = positionUnit;
+        const newPos = await boqApi.addPosition({
+          boq_id: linkPickerBoqId,
+          ordinal: `TK.${String(nextNum).padStart(3, '0')}`,
+          description,
+          unit,
+          quantity,
+          unit_rate: linkCreateCost?.rate ?? 0,
+          ...(sectionId ? { parent_id: sectionId } : {}),
+        });
+        created = {
+          id: newPos.id,
+          ordinal: newPos.ordinal,
+          boq_id: newPos.boq_id,
+          description: newPos.description,
+        };
       }
 
       setMeasurements((prev) => prev.map((m) =>
         m.id === measurementId
           ? {
               ...m,
-              linkedPositionId: newPos.id,
-              linkedPositionOrdinal: newPos.ordinal,
-              linkedBoqId: newPos.boq_id,
-              linkedPositionLabel: newPos.description,
+              linkedPositionId: created.id,
+              linkedPositionOrdinal: created.ordinal,
+              linkedBoqId: created.boq_id,
+              linkedPositionLabel: created.description,
             }
           : m,
       ));
-      // Also keep the local position list fresh so subsequent ordinals
-      // increment correctly without a round-trip.
-      setLinkBoqPositions((prev) => [...prev, newPos]);
+      // Reload the picker's positions so the next create numbers after this one.
+      void loadPickerPositions(created.boq_id);
 
       // Refresh the react-query cached BOQ editor views.
-      queryClient.invalidateQueries({ queryKey: ['boq', newPos.boq_id] });
+      queryClient.invalidateQueries({ queryKey: ['boq', created.boq_id] });
       queryClient.invalidateQueries({ queryKey: ['all-boqs'] });
+      queryClient.invalidateQueries({ queryKey: ['takeoff-linked-boq'] });
 
       addToast({
         type: 'success',
         title: t('takeoff.linked_created', { defaultValue: 'Position created & linked' }),
-        message: `${ordinal} - ${newQty} ${canonicalUnit}`,
+        message: t('takeoff_create.created_msg', {
+          defaultValue: '{{posOrdinal}}: {{qty}} {{unit}}',
+          posOrdinal: created.ordinal,
+          qty: formatMaxDigits(quantity, 4),
+          unit,
+        }),
       });
       setLinkingMeasurementId(null);
     } catch (err) {
@@ -6091,7 +6217,20 @@ export default function TakeoffViewerModule({
     } finally {
       setLinkingInProgress(false);
     }
-  }, [measurements, linkPickerBoqId, linkBoqPositions, addToast, t, normalizeUnit, queryClient]);
+  }, [
+    measurements,
+    linkPickerBoqId,
+    linkBoqPositions,
+    linkCreateSectionId,
+    linkCreateDescription,
+    linkCreateCost,
+    measurementSystem,
+    defaultPositionDescription,
+    loadPickerPositions,
+    addToast,
+    t,
+    queryClient,
+  ]);
 
   /** Remove the link between a measurement and its BOQ position.
    *  We intentionally leave the BOQ position alone — unlinking just
@@ -6259,8 +6398,10 @@ export default function TakeoffViewerModule({
           type: m.type,
           page: m.page,
         }),
-        quantity: boqQuantity(m.value),
-        unit: normalizeUnit(m.unit),
+        // Reported quantity + unit (wall area, wastage, multiplier), the
+        // figure the ledger shows, not the raw drawn length.
+        quantity: boqQuantity(reportedMagnitude(m)),
+        unit: normalizeUnit(effectiveUnit(m)),
         source: 'takeoff',
         metadata: {
           takeoff_raw_unit: m.unit,
@@ -6316,7 +6457,10 @@ export default function TakeoffViewerModule({
         createdByMeasurement.set(m.id, pos);
         if (m.serverId) {
           try {
-            await takeoffApi.linkToBoq(m.serverId, pos.id, { pushQuantity: true });
+            // The server push copies the RAW stored value, so it is only safe
+            // for a row with no adjustment; an adjusted row keeps the
+            // reported quantity written at create.
+            await takeoffApi.linkToBoq(m.serverId, pos.id, { pushQuantity: !hasQuantityFactor(m) });
           } catch {
             linkFailures += 1;
           }
@@ -6338,6 +6482,7 @@ export default function TakeoffViewerModule({
 
       queryClient.invalidateQueries({ queryKey: ['boq', linkPickerBoqId] });
       queryClient.invalidateQueries({ queryKey: ['all-boqs'] });
+      queryClient.invalidateQueries({ queryKey: ['takeoff-linked-boq'] });
 
       const first = created[0];
       addToast({
@@ -9156,6 +9301,45 @@ export default function TakeoffViewerModule({
                   </label>
                 )}
 
+                {/* The linked bill position holds another figure than this
+                    measurement reports now. A question, never an overwrite. */}
+                {selectedLinkedDrift && (
+                  <div
+                    className="space-y-1.5 rounded border border-amber-300/70 dark:border-amber-700/50 bg-amber-50/70 dark:bg-amber-950/20 p-2"
+                    data-testid="prop-linked-drift"
+                  >
+                    <p className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-amber-800 dark:text-amber-300">
+                      <AlertTriangle size={11} className="shrink-0" />
+                      {t('takeoff_drift.title', { defaultValue: 'Bill differs from the drawing' })}
+                    </p>
+                    <p className="text-xs text-content-primary tabular-nums">
+                      {t('takeoff_drift.msg', {
+                        defaultValue: 'Bill {{bill}} {{unit}}, measured {{measured}} {{unit}}.',
+                        bill: formatMaxDigits(selectedLinkedDrift.billQuantity, 4),
+                        measured: formatMaxDigits(selectedLinkedDrift.measuredQuantity, 4),
+                        unit: selectedLinkedDrift.unit,
+                      })}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => void handleUpdateLinkedQuantity()}
+                        disabled={linkingInProgress}
+                        className="rounded bg-amber-600 px-2 py-1 text-[11px] font-semibold text-white hover:bg-amber-700 disabled:opacity-50"
+                        data-testid="prop-linked-drift-update"
+                      >
+                        {t('takeoff_drift.update', { defaultValue: 'Update bill' })}
+                      </button>
+                      <span className="min-w-0 text-[10px] text-content-tertiary">
+                        {t('takeoff_drift.hint', {
+                          defaultValue: 'Writes the measured quantity into position {{posOrdinal}}. Nothing changes until you confirm.',
+                          posOrdinal: selectedMeasurement.linkedPositionOrdinal ?? '',
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 {/* Reported-quantity adjustments (issue #332 wave): slope /
                     pitch (area only), wastage %, and a typical multiplier. Each
                     defaults to its identity value, so an untouched measurement
@@ -9172,6 +9356,16 @@ export default function TakeoffViewerModule({
                     <p className="text-[10px] font-semibold uppercase tracking-wider text-content-tertiary">
                       {t('takeoff_viewer.prop_adjustments', { defaultValue: 'Quantity adjustments' })}
                     </p>
+
+                    {/* Wall area (linear only): a height turns the run into
+                        wall area, openings are deducted from it. */}
+                    {isLinearMeasurement(selectedMeasurement) && (
+                      <WallAreaPanel
+                        measurement={selectedMeasurement}
+                        measurementSystem={measurementSystem}
+                        onChange={(patch) => updateSelectedMeasurement(patch)}
+                      />
+                    )}
 
                     {/* Slope / pitch (area only): true surface = plan x factor.
                         Accepts either a factor (>=1) or a pitch in degrees
@@ -9318,10 +9512,12 @@ export default function TakeoffViewerModule({
                           {(() => {
                             const eff = convertQuantity(
                               Math.abs(effectiveQuantity(selectedMeasurement)),
-                              selectedMeasurement.unit || '',
+                              effectiveUnit(selectedMeasurement) || '',
                               measurementSystem,
                             );
-                            return `${formatFixedDigits(eff.value, 3)} ${localizedUnitCode(eff.unit, i18n.language)}`;
+                            // Same decimal ladder as the wall-area readout above, so
+                            // 71.35 m2 is not shown again as 71.350 m2.
+                            return `${formatFixedDigits(eff.value, quantityDigits(eff.value))} ${localizedUnitCode(eff.unit, i18n.language)}`;
                           })()}
                         </span>
                       </div>
@@ -9482,11 +9678,13 @@ export default function TakeoffViewerModule({
                             selectedMeasurement.annotation ||
                             selectedMeasurement.type,
                           quantities: pdfMeasurementQuantities(selectedMeasurement),
-                          unitHint: selectedMeasurement.unit || null,
+                          unitHint: effectiveUnit(selectedMeasurement) || null,
                         }}
+                        // The reported quantity (wall area, wastage, multiplier),
+                        // the same figure the ledger shows and the link writes.
                         quantityOverride={
                           Number.isFinite(selectedMeasurement.value)
-                            ? selectedMeasurement.value
+                            ? reportedMagnitude(selectedMeasurement)
                             : null
                         }
                         onApplied={async (result) => {
@@ -9991,14 +10189,16 @@ export default function TakeoffViewerModule({
                                       {/* Issue #287: preview the quantity in the user's
                                           system so it matches the canvas readout. The
                                           value pushed to the position stays metric. */}
+                                      {/* The REPORTED quantity (wall area, wastage,
+                                          multiplier): the figure that is written. */}
                                       {(
                                         Math.round(
-                                          convertQuantity(m.value, m.unit || '', measurementSystem).value * 100,
+                                          convertQuantity(reportedMagnitude(m), effectiveUnit(m) || '', measurementSystem).value * 100,
                                         ) / 100
                                       ).toLocaleString(getIntlLocale())}
                                     </span>
                                     <span className="font-mono text-rose-700/80 dark:text-rose-300/80 shrink-0">
-                                      {displayUnitFor(m.unit || '', measurementSystem)}
+                                      {displayUnitFor(effectiveUnit(m) || '', measurementSystem)}
                                     </span>
                                     {m.page && (
                                       <span className="text-content-tertiary shrink-0 ml-auto">
@@ -10123,13 +10323,13 @@ export default function TakeoffViewerModule({
                                             })
                                             .slice(0, 100)
                                             .map((pos) => {
-                                              const measurementUnit = normalizeUnit(m.unit);
+                                              const measurementUnit = normalizeUnit(effectiveUnit(m));
                                               const unitMismatch = !!pos.unit && !!measurementUnit && pos.unit !== measurementUnit;
                                               // True cross-dimension mismatch (area → m3 etc.) -
                                               // the backend push guard refuses these, and
                                               // handleLinkToPosition surfaces the refusal as an
                                               // error toast instead of silently linking.
-                                              const mDim = measurementDimension(m.type, measurementUnit);
+                                              const mDim = measurementDimension(reportingType(m), measurementUnit);
                                               const pDim = unitDimension(pos.unit);
                                               const dimensionMismatch = mDim !== null && pDim !== null && mDim !== pDim;
                                               const currentQty = typeof pos.quantity === 'number' ? pos.quantity : Number(pos.quantity ?? 0);
@@ -10183,28 +10383,95 @@ export default function TakeoffViewerModule({
                                       </>
                                     )
                                   ) : (
-                                    /* Create new position from measurement */
-                                    <div className="rounded bg-surface-primary/60 p-1.5 space-y-1">
+                                    /* Create new position from measurement: section,
+                                       editable text, the reported quantity in the
+                                       reader's unit, optional price from the cost
+                                       database. The server creates + links it. */
+                                    <div className="rounded bg-surface-primary/60 p-1.5 space-y-1" data-testid="link-create-form">
+                                      <label className="block text-[10px] text-content-secondary">
+                                        <span className="font-semibold">{t('takeoff_create.section', { defaultValue: 'Section' })}</span>
+                                        <select
+                                          value={linkCreateSectionId ?? defaultSectionId(linkBoqPositions)}
+                                          onChange={(e) => setLinkCreateSectionId(e.target.value)}
+                                          className="mt-0.5 w-full text-[10px] rounded border border-border-light bg-surface-primary px-1 py-0.5 text-content-primary"
+                                          data-testid="link-create-section"
+                                        >
+                                          <option value="">{t('takeoff_create.no_section', { defaultValue: '(top level, no section)' })}</option>
+                                          {sectionOptions(linkBoqPositions).map((sec) => (
+                                            <option key={sec.id} value={sec.id}>{sec.label}</option>
+                                          ))}
+                                        </select>
+                                      </label>
+                                      <label className="block text-[10px] text-content-secondary">
+                                        <span className="font-semibold">{t('takeoff.description', { defaultValue: 'Description' })}</span>
+                                        <input
+                                          type="text"
+                                          value={linkCreateDescription ?? defaultPositionDescription(m)}
+                                          onChange={(e) => setLinkCreateDescription(e.target.value)}
+                                          className="mt-0.5 w-full text-[10px] rounded border border-border-light bg-surface-primary px-1.5 py-0.5 text-content-primary"
+                                          data-testid="link-create-description"
+                                        />
+                                      </label>
                                       <div className="grid grid-cols-[auto_1fr] gap-x-1.5 text-[10px] text-content-secondary">
-                                        <span className="font-semibold">{t('takeoff.description', { defaultValue: 'Description' })}:</span>
-                                        <span className="text-content-primary truncate">
-                                          {m.annotation || `${m.type} page ${m.page}`}
-                                        </span>
                                         <span className="font-semibold">{t('takeoff.quantity', { defaultValue: 'Quantity' })}:</span>
-                                        <span className="text-content-primary font-mono">
-                                          {/* Issue #287: display the quantity in the user's
-                                              system; the created position stores metric. */}
-                                          {Math.round(
-                                            convertQuantity(m.value, m.unit || '', measurementSystem).value * 100,
-                                          ) / 100}{' '}
-                                          {displayUnitFor(m.unit || '', measurementSystem)}
+                                        <span className="text-content-primary font-mono" data-testid="link-create-quantity">
+                                          {/* The reported quantity, stated in the unit the
+                                              position is created in (ft² for imperial). */}
+                                          {formatMaxDigits(positionQuantityFor(m, measurementSystem), 4)}{' '}
+                                          {displayUnitFor(positionUnitFor(m, measurementSystem), 'metric')}
+                                        </span>
+                                        <span className="font-semibold">{t('takeoff_create.price', { defaultValue: 'Price' })}:</span>
+                                        <span className="flex items-center gap-1 min-w-0">
+                                          {linkCreateCost ? (
+                                            <>
+                                              <span className="truncate text-content-primary" title={linkCreateCost.description} data-testid="link-create-cost">
+                                                <span className="font-mono">{linkCreateCost.code}</span> {linkCreateCost.description}
+                                                {' · '}
+                                                <span className="font-mono">
+                                                  {fmtCurrency(linkCreateCost.rate, linkCreateCost.currency)}/{linkCreateCost.unit}
+                                                </span>
+                                              </span>
+                                              <button
+                                                type="button"
+                                                onClick={() => setLinkCreateCost(null)}
+                                                className="shrink-0 text-content-tertiary hover:text-content-primary"
+                                                aria-label={t('takeoff_create.clear_price', { defaultValue: 'Remove price' })}
+                                                title={t('takeoff_create.clear_price', { defaultValue: 'Remove price' })}
+                                              >
+                                                <X size={10} />
+                                              </button>
+                                            </>
+                                          ) : (
+                                            <button
+                                              type="button"
+                                              onClick={() => setLinkCostPickerOpen(true)}
+                                              className="text-oe-blue hover:underline text-left"
+                                              data-testid="link-create-pick-cost"
+                                            >
+                                              {t('takeoff_create.pick_cost', { defaultValue: 'Pick from cost database (optional)' })}
+                                            </button>
+                                          )}
                                         </span>
                                       </div>
+                                      {linkCreateCost && linkCreateCost.unit
+                                        && normalizeUnit(linkCreateCost.unit) !== positionUnitFor(m, measurementSystem) && (
+                                        <p className="flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400" data-testid="link-create-cost-unit-warning">
+                                          <AlertTriangle size={10} className="shrink-0" />
+                                          {t('takeoff_create.cost_unit_mismatch', {
+                                            defaultValue: 'The cost item is priced per {{costUnit}}, the position is in {{unit}}. Check the rate before pricing.',
+                                            costUnit: linkCreateCost.unit,
+                                            unit: positionUnitFor(m, measurementSystem),
+                                          })}
+                                        </p>
+                                      )}
                                       <button
                                         type="button"
                                         onClick={() => handleCreateAndLink(m.id)}
-                                        disabled={linkingInProgress || !linkPickerBoqId}
+                                        // An opening, or a suggestion nobody accepted yet, is
+                                        // not a bill quantity (the server refuses both too).
+                                        disabled={linkingInProgress || !linkPickerBoqId || Boolean(m.isDeduction) || Boolean(m.suggested)}
                                         className="w-full flex items-center justify-center gap-1.5 px-2 py-1 rounded text-[10px] font-semibold bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-50 transition-colors"
+                                        data-testid="link-create-submit"
                                       >
                                         {linkingInProgress && <Loader2 size={10} className="animate-spin" />}
                                         {t('takeoff.create_and_link', { defaultValue: 'Create position & link' })}
@@ -10509,6 +10776,37 @@ export default function TakeoffViewerModule({
           </div>
         </div>
       )}
+      {/* Cost-database picker for "Create new position" (the BOQ editor's own
+          modal in pick-only mode): the picked item prices the new position and
+          nothing is added to the bill until "Create position & link". */}
+      {linkCostPickerOpen && linkPickerBoqId && (
+        <Suspense fallback={null}>
+          <CostDatabaseSearchModal
+            boqId={linkPickerBoqId}
+            onClose={() => setLinkCostPickerOpen(false)}
+            onAdded={() => setLinkCostPickerOpen(false)}
+            onSelectForResources={(item, picked) => {
+              const stats = item.metadata_?.variant_stats;
+              const rate =
+                picked?.kind === 'variant'
+                  ? picked.variant.price
+                  : picked?.kind === 'default' && stats
+                    ? stats[picked.strategy]
+                    : item.buildup_rate ?? item.rate;
+              setLinkCreateCost({
+                id: item.id,
+                code: item.code,
+                description: item.description,
+                unit: item.unit,
+                rate: Number.isFinite(rate) ? rate : 0,
+                currency: item.currency,
+              });
+              setLinkCostPickerOpen(false);
+            }}
+          />
+        </Suspense>
+      )}
+
       {/* Create RFI from a measurement (cross-module link). Rendered fresh per
           open so the prefilled fields initialise from the chosen measurement. */}
       {rfiMeasurement && (

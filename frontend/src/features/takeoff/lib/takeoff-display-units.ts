@@ -26,6 +26,7 @@
 import type { MeasurementSystem } from '@/stores/usePreferencesStore';
 import { convertUnit, getDisplayUnit } from '@/shared/lib/unitConversion';
 import type { Measurement } from './takeoff-types';
+import { effectiveQuantity, effectiveUnit, isWallMeasurement, wallGrossArea } from './takeoff-quantity';
 import {
   type ScaleConfig,
   formatFeetInches,
@@ -146,9 +147,22 @@ export function measurementLabel(
 ): string {
   switch (m.type) {
     case 'distance':
-    case 'polyline':
+    case 'polyline': {
       // Stored unit is "m"; value is metres.
-      return formatQuantity(m.value, m.unit || 'm', system);
+      const lengthStr = formatQuantity(m.value, m.unit || 'm', system);
+      if (!isWallMeasurement(m)) return lengthStr;
+      // A wall reads as its sum, "12.5 m × 2.8 m = 35 m²", and when openings,
+      // wastage or a multiplier move the reported figure, "→ 31.2 m²" after it,
+      // so the drawing shows the same number the ledger and the bill carry.
+      const areaUnit = effectiveUnit(m);
+      const heightStr = formatQuantity(m.wallHeight ?? 0, m.unit || 'm', system);
+      const gross = wallGrossArea(m);
+      const reported = Math.abs(effectiveQuantity(m));
+      const head = `${lengthStr} × ${heightStr} = ${formatQuantity(gross, areaUnit, system)}`;
+      return Math.abs(reported - gross) > 1e-9
+        ? `${head} → ${formatQuantity(reported, areaUnit, system)}`
+        : head;
+    }
 
     case 'area': {
       const areaStr = formatQuantity(m.value, m.unit || 'm²', system);

@@ -13,7 +13,7 @@ import type { Measurement, MeasurementType } from './takeoff-types';
 import { ANNOTATION_TYPES } from './takeoff-groups';
 import type { MeasurementSystem } from '@/stores/usePreferencesStore';
 import { convertQuantity } from './takeoff-display-units';
-import { effectiveQuantity } from './takeoff-quantity';
+import { effectiveQuantity, effectiveUnit, isWallMeasurement, reportingType } from './takeoff-quantity';
 import { fmtFixed } from '@/shared/lib/formatters';
 
 /** Sortable column keys exposed by the ledger table. */
@@ -123,9 +123,10 @@ function compareByColumn(
     case 'group':
       return (a.group || 'General').localeCompare(b.group || 'General');
     case 'value':
-      return a.value - b.value;
+      // Sort by the figure the column shows (wall area, wastage, deduction sign).
+      return effectiveQuantity(a) - effectiveQuantity(b);
     case 'unit':
-      return (a.unit || '').localeCompare(b.unit || '');
+      return (effectiveUnit(a) || '').localeCompare(effectiveUnit(b) || '');
     case 'page':
       return a.page - b.page;
   }
@@ -159,10 +160,11 @@ export function groupSubtotals(measurements: Measurement[]): GroupSubtotal[] {
     }
     entry.count += 1;
     if (!ANNOTATION_TYPES.has(m.type)) {
-      const unit = m.unit || '';
+      // Keyed by the REPORTED unit (a wall reports m², not m) so m + m2 + m3
+      // stay distinct and a wall area never sums into a length.
+      const unit = effectiveUnit(m) || '';
       // Effective quantity folds slope / wastage / typical-multiplier and the
-      // opening-deduction sign (net area = gross - openings), keyed by the
-      // stored unit so m + m2 + m3 stay distinct.
+      // opening-deduction sign (net area = gross - openings).
       entry.totals[unit] = (entry.totals[unit] ?? 0) + effectiveQuantity(m);
       entry.countOnly[unit] = (entry.countOnly[unit] ?? true) && m.type === 'count';
     }
@@ -180,17 +182,20 @@ export function typeGrandTotals(measurements: Measurement[]): TypeGrandTotal[] {
   const byType = new Map<MeasurementType, TypeGrandTotal>();
   for (const m of measurements) {
     if (ANNOTATION_TYPES.has(m.type)) continue;
-    let entry = byType.get(m.type);
+    // A wall (linear run with a height) reports area, so it totals with areas.
+    const type = reportingType(m);
+    const unit = effectiveUnit(m);
+    let entry = byType.get(type);
     if (!entry) {
-      entry = { type: m.type, unit: m.unit || '', total: 0, count: 0 };
-      byType.set(m.type, entry);
+      entry = { type, unit: unit || '', total: 0, count: 0 };
+      byType.set(type, entry);
     }
     // Effective quantity folds slope / wastage / typical-multiplier and the
     // opening-deduction sign (net = gross - openings) into the grand total.
     entry.total += effectiveQuantity(m);
     entry.count += 1;
     // Prefer a non-empty unit string if we have one.
-    if (!entry.unit && m.unit) entry.unit = m.unit;
+    if (!entry.unit && unit) entry.unit = unit;
   }
   return Array.from(byType.values()).sort((a, b) =>
     a.type.localeCompare(b.type),
@@ -232,8 +237,10 @@ export function ledgerToCsv(
       const signedValue = effectiveQuantity(measurement);
       const typeLabel = measurement.isDeduction
         ? `${measurement.type} (deduction)`
-        : measurement.type;
-      const disp = convertQuantity(signedValue, measurement.unit || '', system);
+        : isWallMeasurement(measurement)
+          ? `${measurement.type} (wall)`
+          : measurement.type;
+      const disp = convertQuantity(signedValue, effectiveUnit(measurement) || '', system);
       rows.push(
         [
           String(ordinal),

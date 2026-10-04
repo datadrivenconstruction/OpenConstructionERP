@@ -578,6 +578,48 @@ class LinkToBoqRequest(BaseModel):
     )
 
 
+class CreateBoqPositionFromMeasurementRequest(BaseModel):
+    """Create a new BOQ position from a measurement and link the two.
+
+    The quantity is NOT taken from the client: the server computes the
+    measurement's reported quantity (wall area, openings, slope, wastage,
+    multiplier) itself, so the new position carries the same figure the
+    takeoff ledger shows.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    boq_id: UUID = Field(..., description="Bill the new position goes into; must be in the measurement's project")
+    parent_id: UUID | None = Field(default=None, description="Section to place the position in; None = top level")
+    description: str | None = Field(
+        default=None,
+        max_length=5000,
+        description="Position text; defaults to the measurement's annotation",
+    )
+    unit: str | None = Field(
+        default=None,
+        max_length=20,
+        description=(
+            "Unit to state the position in (e.g. ft2 for an imperial bill). The reported quantity is "
+            "converted into it; None keeps the measurement's own unit."
+        ),
+    )
+    cost_item_id: UUID | None = Field(default=None, description="Cost database item to price the position from")
+    unit_rate: Decimal | None = Field(default=None, ge=0, description="Unit rate; None = 0 (to be priced)")
+
+
+class CreateBoqPositionFromMeasurementResponse(BaseModel):
+    """The created position and the measurement now linked to it."""
+
+    position_id: str
+    boq_id: str
+    ordinal: str
+    description: str
+    unit: str
+    quantity: float
+    measurement: TakeoffMeasurementResponse
+
+
 # ── Vision-LLM plan reading (issue #194) ────────────────────────────────────
 #
 # The vision-LLM path is an ADDITIONAL, higher-quality suggestion source that
