@@ -24,7 +24,14 @@ const previewMock = vi.mocked(api.previewX31);
 const applyMock = vi.mocked(api.applyX31);
 const checkMock = vi.mocked(api.checkX89);
 
-function matched(oz: string, id: string, proposed: string, unchanged = false): api.X31MatchedItem {
+function matched(
+  oz: string,
+  id: string,
+  proposed: string,
+  unchanged = false,
+  sheetLines = 0,
+  version: number | null = 3,
+): api.X31MatchedItem {
   return {
     oz,
     quantity: proposed,
@@ -40,6 +47,9 @@ function matched(oz: string, id: string, proposed: string, unchanged = false): a
     proposed_quantity: proposed,
     difference_to_quantity: '0.000',
     unchanged,
+    current_sheet_lines: sheetLines,
+    current_sheet_source: sheetLines > 0 ? 'manual' : null,
+    position_version: version,
   };
 }
 
@@ -101,7 +111,8 @@ describe('GaebSiteExchangeDialog', () => {
     expect(boqId).toBe('b1');
     expect(body.set_boq_quantity).toBe(false);
     expect(body.file_name).toBe('aufmass.x31');
-    expect(body.items).toEqual([{ position_id: 'p1', quantity: '125.500', oz: '01.0010', rows: [] }]);
+    // The version read at preview goes back, so an edit made in between is refused, not overwritten.
+    expect(body.items).toEqual([{ position_id: 'p1', quantity: '125.500', oz: '01.0010', rows: [], version: 3 }]);
     await waitFor(() => expect(onApplied).toHaveBeenCalledTimes(1));
   });
 
@@ -150,6 +161,89 @@ describe('GaebSiteExchangeDialog', () => {
     expect((screen.getByLabelText('01.0010') as HTMLInputElement).checked).toBe(false);
     expect((screen.getByLabelText('01.0020') as HTMLInputElement).checked).toBe(true);
     expect(screen.getByRole('button', { name: 'Apply 1 measured quantity' })).toBeInTheDocument();
+  });
+
+  it('does not tick a row whose apply would replace a take-off of several lines, and says how many', async () => {
+    previewMock.mockResolvedValue({
+      ...PREVIEW,
+      matched: [matched('01.0010', 'p1', '125.500', false, 40), matched('01.0020', 'p2', '42.000', false, 1)],
+    });
+    render(
+      <GaebSiteExchangeDialog
+        open
+        boqId="b1"
+        boqName="LV"
+        initialFile={new File(['<GAEB/>'], 'aufmass.x31')}
+        onClose={() => {}}
+      />,
+    );
+    const handMeasured = (await screen.findByLabelText('01.0010')) as HTMLInputElement;
+    expect(handMeasured.checked).toBe(false);
+    // A one-line sheet (an earlier X31, or a single total) is replaced like for like.
+    expect((screen.getByLabelText('01.0020') as HTMLInputElement).checked).toBe(true);
+    expect(screen.getByText('Replaces 40 measurement lines')).toBeInTheDocument();
+    expect(screen.getAllByTestId('gaeb-x31-replaces-take-off')).toHaveLength(1);
+  });
+
+  it('names a position edited since the file was read', async () => {
+    previewMock.mockResolvedValue(PREVIEW);
+    applyMock.mockResolvedValue({
+      applied: [],
+      unchanged: [],
+      errors: [{ position_id: 'p1', error: 'version_conflict' }],
+      set_boq_quantity: false,
+    });
+    render(
+      <GaebSiteExchangeDialog
+        open
+        boqId="b1"
+        boqName="LV"
+        initialFile={new File(['<GAEB/>'], 'aufmass.x31')}
+        onClose={() => {}}
+      />,
+    );
+    fireEvent.click(await screen.findByRole('button', { name: 'Apply 2 measured quantities' }));
+    expect(
+      await screen.findByText('01.0010: The position was changed after the file was read. Read the file again.'),
+    ).toBeInTheDocument();
+  });
+
+  it('flags an invoice in another currency and prices the bill side in the bill currency', async () => {
+    checkMock.mockResolvedValue({
+      file_name: 'r.x89',
+      header: {},
+      currency: 'CHF',
+      bill_currency: 'EUR',
+      currency_mismatch: true,
+      items_in_file: 2,
+      lines: [
+        {
+          oz: '01.0900',
+          kind: 'markup',
+          description: 'Nachlass',
+          unit: '',
+          bill_qty: null,
+          unit_price: null,
+          amount: '-30.00',
+          position_id: null,
+          expected_amount: null,
+          difference: '-30.00',
+          issues: ['markup_not_in_bill'],
+          markup_percent: '-3',
+        },
+      ],
+      invoiced_total: '970.00',
+      expected_total: '1000.00',
+      total_difference: '-30.00',
+      issue_counts: { markup_not_in_bill: 1 },
+      totals_check: [],
+      positions_not_invoiced: 0,
+    });
+    render(
+      <GaebSiteExchangeDialog open boqId="b1" boqName="LV" initialFile={new File(['x'], 'r.x89')} onClose={() => {}} />,
+    );
+    expect(await screen.findByTestId('gaeb-x89-currency-mismatch')).toHaveTextContent('The invoice is in CHF, the bill in EUR.');
+    expect(screen.getByText('Discount or surcharge the bill does not have')).toBeInTheDocument();
   });
 
   it('opens a handed-over X89 on the check, shows findings and offers no apply', async () => {
