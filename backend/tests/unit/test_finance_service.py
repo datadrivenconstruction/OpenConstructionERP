@@ -216,6 +216,21 @@ class _StubEVMRepo:
     def __init__(self) -> None:
         self.rows: list[Any] = []
 
+    async def delete_automatic_for_date(self, project_id: uuid.UUID, snapshot_date: str) -> int:
+        """Drop the schedule progress rows of one day, as the real repository does."""
+        keep = [
+            r
+            for r in self.rows
+            if not (
+                r.project_id == project_id
+                and r.snapshot_date == snapshot_date
+                and (r.metadata_ or {}).get("source") == "schedule_progress"
+            )
+        ]
+        dropped = len(self.rows) - len(keep)
+        self.rows = keep
+        return dropped
+
     async def create(self, snapshot: Any) -> Any:
         if getattr(snapshot, "id", None) is None:
             snapshot.id = uuid.uuid4()

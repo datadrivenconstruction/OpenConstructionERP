@@ -22,6 +22,7 @@ from app.core.events import event_bus
 from app.core.money import money_quantum
 from app.modules.finance import gaap
 from app.modules.finance.models import (
+    EVM_SNAPSHOT_SOURCE_SCHEDULE_PROGRESS,
     EVMSnapshot,
     Invoice,
     InvoiceLineItem,
@@ -2617,6 +2618,13 @@ class FinanceService:
             tcpi = ((bac - ev) / remaining_budget).quantize(Decimal("0.0001"))
         else:
             tcpi = Decimal("0")
+
+        # One figure per project per day. A snapshot a person records replaces
+        # the automatic one the schedule progress subscriber wrote for the same
+        # date, rather than standing beside it as a second point on the S-curve
+        # and a coin toss for whichever "latest snapshot" query reads it.
+        if (data.metadata or {}).get("source") != EVM_SNAPSHOT_SOURCE_SCHEDULE_PROGRESS:
+            await self.evm.delete_automatic_for_date(data.project_id, data.snapshot_date)
 
         snapshot = EVMSnapshot(
             project_id=data.project_id,

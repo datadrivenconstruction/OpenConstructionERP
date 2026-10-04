@@ -748,6 +748,9 @@ async def _handle_estimate_approved(event: Event) -> None:
 
 #: ``EVMSnapshot.metadata_["source"]`` on rows this handler owns. A row without
 #: it was recorded by a person through the finance API and is never touched.
+#: The same value as ``finance.models.EVM_SNAPSHOT_SOURCE_SCHEDULE_PROGRESS``,
+#: which the finance writer reads to replace these rows; spelled out here so
+#: importing the handlers does not import finance.
 EVM_PROGRESS_SNAPSHOT_SOURCE = "schedule_progress"
 
 #: Schedule types whose progress is the project's record of work done. A
@@ -1134,7 +1137,16 @@ async def _write_progress_snapshot(
             .scalars()
             .all()
         )
-        if any((s.metadata_ or {}).get("source") != EVM_PROGRESS_SNAPSHOT_SOURCE for s in todays):
+        automatic = [s for s in todays if (s.metadata_ or {}).get("source") == EVM_PROGRESS_SNAPSHOT_SOURCE]
+        if len(automatic) != len(todays):
+            # A person recorded the day's figure. The finance writer removes an
+            # automatic row of the same date when it inserts, but a row written
+            # before that rule, or by a run that passed this check a moment
+            # before the person saved, can still stand beside it. Clear it so
+            # the day keeps one point.
+            if automatic:
+                await session.execute(delete(EVMSnapshot).where(EVMSnapshot.id.in_([s.id for s in automatic])))
+                await session.commit()
             logger.info(
                 "schedule.activity.progress_updated: project %s already has a recorded snapshot for %s, "
                 "leaving it as the day's figure",

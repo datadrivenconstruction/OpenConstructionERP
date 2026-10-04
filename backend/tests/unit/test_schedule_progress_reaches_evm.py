@@ -570,6 +570,144 @@ async def test_a_snapshot_a_person_recorded_today_is_left_alone(factory: async_s
     assert rows[0].bac == "1", "the recorded snapshot was overwritten"
 
 
+async def _record_by_hand(project_id: uuid.UUID, snapshot_date: str, value: str = "7") -> EVMSnapshot:
+    """A snapshot a person records through the finance API's writer."""
+    import app.database as database_module
+    from app.modules.finance.schemas import EVMSnapshotCreate
+    from app.modules.finance.service import FinanceService
+
+    async with database_module.async_session_factory() as s:
+        snap = await FinanceService(s).create_evm_snapshot(
+            EVMSnapshotCreate(
+                project_id=project_id, snapshot_date=snapshot_date, bac=value, pv=value, ev=value, ac=value
+            )
+        )
+        await s.commit()
+        return snap
+
+
+async def test_a_snapshot_recorded_by_hand_replaces_the_days_automatic_one(
+    factory: async_sessionmaker[AsyncSession],
+) -> None:
+    """Progress at 09:00 writes the automatic row, the PM records the official one at 15:00.
+
+    Both used to stay, two points for one day on the S-curve, and the forecast
+    read whichever the database returned first.
+    """
+    project_id, (a, _b) = await _project(factory)
+    await _progress(a, 50)
+
+    manual = await _record_by_hand(project_id, TODAY.isoformat())
+
+    assert [r.id for r in await _snapshots(factory, project_id)] == [manual.id]
+    # Later saves leave the recorded figure as the day's figure.
+    await _progress(a, 60)
+    assert [r.id for r in await _snapshots(factory, project_id)] == [manual.id]
+
+
+async def test_a_recorded_snapshot_for_another_day_leaves_todays_automatic_one(
+    factory: async_sessionmaker[AsyncSession],
+) -> None:
+    project_id, (a, _b) = await _project(factory)
+    await _progress(a, 50)
+
+    await _record_by_hand(project_id, (TODAY - timedelta(days=1)).isoformat())
+
+    rows = await _snapshots(factory, project_id)
+    assert sorted((r.snapshot_date, (r.metadata_ or {}).get("source")) for r in rows) == [
+        ((TODAY - timedelta(days=1)).isoformat(), None),
+        (TODAY.isoformat(), EVM_PROGRESS_SNAPSHOT_SOURCE),
+    ]
+
+
+async def test_an_automatic_row_left_beside_a_recorded_one_is_cleared_on_the_next_save(
+    factory: async_sessionmaker[AsyncSession],
+) -> None:
+    """Rows written before the finance writer replaced them, or in a race with it."""
+    project_id, (a, _b) = await _project(factory)
+    async with factory() as s:
+        manual = EVMSnapshot(project_id=project_id, snapshot_date=TODAY.isoformat(), bac="1", ev="1", metadata_={})
+        s.add(manual)
+        s.add(
+            EVMSnapshot(
+                project_id=project_id,
+                snapshot_date=TODAY.isoformat(),
+                bac="100000",
+                ev="10000",
+                metadata_={"source": EVM_PROGRESS_SNAPSHOT_SOURCE},
+            )
+        )
+        await s.commit()
+
+    await _progress(a, 50)
+
+    assert [r.id for r in await _snapshots(factory, project_id)] == [manual.id]
+
+
+def test_the_handler_and_the_finance_writer_name_the_same_source() -> None:
+    from app.modules.finance.models import EVM_SNAPSHOT_SOURCE_SCHEDULE_PROGRESS
+
+    assert EVM_PROGRESS_SNAPSHOT_SOURCE == EVM_SNAPSHOT_SOURCE_SCHEDULE_PROGRESS
+
+
+@pytest.mark.parametrize("newest_inserted_first", [True, False])
+async def test_the_latest_snapshot_of_a_shared_date_is_the_newest(
+    factory: async_sessionmaker[AsyncSession],
+    newest_inserted_first: bool,
+) -> None:
+    """Two rows on one date: the forecast and the finance list read the newer.
+
+    Ordering by the date alone left the tie to the database. Both insertion
+    orders are run, so an order that only happens to follow the heap fails one.
+    """
+    from datetime import UTC, datetime
+
+    from app.modules.finance.service import FinanceService
+    from app.modules.full_evm.service import EVMService
+
+    project_id, _ = await _project(factory)
+    older = EVMSnapshot(
+        project_id=project_id,
+        snapshot_date=TODAY.isoformat(),
+        bac="100",
+        ev="10",
+        ac="10",
+        cpi="1",
+        spi="1",
+        metadata_={},
+        created_at=datetime(2026, 1, 1, 9, tzinfo=UTC),
+    )
+    newer = EVMSnapshot(
+        project_id=project_id,
+        snapshot_date=TODAY.isoformat(),
+        bac="100",
+        ev="50",
+        ac="100",
+        cpi="0.5",
+        spi="1",
+        metadata_={},
+        created_at=datetime(2026, 1, 1, 15, tzinfo=UTC),
+    )
+    async with factory() as s:
+        for row in (newer, older) if newest_inserted_first else (older, newer):
+            s.add(row)
+            await s.flush()
+        await s.commit()
+        newer_id, older_id = newer.id, older.id
+
+    async with factory() as s:
+        forecast = await EVMService(s).calculate_forecast(project_id, "cpi")
+        source_id, eac = forecast.metadata_["source_snapshot_id"], Decimal(forecast.eac)
+        listed, _total = await FinanceService(s).list_evm_snapshots(project_id=project_id)
+        listed_ids = [r.id for r in listed]
+        await s.rollback()
+
+    assert source_id == str(newer_id)
+    # 100 spent + 50 remaining at CPI 0.5. The older row would give 10 + 90 = 100.
+    assert eac == Decimal("200")
+    assert listed_ids == [newer_id, older_id]
+
+
 async def test_yesterdays_automatic_snapshot_is_kept(factory: async_sessionmaker[AsyncSession]) -> None:
     """Replacement is per day; history is the S-curve."""
     project_id, (a, _b) = await _project(factory)

@@ -17,6 +17,7 @@ from sqlalchemy.orm import selectinload
 
 from app.core.orm_write import apply_update
 from app.modules.finance.models import (
+    EVM_SNAPSHOT_SOURCE_SCHEDULE_PROGRESS,
     EVMSnapshot,
     Invoice,
     InvoiceLineItem,
@@ -752,7 +753,9 @@ class EVMSnapshotRepository:
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
 
-        stmt = base.order_by(EVMSnapshot.snapshot_date.desc())
+        # created_at breaks a tie on the date, so the newest row for a day
+        # comes first, the same order every "latest snapshot" reader uses.
+        stmt = base.order_by(EVMSnapshot.snapshot_date.desc(), EVMSnapshot.created_at.desc())
         result = await self.session.execute(stmt)
         items = list(result.scalars().all())
 
@@ -763,6 +766,32 @@ class EVMSnapshotRepository:
         self.session.add(snapshot)
         await self.session.flush()
         return snapshot
+
+    async def delete_automatic_for_date(self, project_id: uuid.UUID, snapshot_date: str) -> int:
+        """Remove the schedule progress subscriber's rows for one project and day.
+
+        Returns how many rows went. Rows a person recorded are never touched.
+        """
+        rows = (
+            (
+                await self.session.execute(
+                    select(EVMSnapshot).where(
+                        EVMSnapshot.project_id == project_id,
+                        EVMSnapshot.snapshot_date == snapshot_date,
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
+        automatic = [
+            row for row in rows if (row.metadata_ or {}).get("source") == EVM_SNAPSHOT_SOURCE_SCHEDULE_PROGRESS
+        ]
+        for row in automatic:
+            await self.session.delete(row)
+        if automatic:
+            await self.session.flush()
+        return len(automatic)
 
 
 class LedgerAccountRepository:

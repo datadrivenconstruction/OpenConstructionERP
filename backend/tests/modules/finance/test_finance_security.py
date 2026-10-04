@@ -190,6 +190,9 @@ class _StubEVMRepo:
     def __init__(self) -> None:
         self.rows: dict[uuid.UUID, Any] = {}
 
+    async def delete_automatic_for_date(self, project_id: uuid.UUID, snapshot_date: str) -> int:
+        return 0
+
     async def create(self, snap: Any) -> Any:
         if getattr(snap, "id", None) is None:
             snap.id = uuid.uuid4()

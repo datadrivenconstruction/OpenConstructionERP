@@ -244,6 +244,12 @@ class ProjectBudget(Base):
         return f"<ProjectBudget project={self.project_id} cat={self.category}>"
 
 
+#: ``EVMSnapshot.metadata_["source"]`` on the rows the schedule progress
+#: subscriber (``app.core.event_handlers``) writes and replaces. Any other row
+#: was recorded by a person and is the figure for its date.
+EVM_SNAPSHOT_SOURCE_SCHEDULE_PROGRESS = "schedule_progress"
+
+
 class EVMSnapshot(Base):
     """Earned Value Management snapshot for a project at a point in time."""
 
