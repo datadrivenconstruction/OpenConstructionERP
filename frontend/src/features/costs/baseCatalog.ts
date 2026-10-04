@@ -218,6 +218,10 @@ export function canReturnHome(
 /** Server answer of POST /v1/costs/base-home/{base_region}. */
 export interface RestoreHomeResult extends Record<string, unknown> {
   items_restored?: number;
+  /** Items the home file does not hold, repriced from the rebuilt home sheet. */
+  items_repriced_home?: number;
+  /** Items whose recipe the home sheet cannot price: they keep the market's rates and currency. */
+  items_left_in_market?: number;
   currency?: string;
   /** Edited resource prices the return home replaced. */
   user_prices_discarded?: number;

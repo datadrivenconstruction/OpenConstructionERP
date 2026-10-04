@@ -772,6 +772,8 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
           }),
           message:
             t('costs.restore_home_done_msg', {
+              count: data.items_restored ?? 0,
+              defaultValue_one: '{{items}} item is back on its own price in {{currency}}.',
               defaultValue: '{{items}} items are back on their own prices in {{currency}}.',
               items: (data.items_restored ?? 0).toLocaleString(getNumberLocale()),
               currency: data.currency ?? variant.currency,
@@ -783,6 +785,24 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
                 })}`
               : ''),
         });
+        // Items whose recipe the home sheet cannot price keep the market's
+        // rates and currency. The server counts them so nobody takes them for
+        // home prices.
+        const leftInMarket = data.items_left_in_market ?? 0;
+        if (leftInMarket > 0) {
+          addToast({
+            type: 'warning',
+            title: variant.market,
+            message: t('costs.restore_home_left_in_market', {
+              count: leftInMarket,
+              defaultValue_one:
+                '{{items}} item still carries a market price: its recipe has no resource the home price sheet prices. Check it before using it in an estimate.',
+              defaultValue:
+                '{{items}} items still carry market prices: their recipes have no resource the home price sheet prices. Check them before using them in an estimate.',
+              items: leftInMarket.toLocaleString(getNumberLocale()),
+            }),
+          });
+        }
         const fellBackTo = textLanguageFallback(data);
         if (fellBackTo) {
           addToast({
