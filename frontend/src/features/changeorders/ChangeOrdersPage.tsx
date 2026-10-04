@@ -29,6 +29,8 @@ import {
   GitBranch,
   Lock,
   Info,
+  Table2,
+  Wallet,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, InfoHint, DismissibleInfo, IntroRichText, ConfirmDialog, RecoveryCard, SkeletonTable, SkeletonCard, ModuleGuideButton } from '@/shared/ui';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -50,6 +52,7 @@ import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { listContracts } from '@/features/contracts/api';
 import { contractDeepLink, linkedVariationDeepLink } from '@/shared/lib/changeChainLinks';
+import { boqDeepLink, changeOrderWriteback, FINANCE_BUDGETS_LINK } from '@/shared/lib/awardChainLinks';
 import { ProvabilityGauge, EvidenceThreadPanel } from '@/features/claims-evidence';
 import { ApprovalTimeline } from './ApprovalTimeline';
 import { ImpactSimulator, type SavedScenario } from './ImpactSimulator';
@@ -1997,7 +2000,22 @@ function DetailView({
           sourceRecord && !(sourceRecord.kind === 'rfi' && rfiIds.includes(sourceRecord.id))
             ? sourceRecord
             : null;
-        if (poIds.length === 0 && rfiIds.length === 0 && !variationLink && !linkedContractId && !sourcePill) {
+        // Where the approval wrote the scope and the money. Stamped on the
+        // order by the approval itself; an order approved before the stamp
+        // existed carries none, and then no pill is drawn rather than one to
+        // a bill the page would have to guess.
+        const writeback = changeOrderWriteback(order.metadata as Record<string, unknown> | undefined);
+        const landedInBoq = order.status === 'approved' && !!writeback.boqId;
+        const landedInBudget = order.status === 'approved' && !!writeback.budgetRowId;
+        if (
+          poIds.length === 0 &&
+          rfiIds.length === 0 &&
+          !variationLink &&
+          !linkedContractId &&
+          !sourcePill &&
+          !landedInBoq &&
+          !landedInBudget
+        ) {
           return null;
         }
         const chipCls =
@@ -2052,6 +2070,32 @@ function DetailView({
                 >
                   <FileText size={12} />
                   {t('changeorders.applies_to_contract', { defaultValue: 'Applies to contract' })}
+                </button>
+              )}
+              {landedInBoq && writeback.boqId && (
+                <button
+                  type="button"
+                  className={chipCls}
+                  onClick={() => navigate(boqDeepLink(writeback.boqId as string, writeback.boqSectionId))}
+                  title={t('changeorders.written_into_boq_hint', {
+                    defaultValue: 'Open the bill of quantities on the section this change order added',
+                  })}
+                >
+                  <Table2 size={12} />
+                  {t('changeorders.written_into_boq', { defaultValue: 'BOQ section' })}
+                </button>
+              )}
+              {landedInBudget && (
+                <button
+                  type="button"
+                  className={chipCls}
+                  onClick={() => navigate(FINANCE_BUDGETS_LINK)}
+                  title={t('changeorders.revised_budget_hint', {
+                    defaultValue: 'Open the budget lines, where this change order is recorded as a revised-budget row',
+                  })}
+                >
+                  <Wallet size={12} />
+                  {t('changeorders.revised_budget', { defaultValue: 'Revised budget' })}
                 </button>
               )}
               {poIds.map((poId, i) => (
