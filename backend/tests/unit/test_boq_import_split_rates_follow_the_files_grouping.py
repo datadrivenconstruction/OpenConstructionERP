@@ -191,6 +191,40 @@ def test_a_contingency_written_with_dot_thousands_keeps_its_amount() -> None:
     assert [row["amount"] for row in summary] == [pytest.approx(1875500.0)]
 
 
+def test_a_summary_amount_with_one_dot_group_is_read_in_thousands() -> None:
+    # "1.875.500" above has two dots, and a number with two dots was read as
+    # thousands with no grouping at all, so that case passes whether or not
+    # the summary reader is told the file's grouping. A total with one dot
+    # group is the one the grouping decides: read without it, "150.000" is
+    # one hundred and fifty.
+    content = (
+        "Ssz.;Megnevezés;Me.;Mennyiség;Egységár;Összesen\n"
+        "1;Falazás kisméretű téglából;m2;12;12.500;150.000\n"
+        ";Összesen;;;;150.000\n"
+    ).encode()
+    result = _import(content)
+
+    assert _lines(result)["1"].unit_rate == pytest.approx(12500.0)
+    summary = result.metadata.get("summary_rows") or []
+    assert [row["amount"] for row in summary] == [pytest.approx(150000.0)]
+
+
+def test_a_summary_amount_keeps_its_decimal_point_when_the_file_vetoes_the_grouping() -> None:
+    # The other side: the same Hungarian header over a file that writes its
+    # rates with a decimal point. "12.5" vetoes dot grouping for the whole
+    # file, so the summary's "150.5" is one hundred and fifty and a half.
+    content = (
+        "Ssz.;Megnevezés;Me.;Mennyiség;Egységár;Összesen\n"
+        "1;Falazás kisméretű téglából;m2;12;12.5;150.5\n"
+        ";Összesen;;;;150.5\n"
+    ).encode()
+    result = _import(content)
+
+    assert _lines(result)["1"].unit_rate == pytest.approx(12.5)
+    summary = result.metadata.get("summary_rows") or []
+    assert [row["amount"] for row in summary] == [pytest.approx(150.5)]
+
+
 def test_a_half_that_is_not_a_number_still_fails_its_row_rather_than_pricing_it() -> None:
     content = (
         b"Item;Description;Unit;Quantity;Material rate;Labour rate\n"
