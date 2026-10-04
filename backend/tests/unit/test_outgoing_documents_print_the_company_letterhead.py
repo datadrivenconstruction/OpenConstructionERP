@@ -578,17 +578,22 @@ def _ink_centre(page: pymupdf.Page, first_word: str) -> float:
 def test_the_boq_cover_centres_its_summary_heading_and_signature(name: str, letterhead: bool, data_dir: Path) -> None:
     """The summary heading and the prepared-by line were pushed right with runs of
     non-breaking spaces off the axis of the centred title and table, the heading
-    by some 70pt. Their styles centre them now, with or without a letterhead."""
+    by some 70pt. Their styles centre them now, with or without a letterhead.
+
+    The prepared-by line has an approved-by beside it now, a column each over
+    a line to sign on, so it is the pair that sits on the axis: the two columns
+    are mirror images of each other about the middle of the page."""
     if letterhead:
         _write_profile(data_dir)
     with pymupdf.open(stream=EXPORTERS[name](), filetype="pdf") as doc:
         page = doc[0]
         axis = page.rect.width / 2
-        for first_word in ("SUMMARY", "Prepared"):
-            centre = _ink_centre(page, first_word)
-            assert abs(centre - axis) < 1, (
-                f"{name}: {first_word!r} is centred at {centre:.1f}pt, the page at {axis:.1f}pt"
-            )
+        centre = _ink_centre(page, "SUMMARY")
+        assert abs(centre - axis) < 1, f"{name}: 'SUMMARY' is centred at {centre:.1f}pt, the page at {axis:.1f}pt"
+        prepared, approved = _ink_centre(page, "Prepared"), _ink_centre(page, "Approved")
+        assert prepared < axis < approved, f"{name}: the sign-off columns are not either side of the axis"
+        pair = (prepared + approved) / 2
+        assert abs(pair - axis) < 1, f"{name}: the sign-off pair is centred at {pair:.1f}pt, the page at {axis:.1f}pt"
 
 
 # ── Property documents with no development name ───────────────────────────

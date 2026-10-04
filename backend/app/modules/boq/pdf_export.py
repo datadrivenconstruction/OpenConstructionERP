@@ -26,9 +26,10 @@ Security note (BUG-PDF01 / BUG-PDF02):
 
 import html
 import io
+from collections.abc import Mapping
 from datetime import UTC, datetime
 from decimal import Decimal
-from typing import Any
+from typing import Any, NamedTuple
 
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
@@ -78,6 +79,9 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "date": "Date:",
         "status": "Status:",
         "prepared_by": "Prepared by:",
+        "approved_by": "Approved by:",
+        "signature_hint": "Name / Signature / Date",
+        "contents": "Sections / Positions:",
         "pos": "Pos.",
         "description": "Description",
         "unit": "Unit",
@@ -112,6 +116,9 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "date": "Datum:",
         "status": "Status:",
         "prepared_by": "Erstellt von:",
+        "approved_by": "Freigegeben von:",
+        "signature_hint": "Name / Unterschrift / Datum",
+        "contents": "Abschnitte / Positionen:",
         "pos": "Pos.",
         "description": "Beschreibung",
         "unit": "Einheit",
@@ -146,6 +153,9 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "date": "Date :",
         "status": "Statut :",
         "prepared_by": "Préparé par :",
+        "approved_by": "Approuvé par :",
+        "signature_hint": "Nom / Signature / Date",
+        "contents": "Lots / Postes :",
         "pos": "Pos.",
         "description": "Description",
         "unit": "Unité",
@@ -180,6 +190,9 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "date": "Fecha:",
         "status": "Estado:",
         "prepared_by": "Preparado por:",
+        "approved_by": "Aprobado por:",
+        "signature_hint": "Nombre / Firma / Fecha",
+        "contents": "Capítulos / Partidas:",
         "pos": "Pos.",
         "description": "Descripción",
         "unit": "Unidad",
@@ -214,6 +227,9 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "date": "Дата:",
         "status": "Статус:",
         "prepared_by": "Составил:",
+        "approved_by": "Утвердил:",
+        "signature_hint": "ФИО / Подпись / Дата",
+        "contents": "Разделы / Позиции:",
         "pos": "№ п/п",
         "description": "Наименование",
         "unit": "Ед. изм.",
@@ -248,6 +264,9 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "date": "Дата:",
         "status": "Статус:",
         "prepared_by": "Склав:",
+        "approved_by": "Затвердив:",
+        "signature_hint": "ПІБ / Підпис / Дата",
+        "contents": "Розділи / Позиції:",
         "pos": "№ з/п",
         "description": "Найменування",
         "unit": "Од. вим.",
@@ -282,6 +301,9 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "date": "Dátum:",
         "status": "Állapot:",
         "prepared_by": "Készítette:",
+        "approved_by": "Jóváhagyta:",
+        "signature_hint": "Név / Aláírás / Dátum",
+        "contents": "Fejezetek / Tételek:",
         "pos": "Tétel",
         "description": "Megnevezés",
         "unit": "Egység",
@@ -339,6 +361,9 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "date": "Data:",
         "status": "Estado:",
         "prepared_by": "Preparado por:",
+        "approved_by": "Aprovado por:",
+        "signature_hint": "Nome / Assinatura / Data",
+        "contents": "Capítulos / Itens:",
         "pos": "Pos.",
         "description": "Descrição",
         "unit": "Unid.",
@@ -373,6 +398,9 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "date": "Tarih:",
         "status": "Durum:",
         "prepared_by": "Hazırlayan:",
+        "approved_by": "Onaylayan:",
+        "signature_hint": "Ad Soyad / İmza / Tarih",
+        "contents": "Bölümler / Kalemler:",
         "pos": "Poz.",
         "description": "Tanım",
         "unit": "Birim",
@@ -406,6 +434,17 @@ def _get_pdf_labels(locale: str) -> dict[str, str]:
     """Resolve PDF labels for the given locale, English filling any key it lacks."""
     prefix = (locale or "en")[:2].lower()
     return {**_PDF_LABELS["en"], **_PDF_LABELS.get(prefix, {})}
+
+
+def pdf_language(locale: str) -> str:
+    """The language the PDF's own labels are printed in, for ``Content-Language``.
+
+    The project locale's table when there is one, English otherwise. Chinese
+    has a table that is English on purpose (see the note above
+    ``_PDF_LABELS``), so a Chinese bill's labels are English and say so.
+    """
+    prefix = (locale or "en")[:2].lower()
+    return prefix if prefix in _PDF_LABELS and prefix != "zh" else "en"
 
 
 def _status_label(status: str | None, labels: dict[str, str]) -> str:
@@ -625,6 +664,105 @@ def _tax_split(boq_data: Any) -> tuple[list[Any], Decimal, Decimal, Decimal]:
     return tax_lines, tax_amount, gross_total - tax_amount, gross_total
 
 
+def _position_meta(pos: Any) -> dict[str, Any]:
+    """A position's metadata, whichever name the object carries it under."""
+    meta = getattr(pos, "metadata", None)
+    if not isinstance(meta, dict):
+        meta = getattr(pos, "metadata_", None)
+    return meta if isinstance(meta, dict) else {}
+
+
+def _line_money(pos: Any, base_currency: str, fx_rates: Mapping[str, str] | None) -> tuple[Decimal, Decimal]:
+    """A line's total and unit rate in the project's base currency.
+
+    The section subtotals, the direct cost and every total below them are
+    already in the base currency: :meth:`BOQService.get_boq_structured` rolls
+    each leaf up through ``_leaf_total_base_with_resources``. The lines have to
+    be read through the same function, or a line priced in dollars on a euro
+    bill prints its dollar figure under a "Total (EUR)" heading and the lines
+    of a section stop adding up to the subtotal printed under them.
+
+    The rate goes through the same function with a quantity of one, so it is
+    converted the same way the total is (from the position's own currency, or
+    resource by resource) and ``quantity x rate`` still makes the line. A line
+    already in the base currency comes back exactly as stored.
+
+    The helper reads ``metadata_``, the ORM name; the export payload carries
+    ``metadata``, so it is handed a stand-in with the name it reads.
+    """
+    from types import SimpleNamespace
+
+    from app.modules.boq.service import _leaf_total_base_with_resources
+
+    meta = _position_meta(pos)
+    fx = dict(fx_rates or {})
+    quantity = getattr(pos, "quantity", 0) or 0
+    unit_rate = getattr(pos, "unit_rate", 0) or 0
+    total = getattr(pos, "total", 0) or 0
+    line = SimpleNamespace(metadata_=meta, total=total, quantity=quantity)
+    per_unit = SimpleNamespace(metadata_=meta, total=unit_rate, quantity=1)
+    return (
+        _leaf_total_base_with_resources(line, fx, base_currency),
+        _leaf_total_base_with_resources(per_unit, fx, base_currency),
+    )
+
+
+class _ResourceLine(NamedTuple):
+    """One resource of a position, scaled to the position's quantity."""
+
+    name: str
+    unit: str
+    quantity: Decimal
+    unit_rate: Decimal
+    total: Decimal
+
+
+def _resource_lines(pos: Any, base_currency: str, fx_rates: Mapping[str, str] | None) -> list[_ResourceLine]:
+    """The resources a position is built from, as lines of the bill.
+
+    A resource is stored per unit of its position (0.25 h of labour per m3),
+    which is how the position's unit rate is built from them. Printed under a
+    line whose quantity is 120 m3, a per-unit figure in the Total column reads
+    as the resource's share of the line and is off by a factor of 120, so each
+    one is scaled to the line here: its quantity times the position's, and a
+    total that is that quantity times its rate. The rate is converted into the
+    base currency the way the rollup converts it, a currency with no usable
+    rate staying in its own units exactly as it does there, so the resources
+    of a line add up to the line.
+    """
+    from app.modules.boq.service import _to_decimal
+
+    resources = _position_meta(pos).get("resources")
+    if not isinstance(resources, list):
+        return []
+    base = (base_currency or "").strip().upper()
+    fx = fx_rates or {}
+    position_qty = _to_decimal(getattr(pos, "quantity", 0))
+    lines: list[_ResourceLine] = []
+    for resource in resources:
+        if not isinstance(resource, dict):
+            continue
+        rate = _to_decimal(resource.get("unit_rate"))
+        # The rule of ``_resource_total_in_base``, word for word, so the
+        # resources printed under a line add up to the line the rollup made.
+        code = str(resource.get("currency") or "").strip().upper()
+        if code and code != base and fx.get(code):
+            factor = _to_decimal(fx[code])
+            if factor.is_finite() and factor != 0:
+                rate *= factor
+        quantity = _to_decimal(resource.get("quantity")) * position_qty
+        lines.append(
+            _ResourceLine(
+                name=str(resource.get("name") or resource.get("code") or "").strip(),
+                unit=str(resource.get("unit") or "").strip(),
+                quantity=quantity,
+                unit_rate=rate,
+                total=quantity * rate,
+            )
+        )
+    return lines
+
+
 def _build_styles() -> dict[str, ParagraphStyle]:
     """Build the set of paragraph styles used throughout the PDF."""
     base = getSampleStyleSheet()
@@ -791,6 +929,56 @@ def _build_styles() -> dict[str, ParagraphStyle]:
             fontSize=7,
             textColor=colors.HexColor("#999999"),
         ),
+        # A resource under its position: the cost build-up, one size down and
+        # greyed so the priced line above it stays the thing a reader scans.
+        "resource_cell": ParagraphStyle(
+            "ResourceCell",
+            parent=base["Normal"],
+            fontName=BODY_FONT,
+            fontSize=7,
+            textColor=colors.HexColor("#666666"),
+            leading=9,
+            leftIndent=3 * mm,
+        ),
+        "resource_cell_right": ParagraphStyle(
+            "ResourceCellRight",
+            parent=base["Normal"],
+            fontName=BODY_FONT,
+            fontSize=7,
+            textColor=colors.HexColor("#666666"),
+            alignment=TA_RIGHT,
+            leading=9,
+        ),
+        # The sign-off block at the foot of the cover. Each column is centred
+        # over its signing line, so the pair sits on the page's axis like the
+        # title and the summary above it.
+        "sign_label": ParagraphStyle(
+            "SignLabel",
+            parent=base["Normal"],
+            fontName=BODY_FONT,
+            fontSize=9,
+            textColor=colors.HexColor("#666666"),
+            alignment=TA_CENTER,
+            leading=11,
+        ),
+        "sign_name": ParagraphStyle(
+            "SignName",
+            parent=base["Normal"],
+            fontName=BOLD_FONT,
+            fontSize=10,
+            textColor=colors.HexColor("#1a1a2e"),
+            alignment=TA_CENTER,
+            leading=12,
+        ),
+        "sign_hint": ParagraphStyle(
+            "SignHint",
+            parent=base["Normal"],
+            fontName=BODY_FONT,
+            fontSize=7,
+            textColor=colors.HexColor("#999999"),
+            alignment=TA_CENTER,
+            leading=9,
+        ),
     }
 
 
@@ -948,14 +1136,18 @@ def _build_cover_page(
 
     elements.append(Spacer(1, 2 * mm))
     elements.append(line_wrapper)
-    elements.append(Spacer(1, 12 * mm))
+    elements.append(Spacer(1, 8 * mm))
 
     # Project info
+    # How big the bill is, as two plain numbers: "3 / 42" needs no plural
+    # form in any language, where "3 sections" would need three in Russian.
+    contents = f"{len(boq_data.sections)} / {count_boq_positions(boq_data)}"
     info_rows = [
         (lb["project"], project_name),
         (lb["boq"], boq_data.name),
         (lb["date"], format_date(datetime.now(tz=UTC), country_code)),
         (lb["status"], _status_label(boq_data.status, lb)),
+        (lb["contents"], contents),
     ]
 
     info_table_data = []
@@ -970,9 +1162,12 @@ def _build_cover_page(
             ]
         )
 
+    # The label column fits "Abschnitte / Positionen:" on one line; a label
+    # that wraps makes its row two lines tall, and the cover has no height to
+    # spare once the sign-off block is under the summary.
     info_table = Table(
         info_table_data,
-        colWidths=[30 * mm, 100 * mm],
+        colWidths=[48 * mm, 82 * mm],
         hAlign="CENTER",
     )
     info_table.setStyle(
@@ -985,7 +1180,7 @@ def _build_cover_page(
         )
     )
     elements.append(info_table)
-    elements.append(Spacer(1, 12 * mm))
+    elements.append(Spacer(1, 8 * mm))
 
     # Separator
     sep_table = Table([[""]], colWidths=[130 * mm], rowHeights=[0.3 * mm])
@@ -1061,26 +1256,61 @@ def _build_cover_page(
     summary_table.setStyle(TableStyle(summary_style_commands))
     elements.append(summary_table)
 
-    elements.append(Spacer(1, 10 * mm))
-    elements.append(sep_wrapper)
     elements.append(Spacer(1, 6 * mm))
-
-    # Prepared by
-    if prepared_by:
-        # ``prepared_by`` is user-supplied; escape it before splicing into
-        # the cover-page paragraph or a payload like
-        # ``<font color="white">x</font>`` would render as styled text and
-        # ``<img onerror=...>`` would crash paraparser (BUG-PDF01). Centred by
-        # its style, as the summary heading is.
-        elements.append(
-            Paragraph(
-                f"{lb['prepared_by']} " + html.escape(prepared_by, quote=True),
-                # The estimator who signs a Chinese bill has a Chinese name.
-                pdf_style_for_text(styles["subtitle"], prepared_by),
-            )
-        )
+    elements.append(_sign_off_block(prepared_by, styles, lb, uw))
 
     return elements
+
+
+def _sign_off_block(prepared_by: str, styles: dict[str, ParagraphStyle], lb: dict[str, str], width: float) -> Any:
+    """Who prepared the estimate and who approved it, each with a line to sign on.
+
+    A cost estimate that leaves the office is signed off, and the person who
+    prints it needs somewhere to do that. The preparer is named when the
+    project's owner is known; the approver's name is left for the hand that
+    signs.
+
+    ``prepared_by`` is user-supplied and goes through :func:`_safe_para`, which
+    escapes it (a payload like ``<font color="white">x</font>`` would otherwise
+    render as styled text, BUG-PDF01) and picks the Chinese face when the name
+    needs it.
+    """
+    column = min((width - 16 * mm) / 2, 65 * mm)
+    rule = colors.HexColor("#999999")
+    table = Table(
+        [
+            [
+                Paragraph(lb["prepared_by"], styles["sign_label"]),
+                "",
+                Paragraph(lb["approved_by"], styles["sign_label"]),
+            ],
+            [_safe_para(prepared_by, styles["sign_name"]), "", ""],
+            ["", "", ""],
+            [
+                Paragraph(lb["signature_hint"], styles["sign_hint"]),
+                "",
+                Paragraph(lb["signature_hint"], styles["sign_hint"]),
+            ],
+        ],
+        colWidths=[column, 16 * mm, column],
+        rowHeights=[None, None, 8 * mm, None],
+        hAlign="CENTER",
+    )
+    table.setStyle(
+        TableStyle(
+            [
+                ("VALIGN", (0, 0), (-1, -1), "BOTTOM"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                ("TOPPADDING", (0, 0), (-1, -1), 1 * mm),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 1 * mm),
+                # The two lines to sign on, one under each column.
+                ("LINEBELOW", (0, 2), (0, 2), 0.5, rule),
+                ("LINEBELOW", (2, 2), (2, 2), 0.5, rule),
+            ]
+        )
+    )
+    return table
 
 
 def _build_boq_table(
@@ -1091,6 +1321,10 @@ def _build_boq_table(
     country_code: str = "",
     labels: dict[str, str] | None = None,
     col_widths: list[float] | None = None,
+    *,
+    base_currency: str = "",
+    fx_rates: Mapping[str, str] | None = None,
+    include_resources: bool = False,
 ) -> list[Any]:
     """Build the BOQ table flowables (sections, positions, totals).
 
@@ -1107,31 +1341,40 @@ def _build_boq_table(
     Line / project totals (total / subtotals / markups / VAT) are NEVER
     converted or recomputed - they are invariant amounts in the project
     currency, not measurements.
+
+    ``base_currency`` and ``fx_rates`` are the project's, as the structured
+    payload's subtotals were rolled up with them: each line's total and rate
+    are read in the base currency through :func:`_line_money`, so the lines
+    of a section add up to its subtotal on a mixed-currency bill too.
+
+    ``include_resources`` prints each position's resources under it, scaled
+    to the line (see :func:`_resource_lines`). Off by default: the build-up is
+    the estimator's own cost, not every recipient's business.
     """
     lb = labels or _PDF_LABELS["en"]
     table_widths = col_widths or TABLE_COL_WIDTHS
     elements: list[Any] = []
 
     # Locale-aware formatting shortcuts
-    def _fv(value: float, decimals: int = 2) -> str:
+    def _fv(value: Any, decimals: int = 2) -> str:
         return _fmt(value, decimals, currency, country_code)
 
-    def _fc(value: float) -> str:
+    def _fc(value: Any) -> str:
         return _fmt_currency(value, currency, country=country_code)
 
-    def _qty_cell(pos: Any) -> tuple[str, str]:
-        """Return (quantity_text, unit_label) for a position row.
+    def _qty_cell(quantity: Any, unit: str) -> tuple[str, str]:
+        """Return (quantity_text, unit_label) for a row.
 
         Honours ``measurement_system``: the quantity is converted and the unit
         relabelled for imperial; metric tidies the label only. The numeric
         value is formatted with the same locale-aware helper as before so
         thousands / decimal separators stay consistent.
         """
-        result = convert_units(pos.quantity, pos.unit, measurement_system)
+        result = convert_units(quantity, unit, measurement_system)
         return _fv(result.value), result.display_unit
 
-    def _rate_cell(pos: Any) -> str:
-        """Return the per-unit rate text for a position row.
+    def _rate_cell(rate: Any, unit: str) -> str:
+        """Return the per-unit rate text for a row.
 
         The rate is money per ONE metric unit. When ``_qty_cell`` shows the
         quantity converted (m -> ft ...) the rate is restated reciprocally
@@ -1141,8 +1384,36 @@ def _build_boq_table(
         unchanged. The line total is never recomputed from this - only the
         printed per-unit basis is restated.
         """
-        rate = display_rate(pos.unit_rate, pos.unit, measurement_system)
-        return _fv(rate)
+        return _fv(display_rate(rate, unit, measurement_system))
+
+    def _position_rows(pos: Any) -> tuple[list[list[Any]], Decimal]:
+        """The position's row, its resource rows when asked for, and its total."""
+        total, rate = _line_money(pos, base_currency, fx_rates)
+        qty_text, unit_label = _qty_cell(pos.quantity, pos.unit)
+        rows: list[list[Any]] = [
+            [
+                _safe_para(pos.ordinal, styles["cell"]),
+                _safe_para(pos.description, styles["cell"]),
+                _safe_para(unit_label, styles["cell"]),
+                Paragraph(qty_text, styles["cell_right"]),
+                Paragraph(_rate_cell(rate, pos.unit), styles["cell_right"]),
+                Paragraph(_fv(total), styles["cell_right"]),
+            ]
+        ]
+        if include_resources:
+            for resource in _resource_lines(pos, base_currency, fx_rates):
+                r_qty, r_unit = _qty_cell(resource.quantity, resource.unit)
+                rows.append(
+                    [
+                        "",
+                        _safe_para(resource.name, styles["resource_cell"]),
+                        _safe_para(r_unit, styles["resource_cell"]),
+                        Paragraph(r_qty, styles["resource_cell_right"]),
+                        Paragraph(_rate_cell(resource.unit_rate, resource.unit), styles["resource_cell_right"]),
+                        Paragraph(_fv(resource.total), styles["resource_cell_right"]),
+                    ]
+                )
+        return rows, total
 
     # Table header row (locale-aware)
     header_row = [
@@ -1177,19 +1448,11 @@ def _build_boq_table(
 
         # Position rows within section
         for pos in section.positions:
-            qty_text, unit_label = _qty_cell(pos)
-            table_data.append(
-                [
-                    _safe_para(pos.ordinal, styles["cell"]),
-                    _safe_para(pos.description, styles["cell"]),
-                    _safe_para(unit_label, styles["cell"]),
-                    Paragraph(qty_text, styles["cell_right"]),
-                    Paragraph(_rate_cell(pos), styles["cell_right"]),
-                    Paragraph(_fv(pos.total), styles["cell_right"]),
-                ]
-            )
-            row_styles.append((row_idx, "item"))
-            row_idx += 1
+            rows, _total = _position_rows(pos)
+            for kind, row in zip(["item"] + ["resource"] * (len(rows) - 1), rows, strict=True):
+                table_data.append(row)
+                row_styles.append((row_idx, kind))
+                row_idx += 1
 
         # Section subtotal
         table_data.append(
@@ -1220,25 +1483,15 @@ def _build_boq_table(
         row_styles.append((row_idx, "section"))
         row_idx += 1
 
-        ungrouped_total = 0.0
+        # Summed in the base currency, line by line, as the direct cost is.
+        ungrouped_total = Decimal("0")
         for pos in boq_data.positions:
-            qty_text, unit_label = _qty_cell(pos)
-            table_data.append(
-                [
-                    _safe_para(pos.ordinal, styles["cell"]),
-                    _safe_para(pos.description, styles["cell"]),
-                    _safe_para(unit_label, styles["cell"]),
-                    Paragraph(qty_text, styles["cell_right"]),
-                    Paragraph(_rate_cell(pos), styles["cell_right"]),
-                    Paragraph(_fv(pos.total), styles["cell_right"]),
-                ]
-            )
-            row_styles.append((row_idx, "item"))
-            row_idx += 1
-            # ``pos.total`` is a SQLAlchemy Numeric (Decimal); the
-            # accumulator is a float - mixing the two raises TypeError and
-            # crashed PDF export for any BOQ with ungrouped positions.
-            ungrouped_total += float(pos.total or 0)
+            rows, total = _position_rows(pos)
+            for kind, row in zip(["item"] + ["resource"] * (len(rows) - 1), rows, strict=True):
+                table_data.append(row)
+                row_styles.append((row_idx, kind))
+                row_idx += 1
+            ungrouped_total += total
 
         table_data.append(
             [
@@ -1377,6 +1630,11 @@ def _build_boq_table(
             style_commands.append(("BACKGROUND", (0, ri), (-1, ri), colors.HexColor("#e8e8ee")))
         elif row_type == "spacer":
             style_commands.append(("BACKGROUND", (0, ri), (-1, ri), colors.white))
+        elif row_type == "resource":
+            # Tight and on white, so a build-up reads as part of the line above.
+            style_commands.append(("BACKGROUND", (0, ri), (-1, ri), colors.white))
+            style_commands.append(("TOPPADDING", (0, ri), (-1, ri), 0.5 * mm))
+            style_commands.append(("BOTTOMPADDING", (0, ri), (-1, ri), 0.5 * mm))
 
     table.setStyle(TableStyle(style_commands))
     elements.append(table)
@@ -1393,6 +1651,10 @@ def generate_boq_pdf(
     country_code: str = "",
     locale: str = "en",
     page_format: str = "A4",
+    *,
+    base_currency: str = "",
+    fx_rates: Mapping[str, str] | None = None,
+    include_resources: bool = False,
 ) -> bytes:
     """Generate a professional PDF cost estimate report.
 
@@ -1411,6 +1673,11 @@ def generate_boq_pdf(
             "ru", "es"). Falls back to English for unknown locales.
         page_format: ``"A4"`` (default, 210x297mm) or ``"LETTER"``
             (8.5x11in, US/CA standard).
+        base_currency: The project's base currency the payload's subtotals
+            were rolled up in (``BOQService.get_export_fx``).
+        fx_rates: The project's FX table, ``{code: rate}``, used to print each
+            line in that base currency so the lines add up to the subtotals.
+        include_resources: Print each position's resources under it.
 
     Returns:
         PDF file contents as bytes.
@@ -1507,7 +1774,16 @@ def generate_boq_pdf(
     flowables.append(PageBreak())
     flowables.extend(
         _build_boq_table(
-            boq_data, currency, styles, measurement_system, country_code, labels=labels, col_widths=table_col_widths
+            boq_data,
+            currency,
+            styles,
+            measurement_system,
+            country_code,
+            labels=labels,
+            col_widths=table_col_widths,
+            base_currency=base_currency,
+            fx_rates=fx_rates,
+            include_resources=include_resources,
         )
     )
 
@@ -1541,7 +1817,16 @@ def generate_boq_pdf(
     flowables2.append(PageBreak())
     flowables2.extend(
         _build_boq_table(
-            boq_data, currency, styles, measurement_system, country_code, labels=labels, col_widths=table_col_widths
+            boq_data,
+            currency,
+            styles,
+            measurement_system,
+            country_code,
+            labels=labels,
+            col_widths=table_col_widths,
+            base_currency=base_currency,
+            fx_rates=fx_rates,
+            include_resources=include_resources,
         )
     )
 
@@ -1585,8 +1870,15 @@ def generate_boq_pdf_simple(
     country_code: str = "",
     locale: str = "en",
     page_format: str = "A4",
+    *,
+    base_currency: str = "",
+    fx_rates: Mapping[str, str] | None = None,
 ) -> bytes:
     """Generate a simplified PDF for large BOQs (> 500 positions).
+
+    ``base_currency`` and ``fx_rates`` are the project's, as for
+    :func:`generate_boq_pdf`: the ungrouped positions are summed in the base
+    currency the section subtotals are already in.
 
     Uses a single-pass build (no two-pass page counting) and a compact
     table layout to reduce memory usage and generation time on Windows.
@@ -1735,7 +2027,10 @@ def generate_boq_pdf_simple(
         )
 
     if boq_data.positions:
-        ungrouped_total = sum(p.total for p in boq_data.positions)
+        ungrouped_total = sum(
+            (_line_money(p, base_currency, fx_rates)[0] for p in boq_data.positions),
+            Decimal("0"),
+        )
         table_data.append(
             [
                 Paragraph("", styles["cell"]),

@@ -1,0 +1,371 @@
+# DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+# Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+"""The server PDF is the BOQ editor's only PDF, so it carries what the browser one did.
+
+The editor used to build its PDF in the browser for bills of up to 500 lines.
+That copy took its tax from the first percentage tax markup only, so a second
+tax line or a fixed one vanished from its totals, while the server PDF prints
+every tax line from the authoritative rollup. The button now downloads the
+server PDF, and these are the things the browser copy had that the server one
+lacked, each with the case that tells right from wrong:
+
+* A line priced in a foreign currency printed its own figure under a "Total
+  (EUR)" heading, and the lines of its section stopped adding up to the
+  subtotal printed under them. Lines are read in the base currency now.
+* The resources a rate is built from could be printed under each line. They
+  are per unit of the line in storage, so printed as stored they added up to
+  the unit rate and not to the line. They are scaled to the line now.
+* The cover counted sections and positions and had a place for whoever
+  approves the estimate to sign.
+"""
+
+from __future__ import annotations
+
+import io
+import uuid
+from decimal import Decimal
+from types import SimpleNamespace
+from typing import Any
+
+import pypdf
+import pytest
+
+from app.modules.boq.pdf_export import (
+    _PDF_LABELS,
+    _build_boq_table,
+    _build_styles,
+    _line_money,
+    _resource_lines,
+    generate_boq_pdf,
+    generate_boq_pdf_simple,
+    pdf_language,
+)
+
+FX = {"USD": "0.90"}
+
+
+def _position(
+    ordinal: str,
+    quantity: str,
+    unit_rate: str,
+    total: str,
+    *,
+    unit: str = "m3",
+    metadata: dict[str, Any] | None = None,
+    description: str = "Line",
+) -> Any:
+    return SimpleNamespace(
+        id=uuid.uuid4(),
+        ordinal=ordinal,
+        description=description,
+        unit=unit,
+        quantity=Decimal(quantity),
+        unit_rate=Decimal(unit_rate),
+        total=Decimal(total),
+        metadata=metadata or {},
+    )
+
+
+def _tax(name: str, percentage: float, amount: str) -> Any:
+    return SimpleNamespace(
+        id=uuid.uuid4(),
+        name=name,
+        markup_type="percentage",
+        category="tax",
+        percentage=percentage,
+        fixed_amount=Decimal("0"),
+        apply_to="cumulative",
+        sort_order=0,
+        is_active=True,
+        amount=Decimal(amount),
+    )
+
+
+def _bill(sections: list[Any], positions: list[Any] | None = None, markups: list[Any] | None = None) -> Any:
+    direct = sum((Decimal(str(s.subtotal)) for s in sections), Decimal("0"))
+    markups = markups or []
+    net = direct + sum((m.amount for m in markups), Decimal("0"))
+    return SimpleNamespace(
+        id=uuid.uuid4(),
+        project_id=uuid.uuid4(),
+        name="Harbour BOQ",
+        description="",
+        status="draft",
+        sections=sections,
+        positions=positions or [],
+        direct_cost=direct,
+        markups=markups,
+        net_total=net,
+        grand_total=net,
+    )
+
+
+def _section(positions: list[Any], subtotal: str, ordinal: str = "01") -> Any:
+    return SimpleNamespace(
+        id=uuid.uuid4(), ordinal=ordinal, description="Structure", positions=positions, subtotal=Decimal(subtotal)
+    )
+
+
+def _rows(flowables: list[Any]) -> list[list[str]]:
+    """Each row of the position table as the text of its six cells."""
+    table = flowables[0]
+    return [[getattr(cell, "text", cell if isinstance(cell, str) else "") for cell in row] for row in table._cellvalues]
+
+
+def _row(rows: list[list[str]], ordinal: str) -> list[str]:
+    return next(row for row in rows if row[0] == ordinal)
+
+
+def _money(text: str) -> Decimal:
+    return Decimal(text.replace(",", ""))
+
+
+def _pdf_text(data: bytes) -> list[str]:
+    return [page.extract_text() for page in pypdf.PdfReader(io.BytesIO(data)).pages]
+
+
+# -- A foreign-currency line -----------------------------------------------------
+
+
+def _mixed_bill() -> Any:
+    euro = _position("01.001", "10", "50", "500")
+    dollar = _position("01.002", "10", "100", "1000", metadata={"currency": "USD"})
+    # 500 EUR + 1000 USD at 0.90 = 1400 EUR, which is what the rollup makes.
+    return _bill([_section([euro, dollar], "1400")])
+
+
+def test_a_dollar_line_on_a_euro_bill_prints_in_euro() -> None:
+    rows = _rows(
+        _build_boq_table(_mixed_bill(), "EUR", _build_styles(), country_code="IE", base_currency="EUR", fx_rates=FX)
+    )
+
+    dollar = _row(rows, "01.002")
+    assert dollar[5] == "900.00", "the line total is not in the base currency"
+    assert dollar[4] == "90.00", "the rate is not restated in the base currency"
+    assert _money(dollar[3]) * _money(dollar[4]) == _money(dollar[5])
+    # The euro line is untouched.
+    assert _row(rows, "01.001")[4:] == ["50.00", "500.00"]
+
+
+def test_the_lines_of_a_section_add_up_to_its_subtotal() -> None:
+    # The distinguishing case: printed raw, the lines make 1500 under a
+    # subtotal of 1400.
+    rows = _rows(
+        _build_boq_table(_mixed_bill(), "EUR", _build_styles(), country_code="IE", base_currency="EUR", fx_rates=FX)
+    )
+
+    lines = sum(_money(_row(rows, o)[5]) for o in ("01.001", "01.002"))
+    subtotal = next(row[5] for row in rows if row[2].startswith("Subtotal"))
+    assert lines == _money(subtotal) == Decimal("1400")
+    assert not any("1,000.00" in cell for row in rows for cell in row)
+
+
+def test_ungrouped_lines_are_summed_in_the_base_currency_too() -> None:
+    dollar = _position("02", "10", "100", "1000", metadata={"currency": "USD"})
+    bill = _bill([], positions=[dollar])
+    bill.direct_cost = Decimal("900")
+
+    rows = _rows(_build_boq_table(bill, "EUR", _build_styles(), country_code="IE", base_currency="EUR", fx_rates=FX))
+    subtotal = next(row[5] for row in rows if row[2].startswith("Subtotal"))
+    assert subtotal == "900.00"
+
+    summary = "\n".join(
+        _pdf_text(
+            generate_boq_pdf_simple(
+                bill, "Harbour", currency="EUR", country_code="IE", base_currency="EUR", fx_rates=FX
+            )
+        )
+    )
+    assert "900.00 EUR" in summary
+    assert "1,000.00 EUR" not in summary
+
+
+def test_a_rate_with_no_usable_fx_entry_is_left_as_the_rollup_leaves_it() -> None:
+    # No rate for the line's currency: the rollup sums it in its own units
+    # rather than dropping it, and the line has to agree with that.
+    dollar = _position("01.002", "10", "100", "1000", metadata={"currency": "USD"})
+    assert _line_money(dollar, "EUR", {}) == (Decimal("1000"), Decimal("100"))
+
+
+def test_a_single_currency_line_prints_exactly_as_stored() -> None:
+    line = _position("01", "3", "33.3333", "100.00")
+    assert _line_money(line, "EUR", FX) == (Decimal("100.00"), Decimal("33.3333"))
+    assert _line_money(line, "", None) == (Decimal("100.00"), Decimal("33.3333"))
+
+
+# -- Resources ---------------------------------------------------------------------
+
+
+def _resourced() -> Any:
+    return _position(
+        "01.003",
+        "10",
+        "110",
+        # Stored unconverted, the way update_position builds it: 10 x (60 + 50).
+        "1100",
+        metadata={
+            "resources": [
+                {"name": "Labour", "type": "labor", "unit": "h", "quantity": 2, "unit_rate": 30, "currency": "EUR"},
+                {"name": "Steel", "type": "material", "unit": "kg", "quantity": 5, "unit_rate": 10, "currency": "USD"},
+            ]
+        },
+    )
+
+
+def test_resources_are_scaled_to_the_line_and_add_up_to_it() -> None:
+    lines = _resource_lines(_resourced(), "EUR", FX)
+
+    assert [(r.name, r.unit, r.quantity, r.unit_rate, r.total) for r in lines] == [
+        ("Labour", "h", Decimal("20"), Decimal("30"), Decimal("600")),
+        ("Steel", "kg", Decimal("50"), Decimal("9.00"), Decimal("450.00")),
+    ]
+    total, rate = _line_money(_resourced(), "EUR", FX)
+    # Per unit the resources make 105; printed per unit they summed to the
+    # rate, not to the 1050 line.
+    assert sum(r.total for r in lines) == total == Decimal("1050")
+    assert rate == Decimal("105")
+
+
+def test_resources_print_under_their_line_only_when_asked() -> None:
+    bill = _bill([_section([_resourced()], "1050")])
+    styles = _build_styles()
+
+    plain = _rows(_build_boq_table(bill, "EUR", styles, country_code="IE", base_currency="EUR", fx_rates=FX))
+    assert not any("Labour" in cell for row in plain for cell in row)
+
+    rows = _rows(
+        _build_boq_table(
+            bill, "EUR", styles, country_code="IE", base_currency="EUR", fx_rates=FX, include_resources=True
+        )
+    )
+    at = next(i for i, row in enumerate(rows) if row[0] == "01.003")
+    assert rows[at][5] == "1,050.00"
+    labour, steel = rows[at + 1], rows[at + 2]
+    assert labour[1:] == ["Labour", "h", "20.00", "30.00", "600.00"]
+    assert steel[1:] == ["Steel", "kg", "50.00", "9.00", "450.00"]
+    assert _money(labour[5]) + _money(steel[5]) == _money(rows[at][5])
+
+
+def test_resource_rows_follow_the_measurement_system() -> None:
+    line = _position(
+        "01",
+        "2",
+        "40",
+        "80",
+        unit="m",
+        metadata={"resources": [{"name": "Kerb", "unit": "m", "quantity": 1, "unit_rate": 40}]},
+    )
+    rows = _rows(
+        _build_boq_table(
+            _bill([_section([line], "80")]),
+            "USD",
+            _build_styles(),
+            measurement_system="imperial",
+            country_code="US",
+            include_resources=True,
+        )
+    )
+    kerb = next(row for row in rows if row[1] == "Kerb")
+    assert kerb[2] == "ft"
+    assert _money(kerb[3]) * _money(kerb[4]) == pytest.approx(Decimal("80"), abs=Decimal("0.05"))
+    assert kerb[5] == "80.00"
+
+
+def test_malformed_resources_are_skipped_rather_than_failing_the_export() -> None:
+    line = _position("01", "2", "40", "80", metadata={"resources": ["junk", None, {"name": "Ok", "quantity": "x"}]})
+    assert [r.name for r in _resource_lines(line, "EUR", FX)] == ["Ok"]
+    assert _resource_lines(_position("02", "1", "1", "1", metadata={"resources": "nope"}), "EUR", FX) == []
+
+
+# -- The cover -----------------------------------------------------------------------
+
+
+def _three_taxes() -> Any:
+    return _bill(
+        [_section([_position("01.001", "10", "50", "500"), _position("01.002", "1", "500", "500")], "1000")],
+        markups=[_tax("PIS", 1.65, "16.50"), _tax("COFINS", 7.6, "76.00"), _tax("ISS", 5.0, "50.00")],
+    )
+
+
+def test_the_cover_counts_the_bill_and_has_a_place_to_sign() -> None:
+    pages = _pdf_text(generate_boq_pdf(_three_taxes(), "Harbour", currency="EUR", prepared_by="Maria Keller"))
+    cover = " ".join(pages[0].split())
+
+    assert "Sections / Positions: 1 / 2" in cover
+    assert "Prepared by:" in cover
+    assert "Maria Keller" in cover
+    assert "Approved by:" in cover
+    assert cover.count("Name / Signature / Date") == 2
+
+
+def _letterhead(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A full company profile with a logo, through the branding layer's readers."""
+    import base64
+
+    from PIL import Image as PILImage
+
+    from app.core import pdf_branding
+    from app.core.company_profile import DEFAULT_COMPANY_PROFILE
+
+    out = io.BytesIO()
+    PILImage.new("RGB", (400, 140), (20, 60, 140)).save(out, format="PNG")
+    profile = {
+        **DEFAULT_COMPANY_PROFILE,
+        "legal_name": "Acme & Sons Construction GmbH",
+        "address": "Hauptstrasse 1\n10115 Berlin\nGermany",
+        "registration_line": "HRB 12345 · VAT DE123456789",
+        "phone": "+49 30 1234567",
+        "email": "office@acme.example",
+        "website": "acme.example",
+        "document_logo_data_url": "data:image/png;base64," + base64.b64encode(out.getvalue()).decode("ascii"),
+    }
+    monkeypatch.setattr(pdf_branding, "_read_company_profile", lambda *_a, **_kw: dict(profile))
+    monkeypatch.setattr(pdf_branding, "_read_branding", lambda *_a, **_kw: {})
+    monkeypatch.setattr(pdf_branding, "_read_appearance", lambda *_a, **_kw: {})
+
+
+@pytest.mark.parametrize("letterhead", [False, True], ids=["plain", "letterhead"])
+@pytest.mark.parametrize("locale", ["en", "de"])
+def test_the_cover_stays_one_page_with_three_tax_lines(
+    monkeypatch: pytest.MonkeyPatch, letterhead: bool, locale: str
+) -> None:
+    if letterhead:
+        _letterhead(monkeypatch)
+    pages = _pdf_text(
+        generate_boq_pdf(_three_taxes(), "Harbour", currency="EUR", prepared_by="Maria Keller", locale=locale)
+    )
+    if letterhead:
+        assert "Acme & Sons" in pages[0]
+    labels = _PDF_LABELS[locale]
+    assert labels["approved_by"] in pages[0]
+    assert pages[0].count(labels["signature_hint"]) == 2, "the sign-off block ran onto a second page"
+    assert labels["signature_hint"] not in pages[1]
+    # The position table, headed by its "Pos." column, starts on page two.
+    assert labels["pos"] in pages[1]
+    assert labels["description"] not in pages[0]
+
+
+def test_the_cover_labels_are_in_the_project_language() -> None:
+    cover = " ".join(_pdf_text(generate_boq_pdf(_three_taxes(), "Hafen", currency="EUR", locale="de"))[0].split())
+
+    assert "Freigegeben von:" in cover
+    assert "Abschnitte / Positionen: 1 / 2" in cover
+    assert "Name / Unterschrift / Datum" in cover
+
+
+def test_every_translated_table_names_the_sign_off_and_the_counts() -> None:
+    # Chinese prints English labels on purpose (see the note on _PDF_LABELS).
+    for locale, table in _PDF_LABELS.items():
+        if locale in {"en", "zh"}:
+            continue
+        for key in ("approved_by", "signature_hint", "contents"):
+            assert table.get(key), f"{locale} has no {key}"
+            assert table[key] != _PDF_LABELS["en"][key], f"{locale} {key} is still English"
+
+
+def test_the_declared_language_is_the_one_the_labels_are_printed_in() -> None:
+    assert pdf_language("de-DE") == "de"
+    assert pdf_language("uk") == "uk"
+    assert pdf_language("zh-CN") == "en"
+    assert pdf_language("ja") == "en"
+    assert pdf_language("") == "en"

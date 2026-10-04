@@ -5218,6 +5218,16 @@ async def export_boq_pdf(
             "stay canonical metric and ignore this parameter."
         ),
     ),
+    include_resources: bool = Query(
+        False,
+        description=(
+            "Print each position's resources (labour, material, equipment) "
+            "under it, scaled to the line, so the build-up of every rate is on "
+            "the page. Off by default: the build-up is the estimator's own "
+            "cost and not every recipient's business. The summary report for "
+            "large bills lists no positions and ignores it."
+        ),
+    ),
 ) -> StreamingResponse:
     """Export BOQ as a professional PDF cost estimate report.
 
@@ -5241,6 +5251,7 @@ async def export_boq_pdf(
         count_boq_positions,
         generate_boq_pdf,
         generate_boq_pdf_simple,
+        pdf_language,
     )
     from app.modules.projects.repository import ProjectRepository
     from app.modules.users.models import User
@@ -5249,6 +5260,11 @@ async def export_boq_pdf(
     # every other BOQ read endpoint.
     await _verify_boq_owner(session, boq_id, _user_id, payload)
     boq_data = await service.get_boq_structured_for_export(boq_id)
+    # The subtotals in ``boq_data`` were rolled up in the project's base
+    # currency with this FX table; each printed line is converted with it too,
+    # or a foreign-currency line prints a figure its section subtotal does not
+    # contain.
+    fx_base, fx_map = await service.get_export_fx(boq_id)
 
     # Load project for cover page info
     project_repo = ProjectRepository(session)
@@ -5298,6 +5314,8 @@ async def export_boq_pdf(
                 country_code=_country,
                 locale=_locale,
                 page_format=_page_format,
+                base_currency=fx_base,
+                fx_rates=fx_map,
             )
         else:
             import asyncio
@@ -5316,6 +5334,9 @@ async def export_boq_pdf(
                 country_code=_country,
                 locale=_locale,
                 page_format=_page_format,
+                base_currency=fx_base,
+                fx_rates=fx_map,
+                include_resources=include_resources,
             )
     except Exception:
         _log.exception("PDF generation failed for BOQ %s", boq_id)
@@ -5341,16 +5362,13 @@ async def export_boq_pdf(
         headers={
             "Content-Disposition": attachment_disposition(filename),
             "Content-Length": str(len(pdf_bytes)),
-            # boq/pdf_export.py writes its labels as English literals and takes
-            # no locale, so English is what this page is. Declaring it stops the
-            # Accept-Language middleware from labelling these bytes with the
-            # language the reader asked for. Worth naming what this does not
-            # cover: the same builder formats money on the currency code and
-            # converts quantities on a query parameter while leaving the
-            # description text in the original system, so a reader is being told
-            # about one axis of three. The other two have nowhere to be declared
-            # in a header and are tracked separately.
-            "Content-Language": "en",
+            # The labels are printed in the project's language (English where
+            # boq/pdf_export.py has no table for it), so that is what the page
+            # declares. Declaring it stops the Accept-Language middleware from
+            # labelling these bytes with the language the reader asked for. The
+            # descriptions are the estimator's own text, in whatever language
+            # they were typed.
+            "Content-Language": pdf_language(_locale),
         },
     )
 
