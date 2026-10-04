@@ -75,6 +75,7 @@ const QK = {
 
 export function PriceIndexPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   return (
     <div className="space-y-5">
@@ -84,6 +85,12 @@ export function PriceIndexPage() {
           defaultValue:
             'Bring an old rate library or a foreign benchmark to current-period money and your region using cost index series and regional factors.',
         })}
+        actions={
+          <Button variant="secondary" size="sm" onClick={() => navigate('/price-index/resource-index')}>
+            <Calculator className="mr-1 h-4 w-4" aria-hidden />
+            {t('price_index.ri.open', { defaultValue: 'Resource-index estimate (Russia)' })}
+          </Button>
+        }
       />
       <PriceIndexContent />
     </div>

@@ -646,6 +646,9 @@ const EstimateCopilotPage = lazy(() =>
 const PriceIndexPage = lazy(() =>
   import('@/features/price-index').then((m) => ({ default: m.PriceIndexPage }))
 );
+const ResourceIndexPage = lazy(() =>
+  import('@/features/price-index').then((m) => ({ default: m.ResourceIndexPage }))
+);
 const LaborRatesPage = lazy(() =>
   import('@/features/labor-rates').then((m) => ({ default: m.LaborRatesPage }))
 );
@@ -1254,6 +1257,7 @@ export default function App() {
         <Route path="/design-options" element={<P title="Design Options"><DesignOptionsPage /></P>} />
         <Route path="/formwork" element={<P title="Formwork"><FormworkPage /></P>} />
         <Route path="/price-index" element={<P title="Price Index"><PriceIndexPage /></P>} />
+        <Route path="/price-index/resource-index" element={<P title="Resource-index estimate"><ResourceIndexPage /></P>} />
         <Route path="/labor-rates" element={<P title="Labor Rates"><LaborRatesPage /></P>} />
         <Route path="/resource-summary" element={<P title="Resource Summary"><ResourceSummaryPage /></P>} />
         <Route path="/waste-factors" element={<P title="Waste Factors"><WasteFactorsPage /></P>} />
