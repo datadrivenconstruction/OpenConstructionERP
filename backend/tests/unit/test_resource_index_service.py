@@ -201,6 +201,7 @@ class _Pos:
         self.quantity = quantity
         self.unit_rate = "0"
         self.metadata_ = {"resources": resources} if resources is not None else {}
+        self.price_basis: str | None = None
 
 
 def test_mapping_lists_every_position_it_cannot_price() -> None:
@@ -211,15 +212,28 @@ def test_mapping_lists_every_position_it_cannot_price() -> None:
     bad = _Pos("5", "1", [_res("material", "x", "100", "M")])
     no_wt = _Pos("6", "1", [_res("material", "1", "100", "M")])
     section = _Pos("7", "0", None, unit="")
+    quoted = _Pos("8", "1", [_res("material", "1", "100", "M")])
+    quoted.price_basis = "quotation"
+    catalogue = _Pos("9", "1", [_res("material", "1", "100", "M")])
+    catalogue.price_basis = "price_list"
 
     mapped, excluded = map_boq_positions(
-        [ok, empty, electricity, foreign, bad, no_wt, section],
+        [ok, empty, electricity, foreign, bad, no_wt, section, quoted, catalogue],
         currency="RUB",
-        work_types={str(ok.id): "wt", str(electricity.id): "wt", str(foreign.id): "wt", str(bad.id): "wt"},
+        work_types={
+            str(ok.id): "wt",
+            str(electricity.id): "wt",
+            str(foreign.id): "wt",
+            str(bad.id): "wt",
+            str(quoted.id): "wt",
+            str(catalogue.id): "wt",
+        },
         default_work_type="",
     )
-    assert [m.position.ordinal for m in mapped] == ["1"]
+    # A base-price catalogue (price_list) is indexed; a quotation is current money.
+    assert [m.position.ordinal for m in mapped] == ["1", "9"]
     reasons = {e.ordinal: (e.reason, e.detail) for e in excluded}
+    assert reasons["8"] == ("not_base_prices", "quotation")
     assert reasons["2"][0] == "no_resources"
     assert reasons["3"] == ("unmapped_resource_type", "electricity")
     assert reasons["4"] == ("foreign_currency", "EUR")
@@ -302,6 +316,43 @@ async def test_editing_a_sample_row_makes_it_the_persons_own(session: AsyncSessi
     assert updated is not None
     assert updated.index_value == D("1.71")
     assert updated.is_sample is False
+
+
+@pytest.mark.asyncio
+async def test_a_sample_edited_in_place_drops_the_sample_note(session: AsyncSession) -> None:
+    from app.modules.price_index.seed import SAMPLE_SOURCE_NOTE
+
+    row = ResourceIndexValue(
+        region_code="RU-X2",
+        quarter="2026-Q1",
+        resource_group="machine",
+        index_value=D("1.3"),
+        source=SAMPLE_SOURCE_NOTE,
+        is_sample=True,
+    )
+    session.add(row)
+    await session.flush()
+    service = ResourceIndexService(session)
+    # Only the value is typed in, as the inline editor does.
+    updated = await service.update_index(row.id, ResourceIndexValueUpdate(index_value=D("1.42")))
+    assert updated is not None
+    assert updated.is_sample is False
+    assert updated.source == ""
+    # An unchanged value is not an edit: the row stays a sample with its note.
+    other = ResourceIndexValue(
+        region_code="RU-X2",
+        quarter="2026-Q1",
+        resource_group="labor",
+        index_value=D("1.6"),
+        source=SAMPLE_SOURCE_NOTE,
+        is_sample=True,
+    )
+    session.add(other)
+    await session.flush()
+    same = await service.update_index(other.id, ResourceIndexValueUpdate(index_value=D("1.6")))
+    assert same is not None
+    assert same.is_sample is True
+    assert same.source == SAMPLE_SOURCE_NOTE
 
 
 # ── VAT from the dated tax rows ───────────────────────────────────────────────

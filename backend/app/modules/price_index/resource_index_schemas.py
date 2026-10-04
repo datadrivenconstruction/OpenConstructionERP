@@ -307,7 +307,14 @@ class ExcludedPositionOut(BaseModel):
     position_id: str
     ordinal: str
     description: str
-    reason: Literal["no_resources", "unmapped_resource_type", "foreign_currency", "no_work_type", "bad_number"]
+    reason: Literal[
+        "no_resources",
+        "unmapped_resource_type",
+        "foreign_currency",
+        "no_work_type",
+        "bad_number",
+        "not_base_prices",
+    ]
     detail: str = ""
 
 

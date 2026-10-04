@@ -44,6 +44,7 @@ from app.modules.price_index.resource_index_schemas import (
     TotalsOut,
     WorkTypeSummaryOut,
 )
+from app.modules.price_index.seed import SAMPLE_NORM_SOURCE_NOTE, SAMPLE_SOURCE_NOTE
 from app.modules.projects.models import Project
 
 #: Key under ``BOQ.metadata_`` that holds the person's choices for this method.
@@ -66,6 +67,12 @@ _TYPE_TO_KIND: dict[str, str] = {
     "material": rim.KIND_MATERIAL,
 }
 
+
+#: ``Position.price_basis`` values that say the line already stands on current
+#: money (an invoice or a supplier quotation). The method indexes base prices;
+#: indexing such a line would bring 2026 roubles to 2026 roubles a second time,
+#: so the position is listed as excluded instead.
+_CURRENT_PRICE_BASES: frozenset[str] = frozenset({"invoice", "quotation"})
 
 # ── Errors ───────────────────────────────────────────────────────────────────
 
@@ -181,8 +188,11 @@ class ResourceIndexService:
             changed = True
         if changed:
             # A person has put their own value or reference on the row, so it
-            # no longer is the platform's sample.
+            # no longer is the platform's sample, and the sample's "not an
+            # official value" note must not stay on it as its source.
             row.is_sample = False
+            if data.source is None and row.source == SAMPLE_SOURCE_NOTE:
+                row.source = ""
         await self.session.flush()
         await self.session.refresh(row)
         return row
@@ -234,6 +244,8 @@ class ResourceIndexService:
                 changed = True
         if changed:
             row.is_sample = False
+            if data.source is None and row.source == SAMPLE_NORM_SOURCE_NOTE:
+                row.source = ""
         await self.session.flush()
         await self.session.refresh(row)
         return row
@@ -465,6 +477,11 @@ def map_boq_positions(
                     detail=detail,
                 )
             )
+
+        basis = str(getattr(pos, "price_basis", None) or "").strip().lower()
+        if basis in _CURRENT_PRICE_BASES:
+            skip("not_base_prices", basis)
+            continue
 
         meta = pos.metadata_ if isinstance(pos.metadata_, dict) else {}
         resources = [r for r in (meta.get("resources") or []) if isinstance(r, dict)]
