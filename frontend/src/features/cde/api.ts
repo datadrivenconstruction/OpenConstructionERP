@@ -183,6 +183,11 @@ export async function fetchCDEContainers(
   return apiGet<CDEContainer[]>(`/v1/cde/containers/${qs ? `?${qs}` : ''}`);
 }
 
+/** One container by id. The route has no trailing slash, unlike the list. */
+export async function fetchCDEContainer(id: string): Promise<CDEContainer> {
+  return apiGet<CDEContainer>(`/v1/cde/containers/${encodeURIComponent(id)}`);
+}
+
 export async function createCDEContainer(
   data: CreateCDEContainerPayload,
 ): Promise<CDEContainer> {

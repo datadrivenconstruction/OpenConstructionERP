@@ -8952,6 +8952,7 @@ const resource = {
     "cde.no_containers_hint": "Create your first document container to get started.",
     "cde.no_results": "No matching containers",
     "cde.no_results_hint": "Try adjusting your search or filters.",
+    "cde.focus_not_found": "The container this link points to was not found in this project.",
     "cde.no_revisions": "No revisions recorded",
     "cde.page_title": "Common Data Environment",
     "cde.promoted": "Container promoted",
