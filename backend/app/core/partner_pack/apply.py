@@ -120,6 +120,42 @@ def _near_miss_rule_set(slug: str, known: set[str]) -> str | None:
     return None
 
 
+def _rule_set_for_classification(name: str, known: set[str]) -> str | None:
+    """The registered rule set that checks ``name``, when ``name`` is a classification.
+
+    A classification key and the rule set that reads it are usually the same
+    word (``nrm``, ``birimfiyat``, ``sekisan``), and the exceptions are where a
+    pack goes wrong without a sound: the Hungarian classification is
+    ``tetelrend`` and its rule set is ``hungary``, the Chinese one is
+    ``gb50500`` and its rule set is ``gbt50500``, the Polish catalogue key is
+    ``knr`` and its rule set is ``poland``. A pack that writes the
+    classification into ``validation_rule_sets`` names a set the registry has
+    never heard of, and :func:`_near_miss_rule_set` cannot see the pairing,
+    because the two words share no spelling.
+
+    The table that pairs them is the BOQ router's, the one the Validate button
+    reads, so the hint and the product cannot disagree. It is imported lazily
+    and only on the refusal path; when it cannot be imported the refusal still
+    happens, it just carries no hint.
+
+    Args:
+        name: The declared entry the registry did not know.
+        known: The registered rule-set identifiers.
+
+    Returns:
+        The rule set to write instead, or ``None`` when ``name`` is not a
+        classification with a registered rule set of another name.
+    """
+    try:
+        from app.modules.boq.router import _STANDARD_RULE_SETS
+    except Exception:  # noqa: BLE001 - a hint is optional, the refusal is not
+        return None
+    target = _STANDARD_RULE_SETS.get(name.strip().lower())
+    if target and target != name and target in known:
+        return target
+    return None
+
+
 def _rule_set_severities(names: Sequence[str]) -> dict[str, dict[str, int]]:
     """How many rules of each severity each named rule set holds.
 
@@ -209,6 +245,13 @@ def resolve_declared_rule_sets(m: PartnerPackManifest, *, strict: bool = False) 
     if unknown and strict:
         hints = []
         for name in unknown:
+            checked_by = _rule_set_for_classification(name, known)
+            if checked_by:
+                hints.append(
+                    f"{name!r} (a classification standard, not a rule set; the rule set that "
+                    f"checks it is {checked_by!r})"
+                )
+                continue
             neighbour = _near_miss_rule_set(name, known)
             hints.append(f"{name!r}" + (f" (did you mean {neighbour!r}?)" if neighbour else ""))
         raise UnknownRuleSetError(

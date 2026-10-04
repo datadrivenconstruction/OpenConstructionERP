@@ -31,7 +31,11 @@ MANIFEST = PartnerPackManifest(
         "oenorm_b1801",
         "oenorm_a2063",
     ],
-    validation_rule_sets=[],
+    # The engine sets an Austrian project already runs through the AT country
+    # row: the GAEB structure checks and the ÖNORM rules. The documents above
+    # are reference text the engine never executes, so without this line the
+    # pack switched on nothing of its own.
+    validation_rule_sets=["gaeb", "onorm"],
     default_modules=[],
     hidden_modules=[],
     demo_template_ids=[

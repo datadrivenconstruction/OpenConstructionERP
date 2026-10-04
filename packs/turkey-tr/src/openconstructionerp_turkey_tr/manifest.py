@@ -39,7 +39,12 @@ MANIFEST = PartnerPackManifest(
         "bayindirlik_unit_prices",
         "kamu_ihale",
     ],
-    validation_rule_sets=[],
+    # The engine rule set that reads the poz number every Turkish line is
+    # priced from. It shares its name with the classification key it reads,
+    # unlike Hungary, where the classification is tetelrend and the rule set
+    # is hungary, so the name is checked against the registry by test rather
+    # than assumed.
+    validation_rule_sets=["birimfiyat"],
     default_modules=[],  # empty = show all
     hidden_modules=[],
     demo_template_ids=["mixed-use-istanbul"],

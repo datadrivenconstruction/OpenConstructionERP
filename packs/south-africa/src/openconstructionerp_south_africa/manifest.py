@@ -56,6 +56,11 @@ MANIFEST = PartnerPackManifest(
         "pppfa_preferential_procurement",
         "ipdm_procurement_gates",
     ],
+    # The documents above are reference text the engine never executes. This
+    # is the list that switches rules on. ASAQS measurement is in the NRM
+    # lineage, which is what the classification registry and the ZA country
+    # row already give a South African project.
+    validation_rule_sets=["nrm"],
     default_modules=[],  # empty = show all
     hidden_modules=[],
     # No bundled SA demo project yet: an empty list keeps the default

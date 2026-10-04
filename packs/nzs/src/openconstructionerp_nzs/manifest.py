@@ -43,6 +43,13 @@ MANIFEST = PartnerPackManifest(
         "nzs_3910_2023_contracts",
         "rawlinsons_nz_benchmarks",
     ],
+    # The documents above are reference text the engine never executes. This
+    # is the list that switches rules on. New Zealand quantity surveying sits in
+    # the Commonwealth measurement tradition, and NRM is what the classification
+    # registry and the NZ country row already give a New Zealand project, so a
+    # project created under the pack runs the same national checks as one
+    # created without it.
+    validation_rule_sets=["nrm"],
     default_modules=[],
     hidden_modules=[],
     branding=PartnerBranding(

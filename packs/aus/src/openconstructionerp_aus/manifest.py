@@ -41,6 +41,13 @@ MANIFEST = PartnerPackManifest(
         "as_4000_contracts",
         "rawlinsons_benchmarks",
     ],
+    # The documents above are reference text the engine never executes. This
+    # is the list that switches rules on. Australian quantity surveying follows
+    # the Commonwealth NRM lineage, which is also what the classification
+    # registry and the AU country row give an Australian project, so a project
+    # created under the pack runs the same national checks as one created
+    # without it.
+    validation_rule_sets=["nrm"],
     default_modules=[],  # empty = show all (Shape A, no module hiding)
     hidden_modules=[],
     # Two Australian (AUD, NCC 2022 / AS-standards) demos so the pack always

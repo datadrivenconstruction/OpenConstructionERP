@@ -79,6 +79,12 @@ MANIFEST = PartnerPackManifest(
         # Vision 2030 cross-cutting KPIs.
         "vision_2030_kpis",
     ],
+    # The documents above are reference text the engine never executes. This
+    # is the list that switches rules on. Saudi tenders are coded against
+    # MasterFormat, which is what the classification registry, the SA country
+    # row and both Saudi demos say. No engine rule set reads the Saudi Building
+    # Code itself yet, so none is named for it.
+    validation_rule_sets=["masterformat"],
     default_modules=[],  # empty = show all modules in sidebar
     hidden_modules=[],
     branding=PartnerBranding(

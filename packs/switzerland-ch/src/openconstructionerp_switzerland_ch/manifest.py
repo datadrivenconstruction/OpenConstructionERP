@@ -31,7 +31,10 @@ MANIFEST = PartnerPackManifest(
         "bkp_classification",
         "sia_118",
     ],
-    validation_rule_sets=[],
+    # Swiss bills are coded in BKP, which has no rule set yet, so the pack runs
+    # what the CH country row runs: the GAEB structure checks and no cost-group
+    # code rule that a BKP bill would fail line by line.
+    validation_rule_sets=["gaeb"],
     default_modules=[],
     hidden_modules=[],
     demo_template_ids=[

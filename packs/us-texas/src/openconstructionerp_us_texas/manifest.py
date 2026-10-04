@@ -40,6 +40,9 @@ MANIFEST = PartnerPackManifest(
         "tx_retainage_2252",
         "tx_payment_and_lien_clocks",
     ],
+    # No engine rule set reads Texas law yet; the bill itself is coded in
+    # MasterFormat, the set the US country row already runs.
+    validation_rule_sets=["masterformat"],
     default_modules=[],  # empty = show all
     hidden_modules=[],
     # Left empty on purpose. The demo estate is owned elsewhere and a template

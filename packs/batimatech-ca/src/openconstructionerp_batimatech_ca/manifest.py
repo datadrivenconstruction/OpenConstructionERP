@@ -55,6 +55,12 @@ MANIFEST = PartnerPackManifest(
         "ontario_obc",
         "quebec_ccq",
     ],
+    # The documents above are reference text the engine never executes. This
+    # is the list that switches rules on. Canadian bills are coded against
+    # MasterFormat, the same set the canada-ca pack and the CA country row
+    # run, so a Quebec project created under this partner pack is checked the
+    # way any other Canadian project is.
+    validation_rule_sets=["masterformat"],
     default_modules=[],  # empty = show all (Shape A, no module hiding)
     hidden_modules=[],
     demo_template_ids=["office-montreal"],
