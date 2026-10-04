@@ -25,8 +25,19 @@ Placement of a position, in order:
    an element number the table does not list: placed on the group as a
    group-level line, with the code kept. Anything else: not allocated.
 
-Nothing is ever dropped. The invariant every caller can rely on, and the tests
-pin, is ``works_estimate + addon groups + unallocated == direct_cost`` exactly.
+Group 0 and groups 1-8 are subtotalled apart, as NRM 1 does: group 0 is the
+facilitating works estimate and groups 1-8 alone are the building works
+estimate, the figure a cost per m2 of GIFA is benchmarked on. Folding demolition
+or remediation into the building works estimate would overstate that rate by
+exactly the abnormal costs a benchmark leaves out.
+
+An empty placeholder row (the "Add Position" row nobody has typed into yet,
+see ``app.modules.boq.service.is_empty_position``) carries no money and is not
+a position, so it is skipped outright: it counts nowhere and raises nothing.
+
+Nothing else is ever dropped. The invariant every caller can rely on, and the
+tests pin, is ``facilitating_works_estimate + building_works_estimate + addon
+groups + unallocated == direct_cost`` exactly.
 """
 
 from __future__ import annotations
@@ -53,6 +64,7 @@ from app.modules.cost_plan.schemas import (
 )
 
 __all__ = [
+    "FACILITATING_GROUP",
     "MAX_LISTED_UNALLOCATED",
     "Catalogue",
     "CatalogueElement",
@@ -75,6 +87,10 @@ _CODE_RE = re.compile(r"^\d{1,3}(\.\d{1,3}){0,4}$")
 #: not ship them all to the browser. The total and the count are never capped.
 MAX_LISTED_UNALLOCATED = 500
 
+#: NRM 1 group 0, facilitating works. It is subtotalled as the facilitating
+#: works estimate and kept out of the building works estimate (groups 1-8).
+FACILITATING_GROUP = "0"
+
 
 # ── Element table ────────────────────────────────────────────────────────────
 
@@ -91,8 +107,9 @@ class CatalogueElement:
 class CatalogueGroup:
     """One NRM 1 group element.
 
-    ``kind`` is ``works`` for 0-8, which build the works estimate, and
-    ``addon`` for 9-14, which NRM 1 places below it.
+    ``kind`` is ``works`` for 0-8, which build the facilitating works estimate
+    (group 0) and the building works estimate (1-8), and ``addon`` for 9-14,
+    which NRM 1 places below them.
     """
 
     code: str
@@ -245,6 +262,9 @@ class LeafInput:
 
     ``code`` is the position's own ``classification.nrm``; ``inherited_code``
     is the nearest ancestor's, used only when the position has none.
+    ``placeholder`` marks an empty row nobody has filled in yet. Such a row is
+    skipped by the rollup, but only while its amount is zero: a row flagged by
+    mistake that carries money is still counted, so no money can be lost.
     """
 
     id: Any
@@ -253,7 +273,7 @@ class LeafInput:
     amount: Decimal
     code: object = None
     inherited_code: object = None
-    listable: bool = True
+    placeholder: bool = False
 
 
 @dataclass(frozen=True)
@@ -310,7 +330,8 @@ def build_cost_plan(
         boq_name: The bill's name.
         project_id: The owning project's id.
         currency: The base currency every amount is in.
-        leaves: Every priced (non-section) position of the bill.
+        leaves: Every non-section position of the bill. Empty placeholder
+            rows may be included; they are skipped.
         markups: The bill's active markup lines in cascade order, each with the
             amount the bill's own cascade gave it.
         gifa: Gross internal floor area in m2, or None.
@@ -331,11 +352,14 @@ def build_cost_plan(
     group_level_codes: dict[str, set[str]] = {}
     unallocated = _Bucket()
     unallocated_rows: list[UnallocatedPosition] = []
-    listable_unallocated = 0
     direct_cost = Decimal("0")
+    position_count = 0
     inherited = 0
 
     for leaf in leaves:
+        if leaf.placeholder and leaf.amount == 0:
+            continue
+        position_count += 1
         direct_cost += leaf.amount
         own_written = _raw_text(leaf.code) is not None
         written = leaf.code if own_written else leaf.inherited_code
@@ -351,8 +375,7 @@ def build_cost_plan(
             )
         else:
             unallocated.add(leaf.amount)
-            listable_unallocated += 1 if leaf.listable else 0
-            if leaf.listable and len(unallocated_rows) < MAX_LISTED_UNALLOCATED:
+            if len(unallocated_rows) < MAX_LISTED_UNALLOCATED:
                 unallocated_rows.append(
                     UnallocatedPosition(
                         id=leaf.id,
@@ -412,7 +435,8 @@ def build_cost_plan(
 
     works = [group_row(g) for g in table.groups if g.kind == "works"]
     addons = [group_row(g) for g in table.groups if g.kind == "addon"]
-    works_total = sum((g.total for g in works), Decimal("0"))
+    facilitating_total = sum((g.total for g in works if g.code == FACILITATING_GROUP), Decimal("0"))
+    building_total = sum((g.total for g in works if g.code != FACILITATING_GROUP), Decimal("0"))
 
     has_scoped = any(m.scoped for m in markups)
     markup_rows: list[MarkupRow] = []
@@ -457,20 +481,21 @@ def build_cost_plan(
         gifa=gifa,
         gifa_source=gifa_source,
         groups=works,
-        works_estimate=subtotal(works_total),
+        facilitating_works_estimate=subtotal(facilitating_total),
+        building_works_estimate=subtotal(building_total),
         addon_groups=addons,
         unallocated=UnallocatedBlock(
             position_count=unallocated.count,
             positions=unallocated_rows,
-            positions_truncated=len(unallocated_rows) < listable_unallocated,
+            positions_truncated=len(unallocated_rows) < unallocated.count,
             **subtotal(unallocated.total).model_dump(),
         ),
         direct_cost=subtotal(direct_cost),
         markups=markup_rows,
         markups_total=subtotal(markups_total),
         grand_total=subtotal(grand_total),
-        position_count=len(leaves),
-        allocated_count=len(leaves) - unallocated.count,
+        position_count=position_count,
+        allocated_count=position_count - unallocated.count,
         inherited_count=inherited,
         warnings=warnings,
     )

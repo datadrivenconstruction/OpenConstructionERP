@@ -153,7 +153,7 @@ async def build_nrm1_cost_plan(
                 amount=amount,
                 code=_nrm_code(position),
                 inherited_code=inherited.get(position.id),
-                listable=not (amount == 0 and is_empty_position(position)),
+                placeholder=amount == 0 and is_empty_position(position),
             )
         )
 

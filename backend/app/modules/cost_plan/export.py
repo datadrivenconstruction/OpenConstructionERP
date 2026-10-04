@@ -25,6 +25,7 @@ from openpyxl.styles import Alignment, Font, PatternFill
 from app.core.document_locale import translate
 from app.core.xlsx_branding import apply_company_header
 from app.core.xlsx_text import store_strings_as_text
+from app.modules.cost_plan.engine import FACILITATING_GROUP
 from app.modules.cost_plan.schemas import CostPlanResponse, GroupRow, MarkupRow, SubtotalRow
 
 __all__ = ["DEFAULT_LOCALE", "EXPORT_LOCALES", "build_cost_plan_workbook", "label"]
@@ -51,6 +52,7 @@ _LABELS: dict[str, dict[str, str]] = {
         "col_share": "% of total",
         "col_running": "Running total",
         "group_level": "Group level, no element given",
+        "facilitating_works_estimate": "Facilitating works estimate",
         "works_estimate": "Building works estimate",
         "addons_heading": "NRM 1 groups 9-14 priced as bill items",
         "unallocated": "Not allocated to an element",
@@ -93,6 +95,7 @@ _LABELS: dict[str, dict[str, str]] = {
         "col_share": "% der Summe",
         "col_running": "Laufende Summe",
         "group_level": "Gruppenebene, kein Element angegeben",
+        "facilitating_works_estimate": "Kosten der vorbereitenden Maßnahmen",
         "works_estimate": "Kosten der Bauleistungen",
         "addons_heading": "NRM 1 Gruppen 9-14 als Positionen bepreist",
         "unallocated": "Keinem Element zugeordnet",
@@ -135,6 +138,7 @@ _LABELS: dict[str, dict[str, str]] = {
         "col_share": "% от итога",
         "col_running": "Нарастающий итог",
         "group_level": "Уровень группы, элемент не указан",
+        "facilitating_works_estimate": "Стоимость подготовительных работ",
         "works_estimate": "Стоимость строительных работ",
         "addons_heading": "Группы NRM 1 9-14, оцененные позициями ведомости",
         "unallocated": "Не отнесено к элементу",
@@ -332,11 +336,27 @@ def build_cost_plan_workbook(plan: CostPlanResponse, *, locale: str = DEFAULT_LO
     header_row = ws.max_row
 
     writer = _Writer(ws, locale)
+    # NRM 1 subtotals group 0 on its own and groups 1-8 on their own; the
+    # building works estimate never carries the facilitating works. The code
+    # column of the building subtotal names its range ("1-8") so a reader sees
+    # what it sums without a new label.
     for group in plan.groups:
-        writer.group(group, show_empty_elements=False)
+        if group.code == FACILITATING_GROUP:
+            writer.group(group, show_empty_elements=False)
     writer.money_row(
+        description=label(locale, "facilitating_works_estimate"),
+        row=plan.facilitating_works_estimate,
+        bold=True,
+        fill=_TOTAL_FILL,
+    )
+    building_codes = [g.code for g in plan.groups if g.code != FACILITATING_GROUP]
+    for group in plan.groups:
+        if group.code != FACILITATING_GROUP:
+            writer.group(group, show_empty_elements=False)
+    writer.money_row(
+        code=f"{building_codes[0]}-{building_codes[-1]}" if building_codes else "",
         description=label(locale, "works_estimate"),
-        row=plan.works_estimate,
+        row=plan.building_works_estimate,
         bold=True,
         fill=_TOTAL_FILL,
     )

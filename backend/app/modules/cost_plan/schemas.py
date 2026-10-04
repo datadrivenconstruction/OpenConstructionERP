@@ -153,14 +153,23 @@ class CostPlanResponse(BaseModel):
     Reading order, top to bottom, is the order the plan is printed in:
 
     1. ``groups`` - group elements 0-8, each with its elements.
-    2. ``works_estimate`` - their sum, the building works estimate.
+    2. ``facilitating_works_estimate`` - group 0 alone, and
+       ``building_works_estimate`` - groups 1-8 alone. NRM 1 keeps the two
+       apart: the building works estimate is the figure cost per m2 of GIFA
+       is benchmarked on, and facilitating works (demolition, remediation)
+       are abnormal costs a benchmark leaves out.
     3. ``addon_groups`` - bill positions coded to groups 9-14
        (preliminaries, overheads and profit, fees, other costs, risk,
        inflation) that were priced as items in the bill.
     4. ``unallocated`` - positions with no usable NRM code.
-    5. ``direct_cost`` - 1 + 3 + 4, equal to the bill's direct cost.
+    5. ``direct_cost`` - 2 + 3 + 4, equal to the bill's direct cost.
     6. ``markups`` - the bill's markup cascade in compounding order.
     7. ``grand_total`` - equal to the bill's grand total.
+
+    ``position_count`` counts real positions only: an empty placeholder row
+    nobody has typed into yet is not one. ``allocated_count`` is the part of
+    them placed on a group, by element or at group level, so
+    ``position_count - allocated_count`` is always the unallocated count.
     """
 
     standard: Literal["NRM1"] = "NRM1"
@@ -171,7 +180,8 @@ class CostPlanResponse(BaseModel):
     gifa: Money | None = None
     gifa_source: Literal["project", "entered", "none"] = "none"
     groups: list[GroupRow] = Field(default_factory=list)
-    works_estimate: SubtotalRow = Field(default_factory=SubtotalRow)
+    facilitating_works_estimate: SubtotalRow = Field(default_factory=SubtotalRow)
+    building_works_estimate: SubtotalRow = Field(default_factory=SubtotalRow)
     addon_groups: list[GroupRow] = Field(default_factory=list)
     unallocated: UnallocatedBlock = Field(default_factory=UnallocatedBlock)
     direct_cost: SubtotalRow = Field(default_factory=SubtotalRow)

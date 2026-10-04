@@ -176,8 +176,11 @@ async def test_plan_conserves_the_bill_and_matches_both_bill_rollups(session: As
     direct = D("1556.34")
     assert plan.direct_cost.total == direct
     addons = sum((g.total for g in plan.addon_groups), D("0"))
-    assert plan.works_estimate.total + addons + plan.unallocated.total == direct
-    assert plan.works_estimate.total == D("1520")
+    facilitating = plan.facilitating_works_estimate.total
+    building = plan.building_works_estimate.total
+    assert facilitating + building + addons + plan.unallocated.total == direct
+    assert facilitating == D("0")
+    assert building == D("1520")
     assert addons == D("15")
     assert plan.unallocated.total == D("21.34")
     assert plan.unallocated.position_count == 2
@@ -219,6 +222,37 @@ async def test_cascade_follows_sort_order_and_compounds_on_the_running_subtotal(
     # The inactive 50% line is neither printed nor priced.
     assert plan.grand_total.total == fees.running_total
     assert plan.markups_total.total == prelims.total + ohp.total + fees.total
+
+
+@pytest.mark.asyncio
+async def test_blank_rows_from_add_position_change_nothing_in_the_plan(session: AsyncSession) -> None:
+    """A row nobody has typed into is not a position: no count, no warning."""
+    project = await _project(session)
+    boq = await _bill(session, project)
+    before = await build_nrm1_cost_plan(session, boq.id)
+
+    walls = next(p for p in await BOQService(session).position_repo.list_all_for_boq(boq.id) if p.ordinal == "02")
+    # A real unit, so the row is not mistaken for a section header.
+    blank = {"description": "", "unit": "m2", "quantity": "0", "unit_rate": "0"}
+    session.add_all([_pos(boq, "07.001", "0", **blank), _pos(boq, "02.003", "0", parent=walls, **blank)])
+    await session.flush()
+    after = await build_nrm1_cost_plan(session, boq.id)
+
+    assert after.position_count == before.position_count
+    assert after.allocated_count == before.allocated_count
+    assert after.unallocated.position_count == before.unallocated.position_count == 2
+    assert len(after.unallocated.positions) == 2
+    assert after.warnings == before.warnings
+    assert _element_count(after, "2.7") == _element_count(before, "2.7") == 1
+    assert after.direct_cost.total == before.direct_cost.total
+
+
+def _element_count(plan: CostPlanResponse, code: str) -> int:
+    for group in _all_groups(plan):
+        for element in group.elements:
+            if element.code == code:
+                return element.position_count
+    raise AssertionError(code)
 
 
 # ── GIFA ─────────────────────────────────────────────────────────────────────
@@ -306,7 +340,8 @@ async def test_export_has_the_same_structure_and_totals_as_the_plan(session: Asy
     book = load_workbook(io.BytesIO(response.body))
     rows = _rows(book.worksheets[0])
 
-    assert _row_by_label(rows, "Building works estimate")[4] == pytest.approx(float(plan.works_estimate.total))
+    assert _row_by_label(rows, "Building works estimate")[4] == pytest.approx(float(plan.building_works_estimate.total))
+    assert _row_by_label(rows, "Facilitating works estimate")[4] == pytest.approx(0.0)
     assert _row_by_label(rows, "Not allocated to an element")[4] == pytest.approx(float(plan.unallocated.total))
     assert _row_by_label(rows, "Direct cost of the bill")[4] == pytest.approx(float(plan.direct_cost.total))
     total_row = _row_by_label(rows, "Cost plan total")

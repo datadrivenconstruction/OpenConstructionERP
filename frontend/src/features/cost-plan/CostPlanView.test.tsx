@@ -6,8 +6,10 @@
 // server returned: element names come from the plan (data), unallocated money
 // is shown with its count, the markup cascade keeps the server's order, a typed
 // floor area is sent to the server and a bad one is refused before it is, and
-// the export goes out with the area the reader is looking at. A reopened plan
-// is read again, never served from the app's two-minute query cache.
+// the export goes out with the area the reader is looking at. Group 0 is
+// subtotalled as the facilitating works estimate, apart from the building works
+// estimate of groups 1-8, and a reopened plan is read again, never served from
+// the app's two-minute query cache.
 
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup, within } from '@testing-library/react';
@@ -85,7 +87,8 @@ function makePlan(overrides: Partial<Nrm1CostPlan> = {}): Nrm1CostPlan {
         group_level: { position_count: 1, codes: ['2'], ...sub('30', '0.03', '1.50') },
       },
     ],
-    works_estimate: sub('1400', '1.40', '70.00'),
+    facilitating_works_estimate: sub('0', '0.00', '0.00'),
+    building_works_estimate: sub('1400', '1.40', '70.00'),
     addon_groups: [
       {
         code: '9',
@@ -199,6 +202,47 @@ describe('CostPlanView', () => {
 
     expect(table.textContent).toContain('Building works estimate');
     expect(screen.getByTestId('cost-plan-warnings').textContent).toContain('counted twice');
+    // The KPI counts positions placed on a group, which is what its label says.
+    expect(screen.getByText('Positions allocated to NRM 1')).toBeTruthy();
+    expect(screen.getByText('4 / 5')).toBeTruthy();
+  });
+
+  it('subtotals group 0 as facilitating works, apart from the building works of groups 1-8', async () => {
+    const plan = makePlan();
+    apiMocks.nrm1.mockResolvedValue(
+      makePlan({
+        groups: [
+          {
+            code: '0',
+            name: 'Facilitating works',
+            kind: 'works',
+            position_count: 1,
+            ...sub('400', '0.40', '20.00'),
+            elements: [{ code: '0.2', name: 'Major demolition works', position_count: 1, ...sub('400', '0.40', '20.00') }],
+            group_level: null,
+          },
+          ...plan.groups,
+        ],
+        facilitating_works_estimate: sub('400', '0.40', '20.00'),
+        building_works_estimate: sub('1400', '1.40', '70.00'),
+      }),
+    );
+    renderView();
+    const table = await screen.findByTestId('cost-plan-table');
+    const rows = Array.from(table.querySelectorAll('tbody tr'));
+    const at = (testId: string) => rows.findIndex((row) => row.getAttribute('data-testid') === testId);
+
+    const facilitating = screen.getByTestId('cost-plan-facilitating-estimate');
+    const building = screen.getByTestId('cost-plan-building-estimate');
+    expect(facilitating.textContent).toContain('Facilitating works estimate');
+    expect(facilitating.textContent).toContain('400');
+    expect(building.textContent).toContain('Building works estimate');
+    expect(building.textContent).toContain('1,400');
+    expect(building.querySelector('td')?.textContent).toBe('1-2');
+    // Group 0, its subtotal, groups 1-8, their subtotal: in that order.
+    expect(at('cost-plan-group-0')).toBeLessThan(at('cost-plan-facilitating-estimate'));
+    expect(at('cost-plan-facilitating-estimate')).toBeLessThan(at('cost-plan-group-1'));
+    expect(at('cost-plan-group-2')).toBeLessThan(at('cost-plan-building-estimate'));
   });
 
   it('reads the plan again when it is reopened, even inside the app-wide cache window', async () => {

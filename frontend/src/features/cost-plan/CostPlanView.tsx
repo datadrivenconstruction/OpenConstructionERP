@@ -3,11 +3,12 @@
 /**
  * The NRM 1 elemental cost plan of one bill.
  *
- * Reads top to bottom the way a UK cost plan is printed: group elements 0-8
- * with their elements, the building works estimate, any NRM 1 groups 9-14 the
- * bill prices as items, what is not allocated to an element, the bill's direct
- * cost, then the bill's own markup cascade in compounding order and the total.
- * Every row carries cost per m2 of GIFA and its share of the total.
+ * Reads top to bottom the way a UK cost plan is printed: group 0 and the
+ * facilitating works estimate, groups 1-8 with their elements and the building
+ * works estimate, any NRM 1 groups 9-14 the bill prices as items, what is not
+ * allocated to an element, the bill's direct cost, then the bill's own markup
+ * cascade in compounding order and the total. Every row carries cost per m2 of
+ * GIFA and its share of the total.
  *
  * The plan is re-read every time the view mounts. The dialog unmounts it on
  * close, and the estimator's loop is "fix a code or a rate in the grid, open
@@ -96,6 +97,9 @@ const WARNING_DEFAULTS: Record<string, string> = {
   scoped_markups:
     'Some markup lines apply to one section only, so a line earns on several bases. Amounts are exact; no single base is shown.',
 };
+
+/** NRM 1 group 0, subtotalled apart from the building works (groups 1-8). */
+const FACILITATING_GROUP = '0';
 
 const REASON_DEFAULTS: Record<string, string> = {
   no_code: 'No NRM code on the position or its sections',
@@ -203,6 +207,11 @@ function SectionHeading({ children }: { children: ReactNode }) {
 function PlanTable({ plan, showEmpty, t }: { plan: Nrm1CostPlan; showEmpty: boolean; t: TFn }) {
   const currency = plan.currency;
   const pricedAddons = plan.addon_groups.filter((g) => g.position_count > 0 || Number(g.total) !== 0);
+  const facilitatingGroups = plan.groups.filter((g) => g.code === FACILITATING_GROUP);
+  const buildingGroups = plan.groups.filter((g) => g.code !== FACILITATING_GROUP);
+  const firstBuilding = buildingGroups[0];
+  const lastBuilding = buildingGroups[buildingGroups.length - 1];
+  const buildingRange = firstBuilding && lastBuilding ? `${firstBuilding.code}-${lastBuilding.code}` : undefined;
   return (
     <div className="overflow-x-auto rounded-lg border border-border">
       <table className="w-full text-sm" data-testid="cost-plan-table">
@@ -219,15 +228,26 @@ function PlanTable({ plan, showEmpty, t }: { plan: Nrm1CostPlan; showEmpty: bool
           </tr>
         </thead>
         <tbody>
-          {plan.groups.map((group) => (
+          {facilitatingGroups.map((group) => (
             <GroupRows key={group.code} group={group} currency={currency} showEmpty={showEmpty} t={t} />
           ))}
           <PlanRow
-            label={t('cost_plan.works_estimate', { defaultValue: 'Building works estimate' })}
-            row={plan.works_estimate}
+            label={t('cost_plan.facilitating_works_estimate', { defaultValue: 'Facilitating works estimate' })}
+            row={plan.facilitating_works_estimate}
             currency={currency}
             tone="subtotal"
-            testId="cost-plan-works-estimate"
+            testId="cost-plan-facilitating-estimate"
+          />
+          {buildingGroups.map((group) => (
+            <GroupRows key={group.code} group={group} currency={currency} showEmpty={showEmpty} t={t} />
+          ))}
+          <PlanRow
+            code={buildingRange}
+            label={t('cost_plan.works_estimate', { defaultValue: 'Building works estimate' })}
+            row={plan.building_works_estimate}
+            currency={currency}
+            tone="subtotal"
+            testId="cost-plan-building-estimate"
           />
           {pricedAddons.length > 0 && (
             <>
@@ -420,7 +440,7 @@ export function CostPlanView({ boqId }: CostPlanViewProps) {
       {
         key: 'works',
         label: t('cost_plan.works_estimate', { defaultValue: 'Building works estimate' }),
-        value: money(plan.works_estimate.total, plan.currency),
+        value: money(plan.building_works_estimate.total, plan.currency),
       },
       {
         key: 'total',
@@ -442,7 +462,7 @@ export function CostPlanView({ boqId }: CostPlanViewProps) {
       },
       {
         key: 'allocated',
-        label: t('cost_plan.kpi_allocated', { defaultValue: 'Positions on an element' }),
+        label: t('cost_plan.kpi_allocated', { defaultValue: 'Positions allocated to NRM 1' }),
         value: `${plan.allocated_count} / ${plan.position_count}`,
         sub:
           plan.inherited_count > 0

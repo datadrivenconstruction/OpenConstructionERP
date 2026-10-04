@@ -4,8 +4,9 @@
 
 The engine regroups a bill; it never invents or loses money. Every test that
 builds a plan therefore checks the one invariant a cost plan has to keep:
-works estimate + groups 9-14 priced in the bill + not allocated == direct cost,
-exactly, as Decimals. The fixtures are chosen so that a plausible wrong
+facilitating works estimate (group 0) + building works estimate (groups 1-8)
++ groups 9-14 priced in the bill + not allocated == direct cost, exactly, as
+Decimals. The fixtures are chosen so that a plausible wrong
 implementation fails: a leaf with its own bad code under a well-coded section
 (inheriting would hide the typo), ``2.10`` next to ``2.1`` (a float parse merges
 them), an element number the table does not list (dropping it loses money).
@@ -13,10 +14,12 @@ them), an element number the table does not list (dropping it loses money).
 
 from __future__ import annotations
 
+import io
 import uuid
 from decimal import Decimal
 
 import pytest
+from openpyxl import load_workbook
 
 from app.modules.cost_plan.engine import (
     MAX_LISTED_UNALLOCATED,
@@ -27,12 +30,13 @@ from app.modules.cost_plan.engine import (
     normalise_code,
     place_code,
 )
+from app.modules.cost_plan.export import build_cost_plan_workbook
 from app.modules.cost_plan.schemas import CostPlanResponse
 
 D = Decimal
 
 
-def _leaf(amount: str, code: object = None, inherited: object = None, *, listable: bool = True) -> LeafInput:
+def _leaf(amount: str, code: object = None, inherited: object = None, *, placeholder: bool = False) -> LeafInput:
     return LeafInput(
         id=uuid.uuid4(),
         ordinal="x",
@@ -40,7 +44,7 @@ def _leaf(amount: str, code: object = None, inherited: object = None, *, listabl
         amount=D(amount),
         code=code,
         inherited_code=inherited,
-        listable=listable,
+        placeholder=placeholder,
     )
 
 
@@ -77,8 +81,11 @@ def _assert_conserved(plan: CostPlanResponse, leaves: list[LeafInput]) -> None:
     expected = sum((leaf.amount for leaf in leaves), D("0"))
     addons = sum((g.total for g in plan.addon_groups), D("0"))
     assert plan.direct_cost.total == expected
-    assert plan.works_estimate.total + addons + plan.unallocated.total == expected
-    assert plan.works_estimate.total == sum((g.total for g in plan.groups), D("0"))
+    facilitating = plan.facilitating_works_estimate.total
+    building = plan.building_works_estimate.total
+    assert facilitating + building + addons + plan.unallocated.total == expected
+    assert facilitating == sum((g.total for g in plan.groups if g.code == "0"), D("0"))
+    assert building == sum((g.total for g in plan.groups if g.code != "0"), D("0"))
     for group in [*plan.groups, *plan.addon_groups]:
         level = group.group_level.total if group.group_level else D("0")
         assert group.total == sum((e.total for e in group.elements), D("0")) + level
@@ -198,7 +205,8 @@ def test_every_kind_of_code_is_conserved_and_placed() -> None:
     assert services.group_level.codes == ["5.99"]
     assert services.total == D("20")
     assert _group(plan, "9").total == D("15")
-    assert plan.works_estimate.total == D("1420.15")
+    assert plan.building_works_estimate.total == D("1420.15")
+    assert plan.facilitating_works_estimate.total == D("0")
 
     assert plan.unallocated.total == D("24.67")
     assert plan.unallocated.position_count == 3
@@ -229,7 +237,7 @@ def test_cost_per_m2_with_gifa() -> None:
     assert plan.gifa_source == "entered"
     assert _element(plan, "1.1").cost_per_m2 == D("4.00")
     assert _element(plan, "2.1").cost_per_m2 == D("2.00")
-    assert plan.works_estimate.cost_per_m2 == D("6.00")
+    assert plan.building_works_estimate.cost_per_m2 == D("6.00")
     assert plan.grand_total.cost_per_m2 == D("6.00")
     assert "no_gifa" not in plan.warnings
 
@@ -352,12 +360,112 @@ def test_unallocated_list_is_capped_but_total_and_count_are_not() -> None:
     _assert_conserved(plan, leaves)
 
 
-def test_empty_placeholders_are_counted_but_not_listed_and_do_not_read_as_truncation() -> None:
-    leaves = [_leaf("0", None, listable=False), _leaf("5", None)]
+# ── Empty placeholder rows ──────────────────────────────────────────────────
+
+
+def test_a_blank_row_in_a_fully_coded_bill_raises_no_warning_and_counts_nowhere() -> None:
+    """The estimator just clicked "Add Position": the plan must look the same."""
+    coded = [_leaf("1000", "1.1"), _leaf("500", "2.5")]
+    leaves = [*coded, _leaf("0", None, placeholder=True)]
     plan = _plan(leaves)
-    assert plan.unallocated.position_count == 2
+    _assert_conserved(plan, leaves)
+
+    assert "unallocated_positions" not in plan.warnings
+    assert plan.unallocated.position_count == 0
+    assert plan.unallocated.positions == []
+    assert plan.unallocated.positions_truncated is False
+    assert plan.position_count == 2
+    assert plan.allocated_count == plan.position_count
+    without = _plan(coded)
+    assert plan.warnings == without.warnings
+    assert plan.direct_cost == without.direct_cost
+    assert [g.position_count for g in plan.groups] == [g.position_count for g in without.groups]
+
+
+def test_a_blank_row_under_a_coded_section_does_not_bump_the_element_count() -> None:
+    leaves = [_leaf("40", None, inherited="2.7"), _leaf("0", None, inherited="2.7", placeholder=True)]
+    plan = _plan(leaves)
+    assert _element(plan, "2.7").position_count == 1
+    assert _group(plan, "2").position_count == 1
+    assert plan.position_count == 1
+    assert plan.inherited_count == 1
+
+
+def test_an_unallocated_real_row_is_still_listed_next_to_a_blank_one() -> None:
+    leaves = [_leaf("0", None, placeholder=True), _leaf("5", None)]
+    plan = _plan(leaves)
+    assert plan.unallocated.position_count == 1
     assert len(plan.unallocated.positions) == 1
     assert plan.unallocated.positions_truncated is False
+    assert "unallocated_positions" in plan.warnings
+
+
+def test_a_row_flagged_as_placeholder_that_carries_money_is_still_counted() -> None:
+    """The flag never outranks the money: a wrong flag must not lose an amount."""
+    leaves = [_leaf("12.50", None, placeholder=True)]
+    plan = _plan(leaves)
+    _assert_conserved(plan, leaves)
+    assert plan.unallocated.total == D("12.50")
+    assert plan.unallocated.position_count == 1
+    assert plan.position_count == 1
+
+
+# ── Facilitating works vs building works ────────────────────────────────────
+
+
+def test_facilitating_works_stay_out_of_the_building_works_estimate() -> None:
+    """NRM 1: the building works estimate is groups 1-8 only.
+
+    The wrong answer is 4,400,000, the sum of groups 0-8, and the cost per m2
+    a benchmark is read against would be overstated by the demolition.
+    """
+    leaves = [
+        _leaf("400000", "0.2"),  # major demolition works
+        _leaf("1500000", "1.1"),
+        _leaf("2000000", "2.1"),
+        _leaf("500000", "8.1"),
+        _leaf("100000", "9"),
+    ]
+    plan = _plan(leaves, gifa="2000")
+    _assert_conserved(plan, leaves)
+
+    assert plan.facilitating_works_estimate.total == D("400000")
+    assert plan.building_works_estimate.total == D("4000000")
+    assert plan.building_works_estimate.total != D("4400000")
+    assert plan.building_works_estimate.cost_per_m2 == D("2000.00")
+    assert plan.facilitating_works_estimate.cost_per_m2 == D("200.00")
+    # Shares are of the cost plan total, 4,500,000 here.
+    assert plan.facilitating_works_estimate.share_pct == D("8.89")
+    assert plan.building_works_estimate.share_pct == D("88.89")
+    assert _group(plan, "0").total == D("400000")
+
+
+def test_the_workbook_prints_both_estimates_with_the_plans_figures() -> None:
+    leaves = [_leaf("400000", "0.2"), _leaf("4000000", "2.1"), _leaf("7", None)]
+    plan = _plan(leaves, gifa="2000")
+    book = load_workbook(io.BytesIO(build_cost_plan_workbook(plan)))
+    rows = list(book.worksheets[0].iter_rows(values_only=True))
+
+    def row(text: str) -> tuple:
+        matches = [r for r in rows if len(r) > 1 and r[1] == text]
+        assert len(matches) == 1, text
+        return matches[0]
+
+    facilitating = row("Facilitating works estimate")
+    building = row("Building works estimate")
+    assert facilitating[4] == pytest.approx(400000.0)
+    assert building[4] == pytest.approx(4000000.0)
+    assert building[5] == pytest.approx(2000.0)
+    assert building[0] == "1-8"
+
+    # Group 0, its subtotal, groups 1-8, their subtotal: in that order.
+    def at(predicate) -> int:
+        return next(i for i, r in enumerate(rows) if predicate(r))
+
+    group_0 = at(lambda r: r[0] == "0")
+    group_1 = at(lambda r: r[0] == "1")
+    group_8 = at(lambda r: r[0] == "8")
+    assert group_0 < rows.index(facilitating) < group_1 < group_8 < rows.index(building)
 
 
 def test_json_money_is_positional_text() -> None:

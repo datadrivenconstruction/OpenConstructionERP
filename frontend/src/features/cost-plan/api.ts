@@ -96,14 +96,19 @@ export interface Nrm1CostPlan {
   gifa: string | null;
   gifa_source: 'project' | 'entered' | 'none';
   groups: CostPlanGroup[];
-  works_estimate: CostPlanSubtotal;
+  /** NRM 1 group 0 alone. */
+  facilitating_works_estimate: CostPlanSubtotal;
+  /** NRM 1 groups 1-8 alone, the figure cost per m2 GIFA is benchmarked on. */
+  building_works_estimate: CostPlanSubtotal;
   addon_groups: CostPlanGroup[];
   unallocated: CostPlanUnallocated;
   direct_cost: CostPlanSubtotal;
   markups: CostPlanMarkup[];
   markups_total: CostPlanSubtotal;
   grand_total: CostPlanSubtotal;
+  /** Real positions only; an empty "Add Position" row is not counted. */
   position_count: number;
+  /** Positions placed on a group, by element or at group level. */
   allocated_count: number;
   inherited_count: number;
   warnings: string[];
