@@ -96,16 +96,24 @@ class ChangeFlagReviewResponse(BaseModel):
 
 
 ProposalStatus = Literal["changed", "elements_missing", "no_quantity"]
+ProposalBasis = Literal["model_change", "rule_result"]
 
 
 class BIMQuantityProposalRow(BaseModel):
     """One position whose linked BIM quantity moved with a new model version.
 
-    ``previous_model_quantity`` is what the linked elements measure in the
-    version the position is linked to, ``new_model_quantity`` what the same
-    elements (matched by stable id) measure in the newest version. ``delta``
-    and ``total_delta`` are against what the position holds now, so they are
-    exactly what accepting the row changes.
+    ``previous_model_quantity`` is what the position's elements measure in its
+    baseline version: the version it is linked to, or a later one whose
+    quantity was accepted here. ``new_model_quantity`` is what they measure in
+    the newest ready version, matched by stable id (or, for a quantity-map
+    rule, every element the rule matches there). ``delta`` and ``total_delta``
+    are against what the position holds now, so they are exactly what
+    accepting the row changes.
+
+    ``basis`` is ``model_change`` for a model that moved, and ``rule_result``
+    for a rule aimed at an existing position whose result never became its
+    quantity; there ``previous_model_quantity`` is the rule on the baseline
+    and the comparison is with the stored quantity.
     """
 
     position_id: uuid.UUID
@@ -121,16 +129,19 @@ class BIMQuantityProposalRow(BaseModel):
     new_total: str
     total_delta: str
     method: Literal["unit", "rule"]
+    basis: ProposalBasis = "model_change"
     status: ProposalStatus
     appliable: bool
     manual_override: bool
     model_id: uuid.UUID | None = None
     new_model_id: uuid.UUID | None = None
+    new_model_ids: list[uuid.UUID] = Field(default_factory=list)
     model_name: str = ""
     model_version: str = ""
     element_count: int = 0
     modified_count: int = 0
     missing_count: int = 0
+    added_count: int = 0
 
 
 class BIMQuantityProposalResponse(BaseModel):

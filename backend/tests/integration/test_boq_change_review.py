@@ -136,14 +136,17 @@ async def _model(
     version: str,
     elements: list[dict],
     parent_model_id: str | None = None,
+    status: str = "ready",
 ) -> tuple[str, dict[str, str]]:
     """Create a model with elements; returns (model_id, {stable_id: element_id})."""
-    body: dict = {"project_id": project_id, "name": "Structure", "version": version, "status": "ready"}
+    body: dict = {"project_id": project_id, "name": "Structure", "version": version, "status": status}
     if parent_model_id:
         body["parent_model_id"] = parent_model_id
     m = await client.post("/api/v1/bim_hub/", json=body, headers=auth)
     assert m.status_code == 201, m.text
     model_id = m.json()["id"]
+    if not elements:
+        return model_id, {}
     e = await client.post(f"/api/v1/bim_hub/models/{model_id}/elements/", json={"elements": elements}, headers=auth)
     assert e.status_code == 201, e.text
     return model_id, {item["stable_id"]: item["id"] for item in e.json()["items"]}
@@ -761,6 +764,427 @@ async def test_bim_version_event_requires_the_model_in_the_project(client: Async
     scan = await client.post(f"/api/v1/boq/boqs/{s['boq_id']}/change-flags/scan/", headers=auth)
     assert scan.json()["created"] == 2
     assert scan.json()["open_count"] == 4
+
+
+# ── The newest version must have finished importing ───────────────────────
+
+
+async def _one_line(client: AsyncClient, auth: dict[str, str], *, volume: float = 10, rate: float = 10) -> dict:
+    """A bill with one m3 line linked to element X in model v1."""
+    project_id = await _project(client, auth)
+    boq_id = await _boq(client, auth, project_id)
+    v1, ids = await _model(client, auth, project_id, version="1", elements=[_elem("X", volume=volume, ghash="x1")])
+    pos = await _position(client, auth, boq_id, ordinal="1", description="Wall", unit="m3", unit_rate=rate)
+    await _link(client, auth, pos["id"], ids["X"])
+    synced = await _positions(client, auth, boq_id)
+    assert _d(synced[pos["id"]]["quantity"]) == Decimal(str(volume))
+    return {"project_id": project_id, "boq_id": boq_id, "v1": v1, "pos": pos["id"]}
+
+
+@pytest.mark.asyncio
+async def test_a_version_still_importing_is_not_the_newest_yet(client: AsyncClient, auth: dict[str, str]):
+    """A processing child has no elements; reading it as the tip would delete everything.
+
+    The scan must not burn the version's key on that reading either: once the
+    import finishes, the real change gets its flag with the right reason.
+    """
+    s = await _one_line(client, auth)
+    v2, _ = await _model(
+        client, auth, s["project_id"], version="2", parent_model_id=s["v1"], elements=[], status="processing"
+    )
+
+    scan = await client.post(f"/api/v1/boq/boqs/{s['boq_id']}/change-flags/scan/", headers=auth)
+    assert scan.status_code == 200, scan.text
+    assert scan.json()["created"] == 0
+    proposals = await client.get(f"/api/v1/boq/boqs/{s['boq_id']}/bim-quantity-proposals/", headers=auth)
+    assert proposals.json()["rows"] == []
+
+    # The import lands and the version turns ready.
+    e = await client.post(
+        f"/api/v1/bim_hub/models/{v2}/elements/", json={"elements": [_elem("X", volume=12, ghash="x2")]}, headers=auth
+    )
+    assert e.status_code == 201, e.text
+    ready = await client.patch(f"/api/v1/bim_hub/{v2}", json={"status": "ready"}, headers=auth)
+    assert ready.status_code == 200, ready.text
+
+    scan = await client.post(f"/api/v1/boq/boqs/{s['boq_id']}/change-flags/scan/", headers=auth)
+    assert scan.json()["created"] == 1
+    flag = (await client.get(f"/api/v1/boq/boqs/{s['boq_id']}/change-flags/", headers=auth)).json()["flags"][0]
+    assert flag["source_key"] == f"bim:{v2}"
+    assert flag["reason"] == "elements_modified"
+    assert flag["details"]["deleted_count"] == 0
+    rows = (await client.get(f"/api/v1/boq/boqs/{s['boq_id']}/bim-quantity-proposals/", headers=auth)).json()["rows"]
+    assert len(rows) == 1
+    assert (rows[0]["status"], _d(rows[0]["new_model_quantity"])) == ("changed", Decimal("12"))
+
+
+@pytest.mark.asyncio
+async def test_a_failed_version_is_walked_through_to_a_later_good_one(client: AsyncClient, auth: dict[str, str]):
+    s = await _one_line(client, auth)
+    v2, _ = await _model(
+        client, auth, s["project_id"], version="2", parent_model_id=s["v1"], elements=[], status="error"
+    )
+    v3, _ = await _model(
+        client, auth, s["project_id"], version="3", parent_model_id=v2, elements=[_elem("X", volume=11, ghash="x3")]
+    )
+    rows = (await client.get(f"/api/v1/boq/boqs/{s['boq_id']}/bim-quantity-proposals/", headers=auth)).json()["rows"]
+    assert len(rows) == 1
+    assert rows[0]["new_model_id"] == v3
+    assert _d(rows[0]["new_model_quantity"]) == Decimal("11")
+    # And a failed newest version leaves the last good one as the tip.
+    await _model(client, auth, s["project_id"], version="4", parent_model_id=v3, elements=[], status="error")
+    rows = (await client.get(f"/api/v1/boq/boqs/{s['boq_id']}/bim-quantity-proposals/", headers=auth)).json()["rows"]
+    assert [r["new_model_id"] for r in rows] == [v3]
+
+
+@pytest.mark.asyncio
+async def test_bim_version_event_for_a_model_not_ready_writes_nothing(client: AsyncClient, auth: dict[str, str]):
+    from app.core.events import event_bus
+
+    s = await _one_line(client, auth)
+    v2, _ = await _model(
+        client, auth, s["project_id"], version="2", parent_model_id=s["v1"], elements=[], status="processing"
+    )
+    await event_bus.publish(
+        "boq.positions.bim_version_flagged",
+        {
+            "project_id": s["project_id"],
+            "old_model_id": s["v1"],
+            "new_model_id": v2,
+            "modified_element_count": 0,
+            "deleted_element_count": 1,
+            "affected_position_ids": [s["pos"]],
+        },
+        source_module="test",
+    )
+    summary = await client.get(f"/api/v1/boq/boqs/{s['boq_id']}/change-flags/summary/", headers=auth)
+    assert summary.json()["open_count"] == 0
+
+
+# ── The baseline moves with what was accepted ─────────────────────────────
+
+
+async def _accept_all(client: AsyncClient, auth: dict[str, str], boq_id: str) -> dict:
+    rows = (await client.get(f"/api/v1/boq/boqs/{boq_id}/bim-quantity-proposals/", headers=auth)).json()["rows"]
+    ids = [r["position_id"] for r in rows if r["appliable"]]
+    assert ids, rows
+    resp = await client.post(
+        f"/api/v1/boq/boqs/{boq_id}/bim-quantity-proposals/apply/", json={"position_ids": ids}, headers=auth
+    )
+    assert resp.status_code == 200, resp.text
+    return resp.json()
+
+
+@pytest.mark.asyncio
+async def test_a_design_revert_after_an_accepted_version_is_proposed(client: AsyncClient, auth: dict[str, str]):
+    """v1 10, v2 12 accepted, v3 back to 10: the line holds 12 and must come back down.
+
+    Compared with v1, v3 looks unchanged and nothing would be said at all.
+    """
+    s = await _one_line(client, auth, volume=10, rate=10)
+    v2, _ = await _model(
+        client,
+        auth,
+        s["project_id"],
+        version="2",
+        parent_model_id=s["v1"],
+        elements=[_elem("X", volume=12, ghash="x2")],
+    )
+    applied = await _accept_all(client, auth, s["boq_id"])
+    assert applied["applied"] == 1
+    assert _d((await _positions(client, auth, s["boq_id"]))[s["pos"]]["quantity"]) == Decimal("12")
+
+    # Accepting without a check first still records the version as caught up with.
+    first = await client.post(f"/api/v1/boq/boqs/{s['boq_id']}/change-flags/scan/", headers=auth)
+    assert first.json()["created"] == 0
+    reviewed = (await client.get(f"/api/v1/boq/boqs/{s['boq_id']}/change-flags/?status=reviewed", headers=auth)).json()
+    assert [f["source_key"] for f in reviewed["flags"]] == [f"bim:{v2}"]
+    assert reviewed["flags"][0]["review_note"] == "quantity_updated_from_model"
+
+    v3, _ = await _model(
+        client, auth, s["project_id"], version="3", parent_model_id=v2, elements=[_elem("X", volume=10, ghash="x1")]
+    )
+    rows = (await client.get(f"/api/v1/boq/boqs/{s['boq_id']}/bim-quantity-proposals/", headers=auth)).json()["rows"]
+    assert len(rows) == 1, rows
+    row = rows[0]
+    assert _d(row["previous_model_quantity"]) == Decimal("12")
+    assert _d(row["new_model_quantity"]) == Decimal("10")
+    assert _d(row["delta"]) == Decimal("-2")
+    assert _d(row["total_delta"]) == Decimal("-20")
+    assert row["manual_override"] is False
+    assert row["model_id"] == v2
+    assert row["new_model_id"] == v3
+
+    scan = await client.post(f"/api/v1/boq/boqs/{s['boq_id']}/change-flags/scan/", headers=auth)
+    assert scan.json()["created"] == 1
+    flag = (await client.get(f"/api/v1/boq/boqs/{s['boq_id']}/change-flags/?status=open", headers=auth)).json()[
+        "flags"
+    ][0]
+    assert flag["source_key"] == f"bim:{v3}"
+    assert flag["details"]["old_model_ids"] == [v2]
+
+
+@pytest.mark.asyncio
+async def test_a_value_the_panel_wrote_is_not_called_a_hand_edit(client: AsyncClient, auth: dict[str, str]):
+    s = await _one_line(client, auth, volume=10, rate=10)
+    v2, _ = await _model(
+        client,
+        auth,
+        s["project_id"],
+        version="2",
+        parent_model_id=s["v1"],
+        elements=[_elem("X", volume=12, ghash="x2")],
+    )
+    await _accept_all(client, auth, s["boq_id"])
+    # A grid save that sends back a metadata copy without the provenance must
+    # not send the baseline back to v1: the closed flag still records v2.
+    patched = await client.patch(f"/api/v1/boq/positions/{s['pos']}", json={"metadata": {}}, headers=auth)
+    assert patched.status_code == 200, patched.text
+    await _model(
+        client, auth, s["project_id"], version="3", parent_model_id=v2, elements=[_elem("X", volume=14, ghash="x3")]
+    )
+    rows = (await client.get(f"/api/v1/boq/boqs/{s['boq_id']}/bim-quantity-proposals/", headers=auth)).json()["rows"]
+    assert len(rows) == 1
+    assert _d(rows[0]["previous_model_quantity"]) == Decimal("12")
+    assert _d(rows[0]["new_model_quantity"]) == Decimal("14")
+    assert rows[0]["manual_override"] is False
+
+
+@pytest.mark.asyncio
+async def test_an_accepted_deletion_is_not_flagged_on_every_later_version(client: AsyncClient, auth: dict[str, str]):
+    project_id = await _project(client, auth)
+    boq_id = await _boq(client, auth, project_id)
+    v1, ids = await _model(
+        client,
+        auth,
+        project_id,
+        version="1",
+        elements=[_elem("D1", ghash="d1", element_type="door"), _elem("D2", ghash="d2", element_type="door")],
+    )
+    pos = await _position(client, auth, boq_id, ordinal="1", description="Doors", unit="pcs", unit_rate=400)
+    await _link(client, auth, pos["id"], ids["D1"])
+    await _link(client, auth, pos["id"], ids["D2"])
+    v2, _ = await _model(
+        client,
+        auth,
+        project_id,
+        version="2",
+        parent_model_id=v1,
+        elements=[_elem("D1", ghash="d1", element_type="door")],
+    )
+    await _accept_all(client, auth, boq_id)
+    assert _d((await _positions(client, auth, boq_id))[pos["id"]]["quantity"]) == Decimal("1")
+
+    await _model(
+        client,
+        auth,
+        project_id,
+        version="3",
+        parent_model_id=v2,
+        elements=[_elem("D1", ghash="d1", element_type="door")],
+    )
+    scan = await client.post(f"/api/v1/boq/boqs/{boq_id}/change-flags/scan/", headers=auth)
+    assert scan.json()["created"] == 0
+    proposals = await client.get(f"/api/v1/boq/boqs/{boq_id}/bim-quantity-proposals/", headers=auth)
+    assert proposals.json()["rows"] == []
+
+
+@pytest.mark.asyncio
+async def test_a_reviewed_flag_moves_the_check_but_not_the_quantities_tab(client: AsyncClient, auth: dict[str, str]):
+    """Mark all reviewed, then open Model quantities: the proposal is still there.
+
+    The next check compares with the version the estimator looked at, so a v3
+    identical to v2 raises nothing new.
+    """
+    s = await _one_line(client, auth, volume=5, rate=10)
+    v2, _ = await _model(
+        client, auth, s["project_id"], version="2", parent_model_id=s["v1"], elements=[_elem("X", volume=7, ghash="x2")]
+    )
+    scan = await client.post(f"/api/v1/boq/boqs/{s['boq_id']}/change-flags/scan/", headers=auth)
+    assert scan.json()["created"] == 1
+    await client.post(f"/api/v1/boq/boqs/{s['boq_id']}/change-flags/review/", json={"all_open": True}, headers=auth)
+
+    rows = (await client.get(f"/api/v1/boq/boqs/{s['boq_id']}/bim-quantity-proposals/", headers=auth)).json()["rows"]
+    assert len(rows) == 1
+    assert (_d(rows[0]["previous_model_quantity"]), _d(rows[0]["new_model_quantity"])) == (Decimal("5"), Decimal("7"))
+
+    v3, _ = await _model(
+        client, auth, s["project_id"], version="3", parent_model_id=v2, elements=[_elem("X", volume=7, ghash="x2")]
+    )
+    again = await client.post(f"/api/v1/boq/boqs/{s['boq_id']}/change-flags/scan/", headers=auth)
+    assert again.json()["created"] == 0
+    rows = (await client.get(f"/api/v1/boq/boqs/{s['boq_id']}/bim-quantity-proposals/", headers=auth)).json()["rows"]
+    assert [(r["new_model_id"], _d(r["new_model_quantity"])) for r in rows] == [(v3, Decimal("7"))]
+
+    # Reopening the flag is a person saying "look again": the check compares
+    # from v1 once more and v3 gets its own flag.
+    flag_id = (await client.get(f"/api/v1/boq/boqs/{s['boq_id']}/change-flags/", headers=auth)).json()["flags"][0]["id"]
+    await client.post(
+        f"/api/v1/boq/boqs/{s['boq_id']}/change-flags/review/",
+        json={"flag_ids": [flag_id], "status": "open"},
+        headers=auth,
+    )
+    third = await client.post(f"/api/v1/boq/boqs/{s['boq_id']}/change-flags/scan/", headers=auth)
+    assert third.json()["created"] == 1
+
+
+# ── Quantity-map rules are re-run, not only summed over old links ──────────
+
+
+async def _rule(client: AsyncClient, auth: dict[str, str], project_id: str, kind: str, target: dict, **extra) -> str:
+    body = {
+        "project_id": project_id,
+        "name": f"Rule {kind}",
+        "element_type_filter": kind,
+        "quantity_source": "area_m2",
+        "multiplier": "1",
+        "waste_factor_pct": "0",
+        "unit": "m2",
+        "boq_target": target,
+    }
+    body.update(extra)
+    resp = await client.post("/api/v1/bim_hub/quantity-maps/", json=body, headers=auth)
+    assert resp.status_code == 201, resp.text
+    return resp.json()["id"]
+
+
+async def _apply_rules(client: AsyncClient, auth: dict[str, str], model_id: str, boq_id: str) -> dict:
+    resp = await client.post(
+        "/api/v1/bim_hub/quantity-maps/apply/",
+        json={"model_id": model_id, "dry_run": False, "target_boq_id": boq_id},
+        headers=auth,
+    )
+    assert resp.status_code == 200, resp.text
+    return resp.json()
+
+
+def _area(sid: str, kind: str, area: float, ghash: str) -> dict:
+    return {"stable_id": sid, "element_type": kind, "quantities": {"area_m2": area}, "geometry_hash": ghash}
+
+
+@pytest.mark.asyncio
+async def test_new_elements_matching_the_rule_are_counted(client: AsyncClient, auth: dict[str, str]):
+    """v2 adds a screed zone that matches the rule; nothing links it yet, it still counts."""
+    project_id = await _project(client, auth)
+    boq_id = await _boq(client, auth, project_id)
+    kind = f"screed{uuid.uuid4().hex[:6]}"
+    v1, _ = await _model(
+        client, auth, project_id, version="1", elements=[_area("R1", kind, 10, "a"), _area("R2", kind, 20, "b")]
+    )
+    await _rule(client, auth, project_id, kind, {"auto_create": True}, waste_factor_pct="5")
+    assert (await _apply_rules(client, auth, v1, boq_id))["positions_created"] == 1
+
+    v2, _ = await _model(
+        client,
+        auth,
+        project_id,
+        version="2",
+        parent_model_id=v1,
+        elements=[_area("R1", kind, 10, "a"), _area("R2", kind, 20, "b"), _area("R3", kind, 10, "c")],
+    )
+    rows = (await client.get(f"/api/v1/boq/boqs/{boq_id}/bim-quantity-proposals/", headers=auth)).json()["rows"]
+    assert len(rows) == 1, rows
+    row = rows[0]
+    assert (row["method"], row["basis"], row["manual_override"]) == ("rule", "model_change", False)
+    assert _d(row["previous_model_quantity"]) == Decimal("31.5")
+    assert _d(row["new_model_quantity"]) == Decimal("42")
+    assert row["added_count"] == 1
+
+    scan = await client.post(f"/api/v1/boq/boqs/{boq_id}/change-flags/scan/", headers=auth)
+    assert scan.json()["created"] == 1
+    flag = (await client.get(f"/api/v1/boq/boqs/{boq_id}/change-flags/", headers=auth)).json()["flags"][0]
+    assert flag["reason"] == "elements_added"
+    assert flag["details"]["added_stable_ids"] == ["R3"]
+    assert flag["source_key"] == f"bim:{v2}"
+
+
+@pytest.mark.asyncio
+async def test_a_rule_aimed_at_an_existing_position_offers_its_result(client: AsyncClient, auth: dict[str, str]):
+    """A rule pointed at a position links elements but sets no quantity.
+
+    Its result is offered on the first model version, without waiting for a
+    second one, and once accepted the position is judged model against model.
+    """
+    project_id = await _project(client, auth)
+    boq_id = await _boq(client, auth, project_id)
+    kind = f"tile{uuid.uuid4().hex[:6]}"
+    target = await _position(client, auth, boq_id, ordinal="7", description="Tiling", unit="m2", unit_rate=10)
+    other = await _position(client, auth, boq_id, ordinal="8", description="Untouched", unit="m2", unit_rate=3)
+    v1, _ = await _model(
+        client, auth, project_id, version="1", elements=[_area("T1", kind, 12, "a"), _area("T2", kind, 18, "b")]
+    )
+    await _rule(client, auth, project_id, kind, {"position_id": target["id"]})
+    applied = await _apply_rules(client, auth, v1, boq_id)
+    assert applied["links_created"] == 2
+    before = await _positions(client, auth, boq_id)
+    assert _d(before[target["id"]]["quantity"]) == Decimal("0")
+
+    body = (await client.get(f"/api/v1/boq/boqs/{boq_id}/bim-quantity-proposals/", headers=auth)).json()
+    assert [r["position_id"] for r in body["rows"]] == [target["id"]]
+    row = body["rows"][0]
+    assert (row["method"], row["basis"], row["appliable"], row["manual_override"]) == (
+        "rule",
+        "rule_result",
+        True,
+        False,
+    )
+    assert _d(row["new_model_quantity"]) == Decimal("30")
+    assert _d(row["total_delta"]) == Decimal("300")
+
+    await _accept_all(client, auth, boq_id)
+    after = await _positions(client, auth, boq_id)
+    assert _d(after[target["id"]]["quantity"]) == Decimal("30")
+    assert _d(after[target["id"]]["total"]) == Decimal("300")
+    for fld in ("quantity", "total", "version"):
+        assert after[other["id"]][fld] == before[other["id"]][fld]
+    left = await client.get(f"/api/v1/boq/boqs/{boq_id}/bim-quantity-proposals/", headers=auth)
+    assert left.json()["rows"] == []
+
+    # A hand edit after the rule result was taken is the estimator's call, and
+    # an unchanged model does not argue with it.
+    await client.patch(f"/api/v1/boq/positions/{target['id']}", json={"quantity": 33}, headers=auth)
+    assert (await client.get(f"/api/v1/boq/boqs/{boq_id}/bim-quantity-proposals/", headers=auth)).json()["rows"] == []
+
+    await _model(
+        client,
+        auth,
+        project_id,
+        version="2",
+        parent_model_id=v1,
+        elements=[_area("T1", kind, 12, "a"), _area("T2", kind, 18, "b"), _area("T3", kind, 5, "c")],
+    )
+    rows = (await client.get(f"/api/v1/boq/boqs/{boq_id}/bim-quantity-proposals/", headers=auth)).json()["rows"]
+    assert len(rows) == 1
+    assert rows[0]["basis"] == "model_change"
+    assert _d(rows[0]["previous_model_quantity"]) == Decimal("30")
+    assert _d(rows[0]["new_model_quantity"]) == Decimal("35")
+    assert rows[0]["manual_override"] is True
+
+
+@pytest.mark.asyncio
+async def test_a_switched_off_rule_keeps_its_arithmetic_on_linked_elements(client: AsyncClient, auth: dict[str, str]):
+    project_id = await _project(client, auth)
+    boq_id = await _boq(client, auth, project_id)
+    kind = f"render{uuid.uuid4().hex[:6]}"
+    v1, _ = await _model(client, auth, project_id, version="1", elements=[_area("P1", kind, 10, "a")])
+    rule_id = await _rule(client, auth, project_id, kind, {"auto_create": True}, multiplier="2")
+    await _apply_rules(client, auth, v1, boq_id)
+    off = await client.patch(f"/api/v1/bim_hub/quantity-maps/{rule_id}", json={"is_active": False}, headers=auth)
+    assert off.status_code == 200, off.text
+    await _model(
+        client,
+        auth,
+        project_id,
+        version="2",
+        parent_model_id=v1,
+        elements=[_area("P1", kind, 12, "b"), _area("P2", kind, 50, "c")],
+    )
+    rows = (await client.get(f"/api/v1/boq/boqs/{boq_id}/bim-quantity-proposals/", headers=auth)).json()["rows"]
+    assert len(rows) == 1
+    # The linked element only, doubled by the rule; the new P2 is not the
+    # switched-off rule's to claim.
+    assert _d(rows[0]["previous_model_quantity"]) == Decimal("20")
+    assert _d(rows[0]["new_model_quantity"]) == Decimal("24")
 
 
 # ── Tenancy ───────────────────────────────────────────────────────────────

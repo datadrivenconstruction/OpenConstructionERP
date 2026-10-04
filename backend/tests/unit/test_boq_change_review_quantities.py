@@ -106,7 +106,13 @@ def test_rule_with_unparseable_factors_has_no_figure():
 
 
 def _pair(old: _Elem, new: _Elem | None) -> _Pair:
-    return _Pair(stable_id=old.stable_id, old=old, new=new, tip=_Tip(tip_id=_MODEL_V2, name="M", version="2"))
+    return _Pair(
+        stable_id=old.stable_id,
+        old=old,
+        new=new,
+        tip=_Tip(tip_id=_MODEL_V2, name="M", version="2"),
+        baseline_model_id=old.model_id,
+    )
 
 
 def test_pair_detects_deleted_modified_and_unchanged():
@@ -115,15 +121,51 @@ def test_pair_detects_deleted_modified_and_unchanged():
     assert _pair(old, _e("w", {"volume_m3": 2}, model=_MODEL_V2, ghash="a")).modified
     assert _pair(old, _e("w", {"volume_m3": 1}, model=_MODEL_V2, ghash="b")).modified
     same = _pair(old, _e("w", {"volume_m3": 1}, model=_MODEL_V2, ghash="a"))
-    assert not same.modified and not same.deleted and same.crosses_version
+    assert not same.modified and not same.deleted and not same.added and same.crosses_version
 
 
 def test_element_already_in_the_newest_version_is_never_a_change():
     current = _e("w", {"volume_m3": 1}, model=_MODEL_V2)
-    pair = _Pair(stable_id="w", old=current, new=current, tip=_Tip(tip_id=_MODEL_V2, name="M", version="2"))
+    pair = _Pair(
+        stable_id="w",
+        old=current,
+        new=current,
+        tip=_Tip(tip_id=_MODEL_V2, name="M", version="2"),
+        baseline_model_id=_MODEL_V2,
+    )
     assert not pair.crosses_version
     assert not pair.modified
     assert not pair.deleted
+
+
+def test_a_deletion_already_caught_up_with_is_not_reported_again():
+    """Gone at the baseline and still gone: nothing to say about it."""
+    tip = _Tip(tip_id=uuid.uuid4(), name="M", version="3")
+    pair = _Pair(stable_id="w", old=None, new=None, tip=tip, baseline_model_id=_MODEL_V2)
+    assert pair.crosses_version
+    assert not pair.deleted and not pair.modified and not pair.added
+
+
+def test_an_element_back_after_a_caught_up_deletion_is_added():
+    tip_id = uuid.uuid4()
+    back = _e("w", {"volume_m3": 1}, model=tip_id)
+    pair = _Pair(
+        stable_id="w", old=None, new=back, tip=_Tip(tip_id=tip_id, name="M", version="3"), baseline_model_id=_MODEL_V2
+    )
+    assert pair.added
+    assert not pair.deleted and not pair.modified
+
+
+def test_baseline_in_a_later_version_compares_from_there():
+    """Accepted v2: v3 equal to v2 is no change, even though v1 differs from both."""
+    tip_id = uuid.uuid4()
+    at_v2 = _e("w", {"volume_m3": 12}, model=_MODEL_V2, ghash="b")
+    at_v3 = _e("w", {"volume_m3": 12}, model=tip_id, ghash="b")
+    pair = _Pair(
+        stable_id="w", old=at_v2, new=at_v3, tip=_Tip(tip_id=tip_id, name="M", version="3"), baseline_model_id=_MODEL_V2
+    )
+    assert pair.crosses_version
+    assert not pair.modified
 
 
 # ── keys ──────────────────────────────────────────────────────────────────

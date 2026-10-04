@@ -97,6 +97,14 @@ _UNIT_TO_QUANTITY_KEYS: dict[str, tuple[str, ...]] = {
 }
 _TONNE_UNITS = frozenset({"t", "to"})
 
+# A model version counts as the newest one only once its elements are in.
+# ``ready`` and its synonyms are what the converter pipeline writes when it
+# finishes; ``active`` is what ``BIMHubService.bulk_import_elements`` writes
+# after a direct element import. Everything else (``processing``, ``error``,
+# ``needs_converter``, ``empty_model``, and ``degraded``, which has geometry
+# but no quantities) is not a version a quantity can be compared with.
+_USABLE_MODEL_STATUSES = frozenset({"ready", "complete", "completed", "done", "active"})
+
 
 # ── Small helpers ─────────────────────────────────────────────────────────
 
@@ -323,7 +331,9 @@ async def handle_bim_version_flagged(event: Any) -> None:
     async with async_session_factory() as session:
         row = (
             await session.execute(
-                select(BIMModel.project_id, BIMModel.name, BIMModel.version).where(BIMModel.id == new_model_id)
+                select(BIMModel.project_id, BIMModel.name, BIMModel.version, BIMModel.status).where(
+                    BIMModel.id == new_model_id
+                )
             )
         ).first()
         if row is None or row[0] != project_id:
@@ -332,6 +342,12 @@ async def handle_bim_version_flagged(event: Any) -> None:
                 new_model_id,
                 project_id,
             )
+            return
+        if str(row[3] or "").strip().lower() not in _USABLE_MODEL_STATUSES:
+            # Writing the flag now would burn the version's key on counts
+            # taken before its elements exist. The scan raises it once the
+            # import has finished.
+            logger.info("bim_version_flagged: model %s is not ready (%s), ignored", new_model_id, row[3])
             return
         details = {
             "old_model_ids": [str(old_model_id)] if old_model_id else [],
@@ -378,6 +394,24 @@ class _Elem:
     geometry_hash: str | None
     quantities: dict[str, Any]
     properties: dict[str, Any]
+    element_type: str | None = None
+
+
+def _elem_changed(old: _Elem, new: _Elem) -> bool:
+    return old.geometry_hash != new.geometry_hash or (old.quantities or {}) != (new.quantities or {})
+
+
+def _row_elem(row: Sequence[Any]) -> _Elem:
+    """Build an element from ``(id, model_id, stable_id, geometry_hash, quantities, properties, element_type)``."""
+    return _Elem(
+        element_id=row[0],
+        model_id=row[1],
+        stable_id=str(row[2]),
+        geometry_hash=row[3],
+        quantities=row[4] if isinstance(row[4], dict) else {},
+        properties=row[5] if isinstance(row[5], dict) else {},
+        element_type=row[6],
+    )
 
 
 @dataclass
@@ -389,7 +423,7 @@ class _Link:
 
 @dataclass
 class _Tip:
-    """Newest version of a linked model, already checked to be in the project."""
+    """Newest ready version of a linked model, already checked to be in the project."""
 
     tip_id: uuid.UUID
     name: str
@@ -398,28 +432,58 @@ class _Tip:
 
 @dataclass
 class _Pair:
-    """One linked element and its counterpart in the newest model version."""
+    """One linked element at its baseline and in the newest ready model version.
+
+    The baseline is the newest version of the chain this position has already
+    caught up with: the linked model itself, or a later version whose quantity
+    was accepted (and, for change flags, a later version whose flag a person
+    marked reviewed). ``old`` is the element in the baseline version and is
+    ``None`` when the element was already gone there, so a deletion someone
+    accepted is not reported again on every later version.
+    """
 
     stable_id: str
-    old: _Elem
+    old: _Elem | None
     new: _Elem | None
     tip: _Tip
+    baseline_model_id: uuid.UUID
 
     @property
     def crosses_version(self) -> bool:
-        return self.old.model_id != self.tip.tip_id
+        return self.baseline_model_id != self.tip.tip_id
 
     @property
     def deleted(self) -> bool:
-        return self.crosses_version and self.new is None
+        return self.crosses_version and self.old is not None and self.new is None
+
+    @property
+    def added(self) -> bool:
+        return self.crosses_version and self.old is None and self.new is not None
 
     @property
     def modified(self) -> bool:
-        if not self.crosses_version or self.new is None:
+        if not self.crosses_version or self.old is None or self.new is None:
             return False
-        return self.old.geometry_hash != self.new.geometry_hash or (self.old.quantities or {}) != (
-            self.new.quantities or {}
-        )
+        return _elem_changed(self.old, self.new)
+
+
+@dataclass
+class _RuleDiff:
+    """A quantity-map rule evaluated on the baseline and on the newest version.
+
+    The rule is run against every element of each model, the way
+    ``BIMHubService.apply_quantity_maps`` runs it, so an element the new
+    version adds that matches the rule counts even though nothing links it.
+    """
+
+    previous: Decimal | None
+    proposed: Decimal | None
+    base_count: int
+    tip_count: int
+    modified: list[str]
+    deleted: list[str]
+    added: list[str]
+    crosses_version: bool
 
 
 def unit_method_quantity(unit: str, elements: Sequence[_Elem]) -> Decimal | None:
@@ -508,6 +572,27 @@ class _PositionLinks:
     position: _PosRow
     links: list[_Link]
     pairs: list[_Pair]
+    # Per newest model version: (baseline model id, tip) for the position as a
+    # whole, the input of a rule evaluated over whole models.
+    baselines: dict[uuid.UUID, tuple[uuid.UUID, _Tip]] = field(default_factory=dict)
+    # The position took a quantity from this panel before (any chain).
+    applied_before: bool = False
+    rule: Any = None
+    # "rule_full": re-run the active rule over whole models; "rule_linked":
+    # the rule's arithmetic over the linked elements only (inactive rule);
+    # "unit": the BIM Hub's unit-to-dimension rule over the linked elements.
+    method: str = "unit"
+    # Set for "rule_full": the rule result has never become this position's
+    # quantity, so the proposal is rule result against stored quantity.
+    rule_not_applied: bool = False
+    rule_diff: _RuleDiff | None = None
+
+
+# Acknowledgement modes for the baseline. Proposals move the baseline only
+# when a quantity was accepted; flags also when a person reviewed the flag.
+_ACK_APPLIED = "applied"
+_ACK_REVIEWED = "reviewed"
+_APPLIED_NOTE = "quantity_updated_from_model"
 
 
 class ChangeReviewService:
@@ -660,9 +745,186 @@ class ChangeReviewService:
 
     # ── BIM link context ──────────────────────────────────────────────────
 
-    async def _load_bim_context(self, boq: _BoqRef, *, only: set[uuid.UUID] | None = None) -> list[_PositionLinks]:
-        """Positions of the BOQ with BIM Hub links, paired against the newest model."""
-        from app.modules.bim_hub.models import BIMElement, BIMModel, BOQElementLink
+    async def _walk_chain(
+        self,
+        start: uuid.UUID,
+        project_id: uuid.UUID,
+        info_cache: dict[uuid.UUID, tuple[uuid.UUID, str, str, str] | None],
+        succ_cache: dict[uuid.UUID, uuid.UUID | None],
+    ) -> tuple[_Tip, dict[uuid.UUID, int]] | None:
+        """The newest ready version of ``start``'s chain, and each member's distance from it.
+
+        Follows ``parent_model_id`` forward the way
+        ``BOQService._resolve_latest_model_id`` does (newest child by creation
+        time, with a visited guard), but the tip is the newest member whose
+        import finished. A version still processing, or one that failed, has
+        no elements yet: taking it as the tip would read every linked element
+        as deleted and record that under a flag key that never gets a second
+        chance once the import completes. A failed version in the middle is
+        walked through, so a later good upload is still found. ``start``
+        itself always counts, since its elements are the ones linked.
+
+        The walk stops at a member outside the BOQ's project. Returns ``None``
+        when ``start`` is missing or belongs to another project.
+        """
+        from app.modules.bim_hub.models import BIMModel
+
+        async def info(mid: uuid.UUID) -> tuple[uuid.UUID, str, str, str] | None:
+            if mid not in info_cache:
+                row = (
+                    await self.session.execute(
+                        select(BIMModel.project_id, BIMModel.status, BIMModel.name, BIMModel.version).where(
+                            BIMModel.id == mid
+                        )
+                    )
+                ).first()
+                info_cache[mid] = None if row is None else (row[0], str(row[1] or ""), row[2] or "", str(row[3] or ""))
+            return info_cache[mid]
+
+        first = await info(start)
+        if first is None or first[0] != project_id:
+            return None
+        path = [start]
+        seen = {start}
+        tip_index = 0
+        current = start
+        while True:
+            if current not in succ_cache:
+                row = (
+                    await self.session.execute(
+                        select(BIMModel.id)
+                        .where(BIMModel.parent_model_id == current)
+                        .order_by(BIMModel.created_at.desc())
+                        .limit(1)
+                    )
+                ).first()
+                succ_cache[current] = row[0] if row is not None else None
+            successor = succ_cache[current]
+            if successor is None or successor in seen:
+                break
+            successor_info = await info(successor)
+            if successor_info is None:
+                break
+            if successor_info[0] != project_id:
+                logger.warning(
+                    "Model %s has a newer version %s outside project %s; ignored",
+                    current,
+                    successor,
+                    project_id,
+                )
+                break
+            seen.add(successor)
+            path.append(successor)
+            if successor_info[1].strip().lower() in _USABLE_MODEL_STATUSES:
+                tip_index = len(path) - 1
+            current = successor
+        tip_id = path[tip_index]
+        tip_info = await info(tip_id)
+        assert tip_info is not None  # noqa: S101 - every path member was read above
+        distance = {mid: tip_index - index for index, mid in enumerate(path[: tip_index + 1])}
+        return _Tip(tip_id=tip_id, name=tip_info[2], version=tip_info[3]), distance
+
+    async def _acknowledged_models(
+        self, boq_id: uuid.UUID, positions: dict[uuid.UUID, _PosRow], mode: str
+    ) -> tuple[dict[uuid.UUID, set[uuid.UUID]], set[uuid.UUID]]:
+        """Model versions each position has caught up with, and who took a quantity here.
+
+        A version is caught up with when its quantity was accepted through
+        this panel: recorded both in the position's provenance
+        (``metadata.bim_quantity_update_history``) and as a reviewed flag with
+        the note ``quantity_updated_from_model``. Either is enough, so a grid
+        edit that rewrites metadata from a stale copy does not send the
+        baseline back to the first version. In ``reviewed`` mode, used by
+        the scan, a BIM flag a person marked reviewed counts as well: the
+        next version is compared with the one they already looked at.
+        """
+        applied: dict[uuid.UUID, set[uuid.UUID]] = {}
+        acknowledged: dict[uuid.UUID, set[uuid.UUID]] = {}
+        for pid, position in positions.items():
+            meta = position.metadata_ or {}
+            entries = list(meta.get("bim_quantity_update_history") or [])
+            current = meta.get("bim_quantity_update")
+            if isinstance(current, dict):
+                entries.append(current)
+            for entry in entries:
+                if not isinstance(entry, dict):
+                    continue
+                raw_ids = entry.get("new_model_ids")
+                if not isinstance(raw_ids, list):
+                    raw_ids = [entry.get("new_model_id")]
+                for raw in raw_ids:
+                    mid = _parse_uuid(raw)
+                    if mid is not None:
+                        applied.setdefault(pid, set()).add(mid)
+        for chunk in _chunks(list(positions)):
+            rows = await self.session.execute(
+                select(BOQChangeFlag.position_id, BOQChangeFlag.source_id, BOQChangeFlag.review_note).where(
+                    BOQChangeFlag.boq_id == boq_id,
+                    BOQChangeFlag.position_id.in_(list(chunk)),
+                    BOQChangeFlag.source_type == SOURCE_BIM_VERSION,
+                    BOQChangeFlag.status == FLAG_STATUS_REVIEWED,
+                )
+            )
+            for pid, source_id, note in rows:
+                mid = _parse_uuid(source_id)
+                if mid is None:
+                    continue
+                if note == _APPLIED_NOTE:
+                    applied.setdefault(pid, set()).add(mid)
+                if mode == _ACK_REVIEWED:
+                    acknowledged.setdefault(pid, set()).add(mid)
+        for pid, mids in applied.items():
+            acknowledged.setdefault(pid, set()).update(mids)
+        return acknowledged, set(applied)
+
+    async def _elements_by_stable_id(self, model_id: uuid.UUID, stable_ids: Iterable[str]) -> dict[str, _Elem]:
+        from app.modules.bim_hub.models import BIMElement
+
+        found: dict[str, _Elem] = {}
+        for chunk in _chunks(sorted(set(stable_ids))):
+            rows = await self.session.execute(
+                select(
+                    BIMElement.id,
+                    BIMElement.model_id,
+                    BIMElement.stable_id,
+                    BIMElement.geometry_hash,
+                    BIMElement.quantities,
+                    BIMElement.properties,
+                    BIMElement.element_type,
+                ).where(BIMElement.model_id == model_id, BIMElement.stable_id.in_(list(chunk)))
+            )
+            for row in rows:
+                found.setdefault(str(row[2]), _row_elem(row))
+        return found
+
+    async def _all_elements(self, model_id: uuid.UUID, cache: dict[uuid.UUID, list[_Elem]]) -> list[_Elem]:
+        """Every element of a model, read once per request (a rule runs over all of them)."""
+        from app.modules.bim_hub.models import BIMElement
+
+        if model_id not in cache:
+            rows = await self.session.execute(
+                select(
+                    BIMElement.id,
+                    BIMElement.model_id,
+                    BIMElement.stable_id,
+                    BIMElement.geometry_hash,
+                    BIMElement.quantities,
+                    BIMElement.properties,
+                    BIMElement.element_type,
+                ).where(BIMElement.model_id == model_id)
+            )
+            cache[model_id] = [_row_elem(row) for row in rows]
+        return cache[model_id]
+
+    async def _load_bim_context(
+        self,
+        boq: _BoqRef,
+        *,
+        only: set[uuid.UUID] | None = None,
+        ack_mode: str = _ACK_APPLIED,
+    ) -> list[_PositionLinks]:
+        """Positions of the BOQ with BIM Hub links, each element paired baseline against newest version."""
+        from app.modules.bim_hub.models import BIMElement, BOQElementLink
 
         # Links first, joined to the bill, so a 5 000 line BOQ with ten linked
         # lines reads ten positions and not five thousand.
@@ -678,6 +940,7 @@ class ChangeReviewService:
                 BIMElement.geometry_hash,
                 BIMElement.quantities,
                 BIMElement.properties,
+                BIMElement.element_type,
             )
             .join(BIMElement, BIMElement.id == BOQElementLink.bim_element_id)
             .join(Position, Position.id == BOQElementLink.boq_position_id)
@@ -686,14 +949,7 @@ class ChangeReviewService:
         for row in link_rows:
             if only is not None and row[0] not in only:
                 continue
-            elem = _Elem(
-                element_id=row[3],
-                model_id=row[4],
-                stable_id=str(row[5]),
-                geometry_hash=row[6],
-                quantities=row[7] if isinstance(row[7], dict) else {},
-                properties=row[8] if isinstance(row[8], dict) else {},
-            )
+            elem = _row_elem(tuple(row)[3:])
             links_by_pos.setdefault(row[0], []).append(_Link(element=elem, link_type=row[1] or "", rule_id=row[2]))
         if not links_by_pos:
             return []
@@ -726,146 +982,242 @@ class ChangeReviewService:
                     sort_order=row[8] or 0,
                 )
 
-        # Resolve every linked model to the newest version of its chain, and
-        # refuse a chain that leaves the BOQ's project.
-        from app.modules.boq.service import BOQService
+        # Resolve every linked model to the newest ready version of its chain.
+        info_cache: dict[uuid.UUID, tuple[uuid.UUID, str, str, str] | None] = {}
+        succ_cache: dict[uuid.UUID, uuid.UUID | None] = {}
+        chain_of: dict[uuid.UUID, tuple[_Tip, dict[uuid.UUID, int]] | None] = {}
+        for mid in sorted({link.element.model_id for links in links_by_pos.values() for link in links}, key=str):
+            chain_of[mid] = await self._walk_chain(mid, boq.project_id, info_cache, succ_cache)
+        # Distance from the tip, merged over every chain that ends there.
+        distance: dict[uuid.UUID, dict[uuid.UUID, int]] = {}
+        tips: dict[uuid.UUID, _Tip] = {}
+        for chain in chain_of.values():
+            if chain is None:
+                continue
+            tip, dist = chain
+            tips[tip.tip_id] = tip
+            distance.setdefault(tip.tip_id, {}).update(dist)
 
-        boq_service = BOQService(self.session)
-        model_ids = {link.element.model_id for links in links_by_pos.values() for link in links}
-        model_info: dict[uuid.UUID, tuple[uuid.UUID, str, str, datetime | None]] = {}
-        for chunk in _chunks(list(model_ids)):
-            rows = await self.session.execute(
-                select(BIMModel.id, BIMModel.project_id, BIMModel.name, BIMModel.version, BIMModel.created_at).where(
-                    BIMModel.id.in_(list(chunk))
-                )
-            )
-            for row in rows:
-                model_info[row[0]] = (row[1], row[2] or "", str(row[3] or ""), row[4])
-        tips: dict[uuid.UUID, _Tip | None] = {}
-        for mid in model_ids:
-            info = model_info.get(mid)
-            if info is None or info[0] != boq.project_id:
-                tips[mid] = None
-                continue
-            tip_id, _version = await boq_service._resolve_latest_model_id(mid)
-            if tip_id == mid:
-                tips[mid] = _Tip(tip_id=mid, name=info[1], version=info[2])
-                continue
-            tip_row = (
-                await self.session.execute(
-                    select(BIMModel.project_id, BIMModel.name, BIMModel.version).where(BIMModel.id == tip_id)
-                )
-            ).first()
-            if tip_row is None or tip_row[0] != boq.project_id:
-                logger.warning(
-                    "Model %s resolves to version %s outside project %s; ignored",
-                    mid,
-                    tip_id,
-                    boq.project_id,
-                )
-                tips[mid] = None
-                continue
-            tips[mid] = _Tip(tip_id=tip_id, name=tip_row[1] or "", version=str(tip_row[2] or ""))
+        acknowledged, applied_before = await self._acknowledged_models(boq.id, by_id, ack_mode)
 
-        # One counterpart lookup per tip model, by stable id.
+        # Per position and stable id: the linked copy nearest the tip, and the
+        # baseline version (the newest of that copy and any version caught up
+        # with). Elements are then read once per (model, stable ids).
+        plans: dict[uuid.UUID, list[tuple[str, _Elem, uuid.UUID, uuid.UUID]]] = {}
+        baselines: dict[uuid.UUID, dict[uuid.UUID, uuid.UUID]] = {}
         wanted: dict[uuid.UUID, set[str]] = {}
-        for links in links_by_pos.values():
-            for link in links:
-                tip = tips.get(link.element.model_id)
-                if tip is not None:
-                    wanted.setdefault(tip.tip_id, set()).add(link.element.stable_id)
-        tip_elements: dict[uuid.UUID, dict[str, _Elem]] = {}
-        for tip_id, sids in wanted.items():
-            found: dict[str, _Elem] = {}
-            for chunk in _chunks(sorted(sids)):
-                rows = await self.session.execute(
-                    select(
-                        BIMElement.id,
-                        BIMElement.model_id,
-                        BIMElement.stable_id,
-                        BIMElement.geometry_hash,
-                        BIMElement.quantities,
-                        BIMElement.properties,
-                    ).where(BIMElement.model_id == tip_id, BIMElement.stable_id.in_(list(chunk)))
-                )
-                for row in rows:
-                    found.setdefault(
-                        str(row[2]),
-                        _Elem(
-                            element_id=row[0],
-                            model_id=row[1],
-                            stable_id=str(row[2]),
-                            geometry_hash=row[3],
-                            quantities=row[4] if isinstance(row[4], dict) else {},
-                            properties=row[5] if isinstance(row[5], dict) else {},
-                        ),
-                    )
-            tip_elements[tip_id] = found
-
-        epoch = datetime.min.replace(tzinfo=UTC)
-        result: list[_PositionLinks] = []
         for pid, links in links_by_pos.items():
-            position = by_id.get(pid)
-            if position is None:
+            if pid not in by_id:
                 continue
-            # One entry per (newest model, stable id). A position linked to
-            # both the v1 and the v2 copy of an element counts it once, from
-            # the copy nearest the newest version.
             chosen: dict[tuple[uuid.UUID, str], _Elem] = {}
             for link in links:
                 elem = link.element
-                tip = tips.get(elem.model_id)
-                if tip is None:
+                chain = chain_of.get(elem.model_id)
+                if chain is None:
                     continue
-                key = (tip.tip_id, elem.stable_id)
+                tip_id = chain[0].tip_id
+                key = (tip_id, elem.stable_id)
                 current = chosen.get(key)
-                if current is None:
+                dist = distance[tip_id]
+                if current is None or dist.get(elem.model_id, 1 << 30) < dist.get(current.model_id, 1 << 30):
                     chosen[key] = elem
-                    continue
-                if current.model_id == tip.tip_id:
-                    continue
-                newer = (model_info.get(elem.model_id, (None, "", "", None))[3] or epoch) > (
-                    model_info.get(current.model_id, (None, "", "", None))[3] or epoch
-                )
-                if elem.model_id == tip.tip_id or newer:
-                    chosen[key] = elem
-            pairs: list[_Pair] = []
+            acked = acknowledged.get(pid, set())
+            plan: list[tuple[str, _Elem, uuid.UUID, uuid.UUID]] = []
             for (tip_id, sid), elem in chosen.items():
-                tip = tips[elem.model_id]
-                assert tip is not None  # noqa: S101 - filtered above
-                pairs.append(
-                    _Pair(
-                        stable_id=sid,
-                        old=elem,
-                        new=elem if elem.model_id == tip_id else tip_elements.get(tip_id, {}).get(sid),
-                        tip=tip,
-                    )
+                dist = distance[tip_id]
+                baseline = elem.model_id
+                for mid in acked:
+                    if mid in dist and dist[mid] < dist.get(baseline, 1 << 30):
+                        baseline = mid
+                plan.append((sid, elem, tip_id, baseline))
+                if baseline != elem.model_id:
+                    wanted.setdefault(baseline, set()).add(sid)
+                if tip_id not in (elem.model_id, baseline):
+                    wanted.setdefault(tip_id, set()).add(sid)
+                # Position-wide baseline per tip: the newest of the pair baselines.
+                pos_base = baselines.setdefault(pid, {})
+                prior = pos_base.get(tip_id)
+                if prior is None or dist.get(baseline, 1 << 30) < dist.get(prior, 1 << 30):
+                    pos_base[tip_id] = baseline
+            plans[pid] = plan
+
+        elements: dict[uuid.UUID, dict[str, _Elem]] = {}
+        for model_id, sids in wanted.items():
+            elements[model_id] = await self._elements_by_stable_id(model_id, sids)
+
+        result: list[_PositionLinks] = []
+        for pid, plan in plans.items():
+            pairs: list[_Pair] = []
+            for sid, elem, tip_id, baseline in plan:
+                if baseline == elem.model_id:
+                    old: _Elem | None = elem
+                else:
+                    old = elements.get(baseline, {}).get(sid)
+                if tip_id == elem.model_id:
+                    new: _Elem | None = elem
+                elif tip_id == baseline:
+                    new = old
+                else:
+                    new = elements.get(tip_id, {}).get(sid)
+                pairs.append(_Pair(stable_id=sid, old=old, new=new, tip=tips[tip_id], baseline_model_id=baseline))
+            result.append(
+                _PositionLinks(
+                    position=by_id[pid],
+                    links=links_by_pos[pid],
+                    pairs=pairs,
+                    baselines={tip_id: (base, tips[tip_id]) for tip_id, base in baselines.get(pid, {}).items()},
+                    applied_before=pid in applied_before,
                 )
-            result.append(_PositionLinks(position=position, links=links, pairs=pairs))
+            )
         result.sort(key=lambda item: (item.position.sort_order or 0, item.position.ordinal or ""))
+        await self._resolve_methods(result)
         return result
+
+    async def _resolve_methods(self, contexts: Sequence[_PositionLinks]) -> None:
+        """Decide how each position's quantity is computed, and run the rules.
+
+        A position whose links all come from one quantity-map rule is
+        computed with that rule, provided the rule still exists, is active
+        and measures in the position's unit: it is re-run over every element
+        of the baseline and of the newest version, so elements a new version
+        adds that match the rule are counted. A position the rule created
+        whose rule has since been switched off keeps the rule's arithmetic
+        over its linked elements. Everything else is computed by unit, the
+        way the BIM Hub synced it when the link was made.
+        """
+        from app.modules.bim_hub.models import BIMQuantityMap
+        from app.modules.bim_hub.service import normalize_unit_token
+
+        rule_keys: dict[uuid.UUID, str] = {}
+        for ctx in contexts:
+            created_by = str((ctx.position.metadata_ or {}).get("auto_created_by_rule") or "")
+            link_rules = {str(link.rule_id or "") for link in ctx.links}
+            all_rule_based = all(link.link_type == "rule_based" for link in ctx.links)
+            if not all_rule_based or len(link_rules) != 1:
+                continue
+            (key,) = link_rules
+            if not key or (created_by and created_by != key):
+                continue
+            rule_keys[ctx.position.id] = key
+        rule_ids = [rid for rid in (_parse_uuid(k) for k in set(rule_keys.values())) if rid is not None]
+        rules: dict[str, Any] = {}
+        for chunk in _chunks(rule_ids):
+            rows = await self.session.execute(select(BIMQuantityMap).where(BIMQuantityMap.id.in_(list(chunk))))
+            rules.update({str(rule.id): rule for rule in rows.scalars().all()})
+
+        model_cache: dict[uuid.UUID, list[_Elem]] = {}
+        for ctx in contexts:
+            key = rule_keys.get(ctx.position.id)
+            rule = rules.get(key) if key else None
+            if rule is None:
+                continue
+            created_by_rule = str((ctx.position.metadata_ or {}).get("auto_created_by_rule") or "") == key
+            same_unit = normalize_unit_token(rule.unit) == normalize_unit_token(ctx.position.unit) or (
+                created_by_rule and not normalize_unit_token(rule.unit)
+            )
+            if bool(rule.is_active) and same_unit and ctx.baselines:
+                ctx.rule = rule
+                ctx.method = "rule_full"
+                ctx.rule_not_applied = not created_by_rule and not ctx.applied_before
+                ctx.rule_diff = await self._rule_diff(rule, ctx, model_cache)
+            elif created_by_rule:
+                ctx.rule = rule
+                ctx.method = "rule_linked"
+
+    async def _rule_diff(self, rule: Any, ctx: _PositionLinks, cache: dict[uuid.UUID, list[_Elem]]) -> _RuleDiff:
+        from app.modules.bim_hub.service import BIMHubService
+
+        def matched(elems: Sequence[_Elem]) -> dict[str, _Elem]:
+            out: dict[str, _Elem] = {}
+            for elem in elems:
+                if BIMHubService._rule_matches_element(rule, elem):  # type: ignore[arg-type]
+                    out.setdefault(elem.stable_id, elem)
+            return out
+
+        base_all: list[_Elem] = []
+        tip_all: list[_Elem] = []
+        modified: list[str] = []
+        deleted: list[str] = []
+        added: list[str] = []
+        crosses = False
+        for tip_id, (baseline, _tip) in ctx.baselines.items():
+            tip_matched = matched(await self._all_elements(tip_id, cache))
+            if baseline == tip_id:
+                base_matched = tip_matched
+            else:
+                crosses = True
+                base_matched = matched(await self._all_elements(baseline, cache))
+            base_all.extend(base_matched.values())
+            tip_all.extend(tip_matched.values())
+            for sid, old in base_matched.items():
+                new = tip_matched.get(sid)
+                if new is None:
+                    deleted.append(sid)
+                elif _elem_changed(old, new):
+                    modified.append(sid)
+            added.extend(sid for sid in tip_matched if sid not in base_matched)
+        return _RuleDiff(
+            previous=rule_method_quantity(rule, base_all),
+            proposed=rule_method_quantity(rule, tip_all),
+            base_count=len(base_all),
+            tip_count=len(tip_all),
+            modified=sorted(modified),
+            deleted=sorted(deleted),
+            added=sorted(added),
+            crosses_version=crosses,
+        )
 
     # ── Scan ──────────────────────────────────────────────────────────────
 
     def _bim_flag_candidates(self, contexts: Sequence[_PositionLinks]) -> list[FlagCandidate]:
         candidates: list[FlagCandidate] = []
         for ctx in contexts:
-            by_tip: dict[uuid.UUID, list[_Pair]] = {}
-            for pair in ctx.pairs:
-                if pair.crosses_version:
-                    by_tip.setdefault(pair.tip.tip_id, []).append(pair)
-            for tip_id, pairs in by_tip.items():
-                modified = sorted(p.stable_id for p in pairs if p.modified)
-                deleted = sorted(p.stable_id for p in pairs if p.deleted)
-                if not modified and not deleted:
+            # Per newest version: (stable ids modified, deleted, added, baselines).
+            by_tip: dict[uuid.UUID, tuple[list[str], list[str], list[str], set[uuid.UUID]]] = {}
+            if ctx.method == "rule_full" and ctx.rule_diff is not None:
+                # The rule decides which elements belong to the position, so
+                # an element the new version adds that matches it is a change
+                # to this position even though nothing links it yet.
+                crossing_tips = sorted(
+                    (tip_id for tip_id, (base, _tip) in ctx.baselines.items() if base != tip_id), key=str
+                )
+                if crossing_tips:
+                    # A rule spanning several model chains is rare; its change
+                    # is reported once, under the first chain that moved.
+                    by_tip[crossing_tips[0]] = (
+                        list(ctx.rule_diff.modified),
+                        list(ctx.rule_diff.deleted),
+                        list(ctx.rule_diff.added),
+                        {ctx.baselines[t][0] for t in crossing_tips},
+                    )
+            else:
+                for pair in ctx.pairs:
+                    if not pair.crosses_version:
+                        continue
+                    entry = by_tip.setdefault(pair.tip.tip_id, ([], [], [], set()))
+                    entry[3].add(pair.baseline_model_id)
+                    if pair.modified:
+                        entry[0].append(pair.stable_id)
+                    elif pair.deleted:
+                        entry[1].append(pair.stable_id)
+                    elif pair.added:
+                        entry[2].append(pair.stable_id)
+            for tip_id, (modified, deleted, added, bases) in by_tip.items():
+                modified, deleted, added = sorted(modified), sorted(deleted), sorted(added)
+                kinds = sum(1 for group in (modified, deleted, added) if group)
+                if kinds == 0:
                     continue
-                if modified and deleted:
+                if kinds > 1:
                     reason = "elements_changed"
                 elif deleted:
                     reason = "elements_deleted"
+                elif added:
+                    reason = "elements_added"
                 else:
                     reason = "elements_modified"
-                tip = pairs[0].tip
+                tip = ctx.baselines[tip_id][1] if tip_id in ctx.baselines else None
+                if tip is None:
+                    continue
                 candidates.append(
                     FlagCandidate(
                         position_id=ctx.position.id,
@@ -876,13 +1228,15 @@ class ChangeReviewService:
                         source_label=tip.name,
                         source_version=tip.version,
                         details={
-                            "old_model_ids": sorted({str(p.old.model_id) for p in pairs}),
+                            "old_model_ids": sorted(str(b) for b in bases),
                             "new_model_id": str(tip_id),
                             "modified_count": len(modified),
                             "deleted_count": len(deleted),
+                            "added_count": len(added),
                             "modified_stable_ids": modified[:_MAX_IDS_IN_DETAILS],
                             "deleted_stable_ids": deleted[:_MAX_IDS_IN_DETAILS],
-                            "scope": "position",
+                            "added_stable_ids": added[:_MAX_IDS_IN_DETAILS],
+                            "scope": "rule" if ctx.method == "rule_full" else "position",
                         },
                     )
                 )
@@ -1042,7 +1396,7 @@ class ChangeReviewService:
         position_ids = list(
             (await self.session.execute(select(Position.id).where(Position.boq_id == boq_id))).scalars().all()
         )
-        contexts = await self._load_bim_context(boq)
+        contexts = await self._load_bim_context(boq, ack_mode=_ACK_REVIEWED)
         bim_candidates = self._bim_flag_candidates(contexts)
         doc_candidates = await self._document_flag_candidates(boq, position_ids) if position_ids else []
         created = await record_change_flags(
@@ -1063,24 +1417,10 @@ class ChangeReviewService:
 
     # ── BIM quantity proposals ────────────────────────────────────────────
 
-    async def _rules_by_id(self, contexts: Sequence[_PositionLinks]) -> dict[str, Any]:
-        from app.modules.bim_hub.models import BIMQuantityMap
-
-        rule_ids: set[uuid.UUID] = set()
-        for ctx in contexts:
-            raw = (ctx.position.metadata_ or {}).get("auto_created_by_rule")
-            rid = _parse_uuid(raw)
-            if rid is not None:
-                rule_ids.add(rid)
-        if not rule_ids:
-            return {}
-        rows = await self.session.execute(select(BIMQuantityMap).where(BIMQuantityMap.id.in_(list(rule_ids))))
-        return {str(rule.id): rule for rule in rows.scalars().all()}
-
     async def _proposals(
         self, boq: _BoqRef, *, only: set[uuid.UUID] | None = None
     ) -> tuple[int, list[BIMQuantityProposalRow]]:
-        contexts = await self._load_bim_context(boq, only=only)
+        contexts = await self._load_bim_context(boq, only=only, ack_mode=_ACK_APPLIED)
         if not contexts:
             return 0, []
         bound: set[uuid.UUID] = set()
@@ -1094,44 +1434,61 @@ class ChangeReviewService:
                 .scalars()
                 .all()
             )
-        rules = await self._rules_by_id(contexts)
 
         rows: list[BIMQuantityProposalRow] = []
         for ctx in contexts:
             position = ctx.position
             if position.id in bound:
                 continue  # the "Model sync" review owns this position
-            crossing = [p for p in ctx.pairs if p.crosses_version]
-            if not crossing:
-                continue  # no newer model version behind any link
 
-            rule_key = str((position.metadata_ or {}).get("auto_created_by_rule") or "")
-            rule = rules.get(rule_key) if rule_key else None
-            use_rule = rule is not None and all(
-                link.link_type == "rule_based" and str(link.rule_id or "") == rule_key for link in ctx.links
-            )
-
-            old_elems = [p.old for p in ctx.pairs]
-            new_elems = [p.new for p in ctx.pairs if p.new is not None]
-            if use_rule:
-                previous = rule_method_quantity(rule, old_elems)
-                proposed = rule_method_quantity(rule, new_elems)
+            basis = "model_change"
+            if ctx.method == "rule_full" and ctx.rule_diff is not None:
+                diff = ctx.rule_diff
+                previous, proposed = diff.previous, diff.proposed
+                crosses = diff.crosses_version
+                has_new = diff.tip_count > 0
+                missing, modified, added = len(diff.deleted), len(diff.modified), len(diff.added)
+                element_count = diff.tip_count or diff.base_count
+                if ctx.rule_not_applied:
+                    # The rule matched elements but its result never became
+                    # this position's quantity (a rule aimed at an existing
+                    # position does not set one). That is the proposal, model
+                    # version or not.
+                    basis = "rule_result"
+                crossing_tips = [t for t, (base, _tip) in ctx.baselines.items() if base != t]
             else:
-                previous = unit_method_quantity(position.unit, old_elems)
-                proposed = unit_method_quantity(position.unit, new_elems)
+                crossing_pairs = [p for p in ctx.pairs if p.crosses_version]
+                crosses = bool(crossing_pairs)
+                old_elems = [p.old for p in ctx.pairs if p.old is not None]
+                new_elems = [p.new for p in ctx.pairs if p.new is not None]
+                if ctx.method == "rule_linked":
+                    previous = rule_method_quantity(ctx.rule, old_elems)
+                    proposed = rule_method_quantity(ctx.rule, new_elems)
+                else:
+                    previous = unit_method_quantity(position.unit, old_elems)
+                    proposed = unit_method_quantity(position.unit, new_elems)
+                has_new = bool(new_elems)
+                missing = sum(1 for p in ctx.pairs if p.deleted)
+                modified = sum(1 for p in ctx.pairs if p.modified)
+                added = sum(1 for p in ctx.pairs if p.added)
+                element_count = len(ctx.pairs)
+                crossing_tips = list({p.tip.tip_id: None for p in crossing_pairs})
             if previous is None or proposed is None:
                 continue  # unit with no dimension: nothing to propose
 
-            missing = sum(1 for p in ctx.pairs if p.deleted)
-            modified = sum(1 for p in ctx.pairs if p.modified)
             current_qty = _q(_to_decimal(position.quantity))
-            if new_elems and previous == proposed:
-                # The model moved but this quantity did not. Judged BIM
-                # against BIM on purpose: comparing the position with the new
-                # figure would turn every hand-edited quantity, and every rule
-                # target whose quantity was never synced, into a phantom change.
-                continue
-            if not new_elems:
+            if basis == "model_change":
+                if not crosses:
+                    continue  # the newest version is the one this quantity came from
+                if has_new and previous == proposed:
+                    # The model moved but this quantity did not. Judged BIM
+                    # against BIM on purpose: comparing the position with the
+                    # new figure would turn every hand-edited quantity into a
+                    # phantom change.
+                    continue
+            elif not has_new or proposed <= 0:
+                continue  # the rule measures nothing, so it has nothing to offer
+            if not has_new:
                 row_status = "elements_missing"
             elif proposed <= 0:
                 row_status = "no_quantity"
@@ -1148,8 +1505,8 @@ class ChangeReviewService:
                 else str(_q(current_total_dec))
             )
             appliable = row_status == "changed"
-            tip = crossing[0].tip
-            old_model_ids = sorted({p.old.model_id for p in crossing}, key=str)
+            tip_ids = sorted(crossing_tips or ctx.baselines, key=str)
+            baseline_id, tip = ctx.baselines[tip_ids[0]]
             rows.append(
                 BIMQuantityProposalRow(
                     position_id=position.id,
@@ -1164,17 +1521,20 @@ class ChangeReviewService:
                     current_total=_dec_str(current_total_dec),
                     new_total=new_total_str,
                     total_delta=(_dec_str(_to_decimal(new_total_str) - current_total_dec) if appliable else "0.0000"),
-                    method="rule" if use_rule else "unit",
+                    method="rule" if ctx.method in ("rule_full", "rule_linked") else "unit",
+                    basis=basis,  # type: ignore[arg-type]
                     status=row_status,  # type: ignore[arg-type]
                     appliable=appliable,
-                    manual_override=current_qty != previous,
-                    model_id=old_model_ids[0] if old_model_ids else None,
+                    manual_override=basis == "model_change" and current_qty != previous,
+                    model_id=baseline_id,
                     new_model_id=tip.tip_id,
+                    new_model_ids=tip_ids,
                     model_name=tip.name,
                     model_version=tip.version,
-                    element_count=len(ctx.pairs),
+                    element_count=element_count,
                     modified_count=modified,
                     missing_count=missing,
+                    added_count=added,
                 )
             )
         return len(contexts), rows
@@ -1191,6 +1551,88 @@ class ChangeReviewService:
             total_delta=_dec_str(total_delta),
             rows=rows,
         )
+
+    async def _record_accepted_versions(
+        self,
+        boq: _BoqRef,
+        position: Position,
+        row: BIMQuantityProposalRow,
+        *,
+        user_id: uuid.UUID | None,
+        now: datetime,
+    ) -> None:
+        """Close this position's flags for the accepted versions, or record one closed.
+
+        Accepting the new figure is the review, so an open flag of the same
+        version is closed. When no flag exists yet (nobody ran the check
+        before accepting), a closed one is written instead. It is the durable
+        record that the position caught up with that version, which the next
+        comparison starts from, and it keeps a later check from raising a flag
+        about a change the estimator already took.
+        """
+        if row.new_model_id is None or row.model_id == row.new_model_id:
+            return  # nothing crossed a version (a rule result on the same model)
+        for tip_id in row.new_model_ids or [row.new_model_id]:
+            key = bim_flag_key(tip_id)
+            result = await self.session.execute(
+                update(BOQChangeFlag)
+                .where(
+                    BOQChangeFlag.position_id == position.id,
+                    BOQChangeFlag.source_type == SOURCE_BIM_VERSION,
+                    BOQChangeFlag.source_key == key,
+                    BOQChangeFlag.status == FLAG_STATUS_OPEN,
+                )
+                .values(
+                    status=FLAG_STATUS_REVIEWED,
+                    reviewed_by=user_id,
+                    reviewed_at=now,
+                    review_note=_APPLIED_NOTE,
+                )
+                .execution_options(synchronize_session=False)
+            )
+            if int(result.rowcount or 0):
+                continue
+            exists = (
+                await self.session.execute(
+                    select(BOQChangeFlag.id).where(
+                        BOQChangeFlag.position_id == position.id,
+                        BOQChangeFlag.source_type == SOURCE_BIM_VERSION,
+                        BOQChangeFlag.source_key == key,
+                    )
+                )
+            ).first()
+            if exists is not None:
+                continue  # already reviewed by a person; their note stays
+            flag = BOQChangeFlag(
+                project_id=boq.project_id,
+                boq_id=boq.id,
+                position_id=position.id,
+                source_type=SOURCE_BIM_VERSION,
+                source_key=key,
+                source_id=str(tip_id),
+                source_label=row.model_name[:500],
+                source_version=row.model_version[:64] or None,
+                reason="model_changed",
+                details={
+                    "old_model_ids": [str(row.model_id)] if row.model_id else [],
+                    "new_model_id": str(tip_id),
+                    "modified_count": row.modified_count,
+                    "deleted_count": row.missing_count,
+                    "added_count": row.added_count,
+                    "scope": "position",
+                },
+                detected_via="apply",
+                status=FLAG_STATUS_REVIEWED,
+                reviewed_by=user_id,
+                reviewed_at=now,
+                review_note=_APPLIED_NOTE,
+            )
+            try:
+                async with self.session.begin_nested():
+                    self.session.add(flag)
+                    await self.session.flush()
+            except IntegrityError:
+                continue  # a concurrent scan wrote the key; the provenance still holds
 
     async def apply_bim_quantity_proposals(
         self,
@@ -1256,8 +1698,10 @@ class ChangeReviewService:
             provenance = {
                 "model_id": str(row.model_id) if row.model_id else None,
                 "new_model_id": str(row.new_model_id) if row.new_model_id else None,
+                "new_model_ids": [str(mid) for mid in row.new_model_ids],
                 "model_version": row.model_version,
                 "method": row.method,
+                "basis": row.basis,
                 "previous_model_quantity": row.previous_model_quantity,
                 "old_quantity": row.current_quantity,
                 "new_quantity": new_qty,
@@ -1277,23 +1721,7 @@ class ChangeReviewService:
                 metadata_=meta,
                 version=Position.version + 1,
             )
-            if row.new_model_id is not None:
-                await self.session.execute(
-                    update(BOQChangeFlag)
-                    .where(
-                        BOQChangeFlag.position_id == pid,
-                        BOQChangeFlag.source_type == SOURCE_BIM_VERSION,
-                        BOQChangeFlag.source_key == bim_flag_key(row.new_model_id),
-                        BOQChangeFlag.status == FLAG_STATUS_OPEN,
-                    )
-                    .values(
-                        status=FLAG_STATUS_REVIEWED,
-                        reviewed_by=user_id,
-                        reviewed_at=now,
-                        review_note="quantity_updated_from_model",
-                    )
-                    .execution_options(synchronize_session=False)
-                )
+            await self._record_accepted_versions(boq, position, row, user_id=user_id, now=now)
             delta = _to_decimal(new_total) - _to_decimal(old_total)
             total_delta += delta
             applied += 1
