@@ -1306,12 +1306,17 @@ class RFQService:
         except Exception:
             logger.debug("FSM audit log skipped for RFQ %s award", rfq_id_local)
 
-        # Notification + downstream subscribers (procurement PO creation, etc).
-        # Best-effort: a flaky subscriber must not roll back the award itself.
+        # Notification + downstream subscribers (procurement drafts the purchase
+        # order). Deferred until this transaction commits: every subscriber
+        # opens its own session, and published from here, before the commit,
+        # it would read an RFQ that is not awarded yet and an award row that
+        # does not exist. Best-effort: a flaky subscriber must not roll back
+        # the award itself.
         try:
-            from app.core.events import event_bus
+            from app.core.events import publish_after_commit
 
-            await event_bus.publish(
+            publish_after_commit(
+                self.session,
                 "rfq.awarded",
                 {
                     "rfq_id": str(rfq_id_local),
@@ -1322,9 +1327,11 @@ class RFQService:
                     "currency_code": bid_currency_local,
                     "project_id": str(project_id_local),
                     "actor_id": actor_id,
-                    # The number downstream commitments should carry: the
-                    # headline restated on the RFQ's basis, which is what the
-                    # decision was actually taken on.
+                    # The headline restated on the RFQ's basis, which is what
+                    # the ranking compared. It is not what the supplier
+                    # invoices: the order drafted from this award carries the
+                    # quote's own amount and currency (bid_amount,
+                    # currency_code) and keeps this one for the record.
                     "normalised_amount": format(candidate.normalised_amount or Decimal("0"), "f"),
                     "basis_currency": comparison.basis_currency,
                     "award_id": str(award.id),
