@@ -50,7 +50,7 @@ So the population is derived from the shipped file rather than written out, and
 returns. The mechanism is general; the set of rate lines it will touch is not
 allowed to grow without somebody saying so.
 
-That set is three lines now, ``CA/HST_NS``, ``IL/VAT`` and ``RU/NDS``, and the
+That set is four lines now, ``CA/HST_NS``, ``IL/VAT``, ``RU/NDS`` and ``IE/VAT``, and the
 second one is what the generality was bought for. Israel raised standard VAT from 17 % to
 18 % on 2025-01-01 and the seed file went on shipping 17 as the rate in force,
 which is the same defect as Nova Scotia's in a second country. It was found by
@@ -60,6 +60,15 @@ said 18 the whole time. ``tests/unit/test_tax_tables_do_not_drift.py`` compares
 them now. Closing the Israeli window here needed no new code at all: the pair
 went into the seed file and this repair picked it up, which is what "the
 generality buys the next one" was a promise about.
+
+``IE/VAT`` joined on 2026-10-04 and it is a different shape from the other
+three: the change it carries is over. Ireland cut the standard rate from 23 %
+to 21 % for 1 September 2020 to 28 February 2021 and then went back to 23 %,
+so the file now ships three windows where it shipped one open 23 % row. On an
+old install this closes that row at 2020-08-31 and inserts the other two, which
+moves the answer only for that half year and leaves today's 23 % where it is.
+Pricing a document at the rate of its own date is the whole point of the
+windows, so a past half year is in scope exactly as a future rate is.
 
 ``RU/NDS`` is the third, added 2026-09-07, and it is the statutory fact written
 down where the rows are rewritten rather than only where they are shipped.
@@ -203,7 +212,7 @@ REPAIR_ID: Final = "tax_window_supersede"
 #: derivation in ``tests/unit/test_tax_window_supersede_population.py``, so a
 #: seed file that supersedes something earlier cannot leave this saying the
 #: wrong month.
-EARLIEST_SUPERSEDED_FROM: Final = "2025-01-01"
+EARLIEST_SUPERSEDED_FROM: Final = "2020-09-01"
 
 
 def superseded_lines() -> dict[RateLine, list[dict]]:

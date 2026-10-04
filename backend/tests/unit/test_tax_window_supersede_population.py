@@ -99,7 +99,28 @@ from app.modules.i18n_foundation.tax_window_supersede import (
 #: * ``EARLIEST_SUPERSEDED_FROM`` does not move. It is derived from
 #:   ``windows[1:]``, the superseding windows only, and 2026-01-01 is later
 #:   than Israel's 2025-01-01.
-EXPECTED_POPULATION = {("CA", "HST_NS"), ("IL", "VAT"), ("RU", "NDS")}
+#:
+#: ``IE/VAT`` was added on 2026-10-04, and it is the first line here whose
+#: change lies wholly in the past. What was looked at before updating it:
+#:
+#: * Ireland cut the standard rate from 23 % to 21 % for 1 September 2020 to
+#:   28 February 2021, by an amendment to section 46 of the VAT Consolidation
+#:   Act 2010, and 23 % came back on 1 March 2021. Source read for that:
+#:   Chartered Accountants Ireland, TaxSource, "VAT Matters", September 2020
+#:   (read 2026-10-04). The seed shipped one open 23 % window from 2012-01-01,
+#:   so a supply in that half year was priced two points high.
+#: * What the repair will therefore do to installs in the field: close the
+#:   open 23 % row at 2020-08-31 and insert the 21 % window and the 23 % one
+#:   that follows it. Unlike Nova Scotia, Israel and Russia, the answer moves
+#:   on past dates only - 1 September 2020 to 28 February 2021 now resolves
+#:   at 21 - and today's answer stays 23. That is the intended reading: a
+#:   document dated in that half year is charged the rate of its own date.
+#: * The flag stays still. All three Irish windows ship ``is_default`` true,
+#:   the Israeli way, and they must, because VAT_RED, VAT_RED_9 and VAT_ZERO
+#:   are open-ended beside every one of them.
+#: * ``EARLIEST_SUPERSEDED_FROM`` moves from 2025-01-01 to 2020-09-01, the
+#:   start of the 21 % window.
+EXPECTED_POPULATION = {("CA", "HST_NS"), ("IL", "VAT"), ("RU", "NDS"), ("IE", "VAT")}
 
 
 def test_the_repair_will_touch_exactly_these_rate_lines() -> None:

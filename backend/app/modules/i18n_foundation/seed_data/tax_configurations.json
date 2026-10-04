@@ -1213,6 +1213,36 @@
     "combination": "national",
     "subdivision_code": null,
     "effective_from": "2012-01-01",
+    "effective_to": "2020-08-31",
+    "is_default": true
+  },
+  {
+    "country_code": "IE",
+    "tax_name": "VAT Standard",
+    "tax_name_translations": {
+      "en": "VAT Standard"
+    },
+    "tax_code": "VAT",
+    "rate_pct": "21.0",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": "2020-09-01",
+    "effective_to": "2021-02-28",
+    "is_default": true
+  },
+  {
+    "country_code": "IE",
+    "tax_name": "VAT Standard",
+    "tax_name_translations": {
+      "en": "VAT Standard"
+    },
+    "tax_code": "VAT",
+    "rate_pct": "23.0",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": "2021-03-01",
     "effective_to": null,
     "is_default": true
   },

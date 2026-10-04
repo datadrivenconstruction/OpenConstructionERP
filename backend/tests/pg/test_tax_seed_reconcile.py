@@ -87,6 +87,15 @@ _TIERS_ADDED_IN_18_4 = {
     ("HU", "AFA_5", "2004-01-01"),
 }
 
+#: Ireland's temporary 21 % standard rate and the 23 % that came back after it.
+#: Two more windows on a rate line every cohort already holds, so they are the
+#: supersede repair's to carry forward rather than the reconciler's to deliver,
+#: exactly as Russia's 22 % window is.
+_IRISH_WINDOWS_ADDED_IN_18_4 = {
+    ("IE", "VAT", "2020-09-01"),
+    ("IE", "VAT", "2021-03-01"),
+}
+
 #: The same four as delivery keys.
 _IRISH_AND_HUNGARIAN_TIERS = {"IE/VAT_RED_9", "IE/VAT_ZERO", "HU/AFA_18", "HU/AFA_5"}
 
@@ -128,6 +137,7 @@ _ADDED_AFTER_V15_4_0 = {
     # 18.4. Every cohort holds the standard rate of both countries, so these
     # join a filled country-wide slot as tiers, the Croatian way.
     *_TIERS_ADDED_IN_18_4,
+    *_IRISH_WINDOWS_ADDED_IN_18_4,
 }
 
 #: Rows the current file has since EDITED, restored to what the old file said.
@@ -147,6 +157,7 @@ _RESTORED_TO_V15_4_0 = {
     ("CA", "HST_NS", "2010-07-01"): {"effective_to": None},
     ("IL", "VAT", "2015-10-01"): {"effective_to": None},
     ("RU", "NDS", "2019-01-01"): {"effective_to": None},
+    ("IE", "VAT", "2012-01-01"): {"effective_to": None},
     # The old file dated Croatia's 25 % a year late.
     ("HR", "PDV", "2012-03-01"): {"effective_from": "2013-03-01"},
 }
@@ -164,6 +175,7 @@ _ADDED_AFTER_V15_9_1 = {
     ("HR", "PDV_5", "2013-01-01"),
     ("HR", "PDV_0", "2022-10-01"),
     *_TIERS_ADDED_IN_18_4,
+    *_IRISH_WINDOWS_ADDED_IN_18_4,
 }
 
 #: The v15.9.1 cohort needed no restorations until Israel's 18 % rate was
@@ -176,6 +188,7 @@ _ADDED_AFTER_V15_9_1 = {
 _RESTORED_TO_V15_9_1 = {
     ("IL", "VAT", "2015-10-01"): {"effective_to": None},
     ("RU", "NDS", "2019-01-01"): {"effective_to": None},
+    ("IE", "VAT", "2012-01-01"): {"effective_to": None},
     ("HR", "PDV", "2012-03-01"): {"effective_from": "2013-03-01"},
 }
 

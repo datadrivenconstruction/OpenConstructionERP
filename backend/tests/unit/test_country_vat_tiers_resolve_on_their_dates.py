@@ -76,6 +76,27 @@ def test_the_irish_second_reduced_rate_did_not_exist_before_july_2011() -> None:
     assert _rates_in_force("IE", "2011-07-01")["VAT_RED_9"] == Decimal("9")
 
 
+@pytest.mark.parametrize(
+    ("on_date", "rate"),
+    [
+        ("2012-01-01", "23"),
+        ("2020-08-31", "23"),
+        ("2020-09-01", "21"),
+        ("2021-02-28", "21"),
+        ("2021-03-01", "23"),
+        ("2026-10-04", "23"),
+    ],
+)
+def test_ireland_charged_21_percent_for_half_a_year(on_date: str, rate: str) -> None:
+    """Both edges of the temporary rate, so neither window can leak into the other."""
+    assert _standard("IE", on_date) == rate
+
+
+def test_an_irish_date_before_the_first_standard_window_gets_no_rate() -> None:
+    """2011 was 21 % too, which the seed does not carry, so it must say nothing rather than 23 or 13.5."""
+    assert _standard("IE", "2011-12-31") is None
+
+
 # ── Hungary ──────────────────────────────────────────────────────────────────
 
 

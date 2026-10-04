@@ -253,7 +253,9 @@ TAX_SEED_RECONCILE = register_data_repair(
 #:
 #: ``effective_from`` moved from 2025-04-01 to 2025-01-01 when the Israeli
 #: windows were added: it is the earliest date the population supersedes on, so
-#: it names Israel's rise now rather than Nova Scotia's cut.
+#: it names Israel's rise now rather than Nova Scotia's cut. It moved again,
+#: to 2020-09-01, when Ireland's temporary 21 % window was added, which is
+#: the first superseding window in the population that lies wholly in the past.
 #:
 #: Registered last on purpose. It writes to rows the two scope repairs above
 #: correct, and while its predicate does not require them to have run - an
@@ -267,7 +269,7 @@ TAX_WINDOW_SUPERSEDE = register_data_repair(
         run=_run_tax_window_supersede,
         nature="superseded",
         superseded=SupersededBy(
-            effective_from="2025-01-01",
+            effective_from="2020-09-01",
             table=TAX_CONFIG_TABLE,
             closes_column="effective_to",
         ),
