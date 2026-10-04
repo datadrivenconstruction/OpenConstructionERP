@@ -5366,6 +5366,20 @@ _INSERT_FLUSH_ROWS = 5000
 _FAILED_CODES_REPORTED = 50
 
 
+# Parquet rows the cost import reads at a time.
+#
+# The import used to read the whole parquet into one pandas frame. A country
+# base is about 900 000 rows, and as object-dtype strings plus the intermediate
+# copies that frame peaked at 2 to 8 GiB of resident memory (measured 29.09 on
+# 23 bases), far over the ~1.8 GiB the 3 GB server floor leaves for an import.
+# Reading a slice at a time bounds the frame to this many rows plus the few a
+# work item spills over, whatever the size of the base. Measured on USA_USD
+# (900 225 rows, 55 719 items) with the inserter stubbed, the import's peak over
+# a warm process went from 2 971 MiB read whole to 441 MiB at 5 000 rows and
+# 578 MiB at 20 000, in about the same wall time.
+_PARQUET_READ_ROWS = 5_000
+
+
 def _insert_cost_rows_isolating_rejects(sync_url: str, rows: list[tuple], failed_codes: list[str]) -> int:
     """Insert one flush of cost rows, skipping any row PostgreSQL refuses.
 
@@ -5662,88 +5676,348 @@ def _join_work_name_columns(
     return joined.where((orig != final) & (orig != "") & (final != ""), single)
 
 
-def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> dict[str, Any]:
-    """Process CWICR parquet + insert into PostgreSQL. Runs in a thread.
+# The parquet columns the cost import reads, by their lower-cased name. The full
+# CWICR parquet has ~85 columns; reading them all doubles memory for no reason.
+_CWICR_NEEDED_COLUMNS = frozenset(
+    {
+        "rate_code",
+        "rate_original_name",
+        "rate_final_name",
+        "rate_unit",
+        "total_cost_per_position",
+        "collection_name",
+        "department_name",
+        "section_name",
+        "subsection_name",
+        "category_type",
+        "cost_of_working_hours",
+        "total_value_machinery_equipment",
+        "total_material_cost_per_position",
+        "total_labor_hours_all_personnel",
+        "count_total_people_per_unit",
+        # Resource columns
+        "resource_name",
+        "resource_code",
+        "resource_unit",
+        "resource_quantity",
+        "resource_cost",
+        "resource_cost_eur",
+        "resource_price_per_unit_current",
+        "resource_price_per_unit_eur_current",
+        "row_type",
+        "is_machine",
+        "is_material",
+        "is_labor",
+        # Scope of work
+        "work_composition_text",
+        "is_scope",
+        # Abstract resource / variant columns
+        "price_abstract_resource_variable_parts",
+        "price_abstract_resource_est_price_all_values",
+        "price_abstract_resource_position_count",
+        "price_abstract_resource_est_price_min",
+        "price_abstract_resource_est_price_max",
+        "price_abstract_resource_est_price_mean",
+        "price_abstract_resource_est_price_median",
+        "price_abstract_resource_unit",
+        "price_abstract_resource_group_per_unit",
+        "price_abstract_resource_variable_parts_per_unit",
+        "price_abstract_resource_est_price_all_values_per_unit",
+        "price_abstract_resource_common_start",
+    }
+)
 
-    Uses vectorized pandas (no iterrows!) and delegates the load to
-    ``_pg_bulk_insert_cost_rows`` (PostgreSQL ``COPY`` into a staging table +
-    ``INSERT ... ON CONFLICT (code, region) DO NOTHING``). ``db_file`` carries
-    the sync SQLAlchemy URL (``postgresql+psycopg2://...``) of the target
-    cluster.
+
+# Stands in for a missing rate code when the import groups rows by code. A
+# missing value is not equal to itself, so it cannot be a dictionary key, and
+# any string chosen for it could be a real code.
+_NULL_RATE_CODE = object()
+
+
+class _CwicrImportTally:
+    """What one cost import has done so far, carried from one set of codes to the next.
+
+    The insert batch lives here rather than per set of codes so the flushes land
+    on the same rows as when the whole parquet was one frame: the rows of one
+    flush can come from two sets, and a set never forces a short flush.
     """
-    import gc
-    import json as _json
+
+    def __init__(self, db_file: str, currency: str) -> None:
+        self.db_file = db_file
+        self.currency = currency
+        self.imported = 0
+        self.skipped = 0
+        self.unique_items = 0
+        self.resource_components = 0
+        self.variant_catalogs = 0
+        self.scope_codes = 0
+        # Codes of rows PostgreSQL refused. Kept apart from ``skipped``, which
+        # counts rows the transform drops on purpose (no description, no code):
+        # those are expected on every base, these are a partial load.
+        self.failed_codes: list[str] = []
+        self.batch: list[tuple] = []
+
+    def add(self, row: tuple) -> None:
+        self.batch.append(row)
+        # Hand the rows over in bounded slices instead of building the whole
+        # region first. Each flush is its own committed transaction, so peak
+        # memory stays flat and a killed import resumes rather than restarts.
+        if len(self.batch) >= _INSERT_FLUSH_ROWS:
+            self.flush()
+
+    def flush(self) -> None:
+        # PostgreSQL: idempotent bulk insert via ON CONFLICT (code, region)
+        # DO NOTHING.
+        if self.batch:
+            self.imported += _insert_cost_rows_isolating_rejects(self.db_file, self.batch, self.failed_codes)
+            self.batch.clear()
+
+
+def _cwicr_int_columns_read_as_float(parquet: Any, columns: list[str]) -> frozenset[str]:
+    """Integer columns that pandas reads as floats when it reads the whole file.
+
+    pandas turns an integer column with a missing value into floats, so read as
+    one frame such a column is float in every row, while a batch that happens to
+    have no missing value would come out as integers and stringify as ``5``
+    instead of ``5.0``. Knowing these columns up front lets every batch be
+    converted the way the whole file would have been. A column whose pandas
+    metadata asks for a nullable integer type stays integer either way, which
+    is why the answer comes from converting the column rather than from its
+    missing values alone.
+    """
+    import pandas as pd
+    import pyarrow as pa
+
+    out: set[str] = set()
+    for name in columns:
+        if not pa.types.is_integer(parquet.schema_arrow.field(name).type):
+            continue
+        column = parquet.read(columns=[name])
+        if column.column(0).null_count and pd.api.types.is_float_dtype(column.to_pandas().iloc[:, 0]):
+            out.add(name)
+    return frozenset(out)
+
+
+def _cwicr_arrow_frame(table: Any, float_columns: frozenset[str]) -> pd.DataFrame:  # noqa: F821
+    """Convert part of a CWICR parquet to pandas as reading the whole file would.
+
+    The conversion is pyarrow's ``Table.to_pandas``, which is what
+    ``pd.read_parquet`` calls, with two adjustments so the result does not
+    depend on which rows the batch holds: an integer column with a missing value
+    somewhere in the file becomes floats (see
+    :func:`_cwicr_int_columns_read_as_float`), and a dictionary-encoded column is
+    decoded to its plain values, since categories would differ batch to batch.
+    Column names are stripped and lower-cased, as the transform expects.
+    """
+    import pyarrow as pa
+
+    for index, field in enumerate(table.schema):
+        column_type = field.type.value_type if pa.types.is_dictionary(field.type) else field.type
+        if field.name in float_columns:
+            column_type = pa.float64()
+        if column_type != field.type:
+            table = table.set_column(index, field.name, table.column(index).cast(column_type))
+    frame = table.to_pandas()
+    frame.columns = [str(c).strip().lower() for c in frame.columns]
+    return frame
+
+
+def _cwicr_unit_keys(rate_codes: pd.Series) -> pd.Series:  # noqa: F821
+    """The key that decides which rows of a CWICR parquet must be processed together.
+
+    The transform matches rows to a work item through three differently built
+    strings: the resources by the raw code, the scope steps by the stripped
+    code, and the stored code itself is stripped and cut to 100 characters. All
+    three agree on this key, so rows that one of them could bring together never
+    land in different sets.
+    """
+    return rate_codes.astype(str).str.strip().str.slice(0, 100).str.strip()
+
+
+def _cwicr_unit_ids(parquet: Any, rate_code_column: str, float_columns: frozenset[str], read_rows: int) -> Any:
+    """One integer per parquet row naming the set of rows it has to be processed with.
+
+    Reads the ``rate_code`` column alone, in batches. Ids are handed out in the
+    order the keys first appear, so a lower id always means an earlier first
+    row, which is what lets the import release codes in their original order.
+    """
+    import numpy as np
+    import pandas as pd
+    import pyarrow as pa
+
+    ids: dict[Any, int] = {}
+    parts: list[Any] = []
+    for record_batch in parquet.iter_batches(batch_size=read_rows, columns=[rate_code_column]):
+        frame = _cwicr_arrow_frame(pa.Table.from_batches([record_batch]), float_columns)
+        local, uniques = pd.factorize(_cwicr_unit_keys(frame.iloc[:, 0]), use_na_sentinel=False)
+        mapping = np.fromiter(
+            (ids.setdefault(_NULL_RATE_CODE if pd.isna(key) else key, len(ids)) for key in uniques),
+            dtype=np.int64,
+            count=len(uniques),
+        )
+        parts.append(mapping[local])
+    if not parts:
+        return np.empty(0, dtype=np.int64)
+    return np.concatenate(parts)
+
+
+def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> dict[str, Any]:
+    """Process a CWICR parquet and insert it into PostgreSQL. Runs in a thread.
+
+    The parquet is read in batches of ``_PARQUET_READ_ROWS`` rows, never as one
+    frame: read whole, a country base peaked at 2 to 8 GiB of resident memory,
+    far over what a 3 GB server leaves for an import.
+
+    A work item (rate code) spans several rows, its resources, scope steps and
+    variant slots, and those rows are not always next to each other: the CWICR
+    bases come back to a code up to ~100 rows later, a national base up to
+    ~28 000 rows later. So a first pass over the ``rate_code`` column alone
+    records where each code's last row is, and a code is processed only once
+    every one of its rows has been read. Codes are released in the order they
+    first appear, so the rows reach the database in the same order and in the
+    same flushes as when the whole file was one frame, and the transform
+    (:func:`_import_cwicr_codes`) sees each code exactly as it did then.
+
+    The rows go to ``_pg_bulk_insert_cost_rows`` (PostgreSQL ``COPY`` into a
+    staging table + ``INSERT ... ON CONFLICT (code, region) DO NOTHING``) every
+    ``_INSERT_FLUSH_ROWS`` rows. Each flush commits on its own, so an import that
+    dies part way keeps the flushes before it and a rerun adds only what is
+    missing. ``db_file`` carries the sync SQLAlchemy URL
+    (``postgresql+psycopg2://...``) of the target cluster.
+    """
+    import pyarrow.parquet as pq
+
+    # Closed on the way out: an open handle on Windows keeps the cached
+    # parquet from being replaced by the next download.
+    with pq.ParquetFile(parquet_path) as parquet:
+        return _stream_cwicr_parquet(parquet, parquet_path, db_id, db_file)
+
+
+def _stream_cwicr_parquet(parquet: Any, parquet_path: str, db_id: str, db_file: str) -> dict[str, Any]:
+    """The body of :func:`_process_and_insert_cwicr`, over an open parquet."""
     import logging
-    import math
     import time
 
-    import pandas as pd
+    import numpy as np
+    import pyarrow as pa
+    import pyarrow.compute as pc
 
     _log = logging.getLogger("cwicr_import")
     start = time.monotonic()
 
-    # 1. Read parquet - only the columns this function actually uses.
-    # The full CWICR parquet has ~85 columns; loading them all doubles
-    # memory for no reason and OOM-kills 4 GB servers.
-    _NEEDED_COLUMNS = frozenset(
-        {
-            "rate_code",
-            "rate_original_name",
-            "rate_final_name",
-            "rate_unit",
-            "total_cost_per_position",
-            "collection_name",
-            "department_name",
-            "section_name",
-            "subsection_name",
-            "category_type",
-            "cost_of_working_hours",
-            "total_value_machinery_equipment",
-            "total_material_cost_per_position",
-            "total_labor_hours_all_personnel",
-            "count_total_people_per_unit",
-            # Resource columns
-            "resource_name",
-            "resource_code",
-            "resource_unit",
-            "resource_quantity",
-            "resource_cost",
-            "resource_cost_eur",
-            "resource_price_per_unit_current",
-            "resource_price_per_unit_eur_current",
-            "row_type",
-            "is_machine",
-            "is_material",
-            "is_labor",
-            # Scope of work
-            "work_composition_text",
-            "is_scope",
-            # Abstract resource / variant columns
-            "price_abstract_resource_variable_parts",
-            "price_abstract_resource_est_price_all_values",
-            "price_abstract_resource_position_count",
-            "price_abstract_resource_est_price_min",
-            "price_abstract_resource_est_price_max",
-            "price_abstract_resource_est_price_mean",
-            "price_abstract_resource_est_price_median",
-            "price_abstract_resource_unit",
-            "price_abstract_resource_group_per_unit",
-            "price_abstract_resource_variable_parts_per_unit",
-            "price_abstract_resource_est_price_all_values_per_unit",
-            "price_abstract_resource_common_start",
-        }
-    )
-    import pyarrow.parquet as pq
-
-    _file_schema = pq.read_schema(parquet_path)
-    _orig_by_lower = {n.strip().lower(): n for n in _file_schema.names}
-    _use_cols = [_orig_by_lower[k] for k in _NEEDED_COLUMNS if k in _orig_by_lower]
-    df = pd.read_parquet(parquet_path, columns=_use_cols or None)
-    total_rows = len(df)
-    df.columns = [str(c).strip().lower() for c in df.columns]
-
-    if "rate_code" not in df.columns:
+    total_rows = parquet.metadata.num_rows
+    _orig_by_lower = {n.strip().lower(): n for n in parquet.schema_arrow.names}
+    if "rate_code" not in _orig_by_lower:
         return {"imported": 0, "skipped": 0, "total_rows": total_rows, "error": "no rate_code column"}
+    _use_cols = [_orig_by_lower[k] for k in _CWICR_NEEDED_COLUMNS if k in _orig_by_lower]
+
+    read_rows = max(1, int(_PARQUET_READ_ROWS))
+    float_columns = _cwicr_int_columns_read_as_float(parquet, _use_cols)
+    unit_of_row = _cwicr_unit_ids(parquet, _orig_by_lower["rate_code"], float_columns, read_rows)
+    # Row index of the last row of every set; a set is complete once the
+    # import has read past it.
+    unit_last = np.full(int(unit_of_row.max()) + 1 if len(unit_of_row) else 0, -1, dtype=np.int64)
+    np.maximum.at(unit_last, unit_of_row, np.arange(len(unit_of_row), dtype=np.int64))
+
+    # CWICR parquet carries no currency column - every rate is denominated in
+    # the region's local currency. Resolve it ONCE from ``db_id`` (constant for
+    # the whole import) so each row persists its true ISO currency instead of
+    # the empty string that read-side fallbacks then had to paper over.
+    tally = _CwicrImportTally(db_file, _resolve_currency(None, db_id))
+
+    # Rows read but not processed yet: the batches they came in, and their set ids.
+    pending: list[Any] = []
+    pending_units: list[Any] = []
+    rows_read = 0
+    for record_batch in parquet.iter_batches(batch_size=read_rows, columns=_use_cols):
+        if not record_batch.num_rows:
+            continue
+        pending.append(record_batch)
+        pending_units.append(unit_of_row[rows_read : rows_read + record_batch.num_rows])
+        rows_read += record_batch.num_rows
+
+        units = pending_units[0] if len(pending_units) == 1 else np.concatenate(pending_units)
+        # Release every set that first appeared before the earliest set still
+        # waiting for rows. Those are complete, and nothing that comes later
+        # can belong in front of them.
+        waiting = units[unit_last[units] >= rows_read]
+        ready = units < waiting.min() if waiting.size else np.ones(len(units), dtype=bool)
+        if not ready.any():
+            continue
+        table = pa.Table.from_batches(pending)
+        if ready.all():
+            pending, pending_units = [], []
+        else:
+            mask = pa.array(ready)
+            pending = table.filter(pc.invert(mask)).to_batches()
+            pending_units = [units[~ready]]
+            table = table.filter(mask)
+        _import_cwicr_codes(_cwicr_arrow_frame(table, float_columns), db_id, tally)
+        del table
+
+    if rows_read != len(unit_of_row) or pending:
+        # The first pass and this one disagree about the file, or a set never
+        # completed. Either way the rows above are not the whole base.
+        raise RuntimeError(
+            f"CWICR parquet {parquet_path} changed while it was imported "
+            f"({len(unit_of_row)} rows indexed, {rows_read} read)"
+        )
+    if not total_rows:
+        # An empty base still reports what the transform makes of no rows.
+        _import_cwicr_codes(
+            _cwicr_arrow_frame(parquet.schema_arrow.empty_table().select(_use_cols), float_columns), db_id, tally
+        )
+    # Whatever the last set did not fill a flush with lands here.
+    tally.flush()
+
+    elapsed = round(time.monotonic() - start, 1)
+    _log.info(
+        "Grouped %d unique items from %d rows; %d per-component variant catalogs, "
+        "scope_of_work for %d rate_codes, %d resource components",
+        tally.unique_items,
+        total_rows,
+        tally.variant_catalogs,
+        tally.scope_codes,
+        tally.resource_components,
+    )
+    _log.info(
+        "CWICR %s: %d imported, %d skipped, %d rejected by the database in %.1fs",
+        db_id,
+        tally.imported,
+        tally.skipped,
+        len(tally.failed_codes),
+        elapsed,
+    )
+
+    return {
+        "imported": tally.imported,
+        "skipped": tally.skipped,
+        "failed": len(tally.failed_codes),
+        "failed_codes": tally.failed_codes[:_FAILED_CODES_REPORTED],
+        "total_rows": total_rows,
+        "unique_items": tally.unique_items,
+        # Total resource components carried by the imported work items. Each
+        # CWICR work item (rate_code) bundles a labour/material/equipment
+        # breakdown in its ``components`` array; surfacing the aggregate count
+        # lets the partner-pack installer report the embedded resource database
+        # it just loaded alongside the work catalog.
+        "resource_components": tally.resource_components,
+        "database": db_id,
+    }
+
+
+def _import_cwicr_codes(df: pd.DataFrame, db_id: str, tally: _CwicrImportTally) -> None:  # noqa: F821
+    """Turn the parquet rows of a set of complete work items into cost rows.
+
+    ``df`` holds every row of each work item it touches, in file order, so the
+    vectorized pandas below (no iterrows over the full set) gives each item what
+    it gave when the whole file was one frame. The rows go into ``tally``, which
+    flushes them; the per-item indexes built here are dropped on return.
+    """
+    import json as _json
+    import math
+
+    import pandas as pd
 
     # 2. Vectorized processing - use groupby.first() instead of iterrows
     if "rate_original_name" in df.columns and "rate_final_name" in df.columns:
@@ -5799,7 +6073,7 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
             agg_cols[col] = "first"
 
     grouped = df.groupby("rate_code", sort=False).agg(agg_cols)
-    _log.info("Grouped %d unique items from %d rows in %.1fs", len(grouped), total_rows, time.monotonic() - start)
+    tally.unique_items += len(grouped)
 
     # 3. Build insert tuples (vectorized - no Python loop over rows)
     def _safe_float(v: object) -> float:
@@ -5952,7 +6226,7 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
                     "common_start": common_start,
                 },
             }
-    _log.info("Indexed %d per-component variant catalogs", len(abstract_variants_by_pair))
+    tally.variant_catalogs += len(abstract_variants_by_pair)
 
     # ── Scope-of-work index ──
     # ``work_composition_text`` carries the ordered steps describing HOW a
@@ -5977,7 +6251,7 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
             if not rc or not text or text == "nan":
                 continue
             scope_by_code.setdefault(rc, []).append(text[:500])
-    _log.info("Indexed scope_of_work for %d rate_codes", len(scope_by_code))
+    tally.scope_codes += len(scope_by_code)
 
     resources_by_code: dict[str, list[dict]] = {}
     if "resource_name" in df.columns and _cost_col in df.columns:
@@ -6128,44 +6402,23 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
                     comp["available_variant_stats"] = v_data["variant_stats"]
                 comps.append(comp)
 
-        _log.info("Built resources for %d rate_codes in %.1fs", len(resources_by_code), time.monotonic() - start)
-
-    # Free the raw DataFrame before the INSERT phase - it is no longer
-    # needed; only ``grouped``, ``resources_by_code``, ``scope_by_code``
-    # and ``abstract_variants_by_pair`` survive past this point.
+    # The raw rows are no longer needed; only ``grouped`` and the per-code
+    # indexes above survive into the row building below.
     del df
-    gc.collect()
-
-    # 5. Build the insert rows. ``db_file`` carries the sync SQLAlchemy URL
-    # (postgresql://...) of the target cluster - see the caller. Every row is
-    # accumulated and handed to ``_pg_bulk_insert_cost_rows`` (COPY into a
-    # staging table + ON CONFLICT DO NOTHING) below.
-
-    # CWICR parquet carries no currency column - every rate is denominated in
-    # the region's local currency. Resolve it ONCE from ``db_id`` (constant for
-    # the whole import) so each row persists its true ISO currency instead of
-    # the empty string that read-side fallbacks then had to paper over.
-    resolved_currency = _resolve_currency(None, db_id)
-
-    skipped_count = 0
-    imported = 0
-    batch: list[tuple] = []
-    # Codes of rows PostgreSQL refused. Kept apart from ``skipped_count``, which
-    # counts rows this transform drops on purpose (no description, no code):
-    # those are expected on every base, these are a partial load.
-    failed_codes: list[str] = []
+    tally.resource_components += sum(len(v) for v in resources_by_code.values())
+    resolved_currency = tally.currency
 
     for rate_code, row in grouped.iterrows():
         desc = _safe_str(row.get("_desc", ""))
         if len(desc) < 3:
             desc = _safe_str(row.get("subsection_name", ""))
         if len(desc) < 3:
-            skipped_count += 1
+            tally.skipped += 1
             continue
 
         code = _safe_str(rate_code)[:100]
         if not code:
-            skipped_count += 1
+            tally.skipped += 1
             continue
 
         unit = _safe_str(row.get("rate_unit", "m2"))[:20] or "m2"
@@ -6253,7 +6506,7 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
         # Get full resource components for this rate_code
         components = resources_by_code.get(code, [])
 
-        batch.append(
+        tally.add(
             (
                 str(uuid.uuid4()),
                 code,
@@ -6271,48 +6524,6 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
                 _json.dumps(metadata),
             )
         )
-
-        # Hand the rows over in bounded slices instead of building the whole
-        # region first. Each flush is its own committed transaction, so peak
-        # memory stays flat and a killed import resumes rather than restarts.
-        if len(batch) >= _INSERT_FLUSH_ROWS:
-            imported += _insert_cost_rows_isolating_rejects(db_file, batch, failed_codes)
-            batch.clear()
-
-    # PostgreSQL: idempotent bulk insert via ON CONFLICT (code, region)
-    # DO NOTHING. Whatever the loop did not fill a flush with lands here.
-    if batch:
-        imported += _insert_cost_rows_isolating_rejects(db_file, batch, failed_codes)
-        batch.clear()
-
-    elapsed = round(time.monotonic() - start, 1)
-    _log.info(
-        "CWICR %s: %d imported, %d skipped, %d rejected by the database in %.1fs",
-        db_id,
-        imported,
-        skipped_count,
-        len(failed_codes),
-        elapsed,
-    )
-
-    # Total resource components carried by the imported work items. Each CWICR
-    # work item (rate_code) bundles a labour/material/equipment breakdown in its
-    # ``components`` array (the parquet is literally
-    # ``..._workitems_costs_resources_...``); surfacing the aggregate count lets
-    # the partner-pack installer report the embedded resource database it just
-    # loaded alongside the work catalog.
-    resource_components = sum(len(v) for v in resources_by_code.values())
-
-    return {
-        "imported": imported,
-        "skipped": skipped_count,
-        "failed": len(failed_codes),
-        "failed_codes": failed_codes[:_FAILED_CODES_REPORTED],
-        "total_rows": total_rows,
-        "unique_items": len(grouped),
-        "resource_components": resource_components,
-        "database": db_id,
-    }
 
 
 def _build_cwicr_items(df: pd.DataFrame, db_id: str) -> list[dict[str, Any]]:  # noqa: F821
