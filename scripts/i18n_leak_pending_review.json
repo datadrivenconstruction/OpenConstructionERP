@@ -3054,5 +3054,33 @@
     "en_value": "Sekisan",
     "n": 41,
     "reason": "Validation rule set label added in 18.1.0. It names a standard or a workflow, so most locales keep the English form on purpose, while the locales in differs_in write it natively; filed for review rather than allowlisted because it is not identical everywhere."
+  },
+  "changeorders.source_kind_ncr": {
+    "added_by": "batch 18.4 integration (2026-10-04)",
+    "differs_in": [
+      "es",
+      "es-CL",
+      "es-CO",
+      "es-MX"
+    ],
+    "en_value": "NCR",
+    "n": 38,
+    "reason": "Short pill label naming the source record type of an automatically drafted change order. NCR is kept as the acronym in most locales, the way each file already labels the QMS records; the locales that differ write a local acronym. Filed for a native review of which reads better on the pill, not a prose leak."
+  },
+  "changeorders.source_kind_rfi": {
+    "added_by": "batch 18.4 integration (2026-10-04)",
+    "differs_in": [],
+    "en_value": "RFI",
+    "n": 42,
+    "reason": "Short pill label naming the source record type of an automatically drafted change order. RFI is the acronym the locale files already use for the RFI module; filed for review rather than allowlisted because a few locales spell it differently."
+  },
+  "risk.cont_p80_exact": {
+    "added_by": "batch 18.4 integration (2026-10-04)",
+    "differs_in": [
+      "hu"
+    ],
+    "en_value": "P80 {{amount}}",
+    "n": 41,
+    "reason": "Value cell for the 80th percentile of the contingency simulation, P80 followed by an amount. P80 is the risk notation used across markets; the locales that differ write a local form. Filed for a native review of the notation, not a prose leak."
   }
 }
