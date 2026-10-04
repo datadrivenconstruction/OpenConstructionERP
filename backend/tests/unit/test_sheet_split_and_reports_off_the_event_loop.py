@@ -372,3 +372,55 @@ async def test_bi_report_without_a_file_renders_nothing(monkeypatch: pytest.Monk
 
     assert response is not None and response.file_url is None
     assert seen == []
+
+
+# ── Schedule MSPDI ────────────────────────────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_msp_xml_is_serialised_off_the_loop(monkeypatch: pytest.MonkeyPatch) -> None:
+    # A programme exports up to 5,000 tasks with their predecessor links.
+    from app.modules.schedule import mspdi_export
+    from app.modules.schedule import router as schedule_router
+
+    seen: list[int] = []
+    monkeypatch.setattr(mspdi_export, "build_mspdi_xml", _recording(seen, mspdi_export.build_mspdi_xml))
+    monkeypatch.setattr(schedule_router, "_verify_schedule_owner", AsyncMock(return_value=None))
+    first, second = uuid.uuid4(), uuid.uuid4()
+
+    def activity(act_id: uuid.UUID, name: str, deps: list[dict[str, Any]]) -> SimpleNamespace:
+        return SimpleNamespace(
+            id=act_id,
+            name=name,
+            start_date="2026-10-05",
+            end_date="2026-10-09",
+            duration_days=5,
+            progress_pct="0",
+            activity_type="task",
+            wbs_code="1.1",
+            constraint_type=None,
+            constraint_date=None,
+            dependencies=deps,
+        )
+
+    activities = [
+        activity(first, "Excavation", []),
+        activity(second, "Blinding concrete", [{"activity_id": str(first), "type": "FS", "lag_days": 1}]),
+    ]
+    service = SimpleNamespace(
+        get_schedule=AsyncMock(return_value=SimpleNamespace(name="Riverside programme")),
+        list_activities_for_schedule=AsyncMock(return_value=(activities, len(activities))),
+    )
+    no_relationships = MagicMock()
+    no_relationships.scalars.return_value.all.return_value = []
+    session = MagicMock()
+    session.execute = AsyncMock(return_value=no_relationships)
+
+    response = await schedule_router.export_schedule_msp_xml(
+        _user_id="u1", payload={}, schedule_id=uuid.uuid4(), service=service, session=session
+    )
+
+    body = b"".join([chunk async for chunk in response.body_iterator])
+    assert b"<Name>Blinding concrete</Name>" in body
+    assert b"<PredecessorUID>1</PredecessorUID>" in body
+    assert seen and threading.get_ident() not in seen

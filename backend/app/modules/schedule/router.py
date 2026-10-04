@@ -2447,12 +2447,16 @@ async def export_schedule_msp_xml(
                 lag = 0
             _add_link(succ, pred, str(dep.get("type", "FS")), lag)
 
-    xml_str = build_mspdi_xml(
+    # Serialising up to 5,000 tasks and their links into the XML tree is CPU
+    # work that grows with the programme; it runs in a worker thread so the
+    # event loop keeps serving. The inputs are plain dataclasses by now.
+    xml_str = await asyncio.to_thread(
+        build_mspdi_xml,
         MspdiProject(
             name=schedule.name or "Schedule",
             activities=mspdi_acts,
             predecessors_by_uid=preds_by_uid,
-        )
+        ),
     )
 
     schedule_name = schedule.name.replace(" ", "_")[:40]
