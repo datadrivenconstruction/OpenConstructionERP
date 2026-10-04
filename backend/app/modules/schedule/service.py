@@ -608,7 +608,8 @@ _CALENDAR_BY_PICKER_REGION: dict[str, str] = {
     # "MIDDLE EAST" label below has always answered. The UAE is the one GCC
     # state that does not work it, and it stays reachable by "AE", "AE_DUBAI"
     # and "United Arab Emirates"; a UAE project stored under a region naming the
-    # group rather than the country still gets Sunday-Thursday.
+    # group rather than the country gets Sunday-Thursday from this table, unless
+    # its country column says AE, which calendar_region_for prefers to a group.
     "GULFSTATES": "GULF",
     "MIDDLEEAST": "GULF",
     # Not a week change: RU is Monday-Friday and eight hours, exactly DEFAULT.
@@ -684,6 +685,41 @@ def get_work_calendar(region: str | None = None) -> dict:
     if mapped:
         return WORK_CALENDARS.get(mapped, WORK_CALENDARS["DEFAULT"])
     return WORK_CALENDARS["DEFAULT"]
+
+
+def calendar_region_for(region: str | None, country_code: str | None) -> str | None:
+    """The string a project's working week is resolved from: its region, or its country.
+
+    A project carries two statements of where it is. ``region`` is free text
+    (a city, a picker token, a group label) and ``country_code`` is ISO 3166-1
+    alpha-2, filled by the creator, the address, or the country pack active at
+    creation. The week used to be read off ``region`` alone, so a project
+    created under the Saudi pack with "Riyadh" or nothing in its region was
+    planned Monday to Friday while its country column said SA, and every date
+    landed on the wrong side of a Sunday-Thursday week.
+
+    The rule is the one the BOQ router already applies to rule sets. A region
+    that names a calendar of its own wins, so a project filed under "QA" or
+    "DE_BERLIN" keeps the week it has always had. A region that names none, or
+    names a group of countries rather than one ("GulfStates", "DACH", "Middle
+    East"), gives way to the country column, which is the more precise
+    statement: a UAE project filed under the Gulf group works the UAE week.
+
+    Args:
+        region: ``project.region`` as stored.
+        country_code: ``project.country_code`` as stored.
+
+    Returns:
+        The string to hand :func:`get_work_calendar`.
+    """
+    country = (country_code or "").strip().upper()
+    if len(country) != 2 or not country.isalpha():
+        return region
+    from app.core.classification_registry import is_macro_region
+
+    if get_work_calendar(region) is WORK_CALENDARS["DEFAULT"] or is_macro_region(region):
+        return country
+    return region
 
 
 def compute_duration(
@@ -928,7 +964,9 @@ class ScheduleService:
                 project to ask, which nothing the product creates is.
 
         Returns:
-            ``project.region`` as stored, or ``None`` when the project is gone
+            ``project.region`` as stored, or the project's country code when
+            the region names no calendar of its own (see
+            :func:`calendar_region_for`), or ``None`` when the project is gone
             or was never given, which :func:`get_work_calendar` reads as the
             DEFAULT Monday-to-Friday week.
         """
@@ -937,7 +975,9 @@ class ScheduleService:
         from app.modules.projects.repository import ProjectRepository
 
         project = await ProjectRepository(self.session).get_by_id(project_id)
-        return project.region if project else None
+        if project is None:
+            return None
+        return calendar_region_for(project.region, getattr(project, "country_code", None))
 
     # ── Schedule operations ────────────────────────────────────────────────
 
