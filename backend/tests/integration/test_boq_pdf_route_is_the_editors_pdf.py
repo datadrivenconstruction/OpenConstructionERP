@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import asyncio
 import io
+import re
 import uuid
 
 import pypdf
@@ -109,7 +110,14 @@ async def _bill(client: AsyncClient, auth: dict[str, str], *, locale: str = "en"
     section_id = resp.json()["id"]
 
     lines = [
-        {"ordinal": "01.001", "description": "Formwork", "quantity": 10, "unit_rate": 50, "metadata": {}},
+        {
+            "ordinal": "01.001",
+            "description": "Formwork",
+            "quantity": 10,
+            "unit_rate": 50,
+            # Per unit of the line: 2 m2 at 25 makes the rate of 50.
+            "metadata": {"resources": [{"name": "Plywood sheeting", "unit": "m2", "quantity": 2, "unit_rate": 25}]},
+        },
         {
             "ordinal": "01.002",
             "description": "Imported anchors",
@@ -145,10 +153,13 @@ async def test_a_dollar_line_prints_in_euro_and_the_section_adds_up(client: Asyn
     text, language = await _pdf(client, auth, boq_id)
 
     assert "900.00" in text, "the dollar line is not printed in euro"
-    assert "90.00" in text, "the dollar rate is not printed in euro"
+    # The rate on its own, not the tail of 900.00 or 1,090.00.
+    assert re.search(r"(?<![\d,.])90\.00", text), "the dollar rate is not printed in euro"
     assert "1,000.00" not in text, "the dollar line printed its own figure under a euro heading"
     assert "1,400.00" in text
     assert language == "en"
+    # The build-up is the estimator's own cost: not printed unless asked for.
+    assert "Plywood sheeting" not in text
 
 
 @pytest.mark.asyncio
@@ -162,6 +173,10 @@ async def test_the_editor_query_is_honoured(client: AsyncClient, auth: dict[str,
     assert language == "de"
     # m3 lines in cubic feet: 10 m3 is 353.15 ft3.
     assert "353.15" in text
+    # The resource under the line, scaled to it: 2 m2 per unit times 10 is
+    # 20 m2, which prints as 215.28 ft2, and 20 at 25 is 500.
+    assert "Plywood sheeting" in text
+    assert "215.28" in text
 
 
 @pytest.mark.asyncio
