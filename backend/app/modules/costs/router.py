@@ -5728,12 +5728,6 @@ _CWICR_NEEDED_COLUMNS = frozenset(
 )
 
 
-# Stands in for a missing rate code when the import groups rows by code. A
-# missing value is not equal to itself, so it cannot be a dictionary key, and
-# any string chosen for it could be a real code.
-_NULL_RATE_CODE = object()
-
-
 class _CwicrImportTally:
     """What one cost import has done so far, carried from one set of codes to the next.
 
@@ -5838,27 +5832,101 @@ def _cwicr_unit_ids(parquet: Any, rate_code_column: str, float_columns: frozense
     """One integer per parquet row naming the set of rows it has to be processed with.
 
     Reads the ``rate_code`` column alone, in batches. Ids are handed out in the
-    order the keys first appear, so a lower id always means an earlier first
-    row, which is what lets the import release codes in their original order.
+    order the sets first appear, so a lower id always means an earlier first
+    row, which is what lets the import release sets in their original order.
+
+    Rows that share a key (:func:`_cwicr_unit_keys`) share a set. Two more rules
+    keep the stream equal to the whole frame:
+
+    * A row without a code belongs to no work item, so it is a set of its own.
+      Keyed by its stringified code it would join every other such row in the
+      file into one set that stays open until the last of them, and everything
+      after the first would wait for it. The transform does file such a row's
+      resources under the word its missing code stringifies to (``None``), so
+      when an item is literally coded that way the rows join that item instead.
+    * The transform hands its rows over in the order each raw code first
+      appears. Two raw codes of one set (``"H"`` and ``" H"``) can open on
+      either side of another set's first row, and then that set has to be
+      processed in the same frame, or its rows would be handed over after both
+      of them instead of between. Such sets are merged.
     """
     import numpy as np
     import pandas as pd
     import pyarrow as pa
 
-    ids: dict[Any, int] = {}
+    ids: dict[str, int] = {}
+    raw_seen: set[str] = set()
+    # Per set id: the row it opens on, and the row its last raw code opens on.
+    first_row: list[int] = []
+    last_open: list[int] = []
+    # Rows without a code, and the key their missing code stringifies to.
+    null_rows: list[Any] = []
+    null_keys: list[Any] = []
     parts: list[Any] = []
+    offset = 0
     for record_batch in parquet.iter_batches(batch_size=read_rows, columns=[rate_code_column]):
-        frame = _cwicr_arrow_frame(pa.Table.from_batches([record_batch]), float_columns)
-        local, uniques = pd.factorize(_cwicr_unit_keys(frame.iloc[:, 0]), use_na_sentinel=False)
-        mapping = np.fromiter(
-            (ids.setdefault(_NULL_RATE_CODE if pd.isna(key) else key, len(ids)) for key in uniques),
-            dtype=np.int64,
-            count=len(uniques),
+        codes = _cwicr_arrow_frame(pa.Table.from_batches([record_batch]), float_columns).iloc[:, 0]
+        n = len(codes)
+        null = codes.isna().to_numpy()
+        keys = _cwicr_unit_keys(codes).to_numpy(dtype=object)
+        coded = np.flatnonzero(~null)
+        local, raws = pd.factorize(codes.astype(str).to_numpy(dtype=object)[coded])
+        _, first_of_raw = np.unique(local, return_index=True)
+        opens = coded[first_of_raw]
+        nulls = np.flatnonzero(null)
+
+        # Walk what can open a set in row order, so ids follow first rows.
+        events = sorted(
+            [(int(pos), raw) for pos, raw in zip(opens, raws, strict=True)] + [(int(p), None) for p in nulls]
         )
-        parts.append(mapping[local])
+        unit_of_raw: dict[str, int] = {}
+        null_ids = np.empty(len(nulls), dtype=np.int64)
+        null_index = 0
+        for pos, raw in events:
+            row = offset + pos
+            if raw is None:
+                null_ids[null_index] = len(first_row)
+                null_index += 1
+                first_row.append(row)
+                last_open.append(row)
+                continue
+            key = keys[pos]
+            unit = ids.get(key)
+            if unit is None:
+                unit = ids[key] = len(first_row)
+                first_row.append(row)
+                last_open.append(row)
+            elif raw not in raw_seen:
+                last_open[unit] = row
+            raw_seen.add(raw)
+            unit_of_raw[raw] = unit
+
+        out = np.empty(n, dtype=np.int64)
+        out[coded] = np.fromiter((unit_of_raw[r] for r in raws), dtype=np.int64, count=len(raws))[local]
+        out[nulls] = null_ids
+        if len(nulls):
+            null_rows.append(nulls + offset)
+            null_keys.append(keys[nulls])
+        parts.append(out)
+        offset += n
     if not parts:
         return np.empty(0, dtype=np.int64)
-    return np.concatenate(parts)
+    unit_of_row = np.concatenate(parts)
+
+    for rows, keys in zip(null_rows, null_keys, strict=True):
+        for row, key in zip(rows, keys, strict=True):
+            if key in ids:
+                unit_of_row[row] = ids[key]
+
+    # Merge every set that opens before an earlier set's last raw code does.
+    # Sets are in first-row order, so a running maximum of where each one's
+    # last raw code opened says whether the next set starts inside it.
+    first = np.asarray(first_row, dtype=np.int64)
+    reach = np.maximum.accumulate(np.asarray(last_open, dtype=np.int64))
+    starts_new = np.ones(len(first), dtype=bool)
+    starts_new[1:] = first[1:] > reach[:-1]
+    merged = np.cumsum(starts_new) - 1
+    return merged[unit_of_row]
 
 
 def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> dict[str, Any]:

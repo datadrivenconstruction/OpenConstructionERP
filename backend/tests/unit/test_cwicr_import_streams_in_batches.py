@@ -42,6 +42,7 @@ from tests._cwicr_import_cases import (
     LONG_A,
     hard_case_rows,
     write_hard_case_parquet,
+    write_orphan_scattered_parquet,
     write_synthetic_parquet,
 )
 from tests._cwicr_whole_frame_import import whole_frame_import
@@ -139,6 +140,9 @@ def test_the_fixture_reaches_every_hard_case(hard_case: Path, monkeypatch: pytes
     assert all(json.loads(row[12])["scope_of_work"] == ["Spaced step.", "Plain step."] for row in d_rows)
     # The two long codes collide on their first 100 characters.
     assert len(by_code[LONG_A[:100]]) == 2
+    # "H" and " H" are handed over by the first row of each raw code, with K
+    # between them, not together.
+    assert [row[0] for row in recorded.rows if row[0] in {"H", "K"}] == ["H", "K", "H"]
     # E is skipped, N is refused, the rows without a code are never stored.
     assert "E" not in by_code
     assert result["skipped"] == 1
@@ -269,6 +273,73 @@ def test_an_import_cut_off_mid_way_keeps_what_the_old_one_kept_and_resumes(
     assert table == clean
     assert len(table) > committed
     assert resumed["failed_codes"] == ["N"]
+
+
+def _spy_on_frames(monkeypatch: pytest.MonkeyPatch) -> list[int]:
+    """Record the row count of every frame the stream hands to the transform."""
+    sizes: list[int] = []
+    transform = router._import_cwicr_codes
+
+    def _spy(df: Any, db_id: str, tally: Any) -> None:
+        sizes.append(len(df))
+        transform(df, db_id, tally)
+
+    monkeypatch.setattr(router, "_import_cwicr_codes", _spy)
+    return sizes
+
+
+def test_rows_without_a_code_do_not_hold_the_base_back(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A resource row with no rate code, every so often, must not chain the file into one set.
+
+    Every missing code stringifies to the same word, so keyed by that word the
+    rows without a code form one set whose last row is the last of them in the
+    file. Nothing after its first row could be released before then, and the
+    stream would hand the transform nearly the whole base as one frame, which
+    is the peak it exists to avoid. They belong to no item, so each stands alone.
+    """
+    path = tmp_path / "orphans.parquet"
+    total = write_orphan_scattered_parquet(path, 2000, 100)
+    read_rows = 100
+
+    expected, before = _run(whole_frame_import, path, monkeypatch, flush=250)
+    sizes = _spy_on_frames(monkeypatch)
+    result, after = _run(router._process_and_insert_cwicr, path, monkeypatch, flush=250, read_rows=read_rows)
+
+    assert after.rows == before.rows
+    assert after.flushes == before.flushes
+    assert result == expected
+    assert sum(sizes) == total
+    # An item is two rows, so a frame is one read plus the item it spilled into.
+    assert max(sizes) <= read_rows + 2, (max(sizes), total)
+
+
+@pytest.mark.parametrize("read_rows", [1, 7, 100])
+def test_an_item_coded_none_still_collects_the_rows_without_a_code(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, read_rows: int
+) -> None:
+    """The transform files a missing code's resources under the word ``None``.
+
+    So an item that is literally coded ``None`` gets every one of them as its
+    own components, wherever in the file they sit. That is the old behaviour
+    and the stream keeps it, which means those rows must travel with that item
+    rather than alone.
+    """
+    import json
+
+    path = tmp_path / "literal_none.parquet"
+    write_orphan_scattered_parquet(path, 300, 40, literal_none_at=150)
+
+    expected, before = _run(whole_frame_import, path, monkeypatch, flush=64)
+    result, after = _run(router._process_and_insert_cwicr, path, monkeypatch, flush=64, read_rows=read_rows)
+
+    assert after.rows == before.rows
+    assert after.flushes == before.flushes
+    assert result == expected
+    # The case is only a case if the orphans reach the item from both sides of it.
+    (none_row,) = [row for row in before.rows if row[0] == "None"]
+    names = [c["name"] for c in json.loads(none_row[8])]
+    assert "Orphan resource 0" in names
+    assert "Orphan resource 280" in names
 
 
 def _peak_traced_bytes(fn: Any, parquet: Path, monkeypatch: pytest.MonkeyPatch, read_rows: int) -> int:

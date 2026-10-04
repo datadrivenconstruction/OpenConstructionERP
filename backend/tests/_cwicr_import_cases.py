@@ -18,6 +18,9 @@ file is made of such items, together with the shapes the real bases carry:
 * `` D `` and ``D`` are two items that strip to the same code, so the scope
   steps of one are matched to the other.
 * two codes over 100 characters truncate to the same stored code.
+* ``H`` and `` H`` also store as one code, but ``K`` opens between them and
+  closes after them, so the order the rows are handed over in depends on
+  releasing them by the first row of each raw code, not of the stored one.
 * ``E`` has no usable description and is skipped; ``N`` has a NUL character,
   which PostgreSQL refuses.
 * ``resource_code`` is an integer column with missing values, but none among
@@ -187,6 +190,18 @@ def hard_case_rows() -> list[dict[str, Any]]:
         _head("N", "Bad\x00name"),
         _resource("N", "Bad labour", 16),
     ]
+    # "H" and " H" store as the same code, and K opens between them and is
+    # still open when " H" arrives. The whole frame hands over H, K, H in the
+    # order the three raw codes first appear, so a loader that releases H and
+    # " H" together, ahead of K, changes which rows share a flush. It sits
+    # where no earlier item is still open, since an open item would hold all
+    # three back and release them together, in the right order by accident.
+    rows += [
+        _head("H", "Interleaved first"),
+        _head("K", "Interleaved between"),
+        _head(" H", "Interleaved second"),
+        _resource("K", "Between labour", 18),
+    ]
     # Padding, with the only missing resource codes late in the file. G opens
     # among them and closes the file, so everything after it waits for the end.
     # Each filler is one row that carries both the item and its resource, as
@@ -234,3 +249,22 @@ def write_synthetic_parquet(path: Path, items: int, rows_per_item: int = 6) -> N
         for part in range(rows_per_item - 1):
             rows.append(_resource(code, f"Synthetic resource {part} of {index}", 1000 + part, cost=1.0 + part))
     write_hard_case_parquet(path, rows)
+
+
+def write_orphan_scattered_parquet(path: Path, items: int, every: int, *, literal_none_at: int | None = None) -> int:
+    """A plain base with a resource row without a rate code after every ``every`` items.
+
+    Rows without a code belong to no work item, so nothing needs them grouped
+    with anything. With ``literal_none_at`` the item at that index is coded with
+    the word ``None``, which is what such a row's missing code turns into when
+    the transform stringifies it, so that item does collect their resources.
+    Returns the row count.
+    """
+    rows: list[dict[str, Any]] = []
+    for index in range(items):
+        code = "None" if index == literal_none_at else f"S{index:06d}"
+        rows.append(_head(code, f"Plain work item number {index}", cost=float(index % 89)))
+        rows.append(_resource(code, f"Plain resource of {index}", 1000 + index % 7))
+        if index % every == 0:
+            rows.append(_resource(None, f"Orphan resource {index}", 900 + index % 5))
+    return write_hard_case_parquet(path, rows)
