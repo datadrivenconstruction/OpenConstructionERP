@@ -88,6 +88,7 @@ PICKER_REGIONS_THAT_ARE_MONDAY_TO_FRIDAY: dict[str, str] = {
     "Croatia": "Saturday-Sunday weekend; the Labour Act sets a 40-hour week over five days.",
     "Czech": "Saturday-Sunday weekend.",
     "INTL": "Multi-region, so no single week applies; DEFAULT is the neutral answer rather than a guess.",
+    "Ireland": "Saturday-Sunday weekend.",
     "Italy": "Saturday-Sunday weekend.",
     "Japan": "Saturday-Sunday weekend.",
     "Korea": "Saturday-Sunday weekend.",

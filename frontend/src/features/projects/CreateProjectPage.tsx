@@ -69,6 +69,7 @@ const REGION_GROUPS: OptionGroup[] = [
     options: [
       { value: 'DACH', label: 'DACH (Germany, Austria, Switzerland)' },
       { value: 'UK', label: 'United Kingdom', iso: 'GB' },
+      { value: 'Ireland', label: 'Ireland', iso: 'IE' },
       { value: 'Nordics', label: 'Nordics (Sweden, Norway, Denmark, Finland)' },
       { value: 'France', label: 'France', iso: 'FR' },
       { value: 'Spain', label: 'Spain', iso: 'ES' },
@@ -240,6 +241,7 @@ export const CURRENCY_GROUPS: OptionGroup[] = [
       { value: 'CZK', label: 'CZK (Kč) - Czech Koruna' },
       { value: 'TRY', label: 'TRY (₺) - Turkish Lira' },
       { value: 'RUB', label: 'RUB (₽) - Russian Ruble' },
+      { value: 'UAH', label: 'UAH (₴) - Ukrainian Hryvnia' },
       { value: 'HUF', label: 'HUF (Ft) - Hungarian Forint' },
       { value: 'RON', label: 'RON (lei) - Romanian Leu' },
       { value: 'ISK', label: 'ISK (kr) - Icelandic Krona' },

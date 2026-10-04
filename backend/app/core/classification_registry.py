@@ -327,6 +327,7 @@ REGION_ALIAS_TO_COUNTRY: Mapping[str, str] = MappingProxyType(
         "AUSTRALIA": "AU",
         "NEWZEALAND": "NZ",
         "CROATIA": "HR",
+        "IRELAND": "IE",
         # The picker's macro options, anchored the same way the macro
         # names above are: on a member country whose standard the whole
         # option can live with. Where the members agree the anchor is
