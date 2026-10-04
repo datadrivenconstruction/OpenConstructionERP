@@ -323,6 +323,9 @@ export type EditableField = (typeof EDITABLE_FIELDS)[number];
 export const SUGGESTED_VAT_RATES: Record<string, number> = {
   'DACH (Germany, Austria, Switzerland)': 0.19,
   'United Kingdom': 0.20,
+  // Construction services in Ireland are charged at the 13.5% reduced rate,
+  // not the 23% standard one; the bill seeds the same tier on the server.
+  'Ireland': 0.135,
   'France': 0.20,
   'Spain': 0.21,
   'Italy': 0.22,
@@ -373,6 +376,15 @@ export function getVatRateFromMarkups(markups: Markup[]): number {
 export function getVatRate(region?: string): number {
   if (!region) return 0;
   return SUGGESTED_VAT_RATES[region] ?? 0;
+}
+
+/**
+ * The suggested rate as a percentage for display, keeping a fractional rate.
+ * Rounded to two decimals rather than to a whole number: Ireland's 13.5 would
+ * otherwise read as 14, and 0.135 * 100 is 13.500000000000002 in floating point.
+ */
+export function getVatPercent(region?: string): number {
+  return Math.round(getVatRate(region) * 10000) / 100;
 }
 
 /* ── Currency Symbols ────────────────────────────────────────────────── */

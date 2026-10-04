@@ -29,10 +29,13 @@ Sources, read 2026-10-04:
 
 from __future__ import annotations
 
+import uuid
 from decimal import Decimal
 
 import pytest
 
+from app.modules.boq.markup_templates import CONSTRUCTION_TIER_COUNTRIES, CONSTRUCTION_TIER_TAX_CODE
+from app.modules.boq.service import _construction_tier_rate
 from app.modules.i18n_foundation.seed import load_tax_seed_rows
 from app.modules.i18n_foundation.tax_rules import active_rows, resolve, row_from_mapping
 
@@ -75,6 +78,56 @@ def test_the_irish_construction_rate_is_the_reduced_tier() -> None:
     assert [row["rate_pct"] for row in reduced] == ["13.5"]
     assert "Construction" in reduced[0]["tax_name"]
     assert reduced[0]["is_default"] is False
+
+
+def test_every_construction_tier_country_names_the_row_its_bill_is_priced_from() -> None:
+    """The two maps carry one set of countries, and each named row ships."""
+    assert set(CONSTRUCTION_TIER_COUNTRIES) == set(CONSTRUCTION_TIER_TAX_CODE)
+    shipped = {(row["country_code"], row["tax_code"]) for row in load_tax_seed_rows()}
+    for country, tax_code in CONSTRUCTION_TIER_TAX_CODE.items():
+        assert (country, tax_code) in shipped, f"{country}'s tier row {tax_code} is not in the seed"
+
+
+@pytest.mark.parametrize(
+    ("on_date", "expected"),
+    [
+        # The day that tells every wrong answer apart: the standard rate was 21
+        # then, the UK stack carries 20 and today's standard rate is 23.
+        ("2020-10-01", "13.5"),
+        ("2026-10-04", "13.5"),
+        ("2011-12-31", "13.5"),
+        # The tier row opens on 2003-01-01; before it the bill has no tier on
+        # file and the caller falls back, rather than being handed 23.
+        ("2002-12-31", None),
+    ],
+)
+def test_an_irish_bill_reads_the_construction_tier(on_date: str, expected: str | None) -> None:
+    assert _construction_tier_rate(_rows(), "IE", "VAT_RED", on_date, uuid.uuid4()) == expected
+
+
+def test_china_reads_its_nine_percent_tier_not_its_headline_rate() -> None:
+    assert _standard("CN", "2026-10-04") == "13"
+    assert _construction_tier_rate(_rows(), "CN", "VAT_RED", "2026-10-04", uuid.uuid4()) == "9"
+
+
+def test_two_tier_rows_in_force_are_refused_rather_than_picked(caplog: pytest.LogCaptureFixture) -> None:
+    """A second VAT_RED row in one window leaves nothing to choose by, so nothing is chosen."""
+    rows = [*_rows(), row_from_mapping({**_irish_tier_row(), "rate_pct": "12.5"})]
+    with caplog.at_level("WARNING", logger="app.modules.boq.service"):
+        assert _construction_tier_rate(rows, "IE", "VAT_RED", "2026-10-04", uuid.uuid4()) is None
+    assert any("VAT_RED" in record.getMessage() for record in caplog.records)
+
+
+def test_a_tier_row_that_is_not_a_number_is_refused_loudly(caplog: pytest.LogCaptureFixture) -> None:
+    rows = [row for row in _rows() if not (row.country_code == "IE" and row.tax_code == "VAT_RED")]
+    rows.append(row_from_mapping({**_irish_tier_row(), "rate_pct": "thirteen and a half"}))
+    with caplog.at_level("WARNING", logger="app.modules.boq.service"):
+        assert _construction_tier_rate(rows, "IE", "VAT_RED", "2026-10-04", uuid.uuid4()) is None
+    assert any("thirteen and a half" in record.getMessage() for record in caplog.records)
+
+
+def _irish_tier_row() -> dict:
+    return next(row for row in load_tax_seed_rows() if row["country_code"] == "IE" and row["tax_code"] == "VAT_RED")
 
 
 def test_the_irish_second_reduced_rate_did_not_exist_before_july_2011() -> None:

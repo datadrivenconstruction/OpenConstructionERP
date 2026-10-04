@@ -23,15 +23,16 @@ by a rule that grows on its own.
 Three populations, counted apart
 -------------------------------
 "No disagreements" over the whole set would read as forty-six countries
-verified when it is thirty-six verified, nine unmeasured and one asserted
+verified when it is thirty-five verified, nine unmeasured and two asserted
 against a different number. A country with no row in the seed cannot be
 checked against the seed, so it is reported as unmeasured rather than as
 agreement, and every denominator is printed beside the verdict.
 
-The third population is one country and it is the interesting one. China's
-seed row carries the headline 13 and its bill is priced at the 9 tier
-construction is charged at, so the rule the other thirty-six obey would move
-a Chinese bill to a number that is right about the wrong question. It is named
+The third population is the interesting one. China's seed row carries the
+headline 13 and its bill is priced at the 9 tier construction is charged at,
+so the rule the other thirty-five obey would move a Chinese bill to a number
+that is right about the wrong question. Ireland is the same shape on a shared
+stack: standard 23, construction 13.5, seeded from the UK's 20. Both are named
 in ``CONSTRUCTION_TIER_COUNTRIES`` and asserted against the tier instead.
 
 Gated by ``OE_TEST_DB=pg`` (see conftest): it needs stored Project, BOQ and
@@ -259,7 +260,7 @@ async def test_a_construction_tier_survives_its_countrys_headline_rate(pg_sessio
     answering the question rather than a table answering a different one.
     """
     await _install_tax_seed(pg_session)
-    assert set(CONSTRUCTION_TIER_COUNTRIES) == {"CN"}, (
+    assert set(CONSTRUCTION_TIER_COUNTRIES) == {"CN", "IE"}, (
         "a country was added to or removed from the construction-tier set without this test "
         "being told which rate its bill should carry"
     )
@@ -277,7 +278,10 @@ async def test_a_construction_tier_survives_its_countrys_headline_rate(pg_sessio
         f"a Chinese bill was seeded at {line.percentage}. Construction is charged at {tier} there; "
         f"{_seed_rate('CN')} is the headline rate and answers a different question."
     )
-    assert line.metadata_.get("vat_rate_source") == "region_template"
+    # Read from the seed's VAT_RED row since Ireland made the tier a lookup of
+    # its own; the stack's 9 and the seed's 9 agree, and the line says which
+    # one it was.
+    assert line.metadata_.get("vat_rate_source") == "country_seed"
 
     stated = await _bill_for(pg_session, "CN", vat="6")
     await BOQService(pg_session).apply_default_markups(stated.id)
@@ -287,6 +291,55 @@ async def test_a_construction_tier_survives_its_countrys_headline_rate(pg_sessio
 
     for country, reason in CONSTRUCTION_TIER_COUNTRIES.items():
         assert reason.strip(), f"{country} claims a construction tier with no reason, which claims nothing"
+
+
+@pytest.mark.parametrize(
+    ("base_date", "expected"),
+    [
+        # The date that separates every wrong answer: Ireland's standard rate
+        # was 21 then, the UK stack it is seeded from carries 20, and today's
+        # standard rate is 23. Only the construction tier is 13.5.
+        ("2020-10-01", "13.5"),
+        (None, "13.5"),
+        ("2026-Q1", "13.5"),
+    ],
+)
+async def test_an_irish_bill_is_charged_the_construction_rate(pg_session, base_date, expected) -> None:
+    """Ireland is seeded from the UK stack and owes neither its 20 nor its own standard 23."""
+    await _install_tax_seed(pg_session)
+    assert _seed_rate("IE") == Decimal("23"), "Ireland's standard rate moved, so this proves nothing"
+    uk_line = [line for line in resolve_region_lines("UK", vat_rate=None) if line["category"] == "tax"][0]
+    assert Decimal(str(uk_line["percentage"])) == Decimal("20")
+
+    boq = await _bill_for(pg_session, "IE", base_date=base_date)
+    await BOQService(pg_session).apply_default_markups(boq.id)
+    lines = await _tax_lines(pg_session, boq.id)
+    assert len(lines) == 1
+    assert Decimal(lines[0].percentage) == Decimal(expected), (
+        f"an Irish bill dated {base_date!r} was charged {lines[0].percentage}; construction services "
+        f"are charged at the 13.5 reduced rate"
+    )
+    assert lines[0].metadata_["vat_rate_source"] == "country_seed"
+    assert lines[0].metadata_["vat_override"] is True
+
+
+async def test_an_irish_project_that_states_its_rate_keeps_it(pg_session) -> None:
+    """A project override still wins over the tier, as it does over every seeded rate."""
+    await _install_tax_seed(pg_session)
+    boq = await _bill_for(pg_session, "IE", vat="23")
+    await BOQService(pg_session).apply_default_markups(boq.id)
+    line = (await _tax_lines(pg_session, boq.id))[0]
+    assert Decimal(line.percentage) == Decimal("23")
+    assert line.metadata_["vat_rate_source"] == "project"
+
+
+async def test_an_irish_bill_on_an_unseeded_install_falls_back_to_the_stack(pg_session) -> None:
+    """No tier row on file: the UK stack's line stands and says so, rather than nothing at all."""
+    boq = await _bill_for(pg_session, "IE")
+    await BOQService(pg_session).apply_default_markups(boq.id)
+    line = (await _tax_lines(pg_session, boq.id))[0]
+    assert Decimal(line.percentage) == Decimal("20")
+    assert line.metadata_["vat_rate_source"] == "region_template"
 
 
 async def test_a_country_with_no_single_tax_line_keeps_its_own_rates(pg_session) -> None:

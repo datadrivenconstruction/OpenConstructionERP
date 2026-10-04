@@ -1104,7 +1104,11 @@ _MORE_COUNTRY_TEMPLATES: list[dict[str, Any]] = [
         name="Ireland",
         country_code="IE",
         currency="EUR",
-        vat="23",
+        # Construction services are charged at the 13.5 reduced rate, not the
+        # 23 standard one, the same way China's template carries its 9 tier.
+        # The bill engine reads the same tier from the tax seed, see
+        # ``CONSTRUCTION_TIER_COUNTRIES``, so both engines agree.
+        vat="13.5",
         overhead="12",
         profit="7",
         tax_label="VAT",

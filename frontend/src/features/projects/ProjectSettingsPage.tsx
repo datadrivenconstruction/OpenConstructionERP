@@ -35,7 +35,7 @@ import { useFxRatesStore, getFxRate } from '@/stores/useFxRatesStore';
 import { getErrorMessage } from '@/shared/lib/api';
 import { projectsApi, type Project, type ProjectFxRate } from './api';
 import { CURRENCY_GROUPS, CreateProjectModal } from './CreateProjectPage';
-import { getVatRate } from '../boq/boqHelpers';
+import { getVatPercent } from '../boq/boqHelpers';
 import { TranslationSettingsTab } from '../translation';
 import { MethodologyActiveCard } from '../methodology/MethodologyActiveCard';
 import { ruleSetLabel } from '../validation/ruleSetLabels';
@@ -651,7 +651,7 @@ export function ProjectSettingsPage() {
   }
 
   const baseCurrency = project.currency || '';
-  const regionalVatPct = Math.round(getVatRate(project.region) * 100); // e.g. 19, 20
+  const regionalVatPct = getVatPercent(project.region); // e.g. 19, 20, 13.5
 
   // ── Base currency edit (#editable base currency) ──────────────────────
   // The base currency is changeable after creation. Saving it RELABELS

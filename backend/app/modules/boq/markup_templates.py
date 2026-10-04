@@ -35,6 +35,7 @@ __all__ = [
     "REGION_BY_COUNTRY",
     "NON_SINGLE_TAX_REGIONS",
     "CONSTRUCTION_TIER_COUNTRIES",
+    "CONSTRUCTION_TIER_TAX_CODE",
     "resolve_region_lines",
     "region_lines_for_country",
     "region_key_for_country",
@@ -2701,9 +2702,12 @@ REGION_BY_COUNTRY: dict[str, str] = {
     # Ireland reads the UK stack rather than getting one of its own. The
     # measurement convention, the bill structure and the preliminaries practice
     # are the same tradition, and the one number that differs, VAT at 13.5 on
-    # construction services against 20, is exactly what the per-project rate
-    # override is for. A separate IE stack would be the UK stack retyped, which
-    # is how two descriptions of one convention start to disagree.
+    # construction services against 20, is not left to the per-project
+    # override: Ireland is a construction-tier country (see
+    # ``CONSTRUCTION_TIER_COUNTRIES``), so a bill resolves the 13.5 tier from
+    # the dated tax seed and swaps it into the UK stack's line. A separate IE
+    # stack would be the UK stack retyped, which is how two descriptions of
+    # one convention start to disagree.
     "IE": "UK",
     "ZA": "ZA",
     "IL": "IL",
@@ -2751,10 +2755,20 @@ REGION_BY_COUNTRY: dict[str, str] = {
 # worst shape a wrong number can have, because both figures are defensible and
 # only one of them is about building work.
 #
-# So these countries keep the rate written on their own regional stack, which
-# is where the construction tier is recorded. A per-project override still
-# wins, because a project that states its rate has answered the question
-# itself.
+# So for these countries the bill asks the seed a different question: not
+# "which rate is the standard one" but "which rate does the construction tier
+# carry on this bill's date", read from the row named in
+# ``CONSTRUCTION_TIER_TAX_CODE``. Where that row is not on file (an unseeded
+# install, or one seeded before the tier shipped) the regional stack's own
+# line stands. A per-project override still wins, because a project that
+# states its rate has answered the question itself.
+#
+# The regional stack is NOT a safe place to record the tier on its own, and
+# Ireland is why. China's stack is China's, so its line can carry the 9. The
+# Irish bill is seeded from the UK stack, whose line is Britain's 20, so
+# leaving the stack alone there would charge an Irish bill a British rate,
+# and taking the seed's standard answer would charge it 23. Only the tier row
+# gives 13.5.
 #
 # ``tests/pg/test_a_bill_is_priced_at_its_own_countrys_vat.py`` pins this set
 # in both directions: a country added here without a tier to justify it fails,
@@ -2767,6 +2781,21 @@ CONSTRUCTION_TIER_COUNTRIES: dict[str, str] = {
         "VAT_RED. Both figures are right about different questions and 9 is the one a bill of "
         "quantities asks"
     ),
+    "IE": (
+        "Ireland's standard VAT rate is 23, which is what the seed's is_default row carries, and "
+        "construction services (building and civil engineering work on immovable goods) are "
+        "charged at the 13.5 reduced rate the seed carries as VAT_RED, per Revenue's VAT rates "
+        "database. 13.5 is the one a bill of quantities asks"
+    ),
+}
+
+#: Which seed row carries each construction tier, by ``tax_code``. Kept beside
+#: :data:`CONSTRUCTION_TIER_COUNTRIES` and pinned to the same keys by
+#: ``tests/unit/test_country_vat_tiers_resolve_on_their_dates.py``, so a tier
+#: country cannot be added without naming the row its bill is priced from.
+CONSTRUCTION_TIER_TAX_CODE: dict[str, str] = {
+    "CN": "VAT_RED",
+    "IE": "VAT_RED",
 }
 
 NON_SINGLE_TAX_REGIONS: dict[str, str] = {

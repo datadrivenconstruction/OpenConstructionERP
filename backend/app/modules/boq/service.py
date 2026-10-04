@@ -286,6 +286,7 @@ from app.modules.boq.activity_text import activity_description
 from app.modules.boq.base_date import ACCEPTED_SHAPES, price_base_day
 from app.modules.boq.markup_templates import (
     CONSTRUCTION_TIER_COUNTRIES,
+    CONSTRUCTION_TIER_TAX_CODE,
     region_key_for_country,
     resolve_region_lines,
 )
@@ -353,7 +354,8 @@ from app.modules.boq.schemas import (
 from app.modules.boq.templates import TEMPLATES
 from app.modules.costs.repository import CostItemRepository
 from app.modules.i18n_foundation.repository import TaxConfigRepository
-from app.modules.i18n_foundation.tax_rules import TaxRuleError
+from app.modules.i18n_foundation.tax_rules import TaxRateRow, TaxRuleError, active_rows
+from app.modules.i18n_foundation.tax_rules import format_rate as format_tax_rate
 from app.modules.i18n_foundation.tax_rules import resolve as resolve_tax
 from app.modules.i18n_foundation.tax_rules import row_from_orm as tax_row_from_orm
 
@@ -2147,6 +2149,64 @@ class _LockedSkips:
             "locked_skipped": len(self._lines),
             "locked_boqs": [{"id": str(boq_id), "name": name} for boq_id, name in ordered],
         }
+
+
+def _construction_tier_rate(
+    rows: Sequence[TaxRateRow], country: str, tax_code: str, on_date: str, boq_id: uuid.UUID
+) -> str | None:
+    """The construction tier a country's bill is charged on ``on_date``, or ``None``.
+
+    Read straight off the tier's own row rather than through ``resolve``,
+    because ``resolve`` answers which rate is the STANDARD one and a tier is
+    by definition not. The window rule is still not written twice: the rows
+    in force come from :func:`active_rows`, the same comparison the resolver
+    and the repository use.
+
+    Args:
+        rows: The country's rows as the resolver reads them.
+        country: ISO 3166-1 alpha-2, upper case.
+        tax_code: The tier row's ``tax_code``, from ``CONSTRUCTION_TIER_TAX_CODE``.
+        on_date: The bill's own price-base day as an ISO date.
+        boq_id: The bill, so a broken row is reported against it.
+
+    Returns:
+        The rate as a decimal-string percentage. ``None`` when the tier is not
+        on file for that date, which is the ordinary state of an unseeded
+        install and leaves the region's own line standing, and ``None`` with a
+        warning when the rows on file cannot be read as one rate.
+    """
+    in_force = [
+        row
+        for row in active_rows(rows, country, on_date)
+        if row.tax_code == tax_code and row.combination in ("national", "federal")
+    ]
+    if not in_force:
+        return None
+    if len(in_force) > 1:
+        logger.warning(
+            "BOQ %s: %s has %d %s rows in force on %s, so which construction rate applies cannot be "
+            "told; the region's own VAT line stands",
+            boq_id,
+            country,
+            len(in_force),
+            tax_code,
+            on_date,
+        )
+        return None
+    try:
+        rate = Decimal(in_force[0].rate_pct)
+    except (InvalidOperation, TypeError):
+        rate = None
+    if rate is None or not rate.is_finite() or rate < 0:
+        logger.warning(
+            "BOQ %s: the %s %s row carries rate_pct %r, which is not a rate; the region's own VAT line stands",
+            boq_id,
+            country,
+            tax_code,
+            in_force[0].rate_pct,
+        )
+        return None
+    return format_tax_rate(rate)
 
 
 class BOQService:
@@ -6328,7 +6388,13 @@ class BOQService:
             return None
 
     async def _seeded_vat_rate(self, country_code: str | None, base_date: str | None, boq_id: uuid.UUID) -> str | None:
-        """The country's own standard VAT rate from the shipped tax seed.
+        """The VAT rate a bill of quantities in this country is charged, from the tax seed.
+
+        That is the country's standard rate almost everywhere. In a country
+        named in ``CONSTRUCTION_TIER_COUNTRIES`` it is the construction tier
+        instead, read from the row ``CONSTRUCTION_TIER_TAX_CODE`` names and in
+        force on the bill's base date: China's 9 rather than its headline 13,
+        Ireland's 13.5 rather than its standard 23 or the UK stack's 20.
 
         The bill used to price a country with no project override off its
         region's stack, which is a neighbour's rate wherever a region serves
@@ -6375,13 +6441,16 @@ class BOQService:
         """
         if not country_code:
             return None
+        # The seed's standard answer is not what a bill of quantities asks where
+        # construction has a tier of its own, so those countries are asked for
+        # the tier row instead, further down. A tier country with no row named
+        # keeps the old behaviour, the regional stack's own line, rather than
+        # falling through to the standard rate it is listed here to avoid.
+        tier_code: str | None = None
         if country_code.upper() in CONSTRUCTION_TIER_COUNTRIES:
-            # The seed answers "what is this country's standard rate", which is
-            # not what a bill of quantities asks where construction has a tier
-            # of its own. China's headline rate is 13 and its construction rate
-            # is 9; the 9 is on the regional stack, so leaving it alone is the
-            # answer rather than a gap.
-            return None
+            tier_code = CONSTRUCTION_TIER_TAX_CODE.get(country_code.upper())
+            if tier_code is None:
+                return None
         stated = (base_date or "").strip()
         day = price_base_day(stated)
         on_date = day.isoformat() if day else None
@@ -6412,6 +6481,14 @@ class BOQService:
             # about.
             logger.debug("Tax table unreadable for %s; the region's own VAT line stands", country_code)
             return None
+        if tier_code is not None:
+            return _construction_tier_rate(
+                [tax_row_from_orm(c) for c in configs],
+                country_code.upper(),
+                tier_code,
+                on_date or datetime.now(tz=UTC).date().isoformat(),
+                boq_id,
+            )
         try:
             resolution = resolve_tax([tax_row_from_orm(c) for c in configs], country_code, on_date=on_date)
         except TaxRuleError as exc:

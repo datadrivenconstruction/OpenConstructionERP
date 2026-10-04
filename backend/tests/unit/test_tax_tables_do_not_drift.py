@@ -74,7 +74,7 @@ region serves exactly one. That split is what
 :data:`_SERVED_BY_A_SHARED_REGION` records, and it is why this file asks two
 different questions of the fifth table rather than one.
 
-Read the ``xfailed`` count before reading the passes. Seven countries carry a
+Read the ``xfailed`` count before reading the passes. Six countries carry a
 neighbour's rate on this table and
 ``test_no_country_is_priced_at_another_country_s_rate`` fails because of it.
 Since the bill resolves a country's own rate from the tax seed, that table is
@@ -254,6 +254,17 @@ _CONSTRUCTION_TIER_DIVERGES: dict[str, str] = {
         "at and the rate the methodology template quotes. Both figures are right about different "
         "questions, and the platform needs both."
     ),
+    # Moved here from _SERVED_BY_A_SHARED_REGION on 2026-10-04. Ireland was
+    # excused there as a country the UK stack misprices, which was true and
+    # the wrong explanation: the number an Irish bill of quantities owes is
+    # neither the UK stack's 20 nor the seed's standard 23 but the 13.5 tier.
+    "IE": (
+        "Ireland's standard VAT rate is 23 %, which is what the seed row flagged is_default "
+        "carries. Construction services are charged at the 13.5 % reduced rate the seed carries "
+        "as VAT_RED, so 13.5 is the rate the methodology template quotes and the rate a bill "
+        "resolves from the seed. The bill table's own line is the UK stack's 20, a fallback "
+        "reached only on an install with no Irish tier row."
+    ),
 }
 
 
@@ -337,13 +348,6 @@ _SERVED_BY_A_SHARED_REGION: dict[str, str] = {
         "the NORDIC stack carries 25, which is Denmark's, Norway's and Sweden's rate. "
         "Finland raised its standard rate to 25.5 on 2024-09-01 and is now the one Nordic "
         "the shared number does not fit"
-    ),
-    "IE": (
-        "the UK stack carries 20, which is Great Britain's rate. Ireland's standard rate is "
-        "23. The REGION_BY_COUNTRY comment putting Ireland on the UK stack argues the two "
-        "share a measurement tradition and names the per-project override as the answer to "
-        "the rate, and it quotes 13.5, the Irish reduced rate for construction services, "
-        "which is a third number again and matches neither table"
     ),
     "KW": (
         "the GULF stack carries 5, which is the rate in the UAE and Saudi Arabia's former "
@@ -459,10 +463,11 @@ def _shared_region_mismatches() -> dict[str, tuple[Decimal, Decimal]]:
     belongs to a neighbour - would be the wrong explanation for a real
     divergence, which is the failure the reason strings exist to prevent.
 
-    Not a live case: China is the only tier country and the CN region serves
-    only China. It is written down because the two arms disagreed about it
-    silently until they were compared, and the next tier country is the one
-    that would find out.
+    A live case since 2026-10-04: Ireland is a tier country served by the UK
+    stack. It used to be excused here as a country the shared region
+    misprices, which named the wrong reason, because its bill owes the 13.5
+    tier rather than its own standard 23. China, the first tier country, has a
+    region of its own and never reached this arm.
     """
     out: dict[str, tuple[Decimal, Decimal]] = {}
     for region, countries in _countries_by_region().items():
@@ -877,7 +882,7 @@ def test_the_countries_a_shared_region_misprices_are_exactly_the_named_set() -> 
 @pytest.mark.xfail(
     strict=True,
     reason=(
-        "Seven countries have a neighbour's VAT rate on the region-keyed fallback table. "
+        "Six countries have a neighbour's VAT rate on the region-keyed fallback table. "
         "Nothing here is a guess and nothing is corrected: no rate in any of the three tables "
         "can be shown right from a source for these, and resolving a three-way disagreement by "
         "majority vote would put a confident wrong number where a visible inconsistency is. "
@@ -893,7 +898,7 @@ def test_no_country_is_priced_at_another_country_s_rate() -> None:
     """The invariant the bill table does not satisfy, written down as a failure.
 
     :data:`_SERVED_BY_A_SHARED_REGION` keeps the rest of this file green while
-    seven countries are mispriced, and a list of excuses is exactly where a
+    six countries are mispriced, and a list of excuses is exactly where a
     real defect goes to be forgotten. So the thing the platform ought to
     satisfy is also stated as a test, and it fails.
 
