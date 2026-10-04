@@ -1563,6 +1563,12 @@ class ChangeOrderService:
             currency=currency_s,
         )
 
+        # Record on the order where the approval landed, so the order can link
+        # to the bill section and the budget row it wrote. Until now those ids
+        # reached only the event payload and a log line, and the change-order
+        # screen could say "applied to the project budget" but not where.
+        await self._stamp_writeback(order_id, _md, boq_result, budget_writeback)
+
         await _safe_publish(
             "changeorder.approved",
             {
@@ -1602,6 +1608,37 @@ class ChangeOrderService:
             boq_result,
         )
         return fresh or order
+
+    async def _stamp_writeback(
+        self,
+        order_id: uuid.UUID,
+        metadata: dict[str, Any],
+        boq_result: dict[str, Any],
+        budget_writeback: dict[str, Any],
+    ) -> None:
+        """Write ``metadata.writeback`` naming the bill section and budget row.
+
+        Only ids that point at rows are written: a skipped BOQ writeback (no
+        bill, no items) leaves the BOQ keys out rather than null-filling them,
+        and a failed budget write leaves ``budget_row_id`` out. When nothing
+        landed the stamp is not written at all, so the absence of the key keeps
+        meaning "this order does not say where it went".
+
+        ``already_applied`` reports the section that an earlier pass wrote; it
+        is the right target to link to, so it is stamped like a fresh write.
+        """
+        stamp: dict[str, str] = {}
+        section_id = boq_result.get("section_id")
+        boq_id = boq_result.get("boq_id")
+        if section_id and boq_id:
+            stamp["boq_id"] = str(boq_id)
+            stamp["boq_section_id"] = str(section_id)
+        budget_row_id = budget_writeback.get("budget_id")
+        if budget_row_id:
+            stamp["budget_row_id"] = str(budget_row_id)
+        if not stamp:
+            return
+        await self.repo.update_fields(order_id, metadata_={**metadata, "writeback": stamp})
 
     async def _write_budget_delta_row(
         self,
@@ -2018,6 +2055,7 @@ class ChangeOrderService:
                 return {
                     "applied": False,
                     "reason": "already_applied",
+                    "boq_id": str(boq.id),
                     "section_id": str(sec.id),
                 }
 
