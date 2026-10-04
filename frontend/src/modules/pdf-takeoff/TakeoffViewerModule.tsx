@@ -6289,6 +6289,21 @@ export default function TakeoffViewerModule({
         if (typeof mid === 'string') createdByMeasurementId.set(mid, pos);
       }
 
+      // Every row was dropped: nothing exists to link or to announce, and a
+      // success toast reading "0 positions created, starting at" hid that.
+      // The picker stays open so another bill can be chosen.
+      if (created.length === 0) {
+        addToast({
+          type: 'warning',
+          title: t('takeoff.bulk_add_rejected_title', { defaultValue: 'Nothing added to the BOQ' }),
+          message: t('takeoff.bulk_add_rejected_msg', {
+            defaultValue:
+              'The BOQ accepted none of the selected measurements, so no positions were created. Check that the bill is open for editing and that each measurement has a quantity, then try again.',
+          }),
+        });
+        return;
+      }
+
       // Link measurements to their new positions (and push the quantity
       // server-side). A per-item failure only degrades the back-link -
       // the position already exists with the measured quantity.
@@ -6334,6 +6349,19 @@ export default function TakeoffViewerModule({
           first: first ? `${first.ordinal} ${first.description?.slice(0, 30) ?? ''}`.trim() : '',
         }),
       });
+      const notAccepted = bulkAddMeasurements.length - created.length;
+      if (notAccepted > 0) {
+        addToast({
+          type: 'warning',
+          title: t('takeoff.bulk_add_skipped_title', { defaultValue: 'Some measurements were not added' }),
+          message: t('takeoff.bulk_add_skipped_msg', {
+            defaultValue:
+              'Not accepted by the BOQ: {{count}} of {{total}} measurements. No positions were created for them and they stay unlinked.',
+            count: notAccepted,
+            total: bulkAddMeasurements.length,
+          }),
+        });
+      }
       if (linkFailures > 0) {
         addToast({
           type: 'warning',
