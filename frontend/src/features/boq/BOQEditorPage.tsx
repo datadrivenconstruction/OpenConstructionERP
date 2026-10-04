@@ -4916,6 +4916,25 @@ export function BOQEditorPage() {
               <ShieldCheck size={14} className="mr-1" />
               {t('boq.validate_dashboard_btn', { defaultValue: 'Validate' })}
             </Button>
+            {/* A Russian local estimate opens its resource-index breakdown:
+                each resource group times its regional quarterly index, then
+                NR and SP on the wage fund. Read-only over this BOQ. */}
+            {((project?.region ?? '').toUpperCase().startsWith('RU') ||
+              (project?.classification_standard ?? '').toLowerCase() === 'gesn') && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() =>
+                  navigate(`/price-index/resource-index?boq=${boq.id}&project=${boq.project_id}`)
+                }
+                title={t('boq.resource_index_btn_hint', {
+                  defaultValue: 'Price this estimate by the resource-index method, with every multiplication shown',
+                })}
+              >
+                <Percent size={14} className="mr-1" />
+                {t('boq.resource_index_btn', { defaultValue: 'Resource-index' })}
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="sm"
