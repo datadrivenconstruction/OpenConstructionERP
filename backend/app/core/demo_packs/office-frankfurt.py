@@ -497,4 +497,66 @@ TEMPLATE = DemoTemplate(
             "payment_terms": "Zahlbar innerhalb von 30 Tagen netto gem. § 16 VOB/B",
         },
     },
+    # Detailed build-up of the drywall positions as a German estimator writes
+    # it: quantities per m2 of wall or ceiling (cutting waste included) at
+    # Frankfurt merchant prices 2026, and the crew's hours per m2 at the
+    # average site wage (Mittellohn, 54 EUR/h including wage-related costs).
+    # Each list adds up to the position's unit rate to the cent.
+    position_resources={
+        # CW 100, two layers of 12.5 mm board each side, mineral wool in the cavity.
+        "340.4": [
+            ("drywall_cw_stud_100", "material", "m", 2.00, 2.30),
+            ("drywall_uw_track_100", "material", "m", 0.80, 2.10),
+            ("drywall_board_gkb_12_5", "material", "m2", 4.20, 3.20),
+            ("drywall_mineral_wool", "material", "m2", 1.05, 4.00),
+            ("drywall_screws", "material", "pcs", 40, 0.012),
+            ("drywall_joint_compound", "material", "kg", 0.60, 1.20),
+            ("drywall_sealing_tape", "material", "m", 1.20, 0.375),
+            ("drywall_anchors", "material", "pcs", 1.60, 0.15),
+            ("drywall_installer_avg_wage", "labor", "hr", 0.58, 54.00),
+            ("drywall_small_tools", "equipment", "hr", 0.58, 1.50),
+        ],
+        # Fire wall: fire-rated boards, a steel sheet inlay each side for impact,
+        # non-combustible insulation and metal anchors.
+        "340.5": [
+            ("drywall_cw_stud_100", "material", "m", 2.20, 2.30),
+            ("drywall_uw_track_100", "material", "m", 0.80, 2.10),
+            ("drywall_board_gkf_12_5", "material", "m2", 4.20, 4.10),
+            ("drywall_steel_sheet_inlay", "material", "m2", 2.10, 10.20),
+            ("drywall_mineral_wool_fire", "material", "m2", 1.05, 6.20),
+            ("drywall_screws", "material", "pcs", 50, 0.012),
+            ("drywall_joint_compound", "material", "kg", 0.60, 1.20),
+            ("drywall_fire_sealing_tape", "material", "m", 1.20, 0.70),
+            ("drywall_anchors", "material", "pcs", 2.00, 0.31),
+            ("drywall_installer_avg_wage", "labor", "hr", 1.45, 54.00),
+            ("drywall_small_tools", "equipment", "hr", 1.45, 1.40),
+        ],
+        # Shaft wall, boarded from one side only: CW 75 and two layers of 25 mm
+        # fire-rated board.
+        "340.7": [
+            ("drywall_cw_stud_75", "material", "m", 2.00, 1.90),
+            ("drywall_uw_track_75", "material", "m", 0.80, 1.70),
+            ("drywall_board_gkf_25", "material", "m2", 2.10, 9.90),
+            ("drywall_mineral_wool_fire", "material", "m2", 1.05, 2.60),
+            ("drywall_screws", "material", "pcs", 30, 0.015),
+            ("drywall_joint_compound", "material", "kg", 0.40, 1.20),
+            ("drywall_fire_sealing_tape", "material", "m", 1.20, 0.60),
+            ("drywall_anchors", "material", "pcs", 2.00, 0.31),
+            ("drywall_installer_avg_wage", "labor", "hr", 1.10, 54.00),
+            ("drywall_small_tools", "equipment", "hr", 1.10, 1.50),
+        ],
+        # Suspended ceiling: CD channel grid on adjustable hangers, two layers of
+        # 12.5 mm fire-rated board.
+        "350.12": [
+            ("ceiling_cd_profile", "material", "m", 3.20, 1.15),
+            ("ceiling_ud_profile", "material", "m", 0.80, 0.95),
+            ("ceiling_hangers", "material", "pcs", 1.30, 0.90),
+            ("ceiling_anchors", "material", "pcs", 1.30, 0.30),
+            ("drywall_board_gkf_12_5", "material", "m2", 2.10, 4.10),
+            ("drywall_screws", "material", "pcs", 30, 0.012),
+            ("drywall_joint_compound", "material", "kg", 0.50, 1.10),
+            ("ceiling_installer_avg_wage", "labor", "hr", 0.64, 54.00),
+            ("ceiling_tools_mobile_scaffold", "equipment", "hr", 0.64, 3.00),
+        ],
+    },
 )

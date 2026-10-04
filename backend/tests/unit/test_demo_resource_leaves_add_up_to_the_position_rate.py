@@ -54,11 +54,15 @@ def _positions() -> tuple[tuple[str, str, Decimal, tuple[dict, ...]], ...]:
                 rate = Decimal(str(unit_rate))
                 if rate <= 0:
                     continue
+                # Called the way the installer calls it, so a pack's
+                # hand-written build-up is held to the same identities.
                 meta = demo_projects._enrich_position_metadata(
                     description=description,
                     unit=unit,
                     unit_rate=unit_rate,
                     classification=classification,
+                    locale=template.locale,
+                    explicit_resources=template.position_resources.get(item[0]),
                 )
                 leaves = meta.get("resources") or []
                 if leaves:

@@ -469,4 +469,23 @@ TEMPLATE = DemoTemplate(
     actual_spend_ratio=0.28,
     spi_override=0.99,
     cpi_override=1.02,
+    # Detailed build-up of the double-lined plasterboard partition as a Polish
+    # cost estimate writes it: quantities per m2 of wall (cutting waste
+    # included) at Warsaw merchant prices 2026, and the crew's hours per m2 at
+    # the average labour-hour rate. The rows add up to the unit rate exactly.
+    position_resources={
+        # CW 75, two layers of 12.5 mm board each side, mineral wool in the cavity.
+        "4.3": [
+            ("drywall_cw_stud_75", "material", "m", 2.00, 9.20),
+            ("drywall_uw_track_75", "material", "m", 0.80, 8.10),
+            ("drywall_board_gkb_12_5", "material", "m2", 4.20, 15.80),
+            ("drywall_mineral_wool", "material", "m2", 1.05, 11.40),
+            ("drywall_screws", "material", "szt", 40, 0.0525),
+            ("drywall_joint_compound", "material", "kg", 0.60, 4.80),
+            ("drywall_sealing_tape", "material", "m", 1.20, 1.40),
+            ("drywall_anchors", "material", "szt", 1.60, 0.45),
+            ("drywall_installer_avg_wage", "labor", "hr", 1.15, 72.00),
+            ("drywall_small_tools", "equipment", "hr", 1.15, 1.40),
+        ],
+    },
 )

@@ -22,6 +22,7 @@ from sqlalchemy import delete, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.demo_accounts import SHOWCASE_OWNER_EMAIL
+from app.core.demo_resource_names import resource_name
 from app.core.demo_showcase import GERMAN_SHOWCASE_DEMO_IDS
 from app.modules.boq.models import BOQ, BOQMarkup, Position
 from app.modules.changeorders.models import ChangeOrder, ChangeOrderItem
@@ -353,6 +354,12 @@ ChangeOrderDef = tuple[str, str, str, str, str, float, int, list[ChangeOrderItem
 # Document stub: (name, description, category, mime_type, file_size, tags)
 DocumentDef = tuple[str, str, str, str, int, list[str]]
 
+# One row of a hand-written cost build-up for a single position:
+# (resource key, type, unit, quantity per unit of the position, unit rate).
+# The key is resolved to a name in the template's language through
+# ``demo_resource_names``; the rates are in the template's own currency.
+ResourceRowDef = tuple[str, str, str, float, float]
+
 
 @dataclass
 class DemoTemplate:
@@ -407,6 +414,13 @@ class DemoTemplate:
     # client contact, complete enough to pass an XRechnung dry-run out of
     # the box.
     einvoice_showcase: dict | None = None
+    # Optional: an explicit cost build-up for chosen positions, keyed by the
+    # position ordinal. Replaces the generated material / labour / equipment
+    # split with real rows (quantity per unit x unit rate). The rows must add
+    # up to the position's unit rate exactly; a list that does not is ignored
+    # with a warning and the position keeps its generated split, so a typo in
+    # a pack can never reprice a bill.
+    position_resources: dict[str, list[ResourceRowDef]] = field(default_factory=dict)
 
 
 # ---------------------------------------------------------------------------
@@ -2957,7 +2971,9 @@ def _make_resources(
 ) -> list[dict]:
     """Build a PositionResource array whose leaves sum to exactly ``unit_rate``.
 
-    specs: list of (name, type, pct, labor_hourly_rate_or_None)
+    specs: list of (resource key, type, pct, labor_hourly_rate_or_None)
+    - The key is written as the leaf's ``name`` and replaced by the name in the
+      project's language at the end of ``_enrich_position_metadata``.
     - For labor / equipment: ``hourly_rate`` is set, so the leaf is priced in
       hours - ``unit_rate`` is the hourly rate and ``quantity`` is the share
       divided by it.
@@ -3163,6 +3179,8 @@ def _resources_for_position(
     quantity: float,
     unit_rate: float,
     classification: dict | None = None,
+    *,
+    locale: str | None = None,
 ) -> list[dict]:
     """Build a per-trade labour/material/equipment buildup for one BOQ position.
 
@@ -3180,6 +3198,9 @@ def _resources_for_position(
     ``quantity`` decides only whether there is anything to build up: a
     zero-quantity row gets no buildup, like a zero-priced one.
 
+    ``locale`` picks the language of the Material / Labour / Equipment labels;
+    the trade part of the name is the position's own description.
+
     Returns an empty list for sections / zero-priced rows (nothing to build up).
     """
     rate = float(unit_rate or 0)
@@ -3193,9 +3214,9 @@ def _resources_for_position(
     rate_dec = Decimal(str(rate))
     out: list[dict] = []
     specs = (
-        ("Material", "material", mat_share),
-        ("Labour", "labor", lab_share),
-        ("Equipment", "equipment", eq_share),
+        (resource_name("generic_material", locale), "material", mat_share),
+        (resource_name("generic_labour", locale), "labor", lab_share),
+        (resource_name("generic_equipment", locale), "equipment", eq_share),
     )
     # Distribute the per-unit rate across the three leaves so the leaf rates sum
     # to EXACTLY ``unit_rate`` (no rounding drift): the last leaf takes the
@@ -3259,11 +3280,75 @@ def _resource_breakdown_rollup(resources: list[dict]) -> dict[str, dict[str, flo
     return out
 
 
-def _enrich_position_metadata(description: str, unit: str, unit_rate: float, classification: dict) -> dict:
+def _explicit_resources(
+    rows: list[ResourceRowDef],
+    unit_rate: float,
+    cwicr_ref: str,
+) -> list[dict] | None:
+    """Build the leaves of a hand-written build-up, or ``None`` if it does not add up.
+
+    Each row is a real norm: a quantity per unit of the position (metres of
+    stud per m2 of wall, hours per m2) against a unit rate. Nothing is scaled
+    or absorbed, because a remainder pushed into one row would turn a quoted
+    price into an invented one. The rows either sum to the position's unit
+    rate to the cent or they are refused.
+
+    Args:
+        rows: The template's rows for this position.
+        unit_rate: The position's unit rate.
+        cwicr_ref: Prefix for the leaf codes, as on the generated leaves.
+
+    Returns:
+        The leaves with the resource key as ``name``, or ``None`` when the
+        rows do not reproduce ``unit_rate`` exactly.
+    """
+    leaves: list[dict] = []
+    type_counter: dict[str, int] = {}
+    money_sum = Decimal("0")
+    for key, res_type, res_unit, quantity, rate in rows:
+        type_counter[res_type] = type_counter.get(res_type, 0) + 1
+        money = Decimal(str(quantity)) * Decimal(str(rate))
+        money_sum += money
+        leaves.append(
+            {
+                "name": key,
+                "code": f"{cwicr_ref}-{res_type[0].upper()}{type_counter[res_type]}",
+                "type": res_type,
+                "unit": res_unit,
+                "quantity": float(quantity),
+                "unit_rate": float(rate),
+                "total": float(money),
+            }
+        )
+    if money_sum != Decimal(str(unit_rate)):
+        logger.warning(
+            "explicit build-up for %s sums to %s, not the unit rate %s; keeping the generated split",
+            cwicr_ref,
+            money_sum,
+            unit_rate,
+        )
+        return None
+    return leaves
+
+
+def _enrich_position_metadata(
+    description: str,
+    unit: str,
+    unit_rate: float,
+    classification: dict,
+    *,
+    locale: str | None = None,
+    explicit_resources: list[ResourceRowDef] | None = None,
+) -> dict:
     """Generate realistic CWICR resource breakdown metadata for a demo position.
 
     Returns a dict with ``cwicr_ref``, ``resources`` (PositionResource array),
     and optional ``epd_id`` / ``gwp_kgco2e_per_unit`` for sustainability data.
+
+    ``locale`` is the template's locale; the resource names are written in its
+    language (English when it has none). ``explicit_resources`` is the
+    template's hand-written build-up for this position, if any, and replaces
+    the generated split when it adds up (see ``_explicit_resources``).
     """
     meta: dict = {}
     desc_lower = description.lower()
@@ -3292,9 +3377,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-CON-001",
             [
-                ("Concrete C30/37 ready-mix", "material", 0.50, None),
-                ("Concrete crew (pouring, vibrating)", "labor", 0.35, 45.0),
-                ("Concrete pump + vibrator", "equipment", 0.15, 85.0),
+                ("concrete_c30_37_ready_mix", "material", 0.50, None),
+                ("concrete_crew_pouring_vibrating", "labor", 0.35, 45.0),
+                ("concrete_pump_and_vibrator", "equipment", 0.15, 85.0),
             ],
         )
         meta["epd_id"] = "c30-37"
@@ -3306,9 +3391,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-STL-001",
             [
-                ("Reinforcement steel BSt 500", "material", 0.65, None),
-                ("Rebar fitters", "labor", 0.30, 50.0),
-                ("Crane/tools", "equipment", 0.05, 120.0),
+                ("reinforcement_steel_bst_500", "material", 0.65, None),
+                ("rebar_fitters", "labor", 0.30, 50.0),
+                ("crane_tools", "equipment", 0.05, 120.0),
             ],
         )
         meta["epd_id"] = "steel-rebar"
@@ -3320,9 +3405,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-FRM-001",
             [
-                ("Formwork panels", "material", 0.30, None),
-                ("Formwork carpenters", "labor", 0.60, 48.0),
-                ("Tools/accessories", "equipment", 0.10, 35.0),
+                ("formwork_panels", "material", 0.30, None),
+                ("formwork_carpenters", "labor", 0.60, 48.0),
+                ("tools_accessories", "equipment", 0.10, 35.0),
             ],
         )
     elif any(k in desc_lower for k in ["steel", "stahl", "acier", "structural steel", "w-shape", "edelstahl"]):
@@ -3332,9 +3417,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-STL-002",
             [
-                ("Structural steel sections", "material", 0.55, None),
-                ("Steel erectors", "labor", 0.30, 55.0),
-                ("Crane", "equipment", 0.15, 130.0),
+                ("structural_steel_sections", "material", 0.55, None),
+                ("steel_erectors", "labor", 0.30, 55.0),
+                ("crane", "equipment", 0.15, 130.0),
             ],
         )
         meta["epd_id"] = "steel-structural"
@@ -3346,9 +3431,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-MAS-001",
             [
-                ("Masonry blocks/mortar", "material", 0.50, None),
-                ("Bricklayers", "labor", 0.45, 48.0),
-                ("Scaffolding", "equipment", 0.05, 40.0),
+                ("masonry_blocks_mortar", "material", 0.50, None),
+                ("bricklayers", "labor", 0.45, 48.0),
+                ("scaffolding", "equipment", 0.05, 40.0),
             ],
         )
     elif any(k in desc_lower for k in ["insulation", "dämmung", "dämmung", "isolation", "thermal"]):
@@ -3358,9 +3443,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-INS-001",
             [
-                ("Insulation material", "material", 0.55, None),
-                ("Insulation fitters", "labor", 0.40, 42.0),
-                ("Tools", "equipment", 0.05, 30.0),
+                ("insulation_material", "material", 0.55, None),
+                ("insulation_fitters", "labor", 0.40, 42.0),
+                ("tools", "equipment", 0.05, 30.0),
             ],
         )
         meta["epd_id"] = "insulation-mineral-wool"
@@ -3372,9 +3457,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-WPR-001",
             [
-                ("Waterproofing membrane", "material", 0.45, None),
-                ("Waterproofing crew", "labor", 0.50, 46.0),
-                ("Tools", "equipment", 0.05, 30.0),
+                ("waterproofing_membrane", "material", 0.45, None),
+                ("waterproofing_crew", "labor", 0.50, 46.0),
+                ("tools", "equipment", 0.05, 30.0),
             ],
         )
     elif any(
@@ -3399,9 +3484,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-ELE-001",
             [
-                ("Electrical materials", "material", 0.40, None),
-                ("Electricians", "labor", 0.50, 52.0),
-                ("Test equipment", "equipment", 0.10, 40.0),
+                ("electrical_materials", "material", 0.40, None),
+                ("electricians", "labor", 0.50, 52.0),
+                ("test_equipment", "equipment", 0.10, 40.0),
             ],
         )
     elif any(
@@ -3427,9 +3512,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-MEC-001",
             [
-                ("HVAC equipment/materials", "material", 0.50, None),
-                ("HVAC technicians", "labor", 0.40, 52.0),
-                ("Tools/testing", "equipment", 0.10, 45.0),
+                ("hvac_equipment_materials", "material", 0.50, None),
+                ("hvac_technicians", "labor", 0.40, 52.0),
+                ("tools_testing", "equipment", 0.10, 45.0),
             ],
         )
     elif any(
@@ -3452,9 +3537,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-PLB-001",
             [
-                ("Plumbing materials", "material", 0.45, None),
-                ("Plumbers", "labor", 0.50, 52.0),
-                ("Tools", "equipment", 0.05, 30.0),
+                ("plumbing_materials", "material", 0.45, None),
+                ("plumbers", "labor", 0.50, 52.0),
+                ("tools", "equipment", 0.05, 30.0),
             ],
         )
     elif any(k in desc_lower for k in ["excavat", "aushub", "earthwork", "grading", "terrassement"]):
@@ -3464,9 +3549,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-ERT-001",
             [
-                ("Disposal/fill material", "material", 0.15, None),
-                ("Machine operators", "labor", 0.25, 60.0),
-                ("Excavator/trucks", "equipment", 0.60, 95.0),
+                ("disposal_fill_material", "material", 0.15, None),
+                ("machine_operators", "labor", 0.25, 60.0),
+                ("excavator_trucks", "equipment", 0.60, 95.0),
             ],
         )
     elif any(k in desc_lower for k in ["paint", "anstrich", "peinture", "coating", "farbe"]):
@@ -3476,9 +3561,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-PNT-001",
             [
-                ("Paint/coatings", "material", 0.30, None),
-                ("Painters", "labor", 0.65, 42.0),
-                ("Sprayers/tools", "equipment", 0.05, 30.0),
+                ("paint_coatings", "material", 0.30, None),
+                ("painters", "labor", 0.65, 42.0),
+                ("sprayers_tools", "equipment", 0.05, 30.0),
             ],
         )
     elif any(k in desc_lower for k in ["roof", "dach", "toiture"]):
@@ -3488,9 +3573,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-ROF-001",
             [
-                ("Roofing materials", "material", 0.45, None),
-                ("Roofers", "labor", 0.45, 48.0),
-                ("Access equipment", "equipment", 0.10, 60.0),
+                ("roofing_materials", "material", 0.45, None),
+                ("roofers", "labor", 0.45, 48.0),
+                ("access_equipment", "equipment", 0.10, 60.0),
             ],
         )
     elif any(k in desc_lower for k in ["window", "fenster", "glazing", "curtain wall", "vitrage", "fenêtre"]):
@@ -3500,9 +3585,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-WIN-001",
             [
-                ("Window/glazing units", "material", 0.60, None),
-                ("Glaziers", "labor", 0.35, 50.0),
-                ("Crane/suction cups", "equipment", 0.05, 120.0),
+                ("window_glazing_units", "material", 0.60, None),
+                ("glaziers", "labor", 0.35, 50.0),
+                ("crane_suction_cups", "equipment", 0.05, 120.0),
             ],
         )
     elif any(k in desc_lower for k in ["elevator", "aufzug", "lift", "ascenseur"]):
@@ -3512,9 +3597,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-ELV-001",
             [
-                ("Elevator equipment", "material", 0.65, None),
-                ("Elevator technicians", "labor", 0.30, 55.0),
-                ("Crane", "equipment", 0.05, 130.0),
+                ("elevator_equipment", "material", 0.65, None),
+                ("elevator_technicians", "labor", 0.30, 55.0),
+                ("crane", "equipment", 0.05, 130.0),
             ],
         )
     elif any(k in desc_lower for k in ["tile", "fliese", "carrelage", "ceramic"]):
@@ -3524,9 +3609,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-TIL-001",
             [
-                ("Tiles/adhesive/grout", "material", 0.40, None),
-                ("Tilers", "labor", 0.55, 46.0),
-                ("Cutting tools", "equipment", 0.05, 30.0),
+                ("tiles_adhesive_grout", "material", 0.40, None),
+                ("tilers", "labor", 0.55, 46.0),
+                ("cutting_tools", "equipment", 0.05, 30.0),
             ],
         )
     elif any(k in desc_lower for k in ["door", "tür", "tür", "porte"]):
@@ -3536,9 +3621,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-DOR-001",
             [
-                ("Doors/frames/hardware", "material", 0.55, None),
-                ("Joiners", "labor", 0.40, 48.0),
-                ("Tools", "equipment", 0.05, 30.0),
+                ("doors_frames_hardware", "material", 0.55, None),
+                ("joiners", "labor", 0.40, 48.0),
+                ("tools", "equipment", 0.05, 30.0),
             ],
         )
     elif any(k in desc_lower for k in ["fire", "brand", "sprinkler", "incendie"]):
@@ -3548,9 +3633,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-FPR-001",
             [
-                ("Fire protection materials", "material", 0.45, None),
-                ("Fire protection crew", "labor", 0.45, 50.0),
-                ("Testing equipment", "equipment", 0.10, 45.0),
+                ("fire_protection_materials", "material", 0.45, None),
+                ("fire_protection_crew", "labor", 0.45, 50.0),
+                ("testing_equipment", "equipment", 0.10, 45.0),
             ],
         )
     elif any(k in desc_lower for k in ["pile", "pfahl", "pieux", "bohrpfähle"]):
@@ -3560,9 +3645,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-PIL-001",
             [
-                ("Piling materials", "material", 0.35, None),
-                ("Piling crew", "labor", 0.25, 55.0),
-                ("Piling rig", "equipment", 0.40, 150.0),
+                ("piling_materials", "material", 0.35, None),
+                ("piling_crew", "labor", 0.25, 55.0),
+                ("piling_rig", "equipment", 0.40, 150.0),
             ],
         )
     elif any(k in desc_lower for k in ["parquet", "flooring", "bodenbelag"]):
@@ -3572,9 +3657,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-FLR-001",
             [
-                ("Flooring material", "material", 0.50, None),
-                ("Floor layers", "labor", 0.45, 44.0),
-                ("Tools", "equipment", 0.05, 30.0),
+                ("flooring_material", "material", 0.50, None),
+                ("floor_layers", "labor", 0.45, 44.0),
+                ("tools", "equipment", 0.05, 30.0),
             ],
         )
     elif any(k in desc_lower for k in ["estrich", "screed"]):
@@ -3584,9 +3669,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-SCR-001",
             [
-                ("Screed material", "material", 0.40, None),
-                ("Screed layers", "labor", 0.45, 44.0),
-                ("Screed pump/tools", "equipment", 0.15, 70.0),
+                ("screed_material", "material", 0.40, None),
+                ("screed_layers", "labor", 0.45, 44.0),
+                ("screed_pump_tools", "equipment", 0.15, 70.0),
             ],
         )
     elif any(k in desc_lower for k in ["drywall", "trockenbau", "gipskarton", "plasterboard"]):
@@ -3596,9 +3681,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-DRY-001",
             [
-                ("Drywall boards/profiles", "material", 0.40, None),
-                ("Drywall installers", "labor", 0.55, 44.0),
-                ("Tools", "equipment", 0.05, 30.0),
+                ("drywall_boards_profiles", "material", 0.40, None),
+                ("drywall_installers", "labor", 0.55, 44.0),
+                ("tools", "equipment", 0.05, 30.0),
             ],
         )
     elif any(k in desc_lower for k in ["asphalt", "paving", "pflaster"]):
@@ -3608,9 +3693,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-PAV-001",
             [
-                ("Paving materials", "material", 0.45, None),
-                ("Pavers", "labor", 0.35, 42.0),
-                ("Paving equipment", "equipment", 0.20, 80.0),
+                ("paving_materials", "material", 0.45, None),
+                ("pavers", "labor", 0.35, 42.0),
+                ("paving_equipment", "equipment", 0.20, 80.0),
             ],
         )
     elif any(k in desc_lower for k in ["landscap", "bepflanzung", "rasen", "paysag"]):
@@ -3620,9 +3705,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-LAN-001",
             [
-                ("Plants/soil/turf", "material", 0.45, None),
-                ("Landscapers", "labor", 0.45, 38.0),
-                ("Tools", "equipment", 0.10, 40.0),
+                ("plants_soil_turf", "material", 0.45, None),
+                ("landscapers", "labor", 0.45, 38.0),
+                ("tools", "equipment", 0.10, 40.0),
             ],
         )
     elif any(
@@ -3656,9 +3741,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-ERT-002",
             [
-                ("Earthworks materials", "material", 0.20, None),
-                ("Machine operators/laborers", "labor", 0.30, 60.0),
-                ("Earthmoving plant", "equipment", 0.50, 95.0),
+                ("earthworks_materials", "material", 0.20, None),
+                ("machine_operators_laborers", "labor", 0.30, 60.0),
+                ("earthmoving_plant", "equipment", 0.50, 95.0),
             ],
         )
     elif any(
@@ -3680,9 +3765,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-PLT-001",
             [
-                ("Render/plaster materials", "material", 0.35, None),
-                ("Plasterers", "labor", 0.60, 46.0),
-                ("Tools", "equipment", 0.05, 30.0),
+                ("render_plaster_materials", "material", 0.35, None),
+                ("plasterers", "labor", 0.60, 46.0),
+                ("tools", "equipment", 0.05, 30.0),
             ],
         )
     elif any(
@@ -3706,9 +3791,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-ELE-002",
             [
-                ("Electrical equipment", "material", 0.50, None),
-                ("Electricians", "labor", 0.40, 52.0),
-                ("Test equipment", "equipment", 0.10, 40.0),
+                ("electrical_equipment", "material", 0.50, None),
+                ("electricians", "labor", 0.40, 52.0),
+                ("test_equipment", "equipment", 0.10, 40.0),
             ],
         )
     elif any(
@@ -3736,9 +3821,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-PLB-002",
             [
-                ("Plumbing fittings/fixtures", "material", 0.50, None),
-                ("Plumbers", "labor", 0.45, 52.0),
-                ("Tools", "equipment", 0.05, 30.0),
+                ("plumbing_fittings_fixtures", "material", 0.50, None),
+                ("plumbers", "labor", 0.45, 52.0),
+                ("tools", "equipment", 0.05, 30.0),
             ],
         )
     elif any(
@@ -3764,9 +3849,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-MEC-002",
             [
-                ("Mechanical equipment", "material", 0.55, None),
-                ("Mechanical technicians", "labor", 0.35, 52.0),
-                ("Tools", "equipment", 0.10, 40.0),
+                ("mechanical_equipment", "material", 0.55, None),
+                ("mechanical_technicians", "labor", 0.35, 52.0),
+                ("tools", "equipment", 0.10, 40.0),
             ],
         )
     elif any(
@@ -3787,9 +3872,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-STR-001",
             [
-                ("Structural elements", "material", 0.45, None),
-                ("Structural crew", "labor", 0.40, 50.0),
-                ("Crane/tools", "equipment", 0.15, 120.0),
+                ("structural_elements", "material", 0.45, None),
+                ("structural_crew", "labor", 0.40, 50.0),
+                ("crane_tools", "equipment", 0.15, 120.0),
             ],
         )
     elif any(
@@ -3815,9 +3900,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-STR-002",
             [
-                ("Stair/balcony components", "material", 0.50, None),
-                ("Structural fitters", "labor", 0.40, 50.0),
-                ("Crane/tools", "equipment", 0.10, 120.0),
+                ("stair_balcony_components", "material", 0.50, None),
+                ("structural_fitters", "labor", 0.40, 50.0),
+                ("crane_tools", "equipment", 0.10, 120.0),
             ],
         )
     elif any(
@@ -3839,9 +3924,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-FIN-001",
             [
-                ("Sealants/profiles", "material", 0.45, None),
-                ("Finishing crew", "labor", 0.50, 44.0),
-                ("Tools", "equipment", 0.05, 30.0),
+                ("sealants_profiles", "material", 0.45, None),
+                ("finishing_crew", "labor", 0.50, 44.0),
+                ("tools", "equipment", 0.05, 30.0),
             ],
         )
     elif any(
@@ -3862,9 +3947,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-CLD-001",
             [
-                ("Cladding materials", "material", 0.50, None),
-                ("Cladding installers", "labor", 0.40, 48.0),
-                ("Access equipment", "equipment", 0.10, 60.0),
+                ("cladding_materials", "material", 0.50, None),
+                ("cladding_installers", "labor", 0.40, 48.0),
+                ("access_equipment", "equipment", 0.10, 60.0),
             ],
         )
     elif any(k in desc_lower for k in ["acoustic", "schallschutz", "schalldae", "acoustique"]):
@@ -3874,9 +3959,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-ACO-001",
             [
-                ("Acoustic materials", "material", 0.45, None),
-                ("Acoustic installers", "labor", 0.50, 46.0),
-                ("Tools", "equipment", 0.05, 30.0),
+                ("acoustic_materials", "material", 0.45, None),
+                ("acoustic_installers", "labor", 0.50, 46.0),
+                ("tools", "equipment", 0.05, 30.0),
             ],
         )
     elif any(
@@ -3895,9 +3980,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-SPE-001",
             [
-                ("Safety/protection systems", "material", 0.45, None),
-                ("Specialist installers", "labor", 0.45, 50.0),
-                ("Access equipment", "equipment", 0.10, 60.0),
+                ("safety_protection_systems", "material", 0.45, None),
+                ("specialist_installers", "labor", 0.45, 50.0),
+                ("access_equipment", "equipment", 0.10, 60.0),
             ],
         )
     elif any(
@@ -3921,9 +4006,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-ROF-002",
             [
-                ("Roofing accessories", "material", 0.50, None),
-                ("Roofers", "labor", 0.40, 48.0),
-                ("Access equipment", "equipment", 0.10, 60.0),
+                ("roofing_accessories", "material", 0.50, None),
+                ("roofers", "labor", 0.40, 48.0),
+                ("access_equipment", "equipment", 0.10, 60.0),
             ],
         )
     elif any(
@@ -3956,9 +4041,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-EXT-001",
             [
-                ("External works materials", "material", 0.50, None),
-                ("External works crew", "labor", 0.40, 40.0),
-                ("Tools/plant", "equipment", 0.10, 50.0),
+                ("external_works_materials", "material", 0.50, None),
+                ("external_works_crew", "labor", 0.40, 40.0),
+                ("tools_plant", "equipment", 0.10, 50.0),
             ],
         )
     elif any(
@@ -3980,9 +4065,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-FIN-002",
             [
-                ("Finishing materials", "material", 0.50, None),
-                ("Finishing tradesmen", "labor", 0.45, 44.0),
-                ("Tools", "equipment", 0.05, 30.0),
+                ("finishing_materials", "material", 0.50, None),
+                ("finishing_tradesmen", "labor", 0.45, 44.0),
+                ("tools", "equipment", 0.05, 30.0),
             ],
         )
     elif any(
@@ -4003,9 +4088,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-TMB-001",
             [
-                ("Timber/joinery", "material", 0.50, None),
-                ("Carpenters", "labor", 0.45, 48.0),
-                ("Tools", "equipment", 0.05, 30.0),
+                ("timber_joinery", "material", 0.50, None),
+                ("carpenters", "labor", 0.45, 48.0),
+                ("tools", "equipment", 0.05, 30.0),
             ],
         )
         meta["epd_id"] = "timber-softwood"
@@ -4027,9 +4112,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-REN-001",
             [
-                ("PV panels/inverters", "material", 0.60, None),
-                ("Solar installers", "labor", 0.30, 50.0),
-                ("Access equipment", "equipment", 0.10, 60.0),
+                ("pv_panels_inverters", "material", 0.60, None),
+                ("solar_installers", "labor", 0.30, 50.0),
+                ("access_equipment", "equipment", 0.10, 60.0),
             ],
         )
         meta["epd_id"] = "pv-monocrystalline"
@@ -4053,9 +4138,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-ROF-003",
             [
-                ("Roofing/metalwork", "material", 0.50, None),
-                ("Roofers/plumbers", "labor", 0.40, 48.0),
-                ("Access equipment", "equipment", 0.10, 60.0),
+                ("roofing_metalwork", "material", 0.50, None),
+                ("roofers_plumbers", "labor", 0.40, 48.0),
+                ("access_equipment", "equipment", 0.10, 60.0),
             ],
         )
     elif any(
@@ -4076,9 +4161,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-MHE-001",
             [
-                ("Material handling equipment", "material", 0.55, None),
-                ("Installation crew", "labor", 0.35, 50.0),
-                ("Heavy plant", "equipment", 0.10, 95.0),
+                ("material_handling_equipment", "material", 0.55, None),
+                ("installation_crew", "labor", 0.35, 50.0),
+                ("heavy_plant", "equipment", 0.10, 95.0),
             ],
         )
     elif any(
@@ -4097,9 +4182,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-REF-001",
             [
-                ("Refrigeration equipment", "material", 0.55, None),
-                ("Refrigeration engineers", "labor", 0.35, 55.0),
-                ("Test equipment", "equipment", 0.10, 45.0),
+                ("refrigeration_equipment", "material", 0.55, None),
+                ("refrigeration_engineers", "labor", 0.35, 55.0),
+                ("test_equipment", "equipment", 0.10, 45.0),
             ],
         )
     elif any(
@@ -4117,9 +4202,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-ELV-002",
             [
-                ("Lift/shaft equipment", "material", 0.55, None),
-                ("Lift technicians", "labor", 0.35, 55.0),
-                ("Crane", "equipment", 0.10, 130.0),
+                ("lift_shaft_equipment", "material", 0.55, None),
+                ("lift_technicians", "labor", 0.35, 55.0),
+                ("crane", "equipment", 0.10, 130.0),
             ],
         )
     elif any(
@@ -4140,9 +4225,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-PRE-001",
             [
-                ("Temporary works/disposal", "material", 0.20, None),
-                ("General laborers", "labor", 0.35, 36.0),
-                ("Plant/skips", "equipment", 0.45, 80.0),
+                ("temporary_works_disposal", "material", 0.20, None),
+                ("general_laborers", "labor", 0.35, 36.0),
+                ("plant_skips", "equipment", 0.45, 80.0),
             ],
         )
     elif any(
@@ -4165,9 +4250,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-STL-003",
             [
-                ("Metal/steel components", "material", 0.55, None),
-                ("Steel fitters", "labor", 0.35, 52.0),
-                ("Crane/tools", "equipment", 0.10, 120.0),
+                ("metal_steel_components", "material", 0.55, None),
+                ("steel_fitters", "labor", 0.35, 52.0),
+                ("crane_tools", "equipment", 0.10, 120.0),
             ],
         )
     elif any(
@@ -4190,9 +4275,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-DRY-002",
             [
-                ("Partition/fitout materials", "material", 0.45, None),
-                ("Fitout crew", "labor", 0.50, 44.0),
-                ("Tools", "equipment", 0.05, 30.0),
+                ("partition_fitout_materials", "material", 0.45, None),
+                ("fitout_crew", "labor", 0.50, 44.0),
+                ("tools", "equipment", 0.05, 30.0),
             ],
         )
     elif any(
@@ -4214,9 +4299,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-MEC-003",
             [
-                ("Mechanical/electrical plant", "material", 0.60, None),
-                ("M&E engineers", "labor", 0.30, 55.0),
-                ("Crane/test equipment", "equipment", 0.10, 120.0),
+                ("mechanical_electrical_plant", "material", 0.60, None),
+                ("m_and_e_engineers", "labor", 0.30, 55.0),
+                ("crane_test_equipment", "equipment", 0.10, 120.0),
             ],
         )
     elif any(
@@ -4239,9 +4324,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-SIT-001",
             [
-                ("Site infrastructure materials", "material", 0.40, None),
-                ("Groundworkers", "labor", 0.35, 40.0),
-                ("Excavation plant", "equipment", 0.25, 85.0),
+                ("site_infrastructure_materials", "material", 0.40, None),
+                ("groundworkers", "labor", 0.35, 40.0),
+                ("excavation_plant", "equipment", 0.25, 85.0),
             ],
         )
     elif any(
@@ -4267,9 +4352,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-ENV-001",
             [
-                ("Building envelope components", "material", 0.55, None),
-                ("Specialist installers", "labor", 0.40, 50.0),
-                ("Tools", "equipment", 0.05, 30.0),
+                ("building_envelope_components", "material", 0.55, None),
+                ("specialist_installers", "labor", 0.40, 50.0),
+                ("tools", "equipment", 0.05, 30.0),
             ],
         )
     elif any(
@@ -4301,9 +4386,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-MEC-004",
             [
-                ("HVAC/mechanical components", "material", 0.50, None),
-                ("HVAC technicians", "labor", 0.40, 52.0),
-                ("Test equipment", "equipment", 0.10, 45.0),
+                ("hvac_mechanical_components", "material", 0.50, None),
+                ("hvac_technicians", "labor", 0.40, 52.0),
+                ("test_equipment", "equipment", 0.10, 45.0),
             ],
         )
     elif any(
@@ -4340,9 +4425,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-ELE-003",
             [
-                ("Electrical/low-voltage equipment", "material", 0.50, None),
-                ("Electricians/IT technicians", "labor", 0.40, 52.0),
-                ("Test equipment", "equipment", 0.10, 45.0),
+                ("electrical_low_voltage_equipment", "material", 0.50, None),
+                ("electricians_it_technicians", "labor", 0.40, 52.0),
+                ("test_equipment", "equipment", 0.10, 45.0),
             ],
         )
     elif any(
@@ -4375,9 +4460,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-SPE-002",
             [
-                ("Specialist equipment", "material", 0.55, None),
-                ("Specialist installers", "labor", 0.35, 50.0),
-                ("Tools/plant", "equipment", 0.10, 50.0),
+                ("specialist_equipment", "material", 0.55, None),
+                ("specialist_installers", "labor", 0.35, 50.0),
+                ("tools_plant", "equipment", 0.10, 50.0),
             ],
         )
     elif any(
@@ -4395,9 +4480,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-MEC-005",
             [
-                ("Mechanical services", "material", 0.50, None),
-                ("M&E engineers", "labor", 0.40, 55.0),
-                ("Crane/tools", "equipment", 0.10, 120.0),
+                ("mechanical_services", "material", 0.50, None),
+                ("m_and_e_engineers", "labor", 0.40, 55.0),
+                ("crane_tools", "equipment", 0.10, 120.0),
             ],
         )
     elif any(k in desc_lower for k in ["plantation", "arbre", "tree planting"]):
@@ -4407,9 +4492,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-LAN-002",
             [
-                ("Trees/planting materials", "material", 0.50, None),
-                ("Landscapers", "labor", 0.40, 38.0),
-                ("Mini excavator", "equipment", 0.10, 65.0),
+                ("trees_planting_materials", "material", 0.50, None),
+                ("landscapers", "labor", 0.40, 38.0),
+                ("mini_excavator", "equipment", 0.10, 65.0),
             ],
         )
     elif any(
@@ -4425,9 +4510,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-ERT-003",
             [
-                ("Investigation materials", "material", 0.10, None),
-                ("Geotechnical engineers", "labor", 0.40, 65.0),
-                ("Drilling rig", "equipment", 0.50, 150.0),
+                ("investigation_materials", "material", 0.10, None),
+                ("geotechnical_engineers", "labor", 0.40, 65.0),
+                ("drilling_rig", "equipment", 0.50, 150.0),
             ],
         )
     # DACH retail-trade recipes. These German keyword groups are deliberately
@@ -4452,9 +4537,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-FTC-001",
             [
-                ("Precast concrete elements", "material", 0.55, None),
-                ("Precast erectors", "labor", 0.30, 54.0),
-                ("Mobile crane", "equipment", 0.15, 135.0),
+                ("precast_concrete_elements", "material", 0.55, None),
+                ("precast_erectors", "labor", 0.30, 54.0),
+                ("mobile_crane", "equipment", 0.15, 135.0),
             ],
         )
         meta["epd_id"] = "concrete-precast"
@@ -4474,9 +4559,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-GLT-001",
             [
-                ("Glulam beams/connectors", "material", 0.55, None),
-                ("Timber erectors", "labor", 0.30, 54.0),
-                ("Mobile crane", "equipment", 0.15, 135.0),
+                ("glulam_beams_connectors", "material", 0.55, None),
+                ("timber_erectors", "labor", 0.30, 54.0),
+                ("mobile_crane", "equipment", 0.15, 135.0),
             ],
         )
         meta["epd_id"] = "timber-glulam"
@@ -4502,9 +4587,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-REF-002",
             [
-                ("CO2 refrigeration plant", "material", 0.55, None),
-                ("Refrigeration engineers", "labor", 0.35, 68.0),
-                ("Charging/test equipment", "equipment", 0.10, 55.0),
+                ("co2_refrigeration_plant", "material", 0.55, None),
+                ("refrigeration_engineers", "labor", 0.35, 68.0),
+                ("charging_test_equipment", "equipment", 0.10, 55.0),
             ],
         )
     elif any(
@@ -4533,9 +4618,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-ELE-004",
             [
-                ("Electrical/PV equipment", "material", 0.50, None),
-                ("Electricians", "labor", 0.40, 56.0),
-                ("Test equipment", "equipment", 0.10, 45.0),
+                ("electrical_pv_equipment", "material", 0.50, None),
+                ("electricians", "labor", 0.40, 56.0),
+                ("test_equipment", "equipment", 0.10, 45.0),
             ],
         )
     elif any(
@@ -4553,9 +4638,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-MEC-006",
             [
-                ("Air handling components", "material", 0.50, None),
-                ("HVAC technicians", "labor", 0.40, 56.0),
-                ("Tools/testing", "equipment", 0.10, 45.0),
+                ("air_handling_components", "material", 0.50, None),
+                ("hvac_technicians", "labor", 0.40, 56.0),
+                ("tools_testing", "equipment", 0.10, 45.0),
             ],
         )
     elif any(
@@ -4576,9 +4661,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-PLB-003",
             [
-                ("Sanitary/water components", "material", 0.50, None),
-                ("Plumbers", "labor", 0.45, 56.0),
-                ("Tools", "equipment", 0.05, 30.0),
+                ("sanitary_water_components", "material", 0.50, None),
+                ("plumbers", "labor", 0.45, 56.0),
+                ("tools", "equipment", 0.05, 30.0),
             ],
         )
     elif any(
@@ -4601,9 +4686,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-EQP-001",
             [
-                ("Plant and equipment", "material", 0.70, None),
-                ("Commissioning technicians", "labor", 0.22, 58.0),
-                ("Lifting/handling", "equipment", 0.08, 80.0),
+                ("plant_and_equipment", "material", 0.70, None),
+                ("commissioning_technicians", "labor", 0.22, 58.0),
+                ("lifting_handling", "equipment", 0.08, 80.0),
             ],
         )
     elif any(
@@ -4634,9 +4719,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-FIT-001",
             [
-                ("Shopfitting fixtures/furniture", "material", 0.65, None),
-                ("Shopfitters", "labor", 0.30, 52.0),
-                ("Tools/handling", "equipment", 0.05, 45.0),
+                ("shopfitting_fixtures_furniture", "material", 0.65, None),
+                ("shopfitters", "labor", 0.30, 52.0),
+                ("tools_handling", "equipment", 0.05, 45.0),
             ],
         )
     elif any(
@@ -4653,9 +4738,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-STL-004",
             [
-                ("Steel walkway/ladder components", "material", 0.55, None),
-                ("Steel fitters", "labor", 0.35, 54.0),
-                ("Crane/tools", "equipment", 0.10, 120.0),
+                ("steel_walkway_ladder_components", "material", 0.55, None),
+                ("steel_fitters", "labor", 0.35, 54.0),
+                ("crane_tools", "equipment", 0.10, 120.0),
             ],
         )
     elif any(
@@ -4672,9 +4757,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-DRY-003",
             [
-                ("Suspended ceiling system", "material", 0.40, None),
-                ("Ceiling fitters", "labor", 0.55, 50.0),
-                ("Tools", "equipment", 0.05, 30.0),
+                ("suspended_ceiling_system", "material", 0.40, None),
+                ("ceiling_fitters", "labor", 0.55, 50.0),
+                ("tools", "equipment", 0.05, 30.0),
             ],
         )
     elif any(
@@ -4696,9 +4781,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-DOR-002",
             [
-                ("Doors/gates/hardware", "material", 0.60, None),
-                ("Door/gate fitters", "labor", 0.35, 50.0),
-                ("Tools", "equipment", 0.05, 30.0),
+                ("doors_gates_hardware", "material", 0.60, None),
+                ("door_gate_fitters", "labor", 0.35, 50.0),
+                ("tools", "equipment", 0.05, 30.0),
             ],
         )
     elif "attika-abdeckung" in desc_lower:
@@ -4708,9 +4793,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-ROF-004",
             [
-                ("Parapet capping/metalwork", "material", 0.50, None),
-                ("Roofers/metalworkers", "labor", 0.40, 50.0),
-                ("Access equipment", "equipment", 0.10, 60.0),
+                ("parapet_capping_metalwork", "material", 0.50, None),
+                ("roofers_metalworkers", "labor", 0.40, 50.0),
+                ("access_equipment", "equipment", 0.10, 60.0),
             ],
         )
     elif any(
@@ -4732,9 +4817,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-ERT-004",
             [
-                ("Fill/disposal material", "material", 0.20, None),
-                ("Machine operators/laborers", "labor", 0.30, 42.0),
-                ("Earthmoving plant", "equipment", 0.50, 95.0),
+                ("fill_disposal_material", "material", 0.20, None),
+                ("machine_operators_laborers", "labor", 0.30, 42.0),
+                ("earthmoving_plant", "equipment", 0.50, 95.0),
             ],
         )
     elif any(
@@ -4755,9 +4840,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-CON-002",
             [
-                ("Concrete/slab materials", "material", 0.45, None),
-                ("Concrete finishers", "labor", 0.45, 50.0),
-                ("Tools/plant", "equipment", 0.10, 60.0),
+                ("concrete_slab_materials", "material", 0.45, None),
+                ("concrete_finishers", "labor", 0.45, 50.0),
+                ("tools_plant", "equipment", 0.10, 60.0),
             ],
         )
     elif any(
@@ -4774,9 +4859,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-PAV-002",
             [
-                ("Kerb/paving materials", "material", 0.45, None),
-                ("Pavers/groundworkers", "labor", 0.40, 42.0),
-                ("Paving plant", "equipment", 0.15, 80.0),
+                ("kerb_paving_materials", "material", 0.45, None),
+                ("pavers_groundworkers", "labor", 0.40, 42.0),
+                ("paving_plant", "equipment", 0.15, 80.0),
             ],
         )
     elif any(
@@ -4800,9 +4885,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-LAN-003",
             [
-                ("Plants/soil/irrigation", "material", 0.45, None),
-                ("Landscapers", "labor", 0.45, 38.0),
-                ("Tools/mini plant", "equipment", 0.10, 55.0),
+                ("plants_soil_irrigation", "material", 0.45, None),
+                ("landscapers", "labor", 0.45, 38.0),
+                ("tools_mini_plant", "equipment", 0.10, 55.0),
             ],
         )
     elif any(
@@ -4829,9 +4914,9 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-PRE-002",
             [
-                ("Site facilities/consumables", "material", 0.20, None),
-                ("Site team/general laborers", "labor", 0.45, 38.0),
-                ("Site plant/facilities", "equipment", 0.35, 70.0),
+                ("site_facilities_consumables", "material", 0.20, None),
+                ("site_team_general_laborers", "labor", 0.45, 38.0),
+                ("site_plant_facilities", "equipment", 0.35, 70.0),
             ],
         )
     else:
@@ -4842,11 +4927,21 @@ def _enrich_position_metadata(description: str, unit: str, unit_rate: float, cla
             unit,
             "CWICR-GEN-001",
             [
-                ("General materials", "material", 0.45, None),
-                ("General labor", "labor", 0.45, 42.0),
-                ("Tools/equipment", "equipment", 0.10, 40.0),
+                ("general_materials", "material", 0.45, None),
+                ("general_labor", "labor", 0.45, 42.0),
+                ("tools_equipment", "equipment", 0.10, 40.0),
             ],
         )
+
+    if explicit_resources:
+        explicit = _explicit_resources(explicit_resources, unit_rate, meta.get("cwicr_ref") or "CWICR-GEN-001")
+        if explicit is not None:
+            meta["resources"] = explicit
+
+    # The leaves were written under stable keys; name them in the project's
+    # language now, in one place, so no trade branch handles display text.
+    for leaf in meta.get("resources", []):
+        leaf["name"] = resource_name(leaf["name"], locale)
 
     # Every position carries a structured M/L/E rollup so the BOQ badge renders
     # without re-walking the leaves. Computed from whichever resource array the
@@ -12052,6 +12147,8 @@ async def install_demo_project(
                 unit=unit,
                 unit_rate=rate,
                 classification=cls,
+                locale=template.locale,
+                explicit_resources=template.position_resources.get(sub_ordinal),
             )
             # Every 8th position gets a warning status for visual variety
             v_status = "warning" if pos_counter % 8 == 0 else "valid"
@@ -12147,6 +12244,7 @@ async def install_demo_project(
                 quantity=1.0,
                 unit_rate=b_rate,
                 classification=sec.classification or {},
+                locale=template.locale,
             )
             b_meta: dict = {}
             if b_resources:
