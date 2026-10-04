@@ -698,28 +698,44 @@ def calendar_region_for(region: str | None, country_code: str | None) -> str | N
     planned Monday to Friday while its country column said SA, and every date
     landed on the wrong side of a Sunday-Thursday week.
 
-    The rule is the one the BOQ router already applies to rule sets. A region
-    that names a calendar of its own wins, so a project filed under "QA" or
-    "DE_BERLIN" keeps the week it has always had. A region that names none, or
-    names a group of countries rather than one ("GulfStates", "DACH", "Middle
-    East"), gives way to the country column, which is the more precise
-    statement: a UAE project filed under the Gulf group works the UAE week.
+    The country is decided the way ``_build_rule_sets`` in the BOQ router
+    decides it, so the week and the rule sets cannot name two countries for
+    one project. A region that names one country wins, whether or not that
+    country has a week of its own: "QA" and "DE_BERLIN" keep their weeks, and
+    "PL_WARSAW" keeps the standard week even when the country column, filled
+    from a Saudi or Indian pack, says otherwise. Only a region that names no
+    country ("Riyadh", nothing at all) or a group of countries ("GulfStates",
+    "DACH", "Middle East") gives way to the country column, which is then the
+    more precise statement: a UAE project filed under the Gulf group works the
+    UAE week.
 
     Args:
         region: ``project.region`` as stored.
         country_code: ``project.country_code`` as stored.
 
     Returns:
-        The string to hand :func:`get_work_calendar`.
+        The string to hand :func:`get_work_calendar`: the region as stored, or
+        the ISO code of the country it names when only the code reaches that
+        country's week, or the country column.
     """
     country = (country_code or "").strip().upper()
     if len(country) != 2 or not country.isalpha():
         return region
-    from app.core.classification_registry import is_macro_region
+    from app.core.classification_registry import is_macro_region, normalise_region
 
-    if get_work_calendar(region) is WORK_CALENDARS["DEFAULT"] or is_macro_region(region):
+    if is_macro_region(region):
         return country
-    return region
+    own = get_work_calendar(region)
+    if own is not WORK_CALENDARS["DEFAULT"]:
+        return region
+    named = normalise_region(region)
+    if named:
+        # The region names a country. Its own spelling is kept where it
+        # already reaches that country's week, which is also what the
+        # /work-calendar badge echoes back; a spelling only the registry reads
+        # ("United_States") is handed on as the code it names.
+        return region if get_work_calendar(named) is own else named
+    return country
 
 
 def compute_duration(

@@ -147,6 +147,18 @@ def test_reading_the_region_alone_is_what_planned_the_saudi_pack_on_the_wrong_we
         ("Qatar", None, "GULF"),
         ("DE_BERLIN", "SA", "DACH"),
         ("United Arab Emirates", "SA", "UAE"),
+        # A region naming a country whose week is the standard one keeps it
+        # too. The country column may come from whichever pack was active, so
+        # a Warsaw project created under the Saudi, Indian or Chinese pack was
+        # planned on the Gulf, the Indian or the Chinese week while the BOQ
+        # router validated it as Polish.
+        ("PL_WARSAW", "SA", "DEFAULT"),
+        ("PL", "IN", "DEFAULT"),
+        ("IT_MILAN", "CN", "DEFAULT"),
+        ("TR_ISTANBUL", "SA", "DEFAULT"),
+        ("JP", "IN", "DEFAULT"),
+        # A spelling only the registry reads names its country's week.
+        ("UNITED_STATES", "SA", "US"),
         # No usable country leaves the region to answer, as before.
         ("Riyadh", None, "DEFAULT"),
         ("Riyadh", "SAU", "DEFAULT"),
@@ -162,6 +174,73 @@ def test_the_week_comes_from_the_region_unless_the_country_is_the_more_precise_s
         f"region {region!r} with country {country!r} resolved to {calendar['label']!r}, "
         f"expected {WORK_CALENDARS[expected]['label']!r}"
     )
+
+
+def _region_population() -> list[str]:
+    """Every region spelling the registry reads as a country, plus the shapes that name none."""
+    from app.core import classification_registry as registry
+
+    spellings = (
+        set(registry.REGION_ALIAS_TO_COUNTRY)
+        | set(registry._catalogue_region_to_country())
+        | set(registry.COUNTRY_TO_STANDARD)
+    )
+    return sorted(spellings | {"Riyadh", "Somewhere City", "", "DACH", "GulfStates", "Middle East", "LATAM"})
+
+
+def _router_country(region: str, country: str) -> str | None:
+    """The country ``_build_rule_sets`` validates a project as, decided the way it decides it."""
+    from app.core.classification_registry import is_macro_region, normalise_region
+
+    from_region = normalise_region(region)
+    from_column = normalise_region(country)
+    if from_column and (from_region is None or is_macro_region(region)):
+        return from_column
+    return from_region
+
+
+def test_the_population_holds_regions_that_name_a_standard_week_country() -> None:
+    """Control: the agreement below is only worth something over regions that disagree with the column."""
+    from app.core.classification_registry import normalise_region
+
+    named = {normalise_region(r) for r in _region_population()}
+    for country in ("PL", "IT", "NL", "TR", "JP", "AU", "ZA"):
+        assert country in named, f"no region in the population names {country}"
+    assert len(_region_population()) >= 80, f"only {len(_region_population())} region spellings were read"
+
+
+@pytest.mark.parametrize("column", ["SA", "IN", "CN", "AE", "US", "PL"])
+def test_the_week_is_planned_for_the_country_the_bill_is_validated_as(column: str) -> None:
+    """The schedule and the BOQ router read one project's two columns into one country.
+
+    Before, a region naming a country with the standard week (Poland, Italy,
+    Japan, ...) gave way to the country column, while the router kept the
+    region: the bill was checked as Polish and the dates were planned on the
+    week of whichever pack had filled the column.
+    """
+    wrong: list[str] = []
+    for region in _region_population():
+        country = _router_country(region, column)
+        assert country is not None, f"region {region!r} with column {column} names no country at all"
+        planned = get_work_calendar(calendar_region_for(region, column))
+        if planned is not get_work_calendar(country):
+            wrong.append(f"{region!r}: validated as {country}, planned on {planned['label']!r}")
+    assert wrong == [], f"with country column {column}: {wrong}"
+
+
+def test_the_agreement_check_catches_a_region_that_gives_way_to_the_column() -> None:
+    """Negative control: the resolver as the wave first wrote it fails the agreement above."""
+    from app.core.classification_registry import is_macro_region
+
+    def _first_version(region: str | None, country_code: str | None) -> str | None:
+        if get_work_calendar(region) is WORK_CALENDARS["DEFAULT"] or is_macro_region(region):
+            return country_code
+        return region
+
+    region, column = "PL_WARSAW", "SA"
+    assert _router_country(region, column) == "PL"
+    assert get_work_calendar(_first_version(region, column)) is not get_work_calendar("PL")
+    assert get_work_calendar(calendar_region_for(region, column)) is get_work_calendar("PL")
 
 
 # ── Every country pack ───────────────────────────────────────────────────────
@@ -210,6 +289,14 @@ def test_the_schedule_service_hands_the_resolver_the_country_of_a_pack_project()
 
     berlin = _service(SimpleNamespace(id=pid, region="DE_BERLIN", country_code="DE"))
     assert asyncio.run(berlin.resolve_project_region(pid)) == "DE_BERLIN"
+
+    # Created under the Saudi pack with a Warsaw region and no country typed:
+    # the column says SA, the project is in Poland, and the badge echoes the
+    # region the user wrote.
+    warsaw = _service(SimpleNamespace(id=pid, region="PL_WARSAW", country_code="SA"))
+    region = asyncio.run(warsaw.resolve_project_region(pid))
+    assert region == "PL_WARSAW"
+    assert get_work_calendar(region) is WORK_CALENDARS["DEFAULT"]
 
     gone = _service(None)
     assert asyncio.run(gone.resolve_project_region(pid)) is None
