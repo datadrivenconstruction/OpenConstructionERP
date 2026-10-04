@@ -824,6 +824,18 @@ class TestOverlays:
 
     @pytest.mark.asyncio
     async def test_export_geojson_merges_overlays(self, http_client, tenant_a):
+        # Two overlays of its own, so the merge has something to merge even
+        # when the import tests ran in another shard.
+        for path, field, doc in (
+            ("import-geojson", "geojson", _SAMPLE_GEOJSON),
+            ("import-kml", "kml", _SAMPLE_KML),
+        ):
+            imported = await http_client.post(
+                f"/api/v1/geo-hub/overlays/{path}/",
+                json={"project_id": tenant_a["project_id"], "name": f"Export {path}", "kind": "boundary", field: doc},
+                headers=tenant_a["headers"],
+            )
+            assert imported.status_code == 201, imported.text
         res = await http_client.get(
             f"/api/v1/geo-hub/overlays/export-geojson/?project_id={tenant_a['project_id']}",
             headers=tenant_a["headers"],
@@ -905,11 +917,23 @@ class TestViewpoints:
 
     @pytest.mark.asyncio
     async def test_viewpoint_patch(self, http_client, tenant_a):
-        vps = await http_client.get(
-            f"/api/v1/geo-hub/viewpoints/?project_id={tenant_a['project_id']}",
+        # Its own viewpoint, not the one the create test may have made in
+        # another shard.
+        created = await http_client.post(
+            "/api/v1/geo-hub/viewpoints/",
+            json={
+                "project_id": tenant_a["project_id"],
+                "name": f"Patch me {uuid.uuid4().hex[:6]}",
+                "camera_lat": "52.520",
+                "camera_lon": "13.405",
+                "camera_alt": "500",
+                "heading": "0",
+                "pitch": "-45",
+            },
             headers=tenant_a["headers"],
         )
-        vp_id = vps.json()[0]["id"]
+        assert created.status_code == 201, created.text
+        vp_id = created.json()["id"]
         res = await http_client.patch(
             f"/api/v1/geo-hub/viewpoints/{vp_id}",
             json={"description": "From south-east"},
