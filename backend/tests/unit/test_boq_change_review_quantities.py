@@ -16,6 +16,7 @@ from app.modules.boq.change_review import (
     _Elem,
     _Pair,
     _Tip,
+    _type_filter_as_like,
     bim_flag_key,
     document_flag_key,
     rule_method_quantity,
@@ -176,3 +177,23 @@ def test_flag_keys_are_stable_and_bounded():
     assert document_flag_key("doc", "v2") == "document:doc:v2"
     assert document_flag_key("doc", "v2") != document_flag_key("doc", "v3")
     assert len(document_flag_key("d" * 300, "B")) == 255
+
+
+# ── narrowing a rule's element read ───────────────────────────────────────
+
+
+def test_type_glob_becomes_a_lower_case_like_with_literals_escaped():
+    assert _type_filter_as_like("Wall*") == "wall%"
+    assert _type_filter_as_like("Ifc?lab") == "ifc_lab"
+    assert _type_filter_as_like("tile_50%") == "tile\\_50\\%"
+    assert _type_filter_as_like("a\\b") == "a\\\\b"
+
+
+def test_type_glob_that_cannot_be_narrowed_safely_reads_everything():
+    assert _type_filter_as_like(None) is None
+    assert _type_filter_as_like("") is None
+    assert _type_filter_as_like("*") is None
+    # A character class has no LIKE equivalent.
+    assert _type_filter_as_like("wall[12]") is None
+    # The database may fold non-ASCII case differently from Python.
+    assert _type_filter_as_like("плитка*") is None

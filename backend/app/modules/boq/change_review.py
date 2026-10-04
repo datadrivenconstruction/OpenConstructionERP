@@ -43,7 +43,7 @@ from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from fastapi import HTTPException, status
-from sqlalchemy import func, select, update
+from sqlalchemy import func, null, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -444,6 +444,31 @@ class _Elem:
 
 def _elem_changed(old: _Elem, new: _Elem) -> bool:
     return old.geometry_hash != new.geometry_hash or (old.quantities or {}) != (new.quantities or {})
+
+
+def _type_filter_as_like(pattern: str | None) -> str | None:
+    """An ``element_type_filter`` glob as a lower-case SQL LIKE pattern, or ``None``.
+
+    Only used to narrow what is read; the glob itself still decides. ``None``
+    (read everything) for no filter, ``*``, a character class, or a pattern
+    that is not ASCII: the database may fold the case of non-ASCII letters
+    differently from Python (a cluster created with the C locale does not fold
+    them at all), and a narrowing that drops a real match would be a wrong
+    quantity.
+    """
+    if not pattern or pattern == "*" or "[" in pattern or not pattern.isascii():
+        return None
+    out: list[str] = []
+    for char in pattern.lower():
+        if char == "*":
+            out.append("%")
+        elif char == "?":
+            out.append("_")
+        elif char in ("%", "_", "\\"):
+            out.append("\\" + char)
+        else:
+            out.append(char)
+    return "".join(out)
 
 
 def _row_elem(row: Sequence[Any]) -> _Elem:
@@ -943,24 +968,38 @@ class ChangeReviewService:
                 found.setdefault(str(row[2]), _row_elem(row))
         return found
 
-    async def _all_elements(self, model_id: uuid.UUID, cache: dict[uuid.UUID, list[_Elem]]) -> list[_Elem]:
-        """Every element of a model, read once per request (a rule runs over all of them)."""
+    async def _rule_candidates(
+        self, model_id: uuid.UUID, rule: Any, cache: dict[tuple[uuid.UUID, str], list[_Elem]]
+    ) -> list[_Elem]:
+        """The elements of a model a rule could match, read once per request.
+
+        The scan runs on every editor open, so this does not read whole models
+        blindly. A plain element-type pattern is narrowed in SQL first, and the
+        properties JSON is only read when the rule looks at it. Both only
+        narrow: ``BIMHubService._rule_matches_element`` still decides each
+        element, so the result is the same as matching the whole model.
+        """
         from app.modules.bim_hub.models import BIMElement
 
-        if model_id not in cache:
-            rows = await self.session.execute(
-                select(
-                    BIMElement.id,
-                    BIMElement.model_id,
-                    BIMElement.stable_id,
-                    BIMElement.geometry_hash,
-                    BIMElement.quantities,
-                    BIMElement.properties,
-                    BIMElement.element_type,
-                ).where(BIMElement.model_id == model_id)
-            )
-            cache[model_id] = [_row_elem(row) for row in rows]
-        return cache[model_id]
+        key = (model_id, str(rule.id))
+        if key in cache:
+            return cache[key]
+        source = str(rule.quantity_source or "")
+        needs_properties = bool(rule.property_filter) or source.startswith("property:")
+        stmt = select(
+            BIMElement.id,
+            BIMElement.model_id,
+            BIMElement.stable_id,
+            BIMElement.geometry_hash,
+            BIMElement.quantities,
+            BIMElement.properties if needs_properties else null(),
+            BIMElement.element_type,
+        ).where(BIMElement.model_id == model_id)
+        like = _type_filter_as_like(rule.element_type_filter)
+        if like is not None:
+            stmt = stmt.where(func.lower(BIMElement.element_type).like(like, escape="\\"))
+        cache[key] = [_row_elem(row) for row in await self.session.execute(stmt)]
+        return cache[key]
 
     async def _load_bim_context(
         self,
@@ -1151,7 +1190,7 @@ class ChangeReviewService:
             rows = await self.session.execute(select(BIMQuantityMap).where(BIMQuantityMap.id.in_(list(chunk))))
             rules.update({str(rule.id): rule for rule in rows.scalars().all()})
 
-        model_cache: dict[uuid.UUID, list[_Elem]] = {}
+        model_cache: dict[tuple[uuid.UUID, str], list[_Elem]] = {}
         for ctx in contexts:
             key = rule_keys.get(ctx.position.id)
             rule = rules.get(key) if key else None
@@ -1170,7 +1209,9 @@ class ChangeReviewService:
                 ctx.rule = rule
                 ctx.method = "rule_linked"
 
-    async def _rule_diff(self, rule: Any, ctx: _PositionLinks, cache: dict[uuid.UUID, list[_Elem]]) -> _RuleDiff:
+    async def _rule_diff(
+        self, rule: Any, ctx: _PositionLinks, cache: dict[tuple[uuid.UUID, str], list[_Elem]]
+    ) -> _RuleDiff:
         from app.modules.bim_hub.service import BIMHubService
 
         def matched(elems: Sequence[_Elem]) -> dict[str, _Elem]:
@@ -1187,12 +1228,12 @@ class ChangeReviewService:
         added: list[str] = []
         crosses = False
         for tip_id, (baseline, _tip) in ctx.baselines.items():
-            tip_matched = matched(await self._all_elements(tip_id, cache))
+            tip_matched = matched(await self._rule_candidates(tip_id, rule, cache))
             if baseline == tip_id:
                 base_matched = tip_matched
             else:
                 crosses = True
-                base_matched = matched(await self._all_elements(baseline, cache))
+                base_matched = matched(await self._rule_candidates(baseline, rule, cache))
             base_all.extend(base_matched.values())
             tip_all.extend(tip_matched.values())
             for sid, old in base_matched.items():
