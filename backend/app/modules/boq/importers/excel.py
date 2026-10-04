@@ -146,40 +146,62 @@ _HEADERS_BY_LANGUAGE: dict[str, dict[str, tuple[str, ...]]] = {
         "classification": ("din 276", "din276", "kg"),
     },
     "es": {
-        "description": ("descripción", "descripcion", "designación", "designacion"),
-        "unit": ("unidad", "uds", "ud"),
-        "quantity": ("cantidad", "cant", "cant."),
-        "unit_rate": ("precio",),
-        "total": ("importe",),
+        # The Spanish estimating programs head a presupuesto "Código | Ud |
+        # Resumen | Medición | Precio | Importe", and a Mexican catálogo de
+        # conceptos "Clave | Concepto | Unidad | Cantidad | P.U. | Importe".
+        "description": ("descripción", "descripcion", "designación", "designacion", "resumen", "concepto"),
+        "unit": ("unidad", "uds", "ud", "unidad de medida"),
+        "quantity": ("cantidad", "cant", "cant.", "medición", "medicion"),
+        "unit_rate": ("precio", "precio unitario", "precio unit.", "p. unitario", "p.u."),
+        "total": ("importe", "importe total"),
+        "classification": ("código", "codigo", "clave"),
     },
     "fr": {
+        # A DPGF or DQE is headed "N° | Désignation | U | Qté | PU HT |
+        # Montant HT".
+        "ordinal": ("n°",),
         "description": ("désignation", "designation"),
-        "unit": ("unité",),
-        "quantity": ("quantité",),
-        "unit_rate": ("prix",),
+        "unit": ("unité", "u"),
+        "quantity": ("quantité", "qté", "qte"),
+        "unit_rate": ("prix", "prix unitaire", "prix unitaire ht", "pu", "p.u.", "pu ht", "p.u. ht"),
         "total": ("montant", "prix total", "montant ht", "total ht"),
     },
     "it": {
-        "description": ("descrizione",),
-        "unit": ("unità", "u"),
-        "quantity": ("quantità", "quantita"),
-        "unit_rate": ("prezzo",),
+        # A computo metrico estimativo is headed "Num. ord. | Tariffa |
+        # Designazione dei lavori | U.M. | Quantità | Prezzo unitario |
+        # Importo", the tariffa being the code of the regional price list.
+        "ordinal": ("n.", "n. ord.", "num. ord.", "n.ord."),
+        "description": ("descrizione", "designazione dei lavori", "descrizione dei lavori"),
+        "unit": ("unità", "u", "u.m.", "unità di misura", "unita di misura"),
+        "quantity": ("quantità", "quantita", "q.tà", "q.ta", "qta"),
+        "unit_rate": ("prezzo", "prezzo unitario", "prezzo unit."),
         "total": ("importo", "totale", "importo totale"),
+        "classification": ("tariffa", "codice", "codice tariffa", "articolo"),
     },
     "pl": {
-        "description": ("opis",),
-        "unit": ("jed",),
+        # A kosztorys is headed "Lp. | Podstawa | Opis robót | j.m. | Ilość |
+        # Cena jedn. | Wartość"; the podstawa cites the KNR catalogue table.
+        "ordinal": ("lp", "lp."),
+        "description": ("opis", "opis robót", "opis robot", "nazwa"),
+        "unit": ("jed", "j.m.", "jednostka miary"),
         "quantity": ("ilość", "ilosc"),
         # Polish carried no rate header at all until the table was split by
         # language, which made a Polish bill import with every rate at zero.
         "unit_rate": ("cena jednostkowa", "cena jedn.", "cena"),
+        "total": ("wartość", "wartosc"),
+        "classification": ("podstawa", "podstawa wyceny", "knr"),
     },
     "ru": {
-        "description": ("наименование",),
-        "unit": ("ед", "ед."),
-        "quantity": ("количество", "кол-во"),
+        # A smeta is headed "№ п/п | Обоснование | Наименование работ и
+        # затрат | Ед. изм. | Кол. | Цена | Всего"; the обоснование is the
+        # GESN or FER rate code the line was priced from.
+        "ordinal": ("№ п/п", "п/п", "№ пп"),
+        "description": ("наименование", "наименование работ", "наименование работ и затрат"),
+        "unit": ("ед", "ед.", "ед. изм.", "единица измерения"),
+        "quantity": ("количество", "кол-во", "кол."),
         "unit_rate": ("цена",),
-        "total": ("стоимость",),
+        "total": ("стоимость", "всего", "сметная стоимость"),
+        "classification": ("обоснование", "шифр", "шифр расценки", "код"),
     },
     "pt": {
         "ordinal": ("nº", "n°", "n.º", "ordem"),
@@ -234,8 +256,11 @@ _HEADERS_BY_LANGUAGE: dict[str, dict[str, tuple[str, ...]]] = {
         "unit_rate": ("jednotková cena", "jednotkova cena", "cena"),
         "total": ("spolu", "celkom", "cena spolu"),
     },
+    # Turkish keşif özeti. The poz number is the code of the unit price the
+    # line was priced from ("15.150.1005") and the sıra number is the running
+    # number, so "poz" is read as the classification.
     "tr": {
-        "ordinal": ("sıra", "sira", "sıra no", "sira no", "poz", "poz no"),
+        "ordinal": ("sıra", "sira", "sıra no", "sira no"),
         "description": (
             "tanım",
             "tanim",
@@ -245,11 +270,16 @@ _HEADERS_BY_LANGUAGE: dict[str, dict[str, tuple[str, ...]]] = {
             "aciklama",
             "imalatın cinsi",
             "imalatin cinsi",
+            "yapılan işin cinsi",
+            "yapilan isin cinsi",
         ),
-        "unit": ("birim", "ölçü birimi", "olcu birimi"),
-        "quantity": ("miktar", "metraj"),
+        "unit": ("birim", "birimi", "ölçü birimi", "olcu birimi"),
+        "quantity": ("miktar", "miktarı", "miktari", "metraj"),
         "unit_rate": ("birim fiyat", "birim fiyatı", "birim fiyati"),
-        "total": ("tutar", "toplam", "toplam tutar"),
+        "total": ("tutar", "tutarı", "tutari", "toplam", "toplam tutar"),
+        # Bare "Poz." is the Romanian and Slovenian position number, so only
+        # the spellings that say "poz number" are Turkish.
+        "classification": ("poz no", "poz numarası", "poz numarasi"),
     },
     # Hungarian költségvetés. The item number ("Tételszám") is the norm or
     # catalogue code of the line, 21-003-5.1.1 and the like, not its running
@@ -347,6 +377,8 @@ _HEADERS_BY_LANGUAGE: dict[str, dict[str, tuple[str, ...]]] = {
         "quantity": ("cantitate",),
         "unit_rate": ("preț unitar", "pret unitar"),
         "total": ("valoare", "valoare totală", "valoare totala"),
+        # The norm code of the line ("CA01A1"), not the deviz chapter.
+        "classification": ("simbol", "cod", "cod articol", "simbol articol"),
     },
     "bg": {
         "ordinal": ("№", "поз", "поз."),
@@ -363,6 +395,7 @@ _HEADERS_BY_LANGUAGE: dict[str, dict[str, tuple[str, ...]]] = {
         "quantity": ("ποσότητα", "ποσοτητα"),
         "unit_rate": ("τιμή μονάδας", "τιμη μοναδας", "τιμή", "τιμη"),
         "total": ("σύνολο", "συνολο", "δαπάνη", "δαπανη"),
+        "classification": ("άρθρο", "αρθρο", "κωδικός άρθρου", "κωδικος αρθρου", "κωδικός", "κωδικος"),
     },
     "sv": {
         "ordinal": ("post", "postnr"),
@@ -403,6 +436,7 @@ _HEADERS_BY_LANGUAGE: dict[str, dict[str, tuple[str, ...]]] = {
         "quantity": ("кількість", "к-ть"),
         "unit_rate": ("ціна", "ціна за одиницю", "вартість одиниці"),
         "total": ("сума", "вартість", "загальна вартість"),
+        "classification": ("шифр", "обґрунтування", "обгрунтування", "код"),
     },
     "ja": {
         "ordinal": ("番号", "項番"),
@@ -411,6 +445,7 @@ _HEADERS_BY_LANGUAGE: dict[str, dict[str, tuple[str, ...]]] = {
         "quantity": ("数量",),
         "unit_rate": ("単価",),
         "total": ("金額", "合計"),
+        "classification": ("コード", "細目コード", "工種コード"),
     },
     "ko": {
         "ordinal": ("번호", "순번", "연번"),
@@ -419,6 +454,7 @@ _HEADERS_BY_LANGUAGE: dict[str, dict[str, tuple[str, ...]]] = {
         "quantity": ("수량",),
         "unit_rate": ("단가",),
         "total": ("금액", "합계"),
+        "classification": ("코드", "공종코드", "품목코드"),
     },
     "zh": {
         "ordinal": ("序号", "编号"),
@@ -427,6 +463,9 @@ _HEADERS_BY_LANGUAGE: dict[str, dict[str, tuple[str, ...]]] = {
         "quantity": ("数量", "工程量"),
         "unit_rate": ("单价", "综合单价"),
         "total": ("合价", "金额", "合计"),
+        # The twelve-digit item code of a GB 50500 bill, and the quota number
+        # a line priced from a 定额 cites.
+        "classification": ("项目编码", "清单编码", "编码", "定额编号"),
     },
     "ar": {
         "ordinal": ("رقم", "الرقم", "التسلسل", "رقم البند"),
@@ -455,6 +494,7 @@ _HEADERS_BY_LANGUAGE: dict[str, dict[str, tuple[str, ...]]] = {
         "quantity": ("volume", "vol.", "kuantitas", "banyaknya"),
         "unit_rate": ("harga satuan", "harga"),
         "total": ("jumlah harga", "total harga", "jumlah biaya"),
+        "classification": ("kode", "kode analisa", "kode ahsp", "kode pekerjaan"),
     },
     "vi": {
         "ordinal": ("stt", "số tt", "so tt"),

@@ -209,6 +209,77 @@ _DELIBERATE_ADDITIONS_TO_THE_ORIGINAL_SEVEN: dict[str, frozenset[str]] = {
     "classification": frozenset({"cost code", "cost group", "class"}),
 }
 
+# The second widening, when each market's bills were held to the header they
+# are really printed with: the Spanish presupuesto, the French DPGF, the
+# Italian computo metrico, the Polish kosztorys and the Russian smeta. Most
+# of all it names their code column, which the national code rules read and
+# which was dropped as an unknown column before.
+_MARKET_HEADER_ADDITIONS_TO_THE_ORIGINAL_SEVEN: dict[str, frozenset[str]] = {
+    "ordinal": frozenset(
+        {"n°", "n.", "n. ord.", "num. ord.", "n.ord.", "lp", "lp.", "№ п/п", "п/п", "№ пп"},
+    ),
+    "description": frozenset(
+        {
+            "resumen",
+            "concepto",
+            "designazione dei lavori",
+            "descrizione dei lavori",
+            "opis robót",
+            "opis robot",
+            "nazwa",
+            "наименование работ",
+            "наименование работ и затрат",
+        }
+    ),
+    "unit": frozenset(
+        {
+            "unidad de medida",
+            "u.m.",
+            "unità di misura",
+            "unita di misura",
+            "j.m.",
+            "jednostka miary",
+            "ед. изм.",
+            "единица измерения",
+        }
+    ),
+    "quantity": frozenset({"medición", "medicion", "qté", "qte", "q.tà", "q.ta", "qta", "кол."}),
+    "unit_rate": frozenset(
+        {
+            "precio unitario",
+            "precio unit.",
+            "p. unitario",
+            "prix unitaire",
+            "prix unitaire ht",
+            "pu",
+            "p.u.",
+            "pu ht",
+            "p.u. ht",
+            "prezzo unitario",
+            "prezzo unit.",
+        }
+    ),
+    "total": frozenset({"importe total", "wartość", "wartosc", "всего", "сметная стоимость"}),
+    "classification": frozenset(
+        {
+            "código",
+            "codigo",
+            "clave",
+            "tariffa",
+            "codice",
+            "codice tariffa",
+            "articolo",
+            "podstawa",
+            "podstawa wyceny",
+            "knr",
+            "обоснование",
+            "шифр",
+            "шифр расценки",
+            "код",
+        }
+    ),
+}
+
 
 # ── Behaviour preservation ──────────────────────────────────────────────────
 
@@ -241,7 +312,9 @@ def test_the_original_seven_languages_gained_only_the_named_headers() -> None:
         }
     )
     for canonical, headers in _HEADERS_BEFORE_THE_SPLIT.items():
-        allowed = _DELIBERATE_ADDITIONS_TO_THE_ORIGINAL_SEVEN.get(canonical, frozenset())
+        allowed = _DELIBERATE_ADDITIONS_TO_THE_ORIGINAL_SEVEN.get(
+            canonical, frozenset()
+        ) | _MARKET_HEADER_ADDITIONS_TO_THE_ORIGINAL_SEVEN.get(canonical, frozenset())
         assert original[canonical] - headers == allowed
         assert headers - original[canonical] == frozenset()
 
