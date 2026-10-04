@@ -25,7 +25,7 @@ Inspector-guarded, so a re-run on a database that already has a table, or a
 downgrade on one that never got it, changes nothing.
 
 Revision ID: v50_ru_resource_index_tables
-Revises: v49_boq_change_flag
+Revises: v50_costs_base_state
 Create Date: 2026-10-04
 """
 
@@ -38,7 +38,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "v50_ru_resource_index_tables"
-down_revision: Union[str, Sequence[str], None] = "v49_boq_change_flag"
+down_revision: Union[str, Sequence[str], None] = "v50_costs_base_state"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
