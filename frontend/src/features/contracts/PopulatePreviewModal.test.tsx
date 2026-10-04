@@ -142,3 +142,104 @@ describe('PopulatePreviewModal preview source', () => {
     );
   });
 });
+
+// A second-period row: the line is worth 10,000, earlier claims billed 2,000
+// (20%), and the site now measures 40% to date, so this period bills 2,000.
+function secondPeriod(): ProgressClaimPopulatePreview {
+  const base = preview();
+  return {
+    ...base,
+    items: [
+      {
+        ...base.items[0],
+        observed_pct: '40',
+        prior_completed_value: '2000',
+        period_completed_value: '2000',
+        cumulative_completed_value: '4000',
+      },
+    ],
+  };
+}
+
+function digits(testId: string): string {
+  return (screen.getByTestId(testId).textContent ?? '').replace(/[^0-9.]/g, '');
+}
+
+describe('PopulatePreviewModal correcting field progress', () => {
+  it('commits the percent alone, so the server bills it over the earlier claims', async () => {
+    commitMock.mockResolvedValue({} as never);
+    populateMock.mockResolvedValue(secondPeriod());
+    renderModal();
+    await waitFor(() => expect(screen.getByTestId('populate-preview-table')).toBeTruthy());
+    expect(digits('populate-period-line-1')).toBe('2000.00');
+    expect(digits('populate-to-date-line-1')).toBe('4000.00');
+    fireEvent.click(screen.getByText('Commit lines'));
+    await waitFor(() =>
+      expect(commitMock).toHaveBeenCalledWith('claim-1', [
+        { contract_line_id: 'line-1', period_completed_pct: 40 },
+      ]),
+    );
+  });
+
+  it('works a corrected percent out over what was billed before, and commits it', async () => {
+    commitMock.mockResolvedValue({} as never);
+    populateMock.mockResolvedValue(secondPeriod());
+    renderModal();
+    const input = await screen.findByLabelText('Percent complete to date for line 03.10');
+    fireEvent.change(input, { target: { value: '55' } });
+    // 55% of 10,000 is 5,500 to date, of which 2,000 was billed before.
+    expect(digits('populate-period-line-1')).toBe('3500.00');
+    expect(digits('populate-to-date-line-1')).toBe('5500.00');
+    expect(screen.getByTestId('populate-selected-summary').textContent?.replace(/[^0-9.]/g, '')).toContain(
+      '3500.00',
+    );
+    expect(screen.getByText(/Corrected by you/)).toBeTruthy();
+    fireEvent.click(screen.getByText('Commit lines'));
+    await waitFor(() =>
+      expect(commitMock).toHaveBeenCalledWith('claim-1', [
+        { contract_line_id: 'line-1', period_completed_pct: 55 },
+      ]),
+    );
+  });
+
+  it('bills nothing on a percent below what was billed before, and says so', async () => {
+    populateMock.mockResolvedValue(secondPeriod());
+    renderModal();
+    const input = await screen.findByLabelText('Percent complete to date for line 03.10');
+    fireEvent.change(input, { target: { value: '10' } });
+    expect(digits('populate-period-line-1')).toBe('0.00');
+    expect(digits('populate-to-date-line-1')).toBe('2000.00');
+    expect(screen.getByText(/Below what earlier claims already billed/)).toBeTruthy();
+  });
+
+  it('refuses to commit a percent outside 0 to 100', async () => {
+    populateMock.mockResolvedValue(secondPeriod());
+    renderModal();
+    const input = await screen.findByLabelText('Percent complete to date for line 03.10');
+    fireEvent.change(input, { target: { value: '150' } });
+    expect(screen.getByRole('alert').textContent).toContain('Enter a percent from 0 to 100.');
+    expect(screen.getByText('Commit lines').closest('button')?.disabled).toBe(true);
+    fireEvent.change(input, { target: { value: '100' } });
+    expect(screen.getByText('Commit lines').closest('button')?.disabled).toBe(false);
+  });
+
+  it('goes back to the measured percent', async () => {
+    populateMock.mockResolvedValue(secondPeriod());
+    renderModal();
+    const input = await screen.findByLabelText('Percent complete to date for line 03.10');
+    fireEvent.change(input, { target: { value: '70' } });
+    expect(digits('populate-period-line-1')).toBe('5000.00');
+    fireEvent.click(screen.getByLabelText(/Back to the measured/));
+    expect(digits('populate-period-line-1')).toBe('2000.00');
+    expect((input as HTMLInputElement).value).toBe('40');
+    expect(screen.queryByText(/Corrected by you/)).toBeNull();
+  });
+
+  it('leaves the rows of another source read-only', async () => {
+    const loader = vi.fn().mockResolvedValue(secondPeriod());
+    renderModal({ loadPreview: loader });
+    await waitFor(() => expect(screen.getByTestId('populate-preview-table')).toBeTruthy());
+    expect(screen.queryByLabelText('Percent complete to date for line 03.10')).toBeNull();
+    expect(screen.queryByRole('spinbutton')).toBeNull();
+  });
+});

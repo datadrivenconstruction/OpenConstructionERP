@@ -548,8 +548,10 @@ describe('PopulatePreviewModal', () => {
     await waitFor(() => expect(screen.getByTestId('populate-preview-table')).toBeTruthy());
     fireEvent.click(screen.getByText(/Commit lines/i));
     await waitFor(() => expect(api.commitClaimLines).toHaveBeenCalledTimes(1));
+    // Field progress commits the percent to date; the server bills it over
+    // what the earlier claims billed when it writes.
     expect(api.commitClaimLines).toHaveBeenCalledWith(CLAIM_ID, [
-      { contract_line_id: 'line-1', period_completed_pct: 40, period_completed_value: 400 },
+      { contract_line_id: 'line-1', period_completed_pct: 40 },
     ]);
     await waitFor(() => expect(onClose).toHaveBeenCalled());
   });

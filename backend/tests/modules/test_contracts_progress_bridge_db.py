@@ -25,7 +25,7 @@ back per test). Covers the service contract end-to-end:
 from __future__ import annotations
 
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 
 import pytest
@@ -530,3 +530,103 @@ async def test_commit_emits_event(session, monkeypatch) -> None:
     assert payload["gross"] == "500.0000"
     assert payload["actor"] == "user-1"
     assert events[0][2] == "contracts"
+
+
+# ── Two billing periods from measured progress ─────────────────────────────
+
+
+async def _dated_claim(s, contract: Contract, number: str, start: date, end: date) -> ProgressClaim:
+    claim = ProgressClaim(
+        id=uuid.uuid4(),
+        contract_id=contract.id,
+        claim_number=number,
+        currency=contract.currency,
+        status="draft",
+        period_start=start.isoformat(),
+        period_end=end.isoformat(),
+        period_from=start,
+        period_to=end,
+    )
+    s.add(claim)
+    await s.flush()
+    return claim
+
+
+@pytest.mark.asyncio
+async def test_two_periods_from_measured_progress_bill_the_work_once(session) -> None:
+    """March at 40% and April at 60% bill 40,000 and then 20,000, never 60,000 again.
+
+    Every observation is on record before either preview is taken, the way a
+    claim is often prepared late: March still reads the site as it stood on
+    31 March, and April bills only what the site added over what March billed.
+    """
+    project = await _make_project(session)
+    pos = await _make_boq_position(session, project)
+    contract = await _make_contract(session, project, retention_percent="10")
+    line = await _make_line(session, contract, total_value="100000", quantity="10", boq_position_id=pos.id)
+    await _make_entry(session, project, pos, pct="40", period="2026-03", recorded_at=datetime(2026, 3, 20, tzinfo=UTC))
+    await _make_entry(session, project, pos, pct="60", period="2026-04", recorded_at=datetime(2026, 4, 25, tzinfo=UTC))
+    # Measured after April closed; no claim here may bill it.
+    await _make_entry(session, project, pos, pct="90", period="2026-05", recorded_at=datetime(2026, 5, 10, tzinfo=UTC))
+    march = await _dated_claim(session, contract, "PC-1", date(2026, 3, 1), date(2026, 3, 31))
+    april = await _dated_claim(session, contract, "PC-2", date(2026, 4, 1), date(2026, 4, 30))
+    svc = ContractsService(session)
+
+    [m] = (await svc.populate_claim_from_progress(march.id))["items"]
+    assert m["observed_pct"] == Decimal("40.0000")
+    assert m["prior_completed_value"] == Decimal("0")
+    assert m["period_completed_value"] == Decimal("40000.0000")
+    assert m["cumulative_completed_value"] == Decimal("40000.0000")
+    await svc.commit_preview_to_claim(march.id, [_CommitLine(line.id, m["observed_pct"])])
+    march.status = "submitted"
+    await session.flush()
+
+    preview = await svc.populate_claim_from_progress(april.id)
+    [a] = preview["items"]
+    assert a["observed_pct"] == Decimal("60.0000")
+    assert a["prior_completed_value"] == Decimal("40000.0000")
+    assert a["period_completed_value"] == Decimal("20000.0000")
+    assert a["cumulative_completed_value"] == Decimal("60000.0000")
+    # 6 of the 10 units to date, 4 of them billed in March.
+    assert a["period_completed_qty"] == Decimal("2.0000")
+    assert preview["gross"] == Decimal("20000.0000")
+
+    await svc.commit_preview_to_claim(april.id, [_CommitLine(line.id, a["observed_pct"])])
+    [row] = await svc.claim_line_repo.list_for_claim(april.id)
+    assert row.period_completed_value == Decimal("20000.0000")
+    assert row.prior_completed_value == Decimal("40000.0000")
+    assert row.cumulative_completed_value == Decimal("60000.0000")
+    # Across both claims the line is billed at its percent to date, once.
+    billed = [
+        Decimal(str(r.period_completed_value))
+        for claim in (march, april)
+        for r in await svc.claim_line_repo.list_for_claim(claim.id)
+    ]
+    assert sum(billed, Decimal("0")) == Decimal("60000")
+
+
+@pytest.mark.asyncio
+async def test_a_percent_edited_in_the_preview_is_billed_over_what_came_before(session) -> None:
+    """The person corrects April to 55%: the claim bills 15,000 over March's 40,000."""
+    project = await _make_project(session)
+    pos = await _make_boq_position(session, project)
+    contract = await _make_contract(session, project, retention_percent="10")
+    line = await _make_line(session, contract, total_value="100000", quantity="10", boq_position_id=pos.id)
+    march = await _dated_claim(session, contract, "PC-1", date(2026, 3, 1), date(2026, 3, 31))
+    april = await _dated_claim(session, contract, "PC-2", date(2026, 4, 1), date(2026, 4, 30))
+    svc = ContractsService(session)
+    await svc.commit_preview_to_claim(march.id, [_CommitLine(line.id, "40")])
+    march.status = "submitted"
+    await session.flush()
+
+    april = await svc.commit_preview_to_claim(april.id, [_CommitLine(line.id, "55")])
+    [row] = await svc.claim_line_repo.list_for_claim(april.id)
+    assert row.period_completed_pct == Decimal("55.0000")
+    assert row.period_completed_value == Decimal("15000.0000")
+    assert april.gross_amount == Decimal("15000.0000")
+
+    # Corrected below March, the line bills nothing and the claim says why.
+    april = await svc.commit_preview_to_claim(april.id, [_CommitLine(line.id, "30")])
+    [row] = await svc.claim_line_repo.list_for_claim(april.id)
+    assert row.period_completed_value == Decimal("0")
+    assert [e["contract_line_id"] for e in (april.metadata_ or {})[PERCENT_REGRESSED_META_KEY]] == [str(line.id)]
