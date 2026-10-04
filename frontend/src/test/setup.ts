@@ -152,6 +152,25 @@ const noopPlugin = { type: '3rdParty', init: () => {} };
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string, opts?: Record<string, unknown>) => {
+      // A counted call may give only ``defaultValue_one`` and
+      // ``defaultValue_other``, which real i18next resolves by count. Without
+      // this the mock returned the raw key for every such call.
+      if (
+        typeof opts === 'object' &&
+        opts !== null &&
+        !('defaultValue' in opts) &&
+        'count' in opts &&
+        (typeof opts.defaultValue_one === 'string' || typeof opts.defaultValue_other === 'string')
+      ) {
+        const template = (
+          opts.count === 1 && typeof opts.defaultValue_one === 'string'
+            ? opts.defaultValue_one
+            : (opts.defaultValue_other ?? opts.defaultValue_one)
+        ) as string;
+        return template.replace(/\{\{(\w+)\}\}/g, (_match, name) =>
+          name in opts ? String(opts[name]) : `{{${name}}}`,
+        );
+      }
       if (typeof opts === 'object' && opts !== null && 'defaultValue' in opts) {
         // Mirror the two i18next behaviours real components rely on:
         // (1) pick the ``_other`` plural default whenever ``count`` is
