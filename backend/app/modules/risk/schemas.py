@@ -399,3 +399,129 @@ class RiskSimulationResult(BaseModel):
     # the cost percentiles / histogram are then suppressed (None / empty) rather
     # than blended under a single mislabelled currency. Schedule is unaffected.
     mixed_currency: bool = False
+
+
+# ── Risk-based contingency (EMV vs the finance contingency line) ─────────
+
+
+class ContingencyLineOut(BaseModel):
+    """One finance budget line in the contingency category, in its own currency."""
+
+    budget_id: UUID
+    wbs_id: str | None = None
+    currency: str = ""
+    allocated: Decimal = Decimal("0")
+    drawn: Decimal = Decimal("0")
+    remaining: Decimal = Decimal("0")
+    # False when the line's currency has no FX rate to the project currency,
+    # so it is shown on its own and left out of the totals.
+    converted: bool = True
+
+    @field_serializer("allocated", "drawn", "remaining", when_used="json")
+    def _ser_money(self, v: Decimal) -> str | None:
+        return _serialise_money(v)
+
+
+class ContingencyDrawdownOut(BaseModel):
+    """A confirmed drawdown, amount in the currency of the line it was drawn from.
+
+    The risk's code and title are a snapshot taken at confirmation, so the
+    record still reads correctly after the risk itself was deleted.
+    """
+
+    risk_id: UUID | None = None
+    risk_code: str = ""
+    risk_title: str = ""
+    budget_id: UUID
+    amount: Decimal
+    currency: str = ""
+    confirmed_by: str | None = None
+    confirmed_at: str | None = None
+    note: str = ""
+
+    @field_serializer("amount", when_used="json")
+    def _ser_money(self, v: Decimal) -> str | None:
+        return _serialise_money(v)
+
+
+class ContingencyPendingOut(BaseModel):
+    """An occurred risk whose drawdown a person has not confirmed yet.
+
+    ``proposed_amount`` is the cost impact expressed in the currency of the
+    line the drawdown would land on by default. It prefills the dialog and is
+    never recorded on its own.
+    """
+
+    risk_id: UUID
+    risk_code: str = ""
+    risk_title: str = ""
+    impact_cost: Decimal = Decimal("0")
+    currency: str = ""
+    proposed_amount: Decimal | None = None
+    proposed_currency: str = ""
+    proposed_budget_id: UUID | None = None
+
+    @field_serializer("impact_cost", "proposed_amount", when_used="json")
+    def _ser_money(self, v: Decimal | None) -> str | None:
+        return _serialise_money(v)
+
+
+class ContingencyPosition(BaseModel):
+    """Risk-based contingency against the contingency the finance budget holds.
+
+    Totals are in ``currency`` (the project currency). ``emv`` is the sum of
+    probability x cost impact over risks that can still happen (closed and
+    occurred risks, and risks already drawn down, are out). ``p50``/``p80``
+    are deterministic percentiles of the same register; ``percentile_method``
+    says whether they are exact or a normal approximation. ``remaining`` is
+    allocated minus drawn, and ``coverage_gap`` is remaining minus EMV
+    (negative means the contingency left does not cover the open exposure).
+    """
+
+    currency: str = ""
+    emv: Decimal = Decimal("0")
+    p50: Decimal = Decimal("0")
+    p80: Decimal = Decimal("0")
+    percentile_method: Literal["exact", "normal_approximation"] = "exact"
+    emv_by_currency: dict[str, Decimal] = Field(default_factory=dict)
+    allocated: Decimal = Decimal("0")
+    drawn: Decimal = Decimal("0")
+    remaining: Decimal = Decimal("0")
+    coverage_gap: Decimal = Decimal("0")
+    state: Literal["no_allocation", "covered", "shortfall", "overdrawn"] = "no_allocation"
+    active_risk_count: int = 0
+    excluded_closed_count: int = 0
+    excluded_drawn_count: int = 0
+    unconverted_emv: dict[str, Decimal] = Field(default_factory=dict)
+    missing_fx_rates: list[str] = Field(default_factory=list)
+    lines: list[ContingencyLineOut] = Field(default_factory=list)
+    drawdowns: list[ContingencyDrawdownOut] = Field(default_factory=list)
+    pending: list[ContingencyPendingOut] = Field(default_factory=list)
+
+    @field_serializer("emv", "p50", "p80", "allocated", "drawn", "remaining", "coverage_gap", when_used="json")
+    def _ser_money(self, v: Decimal) -> str | None:
+        return _serialise_money(v)
+
+    @field_serializer("emv_by_currency", "unconverted_emv", when_used="json")
+    def _ser_money_map(self, v: dict[str, Decimal]) -> dict[str, str | None]:
+        return {k: _serialise_money(x) for k, x in v.items()}
+
+
+class ContingencyDrawdownRequest(BaseModel):
+    """A person confirming a drawdown for a risk that occurred.
+
+    ``amount`` is in the currency of the chosen contingency line.
+    ``budget_id`` may be left out when the project has one contingency line
+    (or one in the project currency); with several it is required.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    amount: Decimal = Field(..., gt=0)
+    budget_id: UUID | None = None
+    note: str = Field(default="", max_length=1000)
+
+    @field_validator("amount")
+    @classmethod
+    def _bound_amount(cls, v: Decimal) -> Decimal:
+        return _bound_money(v) or v

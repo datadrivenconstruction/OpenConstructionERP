@@ -19,5 +19,9 @@ def register_risk_permissions() -> None:
             # Gated at MANAGER - escalation drives notifications and action
             # items, so it is a supervisory action, not a routine edit.
             "risk.escalate": Role.MANAGER,
+            # Confirming (or reversing) the money an occurred risk draws from
+            # the finance contingency line. Spending contingency is a
+            # financial commitment, so it sits at MANAGER like finance.approve.
+            "risk.contingency": Role.MANAGER,
         },
     )

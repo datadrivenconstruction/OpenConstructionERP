@@ -10,6 +10,9 @@ Endpoints:
     DELETE /{id}                   - Delete risk
     GET    /matrix?project_id=X    - Risk matrix data (5x5 grid)
     GET    /summary?project_id=X   - Aggregated stats
+    GET    /projects/{pid}/contingency                     - EMV vs finance contingency
+    POST   /projects/{pid}/contingency/drawdowns/{risk_id} - Confirm a drawdown
+    DELETE /projects/{pid}/contingency/drawdowns/{risk_id} - Reverse a drawdown
 """
 
 import logging
@@ -21,6 +24,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from app.core.bulk_ops import BulkDeleteRequest, BulkStatusRequest
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.risk.schemas import (
+    ContingencyDrawdownRequest,
+    ContingencyPosition,
     RiskCreate,
     RiskEscalationSweepRequest,
     RiskEscalationSweepResult,
@@ -256,6 +261,87 @@ async def simulate_risks(
         mode=body.mode,
     )
     return RiskSimulationResult(**data)
+
+
+# ── Risk-based contingency (EMV vs the finance contingency line) ─────────
+#
+# Project-scoped (``/projects/{project_id}/contingency...``) so the routes never
+# collide with ``/{risk_id}``, and so a drawdown of a risk that was deleted
+# later can still be found and reversed through its project.
+
+
+@router.get(
+    "/projects/{project_id}/contingency",
+    response_model=ContingencyPosition,
+    dependencies=[Depends(RequirePermission("risk.read"))],
+)
+async def get_contingency_position(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: RiskService = Depends(_get_service),
+) -> ContingencyPosition:
+    """Risk-based contingency (EMV, P50/P80) against the finance contingency lines.
+
+    Allocated contingency is the project's finance budget lines in the
+    Contingency category; drawn is what people confirmed for risks that
+    occurred; remaining is allocated minus drawn. Totals are in the project
+    currency, converted with the project's FX table; an amount in a currency
+    without a rate is reported apart instead of being summed in its own units.
+    """
+    await verify_project_access(project_id, user_id, session)
+    return ContingencyPosition(**await service.get_contingency_position(project_id))
+
+
+@router.post(
+    "/projects/{project_id}/contingency/drawdowns/{risk_id}",
+    response_model=ContingencyPosition,
+    dependencies=[Depends(RequirePermission("risk.contingency"))],
+)
+async def confirm_contingency_drawdown(
+    project_id: uuid.UUID,
+    risk_id: uuid.UUID,
+    body: ContingencyDrawdownRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: RiskService = Depends(_get_service),
+) -> ContingencyPosition:
+    """Confirm the amount an occurred risk draws from a contingency line.
+
+    One drawdown per risk: confirming again replaces it, and replaying the
+    same confirmation changes nothing. The amount is in the currency of the
+    chosen line. Returns the updated position.
+    """
+    await verify_project_access(project_id, user_id, session)
+    data = await service.confirm_contingency_drawdown(
+        project_id,
+        risk_id,
+        body,
+        user_id=str(user_id) if user_id else None,
+    )
+    return ContingencyPosition(**data)
+
+
+@router.delete(
+    "/projects/{project_id}/contingency/drawdowns/{risk_id}",
+    response_model=ContingencyPosition,
+    dependencies=[Depends(RequirePermission("risk.contingency"))],
+)
+async def reverse_contingency_drawdown(
+    project_id: uuid.UUID,
+    risk_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: RiskService = Depends(_get_service),
+) -> ContingencyPosition:
+    """Reverse a confirmed drawdown and return the updated position."""
+    await verify_project_access(project_id, user_id, session)
+    data = await service.reverse_contingency_drawdown(
+        project_id,
+        risk_id,
+        user_id=str(user_id) if user_id else None,
+    )
+    return ContingencyPosition(**data)
 
 
 # ── Auto-escalation sweep (TOP-30 #24) ───────────────────────────────────
