@@ -1325,6 +1325,10 @@ async def load_base_market(
         # purpose: the region may be half repriced, and the catalogue says so
         # until a switch or a return home completes.
         result = await service.apply_market_catalog(base_region, market_token, rows)
+        # Inside the lock, so the Resource Catalog always shows the market the
+        # rows were last switched to: a switch or return home queued behind
+        # this one cannot write its catalogue before ours lands.
+        catalog_out = await _mirror_market_catalog(session, base_region, rows)
         await base_state.write_base_state(
             session, base_region, active_market=market_token, switching_to=None, updated_by=actor
         )
@@ -1336,7 +1340,7 @@ async def load_base_market(
     # can say so when they differ instead of implying the market's language.
     payload["text_language"] = text_lang
     payload["text_language_requested"] = requested_lang
-    payload["catalog"] = await _mirror_market_catalog(session, base_region, rows)
+    payload["catalog"] = catalog_out
     return payload
 
 
@@ -1408,7 +1412,10 @@ async def restore_base_home_market(
 
     The result is what deleting and loading the base again would give, without
     the delete. 404 for an unknown or not-loaded base, 409 when another switch
-    of the same base is running, 502 when the base's own file cannot be read.
+    of the same base is running, 502 when the base's own file cannot be read,
+    and 502 when the price sheet cannot be rebuilt. In that last case the items
+    are already home and the sheet is rolled back to what it was, so the base
+    stays marked as switching until a second return home finishes the job.
     """
     from sqlalchemy import delete as sql_delete
     from sqlalchemy import func
@@ -1493,17 +1500,41 @@ async def restore_base_home_market(
                 .where(ResourcePrice.region == base_region, ResourcePrice.source == "user")
             )
         ).scalar_one()
-        await session.execute(sql_delete(ResourcePrice).where(ResourcePrice.region == base_region))
-        await session.commit()
         prices = ResourcePriceService(session)
-        # Only rows already back in the home currency say what a home price is.
-        seed = await prices.seed_region(base_region, currency=home_currency)
-        # A priced recipe the home file does not hold still carries the market's
-        # prices: reprice it from the home sheet just built, as the switch
-        # repriced it from the market's, and give it the home currency.
-        repriced_home = await prices.reprice_region(
-            base_region, where=CostItem.currency != home_currency, stamp_currency=home_currency
-        )
+        try:
+            # The delete is not committed on its own: it lands with the seed's
+            # commit, so a seed that fails rolls it back and the region is never
+            # left without a price sheet.
+            await session.execute(sql_delete(ResourcePrice).where(ResourcePrice.region == base_region))
+            # Only rows already back in the home currency say what a home price is.
+            seed = await prices.seed_region(base_region, currency=home_currency)
+            # A priced recipe the home file does not hold still carries the
+            # market's prices: reprice it from the home sheet just built, as the
+            # switch repriced it from the market's, and give it the home currency.
+            repriced_home = await prices.reprice_region(
+                base_region, where=CostItem.currency != home_currency, stamp_currency=home_currency
+            )
+            await session.commit()
+        except Exception as exc:
+            logger.exception("Rebuilding the price sheet of %s on its return home failed", base_region)
+            try:
+                await session.rollback()
+            except Exception:  # noqa: BLE001 - the rollback is best effort
+                logger.debug("rollback after the failed price sheet rebuild also failed", exc_info=True)
+            # The work items already hold their home rates, so caches must not
+            # keep serving the market ones.
+            _invalidate_cost_cache()
+            # ``switching_to`` stays on the return home on purpose: the items
+            # are home but the sheet still holds the market's prices, and
+            # calling that "home" would be the half-done state this marker
+            # exists to show. Returning home again finishes it.
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=(
+                    f"The work items of '{base_region}' are back on their home prices, but its resource price "
+                    f"sheet could not be rebuilt ({exc.__class__.__name__}). Return it home again to finish."
+                ),
+            ) from exc
         left_in_market = (
             await session.execute(
                 select(func.count())
@@ -1517,6 +1548,9 @@ async def restore_base_home_market(
         ).scalar_one()
 
         home_lang_out = await _open_in_home_language(base_region, session)
+        # Inside the lock, so a switch that queued behind this one cannot land
+        # its market catalogue first and then have it overwritten by ours.
+        home_catalog = await _restore_home_catalog(session, base_region)
         await base_state.write_base_state(session, base_region, active_market=None, switching_to=None, updated_by=actor)
     _invalidate_cost_cache()
 
@@ -1544,7 +1578,7 @@ async def restore_base_home_market(
         "previous_market": before.active_market if before else None,
         **home_lang_out,
     }
-    payload["catalog"] = await _restore_home_catalog(session, base_region)
+    payload["catalog"] = home_catalog
     state = await base_state.read_base_state(session, base_region)
     payload["state"] = state.public() if state else None
     return payload

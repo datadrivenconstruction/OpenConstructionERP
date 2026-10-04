@@ -10,7 +10,8 @@ What they pin:
 
 * the stored state round-trips through the table and reads the same from a
   fresh engine; partial writes leave the other fields alone;
-* two users switching two different bases at once each get their own answer;
+* two users switching two different bases at once, on two workers and through
+  the switch endpoint itself, each get their own state, rows and catalogue;
 * the advisory lock excludes a second worker on the same base and only that
   base, with the in-process lock taken out of play so it cannot pass for it;
 * ``/base-catalog`` reports what is stored, and "unknown" for a loaded base
@@ -22,6 +23,12 @@ What they pin:
 * a return to the home market gives every work item its home rate, components
   and currency back, ids kept, an item the home file does not hold untouched,
   and rebuilds the price sheet and the catalogue;
+* a priced recipe the home file does not hold is repriced from the home sheet,
+  never relabelled, and the home sheet is never seeded from market prices;
+* catalogue rows keep their ids across switches, so assembly links survive,
+  and the catalogue is written while the switch still holds the lock;
+* a price sheet rebuild that fails rolls back to a full sheet, answers 502
+  and leaves the base marked as switching until a second return home;
 * an ``already_loaded`` load retries a home-language switch that did not land,
   and only when the stored state says so.
 """
@@ -193,34 +200,97 @@ async def test_nothing_stored_is_unknown_not_home(db: AsyncEngine) -> None:
         assert await base_state.read_base_state(s, BASE) is None
 
 
-async def test_two_users_switching_two_bases_at_once_each_keep_their_own(db: AsyncEngine) -> None:
+async def test_two_users_switching_two_bases_at_once_each_keep_their_own(
+    db: AsyncEngine, wired: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Two market switches of two bases, on two workers, interleaved: nothing crosses over.
+
+    Driven through ``load_base_market`` itself, so a switch that wrote another
+    base's state, rows or catalogue would show here. The two markets differ in
+    currency and prices so a leak cannot pass as a coincidence.
+    """
+    import app.modules.catalog.router as catalog_router
+
+    berlin = "DE_BERLIN_de"
+    berlin_rows = [
+        {
+            "resource_code": "R1",
+            "name": "Resource R1",
+            "type": "material",
+            "unit": "kg",
+            "price_avg": "4",
+            "currency": "EUR",
+        },
+        {
+            "resource_code": "R2",
+            "name": "Resource R2",
+            "type": "material",
+            "unit": "kg",
+            "price_avg": "2",
+            "currency": "EUR",
+        },
+    ]
+
+    async def _rows(base_region: str, market_token: str) -> list[dict[str, Any]]:
+        # Yield to the other switch so the two really interleave.
+        await asyncio.sleep(0.05)
+        source = MARKET_ROWS if market_token == MARKET else berlin_rows
+        return [dict(r) for r in source]
+
+    monkeypatch.setattr(catalog_router, "fetch_market_catalog_rows", _rows)
     alice, bob = uuid.uuid4(), uuid.uuid4()
+    async with _sessions(db)() as s:
+        await _load_home_base(s, BASE)
+        await _load_home_base(s, OTHER_BASE)
+        for region in (BASE, OTHER_BASE):
+            await ResourcePriceService(s).seed_region(region)
+
     second = await _second_worker(db)
     try:
 
-        async def _switch(engine: AsyncEngine, region: str, market: str, lang: str, user: uuid.UUID) -> None:
+        async def _switch(engine: AsyncEngine, region: str, market: str, user: uuid.UUID) -> dict:
             async with _sessions(engine)() as s:
-                await base_state.write_base_state(s, region, switching_to=market, updated_by=user)
-                await asyncio.sleep(0)
-                await base_state.write_base_state(
-                    s, region, active_market=market, text_language=lang, switching_to=None, updated_by=user
+                return await costs_router.load_base_market(
+                    region, market, session=s, _user_id=str(user), service=ResourcePriceService(s)
                 )
 
-        await asyncio.gather(
-            _switch(db, BASE, MARKET, "en", alice),
-            _switch(second, OTHER_BASE, "FR_PARIS_fr", "fr", bob),
+        china_out, turkiye_out = await asyncio.gather(
+            _switch(db, BASE, MARKET, alice),
+            _switch(second, OTHER_BASE, berlin, bob),
         )
         async with _sessions(second)() as s:
             china = await base_state.read_base_state(s, BASE)
             turkiye = await base_state.read_base_state(s, OTHER_BASE)
             owners = {row.region: row.updated_by for row in (await s.execute(select(CostBaseState))).scalars().all()}
+            china_items = await _items(s, BASE)
+            turkiye_items = await _items(s, OTHER_BASE)
+            catalogue = {
+                (r.region, r.resource_code): (r.base_price, r.currency)
+                for r in (await s.execute(select(CatalogResource))).scalars().all()
+            }
     finally:
         await second.dispose()
 
+    assert (china_out["active_market"], turkiye_out["active_market"]) == (MARKET, berlin)
     assert china is not None and turkiye is not None
-    assert (china.active_market, china.text_language) == (MARKET, "en")
-    assert (turkiye.active_market, turkiye.text_language) == ("FR_PARIS_fr", "fr")
+    assert (china.active_market, china.text_language, china.switching_to) == (MARKET, "en", None)
+    assert (turkiye.active_market, turkiye.text_language, turkiye.switching_to) == (berlin, "de", None)
     assert owners == {BASE: alice, OTHER_BASE: bob}
+    # London prices on the Chinese rows only, Berlin prices on the Turkish rows only.
+    assert {code: (Decimal(i.rate), i.currency) for code, i in china_items.items() if code != "ZH-OWN"} == {
+        "ZH-001": (Decimal("7.00"), "GBP"),
+        "ZH-002": (Decimal("3.00"), "GBP"),
+    }
+    assert {code: (Decimal(i.rate), i.currency) for code, i in turkiye_items.items() if code != "ZH-OWN"} == {
+        "ZH-001": (Decimal("10.00"), "EUR"),
+        "ZH-002": (Decimal("4.00"), "EUR"),
+    }
+    assert catalogue == {
+        (BASE, "R1"): ("3", "GBP"),
+        (BASE, "R2"): ("1", "GBP"),
+        (OTHER_BASE, "R1"): ("4", "EUR"),
+        (OTHER_BASE, "R2"): ("2", "EUR"),
+    }
 
 
 # ── The lock ──────────────────────────────────────────────────────────────
@@ -805,6 +875,78 @@ async def test_return_home_reprices_a_recipe_the_home_file_does_not_hold(
         assert (items[code].rate, items[code].currency) == (home["rate"], home_currency)
     assert (items["ZH-OWN"].rate, items["ZH-OWN"].currency) == ("42.50", home_currency)
     assert out["items_restored"] == len(HOME_ITEMS)
+
+
+async def test_a_failed_sheet_rebuild_on_return_home_keeps_the_sheet_and_says_so(
+    db: AsyncEngine, wired: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The seed failing must not leave an empty price sheet, a 500, or a base called home."""
+    user = str(uuid.uuid4())
+
+    async def _broken_seed(self: ResourcePriceService, region: str, **kwargs: Any) -> Any:
+        raise RuntimeError("seed broke")
+
+    async def _sheet(s: AsyncSession) -> dict[str, Decimal]:
+        s.expire_all()
+        rows = (await s.execute(select(ResourcePrice).where(ResourcePrice.region == BASE))).scalars().all()
+        return {r.resource_key: Decimal(r.unit_price) for r in rows}
+
+    async with _sessions(db)() as s:
+        await _load_home_base(s)
+        await ResourcePriceService(s).seed_region(BASE)
+        await _switch_to_london(s, user)
+        market_sheet = await _sheet(s)
+
+        real_seed = ResourcePriceService.seed_region
+        monkeypatch.setattr(ResourcePriceService, "seed_region", _broken_seed)
+        with pytest.raises(HTTPException) as exc:
+            await costs_router.restore_base_home_market(BASE, session=s, _user_id=user)
+        sheet_after_failure = await _sheet(s)
+        state_after_failure = await base_state.read_base_state(s, BASE)
+
+        # The lock was let go: a second return home gets in and finishes.
+        monkeypatch.setattr(ResourcePriceService, "seed_region", real_seed)
+        out = await costs_router.restore_base_home_market(BASE, session=s, _user_id=user)
+        sheet_after_retry = await _sheet(s)
+        state_after_retry = await base_state.read_base_state(s, BASE)
+
+    assert market_sheet == {"R1": Decimal("3.00"), "R2": Decimal("1.00")}
+    assert exc.value.status_code == 502
+    assert "Return it home again" in exc.value.detail
+    # The delete rolled back with the seed: the sheet is not empty.
+    assert sheet_after_failure == market_sheet
+    # Items home, sheet not: still marked unfinished, not "home".
+    assert state_after_failure is not None
+    assert state_after_failure.switching_to == base_state.RESTORING_HOME
+    assert state_after_failure.market_state == "switching"
+
+    assert sheet_after_retry == {"R1": Decimal("10.00"), "R2": Decimal("5.00")}
+    assert state_after_retry is not None and state_after_retry.market_state == "home"
+    assert out["items_restored"] == len(HOME_ITEMS)
+
+
+async def test_the_catalogue_is_written_while_the_switch_still_holds_the_lock(
+    db: AsyncEngine, wired: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A switch queued behind this one must not be able to write its catalogue first."""
+    import app.modules.catalog.router as catalog_router
+
+    real_replace = catalog_router.replace_imported_catalog_rows
+    held_during: list[tuple[str, bool]] = []
+
+    async def _spy(session: AsyncSession, region: str, rows: list[dict[str, Any]], *, source: str) -> dict[str, Any]:
+        held_during.append((source, base_state._process_lock(region).locked()))
+        return await real_replace(session, region, rows, source=source)
+
+    monkeypatch.setattr(catalog_router, "replace_imported_catalog_rows", _spy)
+    user = str(uuid.uuid4())
+    async with _sessions(db)() as s:
+        await _load_home_base(s)
+        await ResourcePriceService(s).seed_region(BASE)
+        await _switch_to_london(s, user)
+        await costs_router.restore_base_home_market(BASE, session=s, _user_id=user)
+
+    assert held_during == [("market_import", True), ("github_import", True)]
 
 
 async def test_return_home_then_market_again_lands_the_same_market_prices(
