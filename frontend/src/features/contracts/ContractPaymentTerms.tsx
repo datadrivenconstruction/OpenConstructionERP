@@ -16,6 +16,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle } from 'lucide-react';
+import { fmtList } from '@/shared/lib/formatters';
 import {
   getContractCountryDefaults,
   type ContractDefaultsStamp,
@@ -161,15 +162,15 @@ export function releaseSplitText(t: TFunction, split: ReleaseSplitStep[] | null 
   if (preset) {
     return t(`contracts.payment_terms.split.${preset.id}`, { defaultValue: preset.defaultLabel });
   }
-  return split
-    .map((step) =>
+  return fmtList(
+    split.map((step) =>
       t('contracts.payment_terms.split_step', {
         defaultValue: '{{percent}}% of what is held at {{event}}',
         percent: step.release_percent_of_held,
         event: retentionEventLabel(t, step.event),
       }),
-    )
-    .join(', ');
+    ),
+  );
 }
 
 /** A country's name in the reader's language, or its code where the browser has none. */

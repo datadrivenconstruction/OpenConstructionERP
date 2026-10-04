@@ -3133,12 +3133,11 @@ export function CreateContractModal({
                   ? t('contracts.payment_terms.defaults_loaded', {
                       defaultValue:
                         'Pre-filled with the usual terms for {{country}}. Every figure can be changed.',
-                      country: [
-                        countryName(knownDefaults.country_code, i18n.language),
-                        knownDefaults.standard_form,
-                      ]
-                        .filter(Boolean)
-                        .join(', '),
+                      // The form qualifies the country, it is not a second
+                      // item of a list: "United Kingdom (JCT 2016 / NEC4)".
+                      country: knownDefaults.standard_form
+                        ? `${countryName(knownDefaults.country_code, i18n.language)} (${knownDefaults.standard_form})`
+                        : countryName(knownDefaults.country_code, i18n.language),
                     })
                   : defaults?.country_code
                     ? t('contracts.payment_terms.no_defaults', {
