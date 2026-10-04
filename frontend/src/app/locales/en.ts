@@ -16905,6 +16905,7 @@ const resource = {
     "subcontractors.agreement_currency": "Currency",
     "subcontractors.agreement_retention": "Retention %",
     "subcontractors.agreement_retention_hint": "Held back from every payment until the retention is released.",
+    "subcontractors.agreement_retention_required": "Enter the retention this agreement states (0 if none).",
     "subcontractors.agreement_contract": "Same subcontract in Contracts",
     "subcontractors.agreement_contract_none": "Not written in Contracts",
     "subcontractors.agreement_contract_hint": "Pick it if this subcontract is also a contract there, so its value is committed to the budget once.",

@@ -202,6 +202,36 @@ describe('AgreementFormModal', () => {
     expect(vi.mocked(api.createAgreement).mock.calls[0]?.[0]?.retention_percent).toBeUndefined();
   });
 
+  it('asks for a figure where the country has no usual retention, rather than storing 5%', async () => {
+    // An Italian project: the table has no row, so a blank would reach the
+    // server as "not sent" and be stored at the platform's 5% fallback.
+    vi.mocked(contractsApi.getContractCountryDefaults).mockResolvedValueOnce({
+      project_id: 'prj-1',
+      country_code: 'IT',
+      has_defaults: false,
+      standard_form: null,
+      values: {},
+      sources: {},
+      release_split_source: null,
+    });
+    vi.mocked(api.createAgreement).mockResolvedValue(agreement);
+    wrap(<AgreementFormModal subcontractorId="sub-1" onClose={vi.fn()} />);
+
+    await waitFor(() => expect(screen.getByTestId('agreement-retention-required')).toBeTruthy());
+    expect((screen.getByTestId('agreement-retention') as HTMLInputElement).value).toBe('');
+    fireEvent.change(screen.getByTestId('agreement-title'), { target: { value: 'Drywall, block B' } });
+    fireEvent.change(screen.getByTestId('agreement-value'), { target: { value: '120000' } });
+    fireEvent.click(screen.getByText('Create'));
+    expect(api.createAgreement).not.toHaveBeenCalled();
+
+    // Zero is an answer: no retention on this agreement.
+    fireEvent.change(screen.getByTestId('agreement-retention'), { target: { value: '0' } });
+    expect(screen.queryByTestId('agreement-retention-required')).toBeNull();
+    fireEvent.click(screen.getByText('Create'));
+    await waitFor(() => expect(api.createAgreement).toHaveBeenCalled());
+    expect(vi.mocked(api.createAgreement).mock.calls[0]?.[0]?.retention_percent).toBe('0');
+  });
+
   it("holds a linked contract's rate to the cap that contract states", async () => {
     vi.mocked(contractsApi.listContracts).mockResolvedValueOnce({
       items: [

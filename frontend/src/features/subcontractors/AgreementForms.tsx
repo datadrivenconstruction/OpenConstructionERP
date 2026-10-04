@@ -184,8 +184,19 @@ export function AgreementFormModal({
   });
 
   const retention = toNum(retentionValue);
+  // With no usual figure for the country the rate has to come from the
+  // person. Left blank, the server would store its platform fallback, and a
+  // blank read as "no retention" would then withhold 5% from every payment.
+  // While the defaults are loading, or could not be read, a blank is left to
+  // the server, which applies the same table this form would have shown.
+  const retentionRequired = defaultsQ.isSuccess && retentionValue.trim() === '';
   const invalid =
-    !form.title.trim() || !projectId || toNum(form.total_value) <= 0 || retention < 0 || retention > 100;
+    !form.title.trim() ||
+    !projectId ||
+    toNum(form.total_value) <= 0 ||
+    retention < 0 ||
+    retention > 100 ||
+    retentionRequired;
 
   return (
     <WideModal
@@ -275,6 +286,7 @@ export function AgreementFormModal({
         <WideModalField
           label={t('subcontractors.agreement_retention')}
           hint={t('subcontractors.agreement_retention_hint')}
+          required={defaultsQ.isSuccess && countryRetention === ''}
         >
           <input
             type="number"
@@ -297,6 +309,13 @@ export function AgreementFormModal({
               country={knownDefaults.country_code}
               source={knownDefaults.sources[countryRetentionField]}
             />
+          )}
+          {retentionRequired && (
+            <p className="mt-1 text-xs text-content-secondary" data-testid="agreement-retention-required">
+              {t('subcontractors.agreement_retention_required', {
+                defaultValue: 'Enter the retention this agreement states (0 if none).',
+              })}
+            </p>
           )}
         </WideModalField>
         <div />
