@@ -258,8 +258,8 @@ async def test_the_exported_workbook_names_its_project_and_imports_back_unchange
     """Export, then upload that very file: the sheet says which job it is for,
     and the re-import matches every line in place and changes none.
 
-    The project line is written by the export itself, in the row above the
-    header, so it is on the sheet whether or not a company profile draws a
+    The document block (the bill's name, the project line, the currency and
+    the export date) is on the sheet whether or not a company profile draws a
     letterhead over it. Both are rows above the table that the importer has to
     get past to find the header.
     """
@@ -282,17 +282,24 @@ async def test_the_exported_workbook_names_its_project_and_imports_back_unchange
     rows = list(wb.active.iter_rows(values_only=True))
     wb.close()
     header_at = _header_row_number(rows)
-    assert header_at > 1, "the header row was not found below the project line"
-    project_line = str(rows[header_at - 2][0] or "")
-    assert project_line.startswith("Project: Round-Trip Project "), rows[: header_at - 1]
-    assert "Standard: din276" in project_line
-    assert "Region: DACH" in project_line
+    assert header_at > 1, "the header row was not found below the document block"
     printed = [str(c) for row in rows[: header_at - 1] for c in row if c is not None]
-    assert sum(1 for c in printed if c.startswith("Project: ")) == 1, f"project line printed twice: {printed}"
+    project_lines = [c for c in printed if c.startswith("Project: ")]
+    assert len(project_lines) == 1, f"project line missing or printed twice: {printed}"
+    assert project_lines[0].startswith("Project: Round-Trip Project ")
+    assert "Standard: din276" in project_lines[0]
+    assert "Region: DACH" in project_lines[0]
+    # The block names the bill, its currency and the day it was taken, with
+    # or without a letterhead over it.
+    assert "Round-Trip BOQ" in printed, printed
+    money_line = next((c for c in printed if c.startswith("Currency: ")), "")
+    assert money_line.startswith("Currency: EUR  |  Exported: 20"), printed
     if profile is None:
-        assert header_at == 2, "without a letterhead the project line is the only row above the table"
+        assert "Acme & Sons Construction GmbH" not in printed
+        # Title, project line, money line and the spacer: nothing else.
+        assert header_at == 5, rows[: header_at - 1]
     else:
-        assert "Acme & Sons Construction GmbH" in printed, "the letterhead did not draw"
+        assert printed[0] == "Acme & Sons Construction GmbH", "the letterhead did not draw on top"
 
     upload = await shared_client.post(
         f"/api/v1/boq/boqs/{boq_id}/import/excel/",

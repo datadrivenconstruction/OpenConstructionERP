@@ -4676,6 +4676,32 @@ def _project_line(project: Any) -> str | None:
     return "  |  ".join(parts) or None
 
 
+def _export_details(project_line: str | None, currency: str, exported_at: datetime) -> list[str]:
+    """The detail lines of the Excel export's document block, under the bill's name.
+
+    The project line, then the money and the moment: which currency every
+    total on the sheet is stated in, and when the figures were taken. A sheet
+    forwarded a week later is otherwise a set of numbers with no unit and no
+    date. The date is ISO, like the rest of the sheet's own text, which is
+    English and declared so.
+
+    Args:
+        project_line: From :func:`_project_line`, ``None`` when the project
+            names nothing.
+        currency: The base currency the totals are stated in, ``""`` when the
+            project has none.
+        exported_at: When the export was taken.
+
+    Returns:
+        One or two lines, never an empty one.
+    """
+    money = [f"Currency: {currency.strip().upper()}"] if currency and currency.strip() else []
+    when = f"Exported: {exported_at.astimezone(UTC).date().isoformat()}"
+    lines = [project_line] if project_line else []
+    lines.append("  |  ".join([*money, when]))
+    return lines
+
+
 def _render_boq_xlsx(
     boq_data: Any,
     structured_data: Any,
@@ -4684,13 +4710,15 @@ def _render_boq_xlsx(
     project_line: str | None,
     base_ccy: str,
     fx_map: Mapping[str, Any],
+    exported_at: datetime | None = None,
 ) -> bytes:
     """Write the Excel export of a bill already read from the database.
 
     Pure: it touches no session and loads nothing, so the route can run it in a
     worker thread. ``boq_data`` is the ``BOQWithPositions`` payload,
     ``structured_data`` the ``BOQWithSections`` one, and ``project_line`` the
-    line printed above the header, already built from the project row.
+    project's line of the document block, already built from the project row.
+    ``exported_at`` is the moment printed in that block, now when omitted.
     """
     from openpyxl import Workbook
     from openpyxl.styles import Alignment, Border, Font, PatternFill, Side, numbers
@@ -4709,11 +4737,9 @@ def _render_boq_xlsx(
     ws = wb.active
     ws.title = "BOQ"
 
+    # The bill's name, its project, currency and date go above the table at
+    # the end, as one document block (see the letterhead call below).
     header_row = 1
-    if project_line:
-        line_cell = ws.cell(row=1, column=1, value=neutralise_formula(project_line))
-        line_cell.font = Font(size=10, color="666666")
-        header_row = 2
 
     # ── Header row: standard + custom ────────────────────────────────────
     # Extended set preserves roundtrip data (BUG-163-175) while keeping
@@ -5038,17 +5064,23 @@ def _render_boq_xlsx(
         for cell in row:
             cell.alignment = right_align
 
-    # ── Company letterhead ────────────────────────────────────────────────
-    # Last, once every row above is final: it moves the table down under the
-    # letterhead, the project line with it. Nothing changes without a company
-    # profile, and the importer finds the header row under a letterhead, so the
-    # round-trip holds. No subtitle: the project line is already on the sheet,
-    # and passing it here as well would print it twice.
+    # ── Document block and company letterhead ────────────────────────────
+    # Last, once every row of the table is final: it moves the table down.
+    # The block (the bill's name, then its project, currency and export date)
+    # is written whether or not the company has a profile, because which job
+    # and which money a sheet is about has nothing to do with whether anyone
+    # uploaded a logo; a profile adds the firm above it. The importers find
+    # the header row by its column names under all of it, so the round trip
+    # holds.
     from app.core.xlsx_branding import apply_company_header
     from app.core.xlsx_text import store_strings_as_text
 
     store_strings_as_text(ws)
-    apply_company_header(ws, title=boq_data.name)
+    apply_company_header(
+        ws,
+        title=boq_data.name,
+        details=_export_details(project_line, base_ccy, exported_at or datetime.now(tz=UTC)),
+    )
 
     # ── Workbook origin metadata ──────────────────────────────────────────
     # Stamp docProps/core.xml + docProps/app.xml so a downloaded BOQ .xlsx
@@ -5120,11 +5152,8 @@ async def export_boq_excel(
     # ── Project line ─────────────────────────────────────────────────────
     # Which job this bill belongs to, as the PDF export's cover page already
     # names it. The sheet is read by whoever receives it, and the bill's name
-    # alone does not tell them. Written here, in the row above the header,
-    # rather than handed to the letterhead: the letterhead is drawn only when
-    # the company has a profile, and which job a bill is for has nothing to do
-    # with whether anyone uploaded a logo. The importers find the header row by
-    # its column names, so one more row above it does not stop a re-import.
+    # alone does not tell them. It goes into the document block above the
+    # header, which is written with or without a company letterhead.
     from app.modules.projects.repository import ProjectRepository
 
     project = await ProjectRepository(session).get_by_id(boq_data.project_id)

@@ -16,8 +16,9 @@ Run:
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 
-from app.modules.boq.router import _project_line
+from app.modules.boq.router import _export_details, _project_line
 
 
 @dataclass
@@ -62,3 +63,21 @@ class TestProjectLine:
         # A row read through a different model, or a stub in a caller's test,
         # must not raise inside an export that is otherwise finished.
         assert _project_line(object()) is None
+
+
+class TestExportDetails:
+    """The detail lines of the document block: the project, the money, the day."""
+
+    _AT = datetime(2026, 10, 4, 23, 30, tzinfo=timezone(timedelta(hours=-5)))
+
+    def test_project_then_currency_and_date(self) -> None:
+        lines = _export_details("Project: Riverside HQ", "eur", self._AT)
+        # 23:30 at UTC-5 is already the 5th in UTC, which is the date printed.
+        assert lines == ["Project: Riverside HQ", "Currency: EUR  |  Exported: 2026-10-05"]
+
+    def test_no_project_still_states_currency_and_date(self) -> None:
+        assert _export_details(None, "USD", self._AT) == ["Currency: USD  |  Exported: 2026-10-05"]
+
+    def test_no_currency_is_left_out_rather_than_printed_empty(self) -> None:
+        assert _export_details("Project: X", "  ", self._AT) == ["Project: X", "Exported: 2026-10-05"]
+        assert _export_details("Project: X", "", self._AT)[-1] == "Exported: 2026-10-05"

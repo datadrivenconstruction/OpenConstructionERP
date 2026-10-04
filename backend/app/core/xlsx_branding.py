@@ -22,11 +22,19 @@ The sheet's printed header and footer carry the company name and the page
 number, with the header left off the first page, where the letterhead already
 is.
 
-**Nothing changes without a letterhead.** The PDF layer makes the decision, so
-the PDF and the workbook cannot disagree: a legal name or a document logo in
-the company profile, and the appearance switch ``show_letterhead`` on.
-Otherwise the function returns ``1`` without touching the sheet, and the
-workbook is identical cell for cell to what the exporter wrote.
+**Nothing changes without a letterhead, unless the exporter asks for a
+document block.** The PDF layer makes the letterhead decision, so the PDF and
+the workbook cannot disagree: a legal name or a document logo in the company
+profile, and the appearance switch ``show_letterhead`` on. Otherwise the
+function returns ``1`` without touching the sheet, and the workbook is
+identical cell for cell to what the exporter wrote.
+
+An exporter that passes ``details`` (the BOQ export names its project,
+currency and date this way) gets the title and those lines whether or not
+there is a letterhead: what a document is about has nothing to do with whether
+anyone uploaded a logo. The letterhead only adds the firm on top. When the
+letterhead fails to build, the block is tried again on its own, so a broken
+logo never costs the line that says which project a sheet belongs to.
 
 **Mind the importer.** The rows above the table move the header off row 1.
 The BOQ importer looks for its header under a letterhead for that reason
@@ -56,7 +64,7 @@ from __future__ import annotations
 
 import logging
 import re
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from io import BytesIO
 from typing import Any
 
@@ -98,11 +106,27 @@ _HEADER_PART_CHARS = 100
 #: A title passed by the exporter, capped like the PDF brand line.
 _TITLE_CHARS = 160
 
+#: The most detail lines a document block prints. The tallest letterhead puts
+#: eight rows above a table (the logo on its own row, four company lines, the
+#: title, the subtitle and a spacer), and the importers look for the header in
+#: the first :data:`app.core.sheet_header.HEADER_SEARCH_ROWS` rows. Three more
+#: keep it there with room to spare.
+MAX_DETAIL_LINES = 3
+#: A detail line is longer than a title: a project line names the project,
+#: its classification standard and its region.
+_DETAIL_CHARS = 300
+
 _HEX_COLOUR = re.compile(r"#?([0-9A-Fa-f]{6})")
 
 
-def apply_company_header(ws: Any, *, title: str | None = None, subtitle: str | None = None) -> int:
-    """Put the company letterhead above the table on ``ws``.
+def apply_company_header(
+    ws: Any,
+    *,
+    title: str | None = None,
+    subtitle: str | None = None,
+    details: Sequence[str | None] | None = None,
+) -> int:
+    """Put the company letterhead, and the document block, above the table on ``ws``.
 
     Call it once, on the finished sheet, right before the workbook is saved.
 
@@ -112,47 +136,85 @@ def apply_company_header(ws: Any, *, title: str | None = None, subtitle: str | N
             sheet's own name. ``None`` for a sheet that already opens with
             its title.
         subtitle: A second, lighter line under the title.
+        details: Lines that say what the document is about, printed under the
+            title, e.g. which project a bill belongs to, its currency and the
+            export date. Passing any makes the title, subtitle and these
+            lines a document block that is written whether or not the company
+            has a letterhead: the profile adds the logo and the firm's lines
+            above it and nothing else. Blank lines are dropped and at most
+            :data:`MAX_DETAIL_LINES` are printed, so the header row stays
+            where the importers look for it. Without ``details`` the old rule
+            holds: no letterhead, no change.
 
     Returns:
-        The row the table's first row now sits on: ``1`` when there is no
-        letterhead, otherwise the first row below it.
+        The row the table's first row now sits on: ``1`` when nothing was
+        written, otherwise the first row below what was.
     """
-    undo = _Undo()
-    inserted = 0
+    detail_lines = _detail_lines(details)
     try:
-        profile = _letterhead_profile()
-        if profile is None or not hasattr(ws, "insert_rows"):
+        return _apply(ws, title, subtitle, detail_lines, with_company=True)
+    except _BuildFailed:
+        if not detail_lines:
             return 1
-        brand = _brand_name()
+    # The letterhead could not be built. The block on its own still can, and
+    # which project and bill a sheet is matters more than whose logo is on it.
+    try:
+        return _apply(ws, title, subtitle, detail_lines, with_company=False)
+    except _BuildFailed:
+        return 1
+
+
+class _BuildFailed(Exception):
+    """A build failed and everything it changed has been put back."""
+
+
+def _apply(
+    ws: Any,
+    title: str | None,
+    subtitle: str | None,
+    details: list[str],
+    *,
+    with_company: bool,
+) -> int:
+    """One attempt at the rows above the table, rolled back on any failure."""
+    undo = _Undo()
+    try:
+        if not hasattr(ws, "insert_rows"):
+            return 1
+        profile = _letterhead_profile() if with_company else None
+        if profile is None and not details:
+            return 1
+        brand = _brand_name() if profile is not None else ""
         title_text = _single_line(title)
         subtitle_text = _single_line(subtitle)
         if getattr(ws, "_charts", None) or getattr(ws, "_pivots", None):
-            _set_print_header_footer(ws, brand, title_text, letterhead=False, undo=undo)
+            if profile is not None:
+                _set_print_header_footer(ws, brand, title_text, letterhead=False, undo=undo)
             return 1
 
-        logo = _logo_picture(profile)
-        lines = _company_lines(profile)
-        if logo is None and not lines:
+        logo = _logo_picture(profile) if profile is not None else None
+        lines = _company_lines(profile) if profile is not None else []
+        if logo is None and not lines and not details:
             # A logo-only profile whose logo will not decode: nothing of the
             # firm's to print, which is where the PDF letterhead stops too.
             _set_print_header_footer(ws, brand, title_text, letterhead=False, undo=undo)
             return 1
-        layout = _layout(ws, logo, lines, title_text, subtitle_text)
+        layout = _layout(ws, logo, lines, title_text, subtitle_text, details)
 
         inserted = layout.rows
         _remember_styles(ws, undo)
         _move_cells_down(ws, inserted, undo)
         _shift_everything_below(ws, inserted, undo)
-        _write_letterhead(ws, layout, logo, lines, title_text, subtitle_text, undo)
+        _write_letterhead(ws, layout, logo, lines, title_text, subtitle_text, undo, details)
         _set_print_header_footer(ws, brand, title_text, letterhead=True, undo=undo)
         return inserted + 1
-    except Exception:  # noqa: BLE001 - a letterhead must never break an export
+    except Exception as exc:  # noqa: BLE001 - a letterhead must never break an export
         # Put back what was already changed. A sheet with the table pushed
         # down and no letterhead over it is worse than one without a
         # letterhead, and it is what the exporter would ship otherwise.
         undo.restore()
         logger.warning("Excel letterhead skipped (build failed)", exc_info=True)
-        return 1
+        raise _BuildFailed from exc
 
 
 # -- What to print -------------------------------------------------------------
@@ -250,6 +312,23 @@ def _single_line(value: Any) -> str:
     return " ".join(value.split())[:_TITLE_CHARS]
 
 
+def _detail_lines(details: Sequence[str | None] | None) -> list[str]:
+    """The caller's detail lines, each on one line, blanks dropped, capped.
+
+    Only line breaks are folded. The spacing inside a line is the caller's
+    layout (the BOQ project line sets its parts apart with ``"  |  "``) and is
+    kept as written.
+    """
+    lines: list[str] = []
+    for line in details or ():
+        if not isinstance(line, str):
+            continue
+        text = " ".join(part.strip() for part in line.splitlines() if part.strip())
+        if text:
+            lines.append(text[:_DETAIL_CHARS])
+    return lines[:MAX_DETAIL_LINES]
+
+
 def _company_lines(profile: dict[str, Any]) -> list[tuple[str, str]]:
     """``(kind, text)`` for each line of the company block that has text.
 
@@ -332,6 +411,8 @@ class _Layout:
         self.rule_cols = 1
         self.title_row = 0
         self.subtitle_row = 0
+        #: Rows of the document block's detail lines, top first.
+        self.detail_rows: list[int] = []
 
 
 def _column_px(ws: Any, col: int) -> int:
@@ -355,13 +436,16 @@ def _layout(
     lines: list[tuple[str, str]],
     title: str,
     subtitle: str,
+    details: list[str] | None = None,
 ) -> _Layout:
     """Plan the letterhead rows against the finished sheet's column widths.
 
     The logo sits at the top left and the text beside it, from the first
     column clear of the logo. When the first columns are so wide that the text
     would start out of sight, the logo gets a row of its own and the text goes
-    under it from column A instead.
+    under it from column A instead. The title, the subtitle and the detail
+    lines follow, one row each; with no logo and no company lines they are
+    all there is, and there is no rule.
     """
     layout = _Layout()
     table_cols = max(int(ws.max_column or 1), 1)
@@ -407,6 +491,10 @@ def _layout(
         layout.subtitle_row = row
         layout.heights[row] = _DETAIL_ROW_PT
         row += 1
+    for _line in details or ():
+        layout.detail_rows.append(row)
+        layout.heights[row] = _DETAIL_ROW_PT
+        row += 1
     # One short blank row between the letterhead and the table.
     layout.heights[row] = _SPACER_ROW_PT
     layout.rows = row
@@ -421,6 +509,7 @@ def _write_letterhead(
     title: str,
     subtitle: str,
     undo: _Undo,
+    details: list[str] | None = None,
 ) -> None:
     from openpyxl.styles import Alignment, Border, Font, Side
 
@@ -449,6 +538,9 @@ def _write_letterhead(
     if layout.subtitle_row:
         cell = _text_cell(ws, layout.subtitle_row, 1, subtitle)
         cell.font = Font(size=10, color=_MUTED)
+    block_font = Font(size=10, color=_MUTED)
+    for text, row in zip(details or (), layout.detail_rows, strict=True):
+        _text_cell(ws, row, 1, text).font = block_font
 
     if logo is not None:
         from openpyxl.drawing.image import Image
