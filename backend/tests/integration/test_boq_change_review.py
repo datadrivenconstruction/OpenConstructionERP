@@ -801,6 +801,103 @@ async def test_bim_version_event_requires_the_model_in_the_project(client: Async
     assert scan.json()["open_count"] == 4
 
 
+# ── Money in the position's own currency ──────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_proposal_money_is_summed_in_the_project_currency(client: AsyncClient, auth: dict[str, str]):
+    """EUR project, one USD line (+1000 USD at 0.90) and one EUR line (-200 EUR).
+
+    The total is +700 EUR. Adding the raw figures says +800 "EUR", which is the
+    mixed-currency sum the platform already fixed twice elsewhere. A GBP line
+    the project has no rate for is reported in GBP and left out, not added at 1:1.
+    """
+    from sqlalchemy import update as sa_update
+
+    from app.database import async_session_factory
+    from app.modules.projects.models import Project
+
+    project_id = await _project(client, auth)
+    async with async_session_factory() as session:
+        await session.execute(
+            sa_update(Project)
+            .where(Project.id == uuid.UUID(project_id))
+            .values(fx_rates=[{"code": "USD", "rate": "0.90"}])
+        )
+        await session.commit()
+    boq_id = await _boq(client, auth, project_id)
+    v1, ids = await _model(
+        client,
+        auth,
+        project_id,
+        version="1",
+        elements=[
+            _elem("U1", volume=10, ghash="u"),
+            _elem("E1", volume=5, ghash="e"),
+            _elem("G1", volume=1, ghash="g"),
+        ],
+    )
+    usd = await _position(
+        client,
+        auth,
+        boq_id,
+        ordinal="1",
+        description="Imported",
+        unit="m3",
+        unit_rate=100,
+        metadata={"currency": "USD"},
+    )
+    eur = await _position(client, auth, boq_id, ordinal="2", description="Local", unit="m3", unit_rate=100)
+    gbp = await _position(
+        client, auth, boq_id, ordinal="3", description="No rate", unit="m3", unit_rate=10, metadata={"currency": "GBP"}
+    )
+    await _link(client, auth, usd["id"], ids["U1"])
+    await _link(client, auth, eur["id"], ids["E1"])
+    await _link(client, auth, gbp["id"], ids["G1"])
+    await _model(
+        client,
+        auth,
+        project_id,
+        version="2",
+        parent_model_id=v1,
+        elements=[
+            _elem("U1", volume=20, ghash="u2"),
+            _elem("E1", volume=3, ghash="e2"),
+            _elem("G1", volume=2, ghash="g2"),
+        ],
+    )
+
+    body = (await client.get(f"/api/v1/boq/boqs/{boq_id}/bim-quantity-proposals/", headers=auth)).json()
+    rows = {r["position_id"]: r for r in body["rows"]}
+    assert (rows[usd["id"]]["currency"], _d(rows[usd["id"]]["total_delta"])) == ("USD", Decimal("1000"))
+    assert _d(rows[usd["id"]]["total_delta_base"]) == Decimal("900")
+    assert (rows[eur["id"]]["currency"], _d(rows[eur["id"]]["total_delta"])) == ("EUR", Decimal("-200"))
+    assert _d(rows[eur["id"]]["total_delta_base"]) == Decimal("-200")
+    assert (rows[gbp["id"]]["currency"], _d(rows[gbp["id"]]["total_delta"])) == ("GBP", Decimal("10"))
+    assert rows[gbp["id"]]["total_delta_base"] is None
+    assert body["currency"] == "EUR"
+    assert _d(body["total_delta"]) == Decimal("700")
+    assert body["unconverted_count"] == 1
+
+    applied = await client.post(
+        f"/api/v1/boq/boqs/{boq_id}/bim-quantity-proposals/apply/",
+        json={"position_ids": [usd["id"], eur["id"], gbp["id"]]},
+        headers=auth,
+    )
+    assert applied.status_code == 200, applied.text
+    ab = applied.json()
+    assert ab["applied"] == 3
+    assert (ab["currency"], _d(ab["total_delta"]), ab["unconverted_count"]) == ("EUR", Decimal("700"), 1)
+    by_pos = {r["position_id"]: r for r in ab["results"]}
+    assert (by_pos[usd["id"]]["currency"], _d(by_pos[usd["id"]]["total_delta_base"])) == ("USD", Decimal("900"))
+    assert by_pos[gbp["id"]]["total_delta_base"] is None
+    after = await _positions(client, auth, boq_id)
+    # Each line moved in its own currency; nothing was converted on the line.
+    assert _d(after[usd["id"]]["total"]) == Decimal("2000")
+    assert _d(after[eur["id"]]["total"]) == Decimal("300")
+    assert _d(after[gbp["id"]]["total"]) == Decimal("20")
+
+
 # ── The newest version must have finished importing ───────────────────────
 
 

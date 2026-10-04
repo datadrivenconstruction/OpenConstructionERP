@@ -69,7 +69,13 @@ from app.modules.boq.change_review_schemas import (
 )
 from app.modules.boq.models import BOQ, Position, QuantityLink
 from app.modules.boq.repository import PositionRepository
-from app.modules.boq.service import _compute_total, _quantize_money_str, _to_decimal
+from app.modules.boq.service import (
+    _compute_total,
+    _position_currency,
+    _quantize_money_str,
+    _to_decimal,
+    resource_fx_factor,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -639,6 +645,7 @@ class ChangeReviewService:
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
+        self._fx_cache: tuple[uuid.UUID, str, dict[str, str]] | None = None
 
     async def _get_boq(self, boq_id: uuid.UUID) -> _BoqRef:
         row = (
@@ -1462,6 +1469,7 @@ class ChangeReviewService:
         contexts = await self._load_bim_context(boq, only=only, ack_mode=_ACK_APPLIED)
         if not contexts:
             return 0, []
+        base_currency, fx_rates = await self._project_fx(boq)
         bound: set[uuid.UUID] = set()
         for chunk in _chunks([ctx.position.id for ctx in contexts]):
             bound.update(
@@ -1546,6 +1554,8 @@ class ChangeReviewService:
             appliable = row_status == "changed"
             tip_ids = sorted(crossing_tips or ctx.baselines, key=str)
             baseline_id, tip = ctx.baselines[tip_ids[0]]
+            total_delta = _to_decimal(new_total_str) - current_total_dec if appliable else Decimal("0")
+            row_currency, total_delta_base = _in_base(position, total_delta, base_currency, fx_rates)
             rows.append(
                 BIMQuantityProposalRow(
                     position_id=position.id,
@@ -1559,7 +1569,9 @@ class ChangeReviewService:
                     delta=_dec_str(proposed - current_qty) if appliable else "0.0000",
                     current_total=_dec_str(current_total_dec),
                     new_total=new_total_str,
-                    total_delta=(_dec_str(_to_decimal(new_total_str) - current_total_dec) if appliable else "0.0000"),
+                    total_delta=_dec_str(total_delta),
+                    currency=row_currency,
+                    total_delta_base=None if total_delta_base is None else _dec_str(total_delta_base),
                     method="rule" if ctx.method in ("rule_full", "rule_linked") else "unit",
                     basis=basis,  # type: ignore[arg-type]
                     status=row_status,  # type: ignore[arg-type]
@@ -1582,19 +1594,36 @@ class ChangeReviewService:
         """Proposed quantity updates from new BIM model versions. Writes nothing."""
         boq = await self._get_boq(boq_id)
         checked, rows = await self._proposals(boq)
-        total_delta = sum((_to_decimal(r.total_delta) for r in rows if r.appliable), Decimal("0"))
+        base_currency, _fx = await self._project_fx(boq)
+        appliable = [r for r in rows if r.appliable]
+        total_delta = sum(
+            (_to_decimal(r.total_delta_base) for r in appliable if r.total_delta_base is not None), Decimal("0")
+        )
         return BIMQuantityProposalResponse(
             boq_id=boq_id,
             positions_checked=checked,
-            appliable_count=sum(1 for r in rows if r.appliable),
+            appliable_count=len(appliable),
+            currency=base_currency,
             total_delta=_dec_str(total_delta),
+            unconverted_count=sum(1 for r in appliable if r.total_delta_base is None),
             rows=rows,
         )
+
+    async def _project_fx(self, boq: _BoqRef) -> tuple[str, dict[str, str]]:
+        """The project's base currency and FX table, read once per service."""
+        cached = self._fx_cache
+        if cached is not None and cached[0] == boq.id:
+            return cached[1], cached[2]
+        from app.modules.boq.service import BOQService
+
+        base, fx_rates = await BOQService(self.session)._resolve_project_fx(boq.id)
+        self._fx_cache = (boq.id, base, fx_rates)
+        return base, fx_rates
 
     async def _record_accepted_versions(
         self,
         boq: _BoqRef,
-        position: Position,
+        position_id: uuid.UUID,
         row: BIMQuantityProposalRow,
         *,
         user_id: uuid.UUID | None,
@@ -1616,7 +1645,7 @@ class ChangeReviewService:
             result = await self.session.execute(
                 update(BOQChangeFlag)
                 .where(
-                    BOQChangeFlag.position_id == position.id,
+                    BOQChangeFlag.position_id == position_id,
                     BOQChangeFlag.source_type == SOURCE_BIM_VERSION,
                     BOQChangeFlag.source_key == key,
                     BOQChangeFlag.status == FLAG_STATUS_OPEN,
@@ -1634,7 +1663,7 @@ class ChangeReviewService:
             exists = (
                 await self.session.execute(
                     select(BOQChangeFlag.id).where(
-                        BOQChangeFlag.position_id == position.id,
+                        BOQChangeFlag.position_id == position_id,
                         BOQChangeFlag.source_type == SOURCE_BIM_VERSION,
                         BOQChangeFlag.source_key == key,
                     )
@@ -1645,7 +1674,7 @@ class ChangeReviewService:
             flag = BOQChangeFlag(
                 project_id=boq.project_id,
                 boq_id=boq.id,
-                position_id=position.id,
+                position_id=position_id,
                 source_type=SOURCE_BIM_VERSION,
                 source_key=key,
                 source_id=str(tip_id),
@@ -1704,6 +1733,8 @@ class ChangeReviewService:
         wanted = list(dict.fromkeys(position_ids))
         _checked, rows = await self._proposals(boq, only=set(wanted))
         by_position = {row.position_id: row for row in rows}
+        base_currency, fx_rates = await self._project_fx(boq)
+        unconverted = 0
 
         repo = PositionRepository(self.session)
         now = datetime.now(UTC)
@@ -1733,6 +1764,9 @@ class ChangeReviewService:
             new_qty = _quantize_money_str(row.new_model_quantity)
             new_total = _compute_total(new_qty, position.unit_rate)
             old_total = position.total
+            # Read before the write, which expires the instance.
+            delta = _to_decimal(new_total) - _to_decimal(old_total)
+            row_currency, delta_base = _in_base(position, delta, base_currency, fx_rates)
             meta = dict(position.metadata_ or {})
             provenance = {
                 "model_id": str(row.model_id) if row.model_id else None,
@@ -1760,9 +1794,11 @@ class ChangeReviewService:
                 metadata_=meta,
                 version=Position.version + 1,
             )
-            await self._record_accepted_versions(boq, position, row, user_id=user_id, now=now)
-            delta = _to_decimal(new_total) - _to_decimal(old_total)
-            total_delta += delta
+            await self._record_accepted_versions(boq, pid, row, user_id=user_id, now=now)
+            if delta_base is None:
+                unconverted += 1
+            else:
+                total_delta += delta_base
             applied += 1
             results.append(
                 BIMQuantityApplyResultRow(
@@ -1773,6 +1809,9 @@ class ChangeReviewService:
                     new_quantity=new_qty,
                     old_total=_dec_str(_to_decimal(old_total)),
                     new_total=new_total,
+                    currency=row_currency,
+                    total_delta=_dec_str(delta),
+                    total_delta_base=None if delta_base is None else _dec_str(delta_base),
                 )
             )
         await self.session.flush()
@@ -1800,9 +1839,30 @@ class ChangeReviewService:
             boq_id=boq_id,
             applied=applied,
             skipped=len(results) - applied,
+            currency=base_currency,
             total_delta=_dec_str(total_delta),
+            unconverted_count=unconverted,
             results=results,
         )
+
+
+def _in_base(
+    position: Any, amount: Decimal, base_currency: str, fx_rates: dict[str, str]
+) -> tuple[str, Decimal | None]:
+    """The position's own currency, and ``amount`` (in it) converted to the project base.
+
+    A position's money is in its ``metadata.currency`` when it has one, the
+    project base otherwise (Issues #111 and #131). The converted amount is
+    ``None`` when the position is priced in a currency the project holds no
+    usable rate for: such an amount is reported in its own currency and left
+    out of any base total, never added at 1:1.
+    """
+    own = _position_currency(position)
+    base = (base_currency or "").strip().upper()
+    factor = resource_fx_factor(own, base, fx_rates)
+    if factor is None:
+        return own, None
+    return own or base, amount * Decimal(str(factor))
 
 
 def _aware(value: datetime) -> datetime:

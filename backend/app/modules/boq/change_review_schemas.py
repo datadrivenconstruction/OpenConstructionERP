@@ -127,7 +127,13 @@ class BIMQuantityProposalRow(BaseModel):
     delta: str
     current_total: str
     new_total: str
+    # Line money is in the position's own currency (``currency``: its
+    # ``metadata.currency``, else the project base). ``total_delta_base`` is
+    # the same change in the project base currency, ``None`` when the project
+    # has no usable rate for ``currency``.
     total_delta: str
+    currency: str = ""
+    total_delta_base: str | None = None
     method: Literal["unit", "rule"]
     basis: ProposalBasis = "model_change"
     status: ProposalStatus
@@ -145,12 +151,20 @@ class BIMQuantityProposalRow(BaseModel):
 
 
 class BIMQuantityProposalResponse(BaseModel):
-    """All proposals for one BOQ. Computing them writes nothing."""
+    """All proposals for one BOQ. Computing them writes nothing.
+
+    ``total_delta`` is in the project base currency (``currency``) and sums
+    the appliable rows that could be converted; ``unconverted_count`` says how
+    many appliable rows are priced in a currency without a usable rate and are
+    therefore not in it.
+    """
 
     boq_id: uuid.UUID
     positions_checked: int
     appliable_count: int
+    currency: str = ""
     total_delta: str
+    unconverted_count: int = 0
     rows: list[BIMQuantityProposalRow]
 
 
@@ -170,13 +184,23 @@ class BIMQuantityApplyResultRow(BaseModel):
     new_quantity: str | None = None
     old_total: str | None = None
     new_total: str | None = None
+    currency: str | None = None
+    total_delta: str | None = None
+    total_delta_base: str | None = None
 
 
 class BIMQuantityApplyResponse(BaseModel):
-    """What the apply wrote. ``total_delta`` is the sum over applied rows."""
+    """What the apply wrote.
+
+    ``total_delta`` is the sum over applied rows in the project base currency
+    (``currency``); rows in a currency without a usable rate are counted in
+    ``unconverted_count`` instead of being added at 1:1.
+    """
 
     boq_id: uuid.UUID
     applied: int
     skipped: int
+    currency: str = ""
     total_delta: str
+    unconverted_count: int = 0
     results: list[BIMQuantityApplyResultRow]
