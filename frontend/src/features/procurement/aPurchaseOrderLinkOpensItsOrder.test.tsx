@@ -125,6 +125,59 @@ describe('?po=<id> opens the register on that order', () => {
   });
 });
 
+describe('a link to an order drafted after the register was cached', () => {
+  /* The app's client keeps a register fresh for two minutes, so a buyer who
+     looked at Procurement, awarded an RFQ and followed the link to its draft
+     lands on a cached page that predates the draft. A client with that
+     staleTime and that cache is what tells a re-read apart from none. */
+  function renderOverCache(path: string, cached: ReturnType<typeof po>[]) {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: 120_000 } } });
+    client.setQueryData(['procurement-po', PROJECT_ID], {
+      items: cached,
+      total: cached.length,
+      offset: 0,
+      limit: 50,
+    });
+    return render(
+      <QueryClientProvider client={client}>
+        <MemoryRouter initialEntries={[path]}>
+          <ProcurementPage />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+  }
+
+  it('reads the register again and marks the new row instead of calling it off the page', async () => {
+    serve([po('po-1', 'PO-0001'), po('po-2', 'PO-0002', FROM_RFQ)], {
+      'po-2': { ...po('po-2', 'PO-0002', FROM_RFQ), items: [] },
+    });
+    renderOverCache('/procurement?po=po-2', [po('po-1', 'PO-0001')]);
+
+    await screen.findByText('PO-0002');
+    expect(row('PO-0002').getAttribute('data-focused')).toBe('true');
+    expect(screen.queryByTestId('po-focus-notice')).toBeNull();
+    expect(mockGet.mock.calls.some(([path]) => path === '/v1/procurement/po-2')).toBe(false);
+  });
+
+  it('does not show an empty register for the first order of a project', async () => {
+    serve([po('po-2', 'PO-0002', FROM_RFQ)]);
+    renderOverCache('/procurement?po=po-2', []);
+
+    expect(screen.queryByText('No purchase orders yet')).toBeNull();
+    await screen.findByText('PO-0002');
+    expect(row('PO-0002').getAttribute('data-focused')).toBe('true');
+    expect(screen.queryByText('No purchase orders yet')).toBeNull();
+  });
+
+  it('still names an order that the fresh register does not hold either', async () => {
+    serve([po('po-1', 'PO-0001')], { 'po-99': { ...po('po-99', 'PO-0099'), items: [] } });
+    renderOverCache('/procurement?po=po-99', [po('po-1', 'PO-0001')]);
+
+    const notice = await screen.findByTestId('po-focus-notice');
+    await waitFor(() => expect(notice.textContent).toContain('PO-0099'));
+  });
+});
+
 describe('an order drafted from an RFQ award names its source', () => {
   it('links the drafted order to its RFQ and leaves a hand-made one without a link', async () => {
     serve([po('po-1', 'PO-0001'), po('po-2', 'PO-0002', FROM_RFQ)]);

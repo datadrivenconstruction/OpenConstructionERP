@@ -1029,8 +1029,25 @@ function PurchaseOrdersTab({
      The order is scrolled to and marked when it is on the page this tab
      loaded. When it is not (a register longer than one page, or an order of
      another project), it is fetched by id and named above the table, so the
-     link never lands on a register that silently does not show it. */
+     link never lands on a register that silently does not show it.
+
+     The register in the cache can be up to two minutes old (the client's
+     staleTime), and the order a link names is usually newer than that: an
+     RFQ award drafts it a moment before the buyer clicks through. So before
+     an order is called off the page, the register is read again, once per
+     linked order, and the off-page lookup waits for that read. */
   const focusOnPage = !!focusPoId && !!orders?.some((po) => po.id === focusPoId);
+  const [focusRecheck, setFocusRecheck] = useState<{ id: string; done: boolean } | null>(null);
+  const focusNeedsRecheck = !!focusPoId && !!orders && !focusOnPage && focusRecheck?.id !== focusPoId;
+  useEffect(() => {
+    if (!focusNeedsRecheck || !focusPoId) return;
+    setFocusRecheck({ id: focusPoId, done: false });
+    void refetch().finally(() =>
+      setFocusRecheck((cur) => (cur?.id === focusPoId ? { id: focusPoId, done: true } : cur)),
+    );
+  }, [focusNeedsRecheck, focusPoId, refetch]);
+  const focusRechecking =
+    !!focusPoId && !focusOnPage && !(focusRecheck?.id === focusPoId && focusRecheck.done);
   const scrolledPoRef = useRef<string | null>(null);
   useEffect(() => {
     if (!focusPoId || !focusOnPage || scrolledPoRef.current === focusPoId) return;
@@ -1042,11 +1059,16 @@ function PurchaseOrdersTab({
   const focusOffPage = useQuery({
     queryKey: ['procurement-po-focus', focusPoId],
     queryFn: () => apiGet<POResponse>(`/v1/procurement/${encodeURIComponent(focusPoId as string)}`),
-    enabled: !!focusPoId && !!orders && !focusOnPage,
+    enabled: !!focusPoId && !!orders && !focusOnPage && !focusRechecking,
     retry: false,
   });
 
-  if (isLoading) return <SkeletonTable rows={5} columns={6} />;
+  // An empty cached register is the usual case for the first order of a
+  // project, which an award drafts; it is not "no purchase orders yet" until
+  // the re-read says so.
+  if (isLoading || (focusRechecking && !isError && orders?.length === 0)) {
+    return <SkeletonTable rows={5} columns={6} />;
+  }
 
   if (isError) {
     return (
@@ -1494,7 +1516,7 @@ function PurchaseOrdersTab({
           data-testid="po-focus-notice"
           className="mx-4 mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-oe-blue/30 bg-oe-blue/5 px-3.5 py-2.5 text-xs text-content-secondary"
         >
-          {focusOffPage.data ? (
+          {!focusRechecking && focusOffPage.data ? (
             <>
               <span>
                 {t('procurement.focus_po_off_page', {
@@ -1516,7 +1538,7 @@ function PurchaseOrdersTab({
                 </Button>
               )}
             </>
-          ) : focusOffPage.isError ? (
+          ) : !focusRechecking && focusOffPage.isError ? (
             <span>
               {t('procurement.focus_po_missing', {
                 defaultValue: 'The linked purchase order could not be found. It may have been deleted.',
