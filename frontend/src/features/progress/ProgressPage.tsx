@@ -17,9 +17,11 @@
 import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Activity,
+  CalendarRange,
+  Receipt,
   Inbox,
   Layers,
   ListChecks,
@@ -54,6 +56,9 @@ import {
 } from './api';
 import { RecordProgressDialog } from './RecordProgressDialog';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { boqPositionDeepLink } from '@/shared/lib/awardChainLinks';
+import { contractsTabHref } from '@/features/contracts/contractsTabs';
+import { RelatedRecordLink, RelatedRecordStrip } from '@/shared/ui/RelatedRecordLink';
 
 interface ProjectLite {
   id: string;
@@ -326,6 +331,7 @@ function StatusBadge({ status }: { status: string }) {
 /* ── Variance row ───────────────────────────────────────────────────────── */
 
 function VarianceRow({ item }: { item: PositionQuantityVarianceItem }) {
+  const { t } = useTranslation();
   const pc = clampPct(parseFloat(item.percent_complete));
   const varianceTone = item.is_over_run
     ? 'text-amber-600 dark:text-amber-400'
@@ -335,7 +341,18 @@ function VarianceRow({ item }: { item: PositionQuantityVarianceItem }) {
   return (
     <tr className="border-t border-border-light hover:bg-surface-secondary/40">
       <td className="px-3 py-2 font-medium text-content-primary tabular-nums whitespace-nowrap">
-        {item.ordinal || '-'}
+        {/* The position the reading is against, in its bill. BOQListPage
+            resolves the owning bill from the position id alone and lands on
+            the row, so no bill id has to travel with the reading. */}
+        <Link
+          to={boqPositionDeepLink(item.boq_position_id)}
+          className="text-oe-blue-text hover:underline"
+          title={t('progress.open_position_in_boq', {
+            defaultValue: 'Open this position in the bill of quantities',
+          })}
+        >
+          {item.ordinal || '-'}
+        </Link>
       </td>
       <td className="px-3 py-2 text-content-secondary">
         <span className="line-clamp-2">{item.description || '-'}</span>
@@ -461,6 +478,37 @@ export function ProgressPage() {
             'This page answers one question: how much of the work is actually built, as opposed to how much has been spent. It is fed by percent-complete observations recorded against BOQ positions or against the project as a whole, and it turns them into an actual versus planned S-curve, what each period added, and a design versus earned quantity comparison per position. If it is empty, nothing has been recorded yet - use "Record progress" to add the first observation.',
         })}
       </DismissibleInfo>
+
+      {/* Where the readings go next. A percent complete is billed through a
+       *  payment application (the claim's "Populate from progress" reads the
+       *  latest reading per position) and is judged against the programme on
+       *  the schedule. Readings carry a BOQ position, not an activity id, so
+       *  the schedule link is to the programme rather than to one activity. */}
+      {projectId && (
+        <RelatedRecordStrip
+          label={t('progress.feeds', { defaultValue: 'Next in the workflow:' })}
+          data-testid="progress-next"
+        >
+          <RelatedRecordLink
+            to={contractsTabHref('claims', projectId)}
+            icon={<Receipt size={12} />}
+            title={t('progress.link_claims_hint', {
+              defaultValue: 'Bill the recorded progress in a payment application',
+            })}
+          >
+            {t('progress.link_claims', { defaultValue: 'Payment applications' })}
+          </RelatedRecordLink>
+          <RelatedRecordLink
+            to="/schedule"
+            icon={<CalendarRange size={12} />}
+            title={t('progress.link_schedule_hint', {
+              defaultValue: 'Compare the recorded progress with the planned programme',
+            })}
+          >
+            {t('progress.link_schedule', { defaultValue: 'Schedule' })}
+          </RelatedRecordLink>
+        </RelatedRecordStrip>
+      )}
 
       {/* Mounted only with a project, so the dialog can trust its project id
        *  rather than defending against an empty one. */}
