@@ -1489,7 +1489,9 @@ async def batch_delete_documents(
     # A bare bulk DELETE of the rows skipped everything around it: no
     # ``documents.document.deleted`` (so the file-reference purge and the
     # search index never heard of it), no takeoff copy of a blob it still
-    # reads, and the file left on disk for good.
+    # reads, and the file left on disk for good. ``batch=True`` holds the
+    # deleted event and every file removal until this request commits, so a
+    # failure on a later document rolls back to a state with nothing missing.
     actor = str(user_id) if user_id else None
     for doc_id in allowed:
         await service.delete_document(doc_id, user_id=actor, batch=True)

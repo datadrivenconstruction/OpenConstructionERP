@@ -460,3 +460,103 @@ async def test_batch_delete_removes_each_file_like_the_single_delete(
     assert await _still_there([own_id, shared_id, keeper_id]) == {keeper_id}
     assert not own_blob.exists(), "the batch left the deleted document's file on disk"
     assert shared_blob.exists(), "a file another document still uses must stay"
+
+
+@pytest.mark.asyncio
+async def test_a_batch_that_fails_part_way_keeps_every_file(
+    client: AsyncClient,
+    auth_headers: dict[str, str],
+    project_id: uuid.UUID,
+    tmp_path,  # type: ignore[no-untyped-def]
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A late failure rolls the rows back, so the earlier files must still be there.
+
+    The batch deletes inside one request transaction. Unlinking each file
+    inside the loop removed the first document's bytes before the second
+    document failed, and the rollback then restored a row pointing at
+    nothing. The file now goes only when the commit does.
+    """
+    from app.database import async_session_factory
+    from app.modules.documents.models import Document
+    from app.modules.documents.service import DocumentService
+
+    first_blob = tmp_path / "first.pdf"
+    first_blob.write_bytes(b"%PDF-1.4 first")
+    second_blob = tmp_path / "second.pdf"
+    second_blob.write_bytes(b"%PDF-1.4 second")
+
+    async with async_session_factory() as session:
+        first = Document(project_id=project_id, name="first.pdf", category="drawing", file_path=str(first_blob))
+        second = Document(project_id=project_id, name="second.pdf", category="drawing", file_path=str(second_blob))
+        session.add_all([first, second])
+        await session.commit()
+        first_id, second_id = first.id, second.id
+
+    real_delete = DocumentService.delete_document
+
+    async def failing_on_the_second(self, document_id, *args, **kwargs):  # type: ignore[no-untyped-def]
+        if document_id == second_id:
+            raise RuntimeError("simulated failure part-way through the batch")
+        return await real_delete(self, document_id, *args, **kwargs)
+
+    monkeypatch.setattr(DocumentService, "delete_document", failing_on_the_second)
+
+    try:
+        resp = await client.post(
+            "/api/v1/documents/batch/delete/",
+            json={"ids": [str(first_id), str(second_id)]},
+            headers=auth_headers,
+        )
+    except RuntimeError:
+        pass  # The transport re-raised the app's exception; the rollback already ran.
+    else:
+        assert resp.status_code >= 500, resp.text
+
+    assert await _still_there([first_id, second_id]) == {first_id, second_id}
+    assert first_blob.exists(), "the first file went although its row was rolled back"
+    assert second_blob.exists()
+
+
+@pytest.mark.asyncio
+async def test_a_batch_removes_its_files_on_the_commit_and_never_after_a_rollback(
+    client: AsyncClient,
+    project_id: uuid.UUID,
+    tmp_path,  # type: ignore[no-untyped-def]
+) -> None:
+    """The removal waits for the commit, and a rollback cancels it for good.
+
+    The second half is the case a one-shot ``after_commit`` listener gets
+    wrong: left armed after a rollback, it would fire on the next commit of the
+    same session and remove the file of a delete that never happened.
+    """
+    from sqlalchemy import text
+
+    from app.database import async_session_factory
+    from app.modules.documents.models import Document
+    from app.modules.documents.service import DocumentService
+
+    blob = tmp_path / "drawing.pdf"
+    blob.write_bytes(b"%PDF-1.4 drawing")
+    async with async_session_factory() as session:
+        doc = Document(project_id=project_id, name="drawing.pdf", category="drawing", file_path=str(blob))
+        session.add(doc)
+        await session.commit()
+        doc_id = doc.id
+
+    async with async_session_factory() as session:
+        await DocumentService(session).delete_document(doc_id, batch=True)
+        assert blob.exists(), "a batch removed the file before its transaction committed"
+        await session.rollback()
+        # The same session commits something else afterwards.
+        await session.execute(text("SELECT 1"))
+        await session.commit()
+    assert blob.exists(), "a rolled-back batch delete removed the file on a later commit"
+    assert await _still_there([doc_id]) == {doc_id}
+
+    async with async_session_factory() as session:
+        await DocumentService(session).delete_document(doc_id, batch=True)
+        assert blob.exists()
+        await session.commit()
+    assert not blob.exists(), "the committed batch delete left the file on disk"
+    assert await _still_there([doc_id]) == set()

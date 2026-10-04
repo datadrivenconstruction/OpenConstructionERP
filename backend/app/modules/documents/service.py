@@ -437,6 +437,82 @@ def _generate_photo_thumbnail(
         return False
 
 
+def _remove_file(file_path_str: str) -> None:
+    """Unlink one stored file, best-effort: a failure leaves an orphan, not an error."""
+    try:
+        file_path = Path(file_path_str)
+        if file_path.exists():
+            file_path.unlink()
+            logger.info("File removed: %s", file_path)
+    except Exception:
+        logger.warning("Failed to remove file: %s", file_path_str)
+
+
+#: ``Session.info`` key holding the files a batch delete removes on commit.
+_PENDING_REMOVALS_KEY = "documents.pending_file_removals"
+#: ``Session.info`` flag set once the two listeners below are attached.
+_REMOVAL_LISTENERS_KEY = "documents.file_removal_listeners"
+
+
+def _remove_file_after_commit(session: AsyncSession, file_path_str: str) -> bool:
+    """Queue ``file_path_str`` to be unlinked once ``session`` commits.
+
+    A batch delete runs every document through :meth:`DocumentService.
+    delete_document` inside one request transaction. Unlinking inside that
+    loop removed each file before anything was durable, so a failure on a
+    later document, or at the commit itself, rolled every row back while the
+    earlier rows' files were already gone: documents restored pointing at
+    nothing, and bytes nobody can get back. Queued here, the files go only
+    when the rows they belonged to are gone for good.
+
+    A rollback empties the queue, so the files stay. That is the trade the
+    delete path makes everywhere: an orphaned file is recoverable, a document
+    row pointing at a deleted blob is not. Clearing on rollback also keeps a
+    later commit of the same session from removing files of a delete that
+    never happened, which a one-shot listener left armed would do.
+
+    One queue and one pair of listeners per session, not one per file: a
+    2000-document batch would otherwise stack 2000 listeners on one session.
+
+    Returns False when there is no transaction to wait for (or the session
+    cannot be inspected); the caller then removes the file at once, as before.
+    """
+    try:
+        in_transaction = session.in_transaction()
+        sync_session = session.sync_session
+    except Exception:  # noqa: BLE001 - a session that cannot be inspected
+        return False
+    if not in_transaction:
+        return False
+
+    info = sync_session.info
+    if not info.get(_REMOVAL_LISTENERS_KEY):
+        from sqlalchemy import event as sa_event
+
+        def _after_commit(session_: Any) -> None:
+            # Released SAVEPOINTs dispatch after_commit too, while the outer
+            # transaction is still open and nothing is durable yet.
+            if session_.in_nested_transaction():
+                return
+            for path in session_.info.pop(_PENDING_REMOVALS_KEY, None) or []:
+                _remove_file(path)
+
+        def _after_soft_rollback(session_: Any, _previous: Any) -> None:
+            kept = session_.info.pop(_PENDING_REMOVALS_KEY, None)
+            if kept:
+                logger.warning(
+                    "Delete rolled back; kept %d file(s) it would have removed",
+                    len(kept),
+                )
+
+        sa_event.listen(sync_session, "after_commit", _after_commit)
+        sa_event.listen(sync_session, "after_soft_rollback", _after_soft_rollback)
+        info[_REMOVAL_LISTENERS_KEY] = True
+
+    info.setdefault(_PENDING_REMOVALS_KEY, []).append(file_path_str)
+    return True
+
+
 #: Heaviest consequence first, so a delete prompt leads with what cannot be
 #: repaired.
 _IMPACT_ORDER = {"strands": 0, "unlinks": 1, "retains": 2}
@@ -1252,11 +1328,14 @@ class DocumentService:
         File removal failure is logged but not fatal - leaves an orphan file rather
         than an orphan DB record pointing to a missing file.
 
-        ``batch`` marks the activity entry as part of a bulk delete, which is
-        the only difference between the two paths: the batch endpoint runs
-        every document through here so it publishes the deleted event, hands
-        takeoff its copy of the blob and removes the file exactly as a single
-        delete does.
+        ``batch`` marks the activity entry as part of a bulk delete. The batch
+        endpoint runs every document through here so it publishes the deleted
+        event, hands takeoff its copy of the blob and removes the file exactly
+        as a single delete does, with one difference in timing: a batch holds
+        the deleted event and the file removal until its transaction commits.
+        A batch is many deletes in one transaction, so a failure late in it
+        rolls back rows whose files and links the earlier iterations would
+        otherwise already have removed.
         """
         document = await self.get_document(document_id)
         file_path_str = document.file_path
@@ -1284,17 +1363,31 @@ class DocumentService:
 
         # Publish documents.document.deleted so the vector indexer and
         # other subscribers can evict the row from their stores.
+        #
+        # A batch defers it to the commit. Its subscribers purge file links
+        # and search entries in sessions of their own, and a batch that fails
+        # on a later document rolls this row back: published at once, they
+        # would already have purged the links of a document that is restored.
         try:
-            from app.core.events import event_bus
+            from app.core.events import event_bus, publish_after_commit
 
-            event_bus.publish_detached(
-                "documents.document.deleted",
-                {
-                    "project_id": str(project_id) if project_id else "",
-                    "document_id": str(document_id),
-                },
-                source_module="oe_documents",
-            )
+            payload = {
+                "project_id": str(project_id) if project_id else "",
+                "document_id": str(document_id),
+            }
+            if batch:
+                publish_after_commit(
+                    self.session,
+                    "documents.document.deleted",
+                    payload,
+                    source_module="oe_documents",
+                )
+            else:
+                event_bus.publish_detached(
+                    "documents.document.deleted",
+                    payload,
+                    source_module="oe_documents",
+                )
         except Exception as exc:
             logger.debug("Failed to publish documents.document.deleted event: %s", exc)
 
@@ -1343,13 +1436,10 @@ class DocumentService:
         if file_path_str and await self._file_has_other_documents(document_id, file_path_str):
             return
 
-        try:
-            file_path = Path(file_path_str)
-            if file_path.exists():
-                file_path.unlink()
-                logger.info("File removed: %s", file_path)
-        except Exception:
-            logger.warning("Failed to remove file: %s", file_path_str)
+        # A batch removes its files on commit, see _remove_file_after_commit.
+        if batch and file_path_str and _remove_file_after_commit(self.session, file_path_str):
+            return
+        _remove_file(file_path_str)
 
     async def _file_has_other_documents(self, document_id: uuid.UUID, file_path: str) -> bool:
         """True when documents other than ``document_id`` point at ``file_path``.
