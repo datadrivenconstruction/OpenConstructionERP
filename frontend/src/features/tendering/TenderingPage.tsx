@@ -1379,14 +1379,18 @@ function PackageDetail({
   // What the award drafted. The award subscribers stamp this package's id on
   // the contract and the purchase order they create; the lookup reads the
   // stamp back. Linked bid packages count too, because the bid-management
-  // award path stamps its own key on the same records.
+  // award path stamps its own key on the same records. A package closed for
+  // archival after its award keeps those records, so a closed package is
+  // looked up too; one closed without an award simply finds nothing. Only a
+  // fresh award waits for drafts still on their way.
   const awardOutcome = useAwardOutcome(
     projectIdForLinks,
     {
       tender_package_id: packageId,
       bid_package_ids: linkedBidPackages.map((bp) => bp.id),
     },
-    pkg?.status === 'awarded',
+    pkg?.status === 'awarded' || pkg?.status === 'closed',
+    { awaitDraft: pkg?.status === 'awarded' },
   );
   const awardContract = awardOutcome.contract.state === 'found' ? awardOutcome.contract.record : null;
   const awardOrder = awardOutcome.order.state === 'found' ? awardOutcome.order.record : null;
@@ -1795,8 +1799,10 @@ function PackageDetail({
                 Contracts instead of dead-ending. The awarded rates already
                 live on the BOQ, so the contract is formalised downstream. */}
             {/* The award drafts a contract; once it is found, the button
-                opens that contract instead of the bare register. */}
-            {pkg.status === 'awarded' && (
+                opens that contract instead of the bare register. A package
+                closed after its award keeps the button only while the
+                contract is there to open. */}
+            {(pkg.status === 'awarded' || (pkg.status === 'closed' && awardContract)) && (
               <Button
                 variant="primary"
                 size="sm"

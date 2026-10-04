@@ -110,12 +110,28 @@ function awardScope(keys: AwardKeys): string {
   return [keys.tender_package_id || '', ...[...new Set(bids)].sort()].join('|');
 }
 
+export interface AwardOutcomeOptions {
+  /**
+   * Keep re-reading for a while when the draft is not there yet (default).
+   * Off for a package whose award, if it had one, is long settled, such as a
+   * tender package closed for archival: one read answers it, and a package
+   * closed without an award would otherwise poll for a draft that never comes.
+   */
+  awaitDraft?: boolean;
+}
+
 /**
  * Look up what an award drafted. `enabled` is the caller's "this package is
  * awarded"; before that there is nothing to look for and nothing is fetched.
  */
-export function useAwardOutcome(projectId: string | null | undefined, keys: AwardKeys, enabled: boolean): AwardOutcome {
+export function useAwardOutcome(
+  projectId: string | null | undefined,
+  keys: AwardKeys,
+  enabled: boolean,
+  options: AwardOutcomeOptions = {},
+): AwardOutcome {
   const on = enabled && !!projectId;
+  const awaitDraft = options.awaitDraft ?? true;
   const scope = awardScope(keys);
 
   const contractsQ = useQuery({
@@ -128,7 +144,7 @@ export function useAwardOutcome(projectId: string | null | undefined, keys: Awar
     // lookup on always reads.
     staleTime: 0,
     refetchInterval: (q) =>
-      pollWhileAbsent(q.state.data, q.state.dataUpdateCount, keys, RETIRED_AWARD_CONTRACT_STATUSES),
+      awaitDraft && pollWhileAbsent(q.state.data, q.state.dataUpdateCount, keys, RETIRED_AWARD_CONTRACT_STATUSES),
   });
 
   const ordersQ = useQuery({
@@ -141,7 +157,7 @@ export function useAwardOutcome(projectId: string | null | undefined, keys: Awar
     retry: false,
     staleTime: 0,
     refetchInterval: (q) =>
-      pollWhileAbsent(q.state.data, q.state.dataUpdateCount, keys, RETIRED_AWARD_ORDER_STATUSES),
+      awaitDraft && pollWhileAbsent(q.state.data, q.state.dataUpdateCount, keys, RETIRED_AWARD_ORDER_STATUSES),
   });
 
   if (!on) return { contract: { state: 'unknown' }, order: { state: 'unknown' } };

@@ -172,6 +172,26 @@ describe('useAwardOutcome', () => {
     await waitFor(() => expect(second.result.current.contract.state).toBe('found'));
   }, 20_000);
 
+  it('reads once and does not wait for a draft when told the award is settled', async () => {
+    // A tender package closed for archival: its award, if it had one, wrote
+    // its drafts long ago, and one closed without an award never will.
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    let contractReads = 0;
+    apiGetMock.mockImplementation((url: string) => {
+      if (url.startsWith('/v1/contracts/contracts/')) contractReads += 1;
+      return Promise.resolve(page([]));
+    });
+    const { result } = renderHook(() => useAwardOutcome('proj-1', KEYS, true, { awaitDraft: false }), {
+      wrapper,
+    });
+
+    await waitFor(() => expect(result.current.contract.state).toBe('absent'));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(10_000);
+    });
+    expect(contractReads).toBe(1);
+  });
+
   it('fetches nothing before the award', async () => {
     route(page([]), page([]));
     const { result } = renderHook(() => useAwardOutcome('proj-1', KEYS, false), { wrapper });

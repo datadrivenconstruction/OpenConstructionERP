@@ -85,7 +85,7 @@ vi.mock('@/stores/useToastStore', () => {
 
 import { TenderingPage } from '../TenderingPage';
 
-type Status = 'collecting' | 'awarded';
+type Status = 'collecting' | 'awarded' | 'closed';
 
 function tenderPackage(status: Status) {
   return {
@@ -270,5 +270,41 @@ describe('an awarded tender package links to what the award drafted', () => {
 
     expect(navigateSpy).toHaveBeenCalledWith('/contracts');
     expect(screen.queryByText(/Contract CONTRACT-TND-AB12/)).toBeNull();
+  });
+});
+
+describe('a tender package closed after its award', () => {
+  // awarded -> closed is the archival step. The contract and the order the
+  // award drafted still carry the package stamp, so the way to them stays.
+  it('still names the drafted contract and purchase order', async () => {
+    setWorld({ status: 'closed', contracts: [DRAFTED_CONTRACT], orders: [DRAFTED_ORDER] });
+    renderPage();
+
+    const strip = await related();
+    const contract = await strip.findByRole('link', { name: /Contract CONTRACT-TND-AB12/ });
+    expect(contract.getAttribute('href')).toBe('/contracts?highlight=ct-9');
+    expect(await strip.findByRole('link', { name: /Purchase order PO-0042/ })).toBeTruthy();
+  });
+
+  it('keeps the button that opens the drafted contract', async () => {
+    setWorld({ status: 'closed', contracts: [DRAFTED_CONTRACT] });
+    renderPage();
+
+    fireEvent.click(await screen.findByRole('button', { name: /Open contract CONTRACT-TND-AB12/ }));
+
+    expect(navigateSpy).toHaveBeenCalledWith('/contracts?highlight=ct-9');
+  });
+
+  it('offers no contract button on a package closed without an award', async () => {
+    setWorld({ status: 'closed', contracts: [{ id: 'ct-hand', code: 'HAND-1', status: 'active', metadata: {} }] });
+    renderPage();
+
+    await related();
+    await vi.waitFor(() =>
+      expect(apiGetMock.mock.calls.some(([u]) => String(u).startsWith('/v1/contracts/'))).toBe(true),
+    );
+    expect(screen.queryByRole('button', { name: /Formalise as Contract/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Open contract/ })).toBeNull();
+    expect(screen.queryByText(/HAND-1/)).toBeNull();
   });
 });
