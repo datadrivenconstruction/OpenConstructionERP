@@ -15,8 +15,6 @@ import {
   triggerDownload,
 } from '@/shared/lib/api';
 
-const BOQ_BASE = '/api/v1/boq/boqs';
-const CLAIM_BASE = '/api/v1/boq/claims';
 
 export interface X31MatchedItem {
   oz: string;
@@ -151,7 +149,7 @@ async function upload<T>(url: string, file: File): Promise<T> {
 
 /** Read an X31 and get proposals per OZ. Writes nothing. */
 export function previewX31(boqId: string, file: File): Promise<X31Preview> {
-  return upload<X31Preview>(`${BOQ_BASE}/${encodeURIComponent(boqId)}/import/gaeb-x31/preview/`, file);
+  return upload<X31Preview>(`/api/v1/boq/boqs/${encodeURIComponent(boqId)}/import/gaeb-x31/preview/`, file);
 }
 
 /** Write the proposals a person confirmed. */
@@ -173,7 +171,7 @@ export async function downloadX31(
   fallbackName: string,
 ): Promise<{ written: number; skipped: number }> {
   const res = await fetchWithAuth(
-    `${BOQ_BASE}/${encodeURIComponent(boqId)}/export/gaeb-x31/?basis=${basis}`,
+    `/api/v1/boq/boqs/${encodeURIComponent(boqId)}/export/gaeb-x31/?basis=${basis}`,
   );
   if (!res.ok) throw await failure(res, `Export failed (${res.status})`);
   const blob = await res.blob();
@@ -186,7 +184,7 @@ export async function downloadX31(
 
 /** Check a received X89 against the bill. Writes nothing. */
 export function checkX89(boqId: string, file: File): Promise<X89CheckReport> {
-  return upload<X89CheckReport>(`${BOQ_BASE}/${encodeURIComponent(boqId)}/check/gaeb-x89/`, file);
+  return upload<X89CheckReport>(`/api/v1/boq/boqs/${encodeURIComponent(boqId)}/check/gaeb-x89/`, file);
 }
 
 function claimQuery(vatRate: string): string {
@@ -204,7 +202,7 @@ export function previewClaimInvoice(claimId: string, vatRate = ''): Promise<Clai
 /** Download the X89 of a progress claim. */
 export async function downloadClaimInvoice(claimId: string, fallbackName: string, vatRate = ''): Promise<void> {
   const res = await fetchWithAuth(
-    `${CLAIM_BASE}/${encodeURIComponent(claimId)}/export/gaeb-x89/${claimQuery(vatRate)}`,
+    `/api/v1/boq/claims/${encodeURIComponent(claimId)}/export/gaeb-x89/${claimQuery(vatRate)}`,
   );
   if (!res.ok) throw await failure(res, `Export failed (${res.status})`);
   const blob = await res.blob();
