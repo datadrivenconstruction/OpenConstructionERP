@@ -8,6 +8,7 @@ Tables:
     oe_price_index_location_factor - a regional cost factor keyed by region code
     oe_price_index_resource_index  - a resource-index value per region, quarter and group
     oe_price_index_overhead_norm   - NR and SP percentages of the wage fund per work type
+    oe_price_index_seed_marker     - which sample seeds have already run on this install
 
 The reference data is platform-wide (not project-scoped): an index series and
 its regional factors are shared across every estimate. Every NOT NULL column
@@ -185,3 +186,22 @@ class WorkTypeOverheadNorm(Base):
 
     def __repr__(self) -> str:
         return f"<WorkTypeOverheadNorm {self.work_type_code} NR={self.nr_pct} SP={self.sp_pct}>"
+
+
+class PriceIndexSeedMarker(Base):
+    """A record that one of the module's sample seeds has run on this install.
+
+    The resource-index samples go into empty tables once. "Empty" alone cannot
+    say whether that once has happened: a person who deletes every sample row
+    before entering the official letter leaves the tables empty again, and the
+    next boot would put the samples back. One row per ``seed_key``, written by
+    the seeder whether or not it inserted anything; once its row is here the
+    seeder does nothing.
+    """
+
+    __tablename__ = "oe_price_index_seed_marker"
+
+    seed_key: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True, server_default="")
+
+    def __repr__(self) -> str:
+        return f"<PriceIndexSeedMarker {self.seed_key}>"

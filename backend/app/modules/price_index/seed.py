@@ -24,6 +24,7 @@ from app.modules.price_index.models import (
     CostIndexPoint,
     CostIndexSeries,
     LocationFactor,
+    PriceIndexSeedMarker,
     ResourceIndexValue,
     WorkTypeOverheadNorm,
 )
@@ -128,13 +129,20 @@ _SAMPLE_NORMS: tuple[tuple[str, str, str, str], ...] = (
     ("finishing", "Отделочные работы (finishing works)", "105", "55"),
 )
 
+#: The marker key the resource-index sample seed records once it has run.
+RESOURCE_INDEX_SEED_KEY = "ru_resource_index_samples"
+
 
 async def seed_resource_index_samples(session: AsyncSession) -> dict[str, int]:
-    """Insert the sample resource indices and NR/SP norms into empty tables.
+    """Insert the sample resource indices and NR/SP norms, once per install.
 
-    Each table is seeded only while it holds no rows at all. Once a person has
-    entered an official value, or deleted the samples, a restart never brings
-    the samples back next to their data.
+    The first run on an install puts the samples into whichever of the two
+    tables is empty and records :data:`RESOURCE_INDEX_SEED_KEY` in
+    :class:`PriceIndexSeedMarker`, whether it inserted anything or not. Every
+    later run finds the marker and does nothing. So a person who entered an
+    official value never gets the samples next to it, and a person who deleted
+    the samples (the natural first step before typing in the letter) does not
+    get them back on the next restart, although the tables are empty again.
 
     Args:
         session: An open async session; the caller owns the transaction.
@@ -144,6 +152,14 @@ async def seed_resource_index_samples(session: AsyncSession) -> dict[str, int]:
     """
     indices_added = 0
     norms_added = 0
+
+    already = (
+        await session.execute(
+            select(PriceIndexSeedMarker.id).where(PriceIndexSeedMarker.seed_key == RESOURCE_INDEX_SEED_KEY)
+        )
+    ).first()
+    if already is not None:
+        return {"resource_indices": 0, "overhead_norms": 0}
 
     has_index = (await session.execute(select(ResourceIndexValue.id).limit(1))).first() is not None
     if not has_index:
@@ -175,6 +191,6 @@ async def seed_resource_index_samples(session: AsyncSession) -> dict[str, int]:
             )
             norms_added += 1
 
-    if indices_added or norms_added:
-        await session.flush()
+    session.add(PriceIndexSeedMarker(seed_key=RESOURCE_INDEX_SEED_KEY))
+    await session.flush()
     return {"resource_indices": indices_added, "overhead_norms": norms_added}
