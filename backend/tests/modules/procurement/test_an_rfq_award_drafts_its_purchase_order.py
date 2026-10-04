@@ -33,6 +33,7 @@ import pytest
 import pytest_asyncio
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.events import Event
 from app.modules.contacts.models import Contact
@@ -236,6 +237,32 @@ def _sum(items: list[PurchaseOrderItem]) -> Decimal:
     return sum((Decimal(item.amount) for item in items), Decimal("0"))
 
 
+async def approval_errors(session: AsyncSession, po_id: uuid.UUID | None) -> list[str]:
+    """The ERROR findings approval would refuse the stored draft on.
+
+    The draft is read back from the database and run through the same
+    ``procurement`` rule set ``approve_po`` runs, so this sees the strings the
+    order lines actually hold. The run must include the line-amount rule, or
+    an empty answer would only mean the rules never ran.
+    """
+    from app.core.validation.rules import register_builtin_rules
+    from app.modules.procurement.service import ProcurementService
+
+    assert po_id is not None
+    register_builtin_rules()
+    po = (
+        await session.execute(
+            select(PurchaseOrder)
+            .where(PurchaseOrder.id == po_id)
+            .options(selectinload(PurchaseOrder.items))
+            .execution_options(populate_existing=True)
+        )
+    ).scalar_one()
+    report = await ProcurementService(session)._validate_po(po, operation="approve")
+    assert "procurement.po_line_amount" in {r.rule_id for r in report.results}
+    return [f"{r.rule_id} {r.element_ref}" for r in report.errors]
+
+
 TWO_LINE_SCOPE = [
     {"code": "S-01", "description": "HEB 300 columns, S355", "unit": "t", "quantity": "12"},
     {"code": "S-02", "description": "IPE 400 beams, S355", "unit": "t", "quantity": "8"},
@@ -386,20 +413,92 @@ async def test_lines_short_of_the_total_keep_their_figures_and_the_gap_is_one_li
     assert po.metadata_["pricing"] == "itemised_with_balance"
 
 
-async def test_lines_over_the_total_are_ordered_as_one_line_at_the_total(
+async def test_an_overall_discount_is_spread_over_the_lines_and_keeps_their_cost_lines(
     session: AsyncSession, actor_id: uuid.UUID
 ) -> None:
-    """An overall discount below the line total cannot be a negative line."""
-    contact = await make_contact(session, tenant=actor_id)
-    rfq, bid, award = await priced_award(session, bidder=str(contact.id), amount="24000.00")
+    """Lines of 25,000.00 under a 24,000.00 total: a 4% discount on every line.
 
-    await rfq_award.draft_po_from_rfq_award(awarded(rfq, bid, award, actor=actor_id))
+    One lump sum at the total would add up too, so the test tells the two
+    apart on what a lump sum loses: each line keeps its scope item and its
+    cost line, and comes down by the same 4%, with a rate that still gives
+    its amount.
+    """
+    project_id = uuid.uuid4()
+    columns = CostLine(
+        project_id=project_id, code="CL-1", description="Columns", unit="t", currency="EUR", status="active"
+    )
+    beams = CostLine(project_id=project_id, code="CL-2", description="Beams", unit="t", currency="EUR", status="active")
+    session.add_all([columns, beams])
+    await session.flush()
+    contact = await make_contact(session, tenant=actor_id)
+    rfq = await make_rfq(
+        session,
+        project_id=project_id,
+        scope=[
+            {**TWO_LINE_SCOPE[0], "cost_line_id": columns.id},
+            {**TWO_LINE_SCOPE[1], "cost_line_id": beams.id},
+        ],
+    )
+    s1, s2 = await scope_lines(session, rfq)
+    bid = await make_bid(
+        session,
+        rfq,
+        bidder=str(contact.id),
+        amount="24000.00",
+        lines=[
+            {"rfq_line_id": s1.id, "unit": "t", "quantity": "12", "unit_rate": "1250", "amount": "15000"},
+            {"rfq_line_id": s2.id, "unit": "t", "quantity": "8", "unit_rate": "1250", "amount": "10000"},
+        ],
+    )
+    award = await make_award(session, rfq, bid, basis_amount="24000.00")
+
+    po_id = await rfq_award.draft_po_from_rfq_award(awarded(rfq, bid, award, actor=actor_id))
+
+    [po] = await orders(session, project_id)
+    items = await items_of(session, po)
+    assert [(i.description, i.quantity, i.unit_rate, i.amount, i.cost_line_id) for i in items] == [
+        ("S-01 HEB 300 columns, S355", "12", "1200", "14400.00", columns.id),
+        ("S-02 IPE 400 beams, S355", "8", "1200", "9600.00", beams.id),
+    ]
+    assert _sum(items) == Decimal(po.amount_total) == Decimal("24000.00")
+    assert po.metadata_["pricing"] == "itemised_discounted"
+    assert "add up to 25000.00 EUR" in po.notes
+    assert "overall discount of 4.00%" in po.notes
+    assert "lump sum" not in po.notes
+    assert await approval_errors(session, po_id) == []
+
+
+async def test_a_discount_that_does_not_divide_evenly_still_sums_to_the_cent(
+    session: AsyncSession, actor_id: uuid.UUID
+) -> None:
+    """Three lines of 100.00 under a total of 200.00: 66.666... each.
+
+    Rounding each share gives 66.67 three times, 200.01 in all. The extra
+    cent comes off one line, so the order is 200.00 and not a cent more, and
+    every line's rate still gives its amount.
+    """
+    contact = await make_contact(session, tenant=actor_id)
+    rfq = await make_rfq(session, scope=[])
+    bid = await make_bid(
+        session,
+        rfq,
+        bidder=str(contact.id),
+        amount="200.00",
+        lines=[
+            {"description": name, "unit": "pcs", "quantity": "1", "unit_rate": "100", "amount": "100"}
+            for name in ("Anchor set A", "Anchor set B", "Anchor set C")
+        ],
+    )
+    award = await make_award(session, rfq, bid, basis_amount="200.00")
+
+    po_id = await rfq_award.draft_po_from_rfq_award(awarded(rfq, bid, award, actor=actor_id))
 
     [po] = await orders(session, rfq.project_id)
-    [item] = await items_of(session, po)
-    assert item.amount == po.amount_total == "24000.00"
-    assert po.metadata_["pricing"] == "lump_sum"
-    assert "overall discount" in po.notes
+    items = await items_of(session, po)
+    assert sorted(i.amount for i in items) == ["66.66", "66.67", "66.67"]
+    assert _sum(items) == Decimal(po.amount_total) == Decimal("200.00")
+    assert all(i.unit_rate == i.amount.rstrip("0").rstrip(".") for i in items)
+    assert await approval_errors(session, po_id) == []
 
 
 async def test_an_excluded_line_is_not_ordered_and_an_extra_line_is(session: AsyncSession, actor_id: uuid.UUID) -> None:
@@ -531,6 +630,155 @@ async def test_a_rounding_difference_stays_itemised_and_still_adds_up(
     assert po.metadata_["pricing"] == "itemised"
     assert "by 0.03 EUR through rounding" in po.notes
     assert "discount" not in po.notes
+
+
+# ── The draft passes the gate it will be approved through ──────────────────
+
+
+@pytest.mark.parametrize(
+    ("headline", "first"),
+    [
+        pytest.param("25000.00", ("12", "1250", "15000"), id="as-quoted"),
+        pytest.param("25000.03", ("12", "1250", "15000"), id="rounding-up"),
+        pytest.param("24999.97", ("12", "1250", "15000"), id="rounding-down"),
+        pytest.param("25000.00", ("12", "1250", "15000.03"), id="rounding-repairs-a-line"),
+        pytest.param("26200.00", ("12", "1250", "15000"), id="balance-line"),
+        pytest.param("24000.00", ("12", "1250", "15000"), id="overall-discount"),
+        pytest.param("24250.00", ("12", "1250", "14250"), id="line-discount"),
+        pytest.param("25000.00", ("0", "1250", "15000"), id="no-quantity"),
+        pytest.param("25000.00", ("0", "1300", "15000"), id="no-quantity-rate-disagrees"),
+    ],
+)
+async def test_every_pricing_shape_drafts_an_order_approval_accepts(
+    session: AsyncSession, actor_id: uuid.UUID, headline: str, first: tuple[str, str, str]
+) -> None:
+    """A draft the system wrote must not be refused by the system's own gate.
+
+    ``procurement.po_line_amount`` refuses a line whose amount is not its
+    quantity times its rate. Before the rate was restated, the rounding
+    shapes, the line discount and the missing quantity each wrote such a line,
+    and the reviewer met a 422 on Approve.
+    """
+    contact = await make_contact(session, tenant=actor_id)
+    rfq, bid, award = await priced_award(session, bidder=str(contact.id), amount=headline, first=first)
+
+    po_id = await rfq_award.draft_po_from_rfq_award(awarded(rfq, bid, award, actor=actor_id))
+
+    [po] = await orders(session, rfq.project_id)
+    assert _sum(await items_of(session, po)) == Decimal(po.amount_total) == Decimal(headline)
+    assert await approval_errors(session, po_id) == []
+
+
+async def test_cents_of_rounding_restate_the_rate_and_name_the_quoted_one(
+    session: AsyncSession, actor_id: uuid.UUID
+) -> None:
+    """Two consistent lines under a total three cents higher.
+
+    The cents land on the largest line as before; its rate becomes the one
+    that gives 15,000.03 over 12 t, and the notes keep the 1,250 the supplier
+    quoted. The other line is untouched.
+    """
+    contact = await make_contact(session, tenant=actor_id)
+    rfq, bid, award = await priced_award(session, bidder=str(contact.id), amount="25000.03")
+
+    po_id = await rfq_award.draft_po_from_rfq_award(awarded(rfq, bid, award, actor=actor_id))
+
+    [po] = await orders(session, rfq.project_id)
+    items = await items_of(session, po)
+    assert [(i.quantity, i.unit_rate, i.amount) for i in items] == [
+        ("12", "1250.0025", "15000.03"),
+        ("8", "1250", "10000.00"),
+    ]
+    assert "S-01 HEB 300 columns, S355 (quoted 1250, ordered 1250.0025)" in po.notes
+    assert "S-02" not in po.notes
+    assert await approval_errors(session, po_id) == []
+
+
+async def test_a_line_discount_keeps_the_amount_and_restates_the_rate(
+    session: AsyncSession, actor_id: uuid.UUID
+) -> None:
+    """10 x 100 priced at 950: the supplier charges 950, so 950 is ordered at 95."""
+    contact = await make_contact(session, tenant=actor_id)
+    rfq = await make_rfq(session, scope=[])
+    bid = await make_bid(
+        session,
+        rfq,
+        bidder=str(contact.id),
+        amount="950.00",
+        lines=[
+            {"description": "Grout, non-shrink", "unit": "bag", "quantity": "10", "unit_rate": "100", "amount": "950"}
+        ],
+    )
+    award = await make_award(session, rfq, bid, basis_amount="950.00")
+
+    po_id = await rfq_award.draft_po_from_rfq_award(awarded(rfq, bid, award, actor=actor_id))
+
+    [po] = await orders(session, rfq.project_id)
+    [item] = await items_of(session, po)
+    assert (item.quantity, item.unit_rate, item.amount) == ("10", "95", "950.00")
+    assert "Grout, non-shrink (quoted 100, ordered 95)" in po.notes
+    assert await approval_errors(session, po_id) == []
+
+
+async def test_a_line_without_a_quantity_takes_the_one_its_rate_and_amount_imply(
+    session: AsyncSession, actor_id: uuid.UUID
+) -> None:
+    """Rate 50 and amount 500 is ten units, whatever the scope's 12 says.
+
+    Taking the scope's quantity would order 12 at the supplier's 50 against
+    an amount of 500, which approval refuses; restating the rate to 41.667
+    would pass but misquote a supplier who priced ten.
+    """
+    contact = await make_contact(session, tenant=actor_id)
+    rfq = await make_rfq(session, scope=[TWO_LINE_SCOPE[0]])
+    [s1] = await scope_lines(session, rfq)
+    bid = await make_bid(
+        session,
+        rfq,
+        bidder=str(contact.id),
+        amount="500.00",
+        lines=[{"rfq_line_id": s1.id, "unit": "t", "quantity": "0", "unit_rate": "50", "amount": "500"}],
+    )
+    award = await make_award(session, rfq, bid, basis_amount="500.00")
+
+    po_id = await rfq_award.draft_po_from_rfq_award(awarded(rfq, bid, award, actor=actor_id))
+
+    [po] = await orders(session, rfq.project_id)
+    [item] = await items_of(session, po)
+    assert (item.quantity, item.unit_rate, item.amount) == ("10", "50", "500.00")
+    assert "quoted 50" not in po.notes
+    assert await approval_errors(session, po_id) == []
+
+
+async def test_a_restated_rate_on_an_awkward_quantity_stays_short_and_exact(
+    session: AsyncSession, actor_id: uuid.UUID
+) -> None:
+    """12,345.678 m at a quoted 1.23 but priced 15,000.00.
+
+    The exact quotient runs to 28 digits. The rate written is the shortest
+    one whose product lands on the amount, and it fits the column.
+    """
+    contact = await make_contact(session, tenant=actor_id)
+    rfq = await make_rfq(session, scope=[])
+    bid = await make_bid(
+        session,
+        rfq,
+        bidder=str(contact.id),
+        amount="15000.00",
+        lines=[
+            {"description": "Cable tray", "unit": "m", "quantity": "12345.678", "unit_rate": "1.23", "amount": "15000"}
+        ],
+    )
+    award = await make_award(session, rfq, bid, basis_amount="15000.00")
+
+    po_id = await rfq_award.draft_po_from_rfq_award(awarded(rfq, bid, award, actor=actor_id))
+
+    [po] = await orders(session, rfq.project_id)
+    [item] = await items_of(session, po)
+    assert item.amount == "15000.00"
+    assert len(item.unit_rate) <= 20
+    assert abs(Decimal(item.quantity) * Decimal(item.unit_rate) - Decimal("15000.00")) <= Decimal("0.005")
+    assert await approval_errors(session, po_id) == []
 
 
 async def test_charges_outside_the_quote_are_named_not_ordered(session: AsyncSession, actor_id: uuid.UUID) -> None:

@@ -24,12 +24,17 @@ What the draft carries
 * **Lines.** The priced scope lines of the awarded quote, in scope order, with
   the supplier's quantity, unit and rate. When those lines fall short of the
   headline the gap is ordered as one balancing line so the order still adds up
-  to what was quoted; when they exceed it (an overall discount) or there are
-  none, the order is one lump-sum line at the headline. A difference within
-  the comparison's rounding tolerance is taken up on the largest line. A line
-  priced against an optional scope item is an alternate: it is ordered only
-  when the headline can be seen to include it, and otherwise named in the
-  notes. Either way the item amounts sum to the order total exactly.
+  to what was quoted; when they exceed it (an overall discount) every line is
+  reduced by the same share, so each keeps its scope item and cost line; when
+  there are none, the order is one lump-sum line at the headline. A
+  difference within the comparison's rounding tolerance is taken up on the
+  largest line. A line priced against an optional scope item is an alternate:
+  it is ordered only when the headline can be seen to include it, and
+  otherwise named in the notes. Either way the item amounts sum to the order
+  total exactly, and every line's amount is its quantity times its rate, the
+  arithmetic approval checks: where the supplier's amount and rate disagree,
+  or a line was adjusted, the amount stands and the rate is restated, with
+  the quoted rate named in the notes.
 * **Adjustments.** Charges the supplier stated outside the headline (freight,
   installation and the like) are listed in the notes, not ordered: whether the
   supplier invoices them or the buyer sources them elsewhere is the reviewer's
@@ -60,7 +65,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
@@ -74,6 +79,7 @@ from app.database import async_session_factory
 from app.modules.procurement.cost_spine import resolve_cost_line_ids
 from app.modules.procurement.models import PurchaseOrder, PurchaseOrderItem
 from app.modules.procurement.repository import PurchaseOrderRepository
+from app.modules.procurement.validators import MONEY_TOLERANCE
 
 logger = logging.getLogger(__name__)
 
@@ -90,6 +96,11 @@ _DESCRIPTION_MAX = 500
 _UNIT_MAX = 20
 
 _ZERO = Decimal("0")
+_CENT = Decimal("0.01")
+#: A restated rate reproduces its line's amount to the half cent.
+_RATE_FIT = Decimal("0.005")
+#: Most decimals a restated rate is written with before the full quotient is used.
+_RATE_MAX_PLACES = 12
 
 
 def _uuid(value: object) -> uuid.UUID | None:
@@ -135,6 +146,9 @@ class _Item:
     unit_rate: Decimal
     amount: Decimal
     cost_line_id: uuid.UUID | None = None
+    #: The supplier's own rate, when the order states a different one so that
+    #: the line's amount is quantity x rate.
+    quoted_rate: Decimal | None = None
 
 
 @dataclass(frozen=True)
@@ -391,20 +405,77 @@ def _scope_label(code: str | None, description: str) -> str:
     return f"{code} {description}".strip() if code else description
 
 
+def _stored_gap(quantity: Decimal, unit_rate: Decimal, amount: Decimal) -> Decimal:
+    """How far ``quantity x unit_rate`` lands from ``amount`` once all three are stored.
+
+    Measured on the strings the order line will hold, because those are what
+    ``procurement.po_line_amount`` reads back at approval.
+    """
+    return abs(Decimal(_plain(quantity)) * Decimal(_plain(unit_rate)) - Decimal(_money(amount)))
+
+
+def _fit_rate(amount: Decimal, quantity: Decimal) -> Decimal:
+    """The shortest rate whose product with ``quantity`` gives ``amount`` to the half cent.
+
+    ``amount / quantity`` written out in full would pass, but a rate of 28
+    digits is no use to anyone matching an invoice, so the fewest decimals that
+    still reproduce the amount win. The full quotient is the fallback.
+    """
+    exact = amount / quantity
+    for places in range(2, _RATE_MAX_PLACES + 1):
+        try:
+            rate = exact.quantize(Decimal(1).scaleb(-places))
+        except InvalidOperation:  # more digits than the context holds
+            break
+        if _stored_gap(quantity, rate, amount) <= _RATE_FIT:
+            return rate
+    return exact
+
+
+def _implied_quantity(amount: Decimal, rate: Decimal) -> Decimal | None:
+    """``amount / rate`` when it is a quantity the supplier plainly priced.
+
+    Plainly means at most three decimals and exactly the amount at the
+    supplier's own rate. Anything looser is a guess at a quantity nobody
+    stated, and the scope's quantity is the better guess.
+    """
+    exact = amount / rate
+    for places in range(4):
+        try:
+            quantity = exact.quantize(Decimal(1).scaleb(-places))
+        except InvalidOperation:  # more digits than the context holds
+            return None
+        if quantity > _ZERO and quantity * rate == amount:
+            return quantity
+    return None
+
+
 def _item_from_bid_line(bid_line: Any, scope_line: Any | None) -> _Item | None:
-    """One order line from one priced line of the awarded quote."""
+    """One order line from one priced line of the awarded quote.
+
+    The supplier's amount is what they charge, so it is kept as quoted. When
+    the quote gives no quantity, the quantity the supplier's own rate and
+    amount imply is used, and failing that the scope's. Whether the rate still
+    agrees with the amount is settled once, for every line, by
+    :func:`_consistent`.
+    """
     amount = _dec(bid_line.amount) or _ZERO
     quantity = _dec(bid_line.quantity) or _ZERO
     rate = _dec(bid_line.unit_rate) or _ZERO
     if amount <= _ZERO and quantity > _ZERO and rate > _ZERO:
         amount = quantity * rate
+    amount = amount.quantize(_CENT)
     if amount <= _ZERO:
         return None
     if quantity <= _ZERO:
-        scope_qty = _dec(scope_line.quantity) if scope_line is not None else None
-        quantity = scope_qty if scope_qty is not None and scope_qty > _ZERO else Decimal("1")
+        implied = _implied_quantity(amount, rate) if rate > _ZERO else None
+        if implied is not None:
+            quantity = implied
+        else:
+            scope_qty = _dec(scope_line.quantity) if scope_line is not None else None
+            quantity = scope_qty if scope_qty is not None and scope_qty > _ZERO else Decimal("1")
     if rate <= _ZERO:
-        rate = amount / quantity
+        rate = _fit_rate(amount, quantity)
     unit = (bid_line.unit or "").strip() or (scope_line.unit if scope_line is not None else None)
     if scope_line is not None:
         description = _scope_label(scope_line.code, scope_line.description)
@@ -415,9 +486,25 @@ def _item_from_bid_line(bid_line: Any, scope_line: Any | None) -> _Item | None:
         quantity=quantity,
         unit=unit,
         unit_rate=rate,
-        amount=amount.quantize(Decimal("0.01")),
+        amount=amount,
         cost_line_id=scope_line.cost_line_id if scope_line is not None else None,
     )
+
+
+def _consistent(item: _Item) -> _Item:
+    """The item with a rate that agrees with its amount.
+
+    Approval refuses a line whose amount is not ``quantity x unit_rate``
+    (``procurement.po_line_amount``), so a draft that carried one would be a
+    draft the platform itself refuses. The amount is never the one to move:
+    the items have to keep summing to the quoted total. So a rate that
+    disagrees with its line's amount by more than the rule tolerates is
+    restated as amount / quantity, and the rate the supplier quoted is kept on
+    the item for the notes.
+    """
+    if _stored_gap(item.quantity, item.unit_rate, item.amount) <= MONEY_TOLERANCE:
+        return item
+    return replace(item, unit_rate=_fit_rate(item.amount, item.quantity), quoted_rate=item.unit_rate)
 
 
 @dataclass(frozen=True)
@@ -425,30 +512,51 @@ class _Lines:
     """The order lines for the awarded quote, and how they were arrived at."""
 
     items: list[_Item]
-    #: ``itemised``, ``itemised_with_balance`` or ``lump_sum``.
+    #: ``itemised``, ``itemised_with_balance``, ``itemised_discounted`` or
+    #: ``lump_sum``.
     pricing: str
     #: Lines priced against optional scope items and left out of the order.
     optional_left_out: list[_Item]
     #: A rounding difference within the comparison's tolerance, taken up on the
     #: largest line so the items still sum to the quoted total. Signed.
     rounding: Decimal = _ZERO
-    #: The priced lines exceed the quoted total by more than rounding.
+    #: The priced lines exceed the quoted total by more than rounding and could
+    #: not be reduced in proportion, so the order is one lump sum.
     lines_over_total: bool = False
-
-
-def _with_amount(item: _Item, amount: Decimal) -> _Item:
-    return _Item(
-        description=item.description,
-        quantity=item.quantity,
-        unit=item.unit,
-        unit_rate=item.unit_rate,
-        amount=amount,
-        cost_line_id=item.cost_line_id,
-    )
+    #: An overall discount spread over the lines: what the lines added up to
+    #: before it. ``None`` when there was none.
+    discounted_from: Decimal | None = None
 
 
 def _total(items: list[_Item]) -> Decimal:
     return sum((item.amount for item in items), _ZERO)
+
+
+def _on_largest(items: list[_Item], difference: Decimal) -> list[_Item]:
+    """The items with ``difference`` added to the largest one."""
+    largest = max(range(len(items)), key=lambda idx: items[idx].amount)
+    adjusted = list(items)
+    adjusted[largest] = replace(items[largest], amount=items[largest].amount + difference)
+    return adjusted
+
+
+def _spread_discount(items: list[_Item], headline: Decimal) -> list[_Item] | None:
+    """The items reduced in proportion so they sum to ``headline`` exactly.
+
+    Each line keeps its description, quantity, unit and cost-line link, so the
+    commitment still lands on the scope it buys; only its amount (and with it
+    the rate) comes down by the same share. The cents the per-line rounding
+    leaves over go on the largest line. ``None`` when that would leave a line
+    below zero, which only a total far below the lines can do.
+    """
+    lines_total = _total(items)
+    scaled = [replace(item, amount=(item.amount * headline / lines_total).quantize(_CENT)) for item in items]
+    remainder = headline - _total(scaled)
+    if remainder != _ZERO:
+        scaled = _on_largest(scaled, remainder)
+    if any(item.amount < _ZERO for item in scaled):
+        return None
+    return scaled
 
 
 def _order_lines(rfq: Any, bid: Any, headline: Decimal | None) -> _Lines:
@@ -466,10 +574,20 @@ def _order_lines(rfq: Any, bid: Any, headline: Decimal | None) -> _Lines:
     * within the comparison's rounding tolerance: the lines as quoted, the cents
       taken up on the largest line;
     * short of the total: the lines as quoted plus one balancing line;
-    * over the total (an overall discount): one lump-sum line at the total,
-      because a discount cannot be a negative order line;
+    * over the total (an overall discount): every line reduced by the same
+      share, the left-over cents on the largest line, because a discount
+      cannot be a negative order line and one lump sum would lose what each
+      line buys and which cost line it lands on;
     * no priced lines at all: one lump-sum line at the total.
+
+    And every item's rate agrees with its amount (:func:`_consistent`), so the
+    draft passes the arithmetic the approval gate checks.
     """
+    lines = _shape_lines(rfq, bid, headline)
+    return replace(lines, items=[_consistent(item) for item in lines.items])
+
+
+def _shape_lines(rfq: Any, bid: Any, headline: Decimal | None) -> _Lines:
     from app.modules.rfq_bidding.comparison import LINE_TOTAL_TOLERANCE  # noqa: PLC0415
 
     scope = sorted(rfq.lines, key=lambda line: line.line_no)
@@ -498,7 +616,7 @@ def _order_lines(rfq: Any, bid: Any, headline: Decimal | None) -> _Lines:
             return _Lines(optional_items, "itemised", [])
         return _Lines(base, "itemised", optional_items)
 
-    headline = headline.quantize(Decimal("0.01"))
+    headline = headline.quantize(_CENT)
     items, left_out = base, optional_items
     if (
         optional_items
@@ -511,10 +629,7 @@ def _order_lines(rfq: Any, bid: Any, headline: Decimal | None) -> _Lines:
     if items and gap == _ZERO:
         return _Lines(items, "itemised", left_out)
     if items and abs(gap) <= LINE_TOTAL_TOLERANCE:
-        largest = max(range(len(items)), key=lambda idx: items[idx].amount)
-        adjusted = list(items)
-        adjusted[largest] = _with_amount(items[largest], items[largest].amount + gap)
-        return _Lines(adjusted, "itemised", left_out, rounding=gap)
+        return _Lines(_on_largest(items, gap), "itemised", left_out, rounding=gap)
     if items and gap > _ZERO:
         balance = _Item(
             description="Quoted total not itemised against the priced lines",
@@ -524,6 +639,10 @@ def _order_lines(rfq: Any, bid: Any, headline: Decimal | None) -> _Lines:
             amount=gap,
         )
         return _Lines([*items, balance], "itemised_with_balance", left_out)
+    if items:
+        spread = _spread_discount(items, headline)
+        if spread is not None:
+            return _Lines(spread, "itemised_discounted", left_out, discounted_from=_total(items))
     label = _scope_label(rfq.rfq_number, rfq.title or "")
     lump = _Item(
         description=f"{label}: awarded quote, lump sum",
@@ -559,14 +678,7 @@ async def _link_cost_lines(session: AsyncSession, project_id: uuid.UUID, items: 
             resolved.append(one)
     for idx, cost_line_id in enumerate(resolved):
         if items[idx].cost_line_id != cost_line_id:
-            items[idx] = _Item(
-                description=items[idx].description,
-                quantity=items[idx].quantity,
-                unit=items[idx].unit,
-                unit_rate=items[idx].unit_rate,
-                amount=items[idx].amount,
-                cost_line_id=cost_line_id,
-            )
+            items[idx] = replace(items[idx], cost_line_id=cost_line_id)
 
 
 # ── Supplier ────────────────────────────────────────────────────────────────
@@ -660,6 +772,14 @@ def _notes(
             "The priced lines of the quote add up to less than its total, so the difference is ordered as one "
             "balancing line."
         )
+    elif lines.pricing == "itemised_discounted" and lines.discounted_from is not None and headline is not None:
+        before = lines.discounted_from
+        share = ((before - headline) / before * 100).quantize(_CENT)
+        parts.append(
+            f"The priced lines of the quote add up to {_money(before)} {currency}, more than its total of "
+            f"{_money(headline)} {currency} (an overall discount of {share}%), so every line is reduced by that "
+            "share and its rate restated. Each line keeps its scope item and cost line."
+        )
     elif lines.pricing == "lump_sum":
         if lines.lines_over_total:
             parts.append(
@@ -672,6 +792,17 @@ def _notes(
         parts.append(
             f"The priced lines differ from the quoted total by {_money(abs(lines.rounding))} {currency} through "
             "rounding; the difference is taken up on the largest line."
+        )
+    restated = [item for item in lines.items if item.quoted_rate is not None]
+    if restated and lines.pricing != "itemised_discounted":
+        listed = "; ".join(
+            f"{item.description} (quoted {_plain(item.quoted_rate)}, ordered {_plain(item.unit_rate)})"
+            for item in restated
+            if item.quoted_rate is not None
+        )
+        parts.append(
+            "On these lines the amount is not the quantity times the quoted rate, so the rate is restated as the "
+            f"amount divided by the quantity: {listed}."
         )
     if lines.optional_left_out:
         listed = "; ".join(f"{item.description} {_money(item.amount)} {currency}" for item in lines.optional_left_out)
