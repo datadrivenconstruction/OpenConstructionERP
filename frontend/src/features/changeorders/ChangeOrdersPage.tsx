@@ -53,6 +53,7 @@ import { contractDeepLink, linkedVariationDeepLink } from '@/shared/lib/changeCh
 import { ProvabilityGauge, EvidenceThreadPanel } from '@/features/claims-evidence';
 import { ApprovalTimeline } from './ApprovalTimeline';
 import { ImpactSimulator, type SavedScenario } from './ImpactSimulator';
+import { changeOrderSource } from './changeOrderSource';
 import { AIDraftModal } from './AIDraftModal';
 import { changeordersGuide } from './changeordersGuide';
 import {
@@ -1651,6 +1652,48 @@ function DetailView({
           );
         })()}
 
+        {/* A draft the platform raised from an answered RFI or a closed NCR
+            with a cost impact. Says where it came from and that nothing has
+            been applied, so a person reviews it rather than mistaking it for
+            an instruction somebody already gave. Only while it is a draft. */}
+        {(() => {
+          const src = changeOrderSource(order.metadata as Record<string, unknown> | undefined);
+          if (!src || !src.autoDrafted || order.status !== 'draft') return null;
+          const label =
+            src.number ||
+            (src.kind === 'rfi'
+              ? t('changeorders.source_kind_rfi', { defaultValue: 'RFI' })
+              : t('changeorders.source_kind_ncr', { defaultValue: 'NCR' }));
+          return (
+            <div
+              className="mb-4 flex items-start gap-2.5 rounded-lg border border-semantic-warning/30 bg-semantic-warning/5 p-3 text-sm text-content-secondary"
+              data-testid="co-auto-draft-banner"
+            >
+              <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-semantic-warning" />
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-content-primary">
+                  {t('changeorders.auto_draft_title', {
+                    defaultValue: 'Drafted automatically from {{source}}',
+                    source: label,
+                  })}
+                </p>
+                <p className="mt-0.5">
+                  {t('changeorders.auto_draft_body', {
+                    defaultValue:
+                      'Nothing has been applied to the budget or the contract. Check the amount, the days and the scope, then submit it for approval or reject it.',
+                  })}
+                </p>
+              </div>
+              <Button variant="secondary" size="sm" onClick={() => navigate(src.to)}>
+                {t('changeorders.auto_draft_open_source', {
+                  defaultValue: 'Open {{source}}',
+                  source: label,
+                })}
+              </Button>
+            </div>
+          );
+        })()}
+
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-3">
@@ -1923,7 +1966,14 @@ function DetailView({
         const variationLink =
           meta.origin === 'variations.convert_vr_to_vo' ? linkedVariationDeepLink(meta) : null;
         const linkedContractId = meta.contract_id || '';
-        if (poIds.length === 0 && rfiIds.length === 0 && !variationLink && !linkedContractId) {
+        // The RFI or NCR the order was raised from. An RFI already listed in
+        // linked_rfi_ids gets its pill there, so it is not drawn twice.
+        const sourceRecord = changeOrderSource(order.metadata as Record<string, unknown> | undefined);
+        const sourcePill =
+          sourceRecord && !(sourceRecord.kind === 'rfi' && rfiIds.includes(sourceRecord.id))
+            ? sourceRecord
+            : null;
+        if (poIds.length === 0 && rfiIds.length === 0 && !variationLink && !linkedContractId && !sourcePill) {
           return null;
         }
         const chipCls =
@@ -1945,6 +1995,28 @@ function DetailView({
                 >
                   <GitBranch size={12} />
                   {t('changeorders.from_variation', { defaultValue: 'From variation' })}
+                </button>
+              )}
+              {sourcePill && (
+                <button
+                  type="button"
+                  className={chipCls}
+                  onClick={() => navigate(sourcePill.to)}
+                  title={
+                    sourcePill.kind === 'rfi'
+                      ? t('changeorders.source_hint_rfi', {
+                          defaultValue: 'Open the RFI this change order was raised from',
+                        })
+                      : t('changeorders.source_hint_ncr', {
+                          defaultValue: 'Open the NCR this change order was raised from',
+                        })
+                  }
+                >
+                  {sourcePill.kind === 'rfi' ? <HelpCircle size={12} /> : <AlertTriangle size={12} />}
+                  {sourcePill.number ||
+                    (sourcePill.kind === 'rfi'
+                      ? t('changeorders.source_kind_rfi', { defaultValue: 'RFI' })
+                      : t('changeorders.source_kind_ncr', { defaultValue: 'NCR' }))}
                 </button>
               )}
               {linkedContractId && (
@@ -1978,7 +2050,7 @@ function DetailView({
                   key={`rfi-${rfiId}`}
                   type="button"
                   className={chipCls}
-                  onClick={() => navigate('/rfi')}
+                  onClick={() => navigate(`/rfi/${encodeURIComponent(rfiId)}`)}
                   title={rfiId}
                 >
                   <HelpCircle size={12} />
