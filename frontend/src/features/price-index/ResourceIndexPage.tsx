@@ -53,6 +53,7 @@ import {
   type ResourceIndexEstimate,
   type ResourceIndexRefusal,
   type ResourceIndexValue,
+  type WorkedExampleLabels,
 } from './resourceIndexApi';
 
 const QK = {
@@ -188,6 +189,20 @@ function ResourceIndexContent() {
     onError: onRefusalOrError,
   });
 
+  const exampleLabels: WorkedExampleLabels = {
+    concreteBlinding: t('price_index.ri.ex_concrete_blinding', { defaultValue: 'Concrete blinding (example)' }),
+    handExcavation: t('price_index.ri.ex_hand_excavation', { defaultValue: 'Trench excavation by hand (example)' }),
+    workersGrade35: t('price_index.ri.ex_workers_35', { defaultValue: 'Workers, average grade 3.5' }),
+    workersGrade2: t('price_index.ri.ex_workers_2', { defaultValue: 'Workers, average grade 2' }),
+    concretePump: t('price_index.ri.ex_concrete_pump', { defaultValue: 'Concrete pump' }),
+    pumpOperator: t('price_index.ri.ex_pump_operator', { defaultValue: 'Pump operator' }),
+    concrete: t('price_index.ri.ex_concrete', { defaultValue: 'Concrete B7.5' }),
+    sand: t('price_index.ri.ex_sand', { defaultValue: 'Sand' }),
+    gravel: t('price_index.ri.ex_gravel', { defaultValue: 'Gravel' }),
+    manHour: t('price_index.ri.ex_man_hour', { defaultValue: 'man-h' }),
+    machineHour: t('price_index.ri.ex_machine_hour', { defaultValue: 'mach-h' }),
+  };
+
   const exampleMut = useMutation({
     mutationFn: () => {
       const first = norms[0]?.work_type_code ?? '';
@@ -196,7 +211,7 @@ function ResourceIndexContent() {
         region_code: settings.region_code,
         quarter: settings.quarter,
         on_date: onDate,
-        positions: workedExamplePositions(first, second),
+        positions: workedExamplePositions(first, second, exampleLabels),
       });
     },
     onSuccess: (r) => {
@@ -436,6 +451,17 @@ function RefusalBox({ refusal }: { refusal: ResourceIndexRefusal }) {
       break;
     case 'settings_incomplete':
       text = t('price_index.ri.err_settings', { defaultValue: 'Choose the region and the quarter of the indices first.' });
+      break;
+    case 'invalid_index':
+      text = t('price_index.ri.err_invalid_index', {
+        defaultValue: 'An index the estimate needs is zero or negative. Correct it below.',
+      });
+      break;
+    case 'invalid_input':
+      text = t('price_index.ri.err_invalid_input', {
+        defaultValue: 'The estimate cannot be priced as entered: {{reason}}',
+        reason: refusal.message,
+      });
       break;
     default:
       text = refusal.message;
@@ -712,6 +738,11 @@ function ExcludedList({
         return t('price_index.ri.reason_no_work_type', { defaultValue: 'no work type chosen' });
       case 'bad_number':
         return t('price_index.ri.reason_bad_number', { defaultValue: 'a quantity or price is not a number' });
+      case 'not_base_prices':
+        return t('price_index.ri.reason_not_base_prices', {
+          defaultValue: 'priced from {{basis}}, which is current money; only base prices are indexed',
+          basis: detail,
+        });
       default:
         return r;
     }

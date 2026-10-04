@@ -130,7 +130,8 @@ export type ExcludedReason =
   | 'unmapped_resource_type'
   | 'foreign_currency'
   | 'no_work_type'
-  | 'bad_number';
+  | 'bad_number'
+  | 'not_base_prices';
 
 export interface ExcludedPositionOut {
   position_id: string;
@@ -282,37 +283,53 @@ export function refusalOf(err: unknown): ResourceIndexRefusal | null {
   };
 }
 
+/** The display text of the worked example; the page passes it in translated. */
+export interface WorkedExampleLabels {
+  concreteBlinding: string;
+  handExcavation: string;
+  workersGrade35: string;
+  workersGrade2: string;
+  concretePump: string;
+  pumpOperator: string;
+  concrete: string;
+  sand: string;
+  gravel: string;
+  manHour: string;
+  machineHour: string;
+}
+
 /**
  * A small worked example, the one the backend tests check figure by figure:
  * two positions with workers, a machine and its operator, and materials.
  * Lets a person see every multiplication before their own bill carries a
- * resource breakdown.
+ * resource breakdown. Numbers are fixed; every word comes from `labels`.
  */
-export function workedExamplePositions(workTypeA: string, workTypeB: string): PositionIn[] {
+export function workedExamplePositions(workTypeA: string, workTypeB: string, labels: WorkedExampleLabels): PositionIn[] {
+  const l = labels;
   return [
     {
       ordinal: '1',
-      description: 'Concrete blinding (example)',
+      description: l.concreteBlinding,
       unit: '100 m3',
       quantity: '2',
       work_type: workTypeA,
       resources: [
-        { code: 'L1', name: 'Workers, grade 3.5', unit: 'man-h', kind: 'labor', quantity: '12.5', base_unit_price: '400.00' },
-        { code: 'M1', name: 'Concrete pump', unit: 'mach-h', kind: 'machine', quantity: '3', base_unit_price: '1000.00' },
-        { code: 'O1', name: 'Pump operator', unit: 'man-h', kind: 'operator', quantity: '3', base_unit_price: '500.00' },
-        { code: 'MAT1', name: 'Concrete B7.5', unit: 'm3', kind: 'material', quantity: '10', base_unit_price: '250.00' },
+        { code: 'L1', name: l.workersGrade35, unit: l.manHour, kind: 'labor', quantity: '12.5', base_unit_price: '400.00' },
+        { code: 'M1', name: l.concretePump, unit: l.machineHour, kind: 'machine', quantity: '3', base_unit_price: '1000.00' },
+        { code: 'O1', name: l.pumpOperator, unit: l.manHour, kind: 'operator', quantity: '3', base_unit_price: '500.00' },
+        { code: 'MAT1', name: l.concrete, unit: 'm3', kind: 'material', quantity: '10', base_unit_price: '250.00' },
       ],
     },
     {
       ordinal: '2',
-      description: 'Trench excavation by hand (example)',
+      description: l.handExcavation,
       unit: 'm3',
       quantity: '1.5',
       work_type: workTypeB,
       resources: [
-        { code: 'L2', name: 'Workers, grade 2', unit: 'man-h', kind: 'labor', quantity: '2.4', base_unit_price: '280.75' },
-        { code: 'MAT2A', name: 'Sand', unit: 'm3', kind: 'material', quantity: '0.5', base_unit_price: '13.47' },
-        { code: 'MAT2B', name: 'Gravel', unit: 'm3', kind: 'material', quantity: '0.5', base_unit_price: '13.47' },
+        { code: 'L2', name: l.workersGrade2, unit: l.manHour, kind: 'labor', quantity: '2.4', base_unit_price: '280.75' },
+        { code: 'MAT2A', name: l.sand, unit: 'm3', kind: 'material', quantity: '0.5', base_unit_price: '13.47' },
+        { code: 'MAT2B', name: l.gravel, unit: 'm3', kind: 'material', quantity: '0.5', base_unit_price: '13.47' },
       ],
     },
   ];

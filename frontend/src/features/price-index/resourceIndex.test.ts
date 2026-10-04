@@ -127,7 +127,22 @@ describe('refusalOf', () => {
 
 describe('workedExamplePositions', () => {
   it('carries a machine operator line and the chosen work types', () => {
-    const positions = workedExamplePositions('a', 'b');
+    const labels = {
+      concreteBlinding: 'cb',
+      handExcavation: 'he',
+      workersGrade35: 'w35',
+      workersGrade2: 'w2',
+      concretePump: 'pump',
+      pumpOperator: 'op',
+      concrete: 'c',
+      sand: 's',
+      gravel: 'g',
+      manHour: 'mh',
+      machineHour: 'mch',
+    };
+    const positions = workedExamplePositions('a', 'b', labels);
+    expect(positions.map((p) => p.description)).toEqual(['cb', 'he']);
+    expect(positions[0]!.resources.map((r) => r.name)).toEqual(['w35', 'pump', 'op', 'c']);
     expect(positions.map((p) => p.work_type)).toEqual(['a', 'b']);
     expect(positions[0]!.resources.map((r) => r.kind)).toEqual(['labor', 'machine', 'operator', 'material']);
   });
