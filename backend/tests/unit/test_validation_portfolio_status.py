@@ -454,6 +454,9 @@ async def test_statement_count_does_not_grow_with_projects(session) -> None:
     finally:
         event.remove(bind, "before_cursor_execute", _count)
 
+    # The listener must actually see the reads (project names, estimates,
+    # latest reports at the least), or 0 == 0 would pass for anything.
+    assert one >= 3, one
     assert len(resp.projects) == 6
     assert all(pr.estimate_count == 3 for pr in resp.projects)
     assert all(pr.state == STATE_WARNINGS for pr in resp.projects)
