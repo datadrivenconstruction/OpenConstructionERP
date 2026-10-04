@@ -48,6 +48,7 @@ from app.modules.contracts.country_defaults import (
     forget_overridden,
     normalise_country,
     resolve_contract_defaults,
+    subcontract_retention_default,
 )
 from app.modules.contracts.events import CLAIM_POPULATED, EOT_DECIDED, EOT_SUBMITTED
 from app.modules.contracts.final_account import (
@@ -1297,6 +1298,10 @@ class ContractsService:
         """What a new contract on ``project_id`` starts from, for the form to pre-fill."""
         country = await self.project_country(project_id)
         defaults = resolve_contract_defaults(country)
+        # A subcontract agreement has no ceiling, so where the country's rate
+        # runs above its cap the agreement form starts from the cap. Answered
+        # here so the form shows the figure the server will apply.
+        sub_rate, sub_from = subcontract_retention_default(defaults)
         return {
             "project_id": project_id,
             "country_code": country,
@@ -1305,6 +1310,8 @@ class ContractsService:
             "values": (defaults or {}).get("values") or {},
             "sources": (defaults or {}).get("sources") or {},
             "release_split_source": (defaults or {}).get("release_split_source"),
+            "subcontract_retention_percent": sub_rate,
+            "subcontract_retention_from": sub_from,
         }
 
     async def _payment_terms_for_new_contract(self, data: Any) -> tuple[dict[str, Any], Decimal, str, dict[str, Any]]:

@@ -1221,6 +1221,13 @@ class SubcontractorService:
         the same way. A figure the author sent always wins and stamps nothing.
         A country with no row keeps the platform's historical rate, stamped as
         a fallback rather than passed off as that country's figure.
+
+        An agreement has no retention ceiling: every payment application holds
+        ``gross x rate``. Where the country's usual rate runs above its usual
+        cap (FIDIC in the Gulf: ten percent until five percent is held), the
+        agreement starts from the cap instead, so it never holds past the
+        limit (see ``subcontract_retention_default``), and the stamp names
+        the cap as the figure it came from.
         """
         if data.retention_percent is not None:
             return data.retention_percent, data.retention_release_event, None
@@ -1229,18 +1236,23 @@ class SubcontractorService:
             apply_contract_defaults,
             normalise_country,
             resolve_contract_defaults,
+            subcontract_retention_default,
         )
         from app.modules.projects.models import Project  # noqa: PLC0415
 
         project = await self.session.get(Project, data.project_id)
         country = normalise_country(getattr(project, "country_code", None)) or None
         defaults = resolve_contract_defaults(country)
-        values, stamp = apply_contract_defaults({}, defaults, country_code=country)
+        _values, stamp = apply_contract_defaults({}, defaults, country_code=country)
         # An agreement states a rate and one release event; the ceiling, the
         # split and the payment period belong to the contract it sits under.
-        stamp["applied"] = {k: v for k, v in stamp["applied"].items() if k == "retention_percent"}
-        stamp["sources"] = {k: v for k, v in stamp["sources"].items() if k == "retention_percent"}
-        rate = values.get("retention_percent")
+        rate, from_field = subcontract_retention_default(defaults)
+        stamp["applied"] = {"retention_percent": rate} if rate is not None else {}
+        source = (stamp.get("sources") or {}).get(from_field) if from_field else None
+        stamp["sources"] = {"retention_percent": source} if source else {}
+        if from_field == "retention_cap_percent":
+            # Said out loud: the rate is the country's ceiling, not its usual rate.
+            stamp["retention_percent_from"] = from_field
         if rate is None:
             stamp["fallback"] = ["retention_percent"]
             rate = PLATFORM_FALLBACK["retention_percent"]

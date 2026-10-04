@@ -67,6 +67,7 @@ vi.mock('@/stores/useToastStore', () => ({
 
 import * as api from './api';
 import type { Agreement } from './api';
+import * as contractsApi from '@/features/contracts/api';
 import { ApiError } from '@/shared/lib/api';
 import { AgreementFormModal, PaymentApplicationFormModal, SignAgreementButton } from './AgreementForms';
 
@@ -159,6 +160,78 @@ describe('AgreementFormModal', () => {
     // Not a 5 the form made up, and not the 3 either: the server applies the
     // country's figure and records it as a default rather than as typed.
     expect(vi.mocked(api.createAgreement).mock.calls[0]?.[0]?.retention_percent).toBeUndefined();
+  });
+
+  it('starts a Gulf agreement from the FIDIC limit, not the rate the limit stops', async () => {
+    // FIDIC: 10% of each payment until 5% of the sum is held. An agreement
+    // holds every payment at one rate with no ceiling, so the server starts it
+    // from 5% and the form must show that, with the limit's own reference.
+    vi.mocked(contractsApi.getContractCountryDefaults).mockResolvedValueOnce({
+      project_id: 'prj-1',
+      country_code: 'AE',
+      has_defaults: true,
+      standard_form: 'FIDIC Red Book 2017',
+      values: { retention_percent: '10', retention_cap_percent: '5' },
+      sources: {
+        retention_percent: { source: 'standard_form', reference: 'Sub-Clause 14.3(iii)', note: '' },
+        retention_cap_percent: {
+          source: 'standard_form',
+          reference: 'Limit of Retention Money',
+          note: '',
+        },
+      },
+      release_split_source: 'table',
+      subcontract_retention_percent: '5',
+      subcontract_retention_from: 'retention_cap_percent',
+    });
+    vi.mocked(api.createAgreement).mockResolvedValue(agreement);
+    wrap(<AgreementFormModal subcontractorId="sub-1" onClose={vi.fn()} />);
+
+    await waitFor(() =>
+      expect((screen.getByTestId('agreement-retention') as HTMLInputElement).value).toBe('5'),
+    );
+    const hint = screen.getByTestId('default-hint-retention_percent');
+    expect(hint.textContent).toContain('Limit of Retention Money');
+    expect(hint.textContent).not.toContain('14.3(iii)');
+    fireEvent.change(screen.getByTestId('agreement-title'), { target: { value: 'MEP, tower 2' } });
+    fireEvent.change(screen.getByTestId('agreement-value'), { target: { value: '1000000' } });
+    fireEvent.click(screen.getByText('Create'));
+
+    await waitFor(() => expect(api.createAgreement).toHaveBeenCalled());
+    // Still left to the server, which applies and stamps the same 5.
+    expect(vi.mocked(api.createAgreement).mock.calls[0]?.[0]?.retention_percent).toBeUndefined();
+  });
+
+  it("holds a linked contract's rate to the cap that contract states", async () => {
+    vi.mocked(contractsApi.listContracts).mockResolvedValueOnce({
+      items: [
+        {
+          id: 'ct-ae',
+          code: 'SC-AE',
+          title: 'MEP subcontract',
+          total_value: '1000000.00',
+          currency: 'AED',
+          retention_percent: '10.00',
+          counterparty_type: 'subcontractor',
+          terms: { payment_terms: { retention_cap_percent: '5' } },
+        },
+      ],
+      total: 1,
+    } as unknown as Awaited<ReturnType<typeof contractsApi.listContracts>>);
+    vi.mocked(api.createAgreement).mockResolvedValue(agreement);
+    wrap(<AgreementFormModal subcontractorId="sub-1" onClose={vi.fn()} />);
+
+    await waitFor(() => expect(screen.getByText('SC-AE MEP subcontract')).toBeTruthy());
+    fireEvent.change(screen.getByTestId('agreement-contract'), { target: { value: 'ct-ae' } });
+    // The contract holds 10% until its 5% cap; the agreement has no cap, so 5%.
+    expect((screen.getByTestId('agreement-retention') as HTMLInputElement).value).toBe('5');
+    fireEvent.click(screen.getByText('Create'));
+
+    await waitFor(() =>
+      expect(api.createAgreement).toHaveBeenCalledWith(
+        expect.objectContaining({ contract_id: 'ct-ae', retention_percent: '5' }),
+      ),
+    );
   });
 
   it('selects the prefilled retention on focus so typing replaces it', () => {

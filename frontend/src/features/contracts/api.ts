@@ -518,6 +518,13 @@ export interface ContractCountryDefaults {
   }>;
   sources: Partial<Record<CountryDefaultField, CountryDefaultSource>>;
   release_split_source: 'table' | 'regional_pack' | null;
+  /**
+   * The flat rate a subcontract agreement on the project starts from. An
+   * agreement has no retention cap, so where the country's rate runs above
+   * its cap this is the cap, and `subcontract_retention_from` says so.
+   */
+  subcontract_retention_percent?: string | null;
+  subcontract_retention_from?: 'retention_percent' | 'retention_cap_percent' | null;
 }
 
 export function getContractCountryDefaults(projectId: string): Promise<ContractCountryDefaults> {

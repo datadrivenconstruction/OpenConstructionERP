@@ -28,12 +28,19 @@ import pytest
 from fastapi import HTTPException
 
 from app.core.events import event_bus
+from app.modules.contracts.country_defaults import COUNTRY_CONTRACT_DEFAULTS
 from app.modules.contracts.models import Contract, ContractLine, ProgressClaim
 from app.modules.contracts.schemas import AutoGenerateClaimRequest, ContractCreate, ContractUpdate
 from app.modules.contracts.service import RELEASE_RULE_FROM_CONTRACT, RELEASE_RULE_FROM_PACK, ContractsService
 from app.modules.contracts.validators import register_contracts_validation_rules
 from app.modules.projects.models import Project
-from app.modules.subcontractors.schemas import AgreementCreate, SubcontractorCreate
+from app.modules.subcontractors.models import Certificate
+from app.modules.subcontractors.schemas import (
+    AgreementCreate,
+    AgreementUpdate,
+    PaymentApplicationCreate,
+    SubcontractorCreate,
+)
 from app.modules.subcontractors.service import SubcontractorService
 from app.modules.users.models import User
 
@@ -395,6 +402,69 @@ async def test_a_subcontract_starts_from_the_same_rate_as_a_contract_there(pg_se
     assert agreement.retention_release_event == "substantial_completion"
     stamp = agreement.metadata_["country_defaults"]
     assert set(stamp["applied"]) == {"retention_percent", "retention_release_event"}
+
+
+@pytest.mark.parametrize(("country", "rate"), [("GB", "3"), ("DE", "5"), ("FR", "5"), ("CN", "3"), ("US", "10")])
+async def test_a_subcontract_takes_the_countrys_rate_where_it_is_within_the_cap(pg_session, country, rate) -> None:
+    agreement = await _agreement(pg_session, await _project(pg_session, country))
+    assert agreement.retention_percent == Decimal(rate)
+    stamp = agreement.metadata_["country_defaults"]
+    assert "retention_percent_from" not in stamp
+    assert (
+        stamp["sources"]["retention_percent"]["note"]
+        == (COUNTRY_CONTRACT_DEFAULTS[country]["retention_percent"]["note"])
+    )
+
+
+@pytest.mark.parametrize("country", ["AE", "SA"])
+async def test_a_gulf_subcontract_never_holds_past_the_fidic_limit(pg_session, country) -> None:
+    """FIDIC says ten percent until five percent of the sum is held; an agreement has no ceiling.
+
+    Started at the country's ten percent, an agreement billed in full would
+    hold 100,000 on 1,000,000, twice the limit the same row states. It starts
+    from the limit instead, and the stamp says the rate is the cap.
+    """
+    project = await _project(pg_session, country)
+    svc = SubcontractorService(pg_session)
+    sub = await svc.create_subcontractor(SubcontractorCreate(legal_name=f"Sub {uuid.uuid4().hex[:6]}"))
+    # What a subcontractor must hold to be paid at all.
+    for cert_type in ("insurance", "license"):
+        pg_session.add(
+            Certificate(subcontractor_id=sub.id, cert_type=cert_type, valid_until=date(2030, 12, 31), status="valid")
+        )
+    await pg_session.flush()
+    agreement = await svc.create_agreement(
+        AgreementCreate(
+            subcontractor_id=sub.id,
+            project_id=project.id,
+            title="MEP",
+            total_value=Decimal("1000000"),
+            currency="AED",
+        )
+    )
+    assert agreement.retention_percent == Decimal("5")
+    stamp = agreement.metadata_["country_defaults"]
+    assert stamp["applied"]["retention_percent"] == "5"
+    assert stamp["retention_percent_from"] == "retention_cap_percent"
+    assert "Limit of Retention Money" in stamp["sources"]["retention_percent"]["reference"]
+
+    await svc.update_agreement(agreement.id, AgreementUpdate(status="active"))
+    held = Decimal("0")
+    for gross in (Decimal("600000"), Decimal("400000")):
+        payment = await svc.submit_payment_application(
+            PaymentApplicationCreate(agreement_id=agreement.id, gross_amount=gross, currency="AED"),
+            today=date(2026, 9, 30),
+        )
+        assert payment.net_amount == payment.gross_amount - payment.retention_amount
+        held += payment.retention_amount
+    # The whole agreement billed holds exactly the FIDIC limit, not 100,000.
+    assert held == Decimal("50000")
+
+    # The contract above it keeps ten percent with the cap that stops it.
+    view = await ContractsService(pg_session).country_defaults_for_project(project.id)
+    assert view["values"]["retention_percent"] == "10"
+    assert view["subcontract_retention_percent"] == "5"
+    assert view["subcontract_retention_from"] == "retention_cap_percent"
 
 
 async def test_a_subcontract_rate_sent_wins_and_stamps_nothing(pg_session) -> None:

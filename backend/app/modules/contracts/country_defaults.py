@@ -674,6 +674,33 @@ def apply_contract_defaults(
     return values, stamp
 
 
+def subcontract_retention_default(defaults: dict[str, Any] | None) -> tuple[str | None, str | None]:
+    """The flat rate a subcontract agreement starts from, and the figure it was read from.
+
+    A subcontract agreement holds one rate on every payment application and
+    carries no ceiling, so it cannot do what the contract above it does with
+    "ten percent until five percent of the sum is held". Given the country's
+    rate it would hold ten percent for the whole job, twice the limit the same
+    row states. Where the country's cap is below its rate, the agreement
+    therefore starts from the cap: the highest flat rate that never holds more
+    than the limit on work billed up to the agreement's value.
+
+    Returns:
+        ``(rate, field)``, where ``field`` names the table figure the rate is
+        (``"retention_percent"`` or ``"retention_cap_percent"``), so the form
+        can show that figure's own source. ``(None, None)`` when the country
+        has no row or no usual rate.
+    """
+    values = (defaults or {}).get("values") or {}
+    rate = values.get("retention_percent")
+    if rate is None:
+        return None, None
+    cap = values.get("retention_cap_percent")
+    if cap is not None and Decimal(str(cap)) < Decimal(str(rate)):
+        return str(cap), "retention_cap_percent"
+    return str(rate), "retention_percent"
+
+
 def forget_overridden(stamp: Any, changed: dict[str, Any]) -> Any:
     """Drop from a stamp the fields a later edit set to something else.
 
@@ -721,5 +748,6 @@ __all__ = [
     "forget_overridden",
     "normalise_country",
     "resolve_contract_defaults",
+    "subcontract_retention_default",
     "validate_release_split",
 ]

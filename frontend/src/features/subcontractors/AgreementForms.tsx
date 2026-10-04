@@ -20,8 +20,12 @@ import { Button, WideModal, WideModalField, WideModalSection } from '@/shared/ui
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { useToastStore } from '@/stores/useToastStore';
 import { projectsApi } from '@/features/projects/api';
-import { listContracts } from '@/features/contracts/api';
-import { DefaultHint, useContractCountryDefaults } from '@/features/contracts/ContractPaymentTerms';
+import { listContracts, type ContractItem, type CountryDefaultField } from '@/features/contracts/api';
+import {
+  DefaultHint,
+  paymentTermsOf,
+  useContractCountryDefaults,
+} from '@/features/contracts/ContractPaymentTerms';
 import {
   createAgreement,
   submitPaymentApplication,
@@ -49,6 +53,25 @@ function toNum(value: string | number | null | undefined): number {
 
 function round2(n: number): number {
   return Math.round(n * 100) / 100;
+}
+
+/**
+ * The retention an agreement takes from the contract it is linked to.
+ *
+ * A contract may hold its rate until its cap stops it (FIDIC: 10% until 5%
+ * of the sum is held). An agreement holds every payment at one rate and has
+ * no cap, so copying the 10% would hold twice the limit by the end of the
+ * job. Where the contract states a cap below its rate, the agreement takes
+ * the cap.
+ */
+export function agreementRetentionFrom(
+  contract: Pick<ContractItem, 'retention_percent' | 'terms'>,
+): string {
+  const rate = toNum(contract.retention_percent);
+  const capRaw = paymentTermsOf(contract).retention_cap_percent;
+  const cap = capRaw == null || capRaw === '' ? null : Number(capRaw);
+  if (cap !== null && Number.isFinite(cap) && cap >= 0 && cap < rate) return String(cap);
+  return String(rate);
 }
 
 /* ─── New agreement ─── */
@@ -107,22 +130,31 @@ export function AgreementFormModal({
 
   // The retention a subcontract in this country usually carries, shown until
   // the person types or links a contract. It is shown, not sent: the server
-  // applies the same figure and records it as the country's default.
+  // applies the same figure and records it as the country's default. An
+  // agreement holds every payment at one rate with no ceiling, so where the
+  // country's rate runs above its cap (FIDIC: 10% until 5% is held) the
+  // server starts the agreement from the cap and says which figure it is.
   const defaultsQ = useContractCountryDefaults(projectId);
   const knownDefaults = defaultsQ.data?.has_defaults ? defaultsQ.data : null;
-  const countryRetention = knownDefaults?.values.retention_percent ?? '';
+  const countryRetention =
+    knownDefaults?.subcontract_retention_percent ?? knownDefaults?.values.retention_percent ?? '';
+  const countryRetentionField: CountryDefaultField =
+    knownDefaults?.subcontract_retention_from ?? 'retention_percent';
   const retentionValue = retentionTouched ? form.retention_percent : countryRetention;
 
   const linkContract = (id: string) => {
     const picked = subcontracts.find((c) => c.id === id);
-    // Take the figures from the contract where nothing was typed yet.
+    // Take the figures from the contract where nothing was typed yet. The
+    // contract's rate may run until its cap stops it; the agreement has no
+    // cap, so it takes the lower of the two and never holds past the limit.
+    const pickedRetention = picked ? agreementRetentionFrom(picked) : '';
     setForm((prev) => ({
       ...prev,
       contract_id: id,
       title: prev.title || picked?.title || '',
       total_value: prev.total_value || (picked ? String(picked.total_value ?? '') : ''),
       currency: prev.currency || picked?.currency || '',
-      retention_percent: picked ? String(toNum(picked.retention_percent)) : prev.retention_percent,
+      retention_percent: picked ? pickedRetention : prev.retention_percent,
     }));
     if (picked) setRetentionTouched(true);
   };
@@ -262,7 +294,7 @@ export function AgreementFormModal({
             <DefaultHint
               field="retention_percent"
               country={knownDefaults.country_code}
-              source={knownDefaults.sources.retention_percent}
+              source={knownDefaults.sources[countryRetentionField]}
             />
           )}
         </WideModalField>

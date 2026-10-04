@@ -192,6 +192,12 @@ class ContractCountryDefaultsResponse(BaseModel):
     sources: dict[str, dict[str, Any]] = Field(default_factory=dict)
     # "table", or "regional_pack" when the release split is the pack's.
     release_split_source: str | None = None
+    # The flat rate a subcontract agreement on this project starts from, and
+    # the field of ``values`` it is: the country's rate, or its cap where the
+    # rate runs above it (an agreement holds every payment at one rate and has
+    # no ceiling). None when the country has no usual rate.
+    subcontract_retention_percent: str | None = None
+    subcontract_retention_from: str | None = None
 
 
 class ContractListResponse(BaseModel):

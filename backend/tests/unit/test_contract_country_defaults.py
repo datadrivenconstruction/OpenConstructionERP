@@ -32,6 +32,7 @@ from app.modules.contracts.country_defaults import (
     apply_contract_defaults,
     forget_overridden,
     resolve_contract_defaults,
+    subcontract_retention_default,
     validate_release_split,
 )
 from app.modules.contracts.retention import compute_retention, policy_from_rule
@@ -416,6 +417,39 @@ def test_the_engine_holds_the_cap_across_periods_on_a_schedule_of_values() -> No
     assert held == [Decimal("4000.00"), Decimal("5000.00"), Decimal("5000.00")]
     # What each period accrues is the step in held: nothing once the cap is reached.
     assert [held[0], held[1] - held[0], held[2] - held[1]] == [Decimal("4000"), Decimal("1000"), Decimal("0")]
+
+
+@pytest.mark.parametrize("country", REQUIRED)
+def test_a_subcontract_rate_never_runs_above_the_countrys_cap(country: str) -> None:
+    """An agreement holds one rate with no ceiling, so its default may not exceed the cap.
+
+    Only the Gulf rows state a rate above their cap; every other row hands the
+    agreement its own rate unchanged.
+    """
+    defaults = resolve_contract_defaults(country)
+    rate, from_field = subcontract_retention_default(defaults)
+    values = defaults["values"]
+    cap = values["retention_cap_percent"]
+    if cap is not None and Decimal(cap) < Decimal(values["retention_percent"]):
+        assert (rate, from_field) == (cap, "retention_cap_percent")
+    else:
+        assert (rate, from_field) == (values["retention_percent"], "retention_percent")
+    if cap is not None:
+        assert Decimal(rate) <= Decimal(cap)
+
+
+def test_only_the_gulf_subcontract_is_held_to_the_cap() -> None:
+    held = {
+        c for c in REQUIRED if subcontract_retention_default(resolve_contract_defaults(c))[1] != "retention_percent"
+    }
+    assert held == {"AE", "SA"}
+    assert subcontract_retention_default(resolve_contract_defaults("AE")) == ("5", "retention_cap_percent")
+    assert subcontract_retention_default(resolve_contract_defaults("GB")) == ("3", "retention_percent")
+
+
+def test_a_country_with_no_row_gives_a_subcontract_no_rate() -> None:
+    assert subcontract_retention_default(None) == (None, None)
+    assert subcontract_retention_default(resolve_contract_defaults("IT")) == (None, None)
 
 
 @pytest.mark.parametrize(
