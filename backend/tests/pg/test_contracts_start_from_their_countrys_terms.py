@@ -519,6 +519,41 @@ async def test_the_populate_preview_holds_what_the_commit_holds_once_the_ceiling
     assert committed.net_due == preview["net_due"]
 
 
+async def test_the_subcontractor_rollup_preview_holds_the_same_capped_rate(pg_session, monkeypatch) -> None:
+    """The claim preview built from the subs' pay applications used the full rate too.
+
+    What the subs billed is stubbed to one 8000 line; the rollup itself is
+    tested elsewhere. What matters here is the retention the preview puts
+    beside that gross once March has held 4600 of a 5000 ceiling.
+    """
+    from app.modules.subcontractors import rollup as sub_rollup
+
+    svc = ContractsService(pg_session)
+    contract = await _create(
+        svc, await _project(pg_session, "AE"), contract_type="cost_plus", terms={"fee_percent": "0"}
+    )
+    contract.status = "active"
+    await pg_session.flush()
+    march = await svc.auto_generate_claim_lines(
+        (await _claim(pg_session, contract, "PC-3", 3)).id,
+        AutoGenerateClaimRequest(actual_costs_total=Decimal("46000")),
+    )
+    await svc.transition_claim(march.id, "submitted", "cap-test")
+    april = await _claim(pg_session, contract, "PC-4", 4)
+
+    subs = SubcontractorService(pg_session)
+
+    async def _rollup(_claim, _contract):
+        return {"currency": "EUR"}, [], []
+
+    monkeypatch.setattr(subs, "_assemble_claim_rollup", _rollup)
+    monkeypatch.setattr(sub_rollup, "suggest_claim_lines", lambda *_args: [{"period_completed_value": Decimal("8000")}])
+    preview = await subs.suggested_claim_lines(april.id)
+    assert preview["gross"] == Decimal("8000")
+    # 10 percent would be 800; the ceiling leaves 400.
+    assert preview["retention"] == Decimal("400")
+
+
 async def test_a_schedule_of_values_contract_holds_the_cap_in_total(pg_session) -> None:
     svc = ContractsService(pg_session)
     contract = await _create(
