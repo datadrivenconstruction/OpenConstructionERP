@@ -28088,7 +28088,8 @@
         "schedule",
         "takeoff",
         "teams",
-        "users"
+        "users",
+        "validation"
       ]
     },
     {
@@ -33180,10 +33181,12 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "events.py",
         "intl.py",
         "manifest.py",
         "models.py",
         "permissions.py",
+        "published_notice.py",
         "readiness.py",
         "repository.py",
         "roles.py",
@@ -34683,6 +34686,7 @@
         "approval_routes",
         "documents",
         "file_versions",
+        "notifications",
         "transmittals"
       ]
     },
@@ -61906,6 +61910,363 @@
       ]
     },
     {
+      "module_id": "cost_plan",
+      "module_label": "Elemental Cost Plan",
+      "module_category": "business",
+      "files": [
+        "__init__.py",
+        "engine.py",
+        "export.py",
+        "manifest.py",
+        "permissions.py",
+        "router.py",
+        "schemas.py",
+        "service.py"
+      ],
+      "manifest": {
+        "name": "oe_cost_plan",
+        "version": "1.0.0",
+        "display_name": "Elemental Cost Plan",
+        "description": "Rolls a bill of quantities up into an NRM 1 elemental cost plan: group elements 0-8 with their elements, the building works estimate, the bill's markup cascade below it, cost per m2 of GIFA and share of total on every line, unallocated positions listed rather than dropped, and an Excel export with the same structure. Read-only.",
+        "author": "OpenConstructionERP Core Team",
+        "category": "business",
+        "depends": [
+          "oe_boq",
+          "oe_projects"
+        ],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/boqs/{boq_id}/nrm1",
+          "handler": "get_nrm1_cost_plan",
+          "response_model": "CostPlanResponse",
+          "request_schema": "GifaParam"
+        },
+        {
+          "method": "GET",
+          "path": "/boqs/{boq_id}/nrm1/export.xlsx",
+          "handler": "export_nrm1_cost_plan",
+          "request_schema": "GifaParam"
+        }
+      ],
+      "schemas": [
+        {
+          "class_name": "SubtotalRow",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One money line with its two derived ratios.",
+          "fields": [
+            {
+              "name": "total",
+              "type": "Money"
+            },
+            {
+              "name": "cost_per_m2",
+              "type": "Money | None",
+              "description": "Total divided by GIFA; null without a GIFA."
+            },
+            {
+              "name": "share_pct",
+              "type": "Money | None",
+              "description": "Percentage of the cost plan total; null when the total is zero."
+            }
+          ]
+        },
+        {
+          "class_name": "ElementRow",
+          "bases": [
+            "SubtotalRow"
+          ],
+          "docstring": "One NRM 1 element, for example 2.5 External walls.",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "position_count",
+              "type": "int",
+              "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "GroupLevelRow",
+          "bases": [
+            "SubtotalRow"
+          ],
+          "docstring": "Money coded to a group but not to one of its elements.\n\nHolds both a bare group code (``\"2\"``) and an element number the table does\nnot list (``\"5.99\"``). ``codes`` names each distinct code that landed here,\nso an estimator can see whether it is a deliberate group-level line or a\ntypo in an element number.",
+          "fields": [
+            {
+              "name": "position_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "codes",
+              "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "GroupRow",
+          "bases": [
+            "SubtotalRow"
+          ],
+          "docstring": "One NRM 1 group element (0-14) with its elements.",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "Literal['works', 'addon']"
+            },
+            {
+              "name": "position_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "elements",
+              "type": "list[ElementRow]"
+            },
+            {
+              "name": "group_level",
+              "type": "GroupLevelRow | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "UnallocatedPosition",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A bill position the plan could not place on any element.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "ordinal",
+              "type": "str"
+            },
+            {
+              "name": "description",
+              "type": "str"
+            },
+            {
+              "name": "code",
+              "type": "str | None",
+              "description": "The code as written on the position, if any."
+            },
+            {
+              "name": "reason",
+              "type": "PlacementReason"
+            },
+            {
+              "name": "total",
+              "type": "Money"
+            }
+          ]
+        },
+        {
+          "class_name": "UnallocatedBlock",
+          "bases": [
+            "SubtotalRow"
+          ],
+          "docstring": "Everything not allocated to an element, listed rather than dropped.\n\n``total`` and ``position_count`` always cover every unallocated position.\n``positions`` is capped for a very large bill; ``positions_truncated`` says\nwhen the list is shorter than the count.",
+          "fields": [
+            {
+              "name": "position_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "positions",
+              "type": "list[UnallocatedPosition]"
+            },
+            {
+              "name": "positions_truncated",
+              "type": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "MarkupRow",
+          "bases": [
+            "SubtotalRow"
+          ],
+          "docstring": "One line of the bill's own markup cascade, read, never recomputed here.\n\n``amount`` is ``total`` (kept under that name so every row shares one\nshape). ``base`` is the figure a single-stack line was computed on: the\ndirect cost for ``direct_cost`` lines, the running subtotal before the line\nfor ``cumulative`` and ``subtotal`` lines. It is null for a lump sum, and\nfor every line when the bill carries section-scoped markups, because then\na line earns on several bases at once and no single figure is honest.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "category",
+              "type": "str"
+            },
+            {
+              "name": "markup_type",
+              "type": "str"
+            },
+            {
+              "name": "apply_to",
+              "type": "str"
+            },
+            {
+              "name": "percentage",
+              "type": "Money | None",
+              "default": "None"
+            },
+            {
+              "name": "fixed_amount",
+              "type": "Money | None",
+              "default": "None"
+            },
+            {
+              "name": "base",
+              "type": "Money | None",
+              "default": "None"
+            },
+            {
+              "name": "running_total",
+              "type": "Money"
+            },
+            {
+              "name": "scoped",
+              "type": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "CostPlanResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "An NRM 1 elemental cost plan rolled up from one bill of quantities.\n\nReading order, top to bottom, is the order the plan is printed in:\n\n1. ``groups`` - group elements 0-8, each with its elements.\n2. ``facilitating_works_estimate`` - group 0 alone, and\n   ``building_works_estimate`` - groups 1-8 alone. NRM 1 keeps the two\n   apart: the building works estimate is the figure cost per m2 of GIFA\n   is benchmarked on, and facilitating works (demolition, remediation)\n   are abnormal costs a benchmark leaves out.\n3. ``addon_groups`` - bill positions coded to groups 9-14\n   (preliminaries, overheads and profit, fees, other costs, risk,\n   inflation) that were priced as items in the bill.\n4. ``unallocated`` - positions with no usable NRM code.\n5. ``direct_cost`` - 2 + 3 + 4, equal to the bill's direct cost.\n6. ``markups`` - the bill's markup cascade in compounding order.\n7. ``grand_total`` - equal to the bill's grand total.\n\n``position_count`` counts real positions only: an empty placeholder row\nnobody has typed into yet is not one. ``allocated_count`` is the part of\nthem placed on a group, by element or at group level, so\n``position_count - allocated_count`` is always the unallocated count.",
+          "fields": [
+            {
+              "name": "standard",
+              "type": "Literal['NRM1']",
+              "default": "'NRM1'"
+            },
+            {
+              "name": "boq_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "boq_name",
+              "type": "str"
+            },
+            {
+              "name": "project_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "currency",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "gifa",
+              "type": "Money | None",
+              "default": "None"
+            },
+            {
+              "name": "gifa_source",
+              "type": "Literal['project', 'entered', 'none']",
+              "default": "'none'"
+            },
+            {
+              "name": "groups",
+              "type": "list[GroupRow]"
+            },
+            {
+              "name": "facilitating_works_estimate",
+              "type": "SubtotalRow"
+            },
+            {
+              "name": "building_works_estimate",
+              "type": "SubtotalRow"
+            },
+            {
+              "name": "addon_groups",
+              "type": "list[GroupRow]"
+            },
+            {
+              "name": "unallocated",
+              "type": "UnallocatedBlock"
+            },
+            {
+              "name": "direct_cost",
+              "type": "SubtotalRow"
+            },
+            {
+              "name": "markups",
+              "type": "list[MarkupRow]"
+            },
+            {
+              "name": "markups_total",
+              "type": "SubtotalRow"
+            },
+            {
+              "name": "grand_total",
+              "type": "SubtotalRow"
+            },
+            {
+              "name": "position_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "allocated_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "inherited_count",
+              "type": "int",
+              "description": "Positions placed through a parent section's code rather than their own."
+            },
+            {
+              "name": "warnings",
+              "type": "list[str]",
+              "description": "Stable warning keys the UI translates."
+            }
+          ]
+        }
+      ],
+      "import_dependencies": [
+        "boq",
+        "projects"
+      ]
+    },
+    {
       "module_id": "cost_recovery",
       "module_label": "Cost Recovery",
       "module_category": "controls",
@@ -81550,9 +81911,16 @@
         },
         {
           "method": "POST",
+          "path": "/batch/references/",
+          "handler": "batch_document_references",
+          "response_model": "DocumentBatchReferencesResponse",
+          "request_schema": "DocumentBatchReferencesRequest"
+        },
+        {
+          "method": "POST",
           "path": "/batch/delete/",
           "handler": "batch_delete_documents",
-          "request_schema": "BulkDeleteRequest"
+          "request_schema": "DocumentBatchDeleteRequest"
         },
         {
           "method": "GET",
@@ -82999,6 +83367,84 @@
             {
               "name": "references",
               "type": "list[DocumentReferenceItem]"
+            }
+          ]
+        },
+        {
+          "class_name": "DocumentBatchReferencesRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Documents a bulk delete is about to remove.",
+          "fields": [
+            {
+              "name": "ids",
+              "type": "list[UUID]"
+            }
+          ]
+        },
+        {
+          "class_name": "DocumentBatchReferencesResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What still points at any document in a batch, for the bulk delete prompt.\n\nThe totals and ``references`` cover the whole batch so the prompt can say\nwhat the whole delete costs in one panel. They count rows, each once: a\nmeeting holding two of the selected documents is one record, counted under\none reference key (the heaviest impact that reaches it), so ``references``\nadds up to ``total``. ``documents`` keeps the per-document answer (only\ndocuments something points at), which counts links exactly as the single\nendpoint does, so a caller can name the files responsible. ``checked`` is how many of the requested ids\nthe caller may read and were looked at; ids outside it are neither counted\nnor named, so the answer never says more than reading those documents\nwould.",
+          "fields": [
+            {
+              "name": "checked",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "referenced_documents",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "total",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "strands",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "unlinks",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "retains",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "references",
+              "type": "list[DocumentReferenceItem]"
+            },
+            {
+              "name": "documents",
+              "type": "list[DocumentReferencesResponse]"
+            }
+          ]
+        },
+        {
+          "class_name": "DocumentBatchDeleteRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "IDs to delete, plus the caller's word that the references were seen.\n\n``acknowledge_references`` defaults to false. A batch where any document is\nstill pointed at by a row that would be stranded or unlinked is refused\nwith 409 and the references report until the caller sends it as true,\nthe server-side form of the confirmation the single-document prompt asks\nof the person.",
+          "fields": [
+            {
+              "name": "ids",
+              "type": "list[UUID]"
+            },
+            {
+              "name": "acknowledge_references",
+              "type": "bool",
+              "default": "False"
             }
           ]
         }
@@ -145747,6 +146193,7 @@
         "otif.py",
         "permissions.py",
         "repository.py",
+        "rfq_award.py",
         "router.py",
         "schemas.py",
         "service.py",
@@ -147608,8 +148055,10 @@
         "costmodel",
         "finance",
         "projects",
+        "rfq_bidding",
         "subcontractors",
-        "tendering"
+        "tendering",
+        "users"
       ]
     },
     {
@@ -150142,6 +150591,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "access.py",
         "bundle_export.py",
         "bundle_import.py",
         "file_manager_schemas.py",
@@ -224350,6 +224800,7 @@
         "manifest.py",
         "models.py",
         "permissions.py",
+        "portfolio.py",
         "repository.py",
         "router.py",
         "rules/__init__.py",
@@ -224495,6 +224946,12 @@
           "method": "GET",
           "path": "/bim-scorecard/{model_id}/trend",
           "handler": "get_bim_scorecard_trend"
+        },
+        {
+          "method": "GET",
+          "path": "/portfolio-status/",
+          "handler": "portfolio_status",
+          "response_model": "ValidationPortfolioResponse"
         },
         {
           "method": "GET",
@@ -224815,6 +225272,196 @@
             {
               "name": "rules",
               "type": "list[dict[str, Any]]"
+            }
+          ]
+        },
+        {
+          "class_name": "PortfolioEstimateStatus",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The current validation verdict of one estimate (BOQ) in a project.\n\nThe verdict rests on every report that is still the newest one for at\nleast one rule set it ran, so a narrow run (the one-click audit) does not\nclear findings of a broader run it did not repeat. ``state`` is the worst\nof those reports. It is ``not_validated`` whenever there is no report, or\nthe reports did not actually check anything (pending, skipped, unsupported\nrule sets, no rules run), so an estimate nobody validated can never read\nas passed.\n\n``report_id``, ``report_status``, ``score`` and ``validated_at`` describe\nthe report that drives the verdict, the one a link should open. The counts\nadd up the reports behind the verdict; where two of them ran the same rule\nset, that overlap is counted from both.",
+          "fields": [
+            {
+              "name": "boq_id",
+              "type": "UUID"
+            },
+            {
+              "name": "boq_name",
+              "type": "str"
+            },
+            {
+              "name": "state",
+              "type": "str",
+              "description": "errors, warnings, not_validated, info or passed"
+            },
+            {
+              "name": "report_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "report_status",
+              "type": "str | None",
+              "description": "Raw status of the report that drives the verdict, if any"
+            },
+            {
+              "name": "rule_sets",
+              "type": "list[str]"
+            },
+            {
+              "name": "unsupported_rule_sets",
+              "type": "list[str]"
+            },
+            {
+              "name": "error_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "warning_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "passed_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "total_rules",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "score",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "validated_at",
+              "type": "datetime | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PortfolioProjectStatus",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One project's validation standing, taken from its estimates' verdicts.\n\n``state`` is the worst state among the estimates, and ``not_validated``\nfor a project that has no estimates at all. The counts add up the reports\nbehind each estimate's verdict, never the superseded report history.",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "project_name",
+              "type": "str"
+            },
+            {
+              "name": "state",
+              "type": "str"
+            },
+            {
+              "name": "estimate_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "validated_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "not_validated_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "error_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "warning_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "passed_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "rule_sets",
+              "type": "list[str]"
+            },
+            {
+              "name": "last_validated_at",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "estimates",
+              "type": "list[PortfolioEstimateStatus]"
+            }
+          ]
+        },
+        {
+          "class_name": "PortfolioStateSummary",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "How many projects sit in each state.",
+          "fields": [
+            {
+              "name": "errors",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "warnings",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "not_validated",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "info",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "passed",
+              "type": "int",
+              "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "ValidationPortfolioResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Response of GET /validation/portfolio-status/, projects sorted worst first.",
+          "fields": [
+            {
+              "name": "project_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "summary",
+              "type": "PortfolioStateSummary"
+            },
+            {
+              "name": "projects",
+              "type": "list[PortfolioProjectStatus]"
             }
           ]
         }
@@ -231462,10 +232109,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 157,
+      "ts_files": 155,
       "css_files": 0,
-      "test_files": 79,
-      "total_files": 157
+      "test_files": 78,
+      "total_files": 155
     },
     {
       "name": "buyer-portal",
@@ -231504,10 +232151,10 @@
     },
     {
       "name": "cde",
-      "ts_files": 8,
+      "ts_files": 10,
       "css_files": 0,
-      "test_files": 0,
-      "total_files": 8
+      "test_files": 1,
+      "total_files": 10
     },
     {
       "name": "certified-payroll",
@@ -231636,6 +232283,13 @@
       "total_files": 6
     },
     {
+      "name": "cost-plan",
+      "ts_files": 5,
+      "css_files": 0,
+      "test_files": 1,
+      "total_files": 5
+    },
+    {
       "name": "cost-recovery",
       "ts_files": 3,
       "css_files": 0,
@@ -231686,10 +232340,10 @@
     },
     {
       "name": "dashboard",
-      "ts_files": 40,
+      "ts_files": 43,
       "css_files": 0,
-      "test_files": 10,
-      "total_files": 40
+      "test_files": 11,
+      "total_files": 43
     },
     {
       "name": "dashboards",
@@ -231728,10 +232382,10 @@
     },
     {
       "name": "documents",
-      "ts_files": 10,
+      "ts_files": 11,
       "css_files": 0,
-      "test_files": 3,
-      "total_files": 10
+      "test_files": 4,
+      "total_files": 11
     },
     {
       "name": "dwg-takeoff",
@@ -232225,10 +232879,10 @@
     },
     {
       "name": "procurement",
-      "ts_files": 25,
+      "ts_files": 26,
       "css_files": 0,
-      "test_files": 10,
-      "total_files": 25
+      "test_files": 11,
+      "total_files": 26
     },
     {
       "name": "progress",
@@ -232372,10 +233026,10 @@
     },
     {
       "name": "rfq-bidding",
-      "ts_files": 8,
+      "ts_files": 9,
       "css_files": 0,
       "test_files": 5,
-      "total_files": 8
+      "total_files": 9
     },
     {
       "name": "risk",
@@ -232806,7 +233460,8 @@
       "schedule",
       "takeoff",
       "teams",
-      "users"
+      "users",
+      "validation"
     ],
     "cad": [
       "projects"
@@ -232827,6 +233482,7 @@
       "approval_routes",
       "documents",
       "file_versions",
+      "notifications",
       "projects",
       "transmittals",
       "users"
@@ -233015,6 +233671,10 @@
       "dashboards",
       "projects",
       "users"
+    ],
+    "cost_plan": [
+      "boq",
+      "projects"
     ],
     "cost_recovery": [
       "claims_evidence",
@@ -233558,6 +234218,7 @@
       "costmodel",
       "finance",
       "projects",
+      "rfq_bidding",
       "subcontractors",
       "tendering",
       "users"
@@ -233935,17 +234596,17 @@
     ]
   },
   "statistics": {
-    "backend_modules": 195,
-    "modules_with_manifests": 193,
+    "backend_modules": 196,
+    "modules_with_manifests": 194,
     "total_models": 618,
     "total_columns": 7104,
     "total_relationships": 234,
-    "total_routes": 3714,
-    "total_schemas": 3494,
-    "total_python_files": 2220,
-    "frontend_features": 190,
-    "frontend_ts_files": 2813,
-    "frontend_backend_mapped": 169
+    "total_routes": 3718,
+    "total_schemas": 3509,
+    "total_python_files": 2233,
+    "frontend_features": 191,
+    "frontend_ts_files": 2824,
+    "frontend_backend_mapped": 170
   },
   "frontend_backend_mapping": {
     "about": null,
@@ -233993,6 +234654,7 @@
     "correspondence": "correspondence",
     "cost-explorer": "cost_explorer",
     "cost-match": "cost_match",
+    "cost-plan": "cost_plan",
     "cost-recovery": "cost_recovery",
     "costmodel": "costmodel",
     "costs": "costs",
