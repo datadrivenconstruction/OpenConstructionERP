@@ -22578,6 +22578,7 @@
         "models.py",
         "pdf_export.py",
         "permissions.py",
+        "quantity_baseline.py",
         "quantity_formula.py",
         "repository.py",
         "resource_norms.py",
@@ -144552,6 +144553,7 @@
         "model.py",
         "norm_outturn.py",
         "permissions.py",
+        "quantity_check.py",
         "router.py",
         "service.py"
       ],
@@ -144582,6 +144584,19 @@
           "path": "/projects/{project_id}/norm-outturn",
           "handler": "get_norm_outturn",
           "response_model": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/quantity-check",
+          "handler": "get_quantity_check",
+          "response_model": "None"
+        },
+        {
+          "method": "PUT",
+          "path": "/projects/{project_id}/quantity-check/baseline",
+          "handler": "set_quantity_baseline",
+          "response_model": "None",
+          "request_schema": "QuantityBaselineRequest"
         }
       ],
       "schemas": [],
@@ -232877,10 +232892,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 158,
+      "ts_files": 160,
       "css_files": 0,
-      "test_files": 79,
-      "total_files": 158
+      "test_files": 80,
+      "total_files": 160
     },
     {
       "name": "buyer-portal",
@@ -233619,10 +233634,10 @@
     },
     {
       "name": "postcalc",
-      "ts_files": 5,
+      "ts_files": 8,
       "css_files": 0,
-      "test_files": 0,
-      "total_files": 5
+      "test_files": 1,
+      "total_files": 8
     },
     {
       "name": "prefab",
@@ -235373,11 +235388,11 @@
     "total_models": 623,
     "total_columns": 7135,
     "total_relationships": 234,
-    "total_routes": 3730,
+    "total_routes": 3732,
     "total_schemas": 3520,
-    "total_python_files": 2248,
+    "total_python_files": 2250,
     "frontend_features": 192,
-    "frontend_ts_files": 2857,
+    "frontend_ts_files": 2862,
     "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {
