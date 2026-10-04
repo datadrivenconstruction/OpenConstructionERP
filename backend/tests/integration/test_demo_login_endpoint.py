@@ -14,6 +14,16 @@ Covers:
 
 The demo accounts are auto-seeded on startup by ``app.main._seed_demo_account``
 inside the regular lifespan, so we don't need to register them ourselves.
+
+The tests that expect a session sign in through a demo tile below admin. This
+module boots on the suite's shared database, where earlier modules have
+usually created a real administrator, and next to one the Admin tile is
+refused by design (``app.core.demo_admin``), so with that tile the outcome
+would depend on which tests ran first. The Admin tile itself is pinned on
+state of its own: on a fresh install and next to a real administrator in
+``tests/pg/test_a_demo_admin_can_install_a_country_pack.py``, and at service
+level, the login form shortcut included, in
+``tests/unit/test_demo_admin_login_superseded_by_a_real_admin.py``.
 """
 
 from __future__ import annotations
@@ -28,6 +38,10 @@ import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
 from app.main import create_app
+
+#: A seeded demo tile whose role is below admin, so the superseded-admin rule
+#: never applies to it, whatever else the shared database holds.
+DEMO_TILE_EMAIL = "manager@openconstructionerp.com"
 
 
 @pytest_asyncio.fixture(scope="module")
@@ -63,7 +77,7 @@ class TestDemoLoginEndpoint:
         for _ in range(5):
             resp = await demo_client.post(
                 "/api/v1/users/auth/demo-login/",
-                json={"email": "demo@openconstructionerp.com"},
+                json={"email": DEMO_TILE_EMAIL},
             )
             last_resp = resp
             if resp.status_code == 200:
@@ -181,7 +195,7 @@ class TestDemoLoginEndpoint:
         # The documented password — must still work.
         resp = await demo_client.post(
             "/api/v1/users/auth/login/",
-            json={"email": "demo@openconstructionerp.com", "password": "DemoPass1234!"},
+            json={"email": DEMO_TILE_EMAIL, "password": "DemoPass1234!"},
         )
         assert resp.status_code == 200, resp.text
         assert resp.json()["access_token"]
@@ -190,7 +204,7 @@ class TestDemoLoginEndpoint:
         # is intentionally ignored on the demo path.
         resp = await demo_client.post(
             "/api/v1/users/auth/login/",
-            json={"email": "demo@openconstructionerp.com", "password": "wrong-on-purpose"},
+            json={"email": DEMO_TILE_EMAIL, "password": "wrong-on-purpose"},
         )
         assert resp.status_code == 200, resp.text
         assert resp.json()["access_token"]
