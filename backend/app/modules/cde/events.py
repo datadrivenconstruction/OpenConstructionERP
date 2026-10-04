@@ -12,6 +12,15 @@ container's documents that the version under their work has changed. The
 logic lives in :mod:`app.modules.cde.published_notice`; this file only binds
 it to the bus and gives it its own session, opened after the publisher has
 committed.
+
+``cde.revision.published`` is the same news for every revision added after
+that. A container crosses Gate B once and the state machine has no way back,
+so without it the owners would hear about the first published revision and
+never about the next one, which is the one that makes their quantities stale.
+``CDEService.create_revision`` publishes it, after the commit, when the
+container it adds to is already published. The notice is idempotent per
+container revision, so the two events can never tell anyone twice about the
+same one.
 """
 
 from __future__ import annotations
@@ -25,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 
 async def _on_container_published(event: Event) -> None:
-    """``cde.container.published`` -> notify owners of linked records."""
+    """``cde.container.published`` / ``cde.revision.published`` -> notify owners."""
     data = event.data or {}
     raw_id = data.get("container_id")
     try:
@@ -50,3 +59,4 @@ async def _on_container_published(event: Event) -> None:
 
 
 event_bus.subscribe_once("cde.container.published", _on_container_published)
+event_bus.subscribe_once("cde.revision.published", _on_container_published)

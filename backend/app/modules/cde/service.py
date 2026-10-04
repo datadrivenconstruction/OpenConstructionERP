@@ -598,6 +598,7 @@ class CDEService:
                 linked_doc_id,
                 container_id,
             )
+            self._announce_revision_if_published(container, revision_id, revision_code, user_id)
             return revision
 
         # Upload mode: cross-link into the Documents hub when the revision
@@ -692,7 +693,51 @@ class CDEService:
             rev_number,
             container_id,
         )
+        self._announce_revision_if_published(container, revision_id, revision_code, user_id)
         return revision
+
+    def _announce_revision_if_published(
+        self,
+        container: DocumentContainer,
+        revision_id: uuid.UUID,
+        revision_code: str,
+        user_id: str | None,
+    ) -> None:
+        """Say so when a revision lands on a container that is already published.
+
+        The state machine has no way back from ``published``, so a container
+        crosses Gate B exactly once and ``cde.container.published`` fires once
+        per container. Every later revision added to it still becomes the
+        container's current revision at once, which is the change that leaves
+        measurements and links made against the previous one stale. Without
+        this the owners of those records heard about C01 and never about C02.
+
+        A name of its own rather than a second ``cde.container.published``:
+        that one means "crossed the approval gate" to the webhook and audit
+        readers, and a revision is not a gate. The CDE subscriber listens to
+        both. Deferred to the commit for the same reason the promote event is:
+        the subscriber reads the container's current revision in its own
+        session and must see the one this request wrote.
+
+        ``container.cde_state`` is the state read at the top of
+        ``create_revision``; nothing in between changes it.
+        """
+        if container.cde_state != CDEState.PUBLISHED.value:
+            return
+        publish_after_commit(
+            self.session,
+            "cde.revision.published",
+            {
+                "project_id": str(container.project_id),
+                "container_id": str(container.id),
+                "container_code": container.container_code,
+                "revision_id": str(revision_id),
+                "revision_code": revision_code,
+                "user_id": user_id,
+                "promoted_by": user_id,
+            },
+            source_module="cde",
+        )
 
     async def get_revision(self, revision_id: uuid.UUID) -> DocumentRevision:
         """Get revision by ID. Raises 404 if not found."""

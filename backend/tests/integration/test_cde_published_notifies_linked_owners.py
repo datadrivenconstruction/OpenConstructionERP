@@ -371,6 +371,129 @@ async def test_publishing_notifies_exactly_the_member_owners_of_linked_records(
 
 
 @pytest.mark.asyncio
+async def test_a_revision_added_to_a_published_container_tells_the_owners_again(
+    client: AsyncClient,
+    publisher: tuple[uuid.UUID, dict[str, str]],
+) -> None:
+    """A container is published once; its later revisions still reach people.
+
+    The state machine has no way back from ``published``, so Gate B is crossed
+    exactly once per container. A revision added afterwards becomes the
+    current one straight away, and that is the change that leaves a takeoff
+    measured on the previous revision stale. Both exits of ``create_revision``
+    are driven: link mode returns early, upload mode at the bottom.
+
+    Without ``cde.revision.published`` the count below stays at one after
+    each new revision.
+    """
+    from app.core.events import event_bus
+    from app.database import async_session_factory
+    from app.modules.documents.models import Document
+    from app.modules.takeoff.models import TakeoffMeasurement
+    from app.modules.teams.models import Team, TeamMembership
+
+    publisher_id, headers = publisher
+    project_id = await _new_project(client, headers, "CDE revision after publish")
+
+    async with async_session_factory() as session:
+        estimator = await _make_user(session, "estimator")
+        team = Team(project_id=project_id, name="Estimating", is_default=True)
+        session.add(team)
+        await session.flush()
+        session.add(TeamMembership(team_id=team.id, user_id=estimator))
+        drawing = Document(
+            project_id=project_id,
+            name="A-101 Ground floor.pdf",
+            category="drawing",
+            file_path="/tmp/a-101-rev.pdf",
+            mime_type="application/pdf",
+            uploaded_by=str(publisher_id),
+        )
+        session.add(drawing)
+        await session.flush()
+        session.add_all(
+            [
+                TakeoffMeasurement(
+                    project_id=project_id,
+                    document_id=str(drawing.id),
+                    type="area",
+                    created_by=str(estimator),
+                ),
+                # The publisher measured too, and is never told about their own revision.
+                TakeoffMeasurement(
+                    project_id=project_id,
+                    document_id=str(drawing.id),
+                    type="count",
+                    created_by=str(publisher_id),
+                ),
+            ]
+        )
+        await session.commit()
+        drawing_id = drawing.id
+
+    container_id = await _create_container(client, headers, project_id)
+
+    # A revision on a container that is not published yet tells nobody.
+    first = await client.post(
+        f"/api/v1/cde/containers/{container_id}/revisions/",
+        json={"file_name": "A-101 Ground floor.pdf", "document_id": str(drawing_id), "is_preliminary": False},
+        headers=headers,
+    )
+    assert first.status_code == 201, first.text
+    await _drain()
+    assert await _notices(container_id) == []
+
+    await _publish(client, headers, container_id)
+    await _drain()
+    notices = await _notices(container_id)
+    assert [n.user_id for n in notices] == [estimator]
+    assert notices[0].metadata_["revision_id"] == first.json()["id"]
+
+    # Link mode on the published container: the early return.
+    second = await client.post(
+        f"/api/v1/cde/containers/{container_id}/revisions/",
+        json={"file_name": "A-101 Ground floor.pdf", "document_id": str(drawing_id), "is_preliminary": False},
+        headers=headers,
+    )
+    assert second.status_code == 201, second.text
+    await _drain()
+
+    # Upload mode on the published container: the return at the bottom.
+    third = await client.post(
+        f"/api/v1/cde/containers/{container_id}/revisions/",
+        json={
+            "file_name": "A-101 Ground floor rev C.pdf",
+            "storage_key": f"cde/{uuid.uuid4().hex}.pdf",
+            "is_preliminary": False,
+        },
+        headers=headers,
+    )
+    assert third.status_code == 201, third.text
+    await _drain()
+
+    notices = await _notices(container_id)
+    assert {n.user_id for n in notices} == {estimator}, "the publisher must not be told"
+    by_revision = {n.metadata_["revision_id"]: n for n in notices}
+    assert set(by_revision) == {first.json()["id"], second.json()["id"], third.json()["id"]}
+    assert by_revision[second.json()["id"]].metadata_["revision_code"] == second.json()["revision_code"]
+    assert by_revision[third.json()["id"]].body_context["revision_code"] == third.json()["revision_code"]
+
+    # The same revision event delivered twice still makes one notice.
+    await event_bus.publish(
+        "cde.revision.published",
+        {
+            "project_id": str(project_id),
+            "container_id": container_id,
+            "revision_id": third.json()["id"],
+            "promoted_by": str(publisher_id),
+        },
+        source_module="test",
+    )
+    await _drain()
+    assert len(await _notices(container_id)) == 3
+
+
+@pytest.mark.asyncio
 async def test_the_promoted_audit_row_records_the_real_states(
     client: AsyncClient,
     publisher: tuple[uuid.UUID, dict[str, str]],

@@ -42,6 +42,9 @@ person who published: they already know.
 
 Idempotency
 -----------
+Two events reach this: ``cde.container.published`` when the container
+crosses Gate B, which happens once because the state machine has no way back,
+and ``cde.revision.published`` for every revision added to it afterwards.
 One notification per recipient per container revision. The key is the
 container id in ``entity_id`` plus ``metadata.revision_id``, and on
 PostgreSQL a transaction-scoped advisory lock on that pair makes two
