@@ -252,47 +252,89 @@ async def _verify_boq_owner(
     user_id: str,
     payload: dict | None = None,
 ) -> None:
-    """Load a BOQ, then its project, and verify the user has access.
+    """Verify the user may reach a BOQ through its project.
 
     Admins bypass the check. Grants access to the project owner and to
     any user who is a team member of the project (added via add_project_member).
     Raises 404 (not 403) on denial to keep 'missing' and 'denied'
     indistinguishable, matching verify_project_access.
+
+    One statement, see :func:`_verify_boqs_owner`.
+    """
+    await _verify_boqs_owner(session, [boq_id], user_id, payload)
+
+
+async def _verify_boqs_owner(
+    session: SessionDep,
+    boq_ids: list[uuid.UUID],
+    user_id: str,
+    payload: dict | None = None,
+) -> None:
+    """:func:`_verify_boq_owner` for several BOQs, in one statement for all of them.
+
+    The guard stands in front of nearly every BOQ endpoint, the BOQ editor's
+    whole page load included, and it used to cost two statements for an owner
+    (the bill's project, then the project's owner) and three for a team member
+    (plus the membership lookup), on every request. It now reads the bill, its
+    project's owner and the caller's membership together, and a request that
+    guards two bills, such as a comparison, reads both in that same statement.
+
+    The answer is exactly the one the bills checked one by one in the order
+    given would produce, the first refusal included: 404 "BOQ not found" for a
+    bill that does not exist, 404 "project not found" for a bill whose project
+    row is gone, 404 "BOQ not found" for a bill the caller neither owns nor is a
+    member of. An archived project does not refuse here, as it never has.
+
+    Raises:
+        HTTPException: 404 as above, for the first bill in *boq_ids* refused.
     """
     if payload and payload.get("role") == "admin":
+        return
+    if not boq_ids:
         return
     from sqlalchemy import select
 
     from app.modules.boq.models import BOQ
+    from app.modules.projects.access import caller_uuid, membership_exists
     from app.modules.projects.models import Project
 
-    # Two scalar reads. Loading the BOQ object loaded every position and
+    # The rows come back keyed by UUID, so a caller handing in the id as a
+    # string must still find its row rather than be told the bill is missing.
+    boq_ids = [b if isinstance(b, uuid.UUID) else uuid.UUID(str(b)) for b in boq_ids]
+    # Scalar columns only. Loading the BOQ object loaded every position and
     # markup of the bill (both collections are ``selectin``) to read one
-    # column, and this guard stands in front of nearly every BOQ endpoint,
-    # the single-position price edit included.
-    boq_row = (await session.execute(select(BOQ.project_id).where(BOQ.id == boq_id))).first()
-    if boq_row is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BOQ not found")
-    project_id = boq_row[0]
-    owner_row = (await session.execute(select(Project.owner_id).where(Project.id == project_id))).first()
-    if owner_row is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.project_not_found", locale=get_locale())
+    # column. The outer join keeps a bill whose project row is gone, so it
+    # still answers "project not found" rather than "BOQ not found".
+    rows = (
+        await session.execute(
+            select(
+                BOQ.id,
+                Project.id,
+                Project.owner_id,
+                membership_exists(BOQ.project_id, caller_uuid(user_id)).label("is_member"),
+            )
+            .select_from(BOQ)
+            .outerjoin(Project, Project.id == BOQ.project_id)
+            .where(BOQ.id.in_(list(dict.fromkeys(boq_ids))))
         )
-    if str(owner_row[0]) == user_id:
-        return
-    from app.modules.teams.access import is_project_member
-
-    try:
-        uid = uuid.UUID(str(user_id))
-    except (ValueError, TypeError):
-        uid = None
-    if uid is not None and await is_project_member(session, project_id, uid):
-        return
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="BOQ not found",
-    )
+    ).all()
+    by_boq = {row[0]: row for row in rows}
+    for boq_id in boq_ids:
+        row = by_boq.get(boq_id)
+        if row is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BOQ not found")
+        _, project_id, owner_id, is_member = row
+        if project_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=translate("errors.project_not_found", locale=get_locale()),
+            )
+        if str(owner_id) == user_id or is_member:
+            continue
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="BOQ not found",
+        )
 
 
 async def _verify_project_owner_for_boq(
@@ -305,28 +347,26 @@ async def _verify_project_owner_for_boq(
 
     Grants access to: admins, the project owner, and team members.
     Treats archived (soft-deleted) projects as 404 - no operations on
-    archived projects are permitted via this gateway.
+    archived projects are permitted via this gateway, an admin's included.
+    Anyone else gets 403.
+
+    One statement: the project's owner and status and the caller's membership
+    are read together (:func:`app.modules.projects.access.project_access`).
+    This used to load the whole project, which pulled its milestones and WBS
+    through their ``selectin`` relationships, and then look the membership up
+    on its own.
     """
     is_admin = bool(payload and payload.get("role") == "admin")
-    from app.modules.projects.repository import ProjectRepository
+    from app.modules.projects.access import project_access
 
-    project_repo = ProjectRepository(session)
-    project = await project_repo.get_by_id(project_id)
-    if project is None or project.status == "archived":
+    access = (await project_access(session, [project_id], user_id)).get(project_id)
+    if access is None or access.is_archived:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.project_not_found", locale=get_locale())
         )
     if is_admin:
         return
-    if str(project.owner_id) == user_id:
-        return
-    from app.modules.teams.access import is_project_member
-
-    try:
-        uid = uuid.UUID(str(user_id))
-    except (ValueError, TypeError):
-        uid = None
-    if uid is not None and await is_project_member(session, project_id, uid):
+    if access.is_owned_by(user_id) or access.is_member:
         return
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,
@@ -3041,8 +3081,7 @@ async def compare_boqs(
     Pure read. Ownership is verified on BOTH BOQs so a baseline can never
     leak positions from a project the caller does not own.
     """
-    await _verify_boq_owner(session, boq_id, user_id, payload)
-    await _verify_boq_owner(session, other_id, user_id, payload)
+    await _verify_boqs_owner(session, [boq_id, other_id], user_id, payload)
     return await service.compare_boqs(boq_id, other_id)
 
 
