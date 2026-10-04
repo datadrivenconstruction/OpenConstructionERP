@@ -342,6 +342,63 @@ async def test_an_irish_bill_on_an_unseeded_install_falls_back_to_the_stack(pg_s
     assert line.metadata_["vat_rate_source"] == "region_template"
 
 
+@pytest.mark.parametrize(
+    ("country", "base_date", "stand_in"),
+    [
+        # Switzerland's rows start in 2018, so a 2017 bill has no Swiss rate on
+        # file and the DACH stack's line, Germany's 19, stands in.
+        ("CH", "2017-06-30", "19"),
+        # Ireland's construction tier starts in 2003; the UK stack's 20 stands in.
+        ("IE", "2002-06-30", "20"),
+    ],
+)
+async def test_a_bill_dated_before_its_countrys_rates_says_its_tax_is_a_stand_in(
+    pg_session, caplog, country, base_date, stand_in
+) -> None:
+    """No rate can be shown right for a date before the history, so the bill says so.
+
+    It still seeds, at the region's line, because refusing to price a project
+    is worse. What changed is that this is no longer silent: the line carries
+    the day nothing answered, and the log names the bill.
+    """
+    await _install_tax_seed(pg_session)
+    boq = await _bill_for(pg_session, country, base_date=base_date)
+    with caplog.at_level(logging.WARNING, logger="app.modules.boq.service"):
+        await BOQService(pg_session).apply_default_markups(boq.id)
+
+    line = (await _tax_lines(pg_session, boq.id))[0]
+    assert Decimal(line.percentage) == Decimal(stand_in)
+    assert line.metadata_["vat_rate_source"] == "region_template"
+    assert line.metadata_["vat_rate_unresolved_on"] == base_date
+    reported = [
+        r.getMessage() for r in caplog.records if r.levelno >= logging.WARNING and str(boq.id) in r.getMessage()
+    ]
+    assert reported and base_date in reported[0]
+
+
+async def test_a_country_with_no_rates_on_file_is_not_reported_as_a_gap(pg_session, caplog) -> None:
+    """Argentina has no seed row at all, which is a known absence and not a missing date."""
+    await _install_tax_seed(pg_session)
+    boq = await _bill_for(pg_session, "AR", base_date="2017-06-30")
+    with caplog.at_level(logging.WARNING, logger="app.modules.boq.service"):
+        await BOQService(pg_session).apply_default_markups(boq.id)
+
+    line = (await _tax_lines(pg_session, boq.id))[0]
+    assert line.metadata_["vat_rate_source"] == "region_template"
+    assert "vat_rate_unresolved_on" not in line.metadata_
+    assert not [r for r in caplog.records if r.levelno >= logging.WARNING and str(boq.id) in r.getMessage()]
+
+
+async def test_a_resolved_bill_carries_no_gap_marker(pg_session) -> None:
+    """The control: a Swiss bill inside the history is resolved and says nothing extra."""
+    await _install_tax_seed(pg_session)
+    boq = await _bill_for(pg_session, "CH", base_date="2023-06-30")
+    await BOQService(pg_session).apply_default_markups(boq.id)
+    line = (await _tax_lines(pg_session, boq.id))[0]
+    assert Decimal(line.percentage) == Decimal("7.7")
+    assert "vat_rate_unresolved_on" not in line.metadata_
+
+
 async def test_a_country_with_no_single_tax_line_keeps_its_own_rates(pg_session) -> None:
     """Brazil's two levies survive a country that has a seed rate of its own.
 

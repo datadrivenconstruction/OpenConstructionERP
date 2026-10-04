@@ -26,7 +26,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Final, NamedTuple
 
 from fastapi import HTTPException, status
 
@@ -2149,6 +2149,44 @@ class _LockedSkips:
             "locked_skipped": len(self._lines),
             "locked_boqs": [{"id": str(boq_id), "name": name} for boq_id, name in ordered],
         }
+
+
+class _SeededVat(NamedTuple):
+    """What the tax seed answered for a bill.
+
+    Attributes:
+        rate: The rate as a decimal-string percentage, or ``None`` when the
+            region's own line has to stand.
+        unanswered_on: Set only when the country HAS rates on file and none of
+            them answers the day the bill is priced on, to that day. ``None``
+            when there was an answer, and also when the country simply has no
+            rows, which is the ordinary state and is not reported.
+    """
+
+    rate: str | None
+    unanswered_on: str | None = None
+
+
+_NO_SEEDED_VAT: Final = _SeededVat(None)
+
+#: Resolver statuses that mean "nothing on file is in force on that day", as
+#: opposed to a country that needs a subdivision or whose rows contradict each
+#: other. Only these are a gap in the dated history.
+_DATE_GAP_STATUSES: Final = frozenset({"no_configuration", "default_rate_not_in_force"})
+
+
+def _report_unanswered_day(boq_id: uuid.UUID, country_code: str, day: str, rows_on_file: int) -> str:
+    """Log that a bill's own date has no rate although the country has rates, and return the day."""
+    logger.warning(
+        "BOQ %s is priced on %s, and none of the %d %s tax rate(s) on file is in force that day; the "
+        "region's own VAT line stands in, which is today's rate or a neighbour's, not the rate of %s",
+        boq_id,
+        day,
+        rows_on_file,
+        country_code.upper(),
+        day,
+    )
+    return day
 
 
 def _construction_tier_rate(
@@ -6387,7 +6425,7 @@ class BOQService:
             logger.debug("project lookup failed for boq %s", boq_id, exc_info=True)
             return None
 
-    async def _seeded_vat_rate(self, country_code: str | None, base_date: str | None, boq_id: uuid.UUID) -> str | None:
+    async def _seeded_vat_rate(self, country_code: str | None, base_date: str | None, boq_id: uuid.UUID) -> _SeededVat:
         """The VAT rate a bill of quantities in this country is charged, from the tax seed.
 
         That is the country's standard rate almost everywhere. In a country
@@ -6426,11 +6464,16 @@ class BOQService:
                 names the bill it came from in the log rather than only itself.
 
         Returns:
-            The rate as a decimal-string percentage, or None when the country
-            is unknown, has no row in force, or the table is empty - the last
-            being every database that has not been seeded yet. None means the
-            region's own line stands, which the caller records rather than
-            leaving indistinguishable from a rate that was resolved.
+            A :class:`_SeededVat`. Its ``rate`` is the rate as a decimal-string
+            percentage, or None when the country is unknown, has no row in
+            force, or the table is empty - the last being every database that
+            has not been seeded yet. None means the region's own line stands,
+            which the caller records rather than leaving indistinguishable
+            from a rate that was resolved. ``unanswered_on`` separates the one
+            case of those that is a gap rather than an absence: the country
+            has rates on file and none is in force on the bill's day, so the
+            line standing in is today's rate or a neighbour's. That case is
+            logged at warning, and the caller writes the day onto the line.
 
         Raises:
             Nothing. A rate that cannot be read is not a reason a bill cannot
@@ -6440,7 +6483,7 @@ class BOQService:
             a defect in somebody's data that nothing else would report.
         """
         if not country_code:
-            return None
+            return _NO_SEEDED_VAT
         # The seed's standard answer is not what a bill of quantities asks where
         # construction has a tier of its own, so those countries are asked for
         # the tier row instead, further down. A tier country with no row named
@@ -6450,7 +6493,7 @@ class BOQService:
         if country_code.upper() in CONSTRUCTION_TIER_COUNTRIES:
             tier_code = CONSTRUCTION_TIER_TAX_CODE.get(country_code.upper())
             if tier_code is None:
-                return None
+                return _NO_SEEDED_VAT
         stated = (base_date or "").strip()
         day = price_base_day(stated)
         on_date = day.isoformat() if day else None
@@ -6480,15 +6523,16 @@ class BOQService:
             # ordinary state of the ten priced countries the seed says nothing
             # about.
             logger.debug("Tax table unreadable for %s; the region's own VAT line stands", country_code)
-            return None
+            return _NO_SEEDED_VAT
+        day_priced = on_date or datetime.now(tz=UTC).date().isoformat()
         if tier_code is not None:
-            return _construction_tier_rate(
-                [tax_row_from_orm(c) for c in configs],
-                country_code.upper(),
-                tier_code,
-                on_date or datetime.now(tz=UTC).date().isoformat(),
-                boq_id,
-            )
+            tier_rows = [tax_row_from_orm(c) for c in configs]
+            tier_rate = _construction_tier_rate(tier_rows, country_code.upper(), tier_code, day_priced, boq_id)
+            if tier_rate is not None:
+                return _SeededVat(tier_rate)
+            if any(row.tax_code == tier_code for row in tier_rows):
+                return _SeededVat(None, _report_unanswered_day(boq_id, country_code, day_priced, len(tier_rows)))
+            return _NO_SEEDED_VAT
         try:
             resolution = resolve_tax([tax_row_from_orm(c) for c in configs], country_code, on_date=on_date)
         except TaxRuleError as exc:
@@ -6508,12 +6552,25 @@ class BOQService:
                 exc.code,
                 exc.message,
             )
-            return None
+            return _NO_SEEDED_VAT
         if not resolution.resolved or resolution.combined_rate_pct is None:
-            return None
+            if configs and resolution.status in _DATE_GAP_STATUSES:
+                # Rates are on file for this country and none answers the day
+                # the bill is priced on: a base date before the earliest
+                # window the install holds. Not the same event as a country
+                # with no rows at all, which is the ordinary state of a dozen
+                # priced countries and of every unseeded install and stays
+                # silent. Here the region's line stands in for a rate the
+                # country did have, and that line is today's, or a
+                # neighbour's on a shared stack: a Swiss bill for 2017 is
+                # charged Germany's 19. Nothing can say what the right number
+                # was, so the bill still seeds; the log and the line's own
+                # metadata are what say a rate was missing.
+                return _SeededVat(None, _report_unanswered_day(boq_id, country_code, day_priced, len(configs)))
+            return _NO_SEEDED_VAT
         # Explicitly against None: "0" is Kuwait's and Qatar's real answer and
         # a truthiness test here would send both back to the Gulf region's 5.
-        return resolution.combined_rate_pct
+        return _SeededVat(resolution.combined_rate_pct)
 
     async def apply_default_markups(self, boq_id: uuid.UUID, region: str | None = None) -> list[BOQMarkup]:
         """Replace all markups on a BOQ with the default template for a region.
@@ -6590,8 +6647,10 @@ class BOQService:
         # so the region's line is the last resort, not the default.
         vat_rate = project_vat_override
         rate_source = "project"
+        unanswered_on: str | None = None
         if vat_rate is None:
-            vat_rate = await self._seeded_vat_rate(country_code, getattr(boq, "base_date", None), boq_id)
+            seeded = await self._seeded_vat_rate(country_code, getattr(boq, "base_date", None), boq_id)
+            vat_rate, unanswered_on = seeded.rate, seeded.unanswered_on
             rate_source = "country_seed"
         if vat_rate is None:
             rate_source = "region_template"
@@ -6615,6 +6674,12 @@ class BOQService:
                 metadata["vat_override"] = True
             if entry["category"] == "tax":
                 metadata["vat_rate_source"] = rate_source if entry["vat_override"] else "region_template"
+                if unanswered_on is not None and not entry["vat_override"]:
+                    # The region's line stood in for a day the country's own
+                    # rates do not reach. Said on the line, not only in the
+                    # log, so the bill itself records that its tax is a
+                    # stand-in rather than a rate of that date.
+                    metadata["vat_rate_unresolved_on"] = unanswered_on
             markup = BOQMarkup(
                 boq_id=boq_id,
                 name=str(entry["name"]),
