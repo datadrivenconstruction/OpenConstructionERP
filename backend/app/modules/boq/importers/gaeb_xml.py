@@ -339,6 +339,27 @@ def _detect_da_kind(root: ET.Element) -> str:
     return "x"
 
 
+def _site_phase(root: ET.Element) -> str:
+    """Return ``"31"`` or ``"89"`` for a measurement or invoice file, else ``""``.
+
+    Those two phases share the BoQ tree with the tender phases but are not
+    bills: an X31 holds measured quantities for existing positions and an X89
+    an invoice against them. Read as a bill, an X31 yields empty sections and
+    an X89 yields its invoiced lines as new positions. Recognised by the
+    ``DA31`` / ``DA89`` namespace, or by the container directly under the
+    root (``QtyDeterm`` and ``Invoice`` exist in no other phase).
+    """
+    ns = root.tag.split("}", 1)[0].lstrip("{") if "}" in root.tag else ""
+    for phase in ("31", "89"):
+        if f"/DA{phase}/" in ns + "/":
+            return phase
+    if _find_child(root, "QtyDeterm") is not None:
+        return "31"
+    if _find_child(root, "Invoice") is not None:
+        return "89"
+    return ""
+
+
 def _ozmask_separators(root: ET.Element) -> tuple[list[str], str]:
     """Read the OZ-Maske (``BoQBkdn``) - the level lengths and the index flag.
 
@@ -398,7 +419,10 @@ class GAEBXMLImporter:
         if not head_bytes:
             return False
         name = filename.lower()
-        if any(name.endswith(ext) for ext in (".x81", ".x83", ".x84", ".x86")):
+        # X31 and X89 are claimed too, only so that ``parse`` can refuse them
+        # by name. Left unclaimed they would fall through to the model-assisted
+        # import, which would happily turn an invoice into new positions.
+        if any(name.endswith(ext) for ext in (".x81", ".x83", ".x84", ".x86", ".x31", ".x89")):
             return True
         if not name.endswith(".xml"):
             return False
@@ -422,6 +446,20 @@ class GAEBXMLImporter:
             raise ImporterParseError(f"Failed to parse GAEB XML: {exc}") from exc
         except Exception as exc:  # noqa: BLE001
             raise ImporterParseError(f"GAEB XML rejected by security parser: {exc}") from exc
+
+        site_phase = _site_phase(root)
+        if site_phase == "31":
+            raise ImporterParseError(
+                "This is a GAEB X31 quantity determination (Mengenermittlung), not a bill of quantities. "
+                "It carries measured quantities for positions that already exist: open the bill and use "
+                "the GAEB X31 / X89 dialog to import them."
+            )
+        if site_phase == "89":
+            raise ImporterParseError(
+                "This is a GAEB X89 invoice (Rechnung), not a bill of quantities. Importing it would add "
+                "the invoiced lines as new positions: open the bill and use the GAEB X31 / X89 dialog to "
+                "check it instead."
+            )
 
         da_kind = _detect_da_kind(root)
         priced_phase = da_kind in ("x84", "x86")
