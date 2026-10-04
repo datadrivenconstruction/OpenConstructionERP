@@ -11,8 +11,6 @@
  * Mounted at `/api/v1/tendering/bid-portal/{token}/`.
  */
 
-const BASE = '/api/v1/tendering/bid-portal';
-
 export interface BidPortalLine {
   id: string;
   kind: 'section' | 'item';
@@ -114,7 +112,7 @@ async function toError(res: Response): Promise<BidPortalError> {
 }
 
 async function call(token: string, path: string, init?: RequestInit): Promise<BidPortalView> {
-  const res = await fetch(`${BASE}/${encodeURIComponent(token)}/${path}`, {
+  const res = await fetch(`/api/v1/tendering/bid-portal/${encodeURIComponent(token)}/${path}`, {
     ...init,
     headers: { Accept: 'application/json', ...(init?.body ? { 'Content-Type': 'application/json' } : {}) },
     credentials: 'omit',

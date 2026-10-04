@@ -482,8 +482,19 @@ def read_locale_keys(locale_glob: str) -> dict[str, set[str]]:
 
 
 def _reach(key: str, by_locale: dict[str, set[str]]) -> set[str]:
-    """Locales that can answer this key, bare form or any CLDR plural form."""
-    forms = (key, *(key + suffix for suffix in _CLDR_SUFFIXES))
+    """Locales that can answer this key, bare form or any CLDR plural form.
+
+    A member found in en.ts can itself be one plural form, `x_one`, because
+    the template prefix matches every form English declares. The reader's
+    i18next never asks for `x_one` by that name: it asks for `x` with a count
+    and picks the form its own language uses. ja, ko, th, vi, zh and id have
+    only `other`, so a member `x_one` is answered there by `x_other`, and
+    demanding `x_one` would ask those files for a form their language never
+    looks up. Whether a language holds every category it needs is
+    check_i18n_plural_forms.py's question, not this one's.
+    """
+    base = next((key[: -len(s)] for s in _CLDR_SUFFIXES if key.endswith(s)), key)
+    forms = (key, base, *(base + suffix for suffix in _CLDR_SUFFIXES))
     return {stem for stem, keys in by_locale.items() if any(f in keys for f in forms)}
 
 

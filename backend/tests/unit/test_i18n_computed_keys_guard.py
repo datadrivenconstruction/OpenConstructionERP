@@ -306,3 +306,22 @@ def test_both_quote_styles_of_key_field_resolve(tmp_path, quote):
         "S.tsx": "t(item.labelKey, { defaultValue: item.defaultLabel });\n",
     }
     assert _run(tmp_path, sources, {"nav.other": "O"}) == 1
+
+
+def test_a_plural_member_is_answered_by_the_form_the_language_uses():
+    """`x_one` as a family member is owed as `x`, not as that one form.
+
+    The prefix `boq.markup_` matched `boq.markup_band_count_one` in en.ts, and
+    the guard then asked zh for that exact key. zh has one plural category,
+    so i18next reads `_other` there and `_one` never exists. A locale with no
+    form of the key at all is still missing it.
+    """
+    by_locale = {
+        "en": {"x.count_one", "x.count_other"},
+        "zh": {"x.count_other"},
+        "de": {"x.count_one", "x.count_other"},
+        "fr": set(),
+    }
+    bases = {"en": None, "zh": None, "de": None, "fr": None}
+    assert guard.missing_locales("x.count_one", by_locale, bases) == ["fr"]
+    assert guard.missing_locales("x.count_other", by_locale, bases) == ["fr"]
