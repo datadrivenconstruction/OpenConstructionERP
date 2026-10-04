@@ -24,10 +24,12 @@
  *   position id is known.
  * - `/finance?tab=budgets` - the budget lines, where an approved change order
  *   writes its revised-budget row.
+ * - `/procurement?po=<id>` - ProcurementPage opens the purchase-order tab and
+ *   scrolls to and marks that order, or names it when it is not on the page.
+ * - `/rfq-bidding?rfq=<id>` - RFQBiddingPage opens the tab that RFQ lives on
+ *   (Awards once it is awarded) and marks it.
  *
- * The procurement register reads no deep-link parameter yet, so a purchase
- * order is linked to the register and named by its number in the label; the
- * reader still knows which row to look for.
+ * The bare `PROCUREMENT_LINK` stays for the places that know no order id yet.
  */
 
 const encode = (id: string): string => encodeURIComponent(id);
@@ -56,11 +58,21 @@ export function boqPositionDeepLink(positionId: string): string {
 /** The project's budget lines. */
 export const FINANCE_BUDGETS_LINK = '/finance?tab=budgets';
 
-/** The purchase-order register. It reads no deep-link parameter yet. */
+/** The purchase-order register, with no order in focus. */
 export const PROCUREMENT_LINK = '/procurement';
+
+/** The purchase-order register, open on one order. */
+export function purchaseOrderDeepLink(poId: string): string {
+  return `/procurement?po=${encode(poId)}`;
+}
 
 /** The request-for-quotation register. */
 export const RFQ_LINK = '/rfq-bidding';
+
+/** The request-for-quotation register, open on one RFQ. */
+export function rfqDeepLink(rfqId: string): string {
+  return `/rfq-bidding?rfq=${encode(rfqId)}`;
+}
 
 /* ── Which record an award produced ─────────────────────────────────────── */
 
@@ -123,6 +135,43 @@ export function findAwardRecord<T extends AwardStampedRow>(
     if (typeof rowBid === 'string' && bids.has(rowBid)) return row;
   }
   return null;
+}
+
+/**
+ * The live purchase order an RFQ award drafted, or `null` when none in `rows`
+ * carries the RFQ's stamp.
+ *
+ * The RFQ path (`procurement/rfq_award.py`) stamps `origin: 'rfq_award'` and
+ * `rfq_id`. A cancelled order is passed over: a re-award retires the earlier
+ * draft by cancelling it, and the order that stands for the RFQ is the live
+ * one. As with `findAwardRecord`, `null` means "not among these rows".
+ */
+export function findRfqAwardOrder<T extends AwardStampedRow>(rows: readonly T[], rfqId: string): T | null {
+  if (!rfqId) return null;
+  for (const row of rows) {
+    if (RETIRED_AWARD_ORDER_STATUSES.has(row.status)) continue;
+    const md: Record<string, unknown> = row.metadata && typeof row.metadata === 'object' ? row.metadata : {};
+    if (md.origin === 'rfq_award' && md.rfq_id === rfqId) return row;
+  }
+  return null;
+}
+
+/** The RFQ a purchase order was drafted from, each field only when present. */
+export interface OrderSource {
+  rfqId: string | null;
+  rfqNumber: string | null;
+}
+
+/**
+ * Read the origin an RFQ award stamped onto the order it drafted. An order
+ * raised by hand, or drafted from a tender, carries no RFQ and both fields are
+ * `null`, so the caller draws no link.
+ */
+export function orderSource(metadata: Record<string, unknown> | null | undefined): OrderSource {
+  const md: Record<string, unknown> = metadata && typeof metadata === 'object' ? metadata : {};
+  const str = (v: unknown): string | null => (typeof v === 'string' && v.trim() !== '' ? v : null);
+  if (md.origin !== 'rfq_award') return { rfqId: null, rfqNumber: null };
+  return { rfqId: str(md.rfq_id), rfqNumber: str(md.rfq_number) };
 }
 
 /* ── What a contract was drafted from ───────────────────────────────────── */

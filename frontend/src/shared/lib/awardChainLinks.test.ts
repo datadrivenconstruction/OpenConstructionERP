@@ -14,8 +14,12 @@ import {
   changeOrderWriteback,
   contractSource,
   findAwardRecord,
+  findRfqAwardOrder,
+  orderSource,
+  purchaseOrderDeepLink,
   RETIRED_AWARD_CONTRACT_STATUSES,
   RETIRED_AWARD_ORDER_STATUSES,
+  rfqDeepLink,
   tenderPackageDeepLink,
 } from './awardChainLinks';
 
@@ -27,6 +31,8 @@ describe('each link lands on the record the page reads', () => {
     expect(boqDeepLink('boq-1', 'pos-2')).toBe('/boq/boq-1?highlight=pos-2');
     expect(boqDeepLink('boq-1', null)).toBe('/boq/boq-1');
     expect(boqPositionDeepLink('pos-2')).toBe('/boq?positionId=pos-2');
+    expect(purchaseOrderDeepLink('po-1')).toBe('/procurement?po=po-1');
+    expect(rfqDeepLink('rfq-1')).toBe('/rfq-bidding?rfq=rfq-1');
   });
 
   it('escapes an id that would otherwise rewrite the query string', () => {
@@ -134,5 +140,40 @@ describe('changeOrderWriteback', () => {
     expect(changeOrderWriteback(undefined)).toEqual(none);
     expect(changeOrderWriteback({ writeback: 'boq-1' })).toEqual(none);
     expect(changeOrderWriteback({ writeback: ['boq-1'] })).toEqual(none);
+  });
+});
+
+describe('findRfqAwardOrder', () => {
+  const rows: Row[] = [
+    { id: 'retired', status: 'cancelled', metadata: { origin: 'rfq_award', rfq_id: 'rfq-1' } },
+    { id: 'hand-made', status: 'draft', metadata: { rfq_id: 'rfq-1' } },
+    { id: 'live', status: 'draft', metadata: { origin: 'rfq_award', rfq_id: 'rfq-1' } },
+    { id: 'other', status: 'issued', metadata: { origin: 'rfq_award', rfq_id: 'rfq-2' } },
+  ];
+
+  it('finds the live order the award stamped, past a cancelled one', () => {
+    expect(findRfqAwardOrder(rows, 'rfq-1')?.id).toBe('live');
+    expect(findRfqAwardOrder(rows, 'rfq-2')?.id).toBe('other');
+  });
+
+  it('does not take an order that only happens to carry the key', () => {
+    expect(findRfqAwardOrder(rows.slice(0, 2), 'rfq-1')).toBeNull();
+    expect(findRfqAwardOrder(rows, '')).toBeNull();
+  });
+});
+
+describe('orderSource', () => {
+  it('reads the RFQ an award drafted the order from', () => {
+    expect(orderSource({ origin: 'rfq_award', rfq_id: 'rfq-1', rfq_number: 'RFQ-014' })).toEqual({
+      rfqId: 'rfq-1',
+      rfqNumber: 'RFQ-014',
+    });
+  });
+
+  it('answers null for an order with another origin or none', () => {
+    const none = { rfqId: null, rfqNumber: null };
+    expect(orderSource({ origin: 'tender_award', rfq_id: 'rfq-1' })).toEqual(none);
+    expect(orderSource(null)).toEqual(none);
+    expect(orderSource({ origin: 'rfq_award', rfq_id: '' })).toEqual(none);
   });
 });
