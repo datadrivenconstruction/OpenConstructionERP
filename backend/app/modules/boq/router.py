@@ -3376,7 +3376,7 @@ def _national_code_value(key: str, value: str, classification: dict[str, Any]) -
         bare = re.sub(r"\s+", "", _GESN_PRINTED_PREFIX.sub("", value))
         return bare if national_rules.GESNValidCode._PATTERN.match(bare) else None
     if key == "birimfiyat":
-        return value if national_rules.BirimFiyatValidPoz._PATTERN.match(value) else None
+        return value if national_rules.BirimFiyatValidPoz.poz_is_well_formed(value) else None
     if key == "sinapi":
         bank = str(classification.get("banco") or "").strip().upper()
         if bank and not bank.startswith("SINAPI"):

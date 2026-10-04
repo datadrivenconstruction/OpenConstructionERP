@@ -224,4 +224,4 @@ def test_a_sinapi_code_is_carried_only_from_a_sinapi_line(bank: str, carried: bo
 def test_the_poz_rule_reads_the_current_ministry_book(poz: str, valid: bool) -> None:
     from app.core.validation.rules import BirimFiyatValidPoz
 
-    assert bool(BirimFiyatValidPoz._PATTERN.match(poz)) is valid
+    assert BirimFiyatValidPoz.poz_is_well_formed(poz) is valid
