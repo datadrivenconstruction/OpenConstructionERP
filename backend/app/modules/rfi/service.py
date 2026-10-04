@@ -24,7 +24,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.events import event_bus
+from app.core.events import event_bus, publish_after_commit
 from app.core.json_merge import merge_metadata
 from app.modules.rfi.models import RFI
 from app.modules.rfi.repository import RFIRepository
@@ -506,6 +506,10 @@ class RFIService:
         # reassignment or a prior reopen) so the audit before_state is exact.
         prev_bic_s = str(rfi.ball_in_court) if rfi.ball_in_court else None
         old_status = rfi.status
+        has_cost_impact = bool(rfi.cost_impact)
+        cost_impact_value_s = rfi.cost_impact_value
+        schedule_impact = bool(rfi.schedule_impact)
+        schedule_impact_days = rfi.schedule_impact_days
 
         await self.repo.update_fields(
             rfi_id,
@@ -555,6 +559,28 @@ class RFIService:
             },
             source_module="oe_rfi",
         )
+
+        # An answer to an RFI flagged with a cost impact is a design change
+        # with money attached. The change orders module drafts a change order
+        # from it for a person to review. Deferred to the commit because that
+        # subscriber reads this RFI from its own session and checks it is
+        # really answered.
+        if has_cost_impact:
+            publish_after_commit(
+                self.session,
+                "rfi.response.design_change",
+                {
+                    "project_id": project_id_s,
+                    "rfi_id": str(rfi_id),
+                    "rfi_number": rfi_number_s,
+                    "subject": subject_s,
+                    "cost_impact": True,
+                    "cost_impact_value": cost_impact_value_s,
+                    "schedule_impact": schedule_impact,
+                    "schedule_impact_days": schedule_impact_days,
+                },
+                source_module="oe_rfi",
+            )
 
         logger.info(
             "rfi.state_change",

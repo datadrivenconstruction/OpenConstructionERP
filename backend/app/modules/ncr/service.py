@@ -9,7 +9,9 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.events import event_bus, publish_after_commit
+# event_bus stays importable here: tests/unit/test_ncr.py patches
+# app.modules.ncr.service.event_bus.publish.
+from app.core.events import event_bus, publish_after_commit  # noqa: F401
 from app.core.json_merge import merge_metadata
 from app.modules.ncr.models import NCR
 from app.modules.ncr.repository import NCRRepository
@@ -392,9 +394,12 @@ class NCRService:
 
         logger.info("NCR closed: %s", ncr_id)
 
-        # Emit event for variation creation when cost impact exists
+        # Emit event for variation creation when cost impact exists. Deferred
+        # to the commit: the change orders subscriber reads this NCR from its
+        # own session and must see it closed.
         if ncr.cost_impact:
-            event_bus.publish_detached(
+            publish_after_commit(
+                self.session,
                 "ncr.closed_with_cost_impact",
                 {
                     "ncr_id": str(ncr.id),

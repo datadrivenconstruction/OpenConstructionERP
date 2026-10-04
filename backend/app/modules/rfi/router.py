@@ -690,6 +690,11 @@ async def create_variation_from_rfi(
     """
     rfi = await service.get_rfi(rfi_id)
     await verify_project_access(rfi.project_id, str(user_id), session)
+    # Row lock shared with app.modules.changeorders.events, which drafts the
+    # same change order when the RFI is answered. Both sides take it before
+    # reading change_order_id, so whichever runs second sees the first one's
+    # link instead of minting a second order.
+    await session.refresh(rfi, with_for_update=True)
 
     if not rfi.cost_impact:
         raise HTTPException(

@@ -8,9 +8,9 @@ Each handler is thin: validates the event, calls the target module's service.
 Dataflows wired:
    1. meeting.action_item.created   -> auto-create task
    2. safety.observation.high_risk  -> notify PM + safety officer
-   3. inspection.completed.failed   -> log for possible punch item creation
-   4. rfi.response.design_change    -> flag for variation (change order)
-   5. ncr.cost_impact               -> flag for variation (change order)
+   3. inspection.completed.failed   -> punch suggestion event (punchlist creates the items)
+   4. rfi.response.design_change    -> flag for variation (changeorders drafts a CO)
+   5. ncr.closed_with_cost_impact   -> flag for variation (changeorders drafts a CO)
    6. document.revision.created     -> flag linked BOQ positions
    7. invoice.paid                  -> update project budget actuals
    8. po.issued                     -> update project budget committed
@@ -286,12 +286,19 @@ async def _handle_safety_incident_created(event: Event) -> None:
 
 
 # ---------------------------------------------------------------------------
-# 3. inspection.completed.failed -> log for possible punch item
+# 3. inspection.completed.failed -> punch suggestion for webhooks
 # ---------------------------------------------------------------------------
 
 
 async def _handle_inspection_completed_failed(event: Event) -> None:
-    """Log failed inspection for UI to offer punch item creation.
+    """Re-announce a failed inspection as ``punchlist.suggestion.from_inspection``.
+
+    The punch items themselves are created by
+    ``app.modules.punchlist.events._on_inspection_completed_failed``, which
+    subscribes to ``inspection.completed.failed`` directly and is idempotent per
+    inspection and checklist item. This handler only re-emits the narrower name
+    for outgoing webhooks and must never create items itself, or every failed
+    check would be raised twice.
 
     Expected event.data:
         project_id: str (UUID)
@@ -307,14 +314,14 @@ async def _handle_inspection_completed_failed(event: Event) -> None:
         result = data.get("result", "")
 
         logger.info(
-            "inspection.completed.failed: inspection %s (%s) result=%s -- UI may offer punch item creation",
+            "inspection.completed.failed: inspection %s (%s) result=%s, re-emitting as a punch suggestion",
             inspection_number,
             inspection_id,
             result,
         )
 
-        # Re-emit a more specific event that the frontend can subscribe to via
-        # WebSocket or the UI can poll for.  For now, we simply log it.
+        # Re-emit a more specific event for webhook consumers. Nothing in the
+        # application subscribes to it on purpose, see the docstring.
         await event_bus.publish(
             "punchlist.suggestion.from_inspection",
             data={
@@ -336,7 +343,11 @@ async def _handle_inspection_completed_failed(event: Event) -> None:
 
 
 async def _handle_rfi_response_design_change(event: Event) -> None:
-    """Flag RFI response with cost_impact for potential variation/change order.
+    """An answered RFI with a cost impact -> ``variation.flagged``.
+
+    Published by ``RFIService.respond_to_rfi`` after its commit when the RFI is
+    flagged with a cost impact. ``app.modules.changeorders.events`` turns the
+    flag into a draft change order that a person reviews.
 
     Expected event.data:
         project_id: str (UUID)
@@ -354,8 +365,8 @@ async def _handle_rfi_response_design_change(event: Event) -> None:
         rfi_number = data.get("rfi_number", "")
         cost_impact = data.get("cost_impact", False)
 
-        if not cost_impact:
-            logger.debug("rfi.response.design_change: no cost_impact, skipping")
+        if not cost_impact or not rfi_id or not data.get("project_id"):
+            logger.debug("rfi.response.design_change: no cost_impact or no ids, skipping")
             return
 
         logger.info(
@@ -382,38 +393,52 @@ async def _handle_rfi_response_design_change(event: Event) -> None:
 
 
 # ---------------------------------------------------------------------------
-# 5. ncr.cost_impact -> flag for variation
+# 5. ncr.closed_with_cost_impact -> flag for variation
 # ---------------------------------------------------------------------------
 
 
 async def _handle_ncr_cost_impact(event: Event) -> None:
-    """Flag NCR with cost_impact > 0 for potential variation/change order.
+    """An NCR closed with a cost impact -> ``variation.flagged``.
+
+    Subscribed to ``ncr.closed_with_cost_impact``, which ``NCRService.close_ncr``
+    publishes after its commit. It used to listen for ``ncr.cost_impact``, a
+    name nothing publishes.
+
+    The NCR stores its cost as free text such as ``"BRL 12000"`` or
+    ``"12,000"``, so it is read with the same parser the NCR's own "create
+    variation" action uses. Reading it with ``float()`` turned every amount
+    that carried a currency code into zero and dropped the flag.
 
     Expected event.data:
         project_id: str (UUID)
         ncr_id: str (UUID)
         ncr_number: str
-        cost_impact: str (monetary value as string, e.g. "15000")
+        cost_impact: str (free text, e.g. "15000" or "BRL 12000")
         title: str
+        schedule_impact_days: int | None
     """
     try:
+        from decimal import Decimal, InvalidOperation
+
+        from app.modules.ncr.router import _parse_cost_impact
+
         data = event.data
         ncr_id = data.get("ncr_id")
         ncr_number = data.get("ncr_number", "")
         cost_impact = data.get("cost_impact", "0")
 
-        # Parse cost_impact; treat non-numeric as zero
+        amount, _currency = _parse_cost_impact(str(cost_impact) if cost_impact is not None else None)
         try:
-            cost_value = float(str(cost_impact).replace(",", ""))
-        except (ValueError, TypeError):
-            cost_value = 0.0
+            cost_value = Decimal(amount)
+        except (InvalidOperation, ValueError, TypeError):
+            cost_value = Decimal("0")
 
-        if cost_value <= 0:
-            logger.debug("ncr.cost_impact: cost_impact=%s <= 0, skipping", cost_impact)
+        if not ncr_id or not data.get("project_id") or not cost_value.is_finite() or cost_value <= 0:
+            logger.debug("ncr.closed_with_cost_impact: cost_impact=%s is not a positive amount, skipping", cost_impact)
             return
 
         logger.info(
-            "ncr.cost_impact: NCR %s has cost_impact=%s, emitting variation flag",
+            "ncr.closed_with_cost_impact: NCR %s has cost_impact=%s, emitting variation flag",
             ncr_number,
             cost_impact,
         )
@@ -427,13 +452,13 @@ async def _handle_ncr_cost_impact(event: Event) -> None:
                 "source_number": ncr_number,
                 "subject": data.get("title", ""),
                 "cost_impact_value": cost_impact,
-                "schedule_impact": False,
+                "schedule_impact": bool(data.get("schedule_impact_days")),
                 "schedule_impact_days": data.get("schedule_impact_days"),
             },
             source_module="event_handlers",
         )
     except Exception:
-        logger.exception("Error handling ncr.cost_impact")
+        logger.exception("Error handling ncr.closed_with_cost_impact")
 
 
 # ---------------------------------------------------------------------------
@@ -2067,7 +2092,7 @@ def register_event_handlers() -> None:
     event_bus.subscribe_once("safety.incident.created", _handle_safety_incident_created)
     event_bus.subscribe_once("inspection.completed.failed", _handle_inspection_completed_failed)
     event_bus.subscribe_once("rfi.response.design_change", _handle_rfi_response_design_change)
-    event_bus.subscribe_once("ncr.cost_impact", _handle_ncr_cost_impact)
+    event_bus.subscribe_once("ncr.closed_with_cost_impact", _handle_ncr_cost_impact)
     event_bus.subscribe_once("document.revision.created", _handle_document_revision_created)
     # invoice.paid is NOT subscribed here any more: _handle_invoice_paid wrote the
     # total of every paid invoice onto EACH budget line, inflating actual N times.

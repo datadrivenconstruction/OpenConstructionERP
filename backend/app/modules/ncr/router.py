@@ -206,6 +206,11 @@ async def create_variation_from_ncr(
     # IDOR guard: ncr.update is a global role; without this any holder could
     # escalate an NCR in a project they cannot access into a change order.
     await verify_project_access(ncr.project_id, str(user_id), session)
+    # Row lock shared with app.modules.changeorders.events, which drafts the
+    # same change order when the NCR is closed. Both sides take it before
+    # reading change_order_id, so whichever runs second sees the first one's
+    # link instead of minting a second order.
+    await session.refresh(ncr, with_for_update=True)
 
     if not ncr.cost_impact:
         raise HTTPException(

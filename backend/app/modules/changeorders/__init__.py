@@ -8,7 +8,9 @@ and approval workflows (draft -> submitted -> approved/rejected).
 
 
 async def on_startup() -> None:
-    """Module startup hook - register permissions."""
+    """Module startup hook - register permissions and event subscribers."""
+    from app.modules.changeorders.events import register_changeorder_event_subscribers
     from app.modules.changeorders.permissions import register_changeorder_permissions
 
     register_changeorder_permissions()
+    register_changeorder_event_subscribers()

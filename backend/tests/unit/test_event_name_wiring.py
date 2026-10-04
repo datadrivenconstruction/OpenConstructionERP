@@ -142,11 +142,9 @@ KNOWN_DEAD_SUBSCRIPTIONS: dict[str, str] = {
     "meeting.scheduled": "nothing publishes when a meeting is scheduled",
     "moc.entry.accepted": "moc subscribers wait on an acceptance event no service publishes",
     "moc.entry.implemented": "moc subscribers wait on an implementation event no service publishes",
-    "ncr.cost_impact": "core/event_handlers.py:1832; ncr/service.py:333 publishes 'ncr.closed_with_cost_impact'",
     "po.issued": "core/event_handlers.py:1835; procurement/service.py:1588 publishes 'procurement.po.issued'",
     "portal.buyer_signup.completed": "nothing publishes a completed buyer signup",
     "qms.inspection.hold_point_failed": "qms subscribes to a hold-point failure no inspection service publishes",
-    "rfi.response.design_change": "nothing publishes an RFI response that carries a design change",
     "schedule.milestone.reached": "nothing publishes when a schedule milestone is reached",
     "schedule_advanced.task.completed": (
         "bi_dashboards/events.py:104, inside the annotated _PROJECTION_INVALIDATING_EVENTS "
