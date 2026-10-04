@@ -22547,6 +22547,10 @@
         "ai_prompts.py",
         "base_date.py",
         "cad_import.py",
+        "change_review.py",
+        "change_review_models.py",
+        "change_review_router.py",
+        "change_review_schemas.py",
         "copilot_models.py",
         "copilot_schemas.py",
         "copilot_service.py",
@@ -28072,7 +28076,9 @@
         "cad",
         "costmodel",
         "costs",
+        "documents",
         "dwg_takeoff",
+        "file_versions",
         "finance",
         "i18n_foundation",
         "measurement",
@@ -38380,6 +38386,7 @@
       "files": [
         "__init__.py",
         "budget_delta_repair.py",
+        "events.py",
         "intl.py",
         "manifest.py",
         "models.py",
@@ -39830,7 +39837,9 @@
         "ai",
         "boq",
         "finance",
+        "ncr",
         "projects",
+        "rfi",
         "teams",
         "variations"
       ]
@@ -52452,6 +52461,7 @@
         "seed.py",
         "service.py",
         "signing_bridge.py",
+        "sov_adjustments.py",
         "sov_posting.py",
         "validators.py"
       ],
@@ -56807,6 +56817,16 @@
               "name": "percent_regressed",
               "type": "bool",
               "default": "False"
+            },
+            {
+              "name": "adjusts_contract_line_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "adjusts_line_code",
+              "type": "str",
+              "default": "''"
             }
           ]
         },
@@ -121117,6 +121137,7 @@
         "service.py",
         "subdivisions.py",
         "tax_federal_scope_repair.py",
+        "tax_history_backfill.py",
         "tax_rules.py",
         "tax_seed_reconcile.py",
         "tax_subdivision_repair.py",
@@ -182504,6 +182525,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "contingency.py",
         "escalation.py",
         "events.py",
         "intl.py",
@@ -182782,6 +182804,27 @@
           "handler": "simulate_risks",
           "response_model": "RiskSimulationResult",
           "request_schema": "RiskSimulateRequest"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/contingency",
+          "handler": "get_contingency_position",
+          "response_model": "ContingencyPosition",
+          "request_schema": "RiskService"
+        },
+        {
+          "method": "POST",
+          "path": "/projects/{project_id}/contingency/drawdowns/{risk_id}",
+          "handler": "confirm_contingency_drawdown",
+          "response_model": "ContingencyPosition",
+          "request_schema": "ContingencyDrawdownRequest"
+        },
+        {
+          "method": "DELETE",
+          "path": "/projects/{project_id}/contingency/drawdowns/{risk_id}",
+          "handler": "reverse_contingency_drawdown",
+          "response_model": "ContingencyPosition",
+          "request_schema": "RiskService"
         },
         {
           "method": "POST",
@@ -183446,9 +183489,262 @@
               "default": "False"
             }
           ]
+        },
+        {
+          "class_name": "ContingencyLineOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One finance budget line in the contingency category, in its own currency.",
+          "fields": [
+            {
+              "name": "budget_id",
+              "type": "UUID"
+            },
+            {
+              "name": "wbs_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "currency",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "allocated",
+              "type": "Decimal"
+            },
+            {
+              "name": "drawn",
+              "type": "Decimal"
+            },
+            {
+              "name": "remaining",
+              "type": "Decimal"
+            },
+            {
+              "name": "converted",
+              "type": "bool",
+              "default": "True"
+            }
+          ]
+        },
+        {
+          "class_name": "ContingencyDrawdownOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A confirmed drawdown, amount in the currency of the line it was drawn from.\n\nThe risk's code and title are a snapshot taken at confirmation, so the\nrecord still reads correctly after the risk itself was deleted.",
+          "fields": [
+            {
+              "name": "risk_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "risk_code",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "risk_title",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "budget_id",
+              "type": "UUID"
+            },
+            {
+              "name": "amount",
+              "type": "Decimal"
+            },
+            {
+              "name": "currency",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "confirmed_by",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "confirmed_at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "note",
+              "type": "str",
+              "default": "''"
+            }
+          ]
+        },
+        {
+          "class_name": "ContingencyPendingOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "An occurred risk whose drawdown a person has not confirmed yet.\n\n``proposed_amount`` is the cost impact expressed in the currency of the\nline the drawdown would land on by default. It prefills the dialog and is\nnever recorded on its own.",
+          "fields": [
+            {
+              "name": "risk_id",
+              "type": "UUID"
+            },
+            {
+              "name": "risk_code",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "risk_title",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "impact_cost",
+              "type": "Decimal"
+            },
+            {
+              "name": "currency",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "proposed_amount",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "proposed_currency",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "proposed_budget_id",
+              "type": "UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "ContingencyPosition",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Risk-based contingency against the contingency the finance budget holds.\n\nTotals are in ``currency`` (the project currency). ``emv`` is the sum of\nweight x cost impact over the register, where the weight is the\nprobability, 1 for an occurred risk still waiting for its drawdown (its\ncost is certain), and 0 for a closed risk or one already drawn down (see\n``contingency.risk_weight``). ``p50``/``p80``\nare deterministic percentiles of the same register; ``percentile_method``\nsays whether they are exact or a normal approximation. ``remaining`` is\nallocated minus drawn, and ``coverage_gap`` is remaining minus EMV\n(negative means the contingency left does not cover the open exposure\nplus the occurred risks still to be drawn).",
+          "fields": [
+            {
+              "name": "currency",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "emv",
+              "type": "Decimal"
+            },
+            {
+              "name": "p50",
+              "type": "Decimal"
+            },
+            {
+              "name": "p80",
+              "type": "Decimal"
+            },
+            {
+              "name": "percentile_method",
+              "type": "Literal['exact', 'normal_approximation']",
+              "default": "'exact'"
+            },
+            {
+              "name": "emv_by_currency",
+              "type": "dict[str, Decimal]"
+            },
+            {
+              "name": "allocated",
+              "type": "Decimal"
+            },
+            {
+              "name": "drawn",
+              "type": "Decimal"
+            },
+            {
+              "name": "remaining",
+              "type": "Decimal"
+            },
+            {
+              "name": "coverage_gap",
+              "type": "Decimal"
+            },
+            {
+              "name": "state",
+              "type": "Literal['no_allocation', 'covered', 'shortfall', 'overdrawn']",
+              "default": "'no_allocation'"
+            },
+            {
+              "name": "active_risk_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "excluded_closed_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "excluded_drawn_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "unconverted_emv",
+              "type": "dict[str, Decimal]"
+            },
+            {
+              "name": "missing_fx_rates",
+              "type": "list[str]"
+            },
+            {
+              "name": "lines",
+              "type": "list[ContingencyLineOut]"
+            },
+            {
+              "name": "drawdowns",
+              "type": "list[ContingencyDrawdownOut]"
+            },
+            {
+              "name": "pending",
+              "type": "list[ContingencyPendingOut]"
+            }
+          ]
+        },
+        {
+          "class_name": "ContingencyDrawdownRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A person confirming a drawdown for a risk that occurred.\n\n``amount`` is in the currency of the chosen contingency line.\n``budget_id`` may be left out when the project has one contingency line\n(or one in the project currency); with several it is required.",
+          "fields": [
+            {
+              "name": "amount",
+              "type": "Decimal"
+            },
+            {
+              "name": "budget_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "note",
+              "type": "str"
+            }
+          ]
         }
       ],
       "import_dependencies": [
+        "finance",
         "projects"
       ]
     },
@@ -231145,10 +231441,10 @@
     },
     {
       "name": "bid-management",
-      "ts_files": 10,
+      "ts_files": 11,
       "css_files": 0,
-      "test_files": 2,
-      "total_files": 10
+      "test_files": 3,
+      "total_files": 11
     },
     {
       "name": "bim",
@@ -231166,10 +231462,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 152,
+      "ts_files": 157,
       "css_files": 0,
-      "test_files": 76,
-      "total_files": 152
+      "test_files": 79,
+      "total_files": 157
     },
     {
       "name": "buyer-portal",
@@ -231229,10 +231525,10 @@
     },
     {
       "name": "changeorders",
-      "ts_files": 11,
+      "ts_files": 14,
       "css_files": 0,
-      "test_files": 4,
-      "total_files": 11
+      "test_files": 6,
+      "total_files": 14
     },
     {
       "name": "claims-evidence",
@@ -231306,10 +231602,10 @@
     },
     {
       "name": "contracts",
-      "ts_files": 52,
+      "ts_files": 53,
       "css_files": 0,
-      "test_files": 24,
-      "total_files": 52
+      "test_files": 25,
+      "total_files": 53
     },
     {
       "name": "coordination",
@@ -231390,10 +231686,10 @@
     },
     {
       "name": "dashboard",
-      "ts_files": 39,
+      "ts_files": 40,
       "css_files": 0,
-      "test_files": 9,
-      "total_files": 39
+      "test_files": 10,
+      "total_files": 40
     },
     {
       "name": "dashboards",
@@ -231936,10 +232232,10 @@
     },
     {
       "name": "progress",
-      "ts_files": 4,
+      "ts_files": 5,
       "css_files": 0,
-      "test_files": 0,
-      "total_files": 4
+      "test_files": 1,
+      "total_files": 5
     },
     {
       "name": "project-controls",
@@ -232076,17 +232372,17 @@
     },
     {
       "name": "rfq-bidding",
-      "ts_files": 7,
+      "ts_files": 8,
       "css_files": 0,
-      "test_files": 4,
-      "total_files": 7
+      "test_files": 5,
+      "total_files": 8
     },
     {
       "name": "risk",
-      "ts_files": 6,
+      "ts_files": 11,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 6
+      "test_files": 3,
+      "total_files": 11
     },
     {
       "name": "rom-estimate",
@@ -232279,10 +232575,10 @@
     },
     {
       "name": "tendering",
-      "ts_files": 15,
+      "ts_files": 16,
       "css_files": 0,
-      "test_files": 4,
-      "total_files": 15
+      "test_files": 5,
+      "total_files": 16
     },
     {
       "name": "timeline",
@@ -232498,7 +232794,9 @@
       "cad",
       "costmodel",
       "costs",
+      "documents",
       "dwg_takeoff",
+      "file_versions",
       "finance",
       "i18n_foundation",
       "measurement",
@@ -232559,7 +232857,9 @@
       "ai",
       "boq",
       "finance",
+      "ncr",
       "projects",
+      "rfi",
       "teams",
       "variations"
     ],
@@ -233426,6 +233726,7 @@
       "users"
     ],
     "risk": [
+      "finance",
       "projects"
     ],
     "rom_estimate": [
@@ -233639,11 +233940,11 @@
     "total_models": 618,
     "total_columns": 7104,
     "total_relationships": 234,
-    "total_routes": 3711,
-    "total_schemas": 3489,
-    "total_python_files": 2212,
+    "total_routes": 3714,
+    "total_schemas": 3494,
+    "total_python_files": 2220,
     "frontend_features": 190,
-    "frontend_ts_files": 2794,
+    "frontend_ts_files": 2813,
     "frontend_backend_mapped": 169
   },
   "frontend_backend_mapping": {
