@@ -4,8 +4,11 @@
 What a project manager relies on, each pinned with a case where the wrong
 implementation gives a different number:
 
-* closed and occurred risks drop out of EMV (and out of the summary exposure
-  and the Monte Carlo draw);
+* closed risks drop out of EMV; an occurred risk counts at its full impact
+  until its drawdown is confirmed and then drops out, so the money is counted
+  once at every step (the summary exposure and the Monte Carlo draw follow
+  the same rule, and an occurred delay stays in the schedule);
+* only the drawdown route writes a drawdown, not the budget create route;
 * allocated contingency is the project's own Contingency budget lines, in
   either spelling, converted into the project currency;
 * nothing is drawn until a person confirms; confirming the same drawdown twice
@@ -100,7 +103,7 @@ async def _markers(session, budget_id: uuid.UUID) -> dict:
 
 
 @pytest.mark.asyncio
-async def test_closed_and_occurred_risks_leave_emv_and_summary_exposure(session):
+async def test_closed_risk_leaves_emv_and_a_pending_occurred_one_counts_in_full(session):
     svc = RiskService(session)
     await _risk(svc, probability=0.5, impact_cost=D("1000"))
     closed_id = await _risk(svc, probability=0.4, impact_cost=D("5000"))
@@ -108,18 +111,54 @@ async def test_closed_and_occurred_risks_leave_emv_and_summary_exposure(session)
     await _risk(svc, probability=0.9, impact_cost=D("3000"), status="occurred")
 
     pos = await svc.get_contingency_position(PROJECT_ID)
-    # 0.5 x 1000 only. With the closed risk it would be 2500, with both 5200.
-    assert pos["emv"] == D("500.00")
+    # 0.5 x 1000 + 1 x 3000 (occurred, not yet drawn). With the closed risk it
+    # would be 5500; dropping the occurred one would say 500.
+    assert pos["emv"] == D("3500.00")
     assert pos["active_risk_count"] == 1
     assert pos["excluded_closed_count"] == 1
     assert len(pos["pending"]) == 1
 
     summary = await svc.get_summary(PROJECT_ID)
-    assert summary["total_exposure"] == pytest.approx(500.0)
+    # The register's exposure follows the same rule as the card.
+    assert summary["total_exposure"] == pytest.approx(3500.0)
     # Every risk is still counted in the register totals.
     assert summary["total"] == 3
 
-    ContingencyPosition(**pos)  # the dict fits the response model
+
+@pytest.mark.asyncio
+async def test_occurring_then_confirming_moves_the_cost_once(session):
+    """Open, occurred, confirmed: the gap never improves and the money is counted once."""
+    svc = RiskService(session)
+    await _line(session, amount="100000")
+    rid = await _risk(svc, probability=0.5, impact_cost=D("100000"))
+
+    open_pos = await svc.get_contingency_position(PROJECT_ID)
+    open_summary = await svc.get_summary(PROJECT_ID)
+    assert open_pos["coverage_gap"] == D("50000.00")
+    assert open_summary["total_exposure"] == pytest.approx(50000.0)
+
+    await svc.update_risk(rid, RiskUpdate(status="occurred"))
+    pending_pos = await svc.get_contingency_position(PROJECT_ID)
+    pending_summary = await svc.get_summary(PROJECT_ID)
+    # The old rule read EMV 0 and 100 000 to spare here.
+    assert pending_pos["emv"] == D("100000.00")
+    assert pending_pos["coverage_gap"] == D("0.00")
+    assert pending_summary["total_exposure"] == pytest.approx(100000.0)
+
+    confirmed = await svc.confirm_contingency_drawdown(PROJECT_ID, rid, _req("100000"))
+    confirmed_summary = await svc.get_summary(PROJECT_ID)
+    assert confirmed["drawn"] == D("100000.00")
+    assert confirmed["emv"] == D("0.00")
+    assert confirmed["coverage_gap"] == D("0.00")
+    # Drawn money is no longer exposure; counting it twice would say 100 000.
+    assert confirmed_summary["total_exposure"] == pytest.approx(0.0)
+
+    # Reversing the drawdown puts the full impact back as exposure.
+    reversed_pos = await svc.reverse_contingency_drawdown(PROJECT_ID, rid)
+    assert reversed_pos["emv"] == D("100000.00")
+    assert reversed_pos["drawn"] == D("0.00")
+
+    ContingencyPosition(**reversed_pos)  # the dict fits the response model
 
 
 @pytest.mark.asyncio
@@ -130,6 +169,42 @@ async def test_simulation_leaves_out_closed_risks(session):
     result = await svc.simulate(PROJECT_ID, iterations=1000, mode="cost")
     assert result["p80_cost"] == 0.0
     assert result["tornado"] == []
+
+
+# No PERT triple on these risks, so every draw is the point estimate and the
+# percentiles are exact numbers rather than samples.
+
+
+@pytest.mark.asyncio
+async def test_simulation_keeps_an_occurred_delay_in_the_schedule(session):
+    svc = RiskService(session)
+    await _risk(svc, probability=0.2, impact_cost=D("0"), impact_schedule_days=30, status="occurred")
+    closed = await _risk(svc, probability=0.9, impact_cost=D("0"), impact_schedule_days=40)
+    await svc.update_risk(closed, RiskUpdate(status="closed"))
+
+    result = await svc.simulate(PROJECT_ID, iterations=1000, mode="schedule")
+    # The 30 days have happened: in full, not at 0.2 (6 days) and not dropped
+    # (0). The closed risk's 40 days are gone.
+    assert result["p50_schedule_days"] == 30
+    assert result["p80_schedule_days"] == 30
+
+
+@pytest.mark.asyncio
+async def test_simulation_cost_counts_a_pending_occurred_risk_and_not_a_drawn_one(session):
+    svc = RiskService(session)
+    await _line(session, amount="100000")
+    pending = await _risk(svc, probability=0.2, impact_cost=D("4000"), impact_schedule_days=10, status="occurred")
+    drawn = await _risk(svc, probability=0.2, impact_cost=D("7000"), impact_schedule_days=5, status="occurred")
+    await svc.confirm_contingency_drawdown(PROJECT_ID, drawn, _req("7000"))
+
+    result = await svc.simulate(PROJECT_ID, iterations=1000, mode="both")
+    # Pending in full (4000), drawn out (its money is spent): 4000. Weighting by
+    # probability would say 800; counting the drawn one too 11 000.
+    assert result["p50_cost"] == pytest.approx(4000.0)
+    assert result["p80_cost"] == pytest.approx(4000.0)
+    assert [t["risk_id"] for t in result["tornado"]] == [str(pending)]
+    # Drawing the money does not give the days back: both delays stay.
+    assert result["p50_schedule_days"] == 15
 
 
 @pytest.mark.asyncio

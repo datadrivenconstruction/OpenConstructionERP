@@ -22,12 +22,12 @@ from app.modules.risk.contingency import (
     build_position,
     clamp_probability,
     convert_to_base,
-    counts_toward_emv,
     default_line,
     emv_percentiles,
     fx_map_from_rates,
     parse_drawdown_record,
     resolve_base_currency,
+    risk_weight,
     to_decimal,
 )
 
@@ -61,23 +61,35 @@ def _line(bid: str, allocated: str, *, currency: str = "EUR", drawdowns=()) -> C
 
 
 @pytest.mark.parametrize(
-    ("status", "expected"),
+    ("status", "drawn", "expected"),
     [
-        ("identified", True),
-        ("assessed", True),
-        ("open", True),
-        ("mitigating", True),
-        ("mitigated", True),
-        ("monitoring", True),
-        ("closed", False),
-        ("occurred", False),
-        ("CLOSED", False),
-        ("", True),
-        (None, True),
+        ("identified", False, D("0.4")),
+        ("assessed", False, D("0.4")),
+        ("open", False, D("0.4")),
+        ("mitigating", False, D("0.4")),
+        ("mitigated", False, D("0.4")),
+        ("monitoring", False, D("0.4")),
+        ("", False, D("0.4")),
+        (None, False, D("0.4")),
+        # Retired: nothing left to carry.
+        ("closed", False, D("0")),
+        ("CLOSED", False, D("0")),
+        # Happened and not yet drawn: certain, not gone.
+        ("occurred", False, D("1")),
+        (" Occurred ", False, D("1")),
+        # A confirmed drawdown takes the cost out whatever the status says.
+        ("occurred", True, D("0")),
+        ("open", True, D("0")),
     ],
 )
-def test_counts_toward_emv(status, expected):
-    assert counts_toward_emv(status) is expected
+def test_risk_weight(status, drawn, expected):
+    assert risk_weight(status, "0.4", drawn=drawn) == expected
+
+
+def test_risk_weight_clamps_the_probability():
+    assert risk_weight("open", "1.7") == D("1")
+    assert risk_weight("open", "-0.2") == D("0")
+    assert risk_weight("open", "junk") == D("0")
 
 
 # ── Number helpers ────────────────────────────────────────────────────────
@@ -196,7 +208,7 @@ def test_percentiles_fall_back_to_normal_approximation_for_large_registers():
 # ── The position ──────────────────────────────────────────────────────────
 
 
-def test_closed_and_occurred_risks_drop_out_of_emv():
+def test_closed_drops_out_and_a_pending_occurred_risk_counts_in_full():
     risks = [
         _risk("a", "0.5", "1000"),
         _risk("b", "0.2", "5000", status="closed"),
@@ -204,14 +216,76 @@ def test_closed_and_occurred_risks_drop_out_of_emv():
         _risk("d", "0.1", "2000", status="mitigated"),
     ]
     pos = build_position(risks, [_line("L1", "1000")], project_currency="EUR", fx={})
-    # 0.5 x 1000 + 0.1 x 2000 = 700. Counting the closed risk would give 1700,
-    # counting the occurred one as well 4400.
-    assert pos["emv"] == D("700.00")
+    # 0.5 x 1000 + 0.1 x 2000 + 1 x 3000 = 3700. Counting the closed risk
+    # would add 1000; dropping the occurred one would say 700; counting it at
+    # its old probability would say 3400.
+    assert pos["emv"] == D("3700.00")
+    assert pos["emv_by_currency"] == {"EUR": D("3700.00")}
     assert pos["active_risk_count"] == 2
     assert pos["excluded_closed_count"] == 1
     assert [p["risk_id"] for p in pos["pending"]] == ["c"]
     assert pos["pending"][0]["proposed_amount"] == D("3000.00")
     assert pos["pending"][0]["proposed_budget_id"] == "L1"
+    # The occurred cost is certain, so it shifts both percentiles by 3000.
+    assert pos["p50"] >= D("3000.00")
+    assert pos["state"] == "shortfall"
+
+
+def _stage(status: str, *, drawn: str | None = None, allocated: str = "100000") -> dict:
+    """One open risk (p 0.5, impact 100 000) at a stage of its life."""
+    risks = [_risk("r", "0.5", "100000", status=status)]
+    drawdowns = (
+        (DrawdownRecord(source="risk:r", risk_id="r", amount=D(drawn), currency="EUR"),) if drawn is not None else ()
+    )
+    return build_position(risks, [_line("L", allocated, drawdowns=drawdowns)], project_currency="EUR", fx={})
+
+
+def test_a_risk_occurring_never_improves_the_position():
+    """The finding's case, followed through its three stages.
+
+    Allocated 100 000. Open at p 0.5: 50 000 to spare. Occurred and waiting:
+    the full 100 000 is about to go, so nothing is to spare (the old rule said
+    100 000 to spare). Confirmed at 100 000: drawn, out of EMV, still nothing
+    to spare (a rule counting it twice would say 100 000 short).
+    """
+    open_ = _stage("open")
+    assert (open_["emv"], open_["coverage_gap"], open_["state"]) == (D("50000.00"), D("50000.00"), "covered")
+
+    pending = _stage("occurred")
+    assert pending["emv"] == D("100000.00")
+    assert pending["drawn"] == D("0.00")
+    assert pending["remaining"] == D("100000.00")
+    assert pending["coverage_gap"] == D("0.00")
+    assert pending["coverage_gap"] <= open_["coverage_gap"]
+
+    confirmed = _stage("occurred", drawn="100000")
+    assert confirmed["emv"] == D("0.00")
+    assert confirmed["drawn"] == D("100000.00")
+    assert confirmed["remaining"] == D("0.00")
+    assert confirmed["coverage_gap"] == D("0.00")
+    assert confirmed["pending"] == []
+    assert confirmed["excluded_drawn_count"] == 1
+
+
+def test_a_pending_occurred_risk_turns_a_thin_cover_into_a_shortfall():
+    # Allocated 80 000: covered while open (gap +30 000), short once it occurs
+    # (gap -20 000). The old rule showed it covered with 80 000 to spare.
+    assert _stage("open", allocated="80000")["state"] == "covered"
+    pending = _stage("occurred", allocated="80000")
+    assert pending["state"] == "shortfall"
+    assert pending["coverage_gap"] == D("-20000.00")
+    # Confirming a smaller actual cost than the impact frees the difference.
+    settled = _stage("occurred", drawn="60000", allocated="80000")
+    assert settled["state"] == "covered"
+    assert settled["coverage_gap"] == D("20000.00")
+
+
+def test_pending_occurred_risk_without_a_rate_is_reported_apart():
+    risks = [_risk("g", "0.1", "800", status="occurred", currency="GBP")]
+    pos = build_position(risks, [_line("L", "5000")], project_currency="EUR", fx={})
+    assert pos["emv"] == D("0.00")
+    assert pos["unconverted_emv"] == {"GBP": D("800.00")}
+    assert pos["missing_fx_rates"] == ["GBP"]
 
 
 def test_foreign_currency_converted_not_summed_in_own_units():

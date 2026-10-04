@@ -470,12 +470,15 @@ class ContingencyPosition(BaseModel):
     """Risk-based contingency against the contingency the finance budget holds.
 
     Totals are in ``currency`` (the project currency). ``emv`` is the sum of
-    probability x cost impact over risks that can still happen (closed and
-    occurred risks, and risks already drawn down, are out). ``p50``/``p80``
+    weight x cost impact over the register, where the weight is the
+    probability, 1 for an occurred risk still waiting for its drawdown (its
+    cost is certain), and 0 for a closed risk or one already drawn down (see
+    ``contingency.risk_weight``). ``p50``/``p80``
     are deterministic percentiles of the same register; ``percentile_method``
     says whether they are exact or a normal approximation. ``remaining`` is
     allocated minus drawn, and ``coverage_gap`` is remaining minus EMV
-    (negative means the contingency left does not cover the open exposure).
+    (negative means the contingency left does not cover the open exposure
+    plus the occurred risks still to be drawn).
     """
 
     currency: str = ""

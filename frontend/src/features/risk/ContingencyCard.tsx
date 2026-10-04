@@ -7,7 +7,9 @@
  *
  * A risk that occurs is never drawn on its own. It is listed as pending with
  * a proposed amount, and a manager confirms the drawdown here, choosing the
- * line and the real figure. A mistaken confirmation can be reversed.
+ * line and the real figure. A mistaken confirmation can be reversed. While it
+ * waits, the server counts its full impact in EMV (it is certain cost now), so
+ * the verdict never improves at the moment a risk materialises.
  */
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';

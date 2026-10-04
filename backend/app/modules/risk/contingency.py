@@ -20,13 +20,20 @@ Vocabulary, as a project manager reads it:
   from "held for the unknown" to "spent on a known event", so remaining
   contingency is allocated minus drawn.
 
-Which risks count toward EMV. A closed risk has been retired and an occurred
-risk is no longer uncertain (its cost is now a drawdown, or waiting for one),
-so both drop out. A risk that already has a confirmed drawdown also drops out
-whatever its status says, otherwise reopening it would count its cost twice:
-once as drawn money and once as exposure. Every other status, including
-``mitigated`` and ``monitoring``, still carries residual probability and stays
-in.
+Which risks count toward EMV, and with what weight (:func:`risk_weight`, the
+one rule the register summary, the Monte Carlo draw and this module share):
+
+* A closed risk has been retired and drops out (weight 0).
+* A risk with a confirmed drawdown drops out whatever its status says (weight
+  0): its cost is already in ``drawn``, and counting it again as exposure, for
+  example after it was reopened, would take the same money twice.
+* An occurred risk waiting for its drawdown counts at its full impact (weight
+  1). It is no longer a chance but a cost that is about to be drawn, so it must
+  not make the position look better than before it occurred. Once a person
+  confirms the drawdown, the confirmed amount moves into ``drawn`` and the risk
+  leaves EMV, so the money is counted exactly once at every step.
+* Every other status, including ``mitigated`` and ``monitoring``, still
+  carries residual probability and counts at that probability.
 
 Currency. Every amount carries its own ISO code. Amounts are converted into the
 project currency with the project's own FX table (``Project.fx_rates``: units
@@ -56,10 +63,11 @@ from app.core.currency_registry import money_quantum
 
 # ── Status rule (one place, used by summary, simulation and this module) ──
 
-#: Statuses that take a risk out of the expected monetary value.
-EMV_EXCLUDED_STATUSES: frozenset[str] = frozenset({"closed", "occurred"})
+#: The status of a retired risk: no exposure left at all.
+CLOSED_STATUS = "closed"
 
-#: The status that makes a risk eligible for a contingency drawdown.
+#: The status that makes a risk eligible for a contingency drawdown, and makes
+#: its cost certain until the drawdown is confirmed.
 MATERIALISED_STATUS = "occurred"
 
 #: The finance budget category that holds contingency (compared lower-case:
@@ -75,9 +83,30 @@ _EXACT_OUTCOME_CAP = 32_768
 _Z = {50: Decimal("0"), 80: Decimal("0.8416212335729143")}
 
 
-def counts_toward_emv(status: str | None) -> bool:
-    """True when a risk in ``status`` still contributes expected value."""
-    return (status or "").strip().lower() not in EMV_EXCLUDED_STATUSES
+def _status(status: str | None) -> str:
+    return (status or "").strip().lower()
+
+
+def risk_weight(status: str | None, probability: object, *, drawn: bool = False) -> Decimal:
+    """How much of a risk's impact the register still has to carry, in [0, 1].
+
+    Args:
+        status: The risk's status.
+        probability: Its probability (anything :func:`clamp_probability` reads).
+        drawn: True when a person has confirmed a contingency drawdown for it.
+            Only the cost side knows about drawdowns; a schedule caller leaves
+            this False, because drawing money does not give the days back.
+
+    Returns:
+        0 for a closed risk or a drawn one, 1 for an occurred risk (its impact
+        is certain now), and the probability for every other status.
+    """
+    s = _status(status)
+    if drawn or s == CLOSED_STATUS:
+        return Decimal("0")
+    if s == MATERIALISED_STATUS:
+        return Decimal("1")
+    return clamp_probability(probability)
 
 
 # ── Number helpers ────────────────────────────────────────────────────────
@@ -366,19 +395,24 @@ def build_position(
     excluded_drawn = 0
     pending: list[dict[str, Any]] = []
     for r in risks:
-        if r.risk_id in drawn_risk_ids:
+        drawn = r.risk_id in drawn_risk_ids
+        weight = risk_weight(r.status, r.probability, drawn=drawn)
+        if drawn:
             excluded_drawn += 1
             continue
-        status = (r.status or "").strip().lower()
-        if status == MATERIALISED_STATUS:
-            pending.append(_pending_entry(r, base=base, fx=fx, lines=lines))
-            continue
-        if not counts_toward_emv(status):
+        status = _status(r.status)
+        if status == CLOSED_STATUS:
             excluded_closed += 1
             continue
-        active += 1
+        if status == MATERIALISED_STATUS:
+            # Listed for a person to confirm, and meanwhile carried at its full
+            # impact (weight 1), so the position cannot improve the moment a
+            # risk materialises and before its money is drawn.
+            pending.append(_pending_entry(r, base=base, fx=fx, lines=lines))
+        else:
+            active += 1
         impact = max(r.impact, Decimal("0"))
-        emv = r.probability * impact
+        emv = weight * impact
         code = norm_code(r.currency) or base
         emv_by_currency[code] = emv_by_currency.get(code, Decimal("0")) + emv
         converted_impact = convert_to_base(impact, r.currency, base=base, fx=fx)
@@ -386,8 +420,8 @@ def build_position(
             missing.add(norm_code(r.currency))
             unconverted[norm_code(r.currency)] = unconverted.get(norm_code(r.currency), Decimal("0")) + emv
             continue
-        emv_total += r.probability * converted_impact
-        outcomes.append((r.probability, converted_impact))
+        emv_total += weight * converted_impact
+        outcomes.append((weight, converted_impact))
 
     percentiles, method = emv_percentiles(outcomes)
 

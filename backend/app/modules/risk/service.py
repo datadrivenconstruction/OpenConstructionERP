@@ -23,17 +23,18 @@ from app.core.json_merge import merge_metadata
 from app.modules.risk.contingency import (
     MATERIALISED_STATUS,
     ContingencyLine,
+    DrawdownRecord,
     RiskMoney,
     allocated_amount,
     build_position,
     clamp_probability,
-    counts_toward_emv,
     default_line,
     fx_map_from_rates,
     norm_code,
     parse_drawdown_record,
     quantize_money,
     resolve_base_currency,
+    risk_weight,
     to_decimal,
 )
 from app.modules.risk.models import RiskItem
@@ -370,6 +371,7 @@ class RiskService:
     async def get_summary(self, project_id: uuid.UUID) -> dict[str, Any]:
         """Get aggregated stats for a project's risk register."""
         items = await self.repo.all_for_project(project_id)
+        drawn_ids = await self._drawn_risk_ids(project_id) if items else set()
 
         by_status: dict[str, int] = {}
         by_tier: dict[str, int] = {}
@@ -412,18 +414,19 @@ class RiskService:
             else:
                 without_mitigation += 1
 
-            # Exposure = impact_cost * probability, accumulated per currency,
-            # over risks that can still happen. A closed risk was retired and
-            # an occurred one is now a contingency drawdown, so counting either
-            # here put exposure on the card that the register no longer holds
-            # (same rule as the contingency card, see contingency.py).
+            # Exposure = impact_cost x weight, accumulated per currency. The
+            # weight is the contingency card's rule (contingency.risk_weight):
+            # a closed or already drawn risk carries nothing, an occurred one
+            # waiting for its drawdown carries its full impact, every other one
+            # its probability.
             try:
-                exposure = float(item.impact_cost) * float(item.probability)
+                weight = risk_weight(item.status, item.probability, drawn=str(item.id) in drawn_ids)
+                exposure = float(item.impact_cost) * float(weight)
                 # A legacy / raw-written non-finite or absurd impact_cost makes
                 # float() overflow to inf (no exception); inf would poison the
                 # whole rollup (round(inf) -> inf -> RiskSummary 500). Skip just
                 # this contribution. New rows are guarded by the schema validator.
-                if math.isfinite(exposure) and counts_toward_emv(item.status):
+                if math.isfinite(exposure) and weight > 0:
                     cur = item.currency or ""
                     exposure_by_currency[cur] = exposure_by_currency.get(cur, 0.0) + exposure
             except (ValueError, TypeError):
@@ -607,25 +610,28 @@ class RiskService:
         # the simulation when only the qualitative path is populated.
         cost_triples: list[tuple[float, float, float]] = []
         schedule_triples: list[tuple[float, float, float]] = []
-        prob_weights: list[float] = []
+        cost_weights: list[float] = []
+        schedule_weights: list[float] = []
         item_meta: list[tuple[uuid.UUID, str]] = []
+        drawn_ids = await self._drawn_risk_ids(project_id) if mode in ("cost", "both") else set()
 
         for item in items:
             # Probability weight on a 0..1 scale. Prefer the 1-5 PMBOK
             # score (probability_score) - it's already discretised - and
             # fall back to the raw ``probability`` string if missing.
-            if not counts_toward_emv(item.status):
-                # Closed and occurred risks are no longer uncertain, so they
-                # take no part in the contingency distribution.
-                weight = 0.0
-            elif item.probability_score is not None:
-                weight = max(0.0, min(float(item.probability_score) / 5.0, 1.0))
+            if item.probability_score is not None:
+                probability = max(0.0, min(float(item.probability_score) / 5.0, 1.0))
             else:
                 try:
-                    weight = max(0.0, min(float(item.probability), 1.0))
+                    probability = max(0.0, min(float(item.probability), 1.0))
                 except (ValueError, TypeError):
-                    weight = 0.0
-            prob_weights.append(weight)
+                    probability = 0.0
+            # The status rule the contingency card uses (contingency.risk_weight):
+            # a closed risk is out, an occurred one is certain. Cost and schedule
+            # differ in one place only: a confirmed drawdown takes the cost out
+            # (it is drawn money now), but the delay has still happened.
+            cost_weights.append(float(risk_weight(item.status, probability, drawn=str(item.id) in drawn_ids)))
+            schedule_weights.append(float(risk_weight(item.status, probability)))
             item_meta.append((item.id, item.code))
 
             cost_triples.append(
@@ -655,7 +661,7 @@ class RiskService:
         # them - the same rule get_summary applies to total_exposure.
         cost_currencies: set[str] = set()
         for idx in range(len(items)):
-            if prob_weights[idx] > 0.0 and max(cost_triples[idx]) > 0.0:
+            if cost_weights[idx] > 0.0 and max(cost_triples[idx]) > 0.0:
                 cur = (items[idx].currency or "").strip()
                 if cur:
                     cost_currencies.add(cur)
@@ -681,22 +687,21 @@ class RiskService:
             c_total = 0.0
             s_total = 0.0
             for idx in range(len(items)):
-                weight = prob_weights[idx]
-                if weight <= 0.0:
-                    continue
-                if sample_cost:
+                c_weight = cost_weights[idx]
+                s_weight = schedule_weights[idx]
+                if sample_cost and c_weight > 0.0:
                     lo, mid, hi = cost_triples[idx]
                     # random.triangular(low, high, mode) - note the
                     # argument order is (low, high, mode), NOT
                     # (low, mode, high). Easy off-by-one to make.
                     draw = random.triangular(lo, hi, mid) if hi > lo else mid
-                    contrib = draw * weight
+                    contrib = draw * c_weight
                     c_total += contrib
                     per_risk_cost_sum[idx] += contrib
-                if sample_schedule:
+                if sample_schedule and s_weight > 0.0:
                     lo, mid, hi = schedule_triples[idx]
                     draw = random.triangular(lo, hi, mid) if hi > lo else mid
-                    contrib = draw * weight
+                    contrib = draw * s_weight
                     s_total += contrib
                     per_risk_schedule_sum[idx] += contrib
             if sample_cost:
@@ -814,7 +819,7 @@ class RiskService:
         Returns the risks, the lines (with their parsed drawdowns), the project
         currency and its FX table.
         """
-        from app.modules.finance.service import CONTINGENCY_DRAWDOWN_PREFIX, FinanceService
+        from app.modules.finance.service import FinanceService
         from app.modules.projects.repository import ProjectRepository
 
         project = await ProjectRepository(self.session).get_by_id(project_id)
@@ -839,27 +844,32 @@ class RiskService:
         lines: list[ContingencyLine] = []
         for budget in await FinanceService(self.session).list_contingency_lines(project_id):
             line_currency = norm_code(budget.currency_code)
-            drawdowns = []
-            for key, raw in (budget.metadata_ or {}).items():
-                if not str(key).startswith(CONTINGENCY_DRAWDOWN_PREFIX):
-                    continue
-                record = parse_drawdown_record(
-                    str(key)[len(CONTINGENCY_DRAWDOWN_PREFIX) :],
-                    raw,
-                    line_currency=line_currency or project_currency,
-                )
-                if record is not None:
-                    drawdowns.append(record)
             lines.append(
                 ContingencyLine(
                     budget_id=str(budget.id),
                     wbs_id=budget.wbs_id,
                     currency=line_currency,
                     allocated=allocated_amount(budget.revised_budget, budget.original_budget),
-                    drawdowns=tuple(drawdowns),
+                    drawdowns=_line_drawdowns(budget, line_currency or project_currency),
                 )
             )
         return risks, lines, project_currency, fx
+
+    async def _drawn_risk_ids(self, project_id: uuid.UUID) -> set[str]:
+        """Ids of the risks holding a confirmed drawdown on this project's contingency.
+
+        One read of the contingency lines, for the register summary and the
+        Monte Carlo draw, which apply the card's rule (a drawn risk carries no
+        cost exposure) without building the whole position.
+        """
+        from app.modules.finance.service import FinanceService
+
+        return {
+            record.risk_id
+            for budget in await FinanceService(self.session).list_contingency_lines(project_id)
+            for record in _line_drawdowns(budget, norm_code(budget.currency_code))
+            if record.risk_id
+        }
 
     async def get_contingency_position(self, project_id: uuid.UUID) -> dict[str, Any]:
         """Risk-based contingency (EMV, P50/P80) against the finance contingency lines."""
@@ -1014,6 +1024,24 @@ class RiskService:
             },
         )
         return await self.get_contingency_position(project_id)
+
+
+def _line_drawdowns(budget: Any, line_currency: str) -> tuple[DrawdownRecord, ...]:
+    """The confirmed drawdowns stored on one contingency budget line's metadata."""
+    from app.modules.finance.service import CONTINGENCY_DRAWDOWN_PREFIX
+
+    records: list[DrawdownRecord] = []
+    for key, raw in (getattr(budget, "metadata_", None) or {}).items():
+        if not str(key).startswith(CONTINGENCY_DRAWDOWN_PREFIX):
+            continue
+        record = parse_drawdown_record(
+            str(key)[len(CONTINGENCY_DRAWDOWN_PREFIX) :],
+            raw,
+            line_currency=line_currency,
+        )
+        if record is not None:
+            records.append(record)
+    return tuple(records)
 
 
 # ── Monte Carlo helpers (module-level, pure) ──────────────────────────────

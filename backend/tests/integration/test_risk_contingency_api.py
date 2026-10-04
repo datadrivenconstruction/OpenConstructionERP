@@ -271,7 +271,10 @@ async def test_owner_reads_confirms_and_reverses(http_client, tenants):
     assert view.status_code == 200, view.text
     body = view.json()
     assert body["currency"] == "EUR"
-    assert body["emv"] == "1500.00"  # only the open risk: 0.5 x 3000
+    # 0.5 x 3000 for the open risk plus the occurred one's full 2500, which
+    # waits for its drawdown.
+    assert body["emv"] == "4000.00"
+    assert body["coverage_gap"] == "6000.00"
     assert body["allocated"] == "10000.00"
     assert body["state"] == "covered"
     assert [p["risk_id"] for p in body["pending"]] == [a["risk_id"]]
@@ -287,6 +290,9 @@ async def test_owner_reads_confirms_and_reverses(http_client, tenants):
     assert after["drawn"] == "2300.00"
     assert after["remaining"] == "7700.00"
     assert after["pending"] == []
+    # Confirmed: the drawn 2300 replaces the 2500 impact, counted once.
+    assert after["emv"] == "1500.00"
+    assert after["coverage_gap"] == "6200.00"
     assert after["drawdowns"][0]["note"] == "pumping and dewatering"
 
     # Replayed: still one drawdown, same totals.
