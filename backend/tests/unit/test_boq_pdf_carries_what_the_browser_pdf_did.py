@@ -246,6 +246,87 @@ def test_resources_print_under_their_line_only_when_asked() -> None:
     assert _money(labour[5]) + _money(steel[5]) == _money(rows[at][5])
 
 
+def _dollar_assembly_line() -> Any:
+    """A USD assembly applied to a euro project that had no USD rate yet.
+
+    ``assemblies/service.py`` stores the assembly's currency on the position and
+    builds the resources without a currency of their own: they inherit the
+    line's. 10 m3 at 100 USD, built from 2 units of 50 per m3.
+    """
+    return _position(
+        "01.004",
+        "10",
+        "100",
+        "1000",
+        metadata={
+            "currency": "USD",
+            "resources": [{"name": "Crew", "type": "labor", "unit": "h", "quantity": 2, "unit_rate": 50}],
+        },
+    )
+
+
+def test_resources_of_a_foreign_line_are_converted_by_the_lines_currency() -> None:
+    # The rate was added in Project Settings afterwards. The rollup converts the
+    # line by its own currency, so the rows under it have to come along: read
+    # resource by resource they carry no currency and printed 1,000.00 under a
+    # 900.00 line.
+    line = _dollar_assembly_line()
+    total, rate = _line_money(line, "EUR", FX)
+    assert (total, rate) == (Decimal("900.00"), Decimal("90.00"))
+
+    (crew,) = _resource_lines(line, "EUR", FX)
+    assert (crew.quantity, crew.unit_rate, crew.total) == (Decimal("20"), Decimal("45.00"), Decimal("900.00"))
+    assert crew.total == total
+
+    rows = _rows(
+        _build_boq_table(
+            _bill([_section([line], "900")]),
+            "EUR",
+            _build_styles(),
+            country_code="IE",
+            base_currency="EUR",
+            fx_rates=FX,
+            include_resources=True,
+        )
+    )
+    at = next(i for i, row in enumerate(rows) if row[0] == "01.004")
+    assert rows[at][4:] == ["90.00", "900.00"]
+    assert rows[at + 1][1:] == ["Crew", "h", "20.00", "45.00", "900.00"]
+    assert not any("1,000.00" in cell for row in rows for cell in row)
+
+
+def test_a_foreign_line_with_no_rate_keeps_its_rows_in_its_own_units() -> None:
+    # No USD rate on the project: the rollup sums the line in dollars, and the
+    # rows stay in dollars with it rather than being converted on their own.
+    line = _dollar_assembly_line()
+    assert _line_money(line, "EUR", {}) == (Decimal("1000"), Decimal("100"))
+    (crew,) = _resource_lines(line, "EUR", {})
+    assert (crew.unit_rate, crew.total) == (Decimal("50"), Decimal("1000"))
+
+
+def test_a_resource_naming_a_foreign_currency_is_converted_on_its_own() -> None:
+    # Once one resource names a foreign currency the rollup converts resource by
+    # resource and ignores the line's currency; a resource with no currency is
+    # then read as base. The rows follow the same branch, so they still add up.
+    line = _position(
+        "01.005",
+        "10",
+        "110",
+        "1100",
+        metadata={
+            "currency": "USD",
+            "resources": [
+                {"name": "Crew", "unit": "h", "quantity": 2, "unit_rate": 30},
+                {"name": "Steel", "unit": "kg", "quantity": 5, "unit_rate": 10, "currency": "USD"},
+            ],
+        },
+    )
+    crew, steel = _resource_lines(line, "EUR", FX)
+    assert (crew.unit_rate, steel.unit_rate) == (Decimal("30"), Decimal("9.00"))
+    total, _rate = _line_money(line, "EUR", FX)
+    assert crew.total + steel.total == total == Decimal("1050.00")
+
+
 def test_resource_rows_follow_the_measurement_system() -> None:
     line = _position(
         "01",

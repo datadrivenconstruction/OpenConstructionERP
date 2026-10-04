@@ -29,6 +29,7 @@ import io
 from collections.abc import Mapping
 from datetime import UTC, datetime
 from decimal import Decimal
+from types import SimpleNamespace
 from typing import Any, NamedTuple
 
 from reportlab.lib import colors
@@ -690,8 +691,6 @@ def _line_money(pos: Any, base_currency: str, fx_rates: Mapping[str, str] | None
     The helper reads ``metadata_``, the ORM name; the export payload carries
     ``metadata``, so it is handed a stand-in with the name it reads.
     """
-    from types import SimpleNamespace
-
     from app.modules.boq.service import _leaf_total_base_with_resources
 
     meta = _position_meta(pos)
@@ -725,31 +724,59 @@ def _resource_lines(pos: Any, base_currency: str, fx_rates: Mapping[str, str] | 
     line whose quantity is 120 m3, a per-unit figure in the Total column reads
     as the resource's share of the line and is off by a factor of 120, so each
     one is scaled to the line here: its quantity times the position's, and a
-    total that is that quantity times its rate. The rate is converted into the
-    base currency the way the rollup converts it, a currency with no usable
-    rate staying in its own units exactly as it does there, so the resources
-    of a line add up to the line.
-    """
-    from app.modules.boq.service import _to_decimal
+    total that is that quantity times its rate.
 
-    resources = _position_meta(pos).get("resources")
+    The rate is converted into the base currency by the branch the rollup
+    (``_leaf_total_base_with_resources``) takes for the same line, through the
+    rollup's own helpers, so the rows printed under a line are converted the
+    way the line above them was:
+
+    * When some resource names a foreign currency, the rollup converts
+      resource by resource, and so does this.
+    * When none does, the rollup converts the stored line total by the
+      POSITION's currency. That is the shape an assembly applied without an
+      FX rate leaves: ``metadata.currency`` is the assembly's, and its
+      resources carry no currency of their own because they inherit the
+      line's. Each rate is then scaled by that same position factor. A
+      resource tagged with the base currency counts as not foreign there, so
+      under a dollar line it is scaled by the dollar rate too, exactly as the
+      line's total is.
+
+    A currency with no usable rate stays in its own units, as in the rollup.
+    """
+    from app.modules.boq.service import (
+        _position_currency,
+        _position_total_in_base,
+        _resource_total_in_base,
+        _to_decimal,
+    )
+
+    meta = _position_meta(pos)
+    resources = meta.get("resources")
     if not isinstance(resources, list):
         return []
     base = (base_currency or "").strip().upper()
-    fx = fx_rates or {}
+    fx = dict(fx_rates or {})
     position_qty = _to_decimal(getattr(pos, "quantity", 0))
+    any_foreign = any(
+        isinstance(r, dict) and str(r.get("currency") or "").strip().upper() not in ("", base) for r in resources
+    )
+    # The factor the rollup applies to the whole line when no resource is
+    # foreign: the position's currency through ``_position_total_in_base``.
+    position_factor = _position_total_in_base(
+        "1", _position_currency(SimpleNamespace(metadata_=meta)), fx, base_currency
+    )
     lines: list[_ResourceLine] = []
     for resource in resources:
         if not isinstance(resource, dict):
             continue
         rate = _to_decimal(resource.get("unit_rate"))
-        # The rule of ``_resource_total_in_base``, word for word, so the
-        # resources printed under a line add up to the line the rollup made.
-        code = str(resource.get("currency") or "").strip().upper()
-        if code and code != base and fx.get(code):
-            factor = _to_decimal(fx[code])
-            if factor.is_finite() and factor != 0:
-                rate *= factor
+        if any_foreign:
+            rate = _resource_total_in_base(
+                [{"quantity": 1, "unit_rate": rate, "currency": resource.get("currency")}], fx, base_currency
+            )
+        else:
+            rate *= position_factor
         quantity = _to_decimal(resource.get("quantity")) * position_qty
         lines.append(
             _ResourceLine(
