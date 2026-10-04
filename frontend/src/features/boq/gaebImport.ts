@@ -11,6 +11,7 @@
  * DOMParser is browser-native — zero extra dependencies.
  */
 
+import i18n from '@/app/i18n';
 import { boqApi, type CreatePositionData } from './api';
 
 // ---------------------------------------------------------------------------
@@ -508,7 +509,13 @@ export async function importGAEBToBOQ(file: File, boqId: string): Promise<GAEBIm
   const xmlString = decodeXmlBuffer(buffer);
   const phase = detectGAEBPhase(xmlString);
   if (isGAEBSitePhase(phase)) {
-    throw new Error(`GAEB ${phase} is not a bill of quantities and is not imported as one.`);
+    throw new Error(
+      i18n.t('gaeb.site_phase_not_a_bill', {
+        phase,
+        defaultValue:
+          'This is a GAEB {{phase}} file, not a bill of quantities. Open the bill it belongs to and use "GAEB X31 / X89" in its toolbar to read it.',
+      }),
+    );
   }
   const positions = parseGAEBXML(xmlString);
 

@@ -21,6 +21,7 @@ import {
   checkX89,
   downloadX31,
   previewX31,
+  type X31MatchedItem,
   type X31Preview,
   type X89CheckReport,
 } from './gaebSiteExchangeApi';
@@ -86,6 +87,12 @@ function invoiceIssue(t: TFunction, issue: string): string {
       return t('boq.gaeb_site.issue_missing_quantity', { defaultValue: 'No billed quantity' });
     case 'duplicate_oz_in_file':
       return t('boq.gaeb_site.issue_duplicate_oz', { defaultValue: 'OZ invoiced more than once' });
+    case 'markup_not_in_bill':
+      return t('boq.gaeb_site.issue_markup_not_in_bill', {
+        defaultValue: 'Discount or surcharge the bill does not have',
+      });
+    case 'amount_not_base_times_percent':
+      return t('boq.gaeb_site.issue_markup_arithmetic', { defaultValue: 'Amount is not base x percent' });
     default:
       return issue;
   }
@@ -106,6 +113,10 @@ function applyError(t: TFunction, error: string): string {
       });
     case 'duplicate_item':
       return t('boq.gaeb_site.apply_error_duplicate', { defaultValue: 'The position was sent twice' });
+    case 'version_conflict':
+      return t('boq.gaeb_site.apply_error_version_conflict', {
+        defaultValue: 'The position was changed after the file was read. Read the file again.',
+      });
     default:
       return error;
   }
@@ -128,6 +139,20 @@ function totalsLabel(t: TFunction, key: string): string {
 
 function num(value: string | null | undefined, decimals: number): string {
   return value === null || value === undefined || value === '' ? '-' : fmtNumber(value, decimals);
+}
+
+/**
+ * Applying replaces the whole measurement sheet with one line. A position
+ * whose take-off has more than one line would lose it, so it is offered but
+ * never ticked on its own.
+ */
+export function replacesTakeOff(m: X31MatchedItem): boolean {
+  return !m.unchanged && (m.current_sheet_lines ?? 0) > 1;
+}
+
+/** The changed proposals ticked when a file is read. */
+export function preselectedProposals(matched: X31MatchedItem[]): Set<string> {
+  return new Set(matched.filter((m) => !m.unchanged && !replacesTakeOff(m)).map((m) => m.position_id));
 }
 
 export function GaebSiteExchangeDialog({
@@ -164,7 +189,7 @@ export function GaebSiteExchangeDialog({
       try {
         const result = await previewX31(boqId, file);
         setPreview(result);
-        setSelected(new Set(result.matched.filter((m) => !m.unchanged).map((m) => m.position_id)));
+        setSelected(preselectedProposals(result.matched));
       } catch (err) {
         setPreview(null);
         setError(err instanceof Error ? err.message : String(err));
@@ -218,6 +243,7 @@ export function GaebSiteExchangeDialog({
           quantity: m.proposed_quantity,
           oz: m.oz,
           rows: m.rows,
+          version: m.position_version ?? null,
         })),
       });
       setApplyErrors(result.errors);
@@ -243,6 +269,10 @@ export function GaebSiteExchangeDialog({
                       ...m,
                       current_measured_quantity: m.proposed_quantity,
                       unchanged: true,
+                      current_sheet_lines: 1,
+                      current_sheet_source: 'gaeb_x31',
+                      // The write bumped the version; a second apply reads the file again.
+                      position_version: null,
                       ...(setBoqQuantity
                         ? { current_quantity: m.proposed_quantity, difference_to_quantity: '0' }
                         : {}),
@@ -467,8 +497,23 @@ export function GaebSiteExchangeDialog({
                                 />
                               </td>
                               <td className="px-2 py-1.5 font-mono">{m.oz}</td>
-                              <td className="px-2 py-1.5 truncate max-w-[16rem]" title={m.description}>
-                                {m.description}
+                              <td className="px-2 py-1.5 max-w-[16rem]">
+                                <div className="truncate" title={m.description}>
+                                  {m.description}
+                                </div>
+                                {replacesTakeOff(m) && (
+                                  <div
+                                    className="flex items-center gap-1 text-2xs text-semantic-warning"
+                                    data-testid="gaeb-x31-replaces-take-off"
+                                  >
+                                    <AlertTriangle size={11} className="shrink-0" />
+                                    {t('boq.gaeb_site.replaces_take_off', {
+                                      defaultValue: 'Replaces {{count}} measurement line',
+                                      defaultValue_other: 'Replaces {{count}} measurement lines',
+                                      count: m.current_sheet_lines,
+                                    })}
+                                  </div>
+                                )}
                               </td>
                               <td className="px-2 py-1.5 text-center">{m.unit}</td>
                               <td className="px-2 py-1.5 text-right tabular-nums">{num(m.current_quantity, 3)}</td>
@@ -635,7 +680,7 @@ export function GaebSiteExchangeDialog({
                         {t('boq.gaeb_site.expected', { defaultValue: 'At bill rates' })}
                       </div>
                       <div className="font-semibold tabular-nums">
-                        {num(report.expected_total, 2)} {report.currency}
+                        {num(report.expected_total, 2)} {report.bill_currency || report.currency}
                       </div>
                     </div>
                     <div className="rounded-lg bg-surface-secondary p-2">
@@ -647,6 +692,20 @@ export function GaebSiteExchangeDialog({
                       </div>
                     </div>
                   </div>
+                  {report.currency_mismatch && (
+                    <div
+                      className="flex items-start gap-2 rounded-lg bg-semantic-warning-bg p-2 text-xs text-content-primary"
+                      data-testid="gaeb-x89-currency-mismatch"
+                    >
+                      <AlertTriangle size={13} className="mt-0.5 shrink-0 text-semantic-warning" />
+                      {t('boq.gaeb_site.currency_mismatch', {
+                        defaultValue:
+                          'The invoice is in {{invoice}}, the bill in {{bill}}. The differences compare two currencies and mean nothing until one is converted.',
+                        invoice: report.currency,
+                        bill: report.bill_currency ?? '',
+                      })}
+                    </div>
+                  )}
                   {report.header.InvoiceNo && (
                     <p className="text-xs text-content-secondary">
                       {t('boq.gaeb_site.invoice_header', {
@@ -708,10 +767,18 @@ export function GaebSiteExchangeDialog({
                           <tr key={`${line.oz}-${i}`} className="border-t border-border-light">
                             <td className="px-2 py-1.5 font-mono">{line.oz}</td>
                             <td className="px-2 py-1.5 truncate max-w-[14rem]" title={line.description}>
+                              {line.kind === 'markup' && (
+                                <Badge variant="neutral" size="sm" className="mr-1">
+                                  {t('boq.gaeb_site.markup_line', {
+                                    defaultValue: 'Markup {{percent}} %',
+                                    percent: num(line.markup_percent, 2),
+                                  })}
+                                </Badge>
+                              )}
                               {line.description}
                             </td>
                             <td className="px-2 py-1.5 text-right tabular-nums">
-                              {num(line.bill_qty, 3)} {line.unit}
+                              {line.kind === 'markup' ? '-' : `${num(line.bill_qty, 3)} ${line.unit}`}
                             </td>
                             <td className="px-2 py-1.5 text-right tabular-nums">{num(line.unit_price, 2)}</td>
                             <td className="px-2 py-1.5 text-right tabular-nums">{num(line.amount, 2)}</td>

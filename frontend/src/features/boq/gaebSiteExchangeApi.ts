@@ -7,6 +7,7 @@
  * quantities are decimal strings on the wire and stay strings here, so a
  * figure is shown exactly as the server computed it.
  */
+import i18n from '@/app/i18n';
 import {
   apiGet,
   apiPost,
@@ -14,7 +15,6 @@ import {
   fetchWithAuth,
   triggerDownload,
 } from '@/shared/lib/api';
-
 
 export interface X31MatchedItem {
   oz: string;
@@ -31,6 +31,12 @@ export interface X31MatchedItem {
   proposed_quantity: string;
   difference_to_quantity: string;
   unchanged: boolean;
+  /** Lines of the measurement sheet the position has now; applying replaces them all with one. */
+  current_sheet_lines: number;
+  /** `gaeb_x31` for a sheet an earlier X31 wrote, `manual` otherwise, null without a sheet. */
+  current_sheet_source: string | null;
+  /** The position version the preview read, sent back so an edit made since is refused. */
+  position_version: number | null;
 }
 
 export interface X31UnmatchedItem {
@@ -61,6 +67,8 @@ export interface X31ApplyResult {
 
 export interface X89CheckLine {
   oz: string;
+  /** `item`, or `markup` for a discount or surcharge (MarkupItem). */
+  kind?: 'item' | 'markup';
   description: string;
   unit: string;
   bill_qty: string | null;
@@ -70,6 +78,9 @@ export interface X89CheckLine {
   expected_amount: string | null;
   difference: string;
   issues: string[];
+  markup_percent?: string | null;
+  markup_base?: string | null;
+  bill_markup?: string;
 }
 
 export interface X89TotalsCheck {
@@ -83,6 +94,9 @@ export interface X89CheckReport {
   file_name: string;
   header: Record<string, string>;
   currency: string;
+  /** The currency the bill is priced in, which the expected figures are in. */
+  bill_currency?: string;
+  currency_mismatch?: boolean;
   items_in_file: number;
   lines: X89CheckLine[];
   invoiced_total: string;
@@ -119,13 +133,21 @@ export interface ClaimInvoicePreview {
     vat_amount: string;
     gross: string;
     retention: string;
+    /** Retention released and billed on this claim, paid with it. */
+    release?: string;
     payable: string;
+    /** Net less retention plus release: what the claim's net due should equal. */
+    outstanding_before_vat?: string;
   };
+  /** The claim's own net due, beside which `outstanding_before_vat` is shown. */
+  claim_net_due?: string;
   vat_source: string;
   creator: InvoiceParty;
   recipient: InvoiceParty;
   missing: string[];
-  warnings: { code: string; detail: string }[];
+  warnings: { code: string; detail: string; reason?: string }[];
+  /** Lines that could not keep their own OZ, and the OZ they are written under. */
+  remapped?: { ordinal: string; written_as: string; reason: string }[];
 }
 
 async function failure(res: Response, fallback: string): Promise<Error> {
@@ -139,11 +161,20 @@ async function failure(res: Response, fallback: string): Promise<Error> {
   return new Error(extractErrorMessageFromBody(body) ?? fallback);
 }
 
+function exportFailed(status: number): string {
+  return i18n.t('boq.gaeb_site.export_failed', { defaultValue: 'Export failed ({{status}})', status });
+}
+
 async function upload<T>(url: string, file: File): Promise<T> {
   const form = new FormData();
   form.append('file', file);
   const res = await fetchWithAuth(url, { method: 'POST', body: form });
-  if (!res.ok) throw await failure(res, `Upload failed (${res.status})`);
+  if (!res.ok) {
+    throw await failure(
+      res,
+      i18n.t('boq.gaeb_site.upload_failed', { defaultValue: 'Upload failed ({{status}})', status: res.status }),
+    );
+  }
   return (await res.json()) as T;
 }
 
@@ -158,7 +189,7 @@ export function applyX31(
   body: {
     file_name: string;
     set_boq_quantity: boolean;
-    items: { position_id: string; quantity: string; oz: string; rows: string[] }[];
+    items: { position_id: string; quantity: string; oz: string; rows: string[]; version?: number | null }[];
   },
 ): Promise<X31ApplyResult> {
   return apiPost<X31ApplyResult>(`/v1/boq/boqs/${encodeURIComponent(boqId)}/import/gaeb-x31/apply/`, body);
@@ -173,7 +204,7 @@ export async function downloadX31(
   const res = await fetchWithAuth(
     `/api/v1/boq/boqs/${encodeURIComponent(boqId)}/export/gaeb-x31/?basis=${basis}`,
   );
-  if (!res.ok) throw await failure(res, `Export failed (${res.status})`);
+  if (!res.ok) throw await failure(res, exportFailed(res.status));
   const blob = await res.blob();
   triggerDownload(blob, `${fallbackName}.X31`);
   return {
@@ -204,7 +235,7 @@ export async function downloadClaimInvoice(claimId: string, fallbackName: string
   const res = await fetchWithAuth(
     `/api/v1/boq/claims/${encodeURIComponent(claimId)}/export/gaeb-x89/${claimQuery(vatRate)}`,
   );
-  if (!res.ok) throw await failure(res, `Export failed (${res.status})`);
+  if (!res.ok) throw await failure(res, exportFailed(res.status));
   const blob = await res.blob();
   triggerDownload(blob, `${fallbackName}.X89`);
 }

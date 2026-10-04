@@ -83,11 +83,43 @@ function missingLabel(t: TFunction, field: string): string {
     default:
       what = attr ?? field;
   }
-  return who ? `${who}: ${what}` : what;
+  return who ? t('contracts.gaeb_invoice.missing_field', { defaultValue: '{{who}}: {{what}}', who, what }) : what;
 }
 
-function warningLabel(t: TFunction, code: string, detail: string): string {
+function differenceReason(t: TFunction, reason: string | undefined): string {
+  switch (reason) {
+    case 'stored_materials':
+      return t('contracts.gaeb_invoice.reason_stored_materials', {
+        defaultValue: 'The claim includes materials stored on site, which an X89 does not bill.',
+      });
+    case 'claim_gross_differs_from_lines':
+      return t('contracts.gaeb_invoice.reason_gross_differs', {
+        defaultValue: 'The claim gross is not the sum of its lines.',
+      });
+    case 'certified_to_date':
+      return t('contracts.gaeb_invoice.reason_certified_to_date', {
+        defaultValue:
+          'The claim works its net due out from everything certified to date, including money no schedule line carries.',
+      });
+    default:
+      return t('contracts.gaeb_invoice.reason_other', {
+        defaultValue: 'The claim figures were changed by hand or are out of date. Recalculate the claim.',
+      });
+  }
+}
+
+function warningLabel(t: TFunction, code: string, detail: string, reason?: string): string {
   switch (code) {
+    case 'outstanding_differs_from_net_due':
+      return t('contracts.gaeb_invoice.warn_outstanding_differs', {
+        defaultValue: 'The invoice does not ask for the net due of the claim. {{reason}}',
+        reason: differenceReason(t, reason),
+      });
+    case 'subcontract_reverse_charge_de':
+      return t('contracts.gaeb_invoice.warn_reverse_charge_de', {
+        defaultValue:
+          "The invoice is issued in the subcontractor's name. Check whether reverse charge (section 13b UStG) applies before it is sent; if it does, no VAT may be stated.",
+      });
     case 'claim_gross_differs_from_lines':
       return t('contracts.gaeb_invoice.warn_gross_differs', {
         defaultValue: 'The claim gross is not the sum of its lines. The invoice uses the lines.',
@@ -109,6 +141,33 @@ function warningLabel(t: TFunction, code: string, detail: string): string {
   }
 }
 
+function remapReason(t: TFunction, reason: string): string {
+  switch (reason) {
+    case 'duplicate_ordinal':
+      return t('contracts.gaeb_invoice.remap_duplicate', {
+        defaultValue: 'another line bills the same OZ at another price or unit',
+      });
+    case 'ordinal_not_representable':
+      return t('contracts.gaeb_invoice.remap_not_representable', {
+        defaultValue: 'the OZ has characters GAEB cannot write',
+      });
+    case 'ordinal_depth_mismatch':
+      return t('contracts.gaeb_invoice.remap_depth', {
+        defaultValue: 'the OZ has another number of levels than the rest of the bill',
+      });
+    case 'ordinal_too_deep':
+      return t('contracts.gaeb_invoice.remap_too_deep', { defaultValue: 'the OZ has more levels than GAEB allows' });
+    case 'empty_ordinal':
+      return t('contracts.gaeb_invoice.remap_empty', { defaultValue: 'the line has no OZ' });
+    default:
+      return reason;
+  }
+}
+
+function hasAmount(value: string | undefined): boolean {
+  return value !== undefined && value !== '' && Number(value) !== 0;
+}
+
 function partyText(party: InvoiceParty): string {
   const place = [party.postcode, party.city].filter(Boolean).join(' ');
   return fmtList([party.name, party.street, place, party.country]) || '-';
@@ -128,6 +187,7 @@ export function GaebInvoicePanel({ claimId, claimNumber }: { claimId: string; cl
   });
   const preview = previewQ.data;
   const missing = preview?.missing ?? [];
+  const remapped = preview?.remapped ?? [];
 
   const handleDownload = async () => {
     setDownloading(true);
@@ -220,6 +280,16 @@ export function GaebInvoicePanel({ claimId, claimNumber }: { claimId: string; cl
                     <MoneyDisplay amount={preview.figures.retention} currency={preview.currency} />
                   </dd>
                 </div>
+                {hasAmount(preview.figures.release) && (
+                  <div className="flex justify-between px-3 py-1.5">
+                    <dt className="text-content-secondary">
+                      {t('contracts.gaeb_invoice.release', { defaultValue: 'Retention released on this claim' })}
+                    </dt>
+                    <dd>
+                      <MoneyDisplay amount={preview.figures.release ?? '0'} currency={preview.currency} />
+                    </dd>
+                  </div>
+                )}
                 <div className="flex justify-between px-3 py-1.5">
                   <dt className="text-content-secondary">
                     {t('contracts.gaeb_invoice.payable', { defaultValue: 'Outstanding amount' })}
@@ -228,6 +298,20 @@ export function GaebInvoicePanel({ claimId, claimNumber }: { claimId: string; cl
                     <MoneyDisplay amount={preview.figures.payable} currency={preview.currency} />
                   </dd>
                 </div>
+                {preview.figures.outstanding_before_vat !== undefined && preview.claim_net_due !== undefined && (
+                  <div className="flex justify-between px-3 py-1.5" data-testid="gaeb-invoice-reconcile">
+                    <dt className="text-content-secondary">
+                      {t('contracts.gaeb_invoice.outstanding_vs_net_due', {
+                        defaultValue: 'Outstanding before VAT / net due of the claim',
+                      })}
+                    </dt>
+                    <dd className="flex items-center gap-1">
+                      <MoneyDisplay amount={preview.figures.outstanding_before_vat} currency={preview.currency} />
+                      <span className="text-content-tertiary">/</span>
+                      <MoneyDisplay amount={preview.claim_net_due} currency={preview.currency} />
+                    </dd>
+                  </div>
+                )}
               </dl>
 
               <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-2">
@@ -268,11 +352,33 @@ export function GaebInvoicePanel({ claimId, claimNumber }: { claimId: string; cl
               )}
 
               {preview.warnings.length > 0 && (
-                <ul className="text-xs text-semantic-warning">
+                <ul className="text-xs text-semantic-warning" data-testid="gaeb-invoice-warnings">
                   {preview.warnings.map((w) => (
-                    <li key={w.code}>{warningLabel(t, w.code, w.detail)}</li>
+                    <li key={w.code}>{warningLabel(t, w.code, w.detail, w.reason)}</li>
                   ))}
                 </ul>
+              )}
+
+              {remapped.length > 0 && (
+                <div className="rounded-lg bg-semantic-warning-bg p-3 text-xs" data-testid="gaeb-invoice-remapped">
+                  <div className="mb-1 font-medium text-content-primary">
+                    {t('contracts.gaeb_invoice.remapped_title', {
+                      defaultValue: 'These lines cannot keep their own OZ and are written under another one:',
+                    })}
+                  </div>
+                  <ul className="list-disc pl-5 text-content-secondary">
+                    {remapped.map((r) => (
+                      <li key={`${r.ordinal}-${r.written_as}`}>
+                        {t('contracts.gaeb_invoice.remapped_line', {
+                          defaultValue: '{{ordinal}} is written as {{written}} ({{reason}})',
+                          ordinal: r.ordinal || '-',
+                          written: r.written_as,
+                          reason: remapReason(t, r.reason),
+                        })}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
 
               <Button
