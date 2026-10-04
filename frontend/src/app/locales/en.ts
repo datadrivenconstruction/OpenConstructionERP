@@ -4321,6 +4321,7 @@ const resource = {
     "boq.fx_rate_project_badge": "PROJECT",
     "boq.gaeb_export_desc": "This will export your BOQ as GAEB XML 3.3 format, compatible with standard tender workflows.",
     "boq.gaeb_export_title": "Export GAEB XML (X83)",
+    "boq.gaeb_export_title_x84": "Export GAEB XML (X84) - with prices",
     "boq.gaeb_grand_total": "Grand Total",
     "boq.gaeb_positions": "Positions",
     "boq.grand_total_conversion_tooltip_v2": "Whole BOQ rendered in {{disp}} at rate {{rate}} ({{base}} → {{disp}}). View-only, server keeps base values. Switch to \"Base\" to edit prices.",

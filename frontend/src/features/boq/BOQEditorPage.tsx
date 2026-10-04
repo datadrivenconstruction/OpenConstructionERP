@@ -2141,6 +2141,9 @@ export function BOQEditorPage() {
   const [showVersionHistory, setShowVersionHistory] = useState(false);
   const [exportWarning, setExportWarning] = useState<{ format: string; score: number } | null>(null);
   const [gaebPreviewOpen, setGaebPreviewOpen] = useState(false);
+  // Which GAEB phase the preview dialog is confirming. The dialog used to
+  // export X83 whichever menu item opened it.
+  const [gaebExportFormat, setGaebExportFormat] = useState<'gaeb' | 'gaeb_x84'>('gaeb');
 
   /* ── Computed data ─────────────────────────────────────────────────── */
 
@@ -3019,7 +3022,10 @@ export function BOQEditorPage() {
       // Map frontend format names to API endpoints and query params
       const exportFormat = format === 'gaeb_x84' ? 'gaeb' : format;
       const params = new URLSearchParams();
-      if (format === 'gaeb_x84') params.set('phase', '84');
+      // The route reads the phase from ``?format=``. It used to be sent as
+      // ``?phase=84``, which the route ignores, so "with prices" downloaded
+      // the unpriced X83.
+      if (format === 'gaeb_x84') params.set('format', 'x84');
       if (format === 'pdf') {
         // Issue #270: quantities and unit labels in the reader's system, as
         // the browser PDF printed them. The resources under each line are
@@ -3050,7 +3056,7 @@ export function BOQEditorPage() {
       if (r.ok) {
         const blob = await r.blob();
         const extensions: Record<string, string> = {
-          excel: 'xlsx', csv: 'csv', pdf: 'pdf', gaeb: 'xml', gaeb_x84: 'xml', bc3: 'bc3',
+          excel: 'xlsx', csv: 'csv', pdf: 'pdf', gaeb: 'x83', gaeb_x84: 'x84', bc3: 'bc3',
         };
         triggerDownload(blob, `${boq?.name ?? 'boq'}.${extensions[format] ?? format}`);
         addToast({ type: 'success', title: t('boq.file_downloaded', { defaultValue: 'File downloaded' }) });
@@ -3079,6 +3085,7 @@ export function BOQEditorPage() {
     (format: string) => {
       // Show GAEB confirmation dialog before quality check
       if (format === 'gaeb' || format === 'gaeb_x84') {
+        setGaebExportFormat(format);
         setGaebPreviewOpen(true);
         return;
       }
@@ -3099,11 +3106,11 @@ export function BOQEditorPage() {
     setGaebPreviewOpen(false);
     const score = qualityBreakdown.score;
     if (score < 60) {
-      setExportWarning({ format: 'gaeb', score });
+      setExportWarning({ format: gaebExportFormat, score });
     } else {
-      doExport('gaeb');
+      doExport(gaebExportFormat);
     }
-  }, [qualityBreakdown.score, doExport]);
+  }, [qualityBreakdown.score, doExport, gaebExportFormat]);
 
   const [isValidating, setIsValidating] = useState(false);
   const [lastValidationScore, setLastValidationScore] = useState<number | null>(null);
@@ -5527,7 +5534,9 @@ export function BOQEditorPage() {
           >
             <div className="flex items-center justify-between mb-4">
               <h3 id="boq-gaeb-export-title" className="text-sm font-semibold text-content-primary">
-                {t('boq.gaeb_export_title', { defaultValue: 'Export GAEB XML (X83)' })}
+                {gaebExportFormat === 'gaeb_x84'
+                  ? t('boq.gaeb_export_title_x84', { defaultValue: 'Export GAEB XML (X84) - with prices' })
+                  : t('boq.gaeb_export_title', { defaultValue: 'Export GAEB XML (X83)' })}
               </h3>
               <button
                 onClick={() => setGaebPreviewOpen(false)}
