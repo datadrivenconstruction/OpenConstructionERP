@@ -266,6 +266,7 @@ async def handle_revision_flagged(event: Any) -> None:
 
     async with async_session_factory() as session:
         label = document_name
+        version_number: int | None = None
         doc_uuid = _parse_uuid(document_id)
         if doc_uuid is not None:
             from app.modules.documents.models import Document
@@ -282,7 +283,12 @@ async def handle_revision_flagged(event: Any) -> None:
                     )
                     return
                 label = label or row[1]
-        key = document_flag_key(document_id, revision_code)
+                version_number = await _current_document_version(session, project_id, document_id)
+        # Keyed like the scan: on the immutable version number when the
+        # document has a version chain. The typed revision code is free text
+        # that a revision upload leaves as it was unless a new one is sent, so
+        # two versions can share it; it stays the label only.
+        key = document_flag_key(document_id, f"v{version_number}" if version_number else revision_code)
         candidates = [
             FlagCandidate(
                 position_id=pid,
@@ -296,6 +302,7 @@ async def handle_revision_flagged(event: Any) -> None:
                     "document_id": document_id,
                     "document_name": label,
                     "revision_code": revision_code,
+                    **({"version_number": version_number} if version_number else {}),
                 },
             )
             for pid in position_ids
@@ -372,6 +379,38 @@ async def handle_bim_version_flagged(event: Any) -> None:
         created = await record_change_flags(session, project_id=project_id, candidates=candidates, detected_via="event")
         await session.commit()
     logger.info("bim_version_flagged: %d new change flag(s) for model %s", created, new_model_id)
+
+
+async def _current_document_version(session: AsyncSession, project_id: uuid.UUID, document_id: str) -> int | None:
+    """Version number of the current upload in a Documents hub file's chain, if it has one."""
+    from app.modules.file_versions.models import FileVersion
+
+    names = (
+        (
+            await session.execute(
+                select(FileVersion.canonical_name).where(
+                    FileVersion.project_id == project_id,
+                    FileVersion.file_kind == "document",
+                    FileVersion.file_id == document_id,
+                )
+            )
+        )
+        .scalars()
+        .all()
+    )
+    if not names:
+        return None
+    number = (
+        await session.execute(
+            select(func.max(FileVersion.version_number)).where(
+                FileVersion.project_id == project_id,
+                FileVersion.file_kind == "document",
+                FileVersion.is_current.is_(True),
+                FileVersion.canonical_name.in_(sorted(set(names))),
+            )
+        )
+    ).scalar_one_or_none()
+    return int(number) if number else None
 
 
 def _safe_int(value: Any) -> int:

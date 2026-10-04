@@ -672,10 +672,45 @@ async def test_scan_flags_positions_measured_on_a_revised_document(client: Async
     assert flag["source_label"] == "ground_floor.pdf"
     assert flag["source_version"] == "B"
     assert flag["details"]["version_number"] == 2
+    assert flag["source_key"] == f"document:{doc_id}:v2"
     assert unmeasured["id"] != flag["position_id"]
 
     again = await client.post(f"/api/v1/boq/boqs/{boq_id}/change-flags/scan/", headers=auth)
     assert again.json()["created"] == 0
+
+    # The estimator checks rev B. Then v3 arrives without a new revision code,
+    # so the document still reads "B": the version number, not the typed code,
+    # tells the two uploads apart, and v3 is a new flag.
+    await client.post(f"/api/v1/boq/boqs/{boq_id}/change-flags/review/", json={"all_open": True}, headers=auth)
+    rev3 = await client.post(
+        f"/api/v1/documents/{doc_id}/revisions/",
+        files={"file": ("ground_floor.pdf", io.BytesIO(b"%PDF-1.4\n%rev B2\n%%EOF"), "application/pdf")},
+        data={"notes": "stair moved"},
+        headers=auth,
+    )
+    assert rev3.status_code == 201, rev3.text
+    third = await client.post(f"/api/v1/boq/boqs/{boq_id}/change-flags/scan/", headers=auth)
+    assert third.json()["created"] == 1
+    opened = (await client.get(f"/api/v1/boq/boqs/{boq_id}/change-flags/?status=open", headers=auth)).json()["flags"]
+    assert [(f["source_key"], f["details"]["version_number"]) for f in opened] == [(f"document:{doc_id}:v3", 3)]
+
+    # The event path keys the same revision the same way, so it adds nothing
+    # on top of what the scan found.
+    from app.core.events import event_bus
+
+    await event_bus.publish(
+        "boq.positions.revision_flagged",
+        {
+            "project_id": project_id,
+            "document_id": doc_id,
+            "document_name": "ground_floor.pdf",
+            "revision_code": "B",
+            "affected_position_ids": [measured["id"]],
+        },
+        source_module="test",
+    )
+    summary = await client.get(f"/api/v1/boq/boqs/{boq_id}/change-flags/summary/", headers=auth)
+    assert summary.json()["open_count"] == 1
 
 
 # ── Change flags: events ──────────────────────────────────────────────────
