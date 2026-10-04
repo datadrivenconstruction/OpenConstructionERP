@@ -362,10 +362,12 @@ async def get_bim_scorecard_trend(
     response_model=ValidationPortfolioResponse,
     summary="Validation status across projects",
     description=(
-        "For every live project the caller can open, the latest validation report of each estimate "
-        "in its bill register, with the project's worst state on top. Reads stored reports only and "
-        "never runs validation. An estimate without a report, or whose latest report checked nothing, "
-        "is 'not_validated', never 'passed'."
+        "For every live project the caller can open, the validation verdict of each estimate in its "
+        "bill register, with the project's worst state on top. An estimate's verdict rests on every "
+        "report that is still the newest for one of the rule sets it ran, so a narrower later run does "
+        "not clear an older broader run's findings. Reads stored reports only and never runs "
+        "validation. An estimate without a report, or whose reports checked nothing, is "
+        "'not_validated', never 'passed'."
     ),
     dependencies=[Depends(RequirePermission("validation.read"))],
 )

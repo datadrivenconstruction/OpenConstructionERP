@@ -138,19 +138,29 @@ class RuleSetInfo(BaseModel):
 
 
 class PortfolioEstimateStatus(BaseModel):
-    """The latest validation outcome of one estimate (BOQ) in a project.
+    """The current validation verdict of one estimate (BOQ) in a project.
 
-    ``state`` is what a reader should take away. It is ``not_validated``
-    whenever there is no report, or the latest report did not actually check
-    anything (pending, skipped, unsupported rule sets, no rules run), so an
-    estimate nobody validated can never read as passed.
+    The verdict rests on every report that is still the newest one for at
+    least one rule set it ran, so a narrow run (the one-click audit) does not
+    clear findings of a broader run it did not repeat. ``state`` is the worst
+    of those reports. It is ``not_validated`` whenever there is no report, or
+    the reports did not actually check anything (pending, skipped, unsupported
+    rule sets, no rules run), so an estimate nobody validated can never read
+    as passed.
+
+    ``report_id``, ``report_status``, ``score`` and ``validated_at`` describe
+    the report that drives the verdict, the one a link should open. The counts
+    add up the reports behind the verdict; where two of them ran the same rule
+    set, that overlap is counted from both.
     """
 
     boq_id: UUID
     boq_name: str
     state: str = Field(description="errors, warnings, not_validated, info or passed")
     report_id: UUID | None = None
-    report_status: str | None = Field(default=None, description="Raw status of the latest report, if any")
+    report_status: str | None = Field(
+        default=None, description="Raw status of the report that drives the verdict, if any"
+    )
     rule_sets: list[str] = Field(default_factory=list)
     unsupported_rule_sets: list[str] = Field(default_factory=list)
     error_count: int = 0
@@ -162,11 +172,11 @@ class PortfolioEstimateStatus(BaseModel):
 
 
 class PortfolioProjectStatus(BaseModel):
-    """One project's validation standing, taken from its estimates' latest reports.
+    """One project's validation standing, taken from its estimates' verdicts.
 
     ``state`` is the worst state among the estimates, and ``not_validated``
-    for a project that has no estimates at all. The counts add up the latest
-    report of each estimate only, never the report history.
+    for a project that has no estimates at all. The counts add up the reports
+    behind each estimate's verdict, never the superseded report history.
     """
 
     project_id: UUID
