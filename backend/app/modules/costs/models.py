@@ -8,6 +8,8 @@ Tables:
     oe_regional_indices - region × category cost-factor matrix (v3.12.0)
     oe_cost_item_usage - append-only usage ledger backing the certainty
         badge (v3.12.0)
+    oe_resource_price - per-region resource price sheet
+    oe_costs_base_state - active market and text language per loaded base
 """
 
 from __future__ import annotations
@@ -298,3 +300,38 @@ class ResourcePrice(Base):
 
     def __repr__(self) -> str:
         return f"<ResourcePrice {self.region}/{self.resource_key} = {self.unit_price} {self.currency}>"
+
+
+class CostBaseState(Base):
+    """Which market and language a loaded cost base's rows are in right now.
+
+    One row per base region. A national base can be priced into another market
+    (``/base-market``) and its work-item text switched to another language, and
+    both changes rewrite the shared ``oe_costs_item`` rows of that region for
+    every user on the deployment. This record is what remembers the result, so
+    a restart, a second worker or another browser reads the same answer the
+    rows hold. It used to live in a process-local dict and in browser storage,
+    and both forgot it.
+
+    ``active_market`` is the market token the base is priced into, or ``None``
+    for the base's own home market. ``text_language`` is the language the rows
+    are in, or ``None`` when that is not known: a switch that was interrupted,
+    or a base loaded before this record existed. ``switching_to`` is set while
+    a market switch or a return to the home market runs and cleared when it
+    finishes, so a switch that died half way is reported, not hidden.
+    """
+
+    __tablename__ = "oe_costs_base_state"
+    __table_args__ = (UniqueConstraint("region", name="uq_oe_costs_base_state_region"),)
+
+    region: Mapped[str] = mapped_column(String(100), nullable=False)
+    text_language: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    active_market: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    switching_to: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+
+    def __repr__(self) -> str:
+        return (
+            f"<CostBaseState {self.region} market={self.active_market or 'home'} "
+            f"text={self.text_language} switching_to={self.switching_to}>"
+        )

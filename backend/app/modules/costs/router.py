@@ -28,6 +28,8 @@ import re as _re
 import urllib.parse
 import uuid
 import zipfile
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from decimal import Decimal
 from pathlib import Path
 from typing import Any
@@ -58,7 +60,7 @@ from app.dependencies import (
     SessionDep,
     verify_project_access,
 )
-from app.modules.costs import base_registry
+from app.modules.costs import base_registry, base_state
 from app.modules.costs.intelligence import (
     CostCertaintyService,
     CostUsageRecorder,
@@ -1027,6 +1029,8 @@ async def clear_region_database(
 
     stmt = sql_delete(CostItem).where(CostItem.region == region)
     result = await session.execute(stmt)
+    # The rows the stored market and language described are gone with them.
+    await base_state.forget_base_state(session, region, commit=False)
     await session.commit()
     count = result.rowcount  # type: ignore[union-attr]
 
@@ -1253,7 +1257,7 @@ async def load_base_market(
         raise HTTPException(status_code=404, detail=f"Unknown market '{market_token}'.")
 
     # Ensure the base parquet is loaded before repricing it (idempotent).
-    await load_cwicr_region(base_region, session)
+    await load_cwicr_region(base_region, session, retry_home_language=False)
 
     # Switch the base's work-item TEXT to the market's language before repricing.
     # A national base ships one English parquet plus a translated parquet per app
@@ -1282,27 +1286,48 @@ async def load_base_market(
 
     from app.modules.catalog.router import fetch_market_catalog_rows
 
-    # One text swap plus reprice per base at a time in this process: two market
-    # clicks on the same base interleaved could leave one market's text under
-    # the other's prices while each tab reports its own.
-    async with _base_market_lock(base_region):
-        text_lang = await _ensure_region_text_language(base_region, target_lang, session) if target_lang else None
-        if target_lang and text_lang != target_lang:
-            reason = _LAST_TEXT_SWAP_ERROR.pop(base_region, "")
-            raise HTTPException(
-                status_code=status.HTTP_502_BAD_GATEWAY,
-                detail=(
-                    f"The '{target_lang}' text of '{base_region}' could not be loaded, so "
-                    f"'{market_token}' was not applied. {reason}"
-                ).strip(),
-            )
-
+    actor = _parse_user_uuid(_user_id)
+    # One text swap plus reprice per base at a time, across every worker: two
+    # market clicks on the same base interleaved could leave one market's text
+    # under the other's prices while each tab reports its own.
+    async with _market_lock_or_409(session, base_region):
+        before = await base_state.read_base_state(session, base_region)
+        # Say a switch is under way before anything moves, and keep saying so if
+        # it dies half way: a reader must never be told a market the rows are
+        # only partly in.
+        await base_state.write_base_state(session, base_region, switching_to=market_token, updated_by=actor)
         try:
-            rows = await fetch_market_catalog_rows(base_region, market_token)
-        except RuntimeError as exc:
-            raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
+            text_lang = await _ensure_region_text_language(base_region, target_lang, session) if target_lang else None
+            if target_lang and text_lang != target_lang:
+                reason = _LAST_TEXT_SWAP_ERROR.pop(base_region, "")
+                raise HTTPException(
+                    status_code=status.HTTP_502_BAD_GATEWAY,
+                    detail=(
+                        f"The '{target_lang}' text of '{base_region}' could not be loaded, so "
+                        f"'{market_token}' was not applied. {reason}"
+                    ).strip(),
+                )
 
+            try:
+                rows = await fetch_market_catalog_rows(base_region, market_token)
+            except RuntimeError as exc:
+                raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
+        except HTTPException:
+            # Nothing was repriced, so the base is still in the market it was in.
+            await base_state.write_base_state(
+                session,
+                base_region,
+                switching_to=before.switching_to if before else None,
+            )
+            raise
+
+        # From here on prices move. A failure leaves ``switching_to`` set on
+        # purpose: the region may be half repriced, and the catalogue says so
+        # until a switch or a return home completes.
         result = await service.apply_market_catalog(base_region, market_token, rows)
+        await base_state.write_base_state(
+            session, base_region, active_market=market_token, switching_to=None, updated_by=actor
+        )
     _invalidate_cost_cache()
 
     payload = result.as_dict()
@@ -1311,7 +1336,223 @@ async def load_base_market(
     # can say so when they differ instead of implying the market's language.
     payload["text_language"] = text_lang
     payload["text_language_requested"] = requested_lang
+    payload["catalog"] = await _mirror_market_catalog(session, base_region, rows)
     return payload
+
+
+@asynccontextmanager
+async def _market_lock_or_409(session: AsyncSession | None, base_region: str) -> AsyncIterator[None]:
+    """The base's market lock, answering 409 when another switch holds it too long.
+
+    ``BaseBusyError`` is raised only while the lock is being taken, so nothing
+    the body raises is turned into a 409.
+    """
+    try:
+        async with base_state.base_market_lock(session, base_region):
+            yield
+    except base_state.BaseBusyError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+
+
+async def _mirror_market_catalog(session: AsyncSession, base_region: str, rows: list[dict[str, Any]]) -> dict:
+    """Show the market's resources in the Resource Catalog under the base's region.
+
+    The market CSV a switch prices from is the catalogue of that market: the
+    base's own resources at the market's prices and in its currency. It used to
+    be read for the reprice and dropped, so the Resource Catalog stayed empty
+    (or kept the home prices) after a market load. Fail-soft: the reprice has
+    committed by now, so a catalogue error is reported beside it, not raised.
+    """
+    from app.modules.catalog.router import replace_imported_catalog_rows
+
+    try:
+        out = await replace_imported_catalog_rows(session, base_region, rows, source="market_import")
+        await session.commit()
+        return out
+    except Exception as exc:  # noqa: BLE001 - the switch itself has already landed
+        logger.exception("Mirroring the market catalogue of %s failed (non-fatal)", base_region)
+        try:
+            await session.rollback()
+        except Exception:  # noqa: BLE001 - the rollback is best effort
+            logger.debug("rollback after the failed catalogue mirror also failed", exc_info=True)
+        return {"region": base_region, "error": f"The resource catalogue was not updated: {exc.__class__.__name__}."}
+
+
+@router.post(
+    "/base-home/{base_region}",
+    # Same gate as the market switch it undoes: it rewrites the shared rows.
+    dependencies=[Depends(RequirePermission("costs.update"))],
+)
+async def restore_base_home_market(
+    base_region: str,
+    session: SessionDep,
+    _user_id: CurrentUserId,
+) -> dict:
+    """Bring a national base back to its own market, currency and language.
+
+    Once a base had been priced into another market nothing led back: the home
+    card only offered "Set as active", and deleting the region to load it
+    again would cascade away every match, assembly and usage record that
+    points at its items. This puts the rows back in place instead, ids kept:
+
+    1. The base's own parquet is read into a staging region and its text, rate,
+       components and breakdown are copied onto the live rows, joined on code.
+       The home currency is stamped back onto every row of the region.
+    2. The resource price sheet is rebuilt from those rows, as a fresh load
+       builds it. Prices edited on the sheet are replaced; the answer says how
+       many.
+    3. The text is switched to the base's own language, as a fresh load does.
+    4. The Resource Catalog gets the base's own catalogue back (fail-soft).
+
+    The result is what deleting and loading the base again would give, without
+    the delete. 404 for an unknown or not-loaded base, 409 when another switch
+    of the same base is running, 502 when the base's own file cannot be read.
+    """
+    from sqlalchemy import delete as sql_delete
+    from sqlalchemy import func
+
+    from app.modules.costs.models import ResourcePrice
+
+    if not base_registry.is_national_region(base_region) or base_registry.variant_by_region(base_region) is None:
+        raise HTTPException(status_code=404, detail=f"'{base_region}' is not a base with markets to return from.")
+    loaded = (
+        await session.execute(
+            select(func.count())
+            .select_from(CostItem)
+            .where(CostItem.region == base_region, CostItem.is_active.is_(True))
+        )
+    ).scalar_one()
+    if not loaded:
+        raise HTTPException(status_code=404, detail=f"'{base_region}' is not loaded.")
+
+    actor = _parse_user_uuid(_user_id)
+    home_currency = _resolve_currency(None, base_region)
+    async with _market_lock_or_409(session, base_region):
+        before = await base_state.read_base_state(session, base_region)
+        parquet = await _find_cwicr_file(base_region)
+        if not parquet:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=(
+                    f"The home file of '{base_region}' could not be found or downloaded, so nothing was changed. "
+                    f"{_LAST_DOWNLOAD_ERROR.get(base_region, '')}"
+                ).strip(),
+            )
+
+        await base_state.write_base_state(
+            session, base_region, switching_to=base_state.RESTORING_HOME, updated_by=actor
+        )
+        import os as _os
+
+        from app.config import get_settings
+
+        target = _os.environ.get("DATABASE_SYNC_URL") or get_settings().database_sync_url
+        try:
+            restored = await asyncio.to_thread(
+                _overlay_region_from_parquet_sync,
+                target,
+                str(parquet),
+                base_region,
+                f"__xlate_{base_region}_home",
+                _HOME_RESTORE_COLS,
+                home_currency,
+            )
+        except Exception as exc:
+            logger.exception("Returning %s to its home market failed", base_region)
+            # The overlay is one transaction, so the rows are as they were.
+            await base_state.write_base_state(
+                session, base_region, switching_to=before.switching_to if before else None
+            )
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=f"'{base_region}' could not be returned to its home market: {exc.__class__.__name__}.",
+            ) from exc
+        if not restored:
+            await base_state.write_base_state(
+                session, base_region, switching_to=before.switching_to if before else None
+            )
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=f"No work item of '{base_region}' matched its home file, so nothing was changed.",
+            )
+        # The rows now hold the home parquet's text; record that before the
+        # language switch below so it is not skipped as already done.
+        await base_state.write_base_state(
+            session, base_region, text_language=base_registry.home_parquet_text_lang(base_region)
+        )
+
+        # Rebuild the price sheet the way a fresh load builds it: from the rows
+        # just restored. The market switch overwrote every sheet row, so the
+        # sheet is replaced rather than merged, and the edits lost are counted.
+        discarded = (
+            await session.execute(
+                select(func.count())
+                .select_from(ResourcePrice)
+                .where(ResourcePrice.region == base_region, ResourcePrice.source == "user")
+            )
+        ).scalar_one()
+        await session.execute(sql_delete(ResourcePrice).where(ResourcePrice.region == base_region))
+        await session.commit()
+        seed = await ResourcePriceService(session).seed_region(base_region)
+
+        home_lang_out = await _open_in_home_language(base_region, session)
+        await base_state.write_base_state(session, base_region, active_market=None, switching_to=None, updated_by=actor)
+    _invalidate_cost_cache()
+
+    # The rates moved back, so whatever was built on them should follow, as it
+    # does after a reprice. Published after the commits above.
+    from app.modules.costs.resource_pricing import _safe_publish
+
+    await _safe_publish(
+        "costs.region.repriced",
+        {"region": base_region, "items_changed": int(restored)},
+        source_module="oe_costs",
+    )
+
+    payload: dict[str, Any] = {
+        "region": base_region,
+        "items_restored": int(restored),
+        "currency": home_currency,
+        "resource_prices": seed.as_dict(),
+        "user_prices_discarded": int(discarded or 0),
+        "previous_market": before.active_market if before else None,
+        **home_lang_out,
+    }
+    payload["catalog"] = await _restore_home_catalog(session, base_region)
+    state = await base_state.read_base_state(session, base_region)
+    payload["state"] = state.public() if state else None
+    return payload
+
+
+async def _restore_home_catalog(session: AsyncSession, base_region: str) -> dict:
+    """Give the Resource Catalog the base's own catalogue back after a return home.
+
+    Fail-soft like :func:`_mirror_market_catalog`. When the base's catalogue
+    cannot be read, the market rows a switch put there are still taken out, so
+    the catalogue is empty rather than showing another market's prices.
+    """
+    from app.modules.catalog.router import fetch_region_catalog_rows, replace_imported_catalog_rows
+
+    try:
+        rows = await fetch_region_catalog_rows(base_region)
+    except (ValueError, RuntimeError) as exc:
+        rows = []
+        reason = str(exc)
+    else:
+        reason = ""
+    try:
+        out = await replace_imported_catalog_rows(session, base_region, rows, source="github_import")
+        await session.commit()
+    except Exception as exc:  # noqa: BLE001 - the return home itself has landed
+        logger.exception("Restoring the home catalogue of %s failed (non-fatal)", base_region)
+        try:
+            await session.rollback()
+        except Exception:  # noqa: BLE001 - the rollback is best effort
+            logger.debug("rollback after the failed catalogue restore also failed", exc_info=True)
+        return {"region": base_region, "error": f"The resource catalogue was not updated: {exc.__class__.__name__}."}
+    if reason:
+        out["error"] = f"The home resource catalogue could not be read, so it was emptied: {reason}"
+    return out
 
 
 # ── Vector database (LanceDB embedded / Qdrant server) ──────────────────────
@@ -4686,35 +4927,31 @@ _GITHUB_CWICR_FILES.setdefault("CA_TORONTO", _GITHUB_CWICR_FILES["ENG_TORONTO"])
 # language swap but never surface in the ``/available-databases`` region list.
 _GITHUB_CWICR_LANG_FILES: dict[str, str] = base_registry.national_language_workitems_files()
 
-# Which app language each already-loaded national base currently renders its
-# work-item text in. Process-local fast path for the market-switch language swap
-# (see ``_ensure_region_text_language``): re-selecting a market of the same
-# language becomes a no-op. The swap itself is idempotent, so a cold process
-# simply re-runs it once on the first switch. Cleared whenever a region is loaded
-# fresh (it reverts to the home English text at that point).
-_REGION_ACTIVE_LANG: dict[str, str] = {}
+# Which language each loaded national base's text is in, and which market it is
+# priced into, live in the database (``app.modules.costs.base_state``), not here:
+# a process-local dict was forgotten by a restart and never seen by a second
+# worker, so a re-selected market could skip a swap the rows still needed.
 
 # Why the last text swap of a base did not land, for the error a caller shows.
 # Set only by the swap that failed, so a stale download error from an unrelated
-# earlier attempt is never offered as the reason.
+# earlier attempt is never offered as the reason. Process-local on purpose: it
+# is read back by the same request that set it.
 _LAST_TEXT_SWAP_ERROR: dict[str, str] = {}
-
-# One market switch per base at a time. Process-local, like _REGION_ACTIVE_LANG:
-# it orders concurrent clicks inside one worker, which is how the app runs.
-_BASE_MARKET_LOCKS: dict[str, asyncio.Lock] = {}
-
-
-def _base_market_lock(base_region: str) -> asyncio.Lock:
-    lock = _BASE_MARKET_LOCKS.get(base_region)
-    if lock is None:
-        lock = _BASE_MARKET_LOCKS[base_region] = asyncio.Lock()
-    return lock
 
 
 # CostItem columns the language swap rewrites - the text-bearing ones only.
 # Deliberately excludes ``rate``/``currency`` (the market reprice owns those),
 # ``descriptions`` (the separate multilang map) and the identity columns.
+# ``components`` is text AND price: it carries each resource's name and also its
+# unit rate and cost as the language file has them. The market reprice that
+# follows a swap rewrites those prices again from the sheet.
 _TRANSLATED_TEXT_COLS: tuple[str, ...] = ("description", "unit", "classification", "components", "tags")
+
+# What a return to the home market copies back from the base's own parquet: the
+# text, plus the rate and its breakdown. ``currency`` is not here because the
+# parquet has none (the importer derives it from the region id, which a staging
+# region does not carry), so the restore sets it from the base region instead.
+_HOME_RESTORE_COLS: tuple[str, ...] = (*_TRANSLATED_TEXT_COLS, "rate", "metadata")
 
 CWICR_SEARCH_PATHS = [
     "../../DDC_Toolkit/pricing/data/excel",
@@ -4966,7 +5203,11 @@ async def get_base_catalog(session: SessionDep) -> dict:
     stmt = select(CostItem.region, func.count()).where(CostItem.is_active.is_(True)).group_by(CostItem.region)
     rows = (await session.execute(stmt)).all()
     loaded_counts = {region: int(count) for region, count in rows if region}
-    return base_registry.public_catalog(loaded_counts)
+    # Which market and language each base is in, as stored server side, so
+    # every screen and every browser shows what the rows hold rather than what
+    # one browser remembers clicking.
+    states = {region: state.public() for region, state in (await base_state.read_all_base_states(session)).items()}
+    return base_registry.public_catalog(loaded_counts, states)
 
 
 @router.post(
@@ -5043,7 +5284,45 @@ async def region_priced_in_other_currency(db_id: str, session: AsyncSession) -> 
     return (await session.execute(stmt)).scalar_one_or_none()
 
 
-async def load_cwicr_region(db_id: str, session: AsyncSession, *, resume_incomplete: bool = False) -> dict:
+async def _retry_home_language(db_id: str, session: AsyncSession) -> dict[str, Any]:
+    """Try the switch to the base's own language again when the last one did not land.
+
+    A fresh load opens a national base in its own language, and when that swap
+    fails the base stays in the home parquet's language. Loading it again used
+    to answer ``already_loaded`` and never try again. Retried only when the
+    stored state says the base is on its home market, no switch is running and
+    the text is not (or not known to be) in the base's language. A base with no
+    stored state is left alone: it may be priced into a market nobody recorded.
+    """
+    home_lang = base_registry.home_language_code(db_id)
+    if not home_lang:
+        return {}
+
+    def _needs_retry(stored: base_state.BaseState | None) -> bool:
+        return (
+            stored is not None
+            and not stored.active_market
+            and not stored.switching_to
+            and stored.text_language != home_lang
+        )
+
+    if not _needs_retry(await base_state.read_base_state(session, db_id)):
+        return {}
+    async with _market_lock_or_409(session, db_id):
+        # Read again under the lock: a switch may have finished while we waited.
+        if not _needs_retry(await base_state.read_base_state(session, db_id)):
+            return {}
+        logger.info("CWICR %s: retrying the switch to its own language (%s)", db_id, home_lang)
+        return await _open_in_home_language(db_id, session)
+
+
+async def load_cwicr_region(
+    db_id: str,
+    session: AsyncSession,
+    *,
+    resume_incomplete: bool = False,
+    retry_home_language: bool = True,
+) -> dict:
     """Load one CWICR regional cost database into the relational store.
 
     Optimized: reads Parquet, deduplicates by rate_code (55K unique items
@@ -5068,6 +5347,11 @@ async def load_cwicr_region(db_id: str, session: AsyncSession, *, resume_incompl
     another market is not topped up with home-currency rows; it comes back as
     ``status="incomplete"`` for the caller to report. Off by default, so the
     route and the market switch behave exactly as before.
+
+    ``retry_home_language`` lets an ``already_loaded`` answer try the switch to
+    a national base's own language again when the last one did not land (see
+    :func:`_retry_home_language`). The market switch turns it off: it is about
+    to put the text into the market's language anyway.
     """
     import time
 
@@ -5170,6 +5454,8 @@ async def load_cwicr_region(db_id: str, session: AsyncSession, *, resume_incompl
                     except Exception:  # noqa: BLE001 - the rollback is best effort
                         logger.debug("rollback after the failed price seed also failed", exc_info=True)
                     already_loaded["resource_prices_error"] = "seed_failed"
+        if retry_home_language:
+            already_loaded.update(await _retry_home_language(db_id, session))
         return {
             **already_loaded,
             "imported": 0,
@@ -5198,9 +5484,9 @@ async def load_cwicr_region(db_id: str, session: AsyncSession, *, resume_incompl
     # its work where a rollback would silently discard it.
     await session.commit()
 
-    # A fresh (re)load repopulates the region from its home English parquet, so
-    # forget any language the market-switch swap had recorded for it.
-    _REGION_ACTIVE_LANG.pop(db_id, None)
+    # A fresh (re)load repopulates the region from its home parquet, so forget
+    # any market and language stored for it until the import says what landed.
+    await base_state.forget_base_state(session, db_id)
 
     # Find the file (async - GitHub download runs in thread pool)
     cwicr_path = await _find_cwicr_file(db_id)
@@ -5313,8 +5599,15 @@ async def load_cwicr_region(db_id: str, session: AsyncSession, *, resume_incompl
     # loaded base reads in English until a market card swaps the language. Open
     # it in its own language instead (China in Chinese, Brazil in Portuguese).
     # No-op for the global markets and for a base whose language has no parquet.
-    if result_data.get("imported", 0) > 0:
-        result_data.update(await _open_in_home_language(db_id, session))
+    # Under the base's market lock, like every other change of its language.
+    parquet_lang = base_registry.home_parquet_text_lang(db_id)
+    if result_data.get("imported", 0) > 0 and parquet_lang is not None:
+        async with _market_lock_or_409(session, db_id):
+            # What the import just wrote: the home market, in the parquet's language.
+            await base_state.write_base_state(
+                session, db_id, text_language=parquet_lang, active_market=None, switching_to=None
+            )
+            result_data.update(await _open_in_home_language(db_id, session))
 
     if resuming:
         # ``imported`` counts only the rows this run added; the caller reports
@@ -5536,11 +5829,38 @@ def _swap_region_text_sync(sync_url: str, lang_parquet: str, base_region: str, s
        live ``base_region`` rows, joined on ``code`` so every id is preserved, and
     3. drops the staging region.
 
-    Prices are untouched here - the caller reprices afterwards, and
-    :meth:`reprice_region` keeps each component's (now translated) name. Runs in a
-    thread (sync DB work). Idempotent: pre-cleans and drops the staging region so a
-    retry starts clean and leaves nothing behind. Returns the number of live rows
-    updated.
+    The rate is untouched here, but ``components`` arrives with the language
+    file's unit rates: the market reprice the caller runs afterwards rewrites
+    them from the sheet and keeps each component's (now translated) name. Runs
+    in a thread (sync DB work). Idempotent: pre-cleans and drops the staging
+    region so a retry starts clean and leaves nothing behind. Returns the number
+    of live rows updated.
+    """
+    return _overlay_region_from_parquet_sync(sync_url, lang_parquet, base_region, staging_region, _TRANSLATED_TEXT_COLS)
+
+
+def _overlay_region_from_parquet_sync(
+    sync_url: str,
+    parquet: str,
+    base_region: str,
+    staging_region: str,
+    columns: tuple[str, ...],
+    currency: str | None = None,
+) -> int:
+    """Copy ``columns`` of a parquet's work items onto ``base_region`` in place.
+
+    The parquet is imported into ``staging_region`` with the canonical transform
+    (:func:`_process_and_insert_cwicr`), the named columns are copied onto the
+    live rows joined on ``code`` so every id is kept, and staging is dropped.
+    The language swap copies the text columns; a return to the home market
+    copies text, rate and breakdown from the base's own parquet and passes
+    ``currency``, which is then stamped onto every row of the region in the same
+    transaction (the market switch stamps its currency onto every row too).
+
+    ``columns`` only ever comes from the module's own tuples, never a caller's
+    input, so naming them in the SQL is safe. Runs in a thread (sync DB work).
+    Idempotent: pre-cleans and drops the staging region so a retry starts clean
+    and leaves nothing behind. Returns the number of live rows updated.
     """
     import os as _os
 
@@ -5550,7 +5870,7 @@ def _swap_region_text_sync(sync_url: str, lang_parquet: str, base_region: str, s
         sync_url = _os.environ.get("DATABASE_SYNC_URL", "")
 
     table = CostItem.__table__.name  # oe_costs_item
-    set_clause = ", ".join(f"{c} = s.{c}" for c in _TRANSLATED_TEXT_COLS)
+    set_clause = ", ".join(f"{c} = s.{c}" for c in columns)
 
     engine = create_engine(sync_url)
     try:
@@ -5560,9 +5880,9 @@ def _swap_region_text_sync(sync_url: str, lang_parquet: str, base_region: str, s
         # Reuse the canonical parquet->rows transform, targeting staging. Same
         # dedup-by-rate_code, so staging carries one row per ``code`` exactly like
         # the live region - the join below is 1:1.
-        _process_and_insert_cwicr(lang_parquet, staging_region, sync_url)
-        # Overlay translated text onto the live region (ids and prices preserved),
-        # then drop staging. A single set-based UPDATE ... FROM self-join.
+        _process_and_insert_cwicr(parquet, staging_region, sync_url)
+        # Overlay the columns onto the live region (ids preserved), then drop
+        # staging. A single set-based UPDATE ... FROM self-join, one transaction.
         with engine.begin() as conn:
             updated = conn.execute(
                 text(  # noqa: S608
@@ -5571,6 +5891,11 @@ def _swap_region_text_sync(sync_url: str, lang_parquet: str, base_region: str, s
                 ),
                 {"base": base_region, "stage": staging_region},
             ).rowcount
+            if currency is not None and updated:
+                conn.execute(
+                    text(f"UPDATE {table} SET currency = :currency WHERE region = :base"),  # noqa: S608
+                    {"currency": currency, "base": base_region},
+                )
             conn.execute(text(f"DELETE FROM {table} WHERE region = :r"), {"r": staging_region})  # noqa: S608
         return int(updated or 0)
     finally:
@@ -5591,6 +5916,14 @@ async def _ensure_region_text_language(base_region: str, lang_code: str | None, 
     was swapped: a non-national base, a language no file holds, or a download or
     swap that failed. ``None`` never means success, so a caller that promised a
     language can tell it was not delivered.
+
+    Which language the rows are in is read from and written to the base's
+    stored state (:mod:`app.modules.costs.base_state`), so a restart or another
+    worker sees it too. The swap is skipped only when the stored language is
+    already the one asked for; an unknown language never skips it. The stored
+    language is cleared before the swap starts and set when it lands, so a swap
+    cut off half way leaves "unknown" behind rather than a language the rows
+    may not be in. The caller holds the base's market lock.
     """
     if not lang_code:
         return None
@@ -5598,7 +5931,9 @@ async def _ensure_region_text_language(base_region: str, lang_code: str | None, 
     lang_region = base_registry.text_source_region(base_region, lang_code)
     if lang_region is None:
         return None
-    if _REGION_ACTIVE_LANG.get(base_region) == lang_code:
+    stored = await base_state.read_base_state(session, base_region)
+    previous = stored.text_language if stored is not None else None
+    if previous == lang_code:
         return lang_code
 
     _LAST_TEXT_SWAP_ERROR.pop(base_region, None)
@@ -5619,20 +5954,27 @@ async def _ensure_region_text_language(base_region: str, lang_code: str | None, 
 
     target = _os.environ.get("DATABASE_SYNC_URL") or get_settings().database_sync_url
     staging_region = f"__xlate_{base_region}_{lang_code}"
+    # Unknown while the swap runs: the swap commits on its own connection, and a
+    # process that dies before the line below must not leave the old language
+    # claimed over rows that may already be in the new one.
+    await base_state.write_base_state(session, base_region, text_language=None)
     try:
         updated = await asyncio.to_thread(_swap_region_text_sync, target, str(parquet), base_region, staging_region)
     except Exception as exc:
         logger.exception("Language swap to %s failed for %s (keeping current text)", lang_code, base_region)
         _LAST_TEXT_SWAP_ERROR[base_region] = f"The text swap failed: {exc.__class__.__name__}."
+        # The overlay is one transaction, so the text is what it was.
+        await base_state.write_base_state(session, base_region, text_language=previous)
         return None
     if not updated:
         # Nothing joined on code, so no row changed language. Recording the
         # language here would claim a switch that did not happen.
         logger.warning("Language swap to %s matched no rows of %s", lang_code, base_region)
         _LAST_TEXT_SWAP_ERROR[base_region] = f"No work item of '{base_region}' matched the '{lang_code}' file."
+        await base_state.write_base_state(session, base_region, text_language=previous)
         return None
 
-    _REGION_ACTIVE_LANG[base_region] = lang_code
+    await base_state.write_base_state(session, base_region, text_language=lang_code)
     _invalidate_cost_cache()
     logger.info("Swapped %s work-item text to %s (%d items updated)", base_region, lang_code, updated)
     return lang_code
@@ -6774,6 +7116,12 @@ async def clear_cost_database(
         stmt = sql_delete(CostItem)
 
     result = await session.execute(stmt)
+    if source in ("", "cwicr"):
+        # Every loaded base was CWICR rows, so no stored market or language
+        # describes anything any more.
+        from app.modules.costs.models import CostBaseState
+
+        await session.execute(sql_delete(CostBaseState))
     await session.commit()
     count = result.rowcount  # type: ignore[union-attr]
 

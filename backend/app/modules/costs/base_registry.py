@@ -99,8 +99,8 @@ class BaseVariant:
         market_catalog: The ``markets/`` catalog file token this card reprices
             into (e.g. ``"GB_LONDON_en"``); empty for global and home variants.
         active: Whether this market is the one the base is currently repriced
-            into. Registry default is ``False``; the live value is tracked client
-            side (localStorage) in this MVP.
+            into. Registry default is ``False``; :func:`public_catalog` fills the
+            live value from the stored base state (``oe_costs_base_state``).
     """
 
     region: str
@@ -864,11 +864,25 @@ def catalog_token(region: str) -> str | None:
     return v.catalog_token if v else None
 
 
-def _variant_public(v: BaseVariant, loaded_counts: dict[str, int]) -> dict:
+def _variant_public(
+    v: BaseVariant,
+    loaded_counts: dict[str, int],
+    base_states: dict[str, dict] | None = None,
+) -> dict:
     # A base's load lands under its base_region, and every card of that base
-    # shares it, so all cards of a loaded base read as loaded (the active card
-    # is tracked client-side in this MVP; the registry reports active=False).
+    # shares it, so all cards of a loaded base read as loaded. A market card is
+    # active when the stored state of its base says the rows are in that market
+    # and no switch is under way. A home card's ``active`` stays False: on the
+    # client "active" on a home card means the user's active database.
     loaded = loaded_counts.get(v.base_region, 0)
+    state = (base_states or {}).get(v.base_region)
+    active = bool(
+        v.market_catalog
+        and loaded > 10
+        and state is not None
+        and state.get("market_state") == "market"
+        and state.get("active_market") == v.market_catalog
+    )
     return {
         "region": v.region,
         "variant_id": v.variant_id,
@@ -886,13 +900,27 @@ def _variant_public(v: BaseVariant, loaded_counts: dict[str, int]) -> dict:
         "positions": v.positions,
         "bundled": v.bundled,
         "coefficient": v.coefficient,
-        "active": v.active,
+        "active": active or v.active,
         "loaded": loaded > 10,
         "loaded_positions": loaded,
     }
 
 
-def public_catalog(loaded_counts: dict[str, int] | None = None) -> dict:
+#: ``market_state`` of a loaded national base nothing is stored for: loaded
+#: before the state was kept, so its rows may be in any market.
+UNKNOWN_BASE_STATE: dict = {
+    "market_state": "unknown",
+    "active_market": None,
+    "switching_to": None,
+    "text_language": None,
+    "updated_at": None,
+}
+
+
+def public_catalog(
+    loaded_counts: dict[str, int] | None = None,
+    base_states: dict[str, dict] | None = None,
+) -> dict:
     """Serialize the catalog for the API, merging live loaded counts.
 
     Args:
@@ -900,14 +928,19 @@ def public_catalog(loaded_counts: dict[str, int] | None = None) -> dict:
             items, from ``oe_costs_item``. A region with more than 10 loaded
             items is marked ``loaded`` and carries its real count so the browser
             shows the true figure after import rather than only the estimate.
+        base_states: Region id to the stored market and language of that base
+            (``BaseState.public()``), from ``oe_costs_base_state``.
 
     Returns:
-        A JSON-ready dict with a ``families`` list and roll-up totals.
+        A JSON-ready dict with a ``families`` list and roll-up totals, plus
+        ``base_states``: for every loaded national base, which market it is in
+        (``home``, ``market``, ``switching`` or ``unknown``) and its language.
     """
     counts = loaded_counts or {}
+    states = base_states or {}
     families = []
     for fam in BASE_FAMILIES:
-        variants = [_variant_public(v, counts) for v in fam.variants]
+        variants = [_variant_public(v, counts, states) for v in fam.variants]
         families.append(
             {
                 "key": fam.key,
@@ -932,4 +965,9 @@ def public_catalog(loaded_counts: dict[str, int] | None = None) -> dict:
         "total_bases": len(all_variants),
         "total_families": len(BASE_FAMILIES),
         "loaded_regions": sorted(r for r, c in counts.items() if c > 10),
+        "base_states": {
+            region: dict(states.get(region) or UNKNOWN_BASE_STATE)
+            for region in sorted(_NATIONAL_REGIONS)
+            if counts.get(region, 0) > 10
+        },
     }
