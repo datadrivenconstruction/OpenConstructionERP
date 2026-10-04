@@ -56,13 +56,42 @@ export interface AwardOutcome {
 const CONTRACT_PAGE = 200;
 const ORDER_PAGE = 100;
 
-function resolve<T extends { status: string; metadata?: Record<string, unknown> | null }>(
-  query: { isPending: boolean; isError: boolean; data?: Page<T> },
+/**
+ * How long to keep looking for a draft that is not there yet. The award
+ * subscribers run detached after the award commits, so the first read right
+ * after "Award" usually lands before the draft does. A few re-reads a few
+ * seconds apart cover that, and then the lookup stops: a draft that has not
+ * appeared by then was not made (a module is not installed), and polling a
+ * register forever on an open screen is not free.
+ */
+const DRAFT_POLL_MS = 3000;
+const DRAFT_POLL_READS = 5;
+
+type StampedRow = { status: string; metadata?: Record<string, unknown> | null };
+
+/** Re-read while the whole register was read and the stamp is not on it yet. */
+function pollWhileAbsent<T extends StampedRow>(
+  page: Page<T> | undefined,
+  reads: number,
+  keys: AwardKeys,
+  retired: ReadonlySet<string>,
+): number | false {
+  if (!page || !Array.isArray(page.items) || isTruncated(page)) return false;
+  if (findAwardRecord(page.items, keys, retired)) return false;
+  return reads < DRAFT_POLL_READS ? DRAFT_POLL_MS : false;
+}
+
+function resolve<T extends StampedRow>(
+  query: { isPending: boolean; isError: boolean; data: Page<T> | undefined },
   keys: AwardKeys,
   retired: ReadonlySet<string>,
 ): AwardLookup<T> {
   if (query.isError) return { state: 'unknown' };
   if (query.isPending || !query.data) return { state: 'loading' };
+  // A body that is not a page (a proxy error page, an older server answering
+  // with a bare list) is not evidence of anything, so it reads as unknown
+  // rather than throwing inside the render that asked.
+  if (!Array.isArray(query.data.items)) return { state: 'unknown' };
   const record = findAwardRecord(query.data.items, keys, retired);
   if (record) return { state: 'found', record };
   return isTruncated(query.data) ? { state: 'unknown' } : { state: 'absent' };
@@ -80,6 +109,8 @@ export function useAwardOutcome(projectId: string | null | undefined, keys: Awar
     queryFn: () => listContracts({ project_id: projectId as string, limit: CONTRACT_PAGE }),
     enabled: on,
     retry: false,
+    refetchInterval: (q) =>
+      pollWhileAbsent(q.state.data, q.state.dataUpdateCount, keys, RETIRED_AWARD_CONTRACT_STATUSES),
   });
 
   const ordersQ = useQuery({
@@ -90,6 +121,8 @@ export function useAwardOutcome(projectId: string | null | undefined, keys: Awar
       ),
     enabled: on,
     retry: false,
+    refetchInterval: (q) =>
+      pollWhileAbsent(q.state.data, q.state.dataUpdateCount, keys, RETIRED_AWARD_ORDER_STATUSES),
   });
 
   if (!on) return { contract: { state: 'unknown' }, order: { state: 'unknown' } };
