@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cross-project validation status: the latest report of every estimate.
+"""Cross-project validation status: the latest verdict of every estimate.
 
 A head of estimating wants one answer per project: which estimates failed
 validation, which only warn, and which nobody has validated yet. The reports
@@ -13,12 +13,21 @@ The read is a fixed set of statements whatever the size of the estate:
    uses, archived projects left out, partner-pack scope applied),
 2. the estimates of those projects (the project bill register, so the list
    matches what the BOQ page shows),
-3. the newest report of each estimate, picked in SQL with a window function.
+3. the newest report of each estimate per rule-set label, picked in SQL with a
+   window function.
+
+Runs differ in scope. A full validation checks DIN 276, GAEB and BOQ quality,
+the one-click estimate audit only BOQ quality. If the newest report simply
+won, a narrow audit that passes would wipe out a full run's DIN 276 errors
+that nobody fixed. So the verdict of an estimate rests on every report that is
+the newest one for at least one rule set it ran: walking newest first, a
+report counts while it still covers a rule set no newer report covered. The
+estimate takes the worst state among those reports.
 
 Ranking, worst first: ``errors`` > ``warnings`` > ``not_validated`` > ``info``
-> ``passed``. An estimate without a report, or whose latest report did not
-actually check anything, is ``not_validated`` and sits above everything that
-did pass, so silence can never read as a clean bill of health.
+> ``passed``. An estimate without a report, or whose reports did not actually
+check anything, is ``not_validated`` and sits above everything that did pass,
+so silence can never read as a clean bill of health.
 """
 
 from __future__ import annotations
@@ -53,6 +62,10 @@ STATE_RANK: dict[str, int] = {
     STATE_PASSED: 4,
 }
 
+#: Coverage key for a report that carries a real outcome but names no rule
+#: set at all (legacy rows). It keeps such a report from being dropped.
+_UNLABELLED = "\x00unlabelled"
+
 
 def report_state(status: str | None, total_rules: int | None) -> str:
     """Map a stored report status to the state a reader sees.
@@ -81,12 +94,30 @@ def worst_state(states: Iterable[str]) -> str:
     return worst if worst is not None else STATE_NOT_VALIDATED
 
 
-def _rule_sets(meta_rule_sets: Any, rule_set: str | None) -> list[str]:
-    """The rule sets a report ran, from its metadata or its ``a+b`` label."""
-    if isinstance(meta_rule_sets, list) and meta_rule_sets and all(isinstance(x, str) for x in meta_rule_sets):
-        names = meta_rule_sets
+def _rule_sets(
+    meta_rule_sets: Any,
+    rule_set: str | None,
+    supported: Any = None,
+    unsupported: Any = None,
+) -> list[str]:
+    """The rule sets a report actually ran.
+
+    ``metadata.rule_sets`` holds what was REQUESTED, including names that
+    resolved to no rule on this install. A validation run stores
+    ``supported_rule_sets`` next to it, and that list (even an empty one) is
+    the answer. The estimate audit writes no ``supported_rule_sets``, so there
+    the requested names (from the metadata, or the ``a+b`` label) minus
+    ``unsupported_rule_sets`` are used.
+    """
+    if isinstance(supported, list) and all(isinstance(x, str) for x in supported):
+        names: list[str] = supported
     else:
-        names = (rule_set or "").split("+")
+        if isinstance(meta_rule_sets, list) and meta_rule_sets and all(isinstance(x, str) for x in meta_rule_sets):
+            names = meta_rule_sets
+        else:
+            names = (rule_set or "").split("+")
+        skipped = {n.strip() for n in _str_list(unsupported)}
+        names = [n for n in names if n.strip() not in skipped]
     return list(dict.fromkeys(n.strip() for n in names if n and n.strip()))
 
 
@@ -157,14 +188,17 @@ async def build_portfolio_status(session: AsyncSession, user_id: str) -> Validat
         )
     ).all()
 
-    latest: dict[tuple[uuid.UUID, str], Any] = {}
+    reports: dict[tuple[uuid.UUID, str], list[Any]] = {}
     if boq_rows:
         register_ids = select(BOQ.id).where(
             BOQ.project_id.in_(project_ids),
             BOQ.variation_request_id.is_(None),
         )
-        # Never the ``results`` column, and never the whole metadata blob: an
-        # estimate audit keeps its findings there and they can be large.
+        # The newest report per rule-set label: an older report under the same
+        # label ran the same scope and is fully covered by the newer one, so it
+        # can never take part in the verdict. Never the ``results`` column, and
+        # never the whole metadata blob: an estimate audit keeps its findings
+        # there and they can be large.
         ranked = (
             select(
                 VR.id,
@@ -179,10 +213,11 @@ async def build_portfolio_status(session: AsyncSession, user_id: str) -> Validat
                 VR.error_count,
                 VR.created_at,
                 VR.metadata_["rule_sets"].label("meta_rule_sets"),
+                VR.metadata_["supported_rule_sets"].label("meta_supported"),
                 VR.metadata_["unsupported_rule_sets"].label("meta_unsupported"),
                 func.row_number()
                 .over(
-                    partition_by=(VR.project_id, VR.target_id),
+                    partition_by=(VR.project_id, VR.target_id, VR.rule_set),
                     order_by=(VR.created_at.desc(), VR.id.desc()),
                 )
                 .label("rn"),
@@ -195,12 +230,12 @@ async def build_portfolio_status(session: AsyncSession, user_id: str) -> Validat
             .subquery()
         )
         for row in (await session.execute(select(ranked).where(ranked.c.rn == 1))).all():
-            latest[(row.project_id, str(row.target_id).lower())] = row
+            reports.setdefault((row.project_id, str(row.target_id).lower()), []).append(row)
 
     estimates_by_project: dict[uuid.UUID, list[PortfolioEstimateStatus]] = {pid: [] for pid in project_ids}
     for boq_id, boq_project_id, boq_name in boq_rows:
-        row = latest.get((boq_project_id, str(boq_id).lower()))
-        estimates_by_project.setdefault(boq_project_id, []).append(_estimate(boq_id, boq_name, row))
+        rows = reports.get((boq_project_id, str(boq_id).lower()), [])
+        estimates_by_project.setdefault(boq_project_id, []).append(_estimate(boq_id, boq_name, rows))
 
     out: list[PortfolioProjectStatus] = []
     summary = PortfolioStateSummary()
@@ -213,23 +248,91 @@ async def build_portfolio_status(session: AsyncSession, user_id: str) -> Validat
     return ValidationPortfolioResponse(project_count=len(out), summary=summary, projects=out)
 
 
-def _estimate(boq_id: uuid.UUID, boq_name: str | None, row: Any) -> PortfolioEstimateStatus:
-    if row is None:
+def _ran(row: Any) -> list[str]:
+    return _rule_sets(row.meta_rule_sets, row.rule_set, row.meta_supported, row.meta_unsupported)
+
+
+def verdict_reports(rows: Sequence[Any]) -> list[Any]:
+    """The reports an estimate's verdict rests on, newest first.
+
+    Walking newest first, a report counts while it ran at least one rule set
+    that no newer report ran. A report that checked nothing (no rule set
+    actually ran and no real outcome) never counts, so a run whose rule sets
+    were all unsupported does not erase an older real verdict. An older report
+    whose every rule set was re-run since is superseded and dropped.
+    """
+    ordered = sorted(rows, key=lambda r: (r.created_at, str(r.id)), reverse=True)
+    covered: set[str] = set()
+    out: list[Any] = []
+    for row in ordered:
+        ran = set(_ran(row))
+        if not ran:
+            if report_state(row.status, row.total_rules) == STATE_NOT_VALIDATED:
+                continue
+            ran = {_UNLABELLED}
+        if ran - covered:
+            out.append(row)
+            covered |= ran
+    return out
+
+
+def _estimate(boq_id: uuid.UUID, boq_name: str | None, rows: Sequence[Any]) -> PortfolioEstimateStatus:
+    if not rows:
         return PortfolioEstimateStatus(boq_id=boq_id, boq_name=boq_name or "", state=STATE_NOT_VALIDATED)
+
+    basis = verdict_reports(rows)
+    if not basis:
+        # Every report checked nothing. Show the newest one so the reader can
+        # open it and see why (pending, unsupported rule sets, no rules).
+        newest = max(rows, key=lambda r: (r.created_at, str(r.id)))
+        return PortfolioEstimateStatus(
+            boq_id=boq_id,
+            boq_name=boq_name or "",
+            state=STATE_NOT_VALIDATED,
+            report_id=newest.id,
+            report_status=newest.status,
+            rule_sets=_ran(newest),
+            unsupported_rule_sets=_str_list(newest.meta_unsupported),
+            total_rules=newest.total_rules or 0,
+            score=_score(newest.score),
+            validated_at=newest.created_at,
+        )
+
+    states = [report_state(r.status, r.total_rules) for r in basis]
+    # The report that drives the verdict is the one the link opens, so the
+    # validation page shows what the card claims. ``basis`` is newest first
+    # and ``min`` keeps the first of equals, so a tie goes to the newest.
+    driver_index = min(range(len(basis)), key=lambda i: STATE_RANK[states[i]])
+    driver = basis[driver_index]
+
+    ran: dict[str, None] = {}
+    for r in basis:
+        for rs in _ran(r):
+            ran.setdefault(rs, None)
+    unsupported: dict[str, None] = {}
+    for r in basis:
+        for rs in _str_list(r.meta_unsupported):
+            if rs not in ran:
+                unsupported.setdefault(rs, None)
+
+    # Counts add up the reports the verdict rests on. They cannot be split per
+    # rule set without loading every report's results, so where two of them
+    # overlap (a full run and a later audit both ran BOQ quality) the overlap
+    # is counted from both.
     return PortfolioEstimateStatus(
         boq_id=boq_id,
         boq_name=boq_name or "",
-        state=report_state(row.status, row.total_rules),
-        report_id=row.id,
-        report_status=row.status,
-        rule_sets=_rule_sets(row.meta_rule_sets, row.rule_set),
-        unsupported_rule_sets=_str_list(row.meta_unsupported),
-        error_count=row.error_count or 0,
-        warning_count=row.warning_count or 0,
-        passed_count=row.passed_count or 0,
-        total_rules=row.total_rules or 0,
-        score=_score(row.score),
-        validated_at=row.created_at,
+        state=worst_state(states),
+        report_id=driver.id,
+        report_status=driver.status,
+        rule_sets=list(ran),
+        unsupported_rule_sets=list(unsupported),
+        error_count=sum(r.error_count or 0 for r in basis),
+        warning_count=sum(r.warning_count or 0 for r in basis),
+        passed_count=sum(r.passed_count or 0 for r in basis),
+        total_rules=sum(r.total_rules or 0 for r in basis),
+        score=_score(driver.score),
+        validated_at=driver.created_at,
     )
 
 

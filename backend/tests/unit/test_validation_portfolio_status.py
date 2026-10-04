@@ -421,6 +421,168 @@ async def test_rule_sets_come_from_metadata_or_the_label(session) -> None:
     assert sorted(project.rule_sets) == ["boq_quality", "din276", "gaeb"]
 
 
+@pytest.mark.asyncio
+async def test_a_requested_rule_set_that_ran_no_rule_is_not_listed_as_run(session) -> None:
+    owner = await _user(session)
+    p = await _project(session, owner, "Unsupported GAEB")
+    full = await _boq(session, p, "Full run")
+    audit = await _boq(session, p, "Audit shape")
+    label_only = await _boq(session, p, "Label only")
+    # A validation run stores what it was asked for AND what actually ran.
+    await _report(
+        session,
+        full,
+        "passed",
+        passed=8,
+        rule_set="din276+gaeb+boq_quality",
+        metadata={
+            "rule_sets": ["din276", "gaeb", "boq_quality"],
+            "supported_rule_sets": ["din276", "boq_quality"],
+            "unsupported_rule_sets": ["gaeb"],
+        },
+    )
+    # The audit path writes no supported list, only the unsupported one.
+    await _report(
+        session,
+        audit,
+        "passed",
+        passed=4,
+        rule_set="estimate_audit",
+        metadata={"rule_sets": ["boq_quality", "gaeb"], "unsupported_rule_sets": ["gaeb"]},
+    )
+    # No requested list either: the label is all there is.
+    await _report(
+        session,
+        label_only,
+        "passed",
+        passed=2,
+        rule_set="gaeb+boq_quality",
+        metadata={"unsupported_rule_sets": ["gaeb"]},
+    )
+
+    (project,) = (await build_portfolio_status(session, str(owner.id))).projects
+    est = {e.boq_name: e for e in project.estimates}
+    assert est["Full run"].rule_sets == ["din276", "boq_quality"]
+    assert est["Full run"].unsupported_rule_sets == ["gaeb"]
+    assert est["Audit shape"].rule_sets == ["boq_quality"]
+    assert est["Label only"].rule_sets == ["boq_quality"]
+    assert "gaeb" not in project.rule_sets
+
+
+@pytest.mark.asyncio
+async def test_an_empty_supported_list_means_nothing_ran(session) -> None:
+    owner = await _user(session)
+    p = await _project(session, owner, "All unsupported")
+    b = await _boq(session, p, "Bill")
+    r = await _report(
+        session,
+        b,
+        "unsupported",
+        rule_set="gaeb",
+        metadata={"rule_sets": ["gaeb"], "supported_rule_sets": [], "unsupported_rule_sets": ["gaeb"]},
+    )
+
+    (project,) = (await build_portfolio_status(session, str(owner.id))).projects
+    (est,) = project.estimates
+    assert est.state == STATE_NOT_VALIDATED
+    assert est.rule_sets == []
+    assert est.report_id == r.id
+
+
+# ── A narrow run does not hide a broad verdict ────────────────────────────
+
+FULL_META = {
+    "rule_sets": ["din276", "boq_quality"],
+    "supported_rule_sets": ["din276", "boq_quality"],
+    "unsupported_rule_sets": [],
+}
+AUDIT_META = {"rule_sets": ["boq_quality"], "audit": True}
+
+
+@pytest.mark.asyncio
+async def test_a_newer_passing_audit_keeps_the_older_full_runs_errors(session) -> None:
+    owner = await _user(session)
+    p = await _project(session, owner, "Audit after full")
+    b = await _boq(session, p, "Bill")
+    full = await _report(
+        session, b, "errors", minutes=0, errors=12, passed=30, rule_set="din276+boq_quality", metadata=FULL_META
+    )
+    await _report(session, b, "passed", minutes=5, passed=10, rule_set="estimate_audit", metadata=AUDIT_META)
+
+    resp = await build_portfolio_status(session, str(owner.id))
+    (project,) = resp.projects
+    (est,) = project.estimates
+    # The DIN 276 errors were never re-checked, so they still stand.
+    assert est.state == STATE_ERRORS
+    assert project.state == STATE_ERRORS
+    # The link opens the report that carries the errors, not the audit.
+    assert est.report_id == full.id
+    assert est.validated_at == T0
+    assert est.error_count == 12
+    assert est.rule_sets == ["boq_quality", "din276"]
+    assert resp.summary.errors == 1
+    assert resp.summary.passed == 0
+
+
+@pytest.mark.asyncio
+async def test_a_newer_full_run_supersedes_an_older_audit(session) -> None:
+    owner = await _user(session)
+    p = await _project(session, owner, "Full after audit")
+    b = await _boq(session, p, "Bill")
+    await _report(session, b, "errors", minutes=0, errors=4, rule_set="estimate_audit", metadata=AUDIT_META)
+    full = await _report(session, b, "passed", minutes=5, passed=30, rule_set="din276+boq_quality", metadata=FULL_META)
+
+    (project,) = (await build_portfolio_status(session, str(owner.id))).projects
+    (est,) = project.estimates
+    # The full run re-checked BOQ quality, so the audit's errors are history.
+    assert est.state == STATE_PASSED
+    assert est.report_id == full.id
+    assert est.error_count == 0
+    assert est.passed_count == 30
+
+
+@pytest.mark.asyncio
+async def test_a_newer_failing_audit_over_a_passed_full_run_reads_errors(session) -> None:
+    owner = await _user(session)
+    p = await _project(session, owner, "Audit finds errors")
+    b = await _boq(session, p, "Bill")
+    await _report(session, b, "passed", minutes=0, passed=30, rule_set="din276+boq_quality", metadata=FULL_META)
+    audit = await _report(
+        session, b, "errors", minutes=5, errors=2, passed=8, rule_set="estimate_audit", metadata=AUDIT_META
+    )
+
+    (project,) = (await build_portfolio_status(session, str(owner.id))).projects
+    (est,) = project.estimates
+    assert est.state == STATE_ERRORS
+    assert est.report_id == audit.id
+    # Both reports still back the verdict: DIN 276 passed in the full run.
+    assert est.rule_sets == ["boq_quality", "din276"]
+    assert est.error_count == 2
+
+
+@pytest.mark.asyncio
+async def test_a_run_that_checked_nothing_does_not_erase_an_older_verdict(session) -> None:
+    owner = await _user(session)
+    p = await _project(session, owner, "Pack removed")
+    b = await _boq(session, p, "Bill")
+    full = await _report(
+        session, b, "errors", minutes=0, errors=3, passed=5, rule_set="din276+boq_quality", metadata=FULL_META
+    )
+    await _report(
+        session,
+        b,
+        "unsupported",
+        minutes=5,
+        rule_set="gaeb",
+        metadata={"rule_sets": ["gaeb"], "supported_rule_sets": [], "unsupported_rule_sets": ["gaeb"]},
+    )
+
+    (project,) = (await build_portfolio_status(session, str(owner.id))).projects
+    (est,) = project.estimates
+    assert est.state == STATE_ERRORS
+    assert est.report_id == full.id
+
+
 # ── No N+1 ────────────────────────────────────────────────────────────────
 
 
