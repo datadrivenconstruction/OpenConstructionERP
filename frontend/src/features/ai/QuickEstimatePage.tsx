@@ -983,7 +983,11 @@ function QuantityTablesResult({ data }: { data: CadExtractResponse }) {
                 {group.category}
               </span>
               <span className="text-xs text-content-tertiary">
-                {group.items.length} {group.items.length === 1 ? 'type' : 'types'}
+                {t('ai.cad_types_count', {
+                  count: group.items.length,
+                  defaultValue_one: '{{count}} type',
+                  defaultValue_other: '{{count}} types',
+                })}
               </span>
               <div className="flex items-center gap-3 text-xs text-content-tertiary ml-3">
                 {group.totals.count > 0 && (

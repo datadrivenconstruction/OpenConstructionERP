@@ -1,5 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { useTranslation } from 'react-i18next';
 import { unwrapList } from './normalize';
 import { fmtFixed } from '@/shared/lib/formatters';
 
@@ -93,6 +94,7 @@ function HitCard({ hit }: { hit: Hit }) {
 }
 
 export default function SemanticSearchRenderer({ data }: { data: unknown }) {
+  const { t } = useTranslation();
   const hits = unwrapList(data, ['hits']) as Hit[];
   const obj = (data && typeof data === 'object' ? data : {}) as { query?: string; total?: number };
 
@@ -116,7 +118,15 @@ export default function SemanticSearchRenderer({ data }: { data: unknown }) {
     <div style={{ overflow: 'auto', height: '100%', padding: 12, fontFamily: 'var(--chat-font-body)' }}>
       {obj.query && (
         <div style={{ fontSize: 12, color: 'var(--chat-text-tertiary)', marginBottom: 10 }}>
-          {hits.length} match{hits.length !== 1 ? 'es' : ''} for{' '}
+          {/* The count is its own counted phrase so i18next can pick the
+              form the reader's language needs; the query follows it as a
+              quoted label rather than inside an English "for" clause. */}
+          {t('erp_chat.search.matches_count', {
+            count: hits.length,
+            defaultValue_one: '{{count}} match',
+            defaultValue_other: '{{count}} matches',
+          })}
+          {': '}
           <span style={{ color: 'var(--chat-text-primary)' }}>&ldquo;{obj.query}&rdquo;</span>
         </div>
       )}

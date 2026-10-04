@@ -187,15 +187,11 @@ function FolderCard({
   const isEmpty = node.file_count === 0;
   const label = t(`files.category.${kind}`, { defaultValue: node.label });
   const isRestricted = permissionCount > 0;
-  const lockTooltip = t(
-    permissionCount === 1
-      ? 'files.permissions.lock_tooltip'
-      : 'files.permissions.lock_tooltip_plural',
-    {
-      defaultValue: 'Restricted: {{count}} members can access',
-      count: permissionCount,
-    },
-  );
+  const lockTooltip = t('files.permissions.restricted_members', {
+    count: permissionCount,
+    defaultValue_one: 'Restricted: {{count}} member can access',
+    defaultValue_other: 'Restricted: {{count}} members can access',
+  });
 
   if (isEmpty) {
     return (

@@ -372,32 +372,25 @@ export function ImpactSimulator({
                         defaultValue: 'No line items yet, so nothing would be written to the BOQ.',
                       })
                     : data.boq.target_boq_ambiguous
-                    ? t('changeorders.impact_boq_ambiguous', {
-                        defaultValue:
-                          'This project has more than one unlocked bill of quantities, so the {{positions}} {{posLabel}} cannot be placed automatically. Name the bill when you approve this change order.',
-                        positions: data.boq.positions_added,
-                        posLabel:
-                          data.boq.positions_added === 1
-                            ? t('changeorders.impact_position', { defaultValue: 'position' })
-                            : t('changeorders.impact_positions', { defaultValue: 'positions' }),
+                    ? t('changeorders.impact_boq_ambiguous_count', {
+                        count: data.boq.positions_added,
+                        defaultValue_one:
+                          'This project has more than one unlocked bill of quantities, so the {{count}} position cannot be placed automatically. Name the bill when you approve this change order.',
+                        defaultValue_other:
+                          'This project has more than one unlocked bill of quantities, so the {{count}} positions cannot be placed automatically. Name the bill when you approve this change order.',
                       })
                     : !data.boq.target_boq_name
-                    ? t('changeorders.impact_boq_none', {
-                        defaultValue:
-                          'This project has no unlocked bill of quantities, so the {{positions}} {{posLabel}} would not be written into one.',
-                        positions: data.boq.positions_added,
-                        posLabel:
-                          data.boq.positions_added === 1
-                            ? t('changeorders.impact_position', { defaultValue: 'position' })
-                            : t('changeorders.impact_positions', { defaultValue: 'positions' }),
+                    ? t('changeorders.impact_boq_none_count', {
+                        count: data.boq.positions_added,
+                        defaultValue_one:
+                          'This project has no unlocked bill of quantities, so the {{count}} position would not be written into one.',
+                        defaultValue_other:
+                          'This project has no unlocked bill of quantities, so the {{count}} positions would not be written into one.',
                       })
-                    : t('changeorders.impact_boq_add', {
-                        defaultValue: 'Will add 1 new section with {{positions}} {{posLabel}} to {{boq}}.',
-                        positions: data.boq.positions_added,
-                        posLabel:
-                          data.boq.positions_added === 1
-                            ? t('changeorders.impact_position', { defaultValue: 'position' })
-                            : t('changeorders.impact_positions', { defaultValue: 'positions' }),
+                    : t('changeorders.impact_boq_add_count', {
+                        count: data.boq.positions_added,
+                        defaultValue_one: 'Will add 1 new section with {{count}} position to {{boq}}.',
+                        defaultValue_other: 'Will add 1 new section with {{count}} positions to {{boq}}.',
                         boq: data.boq.target_boq_name,
                       })}
                   </span>

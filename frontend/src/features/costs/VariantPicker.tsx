@@ -528,12 +528,11 @@ export function VariantPicker({
             {t('costs.choose_variant', { defaultValue: 'Choose price variant' })}
           </span>
           <span className="text-2xs text-content-tertiary tabular-nums shrink-0">
-            {variants.length === 1
-              ? t('costs.variant_count_one', { defaultValue: '1 option' })
-              : t('costs.variant_count_n', {
-                  defaultValue: '{{count}} options',
-                  count: variants.length,
-                })}
+            {t('costs.variant_option_count', {
+              count: variants.length,
+              defaultValue_one: '{{count}} option',
+              defaultValue_other: '{{count}} options',
+            })}
           </span>
         </div>
         <button
@@ -668,15 +667,11 @@ export function VariantPicker({
             const groupLabel =
               g.label ||
               t('costs.variant_group_other', { defaultValue: 'Other' });
-            const countLabel =
-              g.totalCount === 1
-                ? t('costs.variant_group_count_one', {
-                    defaultValue: '1 variant',
-                  })
-                : t('costs.variant_group_count_n', {
-                    defaultValue: '{{count}} variants',
-                    count: g.totalCount,
-                  });
+            const countLabel = t('costs.variant_group_total', {
+              count: g.totalCount,
+              defaultValue_one: '{{count}} variant',
+              defaultValue_other: '{{count}} variants',
+            });
             return (
               <div key={g.key || '__empty__'} className="border-b border-border-light/50 last:border-b-0">
                 <button

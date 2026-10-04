@@ -1,6 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { useEffect, useSyncExternalStore } from 'react';
+import i18next from 'i18next';
 import {
   getQueuedMutations,
   removeMutation,
@@ -99,16 +100,26 @@ export function useOfflineSync(): void {
     // Small delay to let network stabilize
     const timer = setTimeout(async () => {
       const { replayed, failed } = await replayMutations();
+      // `i18next.t` rather than a hook's `t`: a language switch must not
+      // re-run this effect, because re-running it schedules another replay.
       if (replayed > 0) {
         addToast({
           type: 'success',
-          title: `Synced ${replayed} offline change${replayed > 1 ? 's' : ''}`,
+          title: i18next.t('offline.synced_changes', {
+            count: replayed,
+            defaultValue_one: 'Synced {{count}} offline change',
+            defaultValue_other: 'Synced {{count}} offline changes',
+          }),
         });
       }
       if (failed > 0) {
         addToast({
           type: 'warning',
-          title: `${failed} change${failed > 1 ? 's' : ''} failed to sync`,
+          title: i18next.t('offline.failed_changes', {
+            count: failed,
+            defaultValue_one: '{{count}} change failed to sync',
+            defaultValue_other: '{{count}} changes failed to sync',
+          }),
         });
       }
     }, 1000);

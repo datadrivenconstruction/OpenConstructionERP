@@ -4435,14 +4435,11 @@ export function BIMViewer({
       {selectionCount > 0 && (
         <div className="absolute bottom-3 start-1/2 -translate-x-1/2 z-30 flex items-center gap-2 rounded-lg bg-surface-primary border border-oe-blue/40 shadow-md px-3 py-1.5">
           <span className="text-xs font-semibold text-content-primary whitespace-nowrap">
-            {selectionCount === 1
-              ? t('bim.sel_one', {
-                  defaultValue: '1 selected',
-                })
-              : t('bim.sel_n', {
-                  defaultValue: '{{count}} selected',
-                  count: selectionCount,
-                })}
+            {t('bim.selection_count', {
+              count: selectionCount,
+              defaultValue_one: '{{count}} selected',
+              defaultValue_other: '{{count}} selected',
+            })}
           </span>
           {selectionParts.length > 0 && (
             <span className="text-[10px] text-content-tertiary truncate max-w-[200px]">

@@ -1038,7 +1038,7 @@ function LoadedDatabasesSection() {
               {isLoading
                 ? t('costs.loaded_loading', { defaultValue: 'Loading installed databases...' })
                 : hasData
-                  ? `${regionCount} ${regionCount === 1 ? t('costs.region_singular', { defaultValue: 'region' }) : t('costs.region_plural', { defaultValue: 'regions' })} · ${totalItems.toLocaleString(getNumberLocale())} ${t('costs.items_total', { defaultValue: 'items total' })}`
+                  ? `${t('costs.region_count', { count: regionCount, defaultValue_one: '{{count}} region', defaultValue_other: '{{count}} regions' })} · ${totalItems.toLocaleString(getNumberLocale())} ${t('costs.items_total', { defaultValue: 'items total' })}`
                   : t('costs.no_databases_installed', {
                       defaultValue: 'No databases installed yet. Pick a region above to install.',
                     })}

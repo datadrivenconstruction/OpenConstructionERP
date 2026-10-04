@@ -416,18 +416,11 @@ export function ShareLinkModal({ open, row, onClose }: ShareLinkModalProps) {
                             })}
                       </span>
                       <span className="tabular-nums">
-                        {t(
-                          link.download_count === 1
-                            ? 'files.share.downloads'
-                            : 'files.share.downloads_plural',
-                          {
-                            defaultValue:
-                              link.download_count === 1
-                                ? '{{count}} download'
-                                : '{{count}} downloads',
-                            count: link.download_count,
-                          },
-                        )}
+                        {t('files.share.download_count', {
+                          count: link.download_count,
+                          defaultValue_one: '{{count}} download',
+                          defaultValue_other: '{{count}} downloads',
+                        })}
                       </span>
                     </div>
                   </li>

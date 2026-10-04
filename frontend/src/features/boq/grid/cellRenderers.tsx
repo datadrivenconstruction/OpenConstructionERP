@@ -348,10 +348,11 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
       <span className="shrink-0 inline-flex items-center h-4 px-1.5 rounded-full
                        bg-surface-tertiary text-[10px] font-medium text-content-tertiary
                        tabular-nums">
-        {childCount} {childCount === 1
-          ? t('boq.item', { defaultValue: 'item' })
-          : t('boq.items', { defaultValue: 'items' })
-        }
+        {t('boq.item_count', {
+          count: childCount,
+          defaultValue_one: '{{count}} item',
+          defaultValue_other: '{{count}} items',
+        })}
       </span>
 
       <div className="flex-1" />

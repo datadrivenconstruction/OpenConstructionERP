@@ -469,7 +469,11 @@ export function TemplatesPage() {
                   {tpl.name}
                 </p>
                 <p className="mt-0.5 text-xs text-content-tertiary">
-                  {tpl.positions} {t('boq.items', { defaultValue: 'items' })}
+                  {t('boq.item_count', {
+                    count: tpl.positions,
+                    defaultValue_one: '{{count}} item',
+                    defaultValue_other: '{{count}} items',
+                  })}
                 </p>
               </div>
 

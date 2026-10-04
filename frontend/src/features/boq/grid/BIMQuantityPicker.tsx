@@ -261,7 +261,13 @@ export function BIMQuantityPicker({
           <Cuboid size={14} className="text-emerald-600" />
           <span className="text-xs font-semibold text-content-primary">BIM Quantities</span>
           <span className="text-[10px] text-content-tertiary tabular-nums">
-            ({cadElementIds.length} element{cadElementIds.length !== 1 ? 's' : ''})
+            (
+            {t('boq.bim_qty_elements_count', {
+              count: cadElementIds.length,
+              defaultValue_one: '{{count}} element',
+              defaultValue_other: '{{count}} elements',
+            })}
+            )
           </span>
         </div>
         <button

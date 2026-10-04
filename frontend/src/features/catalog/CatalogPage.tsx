@@ -1211,11 +1211,11 @@ function BuildAssemblyModal({
                 {t('catalog.build_assembly', { defaultValue: 'Build Assembly' })}
               </h2>
               <p className="text-xs text-content-tertiary">
-                {entries.length}{' '}
-                {entries.length === 1
-                  ? t('catalog.resource', { defaultValue: 'resource' })
-                  : t('catalog.resources', { defaultValue: 'resources' })}{' '}
-                {t('catalog.selected', { defaultValue: 'selected' })}
+                {t('catalog.resources_selected', {
+                  count: entries.length,
+                  defaultValue_one: '{{count}} resource selected',
+                  defaultValue_other: '{{count}} resources selected',
+                })}
               </p>
             </div>
           </div>
@@ -1413,10 +1413,11 @@ function BuildAssemblyModal({
         {/* Footer */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-border-light bg-surface-secondary/30 shrink-0">
           <span className="text-xs text-content-tertiary">
-            {entries.length}{' '}
-            {entries.length === 1
-              ? t('catalog.component', { defaultValue: 'component' })
-              : t('catalog.components', { defaultValue: 'components' })}
+            {t('catalog.component_count', {
+              count: entries.length,
+              defaultValue_one: '{{count}} component',
+              defaultValue_other: '{{count}} components',
+            })}
             {' | '}
             {isMultiCurrency
               ? distinctCurrencies

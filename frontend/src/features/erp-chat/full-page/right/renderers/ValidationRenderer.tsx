@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { unwrapList, toNum } from './normalize';
 import { validationPath } from './deepLink';
 import DeepLinkBar, { useOpenLabels } from './DeepLinkBar';
@@ -133,6 +134,44 @@ function groupBySeverity(items: ValidationItem[]): Record<string, ValidationItem
   return groups;
 }
 
+/**
+ * "3 errors" for a severity group. Each severity is its own counted key, so
+ * i18next picks the form the reader's language needs for that number; gluing
+ * an English "s" onto the raw severity could not do that. A severity the
+ * backend adds later falls back to its raw name and the bare number, which
+ * makes no grammatical claim at all.
+ */
+function severityCountLabel(severity: string, count: number, t: TFunction): string {
+  switch (severity) {
+    case 'critical':
+      return t('erp_chat.validation.critical_count', {
+        count,
+        defaultValue_one: '{{count}} critical issue',
+        defaultValue_other: '{{count}} critical issues',
+      });
+    case 'error':
+      return t('erp_chat.validation.error_count', {
+        count,
+        defaultValue_one: '{{count}} error',
+        defaultValue_other: '{{count}} errors',
+      });
+    case 'warning':
+      return t('erp_chat.validation.warning_count', {
+        count,
+        defaultValue_one: '{{count}} warning',
+        defaultValue_other: '{{count}} warnings',
+      });
+    case 'info':
+      return t('erp_chat.validation.info_count', {
+        count,
+        defaultValue_one: '{{count}} info message',
+        defaultValue_other: '{{count}} info messages',
+      });
+    default:
+      return `${severity}: ${count}`;
+  }
+}
+
 function ValidationItemRow({ item }: { item: ValidationItem }) {
   const [expanded, setExpanded] = useState(false);
   const color = SEVERITY_COLORS[item.severity ?? 'info'] ?? 'var(--chat-text-secondary)';
@@ -206,6 +245,7 @@ function ValidationItemRow({ item }: { item: ValidationItem }) {
 }
 
 export default function ValidationRenderer({ data }: { data: unknown }) {
+  const { t } = useTranslation();
   const labels = useOpenLabels();
   // Backend `get_validation_results` / `run_validation` return
   // `{ reports: [...] }` where each report is a per-run summary with
@@ -256,7 +296,7 @@ export default function ValidationRenderer({ data }: { data: unknown }) {
                 letterSpacing: '0.05em',
               }}
             >
-              {groupItems.length} {severity}{groupItems.length !== 1 ? 's' : ''}
+              {severityCountLabel(severity, groupItems.length, t)}
             </div>
             {groupItems.map((item, i) => (
               <ValidationItemRow key={item.rule_id ?? i} item={item} />

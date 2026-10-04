@@ -235,7 +235,10 @@ describe('every translation keeps the placeholders its sentence needs', () => {
     // not for a policy change: a jump past these means someone started
     // dropping the number from forms that cover a range. 18.0.0 added the AI
     // dock, whose `_one` sentences read "one change" in words in most
-    // languages, which took the singular count to 214.
+    // languages, which took the singular count to 214. 18.4 moved 23 counted
+    // phrases off JavaScript two-arm branches onto i18next plurals; Arabic
+    // states one and two in words ("شرط واحد", "شرطان") and Hebrew states one
+    // ("תנאי אחד"), as each grammar does, which added 70 and made it 284.
     let zeroForms = 0;
     let spelledOut = 0;
     for (const { key, missing } of comparisons) {
@@ -244,6 +247,6 @@ describe('every translation keeps the placeholders its sentence needs', () => {
       else if (missing.length === 1 && missing[0] === 'count') spelledOut += 1;
     }
     expect(zeroForms, 'zero forms dropping a placeholder').toBeLessThanOrEqual(60);
-    expect(spelledOut, 'singular or dual forms spelling the number out').toBeLessThanOrEqual(240);
+    expect(spelledOut, 'singular or dual forms spelling the number out').toBeLessThanOrEqual(310);
   });
 });

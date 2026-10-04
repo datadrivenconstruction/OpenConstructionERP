@@ -1198,7 +1198,11 @@ function RoomRow({
             const tooltip = `${booking.occupant_name ?? '—'} · ${
               nights === null
                 ? '∞'
-                : `${nights} ${nights === 1 ? 'night' : 'nights'}`
+                : t('accommodation.calendar.nights_count', {
+                    count: nights,
+                    defaultValue_one: '{{count}} night',
+                    defaultValue_other: '{{count}} nights',
+                  })
             }`;
             return (
               <button

@@ -7,6 +7,7 @@
  * children render below as nested `<TripletBlock>` / `<LogicBlock>` instances
  * — that recursion is owned by the canvas (EAC-3.2).
  */
+import { useTranslation } from 'react-i18next';
 import { BlockShell, type BlockShellProps } from './BlockShell';
 import type { LogicKind } from '../../types';
 
@@ -28,11 +29,14 @@ const KIND_LABEL: Record<LogicKind, string> = {
 };
 
 export function LogicBlock({ kind, childCount, label, ...shellProps }: LogicBlockProps) {
+  const { t } = useTranslation();
   const operator = KIND_LABEL[kind];
-  const summary =
-    kind === 'not'
-      ? '1 child'
-      : `${childCount} child${childCount === 1 ? '' : 'ren'}`;
+  // NOT negates exactly one condition, whatever the canvas reports.
+  const summary = t('eac.logic_block.conditions_count', {
+    count: kind === 'not' ? 1 : childCount,
+    defaultValue_one: '{{count}} condition',
+    defaultValue_other: '{{count}} conditions',
+  });
 
   return (
     <BlockShell color="logic" label={label ?? operator} {...shellProps}>
