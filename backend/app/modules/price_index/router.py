@@ -9,6 +9,7 @@ Endpoint groups:
     /series/{id}/points/             - period/value points under a series
     /location-factors/               - regional cost factors CRUD
     /adjust/                         - batch base-to-current adjustment
+    /resource-index/...              - the resource-index method (Russia), see resource_index_router
 
 The reference data is platform-wide, so reads only require an authenticated
 user and writes require the ``price_index.manage`` permission. A missing row
@@ -23,6 +24,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.price_index.models import CostIndexSeries
+from app.modules.price_index.resource_index_router import router as resource_index_router
 from app.modules.price_index.schemas import (
     AdjustRequest,
     AdjustResponse,
@@ -47,6 +49,7 @@ from app.modules.price_index.service import (
 )
 
 router = APIRouter(tags=["price-index"])
+router.include_router(resource_index_router)
 
 _MANAGE = Depends(RequirePermission("price_index.manage"))
 
