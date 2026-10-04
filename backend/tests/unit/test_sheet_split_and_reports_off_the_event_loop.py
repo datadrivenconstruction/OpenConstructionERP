@@ -148,6 +148,81 @@ async def test_thumbnails_render_one_at_a_time(monkeypatch: pytest.MonkeyPatch, 
 
 
 @pytest.mark.asyncio
+async def test_each_page_drops_its_parsed_layout_before_the_next_is_read(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    # pdfplumber keeps every Page in ``pdf.pages`` and each Page caches its
+    # parsed layout and objects until the document closes. A set has no page
+    # limit and several uploads now split side by side in worker threads, so
+    # holding every page's layout at once multiplies the peak by the page
+    # count and again by the number of uploads. While page N is read, no
+    # earlier page may still hold its parse.
+    import pdfplumber.page
+
+    real = pdfplumber.page.Page.extract_text
+    still_cached: list[list[int]] = []
+
+    def spy(self: Any, *args: Any, **kwargs: Any) -> Any:
+        still_cached.append(
+            [
+                p.page_number
+                for p in self.pdf.pages
+                if p.page_number < self.page_number and (hasattr(p, "_layout") or hasattr(p, "_objects"))
+            ]
+        )
+        return real(self, *args, **kwargs)
+
+    monkeypatch.setattr(pdfplumber.page.Page, "extract_text", spy)
+    service = _split_service(monkeypatch, tmp_path)
+
+    sheets = await service.split_pdf_to_sheets(
+        uuid.uuid4(), _upload(_drawing_set([["A-101"], ["A-102"], ["A-103"], ["A-104"]])), "u1"
+    )
+
+    assert [s.page_number for s in sheets] == [1, 2, 3, 4]
+    assert still_cached == [[], [], [], []]
+
+
+@pytest.mark.asyncio
+async def test_a_page_whose_text_cannot_be_read_still_drops_its_parse(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    # The release runs in a ``finally``: a page that fails mid-read must not
+    # leave its layout behind for the rest of a long failing request.
+    import pdfplumber.page
+
+    # Page objects, not numbers: closing the document rebuilds ``pdf.pages``
+    # and closes the fresh copies, so a page number would be closed either way.
+    # Holding the objects also keeps their ids from being reused.
+    closed: list[Any] = []
+    failed: list[Any] = []
+    real_close = pdfplumber.page.Page.close
+
+    def close_spy(self: Any) -> None:
+        closed.append(self)
+        real_close(self)
+
+    def broken(self: Any, *_args: Any, **_kwargs: Any) -> Any:
+        failed.append(self)
+        _ = self.layout  # the parse is what the release has to drop
+        raise RuntimeError("damaged content stream")
+
+    monkeypatch.setattr(pdfplumber.page.Page, "close", close_spy)
+    monkeypatch.setattr(pdfplumber.page.Page, "extract_text", broken)
+    service = _split_service(monkeypatch, tmp_path)
+
+    from fastapi import HTTPException
+
+    with pytest.raises(HTTPException) as caught:
+        await service.split_pdf_to_sheets(uuid.uuid4(), _upload(_drawing_set([["A-101"], ["A-102"]])), "u1")
+
+    assert caught.value.status_code == 422
+    assert len(failed) == 1
+    assert any(page is failed[0] for page in closed)
+    assert not hasattr(failed[0], "_layout")
+
+
+@pytest.mark.asyncio
 async def test_a_failed_thumbnail_still_leaves_the_page_its_row(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:

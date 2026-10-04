@@ -2102,28 +2102,35 @@ def _read_sheet_pages(pdf_path: Path, thumb_dir: Path, file_uuid: str, safe_name
     with pdfplumber.open(str(pdf_path)) as pdf:
         for page_idx, page in enumerate(pdf.pages):
             page_number = page_idx + 1
-
-            # Extract text for sheet info detection
-            page_text = page.extract_text() or ""
-
-            # Detect sheet info from text
-            info = detect_sheet_info(page_text)
-            sheet_number = info["sheet_number"]
-
-            # Generate thumbnail
-            thumbnail_path_str: str | None = None
             try:
-                thumb_path = thumb_dir / f"{file_uuid}_page_{page_number}.png"
-                with _PDFIUM_RENDER_LOCK:
-                    page_image = page.to_image(resolution=72)
-                    page_image.save(str(thumb_path), format="PNG")
-                thumbnail_path_str = str(thumb_path)
-            except Exception:
-                logger.warning(
-                    "Failed to generate thumbnail for page %d of %s",
-                    page_number,
-                    safe_name,
-                )
+                # Extract text for sheet info detection
+                page_text = page.extract_text() or ""
+
+                # Detect sheet info from text
+                info = detect_sheet_info(page_text)
+                sheet_number = info["sheet_number"]
+
+                # Generate thumbnail
+                thumbnail_path_str: str | None = None
+                try:
+                    thumb_path = thumb_dir / f"{file_uuid}_page_{page_number}.png"
+                    with _PDFIUM_RENDER_LOCK:
+                        page_image = page.to_image(resolution=72)
+                        page_image.save(str(thumb_path), format="PNG")
+                    thumbnail_path_str = str(thumb_path)
+                except Exception:
+                    logger.warning(
+                        "Failed to generate thumbnail for page %d of %s",
+                        page_number,
+                        safe_name,
+                    )
+            finally:
+                # pdfplumber keeps every Page in ``pdf.pages`` and each one
+                # caches its parsed layout and objects until the document
+                # closes. Without this a two hundred page set holds every
+                # page's layout at once, once per concurrent upload, on a
+                # server whose floor is 3 GB.
+                page.close()
 
             pages.append(
                 {
