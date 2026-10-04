@@ -435,6 +435,17 @@ async def test_the_refusals_carry_their_status_and_detail(world):
     result, _ = await _outcome(_verify_project_owner_for_boq, uuid.uuid4(), admin_id, admin)
     assert result[0] == 404
 
+    # A project named by a string id is found like one named by a UUID, as the
+    # old guard's ``session.get`` found it.
+    for who in ("owner", "member"):
+        user_id, _headers, role = world["users"][who]
+        result, _ = await _outcome(
+            _verify_project_owner_for_boq, world["live"], user_id, {"sub": user_id, "role": role}
+        )
+        assert result == ("ok",), f"{who}: {result}"
+    result, _ = await _outcome(_verify_project_owner_for_boq, world["live"], stranger_id, stranger)
+    assert result == (403, "You do not have access to this project")
+
 
 @pytest.mark.asyncio
 async def test_two_bills_are_guarded_in_one_statement_and_in_order(world):
