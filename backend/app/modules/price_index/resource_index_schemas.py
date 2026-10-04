@@ -122,6 +122,34 @@ class OverheadNormResponse(BaseModel):
     updated_at: datetime
 
 
+#: The largest page either reference list hands out in one answer.
+LIST_LIMIT_MAX = 1000
+
+
+class ResourceIndexValueList(BaseModel):
+    """One page of index values and the size of the whole set.
+
+    The screen picks a region and a quarter, and says which groups have no
+    index, from this list. A short answer read as the whole would offer too
+    few regions and report indices as missing that are entered, so the reader
+    pages until ``offset + len(items)`` reaches ``total``.
+    """
+
+    items: list[ResourceIndexValueResponse] = Field(default_factory=list)
+    total: int = 0
+    offset: int = 0
+    limit: int = LIST_LIMIT_MAX
+
+
+class OverheadNormList(BaseModel):
+    """One page of NR/SP norms and the size of the whole set."""
+
+    items: list[OverheadNormResponse] = Field(default_factory=list)
+    total: int = 0
+    offset: int = 0
+    limit: int = LIST_LIMIT_MAX
+
+
 # ── Compute: explicit input ──────────────────────────────────────────────────
 
 

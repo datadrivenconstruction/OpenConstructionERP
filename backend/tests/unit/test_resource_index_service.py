@@ -867,6 +867,30 @@ async def test_router_duplicate_index_is_a_conflict(session: AsyncSession) -> No
         assert resp.status_code == 422
 
 
+async def test_router_lists_page_with_a_total_so_a_short_answer_is_visible(session: AsyncSession) -> None:
+    owner = await _make_user(session)
+    await _seed_reference(session)
+    async with await _client(_app(session, owner)) as client:
+        base = "/v1/price-index/resource-index/indices/"
+        first = (await client.get(base, params={"region_code": REGION, "quarter": QUARTER, "limit": 3})).json()
+        assert first["total"] == 4
+        assert (first["offset"], first["limit"]) == (0, 3)
+        assert len(first["items"]) == 3
+        rest = (
+            await client.get(base, params={"region_code": REGION, "quarter": QUARTER, "offset": 3, "limit": 3})
+        ).json()
+        assert rest["total"] == 4
+        assert len(rest["items"]) == 1
+        # The two pages together are the whole set, each group exactly once.
+        groups = sorted(i["resource_group"] for i in first["items"] + rest["items"])
+        assert groups == ["labor", "machine", "material", "operator_wages"]
+        assert (await client.get(base, params={"limit": 0})).status_code == 422
+
+        norms = (await client.get("/v1/price-index/resource-index/norms/", params={"limit": 1})).json()
+        assert len(norms["items"]) == 1
+        assert norms["total"] >= 2
+
+
 def test_schema_literals_match_the_math_module() -> None:
     from typing import get_args
 

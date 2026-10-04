@@ -34,14 +34,17 @@ from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verif
 from app.modules.boq.models import BOQ
 from app.modules.price_index import resource_index_math as rim
 from app.modules.price_index.resource_index_schemas import (
+    LIST_LIMIT_MAX,
     BOQResourceIndexComputeRequest,
     BOQResourceIndexSettings,
     OverheadNormCreate,
+    OverheadNormList,
     OverheadNormResponse,
     OverheadNormUpdate,
     ResourceIndexComputeRequest,
     ResourceIndexEstimateResponse,
     ResourceIndexValueCreate,
+    ResourceIndexValueList,
     ResourceIndexValueResponse,
     ResourceIndexValueUpdate,
 )
@@ -83,19 +86,23 @@ def _refusal(exc: Exception) -> HTTPException:
 # ── Index values ─────────────────────────────────────────────────────────────
 
 
-@router.get("/indices/", response_model=list[ResourceIndexValueResponse])
+@router.get("/indices/", response_model=ResourceIndexValueList)
 async def list_indices(
     session: SessionDep,
     _user_id: CurrentUserId,
     region_code: str | None = Query(default=None, max_length=64),
     quarter: str | None = Query(default=None, max_length=7),
-) -> list[ResourceIndexValueResponse]:
-    """List index values, newest quarter first within each region."""
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=LIST_LIMIT_MAX, ge=1, le=LIST_LIMIT_MAX),
+) -> ResourceIndexValueList:
+    """One page of index values, newest quarter first within each region, with the total."""
     try:
-        rows = await ResourceIndexService(session).list_indices(region_code, quarter)
+        rows, total = await ResourceIndexService(session).list_indices(region_code, quarter, offset=offset, limit=limit)
     except rim.ResourceIndexInputError as exc:
         raise _refusal(exc) from exc
-    return [ResourceIndexValueResponse.model_validate(r) for r in rows]
+    return ResourceIndexValueList(
+        items=[ResourceIndexValueResponse.model_validate(r) for r in rows], total=total, offset=offset, limit=limit
+    )
 
 
 @router.post(
@@ -136,10 +143,18 @@ async def delete_index(index_id: uuid.UUID, session: SessionDep, _user_id: Curre
 # ── Norms ────────────────────────────────────────────────────────────────────
 
 
-@router.get("/norms/", response_model=list[OverheadNormResponse])
-async def list_norms(session: SessionDep, _user_id: CurrentUserId) -> list[OverheadNormResponse]:
-    """List NR/SP norms per work type."""
-    return [OverheadNormResponse.model_validate(r) for r in await ResourceIndexService(session).list_norms()]
+@router.get("/norms/", response_model=OverheadNormList)
+async def list_norms(
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=LIST_LIMIT_MAX, ge=1, le=LIST_LIMIT_MAX),
+) -> OverheadNormList:
+    """One page of NR/SP norms per work type, with the total."""
+    rows, total = await ResourceIndexService(session).list_norms(offset=offset, limit=limit)
+    return OverheadNormList(
+        items=[OverheadNormResponse.model_validate(r) for r in rows], total=total, offset=offset, limit=limit
+    )
 
 
 @router.post(

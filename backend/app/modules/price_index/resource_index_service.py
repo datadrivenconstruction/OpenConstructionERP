@@ -21,7 +21,7 @@ from datetime import UTC, date, datetime
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import raiseload
 
@@ -147,19 +147,29 @@ class ResourceIndexService:
     # ── Index values ─────────────────────────────────────────────────────
 
     async def list_indices(
-        self, region_code: str | None = None, quarter: str | None = None
-    ) -> list[ResourceIndexValue]:
+        self,
+        region_code: str | None = None,
+        quarter: str | None = None,
+        *,
+        offset: int = 0,
+        limit: int | None = None,
+    ) -> tuple[list[ResourceIndexValue], int]:
+        """One page of index values, newest quarter first within each region, and the total."""
         stmt = select(ResourceIndexValue)
         if region_code:
             stmt = stmt.where(ResourceIndexValue.region_code == _norm_region(region_code))
         if quarter:
             stmt = stmt.where(ResourceIndexValue.quarter == rim.normalise_quarter(quarter))
+        total = int((await self.session.execute(select(func.count()).select_from(stmt.subquery()))).scalar_one())
         stmt = stmt.order_by(
             ResourceIndexValue.region_code,
             ResourceIndexValue.quarter.desc(),
             ResourceIndexValue.resource_group,
-        )
-        return list((await self.session.execute(stmt)).scalars().all())
+            ResourceIndexValue.id,
+        ).offset(offset)
+        if limit is not None:
+            stmt = stmt.limit(limit)
+        return list((await self.session.execute(stmt)).scalars().all()), total
 
     async def create_index(self, data: ResourceIndexValueCreate) -> ResourceIndexValue:
         region = _norm_region(data.region_code)
@@ -221,9 +231,13 @@ class ResourceIndexService:
 
     # ── Overhead and profit norms ────────────────────────────────────────
 
-    async def list_norms(self) -> list[WorkTypeOverheadNorm]:
-        stmt = select(WorkTypeOverheadNorm).order_by(WorkTypeOverheadNorm.work_type_code)
-        return list((await self.session.execute(stmt)).scalars().all())
+    async def list_norms(self, *, offset: int = 0, limit: int | None = None) -> tuple[list[WorkTypeOverheadNorm], int]:
+        """One page of NR/SP norms by work type code, and the total."""
+        total = int((await self.session.execute(select(func.count(WorkTypeOverheadNorm.id)))).scalar_one())
+        stmt = select(WorkTypeOverheadNorm).order_by(WorkTypeOverheadNorm.work_type_code).offset(offset)
+        if limit is not None:
+            stmt = stmt.limit(limit)
+        return list((await self.session.execute(stmt)).scalars().all()), total
 
     async def create_norm(self, data: OverheadNormCreate) -> WorkTypeOverheadNorm:
         existing = (
@@ -275,11 +289,12 @@ class ResourceIndexService:
     # ── Lookups ──────────────────────────────────────────────────────────
 
     async def _indices_for(self, region: str, quarter: str) -> dict[str, ResourceIndexValue]:
-        rows = await self.list_indices(region, quarter)
+        rows, _total = await self.list_indices(region, quarter)
         return {row.resource_group: row for row in rows}
 
     async def _norms_by_code(self) -> dict[str, WorkTypeOverheadNorm]:
-        return {row.work_type_code: row for row in await self.list_norms()}
+        rows, _total = await self.list_norms()
+        return {row.work_type_code: row for row in rows}
 
     async def resolve_vat(self, on_date: date) -> tuple[Decimal, str]:
         """Return the VAT rate in percent and its name from the platform's tax tables.

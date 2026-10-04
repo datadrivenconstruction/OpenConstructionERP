@@ -349,9 +349,34 @@ export function workedExamplePositions(workTypeA: string, workTypeB: string, lab
 
 /* -- Reference data ------------------------------------------------------- */
 
+/** One page of a reference list as the server sends it. */
+export interface ListPage<T> {
+  items: T[];
+  total: number;
+  offset: number;
+  limit: number;
+}
+
+/**
+ * Read every page of a reference list. The page picks regions and quarters
+ * and names missing index groups from these lists, so a first page read as the
+ * whole set would be wrong rather than short. Stops on an empty page as well,
+ * so a total that moves under the reader cannot loop forever.
+ */
+export async function collectPages<T>(fetchPage: (offset: number) => Promise<ListPage<T> | null | undefined>): Promise<T[]> {
+  const all: T[] = [];
+  for (;;) {
+    const page = await fetchPage(all.length);
+    const items = page && Array.isArray(page.items) ? page.items : [];
+    all.push(...items);
+    if (items.length === 0 || !page || all.length >= page.total) return all;
+  }
+}
+
 export async function listResourceIndices(): Promise<ResourceIndexValue[]> {
-  const res = await apiGet<ResourceIndexValue[]>(`/v1/price-index/resource-index/indices/`);
-  return Array.isArray(res) ? res : [];
+  return collectPages((offset) =>
+    apiGet<ListPage<ResourceIndexValue>>(`/v1/price-index/resource-index/indices/?offset=${offset}`),
+  );
 }
 
 export async function createResourceIndex(data: {
@@ -376,8 +401,9 @@ export async function deleteResourceIndex(id: string): Promise<void> {
 }
 
 export async function listOverheadNorms(): Promise<OverheadNorm[]> {
-  const res = await apiGet<OverheadNorm[]>(`/v1/price-index/resource-index/norms/`);
-  return Array.isArray(res) ? res : [];
+  return collectPages((offset) =>
+    apiGet<ListPage<OverheadNorm>>(`/v1/price-index/resource-index/norms/?offset=${offset}`),
+  );
 }
 
 export async function createOverheadNorm(data: {

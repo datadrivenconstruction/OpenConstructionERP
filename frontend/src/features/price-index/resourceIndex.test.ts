@@ -4,11 +4,12 @@
 // region/quarter pickers, the missing-index pre-check, string-only money
 // formatting (a kopeck is never rounded by a float) and reading the server's
 // structured refusal.
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 import { ApiError } from '@/shared/lib/api';
 import {
   RESOURCE_GROUPS,
+  collectPages,
   formatAmount,
   formatFactorString,
   missingGroups,
@@ -17,6 +18,7 @@ import {
   refusalOf,
   regionsOf,
   workedExamplePositions,
+  type ListPage,
   type ResourceIndexValue,
 } from './resourceIndexApi';
 
@@ -155,5 +157,26 @@ describe('workedExamplePositions', () => {
     expect(positions[0]!.resources.map((r) => r.name)).toEqual(['w35', 'pump', 'op', 'c']);
     expect(positions.map((p) => p.work_type)).toEqual(['a', 'b']);
     expect(positions[0]!.resources.map((r) => r.kind)).toEqual(['labor', 'machine', 'operator', 'material']);
+  });
+});
+
+describe('collectPages', () => {
+  it('reads every page until the total, not just the first', async () => {
+    const pages: Record<number, ListPage<string>> = {
+      0: { items: ['a', 'b'], total: 5, offset: 0, limit: 2 },
+      2: { items: ['c', 'd'], total: 5, offset: 2, limit: 2 },
+      4: { items: ['e'], total: 5, offset: 4, limit: 2 },
+    };
+    const fetchPage = vi.fn(async (offset: number) => pages[offset]);
+    expect(await collectPages(fetchPage)).toEqual(['a', 'b', 'c', 'd', 'e']);
+    expect(fetchPage.mock.calls.map((c) => c[0])).toEqual([0, 2, 4]);
+  });
+
+  it('stops on an empty page even when the total says there is more', async () => {
+    const fetchPage = vi.fn(async (offset: number): Promise<ListPage<string>> =>
+      offset === 0 ? { items: ['a'], total: 3, offset: 0, limit: 1 } : { items: [], total: 3, offset, limit: 1 },
+    );
+    expect(await collectPages(fetchPage)).toEqual(['a']);
+    expect(fetchPage).toHaveBeenCalledTimes(2);
   });
 });
