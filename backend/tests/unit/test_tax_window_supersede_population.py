@@ -120,7 +120,31 @@ from app.modules.i18n_foundation.tax_window_supersede import (
 #:   are open-ended beside every one of them.
 #: * ``EARLIEST_SUPERSEDED_FROM`` moves from 2025-01-01 to 2020-09-01, the
 #:   start of the 21 % window.
-EXPECTED_POPULATION = {("CA", "HST_NS"), ("IL", "VAT"), ("RU", "NDS"), ("IE", "VAT")}
+#:
+#: ``CH/VAT``, ``CH/VAT_REDUCED`` and ``CH/VAT_SPECIAL`` were added on
+#: 2026-10-04, and the repair does nothing to any of them. What was looked at:
+#:
+#: * Switzerland charged 7.7, 2.5 and 3.7 % from 2018-01-01 to 2023-12-31 and
+#:   8.1, 2.6 and 3.8 % from 2024-01-01 (ESTV, "Erhoehung der MWST-Steuersaetze
+#:   2024", read 2026-10-04). The seed carried only the 2024 rates, so a Swiss
+#:   date before 2024 had no rate at all. The new rows are closed windows
+#:   placed BEFORE the windows every install already holds.
+#: * What the repair will therefore do in the field: nothing. Its predicate
+#:   looks for an open row matching a window the file has closed, and the only
+#:   open Swiss rows are the 2024 ones, which the file still leaves open. Old
+#:   installs keep refusing pre-2024 dates; new installs price them. Both are
+#:   honest answers, and neither prices 2023 at 8.1.
+#: * ``EARLIEST_SUPERSEDED_FROM`` does not move: the Swiss replacement windows
+#:   start on 2024-01-01, after Ireland's 2020-09-01.
+EXPECTED_POPULATION = {
+    ("CA", "HST_NS"),
+    ("IL", "VAT"),
+    ("RU", "NDS"),
+    ("IE", "VAT"),
+    ("CH", "VAT"),
+    ("CH", "VAT_REDUCED"),
+    ("CH", "VAT_SPECIAL"),
+}
 
 
 def test_the_repair_will_touch_exactly_these_rate_lines() -> None:

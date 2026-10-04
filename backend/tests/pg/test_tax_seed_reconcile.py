@@ -96,6 +96,16 @@ _IRISH_WINDOWS_ADDED_IN_18_4 = {
     ("IE", "VAT", "2021-03-01"),
 }
 
+#: Switzerland's 2018 to 2023 rates, closed windows before the 2024 ones every
+#: cohort already holds. Nothing delivers them to an old install: the line is
+#: present, so the reconciler leaves it alone, and no window an old install
+#: holds open has been closed, so the supersede repair finds nothing either.
+_SWISS_HISTORY_ADDED_IN_18_4 = {
+    ("CH", "VAT", "2018-01-01"),
+    ("CH", "VAT_REDUCED", "2018-01-01"),
+    ("CH", "VAT_SPECIAL", "2018-01-01"),
+}
+
 #: The same four as delivery keys.
 _IRISH_AND_HUNGARIAN_TIERS = {"IE/VAT_RED_9", "IE/VAT_ZERO", "HU/AFA_18", "HU/AFA_5"}
 
@@ -138,6 +148,7 @@ _ADDED_AFTER_V15_4_0 = {
     # join a filled country-wide slot as tiers, the Croatian way.
     *_TIERS_ADDED_IN_18_4,
     *_IRISH_WINDOWS_ADDED_IN_18_4,
+    *_SWISS_HISTORY_ADDED_IN_18_4,
 }
 
 #: Rows the current file has since EDITED, restored to what the old file said.
@@ -176,6 +187,7 @@ _ADDED_AFTER_V15_9_1 = {
     ("HR", "PDV_0", "2022-10-01"),
     *_TIERS_ADDED_IN_18_4,
     *_IRISH_WINDOWS_ADDED_IN_18_4,
+    *_SWISS_HISTORY_ADDED_IN_18_4,
 }
 
 #: The v15.9.1 cohort needed no restorations until Israel's 18 % rate was

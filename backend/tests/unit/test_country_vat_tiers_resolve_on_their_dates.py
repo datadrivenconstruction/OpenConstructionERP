@@ -17,8 +17,14 @@ Sources, read 2026-10-04:
 * Ireland: Revenue, "Current VAT rates",
   https://www.revenue.ie/en/vat/vat-rates/search-vat-rates/current-vat-rates.aspx
   - standard 23, reduced 13.5, second reduced 9.
+* Ireland's temporary 21 % rate, 2020-09-01 to 2021-02-28: Chartered
+  Accountants Ireland, TaxSource, "VAT Matters", September 2020.
 * Hungary: 27 % standard since 2012-01-01; 5 % since EU accession on
   2004-01-01 and 18 % since 2009-07-01.
+* Switzerland: ESTV, "Erhoehung der MWST-Steuersaetze 2024" - 7.7, 2.5 and
+  3.7 % from 2018-01-01 to 2023-12-31, then 8.1, 2.6 and 3.8 %.
+* Russia: Federal Tax Service, "Taxes 2026", https://www.nalog.gov.ru/new2026/
+  - 20 % to 22 % from 2026-01-01.
 """
 
 from __future__ import annotations
@@ -113,6 +119,91 @@ def test_hungary_still_resolves_to_27_with_the_tiers_beside_it() -> None:
 def test_a_hungarian_date_before_the_27_percent_rate_is_not_priced_at_a_tier(on_date: str) -> None:
     """Before 2012 the seed has no Hungarian standard rate, and a tier must not stand in for it."""
     assert _standard("HU", on_date) is None
+
+
+# ── Switzerland ──────────────────────────────────────────────────────────────
+
+
+@pytest.mark.parametrize(
+    ("on_date", "rate"),
+    [("2018-01-01", "7.7"), ("2023-12-31", "7.7"), ("2024-01-01", "8.1"), ("2026-10-04", "8.1")],
+)
+def test_switzerland_charges_the_rate_of_the_documents_own_year(on_date: str, rate: str) -> None:
+    """The distinguishing case is 2023-12-31: an open 8.1 % window would answer 8.1 there."""
+    assert _standard("CH", on_date) == rate
+
+
+def test_a_swiss_date_before_2018_gets_no_rate_rather_than_a_later_one() -> None:
+    assert _standard("CH", "2017-12-31") is None
+
+
+@pytest.mark.parametrize(
+    ("on_date", "expected"),
+    [
+        ("2023-12-31", {"VAT": Decimal("7.7"), "VAT_REDUCED": Decimal("2.5"), "VAT_SPECIAL": Decimal("3.7")}),
+        ("2024-01-01", {"VAT": Decimal("8.1"), "VAT_REDUCED": Decimal("2.6"), "VAT_SPECIAL": Decimal("3.8")}),
+    ],
+)
+def test_the_swiss_tiers_move_on_the_same_day_as_the_standard_rate(on_date: str, expected: dict) -> None:
+    assert _rates_in_force("CH", on_date) == expected
+
+
+# ── Russia ───────────────────────────────────────────────────────────────────
+
+
+@pytest.mark.parametrize(("on_date", "rate"), [("2025-12-31", "20"), ("2026-01-01", "22")])
+def test_russia_charges_22_percent_only_from_2026(on_date: str, rate: str) -> None:
+    assert _standard("RU", on_date) == rate
+
+
+# ── No later rate on an earlier date, anywhere ───────────────────────────────
+
+
+def _window_contains(row, on_date: str) -> bool:
+    return (row.effective_from is None or row.effective_from <= on_date) and (
+        row.effective_to is None or row.effective_to >= on_date
+    )
+
+
+def test_no_country_answers_a_date_with_a_standard_rate_that_was_not_in_force_on_it() -> None:
+    """Swept over every country and every window boundary in the seed, the day before and the day of.
+
+    Whatever the resolver answers for a country-wide date has to be the rate
+    of a standard row whose own window contains that date. A rate from a
+    window that starts later is exactly the defect of pricing yesterday's
+    invoice at tomorrow's rate, and this is where it would show.
+    """
+    from datetime import date, timedelta
+
+    rows = _rows()
+    countries = sorted({row.country_code for row in rows})
+    bounds = {row.effective_from for row in rows if row.effective_from} | {
+        row.effective_to for row in rows if row.effective_to
+    }
+    dates = set()
+    for bound in bounds:
+        day = date.fromisoformat(bound)
+        dates.update({(day - timedelta(days=1)).isoformat(), day.isoformat()})
+
+    checked = 0
+    for country in countries:
+        for on_date in sorted(dates):
+            outcome = resolve(rows, country, None, on_date)
+            if outcome.status != "national":
+                continue
+            checked += 1
+            in_force = {
+                Decimal(row.rate_pct)
+                for row in rows
+                if row.country_code == country
+                and row.combination in ("national", "federal")
+                and _window_contains(row, on_date)
+            }
+            assert Decimal(outcome.combined_rate_pct) in in_force, (
+                f"{country} on {on_date} answered {outcome.combined_rate_pct}, which no row in force that day carries"
+            )
+    # Not vacuous: the sweep has to have priced a real number of dates.
+    assert checked > 500, checked
 
 
 # ── Every shipped tier ───────────────────────────────────────────────────────

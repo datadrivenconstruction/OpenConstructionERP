@@ -72,6 +72,23 @@
       "fr": "TVA taux normal"
     },
     "tax_code": "VAT",
+    "rate_pct": "7.7",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": "2018-01-01",
+    "effective_to": "2023-12-31",
+    "is_default": true
+  },
+  {
+    "country_code": "CH",
+    "tax_name": "VAT Standard",
+    "tax_name_translations": {
+      "en": "VAT Standard",
+      "de": "MWST Normalsatz",
+      "fr": "TVA taux normal"
+    },
+    "tax_code": "VAT",
     "rate_pct": "8.1",
     "tax_type": "vat",
     "combination": "national",
@@ -89,12 +106,45 @@
       "fr": "TVA taux réduit"
     },
     "tax_code": "VAT_REDUCED",
+    "rate_pct": "2.5",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": "2018-01-01",
+    "effective_to": "2023-12-31",
+    "is_default": false
+  },
+  {
+    "country_code": "CH",
+    "tax_name": "VAT Reduced",
+    "tax_name_translations": {
+      "en": "VAT Reduced",
+      "de": "MWST reduzierter Satz",
+      "fr": "TVA taux réduit"
+    },
+    "tax_code": "VAT_REDUCED",
     "rate_pct": "2.6",
     "tax_type": "vat",
     "combination": "national",
     "subdivision_code": null,
     "effective_from": "2024-01-01",
     "effective_to": null,
+    "is_default": false
+  },
+  {
+    "country_code": "CH",
+    "tax_name": "VAT Special Rate (Accommodation)",
+    "tax_name_translations": {
+      "en": "VAT Special Rate",
+      "de": "MWST Sondersatz"
+    },
+    "tax_code": "VAT_SPECIAL",
+    "rate_pct": "3.7",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": "2018-01-01",
+    "effective_to": "2023-12-31",
     "is_default": false
   },
   {
