@@ -725,6 +725,12 @@ export interface ProgressClaimPopulatePreviewItem {
    * period value is held at zero and the claim's validation report says so.
    */
   percent_regressed?: boolean;
+  /**
+   * Set on a line a change order added beside the line it adjusts. It has no
+   * BOQ position of its own and bills at the percent observed on that line's.
+   */
+  adjusts_contract_line_id?: string | null;
+  adjusts_line_code?: string;
 }
 
 export interface ProgressClaimPopulatePreview {

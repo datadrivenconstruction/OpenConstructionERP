@@ -447,6 +447,14 @@ function PreviewRow({
               {item.contract_line_description}
             </div>
           )}
+          {item.adjusts_contract_line_id && (
+            <div className="text-xs text-content-tertiary">
+              {t('contracts.populate_adjusts_line', {
+                code: item.adjusts_line_code || item.adjusts_contract_line_id.slice(0, 8),
+                defaultValue: 'Change order line, billed at the percent of {{code}}',
+              })}
+            </div>
+          )}
         </td>
         <td className="px-3 py-2 text-right">
           {editable ? (

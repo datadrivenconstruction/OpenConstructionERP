@@ -630,3 +630,97 @@ async def test_a_percent_edited_in_the_preview_is_billed_over_what_came_before(s
     [row] = await svc.claim_line_repo.list_for_claim(april.id)
     assert row.period_completed_value == Decimal("0")
     assert [e["contract_line_id"] for e in (april.metadata_ or {})[PERCENT_REGRESSED_META_KEY]] == [str(line.id)]
+
+
+# ── A change order line beside the line it adjusts ─────────────────────────
+
+
+async def _beside(s, contract: Contract, adjusts: ContractLine | uuid.UUID, *, total: str, code: str) -> ContractLine:
+    """The line a change order adds when it cannot be written on the line it changes."""
+    target_id = adjusts if isinstance(adjusts, uuid.UUID) else adjusts.id
+    line = ContractLine(
+        id=uuid.uuid4(),
+        contract_id=contract.id,
+        code=code,
+        description="Owner change",
+        quantity=Decimal("1"),
+        unit_rate=Decimal(total),
+        total_value=Decimal(total),
+        origin="change_order",
+        metadata_={"adjusts_line_id": str(target_id), "adjusts_line_code": "C"},
+    )
+    s.add(line)
+    await s.flush()
+    return line
+
+
+@pytest.mark.asyncio
+async def test_a_change_order_line_is_billed_at_the_percent_of_the_line_it_adjusts(session) -> None:
+    """Masonry 9,990 plus 3,400 of change beside it, the position measured at 100%."""
+    project = await _make_project(session)
+    pos = await _make_boq_position(session, project)
+    contract = await _make_contract(session, project, retention_percent="0")
+    masonry = await _make_line(session, contract, total_value="9990", quantity="30", boq_position_id=pos.id, code="C")
+    change = await _beside(session, contract, masonry, total="3400", code="CO-004")
+    await _make_entry(session, project, pos, pct="100")
+    claim = await _make_claim(session, contract)
+
+    svc = ContractsService(session)
+    preview = await svc.populate_claim_from_progress(claim.id)
+    by_line = {it["contract_line_id"]: it for it in preview["items"]}
+    assert set(by_line) == {masonry.id, change.id}
+    assert by_line[masonry.id]["period_completed_value"] == Decimal("9990.0000")
+    assert by_line[change.id]["period_completed_value"] == Decimal("3400.0000")
+    assert by_line[change.id]["boq_position_id"] == pos.id
+    assert by_line[change.id]["adjusts_contract_line_id"] == masonry.id
+    assert by_line[change.id]["adjusts_line_code"] == "C"
+    assert by_line[masonry.id]["adjusts_contract_line_id"] is None
+    assert preview["skipped_unlinked"] == 0
+    assert preview["gross"] == Decimal("13390.0000")
+
+    # The commit bills it too.
+    claim = await svc.commit_preview_to_claim(claim.id, [_CommitLine(masonry.id, "100"), _CommitLine(change.id, "100")])
+    assert claim.gross_amount == Decimal("13390.0000")
+
+
+@pytest.mark.asyncio
+async def test_a_change_order_line_follows_the_position_filter_of_the_line_it_adjusts(session) -> None:
+    project = await _make_project(session)
+    pos = await _make_boq_position(session, project)
+    other = await _make_boq_position(session, project)
+    contract = await _make_contract(session, project)
+    masonry = await _make_line(session, contract, total_value="9990", quantity="30", boq_position_id=pos.id, code="C")
+    await _beside(session, contract, masonry, total="3400", code="CO-004")
+    await _make_entry(session, project, pos, pct="50")
+    await _make_entry(session, project, other, pct="50")
+    claim = await _make_claim(session, contract)
+
+    svc = ContractsService(session)
+    preview = await svc.populate_claim_from_progress(claim.id, boq_position_ids=[other.id])
+    assert preview["items"] == []
+    preview = await svc.populate_claim_from_progress(claim.id, boq_position_ids=[pos.id])
+    assert len(preview["items"]) == 2
+
+
+@pytest.mark.asyncio
+async def test_a_change_order_line_with_nothing_to_follow_is_counted_as_unlinked(session) -> None:
+    """Another contract's line, a missing line, a chain and a self link are not followed."""
+    project = await _make_project(session)
+    pos = await _make_boq_position(session, project)
+    contract = await _make_contract(session, project)
+    elsewhere = await _make_contract(session, project)
+    foreign = await _make_line(session, elsewhere, boq_position_id=pos.id, code="F")
+    masonry = await _make_line(session, contract, total_value="9990", quantity="30", boq_position_id=pos.id, code="C")
+    first = await _beside(session, contract, masonry, total="100", code="CO-1")
+    await _beside(session, contract, first, total="200", code="CO-2")  # a chain
+    await _beside(session, contract, foreign, total="300", code="CO-3")
+    await _beside(session, contract, uuid.uuid4(), total="400", code="CO-4")
+    looped = await _beside(session, contract, uuid.uuid4(), total="500", code="CO-5")
+    looped.metadata_ = {"adjusts_line_id": str(looped.id)}
+    await session.flush()
+    await _make_entry(session, project, pos, pct="10")
+    claim = await _make_claim(session, contract)
+
+    preview = await ContractsService(session).populate_claim_from_progress(claim.id)
+    assert {it["contract_line_code"] for it in preview["items"]} == {"C", "CO-1"}
+    assert preview["skipped_unlinked"] == 4

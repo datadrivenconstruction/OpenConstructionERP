@@ -101,6 +101,7 @@ from app.modules.contracts.retention import (
     step_down_release,
 )
 from app.modules.contracts.retention import percent_complete as retention_percent_complete
+from app.modules.contracts.sov_adjustments import ADJUSTS_LINE_META_KEY
 
 logger = logging.getLogger(__name__)
 
@@ -496,6 +497,32 @@ def boq_position_id_for_line(line: ContractLine | Any) -> uuid.UUID | None:
         return uuid.UUID(str(raw))
     except (ValueError, AttributeError, TypeError):
         return None
+
+
+def adjusted_line_for(line: ContractLine | Any, leaf_by_id: dict[uuid.UUID, Any]) -> Any | None:
+    """The schedule line a change order adjustment line sits beside, or ``None``.
+
+    A change that cannot be written on the line it changes goes on a new line
+    naming it in ``metadata_["adjusts_line_id"]`` (see
+    :mod:`app.modules.contracts.sov_adjustments`). ``leaf_by_id`` are this
+    contract's billable lines, so a link to another contract's line or to a
+    roll-up row is not followed, and neither is a chain: the line it names
+    must itself carry no such link.
+    """
+    meta = getattr(line, "metadata_", None)
+    raw = meta.get(ADJUSTS_LINE_META_KEY) if isinstance(meta, dict) else None
+    if not raw:
+        return None
+    try:
+        target = leaf_by_id.get(uuid.UUID(str(raw)))
+    except (ValueError, AttributeError, TypeError):
+        return None
+    if target is None or target.id == getattr(line, "id", None):
+        return None
+    target_meta = getattr(target, "metadata_", None)
+    if isinstance(target_meta, dict) and target_meta.get(ADJUSTS_LINE_META_KEY):
+        return None
+    return target
 
 
 def compute_progress_claim_line(
@@ -3776,10 +3803,18 @@ class ContractsService:
         skipped_no_progress = 0
         skipped_foreign_currency = 0
 
+        leaf_by_id = {ln.id: ln for ln in lines if ln.id not in parent_ids}
         for ln in lines:
             if getattr(ln, "id", None) in parent_ids:
                 continue
             pos_id = boq_position_id_for_line(ln)
+            adjusts = adjusted_line_for(ln, leaf_by_id) if pos_id is None else None
+            if adjusts is not None:
+                # A change order line beside the line it adjusts carries the
+                # same scope, measured on the same bill position, so it bills
+                # at the same percent. Its own row keeps no position link,
+                # which would make the position ambiguous for the next change.
+                pos_id = boq_position_id_for_line(adjusts)
             if pos_id is None:
                 skipped_unlinked += 1
                 continue
@@ -3815,6 +3850,8 @@ class ContractsService:
                     "prior_completed_value": derived["prior_completed_value"],
                     "cumulative_completed_value": derived["cumulative_completed_value"],
                     "percent_regressed": claim_line_percent_regressed(derived),
+                    "adjusts_contract_line_id": adjusts.id if adjusts is not None else None,
+                    "adjusts_line_code": (adjusts.code or "") if adjusts is not None else "",
                 }
             )
 
@@ -7152,6 +7189,7 @@ __all__ = [
     "NTECapExceededError",
     "_REQUIRED_TERM_FIELDS",
     "allowed_claim_transitions",
+    "adjusted_line_for",
     "allowed_contract_transitions",
     "allowed_eot_transitions",
     "allowed_final_account_transitions",

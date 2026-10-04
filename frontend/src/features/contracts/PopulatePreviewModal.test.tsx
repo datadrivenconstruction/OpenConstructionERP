@@ -143,6 +143,43 @@ describe('PopulatePreviewModal preview source', () => {
   });
 });
 
+describe('PopulatePreviewModal change order lines', () => {
+  it('names the line a change order line is billed with, and commits it like any other', async () => {
+    commitMock.mockResolvedValue({} as never);
+    const base = preview();
+    populateMock.mockResolvedValue(
+      preview({
+        items: [
+          base.items[0],
+          {
+            ...base.items[0],
+            contract_line_id: 'line-2',
+            contract_line_code: 'CO-004',
+            contract_line_description: 'Owner change',
+            contract_line_value: '3400',
+            period_completed_value: '680',
+            cumulative_completed_value: '680',
+            adjusts_contract_line_id: 'line-1',
+            adjusts_line_code: '03.10',
+          },
+        ],
+      }),
+    );
+    renderModal();
+    await waitFor(() => expect(screen.getByTestId('populate-preview-table')).toBeTruthy());
+    expect(screen.getByText('Change order line, billed at the percent of 03.10')).toBeTruthy();
+    // Only the change order line says so.
+    expect(screen.getAllByText(/Change order line, billed at the percent of/)).toHaveLength(1);
+    fireEvent.click(screen.getByText('Commit lines'));
+    await waitFor(() =>
+      expect(commitMock).toHaveBeenCalledWith('claim-1', [
+        { contract_line_id: 'line-1', period_completed_pct: 20 },
+        { contract_line_id: 'line-2', period_completed_pct: 20 },
+      ]),
+    );
+  });
+});
+
 // A second-period row: the line is worth 10,000, earlier claims billed 2,000
 // (20%), and the site now measures 40% to date, so this period bills 2,000.
 function secondPeriod(): ProgressClaimPopulatePreview {

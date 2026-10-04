@@ -775,6 +775,11 @@ class ProgressClaimPopulatePreviewItem(BaseModel):
     # this line. The period value is held at zero; a person decides whether
     # the earlier claims overstated the work.
     percent_regressed: bool = False
+    # Set on a line a change order added beside the line it adjusts: it has
+    # no bill position of its own and is billed at the percent observed on
+    # that line's position, which ``boq_position_id`` then is.
+    adjusts_contract_line_id: UUID | None = None
+    adjusts_line_code: str = ""
 
 
 class ProgressClaimPopulatePreviewResponse(BaseModel):

@@ -15524,6 +15524,7 @@ const resource = {
     "contracts.populate_pct_line": "Percent complete to date for line {{code}}",
     "contracts.populate_pct_to_date": "% to date",
     "contracts.populate_regressed": "Below what earlier claims already billed on this line, so this claim bills nothing on it. Check the measurement or the earlier claims.",
+    "contracts.populate_adjusts_line": "Change order line, billed at the percent of {{code}}",
     "contracts.populate_reset_pct": "Back to the measured {{pct}}",
     "contracts.populate_subtitle": "Review the values derived from the latest field observations, deselect any you do not want, then commit.",
     "contracts.populate_subtitle_editable": "Proposed from the field progress measured up to the end of this claim period. Correct a percent to date where the site says otherwise, deselect what you do not want to bill, then commit.",
