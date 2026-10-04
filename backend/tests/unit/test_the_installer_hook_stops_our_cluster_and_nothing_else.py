@@ -256,7 +256,10 @@ pytestmark_windows = pytest.mark.skipif(
 
 def _spawn(exe: Path) -> subprocess.Popen:
     return subprocess.Popen(
-        [str(exe), "-NoProfile", "-NonInteractive", "-Command", "Start-Sleep -Seconds 120"],
+        # Outlives any wait below; every test kills it in its finally block. A
+        # sleep shorter than the hook's own run could end on its own and pass
+        # for a stop.
+        [str(exe), "-NoProfile", "-NonInteractive", "-Command", "Start-Sleep -Seconds 900"],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
@@ -279,13 +282,27 @@ def _run(command: str, data_dir: Path) -> None:
         env=env,
         capture_output=True,
         text=True,
-        timeout=120,
+        # The hook itself is bounded by nsExec's /TIMEOUT in the installer. Here
+        # a loaded Windows runner has taken longer than 120 s just to start
+        # PowerShell and query the process table, which failed the run without
+        # saying anything about the hook.
+        timeout=600,
     )
 
 
 def _still_running(proc: subprocess.Popen) -> bool:
     time.sleep(1.0)
     return proc.poll() is None
+
+
+def _stopped_within(proc: subprocess.Popen, seconds: float = 15.0) -> bool:
+    """A stopped process can take a moment to leave the table on a busy machine."""
+    deadline = time.monotonic() + seconds
+    while time.monotonic() < deadline:
+        if proc.poll() is not None:
+            return True
+        time.sleep(0.25)
+    return False
 
 
 @pytest.fixture
@@ -312,7 +329,7 @@ def test_it_stops_the_postmaster_its_pid_file_names(postmaster_command: str, imp
         try:
             _write_pid_file(Path(directory), proc.pid, int(time.time()))
             _run(postmaster_command, Path(directory))
-            stopped = not _still_running(proc)
+            stopped = _stopped_within(proc)
             print(f"postmaster pid {proc.pid}: stopped={stopped}")
             assert stopped, "the hook left the cluster running that its own pid file named"
         finally:
