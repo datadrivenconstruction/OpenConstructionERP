@@ -33,9 +33,10 @@ header. The records the importer cares about:
 * ``~T`` - Extended text record (long description for a concept).
 * ``~M`` - Measurement record. ``~M|PARENT\\CHILD|...|QTY|COMMENT|``.
 
-Encoding: FIEBDC-3 files in the wild ship in CP1252 (Spain), Latin-1
-(LATAM) and UTF-8 (modern exporters). We probe in that order and accept
-the first lossless decode.
+Encoding: the fifth field of ``~V`` (JUEGO_CARACTERES) names the character
+set, ``850`` or ``437`` for the MS-DOS code pages, ``ANSI`` for Windows-1252,
+``UTF-8`` in the newer revisions, and empty for the default 850. See
+:func:`_decode_bc3` for how the declaration and the bytes are weighed.
 
 Line continuation: a logical record may wrap across multiple physical
 lines. The convention is "anything not starting with ``~`` is a
@@ -52,7 +53,7 @@ from app.modules.boq.importers._base import (
     ImportedPosition,
     ImporterParseError,
 )
-from app.modules.boq.importers._encoding import decode_text_bytes, safe_float
+from app.modules.boq.importers._encoding import decode_text_bytes, safe_float, wide_bom_codec
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +73,112 @@ _HDR_DATA_CONFIG = "~DC"
 #  3  - agrupador (aggregator - generally treated as a section)
 _CONCEPT_TYPE_PARTIDA = "0"
 _CONCEPT_TYPE_CAPITULO = "1"
+
+
+# JUEGO_CARACTERES spellings → (canonical token, Python codec).
+_CHARSET_TOKENS: dict[str, tuple[str, str]] = {
+    "850": ("850", "cp850"),
+    "CP850": ("850", "cp850"),
+    "437": ("437", "cp437"),
+    "CP437": ("437", "cp437"),
+    "ANSI": ("ANSI", "cp1252"),
+    "1252": ("ANSI", "cp1252"),
+    "CP1252": ("ANSI", "cp1252"),
+    "WINDOWS-1252": ("ANSI", "cp1252"),
+    "WIN1252": ("ANSI", "cp1252"),
+    "UTF-8": ("UTF-8", "utf-8"),
+    "UTF8": ("UTF-8", "utf-8"),
+    "ISO-8859-1": ("ISO-8859-1", "latin-1"),
+    "8859-1": ("ISO-8859-1", "latin-1"),
+}
+_CODEC_BY_TOKEN: dict[str, str] = dict(_CHARSET_TOKENS.values())
+
+# The JUEGO_CARACTERES field is the fifth after ``~V``. Our own exporter and
+# some others put it one or two fields later, so those are read when the
+# fifth holds no charset.
+_CHARSET_FIELD = 4
+_CHARSET_FIELD_FALLBACKS = (5, 6, 7)
+
+# The letters a Spanish budget is written in, which tell code page 850 from
+# Windows-1252 when the header names neither: each decodes the other's
+# accented vowels into box drawings and currency signs.
+_SPANISH_LETTERS = frozenset("áéíóúñüÁÉÍÓÚÑÜ¿¡ºª")
+
+
+def declared_bc3_charset(content: bytes) -> str | None:
+    """The charset the file's ``~V`` record declares, as a canonical token.
+
+    Returns ``"850"``, ``"437"``, ``"ANSI"``, ``"UTF-8"`` or ``"ISO-8859-1"``,
+    ``""`` when there is a ``~V`` record that names none (the field is empty
+    or holds something else), and ``None`` when there is no ``~V`` record.
+    The record is ASCII up to its free-text fields, so the bytes are read as
+    Latin-1, which cannot fail.
+    """
+    head = content[:8192]
+    if head.startswith(b"\xef\xbb\xbf"):
+        head = head[3:]
+    text = head.decode("latin-1")
+    for line in text.splitlines():
+        stripped = line.lstrip()
+        if not stripped.startswith(_HDR_VERSION):
+            continue
+        fields = [field.strip().upper() for field in stripped.split("|")[1:]]
+        for index in (_CHARSET_FIELD, *_CHARSET_FIELD_FALLBACKS):
+            if index < len(fields) and fields[index] in _CHARSET_TOKENS:
+                return _CHARSET_TOKENS[fields[index]][0]
+        return ""
+    return None
+
+
+def _spanish_score(text: str) -> int:
+    return sum(1 for char in text if char in _SPANISH_LETTERS)
+
+
+def _decode_bc3(content: bytes) -> tuple[str, str, str | None]:
+    """Decode a BC3 upload. Returns ``(text, codec used, declared charset)``.
+
+    In order:
+
+    * A byte-order mark names the encoding outright.
+    * Bytes that are valid UTF-8 and not plain ASCII are UTF-8 whatever the
+      header says: text in a single-byte code page with accented letters is
+      almost never valid UTF-8, and a converted file often keeps its old
+      header.
+    * A declared charset decodes the file.
+    * With none declared, code page 850 (the standard's default) and
+      Windows-1252 (what most Windows programs write without saying so) are
+      both tried, and the one that reads more Spanish letters wins, ties to
+      Windows-1252. Code page 437 is never guessed.
+    * The shared probe of :func:`decode_text_bytes` is the last resort.
+    """
+    declared = declared_bc3_charset(content)
+    if content.startswith(b"\xef\xbb\xbf") or wide_bom_codec(content) is not None:
+        text, used = decode_text_bytes(content)
+        return text, used, declared
+    if not content.isascii():
+        try:
+            return content.decode("utf-8"), "utf-8", declared
+        except UnicodeDecodeError:
+            pass
+    codec = _CODEC_BY_TOKEN.get(declared or "")
+    if codec is not None:
+        try:
+            return content.decode(codec), codec, declared
+        except UnicodeDecodeError:
+            pass
+    else:
+        candidates: list[tuple[int, int, str, str]] = []
+        for rank, guess in enumerate(("cp1252", "cp850")):
+            try:
+                decoded = content.decode(guess)
+            except UnicodeDecodeError:
+                continue
+            candidates.append((_spanish_score(decoded), -rank, decoded, guess))
+        if candidates:
+            _, _, text, used = max(candidates)
+            return text, used, declared
+    text, used = decode_text_bytes(content)
+    return text, used, declared
 
 
 def _split_logical_records(text: str) -> list[str]:
@@ -214,7 +321,7 @@ class BC3Importer:
             raise ImporterParseError("BC3 upload is empty")
 
         try:
-            text, encoding_used = decode_text_bytes(content)
+            text, encoding_used, declared_charset = _decode_bc3(content)
         except UnicodeDecodeError as exc:
             raise ImporterParseError(f"BC3 file uses an unsupported encoding: {exc}") from exc
 
@@ -431,6 +538,7 @@ class BC3Importer:
 
         result.metadata = {
             "bc3_encoding": encoding_used,
+            "bc3_declared_charset": declared_charset,
             "bc3_concepts": len(concepts),
             "bc3_extended_texts": len(extended_texts),
             "bc3_decompositions": len(decompositions),
