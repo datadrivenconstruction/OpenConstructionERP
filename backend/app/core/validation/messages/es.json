@@ -678,6 +678,7 @@
     "agreement_not_found": "Contrato no encontrado",
     "rejection_not_found": "Rechazo no encontrado",
     "claim_not_found": "Certificación de avance no encontrada",
+    "gaeb_x89_final_account_unsupported": "Una liquidación final o liquidación final parcial todavía no se puede exportar como GAEB X89. Debe facturar la obra acumulada menos los pagos anteriores, y a partir de una certificación solo se genera una factura parcial de un período. Exporte la certificación como factura parcial.",
     "plot_not_found": "Parcela no encontrada",
     "survey_not_found": "Levantamiento con dron no encontrado",
     "diary_video_not_found": "Vídeo del diario de obra no encontrado",

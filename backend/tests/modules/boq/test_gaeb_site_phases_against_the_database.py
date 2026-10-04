@@ -41,10 +41,16 @@ from app.modules.boq.gaeb_exchange_router import (
 )
 from app.modules.boq.gaeb_x31 import parse_x31
 from app.modules.boq.models import BOQ, BOQMarkup, Position
-from app.modules.boq.schemas import PositionCreate
+from app.modules.boq.schemas import PositionCreate, PositionUpdate
 from app.modules.boq.service import BOQService
 from app.modules.contacts.models import Contact
-from app.modules.contracts.models import Contract, ContractLine, ProgressClaim, ProgressClaimLine
+from app.modules.contracts.models import (
+    Contract,
+    ContractLine,
+    ProgressClaim,
+    ProgressClaimLine,
+    RetentionRelease,
+)
 from app.modules.finance.einvoice_settings_models import DEFAULT_SCOPE, EInvoiceSettings
 from app.modules.projects.models import Project
 from app.modules.subcontractors.models import Subcontractor
@@ -272,6 +278,7 @@ async def _contract_with_two_claims(
         ),
     ):
         gross = sum((Decimal(v) for _l, _q, v in lines), Decimal("0"))
+        retention = (gross * Decimal("0.05")).quantize(Decimal("0.01"))
         claim = ProgressClaim(
             contract_id=contract.id,
             claim_number=number,
@@ -280,8 +287,8 @@ async def _contract_with_two_claims(
             application_date=period_to,
             currency=currency,
             gross_amount=gross,
-            retention_amount=(gross * Decimal("0.05")).quantize(Decimal("0.01")),
-            net_due=gross,
+            retention_amount=retention,
+            net_due=gross - retention,
             status="submitted",
         )
         session.add(claim)
@@ -447,4 +454,167 @@ async def test_a_stranger_cannot_read_the_claim(session) -> None:
     _first, second = await _contract_with_two_claims(session, owner)
     with pytest.raises(HTTPException) as denied:
         await preview_claim_gaeb_x89(second.id, str(stranger.id), session, vat_rate=None, invoice_type="deduction")
-    assert denied.value.status_code in (403, 404)
+    with pytest.raises(HTTPException) as missing:
+        await preview_claim_gaeb_x89(uuid.uuid4(), str(stranger.id), session, vat_rate=None, invoice_type="deduction")
+    # Another project's claim and no claim at all answer alike, so the reply
+    # tells a stranger nothing about which claim ids exist.
+    assert denied.value.status_code == missing.value.status_code == 404
+    assert denied.value.detail == missing.value.detail
+
+
+# ── The invoice and the claim agree on what is due ──────────────────────
+
+
+async def test_a_release_billed_on_the_claim_reaches_the_outstanding_amount(session) -> None:
+    """Gross 100k, retention 5k and a 20k release billed on the claim: net due 115k, the X89 says 115k."""
+    owner = await _user(session)
+    _first, second = await _contract_with_two_claims(session, owner)
+    lines = (
+        (await session.execute(select(ProgressClaimLine).where(ProgressClaimLine.progress_claim_id == second.id)))
+        .scalars()
+        .all()
+    )
+    ordered = sorted(lines, key=lambda ln: ln.period_completed_qty, reverse=True)
+    for line, value in zip(ordered, ("60000", "40000"), strict=True):
+        line.period_completed_value = Decimal(value)
+    second.gross_amount = Decimal("100000")
+    second.retention_amount = Decimal("5000")
+    second.net_due = Decimal("115000")
+    session.add(
+        RetentionRelease(
+            contract_id=second.contract_id,
+            event="substantial_completion",
+            status="billed",
+            amount=Decimal("20000"),
+            progress_claim_id=second.id,
+        )
+    )
+    await session.flush()
+
+    preview = await preview_claim_gaeb_x89(second.id, str(owner.id), session, vat_rate=None, invoice_type="deduction")
+    assert preview["figures"]["net"] == "100000.00"
+    assert preview["figures"]["retention"] == "5000.00"
+    assert preview["figures"]["release"] == "20000.00"
+    assert preview["figures"]["outstanding_before_vat"] == "115000.00"
+    assert preview["claim_net_due"] == "115000.00"
+    assert all(w["code"] != "outstanding_differs_from_net_due" for w in preview["warnings"])
+
+    response = await export_claim_gaeb_x89(second.id, str(owner.id), session, vat_rate=None, invoice_type="deduction")
+    root = ET.fromstring(await _body(response))
+    shares = {
+        (s.findtext(f"{NS89}InvoiceShareType"), s.findtext(f"{NS89}CounterClaim")): Decimal(
+            s.findtext(f"{NS89}Total") or "0"
+        )
+        for s in root.iter(f"{NS89}InvoiceShare")
+    }
+    assert shares[("security deposit", "Yes")] == Decimal("5000.00")
+    assert shares[("security deposit", None)] == Decimal("20000.00")
+    # 100000 + 19 % VAT - 5000 + 20000
+    assert shares[("outstanding amount", None)] == Decimal("134000.00")
+
+
+async def test_a_claim_whose_net_due_the_invoice_cannot_reach_is_warned_about(session) -> None:
+    owner = await _user(session)
+    _first, second = await _contract_with_two_claims(session, owner)
+    second.net_due = Decimal("9000")
+    await session.flush()
+    preview = await preview_claim_gaeb_x89(second.id, str(owner.id), session, vat_rate=None, invoice_type="deduction")
+    warning = next(w for w in preview["warnings"] if w["code"] == "outstanding_differs_from_net_due")
+    assert warning["reason"] == "other"
+    assert preview["figures"]["outstanding_before_vat"] == "9595.00"
+    assert preview["claim_net_due"] == "9000.00"
+
+
+@pytest.mark.parametrize("invoice_type", ["final account", "part final account"])
+async def test_a_final_account_is_refused_until_it_is_built_cumulatively(session, invoice_type: str) -> None:
+    owner = await _user(session)
+    _first, second = await _contract_with_two_claims(session, owner)
+    for route in (preview_claim_gaeb_x89, export_claim_gaeb_x89):
+        with pytest.raises(HTTPException) as refused:
+            await route(second.id, str(owner.id), session, vat_rate=None, invoice_type=invoice_type)
+        assert refused.value.status_code == 422
+        assert "final account" in str(refused.value.detail)
+
+
+async def test_a_draft_or_rejected_claim_takes_no_number_in_the_sequence(session) -> None:
+    owner = await _user(session)
+    first, second = await _contract_with_two_claims(session, owner)
+    first.status = "rejected"
+    await session.flush()
+    preview_root = ET.fromstring(
+        await _body(
+            await export_claim_gaeb_x89(second.id, str(owner.id), session, vat_rate=None, invoice_type="deduction")
+        )
+    )
+    assert preview_root.findtext(f"{NS89}Invoice/{NS89}InvoiceHeader/{NS89}SequentialNo") == "1"
+
+    first.status = "draft"
+    await session.flush()
+    root = ET.fromstring(
+        await _body(
+            await export_claim_gaeb_x89(second.id, str(owner.id), session, vat_rate=None, invoice_type="deduction")
+        )
+    )
+    assert root.findtext(f"{NS89}Invoice/{NS89}InvoiceHeader/{NS89}SequentialNo") == "1"
+
+
+async def test_a_german_subcontract_is_told_to_check_reverse_charge(session) -> None:
+    owner = await _user(session)
+    _first, second = await _contract_with_two_claims(session, owner)
+    client_preview = await preview_claim_gaeb_x89(
+        second.id, str(owner.id), session, vat_rate=None, invoice_type="deduction"
+    )
+    assert all(w["code"] != "subcontract_reverse_charge_de" for w in client_preview["warnings"])
+
+    contract = await session.get(Contract, second.contract_id)
+    assert contract is not None
+    contract.counterparty_type = "subcontractor"
+    await session.flush()
+    preview = await preview_claim_gaeb_x89(second.id, str(owner.id), session, vat_rate=None, invoice_type="deduction")
+    assert any(w["code"] == "subcontract_reverse_charge_de" for w in preview["warnings"])
+
+
+async def test_a_subcontract_outside_germany_is_not_told_about_german_reverse_charge(session) -> None:
+    owner = await _user(session)
+    _first, second = await _contract_with_two_claims(session, owner, country="GB", currency="GBP", tax_markup=False)
+    contract = await session.get(Contract, second.contract_id)
+    assert contract is not None
+    contract.counterparty_type = "subcontractor"
+    await session.flush()
+    preview = await preview_claim_gaeb_x89(second.id, str(owner.id), session, vat_rate=None, invoice_type="deduction")
+    assert all(w["code"] != "subcontract_reverse_charge_de" for w in preview["warnings"])
+
+
+# ── X31 apply against a position edited since the preview ───────────────
+
+
+async def test_apply_refuses_a_position_edited_since_the_preview(session) -> None:
+    owner = await _user(session)
+    boq, pos = await _bill(session, owner)
+    target = pos["01.0010"]
+    read_version = int(target.version or 0)
+    # Somebody edits the position between preview and apply.
+    await BOQService(session).update_position(target.id, PositionUpdate(description="Beton C35/45"))
+    await session.flush()
+
+    result = await apply_boq_gaeb_x31(
+        boq.id,
+        str(owner.id),
+        {"role": "editor"},
+        session,
+        X31ApplyRequest(items=[X31ApplyItem(position_id=target.id, quantity="99", version=read_version)]),
+    )
+    assert result["applied"] == []
+    assert result["errors"] == [{"position_id": str(target.id), "error": "version_conflict"}]
+    _qty, meta = await _fresh(session, target.id)
+    assert "measurement" not in meta
+
+    current = (await session.execute(select(Position.version).where(Position.id == target.id))).scalar_one()
+    applied = await apply_boq_gaeb_x31(
+        boq.id,
+        str(owner.id),
+        {"role": "editor"},
+        session,
+        X31ApplyRequest(items=[X31ApplyItem(position_id=target.id, quantity="99", version=int(current))]),
+    )
+    assert applied["applied"] == [str(target.id)]

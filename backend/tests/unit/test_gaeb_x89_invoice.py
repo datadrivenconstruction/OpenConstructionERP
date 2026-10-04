@@ -48,6 +48,8 @@ from app.modules.boq.gaeb_x89 import (
     invoice_lines_from_claim,
     missing_invoice_fields,
     parse_x89,
+    place_invoice_lines,
+    x89_figures,
 )
 from app.modules.boq.importers import ImporterParseError
 from app.modules.boq.importers.gaeb_xml import GAEBXMLImporter
@@ -576,3 +578,246 @@ def test_published_x89_schema_accepts_the_export() -> None:
     assert root.findtext(f"{NS}Invoice/{NS}InvoiceRecipient/{NS}TaxNo") == "11/222/33333"
     assert schema.validate(etree.fromstring(exported.xml.encode("utf-8"))), [str(e) for e in schema.error_log][:5]
     assert schema.validate(etree.fromstring(_RECEIVED)), [str(e) for e in schema.error_log][:5]
+
+
+# ── The invoice asks for what the claim says is due ─────────────────────
+
+
+def _shares(xml: str) -> list[tuple[str | None, str | None, Decimal, str | None]]:
+    return [
+        (
+            s.findtext(f"{NS}InvoiceShareType"),
+            s.findtext(f"{NS}Description"),
+            D(s.findtext(f"{NS}Total") or "0"),
+            s.findtext(f"{NS}CounterClaim"),
+        )
+        for s in ET.fromstring(xml).iter(f"{NS}InvoiceShare")
+    ]
+
+
+def test_a_release_billed_on_the_claim_is_paid_with_it() -> None:
+    """Gross 100k, retention 5k, a 20k release billed here: the claim's net due is 115k, and so is the X89's."""
+    lines = [InvoiceLine("01.0010", "Beton", "m3", D("500"), D("200"), D("100000"))]
+    data = _invoice(lines, retention="5000")
+    data.release = D("20000")
+    exported = build_x89_xml(data)
+
+    assert exported.figures.outstanding_before_vat == D("115000.00")
+    # VAT is on the work of the period only; released retention is not taxed again.
+    assert exported.figures.vat_amount == D("19000.00")
+    assert exported.figures.payable == D("134000.00")
+    assert _totals(exported.xml)["TotalNet"] == D("100000.00")
+    shares = _shares(exported.xml)
+    assert ("security deposit", "Sicherheitseinbehalt", D("5000.00"), "Yes") in shares
+    assert ("security deposit", "Auszahlung Sicherheitseinbehalt", D("20000.00"), None) in shares
+    assert shares[-1][0] == "outstanding amount"
+    assert shares[-1][2] == D("134000.00")
+
+
+def test_retention_on_stored_materials_is_not_taken_off_an_invoice_that_does_not_bill_them() -> None:
+    """The engine accrued 5 % on 100k of work and 20k of materials stored; the X89 bills the work only."""
+    from app.modules.boq.gaeb_exchange_router import _retention_on_billed_work
+
+    this_claim = [
+        SimpleNamespace(
+            materials_stored_value=D("20000"), retention_to_date=D("5000"), retention_stored_to_date=D("1000")
+        )
+    ]
+    retention, stored_part, moved = _retention_on_billed_work(D("6000"), this_claim, [])
+    assert (retention, stored_part, moved) == (D("5000"), D("1000"), True)
+
+    # Next month the materials are built in: the work billed carries their retention now.
+    next_claim = [
+        SimpleNamespace(materials_stored_value=D("0"), retention_to_date=D("6000"), retention_stored_to_date=D("0"))
+    ]
+    retention, stored_part, moved = _retention_on_billed_work(D("0"), next_claim, this_claim)
+    assert (retention, stored_part, moved) == (D("1000"), D("-1000"), True)
+
+    # Flat retention: the engine never ran, the accrual is on the billed gross already.
+    flat = [SimpleNamespace(materials_stored_value=D("0"), retention_to_date=None, retention_stored_to_date=None)]
+    assert _retention_on_billed_work(D("505"), flat, []) == (D("505"), D("0"), False)
+
+
+def test_a_release_without_retention_still_states_what_is_outstanding() -> None:
+    lines = [InvoiceLine("01.0010", "Beton", "m3", D("1"), D("1000"), D("1000"))]
+    data = _invoice(lines)
+    data.release = D("250")
+    types = [s[0] for s in _shares(build_x89_xml(data).xml)]
+    assert types == ["basic amount", "VAT", "security deposit", "outstanding amount"]
+
+
+# ── Indexpositionen and two lines on one position ───────────────────────
+
+
+def test_an_index_position_keeps_its_oz_and_checks_clean() -> None:
+    lines = [
+        InvoiceLine("01.0010", "Beton", "m3", D("40"), D("185.50"), D("7420.00")),
+        InvoiceLine("01.0020", "Betonstahl", "t", D("2"), D("1340"), D("2680.00")),
+        InvoiceLine("01.0020.A", "Betonstahl, Zulage", "t", D("1"), D("90"), D("90.00"), index="A"),
+    ]
+    exported = build_x89_xml(_invoice(lines))
+    assert exported.remapped == []
+    items = _items(exported.xml)
+    assert [(i.get("RNoPart"), i.get("RNoIndex")) for i in items] == [("0010", None), ("0020", None), ("0020", "A")]
+
+    indexed = SimpleNamespace(
+        id="P3",
+        boq_id="B1",
+        ordinal="01.0020.A",
+        description="Zulage",
+        unit="t",
+        quantity="10",
+        unit_rate="90",
+        metadata_={"gaeb_rno_index": "A"},
+    )
+    parsed = parse_x89(exported.xml.encode("utf-8"))
+    assert [i.oz for i in parsed.items] == ["01.0010", "01.0020", "01.0020.A"]
+    report = check_x89(parsed, [*POSITIONS.values(), indexed], is_section=_is_section)
+    assert report["issue_counts"] == {}
+    assert report["total_difference"] == "0.00"
+
+
+def test_two_lines_on_one_position_are_one_item_not_a_renumbered_one() -> None:
+    lines = [
+        InvoiceLine("01.0010", "Beton Achse 1", "m3", D("10"), D("185.50"), D("1855.00")),
+        InvoiceLine("01.0020", "Betonstahl", "t", D("1"), D("1340"), D("1340.00")),
+        InvoiceLine("01.0010", "Beton Achse 2", "m3", D("5"), D("185.50"), D("927.50")),
+    ]
+    placement = place_invoice_lines(lines)
+    assert placement.remapped == []
+    assert placement.merged == ["01.0010"]
+    exported = build_x89_xml(_invoice(lines))
+    concrete = next(i for i in _items(exported.xml) if i.get("RNoPart") == "0010")
+    assert concrete.findtext(f"{NS}BillQty") == "15.000"
+    assert concrete.findtext(f"{NS}IT") == "2782.50"
+    assert _totals(exported.xml)["Total"] == D("4122.50")
+    # The caller's lines are not changed by the merge.
+    assert lines[0].bill_qty == D("10")
+
+
+def test_a_second_line_at_another_price_keeps_its_money_and_is_listed() -> None:
+    lines = [
+        InvoiceLine("01.0010", "Beton", "m3", D("10"), D("185.50"), D("1855.00")),
+        InvoiceLine("01.0010", "Beton, Nachtragspreis", "m3", D("5"), D("190"), D("950.00")),
+    ]
+    figures, placement = x89_figures(_invoice(lines))
+    assert placement.remapped == [{"ordinal": "01.0010", "written_as": "ZZ.Z001", "reason": "duplicate_ordinal"}]
+    assert placement.placed[0][0] == "01.0010"
+    assert figures.net == D("2805.00")
+
+
+# ── Discounts and surcharges in a received invoice ──────────────────────
+
+_WITH_DISCOUNT = b"""<?xml version="1.0" encoding="UTF-8"?>
+<GAEB xmlns="http://www.gaeb.de/GAEB_DA_XML/DA89/3.3">
+  <GAEBInfo><Version>3.3</Version><VersDate>2021-05</VersDate><Date>2026-10-01</Date></GAEBInfo>
+  <PrjInfo><NamePrj>Kita Nord</NamePrj><Cur>EUR</Cur></PrjInfo>
+  <Invoice>
+    <DP>89</DP>
+    <BoQ ID="B">
+      <BoQInfo>
+        <BoQBkdn><Type>BoQLevel</Type><Length>2</Length><Num>Yes</Num></BoQBkdn>
+        <BoQBkdn><Type>Item</Type><Length>4</Length><Num>Yes</Num></BoQBkdn>
+        <Totals><Total>970.00</Total><VAT>19.00</VAT><TotalNet>970.00</TotalNet><VATAmount>184.30</VATAmount><TotalGross>1154.30</TotalGross></Totals>
+      </BoQInfo>
+      <BoQBody>
+        <BoQCtgy ID="C1" RNoPart="01">
+          <BoQBody><Itemlist>
+            <Item ID="I1" RNoPart="0010"><BillQty>1.000</BillQty><QU>psch</QU><UP>1000.000</UP><IT>1000.00</IT></Item>
+            <MarkupItem ID="M1" RNoPart="0900"><ITMarkup>1000.00</ITMarkup><Markup>-3</Markup><IT>-30.00</IT>
+              <Description><OutlineText><OutlTxt><TextOutlTxt><p><span>Nachlass</span></p></TextOutlTxt></OutlTxt></OutlineText></Description></MarkupItem>
+          </Itemlist></BoQBody>
+          <Totals><Total>970.00</Total></Totals>
+        </BoQCtgy>
+      </BoQBody>
+    </BoQ>
+    <TotalGross>1154.30</TotalGross>
+  </Invoice>
+</GAEB>
+"""
+
+_LUMP = SimpleNamespace(
+    id="PL", boq_id="B1", ordinal="01.0010", description="Pauschale", unit="psch", quantity="1", unit_rate="1000"
+)
+
+
+def test_a_discount_the_bill_also_grants_differs_by_nothing() -> None:
+    discount = SimpleNamespace(
+        name="Nachlass", category="discount", percentage="-3", markup_type="percentage", is_active=True
+    )
+    report = check_x89(parse_x89(_WITH_DISCOUNT), [_LUMP], is_section=_is_section, markups=[discount])
+    markup = next(ln for ln in report["lines"] if ln["kind"] == "markup")
+    assert markup["amount"] == "-30.00"
+    assert markup["expected_amount"] == "-30.00"
+    assert markup["difference"] == "0.00"
+    assert markup["issues"] == []
+    assert report["invoiced_total"] == "970.00"
+    assert report["total_difference"] == "0.00"
+    assert all(row["matches"] for row in report["totals_check"])
+
+
+def test_a_discount_the_bill_does_not_have_is_its_whole_amount() -> None:
+    report = check_x89(parse_x89(_WITH_DISCOUNT), [_LUMP], is_section=_is_section)
+    markup = next(ln for ln in report["lines"] if ln["kind"] == "markup")
+    assert markup["issues"] == ["markup_not_in_bill"]
+    assert report["total_difference"] == "-30.00"
+    assert sum((D(ln["difference"]) for ln in report["lines"]), D("0")) == D(report["total_difference"])
+    # The stated total still adds up: the discount is a line, not a gap.
+    assert {row["key"]: row["matches"] for row in report["totals_check"]}["items_total"] is True
+
+
+# ── Rounding the checker must not mistake for a difference ──────────────
+
+
+def test_vat_is_worked_out_on_the_rate_as_it_stands() -> None:
+    lines = [InvoiceLine("01.0010", "Pauschale", "psch", D("1"), D("1000000"), D("1000000"))]
+    figures = invoice_figures(lines, vat_rate=D("14.975"), retention=D("0"))
+    # 14.98 % would make it 149800.00, fifty too much.
+    assert figures.vat_amount == D("149750.00")
+    exported = build_x89_xml(_invoice(lines, vat="14.975"))
+    assert _totals(exported.xml)["VAT"] == D("14.975")
+    position = SimpleNamespace(
+        id="PX", boq_id="B1", ordinal="01.0010", description="x", unit="psch", quantity="1", unit_rate="1000000"
+    )
+    report = check_x89(parse_x89(exported.xml.encode("utf-8")), [position], is_section=_is_section)
+    assert all(row["matches"] for row in report["totals_check"])
+    assert report["issue_counts"] == {}
+
+
+def test_a_third_of_a_lump_sum_checks_clean_against_its_own_bill() -> None:
+    """33.3333 % of 300,000 goes out as BillQty 0.333; the 100.00 that cut costs is not a difference."""
+    setup = SimpleNamespace(
+        id="PS", boq_id="B1", ordinal="01.0030", description="BE", unit="psch", quantity="1", unit_rate="300000"
+    )
+    lines = [InvoiceLine("01.0030", "Baustelleneinrichtung", "psch", D("0.333333"), D("300000"), D("100000.00"))]
+    exported = build_x89_xml(_invoice(lines))
+    report = check_x89(parse_x89(exported.xml.encode("utf-8")), [setup], is_section=_is_section)
+    assert report["issue_counts"] == {}
+    assert report["total_difference"] == "0.00"
+
+    # A real overbill on the same line still shows.
+    over = exported.xml.replace("<IT>100000.00</IT>", "<IT>100600.00</IT>")
+    report = check_x89(parse_x89(over.encode("utf-8")), [setup], is_section=_is_section)
+    line = report["lines"][0]
+    assert "amount_not_qty_times_price" in line["issues"]
+    assert line["difference"] == "700.00"
+
+
+def test_an_invoice_in_another_currency_than_the_bill_is_flagged() -> None:
+    positions = list(POSITIONS.values())
+    assert check_x89(parse_x89(_RECEIVED), positions, is_section=_is_section, bill_currency="CHF")["currency_mismatch"]
+    same = check_x89(parse_x89(_RECEIVED), positions, is_section=_is_section, bill_currency="eur")
+    assert same["currency_mismatch"] is False
+    assert same["bill_currency"] == "EUR"
+
+
+def test_a_control_character_in_a_description_does_not_break_the_file() -> None:
+    lines = [InvoiceLine("01.0010", "Beton\x0bC30/37", "m3", D("1"), D("10"), D("10"))]
+    data = _invoice(lines)
+    data.creator = InvoiceParty(
+        name="Rohbau\x01 Nord", street="Hafenweg 4", postcode="20457", city="Hamburg", tax_no="22/815/04711"
+    )
+    exported = build_x89_xml(data)
+    root = ET.fromstring(exported.xml)
+    assert root.findtext(f"{NS}Invoice/{NS}InvoiceCreator/{NS}Address/{NS}Name1") == "Rohbau Nord"
+    assert parse_x89(exported.xml.encode("utf-8")).items[0].description == "BetonC30/37"

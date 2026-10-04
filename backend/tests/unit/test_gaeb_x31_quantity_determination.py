@@ -391,3 +391,88 @@ def test_published_x31_schema_accepts_the_export() -> None:
     )
     assert schema.validate(etree.fromstring(exported.xml.encode("utf-8"))), [str(e) for e in schema.error_log][:5]
     assert schema.validate(etree.fromstring(_X31_BY_HAND)), [str(e) for e in schema.error_log][:5]
+
+
+# ── Indexpositionen ──────────────────────────────────────────────────────
+
+
+def test_an_index_position_is_written_with_rnoindex_and_reads_back_to_its_oz() -> None:
+    """A bill imported from an X83 with Indexpositionen exports their measured quantities too."""
+    exported = build_x31_xml(
+        [("01.0010", Decimal("5")), ("01.0020", Decimal("6")), ("01.0020.A", Decimal("7"))],
+        boq_name="LV",
+        project_name="P",
+    )
+    assert exported.skipped == []
+    assert exported.written == ["01.0010", "01.0020", "01.0020.A"]
+    items = ET.fromstring(exported.xml).findall(f".//{NS}Item")
+    assert [(i.get("RNoPart"), i.get("RNoIndex")) for i in items] == [("0010", None), ("0020", None), ("0020", "A")]
+    bkdn_types = [b.findtext(f"{NS}Type") for b in ET.fromstring(exported.xml).iter(f"{NS}BoQBkdn")]
+    assert bkdn_types == ["BoQLevel", "Item", "Index"]
+    parsed = parse_x31(exported.xml.encode("utf-8"))
+    assert [(i.oz, i.quantity) for i in parsed.items] == [
+        ("01.0010", Decimal("5.000")),
+        ("01.0020", Decimal("6.000")),
+        ("01.0020.A", Decimal("7.000")),
+    ]
+
+
+def test_a_bill_of_mostly_index_positions_keeps_the_depth_of_its_base_positions() -> None:
+    """Three indexed OZ outnumber the one plain OZ, yet the plain one is not rejected as too shallow."""
+    entries = [
+        ("01.0010", Decimal("1")),
+        ("01.0020.A", Decimal("2")),
+        ("01.0020.B", Decimal("3")),
+        ("01.0030.A", Decimal("4")),
+    ]
+    exported = build_x31_xml(entries, boq_name="LV", project_name="P")
+    assert exported.skipped == []
+    parsed = parse_x31(exported.xml.encode("utf-8"))
+    assert [i.oz for i in parsed.items] == [o for o, _ in entries]
+
+
+def test_an_index_the_import_recorded_is_used_even_when_it_does_not_look_like_one() -> None:
+    entries = [("01.0010", Decimal("1")), ("01.0010.X1", Decimal("2"))]
+    # Unrecorded, X1 reads as a third level, and one of the two OZ cannot share the other's depth.
+    guessed = build_x31_xml(entries, boq_name="LV", project_name="P")
+    assert len(guessed.skipped) == 1
+    recorded = build_x31_xml(entries, boq_name="LV", project_name="P", index_of={"01.0010.X1": "X1"})
+    assert recorded.skipped == []
+    assert [i.oz for i in parse_x31(recorded.xml.encode("utf-8")).items] == ["01.0010", "01.0010.X1"]
+
+
+# ── What an apply would replace ──────────────────────────────────────────
+
+
+def test_a_proposal_says_how_many_take_off_lines_applying_would_replace() -> None:
+    take_off = {
+        "unit": "m3",
+        "lines": [
+            {"description": "Fund A", "formula": "5*3.2*0.75"},
+            {"description": "Fund B", "formula": "4*3.2*0.75"},
+            {"description": "Fund C", "formula": "2*3.2*0.75"},
+        ],
+    }
+    hand_measured = _pos("01.0010", "100", measurement=take_off)
+    hand_measured.version = 4
+    from_x31 = _pos(
+        "01.0020",
+        "40",
+        measurement=measurement_from_x31(Decimal("40"), unit="t", file_name="a.x31", oz="01.0020", rows=[]),
+    )
+    proposal = propose_x31(parse_x31(_X31_BY_HAND), [hand_measured, from_x31], is_section=_is_section)
+    rows = _by_oz(proposal)
+    assert rows["01.0010"]["current_sheet_lines"] == 3
+    assert rows["01.0010"]["current_sheet_source"] == "manual"
+    assert rows["01.0010"]["position_version"] == 4
+    assert rows["01.0020"]["current_sheet_lines"] == 1
+    assert rows["01.0020"]["current_sheet_source"] == "gaeb_x31"
+    # A SimpleNamespace without a version column carries none.
+    assert rows["01.0020"]["position_version"] is None
+
+
+def test_a_control_character_in_a_name_does_not_break_the_file() -> None:
+    exported = build_x31_xml([("01.0010", Decimal("1"))], boq_name="LV\x0bRohbau", project_name="Kita\x01 Nord")
+    root = ET.fromstring(exported.xml)
+    assert root.findtext(f"{NS}QtyDeterm/{NS}PrjInfo/{NS}RefPrjName") == "Kita Nord"
+    assert parse_x31(exported.xml.encode("utf-8")).boq_name == "LVRohbau"

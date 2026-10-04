@@ -678,6 +678,7 @@
     "agreement_not_found": "Vereinbarung nicht gefunden",
     "rejection_not_found": "Ablehnung nicht gefunden",
     "claim_not_found": "Abschlagsrechnung nicht gefunden",
+    "gaeb_x89_final_account_unsupported": "Eine Schlussrechnung oder Teilschlussrechnung kann noch nicht als GAEB X89 exportiert werden. Sie muss die gesamte Leistung abzüglich früherer Zahlungen abrechnen, aus einer Abrechnung wird nur eine Abschlagsrechnung eines Zeitraums erstellt. Exportieren Sie die Abrechnung als Abschlagsrechnung.",
     "plot_not_found": "Grundstück nicht gefunden",
     "survey_not_found": "Drohnenvermessung nicht gefunden",
     "diary_video_not_found": "Bautagebuch-Video nicht gefunden",
