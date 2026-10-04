@@ -283,9 +283,11 @@ export const NUMBER_LOCALES: readonly NumberLocale[] = [
  * Switzerland is the second entry after India. A German-speaking Swiss reader
  * runs the German UI, which resolves to `de` and writes `1.234.567,89`; a Swiss
  * bill is written `1'234'567.89`. Measured on ICU 78.3 (CLDR 48): `de-CH`,
- * `fr-CH` and `it-CH` all print that same apostrophe grouping with a decimal
- * point, so mapping the country to `de-CH` is right for French- and
- * Italian-speaking Swiss workspaces too, even though the tag names German.
+ * `fr-CH` and `it-CH` all print that same apostrophe grouping, so mapping the
+ * country to `de-CH` is right for French- and Italian-speaking Swiss
+ * workspaces too, even though the tag names German. They differ only in the
+ * decimal mark: `fr-CH` writes a comma, and a French-speaking workspace gets
+ * the point `de-CH` and `it-CH` write.
  */
 const COUNTRY_NUMBER_LOCALE: ReadonlyMap<string, NumberLocale> = new Map<string, NumberLocale>([
   ['in', 'en-IN'],

@@ -25,6 +25,7 @@ import {
   CURRENCY_GROUPS,
   lookupCountryDefault,
 } from '@/features/projects/currencyGroups';
+import { getCurrencySymbol } from '@/features/boq/boqHelpers';
 
 const SAMPLE = 1234567.89;
 
@@ -32,21 +33,34 @@ function createProjectSource(): string {
   return readFileSync(resolve(__dirname, '../../../features/projects/CreateProjectPage.tsx'), 'utf-8');
 }
 
+/**
+ * Intl output with the typographic apostrophe folded into the ASCII one.
+ *
+ * CLDR has printed both for Switzerland over the years (U+2019 in older
+ * releases, U+0027 in CLDR 48), and the runtime's ICU decides which. Either is
+ * a Swiss grouping; what these tests guard is the grouping and the decimal
+ * point, not which apostrophe one ICU release prefers.
+ */
+function swissFold(locale: string): string {
+  return new Intl.NumberFormat(locale, { minimumFractionDigits: 2 }).format(SAMPLE).replace(/’/g, "'");
+}
+
 describe('Swiss number grouping', () => {
   it('is what Intl prints for de-CH, and is not the German answer', () => {
-    const swiss = new Intl.NumberFormat('de-CH', { minimumFractionDigits: 2 }).format(SAMPLE);
     const german = new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2 }).format(SAMPLE);
-    expect(swiss).toBe("1'234'567.89");
+    expect(swissFold('de-CH')).toBe("1'234'567.89");
     expect(german).toBe('1.234.567,89');
-    expect(swiss).not.toBe(german);
+    expect(swissFold('de-CH')).not.toBe(german);
   });
 
   it('is the same grouping in the French and Italian Swiss locales', () => {
     // Why mapping the whole country to `de-CH` is right for a Geneva or Lugano
-    // workspace too: the apostrophe grouping is shared. The decimal mark in
-    // `fr-CH` is a comma, which a Swiss bill does not use for francs.
-    expect(new Intl.NumberFormat('it-CH', { minimumFractionDigits: 2 }).format(SAMPLE)).toBe("1'234'567.89");
-    expect(new Intl.NumberFormat('fr-CH', { minimumFractionDigits: 2 }).format(SAMPLE)).toContain("1'234'567");
+    // workspace too: the apostrophe grouping is shared. `fr-CH` writes a
+    // decimal comma where `de-CH` writes a point, so a French-speaking Swiss
+    // workspace sees the point; the grouping, which is what this mapping is
+    // for, is the same.
+    expect(swissFold('it-CH')).toBe("1'234'567.89");
+    expect(swissFold('fr-CH')).toContain("1'234'567");
   });
 
   it('answers Switzerland with de-CH, in any case', () => {
@@ -102,6 +116,13 @@ describe('the project pickers', () => {
   it('offer the hryvnia in both currency lists', () => {
     expect(CURRENCY_GROUPS.flatMap((g) => g.options.map((o) => o.value))).toContain('UAH');
     expect(createProjectSource()).toContain("{ value: 'UAH', label: 'UAH (₴) - Ukrainian Hryvnia' }");
+  });
+
+  it('show the hryvnia and forint signs rather than their codes', () => {
+    // The BOQ editor's symbol lookup fell back to the bare code for both.
+    expect(getCurrencySymbol('UAH')).toBe('₴');
+    expect(getCurrencySymbol('HUF')).toBe('Ft');
+    expect(getCurrencySymbol('UAH (₴) - Ukrainian Hryvnia')).toBe('₴');
   });
 
   it('write a hryvnia amount spaced, the Ukrainian way', () => {

@@ -382,6 +382,7 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
   EUR: '\u20ac', GBP: '\u00a3', USD: '$', CHF: 'Fr.', CAD: 'C$', AUD: 'A$', NZD: 'NZ$',
   JPY: '\u00a5', CNY: '\u00a5', KRW: '\u20a9', INR: '\u20b9', BRL: 'R$', MXN: 'Mex$', TRY: '\u20ba',
   RUB: '\u20bd', PLN: 'z\u0142', CZK: 'K\u010d', SEK: 'kr', NOK: 'kr', DKK: 'kr',
+  UAH: '\u20b4', HUF: 'Ft',
   AED: '\u062f.\u0625', SAR: '\ufdfc', QAR: '\ufdfc', ZAR: 'R', EGP: 'E\u00a3', NGN: '\u20a6',
   SGD: 'S$', MYR: 'RM', THB: '\u0e3f', IDR: 'Rp', PHP: '\u20b1', HKD: 'HK$',
 };
