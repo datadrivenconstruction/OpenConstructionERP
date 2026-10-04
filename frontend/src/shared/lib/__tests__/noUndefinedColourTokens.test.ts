@@ -41,7 +41,11 @@ const DEAD_COLOUR_UTILITY = new RegExp(
   'g',
 );
 
+/** Cheap substring test run first: the full pattern backtracks on every line of 3500 files. */
+const MAY_HOLD_DEAD_GROUP = /-(?:accent|status|text)-/;
+
 function findDeadUtilities(line: string): string[] {
+  if (!MAY_HOLD_DEAD_GROUP.test(line)) return [];
   return [...line.matchAll(DEAD_COLOUR_UTILITY)].map((m) => m[0].trim().replace(/^[\s"'`{(]/, ''));
 }
 
@@ -101,5 +105,7 @@ describe('colour utilities name a colour group the Tailwind config defines', () 
 
     console.info(`[noUndefinedColourTokens] scanned ${files.length} files, ${offenders.length} dead utilities`);
     expect(offenders, `Unknown colour group; use oe-blue or semantic-*:\n${offenders.join('\n')}`).toEqual([]);
-  });
+    // A whole-tree read: next to the rest of the suite on a loaded machine it
+    // can outlast the default per-test timeout without anything being wrong.
+  }, 120_000);
 });
