@@ -2,9 +2,10 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """A "code required" set a pack adds to a project is filtered by the project's standard.
 
-Seven country packs name a set that demands one classification code on every
-line: aus and nzs name nrm, saudi-vision2030, batimatech-ca, us-california and
-us-texas name masterformat, turkey-tr names birimfiyat. Project creation copies
+Eight country packs were given a set that demands one classification code on
+every line: aus, nzs and south-africa name nrm, saudi-vision2030,
+batimatech-ca, us-california and us-texas name masterformat, turkey-tr names
+birimfiyat. Project creation copies
 a pack's sets onto the project, and the BOQ router took the project's sets
 verbatim, filtering by standard only the sets the country row adds. So a
 project under the Texas pack that named UniFormat failed
@@ -71,6 +72,8 @@ REPAIRED: dict[str, str] = {
     "us-california": "uniformat",
     "us-texas": "uniformat",
     "turkey-tr": "din276",
+    # The Johannesburg demo the pack installs is coded in MasterFormat.
+    "south-africa": "masterformat",
 }
 
 
@@ -149,7 +152,7 @@ def _project_sets(manifest: PartnerPackManifest, asked: list[str] | None = None)
 # ── Controls ─────────────────────────────────────────────────────────────────
 
 
-def test_the_population_holds_the_seven_repaired_packs() -> None:
+def test_the_population_holds_the_repaired_packs() -> None:
     packs = set(_code_set_packs())
     for slug in REPAIRED:
         assert slug in packs, f"{slug} names no code set any more; this file lost its subject"

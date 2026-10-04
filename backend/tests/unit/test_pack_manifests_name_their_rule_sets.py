@@ -10,8 +10,10 @@ those packs switched on nothing of their own. Their countries were not left
 unchecked, because the BOQ router's country row adds the national sets to any
 project filed under the country, but the pack's own preview said it switched
 on no rule set, and a project whose region names no country got nothing.
-Nine of them now name their sets. South Africa is left empty on purpose, see
-:data:`LEFT_TO_THE_COUNTRY_ROW`.
+All ten now name their sets. South Africa was briefly left empty, because its
+nrm would have reached its MasterFormat-coded Johannesburg demo unfiltered;
+the record of what a pack added closed that, see
+:func:`test_the_record_is_what_keeps_a_pack_code_set_off_a_demo_coded_otherwise`.
 
 A named set is copied onto every project created under the pack, and project
 creation records which sets the pack added. The BOQ router drops such a set,
@@ -68,19 +70,14 @@ EXPECTED: dict[str, list[str]] = {
     "switzerland-ch": ["gaeb"],
     "us-california": ["masterformat"],
     "us-texas": ["masterformat"],
+    "south-africa": ["nrm"],
 }
 
 #: Country packs that deliberately name none of their country row's sets, with
 #: the reason. Self-cancelling: see
-#: :func:`test_a_pack_left_to_the_country_row_still_has_its_reason`.
-LEFT_TO_THE_COUNTRY_ROW: dict[str, str] = {
-    "south-africa": (
-        "The registry and the ZA row read South Africa as NRM, and the Johannesburg demo the pack "
-        "installs is coded in MasterFormat. A set the pack names reaches every project created under "
-        "it unfiltered, so either code set would fail one of the two bills on every line. The row "
-        "alone applies until the market's standard is settled."
-    ),
-}
+#: :func:`test_a_pack_left_to_the_country_row_still_has_its_reason`. Empty since
+#: South Africa names nrm again.
+LEFT_TO_THE_COUNTRY_ROW: dict[str, str] = {}
 
 _PROBE = """
 import importlib, importlib.util, json, pathlib, sys, warnings
@@ -402,7 +399,16 @@ def _demo_cases_with_code_sets() -> list[tuple[str, str]]:
 def test_the_inherited_demo_population_covers_the_repaired_code_set_packs() -> None:
     """Control: the test below must actually reach the packs that now name a code set."""
     packs = {slug for slug, _demo in _demo_cases_with_code_sets()}
-    for slug in ("aus", "nzs", "saudi-vision2030", "turkey-tr", "batimatech-ca", "us-california", "us-texas"):
+    for slug in (
+        "aus",
+        "nzs",
+        "saudi-vision2030",
+        "turkey-tr",
+        "batimatech-ca",
+        "us-california",
+        "us-texas",
+        "south-africa",
+    ):
         assert slug in packs, f"{slug} has no demo the inherited-set check can validate"
 
 
@@ -478,7 +484,8 @@ def test_the_record_is_what_keeps_a_pack_code_set_off_a_demo_coded_otherwise() -
     """
     from app.core.demo_projects import PACK_DEMO_PROJECT
 
-    named = _manifests()["south-africa"].model_copy(update={"validation_rule_sets": ["nrm"]})
+    named = _manifests()["south-africa"]
+    assert named.validation_rule_sets == ["nrm"]
     demo = PACK_DEMO_PROJECT["south-africa"]
     _runnable, unrecorded = _inherited_errors(named, demo, recorded=False)
     assert unrecorded.get("nrm.classification_required", 0) > 0, unrecorded
