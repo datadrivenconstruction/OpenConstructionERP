@@ -117,6 +117,16 @@ describe('refusalOf', () => {
     expect(r!.region_code).toBe('RU-MOW');
   });
 
+  it('reads the positions a machine without an operator line was refused for', () => {
+    const err = new ApiError(422, 'Unprocessable', {
+      detail: { code: 'missing_operator_wages', message: 'no operator', positions: ['1', '4.2'] },
+    });
+    const r = refusalOf(err);
+    expect(r).not.toBeNull();
+    expect(r!.code).toBe('missing_operator_wages');
+    expect(r!.positions).toEqual(['1', '4.2']);
+  });
+
   it('ignores other failures', () => {
     expect(refusalOf(new ApiError(500, 'Server', { detail: { code: 'x' } }))).toBeNull();
     expect(refusalOf(new ApiError(422, 'Unprocessable', { detail: [{ loc: ['body'], msg: 'bad' }] }))).toBeNull();

@@ -44,6 +44,7 @@ export const PERMISSION_MIN_ROLE = {
   'qms.audit.write': 'manager',
   'resources.create': 'editor',
   'assemblies.update': 'editor',
+  'price_index.manage': 'editor',
 } as const satisfies Record<string, RankedRole>;
 
 export type GatedPermission = keyof typeof PERMISSION_MIN_ROLE;

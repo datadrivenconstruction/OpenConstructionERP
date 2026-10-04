@@ -12,15 +12,16 @@
  * work types). Every number is the decimal string the server computed.
  */
 
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, Calculator, FlaskConical, Info, Loader2, Plus, Save, Trash2 } from 'lucide-react';
+import { AlertTriangle, Calculator, FlaskConical, Info, Loader2, Plus, RefreshCw, Save, Trash2 } from 'lucide-react';
 import { BOQPicker, Badge, Button, Card, CardHeader, Input, PageHeader } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { getErrorMessage } from '@/shared/lib/api';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { toDecimalPayloadString } from '@/shared/lib/parseDecimal';
 import {
   RESOURCE_GROUPS,
@@ -67,6 +68,7 @@ const EMPTY_SETTINGS: BOQResourceIndexSettings = {
   quarter: '',
   default_work_type: '',
   work_types: {},
+  resources_at_base_prices: false,
 };
 
 const selectClass =
@@ -129,6 +131,14 @@ function ResourceIndexContent() {
   const [result, setResult] = useState<ResourceIndexEstimate | null>(null);
   const [refusal, setRefusal] = useState<ResourceIndexRefusal | null>(null);
   const [dirty, setDirty] = useState(false);
+  // The result on screen was computed before an index or norm was changed.
+  const [stale, setStale] = useState(false);
+  // Which calculation produced the result on screen, so a stale one can be re-run.
+  const [lastRun, setLastRun] = useState<'boq' | 'example' | null>(null);
+  // The BOQ whose stored choices have been loaded into the form. A refetch of
+  // the same BOQ's settings (after Save, or any invalidation) must not reset
+  // the form or wipe the breakdown on screen; only picking a BOQ does.
+  const loadedFor = useRef<string | null>(null);
 
   const indicesQ = useQuery({ queryKey: QK.indices, queryFn: listResourceIndices });
   const normsQ = useQuery({ queryKey: QK.norms, queryFn: listOverheadNorms });
@@ -144,15 +154,18 @@ function ResourceIndexContent() {
   const quarters = useMemo(() => quartersOf(indices, settings.region_code), [indices, settings.region_code]);
   const normLabel = useMemo(() => new Map(norms.map((n) => [n.work_type_code, n.label])), [norms]);
 
-  // Load the stored choices when a BOQ is picked; a fresh BOQ starts empty.
+  // Load the stored choices once per picked BOQ; a fresh BOQ starts empty.
   useEffect(() => {
-    if (!boqId) return;
-    if (settingsQ.data) {
-      setSettings({ ...EMPTY_SETTINGS, ...settingsQ.data, work_types: { ...settingsQ.data.work_types } });
-      setDirty(false);
-      setResult(null);
-      setRefusal(null);
+    if (!boqId) {
+      loadedFor.current = null;
+      return;
     }
+    if (!settingsQ.data || loadedFor.current === boqId) return;
+    loadedFor.current = boqId;
+    setSettings({ ...EMPTY_SETTINGS, ...settingsQ.data, work_types: { ...settingsQ.data.work_types } });
+    setDirty(false);
+    setResult(null);
+    setRefusal(null);
   }, [boqId, settingsQ.data]);
 
   // Offer the first region and its newest quarter when nothing is chosen yet.
@@ -185,6 +198,8 @@ function ResourceIndexContent() {
     onSuccess: (r) => {
       setResult(r);
       setRefusal(null);
+      setStale(false);
+      setLastRun('boq');
     },
     onError: onRefusalOrError,
   });
@@ -217,6 +232,8 @@ function ResourceIndexContent() {
     onSuccess: (r) => {
       setResult(r);
       setRefusal(null);
+      setStale(false);
+      setLastRun('example');
     },
     onError: onRefusalOrError,
   });
@@ -378,6 +395,20 @@ function ResourceIndexContent() {
               </span>
             )}
           </div>
+          <label className="flex items-start gap-2 text-sm text-content-secondary">
+            <input
+              type="checkbox"
+              className="mt-0.5 h-4 w-4 shrink-0"
+              checked={settings.resources_at_base_prices}
+              onChange={(e) => update({ resources_at_base_prices: e.target.checked })}
+            />
+            <span>
+              {t('price_index.ri.base_prices_confirm', {
+                defaultValue:
+                  'The resource prices on this estimate are base prices of the 2022 federal base (FSNB-2022). Tick this only if they are: prices in current money, such as a resource split of current rates, would be indexed a second time. Without it only lines marked as priced from the norm base are indexed.',
+              })}
+            </span>
+          </label>
           {ready && missing.length > 0 && (
             <MissingIndexNote groups={missing} region={settings.region_code} quarter={settings.quarter} />
           )}
@@ -385,6 +416,30 @@ function ResourceIndexContent() {
       </Card>
 
       {refusal && <RefusalBox refusal={refusal} />}
+
+      {result && stale && (
+        <div
+          role="status"
+          className="flex flex-wrap items-center gap-2 rounded-lg border border-semantic-warning/40 bg-semantic-warning-bg px-3 py-2 text-sm"
+        >
+          <AlertTriangle className="h-4 w-4 shrink-0 text-semantic-warning" aria-hidden />
+          <span className="flex-1">
+            {t('price_index.ri.stale_banner', {
+              defaultValue:
+                'An index or norm was changed after this calculation. The figures below are the old ones until you recalculate.',
+            })}
+          </span>
+          <Button
+            size="sm"
+            variant="secondary"
+            disabled={busy || (lastRun === 'boq' && !boqId)}
+            onClick={() => (lastRun === 'example' ? exampleMut.mutate() : computeMut.mutate(settings))}
+          >
+            <RefreshCw className="mr-1 h-4 w-4" aria-hidden />
+            {t('price_index.ri.recalculate', { defaultValue: 'Recalculate' })}
+          </Button>
+        </div>
+      )}
 
       {result && (
         <EstimateBreakdown
@@ -396,7 +451,13 @@ function ResourceIndexContent() {
         />
       )}
 
-      <ReferenceData indices={indices} norms={norms} region={settings.region_code} quarter={settings.quarter} />
+      <ReferenceData
+        indices={indices}
+        norms={norms}
+        region={settings.region_code}
+        quarter={settings.quarter}
+        onChanged={() => setStale(true)}
+      />
     </div>
   );
 }
@@ -440,6 +501,13 @@ function RefusalBox({ refusal }: { refusal: ResourceIndexRefusal }) {
       text = t('price_index.ri.err_missing_norm', {
         defaultValue: 'No overhead and profit percentages are entered for work type {{types}}. Enter them below.',
         types: (refusal.work_types ?? []).join(', '),
+      });
+      break;
+    case 'missing_operator_wages':
+      text = t('price_index.ri.err_missing_operator', {
+        defaultValue:
+          "Position {{positions}} has machine lines but no operator line, so the operators' wages would enter the wage fund as zero. Split the operators' wages out of the machine price into an operator line, with zero if the machine has no operator.",
+        positions: (refusal.positions ?? []).join(', '),
       });
       break;
     case 'vat_unresolved':
@@ -538,9 +606,17 @@ export function EstimateBreakdown({
             <span>
               {t('price_index.ri.partial_banner', {
                 defaultValue:
-                  'Partial: {{priced}} positions priced, {{excluded}} not priced. The totals below cover only the priced positions and are not the estimate total.',
-                priced: result.priced_count,
-                excluded: result.excluded_count,
+                  'Partial: {{priced}}, {{excluded}}. The totals below cover only the priced positions and are not the estimate total.',
+                priced: t('price_index.ri.priced_count', {
+                  count: result.priced_count,
+                  defaultValue: '{{count}} position priced',
+                  defaultValue_other: '{{count}} positions priced',
+                }),
+                excluded: t('price_index.ri.excluded_count', {
+                  count: result.excluded_count,
+                  defaultValue: '{{count}} position not priced',
+                  defaultValue_other: '{{count}} positions not priced',
+                }),
               })}
             </span>
           </div>
@@ -743,6 +819,20 @@ function ExcludedList({
           defaultValue: 'priced from {{basis}}, which is current money; only base prices are indexed',
           basis: detail,
         });
+      case 'base_prices_unconfirmed':
+        return t('price_index.ri.reason_base_prices_unconfirmed', {
+          defaultValue:
+            'not confirmed as base prices; tick the base-price statement above if the resource prices of this estimate are FSNB-2022 base prices',
+        });
+      case 'estimated_resources':
+        return t('price_index.ri.reason_estimated_resources', {
+          defaultValue: 'the resource split was generated from the current rate, so it is current money, not base prices',
+        });
+      case 'machine_without_operator_wages':
+        return t('price_index.ri.reason_machine_without_operator', {
+          defaultValue:
+            "machine lines with no operator line; add the operators' wages as an operator resource (zero if the machine has none)",
+        });
       default:
         return r;
     }
@@ -935,25 +1025,75 @@ function PositionBlock({
 
 /* ── Reference data ─────────────────────────────────────────────────────── */
 
+/**
+ * An index or percentage edited in place. The draft follows the server value
+ * whenever that changes, and goes back to it when the save is refused, so the
+ * field never keeps showing a number that was not stored.
+ */
+function InlineDecimal({
+  value,
+  ariaLabel,
+  widthClass,
+  onCommit,
+}: {
+  value: string;
+  ariaLabel: string;
+  widthClass: string;
+  onCommit: (next: string) => Promise<unknown>;
+}) {
+  const shown = formatFactorString(value);
+  const [draft, setDraft] = useState(shown);
+  useEffect(() => setDraft(shown), [shown]);
+  return (
+    <input
+      aria-label={ariaLabel}
+      className={selectClass + ' h-8 text-right font-mono ' + widthClass}
+      inputMode="decimal"
+      value={draft}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={() => {
+        const v = toDecimalPayloadString(draft, '');
+        if (!v) {
+          setDraft(shown);
+          return;
+        }
+        if (v === shown) return;
+        onCommit(v).catch(() => setDraft(shown));
+      }}
+    />
+  );
+}
+
 function ReferenceData({
   indices,
   norms,
   region,
   quarter,
+  onChanged,
 }: {
   indices: ResourceIndexValue[];
   norms: OverheadNorm[];
   region: string;
   quarter: string;
+  /** Called after an index or norm was stored or removed. */
+  onChanged: () => void;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const label = useGroupLabel();
+  // Entering, editing and removing reference data is price_index.manage on the
+  // server; a person without it reads the tables and is not offered controls
+  // that could only answer 403.
+  const canManage = useHasPermission('price_index.manage');
   const onError = (e: unknown) =>
     addToast({ type: 'error', title: t('common.error', { defaultValue: 'Error' }), message: getErrorMessage(e) });
   const refresh = () => {
-    void queryClient.invalidateQueries({ queryKey: ['price-index', 'resource-index'] });
+    // Only the reference lists: the BOQ settings query shares the prefix, and
+    // refetching it would race the person's unsaved choices.
+    void queryClient.invalidateQueries({ queryKey: QK.indices });
+    void queryClient.invalidateQueries({ queryKey: QK.norms });
+    onChanged();
   };
 
   // New index form, prefilled with the selected region and quarter.
@@ -1048,25 +1188,28 @@ function ReferenceData({
                     {i.source && <div className="text-xs text-content-tertiary">{i.source}</div>}
                   </td>
                   <td className="px-2 py-1.5 text-right">
-                    <input
-                      aria-label={t('price_index.ri.index_value', { defaultValue: 'Index' })}
-                      className={selectClass + ' h-8 w-24 text-right font-mono'}
-                      defaultValue={formatFactorString(i.index_value)}
-                      onBlur={(e) => {
-                        const v = toDecimalPayloadString(e.target.value, '');
-                        if (v && v !== formatFactorString(i.index_value)) updateIdx.mutate({ id: i.id, index_value: v });
-                      }}
-                    />
+                    {canManage ? (
+                      <InlineDecimal
+                        value={i.index_value}
+                        ariaLabel={t('price_index.ri.index_value', { defaultValue: 'Index' })}
+                        widthClass="w-24"
+                        onCommit={(v) => updateIdx.mutateAsync({ id: i.id, index_value: v })}
+                      />
+                    ) : (
+                      <span className="font-mono">{formatFactorString(i.index_value)}</span>
+                    )}
                   </td>
                   <td className="px-1 py-1.5 text-right">
-                    <button
-                      type="button"
-                      className="rounded p-1 text-content-tertiary hover:text-semantic-error"
-                      aria-label={t('common.delete', { defaultValue: 'Delete' })}
-                      onClick={() => deleteIdx.mutate(i.id)}
-                    >
-                      <Trash2 className="h-4 w-4" aria-hidden />
-                    </button>
+                    {canManage && (
+                      <button
+                        type="button"
+                        className="rounded p-1 text-content-tertiary hover:text-semantic-error"
+                        aria-label={t('common.delete', { defaultValue: 'Delete' })}
+                        onClick={() => deleteIdx.mutate(i.id)}
+                      >
+                        <Trash2 className="h-4 w-4" aria-hidden />
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -1078,41 +1221,45 @@ function ReferenceData({
             </p>
           )}
         </div>
-        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-          <Input
-            placeholder={t('price_index.ri.region_ph', { defaultValue: 'Region, e.g. RU-MOW' })}
-            value={newRegion}
-            onChange={(e) => setNewRegion(e.target.value)}
-          />
-          <Input
-            placeholder={t('price_index.ri.quarter_ph', { defaultValue: 'Quarter, e.g. 2026-Q2' })}
-            value={newQuarter}
-            onChange={(e) => setNewQuarter(e.target.value)}
-          />
-          <select className={selectClass} value={newGroup} onChange={(e) => setNewGroup(e.target.value as ResourceGroup)}>
-            {RESOURCE_GROUPS.map((g) => (
-              <option key={g} value={g}>
-                {label(g)}
-              </option>
-            ))}
-          </select>
-          <Input
-            placeholder={t('price_index.ri.index_value', { defaultValue: 'Index' })}
-            inputMode="decimal"
-            value={newValue}
-            onChange={(e) => setNewValue(e.target.value)}
-          />
-          <Input
-            className="sm:col-span-2"
-            placeholder={t('price_index.ri.source_ph', { defaultValue: 'Source, e.g. the letter number and date' })}
-            value={newSource}
-            onChange={(e) => setNewSource(e.target.value)}
-          />
-        </div>
-        <Button className="mt-2" size="sm" variant="secondary" disabled={!canAddIndex || createIdx.isPending} onClick={() => createIdx.mutate()}>
-          <Plus className="mr-1 h-4 w-4" aria-hidden />
-          {t('price_index.ri.add_index', { defaultValue: 'Add index' })}
-        </Button>
+        {canManage && (
+          <>
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+              <Input
+                placeholder={t('price_index.ri.region_ph', { defaultValue: 'Region, e.g. RU-MOW' })}
+                value={newRegion}
+                onChange={(e) => setNewRegion(e.target.value)}
+              />
+              <Input
+                placeholder={t('price_index.ri.quarter_ph', { defaultValue: 'Quarter, e.g. 2026-Q2' })}
+                value={newQuarter}
+                onChange={(e) => setNewQuarter(e.target.value)}
+              />
+              <select className={selectClass} value={newGroup} onChange={(e) => setNewGroup(e.target.value as ResourceGroup)}>
+                {RESOURCE_GROUPS.map((g) => (
+                  <option key={g} value={g}>
+                    {label(g)}
+                  </option>
+                ))}
+              </select>
+              <Input
+                placeholder={t('price_index.ri.index_value', { defaultValue: 'Index' })}
+                inputMode="decimal"
+                value={newValue}
+                onChange={(e) => setNewValue(e.target.value)}
+              />
+              <Input
+                className="sm:col-span-2"
+                placeholder={t('price_index.ri.source_ph', { defaultValue: 'Source, e.g. the letter number and date' })}
+                value={newSource}
+                onChange={(e) => setNewSource(e.target.value)}
+              />
+            </div>
+            <Button className="mt-2" size="sm" variant="secondary" disabled={!canAddIndex || createIdx.isPending} onClick={() => createIdx.mutate()}>
+              <Plus className="mr-1 h-4 w-4" aria-hidden />
+              {t('price_index.ri.add_index', { defaultValue: 'Add index' })}
+            </Button>
+          </>
+        )}
       </Card>
 
       <Card>
@@ -1145,77 +1292,85 @@ function ReferenceData({
                     )}
                   </td>
                   <td className="px-2 py-1.5 text-right">
-                    <input
-                      aria-label={t('price_index.ri.nr_pct', { defaultValue: 'NR %' })}
-                      className={selectClass + ' h-8 w-20 text-right font-mono'}
-                      defaultValue={formatFactorString(n.nr_pct)}
-                      onBlur={(e) => {
-                        const v = toDecimalPayloadString(e.target.value, '');
-                        if (v && v !== formatFactorString(n.nr_pct)) updateNorm.mutate({ id: n.id, nr_pct: v });
-                      }}
-                    />
+                    {canManage ? (
+                      <InlineDecimal
+                        value={n.nr_pct}
+                        ariaLabel={t('price_index.ri.nr_pct', { defaultValue: 'NR %' })}
+                        widthClass="w-20"
+                        onCommit={(v) => updateNorm.mutateAsync({ id: n.id, nr_pct: v })}
+                      />
+                    ) : (
+                      <span className="font-mono">{formatFactorString(n.nr_pct)}</span>
+                    )}
                   </td>
                   <td className="px-2 py-1.5 text-right">
-                    <input
-                      aria-label={t('price_index.ri.sp_pct', { defaultValue: 'SP %' })}
-                      className={selectClass + ' h-8 w-20 text-right font-mono'}
-                      defaultValue={formatFactorString(n.sp_pct)}
-                      onBlur={(e) => {
-                        const v = toDecimalPayloadString(e.target.value, '');
-                        if (v && v !== formatFactorString(n.sp_pct)) updateNorm.mutate({ id: n.id, sp_pct: v });
-                      }}
-                    />
+                    {canManage ? (
+                      <InlineDecimal
+                        value={n.sp_pct}
+                        ariaLabel={t('price_index.ri.sp_pct', { defaultValue: 'SP %' })}
+                        widthClass="w-20"
+                        onCommit={(v) => updateNorm.mutateAsync({ id: n.id, sp_pct: v })}
+                      />
+                    ) : (
+                      <span className="font-mono">{formatFactorString(n.sp_pct)}</span>
+                    )}
                   </td>
                   <td className="px-1 py-1.5 text-right">
-                    <button
-                      type="button"
-                      className="rounded p-1 text-content-tertiary hover:text-semantic-error"
-                      aria-label={t('common.delete', { defaultValue: 'Delete' })}
-                      onClick={() => deleteNorm.mutate(n.id)}
-                    >
-                      <Trash2 className="h-4 w-4" aria-hidden />
-                    </button>
+                    {canManage && (
+                      <button
+                        type="button"
+                        className="rounded p-1 text-content-tertiary hover:text-semantic-error"
+                        aria-label={t('common.delete', { defaultValue: 'Delete' })}
+                        onClick={() => deleteNorm.mutate(n.id)}
+                      >
+                        <Trash2 className="h-4 w-4" aria-hidden />
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <Input
-            placeholder={t('price_index.ri.work_type_code_ph', { defaultValue: 'Code' })}
-            value={nCode}
-            onChange={(e) => setNCode(e.target.value)}
-          />
-          <Input
-            className="sm:col-span-3"
-            placeholder={t('price_index.ri.work_type_label_ph', { defaultValue: 'Work type name' })}
-            value={nLabel}
-            onChange={(e) => setNLabel(e.target.value)}
-          />
-          <Input
-            placeholder={t('price_index.ri.nr_pct', { defaultValue: 'NR %' })}
-            inputMode="decimal"
-            value={nNr}
-            onChange={(e) => setNNr(e.target.value)}
-          />
-          <Input
-            placeholder={t('price_index.ri.sp_pct', { defaultValue: 'SP %' })}
-            inputMode="decimal"
-            value={nSp}
-            onChange={(e) => setNSp(e.target.value)}
-          />
-          <Input
-            className="col-span-2"
-            placeholder={t('price_index.ri.norm_source_ph', { defaultValue: 'Source, e.g. order and item' })}
-            value={nSource}
-            onChange={(e) => setNSource(e.target.value)}
-          />
-        </div>
-        <Button className="mt-2" size="sm" variant="secondary" disabled={!canAddNorm || createNorm.isPending} onClick={() => createNorm.mutate()}>
-          <Plus className="mr-1 h-4 w-4" aria-hidden />
-          {t('price_index.ri.add_norm', { defaultValue: 'Add work type' })}
-        </Button>
+        {canManage && (
+          <>
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <Input
+                placeholder={t('price_index.ri.work_type_code_ph', { defaultValue: 'Code' })}
+                value={nCode}
+                onChange={(e) => setNCode(e.target.value)}
+              />
+              <Input
+                className="sm:col-span-3"
+                placeholder={t('price_index.ri.work_type_label_ph', { defaultValue: 'Work type name' })}
+                value={nLabel}
+                onChange={(e) => setNLabel(e.target.value)}
+              />
+              <Input
+                placeholder={t('price_index.ri.nr_pct', { defaultValue: 'NR %' })}
+                inputMode="decimal"
+                value={nNr}
+                onChange={(e) => setNNr(e.target.value)}
+              />
+              <Input
+                placeholder={t('price_index.ri.sp_pct', { defaultValue: 'SP %' })}
+                inputMode="decimal"
+                value={nSp}
+                onChange={(e) => setNSp(e.target.value)}
+              />
+              <Input
+                className="col-span-2"
+                placeholder={t('price_index.ri.norm_source_ph', { defaultValue: 'Source, e.g. order and item' })}
+                value={nSource}
+                onChange={(e) => setNSource(e.target.value)}
+              />
+            </div>
+            <Button className="mt-2" size="sm" variant="secondary" disabled={!canAddNorm || createNorm.isPending} onClick={() => createNorm.mutate()}>
+              <Plus className="mr-1 h-4 w-4" aria-hidden />
+              {t('price_index.ri.add_norm', { defaultValue: 'Add work type' })}
+            </Button>
+          </>
+        )}
       </Card>
     </div>
   );

@@ -131,7 +131,8 @@ describe('EstimateBreakdown', () => {
         ],
       }),
     );
-    expect(screen.getByText(/Partial: 1 positions priced, 2 not priced/)).toBeTruthy();
+    // One priced, two left out: each count takes its own plural form.
+    expect(screen.getByText(/Partial: 1 position priced, 2 positions not priced/)).toBeTruthy();
     expect(screen.getByText('Totals of the priced positions')).toBeTruthy();
     expect(screen.queryByText('Estimate totals')).toBeNull();
     expect(screen.getByText(/no resource breakdown on the position/)).toBeTruthy();
@@ -160,5 +161,24 @@ describe('EstimateBreakdown', () => {
     expect(selects.length).toBe(2);
     fireEvent.change(selects[0]!, { target: { value: 'concrete' } });
     expect(onChange).toHaveBeenCalledWith('p9', 'concrete');
+  });
+
+  it('says why current money and machines without operators are left out', () => {
+    renderIt(
+      fixture({
+        is_complete: false,
+        priced_count: 2,
+        excluded_count: 3,
+        excluded: [
+          { position_id: 'p4', ordinal: '3.1', description: 'Walls', reason: 'base_prices_unconfirmed', detail: '' },
+          { position_id: 'p5', ordinal: '3.2', description: 'Slab', reason: 'estimated_resources', detail: '' },
+          { position_id: 'p6', ordinal: '3.3', description: 'Pit', reason: 'machine_without_operator_wages', detail: '' },
+        ],
+      }),
+    );
+    expect(screen.getByText(/Partial: 2 positions priced, 3 positions not priced/)).toBeTruthy();
+    expect(screen.getByText(/not confirmed as base prices/)).toBeTruthy();
+    expect(screen.getByText(/generated from the current rate/)).toBeTruthy();
+    expect(screen.getByText(/machine lines with no operator line/)).toBeTruthy();
   });
 });

@@ -10,8 +10,6 @@
 
 import { ApiError, apiDelete, apiGet, apiPatch, apiPost, apiPut } from '@/shared/lib/api';
 
-const BASE = '/v1/price-index/resource-index';
-
 /* -- Types ---------------------------------------------------------------- */
 
 export type ResourceGroup = 'labor' | 'machine' | 'operator_wages' | 'material';
@@ -50,6 +48,13 @@ export interface BOQResourceIndexSettings {
   default_work_type: string;
   /** position id -> work type code */
   work_types: Record<string, string>;
+  /**
+   * The person's statement that the resource prices on this bill are base
+   * prices of the 2022 federal base. Without it the server indexes only lines
+   * whose price basis is `norm` and lists the rest as excluded, so current
+   * money is never indexed a second time.
+   */
+  resources_at_base_prices: boolean;
 }
 
 export interface LineOut {
@@ -131,7 +136,10 @@ export type ExcludedReason =
   | 'foreign_currency'
   | 'no_work_type'
   | 'bad_number'
-  | 'not_base_prices';
+  | 'not_base_prices'
+  | 'base_prices_unconfirmed'
+  | 'estimated_resources'
+  | 'machine_without_operator_wages';
 
 export interface ExcludedPositionOut {
   position_id: string;
@@ -251,6 +259,7 @@ export interface ResourceIndexRefusal {
   code:
     | 'missing_index'
     | 'missing_overhead_norm'
+    | 'missing_operator_wages'
     | 'invalid_index'
     | 'invalid_input'
     | 'vat_unresolved'
@@ -259,6 +268,8 @@ export interface ResourceIndexRefusal {
   message: string;
   groups?: ResourceGroup[];
   work_types?: string[];
+  /** Ordinals of the positions with machine lines and no operator line. */
+  positions?: string[];
   region_code?: string;
   quarter?: string;
   on_date?: string;
@@ -277,6 +288,7 @@ export function refusalOf(err: unknown): ResourceIndexRefusal | null {
     message: typeof d.message === 'string' ? d.message : '',
     groups: Array.isArray(d.groups) ? (d.groups as ResourceGroup[]) : undefined,
     work_types: Array.isArray(d.work_types) ? (d.work_types as string[]) : undefined,
+    positions: Array.isArray(d.positions) ? (d.positions as string[]) : undefined,
     region_code: typeof d.region_code === 'string' ? d.region_code : undefined,
     quarter: typeof d.quarter === 'string' ? d.quarter : undefined,
     on_date: typeof d.on_date === 'string' ? d.on_date : undefined,
@@ -338,7 +350,7 @@ export function workedExamplePositions(workTypeA: string, workTypeB: string, lab
 /* -- Reference data ------------------------------------------------------- */
 
 export async function listResourceIndices(): Promise<ResourceIndexValue[]> {
-  const res = await apiGet<ResourceIndexValue[]>(`${BASE}/indices/`);
+  const res = await apiGet<ResourceIndexValue[]>(`/v1/price-index/resource-index/indices/`);
   return Array.isArray(res) ? res : [];
 }
 
@@ -349,22 +361,22 @@ export async function createResourceIndex(data: {
   index_value: string;
   source: string;
 }): Promise<ResourceIndexValue> {
-  return apiPost<ResourceIndexValue>(`${BASE}/indices/`, data);
+  return apiPost<ResourceIndexValue>(`/v1/price-index/resource-index/indices/`, data);
 }
 
 export async function updateResourceIndex(
   id: string,
   data: { index_value?: string; source?: string },
 ): Promise<ResourceIndexValue> {
-  return apiPatch<ResourceIndexValue>(`${BASE}/indices/${id}/`, data);
+  return apiPatch<ResourceIndexValue>(`/v1/price-index/resource-index/indices/${id}/`, data);
 }
 
 export async function deleteResourceIndex(id: string): Promise<void> {
-  return apiDelete(`${BASE}/indices/${id}/`);
+  return apiDelete(`/v1/price-index/resource-index/indices/${id}/`);
 }
 
 export async function listOverheadNorms(): Promise<OverheadNorm[]> {
-  const res = await apiGet<OverheadNorm[]>(`${BASE}/norms/`);
+  const res = await apiGet<OverheadNorm[]>(`/v1/price-index/resource-index/norms/`);
   return Array.isArray(res) ? res : [];
 }
 
@@ -375,38 +387,38 @@ export async function createOverheadNorm(data: {
   sp_pct: string;
   source: string;
 }): Promise<OverheadNorm> {
-  return apiPost<OverheadNorm>(`${BASE}/norms/`, data);
+  return apiPost<OverheadNorm>(`/v1/price-index/resource-index/norms/`, data);
 }
 
 export async function updateOverheadNorm(
   id: string,
   data: { label?: string; nr_pct?: string; sp_pct?: string; source?: string },
 ): Promise<OverheadNorm> {
-  return apiPatch<OverheadNorm>(`${BASE}/norms/${id}/`, data);
+  return apiPatch<OverheadNorm>(`/v1/price-index/resource-index/norms/${id}/`, data);
 }
 
 export async function deleteOverheadNorm(id: string): Promise<void> {
-  return apiDelete(`${BASE}/norms/${id}/`);
+  return apiDelete(`/v1/price-index/resource-index/norms/${id}/`);
 }
 
 /* -- BOQ ------------------------------------------------------------------ */
 
 export async function getBoqSettings(boqId: string): Promise<BOQResourceIndexSettings> {
-  return apiGet<BOQResourceIndexSettings>(`${BASE}/boqs/${boqId}/settings/`);
+  return apiGet<BOQResourceIndexSettings>(`/v1/price-index/resource-index/boqs/${boqId}/settings/`);
 }
 
 export async function saveBoqSettings(
   boqId: string,
   settings: BOQResourceIndexSettings,
 ): Promise<BOQResourceIndexSettings> {
-  return apiPut<BOQResourceIndexSettings>(`${BASE}/boqs/${boqId}/settings/`, settings);
+  return apiPut<BOQResourceIndexSettings>(`/v1/price-index/resource-index/boqs/${boqId}/settings/`, settings);
 }
 
 export async function computeBoq(
   boqId: string,
   settings: BOQResourceIndexSettings & { on_date?: string | null },
 ): Promise<ResourceIndexEstimate> {
-  return apiPost<ResourceIndexEstimate>(`${BASE}/boqs/${boqId}/compute/`, {
+  return apiPost<ResourceIndexEstimate>(`/v1/price-index/resource-index/boqs/${boqId}/compute/`, {
     ...settings,
     on_date: settings.on_date || null,
   });
@@ -418,5 +430,5 @@ export async function computeExplicit(data: {
   on_date?: string | null;
   positions: PositionIn[];
 }): Promise<ResourceIndexEstimate> {
-  return apiPost<ResourceIndexEstimate>(`${BASE}/compute/`, { ...data, on_date: data.on_date || null });
+  return apiPost<ResourceIndexEstimate>(`/v1/price-index/resource-index/compute/`, { ...data, on_date: data.on_date || null });
 }
