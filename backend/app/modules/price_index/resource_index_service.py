@@ -23,6 +23,7 @@ from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import raiseload
 
 from app.modules.boq.models import BOQ, Position
 from app.modules.price_index import resource_index_math as rim
@@ -69,10 +70,19 @@ _TYPE_TO_KIND: dict[str, str] = {
 
 
 #: ``Position.price_basis`` values that say the line already stands on current
-#: money (an invoice or a supplier quotation). The method indexes base prices;
-#: indexing such a line would bring 2026 roubles to 2026 roubles a second time,
-#: so the position is listed as excluded instead.
-_CURRENT_PRICE_BASES: frozenset[str] = frozenset({"invoice", "quotation"})
+#: money: an invoice, a supplier quotation, a contract rate, the organisation's
+#: own cost history. The method indexes base prices; indexing such a line would
+#: bring 2026 roubles to 2026 roubles a second time, so the position is listed
+#: as excluded whatever the person has confirmed for the bill.
+_CURRENT_PRICE_BASES: frozenset[str] = frozenset({"invoice", "quotation", "contract_rate", "historic"})
+
+#: The one ``price_basis`` that says the line stands on a published norm base,
+#: and so is indexed without the bill-level confirmation. Every other value
+#: (unset, ``price_list``, ``judgement``) says nothing about WHICH money the
+#: price is in: the federal catalogue is a published list too, and so is a
+#: supplier's current one. Those lines are indexed only when the person has
+#: confirmed that the bill's resource prices are base prices.
+_BASE_PRICE_BASES: frozenset[str] = frozenset({"norm"})
 
 # ── Errors ───────────────────────────────────────────────────────────────────
 
@@ -96,6 +106,10 @@ class SettingsIncompleteError(ValueError):
 
 class BOQNotFoundError(LookupError):
     """The BOQ does not exist."""
+
+
+class BOQLockedError(PermissionError):
+    """The BOQ is locked, so not even this method's own choices are written onto it."""
 
 
 @dataclass(frozen=True)
@@ -357,7 +371,15 @@ class ResourceIndexService:
     # ── BOQ ──────────────────────────────────────────────────────────────
 
     async def get_boq(self, boq_id: uuid.UUID) -> BOQ:
-        boq = await self.session.get(BOQ, boq_id)
+        """Load the BOQ row alone.
+
+        Both of its collections are ``selectin``, so a plain load reads every
+        position and markup of the bill to reach one metadata key. They are
+        set to raise instead: nothing here walks them (positions are read by
+        their own query in :meth:`compute_boq`), and an empty collection left
+        in the identity map would be a worse surprise than an error.
+        """
+        boq = await self.session.get(BOQ, boq_id, options=[raiseload(BOQ.positions), raiseload(BOQ.markups)])
         if boq is None:
             raise BOQNotFoundError(str(boq_id))
         return boq
@@ -371,7 +393,11 @@ class ResourceIndexService:
             return BOQResourceIndexSettings()
         try:
             return BOQResourceIndexSettings.model_validate(
-                {k: raw.get(k) for k in ("region_code", "quarter", "default_work_type", "work_types") if k in raw}
+                {
+                    k: raw.get(k)
+                    for k in ("region_code", "quarter", "default_work_type", "work_types", "resources_at_base_prices")
+                    if k in raw
+                }
             )
         except ValueError:
             return BOQResourceIndexSettings()
@@ -379,13 +405,21 @@ class ResourceIndexService:
     async def save_settings(
         self, boq: BOQ, settings: BOQResourceIndexSettings, user_id: str
     ) -> BOQResourceIndexSettings:
-        """Store the choices under :data:`SETTINGS_KEY`, leaving every other key alone."""
+        """Store the choices under :data:`SETTINGS_KEY`, leaving every other key alone.
+
+        Raises:
+            BOQLockedError: The BOQ is locked. A locked bill refuses every
+                writer, this one included, even though it touches no position.
+        """
+        if boq.is_locked:
+            raise BOQLockedError(str(boq.id))
         meta = dict(boq.metadata_) if isinstance(boq.metadata_, dict) else {}
         meta[SETTINGS_KEY] = {
             "region_code": _norm_region(settings.region_code),
             "quarter": settings.quarter,
             "default_work_type": settings.default_work_type,
             "work_types": dict(settings.work_types),
+            "resources_at_base_prices": bool(settings.resources_at_base_prices),
             "updated_by": str(user_id),
             "updated_at": datetime.now(UTC).isoformat(),
         }
@@ -417,6 +451,7 @@ class ResourceIndexService:
             currency=currency,
             work_types=request.work_types,
             default_work_type=request.default_work_type,
+            resources_at_base_prices=request.resources_at_base_prices,
         )
         result, index_rows, norm_rows, _vat_pct, vat_name, day = await self._run(
             region=region, quarter=request.quarter, on_date=request.on_date, mapped=mapped
@@ -446,14 +481,24 @@ def map_boq_positions(
     currency: str,
     work_types: dict[str, str],
     default_work_type: str,
+    resources_at_base_prices: bool = False,
 ) -> tuple[list[_MappedPosition], list[ExcludedPositionOut]]:
     """Turn BOQ positions into the computation's input.
 
-    A position's resources carry a per-unit ``quantity`` and a base ``unit_rate``
+    A position's resources carry a per-unit ``quantity`` and a ``unit_rate``
     (the platform's own shape, where the position total is
     ``quantity x sum(resource quantity x unit_rate)``). Section headers and
     untouched placeholder rows are skipped; every other position is either
     mapped or listed in the second return value with the reason.
+
+    Which ``unit_rate`` is a base price is never assumed. A position is
+    indexed when its ``price_basis`` is ``norm``, or when it is unjudged and
+    the person confirmed ``resources_at_base_prices`` for the bill. A current
+    basis (:data:`_CURRENT_PRICE_BASES`) is excluded either way, and so is a
+    resource split the platform generated (rows flagged ``estimated``): those
+    are percentage shares of the position's own current rate, whatever the
+    bill says. A position with machines and no operator line is excluded too,
+    because its operators' wages would enter FOT as a silent zero.
     """
     from app.modules.boq.service import _is_section, is_empty_position
 
@@ -489,6 +534,14 @@ def map_boq_positions(
             skip("no_resources")
             continue
 
+        if any(r.get("estimated") for r in resources):
+            skip("estimated_resources")
+            continue
+
+        if basis not in _BASE_PRICE_BASES and not resources_at_base_prices:
+            skip("base_prices_unconfirmed", basis)
+            continue
+
         unmapped = sorted(
             {
                 str(r.get("type") or "").strip().lower() or "(blank)"
@@ -509,6 +562,10 @@ def map_boq_positions(
         )
         if foreign:
             skip("foreign_currency", ", ".join(foreign))
+            continue
+
+        if rim.lacks_operator_wages([_TYPE_TO_KIND[str(r.get("type") or "").strip().lower()] for r in resources]):
+            skip("machine_without_operator_wages")
             continue
 
         chosen = (work_types.get(pid) or "").strip()

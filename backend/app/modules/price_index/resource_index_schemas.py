@@ -174,6 +174,13 @@ class BOQResourceIndexSettings(BaseModel):
 
     ``work_types`` maps a position id to its work type; positions not in it use
     ``default_work_type``. Stored on the BOQ so the choices survive a visit.
+
+    ``resources_at_base_prices`` is the person's statement that the resource
+    prices on this bill are base prices of the 2022 federal base. A line nobody
+    has judged (``price_basis`` unset) is indexed only under that statement:
+    the platform's own resource splits and most imported bills carry current
+    money, and indexing current money a second time is the error this method
+    is easiest to make without seeing it.
     """
 
     model_config = ConfigDict(str_strip_whitespace=True)
@@ -182,6 +189,7 @@ class BOQResourceIndexSettings(BaseModel):
     quarter: str = Field(default="", max_length=7)
     default_work_type: str = Field(default="", max_length=64)
     work_types: dict[str, str] = Field(default_factory=dict, max_length=20000)
+    resources_at_base_prices: bool = False
 
     @field_validator("quarter")
     @classmethod
@@ -314,6 +322,9 @@ class ExcludedPositionOut(BaseModel):
         "no_work_type",
         "bad_number",
         "not_base_prices",
+        "base_prices_unconfirmed",
+        "estimated_resources",
+        "machine_without_operator_wages",
     ]
     detail: str = ""
 

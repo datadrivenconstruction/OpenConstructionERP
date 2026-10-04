@@ -13,13 +13,13 @@ Included into the price-index router, so mounted under
     POST   /norms/ ; PATCH / DELETE /norms/{id}/                           (price_index.manage)
     POST   /compute/                    - price explicit positions
     GET    /boqs/{boq_id}/settings/     - the person's choices for a BOQ   (project access)
-    PUT    /boqs/{boq_id}/settings/     - store them                       (project access + boq.update)
+    PUT    /boqs/{boq_id}/settings/     - store them             (project access + boq.update, 409 if locked)
     POST   /boqs/{boq_id}/compute/      - price a BOQ, read-only           (project access)
 
 Every refusal of the computation is a 422 whose ``detail`` carries a ``code``
-(``missing_index``, ``missing_overhead_norm``, ``invalid_index``,
-``invalid_input``, ``vat_unresolved``, ``settings_incomplete``) and the facts
-the screen needs to say what to enter.
+(``missing_index``, ``missing_overhead_norm``, ``missing_operator_wages``,
+``invalid_index``, ``invalid_input``, ``vat_unresolved``,
+``settings_incomplete``) and the facts the screen needs to say what to enter.
 """
 
 from __future__ import annotations
@@ -28,6 +28,8 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
+from app.core.i18n import get_locale
+from app.core.validation.messages import translate
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.boq.models import BOQ
 from app.modules.price_index import resource_index_math as rim
@@ -44,6 +46,7 @@ from app.modules.price_index.resource_index_schemas import (
     ResourceIndexValueUpdate,
 )
 from app.modules.price_index.resource_index_service import (
+    BOQLockedError,
     BOQNotFoundError,
     DuplicateEntryError,
     ResourceIndexService,
@@ -64,6 +67,8 @@ def _refusal(exc: Exception) -> HTTPException:
         detail.update(code=exc.code, groups=list(exc.groups), region_code=exc.region, quarter=exc.quarter)
     elif isinstance(exc, rim.MissingOverheadNormError):
         detail.update(code=exc.code, work_types=list(exc.work_types))
+    elif isinstance(exc, rim.MissingOperatorWagesError):
+        detail.update(code=exc.code, positions=list(exc.positions))
     elif isinstance(exc, rim.InvalidIndexError):
         detail.update(code=exc.code, group=exc.group)
     elif isinstance(exc, rim.ResourceIndexError):
@@ -207,10 +212,19 @@ async def get_settings(boq_id: uuid.UUID, session: SessionDep, user_id: CurrentU
 async def put_settings(
     boq_id: uuid.UUID, data: BOQResourceIndexSettings, session: SessionDep, user_id: CurrentUserId
 ) -> BOQResourceIndexSettings:
-    """Store the region, quarter and work types for this BOQ. Positions are not touched."""
+    """Store the region, quarter and work types for this BOQ. Positions are not touched.
+
+    A locked BOQ is a 409, as for every other writer of a bill.
+    """
     service = ResourceIndexService(session)
     boq = await _boq_with_access(boq_id, user_id, service)
-    return await service.save_settings(boq, data, user_id)
+    try:
+        return await service.save_settings(boq, data, user_id)
+    except BOQLockedError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=translate("errors.boq_locked", locale=get_locale()),
+        ) from exc
 
 
 @router.post("/boqs/{boq_id}/compute/", response_model=ResourceIndexEstimateResponse)

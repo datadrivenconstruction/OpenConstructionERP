@@ -30,7 +30,7 @@ from app.dependencies import get_current_user_id, get_current_user_payload, get_
 from app.modules.boq.models import BOQ, Position
 from app.modules.i18n_foundation.models import TaxConfiguration
 from app.modules.price_index import resource_index_math as rim
-from app.modules.price_index.models import ResourceIndexValue, WorkTypeOverheadNorm
+from app.modules.price_index.models import PriceIndexSeedMarker, ResourceIndexValue, WorkTypeOverheadNorm
 from app.modules.price_index.resource_index_schemas import (
     BOQResourceIndexComputeRequest,
     BOQResourceIndexSettings,
@@ -44,7 +44,12 @@ from app.modules.price_index.resource_index_service import (
     map_boq_positions,
 )
 from app.modules.price_index.router import router as price_index_router
-from app.modules.price_index.seed import SAMPLE_QUARTER, SAMPLE_REGION, seed_resource_index_samples
+from app.modules.price_index.seed import (
+    RESOURCE_INDEX_SEED_KEY,
+    SAMPLE_QUARTER,
+    SAMPLE_REGION,
+    seed_resource_index_samples,
+)
 from app.modules.projects.models import Project
 from app.modules.users.models import User
 from tests._pg import transactional_session
@@ -229,8 +234,10 @@ def test_mapping_lists_every_position_it_cannot_price() -> None:
             str(catalogue.id): "wt",
         },
         default_work_type="",
+        resources_at_base_prices=True,
     )
-    # A base-price catalogue (price_list) is indexed; a quotation is current money.
+    # On a bill confirmed at base prices a catalogue line (price_list) is
+    # indexed; a quotation is current money whatever the bill says.
     assert [m.position.ordinal for m in mapped] == ["1", "9"]
     reasons = {e.ordinal: (e.reason, e.detail) for e in excluded}
     assert reasons["8"] == ("not_base_prices", "quotation")
@@ -246,7 +253,11 @@ def test_mapping_uses_chosen_then_default_work_type() -> None:
     a = _Pos("1", "1", [_res("labor", "1", "100", "L")])
     b = _Pos("2", "1", [_res("labor", "1", "100", "L")])
     mapped, excluded = map_boq_positions(
-        [a, b], currency="RUB", work_types={str(a.id): "chosen_wt"}, default_work_type="default_wt"
+        [a, b],
+        currency="RUB",
+        work_types={str(a.id): "chosen_wt"},
+        default_work_type="default_wt",
+        resources_at_base_prices=True,
     )
     assert not excluded
     assert [(m.position.work_type, m.work_type_source) for m in mapped] == [
@@ -266,7 +277,9 @@ def test_mapping_keeps_resource_types_apart() -> None:
             _res("material", "1", "1", "d"),
         ],
     )
-    mapped, _ = map_boq_positions([p], currency="RUB", work_types={}, default_work_type="wt")
+    mapped, _ = map_boq_positions(
+        [p], currency="RUB", work_types={}, default_work_type="wt", resources_at_base_prices=True
+    )
     assert [line.kind for line in mapped[0].position.resources] == [
         rim.KIND_LABOR,
         rim.KIND_MACHINE,
@@ -275,11 +288,108 @@ def test_mapping_keeps_resource_types_apart() -> None:
     ]
 
 
+def _basis(ordinal: str, basis: str | None) -> _Pos:
+    p = _Pos(ordinal, "1", [_res("labor", "1", "100", "L"), _res("material", "1", "50", "M")])
+    p.price_basis = basis
+    return p
+
+
+def test_unjudged_lines_are_indexed_only_on_the_persons_confirmation() -> None:
+    rows = [
+        _basis("unset", None),
+        _basis("list", "price_list"),
+        _basis("judged", "judgement"),
+        _basis("norm", "norm"),
+        _basis("invoice", "invoice"),
+        _basis("quote", "quotation"),
+        _basis("contract", "contract_rate"),
+        _basis("history", "historic"),
+    ]
+
+    mapped, excluded = map_boq_positions(rows, currency="RUB", work_types={}, default_work_type="wt")
+    # Without the confirmation only a line that says it stands on the norm base is indexed.
+    assert [m.position.ordinal for m in mapped] == ["norm"]
+    reasons = {e.ordinal: (e.reason, e.detail) for e in excluded}
+    assert reasons["unset"] == ("base_prices_unconfirmed", "")
+    assert reasons["list"] == ("base_prices_unconfirmed", "price_list")
+    assert reasons["judged"] == ("base_prices_unconfirmed", "judgement")
+    for ordinal, basis in (
+        ("invoice", "invoice"),
+        ("quote", "quotation"),
+        ("contract", "contract_rate"),
+        ("history", "historic"),
+    ):
+        assert reasons[ordinal] == ("not_base_prices", basis)
+
+    mapped, excluded = map_boq_positions(
+        rows, currency="RUB", work_types={}, default_work_type="wt", resources_at_base_prices=True
+    )
+    # The confirmation covers the lines nobody judged; current money stays out.
+    assert [m.position.ordinal for m in mapped] == ["unset", "list", "judged", "norm"]
+    assert {e.ordinal for e in excluded} == {"invoice", "quote", "contract", "history"}
+    assert {e.reason for e in excluded} == {"not_base_prices"}
+
+
+def test_platform_generated_resource_splits_are_never_indexed_as_base_prices() -> None:
+    """The splits the platform writes are shares of a CURRENT rate; indexing them is double indexing.
+
+    Fed with what the generators really produce, not with a hand-made copy.
+    """
+    from app.core.demo_projects import _enrich_position_metadata, _resources_for_position
+
+    # The trade split of a lump sum, flagged ``estimated``: out even when the
+    # person confirms the bill, because the flag outranks the confirmation.
+    split = _Pos("split", "1", _resources_for_position("Concrete works", "LS", 1.0, 2_640_000.0))
+    assert split.metadata_["resources"] and all(r["estimated"] for r in split.metadata_["resources"])
+    # The catalogue-style build-up of a demo position: machines with the
+    # operator inside the machine price and no operator line.
+    demo = _Pos("demo", "100", _enrich_position_metadata("RC wall C30/37", "m3", 26_400.0, {})["resources"])
+    assert {r["type"] for r in demo.metadata_["resources"]} == {"material", "labor", "equipment"}
+
+    for confirmed in (False, True):
+        mapped, excluded = map_boq_positions(
+            [split, demo],
+            currency="RUB",
+            work_types={},
+            default_work_type="wt",
+            resources_at_base_prices=confirmed,
+        )
+        assert mapped == []
+        reasons = {e.ordinal: e.reason for e in excluded}
+        assert reasons["split"] == "estimated_resources"
+        assert reasons["demo"] == ("machine_without_operator_wages" if confirmed else "base_prices_unconfirmed")
+
+
+def test_machine_without_operator_line_is_excluded_not_priced_with_otm_zero() -> None:
+    bare = _Pos("bare", "1", [_res("labor", "1", "10000", "L"), _res("equipment", "1", "6000", "EX")])
+    split = _Pos(
+        "split",
+        "1",
+        [_res("labor", "1", "10000", "L"), _res("equipment", "1", "4000", "EX"), _res("operator", "1", "2000", "OP")],
+    )
+    stated_zero = _Pos(
+        "zero",
+        "1",
+        [_res("labor", "1", "10000", "L"), _res("machine", "1", "6000", "VIB"), _res("operator", "0", "0", "OP")],
+    )
+    no_machine = _Pos("hand", "1", [_res("labor", "1", "10000", "L")])
+    mapped, excluded = map_boq_positions(
+        [bare, split, stated_zero, no_machine],
+        currency="RUB",
+        work_types={},
+        default_work_type="wt",
+        resources_at_base_prices=True,
+    )
+    assert [m.position.ordinal for m in mapped] == ["split", "zero", "hand"]
+    assert [(e.ordinal, e.reason) for e in excluded] == [("bare", "machine_without_operator_wages")]
+
+
 # ── Seed ──────────────────────────────────────────────────────────────────────
 
 
 @pytest.mark.asyncio
 async def test_sample_seed_is_flagged_and_only_fills_empty_tables(session: AsyncSession) -> None:
+    await session.execute(delete(PriceIndexSeedMarker))
     await session.execute(delete(ResourceIndexValue))
     await session.execute(delete(WorkTypeOverheadNorm))
     first = await seed_resource_index_samples(session)
@@ -301,6 +411,44 @@ async def test_sample_seed_is_flagged_and_only_fills_empty_tables(session: Async
     session.add(ResourceIndexValue(region_code="RU-SPE", quarter="2026-Q2", resource_group="labor", index_value=D("2")))
     await session.flush()
     assert (await seed_resource_index_samples(session))["resource_indices"] == 0
+
+
+@pytest.mark.asyncio
+async def test_deleted_samples_stay_deleted_after_a_restart(session: AsyncSession) -> None:
+    await session.execute(delete(PriceIndexSeedMarker))
+    await session.execute(delete(ResourceIndexValue))
+    await session.execute(delete(WorkTypeOverheadNorm))
+    assert await seed_resource_index_samples(session) == {"resource_indices": 4, "overhead_norms": 4}
+
+    # The person clears every sample row before typing in the official letter,
+    # which leaves both tables exactly as empty as on a fresh install.
+    await session.execute(delete(ResourceIndexValue))
+    await session.execute(delete(WorkTypeOverheadNorm))
+    await session.flush()
+
+    # The next boot puts nothing back.
+    assert await seed_resource_index_samples(session) == {"resource_indices": 0, "overhead_norms": 0}
+    assert (await session.execute(select(ResourceIndexValue.id))).first() is None
+    assert (await session.execute(select(WorkTypeOverheadNorm.id))).first() is None
+    markers = (await session.execute(select(PriceIndexSeedMarker))).scalars().all()
+    assert [m.seed_key for m in markers] == [RESOURCE_INDEX_SEED_KEY]
+
+
+@pytest.mark.asyncio
+async def test_an_install_with_its_own_data_is_marked_and_never_seeded(session: AsyncSession) -> None:
+    # An install that had rows before the marker existed: nothing is added
+    # now, and the marker means nothing is added after the rows go either.
+    await session.execute(delete(PriceIndexSeedMarker))
+    await session.execute(delete(ResourceIndexValue))
+    await session.execute(delete(WorkTypeOverheadNorm))
+    session.add(ResourceIndexValue(region_code="RU-SPE", quarter="2026-Q2", resource_group="labor", index_value=D("2")))
+    session.add(WorkTypeOverheadNorm(work_type_code="own", label="own", nr_pct=D("90"), sp_pct=D("50")))
+    await session.flush()
+    assert await seed_resource_index_samples(session) == {"resource_indices": 0, "overhead_norms": 0}
+    await session.execute(delete(ResourceIndexValue))
+    await session.execute(delete(WorkTypeOverheadNorm))
+    await session.flush()
+    assert await seed_resource_index_samples(session) == {"resource_indices": 0, "overhead_norms": 0}
 
 
 @pytest.mark.asyncio
@@ -391,6 +539,7 @@ async def test_boq_prices_to_the_hand_computed_figures(session: AsyncSession) ->
             quarter=QUARTER,
             work_types={str(p1.id): "t_concrete", str(p2.id): "t_earthworks"},
             on_date=date(2026, 2, 15),
+            resources_at_base_prices=True,
         ),
     )
     assert result.is_complete is True
@@ -436,6 +585,7 @@ async def test_same_boq_before_the_vat_change(session: AsyncSession) -> None:
             default_work_type="t_concrete",
             work_types={str(p2.id): "t_earthworks"},
             on_date=date(2025, 12, 31),
+            resources_at_base_prices=True,
         ),
     )
     assert result.totals.total == D("58242.70")
@@ -454,7 +604,11 @@ async def test_index_of_another_quarter_does_not_count(session: AsyncSession) ->
         await ResourceIndexService(session).compute_boq(
             boq,
             BOQResourceIndexComputeRequest(
-                region_code=REGION, quarter=QUARTER, default_work_type="t_concrete", on_date=date(2026, 2, 1)
+                region_code=REGION,
+                quarter=QUARTER,
+                default_work_type="t_concrete",
+                on_date=date(2026, 2, 1),
+                resources_at_base_prices=True,
             ),
         )
     assert excinfo.value.groups == ("labor", "machine", "material", "operator_wages")
@@ -470,7 +624,11 @@ async def test_partial_boq_is_flagged_not_presented_as_the_total(session: AsyncS
     result = await ResourceIndexService(session).compute_boq(
         boq,
         BOQResourceIndexComputeRequest(
-            region_code=REGION, quarter=QUARTER, work_types={str(p1.id): "t_concrete"}, on_date=date(2026, 2, 1)
+            region_code=REGION,
+            quarter=QUARTER,
+            work_types={str(p1.id): "t_concrete"},
+            on_date=date(2026, 2, 1),
+            resources_at_base_prices=True,
         ),
     )
     assert result.is_complete is False
@@ -495,7 +653,11 @@ async def test_settings_are_kept_under_one_key(session: AsyncSession) -> None:
     saved = await service.save_settings(
         boq,
         BOQResourceIndexSettings(
-            region_code="ru-mow", quarter="2026-q1", default_work_type="masonry", work_types={"abc": "finishing"}
+            region_code="ru-mow",
+            quarter="2026-q1",
+            default_work_type="masonry",
+            work_types={"abc": "finishing"},
+            resources_at_base_prices=True,
         ),
         str(owner),
     )
@@ -505,6 +667,39 @@ async def test_settings_are_kept_under_one_key(session: AsyncSession) -> None:
     assert boq.metadata_["keep"] == "me"
     assert boq.metadata_[SETTINGS_KEY]["work_types"] == {"abc": "finishing"}
     assert service.read_settings(boq).default_work_type == "masonry"
+    # The confirmation is read back, not dropped by the key whitelist.
+    assert boq.metadata_[SETTINGS_KEY]["resources_at_base_prices"] is True
+    assert service.read_settings(boq).resources_at_base_prices is True
+
+
+@pytest.mark.asyncio
+async def test_unconfirmed_bill_lists_every_line_instead_of_indexing_it(session: AsyncSession) -> None:
+    """The double-indexing case: the same bill, unconfirmed, prices nothing and says why."""
+    await _seed_ru_vat(session)
+    await _seed_reference(session)
+    owner = await _make_user(session)
+    boq, p1, p2 = await _hand_computed_boq(session, owner)
+    request = BOQResourceIndexComputeRequest(
+        region_code=REGION,
+        quarter=QUARTER,
+        work_types={str(p1.id): "t_concrete", str(p2.id): "t_earthworks"},
+        on_date=date(2026, 2, 15),
+    )
+    result = await ResourceIndexService(session).compute_boq(boq, request)
+    assert result.is_complete is False
+    assert result.priced_count == 0
+    assert {(e.ordinal, e.reason) for e in result.excluded} == {
+        ("1.1", "base_prices_unconfirmed"),
+        ("1.2", "base_prices_unconfirmed"),
+    }
+    assert result.totals.total == D("0.00")
+
+    # One line marked as standing on the norm base is indexed on its own word.
+    p2.price_basis = "norm"
+    await session.flush()
+    result = await ResourceIndexService(session).compute_boq(boq, request)
+    assert [p.ordinal for p in result.positions] == ["1.2"]
+    assert result.totals.total == D("3040.70")  # position 1.2 alone, as in the math test
 
 
 # ── Router: refusals and tenancy ──────────────────────────────────────────────
@@ -596,6 +791,56 @@ async def test_router_owner_saves_and_reads_settings(session: AsyncSession) -> N
         resp = await client.post(f"/v1/price-index/resource-index/boqs/{boq.id}/compute/", json={})
         assert resp.status_code == 422
         assert resp.json()["detail"]["code"] == "settings_incomplete"
+
+
+@pytest.mark.asyncio
+async def test_router_locked_boq_refuses_settings_and_stays_untouched(session: AsyncSession) -> None:
+    owner = await _make_user(session)
+    boq = await _make_boq(session, owner)
+    boq.is_locked = True
+    await session.flush()
+    await session.refresh(boq)
+    stamp = boq.updated_at
+    async with await _client(_app(session, owner)) as client:
+        resp = await client.put(
+            f"/v1/price-index/resource-index/boqs/{boq.id}/settings/",
+            json={"region_code": "RU-MOW", "quarter": "2026-Q1", "resources_at_base_prices": True},
+        )
+        assert resp.status_code == 409, resp.text
+        # Reading the choices and pricing stay open on a locked bill.
+        assert (await client.get(f"/v1/price-index/resource-index/boqs/{boq.id}/settings/")).status_code == 200
+    await session.refresh(boq)
+    assert boq.metadata_ == {"keep": "me"}
+    assert boq.updated_at == stamp
+
+
+@pytest.mark.asyncio
+async def test_router_missing_operator_line_is_a_422_naming_the_position(session: AsyncSession) -> None:
+    await _seed_ru_vat(session)
+    await _seed_reference(session)
+    owner = await _make_user(session)
+    payload = {
+        "region_code": REGION,
+        "quarter": "2026-Q1",
+        "on_date": "2026-02-01",
+        "positions": [
+            {
+                "ordinal": "7",
+                "quantity": "1",
+                "work_type": "t_earthworks",
+                "resources": [
+                    {"kind": "labor", "quantity": "1", "base_unit_price": "10000"},
+                    {"kind": "machine", "quantity": "1", "base_unit_price": "6000"},
+                ],
+            }
+        ],
+    }
+    async with await _client(_app(session, owner)) as client:
+        resp = await client.post("/v1/price-index/resource-index/compute/", json=payload)
+        assert resp.status_code == 422
+        detail = resp.json()["detail"]
+        assert detail["code"] == "missing_operator_wages"
+        assert detail["positions"] == ["7"]
 
 
 @pytest.mark.asyncio

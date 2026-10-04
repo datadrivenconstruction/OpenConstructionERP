@@ -32,6 +32,13 @@ operation whose whole amount is operators' wages:
 Adding the operators to direct cost a second time, or leaving them out of FOT,
 are the two ways to get this wrong; both change the total.
 
+A position with machine lines and no ``operator`` line is refused
+(:class:`MissingOperatorWagesError`). Nearly every mechanised norm of the base
+carries operators' wages, and a machine line on its own gives OTm = 0, so FOT,
+NR and SP would come out short with nothing on screen to say so. A machine that
+genuinely runs without an operator is stated with an ``operator`` line of zero
+price, which is an answer, where a missing line is not.
+
 Rounding rule (the platform's, stated here so it can be checked)
 ---------------------------------------------------------------
 Every product is rounded to kopecks (0.01) with ``ROUND_HALF_UP`` the moment it
@@ -73,6 +80,7 @@ __all__ = [
     "InvalidIndexError",
     "LineResult",
     "MissingIndexError",
+    "MissingOperatorWagesError",
     "MissingOverheadNormError",
     "OverheadProfitNorm",
     "PositionInput",
@@ -82,6 +90,7 @@ __all__ = [
     "ResourceLineInput",
     "WorkTypeSummary",
     "compute_resource_index_estimate",
+    "lacks_operator_wages",
     "normalise_quarter",
 ]
 
@@ -170,6 +179,23 @@ class MissingOverheadNormError(ResourceIndexError):
     def __init__(self, work_types: tuple[str, ...]) -> None:
         self.work_types = work_types
         super().__init__(f"no overhead and profit norm for work type(s) {', '.join(work_types)}")
+
+
+class MissingOperatorWagesError(ResourceIndexError):
+    """A position has machine lines but no operator line, so its OTm would be a silent zero.
+
+    Attributes:
+        positions: The ordinal (or ref) of every such position, in input order.
+    """
+
+    code = "missing_operator_wages"
+
+    def __init__(self, positions: tuple[str, ...]) -> None:
+        self.positions = positions
+        super().__init__(
+            f"position(s) {', '.join(positions)} have machine lines but no operator line; split the operators' "
+            "wages out of the machine price into an operator line (zero if the machine has no operator)"
+        )
 
 
 # ── Input ────────────────────────────────────────────────────────────────────
@@ -380,6 +406,23 @@ def _validate(data: EstimateInput) -> None:
                 raise ResourceIndexInputError(
                     f"position {position.ordinal}: resource {line.code or line.name!r} has a negative value"
                 )
+    no_operator = tuple(
+        position.ordinal or position.ref
+        for position in data.positions
+        if lacks_operator_wages([line.kind for line in position.resources])
+    )
+    if no_operator:
+        raise MissingOperatorWagesError(no_operator)
+
+
+def lacks_operator_wages(kinds: list[str] | tuple[str, ...]) -> bool:
+    """True when a position's resource kinds have a machine and no operator.
+
+    Such a position would be priced with OTm = 0, which understates FOT, NR
+    and SP. Callers refuse it (the computation) or list it as excluded (the
+    BOQ mapping); neither prices it as if the zero were known.
+    """
+    return KIND_MACHINE in kinds and KIND_OPERATOR not in kinds
 
 
 def _required_groups(positions: tuple[PositionInput, ...]) -> set[str]:
@@ -521,6 +564,8 @@ def compute_resource_index_estimate(data: EstimateInput) -> EstimateResult:
     Raises:
         ResourceIndexInputError: Malformed quarter, blank work type, unknown
             resource kind, negative value.
+        MissingOperatorWagesError: A position has machine lines and no
+            operator line, so its OTm cannot be known.
         MissingIndexError: A group with lines has no index.
         InvalidIndexError: A needed index is not positive.
         MissingOverheadNormError: A work type in use has no NR/SP norm.

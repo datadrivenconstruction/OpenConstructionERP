@@ -367,6 +367,72 @@ def test_unknown_resource_kind_is_an_error_not_material() -> None:
         _compute(positions=(odd,))
 
 
+def _mechanised(*resources: rim.ResourceLineInput, ordinal: str = "3") -> rim.PositionInput:
+    return rim.PositionInput(
+        ref=f"p{ordinal}",
+        ordinal=ordinal,
+        description="Excavation by machine",
+        unit="1000 m3",
+        quantity=D("1"),
+        work_type="earthworks",
+        resources=resources,
+    )
+
+
+def test_machine_without_an_operator_line_is_refused_not_priced_with_otm_zero() -> None:
+    # Labour base 10 000 and an excavator 6 000 with the operator inside the
+    # machine price. Priced as it stands, FOT would be 10 000 x 1.25 = 12 500
+    # with OTm silently 0, and NR / SP short by the operators' share.
+    bare = _mechanised(_line("labor", "1", "10000.00", "L"), _line("machine", "1", "6000.00", "EX"))
+    with pytest.raises(rim.MissingOperatorWagesError) as excinfo:
+        _compute(positions=(_position_2(), bare))
+    assert excinfo.value.positions == ("3",)
+    assert excinfo.value.code == "missing_operator_wages"
+
+
+def test_operator_split_out_of_the_machine_counts_in_fot() -> None:
+    # The same 6 000 split into machine 4 000 and operator 2 000:
+    #   OT  = 10 000 x 1.25 = 12 500 ; EM = 4 000 x 1.10 + 2 000 x 1.10 = 6 600
+    #   OTm = 2 000 x 1.30 = 2 600   ; FOT = 12 500 + 2 600 = 15 100
+    #   NR 89 % = 13 439.00 ; SP 50 % = 7 550.00 ; total = 19 100 + 13 439 + 7 550 = 40 089.00
+    split = _mechanised(
+        _line("labor", "1", "10000.00", "L"),
+        _line("machine", "1", "4000.00", "EX"),
+        _line("operator", "1", "2000.00", "OP"),
+    )
+    p = _compute(positions=(split,)).positions[0]
+    assert (p.ot, p.em, p.otm, p.fot) == (D("12500.00"), D("6600.00"), D("2600.00"), D("15100.00"))
+    assert (p.nr, p.sp, p.total) == (D("13439.00"), D("7550.00"), D("40089.00"))
+
+
+def test_operator_line_at_zero_states_a_machine_without_operator() -> None:
+    # An explicit zero is an answer: OTm is known to be 0, so FOT is OT alone.
+    stated = _mechanised(
+        _line("labor", "1", "10000.00", "L"),
+        _line("machine", "1", "6000.00", "VIB"),
+        _line("operator", "0", "0", "OP"),
+    )
+    p = _compute(positions=(stated,)).positions[0]
+    assert p.otm == D("0.00")
+    assert p.fot == D("12500.00")
+    assert p.em == D("6600.00")
+
+
+@pytest.mark.parametrize(
+    ("kinds", "expected"),
+    [
+        (("labor", "machine"), True),
+        (("machine",), True),
+        (("machine", "operator"), False),
+        (("labor", "material"), False),
+        (("operator",), False),
+        ((), False),
+    ],
+)
+def test_lacks_operator_wages(kinds: tuple[str, ...], expected: bool) -> None:
+    assert rim.lacks_operator_wages(kinds) is expected
+
+
 def test_negative_vat_rate_is_an_error() -> None:
     with pytest.raises(rim.ResourceIndexInputError):
         _compute(vat="-1")
