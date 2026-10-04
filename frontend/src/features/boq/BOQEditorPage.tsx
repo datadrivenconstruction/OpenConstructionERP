@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 // lucide-react icons used by sub-components (BOQToolbar, BOQGrid, etc.) — none needed directly here
-import { Database, Download, ExternalLink, X, Sparkles, AlertTriangle as WarnTriangle, Lock, Copy, Wallet, Keyboard, GitCompare, RefreshCw, ShieldCheck, FlaskConical, Send, Percent, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Database, Download, ExternalLink, X, Sparkles, AlertTriangle as WarnTriangle, Lock, Copy, Wallet, Keyboard, GitCompare, RefreshCw, ShieldCheck, FlaskConical, Send, Percent, CheckCircle, ArrowLeft, LayoutList } from 'lucide-react';
 import { Button, Badge, Breadcrumb, ModuleHelpButton, ModuleGuideButton, ConfirmDialog, DismissibleInfo, IntroRichText } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useProgressStore } from '@/shared/ui/GlobalProgress';
@@ -81,6 +81,7 @@ import { allResourcesExpanded, type ResourceExpansionState } from './resourceExp
 import { BatchActionBar } from './BatchActionBar';
 import { ScenarioDialog } from './ScenarioDialog';
 import { SendToTenderDialog } from './SendToTenderDialog';
+import { CostPlanDialog } from '@/features/cost-plan';
 import { ImportPreviewDialog } from './ImportPreviewDialog';
 import { BOQFilterBar, type BoqFilterKind } from './BOQFilterBar';
 import { BOQOutline } from './BOQOutline';
@@ -2892,6 +2893,8 @@ export function BOQEditorPage() {
   // signal that re-opens the (collapsible) markup panel below the grid.
   const [scenarioOpen, setScenarioOpen] = useState(false);
   const [tenderOpen, setTenderOpen] = useState(false);
+  // NRM 1 elemental cost plan of this bill, read-only, opened over the editor.
+  const [costPlanOpen, setCostPlanOpen] = useState(false);
   const [markupOpenSignal, setMarkupOpenSignal] = useState(0);
 
   // Top-level sections inside the current selection. Empty means the tender
@@ -4938,6 +4941,17 @@ export function BOQEditorPage() {
             <Button
               variant="ghost"
               size="sm"
+              onClick={() => setCostPlanOpen(true)}
+              title={t('cost_plan.open_hint', {
+                defaultValue: 'Roll this bill up into an NRM 1 elemental cost plan with cost per m2 GIFA',
+              })}
+            >
+              <LayoutList size={14} className="mr-1" />
+              {t('cost_plan.open_button', { defaultValue: 'Cost plan' })}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={handleJumpToMarkups}
               title={t('boq.markups_btn_hint', {
                 defaultValue: 'Overhead, profit, tax and contingency (OH&P)',
@@ -5602,6 +5616,16 @@ export function BOQEditorPage() {
           isOpen={scenarioOpen}
           onClose={() => setScenarioOpen(false)}
           onCreated={handleScenarioCreated}
+        />
+      )}
+
+      {/* ── NRM 1 elemental cost plan (read-only view of this bill) ─ */}
+      {boqId && (
+        <CostPlanDialog
+          boqId={boqId}
+          boqName={boq?.name ?? ''}
+          open={costPlanOpen}
+          onClose={() => setCostPlanOpen(false)}
         />
       )}
 
