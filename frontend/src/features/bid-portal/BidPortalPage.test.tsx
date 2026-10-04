@@ -112,6 +112,16 @@ describe('the bidder price-entry page', () => {
     expect(screen.getByText(/soil class 3-5/)).toBeTruthy();
   });
 
+  it('writes the unit the way the bill editor does, not as the stored code', async () => {
+    fetchMock.mockResolvedValue(makeView());
+    renderPage();
+
+    const row = (await screen.findByTestId('bid-price-input-01.001')).closest('tr');
+    expect(row).toBeTruthy();
+    expect(within(row as HTMLElement).getByText('m³')).toBeTruthy();
+    expect(within(row as HTMLElement).queryByText('m3')).toBeNull();
+  });
+
   it('updates the line sums and the bid sum as prices are typed', async () => {
     fetchMock.mockResolvedValue(makeView());
     renderPage();
@@ -197,9 +207,37 @@ describe('the bidder price-entry page', () => {
     const receipt = await screen.findByTestId('bid-portal-receipt');
     expect(receipt.textContent).toContain(formatCurrency('135.00', 'EUR', LOCALE));
     const input = screen.getByTestId('bid-price-input-01.001') as HTMLInputElement;
-    expect(input.value).toBe('12.5');
+    expect(input.value).toBe('12.50');
     expect(input.disabled).toBe(true);
     expect(screen.queryByTestId('bid-portal-submit')).toBeNull();
+  });
+
+  it('writes the submitted prices in the reader locale once they can no longer be edited', async () => {
+    usePreferencesStore.setState({ numberLocale: 'de-DE' });
+    fetchMock.mockResolvedValue(
+      makeView({
+        state: 'submitted',
+        submitted_at: '2026-10-01T08:30:00Z',
+        bid_amount: '1260.00',
+        unpriced_count: 0,
+        draft: { unit_prices: { p1: '52.50', p2: '294' }, notes: '', saved_at: '2026-10-01T08:30:00Z' },
+      }),
+    );
+    renderPage();
+
+    await screen.findByTestId('bid-portal-receipt');
+    expect((screen.getByTestId('bid-price-input-01.001') as HTMLInputElement).value).toBe('52,50');
+    expect((screen.getByTestId('bid-price-input-01.002') as HTMLInputElement).value).toBe('294,00');
+  });
+
+  it('keeps an open draft price in the form it was stored, so it parses back the same', async () => {
+    usePreferencesStore.setState({ numberLocale: 'de-DE' });
+    fetchMock.mockResolvedValue(makeView({ draft: { unit_prices: { p1: '52.50' }, notes: '', saved_at: null } }));
+    renderPage();
+
+    const input = (await screen.findByTestId('bid-price-input-01.001')) as HTMLInputElement;
+    expect(input.value).toBe('52.50');
+    expect(input.disabled).toBe(false);
   });
 
   it.each([

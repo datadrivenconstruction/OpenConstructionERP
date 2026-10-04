@@ -23,6 +23,7 @@ import { Button, ConfirmDialog } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { formatCurrency } from '@/shared/lib/money';
 import { formatDateValue } from '@/shared/lib/formatters';
+import { localizedUnitCode } from '@/shared/lib/unitLabels';
 import { parseMoneyInput, toDecimalPayloadString } from '@/shared/lib/parseDecimal';
 import { useNumberLocale } from '@/stores/usePreferencesStore';
 
@@ -63,7 +64,7 @@ function quantityOf(line: BidPortalLine): number {
 
 export function BidPortalPage() {
   const { token = '' } = useParams<{ token: string }>();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const numberLocale = useNumberLocale();
   const { confirm, ...confirmProps } = useConfirm();
 
@@ -130,6 +131,13 @@ export function BidPortalPage() {
   const unpricedCount = items.length - pricedCount - invalidCount;
   const sum = items.reduce((acc, l) => acc + (parsed[l.id]?.value ?? 0) * quantityOf(l), 0);
 
+  // A field the bidder edits keeps the canonical form they typed or the
+  // server stored; once the bid is in and the field is only read, the price
+  // is written the reader's way (52,50 rather than 52.50).
+  const priceFormat = useMemo(
+    () => new Intl.NumberFormat(numberLocale, { minimumFractionDigits: 2, maximumFractionDigits: 4 }),
+    [numberLocale],
+  );
   const qtyFormat = useMemo(
     () => new Intl.NumberFormat(numberLocale, { maximumFractionDigits: 3 }),
     [numberLocale],
@@ -362,7 +370,7 @@ export function BidPortalPage() {
                       </>
                     )}
                   </td>
-                  <td className="px-3 py-2 text-content-secondary">{line.unit}</td>
+                  <td className="px-3 py-2 text-content-secondary">{localizedUnitCode(line.unit, i18n.language)}</td>
                   <td className="px-3 py-2 text-right tabular-nums text-content-secondary">
                     {qtyFormat.format(quantityOf(line))}
                   </td>
@@ -372,7 +380,11 @@ export function BidPortalPage() {
                       type="text"
                       inputMode="decimal"
                       autoComplete="off"
-                      value={inputs[line.id] ?? ''}
+                      value={
+                        readOnly && p?.value !== null && p?.value !== undefined
+                          ? priceFormat.format(p.value)
+                          : (inputs[line.id] ?? '')
+                      }
                       disabled={readOnly}
                       onChange={(e) => {
                         const next = e.target.value;
