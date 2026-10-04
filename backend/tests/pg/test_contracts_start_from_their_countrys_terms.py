@@ -20,7 +20,7 @@ shows in the second and third.
 from __future__ import annotations
 
 import uuid
-from datetime import date
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from types import SimpleNamespace
 
@@ -28,11 +28,18 @@ import pytest
 from fastapi import HTTPException
 
 from app.core.events import event_bus
+from app.modules.boq.models import BOQ, Position
 from app.modules.contracts.country_defaults import COUNTRY_CONTRACT_DEFAULTS
 from app.modules.contracts.models import Contract, ContractLine, ProgressClaim
 from app.modules.contracts.schemas import AutoGenerateClaimRequest, ContractCreate, ContractUpdate
-from app.modules.contracts.service import RELEASE_RULE_FROM_CONTRACT, RELEASE_RULE_FROM_PACK, ContractsService
+from app.modules.contracts.service import (
+    BOQ_POSITION_META_KEY,
+    RELEASE_RULE_FROM_CONTRACT,
+    RELEASE_RULE_FROM_PACK,
+    ContractsService,
+)
 from app.modules.contracts.validators import register_contracts_validation_rules
+from app.modules.progress.models import ProgressEntry
 from app.modules.projects.models import Project
 from app.modules.subcontractors.models import Certificate
 from app.modules.subcontractors.schemas import (
@@ -323,6 +330,128 @@ async def test_a_cost_plus_contract_with_no_total_keeps_holding_its_rate(pg_sess
         await svc.transition_claim(claim.id, "submitted", "cap-test")
 
     assert accruals == [Decimal("1000"), Decimal("1000"), Decimal("2000")]
+
+
+async def test_a_claim_raised_while_the_one_before_is_a_draft_still_stops_at_the_ceiling(pg_session) -> None:
+    """FIDIC defaults again, but nothing is submitted before the next month is raised.
+
+    "Previous certificates" leave drafts out, and the ceiling used to read
+    the same list, so April raised while March was still a draft saw nothing
+    held and could hold up to the whole ceiling again: 4000, 2000 and 3000,
+    9000 against a limit of 5000 once all three went out.
+    """
+    svc = ContractsService(pg_session)
+    contract = await _create(
+        svc, await _project(pg_session, "AE"), contract_type="cost_plus", terms={"fee_percent": "0"}
+    )
+    contract.status = "active"
+    await pg_session.flush()
+
+    accruals = []
+    for month, cost in ((3, "40000"), (4, "20000"), (5, "30000")):
+        claim = await svc.auto_generate_claim_lines(
+            (await _claim(pg_session, contract, f"PC-{month}", month)).id,
+            AutoGenerateClaimRequest(actual_costs_total=Decimal(cost)),
+        )
+        assert claim.status == "draft"
+        accruals.append(claim.retention_amount)
+
+    assert accruals == [Decimal("4000"), Decimal("1000"), Decimal("0")]
+
+
+async def test_a_rejected_claim_leaves_its_room_under_the_ceiling(pg_session) -> None:
+    svc = ContractsService(pg_session)
+    contract = await _create(
+        svc, await _project(pg_session, "AE"), contract_type="cost_plus", terms={"fee_percent": "0"}
+    )
+    contract.status = "active"
+    await pg_session.flush()
+    march = await svc.auto_generate_claim_lines(
+        (await _claim(pg_session, contract, "PC-3", 3)).id,
+        AutoGenerateClaimRequest(actual_costs_total=Decimal("40000")),
+    )
+    march.status = "rejected"
+    await pg_session.flush()
+    april = await svc.auto_generate_claim_lines(
+        (await _claim(pg_session, contract, "PC-4", 4)).id,
+        AutoGenerateClaimRequest(actual_costs_total=Decimal("20000")),
+    )
+    # March certified nothing and holds nothing, so April has the whole room.
+    assert april.retention_amount == Decimal("2000")
+
+
+async def test_the_populate_preview_holds_what_the_commit_holds_once_the_ceiling_binds(pg_session) -> None:
+    """The preview used to hold the full rate on a flat claim and the commit the capped one.
+
+    FIDIC defaults on 100000: March holds 4600 of a 5000 ceiling, so April's
+    8000 of progress has 400 of room left where 10 percent would be 800. A
+    preview of 800 told the person 400 less net than the claim then paid.
+    """
+    project = await _project(pg_session, "AE")
+    svc = ContractsService(pg_session)
+    contract = await _create(svc, project, contract_type="cost_plus", terms={"fee_percent": "0"})
+    boq = BOQ(id=uuid.uuid4(), project_id=project.id, name="Main BOQ")
+    pg_session.add(boq)
+    await pg_session.flush()
+    position = Position(
+        id=uuid.uuid4(),
+        boq_id=boq.id,
+        ordinal="01.001",
+        description="Concrete",
+        unit="m3",
+        quantity="100",
+        unit_rate="200",
+        total="20000",
+    )
+    pg_session.add(position)
+    line = ContractLine(
+        id=uuid.uuid4(),
+        contract_id=contract.id,
+        code="A",
+        description="Concrete",
+        quantity=Decimal("10"),
+        unit_rate=Decimal("2000"),
+        total_value=Decimal("20000"),
+        order_index=0,
+        metadata_={BOQ_POSITION_META_KEY: str(position.id)},
+    )
+    pg_session.add(line)
+    contract.status = "active"
+    await pg_session.flush()
+
+    march = await svc.auto_generate_claim_lines(
+        (await _claim(pg_session, contract, "PC-3", 3)).id,
+        AutoGenerateClaimRequest(actual_costs_total=Decimal("46000")),
+    )
+    assert march.retention_amount == Decimal("4600")
+    await svc.transition_claim(march.id, "submitted", "cap-test")
+
+    april = await _claim(pg_session, contract, "PC-4", 4)
+    pg_session.add(
+        ProgressEntry(
+            id=uuid.uuid4(),
+            project_id=project.id,
+            boq_position_id=position.id,
+            period_label="2026-04",
+            percent_complete=Decimal("40"),
+            recorded_at=datetime(2026, 4, 10, 9, 0, tzinfo=UTC),
+        )
+    )
+    await pg_session.flush()
+
+    preview = await svc.populate_claim_from_progress(april.id)
+    assert preview["gross"] == Decimal("8000")
+    assert preview["retention"] == Decimal("400")
+    assert preview["net_due"] == Decimal("7600")
+
+    [item] = preview["items"]
+    committed = await svc.commit_preview_to_claim(
+        april.id,
+        [SimpleNamespace(contract_line_id=item["contract_line_id"], period_completed_pct=item["observed_pct"])],
+    )
+    assert committed.gross_amount == preview["gross"]
+    assert committed.retention_amount == preview["retention"]
+    assert committed.net_due == preview["net_due"]
 
 
 async def test_a_schedule_of_values_contract_holds_the_cap_in_total(pg_session) -> None:

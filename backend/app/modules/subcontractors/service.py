@@ -2763,8 +2763,13 @@ class SubcontractorService:
         items = suggest_claim_lines(rollup, sov_lines, claim_lines)
         gross = sum((item["period_completed_value"] for item in items), Decimal("0"))
         # The same retention and net arithmetic the progress preview shows,
-        # so the two previews of one claim agree on what a gross implies.
-        retention = (gross * Decimal(str(contract.retention_percent or 0)) / Decimal("100")).quantize(Decimal("0.0001"))
+        # so the two previews of one claim agree on what a gross implies. The
+        # rate stops at the contract's agreed ceiling, as the commit's does:
+        # a preview that held the full rate past it would promise less net
+        # than the claim then pays.
+        from app.modules.contracts.service import ContractsService  # noqa: PLC0415
+
+        retention = await ContractsService(self.session).flat_claim_retention(contract, claim, gross)
         prior_paid = Decimal(str(await PrimeContractReader(self.session).paid_total(contract.id) or 0))
         net = max(gross - retention - prior_paid, Decimal("0"))
         return {

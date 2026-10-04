@@ -4147,8 +4147,9 @@ class ContractsService:
         gross = sum((Decimal(str(ln.period_completed_value or 0)) for ln in would_be), DEC_ZERO)
         figures = await self.claim_retention_figures(claim, contract=contract, lines=would_be)
         if figures is None:
-            pct = Decimal(str(contract.retention_percent or 0))
-            retention = (gross * pct / DEC_HUNDRED).quantize(Decimal("0.0001"))
+            # The flat rate within the contract's ceiling, exactly as the
+            # commit's roll_claim_retention writes it.
+            retention = await self.flat_claim_retention(contract, claim, gross)
             # Gross is this period's work, so net due is gross less retention.
             net = gross - retention
         else:
@@ -5255,6 +5256,39 @@ class ContractsService:
         except HTTPException:
             return contract_retention_cap(contract)
 
+    async def flat_claim_retention(self, contract: Contract, claim: Any, gross: Decimal) -> Decimal:
+        """Retention a flat-rate claim holds on ``gross``: the contract's rate, never past its ceiling.
+
+        The one place this figure is worked out, so the claim the commit writes
+        (:meth:`roll_claim_retention`) and the two previews of it (populate
+        from progress, and the subcontractor rollup) cannot disagree once the
+        ceiling binds.
+
+        The agreed ceiling is on what the contract holds in total, so the room
+        left is the ceiling less what the earlier claims accrued: a month that
+        reaches it leaves the next one nothing to hold. Earlier claims still in
+        draft count here, unlike for "previous certificates". A draft has
+        certified nothing, but its retention is already written, and leaving
+        it out let the next claim, raised while this one was still a draft,
+        hold up to the whole ceiling again, so the two together held twice the
+        limit once both were submitted. Rejected claims hold nothing and do
+        not count.
+        """
+        rate = Decimal(str(getattr(contract, "retention_percent", 0) or 0))
+        cap_percent = await self._flat_retention_cap(contract)
+        accrued_before = DEC_ZERO
+        if cap_percent is not None:
+            ordered = await self.claim_repo.ordered_for_contract(contract.id)
+            earlier = [c for c in claims_before(ordered, getattr(claim, "id", None)) if c.status != "rejected"]
+            accrued_before = sum((Decimal(str(c.retention_amount or 0)) for c in earlier), DEC_ZERO)
+        return flat_retention_within_cap(
+            gross,
+            rate,
+            cap_percent=cap_percent,
+            contract_sum=Decimal(str(getattr(contract, "total_value", 0) or 0)),
+            accrued_before=accrued_before,
+        )
+
     async def _progress_billing(self, contract: Contract) -> dict[str, Any] | None:
         """The progress billing block of the project's national pack, or None when none answers."""
         from app.core.regional_packs import resolve_progress_billing  # noqa: PLC0415
@@ -5456,23 +5490,7 @@ class ContractsService:
             # stopped retaining on the schedule, and the certificate carries
             # it on a row of its own that a release pays back like any other
             # retention (outside_schedule_retention_held).
-            rate = Decimal(str(getattr(contract, "retention_percent", 0) or 0))
-            # The agreed ceiling binds a flat claim too. It is a ceiling on what
-            # the contract holds in total, so the room left is the ceiling less
-            # what the earlier claims accrued: a month that reaches it leaves
-            # the next one nothing to hold.
-            cap_percent = await self._flat_retention_cap(contract)
-            accrued_before = DEC_ZERO
-            if cap_percent is not None:
-                earlier = await self.claim_repo.prior_claims(contract.id, before_claim_id=claim.id)
-                accrued_before = sum((Decimal(str(c.retention_amount or 0)) for c in earlier), DEC_ZERO)
-            retention = flat_retention_within_cap(
-                gross,
-                rate,
-                cap_percent=cap_percent,
-                contract_sum=Decimal(str(getattr(contract, "total_value", 0) or 0)),
-                accrued_before=accrued_before,
-            )
+            retention = await self.flat_claim_retention(contract, claim, gross)
             billed_here = await self.release_repo.billed_on_claims([claim.id])
             released_here = sum((Decimal(str(r.amount or 0)) for r in billed_here), DEC_ZERO)
             net = gross - retention + released_here
