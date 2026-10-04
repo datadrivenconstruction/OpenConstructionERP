@@ -798,12 +798,70 @@ def _keep_validation_rules_registered():
     engine = _eng.validation_engine
     registry = engine.registry
     register_builtin_rules()
+    _register_module_rule_sets()
     try:
         yield
     finally:
         _eng.validation_engine = engine
         engine.registry = registry
         register_builtin_rules()
+        _register_module_rule_sets()
+
+
+_MODULE_RULE_REGISTRARS: list | None = None
+
+
+def _module_rule_registrars() -> list:
+    """Every module's synchronous ``register_*rules`` function, found once per process.
+
+    The application registers a module's rule sets from that module's
+    ``on_startup`` (``pay_application`` from contracts, the schedule, funding,
+    payment clock sets and so on). No test process runs ``on_startup``, so before
+    this a module set existed only in the files that happened to call its
+    registrar themselves. Everywhere else the engine reported the set as
+    unsupported and returned a report with no findings, which reads exactly like
+    the rules having run and found nothing. Registering them here keeps each
+    test's registry as complete as the running product's.
+
+    Discovery is by name in each module's ``validators.py``: a module-level
+    function named ``register_...rules`` that takes no arguments and is not a
+    coroutine. That is the shape every module registrar has; anything else
+    (the compliance DSL loader reads a repository) is left alone.
+    """
+    global _MODULE_RULE_REGISTRARS
+    if _MODULE_RULE_REGISTRARS is not None:
+        return _MODULE_RULE_REGISTRARS
+    import importlib
+    import warnings
+    from pathlib import Path
+
+    import app.modules as _modules
+
+    registrars: list = []
+    for validators in sorted(Path(_modules.__file__).parent.glob("*/validators.py")):
+        module_name = f"app.modules.{validators.parent.name}.validators"
+        try:
+            module = importlib.import_module(module_name)
+        except Exception as exc:  # noqa: BLE001 - one broken module must not hide the rest
+            warnings.warn(f"could not import {module_name} to register its rules: {exc!r}", stacklevel=2)
+            continue
+        for name, func in vars(module).items():
+            if not (name.startswith("register_") and name.endswith("rules")):
+                continue
+            if not inspect.isfunction(func) or func.__module__ != module_name:
+                continue
+            if inspect.iscoroutinefunction(func):
+                continue
+            if any(p.default is inspect.Parameter.empty for p in inspect.signature(func).parameters.values()):
+                continue
+            registrars.append(func)
+    _MODULE_RULE_REGISTRARS = registrars
+    return registrars
+
+
+def _register_module_rule_sets() -> None:
+    for register in _module_rule_registrars():
+        register()
 
 
 @pytest.fixture

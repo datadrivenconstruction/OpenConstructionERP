@@ -40,6 +40,11 @@ EXPECTED_RULE_SETS = [
     # that came back. There is no single "rfq_bidding" set.
     "rfq_issue",
     "rfq_award",
+    # Registered by a module's on_startup, which no test process runs. The
+    # conftest guard calls every module registrar for that reason; before it
+    # did, these existed only in files that registered them by hand and every
+    # other file got a clean report from rules that never ran.
+    "pay_application",
 ]
 
 
