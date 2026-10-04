@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { AlertTriangle, CheckCircle2, Download, FileUp, Loader2, Ruler, X } from 'lucide-react';
 import { Badge, Button } from '@/shared/ui';
-import { fmtNumber } from '@/shared/lib/formatters';
+import { fmtList, fmtNumber } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import {
   applyX31,
@@ -507,7 +507,7 @@ export function GaebSiteExchangeDialog({
                             {u.quantity !== null && <span className="tabular-nums"> ({num(u.quantity, 3)})</span>}
                             {': '}
                             {unmatchedReason(t, u.reason)}
-                            {u.candidates && u.candidates.length > 0 && ` (${u.candidates.join(', ')})`}
+                            {u.candidates && u.candidates.length > 0 && ` (${fmtList(u.candidates)})`}
                           </li>
                         ))}
                       </ul>

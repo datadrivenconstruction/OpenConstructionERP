@@ -18,6 +18,7 @@ import { Button, Card, RecoveryCard, SkeletonTable } from '@/shared/ui';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { useToastStore } from '@/stores/useToastStore';
 import { getErrorMessage } from '@/shared/lib/api';
+import { fmtList } from '@/shared/lib/formatters';
 import {
   downloadClaimInvoice,
   previewClaimInvoice,
@@ -110,7 +111,7 @@ function warningLabel(t: TFunction, code: string, detail: string): string {
 
 function partyText(party: InvoiceParty): string {
   const place = [party.postcode, party.city].filter(Boolean).join(' ');
-  return [party.name, party.street, place, party.country].filter(Boolean).join(', ') || '-';
+  return fmtList([party.name, party.street, place, party.country]) || '-';
 }
 
 export function GaebInvoicePanel({ claimId, claimNumber }: { claimId: string; claimNumber: string }) {
