@@ -399,7 +399,7 @@ export function TaxQuotePanel({
         {error && (
           <span
             role="alert"
-            className="inline-flex items-center gap-1 text-xs text-status-error"
+            className="inline-flex items-center gap-1 text-xs text-semantic-error"
           >
             <AlertCircle size={12} aria-hidden="true" />
             {error}

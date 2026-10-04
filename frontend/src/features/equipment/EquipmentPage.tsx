@@ -999,7 +999,7 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
             {dashQ.data?.blocked && (
               <div
                 role="alert"
-                className="mx-5 mt-3 flex items-start gap-2 rounded-lg border border-status-error/30 bg-status-error/10 px-3 py-2 text-xs text-status-error"
+                className="mx-5 mt-3 flex items-start gap-2 rounded-lg border border-semantic-error/30 bg-semantic-error/10 px-3 py-2 text-xs text-semantic-error"
               >
                 <AlertTriangle size={14} className="mt-0.5 shrink-0" />
                 <span>
@@ -2031,7 +2031,7 @@ function CertificationsTab({
                       className={clsx(
                         'px-3 py-2',
                         expired
-                          ? 'text-status-error font-medium'
+                          ? 'text-semantic-error font-medium'
                           : 'text-content-secondary',
                       )}
                     >

@@ -293,7 +293,7 @@ export function AISmartPanel({
         </div>
         <button
           onClick={onClose}
-          className="p-1.5 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 text-text-muted hover:text-red-600 dark:hover:text-red-400 transition-colors"
+          className="p-1.5 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 text-content-tertiary hover:text-red-600 dark:hover:text-red-400 transition-colors"
           aria-label={t('common.close', { defaultValue: 'Close' })}
         >
           <X size={18} />
@@ -304,16 +304,16 @@ export function AISmartPanel({
       <div className="px-4 py-2 border-b border-border-light bg-surface-secondary/50 shrink-0">
         {selectedPosition ? (
           <div>
-            <p className="text-xs text-text-muted">
+            <p className="text-xs text-content-tertiary">
               {t('boq.ai_selected_position', { defaultValue: 'Selected Position' })}
             </p>
             <p className="text-sm font-medium truncate">{selectedPosition.description || '—'}</p>
-            <p className="text-xs text-text-muted">
+            <p className="text-xs text-content-tertiary">
               {selectedPosition.unit} | {fmtWithCurrency(selectedPosition.unit_rate, locale, currencyCode)}
             </p>
           </div>
         ) : (
-          <p className="text-xs text-text-muted italic">
+          <p className="text-xs text-content-tertiary italic">
             {t('boq.ai_no_selection', { defaultValue: 'Select a position in the grid for per-position AI actions' })}
           </p>
         )}
@@ -372,7 +372,7 @@ export function AISmartPanel({
       {/* Actions */}
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
         {/* ── Per-position actions ─────────────────────────────────────── */}
-        <div className="text-xs font-semibold text-text-muted uppercase tracking-wider">
+        <div className="text-xs font-semibold text-content-tertiary uppercase tracking-wider">
           {t('boq.ai_position_actions', { defaultValue: 'Position Actions' })}
         </div>
 
@@ -395,12 +395,12 @@ export function AISmartPanel({
               </div>
               {enhanceResult.specifications.length > 0 && (
                 <div>
-                  <p className="text-xs font-medium text-text-muted mb-1">
+                  <p className="text-xs font-medium text-content-tertiary mb-1">
                     {t('boq.ai_specs', { defaultValue: 'Specifications' })}
                   </p>
                   <ul className="text-xs space-y-0.5">
                     {enhanceResult.specifications.map((s, i) => (
-                      <li key={`spec-${s.slice(0, 30)}-${i}`} className="text-text-secondary">• {s}</li>
+                      <li key={`spec-${s.slice(0, 30)}-${i}`} className="text-content-secondary">• {s}</li>
                     ))}
                   </ul>
                 </div>
@@ -449,10 +449,10 @@ export function AISmartPanel({
                     </span>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium leading-tight">{item.description}</p>
-                      <p className="text-[10px] text-text-muted mt-0.5">
+                      <p className="text-[10px] text-content-tertiary mt-0.5">
                         {item.unit} | {fmtWithCurrency(item.typical_rate_eur, locale, currencyCode)}
                       </p>
-                      <p className="text-[10px] text-text-muted italic mt-0.5">{item.reason}</p>
+                      <p className="text-[10px] text-content-tertiary italic mt-0.5">{item.reason}</p>
                     </div>
                   </div>
                   <button
@@ -467,7 +467,7 @@ export function AISmartPanel({
             </div>
           )}
           {prereqResult && prereqResult.suggestions.length === 0 && (
-            <p className="text-xs text-text-muted italic">
+            <p className="text-xs text-content-tertiary italic">
               {t('boq.ai_no_prereqs', { defaultValue: 'No missing items found - BOQ looks complete for this position.' })}
             </p>
           )}
@@ -489,12 +489,12 @@ export function AISmartPanel({
             <div className="space-y-2">
               <div className="flex items-center gap-3 p-2 rounded bg-surface-secondary">
                 <div className="text-center">
-                  <p className="text-[10px] text-text-muted">{t('boq.ai_original', { defaultValue: 'Original' })}</p>
+                  <p className="text-[10px] text-content-tertiary">{t('boq.ai_original', { defaultValue: 'Original' })}</p>
                   <p className="text-sm font-mono">{fmtWithCurrency(escalateResult.original_rate, locale, currencyCode)}</p>
                 </div>
                 <ArrowUpRight size={16} className="text-green-500 shrink-0" />
                 <div className="text-center">
-                  <p className="text-[10px] text-text-muted">{t('boq.ai_escalated', { defaultValue: 'Escalated' })}</p>
+                  <p className="text-[10px] text-content-tertiary">{t('boq.ai_escalated', { defaultValue: 'Escalated' })}</p>
                   <p className="text-sm font-mono font-bold text-green-600 dark:text-green-400">
                     {fmtWithCurrency(escalateResult.escalated_rate, locale, currencyCode)}
                   </p>
@@ -509,7 +509,7 @@ export function AISmartPanel({
                 <FactorBadge label={t('boq.ai_factor_labor', { defaultValue: 'Labor' })} value={escalateResult.factors.labor_cost_change} />
                 <FactorBadge label={t('boq.ai_factor_region', { defaultValue: 'Regional' })} value={escalateResult.factors.regional_adjustment} />
               </div>
-              <p className="text-[10px] text-text-muted italic">{escalateResult.reasoning}</p>
+              <p className="text-[10px] text-content-tertiary italic">{escalateResult.reasoning}</p>
               <div className="flex items-center gap-2">
                 <ConfidenceBadge level={escalateResult.confidence} />
                 <Button size="sm" variant="primary" icon={<Zap size={13} />} onClick={applyEscalatedRate}>
@@ -522,7 +522,7 @@ export function AISmartPanel({
 
         {/* Divider */}
         <div className="border-t border-border-light pt-3">
-          <div className="text-xs font-semibold text-text-muted uppercase tracking-wider">
+          <div className="text-xs font-semibold text-content-tertiary uppercase tracking-wider">
             {t('boq.ai_global_actions', { defaultValue: 'BOQ-level Actions' })}
           </div>
         </div>
@@ -562,7 +562,7 @@ export function AISmartPanel({
                   <p className="text-sm font-medium">
                     {t('boq.ai_scope_score', { defaultValue: 'Completeness Score' })}
                   </p>
-                  <p className="text-xs text-text-muted">{scopeResult.summary}</p>
+                  <p className="text-xs text-content-tertiary">{scopeResult.summary}</p>
                 </div>
               </div>
 
@@ -581,7 +581,7 @@ export function AISmartPanel({
               {/* Missing items */}
               {scopeResult.missing_items.length > 0 && (
                 <div className="space-y-1.5">
-                  <p className="text-xs font-medium text-text-muted">
+                  <p className="text-xs font-medium text-content-tertiary">
                     {t('boq.ai_missing_items', { defaultValue: 'Missing Items' })} ({scopeResult.missing_items.length})
                   </p>
                   {scopeResult.missing_items.map((item, i) => (
@@ -598,9 +598,9 @@ export function AISmartPanel({
                         </span>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-medium leading-tight">{item.description}</p>
-                          <p className="text-[10px] text-text-muted mt-0.5">{item.category}</p>
-                          <p className="text-[10px] text-text-muted italic">{item.reason}</p>
-                          <p className="text-[10px] text-text-secondary mt-0.5">
+                          <p className="text-[10px] text-content-tertiary mt-0.5">{item.category}</p>
+                          <p className="text-[10px] text-content-tertiary italic">{item.reason}</p>
+                          <p className="text-[10px] text-content-secondary mt-0.5">
                             {item.unit} | ~{fmtWithCurrency(item.estimated_rate, locale, currencyCode)}
                           </p>
                         </div>
@@ -622,7 +622,7 @@ export function AISmartPanel({
       </div>
 
       {/* Footer */}
-      <div className="shrink-0 px-4 py-2 border-t border-border-light text-[10px] text-text-muted">
+      <div className="shrink-0 px-4 py-2 border-t border-border-light text-[10px] text-content-tertiary">
         <div className="flex items-center gap-1">
           <Sparkles size={10} />
           {t('boq.ai_smart_footer', { defaultValue: 'Powered by your AI provider (Settings > AI). Results are suggestions - always review.' })}
@@ -655,7 +655,7 @@ function ActionCard({ icon, title, subtitle, loading, disabled, onClick, expande
         <div className="shrink-0 text-primary">{icon}</div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium">{title}</p>
-          <p className="text-[10px] text-text-muted truncate">{subtitle}</p>
+          <p className="text-[10px] text-content-tertiary truncate">{subtitle}</p>
         </div>
         <button
           onClick={onClick}
@@ -697,8 +697,8 @@ function ActionCard({ icon, title, subtitle, loading, disabled, onClick, expande
 function FactorBadge({ label, value }: { label: string; value: number }) {
   return (
     <div className="px-2 py-1 rounded bg-surface-secondary text-center">
-      <p className="text-[10px] text-text-muted">{label}</p>
-      <p className={`text-xs font-bold ${value > 0 ? 'text-red-500' : value < 0 ? 'text-green-500' : 'text-text-secondary'}`}>
+      <p className="text-[10px] text-content-tertiary">{label}</p>
+      <p className={`text-xs font-bold ${value > 0 ? 'text-red-500' : value < 0 ? 'text-green-500' : 'text-content-secondary'}`}>
         {value > 0 ? '+' : ''}{value}%
       </p>
     </div>

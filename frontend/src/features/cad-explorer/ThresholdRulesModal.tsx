@@ -99,8 +99,8 @@ export function ThresholdRulesModal({
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-6 pb-4 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-primary/10">
-              <Palette size={20} className="text-accent-primary" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue/10">
+              <Palette size={20} className="text-oe-blue" />
             </div>
             <div>
               <h2 className="text-lg font-semibold text-content-primary">

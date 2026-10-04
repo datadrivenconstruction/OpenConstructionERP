@@ -535,14 +535,14 @@ export function ReconciliationPage() {
             <>
               <div className="flex flex-wrap items-center gap-2 text-xs text-content-tertiary">
                 <span className="inline-flex items-center gap-1">
-                  <CircleCheck className="h-3.5 w-3.5 text-status-success" />
+                  <CircleCheck className="h-3.5 w-3.5 text-semantic-success" />
                   {t('reconciliation.confirmed_count', {
                     defaultValue: '{{count}} confirmed',
                     count: thread.confirmed_count,
                   })}
                 </span>
                 <span className="inline-flex items-center gap-1">
-                  <CircleX className="h-3.5 w-3.5 text-status-error" />
+                  <CircleX className="h-3.5 w-3.5 text-semantic-error" />
                   {t('reconciliation.rejected_count', {
                     defaultValue: '{{count}} rejected',
                     count: thread.rejected_count,
@@ -619,7 +619,7 @@ export function ReconciliationPage() {
         {decisionsQuery.isLoading ? (
           <SkeletonTable rows={2} />
         ) : decisionsQuery.isError ? (
-          <p className="text-sm text-status-error">{getErrorMessage(decisionsQuery.error)}</p>
+          <p className="text-sm text-semantic-error">{getErrorMessage(decisionsQuery.error)}</p>
         ) : !decisionsQuery.data || decisionsQuery.data.length === 0 ? (
           <EmptyState
             icon={<CircleCheck className="h-6 w-6" />}

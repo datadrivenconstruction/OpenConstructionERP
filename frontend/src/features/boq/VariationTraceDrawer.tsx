@@ -213,7 +213,7 @@ export function VariationTraceDrawer({
       subtitle={`${position.ordinal} ${position.description}`.trim()}
       busy={busy}
     >
-      <div className="space-y-5">
+      <div className="space-y-5 px-5 py-4">
         <p className="text-xs text-content-secondary">
           {t('boq.variation_trace_intro', {
             defaultValue:

@@ -39,6 +39,8 @@ import { SideDrawer } from '@/shared/ui';
 import { boqApi } from './api';
 import type { MeasurementLineInput, MeasurementLineResult, MeasurementSheet, Position } from './api';
 import { normalizeDecimalSeparators, parseDecimalInput } from '@/shared/lib/parseDecimal';
+import { formatValue } from '@/shared/lib/numberFormat';
+import { localizedUnitCode } from '@/shared/lib/unitLabels';
 
 /** One row as it is typed. Everything is a string: a half-typed "3." is not a number yet. */
 interface Row {
@@ -100,6 +102,20 @@ function invalidFields(row: Row): string[] {
   );
 }
 
+/**
+ * A quantity the server computed, written the way the reader writes numbers.
+ *
+ * Only for figures nobody types into: the inputs above stay in the form they
+ * were typed, and these are the subtotals and totals the server sends back as
+ * dot-decimal strings, which a German reader would otherwise read as
+ * "10602.000" next to a bill that writes "10.602,00".
+ */
+function fmtQuantity(value: string | number | null | undefined): string {
+  if (value === null || value === undefined || value === '') return '';
+  const n = Number(value);
+  return Number.isFinite(n) ? formatValue(n, 'number', { maximumFractionDigits: 3 }) : String(value);
+}
+
 function toLine(row: Row): MeasurementLineInput {
   // Sent in canonical dot form: the server parses with Decimal(), which reads
   // neither a decimal comma nor a thousands separator.
@@ -112,8 +128,10 @@ function toLine(row: Row): MeasurementLineInput {
     description: row.description.trim(),
     // A row with nothing measured yet still has to be a valid expression, or
     // the whole sheet comes back as one error and the rows above it lose their
-    // subtotals while somebody is still typing into the row below.
-    formula: row.formula.trim() || deriveFormula(row) || '0',
+    // subtotals while somebody is still typing into the row below. A row with
+    // a count and no dimension is a count of pieces (64 WC cubicles, 12
+    // doors), so it measures as that many, not as that many times nothing.
+    formula: row.formula.trim() || deriveFormula(row) || (row.units.trim() ? '1' : '0'),
     variables,
     factor: row.units.trim() ? num(row.units) : '1',
     sign: row.sign,
@@ -145,6 +163,12 @@ function fromLine(line: MeasurementLineResult): Row {
   };
   const derived = deriveFormula(row);
   const stored = (line.formula || '').replace(/\s+/g, ' ').trim();
+  if (stored === '1' && !derived) {
+    // A count of pieces: the count is the whole measurement, so it goes back
+    // into its column even when it is 1, or the row would reload as empty.
+    row.units = line.factor ? String(line.factor) : '1';
+    return row;
+  }
   if (stored && stored !== derived) {
     row.formula = line.formula;
     row.length = '';
@@ -171,7 +195,7 @@ export function MeasurementDrawer({
   readOnly = false,
   saving = false,
 }: MeasurementDrawerProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const positionId = position?.id ?? null;
   const [rows, setRows] = useState<Row[]>([]);
   const [loadedFor, setLoadedFor] = useState<string | null>(null);
@@ -246,6 +270,7 @@ export function MeasurementDrawer({
   const total = sheet?.total_quantity ?? '';
   const current = position ? String(position.quantity ?? '') : '';
   const matches = sheet?.reconciliation?.matches ?? false;
+  const unit = position?.unit ? localizedUnitCode(position.unit, i18n.language) : '';
   const measured = Number(total);
   const canSave =
     !readOnly &&
@@ -257,8 +282,8 @@ export function MeasurementDrawer({
 
   const numberCell =
     'w-full rounded border border-border-light bg-surface-primary px-2 py-1 text-right text-xs ' +
-    'tabular-nums focus:border-accent-primary focus:outline-none disabled:opacity-60 ' +
-    'aria-[invalid=true]:border-status-error aria-[invalid=true]:text-status-error';
+    'tabular-nums focus:border-border-focus focus:outline-none disabled:opacity-60 ' +
+    'aria-[invalid=true]:border-semantic-error aria-[invalid=true]:text-semantic-error';
 
   return (
     <SideDrawer
@@ -269,7 +294,7 @@ export function MeasurementDrawer({
       subtitle={position ? `${position.ordinal} ${position.description}` : undefined}
       busy={saving}
     >
-      <div className="space-y-4">
+      <div className="space-y-4 px-5 py-4">
         <p className="text-xs text-content-secondary">{t('boq.measurement.intro')}</p>
 
         <div className="overflow-x-auto">
@@ -311,7 +336,7 @@ export function MeasurementDrawer({
                         onChange={(e) => patch(index, 'description', e.target.value)}
                         disabled={readOnly}
                         placeholder={t('boq.measurement.description_placeholder')}
-                        className="w-full rounded border border-border-light bg-surface-primary px-2 py-1 text-xs focus:border-accent-primary focus:outline-none disabled:opacity-60"
+                        className="w-full rounded border border-border-light bg-surface-primary px-2 py-1 text-xs focus:border-border-focus focus:outline-none disabled:opacity-60"
                       />
                       {row.formula && (
                         // Shown, not hidden: this row came from a sheet whose
@@ -322,11 +347,11 @@ export function MeasurementDrawer({
                           onChange={(e) => patch(index, 'formula', e.target.value)}
                           disabled={readOnly}
                           aria-label={t('boq.measurement.formula')}
-                          className="mt-1 w-full rounded border border-border-light bg-surface-secondary px-2 py-1 font-mono text-[11px] focus:border-accent-primary focus:outline-none disabled:opacity-60"
+                          className="mt-1 w-full rounded border border-border-light bg-surface-secondary px-2 py-1 font-mono text-[11px] focus:border-border-focus focus:outline-none disabled:opacity-60"
                         />
                       )}
                       {line?.error && (
-                        <p className="mt-1 text-[11px] text-status-error">{line.error}</p>
+                        <p className="mt-1 text-[11px] text-semantic-error">{line.error}</p>
                       )}
                     </td>
                     <td className="px-2 py-1">
@@ -387,7 +412,7 @@ export function MeasurementDrawer({
                         }
                         className={`inline-flex h-6 w-6 items-center justify-center rounded border ${
                           row.sign === '-'
-                            ? 'border-status-error text-status-error'
+                            ? 'border-semantic-error text-semantic-error'
                             : 'border-border-light text-content-secondary'
                         } disabled:opacity-60`}
                       >
@@ -395,7 +420,7 @@ export function MeasurementDrawer({
                       </button>
                     </td>
                     <td className="px-2 py-1 text-right tabular-nums">
-                      {line && !line.error ? line.quantity : ''}
+                      {line && !line.error ? fmtQuantity(line.quantity) : ''}
                     </td>
                     <td className="px-2 py-1 text-right">
                       <button
@@ -403,7 +428,7 @@ export function MeasurementDrawer({
                         disabled={readOnly || rows.length === 1}
                         onClick={() => setRows((prev) => prev.filter((_, i) => i !== index))}
                         aria-label={t('boq.measurement.remove_line')}
-                        className="text-content-secondary hover:text-status-error disabled:opacity-40"
+                        className="text-content-secondary hover:text-semantic-error disabled:opacity-40"
                       >
                         <Trash2 size={13} />
                       </button>
@@ -428,7 +453,7 @@ export function MeasurementDrawer({
           <div className="flex items-baseline justify-between">
             <span className="text-xs text-content-secondary">{t('boq.measurement.total')}</span>
             <span className="text-lg font-semibold tabular-nums">
-              {total || '—'} {position?.unit}
+              {total ? fmtQuantity(total) : '-'} {unit}
             </span>
           </div>
           <div className="mt-1 flex items-baseline justify-between">
@@ -436,16 +461,16 @@ export function MeasurementDrawer({
               {t('boq.measurement.current_quantity')}
             </span>
             <span className="text-xs tabular-nums text-content-secondary">
-              {current} {position?.unit}
+              {fmtQuantity(current)} {unit}
             </span>
           </div>
           {sheet?.reconciliation && !matches && (
-            <p className="mt-2 text-xs text-status-warning">
-              {t('boq.measurement.differs', { difference: sheet.reconciliation.difference })}
+            <p className="mt-2 text-xs text-semantic-warning">
+              {t('boq.measurement.differs', { difference: fmtQuantity(sheet.reconciliation.difference) })}
             </p>
           )}
           {sheet?.has_errors && (
-            <p className="mt-2 text-xs text-status-error">{t('boq.measurement.has_errors')}</p>
+            <p className="mt-2 text-xs text-semantic-error">{t('boq.measurement.has_errors')}</p>
           )}
         </div>
 
@@ -461,7 +486,7 @@ export function MeasurementDrawer({
             type="button"
             disabled={!canSave}
             onClick={() => onSave(measured, payload)}
-            className="rounded-lg bg-accent-primary px-3 py-2 text-xs font-medium text-white disabled:opacity-50"
+            className="rounded-lg bg-oe-blue px-3 py-2 text-xs font-medium text-content-inverse hover:bg-oe-blue-hover disabled:opacity-50"
           >
             {t('boq.measurement.apply')}
           </button>

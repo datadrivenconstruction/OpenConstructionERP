@@ -283,7 +283,7 @@ function ScheduleRow({
             disabled={busy}
             onClick={onDelete}
             title={t('common.delete', { defaultValue: 'Delete' })}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border-light text-status-error transition-colors hover:border-status-error disabled:opacity-50"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-border-light text-semantic-error transition-colors hover:border-semantic-error disabled:opacity-50"
           >
             <Trash2 size={14} />
           </button>

@@ -123,9 +123,9 @@ function TicketChip({ cert }: { cert: RosterMember['certifications'][number] }) 
       className={clsx(
         'inline-flex max-w-[13rem] items-center gap-1 truncate rounded px-1.5 py-0.5 text-2xs',
         cert.expired
-          ? 'bg-status-danger-subtle text-status-danger-text'
+          ? 'bg-semantic-error-bg text-semantic-error'
           : soon
-            ? 'bg-status-warning-subtle text-status-warning-text'
+            ? 'bg-semantic-warning-bg text-semantic-warning'
             : 'bg-surface-tertiary text-content-tertiary',
       )}
     >
@@ -898,7 +898,7 @@ function EditMemberModal({
                 type="button"
                 onClick={() => setCerts((prev) => prev.filter((_, j) => j !== i))}
                 aria-label={t('teams.roster_ticket_remove', 'Remove this ticket')}
-                className="p-1 text-content-tertiary hover:text-status-danger-text"
+                className="p-1 text-content-tertiary hover:text-semantic-error"
               >
                 <Trash2 size={14} />
               </button>
@@ -1182,7 +1182,7 @@ export function RosterTab({ projectId }: { projectId: string }) {
                     <span
                       className={clsx(
                         'block text-2xs',
-                        m.off_window ? 'text-status-warning-text' : 'text-content-tertiary',
+                        m.off_window ? 'text-semantic-warning' : 'text-content-tertiary',
                       )}
                     >
                       {m.starts_on || m.ends_on
@@ -1190,7 +1190,7 @@ export function RosterTab({ projectId }: { projectId: string }) {
                         : '—'}
                     </span>
                     {m.off_window ? (
-                      <span className="inline-flex items-center gap-1 text-2xs text-status-warning-text">
+                      <span className="inline-flex items-center gap-1 text-2xs text-semantic-warning">
                         <CalendarClock size={10} />
                         {t('teams.roster_off_window', 'Outside their dates')}
                       </span>
@@ -1237,7 +1237,7 @@ export function RosterTab({ projectId }: { projectId: string }) {
                         <button
                           type="button"
                           onClick={() => removal.mutate(m.id)}
-                          className="text-2xs font-medium text-status-danger-text hover:underline"
+                          className="text-2xs font-medium text-semantic-error hover:underline"
                         >
                           {t('teams.roster_confirm_remove', 'Remove')}
                         </button>
@@ -1263,7 +1263,7 @@ export function RosterTab({ projectId }: { projectId: string }) {
                           type="button"
                           onClick={() => setConfirmId(m.id)}
                           aria-label={t('teams.roster_remove', 'Take off the roster')}
-                          className="p-1 text-content-tertiary hover:text-status-danger-text"
+                          className="p-1 text-content-tertiary hover:text-semantic-error"
                         >
                           <Trash2 size={14} />
                         </button>

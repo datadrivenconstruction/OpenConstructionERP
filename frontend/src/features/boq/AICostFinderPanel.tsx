@@ -184,7 +184,7 @@ export function AICostFinderPanel({
         </div>
         <button
           onClick={onClose}
-          className="p-1.5 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 text-text-muted hover:text-red-600 dark:hover:text-red-400 transition-colors"
+          className="p-1.5 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 text-content-tertiary hover:text-red-600 dark:hover:text-red-400 transition-colors"
           aria-label={t('common.close', { defaultValue: 'Close' })}
         >
           <X size={18} />
@@ -196,7 +196,7 @@ export function AICostFinderPanel({
         <div className="relative">
           <Search
             size={14}
-            className="absolute start-2.5 top-1/2 -translate-y-1/2 text-text-muted"
+            className="absolute start-2.5 top-1/2 -translate-y-1/2 text-content-tertiary"
           />
           <input
             ref={inputRef}
@@ -248,7 +248,7 @@ export function AICostFinderPanel({
       <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2">
         {/* Loading */}
         {isLoading && debouncedQuery.length >= 2 && (
-          <div className="flex items-center justify-center py-8 text-text-muted text-sm">
+          <div className="flex items-center justify-center py-8 text-content-tertiary text-sm">
             <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full mr-2" />
             {t('common.loading', { defaultValue: 'Searching...' })}
           </div>
@@ -263,7 +263,7 @@ export function AICostFinderPanel({
 
         {/* Empty query */}
         {!isLoading && !isError && debouncedQuery.length < 2 && (
-          <div className="text-center py-8 text-text-muted text-sm">
+          <div className="text-center py-8 text-content-tertiary text-sm">
             {t('boq.cost_finder_no_query', {
               defaultValue: 'Enter a description to search the cost database',
             })}
@@ -272,7 +272,7 @@ export function AICostFinderPanel({
 
         {/* No results */}
         {!isLoading && !isError && debouncedQuery.length >= 2 && results.length === 0 && data && (
-          <div className="text-center py-8 text-text-muted text-sm">
+          <div className="text-center py-8 text-content-tertiary text-sm">
             {t('boq.cost_finder_no_results', { defaultValue: 'No matching items found' })}
           </div>
         )}
@@ -297,7 +297,7 @@ export function AICostFinderPanel({
       </div>
 
       {/* ── Footer ───────────────────────────────────────────────── */}
-      <div className="shrink-0 px-4 py-2 border-t border-border-light text-xs text-text-muted">
+      <div className="shrink-0 px-4 py-2 border-t border-border-light text-xs text-content-tertiary">
         {data && debouncedQuery.length >= 2 && (
           <span>
             {t('boq.cost_finder_results_count', {
@@ -308,7 +308,7 @@ export function AICostFinderPanel({
           </span>
         )}
         {selectedPosition && (
-          <div className="truncate mt-0.5 text-text-secondary">
+          <div className="truncate mt-0.5 text-content-secondary">
             {t('boq.cost_finder_for_position', {
               defaultValue: 'For: {{description}}',
               description: selectedPosition.description?.slice(0, 50) ?? '',
@@ -360,13 +360,13 @@ function ResultCard({
           <p className="text-sm font-medium leading-tight line-clamp-2">
             {item.description}
           </p>
-          <div className="flex items-center gap-2 mt-1 text-xs text-text-muted">
+          <div className="flex items-center gap-2 mt-1 text-xs text-content-tertiary">
             <span>{item.unit}</span>
-            <span className="text-text-muted">|</span>
-            <span className="font-semibold text-text-primary">
+            <span className="text-content-tertiary">|</span>
+            <span className="font-semibold text-content-primary">
               {fmtWithCurrency(item.rate, locale, currencyCode)}
             </span>
-            <span className="text-text-muted">|</span>
+            <span className="text-content-tertiary">|</span>
             <span
               className="font-mono text-2xs text-content-quaternary truncate max-w-[80px]"
               title={item.code}
@@ -374,7 +374,7 @@ function ResultCard({
               {item.code}
             </span>
           </div>
-          <div className="text-[10px] text-text-muted mt-0.5">
+          <div className="text-[10px] text-content-tertiary mt-0.5">
             {item.region}
           </div>
         </div>
@@ -386,7 +386,7 @@ function ResultCard({
           type="button"
           onClick={onToggleExpand}
           aria-expanded={expanded}
-          className="flex items-center gap-1 mt-2 text-xs text-text-muted hover:text-text-primary transition-colors"
+          className="flex items-center gap-1 mt-2 text-xs text-content-tertiary hover:text-content-primary transition-colors"
         >
           {expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
           {t('boq.cost_finder_components', {
@@ -398,7 +398,7 @@ function ResultCard({
       {expanded && hasComponents && (
         <div className="mt-1 ml-4 space-y-0.5">
           {item.components.map((c, i) => (
-            <div key={`${c.description}-${c.unit}-${i}`} className="text-xs text-text-muted flex justify-between">
+            <div key={`${c.description}-${c.unit}-${i}`} className="text-xs text-content-tertiary flex justify-between">
               <span className="truncate mr-2">{c.description}</span>
               <span className="shrink-0">
                 {c.unit} {fmtWithCurrency(c.rate, locale, currencyCode)}

@@ -154,7 +154,7 @@ function MatrixCell({
     state === 'allowed' && 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100',
     state === 'denied' && 'text-rose-500 bg-rose-50 hover:bg-rose-100',
     state === 'admin-bypass' && 'text-amber-700 bg-amber-50 hover:bg-amber-100',
-    editable && 'cursor-pointer hover:ring-2 hover:ring-accent-primary/50 focus:outline-none focus:ring-2 focus:ring-accent-primary',
+    editable && 'cursor-pointer hover:ring-2 hover:ring-oe-blue/50 focus:outline-none focus:ring-2 focus:ring-oe-blue',
     !editable && 'cursor-default',
     pending && 'opacity-60',
   );
@@ -315,7 +315,7 @@ function ModuleRows({
         <th
           scope="rowgroup"
           colSpan={roles.length + 1}
-          className="px-3 py-2 text-left text-sm font-semibold text-text-primary"
+          className="px-3 py-2 text-left text-sm font-semibold text-content-primary"
         >
           <div className="flex items-center gap-2">
             {/* Per-group tri-state "grant all / none" for the selected role */}
@@ -358,10 +358,10 @@ function ModuleRows({
                         })
               }
               className={clsx(
-                'flex items-center justify-center rounded p-0.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary',
+                'flex items-center justify-center rounded p-0.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue',
                 checkboxActionable
-                  ? 'text-accent-primary hover:bg-accent-primary/10 cursor-pointer'
-                  : 'text-text-quaternary cursor-not-allowed opacity-60',
+                  ? 'text-oe-blue hover:bg-oe-blue/10 cursor-pointer'
+                  : 'text-content-quaternary cursor-not-allowed opacity-60',
               )}
             >
               {bulkPending ? (
@@ -375,7 +375,7 @@ function ModuleRows({
               type="button"
               onClick={onToggle}
               id={headerId}
-              className="flex flex-1 items-center gap-2 hover:text-accent-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary rounded text-left"
+              className="flex flex-1 items-center gap-2 hover:text-oe-blue focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue rounded text-left"
               data-testid={`module-toggle-${module.name}`}
               aria-expanded={!collapsed}
             >
@@ -385,10 +385,10 @@ function ModuleRows({
                 <ChevronDown size={16} aria-hidden />
               )}
               <span className="font-semibold">{friendlyName}</span>
-              <span className="font-mono text-[11px] font-normal text-text-tertiary">
+              <span className="font-mono text-[11px] font-normal text-content-tertiary">
                 {module.name}
               </span>
-              <span className="ml-auto text-xs text-text-tertiary font-normal tabular-nums">
+              <span className="ml-auto text-xs text-content-tertiary font-normal tabular-nums">
                 {selectedRole
                   ? t('admin.permissions.group_granted_count', {
                       defaultValue: '{{granted}} / {{total}} granted',
@@ -416,16 +416,16 @@ function ModuleRows({
             <th
               scope="row"
               className={clsx(
-                'sticky left-0 z-10 bg-surface-elevated px-3 py-2 pl-9 text-left text-sm text-text-secondary',
+                'sticky left-0 z-10 bg-surface-elevated px-3 py-2 pl-9 text-left text-sm text-content-secondary',
                 'border-r border-border-light',
               )}
             >
               {/* Action is the primary, readable label; the full dotted
                   key is muted, monospaced secondary text. */}
-              <span className="block truncate max-w-[280px] font-medium text-text-primary" title={permissionAction(perm.key)}>
+              <span className="block truncate max-w-[280px] font-medium text-content-primary" title={permissionAction(perm.key)}>
                 {permissionAction(perm.key)}
               </span>
-              <span className="block truncate max-w-[280px] font-mono text-[10px] text-text-tertiary" title={perm.key}>
+              <span className="block truncate max-w-[280px] font-mono text-[10px] text-content-tertiary" title={perm.key}>
                 {perm.key}
                 <span className="ml-1.5 uppercase tracking-wider">
                   · {t('admin.permissions.min_role_label', { defaultValue: 'min' })}: {perm.min_role}
@@ -444,7 +444,7 @@ function ModuleRows({
                 });
                 return (
                   <span
-                    className="mt-0.5 block max-w-[280px] text-[11px] leading-snug text-text-tertiary line-clamp-2 font-normal normal-case"
+                    className="mt-0.5 block max-w-[280px] text-[11px] leading-snug text-content-tertiary line-clamp-2 font-normal normal-case"
                     title={desc}
                   >
                     {desc}
@@ -478,7 +478,7 @@ function ModuleRows({
                   key={role}
                   className={clsx(
                     'px-2 py-2 text-center transition-colors',
-                    hoveredRole === role && 'bg-accent-primary/10',
+                    hoveredRole === role && 'bg-oe-blue/10',
                   )}
                 >
                   <MatrixCell
@@ -504,7 +504,7 @@ function ModuleRows({
         <tr className="border-b border-border-light last:border-0">
           <td
             colSpan={roles.length + 1}
-            className="px-3 py-2 pl-9 text-left text-xs italic text-text-tertiary"
+            className="px-3 py-2 pl-9 text-left text-xs italic text-content-tertiary"
           >
             {selectedRole
               ? t('admin.permissions.group_all_granted', {
@@ -1218,7 +1218,7 @@ export function PermissionsMatrixPage() {
               <button
                 type="button"
                 onClick={handleExportCsv}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-white/40 bg-white/70 px-3 py-1.5 text-sm font-medium text-text-secondary hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-white/40 bg-white/70 px-3 py-1.5 text-sm font-medium text-content-secondary hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-oe-blue"
                 data-testid="permissions-matrix-export-csv"
               >
                 <Download size={14} aria-hidden />
@@ -1229,10 +1229,10 @@ export function PermissionsMatrixPage() {
                   type="button"
                   onClick={() => setEditMode((v) => !v)}
                   className={clsx(
-                    'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-accent-primary',
+                    'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-oe-blue',
                     canEdit
                       ? 'bg-amber-500 text-white hover:bg-amber-600'
-                      : 'border border-white/40 bg-white/70 text-text-secondary hover:bg-white/90',
+                      : 'border border-white/40 bg-white/70 text-content-secondary hover:bg-white/90',
                   )}
                   data-testid="permissions-matrix-edit-toggle"
                   aria-pressed={canEdit}
@@ -1252,7 +1252,7 @@ export function PermissionsMatrixPage() {
             <div className="relative flex-1 min-w-[240px] max-w-md">
               <Search
                 size={16}
-                className="absolute start-3 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none"
+                className="absolute start-3 top-1/2 -translate-y-1/2 text-content-tertiary pointer-events-none"
                 aria-hidden
               />
               <input
@@ -1266,18 +1266,18 @@ export function PermissionsMatrixPage() {
                   defaultValue: 'Search permissions',
                 })}
                 data-testid="permissions-matrix-search"
-                className="w-full ps-9 pe-3 py-2 text-sm border border-border-light rounded-md bg-white/80 focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                className="w-full ps-9 pe-3 py-2 text-sm border border-border-light rounded-md bg-white/80 focus:outline-none focus:ring-2 focus:ring-oe-blue"
               />
             </div>
-            <label className="flex items-center gap-2 text-sm text-text-secondary">
-              <span className="text-xs uppercase tracking-wider text-text-tertiary">
+            <label className="flex items-center gap-2 text-sm text-content-secondary">
+              <span className="text-xs uppercase tracking-wider text-content-tertiary">
                 {t('admin.permissions.role_filter_label', { defaultValue: 'Role' })}
               </span>
               <select
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value as MatrixRole | 'all')}
                 data-testid="permissions-matrix-role-filter"
-                className="px-2 py-1.5 text-sm border border-border-light rounded-md bg-white/80 focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                className="px-2 py-1.5 text-sm border border-border-light rounded-md bg-white/80 focus:outline-none focus:ring-2 focus:ring-oe-blue"
               >
                 <option value="all">
                   {t('admin.permissions.role_filter_all', { defaultValue: 'All roles' })}
@@ -1294,7 +1294,7 @@ export function PermissionsMatrixPage() {
             </label>
             {canEdit && data?.presets && data.presets.length > 0 && (
               <div className="flex items-center gap-1.5 ml-auto">
-                <span className="text-xs uppercase tracking-wider text-text-tertiary">
+                <span className="text-xs uppercase tracking-wider text-content-tertiary">
                   {t('admin.permissions.preset_label', { defaultValue: 'Reset to preset' })}
                 </span>
                 {data.presets.map((preset) => (
@@ -1303,7 +1303,7 @@ export function PermissionsMatrixPage() {
                     type="button"
                     onClick={() => setConfirmState({ kind: 'preset', preset })}
                     disabled={presetMutation.isPending}
-                    className="inline-flex items-center gap-1 rounded-md border border-border-light bg-white/80 px-2.5 py-1 text-xs font-medium text-text-secondary hover:bg-white disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                    className="inline-flex items-center gap-1 rounded-md border border-border-light bg-white/80 px-2.5 py-1 text-xs font-medium text-content-secondary hover:bg-white disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-oe-blue"
                     data-testid={`permissions-matrix-preset-${preset}`}
                   >
                     <RotateCcw size={11} aria-hidden />
@@ -1327,7 +1327,7 @@ export function PermissionsMatrixPage() {
                       })
                     : undefined
                 }
-                className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-white/80 px-2.5 py-1 text-xs font-medium text-text-secondary hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-accent-primary"
+                className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-white/80 px-2.5 py-1 text-xs font-medium text-content-secondary hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-oe-blue"
               >
                 {allExpanded ? (
                   <ChevronsDownUp size={13} aria-hidden />
@@ -1341,7 +1341,7 @@ export function PermissionsMatrixPage() {
 
               {/* Summary — "N of M granted" for the selected role, else
                   the module/permission totals. */}
-              <div className="text-xs text-text-tertiary tabular-nums" data-testid="permissions-matrix-summary">
+              <div className="text-xs text-content-tertiary tabular-nums" data-testid="permissions-matrix-summary">
                 {selectedRole
                   ? t('admin.permissions.summary_granted', {
                       defaultValue: '{{granted}} of {{total}} permissions granted',
@@ -1369,7 +1369,7 @@ export function PermissionsMatrixPage() {
                 <tr className="bg-surface-secondary border-b border-border-light">
                   <th
                     scope="col"
-                    className="sticky left-0 z-20 bg-surface-secondary px-3 py-2 text-left text-xs uppercase tracking-wider text-text-tertiary border-r border-border-light min-w-[260px]"
+                    className="sticky left-0 z-20 bg-surface-secondary px-3 py-2 text-left text-xs uppercase tracking-wider text-content-tertiary border-r border-border-light min-w-[260px]"
                   >
                     {t('admin.permissions.col_permission', {
                       defaultValue: 'Permission',
@@ -1382,8 +1382,8 @@ export function PermissionsMatrixPage() {
                       className={clsx(
                         'px-3 py-2 text-center text-xs uppercase tracking-wider transition-colors cursor-default',
                         hoveredRole === role
-                          ? 'bg-accent-primary/10 text-accent-primary'
-                          : 'text-text-tertiary',
+                          ? 'bg-oe-blue/10 text-oe-blue'
+                          : 'text-content-tertiary',
                       )}
                       onMouseEnter={() => setHoveredRole(role)}
                       onMouseLeave={() => setHoveredRole(null)}
@@ -1395,7 +1395,7 @@ export function PermissionsMatrixPage() {
                       {t(`admin.permissions.role_${role}`, {
                         defaultValue: role,
                       })}
-                      <div className="text-[10px] font-normal normal-case text-text-tertiary">
+                      <div className="text-[10px] font-normal normal-case text-content-tertiary">
                         {role}
                       </div>
                     </th>
@@ -1432,7 +1432,7 @@ export function PermissionsMatrixPage() {
                   <tr>
                     <td
                       colSpan={data.roles.length + 1}
-                      className="px-3 py-8 text-center text-sm text-text-tertiary"
+                      className="px-3 py-8 text-center text-sm text-content-tertiary"
                       data-testid="permissions-matrix-no-results"
                     >
                       {t('admin.permissions.no_results', {
@@ -1447,7 +1447,7 @@ export function PermissionsMatrixPage() {
           </div>
         </div>
 
-        <footer className="text-xs text-text-tertiary flex items-center gap-4 flex-wrap">
+        <footer className="text-xs text-content-tertiary flex items-center gap-4 flex-wrap">
           <span className="inline-flex items-center gap-1">
             <Check size={14} className="text-emerald-600" aria-hidden />
             {t('admin.permissions.legend_allowed', { defaultValue: 'allowed' })}

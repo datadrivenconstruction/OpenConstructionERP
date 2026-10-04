@@ -403,7 +403,7 @@ export function InboundCapturePage() {
             {sourcesQ.isLoading ? (
               <SkeletonTable rows={2} />
             ) : sourcesQ.isError ? (
-              <p className="text-sm text-status-error">{getErrorMessage(sourcesQ.error)}</p>
+              <p className="text-sm text-semantic-error">{getErrorMessage(sourcesQ.error)}</p>
             ) : sources.length === 0 ? (
               <EmptyState
                 icon={<HardDrive className="h-6 w-6" />}

@@ -2973,8 +2973,8 @@ function CreateBOQFromPivotModal({ open, onClose, groups, groupByColumns, aggCol
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-6 pb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-primary/10">
-              <Table2 size={20} className="text-accent-primary" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue/10">
+              <Table2 size={20} className="text-oe-blue" />
             </div>
             <div>
               <h2 className="text-lg font-semibold text-content-primary">

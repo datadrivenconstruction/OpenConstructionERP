@@ -140,7 +140,7 @@ const CAPTURE_STATUS_COLORS: Record<CaptureStatus, 'neutral' | 'blue' | 'success
 const inputCls =
   'h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
 
-const labelCls = 'block text-xs font-medium text-text-secondary mb-1';
+const labelCls = 'block text-xs font-medium text-content-secondary mb-1';
 
 /* ── Confidence pill ───────────────────────────────────────────────────── */
 
@@ -263,10 +263,10 @@ export function InvoiceInboxTab({ projectId }: { projectId: string }) {
       <Card className="p-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h3 className="text-base font-semibold text-text-primary">
+            <h3 className="text-base font-semibold text-content-primary">
               {t('finance.inbox.title', { defaultValue: 'Invoice inbox' })}
             </h3>
-            <p className="mt-0.5 max-w-2xl text-sm text-text-secondary">
+            <p className="mt-0.5 max-w-2xl text-sm text-content-secondary">
               {t('finance.inbox.subtitle', {
                 defaultValue:
                   'Capture a supplier invoice or delivery note, review the read-out fields, confirm the booking, route it for approval, and post it to the ledger. The original is archived unaltered with a tamper-evident seal.',
@@ -294,7 +294,7 @@ export function InvoiceInboxTab({ projectId }: { projectId: string }) {
       </Card>
 
       <div className="flex items-center gap-2">
-        <label className="text-sm text-text-secondary">
+        <label className="text-sm text-content-secondary">
           {t('finance.inbox.filter_label', { defaultValue: 'Show' })}
         </label>
         <select
@@ -329,7 +329,7 @@ export function InvoiceInboxTab({ projectId }: { projectId: string }) {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-text-secondary">
+                <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-content-secondary">
                   <th className="px-4 py-3 font-medium">
                     {t('finance.inbox.col_supplier', { defaultValue: 'Supplier' })}
                   </th>
@@ -356,17 +356,17 @@ export function InvoiceInboxTab({ projectId }: { projectId: string }) {
                     onClick={() => setSelectedId(c.id)}
                   >
                     <td className="px-4 py-3">
-                      <div className="font-medium text-text-primary">
+                      <div className="font-medium text-content-primary">
                         {c.supplier_name || t('finance.inbox.unknown_supplier', { defaultValue: 'Unknown supplier' })}
                       </div>
                       {c.has_document && (
-                        <div className="text-xs text-text-secondary">{c.original_filename}</div>
+                        <div className="text-xs text-content-secondary">{c.original_filename}</div>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-text-secondary">
-                      {c.invoice_number || <span className="text-text-tertiary">-</span>}
+                    <td className="px-4 py-3 text-content-secondary">
+                      {c.invoice_number || <span className="text-content-tertiary">-</span>}
                     </td>
-                    <td className="px-4 py-3 text-text-secondary">
+                    <td className="px-4 py-3 text-content-secondary">
                       {c.invoice_date ? <DateDisplay value={c.invoice_date} /> : '-'}
                     </td>
                     <td className="px-4 py-3 text-right">
@@ -581,7 +581,7 @@ function CaptureDetail({
                 addToast({ type: 'error', title: t('common.download_failed', { defaultValue: 'Download failed' }), message: e.message }),
               )
             }
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-text-secondary hover:bg-surface-secondary"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm text-content-secondary hover:bg-surface-secondary"
           >
             <Download size={15} />
             {t('finance.inbox.view_original', { defaultValue: 'Original' })}
@@ -641,7 +641,7 @@ function CaptureDetail({
             <Badge variant={CAPTURE_STATUS_COLORS[capture.status] ?? 'neutral'} size="sm">
               {t(`finance.inbox.status_${capture.status}`, { defaultValue: capture.status })}
             </Badge>
-            <span className="text-xs text-text-secondary">
+            <span className="text-xs text-content-secondary">
               {t('finance.inbox.read_by', { defaultValue: 'Read by' })}: {capture.extraction_engine}
             </span>
           </span>
@@ -651,7 +651,7 @@ function CaptureDetail({
       busy={actionMut.isPending || saveMut.isPending}
     >
       {itemQuery.isLoading || !capture || !draft ? (
-        <div className="flex items-center justify-center py-16 text-text-secondary">
+        <div className="flex items-center justify-center py-16 text-content-secondary">
           <Loader2 className="animate-spin" />
         </div>
       ) : (
@@ -686,7 +686,7 @@ function CaptureDetail({
           {/* Extracted / reviewed fields */}
           <section>
             <div className="mb-2 flex items-center justify-between">
-              <h4 className="text-sm font-semibold text-text-primary">
+              <h4 className="text-sm font-semibold text-content-primary">
                 {t('finance.inbox.fields', { defaultValue: 'Invoice fields' })}
               </h4>
               {editable && (
@@ -803,7 +803,7 @@ function CaptureDetail({
           {status !== 'posted' ? (
             <section>
               <div className="mb-2 flex items-center gap-2">
-                <h4 className="text-sm font-semibold text-text-primary">
+                <h4 className="text-sm font-semibold text-content-primary">
                   {t('finance.inbox.booking', { defaultValue: 'Booking proposal' })}
                 </h4>
                 {capture.booking_proposal && (
@@ -811,7 +811,7 @@ function CaptureDetail({
                 )}
               </div>
               {capture.booking_proposal?.rationale?.length ? (
-                <ul className="mb-3 space-y-1 text-xs text-text-secondary">
+                <ul className="mb-3 space-y-1 text-xs text-content-secondary">
                   {capture.booking_proposal.rationale.map((r, i) => (
                     <li key={i} className="flex items-start gap-1.5">
                       <Info size={13} className="mt-0.5 shrink-0 text-oe-blue" />
@@ -873,7 +873,7 @@ function CaptureDetail({
           {/* Send-back actions for reviewers */}
           {status && ['captured', 'coded', 'queried', 'approved'].includes(status) && (
             <section className="rounded-lg border border-border p-3">
-              <h4 className="mb-2 text-sm font-semibold text-text-primary">
+              <h4 className="mb-2 text-sm font-semibold text-content-primary">
                 {t('finance.inbox.decision', { defaultValue: 'Reject or query' })}
               </h4>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -921,25 +921,25 @@ function CaptureDetail({
 
           {/* Audit trail */}
           <section>
-            <h4 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-text-primary">
+            <h4 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-content-primary">
               <History size={15} />
               {t('finance.inbox.audit', { defaultValue: 'Audit trail' })}
             </h4>
             <div className="space-y-1.5">
               {(auditQuery.data?.items ?? []).map((a, i) => (
                 <div key={i} className="flex items-center justify-between rounded-md bg-surface-secondary/50 px-3 py-1.5 text-xs">
-                  <span className="text-text-primary">
+                  <span className="text-content-primary">
                     {t(`finance.inbox.event_${a.action}`, { defaultValue: a.action })}
                     {a.to_status ? ` -> ${a.to_status}` : ''}
                     {a.reason ? ` (${a.reason})` : ''}
                   </span>
-                  <span className="text-text-secondary">
+                  <span className="text-content-secondary">
                     <DateDisplay value={a.created_at} format="datetime" />
                   </span>
                 </div>
               ))}
               {(auditQuery.data?.items?.length ?? 0) === 0 && (
-                <p className="text-xs text-text-secondary">
+                <p className="text-xs text-content-secondary">
                   {t('finance.inbox.no_audit', { defaultValue: 'No actions recorded yet.' })}
                 </p>
               )}
@@ -965,7 +965,7 @@ function Field({
   return (
     <div>
       <div className="mb-1 flex items-center justify-between">
-        <label className="text-xs font-medium text-text-secondary">{label}</label>
+        <label className="text-xs font-medium text-content-secondary">{label}</label>
         <ConfidencePill score={conf} />
       </div>
       {children}
@@ -1015,7 +1015,7 @@ function PostedArchivePanel({
     <section className="rounded-lg border border-success/40 bg-success/5 p-4">
       <div className="mb-2 flex items-center gap-2">
         <ShieldCheck size={16} className="text-success" />
-        <h4 className="text-sm font-semibold text-text-primary">
+        <h4 className="text-sm font-semibold text-content-primary">
           {t('finance.inbox.archived', { defaultValue: 'Posted and archived' })}
         </h4>
       </div>
@@ -1053,8 +1053,8 @@ function PostedArchivePanel({
 function Row({ label, value, mono }: { label: string; value: string | null; mono?: boolean }) {
   return (
     <>
-      <dt className="text-text-secondary">{label}</dt>
-      <dd className={`text-text-primary ${mono ? 'font-mono' : ''}`}>{value || '-'}</dd>
+      <dt className="text-content-secondary">{label}</dt>
+      <dd className={`text-content-primary ${mono ? 'font-mono' : ''}`}>{value || '-'}</dd>
     </>
   );
 }

@@ -196,7 +196,7 @@ export function BillPositionPicker({
       </select>
       {/* A page of a longer register must never read as the whole register. */}
       {(page?.truncated ?? false) && (
-        <p className="text-[11px] leading-tight text-text-tertiary">
+        <p className="text-[11px] leading-tight text-content-tertiary">
           {t('procurement.item_position_truncated', {
             defaultValue: 'Showing the first {{count}}. Search to reach the rest of the bill.',
             count: SPINE_PAGE_SIZE,

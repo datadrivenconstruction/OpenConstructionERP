@@ -661,7 +661,7 @@ export function ServicePage() {
             className={clsx(
               'inline-flex items-center gap-1.5 rounded-lg border px-3 h-9 text-sm font-medium transition-colors',
               overdueOnly
-                ? 'border-status-error/40 bg-status-error/10 text-status-error'
+                ? 'border-semantic-error/40 bg-semantic-error/10 text-semantic-error'
                 : 'border-border bg-surface-primary text-content-secondary hover:text-content-primary',
             )}
             aria-pressed={overdueOnly}

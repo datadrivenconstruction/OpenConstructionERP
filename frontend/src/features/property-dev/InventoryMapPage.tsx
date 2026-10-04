@@ -488,8 +488,8 @@ export function InventoryMapPage() {
       {/* ── Body ───────────────────────────────────────────────────── */}
       {query.isLoading && <InventoryMapSkeleton />}
       {query.isError && (
-        <Card className="border-status-error/40 bg-status-error/5 p-4">
-          <p className="text-sm font-medium text-status-error">
+        <Card className="border-semantic-error/40 bg-semantic-error/5 p-4">
+          <p className="text-sm font-medium text-semantic-error">
             {t('propdev.inventory_map.load_error', {
               defaultValue: 'Failed to load inventory map.',
             })}

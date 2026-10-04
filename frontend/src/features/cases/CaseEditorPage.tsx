@@ -347,7 +347,7 @@ export function CaseEditorPage() {
                   type="button"
                   className={clsx(
                     'flex gap-3 rounded-lg border border-border-light p-2.5 text-left transition',
-                    'hover:border-accent-primary hover:bg-surface-secondary',
+                    'hover:border-oe-blue hover:bg-surface-secondary',
                   )}
                   onClick={() => {
                     setDraft(draftFromPlaybook(entry.playbook, resolve));
@@ -473,7 +473,7 @@ export function CaseEditorPage() {
                     className={clsx(
                       'rounded-full border px-3 py-1 text-xs',
                       on
-                        ? 'border-accent-primary bg-accent-primary/10 text-accent-primary'
+                        ? 'border-oe-blue bg-oe-blue/10 text-oe-blue'
                         : 'border-border-light text-content-secondary hover:bg-surface-secondary',
                     )}
                     onClick={() =>
@@ -561,7 +561,7 @@ export function CaseEditorPage() {
                     <button
                       type="button"
                       aria-label={t('cases.editor.step_remove', { defaultValue: 'Remove step' })}
-                      className="flex h-7 w-7 items-center justify-center rounded text-content-tertiary hover:bg-surface-secondary hover:text-status-error"
+                      className="flex h-7 w-7 items-center justify-center rounded text-content-tertiary hover:bg-surface-secondary hover:text-semantic-error"
                       onClick={() => patch({ steps: removeDraftStep(draft.steps, index) })}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -579,8 +579,8 @@ export function CaseEditorPage() {
                         className={clsx(
                           'flex w-full items-center gap-2.5 rounded-md border p-2 text-left transition',
                           targetBad
-                            ? 'border-status-error'
-                            : 'border-border-light hover:border-accent-primary hover:bg-surface-secondary',
+                            ? 'border-semantic-error'
+                            : 'border-border-light hover:border-oe-blue hover:bg-surface-secondary',
                         )}
                       >
                         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-surface-secondary text-content-secondary ring-1 ring-border-light">
@@ -607,7 +607,7 @@ export function CaseEditorPage() {
                         <ChevronDown className="h-4 w-4 shrink-0 text-content-tertiary" />
                       </button>
                       {targetBad ? (
-                        <p className="mt-1 flex items-center gap-1 text-xs text-status-error">
+                        <p className="mt-1 flex items-center gap-1 text-xs text-semantic-error">
                           <AlertTriangle className="h-3 w-3" />
                           {t('cases.editor.step_screen_invalid', {
                             defaultValue:

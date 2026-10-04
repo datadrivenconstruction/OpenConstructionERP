@@ -400,7 +400,7 @@ export function CustomKpiModal({
       }
     >
       {catalogQ.isError ? (
-        <p className="text-sm text-status-error">
+        <p className="text-sm text-semantic-error">
           {t('bi.kpi_catalog_failed', {
             defaultValue:
               'The list of things a KPI can measure could not be loaded, so the form has nothing to offer.',

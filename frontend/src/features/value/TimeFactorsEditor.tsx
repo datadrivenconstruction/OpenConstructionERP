@@ -147,7 +147,7 @@ export function TimeFactorsEditor({ open, onClose }: TimeFactorsEditorProps) {
             {t('common.loading', { defaultValue: 'Loading...' })}
           </p>
         ) : factorsQ.isError ? (
-          <p className="text-sm text-status-error">{getErrorMessage(factorsQ.error)}</p>
+          <p className="text-sm text-semantic-error">{getErrorMessage(factorsQ.error)}</p>
         ) : rows.length === 0 ? (
           <p className="text-sm text-content-tertiary">
             {t('value.factors.empty', { defaultValue: 'No factors to edit.' })}
@@ -199,7 +199,7 @@ export function TimeFactorsEditor({ open, onClose }: TimeFactorsEditorProps) {
                       value={value}
                       onChange={(e) => setDraft((d) => ({ ...d, [key]: e.target.value }))}
                       className={`w-20 rounded-md border bg-surface-primary px-2 py-1 text-right text-sm text-content-primary ${
-                        invalid ? 'border-status-error' : 'border-border-light'
+                        invalid ? 'border-semantic-error' : 'border-border-light'
                       }`}
                     />
                     <span className="text-xs text-content-tertiary">

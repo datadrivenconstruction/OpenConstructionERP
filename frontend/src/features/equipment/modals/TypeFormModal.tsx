@@ -225,7 +225,7 @@ export function TypeFormModal({
             />
           </div>
           {error && (
-            <p className="text-xs text-status-error" role="alert">
+            <p className="text-xs text-semantic-error" role="alert">
               {error}
             </p>
           )}
