@@ -116,6 +116,7 @@ from app.modules.boq.copilot_schemas import (
     CopilotReviewResponse,
 )
 from app.modules.boq.exchange_formats import ExchangeCatalogue, build_catalogue
+from app.modules.boq.gaeb_exchange_router import gaeb_exchange_router
 from app.modules.boq.importers.excel import (
     _parse_csv,
     _parse_rows_from_csv,
@@ -239,6 +240,7 @@ router = APIRouter(tags=["boq"])
 # that live in their own files answer nowhere until they are included here.
 router.include_router(resource_review_router)
 router.include_router(change_review_router)
+router.include_router(gaeb_exchange_router)
 _log = logging.getLogger(__name__)
 
 
