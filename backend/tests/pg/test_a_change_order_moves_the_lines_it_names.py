@@ -157,7 +157,7 @@ async def _change_order(world, cost_impact: str, items: list[tuple[str, dict]]) 
         return order
 
 
-async def _approve(world, order: ChangeOrder) -> None:
+async def _approve(world, order: ChangeOrder, *, mirrors: uuid.UUID | None = None) -> None:
     data = {
         "change_order_id": str(order.id),
         "project_id": str(world.project.id),
@@ -165,7 +165,7 @@ async def _approve(world, order: ChangeOrder) -> None:
         "cost_impact": str(order.cost_impact),
         "currency": "USD",
         "contract_id": str(world.contract.id),
-        "variation_order_id": None,
+        "variation_order_id": str(mirrors) if mirrors else None,
     }
     await w5._on_changeorder_approved_contract(Event(name="changeorder.approved", data=data))
 
@@ -290,6 +290,29 @@ async def test_a_reference_to_another_contracts_line_is_not_followed(world) -> N
     assert adjustment.delta_value == D("700")
     assert list(adjustment.metadata_["unresolved_items"].values()) == ["line_not_on_contract"]
     assert sum((ln.total_value for ln in after.values()), D("0")) == total
+
+
+async def test_a_mirrored_change_order_moves_its_lines_once_and_its_variation_posts_nothing(world) -> None:
+    vo_id = uuid.uuid4()
+    order = await _change_order(world, "5000", [("5000", {"contract_line_id": str(world.lines["A"].id)})])
+    await _approve(world, order, mirrors=vo_id)
+    data = {
+        "project_id": str(world.project.id),
+        "vo_id": str(vo_id),
+        "contract_id": str(world.contract.id),
+        "code": "VO-001",
+        "delta_amount": "5000",
+        "currency": "USD",
+    }
+    await w5._on_variation_completed(Event(name="variations.contract_sum.updated", data=data))
+
+    total, after, adjustments = await _state(world)
+    assert total == BASE + D("5000")
+    [adjustment] = adjustments
+    assert adjustment.source_key == f"variation_order:{vo_id}"
+    assert adjustment.created_line is False
+    assert after[world.lines["A"].id].total_value == D("65000")
+    assert len(after) == len(world.lines)
 
 
 async def test_a_change_order_without_items_still_posts_one_pooled_line(world) -> None:
