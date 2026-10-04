@@ -29,6 +29,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { fmtList } from '@/shared/lib/formatters';
 
 import {
   fetchBatchDocumentReferences,
@@ -287,7 +288,7 @@ export function BulkDeleteReferencesWarning({ documentIds, namesById }: BulkDele
         })}
         {': '}
         <span className="text-content-tertiary">
-          {shown.join(', ')}
+          {fmtList(shown)}
           {extra > 0 &&
             ` ${t('documents.references.bulk_more', { extra, defaultValue: '+{{extra}} more' })}`}
         </span>

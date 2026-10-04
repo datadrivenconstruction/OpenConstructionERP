@@ -29,7 +29,7 @@ import { AlertTriangle, Download, Loader2 } from 'lucide-react';
 import clsx from 'clsx';
 import { Button, ErrorState, KpiBand } from '@/shared/ui';
 import { formatCurrency } from '@/shared/lib/money';
-import { fmtFixed, fmtPercent } from '@/shared/lib/formatters';
+import { fmtFixed, fmtList, fmtPercent } from '@/shared/lib/formatters';
 import { parseDecimalInput } from '@/shared/lib/parseDecimal';
 import { getErrorMessage } from '@/shared/lib/api';
 import {
@@ -178,7 +178,7 @@ function GroupRows({
         ))}
       {group.group_level && (
         <PlanRow
-          code={group.group_level.codes.join(', ')}
+          code={fmtList(group.group_level.codes)}
           label={
             <span className="italic text-content-secondary">
               {t('cost_plan.group_level', { defaultValue: 'Group level, no element given' })}
