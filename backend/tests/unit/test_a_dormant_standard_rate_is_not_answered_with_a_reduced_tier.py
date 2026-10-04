@@ -65,6 +65,11 @@ MISQUOTED = [
     # one the other members give; filing the 23 % window is a data addition
     # for later, not something this gate should force by staying red.
     ("GR", "2014-01-01", "13"),
+    # Hungary joined with its 5 % and 18 % tiers in 18.4. The seed's 27 %
+    # standard row opens on 2012-01-01 and the 25 % rate before it is not on
+    # file, so a 2010 Hungarian date has only the tiers in force and must
+    # refuse rather than answer 18 or 5.
+    ("HU", "2010-01-01", "18"),
     ("IE", "2005-01-01", "13.5"),
     ("IT", "2000-01-01", "10"),
     ("RU", "2010-01-01", "10"),
