@@ -149,4 +149,70 @@ describe('SovReconcilePanel', () => {
     expect(await screen.findByText('CO-007')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Reconcile change orders/ })).toBeNull();
   });
+
+  it('shows where a change that names lines will land, and nothing extra for a pooled one', async () => {
+    previewMock.mockResolvedValue({
+      ...PREVIEW,
+      items: [
+        {
+          ...PREVIEW.items[0]!,
+          allocation_method: 'pro_rata',
+          allocation: [
+            {
+              contract_line_id: 'line-a',
+              code: '07 10 00',
+              description: 'Waterproofing',
+              delta: '12000.0000',
+              placement: 'lump_sum',
+              total_before: '40000.0000',
+              total_after: '52000.0000',
+            },
+            {
+              contract_line_id: 'line-c',
+              code: '04 20 00',
+              description: 'Masonry',
+              delta: '1000.0000',
+              placement: 'linked_line',
+              total_before: '9990.0000',
+              total_after: '10990.0000',
+            },
+            {
+              contract_line_id: null,
+              code: '',
+              description: '',
+              delta: '2000.0000',
+              placement: 'new_line',
+              total_before: null,
+              total_after: null,
+            },
+          ],
+        },
+        {
+          ...PREVIEW.items[1]!,
+          allocation_method: 'pooled',
+          allocation: [
+            {
+              contract_line_id: null,
+              code: '',
+              description: '',
+              delta: '-2500.0000',
+              placement: 'new_line',
+              total_before: null,
+              total_after: null,
+            },
+          ],
+        },
+      ],
+    });
+    renderPanel();
+
+    const split = await screen.findByTestId('sov-reconcile-split-change_order:co-7');
+    expect(split.textContent).toContain('Waterproofing');
+    expect(split.textContent).toContain('New line beside 04 20 00');
+    expect(split.textContent).toContain('New line for this change');
+    expect(split.textContent).toContain('each line takes its share');
+    expect(split.textContent?.replace(/[^0-9.]/g, '')).toContain('40000.0052000.00');
+    // A pooled change adds one line, which the row above already says.
+    expect(screen.queryByTestId('sov-reconcile-split-variation_order:vo-3')).toBeNull();
+  });
 });

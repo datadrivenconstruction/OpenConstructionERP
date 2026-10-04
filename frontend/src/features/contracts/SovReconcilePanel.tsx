@@ -6,6 +6,9 @@
 // to bill the change against. The server lists them with the amount each
 // would add; a person ticks the ones to post and confirms, and the apply
 // posts that subset or nothing (409 when one of them is no longer on offer).
+// A change order whose items name schedule lines moves those lines rather
+// than adding one pooled line, so each such change lists where its money
+// lands, from the same split the apply posts.
 //
 // A change someone already put on the schedule by hand would be billed twice
 // if the reconcile added another line, so each one can be set aside as
@@ -15,7 +18,7 @@
 // Renders nothing when there is nothing to reconcile and nothing set aside,
 // which is every contract whose changes were approved after the poster existed.
 
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ListPlus, Undo2 } from 'lucide-react';
@@ -29,7 +32,71 @@ import {
   applySovReconcile,
   getSovReconcilePreview,
   setSovReconcileExclusion,
+  type SovReconcileItem,
 } from './api';
+
+/** A change that moves existing lines, rather than adding one pooled line. */
+function splitsLines(item: SovReconcileItem): boolean {
+  return (item.allocation ?? []).some((row) => row.contract_line_id !== null);
+}
+
+// Where a change's money lands, as the server will post it: the lines its
+// items name move by their share, the rest goes on the change's own line.
+function AllocationList({ item, currency }: { item: SovReconcileItem; currency?: string }) {
+  const { t } = useTranslation();
+  return (
+    <div className="rounded border border-border-light bg-surface-primary px-2 py-1">
+      {item.allocation_method === 'pro_rata' && (
+        <p className="text-content-tertiary">
+          {t('contracts.sov_reconcile_split_pro_rata', {
+            defaultValue:
+              'Approved at a different amount than its items add up to, so each line takes its share of the approved amount.',
+          })}
+        </p>
+      )}
+      {item.allocation_method === 'itemized_with_balance' && (
+        <p className="text-content-tertiary">
+          {t('contracts.sov_reconcile_split_balance', {
+            defaultValue:
+              'Its items do not add up to the approved amount; they move their lines as priced and the difference goes on a new line.',
+          })}
+        </p>
+      )}
+      <ul className="space-y-0.5">
+        {(item.allocation ?? []).map((row, index) => (
+          <li
+            key={row.contract_line_id ?? `new-${index}`}
+            className="flex flex-wrap items-center justify-between gap-2"
+          >
+            <span className="min-w-0 truncate">
+              {row.placement === 'new_line' ? (
+                t('contracts.sov_reconcile_share_new_line', { defaultValue: 'New line for this change' })
+              ) : row.placement === 'linked_line' ? (
+                t('contracts.sov_reconcile_share_beside', {
+                  code: row.code,
+                  defaultValue: 'New line beside {{code}} (its rate is not restated)',
+                })
+              ) : (
+                <>
+                  <span className="font-mono">{row.code}</span> {row.description}
+                </>
+              )}
+            </span>
+            <span className="whitespace-nowrap">
+              {row.total_before !== null && row.total_after !== null && row.placement !== 'linked_line' && (
+                <>
+                  <MoneyDisplay amount={row.total_before} currency={currency} /> →{' '}
+                  <MoneyDisplay amount={row.total_after} currency={currency} />{' '}
+                </>
+              )}
+              (<MoneyDisplay amount={row.delta} currency={currency} signDisplay="always" />)
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export function SovReconcilePanel({ contractId }: { contractId: string }) {
   const { t } = useTranslation();
@@ -146,7 +213,8 @@ export function SovReconcilePanel({ contractId }: { contractId: string }) {
               </thead>
               <tbody>
                 {items.map((item) => (
-                  <tr key={item.source_key} className="border-t border-border-light align-top">
+                  <Fragment key={item.source_key}>
+                  <tr className="border-t border-border-light align-top">
                     {preview.can_apply && (
                       <td className="py-1">
                         <input
@@ -229,6 +297,16 @@ export function SovReconcilePanel({ contractId }: { contractId: string }) {
                       )}
                     </td>
                   </tr>
+                  {splitsLines(item) && (
+                    <tr data-testid={`sov-reconcile-split-${item.source_key}`}>
+                      {preview.can_apply && <td />}
+                      <td />
+                      <td colSpan={4} className="pb-2">
+                        <AllocationList item={item} currency={item.currency || currency} />
+                      </td>
+                    </tr>
+                  )}
+                  </Fragment>
                 ))}
               </tbody>
             </table>
@@ -249,9 +327,9 @@ export function SovReconcilePanel({ contractId }: { contractId: string }) {
           ) : confirming ? (
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <span className="text-content-primary">
-                {t('contracts.sov_reconcile_confirm_ticked', {
+                {t('contracts.sov_reconcile_confirm_split', {
                   defaultValue:
-                    'Add each ticked change to the schedule of values as a line of its own?',
+                    'Post each ticked change to the schedule of values as listed: the lines it names move, the rest goes on a line of its own?',
                 })}
               </span>
               <Button

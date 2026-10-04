@@ -1445,6 +1445,31 @@ export interface SovReconcileItem {
   amount: string;
   currency: string;
   approved_on: string | null;
+  /**
+   * How the amount is split over the schedule: one pooled new line, the
+   * items as priced, pro rata to the items, or the items plus a balance line.
+   * Absent on a set-aside change.
+   */
+  allocation_method?: 'pooled' | 'itemized' | 'pro_rata' | 'itemized_with_balance';
+  /** Where each part of the amount lands, the same split the apply posts. */
+  allocation?: SovReconcileAllocationRow[];
+}
+
+/** One share of a change: a line it moves in place, or a line it adds. */
+export interface SovReconcileAllocationRow {
+  /** Null for the change's own new line. */
+  contract_line_id: string | null;
+  code: string;
+  description: string;
+  delta: string;
+  /**
+   * new_line: the change's own line; linked_line: a new line beside the one
+   * it adjusts (a measured line the change does not divide into whole
+   * units); lump_sum / quantity: the line itself moves.
+   */
+  placement: 'new_line' | 'linked_line' | 'lump_sum' | 'quantity';
+  total_before: string | null;
+  total_after: string | null;
 }
 
 export interface SovReconcilePreview {
