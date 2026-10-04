@@ -359,6 +359,9 @@ async def _verify_project_owner_for_boq(
     is_admin = bool(payload and payload.get("role") == "admin")
     from app.modules.projects.access import project_access
 
+    # The answer is keyed by UUID; a string id must still find its project.
+    if not isinstance(project_id, uuid.UUID):
+        project_id = uuid.UUID(str(project_id))
     access = (await project_access(session, [project_id], user_id)).get(project_id)
     if access is None or access.is_archived:
         raise HTTPException(
