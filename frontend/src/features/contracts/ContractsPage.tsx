@@ -117,7 +117,22 @@ import {
   type ClaimStatus,
   type CounterpartyType,
   type ContractDashboard,
+  type ContractCountryDefaults,
+  type ContractCreatePayload,
+  type CountryDefaultField,
+  type ValuationInterval,
 } from './api';
+import {
+  ContractPaymentTermsSummary,
+  DefaultHint,
+  RELEASE_SPLIT_PRESETS,
+  VALUATION_INTERVALS,
+  countryName,
+  releaseSplitText,
+  splitPresetId,
+  useContractCountryDefaults,
+  valuationIntervalLabel,
+} from './ContractPaymentTerms';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildContractsInsights } from './contractsInsights';
 import { DEFAULT_CONTRACTS_TAB, isContractsTab, type ContractsTab } from './contractsTabs';
@@ -2368,6 +2383,15 @@ export function ContractDetailDrawer({
             </div>
           </Card>
 
+          {/* The payment terms beside the rate, each marked where the
+              project's country filled it in. */}
+          <Card padding="sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-content-secondary mb-2">
+              {t('contracts.payment_terms.section', { defaultValue: 'Payment terms' })}
+            </p>
+            <ContractPaymentTermsSummary contract={contract} />
+          </Card>
+
           {/* Who the contract is between. Directly under the header because the
               header's counterparty field is one side and a category, and this
               is the list the signature block is actually built from. */}
@@ -2762,6 +2786,12 @@ function Field({ label, value }: { label: React.ReactNode; value: React.ReactNod
 /* ─── Create modal ───
    Exported for the currency test; the page renders it directly. */
 
+/** The payment-term fields of the create form, the same names the server's country defaults use. */
+type PaymentTermField = CountryDefaultField;
+
+/** The release select's value for a country default no preset describes. */
+const DEFAULT_SPLIT_OPTION = '__country_default__';
+
 export function CreateContractModal({
   projectId,
   defaultCurrency,
@@ -2773,7 +2803,7 @@ export function CreateContractModal({
   defaultCurrency?: string;
   onClose: () => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const [busy, setBusy] = useState(false);
@@ -2789,11 +2819,56 @@ export function CreateContractModal({
     // the figures are the contract's and the sign is not. Empty when the
     // project names none, and then the server decides.
     currency: defaultCurrency ?? '',
-    retention_percent: '5',
     start_date: todayIso(),
     end_date: '',
     template_code: '',
   });
+
+  // Payment terms start from the usual figures of the project's country and
+  // stay editable. Only what the person changes is sent: a figure left as the
+  // country filled it is left out, so the server fills it the same way and
+  // the contract records that it was the country's default rather than
+  // claiming the person typed it. A project whose country has no usual terms
+  // gets empty fields, never another country's figures.
+  const defaultsQ = useContractCountryDefaults(projectId);
+  const defaults = defaultsQ.data;
+  const knownDefaults = defaults?.has_defaults ? defaults : null;
+  const prefill = useMemo<Record<PaymentTermField, string>>(() => {
+    const v: ContractCountryDefaults['values'] = knownDefaults?.values ?? {};
+    const split = v.retention_release_split ?? null;
+    return {
+      retention_percent: v.retention_percent ?? '',
+      retention_cap_percent: v.retention_cap_percent ?? '',
+      retention_release_split: splitPresetId(split) ?? (split ? DEFAULT_SPLIT_OPTION : ''),
+      payment_period_days: v.payment_period_days != null ? String(v.payment_period_days) : '',
+      valuation_interval: v.valuation_interval ?? '',
+      certificate_name: v.certificate_name ?? '',
+    };
+  }, [knownDefaults]);
+  const [terms, setTerms] = useState<Record<PaymentTermField, string>>({
+    retention_percent: '',
+    retention_cap_percent: '',
+    retention_release_split: '',
+    payment_period_days: '',
+    valuation_interval: '',
+    certificate_name: '',
+  });
+  const [touched, setTouched] = useState<ReadonlySet<PaymentTermField>>(() => new Set());
+  const termValue = (field: PaymentTermField): string =>
+    touched.has(field) ? terms[field] : prefill[field];
+  const setTerm = (field: PaymentTermField, value: string) => {
+    setTerms((prev) => ({ ...prev, [field]: value }));
+    setTouched((prev) => new Set(prev).add(field));
+  };
+  const defaultHint = (field: PaymentTermField) =>
+    knownDefaults && !touched.has(field) && prefill[field] !== '' ? (
+      <DefaultHint
+        field={field}
+        country={knownDefaults.country_code}
+        source={knownDefaults.sources[field]}
+      />
+    ) : null;
+  const defaultSplit = knownDefaults?.values.retention_release_split ?? null;
 
   // Only paper that can be drawn from is offered. An unpublished draft is
   // refused by the server, so listing it here would be an option that fails.
@@ -2814,21 +2889,60 @@ export function CreateContractModal({
       });
       return;
     }
+    // With no usual figure for the country the rate has to come from the
+    // person: the server would otherwise fall back to a platform figure that
+    // is nobody's law. While the defaults are still loading, or could not be
+    // read, an empty field is left to the server, which applies the same
+    // table this form would have shown.
+    if (defaultsQ.isSuccess && termValue('retention_percent').trim() === '') {
+      addToast({
+        type: 'error',
+        title: t('contracts.payment_terms.retention_required', {
+          defaultValue: 'Enter the retention this contract states (0 if none).',
+        }),
+      });
+      return;
+    }
+    const payload: ContractCreatePayload = {
+      project_id: projectId,
+      code: form.code.trim(),
+      title: form.title.trim(),
+      contract_type: form.contract_type,
+      counterparty_type: form.counterparty_type,
+      total_value: Number(form.total_value) || 0,
+      currency: form.currency.trim().toUpperCase() || undefined,
+      start_date: form.start_date || null,
+      end_date: form.end_date || null,
+      template_code: form.template_code || null,
+    };
+    const retention = termValue('retention_percent').trim();
+    if (touched.has('retention_percent') && retention !== '') {
+      payload.retention_percent = Number(retention) || 0;
+    }
+    if (touched.has('retention_cap_percent')) {
+      const cap = terms.retention_cap_percent.trim();
+      payload.retention_cap_percent = cap === '' ? null : Number(cap);
+    }
+    if (touched.has('retention_release_split')) {
+      const choice = terms.retention_release_split;
+      payload.retention_release_split =
+        choice === DEFAULT_SPLIT_OPTION
+          ? defaultSplit
+          : (RELEASE_SPLIT_PRESETS.find((p) => p.id === choice)?.split ?? null);
+    }
+    if (touched.has('payment_period_days')) {
+      const days = terms.payment_period_days.trim();
+      payload.payment_period_days = days === '' ? null : Math.round(Number(days));
+    }
+    if (touched.has('valuation_interval')) {
+      payload.valuation_interval = (terms.valuation_interval || null) as ValuationInterval | null;
+    }
+    if (touched.has('certificate_name')) {
+      payload.certificate_name = terms.certificate_name.trim() || null;
+    }
     setBusy(true);
     try {
-      await createContract({
-        project_id: projectId,
-        code: form.code.trim(),
-        title: form.title.trim(),
-        contract_type: form.contract_type,
-        counterparty_type: form.counterparty_type,
-        total_value: Number(form.total_value) || 0,
-        currency: form.currency.trim().toUpperCase() || undefined,
-        retention_percent: Number(form.retention_percent) || 0,
-        start_date: form.start_date || null,
-        end_date: form.end_date || null,
-        template_code: form.template_code || null,
-      });
+      await createContract(payload);
       addToast({
         type: 'success',
         title: t('contracts.created_ok', { defaultValue: 'Contract created' }),
@@ -2981,20 +3095,159 @@ export function CreateContractModal({
         </WideModalField>
         <WideModalField
           label={t('contracts.retention_pct', { defaultValue: 'Retention %' })}
+          required={defaultsQ.isSuccess && !knownDefaults}
         >
           <input
             type="number"
             step="0.1"
-            value={form.retention_percent}
-            onChange={(e) =>
-              setForm({ ...form, retention_percent: e.target.value })
-            }
-            // Select the prefilled 5 on focus so typing replaces it; typing
-            // 5 used to append and read 55.
+            min={0}
+            max={100}
+            value={termValue('retention_percent')}
+            onChange={(e) => setTerm('retention_percent', e.target.value)}
+            // Select the prefilled figure on focus so typing replaces it;
+            // typing 5 over a 5 used to append and read 55.
             onFocus={(e) => e.currentTarget.select()}
             data-testid="contract-retention"
             className={inputCls}
           />
+          {defaultHint('retention_percent')}
+        </WideModalField>
+      </WideModalSection>
+
+      <WideModalSection
+        title={t('contracts.payment_terms.section', { defaultValue: 'Payment terms' })}
+        columns={3}
+      >
+        <WideModalField span={3}>
+          <p className="text-xs text-content-secondary" data-testid="country-defaults-status">
+            {defaultsQ.isError
+              ? t('contracts.payment_terms.defaults_unavailable', {
+                  defaultValue:
+                    "The usual terms for this project's country could not be loaded. Anything left blank is filled by the server from them.",
+                })
+              : defaultsQ.isPending
+                ? t('contracts.payment_terms.defaults_loading', {
+                    defaultValue: "Looking up the usual terms for this project's country",
+                  })
+                : knownDefaults
+                  ? t('contracts.payment_terms.defaults_loaded', {
+                      defaultValue:
+                        'Pre-filled with the usual terms for {{country}}. Every figure can be changed.',
+                      country: [
+                        countryName(knownDefaults.country_code, i18n.language),
+                        knownDefaults.standard_form,
+                      ]
+                        .filter(Boolean)
+                        .join(', '),
+                    })
+                  : defaults?.country_code
+                    ? t('contracts.payment_terms.no_defaults', {
+                        defaultValue:
+                          'No usual payment terms are on file for {{country}}. Enter the figures the contract states.',
+                        country: countryName(defaults.country_code, i18n.language),
+                      })
+                    : t('contracts.payment_terms.no_country', {
+                        defaultValue:
+                          'This project names no country, so nothing is pre-filled. Enter the figures the contract states.',
+                      })}
+          </p>
+        </WideModalField>
+        <WideModalField
+          label={t('contracts.payment_terms.retention_cap', {
+            defaultValue: 'Retention cap (% of contract sum)',
+          })}
+        >
+          <input
+            type="number"
+            step="0.1"
+            min={0}
+            max={100}
+            value={termValue('retention_cap_percent')}
+            onChange={(e) => setTerm('retention_cap_percent', e.target.value)}
+            placeholder={t('contracts.payment_terms.no_cap', { defaultValue: 'No cap' })}
+            data-testid="contract-retention-cap"
+            className={inputCls}
+          />
+          {defaultHint('retention_cap_percent')}
+        </WideModalField>
+        <WideModalField
+          label={t('contracts.payment_terms.payment_period_days', {
+            defaultValue: 'Payment period (days)',
+          })}
+        >
+          <input
+            type="number"
+            step="1"
+            min={0}
+            max={365}
+            value={termValue('payment_period_days')}
+            onChange={(e) => setTerm('payment_period_days', e.target.value)}
+            data-testid="contract-payment-days"
+            className={inputCls}
+          />
+          {defaultHint('payment_period_days')}
+        </WideModalField>
+        <WideModalField
+          label={t('contracts.payment_terms.valuation_interval', {
+            defaultValue: 'Valuation interval',
+          })}
+        >
+          <select
+            value={termValue('valuation_interval')}
+            onChange={(e) => setTerm('valuation_interval', e.target.value)}
+            data-testid="contract-valuation-interval"
+            className={inputCls}
+          >
+            <option value="">
+              {t('contracts.payment_terms.not_stated', { defaultValue: 'Not stated' })}
+            </option>
+            {VALUATION_INTERVALS.map((interval) => (
+              <option key={interval} value={interval}>
+                {valuationIntervalLabel(t, interval)}
+              </option>
+            ))}
+          </select>
+          {defaultHint('valuation_interval')}
+        </WideModalField>
+        <WideModalField
+          label={t('contracts.payment_terms.release_split', {
+            defaultValue: 'Retention release',
+          })}
+          span={2}
+        >
+          <select
+            value={termValue('retention_release_split')}
+            onChange={(e) => setTerm('retention_release_split', e.target.value)}
+            data-testid="contract-release-split"
+            className={inputCls}
+          >
+            <option value="">
+              {t('contracts.payment_terms.not_stated', { defaultValue: 'Not stated' })}
+            </option>
+            {defaultSplit && splitPresetId(defaultSplit) === null && (
+              <option value={DEFAULT_SPLIT_OPTION}>{releaseSplitText(t, defaultSplit)}</option>
+            )}
+            {RELEASE_SPLIT_PRESETS.map((preset) => (
+              <option key={preset.id} value={preset.id}>
+                {releaseSplitText(t, preset.split)}
+              </option>
+            ))}
+          </select>
+          {defaultHint('retention_release_split')}
+        </WideModalField>
+        <WideModalField
+          label={t('contracts.payment_terms.certificate_name', {
+            defaultValue: 'Interim certificate',
+          })}
+        >
+          <input
+            value={termValue('certificate_name')}
+            onChange={(e) => setTerm('certificate_name', e.target.value)}
+            maxLength={200}
+            data-testid="contract-certificate-name"
+            className={inputCls}
+          />
+          {defaultHint('certificate_name')}
         </WideModalField>
       </WideModalSection>
 

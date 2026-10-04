@@ -308,8 +308,18 @@ export interface ContractCreatePayload {
   end_date?: string | null;
   total_value?: number;
   currency?: string;
+  /**
+   * Left out, the server fills it from the usual figure of the project's
+   * country (see {@link getContractCountryDefaults}) and records that it did.
+   * Send only what the person actually set, or every figure reads as theirs.
+   */
   retention_percent?: number;
   retention_release_event?: RetentionReleaseEvent;
+  retention_cap_percent?: number | null;
+  retention_release_split?: ReleaseSplitStep[] | null;
+  payment_period_days?: number | null;
+  valuation_interval?: ValuationInterval | null;
+  certificate_name?: string | null;
   status?: ContractStatus;
   signed_at?: string | null;
   /**
@@ -450,6 +460,81 @@ export function getContract(id: string): Promise<ContractItem> {
 
 export function createContract(data: ContractCreatePayload): Promise<ContractItem> {
   return apiPost<ContractItem>('/v1/contracts/contracts/', data);
+}
+
+/* ── Country payment-term defaults ────────────────────────────────────── */
+
+/** How often work is valued for an interim payment. */
+export type ValuationInterval = 'monthly' | 'four_weekly' | 'fortnightly' | 'weekly' | 'milestone';
+
+/**
+ * One step of how retention is paid back. `release_percent_of_held` is the
+ * percent of what is held AT that event, so "half at completion, the rest at
+ * the end of the defects period" is 50 then 100.
+ */
+export interface ReleaseSplitStep {
+  event: RetentionReleaseEvent;
+  release_percent_of_held: string;
+}
+
+/** The payment terms a contract states beside its retention rate (`terms.payment_terms`). */
+export interface ContractPaymentTerms {
+  retention_cap_percent?: string | null;
+  retention_release_split?: ReleaseSplitStep[] | null;
+  payment_period_days?: number | null;
+  valuation_interval?: ValuationInterval | null;
+  certificate_name?: string | null;
+}
+
+/** The fields a country default can fill. */
+export type CountryDefaultField =
+  | 'retention_percent'
+  | 'retention_cap_percent'
+  | 'retention_release_split'
+  | 'payment_period_days'
+  | 'valuation_interval'
+  | 'certificate_name';
+
+/** Where one default figure comes from. */
+export interface CountryDefaultSource {
+  source: 'statute' | 'standard_form' | 'industry_practice' | 'regional_pack' | string;
+  reference: string;
+  note: string;
+}
+
+/** What a new contract on a project starts from. Never another country's row. */
+export interface ContractCountryDefaults {
+  project_id: string;
+  country_code: string | null;
+  has_defaults: boolean;
+  standard_form: string | null;
+  values: Partial<{
+    retention_percent: string | null;
+    retention_cap_percent: string | null;
+    retention_release_split: ReleaseSplitStep[] | null;
+    payment_period_days: number | null;
+    valuation_interval: ValuationInterval | null;
+    certificate_name: string | null;
+  }>;
+  sources: Partial<Record<CountryDefaultField, CountryDefaultSource>>;
+  release_split_source: 'table' | 'regional_pack' | null;
+}
+
+export function getContractCountryDefaults(projectId: string): Promise<ContractCountryDefaults> {
+  return apiGet<ContractCountryDefaults>(
+    `/v1/contracts/country-defaults/?project_id=${encodeURIComponent(projectId)}`,
+  );
+}
+
+/** What a contract recorded about the defaults it was created from (`metadata.country_defaults`). */
+export interface ContractDefaultsStamp {
+  country_code: string | null;
+  has_country_defaults: boolean;
+  applied: Partial<Record<CountryDefaultField | 'retention_release_event', unknown>>;
+  sources: Partial<Record<CountryDefaultField, CountryDefaultSource>>;
+  release_split_source: 'table' | 'regional_pack' | null;
+  /** Figures that took the platform's historical value because the country has none. */
+  fallback?: string[];
 }
 
 export function updateContract(
