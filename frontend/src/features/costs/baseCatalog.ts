@@ -26,8 +26,8 @@ export interface BaseVariant {
   /** The markets/ catalog file token this card reprices into (e.g.
    *  "GB_LONDON_en"); empty for global + home variants. */
   market_catalog: string;
-  /** Whether this market is the one the base is currently repriced into
-   *  (registry default false; live value tracked client-side). */
+  /** On a market card: whether the server's stored state says the base is
+   *  priced into this market now. Always false on a home or global card. */
   active: boolean;
   /** Human market / country label (English). */
   market: string;
@@ -75,12 +75,34 @@ export interface BaseFamily {
   variants: BaseVariant[];
 }
 
+/**
+ * Which market a loaded national base is in, as the server stores it.
+ *
+ * `home`: the base's own prices. `market`: priced into `active_market`.
+ * `switching`: a market switch or a return home started and has not finished
+ * (still running, or cut off). `unknown`: the base was loaded before the server
+ * kept this, so nothing is known about it.
+ */
+export type BaseMarketState = 'home' | 'market' | 'switching' | 'unknown';
+
+export interface BaseStateInfo {
+  market_state: BaseMarketState;
+  active_market: string | null;
+  switching_to: string | null;
+  /** Language the work items are in, or null when not known. */
+  text_language: string | null;
+  updated_at: string | null;
+}
+
 export interface BaseCatalog {
   repo: string;
   families: BaseFamily[];
   total_bases: number;
   total_families: number;
   loaded_regions: string[];
+  /** Stored state of every loaded national base, keyed by base_region. Absent
+   *  from an older server, which kept the active market in the browser only. */
+  base_states?: Record<string, BaseStateInfo>;
 }
 
 /** Fetch the full cost-base catalog (families, variants, live loaded counts). */
@@ -118,9 +140,12 @@ export function variantMatches(variant: BaseVariant, family: BaseFamily, query: 
   );
 }
 
-// Which market each national base is currently repriced into. Keyed by
-// base_region -> market_catalog token (e.g. { ZH_CHINA: 'GB_LONDON_en' }). MVP
-// client-side tracking; a server table is a later hardening.
+// Which market each national base is currently repriced into, as THIS browser
+// last saw it. Keyed by base_region -> market_catalog token (e.g.
+// { ZH_CHINA: 'GB_LONDON_en' }). The server's stored state is the answer
+// (`BaseCatalog.base_states`, read through `effectiveActiveMarkets`); this is
+// only a cache for the moment before the catalog has loaded and for a base the
+// server knows nothing about.
 const ACTIVE_MARKETS_KEY = 'oe_active_markets';
 
 export function getActiveMarkets(): Record<string, string> {
@@ -142,6 +167,81 @@ export function setActiveMarketFor(baseRegion: string, token: string): void {
   }
 }
 
+/** Forget this browser's cached market for a base (it is back on its home market). */
+export function clearActiveMarketFor(baseRegion: string): void {
+  try {
+    const rest = Object.fromEntries(Object.entries(getActiveMarkets()).filter(([region]) => region !== baseRegion));
+    localStorage.setItem(ACTIVE_MARKETS_KEY, JSON.stringify(rest));
+  } catch {
+    // Storage unavailable -- ignore.
+  }
+}
+
+/**
+ * The market each base is in, for the cards to mark: the server's stored state
+ * wherever it knows one, this browser's cache only where it does not.
+ *
+ * A base the server reports on the home market, or in the middle of a switch,
+ * maps to '' so no market card reads as active, whatever the cache still holds.
+ * Without this, two browsers showed two different active markets over the same
+ * shared rows, and a restart of the server was invisible to both.
+ */
+export function effectiveActiveMarkets(
+  catalog: BaseCatalog | undefined,
+  cached: Record<string, string> | undefined,
+): Record<string, string> {
+  const out: Record<string, string> = { ...(cached ?? {}) };
+  for (const [baseRegion, state] of Object.entries(catalog?.base_states ?? {})) {
+    if (state.market_state === 'unknown') continue;
+    out[baseRegion] = state.market_state === 'market' ? (state.active_market ?? '') : '';
+  }
+  return out;
+}
+
+/**
+ * Whether a base can be offered "Return to home market": the server says it is
+ * priced into a market or a switch did not finish, or, where the server knows
+ * nothing, this browser remembers pricing it into one.
+ */
+export function canReturnHome(
+  baseRegion: string,
+  catalog: BaseCatalog | undefined,
+  cached: Record<string, string> | undefined,
+): boolean {
+  const state = catalog?.base_states?.[baseRegion];
+  if (state && state.market_state !== 'unknown') {
+    return state.market_state === 'market' || state.market_state === 'switching';
+  }
+  return !!cached?.[baseRegion];
+}
+
+/** Server answer of POST /v1/costs/base-home/{base_region}. */
+export interface RestoreHomeResult extends Record<string, unknown> {
+  items_restored?: number;
+  currency?: string;
+  /** Edited resource prices the return home replaced. */
+  user_prices_discarded?: number;
+  previous_market?: string | null;
+  text_language?: string | null;
+  text_language_requested?: string;
+  text_language_error?: string;
+  catalog?: { error?: string } & Record<string, unknown>;
+  state?: BaseStateInfo | null;
+}
+
+/**
+ * Bring a national base back from a market to its own prices, currency and
+ * language. The server keeps every item id, rebuilds the resource price sheet
+ * and the Resource Catalog, and records the home market for every browser.
+ */
+export async function restoreBaseHome(baseRegion: string): Promise<RestoreHomeResult> {
+  const data = await apiPost<RestoreHomeResult>(`/v1/costs/base-home/${baseRegion}`, undefined, {
+    longRunning: true,
+  });
+  clearActiveMarketFor(baseRegion);
+  return data;
+}
+
 /** Server answer of POST /v1/costs/base-market/{base_region}/{market_token}. */
 export interface BaseMarketResult extends Record<string, unknown> {
   items_repriced?: number;
@@ -150,6 +250,8 @@ export interface BaseMarketResult extends Record<string, unknown> {
   text_language?: string | null;
   /** Language the card asked for. */
   text_language_requested?: string;
+  /** The Resource Catalog mirror of the market; `error` when it failed. */
+  catalog?: { error?: string } & Record<string, unknown>;
 }
 
 /**

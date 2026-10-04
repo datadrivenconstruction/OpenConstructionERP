@@ -14,10 +14,10 @@
 
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, ChevronDown, Download, Loader2, Search } from 'lucide-react';
+import { Check, ChevronDown, Download, Loader2, RotateCcw, Search } from 'lucide-react';
 import { CountryFlag, CountryFlagBackdrop } from '@/shared/ui';
 import type { BaseCatalog, BaseFamily, BaseVariant } from './baseCatalog';
-import { languageName, variantMatches } from './baseCatalog';
+import { canReturnHome, effectiveActiveMarkets, languageName, variantMatches } from './baseCatalog';
 import { DEPTH_BANDS, baseDepthLevel } from './baseDepth';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 
@@ -88,9 +88,14 @@ interface BaseCatalogBrowserProps {
    *  hides the market cards: loading one as a plain base would install the
    *  home language instead of the card's. */
   onReprice?: (variant: BaseVariant) => void;
-  /** Active market token per base_region (e.g. { ZH_CHINA: 'GB_LONDON_en' }),
-   *  used to show the "Active market" badge vs a "Switch to" action. */
+  /** This browser's cached market token per base_region (e.g.
+   *  { ZH_CHINA: 'GB_LONDON_en' }). The server's stored state in
+   *  `catalog.base_states` wins wherever it knows one; this fills in only for a
+   *  base the server knows nothing about. */
   activeMarkets?: Record<string, string>;
+  /** Bring a national base back from a market to its own prices, currency and
+   *  language. Without it the home card offers no way back. */
+  onRestoreHome?: (variant: BaseVariant) => void;
   /** Seconds elapsed on the in-flight import, for the spinner label. */
   elapsedSeconds?: number;
   className?: string;
@@ -159,6 +164,10 @@ interface CardProps {
    *  when already loaded, switch the active market). Distinct from onSetActive,
    *  which stays for the global family's set-active-database. */
   onReprice?: (variant: BaseVariant) => void;
+  /** Home card of a base priced into a market: offer the way back. */
+  onRestoreHome?: (variant: BaseVariant) => void;
+  /** Home card of a base whose last market switch has not finished. */
+  unfinishedSwitch?: boolean;
   elapsedSeconds?: number;
 }
 
@@ -176,6 +185,8 @@ function BaseVariantCard({
   onSelect,
   onSetActive,
   onReprice,
+  onRestoreHome,
+  unfinishedSwitch = false,
   elapsedSeconds,
 }: CardProps) {
   const { t, i18n } = useTranslation();
@@ -243,6 +254,14 @@ function BaseVariantCard({
           {t('costs.base_text_only_in', {
             defaultValue: 'Work items in {{language}} only',
             language: languageName(variant.text_lang_code, i18n.language),
+          })}
+        </div>
+      )}
+
+      {unfinishedSwitch && (
+        <div className="mt-1.5 text-[11px] font-medium text-semantic-warning" data-testid="base-switch-unfinished">
+          {t('costs.base_market_unfinished', {
+            defaultValue: 'A market switch of this base has not finished',
           })}
         </div>
       )}
@@ -336,6 +355,23 @@ function BaseVariantCard({
                 : t('costs.base_download', { defaultValue: 'Download' })}
             </button>
           )}
+          {/* The way back from a market. Only on the home card of a base the
+              server (or, where it knows nothing, this browser) has in a market. */}
+          {!isMarket && loaded && onRestoreHome && (
+            <button
+              type="button"
+              disabled={disabled || loading}
+              onClick={() => onRestoreHome(variant)}
+              title={t('costs.base_restore_home_hint', {
+                defaultValue: 'Put this base back on its own prices, currency and language',
+              })}
+              className={`mt-1.5 flex items-center justify-center gap-1.5 ${ACTION_SECONDARY_CLASS} disabled:opacity-50`}
+              data-testid="base-restore-home"
+            >
+              {loading ? <Loader2 size={13} className="animate-spin" /> : <RotateCcw size={13} />}
+              {t('costs.base_restore_home', { defaultValue: 'Return to home market' })}
+            </button>
+          )}
         </div>
       )}
 
@@ -361,6 +397,7 @@ export function BaseCatalogBrowser({
   onSetActive,
   onReprice,
   activeMarkets,
+  onRestoreHome,
   elapsedSeconds,
   className = '',
 }: BaseCatalogBrowserProps) {
@@ -380,13 +417,34 @@ export function BaseCatalogBrowser({
   const isLoaded = (v: BaseVariant) => (loadedRegions ? loadedRegions.has(v.base_region) : v.loaded);
   const anyLoading = loadingRegion !== null;
 
+  // Which market each base is in: the server's stored state where it has one,
+  // this browser's cache only where it does not. Every surface that renders the
+  // browser gets the same answer, whatever it passes in.
+  const markets = useMemo(() => effectiveActiveMarkets(catalog, activeMarkets), [catalog, activeMarkets]);
+
+  // Bases that have market cards at all, so only their home card can offer a
+  // way back from a market.
+  const marketBases = useMemo(
+    () =>
+      new Set(
+        catalog.families.flatMap((f) => f.variants.filter((v) => v.market_catalog !== '').map((v) => v.base_region)),
+      ),
+    [catalog.families],
+  );
+
   // Whether a card is the active choice. A national market card is active when
   // its base is loaded and its market_catalog is the active market for that
   // base; a home/global card is active via the set-active-database mechanism.
   const isActive = (v: BaseVariant) =>
     v.market_catalog !== ''
-      ? isLoaded(v) && (activeMarkets?.[v.base_region] ?? '') === v.market_catalog
+      ? isLoaded(v) && (markets[v.base_region] ?? '') === v.market_catalog
       : activeRegion === v.variant_id;
+
+  const offersReturnHome = (v: BaseVariant) =>
+    v.market_catalog === '' &&
+    marketBases.has(v.base_region) &&
+    isLoaded(v) &&
+    canReturnHome(v.base_region, catalog, activeMarkets);
 
   // China first, the Global CWICR (GESN / FER / TER) base second, then the rest.
   const orderedFamilies = useMemo(() => orderFamilies(catalog.families), [catalog.families]);
@@ -448,6 +506,10 @@ export function BaseCatalogBrowser({
       onSelect={onSelect}
       onSetActive={onSetActive}
       onReprice={onReprice}
+      onRestoreHome={onRestoreHome && offersReturnHome(variant) ? onRestoreHome : undefined}
+      unfinishedSwitch={
+        variant.market_catalog === '' && catalog.base_states?.[variant.base_region]?.market_state === 'switching'
+      }
       elapsedSeconds={elapsedSeconds}
     />
   );

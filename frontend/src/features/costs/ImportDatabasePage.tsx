@@ -54,6 +54,7 @@ import {
   getActiveMarkets,
   languageName,
   loadBaseMarket,
+  restoreBaseHome,
   textLanguageFallback,
   canPriceMarkets as roleCanPriceMarkets,
   type BaseMarketResult,
@@ -426,6 +427,7 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
   // "Active market" badge vs a "Switch to" action.
   const [activeMarkets, setActiveMarkets] = useState<Record<string, string>>(() => getActiveMarkets());
   const addToast = useToastStore((s) => s.addToast);
+  const { confirm: confirmRestore, ...restoreConfirmProps } = useConfirm();
 
   // The whole loadable catalog (9 base families, 38 cost bases) with real
   // work-item counts, from the single-source backend registry. The browser
@@ -507,6 +509,15 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
           }
           const repriced = data.items_repriced ?? data.items_total ?? 0;
           setResult({ id: variant.variant_id, imported: repriced, skipped: 0, file: '' });
+          if (data.catalog?.error) {
+            addToast({
+              type: 'warning',
+              title: variant.market,
+              message: t('costs.market_catalog_not_updated', {
+                defaultValue: 'The prices are switched, but the Resource Catalog could not be updated to this market.',
+              }),
+            });
+          }
           const fellBackTo = textLanguageFallback(data);
           addToast({
             type: fellBackTo ? 'warning' : 'success',
@@ -724,6 +735,96 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
     [addToast, t, i18n, queryClient],
   );
 
+  // The way back from a market: the base's own prices, currency and language,
+  // every item id kept. It rewrites the shared rows and replaces the price
+  // sheet, so it is confirmed first.
+  const handleRestoreHome = useCallback(
+    async (variant: BaseVariant) => {
+      const baseRegion = variant.base_region;
+      const ok = await confirmRestore({
+        title: t('costs.restore_home_confirm_title', {
+          defaultValue: 'Return {{base}} to its home market?',
+          base: variant.market,
+        }),
+        message: t('costs.restore_home_confirm_msg', {
+          defaultValue:
+            'Every work item of this base goes back to its own prices in {{currency}} and its own language, for everyone using it. Prices edited on its resource price sheet are replaced.',
+          currency: variant.currency,
+        }),
+        confirmLabel: t('costs.base_restore_home', { defaultValue: 'Return to home market' }),
+        variant: 'warning',
+      });
+      if (!ok) return;
+      setLoading(variant.variant_id);
+      setResult(null);
+      try {
+        const data = await restoreBaseHome(baseRegion);
+        if (!mountedRef.current) return;
+        setActiveMarkets((prev) =>
+          Object.fromEntries(Object.entries(prev).filter(([region]) => region !== baseRegion)),
+        );
+        const discarded = data.user_prices_discarded ?? 0;
+        addToast({
+          type: 'success',
+          title: t('costs.restore_home_done_title', {
+            defaultValue: '{{base}} is back on its home market',
+            base: variant.market,
+          }),
+          message:
+            t('costs.restore_home_done_msg', {
+              defaultValue: '{{items}} items are back on their own prices in {{currency}}.',
+              items: (data.items_restored ?? 0).toLocaleString(getNumberLocale()),
+              currency: data.currency ?? variant.currency,
+            }) +
+            (discarded > 0
+              ? ` ${t('costs.restore_home_discarded', {
+                  defaultValue: 'Edited resource prices replaced: {{n}}.',
+                  n: discarded,
+                })}`
+              : ''),
+        });
+        const fellBackTo = textLanguageFallback(data);
+        if (fellBackTo) {
+          addToast({
+            type: 'warning',
+            title: variant.market,
+            message: t('costs.base_text_swap_failed', {
+              defaultValue: 'The work items stayed in {{language}}: the {{requested}} text could not be loaded.',
+              language: languageName(fellBackTo, i18n.language),
+              requested: languageName(String(data.text_language_requested), i18n.language),
+            }),
+          });
+        }
+        if (data.catalog?.error) {
+          addToast({
+            type: 'warning',
+            title: variant.market,
+            message: t('costs.restore_home_catalog_not_updated', {
+              defaultValue:
+                'The prices are back, but the Resource Catalog could not be given its home resources. Import them again from the Resource Catalog page.',
+            }),
+          });
+        }
+        queryClient.invalidateQueries({ queryKey: ['costs'] });
+      } catch (err: unknown) {
+        if (!mountedRef.current) return;
+        addToast({
+          type: 'error',
+          title: t('costs.restore_home_failed_title', {
+            defaultValue: 'Could not return {{base}} to its home market',
+            base: variant.market,
+          }),
+          message: err instanceof Error ? err.message : '',
+        });
+        // A failure may leave the switch marked unfinished; show what the server says.
+        queryClient.invalidateQueries({ queryKey: ['costs', 'base-catalog'] });
+      } finally {
+        if (mountedRef.current) setLoading(null);
+      }
+    },
+    [addToast, confirmRestore, t, i18n, queryClient],
+  );
+
   return (
     <div>
       {/* One browser for all 9 base families (30 global markets + 8 national
@@ -737,6 +838,7 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
           activeMarkets={activeMarkets}
           onLoad={handleLoad}
           onReprice={canPriceMarkets ? handleLoad : undefined}
+          onRestoreHome={canPriceMarkets ? handleRestoreHome : undefined}
           onSetActive={handleSetActive}
           elapsedSeconds={elapsed}
         />
@@ -748,6 +850,8 @@ function CWICRDatabaseGrid(_props: { onLoadDatabase: (file: File) => void }) {
           {t('costs.base_loading_catalog', { defaultValue: 'Loading cost bases...' })}
         </div>
       )}
+
+      <ConfirmDialog {...restoreConfirmProps} />
 
       {/* ── Import Progress Panel ─────────────────────────────────────── */}
       {(loading || result) && (() => {

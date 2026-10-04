@@ -114,6 +114,99 @@ describe('BaseCatalogBrowser market cards', () => {
     expect(notes[0].textContent).toMatch(/Turkish/);
   });
 
+  it('marks the market the server stores, not the one this browser cached', () => {
+    const loaded = new Set(['TR_NATIONAL']);
+    const catalog = {
+      ...CATALOG,
+      base_states: {
+        TR_NATIONAL: {
+          market_state: 'market',
+          active_market: 'GB_LONDON_en',
+          switching_to: null,
+          text_language: 'tr',
+          updated_at: null,
+        },
+      },
+    };
+    render(
+      <BaseCatalogBrowser
+        catalog={catalog}
+        loadedRegions={loaded}
+        onReprice={vi.fn()}
+        activeMarkets={{ TR_NATIONAL: 'FR_PARIS_fr' }}
+      />,
+    );
+    // Paris is offered as a switch; London is the active one.
+    expect(screen.getAllByRole('button').some((b) => /Switch to France/.test(b.textContent ?? ''))).toBe(true);
+    expect(screen.getAllByRole('button').some((b) => /Switch to United Kingdom/.test(b.textContent ?? ''))).toBe(
+      false,
+    );
+    expect(screen.getAllByText('Active market')).toHaveLength(1);
+  });
+
+  it('offers the way home on the home card of a base in a market, and nowhere else', () => {
+    const onRestoreHome = vi.fn();
+    const loaded = new Set(['TR_NATIONAL']);
+    const inMarket = {
+      ...CATALOG,
+      base_states: {
+        TR_NATIONAL: {
+          market_state: 'market',
+          active_market: 'GB_LONDON_en',
+          switching_to: null,
+          text_language: 'tr',
+          updated_at: null,
+        },
+      },
+    };
+    const { unmount } = render(
+      <BaseCatalogBrowser catalog={inMarket} loadedRegions={loaded} onReprice={vi.fn()} onRestoreHome={onRestoreHome} />,
+    );
+    const buttons = screen.getAllByTestId('base-restore-home');
+    expect(buttons).toHaveLength(1);
+    fireEvent.click(buttons[0]);
+    expect(onRestoreHome).toHaveBeenCalledWith(HOME);
+    unmount();
+
+    const atHome = {
+      ...CATALOG,
+      base_states: { TR_NATIONAL: { ...inMarket.base_states.TR_NATIONAL, market_state: 'home', active_market: null } },
+    };
+    render(
+      <BaseCatalogBrowser
+        catalog={atHome}
+        loadedRegions={loaded}
+        onReprice={vi.fn()}
+        onRestoreHome={onRestoreHome}
+        activeMarkets={{ TR_NATIONAL: 'FR_PARIS_fr' }}
+      />,
+    );
+    expect(screen.queryByTestId('base-restore-home')).toBeNull();
+  });
+
+  it('says so on the home card when a switch did not finish', () => {
+    const loaded = new Set(['TR_NATIONAL']);
+    const switching = {
+      ...CATALOG,
+      base_states: {
+        TR_NATIONAL: {
+          market_state: 'switching',
+          active_market: 'GB_LONDON_en',
+          switching_to: 'FR_PARIS_fr',
+          text_language: null,
+          updated_at: null,
+        },
+      },
+    };
+    render(
+      <BaseCatalogBrowser catalog={switching} loadedRegions={loaded} onReprice={vi.fn()} onRestoreHome={vi.fn()} />,
+    );
+    expect(screen.getAllByTestId('base-switch-unfinished')).toHaveLength(1);
+    // Neither market reads as active while the rows may be half in one of them.
+    expect(screen.queryByText('Active market')).toBeNull();
+    expect(screen.getAllByTestId('base-restore-home')).toHaveLength(1);
+  });
+
   it('keeps market cards selectable in the onboarding picker', () => {
     const onSelect = vi.fn();
     const { container } = render(
