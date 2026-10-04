@@ -18,9 +18,10 @@
  * The project name, standard, region and currency were absent for a different
  * reason: `doExport` closed over `project` while `project` was not in its
  * dependency list, and the project query is gated on the bill having arrived,
- * so it always resolves after the callback was last built. That half still
- * matters because the PDF branch is still built in the browser, so the second
- * test drives PDF with a project that arrives after mount.
+ * so it always resolves after the callback was last built. The PDF was the
+ * last export still drawn in the browser and so the last one exposed to that;
+ * it is asked of the server now too, and the PDF tests below drive it with a
+ * project that arrives after mount to show the page no longer needs it.
  *
  * Reproducing the staleness needs every other dependency to be stable across
  * the project arriving, which is why the fixtures below are module-level
@@ -68,7 +69,6 @@ vi.mock('../BOQGrid', () => ({
   }),
 }));
 
-vi.mock('../pdfReport', () => ({ generateBOQPdf: vi.fn() }));
 vi.mock('@/features/bim/api', () => ({ fetchBIMModels: vi.fn().mockResolvedValue({ items: [] }) }));
 
 vi.mock('@/shared/lib/api', async (importOriginal) => {
@@ -147,9 +147,11 @@ vi.mock('@/features/projects/api', async (importOriginal) => {
   return { ...actual, projectsApi: { ...actual.projectsApi, get: vi.fn() } };
 });
 
-import { generateBOQPdf } from '../pdfReport';
 import { triggerDownload } from '@/shared/lib/api';
 import { projectsApi } from '@/features/projects/api';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { usePreferencesStore } from '@/stores/usePreferencesStore';
+import { useToastStore } from '@/stores/useToastStore';
 import { BOQEditorPage } from '../BOQEditorPage';
 
 /* ── Harness ───────────────────────────────────────────────────────────── */
@@ -269,24 +271,115 @@ describe('exporting a bill of quantities to Excel', () => {
 });
 
 describe('exporting a bill of quantities to PDF', () => {
-  it('prints the project that arrived after the page was built, not the one it had', async () => {
+  const PDF_URL = `/api/v1/boq/boqs/${BOQ_ID}/export/pdf/`;
+
+  function pdfCall(): [string, RequestInit | undefined] | undefined {
+    const call = fetchSpy.mock.calls.find((c) => String(c[0]).startsWith(PDF_URL));
+    return call ? [String(call[0]), call[1] as RequestInit | undefined] : undefined;
+  }
+
+  function errorToasts(): { title: string; message?: string }[] {
+    return useToastStore.getState().toasts.filter((toast) => toast.type === 'error');
+  }
+
+  beforeEach(() => {
+    useToastStore.setState({ toasts: [] });
+    useAuthStore.setState({ accessToken: 'token-123' });
+    usePreferencesStore.setState({ measurementSystem: 'metric' });
+  });
+
+  afterEach(() => {
+    useAuthStore.setState({ accessToken: null });
+    usePreferencesStore.setState({ measurementSystem: 'metric' });
+  });
+
+  it('downloads the server PDF with the token, never drawing one in the browser', async () => {
     await renderWithProjectPending();
     await letTheProjectArrive();
 
     await chooseExport('PDF');
 
-    // The PDF is still drawn in the browser, so it reads the project directly.
-    // Before the dependency list was completed this was called with
-    // `projectName: undefined` and `currency: ''`, because the callback was
-    // last built while the project query was still in flight.
-    await waitFor(() => expect(generateBOQPdf).toHaveBeenCalled());
-    expect(generateBOQPdf).toHaveBeenCalledWith(
-      expect.objectContaining({
-        boqTitle: 'Riverside HQ Bill',
-        projectName: 'Riverside HQ',
-        currency: '€',
-        baseCurrency: 'EUR',
-      }),
+    await waitFor(() => expect(pdfCall()).toBeDefined());
+    const [url, init] = pdfCall()!;
+    const query = new URL(url, 'http://test').searchParams;
+    // The reader's measurement system, and the resources under each line,
+    // as the browser PDF printed them.
+    expect(query.get('measurement_system')).toBe('metric');
+    expect(query.get('include_resources')).toBe('true');
+    expect(init?.headers).toEqual({ Authorization: 'Bearer token-123' });
+    await waitFor(() =>
+      expect(triggerDownload).toHaveBeenCalledWith(SERVER_FILE, 'Riverside HQ Bill.pdf'),
     );
+    expect(errorToasts()).toEqual([]);
+  });
+
+  it('does not wait for the project: the server reads it for itself', async () => {
+    await renderWithProjectPending();
+
+    await chooseExport('PDF');
+
+    await waitFor(() => expect(pdfCall()).toBeDefined());
+    await waitFor(() => expect(triggerDownload).toHaveBeenCalledWith(SERVER_FILE, 'Riverside HQ Bill.pdf'));
+  });
+
+  it('asks for imperial quantities when the reader works in imperial', async () => {
+    usePreferencesStore.setState({ measurementSystem: 'imperial' });
+    await renderWithProjectPending();
+    await letTheProjectArrive();
+
+    await chooseExport('PDF');
+
+    await waitFor(() => expect(pdfCall()).toBeDefined());
+    expect(new URL(pdfCall()![0], 'http://test').searchParams.get('measurement_system')).toBe('imperial');
+  });
+
+  it('shows the server reason when the PDF cannot be built, and downloads nothing', async () => {
+    const reason = 'PDF generation failed. The BOQ may be too large or contain invalid data.';
+    fetchSpy.mockImplementation(async () => ({
+      ok: false,
+      status: 500,
+      blob: async () => new Blob([]),
+      json: async () => ({ detail: reason }),
+      text: async () => '',
+      headers: new Headers(),
+    }));
+    await renderWithProjectPending();
+
+    await chooseExport('PDF');
+
+    await waitFor(() => expect(errorToasts().map((toast) => toast.title)).toContain(reason));
+    expect(triggerDownload).not.toHaveBeenCalled();
+  });
+
+  it('does not show a validation error list as the title', async () => {
+    fetchSpy.mockImplementation(async () => ({
+      ok: false,
+      status: 422,
+      blob: async () => new Blob([]),
+      json: async () => ({ detail: [{ loc: ['query', 'measurement_system'], msg: 'bad' }] }),
+      text: async () => '',
+      headers: new Headers(),
+    }));
+    await renderWithProjectPending();
+
+    await chooseExport('PDF');
+
+    await waitFor(() => expect(errorToasts().map((toast) => toast.title)).toContain('Export failed'));
+  });
+
+  it('says the server could not be reached when there is no response at all', async () => {
+    fetchSpy.mockImplementation(async () => {
+      throw new TypeError('Failed to fetch');
+    });
+    await renderWithProjectPending();
+
+    await chooseExport('PDF');
+
+    await waitFor(() => expect(errorToasts()).toHaveLength(1));
+    expect(errorToasts()[0]).toMatchObject({
+      title: 'Export failed',
+      message: 'The server could not be reached. Check your connection and try again.',
+    });
+    expect(triggerDownload).not.toHaveBeenCalled();
   });
 });

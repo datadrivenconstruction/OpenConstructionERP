@@ -76,7 +76,6 @@ import { SensitivityChart } from './SensitivityChart';
 import { CostRiskPanel } from './CostRiskPanel';
 import { MarkupPanel } from './MarkupPanel';
 import BOQGrid from './BOQGrid';
-import { generateBOQPdf } from './pdfReport';
 import type { BOQGridHandle } from './BOQGrid';
 import { allResourcesExpanded, type ResourceExpansionState } from './resourceExpansion';
 import { BatchActionBar } from './BatchActionBar';
@@ -2323,9 +2322,10 @@ export function BOQEditorPage() {
   /* Client-side VAT / gross. This chain is NOT authoritative and must not be
    * printed under a "Grand Total" label — ``vatRate`` resolves a single tax
    * markup, so a BOQ with two tax lines (Brazil BDI) or a fixed-amount tax
-   * loses the rest. It stays client-side because the grid footer and the
-   * client PDF export need net / VAT / gross as three separate rows that
-   * react to a cell edit instantly, which a server round-trip cannot do.
+   * loses the rest. It stays client-side because the grid footer needs
+   * net / VAT / gross as three separate rows that react to a cell edit
+   * instantly, which a server round-trip cannot do. Nothing that leaves the
+   * page reads it: every export, the PDF included, is the server's.
    * The authority for the total of everything is the server's
    * ``cost-breakdown.grand_total`` (see the ``costBreakdown`` query above),
    * which is what the toolbar card, the Markup panel and the Cost Breakdown
@@ -3000,62 +3000,44 @@ export function BOQEditorPage() {
   /** Actually perform the export (download file). */
   const doExport = useCallback(
     async (format: string) => {
-      /* Excel is asked of the server, like CSV, GAEB and BC3, and unlike the
-       * PDF below. The workbook a customer receives carries the company
-       * letterhead, the header block the importers read back, a Position ID
-       * column that survives a round trip, per-row currencies and the frozen
-       * FX table, and the server is the only place any of that is written. A
-       * browser-built spreadsheet had none of it: its second row was the
-       * product name, its money came from the client net / VAT / gross chain
-       * below, which is documented there as not authoritative and loses a
-       * second tax line, and a letterhead assembled in two places drifts. */
-
-      // Client-side PDF export via jsPDF (skip for very large BOQs to avoid
-      // browser memory issues — let the server handle them with a simplified report)
-      const LARGE_BOQ_THRESHOLD = 500;
-      const nonSectionPositions = positions.filter((p) => !isSection(p));
-      if (format === 'pdf' && nonSectionPositions.length > 0 && nonSectionPositions.length <= LARGE_BOQ_THRESHOLD) {
-        try {
-          const markupTotalsForExport = markupTotals.map((m) => ({
-            name: m.name,
-            percentage: m.percentage,
-            amount: m.amount,
-          }));
-          generateBOQPdf({
-            boqTitle: boq?.name ?? 'BOQ',
-            projectName: project?.name,
-            date: new Date().toISOString(),
-            currency: currencySymbol,
-            // Issue #150 — convert foreign-currency resources to the project
-            // base in the PDF totals exactly as the grid does. ``directCost``
-            // (passed above) is already resource-aware base-converted.
-            baseCurrency: currencyCode,
-            fxRates,
-            positions,
-            markupTotals: markupTotalsForExport,
-            directCost,
-            netTotal,
-            vatRate,
-            vatAmount,
-            grossTotal,
-            locale,
-            // Issue #270 - emit quantities + unit labels in the user's system.
-            measurementSystem,
-          });
-          addToast({ type: 'success', title: t('boq.file_downloaded', { defaultValue: 'File downloaded' }) });
-          return;
-        } catch {
-          // Fall through to server-side export
-        }
-      }
-
+      /* Every format is asked of the server: Excel, CSV, GAEB, BC3 and PDF.
+       * The server is the only place the company letterhead, the header block
+       * the importers read back, the Position ID column, per-row currencies
+       * and the frozen FX table are written, and the only place the money is
+       * authoritative. The PDF used to be drawn here in the browser from the
+       * client net / VAT / gross chain, which takes its tax from the first
+       * percentage tax markup only, so a second or a fixed tax line vanished
+       * from a printed estimate the grid itself totalled correctly. */
       const token = useAuthStore.getState().accessToken;
       // Map frontend format names to API endpoints and query params
       const exportFormat = format === 'gaeb_x84' ? 'gaeb' : format;
-      const exportParams = format === 'gaeb_x84' ? '?phase=84' : '';
-      const r = await fetch(`/api/v1/boq/boqs/${boqId}/export/${exportFormat}/${exportParams}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      const params = new URLSearchParams();
+      if (format === 'gaeb_x84') params.set('phase', '84');
+      if (format === 'pdf') {
+        // Issue #270: quantities and unit labels in the reader's system, as
+        // the browser PDF printed them. The resources under each line are
+        // what the browser PDF printed too.
+        params.set('measurement_system', measurementSystem);
+        params.set('include_resources', 'true');
+      }
+      const query = params.toString();
+      let r: Response;
+      try {
+        r = await fetch(`/api/v1/boq/boqs/${boqId}/export/${exportFormat}/${query ? `?${query}` : ''}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+      } catch {
+        // No response at all (offline, server down): say so, rather than
+        // leaving the click without an answer.
+        addToast({
+          type: 'error',
+          title: t('boq.export_failed', { defaultValue: 'Export failed' }),
+          message: t('boq.export_unreachable', {
+            defaultValue: 'The server could not be reached. Check your connection and try again.',
+          }),
+        });
+        return;
+      }
       if (r.ok) {
         const blob = await r.blob();
         const extensions: Record<string, string> = {
@@ -3067,7 +3049,9 @@ export function BOQEditorPage() {
         let errorMsg = t('boq.export_failed', { defaultValue: 'Export failed' });
         try {
           const errBody = await r.json();
-          if (errBody?.detail) {
+          // A string only: a validation error's ``detail`` is a list, and a
+          // list is not a title.
+          if (typeof errBody?.detail === 'string' && errBody.detail) {
             errorMsg = errBody.detail;
           }
         } catch {
@@ -3076,18 +3060,9 @@ export function BOQEditorPage() {
         addToast({ type: 'error', title: errorMsg });
       }
     },
-    /* Everything the body reads. The project and the four values derived from
-     * it used to be missing, and the project query is gated on the bill having
-     * arrived, so it always resolves after this callback was last built: the
-     * export printed no project name, no currency and no rates. It was not a
-     * race that sometimes went the other way, because nothing else changes
-     * when the project lands unless the bill holds foreign-currency rows,
-     * whose converted direct cost is what would rebuild this. */
-    [
-      boqId, boq, positions, markups, project, currencySymbol, currencyCode, fxRates, locale,
-      directCost, markupTotals, netTotal, vatRate, vatAmount, grossTotal,
-      addToast, t, measurementSystem,
-    ],
+    /* Everything the body reads. The project and the money are not among them
+     * any more: the server reads both for itself. */
+    [boqId, boq, addToast, t, measurementSystem],
   );
 
   /** Pre-export validation check: warn if quality < 60%, GAEB preview before export. */

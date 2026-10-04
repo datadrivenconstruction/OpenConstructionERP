@@ -44,7 +44,6 @@ vi.mock('../BOQGrid', () => ({
   }),
 }));
 
-vi.mock('../pdfReport', () => ({ generateBOQPdf: vi.fn() }));
 vi.mock('@/features/bim/api', () => ({ fetchBIMModels: vi.fn().mockResolvedValue({ items: [] }) }));
 
 const BOQ_ID = 'boq-1';

@@ -217,9 +217,6 @@ const KEPT_AS_PLAIN_COMMAS: readonly Excluded[] = [
   { file: 'features/eac/components/blocks/ConstraintBlock.tsx', sites: 1, why: 'set notation, {a, b}' },
   { file: 'features/pipelines/canvas/PipelineNode.tsx', sites: 1, why: 'arbitrary value stringify' },
   { file: 'features/smart_views/SmartViewRuleEditor.tsx', sites: 1, why: 'arbitrary value stringify' },
-  // The labels around it are hardcoded English, so the document is English by
-  // construction and one localised separator would read as an accident.
-  { file: 'features/boq/pdfReport.ts', sites: 1, why: 'English-only generated PDF' },
 ];
 
 /** `.join(', ')` and `.join(", ")`, and neither `.join('; ')` nor `.join(',')`. */
@@ -262,7 +259,7 @@ describe('the rest of the product', () => {
     // root, or a regex that quietly stopped matching, returns an empty map and
     // every assertion after this one passes while checking nothing at all.
     expect(files.length).toBeGreaterThan(2000);
-    expect([...found.values()].reduce((a, b) => a + b, 0)).toBe(36);
+    expect([...found.values()].reduce((a, b) => a + b, 0)).toBe(35);
   });
 
   it('routes every list a reader sees through the helper, except the recorded ones', () => {

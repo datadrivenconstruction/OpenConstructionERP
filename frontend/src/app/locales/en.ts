@@ -3744,6 +3744,7 @@ const resource = {
     "boq.estimates": "estimates",
     "boq.export": "Export",
     "boq.export_failed": "Export failed",
+    "boq.export_unreachable": "The server could not be reached. Check your connection and try again.",
     "boq.export_format_excel": "Excel (.xlsx)",
     "boq.export_format_csv": "CSV (.csv)",
     "boq.export_format_pdf": "PDF",
