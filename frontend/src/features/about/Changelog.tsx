@@ -73,6 +73,13 @@ const UNRELEASED: ChangelogEntry | null = {
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '18.4.0',
+    date: '2026-10-04',
+    tag: 'NEW',
+    summary:
+      'A trade package goes from the drawing to the subcontractor and back: a wall measured on the plan keeps its openings and becomes a bill position, the bill goes out as Excel or GAEB X83 without prices, each firm types its prices through a personal link without an account, and the price comparison exports to Excel with missing prices flagged rather than read as zero. Cost control gets a quantity check of measured against contract quantities with the cost of each difference. Records lead to each other from RFIs and NCRs to change orders, budgets and purchase orders, contracts start from their country's payment terms, Germany gets GAEB X31 and X89, the United Kingdom an NRM 1 cost plan and Russia the resource-index method.',
+  },
+  {
     version: '18.3.0',
     date: '2026-10-02',
     tag: 'NEW',
