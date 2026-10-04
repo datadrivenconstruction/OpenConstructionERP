@@ -17,6 +17,9 @@ lacked, each with the case that tells right from wrong:
   the unit rate and not to the line. They are scaled to the line now.
 * The cover counted sections and positions and had a place for whoever
   approves the estimate to sign.
+* A bill of several sections opened with a table of contents that gave the
+  page each section starts on, and ended with a page listing each section's
+  subtotal above the totals.
 """
 
 from __future__ import annotations
@@ -358,6 +361,111 @@ def test_malformed_resources_are_skipped_rather_than_failing_the_export() -> Non
     assert _resource_lines(_position("02", "1", "1", "1", metadata={"resources": "nope"}), "EUR", FX) == []
 
 
+# -- Table of contents and cost summary --------------------------------------------
+
+SECTION_NAMES = ("Earthworks", "Concrete", "Roofing")
+
+
+def _long_bill() -> Any:
+    """Three sections of 40 lines each, so every section starts on a page of its own.
+
+    Each position's description is the same neutral word, so a section's name
+    is printed only by its own header row and by the table of contents.
+    """
+    sections = []
+    for number, name in enumerate(SECTION_NAMES, start=1):
+        lines = [_position(f"{number:02d}.{i:03d}", "1", "100", "100", description="Item") for i in range(1, 41)]
+        section = _section(lines, "4000", ordinal=f"{number:02d}")
+        section.description = name
+        sections.append(section)
+    return _bill(sections)
+
+
+def _toc_numbers(toc_page: str) -> dict[str, int]:
+    """The page number the table of contents prints against each entry."""
+    import re
+
+    numbers: dict[str, int] = {}
+    for name in (*SECTION_NAMES, "Cost Summary"):
+        match = re.search(rf"{name}\s+(\d+)", toc_page)
+        assert match, f"{name} has no page number in the table of contents:\n{toc_page}"
+        numbers[name] = int(match.group(1))
+    return numbers
+
+
+def test_a_bill_of_several_sections_opens_with_a_table_of_contents_that_points_right() -> None:
+    pages = _pdf_text(generate_boq_pdf(_long_bill(), "Harbour", currency="EUR"))
+
+    assert "Table of Contents" in pages[1]
+    numbers = _toc_numbers(pages[1])
+    starts = [numbers[name] for name in SECTION_NAMES]
+    # The distinguishing shape: the sections start on three different pages,
+    # all after the contents, so a number off by one page, or the same number
+    # for all, cannot pass.
+    assert starts == sorted(set(starts)), starts
+    assert starts[0] > 2
+
+    for name, number in numbers.items():
+        page = pages[number - 1]
+        assert name in page, f"{name} is not on page {number}, where the contents point"
+        assert f"Page {number} of {len(pages)}" in page, "the number is not the one the footer prints"
+        # And it is where the section starts, not a later page it also appears on.
+        earlier = [i + 1 for i, text in enumerate(pages[2 : number - 1], start=2) if name in text]
+        assert not earlier, f"{name} already appears on page(s) {earlier}"
+    assert numbers["Cost Summary"] == len(pages)
+
+
+def test_a_bill_of_one_section_has_no_table_of_contents() -> None:
+    pages = _pdf_text(generate_boq_pdf(_three_taxes(), "Harbour", currency="EUR"))
+    assert not any("Table of Contents" in page for page in pages)
+    assert "Pos." in pages[1]
+
+
+def test_the_table_of_contents_is_in_the_project_language() -> None:
+    pages = _pdf_text(generate_boq_pdf(_long_bill(), "Hafen", currency="EUR", locale="de"))
+    assert "Inhaltsverzeichnis" in pages[1]
+    assert "Kostenübersicht" in pages[-1]
+
+
+def _summary_bill() -> Any:
+    """Two sections plus a dollar line outside any section, on a euro project."""
+    first = _section([_position("01.001", "10", "50", "500")], "500", ordinal="01")
+    second = _section([_position("02.001", "2", "300", "600")], "600", ordinal="02")
+    second.description = "Finishes"
+    dollar = _position("99", "10", "100", "1000", metadata={"currency": "USD"})
+    bill = _bill([first, second], positions=[dollar], markups=[_tax("VAT", 23.0, "460.00")])
+    # 500 + 600 + 1000 USD at 0.90, as the rollup makes it.
+    bill.direct_cost = Decimal("2000")
+    bill.net_total = bill.grand_total = Decimal("2460")
+    return bill
+
+
+def test_the_cost_summary_page_lists_each_section_and_adds_up_to_the_direct_cost() -> None:
+    from app.modules.boq.pdf_export import _section_summary_table
+
+    bill = _summary_bill()
+    table = _section_summary_table(
+        bill, "EUR", _build_styles(), _PDF_LABELS["en"], 170, country_code="IE", base_currency="EUR", fx_rates=FX
+    )
+    rows = [[getattr(cell, "text", "") for cell in row] for row in table._cellvalues[1:]]
+    assert [(row[1], row[3]) for row in rows] == [
+        ("Structure", "500.00 EUR"),
+        ("Finishes", "600.00 EUR"),
+        ("Other Positions", "900.00 EUR"),
+    ]
+    # The distinguishing case: summed raw, the dollar row makes 2,100.
+    assert sum(_money(row[3].removesuffix(" EUR")) for row in rows) == bill.direct_cost
+
+    pages = _pdf_text(
+        generate_boq_pdf(bill, "Harbour", currency="EUR", country_code="IE", base_currency="EUR", fx_rates=FX)
+    )
+    summary = " ".join(pages[-1].split())
+    assert "Cost Summary" in summary
+    for expected in ("Finishes", "600.00 EUR", "Other Positions", "900.00 EUR", "2,000.00 EUR", "2,460.00 EUR"):
+        assert expected in summary, f"{expected} is missing from the cost summary page"
+    assert "1,000.00 EUR" not in summary
+
+
 # -- The cover -----------------------------------------------------------------------
 
 
@@ -439,7 +547,7 @@ def test_every_translated_table_names_the_sign_off_and_the_counts() -> None:
     for locale, table in _PDF_LABELS.items():
         if locale in {"en", "zh"}:
             continue
-        for key in ("approved_by", "signature_hint", "contents"):
+        for key in ("approved_by", "signature_hint", "contents", "table_of_contents"):
             assert table.get(key), f"{locale} has no {key}"
             assert table[key] != _PDF_LABELS["en"][key], f"{locale} {key} is still English"
 

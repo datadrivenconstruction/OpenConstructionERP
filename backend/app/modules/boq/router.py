@@ -5233,7 +5233,9 @@ async def export_boq_pdf(
 
     Generates a multi-page PDF document with:
     - Cover page: project name, BOQ title, cost summary, date, status
+    - Table of contents with page numbers, for a bill of more than one section
     - BOQ table pages: sections, positions, subtotals, markups, totals
+    - Cost summary page: each section's subtotal, then the totals
     - Running headers/footers with page numbering
 
     For large BOQs (> 500 positions), a simplified summary report is generated

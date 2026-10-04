@@ -4,7 +4,9 @@
 
 Produces a professional multi-page PDF document with:
 - Cover page: project name, BOQ title, cost summary, date, status
+- Table of contents with page numbers, for a bill of more than one section
 - BOQ table pages: sections, positions, subtotals, markups, totals
+- Cost summary page: each section's subtotal, then the totals
 - Running headers/footers with page numbering
 
 Security note (BUG-PDF01 / BUG-PDF02):
@@ -39,6 +41,7 @@ from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
 from reportlab.platypus import (
     BaseDocTemplate,
+    Flowable,
     Frame,
     NextPageTemplate,
     PageBreak,
@@ -103,6 +106,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "section": "Section",
         "items": "Items",
         "cost_summary": "Cost Summary",
+        "table_of_contents": "Table of Contents",
         "status_draft": "Draft",
         "status_final": "Final",
         "status_archived": "Archived",
@@ -140,6 +144,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "section": "Abschnitt",
         "items": "Positionen",
         "cost_summary": "Kostenübersicht",
+        "table_of_contents": "Inhaltsverzeichnis",
         "status_draft": "Entwurf",
         "status_final": "Freigegeben",
         "status_archived": "Archiviert",
@@ -177,6 +182,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "section": "Lot",
         "items": "Postes",
         "cost_summary": "Récapitulatif des coûts",
+        "table_of_contents": "Table des matières",
         "status_draft": "Brouillon",
         "status_final": "Validé",
         "status_archived": "Archivé",
@@ -214,6 +220,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "section": "Capítulo",
         "items": "Partidas",
         "cost_summary": "Resumen de costes",
+        "table_of_contents": "Índice",
         "status_draft": "Borrador",
         "status_final": "Aprobado",
         "status_archived": "Archivado",
@@ -251,6 +258,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "section": "Раздел",
         "items": "Позиций",
         "cost_summary": "Сводка затрат",
+        "table_of_contents": "Содержание",
         "status_draft": "Черновик",
         "status_final": "Утверждена",
         "status_archived": "В архиве",
@@ -288,6 +296,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "section": "Розділ",
         "items": "Позицій",
         "cost_summary": "Зведення витрат",
+        "table_of_contents": "Зміст",
         "status_draft": "Чернетка",
         "status_final": "Затверджено",
         "status_archived": "В архіві",
@@ -325,6 +334,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "section": "Fejezet",
         "items": "Tételek",
         "cost_summary": "Költségösszesítő",
+        "table_of_contents": "Tartalomjegyzék",
         "status_draft": "Piszkozat",
         "status_final": "Jóváhagyva",
         "status_archived": "Archiválva",
@@ -385,6 +395,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "section": "Capítulo",
         "items": "Itens",
         "cost_summary": "Resumo de custos",
+        "table_of_contents": "Índice",
         "status_draft": "Rascunho",
         "status_final": "Aprovado",
         "status_archived": "Arquivado",
@@ -422,6 +433,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "section": "Bölüm",
         "items": "Kalem",
         "cost_summary": "Maliyet özeti",
+        "table_of_contents": "İçindekiler",
         "status_draft": "Taslak",
         "status_final": "Onaylandı",
         "status_archived": "Arşivlendi",
@@ -1352,6 +1364,7 @@ def _build_boq_table(
     base_currency: str = "",
     fx_rates: Mapping[str, str] | None = None,
     include_resources: bool = False,
+    page_marks: dict[str, int] | None = None,
 ) -> list[Any]:
     """Build the BOQ table flowables (sections, positions, totals).
 
@@ -1377,10 +1390,17 @@ def _build_boq_table(
     ``include_resources`` prints each position's resources under it, scaled
     to the line (see :func:`_resource_lines`). Off by default: the build-up is
     the estimator's own cost, not every recipient's business.
+
+    ``page_marks``, when given, receives the page each section's header row
+    is drawn on (see :class:`_PageMark`), for the table of contents.
     """
     lb = labels or _PDF_LABELS["en"]
     table_widths = col_widths or TABLE_COL_WIDTHS
     elements: list[Any] = []
+
+    def _mark(key: str) -> Any:
+        """An empty cell of a section's header row, holding its page mark when asked for."""
+        return _PageMark(key, page_marks) if page_marks is not None else ""
 
     # Locale-aware formatting shortcuts
     def _fv(value: Any, decimals: int = 2) -> str:
@@ -1458,13 +1478,13 @@ def _build_boq_table(
     row_idx = 1  # 0 = header
 
     # Sections with positions
-    for section in boq_data.sections:
+    for section_index, section in enumerate(boq_data.sections):
         # Section header row
         table_data.append(
             [
                 _safe_para(section.ordinal, styles["section_header"]),
                 _safe_para(section.description, styles["section_header"]),
-                "",
+                _mark(_toc_section_key(section_index)),
                 "",
                 "",
                 "",
@@ -1501,7 +1521,7 @@ def _build_boq_table(
             [
                 Paragraph("", styles["section_header"]),
                 Paragraph(lb["other_positions"], styles["section_header"]),
-                "",
+                _mark(_TOC_UNGROUPED),
                 "",
                 "",
                 "",
@@ -1669,6 +1689,264 @@ def _build_boq_table(
     return elements
 
 
+class _PageMark(Flowable):
+    """A flowable of no size that writes down the page it is drawn on.
+
+    The bill is one long table that reportlab splits across pages, so the page
+    a section starts on is known only once that table has been laid out. A
+    mark in an empty cell of the section's header row is drawn with the row,
+    on whichever page the row lands, and records that page's number in
+    ``sink`` under ``key``. The first build fills the sink; the second prints
+    the table of contents from it. The number is the canvas page, the same
+    one the footer prints as ``doc.page``.
+    """
+
+    def __init__(self, key: str, sink: dict[str, int]) -> None:
+        super().__init__()
+        self._key = key
+        self._sink = sink
+        self.width = 0
+        self.height = 0
+
+    def wrap(self, avail_width: float, avail_height: float) -> tuple[float, float]:
+        return 0, 0
+
+    def draw(self) -> None:
+        self._sink.setdefault(self._key, self.canv.getPageNumber())
+
+
+#: Keys under which the page marks record where each part of the bill starts.
+_TOC_UNGROUPED = "__ungrouped__"
+_TOC_SUMMARY = "__summary__"
+
+
+def _toc_section_key(index: int) -> str:
+    """The page mark key of the section at ``index`` in ``boq_data.sections``."""
+    return f"section:{index}"
+
+
+def _toc_entries(boq_data: Any, lb: dict[str, str]) -> list[tuple[str, str, str]]:
+    """``(ordinal, title, page mark key)`` for each line of the table of contents.
+
+    Every section in bill order, then the positions outside any section when
+    there are some, then the cost summary page.
+    """
+    entries = [
+        (str(section.ordinal or ""), str(section.description or ""), _toc_section_key(index))
+        for index, section in enumerate(boq_data.sections)
+    ]
+    if boq_data.positions:
+        entries.append(("", lb["other_positions"], _TOC_UNGROUPED))
+    entries.append(("", lb["cost_summary"], _TOC_SUMMARY))
+    return entries
+
+
+def _table_of_contents(
+    boq_data: Any,
+    styles: dict[str, ParagraphStyle],
+    lb: dict[str, str],
+    width: float,
+    page_refs: Mapping[str, int] | None,
+) -> list[Any]:
+    """The table of contents page: each section and the page it starts on.
+
+    ``page_refs`` is what the page marks recorded in the first build. That
+    build lays this page out too, with every number still unknown, so the
+    page takes the same room in both builds and no number it prints is
+    pushed onto a later page by the numbers themselves. The page column is
+    fixed and wide enough for any page count a PDF of this size reaches.
+    """
+    refs = page_refs or {}
+    page_heading = lb["page"]
+    rows: list[list[Any]] = [
+        [
+            Paragraph(f"<b>{lb['section']}</b>", styles["table_header"]),
+            Paragraph(f"<b>{lb['description']}</b>", styles["table_header"]),
+            Paragraph(f"<b>{page_heading}</b>", styles["table_header_right"]),
+        ]
+    ]
+    for ordinal, title, key in _toc_entries(boq_data, lb):
+        page = refs.get(key)
+        rows.append(
+            [
+                _safe_para(ordinal, styles["cell"]),
+                _safe_para(title, styles["cell"]),
+                Paragraph(str(page) if page else "-", styles["cell_right"]),
+            ]
+        )
+    table = Table(rows, colWidths=[35 * mm, width - 35 * mm - 20 * mm, 20 * mm], repeatRows=1)
+    table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1a1a2e")),
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("TOPPADDING", (0, 0), (-1, -1), 2 * mm),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 2 * mm),
+                ("LEFTPADDING", (0, 0), (-1, -1), 2 * mm),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 2 * mm),
+                ("LINEBELOW", (0, 0), (-1, 0), 1, colors.HexColor("#1a1a2e")),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f8f8f8")]),
+            ]
+        )
+    )
+    return [
+        Paragraph(f"<b>{lb['table_of_contents']}</b>", styles["section_header"]),
+        Spacer(1, 4 * mm),
+        table,
+    ]
+
+
+def _section_summary_table(
+    boq_data: Any,
+    currency: str,
+    styles: dict[str, ParagraphStyle],
+    lb: dict[str, str],
+    width: float,
+    *,
+    country_code: str = "",
+    base_currency: str = "",
+    fx_rates: Mapping[str, str] | None = None,
+) -> Any:
+    """Each section with its number of positions and its subtotal, one row each.
+
+    The positions outside any section get a row of their own, summed line by
+    line in the base currency the section subtotals are already in (see
+    :func:`_line_money`), so the rows add up to the direct cost.
+    """
+    # ``subtotal`` carries the colon the section rows print it with.
+    subtotal_heading = lb["subtotal"].rstrip(" :")
+    header_row = [
+        Paragraph(f"<b>{lb['section']}</b>", styles["table_header"]),
+        Paragraph(f"<b>{lb['description']}</b>", styles["table_header"]),
+        Paragraph(f"<b>{lb['items']}</b>", styles["table_header_right"]),
+        Paragraph(f"<b>{subtotal_heading}</b>", styles["table_header_right"]),
+    ]
+    col_widths = [35 * mm, width - 35 * mm - 25 * mm - 35 * mm, 25 * mm, 35 * mm]
+
+    def _fc(value: Any) -> str:
+        return _fmt_currency(value, currency, country=country_code)
+
+    table_data: list[list[Any]] = [header_row]
+
+    for section in boq_data.sections:
+        table_data.append(
+            [
+                _safe_para(section.ordinal, styles["cell"]),
+                _safe_para(section.description, styles["cell"]),
+                Paragraph(str(len(section.positions)), styles["cell_right"]),
+                Paragraph(_fc(section.subtotal), styles["cell_right"]),
+            ]
+        )
+
+    if boq_data.positions:
+        ungrouped_total = sum(
+            (_line_money(p, base_currency, fx_rates)[0] for p in boq_data.positions),
+            Decimal("0"),
+        )
+        table_data.append(
+            [
+                Paragraph("", styles["cell"]),
+                Paragraph(lb["other_positions"], styles["cell"]),
+                Paragraph(str(len(boq_data.positions)), styles["cell_right"]),
+                Paragraph(_fc(ungrouped_total), styles["cell_right"]),
+            ]
+        )
+
+    table = Table(table_data, colWidths=col_widths, repeatRows=1)
+    table.setStyle(
+        TableStyle(
+            [
+                # The fill only, for the same reason as the position table.
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1a1a2e")),
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("TOPPADDING", (0, 0), (-1, -1), 2 * mm),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 2 * mm),
+                ("LEFTPADDING", (0, 0), (-1, -1), 2 * mm),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 2 * mm),
+                ("LINEBELOW", (0, 0), (-1, 0), 1, colors.HexColor("#1a1a2e")),
+                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f8f8f8")]),
+            ]
+        )
+    )
+    return table
+
+
+def _cost_totals_table(
+    boq_data: Any,
+    currency: str,
+    styles: dict[str, ParagraphStyle],
+    lb: dict[str, str],
+    width: float,
+    *,
+    country_code: str = "",
+) -> Any:
+    """Direct cost, each markup, the pre-tax total, each tax line and the gross total."""
+
+    def _fc(value: Any) -> str:
+        return _fmt_currency(value, currency, country=country_code)
+
+    cost_rows: list[list[Any]] = []
+    cost_rows.append(
+        [
+            Paragraph(f"<b>{lb['direct_cost']}</b>", styles["cell_bold_right"]),
+            Paragraph(f"<b>{_fc(boq_data.direct_cost)}</b>", styles["cell_bold_right"]),
+        ]
+    )
+
+    # Tax is excluded here and printed under the pre-tax subtotal instead, so
+    # its money is stated once. See :func:`_tax_split`.
+    for markup in boq_data.markups:
+        if not markup.is_active or markup.category == "tax":
+            continue
+        label = markup.name
+        if markup.markup_type == "percentage":
+            label = f"{markup.name} ({_fmt_rate(markup.percentage, 1, currency, country_code)}%)"
+        cost_rows.append(
+            [
+                _safe_para(label, styles["cell_right"]),
+                Paragraph(_fc(markup.amount), styles["cell_right"]),
+            ]
+        )
+
+    tax_lines, _tax_amount, subtotal_ex_tax, gross_total = _tax_split(boq_data)
+    cost_rows.append(
+        [
+            Paragraph(f"<b>{lb['net_total']}</b>", styles["cell_bold_right"]),
+            Paragraph(f"<b>{_fc(subtotal_ex_tax)}</b>", styles["cell_bold_right"]),
+        ]
+    )
+
+    tax_rows = [(f"{_tax_label(m, currency, country_code)}:", Decimal(str(m.amount))) for m in tax_lines]
+    if not tax_rows:
+        tax_rows = [(_zero_tax_fallback_label(country_code, lb), Decimal("0"))]
+    for tax_label, tax_line_amount in tax_rows:
+        cost_rows.append(
+            [
+                Paragraph(tax_label, styles["cell_right"]),
+                Paragraph(_fc(tax_line_amount), styles["cell_right"]),
+            ]
+        )
+    cost_rows.append(
+        [
+            Paragraph(f"<b>{lb['gross_total']} ({currency}):</b>", styles["cell_bold_right"]),
+            Paragraph(f"<b>{_fc(gross_total)}</b>", styles["cell_bold_right"]),
+        ]
+    )
+
+    cost_table = Table(cost_rows, colWidths=[width * 0.6, width * 0.4])
+    cost_style: list[Any] = [
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("TOPPADDING", (0, 0), (-1, -1), 2 * mm),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 2 * mm),
+    ]
+    # Gross total row styling
+    last_row = len(cost_rows) - 1
+    cost_style.append(("LINEABOVE", (0, last_row), (-1, last_row), 1.5, colors.HexColor("#1a1a2e")))
+    cost_style.append(("BACKGROUND", (0, last_row), (-1, last_row), colors.HexColor("#e8e8ee")))
+    cost_table.setStyle(TableStyle(cost_style))
+    return cost_table
+
+
 def generate_boq_pdf(
     boq_data: Any,
     project_name: str,
@@ -1782,40 +2060,76 @@ def generate_boq_pdf(
     def _letterhead() -> Any | None:
         return branded_letterhead(uw - 12) if with_letterhead else None
 
-    # -- Build flowables --
-    flowables: list[Any] = []
-    flowables.extend(
-        _build_cover_page(
-            boq_data,
-            project_name,
-            currency,
-            prepared_by,
-            styles,
-            country_code,
-            labels=labels,
-            usable_width=uw,
-            letterhead=_letterhead(),
-        )
-    )
-    flowables.append(NextPageTemplate("table"))
-    flowables.append(PageBreak())
-    flowables.extend(
-        _build_boq_table(
-            boq_data,
-            currency,
-            styles,
-            measurement_system,
-            country_code,
-            labels=labels,
-            col_widths=table_col_widths,
-            base_currency=base_currency,
-            fx_rates=fx_rates,
-            include_resources=include_resources,
-        )
-    )
+    # A bill of more than one section opens with a table of contents, as the
+    # editor's browser PDF did. Its page numbers come from the first build:
+    # the page marks in the bill record where each section starts, and the
+    # second build prints them.
+    with_toc = len(boq_data.sections) > 1
 
-    # Two-pass build: first pass counts pages, second pass renders with totals
-    doc.build(flowables)
+    def _flowables(page_refs: Mapping[str, int] | None, page_marks: dict[str, int] | None) -> list[Any]:
+        """Everything the document holds, in order, for one build."""
+        flowables: list[Any] = []
+        flowables.extend(
+            _build_cover_page(
+                boq_data,
+                project_name,
+                currency,
+                prepared_by,
+                styles,
+                country_code,
+                labels=labels,
+                usable_width=uw,
+                letterhead=_letterhead(),
+            )
+        )
+        flowables.append(NextPageTemplate("table"))
+        flowables.append(PageBreak())
+        if with_toc:
+            flowables.extend(_table_of_contents(boq_data, styles, labels, uw, page_refs))
+            flowables.append(PageBreak())
+        flowables.extend(
+            _build_boq_table(
+                boq_data,
+                currency,
+                styles,
+                measurement_system,
+                country_code,
+                labels=labels,
+                col_widths=table_col_widths,
+                base_currency=base_currency,
+                fx_rates=fx_rates,
+                include_resources=include_resources,
+                page_marks=page_marks,
+            )
+        )
+        # The cost summary page: each section's subtotal on one page, then the
+        # totals, so a reviewer reads the bill's shape without paging through
+        # every subtotal row of the table.
+        flowables.append(PageBreak())
+        if page_marks is not None:
+            flowables.append(_PageMark(_TOC_SUMMARY, page_marks))
+        flowables.append(Paragraph(f"<b>{labels['cost_summary']}</b>", styles["section_header"]))
+        flowables.append(Spacer(1, 4 * mm))
+        flowables.append(
+            _section_summary_table(
+                boq_data,
+                currency,
+                styles,
+                labels,
+                uw,
+                country_code=country_code,
+                base_currency=base_currency,
+                fx_rates=fx_rates,
+            )
+        )
+        flowables.append(Spacer(1, 6 * mm))
+        flowables.append(_cost_totals_table(boq_data, currency, styles, labels, uw, country_code=country_code))
+        return flowables
+
+    # Two-pass build: the first counts the pages and records where each part of
+    # the bill starts, the second renders with both.
+    page_marks: dict[str, int] = {}
+    doc.build(_flowables(None, page_marks if with_toc else None))
     total_pages = doc.page_count
 
     # Second pass with correct page count
@@ -1825,39 +2139,7 @@ def generate_boq_pdf(
     doc2 = _NumberedDocTemplate(buffer, **doc_kwargs)
     doc2.page_count = total_pages
     doc2.addPageTemplates([cover_template, table_template])
-
-    flowables2: list[Any] = []
-    flowables2.extend(
-        _build_cover_page(
-            boq_data,
-            project_name,
-            currency,
-            prepared_by,
-            styles,
-            country_code,
-            labels=labels,
-            usable_width=uw,
-            letterhead=_letterhead(),
-        )
-    )
-    flowables2.append(NextPageTemplate("table"))
-    flowables2.append(PageBreak())
-    flowables2.extend(
-        _build_boq_table(
-            boq_data,
-            currency,
-            styles,
-            measurement_system,
-            country_code,
-            labels=labels,
-            col_widths=table_col_widths,
-            base_currency=base_currency,
-            fx_rates=fx_rates,
-            include_resources=include_resources,
-        )
-    )
-
-    doc2.build(flowables2)
+    doc2.build(_flowables(page_marks, None))
 
     pdf_bytes = buffer.getvalue()
     buffer.close()
@@ -2027,129 +2309,24 @@ def generate_boq_pdf_simple(
     )
     flowables.append(Spacer(1, 4 * mm))
 
-    # Build a compact section summary table
-    # ``subtotal`` carries the colon the section rows print it with.
-    subtotal_heading = lb["subtotal"].rstrip(" :")
-    header_row = [
-        Paragraph(f"<b>{lb['section']}</b>", styles["table_header"]),
-        Paragraph(f"<b>{lb['description']}</b>", styles["table_header"]),
-        Paragraph(f"<b>{lb['items']}</b>", styles["table_header_right"]),
-        Paragraph(f"<b>{subtotal_heading}</b>", styles["table_header_right"]),
-    ]
-    summary_col_widths = [35 * mm, uw - 35 * mm - 25 * mm - 35 * mm, 25 * mm, 35 * mm]
-
-    def _fc(value: Any) -> str:
-        return _fmt_currency(value, currency, country=country_code)
-
-    table_data: list[list[Any]] = [header_row]
-
-    for section in boq_data.sections:
-        table_data.append(
-            [
-                _safe_para(section.ordinal, styles["cell"]),
-                _safe_para(section.description, styles["cell"]),
-                Paragraph(str(len(section.positions)), styles["cell_right"]),
-                Paragraph(_fc(section.subtotal), styles["cell_right"]),
-            ]
+    flowables.append(
+        _section_summary_table(
+            boq_data,
+            currency,
+            styles,
+            lb,
+            uw,
+            country_code=country_code,
+            base_currency=base_currency,
+            fx_rates=fx_rates,
         )
-
-    if boq_data.positions:
-        ungrouped_total = sum(
-            (_line_money(p, base_currency, fx_rates)[0] for p in boq_data.positions),
-            Decimal("0"),
-        )
-        table_data.append(
-            [
-                Paragraph("", styles["cell"]),
-                Paragraph(lb["other_positions"], styles["cell"]),
-                Paragraph(str(len(boq_data.positions)), styles["cell_right"]),
-                Paragraph(_fc(ungrouped_total), styles["cell_right"]),
-            ]
-        )
-
-    summary_table = Table(table_data, colWidths=summary_col_widths, repeatRows=1)
-    summary_style_commands: list[Any] = [
-        # The fill only, for the same reason as the position table above.
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1a1a2e")),
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("TOPPADDING", (0, 0), (-1, -1), 2 * mm),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 2 * mm),
-        ("LEFTPADDING", (0, 0), (-1, -1), 2 * mm),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 2 * mm),
-        ("LINEBELOW", (0, 0), (-1, 0), 1, colors.HexColor("#1a1a2e")),
-        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f8f8f8")]),
-    ]
-    summary_table.setStyle(TableStyle(summary_style_commands))
-    flowables.append(summary_table)
+    )
     flowables.append(Spacer(1, 6 * mm))
 
     # Direct cost, markups, net total, VAT, gross total
     flowables.append(Paragraph(f"<b>{lb['cost_summary']}</b>", styles["section_header"]))
     flowables.append(Spacer(1, 3 * mm))
-
-    cost_rows: list[list[Any]] = []
-    cost_rows.append(
-        [
-            Paragraph(f"<b>{lb['direct_cost']}</b>", styles["cell_bold_right"]),
-            Paragraph(f"<b>{_fc(boq_data.direct_cost)}</b>", styles["cell_bold_right"]),
-        ]
-    )
-
-    # Tax is excluded here and printed under the pre-tax subtotal instead, so
-    # its money is stated once. See :func:`_tax_split`.
-    for markup in boq_data.markups:
-        if not markup.is_active or markup.category == "tax":
-            continue
-        label = markup.name
-        if markup.markup_type == "percentage":
-            label = f"{markup.name} ({_fmt_rate(markup.percentage, 1, currency, country_code)}%)"
-        cost_rows.append(
-            [
-                _safe_para(label, styles["cell_right"]),
-                Paragraph(_fc(markup.amount), styles["cell_right"]),
-            ]
-        )
-
-    tax_lines, tax_amount, subtotal_ex_tax, gross_total = _tax_split(boq_data)
-    cost_rows.append(
-        [
-            Paragraph(f"<b>{lb['net_total']}</b>", styles["cell_bold_right"]),
-            Paragraph(f"<b>{_fc(subtotal_ex_tax)}</b>", styles["cell_bold_right"]),
-        ]
-    )
-
-    tax_rows = [(f"{_tax_label(m, currency, country_code)}:", Decimal(str(m.amount))) for m in tax_lines]
-    if not tax_rows:
-        tax_rows = [(_zero_tax_fallback_label(country_code, lb), Decimal("0"))]
-    for tax_label, tax_line_amount in tax_rows:
-        cost_rows.append(
-            [
-                Paragraph(tax_label, styles["cell_right"]),
-                Paragraph(_fc(tax_line_amount), styles["cell_right"]),
-            ]
-        )
-    cost_rows.append(
-        [
-            Paragraph(f"<b>{lb['gross_total']} ({currency}):</b>", styles["cell_bold_right"]),
-            Paragraph(f"<b>{_fc(gross_total)}</b>", styles["cell_bold_right"]),
-        ]
-    )
-
-    cost_table = Table(
-        cost_rows,
-        colWidths=[uw * 0.6, uw * 0.4],
-    )
-    cost_style: list[Any] = [
-        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("TOPPADDING", (0, 0), (-1, -1), 2 * mm),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 2 * mm),
-    ]
-    # Gross total row styling
-    last_row = len(cost_rows) - 1
-    cost_style.append(("LINEABOVE", (0, last_row), (-1, last_row), 1.5, colors.HexColor("#1a1a2e")))
-    cost_style.append(("BACKGROUND", (0, last_row), (-1, last_row), colors.HexColor("#e8e8ee")))
-    cost_table.setStyle(TableStyle(cost_style))
-    flowables.append(cost_table)
+    flowables.append(_cost_totals_table(boq_data, currency, styles, lb, uw, country_code=country_code))
 
     # Single-pass build (no two-pass for page count - acceptable trade-off
     # for large BOQs; footer shows "Page X" without " of Y")
