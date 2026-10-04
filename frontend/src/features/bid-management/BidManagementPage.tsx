@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-import { useState, useMemo, useEffect, Fragment } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useMemo, useEffect, useCallback, Fragment } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
@@ -25,6 +25,8 @@ import {
   Users,
   Check,
   Network,
+  Gavel,
+  ShoppingCart,
 } from 'lucide-react';
 import {
   Button,
@@ -51,6 +53,10 @@ import { useToastStore } from '@/stores/useToastStore';
 import { useActiveProjectId } from '@/shared/hooks/useActiveProjectId';
 import { useTabKeyboardNav } from '@/shared/hooks/useTabKeyboardNav';
 import { useDisplayQuantity } from '@/shared/hooks/useDisplayQuantity';
+import { useAwardOutcome } from '@/shared/hooks/useAwardOutcome';
+import { RelatedRecordLink, RelatedRecordStrip } from '@/shared/ui/RelatedRecordLink';
+import { contractDeepLink } from '@/shared/lib/changeChainLinks';
+import { PROCUREMENT_LINK, RFQ_LINK, tenderPackageDeepLink } from '@/shared/lib/awardChainLinks';
 import {
   listPackages,
   getPackage,
@@ -515,6 +521,10 @@ function HowBidManagementWorks() {
           </span>{' '}
           <ModLink to="/tendering">
             {t('bid_management.mod_tendering', { defaultValue: 'Tendering' })}
+          </ModLink>{' '}
+          ·{' '}
+          <ModLink to={RFQ_LINK}>
+            {t('bid_management.mod_rfq', { defaultValue: 'RFQ Bidding' })}
           </ModLink>
         </span>
       </div>
@@ -556,6 +566,30 @@ export function BidManagementPage() {
   });
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
+
+  // /bid-management?highlight=<packageId> opens that package's drawer (the
+  // house deep-link convention, used by the tender and contract screens to
+  // land here on the record). The param stays while the drawer is open so a
+  // refresh or a shared link reopens it, and is dropped on close so a later
+  // remount does not reopen what the reader just closed.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const highlightPackageId = searchParams.get('highlight');
+  useEffect(() => {
+    if (highlightPackageId) setSelectedPackageId(highlightPackageId);
+  }, [highlightPackageId]);
+  const closeDrawer = useCallback(() => {
+    setSelectedPackageId(null);
+    if (searchParams.has('highlight')) {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.delete('highlight');
+          return next;
+        },
+        { replace: true },
+      );
+    }
+  }, [searchParams, setSearchParams]);
 
   const packagesQ = useQuery({
     queryKey: ['bid-management', 'packages', projectId, statusFilter],
@@ -696,6 +730,10 @@ export function BidManagementPage() {
             label: t('nav.tendering', { defaultValue: 'Tendering' }),
             onClick: () => navigate('/tendering'),
           },
+          {
+            label: t('nav.rfq_bidding', { defaultValue: 'RFQ Bidding' }),
+            onClick: () => navigate(RFQ_LINK),
+          },
         ]}
       >
         {t('bid_management.intro_body', {
@@ -829,7 +867,7 @@ export function BidManagementPage() {
       {selectedPackageId && (
         <PackageDrawer
           packageId={selectedPackageId}
-          onClose={() => setSelectedPackageId(null)}
+          onClose={closeDrawer}
           currency={currentProject?.currency || undefined}
         />
       )}
@@ -1950,6 +1988,17 @@ function PackageDrawer({
 
   const pkg = pkgQ.data;
 
+  // What the award drafted. The award subscriber stamps this package's id
+  // (and its tender package's id, when linked) on the contract and the
+  // purchase order it creates; the lookup reads the stamp back.
+  const awardOutcome = useAwardOutcome(
+    pkg?.project_id,
+    { tender_package_id: pkg?.tender_id ?? null, bid_package_ids: [packageId] },
+    pkg?.status === 'awarded',
+  );
+  const awardContract = awardOutcome.contract.state === 'found' ? awardOutcome.contract.record : null;
+  const awardOrder = awardOutcome.order.state === 'found' ? awardOutcome.order.record : null;
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -2041,6 +2090,51 @@ function PackageDrawer({
                 />
               </div>
 
+              <RelatedRecordStrip
+                label={t('bid_management.related', { defaultValue: 'Related:' })}
+                data-testid="bid-package-related"
+              >
+                {pkg.tender_id && (
+                  <RelatedRecordLink
+                    to={tenderPackageDeepLink(pkg.tender_id)}
+                    icon={<Gavel size={12} />}
+                    title={t('bid_management.tender_package_hint', {
+                      defaultValue: 'Open the tender package this bid package belongs to',
+                    })}
+                  >
+                    {t('bid_management.tender_package', { defaultValue: 'Tender package' })}
+                  </RelatedRecordLink>
+                )}
+                {awardContract && (
+                  <RelatedRecordLink
+                    to={contractDeepLink(awardContract.id)}
+                    icon={<FileText size={12} />}
+                    title={t('bid_management.award_contract_hint', {
+                      defaultValue: 'Open the contract drafted from this award',
+                    })}
+                  >
+                    {t('bid_management.award_contract_named', {
+                      defaultValue: 'Contract {{code}}',
+                      code: awardContract.code,
+                    })}
+                  </RelatedRecordLink>
+                )}
+                {awardOrder && (
+                  <RelatedRecordLink
+                    to={PROCUREMENT_LINK}
+                    icon={<ShoppingCart size={12} />}
+                    title={t('bid_management.award_po_hint', {
+                      defaultValue: 'Open Procurement, where the purchase order drafted from this award is listed',
+                    })}
+                  >
+                    {t('bid_management.award_po_named', {
+                      defaultValue: 'Purchase order {{number}}',
+                      number: awardOrder.po_number,
+                    })}
+                  </RelatedRecordLink>
+                )}
+              </RelatedRecordStrip>
+
               {/* missing_help fix (audit #8): explain the required FSM sequence
                   so a user knows why leveling/award stay empty until they walk
                   publish → open bids → record submissions → level → award. */}
@@ -2114,11 +2208,16 @@ function PackageDrawer({
                   {t('bid_management.run_leveling', { defaultValue: 'Compute Leveling' })}
                 </Button>
                 {pkg.status === 'awarded' && (
-                  <Link to="/contracts">
+                  <Link to={awardContract ? contractDeepLink(awardContract.id) : '/contracts'}>
                     <Button variant="primary" icon={<ArrowRight size={14} />}>
-                      {t('bid_management.create_contract', {
-                        defaultValue: 'Formalise as Contract',
-                      })}
+                      {awardContract
+                        ? t('bid_management.open_award_contract', {
+                            defaultValue: 'Open contract {{code}}',
+                            code: awardContract.code,
+                          })
+                        : t('bid_management.create_contract', {
+                            defaultValue: 'Formalise as Contract',
+                          })}
                     </Button>
                   </Link>
                 )}
