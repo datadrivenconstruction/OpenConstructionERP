@@ -1369,6 +1369,9 @@ export function SettingsPage() {
       apiPatch<UserProfile>('/v1/users/me/', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['me'] });
+      // The dashboard greeting and other shell surfaces read the name from the
+      // auth store, not from ['me']; refresh it so a rename shows at once.
+      void useAuthStore.getState().syncRoleFromServer();
       setEditingProfile(false);
       addToast({ type: 'success', title: t('toasts.profile_updated', { defaultValue: 'Profile updated' }) });
     },

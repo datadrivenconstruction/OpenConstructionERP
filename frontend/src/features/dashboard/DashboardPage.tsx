@@ -2173,25 +2173,19 @@ function DashboardPageInner() {
   // Friendly display name for the greeting. We prefer the user's REAL profile
   // name (their ``full_name``; there is no separate display_name field) and
   // only fall back to a name guessed from the email local-part when no real
-  // name is known. The authoritative source is the live ``/v1/users/me/``
-  // profile; the auth store carries a cached name (hydrated on load, refreshed
-  // by syncRoleFromServer) so the greeting shows the real name on first paint
-  // even before this query resolves. We never surface a raw email or
-  // "undefined" - if nothing usable remains, the greeting renders name-less.
+  // name is known. The name comes from the auth store, which reads the live
+  // ``/v1/users/me/`` profile once at app start (syncRoleFromServer), keeps it
+  // across reloads, and is refreshed again when the name is edited in
+  // Settings. The dashboard used to ask ``/v1/users/me/`` a second time on
+  // every open for the same field, and cached ``null`` on a failure under the
+  // ['me'] key that Settings, Projects and approvals read for the profile.
+  // We never surface a raw email or "undefined" - if nothing usable remains,
+  // the greeting renders name-less.
   const userEmail = useAuthStore((s) => s.userEmail);
   const cachedFullName = useAuthStore((s) => s.userFullName);
-  const { data: profile } = useQuery({
-    queryKey: ['me'],
-    queryFn: () => apiGet<{ full_name?: string; email?: string }>('/v1/users/me/').catch(() => null),
-    retry: false,
-    staleTime: 5 * 60_000,
-  });
   const greetingName = useMemo(
-    () =>
-      firstNameFromFullName(profile?.full_name) ??
-      firstNameFromFullName(cachedFullName) ??
-      deriveGreetingName(profile?.email ?? userEmail),
-    [profile?.full_name, profile?.email, cachedFullName, userEmail],
+    () => firstNameFromFullName(cachedFullName) ?? deriveGreetingName(userEmail),
+    [cachedFullName, userEmail],
   );
 
   // Pull the server-side layout once at mount so a user who customised on

@@ -515,6 +515,11 @@ export function createAuthStore(env: AuthTabEnv) {
           userRole: decodeRoleFromToken(access),
         });
         env.channel?.post({ type: 'tokens', access, refresh, remember, email: email ?? null });
+        // The name was just cleared and the role is only the token's claim.
+        // Read both from the server now: the start-up read in App.tsx ran
+        // before this sign-in, so without this a fresh login kept a guessed
+        // greeting and a possibly stale role until the next reload.
+        void get().syncRoleFromServer();
       },
 
       logout: () => {
@@ -601,6 +606,9 @@ export function createAuthStore(env: AuthTabEnv) {
             email?: string;
             full_name?: string;
           };
+          // Another account signed in on this tab while the call was on the
+          // wire: this answer describes the previous one, so drop it.
+          if (decodeUserIdFromToken(get().accessToken) !== decodeUserIdFromToken(accessToken)) return;
           if (typeof data.role === 'string') {
             set({ userRole: data.role });
           }
