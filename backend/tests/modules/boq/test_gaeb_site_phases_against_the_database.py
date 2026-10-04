@@ -69,8 +69,8 @@ async def _user(session) -> User:
     return user
 
 
-async def _bill(session, owner: User) -> tuple[BOQ, dict[str, Position]]:
-    project = Project(name=f"Kita {uuid.uuid4().hex[:6]}", owner_id=owner.id, currency="EUR", country_code="DE")
+async def _bill(session, owner: User, *, country: str = "DE", currency: str = "EUR") -> tuple[BOQ, dict[str, Position]]:
+    project = Project(name=f"Kita {uuid.uuid4().hex[:6]}", owner_id=owner.id, currency=currency, country_code=country)
     session.add(project)
     await session.flush()
     boq = BOQ(project_id=project.id, name="LV Rohbau", status="draft", metadata_={})
@@ -185,11 +185,22 @@ async def test_a_stranger_and_a_locked_bill_are_refused(session) -> None:
 # ── X89 from a progress claim ───────────────────────────────────────────
 
 
-async def _contract_with_two_claims(session, owner: User, *, with_seller: bool = True):
-    boq, pos = await _bill(session, owner)
-    session.add(
-        BOQMarkup(boq_id=boq.id, name="MwSt", category="tax", percentage="19", markup_type="percentage", is_active=True)
-    )
+async def _contract_with_two_claims(
+    session,
+    owner: User,
+    *,
+    with_seller: bool = True,
+    country: str = "DE",
+    currency: str = "EUR",
+    tax_markup: bool = True,
+):
+    boq, pos = await _bill(session, owner, country=country, currency=currency)
+    if tax_markup:
+        session.add(
+            BOQMarkup(
+                boq_id=boq.id, name="MwSt", category="tax", percentage="19", markup_type="percentage", is_active=True
+            )
+        )
     client = Contact(
         contact_type="client",
         company_name="Stadt Musterstadt",
@@ -218,7 +229,7 @@ async def _contract_with_two_claims(session, owner: User, *, with_seller: bool =
         contract_type="unit_price",
         counterparty_type="client",
         counterparty_id=client.id,
-        currency="EUR",
+        currency=currency,
         total_value=Decimal("35680"),
         retention_percent=Decimal("5"),
         status="active",
@@ -267,7 +278,7 @@ async def _contract_with_two_claims(session, owner: User, *, with_seller: bool =
             period_from=period_from,
             period_to=period_to,
             application_date=period_to,
-            currency="EUR",
+            currency=currency,
             gross_amount=gross,
             retention_amount=(gross * Decimal("0.05")).quantize(Decimal("0.01")),
             net_due=gross,
@@ -379,6 +390,55 @@ async def test_a_subcontract_is_invoiced_by_the_subcontractor_register_entry(ses
     assert root.findtext(f"{NS89}Invoice/{NS89}InvoiceCreator/{NS89}Address/{NS89}Name1") == "Stahlbau Weber GmbH"
     assert root.findtext(f"{NS89}Invoice/{NS89}InvoiceCreator/{NS89}TaxNo") == "DE987654321"
     assert root.findtext(f"{NS89}Invoice/{NS89}InvoiceRecipient/{NS89}Address/{NS89}Name1") == "Rohbau Nord GmbH"
+
+
+@pytest.mark.parametrize(
+    ("country", "currency", "rate", "source"),
+    [
+        ("GB", "GBP", "20.00", "country_standard"),
+        # No VAT in the federal table: said so, never a German 19 %.
+        ("US", "USD", "0.00", "none"),
+    ],
+)
+async def test_outside_germany_the_vat_and_currency_come_from_the_project(
+    session, country: str, currency: str, rate: str, source: str
+) -> None:
+    """No tax markup and no project default: the project's own country decides, not a German default."""
+    owner = await _user(session)
+    _first, second = await _contract_with_two_claims(
+        session, owner, country=country, currency=currency, tax_markup=False
+    )
+
+    preview = await preview_claim_gaeb_x89(second.id, str(owner.id), session, vat_rate=None, invoice_type="deduction")
+    assert preview["vat_source"] == source
+    assert preview["figures"]["vat_rate"] == rate
+    assert preview["currency"] == currency
+    assert preview["figures"]["vat_amount"] == str(
+        (Decimal("10100.00") * Decimal(rate) / 100).quantize(Decimal("0.01"))
+    )
+
+    response = await export_claim_gaeb_x89(second.id, str(owner.id), session, vat_rate=None, invoice_type="deduction")
+    root = ET.fromstring(await _body(response))
+    assert root.findtext(f"{NS89}PrjInfo/{NS89}Cur") == currency
+    assert root.findtext(f"{NS89}Invoice/{NS89}BoQ/{NS89}BoQInfo/{NS89}Totals/{NS89}VAT") == rate
+
+
+async def test_a_missing_subcontractor_module_falls_through_instead_of_failing(session, monkeypatch) -> None:
+    """Modules are plugins. Without the register the lookup finds nothing, it does not raise."""
+    import sys
+
+    owner = await _user(session)
+    _first, second = await _contract_with_two_claims(session, owner)
+    contract = await session.get(Contract, second.contract_id)
+    assert contract is not None
+    # A counterparty id no contact answers to sends the lookup on to the register.
+    contract.counterparty_id = uuid.uuid4()
+    await session.flush()
+    monkeypatch.setitem(sys.modules, "app.modules.subcontractors.models", None)
+
+    preview = await preview_claim_gaeb_x89(second.id, str(owner.id), session, vat_rate=None, invoice_type="deduction")
+    assert preview["creator"]["name"] == "Rohbau Nord GmbH"
+    assert "recipient.name" in preview["missing"]
 
 
 async def test_a_stranger_cannot_read_the_claim(session) -> None:

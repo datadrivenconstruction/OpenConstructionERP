@@ -471,7 +471,13 @@ async def _party_from_subcontractor(session: Any, entity_id: uuid.UUID) -> Invoi
     kept on the contact still reaches the invoice.
     """
     from app.modules.contacts.models import Contact
-    from app.modules.subcontractors.models import Subcontractor
+
+    try:
+        from app.modules.subcontractors.models import Subcontractor
+    except ImportError:
+        # Modules are plugins: an install without the subcontractor register
+        # simply has no such row, as the contracts service treats it too.
+        return None
 
     sub = await session.get(Subcontractor, entity_id)
     if sub is None:
