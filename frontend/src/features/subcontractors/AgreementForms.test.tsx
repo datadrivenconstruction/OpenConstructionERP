@@ -8,6 +8,8 @@
 //
 //   * the agreement goes out with the value and retention typed, for the
 //     subcontractor the page is open on;
+//   * left untouched, the retention shows the country's usual figure and is
+//     not sent, so the server applies and records it as the default;
 //   * a number field selects its value on focus, so typing replaces the
 //     prefilled 5 instead of appending to it (5 then 5 used to read 55);
 //   * the payment application shows the retention and net the server will
@@ -39,6 +41,16 @@ vi.mock('@/features/contracts/api', () => ({
       },
     ],
     total: 1,
+  }),
+  // The project sits in Great Britain, where a subcontract usually holds 3%.
+  getContractCountryDefaults: vi.fn().mockResolvedValue({
+    project_id: 'prj-1',
+    country_code: 'GB',
+    has_defaults: true,
+    standard_form: null,
+    values: { retention_percent: '3' },
+    sources: { retention_percent: { source: 'standard_form', reference: 'JCT', note: '' } },
+    release_split_source: 'table',
   }),
 }));
 
@@ -129,6 +141,24 @@ describe('AgreementFormModal', () => {
         expect.objectContaining({ contract_id: 'ct-9', total_value: '120000', retention_percent: '5' }),
       ),
     );
+  });
+
+  it("shows the country's usual retention and leaves it to the server when untouched", async () => {
+    vi.mocked(api.createAgreement).mockResolvedValue(agreement);
+    wrap(<AgreementFormModal subcontractorId="sub-1" onClose={vi.fn()} />);
+
+    await waitFor(() =>
+      expect((screen.getByTestId('agreement-retention') as HTMLInputElement).value).toBe('3'),
+    );
+    expect(screen.getByTestId('default-hint-retention_percent').textContent).toContain('United Kingdom');
+    fireEvent.change(screen.getByTestId('agreement-title'), { target: { value: 'Drywall, block B' } });
+    fireEvent.change(screen.getByTestId('agreement-value'), { target: { value: '120000' } });
+    fireEvent.click(screen.getByText('Create'));
+
+    await waitFor(() => expect(api.createAgreement).toHaveBeenCalled());
+    // Not a 5 the form made up, and not the 3 either: the server applies the
+    // country's figure and records it as a default rather than as typed.
+    expect(vi.mocked(api.createAgreement).mock.calls[0]?.[0]?.retention_percent).toBeUndefined();
   });
 
   it('selects the prefilled retention on focus so typing replaces it', () => {

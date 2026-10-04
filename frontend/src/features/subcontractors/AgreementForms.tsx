@@ -21,6 +21,7 @@ import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { useToastStore } from '@/stores/useToastStore';
 import { projectsApi } from '@/features/projects/api';
 import { listContracts } from '@/features/contracts/api';
+import { DefaultHint, useContractCountryDefaults } from '@/features/contracts/ContractPaymentTerms';
 import {
   createAgreement,
   submitPaymentApplication,
@@ -80,13 +81,16 @@ export function AgreementFormModal({
     project_id: '',
     total_value: '',
     currency: '',
-    retention_percent: '5',
+    // Empty until typed: an untouched field is left to the server, which
+    // starts the agreement from the project's country's usual retention.
+    retention_percent: '',
     start_date: '',
     end_date: '',
     contract_id: '',
   });
   const set = <K extends keyof AgreementFormState>(key: K, value: AgreementFormState[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
+  const [retentionTouched, setRetentionTouched] = useState(false);
 
   const projectId = form.project_id || projects[0]?.id || '';
   const currency = form.currency || projects.find((p) => p.id === projectId)?.currency || '';
@@ -101,6 +105,14 @@ export function AgreementFormModal({
   });
   const subcontracts = contractsQ.data?.items ?? [];
 
+  // The retention a subcontract in this country usually carries, shown until
+  // the person types or links a contract. It is shown, not sent: the server
+  // applies the same figure and records it as the country's default.
+  const defaultsQ = useContractCountryDefaults(projectId);
+  const knownDefaults = defaultsQ.data?.has_defaults ? defaultsQ.data : null;
+  const countryRetention = knownDefaults?.values.retention_percent ?? '';
+  const retentionValue = retentionTouched ? form.retention_percent : countryRetention;
+
   const linkContract = (id: string) => {
     const picked = subcontracts.find((c) => c.id === id);
     // Take the figures from the contract where nothing was typed yet.
@@ -112,6 +124,7 @@ export function AgreementFormModal({
       currency: prev.currency || picked?.currency || '',
       retention_percent: picked ? String(toNum(picked.retention_percent)) : prev.retention_percent,
     }));
+    if (picked) setRetentionTouched(true);
   };
 
   const mutation = useMutation({
@@ -122,7 +135,10 @@ export function AgreementFormModal({
         title: form.title.trim(),
         total_value: String(toNum(form.total_value)),
         currency: currency.trim().toUpperCase(),
-        retention_percent: String(toNum(form.retention_percent)),
+        retention_percent:
+          retentionTouched && form.retention_percent.trim() !== ''
+            ? String(toNum(form.retention_percent))
+            : undefined,
         start_date: form.start_date || undefined,
         end_date: form.end_date || undefined,
         contract_id: form.contract_id || undefined,
@@ -135,7 +151,7 @@ export function AgreementFormModal({
     onError: (err) => addToast({ type: 'error', title: gateErrorMessage(err, t) }),
   });
 
-  const retention = toNum(form.retention_percent);
+  const retention = toNum(retentionValue);
   const invalid =
     !form.title.trim() || !projectId || toNum(form.total_value) <= 0 || retention < 0 || retention > 100;
 
@@ -233,12 +249,22 @@ export function AgreementFormModal({
             min="0"
             max="100"
             step="0.1"
-            value={form.retention_percent}
-            onChange={(e) => set('retention_percent', e.target.value)}
+            value={retentionValue}
+            onChange={(e) => {
+              set('retention_percent', e.target.value);
+              setRetentionTouched(true);
+            }}
             onFocus={selectOnFocus}
             className={inputCls}
             data-testid="agreement-retention"
           />
+          {!retentionTouched && knownDefaults && countryRetention !== '' && (
+            <DefaultHint
+              field="retention_percent"
+              country={knownDefaults.country_code}
+              source={knownDefaults.sources.retention_percent}
+            />
+          )}
         </WideModalField>
         <div />
         <WideModalField label={t('subcontractors.agreement_start')}>

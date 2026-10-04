@@ -311,7 +311,8 @@ export interface CreateAgreementPayload {
   title: string;
   total_value: string;
   currency: string;
-  retention_percent: string;
+  /** Left out to start from the usual retention of the project's country. */
+  retention_percent?: string;
   start_date?: string;
   end_date?: string;
   contract_id?: string;
