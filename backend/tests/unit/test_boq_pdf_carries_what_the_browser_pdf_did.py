@@ -355,6 +355,63 @@ def test_resource_rows_follow_the_measurement_system() -> None:
     assert kerb[5] == "80.00"
 
 
+def _crewed(ordinal: str, crews: int) -> Any:
+    resources: list[Any] = [
+        {"name": f"Crew {n}", "unit": "h", "quantity": 1, "unit_rate": 10} for n in range(1, crews + 1)
+    ]
+    # Not a resource record: skipped when printed, so not counted either.
+    resources.append("junk")
+    return _position(ordinal, "1", str(10 * crews), str(10 * crews), metadata={"resources": resources})
+
+
+def test_the_row_budget_counts_the_resource_rows_the_pdf_would_print(monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.modules.boq import pdf_export
+
+    # 2 positions + 3 resources = 5 rows, one of them ungrouped.
+    bill = _bill([_section([_crewed("01.001", 2)], "20")], positions=[_crewed("02", 1)])
+    assert pdf_export.count_boq_resource_rows(bill) == 3
+
+    monkeypatch.setattr(pdf_export, "PDF_ROW_BUDGET", 5)
+    assert pdf_export.resource_rows_fit(bill)
+    monkeypatch.setattr(pdf_export, "PDF_ROW_BUDGET", 4)
+    # Two positions are far inside any position threshold; the rows are not.
+    assert not pdf_export.resource_rows_fit(bill)
+
+
+def test_a_bill_past_the_row_budget_prints_its_lines_without_the_build_up(monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.modules.boq import pdf_export
+
+    bill = _bill([_section([_crewed("01.001", 3), _crewed("01.002", 3)], "60")])
+    monkeypatch.setattr(pdf_export, "PDF_ROW_BUDGET", 7)  # 2 positions + 6 resources = 8 rows
+
+    text = " ".join(
+        " ".join(_pdf_text(generate_boq_pdf(bill, "Harbour", currency="EUR", include_resources=True))).split()
+    )
+    assert _PDF_LABELS["en"]["resources_omitted"] in text
+    assert "Crew 1" not in text
+    # Every line is still printed: this is not the summary report.
+    assert "01.001" in text and "01.002" in text
+    assert _PDF_LABELS["en"]["summary_report"] not in text
+
+    monkeypatch.setattr(pdf_export, "PDF_ROW_BUDGET", 8)
+    text = " ".join(
+        " ".join(_pdf_text(generate_boq_pdf(bill, "Harbour", currency="EUR", include_resources=True))).split()
+    )
+    assert "Crew 1" in text
+    assert _PDF_LABELS["en"]["resources_omitted"] not in text
+
+
+def test_a_bill_that_did_not_ask_for_the_build_up_is_not_told_it_was_left_out(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from app.modules.boq import pdf_export
+
+    bill = _bill([_section([_crewed("01.001", 3)], "30")])
+    monkeypatch.setattr(pdf_export, "PDF_ROW_BUDGET", 1)
+    text = " ".join(" ".join(_pdf_text(generate_boq_pdf(bill, "Harbour", currency="EUR"))).split())
+    assert _PDF_LABELS["en"]["resources_omitted"] not in text
+
+
 def test_malformed_resources_are_skipped_rather_than_failing_the_export() -> None:
     line = _position("01", "2", "40", "80", metadata={"resources": ["junk", None, {"name": "Ok", "quantity": "x"}]})
     assert [r.name for r in _resource_lines(line, "EUR", FX)] == ["Ok"]
@@ -547,7 +604,7 @@ def test_every_translated_table_names_the_sign_off_and_the_counts() -> None:
     for locale, table in _PDF_LABELS.items():
         if locale in {"en", "zh"}:
             continue
-        for key in ("approved_by", "signature_hint", "contents", "table_of_contents"):
+        for key in ("approved_by", "signature_hint", "contents", "table_of_contents", "resources_omitted"):
             assert table.get(key), f"{locale} has no {key}"
             assert table[key] != _PDF_LABELS["en"][key], f"{locale} {key} is still English"
 

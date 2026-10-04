@@ -5225,7 +5225,9 @@ async def export_boq_pdf(
             "under it, scaled to the line, so the build-up of every rate is on "
             "the page. Off by default: the build-up is the estimator's own "
             "cost and not every recipient's business. The summary report for "
-            "large bills lists no positions and ignores it."
+            "large bills lists no positions and ignores it, and a bill whose "
+            "positions and resources together pass the PDF's row budget (500 "
+            "rows) prints its lines without the build-up and says so on the page."
         ),
     ),
 ) -> StreamingResponse:
@@ -5250,10 +5252,13 @@ async def export_boq_pdf(
     from app.core.regional_format import document_country
     from app.modules.boq.pdf_export import (
         LARGE_BOQ_THRESHOLD,
+        PDF_ROW_BUDGET,
         count_boq_positions,
+        count_boq_resource_rows,
         generate_boq_pdf,
         generate_boq_pdf_simple,
         pdf_language,
+        resource_rows_fit,
     )
     from app.modules.projects.repository import ProjectRepository
     from app.modules.users.models import User
@@ -5322,6 +5327,15 @@ async def export_boq_pdf(
         else:
             import asyncio
 
+            if include_resources and not resource_rows_fit(boq_data):
+                _log.info(
+                    "BOQ %s: %d positions with %d resource rows pass the PDF row budget (%d) - "
+                    "printing without the resource build-up",
+                    boq_id,
+                    position_count,
+                    count_boq_resource_rows(boq_data),
+                    PDF_ROW_BUDGET,
+                )
             _currency = (project.currency or "").strip()
             _country = document_country(project.country_code, project.region, _currency)
             _locale = (project.locale or "en").strip()

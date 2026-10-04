@@ -107,6 +107,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "items": "Items",
         "cost_summary": "Cost Summary",
         "table_of_contents": "Table of Contents",
+        "resources_omitted": "Resource build-up not printed: this bill has too many resource lines for one PDF.",
         "status_draft": "Draft",
         "status_final": "Final",
         "status_archived": "Archived",
@@ -145,6 +146,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "items": "Positionen",
         "cost_summary": "Kostenübersicht",
         "table_of_contents": "Inhaltsverzeichnis",
+        "resources_omitted": "Ressourcenaufschlüsselung nicht gedruckt: Dieses LV hat zu viele Ressourcenzeilen für ein PDF.",
         "status_draft": "Entwurf",
         "status_final": "Freigegeben",
         "status_archived": "Archiviert",
@@ -183,6 +185,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "items": "Postes",
         "cost_summary": "Récapitulatif des coûts",
         "table_of_contents": "Table des matières",
+        "resources_omitted": "Détail des ressources non imprimé : ce devis compte trop de lignes de ressources pour un seul PDF.",
         "status_draft": "Brouillon",
         "status_final": "Validé",
         "status_archived": "Archivé",
@@ -221,6 +224,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "items": "Partidas",
         "cost_summary": "Resumen de costes",
         "table_of_contents": "Índice",
+        "resources_omitted": "Desglose de recursos no impreso: este presupuesto tiene demasiadas líneas de recursos para un solo PDF.",
         "status_draft": "Borrador",
         "status_final": "Aprobado",
         "status_archived": "Archivado",
@@ -259,6 +263,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "items": "Позиций",
         "cost_summary": "Сводка затрат",
         "table_of_contents": "Содержание",
+        "resources_omitted": "Состав ресурсов не напечатан: в этой смете слишком много строк ресурсов для одного PDF.",
         "status_draft": "Черновик",
         "status_final": "Утверждена",
         "status_archived": "В архиве",
@@ -297,6 +302,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "items": "Позицій",
         "cost_summary": "Зведення витрат",
         "table_of_contents": "Зміст",
+        "resources_omitted": "Склад ресурсів не надруковано: у цьому кошторисі забагато рядків ресурсів для одного PDF.",
         "status_draft": "Чернетка",
         "status_final": "Затверджено",
         "status_archived": "В архіві",
@@ -335,6 +341,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "items": "Tételek",
         "cost_summary": "Költségösszesítő",
         "table_of_contents": "Tartalomjegyzék",
+        "resources_omitted": "Az erőforrás-bontás nincs kinyomtatva: ebben a költségvetésben túl sok erőforrássor van egy PDF-hez.",
         "status_draft": "Piszkozat",
         "status_final": "Jóváhagyva",
         "status_archived": "Archiválva",
@@ -396,6 +403,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "items": "Itens",
         "cost_summary": "Resumo de custos",
         "table_of_contents": "Índice",
+        "resources_omitted": "Composição de recursos não impressa: este orçamento tem demasiadas linhas de recursos para um único PDF.",
         "status_draft": "Rascunho",
         "status_final": "Aprovado",
         "status_archived": "Arquivado",
@@ -434,6 +442,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "items": "Kalem",
         "cost_summary": "Maliyet özeti",
         "table_of_contents": "İçindekiler",
+        "resources_omitted": "Kaynak dökümü yazdırılmadı: bu keşifte tek bir PDF için çok fazla kaynak satırı var.",
         "status_draft": "Taslak",
         "status_final": "Onaylandı",
         "status_archived": "Arşivlendi",
@@ -1982,7 +1991,10 @@ def generate_boq_pdf(
             were rolled up in (``BOQService.get_export_fx``).
         fx_rates: The project's FX table, ``{code: rate}``, used to print each
             line in that base currency so the lines add up to the subtotals.
-        include_resources: Print each position's resources under it.
+        include_resources: Print each position's resources under it, while
+            positions and resources together fit :data:`PDF_ROW_BUDGET`
+            (see :func:`resource_rows_fit`). Past it the bill prints without
+            them and a line above the table says so.
 
     Returns:
         PDF file contents as bytes.
@@ -2066,6 +2078,14 @@ def generate_boq_pdf(
     # second build prints them.
     with_toc = len(boq_data.sections) > 1
 
+    # The build-up multiplies the rows the table holds, and the size gate in
+    # front of this writer counts positions only. A bill whose resources would
+    # take it past the row budget prints its lines without them and says so,
+    # rather than losing every line to the summary report.
+    resources_left_out = include_resources and not resource_rows_fit(boq_data)
+    if resources_left_out:
+        include_resources = False
+
     def _flowables(page_refs: Mapping[str, int] | None, page_marks: dict[str, int] | None) -> list[Any]:
         """Everything the document holds, in order, for one build."""
         flowables: list[Any] = []
@@ -2087,6 +2107,9 @@ def generate_boq_pdf(
         if with_toc:
             flowables.extend(_table_of_contents(boq_data, styles, labels, uw, page_refs))
             flowables.append(PageBreak())
+        if resources_left_out:
+            flowables.append(Paragraph(html.escape(labels["resources_omitted"]), styles["cell"]))
+            flowables.append(Spacer(1, 3 * mm))
         flowables.extend(
             _build_boq_table(
                 boq_data,
@@ -2165,9 +2188,43 @@ def count_boq_positions(boq_data: Any) -> int:
     return total
 
 
+def count_boq_resource_rows(boq_data: Any) -> int:
+    """Count the resource rows the full PDF prints when asked for the build-up.
+
+    One row per resource of every position, counted the way
+    :func:`_resource_lines` prints them: an entry that is not a resource
+    record is skipped there and not counted here.
+    """
+    total = 0
+    for position in (*(p for s in boq_data.sections for p in s.positions), *boq_data.positions):
+        resources = _position_meta(position).get("resources")
+        if isinstance(resources, list):
+            total += sum(1 for r in resources if isinstance(r, dict))
+    return total
+
+
+def resource_rows_fit(boq_data: Any) -> bool:
+    """Whether the bill's lines and their resources fit the full PDF's row budget.
+
+    The full PDF lays the bill out as one table and builds it twice, and its
+    cost grows with the rows it prints, not with the positions alone: measured
+    on the development machine, 500 rows cost about 11 MiB and 8 s whether
+    they were 500 positions or 100 positions of four resources each, while
+    5,500 rows (500 positions of ten resources) cost 81 MiB and 155 s. The position
+    threshold has always accepted the cost of 500 rows, so the build-up is
+    printed while positions and resources together stay within that.
+    """
+    return count_boq_positions(boq_data) + count_boq_resource_rows(boq_data) <= PDF_ROW_BUDGET
+
+
 # ── Large BOQ threshold ──────────────────────────────────────────────────────
 
 LARGE_BOQ_THRESHOLD = 500
+
+#: The most position and resource rows the full PDF prints. Past it the
+#: resource build-up is left out and the page says so; see
+#: :func:`resource_rows_fit`.
+PDF_ROW_BUDGET = LARGE_BOQ_THRESHOLD
 
 
 def generate_boq_pdf_simple(

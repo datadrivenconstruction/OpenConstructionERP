@@ -3016,7 +3016,9 @@ export function BOQEditorPage() {
       if (format === 'pdf') {
         // Issue #270: quantities and unit labels in the reader's system, as
         // the browser PDF printed them. The resources under each line are
-        // what the browser PDF printed too.
+        // what the browser PDF printed too; the server leaves them out, and
+        // says so on the page, when they would take the bill past its PDF
+        // row budget (pdf_export.resource_rows_fit).
         params.set('measurement_system', measurementSystem);
         params.set('include_resources', 'true');
       }
