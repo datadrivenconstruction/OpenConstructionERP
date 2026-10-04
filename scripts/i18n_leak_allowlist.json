@@ -1334,6 +1334,11 @@
     "note": "named open data / interchange standard or format code (CLAUDE.md: not translated)",
     "reason_category": "standard_code"
   },
+  "takeoff_create.created_msg": {
+    "en_value": "{{posOrdinal}}: {{qty}} {{unit}}",
+    "note": "Pure template: position ordinal, quantity and unit, all substituted and already localised; there are no words to translate. fr differs only by its typographic space before the colon.",
+    "reason_category": "template_placeholder"
+  },
   "takeoff_viewer.col_ordinal": {
     "en_value": "#",
     "note": "row-number column header, a single symbol with no word to translate",
