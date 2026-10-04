@@ -937,7 +937,9 @@ _COMMA_DECIMAL_SHAPE = re.compile(r"\d\.\d{3},\d|\d,\d{1,2}(?![\d.,])")
 _NUMERIC_COLUMNS: tuple[str, ...] = ("quantity", "unit_rate", *_SPLIT_COLUMNS)
 
 
-def _combine_split_columns(row: dict[str, Any], language: str | None = None) -> dict[str, Any]:
+def _combine_split_columns(
+    row: dict[str, Any], *, dot_thousands: bool = False, comma_thousands: bool = False
+) -> dict[str, Any]:
     """Fold material and labour columns into ``unit_rate`` and ``total``.
 
     Only when the file has no single column of its own for the target: a
@@ -946,6 +948,9 @@ def _combine_split_columns(row: dict[str, Any], language: str | None = None) -> 
     half is handed on as text so the row reports it rather than importing at
     a guessed rate, and a row where both halves are blank stays unpriced, so
     a heading or a total line is still recognised as one.
+
+    The two flags are the file's grouping, decided once for the whole file by
+    :func:`_grouping_conventions`; see :func:`_fold_split_columns`.
     """
     for target in ("unit_rate", "total"):
         halves = [key for key, feeds in _SPLIT_COLUMNS.items() if feeds == target and key in row]
@@ -957,11 +962,7 @@ def _combine_split_columns(row: dict[str, Any], language: str | None = None) -> 
             value = row[key]
             if _is_blank_value(value):
                 continue
-            parsed, error = parse_numeric_cell(
-                value,
-                dot_thousands=language in DECIMAL_COMMA_LANGUAGES,
-                comma_thousands=language in DECIMAL_POINT_LANGUAGES,
-            )
+            parsed, error = parse_numeric_cell(value, dot_thousands=dot_thousands, comma_thousands=comma_thousands)
             if error is not None or parsed is None:
                 row[target] = value
                 break
@@ -971,6 +972,21 @@ def _combine_split_columns(row: dict[str, Any], language: str | None = None) -> 
             if filled:
                 row[target] = amount
     return row
+
+
+def _fold_split_columns(rows: list[dict[str, Any]], language: str | None) -> list[dict[str, Any]]:
+    """Fold every row's material and labour halves with the file's own grouping.
+
+    The fold used to run row by row as each row was read, with the header
+    language as the only guide, before the file's numbers had been seen. A
+    file whose own cells veto that language's grouping (an English header over
+    "2,50", a Hungarian one over "12.5") still had its halves read with it, so
+    "1,250" + "2,50" became 1252.50 instead of 3.75. Deciding first, over every
+    row of the file, is what :func:`_rows_to_positions` does for the single
+    rate column, so the two now agree.
+    """
+    dot_thousands, comma_thousands = _grouping_conventions(rows, language)
+    return [_combine_split_columns(row, dot_thousands=dot_thousands, comma_thousands=comma_thousands) for row in rows]
 
 
 def header_report(headers: tuple[Any, ...] | list[Any], column_map: dict[int, str]) -> dict[str, Any]:
@@ -1382,8 +1398,9 @@ def _parse_csv(
             if canonical:
                 row[canonical] = val.strip() if isinstance(val, str) else val
         if row:
-            rows.append(_combine_split_columns(row, language))
+            rows.append(row)
             row_numbers.append(line_number)
+    rows = _fold_split_columns(rows, language)
 
     import_metadata = {
         "original_columns": [_cell_text(h) for h in display],
@@ -1511,7 +1528,8 @@ def _read_sheet_rows(
         )
         display_map = column_map if display == tuple(raw_headers) else _map_columns(display)
         report = header_report(display, display_map)
-    language = header_language(raw_headers)
+    # The material and labour halves are folded later, once every sheet of the
+    # workbook has been read, see :func:`_parse_rows_from_excel`.
     rows: list[dict[str, Any]] = []
     row_numbers: list[int] = []
     for sheet_row, raw_row in enumerate(rows_iter, start=header_number + 1):
@@ -1521,7 +1539,7 @@ def _read_sheet_rows(
             if canonical and val is not None:
                 row[canonical] = val
         if row:
-            rows.append(_combine_split_columns(row, language))
+            rows.append(row)
             row_numbers.append(sheet_row)
     return {
         "title": worksheet.title,
@@ -1648,6 +1666,11 @@ def _parse_rows_from_excel(
         row_sheets = [first["title"]] * len(rows)
     else:
         rows, row_numbers, row_sheets = _join_sheets(read)
+    # One grouping for the whole workbook, in the language the positions are
+    # read in: a trade sheet with no cell of its own to veto the grouping
+    # follows the sheets that have one.
+    language = header_language(first["headers"])
+    rows = _fold_split_columns(rows, language)
 
     import_metadata = {
         "original_columns": [str(h) if h is not None else "" for h in first["display_headers"]],
@@ -1655,7 +1678,7 @@ def _parse_rows_from_excel(
         "column_mapping": _report_mapping(first["display_column_map"]),
         "column_mapping_applied": overrides is not None,
         "mapping_notes": mapping_notes,
-        "header_language": header_language(first["headers"]),
+        "header_language": language,
         "header_report": {**first["header_report"], "sheet": first["title"]},
         "sheet_names": sheet_names,
         "item_sheet": first["title"],
@@ -1954,6 +1977,12 @@ def summary_label_kind(label: str) -> tuple[str, bool] | None:
     return None
 
 
+def _amount_cell(value: Any, *, dot_thousands: bool = False, comma_thousands: bool = False) -> float:
+    """A money cell read with the file's grouping; zero when it is blank or not a number."""
+    parsed, _ = parse_numeric_cell(value, dot_thousands=dot_thousands, comma_thousands=comma_thousands)
+    return parsed if parsed is not None else 0.0
+
+
 def _is_blank_cell(value: Any) -> bool:
     """A cell that carries nothing: empty, whitespace or a zero."""
     if value is None:
@@ -1968,6 +1997,8 @@ def partition_summary_rows(
     *,
     first_row_number: int = 2,
     row_numbers: list[int] | None = None,
+    dot_thousands: bool = False,
+    comma_thousands: bool = False,
 ) -> tuple[list[tuple[int, dict[str, Any]]], list[dict[str, Any]]]:
     """Separate a bill's total, tax and recap lines from its sections and work.
 
@@ -1986,6 +2017,9 @@ def partition_summary_rows(
             ``row_numbers`` is not given.
         row_numbers: The sheet row of each row, as the Excel reader returns
             them in its metadata.
+        dot_thousands: The file's grouping, see :func:`_grouping_conventions`,
+            for reading the amount a summary line reports.
+        comma_thousands: Likewise, for a decimal-point market.
 
     Returns:
         ``(kept, summary)``: the rows to import, each with its row number, and
@@ -2011,7 +2045,7 @@ def partition_summary_rows(
             kept.append((number, row))
             continue
 
-        amount = safe_float(row.get("total"), default=0.0)
+        amount = _amount_cell(row.get("total"), dot_thousands=dot_thousands, comma_thousands=comma_thousands)
         ordinal = str(row.get("ordinal", "") or "").strip()
         ordinal_key = _label_key(ordinal)
         kind: str | None = None
@@ -2070,11 +2104,28 @@ def summary_row_warning(report: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _split_metadata(row: dict[str, Any], language: str | None) -> dict[str, Any]:
-    """The material and labour halves of a line, keyed for where they are read."""
+def _split_metadata(
+    row: dict[str, Any],
+    language: str | None,
+    *,
+    dot_thousands: bool = False,
+    comma_thousands: bool = False,
+) -> dict[str, Any]:
+    """The material and labour halves of a line, keyed for where they are read.
+
+    Read with the file's grouping, the same reading the line's rate was folded
+    with, so the halves add up to the rate stored beside them. They used to be
+    read with no grouping at all: a Hungarian "12.500" folded into a rate of
+    12 500 and was kept here as 12.5.
+    """
     if not any(key in row for key in _SPLIT_COLUMNS):
         return {}
-    halves = {key: safe_float(row.get(key), default=0.0) for key in _SPLIT_COLUMNS}
+
+    def half(key: str) -> float:
+        parsed, _ = parse_numeric_cell(row.get(key), dot_thousands=dot_thousands, comma_thousands=comma_thousands)
+        return parsed if parsed is not None else 0.0
+
+    halves = {key: half(key) for key in _SPLIT_COLUMNS}
     if language == "hu":
         return {
             "hu": {
@@ -2117,11 +2168,14 @@ _CONTINGENCY_PHRASES: frozenset[str] = frozenset(
 )
 
 
-def _contingency_amount(row: dict[str, Any], description: str) -> float | None:
+def _contingency_amount(
+    row: dict[str, Any], description: str, *, dot_thousands: bool = False, comma_thousands: bool = False
+) -> float | None:
     """The amount of a contingency line written without a unit, quantity or rate.
 
     Returns ``None`` for any other row, and for a contingency line that is
-    priced like work already or carries no amount.
+    priced like work already or carries no amount. The amount is read with
+    the file's grouping, like every other number of the line.
     """
     if str(row.get("unit", "") or "").strip():
         return None
@@ -2130,7 +2184,7 @@ def _contingency_amount(row: dict[str, Any], description: str) -> float | None:
     words = normalise_label(description).split()
     if not any(" ".join(words[:length]) in _CONTINGENCY_PHRASES for length in range(1, len(words) + 1)):
         return None
-    amount = safe_float(row.get("total"), default=0.0)
+    amount = _amount_cell(row.get("total"), dot_thousands=dot_thousands, comma_thousands=comma_thousands)
     return amount if amount > 0 else None
 
 
@@ -2316,7 +2370,9 @@ def _rows_to_positions(
     )
     median_rate = rate_samples[len(rate_samples) // 2] if rate_samples else 0.0
 
-    kept_rows, summary_rows = partition_summary_rows(rows, row_numbers=row_numbers)
+    kept_rows, summary_rows = partition_summary_rows(
+        rows, row_numbers=row_numbers, dot_thousands=dot_thousands, comma_thousands=comma_thousands
+    )
     result.skipped += len(summary_rows)
     result.warnings.extend(summary_row_warning(report) for report in summary_rows)
     if summary_rows:
@@ -2359,7 +2415,9 @@ def _rows_to_positions(
             unit_raw = str(row.get("unit", "")).strip()
             quantity_raw = row.get("quantity")
             unit_rate_raw = row.get("unit_rate")
-            contingency = _contingency_amount(row, description)
+            contingency = _contingency_amount(
+                row, description, dot_thousands=dot_thousands, comma_thousands=comma_thousands
+            )
             if contingency is not None:
                 unit_raw, quantity_raw, unit_rate_raw = "lsum", 1.0, contingency
             quantity, q_err = parse_numeric_cell(
@@ -2489,7 +2547,7 @@ def _rows_to_positions(
                 metadata["import_sheet"] = row["_sheet"]
             if contingency is not None:
                 metadata["contingency"] = True
-            split = _split_metadata(row, header_language)
+            split = _split_metadata(row, header_language, dot_thousands=dot_thousands, comma_thousands=comma_thousands)
             if split:
                 metadata.update(split)
 
