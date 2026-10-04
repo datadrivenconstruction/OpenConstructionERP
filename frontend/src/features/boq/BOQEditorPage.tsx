@@ -81,7 +81,7 @@ import { allResourcesExpanded, type ResourceExpansionState } from './resourceExp
 import { BatchActionBar } from './BatchActionBar';
 import { ScenarioDialog } from './ScenarioDialog';
 import { SendToTenderDialog } from './SendToTenderDialog';
-import { CostPlanDialog } from '@/features/cost-plan';
+import { CostPlanDialog, offersCostPlan } from '@/features/cost-plan';
 import { ImportPreviewDialog } from './ImportPreviewDialog';
 import { BOQFilterBar, type BoqFilterKind } from './BOQFilterBar';
 import { BOQOutline } from './BOQOutline';
@@ -2895,6 +2895,10 @@ export function BOQEditorPage() {
   const [tenderOpen, setTenderOpen] = useState(false);
   // NRM 1 elemental cost plan of this bill, read-only, opened over the editor.
   const [costPlanOpen, setCostPlanOpen] = useState(false);
+  const showCostPlan = useMemo(
+    () => offersCostPlan(project?.classification_standard, positions),
+    [project?.classification_standard, positions],
+  );
   const [markupOpenSignal, setMarkupOpenSignal] = useState(0);
 
   // Top-level sections inside the current selection. Empty means the tender
@@ -4938,17 +4942,19 @@ export function BOQEditorPage() {
               <FlaskConical size={14} className="mr-1" />
               {t('boq.scenario_btn', { defaultValue: 'What-if' })}
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setCostPlanOpen(true)}
-              title={t('cost_plan.open_hint', {
-                defaultValue: 'Roll this bill up into an NRM 1 elemental cost plan with cost per m2 GIFA',
-              })}
-            >
-              <LayoutList size={14} className="mr-1" />
-              {t('cost_plan.open_button', { defaultValue: 'Cost plan' })}
-            </Button>
+            {showCostPlan && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setCostPlanOpen(true)}
+                title={t('cost_plan.open_hint', {
+                  defaultValue: 'Roll this bill up into an NRM 1 elemental cost plan with cost per m2 GIFA',
+                })}
+              >
+                <LayoutList size={14} className="mr-1" />
+                {t('cost_plan.open_button', { defaultValue: 'Cost plan' })}
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="sm"

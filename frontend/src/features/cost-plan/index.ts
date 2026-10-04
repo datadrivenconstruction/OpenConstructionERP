@@ -3,5 +3,6 @@
 export { CostPlanDialog } from './CostPlanDialog';
 export type { CostPlanDialogProps } from './CostPlanDialog';
 export { CostPlanView } from './CostPlanView';
+export { offersCostPlan } from './offersCostPlan';
 export { costPlanApi } from './api';
 export type { Nrm1CostPlan } from './api';
