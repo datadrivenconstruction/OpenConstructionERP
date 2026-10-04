@@ -249,6 +249,7 @@ async def test_a_smeta_without_norm_codes_is_not_read_as_a_norm_estimate(
     lines = await _lines(shared_client, shared_auth, boq_id)
     assert [p for p in lines if "gesn" in (p["classification"] or {})] == []
     assert _results(body, "gesn.resource_breakdown") == []
+    assert [r for r in _results(body, "gesn.price_level_declared") if not r["passed"]] == []
     assert _results(body, "gesn.valid_code") == []
     assert len(_results(body, "gesn.code_required")) == 2
 
