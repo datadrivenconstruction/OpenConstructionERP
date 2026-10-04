@@ -562,6 +562,13 @@ def check_x89(parsed: ParsedX89, positions: list[Any], *, is_section: Any) -> di
     invoiced_total = _ZERO
     expected_total = _ZERO
     issue_counts: dict[str, int] = {}
+    oz_counts: dict[str, int] = {}
+    for item in parsed.items:
+        oz_counts[item.oz] = oz_counts.get(item.oz, 0) + 1
+    # Billed quantity per position across the whole file, so a quantity split
+    # over two items under one OZ is held against the bill as one quantity.
+    billed_per_position: dict[str, Decimal] = {}
+    bill_qty_of: dict[str, Decimal] = {}
 
     for item in parsed.items:
         amount = c2(item.amount) if item.amount is not None else _ZERO
@@ -575,8 +582,12 @@ def check_x89(parsed: ParsedX89, positions: list[Any], *, is_section: Any) -> di
             "unit_price": str(q3(item.unit_price)) if item.unit_price is not None else None,
             "amount": str(amount),
         }
+        if oz_counts[item.oz] > 1:
+            issues.append("duplicate_oz_in_file")
         if item.amount is None:
             issues.append("missing_amount")
+        if item.bill_qty is None:
+            issues.append("missing_quantity")
         if item.bill_qty is not None and item.unit_price is not None and item.amount is not None:
             arithmetic = c2(item.bill_qty * item.unit_price)
             if arithmetic != amount:
@@ -607,12 +618,22 @@ def check_x89(parsed: ParsedX89, positions: list[Any], *, is_section: Any) -> di
             if item.unit_price is not None and q3(item.unit_price) != q3(rate):
                 issues.append("unit_price_differs")
                 entry["unit_price_difference"] = str(q3(item.unit_price) - q3(rate))
-            if item.bill_qty is not None and boq_qty > 0 and item.bill_qty > boq_qty:
-                issues.append("quantity_above_boq")
+            pos_key = entry["position_id"]
+            billed_per_position[pos_key] = billed_per_position.get(pos_key, _ZERO) + qty
+            bill_qty_of[pos_key] = boq_qty
         entry["issues"] = issues
-        for issue in issues:
-            issue_counts[issue] = issue_counts.get(issue, 0) + 1
         lines.append(entry)
+
+    for entry in lines:
+        pos_key = entry.get("position_id")
+        if not pos_key:
+            continue
+        boq_qty = bill_qty_of[pos_key]
+        if boq_qty > 0 and billed_per_position[pos_key] > boq_qty:
+            entry["issues"].append("quantity_above_boq")
+    for entry in lines:
+        for issue in entry["issues"]:
+            issue_counts[issue] = issue_counts.get(issue, 0) + 1
 
     totals_check: list[dict[str, Any]] = []
 

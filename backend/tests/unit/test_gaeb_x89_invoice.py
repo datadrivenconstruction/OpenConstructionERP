@@ -401,6 +401,44 @@ def test_check_flags_a_stated_total_that_does_not_add_up() -> None:
     assert by_key["vat_amount"]["computed"] == "2017.80"
 
 
+def test_a_quantity_split_over_one_oz_twice_is_held_against_the_bill_as_one() -> None:
+    """40 m3 and 70 m3 under the same OZ are each below the 100 m3 of the bill, together above it."""
+    split = _RECEIVED.replace(
+        b'<Item ID="I3" RNoPart="0090"><BillQty>1.000</BillQty><QU>psch</QU><UP>350.000</UP><IT>400.00</IT>',
+        b'<Item ID="I3" RNoPart="0010"><BillQty>70.000</BillQty><QU>m3</QU><UP>185.500</UP><IT>12985.00</IT>',
+    )
+    assert split != _RECEIVED
+    report = check_x89(parse_x89(split), list(POSITIONS.values()), is_section=_is_section)
+
+    concrete = [ln for ln in report["lines"] if ln["oz"] == "01.0010"]
+    assert len(concrete) == 2
+    for line in concrete:
+        assert "duplicate_oz_in_file" in line["issues"]
+        assert "quantity_above_boq" in line["issues"]
+    # The bill's other position is under its quantity and stays clean of both.
+    steel = next(ln for ln in report["lines"] if ln["oz"] == "01.0020")
+    assert "quantity_above_boq" not in steel["issues"]
+    assert "duplicate_oz_in_file" not in steel["issues"]
+    assert report["issue_counts"]["quantity_above_boq"] == 2
+    # The money still reconciles line by line.
+    assert sum((D(ln["difference"]) for ln in report["lines"]), D("0")) == D(report["total_difference"])
+
+
+def test_a_single_item_under_the_bill_quantity_is_not_flagged() -> None:
+    report = check_x89(parse_x89(_RECEIVED), list(POSITIONS.values()), is_section=_is_section)
+    assert all("quantity_above_boq" not in ln["issues"] for ln in report["lines"])
+    assert all("duplicate_oz_in_file" not in ln["issues"] for ln in report["lines"])
+
+
+def test_an_item_without_a_billed_quantity_is_named() -> None:
+    no_qty = _RECEIVED.replace(b"<BillQty>40.000</BillQty>", b"")
+    report = check_x89(parse_x89(no_qty), list(POSITIONS.values()), is_section=_is_section)
+    concrete = next(ln for ln in report["lines"] if ln["oz"] == "01.0010")
+    assert "missing_quantity" in concrete["issues"]
+    # Without a quantity nothing is expected, so the whole amount is the difference.
+    assert concrete["difference"] == "7420.00"
+
+
 def test_our_own_export_checks_clean_against_the_bill() -> None:
     lines, _ = invoice_lines_from_claim(CLAIM_1, SOV, POSITIONS, position_for_line=_position_for)
     exported = build_x89_xml(_invoice(lines))
@@ -459,6 +497,30 @@ def test_published_x89_schema_accepts_the_export() -> None:
     schema = etree.XMLSchema(etree.parse(str(xsd), parser))
     lines, _ = invoice_lines_from_claim(CLAIM_2, SOV, POSITIONS, position_for_line=_position_for)
     lines.append(InvoiceLine("A/7", "Nachtrag", "psch", D("1"), None, D("5")))
-    exported = build_x89_xml(_invoice(lines, retention="100"))
+    # Every optional party field the claim route fills in production: country
+    # and VAT ID on both addresses, a tax number for the recipient too.
+    full = _invoice(lines, retention="100")
+    full.creator = InvoiceParty(
+        name="Rohbau Nord GmbH",
+        street="Hafenweg 4",
+        postcode="20457",
+        city="Hamburg",
+        country="DE",
+        tax_no="22/815/04711",
+        vat_id="DE123456789",
+    )
+    full.recipient = InvoiceParty(
+        name="Stadt Musterstadt",
+        street="Rathausplatz 1",
+        postcode="12345",
+        city="Musterstadt",
+        country="DE",
+        tax_no="11/222/33333",
+        vat_id="DE111222333",
+    )
+    exported = build_x89_xml(full)
+    root = ET.fromstring(exported.xml)
+    assert root.findtext(f"{NS}Invoice/{NS}InvoiceCreator/{NS}Address/{NS}VATID") == "DE123456789"
+    assert root.findtext(f"{NS}Invoice/{NS}InvoiceRecipient/{NS}TaxNo") == "11/222/33333"
     assert schema.validate(etree.fromstring(exported.xml.encode("utf-8"))), [str(e) for e in schema.error_log][:5]
     assert schema.validate(etree.fromstring(_RECEIVED)), [str(e) for e in schema.error_log][:5]
