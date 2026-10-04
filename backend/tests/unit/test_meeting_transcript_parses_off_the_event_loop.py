@@ -103,7 +103,7 @@ def test_only_the_first_fifty_pages_are_read(monkeypatch: pytest.MonkeyPatch) ->
 
 @pytest.mark.parametrize(
     ("content", "expected"),
-    [("Protokoll Baubesprechung".encode(), "Protokoll Baubesprechung"), (b"caf\xe9", "caf\xe9")],
+    [("Prüfbericht Baubesprechung".encode(), "Prüfbericht Baubesprechung"), (b"caf\xe9", "caf\xe9")],
 )
 def test_a_text_transcript_reads_utf8_then_latin1(content: bytes, expected: str) -> None:
     assert asyncio.run(meetings_router._extract_text_from_file(content, "minutes.txt")) == expected
