@@ -404,3 +404,22 @@ async def test_a_line_with_drawdowns_keeps_its_category(session):
     await fin.update_budget(line, BudgetUpdate(category="Contingency"))
     pos = await svc.get_contingency_position(PROJECT_ID)
     assert pos["drawn"] == D("900.00")
+
+
+@pytest.mark.asyncio
+async def test_null_metadata_clears_a_plain_line_but_keeps_a_drawdown(session):
+    svc = RiskService(session)
+    fin = FinanceService(session)
+    plain = await _line(session, amount="100", category="material", wbs="M-1")
+    await fin.update_budget(plain, BudgetUpdate(metadata={"notes": "x"}))
+    # An explicit null still clears the metadata of a line that holds no drawdown.
+    await fin.update_budget(plain, BudgetUpdate(metadata=None))
+    b = await fin.get_budget(plain)
+    await session.refresh(b)
+    assert not b.metadata_
+
+    line = await _line(session, amount="5000")
+    rid = await _risk(svc, status="occurred")
+    await svc.confirm_contingency_drawdown(PROJECT_ID, rid, _req("900"))
+    await fin.update_budget(line, BudgetUpdate(metadata=None))
+    assert list(await _markers(session, line)) == [f"{CONTINGENCY_DRAWDOWN_PREFIX}risk:{rid}"]

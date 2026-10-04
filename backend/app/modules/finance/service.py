@@ -2335,7 +2335,8 @@ class FinanceService:
                 else {}
             )
             merged.update(stored_drawdowns)
-            fields["metadata_"] = merged
+            # An explicit null on a line without drawdowns still clears it, as before.
+            fields["metadata_"] = merged if (merged or incoming is not None) else None
         if (
             stored_drawdowns
             and "category" in fields
@@ -2358,6 +2359,11 @@ class FinanceService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Budget not found",
             )
+        if fields:
+            # The row read above stays in the identity map, so apply_update
+            # wrote the request's values onto it as sent ("350000"). Read the
+            # row back so the response carries the stored form ("350000.00").
+            await self.session.refresh(updated)
         logger.info("Budget updated: %s", budget_id)
         return updated
 
