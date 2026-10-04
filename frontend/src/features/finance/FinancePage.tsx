@@ -79,6 +79,7 @@ import {
 import { invalidateFinanceFigures } from './financeQueryKeys';
 import { settleAndMarkPaid } from './markInvoicePaid';
 import { budgetCategoryLabel, wbsLabel, type WbsNode } from './budgetLabels';
+import { ContingencyBudgetNote } from '@/features/risk/ContingencyBudgetNote';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useActiveProjectId } from '@/shared/hooks/useActiveProjectId';
@@ -1759,6 +1760,13 @@ function BudgetsTab({ projectId }: { projectId: string }) {
                   </td>
                   <td className="px-4 py-3 text-content-secondary" data-testid="budget-category">
                     {budgetCategoryLabel(t, b.category)}
+                    <ContingencyBudgetNote
+                      category={b.category}
+                      metadata={b.metadata}
+                      revised={b.revised_budget}
+                      original={b.original_budget}
+                      currency={rowCurrency}
+                    />
                   </td>
                   <td className="px-4 py-3 text-right">
                     <MoneyDisplay amount={b.original_budget} currency={rowCurrency} />
@@ -1861,6 +1869,13 @@ function BudgetsTab({ projectId }: { projectId: string }) {
                   <h4 className="text-sm font-semibold text-content-primary truncate">
                     {budgetCategoryLabel(t, b.category)}
                   </h4>
+                  <ContingencyBudgetNote
+                    category={b.category}
+                    metadata={b.metadata}
+                    revised={b.revised_budget}
+                    original={b.original_budget}
+                    currency={rowCurrency}
+                  />
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {rowCurrency && (
