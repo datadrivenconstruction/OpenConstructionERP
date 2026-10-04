@@ -2004,9 +2004,13 @@ function DetailView({
         // order by the approval itself; an order approved before the stamp
         // existed carries none, and then no pill is drawn rather than one to
         // a bill the page would have to guess.
+        // Execution is the normal end of an approved order and writes only
+        // the status, so an executed order keeps both the stamp and the rows
+        // it names; the pills stay with it.
         const writeback = changeOrderWriteback(order.metadata as Record<string, unknown> | undefined);
-        const landedInBoq = order.status === 'approved' && !!writeback.boqId;
-        const landedInBudget = order.status === 'approved' && !!writeback.budgetRowId;
+        const approvalLanded = order.status === 'approved' || order.status === 'executed';
+        const landedInBoq = approvalLanded && !!writeback.boqId;
+        const landedInBudget = approvalLanded && !!writeback.budgetRowId;
         if (
           poIds.length === 0 &&
           rfiIds.length === 0 &&

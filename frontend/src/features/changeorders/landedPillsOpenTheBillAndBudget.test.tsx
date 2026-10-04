@@ -5,8 +5,9 @@
 // money into a revised-budget row, and the approval now stamps both ids on the
 // order (metadata.writeback). The detail view turns them into pills that land
 // on the bill row and on the budget lines. What is pinned: the destination,
-// that a draft order draws neither pill even when the stamp is present, and
-// that an approved order without the stamp draws none rather than guessing.
+// that the pills survive approved -> executed, that a draft, submitted or
+// rejected order draws neither pill even when the stamp is present, and that
+// an approved order without the stamp draws none rather than guessing.
 //
 // The harness is the one relatedPillsLandOnTheRecord.test.tsx uses.
 
@@ -129,12 +130,12 @@ function order(status: string, metadata: Record<string, unknown>) {
     status,
     submitted_by: null,
     submitted_by_name: null,
-    approved_by: status === 'approved' ? 'u-2' : null,
+    approved_by: status === 'approved' || status === 'executed' ? 'u-2' : null,
     approved_by_name: null,
     rejected_by: null,
     rejected_by_name: null,
     submitted_at: null,
-    approved_at: status === 'approved' ? '2026-08-02T09:00:00Z' : null,
+    approved_at: status === 'approved' || status === 'executed' ? '2026-08-02T09:00:00Z' : null,
     rejected_at: null,
     cost_impact: '12500.00',
     schedule_impact_days: 4,
@@ -206,6 +207,28 @@ describe('an approved change order links to where it landed', () => {
     fireEvent.click(await screen.findByText('BOQ section'));
 
     expect(navigateSpy).toHaveBeenCalledWith('/boq/boq-3');
+    expect(screen.queryByText('Revised budget')).toBeNull();
+  });
+
+  it('keeps both pills once the approved order is executed', async () => {
+    // approved -> executed is the normal end of a change order, and the
+    // execute step writes only the status, so the stamp is still there.
+    setTransport(order('executed', STAMP));
+    renderDetail();
+
+    fireEvent.click(await screen.findByText('BOQ section'));
+    expect(navigateSpy).toHaveBeenCalledWith('/boq/boq-3?highlight=sec-9');
+
+    fireEvent.click(screen.getByText('Revised budget'));
+    expect(navigateSpy).toHaveBeenCalledWith('/finance?tab=budgets');
+  });
+
+  it.each(['submitted', 'rejected'])('draws neither pill on a %s order', async (status) => {
+    setTransport(order(status, STAMP));
+    renderDetail();
+
+    await screen.findByText('Revised ground floor slab');
+    expect(screen.queryByText('BOQ section')).toBeNull();
     expect(screen.queryByText('Revised budget')).toBeNull();
   });
 
