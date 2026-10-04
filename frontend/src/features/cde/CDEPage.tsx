@@ -1,9 +1,9 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-import React, { Fragment, useState, useMemo, useCallback, useEffect } from 'react';
+import React, { Fragment, useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   Database,
@@ -864,16 +864,28 @@ const ContainerRow = React.memo(function ContainerRow({
   onPromote,
   onLinkDocument,
   onShowHistory,
+  focused = false,
 }: {
   container: CDEContainer;
   userRole: string | null;
   onPromote: (c: CDEContainer) => void;
   onLinkDocument: (c: CDEContainer) => void;
   onShowHistory: (c: CDEContainer) => void;
+  /** Opened from a link that names this container (`?container=<id>`, e.g. the
+   *  "published" notification): start expanded and bring it into view. */
+  focused?: boolean;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(focused);
+  const rowRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!focused) return;
+    setExpanded(true);
+    // Optional call: jsdom (and some embedded webviews) lack scrollIntoView.
+    rowRef.current?.scrollIntoView?.({ block: 'center' });
+  }, [focused]);
   const containerState = getContainerState(container);
   const containerDiscipline = getContainerDiscipline(container);
   const stateCfg = STATE_CONFIG[containerState] ?? STATE_CONFIG.wip;
@@ -897,7 +909,13 @@ const ContainerRow = React.memo(function ContainerRow({
     | undefined;
 
   return (
-    <div className="border-b border-border-light last:border-b-0">
+    <div
+      ref={rowRef}
+      className={clsx(
+        'border-b border-border-light last:border-b-0',
+        focused && 'ring-1 ring-inset ring-oe-blue/40',
+      )}
+    >
       {/* Main row */}
       <div
         className={clsx(
@@ -1544,6 +1562,10 @@ export function CDEPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { projectId: routeProjectId } = useParams<{ projectId: string }>();
+  // `?container=<id>` deep-links one container (the notification sent when a
+  // container is published points here).
+  const [searchParams] = useSearchParams();
+  const focusContainerId = searchParams.get('container');
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
@@ -2101,6 +2123,7 @@ export function CDEPage() {
                   onPromote={handlePromote}
                   onLinkDocument={handleLinkDocument}
                   onShowHistory={handleShowHistory}
+                  focused={c.id === focusContainerId}
                 />
               ))}
             </Card>
