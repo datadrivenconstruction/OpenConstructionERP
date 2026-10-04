@@ -612,6 +612,30 @@ export function createAuthStore(env: AuthTabEnv) {
           if (typeof data.role === 'string') {
             set({ userRole: data.role });
           }
+          // The server's email is the account's own. Some sign-ins hand
+          // setTokens no email (SSO, desktop bootstrap), which left userEmail
+          // null and kept the previous account's address in storage, so a
+          // reload greeted this user with the earlier person's name.
+          const email = typeof data.email === 'string' ? data.email.trim() : '';
+          if (email) {
+            try {
+              const local = env.local();
+              const stored = local.getItem(KEY_EMAIL);
+              if (stored !== email) {
+                local.setItem(KEY_EMAIL, email);
+                // Same rule as setTokens: a different account than the one this
+                // browser last knew must not inherit its onboarding fast-path
+                // flag or cached workspace. A casing difference is the same account.
+                if (stored === null || stored.toLowerCase() !== email.toLowerCase()) {
+                  local.removeItem('oe_onboarding_completed');
+                  local.removeItem(KEY_COMPANY_TYPE);
+                }
+              }
+            } catch {
+              // storage unavailable -- the in-memory value below still applies.
+            }
+            if (get().userEmail !== email) set({ userEmail: email });
+          }
           // Cache the real display name (== full_name) for the greeting and any
           // other surface; persist it so a reload paints the name without waiting
           // on this round-trip. Ignore an empty/whitespace name.

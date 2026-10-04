@@ -42,7 +42,10 @@ const b64url = (value: object) =>
   btoa(JSON.stringify(value)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 const jwt = (claims: object) => `h.${b64url(claims)}.s`;
 
-function storeWithProfile(profile: { full_name?: string; role?: string }) {
+function storeWithProfile(
+  profile: { full_name?: string; role?: string; email?: string },
+  local: MemoryStorage = new MemoryStorage(),
+) {
   const current = { ...profile };
   const fetchMock = vi.fn(async (input: string) => {
     if (input === '/api/v1/users/me/') {
@@ -50,7 +53,6 @@ function storeWithProfile(profile: { full_name?: string; role?: string }) {
     }
     return { ok: false, status: 404, json: async () => ({}) } as Response;
   });
-  const local = new MemoryStorage();
   const env: AuthTabEnv = {
     local: () => local as unknown as Storage,
     session: () => new MemoryStorage() as unknown as Storage,
@@ -135,6 +137,94 @@ describe('the name the dashboard greets with', () => {
     await store.getState().syncRoleFromServer();
 
     expect(store.getState().userFullName).toBe('Maria Schmidt');
+  });
+});
+
+describe('the email the greeting falls back to', () => {
+  // A sign-in that hands setTokens no email (SSO, desktop bootstrap) left
+  // userEmail null and kept the previous account's address in storage, so a
+  // profile without a full name greeted nobody, and after a reload greeted
+  // the earlier person.
+  it('is taken from the profile when the sign-in carried none', async () => {
+    const local = new MemoryStorage();
+    local.setItem('oe_user_email', 'adam.ash@x.io');
+    local.setItem('oe_onboarding_completed', 'true');
+    local.setItem('oe_company_type', 'general_contractor');
+    const { store } = storeWithProfile({ email: 'bea.brown@x.io' }, local);
+
+    store.getState().setTokens(jwt({ sub: 'user-b' }), jwt({ sub: 'user-b', type: 'refresh' }), false);
+    expect(store.getState().userEmail).toBeNull();
+    await vi.waitFor(() => expect(store.getState().userEmail).toBe('bea.brown@x.io'));
+
+    expect(local.getItem('oe_user_email')).toBe('bea.brown@x.io');
+    // A different account than the one this browser knew: the previous
+    // person's onboarding shortcut and workspace cache go, as in setTokens.
+    expect(local.getItem('oe_onboarding_completed')).toBeNull();
+    expect(local.getItem('oe_company_type')).toBeNull();
+
+    // After a reload the store paints this account's address, not Adam's.
+    const reloaded = storeWithProfile({ email: 'bea.brown@x.io' }, local).store;
+    reloaded.getState().loadFromStorage();
+    expect(reloaded.getState().userEmail).toBe('bea.brown@x.io');
+  });
+
+  it('keeps the onboarding shortcut when only the casing differs', async () => {
+    const local = new MemoryStorage();
+    const { store } = storeWithProfile({ email: 'maria@x.io' }, local);
+    store.getState().setTokens(jwt({ sub: 'u1' }), jwt({ sub: 'u1', type: 'refresh' }), false, 'Maria@X.io');
+    local.setItem('oe_onboarding_completed', 'true');
+    local.setItem('oe_company_type', 'estimator');
+
+    await vi.waitFor(() => expect(store.getState().userEmail).toBe('maria@x.io'));
+
+    expect(local.getItem('oe_user_email')).toBe('maria@x.io');
+    expect(local.getItem('oe_onboarding_completed')).toBe('true');
+    expect(local.getItem('oe_company_type')).toBe('estimator');
+  });
+
+  it('leaves the stored email alone when the profile has none', async () => {
+    const local = new MemoryStorage();
+    const { store } = storeWithProfile({ full_name: 'Maria Schmidt' }, local);
+    store.getState().setTokens(jwt({ sub: 'u1' }), jwt({ sub: 'u1', type: 'refresh' }), false, 'm@x.io');
+    await vi.waitFor(() => expect(store.getState().userFullName).toBe('Maria Schmidt'));
+
+    expect(store.getState().userEmail).toBe('m@x.io');
+    expect(local.getItem('oe_user_email')).toBe('m@x.io');
+  });
+
+  it('does not take the email from a late answer for the previous account', async () => {
+    const answers: Array<(body: object) => void> = [];
+    const local = new MemoryStorage();
+    const fetchMock = vi.fn(
+      (input: string) =>
+        new Promise<Response>((resolve) => {
+          if (input !== '/api/v1/users/me/') {
+            resolve({ ok: false, status: 404, json: async () => ({}) } as Response);
+            return;
+          }
+          answers.push((body) => resolve({ ok: true, status: 200, json: async () => body } as Response));
+        }),
+    );
+    const store = createAuthStore({
+      local: () => local as unknown as Storage,
+      session: () => new MemoryStorage() as unknown as Storage,
+      channel: null,
+      locks: null,
+      fetch: fetchMock as unknown as AuthTabEnv['fetch'],
+      reload: vi.fn(),
+      goToLogin: vi.fn(),
+    });
+
+    store.getState().setTokens(jwt({ sub: 'user-a' }), jwt({ sub: 'user-a', type: 'refresh' }), false);
+    store.getState().setTokens(jwt({ sub: 'user-b' }), jwt({ sub: 'user-b', type: 'refresh' }), false);
+    expect(answers).toHaveLength(2);
+    answers[1]!({ email: 'bea@x.io' });
+    await vi.waitFor(() => expect(store.getState().userEmail).toBe('bea@x.io'));
+    answers[0]!({ email: 'adam@x.io' });
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(store.getState().userEmail).toBe('bea@x.io');
+    expect(local.getItem('oe_user_email')).toBe('bea@x.io');
   });
 });
 
