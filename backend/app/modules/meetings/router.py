@@ -622,8 +622,15 @@ def _extract_meeting_data_heuristic(
 async def _extract_text_from_file(file_content: bytes, filename: str) -> str:
     """Extract text content from uploaded file based on extension.
 
-    Supports: .txt, .vtt, .srt, .docx, .pdf
+    Supports: .txt, .vtt, .srt, .docx, .pdf. Parsing a 50-page PDF or a long
+    DOCX takes seconds of CPU, so it runs in a worker thread rather than on
+    the event loop, where it stalled every other request for that long.
     """
+    return await asyncio.to_thread(_extract_text_sync, file_content, filename)
+
+
+def _extract_text_sync(file_content: bytes, filename: str) -> str:
+    """The parsing behind :func:`_extract_text_from_file`, run off the event loop."""
     ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
 
     if ext in ("txt", "vtt", "srt"):
@@ -658,7 +665,12 @@ async def _extract_text_from_file(file_content: bytes, filename: str) -> str:
             text_parts = []
             with pdfplumber.open(io.BytesIO(file_content)) as pdf:
                 for page in pdf.pages[:50]:  # Cap at 50 pages
-                    page_text = page.extract_text()
+                    try:
+                        page_text = page.extract_text()
+                    finally:
+                        # pdfplumber keeps every parsed page's layout until
+                        # the document closes; release each one as we go.
+                        page.close()
                     if page_text:
                         text_parts.append(page_text)
             return "\n".join(text_parts)
