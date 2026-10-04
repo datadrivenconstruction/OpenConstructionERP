@@ -63,6 +63,13 @@ from app.modules.finance.schemas import (
 
 logger = logging.getLogger(__name__)
 
+#: Budget category that holds contingency (compared lower-case).
+CONTINGENCY_CATEGORY = "contingency"
+#: Metadata key prefix of a confirmed drawdown on a contingency budget line,
+#: followed by its source (``risk:<uuid>``). Written only by
+#: ``FinanceService.set_contingency_drawdown``.
+CONTINGENCY_DRAWDOWN_PREFIX = "contingency_drawdown:"
+
 # Upper bound on invoices scanned for the retention ledger (mirrors the invoice
 # Excel-export cap). A read model, so a hard ceiling keeps a pathological
 # project from loading unbounded rows; realistic projects stay far below it.
@@ -2303,12 +2310,44 @@ class FinanceService:
         budget_id: uuid.UUID,
         data: BudgetUpdate,
     ) -> ProjectBudget:
-        """Update budget fields."""
-        await self.get_budget(budget_id)  # 404 check
+        """Update budget fields.
+
+        Confirmed contingency drawdowns live on the row's metadata under
+        ``contingency_drawdown:`` keys and are written only by
+        :meth:`set_contingency_drawdown`. A PATCH replaces metadata wholesale,
+        and the Budgets tab sends back the metadata it loaded earlier, so an
+        edit saved after someone confirmed (or reversed) a drawdown would
+        silently drop (or resurrect) money. The stored drawdown keys therefore
+        always win over whatever the request carries. A line holding drawdowns
+        also keeps its contingency category: moving it elsewhere would make
+        the drawn money vanish from the contingency position.
+        """
+        current = await self.get_budget(budget_id)  # 404 check
 
         fields = data.model_dump(exclude_unset=True)
+        stored_md = dict(getattr(current, "metadata_", None) or {})
+        stored_drawdowns = {k: v for k, v in stored_md.items() if k.startswith(CONTINGENCY_DRAWDOWN_PREFIX)}
         if "metadata" in fields:
-            fields["metadata_"] = fields.pop("metadata")
+            incoming = fields.pop("metadata")
+            merged = (
+                {k: v for k, v in incoming.items() if not str(k).startswith(CONTINGENCY_DRAWDOWN_PREFIX)}
+                if isinstance(incoming, dict)
+                else {}
+            )
+            merged.update(stored_drawdowns)
+            fields["metadata_"] = merged
+        if (
+            stored_drawdowns
+            and "category" in fields
+            and (fields["category"] or "").strip().lower() != CONTINGENCY_CATEGORY
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    "This contingency line carries confirmed risk drawdowns. "
+                    "Reverse them on the risk register before changing its category."
+                ),
+            )
 
         if fields:
             await self.budgets.update(budget_id, **fields)
@@ -2321,6 +2360,93 @@ class FinanceService:
             )
         logger.info("Budget updated: %s", budget_id)
         return updated
+
+    # ── Contingency (risk-based drawdowns) ─────────────────────────────────
+
+    async def list_contingency_lines(
+        self,
+        project_id: uuid.UUID,
+        *,
+        for_update: bool = False,
+    ) -> list[ProjectBudget]:
+        """The project's budget lines in the contingency category.
+
+        The category is compared case-insensitively: the manual budget form
+        writes "Contingency", imports write "contingency". Ordered oldest
+        first so the line a drawdown lands on by default is stable.
+        ``for_update`` row-locks the lines for a read-modify-write of their
+        metadata, so two people confirming drawdowns at once cannot lose one.
+        """
+        from sqlalchemy import func
+
+        stmt = (
+            select(ProjectBudget)
+            .where(
+                ProjectBudget.project_id == project_id,
+                func.lower(func.coalesce(ProjectBudget.category, "")) == CONTINGENCY_CATEGORY,
+            )
+            .order_by(ProjectBudget.created_at.asc(), ProjectBudget.id.asc())
+        )
+        if for_update:
+            # populate_existing: rows this session already loaded (the caller
+            # usually read the position first) must be overwritten with what
+            # the lock returns, or the read-modify-write works on the copy
+            # taken before another request committed its drawdown.
+            stmt = stmt.with_for_update().execution_options(populate_existing=True)
+        return list((await self.session.execute(stmt)).scalars().all())
+
+    async def set_contingency_drawdown(
+        self,
+        *,
+        project_id: uuid.UUID,
+        source: str,
+        budget_id: uuid.UUID | None,
+        record: dict[str, Any] | None,
+    ) -> ProjectBudget | None:
+        """Record, replace or reverse the one drawdown ``source`` holds.
+
+        A source (``risk:<id>``) holds at most one drawdown across all of the
+        project's contingency lines. Confirming again replaces the amount
+        rather than adding a second one, and confirming onto a different line
+        moves it, so replaying the same confirmation changes nothing.
+        ``record=None`` reverses it.
+
+        Args:
+            project_id: The project whose contingency lines are touched.
+            source: Stable key of what drew the money, e.g. ``risk:<uuid>``.
+            budget_id: The contingency line to draw from; required when
+                recording (``record`` given), ignored when reversing.
+            record: The stored record (amount as a string in the line's
+                currency, plus who confirmed it and when), or None to reverse.
+
+        Returns:
+            The line now holding the drawdown, or None after a reversal.
+
+        Raises:
+            HTTPException: 404 when ``budget_id`` is not a contingency line of
+                this project.
+        """
+        key = f"{CONTINGENCY_DRAWDOWN_PREFIX}{source}"
+        lines = await self.list_contingency_lines(project_id, for_update=True)
+        target: ProjectBudget | None = None
+        if record is not None:
+            target = next((ln for ln in lines if ln.id == budget_id), None)
+            if target is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Contingency budget line not found for this project",
+                )
+        for line in lines:
+            md = dict(line.metadata_ or {})
+            if line is target:
+                md[key] = record
+            elif key in md:
+                md.pop(key)
+            else:
+                continue
+            line.metadata_ = md
+        await self.session.flush()
+        return target
 
     # ── EVM ──────────────────────────────────────────────────────────────────
 
