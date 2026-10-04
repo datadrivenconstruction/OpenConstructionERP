@@ -137,6 +137,9 @@ const RegionalPackCard = lazy(() =>
 const DashboardMarketCasesCard = lazy(() =>
   import('./DashboardMarketCasesCard').then((m) => ({ default: m.DashboardMarketCasesCard })),
 );
+const ValidationPortfolioCard = lazy(() =>
+  import('./ValidationPortfolioCard').then((m) => ({ default: m.ValidationPortfolioCard })),
+);
 
 /**
  * Widget ids whose card self-hides internally (renders `null` when its module
@@ -2564,6 +2567,11 @@ function DashboardPageInner() {
       projects && projects.length > 1 ? (
         <PortfolioOverview />
       ) : null,
+
+    // Workspace-wide on purpose, like the portfolio overview above: it lists
+    // every project the reader can open and marks the selected one. Never in
+    // WIDGET_NULL_FALLBACK, it renders its own loading, error and empty states.
+    validation_portfolio: <ValidationPortfolioCard />,
 
     map:
       projects && projects.length > 0 ? (

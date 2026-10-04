@@ -43,6 +43,8 @@ import {
   GraduationCap,
   // Cases for the reader's own market (2026-09-06)
   MapPin,
+  // Validation across projects (2026-10-04)
+  ShieldCheck,
 } from 'lucide-react';
 
 export interface DashboardWidgetMeta {
@@ -167,6 +169,20 @@ export const DASHBOARD_WIDGETS: readonly DashboardWidgetMeta[] = [
     descKey: 'dashboard.layout.w_portfolio_desc',
     descDefault: 'Cross-project rollup for multi-project workspaces',
     icon: Layers,
+  },
+  // The latest validation report of every estimate in every project the
+  // reader can open, worst first, each row linking to its report. Sits next
+  // to the portfolio overview because it answers the same kind of question,
+  // across the workspace rather than for the project picked in the top bar.
+  // labelKey is the card's own heading key, as for regional_pack above.
+  {
+    id: 'validation_portfolio',
+    labelKey: 'dashboard.validation_portfolio.title',
+    labelDefault: 'Validation across projects',
+    descKey: 'dashboard.layout.w_validation_portfolio_desc',
+    descDefault: 'Latest validation of every estimate in all your projects, worst first',
+    icon: ShieldCheck,
+    defaultSpan: 3,
   },
   {
     id: 'map',
