@@ -4433,8 +4433,10 @@ class ContractsService:
         )
 
         # The row lock is the guard against a change posted twice, not the
-        # unique constraint: each post makes a new line, so (line, source key)
-        # never collides. Two confirms in parallel queue here, and the second
+        # unique constraint: a post that makes new lines never collides on
+        # (line, source key), and one that moves existing lines would only
+        # collide on the lines both posts moved. Two confirms in parallel
+        # queue here, and the second
         # plans after the first has committed and finds the preview stale.
         # The wave-5 subscribers take the same lock before they post.
         contract = await self._lock_contract_for_reconcile(contract_id)
@@ -4455,6 +4457,12 @@ class ContractsService:
         except ReconcileMismatchError as exc:
             raise _reconcile_stale(contracts_translate, locale) from exc
         preview = await reconcile_preview(self.session, contract)
+        # A change may move several lines, one adjustment each; the audit and
+        # the count speak per change, with every line it touched listed.
+        source_keys = list(dict.fromkeys(row.source_key for row in posted))
+        amounts: dict[str, Decimal] = {}
+        for row in posted:
+            amounts[row.source_key] = amounts.get(row.source_key, DEC_ZERO) + Decimal(str(row.delta_value))
         if posted:
             await audit_log(
                 self.session,
@@ -4463,14 +4471,23 @@ class ContractsService:
                 entity_id=str(contract.id),
                 user_id=actor_id,
                 details={
-                    "source_keys": [row.source_key for row in posted],
-                    "amounts": {row.source_key: str(row.delta_value) for row in posted},
+                    "source_keys": source_keys,
+                    "amounts": {key: str(value) for key, value in amounts.items()},
                     "contract_line_ids": [str(row.contract_line_id) for row in posted],
+                    "line_deltas": [
+                        {
+                            "source_key": row.source_key,
+                            "contract_line_id": str(row.contract_line_id),
+                            "delta": str(row.delta_value),
+                            "created_line": bool(row.created_line),
+                        }
+                        for row in posted
+                    ],
                     # What the person saw and left unticked, still on offer.
                     "left_out": [item["source_key"] for item in preview["items"]],
                 },
             )
-        return {**preview, "posted": len(posted)}
+        return {**preview, "posted": len(source_keys)}
 
     async def sov_reconcile_set_exclusion(
         self,

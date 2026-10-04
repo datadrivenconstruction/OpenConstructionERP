@@ -9,12 +9,16 @@ drifted away from the contract sum with every approval, and the change was
 work nobody could bill.
 
 :func:`post_source_to_sov` is called by those subscribers on the path that
-moves the money, in the same transaction: it adds one pooled SoV line for the
-change and one :class:`~app.modules.contracts.models.SovAdjustment` recording
-it. The adjustment carries the same idempotency key the contract's posted
-sources use (``change_order:<id>``, or ``variation_order:<id>`` for a
-variation and the change order that mirrors it), so a replayed event or the
-second half of a mirrored pair posts nothing.
+moves the money, in the same transaction. A change order whose items name the
+schedule lines they change moves those lines, and its other items share one
+new line; a change order with no such items, and a variation, add one pooled
+line as before. :mod:`app.modules.contracts.sov_adjustments` decides the split
+and keeps the per-line deltas adding up to the amount the contract sum moved
+by. Every line moved or added gets one
+:class:`~app.modules.contracts.models.SovAdjustment`, all carrying the same
+idempotency key the contract's posted sources use (``change_order:<id>``, or
+``variation_order:<id>`` for a variation and the change order that mirrors
+it), so a replayed event or the second half of a mirrored pair posts nothing.
 
 Changes approved before the poster existed moved the contract sum and no line.
 They are not repaired at boot: rows injected into billable lines need a person
@@ -39,6 +43,14 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.contracts.models import Contract, ContractLine, SovAdjustment
+from app.modules.contracts.sov_adjustments import (
+    ADJUSTS_LINE_META_KEY,
+    PLACE_LINKED_LINE,
+    Allocation,
+    allocate,
+    placement,
+    resolve_items,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +89,75 @@ async def posted_source_keys(session: AsyncSession, contract_id: uuid.UUID) -> s
     return {str(key) for key in rows.scalars().all()}
 
 
+async def plan_source_allocation(
+    session: AsyncSession,
+    contract: Contract,
+    *,
+    kind: str,
+    source_id: uuid.UUID | None,
+    amount: Decimal,
+) -> tuple[Allocation, dict[uuid.UUID, ContractLine]]:
+    """How one change's amount would land on this contract's schedule lines.
+
+    Reads the change order's items when ``kind`` is a change order; a
+    variation, or a change order that has no items, is pooled. Returns the
+    allocation and the contract's lines by id, which the shares refer to.
+    Writes nothing.
+    """
+    rows = list(
+        (await session.execute(select(ContractLine).where(ContractLine.contract_id == contract.id))).scalars().all()
+    )
+    items: list[Any] = []
+    if kind == SOURCE_CHANGE_ORDER and source_id is not None:
+        from app.modules.changeorders.models import ChangeOrderItem  # noqa: PLC0415
+
+        raw = await session.execute(
+            select(ChangeOrderItem)
+            .where(ChangeOrderItem.change_order_id == source_id)
+            .order_by(ChangeOrderItem.sort_order, ChangeOrderItem.created_at, ChangeOrderItem.id)
+        )
+        items = resolve_items(list(raw.scalars().all()), rows)
+    return allocate(amount, items), {ln.id: ln for ln in rows}
+
+
+def describe_allocation(allocation: Allocation, lines: dict[uuid.UUID, ContractLine]) -> list[dict[str, Any]]:
+    """The allocation as a person reads it in a preview, one row per share.
+
+    ``placement`` is ``new_line`` for the change's own line, ``linked_line``
+    for a share that goes on a new line beside the line it adjusts, and
+    ``lump_sum`` or ``quantity`` for a line moved in place.
+    """
+    rows: list[dict[str, Any]] = []
+    for share in allocation.shares:
+        line = lines.get(share.line_id) if share.line_id is not None else None
+        if line is None:
+            rows.append(
+                {
+                    "contract_line_id": None,
+                    "code": "",
+                    "description": "",
+                    "delta": str(share.delta),
+                    "placement": "new_line",
+                    "total_before": None,
+                    "total_after": None,
+                }
+            )
+            continue
+        before = _money(line.total_value)
+        rows.append(
+            {
+                "contract_line_id": str(line.id),
+                "code": line.code or "",
+                "description": line.description or "",
+                "delta": str(share.delta),
+                "placement": placement(line, share.delta).kind,
+                "total_before": str(before),
+                "total_after": str(before + share.delta),
+            }
+        )
+    return rows
+
+
 async def post_source_to_sov(
     session: AsyncSession,
     contract: Contract,
@@ -89,60 +170,111 @@ async def post_source_to_sov(
     amount: Decimal,
     currency: str,
     approved_on: date | None,
-) -> SovAdjustment | None:
-    """Add the pooled SoV line and adjustment for one approved change.
+) -> list[SovAdjustment]:
+    """Move the schedule lines one approved change touches, and record each move.
 
-    ``kind`` names the record that carried the money, which is what the line's
-    origin says; ``key`` may name the variation a change order mirrors. Does
-    nothing, and returns ``None``, for a contract that is not active, for one
-    with no schedule of values, for a zero amount, and for a key already
-    posted on this contract. Flushes and
-    leaves the commit to the caller, so the line moves with the contract sum.
+    ``kind`` names the record that carried the money, which is what a new
+    line's origin says; ``key`` may name the variation a change order mirrors.
+    Does nothing, and returns an empty list, for a contract that is not
+    active, for one with no schedule of values, for a zero amount, and for a
+    key already posted on this contract. Otherwise returns one adjustment per
+    line moved or added, and their deltas add up to ``amount``. Flushes and
+    leaves the commit to the caller, so the lines move with the contract sum.
     """
     if contract.status not in POSTABLE_CONTRACT_STATUSES or amount == 0:
-        return None
+        return []
     if not await has_schedule(session, contract.id):
-        return None
+        return []
     if key in await posted_source_keys(session, contract.id):
-        return None
+        return []
+    allocation, lines = await plan_source_allocation(session, contract, kind=kind, source_id=source_id, amount=amount)
     last = await session.execute(
         select(func.max(ContractLine.order_index)).where(ContractLine.contract_id == contract.id)
     )
-    line = ContractLine(
+    next_order = int(last.scalar() or 0) + 1
+    # Items whose reference was not followed are reported once, on the share
+    # their money went to: the new line, or the first share when there is none.
+    unresolved_home = next((s for s in allocation.shares if s.line_id is None), None)
+    if unresolved_home is None and allocation.shares:
+        unresolved_home = allocation.shares[0]
+    adjustments: list[SovAdjustment] = []
+    for share in allocation.shares:
+        meta: dict[str, Any] = {"allocation": allocation.method, "item_ids": list(share.item_ids)}
+        if share is unresolved_home and allocation.unresolved:
+            meta["unresolved_items"] = dict(allocation.unresolved)
+        line = lines.get(share.line_id) if share.line_id is not None else None
+        delta_quantity = Decimal("0")
+        created = True
+        if line is None:
+            target = _new_line(contract, key, kind, code, title or code or "", share.delta, next_order)
+            next_order += 1
+            session.add(target)
+            meta["placement"] = "new_line"
+        else:
+            placed = placement(line, share.delta)
+            meta["placement"] = placed.kind
+            if placed.kind == PLACE_LINKED_LINE:
+                # Beside the line it adjusts, never under it: a child would
+                # turn that line into a roll-up parent nobody can bill.
+                target = _new_line(contract, key, kind, code, title or code or "", share.delta, next_order)
+                target.metadata_ = {ADJUSTS_LINE_META_KEY: str(line.id), "adjusts_line_code": line.code or ""}
+                next_order += 1
+                session.add(target)
+                meta[ADJUSTS_LINE_META_KEY] = str(line.id)
+            else:
+                line.quantity = placed.quantity
+                line.unit_rate = placed.unit_rate
+                line.total_value = placed.total_value
+                target = line
+                created = False
+                delta_quantity = placed.delta_quantity
+        await session.flush()
+        adjustment = SovAdjustment(
+            id=uuid.uuid4(),
+            contract_id=contract.id,
+            contract_line_id=target.id,
+            source_key=key,
+            source_kind=kind,
+            source_id=source_id,
+            source_code=(code or "")[:80],
+            delta_value=share.delta,
+            delta_quantity=delta_quantity,
+            created_line=created,
+            approved_on=approved_on,
+            currency=(currency or contract.currency or "")[:3],
+            metadata_=meta,
+        )
+        session.add(adjustment)
+        adjustments.append(adjustment)
+    await session.flush()
+    return adjustments
+
+
+def _new_line(
+    contract: Contract,
+    key: str,
+    kind: str,
+    code: str,
+    description: str,
+    amount: Decimal,
+    order_index: int,
+) -> ContractLine:
+    """A schedule line a change adds, priced as a lump sum."""
+    return ContractLine(
         id=uuid.uuid4(),
         contract_id=contract.id,
         code=(code or "")[:80],
-        description=title or code or "",
+        description=description,
         quantity=Decimal("1"),
         unit_rate=amount,
         total_value=amount,
-        order_index=int(last.scalar() or 0) + 1,
+        order_index=order_index,
         origin="variation" if kind == SOURCE_VARIATION_ORDER else "change_order",
         source_key=key,
         # Added after signing from nothing, which is what zero says here.
         original_value=Decimal("0"),
         metadata_={},
     )
-    session.add(line)
-    await session.flush()
-    adjustment = SovAdjustment(
-        id=uuid.uuid4(),
-        contract_id=contract.id,
-        contract_line_id=line.id,
-        source_key=key,
-        source_kind=kind,
-        source_id=source_id,
-        source_code=(code or "")[:80],
-        delta_value=amount,
-        delta_quantity=Decimal("0"),
-        created_line=True,
-        approved_on=approved_on,
-        currency=(currency or contract.currency or "")[:3],
-        metadata_={},
-    )
-    session.add(adjustment)
-    await session.flush()
-    return adjustment
 
 
 # ── Reconcile: changes approved before the poster existed ───────────────
@@ -319,6 +451,20 @@ async def reconcile_preview(session: AsyncSession, contract: Contract) -> dict[s
     ]
     scheduled = await scheduled_total(session, contract.id)
     adding = sum((item.amount for item in items), Decimal("0"))
+    # Each change shows where its money would land, worked out by the same
+    # allocation the apply posts, so the person confirms what is written.
+    offered: list[dict[str, Any]] = []
+    for item in items:
+        allocation, lines = await plan_source_allocation(
+            session, contract, kind=item.kind, source_id=item.source_id, amount=item.amount
+        )
+        offered.append(
+            {
+                **item.as_dict(),
+                "allocation_method": allocation.method,
+                "allocation": describe_allocation(allocation, lines),
+            }
+        )
     return {
         "contract_id": str(contract.id),
         "contract_status": contract.status,
@@ -327,7 +473,7 @@ async def reconcile_preview(session: AsyncSession, contract: Contract) -> dict[s
         "contract_sum": str(_money(contract.total_value)),
         "scheduled_total": str(scheduled),
         "scheduled_total_after": str(scheduled + adding),
-        "items": [item.as_dict() for item in items],
+        "items": offered,
         "excluded": excluded,
     }
 
@@ -353,7 +499,7 @@ async def apply_reconcile(session: AsyncSession, contract: Contract, confirmed_k
         raise ReconcileMismatchError
     posted: list[SovAdjustment] = []
     for item in items:
-        adjustment = await post_source_to_sov(
+        adjustments = await post_source_to_sov(
             session,
             contract,
             key=item.key,
@@ -365,8 +511,9 @@ async def apply_reconcile(session: AsyncSession, contract: Contract, confirmed_k
             currency=item.currency,
             approved_on=item.approved_on,
         )
-        if adjustment is not None:
-            adjustment.metadata_ = {"reconciled_at": datetime.now(UTC).isoformat()}
+        stamp = datetime.now(UTC).isoformat()
+        for adjustment in adjustments:
+            adjustment.metadata_ = {**(adjustment.metadata_ or {}), "reconciled_at": stamp}
             posted.append(adjustment)
     await session.flush()
     return posted
