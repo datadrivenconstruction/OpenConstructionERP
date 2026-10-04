@@ -4,6 +4,7 @@
 
 import { apiDelete, apiGet, apiPatch, apiPost, extractErrorMessageFromBody } from '@/shared/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
+import type { DocumentBatchReferences } from '@/features/documents/api';
 import type {
   EmailLinkResponse,
   ExportOptions,
@@ -486,10 +487,14 @@ export async function splitPdfIntoSheets(
 
 /* ── Per-kind delete helpers (bulk-delete dispatcher) ────────────────── */
 
-/** Bulk-delete response shape returned by /v1/documents/batch/delete/. */
+/** Bulk-delete response shape returned by /v1/documents/batch/delete/.
+ *
+ *  `references` reports what the delete severed, the same shape the batch
+ *  references endpoint returns. */
 export interface BulkDeleteResponse {
   requested: number;
   deleted: number;
+  references?: DocumentBatchReferences;
 }
 
 /** Outcome of a single per-kind delete pass. */
@@ -509,11 +514,19 @@ export async function deleteByKind(kind: FileKind, fileId: string): Promise<void
   await apiDelete(path);
 }
 
-/** Bulk-delete documents through the existing module-side batch endpoint. */
-export async function bulkDeleteDocuments(ids: string[]): Promise<BulkDeleteResponse> {
-  return apiPost<BulkDeleteResponse, { ids: string[] }>(
+/** Bulk-delete documents through the existing module-side batch endpoint.
+ *
+ *  The server answers 409 (and deletes nothing) while any selected document is
+ *  still pointed at by a row the delete would strand or unlink. Pass
+ *  `acknowledgeReferences` only after the person has been shown that report,
+ *  e.g. through `BulkDeleteReferencesWarning`. */
+export async function bulkDeleteDocuments(
+  ids: string[],
+  acknowledgeReferences = false,
+): Promise<BulkDeleteResponse> {
+  return apiPost<BulkDeleteResponse, { ids: string[]; acknowledge_references: boolean }>(
     '/v1/documents/batch/delete/',
-    { ids },
+    { ids, acknowledge_references: acknowledgeReferences },
   );
 }
 

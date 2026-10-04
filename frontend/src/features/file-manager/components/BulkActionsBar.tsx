@@ -42,6 +42,7 @@ import { showUndoDeleteToast } from '@/features/file-trash/UndoDeleteToast';
 import type { TrashKind } from '@/features/file-trash/types';
 import { BulkTagDrawer } from '@/features/file-tags/BulkTagDrawer';
 import { NewTransmittalWizard } from '@/features/file-transmittals/NewTransmittalWizard';
+import { BulkDeleteReferencesWarning } from '@/features/documents/DocumentDeleteWarning';
 
 interface BulkActionsBarProps {
   selectedRows: FileRow[];
@@ -145,8 +146,17 @@ export async function dispatchBulkDelete(
 
 /** Legacy hard-delete path — kept around so tests + admin tools that
  *  bypass the recycle bin can still wipe rows. Not used in the normal
- *  UI flow. */
-export async function dispatchHardBulkDelete(rows: FileRow[]): Promise<DispatchSummary> {
+ *  UI flow.
+ *
+ *  The documents batch endpoint refuses (409, nothing deleted) while any
+ *  selected document is still pointed at by a row the delete would strand or
+ *  unlink. That refusal lands here as a per-kind failure carrying the server's
+ *  message. Set `acknowledgeReferences` only once the person has seen what the
+ *  delete severs. */
+export async function dispatchHardBulkDelete(
+  rows: FileRow[],
+  { acknowledgeReferences = false }: { acknowledgeReferences?: boolean } = {},
+): Promise<DispatchSummary> {
   const groups = groupByKind(rows);
   const perKind: PerKindResult[] = [];
 
@@ -155,7 +165,7 @@ export async function dispatchHardBulkDelete(rows: FileRow[]): Promise<DispatchS
 
     if (kind === 'document') {
       try {
-        const resp = await bulkDeleteDocuments(ids);
+        const resp = await bulkDeleteDocuments(ids, acknowledgeReferences);
         perKind.push({
           kind,
           requested: ids.length,
@@ -318,7 +328,8 @@ export function BulkActionsBar({ selectedRows, projectId, onClear }: BulkActions
 
   // How many of the selected rows are documents (the only kind with a CDE
   // state) — gates the "Set status" control.
-  const documentCount = selectedRows.filter((r) => r.kind === 'document').length;
+  const documentRows = selectedRows.filter((r) => r.kind === 'document');
+  const documentCount = documentRows.length;
 
   // Bulk CDE transition. Rejections (forward-only lifecycle, role gate) are
   // common on a mixed selection, so we suppress the global error toast and
@@ -685,6 +696,20 @@ export function BulkActionsBar({ selectedRows, projectId, onClear }: BulkActions
           </button>
         )}
       </div>
+
+      {/* What the delete severs, read while the confirm is open so it is seen
+          before Delete is pressed: the bulk form of the panel the single
+          file's menu shows. Documents only, since the references check
+          answers for that kind. Advisory like the single panel, so the
+          buttons above keep working while it loads. */}
+      {confirming && documentCount > 0 && (
+        <div className="basis-full -mx-4 -mb-2">
+          <BulkDeleteReferencesWarning
+            documentIds={documentRows.map((r) => r.id)}
+            namesById={Object.fromEntries(documentRows.map((r) => [r.id, r.name]))}
+          />
+        </div>
+      )}
 
       {/* W4 — bulk tag operations drawer. */}
       <BulkTagDrawer

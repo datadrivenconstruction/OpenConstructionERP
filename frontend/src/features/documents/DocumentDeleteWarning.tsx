@@ -31,9 +31,11 @@ import { AlertTriangle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import {
+  fetchBatchDocumentReferences,
   fetchDocumentReferences,
   type DocumentReferenceImpact,
   type DocumentReferenceItem,
+  type DocumentReferences,
 } from './api';
 
 /** Module key to the i18n key that module already uses for its own name. */
@@ -134,27 +136,6 @@ export function DocumentDeleteWarning({ documentId }: DocumentDeleteWarningProps
 
   if (!data || data.total === 0) return null;
 
-  const headline: Record<DocumentReferenceImpact, string> = {
-    strands: t('documents.references.strands', {
-      count: data.strands,
-      defaultValue_one: '{{count}} record will be left pointing at nothing',
-      defaultValue_other: '{{count}} records will be left pointing at nothing',
-      defaultValue: '{{count}} records will be left pointing at nothing',
-    }),
-    unlinks: t('documents.references.unlinks', {
-      count: data.unlinks,
-      defaultValue_one: '{{count}} record loses the attachment',
-      defaultValue_other: '{{count}} records lose the attachment',
-      defaultValue: '{{count}} records lose the attachment',
-    }),
-    retains: t('documents.references.retains', {
-      count: data.retains,
-      defaultValue_one: '{{count}} record keeps it on file',
-      defaultValue_other: '{{count}} records keep it on file',
-      defaultValue: '{{count}} records keep it on file',
-    }),
-  };
-
   return (
     <div className={SHELL} role="status">
       <div className="mb-1 flex items-center gap-1.5">
@@ -163,9 +144,45 @@ export function DocumentDeleteWarning({ documentId }: DocumentDeleteWarningProps
           {t('documents.references.title', { defaultValue: 'What still links to this file' })}
         </span>
       </div>
+      <ReferencesBreakdown summary={data} />
+    </div>
+  );
+}
 
+/** The per-impact lines both panels draw: a counted headline per consequence,
+ *  heaviest first, and the modules holding the rows under it. */
+function ReferencesBreakdown({
+  summary,
+}: {
+  summary: Pick<DocumentReferences, 'strands' | 'unlinks' | 'retains' | 'references'>;
+}) {
+  const { t } = useTranslation();
+
+  const headline: Record<DocumentReferenceImpact, string> = {
+    strands: t('documents.references.strands', {
+      count: summary.strands,
+      defaultValue_one: '{{count}} record will be left pointing at nothing',
+      defaultValue_other: '{{count}} records will be left pointing at nothing',
+      defaultValue: '{{count}} records will be left pointing at nothing',
+    }),
+    unlinks: t('documents.references.unlinks', {
+      count: summary.unlinks,
+      defaultValue_one: '{{count}} record loses the attachment',
+      defaultValue_other: '{{count}} records lose the attachment',
+      defaultValue: '{{count}} records lose the attachment',
+    }),
+    retains: t('documents.references.retains', {
+      count: summary.retains,
+      defaultValue_one: '{{count}} record keeps it on file',
+      defaultValue_other: '{{count}} records keep it on file',
+      defaultValue: '{{count}} records keep it on file',
+    }),
+  };
+
+  return (
+    <>
       {IMPACT_ORDER.map((impact) => {
-        const items = data.references.filter((item) => item.impact === impact);
+        const items = summary.references.filter((item) => item.impact === impact);
         if (items.length === 0) return null;
         const modules = sumByModule(items);
         return (
@@ -191,6 +208,91 @@ export function DocumentDeleteWarning({ documentId }: DocumentDeleteWarningProps
           </div>
         );
       })}
+    </>
+  );
+}
+
+/** How many referenced file names the bulk panel spells out before "+N more". */
+const BULK_NAMES_SHOWN = 3;
+
+interface BulkDeleteReferencesWarningProps {
+  /** Document ids in the selection. Other file kinds are the caller's to leave out. */
+  documentIds: string[];
+  /** Display names by id, so the panel can say which files are linked. */
+  namesById?: Record<string, string>;
+}
+
+/**
+ * The same warning for a multi-file delete, read from one batch request.
+ *
+ * Same rules as the single panel, for the same reasons: it never blocks the
+ * delete, it renders nothing while the answer is on its way or when nothing
+ * links to the selection, it says so when the check failed rather than going
+ * quiet, and it holds no cached answer between openings. It adds what only a
+ * selection needs: how many of the selected documents are linked, and which.
+ */
+export function BulkDeleteReferencesWarning({ documentIds, namesById }: BulkDeleteReferencesWarningProps) {
+  const { t } = useTranslation();
+  // Sorted so the same selection made in a different order is the same
+  // question; the answer is per document and does not depend on the order.
+  const ids = [...documentIds].sort();
+  const { data, isError } = useQuery({
+    queryKey: ['document-references-batch', ids],
+    queryFn: () => fetchBatchDocumentReferences(ids),
+    enabled: ids.length > 0,
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+  });
+
+  if (ids.length === 0) return null;
+
+  if (isError) {
+    return (
+      <div className={SHELL} role="status">
+        <div className="flex items-center gap-1.5">
+          <AlertTriangle size={12} className="shrink-0 text-semantic-warning" />
+          <span className="text-2xs text-content-secondary">
+            {t('documents.references.bulk_unavailable', {
+              defaultValue: 'Could not check what links to the selected files',
+            })}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data || data.total === 0) return null;
+
+  const linkedNames = data.documents.map((doc) => namesById?.[doc.document_id] ?? doc.document_id);
+  const shown = linkedNames.slice(0, BULK_NAMES_SHOWN);
+  const extra = linkedNames.length - shown.length;
+
+  return (
+    <div className={SHELL} role="status">
+      <div className="mb-1 flex items-center gap-1.5">
+        <AlertTriangle size={12} className="shrink-0 text-semantic-warning" />
+        <span className="text-2xs font-semibold text-content-primary">
+          {t('documents.references.bulk_title', {
+            defaultValue: 'What still links to the selected files',
+          })}
+        </span>
+      </div>
+      <div className="mb-1 text-2xs text-content-secondary">
+        {t('documents.references.bulk_documents', {
+          count: data.referenced_documents,
+          defaultValue_one: '{{count}} selected document is still linked',
+          defaultValue_other: '{{count}} selected documents are still linked',
+          defaultValue: '{{count}} selected documents are still linked',
+        })}
+        {': '}
+        <span className="text-content-tertiary">
+          {shown.join(', ')}
+          {extra > 0 &&
+            ` ${t('documents.references.bulk_more', { extra, defaultValue: '+{{extra}} more' })}`}
+        </span>
+      </div>
+      <ReferencesBreakdown summary={data} />
     </div>
   );
 }

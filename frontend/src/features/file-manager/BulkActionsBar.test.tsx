@@ -35,9 +35,27 @@ vi.mock('@/features/file-trash/api', () => {
 import * as trashApi from '@/features/file-trash/api';
 const softDeleteMock = trashApi.softDelete as unknown as ReturnType<typeof vi.fn>;
 
+/* ── References check + hard batch delete ──────────────────────────── */
+
+vi.mock('@/features/documents/api', async (importOriginal) => ({
+  ...(await importOriginal()),
+  fetchBatchDocumentReferences: vi.fn(),
+}));
+
+vi.mock('./api', async (importOriginal) => ({
+  ...(await importOriginal()),
+  bulkDeleteDocuments: vi.fn(),
+}));
+
+import * as documentsApi from '@/features/documents/api';
+import * as fileManagerApi from './api';
+const fetchBatchMock = documentsApi.fetchBatchDocumentReferences as unknown as ReturnType<typeof vi.fn>;
+const bulkDeleteDocumentsMock = fileManagerApi.bulkDeleteDocuments as unknown as ReturnType<typeof vi.fn>;
+
 import {
   BulkActionsBar,
   dispatchBulkDelete,
+  dispatchHardBulkDelete,
   groupByKind,
 } from './components/BulkActionsBar';
 import type { FileKind, FileRow } from './types';
@@ -241,5 +259,69 @@ describe('BulkActionsBar - partial failure summary toast', () => {
     expect(lastCall.type).toBe('warning');
     expect(lastCall.title).toMatch(/2 of 3 deleted/);
     expect(lastCall.message).toMatch(/1 file\(s\) could not be deleted/);
+  });
+});
+
+/* ── What the bulk delete severs ───────────────────────────────────── */
+
+describe('BulkActionsBar - references warning on the delete confirm', () => {
+  it('asks about the selected documents only, and shows the answer before Delete', async () => {
+    fetchBatchMock.mockReset();
+    fetchBatchMock.mockResolvedValue({
+      checked: 2,
+      referenced_documents: 1,
+      total: 2,
+      strands: 2,
+      unlinks: 0,
+      retains: 0,
+      references: [
+        { key: 'Sheet.document_id', module: 'documents', model: 'Sheet', impact: 'strands', count: 2 },
+      ],
+      documents: [
+        { document_id: 'd1', total: 2, strands: 2, unlinks: 0, retains: 0, references: [] },
+      ],
+    });
+    renderBar([row('d1', 'document'), row('d2', 'document'), row('p1', 'photo')]);
+
+    // Nothing is asked before the person opens the confirm.
+    expect(fetchBatchMock).not.toHaveBeenCalled();
+    fireEvent.click(screen.getAllByRole('button', { name: /^Delete$/ })[0]!);
+
+    expect(await screen.findByText('What still links to the selected files')).toBeInTheDocument();
+    expect(fetchBatchMock).toHaveBeenCalledTimes(1);
+    expect(fetchBatchMock.mock.calls[0]![0]).toEqual(['d1', 'd2']);
+    expect(screen.getByText('document-d1.bin')).toBeInTheDocument();
+    expect(screen.getByText('2 records will be left pointing at nothing')).toBeInTheDocument();
+    // Advisory: the Delete button is still there to press.
+    expect(screen.getByRole('button', { name: /^Delete$/ })).toBeEnabled();
+  });
+
+  it('does not ask when the selection holds no document', async () => {
+    fetchBatchMock.mockReset();
+    renderBar([row('p1', 'photo'), row('r1', 'report')]);
+    fireEvent.click(screen.getAllByRole('button', { name: /^Delete$/ })[0]!);
+    await screen.findByText(/Delete 2 file\(s\)\?/);
+    expect(fetchBatchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('dispatchHardBulkDelete - references acknowledgement', () => {
+  it('does not acknowledge on behalf of the caller', async () => {
+    bulkDeleteDocumentsMock.mockReset();
+    bulkDeleteDocumentsMock.mockResolvedValue({ requested: 1, deleted: 1 });
+    await dispatchHardBulkDelete([row('d1', 'document')]);
+    expect(bulkDeleteDocumentsMock).toHaveBeenCalledWith(['d1'], false);
+
+    await dispatchHardBulkDelete([row('d1', 'document')], { acknowledgeReferences: true });
+    expect(bulkDeleteDocumentsMock).toHaveBeenLastCalledWith(['d1'], true);
+  });
+
+  it('reports a refused batch as failed rows carrying the server message', async () => {
+    bulkDeleteDocumentsMock.mockReset();
+    bulkDeleteDocumentsMock.mockRejectedValue(new Error('Records elsewhere still point at documents in this batch.'));
+    const summary = await dispatchHardBulkDelete([row('d1', 'document'), row('d2', 'document')]);
+    expect(summary.deleted).toBe(0);
+    expect(summary.failed).toBe(2);
+    expect(summary.perKind[0]!.failed[0]!.message).toMatch(/still point at documents/);
   });
 });
