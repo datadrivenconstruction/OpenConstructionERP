@@ -151,3 +151,57 @@ async def test_the_lines_in_the_session_carry_what_was_written(pg_session) -> No
         )
     ).scalars()
     assert {Decimal(str(value)) for value in stored} == {Decimal("50.00")}
+
+
+async def test_each_line_gets_its_own_figures_when_they_all_differ(pg_session) -> None:
+    """One statement for many rows must not hand one row's figures to another.
+
+    Every line above holds the same value, so a write that paired the wrong
+    parameters with the wrong row would still read 50.00 everywhere. Here no
+    two lines retain the same amount, and each is checked by its own id, in
+    the session and in the database, against what the engine works out for it.
+    """
+    svc = ContractsService(pg_session)
+    contract, lines = await _schedule(pg_session, 4)
+    values = [Decimal("1000"), Decimal("2500"), Decimal("7300"), Decimal("40")]
+    percents = [Decimal("30"), Decimal("20"), Decimal("10"), Decimal("25")]
+    for line, value in zip(lines, values, strict=True):
+        line.unit_rate = value
+        line.total_value = value
+    contract.total_value = contract.original_contract_value = sum(values, Decimal("0"))
+    await pg_session.flush()
+    claim = await svc.create_progress_claim(
+        SimpleNamespace(
+            contract_id=contract.id,
+            claim_number="PC-1",
+            period_start="2026-03-01",
+            period_end="2026-03-31",
+            claim_date="2026-03-31",
+            currency="USD",
+            metadata={},
+        )
+    )
+    with _claim_line_updates(pg_session) as updates:
+        claim = await svc.auto_generate_claim_lines(
+            claim.id,
+            AutoGenerateClaimRequest(completion={str(line.id): pct for line, pct in zip(lines, percents, strict=True)}),
+        )
+    assert len(updates) == 1
+
+    # 10% of 300, 500, 730 and 10.
+    expected = {line.id: Decimal(want) for line, want in zip(lines, ["30.00", "50.00", "73.00", "1.00"], strict=True)}
+    rows = await svc.claim_line_repo.list_for_claim(claim.id)
+    assert {row.contract_line_id: row.retention_to_date for row in rows} == expected
+    stored = (
+        await pg_session.execute(
+            select(ProgressClaimLine.contract_line_id, ProgressClaimLine.retention_to_date).where(
+                ProgressClaimLine.progress_claim_id == claim.id
+            )
+        )
+    ).all()
+    assert {line_id: Decimal(str(value)) for line_id, value in stored} == expected
+    # The same figures the engine gives line by line.
+    figures = await svc.claim_retention_figures(claim)
+    assert figures is not None
+    assert {line_id: share.retention_to_date for line_id, share in figures.lines.items()} == expected
+    assert Decimal(str(claim.retention_amount)) == Decimal("154.00")
