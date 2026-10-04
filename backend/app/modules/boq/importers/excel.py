@@ -232,6 +232,8 @@ _HEADERS_BY_LANGUAGE: dict[str, dict[str, tuple[str, ...]]] = {
             "preco unit.",
             "valor unitário",
             "valor unitario",
+            "valor unit.",
+            "valor unit",
             "custo unitário",
             "custo unitario",
         ),
@@ -239,6 +241,12 @@ _HEADERS_BY_LANGUAGE: dict[str, dict[str, tuple[str, ...]]] = {
         # Brazilian estimators label the classification column after the
         # reference they priced from, so these must not fall to ``ordinal``.
         "classification": ("sinapi", "código sinapi", "codigo sinapi", "nbr", "nbr 12721"),
+        # An orçamento prices each line from a price bank (SINAPI, SICRO,
+        # ORSE, an own composition) and names it beside the code. The code
+        # column alone does not say whose code it is, so the bank is kept on
+        # the line as ``classification["banco"]``, where the SINAPI rules
+        # read it.
+        "banco": ("banco", "fonte", "banco de preços", "banco de precos", "base de preços", "base de precos"),
     },
     "nl": {
         "ordinal": ("post", "postnr", "postnr.", "volgnr", "volgnr."),
@@ -858,6 +866,11 @@ _SPLIT_COLUMNS: dict[str, str] = {
     "labour_total": "total",
 }
 
+# The column each read column is shown under in the import dialog, whose
+# choices are :data:`COLUMN_MAPPING_TARGETS`: a split half under the column it
+# feeds, and a price bank column under the classification it belongs to.
+_REPORTED_AS: dict[str, str] = {**_SPLIT_COLUMNS, "banco": "classification"}
+
 # Languages whose CSV exports come out of Excel in Windows-1250. That code
 # page decodes as Windows-1252 without an error, so nothing fails: the
 # Hungarian ő and ű quietly become õ and û. The header row says which market
@@ -1088,7 +1101,7 @@ def header_report(headers: tuple[Any, ...] | list[Any], column_map: dict[int, st
             continue
         canonical = column_map.get(index)
         if canonical:
-            recognised[text] = _SPLIT_COLUMNS.get(canonical, canonical)
+            recognised[text] = _REPORTED_AS.get(canonical, canonical)
         else:
             unrecognised.append(text)
     mapped = set(column_map.values())
@@ -1257,8 +1270,8 @@ def _is_blank_value(value: Any) -> bool:
 
 
 def _report_mapping(column_map: dict[int, str]) -> dict[str, str]:
-    """The mapping as the import dialog shows it: a split column under the column it feeds."""
-    return {str(index): _SPLIT_COLUMNS.get(canonical, canonical) for index, canonical in column_map.items()}
+    """The mapping as the import dialog shows it, see :data:`_REPORTED_AS`."""
+    return {str(index): _REPORTED_AS.get(canonical, canonical) for index, canonical in column_map.items()}
 
 
 def _detect_file_format(content_head: bytes) -> Literal["xlsx", "xls", "csv", "parquet", "unknown"]:
@@ -2655,6 +2668,9 @@ def _rows_to_positions(
                 # carried there too, so those rules judge the code the line
                 # has rather than report it as having none.
                 classification["tetelrend"] = classification["code"]
+            bank = fold_width(str(row.get("banco") or "")).strip()
+            if bank:
+                classification["banco"] = bank
 
             metadata: dict[str, Any] = {"import_row_index": row_idx}
             if row.get("_sheet"):

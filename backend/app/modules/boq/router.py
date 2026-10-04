@@ -3309,9 +3309,12 @@ _CLASSIFICATION_CODE_SETS: dict[str, str] = {
 
 # The code sets a spreadsheet import carries its code column into. Each is a
 # market's own price-book or item code, which a bill of that market prints in
-# its code column and nothing else: the CPWD DSR item, the GESN rate, the
-# SINAPI composition, the GB 50500 item code, the poz number, the sekisan
-# item, the KNR table, the Hungarian item code, the BC3 concept code. DIN 276,
+# its code column: the CPWD DSR item, the GESN rate, the SINAPI composition,
+# the GB 50500 item code, the poz number, the sekisan item, the KNR table, the
+# Hungarian item code, the BC3 concept code. The column holds other things
+# too (a price list entry, another bank's composition, a quota number), so a
+# value is carried only when it has the key's shape, see
+# :func:`_national_code_value`. DIN 276,
 # NRM and MasterFormat are left out on purpose. The importer recognises NRM
 # and MasterFormat codes by their shape, and DIN 276 is the cost-group axis
 # many markets map their bills onto beside a national code (Romania, Greece,
@@ -3339,6 +3342,60 @@ def _national_code_key(rule_sets: list[str], classification_standard: str) -> st
     return keys.pop() if len(keys) == 1 else None
 
 
+# The printed prefix of a GESN norm code and of the federal and territorial
+# unit rates priced from it: "ГЭСН06-01-001-01", "ФЕР 06-01-001-01". The rule
+# reads the bare number, which is also how the platform's own Russian bill
+# stores it. The montage, commissioning and repair collections (ГЭСНм, ГЭСНп,
+# ГЭСНр and their ФЕР and ТЕР twins) are left out on purpose: they reuse the
+# construction collection's numbers, so stripping their prefix would file a
+# montage norm as the construction norm with the same number.
+_GESN_PRINTED_PREFIX = re.compile(r"^(?:ГЭСН|ФЕР|ТЕР|GESN|FER|TER)(?![мпрmpr])[\s-]*", re.IGNORECASE)
+
+
+def _national_code_value(key: str, value: str, classification: dict[str, Any]) -> str | None:
+    """``value`` as the national rules under ``key`` read it, or ``None`` when it is not such a code.
+
+    A code column holds whatever the estimator wrote: a norm code, a price
+    list entry ("Прайс-лист"), a regional price base item ("ФССЦ-04.1.02.05-0006"),
+    another bank's composition. Copying all of it under the national key turned
+    an uncoded line into a line that cites a norm it does not cite, and the
+    format rules then warned on every line. So a value is carried only when it
+    has the shape the key's own format rule accepts, read from the rule itself
+    so the two cannot drift. Keys whose rule set checks no format (``cpwd``,
+    ``sekisan``) take the value as it is.
+
+    A SINAPI code is carried only from a line whose bank is SINAPI or not
+    given: an orçamento mixes SINAPI, SICRO, ORSE and own compositions in one
+    code column and says which in its bank column.
+    """
+    from app.core.validation import rules as national_rules
+
+    if key == "gesn":
+        bare = re.sub(r"\s+", "", _GESN_PRINTED_PREFIX.sub("", value))
+        return bare if national_rules.GESNValidCode._PATTERN.match(bare) else None
+    if key == "birimfiyat":
+        return value if national_rules.BirimFiyatValidPoz._PATTERN.match(value) else None
+    if key == "sinapi":
+        bank = str(classification.get("banco") or "").strip().upper()
+        if bank and not bank.startswith("SINAPI"):
+            return None
+        return value if national_rules._SINAPI_CODE_RE.match(value) else None
+    if key == "gb50500":
+        # A quota number ("A1-1", the 定额编号 column) is not a bill item code.
+        return value if value.isdigit() and len(value) in (9, 12) else None
+    if key == "tetelrend":
+        code = re.sub(r"\s+", "", value).upper()
+        building = national_rules._HU_BUILDING_CODE_RE.match(code)
+        return value if building or national_rules._HU_INFRA_CODE_RE.match(code) else None
+    if key == "knr":
+        recognised = national_rules._PL_KNR_REFERENCE.match(value) or national_rules._PL_OWN_CALCULATION.match(value)
+        return value if recognised else None
+    if key == "bc3_code":
+        shaped = national_rules.BC3ValidCode._PATTERN.match(value) and not value.startswith(".")
+        return value if shaped else None
+    return value
+
+
 def _carry_national_code(classification: Any, key: str | None, *, is_section: bool) -> Any:
     """``classification`` with its raw code also under ``key``, the key the project's rules read.
 
@@ -3347,7 +3404,8 @@ def _carry_national_code(classification: Any, key: str | None, *, is_section: bo
     like an NRM element). The national rules read their own key, so a bill
     whose every line carried its code failed every line as uncoded. A key the
     line already has is never overwritten, and section rows are left alone.
-    The input is not modified.
+    A value that is not a code of that key's kind stays under ``code`` only,
+    see :func:`_national_code_value`. The input is not modified.
     """
     if key is None or is_section or not isinstance(classification, dict):
         return classification
@@ -3356,7 +3414,8 @@ def _carry_national_code(classification: Any, key: str | None, *, is_section: bo
     for source in ("code", "nrm", "masterformat"):
         value = str(classification.get(source) or "").strip()
         if value:
-            return {**classification, key: value}
+            carried = _national_code_value(key, value, classification)
+            return {**classification, key: carried} if carried else classification
     return classification
 
 
@@ -6614,6 +6673,11 @@ async def import_boq_excel(
             class_value = str(row.get("classification", "")).strip()
             if class_value:
                 classification["code"] = class_value
+            # The price bank the line is priced from, which says whose code
+            # the code column holds (see the Brazilian ``banco`` header).
+            bank = str(row.get("banco") or "").strip()
+            if bank:
+                classification["banco"] = bank
 
             # Stamp import provenance for a later round-trip export.
             pos_metadata: dict[str, Any] = {}
