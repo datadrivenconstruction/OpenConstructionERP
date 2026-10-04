@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import logging
 import re
+import unicodedata
 from decimal import Decimal, InvalidOperation
 from types import SimpleNamespace
 from typing import Any
@@ -4476,6 +4477,23 @@ class GBT50500ValidCode(ValidationRule):
         return results
 
 
+# ── National unit lists (India, Japan) ──────────────────────────────────
+
+
+def _national_unit_key(unit: str) -> str:
+    """The key a typed unit is compared to a national unit list by.
+
+    NFKC folds the forms a unit takes in a real document onto its plain
+    spelling: the superscripts of "m²" and "m³", the single squared glyphs
+    "㎡", "㎥" and "㎏", and the full-width letters a Japanese estimate is
+    typed in ("ｍ２", "ｋｇ"). Case is folded, a closing abbreviation dot is
+    dropped ("Nos.", "Qtl.") and so is inner white space ("cu m", "sq m"), so
+    the list only has to hold one spelling of each unit.
+    """
+    text = unicodedata.normalize("NFKC", unit).strip().casefold().rstrip(".")
+    return re.sub(r"\s+", "", text)
+
+
 # ── CPWD Rules (India) ──────────────────────────────────────────────────
 
 
@@ -4529,26 +4547,71 @@ class CPWDMeasurementUnits(ValidationRule):
     category = RuleCategory.COMPLIANCE
     description = "Units must follow IS 1200 measurement standards (metric only)"
 
-    VALID_UNITS = {
-        "m",
-        "m2",
-        "m3",
-        "kg",
-        "t",
-        "nos",
-        "pcs",
-        "rm",
-        "rmt",
-        "sqm",
-        "cum",
-        "each",
-        "lsum",
-        "ls",
-        "set",
-        "pair",
-        "litre",
-        "kl",
-    }
+    # The units of the Delhi Schedule of Rates and of IS 1200 measurement, in
+    # the spelling :func:`_national_unit_key` reduces a typed unit to. The list
+    # held "cum" and "sqm" but not the quintal and the tonne steel and cement
+    # are priced in, the point an electrical item is priced per, the job a
+    # lump item is written as, or "MT", the metric tonne most Indian bills
+    # write. "m²" and "m³", the units the India pack itself declares as its
+    # defaults, failed the pack's own rule until the key folded superscripts.
+    VALID_UNITS = frozenset(
+        {
+            # length
+            "m",
+            "metre",
+            "meter",
+            "mtr",
+            "rm",
+            "rmt",
+            "r.m",
+            "km",
+            # area
+            "m2",
+            "sqm",
+            "sq.m",
+            "sqmt",
+            "sq.mt",
+            "ha",
+            "hectare",
+            # volume
+            "m3",
+            "cum",
+            "cu.m",
+            "cumt",
+            "cu.mt",
+            "litre",
+            "liter",
+            "ltr",
+            "l",
+            "kl",
+            "kilolitre",
+            # mass
+            "kg",
+            "t",
+            "mt",
+            "tonne",
+            "quintal",
+            "qtl",
+            # count and lump
+            "nos",
+            "no",
+            "pcs",
+            "each",
+            "ea",
+            "set",
+            "pair",
+            "point",
+            "job",
+            "lsum",
+            "ls",
+            "l.s",
+            "lumpsum",
+            # time, for hire and establishment items
+            "day",
+            "hour",
+            "month",
+        }
+    )
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
         locale = _get_locale(context)
@@ -4557,7 +4620,7 @@ class CPWDMeasurementUnits(ValidationRule):
             unit = (pos.get("unit") or "").strip().lower()
             if not unit:
                 continue
-            passed = unit in self.VALID_UNITS
+            passed = _national_unit_key(unit) in self.VALID_UNITS
             if passed:
                 message = _ok(locale)
                 suggestion = None
@@ -4957,6 +5020,35 @@ RO_DEVIZ_GENERAL_CHAPTERS: dict[str, str] = {
 # a deviz general (4.1.1, 4.1.2 ...) and the split of 3.8 into 3.8.1 and 3.8.2.
 _RO_DEVIZ_CODE_RE = re.compile(r"^\d(?:\.\d{1,2}){0,2}$")
 
+# How a Romanian estimate actually writes that code. The deviz general and the
+# devize pe obiect head a line with the chapter word as often as with the bare
+# number: "Cap. 4.1", "Capitolul 4", "Subcap. 4.1", "Subcapitolul 4.1", the
+# number closed by a dot ("4.1."), or followed by the chapter's own title
+# ("Capitolul 4 - Cheltuieli pentru investiția de bază"). All of those name the
+# same subchapter and were refused as unrecognised, so a bill copied out of a
+# real deviz warned on every line. The word and the title are dropped and the
+# number is judged as before; a code with no leading chapter number still fails.
+_RO_DEVIZ_LEAD_RE = re.compile(
+    r"^(?:sub)?cap(?:itol(?:ul)?)?\.?\s*(?:nr\.?\s*)?",
+    re.IGNORECASE,
+)
+_RO_DEVIZ_NUMBER_RE = re.compile(r"^([0-9]{1,2}(?:\s*\.\s*[0-9]{1,2}){0,2})\.?(?=$|\s|[-–:])")
+
+
+def _ro_deviz_chapter(raw: str) -> str:
+    """The deviz chapter number a code names, or ``""`` when it names none.
+
+    ``"Cap. 4.1"``, ``"Subcapitolul 4.1 - Construcții"`` and ``"4.1."`` all give
+    ``"4.1"``. Only ASCII digits are read, so a superscript or another script's
+    digit is not taken for a chapter.
+    """
+    text = _RO_DEVIZ_LEAD_RE.sub("", raw.strip(), count=1).strip()
+    match = _RO_DEVIZ_NUMBER_RE.match(text)
+    if not match:
+        return ""
+    return re.sub(r"\s+", "", match.group(1))
+
+
 # The ΝΕΤ ΟΙΚ chapters, by the two digits that open an article code. From the
 # descriptive price list for building works; an English gloss is enough here
 # because the rule reports the number, not the title.
@@ -5030,6 +5122,26 @@ UA_ZKR_CHAPTERS: dict[int, str] = {
 }
 
 
+# How a Ukrainian estimate writes the chapter a line belongs to. The summary
+# estimate names it "Глава 2" or "гл. 2", and the estimates under it carry it
+# as the first group of their own number: the object estimate of chapter 2 is
+# "2-1" and a local estimate under it "2-1-1", often zero-padded as
+# "02-01-001". All of those place the line in chapter 2. Only the bare number
+# was read before, so a line filed under its local estimate number warned as
+# unrecognised, and a superscript digit passed ``str.isdigit`` and then broke
+# ``int``. The digits are ASCII only here.
+_UA_ZKR_RE = re.compile(
+    r"^(?:(?:глава|гл)\.?\s*)?(?:№\s*)?0*([0-9]{1,2})(?:\s*[-–]\s*[0-9]{1,3}){0,2}\.?$",
+    re.IGNORECASE,
+)
+
+
+def _ua_zkr_chapter(raw: str) -> int | None:
+    """The chapter number a Ukrainian code names, or ``None`` when it names none."""
+    match = _UA_ZKR_RE.match(raw.strip())
+    return int(match.group(1)) if match else None
+
+
 def _national_code(pos: dict[str, Any], key: str) -> str:
     """The code a position carries under one classification key, trimmed."""
     return str((pos.get("classification") or {}).get(key, "") or "").strip()
@@ -5097,8 +5209,9 @@ class RomanianDevizChapterRecognised(ValidationRule):
                 continue
             # The two top levels are the standard's; a third level is the
             # per-object split of a recognised subchapter.
-            head = ".".join(code.split(".")[:2])
-            passed = bool(_RO_DEVIZ_CODE_RE.match(code)) and head in RO_DEVIZ_GENERAL_CHAPTERS
+            chapter = _ro_deviz_chapter(code)
+            head = ".".join(chapter.split(".")[:2])
+            passed = bool(_RO_DEVIZ_CODE_RE.match(chapter)) and head in RO_DEVIZ_GENERAL_CHAPTERS
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -5203,7 +5316,8 @@ class UkrainianZkrChapterRecognised(ValidationRule):
             code = _national_code(pos, "zkr")
             if not code:
                 continue
-            passed = code.isdigit() and int(code) in UA_ZKR_CHAPTERS
+            chapter = _ua_zkr_chapter(code)
+            passed = chapter is not None and chapter in UA_ZKR_CHAPTERS
             results.append(
                 RuleResult(
                     rule_id=self.rule_id,
@@ -5222,7 +5336,10 @@ class UkrainianZkrChapterRecognised(ValidationRule):
                         )
                     ),
                     element_ref=pos.get("id"),
-                    details={"chapter": code, "chapter_name": UA_ZKR_CHAPTERS.get(int(code), "") if passed else ""},
+                    details={
+                        "chapter": code,
+                        "chapter_name": UA_ZKR_CHAPTERS.get(chapter, "") if passed and chapter is not None else "",
+                    },
                     suggestion=(
                         None if passed else translate("ukraine.zkr_chapter_recognised.suggestion", locale=locale)
                     ),
@@ -5361,18 +5478,42 @@ class BirimFiyatValidPoz(ValidationRule):
     standard = "birimfiyat"
     severity = Severity.WARNING
     category = RuleCategory.COMPLIANCE
-    description = "Poz numbers should follow Bayındırlık format (XX.XXX/X)"
+    description = "Poz numbers should follow the published unit-price book format (XX.XXX.XXXX, or XX.XXX/X)"
 
-    _PATTERN = re.compile(r"^\d{2}\.\d{3}(/\d{1,2})?$")
+    # The two shapes a Turkish poz number has had. The ministry's unit-price
+    # book has numbered its items XX.XXX.XXXX since the 2014 renumbering
+    # ("15.140.1002"), and that is what every current bill and the Istanbul demo
+    # carry. The older Bayındırlık numbering, XX.XXX/X with an optional "Y."
+    # for building works and an optional letter variant ("Y.16.050/04",
+    # "04.613/1A"), is still found on revised older contracts. Only the older
+    # shape was accepted, so a correctly numbered current bill warned on every
+    # line. An özel poz, the contractor's own analysed item, is numbered by
+    # the bill rather than the book ("ÖZEL-1", "Özel Poz 3") and is accepted as
+    # such.
+    _PATTERN = re.compile(r"^(?:Y\.)?\d{2}\.\d{3}(?:/\d{1,2}[A-Z]?)?$")
+    _CURRENT_PATTERN = re.compile(r"^\d{2}\.\d{3}\.\d{4}(?:/[A-Z0-9]{1,2})?$")
+    _SPECIAL_PATTERN = re.compile(r"^(?:ÖZEL|OZEL|ÖZ|OZ)\.?(?:\s*POZ)?[\s.\-]*(?:NO\.?\s*)?\d{1,4}$")
+    # A section row carries the chapter of the book it groups ("15", "16") or a
+    # sub-chapter ("15.140"), never an item number, and is judged as such.
+    _SECTION_PATTERN = re.compile(r"^\d{2}(?:\.\d{3})?$")
+
+    @classmethod
+    def poz_is_well_formed(cls, code: str, *, is_section: bool = False) -> bool:
+        """Whether ``code`` is a poz number in a shape the unit-price book uses."""
+        text = re.sub(r"\s+", " ", code.strip()).upper()
+        if is_section and cls._SECTION_PATTERN.match(text):
+            return True
+        return bool(cls._PATTERN.match(text) or cls._CURRENT_PATTERN.match(text) or cls._SPECIAL_PATTERN.match(text))
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
         locale = _get_locale(context)
         results: list[RuleResult] = []
+        leaf_ids = {id(pos) for pos in _get_leaf_positions(context)}
         for pos in _get_positions(context):
-            code = str((pos.get("classification") or {}).get("birimfiyat", ""))
-            if not code:
+            code = str((pos.get("classification") or {}).get("birimfiyat", "") or "")
+            if not code.strip():
                 continue
-            passed = bool(self._PATTERN.match(code))
+            passed = self.poz_is_well_formed(code, is_section=id(pos) not in leaf_ids)
             if passed:
                 message = _ok(locale)
                 suggestion = None
@@ -5455,25 +5596,69 @@ class SekisanMetricUnits(ValidationRule):
     category = RuleCategory.COMPLIANCE
     description = "Units must be metric per Japanese construction standards"
 
-    VALID_UNITS = {
-        "m",
-        "m2",
-        "m3",
-        "kg",
-        "t",
-        "本",
-        "枚",
-        "箇所",
-        "式",
-        "台",
-        "セット",
-        "個",
-        "組",
-        "m2/回",
-        "pcs",
-        "set",
-        "lsum",
-    }
+    # The units of the public building works estimating standard
+    # (公共建築工事積算基準) and of everyday Japanese bills, in the spelling
+    # :func:`_national_unit_key` reduces a typed unit to. Missing until now were
+    # 基 (a foundation, a lift, a pole), 面 (a face: a board, a mirror, a
+    # partition), 人 and 人工 (a man-day of labour), 日 and 回, 袋 and 缶 (a bag
+    # of cement, a can of paint), 対, 巻 and 丁, the 箇所 variants a bill is as
+    # likely to carry (個所, ヶ所, カ所, か所), the tsubo, and the litre. The
+    # Tokyo demo's own lifts and mirrors warned against this list. Full-width and
+    # squared forms ("ｍ２", "㎡") need no entry of their own: the key folds them.
+    VALID_UNITS = frozenset(
+        {
+            # metric, as the key spells them
+            "m",
+            "m2",
+            "m3",
+            "km",
+            "cm",
+            "mm",
+            "kg",
+            "t",
+            "トン",
+            "l",
+            "m2/回",
+            # counted things
+            "本",
+            "枚",
+            "個",
+            "組",
+            "台",
+            "基",
+            "面",
+            "対",
+            "巻",
+            "丁",
+            "袋",
+            "缶",
+            "セット",
+            # places
+            "箇所",
+            "個所",
+            "ヶ所",
+            "ケ所",
+            "カ所",
+            "ヵ所",
+            "か所",
+            # lump, labour and time
+            "式",
+            "人",
+            "人工",
+            "日",
+            "回",
+            "月",
+            "ヶ月",
+            "カ月",
+            "時間",
+            # area of a building as a client reads it
+            "坪",
+            # the platform's own canonical tokens
+            "pcs",
+            "set",
+            "lsum",
+        }
+    )
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
         locale = _get_locale(context)
@@ -5482,7 +5667,7 @@ class SekisanMetricUnits(ValidationRule):
             unit = (pos.get("unit") or "").strip().lower()
             if not unit:
                 continue
-            passed = unit in self.VALID_UNITS or unit in {u.lower() for u in self.VALID_UNITS}
+            passed = _national_unit_key(unit) in self.VALID_UNITS
             if passed:
                 message = _ok(locale)
                 suggestion = None

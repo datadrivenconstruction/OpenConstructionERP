@@ -366,8 +366,8 @@
       "suggestion": "Bayındırlık-Positionsnummer zuweisen (z.B. 04.013/1)"
     },
     "valid_poz": {
-      "fail": "Poz '{code}' entspricht nicht dem Format XX.XXX/X",
-      "suggestion": "Format verwenden: NN.NNN oder NN.NNN/N (z.B. 04.013/1)"
+      "fail": "Poz '{code}' ist weder eine aktuelle Nummer des Einheitspreisbuchs (XX.XXX.XXXX) noch eine ältere (XX.XXX/X)",
+      "suggestion": "Die Nummer aus dem Buch verwenden, z. B. 15.140.1002, oder 04.013/1 bei älteren Verträgen; eigene kalkulierte Positionen als ÖZEL-1 nummerieren"
     }
   },
   "sekisan": {

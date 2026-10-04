@@ -366,8 +366,8 @@
       "suggestion": "Assign a Bayındırlık poz number (e.g., 04.013/1)"
     },
     "valid_poz": {
-      "fail": "Poz '{code}' doesn't match format XX.XXX/X",
-      "suggestion": "Use format: NN.NNN or NN.NNN/N (e.g., 04.013/1)"
+      "fail": "Poz '{code}' is neither a current unit-price book number (XX.XXX.XXXX) nor an older one (XX.XXX/X)",
+      "suggestion": "Use the book's number, e.g. 15.140.1002, or 04.013/1 on an older contract; number your own analysed items as ÖZEL-1"
     }
   },
   "sekisan": {
