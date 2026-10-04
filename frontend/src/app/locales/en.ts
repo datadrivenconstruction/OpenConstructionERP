@@ -15725,6 +15725,7 @@ const resource = {
     "contracts.payment_terms.edit": "Edit payment terms",
     "contracts.payment_terms.saved": "Payment terms saved",
     "contracts.payment_terms.invalid": "The retention rate and the cap are percentages from 0 to 100, and the payment period is a whole number of days up to 365.",
+    "contracts.payment_terms.split_from_pack": "As the regional pack sets it: {{split}}",
     "contracts.payment_terms.default_for": "Default for {{country}}",
     "contracts.payment_terms.defaults_loading": "Looking up the usual terms for this project's country",
     "contracts.payment_terms.defaults_loaded": "Pre-filled with the usual terms for {{country}}. Every figure can be changed.",

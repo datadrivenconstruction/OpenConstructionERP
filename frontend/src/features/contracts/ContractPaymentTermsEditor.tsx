@@ -27,12 +27,14 @@ import {
   updateContract,
   type ContractItem,
   type ContractUpdatePayload,
+  type ReleaseSplitStep,
   type ValuationInterval,
 } from './api';
 import {
   ContractPaymentTermsSummary,
   RELEASE_SPLIT_PRESETS,
   VALUATION_INTERVALS,
+  defaultsStampOf,
   paymentTermsOf,
   releaseSplitText,
   splitPresetId,
@@ -135,6 +137,15 @@ function PaymentTermsEditor({ contract, onDone }: { contract: ContractItem; onDo
   const [form, setForm] = useState<TermsForm>(before);
   const set = (field: keyof TermsForm, value: string) => setForm((prev) => ({ ...prev, [field]: value }));
   const currentSplit = paymentTermsOf(contract).retention_release_split ?? null;
+  // Where the regional pack's release events govern (Germany, the US), the
+  // contract states no split of its own and the card shows the pack's. The
+  // empty choice says so here too, rather than "Not stated" beside a card
+  // that names a split.
+  const stamp = defaultsStampOf(contract);
+  const packSplit =
+    stamp?.release_split_source === 'regional_pack'
+      ? (stamp.applied.retention_release_split as ReleaseSplitStep[] | undefined)
+      : undefined;
 
   const valid =
     percentOk(form.retention_percent, true) &&
@@ -196,7 +207,14 @@ function PaymentTermsEditor({ contract, onDone }: { contract: ContractItem; onDo
               data-testid="edit-release-split"
               className={inputCls}
             >
-              <option value="">{t('contracts.payment_terms.not_stated', { defaultValue: 'Not stated' })}</option>
+              <option value="">
+                {packSplit && packSplit.length > 0
+                  ? t('contracts.payment_terms.split_from_pack', {
+                      defaultValue: 'As the regional pack sets it: {{split}}',
+                      split: releaseSplitText(t, packSplit),
+                    })
+                  : t('contracts.payment_terms.not_stated', { defaultValue: 'Not stated' })}
+              </option>
               {before.retention_release_split === CURRENT_SPLIT && (
                 <option value={CURRENT_SPLIT}>{releaseSplitText(t, currentSplit)}</option>
               )}

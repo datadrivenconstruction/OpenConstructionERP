@@ -172,6 +172,33 @@ describe('editing the payment terms of a contract', () => {
     });
   });
 
+  it("names the regional pack's split where the contract states none of its own", () => {
+    renderCard(
+      contract({
+        terms: { payment_terms: { payment_period_days: 21 } },
+        metadata: {
+          country_defaults: {
+            country_code: 'DE',
+            has_country_defaults: true,
+            applied: {
+              retention_release_split: [
+                { event: 'substantial_completion', release_percent_of_held: '100' },
+                { event: 'defects_period_end', release_percent_of_held: '100' },
+              ],
+            },
+            sources: {},
+            release_split_source: 'regional_pack',
+          },
+        },
+      }),
+    );
+    fireEvent.click(screen.getByTestId('payment-terms-edit'));
+    const select = screen.getByTestId('edit-release-split') as HTMLSelectElement;
+    expect(select.value).toBe('');
+    expect(select.selectedOptions[0]?.textContent).toContain('As the regional pack sets it');
+    expect(select.selectedOptions[0]?.textContent).not.toContain('Not stated');
+  });
+
   it('refuses a payment period that is not a whole number of days', () => {
     renderCard(contract());
     fireEvent.click(screen.getByTestId('payment-terms-edit'));
