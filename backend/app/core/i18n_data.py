@@ -66,6 +66,7 @@ DATE_FORMATS: dict[str, dict[str, str | list[str]]] = {
     "DD/MM/YYYY": {"example": "07/04/2026", "regions": ["UK", "EU", "LATAM"]},
     "YYYY-MM-DD": {"example": "2026-04-07", "regions": ["ISO"]},
     "YYYY/MM/DD": {"example": "2026/04/07", "regions": ["JP", "KR", "CN"]},
+    "YYYY.MM.DD.": {"example": "2026.04.07.", "regions": ["HU"]},
 }
 
 # ---------------------------------------------------------------------------
@@ -86,7 +87,21 @@ NUMBER_FORMATS: dict[str, dict[str, str | list[str]]] = {
     "1 234,56": {
         "decimal": ",",
         "thousands": " ",
-        "regions": ["RU", "FR"],
+        "regions": ["RU", "FR", "UA", "HU", "PL", "CZ", "Nordics"],
+    },
+    # Switzerland groups with the ASCII apostrophe, which is what CLDR 48
+    # prints for de-CH, fr-CH and it-CH. app.core.regional_format also
+    # reads the typographic U+2019 spelling older CLDR releases used.
+    "1'234.56": {
+        "decimal": ".",
+        "thousands": "'",
+        "regions": ["CH"],
+    },
+    # Lakh and crore grouping: the last three digits, then pairs.
+    "12,34,567.89": {
+        "decimal": ".",
+        "thousands": ",",
+        "regions": ["IN"],
     },
 }
 
@@ -239,7 +254,7 @@ COUNTRY_DEFAULTS: dict[str, dict[str, str]] = {
         "measurement": "metric",
         "paper": "A4",
         "date_format": "DD/MM/YYYY",
-        "number_format": "1.234,56",
+        "number_format": "1 234,56",
         "locale": "pt",
     },
     # Nordics -------------------------------------------------------------
@@ -248,7 +263,7 @@ COUNTRY_DEFAULTS: dict[str, dict[str, str]] = {
         "measurement": "metric",
         "paper": "A4",
         "date_format": "YYYY-MM-DD",
-        "number_format": "1.234,56",
+        "number_format": "1 234,56",
         "locale": "sv",
     },
     "NO": {
@@ -256,7 +271,7 @@ COUNTRY_DEFAULTS: dict[str, dict[str, str]] = {
         "measurement": "metric",
         "paper": "A4",
         "date_format": "DD.MM.YYYY",
-        "number_format": "1.234,56",
+        "number_format": "1 234,56",
         "locale": "no",
     },
     "DK": {
@@ -272,7 +287,7 @@ COUNTRY_DEFAULTS: dict[str, dict[str, str]] = {
         "measurement": "metric",
         "paper": "A4",
         "date_format": "DD.MM.YYYY",
-        "number_format": "1.234,56",
+        "number_format": "1 234,56",
         "locale": "fi",
     },
     # Central / Eastern Europe --------------------------------------------
@@ -281,7 +296,7 @@ COUNTRY_DEFAULTS: dict[str, dict[str, str]] = {
         "measurement": "metric",
         "paper": "A4",
         "date_format": "DD.MM.YYYY",
-        "number_format": "1.234,56",
+        "number_format": "1 234,56",
         "locale": "pl",
     },
     "CZ": {
@@ -289,8 +304,24 @@ COUNTRY_DEFAULTS: dict[str, dict[str, str]] = {
         "measurement": "metric",
         "paper": "A4",
         "date_format": "DD.MM.YYYY",
-        "number_format": "1.234,56",
+        "number_format": "1 234,56",
         "locale": "cs",
+    },
+    "HU": {
+        "currency": "HUF",
+        "measurement": "metric",
+        "paper": "A4",
+        "date_format": "YYYY.MM.DD.",
+        "number_format": "1 234,56",
+        "locale": "hu",
+    },
+    "UA": {
+        "currency": "UAH",
+        "measurement": "metric",
+        "paper": "A4",
+        "date_format": "DD.MM.YYYY",
+        "number_format": "1 234,56",
+        "locale": "uk",
     },
     "RU": {
         "currency": "RUB",
@@ -379,7 +410,7 @@ COUNTRY_DEFAULTS: dict[str, dict[str, str]] = {
         "measurement": "metric",
         "paper": "A4",
         "date_format": "DD/MM/YYYY",
-        "number_format": "1,234.56",
+        "number_format": "12,34,567.89",
         "locale": "hi",
     },
     # Latin America -------------------------------------------------------
