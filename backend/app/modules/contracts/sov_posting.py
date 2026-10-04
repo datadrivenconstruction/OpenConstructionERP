@@ -11,8 +11,10 @@ work nobody could bill.
 :func:`post_source_to_sov` is called by those subscribers on the path that
 moves the money, in the same transaction. A change order whose items name the
 schedule lines they change moves those lines, and its other items share one
-new line; a change order with no such items, and a variation, add one pooled
-line as before. :mod:`app.modules.contracts.sov_adjustments` decides the split
+new line; a change order with no such items adds one pooled line as before. A
+variation reads the items of the change order that mirrors it, so a mirrored
+pair lands the same way whichever half completes first, and a variation
+without a mirror is pooled. :mod:`app.modules.contracts.sov_adjustments` decides the split
 and keeps the per-line deltas adding up to the amount the contract sum moved
 by. Every line moved or added gets one
 :class:`~app.modules.contracts.models.SovAdjustment`, all carrying the same
@@ -34,9 +36,11 @@ from __future__ import annotations
 
 import logging
 import uuid
+from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from decimal import Decimal, InvalidOperation
+from types import SimpleNamespace
 from typing import Any
 
 from sqlalchemy import func, select
@@ -47,7 +51,10 @@ from app.modules.contracts.sov_adjustments import (
     ADJUSTS_LINE_META_KEY,
     PLACE_LINKED_LINE,
     Allocation,
+    LineShare,
+    Placement,
     allocate,
+    is_measured_contract,
     placement,
     resolve_items,
 )
@@ -89,6 +96,64 @@ async def posted_source_keys(session: AsyncSession, contract_id: uuid.UUID) -> s
     return {str(key) for key in rows.scalars().all()}
 
 
+SourceRef = tuple[str, uuid.UUID]
+
+
+async def _contract_lines(session: AsyncSession, contract_id: uuid.UUID) -> list[ContractLine]:
+    rows = await session.execute(select(ContractLine).where(ContractLine.contract_id == contract_id))
+    return list(rows.scalars().all())
+
+
+async def items_for_sources(
+    session: AsyncSession,
+    contract: Contract,
+    sources: Sequence[tuple[str, uuid.UUID | None]],
+) -> dict[SourceRef, list[Any]]:
+    """The change order items behind each change, read in at most three queries.
+
+    A change order's items are its own. A variation's are the items of the
+    change order that mirrors it (``metadata.variation_order_id``, the link
+    the contract subscribers key their posting on), when exactly one change
+    order in the contract's project carries that link; so the same commercial
+    change lands the same way whichever half is posted first. A change with
+    no items is left out, and the allocator pools it. Writes nothing.
+    """
+    from app.modules.changeorders.models import ChangeOrder, ChangeOrderItem  # noqa: PLC0415
+
+    order_for: dict[SourceRef, uuid.UUID] = {
+        (kind, sid): sid for kind, sid in sources if kind == SOURCE_CHANGE_ORDER and sid is not None
+    }
+    variation_ids = {sid for kind, sid in sources if kind == SOURCE_VARIATION_ORDER and sid is not None}
+    if variation_ids:
+        mirror = ChangeOrder.metadata_["variation_order_id"].as_string()
+        found = await session.execute(
+            select(ChangeOrder.id, mirror).where(
+                ChangeOrder.project_id == contract.project_id,
+                mirror.in_(sorted(str(vid) for vid in variation_ids)),
+            )
+        )
+        mirrors: dict[str, list[uuid.UUID]] = {}
+        for order_id, variation_id in found.all():
+            mirrors.setdefault(str(variation_id), []).append(order_id)
+        for vid in variation_ids:
+            matches = mirrors.get(str(vid), [])
+            # Two change orders claiming one variation say nothing reliable
+            # about its lines; the variation is pooled, as it always was.
+            if len(matches) == 1:
+                order_for[(SOURCE_VARIATION_ORDER, vid)] = matches[0]
+    if not order_for:
+        return {}
+    raw = await session.execute(
+        select(ChangeOrderItem)
+        .where(ChangeOrderItem.change_order_id.in_(set(order_for.values())))
+        .order_by(ChangeOrderItem.sort_order, ChangeOrderItem.created_at, ChangeOrderItem.id)
+    )
+    by_order: dict[uuid.UUID, list[Any]] = {}
+    for item in raw.scalars().all():
+        by_order.setdefault(item.change_order_id, []).append(item)
+    return {ref: by_order[order_id] for ref, order_id in order_for.items() if order_id in by_order}
+
+
 async def plan_source_allocation(
     session: AsyncSession,
     contract: Contract,
@@ -99,33 +164,28 @@ async def plan_source_allocation(
 ) -> tuple[Allocation, dict[uuid.UUID, ContractLine]]:
     """How one change's amount would land on this contract's schedule lines.
 
-    Reads the change order's items when ``kind`` is a change order; a
-    variation, or a change order that has no items, is pooled. Returns the
-    allocation and the contract's lines by id, which the shares refer to.
-    Writes nothing.
+    Reads the items behind the change (see :func:`items_for_sources`); a
+    change without items is pooled. Returns the allocation and the
+    contract's lines by id, which the shares refer to. Writes nothing.
     """
-    rows = list(
-        (await session.execute(select(ContractLine).where(ContractLine.contract_id == contract.id))).scalars().all()
-    )
-    items: list[Any] = []
-    if kind == SOURCE_CHANGE_ORDER and source_id is not None:
-        from app.modules.changeorders.models import ChangeOrderItem  # noqa: PLC0415
-
-        raw = await session.execute(
-            select(ChangeOrderItem)
-            .where(ChangeOrderItem.change_order_id == source_id)
-            .order_by(ChangeOrderItem.sort_order, ChangeOrderItem.created_at, ChangeOrderItem.id)
-        )
-        items = resolve_items(list(raw.scalars().all()), rows)
-    return allocate(amount, items), {ln.id: ln for ln in rows}
+    rows = await _contract_lines(session, contract.id)
+    by_source = await items_for_sources(session, contract, [(kind, source_id)])
+    raw = by_source.get((kind, source_id), []) if source_id is not None else []
+    return allocate(amount, resolve_items(raw, rows)), {ln.id: ln for ln in rows}
 
 
-def describe_allocation(allocation: Allocation, lines: dict[uuid.UUID, ContractLine]) -> list[dict[str, Any]]:
+def place_share(line: Any, share: LineShare, *, measured: bool) -> Placement:
+    """How one share is written on ``line``: the one call the post and the preview share."""
+    return placement(line, share.delta, quantity=share.quantity, units=share.units, measured=measured)
+
+
+def describe_allocation(allocation: Allocation, lines: dict[uuid.UUID, Any], *, measured: bool) -> list[dict[str, Any]]:
     """The allocation as a person reads it in a preview, one row per share.
 
     ``placement`` is ``new_line`` for the change's own line, ``linked_line``
     for a share that goes on a new line beside the line it adjusts, and
-    ``lump_sum`` or ``quantity`` for a line moved in place.
+    ``lump_sum`` or ``quantity`` for a line moved in place. ``lines`` may be
+    the ORM rows or the running copies :func:`reconcile_preview` keeps.
     """
     rows: list[dict[str, Any]] = []
     for share in allocation.shares:
@@ -150,12 +210,38 @@ def describe_allocation(allocation: Allocation, lines: dict[uuid.UUID, ContractL
                 "code": line.code or "",
                 "description": line.description or "",
                 "delta": str(share.delta),
-                "placement": placement(line, share.delta).kind,
+                "placement": place_share(line, share, measured=measured).kind,
                 "total_before": str(before),
                 "total_after": str(before + share.delta),
             }
         )
     return rows
+
+
+def _running_copy(line: ContractLine) -> SimpleNamespace:
+    """What the placement and the preview read of a line, detached from the session."""
+    return SimpleNamespace(
+        id=line.id,
+        code=line.code,
+        description=line.description,
+        unit=line.unit,
+        quantity=_money(line.quantity),
+        unit_rate=_money(line.unit_rate),
+        total_value=_money(line.total_value),
+    )
+
+
+def _advance(lines: dict[uuid.UUID, SimpleNamespace], allocation: Allocation, *, measured: bool) -> None:
+    """Move the running copies the way :func:`post_source_to_sov` moves the rows."""
+    for share in allocation.shares:
+        line = lines.get(share.line_id) if share.line_id is not None else None
+        if line is None:
+            continue
+        placed = place_share(line, share, measured=measured)
+        if placed.kind != PLACE_LINKED_LINE:
+            line.quantity = placed.quantity
+            line.unit_rate = placed.unit_rate
+            line.total_value = placed.total_value
 
 
 async def post_source_to_sov(
@@ -197,6 +283,7 @@ async def post_source_to_sov(
     unresolved_home = next((s for s in allocation.shares if s.line_id is None), None)
     if unresolved_home is None and allocation.shares:
         unresolved_home = allocation.shares[0]
+    measured = is_measured_contract(contract)
     adjustments: list[SovAdjustment] = []
     for share in allocation.shares:
         meta: dict[str, Any] = {"allocation": allocation.method, "item_ids": list(share.item_ids)}
@@ -211,7 +298,7 @@ async def post_source_to_sov(
             session.add(target)
             meta["placement"] = "new_line"
         else:
-            placed = placement(line, share.delta)
+            placed = place_share(line, share, measured=measured)
             meta["placement"] = placed.kind
             if placed.kind == PLACE_LINKED_LINE:
                 # Beside the line it adjusts, never under it: a child would
@@ -435,6 +522,15 @@ async def reconcile_preview(session: AsyncSession, contract: Contract) -> dict[s
     ``items`` are the changes on offer. ``excluded`` are the ones a person set
     aside as already on the schedule, with who did it and why, so the
     decision stays visible and can be taken back.
+
+    Each change shows where its money lands, worked out by the same placement
+    the apply posts and in the order the apply posts them, against the lines
+    as the changes before it leave them: two changes on one line read
+    60,000 -> 65,000 and then 65,000 -> 68,000, which is what gets written
+    when both are ticked. A change left unticked moves nothing, so the ones
+    after it on the same line then start lower than shown. The lines and the
+    items of every change on offer are read once, however many changes there
+    are.
     """
     exclusions = reconcile_exclusions(contract)
     unposted = await unposted_changes(session, contract)
@@ -449,22 +545,26 @@ async def reconcile_preview(session: AsyncSession, contract: Contract) -> dict[s
         for item in unposted
         if item.key in exclusions
     ]
-    scheduled = await scheduled_total(session, contract.id)
+    lines = await _contract_lines(session, contract.id)
+    parents = {ln.parent_line_id for ln in lines if ln.parent_line_id is not None}
+    scheduled = sum((_money(ln.total_value) for ln in lines if ln.id not in parents), Decimal("0"))
     adding = sum((item.amount for item in items), Decimal("0"))
-    # Each change shows where its money would land, worked out by the same
-    # allocation the apply posts, so the person confirms what is written.
+    by_source = await items_for_sources(session, contract, [(item.kind, item.source_id) for item in items])
+    measured = is_measured_contract(contract)
+    running = {ln.id: _running_copy(ln) for ln in lines}
     offered: list[dict[str, Any]] = []
+    # In the order apply_reconcile posts, each against the lines the ones
+    # before it moved; see the docstring.
     for item in items:
-        allocation, lines = await plan_source_allocation(
-            session, contract, kind=item.kind, source_id=item.source_id, amount=item.amount
-        )
+        allocation = allocate(item.amount, resolve_items(by_source.get((item.kind, item.source_id), []), lines))
         offered.append(
             {
                 **item.as_dict(),
                 "allocation_method": allocation.method,
-                "allocation": describe_allocation(allocation, lines),
+                "allocation": describe_allocation(allocation, running, measured=measured),
             }
         )
+        _advance(running, allocation, measured=measured)
     return {
         "contract_id": str(contract.id),
         "contract_status": contract.status,

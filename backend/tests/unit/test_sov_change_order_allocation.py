@@ -172,33 +172,149 @@ def test_unresolved_references_are_reported() -> None:
 # ── placement ────────────────────────────────────────────────────────────
 
 
-def _line(quantity: str, rate: str, total: str) -> SimpleNamespace:
-    return SimpleNamespace(quantity=D(quantity), unit_rate=D(rate), total_value=D(total))
+def _line(quantity: str, rate: str, total: str, unit: str | None = None) -> SimpleNamespace:
+    return SimpleNamespace(quantity=D(quantity), unit_rate=D(rate), total_value=D(total), unit=unit)
 
 
 def test_a_lump_sum_line_takes_the_change_in_its_total_and_rate() -> None:
-    placed = placement(_line("1", "50000", "50000"), D("-1250.50"))
+    placed = placement(_line("1", "50000", "50000"), D("-1250.50"), measured=False)
     assert placed.kind == PLACE_LUMP_SUM
     assert (placed.quantity, placed.unit_rate, placed.total_value) == (D("1"), D("48749.50"), D("48749.50"))
     assert placed.quantity * placed.unit_rate == placed.total_value
 
 
-def test_a_measured_line_takes_whole_units_at_its_contract_rate() -> None:
-    # 120 m3 at 250 = 30,000; the change adds 10,000, which is 40 m3.
-    placed = placement(_line("120", "250", "30000"), D("10000"))
+def test_a_measured_line_takes_the_quantity_the_items_state_at_its_contract_rate() -> None:
+    # 120 m3 at 250 = 30,000; the items add 40 m3 at the contract rate, 10,000.
+    placed = placement(_line("120", "250", "30000", "m3"), D("10000"), quantity=D("40"), measured=True)
     assert placed.kind == PLACE_QUANTITY
     assert (placed.quantity, placed.unit_rate, placed.total_value) == (D("160"), D("250"), D("40000"))
     assert placed.delta_quantity == D("40")
 
 
+def test_a_rate_change_is_never_booked_as_a_quantity_nobody_built() -> None:
+    # 100 m3 at 50, the item reprices it to 60: 1,000 that happens to be 20 m3
+    # at the old rate. No quantity changed, so the line keeps 100 m3 at 50 and
+    # the uplift sits on a line of its own, on either kind of contract.
+    for measured in (True, False):
+        placed = placement(_line("100", "50", "5000", "m3"), D("1000"), quantity=D("0"), measured=measured)
+        assert placed.kind == PLACE_LINKED_LINE
+
+
+def test_a_share_that_is_not_the_stated_quantity_at_the_contract_rate_goes_beside_the_line() -> None:
+    # 20 m3 stated, but priced at a new rate of 60: 1,200 is not 20 x 50.
+    assert placement(_line("100", "50", "5000"), D("1200"), quantity=D("20"), measured=True).kind == PLACE_LINKED_LINE
+    # A pro-rata share: 10 m3 at 400 approved at 90%, 3,600. Nobody built 9 m3.
+    placed = placement(_line("100", "400", "40000"), D("3600"), quantity=D("10"), measured=False)
+    assert placed.kind == PLACE_LINKED_LINE
+
+
 def test_a_measured_line_is_not_repriced_when_the_change_is_not_whole_units() -> None:
     # 10,000 at 333 per m3 is 30.03003... m3, not a quantity the column can hold.
-    assert placement(_line("120", "333", "39960"), D("10000")).kind == PLACE_LINKED_LINE
+    assert placement(_line("120", "333", "39960"), D("10000"), measured=False).kind == PLACE_LINKED_LINE
+
+
+def test_a_stated_quantity_finer_than_the_column_goes_beside_the_line() -> None:
+    # 0.00005 m3 at 200,000 is 10, but the quantity column holds four decimals.
+    placed = placement(_line("2", "200000", "400000"), D("10"), quantity=D("0.00005"), measured=True)
+    assert placed.kind == PLACE_LINKED_LINE
+
+
+def test_a_removal_beyond_the_line_quantity_is_not_written_as_a_negative_quantity() -> None:
+    placed = placement(_line("100", "50", "5000"), D("-6000"), quantity=D("-120"), measured=True)
+    assert placed.kind == PLACE_LINKED_LINE
+
+
+def test_a_removal_of_part_of_the_quantity_takes_it_off_the_line() -> None:
+    placed = placement(_line("100", "50", "5000", "m3"), D("-2000"), quantity=D("-40"), measured=True)
+    assert (placed.kind, placed.quantity, placed.total_value) == (PLACE_QUANTITY, D("60"), D("3000"))
+
+
+def test_an_item_in_another_unit_does_not_move_the_quantity() -> None:
+    placed = placement(_line("100", "50", "5000", "m3"), D("1000"), quantity=D("20"), units=("m2",), measured=True)
+    assert placed.kind == PLACE_LINKED_LINE
+    # Case and a trailing dot do not make another unit.
+    placed = placement(_line("100", "50", "5000", "M3"), D("1000"), quantity=D("20"), units=("m3.",), measured=True)
+    assert placed.kind == PLACE_QUANTITY
 
 
 def test_a_line_priced_at_an_agreed_figure_is_left_alone() -> None:
     # 0.7 x 37 is 25.90 only by agreement; the stored total is 26.00.
-    assert placement(_line("0.7", "37", "26.00"), D("5")).kind == PLACE_LINKED_LINE
+    assert placement(_line("0.7", "37", "26.00"), D("5"), measured=False).kind == PLACE_LINKED_LINE
+
+
+# Unit-price and remeasurement contracts bill measured quantity x unit rate,
+# so a restated rate multiplies every later measurement.
+
+
+def test_a_rate_only_line_on_a_measured_contract_takes_the_quantity_at_its_rate() -> None:
+    # Provisional rock excavation, 0 m3 at 80. The change adds 50 m3 at 80.
+    placed = placement(_line("0", "80", "0", "m3"), D("4000"), quantity=D("50"), measured=True)
+    assert placed.kind == PLACE_QUANTITY
+    assert (placed.quantity, placed.unit_rate, placed.total_value) == (D("50"), D("80"), D("4000"))
+
+
+def test_a_rate_only_line_is_never_turned_into_one_unit_at_the_change_amount() -> None:
+    # The same 4,000 with no quantity stated: 1 m3 at 4,000 would bill 200,000
+    # for the 50 m3 measured next. It goes beside the line instead, on any type.
+    for measured in (True, False):
+        assert placement(_line("0", "80", "0", "m3"), D("4000"), measured=measured).kind == PLACE_LINKED_LINE
+
+
+def test_one_more_pump_on_a_unit_price_line_is_two_pumps_at_the_same_rate() -> None:
+    placed = placement(_line("1", "5000", "5000", "pcs"), D("5000"), quantity=D("1"), measured=True)
+    assert placed.kind == PLACE_QUANTITY
+    assert (placed.quantity, placed.unit_rate) == (D("2"), D("5000"))
+
+
+def test_a_countable_unit_in_the_lump_sum_vocabulary_is_still_counted() -> None:
+    # "item", "kpl" and "ens" are in the lump-sum vocabulary, but one more
+    # stated item is one more item, not one item at twice the price.
+    for unit in ("item", "kpl", "ens"):
+        placed = placement(_line("1", "5000", "5000", unit), D("5000"), quantity=D("1"), measured=True)
+        assert (placed.kind, placed.quantity, placed.unit_rate) == (PLACE_QUANTITY, D("2"), D("5000"))
+
+
+def test_a_single_unit_line_on_a_measured_contract_is_not_a_lump_sum() -> None:
+    # A cost-only share on "1 pcs pump @ 5,000" would make it 1 @ 10,000, and
+    # measuring the two pumps installed would bill 20,000.
+    assert placement(_line("1", "5000", "5000", "pcs"), D("5000"), measured=True).kind == PLACE_LINKED_LINE
+
+
+def test_a_lump_sum_unit_on_a_measured_contract_moves_in_money() -> None:
+    placed = placement(_line("1", "12000", "12000", "LS"), D("3000"), measured=True)
+    assert (placed.kind, placed.quantity, placed.unit_rate) == (PLACE_LUMP_SUM, D("1"), D("15000"))
+    placed = placement(_line("1", "12000", "12000", "psch."), D("-2000"), measured=True)
+    assert (placed.kind, placed.unit_rate) == (PLACE_LUMP_SUM, D("10000"))
+    # Two lump sums on one line are not one lump sum.
+    assert placement(_line("2", "6000", "12000", "LS"), D("3000"), measured=True).kind == PLACE_LINKED_LINE
+
+
+def test_a_total_only_line_on_a_percent_contract_is_written_as_one_unit() -> None:
+    # 0 x 0 with a total of 8,000 bills nothing through q x r; restating it as
+    # 1 at the new total is what makes the change billable.
+    placed = placement(_line("0", "0", "8000"), D("2000"), measured=False)
+    assert (placed.kind, placed.quantity, placed.unit_rate, placed.total_value) == (
+        PLACE_LUMP_SUM,
+        D("1"),
+        D("10000"),
+        D("10000"),
+    )
+    # On a measured contract the same line goes beside it.
+    assert placement(_line("0", "0", "8000"), D("2000"), measured=True).kind == PLACE_LINKED_LINE
+
+
+def test_shares_carry_the_quantity_their_items_state_and_scaling_leaves_it_alone() -> None:
+    items = [
+        AllocationItem(weight=D("4000"), line_id=A, quantity=D("10"), unit="m3"),
+        AllocationItem(weight=D("1000"), line_id=A, quantity=D("2.5"), unit="m3"),
+        AllocationItem(weight=D("5000"), line_id=B, quantity=D("0")),
+    ]
+    allocation = allocate(D("9000"), items)
+    by_line = {share.line_id: share for share in allocation.shares}
+    assert by_line[A].quantity == D("12.5")
+    assert by_line[A].units == ("m3",)
+    assert by_line[B].quantity == D("0")
+    assert allocation.total == D("9000")
 
 
 # ── resolve_items ────────────────────────────────────────────────────────
@@ -209,8 +325,15 @@ def _sov(line_id, *, parent=None, position=None) -> SimpleNamespace:
     return SimpleNamespace(id=line_id, parent_line_id=parent, metadata_=meta)
 
 
-def _item(cost: str, **meta) -> SimpleNamespace:
-    return SimpleNamespace(id=uuid.uuid4(), cost_delta=D(cost), metadata_=meta)
+def _item(cost: str, *, q: tuple[str, str] = ("0", "0"), unit: str = "", **meta) -> SimpleNamespace:
+    return SimpleNamespace(
+        id=uuid.uuid4(),
+        cost_delta=D(cost),
+        original_quantity=D(q[0]),
+        new_quantity=D(q[1]),
+        unit=unit,
+        metadata_=meta,
+    )
 
 
 def test_an_item_finds_its_line_by_id_or_by_the_bill_position() -> None:
@@ -247,3 +370,22 @@ def test_references_that_cannot_be_followed_go_to_the_new_line_with_a_reason() -
         # A bill position no line carries is simply new scope.
         None,
     ]
+
+
+def test_an_item_carries_its_stated_quantity_change_and_unit() -> None:
+    resolved = resolve_items(
+        [
+            _item("8000", q=("100", "120"), unit="m3", contract_line_id=str(A)),
+            _item("-2000", q=("40", "0"), unit="m3", contract_line_id=str(A)),
+            _item("1000", q=("100", "100"), unit="m3", contract_line_id=str(A)),
+        ],
+        [_sov(A)],
+    )
+    assert [item.quantity for item in resolved] == [D("20"), D("-40"), D("0")]
+    assert {item.unit for item in resolved} == {"m3"}
+
+
+def test_an_item_without_quantity_columns_states_no_quantity() -> None:
+    raw = SimpleNamespace(id=uuid.uuid4(), cost_delta=D("50"), metadata_={"contract_line_id": str(A)})
+    [item] = resolve_items([raw], [_sov(A)])
+    assert item.quantity == D("0")

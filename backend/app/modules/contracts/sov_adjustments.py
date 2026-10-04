@@ -51,19 +51,30 @@ the change's source key, so a replayed approval posts nothing and the
 per-line deltas always add up to the amount the contract sum moved by.
 
 A referenced line keeps ``quantity x unit_rate == total_value``, because the
-claim generator prices a line off quantity times rate (see
+claim generators price a line off quantity times rate (see
 ``auto_generate_claim_lines``) and a hand edit recomputes the total the same
 way; a total moved on its own would never be billed, and the next edit would
-throw it away. :func:`placement` decides how:
+throw it away. How a line is billed matters as much: a unit-price or
+remeasurement contract (:data:`MEASURED_CONTRACT_TYPES`) bills measured
+quantity times the line's rate, so a restated rate multiplies every later
+measurement, while every other type bills a percent of quantity times rate.
+:func:`placement` decides, in this order:
 
-* a lump sum line (quantity 0 or 1) becomes quantity 1 at the new total;
-* a measured line whose total is its quantity times its rate takes the
-  change as quantity at its contract rate, when that quantity is exact to the
-  fourth decimal the column holds;
-* anything else (a measured line priced at an agreed figure, or a change that
-  is not a whole number of units at the contract rate) is not rewritten. The
-  share goes on a new line beside it that names the line it adjusts, because
-  restating a contract rate is a commercial decision this code does not make.
+* a line whose total is its quantity times its rate takes the change as
+  quantity at that rate, when the items state a quantity change (new less
+  original quantity) in the line's unit and that quantity at the contract
+  rate is exactly the share, fits the fourth decimal the column holds and
+  does not take the line below zero. The quantity is the one the items state,
+  never one worked out from the money: 1,000 on a 50 line is not 20 more
+  units when the item repriced 100 units from 50 to 60;
+* a lump sum line becomes quantity 1 at the new total: one priced in a lump
+  sum unit at quantity 0 or 1, and on a contract billed by percent also any
+  line at quantity 1, or at quantity 0 with no rate;
+* anything else (a rate change, a pro-rata share, a measured line priced at
+  an agreed figure, a cost-only change on a line billed by measurement) is not
+  rewritten. The share goes on a new line beside it that names the line it
+  adjusts, because restating a contract rate is a commercial decision this
+  code does not make.
 
 A deduction may take a line below what earlier claims billed on it. That is
 posted as approved; the next claim's ``pay_application.line_overbilled``
@@ -103,6 +114,31 @@ PLACE_LINKED_LINE = "linked_line"
 #: ``ContractLine.metadata_`` key naming the line a linked adjustment line adjusts.
 ADJUSTS_LINE_META_KEY = "adjusts_line_id"
 
+#: Contract types billed as measured quantity x unit rate
+#: (``generate_unit_price_claim``); every other type bills a percent.
+MEASURED_CONTRACT_TYPES: frozenset[str] = frozenset({"unit_price", "remeasurement"})
+
+#: Used when the bill of quantities module is not installed.
+_FALLBACK_LUMP_SUM_UNITS: frozenset[str] = frozenset({"ls", "lsum", "lump sum", "lumpsum", "psch", "pauschal"})
+
+
+def is_measured_contract(contract: Any) -> bool:
+    """Whether ``contract`` bills measured quantity times the line rate."""
+    return str(getattr(contract, "contract_type", "") or "") in MEASURED_CONTRACT_TYPES
+
+
+def _is_lump_sum_unit(unit: object) -> bool:
+    text = str(unit or "")
+    try:
+        from app.modules.boq.units import is_lump_sum_unit  # noqa: PLC0415
+    except ImportError:  # pragma: no cover - the boq module is optional
+        return text.strip().lower().rstrip(".") in _FALLBACK_LUMP_SUM_UNITS
+    return is_lump_sum_unit(text)
+
+
+def _unit_key(unit: object) -> str:
+    return str(unit or "").strip().lower().rstrip(".")
+
 
 @dataclass(frozen=True, slots=True)
 class AllocationItem:
@@ -110,21 +146,33 @@ class AllocationItem:
 
     ``line_id`` is the schedule line it changes, already resolved, or None
     for the new line. ``unresolved`` says why a reference was not followed.
+    ``quantity`` is the quantity change the item states (new less original
+    quantity), in ``unit``.
     """
 
     weight: Decimal
     line_id: uuid.UUID | None = None
     item_id: str = ""
     unresolved: str | None = None
+    quantity: Decimal = ZERO
+    unit: str = ""
 
 
 @dataclass(frozen=True, slots=True)
 class LineShare:
-    """What one schedule line, or the new line (``line_id`` None), takes."""
+    """What one schedule line, or the new line (``line_id`` None), takes.
+
+    ``quantity`` is the quantity change its items state, summed, and
+    ``units`` the units they state it in. A pro-rata share scales the money,
+    never the quantity, so the two then no longer agree and the share is not
+    written as quantity.
+    """
 
     line_id: uuid.UUID | None
     delta: Decimal
     item_ids: tuple[str, ...] = ()
+    quantity: Decimal = ZERO
+    units: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -217,15 +265,22 @@ def allocate(amount: Decimal, items: Sequence[AllocationItem]) -> Allocation:
     order: list[uuid.UUID | None] = []
     weights: dict[uuid.UUID | None, Decimal] = {}
     item_ids: dict[uuid.UUID | None, list[str]] = {}
+    quantities: dict[uuid.UUID | None, Decimal] = {}
+    units: dict[uuid.UUID | None, list[str]] = {}
     for item in sorted(items, key=lambda it: it.line_id is None):
         key = item.line_id
         if key not in weights:
             order.append(key)
             weights[key] = ZERO
             item_ids[key] = []
+            quantities[key] = ZERO
+            units[key] = []
         weights[key] += _money(item.weight)
+        quantities[key] += _money(item.quantity)
         if item.item_id:
             item_ids[key].append(item.item_id)
+        if item.unit and item.unit not in units[key]:
+            units[key].append(item.unit)
     items_total = sum(weights.values(), ZERO)
 
     if items_total == amount:
@@ -240,11 +295,21 @@ def allocate(amount: Decimal, items: Sequence[AllocationItem]) -> Allocation:
         if None not in deltas:
             order.append(None)
             item_ids[None] = []
+            quantities[None] = ZERO
+            units[None] = []
             deltas[None] = ZERO
         deltas[None] += amount - items_total
 
     shares = tuple(
-        LineShare(line_id=key, delta=deltas[key], item_ids=tuple(item_ids[key])) for key in order if deltas[key] != ZERO
+        LineShare(
+            line_id=key,
+            delta=deltas[key],
+            item_ids=tuple(item_ids[key]),
+            quantity=quantities[key],
+            units=tuple(units[key]),
+        )
+        for key in order
+        if deltas[key] != ZERO
     )
     return Allocation(amount=amount, method=method, shares=shares, unresolved=unresolved)
 
@@ -265,27 +330,55 @@ class Placement:
     delta_quantity: Decimal = ZERO
 
 
-def placement(line: Any, delta: Decimal) -> Placement:
-    """Decide how ``delta`` is written on ``line``; see the module docstring. Pure."""
-    quantity = _money(getattr(line, "quantity", 0))
+def placement(
+    line: Any,
+    delta: Decimal,
+    *,
+    quantity: Decimal = ZERO,
+    units: Sequence[str] = (),
+    measured: bool,
+) -> Placement:
+    """Decide how ``delta`` is written on ``line``; see the module docstring. Pure.
+
+    ``quantity`` and ``units`` are what the share's items state
+    (:attr:`LineShare.quantity`, :attr:`LineShare.units`); ``measured`` is
+    whether the contract bills measured quantity times rate
+    (:func:`is_measured_contract`).
+    """
+    line_quantity = _money(getattr(line, "quantity", 0))
     rate = _money(getattr(line, "unit_rate", 0))
     total = _money(getattr(line, "total_value", 0))
+    unit = getattr(line, "unit", None)
     new_total = total + delta
-    if quantity in (ZERO, ONE):
-        # A lump sum moves in money, not in units, so no quantity is recorded.
+    stated = _money(quantity)
+
+    line_unit = _unit_key(unit)
+    same_unit = not line_unit or all(_unit_key(u) in ("", line_unit) for u in units)
+    if (
+        stated != ZERO
+        and rate != ZERO
+        and same_unit
+        and line_quantity * rate == total
+        and stated * rate == delta
+        and stated == stated.quantize(QUANTITY_QUANTUM)
+        and line_quantity + stated >= ZERO
+    ):
+        return Placement(
+            kind=PLACE_QUANTITY,
+            quantity=line_quantity + stated,
+            unit_rate=rate,
+            total_value=new_total,
+            delta_quantity=stated,
+        )
+
+    # A lump sum moves in money, not in units, so no quantity is recorded.
+    # Never on a line whose items state a quantity: "item" and "kpl" are in
+    # the lump-sum vocabulary and are still counted.
+    lump_sum = stated == ZERO and line_quantity in (ZERO, ONE) and _is_lump_sum_unit(unit)
+    if not measured:
+        lump_sum = lump_sum or line_quantity == ONE or (line_quantity == ZERO and rate == ZERO)
+    if lump_sum:
         return Placement(kind=PLACE_LUMP_SUM, quantity=ONE, unit_rate=new_total, total_value=new_total)
-    if rate != ZERO and quantity * rate == total:
-        extra = delta / rate
-        if extra == extra.quantize(QUANTITY_QUANTUM):
-            new_quantity = quantity + extra
-            if new_quantity * rate == new_total:
-                return Placement(
-                    kind=PLACE_QUANTITY,
-                    quantity=new_quantity,
-                    unit_rate=rate,
-                    total_value=new_total,
-                    delta_quantity=extra,
-                )
     return Placement(kind=PLACE_LINKED_LINE)
 
 
@@ -294,7 +387,8 @@ def resolve_items(raw_items: Sequence[Any], lines: Sequence[Any]) -> list[Alloca
 
     ``lines`` are the contract's schedule lines. Only a leaf line can be
     referenced: a roll-up parent is summed from its children and is never
-    billed. Pure.
+    billed. Each item carries the quantity change it states, new less
+    original quantity, and its unit. Pure.
     """
     parents = {ln.parent_line_id for ln in lines if getattr(ln, "parent_line_id", None) is not None}
     leaf_ids = {ln.id for ln in lines if ln.id not in parents}
@@ -314,6 +408,7 @@ def resolve_items(raw_items: Sequence[Any], lines: Sequence[Any]) -> list[Alloca
         meta = meta if isinstance(meta, dict) else {}
         item_id = str(getattr(raw, "id", "") or "")
         weight = _money(getattr(raw, "cost_delta", 0))
+        stated = _money(getattr(raw, "new_quantity", 0)) - _money(getattr(raw, "original_quantity", 0))
         line_id: uuid.UUID | None = None
         reason: str | None = None
         explicit = meta.get("contract_line_id")
@@ -335,5 +430,14 @@ def resolve_items(raw_items: Sequence[Any], lines: Sequence[Any]) -> list[Alloca
                 line_id = matches[0]
             elif len(matches) > 1:
                 reason = UNRESOLVED_AMBIGUOUS_BOQ
-        resolved.append(AllocationItem(weight=weight, line_id=line_id, item_id=item_id, unresolved=reason))
+        resolved.append(
+            AllocationItem(
+                weight=weight,
+                line_id=line_id,
+                item_id=item_id,
+                unresolved=reason,
+                quantity=stated,
+                unit=str(getattr(raw, "unit", "") or "").strip(),
+            )
+        )
     return resolved
