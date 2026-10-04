@@ -78,6 +78,18 @@ def _warnings(caplog) -> list[str]:
     return [r.getMessage() for r in caplog.records if r.name == _LOGGER and r.levelno >= logging.WARNING]
 
 
+#: Rate tiers first shipped in 18.4, as seed keys. Neither old cohort holds any
+#: of them, and both are owed all four.
+_TIERS_ADDED_IN_18_4 = {
+    ("IE", "VAT_RED_9", "2011-07-01"),
+    ("IE", "VAT_ZERO", "1972-11-01"),
+    ("HU", "AFA_18", "2009-07-01"),
+    ("HU", "AFA_5", "2004-01-01"),
+}
+
+#: The same four as delivery keys.
+_IRISH_AND_HUNGARIAN_TIERS = {"IE/VAT_RED_9", "IE/VAT_ZERO", "HU/AFA_18", "HU/AFA_5"}
+
 #: Rows the seed file gained after the v15.4.0-era file, by
 #: ``(country, tax_code, effective_from)``. Written out rather than derived from
 #: the reconciler's own tables on purpose: deriving the fixture from the code
@@ -112,6 +124,10 @@ _ADDED_AFTER_V15_4_0 = {
     ("HR", "PDV_13", "2014-01-01"),
     ("HR", "PDV_5", "2013-01-01"),
     ("HR", "PDV_0", "2022-10-01"),
+    # Ireland's 9 % and zero tiers and Hungary's 18 % and 5 % tiers, added in
+    # 18.4. Every cohort holds the standard rate of both countries, so these
+    # join a filled country-wide slot as tiers, the Croatian way.
+    *_TIERS_ADDED_IN_18_4,
 }
 
 #: Rows the current file has since EDITED, restored to what the old file said.
@@ -147,6 +163,7 @@ _ADDED_AFTER_V15_9_1 = {
     ("HR", "PDV_13", "2014-01-01"),
     ("HR", "PDV_5", "2013-01-01"),
     ("HR", "PDV_0", "2022-10-01"),
+    *_TIERS_ADDED_IN_18_4,
 }
 
 #: The v15.9.1 cohort needed no restorations until Israel's 18 % rate was
@@ -201,10 +218,14 @@ _EXPECTED_DELIVERY = {
     # rate, so these join a filled country-wide slot, which a tier that does
     # not change the country's answer is allowed to do.
     *_CROATIA_TIERS,
+    # Ireland's and Hungary's tiers, on the same argument as Croatia's: the
+    # standard rate is on file and the tier does not change what either
+    # country resolves to on any date.
+    *_IRISH_AND_HUNGARIAN_TIERS,
 }
 
 #: What a v15.9.1 install is owed: the lines that shipped after it.
-_EXPECTED_AFTER_V15_9_1 = {"KW/NONE", "QA/NONE", *_GREECE_LINES, *_CROATIA_TIERS}
+_EXPECTED_AFTER_V15_9_1 = {"KW/NONE", "QA/NONE", *_GREECE_LINES, *_CROATIA_TIERS, *_IRISH_AND_HUNGARIAN_TIERS}
 
 
 def _key(row: dict) -> tuple:
@@ -560,8 +581,8 @@ async def test_a_v15_9_1_install_that_deleted_a_rate_does_not_get_it_back(repair
     delivered = await _deliveries(repair_factory)
     assert "NG/VAT" not in delivered, "a rate deleted on a modern install was restored"
     assert ("NG", "VAT") not in await _lines(repair_factory)
-    # This cohort predates the two Gulf rate lines, Greece's lines and Croatia's three tiers, so it
-    # is owed those and nothing else. Pinned rather than counted, so a future
+    # This cohort predates the two Gulf rate lines, Greece's lines, Croatia's three tiers and the
+    # Irish and Hungarian tiers, so it is owed those and nothing else. Pinned rather than counted, so a future
     # seed row cannot slip in here disguised as one of them.
     assert delivered == _EXPECTED_AFTER_V15_9_1
     assert _outcome(report, REPAIR_ID).rows_changed == len(_EXPECTED_AFTER_V15_9_1)

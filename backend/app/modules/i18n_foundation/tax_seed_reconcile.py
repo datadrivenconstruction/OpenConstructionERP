@@ -217,6 +217,21 @@ LINE_FIRST_SHIPPED: Final[dict[RateLine, str]] = {
     ("HR", "PDV_13"): "2026-09-27",
     ("HR", "PDV_5"): "2026-09-27",
     ("HR", "PDV_0"): "2026-09-27",
+    # Ireland's second reduced rate and its zero rate, and Hungary's two
+    # reduced rates. The seed carried only Ireland's 23 % and 13.5 % and only
+    # Hungary's 27 %, so a 9 % Irish supply or a 5 % Hungarian new-home sale
+    # had no rate to pick. Tiers, delivered the Croatian way: each beside the
+    # standard rate the install already holds, never instead of it.
+    #
+    # Ireland, Revenue "Current VAT rates" (read 2026-10-04): standard 23,
+    # reduced 13.5, second reduced 9. The 9 % rate has existed since
+    # 2011-07-01 and the zero rate since VAT itself, 1972-11-01.
+    # Hungary: 5 % since EU accession on 2004-01-01 and 18 % since
+    # 2009-07-01, both unchanged beside the 27 % standard rate.
+    ("IE", "VAT_RED_9"): "2026-10-04",
+    ("IE", "VAT_ZERO"): "2026-10-04",
+    ("HU", "AFA_18"): "2026-10-04",
+    ("HU", "AFA_5"): "2026-10-04",
 }
 
 #: Rate lines another repair owns. Two repairs writing one line would each see

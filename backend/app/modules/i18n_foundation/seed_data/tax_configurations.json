@@ -1232,6 +1232,36 @@
     "is_default": false
   },
   {
+    "country_code": "IE",
+    "tax_name": "VAT Second Reduced",
+    "tax_name_translations": {
+      "en": "VAT Second Reduced Rate"
+    },
+    "tax_code": "VAT_RED_9",
+    "rate_pct": "9.0",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": "2011-07-01",
+    "effective_to": null,
+    "is_default": false
+  },
+  {
+    "country_code": "IE",
+    "tax_name": "VAT Zero-Rated",
+    "tax_name_translations": {
+      "en": "VAT Zero-Rated"
+    },
+    "tax_code": "VAT_ZERO",
+    "rate_pct": "0.0",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": "1972-11-01",
+    "effective_to": null,
+    "is_default": false
+  },
+  {
     "country_code": "HU",
     "tax_name": "VAT Standard (ÁFA)",
     "tax_name_translations": {
@@ -1246,6 +1276,38 @@
     "effective_from": "2012-01-01",
     "effective_to": null,
     "is_default": true
+  },
+  {
+    "country_code": "HU",
+    "tax_name": "VAT Reduced 18% (ÁFA)",
+    "tax_name_translations": {
+      "en": "VAT Reduced 18%",
+      "hu": "ÁFA kedvezményes kulcs 18%"
+    },
+    "tax_code": "AFA_18",
+    "rate_pct": "18.0",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": "2009-07-01",
+    "effective_to": null,
+    "is_default": false
+  },
+  {
+    "country_code": "HU",
+    "tax_name": "VAT Reduced 5% (ÁFA)",
+    "tax_name_translations": {
+      "en": "VAT Reduced 5%",
+      "hu": "ÁFA kedvezményes kulcs 5%"
+    },
+    "tax_code": "AFA_5",
+    "rate_pct": "5.0",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": "2004-01-01",
+    "effective_to": null,
+    "is_default": false
   },
   {
     "country_code": "RO",
