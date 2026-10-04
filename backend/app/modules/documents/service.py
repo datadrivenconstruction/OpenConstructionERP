@@ -1193,17 +1193,22 @@ class DocumentService:
 
         The caller has already narrowed ``document_ids`` to what the user may
         read; this only counts. Per-document answers are the same as asking
-        about each document alone. The batch totals and ``references`` sum
-        them, so a module holding three of the selected drawings shows once
-        with the three rows together.
+        about each document alone, and count links.
+
+        The batch totals and ``references`` count rows instead, each once
+        however many of the selected documents it holds: they feed the "N
+        records lose the attachment" headline, and a meeting holding two of
+        the selected drawings is one record losing something, not two.
+        Summing the per-document answers would say two. A module holding
+        three of the selected drawings still shows once with its rows together.
         """
         from app.modules.documents.references import count_references_many
 
         unique_ids = list(dict.fromkeys(document_ids))
-        per_document = await count_references_many(self.session, unique_ids)
+        counted = await count_references_many(self.session, unique_ids)
+        per_document = counted.per_document
 
         documents: list[DocumentReferencesResponse] = []
-        summed: dict[str, int] = {}
         for doc_id in unique_ids:
             counts = per_document.get(doc_id)
             if not counts:
@@ -1219,10 +1224,8 @@ class DocumentService:
                     references=items,
                 )
             )
-            for key, hits in counts.items():
-                summed[key] = summed.get(key, 0) + hits
 
-        items, totals = _summarise_reference_counts(summed)
+        items, totals = _summarise_reference_counts(counted.rows_by_key)
         # The documents that would strand something lead, as the items do.
         documents.sort(key=lambda d: (-d.strands, -d.unlinks, -d.total, str(d.document_id)))
         return DocumentBatchReferencesResponse(

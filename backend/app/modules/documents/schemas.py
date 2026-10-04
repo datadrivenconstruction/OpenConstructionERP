@@ -668,10 +668,13 @@ class DocumentBatchReferencesRequest(BaseModel):
 class DocumentBatchReferencesResponse(BaseModel):
     """What still points at any document in a batch, for the bulk delete prompt.
 
-    The totals and ``references`` are summed over the batch so the prompt can
-    say what the whole delete costs in one panel; ``documents`` keeps the
-    per-document answer (only documents something points at) so a caller can
-    name the files responsible. ``checked`` is how many of the requested ids
+    The totals and ``references`` cover the whole batch so the prompt can say
+    what the whole delete costs in one panel. They count rows, each once: a
+    meeting holding two of the selected documents is one record, counted under
+    one reference key (the heaviest impact that reaches it), so ``references``
+    adds up to ``total``. ``documents`` keeps the per-document answer (only
+    documents something points at), which counts links exactly as the single
+    endpoint does, so a caller can name the files responsible. ``checked`` is how many of the requested ids
     the caller may read and were looked at; ids outside it are neither counted
     nor named, so the answer never says more than reading those documents
     would.

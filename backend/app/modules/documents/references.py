@@ -374,56 +374,128 @@ async def count_references(session: AsyncSession, document_id: uuid.UUID) -> dic
 _MANY_CHUNK = 500
 
 
+#: Heaviest consequence first. A row reached through two columns is counted
+#: in the batch under the heavier of the two.
+_IMPACT_RANK: dict[str, int] = {"strands": 0, "unlinks": 1, "retains": 2}
+
+
+@dataclass(frozen=True)
+class BatchReferenceCounts:
+    """What :func:`count_references_many` found, read two ways.
+
+    ``per_document`` is the per-document answer, equal to calling
+    :func:`count_references` once per id: it counts links, so a meeting that
+    holds two of the selected drawings counts once against each.
+
+    ``rows_by_key`` counts rows, which is what a "N records lose the
+    attachment" headline promises. Each row that points into the batch is
+    counted once over the whole batch, under one reference key: the one with
+    the heaviest impact among those that reach it, then the first in
+    :data:`DOCUMENT_REFERENCES`. Its values therefore add up to the number of
+    distinct rows, and the per-impact sums of it to the number of rows that
+    strand, unlink or retain.
+    """
+
+    per_document: dict[uuid.UUID, dict[str, int]]
+    rows_by_key: dict[str, int]
+
+
 async def count_references_many(
     session: AsyncSession,
     document_ids: list[uuid.UUID],
-) -> dict[uuid.UUID, dict[str, int]]:
-    """:func:`count_references` for a batch, keyed by document id.
+) -> BatchReferenceCounts:
+    """:func:`count_references` for a batch, per document and per row.
 
-    Answers exactly what calling :func:`count_references` once per id would,
-    and the tests hold it to that, but with one statement per reference and
-    chunk instead of one per document: a batch delete of a few hundred
-    drawings would otherwise be a few hundred round trips, each a union of
-    thirty-four mostly unindexed scans.
+    The per-document half answers exactly what calling
+    :func:`count_references` once per id would, and the tests hold it to that,
+    but with one statement per reference and chunk instead of one per
+    document: a batch delete of a few hundred drawings would otherwise be a
+    few hundred round trips, each a union of thirty-four mostly unindexed
+    scans.
 
     Scalar columns are grouped by value in SQL. The JSON array columns cannot
     be (there is no portable unnest of a ``JSON`` column), so the rows matching
     any id in the chunk come back and are attributed in Python with the same
     quoted-id match the single-id predicate applies to the serialised array.
-    A row holding two ids of the batch therefore counts once against each,
-    as it would if each document were asked about on its own.
+    A row holding two ids of the batch therefore counts once against each
+    document, as it would if each document were asked about on its own.
 
-    Documents nothing points at are absent from the result.
+    Summing those per-document counts would count links, not rows, and the
+    batch prompt says how many records lose something. So the rows are
+    counted too, see :class:`BatchReferenceCounts`. Only two shapes can reach
+    one row twice inside a batch: an array holding several selected ids, and a
+    table with more than one document column (``StoredMaterial``,
+    ``TemporaryWorksItem``). Those rows come back with their primary key and
+    are counted once by it, across chunks too. A table reached through a
+    single scalar column cannot repeat a row, so it keeps the grouped count.
+
+    Documents nothing points at are absent from ``per_document``.
     """
     refs = resolved_references()
     wanted = {str(doc_id): doc_id for doc_id in document_ids}
-    out: dict[uuid.UUID, dict[str, int]] = {}
+    per_document: dict[uuid.UUID, dict[str, int]] = {}
+    rows_by_key: dict[str, int] = {}
     if not refs or not wanted:
-        return out
+        return BatchReferenceCounts(per_document, rows_by_key)
 
-    def _add(doc_key: str, ref_key: str, hits: int) -> None:
+    columns_per_table: dict[str, int] = {}
+    for ref in refs:
+        columns_per_table[ref.table] = columns_per_table.get(ref.table, 0) + 1
+
+    # (table, primary key) -> (impact rank, registry position, reference key)
+    # of the heaviest route found to that row so far.
+    claimed: dict[tuple[str, tuple[object, ...]], tuple[int, int, str]] = {}
+
+    def _add(doc_key: str, ref_key: str, hits: int) -> bool:
         doc_id = wanted.get(doc_key)
         if doc_id is None or hits <= 0:
-            return
-        bucket = out.setdefault(doc_id, {})
+            return False
+        bucket = per_document.setdefault(doc_id, {})
         bucket[ref_key] = bucket.get(ref_key, 0) + hits
+        return True
+
+    def _count_rows(ref_key: str, rows: int) -> None:
+        rows_by_key[ref_key] = rows_by_key.get(ref_key, 0) + rows
+
+    def _claim(position: int, ref: DocumentReference, identity: tuple[object, ...]) -> None:
+        candidate = (_IMPACT_RANK[ref.impact], position, ref.key)
+        row_key = (ref.table, identity)
+        current = claimed.get(row_key)
+        if current is None or candidate < current:
+            claimed[row_key] = candidate
 
     keys = list(wanted)
     for start in range(0, len(keys), _MANY_CHUNK):
         chunk = keys[start : start + _MANY_CHUNK]
-        for ref in refs:
+        for position, ref in enumerate(refs):
             table = Base.metadata.tables[ref.table]
             col = table.c[ref.column]
+            pk_cols = list(table.primary_key.columns)
             if ref.kind == "array":
                 clause = or_(*(cast(col, Text).contains(f'"{key}"') for key in chunk))
                 if ref.qualifier:
                     clause = clause & (table.c[ref.qualifier[0]] == ref.qualifier[1])
-                rows = await session.execute(select(col).where(clause))
-                for (value,) in rows.all():
-                    serialised = json.dumps(value)
+                rows = await session.execute(select(col, *pk_cols).where(clause))
+                for row in rows.all():
+                    serialised = json.dumps(row[0])
+                    matched = False
                     for key in chunk:
                         if f'"{key}"' in serialised:
-                            _add(key, ref.key, 1)
+                            matched = _add(key, ref.key, 1) or matched
+                    if not matched:
+                        continue
+                    if pk_cols:
+                        _claim(position, ref, tuple(row[1:]))
+                    else:  # pragma: no cover - every registered table has a key
+                        _count_rows(ref.key, 1)
+            elif columns_per_table[ref.table] > 1 and pk_cols:
+                clause = col.in_(chunk)
+                if ref.qualifier:
+                    clause = clause & (table.c[ref.qualifier[0]] == ref.qualifier[1])
+                rows = await session.execute(select(col, *pk_cols).where(clause))
+                for row in rows.all():
+                    if _add(str(row[0]), ref.key, 1):
+                        _claim(position, ref, tuple(row[1:]))
             else:
                 clause = col.in_(chunk)
                 if ref.qualifier:
@@ -432,5 +504,9 @@ async def count_references_many(
                 for value, hits in rows.all():
                     # GUID columns hand back a UUID, String columns the stored
                     # text; both stringify to the key the IN list matched on.
-                    _add(str(value), ref.key, int(hits))
-    return out
+                    if _add(str(value), ref.key, int(hits)):
+                        _count_rows(ref.key, int(hits))
+
+    for _rank, _position, ref_key in claimed.values():
+        _count_rows(ref_key, 1)
+    return BatchReferenceCounts(per_document, rows_by_key)

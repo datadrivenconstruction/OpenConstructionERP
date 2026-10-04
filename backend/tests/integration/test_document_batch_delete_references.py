@@ -12,7 +12,9 @@ the single endpoint answers. That is checked by asking both and comparing, on
 a seed that carries every shape the single endpoint's own test uses plus the
 two decoys that catch a name-matching implementation, and one case only a
 batch has: a meeting whose array holds TWO of the selected documents, which
-must count once against each.
+must count once against each document, and once in the batch totals. The
+totals count rows, because the prompt they feed says how many records lose
+something.
 
 ``POST /documents/batch/delete/`` then refuses (409, nothing deleted) while
 anything would be stranded or unlinked, until the caller acknowledges. A
@@ -233,15 +235,84 @@ async def test_batch_answer_matches_the_single_answer_for_every_document(
     assert per_doc[str(second)]["unlinks"] == 2
     assert per_doc[str(second)]["retains"] == 1
 
-    # The batch totals are the sum, and the shared meeting shows as two rows.
-    assert (batch["strands"], batch["unlinks"], batch["retains"], batch["total"]) == (3, 4, 1, 8)
-    summed = {item["key"]: item["count"] for item in batch["references"]}
-    assert summed["Meeting.document_ids"] == 2
-    assert summed["Sheet.document_id"] == 2
+    # The batch totals count rows. The per-document answers above count the
+    # shared meeting once against each drawing, which sums to 4 unlinks, but
+    # only three records lose anything: the punch item, the temporary works
+    # item and M-101. The headline reads "N records lose the attachment".
+    assert (batch["strands"], batch["unlinks"], batch["retains"], batch["total"]) == (3, 3, 1, 7)
+    rows = {item["key"]: item["count"] for item in batch["references"]}
+    assert rows["Meeting.document_ids"] == 1
+    assert rows["Sheet.document_id"] == 2
+    assert sum(rows.values()) == batch["total"]
     assert [item["impact"] for item in batch["references"]][:2] == ["strands", "strands"]
 
     # The heaviest document leads.
     assert batch["documents"][0]["document_id"] == str(first)
+
+
+@pytest.mark.asyncio
+async def test_batch_totals_count_a_row_once_whichever_columns_reach_it(
+    client: AsyncClient,
+    auth_headers: dict[str, str],
+    project_id: uuid.UUID,
+) -> None:
+    """One record pointing at several selected documents is one record.
+
+    A temporary works item names its design in one column and its check
+    certificate in another, and a stored material carries four document
+    columns plus a photo array. Selecting the documents behind both columns
+    of one row must not report two records losing an attachment. Rows of a
+    later chunk are deduplicated too, so the case is also run with the two
+    ids split across chunks.
+    """
+    from app.database import async_session_factory
+    from app.modules.documents import references as references_module
+    from app.modules.temporary_works.models import TemporaryWorksItem
+
+    design, certificate, other_design = await _documents(project_id, "TW-design.pdf", "TW-cert.pdf", "TW-other.pdf")
+    async with async_session_factory() as session:
+        session.add_all(
+            [
+                TemporaryWorksItem(
+                    project_id=project_id,
+                    reference="TW-201",
+                    title="Back propping",
+                    tw_type="propping",
+                    design_document_id=design,
+                    check_certificate_document_id=certificate,
+                ),
+                TemporaryWorksItem(
+                    project_id=project_id,
+                    reference="TW-202",
+                    title="Needling",
+                    tw_type="propping",
+                    design_document_id=other_design,
+                ),
+            ]
+        )
+        await session.commit()
+
+    ids = [str(design), str(certificate), str(other_design)]
+
+    async def _ask() -> dict:
+        resp = await client.post("/api/v1/documents/batch/references/", json={"ids": ids}, headers=auth_headers)
+        assert resp.status_code == 200, resp.text
+        return resp.json()
+
+    for chunk in (500, 1):
+        references_module._MANY_CHUNK = chunk
+        try:
+            batch = await _ask()
+        finally:
+            references_module._MANY_CHUNK = 500
+
+        per_doc = {d["document_id"]: d["unlinks"] for d in batch["documents"]}
+        # Per document, each id is still one link, as the single endpoint says.
+        assert per_doc == {str(design): 1, str(certificate): 1, str(other_design): 1}, chunk
+        # Over the batch, TW-201 and TW-202 are two records, not three.
+        assert batch["unlinks"] == 2, (chunk, batch)
+        assert batch["total"] == 2, (chunk, batch)
+        assert sum(item["count"] for item in batch["references"]) == batch["total"], chunk
 
 
 @pytest.mark.asyncio
