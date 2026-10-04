@@ -39,6 +39,26 @@ from typing import Any
 # last or it would shadow legitimate UTF-8.
 DEFAULT_ENCODINGS: tuple[str, ...] = ("utf-8-sig", "utf-8", "cp1252", "latin-1")
 
+# The byte-order marks of the wide Unicode forms, longest first: the UTF-32 LE
+# mark begins with the UTF-16 LE one. Excel saves "Unicode text" as UTF-16
+# with a mark, and none of the probes above can read it: every second byte is
+# a NUL, which cp1252 and latin-1 decode without an error into text nobody
+# wrote.
+_WIDE_BOMS: tuple[tuple[bytes, str], ...] = (
+    (b"\xff\xfe\x00\x00", "utf-32"),
+    (b"\x00\x00\xfe\xff", "utf-32"),
+    (b"\xff\xfe", "utf-16"),
+    (b"\xfe\xff", "utf-16"),
+)
+
+
+def wide_bom_codec(content: bytes) -> str | None:
+    """``"utf-16"`` or ``"utf-32"`` when ``content`` opens with that form's byte-order mark."""
+    for bom, codec in _WIDE_BOMS:
+        if content.startswith(bom):
+            return codec
+    return None
+
 
 def decode_text_bytes(
     content: bytes,
@@ -57,7 +77,16 @@ def decode_text_bytes(
         UnicodeDecodeError: If none of the candidate encodings can
             decode the input (only possible if ``encodings`` excludes
             ``latin-1``, which is universal).
+
+    A UTF-16 or UTF-32 byte-order mark is read before the probes: it names
+    the form outright, and the codec named after it strips the mark.
     """
+    wide = wide_bom_codec(content)
+    if wide is not None:
+        try:
+            return content.decode(wide), wide
+        except UnicodeDecodeError:
+            pass
     last_exc: UnicodeDecodeError | None = None
     for enc in encodings:
         try:

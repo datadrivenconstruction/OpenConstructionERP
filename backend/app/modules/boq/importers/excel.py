@@ -46,6 +46,7 @@ from app.modules.boq.importers._encoding import (
     fold_width,
     parse_numeric_cell,
     safe_float,
+    wide_bom_codec,
 )
 from app.modules.boq.importers._workbook import open_workbook
 from app.modules.boq.importers.hungary_workbook import parse_hungarian_workbook
@@ -1269,6 +1270,13 @@ def _detect_file_format(content_head: bytes) -> Literal["xlsx", "xls", "csv", "p
         return "xls"
     if content_head[:4] == b"PAR1":
         return "parquet"
+    wide = wide_bom_codec(content_head)
+    if wide is not None:
+        # UTF-16 and UTF-32 text is half NUL bytes, so the binary check below
+        # refused Excel's "Unicode text" export and sent it to the AI path.
+        # The head may end inside a character; that tail is all it loses.
+        decoded = content_head.decode(wide, errors="ignore")
+        return "csv" if any(sep in decoded for sep in (",", ";", "\t", "|", "\n")) else "unknown"
     if b"\x00" in content_head:
         return "unknown"
     for encoding in ("utf-8-sig", "utf-8", "latin-1"):
@@ -1356,6 +1364,22 @@ def _infer_classification(
 
 _CSV_DELIMITERS: tuple[str, ...] = (";", "\t", ",", "|")
 
+# The first line Excel writes, and reads, to name a CSV's separator outright:
+# "sep=;". It is the file saying what it is, so it beats any count.
+_SEP_DIRECTIVE = re.compile(r"\A﻿?[ \t]*sep=(.)[ \t]*(\r\n|\r|\n|\Z)", re.IGNORECASE)
+
+
+def _sep_directive(text: str) -> tuple[str | None, str]:
+    """The separator a leading ``sep=`` line names, and the text with that line blanked.
+
+    The line is blanked rather than cut so every row keeps the line number the
+    user sees in the file.
+    """
+    match = _SEP_DIRECTIVE.match(text)
+    if match is None:
+        return None, text
+    return match.group(1), match.group(2) + text[match.end() :]
+
 
 def _sniff_delimiter(text: str) -> str:
     """The delimiter that splits the most lines into the same number of fields.
@@ -1367,8 +1391,12 @@ def _sniff_delimiter(text: str) -> str:
     field count is shared by the most lines picks the one the table is laid
     out in, whatever sits above it. A tie goes to the earlier delimiter in
     :data:`_CSV_DELIMITERS`, semicolon first, which is what Excel writes in
-    every locale that uses the decimal comma.
+    every locale that uses the decimal comma. A leading ``sep=`` line, see
+    :func:`_sep_directive`, is taken at its word.
     """
+    named, text = _sep_directive(text)
+    if named is not None:
+        return named
     lines = [line for line in text[:16384].splitlines()[:60] if line.strip()]
     best, best_score = ",", 0
     for delimiter in _CSV_DELIMITERS:
@@ -1423,7 +1451,9 @@ def _decode_csv(content_bytes: bytes) -> tuple[str, str]:
         if candidate == text:
             continue
         delimiter = _sniff_delimiter(candidate)
-        header, _, _ = find_header_row(csv.reader(io.StringIO(candidate), delimiter=delimiter), _match_column)
+        header, _, _ = find_header_row(
+            csv.reader(io.StringIO(candidate, newline=""), delimiter=delimiter), _match_column
+        )
         if header_language(header) in languages:
             return candidate, code_page
     return text, encoding
@@ -1439,11 +1469,12 @@ def _parse_csv(
     """
     text, encoding = _decode_csv(content_bytes)
     delimiter = _sniff_delimiter(text)
+    _, text = _sep_directive(text)
 
     def top_rows() -> Iterable[list[str]]:
-        return itertools.islice(csv.reader(io.StringIO(text), delimiter=delimiter), HEADER_SEARCH_ROWS)
+        return itertools.islice(csv.reader(io.StringIO(text, newline=""), delimiter=delimiter), HEADER_SEARCH_ROWS)
 
-    reader = csv.reader(io.StringIO(text), delimiter=delimiter)
+    reader = csv.reader(io.StringIO(text, newline=""), delimiter=delimiter)
     raw_headers, header_number, rows_iter = _locate_header(reader)
     if not raw_headers:
         raise ImporterParseError("CSV file is empty or has no header row")
@@ -1452,7 +1483,7 @@ def _parse_csv(
     display, display_row = _display_header(raw_headers, header_number, column_map, top_rows())
     if overrides is not None:
         if display_row != header_number:
-            found, rows_iter = _header_at(csv.reader(io.StringIO(text), delimiter=delimiter), display_row)
+            found, rows_iter = _header_at(csv.reader(io.StringIO(text, newline=""), delimiter=delimiter), display_row)
             raw_headers, header_number = found or raw_headers, display_row
         column_map = _apply_column_mapping(_map_columns(raw_headers), overrides, len(raw_headers))
         display = tuple(raw_headers)
