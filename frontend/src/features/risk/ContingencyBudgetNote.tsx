@@ -17,6 +17,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ShieldAlert } from 'lucide-react';
 import { fmtCurrency } from '@/shared/lib/formatters';
 import {
+  allocatedOnBudgetLine,
   contingencyQueryKey,
   drawnOnBudgetLine,
   fetchContingency,
@@ -56,7 +57,7 @@ export function ContingencyBudgetNote({
   if (!isContingency) return null;
   const riskBased = position.data;
   const { total } = drawnOnBudgetLine(metadata);
-  const allocated = money(revised) !== 0 ? money(revised) : money(original);
+  const allocated = allocatedOnBudgetLine(revised, original);
   const remaining = allocated - total;
   return (
     <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-2xs text-content-tertiary">

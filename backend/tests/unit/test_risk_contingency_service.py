@@ -247,6 +247,27 @@ async def test_no_line_means_no_allocation(session):
     assert pos["allocated"] == D("0.00")
 
 
+@pytest.mark.asyncio
+async def test_a_line_revised_to_zero_holds_nothing(session):
+    """Contingency released at close-out: revised 0, original still 200 000."""
+    svc = RiskService(session)
+    fin = FinanceService(session)
+    released = await _line(session, amount="200000", wbs="REL")
+    kept = await _line(session, amount="5000", wbs="KEEP")
+    await _risk(svc, probability=0.5, impact_cost=D("20000"))
+    await fin.update_budget(released, BudgetUpdate(revised_budget="0"))
+
+    pos = await svc.get_contingency_position(PROJECT_ID)
+    by_id = {ln["budget_id"]: ln for ln in pos["lines"]}
+    # Falling back to the original would report 200 000 still held.
+    assert by_id[str(released)]["allocated"] == D("0.00")
+    assert by_id[str(kept)]["allocated"] == D("5000.00")
+    assert pos["allocated"] == D("5000.00")
+    # 5000 left against 10 000 of exposure: short, not covered.
+    assert pos["state"] == "shortfall"
+    assert pos["coverage_gap"] == D("-5000.00")
+
+
 # ── Drawdown confirmation ─────────────────────────────────────────────────
 
 

@@ -189,7 +189,11 @@ describe('ContingencyCard', () => {
 });
 
 describe('ContingencyBudgetNote', () => {
-  function renderNote(category: string, metadata: Record<string, unknown>) {
+  function renderNote(
+    category: string,
+    metadata: Record<string, unknown>,
+    amounts: { revised: string; original: string } = { revised: '10000', original: '10000' },
+  ) {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     return render(
       <QueryClientProvider client={qc}>
@@ -198,8 +202,8 @@ describe('ContingencyBudgetNote', () => {
             projectId={PROJECT}
             category={category}
             metadata={metadata}
-            revised="10000"
-            original="10000"
+            revised={amounts.revised}
+            original={amounts.original}
             currency="EUR"
           />
         </MemoryRouter>
@@ -217,6 +221,20 @@ describe('ContingencyBudgetNote', () => {
     expect(screen.getByRole('link', { name: /Risk register/ })).toHaveAttribute('href', '/risks');
     expect((await screen.findByTestId('contingency-risk-based')).textContent).toMatch(/^Risk-based .*1\D?500/);
     expect(getMock).toHaveBeenCalledWith(`/v1/risk/projects/${PROJECT}/contingency`);
+  });
+
+  it('measures what is left against the revised budget, even when it was revised to zero', () => {
+    getMock.mockResolvedValue(position());
+    renderNote(
+      'Contingency',
+      { 'contingency_drawdown:risk:1': { amount: '2300.00' } },
+      { revised: '0', original: '200000' },
+    );
+    const drawn = screen.getByTestId('contingency-drawn');
+    // Released at close-out: nothing held, so the drawn 2,300 leaves -2,300.
+    // Reading the original would claim 197,700 left.
+    expect(drawn.textContent).toMatch(/[-−]\D{0,3}2\D?300/);
+    expect(drawn.textContent).not.toMatch(/197\D?700/);
   });
 
   it('renders nothing and asks nothing for another category', () => {

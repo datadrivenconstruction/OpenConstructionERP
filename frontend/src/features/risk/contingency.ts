@@ -178,6 +178,21 @@ export function drawnOnBudgetLine(metadata: Record<string, unknown> | null | und
   return { total, count };
 }
 
+/**
+ * What a contingency budget line holds: its revised budget as stored, the
+ * original only when there is no revised value at all. Mirrors the backend's
+ * `allocated_amount`. A line revised down to 0 (contingency released at
+ * close-out, or moved to another line) holds nothing, as the Revised column
+ * beside it says; reading the original there would show money that is gone.
+ */
+export function allocatedOnBudgetLine(
+  revised: MoneyWire | null | undefined,
+  original: MoneyWire | null | undefined,
+): number {
+  const hasRevised = revised != null && !(typeof revised === 'string' && revised.trim() === '');
+  return hasRevised ? money(revised) : money(original);
+}
+
 /** Line remaining after drawdowns, in the dialog's terms (null without a line). */
 export function lineRemaining(lines: ContingencyLine[], budgetId: string | null | undefined): number | null {
   const line = lines.find((l) => l.budget_id === budgetId);

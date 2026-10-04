@@ -11,6 +11,7 @@ import { describe, it, expect } from 'vitest';
 
 import {
   CONTINGENCY_DRAWDOWN_PREFIX,
+  allocatedOnBudgetLine,
   canDrawContingency,
   drawnOnBudgetLine,
   isContingencyCategory,
@@ -103,5 +104,23 @@ describe('lineRemaining', () => {
     expect(lineRemaining(lines, 'b')).toBe(500);
     expect(lineRemaining(lines, 'zzz')).toBeNull();
     expect(lineRemaining(lines, null)).toBeNull();
+  });
+});
+
+describe('allocatedOnBudgetLine', () => {
+  it('reads the revised budget as stored', () => {
+    expect(allocatedOnBudgetLine('120', '100')).toBe(120);
+    expect(allocatedOnBudgetLine(120, 100)).toBe(120);
+  });
+  it('keeps a line revised down to zero at zero, not at its original', () => {
+    expect(allocatedOnBudgetLine('0', '200000')).toBe(0);
+    expect(allocatedOnBudgetLine('0.00', '200000')).toBe(0);
+    expect(allocatedOnBudgetLine(0, 200000)).toBe(0);
+  });
+  it('falls back to the original only when there is no revised value', () => {
+    expect(allocatedOnBudgetLine(null, '100')).toBe(100);
+    expect(allocatedOnBudgetLine(undefined, '100')).toBe(100);
+    expect(allocatedOnBudgetLine('  ', '100')).toBe(100);
+    expect(allocatedOnBudgetLine(null, null)).toBe(0);
   });
 });

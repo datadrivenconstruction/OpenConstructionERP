@@ -137,9 +137,14 @@ def test_resolve_base_currency():
     assert resolve_base_currency(None, []) == ""
 
 
-def test_allocated_amount_prefers_revised_then_original():
+def test_allocated_amount_is_the_revised_budget_as_stored():
     assert allocated_amount("120", "100") == D("120")
-    assert allocated_amount("0", "100") == D("100")
+    # Revised down to zero (released at close-out) is zero, not the original.
+    assert allocated_amount("0", "200000") == D("0")
+    assert allocated_amount(D("0.00"), D("200000")) == D("0")
+    # Only a value that never existed falls back.
+    assert allocated_amount(None, "100") == D("100")
+    assert allocated_amount("", "100") == D("100")
     assert allocated_amount(None, None) == D("0")
 
 

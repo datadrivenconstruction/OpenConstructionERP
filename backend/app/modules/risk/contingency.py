@@ -13,8 +13,8 @@ Vocabulary, as a project manager reads it:
   That is the *risk-based contingency*: what the register says should be set
   aside.
 * **Allocated contingency** is the sum of the project's finance budget lines in
-  the ``contingency`` category (revised budget, or original when no revision
-  was ever booked).
+  the ``contingency`` category, at their revised budget as stored (the figure
+  the Budgets table shows; a line revised down to 0 holds nothing).
 * **Drawdown** is an amount a person confirmed against a contingency line when
   a risk materialised. Drawn money stays inside the project budget; it moves
   from "held for the unknown" to "spent on a known event", so remaining
@@ -267,11 +267,18 @@ class ContingencyLine:
 
 
 def allocated_amount(revised: object, original: object) -> Decimal:
-    """Revised budget, or original when no revision was ever booked (both 0 -> 0)."""
-    rev = to_decimal(revised)
-    if rev != 0:
-        return rev
-    return to_decimal(original)
+    """The line's revised budget as stored; the original only when there is no revised value.
+
+    Budget creation starts revised at the original, and the finance totals and
+    the Budgets table read revised as it stands. So a revised budget of 0 is a
+    decision (contingency released at close-out, or moved to another line) and
+    is honoured: falling back to the original there would report money as
+    still held that the table beside it shows as gone. The column is NOT NULL,
+    so the fallback only covers a value that never reached the database.
+    """
+    if revised is None or (isinstance(revised, str) and not revised.strip()):
+        return to_decimal(original)
+    return to_decimal(revised)
 
 
 def parse_drawdown_record(source: str, raw: object, *, line_currency: str) -> DrawdownRecord | None:
