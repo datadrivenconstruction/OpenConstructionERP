@@ -56,6 +56,8 @@ _TEMPLATES: dict[str, str] = {
     # ── CDE ──────────────────────────────────────────────────────────
     "notifications.cde.state_transitioned.title": "Document state changed",
     "notifications.cde.state_transitioned.body": "Container moved to '{new_state}'.",
+    "notifications.cde.linked_published.title": "A document under your work was published",
+    "notifications.cde.linked_published.body": "{container_code} is published at revision {revision_code}. Your linked records: {records}.",
     # ── RFIs ─────────────────────────────────────────────────────────
     "notifications.rfi.assigned.title": "RFI assigned to you",
     "notifications.rfi.assigned.body": "{code} - {title}",

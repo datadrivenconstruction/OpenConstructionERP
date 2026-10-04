@@ -21,7 +21,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.cde_states import CDEState, CDEStateMachine
-from app.core.events import event_bus
+from app.core.events import publish_after_commit
 from app.core.json_merge import merge_metadata
 from app.modules.cde import readiness as cde_readiness
 from app.modules.cde.models import (
@@ -369,17 +369,37 @@ class CDEService:
         )
 
         # Emit event for cross-module handlers (notifications, analytics).
-        event_bus.publish_detached(
+        #
+        # The payload carries each value under two names. ``from_state`` /
+        # ``to_state`` / ``user_id`` are what this module has always sent and
+        # what the notifications and webhook consumers read. The core
+        # ``cde.container.promoted`` handler in ``core/event_handlers.py``
+        # reads ``old_state`` / ``new_state`` / ``promoted_by`` instead, so
+        # with only the first set it audited every transition as "" -> "" and
+        # never re-emitted ``cde.container.published``: nothing downstream of
+        # a publish ever ran. Sending both keeps every reader correct without
+        # touching the shared handler.
+        #
+        # Deferred to the commit rather than detached immediately. The
+        # subscribers open their own sessions and the published consumer
+        # checks the container really is ``published`` before it notifies
+        # anyone; a task scheduled before this transaction commits would read
+        # the old state on PostgreSQL and stand down.
+        publish_after_commit(
+            self.session,
             "cde.container.promoted",
-            data={
+            {
                 "project_id": str(container.project_id),
                 "container_id": str(container_id),
                 "container_code": container.container_code,
                 "from_state": current_state,
                 "to_state": target_state,
+                "old_state": current_state,
+                "new_state": target_state,
                 "reason": data.reason,
                 "gate_code": gate_code,
                 "user_id": user_id,
+                "promoted_by": user_id,
                 "user_role": user_role,
             },
             source_module="cde",

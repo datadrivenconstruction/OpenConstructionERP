@@ -10027,6 +10027,8 @@ const resource = {
     "notifications.meeting.action_assigned.body": "From meeting {{meeting_number}}: {{description}}",
     "notifications.cde.state_transitioned.title": "Document state changed",
     "notifications.cde.state_transitioned.body": "Container moved to '{{new_state}}'.",
+    "notifications.cde.linked_published.title": "A document under your work was published",
+    "notifications.cde.linked_published.body": "{{container_code}} is published at revision {{revision_code}}. Your linked records: {{records}}.",
     "notifications.rfi.assigned.title": "RFI assigned to you",
     "notifications.rfi.assigned.body": "{{code}}, {{title}}",
     "notifications.rfi.responded.title": "RFI answered",
