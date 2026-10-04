@@ -18,6 +18,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { PROCUREMENT_LINK } from '@/shared/lib/awardChainLinks';
 import { fmtDate } from '@/shared/lib/formatters';
 import { Badge, CollapsibleSection, ConfirmDialog, EmptyState, StatCard, Button } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
@@ -181,6 +182,10 @@ function RFQBiddingExplainer() {
         {' · '}
         <Link to="/subcontractors" className="font-medium text-oe-blue-text hover:underline">
           {t('rfq_bidding.mod_subcontractors', { defaultValue: 'Subcontractors' })}
+        </Link>
+        {' · '}
+        <Link to={PROCUREMENT_LINK} className="font-medium text-oe-blue-text hover:underline">
+          {t('rfq_bidding.mod_procurement', { defaultValue: 'Procurement' })}
         </Link>
       </div>
     </CollapsibleSection>
@@ -1051,6 +1056,26 @@ function AwardsPanel({
             </div>
             {winningBid?.notes && (
               <p className="mt-2 text-xs text-content-secondary">{winningBid.notes}</p>
+            )}
+            {/* An award here records the winner and stops: nothing downstream
+                is drafted from it, so the next step is the reader's. The
+                order is raised in Procurement; a status of po_issued says it
+                has been. */}
+            {rfq.status === 'awarded' && (
+              <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border-light pt-2 text-xs">
+                <span className="text-content-tertiary">
+                  {t('rfq_bidding.award_next', { defaultValue: 'Next step:' })}
+                </span>
+                <Link
+                  to={PROCUREMENT_LINK}
+                  className="inline-flex items-center gap-1 rounded-md border border-border-light px-2 py-1 text-content-secondary hover:text-oe-blue hover:border-oe-blue transition-colors"
+                  title={t('rfq_bidding.award_raise_po_hint', {
+                    defaultValue: 'Open Procurement to raise the purchase order for the awarded vendor',
+                  })}
+                >
+                  {t('rfq_bidding.award_raise_po', { defaultValue: 'Raise purchase order' })}
+                </Link>
+              </div>
             )}
           </div>
         );
