@@ -19,6 +19,12 @@ Covers:
 
 The demo accounts are auto-seeded on startup by ``app.main._seed_demo_account``
 inside the regular lifespan, so we don't register them ourselves.
+
+The switch covers every demo tile alike, so the tests that expect a session
+sign in through a tile below admin. This module runs on the suite's shared
+database, where a real administrator usually exists by then, and next to one
+the Admin tile is refused by a separate rule (``app.core.demo_admin``) that
+would otherwise decide these tests by the order they ran in.
 """
 
 from __future__ import annotations
@@ -37,6 +43,10 @@ from app.core.demo_login import (
     set_demo_login_enabled,
 )
 from app.main import create_app
+
+#: A seeded demo tile whose role is below admin, so the superseded-admin rule
+#: never applies to it, whatever else the shared database holds.
+DEMO_TILE_EMAIL = "manager@openconstructionerp.com"
 
 
 @pytest_asyncio.fixture(scope="module")
@@ -81,7 +91,7 @@ async def _post_demo_login(client: AsyncClient):
     for _ in range(5):
         last = await client.post(
             "/api/v1/users/auth/demo-login/",
-            json={"email": "demo@openconstructionerp.com"},
+            json={"email": DEMO_TILE_EMAIL},
         )
         if last.status_code == 200:
             return last
@@ -109,7 +119,7 @@ class TestDemoLoginToggle:
         set_demo_login_enabled(False)
         resp = await demo_client.post(
             "/api/v1/users/auth/demo-login/",
-            json={"email": "demo@openconstructionerp.com"},
+            json={"email": DEMO_TILE_EMAIL},
         )
         assert resp.status_code == 403, resp.text
         assert "administrator" in (resp.json().get("detail") or "").lower()
