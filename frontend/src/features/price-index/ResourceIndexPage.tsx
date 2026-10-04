@@ -21,6 +21,7 @@ import { BOQPicker, Badge, Button, Card, CardHeader, Input, PageHeader } from '@
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { getErrorMessage } from '@/shared/lib/api';
+import { fmtList } from '@/shared/lib/formatters';
 import { useHasPermission } from '@/shared/lib/permissionGates';
 import { toDecimalPayloadString } from '@/shared/lib/parseDecimal';
 import {
@@ -474,7 +475,7 @@ function MissingIndexNote({ groups, region, quarter }: { groups: ResourceGroup[]
         {t('price_index.ri.missing_note', {
           defaultValue:
             'No index entered for {{groups}} in {{region}}, {{quarter}}. Positions that use these groups cannot be priced until you enter them below.',
-          groups: groups.map(label).join(', '),
+          groups: fmtList(groups.map(label)),
           region,
           quarter,
         })}
@@ -492,7 +493,7 @@ function RefusalBox({ refusal }: { refusal: ResourceIndexRefusal }) {
       text = t('price_index.ri.err_missing_index', {
         defaultValue:
           'The estimate needs an index for {{groups}} in {{region}}, {{quarter}}, and none is entered. Enter it from the quarterly letter below; a missing index is never taken as 1.',
-        groups: (refusal.groups ?? []).map(label).join(', '),
+        groups: fmtList((refusal.groups ?? []).map(label)),
         region: refusal.region_code ?? '',
         quarter: refusal.quarter ?? '',
       });
@@ -500,14 +501,14 @@ function RefusalBox({ refusal }: { refusal: ResourceIndexRefusal }) {
     case 'missing_overhead_norm':
       text = t('price_index.ri.err_missing_norm', {
         defaultValue: 'No overhead and profit percentages are entered for work type {{types}}. Enter them below.',
-        types: (refusal.work_types ?? []).join(', '),
+        types: fmtList(refusal.work_types ?? []),
       });
       break;
     case 'missing_operator_wages':
       text = t('price_index.ri.err_missing_operator', {
         defaultValue:
           "Position {{positions}} has machine lines but no operator line, so the operators' wages would enter the wage fund as zero. Split the operators' wages out of the machine price into an operator line, with zero if the machine has no operator.",
-        positions: (refusal.positions ?? []).join(', '),
+        positions: fmtList(refusal.positions ?? []),
       });
       break;
     case 'vat_unresolved':
