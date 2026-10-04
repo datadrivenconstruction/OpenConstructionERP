@@ -29,6 +29,7 @@ All helpers are pure / sync / no third-party deps.
 from __future__ import annotations
 
 import re
+import unicodedata
 from typing import Any
 
 # Encoding probe order matters: BOM-tagged UTF-8 first (Excel exports),
@@ -71,6 +72,33 @@ def decode_text_bytes(
         raise last_exc
     # Defensive: empty encodings tuple.
     raise UnicodeDecodeError("decode_text_bytes", content, 0, 0, "no encodings supplied")
+
+
+def _is_wide(char: str) -> bool:
+    """Whether ``char`` is one of the full-width or squared forms :func:`fold_width` folds."""
+    code = ord(char)
+    return (
+        0xFF01 <= code <= 0xFF5E  # full-width ASCII: digits, letters, ( ) . , : and the rest
+        or 0xFFE0 <= code <= 0xFFE6  # full-width cent, pound, not, macron, broken bar, yen, won
+        or code == 0x3000  # ideographic space
+        or 0x3300 <= code <= 0x33FF  # CJK compatibility squares: ㎡ ㎥ ㎏ ㎜ ㏄
+    )
+
+
+def fold_width(text: str) -> str:
+    """``text`` with its full-width and squared characters folded to their plain forms.
+
+    Chinese, Japanese and Korean input methods type digits, brackets,
+    separators and units full width ("１２．５", "（元）", "㎡"), and a
+    workbook mixes them with the ASCII forms. Only those blocks are folded:
+    the full-width ASCII forms, the full-width currency signs, the
+    ideographic space and the CJK unit squares. Everything else is kept as
+    typed, so "m²", "№" and "½" stay what they are, which a whole-string
+    NFKC would not leave them.
+    """
+    if not any(_is_wide(char) for char in text):
+        return text
+    return "".join(unicodedata.normalize("NFKC", char) if _is_wide(char) else char for char in text)
 
 
 # A currency written in front of the amount: a sign ("$", "₹", "¥"), a
@@ -120,7 +148,7 @@ def safe_float(value: Any, default: float = 0.0) -> float:
         if f != f or f in (float("inf"), float("-inf")):
             return default
         return f
-    text = str(value).strip()
+    text = fold_width(str(value)).strip()
     if not text:
         return default
 
@@ -189,7 +217,7 @@ def dot_groups_thousands(value: Any) -> bool:
     """
     if not isinstance(value, str):
         return False
-    text = strip_currency(value).replace("\u00a0", "").replace("\u202f", "")
+    text = strip_currency(fold_width(value)).replace("\u00a0", "").replace("\u202f", "")
     match = _DOT_GROUPS.match(text)
     return match is not None and "," not in text[: match.end() + 1]
 
@@ -210,7 +238,7 @@ def comma_groups_thousands(value: Any) -> bool:
     """
     if not isinstance(value, str):
         return False
-    text = strip_currency(value).replace(" ", "").replace("\u00a0", "")
+    text = strip_currency(fold_width(value)).replace(" ", "").replace("\u00a0", "")
     match = _COMMA_GROUPS.match(text)
     return match is not None and "." not in text[: match.end() + 1]
 
@@ -234,7 +262,12 @@ def parse_numeric_cell(
         comma_thousands: Read ``"12,500"`` as 12500, see
             :func:`comma_groups_thousands`. For a file written in a
             decimal-point market; reported the same way.
+
+    Full-width digits and separators ("１２．５") read as their ASCII twins,
+    see :func:`fold_width`.
     """
+    if isinstance(value, str):
+        value = fold_width(value)
     if dot_thousands and dot_groups_thousands(value):
         value = value.strip().replace(".", "")
     elif comma_thousands and comma_groups_thousands(value):

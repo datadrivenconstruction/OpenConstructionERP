@@ -43,6 +43,7 @@ from app.modules.boq.importers._encoding import (
     comma_groups_thousands,
     decode_text_bytes,
     dot_groups_thousands,
+    fold_width,
     parse_numeric_cell,
     safe_float,
 )
@@ -703,7 +704,10 @@ _TRANSLITERATE: dict[int, str] = str.maketrans(
 # word, so dropping them would make two different headers one.
 _STRIP_MARKS_BELOW = 0x0590
 
-_BRACKETED = re.compile(r"\([^)]*\)|\[[^\]]*\]|\{[^}]*\}")
+# Round, square and curly brackets, after NFKC has folded their full-width
+# forms ("（元）" -> "(元)"), and the CJK lenticular and tortoise-shell brackets,
+# which have no ASCII twin: "金额【元】", "单价〔元〕".
+_BRACKETED = re.compile(r"\([^)]*\)|\[[^\]]*\]|\{[^}]*\}|【[^】]*】|〔[^〕]*〕|〖[^〗]*〗")
 
 
 def _currency_codes() -> frozenset[str]:
@@ -724,13 +728,19 @@ def normalise_label(text: str) -> str:
     and spacing into one space and drops a trailing currency code or sign
     ("Iznos EUR", "Ukupno €"). The words stay separated by single spaces.
 
+    Compatibility forms are folded first (NFKC), so a header typed with
+    full-width brackets or letters ("金额（元）", "ＱＴＹ") reads like its
+    ASCII twin. It used to keep "元" and match nothing, which refused the
+    two-row header of a GB 50500 bill and imported every line at rate zero.
+
     Args:
         text: The raw cell text.
 
     Returns:
         The normalised label, possibly empty.
     """
-    lowered = _BRACKETED.sub(" ", str(text).lower()).translate(_TRANSLITERATE)
+    folded = unicodedata.normalize("NFKC", str(text)).lower()
+    lowered = _BRACKETED.sub(" ", folded).translate(_TRANSLITERATE)
     kept: list[str] = []
     base = 0
     for char in unicodedata.normalize("NFKD", lowered):
@@ -866,6 +876,15 @@ def _compose_two_row_header(header: tuple[Any, ...], below: tuple[Any, ...]) -> 
     the empty cells of its span, and each column under it is named "<sub>
     <parent>", which is what the alias table spells ("anyag egységár").
 
+    The other way a block is headed twice names a column in each sub-cell and
+    only groups them under the parent: GB 50500 heads its money block
+    "金额（元）" over "综合单价 | 合价 | 其中：暂估价", and a Korean bill heads
+    each cost block over "단가 | 금액". When no sub-cell of a block composes
+    into a known column and the parent is itself a column name, each sub-cell
+    that names a column on its own is read as that column. A block whose
+    parent names nothing ("재료비", material) is left unread rather than
+    guessed at.
+
     The composition is taken only when the row below holds no number and the
     composed header names more columns than the first row alone. A first data
     row that happens to be a text-only section heading composes into nothing
@@ -877,18 +896,33 @@ def _compose_two_row_header(header: tuple[Any, ...], below: tuple[Any, ...]) -> 
         return None
     width = max(len(header), len(below))
     composed: list[str] = []
+    # Column indices of each parent's block, keyed by the parent's own column.
+    blocks: dict[int, list[int]] = {}
+    subs: dict[int, str] = {}
     parent = ""
+    parent_index = -1
     for index in range(width):
         top = _cell_text(header[index]) if index < len(header) else ""
         sub = _cell_text(below[index]) if index < len(below) else ""
         if top:
             parent = top if sub else ""
+            parent_index = index
         elif not sub:
             parent = ""
         if sub and parent:
             composed.append(f"{sub} {parent}")
+            blocks.setdefault(parent_index, []).append(index)
+            subs[index] = sub
         else:
             composed.append(top or sub)
+    for parent_index, members in blocks.items():
+        if any(_match_column(composed[index]) for index in members):
+            continue
+        if not _match_column(_cell_text(header[parent_index])):
+            continue
+        for index in members:
+            if _match_column(subs[index]):
+                composed[index] = subs[index]
     known_before = sum(1 for cell in header if _cell_text(cell) and _match_column(_cell_text(cell)))
     known_after = sum(1 for cell in composed if cell and _match_column(cell))
     return tuple(composed) if known_after > known_before else None
@@ -2222,7 +2256,7 @@ def _grouping_conventions(rows: list[dict[str, Any]], header_language: str | Non
     for row in rows:
         for column in _NUMERIC_COLUMNS:
             text = row.get(column)
-            if isinstance(text, str) and veto.search(text):
+            if isinstance(text, str) and veto.search(fold_width(text)):
                 return False, False
     return dot, comma
 
@@ -2382,7 +2416,7 @@ def _rows_to_positions(
     # bill that numbers its lines but not its chapter headings ("Ssz." blank
     # on the heading row) used to give the first heading "1" beside line 1,
     # and duplicate ordinals fail validation.
-    explicit_ordinals = {str(row.get("ordinal", "")).strip() for _, row in kept_rows} - {""}
+    explicit_ordinals = {fold_width(str(row.get("ordinal", ""))).strip() for _, row in kept_rows} - {""}
 
     for row_idx, row in _naming_the_sheet(kept_rows, result):
         try:
@@ -2399,7 +2433,9 @@ def _rows_to_positions(
                 result.skipped += 1
                 continue
 
-            ordinal = str(row.get("ordinal", "")).strip()
+            # A number, a code or a unit typed full width ("１．２", "㎡") is
+            # the same as its ASCII twin; see :func:`fold_width`.
+            ordinal = fold_width(str(row.get("ordinal", ""))).strip()
             if not ordinal:
                 while str(auto_ordinal) in explicit_ordinals:
                     auto_ordinal += 1
@@ -2412,7 +2448,7 @@ def _rows_to_positions(
             # diff against the BOQ's current ids).
             position_id = normalise_id(row.get("position_id"))
 
-            unit_raw = str(row.get("unit", "")).strip()
+            unit_raw = fold_width(str(row.get("unit", ""))).strip()
             quantity_raw = row.get("quantity")
             unit_rate_raw = row.get("unit_rate")
             contingency = _contingency_amount(
@@ -2533,7 +2569,7 @@ def _rows_to_positions(
                 )
 
             # Heuristic classification (Epics I9 + I10).
-            class_value = str(row.get("classification", "")).strip()
+            class_value = fold_width(str(row.get("classification", ""))).strip()
             classification = _infer_classification(class_value, description)
             if header_language == "hu" and "code" in classification:
                 # The Hungarian rules read the item code from ``tetelrend``,
