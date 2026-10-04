@@ -2,11 +2,17 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /** Bulk-actions bar — visible when one or more files are selected.
  *
- * Bulk delete dispatches per-kind:
- *   - documents → POST /v1/documents/batch/delete/ (server-side batch)
- *   - everything else (photos, sheets, BIM models, DWG drawings, takeoff
- *     uploads, reports, markups) → DELETE one-id-at-a-time on the module's
- *     own per-id endpoint, in parallel.
+ * Bulk delete (`dispatchBulkDelete`) moves every selected row, whatever its
+ * kind, to the recycle bin one row at a time, in parallel. The row leaves its
+ * own table at once and Restore puts it back under the same id. While the
+ * confirm is open, `BulkDeleteReferencesWarning` shows what the selected
+ * documents are still linked to. It is advisory, like the single-file panel,
+ * and nothing on this path asks the server to enforce it.
+ *
+ * The server-side guard, the 409 on POST /v1/documents/batch/delete/ until
+ * `acknowledge_references` is sent, protects only the legacy hard-delete
+ * path (`dispatchHardBulkDelete`), which no screen calls today. The bin's
+ * purge, manual or on expiry, does not check references either.
  *
  * The toast surface reports a per-kind tally: how many files of each kind
  * were deleted, and — on partial failure — which kinds had errors so the
@@ -145,14 +151,21 @@ export async function dispatchBulkDelete(
 }
 
 /** Legacy hard-delete path — kept around so tests + admin tools that
- *  bypass the recycle bin can still wipe rows. Not used in the normal
- *  UI flow.
+ *  bypass the recycle bin can still wipe rows. No screen calls it today:
+ *  the bar's Delete goes through `dispatchBulkDelete` and the recycle bin.
  *
  *  The documents batch endpoint refuses (409, nothing deleted) while any
  *  selected document is still pointed at by a row the delete would strand or
  *  unlink. That refusal lands here as a per-kind failure carrying the server's
  *  message. Set `acknowledgeReferences` only once the person has seen what the
- *  delete severs. */
+ *  delete severs.
+ *
+ *  Whoever wires this into a screen owns that acknowledge step. Show
+ *  `BulkDeleteReferencesWarning` for the selection and pass
+ *  `acknowledgeReferences: true` from the person's own confirmation of it.
+ *  Without the step every selection that anything links to fails with 409
+ *  and can never complete; passing `true` unconditionally instead makes the
+ *  server's guard meaningless. */
 export async function dispatchHardBulkDelete(
   rows: FileRow[],
   { acknowledgeReferences = false }: { acknowledgeReferences?: boolean } = {},
