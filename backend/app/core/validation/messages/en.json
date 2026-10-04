@@ -678,6 +678,7 @@
     "agreement_not_found": "Agreement not found",
     "rejection_not_found": "Rejection not found",
     "claim_not_found": "Progress claim not found",
+    "gaeb_x89_final_account_unsupported": "A final account or part final account cannot be exported as GAEB X89 yet. It has to bill the cumulative work less earlier payments, and only a progress invoice of one period is built from a claim. Export the claim as a progress invoice.",
     "plot_not_found": "Plot not found",
     "survey_not_found": "Drone survey not found",
     "diary_video_not_found": "Diary video not found",

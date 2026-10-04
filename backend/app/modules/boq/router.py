@@ -6116,6 +6116,12 @@ def build_gaeb_xml(
     # with the file at rest.
     xml_declaration = '<?xml version="1.0" encoding="UTF-8"?>\n'
     xml_provenance = f"<!-- OpenConstructionERP · DataDrivenConstruction · {_xtok_gaeb} -->\n"
+    # A control character pasted into a description (a vertical tab from a
+    # spreadsheet) is illegal in XML 1.0 even escaped, and ElementTree writes
+    # it raw: the file would not parse anywhere, our own import included.
+    from app.modules.boq.gaeb_common import strip_xml_control_chars
+
+    strip_xml_control_chars(gaeb)
     xml_body = ET.tostring(gaeb, encoding="unicode", xml_declaration=False)
     return xml_declaration + xml_provenance + xml_body
 

@@ -23,12 +23,19 @@ Money rules, each one pinned by a test:
   overridden the value, and the invoice has to say what was claimed.
 * ``Totals/Total`` and ``TotalNet`` are the sum of the ``IT`` actually
   written, so a receiver adding up the items lands on the total.
-* VAT is computed once, on that net total, and ``TotalGross`` is net plus
-  VAT exactly. The bill's own tax treatment decides the rate, the way the
-  X84 export reads tax from the bill's tax markups (see the router).
+* VAT is computed once, on that net total, at the rate as it stands (a
+  combined 14.975 % is not rounded to 14.98 first), and ``TotalGross`` is
+  net plus VAT exactly. The bill's own tax treatment decides the rate, the
+  way the X84 export reads tax from the bill's tax markups (see the router).
 * Retention is a ``security deposit`` share marked as a counter claim. It is
   taken off what is payable, not off the taxable amount: VAT is owed on the
-  whole performance.
+  whole performance. Only retention on the work this invoice bills is taken
+  off; the caller leaves out retention on stored materials, which an X89
+  does not bill.
+* Retention released and billed on the claim is paid with it. It is its own
+  share, not taxable and not a counter claim, and it is added to what is
+  payable, so the outstanding amount before VAT is what the claim says is
+  due.
 
 Check
 -----
@@ -36,8 +43,10 @@ Check
 bill, position by position. Nothing is written. Per OZ it reports an
 unknown OZ, a unit price that differs from the bill's rate, a line whose
 ``BillQty x UP`` does not make its ``IT``, and a billed quantity above the
-bill quantity; then it reconciles the totals. The per-line differences add
-up to the total difference by construction, which a test pins.
+bill quantity; a ``MarkupItem`` (discount or surcharge) is held against the
+bill's markup of the same percentage. Then it reconciles the totals. The
+per-line differences add up to the total difference by construction, which
+a test pins.
 """
 
 from __future__ import annotations
@@ -49,6 +58,7 @@ from decimal import Decimal
 from typing import Any
 
 from app.modules.boq.gaeb_common import (
+    OzLayout,
     PositionIndex,
     append_bkdn,
     append_gaeb_info,
@@ -69,8 +79,12 @@ from app.modules.boq.importers._base import ImporterParseError
 from app.modules.boq.importers.gaeb_xml import _find_child, _local, _text_of
 from app.modules.boq.units import to_gaeb_unit_code
 
-#: ``tgInvoiceType`` values this module writes.
+#: ``tgInvoiceType`` values this module writes. Only ``deduction`` (an
+#: Abschlagsrechnung) and ``single invoice`` are built correctly from one
+#: period's claim; a final account has to bill the cumulative figure less
+#: the earlier payments, which is not built yet (see the router).
 INVOICE_TYPE_PROGRESS = "deduction"
+CUMULATIVE_INVOICE_TYPES = ("final account", "part final account")
 INVOICE_TYPES = (
     "deduction",
     "final account",
@@ -86,6 +100,7 @@ FALLBACK_CATEGORY = "ZZ"
 
 _ZERO = Decimal("0")
 _HUNDRED = Decimal("100")
+_C1 = Decimal("0.01")
 
 
 @dataclass(slots=True)
@@ -116,6 +131,8 @@ class InvoiceLine:
     bill_qty: Decimal
     unit_price: Decimal | None
     amount: Decimal
+    #: The ``RNoIndex`` a GAEB import recorded for the linked position, if any.
+    index: str = ""
 
 
 @dataclass(slots=True)
@@ -136,11 +153,13 @@ class InvoiceInput:
     recipient: InvoiceParty
     invoice_type: str = INVOICE_TYPE_PROGRESS
     sequential_no: int | None = None
+    #: Retention released and billed on this claim, paid with it.
+    release: Decimal = Decimal("0")
 
 
 @dataclass(slots=True)
 class InvoiceFigures:
-    """The totals an X89 states, all at two decimals."""
+    """The totals an X89 states. Money at two decimals, the VAT rate as it stands."""
 
     net: Decimal
     vat_rate: Decimal
@@ -148,32 +167,54 @@ class InvoiceFigures:
     gross: Decimal
     retention: Decimal
     payable: Decimal
+    release: Decimal = Decimal("0")
+
+    @property
+    def outstanding_before_vat(self) -> Decimal:
+        """What is paid for the work, before VAT: net less retention plus released retention."""
+        return self.net - self.retention + self.release
 
     def as_strings(self) -> dict[str, str]:
         return {
             "net": str(self.net),
-            "vat_rate": str(self.vat_rate),
+            "vat_rate": _fmt_rate(self.vat_rate),
             "vat_amount": str(self.vat_amount),
             "gross": str(self.gross),
             "retention": str(self.retention),
+            "release": str(self.release),
             "payable": str(self.payable),
+            "outstanding_before_vat": str(self.outstanding_before_vat),
         }
 
 
-def invoice_figures(lines: list[InvoiceLine], *, vat_rate: Decimal, retention: Decimal) -> InvoiceFigures:
-    """Net from the cent-rounded line amounts, VAT once on the net, gross exactly."""
+def invoice_figures(
+    lines: list[InvoiceLine],
+    *,
+    vat_rate: Decimal,
+    retention: Decimal,
+    release: Decimal = _ZERO,
+) -> InvoiceFigures:
+    """Net from the cent-rounded line amounts, VAT once on the net, gross exactly.
+
+    The VAT amount is worked out from the rate as given. Rounding the rate to
+    two decimals first made a combined 14.975 % into 14.98 % and put 50.00
+    too much VAT on a million of net. ``payable`` is the gross less the
+    retention plus the release billed here.
+    """
     net = sum((c2(ln.amount) for ln in lines), _ZERO)
-    rate = c2(vat_rate)
+    rate = vat_rate.normalize() if vat_rate else _ZERO
     vat_amount = c2(net * rate / _HUNDRED)
     gross = net + vat_amount
     held = c2(retention)
+    released = c2(release)
     return InvoiceFigures(
         net=net,
         vat_rate=rate,
         vat_amount=vat_amount,
         gross=gross,
         retention=held,
-        payable=gross - held,
+        payable=gross - held + released,
+        release=released,
     )
 
 
@@ -262,6 +303,11 @@ def invoice_lines_from_claim(
                 bill_qty = Decimal("1")
                 unit_price = value
             unit = "psch"
+        index = ""
+        if pos is not None:
+            meta = getattr(pos, "metadata_", None)
+            if isinstance(meta, dict):
+                index = str(meta.get("gaeb_rno_index") or "").strip()
         keyed.append(
             (
                 (int(getattr(sov, "order_index", 0) or 0), str(sov.code or "")),
@@ -272,6 +318,7 @@ def invoice_lines_from_claim(
                     bill_qty=bill_qty,
                     unit_price=unit_price,
                     amount=value,
+                    index=index,
                 ),
             )
         )
@@ -286,6 +333,116 @@ class X89Export:
     xml: str
     figures: InvoiceFigures
     remapped: list[dict[str, str]] = field(default_factory=list)
+
+
+@dataclass(slots=True)
+class InvoicePlacement:
+    """Where every invoice line goes in the X89's bill, worked out before anything is written.
+
+    ``placed`` is ``(written OZ, line)`` in bill order, ``layout`` the tree they
+    are written as, ``merged`` the OZ whose lines were added into one item, and
+    ``remapped`` every line that could not keep its own OZ, with the OZ it is
+    written under and why. The preview reports ``remapped`` so a person sees it
+    before downloading, and the figures are taken from ``placed``, so the total
+    is the sum of the items the file really has.
+    """
+
+    placed: list[tuple[str, InvoiceLine]]
+    layout: OzLayout
+    merged: list[str]
+    remapped: list[dict[str, str]]
+
+
+def _mergeable(a: InvoiceLine, b: InvoiceLine) -> bool:
+    if a.unit != b.unit or a.index != b.index:
+        return False
+    if a.unit_price is None or b.unit_price is None:
+        return a.unit_price is None and b.unit_price is None
+    return q3(a.unit_price) == q3(b.unit_price)
+
+
+def place_invoice_lines(lines: list[InvoiceLine]) -> InvoicePlacement:
+    """Give every claim line an OZ in the X89. Pure.
+
+    Two schedule lines linked to one bill position name the same OZ. When
+    they bill it in the same unit at the same price they are one item of the
+    invoice: the quantities and the cent-rounded amounts are added. Otherwise
+    the first keeps the OZ. An Indexposition keeps its OZ as base plus
+    ``RNoIndex``. A line whose OZ GAEB still cannot spell is not dropped,
+    because its money is part of the claim: it goes under a ``ZZ`` category
+    with a running number and the original reference in its text, and is
+    listed in ``remapped``.
+    """
+    merged_by_oz: dict[str, InvoiceLine] = {}
+    order: list[InvoiceLine] = []
+    merged: list[str] = []
+    for ln in lines:
+        key = ln.oz.strip()
+        first = merged_by_oz.get(key) if key else None
+        if first is not None and _mergeable(first, ln):
+            first.bill_qty = first.bill_qty + ln.bill_qty
+            first.amount = c2(first.amount) + c2(ln.amount)
+            if key not in merged:
+                merged.append(key)
+            continue
+        copy = InvoiceLine(
+            oz=ln.oz,
+            description=ln.description,
+            unit=ln.unit,
+            bill_qty=ln.bill_qty,
+            unit_price=ln.unit_price,
+            amount=ln.amount,
+            index=ln.index,
+        )
+        if key and first is None:
+            merged_by_oz[key] = copy
+        order.append(copy)
+
+    index_of = {ln.oz.strip(): ln.index for ln in order if ln.index}
+    # A second line under an OZ it could not be merged into is a duplicate
+    # for the layout too; only the first one is offered under that OZ.
+    offered: list[str] = []
+    taken: set[str] = set()
+    for ln in order:
+        key = ln.oz.strip()
+        if key and key not in taken:
+            taken.add(key)
+            offered.append(key)
+    layout = plan_oz_layout(offered, index_of=index_of)
+    depth = layout.depth or 1
+    remapped: list[dict[str, str]] = []
+    placed: list[tuple[str, InvoiceLine]] = []
+    used: set[str] = set()
+    fallback_no = 0
+    for ln in order:
+        key = ln.oz.strip()
+        if key in layout.accepted and key not in used:
+            used.add(key)
+            placed.append((key, ln))
+            continue
+        fallback_no += 1
+        synthetic = ".".join([FALLBACK_CATEGORY] * (depth - 1) + [f"Z{fallback_no:03d}"])
+        reason = next(
+            (r["reason"] for r in layout.rejected if r["ordinal"] == key),
+            "duplicate_ordinal" if key else "empty_ordinal",
+        )
+        remapped.append({"ordinal": ln.oz, "written_as": synthetic, "reason": reason})
+        placed.append((synthetic, ln))
+    # Every placed OZ shares one depth by construction, so nothing is rejected.
+    final_layout = plan_oz_layout((o for o, _ in placed), index_of=layout.index)
+    return InvoicePlacement(placed=placed, layout=final_layout, merged=merged, remapped=remapped)
+
+
+def x89_figures(data: InvoiceInput) -> tuple[InvoiceFigures, InvoicePlacement]:
+    """The figures and the placement the X89 of ``data`` will carry. Preview and export both read this."""
+    placement = place_invoice_lines(data.lines)
+    figures = invoice_figures(
+        [ln for _, ln in placement.placed],
+        vat_rate=data.vat_rate,
+        retention=data.retention,
+        release=data.release,
+    )
+    return figures, placement
 
 
 def _address(parent: ET.Element, party: InvoiceParty) -> None:
@@ -314,42 +471,33 @@ def _fmt_pct(rate: Decimal) -> str:
     return text.rstrip("0").rstrip(".") if "." in text else text
 
 
+def _fmt_rate(rate: Decimal) -> str:
+    """A VAT rate for ``Totals/VAT``: two decimals, or more when the rate has them (14.975)."""
+    exponent = rate.normalize().as_tuple().exponent
+    if isinstance(exponent, int) and exponent < -2:
+        return format(rate.normalize(), "f")
+    return str(c2(rate))
+
+
 def build_x89_xml(data: InvoiceInput, *, today: date | None = None) -> X89Export:
     """Write ``data`` as a schema-valid X89. Call :func:`missing_invoice_fields` first.
 
     Element order follows ``tgGAEB`` (``GAEBInfo``, ``PrjInfo``, ``Invoice``)
     and ``tgInvoice`` (``DP``, ``BoQ``, ``InvoiceHeader``, ``InvoiceCreator``,
     ``InvoiceRecipient``, ``InvoiceShare``+, ``TotalGross``). The bill is
-    written with every claimed line under its OZ. A line whose OZ GAEB cannot
-    spell is not dropped, because its money is part of the claim: it goes
-    under a ``ZZ`` category with a running number and the original reference
-    in its text, and the caller is told.
+    written with every claimed line under its OZ, as
+    :func:`place_invoice_lines` places it; the lines that could not keep
+    their OZ come back in ``remapped``.
     """
     missing = missing_invoice_fields(data)
     if missing:
         raise ValueError(f"X89 is missing mandatory fields: {', '.join(missing)}")
     assert data.invoice_date is not None and data.period_start is not None and data.period_end is not None
 
-    figures = invoice_figures(data.lines, vat_rate=data.vat_rate, retention=data.retention)
-
-    # Place every line: its own OZ where GAEB can spell it, a fallback OZ
-    # otherwise. The fallback keeps the depth the rest of the bill has.
-    layout = plan_oz_layout(ln.oz for ln in data.lines)
-    depth = layout.depth or 1
-    remapped: list[dict[str, str]] = []
-    placed: list[tuple[str, InvoiceLine]] = []
-    fallback_no = 0
-    for ln in data.lines:
-        if ln.oz.strip() in layout.accepted and ln.oz.strip() not in {o for o, _ in placed}:
-            placed.append((ln.oz.strip(), ln))
-            continue
-        fallback_no += 1
-        synthetic = ".".join([FALLBACK_CATEGORY] * (depth - 1) + [f"Z{fallback_no:03d}"])
-        reason = next((r["reason"] for r in layout.rejected if r["ordinal"] == ln.oz.strip()), "duplicate_ordinal")
-        remapped.append({"ordinal": ln.oz, "written_as": synthetic, "reason": reason})
-        placed.append((synthetic, ln))
-    final_layout = plan_oz_layout(o for o, _ in placed)
-    # Every placed OZ shares one depth by construction, so nothing is rejected.
+    figures, placement = x89_figures(data)
+    placed = placement.placed
+    final_layout = placement.layout
+    remapped = placement.remapped
 
     root = ET.Element("GAEB", xmlns=namespace_for("89"))
     append_gaeb_info(root, today)
@@ -369,7 +517,7 @@ def build_x89_xml(data: InvoiceInput, *, today: date | None = None) -> X89Export
     append_bkdn(boq_info, final_layout)
     totals = ET.SubElement(boq_info, "Totals")
     ET.SubElement(totals, "Total").text = str(figures.net)
-    ET.SubElement(totals, "VAT").text = str(figures.vat_rate)
+    ET.SubElement(totals, "VAT").text = _fmt_rate(figures.vat_rate)
     ET.SubElement(totals, "TotalNet").text = str(figures.net)
     ET.SubElement(totals, "VATAmount").text = str(figures.vat_amount)
     ET.SubElement(totals, "TotalGross").text = str(figures.gross)
@@ -398,6 +546,7 @@ def build_x89_xml(data: InvoiceInput, *, today: date | None = None) -> X89Export
         if ordinal != ln.oz.strip():
             text = f"{ln.oz} - {text}" if ln.oz.strip() else text
         ml_text(outl, "TextOutlTxt", text[:500])
+        # RNoIndex for an Indexposition is set by write_oz_body.
 
     write_oz_body(body, final_layout, placed, emit_item=_emit, open_category=_open, close_category=_close)
 
@@ -420,12 +569,17 @@ def build_x89_xml(data: InvoiceInput, *, today: date | None = None) -> X89Export
         ET.SubElement(recipient, "TaxNo").text = data.recipient.tax_no[:80]
 
     # The shares in the order the amount is built: what was performed, the
-    # tax on it, and what is held back from payment. The last share states
-    # what is left to pay, so a reader does not have to redo the arithmetic.
+    # tax on it, what is held back from payment and what held-back money is
+    # paid out now. The last share states what is left to pay, so a reader
+    # does not have to redo the arithmetic.
     _share(invoice, "basic amount", "Leistung des Abrechnungszeitraums, netto", figures.net)
     _share(invoice, "VAT", f"Umsatzsteuer {_fmt_pct(figures.vat_rate)} %", figures.vat_amount)
     if figures.retention:
         _share(invoice, "security deposit", "Sicherheitseinbehalt", figures.retention, counter=True)
+    if figures.release:
+        # Not a counter claim: released retention is paid, not taken off.
+        _share(invoice, "security deposit", "Auszahlung Sicherheitseinbehalt", figures.release)
+    if figures.retention or figures.release:
         _share(invoice, "outstanding amount", "Zahlbetrag", figures.payable)
     ET.SubElement(invoice, "TotalGross").text = str(figures.gross)
 
@@ -443,6 +597,11 @@ class X89Item:
     unit_price: Decimal | None
     amount: Decimal | None
     description: str
+    #: ``"item"`` or ``"markup"`` (a ``MarkupItem``: Zuschlag or Nachlass).
+    kind: str = "item"
+    #: A markup's percentage (``Markup``) and the base it applies to (``ITMarkup``).
+    markup_percent: Decimal | None = None
+    markup_base: Decimal | None = None
 
 
 @dataclass(slots=True)
@@ -508,8 +667,23 @@ def parse_x89(content: bytes) -> ParsedX89:
                 value = _decimal_text(totals_el, name)
                 if value is not None:
                     totals[name] = str(value)
-        for file_item in iter_boq_items(boq):
+        for file_item in iter_boq_items(boq, include_markup=True):
             el = file_item.element
+            if file_item.kind == "markup":
+                items.append(
+                    X89Item(
+                        oz=file_item.oz,
+                        bill_qty=None,
+                        unit="",
+                        unit_price=None,
+                        amount=_decimal_text(el, "IT"),
+                        description=_outline(el),
+                        kind="markup",
+                        markup_percent=_decimal_text(el, "Markup"),
+                        markup_base=_decimal_text(el, "ITMarkup"),
+                    )
+                )
+                continue
             bill_qty = _decimal_text(el, "BillQty")
             if bill_qty is None:
                 bill_qty = _decimal_text(el, "Qty")
@@ -548,7 +722,45 @@ def parse_x89(content: bytes) -> ParsedX89:
     )
 
 
-def check_x89(parsed: ParsedX89, positions: list[Any], *, is_section: Any) -> dict[str, Any]:
+#: ``BillQty`` has three decimals, so a third of a lump sum arrives cut to
+#: 0.333. Half a unit of the third decimal times the price is how far
+#: ``BillQty x UP`` can honestly miss ``IT``; half a cent more covers the
+#: amount's own rounding. Beyond that the amount really is not the product.
+_QTY_HALF_UNIT = Decimal("0.0005")
+_HALF_CENT = Decimal("0.005")
+
+
+def _qty_rounding_tolerance(price: Decimal) -> Decimal:
+    return abs(price) * _QTY_HALF_UNIT + _HALF_CENT
+
+
+def _rate_rounding_tolerance(base: Decimal, rate: Decimal) -> Decimal:
+    """How far a VAT amount may sit from ``base x rate`` when the stated rate was cut to two decimals."""
+    exponent = rate.as_tuple().exponent
+    if isinstance(exponent, int) and exponent <= -2:
+        return abs(base) * _HALF_CENT / _HUNDRED + _HALF_CENT
+    return _ZERO
+
+
+def _is_bill_markup(markup: Any) -> bool:
+    """A markup of the bill an invoice's ``MarkupItem`` can answer to: active, a percentage, not tax."""
+    if not getattr(markup, "is_active", True):
+        return False
+    if str(getattr(markup, "category", "") or "").lower() == "tax":
+        return False
+    if str(getattr(markup, "markup_type", "") or "percentage") != "percentage":
+        return False
+    return dec(getattr(markup, "percentage", None)) is not None
+
+
+def check_x89(
+    parsed: ParsedX89,
+    positions: list[Any],
+    *,
+    is_section: Any,
+    markups: list[Any] | tuple[Any, ...] = (),
+    bill_currency: str = "",
+) -> dict[str, Any]:
     """Hold an invoice against the bill. Reports differences; applies nothing.
 
     For each invoiced item the *expected* amount is ``BillQty`` times the
@@ -558,6 +770,17 @@ def check_x89(parsed: ParsedX89, positions: list[Any], *, is_section: Any) -> di
     makes the per-item differences add up to the invoice net minus the
     expected net exactly, which is the property a checker relies on when it
     reads the total first and drills down second.
+
+    A ``MarkupItem`` (a discount or a surcharge) is a line of its own. Its
+    expected amount is the bill's markup of the same percentage applied to
+    the expected items, so a -3 % discount the bill also grants differs by
+    nothing, and one the bill does not have differs by its whole amount and
+    says ``markup_not_in_bill``. ``markups`` are the bill's markups; tax
+    markups are VAT and are not held against a ``MarkupItem``.
+
+    ``bill_currency`` is the currency the bill is priced in. An invoice in
+    another currency is flagged, because every comparison is then between
+    two currencies.
     """
     index = PositionIndex(positions, is_section=is_section)
     lines: list[dict[str, Any]] = []
@@ -566,18 +789,45 @@ def check_x89(parsed: ParsedX89, positions: list[Any], *, is_section: Any) -> di
     issue_counts: dict[str, int] = {}
     oz_counts: dict[str, int] = {}
     for item in parsed.items:
-        oz_counts[item.oz] = oz_counts.get(item.oz, 0) + 1
+        if item.kind == "item":
+            oz_counts[item.oz] = oz_counts.get(item.oz, 0) + 1
     # Billed quantity per position across the whole file, so a quantity split
     # over two items under one OZ is held against the bill as one quantity.
     billed_per_position: dict[str, Decimal] = {}
     bill_qty_of: dict[str, Decimal] = {}
+    markup_entries: list[tuple[X89Item, dict[str, Any]]] = []
 
     for item in parsed.items:
         amount = c2(item.amount) if item.amount is not None else _ZERO
         invoiced_total += amount
         issues: list[str] = []
-        entry: dict[str, Any] = {
+        if item.kind == "markup":
+            entry = {
+                "oz": item.oz,
+                "kind": "markup",
+                "description": item.description,
+                "unit": "",
+                "bill_qty": None,
+                "unit_price": None,
+                "amount": str(amount),
+                "markup_percent": _fmt_pct(item.markup_percent) if item.markup_percent is not None else None,
+                "markup_base": str(c2(item.markup_base)) if item.markup_base is not None else None,
+                "position_id": None,
+                "issues": issues,
+            }
+            if item.amount is None:
+                issues.append("missing_amount")
+            if item.markup_base is not None and item.markup_percent is not None and item.amount is not None:
+                arithmetic = c2(item.markup_base * item.markup_percent / _HUNDRED)
+                if abs(arithmetic - amount) > _C1:
+                    issues.append("amount_not_base_times_percent")
+                    entry["base_times_percent"] = str(arithmetic)
+            lines.append(entry)
+            markup_entries.append((item, entry))
+            continue
+        entry = {
             "oz": item.oz,
+            "kind": "item",
             "description": item.description,
             "unit": item.unit,
             "bill_qty": str(q3(item.bill_qty)) if item.bill_qty is not None else None,
@@ -591,8 +841,9 @@ def check_x89(parsed: ParsedX89, positions: list[Any], *, is_section: Any) -> di
         if item.bill_qty is None:
             issues.append("missing_quantity")
         if item.bill_qty is not None and item.unit_price is not None and item.amount is not None:
-            arithmetic = c2(item.bill_qty * item.unit_price)
-            if arithmetic != amount:
+            product = item.bill_qty * item.unit_price
+            arithmetic = c2(product)
+            if arithmetic != amount and abs(product - amount) > _qty_rounding_tolerance(item.unit_price):
                 issues.append("amount_not_qty_times_price")
                 entry["qty_times_price"] = str(arithmetic)
 
@@ -605,7 +856,18 @@ def check_x89(parsed: ParsedX89, positions: list[Any], *, is_section: Any) -> di
             rate = dec(getattr(pos, "unit_rate", None)) or _ZERO
             boq_qty = dec(getattr(pos, "quantity", None)) or _ZERO
             qty = item.bill_qty if item.bill_qty is not None else _ZERO
-            expected = c2(qty * rate)
+            exact = qty * rate
+            expected = c2(exact)
+            if (
+                item.amount is not None
+                and expected != amount
+                and item.unit_price is not None
+                and q3(item.unit_price) == q3(rate)
+                and abs(exact - amount) <= _qty_rounding_tolerance(rate)
+            ):
+                # At the bill's own rate, and off only by the third decimal
+                # BillQty was cut to: the amount is what the bill says.
+                expected = amount
             expected_total += expected
             entry.update(
                 {
@@ -626,6 +888,35 @@ def check_x89(parsed: ParsedX89, positions: list[Any], *, is_section: Any) -> di
         entry["issues"] = issues
         lines.append(entry)
 
+    # Markups after every item: their base is the items at bill rates, and a
+    # discount category usually comes last in the file anyway.
+    items_expected = expected_total
+    running = items_expected
+    available = [m for m in markups if _is_bill_markup(m)]
+    for item, entry in markup_entries:
+        amount = c2(item.amount) if item.amount is not None else _ZERO
+        pct = item.markup_percent
+        match = None
+        if pct is not None:
+            match = next((m for m in available if q3(dec(m.percentage) or _ZERO) == q3(pct)), None)
+        if match is None or pct is None:
+            entry["issues"].append("markup_not_in_bill")
+            entry.update({"expected_amount": None, "difference": str(amount)})
+            continue
+        available.remove(match)
+        apply_to = str(getattr(match, "apply_to", "") or "direct_cost").lower()
+        base = running if apply_to in ("cumulative", "subtotal") else items_expected
+        expected = c2(base * pct / _HUNDRED)
+        expected_total += expected
+        running += expected
+        entry.update(
+            {
+                "bill_markup": str(getattr(match, "name", "") or ""),
+                "expected_amount": str(expected),
+                "difference": str(amount - expected),
+            }
+        )
+
     for entry in lines:
         pos_key = entry.get("position_id")
         if not pos_key:
@@ -639,14 +930,14 @@ def check_x89(parsed: ParsedX89, positions: list[Any], *, is_section: Any) -> di
 
     totals_check: list[dict[str, Any]] = []
 
-    def _compare(key: str, stated: str | None, computed: Decimal) -> None:
+    def _compare(key: str, stated: str | None, computed: Decimal, tolerance: Decimal = _ZERO) -> None:
         stated_dec = dec(stated) if stated else None
         totals_check.append(
             {
                 "key": key,
                 "stated": str(stated_dec) if stated_dec is not None else None,
                 "computed": str(computed),
-                "matches": stated_dec is not None and c2(stated_dec) == computed,
+                "matches": stated_dec is not None and abs(c2(stated_dec) - computed) <= tolerance,
             }
         )
 
@@ -655,7 +946,12 @@ def check_x89(parsed: ParsedX89, positions: list[Any], *, is_section: Any) -> di
     net_stated = dec(parsed.totals.get("TotalNet")) if parsed.totals.get("TotalNet") else None
     if vat_rate is not None:
         base = net_stated if net_stated is not None else invoiced_total
-        _compare("vat_amount", parsed.totals.get("VATAmount"), c2(base * vat_rate / _HUNDRED))
+        _compare(
+            "vat_amount",
+            parsed.totals.get("VATAmount"),
+            c2(base * vat_rate / _HUNDRED),
+            _rate_rounding_tolerance(base, vat_rate),
+        )
     vat_stated = dec(parsed.totals.get("VATAmount")) if parsed.totals.get("VATAmount") else None
     if net_stated is not None and vat_stated is not None:
         _compare("total_gross", parsed.totals.get("TotalGross"), c2(net_stated + vat_stated))
@@ -663,9 +959,13 @@ def check_x89(parsed: ParsedX89, positions: list[Any], *, is_section: Any) -> di
         _compare("invoice_total_gross", parsed.total_gross, c2(dec(parsed.totals["TotalGross"]) or _ZERO))
 
     measurable = [p for p in positions if not is_section(p)]
+    invoice_currency = (parsed.currency or "").strip().upper()
+    bill_cur = (bill_currency or "").strip().upper()
     return {
         "header": parsed.header,
         "currency": parsed.currency,
+        "bill_currency": bill_cur,
+        "currency_mismatch": bool(invoice_currency and bill_cur and invoice_currency != bill_cur),
         "items_in_file": len(parsed.items),
         "lines": lines,
         "invoiced_total": str(invoiced_total),
@@ -681,6 +981,7 @@ def check_x89(parsed: ParsedX89, positions: list[Any], *, is_section: Any) -> di
 
 
 __all__ = [
+    "CUMULATIVE_INVOICE_TYPES",
     "FALLBACK_CATEGORY",
     "INVOICE_TYPES",
     "INVOICE_TYPE_PROGRESS",
@@ -688,6 +989,7 @@ __all__ = [
     "InvoiceInput",
     "InvoiceLine",
     "InvoiceParty",
+    "InvoicePlacement",
     "ParsedX89",
     "X89Export",
     "X89Item",
@@ -697,4 +999,6 @@ __all__ = [
     "invoice_lines_from_claim",
     "missing_invoice_fields",
     "parse_x89",
+    "place_invoice_lines",
+    "x89_figures",
 ]

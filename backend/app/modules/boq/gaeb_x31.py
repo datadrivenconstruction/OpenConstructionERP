@@ -35,6 +35,7 @@ is what is read; the rows are kept for display and for the audit trail.
 from __future__ import annotations
 
 import xml.etree.ElementTree as ET
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import date
 from decimal import Decimal
@@ -91,6 +92,7 @@ def build_x31_xml(
     service_start: date | None = None,
     service_end: date | None = None,
     today: date | None = None,
+    index_of: Mapping[str, str] | None = None,
 ) -> X31Export:
     """Build a schema-valid X31 from ``(ordinal, quantity)`` pairs in bill order.
 
@@ -98,6 +100,10 @@ def build_x31_xml(
     then ``QtyDeterm`` holding ``PrjInfo``, ``QtyDetermInfo``, ``DP``,
     ``BoQ``. ``DP`` comes after ``QtyDetermInfo`` in this phase, unlike the
     80 phases. ``BoQBkdn`` sits directly in ``BoQ`` (there is no ``BoQInfo``).
+
+    An Indexposition (``01.0020.A``) is written as its base OZ with
+    ``RNoIndex``, see :func:`plan_oz_layout`; ``index_of`` passes the index a
+    GAEB import recorded per ordinal.
 
     An ordinal the GAEB OZ grammar cannot carry, one of a depth the rest of
     the bill does not share, a duplicate, or a quantity beyond the 11.3
@@ -114,7 +120,7 @@ def build_x31_xml(
             continue
         valid.append((ordinal, qty))
 
-    layout = plan_oz_layout(o for o, _ in valid)
+    layout = plan_oz_layout((o for o, _ in valid), index_of=index_of)
     skipped.extend(layout.rejected)
 
     root = ET.Element("GAEB", xmlns=namespace_for("31"))
@@ -265,6 +271,28 @@ def measured_quantity_of(position: Any) -> Decimal | None:
     return sheet.total_quantity
 
 
+def measurement_sheet_info(position: Any) -> tuple[int, str | None]:
+    """How many lines the position's stored measurement sheet has, and who wrote it.
+
+    The source is the sheet's own ``source`` (``gaeb_x31`` for a sheet an
+    earlier X31 apply wrote), ``manual`` for a sheet without one, and
+    ``None`` when there is no sheet. Applying an X31 replaces the whole
+    sheet with one line, so a person has to see what a many-line take-off
+    would lose before it goes.
+    """
+    meta = getattr(position, "metadata_", None)
+    if not isinstance(meta, dict):
+        meta = getattr(position, "metadata", None)
+    stored = meta.get("measurement") if isinstance(meta, dict) else None
+    if not isinstance(stored, dict):
+        return 0, None
+    count = sum(1 for ln in (stored.get("lines") or []) if isinstance(ln, dict))
+    if count == 0:
+        return 0, None
+    source = stored.get("source")
+    return count, str(source) if isinstance(source, str) and source.strip() else "manual"
+
+
 def propose_x31(parsed: ParsedX31, positions: list[Any], *, is_section: Any) -> dict[str, Any]:
     """Hold a parsed X31 against a bill and propose, never apply.
 
@@ -274,6 +302,11 @@ def propose_x31(parsed: ParsedX31, positions: list[Any], *, is_section: Any) -> 
     the reason) and counts. An OZ that occurs twice in the file is not
     proposed at all: which of two totals is the measurement is a question
     for the person who sent it.
+
+    Each proposal also says how many lines the current measurement sheet has
+    and where it came from (``current_sheet_lines``, ``current_sheet_source``),
+    because applying replaces that sheet, and carries the position's
+    ``version`` so the apply can refuse a position edited in between.
     """
     index = PositionIndex(positions, is_section=is_section)
     oz_counts: dict[str, int] = {}
@@ -319,7 +352,9 @@ def propose_x31(parsed: ParsedX31, positions: list[Any], *, is_section: Any) -> 
         claimed[pos_id] = item.oz
         current_qty = dec(getattr(pos, "quantity", None)) or Decimal("0")
         current_measured = measured_quantity_of(pos)
+        sheet_lines, sheet_source = measurement_sheet_info(pos)
         proposed = item.quantity
+        version = getattr(pos, "version", None)
         matched.append(
             {
                 **base,
@@ -333,6 +368,9 @@ def propose_x31(parsed: ParsedX31, positions: list[Any], *, is_section: Any) -> 
                 "proposed_quantity": str(q3(proposed)),
                 "difference_to_quantity": str(q3(proposed - current_qty)),
                 "unchanged": current_measured is not None and q3(current_measured) == q3(proposed),
+                "current_sheet_lines": sheet_lines,
+                "current_sheet_source": sheet_source,
+                "position_version": int(version) if isinstance(version, int) else None,
             }
         )
 
@@ -401,6 +439,7 @@ __all__ = [
     "build_x31_xml",
     "measured_quantity_of",
     "measurement_from_x31",
+    "measurement_sheet_info",
     "parse_x31",
     "propose_x31",
 ]
