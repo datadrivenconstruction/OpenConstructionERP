@@ -7942,6 +7942,7 @@ const resource = {
     "match.group_status_tbd": "Hal qilinadi",
     "match.group_status_applied": "Qoʻllanildi",
     "rfq_bidding.all_statuses": "All statuses",
+    "rfq_bidding.award": "Gʻolib deb topish",
     "rfq_bidding.award_action": "Award to",
     "rfq_bidding.award_error": "Failed to award bid",
     "rfq_bidding.award_success": "Bid awarded successfully",

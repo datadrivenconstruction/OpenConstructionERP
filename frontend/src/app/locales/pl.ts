@@ -8375,6 +8375,7 @@ const resource = {
     "takt.new_takt_schedule": "Nowy harmonogram taktowy",
     "takt.subtitle": "Planowanie metodą linii balansu dla robót powtarzalnych, przepuszczające brygadę przez sekwencję lokalizacji w równym rytmie taktowym.",
     "rfq_bidding.all_statuses": "All statuses",
+    "rfq_bidding.award": "Udziel zamówienia",
     "rfq_bidding.award_action": "Award to",
     "rfq_bidding.award_error": "Failed to award bid",
     "rfq_bidding.award_success": "Bid awarded successfully",

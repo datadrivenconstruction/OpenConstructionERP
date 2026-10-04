@@ -8356,6 +8356,7 @@ const resource = {
     "takt.new_takt_schedule": "Yeni Takt Programı",
     "takt.subtitle": "Tekrarlı işler için denge çizgisi planlaması; bir ekibi sabit bir Takt ritminde konum dizisi boyunca döndürür.",
     "rfq_bidding.all_statuses": "All statuses",
+    "rfq_bidding.award": "İhaleyi ver",
     "rfq_bidding.award_action": "Award to",
     "rfq_bidding.award_error": "Failed to award bid",
     "rfq_bidding.award_success": "Bid awarded successfully",
