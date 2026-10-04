@@ -135,7 +135,7 @@ function timeUnitCode(token: string, lang: string): string | null {
   let code: string | null = null;
   try {
     const partOf = (n: number) =>
-      new Intl.NumberFormat(lang || 'en', { style: 'unit', unit, unitDisplay: 'short' })
+      new Intl.NumberFormat(lang || undefined, { style: 'unit', unit, unitDisplay: 'short' })
         .formatToParts(n)
         .filter((p) => p.type === 'unit')
         .map((p) => p.value)
