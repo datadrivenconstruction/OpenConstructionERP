@@ -226,6 +226,8 @@ describe('CostPlanView', () => {
     fireEvent.change(input, { target: { value: '2400' } });
     fireEvent.click(screen.getByText('Apply'));
     await waitFor(() => expect(apiMocks.nrm1).toHaveBeenLastCalledWith('boq-1', '2400'));
+    // Export stays disabled until the plan for the new area has arrived.
+    expect(await screen.findByText(/entered here/)).toBeTruthy();
 
     fireEvent.click(screen.getByText('Export to Excel'));
     await waitFor(() => expect(apiMocks.exportNrm1Xlsx).toHaveBeenCalledWith('boq-1', '2400'));
