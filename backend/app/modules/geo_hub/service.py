@@ -2138,7 +2138,7 @@ class GeoHubService:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Authentication required",
             )
-        from sqlalchemy import or_, select
+        from sqlalchemy import and_, or_, select
 
         from app.modules.projects.models import Project
         from app.modules.teams.access import member_project_ids_subquery
@@ -2167,6 +2167,23 @@ class GeoHubService:
                     Project.id.in_(member_project_ids_subquery(user_id)),
                 )
             )
+        # Only projects that can carry a pin count against ``limit``. Without
+        # this the limit was spent on the newest projects first and the ones
+        # with no location were dropped afterwards, so a caller whose newest
+        # projects had none got an empty map although older located projects
+        # existed. ``->>`` is SQL NULL for a missing key and for JSON null.
+        # The range and number checks stay in ``_address_coords`` below, so a
+        # row this lets through can still be dropped, but only for bad data.
+        address = Project.address
+        stmt = stmt.where(
+            or_(
+                GeoAnchor.id.isnot(None),
+                and_(
+                    address["lat"].as_string().isnot(None),
+                    or_(address["lng"].as_string().isnot(None), address["lon"].as_string().isnot(None)),
+                ),
+            )
+        )
         # ``id`` breaks ties on ``created_at``, so which projects fall under
         # ``limit`` does not change from one request to the next.
         stmt = stmt.order_by(Project.created_at.desc(), Project.id.desc()).limit(limit)
