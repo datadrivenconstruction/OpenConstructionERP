@@ -130,6 +130,15 @@ export { getVatRate, getCurrencySymbol, computeQualityScore };
 export type { QualityBreakdown };
 
 /**
+ * How the editor lands a `?highlight=` link: the first try waits for the grid
+ * to take the rows, then a few more a quarter second apart (about three
+ * seconds in all) in case the rows arrive after the bill.
+ */
+const URL_HIGHLIGHT_FIRST_MS = 300;
+const URL_HIGHLIGHT_RETRY_MS = 250;
+const URL_HIGHLIGHT_TRIES = 12;
+
+/**
  * Issue #136 — next collision-free ordinal for a sub-section nested under
  * ``parentOrdinal``. The previous logic only looked at *direct children*
  * and stepped +10 from their max numeric suffix, which collided with any
@@ -1453,27 +1462,52 @@ export function BOQEditorPage() {
     };
   }, [queryClient]);
 
-  // Scroll to and highlight a position when ?highlight=pos_id is in URL
-  // Works with both AG Grid rows (div[row-id]) and legacy table rows (tr[data-position-id])
+  // Scroll to and highlight a position when ?highlight=pos_id is in URL.
+  // The grid virtualises its rows, so a row below the fold has no DOM node
+  // to find: the jump goes through the grid's own handle, which looks the row
+  // up in its model and scrolls it into view. Links land here from change
+  // orders (the section an approval appended, always the last rows of the
+  // bill) and from progress, so the target is often far down. The rows can
+  // arrive a moment after the bill does, hence a few tries; the parameter is
+  // dropped once the row was found, or once the tries are spent on a row that
+  // is not in this bill. A legacy table row (tr[data-position-id]) is still
+  // honoured for surfaces that render one.
   useEffect(() => {
     if (!highlightPositionId || !boq) return;
-    const timer = setTimeout(() => {
-      const row = (
-        document.querySelector(`div.ag-row[row-id="${highlightPositionId}"]`) ??
-        document.querySelector(`tr[data-position-id="${highlightPositionId}"]`)
-      ) as HTMLElement | null;
+    let tries = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const dropParam = () =>
+      setSearchParams((prev) => {
+        prev.delete('highlight');
+        return prev;
+      }, { replace: true });
+    const land = () => {
+      tries += 1;
+      if (boqGridRef.current?.scrollToPosition(highlightPositionId)) {
+        dropParam();
+        return;
+      }
+      // Position ids are uuids; anything else in the parameter is not one and
+      // must not reach a selector, where a quote would make it throw.
+      const row = /^[\w-]+$/.test(highlightPositionId)
+        ? (document.querySelector(`tr[data-position-id="${highlightPositionId}"]`) as HTMLElement | null)
+        : null;
       if (row) {
         row.scrollIntoView({ behavior: 'smooth', block: 'center' });
         row.classList.add('ring-2', 'ring-oe-blue', 'ring-inset', 'bg-oe-blue-subtle');
         setTimeout(() => {
           row.classList.remove('ring-2', 'ring-oe-blue', 'ring-inset', 'bg-oe-blue-subtle');
         }, 3000);
+        dropParam();
+        return;
       }
-      setSearchParams((prev) => {
-        prev.delete('highlight');
-        return prev;
-      }, { replace: true });
-    }, 500);
+      if (tries >= URL_HIGHLIGHT_TRIES) {
+        dropParam();
+        return;
+      }
+      timer = setTimeout(land, URL_HIGHLIGHT_RETRY_MS);
+    };
+    timer = setTimeout(land, URL_HIGHLIGHT_FIRST_MS);
     return () => clearTimeout(timer);
   }, [highlightPositionId, boq, setSearchParams]);
 

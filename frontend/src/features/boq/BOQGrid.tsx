@@ -629,9 +629,11 @@ export interface BOQGridHandle {
    * Scroll the grid to a position or section row and flash it. Re-callable
    * (an outline jump may target the same row twice in a row), unlike the
    * `highlightPositionId` prop which only fires when its value changes. No-op
-   * when the row is not in the current model (e.g. filtered out).
+   * when the row is not in the current model (e.g. filtered out, or the grid
+   * has not loaded yet). Returns whether the row was found, so a caller that
+   * arrives before the rows do can try again.
    */
-  scrollToPosition: (positionId: string) => void;
+  scrollToPosition: (positionId: string) => boolean;
   /**
    * Open a freshly-added leaf partida directly in inline edit on its
    * Description cell, so the user types straight away instead of hunting
@@ -1221,11 +1223,12 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     },
     scrollToPosition: (positionId: string) => {
       const api = gridApiRef.current;
-      if (!api) return;
+      if (!api) return false;
       const node = api.getRowNode(positionId);
-      if (!node) return;
+      if (!node) return false;
       api.ensureNodeVisible(node, 'middle');
       api.flashCells({ rowNodes: [node] });
+      return true;
     },
     beginEditDescription: (positionId: string) => {
       // Open a freshly-added leaf row directly in inline edit on its
