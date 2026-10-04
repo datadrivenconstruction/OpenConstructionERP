@@ -7997,7 +7997,14 @@ class BOQService:
         Raises:
             HTTPException 404 if BOQ not found.
         """
-        boq = await self.get_boq(boq_id)
+        # Only the bill's existence is needed here. ``get_boq`` proved it by
+        # loading every position and markup (both ``selectin``), and both are
+        # read again below, so the editor paid for them twice on every open.
+        if await self.boq_repo.get_header(boq_id) is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="BOQ not found",
+            )
         all_positions = await self.position_repo.list_all_for_boq(boq_id)
 
         # Resolve the project's base currency + FX table so positions and
@@ -8754,11 +8761,31 @@ class BOQService:
         Raises:
             HTTPException 404 if BOQ not found.
         """
-        await self.get_boq(boq_id)
+        # The bill's existence and its project's country, in one statement.
+        # This used to take nine: ``get_boq`` loaded the bill with every
+        # position and markup (both ``selectin``) only to prove it exists and
+        # dropped it, so ``project_for_boq`` loaded all of that again, then the
+        # project with its milestones and WBS, all to read one column. A bill
+        # whose project row is gone still classifies, with no country, as
+        # ``project_for_boq`` answered for it.
+        from app.modules.projects.models import Project  # noqa: PLC0415
+
+        row = (
+            await self.session.execute(
+                select(BOQ.id, Project.country_code)
+                .select_from(BOQ)
+                .outerjoin(Project, Project.id == BOQ.project_id)
+                .where(BOQ.id == boq_id)
+            )
+        ).first()
+        if row is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="BOQ not found",
+            )
 
         # Resolve classification system from the project's country.
-        project = await self.project_for_boq(boq_id)
-        country_code = getattr(project, "country_code", None) if project else None
+        country_code = row[1]
         system = _resolve_classification_system(country_code)
 
         all_positions = await self.position_repo.list_all_for_boq(boq_id)

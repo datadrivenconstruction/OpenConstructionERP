@@ -57,8 +57,10 @@ pytestmark = pytest.mark.tenant_isolation
 #: The editor's page-load ceiling for one bill, every request in
 #: ``_editor_urls`` together, auth included. Measured at 57 for the owner and
 #: 62 for a team member before the guards were folded, 53 and 54 after (the
-#: member's one extra is the project read, guarded outside the BOQ module).
-EDITOR_LOAD_CEILING = 53
+#: member's one extra is the project read, guarded outside the BOQ module), and
+#: 43 and 44 once the cost breakdown and the classification stopped loading the
+#: bill twice (``tests/pg/test_editor_panels_read_the_bill_once.py``).
+EDITOR_LOAD_CEILING = 43
 
 
 # ── The guards as they were, verbatim ──────────────────────────────────────
