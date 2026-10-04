@@ -105,6 +105,7 @@ from app.dependencies import (
     verify_project_access,
 )
 from app.modules.boq import cost_risk_engine as cre
+from app.modules.boq.change_review_router import change_review_router
 from app.modules.boq.copilot_schemas import (
     CopilotApplyRequest,
     CopilotApplyResponse,
@@ -237,6 +238,7 @@ router = APIRouter(tags=["boq"])
 # The module loader mounts exactly one router per module, this one. Sub-routers
 # that live in their own files answer nowhere until they are included here.
 router.include_router(resource_review_router)
+router.include_router(change_review_router)
 _log = logging.getLogger(__name__)
 
 

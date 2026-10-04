@@ -647,5 +647,7 @@ class QuantityLink(Base):
 # conftest) imports ``app.modules.boq.models``; importing the copilot model from
 # this already-discovered module guarantees ``oe_boq_position_copilot_message``
 # is created on a fresh database and seen by Alembic autogenerate, without
-# adding a hand-maintained import elsewhere.
+# adding a hand-maintained import elsewhere. The change-flag model
+# (``oe_boq_change_flag``) is registered the same way.
+from app.modules.boq.change_review_models import BOQChangeFlag  # noqa: E402,F401
 from app.modules.boq.copilot_models import PositionCopilotMessage  # noqa: E402,F401
