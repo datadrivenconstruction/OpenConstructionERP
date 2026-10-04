@@ -271,6 +271,15 @@ def resolve_declared_rule_sets(m: PartnerPackManifest, *, strict: bool = False) 
     return [name for name in declared if name in known]
 
 
+#: The project metadata key that records which of a project's rule sets the
+#: pack active at creation appended, as opposed to the ones the caller asked
+#: for. The BOQ router reads it to treat a pack-added "code required" set the
+#: way it treats the country row's: dropped while the project names another
+#: standard. Without the record the two are indistinguishable on the row, and
+#: a set someone asked for on purpose (a dual-coded bill) would go with it.
+PACK_RULE_SETS_METADATA_KEY = "pack_rule_sets"
+
+
 def inherited_rule_sets(
     declared: Sequence[str] | None,
     pack: PartnerPackManifest | None,
@@ -292,7 +301,30 @@ def inherited_rule_sets(
     Returns:
         The de-duplicated union, never empty.
     """
+    return split_inherited_rule_sets(declared, pack)[0]
+
+
+def split_inherited_rule_sets(
+    declared: Sequence[str] | None,
+    pack: PartnerPackManifest | None,
+) -> tuple[list[str], list[str]]:
+    """:func:`inherited_rule_sets`, plus the names the pack itself appended.
+
+    The second list is what project creation records under
+    :data:`PACK_RULE_SETS_METADATA_KEY`. A name the caller asked for is never
+    in it, even when the pack declares the same name, and neither is the
+    ``boq_quality`` baseline seeded for an empty request.
+
+    Args:
+        declared: The rule sets the caller asked for.
+        pack: The pack active at creation time, or ``None``.
+
+    Returns:
+        ``(all_sets, pack_added)``: the de-duplicated union, never empty, and
+        the subset of it that only the pack contributed, in the same order.
+    """
     out: list[str] = []
+    added: list[str] = []
     seen: set[str] = set()
     for name in declared or []:
         cleaned = str(name).strip()
@@ -313,7 +345,8 @@ def inherited_rule_sets(
             if name not in seen:
                 seen.add(name)
                 out.append(name)
-    return out
+                added.append(name)
+    return out, added
 
 
 def _module_exists(name: str) -> bool:

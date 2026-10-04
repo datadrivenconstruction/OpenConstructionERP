@@ -13,11 +13,12 @@ on no rule set, and a project whose region names no country got nothing.
 Nine of them now name their sets. South Africa is left empty on purpose, see
 :data:`LEFT_TO_THE_COUNTRY_ROW`.
 
-A named set is not free. It is copied onto every project created under the
-pack, and the BOQ router drops a country row's "code required" set for a
-project coded in another standard but never drops a set the project carries.
-So the demos each pack installs are validated here with exactly what a project
-created under the pack would carry, and must clear it.
+A named set is copied onto every project created under the pack, and project
+creation records which sets the pack added. The BOQ router drops such a set,
+when it demands a code of another standard than the project names, exactly as
+it drops the country row's; a set the creator asked for is kept. So the demos
+each pack installs are validated here with exactly what a project created
+under the pack would carry, record included, and must clear it.
 
 ``test_pack_conformance`` already holds one direction: every set a pack names
 also runs without it. Nothing held the other one, so a pack could name
@@ -405,13 +406,20 @@ def test_the_inherited_demo_population_covers_the_repaired_code_set_packs() -> N
         assert slug in packs, f"{slug} has no demo the inherited-set check can validate"
 
 
-def _inherited_errors(manifest: PartnerPackManifest, demo_id: str) -> tuple[list[str], dict[str, int]]:
-    """Validate ``demo_id`` with the sets a project created under ``manifest`` carries; count errors per rule."""
+def _inherited_errors(
+    manifest: PartnerPackManifest, demo_id: str, *, recorded: bool = True
+) -> tuple[list[str], dict[str, int]]:
+    """Validate ``demo_id`` with the sets a project created under ``manifest`` carries; count errors per rule.
+
+    ``recorded`` is whether the router is told which sets the pack added, as
+    project creation records them. Off, it reads every carried set as asked
+    for, which is what it did before the record existed.
+    """
     import asyncio
 
     from app.core.classification_registry import resolve_standard
     from app.core.demo_projects import DEMO_TEMPLATES, _country_code_for
-    from app.core.partner_pack.apply import inherited_rule_sets
+    from app.core.partner_pack.apply import split_inherited_rule_sets
     from app.core.validation.engine import validation_engine
     from app.core.validation.rules import register_builtin_rules
     from app.modules.boq.router import _build_rule_sets
@@ -419,10 +427,18 @@ def _inherited_errors(manifest: PartnerPackManifest, demo_id: str) -> tuple[list
     register_builtin_rules()
     template = DEMO_TEMPLATES[demo_id]
     standard = resolve_standard(template.classification_standard or None, region=template.region).standard or ""
-    inherited = inherited_rule_sets(list(template.validation_rule_sets or []), manifest)
-    rule_sets = _build_rule_sets(inherited, standard, template.region or "", _country_code_for(template) or "")
+    inherited, pack_added = split_inherited_rule_sets(list(template.validation_rule_sets or []), manifest)
+    rule_sets = _build_rule_sets(
+        inherited,
+        standard,
+        template.region or "",
+        _country_code_for(template) or "",
+        pack_rule_sets=pack_added if recorded else (),
+    )
     runnable = [name for name in rule_sets if validation_engine.registry.has_rules(name)]
     for name in manifest.validation_rule_sets:
+        if name in pack_added and recorded and name not in rule_sets:
+            continue  # dropped on purpose: a code set of a standard the demo does not use
         assert name in runnable, f"{manifest.slug} names {name!r} and the in-process registry does not run it"
     report = asyncio.run(
         validation_engine.validate(
@@ -442,8 +458,9 @@ def test_a_demo_validated_with_what_a_pack_project_inherits_raises_no_error(slug
 
     ``test_pack_conformance`` validates a demo with the demo's own sets, which
     is how the installed demo is validated. A project the user creates under
-    the pack inherits the pack's sets as well, unfiltered by its standard, and
-    that is the population a pack-declared "code required" set reaches.
+    the pack inherits the pack's sets as well, with the record of which ones
+    the pack added, and that is the population a pack-declared "code required"
+    set reaches.
     """
     runnable, errors = _inherited_errors(_manifests()[slug], demo_id)
     assert errors == {}, (
@@ -451,10 +468,20 @@ def test_a_demo_validated_with_what_a_pack_project_inherits_raises_no_error(slug
     )
 
 
-def test_the_inherited_check_fails_the_south_african_pack_if_it_names_nrm() -> None:
-    """Negative control: the declaration this file declines to make, made, is caught on the pack's demo."""
+def test_the_record_is_what_keeps_a_pack_code_set_off_a_demo_coded_otherwise() -> None:
+    """Negative control: South Africa naming nrm, on its Johannesburg demo coded in MasterFormat.
+
+    Without the record of what the pack added, the router reads nrm as a set
+    the project asked for and the bill fails on every line, which is what
+    happened before the record existed. With it, nrm is dropped for a
+    MasterFormat project exactly as the ZA country row's nrm is.
+    """
     from app.core.demo_projects import PACK_DEMO_PROJECT
 
     named = _manifests()["south-africa"].model_copy(update={"validation_rule_sets": ["nrm"]})
-    _runnable, errors = _inherited_errors(named, PACK_DEMO_PROJECT["south-africa"])
-    assert errors.get("nrm.classification_required", 0) > 0, errors
+    demo = PACK_DEMO_PROJECT["south-africa"]
+    _runnable, unrecorded = _inherited_errors(named, demo, recorded=False)
+    assert unrecorded.get("nrm.classification_required", 0) > 0, unrecorded
+    runnable, recorded = _inherited_errors(named, demo)
+    assert "nrm" not in runnable
+    assert recorded == {}, recorded

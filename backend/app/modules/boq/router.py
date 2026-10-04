@@ -3391,11 +3391,58 @@ _COUNTRY_RULE_SETS: dict[str, list[str]] = {
 }
 
 
+def _is_foreign_code_set(rule_set: str, standard: str, std_rule: str | None) -> bool:
+    """Whether ``rule_set`` demands a code of a standard the project does not name.
+
+    The one predicate behind both filters in :func:`_build_rule_sets`, the
+    country row's and the pack's, so the two cannot drift apart. A project
+    that names no standard keeps every set: nothing says which code its lines
+    carry, and the pack or the country row is then the best statement there is.
+
+    Args:
+        rule_set: A rule-set identifier.
+        standard: The project's classification standard, lower-cased, or "".
+        std_rule: The rule set that checks ``standard``, or ``None``.
+
+    Returns:
+        True when the set should be dropped for this project.
+    """
+    return bool(standard) and rule_set in _CLASSIFICATION_CODE_SETS and rule_set != std_rule
+
+
+def _pack_added_rule_sets(project: Any) -> list[str]:
+    """The rule sets the project's creation pack appended, as recorded on it.
+
+    Written by project creation under
+    :data:`app.core.partner_pack.apply.PACK_RULE_SETS_METADATA_KEY`. A project
+    created before the record existed, or with no pack active, has none, and
+    every set it carries counts as asked for.
+
+    Args:
+        project: A ``Project`` row, or anything with a ``metadata_`` mapping.
+
+    Returns:
+        The recorded names, or an empty list when the record is absent or
+        malformed.
+    """
+    from app.core.partner_pack.apply import PACK_RULE_SETS_METADATA_KEY
+
+    metadata = getattr(project, "metadata_", None)
+    if not isinstance(metadata, dict):
+        return []
+    recorded = metadata.get(PACK_RULE_SETS_METADATA_KEY)
+    if not isinstance(recorded, list):
+        return []
+    return [name for name in recorded if isinstance(name, str)]
+
+
 def _build_rule_sets(
     project_rule_sets: list[str],
     classification_standard: str,
     region: str,
     country_code: str | None = None,
+    *,
+    pack_rule_sets: Sequence[str] | None = None,
 ) -> list[str]:
     """Determine which validation rule sets to apply based on project config.
 
@@ -3411,17 +3458,34 @@ def _build_rule_sets(
             region names no country. A project created while a country pack
             is active gets its country from the pack and may carry a region
             label that is only a city, or nothing at all.
+        pack_rule_sets: The names among ``project_rule_sets`` that the pack
+            active at the project's creation appended, read from
+            ``project.metadata_`` by :func:`_pack_added_rule_sets`. A pack's
+            "code required" set is its country row carried on the project, so
+            it is filtered exactly like the row; every other carried set is
+            kept as asked for.
 
     Returns:
         Deduplicated list of rule set names.
     """
     from app.core.classification_registry import is_macro_region, normalise_region
 
-    rule_sets = list(project_rule_sets)
-
-    # The classification standard's rule set, then the country's.
     standard = (classification_standard or "").strip().lower()
     std_rule = _STANDARD_RULE_SETS.get(standard)
+
+    # A set the project carries because its pack added it goes through the
+    # same filter as the country row, and for the same reason: the Texas pack
+    # names masterformat, and a project under it that names UniFormat would
+    # otherwise fail masterformat.classification_required on every line,
+    # whatever its standard says now or is changed to later. A set the creator
+    # asked for is kept even when it is another standard's, because a
+    # dual-coded bill (the Warsaw demo carries KNR beside DIN 276) asks for it.
+    pack_added = set(pack_rule_sets or ())
+    rule_sets = [
+        rs for rs in project_rule_sets if not (rs in pack_added and _is_foreign_code_set(rs, standard, std_rule))
+    ]
+
+    # The classification standard's rule set, then the country's.
     if std_rule and std_rule not in rule_sets:
         rule_sets.append(std_rule)
 
@@ -3434,7 +3498,7 @@ def _build_rule_sets(
     from_column = normalise_region(country_code)
     country = from_column if from_column and (from_region is None or is_macro_region(region)) else from_region
     for rs in _COUNTRY_RULE_SETS.get(country or "", []):
-        if standard and rs in _CLASSIFICATION_CODE_SETS and rs != std_rule:
+        if _is_foreign_code_set(rs, standard, std_rule):
             # The project names its standard, and this row's code rule is
             # for another one; it would fail every correctly coded line.
             continue
@@ -3527,6 +3591,7 @@ async def _run_import_validation(
             classification_standard=project.classification_standard or "",
             region=project.region or "",
             country_code=getattr(project, "country_code", None),
+            pack_rule_sets=_pack_added_rule_sets(project),
         )
 
         report = await validation_engine.validate(
@@ -3707,6 +3772,7 @@ async def validate_boq(
         classification_standard=project.classification_standard or "",
         region=project.region or "",
         country_code=getattr(project, "country_code", None),
+        pack_rule_sets=_pack_added_rule_sets(project),
     )
 
     # Run validation. The rows are this endpoint's own projection; anything

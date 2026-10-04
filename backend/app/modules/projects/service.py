@@ -15,6 +15,7 @@ import asyncio
 import logging
 import uuid
 from datetime import UTC, datetime
+from typing import Any
 
 from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
@@ -526,7 +527,7 @@ class ProjectService:
 
         # Metadata the pack and the resolution contribute, merged onto the
         # project once it exists.
-        pack_meta: dict[str, str] = {}
+        pack_meta: dict[str, Any] = {}
         country_code = (data.country_code or "").strip().upper() or None
 
         # Resolve from the address country name when no explicit code was
@@ -616,10 +617,22 @@ class ProjectService:
         # the pack's sets are appended, and a set the engine does not register
         # is dropped rather than written - a project must be creatable even
         # when a pack is wrong. Fail-soft, like the pack lookup above.
+        #
+        # Which names the pack added is recorded beside them. A pack's "code
+        # required" set (masterformat under the Texas pack, birimfiyat under
+        # the Turkish one) is its country row carried on the project, and the
+        # BOQ router drops it, as it drops the row's, while the project names
+        # another standard: a UniFormat bill under the Texas pack must not
+        # fail masterformat on every line. A set the caller asked for is not
+        # in the record and is never dropped, because a dual-coded bill asks
+        # for a second code set on purpose.
+        _pack_added: list[str] = []
         try:
-            from app.core.partner_pack.apply import inherited_rule_sets
+            from app.core.partner_pack.apply import PACK_RULE_SETS_METADATA_KEY, split_inherited_rule_sets
 
-            _rule_sets = inherited_rule_sets(data.validation_rule_sets, active_pack)
+            _rule_sets, _pack_added = split_inherited_rule_sets(data.validation_rule_sets, active_pack)
+            if _pack_added:
+                pack_meta[PACK_RULE_SETS_METADATA_KEY] = _pack_added
         except Exception:  # noqa: BLE001 - creation must never break on pack lookup
             _rule_sets = list(data.validation_rule_sets or [])
 
