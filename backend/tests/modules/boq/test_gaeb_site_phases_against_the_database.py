@@ -47,6 +47,7 @@ from app.modules.contacts.models import Contact
 from app.modules.contracts.models import Contract, ContractLine, ProgressClaim, ProgressClaimLine
 from app.modules.finance.einvoice_settings_models import DEFAULT_SCOPE, EInvoiceSettings
 from app.modules.projects.models import Project
+from app.modules.subcontractors.models import Subcontractor
 from app.modules.users.models import User
 from tests._pg import transactional_session
 
@@ -339,6 +340,45 @@ async def test_an_explicit_rate_wins_and_a_missing_seller_is_named(session) -> N
         await export_claim_gaeb_x89(second.id, str(owner.id), session, vat_rate=None, invoice_type="deduction")
     assert refused.value.status_code == 422
     assert "creator.street" in refused.value.detail["missing"]
+
+
+async def test_a_subcontract_is_invoiced_by_the_subcontractor_register_entry(session) -> None:
+    """On a subcontract the counterparty id names a subcontractor row, not a contact.
+
+    The subcontractor writes the invoice and we receive it, so its legal name,
+    address and tax id have to come from the register. Looking the id up among
+    the contacts finds nothing and would leave every creator field missing.
+    """
+    owner = await _user(session)
+    _first, second = await _contract_with_two_claims(session, owner)
+    sub = Subcontractor(
+        legal_name="Stahlbau Weber GmbH",
+        trade_name="Weber",
+        tax_id="DE987654321",
+        country="DE",
+        address={"line1": "Werkstrasse 9", "postcode": "28195", "city": "Bremen"},
+    )
+    session.add(sub)
+    await session.flush()
+    contract = await session.get(Contract, second.contract_id)
+    assert contract is not None
+    contract.counterparty_type = "subcontractor"
+    contract.counterparty_id = sub.id
+    await session.flush()
+
+    preview = await preview_claim_gaeb_x89(second.id, str(owner.id), session, vat_rate=None, invoice_type="deduction")
+    assert preview["creator"]["name"] == "Stahlbau Weber GmbH"
+    assert preview["creator"]["street"] == "Werkstrasse 9"
+    assert preview["creator"]["city"] == "Bremen"
+    assert preview["creator"]["tax_no"] == "DE987654321"
+    assert preview["recipient"]["name"] == "Rohbau Nord GmbH"
+    assert preview["missing"] == []
+
+    response = await export_claim_gaeb_x89(second.id, str(owner.id), session, vat_rate=None, invoice_type="deduction")
+    root = ET.fromstring(await _body(response))
+    assert root.findtext(f"{NS89}Invoice/{NS89}InvoiceCreator/{NS89}Address/{NS89}Name1") == "Stahlbau Weber GmbH"
+    assert root.findtext(f"{NS89}Invoice/{NS89}InvoiceCreator/{NS89}TaxNo") == "DE987654321"
+    assert root.findtext(f"{NS89}Invoice/{NS89}InvoiceRecipient/{NS89}Address/{NS89}Name1") == "Rohbau Nord GmbH"
 
 
 async def test_a_stranger_cannot_read_the_claim(session) -> None:

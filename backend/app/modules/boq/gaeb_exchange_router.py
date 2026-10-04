@@ -462,15 +462,61 @@ async def _our_party(session: Any) -> InvoiceParty | None:
     )
 
 
+async def _party_from_subcontractor(session: Any, entity_id: uuid.UUID) -> InvoiceParty | None:
+    """A subcontractor row as an invoice party, or ``None`` when there is no such row.
+
+    The register keeps its own legal name, address and tax id. A field the row
+    leaves empty is answered by the contact it links to, if any, so an address
+    kept on the contact still reaches the invoice.
+    """
+    from app.modules.contacts.models import Contact
+    from app.modules.subcontractors.models import Subcontractor
+
+    sub = await session.get(Subcontractor, entity_id)
+    if sub is None:
+        return None
+    address = sub.address if isinstance(sub.address, dict) else {}
+    details: dict[str, Any] = {**address, "tax_no": sub.tax_id or ""}
+    if sub.country and not details.get("country_code"):
+        details["country_code"] = sub.country
+    party = _party_from_details(str(sub.legal_name or sub.trade_name or ""), details)
+    if sub.contact_id is not None:
+        contact = await session.get(Contact, sub.contact_id)
+        if contact is not None:
+            linked = _party_from_contact(contact)
+            for attr in ("name", "street", "postcode", "city", "country", "vat_id"):
+                if not getattr(party, attr):
+                    setattr(party, attr, getattr(linked, attr))
+    return party
+
+
 async def _counterparty(session: Any, contract: Any, role: str) -> tuple[InvoiceParty | None, str]:
-    """The other side of the contract: its linked contact, else its party register entry."""
+    """The other side of the contract: its linked record, else its party register entry.
+
+    ``counterparty_id`` names a contact or, on a subcontract, a row of the
+    subcontractor register; both are tried, the declared type first, as the
+    contracts service resolves the name. A party entry is read from the record
+    its ``party_type`` points at.
+    """
     from app.modules.contacts.models import Contact
     from app.modules.contracts.models import ContractParty
 
+    async def _from_contact(entity_id: uuid.UUID) -> InvoiceParty | None:
+        contact = await session.get(Contact, entity_id)
+        return _party_from_contact(contact) if contact is not None else None
+
+    async def _from_subcontractor(entity_id: uuid.UUID) -> InvoiceParty | None:
+        return await _party_from_subcontractor(session, entity_id)
+
     if contract.counterparty_id is not None:
-        contact = await session.get(Contact, contract.counterparty_id)
-        if contact is not None:
-            return _party_from_contact(contact), "contact"
+        if (contract.counterparty_type or "client") == "subcontractor":
+            lookups = ((_from_subcontractor, "subcontractor"), (_from_contact, "contact"))
+        else:
+            lookups = ((_from_contact, "contact"), (_from_subcontractor, "subcontractor"))
+        for lookup, source in lookups:
+            found = await lookup(contract.counterparty_id)
+            if found is not None:
+                return found, source
     rows = (
         (
             await session.execute(
@@ -486,9 +532,14 @@ async def _counterparty(session: Any, contract: Any, role: str) -> tuple[Invoice
     rows = sorted(rows, key=lambda p: (not bool(p.is_primary), str(p.display_name or "")))
     for party in rows:
         if party.party_id is not None:
-            contact = await session.get(Contact, party.party_id)
-            if contact is not None:
-                return _party_from_contact(contact), "contract_party"
+            if party.party_type == "subcontractor":
+                linked = await _from_subcontractor(party.party_id)
+            elif party.party_type in ("user", "external"):
+                linked = None
+            else:
+                linked = await _from_contact(party.party_id)
+            if linked is not None:
+                return linked, "contract_party"
         details = party.contact_details if isinstance(party.contact_details, dict) else {}
         return _party_from_details(str(party.display_name or ""), details), "contract_party"
     return None, "none"
