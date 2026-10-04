@@ -125,6 +125,33 @@ describe('GaebSiteExchangeDialog', () => {
     expect(applyMock.mock.calls[0]![1].set_boq_quantity).toBe(true);
   });
 
+  it('names a refused row in words and unticks the rows that were written', async () => {
+    previewMock.mockResolvedValue(PREVIEW);
+    applyMock.mockResolvedValue({
+      applied: ['p1'],
+      unchanged: [],
+      errors: [{ position_id: 'p2', error: 'position_is_section' }],
+      set_boq_quantity: false,
+    });
+    render(
+      <GaebSiteExchangeDialog
+        open
+        boqId="b1"
+        boqName="LV"
+        initialFile={new File(['<GAEB/>'], 'aufmass.x31')}
+        onClose={() => {}}
+      />,
+    );
+    fireEvent.click(await screen.findByRole('button', { name: 'Apply 2 measured quantities' }));
+
+    expect(await screen.findByText('01.0020: A section row takes no quantity')).toBeInTheDocument();
+    expect(screen.queryByText(/position_is_section/)).toBeNull();
+    // Written: no longer offered. Refused: still ticked, so it can be retried.
+    expect((screen.getByLabelText('01.0010') as HTMLInputElement).checked).toBe(false);
+    expect((screen.getByLabelText('01.0020') as HTMLInputElement).checked).toBe(true);
+    expect(screen.getByRole('button', { name: 'Apply 1 measured quantity' })).toBeInTheDocument();
+  });
+
   it('opens a handed-over X89 on the check, shows findings and offers no apply', async () => {
     checkMock.mockResolvedValue({
       file_name: 'r.x89',

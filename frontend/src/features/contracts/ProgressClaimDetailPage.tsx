@@ -501,7 +501,6 @@ export function ProgressClaimDetailPage() {
       {/* GAEB X89 invoice, collapsed until opened. */}
       <GaebInvoicePanel claimId={claimId as string} claimNumber={claim.claim_number} />
 
-
       {populateOpen && (
         <PopulatePreviewModal
           claimId={claimId as string}

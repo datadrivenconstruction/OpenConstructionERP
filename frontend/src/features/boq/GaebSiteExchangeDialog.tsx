@@ -82,8 +82,32 @@ function invoiceIssue(t: TFunction, issue: string): string {
       return t('boq.gaeb_site.issue_amount_arithmetic', { defaultValue: 'Amount is not quantity x price' });
     case 'missing_amount':
       return t('boq.gaeb_site.issue_missing_amount', { defaultValue: 'No amount' });
+    case 'missing_quantity':
+      return t('boq.gaeb_site.issue_missing_quantity', { defaultValue: 'No billed quantity' });
+    case 'duplicate_oz_in_file':
+      return t('boq.gaeb_site.issue_duplicate_oz', { defaultValue: 'OZ invoiced more than once' });
     default:
       return issue;
+  }
+}
+
+/** The server answers per refused item with a code, or with the update's own message. */
+function applyError(t: TFunction, error: string): string {
+  switch (error) {
+    case 'position_not_in_boq':
+      return t('boq.gaeb_site.apply_error_not_in_boq', { defaultValue: 'The position is not in this bill' });
+    case 'position_is_section':
+      return t('boq.gaeb_site.apply_error_section', { defaultValue: 'A section row takes no quantity' });
+    case 'invalid_quantity':
+      return t('boq.gaeb_site.apply_error_invalid_quantity', { defaultValue: 'The quantity cannot be read' });
+    case 'negative_quantity':
+      return t('boq.gaeb_site.apply_error_negative_quantity', {
+        defaultValue: 'A negative quantity cannot become the bill quantity',
+      });
+    case 'duplicate_item':
+      return t('boq.gaeb_site.apply_error_duplicate', { defaultValue: 'The position was sent twice' });
+    default:
+      return error;
   }
 }
 
@@ -206,10 +230,29 @@ export function GaebSiteExchangeDialog({
         }),
       });
       if (result.applied.length > 0) onApplied?.();
-      if (result.errors.length === 0) {
-        const done = new Set([...result.applied, ...result.unchanged]);
-        setSelected((prev) => new Set([...prev].filter((id) => !done.has(id))));
-      }
+      // The rows that were written (or already said so) now carry the file's
+      // quantity, so the table says that instead of the figures read before.
+      const done = new Set([...result.applied, ...result.unchanged]);
+      setPreview((prev) =>
+        prev
+          ? {
+              ...prev,
+              matched: prev.matched.map((m) =>
+                done.has(m.position_id)
+                  ? {
+                      ...m,
+                      current_measured_quantity: m.proposed_quantity,
+                      unchanged: true,
+                      ...(setBoqQuantity
+                        ? { current_quantity: m.proposed_quantity, difference_to_quantity: '0' }
+                        : {}),
+                    }
+                  : m,
+              ),
+            }
+          : prev,
+      );
+      setSelected((prev) => new Set([...prev].filter((id) => !done.has(id))));
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -476,7 +519,7 @@ export function GaebSiteExchangeDialog({
                       {applyErrors.map((e) => (
                         <div key={e.position_id}>
                           {preview.matched.find((m) => m.position_id === e.position_id)?.oz ?? e.position_id}:{' '}
-                          {e.error}
+                          {applyError(t, e.error)}
                         </div>
                       ))}
                     </div>
