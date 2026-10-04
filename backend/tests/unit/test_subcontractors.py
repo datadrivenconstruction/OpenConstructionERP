@@ -403,6 +403,8 @@ def _make_service() -> Any:
         execute=AsyncMock(return_value=SimpleNamespace(scalar_one_or_none=lambda: None)),
         add=lambda _o: None,
         flush=AsyncMock(),
+        # No project row behind the stub, so an agreement has no country defaults.
+        get=AsyncMock(return_value=None),
     )
     svc.subs = _Repo()
     svc.contacts = _Repo()

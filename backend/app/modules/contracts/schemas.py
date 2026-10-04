@@ -11,6 +11,7 @@ from uuid import UUID
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field
 
+from app.modules.contracts.country_defaults import VALUATION_INTERVALS, validate_release_split
 from app.modules.contracts.models import CLAUSE_RISK_LEVELS
 from app.modules.contracts.retention import (
     CANONICAL_RELEASE_EVENTS,
@@ -39,8 +40,47 @@ RETENTION_RELEASE_ROW_EVENTS = "|".join(
 ReleaseEvent = Annotated[str, AfterValidator(canonical_release_event)]
 
 
-class ContractCreate(BaseModel):
-    """Create a new contract."""
+def _readable_release_split(value: list[dict[str, Any]] | None) -> list[dict[str, Any]] | None:
+    """Refuse a release split that would strand retention, where it is written."""
+    if value is None:
+        return None
+    steps = [
+        {**step, "event": canonical_release_event(str(step.get("event") or ""))} if isinstance(step, dict) else step
+        for step in value
+    ]
+    return validate_release_split(steps)
+
+
+#: How retention is paid back, step by step. ``release_percent_of_held`` is the
+#: percent of what is held at that event, so "half at completion, the rest at
+#: the end of the defects period" is 50 then 100.
+ReleaseSplit = Annotated[list[dict[str, Any]] | None, AfterValidator(_readable_release_split)]
+
+
+class ContractPaymentTermFields(BaseModel):
+    """The payment terms a contract states beside its retention rate.
+
+    All optional. On create, a field left out is filled from the usual figure
+    of the project's country where there is one and left empty where there is
+    not; a field sent always wins. They are stored under
+    ``terms["payment_terms"]``.
+    """
+
+    retention_cap_percent: Decimal | None = Field(default=None, ge=0, le=100)
+    retention_release_split: ReleaseSplit = None
+    payment_period_days: int | None = Field(default=None, ge=0, le=365)
+    valuation_interval: str | None = Field(default=None, pattern=rf"^({'|'.join(VALUATION_INTERVALS)})$")
+    certificate_name: str | None = Field(default=None, max_length=200)
+
+
+class ContractCreate(ContractPaymentTermFields):
+    """Create a new contract.
+
+    ``retention_percent`` and ``retention_release_event`` are optional: left
+    out, they start from the usual figure of the project's country (see
+    ``contracts.country_defaults``), and the contract records which figures
+    were filled that way under ``metadata["country_defaults"]``.
+    """
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
@@ -55,9 +95,9 @@ class ContractCreate(BaseModel):
     end_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$")
     total_value: Decimal = Field(default=Decimal("0"))
     currency: str = Field(default="", max_length=3)
-    retention_percent: Decimal = Field(default=Decimal("5.00"), ge=0, le=100)
-    retention_release_event: ReleaseEvent = Field(
-        default="substantial_completion",
+    retention_percent: Decimal | None = Field(default=None, ge=0, le=100)
+    retention_release_event: ReleaseEvent | None = Field(
+        default=None,
         pattern=rf"^({RETENTION_RELEASE_EVENTS})$",
     )
     status: str = Field(default="draft", pattern=rf"^({CONTRACT_STATUSES})$")
@@ -73,8 +113,8 @@ class ContractCreate(BaseModel):
     template_code: str | None = Field(default=None, max_length=80)
 
 
-class ContractUpdate(BaseModel):
-    """Partial update for a contract."""
+class ContractUpdate(ContractPaymentTermFields):
+    """Partial update for a contract. Payment terms lock with the other financial terms."""
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
@@ -134,6 +174,24 @@ class ContractResponse(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
+
+
+class ContractCountryDefaultsResponse(BaseModel):
+    """The payment terms a new contract on this project starts from.
+
+    ``has_defaults`` is False for a project with no country, or a country the
+    table has no row for; ``values`` is then empty and the form leaves every
+    field for a person to fill. It never answers with another country's row.
+    """
+
+    project_id: UUID
+    country_code: str | None = None
+    has_defaults: bool
+    standard_form: str | None = None
+    values: dict[str, Any] = Field(default_factory=dict)
+    sources: dict[str, dict[str, Any]] = Field(default_factory=dict)
+    # "table", or "regional_pack" when the release split is the pack's.
+    release_split_source: str | None = None
 
 
 class ContractListResponse(BaseModel):

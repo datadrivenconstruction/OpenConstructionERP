@@ -14,6 +14,7 @@ The service centralises:
 
 from __future__ import annotations
 
+import dataclasses
 import logging
 import uuid
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
@@ -36,6 +37,17 @@ from app.modules.contracts.compliance_packs import (
     DEFAULT_PACK_ID,
     WORKFLOW_CONTRACT_SIGNATURE,
     resolve_rule_sets,
+)
+from app.modules.contracts.country_defaults import (
+    CONTRACT_DEFAULT_FIELDS,
+    DEFAULTS_STAMP_KEY,
+    PAYMENT_TERM_FIELDS,
+    PAYMENT_TERMS_KEY,
+    PLATFORM_FALLBACK,
+    apply_contract_defaults,
+    forget_overridden,
+    normalise_country,
+    resolve_contract_defaults,
 )
 from app.modules.contracts.events import CLAIM_POPULATED, EOT_DECIDED, EOT_SUBMITTED
 from app.modules.contracts.final_account import (
@@ -335,6 +347,86 @@ def validate_contract_terms(
     return len(errors) == 0, errors
 
 
+def _explicit_payment_terms(data: Any) -> dict[str, Any]:
+    """The payment-term fields a request actually sent, ``None`` meaning not sent.
+
+    "Sent" is read from ``model_fields_set`` and not from a comparison with the
+    default: a 5 the author typed is the author's 5 even where the country's
+    default is also 5. A figure written straight into
+    ``terms["payment_terms"]`` counts as sent too, so a client that stores its
+    terms there is never overwritten by a default.
+    """
+    sent = getattr(data, "model_fields_set", set())
+    explicit: dict[str, Any] = {}
+    stored = (getattr(data, "terms", None) or {}).get(PAYMENT_TERMS_KEY)
+    if isinstance(stored, dict):
+        explicit.update({k: v for k, v in stored.items() if k in PAYMENT_TERM_FIELDS and v is not None})
+    for field in CONTRACT_DEFAULT_FIELDS:
+        value = getattr(data, field, None)
+        if field in sent and value is not None:
+            explicit[field] = value
+    return explicit
+
+
+def _payment_term_json(value: Any) -> Any:
+    """A payment-term value as the JSON column stores it: money and percentages as strings."""
+    if isinstance(value, Decimal):
+        return format(value.normalize(), "f")
+    if isinstance(value, list):
+        return [dict(step) for step in value]
+    return value
+
+
+def contract_payment_terms(contract: Any) -> dict[str, Any]:
+    """The payment terms a contract states, ``{}`` when it states none."""
+    terms = getattr(contract, "terms", None) or {}
+    block = terms.get(PAYMENT_TERMS_KEY) if isinstance(terms, dict) else None
+    return dict(block) if isinstance(block, dict) else {}
+
+
+def contract_retention_cap(contract: Any) -> Decimal | None:
+    """The retention ceiling the contract agreed, as a percent of the contract sum, or None.
+
+    An unreadable figure reads as no cap rather than raising: it was refused
+    at the schema on the way in, so only a hand-edited row can carry one, and
+    a claim nobody can raise over a typo in a JSON column helps nobody.
+    """
+    raw = contract_payment_terms(contract).get("retention_cap_percent")
+    if raw in (None, ""):
+        return None
+    try:
+        value = Decimal(str(raw))
+    except (ArithmeticError, ValueError):
+        return None
+    if not value.is_finite() or value < DEC_ZERO or value > DEC_HUNDRED:
+        return None
+    return value
+
+
+def flat_retention_within_cap(
+    gross: Decimal,
+    rate: Decimal,
+    *,
+    cap_percent: Decimal | None,
+    contract_sum: Decimal,
+    accrued_before: Decimal,
+) -> Decimal:
+    """Retention a flat-rate claim holds this period, never past the agreed ceiling.
+
+    The ceiling is on what the contract holds in total, so it is measured
+    against what the earlier claims already accrued: once period N reaches it,
+    period N+1 holds nothing more, however large its gross. Checking each
+    period against the cap on its own would let every month hold up to the
+    whole ceiling again.
+    """
+    retention = (gross * rate / DEC_HUNDRED).quantize(Decimal("0.0001"))
+    if cap_percent is None or retention <= DEC_ZERO:
+        return retention
+    ceiling = (max(contract_sum, DEC_ZERO) * cap_percent / DEC_HUNDRED).quantize(Decimal("0.01"), ROUND_HALF_UP)
+    room = max(ceiling - max(accrued_before, DEC_ZERO), DEC_ZERO)
+    return min(retention, room)
+
+
 def compute_line_total(line: ContractLine | Any) -> Decimal:
     """Pure: line.quantity × line.unit_rate. Treats missing values as zero."""
     qty = Decimal(str(getattr(line, "quantity", 0) or 0))
@@ -445,6 +537,9 @@ RELEASE_RULE_FROM_SCHEDULE = "retention_schedule"
 RELEASE_RULE_FROM_PACK = "regional_pack"
 RELEASE_RULE_FROM_REQUEST = "request"
 RELEASE_RULE_DEFAULT = "default"
+#: The release split stated on the contract (``terms["payment_terms"]``),
+#: which a country default or the author wrote there.
+RELEASE_RULE_FROM_CONTRACT = "contract_terms"
 
 #: The release rule when neither the contract nor a national pack gives one:
 #: half at substantial completion, the rest at final completion or at the end
@@ -458,6 +553,36 @@ DEFAULT_RELEASE_RULE: dict[str, Any] = {
         {"event": "defects_period_end", "release_percent_of_held": "100"},
     ],
 }
+
+
+def _contract_release_rule(contract: Any, pack_rule: dict[str, Any] | None) -> dict[str, Any] | None:
+    """The release rule the contract's own split states, or None when it states none.
+
+    The split decides how much each completion event pays back. What else an
+    event needs, the documents and the statute, is the regional pack's, so a
+    step whose event the pack also writes takes the pack's entry with the
+    contract's percentage on it. The pack's events that are not completion
+    events (a rate step-down, a bond replacing retention) are kept as they
+    are: the split says nothing about them.
+    """
+    split = contract_payment_terms(contract).get("retention_release_split")
+    if not isinstance(split, list) or not split:
+        return None
+    pack_events = [e for e in ((pack_rule or {}).get("events") or []) if isinstance(e, dict)]
+    by_event = {canonical_release_event(e.get("event")): e for e in pack_events}
+    events: list[dict[str, Any]] = []
+    for step in split:
+        if not isinstance(step, dict):
+            continue
+        event = canonical_release_event(step.get("event"))
+        entry = dict(by_event.get(event) or {})
+        entry["event"] = event
+        entry["release_percent_of_held"] = str(step.get("release_percent_of_held"))
+        events.append(entry)
+    if not events:
+        return None
+    events.extend(dict(e) for e in pack_events if canonical_release_event(e.get("event")) in OTHER_RELEASE_EVENTS)
+    return {"events": events}
 
 
 def _release_share_outside_schedule(released: Decimal, *, schedule_pool: Decimal, outside_pool: Decimal) -> Decimal:
@@ -1082,6 +1207,15 @@ class ContractsService:
         # versioned template" and keeps the pair populated either way.
         template_code, template_version = await self.resolve_template_for_contract(getattr(data, "template_code", None))
 
+        # Payment terms the author left out start from the usual figures of the
+        # project's country, and the contract records which ones did. A
+        # country with no row fills nothing: the retention rate, which has a
+        # NOT NULL column, takes the platform's historical figure and is
+        # stamped as a fallback rather than passed off as anyone's law.
+        terms, retention_percent, release_event, defaults_stamp = await self._payment_terms_for_new_contract(data)
+        metadata = dict(data.metadata or {})
+        metadata[DEFAULTS_STAMP_KEY] = defaults_stamp
+
         # Contracts always start in 'draft'. The FSM (draft → active →
         # suspended / completed / terminated) is enforced by dedicated
         # transition endpoints that stamp signed_at and emit
@@ -1100,15 +1234,15 @@ class ContractsService:
             end_date=data.end_date,
             total_value=Decimal(str(data.total_value or 0)),
             currency=data.currency,
-            retention_percent=Decimal(str(data.retention_percent or 0)),
-            retention_release_event=data.retention_release_event,
+            retention_percent=retention_percent,
+            retention_release_event=release_event,
             status="draft",
             signed_at=None,
-            terms=data.terms,
+            terms=terms,
             template_code=template_code,
             template_version=template_version,
             created_by=user_id,
-            metadata_=data.metadata,
+            metadata_=metadata,
         )
         # ``code`` carries a unique constraint. Without this the duplicate
         # surfaced as an unhandled IntegrityError, which the caller sees as a
@@ -1132,6 +1266,74 @@ class ContractsService:
             data.project_id,
         )
         return contract
+
+    async def project_country(self, project_id: uuid.UUID) -> str | None:
+        """The project's ISO country, normalised, or None when it names none.
+
+        Only ``country_code`` is read. ``Project.region`` defaults to "DACH",
+        so reading it would hand a German default to every project that never
+        chose a market, which is the thing country defaults exist to stop.
+        """
+        from app.modules.projects.models import Project  # noqa: PLC0415
+
+        project = await self.session.get(Project, project_id)
+        if project is None:
+            return None
+        return normalise_country(getattr(project, "country_code", None)) or None
+
+    async def country_defaults_for_project(self, project_id: uuid.UUID) -> dict[str, Any]:
+        """What a new contract on ``project_id`` starts from, for the form to pre-fill."""
+        country = await self.project_country(project_id)
+        defaults = resolve_contract_defaults(country)
+        return {
+            "project_id": project_id,
+            "country_code": country,
+            "has_defaults": defaults is not None,
+            "standard_form": (defaults or {}).get("standard_form"),
+            "values": (defaults or {}).get("values") or {},
+            "sources": (defaults or {}).get("sources") or {},
+            "release_split_source": (defaults or {}).get("release_split_source"),
+        }
+
+    async def _payment_terms_for_new_contract(self, data: Any) -> tuple[dict[str, Any], Decimal, str, dict[str, Any]]:
+        """Merge what a create request sent with its country's defaults.
+
+        Returns the terms to store (with ``payment_terms`` filled), the
+        retention rate, the release event and the stamp for
+        ``metadata["country_defaults"]``.
+        """
+        country = await self.project_country(data.project_id)
+        explicit = _explicit_payment_terms(data)
+        values, stamp = apply_contract_defaults(explicit, resolve_contract_defaults(country), country_code=country)
+        fallback: list[str] = []
+
+        retention = values.get("retention_percent")
+        if retention is None:
+            retention = PLATFORM_FALLBACK["retention_percent"]
+            fallback.append("retention_percent")
+
+        release_event = getattr(data, "retention_release_event", None)
+        if release_event is None:
+            split = values.get("retention_release_split") or stamp["applied"].get("retention_release_split")
+            if split:
+                release_event = split[0]["event"]
+                stamp["applied"]["retention_release_event"] = release_event
+            else:
+                release_event = PLATFORM_FALLBACK["retention_release_event"]
+                fallback.append("retention_release_event")
+        if fallback:
+            stamp["fallback"] = fallback
+
+        terms = dict(data.terms or {})
+        payment_terms = (
+            dict(terms.get(PAYMENT_TERMS_KEY) or {}) if isinstance(terms.get(PAYMENT_TERMS_KEY), dict) else {}
+        )
+        for field in PAYMENT_TERM_FIELDS:
+            if field in values:
+                payment_terms[field] = _payment_term_json(values[field])
+        if payment_terms:
+            terms[PAYMENT_TERMS_KEY] = payment_terms
+        return terms, Decimal(str(retention)), release_event, stamp
 
     async def get_contract(self, contract_id: uuid.UUID) -> Contract:
         contract = await self.contract_repo.get_by_id(contract_id)
@@ -1184,9 +1386,11 @@ class ContractsService:
         # original_contract_value is set internally when the contract
         # leaves draft and must never be edited through the API.
         fields.pop("original_contract_value", None)
+        # The payment terms that have no column live in terms["payment_terms"].
+        payment_sent = {field: fields.pop(field) for field in PAYMENT_TERM_FIELDS if field in fields}
         # Once the contract leaves `draft`, its financial terms are frozen.
         if contract.status != "draft":
-            locked = sorted(f for f in self._LOCKED_FINANCIAL_FIELDS if f in fields)
+            locked = sorted([*(f for f in self._LOCKED_FINANCIAL_FIELDS if f in fields), *payment_sent])
             if locked:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
@@ -1200,6 +1404,7 @@ class ContractsService:
                         "locked_fields": locked,
                     },
                 )
+        self._fold_payment_terms(contract, fields, payment_sent)
         # re-validate terms if changed
         if "terms" in fields or "contract_type" in fields:
             contract_type = fields.get("contract_type", contract.contract_type)
@@ -1237,6 +1442,53 @@ class ContractsService:
         # deployment without the signing module.
         await self.refresh_signing_content_hash(contract_id)
         return contract
+
+    @staticmethod
+    def _fold_payment_terms(contract: Contract, fields: dict[str, Any], payment_sent: dict[str, Any]) -> None:
+        """Write payment-term edits into ``fields["terms"]`` and correct the defaults stamp.
+
+        A ``terms`` replacement that does not mention ``payment_terms`` keeps
+        the contract's own block: sending ``{"gmp_cap": ...}`` is about the cap,
+        not a request to forget the payment period. ``None`` on a payment-term
+        field clears it.
+
+        Any figure that now differs from the one the country default filled
+        in loses its stamp, so the form stops saying "default for Germany"
+        beside a figure somebody typed over.
+        """
+        before = contract_payment_terms(contract)
+        replaced = fields.get("terms")
+        if before and isinstance(replaced, dict) and PAYMENT_TERMS_KEY not in replaced:
+            fields["terms"] = {**replaced, PAYMENT_TERMS_KEY: dict(before)}
+        if payment_sent:
+            base = dict(fields.get("terms", contract.terms) or {})
+            block = dict(base.get(PAYMENT_TERMS_KEY) or {}) if isinstance(base.get(PAYMENT_TERMS_KEY), dict) else {}
+            for field, value in payment_sent.items():
+                if value is None:
+                    block.pop(field, None)
+                else:
+                    block[field] = _payment_term_json(value)
+            if block:
+                base[PAYMENT_TERMS_KEY] = block
+            else:
+                base.pop(PAYMENT_TERMS_KEY, None)
+            fields["terms"] = base
+
+        changed: dict[str, Any] = {
+            field: fields[field] for field in ("retention_percent", "retention_release_event") if field in fields
+        }
+        if "terms" in fields and isinstance(fields["terms"], dict):
+            after = fields["terms"].get(PAYMENT_TERMS_KEY)
+            after = after if isinstance(after, dict) else {}
+            changed.update({f: after.get(f) for f in PAYMENT_TERM_FIELDS if after.get(f) != before.get(f)})
+        if not changed:
+            return
+        metadata = fields.get("metadata_", contract.metadata_)
+        metadata = dict(metadata) if isinstance(metadata, dict) else {}
+        stamp = metadata.get(DEFAULTS_STAMP_KEY)
+        if isinstance(stamp, dict):
+            metadata[DEFAULTS_STAMP_KEY] = forget_overridden(stamp, changed)
+            fields["metadata_"] = metadata
 
     @staticmethod
     def _code_in_use(code: str) -> HTTPException:
@@ -4900,7 +5152,10 @@ class ContractsService:
             value = sent["cap_percent_of_contract_sum"]
             # The engine reads the cap nested, because a cap has more than one
             # possible basis and only this one is wired.
-            rule["cap"] = None if value is None else {"percent_of_contract_sum": str(value)}
+            # Clearing writes the key with no figure rather than dropping it, so
+            # "this schedule has no cap" stays distinct from "this schedule says
+            # nothing, the contract's agreed ceiling governs" (retention_policy).
+            rule["cap"] = {"percent_of_contract_sum": None if value is None else str(value)}
         if "effective_date" in sent:
             rule["effective_date"] = None if sent["effective_date"] is None else sent["effective_date"].isoformat()
 
@@ -4933,13 +5188,23 @@ class ContractsService:
         is not a policy, and the contract's own rate stands. A schedule whose
         tiers cannot be read refuses with 422 rather than falling back, so a
         policy nobody can apply is never replaced by a flat rate in silence.
+
+        The ceiling is the schedule's own where it writes one. Where it writes
+        none (no ``cap`` key, or ``cap: null`` as a pack's rule copied at
+        signing carries), the contract's agreed ceiling,
+        ``terms["payment_terms"]["retention_cap_percent"]``, governs: a pack
+        that suggests no cap says the agreed security sum governs, and that sum
+        is what the contract states. A schedule whose cap was cleared on
+        purpose carries ``{"percent_of_contract_sum": null}`` and is not
+        overridden.
         """
+        agreed_cap = contract_retention_cap(contract)
         for schedule in await self._retention_schedules(contract):
             rule = schedule.accrual_rule if isinstance(schedule.accrual_rule, dict) else {}
             if not rule.get("tiers"):
                 continue
             try:
-                return policy_from_rule(rule, fallback_rate=contract.retention_percent or 0)
+                policy = policy_from_rule(rule, fallback_rate=contract.retention_percent or 0)
             except ValueError as exc:
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
@@ -4949,7 +5214,25 @@ class ContractsService:
                         "retention_schedule_id": str(schedule.id),
                     },
                 ) from exc
-        return flat_policy(getattr(contract, "retention_percent", 0) or 0)
+            if rule.get("cap") is None and agreed_cap is not None:
+                policy = dataclasses.replace(policy, cap_percent_of_contract_sum=agreed_cap)
+            return policy
+        return dataclasses.replace(
+            flat_policy(getattr(contract, "retention_percent", 0) or 0),
+            cap_percent_of_contract_sum=agreed_cap,
+        )
+
+    async def _flat_retention_cap(self, contract: Contract) -> Decimal | None:
+        """The ceiling a flat-rate claim is held to: the policy's, else the contract's agreed one.
+
+        The flat path never read the retention schedule before, so a schedule
+        nobody can apply must not start refusing T&M and cost-plus claims now;
+        it falls back to the contract's own ceiling instead of raising.
+        """
+        try:
+            return (await self.retention_policy(contract)).cap_percent_of_contract_sum
+        except HTTPException:
+            return contract_retention_cap(contract)
 
     async def _progress_billing(self, contract: Contract) -> dict[str, Any] | None:
         """The progress billing block of the project's national pack, or None when none answers."""
@@ -4969,7 +5252,10 @@ class ContractsService:
 
         The contract's own schedule first, when its ``release_rule`` lists
         events; the older ``{"on_event": ...}`` shape names an event and no
-        amount, so it falls through. Then the project's national pack. Then
+        amount, so it falls through. Then the split the contract itself states
+        in ``terms["payment_terms"]``, from its author or its country's
+        defaults, carrying the pack's documents for each event it shares with
+        the pack. Then the project's national pack. Then
         :data:`DEFAULT_RELEASE_RULE`, labelled as the default so nobody reads
         it as the law of the country.
         """
@@ -4979,6 +5265,9 @@ class ContractsService:
                 return rule, RELEASE_RULE_FROM_SCHEDULE
         billing = await self._progress_billing(contract)
         pack_rule = (billing or {}).get("release_events")
+        agreed = _contract_release_rule(contract, pack_rule if isinstance(pack_rule, dict) else None)
+        if agreed is not None:
+            return agreed, RELEASE_RULE_FROM_CONTRACT
         if isinstance(pack_rule, dict) and pack_rule.get("events"):
             return pack_rule, RELEASE_RULE_FROM_PACK
         return DEFAULT_RELEASE_RULE, RELEASE_RULE_DEFAULT
@@ -5147,7 +5436,22 @@ class ContractsService:
             # it on a row of its own that a release pays back like any other
             # retention (outside_schedule_retention_held).
             rate = Decimal(str(getattr(contract, "retention_percent", 0) or 0))
-            retention = (gross * rate / DEC_HUNDRED).quantize(Decimal("0.0001"))
+            # The agreed ceiling binds a flat claim too. It is a ceiling on what
+            # the contract holds in total, so the room left is the ceiling less
+            # what the earlier claims accrued: a month that reaches it leaves
+            # the next one nothing to hold.
+            cap_percent = await self._flat_retention_cap(contract)
+            accrued_before = DEC_ZERO
+            if cap_percent is not None:
+                earlier = await self.claim_repo.prior_claims(contract.id, before_claim_id=claim.id)
+                accrued_before = sum((Decimal(str(c.retention_amount or 0)) for c in earlier), DEC_ZERO)
+            retention = flat_retention_within_cap(
+                gross,
+                rate,
+                cap_percent=cap_percent,
+                contract_sum=Decimal(str(getattr(contract, "total_value", 0) or 0)),
+                accrued_before=accrued_before,
+            )
             billed_here = await self.release_repo.billed_on_claims([claim.id])
             released_here = sum((Decimal(str(r.amount or 0)) for r in billed_here), DEC_ZERO)
             net = gross - retention + released_here

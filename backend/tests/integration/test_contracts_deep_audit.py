@@ -145,6 +145,11 @@ class _StubSession:
     async def refresh(self, _obj: Any) -> None:
         pass
 
+    async def get(self, _model: Any, _ident: Any) -> Any:
+        # No project row behind the stub: a contract created here has no
+        # country, so it starts from no country defaults.
+        return None
+
 
 class _StubRetentionScheduleRepo:
     async def list_for_contract(self, _contract_id: uuid.UUID) -> list[Any]:

@@ -485,7 +485,9 @@ class AgreementCreate(BaseModel):
     currency: str = Field(default="", max_length=3)
     start_date: date | None = None
     end_date: date | None = None
-    retention_percent: Decimal = Field(default=Decimal("5.0"), ge=0, le=100)
+    # Left out, it starts from the usual retention of the project's country,
+    # the same figure a contract there starts from (contracts.country_defaults).
+    retention_percent: Decimal | None = Field(default=None, ge=0, le=100)
     retention_release_event: str | None = Field(default=None, max_length=120)
     requires_lien_waiver: bool = False
     prime_contract_id: UUID | None = None

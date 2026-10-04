@@ -1186,6 +1186,7 @@ class SubcontractorService:
             await self._assert_prime_contract(data.prime_contract_id, data.project_id)
         if data.contract_id is not None:
             await self._assert_subcontract_contract(data.contract_id, data.project_id)
+        retention_percent, release_event, defaults_stamp = await self._agreement_retention_terms(data)
         entity = SubcontractAgreement(
             subcontractor_id=data.subcontractor_id,
             project_id=data.project_id,
@@ -1194,12 +1195,13 @@ class SubcontractorService:
             currency=data.currency,
             start_date=data.start_date,
             end_date=data.end_date,
-            retention_percent=data.retention_percent,
-            retention_release_event=data.retention_release_event,
+            retention_percent=retention_percent,
+            retention_release_event=release_event,
             requires_lien_waiver=data.requires_lien_waiver,
             prime_contract_id=data.prime_contract_id,
             contract_id=data.contract_id,
             notes=data.notes,
+            metadata_={"country_defaults": defaults_stamp} if defaults_stamp else {},
             # Born unsigned. Set explicitly rather than leaning on the column
             # default so the state machine has a deterministic origin
             # regardless of the persistence layer's flush-time defaulting.
@@ -1208,6 +1210,46 @@ class SubcontractorService:
         )
         await self.agreements.create(entity)
         return entity
+
+    async def _agreement_retention_terms(
+        self, data: AgreementCreate
+    ) -> tuple[Decimal, str | None, dict[str, Any] | None]:
+        """Retention rate and release event for a new agreement, with the defaults stamp.
+
+        A subcontract under a prime contract in a country starts from the same
+        usual retention the prime contract there starts from, and records it
+        the same way. A figure the author sent always wins and stamps nothing.
+        A country with no row keeps the platform's historical rate, stamped as
+        a fallback rather than passed off as that country's figure.
+        """
+        if data.retention_percent is not None:
+            return data.retention_percent, data.retention_release_event, None
+        from app.modules.contracts.country_defaults import (  # noqa: PLC0415
+            PLATFORM_FALLBACK,
+            apply_contract_defaults,
+            normalise_country,
+            resolve_contract_defaults,
+        )
+        from app.modules.projects.models import Project  # noqa: PLC0415
+
+        project = await self.session.get(Project, data.project_id)
+        country = normalise_country(getattr(project, "country_code", None)) or None
+        defaults = resolve_contract_defaults(country)
+        values, stamp = apply_contract_defaults({}, defaults, country_code=country)
+        # An agreement states a rate and one release event; the ceiling, the
+        # split and the payment period belong to the contract it sits under.
+        stamp["applied"] = {k: v for k, v in stamp["applied"].items() if k == "retention_percent"}
+        stamp["sources"] = {k: v for k, v in stamp["sources"].items() if k == "retention_percent"}
+        rate = values.get("retention_percent")
+        if rate is None:
+            stamp["fallback"] = ["retention_percent"]
+            rate = PLATFORM_FALLBACK["retention_percent"]
+        release_event = data.retention_release_event
+        split = ((defaults or {}).get("values") or {}).get("retention_release_split")
+        if release_event is None and split:
+            release_event = split[0]["event"]
+            stamp["applied"]["retention_release_event"] = release_event
+        return Decimal(str(rate)), release_event, stamp
 
     async def update_agreement(
         self,

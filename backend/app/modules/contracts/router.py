@@ -74,6 +74,7 @@ from app.modules.contracts.schemas import (
     AIAApplicationResponse,
     AutoGenerateClaimRequest,
     ContractCloneRequest,
+    ContractCountryDefaultsResponse,
     ContractCreate,
     ContractDashboardResponse,
     ContractDocumentCreate,
@@ -313,6 +314,24 @@ async def list_contracts(
         offset=offset,
         limit=limit,
     )
+
+
+@router.get("/country-defaults/", response_model=ContractCountryDefaultsResponse)
+async def get_contract_country_defaults(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID = Query(...),
+    _perm: None = Depends(RequirePermission("contracts.read")),
+) -> ContractCountryDefaultsResponse:
+    """The payment terms a new contract on this project starts from, and where each came from.
+
+    A project with no country, or a country with no row, answers
+    ``has_defaults: false`` and no values: the form leaves the fields for a
+    person to fill rather than borrowing another country's figures.
+    """
+    await verify_project_access(project_id, user_id, session)
+    service = ContractsService(session)
+    return ContractCountryDefaultsResponse.model_validate(await service.country_defaults_for_project(project_id))
 
 
 @router.post("/contracts/", response_model=ContractResponse, status_code=201)
