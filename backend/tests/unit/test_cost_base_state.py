@@ -716,6 +716,97 @@ async def test_return_home_gives_every_item_its_home_prices_back(db: AsyncEngine
     ]
 
 
+async def test_return_home_reprices_a_recipe_the_home_file_does_not_hold(
+    db: AsyncEngine, wired: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A priced recipe added under the base comes back in home prices, not relabelled market ones.
+
+    The market here is a high-number currency (VND scale), so the two ways to
+    get this wrong both show: stamping the home currency over the market rate
+    (60000 "CNY"), and seeding the home sheet from the market rows (the
+    largest-price rule would make R1 cost 30000 at home).
+    """
+    import app.modules.catalog.router as catalog_router
+
+    vnd_rows = [
+        {"resource_code": "R1", "name": "Resource R1", "type": "material", "unit": "kg", "price_avg": "30000"},
+        {"resource_code": "R2", "name": "Resource R2", "type": "material", "unit": "kg", "price_avg": "15000"},
+        {"resource_code": "R7", "name": "Resource R7", "type": "material", "unit": "kg", "price_avg": "500"},
+    ]
+    for row in vnd_rows:
+        row["currency"] = "VND"
+
+    async def _vnd(base_region: str, market_token: str) -> list[dict[str, Any]]:
+        return [dict(r) for r in vnd_rows]
+
+    monkeypatch.setattr(catalog_router, "fetch_market_catalog_rows", _vnd)
+    home_currency = costs_router._resolve_currency(None, BASE)
+    user = str(uuid.uuid4())
+
+    async with _sessions(db)() as s:
+        await _load_home_base(s)
+        # Added by a person: priced recipes the home parquet does not hold.
+        s.add(
+            CostItem(
+                code="ZH-MINE",
+                description="A priced recipe a person added",
+                unit="m3",
+                rate="20.00",
+                currency=home_currency,
+                source="custom",
+                region=BASE,
+                components=[_comp("R1", 2, 10.0)],
+                is_active=True,
+            )
+        )
+        # Its only resource is one no home row uses, so no home price exists.
+        s.add(
+            CostItem(
+                code="ZH-ODD",
+                description="A recipe on a resource the home sheet lacks",
+                unit="m3",
+                rate="8.00",
+                currency=home_currency,
+                source="custom",
+                region=BASE,
+                components=[_comp("R7", 1, 8.0)],
+                is_active=True,
+            )
+        )
+        await s.commit()
+        await ResourcePriceService(s).seed_region(BASE)
+        await _switch_to_london(s, user)
+        in_market = await _items(s)
+
+        out = await costs_router.restore_base_home_market(BASE, session=s, _user_id=user)
+        items = await _items(s)
+        sheet = {
+            r.resource_key: Decimal(r.unit_price)
+            for r in (await s.execute(select(ResourcePrice).where(ResourcePrice.region == BASE))).scalars().all()
+        }
+
+    # The switch really moved them into VND, so the return has something to undo.
+    assert (Decimal(in_market["ZH-MINE"].rate), in_market["ZH-MINE"].currency) == (Decimal("60000.00"), "VND")
+    assert (Decimal(in_market["ZH-ODD"].rate), in_market["ZH-ODD"].currency) == (Decimal("500.00"), "VND")
+
+    # The home sheet comes from home rows only: no VND price leaks into it.
+    assert sheet["R1"] == Decimal("10.00")
+    assert sheet["R2"] == Decimal("5.00")
+    # Repriced from that sheet: 2 x 10, in the home currency.
+    assert (Decimal(items["ZH-MINE"].rate), items["ZH-MINE"].currency) == (Decimal("20.00"), home_currency)
+    assert items["ZH-MINE"].components[0]["unit_rate"] == 10.0
+    # Nothing at home prices R7: the item keeps its VND rate under its VND label,
+    # and the answer says so instead of calling it restored.
+    assert (Decimal(items["ZH-ODD"].rate), items["ZH-ODD"].currency) == (Decimal("500.00"), "VND")
+    assert out["items_left_in_market"] == 1
+    assert out["items_repriced_home"] == 1
+    # The rest is exactly as the home file has it.
+    for code, home in HOME_ITEMS.items():
+        assert (items[code].rate, items[code].currency) == (home["rate"], home_currency)
+    assert (items["ZH-OWN"].rate, items["ZH-OWN"].currency) == ("42.50", home_currency)
+    assert out["items_restored"] == len(HOME_ITEMS)
+
+
 async def test_return_home_then_market_again_lands_the_same_market_prices(
     db: AsyncEngine, wired: dict[str, Any]
 ) -> None:

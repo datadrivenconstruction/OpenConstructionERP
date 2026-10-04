@@ -1397,10 +1397,12 @@ async def restore_base_home_market(
 
     1. The base's own parquet is read into a staging region and its text, rate,
        components and breakdown are copied onto the live rows, joined on code.
-       The home currency is stamped back onto every row of the region.
-    2. The resource price sheet is rebuilt from those rows, as a fresh load
-       builds it. Prices edited on the sheet are replaced; the answer says how
-       many.
+       Those rows, and rows without components, get the home currency back.
+    2. The resource price sheet is rebuilt from the rows in the home currency,
+       as a fresh load builds it. Prices edited on the sheet are replaced; the
+       answer says how many. A priced recipe the home file does not hold is
+       then repriced from that sheet and given the home currency; any that
+       cannot be is counted in ``items_left_in_market``.
     3. The text is switched to the base's own language, as a fresh load does.
     4. The Resource Catalog gets the base's own catalogue back (fail-soft).
 
@@ -1493,7 +1495,26 @@ async def restore_base_home_market(
         ).scalar_one()
         await session.execute(sql_delete(ResourcePrice).where(ResourcePrice.region == base_region))
         await session.commit()
-        seed = await ResourcePriceService(session).seed_region(base_region)
+        prices = ResourcePriceService(session)
+        # Only rows already back in the home currency say what a home price is.
+        seed = await prices.seed_region(base_region, currency=home_currency)
+        # A priced recipe the home file does not hold still carries the market's
+        # prices: reprice it from the home sheet just built, as the switch
+        # repriced it from the market's, and give it the home currency.
+        repriced_home = await prices.reprice_region(
+            base_region, where=CostItem.currency != home_currency, stamp_currency=home_currency
+        )
+        left_in_market = (
+            await session.execute(
+                select(func.count())
+                .select_from(CostItem)
+                .where(
+                    CostItem.region == base_region,
+                    CostItem.is_active.is_(True),
+                    CostItem.currency != home_currency,
+                )
+            )
+        ).scalar_one()
 
         home_lang_out = await _open_in_home_language(base_region, session)
         await base_state.write_base_state(session, base_region, active_market=None, switching_to=None, updated_by=actor)
@@ -1505,13 +1526,18 @@ async def restore_base_home_market(
 
     await _safe_publish(
         "costs.region.repriced",
-        {"region": base_region, "items_changed": int(restored)},
+        {"region": base_region, "items_changed": int(restored) + repriced_home.items_changed},
         source_module="oe_costs",
     )
 
     payload: dict[str, Any] = {
         "region": base_region,
         "items_restored": int(restored),
+        # Items the home file does not hold, repriced from the home sheet.
+        "items_repriced_home": repriced_home.items_repriced,
+        # Items still in another currency: their recipe has no line the home
+        # sheet prices, so nothing could bring them back. Shown to the user.
+        "items_left_in_market": int(left_in_market or 0),
         "currency": home_currency,
         "resource_prices": seed.as_dict(),
         "user_prices_discarded": int(discarded or 0),
@@ -5855,8 +5881,14 @@ def _overlay_region_from_parquet_sync(
     live rows joined on ``code`` so every id is kept, and staging is dropped.
     The language swap copies the text columns; a return to the home market
     copies text, rate and breakdown from the base's own parquet and passes
-    ``currency``, which is then stamped onto every row of the region in the same
-    transaction (the market switch stamps its currency onto every row too).
+    ``currency``. That currency is stamped, in the same transaction, onto the
+    rows the parquet just gave their home rate, and onto the rows it does not
+    hold that have no components: a reprice never moves a rate without a
+    recipe, so the market switch only relabelled those and the label is all
+    that goes back. A row the parquet does not hold that has components (a
+    priced recipe someone added under the region) keeps the market's rate and
+    currency here; the caller reprices it from the rebuilt home sheet. Stamping
+    the home currency over its market rate would turn 6 GBP into 6 CNY.
 
     ``columns`` only ever comes from the module's own tuples, never a caller's
     input, so naming them in the SQL is safe. Runs in a thread (sync DB work).
@@ -5894,8 +5926,12 @@ def _overlay_region_from_parquet_sync(
             ).rowcount
             if currency is not None and updated:
                 conn.execute(
-                    text(f"UPDATE {table} SET currency = :currency WHERE region = :base"),  # noqa: S608
-                    {"currency": currency, "base": base_region},
+                    text(  # noqa: S608
+                        f"UPDATE {table} AS t SET currency = :currency WHERE t.region = :base AND ("
+                        f"EXISTS (SELECT 1 FROM {table} AS s WHERE s.region = :stage AND s.code = t.code) "
+                        f"OR COALESCE(t.components::jsonb, '[]'::jsonb) IN ('[]'::jsonb, 'null'::jsonb))"
+                    ),
+                    {"currency": currency, "base": base_region, "stage": staging_region},
                 )
             conn.execute(text(f"DELETE FROM {table} WHERE region = :r"), {"r": staging_region})  # noqa: S608
         return int(updated or 0)

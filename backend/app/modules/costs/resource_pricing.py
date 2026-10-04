@@ -315,7 +315,7 @@ class ResourcePriceService:
 
     # ── seeding ──────────────────────────────────────────────────────────────
 
-    async def seed_region(self, region: str) -> SeedResult:
+    async def seed_region(self, region: str, *, currency: str | None = None) -> SeedResult:
         """Populate the price sheet for ``region`` from its work items.
 
         Distinct resources are collected from every work item's components. Each
@@ -324,6 +324,11 @@ class ResourcePriceService:
         base, which is the editable slot the user fills in). Idempotent: existing
         rows are refreshed, but a row a user has edited (``source == 'user'``) is
         never overwritten, so re-seeding after an import keeps local prices.
+
+        ``currency`` limits the scan to work items priced in that currency. A
+        return to the home market passes the home currency: an item still
+        carrying a market's prices would otherwise offer them as observed home
+        prices, and the largest-price rule lets a high-number currency win.
         """
         result = SeedResult(region=region)
 
@@ -340,6 +345,8 @@ class ResourcePriceService:
             .where(CostItem.region == region, CostItem.is_active.is_(True))
             .order_by(CostItem.id)
         )
+        if currency is not None:
+            stmt = stmt.where(CostItem.currency == currency)
         observed: dict[str, dict[str, Any]] = {}
         currency_hint = ""
         offset = 0
@@ -656,8 +663,22 @@ class ResourcePriceService:
         ).all()
         return {key: _to_decimal(price) for key, price in rows}
 
-    async def reprice_region(self, region: str, *, dry_run: bool = False) -> RepriceResult:
+    async def reprice_region(
+        self,
+        region: str,
+        *,
+        dry_run: bool = False,
+        where: Any = None,
+        stamp_currency: str | None = None,
+    ) -> RepriceResult:
         """Recompute every work item's rate in ``region`` from the price sheet.
+
+        ``where`` narrows the walk to the work items matching it. It must not
+        depend on a column this pass writes during the walk (rate, components,
+        metadata): the region is paged by offset, and a filter the writes change
+        would move rows out from under the pages. ``stamp_currency`` is written
+        onto every item whose rate the pass rewrote, after the walk and in the
+        same transaction, so the new rate never shows under an old label.
 
         For each work item: ``rate = sum(component.quantity x sheet_price)``. Each
         component's ``unit_rate`` and ``cost`` are rewritten to match the sheet,
@@ -701,6 +722,11 @@ class ResourcePriceService:
             .where(CostItem.region == region, CostItem.is_active.is_(True))
             .order_by(CostItem.id)
         )
+        if where is not None:
+            stmt = stmt.where(where)
+        # Ids of the items whose rate this pass rewrote, kept only when they
+        # are to be given ``stamp_currency`` after the walk.
+        written_ids: list[uuid.UUID] = []
         result.items_cap = self._MAX_REPRICE_ITEMS
         pending = 0
         offset = 0
@@ -793,6 +819,8 @@ class ResourcePriceService:
                     item.rate = new_rate_str
                     item.components = new_components
                     item.metadata_ = _breakdown_metadata(item.metadata_, by_type, new_total)
+                    if stamp_currency is not None:
+                        written_ids.append(item.id)
                     pending += 1
                     if pending >= 500:
                         await self.session.flush()
@@ -824,6 +852,15 @@ class ResourcePriceService:
                 self.session.expunge(item)
 
         if not dry_run:
+            # After the walk, so the ``where`` the pages were read through never
+            # saw a row change under it. Chunked: one statement may carry at
+            # most 32 767 bound values.
+            for start in range(0, len(written_ids), 1000):
+                await self.session.execute(
+                    update(CostItem)
+                    .where(CostItem.id.in_(written_ids[start : start + 1000]))
+                    .values(currency=stamp_currency)
+                )
             await self.session.commit()
             # Announce the reprice so the assemblies subscriber can pull the new
             # rates through. Without this the rates moved and every assembly
