@@ -115,12 +115,45 @@ _COMMA_DECIMAL_CURRENCIES: Final = frozenset(
 _SPACED_CURRENCIES: Final = frozenset({"UAH", "KZT", "BYN"})
 
 
-def document_country(country_code: str | None, region: str | None = None) -> str:
+#: The value ``oe_projects_project.country_code`` defaulted to until revision
+#: ``v3319``. A row written before it holds this whether or not anybody chose
+#: Germany, so on its own it is not evidence of a German market.
+LEGACY_DEFAULT_COUNTRY: Final = "DE"
+
+
+def _region_country(region: str | None) -> str:
+    """The single country a region names, ``""`` for a macro region or none."""
+    if not region or is_macro_region(region):
+        return ""
+    return normalise_region(region) or ""
+
+
+def document_country(country_code: str | None, region: str | None = None, currency: str | None = None) -> str:
     """The country a project's documents are written for, ``""`` when nothing names one.
 
-    The project's own ``country_code`` wins. The create form does not always
-    send one: it posts ``region`` and fills the country only from a geocoded
-    address or an active country pack, so a project created by choosing
+    The project's own ``country_code`` wins, with one exception. The column
+    was ``NOT NULL DEFAULT 'DE'`` until revision ``v3319`` and that migration
+    deliberately left every older row alone, so a project created before it
+    with no country chosen holds ``DE`` exactly as a German one does. Read at
+    face value that turned every such American, British, Indian or Swiss bill
+    into a German one on paper, ``123.456,78 USD``, where the currency rule
+    used before printed it correctly. So a ``DE`` is believed only when the
+    rest of the project does not contradict it:
+
+    * a region naming one other country wins, so a legacy project in region
+      ``US`` is written American;
+    * with no such region, a currency other than the euro hands the decision
+      back to the currency, which is what decided before the country did;
+    * a region that names Germany, or a euro project with no telling region,
+      keeps ``DE``. A German project billed in dollars and priced from a
+      German region is still German.
+
+    Only ``DE`` is doubted. No other value was ever written by default, so any
+    other country is somebody's answer.
+
+    When there is no country at all the region decides. The create form does
+    not always send one: it posts ``region`` and fills the country only from a
+    geocoded address or an active country pack, so a project created by choosing
     "Ireland" from the region list can reach an export with no country at
     all and be written in the currency's style, which for the euro is German.
     The region is read through the classification registry's normaliser,
@@ -130,20 +163,31 @@ def document_country(country_code: str | None, region: str | None = None) -> str
     A macro region (``DACH``, ``Nordics``, ``LatinAmerica`` ...) is not read:
     its anchor country is a convention for picking a standard, and writing a
     Danish or Argentine bill in the anchor's separators would be a guess.
+    That matters for the ``DE`` rule too: ``DACH`` normalises to ``DE``, so a
+    Swiss franc project in region ``DACH`` must not read as agreeing with
+    Germany. It falls to the currency and is written Swiss.
 
     Args:
         country_code: ``project.country_code``, any case, may be empty.
         region: ``project.region``, free text, may be empty.
+        currency: ``project.currency``, ISO 4217, may be empty. Read only to
+            decide whether a stored ``DE`` is the legacy default.
 
     Returns:
         ISO 3166-1 alpha-2 in upper case, or ``""``.
     """
     explicit = (country_code or "").strip().upper()
+    from_region = _region_country(region)
+    if explicit == LEGACY_DEFAULT_COUNTRY:
+        if from_region and from_region != LEGACY_DEFAULT_COUNTRY:
+            return from_region
+        code = (currency or "").strip().upper()
+        if not from_region and code and code != "EUR":
+            return ""
+        return explicit
     if explicit:
         return explicit
-    if not region or is_macro_region(region):
-        return ""
-    return normalise_region(region) or ""
+    return from_region
 
 
 def style_for_country(country_code: str | None) -> NumberStyle | None:
@@ -255,6 +299,7 @@ __all__ = [
     "CONTINENTAL",
     "DEFAULT_DATE_FORMAT",
     "INDIAN",
+    "LEGACY_DEFAULT_COUNTRY",
     "NBSP",
     "PATTERN_STYLES",
     "SPACED",

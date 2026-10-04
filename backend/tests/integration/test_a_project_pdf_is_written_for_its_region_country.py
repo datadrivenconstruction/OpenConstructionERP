@@ -67,20 +67,26 @@ async def auth(client: AsyncClient) -> dict[str, str]:
     return {"Authorization": f"Bearer {token}"}
 
 
-async def _pdf_for(client: AsyncClient, auth: dict[str, str], region: str) -> tuple[str, dict]:
-    """Create a one-line euro project in ``region`` and return its PDF text and the project."""
-    resp = await client.post(
-        "/api/v1/projects/",
-        json={
-            "name": f"PDF region {region} {uuid.uuid4().hex[:6]}",
-            "description": "PDF country test",
-            "region": region,
-            "classification_standard": "nrm",
-            "currency": "EUR",
-            "locale": "en",
-        },
-        headers=auth,
-    )
+async def _pdf_for(
+    client: AsyncClient,
+    auth: dict[str, str],
+    region: str,
+    *,
+    currency: str = "EUR",
+    country_code: str | None = None,
+) -> tuple[str, dict]:
+    """Create a one-line project in ``region`` and return its PDF text and the project."""
+    body = {
+        "name": f"PDF region {region} {uuid.uuid4().hex[:6]}",
+        "description": "PDF country test",
+        "region": region,
+        "classification_standard": "nrm",
+        "currency": currency,
+        "locale": "en",
+    }
+    if country_code is not None:
+        body["country_code"] = country_code
+    resp = await client.post("/api/v1/projects/", json=body, headers=auth)
     assert resp.status_code == 201, resp.text
     project = resp.json()
 
@@ -126,4 +132,31 @@ async def test_a_dach_project_keeps_the_german_style(client: AsyncClient, auth: 
     text, project = await _pdf_for(client, auth, "DACH")
     if (project.get("country_code") or "").upper() not in ("", "DE", "AT"):
         pytest.skip(f"an active country pack stamped {project['country_code']!r}")
+    assert "12.345,00" in text
+
+
+@pytest.mark.asyncio
+async def test_a_legacy_german_default_does_not_make_an_american_bill_german(
+    client: AsyncClient, auth: dict[str, str]
+) -> None:
+    """A row written before v3319 holds ``DE`` whether or not anybody chose Germany.
+
+    Stored here through the API as ``DE``, which is byte for byte what the old
+    column default left on a US project created with no country. Before the
+    export read the country, the dollar decided and the bill printed
+    ``12,345.00 USD``; reading the stored ``DE`` at face value printed
+    ``12.345,00 USD``. The region names the United States, so the bill is
+    American again.
+    """
+    text, project = await _pdf_for(client, auth, "US", currency="USD", country_code="DE")
+    assert (project.get("country_code") or "").upper() == "DE", "the legacy shape this test needs was not stored"
+    assert "12,345.00" in text
+    assert "12.345,00" not in text
+
+
+@pytest.mark.asyncio
+async def test_a_german_euro_project_stays_german(client: AsyncClient, auth: dict[str, str]) -> None:
+    """The control for the test above: a ``DE`` nothing contradicts is believed."""
+    text, project = await _pdf_for(client, auth, "DACH", currency="EUR", country_code="DE")
+    assert (project.get("country_code") or "").upper() == "DE"
     assert "12.345,00" in text

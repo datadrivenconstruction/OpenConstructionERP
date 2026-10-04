@@ -5168,7 +5168,7 @@ async def export_boq_pdf(
             import asyncio
 
             _currency = (project.currency or "").strip()
-            _country = document_country(project.country_code, project.region)
+            _country = document_country(project.country_code, project.region, _currency)
             _locale = (project.locale or "en").strip()
             _page_format = "LETTER" if _country.upper() in {"US", "CA"} else "A4"
             pdf_bytes = await asyncio.to_thread(
@@ -5186,7 +5186,7 @@ async def export_boq_pdf(
             import asyncio
 
             _currency = (project.currency or "").strip()
-            _country = document_country(project.country_code, project.region)
+            _country = document_country(project.country_code, project.region, _currency)
             _locale = (project.locale or "en").strip()
             _page_format = "LETTER" if _country.upper() in {"US", "CA"} else "A4"
             pdf_bytes = await asyncio.to_thread(

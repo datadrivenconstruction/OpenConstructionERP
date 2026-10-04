@@ -188,9 +188,12 @@ def test_the_spaced_markets_are_spaced(country: str) -> None:
         ("", "Ireland", "IE"),
         (None, "UK", "GB"),
         ("", "Russia", "RU"),
-        # The project's own country always wins over its region.
-        ("de", "Ireland", "DE"),
+        # The project's own country wins over its region. Not shown with DE,
+        # which is the one value a stored row may hold by default; see
+        # ``test_a_legacy_german_default_is_believed_only_when_nothing_contradicts_it``.
+        ("fr", "Ireland", "FR"),
         ("IE", None, "IE"),
+        ("IE", "UK", "IE"),
         # A macro region's anchor is a convention for picking a standard, not
         # the country a Danish or Argentine bill is written in.
         ("", "DACH", ""),
@@ -204,6 +207,54 @@ def test_the_spaced_markets_are_spaced(country: str) -> None:
 )
 def test_document_country(country_code: str | None, region: str | None, expected: str) -> None:
     assert document_country(country_code, region) == expected
+
+
+@pytest.mark.parametrize(
+    ("region", "currency", "expected_country", "expected_text"),
+    [
+        # What the column default left on a project nobody gave a country,
+        # before v3319. The region names the market, so the region decides.
+        ("US", "USD", "US", "123,456.78"),
+        ("UK", "GBP", "GB", "123,456.78"),
+        ("Ireland", "EUR", "IE", "123,456.78"),
+        # No region that names one country: the currency decides, exactly as
+        # it did before the country was consulted at all.
+        ("", "USD", "", "123,456.78"),
+        (None, "GBP", "", "123,456.78"),
+        ("", "INR", "", "1,23,456.78"),
+        # DACH normalises to DE, which must not read as agreeing with Germany:
+        # a franc project in the macro region is Swiss, not German.
+        ("DACH", "CHF", "", f"123{SWISS_APOSTROPHE}456.78"),
+        # Nothing contradicts the stored DE, so it is believed.
+        ("DACH", "EUR", "DE", "123.456,78"),
+        ("", "EUR", "DE", "123.456,78"),
+        (None, None, "DE", "123.456,78"),
+        ("DE_BERLIN", "EUR", "DE", "123.456,78"),
+        # A German region outranks a foreign currency: a German project billed
+        # in dollars is still a German document.
+        ("DE_BERLIN", "USD", "DE", "123.456,78"),
+    ],
+)
+def test_a_legacy_german_default_is_believed_only_when_nothing_contradicts_it(
+    region: str | None, currency: str | None, expected_country: str, expected_text: str
+) -> None:
+    country = document_country("DE", region, currency)
+    assert country == expected_country
+    assert format_number(Decimal("123456.78"), 2, number_style(country, currency)) == expected_text
+
+
+@pytest.mark.parametrize("country", ["FR", "IE", "GB", "US", "CH"])
+def test_only_the_legacy_default_is_doubted(country: str) -> None:
+    """Every other stored country is somebody's answer, whatever the currency says."""
+    assert document_country(country, "DE_BERLIN", "JPY") == country
+
+
+def test_the_legacy_rule_changes_what_the_bill_prints() -> None:
+    """The distinguishing case: the stored DE read at face value prints German."""
+    face_value = format_number(Decimal("123456.78"), 2, number_style("DE", "USD"))
+    assert face_value == "123.456,78"
+    settled = format_number(Decimal("123456.78"), 2, number_style(document_country("DE", "US", "USD"), "USD"))
+    assert settled == "123,456.78"
 
 
 def test_an_irish_project_created_by_region_alone_is_written_irish() -> None:
