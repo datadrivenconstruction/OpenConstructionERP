@@ -29,6 +29,8 @@ import {
   Network,
   ArrowRight,
   Trash2,
+  Gavel,
+  Table2,
 } from 'lucide-react';
 import {
   Button,
@@ -73,6 +75,7 @@ import {
 import { ContractAnalyticsPanels } from './ContractAnalyticsPanels';
 import { SovReconcilePanel } from './SovReconcilePanel';
 import { contractsGuide } from './contractsGuide';
+import { bidPackageDeepLink, boqDeepLink, contractSource, tenderPackageDeepLink } from '@/shared/lib/awardChainLinks';
 import { useToastStore } from '@/stores/useToastStore';
 import { useActiveProjectId } from '@/shared/hooks/useActiveProjectId';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -2244,6 +2247,55 @@ export function ContractDetailDrawer({
                 defaultValue: 'Variations on this contract',
               })}
             </Link>
+            {/* Where an awarded contract came from. The award that drafted it
+                stamped the tender package, the bid package and the bill on
+                its metadata; a contract written by hand carries none, and
+                then none of these is drawn. */}
+            {(() => {
+              const source = contractSource(contract.metadata);
+              const chip =
+                'inline-flex items-center gap-1 rounded-md border border-border-light px-2 py-1 text-content-secondary hover:text-oe-blue hover:border-oe-blue transition-colors';
+              return (
+                <>
+                  {source.tenderPackageId && (
+                    <Link
+                      to={tenderPackageDeepLink(source.tenderPackageId)}
+                      className={chip}
+                      title={t('contracts.from_tender_hint', {
+                        defaultValue: 'Open the tender package this contract was awarded from',
+                      })}
+                    >
+                      <Gavel size={12} />
+                      {t('contracts.from_tender', { defaultValue: 'From tender' })}
+                    </Link>
+                  )}
+                  {source.bidPackageId && (
+                    <Link
+                      to={bidPackageDeepLink(source.bidPackageId)}
+                      className={chip}
+                      title={t('contracts.from_bid_package_hint', {
+                        defaultValue: 'Open the bid package this contract was awarded from',
+                      })}
+                    >
+                      <Gavel size={12} />
+                      {t('contracts.from_bid_package', { defaultValue: 'From bid package' })}
+                    </Link>
+                  )}
+                  {source.boqId && (
+                    <Link
+                      to={boqDeepLink(source.boqId)}
+                      className={chip}
+                      title={t('contracts.source_boq_hint', {
+                        defaultValue: 'Open the bill of quantities the awarded scope was priced in',
+                      })}
+                    >
+                      <Table2 size={12} />
+                      {t('contracts.source_boq', { defaultValue: 'Source BOQ' })}
+                    </Link>
+                  )}
+                </>
+              );
+            })()}
           </div>
 
           {/* Header fields */}
