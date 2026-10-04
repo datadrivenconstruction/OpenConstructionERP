@@ -25,8 +25,11 @@ What the draft carries
   the supplier's quantity, unit and rate. When those lines fall short of the
   headline the gap is ordered as one balancing line so the order still adds up
   to what was quoted; when they exceed it (an overall discount) or there are
-  none, the order is one lump-sum line at the headline. Either way the item
-  amounts sum to the order total exactly.
+  none, the order is one lump-sum line at the headline. A difference within
+  the comparison's rounding tolerance is taken up on the largest line. A line
+  priced against an optional scope item is an alternate: it is ordered only
+  when the headline can be seen to include it, and otherwise named in the
+  notes. Either way the item amounts sum to the order total exactly.
 * **Adjustments.** Charges the supplier stated outside the headline (freight,
   installation and the like) are listed in the notes, not ordered: whether the
   supplier invoices them or the buyer sources them elsewhere is the reviewer's
@@ -280,7 +283,8 @@ async def _draft(
     if headline is not None and headline <= _ZERO:
         headline = None
     currency = (bid.currency_code or rfq.currency_code or "").strip()
-    items, pricing = _order_lines(rfq, bid, headline)
+    lines = _order_lines(rfq, bid, headline)
+    items = lines.items
     if not items:
         logger.warning("rfq.awarded: quote %s on RFQ %s has no readable amount; nothing drafted", bid_id, rfq_id)
         return None
@@ -288,7 +292,7 @@ async def _draft(
     subtotal = sum((item.amount for item in items), _ZERO)
 
     vendor = await _resolve_vendor(session, bid.bidder_contact_id, actor_id=actor_id, project_id=project_id)
-    notes = _notes(rfq, bid, pricing=pricing, vendor=vendor, headline=headline, subtotal=subtotal, currency=currency)
+    notes = _notes(rfq, bid, lines=lines, vendor=vendor, headline=headline, subtotal=subtotal, currency=currency)
 
     po_number = await PurchaseOrderRepository(session).next_po_number(project_id)
     po = PurchaseOrder(
@@ -315,7 +319,7 @@ async def _draft(
             "rfq_bid_id": str(bid_id),
             "supplier_name": vendor.name,
             "vendor_link": vendor.link,
-            "pricing": pricing,
+            "pricing": lines.pricing,
             "quoted_amount": _money(headline) if headline is not None else None,
             "quoted_currency": currency,
             # The figure the ranking used, on the RFQ basis. Audit only.
@@ -416,58 +420,119 @@ def _item_from_bid_line(bid_line: Any, scope_line: Any | None) -> _Item | None:
     )
 
 
-def _order_lines(rfq: Any, bid: Any, headline: Decimal | None) -> tuple[list[_Item], str]:
-    """The order lines for the awarded quote, and how they were arrived at.
+@dataclass(frozen=True)
+class _Lines:
+    """The order lines for the awarded quote, and how they were arrived at."""
 
-    Returns ``(items, pricing)`` where ``pricing`` is ``itemised``,
-    ``itemised_with_balance`` or ``lump_sum``. The item amounts always sum to
-    the quoted headline when there is one.
+    items: list[_Item]
+    #: ``itemised``, ``itemised_with_balance`` or ``lump_sum``.
+    pricing: str
+    #: Lines priced against optional scope items and left out of the order.
+    optional_left_out: list[_Item]
+    #: A rounding difference within the comparison's tolerance, taken up on the
+    #: largest line so the items still sum to the quoted total. Signed.
+    rounding: Decimal = _ZERO
+    #: The priced lines exceed the quoted total by more than rounding.
+    lines_over_total: bool = False
+
+
+def _with_amount(item: _Item, amount: Decimal) -> _Item:
+    return _Item(
+        description=item.description,
+        quantity=item.quantity,
+        unit=item.unit,
+        unit_rate=item.unit_rate,
+        amount=amount,
+        cost_line_id=item.cost_line_id,
+    )
+
+
+def _total(items: list[_Item]) -> Decimal:
+    return sum((item.amount for item in items), _ZERO)
+
+
+def _order_lines(rfq: Any, bid: Any, headline: Decimal | None) -> _Lines:
+    """The order lines for the awarded quote.
+
+    Each priced line of the quote becomes an order line, in scope order, with
+    supplier extras after the scope. A line against an optional scope item is
+    an alternate the supplier priced separately, so it is ordered only when the
+    quoted total can be seen to include it (the lines add up to the total with
+    it and not without it); otherwise it is left out and named in the notes.
+
+    The item amounts always sum to the quoted total when there is one:
+
+    * equal: the lines as quoted;
+    * within the comparison's rounding tolerance: the lines as quoted, the cents
+      taken up on the largest line;
+    * short of the total: the lines as quoted plus one balancing line;
+    * over the total (an overall discount): one lump-sum line at the total,
+      because a discount cannot be a negative order line;
+    * no priced lines at all: one lump-sum line at the total.
     """
+    from app.modules.rfq_bidding.comparison import LINE_TOTAL_TOLERANCE  # noqa: PLC0415
+
     scope = sorted(rfq.lines, key=lambda line: line.line_no)
     scope_by_id = {line.id: line for line in scope}
     priced = [bl for bl in bid.lines if not bl.is_excluded]
 
-    items: list[_Item] = []
+    entries: list[tuple[_Item, bool]] = []
     for line in scope:
         for bid_line in priced:
             if bid_line.rfq_line_id == line.id:
                 item = _item_from_bid_line(bid_line, line)
                 if item is not None:
-                    items.append(item)
+                    entries.append((item, bool(line.is_optional)))
     for bid_line in priced:
         if bid_line.rfq_line_id is None or bid_line.rfq_line_id not in scope_by_id:
             item = _item_from_bid_line(bid_line, None)
             if item is not None:
-                items.append(item)
+                entries.append((item, False))
 
-    lines_total = sum((item.amount for item in items), _ZERO)
+    base = [item for item, optional in entries if not optional]
+    optional_items = [item for item, optional in entries if optional]
+    with_optional = [item for item, _ in entries]
+
     if headline is None:
-        return items, "itemised"
+        if not base:
+            return _Lines(optional_items, "itemised", [])
+        return _Lines(base, "itemised", optional_items)
+
     headline = headline.quantize(Decimal("0.01"))
-    if items and lines_total == headline:
-        return items, "itemised"
-    if items and lines_total < headline:
-        gap = headline - lines_total
-        items.append(
-            _Item(
-                description="Quoted total not itemised against the priced lines",
-                quantity=Decimal("1"),
-                unit=None,
-                unit_rate=gap,
-                amount=gap,
-            )
-        )
-        return items, "itemised_with_balance"
-    label = _scope_label(rfq.rfq_number, rfq.title or "")
-    return [
-        _Item(
-            description=f"{label}: awarded quote, lump sum",
+    items, left_out = base, optional_items
+    if (
+        optional_items
+        and abs(headline - _total(base)) > LINE_TOTAL_TOLERANCE
+        and abs(headline - _total(with_optional)) <= LINE_TOTAL_TOLERANCE
+    ):
+        items, left_out = with_optional, []
+
+    gap = headline - _total(items)
+    if items and gap == _ZERO:
+        return _Lines(items, "itemised", left_out)
+    if items and abs(gap) <= LINE_TOTAL_TOLERANCE:
+        largest = max(range(len(items)), key=lambda idx: items[idx].amount)
+        adjusted = list(items)
+        adjusted[largest] = _with_amount(items[largest], items[largest].amount + gap)
+        return _Lines(adjusted, "itemised", left_out, rounding=gap)
+    if items and gap > _ZERO:
+        balance = _Item(
+            description="Quoted total not itemised against the priced lines",
             quantity=Decimal("1"),
             unit=None,
-            unit_rate=headline,
-            amount=headline,
+            unit_rate=gap,
+            amount=gap,
         )
-    ], "lump_sum"
+        return _Lines([*items, balance], "itemised_with_balance", left_out)
+    label = _scope_label(rfq.rfq_number, rfq.title or "")
+    lump = _Item(
+        description=f"{label}: awarded quote, lump sum",
+        quantity=Decimal("1"),
+        unit=None,
+        unit_rate=headline,
+        amount=headline,
+    )
+    return _Lines([lump], "lump_sum", left_out, lines_over_total=bool(items))
 
 
 async def _link_cost_lines(session: AsyncSession, project_id: uuid.UUID, items: list[_Item]) -> None:
@@ -581,7 +646,7 @@ def _notes(
     rfq: Any,
     bid: Any,
     *,
-    pricing: str,
+    lines: _Lines,
     vendor: _Vendor,
     headline: Decimal | None,
     subtotal: Decimal,
@@ -590,19 +655,27 @@ def _notes(
     """What the reviewer needs to know before approving the draft."""
     label = _scope_label(rfq.rfq_number, rfq.title or "")
     parts = [f"Drafted from the award of {label}. Review the supplier, lines and terms before approving."]
-    if pricing == "itemised_with_balance":
+    if lines.pricing == "itemised_with_balance":
         parts.append(
             "The priced lines of the quote add up to less than its total, so the difference is ordered as one "
             "balancing line."
         )
-    elif pricing == "lump_sum":
-        if any(not bl.is_excluded for bl in bid.lines):
+    elif lines.pricing == "lump_sum":
+        if lines.lines_over_total:
             parts.append(
                 "The priced lines of the quote add up to more than its total (an overall discount), so the "
                 "order is one line at the quoted total."
             )
         else:
             parts.append("The quote was given as a single total, so the order is one line at that total.")
+    if lines.rounding != _ZERO:
+        parts.append(
+            f"The priced lines differ from the quoted total by {_money(abs(lines.rounding))} {currency} through "
+            "rounding; the difference is taken up on the largest line."
+        )
+    if lines.optional_left_out:
+        listed = "; ".join(f"{item.description} {_money(item.amount)} {currency}" for item in lines.optional_left_out)
+        parts.append(f"Optional items the supplier priced separately, not included in this order: {listed}.")
     if vendor.link == "not_in_directory":
         parts.append("The awarded supplier is not a directory contact. Pick the vendor before approving.")
     elif vendor.link == "not_accessible":

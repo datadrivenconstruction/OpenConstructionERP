@@ -116,6 +116,7 @@ async def make_rfq(
                 unit=line["unit"],
                 quantity=Decimal(line["quantity"]),
                 cost_line_id=line.get("cost_line_id"),
+                is_optional=line.get("is_optional", False),
             )
         )
     await session.flush()
@@ -440,6 +441,98 @@ async def test_an_excluded_line_is_not_ordered_and_an_extra_line_is(session: Asy
     assert _sum(items) == Decimal(po.amount_total) == Decimal("15600.00")
 
 
+OPTIONAL_COATING = {
+    "code": "S-03",
+    "description": "Intumescent coating, R60 (alternate)",
+    "unit": "m2",
+    "quantity": "400",
+    "is_optional": True,
+}
+
+
+async def _quote_with_an_alternate(
+    session: AsyncSession, contact: Contact, amount: str
+) -> tuple[RFQ, RFQBid, RFQAward]:
+    """Both required lines priced at 25,000.00 in all, plus an optional alternate at 4,800.00."""
+    rfq = await make_rfq(session, scope=[*TWO_LINE_SCOPE, OPTIONAL_COATING])
+    s1, s2, s3 = await scope_lines(session, rfq)
+    bid = await make_bid(
+        session,
+        rfq,
+        bidder=str(contact.id),
+        amount=amount,
+        lines=[
+            {"rfq_line_id": s1.id, "unit": "t", "quantity": "12", "unit_rate": "1250", "amount": "15000"},
+            {"rfq_line_id": s2.id, "unit": "t", "quantity": "8", "unit_rate": "1250", "amount": "10000"},
+            {"rfq_line_id": s3.id, "unit": "m2", "quantity": "400", "unit_rate": "12", "amount": "4800"},
+        ],
+    )
+    award = await make_award(session, rfq, bid, basis_amount=amount)
+    return rfq, bid, award
+
+
+async def test_an_alternate_priced_beside_the_total_is_named_not_ordered(
+    session: AsyncSession, actor_id: uuid.UUID
+) -> None:
+    """The quoted total covers the required scope; the alternate sits outside it.
+
+    Ordering every priced line would put 29,800.00 of lines against a 25,000.00
+    quote, read that as a discount and collapse the order to one lump sum.
+    """
+    contact = await make_contact(session, tenant=actor_id)
+    rfq, bid, award = await _quote_with_an_alternate(session, contact, "25000.00")
+
+    await rfq_award.draft_po_from_rfq_award(awarded(rfq, bid, award, actor=actor_id))
+
+    [po] = await orders(session, rfq.project_id)
+    items = await items_of(session, po)
+    assert [i.description for i in items] == ["S-01 HEB 300 columns, S355", "S-02 IPE 400 beams, S355"]
+    assert _sum(items) == Decimal(po.amount_total) == Decimal("25000.00")
+    assert po.metadata_["pricing"] == "itemised"
+    assert "S-03 Intumescent coating, R60 (alternate) 4800.00 EUR" in po.notes
+    assert "discount" not in po.notes
+
+
+async def test_an_alternate_the_total_includes_is_ordered(session: AsyncSession, actor_id: uuid.UUID) -> None:
+    contact = await make_contact(session, tenant=actor_id)
+    rfq, bid, award = await _quote_with_an_alternate(session, contact, "29800.00")
+
+    await rfq_award.draft_po_from_rfq_award(awarded(rfq, bid, award, actor=actor_id))
+
+    [po] = await orders(session, rfq.project_id)
+    items = await items_of(session, po)
+    assert len(items) == 3
+    assert _sum(items) == Decimal(po.amount_total) == Decimal("29800.00")
+    assert "Optional items" not in po.notes
+
+
+async def test_a_rounding_difference_stays_itemised_and_still_adds_up(
+    session: AsyncSession, actor_id: uuid.UUID
+) -> None:
+    """Three cents over the total is rounding, not a discount.
+
+    The cents are taken up on the largest line; the other line is exactly as
+    quoted, and the order still adds up to the quoted total.
+    """
+    contact = await make_contact(session, tenant=actor_id)
+    rfq, bid, award = await priced_award(
+        session,
+        bidder=str(contact.id),
+        amount="25000.00",
+        first=("12", "1250.00", "15000.03"),
+    )
+
+    await rfq_award.draft_po_from_rfq_award(awarded(rfq, bid, award, actor=actor_id))
+
+    [po] = await orders(session, rfq.project_id)
+    items = await items_of(session, po)
+    assert [i.amount for i in items] == ["15000.00", "10000.00"]
+    assert _sum(items) == Decimal(po.amount_total) == Decimal("25000.00")
+    assert po.metadata_["pricing"] == "itemised"
+    assert "by 0.03 EUR through rounding" in po.notes
+    assert "discount" not in po.notes
+
+
 async def test_charges_outside_the_quote_are_named_not_ordered(session: AsyncSession, actor_id: uuid.UUID) -> None:
     contact = await make_contact(session, tenant=actor_id)
     rfq = await make_rfq(session, scope=[])
@@ -645,6 +738,44 @@ async def test_a_re_award_does_not_add_an_order_beside_an_approved_one(
 
 
 # ── Wiring ──────────────────────────────────────────────────────────────────
+
+
+async def test_a_real_award_defers_an_event_that_drafts_the_order(
+    session: AsyncSession, actor_id: uuid.UUID, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """From ``award_bid`` itself to the draft, without a hand-built payload.
+
+    The publish is deferred to the commit of the award's own session, and the
+    payload it carries names the stored award and the awarding user in the
+    shapes the subscriber reads.
+    """
+    from app.core import events as core_events
+    from app.modules.rfq_bidding.service import RFQService
+
+    captured: list[tuple[object, str, dict[str, Any]]] = []
+
+    def capture(sess: object, name: str, data: dict[str, Any] | None = None, **_kw: object) -> None:
+        captured.append((sess, name, dict(data or {})))
+
+    monkeypatch.setattr(core_events, "publish_after_commit", capture)
+    contact = await make_contact(session, tenant=actor_id)
+    rfq = await make_rfq(session, scope=[], status="bids_received")
+    bid = await make_bid(session, rfq, bidder=str(contact.id), amount="18000.00", awarded=False)
+
+    await RFQService(session).award_bid(bid.id, actor_id=str(actor_id), actor_role="manager")
+
+    [(published_on, name, payload)] = captured
+    assert published_on is session
+    assert name == "rfq.awarded"
+    award = (await session.execute(select(RFQAward).where(RFQAward.rfq_id == rfq.id))).scalar_one()
+    assert payload["award_id"] == str(award.id)
+
+    po_id = await rfq_award.draft_po_from_rfq_award(Event(name=name, data=payload))
+
+    [po] = await orders(session, rfq.project_id)
+    assert po.id == po_id
+    assert po.vendor_contact_id == str(contact.id)
+    assert (po.amount_total, po.currency_code) == ("18000.00", "EUR")
 
 
 async def test_procurement_subscribes_to_the_rfq_award() -> None:
