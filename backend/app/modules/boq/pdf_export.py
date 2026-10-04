@@ -102,6 +102,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "status_final": "Final",
         "status_archived": "Archived",
         "subject": "Bill of Quantities",
+        "tax_vat": "VAT",
     },
     "de": {
         "cost_estimate": "KOSTENSCHÄTZUNG",
@@ -135,6 +136,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "status_final": "Freigegeben",
         "status_archived": "Archiviert",
         "subject": "Leistungsverzeichnis",
+        "tax_vat": "MwSt.",
     },
     "fr": {
         "cost_estimate": "ESTIMATION DES COÛTS",
@@ -168,6 +170,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "status_final": "Validé",
         "status_archived": "Archivé",
         "subject": "Détail quantitatif estimatif",
+        "tax_vat": "TVA",
     },
     "es": {
         "cost_estimate": "PRESUPUESTO",
@@ -201,6 +204,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "status_final": "Aprobado",
         "status_archived": "Archivado",
         "subject": "Presupuesto y mediciones",
+        "tax_vat": "IVA",
     },
     "ru": {
         "cost_estimate": "СМЕТНЫЙ РАСЧЁТ",
@@ -234,6 +238,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "status_final": "Утверждена",
         "status_archived": "В архиве",
         "subject": "Смета",
+        "tax_vat": "НДС",
     },
     "uk": {
         "cost_estimate": "КОШТОРИСНИЙ РОЗРАХУНОК",
@@ -267,6 +272,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "status_final": "Затверджено",
         "status_archived": "В архіві",
         "subject": "Кошторис",
+        "tax_vat": "ПДВ",
     },
     "hu": {
         "cost_estimate": "KÖLTSÉGBECSLÉS",
@@ -300,6 +306,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "status_final": "Jóváhagyva",
         "status_archived": "Archiválva",
         "subject": "Költségvetés",
+        "tax_vat": "ÁFA",
     },
     "zh": {
         "cost_estimate": "COST ESTIMATE",
@@ -356,6 +363,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "status_final": "Aprovado",
         "status_archived": "Arquivado",
         "subject": "Orçamento",
+        "tax_vat": "IVA",
     },
     "tr": {
         "cost_estimate": "MALİYET TAHMİNİ",
@@ -389,6 +397,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "status_final": "Onaylandı",
         "status_archived": "Arşivlendi",
         "subject": "Keşif ve metraj",
+        "tax_vat": "KDV",
     },
 }
 
@@ -544,9 +553,18 @@ def _tax_label(markup: Any, currency: str, country: str = "") -> str:
     return str(markup.name)
 
 
-# Country-specific tax terminology. Each country's construction industry uses
-# its own name for the consumption levy - printing "VAT" on a US or Indian
-# bill confuses the reader.
+# Countries whose consumption levy is NOT a value-added tax, by the name the
+# levy goes by. Printing "VAT" on a US or Indian bill names a tax that does not
+# exist there, and these names are proper names, so they are written the same
+# in every document language.
+#
+# A country whose levy IS a VAT is deliberately absent. Its word is the
+# document language's own word for VAT, the ``tax_vat`` label: a Ukrainian
+# bill written in Ukrainian says ПДВ, the same bill written in English says
+# VAT and in Russian НДС. The table used to carry those words keyed by country
+# and in Latin transliteration ("PDV", "NDS"), so a Ukrainian-language PDF
+# printed Cyrillic everywhere and then "PDV 0%:", and an English one for the
+# same project printed a word its reader could not place.
 _TAX_LABEL_BY_COUNTRY: dict[str, str] = {
     "US": "Sales Tax",
     "CA": "GST/HST",
@@ -554,31 +572,27 @@ _TAX_LABEL_BY_COUNTRY: dict[str, str] = {
     "NZ": "GST",
     "SG": "GST",
     "IN": "GST",
-    "RU": "NDS",
-    "CN": "VAT",
     "JP": "Consumption Tax",
-    "KR": "VAT",
     "BR": "ICMS",
-    "NG": "VAT",
-    "ZA": "VAT",
-    "AE": "VAT",
-    "SA": "VAT",
-    "BG": "DDS",
-    "UA": "PDV",
-    "HU": "ÁFA",
-    "CH": "MWST",
 }
 
 
-def _zero_tax_fallback_label(country_code: str) -> str:
+def _zero_tax_fallback_label(country_code: str, labels: dict[str, str] | None = None) -> str:
     """Return the fallback label for a bill that carries no tax markup at all.
 
-    Uses country-specific terminology: US gets "Sales Tax 0%", India gets
-    "GST 0%", Russia gets "NDS 0%", etc. Falls back to "VAT 0%" for
-    countries without a specific mapping.
+    A levy that is not a VAT keeps its own name ("Sales Tax 0%:" for the
+    United States, "GST 0%:" for India). Every other country is written with
+    the document language's word for VAT, from the ``tax_vat`` label, so the
+    word is in the same language and script as the rest of the page.
+
+    Args:
+        country_code: The project's country, ISO 3166-1 alpha-2, may be empty.
+        labels: The document's labels from :func:`_get_pdf_labels`; English
+            when omitted.
     """
     cc = (country_code or "").upper()
-    label = _TAX_LABEL_BY_COUNTRY.get(cc, "VAT")
+    lb = labels or _PDF_LABELS["en"]
+    label = _TAX_LABEL_BY_COUNTRY.get(cc) or lb.get("tax_vat") or "VAT"
     return f"{label} 0%:"
 
 
@@ -1014,7 +1028,7 @@ def _build_cover_page(
     # an untaxed bill is visibly untaxed rather than silently missing a row.
     tax_rows = [(f"{_tax_label(m, currency, country_code)}:", Decimal(str(m.amount))) for m in tax_lines]
     if not tax_rows:
-        tax_rows = [(_zero_tax_fallback_label(country_code), Decimal("0"))]
+        tax_rows = [(_zero_tax_fallback_label(country_code, lb), Decimal("0"))]
     summary_rows.extend((label, _fc(amount), False) for label, amount in tax_rows)
     summary_rows.append((f"{lb['gross_total']}:", _fc(gross_total), True))
 
@@ -1298,7 +1312,7 @@ def _build_boq_table(
 
     tax_rows = [(f"{_tax_label(m, currency, country_code)}:", Decimal(str(m.amount))) for m in tax_lines]
     if not tax_rows:
-        tax_rows = [(_zero_tax_fallback_label(country_code), Decimal("0"))]
+        tax_rows = [(_zero_tax_fallback_label(country_code, lb), Decimal("0"))]
     for tax_label, tax_line_amount in tax_rows:
         table_data.append(
             [
@@ -1784,7 +1798,7 @@ def generate_boq_pdf_simple(
 
     tax_rows = [(f"{_tax_label(m, currency, country_code)}:", Decimal(str(m.amount))) for m in tax_lines]
     if not tax_rows:
-        tax_rows = [(_zero_tax_fallback_label(country_code), Decimal("0"))]
+        tax_rows = [(_zero_tax_fallback_label(country_code, lb), Decimal("0"))]
     for tax_label, tax_line_amount in tax_rows:
         cost_rows.append(
             [

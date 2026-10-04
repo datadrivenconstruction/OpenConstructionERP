@@ -233,9 +233,44 @@ def test_the_status_is_translated(status: str | None, locale: str, expected: str
     assert _status_label(status, _get_pdf_labels(locale)) == expected
 
 
-@pytest.mark.parametrize(("country", "word"), [("UA", "PDV"), ("HU", "ÁFA"), ("CH", "MWST"), ("IE", "VAT")])
-def test_an_untaxed_bill_names_the_countrys_tax(country: str, word: str) -> None:
-    assert _zero_tax_fallback_label(country) == f"{word} 0%:"
+@pytest.mark.parametrize(
+    ("country", "locale", "word"),
+    [
+        # A VAT is named in the document's own language and script.
+        ("UA", "uk", "ПДВ"),
+        ("RU", "ru", "НДС"),
+        ("HU", "hu", "ÁFA"),
+        ("CH", "de", "MwSt."),
+        ("IE", "en", "VAT"),
+        # The same Ukrainian bill written in English or Russian. The country
+        # table used to answer "PDV" for all three.
+        ("UA", "en", "VAT"),
+        ("UA", "ru", "НДС"),
+        ("RU", "en", "VAT"),
+        # A levy that is not a VAT keeps its own name in any language.
+        ("US", "de", "Sales Tax"),
+        ("IN", "ru", "GST"),
+        ("JP", "en", "Consumption Tax"),
+        # No country: the language's word.
+        ("", "fr", "TVA"),
+        ("", "en", "VAT"),
+        # Chinese labels stay in English, so does the tax word.
+        ("CN", "zh", "VAT"),
+    ],
+)
+def test_an_untaxed_bill_names_the_countrys_tax(country: str, locale: str, word: str) -> None:
+    assert _zero_tax_fallback_label(country, _get_pdf_labels(locale)) == f"{word} 0%:"
+
+
+def test_the_tax_word_without_labels_is_english() -> None:
+    assert _zero_tax_fallback_label("UA") == "VAT 0%:"
+    assert _zero_tax_fallback_label("US") == "Sales Tax 0%:"
+
+
+@pytest.mark.parametrize("locale", ["ru", "uk"])
+def test_no_cyrillic_locale_writes_its_tax_word_in_latin(locale: str) -> None:
+    word = _get_pdf_labels(locale)["tax_vat"]
+    assert all("Ѐ" <= ch <= "ӿ" for ch in word), word
 
 
 # ── Dates ────────────────────────────────────────────────────────────────────
@@ -260,6 +295,9 @@ def test_a_ukrainian_bill_renders_in_ukrainian_with_spaced_hryvnias() -> None:
     compact = "".join(text.split())
     assert "123456,78UAH" in compact
     assert "123,456.78" not in text
+    # The bill carries no tax line, so the zero row names the tax, in Ukrainian.
+    assert "ПДВ0%" in compact
+    assert "PDV" not in text
 
 
 def test_the_summary_report_is_translated() -> None:
