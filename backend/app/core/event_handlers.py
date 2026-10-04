@@ -15,7 +15,7 @@ Dataflows wired:
    7. invoice.paid                  -> update project budget actuals
    8. po.issued                     -> update project budget committed
    9. estimate.approved             -> auto-populate project budget from BOQ
-  10. schedule.progress_updated     -> create EVM snapshot
+  10. schedule.activity.progress_updated -> today's EVM snapshot (one per project per day)
   11. bim_model.ready               -> apply quantity maps -> draft BOQ
   12. bim_model.new_version         -> diff -> flag affected BOQ positions
   13. variation.approved             -> update contract_value + budget
@@ -30,7 +30,11 @@ from typing import TYPE_CHECKING
 from app.core.events import Event, event_bus
 
 if TYPE_CHECKING:
+    import asyncio
     import uuid
+    from datetime import date
+    from decimal import Decimal
+    from typing import Any
 
     from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -712,131 +716,356 @@ async def _handle_estimate_approved(event: Event) -> None:
 
 
 # ---------------------------------------------------------------------------
-# 10. schedule.progress_updated -> EVM snapshot
+# 10. schedule.activity.progress_updated -> EVM snapshot
 # ---------------------------------------------------------------------------
+
+#: ``EVMSnapshot.metadata_["source"]`` on rows this handler owns. A row without
+#: it was recorded by a person through the finance API and is never touched.
+EVM_PROGRESS_SNAPSHOT_SOURCE = "schedule_progress"
+
+#: Schedule types whose progress is the project's record of work done. A
+#: baseline is a frozen copy, a revision or what-if is a proposal; reading
+#: their progress would earn value for work nobody reported.
+_EVM_PROGRESS_SCHEDULE_TYPES = ("master",)
+
+# One writer per project inside this process. Every progress save publishes, so
+# a person ticking through ten activities fires ten detached handlers at once;
+# without the lock each reads "no snapshot today" and each inserts one.
+# Keyed by the running loop as well, because an asyncio.Lock binds to the loop
+# that first waits on it and an embedded restart runs on a fresh one.
+_evm_project_locks: dict[tuple[int, str], "asyncio.Lock"] = {}
+
+
+def _evm_project_lock(project_id: str) -> "asyncio.Lock":
+    import asyncio
+
+    key = (id(asyncio.get_running_loop()), project_id)
+    lock = _evm_project_locks.get(key)
+    if lock is None:
+        lock = asyncio.Lock()
+        _evm_project_locks[key] = lock
+    return lock
+
+
+def _coerce_uuid(value: object) -> "uuid.UUID | None":
+    import uuid as _uuid
+
+    if value is None or value == "":
+        return None
+    if isinstance(value, _uuid.UUID):
+        return value
+    try:
+        return _uuid.UUID(str(value))
+    except (ValueError, TypeError, AttributeError):
+        return None
+
+
+def _iso_date(value: object) -> "date | None":
+    from datetime import date
+
+    if not value:
+        return None
+    try:
+        return date.fromisoformat(str(value)[:10])
+    except ValueError:
+        return None
+
+
+def _pct(value: object) -> "Decimal":
+    """A progress percentage as a Decimal clamped to 0..100; junk reads as 0."""
+    from decimal import Decimal, InvalidOperation
+
+    try:
+        number = Decimal(str(value).strip())
+    except (InvalidOperation, ValueError, TypeError):
+        return Decimal("0")
+    if not number.is_finite():
+        return Decimal("0")
+    return max(Decimal("0"), min(Decimal("100"), number))
+
+
+def schedule_progress_fractions(
+    activities: "list[Any]",
+    *,
+    as_of: "date",
+    override: "dict[str, Decimal] | None" = None,
+) -> "tuple[Decimal, Decimal] | None":
+    """Earned and planned completion of a set of activities, as fractions of 1.
+
+    Both figures are weighted the same way so their ratio, the SPI, compares
+    like with like:
+
+    * Only work-carrying leaves count. A summary is the roll-up of its children
+      and counting it as well would weigh the same work twice; a milestone
+      carries no work at all.
+    * The weight is the activity's planned cost when every leaf has one, since
+      earned value is a share of budget. When any leaf lacks a cost, all fall
+      back to their planned span in calendar days, the same weighting the
+      schedule uses to roll a summary up. Mixing the two would add money to
+      days.
+    * Planned completion at ``as_of`` is linear across each activity's own
+      planned window, inclusive of both ends, so an activity that was due to
+      finish yesterday is planned complete and one that starts tomorrow is
+      planned at zero.
+
+    ``override`` maps an activity id to the percentage the triggering event
+    reported. The publisher hands its event over before its own transaction
+    commits, so the row read here can still hold the previous value; the event
+    is the fresher witness for that one activity.
+
+    Returns ``(earned, planned)`` or ``None`` when nothing carries work.
+    """
+    from decimal import Decimal
+
+    override = override or {}
+    parent_ids = {str(a.parent_id) for a in activities if getattr(a, "parent_id", None)}
+    leaves = [
+        a
+        for a in activities
+        if str(a.id) not in parent_ids and (getattr(a, "activity_type", "") or "task") not in ("summary", "milestone")
+    ]
+    if not leaves:
+        return None
+
+    costs = [getattr(a, "cost_planned", None) for a in leaves]
+    by_cost = all(c is not None and Decimal(str(c)) > 0 for c in costs)
+
+    total_weight = Decimal("0")
+    earned = Decimal("0")
+    planned = Decimal("0")
+    for activity in leaves:
+        start = _iso_date(activity.start_date)
+        end = _iso_date(activity.end_date)
+        if start is not None and end is not None and end < start:
+            start, end = end, start
+        span_days = (end - start).days + 1 if start is not None and end is not None else 1
+        weight = Decimal(str(activity.cost_planned)) if by_cost else Decimal(span_days)
+
+        progress = override.get(str(activity.id))
+        if progress is None:
+            progress = _pct(activity.progress_pct)
+
+        if start is None or end is None or as_of < start:
+            planned_fraction = Decimal("0")
+        elif as_of >= end:
+            planned_fraction = Decimal("1")
+        else:
+            planned_fraction = Decimal((as_of - start).days + 1) / Decimal(span_days)
+
+        total_weight += weight
+        earned += weight * progress / Decimal("100")
+        planned += weight * planned_fraction
+
+    if total_weight <= 0:
+        return None
+    return earned / total_weight, planned / total_weight
+
+
+async def _project_bac_ac_currency(
+    session: "AsyncSession",
+    project_id: "uuid.UUID",
+) -> "tuple[Decimal, Decimal, str]":
+    """BAC, AC and the project currency, aggregated exactly as finance does.
+
+    Mirrors the derive-from-budget branch of ``FinanceService.create_evm_snapshot``
+    (and so the finance dashboard): BAC is the revised budget, or the original
+    where nothing was revised, AC is the actual booked against budget lines,
+    each currency converted through the project's FX rates. Reading paid
+    invoices instead, as this handler once did, counted VAT as cost.
+    """
+    from decimal import Decimal
+
+    from app.modules.finance.repository import BudgetRepository
+    from app.modules.finance.service import _convert_to_base, _project_fx_map
+    from app.modules.projects.models import Project
+
+    project = await session.get(Project, project_id)
+    base_ccy = (getattr(project, "currency", "") or "").strip().upper() if project else ""
+    fx_map = _project_fx_map(project)
+    agg = await BudgetRepository(session).aggregate_for_dashboard(project_id=project_id)
+
+    def _base(amounts: dict[str, float]) -> Decimal:
+        converted, _missing = _convert_to_base(amounts, base_currency=base_ccy, fx_rates_map=fx_map)
+        return Decimal(str(converted))
+
+    revised = _base(agg["revised_by_currency"])
+    original = _base(agg["original_by_currency"])
+    return (revised or original), _base(agg["actual_by_currency"]), base_ccy
 
 
 async def _handle_schedule_progress(event: Event) -> None:
-    """Schedule progress updated -> create EVM snapshot with PV/EV/AC/SPI/CPI.
+    """Activity progress saved -> today's EVM snapshot for its project.
 
-    Recalculates Earned Value Management metrics from the latest budget data
-    and schedule progress, then persists a snapshot.
+    Subscribed to ``schedule.activity.progress_updated``, the name both progress
+    writers in the schedule module publish (``ScheduleService.update_progress``
+    and ``ProgressService.set_typed_progress``). It used to listen for
+    ``schedule.progress_updated``, which nothing publishes, so no snapshot was
+    ever written from real progress.
+
+    The payload is per activity (``activity_id``, ``progress_pct``) and EVM is
+    per project, so the handler resolves the project, recomputes progress over
+    every master schedule in it and writes through
+    ``FinanceService.create_evm_snapshot``, the one writer that also derives
+    EAC / ETC / VAC / TCPI that the forecast surfaces read.
+
+    Exactly one row per project per day. Today's row written by this handler is
+    replaced, so twenty progress saves leave one point on the S-curve rather
+    than twenty. A row a person recorded through the finance API for the same
+    day is theirs: it is left alone and no automatic row is added beside it.
 
     Expected event.data:
-        project_id: str (UUID)
-        progress_pct: float (0-100, schedule completion percentage)
-        time_elapsed_pct: float (0-100, calendar time elapsed percentage)
+        activity_id: str (UUID)
+        progress_pct: float (0-100, the activity's new progress)
     """
     try:
-        data = event.data
-        project_id = data.get("project_id")
-        progress_pct = data.get("progress_pct", 0)
-        time_elapsed_pct = data.get("time_elapsed_pct", 0)
-
-        if not project_id:
-            logger.debug("schedule.progress_updated: missing project_id")
+        data = event.data or {}
+        activity_id = _coerce_uuid(data.get("activity_id"))
+        if activity_id is None:
+            logger.debug("schedule.activity.progress_updated: missing activity_id")
             return
 
-        from datetime import date
-        from decimal import Decimal, InvalidOperation
+        from sqlalchemy import select
 
-        from sqlalchemy import func, select
-
-        from app.core.money import money_quantum
         from app.database import async_session_factory
-        from app.modules.finance.models import EVMSnapshot, Invoice, ProjectBudget
+        from app.modules.schedule.models import Activity, Schedule
 
         async with async_session_factory() as session:
-            # Compute BAC: sum of all original_budget for the project
-            bac_result = await session.execute(
-                select(func.coalesce(func.sum(0), 0))
-                .select_from(ProjectBudget)
-                .where(
-                    ProjectBudget.project_id == project_id,
+            row = (
+                await session.execute(
+                    select(Schedule.project_id, Schedule.schedule_type)
+                    .join(Activity, Activity.schedule_id == Schedule.id)
+                    .where(Activity.id == activity_id)
                 )
+            ).first()
+        if row is None:
+            logger.debug("schedule.activity.progress_updated: activity %s not found", activity_id)
+            return
+        project_id, schedule_type = row
+        if (schedule_type or "master") not in _EVM_PROGRESS_SCHEDULE_TYPES:
+            logger.debug(
+                "schedule.activity.progress_updated: %s schedule, not a progress record - skipping",
+                schedule_type,
             )
-            # Manual sum because original_budget is stored as String
-            budget_result = await session.execute(select(ProjectBudget).where(ProjectBudget.project_id == project_id))
-            budgets = budget_result.scalars().all()
-            _ = bac_result.scalar()  # consume the previous query
+            return
 
-            bac = Decimal("0")
-            for b in budgets:
-                try:
-                    bac += Decimal(str(b.original_budget))
-                except (InvalidOperation, ValueError):
-                    continue
+        override: dict[str, Decimal] = {}
+        if data.get("progress_pct") is not None:
+            override[str(activity_id)] = _pct(data.get("progress_pct"))
 
-            if bac == 0:
-                logger.debug(
-                    "schedule.progress_updated: BAC=0 for project %s, skipping",
-                    project_id,
-                )
-                return
-
-            # Compute PV, EV
-            time_factor = Decimal(str(time_elapsed_pct)) / Decimal("100")
-            progress_factor = Decimal(str(progress_pct)) / Decimal("100")
-            pv = bac * time_factor
-            ev = bac * progress_factor
-
-            # Compute AC: sum of paid invoices
-            inv_result = await session.execute(
-                select(Invoice).where(
-                    Invoice.project_id == project_id,
-                    Invoice.status == "paid",
-                )
-            )
-            paid_invoices = inv_result.scalars().all()
-            ac = Decimal("0")
-            for inv in paid_invoices:
-                try:
-                    ac += Decimal(str(inv.amount_total))
-                except (InvalidOperation, ValueError):
-                    continue
-
-            # Derived metrics
-            sv = ev - pv
-            cv = ev - ac
-            spi = ev / pv if pv != 0 else Decimal("0")
-            cpi = ev / ac if ac != 0 else Decimal("0")
-
-            # The six money fields are rounded to the project currency's own
-            # subdivision. They are persisted, and they are the inputs every
-            # downstream forecast reads, so a quantum that ignores its currency
-            # is not a display choice: it drops a Kuwaiti fils before anything
-            # else gets to see it. The two indices are dimensionless ratios and
-            # keep their fixed four places. An unknown currency falls back to
-            # two decimals, which is what this handler always wrote.
-            money_q = money_quantum(await _resolve_project_currency(session, project_id))
-
-            snapshot = EVMSnapshot(
-                project_id=project_id,
-                snapshot_date=date.today().isoformat(),
-                bac=str(bac.quantize(money_q)),
-                pv=str(pv.quantize(money_q)),
-                ev=str(ev.quantize(money_q)),
-                ac=str(ac.quantize(money_q)),
-                sv=str(sv.quantize(money_q)),
-                cv=str(cv.quantize(money_q)),
-                spi=str(spi.quantize(Decimal("0.0001"))),
-                cpi=str(cpi.quantize(Decimal("0.0001"))),
-            )
-            session.add(snapshot)
-            await session.commit()
-
-        logger.info(
-            "schedule.progress_updated: EVM snapshot for project %s (BAC=%s PV=%s EV=%s AC=%s SPI=%s CPI=%s)",
-            project_id,
-            snapshot.bac,
-            snapshot.pv,
-            snapshot.ev,
-            snapshot.ac,
-            snapshot.spi,
-            snapshot.cpi,
-        )
+        async with _evm_project_lock(str(project_id)):
+            await _write_progress_snapshot(project_id, override=override, trigger_activity_id=str(activity_id))
     except Exception:
-        logger.exception("Error handling schedule.progress_updated")
+        logger.exception("Error handling schedule.activity.progress_updated")
+
+
+async def _write_progress_snapshot(
+    project_id: "uuid.UUID",
+    *,
+    override: "dict[str, Decimal]",
+    trigger_activity_id: str,
+) -> None:
+    """Recompute and upsert today's automatic EVM snapshot for *project_id*."""
+    from datetime import date
+    from decimal import Decimal
+
+    from sqlalchemy import delete, select
+
+    from app.core.money import money_quantum
+    from app.database import async_session_factory
+    from app.modules.finance.models import EVMSnapshot
+    from app.modules.finance.schemas import EVMSnapshotCreate
+    from app.modules.finance.service import FinanceService
+    from app.modules.schedule.models import Activity, Schedule
+
+    today = date.today()
+    today_iso = today.isoformat()
+
+    async with async_session_factory() as session:
+        activities = list(
+            (
+                await session.execute(
+                    select(Activity)
+                    .join(Schedule, Activity.schedule_id == Schedule.id)
+                    .where(
+                        Schedule.project_id == project_id,
+                        Schedule.schedule_type.in_(_EVM_PROGRESS_SCHEDULE_TYPES),
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
+        fractions = schedule_progress_fractions(activities, as_of=today, override=override)
+        if fractions is None:
+            logger.debug("schedule.activity.progress_updated: no work-carrying activities in %s", project_id)
+            return
+        earned_fraction, planned_fraction = fractions
+
+        bac, ac, currency = await _project_bac_ac_currency(session, project_id)
+        if bac <= 0:
+            logger.debug("schedule.activity.progress_updated: BAC=0 for project %s, skipping", project_id)
+            return
+
+        todays = list(
+            (
+                await session.execute(
+                    select(EVMSnapshot).where(
+                        EVMSnapshot.project_id == project_id,
+                        EVMSnapshot.snapshot_date == today_iso,
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
+        if any((s.metadata_ or {}).get("source") != EVM_PROGRESS_SNAPSHOT_SOURCE for s in todays):
+            logger.info(
+                "schedule.activity.progress_updated: project %s already has a recorded snapshot for %s, "
+                "leaving it as the day's figure",
+                project_id,
+                today_iso,
+            )
+            return
+
+        # Quantise the four inputs to the project currency's own subdivision.
+        # create_evm_snapshot stores what it is given, and SV / CV are their
+        # differences, so quantised inputs keep all six money fields honest for
+        # a three-decimal dinar and a zero-decimal yen alike.
+        finance = FinanceService(session)
+        money_q = money_quantum(currency)
+        pv = (bac * planned_fraction).quantize(money_q)
+        ev = (bac * earned_fraction).quantize(money_q)
+
+        if todays:
+            await session.execute(delete(EVMSnapshot).where(EVMSnapshot.id.in_([s.id for s in todays])))
+
+        await finance.create_evm_snapshot(
+            EVMSnapshotCreate(
+                project_id=project_id,
+                snapshot_date=today_iso,
+                bac=str(bac.quantize(money_q)),
+                pv=str(pv),
+                ev=str(ev),
+                ac=str(ac.quantize(money_q)),
+                metadata={
+                    "source": EVM_PROGRESS_SNAPSHOT_SOURCE,
+                    "earned_pct": str((earned_fraction * Decimal("100")).quantize(Decimal("0.01"))),
+                    "planned_pct": str((planned_fraction * Decimal("100")).quantize(Decimal("0.01"))),
+                    "trigger_activity_id": trigger_activity_id,
+                },
+            )
+        )
+        await session.commit()
+
+    logger.info(
+        "schedule.activity.progress_updated: EVM snapshot for project %s on %s (BAC=%s PV=%s EV=%s AC=%s)",
+        project_id,
+        today_iso,
+        bac,
+        pv,
+        ev,
+        ac,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -1845,7 +2074,7 @@ def register_event_handlers() -> None:
     # FinanceService.pay_invoice buckets actual per (wbs, category, currency) itself.
     event_bus.subscribe_once("po.issued", _handle_po_issued)
     event_bus.subscribe_once("estimate.approved", _handle_estimate_approved)
-    event_bus.subscribe_once("schedule.progress_updated", _handle_schedule_progress)
+    event_bus.subscribe_once("schedule.activity.progress_updated", _handle_schedule_progress)
     event_bus.subscribe_once("bim_model.ready", _handle_bim_model_ready)
     event_bus.subscribe_once("bim_model.new_version", _handle_bim_model_new_version)
     event_bus.subscribe_once("variation.approved", _handle_variation_approved)

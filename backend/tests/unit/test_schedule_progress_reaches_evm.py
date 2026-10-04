@@ -1,0 +1,461 @@
+# DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+# Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+"""Real schedule progress reaches EVM, once per project per day.
+
+The cross-module handler that writes ``oe_finance_evm_snapshot`` from progress
+listened for ``schedule.progress_updated``, a name nothing publishes, and
+expected a project-level payload nobody sends. The schedule module publishes
+``schedule.activity.progress_updated`` with one activity's id and percentage.
+So the S-curve and the forecast surfaces only ever saw snapshots somebody typed
+in by hand.
+
+The handler now listens for the published name, resolves the project and
+recomputes progress over every work-carrying activity of its master schedules.
+The money assertions are written so that a wrong answer cannot pass: a second
+save on the same day must replace the day's row, not add to it, and earned
+value is checked against the weighted figure, not against "non-zero".
+
+The database half runs on a throwaway PostgreSQL database because the handler
+opens its own sessions through ``app.database.async_session_factory``, which
+is the one thing the tests replace.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import uuid
+from collections.abc import AsyncIterator
+from datetime import date, timedelta
+from decimal import Decimal
+from types import SimpleNamespace
+from typing import Any
+
+import pytest
+import pytest_asyncio
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
+from app.core import event_handlers
+from app.core.event_handlers import (
+    EVM_PROGRESS_SNAPSHOT_SOURCE,
+    _handle_schedule_progress,
+    schedule_progress_fractions,
+)
+from app.core.events import Event, EventBus
+from app.modules.finance.models import EVMSnapshot, ProjectBudget
+from app.modules.projects.models import Project
+from app.modules.schedule.models import Activity, Schedule
+from app.modules.users.models import User
+from tests._pg import isolated_engine
+
+_EVENT = "schedule.activity.progress_updated"
+TODAY = date.today()
+
+
+def _d(offset: int) -> str:
+    return (TODAY + timedelta(days=offset)).isoformat()
+
+
+# ── Pure weighting ──────────────────────────────────────────────────────────
+
+
+def _act(
+    *,
+    progress: str = "0",
+    start: int = -10,
+    end: int = 9,
+    cost: str | None = None,
+    activity_type: str = "task",
+    parent_id: Any = None,
+) -> SimpleNamespace:
+    return SimpleNamespace(
+        id=uuid.uuid4(),
+        parent_id=parent_id,
+        activity_type=activity_type,
+        progress_pct=progress,
+        start_date=_d(start),
+        end_date=_d(end),
+        cost_planned=Decimal(cost) if cost is not None else None,
+    )
+
+
+def test_cost_weights_earned_value_when_every_leaf_has_a_cost() -> None:
+    """900 of work at 100% and 100 of work at 0% is 90% earned, not 50%."""
+    big = _act(progress="100", cost="900")
+    small = _act(progress="0", cost="100")
+
+    earned, _planned = schedule_progress_fractions([big, small], as_of=TODAY)
+
+    assert earned == Decimal("0.9")
+
+
+def test_a_missing_cost_falls_back_to_duration_for_every_leaf() -> None:
+    """Money is never added to days: one missing cost switches the whole set."""
+    long_done = _act(progress="100", start=-29, end=0, cost="10")  # 30 days
+    short_open = _act(progress="0", start=-9, end=0, cost=None)  # 10 days
+
+    earned, planned = schedule_progress_fractions([long_done, short_open], as_of=TODAY)
+
+    assert earned == Decimal("30") / Decimal("40")
+    assert planned == Decimal("1")
+
+
+def test_summaries_and_milestones_carry_no_weight() -> None:
+    """Counting a summary as well as its children would weigh the same work twice."""
+    leaf = _act(progress="40", cost="100")
+    summary = _act(progress="99", cost="100000", activity_type="summary")
+    leaf.parent_id = summary.id
+    milestone = _act(progress="0", cost="5000", activity_type="milestone", start=0, end=0)
+    # A parent typed "task" is still a parent.
+    child = _act(progress="0", cost="100")
+    parent_task = _act(progress="100", cost="100")
+    child.parent_id = parent_task.id
+
+    earned, _ = schedule_progress_fractions([leaf, summary, milestone, child, parent_task], as_of=TODAY)
+
+    assert earned == Decimal("0.2")
+
+
+def test_planned_completion_is_linear_inside_each_window() -> None:
+    not_started = _act(start=1, end=10, cost="100")
+    finished_window = _act(start=-10, end=-1, cost="100")
+    halfway = _act(start=-4, end=5, cost="100")  # 10 days, today is day 5
+
+    _, planned_before = schedule_progress_fractions([not_started], as_of=TODAY)
+    _, planned_after = schedule_progress_fractions([finished_window], as_of=TODAY)
+    _, planned_mid = schedule_progress_fractions([halfway], as_of=TODAY)
+
+    assert planned_before == Decimal("0")
+    assert planned_after == Decimal("1")
+    assert planned_mid == Decimal("0.5")
+
+
+def test_the_event_value_beats_a_stale_row() -> None:
+    """The publisher hands its event over before committing; the event is fresher."""
+    a = _act(progress="10", cost="100")
+    b = _act(progress="10", cost="100")
+
+    earned, _ = schedule_progress_fractions([a, b], as_of=TODAY, override={str(a.id): Decimal("90")})
+
+    assert earned == Decimal("0.5")
+
+
+def test_garbage_and_out_of_range_progress_is_clamped() -> None:
+    a = _act(progress="not a number", cost="100")
+    b = _act(progress="250", cost="100")
+
+    earned, _ = schedule_progress_fractions([a, b], as_of=TODAY)
+
+    assert earned == Decimal("0.5")
+
+
+def test_nothing_that_carries_work_returns_none() -> None:
+    summary = _act(activity_type="summary")
+    milestone = _act(activity_type="milestone")
+
+    assert schedule_progress_fractions([], as_of=TODAY) is None
+    assert schedule_progress_fractions([summary, milestone], as_of=TODAY) is None
+
+
+# ── Wiring ──────────────────────────────────────────────────────────────────
+
+
+def test_the_handler_listens_for_the_name_the_schedule_module_publishes(monkeypatch: pytest.MonkeyPatch) -> None:
+    bus = EventBus()
+    monkeypatch.setattr(event_handlers, "event_bus", bus)
+
+    event_handlers.register_event_handlers()
+
+    assert _handle_schedule_progress in bus._handlers.get(_EVENT, [])
+    assert "schedule.progress_updated" not in bus._handlers, "the dead name is still subscribed"
+    # Registering twice must not double-write a day's snapshot.
+    event_handlers.register_event_handlers()
+    assert bus._handlers[_EVENT].count(_handle_schedule_progress) == 1
+
+
+# ── Against PostgreSQL ──────────────────────────────────────────────────────
+
+
+@pytest_asyncio.fixture(scope="module")
+async def _module_db() -> AsyncIterator[async_sessionmaker[AsyncSession]]:
+    async with isolated_engine() as engine:
+        yield async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+
+@pytest.fixture
+def factory(
+    _module_db: async_sessionmaker[AsyncSession],
+    monkeypatch: pytest.MonkeyPatch,
+) -> async_sessionmaker[AsyncSession]:
+    """The throwaway database, also handed to the handler as its session factory."""
+    import app.database as database_module
+
+    monkeypatch.setattr(database_module, "async_session_factory", _module_db)
+    return _module_db
+
+
+async def _project(
+    factory: async_sessionmaker[AsyncSession],
+    *,
+    currency: str = "EUR",
+    budgets: list[tuple[str, str, str]] | None = None,
+    schedule_type: str = "master",
+    activities: list[dict[str, Any]] | None = None,
+) -> tuple[uuid.UUID, list[uuid.UUID]]:
+    """A project with budget lines ``(original, revised, actual)`` and a schedule."""
+    async with factory() as s:
+        user = User(
+            email=f"evm-{uuid.uuid4().hex[:10]}@datadrivenconstruction.io",
+            hashed_password="x" * 16,
+            full_name="EVM Test",
+        )
+        s.add(user)
+        await s.flush()
+        project = Project(
+            id=uuid.uuid4(),
+            name=f"EVM {uuid.uuid4().hex[:6]}",
+            owner_id=user.id,
+            currency=currency,
+            region="DACH",
+            classification_standard="din276",
+            metadata_={},
+            fx_rates=[],
+        )
+        s.add(project)
+        await s.flush()
+        for original, revised, actual in budgets or [("100000", "100000", "30000")]:
+            s.add(
+                ProjectBudget(
+                    project_id=project.id,
+                    category="construction",
+                    currency_code=currency,
+                    original_budget=Decimal(original),
+                    revised_budget=Decimal(revised),
+                    actual=Decimal(actual),
+                )
+            )
+        schedule = Schedule(project_id=project.id, name="Master", schedule_type=schedule_type)
+        s.add(schedule)
+        await s.flush()
+        ids: list[uuid.UUID] = []
+        for spec in activities or [
+            {"progress": "50", "start": -9, "end": 10, "cost": "60000"},
+            {"progress": "0", "start": -9, "end": 10, "cost": "40000"},
+        ]:
+            activity = Activity(
+                schedule_id=schedule.id,
+                name=f"A{len(ids)}",
+                start_date=_d(spec["start"]),
+                end_date=_d(spec["end"]),
+                progress_pct=spec["progress"],
+                activity_type=spec.get("type", "task"),
+                cost_planned=Decimal(spec["cost"]) if spec.get("cost") else None,
+            )
+            s.add(activity)
+            await s.flush()
+            ids.append(activity.id)
+        await s.commit()
+        return project.id, ids
+
+
+async def _snapshots(factory: async_sessionmaker[AsyncSession], project_id: uuid.UUID) -> list[EVMSnapshot]:
+    async with factory() as s:
+        rows = await s.execute(select(EVMSnapshot).where(EVMSnapshot.project_id == project_id))
+        return list(rows.scalars().all())
+
+
+async def _progress(activity_id: uuid.UUID, pct: float) -> None:
+    await _handle_schedule_progress(Event(name=_EVENT, data={"activity_id": str(activity_id), "progress_pct": pct}))
+
+
+async def test_a_progress_save_writes_one_snapshot_with_weighted_earned_value(
+    factory: async_sessionmaker[AsyncSession],
+) -> None:
+    project_id, (a, _b) = await _project(factory)
+
+    await _progress(a, 50)
+
+    rows = await _snapshots(factory, project_id)
+    assert len(rows) == 1, "no snapshot reached EVM, or more than one"
+    snap = rows[0]
+    # 60000 at 50% + 40000 at 0% = 30000 earned of 100000. Planned: both run
+    # day -9 .. day 10 (20 days) and today is day 10 of 20, so PV = 50000.
+    assert Decimal(snap.bac) == Decimal("100000")
+    assert Decimal(snap.ev) == Decimal("30000")
+    assert Decimal(snap.pv) == Decimal("50000")
+    assert Decimal(snap.ac) == Decimal("30000")
+    assert Decimal(snap.sv) == Decimal("-20000")
+    assert Decimal(snap.cv) == Decimal("0")
+    assert Decimal(snap.spi) == Decimal("0.6")
+    assert Decimal(snap.cpi) == Decimal("1")
+    # The forecast family comes from the canonical writer, not left at "0".
+    assert Decimal(snap.eac) == Decimal("100000")
+    assert Decimal(snap.etc) == Decimal("70000")
+    assert snap.snapshot_date == TODAY.isoformat()
+    assert snap.metadata_["source"] == EVM_PROGRESS_SNAPSHOT_SOURCE
+
+
+async def test_a_second_save_on_the_same_day_replaces_the_row_rather_than_adding_one(
+    factory: async_sessionmaker[AsyncSession],
+) -> None:
+    project_id, (a, b) = await _project(factory)
+
+    await _progress(a, 50)
+    await _progress(b, 25)
+
+    rows = await _snapshots(factory, project_id)
+    assert len(rows) == 1, f"{len(rows)} snapshots for one day, the S-curve would plot each"
+    # 60000*50% + 40000*25% = 40000. Doubling would give 70000 or 80000.
+    assert Decimal(rows[0].ev) == Decimal("40000")
+
+
+async def test_concurrent_saves_still_leave_one_row(factory: async_sessionmaker[AsyncSession]) -> None:
+    """A person ticking through activities fires the handlers together."""
+    project_id, (a, b) = await _project(factory)
+
+    await asyncio.gather(*(_progress(a if i % 2 else b, 10 * i) for i in range(6)))
+
+    assert len(await _snapshots(factory, project_id)) == 1
+
+
+async def test_a_snapshot_a_person_recorded_today_is_left_alone(factory: async_sessionmaker[AsyncSession]) -> None:
+    project_id, (a, _b) = await _project(factory)
+    async with factory() as s:
+        s.add(
+            EVMSnapshot(
+                project_id=project_id,
+                snapshot_date=TODAY.isoformat(),
+                bac="1",
+                pv="1",
+                ev="1",
+                ac="1",
+                metadata_={},
+            )
+        )
+        await s.commit()
+
+    await _progress(a, 80)
+
+    rows = await _snapshots(factory, project_id)
+    assert len(rows) == 1
+    assert rows[0].bac == "1", "the recorded snapshot was overwritten"
+
+
+async def test_yesterdays_automatic_snapshot_is_kept(factory: async_sessionmaker[AsyncSession]) -> None:
+    """Replacement is per day; history is the S-curve."""
+    project_id, (a, _b) = await _project(factory)
+    async with factory() as s:
+        s.add(
+            EVMSnapshot(
+                project_id=project_id,
+                snapshot_date=(TODAY - timedelta(days=1)).isoformat(),
+                bac="100000",
+                ev="10000",
+                metadata_={"source": EVM_PROGRESS_SNAPSHOT_SOURCE},
+            )
+        )
+        await s.commit()
+
+    await _progress(a, 50)
+
+    dates = sorted(r.snapshot_date for r in await _snapshots(factory, project_id))
+    assert dates == [(TODAY - timedelta(days=1)).isoformat(), TODAY.isoformat()]
+
+
+async def test_progress_on_a_what_if_schedule_earns_nothing(factory: async_sessionmaker[AsyncSession]) -> None:
+    project_id, (a, _b) = await _project(factory, schedule_type="what_if")
+
+    await _progress(a, 100)
+
+    assert await _snapshots(factory, project_id) == []
+
+
+async def test_a_project_without_a_budget_gets_no_snapshot(factory: async_sessionmaker[AsyncSession]) -> None:
+    project_id, (a, _b) = await _project(factory, budgets=[("0", "0", "0")])
+
+    await _progress(a, 50)
+
+    assert await _snapshots(factory, project_id) == []
+
+
+async def test_revised_budget_is_the_bac(factory: async_sessionmaker[AsyncSession]) -> None:
+    """An approved change raises the budget the work is earned against."""
+    project_id, (a, _b) = await _project(factory, budgets=[("100000", "120000", "0")])
+
+    await _progress(a, 50)
+
+    (snap,) = await _snapshots(factory, project_id)
+    assert Decimal(snap.bac) == Decimal("120000")
+    assert Decimal(snap.ev) == Decimal("36000")
+
+
+@pytest.mark.parametrize("currency", ["KWD", "JPY", "EUR"])
+async def test_every_money_field_is_stored_at_the_currency_precision(
+    factory: async_sessionmaker[AsyncSession],
+    currency: str,
+) -> None:
+    """A dinar keeps its fils and a yen gets no invented decimals.
+
+    Replaces the stub-session test of the old handler: these rows are what the
+    forecast surfaces read, so the precision is checked on the stored row.
+    """
+    from app.core.money import money_quantum
+
+    project_id, (a, _b) = await _project(
+        factory,
+        currency=currency,
+        budgets=[("1000001", "1000001", "333333")],
+        activities=[
+            {"progress": "0", "start": -2, "end": 4, "cost": "700"},
+            {"progress": "0", "start": -2, "end": 4, "cost": "300"},
+        ],
+    )
+
+    await _progress(a, 33.3)
+
+    (snap,) = await _snapshots(factory, project_id)
+    want = -money_quantum(currency).as_tuple().exponent
+    for field in ("bac", "pv", "ev", "ac", "sv", "cv"):
+        value = getattr(snap, field)
+        assert -Decimal(value).as_tuple().exponent == want, f"{currency}: {field}={value!r}, expected {want} places"
+    for field in ("spi", "cpi"):
+        assert -Decimal(getattr(snap, field)).as_tuple().exponent == 4, f"{field} is an index, not money"
+
+
+async def test_an_unknown_activity_is_ignored(factory: async_sessionmaker[AsyncSession]) -> None:
+    await _progress(uuid.uuid4(), 50)
+    await _handle_schedule_progress(Event(name=_EVENT, data={}))
+    await _handle_schedule_progress(Event(name=_EVENT, data={"activity_id": "not-a-uuid"}))
+
+
+async def test_the_schedule_service_payload_drives_the_handler_end_to_end(
+    factory: async_sessionmaker[AsyncSession],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """What the publisher sends is what the handler reads.
+
+    Captures the event ``ScheduleService.update_progress`` really publishes and
+    feeds it to the handler, so a renamed key on either side fails here.
+    """
+    from app.modules.schedule import service as schedule_service_module
+    from app.modules.schedule.service import ScheduleService
+
+    captured: list[tuple[str, dict[str, Any]]] = []
+
+    async def _capture(name: str, data: dict, source_module: str = "") -> None:
+        captured.append((name, data))
+
+    monkeypatch.setattr(schedule_service_module, "_safe_publish", _capture)
+    project_id, (a, _b) = await _project(factory)
+
+    async with factory() as s:
+        await ScheduleService(s).update_progress(a, 75.0)
+        await s.commit()
+
+    progress_events = [data for name, data in captured if name == _EVENT]
+    assert progress_events, f"update_progress published {[n for n, _ in captured]}"
+    await _handle_schedule_progress(Event(name=_EVENT, data=progress_events[0]))
+
+    (snap,) = await _snapshots(factory, project_id)
+    # 60000 at 75% + 40000 at 0% = 45000.
+    assert Decimal(snap.ev) == Decimal("45000")

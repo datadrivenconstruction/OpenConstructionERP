@@ -158,9 +158,6 @@ KNOWN_DEAD_SUBSCRIPTIONS: dict[str, str] = {
         "twice (dashboards/events.py:31 and dashboards/sync_protocol.py:58) and published "
         "nowhere. sync_protocol.py:18 documents the refresh cascade as if it runs"
     ),
-    "schedule.progress_updated": (
-        "core/event_handlers.py:1837; schedule/progress_service.py:230 publishes 'schedule.activity.progress_updated'"
-    ),
     "submittal.status_changed": "nothing publishes a submittal status change",
     "validation.report.updated": "validation/events.py:72; validation publishes report creation, not update",
     "variations.completed": (
