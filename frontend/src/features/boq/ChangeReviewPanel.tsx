@@ -54,13 +54,29 @@ export interface ChangeReviewButtonProps {
   onClick: () => void;
 }
 
-/** Toolbar entry. Reads only the open count, so it costs one small query. */
+/**
+ * Toolbar entry with the open count.
+ *
+ * Flags are rows, and a revised drawing produces no row until something looks
+ * for it, so a count read straight from the table would say "nothing changed"
+ * on a bill nobody has checked yet. The button therefore runs the check once
+ * per editor visit (it is idempotent) and only then reads the count, which
+ * later reviews keep current through the summary query.
+ */
 export function ChangeReviewButton({ boqId, onClick }: ChangeReviewButtonProps) {
   const { t } = useTranslation();
+  const scanQuery = useQuery({
+    queryKey: changeReviewKeys.scan(boqId),
+    queryFn: () => changeReviewApi.scan(boqId),
+    enabled: !!boqId,
+    staleTime: Infinity,
+    retry: false,
+  });
   const { data } = useQuery({
     queryKey: changeReviewKeys.summary(boqId),
     queryFn: () => changeReviewApi.summary(boqId),
-    enabled: !!boqId,
+    // A failed check still shows whatever flags already exist.
+    enabled: !!boqId && (scanQuery.isSuccess || scanQuery.isError),
     staleTime: 60_000,
   });
   const open = data?.open_count ?? 0;

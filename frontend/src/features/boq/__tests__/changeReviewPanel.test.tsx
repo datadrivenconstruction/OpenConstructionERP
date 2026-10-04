@@ -304,7 +304,18 @@ describe('ChangeReviewPanel model quantities', () => {
 });
 
 describe('ChangeReviewButton', () => {
-  function renderButton(open: number) {
+  function renderButton(open: number, scanFails = false) {
+    const scan = vi.spyOn(changeReviewApi, 'scan');
+    if (scanFails) scan.mockRejectedValue(new Error('offline'));
+    else
+      scan.mockResolvedValue({
+        boq_id: 'boq-1',
+        positions_checked: 5,
+        bim_flags_found: 0,
+        document_flags_found: open,
+        created: open,
+        open_count: open,
+      });
     vi.spyOn(changeReviewApi, 'summary').mockResolvedValue({
       boq_id: 'boq-1',
       open_count: open,
@@ -321,6 +332,21 @@ describe('ChangeReviewButton', () => {
     expect((await screen.findByTestId('boq-changes-badge')).textContent).toBe('3');
     fireEvent.click(screen.getByTestId('boq-changes-btn'));
     expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('checks for changes before it reads the count, so an unchecked bill is not shown as clean', async () => {
+    renderButton(2);
+    expect((await screen.findByTestId('boq-changes-badge')).textContent).toBe('2');
+    expect(changeReviewApi.scan).toHaveBeenCalledTimes(1);
+    expect(changeReviewApi.scan).toHaveBeenCalledWith('boq-1');
+    const scanOrder = vi.mocked(changeReviewApi.scan).mock.invocationCallOrder[0]!;
+    const summaryOrder = vi.mocked(changeReviewApi.summary).mock.invocationCallOrder[0]!;
+    expect(scanOrder).toBeLessThan(summaryOrder);
+  });
+
+  it('still shows existing flags when the check fails', async () => {
+    renderButton(1, true);
+    expect((await screen.findByTestId('boq-changes-badge')).textContent).toBe('1');
   });
 
   it('shows no badge when nothing is open', async () => {

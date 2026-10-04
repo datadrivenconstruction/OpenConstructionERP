@@ -117,6 +117,8 @@ export const changeReviewKeys = {
   summary: (boqId: string) => ['boq-change-flags', boqId, 'summary'] as const,
   flags: (boqId: string, status: string) => ['boq-change-flags', boqId, 'list', status] as const,
   all: (boqId: string) => ['boq-change-flags', boqId] as const,
+  /** Outside the `all` prefix on purpose: a review must not re-run the check. */
+  scan: (boqId: string) => ['boq-change-scan', boqId] as const,
   proposals: (boqId: string) => ['boq-bim-quantity-proposals', boqId] as const,
 };
 
