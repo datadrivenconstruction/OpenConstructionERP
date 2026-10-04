@@ -150,9 +150,9 @@ describe('PopulatePreviewModal change order lines', () => {
     populateMock.mockResolvedValue(
       preview({
         items: [
-          base.items[0],
+          base.items[0]!,
           {
-            ...base.items[0],
+            ...base.items[0]!,
             contract_line_id: 'line-2',
             contract_line_code: 'CO-004',
             contract_line_description: 'Owner change',
@@ -188,7 +188,7 @@ function secondPeriod(): ProgressClaimPopulatePreview {
     ...base,
     items: [
       {
-        ...base.items[0],
+        ...base.items[0]!,
         observed_pct: '40',
         prior_completed_value: '2000',
         period_completed_value: '2000',
