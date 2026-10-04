@@ -62,7 +62,7 @@ def _log_failures(
     Returns:
         The created task (callers may ignore it).
     """
-    task = asyncio.create_task(coro)
+    task = asyncio.create_task(coro, name=name)
     _DETACHED_TASKS.add(task)
 
     def _done(t: asyncio.Task[Any]) -> None:
@@ -91,6 +91,11 @@ _BUS_PROTOCOL_TAG: str = "76f7ae245a29ff3c"
 
 EventHandler = Callable[..., Any]
 
+#: How long application shutdown waits for detached subscribers to finish.
+#: Long enough for a subscriber to open its session, write and commit; short
+#: enough that a desktop close or a service restart never feels stuck on it.
+SHUTDOWN_DRAIN_TIMEOUT_S: float = 10.0
+
 
 @dataclass
 class Event:
@@ -116,6 +121,14 @@ class EventResult:
         return len(self.errors) == 0
 
 
+@dataclass(frozen=True)
+class DrainResult:
+    """Outcome of :meth:`EventBus.drain`."""
+
+    finished: int
+    cancelled: int
+
+
 class EventBus:
     """Central event bus for the application.
 
@@ -132,6 +145,10 @@ class EventBus:
         # mid-await, which surfaces as "coroutine ignored GeneratorExit" /
         # "Task was destroyed but it is pending" (and intermittently reddens CI).
         self._background_tasks: set[asyncio.Task[EventResult]] = set()
+        # Further task sets :meth:`drain` waits on besides this bus's own
+        # publishes. The application singleton adds ``_DETACHED_TASKS`` below,
+        # so shutdown also waits for side effects launched via ``_log_failures``.
+        self._extra_task_sets: list[set[asyncio.Task[Any]]] = []
 
     def on(self, event_name: str) -> Callable:
         """Decorator to register an event handler.
@@ -208,7 +225,10 @@ class EventBus:
         code should fire-and-forget. Errors inside the detached task are
         logged by :meth:`publish` itself.
         """
-        task = asyncio.create_task(self.publish(event_name, data, source_module=source_module))
+        task = asyncio.create_task(
+            self.publish(event_name, data, source_module=source_module),
+            name=f"event:{event_name}",
+        )
         # Keep a strong reference until the task finishes so it is never
         # collected while still suspended at an ``await``.
         self._background_tasks.add(task)
@@ -287,9 +307,75 @@ class EventBus:
         self._handlers.clear()
         self._wildcard_handlers.clear()
 
+    def pending_tasks(self) -> set[asyncio.Task[Any]]:
+        """Detached work still in flight: this bus's publishes and any tracked task sets."""
+        tasks: set[asyncio.Task[Any]] = set(self._background_tasks)
+        for extra in self._extra_task_sets:
+            tasks.update(extra)
+        return {t for t in tasks if not t.done()}
+
+    async def drain(self, timeout: float = SHUTDOWN_DRAIN_TIMEOUT_S) -> DrainResult:
+        """Wait for detached publishes to finish, for at most *timeout* seconds.
+
+        Called from application shutdown, before the database engine is
+        disposed. A publish made with :meth:`publish_detached` returns to the
+        request at once, and its subscribers keep running afterwards; on a
+        restart that lands in the middle of one, the subscriber was cut off
+        with its own session half used and whatever it was about to write was
+        simply lost. Draining gives that work a bounded chance to finish.
+
+        This is a courtesy wait, not a delivery guarantee. Nothing is retried
+        and nothing is persisted: work still running at the deadline is
+        cancelled, counted and logged by name, which is the same outcome as
+        before, only now visible.
+
+        Handlers publish further events of their own (a failed inspection
+        becomes a punch suggestion, an NCR becomes a variation flag), so the
+        set is re-read until it stays empty rather than awaited once.
+
+        Args:
+            timeout: Seconds to wait in total, across every round. Zero or less
+                means "do not wait", and everything pending is cancelled.
+
+        Returns:
+            How many tasks finished in time and how many had to be cancelled.
+        """
+        loop = asyncio.get_running_loop()
+        deadline = loop.time() + max(timeout, 0.0)
+        current = asyncio.current_task()
+        finished = 0
+        while True:
+            pending = {t for t in self.pending_tasks() if t is not current}
+            if not pending:
+                break
+            remaining = deadline - loop.time()
+            if remaining <= 0:
+                break
+            done, _ = await asyncio.wait(pending, timeout=remaining)
+            finished += len(done)
+
+        leftover = {t for t in self.pending_tasks() if t is not current}
+        for task in leftover:
+            task.cancel()
+        if leftover:
+            # Let the cancellations land, so no task is destroyed while still
+            # pending once the loop closes. Bounded as well: a handler that
+            # swallows CancelledError must not hold shutdown hostage.
+            await asyncio.wait(leftover, timeout=1.0)
+            logger.warning(
+                "Shutdown drain: %d event task(s) still running after %.1fs were cancelled: %s",
+                len(leftover),
+                timeout,
+                ", ".join(sorted(t.get_name() for t in leftover)),
+            )
+        elif finished:
+            logger.info("Shutdown drain: %d event task(s) finished before shutdown", finished)
+        return DrainResult(finished=finished, cancelled=len(leftover))
+
 
 # Global singleton
 event_bus = EventBus()
+event_bus._extra_task_sets.append(_DETACHED_TASKS)
 
 
 def publish_after_commit(

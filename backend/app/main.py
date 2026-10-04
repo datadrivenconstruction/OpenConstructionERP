@@ -5676,6 +5676,16 @@ def create_app() -> FastAPI:
         logger.info("Shutting down %s", settings.app_name)
         from app.database import engine
 
+        # Let detached event subscribers finish before the pool goes away.
+        # Bounded: whatever is still running at the deadline is cancelled and
+        # logged, so a stuck handler cannot hold a restart hostage.
+        try:
+            from app.core.events import event_bus
+
+            await event_bus.drain()
+        except Exception:
+            logger.debug("event bus drain failed", exc_info=True)
+
         # Stop the collaboration-lock sweeper before closing the DB
         # engine so its last iteration cannot hit a disposed pool.
         try:
