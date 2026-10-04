@@ -6,7 +6,8 @@
 // server returned: element names come from the plan (data), unallocated money
 // is shown with its count, the markup cascade keeps the server's order, a typed
 // floor area is sent to the server and a bad one is refused before it is, and
-// the export goes out with the area the reader is looking at.
+// the export goes out with the area the reader is looking at. A reopened plan
+// is read again, never served from the app's two-minute query cache.
 
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup, within } from '@testing-library/react';
@@ -152,13 +153,19 @@ function makePlan(overrides: Partial<Nrm1CostPlan> = {}): Nrm1CostPlan {
   };
 }
 
-function renderView() {
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+function renderView(client = new QueryClient({ defaultOptions: { queries: { retry: false } } })) {
   return render(
     <QueryClientProvider client={client}>
       <CostPlanView boqId="boq-1" />
     </QueryClientProvider>,
   );
+}
+
+/** A client with the app's own defaults from main.tsx, where caching bites. */
+function appLikeClient() {
+  return new QueryClient({
+    defaultOptions: { queries: { retry: false, staleTime: 120_000, gcTime: 5 * 60_000, refetchOnWindowFocus: false } },
+  });
 }
 
 beforeEach(() => {
@@ -192,6 +199,30 @@ describe('CostPlanView', () => {
 
     expect(table.textContent).toContain('Building works estimate');
     expect(screen.getByTestId('cost-plan-warnings').textContent).toContain('counted twice');
+  });
+
+  it('reads the plan again when it is reopened, even inside the app-wide cache window', async () => {
+    const client = appLikeClient();
+    const first = renderView(client);
+    await screen.findByTestId('cost-plan-table');
+    expect(screen.getByText('Uncoded item')).toBeTruthy();
+    first.unmount();
+    // The estimator closes the dialog and codes the position in the grid.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    apiMocks.nrm1.mockResolvedValue(
+      makePlan({
+        unallocated: { position_count: 0, positions: [], positions_truncated: false, ...sub('0', '0.00', '0.00') },
+        allocated_count: 5,
+        warnings: ['addons_in_bill_and_markups'],
+      }),
+    );
+    renderView(client);
+    // No stale figures while the fresh plan is on its way.
+    expect(screen.queryByText('Uncoded item')).toBeNull();
+    await waitFor(() => expect(screen.getByText('5 / 5')).toBeTruthy());
+    expect(apiMocks.nrm1).toHaveBeenCalledTimes(2);
+    expect(screen.queryByText('Uncoded item')).toBeNull();
   });
 
   it('keeps the markup cascade in the order the server returned and says what each line was based on', async () => {

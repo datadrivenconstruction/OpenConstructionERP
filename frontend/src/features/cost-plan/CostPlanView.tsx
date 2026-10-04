@@ -9,6 +9,12 @@
  * cost, then the bill's own markup cascade in compounding order and the total.
  * Every row carries cost per m2 of GIFA and its share of the total.
  *
+ * The plan is re-read every time the view mounts. The dialog unmounts it on
+ * close, and the estimator's loop is "fix a code or a rate in the grid, open
+ * the plan again", so a cached plan from two minutes ago would be the wrong
+ * plan, and the Excel export (always built fresh on the server) would then
+ * disagree with the screen it was exported from.
+ *
  * Nothing on this screen is computed in the browser. The server regroups the
  * bill and guarantees the rows sum to its direct cost and grand total; the
  * screen formats strings. Element names come from the NRM 1 table as data;
@@ -371,6 +377,12 @@ export function CostPlanView({ boqId }: CostPlanViewProps) {
     queryKey: ['cost-plan', 'nrm1', boqId, enteredGifa],
     queryFn: () => costPlanApi.nrm1(boqId, enteredGifa),
     enabled: Boolean(boqId),
+    // Never serve a remembered plan: nothing invalidates this key when the
+    // bill changes, and the app-wide two-minute staleTime would otherwise
+    // repaint the plan from before the edit. gcTime 0 also drops the old plan
+    // on close, so a reopen shows the loading state instead of stale figures.
+    staleTime: 0,
+    gcTime: 0,
   });
   const plan = planQuery.data;
 
@@ -491,7 +503,7 @@ export function CostPlanView({ boqId }: CostPlanViewProps) {
             variant="primary"
             size="sm"
             onClick={handleExport}
-            disabled={!plan || exporting}
+            disabled={!plan || exporting || planQuery.isFetching}
             icon={exporting ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
           >
             {t('cost_plan.export_xlsx', { defaultValue: 'Export to Excel' })}
