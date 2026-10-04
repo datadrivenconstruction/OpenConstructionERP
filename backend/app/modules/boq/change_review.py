@@ -785,11 +785,11 @@ class ChangeReviewService:
         await self._get_boq(boq_id)
         if not flag_ids and not all_open:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail="Name the flags to review, or set all_open",
             )
         if new_status not in (FLAG_STATUS_OPEN, FLAG_STATUS_REVIEWED):
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Unknown status")
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Unknown status")
 
         if new_status == FLAG_STATUS_REVIEWED:
             values: dict[str, Any] = {

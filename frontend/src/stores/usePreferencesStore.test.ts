@@ -224,10 +224,16 @@ describe('usePreferencesStore', () => {
     });
 
     it('leaves a pattern outside the vocabulary alone, landing on automatic', async () => {
-      // The regional packs also ship lakh grouping, which no pattern key maps.
-      mockApiGet.mockResolvedValueOnce({ number_format: '12,34,567.89' });
+      // A pattern no key maps, such as a period-grouped one with no decimals.
+      mockApiGet.mockResolvedValueOnce({ number_format: '1.234.567' });
       await usePreferencesStore.getState().hydrateFromServer();
       expect(usePreferencesStore.getState().numberLocale).toBe('auto');
+    });
+
+    it('reads the lakh and crore pattern the Indian pack ships as Indian grouping', async () => {
+      mockApiGet.mockResolvedValueOnce({ number_format: '12,34,567.89' });
+      await usePreferencesStore.getState().hydrateFromServer();
+      expect(usePreferencesStore.getState().numberLocale).toBe('en-IN');
     });
 
     // The guard above was inverted, and the two tests below are the half it

@@ -131,6 +131,10 @@ ROUTER_HANDLERS: dict[str, list[str]] = {
         "escalate_project_risks",
         "risk_similar",
         "simulate_risks",
+        # Contingency position and drawdowns (18.4)
+        "get_contingency_position",
+        "confirm_contingency_drawdown",
+        "reverse_contingency_drawdown",
     ],
     "takeoff": [
         "delete_document",

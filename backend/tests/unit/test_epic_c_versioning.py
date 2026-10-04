@@ -221,6 +221,9 @@ async def test_split_pdf_to_sheets_writes_chain(monkeypatch: pytest.MonkeyPatch,
         def extract_text(self) -> str:
             return f"SHEET: A-{200 + self._n}"
 
+        def close(self) -> None:
+            return None
+
         def to_image(self, resolution: int = 72):  # noqa: ARG002
             class _Img:
                 def save(self, *_args, **_kwargs) -> None:

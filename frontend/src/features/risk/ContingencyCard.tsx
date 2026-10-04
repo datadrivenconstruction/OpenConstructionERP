@@ -17,7 +17,7 @@ import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, ArrowRight, CheckCircle2, PiggyBank, Undo2 } from 'lucide-react';
 import { Badge, Button, Card, ConfirmDialog, WideModal, WideModalField } from '@/shared/ui';
-import { fmtCurrency, fmtDate } from '@/shared/lib/formatters';
+import { fmtCurrency, fmtDate, fmtList } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import {
@@ -378,11 +378,11 @@ export function ContingencyCard({ projectId }: { projectId: string }) {
               defaultValue:
                 'No exchange rate to {{currency}} for {{codes}}. Those amounts are left out of the totals; add the rate in the project settings.',
               currency: cur || '-',
-              codes: position.missing_fx_rates.join(', '),
+              codes: fmtList(position.missing_fx_rates),
             })}
             {unconverted.length > 0 && (
               <span className="ml-1 tabular-nums">
-                ({unconverted.map(([c, v]) => fmtCurrency(money(v), c)).join(', ')})
+                ({fmtList(unconverted.map(([c, v]) => fmtCurrency(money(v), c)))})
               </span>
             )}
           </span>

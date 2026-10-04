@@ -933,7 +933,7 @@ class RiskService:
             target = default_line(lines, base)
             if target is None:
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail="This project has several contingency lines. Choose the one to draw from.",
                 )
 
