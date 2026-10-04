@@ -32,7 +32,7 @@ import type { LucideIcon } from 'lucide-react';
 import { Breadcrumb, EmptyState, SkeletonGrid, ModuleGuideButton } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { reportsGuide } from './reportsGuide';
-import { bidTotalRow, csvCell, csvRow, tenderStatusLabel, type BidTotal } from './tenderCsv';
+import { bidTotalCsvRow, csvCell, csvRow, tenderStatusLabel, type BidTotal } from './tenderCsv';
 import { DismissibleInfo, IntroRichText } from '@/shared/ui/DismissibleInfo';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -641,7 +641,7 @@ async function downloadTenderComparisonReport(
           ]),
         );
         for (const bt of comparison.bid_totals) {
-          csvLines.push(bidTotalRow(bt, comparison.budget_total, t, naLabel));
+          csvLines.push(bidTotalCsvRow(bt, comparison.budget_total, t, naLabel));
         }
         csvLines.push(
           csvRow([t('reports.csv_budget_total', { defaultValue: 'Budget Total' }), Number(comparison.budget_total).toFixed(2)]),

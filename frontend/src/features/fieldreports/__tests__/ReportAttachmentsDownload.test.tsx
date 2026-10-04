@@ -75,7 +75,7 @@ describe('ReportAttachments', () => {
     fireEvent.click(await screen.findByText('slab.jpg'));
 
     await waitFor(() => expect(mocks.fetch).toHaveBeenCalled());
-    const [url, init] = mocks.fetch.mock.calls[0];
+    const [url, init] = mocks.fetch.mock.calls[0]!;
     expect(url).toBe('/api/v1/documents/doc-1/download');
     expect(init.headers.Authorization).toBe('Bearer tok-123');
   });

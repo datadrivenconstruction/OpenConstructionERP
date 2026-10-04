@@ -195,7 +195,7 @@ describe('RFQ list screen', () => {
     fireEvent.click(within(dialog).getByRole('button', { name: /Create RFQ/ }));
 
     await waitFor(() => expect(mocks.createRFQ).toHaveBeenCalled());
-    const payload = mocks.createRFQ.mock.calls[0][0];
+    const payload = mocks.createRFQ.mock.calls[0]![0];
     expect(payload).toMatchObject({ project_id: 'proj-1', title: 'Rebar', submission_deadline: '2026-11-01' });
     expect('due_date' in payload).toBe(false);
   });
@@ -206,7 +206,7 @@ describe('RFQ comparison screen', () => {
     mountPage();
     await waitFor(() => expect(screen.getByText('Concrete r-open')).toBeTruthy());
 
-    fireEvent.click(screen.getAllByRole('button', { name: /Compare/ })[0]);
+    fireEvent.click(screen.getAllByRole('button', { name: /Compare/ })[0]!);
 
     await waitFor(() => expect(screen.getByText('Alpha Concrete')).toBeTruthy());
     expect(mocks.fetchComparison).toHaveBeenCalledWith('r-open');
@@ -223,7 +223,7 @@ describe('RFQ comparison screen', () => {
     mountPage();
     await waitFor(() => expect(screen.getByText('Concrete r-open')).toBeTruthy());
 
-    fireEvent.click(screen.getAllByRole('button', { name: /Compare/ })[0]);
+    fireEvent.click(screen.getAllByRole('button', { name: /Compare/ })[0]!);
 
     await waitFor(() => expect(screen.getByText('Not comparable')).toBeTruthy());
     // c-gamma is not in the contacts page, so the id itself is shown.

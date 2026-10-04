@@ -4,7 +4,7 @@
 // the raw enum and a deviation the server could not compute printed as 0.0%.
 
 import { describe, it, expect } from 'vitest';
-import { bidTotalRow, csvCell, tenderStatusLabel } from '../tenderCsv';
+import { bidTotalCsvRow, csvCell, tenderStatusLabel } from '../tenderCsv';
 
 const t = (key: string, opts?: Record<string, unknown>) =>
   key === 'tendering.status_submitted' ? 'Eingereicht' : String(opts?.defaultValue ?? key);
@@ -27,23 +27,23 @@ describe('csvCell', () => {
   });
 });
 
-describe('bidTotalRow', () => {
+describe('bidTotalCsvRow', () => {
   const bid = { company_name: '=evil', total: 1100, currency: 'EUR', deviation_pct: 10, status: 'submitted' };
 
   it('prints the deviation and a translated status', () => {
-    expect(bidTotalRow({ ...bid, deviation_known: true }, 1000, t, 'N/A')).toBe(
+    expect(bidTotalCsvRow({ ...bid, deviation_known: true }, 1000, t, 'N/A')).toBe(
       `"'=evil","1100.00","EUR","10.0%","Eingereicht"`,
     );
   });
 
   it('says N/A when the server could not compare the bid', () => {
-    const row = bidTotalRow({ ...bid, currency: 'USD', deviation_pct: 0, deviation_known: false }, 1000, t, 'N/A');
+    const row = bidTotalCsvRow({ ...bid, currency: 'USD', deviation_pct: 0, deviation_known: false }, 1000, t, 'N/A');
     expect(row).toContain('"N/A"');
     expect(row).not.toContain('0.0%');
   });
 
   it('says N/A for a zero budget even from an older server without the flag', () => {
-    expect(bidTotalRow({ ...bid, deviation_pct: 0 }, '0', t, 'N/A')).toContain('"N/A"');
+    expect(bidTotalCsvRow({ ...bid, deviation_pct: 0 }, '0', t, 'N/A')).toContain('"N/A"');
   });
 });
 

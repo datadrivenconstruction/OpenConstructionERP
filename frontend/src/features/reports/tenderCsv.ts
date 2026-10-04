@@ -51,7 +51,7 @@ export interface BidTotal {
  * or the bid is in another currency; printing "0.0%" there reads as an exact
  * match, so the cell says N/A instead.
  */
-export function bidTotalRow(bt: BidTotal, budgetTotal: number | string, t: TFunc, naLabel: string): string {
+export function bidTotalCsvRow(bt: BidTotal, budgetTotal: number | string, t: TFunc, naLabel: string): string {
   const known = bt.deviation_known ?? Number(budgetTotal) > 0;
   const deviation = known && Number(budgetTotal) > 0 ? `${Number(bt.deviation_pct).toFixed(1)}%` : naLabel;
   return csvRow([bt.company_name, Number(bt.total).toFixed(2), bt.currency, deviation, tenderStatusLabel(bt.status, t)]);
