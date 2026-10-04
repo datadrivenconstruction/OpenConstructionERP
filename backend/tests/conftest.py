@@ -418,6 +418,35 @@ os.environ.setdefault("OE_TEST_NULLPOOL", "1")
 
 import pytest  # noqa: E402
 
+# ── Keep the developer's own install out of the suite ──────────────────────
+# The applied country pack, the installed packs and the module on/off states
+# fall back to ``~/.openestimate`` when no data dir is named, and that is the
+# directory a developer's desktop install writes. A machine whose own install
+# had the Hungarian pack applied ran every project created in the suite under
+# that pack: an Indian test project carried the ``hungary`` rule set and the
+# national code import tests failed there while CI, with an empty home, passed.
+# Writes went the same way, so a test that applies a pack would have changed
+# the developer's install. Only the default home location is redirected; a
+# test that fakes ``Path.home`` or names its own data dir still gets exactly
+# what it asked for.
+import app.core.module_state as _module_state  # noqa: E402
+import app.core.partner_pack.discovery as _pack_discovery  # noqa: E402
+import app.core.partner_pack.state as _pack_state  # noqa: E402
+
+_REAL_HOME_STATE_DIR = Path.home() / ".openestimate"
+_SUITE_STATE_DIR = Path(tempfile.mkdtemp(prefix="oe-tests-home-state-"))
+_resolve_data_dir_unisolated = _module_state._resolve_data_dir
+
+
+def _resolve_data_dir_for_suite(data_dir: Path | None = None) -> Path:
+    resolved = _resolve_data_dir_unisolated(data_dir)
+    return _SUITE_STATE_DIR if resolved == _REAL_HOME_STATE_DIR else resolved
+
+
+_module_state._resolve_data_dir = _resolve_data_dir_for_suite
+_pack_discovery._resolve_data_dir = _resolve_data_dir_for_suite
+_pack_state._resolve_data_dir = _resolve_data_dir_for_suite
+
 import app.core.audit  # noqa: E402,F401
 
 # Audit-log model needs to be registered with Base.metadata before
