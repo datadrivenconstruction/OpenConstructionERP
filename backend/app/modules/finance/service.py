@@ -1276,6 +1276,14 @@ class FinanceService:
                     # then decides which is "oldest", so the fallback line is
                     # the same on every run.
                     .order_by(ProjectBudget.created_at.asc(), ProjectBudget.wbs_id.asc(), ProjectBudget.id.asc())
+                    # This rewrites every row's metadata from what it reads
+                    # here, so it reads under row locks and over any copy the
+                    # session already holds. Otherwise a contingency drawdown
+                    # (or another sync) committed after this read is written
+                    # back out of the row. The lock order matches
+                    # ``list_contingency_lines``, which locks a subset.
+                    .with_for_update()
+                    .execution_options(populate_existing=True)
                 )
             )
             .scalars()
@@ -2337,8 +2345,25 @@ class FinanceService:
         always win over whatever the request carries. A line holding drawdowns
         also keeps its contingency category: moving it elsewhere would make
         the drawn money vanish from the contingency position.
+
+        The row is read under a row lock (and over any copy this session
+        already holds, since the router's access check loads it first). An
+        unlocked read let a drawdown confirmed between this read and the
+        write below be overwritten by the metadata read before it.
         """
-        current = await self.get_budget(budget_id)  # 404 check
+        current = (
+            await self.session.execute(
+                select(ProjectBudget)
+                .where(ProjectBudget.id == budget_id)
+                .with_for_update()
+                .execution_options(populate_existing=True)
+            )
+        ).scalar_one_or_none()
+        if current is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Budget not found",
+            )
 
         fields = data.model_dump(exclude_unset=True)
         stored_md = dict(getattr(current, "metadata_", None) or {})
@@ -2394,6 +2419,9 @@ class FinanceService:
         first so the line a drawdown lands on by default is stable.
         ``for_update`` row-locks the lines for a read-modify-write of their
         metadata, so two people confirming drawdowns at once cannot lose one.
+        The order is the one :meth:`sync_project_budget` locks the project's
+        rows in, so two transactions taking overlapping sets of these locks
+        always take them in the same order and cannot deadlock.
         """
         from sqlalchemy import func
 
@@ -2403,7 +2431,7 @@ class FinanceService:
                 ProjectBudget.project_id == project_id,
                 func.lower(func.coalesce(ProjectBudget.category, "")) == CONTINGENCY_CATEGORY,
             )
-            .order_by(ProjectBudget.created_at.asc(), ProjectBudget.id.asc())
+            .order_by(ProjectBudget.created_at.asc(), ProjectBudget.wbs_id.asc(), ProjectBudget.id.asc())
         )
         if for_update:
             # populate_existing: rows this session already loaded (the caller

@@ -175,6 +175,12 @@ async def _select_budget_row(
 
     Returns None when the project has no budget rows at all - handlers
     treat this as a no-op (we can't update what doesn't exist).
+
+    The row comes back row-locked until the handler commits. Every handler
+    copies the row's metadata, edits it and assigns the whole dict back, and
+    the oldest row can be a contingency line holding confirmed drawdowns. An
+    unlocked read let a drawdown confirmed between the read and the commit be
+    written back out of the row with the stale copy.
     """
     if wbs_id:
         stmt = (
@@ -182,6 +188,8 @@ async def _select_budget_row(
             .where(ProjectBudget.project_id == project_id)
             .where(ProjectBudget.wbs_id == wbs_id)
             .limit(1)
+            .with_for_update()
+            .execution_options(populate_existing=True)
         )
         match = (await session.execute(stmt)).scalar_one_or_none()
         if match is not None:
@@ -192,6 +200,8 @@ async def _select_budget_row(
         .where(ProjectBudget.project_id == project_id)
         .order_by(ProjectBudget.created_at.asc())
         .limit(1)
+        .with_for_update()
+        .execution_options(populate_existing=True)
     )
     return (await session.execute(stmt)).scalar_one_or_none()
 
