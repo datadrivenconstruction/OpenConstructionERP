@@ -359,3 +359,55 @@ async def test_portfolio_status_endpoint(client: AsyncClient, auth: dict[str, st
     assert estimate["report_id"] == str(report_id)
     assert estimate["rule_sets"] == ["boq_quality"]
     assert body["project_count"] == len(body["projects"])
+
+
+@pytest.mark.asyncio
+async def test_the_editor_validate_button_lands_on_the_portfolio_status(
+    client: AsyncClient, auth: dict[str, str]
+) -> None:
+    """A check from the BOQ editor is stored and read back across requests.
+
+    The Validate button used to return its summary and store nothing, so the
+    cross-project status called a just-checked estimate "never validated".
+    """
+    created = await client.post(
+        "/api/v1/projects/",
+        json={"name": f"Editor run {uuid.uuid4().hex[:6]}", "description": "smoke"},
+        headers=auth,
+    )
+    assert created.status_code in (200, 201), created.text[:200]
+    pid = created.json()["id"]
+    boq = await client.post("/api/v1/boq/boqs/", json={"project_id": pid, "name": "Editor bill"}, headers=auth)
+    assert boq.status_code in (200, 201), boq.text[:200]
+    boq_id = boq.json()["id"]
+    pos = await client.post(
+        f"/api/v1/boq/boqs/{boq_id}/positions/",
+        json={
+            "boq_id": boq_id,
+            "ordinal": "01.001",
+            "description": "Strip foundation, no rate yet",
+            "unit": "m3",
+            "quantity": 12.0,
+            "unit_rate": 0.0,
+        },
+        headers=auth,
+    )
+    assert pos.status_code in (200, 201), pos.text[:200]
+
+    run = await client.post(f"/api/v1/boq/boqs/{boq_id}/validate/", json={}, headers=auth)
+    assert run.status_code == 200, run.text[:300]
+    summary = run.json()
+    report_id = summary.get("report_id")
+    assert report_id, "the editor run was not stored"
+
+    stored = await client.get(f"/api/v1/validation/reports/{report_id}", headers=auth)
+    assert stored.status_code == 200, stored.text[:300]
+    assert stored.json()["status"] == summary["status"]
+
+    status_resp = await client.get("/api/v1/validation/portfolio-status/", headers=auth)
+    assert status_resp.status_code == 200, status_resp.text[:300]
+    row = next(p for p in status_resp.json()["projects"] if p["project_id"] == pid)
+    (estimate,) = row["estimates"]
+    assert estimate["boq_id"] == boq_id
+    assert estimate["report_id"] == report_id
+    assert estimate["report_status"] == summary["status"]

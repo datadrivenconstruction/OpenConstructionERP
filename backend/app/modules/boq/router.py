@@ -3987,8 +3987,52 @@ async def validate_boq(
         }
         for r in report.results
     ]
+    summary["report_id"] = await _store_editor_validation(
+        session, boq_data.project_id, boq_id, report, rule_sets, _user_id, payload
+    )
 
     return summary
+
+
+async def _store_editor_validation(
+    session: Any,
+    project_id: uuid.UUID,
+    boq_id: uuid.UUID,
+    report: Any,
+    rule_sets: list[str],
+    user_id: str,
+    payload: dict[str, Any],
+) -> str | None:
+    """Store an editor validation run as a validation report, when the caller may create one.
+
+    A run that is not stored exists only in the toast: the validation page,
+    the dashboard and the cross-project status all read stored reports, so an
+    estimate checked here read as never checked. Storing needs
+    ``validation.create``, the permission the validation page's own run asks
+    for; a viewer can still run the check, it just is not recorded.
+
+    The NCR escalation that a validation page run triggers is left out on
+    purpose: every click here is a new report, and an NCR per click would
+    bury the register while an estimator works through the findings.
+
+    Returns the stored report id, or ``None`` when nothing was stored.
+    """
+    try:
+        await RequirePermission("validation.create")(payload)
+    except HTTPException:
+        return None
+    try:
+        from app.modules.validation.service import ValidationModuleService
+    except ImportError:  # validation module not installed
+        return None
+    try:
+        uid = uuid.UUID(str(user_id))
+    except (TypeError, ValueError):
+        uid = None
+    stored = await ValidationModuleService(session).record_boq_report(
+        project_id, boq_id, report, rule_sets, user_id=uid, source="boq_editor"
+    )
+    return str(stored.id)
 
 
 # ── AI Chat ──────────────────────────────────────────────────────────────────

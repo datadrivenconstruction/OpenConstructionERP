@@ -89,6 +89,103 @@ class ValidationModuleService:
 
     # ── Run validation ────────────────────────────────────────────────────
 
+    async def record_boq_report(
+        self,
+        project_id: uuid.UUID,
+        boq_id: uuid.UUID,
+        engine_report: EngineReport,
+        rule_sets: list[str],
+        *,
+        user_id: uuid.UUID | None = None,
+        source: str | None = None,
+    ) -> ValidationReport:
+        """Store a finished BOQ validation run and publish ``validation.report.created``.
+
+        Every path that validates a whole BOQ writes through here, so the
+        stored row has one shape whoever ran it: the validation page, or the
+        Validate button in the BOQ editor. A run that is not stored is
+        invisible to everything that reads reports (the validation page, the
+        dashboard, the cross-project status), so an estimate that was checked
+        would read as never checked.
+
+        This writes the report only. Escalation (``validation.results.errors_found``,
+        which raises an NCR per report) stays with the caller.
+
+        Args:
+            project_id: Project owning the BOQ.
+            boq_id: The validated BOQ.
+            engine_report: The engine's report for the run.
+            rule_sets: The rule sets the run was asked for.
+            user_id: Who ran it, if known.
+            source: Where the run came from, kept in the metadata
+                (for example ``boq_editor``).
+
+        Returns:
+            The stored report row (flushed, not committed).
+        """
+        results_json = [
+            {
+                "rule_id": r.rule_id,
+                "rule_name": r.rule_name,
+                "severity": r.severity.value if hasattr(r.severity, "value") else str(r.severity),
+                "status": "pass" if r.passed else r.severity.value,
+                "passed": r.passed,
+                "message": r.message,
+                "element_ref": r.element_ref,
+                "details": r.details or {},
+                "suggestion": r.suggestion,
+                "is_engine_error": r.is_engine_error,
+            }
+            for r in engine_report.results
+        ]
+        metadata: dict[str, Any] = {
+            "duration_ms": engine_report.duration_ms,
+            "rule_sets": rule_sets,
+            "supported_rule_sets": engine_report.supported_rule_sets,
+            "unsupported_rule_sets": engine_report.unsupported_rule_sets,
+        }
+        if source:
+            metadata["source"] = source
+
+        db_report = ValidationReport(
+            id=uuid.uuid4(),
+            project_id=project_id,
+            target_type="boq",
+            target_id=str(boq_id),
+            rule_set="+".join(rule_sets),
+            status=engine_report.status.value,
+            score=(None if engine_report.score is None else str(round(engine_report.score, 4))),
+            total_rules=len(engine_report.results),
+            passed_count=len(engine_report.passed_rules),
+            warning_count=len(engine_report.warnings),
+            error_count=len(engine_report.errors),
+            results=results_json,
+            created_by=user_id,
+            metadata_=metadata,
+        )
+        await self.repo.create(db_report)
+
+        # Publish a standardized event so the vector indexer (and any
+        # future cross-module subscriber) can react.  Best-effort -
+        # publish failures must never break a successful validation run.
+        try:
+            from app.core.events import event_bus
+
+            event_bus.publish_detached(
+                "validation.report.created",
+                {
+                    "report_id": str(db_report.id),
+                    "project_id": str(project_id),
+                    "target_type": "boq",
+                    "target_id": str(boq_id),
+                    "status": engine_report.status.value,
+                },
+                source_module="oe_validation",
+            )
+        except Exception:
+            logger.debug("Failed to publish validation.report.created event", exc_info=True)
+        return db_report
+
     async def run_validation(
         self,
         project_id: uuid.UUID,
@@ -137,66 +234,14 @@ class ValidationModuleService:
             metadata={"locale": get_locale()},
         )
 
-        # 3. Build results list for storage
-        results_json = [
-            {
-                "rule_id": r.rule_id,
-                "rule_name": r.rule_name,
-                "severity": r.severity.value if hasattr(r.severity, "value") else str(r.severity),
-                "status": "pass" if r.passed else r.severity.value,
-                "passed": r.passed,
-                "message": r.message,
-                "element_ref": r.element_ref,
-                "details": r.details or {},
-                "suggestion": r.suggestion,
-                "is_engine_error": r.is_engine_error,
-            }
-            for r in engine_report.results
-        ]
-
-        # 4. Persist report
-        db_report = ValidationReport(
-            id=uuid.uuid4(),
-            project_id=project_id,
-            target_type="boq",
-            target_id=str(boq_id),
-            rule_set="+".join(rule_sets),
-            status=engine_report.status.value,
-            score=(None if engine_report.score is None else str(round(engine_report.score, 4))),
-            total_rules=len(engine_report.results),
-            passed_count=len(engine_report.passed_rules),
-            warning_count=len(engine_report.warnings),
-            error_count=len(engine_report.errors),
-            results=results_json,
-            created_by=user_id,
-            metadata_={
-                "duration_ms": engine_report.duration_ms,
-                "rule_sets": rule_sets,
-                "supported_rule_sets": engine_report.supported_rule_sets,
-                "unsupported_rule_sets": engine_report.unsupported_rule_sets,
-            },
+        # 3-4. Persist the report and announce it.
+        db_report = await self.record_boq_report(
+            project_id,
+            boq_id,
+            engine_report,
+            rule_sets,
+            user_id=user_id,
         )
-        await self.repo.create(db_report)
-
-        # Publish a standardized event so the vector indexer (and any
-        # future cross-module subscriber) can react.  Best-effort -
-        # publish failures must never break a successful validation run.
-        try:
-            from app.core.events import event_bus
-
-            event_bus.publish_detached(
-                "validation.report.created",
-                {
-                    "report_id": str(db_report.id),
-                    "project_id": str(project_id),
-                    "target_type": "boq",
-                    "target_id": str(boq_id),
-                    "status": engine_report.status.value,
-                },
-                source_module="oe_validation",
-            )
-        except Exception:
-            logger.debug("Failed to publish validation.report.created event", exc_info=True)
 
         # When the run produced ERROR-severity results, escalate. A blocking
         # validation error is a formal non-conformance, so the NCR module raises
