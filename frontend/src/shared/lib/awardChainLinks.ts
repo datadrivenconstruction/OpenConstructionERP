@@ -116,7 +116,7 @@ export function findAwardRecord<T extends AwardStampedRow>(
   if (!tender && bids.size === 0) return null;
   for (const row of rows) {
     if (retiredStatuses.has(row.status)) continue;
-    const md = row.metadata && typeof row.metadata === 'object' ? row.metadata : {};
+    const md: Record<string, unknown> = row.metadata && typeof row.metadata === 'object' ? row.metadata : {};
     const rowTender = md.tender_package_id;
     const rowBid = md.bid_package_id;
     if (tender && typeof rowTender === 'string' && rowTender === tender) return row;
@@ -142,7 +142,7 @@ export interface ContractSource {
  * a pill to a bare register.
  */
 export function contractSource(metadata: Record<string, unknown> | null | undefined): ContractSource {
-  const md = metadata && typeof metadata === 'object' ? metadata : {};
+  const md: Record<string, unknown> = metadata && typeof metadata === 'object' ? metadata : {};
   const str = (v: unknown): string | null => (typeof v === 'string' && v.trim() !== '' ? v : null);
   return {
     tenderPackageId: str(md.tender_package_id),
@@ -170,9 +170,9 @@ export interface ChangeOrderWriteback {
  * guess.
  */
 export function changeOrderWriteback(metadata: Record<string, unknown> | null | undefined): ChangeOrderWriteback {
-  const md = metadata && typeof metadata === 'object' ? metadata : {};
+  const md: Record<string, unknown> = metadata && typeof metadata === 'object' ? metadata : {};
   const raw = md.writeback;
-  const wb = raw && typeof raw === 'object' && !Array.isArray(raw) ? (raw as Record<string, unknown>) : {};
+  const wb: Record<string, unknown> = raw && typeof raw === 'object' && !Array.isArray(raw) ? (raw as Record<string, unknown>) : {};
   const str = (v: unknown): string | null => (typeof v === 'string' && v.trim() !== '' ? v : null);
   return {
     boqId: str(wb.boq_id),
