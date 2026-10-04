@@ -122,8 +122,8 @@ import {
   type CountryDefaultField,
   type ValuationInterval,
 } from './api';
+import { ContractPaymentTermsCard } from './ContractPaymentTermsEditor';
 import {
-  ContractPaymentTermsSummary,
   DefaultHint,
   RELEASE_SPLIT_PRESETS,
   VALUATION_INTERVALS,
@@ -2389,7 +2389,7 @@ export function ContractDetailDrawer({
             <p className="text-xs font-semibold uppercase tracking-wide text-content-secondary mb-2">
               {t('contracts.payment_terms.section', { defaultValue: 'Payment terms' })}
             </p>
-            <ContractPaymentTermsSummary contract={contract} />
+            <ContractPaymentTermsCard contract={contract} />
           </Card>
 
           {/* Who the contract is between. Directly under the header because the
