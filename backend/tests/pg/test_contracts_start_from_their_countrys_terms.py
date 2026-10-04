@@ -126,6 +126,14 @@ async def test_the_authors_figures_win_and_are_not_called_defaults(pg_session) -
     assert contract.metadata_["source"] == "import"
 
 
+async def test_no_cap_on_purpose_survives_a_country_that_usually_caps(pg_session) -> None:
+    svc = ContractsService(pg_session)
+    contract = await _create(svc, await _project(pg_session, "AE"), retention_cap_percent=None)
+    assert contract.retention_percent == Decimal("10")
+    assert "retention_cap_percent" not in contract.terms["payment_terms"]
+    assert (await svc.retention_policy(contract)).cap_percent_of_contract_sum is None
+
+
 async def test_a_project_with_no_country_gets_nothing_invented(pg_session) -> None:
     svc = ContractsService(pg_session)
     contract = await _create(svc, await _project(pg_session, None))

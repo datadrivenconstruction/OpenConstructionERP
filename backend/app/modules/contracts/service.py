@@ -360,11 +360,18 @@ def _explicit_payment_terms(data: Any) -> dict[str, Any]:
     explicit: dict[str, Any] = {}
     stored = (getattr(data, "terms", None) or {}).get(PAYMENT_TERMS_KEY)
     if isinstance(stored, dict):
-        explicit.update({k: v for k, v in stored.items() if k in PAYMENT_TERM_FIELDS and v is not None})
+        explicit.update({k: v for k, v in stored.items() if k in PAYMENT_TERM_FIELDS})
     for field in CONTRACT_DEFAULT_FIELDS:
+        if field not in sent:
+            continue
         value = getattr(data, field, None)
-        if field in sent and value is not None:
-            explicit[field] = value
+        if value is None and field == "retention_percent":
+            # The rate has a NOT NULL column, so a null is read as "not sent"
+            # and the country's figure (or the stamped fallback) fills it.
+            continue
+        # A null payment term is an answer: "this contract has no cap" must
+        # not be overwritten by the country's usual cap.
+        explicit[field] = value
     return explicit
 
 
@@ -1329,8 +1336,10 @@ class ContractsService:
             dict(terms.get(PAYMENT_TERMS_KEY) or {}) if isinstance(terms.get(PAYMENT_TERMS_KEY), dict) else {}
         )
         for field in PAYMENT_TERM_FIELDS:
-            if field in values:
+            if values.get(field) is not None:
                 payment_terms[field] = _payment_term_json(values[field])
+            elif field in values:
+                payment_terms.pop(field, None)
         if payment_terms:
             terms[PAYMENT_TERMS_KEY] = payment_terms
         return terms, Decimal(str(retention)), release_event, stamp

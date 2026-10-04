@@ -214,6 +214,23 @@ def test_explicit_is_read_from_the_fields_sent_not_from_their_values() -> None:
     assert _explicit_payment_terms(sent) == {"retention_percent": Decimal("5"), "payment_period_days": 45}
 
 
+def test_no_cap_sent_on_purpose_is_not_replaced_by_the_countrys_cap() -> None:
+    sent = ContractCreate(
+        code="C-1",
+        contract_type="lump_sum",
+        project_id="00000000-0000-0000-0000-000000000001",
+        retention_cap_percent=None,
+        retention_percent=None,
+    )
+    explicit = _explicit_payment_terms(sent)
+    # A null rate cannot be stored, so it is "not sent"; a null cap is an answer.
+    assert explicit == {"retention_cap_percent": None}
+    values, stamp = apply_contract_defaults(explicit, resolve_contract_defaults("AE"), country_code="AE")
+    assert values["retention_cap_percent"] is None
+    assert values["retention_percent"] == "10"
+    assert "retention_cap_percent" not in stamp["applied"]
+
+
 def test_a_create_with_nothing_stated_leaves_every_payment_term_unset() -> None:
     sent = ContractCreate(code="C-1", contract_type="lump_sum", project_id="00000000-0000-0000-0000-000000000001")
     assert sent.retention_percent is None
