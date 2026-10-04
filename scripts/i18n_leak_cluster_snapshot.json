@@ -1597,5 +1597,15 @@
     ],
     "key_count_at_seed": 3,
     "note": "Net is the ordinary accounting word for the net amount in French, Romanian, Turkish and Filipino (finance.line_net, finance.total_net, certified_payroll.col.net). Checked in each; German reads Netto, so it is translated where the language differs."
+  },
+  {
+    "locale_set": [
+      "de",
+      "fil",
+      "fr",
+      "nl"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Code is the ordinary word for a code column in German, French, Dutch and Filipino (bi.kpi_code, cost_plan.col_code, boq.import_preview.col_ordinal as Pos. / Code). Checked in each; Spanish, Italian and Russian write their own word, so it is translated where the language differs."
   }
 ]

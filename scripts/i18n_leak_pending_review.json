@@ -3082,5 +3082,15 @@
     "en_value": "P80 {{amount}}",
     "n": 41,
     "reason": "Value cell for the 80th percentile of the contingency simulation, P80 followed by an amount. P80 is the risk notation used across markets; the locales that differ write a local form. Filed for a native review of the notation, not a prose leak."
+  },
+  "procurement.from_rfq_unnamed": {
+    "added_by": "batch 18.4 integration (2026-10-04)",
+    "differs_in": [
+      "ar",
+      "he"
+    ],
+    "en_value": "RFQ",
+    "n": 40,
+    "reason": "Fallback label for a purchase order drafted from an RFQ that has no title, so the order names its source by the record type alone. RFQ is the acronym each locale already uses for the RFQ module; ar and he spell the request out, so it is filed for a native review rather than allowlisted."
   }
 }
