@@ -128,6 +128,13 @@ _HEADERS_BY_LANGUAGE: dict[str, dict[str, tuple[str, ...]]] = {
             "cost code",
             "cost group",
             "class",
+            "item code",
+            # An Indian bill cites the item of the CPWD Delhi Schedule of
+            # Rates, or of a state schedule of rates, the line is priced from.
+            "dsr code",
+            "dsr no.",
+            "dsr item no.",
+            "sor code",
         ),
         # A bill that prices material and labour apart carries two rates and
         # two totals per line and no single rate at all. See

@@ -3307,6 +3307,79 @@ _CLASSIFICATION_CODE_SETS: dict[str, str] = {
     "poland": "knr",
 }
 
+# The code sets a spreadsheet import carries its code column into. Each is a
+# market's own price-book or item code, which a bill of that market prints in
+# its code column and nothing else: the CPWD DSR item, the GESN rate, the
+# SINAPI composition, the GB 50500 item code, the poz number, the sekisan
+# item, the KNR table, the Hungarian item code, the BC3 concept code. DIN 276,
+# NRM and MasterFormat are left out on purpose. The importer recognises NRM
+# and MasterFormat codes by their shape, and DIN 276 is the cost-group axis
+# many markets map their bills onto beside a national code (Romania, Greece,
+# Ukraine, Croatia, Czechia, Belgium), so the code column of such a bill is
+# the national code and copying it under ``din276`` would turn a missing
+# cost group into a wrong one.
+_IMPORT_CARRIED_CODE_SETS: frozenset[str] = frozenset(
+    {"sinapi", "gesn", "gbt50500", "cpwd", "hungary", "birimfiyat", "sekisan", "bc3", "poland"}
+)
+
+
+def _national_code_key(rule_sets: list[str], classification_standard: str) -> str | None:
+    """The classification key an imported line's raw code is carried under.
+
+    The rule sets are the project's, as :func:`_build_rule_sets` returns them.
+    The set of the project's standard wins; otherwise the key is taken only
+    when exactly one carried code set is in play, since with two there is no
+    telling which the column holds.
+    """
+    carried = [rs for rs in rule_sets if rs in _IMPORT_CARRIED_CODE_SETS]
+    std_rule = _STANDARD_RULE_SETS.get((classification_standard or "").strip().lower())
+    if std_rule in carried:
+        return _CLASSIFICATION_CODE_SETS[std_rule]
+    keys = {_CLASSIFICATION_CODE_SETS[rs] for rs in carried}
+    return keys.pop() if len(keys) == 1 else None
+
+
+def _carry_national_code(classification: Any, key: str | None, *, is_section: bool) -> Any:
+    """``classification`` with its raw code also under ``key``, the key the project's rules read.
+
+    An importer files a code column under ``code``, or under ``nrm`` or
+    ``masterformat`` when the code has that shape (a DSR item "2.8.1" looks
+    like an NRM element). The national rules read their own key, so a bill
+    whose every line carried its code failed every line as uncoded. A key the
+    line already has is never overwritten, and section rows are left alone.
+    The input is not modified.
+    """
+    if key is None or is_section or not isinstance(classification, dict):
+        return classification
+    if str(classification.get(key) or "").strip():
+        return classification
+    for source in ("code", "nrm", "masterformat"):
+        value = str(classification.get(source) or "").strip()
+        if value:
+            return {**classification, key: value}
+    return classification
+
+
+async def _project_national_code_key(boq_id: uuid.UUID, service: BOQService) -> str | None:
+    """:func:`_national_code_key` for the project the BOQ belongs to, ``None`` if it cannot be read."""
+    from app.modules.projects.repository import ProjectRepository
+
+    try:
+        boq = await service.get_boq(boq_id)
+        project = await ProjectRepository(service.session).get_by_id(boq.project_id)
+    except Exception as exc:  # noqa: BLE001 - a failed lookup must never block an import
+        logger.warning("Import could not read the project of BOQ %s for its code key: %s", boq_id, exc)
+        return None
+    if project is None:
+        return None
+    rule_sets = _build_rule_sets(
+        project_rule_sets=project.validation_rule_sets or ["boq_quality"],
+        classification_standard=project.classification_standard or "",
+        region=project.region or "",
+        country_code=getattr(project, "country_code", None),
+    )
+    return _national_code_key(rule_sets, project.classification_standard or "")
+
 
 # Map country → additional rule sets. This is the rule-pack axis, not
 # the classification-standard axis, and it stays a table of its own on
@@ -6578,6 +6651,9 @@ async def import_boq_excel(
     # ── Round-trip apply (GitHub #360) ────────────────────────────────────
     # Update-in-place on known ids, create on blank/unknown ids, optional
     # delete of rows the sheet dropped. Cross-BOQ ids can never update.
+    code_key = await _project_national_code_key(boq_id, service)
+    for entry in prepared:
+        entry["classification"] = _carry_national_code(entry["classification"], code_key, is_section=False)
     apply_summary = await _apply_boq_roundtrip(
         boq_id,
         prepared,
@@ -6852,10 +6928,17 @@ async def _persist_imported_boq(
     Returns the apply summary dict (``created`` / ``updated`` / ``unchanged``
     / ``deleted`` / ``would_delete`` / ``round_trip`` / ``problems`` /
     ``apply_errors``).
+
+    Each new line's raw code is also carried under the classification key the
+    project's national code rules read, see :func:`_carry_national_code`. An
+    update never writes classification, so a re-import leaves a code the user
+    corrected alone.
     """
+    code_key = await _project_national_code_key(boq_id, service)
     prepared: list[dict[str, Any]] = []
     for idx, row in enumerate(imported.positions, start=1):
         meta = row.metadata if isinstance(row.metadata, dict) else {}
+        is_section = bool(getattr(row, "is_section", False))
         prepared.append(
             {
                 "row_index": int(meta.get("import_row_index", idx) or idx),
@@ -6867,10 +6950,10 @@ async def _persist_imported_boq(
                 "unit": row.unit,
                 "quantity": row.quantity,
                 "unit_rate": row.unit_rate,
-                "classification": row.classification,
+                "classification": _carry_national_code(row.classification, code_key, is_section=is_section),
                 "source": row.source,
                 "metadata": {**meta, "import_source": file_name},
-                "is_section": bool(getattr(row, "is_section", False)),
+                "is_section": is_section,
             }
         )
 

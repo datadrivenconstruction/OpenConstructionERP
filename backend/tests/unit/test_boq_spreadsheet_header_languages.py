@@ -211,7 +211,8 @@ _DELIBERATE_ADDITIONS_TO_THE_ORIGINAL_SEVEN: dict[str, frozenset[str]] = {
 
 # The second widening, when each market's bills were held to the header they
 # are really printed with: the Spanish presupuesto, the French DPGF, the
-# Italian computo metrico, the Polish kosztorys and the Russian smeta. Most
+# Italian computo metrico, the Polish kosztorys, the Russian smeta and the
+# English-language bill an Indian contractor prices against the DSR. Most
 # of all it names their code column, which the national code rules read and
 # which was dropped as an unknown column before.
 _MARKET_HEADER_ADDITIONS_TO_THE_ORIGINAL_SEVEN: dict[str, frozenset[str]] = {
@@ -276,6 +277,11 @@ _MARKET_HEADER_ADDITIONS_TO_THE_ORIGINAL_SEVEN: dict[str, frozenset[str]] = {
             "шифр",
             "шифр расценки",
             "код",
+            "item code",
+            "dsr code",
+            "dsr no.",
+            "dsr item no.",
+            "sor code",
         }
     ),
 }

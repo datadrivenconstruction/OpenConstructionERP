@@ -114,6 +114,10 @@ from app.modules.boq.importers.excel import (
         ("공종코드", "classification"),
         ("Kode", "classification"),
         ("Kode Analisa", "classification"),
+        # Indian bill priced against the Delhi Schedule of Rates.
+        ("DSR Code", "classification"),
+        ("DSR No.", "classification"),
+        ("Item Code", "classification"),
     ],
 )
 def test_a_market_header_reaches_its_column(header: str, canonical: str) -> None:
