@@ -423,3 +423,62 @@ async def test_null_metadata_clears_a_plain_line_but_keeps_a_drawdown(session):
     await svc.confirm_contingency_drawdown(PROJECT_ID, rid, _req("900"))
     await fin.update_budget(line, BudgetUpdate(metadata=None))
     assert list(await _markers(session, line)) == [f"{CONTINGENCY_DRAWDOWN_PREFIX}risk:{rid}"]
+
+
+# ── Only the drawdown route writes a drawdown ─────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_creating_a_line_cannot_carry_a_drawdown(session):
+    """The budget create route needs finance.create, not risk.contingency.
+
+    A drawdown key smuggled in with a new line's metadata would book money a
+    manager never confirmed and take an open risk out of EMV.
+    """
+    svc = RiskService(session)
+    fin = FinanceService(session)
+    rid = await _risk(svc, probability=0.5, impact_cost=D("100000"))
+    forged_key = f"{CONTINGENCY_DRAWDOWN_PREFIX}risk:{rid}"
+    created = await fin.create_budget(
+        BudgetCreate(
+            project_id=PROJECT_ID,
+            wbs_id="CT-F",
+            category="contingency",
+            original_budget="100000",
+            metadata={
+                forged_key: {"amount": "90000", "currency": "EUR", "confirmed_by": str(OWNER_ID)},
+                "notes": "kept",
+            },
+        )
+    )
+    pos = await svc.get_contingency_position(PROJECT_ID)
+    assert pos["drawn"] == D("0.00")
+    assert pos["excluded_drawn_count"] == 0
+    assert pos["active_risk_count"] == 1
+    assert pos["emv"] == D("50000.00")
+    assert await _markers(session, created.id) == {}
+    b = await fin.get_budget(created.id)
+    await session.refresh(b)
+    # The rest of what was typed is kept, and the line can still be moved.
+    assert b.metadata_["notes"] == "kept"
+    await fin.update_budget(created.id, BudgetUpdate(category="material"))
+
+
+@pytest.mark.asyncio
+async def test_a_line_created_elsewhere_cannot_bring_a_drawdown_into_contingency(session):
+    svc = RiskService(session)
+    fin = FinanceService(session)
+    rid = await _risk(svc, status="occurred", impact_cost=D("4000"))
+    created = await fin.create_budget(
+        BudgetCreate(
+            project_id=PROJECT_ID,
+            wbs_id="M-F",
+            category="material",
+            original_budget="10000",
+            metadata={f"{CONTINGENCY_DRAWDOWN_PREFIX}risk:{rid}": "4000"},
+        )
+    )
+    await fin.update_budget(created.id, BudgetUpdate(category="contingency"))
+    pos = await svc.get_contingency_position(PROJECT_ID)
+    assert pos["drawn"] == D("0.00")
+    assert [p["risk_id"] for p in pos["pending"]] == [str(rid)]

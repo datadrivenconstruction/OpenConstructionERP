@@ -70,6 +70,22 @@ CONTINGENCY_CATEGORY = "contingency"
 #: ``FinanceService.set_contingency_drawdown``.
 CONTINGENCY_DRAWDOWN_PREFIX = "contingency_drawdown:"
 
+
+def _without_drawdowns(metadata: object) -> dict[str, Any]:
+    """Caller-supplied budget metadata minus any contingency drawdown keys.
+
+    A drawdown is money a manager confirmed (``risk.contingency``). The budget
+    create and edit routes need only ``finance.create`` / ``finance.update``,
+    so a key with the drawdown prefix arriving through them would let an
+    editor book a drawdown in a manager's name. Such keys are dropped on the
+    way in, whatever the line's category, so a line created under another
+    category and moved to contingency later cannot carry one either.
+    """
+    if not isinstance(metadata, dict):
+        return {}
+    return {k: v for k, v in metadata.items() if not str(k).startswith(CONTINGENCY_DRAWDOWN_PREFIX)}
+
+
 # Upper bound on invoices scanned for the retention ledger (mirrors the invoice
 # Excel-export cap). A read model, so a hard ceiling keeps a pathological
 # project from loading unbounded rows; realistic projects stay far below it.
@@ -2120,7 +2136,7 @@ class FinanceService:
             forecast_final=data.forecast_final,
             # A new row holds only what was typed onto it; it never carried the
             # old paid-invoice recompute (see ``sync_project_budget``).
-            metadata_={**(data.metadata or {}), "budget_sync": "1"},
+            metadata_={**_without_drawdowns(data.metadata), "budget_sync": "1"},
         )
         try:
             budget = await self.budgets.create(budget)
@@ -2329,11 +2345,7 @@ class FinanceService:
         stored_drawdowns = {k: v for k, v in stored_md.items() if k.startswith(CONTINGENCY_DRAWDOWN_PREFIX)}
         if "metadata" in fields:
             incoming = fields.pop("metadata")
-            merged = (
-                {k: v for k, v in incoming.items() if not str(k).startswith(CONTINGENCY_DRAWDOWN_PREFIX)}
-                if isinstance(incoming, dict)
-                else {}
-            )
+            merged = _without_drawdowns(incoming)
             merged.update(stored_drawdowns)
             # An explicit null on a line without drawdowns still clears it, as before.
             fields["metadata_"] = merged if (merged or incoming is not None) else None

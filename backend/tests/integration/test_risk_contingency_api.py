@@ -189,6 +189,66 @@ async def test_editor_cannot_draw_even_on_own_project(http_client, tenants):
 
 
 @pytest.mark.asyncio
+async def test_editor_cannot_book_a_drawdown_through_the_budget_create_route(http_client, tenants):
+    """POST /finance/budgets/ is open to an editor; it must not write drawdowns.
+
+    A fresh project, so the shared fixtures' figures stay untouched.
+    """
+    headers = tenants["e"]["headers"]
+    proj = await http_client.post(
+        "/api/v1/projects/",
+        json={"name": f"RC-forge {uuid.uuid4().hex[:6]}", "currency": "EUR"},
+        headers=headers,
+    )
+    assert proj.status_code == 201, proj.text
+    project_id = proj.json()["id"]
+    risk = await http_client.post(
+        f"{RISK}/",
+        json={"project_id": project_id, "title": "Open risk", "probability": 0.5, "impact_cost": "100000"},
+        headers=headers,
+    )
+    assert risk.status_code == 201, risk.text
+    risk_id = risk.json()["id"]
+    forged_key = f"contingency_drawdown:risk:{risk_id}"
+
+    line = await http_client.post(
+        "/api/v1/finance/budgets/",
+        json={
+            "project_id": project_id,
+            "wbs_id": "CT",
+            "category": "contingency",
+            "original_budget": "100000",
+            "metadata": {
+                forged_key: {
+                    "amount": "90000",
+                    "currency": "EUR",
+                    "confirmed_by": str(uuid.uuid4()),
+                    "confirmed_at": "2026-10-01T00:00:00+00:00",
+                }
+            },
+        },
+        headers=headers,
+    )
+    assert line.status_code == 201, line.text
+    assert forged_key not in (line.json().get("metadata") or {})
+
+    view = await http_client.get(f"{RISK}/projects/{project_id}/contingency", headers=headers)
+    assert view.status_code == 200, view.text
+    body = view.json()
+    assert body["drawn"] == "0.00"
+    assert body["excluded_drawn_count"] == 0
+    assert body["drawdowns"] == []
+    assert body["emv"] == "50000.00"
+    # Nothing forged is left to block a later category change.
+    moved = await http_client.patch(
+        f"/api/v1/finance/budgets/{line.json()['id']}",
+        json={"category": "material"},
+        headers=headers,
+    )
+    assert moved.status_code == 200, moved.text
+
+
+@pytest.mark.asyncio
 async def test_amount_must_be_positive(http_client, tenants):
     b = tenants["b"]
     for bad in ("0", "-5", "1e400", "abc"):
