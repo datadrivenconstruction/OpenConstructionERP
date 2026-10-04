@@ -215070,6 +215070,13 @@
           "handler": "link_measurement_to_boq",
           "response_model": "TakeoffMeasurementResponse",
           "request_schema": "LinkToBoqRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/measurements/{measurement_id}/create-boq-position/",
+          "handler": "create_boq_position_from_measurement",
+          "response_model": "CreateBoqPositionFromMeasurementResponse",
+          "request_schema": "CreateBoqPositionFromMeasurementRequest"
         }
       ],
       "schemas": [
@@ -216060,6 +216067,82 @@
               "name": "push_quantity",
               "type": "bool",
               "description": "When true, copy the measurement's measured value into the target BOQ position's quantity and recompute the position total. A measurement with no usable value is a no-op (the existing quantity is left untouched). Default false keeps existing callers backward-compatible."
+            }
+          ]
+        },
+        {
+          "class_name": "CreateBoqPositionFromMeasurementRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Create a new BOQ position from a measurement and link the two.\n\nThe quantity is NOT taken from the client: the server computes the\nmeasurement's reported quantity (wall area, openings, slope, wastage,\nmultiplier) itself, so the new position carries the same figure the\ntakeoff ledger shows.",
+          "fields": [
+            {
+              "name": "boq_id",
+              "type": "UUID",
+              "description": "Bill the new position goes into; must be in the measurement's project"
+            },
+            {
+              "name": "parent_id",
+              "type": "UUID | None",
+              "description": "Section to place the position in; None = top level"
+            },
+            {
+              "name": "description",
+              "type": "str | None",
+              "description": "Position text; defaults to the measurement's annotation"
+            },
+            {
+              "name": "unit",
+              "type": "str | None",
+              "description": "Unit to state the position in (e.g. ft2 for an imperial bill). The reported quantity is converted into it; None keeps the measurement's own unit."
+            },
+            {
+              "name": "cost_item_id",
+              "type": "UUID | None",
+              "description": "Cost database item to price the position from"
+            },
+            {
+              "name": "unit_rate",
+              "type": "Decimal | None",
+              "description": "Unit rate; None = 0 (to be priced)"
+            }
+          ]
+        },
+        {
+          "class_name": "CreateBoqPositionFromMeasurementResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The created position and the measurement now linked to it.",
+          "fields": [
+            {
+              "name": "position_id",
+              "type": "str"
+            },
+            {
+              "name": "boq_id",
+              "type": "str"
+            },
+            {
+              "name": "ordinal",
+              "type": "str"
+            },
+            {
+              "name": "description",
+              "type": "str"
+            },
+            {
+              "name": "unit",
+              "type": "str"
+            },
+            {
+              "name": "quantity",
+              "type": "float"
+            },
+            {
+              "name": "measurement",
+              "type": "TakeoffMeasurementResponse"
             }
           ]
         },
@@ -220906,7 +220989,10 @@
       "files": [
         "__init__.py",
         "award_record.py",
+        "bid_portal.py",
+        "gaeb_package.py",
         "intl.py",
+        "invitation_email.py",
         "manifest.py",
         "models.py",
         "pdf_documents.py",
@@ -220914,7 +221000,9 @@
         "repository.py",
         "router.py",
         "schemas.py",
-        "service.py"
+        "service.py",
+        "workbooks.py",
+        "xlsx_translations.py"
       ],
       "manifest": {
         "name": "oe_tendering",
@@ -221064,6 +221152,96 @@
               "back_populates": "bids"
             }
           ]
+        },
+        {
+          "class_name": "TenderBidInvitation",
+          "tablename": "oe_tendering_bid_invitation",
+          "docstring": "A personal web link that lets one invited firm price one tender package.\n\nThe bidder has no account: the link itself is the credential. Only the\nsha256 of the token is stored, the token is shown once when the link is\nmade. One row is one link; making a new link for the same recipient\nrevokes the older row and carries its draft and bid over, so the firm keeps\nwhat it typed.\n\n``draft`` holds the firm's own unit prices (``{\"unit_prices\": {...},\n\"notes\": ...}``) until it submits; submitting writes a ``TenderBid`` through\nthe regular bid path and records its id in ``bid_id``. No ORM relationship\nis declared, every reader goes by id.",
+          "columns": [
+            {
+              "name": "package_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_tendering_package.id"
+            },
+            {
+              "name": "recipient_id",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "company_name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "email",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "token_hash",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "expires_at",
+              "annotation": "Mapped[datetime]",
+              "sql_type": "DateTime",
+              "nullable": false
+            },
+            {
+              "name": "revoked_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "opened_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "draft_saved_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "submitted_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "bid_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true,
+              "is_fk": true,
+              "fk_target": "oe_tendering_bid.id"
+            },
+            {
+              "name": "draft",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "created_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": []
         }
       ],
       "routes": [
@@ -221145,6 +221323,24 @@
           "request_schema": "TenderingService"
         },
         {
+          "method": "GET",
+          "path": "/packages/{package_id}/comparison/export/",
+          "handler": "export_bid_comparison_xlsx",
+          "request_schema": "TenderingService"
+        },
+        {
+          "method": "GET",
+          "path": "/packages/{package_id}/export/bidder-xlsx/",
+          "handler": "export_bill_for_bidders_xlsx",
+          "request_schema": "TenderingService"
+        },
+        {
+          "method": "GET",
+          "path": "/packages/{package_id}/export/gaeb-x83/",
+          "handler": "export_package_gaeb_x83",
+          "request_schema": "TenderingService"
+        },
+        {
           "method": "POST",
           "path": "/packages/{package_id}/apply-winner/",
           "handler": "apply_tender_winner",
@@ -221176,6 +221372,48 @@
           "handler": "distribute_package",
           "response_model": "DistributeResponse",
           "request_schema": "TenderingService"
+        },
+        {
+          "method": "GET",
+          "path": "/packages/{package_id}/bid-invitations/",
+          "handler": "list_bid_invitations",
+          "response_model": "BidInvitationListResponse",
+          "request_schema": "TenderingService"
+        },
+        {
+          "method": "POST",
+          "path": "/packages/{package_id}/recipients/{recipient_id}/bid-link/",
+          "handler": "create_bid_link",
+          "response_model": "BidInvitationCreated",
+          "request_schema": "TenderingService"
+        },
+        {
+          "method": "POST",
+          "path": "/packages/{package_id}/bid-invitations/{invitation_id}/revoke/",
+          "handler": "revoke_bid_invitation",
+          "response_model": "BidInvitationResponse",
+          "request_schema": "TenderingService"
+        },
+        {
+          "method": "GET",
+          "path": "/bid-portal/{token}/",
+          "handler": "bid_portal_view",
+          "response_model": "BidPortalView",
+          "request_schema": "Request"
+        },
+        {
+          "method": "PUT",
+          "path": "/bid-portal/{token}/draft/",
+          "handler": "bid_portal_save_draft",
+          "response_model": "BidPortalView",
+          "request_schema": "BidPortalPricesRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/bid-portal/{token}/submit/",
+          "handler": "bid_portal_submit",
+          "response_model": "BidPortalView",
+          "request_schema": "BidPortalPricesRequest"
         },
         {
           "method": "GET",
@@ -221609,6 +221847,11 @@
               "name": "position_id",
               "type": "str | None",
               "default": "None"
+            },
+            {
+              "name": "ordinal",
+              "type": "str",
+              "default": "''"
             },
             {
               "name": "description",
@@ -222600,6 +222843,278 @@
             {
               "name": "bid_summaries",
               "type": "list[BidLevelingSummary]"
+            }
+          ]
+        },
+        {
+          "class_name": "BidInvitationResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One bidder link as staff see it (never the token itself).",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "package_id",
+              "type": "UUID"
+            },
+            {
+              "name": "recipient_id",
+              "type": "str"
+            },
+            {
+              "name": "company_name",
+              "type": "str"
+            },
+            {
+              "name": "email",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "expires_at",
+              "type": "datetime"
+            },
+            {
+              "name": "opened_at",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "draft_saved_at",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "submitted_at",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "revoked_at",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "bid_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "BidInvitationCreated",
+          "bases": [
+            "BidInvitationResponse"
+          ],
+          "docstring": "A freshly made link. ``url`` holds the token and is returned only here.",
+          "fields": [
+            {
+              "name": "url",
+              "type": "str"
+            },
+            {
+              "name": "replaced_count",
+              "type": "int",
+              "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "BidInvitationListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Every bidder link of a package, newest first.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[BidInvitationResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int",
+              "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "BidPortalLine",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One row of the bill as the bidder sees it: text and quantity, no price.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "ordinal",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "short_text",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "long_text",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "unit",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "quantity",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "depth",
+              "type": "int",
+              "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "BidPortalDraft",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The bidder's own entries: unit prices per line id, as decimal strings.",
+          "fields": [
+            {
+              "name": "unit_prices",
+              "type": "dict[str, str]"
+            },
+            {
+              "name": "notes",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "saved_at",
+              "type": "datetime | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "BidPortalView",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Everything the public bid page needs, and nothing else.",
+          "fields": [
+            {
+              "name": "state",
+              "type": "str"
+            },
+            {
+              "name": "package_name",
+              "type": "str"
+            },
+            {
+              "name": "package_description",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "deadline",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "currency",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "project_name",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "buyer_name",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "bidder_company",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "expires_at",
+              "type": "datetime"
+            },
+            {
+              "name": "lines",
+              "type": "list[BidPortalLine]"
+            },
+            {
+              "name": "draft",
+              "type": "BidPortalDraft"
+            },
+            {
+              "name": "submitted_at",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "bid_amount",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "item_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "unpriced_count",
+              "type": "int",
+              "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "BidPortalPricesRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Unit prices a bidder saves as a draft or submits.\n\nValues are parsed on the server (decimal strings preferred, ``12.5`` and\n``12`` accepted); ``null`` or an empty string leaves a line unpriced.\n``currency``, when sent, must be the package currency.",
+          "fields": [
+            {
+              "name": "unit_prices",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "notes",
+              "type": "str"
+            },
+            {
+              "name": "currency",
+              "type": "str | None"
             }
           ]
         }
@@ -232340,6 +232855,13 @@
       "total_files": 11
     },
     {
+      "name": "bid-portal",
+      "ts_files": 4,
+      "css_files": 0,
+      "test_files": 1,
+      "total_files": 4
+    },
+    {
       "name": "bim",
       "ts_files": 96,
       "css_files": 0,
@@ -233433,10 +233955,10 @@
     },
     {
       "name": "takeoff",
-      "ts_files": 51,
+      "ts_files": 58,
       "css_files": 0,
-      "test_files": 22,
-      "total_files": 51
+      "test_files": 25,
+      "total_files": 59
     },
     {
       "name": "tasks",
@@ -233475,10 +233997,10 @@
     },
     {
       "name": "tendering",
-      "ts_files": 16,
+      "ts_files": 21,
       "css_files": 0,
-      "test_files": 5,
-      "total_files": 16
+      "test_files": 7,
+      "total_files": 21
     },
     {
       "name": "timeline",
@@ -234848,15 +235370,15 @@
   "statistics": {
     "backend_modules": 196,
     "modules_with_manifests": 194,
-    "total_models": 622,
-    "total_columns": 7122,
+    "total_models": 623,
+    "total_columns": 7135,
     "total_relationships": 234,
-    "total_routes": 3720,
-    "total_schemas": 3511,
-    "total_python_files": 2243,
-    "frontend_features": 191,
-    "frontend_ts_files": 2841,
-    "frontend_backend_mapped": 170
+    "total_routes": 3730,
+    "total_schemas": 3520,
+    "total_python_files": 2248,
+    "frontend_features": 192,
+    "frontend_ts_files": 2857,
+    "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {
     "about": null,
@@ -234877,6 +235399,7 @@
     "benchmarks": null,
     "bi-dashboards": "bi_dashboards",
     "bid-management": "bid_management",
+    "bid-portal": "portal",
     "bim": "bim_hub",
     "bim_requirements": "bim_requirements",
     "boq": "boq",
