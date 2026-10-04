@@ -2654,6 +2654,7 @@ TEMPLATE = DemoTemplate(
     # feed-in approval. The bid factor is ``net_bid / _PKG_SHARE`` so
     # install_demo_project (which prices each package off an equal
     # grand_total / 4 share) lands every bid on its exact net figure.
+    tender_bids_from_equal_shares=True,
     tender_packages=[
         (
             "VP-07 Kältetechnik CO2-Verbund und Kühlmöbel (KG 470)",

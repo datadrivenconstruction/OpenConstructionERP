@@ -43,7 +43,7 @@ TEMPLATE = DemoTemplate(
     # Validate button failed every line for a cost group it never carried.
     classification_standard="bkp",
     currency="CHF",
-    locale="de",
+    locale="fr",
     address={
         "street": "Avenue du Flon 24",
         "city": "Lausanne",

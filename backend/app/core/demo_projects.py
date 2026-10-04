@@ -24,6 +24,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.demo_accounts import SHOWCASE_OWNER_EMAIL
 from app.core.demo_resource_names import resource_name
 from app.core.demo_showcase import GERMAN_SHOWCASE_DEMO_IDS
+from app.core.demo_tender_scopes import (
+    OPEN_STATUSES,
+    PENDING_INVITEE,
+    assign_package_scopes,
+    din276_digits,
+    position_trade,
+    seeded_deadlines,
+    seeded_issued_at,
+    seeded_package_statuses,
+    seeded_recipients,
+    seeded_submitted_at,
+)
 from app.modules.boq.models import BOQ, BOQMarkup, Position
 from app.modules.changeorders.models import ChangeOrder, ChangeOrderItem
 from app.modules.contacts.models import Contact
@@ -237,6 +249,54 @@ def _tender_scopes(items: list[Position], package_count: int) -> list[list[Posit
     return scopes
 
 
+def _package_scopes(packages: list[TenderPackageDef], items: list[Position]) -> list[list[Position]]:
+    """The bill lines each tender package covers, chosen by trade.
+
+    Each line goes to the package whose name and description promise its
+    trade (``demo_tender_scopes``), so a fit-out package holds the drywall and
+    not the roof. Packages that name no trade this can read at all fall back to
+    the money-balanced contiguous split, so a package never seeds empty for
+    want of a vocabulary.
+    """
+    rows = [
+        (
+            position_trade(item.classification, (item.metadata_ or {}).get("cwicr_ref"), item.description or ""),
+            din276_digits(item.classification),
+            item.description or "",
+        )
+        for item in items
+    ]
+    picked = assign_package_scopes([(p[0], p[1]) for p in packages], rows)
+    if not any(picked):
+        return _tender_scopes(items, len(packages))
+    return [[items[index] for index in scope] for scope in picked]
+
+
+def _seeded_distribution(
+    status: str,
+    deadline: date,
+    today: date,
+    companies: list[tuple[str, str, float]],
+) -> dict:
+    """``issued_at`` and the invitation list of a seeded package that went out.
+
+    Uses the recipients list the tendering module keeps on the package, so the
+    distribution panel shows who was invited. An open package also lists one
+    invited firm with no bid yet. No invitation token is created.
+    """
+    if status == "draft":
+        return {}
+    issued_at = seeded_issued_at(status, deadline, today)
+    return {
+        "issued_at": issued_at.isoformat(),
+        "recipients": seeded_recipients(
+            [(company, email) for company, email, _factor in companies],
+            sent_at=issued_at,
+            pending_invitee=PENDING_INVITEE if status in OPEN_STATUSES else None,
+        ),
+    }
+
+
 def _bid_line_items(
     scope: list[Position],
     *,
@@ -421,6 +481,11 @@ class DemoTemplate:
     # with a warning and the position keeps its generated split, so a typo in
     # a pack can never reprice a bill.
     position_resources: dict[str, list[ResourceRowDef]] = field(default_factory=dict)
+    # A pack whose tender descriptions state the submitted bids authors its
+    # bid factors against an equal share of the grand total
+    # (``net_bid / (grand_total / n_packages)``), so its bids keep that base.
+    # Every other pack prices a bid off the value of the package's own scope.
+    tender_bids_from_equal_shares: bool = False
 
 
 # ---------------------------------------------------------------------------
@@ -12535,22 +12600,33 @@ async def install_demo_project(
     session.add(snap)
 
     # ── 9. Tendering ──────────────────────────────────────────────────
+    # Statuses agree with the bids seeded below, and every date counts from
+    # the install day rather than the calendar, so a demo opened long after it
+    # shipped still has a tender out with an invited firm yet to quote.
+    tender_today = datetime.now(UTC).date()
     if template.tender_packages:
         # Multiple tender packages
         n_pkgs = len(template.tender_packages)
-        pkg_scopes = _tender_scopes(items_list, n_pkgs)
-        for pkg_idx, (pkg_name, pkg_desc, pkg_status, pkg_companies) in enumerate(template.tender_packages):
-            # The package covers a slice of the priced lines, and each bidder
-            # quotes that slice line by line. Where there are no priced lines
-            # to quote, the bid keeps the old proportional share of the grand
-            # total so the package still shows a number.
+        pkg_scopes = _package_scopes(template.tender_packages, items_list)
+        pkg_statuses = seeded_package_statuses(
+            [p[2] for p in template.tender_packages],
+            [bool(p[3]) for p in template.tender_packages],
+        )
+        pkg_deadlines = seeded_deadlines(pkg_statuses, tender_today)
+        for pkg_idx, (pkg_name, pkg_desc, _authored_status, pkg_companies) in enumerate(template.tender_packages):
+            # The package covers the lines of its own trade, and each bidder
+            # quotes them line by line, priced off what those lines are worth.
+            # Where there are no priced lines to quote, the bid keeps the old
+            # proportional share of the grand total so the package still shows
+            # a number.
             #
-            # The slice is recorded on the package because both comparison
+            # The scope is recorded on the package because both comparison
             # screens read the package's BOQ, which is the whole bill. Without
-            # the record they would put three quarters of a four-package bill
-            # on the reference side of a quarter-sized bid and impute every
-            # line of it.
+            # the record they would put the whole bill on the reference side of
+            # one trade's bid and impute every line of it.
             scope = pkg_scopes[pkg_idx] if pkg_idx < len(pkg_scopes) else []
+            pkg_status = pkg_statuses[pkg_idx]
+            deadline = pkg_deadlines[pkg_idx]
             pkg = TenderPackage(
                 id=_id(),
                 project_id=project.id,
@@ -12558,19 +12634,27 @@ async def install_demo_project(
                 name=pkg_name,
                 description=pkg_desc,
                 status=pkg_status,
-                deadline=(start - timedelta(days=30 + pkg_idx * 7)).strftime("%Y-%m-%d"),
+                deadline=deadline.isoformat(),
                 metadata_={
                     "package_index": pkg_idx + 1,
                     "total_packages": n_pkgs,
                     "scope_position_ids": [str(p.id) for p in scope],
+                    **_seeded_distribution(pkg_status, deadline, tender_today, pkg_companies),
                 },
             )
             session.add(pkg)
             await session.flush()
 
-            pkg_share = grand_total / n_pkgs
+            scope_value = sum(
+                (Decimal(str(p.quantity or 0)) * Decimal(str(p.unit_rate or 0)) for p in scope),
+                Decimal(0),
+            )
+            if template.tender_bids_from_equal_shares or scope_value <= 0:
+                pkg_base = grand_total / n_pkgs
+            else:
+                pkg_base = float(scope_value)
             for bidder_idx, (co, email, factor) in enumerate(pkg_companies):
-                total = round(pkg_share * factor, 2)
+                total = round(pkg_base * factor, 2)
                 lines = _bid_line_items(scope, bid_total=total, bidder_index=bidder_idx)
                 bid = TenderBid(
                     id=_id(),
@@ -12579,7 +12663,7 @@ async def install_demo_project(
                     contact_email=email,
                     total_amount=str(total),
                     currency=template.currency,
-                    submitted_at=datetime.now(UTC).isoformat(),
+                    submitted_at=seeded_submitted_at(pkg_status, deadline, tender_today, bidder_idx).isoformat(),
                     status="submitted",
                     notes=f"Tender - {co} - {pkg_name}",
                     line_items=lines,
@@ -12588,15 +12672,17 @@ async def install_demo_project(
                 session.add(bid)
     else:
         # Single tender package (legacy / default)
+        pkg_status = seeded_package_statuses(["evaluating"], [bool(template.tender_companies)])[0]
+        deadline = seeded_deadlines([pkg_status], tender_today)[0]
         pkg = TenderPackage(
             id=_id(),
             project_id=project.id,
             boq_id=boq.id,
             name=template.tender_name,
             description=f"Main tender package for {template.project_name}",
-            status="evaluating",
-            deadline=(start - timedelta(days=30)).strftime("%Y-%m-%d"),
-            metadata_={},
+            status=pkg_status,
+            deadline=deadline.isoformat(),
+            metadata_=_seeded_distribution(pkg_status, deadline, tender_today, template.tender_companies),
         )
         session.add(pkg)
         await session.flush()
@@ -12611,7 +12697,7 @@ async def install_demo_project(
                 contact_email=email,
                 total_amount=str(total),
                 currency=template.currency,
-                submitted_at=datetime.now(UTC).isoformat(),
+                submitted_at=seeded_submitted_at(pkg_status, deadline, tender_today, bidder_idx).isoformat(),
                 status="submitted",
                 notes=f"Tender - {co}",
                 line_items=lines,
