@@ -72,8 +72,14 @@ def test_clear_stale_pidfile_keeps_live(tmp_path, monkeypatch) -> None:
     pgdata.mkdir()
     pidfile = pgdata / "postmaster.pid"
     pidfile.write_text("4321\n" + str(pgdata) + "\n1700000000\n54999\n")
-    # A live postmaster's pidfile must never be deleted.
+    # A live postmaster's pidfile must never be deleted. "Live" is two answers
+    # since the deletion path asks _pidfile_owner_is_live: the pid runs AND it
+    # is still the process that wrote the file. Pin both. With only the first
+    # pinned, the second asked the real process table about pid 4321, and on a
+    # runner where 4321 happened to be some other process the file read as
+    # recycled and was removed (CI (PostgreSQL), 2026-10-04).
     monkeypatch.setattr(embedded_pg, "_pid_alive", lambda _pid: True)
+    monkeypatch.setattr(embedded_pg, "_pid_was_recycled", lambda _pid, _start: False)
     embedded_pg._clear_stale_pidfile(pgdata.resolve())
     assert pidfile.exists()
 
