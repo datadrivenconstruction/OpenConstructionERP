@@ -1,0 +1,124 @@
+{
+  "standard": "NRM1",
+  "title": "RICS NRM 1 - Order of cost estimating and cost planning, group elements and elements",
+  "source_note": "Group element and element numbers with their titles only, as they appear in the NRM 1 group element and element tables (2nd and 3rd editions share this numbering). The measurement rules, coverage notes and definitions under each element are the publisher's text and are cited, not reproduced. A code this list does not name is still costed: it lands on its group as a group-level line, so a gap here never drops money.",
+  "groups": [
+    {
+      "code": "0",
+      "name": "Facilitating works",
+      "kind": "works",
+      "elements": [
+        {"code": "0.1", "name": "Toxic or hazardous/contaminated material treatment"},
+        {"code": "0.2", "name": "Major demolition works"},
+        {"code": "0.3", "name": "Temporary support to adjacent structures"},
+        {"code": "0.4", "name": "Specialist groundworks"},
+        {"code": "0.5", "name": "Temporary diversion works"},
+        {"code": "0.6", "name": "Extraordinary site investigation works"}
+      ]
+    },
+    {
+      "code": "1",
+      "name": "Substructure",
+      "kind": "works",
+      "elements": [
+        {"code": "1.1", "name": "Substructure"}
+      ]
+    },
+    {
+      "code": "2",
+      "name": "Superstructure",
+      "kind": "works",
+      "elements": [
+        {"code": "2.1", "name": "Frame"},
+        {"code": "2.2", "name": "Upper floors"},
+        {"code": "2.3", "name": "Roof"},
+        {"code": "2.4", "name": "Stairs and ramps"},
+        {"code": "2.5", "name": "External walls"},
+        {"code": "2.6", "name": "Windows and external doors"},
+        {"code": "2.7", "name": "Internal walls and partitions"},
+        {"code": "2.8", "name": "Internal doors"}
+      ]
+    },
+    {
+      "code": "3",
+      "name": "Internal finishes",
+      "kind": "works",
+      "elements": [
+        {"code": "3.1", "name": "Wall finishes"},
+        {"code": "3.2", "name": "Floor finishes"},
+        {"code": "3.3", "name": "Ceiling finishes"}
+      ]
+    },
+    {
+      "code": "4",
+      "name": "Fittings, furnishings and equipment",
+      "kind": "works",
+      "elements": [
+        {"code": "4.1", "name": "Fittings, furnishings and equipment"}
+      ]
+    },
+    {
+      "code": "5",
+      "name": "Services",
+      "kind": "works",
+      "elements": [
+        {"code": "5.1", "name": "Sanitary installations"},
+        {"code": "5.2", "name": "Services equipment"},
+        {"code": "5.3", "name": "Disposal installations"},
+        {"code": "5.4", "name": "Water installations"},
+        {"code": "5.5", "name": "Heat source"},
+        {"code": "5.6", "name": "Space heating and air conditioning"},
+        {"code": "5.7", "name": "Ventilation"},
+        {"code": "5.8", "name": "Electrical installations"},
+        {"code": "5.9", "name": "Fuel installations"},
+        {"code": "5.10", "name": "Lift and conveyor installations"},
+        {"code": "5.11", "name": "Fire and lightning protection"},
+        {"code": "5.12", "name": "Communication, security and control systems"},
+        {"code": "5.13", "name": "Specialist installations"},
+        {"code": "5.14", "name": "Builder's work in connection with services"}
+      ]
+    },
+    {
+      "code": "6",
+      "name": "Prefabricated buildings and building units",
+      "kind": "works",
+      "elements": [
+        {"code": "6.1", "name": "Prefabricated buildings and building units"}
+      ]
+    },
+    {
+      "code": "7",
+      "name": "Work to existing buildings",
+      "kind": "works",
+      "elements": [
+        {"code": "7.1", "name": "Minor demolition works and alteration works"},
+        {"code": "7.2", "name": "Repairs to existing services"},
+        {"code": "7.3", "name": "Damp-proof courses/fungus and beetle eradication"},
+        {"code": "7.4", "name": "Facade retention"},
+        {"code": "7.5", "name": "Cleaning existing surfaces"},
+        {"code": "7.6", "name": "Renovation works"}
+      ]
+    },
+    {
+      "code": "8",
+      "name": "External works",
+      "kind": "works",
+      "elements": [
+        {"code": "8.1", "name": "Site preparation works"},
+        {"code": "8.2", "name": "Roads, paths, pavings and surfacings"},
+        {"code": "8.3", "name": "Soft landscaping, planting and irrigation systems"},
+        {"code": "8.4", "name": "Fencing, railings and walls"},
+        {"code": "8.5", "name": "External fixtures"},
+        {"code": "8.6", "name": "External drainage"},
+        {"code": "8.7", "name": "External services"},
+        {"code": "8.8", "name": "Minor building works and ancillary buildings"}
+      ]
+    },
+    {"code": "9", "name": "Main contractor's preliminaries", "kind": "addon", "elements": []},
+    {"code": "10", "name": "Main contractor's overheads and profit", "kind": "addon", "elements": []},
+    {"code": "11", "name": "Project/design team fees", "kind": "addon", "elements": []},
+    {"code": "12", "name": "Other development/project costs", "kind": "addon", "elements": []},
+    {"code": "13", "name": "Risks", "kind": "addon", "elements": []},
+    {"code": "14", "name": "Inflation", "kind": "addon", "elements": []}
+  ]
+}
