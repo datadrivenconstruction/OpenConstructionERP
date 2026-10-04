@@ -428,34 +428,84 @@ async def test_an_unknown_activity_is_ignored(factory: async_sessionmaker[AsyncS
     await _handle_schedule_progress(Event(name=_EVENT, data={"activity_id": "not-a-uuid"}))
 
 
-async def test_the_schedule_service_payload_drives_the_handler_end_to_end(
-    factory: async_sessionmaker[AsyncSession],
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """What the publisher sends is what the handler reads.
+@pytest.fixture
+def published(monkeypatch: pytest.MonkeyPatch) -> list[tuple[str, dict[str, Any]]]:
+    """What the schedule module really hands the bus, captured at publish_detached."""
+    from app.core.events import event_bus
 
-    Captures the event ``ScheduleService.update_progress`` really publishes and
-    feeds it to the handler, so a renamed key on either side fails here.
+    seen: list[tuple[str, dict[str, Any]]] = []
+
+    def _record(name: str, data: dict | None = None, source_module: str | None = None) -> None:
+        seen.append((name, dict(data or {})))
+
+    monkeypatch.setattr(event_bus, "publish_detached", _record)
+    return seen
+
+
+async def test_update_progress_publishes_after_commit_and_drives_the_handler(
+    factory: async_sessionmaker[AsyncSession],
+    published: list[tuple[str, dict[str, Any]]],
+) -> None:
+    """What the publisher sends is what the handler reads, and only once saved.
+
+    A save that fails after the publish must not leave a snapshot for progress
+    that was never stored, so the event waits for the commit.
     """
-    from app.modules.schedule import service as schedule_service_module
     from app.modules.schedule.service import ScheduleService
 
-    captured: list[tuple[str, dict[str, Any]]] = []
-
-    async def _capture(name: str, data: dict, source_module: str = "") -> None:
-        captured.append((name, data))
-
-    monkeypatch.setattr(schedule_service_module, "_safe_publish", _capture)
     project_id, (a, _b) = await _project(factory)
 
     async with factory() as s:
         await ScheduleService(s).update_progress(a, 75.0)
+        assert _EVENT not in [n for n, _ in published], "published before the commit"
         await s.commit()
 
-    progress_events = [data for name, data in captured if name == _EVENT]
-    assert progress_events, f"update_progress published {[n for n, _ in captured]}"
+    progress_events = [data for name, data in published if name == _EVENT]
+    assert len(progress_events) == 1, f"update_progress published {[n for n, _ in published]}"
     await _handle_schedule_progress(Event(name=_EVENT, data=progress_events[0]))
 
     (snap,) = await _snapshots(factory, project_id)
     # 60000 at 75% + 40000 at 0% = 45000.
     assert Decimal(snap.ev) == Decimal("45000")
+
+
+async def test_a_rolled_back_progress_save_publishes_nothing(
+    factory: async_sessionmaker[AsyncSession],
+    published: list[tuple[str, dict[str, Any]]],
+) -> None:
+    from app.modules.schedule.service import ScheduleService
+
+    _project_id, (a, _b) = await _project(factory)
+
+    async with factory() as s:
+        await ScheduleService(s).update_progress(a, 75.0)
+        await s.rollback()
+
+    assert _EVENT not in [n for n, _ in published]
+
+
+async def test_typed_progress_publishes_after_commit_and_drives_the_handler(
+    factory: async_sessionmaker[AsyncSession],
+    published: list[tuple[str, dict[str, Any]]],
+) -> None:
+    from app.modules.schedule.progress_schemas import TypedProgressRequest
+    from app.modules.schedule.progress_service import ScheduleProgressService
+
+    project_id, (a, _b) = await _project(factory)
+
+    async with factory() as s:
+        outcome = await ScheduleProgressService(s).set_typed_progress(
+            a,
+            TypedProgressRequest(percent_complete_type="physical", percent=40.0),
+        )
+        assert _EVENT not in [n for n, _ in published], "published before the commit"
+        await s.commit()
+
+    progress_events = [data for name, data in published if name == _EVENT]
+    assert len(progress_events) == 1
+    await _handle_schedule_progress(Event(name=_EVENT, data=progress_events[0]))
+
+    (snap,) = await _snapshots(factory, project_id)
+    pct = Decimal(str(outcome.result.percent_complete))
+    assert pct > 0, "the engine resolved no progress, so this test would prove nothing"
+    assert Decimal(snap.ev) == (Decimal("60000") * pct / Decimal("100")).quantize(Decimal("0.01"))

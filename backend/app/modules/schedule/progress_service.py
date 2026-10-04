@@ -23,6 +23,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.cpm import readable_exception_dates, readable_work_days
+from app.core.events import publish_after_commit
 from app.modules.schedule.models import Activity, ProgressStep, Schedule
 from app.modules.schedule.progress_math import (
     DEFAULT_CALENDAR,
@@ -227,7 +228,10 @@ class ScheduleProgressService:
             fields["installed_units"] = req.installed_units
         await self.base.activity_repo.update_fields(activity_id, **fields)
 
-        await _safe_publish(
+        # Deferred to the commit, as in ScheduleService.update_progress: the
+        # EVM snapshot subscriber reads from its own session.
+        publish_after_commit(
+            self.session,
             "schedule.activity.progress_updated",
             {
                 "activity_id": str(activity_id),

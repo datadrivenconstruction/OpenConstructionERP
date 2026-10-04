@@ -25,7 +25,7 @@ from sqlalchemy.orm import noload
 
 from app.core.calendar import _holidays_cn
 from app.core.cpm import normalise_exception_date, readable_exception_dates, readable_work_days
-from app.core.events import event_bus
+from app.core.events import event_bus, publish_after_commit
 from app.core.json_merge import merge_metadata
 
 _logger_ev = __import__("logging").getLogger(__name__ + ".events")
@@ -2081,7 +2081,11 @@ class ScheduleService:
             status=new_status,
         )
 
-        await _safe_publish(
+        # Deferred to the commit: the EVM snapshot subscriber reads this
+        # activity's schedule and its siblings from its own session, and a
+        # save that fails after this point must not leave a snapshot behind.
+        publish_after_commit(
+            self.session,
             "schedule.activity.progress_updated",
             {
                 "activity_id": str(activity_id),
