@@ -214,6 +214,7 @@ export const TITLE_I18N_MAP: Record<string, string> = {
   'Resource Summary': 'nav.resource_summary',
   'Cost Match': 'nav.cost_match',
   'Price Index': 'nav.price_index',
+  'Resource-index estimate': 'price_index.ri.title',
   'Source Data': 'source_data.title',
   'Databases & Resources': 'nav.setup_databases',
   'Currencies': 'nav.fx',
