@@ -129,11 +129,19 @@ from app.modules.i18n_foundation.tax_window_supersede import (
 #:   2024", read 2026-10-04). The seed carried only the 2024 rates, so a Swiss
 #:   date before 2024 had no rate at all. The new rows are closed windows
 #:   placed BEFORE the windows every install already holds.
-#: * What the repair will therefore do in the field: nothing. Its predicate
+#: * What this repair will therefore do in the field: nothing. Its predicate
 #:   looks for an open row matching a window the file has closed, and the only
-#:   open Swiss rows are the 2024 ones, which the file still leaves open. Old
-#:   installs keep refusing pre-2024 dates; new installs price them. Both are
-#:   honest answers, and neither prices 2023 at 8.1.
+#:   open Swiss rows are the 2024 ones, which the file still leaves open.
+#: * That is NOT an honest refusal on its own, and an earlier version of this
+#:   note said it was. The bill does not refuse a date the seed cannot answer:
+#:   ``apply_default_markups`` lets the region's line stand, and Switzerland's
+#:   region is DACH, so a 2023 Swiss bill on an old install was charged
+#:   Germany's 19. The windows reach old installs through
+#:   ``tax_history_backfill`` instead, the additive repair for a past window
+#:   in front of a line the install already holds, pinned in
+#:   ``tests/pg/test_tax_history_backfill.py``. A date before 2018 has no
+#:   Swiss rate anywhere; such a bill still takes the DACH line, and now marks
+#:   it with ``vat_rate_unresolved_on`` and a warning.
 #: * ``EARLIEST_SUPERSEDED_FROM`` does not move: the Swiss replacement windows
 #:   start on 2024-01-01, after Ireland's 2020-09-01.
 EXPECTED_POPULATION = {

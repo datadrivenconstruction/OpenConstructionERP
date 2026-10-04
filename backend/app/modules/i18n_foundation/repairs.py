@@ -5,7 +5,7 @@
 Imported by :func:`app.core.data_repairs.discover_data_repairs`, which is what
 makes the registrations below take effect.
 
-Five of the seven repairs here touch ``oe_i18n_tax_config``, and between them
+Six of the eight repairs here touch ``oe_i18n_tax_config``, and between them
 they use every nature the registry has. That is the useful thing about having
 them side by side: the two tax rate ones may not rewrite a value, the two that
 describe a rate's scope must, and the reconciler may not write to an existing
@@ -100,6 +100,13 @@ async def _run_tax_seed_reconcile(session: AsyncSession) -> int:
     from app.modules.i18n_foundation.tax_seed_reconcile import reconcile_shipped_tax_rows
 
     return await reconcile_shipped_tax_rows(session)
+
+
+async def _run_tax_history_backfill(session: AsyncSession) -> int:
+    """Deliver the past tax windows added in front of a rate line this install already holds."""
+    from app.modules.i18n_foundation.tax_history_backfill import backfill_past_tax_windows
+
+    return await backfill_past_tax_windows(session)
 
 
 async def _run_work_calendar_seed_reconcile(session: AsyncSession) -> int:
@@ -223,6 +230,33 @@ TAX_SEED_RECONCILE = register_data_repair(
         never_delivered=NeverDelivered(
             table=TAX_CONFIG_TABLE,
             identified_by=("country_code", "tax_code"),
+        ),
+    )
+)
+
+#: Nature ``never_delivered``, the reconciler's twin one level down. The
+#: reconciler fills a rate LINE an install never held; this fills a past
+#: WINDOW on a line it does hold, one the file added in front of the windows
+#: the install was seeded with. Switzerland's 2018 to 2023 rates are why: an
+#: install seeded before 18.4 has no Swiss rate on any date before 2024, so a
+#: Swiss bill dated 2023 fell back to the DACH stack and was charged Germany's
+#: 19 against a real 7.7. Nothing on file is wrong and nothing is closed, so
+#: neither ``superseded`` nor the reconciler's line-level absence fits.
+#:
+#: ``identified_by`` adds ``effective_from`` because the line is on file by
+#: construction: what must never be doubled here is the window. The module
+#: carries the rest of the argument, including why a country's windows go in
+#: together or not at all.
+TAX_HISTORY_BACKFILL = register_data_repair(
+    DataRepair(
+        repair_id="tax_history_backfill",
+        revision="",
+        summary="Deliver the past tax rate windows added in front of a rate line this database already holds",
+        run=_run_tax_history_backfill,
+        nature="never_delivered",
+        never_delivered=NeverDelivered(
+            table=TAX_CONFIG_TABLE,
+            identified_by=("country_code", "tax_code", "effective_from"),
         ),
     )
 )
