@@ -34,6 +34,7 @@ import {
   Layers,
   ListChecks,
   Package,
+  Ruler,
   Timer,
   TrendingDown,
   TrendingUp,
@@ -54,6 +55,7 @@ import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { getErrorMessage } from '@/shared/lib/api';
 import { formatCurrency } from '@/shared/lib/money';
 import { formatValue } from '@/shared/lib/numberFormat';
+import { localizedUnitCode } from '@/shared/lib/unitLabels';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
@@ -67,10 +69,11 @@ import {
 } from './api';
 import { kindLabel, statusLabel } from './labels';
 import { buildPostCalcInsights } from './postcalcInsights';
+import { QuantityCheckPanel } from './QuantityCheckPanel';
 
 /* -- Small helpers --------------------------------------------------------- */
 
-type TabId = 'positions' | 'resources' | 'feedback';
+type TabId = 'positions' | 'resources' | 'feedback' | 'quantities';
 type SortId = 'ref' | 'money' | 'factor';
 type FilterId = 'all' | 'compared' | 'deviating';
 
@@ -292,7 +295,7 @@ function totalDelta(line: ProductivityLine): number {
 }
 
 function PositionsTable({ report }: { report: ProductivityReport }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [sort, setSort] = useState<SortId>('ref');
   const [filter, setFilter] = useState<FilterId>('all');
   const unknown = t('postcalc.unknown');
@@ -432,7 +435,7 @@ function PositionsTable({ report }: { report: ProductivityReport }) {
                   <td className="max-w-[280px] truncate px-3 py-2 text-content-primary" title={line.description}>
                     {line.description || '-'}
                   </td>
-                  <td className="px-3 py-2 text-content-tertiary">{line.unit || '-'}</td>
+                  <td className="px-3 py-2 text-content-tertiary">{line.unit ? localizedUnitCode(line.unit, i18n.language) : '-'}</td>
                   <td className="border-l border-border-light px-3 py-2 text-right">
                     <Figure value={line.planned_quantity} kind="number" unknown={unknown} digits={3} />
                   </td>
@@ -604,7 +607,7 @@ function ResourceTable({ resources, currency }: { resources: ResourceRollup[]; c
 /* -- Feedback to estimating ------------------------------------------------ */
 
 function FeedbackTable({ factors }: { factors: FeedbackFactor[] }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   if (factors.length === 0) {
     return (
@@ -643,7 +646,7 @@ function FeedbackTable({ factors }: { factors: FeedbackFactor[] }) {
                 const variance = formatValue(Math.abs(num(factor.variance_pct)), 'number', {
                   maximumFractionDigits: 1,
                 });
-                const unit = factor.unit || t('postcalc.norm_unit_fallback');
+                const unit = factor.unit ? localizedUnitCode(factor.unit, i18n.language) : t('postcalc.norm_unit_fallback');
                 const overran = num(factor.productivity_factor) > 1;
                 return (
                   <tr key={`${factor.ref}-${index}`} className="border-b border-border-light last:border-0">
@@ -695,10 +698,11 @@ export function PostCalcPage() {
   const [activeTab, setActiveTab] = useState<TabId>('positions');
   const [downloading, setDownloading] = useState(false);
 
+  const isQuantityTab = activeTab === 'quantities';
   const query = useQuery({
     queryKey: ['postcalc', 'productivity', projectId],
     queryFn: () => fetchProductivity(projectId),
-    enabled: Boolean(projectId),
+    enabled: Boolean(projectId) && !isQuantityTab,
   });
 
   const report = query.data;
@@ -738,6 +742,14 @@ export function PostCalcPage() {
       label: t('postcalc.tab_feedback'),
       icon: <ListChecks size={15} />,
     },
+    {
+      // Contract quantity against measured quantity, per bill position. It
+      // has its own query, so it opens even when the productivity report is
+      // loading or failed.
+      id: 'quantities' as const,
+      label: t('postcalc.qc.tab', { defaultValue: 'Quantity check' }),
+      icon: <Ruler size={15} />,
+    },
   ];
 
   return (
@@ -754,7 +766,7 @@ export function PostCalcPage() {
               variant="secondary"
               size="sm"
               onClick={onDownload}
-              disabled={!projectId || downloading || !report}
+              disabled={!projectId || downloading || !report || isQuantityTab}
             >
               <Download size={15} />
               {t('postcalc.export_markdown')}
@@ -766,9 +778,23 @@ export function PostCalcPage() {
       <RequiresProject emptyHint={t('postcalc.select_project')}>
         <Explainer />
 
-        {query.isLoading && <SkeletonTable rows={8} />}
+        <TabBar<TabId>
+          tabs={tabs}
+          activeId={activeTab}
+          onChange={(id) => setActiveTab(id)}
+          ariaLabel={t('postcalc.tabs_aria')}
+          variant="underline"
+        />
 
-        {query.isError && (
+        {isQuantityTab && (
+          <div role="tabpanel">
+            <QuantityCheckPanel projectId={projectId} />
+          </div>
+        )}
+
+        {!isQuantityTab && query.isLoading && <SkeletonTable rows={8} />}
+
+        {!isQuantityTab && query.isError && (
           <EmptyState
             icon={<Gauge size={40} className="text-semantic-error" />}
             title={t('postcalc.load_failed')}
@@ -781,17 +807,9 @@ export function PostCalcPage() {
           />
         )}
 
-        {report && (
+        {!isQuantityTab && report && (
           <div className="space-y-4">
             <Headline report={report} />
-
-            <TabBar<TabId>
-              tabs={tabs}
-              activeId={activeTab}
-              onChange={(id) => setActiveTab(id)}
-              ariaLabel={t('postcalc.tabs_aria')}
-              variant="underline"
-            />
 
             <div role="tabpanel">
               {activeTab === 'positions' && (

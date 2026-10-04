@@ -360,6 +360,15 @@ ROUTER_HANDLERS: dict[str, list[str]] = {
         "list_drawing_versions",
         "upload_drawing_revision",
     ],
+    # Post-calculation reads and the quantity check. The quantity-check routes
+    # take a bill id from the query or body, so the handler also refuses a bill
+    # of another project (pinned in tests/modules/postcalc/test_quantity_check.py).
+    "postcalc": [
+        "get_productivity",
+        "get_norm_outturn",
+        "get_quantity_check",
+        "set_quantity_baseline",
+    ],
     # Tendering joined the census with the bidder price-entry links. Every
     # package route funnels through _verify_package_owner (loads the package,
     # then verify_project_access on its project), bids through

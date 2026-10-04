@@ -9,6 +9,7 @@ import { boqApi, type BOQSnapshot, type ActivityEntry } from './api';
 import { useToastStore } from '@/stores/useToastStore';
 import { getIntlLocale } from '@/shared/lib/formatters';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { snapshotDisplayName } from './snapshotNames';
 
 /* ── Snapshot diff helpers ─────────────────────────────────────────────── */
 
@@ -457,7 +458,7 @@ export function VersionHistoryDrawer({ boqId, isOpen, onClose }: VersionHistoryD
 
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-medium text-content-primary truncate">
-                              {snap.name || t('boq.auto_snapshot', { defaultValue: 'Auto-save' })}
+                              {snap.name ? snapshotDisplayName(snap.name, t) : t('boq.auto_snapshot', { defaultValue: 'Auto-save' })}
                             </p>
                             <p className="text-2xs text-content-tertiary mt-0.5">
                               {formatDate(snap.created_at)}

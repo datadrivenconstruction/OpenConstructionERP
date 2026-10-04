@@ -919,6 +919,11 @@
     "note": "placeholder plus a bare percent sign, no literal text to translate. Five keys in this tree carry that exact shape and two are already settled here, cost_match.confidence_percent and pipeline.dock.progress. Diffing the leaked sets against those two, the only locale this key leaks in that they do not is en-US, which is a delta locale over en and identical there by construction. It is in fact the best covered of the family: cs, da, de, fa, fi, fr, sv and tr all give it their own percent typography ({{value}} %, %{{value}}, {{value}} with the Arabic percent sign), which is a typographic convention rather than a translation, and five of those eight still leak on the two settled siblings (postcalc-ui addition)",
     "reason_category": "template_placeholder"
   },
+  "postcalc.qc.source_x31": {
+    "en_value": "GAEB X31",
+    "note": "names the GAEB DA XML quantity determination phase X31 by its format code; identical in every locale including ru (CLAUDE.md: open data standards are not translated)",
+    "reason_category": "standard_code"
+  },
   "prefab.insights.f_ref": {
     "en_value": "Unit",
     "note": "id keeps 'Unit' as an established Indonesian construction loanword - corroborated in-module by prefab.new_unit[id]='Unit Baru' and prefab.field_ref[id]='Referensi unit', both already-shipped, non-baseline keys using the same bare word.",

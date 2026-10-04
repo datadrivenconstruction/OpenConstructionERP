@@ -16,7 +16,7 @@
  * ledger, and subcontract, equipment and other from nothing at all today.
  */
 
-import { apiGet, downloadWithAuth } from '@/shared/lib/api';
+import { apiGet, apiPut, downloadWithAuth } from '@/shared/lib/api';
 
 /* -- Types ----------------------------------------------------------------- */
 
@@ -166,4 +166,119 @@ export async function downloadProductivityMarkdown(
     `/api${path(projectId)}?${params.toString()}`,
     `postcalc-${projectId}.md`,
   );
+}
+
+/* -- Quantity check -------------------------------------------------------- */
+
+/** Where a line's measured quantity came from. */
+export type MeasuredSource = 'measurement_sheet' | 'gaeb_x31';
+
+/** Contract against measured, decided exactly (the highlight band is the view's). */
+export type QuantityStatus = 'over' | 'under' | 'matches' | 'not_measured';
+
+/** One bill position: contract quantity against measured quantity. */
+export interface QuantityCheckLine {
+  position_id: string;
+  ordinal: string;
+  description: string;
+  unit: string;
+  /** `null` for a position added to the bill after the baseline. */
+  contract_quantity: string | null;
+  contract_unit_rate: string | null;
+  contract_value: string | null;
+  /** `null` when the site has not measured the position (or only the take-off exists). */
+  measured_quantity: string | null;
+  measured_source: MeasuredSource | null;
+  difference: string | null;
+  /** `null` when the contract quantity is zero or unknown: no ratio exists. */
+  difference_pct: string | null;
+  /** Difference at the contract unit rate, net of bill markups, in the bill currency. */
+  cost_effect: string | null;
+  status: QuantityStatus;
+  in_baseline: boolean;
+  in_bill: boolean;
+  /** The sheet is the one the bill was let with: the estimating take-off. */
+  sheet_unchanged_since_baseline: boolean;
+  /** No baseline, and the bill quantity equals a sheet the editor saved into it. */
+  contract_quantity_may_be_measured: boolean;
+}
+
+export interface QuantityCheckTotals {
+  line_count: number;
+  measured_count: number;
+  not_measured_count: number;
+  over_count: number;
+  under_count: number;
+  matches_count: number;
+  contract_value: string;
+  measured_contract_value: string;
+  cost_effect_over: string;
+  cost_effect_under: string;
+  cost_effect_net: string;
+}
+
+export interface QuantityCheckBill {
+  id: string;
+  name: string;
+  is_locked: boolean;
+  currency: string;
+}
+
+export interface QuantityCheckSnapshot {
+  id: string;
+  name: string;
+  created_at: string | null;
+  position_count: number | null;
+}
+
+export interface QuantityCheckBaseline {
+  kind: 'snapshot' | 'current';
+  snapshot_id: string | null;
+  name: string | null;
+  created_at: string | null;
+  designated: boolean;
+  designated_reason?: string | null;
+}
+
+export interface QuantityCheckReport {
+  project_id: string;
+  country_code: string;
+  boqs: QuantityCheckBill[];
+  boq_id: string | null;
+  boq_name?: string;
+  currency?: string;
+  is_locked?: boolean;
+  baseline?: QuantityCheckBaseline;
+  designated_snapshot_id?: string | null;
+  snapshots?: QuantityCheckSnapshot[];
+  warnings?: string[];
+  lines: QuantityCheckLine[];
+  totals: QuantityCheckTotals;
+}
+
+/**
+ * Load the quantity check of one bill.
+ *
+ * @param boqId - The bill; the project's first bill when omitted.
+ * @param snapshotId - Read the contract side from this snapshot instead of the
+ *   bill's designated baseline, for this view only.
+ */
+export async function fetchQuantityCheck(
+  projectId: string,
+  boqId?: string,
+  snapshotId?: string,
+): Promise<QuantityCheckReport> {
+  const params = new URLSearchParams();
+  if (boqId) params.set('boq_id', boqId);
+  if (snapshotId) params.set('snapshot_id', snapshotId);
+  const query = params.toString();
+  return apiGet<QuantityCheckReport>(`/v1/postcalc/projects/${projectId}/quantity-check${query ? `?${query}` : ''}`);
+}
+
+/** Name the bill's baseline snapshot, freeze the bill as it stands, or clear it. */
+export async function setQuantityBaseline(
+  projectId: string,
+  body: { boq_id: string; snapshot_id?: string | null; freeze?: boolean },
+): Promise<QuantityCheckReport> {
+  return apiPut<QuantityCheckReport, typeof body>(`/v1/postcalc/projects/${projectId}/quantity-check/baseline`, body);
 }

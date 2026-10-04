@@ -1718,6 +1718,15 @@ async def lock_boq(
     except Exception:
         _log.exception("FSM audit write skipped for BOQ %s lock", boq_id)
 
+    # The first lock freezes the contract quantities the quantity check reads.
+    # Saving a measurement sheet later writes its total into the bill quantity,
+    # so without this the tendered figure is gone once the site measures. A bill
+    # that already names a baseline keeps it, and a failed capture leaves the
+    # lock standing (it runs in its own savepoint).
+    from app.modules.boq.quantity_baseline import capture_baseline_on_lock
+
+    await capture_baseline_on_lock(service.session, boq_id, user_id=user_id)
+
     boq = await service.get_boq(boq_id)
 
     # OC-41: Locking a BOQ should create budget lines in the cost model so
