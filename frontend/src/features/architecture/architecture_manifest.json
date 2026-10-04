@@ -22561,6 +22561,10 @@
         "exchange_formats.py",
         "exporters/__init__.py",
         "exporters/bc3.py",
+        "gaeb_common.py",
+        "gaeb_exchange_router.py",
+        "gaeb_x31.py",
+        "gaeb_x89.py",
         "importers/__init__.py",
         "importers/_base.py",
         "importers/_encoding.py",
@@ -28074,6 +28078,8 @@
         "ai",
         "bim_hub",
         "cad",
+        "contacts",
+        "contracts",
         "costmodel",
         "costs",
         "documents",
@@ -28086,6 +28092,7 @@
         "price_index",
         "projects",
         "schedule",
+        "subcontractors",
         "takeoff",
         "teams",
         "users",
@@ -52449,6 +52456,7 @@
         "aia_pdf.py",
         "claim_context.py",
         "compliance_packs.py",
+        "country_defaults.py",
         "events.py",
         "final_account.py",
         "intl.py",
@@ -54105,6 +54113,13 @@
           "request_schema": "None"
         },
         {
+          "method": "GET",
+          "path": "/country-defaults/",
+          "handler": "get_contract_country_defaults",
+          "response_model": "ContractCountryDefaultsResponse",
+          "request_schema": "None"
+        },
+        {
           "method": "POST",
           "path": "/contracts/",
           "handler": "create_contract",
@@ -54944,11 +54959,41 @@
       ],
       "schemas": [
         {
-          "class_name": "ContractCreate",
+          "class_name": "ContractPaymentTermFields",
           "bases": [
             "BaseModel"
           ],
-          "docstring": "Create a new contract.",
+          "docstring": "The payment terms a contract states beside its retention rate.\n\nAll optional. On create, a field left out is filled from the usual figure\nof the project's country where there is one and left empty where there is\nnot; a field sent always wins. They are stored under\n``terms[\"payment_terms\"]``.",
+          "fields": [
+            {
+              "name": "retention_cap_percent",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "retention_release_split",
+              "type": "ReleaseSplit",
+              "default": "None"
+            },
+            {
+              "name": "payment_period_days",
+              "type": "int | None"
+            },
+            {
+              "name": "valuation_interval",
+              "type": "str | None"
+            },
+            {
+              "name": "certificate_name",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "ContractCreate",
+          "bases": [
+            "ContractPaymentTermFields"
+          ],
+          "docstring": "Create a new contract.\n\n``retention_percent`` and ``retention_release_event`` are optional: left\nout, they start from the usual figure of the project's country (see\n``contracts.country_defaults``), and the contract records which figures\nwere filled that way under ``metadata[\"country_defaults\"]``.",
           "fields": [
             {
               "name": "code",
@@ -54998,11 +55043,11 @@
             },
             {
               "name": "retention_percent",
-              "type": "Decimal"
+              "type": "Decimal | None"
             },
             {
               "name": "retention_release_event",
-              "type": "ReleaseEvent"
+              "type": "ReleaseEvent | None"
             },
             {
               "name": "status",
@@ -55015,7 +55060,7 @@
             },
             {
               "name": "terms",
-              "type": "dict[str, Any]"
+              "type": "ContractTerms"
             },
             {
               "name": "metadata",
@@ -55030,9 +55075,9 @@
         {
           "class_name": "ContractUpdate",
           "bases": [
-            "BaseModel"
+            "ContractPaymentTermFields"
           ],
-          "docstring": "Partial update for a contract.",
+          "docstring": "Partial update for a contract. Payment terms lock with the other financial terms.",
           "fields": [
             {
               "name": "code",
@@ -55096,7 +55141,7 @@
             },
             {
               "name": "terms",
-              "type": "dict[str, Any] | None",
+              "type": "ContractTerms | None",
               "default": "None"
             },
             {
@@ -55217,6 +55262,56 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "ContractCountryDefaultsResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The payment terms a new contract on this project starts from.\n\n``has_defaults`` is False for a project with no country, or a country the\ntable has no row for; ``values`` is then empty and the form leaves every\nfield for a person to fill. It never answers with another country's row.",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "country_code",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "has_defaults",
+              "type": "bool"
+            },
+            {
+              "name": "standard_form",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "values",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "sources",
+              "type": "dict[str, dict[str, Any]]"
+            },
+            {
+              "name": "release_split_source",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "subcontract_retention_percent",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "subcontract_retention_from",
+              "type": "str | None",
+              "default": "None"
             }
           ]
         },
@@ -65662,6 +65757,7 @@
       "files": [
         "__init__.py",
         "base_registry.py",
+        "base_state.py",
         "buildup.py",
         "cwicr_v3_catalogue.py",
         "events.py",
@@ -66013,6 +66109,44 @@
             }
           ],
           "relationships": []
+        },
+        {
+          "class_name": "CostBaseState",
+          "tablename": "oe_costs_base_state",
+          "docstring": "Which market and language a loaded cost base's rows are in right now.\n\nOne row per base region. A national base can be priced into another market\n(``/base-market``) and its work-item text switched to another language, and\nboth changes rewrite the shared ``oe_costs_item`` rows of that region for\nevery user on the deployment. This record is what remembers the result, so\na restart, a second worker or another browser reads the same answer the\nrows hold. It used to live in a process-local dict and in browser storage,\nand both forgot it.\n\n``active_market`` is the market token the base is priced into, or ``None``\nfor the base's own home market. ``text_language`` is the language the rows\nare in, or ``None`` when that is not known: a switch that was interrupted,\nor a base loaded before this record existed. ``switching_to`` is set while\na market switch or a return to the home market runs and cleared when it\nfinishes, so a switch that died half way is reported, not hidden.",
+          "columns": [
+            {
+              "name": "region",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "text_language",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "active_market",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "switching_to",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "updated_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            }
+          ],
+          "relationships": []
         }
       ],
       "routes": [
@@ -66098,6 +66232,11 @@
           "path": "/base-market/{base_region}/{market_token}",
           "handler": "load_base_market",
           "request_schema": "ResourcePriceService"
+        },
+        {
+          "method": "POST",
+          "path": "/base-home/{base_region}",
+          "handler": "restore_base_home_market"
         },
         {
           "method": "GET",
@@ -145456,6 +145595,10 @@
         "manifest.py",
         "models.py",
         "permissions.py",
+        "resource_index_math.py",
+        "resource_index_router.py",
+        "resource_index_schemas.py",
+        "resource_index_service.py",
         "router.py",
         "schemas.py",
         "seed.py",
@@ -145559,6 +145702,108 @@
               "name": "factor",
               "annotation": "Mapped[Decimal]",
               "sql_type": "Numeric",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "ResourceIndexValue",
+          "tablename": "oe_price_index_resource_index",
+          "docstring": "One index of the resource-index method: a group, a region, a quarter.\n\nThe Minstroy publishes these quarterly per region: an index for workers'\nwages, for machine operation, for machine operators' wages and for\nmaterials. A row is the value one letter gives for one group. ``source``\nnames the letter; ``is_sample`` marks the rows the platform ships for\ndemonstration, which are not official and have to be replaced.",
+          "columns": [
+            {
+              "name": "region_code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "quarter",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "resource_group",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "index_value",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "source",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "is_sample",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "WorkTypeOverheadNorm",
+          "tablename": "oe_price_index_overhead_norm",
+          "docstring": "Overheads (NR) and estimated profit (SP) for one type of work.\n\nBoth are percentages of the wage fund (workers' plus machine operators'\nwages), set per type of work by Minstroy orders 812/pr (NR) and 774/pr (SP).\n``is_sample`` marks the rows the platform ships for demonstration.",
+          "columns": [
+            {
+              "name": "work_type_code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "label",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "nr_pct",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "sp_pct",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "source",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "is_sample",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "PriceIndexSeedMarker",
+          "tablename": "oe_price_index_seed_marker",
+          "docstring": "A record that one of the module's sample seeds has run on this install.\n\nThe resource-index samples go into empty tables once. \"Empty\" alone cannot\nsay whether that once has happened: a person who deletes every sample row\nbefore entering the official letter leaves the tables empty again, and the\nnext boot would put the samples back. One row per ``seed_key``, written by\nthe seeder whether or not it inserted anything; once its row is here the\nseeder does nothing.",
+          "columns": [
+            {
+              "name": "seed_key",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
               "nullable": false
             }
           ],
@@ -146176,6 +146421,7 @@
       "import_dependencies": [
         "boq",
         "costs",
+        "i18n_foundation",
         "projects"
       ]
     },
@@ -207070,7 +207316,7 @@
             },
             {
               "name": "retention_percent",
-              "type": "Decimal"
+              "type": "Decimal | None"
             },
             {
               "name": "retention_release_event",
@@ -232109,10 +232355,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 155,
+      "ts_files": 158,
       "css_files": 0,
-      "test_files": 78,
-      "total_files": 155
+      "test_files": 79,
+      "total_files": 158
     },
     {
       "name": "buyer-portal",
@@ -232249,10 +232495,10 @@
     },
     {
       "name": "contracts",
-      "ts_files": 53,
+      "ts_files": 60,
       "css_files": 0,
-      "test_files": 25,
-      "total_files": 53
+      "test_files": 29,
+      "total_files": 60
     },
     {
       "name": "coordination",
@@ -232284,10 +232530,10 @@
     },
     {
       "name": "cost-plan",
-      "ts_files": 5,
+      "ts_files": 7,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 5
+      "test_files": 2,
+      "total_files": 7
     },
     {
       "name": "cost-recovery",
@@ -232872,10 +233118,10 @@
     },
     {
       "name": "price-index",
-      "ts_files": 4,
+      "ts_files": 9,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 4
+      "test_files": 4,
+      "total_files": 9
     },
     {
       "name": "procurement",
@@ -233446,6 +233692,8 @@
       "ai",
       "bim_hub",
       "cad",
+      "contacts",
+      "contracts",
       "costmodel",
       "costs",
       "documents",
@@ -233458,6 +233706,7 @@
       "price_index",
       "projects",
       "schedule",
+      "subcontractors",
       "takeoff",
       "teams",
       "users",
@@ -234209,6 +234458,7 @@
     "price_index": [
       "boq",
       "costs",
+      "i18n_foundation",
       "projects"
     ],
     "procurement": [
@@ -234598,14 +234848,14 @@
   "statistics": {
     "backend_modules": 196,
     "modules_with_manifests": 194,
-    "total_models": 618,
-    "total_columns": 7104,
+    "total_models": 622,
+    "total_columns": 7122,
     "total_relationships": 234,
-    "total_routes": 3718,
-    "total_schemas": 3509,
-    "total_python_files": 2233,
+    "total_routes": 3720,
+    "total_schemas": 3511,
+    "total_python_files": 2243,
     "frontend_features": 191,
-    "frontend_ts_files": 2824,
+    "frontend_ts_files": 2841,
     "frontend_backend_mapped": 170
   },
   "frontend_backend_mapping": {
