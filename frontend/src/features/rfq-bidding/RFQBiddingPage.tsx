@@ -17,8 +17,9 @@ import {
   Clock,
   CheckCircle2,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { PROCUREMENT_LINK } from '@/shared/lib/awardChainLinks';
+import { Link, useSearchParams } from 'react-router-dom';
+import { PROCUREMENT_LINK, purchaseOrderDeepLink } from '@/shared/lib/awardChainLinks';
+import { RelatedRecordLink } from '@/shared/ui/RelatedRecordLink';
 import { fmtDate } from '@/shared/lib/formatters';
 import { Badge, CollapsibleSection, ConfirmDialog, EmptyState, StatCard, Button } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
@@ -46,6 +47,8 @@ import {
   type ComparisonResponse,
   type QuoteComparison,
 } from './api';
+import { useRfqAwardOrders, type RfqOrderLookup } from './useRfqAwardOrders';
+import type { AwardLookup, AwardOrderLite } from '@/shared/hooks/useAwardOutcome';
 
 /** A bidder is stored as a contact id; this is how the page names it. */
 type BidderName = (contactId: string) => string;
@@ -213,6 +216,16 @@ export function RFQBiddingPage() {
   // Comparison selection
   const [comparisonRfqId, setComparisonRfqId] = useState<string | null>(null);
 
+  // The RFQ awarded on this screen, so the Awards tab keeps looking for the
+  // purchase order its award drafts until that order appears.
+  const [justAwardedRfqId, setJustAwardedRfqId] = useState<string | null>(null);
+
+  // `?rfq=<id>` opens the register on one RFQ: the tab it lives on, marked.
+  // A purchase order drafted from an award links back here this way.
+  const [searchParams] = useSearchParams();
+  const focusRfqId = searchParams.get('rfq');
+  const appliedFocusRef = useRef<string | null>(null);
+
   // ── Data fetching ─────────────────────────────────────────────────────
 
   const { data: rfqPage, isLoading: rfqLoading, error: rfqError } = useQuery({
@@ -276,6 +289,21 @@ export function RFQBiddingPage() {
     [rfqs],
   );
 
+  // The purchase order each award drafted, read once for the whole tab.
+  const orderFor = useRfqAwardOrders(
+    projectId,
+    activeTab === 'awards' && awardedRfqs.length > 0,
+    justAwardedRfqId,
+  );
+
+  useEffect(() => {
+    if (!focusRfqId || appliedFocusRef.current === focusRfqId) return;
+    const target = rfqs.find((r) => r.id === focusRfqId);
+    if (!target) return;
+    appliedFocusRef.current = focusRfqId;
+    setActiveTab(RFQ_AWARDED_STATUSES.has(target.status) ? 'awards' : 'list');
+  }, [focusRfqId, rfqs]);
+
   // ── Mutations ─────────────────────────────────────────────────────────
 
   const createMutation = useMutation({
@@ -314,7 +342,8 @@ export function RFQBiddingPage() {
 
   const awardMutation = useMutation({
     mutationFn: (bidId: string) => awardBid(bidId),
-    onSuccess: () => {
+    onSuccess: (bid) => {
+      setJustAwardedRfqId(bid?.rfq_id ?? null);
       queryClient.invalidateQueries({ queryKey: ['rfq-bidding'] });
       queryClient.invalidateQueries({ queryKey: ['rfq-bidding-comparison'] });
       addToast({ type: 'success', title: t('rfq_bidding.award_success', { defaultValue: 'Bid awarded successfully' }) });
@@ -475,6 +504,7 @@ export function RFQBiddingPage() {
               setComparisonRfqId(id);
               setActiveTab('comparison');
             }}
+            focusRfqId={focusRfqId}
             t={t}
           />
         </div>
@@ -509,6 +539,8 @@ export function RFQBiddingPage() {
           <AwardsPanel
             rfqs={awardedRfqs}
             bidderName={bidderName}
+            orderFor={orderFor}
+            focusRfqId={focusRfqId}
             t={t}
           />
         </div>
@@ -543,6 +575,7 @@ function RFQListPanel({
   onIssue,
   onDelete,
   onSelectForComparison,
+  focusRfqId,
   t,
 }: {
   rfqs: RFQ[];
@@ -555,9 +588,11 @@ function RFQListPanel({
   onIssue: (rfq: RFQ) => void;
   onDelete: (id: string) => void;
   onSelectForComparison: (id: string) => void;
+  focusRfqId: string | null;
   t: (k: string, o?: Record<string, unknown>) => string;
 }) {
   const ALL_STATUSES = RFQ_FILTER_STATUSES;
+  useScrollToFocused(focusRfqId, rfqs.length);
 
   return (
     <div className="space-y-3">
@@ -629,8 +664,12 @@ function RFQListPanel({
           {rfqs.map((rfq) => (
             <div
               key={rfq.id}
-              className="flex items-center gap-4 rounded-xl border border-border-light bg-surface-elevated/90 px-4 py-3
-                shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm"
+              id={rfqCardId(rfq.id)}
+              data-focused={rfq.id === focusRfqId ? 'true' : undefined}
+              className={clsx(
+                'flex items-center gap-4 rounded-xl border border-border-light bg-surface-elevated/90 px-4 py-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm',
+                rfq.id === focusRfqId && 'ring-2 ring-oe-blue/60',
+              )}
             >
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
@@ -1005,12 +1044,18 @@ function RankedQuoteRow({
 function AwardsPanel({
   rfqs,
   bidderName,
+  orderFor,
+  focusRfqId,
   t,
 }: {
   rfqs: RFQ[];
   bidderName: BidderName;
+  orderFor: RfqOrderLookup;
+  focusRfqId: string | null;
   t: (k: string, o?: Record<string, unknown>) => string;
 }) {
+  useScrollToFocused(focusRfqId, rfqs.length);
+
   if (rfqs.length === 0) {
     return (
       <EmptyState
@@ -1030,8 +1075,12 @@ function AwardsPanel({
         return (
           <div
             key={rfq.id}
-            className="rounded-xl border border-border-light bg-surface-elevated/90 px-4 py-4
-              shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm"
+            id={rfqCardId(rfq.id)}
+            data-focused={rfq.id === focusRfqId ? 'true' : undefined}
+            className={clsx(
+              'rounded-xl border border-border-light bg-surface-elevated/90 px-4 py-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm',
+              rfq.id === focusRfqId && 'ring-2 ring-oe-blue/60',
+            )}
           >
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
@@ -1057,29 +1106,123 @@ function AwardsPanel({
             {winningBid?.notes && (
               <p className="mt-2 text-xs text-content-secondary">{winningBid.notes}</p>
             )}
-            {/* An award here records the winner and stops: nothing downstream
-                is drafted from it, so the next step is the reader's. The
-                order is raised in Procurement; a status of po_issued says it
-                has been. */}
-            {rfq.status === 'awarded' && (
-              <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border-light pt-2 text-xs">
-                <span className="text-content-tertiary">
-                  {t('rfq_bidding.award_next', { defaultValue: 'Next step:' })}
-                </span>
-                <Link
-                  to={PROCUREMENT_LINK}
-                  className="inline-flex items-center gap-1 rounded-md border border-border-light px-2 py-1 text-content-secondary hover:text-oe-blue hover:border-oe-blue transition-colors"
-                  title={t('rfq_bidding.award_raise_po_hint', {
-                    defaultValue: 'Open Procurement to raise the purchase order for the awarded vendor',
-                  })}
-                >
-                  {t('rfq_bidding.award_raise_po', { defaultValue: 'Raise purchase order' })}
-                </Link>
-              </div>
-            )}
+            <AwardOrderLink rfq={rfq} lookup={orderFor(rfq.id)} t={t} />
           </div>
         );
       })}
+    </div>
+  );
+}
+
+/** The DOM id of an RFQ's row or award card, so a deep link can scroll to it. */
+function rfqCardId(rfqId: string): string {
+  return `rfq-card-${rfqId}`;
+}
+
+/**
+ * Scroll the RFQ a deep link named into view once its row is on screen. Runs
+ * again when the row count changes, because the list may render empty first.
+ */
+function useScrollToFocused(focusRfqId: string | null, rowCount: number) {
+  const scrolledRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!focusRfqId || scrolledRef.current === focusRfqId) return;
+    const el = document.getElementById(rfqCardId(focusRfqId));
+    if (!el) return;
+    scrolledRef.current = focusRfqId;
+    el.scrollIntoView?.({ block: 'center', behavior: 'smooth' });
+  }, [focusRfqId, rowCount]);
+}
+
+/* ── The order an award drafted ───────────────────────────────────────── */
+
+const AWARD_STRIP_CLASS = 'mt-3 flex flex-wrap items-center gap-2 border-t border-border-light pt-2 text-xs';
+
+/**
+ * Where an award went next. Awarding drafts a purchase order for the winning
+ * supplier (`procurement/rfq_award.py`); this names it and links to it. The
+ * register is read rather than trusted to hold the draft, so each state of the
+ * lookup is drawn for what it is:
+ *
+ * - found: the order, by number, opened in Procurement;
+ * - loading: the read, or the draft of an award made on this screen, is on
+ *   its way;
+ * - absent: the register was read in full and no order came from this award
+ *   (an award from before drafting existed, or one the draft was refused for),
+ *   so the order is still the buyer's to raise;
+ * - unknown: the register could not be read in full, so nothing is claimed
+ *   and the reader is sent to look.
+ *
+ * Once the RFQ has moved past `awarded` only a found order is shown: the order
+ * step is behind it.
+ */
+function AwardOrderLink({
+  rfq,
+  lookup,
+  t,
+}: {
+  rfq: RFQ;
+  lookup: AwardLookup<AwardOrderLite>;
+  t: (k: string, o?: Record<string, unknown>) => string;
+}) {
+  if (lookup.state === 'found') {
+    const po = lookup.record;
+    return (
+      <div className={AWARD_STRIP_CLASS} data-testid="rfq-award-order">
+        <span className="text-content-tertiary">
+          {po.status === 'draft'
+            ? t('rfq_bidding.award_po_drafted', { defaultValue: 'Draft purchase order created:' })
+            : t('rfq_bidding.award_po', { defaultValue: 'Purchase order:' })}
+        </span>
+        <RelatedRecordLink
+          to={purchaseOrderDeepLink(po.id)}
+          icon={<FileText className="h-3 w-3" aria-hidden />}
+          title={t('rfq_bidding.award_po_open_hint', {
+            defaultValue: 'Open this purchase order in Procurement to review and approve it',
+          })}
+        >
+          {po.po_number}
+        </RelatedRecordLink>
+      </div>
+    );
+  }
+  if (rfq.status !== 'awarded') return null;
+  if (lookup.state === 'loading') {
+    return (
+      <div className={clsx(AWARD_STRIP_CLASS, 'text-content-tertiary')} role="status">
+        <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
+        {t('rfq_bidding.award_po_pending', { defaultValue: 'Looking for the draft purchase order...' })}
+      </div>
+    );
+  }
+  if (lookup.state === 'unknown') {
+    return (
+      <div className={AWARD_STRIP_CLASS}>
+        <span className="text-content-tertiary">{t('rfq_bidding.award_po', { defaultValue: 'Purchase order:' })}</span>
+        <RelatedRecordLink
+          to={PROCUREMENT_LINK}
+          title={t('rfq_bidding.award_po_find_hint', {
+            defaultValue:
+              'The purchase order register could not be read in full here. Look for this award in Procurement.',
+          })}
+        >
+          {t('rfq_bidding.award_po_find', { defaultValue: 'Find it in Procurement' })}
+        </RelatedRecordLink>
+      </div>
+    );
+  }
+  return (
+    <div className={AWARD_STRIP_CLASS}>
+      <span className="text-content-tertiary">{t('rfq_bidding.award_next', { defaultValue: 'Next step:' })}</span>
+      <Link
+        to={PROCUREMENT_LINK}
+        className="inline-flex items-center gap-1 rounded-md border border-border-light px-2 py-1 text-content-secondary hover:text-oe-blue hover:border-oe-blue transition-colors"
+        title={t('rfq_bidding.award_raise_po_hint', {
+          defaultValue: 'Open Procurement to raise the purchase order for the awarded vendor',
+        })}
+      >
+        {t('rfq_bidding.award_raise_po', { defaultValue: 'Raise purchase order' })}
+      </Link>
     </div>
   );
 }

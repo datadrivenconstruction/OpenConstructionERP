@@ -58,6 +58,8 @@ import { POStatusPipeline } from './POStatusPipeline';
 import { DeliveryCountdownBadge } from './DeliveryCountdownBadge';
 import { RecordDeliveryModal } from './RecordDeliveryModal';
 import { fmtFixed } from '@/shared/lib/formatters';
+import { orderSource, rfqDeepLink } from '@/shared/lib/awardChainLinks';
+import { RelatedRecordLink } from '@/shared/ui/RelatedRecordLink';
 
 // English fallbacks for the computed `procurement.gr_status_*` keys. The default used to be
 // the raw value, so until the key lands in a locale the screen shows the bare
@@ -101,8 +103,17 @@ interface PurchaseOrder {
   retain_on_receipt?: boolean;
   retainage_amount?: string;
   retainage_held?: string;
+  // What the order was drafted from, when an award drafted it: an RFQ award
+  // stamps `origin: 'rfq_award'`, `rfq_id` and `rfq_number`. Read through
+  // `orderSource`, never field by field.
+  metadata?: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
+}
+
+/** The DOM id of a purchase-order row, so a deep link can scroll to it. */
+function poRowId(poId: string): string {
+  return `po-row-${poId}`;
 }
 
 /**
@@ -379,9 +390,19 @@ export function ProcurementPage() {
     [location.state],
   );
 
+  // The query string is kept: a buy-list hand-off must not drop a `?po=` the
+  // reader arrived with.
   const clearIncomingBuyList = useCallback(() => {
-    navigate(location.pathname, { replace: true, state: null });
-  }, [navigate, location.pathname]);
+    navigate({ pathname: location.pathname, search: location.search }, { replace: true, state: null });
+  }, [navigate, location.pathname, location.search]);
+
+  // `?po=<id>` opens the register on one order: the purchase-order tab, the
+  // row scrolled to and marked. An awarded RFQ links to the order it drafted
+  // this way.
+  const focusPoId = useMemo(() => new URLSearchParams(location.search).get('po'), [location.search]);
+  useEffect(() => {
+    if (focusPoId) setActiveTab('purchase-orders');
+  }, [focusPoId]);
 
   // Module Insights panel. Charts the purchase orders THIS PAGE LOADED - the
   // register that carries each order's committed value, supplier and delivery
@@ -553,6 +574,7 @@ export function ProcurementPage() {
               projectId={projectId}
               incomingBuyList={incomingBuyList}
               onBuyListConsumed={clearIncomingBuyList}
+              focusPoId={focusPoId}
             />
           )}
           {activeTab === 'goods-receipts' && (
@@ -573,10 +595,12 @@ function PurchaseOrdersTab({
   projectId,
   incomingBuyList,
   onBuyListConsumed,
+  focusPoId,
 }: {
   projectId: string;
   incomingBuyList: POLineItemForm[];
   onBuyListConsumed: () => void;
+  focusPoId: string | null;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -1000,6 +1024,27 @@ function PurchaseOrdersTab({
         (po.vendor_name ?? '').toLowerCase().includes(q),
     );
   }, [orders, search]);
+
+  /* ── Deep link (?po=<id>) ──
+     The order is scrolled to and marked when it is on the page this tab
+     loaded. When it is not (a register longer than one page, or an order of
+     another project), it is fetched by id and named above the table, so the
+     link never lands on a register that silently does not show it. */
+  const focusOnPage = !!focusPoId && !!orders?.some((po) => po.id === focusPoId);
+  const scrolledPoRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!focusPoId || !focusOnPage || scrolledPoRef.current === focusPoId) return;
+    const el = document.getElementById(poRowId(focusPoId));
+    if (!el) return;
+    scrolledPoRef.current = focusPoId;
+    el.scrollIntoView?.({ block: 'center', behavior: 'smooth' });
+  }, [focusPoId, focusOnPage, filtered]);
+  const focusOffPage = useQuery({
+    queryKey: ['procurement-po-focus', focusPoId],
+    queryFn: () => apiGet<POResponse>(`/v1/procurement/${encodeURIComponent(focusPoId as string)}`),
+    enabled: !!focusPoId && !!orders && !focusOnPage,
+    retry: false,
+  });
 
   if (isLoading) return <SkeletonTable rows={5} columns={6} />;
 
@@ -1443,6 +1488,49 @@ function PurchaseOrdersTab({
         </div>
       </div>
 
+      {focusPoId && orders && !focusOnPage && (
+        <div
+          role="note"
+          data-testid="po-focus-notice"
+          className="mx-4 mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-oe-blue/30 bg-oe-blue/5 px-3.5 py-2.5 text-xs text-content-secondary"
+        >
+          {focusOffPage.data ? (
+            <>
+              <span>
+                {t('procurement.focus_po_off_page', {
+                  defaultValue: 'Purchase order {{number}} ({{status}}) is not on this page of the register.',
+                  number: focusOffPage.data.po_number,
+                  status: t(`procurement.po_status_${focusOffPage.data.status}`, {
+                    defaultValue: focusOffPage.data.status,
+                  }),
+                })}
+              </span>
+              {isManager && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => focusOffPage.data && openEditMut.mutate(focusOffPage.data.id)}
+                  disabled={openEditMut.isPending}
+                >
+                  {t('procurement.focus_po_open', { defaultValue: 'Open it' })}
+                </Button>
+              )}
+            </>
+          ) : focusOffPage.isError ? (
+            <span>
+              {t('procurement.focus_po_missing', {
+                defaultValue: 'The linked purchase order could not be found. It may have been deleted.',
+              })}
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5">
+              <Loader2 size={12} className="animate-spin" />
+              {t('procurement.focus_po_loading', { defaultValue: 'Looking up the linked purchase order...' })}
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
@@ -1478,15 +1566,42 @@ function PurchaseOrdersTab({
                   {t('procurement.no_po_match', { defaultValue: 'No matching purchase orders' })}
                 </td>
               </tr>
-            ) : filtered.map((po) => (
+            ) : filtered.map((po) => {
+              const source = orderSource(po.metadata);
+              const focused = po.id === focusPoId;
+              return (
               <tr
                 key={po.id}
-                className="border-b border-border-light hover:bg-surface-secondary/30 transition-colors"
+                id={poRowId(po.id)}
+                data-focused={focused ? 'true' : undefined}
+                aria-current={focused ? 'true' : undefined}
+                className={clsx(
+                  'border-b border-border-light hover:bg-surface-secondary/30 transition-colors',
+                  focused && 'bg-oe-blue/10',
+                )}
                 onMouseEnter={() => setMatchActive((m) => ({ ...m, [po.id]: true }))}
                 onFocus={() => setMatchActive((m) => ({ ...m, [po.id]: true }))}
               >
                 <td className="px-4 py-3 font-mono text-xs text-content-primary">
                   {po.po_number}
+                  {/* The RFQ whose award drafted this order, so the reviewer
+                      can check the draft against the quote it came from. */}
+                  {source.rfqId && (
+                    <div className="mt-1 font-sans">
+                      <RelatedRecordLink
+                        to={rfqDeepLink(source.rfqId)}
+                        title={t('procurement.from_rfq_hint', {
+                          defaultValue: 'Drafted from the award of this RFQ. Open the RFQ to check the quote.',
+                        })}
+                        data-testid="po-source-rfq"
+                      >
+                        {t('procurement.from_rfq', {
+                          defaultValue: 'From {{rfq}}',
+                          rfq: source.rfqNumber ?? t('procurement.from_rfq_unnamed', { defaultValue: 'RFQ' }),
+                        })}
+                      </RelatedRecordLink>
+                    </div>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-content-secondary">
                   <div className="flex flex-wrap items-center gap-1.5">
@@ -1709,7 +1824,8 @@ function PurchaseOrdersTab({
                   )}
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
