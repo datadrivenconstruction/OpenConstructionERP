@@ -188,6 +188,31 @@ def test_pandas_written_parquets_convert_the_same_in_batches(tmp_path: Path, mon
     assert result == expected
 
 
+def test_a_dictionary_encoded_column_reads_the_same_in_batches(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """The stream decodes a dictionary column, whose categories would differ batch to batch.
+
+    Read whole, pandas makes it a categorical; the transform only takes the
+    first value per item and stringifies it, so the rows must not change.
+    """
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
+    plain = tmp_path / "plain.parquet"
+    write_hard_case_parquet(plain)
+    table = pq.read_table(plain)
+    index = table.schema.get_field_index("category_type")
+    table = table.set_column(index, "category_type", table.column(index).dictionary_encode())
+    assert pa.types.is_dictionary(table.schema.field("category_type").type)
+    encoded = tmp_path / "encoded.parquet"
+    pq.write_table(table, encoded)
+
+    expected, before = _run(whole_frame_import, encoded, monkeypatch, flush=4)
+    result, after = _run(router._process_and_insert_cwicr, encoded, monkeypatch, flush=4, read_rows=3)
+
+    assert after.rows == before.rows
+    assert result == expected
+
+
 def test_an_empty_base_and_a_base_without_codes_report_as_before(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
