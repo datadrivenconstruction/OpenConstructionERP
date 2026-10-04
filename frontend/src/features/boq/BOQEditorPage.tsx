@@ -3175,6 +3175,10 @@ export function BOQEditorPage() {
         message: parts.join('\n'),
       });
       invalidateAll();
+      // The run is now stored as a validation report (when the user may
+      // create one), so every reader of reports, the validation page and the
+      // dashboard's cross-project card included, has to read it again.
+      queryClient.invalidateQueries({ queryKey: ['validation'] });
     } catch (err) {
       addToast({
         type: 'error',
@@ -3188,7 +3192,7 @@ export function BOQEditorPage() {
       setIsValidating(false);
       useProgressStore.getState().done();
     }
-  }, [boqId, addToast, t, invalidateAll]);
+  }, [boqId, addToast, t, invalidateAll, queryClient]);
 
   const [isRecalculating, setIsRecalculating] = useState(false);
   const [showRecalcConfirm, setShowRecalcConfirm] = useState(false);

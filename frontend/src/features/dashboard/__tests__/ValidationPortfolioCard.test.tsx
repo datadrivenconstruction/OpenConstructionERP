@@ -214,11 +214,28 @@ describe('ValidationPortfolioCard', () => {
     expect(halfPill).toHaveAttribute('data-state', 'not_validated');
     expect(halfPill).toHaveTextContent('Not validated');
     expect(within(half!).getByText(/1 of 2 estimates validated/)).toBeInTheDocument();
-    expect(within(half!).getByText(/Never validated/)).toBeInTheDocument();
+    // Not "Never validated": a check nobody stored may still have been run.
+    expect(within(half!).getByText(/No validation report on record/)).toBeInTheDocument();
+    expect(within(half!).queryByText(/Never validated/)).not.toBeInTheDocument();
 
     const emptyPill = empty!.querySelector('[data-state]');
     expect(emptyPill).toHaveTextContent('Not validated');
     expect(within(empty!).getByText('No estimates yet')).toBeInTheDocument();
+  });
+
+  it('makes the estimate count agree with its noun', async () => {
+    const single = project({
+      project_id: 'p-single',
+      project_name: 'Single bill',
+      estimates: [estimate({ boq_id: 'b-one', boq_name: 'Only bill' })],
+    });
+    mockedGet.mockResolvedValue(portfolio([single, HALF_CHECKED]));
+    renderCard();
+    await screen.findByTestId('validation-portfolio-list');
+    const [one, two] = screen.getAllByTestId('validation-portfolio-project');
+    expect(within(one!).getByText(/^0 of 1 estimate validated/)).toBeInTheDocument();
+    expect(within(one!).queryByText(/1 estimates/)).not.toBeInTheDocument();
+    expect(within(two!).getByText(/^1 of 2 estimates validated/)).toBeInTheDocument();
   });
 
   it('reads a state it does not know as not validated, never as a pass', async () => {

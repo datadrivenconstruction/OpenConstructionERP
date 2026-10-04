@@ -60,9 +60,10 @@ export interface ValidationPortfolio {
 }
 
 /**
- * Query key. It sits under `['validation']` on purpose: a validation run and
- * an estimate audit both invalidate that root, so the card refreshes as soon
- * as someone re-validates an estimate.
+ * Query key. It sits under `['validation']` on purpose: a run on the
+ * validation page, an estimate audit and the Validate button in the BOQ
+ * editor all invalidate that root, so the card refreshes as soon as someone
+ * re-validates an estimate.
  */
 export const VALIDATION_PORTFOLIO_QUERY_KEY = ['validation', 'portfolio-status'] as const;
 

@@ -148,7 +148,10 @@ function EstimateRow({ projectId, estimate }: { projectId: string; estimate: Por
   const ruleSets = estimate.rule_sets.map((rs) => ruleSetLabel(rs, t)).join(' · ');
   let detail: string;
   if (estimate.report_id === null) {
-    detail = t('dashboard.validation_portfolio.never_run', { defaultValue: 'Never validated' });
+    // "No report on record", not "never validated": a check run by someone
+    // who may not create validation reports is not stored, and neither was
+    // any run from the BOQ editor before it started storing them.
+    detail = t('dashboard.validation_portfolio.no_report', { defaultValue: 'No validation report on record' });
   } else if (ranButCheckedNothing(estimate)) {
     detail = t('dashboard.validation_portfolio.checked_nothing', {
       defaultValue: 'Last run checked no rules',
@@ -223,9 +226,14 @@ function ProjectBlock({ project, isActive }: { project: PortfolioProject; isActi
         {project.estimate_count === 0
           ? t('dashboard.validation_portfolio.no_estimates', { defaultValue: 'No estimates yet' })
           : t('dashboard.validation_portfolio.validated_of', {
+              // The plural follows the raw total; the shown numbers are
+              // formatted in the reader's locale.
+              count: project.estimate_count,
               validated: formatCount(project.validated_count),
               total: formatCount(project.estimate_count),
-              defaultValue: '{{validated}} of {{total}} estimates validated',
+              defaultValue: '{{validated}} of {{total}} estimate validated',
+              defaultValue_one: '{{validated}} of {{total}} estimate validated',
+              defaultValue_other: '{{validated}} of {{total}} estimates validated',
             })}
         {counts ? ` · ${counts}` : ''}
         {project.last_validated_at
@@ -396,7 +404,7 @@ export function ValidationPortfolioCard() {
           className="mt-3"
           text={t('dashboard.validation_portfolio.help', {
             defaultValue:
-              'Each estimate shows its most recent validation report; nothing is re-run here. A project takes the state of its worst estimate, so one unchecked estimate keeps a project at "Not validated" even if the others passed. Counts add up the latest report of each estimate, not older runs. This card covers every project you can open, not only the one selected at the top.',
+              'Each estimate shows the verdict of its stored validation reports; nothing is re-run here. A narrower check, such as the one-click estimate audit, does not clear findings from rule sets it did not run again, so those stay until a run of the same scope clears them. Checks from the BOQ editor are stored when you may create validation reports. A project takes the state of its worst estimate, so one unchecked estimate keeps a project at "Not validated" even if the others passed. This card covers every project you can open, not only the one selected at the top.',
           })}
         />
       </CardContent>
