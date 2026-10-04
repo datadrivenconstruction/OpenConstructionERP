@@ -28,7 +28,7 @@ import re as _re
 import urllib.parse
 import uuid
 import zipfile
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Iterator
 from contextlib import asynccontextmanager
 from decimal import Decimal
 from pathlib import Path
@@ -5733,6 +5733,12 @@ _FAILED_CODES_REPORTED = 50
 # 578 MiB at 20 000, in about the same wall time.
 _PARQUET_READ_ROWS = 5_000
 
+# How many reads' worth of rows the import may read ahead for items whose last
+# rows sit far down the file (see ``_cwicr_far_rows``). The AR and FR bases
+# need about 2 500 rows; the cap keeps a base made of nothing but such items
+# from reading itself into memory through the side door.
+_CWICR_FAR_ROWS_PER_READ = 10
+
 
 def _insert_cost_rows_isolating_rejects(sync_url: str, rows: list[tuple], failed_codes: list[str]) -> int:
     """Insert one flush of cost rows, skipping any row PostgreSQL refuses.
@@ -5765,6 +5771,42 @@ def _insert_cost_rows_isolating_rejects(sync_url: str, rows: list[tuple], failed
         return _insert_cost_rows_isolating_rejects(
             sync_url, rows[:mid], failed_codes
         ) + _insert_cost_rows_isolating_rejects(sync_url, rows[mid:], failed_codes)
+
+
+# How much CSV text one ``COPY`` of cost rows carries before the next one starts.
+# A flush used to go over as one buffer, and a row of a large base is mostly
+# the JSON of its resources and their variant catalogues, escaped to ASCII: on
+# RU_STPETERSBURG 5 000 rows came to about 570 MB of text, held once in the
+# rows and once more as CSV, which took that import to about 3 GiB against the
+# ~1.8 GiB its floor allows. The staging table takes any number of COPYs in the
+# one transaction.
+_COPY_CHUNK_CHARS = 8 * 1024 * 1024
+
+
+def _cost_rows_as_csv(rows: list[tuple], max_chars: int | None = None) -> Iterator[io.StringIO]:
+    """Cost rows as CSV for ``COPY``, in buffers of about ``max_chars`` characters, rewound.
+
+    ``max_chars`` defaults to ``_COPY_CHUNK_CHARS``, read at call time.
+
+    ``is_active`` (index 11) is an int flag in the tuple; COPY needs a boolean
+    literal. Everything else is already text (the JSON columns carry JSON text,
+    streamed verbatim into the ``json`` columns).
+    """
+    limit = _COPY_CHUNK_CHARS if max_chars is None else max_chars
+    buf = io.StringIO()
+    writer = csv.writer(buf, quoting=csv.QUOTE_ALL)
+    for row in rows:
+        out = list(row)
+        out[11] = "true" if row[11] else "false"
+        writer.writerow(out)
+        if buf.tell() >= limit:
+            buf.seek(0)
+            yield buf
+            buf = io.StringIO()
+            writer = csv.writer(buf, quoting=csv.QUOTE_ALL)
+    if buf.tell():
+        buf.seek(0)
+        yield buf
 
 
 def _pg_bulk_insert_cost_rows(sync_url: str, rows: list[tuple]) -> int:
@@ -5801,8 +5843,6 @@ def _pg_bulk_insert_cost_rows(sync_url: str, rows: list[tuple]) -> int:
     Returns:
         Number of rows actually inserted (conflicts excluded).
     """
-    import csv
-    import io
     import os as _os
 
     from sqlalchemy import create_engine
@@ -5825,17 +5865,8 @@ def _pg_bulk_insert_cost_rows(sync_url: str, rows: list[tuple]) -> int:
         "classification, tags, components, descriptions, is_active, region, metadata"
     )
 
-    def _row_for_copy(row: tuple) -> list[object]:
-        # ``is_active`` (index 11) is an int flag in the tuple; COPY needs a
-        # boolean literal. Everything else is already text (the JSON columns
-        # carry JSON text, streamed verbatim into the ``json`` columns).
-        out = list(row)
-        out[11] = "true" if row[11] else "false"
-        return out
-
     engine = create_engine(sync_url)
     inserted = 0
-    copy_chunk = 5000  # bound peak memory of the CSV buffer for large JSON rows
     raw = engine.raw_connection()
     try:
         cur = raw.cursor()
@@ -5846,12 +5877,7 @@ def _pg_bulk_insert_cost_rows(sync_url: str, rows: list[tuple]) -> int:
         # table is dropped automatically when the transaction commits.
         cur.execute(f"CREATE TEMP TABLE _cwicr_stage (LIKE {table} INCLUDING DEFAULTS) ON COMMIT DROP")  # noqa: S608
         copy_sql = f"COPY _cwicr_stage ({col_list}) FROM STDIN WITH (FORMAT csv)"  # noqa: S608
-        for i in range(0, len(rows), copy_chunk):
-            buf = io.StringIO()
-            writer = csv.writer(buf, quoting=csv.QUOTE_ALL)
-            for r in rows[i : i + copy_chunk]:
-                writer.writerow(_row_for_copy(r))
-            buf.seek(0)
+        for buf in _cost_rows_as_csv(rows):
             cur.copy_expert(copy_sql, buf)
         # One idempotent upsert from staging into the indexed live table. The
         # target's server_default fills created_at/updated_at for the omitted
@@ -6241,12 +6267,15 @@ def _cwicr_unit_keys(rate_codes: pd.Series) -> pd.Series:  # noqa: F821
     return rate_codes.astype(str).str.strip().str.slice(0, 100).str.strip()
 
 
-def _cwicr_unit_ids(parquet: Any, rate_code_column: str, float_columns: frozenset[str], read_rows: int) -> Any:
+def _cwicr_unit_ids(
+    parquet: Any, rate_code_column: str, float_columns: frozenset[str], read_rows: int
+) -> tuple[Any, Any]:
     """One integer per parquet row naming the set of rows it has to be processed with.
 
     Reads the ``rate_code`` column alone, in batches. Ids are handed out in the
     order the sets first appear, so a lower id always means an earlier first
     row, which is what lets the import release sets in their original order.
+    Returns the ids, and per set the row its last raw code first appears on.
 
     Rows that share a key (:func:`_cwicr_unit_keys`) share a set. Two more rules
     keep the stream equal to the whole frame:
@@ -6254,9 +6283,10 @@ def _cwicr_unit_ids(parquet: Any, rate_code_column: str, float_columns: frozense
     * A row without a code belongs to no work item, so it is a set of its own.
       Keyed by its stringified code it would join every other such row in the
       file into one set that stays open until the last of them, and everything
-      after the first would wait for it. The transform does file such a row's
-      resources under the word its missing code stringifies to (``None``), so
-      when an item is literally coded that way the rows join that item instead.
+      after the first would wait for it. Under pandas 2 the transform files such
+      a row's resources under the word its missing code stringifies to
+      (``None``), so when an item is literally coded that way the rows join that
+      item instead. pandas 3 keeps the code missing, and nothing is joined.
     * The transform hands its rows over in the order each raw code first
       appears. Two raw codes of one set (``"H"`` and ``" H"``) can open on
       either side of another set's first row, and then that set has to be
@@ -6323,7 +6353,7 @@ def _cwicr_unit_ids(parquet: Any, rate_code_column: str, float_columns: frozense
         parts.append(out)
         offset += n
     if not parts:
-        return np.empty(0, dtype=np.int64)
+        return np.empty(0, dtype=np.int64), np.empty(0, dtype=np.int64)
     unit_of_row = np.concatenate(parts)
 
     for rows, keys in zip(null_rows, null_keys, strict=True):
@@ -6339,7 +6369,65 @@ def _cwicr_unit_ids(parquet: Any, rate_code_column: str, float_columns: frozense
     starts_new = np.ones(len(first), dtype=bool)
     starts_new[1:] = first[1:] > reach[:-1]
     merged = np.cumsum(starts_new) - 1
-    return merged[unit_of_row]
+    # A merged set ends where the next one starts, and the running maximum at
+    # its last member is the row its last raw code opens on.
+    ends = np.append(np.flatnonzero(starts_new)[1:] - 1, len(first) - 1)
+    return merged[unit_of_row], reach[ends]
+
+
+def _cwicr_far_rows(unit_of_row: Any, unit_opened: Any, read_rows: int) -> Any:
+    """Rows to read ahead of the stream, because their set came back to them much later.
+
+    A set is processed once all of its rows are in, and every set that opened
+    after it waits for it. So a set whose last rows sit far down the file holds
+    everything between its first and last row in memory. The AR and FR CWICR
+    bases do this: about 600 items open near row 158 000 and get their last two
+    or three rows near row 726 000, which held 570 000 rows, two thirds of the
+    base, in one frame.
+
+    Those late rows are few, so they are read on their own first and handed to
+    the transform with the rest of their set, and the stream skips them when it
+    gets there. A row is read ahead once it lies more than ``read_rows`` rows
+    past its set's first row and past the row the set's last raw code opens on,
+    so the set's codes still first appear in the stream in their file order.
+    Read-ahead is capped at ``_CWICR_FAR_ROWS_PER_READ`` reads' worth of rows by
+    raising that distance; whatever stays over it is held as before.
+
+    Returns the file row indices, ascending.
+    """
+    import numpy as np
+
+    if not len(unit_of_row):
+        return np.empty(0, dtype=np.int64)
+    rows = np.arange(len(unit_of_row), dtype=np.int64)
+    first = np.full(len(unit_opened), len(unit_of_row), dtype=np.int64)
+    np.minimum.at(first, unit_of_row, rows)
+    distance = np.where(rows > unit_opened[unit_of_row], rows - first[unit_of_row], 0)
+    hold = read_rows
+    cap = _CWICR_FAR_ROWS_PER_READ * read_rows
+    if np.count_nonzero(distance > hold) > cap:
+        hold = max(hold, int(np.partition(distance, len(distance) - cap - 1)[len(distance) - cap - 1]))
+    return np.flatnonzero(distance > hold)
+
+
+def _cwicr_take_rows(parquet: Any, columns: list[str], rows: Any, read_rows: int) -> Any:
+    """The given rows of ``columns``, in file order, read batch by batch."""
+    import numpy as np
+    import pyarrow as pa
+
+    parts = []
+    if len(rows):
+        offset = 0
+        for record_batch in parquet.iter_batches(batch_size=read_rows, columns=columns):
+            lo, hi = np.searchsorted(rows, [offset, offset + record_batch.num_rows])
+            if hi > lo:
+                parts.append(record_batch.take(pa.array(rows[lo:hi] - offset)))
+            offset += record_batch.num_rows
+            if hi == len(rows):
+                break
+    if parts:
+        return pa.Table.from_batches(parts)
+    return parquet.schema_arrow.empty_table().select(columns)
 
 
 def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> dict[str, Any]:
@@ -6357,7 +6445,9 @@ def _process_and_insert_cwicr(parquet_path: str, db_id: str, db_file: str) -> di
     every one of its rows has been read. Codes are released in the order they
     first appear, so the rows reach the database in the same order and in the
     same flushes as when the whole file was one frame, and the transform
-    (:func:`_import_cwicr_codes`) sees each code exactly as it did then.
+    (:func:`_import_cwicr_codes`) sees each code exactly as it did then. The
+    few rows a code comes back to much later are read ahead
+    (:func:`_cwicr_far_rows`), so such a code does not hold every row between.
 
     The rows go to ``_pg_bulk_insert_cost_rows`` (PostgreSQL ``COPY`` into a
     staging table + ``INSERT ... ON CONFLICT (code, region) DO NOTHING``) every
@@ -6394,11 +6484,18 @@ def _stream_cwicr_parquet(parquet: Any, parquet_path: str, db_id: str, db_file: 
 
     read_rows = max(1, int(_PARQUET_READ_ROWS))
     float_columns = _cwicr_int_columns_read_as_float(parquet, _use_cols)
-    unit_of_row = _cwicr_unit_ids(parquet, _orig_by_lower["rate_code"], float_columns, read_rows)
-    # Row index of the last row of every set; a set is complete once the
-    # import has read past it.
+    unit_of_row, unit_opened = _cwicr_unit_ids(parquet, _orig_by_lower["rate_code"], float_columns, read_rows)
+    # Rows read ahead of the stream (see :func:`_cwicr_far_rows`), and their set ids.
+    far_rows = _cwicr_far_rows(unit_of_row, unit_opened, read_rows)
+    far_table = _cwicr_take_rows(parquet, _use_cols, far_rows, read_rows)
+    far_units = unit_of_row[far_rows]
+    # Row index of the last row of every set the stream itself reads; a set is
+    # complete once the import has read past it.
+    in_stream = np.ones(len(unit_of_row), dtype=bool)
+    in_stream[far_rows] = False
     unit_last = np.full(int(unit_of_row.max()) + 1 if len(unit_of_row) else 0, -1, dtype=np.int64)
-    np.maximum.at(unit_last, unit_of_row, np.arange(len(unit_of_row), dtype=np.int64))
+    np.maximum.at(unit_last, unit_of_row[in_stream], np.flatnonzero(in_stream))
+    del in_stream
 
     # CWICR parquet carries no currency column - every rate is denominated in
     # the region's local currency. Resolve it ONCE from ``db_id`` (constant for
@@ -6413,9 +6510,21 @@ def _stream_cwicr_parquet(parquet: Any, parquet_path: str, db_id: str, db_file: 
     for record_batch in parquet.iter_batches(batch_size=read_rows, columns=_use_cols):
         if not record_batch.num_rows:
             continue
-        pending.append(record_batch)
-        pending_units.append(unit_of_row[rows_read : rows_read + record_batch.num_rows])
-        rows_read += record_batch.num_rows
+        n = record_batch.num_rows
+        batch_units = unit_of_row[rows_read : rows_read + n]
+        lo, hi = np.searchsorted(far_rows, [rows_read, rows_read + n])
+        if hi > lo:
+            # These rows were read ahead and travel with their set's frame.
+            keep = np.ones(n, dtype=bool)
+            keep[far_rows[lo:hi] - rows_read] = False
+            record_batch = record_batch.filter(pa.array(keep))
+            batch_units = batch_units[keep]
+        rows_read += n
+        if record_batch.num_rows:
+            pending.append(record_batch)
+            pending_units.append(batch_units)
+        if not pending_units:
+            continue
 
         units = pending_units[0] if len(pending_units) == 1 else np.concatenate(pending_units)
         # Release every set that first appeared before the earliest set still
@@ -6433,10 +6542,21 @@ def _stream_cwicr_parquet(parquet: Any, parquet_path: str, db_id: str, db_file: 
             pending = table.filter(pc.invert(mask)).to_batches()
             pending_units = [units[~ready]]
             table = table.filter(mask)
+        if far_units.size:
+            # Every set below the earliest one still waiting has had its first
+            # row read, so its read-ahead rows belong in this frame. They go at
+            # the end: the set's raw codes all opened before them, so no code's
+            # first appearance moves, and its own rows stay in file order.
+            bound = waiting.min() if waiting.size else units.max() + 1
+            joins = far_units < bound
+            if joins.any():
+                table = pa.concat_tables([table, far_table.filter(pa.array(joins))])
+                far_table = far_table.filter(pa.array(~joins))
+                far_units = far_units[~joins]
         _import_cwicr_codes(_cwicr_arrow_frame(table, float_columns), db_id, tally)
         del table
 
-    if rows_read != len(unit_of_row) or pending:
+    if rows_read != len(unit_of_row) or pending or far_units.size:
         # The first pass and this one disagree about the file, or a set never
         # completed. Either way the rows above are not the whole base.
         raise RuntimeError(

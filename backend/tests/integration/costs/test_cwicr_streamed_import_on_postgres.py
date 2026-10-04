@@ -18,7 +18,9 @@ the same prefix, and a rerun must complete it to the rows of a clean import.
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from pathlib import Path
+from typing import Any
 
 import psycopg2
 import pytest
@@ -104,6 +106,39 @@ def test_the_streamed_import_stores_the_rows_the_whole_frame_stored(
     # PostgreSQL refused the NUL row and the two long codes kept one row.
     assert result["failed_codes"] == ["N"]
     assert len([row for row in streamed if row[0].startswith("LLLL")]) == 1
+
+
+def test_a_flush_sent_as_many_copies_stores_what_one_copy_stored(
+    sync_url: str, parquet: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The COPY text of a flush goes over in bounded pieces; one row per COPY must store the same rows.
+
+    The pieces share the flush's staging table and transaction, so the NUL row
+    still fails its whole flush and gets isolated, as with a single COPY.
+    """
+    monkeypatch.setattr(router, "_INSERT_FLUSH_ROWS", 50)
+    monkeypatch.setattr(router, "_PARQUET_READ_ROWS", 3)
+
+    expected = whole_frame_import(parquet, WHOLE, sync_url)
+    monkeypatch.setattr(router, "_COPY_CHUNK_CHARS", 1)
+    # COPYs per inserter call.
+    copies: list[int] = []
+    as_csv = router._cost_rows_as_csv
+
+    def _counting(rows: list[tuple], max_chars: int | None = None) -> Iterator[Any]:
+        copies.append(0)
+        for buf in as_csv(rows, max_chars):
+            copies[-1] += 1
+            yield buf
+
+    monkeypatch.setattr(router, "_cost_rows_as_csv", _counting)
+    result = router._process_and_insert_cwicr(parquet, STREAM, sync_url)
+
+    assert _stored(sync_url, STREAM) == _stored(sync_url, WHOLE)
+    assert result["imported"] == expected["imported"]
+    assert result["failed_codes"] == ["N"]
+    # The case is only a case if the inserter did split a flush into several COPYs.
+    assert max(copies) > 1, copies
 
 
 def test_an_import_cut_off_leaves_the_same_rows_and_a_rerun_completes_them(

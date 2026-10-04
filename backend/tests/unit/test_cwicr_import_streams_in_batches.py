@@ -41,6 +41,7 @@ from app.modules.costs import router
 from tests._cwicr_import_cases import (
     LONG_A,
     hard_case_rows,
+    write_far_return_parquet,
     write_hard_case_parquet,
     write_orphan_scattered_parquet,
     write_synthetic_parquet,
@@ -164,7 +165,8 @@ def test_a_stream_that_ignores_items_spanning_batches_is_caught(
     expected, before = _run(whole_frame_import, hard_case, monkeypatch, flush=4)
 
     def _every_row_alone(parquet: Any, *_args: Any) -> Any:
-        return np.arange(parquet.metadata.num_rows, dtype=np.int64)
+        rows = np.arange(parquet.metadata.num_rows, dtype=np.int64)
+        return rows, rows
 
     monkeypatch.setattr(router, "_cwicr_unit_ids", _every_row_alone)
     result, after = _run(router._process_and_insert_cwicr, hard_case, monkeypatch, flush=4, read_rows=3)
@@ -317,12 +319,14 @@ def test_rows_without_a_code_do_not_hold_the_base_back(tmp_path: Path, monkeypat
 def test_an_item_coded_none_still_collects_the_rows_without_a_code(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, read_rows: int
 ) -> None:
-    """The transform files a missing code's resources under the word ``None``.
+    """Under pandas 2 the transform files a missing code's resources under the word ``None``.
 
-    So an item that is literally coded ``None`` gets every one of them as its
-    own components, wherever in the file they sit. That is the old behaviour
-    and the stream keeps it, which means those rows must travel with that item
-    rather than alone.
+    So there an item that is literally coded ``None`` gets every one of them as
+    its own components, wherever in the file they sit. That is the old
+    behaviour and the stream keeps it, which means those rows must travel with
+    that item rather than alone. pandas 3 keeps a missing code missing through
+    ``astype(str)``, so the whole frame files them under no item, and the
+    stream has to agree with that instead.
     """
     import json
 
@@ -335,11 +339,134 @@ def test_an_item_coded_none_still_collects_the_rows_without_a_code(
     assert after.rows == before.rows
     assert after.flushes == before.flushes
     assert result == expected
-    # The case is only a case if the orphans reach the item from both sides of it.
     (none_row,) = [row for row in before.rows if row[0] == "None"]
     names = [c["name"] for c in json.loads(none_row[8])]
-    assert "Orphan resource 0" in names
-    assert "Orphan resource 280" in names
+    if _missing_code_stringifies():
+        # The case is only a case if the orphans reach the item from both sides of it.
+        assert "Orphan resource 0" in names
+        assert "Orphan resource 280" in names
+    else:
+        assert names == ["Plain resource of 150"]
+
+
+def _missing_code_stringifies() -> bool:
+    """Whether a missing code reaches the transform's ``astype(str)`` as the word ``None``.
+
+    Probed on the dtype the stream actually hands the transform, since that is
+    what decides it: object strings under pandas 2, ``str`` under pandas 3.
+    """
+    import pyarrow as pa
+
+    codes = router._cwicr_arrow_frame(pa.table({"rate_code": pa.array(["A", None])}), frozenset()).iloc[:, 0]
+    return not codes.astype(str).isna().any()
+
+
+@pytest.mark.parametrize(("read_rows", "flush"), [(7, 64), (20, 250), (50, 7)])
+def test_items_that_come_back_far_down_do_not_hold_the_rows_between(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, read_rows: int, flush: int
+) -> None:
+    """A few items finished near the end of the file must not keep everything in between waiting.
+
+    The AR and FR bases open about 600 items near row 158 000 and give each its
+    last rows near row 726 000. Holding until then put 570 000 rows into one
+    frame, about 4 GiB of the import on its own. Those late rows are read ahead
+    instead, so the frames stay near one read, and the rows and flushes still
+    match the whole frame.
+    """
+    path = tmp_path / "far_return.parquet"
+    total = write_far_return_parquet(path, 1000, range(100, 130))
+
+    expected, before = _run(whole_frame_import, path, monkeypatch, flush=flush)
+    sizes = _spy_on_frames(monkeypatch)
+    result, after = _run(router._process_and_insert_cwicr, path, monkeypatch, flush=flush, read_rows=read_rows)
+
+    assert after.rows == before.rows
+    assert after.flushes == before.flushes
+    assert result == expected
+    assert sum(sizes) == total
+    # Held, the first frame after item 100 would carry the 1 800 rows up to the
+    # late block. Read ahead, a frame is what was pending plus the late rows.
+    assert max(sizes) <= 3 * read_rows + 2 * 30, (max(sizes), total)
+
+
+@pytest.mark.parametrize("read_rows", [3, 7])
+def test_far_rows_over_the_read_ahead_cap_are_held_and_still_match(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, read_rows: int
+) -> None:
+    """Past the cap the stream holds the rest as before, which is slower on memory but still exact."""
+    path = tmp_path / "far_return_capped.parquet"
+    write_far_return_parquet(path, 400, range(10, 60))
+    monkeypatch.setattr(router, "_CWICR_FAR_ROWS_PER_READ", 2)
+
+    expected, before = _run(whole_frame_import, path, monkeypatch, flush=32)
+    result, after = _run(router._process_and_insert_cwicr, path, monkeypatch, flush=32, read_rows=read_rows)
+
+    assert after.rows == before.rows
+    assert after.flushes == before.flushes
+    assert result == expected
+
+
+def test_a_late_row_that_opens_a_raw_code_is_not_read_ahead(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Control: when the late rows open a raw code of their own, moving them would reorder the output.
+
+    ``" R000100"`` stores as ``R000100`` but first appears at the end of the
+    file, so the whole frame hands its row over after every item in between.
+    Read ahead, it would come right after ``R000100``. The rows have to stay in
+    the stream, held with everything in between, and the output must match.
+    """
+    path = tmp_path / "far_return_variant.parquet"
+    total = write_far_return_parquet(path, 300, range(100, 103), late_variant=True)
+
+    expected, before = _run(whole_frame_import, path, monkeypatch, flush=16)
+    sizes = _spy_on_frames(monkeypatch)
+    result, after = _run(router._process_and_insert_cwicr, path, monkeypatch, flush=16, read_rows=7)
+
+    assert after.rows == before.rows
+    assert after.flushes == before.flushes
+    assert result == expected
+    # The case is only a case if the stream did hold the rows between.
+    assert max(sizes) > 400, (max(sizes), total)
+
+
+def test_the_copy_text_goes_over_in_bounded_buffers_that_add_up_to_one() -> None:
+    """A flush of large rows is sent as several COPYs, together exactly the one CSV it used to be."""
+    import csv
+    import io
+
+    big = "\\u0436" * 4000
+    rows = [
+        (
+            f"id{i}",
+            f"C{i}",
+            'say "hi"\nnext line',
+            "m3",
+            "1.5",
+            "RUB",
+            "cwicr",
+            "{}",
+            "[]",
+            big,
+            "{}",
+            i % 2,
+            "RU",
+            "{}",
+        )
+        for i in range(50)
+    ]
+    whole = io.StringIO()
+    writer = csv.writer(whole, quoting=csv.QUOTE_ALL)
+    for row in rows:
+        out = list(row)
+        out[11] = "true" if row[11] else "false"
+        writer.writerow(out)
+
+    buffers = [buf.read() for buf in router._cost_rows_as_csv(rows, max_chars=100_000)]
+
+    assert "".join(buffers) == whole.getvalue()
+    assert len(buffers) > 1
+    # A buffer closes on the first row that takes it past the limit.
+    assert max(len(b) for b in buffers) < 100_000 + 30_000
+    assert list(router._cost_rows_as_csv([])) == []
 
 
 def _peak_traced_bytes(fn: Any, parquet: Path, monkeypatch: pytest.MonkeyPatch, read_rows: int) -> int:

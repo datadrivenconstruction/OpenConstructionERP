@@ -251,6 +251,33 @@ def write_synthetic_parquet(path: Path, items: int, rows_per_item: int = 6) -> N
     write_hard_case_parquet(path, rows)
 
 
+def write_far_return_parquet(path: Path, items: int, returning: range, *, late_variant: bool = False) -> int:
+    """A plain base where the items in ``returning`` get their last rows near the end of the file.
+
+    That is the shape of the AR and FR CWICR bases: a few hundred items open
+    early and come back for two or three rows some 570 000 rows later. Each
+    returning item gets a resource and a scope step there. With
+    ``late_variant`` the late rows carry the code with a leading space, a raw
+    code that first appears down there, so the item's first appearance in the
+    file moves and it has to stay one set with everything in between.
+    Returns the row count.
+    """
+    rows: list[dict[str, Any]] = []
+    for index in range(items):
+        code = f"R{index:06d}"
+        rows.append(_head(code, f"Returning base item number {index}", cost=float(index % 83)))
+        rows.append(_resource(code, f"Early resource of {index}", 1000 + index % 7))
+    for index in returning:
+        code = (" " if late_variant else "") + f"R{index:06d}"
+        rows.append(_resource(code, f"Late resource of {index}", 2000 + index % 5))
+        rows.append(_scope(code, f"Late step of {index}"))
+    for index in range(items, items + 20):
+        code = f"R{index:06d}"
+        rows.append(_head(code, f"Returning base item number {index}"))
+        rows.append(_resource(code, f"Early resource of {index}", 1000 + index % 7))
+    return write_hard_case_parquet(path, rows)
+
+
 def write_orphan_scattered_parquet(path: Path, items: int, every: int, *, literal_none_at: int | None = None) -> int:
     """A plain base with a resource row without a rate code after every ``every`` items.
 
