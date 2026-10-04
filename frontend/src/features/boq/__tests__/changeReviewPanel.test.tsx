@@ -87,17 +87,22 @@ function proposal(overrides: Partial<BIMQuantityProposal>): BIMQuantityProposal 
     current_total: '1500.00',
     new_total: '1300.00',
     total_delta: '-200.00',
+    currency: 'EUR',
+    total_delta_base: '-200.00',
     method: 'unit',
+    basis: 'model_change',
     status: 'changed',
     appliable: true,
     manual_override: false,
     model_id: 'model-1',
     new_model_id: 'model-2',
+    new_model_ids: ['model-2'],
     model_name: 'Structure',
     model_version: '2',
     element_count: 2,
     modified_count: 1,
     missing_count: 0,
+    added_count: 0,
     ...overrides,
   };
 }
@@ -117,6 +122,7 @@ const ROWS: BIMQuantityProposal[] = [
     current_total: '40.00',
     new_total: '60.00',
     total_delta: '20.00',
+    total_delta_base: '20.00',
     manual_override: true,
   }),
   proposal({
@@ -128,6 +134,7 @@ const ROWS: BIMQuantityProposal[] = [
     new_model_quantity: '0',
     delta: '-15',
     total_delta: '0',
+    total_delta_base: '0',
   }),
 ];
 
@@ -178,7 +185,9 @@ describe('ChangeReviewPanel flags', () => {
       boq_id: 'boq-1',
       positions_checked: 0,
       appliable_count: 0,
+      currency: 'EUR',
       total_delta: '0',
+      unconverted_count: 0,
       rows: [],
     });
     renderPanel();
@@ -196,6 +205,20 @@ describe('ChangeReviewPanel flags', () => {
     const bim = within(rows[1]!);
     expect(bim.getByText('Structure, version 2')).toBeTruthy();
     expect(bim.getByText('Changed: 2')).toBeTruthy();
+  });
+
+  it('names elements a new version adds to a quantity rule', async () => {
+    mockFlags([
+      {
+        ...FLAG_BIM,
+        reason: 'elements_added',
+        details: { modified_count: 1, deleted_count: 0, added_count: 2 },
+      },
+    ]);
+    renderPanel();
+    const row = await screen.findByTestId('change-flag-row');
+    expect(within(row).getByText('Changed: 1 · Added: 2')).toBeTruthy();
+    expect(within(row).getByText(/adds elements that match the quantity rule/)).toBeTruthy();
   });
 
   it('marks one flag reviewed by id and changes nothing else', async () => {
@@ -241,20 +264,27 @@ describe('ChangeReviewPanel flags', () => {
 });
 
 describe('ChangeReviewPanel model quantities', () => {
-  function openQuantities(props: Partial<Parameters<typeof ChangeReviewPanel>[0]> = {}) {
+  function openQuantities(
+    props: Partial<Parameters<typeof ChangeReviewPanel>[0]> = {},
+    rows: BIMQuantityProposal[] = ROWS,
+  ) {
     mockFlags([]);
     vi.spyOn(changeReviewApi, 'proposals').mockResolvedValue({
       boq_id: 'boq-1',
       positions_checked: 4,
-      appliable_count: 2,
+      appliable_count: rows.filter((r) => r.appliable).length,
+      currency: 'EUR',
       total_delta: '-180.00',
-      rows: ROWS,
+      unconverted_count: 0,
+      rows,
     });
     const apply = vi.spyOn(changeReviewApi, 'applyProposals').mockResolvedValue({
       boq_id: 'boq-1',
       applied: 1,
       skipped: 0,
+      currency: 'EUR',
       total_delta: '-200.00',
+      unconverted_count: 0,
       results: [],
     });
     const handles = renderPanel(props);
@@ -289,6 +319,61 @@ describe('ChangeReviewPanel model quantities', () => {
     await waitFor(() => expect(apply).toHaveBeenCalledTimes(1));
     expect(apply).toHaveBeenCalledWith('boq-1', ['pos-a']);
     await waitFor(() => expect(onApplied).toHaveBeenCalledTimes(1));
+  });
+
+  it('formats each line in its own currency and totals in the project currency only', async () => {
+    // +1000 USD is +900 EUR at the project rate; -200 EUR stays -200 EUR.
+    // Adding the raw figures would print +800, in no currency at all.
+    openQuantities({}, [
+      proposal({
+        position_id: 'pos-usd',
+        ordinal: '02.001',
+        description: 'Imported steel',
+        total_delta: '1000.00',
+        currency: 'USD',
+        total_delta_base: '900.00',
+      }),
+      proposal({ position_id: 'pos-eur', ordinal: '02.002', description: 'Local concrete' }),
+      proposal({
+        position_id: 'pos-gbp',
+        ordinal: '02.003',
+        description: 'No rate',
+        total_delta: '10.00',
+        currency: 'GBP',
+        total_delta_base: null,
+      }),
+    ]);
+    const rows = await screen.findAllByTestId('bim-proposal-row');
+    expect(within(rows[0]!).getByText(/\$1,000\.00/)).toBeTruthy();
+    expect(within(rows[2]!).getByText(/£10\.00/)).toBeTruthy();
+
+    const total = screen.getByTestId('bim-proposal-total').textContent ?? '';
+    expect(total).toMatch(/€700\.00/);
+    expect(total).not.toMatch(/800/);
+    expect(screen.getByTestId('bim-proposal-unconverted').textContent).toMatch(/: 1$/);
+
+    // Unticking the line without a rate clears the note and leaves the total.
+    fireEvent.click(within(rows[2]!).getByRole('checkbox'));
+    expect(screen.queryByTestId('bim-proposal-unconverted')).toBeNull();
+    expect(screen.getByTestId('bim-proposal-total').textContent).toMatch(/€700\.00/);
+  });
+
+  it('says when a quantity rule result was never applied, instead of a previous model figure', async () => {
+    openQuantities({}, [
+      proposal({
+        position_id: 'pos-rule',
+        description: 'Tiling',
+        method: 'rule',
+        basis: 'rule_result',
+        current_quantity: '0',
+        previous_model_quantity: '30',
+        new_model_quantity: '30',
+      }),
+    ]);
+    const row = await screen.findByTestId('bim-proposal-row');
+    expect(within(row).getByText(/never applied to this position/)).toBeTruthy();
+    expect(within(row).queryByText(/Previous model version measured/)).toBeNull();
+    expect(within(row).getByText('Quantity rule')).toBeTruthy();
   });
 
   it('does not apply on a locked bill', async () => {

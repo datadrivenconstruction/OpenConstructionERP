@@ -163,15 +163,18 @@ export function ChangeReviewPanel({
     },
     [qtyFmt],
   );
+  // Money is formatted in the currency it is in: a line in its position's own
+  // currency, the running total in the project base the server summed it in.
   const fmtMoney = useCallback(
-    (v: string | number) => formatCurrency(v, currencyCode, locale || undefined),
+    (v: string | number, currency?: string | null) =>
+      formatCurrency(v, currency || currencyCode, locale || undefined),
     [currencyCode, locale],
   );
   const fmtSignedMoney = useCallback(
-    (v: string | number) => {
+    (v: string | number, currency?: string | null) => {
       const n = Number(v);
-      if (!Number.isFinite(n) || n === 0) return fmtMoney(0);
-      return `${n > 0 ? '+' : ''}${fmtMoney(n)}`;
+      if (!Number.isFinite(n) || n === 0) return fmtMoney(0, currency);
+      return `${n > 0 ? '+' : ''}${fmtMoney(n, currency)}`;
     },
     [fmtMoney],
   );
@@ -265,13 +268,19 @@ export function ChangeReviewPanel({
     });
   }, []);
 
-  const selectedTotal = useMemo(
-    () =>
-      proposals
-        .filter((r) => r.appliable && selected.has(r.position_id))
-        .reduce((acc, r) => acc + Number(r.total_delta || 0), 0),
-    [proposals, selected],
-  );
+  // Summed in the project base currency only. A line priced in a currency the
+  // project has no rate for has no base amount; it is counted, never added 1:1.
+  const { selectedTotal, selectedUnconverted } = useMemo(() => {
+    let total = 0;
+    let unconverted = 0;
+    for (const r of proposals) {
+      if (!r.appliable || !selected.has(r.position_id)) continue;
+      if (r.total_delta_base == null) unconverted += 1;
+      else total += Number(r.total_delta_base) || 0;
+    }
+    return { selectedTotal: total, selectedUnconverted: unconverted };
+  }, [proposals, selected]);
+  const baseCurrency = proposalsQuery.data?.currency || currencyCode;
 
   const applyMutation = useMutation({
     mutationFn: (ids: string[]) => changeReviewApi.applyProposals(boqId, ids),
@@ -531,10 +540,21 @@ export function ChangeReviewPanel({
                   <span className="text-content-secondary" data-testid="bim-proposal-total">
                     {t('boq.changes_qty_total', {
                       defaultValue: 'Change to line totals: {{amount}}',
-                      amount: fmtSignedMoney(selectedTotal),
+                      amount: fmtSignedMoney(selectedTotal, baseCurrency),
                     })}
                   </span>
                 </div>
+                {selectedUnconverted > 0 && (
+                  <p
+                    className="text-2xs text-amber-600 dark:text-amber-400"
+                    data-testid="bim-proposal-unconverted"
+                  >
+                    {t('boq.changes_qty_total_unconverted', {
+                      defaultValue: 'Lines in a currency without an exchange rate, not in this total: {{count}}',
+                      count: selectedUnconverted,
+                    })}
+                  </p>
+                )}
                 {isLocked && (
                   <p className="text-2xs text-amber-600 dark:text-amber-400">
                     {t('boq.changes_qty_locked', {
@@ -588,6 +608,17 @@ function FlagRow({
   const details = flag.details ?? {};
   const changed = Number(details.modified_count ?? 0);
   const removed = Number(details.deleted_count ?? 0);
+  const added = Number(details.added_count ?? 0);
+  const counts: string[] = [];
+  if (changed > 0) {
+    counts.push(t('boq.changes_changed_count', { defaultValue: 'Changed: {{count}}', count: changed }));
+  }
+  if (added > 0) {
+    counts.push(t('boq.changes_added_count', { defaultValue: 'Added: {{count}}', count: added }));
+  }
+  if (removed > 0) {
+    counts.push(t('boq.changes_removed_count', { defaultValue: 'Removed: {{count}}', count: removed }));
+  }
   const created = new Date(flag.created_at);
   const reviewedByQuantity = flag.review_note === 'quantity_updated_from_model';
 
@@ -628,14 +659,8 @@ function FlagRow({
               defaultValue: REASON_DEFAULTS[flag.reason] ?? REASON_DEFAULTS.model_changed,
             })}
           </p>
-          {(changed > 0 || removed > 0) && (
-            <p className="mt-0.5 text-2xs text-content-tertiary">
-              {changed > 0 &&
-                t('boq.changes_changed_count', { defaultValue: 'Changed: {{count}}', count: changed })}
-              {changed > 0 && removed > 0 && ' · '}
-              {removed > 0 &&
-                t('boq.changes_removed_count', { defaultValue: 'Removed: {{count}}', count: removed })}
-            </p>
+          {counts.length > 0 && (
+            <p className="mt-0.5 text-2xs text-content-tertiary">{counts.join(' · ')}</p>
           )}
           <p className="mt-0.5 text-2xs text-content-quaternary">
             {Number.isNaN(created.getTime())
@@ -689,6 +714,7 @@ const REASON_DEFAULTS: Record<string, string> = {
   document_revised: 'The drawing was revised after this quantity was measured.',
   elements_modified: 'Linked elements changed in the new model version.',
   elements_deleted: 'Linked elements were removed in the new model version.',
+  elements_added: 'The new model version adds elements that match the quantity rule.',
   elements_changed: 'Linked elements changed or were removed in the new model version.',
   model_changed: 'The linked model has a new version with changed elements.',
 };
@@ -707,11 +733,12 @@ function ProposalRow({
   onToggle: (positionId: string) => void;
   fmtQty: (v: string) => string;
   fmtSignedQty: (v: string) => string;
-  fmtSignedMoney: (v: string) => string;
+  fmtSignedMoney: (v: string, currency?: string | null) => string;
   onJump?: (positionId: string) => void;
 }) {
   const { t } = useTranslation();
   const deltaNum = Number(row.delta);
+  const ruleNotApplied = row.basis === 'rule_result';
   return (
     <li className="px-4 py-3" data-testid="bim-proposal-row">
       <label className={clsx('flex items-start gap-2', row.appliable ? 'cursor-pointer' : 'cursor-default')}>
@@ -765,11 +792,15 @@ function ProposalRow({
             </p>
           )}
           <p className="mt-0.5 text-2xs text-content-tertiary">
-            {t('boq.changes_qty_previous', {
-              defaultValue: 'Previous model version measured {{value}} {{unit}}',
-              value: fmtQty(row.previous_model_quantity),
-              unit: row.unit,
-            })}
+            {ruleNotApplied
+              ? t('boq.changes_qty_rule_not_applied', {
+                  defaultValue: 'The quantity rule result was never applied to this position',
+                })
+              : t('boq.changes_qty_previous', {
+                  defaultValue: 'Previous model version measured {{value}} {{unit}}',
+                  value: fmtQty(row.previous_model_quantity),
+                  unit: row.unit,
+                })}
             {' · '}
             {t('boq.changes_bim_line', {
               defaultValue: '{{name}}, version {{version}}',
@@ -781,7 +812,7 @@ function ProposalRow({
             <p className="mt-0.5 text-2xs text-content-secondary">
               {t('boq.changes_qty_amount', {
                 defaultValue: 'Line total {{amount}}',
-                amount: fmtSignedMoney(row.total_delta),
+                amount: fmtSignedMoney(row.total_delta, row.currency),
               })}
             </p>
           )}

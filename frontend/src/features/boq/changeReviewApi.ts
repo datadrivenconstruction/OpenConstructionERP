@@ -21,10 +21,10 @@ export interface ChangeFlag {
   source_id: string | null;
   source_label: string;
   source_version: string | null;
-  /** document_revised | elements_modified | elements_deleted | elements_changed | model_changed */
+  /** document_revised | elements_modified | elements_deleted | elements_added | elements_changed | model_changed */
   reason: string;
   details: Record<string, unknown>;
-  detected_via: 'event' | 'scan' | string;
+  detected_via: 'event' | 'scan' | 'apply' | string;
   status: ChangeFlagStatus | string;
   reviewed_by: string | null;
   reviewed_at: string | null;
@@ -61,6 +61,12 @@ export interface ChangeFlagReviewResult {
 }
 
 export type BIMProposalStatus = 'changed' | 'elements_missing' | 'no_quantity';
+/**
+ * model_change: the model moved since the version this quantity came from.
+ * rule_result: a quantity rule aimed at this position whose result was never
+ * applied to it, offered even without a newer model version.
+ */
+export type BIMProposalBasis = 'model_change' | 'rule_result';
 
 export interface BIMQuantityProposal {
   position_id: string;
@@ -74,26 +80,38 @@ export interface BIMQuantityProposal {
   delta: string;
   current_total: string;
   new_total: string;
+  /** In the position's own currency, `currency`. */
   total_delta: string;
+  /** The position's currency: its metadata.currency, else the project base. */
+  currency: string;
+  /** total_delta in the project base currency; null when there is no usable rate. */
+  total_delta_base: string | null;
   method: 'unit' | 'rule';
+  basis: BIMProposalBasis | string;
   status: BIMProposalStatus | string;
   appliable: boolean;
-  /** The stored quantity differs from what the old model version measured. */
+  /** The stored quantity differs from what the baseline model version measured. */
   manual_override: boolean;
   model_id: string | null;
   new_model_id: string | null;
+  new_model_ids: string[];
   model_name: string;
   model_version: string;
   element_count: number;
   modified_count: number;
   missing_count: number;
+  added_count: number;
 }
 
 export interface BIMQuantityProposals {
   boq_id: string;
   positions_checked: number;
   appliable_count: number;
+  /** Project base currency of total_delta. */
+  currency: string;
   total_delta: string;
+  /** Appliable lines left out of total_delta for want of an exchange rate. */
+  unconverted_count: number;
   rows: BIMQuantityProposal[];
 }
 
@@ -101,7 +119,9 @@ export interface BIMQuantityApplyResult {
   boq_id: string;
   applied: number;
   skipped: number;
+  currency: string;
   total_delta: string;
+  unconverted_count: number;
   results: Array<{
     position_id: string;
     applied: boolean;
@@ -110,6 +130,9 @@ export interface BIMQuantityApplyResult {
     new_quantity: string | null;
     old_total: string | null;
     new_total: string | null;
+    currency: string | null;
+    total_delta: string | null;
+    total_delta_base: string | null;
   }>;
 }
 
