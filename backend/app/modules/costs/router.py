@@ -1528,8 +1528,9 @@ async def _restore_home_catalog(session: AsyncSession, base_region: str) -> dict
     """Give the Resource Catalog the base's own catalogue back after a return home.
 
     Fail-soft like :func:`_mirror_market_catalog`. When the base's catalogue
-    cannot be read, the market rows a switch put there are still taken out, so
-    the catalogue is empty rather than showing another market's prices.
+    cannot be read, the market rows a switch put there are retired (hidden, not
+    deleted), so the catalogue shows no other market's prices and every
+    assembly component linked to one of them keeps its link.
     """
     from app.modules.catalog.router import fetch_region_catalog_rows, replace_imported_catalog_rows
 
@@ -1551,7 +1552,7 @@ async def _restore_home_catalog(session: AsyncSession, base_region: str) -> dict
             logger.debug("rollback after the failed catalogue restore also failed", exc_info=True)
         return {"region": base_region, "error": f"The resource catalogue was not updated: {exc.__class__.__name__}."}
     if reason:
-        out["error"] = f"The home resource catalogue could not be read, so it was emptied: {reason}"
+        out["error"] = f"The home resource catalogue could not be read, so its market rows were hidden: {reason}"
     return out
 
 

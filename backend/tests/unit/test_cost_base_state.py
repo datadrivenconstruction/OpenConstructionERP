@@ -467,8 +467,39 @@ async def _items(s: AsyncSession, region: str = BASE) -> dict[str, SimpleNamespa
 
 
 async def _catalog(s: AsyncSession) -> list[tuple[str, str, str, str]]:
-    rows = (await s.execute(select(CatalogResource).where(CatalogResource.region == BASE))).scalars().all()
+    """The catalogue rows a reader sees: the active ones."""
+    s.expire_all()
+    rows = (
+        (
+            await s.execute(
+                select(CatalogResource).where(CatalogResource.region == BASE, CatalogResource.is_active.is_(True))
+            )
+        )
+        .scalars()
+        .all()
+    )
     return sorted((r.source, r.resource_code, r.base_price, r.currency) for r in rows)
+
+
+async def _catalog_ids(s: AsyncSession) -> dict[str, uuid.UUID]:
+    """Every catalogue row of the base by code, active or retired."""
+    s.expire_all()
+    rows = (await s.execute(select(CatalogResource).where(CatalogResource.region == BASE))).scalars().all()
+    return {r.resource_code: r.id for r in rows}
+
+
+def _catalog_row(code: str, price: str, currency: str, source: str = "github_import") -> CatalogResource:
+    return CatalogResource(
+        resource_code=code,
+        name=f"Resource {code}",
+        resource_type="material",
+        category="General",
+        unit="kg",
+        base_price=price,
+        currency=currency,
+        source=source,
+        region=BASE,
+    )
 
 
 async def _switch_to_london(s: AsyncSession, user: str) -> dict:
@@ -531,6 +562,84 @@ async def test_a_market_switch_reprices_stores_and_mirrors_the_catalogue(
         ("market_import", "R1", "3", "GBP"),
         ("market_import", "R2", "1", "GBP"),
     ]
+    assert out["catalog"]["updated"] == 1
+    assert out["catalog"]["added"] == 1
+
+
+async def test_market_switches_keep_assembly_links_to_catalogue_resources(
+    db: AsyncEngine, wired: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A switch and a return home update catalogue rows in place, so no link is cut.
+
+    ``Component.catalog_resource_id`` is ``ON DELETE SET NULL``: a delete and
+    re-insert of the catalogue on every switch nulled it without a word.
+    """
+    from app.modules.assemblies.models import Assembly, Component
+
+    async with _sessions(db)() as s:
+        await _load_home_base(s)
+        await ResourcePriceService(s).seed_region(BASE)
+        s.add_all([_catalog_row("R1", "10", "CNY"), _catalog_row("R2", "5", "CNY"), _catalog_row("R9", "2", "CNY")])
+        await s.commit()
+        home_ids = await _catalog_ids(s)
+        assembly = Assembly(code="ASM-LINK", name="Linked", unit="m3")
+        s.add(assembly)
+        await s.flush()
+        for code in ("R1", "R2", "R9"):
+            s.add(
+                Component(
+                    assembly_id=assembly.id,
+                    catalog_resource_id=home_ids[code],
+                    description=f"Uses {code}",
+                    unit="kg",
+                )
+            )
+        await s.commit()
+        assembly_id = assembly.id
+
+        async def _links() -> dict[str, uuid.UUID | None]:
+            s.expire_all()
+            comps = (await s.execute(select(Component).where(Component.assembly_id == assembly_id))).scalars().all()
+            return {c.description: c.catalog_resource_id for c in comps}
+
+        await _switch_to_london(s, str(uuid.uuid4()))
+        after_switch = await _catalog_ids(s)
+        links_after_switch = await _links()
+        catalog_in_market = await _catalog(s)
+
+        await costs_router.restore_base_home_market(BASE, session=s, _user_id=str(uuid.uuid4()))
+        after_home = await _catalog_ids(s)
+        links_after_home = await _links()
+        catalog_at_home = await _catalog(s)
+
+        # A return home whose catalogue cannot be read hides the market rows
+        # and still deletes none of them.
+        await _switch_to_london(s, str(uuid.uuid4()))
+
+        async def _unreadable(region: str) -> list[dict[str, Any]]:
+            raise RuntimeError("catalogue download refused")
+
+        import app.modules.catalog.router as catalog_router
+
+        monkeypatch.setattr(catalog_router, "fetch_region_catalog_rows", _unreadable)
+        out = await costs_router.restore_base_home_market(BASE, session=s, _user_id=str(uuid.uuid4()))
+        after_unreadable = await _catalog_ids(s)
+        links_after_unreadable = await _links()
+        catalog_unreadable = await _catalog(s)
+
+    expected_links = {f"Uses {code}": home_ids[code] for code in ("R1", "R2", "R9")}
+    assert after_switch == home_ids
+    assert after_home == home_ids
+    assert after_unreadable == home_ids
+    assert links_after_switch == expected_links
+    assert links_after_home == expected_links
+    assert links_after_unreadable == expected_links
+    # R9 is in neither catalogue file: hidden from the list, never deleted.
+    assert catalog_in_market == [("market_import", "R1", "3", "GBP"), ("market_import", "R2", "1", "GBP")]
+    assert catalog_at_home == [("github_import", "R1", "10", "CNY"), ("github_import", "R2", "5", "CNY")]
+    assert catalog_unreadable == []
+    assert out["catalog"]["retired"] == 2
+    assert "hidden" in out["catalog"]["error"]
 
 
 async def test_return_home_gives_every_item_its_home_prices_back(db: AsyncEngine, wired: dict[str, Any]) -> None:

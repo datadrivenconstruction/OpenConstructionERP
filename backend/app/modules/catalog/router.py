@@ -597,6 +597,23 @@ _CATALOG_MAPPED_FIELDS = frozenset(
 #: rows a person created. Only these are replaced when a base changes market.
 IMPORTED_CATALOG_SOURCES: tuple[str, ...] = ("github_import", "market_import")
 
+#: What a market switch rewrites on a catalogue row it keeps: everything the
+#: CSV row carries. ``id``, ``region``, ``metadata_`` and ``is_active`` are left
+#: to :func:`replace_imported_catalog_rows`.
+_CATALOG_REPLACED_FIELDS: tuple[str, ...] = (
+    "name",
+    "resource_type",
+    "category",
+    "unit",
+    "base_price",
+    "min_price",
+    "max_price",
+    "currency",
+    "usage_count",
+    "source",
+    "specifications",
+)
+
 
 def _catalog_resource_from_row(row: dict[str, Any], region: str, source: str) -> Any:
     """Build one CatalogResource from a catalogue CSV row, or ``None`` to skip it.
@@ -683,27 +700,86 @@ async def replace_imported_catalog_rows(
 
     Used when a cost base changes market: the Resource Catalog then lists the
     resources at the prices and in the currency the base's work items now use.
-    Only rows a load wrote (:data:`IMPORTED_CATALOG_SOURCES`) are replaced, so a
-    resource a person added under the region stays. Flushed, not committed: the
-    caller owns the transaction.
+    Only rows a load wrote (:data:`IMPORTED_CATALOG_SOURCES`) are touched, so a
+    resource a person added under the region stays.
+
+    The rows are updated in place, matched on ``resource_code``, and never
+    deleted: an assembly component links a catalogue resource by id with
+    ``ON DELETE SET NULL``, so a delete and re-insert on every market switch
+    silently cut every such link and the component stopped following the
+    resource's price. An imported row whose code the new set does not carry is
+    retired (``is_active = False``) instead, which hides it from the catalogue
+    and keeps the link; it comes back when a later set carries the code again.
+    An empty ``rows`` (the caller could not read a catalogue) therefore retires
+    every imported row and deletes none. There is no unique constraint on
+    (region, code), so duplicates on either side are paired off one by one and
+    an extra CSV row is added as a new resource.
+
+    Flushed, not committed: the caller owns the transaction.
     """
-    from sqlalchemy import delete as sql_delete
+    from sqlalchemy import select
 
     from app.modules.catalog.models import CatalogResource
 
-    replaced = await session.execute(
-        sql_delete(CatalogResource).where(
-            CatalogResource.region == region,
-            CatalogResource.source.in_(IMPORTED_CATALOG_SOURCES),
+    existing_rows = (
+        (
+            await session.execute(
+                select(CatalogResource)
+                .where(
+                    CatalogResource.region == region,
+                    CatalogResource.source.in_(IMPORTED_CATALOG_SOURCES),
+                )
+                .order_by(CatalogResource.id)
+            )
         )
+        .scalars()
+        .all()
     )
+    by_code: dict[str, list[Any]] = {}
+    for existing in existing_rows:
+        by_code.setdefault(existing.resource_code, []).append(existing)
+
+    updated = 0
+    added = 0
+    skipped = 0
+    fresh: list[Any] = []
+    for row in rows:
+        try:
+            resource = _catalog_resource_from_row(row, region, source)
+        except (ValueError, TypeError):
+            skipped += 1
+            continue
+        if resource is None:
+            skipped += 1
+            continue
+        matches = by_code.get(resource.resource_code)
+        if not matches:
+            fresh.append(resource)
+            added += 1
+            continue
+        target = matches.pop(0)
+        for field in _CATALOG_REPLACED_FIELDS:
+            setattr(target, field, getattr(resource, field))
+        target.is_active = True
+        updated += 1
+    if fresh:
+        session.add_all(fresh)
+
+    # Whatever no row of the new set claimed is retired, not deleted.
+    retired = 0
+    for leftovers in by_code.values():
+        for existing in leftovers:
+            if existing.is_active:
+                existing.is_active = False
+                retired += 1
     await session.flush()
-    imported, skipped = await _add_catalog_rows(session, region, rows, source=source)
     return {
         "region": region,
-        "imported": imported,
+        "imported": updated + added,
+        "updated": updated,
+        "added": added,
+        "retired": retired,
         "skipped": skipped,
-        "replaced": int(replaced.rowcount or 0),  # type: ignore[attr-defined]
         "source": source,
     }
 
