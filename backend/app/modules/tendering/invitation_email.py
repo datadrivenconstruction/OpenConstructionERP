@@ -200,7 +200,8 @@ def email_locale(project_locale: str | None) -> str:
 
 
 def _t(locale: str, key: str, **params: str) -> str:
-    return translate(_TABLES, locale, key, DEFAULT_LOCALE, **params)
+    # A regional tag (``de-AT``) must read its language, not fall to English.
+    return translate(_TABLES, email_locale(locale), key, DEFAULT_LOCALE, **params)
 
 
 def invitation_subject(locale: str, package_name: str) -> str:
