@@ -281,3 +281,81 @@ async def test_get_report_sarif_404(client: AsyncClient, auth: dict[str, str]) -
         headers=auth,
     )
     assert resp.status_code == 404
+
+
+# ── 3. GET /portfolio-status/ - cross-project status over HTTP ───────────
+
+
+@pytest.mark.asyncio
+async def test_portfolio_status_endpoint(client: AsyncClient, auth: dict[str, str]) -> None:
+    """The route is mounted, gated, and reads stored reports per estimate.
+
+    The service is covered in depth by tests/unit/test_validation_portfolio_status.py;
+    this pins the HTTP surface: auth is required, the latest report of a
+    real estimate decides its state, and a report whose target is not an
+    estimate of the project does not turn the project red.
+    """
+    from app.database import async_session_factory
+    from app.modules.boq.models import BOQ
+    from app.modules.validation.models import ValidationReport
+
+    unauth = await client.get("/api/v1/validation/portfolio-status/")
+    assert unauth.status_code in (401, 403)
+
+    created = await client.post(
+        "/api/v1/projects/",
+        json={"name": f"Portfolio status {uuid.uuid4().hex[:6]}", "description": "smoke"},
+        headers=auth,
+    )
+    assert created.status_code in (200, 201), created.text[:200]
+    pid = uuid.UUID(created.json()["id"])
+
+    boq_id = uuid.uuid4()
+    report_id = uuid.uuid4()
+    async with async_session_factory() as session:
+        session.add(BOQ(id=boq_id, project_id=pid, name="Shell and core", status="draft"))
+        await session.flush()
+        session.add(
+            ValidationReport(
+                id=report_id,
+                project_id=pid,
+                target_type="boq",
+                target_id=str(boq_id),
+                rule_set="boq_quality",
+                status="passed",
+                score="1.0",
+                total_rules=7,
+                passed_count=7,
+                results=[],
+                metadata_={"rule_sets": ["boq_quality"]},
+            )
+        )
+        # A report on something that is not an estimate of this project.
+        session.add(
+            ValidationReport(
+                id=uuid.uuid4(),
+                project_id=pid,
+                target_type="boq",
+                target_id=str(uuid.uuid4()),
+                rule_set="boq_quality",
+                status="errors",
+                total_rules=1,
+                error_count=1,
+                results=[],
+                metadata_={},
+            )
+        )
+        await session.commit()
+
+    resp = await client.get("/api/v1/validation/portfolio-status/", headers=auth)
+    assert resp.status_code == 200, resp.text[:300]
+    body = resp.json()
+    row = next(p for p in body["projects"] if p["project_id"] == str(pid))
+    assert row["state"] == "passed"
+    assert row["error_count"] == 0
+    assert row["estimate_count"] == 1
+    (estimate,) = row["estimates"]
+    assert estimate["boq_id"] == str(boq_id)
+    assert estimate["report_id"] == str(report_id)
+    assert estimate["rule_sets"] == ["boq_quality"]
+    assert body["project_count"] == len(body["projects"])

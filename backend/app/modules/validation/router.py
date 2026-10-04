@@ -5,6 +5,7 @@
 Endpoints:
     POST  /validation/run                    - Run validation on a BOQ
     POST  /validation/import-ids             - Import IDS rules (multipart upload)
+    GET   /validation/portfolio-status/      - Latest status of every estimate, all projects
     GET   /validation/reports?project_id=X   - List validation reports
     GET   /validation/reports/{report_id}    - Get single report
     GET   /validation/reports/{id}/sarif     - Export report as SARIF v2.1.0 JSON
@@ -36,6 +37,7 @@ from app.modules.validation.schemas import (
     CheckBIMModelRequest,
     RunValidationRequest,
     RunValidationResponse,
+    ValidationPortfolioResponse,
     ValidationReportResponse,
     ValidationResultItem,
 )
@@ -350,6 +352,31 @@ async def get_bim_scorecard_trend(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(exc),
         ) from exc
+
+
+# ── GET /portfolio-status - Latest status of every estimate, all projects ─
+
+
+@router.get(
+    "/portfolio-status/",
+    response_model=ValidationPortfolioResponse,
+    summary="Validation status across projects",
+    description=(
+        "For every live project the caller can open, the latest validation report of each estimate "
+        "in its bill register, with the project's worst state on top. Reads stored reports only and "
+        "never runs validation. An estimate without a report, or whose latest report checked nothing, "
+        "is 'not_validated', never 'passed'."
+    ),
+    dependencies=[Depends(RequirePermission("validation.read"))],
+)
+async def portfolio_status(
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> ValidationPortfolioResponse:
+    """Cross-project validation status, sorted worst first."""
+    from app.modules.validation.portfolio import build_portfolio_status
+
+    return await build_portfolio_status(session, user_id)
 
 
 # ── GET /reports - List validation reports ───────────────────────────────

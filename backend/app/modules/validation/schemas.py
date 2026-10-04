@@ -132,3 +132,70 @@ class RuleSetInfo(BaseModel):
     description: str
     rule_count: int
     rules: list[dict[str, Any]] = Field(default_factory=list)
+
+
+# ── Cross-project validation status (portfolio view) ─────────────────────
+
+
+class PortfolioEstimateStatus(BaseModel):
+    """The latest validation outcome of one estimate (BOQ) in a project.
+
+    ``state`` is what a reader should take away. It is ``not_validated``
+    whenever there is no report, or the latest report did not actually check
+    anything (pending, skipped, unsupported rule sets, no rules run), so an
+    estimate nobody validated can never read as passed.
+    """
+
+    boq_id: UUID
+    boq_name: str
+    state: str = Field(description="errors, warnings, not_validated, info or passed")
+    report_id: UUID | None = None
+    report_status: str | None = Field(default=None, description="Raw status of the latest report, if any")
+    rule_sets: list[str] = Field(default_factory=list)
+    unsupported_rule_sets: list[str] = Field(default_factory=list)
+    error_count: int = 0
+    warning_count: int = 0
+    passed_count: int = 0
+    total_rules: int = 0
+    score: float | None = None
+    validated_at: datetime | None = None
+
+
+class PortfolioProjectStatus(BaseModel):
+    """One project's validation standing, taken from its estimates' latest reports.
+
+    ``state`` is the worst state among the estimates, and ``not_validated``
+    for a project that has no estimates at all. The counts add up the latest
+    report of each estimate only, never the report history.
+    """
+
+    project_id: UUID
+    project_name: str
+    state: str
+    estimate_count: int = 0
+    validated_count: int = 0
+    not_validated_count: int = 0
+    error_count: int = 0
+    warning_count: int = 0
+    passed_count: int = 0
+    rule_sets: list[str] = Field(default_factory=list)
+    last_validated_at: datetime | None = None
+    estimates: list[PortfolioEstimateStatus] = Field(default_factory=list)
+
+
+class PortfolioStateSummary(BaseModel):
+    """How many projects sit in each state."""
+
+    errors: int = 0
+    warnings: int = 0
+    not_validated: int = 0
+    info: int = 0
+    passed: int = 0
+
+
+class ValidationPortfolioResponse(BaseModel):
+    """Response of GET /validation/portfolio-status/, projects sorted worst first."""
+
+    project_count: int = 0
+    summary: PortfolioStateSummary = Field(default_factory=PortfolioStateSummary)
+    projects: list[PortfolioProjectStatus] = Field(default_factory=list)
