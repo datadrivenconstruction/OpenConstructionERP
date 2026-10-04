@@ -8,6 +8,7 @@ read-only contract enforceable.
 
 from __future__ import annotations
 
+import asyncio
 import calendar
 import logging
 import uuid
@@ -1324,7 +1325,12 @@ class BIDashboardsService:
             file_path: str | None = None
             file_size = 0
             if produce_file:
-                file_path, file_size = build_report(
+                # reportlab or openpyxl lays out every row, drill-down sections
+                # included, and writes the file to disk. That runs in a worker
+                # thread so the event loop keeps serving while a report, or a
+                # scheduled run of one, renders. The rows are plain dicts here.
+                file_path, file_size = await asyncio.to_thread(
+                    build_report,
                     output_format=report.output_format,
                     report_name=report.code or report.name,
                     rows=rows,

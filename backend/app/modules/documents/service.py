@@ -17,6 +17,7 @@ import asyncio
 import logging
 import os
 import re
+import threading
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
@@ -2072,6 +2073,72 @@ def detect_sheet_info(page_text: str) -> dict[str, str | None]:
     return result
 
 
+# PDFium, which renders the page thumbnails behind pdfplumber's
+# ``Page.to_image``, must not be called from two threads at once, not even on
+# two different documents. The page loop below runs in a worker thread, so two
+# drawing sets uploaded together would otherwise render side by side. The lock
+# covers the thumbnail render only; text extraction is pdfminer, pure Python,
+# and runs unserialised.
+_PDFIUM_RENDER_LOCK = threading.Lock()
+
+
+def _read_sheet_pages(pdf_path: Path, thumb_dir: Path, file_uuid: str, safe_name: str) -> list[dict[str, Any]]:
+    """Read every page of a drawing set: title-block fields and a thumbnail.
+
+    Synchronous on purpose: :meth:`SheetService.split_pdf_to_sheets` runs it in
+    a worker thread. A drawing set has no page limit, and each page costs a
+    text extraction plus a rendered thumbnail, so a two hundred page set is
+    many seconds of CPU that would otherwise hold the event loop and every
+    other request on the worker with it. It touches no session and returns
+    plain dicts, one per page in page order, which the caller turns into
+    ``Sheet`` rows on the loop.
+
+    A thumbnail that fails to render is logged and left out; the page still
+    gets its row. Any other failure propagates, and the caller maps it to 422.
+    """
+    import pdfplumber
+
+    pages: list[dict[str, Any]] = []
+    with pdfplumber.open(str(pdf_path)) as pdf:
+        for page_idx, page in enumerate(pdf.pages):
+            page_number = page_idx + 1
+
+            # Extract text for sheet info detection
+            page_text = page.extract_text() or ""
+
+            # Detect sheet info from text
+            info = detect_sheet_info(page_text)
+            sheet_number = info["sheet_number"]
+
+            # Generate thumbnail
+            thumbnail_path_str: str | None = None
+            try:
+                thumb_path = thumb_dir / f"{file_uuid}_page_{page_number}.png"
+                with _PDFIUM_RENDER_LOCK:
+                    page_image = page.to_image(resolution=72)
+                    page_image.save(str(thumb_path), format="PNG")
+                thumbnail_path_str = str(thumb_path)
+            except Exception:
+                logger.warning(
+                    "Failed to generate thumbnail for page %d of %s",
+                    page_number,
+                    safe_name,
+                )
+
+            pages.append(
+                {
+                    "page_number": page_number,
+                    "sheet_number": sheet_number,
+                    "sheet_title": info["sheet_title"],
+                    "discipline": detect_discipline_from_sheet_number(sheet_number),
+                    "revision": info["revision"],
+                    "scale": info["scale"],
+                    "thumbnail_path": thumbnail_path_str,
+                }
+            )
+    return pages
+
+
 class SheetService:
     """Business logic for drawing sheet operations."""
 
@@ -2274,7 +2341,9 @@ class SheetService:
             they superseded.
         """
         try:
-            import pdfplumber
+            # Probed here, before the upload is staged, so a damaged install
+            # answers with the repair hint; the page loop imports it again.
+            import pdfplumber  # noqa: F401
         except ImportError:
             # pdfplumber is a base dependency and is in requirements-desktop.lock,
             # so a bundle that cannot import it is damaged rather than lean: the
@@ -2295,7 +2364,7 @@ class SheetService:
         # lands fully in RAM, then read the now-bounded bytes back for the split.
         try:
             async with stream_upload_to_temp(file, max_bytes=MAX_FILE_SIZE, suffix=".pdf") as staged:
-                content = staged.path.read_bytes()
+                content = await asyncio.to_thread(staged.path.read_bytes)
         except ValueError as exc:
             raise HTTPException(
                 status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
@@ -2307,7 +2376,7 @@ class SheetService:
         upload_dir = UPLOAD_BASE / str(project_id)
         upload_dir.mkdir(parents=True, exist_ok=True)
         pdf_path = upload_dir / f"{file_uuid}_{safe_name}"
-        pdf_path.write_bytes(content)
+        await asyncio.to_thread(pdf_path.write_bytes, content)
 
         # Also create a Document record for the uploaded PDF
         doc_repo = DocumentRepository(self.session)
@@ -2327,57 +2396,33 @@ class SheetService:
         thumb_dir = SHEET_THUMB_BASE / str(project_id)
         thumb_dir.mkdir(parents=True, exist_ok=True)
 
-        sheets: list[Sheet] = []
-
         try:
-            with pdfplumber.open(str(pdf_path)) as pdf:
-                for page_idx, page in enumerate(pdf.pages):
-                    page_number = page_idx + 1
-
-                    # Extract text for sheet info detection
-                    page_text = page.extract_text() or ""
-
-                    # Detect sheet info from text
-                    info = detect_sheet_info(page_text)
-                    sheet_number = info["sheet_number"]
-                    discipline = detect_discipline_from_sheet_number(sheet_number)
-
-                    # Generate thumbnail
-                    thumbnail_path_str: str | None = None
-                    try:
-                        page_image = page.to_image(resolution=72)
-                        thumb_filename = f"{file_uuid}_page_{page_number}.png"
-                        thumb_path = thumb_dir / thumb_filename
-                        page_image.save(str(thumb_path), format="PNG")
-                        thumbnail_path_str = str(thumb_path)
-                    except Exception:
-                        logger.warning(
-                            "Failed to generate thumbnail for page %d of %s",
-                            page_number,
-                            safe_name,
-                        )
-
-                    sheet = Sheet(
-                        project_id=project_id,
-                        document_id=document_id,
-                        page_number=page_number,
-                        sheet_number=sheet_number,
-                        sheet_title=info["sheet_title"],
-                        discipline=discipline,
-                        revision=info["revision"],
-                        scale=info["scale"],
-                        is_current=True,
-                        thumbnail_path=thumbnail_path_str,
-                        created_by=user_id,
-                    )
-                    sheets.append(sheet)
-
+            # Text extraction and a thumbnail render per page, with no page
+            # limit: off the event loop. Only the rows below touch the session.
+            pages = await asyncio.to_thread(_read_sheet_pages, pdf_path, thumb_dir, file_uuid, safe_name)
         except Exception as exc:
             logger.exception("Failed to process PDF: %s", safe_name)
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Failed to process PDF file: {exc}",
             )
+
+        sheets: list[Sheet] = [
+            Sheet(
+                project_id=project_id,
+                document_id=document_id,
+                page_number=page["page_number"],
+                sheet_number=page["sheet_number"],
+                sheet_title=page["sheet_title"],
+                discipline=page["discipline"],
+                revision=page["revision"],
+                scale=page["scale"],
+                is_current=True,
+                thumbnail_path=page["thumbnail_path"],
+                created_by=user_id,
+            )
+            for page in pages
+        ]
 
         # A revised drawing set arrives as a new PDF, so without this every
         # re-upload doubled the register: two rows per sheet number, both
@@ -2475,7 +2520,9 @@ class SheetService:
             # one project cannot probe another project's document ids.
             if doc is None or doc.project_id != project_id:
                 raise ValueError("Index document not found")
-            expected = parse_index_tables(doc.file_path, index_page)
+            # Table extraction over every page of the index PDF is CPU work
+            # with no page limit; it runs in a worker thread.
+            expected = await asyncio.to_thread(parse_index_tables, doc.file_path, index_page)
         else:
             raise ValueError("No index source provided")
 

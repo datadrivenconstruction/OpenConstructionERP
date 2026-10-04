@@ -846,7 +846,12 @@ class ReportingService:
             id=project_id,
             project_id=project_id,
         )
-        return build_cobie_export(facility, all_elements)
+        # The workbook covers every element of every model on the project, and
+        # the builder saves it, reopens it to add the profile's extra sheets and
+        # saves it again. That is seconds of CPU on a multi-discipline project,
+        # so it runs in a worker thread. The elements are loaded above and the
+        # builder only reads their column values; no session crosses the thread.
+        return await asyncio.to_thread(build_cobie_export, facility, all_elements)
 
     async def dispatch_report_email(
         self,
