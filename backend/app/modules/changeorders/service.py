@@ -609,6 +609,15 @@ class ChangeOrderService:
         the current max ordinal from the DB and bumping from there. After
         ``_MAX_RETRIES`` collisions we surface the error rather than looping
         forever.
+
+        Each insert runs inside a SAVEPOINT, so a collision rolls back that one
+        insert and nothing else. Callers create orders in the middle of their
+        own work: the variation subscriber holds a row lock on the RFI or NCR
+        from its "already has an order?" check until it writes the back link,
+        and the VR -> VO conversion has already written the VO. A full
+        ``session.rollback()`` here released that lock and threw that work
+        away, so a concurrent "create variation" could slip in and the same
+        source ended up with two change orders.
         """
         from sqlalchemy.exc import IntegrityError
 
@@ -653,21 +662,21 @@ class ChangeOrderService:
                 metadata_=data.metadata,
             )
             try:
-                order = await self.repo.create(order)
-                await self._warn_standalone_overlap(order)
-                logger.info(
-                    "Change order created: %s for project %s (attempt %d)",
-                    code,
-                    data.project_id,
-                    attempt + 1,
-                )
-                return order
+                async with self.session.begin_nested():
+                    order = await self.repo.create(order)
             except IntegrityError as exc:
-                # Another transaction picked the same code. Roll back and
-                # retry with a bumped ordinal.
+                # Another transaction picked the same code. Only the savepoint
+                # is rolled back; retry with a bumped ordinal.
                 last_exc = exc
-                await self.session.rollback()
                 continue
+            await self._warn_standalone_overlap(order)
+            logger.info(
+                "Change order created: %s for project %s (attempt %d)",
+                code,
+                data.project_id,
+                attempt + 1,
+            )
+            return order
 
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,

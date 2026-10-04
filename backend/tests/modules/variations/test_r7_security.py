@@ -91,6 +91,18 @@ class _StubSession:
     async def rollback(self) -> None:
         self.rollbacks += 1
 
+    def begin_nested(self) -> Any:
+        """A savepoint that does nothing: ChangeOrderService inserts inside one."""
+
+        class _Savepoint:
+            async def __aenter__(self) -> None:
+                return None
+
+            async def __aexit__(self, *_exc: Any) -> bool:
+                return False
+
+        return _Savepoint()
+
     async def execute(self, _stmt: Any) -> Any:
         class _R:
             def scalar_one_or_none(self) -> Any:

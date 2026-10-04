@@ -76,12 +76,32 @@ def test_change_order_update_bare_payload_does_not_error() -> None:
 # ── Stubs ───────────────────────────────────────────────────────────────────
 
 
+class _StubSavepoint:
+    """``session.begin_nested()``: counts the savepoints an exception unwinds."""
+
+    def __init__(self, session: _StubSession) -> None:
+        self._session = session
+
+    async def __aenter__(self) -> _StubSavepoint:
+        return self
+
+    async def __aexit__(self, exc_type: Any, exc: Any, tb: Any) -> bool:
+        if exc_type is not None:
+            self._session.savepoints_rolled_back += 1
+        return False
+
+
 class _StubSession:
     """Minimal ``AsyncSession`` replacement for service unit tests."""
 
     def __init__(self) -> None:
         self.projects: dict[uuid.UUID, SimpleNamespace] = {}
         self.flushed = False
+        self.rollbacks = 0
+        self.savepoints_rolled_back = 0
+
+    def begin_nested(self) -> _StubSavepoint:
+        return _StubSavepoint(self)
 
     async def refresh(self, obj: Any) -> None:
         pass
@@ -90,7 +110,7 @@ class _StubSession:
         self.flushed = True
 
     async def rollback(self) -> None:
-        pass
+        self.rollbacks += 1
 
     async def execute(self, stmt: Any) -> Any:
         """Answer the statement shapes :meth:`approve_order` issues.
@@ -214,13 +234,17 @@ def _make_order(
 @pytest.mark.asyncio
 async def test_create_order_retries_on_integrity_error() -> None:
     """First two inserts collide; third must succeed with bumped ordinal."""
-    service, _, repo = _make_service()
+    service, session, repo = _make_service()
     repo.integrity_strikes = 2  # first two attempts raise IntegrityError
 
     data = ChangeOrderCreate(project_id=uuid.uuid4(), title="Contingency")
     order = await service.create_order(data)
 
     assert order.code == "CO-003"  # count=0, attempts 0,1,2 → ordinal 3
+    # Each collision unwinds its own savepoint; the caller's transaction, and
+    # any row lock it holds, is never rolled back from in here.
+    assert session.savepoints_rolled_back == 2
+    assert session.rollbacks == 0
 
 
 # ── task #217: no silent EUR default on create ──────────────────────────────

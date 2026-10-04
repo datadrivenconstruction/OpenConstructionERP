@@ -462,6 +462,63 @@ async def test_the_ncr_action_racing_the_subscriber_still_yields_one_order(
         assert len(await _orders(factory, project_id)) == 1, f"manual_first={manual_first}"
 
 
+async def test_a_code_collision_keeps_the_source_locked_until_the_link_is_written(
+    factory: async_sessionmaker[AsyncSession],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The subscriber's CO-NNN code collides with another order mid-draft.
+
+    ``create_order`` retries a collided code. It used to do that with a full
+    ``session.rollback()``, which released the subscriber's lock on the NCR row
+    after the "already has an order?" check had passed. A person pressing
+    "create variation" in that gap minted a second order for the same cost.
+    The probe below stands in for that person: it tries to take the row lock
+    at the moment of the retry and must find it still held.
+    """
+    from sqlalchemy.exc import DBAPIError
+
+    from app.modules.changeorders.repository import ChangeOrderRepository
+
+    project_id, _ = await _project(factory)
+    ncr_id = await _ncr(factory, project_id)
+    async with factory() as s:
+        other = ChangeOrder(project_id=project_id, code="CO-001", title="Unrelated", metadata_={})
+        s.add(other)
+        await s.commit()
+        other_id = other.id
+
+    real_count = ChangeOrderRepository.count_for_project
+    probes: list[str] = []
+
+    async def stale_then_real(self: ChangeOrderRepository, pid: uuid.UUID) -> int:
+        if not probes:
+            probes.append("stale count")
+            return 0  # mints CO-001, which the unrelated order already holds
+        async with factory() as probe:
+            try:
+                await probe.execute(select(NCR.id).where(NCR.id == ncr_id).with_for_update(nowait=True))
+                probes.append("source row free")
+            except DBAPIError:
+                probes.append("source row locked")
+            await probe.rollback()
+        return await real_count(self, pid)
+
+    monkeypatch.setattr(ChangeOrderRepository, "count_for_project", stale_then_real)
+
+    await _on_variation_flagged(_flag("ncr", ncr_id, project_id))
+
+    assert probes == ["stale count", "source row locked"], "the retry released the lock on the NCR"
+    orders = {o.id: o for o in await _orders(factory, project_id)}
+    assert len(orders) == 2, "the draft is missing, or the collision left a stray order"
+    assert orders[other_id].code == "CO-001"
+    assert orders[other_id].metadata_ == {}, "the unrelated order was touched"
+    (draft,) = [o for o in orders.values() if o.id != other_id]
+    assert draft.metadata_["ncr_id"] == str(ncr_id)
+    assert draft.cost_impact == Decimal("12000")
+    async with factory() as s:
+        assert (await s.get(NCR, ncr_id)).change_order_id == str(draft.id)
+
+
 # ── The whole chain ─────────────────────────────────────────────────────────
 
 
