@@ -428,7 +428,8 @@ def _party_from_details(display_name: str, details: dict[str, Any]) -> InvoicePa
                 return value.strip()
         return ""
 
-    address = details.get("address") if isinstance(details.get("address"), dict) else {}
+    raw_address = details.get("address")
+    address: dict[str, Any] = raw_address if isinstance(raw_address, dict) else {}
     merged = {**address, **{k: v for k, v in details.items() if k != "address"}}
     details = merged
     return InvoiceParty(

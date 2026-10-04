@@ -208,6 +208,58 @@ def test_a_line_billed_by_value_is_a_share_of_a_lump_sum() -> None:
     assert (setup.bill_qty, setup.unit_price, setup.amount) == (D("0.25"), D("4000"), D("1000.00"))
 
 
+def test_a_line_and_a_position_without_a_price_keep_money_decimal_and_omit_the_rate() -> None:
+    """No rate on the schedule line nor on the position: the price is not stated, not zero.
+
+    The invoice writes no ``UP`` and still bills the claimed value, and the
+    check expects nothing for a position without a rate, so the whole amount
+    shows as the difference instead of a made-up price mismatch.
+    """
+    sov = {
+        "L9": SimpleNamespace(
+            id="L9",
+            code="9",
+            description="Daywork",
+            unit="h",
+            unit_rate=None,
+            total_value=None,
+            order_index=1,
+            metadata_={"boq_position_id": "P9"},
+        )
+    }
+    position = SimpleNamespace(
+        id="P9",
+        boq_id="B1",
+        ordinal="01.0090",
+        description="Stundenlohn",
+        unit="h",
+        quantity="20",
+        unit_rate=None,
+        metadata_={},
+    )
+    lines, _ = invoice_lines_from_claim(
+        [_claim_line("L9", "8", "520.00")], sov, {"P9": position}, position_for_line=_position_for
+    )
+    assert len(lines) == 1
+    line = lines[0]
+    assert line.unit_price is None
+    assert isinstance(line.amount, Decimal) and line.amount == D("520.00")
+    assert isinstance(line.bill_qty, Decimal) and line.bill_qty == D("8")
+
+    exported = build_x89_xml(_invoice(lines))
+    item = _items(exported.xml)[0]
+    assert item.find(f"{NS}UP") is None
+    assert item.findtext(f"{NS}IT") == "520.00"
+    assert isinstance(exported.figures.net, Decimal) and exported.figures.net == D("520.00")
+
+    report = check_x89(parse_x89(exported.xml.encode("utf-8")), [position], is_section=_is_section)
+    checked = report["lines"][0]
+    assert checked["expected_amount"] == "0.00"
+    assert checked["difference"] == "520.00"
+    assert "unit_price_differs" not in checked["issues"]
+    assert report["total_difference"] == "520.00"
+
+
 def test_a_link_to_a_position_outside_the_project_does_not_lend_its_oz() -> None:
     lines, boqs = invoice_lines_from_claim(CLAIM_1, SOV, {}, position_for_line=_position_for)
     assert [ln.oz for ln in lines] == ["1", "2"]

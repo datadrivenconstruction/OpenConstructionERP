@@ -244,6 +244,8 @@ def invoice_lines_from_claim(
         oz = str((pos.ordinal if pos is not None else sov.code) or "").strip()
         description = str((pos.description if pos is not None else sov.description) or sov.description or "")
         unit_token = str((pos.unit if pos is not None else sov.unit) or sov.unit or "")
+        bill_qty: Decimal
+        unit_price: Decimal | None
         if qty != 0:
             bill_qty = qty
             unit_price = dec(sov.unit_rate)

@@ -249,7 +249,7 @@ def measured_quantity_of(position: Any) -> Decimal | None:
     stored = meta.get("measurement")
     if not isinstance(stored, dict):
         return None
-    lines = [ln for ln in (stored.get("lines") or []) if isinstance(ln, dict)]
+    lines: list[dict[str, Any] | Any] = [ln for ln in (stored.get("lines") or []) if isinstance(ln, dict)]
     if not lines:
         return None
     try:
