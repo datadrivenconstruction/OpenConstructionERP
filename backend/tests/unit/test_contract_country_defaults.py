@@ -321,6 +321,69 @@ def test_the_schema_reads_an_old_event_name_and_refuses_a_stranding_split() -> N
         ContractUpdate(valuation_interval="quarterly")
 
 
+_PROJECT = "00000000-0000-0000-0000-000000000001"
+
+
+@pytest.mark.parametrize(
+    "block",
+    [
+        # A step of the wrong shape used to reach split[0]["event"] in the create and give a 500.
+        {"retention_release_split": ["x"]},
+        # Half at each event leaves a quarter of the retention with no event that releases it.
+        {
+            "retention_release_split": [
+                {"event": "substantial_completion", "release_percent_of_held": 50},
+                {"event": "defects_period_end", "release_percent_of_held": 50},
+            ]
+        },
+        {"retention_cap_percent": "150"},
+        {"payment_period_days": -1},
+        {"valuation_interval": "quarterly"},
+        "not an object",
+    ],
+)
+def test_payment_terms_written_into_terms_pass_the_same_checks_as_the_fields(block) -> None:
+    with pytest.raises(ValidationError):
+        ContractCreate(code="C-1", contract_type="lump_sum", project_id=_PROJECT, terms={"payment_terms": block})
+    with pytest.raises(ValidationError):
+        ContractUpdate(terms={"payment_terms": block})
+
+
+def test_payment_terms_written_into_terms_are_stored_in_the_fields_own_shape() -> None:
+    sent = ContractCreate(
+        code="C-1",
+        contract_type="lump_sum",
+        project_id=_PROJECT,
+        terms={
+            "ld_per_day": "100",
+            "payment_terms": {
+                "retention_cap_percent": "5.0",
+                "retention_release_split": [
+                    {"event": "practical_completion", "release_percent_of_held": 50},
+                    {"event": "defects_liability_end", "release_percent_of_held": 100},
+                ],
+                "payment_period_days": 30,
+                "note_for_file": "kept as written",
+            },
+        },
+    )
+    assert sent.terms == {
+        "ld_per_day": "100",
+        "payment_terms": {
+            "retention_cap_percent": "5",
+            "retention_release_split": [
+                {"event": "substantial_completion", "release_percent_of_held": "50"},
+                {"event": "defects_period_end", "release_percent_of_held": "100"},
+            ],
+            "payment_period_days": 30,
+            "note_for_file": "kept as written",
+        },
+    }
+    # Terms with no payment-terms block, or a null one, are not touched.
+    assert ContractUpdate(terms={"gmp_cap": "1"}).terms == {"gmp_cap": "1"}
+    assert ContractUpdate(terms={"payment_terms": None}).terms == {"payment_terms": None}
+
+
 def test_the_contract_split_keeps_the_packs_documents_and_its_other_events() -> None:
     pack_rule = {
         "events": [

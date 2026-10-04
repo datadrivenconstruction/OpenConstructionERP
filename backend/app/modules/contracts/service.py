@@ -1323,6 +1323,13 @@ class ContractsService:
         """
         country = await self.project_country(data.project_id)
         explicit = _explicit_payment_terms(data)
+        if getattr(data, "retention_release_event", None) is not None:
+            # The author named the release event and no split. A defaulted
+            # split would take precedence over that event in the release
+            # rule, so what the author stated would lose to a default. It is
+            # left unwritten, and the event decides as it did before country
+            # defaults existed.
+            explicit.setdefault("retention_release_split", None)
         values, stamp = apply_contract_defaults(explicit, resolve_contract_defaults(country), country_code=country)
         fallback: list[str] = []
 
@@ -1478,6 +1485,20 @@ class ContractsService:
         beside a figure somebody typed over.
         """
         before = contract_payment_terms(contract)
+        new_event = fields.get("retention_release_event")
+        if (
+            new_event is not None
+            and new_event != contract.retention_release_event
+            and "retention_release_split" not in payment_sent
+            and before.get("retention_release_split") is not None
+            and "retention_release_split"
+            in ((contract.metadata_ or {}).get(DEFAULTS_STAMP_KEY) or {}).get("applied", {})
+        ):
+            # The release event was changed and the split governing the
+            # release is still the one the country filled in. Left in place,
+            # that default would keep deciding over the event just set, so it
+            # goes with its stamp. A split somebody typed stays.
+            payment_sent = {**payment_sent, "retention_release_split": None}
         replaced = fields.get("terms")
         if before and isinstance(replaced, dict) and PAYMENT_TERMS_KEY not in replaced:
             fields["terms"] = {**replaced, PAYMENT_TERMS_KEY: dict(before)}

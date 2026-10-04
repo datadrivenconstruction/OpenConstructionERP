@@ -9,9 +9,14 @@ from decimal import Decimal
 from typing import Annotated, Any
 from uuid import UUID
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, ValidationError
 
-from app.modules.contracts.country_defaults import VALUATION_INTERVALS, validate_release_split
+from app.modules.contracts.country_defaults import (
+    PAYMENT_TERM_FIELDS,
+    PAYMENT_TERMS_KEY,
+    VALUATION_INTERVALS,
+    validate_release_split,
+)
 from app.modules.contracts.models import CLAUSE_RISK_LEVELS
 from app.modules.contracts.retention import (
     CANONICAL_RELEASE_EVENTS,
@@ -73,6 +78,40 @@ class ContractPaymentTermFields(BaseModel):
     certificate_name: str | None = Field(default=None, max_length=200)
 
 
+def _readable_terms(value: dict[str, Any] | None) -> dict[str, Any] | None:
+    """Hold a ``payment_terms`` block written straight into ``terms`` to the typed fields' rules.
+
+    The service reads that block as figures the author sent, so they win over
+    the country's defaults and drive the release rule. They have to pass the
+    same checks as the typed fields, or a split that strands retention is
+    stored and followed, and a step of the wrong shape crashes the create with
+    a 500. Refused here they come back as a 422 naming the field. Keys the
+    block carries beside the payment terms are kept as they are.
+    """
+    if value is None or PAYMENT_TERMS_KEY not in value or value[PAYMENT_TERMS_KEY] is None:
+        return value
+    block = value[PAYMENT_TERMS_KEY]
+    if not isinstance(block, dict):
+        raise ValueError(f"terms.{PAYMENT_TERMS_KEY} must be an object of payment terms")
+    sent = {field: block[field] for field in PAYMENT_TERM_FIELDS if field in block}
+    try:
+        typed = ContractPaymentTermFields.model_validate(sent)
+    except ValidationError as exc:
+        problems = "; ".join(
+            f"{'.'.join(str(part) for part in error['loc'])}: {error['msg']}" for error in exc.errors()
+        )
+        raise ValueError(f"terms.{PAYMENT_TERMS_KEY} is not valid: {problems}") from None
+    cleaned = dict(block)
+    for field in sent:
+        figure = getattr(typed, field)
+        cleaned[field] = format(figure.normalize(), "f") if isinstance(figure, Decimal) else figure
+    return {**value, PAYMENT_TERMS_KEY: cleaned}
+
+
+#: Contract terms, with any payment-terms block inside them checked like the typed fields.
+ContractTerms = Annotated[dict[str, Any], AfterValidator(_readable_terms)]
+
+
 class ContractCreate(ContractPaymentTermFields):
     """Create a new contract.
 
@@ -102,7 +141,7 @@ class ContractCreate(ContractPaymentTermFields):
     )
     status: str = Field(default="draft", pattern=rf"^({CONTRACT_STATUSES})$")
     signed_at: str | None = None
-    terms: dict[str, Any] = Field(default_factory=dict)
+    terms: ContractTerms = Field(default_factory=dict)
     metadata: dict[str, Any] = Field(default_factory=dict)
     # The clause template this contract is drawn from, if any. Only the code is
     # accepted; the version is resolved server-side at create time and stored
@@ -136,7 +175,7 @@ class ContractUpdate(ContractPaymentTermFields):
     )
     status: str | None = Field(default=None, pattern=rf"^({CONTRACT_STATUSES})$")
     signed_at: str | None = None
-    terms: dict[str, Any] | None = None
+    terms: ContractTerms | None = None
     metadata: dict[str, Any] | None = None
 
 

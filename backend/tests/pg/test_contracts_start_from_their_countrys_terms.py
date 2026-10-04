@@ -203,6 +203,71 @@ async def test_a_contract_split_decides_what_completion_releases(pg_session) -> 
     ]
 
 
+async def test_a_release_event_the_author_names_is_not_overruled_by_a_defaulted_split(pg_session) -> None:
+    """GB defaults release half at practical completion; this author says final completion.
+
+    The defaulted JCT split used to be written beside the event, and the
+    release rule reads the contract's split before anything else, so the
+    engine paid back half at substantial completion against what the
+    contract said.
+    """
+    svc = ContractsService(pg_session)
+    contract = await _create(svc, await _project(pg_session, "GB"), retention_release_event="final_completion")
+    assert contract.retention_release_event == "final_completion"
+    assert "retention_release_split" not in contract.terms["payment_terms"]
+    stamp = contract.metadata_["country_defaults"]
+    assert "retention_release_split" not in stamp["applied"]
+    assert "retention_release_event" not in stamp["applied"]
+    # The rest of the country's terms still apply.
+    assert stamp["applied"]["payment_period_days"] == 14
+    _rule, source = await svc.retention_release_rule(contract)
+    assert source != RELEASE_RULE_FROM_CONTRACT
+
+
+async def test_a_split_the_author_sends_with_the_event_is_kept(pg_session) -> None:
+    split = [
+        {"event": "substantial_completion", "release_percent_of_held": "40"},
+        {"event": "final_completion", "release_percent_of_held": "100"},
+    ]
+    svc = ContractsService(pg_session)
+    contract = await _create(
+        svc,
+        await _project(pg_session, "GB"),
+        retention_release_event="substantial_completion",
+        retention_release_split=split,
+    )
+    assert contract.terms["payment_terms"]["retention_release_split"] == split
+    _rule, source = await svc.retention_release_rule(contract)
+    assert source == RELEASE_RULE_FROM_CONTRACT
+
+
+async def test_changing_the_release_event_on_a_draft_drops_the_defaulted_split(pg_session) -> None:
+    svc = ContractsService(pg_session)
+    contract = await _create(svc, await _project(pg_session, "GB"))
+    assert contract.terms["payment_terms"]["retention_release_split"]
+
+    contract = await svc.update_contract(contract.id, ContractUpdate(retention_release_event="final_completion"))
+    assert contract.retention_release_event == "final_completion"
+    assert "retention_release_split" not in contract.terms["payment_terms"]
+    applied = contract.metadata_["country_defaults"]["applied"]
+    assert "retention_release_split" not in applied
+    assert "retention_release_event" not in applied
+    assert applied["certificate_name"] == "Interim Certificate"
+    _rule, source = await svc.retention_release_rule(contract)
+    assert source != RELEASE_RULE_FROM_CONTRACT
+
+
+async def test_changing_the_release_event_keeps_a_split_somebody_typed(pg_session) -> None:
+    split = [
+        {"event": "substantial_completion", "release_percent_of_held": "40"},
+        {"event": "defects_period_end", "release_percent_of_held": "100"},
+    ]
+    svc = ContractsService(pg_session)
+    contract = await _create(svc, await _project(pg_session, "GB"), retention_release_split=split)
+    contract = await svc.update_contract(contract.id, ContractUpdate(retention_release_event="final_completion"))
+    assert contract.terms["payment_terms"]["retention_release_split"] == split
+
+
 async def test_the_country_defaults_view_names_each_figures_source(pg_session) -> None:
     svc = ContractsService(pg_session)
     project = await _project(pg_session, "AE")
