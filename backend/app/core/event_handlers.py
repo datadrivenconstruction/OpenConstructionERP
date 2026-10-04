@@ -759,16 +759,41 @@ _EVM_PROGRESS_SCHEDULE_TYPES = ("master",)
 # that first waits on it and an embedded restart runs on a fresh one.
 _evm_project_locks: dict[tuple[int, str], "asyncio.Lock"] = {}
 
+# How many progress saves per project have queued for the lock, keyed like the
+# locks. A handler that gets the lock after a later save has queued behind it
+# skips its run: the publish follows the commit, so the later handler reads
+# every row this one would have read, and more. Fifty saves from a diary sync
+# recompute the project a couple of times instead of fifty.
+_evm_project_generations: dict[tuple[int, str], int] = {}
+
+
+def _evm_key(project_id: str) -> tuple[int, str]:
+    import asyncio
+
+    return (id(asyncio.get_running_loop()), project_id)
+
 
 def _evm_project_lock(project_id: str) -> "asyncio.Lock":
     import asyncio
 
-    key = (id(asyncio.get_running_loop()), project_id)
+    key = _evm_key(project_id)
     lock = _evm_project_locks.get(key)
     if lock is None:
         lock = asyncio.Lock()
         _evm_project_locks[key] = lock
     return lock
+
+
+def _evm_queue_generation(project_id: str) -> int:
+    """Register one more save for *project_id* and return its place in line."""
+    key = _evm_key(project_id)
+    generation = _evm_project_generations.get(key, 0) + 1
+    _evm_project_generations[key] = generation
+    return generation
+
+
+def _evm_latest_generation(project_id: str) -> int:
+    return _evm_project_generations.get(_evm_key(project_id), 0)
 
 
 def _coerce_uuid(value: object) -> "uuid.UUID | None":
@@ -812,7 +837,6 @@ def schedule_progress_fractions(
     activities: "list[Any]",
     *,
     as_of: "date",
-    override: "dict[str, Decimal] | None" = None,
 ) -> "tuple[Decimal, Decimal] | None":
     """Earned and planned completion of a set of activities, as fractions of 1.
 
@@ -832,16 +856,15 @@ def schedule_progress_fractions(
       finish yesterday is planned complete and one that starts tomorrow is
       planned at zero.
 
-    ``override`` maps an activity id to the percentage the triggering event
-    reported. The publisher hands its event over before its own transaction
-    commits, so the row read here can still hold the previous value; the event
-    is the fresher witness for that one activity.
+    Progress is the stored ``progress_pct`` of each row, never a figure carried
+    by an event: both publishers publish after their commit, so the stored row
+    is at least as fresh as any event about it, and an event handled late would
+    otherwise overwrite a newer save with an older one.
 
     Returns ``(earned, planned)`` or ``None`` when nothing carries work.
     """
     from decimal import Decimal
 
-    override = override or {}
     parent_ids = {str(a.parent_id) for a in activities if getattr(a, "parent_id", None)}
     leaves = [
         a
@@ -865,9 +888,7 @@ def schedule_progress_fractions(
         span_days = (end - start).days + 1 if start is not None and end is not None else 1
         weight = Decimal(str(activity.cost_planned)) if by_cost else Decimal(span_days)
 
-        progress = override.get(str(activity.id))
-        if progress is None:
-            progress = _pct(activity.progress_pct)
+        progress = _pct(activity.progress_pct)
 
         if start is None or end is None or as_of < start:
             planned_fraction = Decimal("0")
@@ -937,9 +958,15 @@ async def _handle_schedule_progress(event: Event) -> None:
     than twenty. A row a person recorded through the finance API for the same
     day is theirs: it is left alone and no automatic row is added beside it.
 
+    The figures come from the committed rows only. ``progress_pct`` in the
+    payload is not read: both publishers publish after their commit, and each
+    handler awaits its own project lookup before it queues for the lock, so
+    handlers reach the lock in no particular order. Reading the stored rows
+    makes that order irrelevant, because whichever runs last sees every save.
+
     Expected event.data:
         activity_id: str (UUID)
-        progress_pct: float (0-100, the activity's new progress)
+        progress_pct: float (0-100; informational, see above)
     """
     try:
         data = event.data or {}
@@ -972,12 +999,15 @@ async def _handle_schedule_progress(event: Event) -> None:
             )
             return
 
-        override: dict[str, Decimal] = {}
-        if data.get("progress_pct") is not None:
-            override[str(activity_id)] = _pct(data.get("progress_pct"))
-
+        generation = _evm_queue_generation(str(project_id))
         async with _evm_project_lock(str(project_id)):
-            await _write_progress_snapshot(project_id, override=override, trigger_activity_id=str(activity_id))
+            if _evm_latest_generation(str(project_id)) != generation:
+                logger.debug(
+                    "schedule.activity.progress_updated: a later save for project %s is queued, it recomputes",
+                    project_id,
+                )
+                return
+            await _write_progress_snapshot(project_id, trigger_activity_id=str(activity_id))
     except Exception:
         logger.exception("Error handling schedule.activity.progress_updated")
 
@@ -985,10 +1015,15 @@ async def _handle_schedule_progress(event: Event) -> None:
 async def _write_progress_snapshot(
     project_id: "uuid.UUID",
     *,
-    override: "dict[str, Decimal]",
     trigger_activity_id: str,
 ) -> None:
-    """Recompute and upsert today's automatic EVM snapshot for *project_id*."""
+    """Recompute and upsert today's automatic EVM snapshot for *project_id*.
+
+    Reads the activity columns the calculation uses and nothing else. Loading
+    ``Activity`` entities would also pull every activity's children, parent
+    and work orders through their ``selectin`` relationships, on every save,
+    for schedules of thousands of activities.
+    """
     from datetime import date
     from decimal import Decimal
 
@@ -1008,18 +1043,24 @@ async def _write_progress_snapshot(
         activities = list(
             (
                 await session.execute(
-                    select(Activity)
+                    select(
+                        Activity.id,
+                        Activity.parent_id,
+                        Activity.activity_type,
+                        Activity.cost_planned,
+                        Activity.start_date,
+                        Activity.end_date,
+                        Activity.progress_pct,
+                    )
                     .join(Schedule, Activity.schedule_id == Schedule.id)
                     .where(
                         Schedule.project_id == project_id,
                         Schedule.schedule_type.in_(_EVM_PROGRESS_SCHEDULE_TYPES),
                     )
                 )
-            )
-            .scalars()
-            .all()
+            ).all()
         )
-        fractions = schedule_progress_fractions(activities, as_of=today, override=override)
+        fractions = schedule_progress_fractions(activities, as_of=today)
         if fractions is None:
             logger.debug("schedule.activity.progress_updated: no work-carrying activities in %s", project_id)
             return

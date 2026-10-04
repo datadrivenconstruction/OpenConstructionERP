@@ -32,7 +32,7 @@ from typing import Any
 
 import pytest
 import pytest_asyncio
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.core import event_handlers
@@ -128,16 +128,6 @@ def test_planned_completion_is_linear_inside_each_window() -> None:
     assert planned_before == Decimal("0")
     assert planned_after == Decimal("1")
     assert planned_mid == Decimal("0.5")
-
-
-def test_the_event_value_beats_a_stale_row() -> None:
-    """The publisher hands its event over before committing; the event is fresher."""
-    a = _act(progress="10", cost="100")
-    b = _act(progress="10", cost="100")
-
-    earned, _ = schedule_progress_fractions([a, b], as_of=TODAY, override={str(a.id): Decimal("90")})
-
-    assert earned == Decimal("0.5")
 
 
 def test_garbage_and_out_of_range_progress_is_clamped() -> None:
@@ -264,8 +254,24 @@ async def _snapshots(factory: async_sessionmaker[AsyncSession], project_id: uuid
         return list(rows.scalars().all())
 
 
-async def _progress(activity_id: uuid.UUID, pct: float) -> None:
+async def _deliver(activity_id: uuid.UUID, pct: float) -> None:
+    """Hand the handler the event the schedule publishes, and nothing else."""
     await _handle_schedule_progress(Event(name=_EVENT, data={"activity_id": str(activity_id), "progress_pct": pct}))
+
+
+async def _progress(activity_id: uuid.UUID, pct: float) -> None:
+    """A progress save as the schedule makes it: commit the row, then publish."""
+    import app.database as database_module
+
+    async with database_module.async_session_factory() as s:
+        await s.execute(update(Activity).where(Activity.id == activity_id).values(progress_pct=str(pct)))
+        await s.commit()
+    await _deliver(activity_id, pct)
+
+
+async def _stored_progress(factory: async_sessionmaker[AsyncSession], *ids: uuid.UUID) -> list[Decimal]:
+    async with factory() as s:
+        return [Decimal((await s.get(Activity, i)).progress_pct) for i in ids]
 
 
 async def test_a_progress_save_writes_one_snapshot_with_weighted_earned_value(
@@ -310,12 +316,104 @@ async def test_a_second_save_on_the_same_day_replaces_the_row_rather_than_adding
 
 
 async def test_concurrent_saves_still_leave_one_row(factory: async_sessionmaker[AsyncSession]) -> None:
-    """A person ticking through activities fires the handlers together."""
+    """A person ticking through activities fires the handlers together.
+
+    The handlers reach the lock in whatever order their lookups return, so the
+    surviving row must match what is stored at the end, not whichever event
+    happened to be handled last.
+    """
     project_id, (a, b) = await _project(factory)
 
     await asyncio.gather(*(_progress(a if i % 2 else b, 10 * i) for i in range(6)))
 
+    (snap,) = await _snapshots(factory, project_id)
+    pa, pb = await _stored_progress(factory, a, b)
+    assert Decimal(snap.ev) == (Decimal("60000") * pa + Decimal("40000") * pb) / Decimal("100")
+
+
+async def test_a_late_event_does_not_overwrite_a_newer_save(factory: async_sessionmaker[AsyncSession]) -> None:
+    """5% typed, corrected to 50% a second later, and the 5% handler runs last.
+
+    Both saves are committed by then, so the stored 50 is the truth. Reading
+    the event's figure instead would leave a day's S-curve point and forecast
+    computed on 5%.
+    """
+    project_id, (a, _b) = await _project(factory)
+    await _progress(a, 50)
+
+    await _deliver(a, 5)
+
+    (snap,) = await _snapshots(factory, project_id)
+    # 60000 at 50% + 40000 at 0%. The stale event would give 3000.
+    assert Decimal(snap.ev) == Decimal("30000")
+    assert snap.metadata_["earned_pct"] == "30.00"
+
+
+async def test_saves_queued_behind_one_run_are_recomputed_once(
+    factory: async_sessionmaker[AsyncSession],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A diary sync of many saves must not recompute the project once per save.
+
+    Each run reads every stored row, so when several saves are queued for the
+    lock only the last one needs to run.
+    """
+    project_id, (a, b) = await _project(factory)
+    runs: list[str] = []
+    real_write = event_handlers._write_progress_snapshot
+
+    async def counting_write(project: uuid.UUID, *, trigger_activity_id: str) -> None:
+        runs.append(trigger_activity_id)
+        await real_write(project, trigger_activity_id=trigger_activity_id)
+
+    monkeypatch.setattr(event_handlers, "_write_progress_snapshot", counting_write)
+
+    lock = event_handlers._evm_project_lock(str(project_id))
+    start = event_handlers._evm_latest_generation(str(project_id))
+    await lock.acquire()
+    try:
+        tasks = [asyncio.create_task(_progress(a if i % 2 else b, 10 + i)) for i in range(5)]
+        for _ in range(500):
+            if event_handlers._evm_latest_generation(str(project_id)) - start == 5:
+                break
+            await asyncio.sleep(0.01)
+        assert event_handlers._evm_latest_generation(str(project_id)) - start == 5, "not every save queued"
+    finally:
+        lock.release()
+    await asyncio.gather(*tasks)
+
+    assert len(runs) == 1, f"{len(runs)} recomputations for five queued saves"
+    (snap,) = await _snapshots(factory, project_id)
+    pa, pb = await _stored_progress(factory, a, b)
+    assert Decimal(snap.ev) == (Decimal("60000") * pa + Decimal("40000") * pb) / Decimal("100")
+
+
+async def test_the_recompute_reads_columns_not_activity_graphs(factory: async_sessionmaker[AsyncSession]) -> None:
+    """Activity entities drag their children, parent and work orders along.
+
+    Each relationship is ``selectin``, so loading entities issues one more
+    query per relationship on every save. Only the columns the arithmetic
+    uses are read.
+    """
+    from sqlalchemy import event as sa_event
+
+    project_id, (a, _b) = await _project(factory)
+    async with factory() as s:
+        engine = s.bind
+    statements: list[str] = []
+
+    def _record(_conn: Any, _cursor: Any, statement: str, *_args: Any) -> None:
+        statements.append(statement)
+
+    sa_event.listen(engine.sync_engine, "before_cursor_execute", _record)
+    try:
+        await _deliver(a, 50)
+    finally:
+        sa_event.remove(engine.sync_engine, "before_cursor_execute", _record)
+
     assert len(await _snapshots(factory, project_id)) == 1
+    assert not [q for q in statements if "oe_schedule_work_order" in q], "work orders were loaded"
+    assert not [q for q in statements if "parent_id IN" in q], "the activity hierarchy was walked"
 
 
 async def test_a_snapshot_a_person_recorded_today_is_left_alone(factory: async_sessionmaker[AsyncSession]) -> None:
