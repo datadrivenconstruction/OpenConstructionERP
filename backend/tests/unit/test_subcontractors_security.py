@@ -173,6 +173,9 @@ def _make_service() -> Any:
     svc.session = SimpleNamespace(
         refresh=AsyncMock(),
         execute=AsyncMock(return_value=SimpleNamespace(scalar_one_or_none=lambda: None)),
+        # A new agreement reads its project's country for the retention default;
+        # no project here, so it falls back to the platform figure.
+        get=AsyncMock(return_value=None),
         add=lambda _o: None,
         flush=AsyncMock(),
         rollback=AsyncMock(),
