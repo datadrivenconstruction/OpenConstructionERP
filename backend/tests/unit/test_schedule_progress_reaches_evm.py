@@ -51,9 +51,22 @@ from tests._pg import isolated_engine
 _EVENT = "schedule.activity.progress_updated"
 TODAY = date.today()
 
+#: A Monday well in the past. Planned value is counted in working days, so a
+#: test that asserts it pins its dates to known weekdays instead of today.
+MON = date(2026, 3, 2)
+assert MON.weekday() == 0
 
-def _d(offset: int) -> str:
+
+def _d(offset: int | str) -> str:
+    """An ISO date: ``offset`` days from today, or the ISO string as given."""
+    if isinstance(offset, str):
+        return offset
     return (TODAY + timedelta(days=offset)).isoformat()
+
+
+def _on(offset: int) -> str:
+    """The ISO date ``offset`` calendar days after :data:`MON`."""
+    return (MON + timedelta(days=offset)).isoformat()
 
 
 # ── Pure weighting ──────────────────────────────────────────────────────────
@@ -62,8 +75,8 @@ def _d(offset: int) -> str:
 def _act(
     *,
     progress: str = "0",
-    start: int = -10,
-    end: int = 9,
+    start: int | str = -10,
+    end: int | str = 9,
     cost: str | None = None,
     activity_type: str = "task",
     parent_id: Any = None,
@@ -116,18 +129,52 @@ def test_summaries_and_milestones_carry_no_weight() -> None:
     assert earned == Decimal("0.2")
 
 
-def test_planned_completion_is_linear_inside_each_window() -> None:
-    not_started = _act(start=1, end=10, cost="100")
-    finished_window = _act(start=-10, end=-1, cost="100")
-    halfway = _act(start=-4, end=5, cost="100")  # 10 days, today is day 5
+def test_planned_completion_is_linear_in_working_days_inside_each_window() -> None:
+    """Mon 2 Mar to Mon 16 Mar is ten working days; Mon 9 Mar is five of them."""
+    window = _act(start=_on(0), end=_on(14), cost="100")
 
-    _, planned_before = schedule_progress_fractions([not_started], as_of=TODAY)
-    _, planned_after = schedule_progress_fractions([finished_window], as_of=TODAY)
-    _, planned_mid = schedule_progress_fractions([halfway], as_of=TODAY)
+    def planned(as_of: date) -> Decimal:
+        return schedule_progress_fractions([window], as_of=as_of)[1]
 
-    assert planned_before == Decimal("0")
-    assert planned_after == Decimal("1")
-    assert planned_mid == Decimal("0.5")
+    assert planned(MON - timedelta(days=1)) == Decimal("0")
+    assert planned(MON) == Decimal("0"), "nothing has elapsed at the planned start"
+    assert planned(MON + timedelta(days=7)) == Decimal("0.5")
+    assert planned(MON + timedelta(days=14)) == Decimal("1")
+    assert planned(MON + timedelta(days=30)) == Decimal("1")
+
+
+def test_a_weekend_plans_no_work() -> None:
+    """On Saturday 7 Mar four of ten working days have elapsed, not five of fourteen days.
+
+    Counting calendar days planned every weekend as work, which inflated planned
+    value and understated the SPI.
+    """
+    window = _act(start=_on(0), end=_on(14), cost="100")
+    saturday, sunday = MON + timedelta(days=5), MON + timedelta(days=6)
+
+    assert schedule_progress_fractions([window], as_of=saturday)[1] == Decimal("0.4")
+    assert schedule_progress_fractions([window], as_of=sunday)[1] == Decimal("0.4")
+
+
+def test_each_activity_is_planned_on_its_own_calendar() -> None:
+    """A seven-day site works the weekend; a holiday stops a five-day one."""
+    from app.modules.schedule.progress_math import WorkCalendar
+
+    seven_day = WorkCalendar(work_weekdays=frozenset(range(7)))
+    with_holiday = WorkCalendar(holidays=frozenset({_on(3)}))  # Thursday 5 Mar
+    weekend_crew = _act(start=_on(0), end=_on(14), cost="100")
+    office = _act(start=_on(0), end=_on(14), cost="100")
+    calendars = {weekend_crew.id: seven_day, office.id: with_holiday}
+    saturday = MON + timedelta(days=5)
+
+    _, planned = schedule_progress_fractions(
+        [weekend_crew, office],
+        as_of=saturday,
+        calendar_for=lambda activity: calendars[activity.id],
+    )
+
+    # Seven-day: 5 of 14 days. Five-day with Thursday off: 3 of 9 working days.
+    assert planned == (Decimal(5) / Decimal(14) + Decimal(3) / Decimal(9)) / 2
 
 
 def test_garbage_and_out_of_range_progress_is_clamped() -> None:
@@ -191,6 +238,7 @@ async def _project(
     budgets: list[tuple[str, str, str]] | None = None,
     schedule_type: str = "master",
     activities: list[dict[str, Any]] | None = None,
+    data_date: str | None = None,
 ) -> tuple[uuid.UUID, list[uuid.UUID]]:
     """A project with budget lines ``(original, revised, actual)`` and a schedule."""
     async with factory() as s:
@@ -224,14 +272,14 @@ async def _project(
                     actual=Decimal(actual),
                 )
             )
-        schedule = Schedule(project_id=project.id, name="Master", schedule_type=schedule_type)
+        schedule = Schedule(project_id=project.id, name="Master", schedule_type=schedule_type, data_date=data_date)
         s.add(schedule)
         await s.flush()
         ids: list[uuid.UUID] = []
         for spec in activities or [
             {"progress": "50", "start": -9, "end": 10, "cost": "60000"},
             {"progress": "0", "start": -9, "end": 10, "cost": "40000"},
-        ]:
+        ]:  # today-relative: the tests using these assert nothing about PV
             activity = Activity(
                 schedule_id=schedule.id,
                 name=f"A{len(ids)}",
@@ -277,7 +325,14 @@ async def _stored_progress(factory: async_sessionmaker[AsyncSession], *ids: uuid
 async def test_a_progress_save_writes_one_snapshot_with_weighted_earned_value(
     factory: async_sessionmaker[AsyncSession],
 ) -> None:
-    project_id, (a, _b) = await _project(factory)
+    project_id, (a, _b) = await _project(
+        factory,
+        activities=[
+            {"progress": "0", "start": _on(0), "end": _on(14), "cost": "60000"},
+            {"progress": "0", "start": _on(0), "end": _on(14), "cost": "40000"},
+        ],
+        data_date=_on(7),
+    )
 
     await _progress(a, 50)
 
@@ -285,7 +340,8 @@ async def test_a_progress_save_writes_one_snapshot_with_weighted_earned_value(
     assert len(rows) == 1, "no snapshot reached EVM, or more than one"
     snap = rows[0]
     # 60000 at 50% + 40000 at 0% = 30000 earned of 100000. Planned: both run
-    # day -9 .. day 10 (20 days) and today is day 10 of 20, so PV = 50000.
+    # Mon 2 Mar .. Mon 16 Mar, ten working days, and the data date Mon 9 Mar
+    # is five of them, so PV = 50000.
     assert Decimal(snap.bac) == Decimal("100000")
     assert Decimal(snap.ev) == Decimal("30000")
     assert Decimal(snap.pv) == Decimal("50000")
@@ -297,8 +353,83 @@ async def test_a_progress_save_writes_one_snapshot_with_weighted_earned_value(
     # The forecast family comes from the canonical writer, not left at "0".
     assert Decimal(snap.eac) == Decimal("100000")
     assert Decimal(snap.etc) == Decimal("70000")
-    assert snap.snapshot_date == TODAY.isoformat()
+    # PV and EV are measured at the schedule's data date, and the point sits there.
+    assert snap.snapshot_date == _on(7)
     assert snap.metadata_["source"] == EVM_PROGRESS_SNAPSHOT_SOURCE
+    assert snap.metadata_["status_date_source"] == "data_date"
+
+
+async def test_without_a_data_date_the_snapshot_is_taken_today(factory: async_sessionmaker[AsyncSession]) -> None:
+    project_id, (a, _b) = await _project(factory)
+
+    await _progress(a, 50)
+
+    (snap,) = await _snapshots(factory, project_id)
+    assert snap.snapshot_date == TODAY.isoformat()
+    assert snap.metadata_["status_date_source"] == "today"
+
+
+async def test_planned_value_is_measured_at_the_data_date_not_today(
+    factory: async_sessionmaker[AsyncSession],
+) -> None:
+    """Progress entered on a later day "as of" the data date.
+
+    Measured at today the work is long since planned complete and the SPI reads
+    0.3; at the data date the plan was half done and the SPI is 0.6.
+    """
+    project_id, (a, _b) = await _project(
+        factory,
+        activities=[
+            {"progress": "0", "start": _on(0), "end": _on(14), "cost": "60000"},
+            {"progress": "0", "start": _on(0), "end": _on(14), "cost": "40000"},
+        ],
+        data_date=_on(7),
+    )
+
+    await _progress(a, 50)
+
+    (snap,) = await _snapshots(factory, project_id)
+    assert Decimal(snap.pv) == Decimal("50000")
+    assert Decimal(snap.spi) == Decimal("0.6")
+
+
+async def test_a_data_date_after_today_is_read_as_today(factory: async_sessionmaker[AsyncSession]) -> None:
+    """A mistyped year must not leave a future point every "latest" query picks."""
+    project_id, (a, _b) = await _project(factory, data_date=(TODAY + timedelta(days=3650)).isoformat())
+
+    await _progress(a, 50)
+
+    (snap,) = await _snapshots(factory, project_id)
+    assert snap.snapshot_date == TODAY.isoformat()
+
+
+async def test_an_activity_calendar_from_the_schedule_is_honoured(
+    factory: async_sessionmaker[AsyncSession],
+) -> None:
+    """The handler resolves each activity's calendar as the progress engine does."""
+    from app.modules.schedule_advanced.models import Calendar
+
+    project_id, (a, b) = await _project(
+        factory,
+        activities=[
+            {"progress": "0", "start": _on(0), "end": _on(14), "cost": "60000"},
+            {"progress": "0", "start": _on(0), "end": _on(14), "cost": "40000"},
+        ],
+        data_date=_on(5),  # Saturday 7 Mar
+    )
+    async with factory() as s:
+        seven_day = Calendar(project_id=project_id, name="Seven-day site", work_days=[0, 1, 2, 3, 4, 5, 6])
+        s.add(seven_day)
+        await s.flush()
+        (await s.get(Activity, a)).calendar_id = seven_day.id
+        await s.commit()
+
+    await _progress(b, 10)
+
+    (snap,) = await _snapshots(factory, project_id)
+    # a: 5 of 14 days on its seven-day calendar. b: 4 of 10 working days.
+    expected = Decimal("60000") * Decimal(5) / Decimal(14) + Decimal("40000") * Decimal("0.4")
+    assert Decimal(snap.pv) == expected.quantize(Decimal("0.01"))
 
 
 async def test_a_second_save_on_the_same_day_replaces_the_row_rather_than_adding_one(

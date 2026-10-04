@@ -32,11 +32,14 @@ from app.core.events import Event, event_bus
 if TYPE_CHECKING:
     import asyncio
     import uuid
+    from collections.abc import Callable
     from datetime import date
     from decimal import Decimal
     from typing import Any
 
     from sqlalchemy.ext.asyncio import AsyncSession
+
+    from app.modules.schedule.progress_math import WorkCalendar
 
 logger = logging.getLogger(__name__)
 
@@ -837,6 +840,7 @@ def schedule_progress_fractions(
     activities: "list[Any]",
     *,
     as_of: "date",
+    calendar_for: "Callable[[Any], WorkCalendar] | None" = None,
 ) -> "tuple[Decimal, Decimal] | None":
     """Earned and planned completion of a set of activities, as fractions of 1.
 
@@ -851,10 +855,14 @@ def schedule_progress_fractions(
       back to their planned span in calendar days, the same weighting the
       schedule uses to roll a summary up. Mixing the two would add money to
       days.
-    * Planned completion at ``as_of`` is linear across each activity's own
-      planned window, inclusive of both ends, so an activity that was due to
-      finish yesterday is planned complete and one that starts tomorrow is
-      planned at zero.
+    * Planned completion at ``as_of``, the status date, is counted in working
+      days of each activity's own calendar (``calendar_for``, Monday to Friday
+      when not given) with the progress engine's own
+      ``progress_math.planned_percent_for``, so a weekend or a holiday plans
+      no work. It is zero on or before the planned start and complete on or
+      after the planned finish. Calendar days would plan two sevenths of a
+      five-day activity's span for every weekend it crosses, and understate
+      the SPI by as much.
 
     Progress is the stored ``progress_pct`` of each row, never a figure carried
     by an event: both publishers publish after their commit, so the stored row
@@ -864,6 +872,8 @@ def schedule_progress_fractions(
     Returns ``(earned, planned)`` or ``None`` when nothing carries work.
     """
     from decimal import Decimal
+
+    from app.modules.schedule.progress_math import DEFAULT_CALENDAR, planned_percent_for
 
     parent_ids = {str(a.parent_id) for a in activities if getattr(a, "parent_id", None)}
     leaves = [
@@ -890,12 +900,17 @@ def schedule_progress_fractions(
 
         progress = _pct(activity.progress_pct)
 
-        if start is None or end is None or as_of < start:
+        if start is None or end is None or as_of <= start:
             planned_fraction = Decimal("0")
         elif as_of >= end:
             planned_fraction = Decimal("1")
         else:
-            planned_fraction = Decimal((as_of - start).days + 1) / Decimal(span_days)
+            calendar = calendar_for(activity) if calendar_for is not None else DEFAULT_CALENDAR
+            planned_fraction = planned_percent_for(
+                {"baseline_start_iso": start.isoformat(), "baseline_end_iso": end.isoformat()},
+                as_of.isoformat(),
+                calendar,
+            )
 
         total_weight += weight
         earned += weight * progress / Decimal("100")
@@ -1017,7 +1032,15 @@ async def _write_progress_snapshot(
     *,
     trigger_activity_id: str,
 ) -> None:
-    """Recompute and upsert today's automatic EVM snapshot for *project_id*.
+    """Recompute and upsert the automatic EVM snapshot for *project_id*.
+
+    The snapshot is taken at the status date: the latest data date of the
+    project's master schedules, the date the schedule's own progress engine
+    measures against, or today when none is set. Planned value and earned
+    value have to be measured at the same date. A scheduler who updates on
+    Monday "as of Friday" gets Friday's point, with Friday's planned value. A
+    data date after today is read as today, so a mistyped year cannot leave a
+    future point that every "latest snapshot" query then picks.
 
     Reads the activity columns the calculation uses and nothing else. Loading
     ``Activity`` entities would also pull every activity's children, parent
@@ -1035,11 +1058,28 @@ async def _write_progress_snapshot(
     from app.modules.finance.schemas import EVMSnapshotCreate
     from app.modules.finance.service import FinanceService
     from app.modules.schedule.models import Activity, Schedule
+    from app.modules.schedule.progress_math import WorkCalendar
+    from app.modules.schedule.progress_service import ScheduleProgressService
 
     today = date.today()
-    today_iso = today.isoformat()
 
     async with async_session_factory() as session:
+        data_dates = [
+            parsed
+            for (raw,) in (
+                await session.execute(
+                    select(Schedule.data_date).where(
+                        Schedule.project_id == project_id,
+                        Schedule.schedule_type.in_(_EVM_PROGRESS_SCHEDULE_TYPES),
+                    )
+                )
+            ).all()
+            if (parsed := _iso_date(raw)) is not None
+        ]
+        status_date = min(max(data_dates), today) if data_dates else today
+        status_source = "data_date" if data_dates else "today"
+        today_iso = status_date.isoformat()
+
         activities = list(
             (
                 await session.execute(
@@ -1051,6 +1091,7 @@ async def _write_progress_snapshot(
                         Activity.start_date,
                         Activity.end_date,
                         Activity.progress_pct,
+                        Activity.calendar_id,
                     )
                     .join(Schedule, Activity.schedule_id == Schedule.id)
                     .where(
@@ -1060,7 +1101,17 @@ async def _write_progress_snapshot(
                 )
             ).all()
         )
-        fractions = schedule_progress_fractions(activities, as_of=today)
+        # Each activity's own working calendar, resolved the way the progress
+        # engine resolves it (a missing or deleted calendar is Monday to Friday).
+        resolver = ScheduleProgressService(session)
+        calendars: dict[Any, WorkCalendar] = {}
+        for calendar_id in {a.calendar_id for a in activities}:
+            calendars[calendar_id] = await resolver.resolve_calendar(calendar_id)
+        fractions = schedule_progress_fractions(
+            activities,
+            as_of=status_date,
+            calendar_for=lambda activity: calendars[activity.calendar_id],
+        )
         if fractions is None:
             logger.debug("schedule.activity.progress_updated: no work-carrying activities in %s", project_id)
             return
@@ -1117,6 +1168,9 @@ async def _write_progress_snapshot(
                     "earned_pct": str((earned_fraction * Decimal("100")).quantize(Decimal("0.01"))),
                     "planned_pct": str((planned_fraction * Decimal("100")).quantize(Decimal("0.01"))),
                     "trigger_activity_id": trigger_activity_id,
+                    # Why the point sits on this date: the schedule's data date,
+                    # or today when no master schedule has one.
+                    "status_date_source": status_source,
                 },
             )
         )

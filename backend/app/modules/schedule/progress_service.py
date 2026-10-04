@@ -90,7 +90,7 @@ class ScheduleProgressService:
             raise _not_found("Progress step not found")
         return step
 
-    async def _resolve_calendar(
+    async def resolve_calendar(
         self,
         calendar_id: uuid.UUID | None,
         cache: dict[uuid.UUID | None, WorkCalendar] | None = None,
@@ -176,7 +176,7 @@ class ScheduleProgressService:
         if pct_type not in PERCENT_COMPLETE_TYPES:
             pct_type = DEFAULT_PERCENT_COMPLETE_TYPE
 
-        calendar = await self._resolve_calendar(activity.calendar_id)
+        calendar = await self.resolve_calendar(activity.calendar_id)
         data_date = req.data_date or schedule.data_date or activity.start_date
 
         percent_in = req.percent if req.percent is not None else _str_to_float(activity.progress_pct)
@@ -328,7 +328,7 @@ class ScheduleProgressService:
                 status_code=status.HTTP_409_CONFLICT,
                 detail=f"Cannot suspend an activity in status '{activity.status}'",
             )
-        calendar = await self._resolve_calendar(activity.calendar_id)
+        calendar = await self.resolve_calendar(activity.calendar_id)
         remaining = activity.remaining_duration
         if remaining is None:
             od = original_duration(calendar, activity.start_date, activity.end_date)
@@ -358,7 +358,7 @@ class ScheduleProgressService:
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Activity is not suspended",
             )
-        calendar = await self._resolve_calendar(activity.calendar_id)
+        calendar = await self.resolve_calendar(activity.calendar_id)
         remaining = activity.remaining_duration if activity.remaining_duration is not None else 0
         when = effective_date or schedule.data_date or activity.start_date
         new_end = forecast_finish(calendar, activity.start_date, when, remaining)
@@ -404,7 +404,7 @@ class ScheduleProgressService:
         cache: dict[uuid.UUID | None, WorkCalendar] = {}
         rows: list[dict[str, object]] = []
         for act in activities:
-            calendar = await self._resolve_calendar(act.calendar_id, cache)
+            calendar = await self.resolve_calendar(act.calendar_id, cache)
             rows.append(
                 {
                     "baseline_start_iso": act.start_date,
