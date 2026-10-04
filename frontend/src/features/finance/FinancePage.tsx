@@ -1761,6 +1761,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
                   <td className="px-4 py-3 text-content-secondary" data-testid="budget-category">
                     {budgetCategoryLabel(t, b.category)}
                     <ContingencyBudgetNote
+                      projectId={projectId}
                       category={b.category}
                       metadata={b.metadata}
                       revised={b.revised_budget}
@@ -1870,6 +1871,7 @@ function BudgetsTab({ projectId }: { projectId: string }) {
                     {budgetCategoryLabel(t, b.category)}
                   </h4>
                   <ContingencyBudgetNote
+                    projectId={projectId}
                     category={b.category}
                     metadata={b.metadata}
                     revised={b.revised_budget}

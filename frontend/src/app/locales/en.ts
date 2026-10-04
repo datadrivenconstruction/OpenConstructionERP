@@ -11133,6 +11133,7 @@ const resource = {
     "risk.cont_amount_invalid": "Enter an amount greater than zero",
     "risk.cont_budget_drawn": "Drawn for risks {{drawn}}, {{remaining}} left",
     "risk.cont_budget_link": "Risk register",
+    "risk.cont_budget_risk_based": "Risk-based {{emv}}",
     "risk.cont_confirm_action": "Confirm drawdown",
     "risk.cont_dialog_body": "The risk has occurred. Enter the amount it actually draws from contingency. The proposal is its cost impact; nothing is drawn until you confirm.",
     "risk.cont_dialog_title": "Confirm contingency drawdown",

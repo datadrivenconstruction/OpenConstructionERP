@@ -190,25 +190,43 @@ describe('ContingencyCard', () => {
 
 describe('ContingencyBudgetNote', () => {
   function renderNote(category: string, metadata: Record<string, unknown>) {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     return render(
-      <MemoryRouter>
-        <ContingencyBudgetNote category={category} metadata={metadata} revised="10000" original="10000" currency="EUR" />
-      </MemoryRouter>,
+      <QueryClientProvider client={qc}>
+        <MemoryRouter>
+          <ContingencyBudgetNote
+            projectId={PROJECT}
+            category={category}
+            metadata={metadata}
+            revised="10000"
+            original="10000"
+            currency="EUR"
+          />
+        </MemoryRouter>
+      </QueryClientProvider>,
     );
   }
 
-  it('shows drawn and the link back for a Contingency line', () => {
+  it('shows drawn, left, the risk-based figure and the link back for a Contingency line', async () => {
+    getMock.mockResolvedValue(position({ emv: '1500.00' }));
     renderNote('Contingency', { 'contingency_drawdown:risk:1': { amount: '2300.00' } });
-    expect(screen.getByTestId('contingency-drawn')).toBeInTheDocument();
+    const drawn = screen.getByTestId('contingency-drawn');
+    // 10,000 allocated less 2,300 drawn leaves 7,700.
+    expect(drawn.textContent).toMatch(/2\D?300/);
+    expect(drawn.textContent).toMatch(/7\D?700/);
     expect(screen.getByRole('link', { name: /Risk register/ })).toHaveAttribute('href', '/risks');
+    expect((await screen.findByTestId('contingency-risk-based')).textContent).toMatch(/^Risk-based .*1\D?500/);
+    expect(getMock).toHaveBeenCalledWith(`/v1/risk/projects/${PROJECT}/contingency`);
   });
 
-  it('renders nothing for another category', () => {
+  it('renders nothing and asks nothing for another category', () => {
     const { container } = renderNote('material', { 'contingency_drawdown:risk:1': { amount: '2300.00' } });
     expect(container).toBeEmptyDOMElement();
+    expect(getMock).not.toHaveBeenCalled();
   });
 
   it('omits the drawn figure while nothing is drawn', () => {
+    getMock.mockResolvedValue(position());
     renderNote('contingency', { notes: 'x' });
     expect(screen.queryByTestId('contingency-drawn')).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Risk register/ })).toBeInTheDocument();

@@ -5,17 +5,29 @@
  * budget line, what risks have drawn from it, what is left, and a way back to
  * the risk register where the drawdowns are confirmed.
  *
- * Read straight from the line's metadata, which the Budgets table already
- * holds, so the finance page needs no extra request. Renders nothing for any
- * other category.
+ * Drawn and left are read straight from the line's metadata, which the
+ * Budgets table already holds. The risk-based figure (EMV of the open risks)
+ * comes from the register's contingency position; React Query shares that one
+ * request across every contingency row. Renders nothing for any other
+ * category.
  */
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { ShieldAlert } from 'lucide-react';
 import { fmtCurrency } from '@/shared/lib/formatters';
-import { drawnOnBudgetLine, isContingencyCategory, money, type MoneyWire } from './contingency';
+import {
+  contingencyQueryKey,
+  drawnOnBudgetLine,
+  fetchContingency,
+  isContingencyCategory,
+  money,
+  type MoneyWire,
+} from './contingency';
 
 export interface ContingencyBudgetNoteProps {
+  /** Project of the line; without it the risk-based figure is not fetched. */
+  projectId?: string | null;
   category: string | null | undefined;
   metadata: Record<string, unknown> | null | undefined;
   revised: MoneyWire | null | undefined;
@@ -23,9 +35,26 @@ export interface ContingencyBudgetNoteProps {
   currency?: string;
 }
 
-export function ContingencyBudgetNote({ category, metadata, revised, original, currency }: ContingencyBudgetNoteProps) {
+export function ContingencyBudgetNote({
+  projectId,
+  category,
+  metadata,
+  revised,
+  original,
+  currency,
+}: ContingencyBudgetNoteProps) {
   const { t } = useTranslation();
-  if (!isContingencyCategory(category)) return null;
+  const isContingency = isContingencyCategory(category);
+  // Called before the early return so the hook order never changes.
+  const position = useQuery({
+    queryKey: contingencyQueryKey(projectId ?? ''),
+    queryFn: () => fetchContingency(projectId ?? ''),
+    enabled: isContingency && !!projectId,
+    staleTime: 30_000,
+    retry: false,
+  });
+  if (!isContingency) return null;
+  const riskBased = position.data;
   const { total } = drawnOnBudgetLine(metadata);
   const allocated = money(revised) !== 0 ? money(revised) : money(original);
   const remaining = allocated - total;
@@ -37,6 +66,14 @@ export function ContingencyBudgetNote({ category, metadata, revised, original, c
             defaultValue: 'Drawn for risks {{drawn}}, {{remaining}} left',
             drawn: fmtCurrency(total, currency),
             remaining: fmtCurrency(remaining, currency),
+          })}
+        </span>
+      )}
+      {riskBased && (
+        <span className="tabular-nums" data-testid="contingency-risk-based">
+          {t('risk.cont_budget_risk_based', {
+            defaultValue: 'Risk-based {{emv}}',
+            emv: fmtCurrency(money(riskBased.emv), riskBased.currency || currency),
           })}
         </span>
       )}
