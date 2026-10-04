@@ -8,9 +8,9 @@
 // matters is between the last two: a truncated register that does not show
 // the stamp has not shown that the record does not exist.
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { ReactNode } from 'react';
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const apiGetMock = vi.fn();
@@ -44,6 +44,10 @@ const KEYS = { tender_package_id: 'tp-1' };
 
 beforeEach(() => {
   apiGetMock.mockReset();
+});
+
+afterEach(() => {
+  vi.useRealTimers();
 });
 
 describe('useAwardOutcome', () => {
@@ -111,6 +115,62 @@ describe('useAwardOutcome', () => {
     await waitFor(() => expect(result.current.contract.state).toBe('found'), { timeout: 6000 });
     expect(contractReads).toBe(2);
   }, 10_000);
+
+  it('gives the next award of a project its own re-reads', async () => {
+    // One client for the whole session, with the app's two minutes of
+    // freshness, as in main.tsx. The first award's draft never appears (its
+    // module is not installed), so its lookup spends every re-read. The next
+    // award on the same project must still read, and keep reading until its
+    // own draft lands, instead of inheriting a spent budget from a cache
+    // entry the two awards shared.
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: 120_000 } } });
+    const shared = ({ children }: { children: ReactNode }) => (
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    );
+
+    let secondAwardLanded = false;
+    let contractReads = 0;
+    apiGetMock.mockImplementation((url: string) => {
+      if (url.startsWith('/v1/contracts/contracts/')) {
+        contractReads += 1;
+        const items = secondAwardLanded
+          ? [{ id: 'ct-2', code: 'C-2', status: 'draft', metadata: { tender_package_id: 'tp-2' } }]
+          : [];
+        return Promise.resolve(page(items));
+      }
+      return Promise.resolve(page([]));
+    });
+
+    const first = renderHook(() => useAwardOutcome('proj-1', { tender_package_id: 'tp-1' }, true), {
+      wrapper: shared,
+    });
+    await waitFor(() => expect(first.result.current.contract.state).toBe('absent'));
+    for (let i = 0; i < 6; i += 1) {
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(3000);
+      });
+    }
+    const spent = contractReads;
+    expect(spent).toBe(5);
+    first.unmount();
+
+    // The second package flips to awarded: the lookup turns on.
+    let awarded = false;
+    const second = renderHook(() => useAwardOutcome('proj-1', { tender_package_id: 'tp-2' }, awarded), {
+      wrapper: shared,
+    });
+    awarded = true;
+    second.rerender();
+    await waitFor(() => expect(contractReads).toBe(spent + 1));
+    expect(second.result.current.contract.state).toBe('absent');
+
+    secondAwardLanded = true;
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3000);
+    });
+    await waitFor(() => expect(second.result.current.contract.state).toBe('found'));
+  }, 20_000);
 
   it('fetches nothing before the award', async () => {
     route(page([]), page([]));

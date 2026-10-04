@@ -98,29 +98,48 @@ function resolve<T extends StampedRow>(
 }
 
 /**
+ * The award a lookup belongs to, as part of its cache key. The re-read budget
+ * is counted on the cache entry (`dataUpdateCount`), so an entry shared by
+ * every award of a project let earlier awards, and the other screen that asks
+ * the same question, spend the budget of the next one: it was enabled with
+ * the counter already at the limit and never re-read. One entry per award
+ * keeps each count to its own award.
+ */
+function awardScope(keys: AwardKeys): string {
+  const bids = (keys.bid_package_ids ?? []).filter((id): id is string => Boolean(id));
+  return [keys.tender_package_id || '', ...[...new Set(bids)].sort()].join('|');
+}
+
+/**
  * Look up what an award drafted. `enabled` is the caller's "this package is
  * awarded"; before that there is nothing to look for and nothing is fetched.
  */
 export function useAwardOutcome(projectId: string | null | undefined, keys: AwardKeys, enabled: boolean): AwardOutcome {
   const on = enabled && !!projectId;
+  const scope = awardScope(keys);
 
   const contractsQ = useQuery({
-    queryKey: ['award-outcome', 'contracts', projectId],
+    queryKey: ['award-outcome', 'contracts', projectId, scope],
     queryFn: () => listContracts({ project_id: projectId as string, limit: CONTRACT_PAGE }),
     enabled: on,
     retry: false,
+    // The app-wide two minutes of freshness would let a register read for
+    // another reason stand in for the read this award needs, so turning the
+    // lookup on always reads.
+    staleTime: 0,
     refetchInterval: (q) =>
       pollWhileAbsent(q.state.data, q.state.dataUpdateCount, keys, RETIRED_AWARD_CONTRACT_STATUSES),
   });
 
   const ordersQ = useQuery({
-    queryKey: ['award-outcome', 'orders', projectId],
+    queryKey: ['award-outcome', 'orders', projectId, scope],
     queryFn: () =>
       apiGet<Page<AwardOrderLite>>(
         `/v1/procurement/?project_id=${encodeURIComponent(projectId as string)}&limit=${ORDER_PAGE}`,
       ),
     enabled: on,
     retry: false,
+    staleTime: 0,
     refetchInterval: (q) =>
       pollWhileAbsent(q.state.data, q.state.dataUpdateCount, keys, RETIRED_AWARD_ORDER_STATUSES),
   });
