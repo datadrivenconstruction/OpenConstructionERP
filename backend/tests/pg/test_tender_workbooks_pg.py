@@ -134,10 +134,14 @@ async def test_the_comparison_workbook_says_what_the_comparison_endpoint_says(pg
 
     service = TenderingService(pg_session)
     comparison = await service.compare_bids(package.id)
-    beta_blinding = next(r for r in comparison.rows if r.description == "Blinding concrete").bids[1]
+    # Looked up by firm, not by column: bids from one transaction share their
+    # creation time on PostgreSQL, so position in the list says nothing here.
+    blinding_row = next(r for r in comparison.rows if r.description == "Blinding concrete")
+    beta_blinding = next(b for b in blinding_row.bids if b["company_name"] == "Beta Tiefbau")
     assert beta_blinding["priced"] is False, "the endpoint must tell a missing price from a zero"
     assert beta_blinding["unit_rate"] is None, "a missing price carries no figure, not 0"
-    alpha_total, beta_total = comparison.bid_totals
+    totals_by_firm = {t["company_name"]: t for t in comparison.bid_totals}
+    alpha_total, beta_total = totals_by_firm["Alpha Bau"], totals_by_firm["Beta Tiefbau"]
     # The header row is not a line; Beta priced two of the three.
     assert (alpha_total["matched_lines"], alpha_total["total_lines"]) == (3, 3)
     assert (beta_total["matched_lines"], beta_total["total_lines"]) == (2, 3)
@@ -150,7 +154,7 @@ async def test_the_comparison_workbook_says_what_the_comparison_endpoint_says(pg
     alpha, beta = _column_of(ws, "Alpha Bau"), _column_of(ws, "Beta Tiefbau")
 
     totals_row = _row_of(ws, "Angebotssumme laut Angebot")
-    for column, bid_total in zip((alpha, beta), comparison.bid_totals, strict=True):
+    for column, bid_total in ((alpha, alpha_total), (beta, beta_total)):
         assert Decimal(str(ws.cell(totals_row, column + 1).value)) == Decimal(str(bid_total["total"]))
 
     missing = ws.cell(_row_of(ws, "Blinding concrete"), beta)

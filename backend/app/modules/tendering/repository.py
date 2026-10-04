@@ -82,8 +82,18 @@ class TenderingRepository:
         return await self.session.get(TenderBid, bid_id)
 
     async def list_bids_for_package(self, package_id: uuid.UUID) -> list[TenderBid]:
-        """List all bids for a package."""
-        stmt = select(TenderBid).where(TenderBid.package_id == package_id).order_by(TenderBid.created_at.desc())
+        """List all bids for a package, newest first.
+
+        Bids entered in one transaction share ``created_at`` on PostgreSQL,
+        where ``now()`` is the transaction start, and without a tie-break the
+        price comparison could swap its columns between two loads. The company
+        name and then the id settle the order.
+        """
+        stmt = (
+            select(TenderBid)
+            .where(TenderBid.package_id == package_id)
+            .order_by(TenderBid.created_at.desc(), TenderBid.company_name, TenderBid.id)
+        )
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 

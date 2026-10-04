@@ -95,6 +95,12 @@ _WORD = re.compile(r"[0-9A-Za-zÀ-ɏ]+")
 #: lines would demand a rename that breaks every lookup at runtime.
 _VALUE = re.compile(r'^\s*"(?:[^"\\]|\\.)*"\s*:\s*("(?:[^"\\]|\\.)*")')
 
+#: An interpolation placeholder is an identifier too, carried inside the
+#: value: `{{gross}} - {{openings}} Openings =` names the variable the code
+#: passes in, and spelling it `{{groß}}` would print the raw braces. Cut out
+#: before counting, like keys are.
+_PLACEHOLDER = re.compile(r"\{\{[^{}]*\}\}")
+
 
 def _fold(word: str) -> set[str]:
     """Every spelling of ``word`` with one umlaut written as its digraph."""
@@ -114,7 +120,7 @@ def _words(path: str) -> collections.Counter[str]:
         for line in handle:
             match = _VALUE.match(line)
             if match:
-                counts.update(_WORD.findall(match.group(1)))
+                counts.update(_WORD.findall(_PLACEHOLDER.sub(" ", match.group(1))))
     return counts
 
 
