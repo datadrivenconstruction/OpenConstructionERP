@@ -273,6 +273,41 @@ REVERSE_CHARGE_RULES: tuple[dict[str, Any], ...] = (
             "France. The subcontractor invoices without VAT and the main contractor declares it."
         ),
     },
+    {
+        # Revenue: from 1 September 2008 a subcontractor does not charge VAT to
+        # the principal contractor on construction services within Relevant
+        # Contracts Tax; the principal accounts for it, and the invoice carries
+        # this sentence and no VAT rate or amount. Revenue Tax and Duty Manual
+        # "Reverse charge - construction", read 2026-10-04.
+        "rule_code": "IE_RCT_REVERSE_CHARGE",
+        "country_code": "IE",
+        "name": "VAT reverse charge on construction services within Relevant Contracts Tax",
+        "legal_reference": "section 16(3) VAT Consolidation Act 2010",
+        "invoice_wording": "VAT on this supply to be accounted for by the Principal Contractor.",
+        "notes": (
+            "Applies where a subcontractor supplies construction services to a principal "
+            "contractor and Relevant Contracts Tax applies to the contract, haulage excepted. "
+            "The invoice shows the subcontractor's VAT number and no VAT rate or VAT amount."
+        ),
+    },
+    {
+        # Hungarian VAT Act (2007. evi CXXVII. torveny) section 142 (1) b) puts
+        # the tax on the recipient of construction-assembly work on real
+        # property that needs a building permit, an acknowledgement procedure
+        # or a notification, and section 169 n) requires the words "forditott
+        # adozas" on the invoice. NAV adozasi kerdes 20264, read 2026-10-04.
+        "rule_code": "HU_FORDITOTT_ADOZAS_EPITES",
+        "country_code": "HU",
+        "name": "Fordított adózás építési-szerelési munkáknál",
+        "legal_reference": "Áfa tv. 142. § (1) b), 169. § n)",
+        "invoice_wording": "Fordított adózás",
+        "notes": (
+            "Applies between taxable persons registered for VAT in Hungary to construction and "
+            "assembly work that creates, extends, converts or demolishes real property where that "
+            "work needs a building permit, an acknowledgement procedure or a notification, which "
+            "the customer confirms to the contractor in writing beforehand."
+        ),
+    },
 )
 
 
