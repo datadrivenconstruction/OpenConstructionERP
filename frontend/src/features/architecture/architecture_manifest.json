@@ -188299,11 +188299,16 @@
           "bases": [
             "BaseModel"
           ],
-          "docstring": "Request body for replacing the BIM element link set on an activity.\n\nThe full ``bim_element_ids`` list is replaced atomically - callers that\nwant to add/remove a single element should read the current list, mutate\nit, then PATCH the whole array back.",
+          "docstring": "Request body for the BIM element link set on an activity.\n\n``replace`` (the default) stores ``bim_element_ids`` as the whole list.\n``add`` merges them into the stored list on the server. A client that\nmerged into a cached copy and sent the result back erased every link made\nsince that copy was read, by another tab, another user or itself.",
           "fields": [
             {
               "name": "bim_element_ids",
               "type": "list[str]"
+            },
+            {
+              "name": "mode",
+              "type": "Literal['replace', 'add']",
+              "default": "'replace'"
             }
           ]
         },
@@ -231147,10 +231152,10 @@
     },
     {
       "name": "bim",
-      "ts_files": 94,
+      "ts_files": 96,
       "css_files": 0,
-      "test_files": 24,
-      "total_files": 94
+      "test_files": 26,
+      "total_files": 96
     },
     {
       "name": "bim_requirements",
@@ -231518,10 +231523,10 @@
     },
     {
       "name": "fieldreports",
-      "ts_files": 10,
+      "ts_files": 11,
       "css_files": 0,
-      "test_files": 0,
-      "total_files": 10
+      "test_files": 1,
+      "total_files": 11
     },
     {
       "name": "file-approvals",
@@ -232022,17 +232027,17 @@
     },
     {
       "name": "reports",
-      "ts_files": 5,
+      "ts_files": 7,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 5
+      "test_files": 2,
+      "total_files": 7
     },
     {
       "name": "requirements",
-      "ts_files": 3,
+      "ts_files": 4,
       "css_files": 0,
-      "test_files": 0,
-      "total_files": 3
+      "test_files": 1,
+      "total_files": 4
     },
     {
       "name": "resource-summary",
@@ -232071,10 +232076,10 @@
     },
     {
       "name": "rfq-bidding",
-      "ts_files": 4,
+      "ts_files": 7,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 4
+      "test_files": 4,
+      "total_files": 7
     },
     {
       "name": "risk",
@@ -232106,10 +232111,10 @@
     },
     {
       "name": "schedule",
-      "ts_files": 43,
+      "ts_files": 44,
       "css_files": 0,
-      "test_files": 18,
-      "total_files": 43
+      "test_files": 19,
+      "total_files": 44
     },
     {
       "name": "schedule-advanced",
@@ -233638,7 +233643,7 @@
     "total_schemas": 3489,
     "total_python_files": 2212,
     "frontend_features": 190,
-    "frontend_ts_files": 2784,
+    "frontend_ts_files": 2794,
     "frontend_backend_mapped": 169
   },
   "frontend_backend_mapping": {
