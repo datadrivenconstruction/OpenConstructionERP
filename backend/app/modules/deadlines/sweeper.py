@@ -274,7 +274,9 @@ async def _notify_overdue(
             body_key="notifications.deadline.overdue.body",
             body_context=context,
             action_url=item.action_url,
-            metadata={"module": item.module, "due_date": item.due_date, "level": 0},
+            # The project lets the academy notification backstop drop a
+            # nudge addressed to someone outside it.
+            metadata={"module": item.module, "due_date": item.due_date, "level": 0, "project_id": item.project_id},
         )
         # Digest fan-out: hourly/daily users get a rolled-up email digest (via
         # the existing NotificationDigestQueue + notification_worker flusher);
@@ -289,6 +291,7 @@ async def _notify_overdue(
                 "action_url": item.action_url,
                 "entity_type": item.entity_type,
                 "entity_id": item.entity_id,
+                "project_id": item.project_id,
             },
             channel="email",
             deferred=outbox,
@@ -327,7 +330,7 @@ async def _maybe_escalate(session: AsyncSession, item: DeadlineItem, now: dateti
             body_key="notifications.deadline.escalated.body",
             body_context=_overdue_context(item),
             action_url=item.action_url,
-            metadata={"module": item.module, "due_date": item.due_date, "level": 1},
+            metadata={"module": item.module, "due_date": item.due_date, "level": 1, "project_id": item.project_id},
         )
     event_bus.publish_detached(
         f"deadlines.{item.module}.escalated",

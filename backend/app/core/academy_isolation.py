@@ -221,3 +221,67 @@ async def assert_admin_adds_members(session: AsyncSession, actor_id: uuid.UUID |
         status_code=status.HTTP_403_FORBIDDEN,
         detail={"error": ADMIN_ADDS_MEMBERS, "message": ADMIN_ADDS_MEMBERS_MESSAGE},
     )
+
+
+async def assert_parties_in_project(
+    session: AsyncSession,
+    project_id: uuid.UUID | str,
+    values: Iterable[str | uuid.UUID | None],
+    actor_id: uuid.UUID | str | None,
+) -> None:
+    """Refuse a free party field that names someone outside the project.
+
+    Some columns (a punch item's ``assigned_to``, an inspection's
+    ``inspector_id``) hold a user id, a contact id or a typed-in name, and the
+    party-name resolver turns any id on the install into a name. In academy
+    mode an id must be a project member or a contact in the actor's own address
+    book; a value that is not an id is a typed name and passes. With no actor
+    (a system call) contacts are not judged, only users.
+
+    Raises:
+        HTTPException: 422 ``user_not_in_project``, the same answer for an
+            outsider and for an id that names nothing.
+    """
+    if not academy_mode_enabled():
+        return
+    ids = {u for u in (_as_uuid(v) for v in values if v is not None and str(v).strip()) if u is not None}
+    # ``_as_uuid`` also parses a typed name that happens to be id-shaped; it is
+    # judged as an id, which is what the resolver would do with it too.
+    if not ids:
+        return
+    outside = ids - await _members_among(session, project_id, ids)
+    if outside and actor_id is not None:
+        outside -= await _own_contacts_among(session, outside, actor_id)
+    elif outside:
+        outside -= await _contacts_among(session, outside)
+    if outside:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail={"error": USER_NOT_IN_PROJECT, "message": USER_NOT_IN_PROJECT_MESSAGE},
+        )
+
+
+async def _contacts_among(session: AsyncSession, ids: set[uuid.UUID], owner: str | None = None) -> set[uuid.UUID]:
+    try:
+        from app.modules.contacts.models import Contact
+        from app.modules.contacts.repository import _tenant_scope
+
+        stmt = select(Contact.id).where(Contact.id.in_(ids))
+        if owner is not None:
+            stmt = stmt.where(_tenant_scope(owner))
+        return {_as_uuid(r) for r in (await session.execute(stmt)).scalars().all()} - {None}  # type: ignore[return-value]
+    except Exception:
+        logger.exception("academy isolation: contact lookup failed")
+        return set()
+
+
+async def _own_contacts_among(session: AsyncSession, ids: set[uuid.UUID], actor_id: uuid.UUID | str) -> set[uuid.UUID]:
+    """Contacts among ``ids`` in the actor's address book; any contact for an admin."""
+    from app.core.tenant_scope import tenant_scope_owner
+
+    try:
+        owner = await tenant_scope_owner(session, str(actor_id))
+    except Exception:
+        logger.exception("academy isolation: tenant lookup failed for %s", actor_id)
+        return set()
+    return await _contacts_among(session, ids, owner)

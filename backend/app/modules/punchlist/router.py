@@ -302,7 +302,7 @@ async def update_item(
     """Update a punch item."""
     existing = await service.get_item(item_id)
     await verify_project_access(existing.project_id, str(user_id), session)
-    item = await service.update_item(item_id, data)
+    item = await service.update_item(item_id, data, actor_id=str(user_id))
     return await _item_response(service, item)
 
 

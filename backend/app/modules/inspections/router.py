@@ -265,7 +265,7 @@ async def update_inspection(
     """Update an inspection."""
     existing = await service.get_inspection(inspection_id)
     await verify_project_access(existing.project_id, str(user_id), session)
-    inspection = await service.update_inspection(inspection_id, data)
+    inspection = await service.update_inspection(inspection_id, data, actor_id=str(user_id))
     return (await _to_response_many(session, [inspection]))[0]
 
 

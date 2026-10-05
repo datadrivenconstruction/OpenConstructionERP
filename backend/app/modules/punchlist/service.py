@@ -24,6 +24,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings
+from app.core.academy_isolation import assert_parties_in_project
 from app.core.calendar_day import calendar_day_iso
 from app.core.events import event_bus
 from app.core.json_merge import merge_metadata
@@ -207,6 +208,7 @@ class PunchListService:
         user_id: str | None = None,
     ) -> PunchItem:
         """Create a new punch list item."""
+        await assert_parties_in_project(self.session, data.project_id, [data.assigned_to], user_id)
         item = PunchItem(
             project_id=data.project_id,
             title=data.title,
@@ -311,11 +313,18 @@ class PunchListService:
         self,
         item_id: uuid.UUID,
         data: PunchItemUpdate,
+        *,
+        actor_id: str | None = None,
     ) -> PunchItem:
-        """Update punch item fields."""
+        """Update punch item fields.
+
+        ``actor_id`` is who asks, for the academy check on a newly named owner.
+        """
         item = await self.get_item(item_id)
 
         fields = data.model_dump(exclude_unset=True)
+        if fields.get("assigned_to") and fields["assigned_to"] != item.assigned_to:
+            await assert_parties_in_project(self.session, item.project_id, [fields["assigned_to"]], actor_id)
         if "metadata" in fields:
             _incoming = fields.pop("metadata")
             fields["metadata_"] = (

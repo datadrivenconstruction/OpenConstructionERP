@@ -9,6 +9,7 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.academy_isolation import assert_parties_in_project
 from app.core.events import publish_after_commit
 from app.core.json_merge import merge_metadata
 from app.modules.inspections.models import QualityInspection
@@ -81,6 +82,7 @@ class InspectionService:
         checklist = [entry.model_dump() for entry in data.checklist_data]
         if checklist:
             _validate_checklist_structure(checklist)
+        await assert_parties_in_project(self.session, data.project_id, [data.inspector_id], user_id)
 
         inspection = QualityInspection(
             project_id=data.project_id,
@@ -141,9 +143,17 @@ class InspectionService:
         self,
         inspection_id: uuid.UUID,
         data: InspectionUpdate,
+        *,
+        actor_id: str | None = None,
     ) -> QualityInspection:
-        """Update inspection fields."""
+        """Update inspection fields.
+
+        ``actor_id`` is who asks, for the academy check on a newly named inspector.
+        """
         inspection = await self.get_inspection(inspection_id)
+        new_inspector = data.model_dump(exclude_unset=True).get("inspector_id")
+        if new_inspector and new_inspector != inspection.inspector_id:
+            await assert_parties_in_project(self.session, inspection.project_id, [new_inspector], actor_id)
 
         # ``completed`` is terminal (see _INSPECTION_STATUS_TRANSITIONS) so it
         # stays locked. ``failed`` is NOT terminal: the FSM allows
