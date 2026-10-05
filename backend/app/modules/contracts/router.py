@@ -72,6 +72,7 @@ from app.modules.contracts.repository import (
     RetentionScheduleRepository,
 )
 from app.modules.contracts.schemas import (
+    COUNTERPARTY_TYPES,
     AIAApplicationResponse,
     AutoGenerateClaimRequest,
     ContractCloneRequest,
@@ -330,6 +331,7 @@ async def get_contract_country_defaults(
     session: SessionDep,
     user_id: CurrentUserId,
     project_id: uuid.UUID = Query(...),
+    counterparty_type: str | None = Query(default=None, pattern=rf"^({COUNTERPARTY_TYPES})$"),
     _perm: None = Depends(RequirePermission("contracts.read")),
 ) -> ContractCountryDefaultsResponse:
     """The payment terms a new contract on this project starts from, and where each came from.
@@ -340,7 +342,9 @@ async def get_contract_country_defaults(
     """
     await verify_project_access(project_id, user_id, session)
     service = ContractsService(session)
-    return ContractCountryDefaultsResponse.model_validate(await service.country_defaults_for_project(project_id))
+    return ContractCountryDefaultsResponse.model_validate(
+        await service.country_defaults_for_project(project_id, counterparty_type)
+    )
 
 
 @router.post("/contracts/", response_model=ContractResponse, status_code=201)

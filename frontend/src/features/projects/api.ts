@@ -45,6 +45,8 @@ export interface Project {
   /** ISO 3166-2 state or province (e.g. US-CA). Rules set below the country,
    *  such as a cap on a home-improvement deposit, read it. */
   subdivision_code?: string | null;
+  /** Whether the client is a public buyer; null when not recorded. */
+  works?: ProjectWorks | null;
   /**
    * True when this project may use AIA G702/G703 payment applications
    * (US/CA/AU only). Computed server-side from the project country; the
@@ -74,6 +76,12 @@ export interface Project {
   updated_at: string;
 }
 
+/**
+ * Whether a project's client is a public buyer. Where a country's retention
+ * law follows the client (France), new contracts start from that law's terms.
+ */
+export type ProjectWorks = 'public' | 'private';
+
 export interface CreateProjectData {
   /** The ONLY hard-required field on the backend `ProjectCreate` schema. */
   name: string;
@@ -89,6 +97,8 @@ export interface CreateProjectData {
   country_code?: string | null;
   /** ISO 3166-2 state or province, e.g. US-CA; null clears it. */
   subdivision_code?: string | null;
+  /** Public buyer or private client; omitted or null when not recorded. */
+  works?: ProjectWorks | null;
   /** Phase-12 expansion fields — all optional on the backend schema. */
   project_code?: string | null;
   project_type?: string | null;

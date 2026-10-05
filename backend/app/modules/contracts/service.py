@@ -48,6 +48,7 @@ from app.modules.contracts.country_defaults import (
     PAYMENT_TERMS_KEY,
     PLATFORM_FALLBACK,
     apply_contract_defaults,
+    contract_works,
     forget_overridden,
     has_subdivision_rows,
     normalise_country,
@@ -1418,13 +1419,28 @@ class ContractsService:
         country = normalise_country(getattr(project, "country_code", None)) or None
         return subdivision_from_address(country, getattr(project, "address", None))
 
-    async def country_defaults_for_project(self, project_id: uuid.UUID) -> dict[str, Any]:
-        """What a new contract on ``project_id`` starts from, for the form to pre-fill."""
+    async def project_works(self, project_id: uuid.UUID) -> str | None:
+        """``"public"`` or ``"private"`` as the project records its client, else ``None``."""
+        from app.modules.projects.models import Project  # noqa: PLC0415
+
+        project = await self.session.get(Project, project_id)
+        return getattr(project, "works", None) if project is not None else None
+
+    async def country_defaults_for_project(
+        self, project_id: uuid.UUID, counterparty_type: str | None = None
+    ) -> dict[str, Any]:
+        """What a new contract on ``project_id`` starts from, for the form to pre-fill.
+
+        ``counterparty_type`` is the contract's: a subcontract follows private
+        law whoever the project's client is (:func:`contract_works`).
+        """
         country = await self.project_country(project_id)
+        works = contract_works(await self.project_works(project_id), counterparty_type)
         defaults = resolve_contract_defaults(
             country,
             await self.project_subdivision(project_id),
             ceiling_subdivision=await self.project_address_subdivision(project_id),
+            works=works,
         )
         ceiling = (defaults or {}).get("statutory_ceiling")
         # A subcontract agreement has no ceiling, so where the country's rate
@@ -1442,6 +1458,7 @@ class ContractsService:
             # showing the national row.
             "subdivision_missing": has_subdivision_rows(country) and not (defaults or {}).get("subdivision_code"),
             "statutory_ceiling": (defaults or {}).get("statutory_ceiling"),
+            "works": (defaults or {}).get("works"),
             "has_defaults": defaults is not None,
             "standard_form": (defaults or {}).get("standard_form"),
             "values": (defaults or {}).get("values") or {},
@@ -1469,15 +1486,20 @@ class ContractsService:
             explicit.setdefault("retention_release_split", None)
         # A draft is entered into today at the earliest, so a state ceiling is
         # read as of today (the resolver's default).
+        works = contract_works(await self.project_works(data.project_id), getattr(data, "counterparty_type", None))
         defaults = resolve_contract_defaults(
             country,
             await self.project_subdivision(data.project_id),
             ceiling_subdivision=await self.project_address_subdivision(data.project_id),
+            works=works,
         )
         values, stamp = apply_contract_defaults(explicit, defaults, country_code=country)
         ceiling = (defaults or {}).get("statutory_ceiling")
         if ceiling:
             stamp["subdivision_code"] = ceiling["subdivision_code"]
+        if (defaults or {}).get("works"):
+            # The law the figures were read under, public or private works.
+            stamp["works"] = defaults["works"]
         fallback: list[str] = []
 
         retention = values.get("retention_percent")

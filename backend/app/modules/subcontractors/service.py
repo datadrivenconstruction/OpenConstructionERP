@@ -1237,6 +1237,7 @@ class SubcontractorService:
         from app.modules.contracts.country_defaults import (  # noqa: PLC0415
             PLATFORM_FALLBACK,
             apply_contract_defaults,
+            contract_works,
             normalise_country,
             resolve_contract_defaults,
             subcontract_retention_default,
@@ -1248,12 +1249,17 @@ class SubcontractorService:
         country = normalise_country(getattr(project, "country_code", None)) or None
         # A state ceiling on retention reaches every tier of the chain, so the
         # agreement reads the project's state the same way the contract does.
+        # A subcontract is never a public contract, whoever the project's client
+        # is, so it starts from private-works law where the country has one.
         defaults = resolve_contract_defaults(
             country,
             getattr(project, "subdivision_code", None),
             ceiling_subdivision=subdivision_from_address(country, getattr(project, "address", None)),
+            works=contract_works(getattr(project, "works", None), "subcontractor"),
         )
         _values, stamp = apply_contract_defaults({}, defaults, country_code=country)
+        if (defaults or {}).get("works"):
+            stamp["works"] = defaults["works"]
         # An agreement states a rate and one release event; the ceiling, the
         # split and the payment period belong to the contract it sits under.
         rate, from_field = subcontract_retention_default(defaults)

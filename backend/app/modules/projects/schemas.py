@@ -13,6 +13,8 @@ _HTML_TAG_RE = re.compile(r"<[^>]+>")
 _CURRENCY_CODE_RE = re.compile(r"^[A-Z]{3}$")
 _DECIMAL_RE = re.compile(r"^[0-9]+(\.[0-9]+)?$")
 _UNIT_CODE_RE = re.compile(r"^[A-Za-z0-9._/²³-]{1,20}$")
+#: A project's works, the vocabulary of ``contracts.country_defaults.CEILING_WORKS``.
+_WORKS_PATTERN = r"^(public|private)$"
 
 # Valid date formats accepted by the platform (ISO 8601 preferred)
 _DATE_FORMATS = ("%Y-%m-%d", "%Y-%m-%dT%H:%M:%S", "%d.%m.%Y", "%m/%d/%Y")
@@ -365,6 +367,13 @@ class ProjectCreate(BaseModel):
         "with Germany - unless a country pack is active, in which case the "
         "pack's market fills the blank and is recorded as inherited.",
     )
+    works: str | None = Field(
+        default=None,
+        pattern=_WORKS_PATTERN,
+        description="Whether the client is a public buyer: 'public' or 'private'. Where a country's "
+        "retention law follows the client (France), new contracts start from that law's terms. "
+        "Omitted means not recorded, and the country's neutral figures apply.",
+    )
 
     @field_validator("country_code", mode="after")
     @classmethod
@@ -526,6 +535,8 @@ class ProjectUpdate(BaseModel):
         description="ISO 3166-1 alpha-2 country code (e.g. US, CA, AU, DE, GB). "
         "Drives the AIA G702/G703 payment-application gate (US/CA/AU only).",
     )
+    # 'public' or 'private'; an explicit null clears it back to not recorded.
+    works: str | None = Field(default=None, pattern=_WORKS_PATTERN)
 
     @field_validator("country_code", mode="after")
     @classmethod
@@ -673,6 +684,7 @@ class ProjectResponse(BaseModel):
     subdivision_code: str | None = None
     # Set through the legal entities module, read-only here.
     legal_entity_id: UUID | None = None
+    works: str | None = None
     contract_value: str | None = None
     planned_start_date: str | None = None
     planned_end_date: str | None = None
