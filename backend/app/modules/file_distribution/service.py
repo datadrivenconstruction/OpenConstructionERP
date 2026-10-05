@@ -24,10 +24,12 @@ import logging
 import uuid
 from typing import TYPE_CHECKING
 
+from fastapi import HTTPException, status
 from sqlalchemy import and_, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.academy_isolation import academy_mode_enabled, assert_users_can_access_project
 from app.dependencies import verify_project_access
 from app.modules.file_distribution.models import (
     FileDistributionList,
@@ -584,6 +586,8 @@ class SubscriptionService:
             raise DistributionValidationError(
                 f"Unknown notify_on event(s): {sorted(bad)}",
             )
+        if academy_mode_enabled():
+            await self._assert_academy_subscriber(payload, user_id)
         sub = FileDistributionSubscription(
             project_id=payload.project_id,
             file_kind=payload.file_kind or "*",
@@ -604,6 +608,31 @@ class SubscriptionService:
                 f"Subscription already exists for {sub.subscriber_email} on kind={sub.file_kind}",
             ) from exc
         return sub
+
+    async def _assert_academy_subscriber(self, payload: SubscriptionCreate, user_id: uuid.UUID) -> None:
+        """On an academy install a learner subscribes themselves, never another learner.
+
+        Every new revision notifies ``subscriber_user_id``, so a subscription
+        naming somebody else is a way to push notifications at them. The
+        subscriber must be the caller or a member of the project, and the
+        address must be the caller's own.
+
+        Raises:
+            HTTPException: 422 ``user_not_in_project`` or ``subscriber_email_not_own``.
+        """
+        from app.modules.users.models import User
+
+        if payload.subscriber_user_id is not None and payload.subscriber_user_id != user_id:
+            await assert_users_can_access_project(self.session, payload.project_id, [payload.subscriber_user_id])
+        own = (await self.session.execute(select(User.email).where(User.id == user_id))).scalar_one_or_none()
+        if (own or "").strip().lower() != payload.subscriber_email.strip().lower():
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail={
+                    "error": "subscriber_email_not_own",
+                    "message": "A subscription can only send to your own email address.",
+                },
+            )
 
     async def delete(
         self,
