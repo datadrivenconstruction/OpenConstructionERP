@@ -15,7 +15,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.academy_isolation import assert_users_can_access_project
+from app.core.academy_isolation import academy_mode_enabled, assert_users_can_access_project, filter_users_to_project
 from app.core.events import event_bus
 from app.core.json_merge import merge_metadata
 from app.modules.tasks.models import Task
@@ -219,14 +219,25 @@ class TaskService:
         resolve (deleted users, free-text-only assignees) are simply
         absent from the returned mapping so the caller can fall back to
         ``metadata.assignee_name``.
+
+        In academy mode a name is resolved only for a user who is in the
+        task's own project, so a row written around the assignee gate cannot
+        print another learner's name.
         """
         ids: set[uuid.UUID] = set()
+        by_project: dict[object, set[uuid.UUID]] = {}
         for t in tasks:
             if t.responsible_id:
                 try:
-                    ids.add(uuid.UUID(str(t.responsible_id)))
+                    uid = uuid.UUID(str(t.responsible_id))
                 except (ValueError, AttributeError):
                     continue
+                ids.add(uid)
+                by_project.setdefault(t.project_id, set()).add(uid)
+        if academy_mode_enabled():
+            ids = set()
+            for project_id, members in by_project.items():
+                ids.update(await filter_users_to_project(self.session, project_id, list(members)))
         if not ids:
             return {}
 
