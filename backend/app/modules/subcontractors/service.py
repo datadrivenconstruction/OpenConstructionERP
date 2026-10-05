@@ -27,7 +27,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.academy_isolation import foreign_directory_link
+from app.core.academy_isolation import academy_directory_owner, foreign_directory_link
 from app.core.events import event_bus, publish_after_commit
 from app.core.i18n import get_locale
 from app.core.validation.engine import ValidationReport, validation_engine
@@ -765,16 +765,17 @@ class SubcontractorService:
         data: SubcontractorCreate,
         user_id: str | None = None,
     ) -> Subcontractor:
-        # Read-then-write duplicate guard on (country, tax_id). The DB
-        # also carries a partial unique index post-v3099 - that's the
-        # backstop; this read keeps the happy path 409 instead of 500.
-        # Stub repositories in unit tests don't implement the method;
-        # the IntegrityError handler below still catches a race.
+        # Read-then-write duplicate guard on (country, tax_id). This read
+        # is the only uniqueness rule: no install has a unique index on
+        # tax_id (see SubcontractorRepository.find_by_tax_id), so two
+        # concurrent POSTs can both pass it. Stub repositories in unit tests
+        # don't implement the method.
         find_by_tax_id = getattr(self.subs, "find_by_tax_id", None)
         if data.tax_id and find_by_tax_id is not None:
             existing = await find_by_tax_id(
                 data.tax_id,
                 country=data.country,
+                **await self._tax_id_scope(user_id),
             )
             if existing is not None:
                 raise HTTPException(
@@ -797,8 +798,9 @@ class SubcontractorService:
         try:
             await self.subs.create(entity)
         except IntegrityError:
-            # Two concurrent POSTs raced past the read-then-write check
-            # above. Translate to 409 so callers retry intelligently.
+            # Some other constraint refused the row. It is not a tax_id race:
+            # nothing in the database makes tax_id unique, so two concurrent
+            # POSTs with the same number both land.
             await self.session.rollback()
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
@@ -817,6 +819,17 @@ class SubcontractorService:
         )
         return entity
 
+    async def _tax_id_scope(self, actor_id: str | None) -> dict[str, str]:
+        """Narrow the tax number check to the caller's own firms in academy mode.
+
+        Each learner keeps their own directory there, so a number another
+        learner registered is not a duplicate, and a 409 for it would tell
+        one learner what another one did. Empty (the whole install) with the
+        flag off, for an admin and without a caller.
+        """
+        owner = await academy_directory_owner(self.session, actor_id)
+        return {"created_by": owner} if owner is not None else {}
+
     async def get_subcontractor(self, sub_id: uuid.UUID) -> Subcontractor:
         entity = await self.subs.get_by_id(sub_id)
         if entity is None:
@@ -827,6 +840,8 @@ class SubcontractorService:
         self,
         sub_id: uuid.UUID,
         data: SubcontractorUpdate,
+        *,
+        actor_id: str | None = None,
     ) -> Subcontractor:
         current = await self.get_subcontractor(sub_id)
         fields = data.model_dump(exclude_unset=True)
@@ -847,7 +862,7 @@ class SubcontractorService:
         find_by_tax_id = getattr(self.subs, "find_by_tax_id", None)
         if fields.get("tax_id") and find_by_tax_id is not None:
             country = fields.get("country", current.country)
-            existing = await find_by_tax_id(fields["tax_id"], country=country)
+            existing = await find_by_tax_id(fields["tax_id"], country=country, **await self._tax_id_scope(actor_id))
             if existing is not None and existing.id != sub_id:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,

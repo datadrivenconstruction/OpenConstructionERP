@@ -139,6 +139,7 @@ class SubcontractorRepository(_BaseRepo):
         tax_id: str,
         *,
         country: str | None = None,
+        created_by: str | None = None,
     ) -> Subcontractor | None:
         """Look up an active subcontractor holding the same tax number.
 
@@ -150,10 +151,13 @@ class SubcontractorRepository(_BaseRepo):
         the digits and their order, so the run is a superset key SQL can
         compute - and the exact comparison happens on the identity key here.
 
-        Used by ``SubcontractorService`` for the happy-path 409 on create and
-        on a PATCH that changes the number. The partial unique index added in
-        ``v3099_subcontractors_unique_tax_id`` stays the backstop for the
-        exact-string race.
+        Used by ``SubcontractorService`` for the 409 on create and on a PATCH
+        that changes the number. This read is the whole uniqueness rule: no
+        install carries a unique index on ``tax_id`` (``v3099`` only builds a
+        non-unique index on a ``tenant_id`` column the table never had, so it
+        never runs), and only active rows are compared. ``created_by`` narrows
+        the read to one owner's rows, which is how an academy install keeps
+        each learner's directory apart.
         """
         if not tax_id:
             return None
@@ -167,6 +171,8 @@ class SubcontractorRepository(_BaseRepo):
         )
         if country_u:
             stmt = stmt.where(Subcontractor.country == country_u)
+        if created_by is not None:
+            stmt = stmt.where(Subcontractor.created_by == created_by)
         rows = (await self.session.execute(stmt)).scalars().all()
         for row in rows:
             if canonical_tax_id(row.country or country_u, row.tax_id) == key:

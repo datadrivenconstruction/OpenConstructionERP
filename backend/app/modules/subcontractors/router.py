@@ -330,7 +330,7 @@ async def update_subcontractor(
     """Update a subcontractor."""
     await _academy_guard_sub(session, _user, sub_id)
     svc = SubcontractorService(session)
-    entity = await svc.update_subcontractor(sub_id, data)
+    entity = await svc.update_subcontractor(sub_id, data, actor_id=_user)
     return SubcontractorResponse.model_validate(entity)
 
 
