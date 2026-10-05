@@ -5,13 +5,15 @@
       "id": "rb0",
       "state": "mismatch",
       "app_value": "34489.48",
-      "kind": "money"
+      "kind": "money",
+      "reason_key": null
     },
     {
       "id": "rb1",
       "state": "match",
       "app_value": "5.00",
-      "kind": "percent"
+      "kind": "percent",
+      "reason_key": null
     }
   ],
   "read_at": "2026-10-05T10:40:00Z"

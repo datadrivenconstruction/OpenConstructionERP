@@ -60,7 +60,7 @@ export type DiagnosisKind = (typeof DIAGNOSIS_KINDS)[number];
 export const READBACK_STATES = ['match', 'mismatch', 'unknown'] as const;
 export type ReadbackState = (typeof READBACK_STATES)[number];
 
-export const ENROLMENT_STATUSES = ['queued', 'provisioning', 'active', 'completed', 'revoked', 'failed'] as const;
+export const ENROLMENT_STATUSES = ['queued', 'provisioning', 'active', 'completed', 'revoked', 'failed', 'suspended'] as const;
 export type EnrolmentStatus = (typeof ENROLMENT_STATUSES)[number];
 
 export const ENROLMENT_SOURCES = ['webhook', 'admin'] as const;
@@ -238,9 +238,12 @@ export interface SavedAnswer {
 }
 
 export interface RelatedValue {
+  // Ledger key of the figure: an identifier, never shown to the learner.
   name: string;
   value: string;
   kind: ValueKind;
+  // Human name in the course language; null means the spec names it nowhere, so hide the row.
+  label: string | null;
 }
 
 export interface Diagnosis {
@@ -332,12 +335,29 @@ export interface ReadbackValue {
   state: ReadbackState;
   app_value: string | null;
   kind: ValueKind;
+  // i18n key telling the learner what to do about an `unknown` reading
+  // (decision 40), e.g. `trainer.readback.open_leveling`; null otherwise.
+  reason_key: string | null;
 }
 
 export interface ReadbackResponse {
   task_id: string;
   items: ReadbackValue[];
   read_at: string;
+}
+
+// ── POST /v1/trainer/tasks/{taskId}/hints/reveal ────────────────────────────
+
+export interface RevealedHint {
+  index: number;
+  text: string;
+}
+
+// Decision 30: idempotent at the last hint.
+export interface HintRevealResult {
+  hint: RevealedHint;
+  hints_revealed: number;
+  hints_total: number;
 }
 
 // ── Admin: POST /v1/trainer/admin/enrolments/ ───────────────────────────────

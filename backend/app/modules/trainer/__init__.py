@@ -36,10 +36,9 @@ async def on_startup() -> None:
     if not get_settings().academy_mode:
         return
 
-    # Load the courses from ``settings.trainer_courses_dir`` (Wave 1). Nothing
-    # here may stop the boot: a bad course is stored as invalid, and any other
-    # failure is logged with the stored courses left as they were. Wave 2 adds
-    # the recheck handlers below.
+    # Load the courses from ``settings.trainer_courses_dir``. Nothing here may
+    # stop the boot: a bad course is stored as invalid, and any other failure
+    # is logged with the stored courses left as they were.
     try:
         from app.modules.trainer import loader
         from app.modules.trainer.validators import register_trainer_rules
@@ -48,3 +47,12 @@ async def on_startup() -> None:
         await loader.load_courses_at_startup()
     except Exception:  # the boot must never crash on the trainer
         logger.exception("Academy mode is on, but the trainer course load failed")
+
+    # ERP events mark a learner's course stale and schedule a recheck (design
+    # §6). The handlers also check the flag themselves, at their first line.
+    try:
+        from app.modules.trainer.events import register_trainer_subscribers
+
+        register_trainer_subscribers()
+    except Exception:  # the boot must never crash on the trainer
+        logger.exception("Academy mode is on, but the trainer event handlers could not be registered")

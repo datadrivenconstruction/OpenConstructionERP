@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from pydantic import ValidationError
 
 from app.modules.trainer.loader import parse_course_bytes
 from app.modules.trainer.seeder import (
@@ -380,20 +381,23 @@ def test_the_seeding_flag_is_set_only_inside_the_block() -> None:
 # ── Bids the learner records, scope links ────────────────────────────────────
 
 
-@pytest.mark.parametrize(
-    ("recorded_by", "by_seed"),
-    [
-        (None, True),
-        ("seed", True),
-        ("seed (API, while Published)", True),
-        ("Seed (API, während Published)", True),
-        ("learner in T3 (Record bid), BEFORE Open Bids", False),
-        ("Lernende in T3 ('Angebot erfassen')", False),
-    ],
-)
-def test_a_bid_is_left_to_the_learner_unless_the_seed_records_it(recorded_by: str | None, by_seed: bool) -> None:
+@pytest.mark.parametrize(("recorded_by", "by_seed"), [("seed", True), ("learner", False)])
+def test_a_bid_is_left_to_the_learner_unless_the_seed_records_it(recorded_by: str, by_seed: bool) -> None:
     bid = BidSeed(bidder="Firm", total=Decimal("100"), recorded_by=recorded_by)
     assert bid_recorded_by_seed(bid) is by_seed
+
+
+@pytest.mark.parametrize(
+    "recorded_by",
+    [None, "Seed", "seed (API, while Published)", "learner in T3 (Record bid)", "Lernende in T3"],
+)
+def test_recorded_by_is_the_enum_and_prose_is_refused(recorded_by: str | None) -> None:
+    """Decision 38: the prose moves to ``_recorded_by_note``; nothing is guessed from it."""
+    payload: dict[str, Any] = {"bidder": "Firm", "total": Decimal("100")}
+    if recorded_by is not None:
+        payload["recorded_by"] = recorded_by
+    with pytest.raises(ValidationError):
+        BidSeed.model_validate(payload)
 
 
 def test_a_scope_line_linking_a_missing_position_is_refused(course: dict[str, Any]) -> None:

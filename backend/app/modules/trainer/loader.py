@@ -11,7 +11,9 @@ The pipeline per file is Import -> Parse -> VALIDATE -> Store:
    normalised dict, so a file that fails the shape still gets a verdict from
    every rule. It fails closed: a rule that raised (an engine-error row, which
    the engine itself never counts as a failure) or a rule set the engine did
-   not know makes the course invalid.
+   not know makes the course invalid. It then builds the seed plan
+   (decision 39): a ``PlanError`` is an error of the course, not of a later
+   enrolment.
 3. :func:`load_courses_dir` stores every course through a
    :class:`CourseStore` (decision 26, design section 3.1): a valid one as
    ``active``, an invalid one as ``invalid`` with its error list in
@@ -184,6 +186,7 @@ async def validate_course(parsed: ParsedCourse, *, previous_sha256: str | None =
             errors.append(f"{result.rule_id}: rule crashed, course treated as invalid")
         elif result.severity == Severity.ERROR:
             errors.append(f"{result.rule_id} at {result.element_ref}: {result.message}")
+    errors.extend(seed_plan_errors(parsed))
     summary = {
         "status": str(getattr(report.status, "value", report.status)),
         "errors": len(report.errors),
@@ -192,6 +195,27 @@ async def validate_course(parsed: ParsedCourse, *, previous_sha256: str | None =
         "results": [_row(r) for r in failed],
     }
     return CourseVerdict(not errors, errors, summary)
+
+
+def seed_plan_errors(parsed: ParsedCourse) -> list[str]:
+    """The seeder's plan problems for a course that passed the shape gate (decision 39).
+
+    The plan is built at load, so a seed whose blocks contradict each other
+    stores the course as invalid instead of failing a learner's enrolment.
+    A course that failed the shape gate has no spec to plan; its shape errors
+    already make it invalid.
+    """
+    if parsed.spec is None:
+        return []
+    from app.modules.trainer.seeder.plan import PlanError, build_plan
+
+    try:
+        build_plan(parsed.spec)
+    except PlanError as exc:
+        return [f"seed plan: {problem}" for problem in exc.problems]
+    except ValidationError as exc:
+        return [f"seed plan: {line}" for line in _error_lines(exc)]
+    return []
 
 
 # ── Storage ──────────────────────────────────────────────────────────────────

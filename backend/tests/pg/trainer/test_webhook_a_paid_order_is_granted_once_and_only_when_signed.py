@@ -287,7 +287,8 @@ async def test_an_unknown_event_type_is_acknowledged_once_and_ignored(pg_session
     await _catalogue(pg_session)
     email, seeder = _email(), _Seeder()
     mail, _ = _mail()
-    body = _body(email, event_id="evt_refund", event_type="order.refunded")
+    # Not ``order.refunded``: decision 42 made that a known type (it suspends).
+    body = _body(email, event_id="evt_refund", event_type="order.updated")
 
     first = await _deliver(pg_session, body, _headers(body), seeder, mail)
     again = await _deliver(pg_session, body, _headers(body), seeder, mail)
@@ -397,6 +398,8 @@ async def test_a_seed_failure_still_acks_the_store_and_a_resend_reseeds_without_
     assert enrolment.status == "failed"
     assert enrolment.metadata_["seed_error"] == "RuntimeError"
     assert len(outbox.sent) == 1, "the buyer still gets their account"
+    # Decision 41: a failed seed gets the "being prepared" variant, never "ready".
+    assert "prepared" in outbox.sent[0].subject
 
     fixed = _Seeder()
     retried = await _deliver(pg_session, body, _headers(body), fixed, mail)
@@ -404,7 +407,13 @@ async def test_a_seed_failure_still_acks_the_store_and_a_resend_reseeds_without_
     await pg_session.refresh(enrolment)
     assert enrolment.status == "active"
     assert fixed.calls == [enrolment.id]
-    assert len(outbox.sent) == 1, "the welcome email is sent once"
+    # The "ready" email is still owed after "being prepared" (decision 41),
+    # and it goes out once.
+    assert len(outbox.sent) == 2
+    assert outbox.sent[1].subject.startswith("Your course is ready")
+    again = await _deliver(pg_session, body, _headers(body), fixed, mail)
+    assert again.status == "duplicate"
+    assert len(outbox.sent) == 2
     assert await _count(pg_session, TrainerEnrolment, TrainerEnrolment.user_id == user.id) == 1
 
 

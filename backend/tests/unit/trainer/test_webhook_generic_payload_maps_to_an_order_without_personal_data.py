@@ -73,10 +73,13 @@ def test_redaction_matches_word_parts_not_substrings() -> None:
 
 
 def test_an_unknown_event_type_maps_without_an_order() -> None:
-    event = parse_generic_payload({"id": "evt_9", "type": "order.refunded", "data": {"phone": "1"}})
+    # ``order.refunded`` used to be the example here; decision 42 made it a
+    # known type (it suspends), so an unrelated store event stands in.
+    event = parse_generic_payload({"id": "evt_9", "type": "order.updated", "data": {"phone": "1"}})
     assert event.order is None
-    assert event.event_type == "order.refunded"
-    assert event.payload == {"id": "evt_9", "type": "order.refunded", "data": {}}
+    assert event.refund is None
+    assert event.event_type == "order.updated"
+    assert event.payload == {"id": "evt_9", "type": "order.updated", "data": {}}
 
 
 @pytest.mark.parametrize(

@@ -257,7 +257,7 @@
         ]
       },
       "diagnoses": [
-        {"id": "t1-rate-left-zero", "applies_to": "direct_cost", "kind": "error", "provenance": "script", "when": "Position 01.002 still has no rate.", "wrong_value": 16092.00, "derivation": "4977.00 + 0.00 + 11115.00", "message": "The blockwork position still counts as zero.", "related": [{"name": "fx_block_amount", "value": 14322.00, "derivation": "310 x 46.20"}]},
+        {"id": "t1-rate-left-zero", "applies_to": "direct_cost", "kind": "error", "provenance": "script", "when": "Position 01.002 still has no rate.", "wrong_value": 16092.00, "derivation": "4977.00 + 0.00 + 11115.00", "message": "The blockwork position still counts as zero.", "related": [{"name": "fx_block_amount", "label": "Blockwork amount", "value": 14322.00, "derivation": "310 x 46.20"}]},
         {"id": "t1-decimal-slip", "applies_to": "direct_cost", "kind": "error", "provenance": "derived-likely", "when": "The rate was typed as 4.62.", "wrong_value": 17524.20, "derivation": "4977.00 + 310 x 4.62 + 11115.00", "message": "The blockwork rate lost a digit: 4.62 instead of 46.20.", "related": []}
       ],
       "hints": [
@@ -326,8 +326,8 @@
         ]
       },
       "diagnoses": [
-        {"id": "t2-profit-compounded", "applies_to": "grand_total", "kind": "error", "provenance": "script", "when": "Profit applied to direct cost plus overheads.", "wrong_value": 34489.48, "derivation": "30414.00 + 2433.12 + 32847.12 x 0.05", "message": "Profit was charged on the overheads as well.", "related": [{"name": "fx_profit_amount", "value": 1520.70, "derivation": "30414.00 x 0.05"}]},
-        {"id": "t2-overheads-missing", "applies_to": "grand_total", "kind": "error", "provenance": "script", "when": "Only the profit markup was added.", "wrong_value": 31934.70, "derivation": "30414.00 + 1520.70", "message": "The overheads markup is missing.", "related": [{"name": "fx_overheads_amount", "value": 2433.12, "derivation": "30414.00 x 0.08"}]},
+        {"id": "t2-profit-compounded", "applies_to": "grand_total", "kind": "error", "provenance": "script", "when": "Profit applied to direct cost plus overheads.", "wrong_value": 34489.48, "derivation": "30414.00 + 2433.12 + 32847.12 x 0.05", "message": "Profit was charged on the overheads as well.", "related": [{"name": "fx_profit_amount", "label": "Profit amount", "value": 1520.70, "derivation": "30414.00 x 0.05"}]},
+        {"id": "t2-overheads-missing", "applies_to": "grand_total", "kind": "error", "provenance": "script", "when": "Only the profit markup was added.", "wrong_value": 31934.70, "derivation": "30414.00 + 1520.70", "message": "The overheads markup is missing.", "related": [{"name": "fx_overheads_amount", "label": "Overheads amount", "value": 2433.12, "derivation": "30414.00 x 0.08"}]},
         {"id": "t2-rounding-convention", "applies_to": "grand_total", "kind": "convention", "provenance": "founder", "when": "The ERP rounds each markup line to two places before summing.", "derivation": "Each markup line is rounded, then summed.", "message": "The ERP rounds each markup line; your own sum may differ by a penny.", "related": []}
       ],
       "hints": [
@@ -389,7 +389,7 @@
         ]
       },
       "diagnoses": [
-        {"id": "t3-raw-lowest", "applies_to": "lowest_normalized", "kind": "error", "provenance": "script", "when": "The raw totals were compared.", "wrong_value": 10980.00, "derivation": "Alderby raw total", "message": "That is Alderby's raw total, with the flashings left out.", "related": [{"name": "fx_alderby_norm", "value": 11780.00, "derivation": "10980.00 + 64 x 12.50"}]},
+        {"id": "t3-raw-lowest", "applies_to": "lowest_normalized", "kind": "error", "provenance": "script", "when": "The raw totals were compared.", "wrong_value": 10980.00, "derivation": "Alderby raw total", "message": "That is Alderby's raw total, with the flashings left out.", "related": [{"name": "fx_alderby_norm", "label": "Alderby normalised total", "value": 11780.00, "derivation": "10980.00 + 64 x 12.50"}]},
         {"id": "t3-budget-allowance", "applies_to": "alderby_normalized", "kind": "error", "provenance": "derived-likely", "when": "The gap was priced at a lump allowance of 620.00.", "wrong_value": 11600.00, "derivation": "10980.00 + 620.00", "message": "The gap was priced at an allowance, not at the highest flashing rate received.", "related": []}
       ],
       "hints": [
@@ -452,7 +452,7 @@
         ]
       },
       "diagnoses": [
-        {"id": "t4-no-retention", "applies_to": "net_due", "kind": "error", "provenance": "script", "when": "Retention was not deducted.", "wrong_value": 12138.00, "derivation": "Gross valuation, nothing deducted", "message": "The net due still includes the retention.", "related": [{"name": "fx_v1_retention", "value": 606.90, "derivation": "12138.00 x 5%"}]},
+        {"id": "t4-no-retention", "applies_to": "net_due", "kind": "error", "provenance": "script", "when": "Retention was not deducted.", "wrong_value": 12138.00, "derivation": "Gross valuation, nothing deducted", "message": "The net due still includes the retention.", "related": [{"name": "fx_v1_retention", "label": "Retention on valuation 1", "value": 606.90, "derivation": "12138.00 x 5%"}]},
         {"id": "t4-wrong-rate", "applies_to": "retention_amount", "kind": "error", "provenance": "derived-likely", "when": "Retention was taken at 3 per cent.", "wrong_value": 364.14, "derivation": "12138.00 x 3%", "message": "This contract holds 5 per cent, not 3.", "related": []}
       ],
       "hints": [
@@ -513,9 +513,9 @@
         ]
       },
       "diagnoses": [
-        {"id": "t5-omission-ignored", "applies_to": "vr_net", "kind": "error", "provenance": "script", "when": "The omitted covering was not deducted.", "wrong_value": 1540.00, "derivation": "4 x 385.00", "message": "The omitted roof covering was not deducted.", "related": [{"name": "fx_omit_amount", "value": -750.00, "derivation": "-12 x 62.50"}]},
+        {"id": "t5-omission-ignored", "applies_to": "vr_net", "kind": "error", "provenance": "script", "when": "The omitted covering was not deducted.", "wrong_value": 1540.00, "derivation": "4 x 385.00", "message": "The omitted roof covering was not deducted.", "related": [{"name": "fx_omit_amount", "label": "Omitted roof covering amount", "value": -750.00, "derivation": "-12 x 62.50"}]},
         {"id": "t5-omission-added", "applies_to": "vr_net", "kind": "error", "provenance": "derived-likely", "when": "The omission was added instead of deducted.", "wrong_value": 2290.00, "derivation": "4 x 385.00 + 12 x 62.50", "message": "The omission was added instead of deducted.", "related": []},
-        {"id": "t5-sum-twice", "applies_to": "new_contract_sum", "kind": "error", "provenance": "script", "when": "The variation was added to the sum by hand after completing the order.", "wrong_value": 36082.82, "derivation": "34502.82 + 2 x 790.00", "message": "The variation reached the contract sum twice.", "related": [{"name": "fx_contract_sum", "value": 34502.82, "derivation": "Signed contract sum"}]}
+        {"id": "t5-sum-twice", "applies_to": "new_contract_sum", "kind": "error", "provenance": "script", "when": "The variation was added to the sum by hand after completing the order.", "wrong_value": 36082.82, "derivation": "34502.82 + 2 x 790.00", "message": "The variation reached the contract sum twice.", "related": [{"name": "fx_contract_sum", "label": "Contract sum", "value": 34502.82, "derivation": "Signed contract sum"}]}
       ],
       "hints": [
         "Omissions are deducted at the rate in the instruction.",

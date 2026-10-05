@@ -925,6 +925,10 @@
       "fail": "Aufgabe {task_id}, Diagnose {diagnosis}: wrong_value ist keine Zahl und keine Konvention mit when",
       "suggestion": "Geben Sie den falschen Wert als Zahl an oder kennzeichnen Sie die Diagnose als Konvention mit Bedingung"
     },
+    "related_value_unlabelled": {
+      "fail": "Aufgabe {task_id}, Diagnose {diagnosis}: der Bezugswert {name} hat keine Bezeichnung und wird dem Lernenden nicht angezeigt",
+      "suggestion": "Geben Sie dem Bezugswert eine Bezeichnung in der Kurssprache, so wie ein Kalkulator die Größe auf dem Bildschirm nennen würde"
+    },
     "single_correct_option": {
       "correct_count": "Aufgabe {task_id}, {question}: {count} Optionen sind als richtig markiert statt genau einer",
       "feedback_missing": "Aufgabe {task_id}, {question}: Option {option} hat kein Feedback",

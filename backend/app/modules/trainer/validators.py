@@ -39,6 +39,7 @@ Rules (severity):
 * ``trainer.diagnosis_wrong_value_numeric`` (ERROR).
 * ``trainer.single_correct_option`` (ERROR).
 * ``trainer.check_id_prefix_matches_task`` (WARNING).
+* ``trainer.related_value_unlabelled`` (WARNING, decision 47).
 * ``trainer.seed_stage_resolvable`` (ERROR) - decision 12.
 * ``trainer.rate_unit_explicit`` (ERROR) - a rule that carries a rate states
   ``percent`` or ``fraction`` (a rule is a rate when the file uses its key as
@@ -1032,6 +1033,54 @@ class SingleCorrectOption(TrainerRule):
                         )
 
 
+def ledger_label_map(tasks: Iterable[Any]) -> dict[str, str]:
+    """Fallback screen names of ledger keys, from the course itself (decision 47).
+
+    A readback that reads exactly one key names it by its ``what``; a given
+    with a ``ledger_key`` names it by its ``name``. The first source in task
+    order wins. A key the course names nowhere has no fallback.
+    """
+    labels: dict[str, str] = {}
+    ordered = sorted(_dicts(list(tasks)), key=lambda t: t.get("n") if isinstance(t.get("n"), int) else 0)
+    for task in ordered:
+        for readback in _dicts(task.get("readback")):
+            expects = [e for e in _list(readback.get("expects")) if isinstance(e, str)]
+            what = _str(readback.get("what")).strip()
+            if len(expects) == 1 and what:
+                labels.setdefault(expects[0], what)
+        for given in _dicts(task.get("given")):
+            key, name = given.get("ledger_key"), _str(given.get("name")).strip()
+            if isinstance(key, str) and key and name:
+                labels.setdefault(key, name)
+    return labels
+
+
+class RelatedValueLabelled(TrainerRule):
+    """Every related value of a diagnosis has a screen name (decision 47).
+
+    The name comes from the value's own ``label``, else from a readback or a
+    given that names the same ledger key. Without either the dock hides the
+    row, so the learner never sees the figure the diagnosis points at.
+    """
+
+    rule_id = "trainer.related_value_unlabelled"
+    name = "Trainer related values have a label"
+    severity = Severity.WARNING
+
+    def findings(self, data: dict[str, Any], context: ValidationContext) -> Iterable[Finding]:
+        fallback = ledger_label_map(_tasks(data))
+        for _i, task, ref in _each_task(data):
+            for diagnosis in _dicts(task.get("diagnoses")):
+                for item in _dicts(diagnosis.get("related")):
+                    if _str(item.get("label")).strip() or item.get("name") in fallback:
+                        continue
+                    yield Finding(
+                        "fail",
+                        f"tasks[{ref}].diagnoses[{diagnosis.get('id')}].related[{item.get('name')}]",
+                        {"task_id": ref, "diagnosis": diagnosis.get("id"), "name": item.get("name")},
+                    )
+
+
 class CheckIdPrefixMatchesTask(TrainerRule):
     """Check ids start with ``t<n>-`` (renumbering residue does not grade wrong)."""
 
@@ -1508,6 +1557,7 @@ TRAINER_RULES: tuple[type[TrainerRule], ...] = (
     DiagnosisAppliesToResolves,
     DiagnosisUniquePerField,
     DiagnosisWrongValueNumeric,
+    RelatedValueLabelled,
     SingleCorrectOption,
     CheckIdPrefixMatchesTask,
     SeedStageResolvable,

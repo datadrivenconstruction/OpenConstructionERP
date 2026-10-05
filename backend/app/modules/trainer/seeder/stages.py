@@ -24,7 +24,7 @@ Service calls per step (the report of stream C lists them too):
   scope line, ``create_bidder`` and ``create_invitation`` per bid,
   ``publish_package``, then ``record_submission`` and
   ``create_submission_line`` per priced line of every bid the seed records.
-  A bid whose ``recorded_by`` is not ``seed ...`` is left to the learner, who
+  A bid whose ``recorded_by`` is ``learner`` (decision 38) is left to the learner, who
   records it in the task; its bidder and invitation are seeded. Bids are recorded before the
   package is opened, so they stay valid; the learner opens, levels and awards.
   ``send_invitations`` and ``open_bids`` are never called.

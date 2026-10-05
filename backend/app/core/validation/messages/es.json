@@ -925,6 +925,10 @@
       "fail": "Tarea {task_id}, diagnóstico {diagnosis}: wrong_value no es un número ni una convención con when",
       "suggestion": "Dé el valor erróneo como número o marque el diagnóstico como convención y diga cuándo aplica"
     },
+    "related_value_unlabelled": {
+      "fail": "Tarea {task_id}, diagnóstico {diagnosis}: el valor relacionado {name} no tiene etiqueta, así que el alumno nunca lo ve",
+      "suggestion": "Dé al valor relacionado una etiqueta en el idioma del curso, tal como un presupuestista nombraría la cifra en pantalla"
+    },
     "single_correct_option": {
       "correct_count": "Tarea {task_id}, {question}: {count} opciones están marcadas como correctas en lugar de exactamente una",
       "feedback_missing": "Tarea {task_id}, {question}: la opción {option} no tiene comentario",

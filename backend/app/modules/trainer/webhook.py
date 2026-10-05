@@ -55,6 +55,10 @@ Outcomes
   retries it.
 * unknown event type: 200 ``ignored``, recorded once, so the store stops
   retrying.
+* ``order.refunded`` / ``order.chargeback`` (decision 42): 200 ``processed``
+  when the buyer's enrolments on that product were suspended, ``ignored``
+  when there was nothing to suspend. Nothing is deleted; a later
+  ``order.paid`` for the same course reactivates the enrolment.
 * ``order.paid``: 200 ``processed`` (or ``ignored`` / ``failed`` from
   provisioning, still 200, because a store retry cannot fix an unknown offer
   or a seed bug). An unexpected exception answers 500 ``failed`` and the
@@ -86,6 +90,7 @@ from app.modules.trainer.provisioning import (
     SeedOnEnrol,
     complete_provisioning,
     provision_order_paid,
+    suspend_order,
 )
 
 if TYPE_CHECKING:
@@ -102,6 +107,10 @@ REPLAY_WINDOW_SECONDS = 300
 
 #: The only event type that grants anything.
 ORDER_PAID = "order.paid"
+
+#: Event types that take a grant back (decision 42): the enrolment is
+#: suspended, never deleted.
+REFUND_TYPES: frozenset[str] = frozenset({"order.refunded", "order.chargeback"})
 
 #: The adapter used when the router names none.
 DEFAULT_PROVIDER = "generic"
@@ -138,18 +147,42 @@ class OrderPaid(BaseModel):
         return value.lower()
 
 
+class OrderRefunded(BaseModel):
+    """A refunded (or charged back) order, in the platform's words (decision 42).
+
+    ``email`` names the buyer. ``offer_code`` narrows the refund to the
+    courses that store product granted, and ``order_ref`` to the enrolments
+    that order created; with neither, every enrolment of the buyer is
+    suspended.
+    """
+
+    model_config = ConfigDict(extra="forbid", frozen=True, str_strip_whitespace=True)
+
+    event_id: str = Field(min_length=1, max_length=128)
+    email: EmailStr
+    offer_code: str | None = Field(default=None, min_length=1, max_length=128)
+    order_ref: str | None = Field(default=None, max_length=128)
+
+    @field_validator("email")
+    @classmethod
+    def _lowercase_email(cls, value: str) -> str:
+        return value.lower()
+
+
 @dataclass(frozen=True)
 class ProviderEvent:
     """One verified delivery after the adapter read it.
 
-    ``order`` is set only for ``order.paid``. ``payload`` is the delivery with
-    address, phone, card and tax fields removed; it is what gets stored.
+    ``order`` is set only for ``order.paid`` and ``refund`` only for a type in
+    :data:`REFUND_TYPES`. ``payload`` is the delivery with address, phone,
+    card and tax fields removed; it is what gets stored.
     """
 
     event_id: str
     event_type: str
     payload: dict[str, Any]
     order: OrderPaid | None = None
+    refund: OrderRefunded | None = None
 
 
 class PayloadError(ValueError):
@@ -278,12 +311,24 @@ def parse_generic_payload(payload: Any) -> ProviderEvent:
         raise PayloadError("missing or invalid field: type", event_id=event_id)
     event_type = event_type.strip()
     redacted = redact_payload(payload)
-    if event_type != ORDER_PAID:
+    if event_type != ORDER_PAID and event_type not in REFUND_TYPES:
         return ProviderEvent(event_id=event_id, event_type=event_type, payload=redacted)
 
     data = payload.get("data")
     if not isinstance(data, Mapping):
         raise PayloadError("missing or invalid field: data", event_id=event_id, event_type=event_type)
+    if event_type in REFUND_TYPES:
+        refund_fields = {key: data[key] for key in ("offer_code", "order_ref", "email") if data.get(key) is not None}
+        try:
+            refund = OrderRefunded.model_validate({"event_id": event_id, **refund_fields})
+        except ValidationError as exc:
+            names = sorted({str(err["loc"][0]) for err in exc.errors() if err.get("loc")})
+            raise PayloadError(
+                f"missing or invalid fields: {', '.join(names) or 'data'}",
+                event_id=event_id,
+                event_type=event_type,
+            ) from None
+        return ProviderEvent(event_id=event_id, event_type=event_type, payload=redacted, refund=refund)
     fields = {key: data[key] for key in _ORDER_FIELDS if data.get(key) is not None}
     try:
         order = OrderPaid.model_validate({"event_id": event_id, **fields})
@@ -574,6 +619,9 @@ async def handle_webhook(
             enrolment_ids=(duplicate.enrolment_id,) if duplicate.enrolment_id else (),
         )
 
+    if event.refund is not None:
+        return await _handle_refund(session, settings, row, event.refund, adapter.name)
+
     if event.event_type != ORDER_PAID or event.order is None:
         row.status = "ignored"
         row.error = "unhandled_event_type"
@@ -615,6 +663,45 @@ async def handle_webhook(
         http_status=200,
         status=row.status,
         event_id=event.event_id,
+        user_id=result.user_id,
+        enrolment_ids=tuple(item.enrolment_id for item in result.enrolments),
+    )
+
+
+async def _handle_refund(
+    session: AsyncSession,
+    settings: Settings,
+    row: TrainerWebhookEvent,
+    refund: OrderRefunded,
+    provider: str,
+) -> WebhookOutcome:
+    """Suspend what a refunded order granted (decision 42) and record the outcome."""
+    row.email = refund.email
+    row.product_ref = refund.offer_code
+    row.order_ref = refund.order_ref
+    try:
+        async with session.begin_nested():
+            result = await suspend_order(
+                session,
+                settings,
+                provider=provider,
+                email=refund.email,
+                offer_code=refund.offer_code,
+                order_ref=refund.order_ref,
+            )
+    except Exception as exc:
+        logger.exception("Trainer refund handling crashed for event %s", refund.event_id)
+        row.status = "failed"
+        row.error = _clip(f"error: {type(exc).__name__}")
+        row.processed_at = datetime.now(UTC)
+        await session.commit()
+        return WebhookOutcome(http_status=500, status="failed", event_id=refund.event_id)
+    _apply_result(row, result)
+    await session.commit()
+    return WebhookOutcome(
+        http_status=200,
+        status=row.status,
+        event_id=refund.event_id,
         user_id=result.user_id,
         enrolment_ids=tuple(item.enrolment_id for item in result.enrolments),
     )

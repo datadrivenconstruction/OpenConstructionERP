@@ -33,7 +33,8 @@ export const attemptFailFixture: AttemptResult = {
           {
             "name": "fx_profit_amount",
             "value": "1520.70",
-            "kind": "money"
+            "kind": "money",
+            "label": "Profit amount"
           }
         ]
       },

@@ -145,6 +145,7 @@ refused                                write instead
 ``answer_key[].unit`` = EUR, days ...  ``answer_key[].display_unit`` (23)
 ``bids[].header_total_typed``          ``bids[].total`` (27)
 ``bids[].header_ledger_key``           ``bids[].total_ledger_key`` (27)
+``bids[].recorded_by`` as prose        ``seed`` | ``learner``; the prose in ``_recorded_by_note`` (38)
 =====================================  ===========================================================
 """
 
@@ -198,6 +199,7 @@ COLUMN_LIMITS: dict[str, int] = {
 Unit = Literal["percent", "fraction"]
 Works = Literal["public", "private"]
 LegalReview = Literal["pending", "reviewed"]
+RECORDED_BY_VALUES: tuple[str, ...] = ("seed", "learner")
 
 #: Country-named seed keys of the first drafts -> the canonical list they
 #: belong in. Refused, never folded: one shape, no aliases.
@@ -430,6 +432,18 @@ def _fixed_ref(expected: str, arg: str) -> Any:
     return BeforeValidator(check)
 
 
+def _check_recorded_by(value: Any) -> Any:
+    if isinstance(value, str) and value not in RECORDED_BY_VALUES:
+        msg = (
+            f"recorded_by {value[:40]!r} is not 'seed' or 'learner'; "
+            "move any explanation to '_recorded_by_note' (decision 38)"
+        )
+        raise ValueError(msg)
+    return value
+
+
+#: Who records a seeded bid (decision 38).
+RecordedBy = Annotated[Literal["seed", "learner"], BeforeValidator(_check_recorded_by)]
 BoqRef = Annotated[str, BeforeValidator(_check_boq_ref)]
 PackageRef = Annotated[str, _fixed_ref(PACKAGE_REF, "package_ref")]
 ContractRef = Annotated[str, _fixed_ref(CONTRACT_REF, "contract_ref")]
@@ -685,9 +699,16 @@ class LedgerFigure(_Strict):
 
 
 class RelatedValue(_Strict):
-    """A derivation shown next to a diagnosis or a rule."""
+    """A derivation shown next to a diagnosis or a rule.
+
+    ``name`` is a ledger key. ``label`` is how an estimator would name the
+    figure on screen, in the course language (decision 47); without it the
+    checker falls back to a readback or given that names the same key, and
+    the loader warns (``trainer.related_value_unlabelled``).
+    """
 
     name: str
+    label: str | None = None
     value: Scalar = None
     derivation: str | None = None
 
@@ -1098,10 +1119,16 @@ class BidSeed(_Strict):
     bid, including one whose lines do not add up to it (then ``line_sum`` and
     ``declared_discrepancy`` carry the other figure). There is no second name
     for the header total.
+
+    ``recorded_by`` (decision 38) says who records the bid: ``seed`` (the
+    seeder, while the package is published) or ``learner`` (the learner in a
+    task; the seeder then creates the bidder and the invitation, never the
+    bid). Any explanation goes in ``_recorded_by_note``, which the loader
+    strips.
     """
 
     bidder: NonEmpty
-    recorded_by: str | None = None
+    recorded_by: RecordedBy
     total: Num
     total_ledger_key: str | None = None
     lines: list[BidLineSeed] = Field(default_factory=list)

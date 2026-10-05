@@ -925,6 +925,10 @@
       "fail": "Task {task_id}, diagnosis {diagnosis}: wrong_value is not a number, and it is not a convention with a when",
       "suggestion": "Give the wrong value as a number, or mark the diagnosis as a convention and say when it applies"
     },
+    "related_value_unlabelled": {
+      "fail": "Task {task_id}, diagnosis {diagnosis}: related value {name} has no label, so the learner never sees it",
+      "suggestion": "Give the related value a label in the course language, as an estimator would name the figure on screen"
+    },
     "single_correct_option": {
       "correct_count": "Task {task_id}, {question}: {count} options are marked correct instead of exactly one",
       "feedback_missing": "Task {task_id}, {question}: option {option} has no feedback",

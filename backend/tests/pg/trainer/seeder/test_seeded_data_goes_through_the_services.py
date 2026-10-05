@@ -276,7 +276,7 @@ async def test_bids_recorded_before_open_are_valid(session, learner) -> None:
 async def test_a_bid_the_learner_records_is_left_open_for_the_learner(session, learner) -> None:
     raw = _raw()
     alderby = raw["seed"]["bid_package"]["bids"][0]
-    alderby["recorded_by"] = "learner in T3 (Record bid)"
+    alderby["recorded_by"] = "learner"
     raw["seed"]["bid_package"]["scope_lines"][0]["boq_position"] = "01.003"
     refs = await _run(session, _plan(raw), _ctx(learner), upto=3)
     assert set(refs["bid_package.main.submissions"]) == {"Brackenfold Roofs", "Corrow and Sons"}

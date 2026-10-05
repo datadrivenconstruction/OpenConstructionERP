@@ -132,7 +132,8 @@ class TrainerEnrolment(Base):
         nullable=True,
         index=True,
     )
-    # queued | provisioning | active | completed | revoked | failed.
+    # queued | provisioning | active | completed | suspended | revoked | failed.
+    # ``suspended``: a refund closed the course; nothing was deleted (decision 42).
     # ``queued``: a second paid course waits while another one is active.
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="provisioning", index=True)
     seeded_refs: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict, server_default="{}")

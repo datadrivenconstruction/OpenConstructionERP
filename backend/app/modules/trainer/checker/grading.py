@@ -42,7 +42,7 @@ from __future__ import annotations
 
 import dataclasses
 import re
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import Any, Literal
@@ -59,7 +59,7 @@ from app.modules.trainer.checker.matching import (
     match_diagnosis,
     scoped_diagnoses,
 )
-from app.modules.trainer.checker.registry import ProbeContext, ProbeMode, ProbeResult, run_probe
+from app.modules.trainer.checker.registry import OPEN_LEVELING_KEY, ProbeContext, ProbeMode, ProbeResult, run_probe
 from app.modules.trainer.checker.units import (
     NUMERIC_KINDS,
     SCHEMA_KIND,
@@ -78,7 +78,7 @@ from app.modules.trainer.spec import (
     parse_graded_by,
     to_decimal,
 )
-from app.modules.trainer.validators import LedgerEntry, graded_readback_indexes, readback_expectation
+from app.modules.trainer.validators import LedgerEntry, graded_readback_indexes, ledger_label_map, readback_expectation
 
 #: Tolerance of an inline ``probe.expect`` that no answer grades; the same
 #: default the course rules use.
@@ -237,9 +237,11 @@ def _diagnosis_view(diagnosis: DiagnosisSpec, ledger: Mapping[str, LedgerEntry],
             entry = ledger.get(item.name)
             if kind == "percent" and entry is not None and entry.unit == "fraction":
                 number = number * 100
-            related.append(RelatedValue(name=item.name, value=format_decimal(number), kind=kind))  # type: ignore[arg-type]
+            related.append(
+                RelatedValue(name=item.name, value=format_decimal(number), kind=kind, label=item.label)  # type: ignore[arg-type]
+            )
         elif isinstance(item.value, str) and item.value:
-            related.append(RelatedValue(name=item.name, value=item.value, kind="text"))
+            related.append(RelatedValue(name=item.name, value=item.value, kind="text", label=item.label))
     return Diagnosis(id=diagnosis.id, kind=diagnosis.kind, message=diagnosis.message, related=related)
 
 
@@ -340,6 +342,29 @@ def _as_task(task: TaskSpec | Mapping[str, Any]) -> TaskSpec:
     return task if isinstance(task, TaskSpec) else TaskSpec.model_validate(task)
 
 
+def ledger_labels(tasks: Iterable[TaskSpec]) -> dict[str, str]:
+    """Fallback names of ledger keys, in the course language (decision 47).
+
+    Used for a related value whose spec carries no ``label``; the rule is
+    :func:`validators.ledger_label_map`, shared with the loader warning.
+    """
+    return ledger_label_map([t.model_dump(mode="python") for t in tasks])
+
+
+def _with_labels(fields: list[FieldResult], labels: Mapping[str, str]) -> list[FieldResult]:
+    out: list[FieldResult] = []
+    for item in fields:
+        diagnosis = item.diagnosis
+        if diagnosis is not None and diagnosis.related:
+            related = [
+                r if r.label is not None else r.model_copy(update={"label": labels.get(r.name)})
+                for r in diagnosis.related
+            ]
+            item = item.model_copy(update={"diagnosis": diagnosis.model_copy(update={"related": related})})
+        out.append(item)
+    return out
+
+
 def grade_task(
     task_spec: TaskSpec | Mapping[str, Any],
     panel_answers: Mapping[str, PanelAnswer],
@@ -348,6 +373,7 @@ def grade_task(
     currency: str | None,
     ledger: Mapping[str, LedgerEntry] | None = None,
     locale: str = "en",
+    labels: Mapping[str, str] | None = None,
 ) -> GradeOutcome:
     """Grade one task. Pure.
 
@@ -363,6 +389,9 @@ def grade_task(
             readbacks that expect a ledger key instead of an inline value,
             and to label related values.
         locale: Language of the engine's own diagnosis messages.
+        labels: :func:`ledger_labels` of the whole course: the fallback for a
+            related value whose spec has no ``label`` (decision 47). The
+            spec label always wins; None leaves the unlabelled ones null.
 
     Returns:
         Verdict, counts, per-item results and rings.
@@ -445,6 +474,8 @@ def grade_task(
         # A ring over zero items stays open: an empty check never passes.
         return bool(items) and all(i.verdict == "ok" for i in items)
 
+    if labels:
+        fields = _with_labels(fields, labels)
     passed_items = sum(1 for f in fields if f.verdict == "ok")
     passing = bool(fields) and passed_items == len(fields)
     return GradeOutcome(
@@ -485,8 +516,24 @@ def readback_values(
         value = format_value(result.value, kind, currency) if state != "unknown" and result is not None else None
         if schema_kind == "date" and value is not None and not _ISO_DATE_RE.match(value):
             schema_kind = "text"
-        items.append(ReadbackValue(id=f"rb{index}", state=state, app_value=value, kind=schema_kind))
+        reason_key = readback_reason_key(result) if state == "unknown" else None
+        items.append(
+            ReadbackValue(id=f"rb{index}", state=state, app_value=value, kind=schema_kind, reason_key=reason_key)
+        )
     return items
+
+
+def readback_reason_key(result: ProbeResult | None) -> str | None:
+    """The i18n key that tells the learner what to do about an unknown reading (decision 40).
+
+    Only a levelling table the learner has not computed yet has an action to
+    name today (:data:`registry.OPEN_LEVELING_KEY`); every other reason has
+    nothing the learner can do from the panel, and gets no key.
+    """
+    if result is None or result.status != "unknown" or not result.detail:
+        return None
+    reason = result.detail.split(":", 1)[0].strip()
+    return OPEN_LEVELING_KEY if reason == "not_computed" else None
 
 
 # ── Running the probes of a task ─────────────────────────────────────────────

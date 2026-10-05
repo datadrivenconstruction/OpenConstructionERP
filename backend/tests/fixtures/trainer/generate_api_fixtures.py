@@ -244,7 +244,7 @@ def _t2_fields(passing: bool) -> list[s.FieldResult]:
                 id="t2-profit-compounded",
                 kind="error",
                 message="Profit was charged on the overheads as well.",
-                related=[s.RelatedValue(name="fx_profit_amount", value="1520.70", kind="money")],
+                related=[s.RelatedValue(name="fx_profit_amount", value="1520.70", kind="money", label="Profit amount")],
             ),
             feedback=None,
         )

@@ -58,7 +58,7 @@ def fixture_report() -> ValidationReport:
 def test_the_rule_set_holds_every_rule_once() -> None:
     register_trainer_rules()
     register_trainer_rules()
-    assert len(RULE_IDS) == len(set(RULE_IDS)) == 28
+    assert len(RULE_IDS) == len(set(RULE_IDS)) == 29
     assert rule_registry.list_rule_sets()[TRAINER_SPEC_RULE_SET] == len(RULE_IDS)
 
 
@@ -160,6 +160,7 @@ MUTATIONS: dict[str, Callable[[dict[str, Any]], None]] = {
     "trainer.diagnosis_applies_to_resolves": _set("tasks.0.diagnoses.0.applies_to", "no_such_field"),
     "trainer.diagnosis_unique_per_field": _set("tasks.0.diagnoses.0.wrong_value", Decimal("30414.00")),
     "trainer.diagnosis_wrong_value_numeric": _set("tasks.0.diagnoses.0.wrong_value", "lots"),
+    "trainer.related_value_unlabelled": _set("tasks.0.diagnoses.0.related.0.label", _DELETE),
     "trainer.single_correct_option": _all_correct,
     "trainer.check_id_prefix_matches_task": _set("tasks.0.checks.1.id", "x-trace"),
     "trainer.seed_stage_resolvable": _set("seed.contract.stage", "on_unlock(9)"),

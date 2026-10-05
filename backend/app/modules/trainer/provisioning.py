@@ -348,7 +348,10 @@ async def provision_learner(
             )
             needs_welcome = needs_welcome or not (enrolment.metadata_ or {}).get("welcome_sent_at")
             continue
-        elif enrolment.status == "revoked":
+        elif enrolment.status in ("revoked", "suspended"):
+            # A refund suspended it (decision 42) or an admin revoked it; the
+            # learner's project and progress were kept, so a new payment for
+            # the same course picks up where the learner left off.
             enrolment.revoked_at = None
             if running:
                 enrolment.status = "queued"
@@ -475,7 +478,9 @@ async def complete_provisioning(
 
     welcome_sent = False
     if result.needs_welcome:
-        welcome_sent = await _send_welcome(session, settings, result, email_service)
+        # A failed seed (decision 41) gets the "being prepared" email; the
+        # "ready" one follows when an admin reseed succeeds.
+        welcome_sent = await _send_welcome(session, settings, result, email_service, preparing=bool(failures))
 
     statuses = {}
     for item in result.enrolments:
@@ -494,8 +499,16 @@ async def _send_welcome(
     settings: Settings,
     result: ProvisioningResult,
     email_service: EmailService | None,
+    *,
+    preparing: bool = False,
 ) -> bool:
-    """Send the welcome email once and stamp the enrolments it covered."""
+    """Send the welcome email once and stamp the enrolments it covered.
+
+    ``preparing`` sends the "your course is being prepared" variant (decision
+    41) and stamps ``welcome_preparing_sent_at`` instead of
+    ``welcome_sent_at``, so the "ready" email is still owed and
+    :func:`send_course_ready_email` sends it after a successful reseed.
+    """
     from app.core.email import EmailMessage, get_email_service
 
     user = await session.get(User, result.user_id)
@@ -511,7 +524,7 @@ async def _send_welcome(
     locale = welcome_locale(result.mail_locale)
     titles = [item.course_title for item in result.enrolments]
     queued = bool(result.enrolments) and all(item.status == "queued" for item in result.enrolments)
-    subject = welcome_subject(locale, titles, queued=queued)
+    subject = welcome_subject(locale, titles, queued=queued, preparing=preparing)
     body = welcome_html(
         locale=locale,
         name=user.full_name or user.email.split("@", 1)[0],
@@ -521,6 +534,7 @@ async def _send_welcome(
         reset_url=reset_url,
         forgot_url=f"{base_url}/forgot-password",
         academy_url=f"{base_url}/academy",
+        preparing=preparing,
     )
     try:
         delivery = await service.send(
@@ -534,13 +548,115 @@ async def _send_welcome(
         return False
 
     stamp = datetime.now(UTC).isoformat()
+    stamp_key = "welcome_preparing_sent_at" if preparing else "welcome_sent_at"
     for item in result.enrolments:
         enrolment = await session.get(TrainerEnrolment, item.enrolment_id)
         if enrolment is not None:
-            enrolment.metadata_ = {**(enrolment.metadata_ or {}), "welcome_sent_at": stamp}
+            enrolment.metadata_ = {**(enrolment.metadata_ or {}), stamp_key: stamp}
     await session.commit()
-    logger.info("Trainer welcome email sent to account %s", user.id)
+    logger.info("Trainer welcome email (%s) sent to account %s", "preparing" if preparing else "ready", user.id)
     return True
+
+
+async def send_course_ready_email(
+    session: AsyncSession,
+    settings: Settings,
+    enrolment_id: uuid.UUID,
+    *,
+    email_service: EmailService | None = None,
+) -> bool:
+    """Send the "your course is ready" email for one enrolment, once. Commits.
+
+    Used after an admin reseed repaired a failed seed (decision 41). The
+    account exists by then, and the "being prepared" email already carried
+    any set-password link, so this one links to the Academy. An enrolment
+    whose ready email went out before is left alone.
+    """
+    row = (
+        await session.execute(
+            select(TrainerEnrolment, TrainerCourse.course_key, TrainerCourse.title)
+            .join(TrainerCourse, TrainerCourse.id == TrainerEnrolment.course_id)
+            .where(TrainerEnrolment.id == enrolment_id)
+        )
+    ).one_or_none()
+    if row is None:
+        return False
+    enrolment, course_key, title = row
+    if (enrolment.metadata_ or {}).get("welcome_sent_at"):
+        return False
+    user = await session.get(User, enrolment.user_id)
+    if user is None:
+        return False
+    result = ProvisioningResult(
+        status="processed",
+        user_id=user.id,
+        is_new_user=False,
+        mail_locale=user.locale,
+        enrolments=(EnrolmentOutcome(enrolment.id, course_key, title, enrolment.status, "unchanged"),),
+        needs_welcome=True,
+    )
+    return await _send_welcome(session, settings, result, email_service)
+
+
+#: Enrolment states a refund suspends (decision 42). A revoked or already
+#: suspended enrolment is left as it is.
+_SUSPENDABLE = frozenset({"provisioning", "active", "queued", "completed", "failed"})
+
+
+async def suspend_order(
+    session: AsyncSession,
+    settings: Settings,
+    *,
+    provider: str,
+    email: str,
+    offer_code: str | None,
+    order_ref: str | None,
+) -> ProvisioningResult:
+    """Suspend the enrolments a refunded order granted (decision 42). Writes, never commits.
+
+    The enrolment goes ``suspended``: the Academy closes for it, and the
+    learner's project, answers and attempts are kept; nothing is deleted. A
+    later paid order for the same course reactivates it in
+    :func:`provision_learner`. The account itself is left as it is.
+
+    The enrolments are the buyer's enrolments on the courses the store
+    product grants; when the refund names an order reference, only the
+    enrolments that order created are suspended.
+    """
+    if not settings.academy_mode:
+        return ProvisioningResult(status="disabled", error="academy_mode_off")
+    user = (await session.execute(select(User).where(User.email == email.strip().lower()))).scalar_one_or_none()
+    if user is None:
+        return ProvisioningResult(status="ignored", error="unknown_buyer")
+    stmt = (
+        select(TrainerEnrolment, TrainerCourse.course_key, TrainerCourse.title)
+        .join(TrainerCourse, TrainerCourse.id == TrainerEnrolment.course_id)
+        .where(TrainerEnrolment.user_id == user.id)
+    )
+    if offer_code:
+        keys = await _offer_course_keys(session, provider, offer_code)
+        if not keys:
+            return ProvisioningResult(status="ignored", error="unknown_offer", user_id=user.id)
+        stmt = stmt.where(TrainerCourse.course_key.in_(keys))
+    if order_ref:
+        stmt = stmt.where(TrainerEnrolment.order_ref == order_ref)
+    outcomes: list[EnrolmentOutcome] = []
+    stamp = datetime.now(UTC).isoformat()
+    for enrolment, course_key, title in (await session.execute(stmt)).all():
+        if enrolment.status not in _SUSPENDABLE:
+            continue
+        enrolment.metadata_ = {
+            **(enrolment.metadata_ or {}),
+            "suspended_at": stamp,
+            "suspended_from": enrolment.status,
+        }
+        enrolment.status = "suspended"
+        outcomes.append(EnrolmentOutcome(enrolment.id, course_key, title, "suspended", "unchanged"))
+    await session.flush()
+    if not outcomes:
+        return ProvisioningResult(status="ignored", error="nothing_to_suspend", user_id=user.id)
+    logger.info("Trainer refund suspended %d enrolment(s) of account %s", len(outcomes), user.id)
+    return ProvisioningResult(status="processed", user_id=user.id, enrolments=tuple(outcomes))
 
 
 # ── The welcome email ────────────────────────────────────────────────────────
@@ -555,12 +671,17 @@ _TABLES: dict[str, dict[str, str]] = {
     "en": {
         "subject_ready": "Your course is ready: {course}",
         "subject_queued": "Your course is booked: {course}",
+        "subject_preparing": "Your course is being prepared: {course}",
         "heading": "Welcome to the Academy",
         "greeting": "Hello {name},",
         "intro_ready": "Thank you for your purchase. Your course {course} is ready in your own practice project.",
         "intro_queued": (
             "Thank you for your purchase. Your course {course} is booked. "
             "It starts when you finish the course you are taking now."
+        ),
+        "intro_preparing": (
+            "Thank you for your purchase. We are still preparing your course {course} in your own practice "
+            "project. We will email you again as soon as it is ready."
         ),
         "new_account": (
             "We have created an account for you with the email address {email}. "
@@ -578,6 +699,7 @@ _TABLES: dict[str, dict[str, str]] = {
     "de": {
         "subject_ready": "Ihr Kurs ist bereit: {course}",
         "subject_queued": "Ihr Kurs ist gebucht: {course}",
+        "subject_preparing": "Ihr Kurs wird vorbereitet: {course}",
         "heading": "Willkommen in der Academy",
         "greeting": "Hallo {name},",
         "intro_ready": (
@@ -586,6 +708,10 @@ _TABLES: dict[str, dict[str, str]] = {
         "intro_queued": (
             "Vielen Dank für Ihren Kauf. Ihr Kurs {course} ist gebucht. "
             "Er beginnt, sobald Sie Ihren aktuellen Kurs abgeschlossen haben."
+        ),
+        "intro_preparing": (
+            "Vielen Dank für Ihren Kauf. Wir bereiten Ihren Kurs {course} in Ihrem eigenen Übungsprojekt noch "
+            "vor. Sobald er bereit ist, erhalten Sie eine weitere E-Mail."
         ),
         "new_account": (
             "Wir haben ein Konto für Sie mit der E-Mail-Adresse {email} angelegt. "
@@ -608,6 +734,7 @@ _TABLES: dict[str, dict[str, str]] = {
     "fr": {
         "subject_ready": "Votre formation est prête : {course}",
         "subject_queued": "Votre formation est réservée : {course}",
+        "subject_preparing": "Votre formation est en préparation : {course}",
         "heading": "Bienvenue à l'Academy",
         "greeting": "Bonjour {name},",
         "intro_ready": (
@@ -616,6 +743,10 @@ _TABLES: dict[str, dict[str, str]] = {
         "intro_queued": (
             "Merci pour votre achat. Votre formation {course} est réservée. "
             "Elle commencera lorsque vous aurez terminé la formation en cours."
+        ),
+        "intro_preparing": (
+            "Merci pour votre achat. Nous préparons encore votre formation {course} dans votre propre projet "
+            "d'entraînement. Nous vous écrirons dès qu'elle sera prête."
         ),
         "new_account": (
             "Nous avons créé un compte pour vous avec l'adresse e-mail {email}. "
@@ -637,12 +768,17 @@ _TABLES: dict[str, dict[str, str]] = {
     "es": {
         "subject_ready": "Su curso está listo: {course}",
         "subject_queued": "Su curso está reservado: {course}",
+        "subject_preparing": "Estamos preparando su curso: {course}",
         "heading": "Bienvenido a la Academy",
         "greeting": "Hola, {name}:",
         "intro_ready": "Gracias por su compra. Su curso {course} le espera en su propio proyecto de práctica.",
         "intro_queued": (
             "Gracias por su compra. Su curso {course} está reservado. "
             "Empezará cuando termine el curso que está haciendo ahora."
+        ),
+        "intro_preparing": (
+            "Gracias por su compra. Todavía estamos preparando su curso {course} en su propio proyecto de "
+            "práctica. Le escribiremos de nuevo en cuanto esté listo."
         ),
         "new_account": (
             "Hemos creado una cuenta para usted con la dirección de correo {email}. "
@@ -663,10 +799,15 @@ _TABLES: dict[str, dict[str, str]] = {
     "ru": {
         "subject_ready": "Ваш курс готов: {course}",
         "subject_queued": "Ваш курс оплачен: {course}",
+        "subject_preparing": "Ваш курс готовится: {course}",
         "heading": "Добро пожаловать в Academy",
         "greeting": "Здравствуйте, {name}!",
         "intro_ready": "Спасибо за покупку. Курс {course} уже ждёт вас в вашем учебном проекте.",
         "intro_queued": ("Спасибо за покупку. Курс {course} оплачен и начнётся, когда вы закончите текущий курс."),
+        "intro_preparing": (
+            "Спасибо за покупку. Мы ещё готовим курс {course} в вашем учебном проекте. "
+            "Как только он будет готов, мы пришлём ещё одно письмо."
+        ),
         "new_account": (
             "Мы создали для вас учётную запись с адресом {email}. Нажмите кнопку ниже, чтобы задать пароль."
         ),
@@ -696,9 +837,15 @@ def _t(locale: str, key: str, **params: str) -> str:
     return translate(_TABLES, welcome_locale(locale), key, DEFAULT_LOCALE, **params)
 
 
-def welcome_subject(locale: str, course_titles: list[str], *, queued: bool) -> str:
-    """The subject line, plain text."""
-    return _t(locale, "subject_queued" if queued else "subject_ready", course=", ".join(course_titles))
+def _variant(*, queued: bool, preparing: bool) -> str:
+    if preparing:
+        return "preparing"
+    return "queued" if queued else "ready"
+
+
+def welcome_subject(locale: str, course_titles: list[str], *, queued: bool, preparing: bool = False) -> str:
+    """The subject line, plain text. ``preparing``: the seed failed (decision 41)."""
+    return _t(locale, f"subject_{_variant(queued=queued, preparing=preparing)}", course=", ".join(course_titles))
 
 
 def welcome_html(
@@ -711,12 +858,14 @@ def welcome_html(
     reset_url: str | None,
     forgot_url: str,
     academy_url: str,
+    preparing: bool = False,
 ) -> str:
     """Render the welcome email through the shared email shell.
 
     ``reset_url`` is given for a new account only; it becomes the button.
     An existing account gets a button to the Academy and the forgot-password
-    hint instead.
+    hint instead. ``preparing`` (decision 41) says the course is still being
+    prepared rather than ready; a second email follows when it is.
     """
     from app.core.email import wrap
 
@@ -735,7 +884,7 @@ def welcome_html(
     courses = ", ".join(course_titles)
     parts = [
         f"<p>{sentence('greeting', name=html.escape(name))}</p>",
-        f"<p>{sentence('intro_queued' if queued else 'intro_ready', course=strong(courses))}</p>",
+        f"<p>{sentence('intro_' + _variant(queued=queued, preparing=preparing), course=strong(courses))}</p>",
     ]
     forgot = html.escape(forgot_url)
     heading = html.escape(_t(locale, "heading"))
@@ -748,7 +897,9 @@ def welcome_html(
         return wrap(
             heading, "".join(parts), html.escape(reset_url, quote=True), html.escape(_t(locale, "cta_set_password"))
         )
-    parts.append(f"<p>{sentence('existing_account', email=strong(email))}</p>")
+    if not preparing:
+        # "Your course is waiting" would be untrue while it is being prepared.
+        parts.append(f"<p>{sentence('existing_account', email=strong(email))}</p>")
     parts.append(f"<p style='font-size:13px; color:#6e6e73;'>{sentence('forgot_hint', forgot_url=forgot)}</p>")
     return wrap(heading, "".join(parts), html.escape(academy_url, quote=True), html.escape(_t(locale, "cta_open")))
 
@@ -765,6 +916,8 @@ __all__ = [
     "learner_role_for",
     "provision_learner",
     "provision_order_paid",
+    "send_course_ready_email",
+    "suspend_order",
     "welcome_html",
     "welcome_locale",
     "welcome_subject",

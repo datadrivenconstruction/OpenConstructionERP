@@ -35,6 +35,7 @@ GET  ``/tasks/{task_id}``               -                           ``TaskView``
 PUT  ``/tasks/{task_id}/answers``       ``AnswersPut``              ``AnswersSaved`` (409: stale)
 POST ``/tasks/{task_id}/check``         ``CheckRequest``            ``AttemptResult``
 GET  ``/tasks/{task_id}/readback``      -                           ``ReadbackResponse``
+POST ``/tasks/{task_id}/hints/reveal``  -                           ``HintRevealResult``
 POST ``/unlocks/{lock_id}/seen``        -                           204, idempotent
 POST ``/admin/enrolments/``             ``AdminEnrolmentCreate``    ``AdminEnrolmentOut``
 ======================================  ==========================  ============================
@@ -83,8 +84,10 @@ DiagnosisKind = Literal["error", "convention"]
 #: Readback of one ERP value against what the task expects, never the value.
 ReadbackState = Literal["match", "mismatch", "unknown"]
 #: Lifecycle of an enrolment. ``queued``: a second paid course waits while
-#: another one is active (one active course per learner).
-EnrolmentStatus = Literal["queued", "provisioning", "active", "completed", "revoked", "failed"]
+#: another one is active (one active course per learner). ``suspended``: the
+#: order was refunded; the learner's data is kept and a later payment for the
+#: same course reactivates it (decision 42).
+EnrolmentStatus = Literal["queued", "provisioning", "active", "completed", "revoked", "failed", "suspended"]
 #: Who created an enrolment.
 EnrolmentSource = Literal["webhook", "admin"]
 
@@ -418,11 +421,19 @@ class SavedAnswer(_Schema):
 
 
 class RelatedValue(_Schema):
-    """One derivation a diagnosis shows."""
+    """One derivation a diagnosis shows.
+
+    ``name`` is the course's ledger key (an identifier, never shown).
+    ``label`` is the human name of that figure in the course language, taken
+    from the course spec (the readback that reads the key, or the given that
+    states it); null when the spec names it nowhere, and the UI then hides
+    the row rather than show an identifier.
+    """
 
     name: str
     value: str
     kind: ValueKind
+    label: str | None = None
 
     @model_validator(mode="after")
     def _value_matches_kind(self) -> RelatedValue:
@@ -638,19 +649,29 @@ class CheckRequest(_Schema):
 
 
 class ReadbackValue(_Schema):
-    """What the ERP holds now for one readback item, never the expected value."""
+    """What the ERP holds now for one readback item, never the expected value.
+
+    ``reason_key`` (decision 40) is an i18n key that tells the learner what to
+    do about an ``unknown`` reading, e.g. ``trainer.readback.open_leveling``
+    when the levelling table has not been computed yet. It is null for a
+    reading that has a value, and null when there is nothing to tell.
+    """
 
     id: str
     state: ReadbackState
     #: The value read from the learner's project; null when it cannot be read.
     app_value: str | None
     kind: ValueKind
+    reason_key: str | None = None
 
     @model_validator(mode="after")
     def _value_matches_kind(self) -> ReadbackValue:
         _check_value_for_kind(self.app_value, self.kind, f"readback {self.id}")
         if self.state == "unknown" and self.app_value is not None:
             msg = f"readback {self.id}: an unknown reading has no value"
+            raise ValueError(msg)
+        if self.reason_key is not None and self.state != "unknown":
+            msg = f"readback {self.id}: only an unknown reading carries a reason"
             raise ValueError(msg)
         return self
 
@@ -661,6 +682,39 @@ class ReadbackResponse(_Schema):
     task_id: str
     items: list[ReadbackValue]
     read_at: dt.datetime
+
+
+# ── Hints ────────────────────────────────────────────────────────────────────
+
+
+class RevealedHint(_Schema):
+    """One hint the learner has been shown. ``index`` is 0-based."""
+
+    index: int = Field(ge=0)
+    text: str
+
+
+class HintRevealResult(_Schema):
+    """``POST /tasks/{task_id}/hints/reveal`` (decision 30).
+
+    Reveals the next hint and returns it with the new count. Idempotent at the
+    last hint: once every hint is shown, a further call returns the last one
+    again and changes nothing.
+    """
+
+    hint: RevealedHint
+    hints_revealed: int = Field(ge=1)
+    hints_total: int = Field(ge=1)
+
+    @model_validator(mode="after")
+    def _consistent(self) -> HintRevealResult:
+        if self.hints_revealed > self.hints_total:
+            msg = f"{self.hints_revealed} hints revealed of {self.hints_total}"
+            raise ValueError(msg)
+        if self.hint.index != self.hints_revealed - 1:
+            msg = f"hint {self.hint.index} is not the last revealed one ({self.hints_revealed})"
+            raise ValueError(msg)
+        return self
 
 
 # ── Admin ────────────────────────────────────────────────────────────────────

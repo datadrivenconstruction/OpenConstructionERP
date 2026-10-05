@@ -228,12 +228,11 @@ def sov_line_rate(line: SovLineSeed) -> Decimal | None:
 def bid_recorded_by_seed(bid: BidSeed) -> bool:
     """Whether the seeder records this bid, or leaves it to the learner.
 
-    ``recorded_by`` is prose in the course files ("seed (API, while
-    published)", "learner in T3 (Record bid)", "Lernende in T3 ..."). A value
-    that starts with ``seed`` (any case), or no value, means the seeder records
-    it; anything else names the learner, who records it in the task.
+    ``recorded_by`` is the enum ``seed`` | ``learner`` (decision 38). For a
+    ``learner`` bid the seeder creates the bidder and the invitation, never
+    the bid.
     """
-    return bid.recorded_by is None or bid.recorded_by.strip().casefold().startswith("seed")
+    return bid.recorded_by == "seed"
 
 
 def _as_spec(spec: CourseSpec | Mapping[str, Any]) -> CourseSpec:
