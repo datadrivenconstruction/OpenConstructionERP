@@ -764,11 +764,11 @@ class SubcontractorService:
         data: SubcontractorCreate,
         user_id: str | None = None,
     ) -> Subcontractor:
-        # Read-then-write duplicate guard on (country, tax_id). The DB
-        # also carries a partial unique index post-v3099 - that's the
-        # backstop; this read keeps the happy path 409 instead of 500.
-        # Stub repositories in unit tests don't implement the method;
-        # the IntegrityError handler below still catches a race.
+        # Read-then-write duplicate guard on (country, tax_id). This read
+        # is the whole uniqueness rule: no install has a unique index on
+        # tax_id (see SubcontractorRepository.find_by_tax_id), it compares
+        # active rows only, and two concurrent POSTs can both pass it.
+        # Stub repositories in unit tests don't implement the method.
         find_by_tax_id = getattr(self.subs, "find_by_tax_id", None)
         if data.tax_id and find_by_tax_id is not None:
             existing = await find_by_tax_id(
@@ -797,8 +797,9 @@ class SubcontractorService:
         try:
             await self.subs.create(entity)
         except IntegrityError:
-            # Two concurrent POSTs raced past the read-then-write check
-            # above. Translate to 409 so callers retry intelligently.
+            # Some other constraint refused the row. It is not a tax_id race:
+            # nothing in the database makes tax_id unique, so two concurrent
+            # POSTs with the same number both land.
             await self.session.rollback()
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
