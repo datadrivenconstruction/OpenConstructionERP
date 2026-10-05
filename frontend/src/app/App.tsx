@@ -4,7 +4,7 @@ import { Suspense, lazy, useState, useCallback, useEffect, useLayoutEffect, useC
 import { Routes, Route, Navigate, Outlet, useLocation, useMatch, useParams } from 'react-router-dom';
 import { AppLayout } from './layout';
 import { DashboardPage } from '@/features/dashboard';
-import { LoginPage, RegisterPage, ForgotPasswordPage, AuthedHome } from '@/features/auth';
+import { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage, AuthedHome } from '@/features/auth';
 import { ProjectsPage, CreateProjectPage, ProjectDetailPage, ProjectSettingsPage } from '@/features/projects';
 // Import the lightweight BOQ pages from their source modules directly,
 // NOT via the `@/features/boq` barrel.  The barrel re-exports
@@ -1182,6 +1182,12 @@ export default function App() {
         <Route path="/register" element={isAuthenticated ? <AuthedHome /> : <RegisterPage />} />
         <Route path="/auth/oidc/callback" element={<Suspense fallback={<LoadingScreen />}><OidcCallbackPage /></Suspense>} />
         <Route path="/forgot-password" element={isAuthenticated ? <AuthedHome /> : <ForgotPasswordPage />} />
+        {/* The password-reset email links here (backend users/service.py).
+            Rendered signed in or not: AuthedHome would forward to the
+            dashboard and drop the token, and signing out on arrival would let
+            any link end a session. The page drops the local session itself
+            once the reset succeeds. */}
+        <Route path="/auth/reset" element={<ResetPasswordPage />} />
 
         {/* Onboarding — full-screen, no layout */}
         <Route path="/onboarding" element={

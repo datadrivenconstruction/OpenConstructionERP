@@ -58,6 +58,9 @@ describe('safeNextPath', () => {
     expect(safeNextPath('?next=/register')).toBe('/');
     expect(safeNextPath('?next=/forgot-password')).toBe('/');
     expect(safeNextPath('?next=/reset-password/abc123')).toBe('/');
+    // The route the reset email links to: its token must never ride a next=.
+    expect(safeNextPath('?next=/auth/reset?token=abc123')).toBe('/');
+    expect(safeNextPath('?next=/auth/reset')).toBe('/');
     expect(safeNextPath('?next=/onboarding')).toBe('/');
   });
 

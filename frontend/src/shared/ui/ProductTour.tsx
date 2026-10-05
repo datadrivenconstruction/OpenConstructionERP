@@ -136,7 +136,7 @@ async function persistTourState(
 /** Routes where the *auto-start* must NOT mount on top of the page (the
  *  spotlight overlay would block form inputs / primary CTAs).  Manual
  *  launches via the `oe:start-tour` event bypass this guard. */
-const AUTO_START_BLOCKED_PREFIXES = ['/login', '/register', '/forgot-password', '/onboarding', '/setup'];
+const AUTO_START_BLOCKED_PREFIXES = ['/login', '/register', '/forgot-password', '/auth/reset', '/onboarding', '/setup'];
 
 /** localStorage flag the OnboardingWizard sets on every completion path
  *  (`markOnboardingCompleted`). The first-run tour is GATED on this so the

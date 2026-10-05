@@ -52,7 +52,7 @@ function leavesOrigin(candidate: string): boolean {
 export function safeNextPath(search: string): string {
   // Never bounce back into an auth route after a successful login - a
   // next=/login (or /onboarding before completion) would dead-end or re-loop.
-  const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password', '/onboarding'];
+  const authRoutes = ['/login', '/register', '/forgot-password', '/auth/reset', '/reset-password', '/onboarding'];
   try {
     const next = new URLSearchParams(search).get('next');
     if (
