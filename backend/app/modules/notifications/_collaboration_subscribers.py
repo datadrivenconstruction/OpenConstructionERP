@@ -133,13 +133,16 @@ async def _on_collaboration_comment_created(event: Event) -> None:
             if not recipients_list:
                 return
 
-            # Deep-link to the commented entity. The discussion panel keys off
-            # entity_type/entity_id, so a project-level discussion points at the
-            # project route; everything else uses the generic entity query.
+            # Deep-link to the commented entity. A project-level discussion
+            # points at the project route; any other entity has no discussion
+            # page of its own, so the reader lands on its project, or on the
+            # collaboration hub when the event carries none.
             if entity_type == "project":
                 action_url = f"/projects/{entity_id}"
+            elif project_id:
+                action_url = f"/projects/{project_id}"
             else:
-                action_url = f"/discussions?entity_type={entity_type}&entity_id={entity_id}"
+                action_url = "/collaboration"
 
             svc = NotificationService(session)
             await svc.notify_users(

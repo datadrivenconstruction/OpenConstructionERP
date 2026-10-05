@@ -2639,7 +2639,7 @@ class BidManagementService:
         sent_count = 0
         skipped = 0
         deadline = package.submission_deadline or ""
-        action_url = f"/bid-management/packages/{package.id}"
+        action_url = f"/projects/{package.project_id}/bid-management?highlight={package.id}"
 
         for inv in invitations:
             if inv.status in ("submitted", "declined", "expired"):

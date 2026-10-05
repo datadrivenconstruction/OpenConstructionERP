@@ -153,7 +153,8 @@ async def test_overrun_crossed_sends_one(session: AsyncSession) -> None:
     notif = (await session.execute(select(Notification).where(Notification.entity_id == str(line.id)))).scalar_one()
     assert notif.user_id == owner_id
     assert notif.title_key == "notifications.costmodel.overrun_alert.title"
-    assert notif.action_url == f"/costmodel?line={line.id}"
+    # The cost model page selects no line from the URL; the id is in entity_id.
+    assert notif.action_url == "/5d"
 
 
 # ── Case 11: not crossed -> no notification ─────────────────────────────────────

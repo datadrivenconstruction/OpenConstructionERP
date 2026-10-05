@@ -2124,7 +2124,13 @@ async def _notify_document_uploaded(event: Event) -> None:
                     "document_name": str(data.get("document_name", ""))[:200],
                     "category": data.get("category", ""),
                 },
-                action_url=f"/projects/{data.get('project_id')}/documents",
+                # Documents live in the file manager; ``?kind=document&file=``
+                # opens the uploaded one in the preview pane.
+                action_url=(
+                    f"/projects/{data['project_id']}/files?kind=document&file={data.get('document_id', '')}"
+                    if data.get("project_id")
+                    else "/files?kind=document"
+                ),
             )
             await session.commit()
 
