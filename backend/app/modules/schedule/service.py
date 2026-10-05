@@ -23,6 +23,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import noload
 
+from app.core.academy_isolation import academy_mode_enabled, filter_users_to_project
 from app.core.calendar import _holidays_cn
 from app.core.cpm import normalise_exception_date, readable_exception_dates, readable_work_days
 from app.core.events import event_bus, publish_after_commit
@@ -1344,25 +1345,46 @@ class ScheduleService:
 
         await assignable_contact(self.session, assignee_id, actor_id)
 
-    async def resolve_assignee_names(self, assignee_ids: set[uuid.UUID]) -> dict[uuid.UUID, str]:
+    async def resolve_assignee_names(
+        self,
+        assignee_ids: set[uuid.UUID],
+        *,
+        project_id: uuid.UUID | None = None,
+    ) -> dict[uuid.UUID, str]:
         """Map contact ids to display names in one query.
 
         The table shows the name from here rather than looking the id up in
         the viewer's own contact list, which holds only that viewer's
         contacts (and only the first page of them), so a colleague's pick
         would otherwise read as unassigned.
+
+        With ``project_id`` an academy install names only a contact that
+        belongs to someone in that project, so a row written around the
+        assignee gate cannot print another learner's contact.
         """
         if not assignee_ids:
             return {}
         from app.modules.contacts.models import Contact
 
-        rows = await self.session.execute(
-            select(
-                Contact.id, Contact.first_name, Contact.last_name, Contact.company_name, Contact.primary_email
-            ).where(Contact.id.in_(assignee_ids))
-        )
+        rows = (
+            await self.session.execute(
+                select(
+                    Contact.id,
+                    Contact.first_name,
+                    Contact.last_name,
+                    Contact.company_name,
+                    Contact.primary_email,
+                    Contact.tenant_id,
+                    Contact.created_by,
+                ).where(Contact.id.in_(assignee_ids))
+            )
+        ).all()
+        if project_id is not None and academy_mode_enabled():
+            owners = {str(o) for row in rows for o in (row.tenant_id, row.created_by) if o}
+            members = set(await filter_users_to_project(self.session, project_id, owners))
+            rows = [r for r in rows if str(r.tenant_id or "") in members or str(r.created_by or "") in members]
         names: dict[uuid.UUID, str] = {}
-        for cid, first, last, company, email in rows.all():
+        for cid, first, last, company, email, _tenant, _creator in rows:
             person = " ".join(p for p in (first, last) if p)
             names[cid] = person or company or email or ""
         return names
@@ -2445,7 +2467,9 @@ class ScheduleService:
         today = datetime.now(UTC).date()
 
         activities, _ = await self.activity_repo.list_for_schedule(schedule_id)
-        assignee_names = await self.resolve_assignee_names({a.assignee_id for a in activities if a.assignee_id})
+        assignee_names = await self.resolve_assignee_names(
+            {a.assignee_id for a in activities if a.assignee_id}, project_id=schedule.project_id
+        )
 
         gantt_activities: list[GanttActivity] = []
         completed = 0
