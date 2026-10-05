@@ -284,5 +284,7 @@ class GeneratedReportResponse(BaseModel):
     currency: str | None = None
     data_snapshot: dict[str, Any] | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
+    published_at: datetime | None = None
+    published_by: UUID | None = None
     created_at: datetime
     updated_at: datetime

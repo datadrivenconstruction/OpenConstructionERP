@@ -173392,6 +173392,18 @@
               "annotation": "Mapped[dict]",
               "sql_type": "JSON",
               "nullable": false
+            },
+            {
+              "name": "published_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "published_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
             }
           ],
           "relationships": []
@@ -173505,6 +173517,20 @@
           "handler": "get_report",
           "response_model": "GeneratedReportResponse",
           "request_schema": "ReportingService"
+        },
+        {
+          "method": "POST",
+          "path": "/reports/{report_id}/publish",
+          "handler": "publish_report",
+          "response_model": "GeneratedReportResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/reports/{report_id}/unpublish",
+          "handler": "unpublish_report",
+          "response_model": "GeneratedReportResponse",
+          "request_schema": "None"
         },
         {
           "method": "DELETE",
@@ -173908,6 +173934,16 @@
             {
               "name": "metadata",
               "type": "dict[str, Any]"
+            },
+            {
+              "name": "published_at",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "published_by",
+              "type": "UUID | None",
+              "default": "None"
             },
             {
               "name": "created_at",
@@ -233620,10 +233656,10 @@
     },
     {
       "name": "portal",
-      "ts_files": 13,
+      "ts_files": 14,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 13
+      "test_files": 2,
+      "total_files": 14
     },
     {
       "name": "portfolio",
@@ -235386,13 +235422,13 @@
     "backend_modules": 196,
     "modules_with_manifests": 194,
     "total_models": 623,
-    "total_columns": 7135,
+    "total_columns": 7137,
     "total_relationships": 234,
-    "total_routes": 3732,
+    "total_routes": 3734,
     "total_schemas": 3520,
     "total_python_files": 2250,
     "frontend_features": 192,
-    "frontend_ts_files": 2862,
+    "frontend_ts_files": 2863,
     "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {

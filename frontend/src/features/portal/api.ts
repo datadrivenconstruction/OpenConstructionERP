@@ -218,12 +218,24 @@ export interface ProgressReport {
   generated_at: string;
   format: string;
   storage_key: string | null;
+  /** Set once a person released the report to the client portal. */
+  published_at: string | null;
 }
 
 export function listProgressReports(projectId: string): Promise<ProgressReport[]> {
   return apiGet<ProgressReport[]>(
     `/v1/reporting/reports/?project_id=${encodeURIComponent(projectId)}`,
   ).then((reports) => reports.filter((r) => r.report_type === 'progress_report'));
+}
+
+/** Release a report to the client portal; until then the client cannot see it. */
+export function publishProgressReport(reportId: string): Promise<ProgressReport> {
+  return apiPost<ProgressReport>(`/v1/reporting/reports/${encodeURIComponent(reportId)}/publish`, {});
+}
+
+/** Take a report back from the client portal. */
+export function unpublishProgressReport(reportId: string): Promise<ProgressReport> {
+  return apiPost<ProgressReport>(`/v1/reporting/reports/${encodeURIComponent(reportId)}/unpublish`, {});
 }
 
 /* ── Portal-user-facing (session-token) payment applications ───────────────

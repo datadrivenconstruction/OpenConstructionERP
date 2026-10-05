@@ -457,6 +457,29 @@ class ReportingService:
         await self.session.delete(report)
         await self.session.flush()
 
+    async def set_published(
+        self,
+        report_id: uuid.UUID,
+        *,
+        published: bool,
+        user_id: uuid.UUID | None,
+    ) -> GeneratedReport:
+        """Release a report to the client portal, or take it back.
+
+        Caller enforces project access, as for ``delete_report``. Publishing
+        an already published report keeps its first release time.
+        """
+        report = await self.get_report(report_id)
+        if published:
+            if report.published_at is None:
+                report.published_at = datetime.now(UTC)
+                report.published_by = user_id
+        else:
+            report.published_at = None
+            report.published_by = None
+        await self.session.flush()
+        return report
+
     async def generate_report(
         self,
         data: GenerateReportRequest,

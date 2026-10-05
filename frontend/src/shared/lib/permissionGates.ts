@@ -45,6 +45,7 @@ export const PERMISSION_MIN_ROLE = {
   'resources.create': 'editor',
   'assemblies.update': 'editor',
   'price_index.manage': 'editor',
+  'reporting.distribute': 'manager',
 } as const satisfies Record<string, RankedRole>;
 
 export type GatedPermission = keyof typeof PERMISSION_MIN_ROLE;

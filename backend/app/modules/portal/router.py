@@ -1090,8 +1090,9 @@ async def portal_list_progress_reports(
     Access is granted by a non-expired ``project`` access rule on
     ``project_id``. A caller with no such rule gets a 404 (never 403) so
     the endpoint never confirms the existence of projects the caller is
-    not entitled to. Only ``report_type == "progress_report"`` rows are
-    returned - other report types stay invisible to the client portal.
+    not entitled to. Only published ``report_type == "progress_report"``
+    rows are returned - other report types and unpublished drafts stay
+    invisible to the client portal.
     """
     from fastapi import HTTPException
     from sqlalchemy import func as _func
@@ -1105,7 +1106,14 @@ async def portal_list_progress_reports(
             detail="Project not found",
         )
 
-    base = _select(_GR).where(_GR.project_id == project_id).where(_GR.report_type == "progress_report")
+    # Only reports a person released to the client. A freshly generated one
+    # may still be a draft carrying internal notes.
+    base = (
+        _select(_GR)
+        .where(_GR.project_id == project_id)
+        .where(_GR.report_type == "progress_report")
+        .where(_GR.published_at.is_not(None))
+    )
     count_stmt = _select(_func.count()).select_from(base.subquery())
     total = int((await session.execute(count_stmt)).scalar_one())
 
@@ -1162,25 +1170,26 @@ async def portal_get_progress_report_content(
         )
 
     reporting = ReportingService(session)
+    not_found = HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Report not found")
     try:
-        report, html_body = await reporting.get_report_content(report_id)
+        report = await reporting.get_report(report_id)
     except HTTPException as exc:
-        # Collapse the reporting module's 404/410. A 410 (body gone) is
-        # still useful to the client, so pass it through; a 404 stays 404.
+        raise not_found from exc
+
+    # Cross-tenant / wrong-type / unreleased guard, checked before the body is
+    # read so a draft answers exactly like a missing id (never 410): the report
+    # must live under the project the caller proved access to, be a progress
+    # report, and have been published to the portal.
+    if report.project_id != project_id or report.report_type != "progress_report" or report.published_at is None:
+        raise not_found
+
+    try:
+        _report, html_body = await reporting.get_report_content(report_id)
+    except HTTPException as exc:
+        # A 410 (body gone) is still useful to the client, so pass it through.
         if exc.status_code == status.HTTP_410_GONE:
             raise
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Report not found",
-        ) from exc
-
-    # Cross-tenant / wrong-type guard: the report must live under the
-    # project the caller proved access to and be a progress report.
-    if report.project_id != project_id or report.report_type != "progress_report":
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Report not found",
-        )
+        raise not_found from exc
 
     return HTMLResponse(content=html_body)
 

@@ -543,6 +543,40 @@ async def get_report(
     return GeneratedReportResponse.model_validate(report)
 
 
+@router.post("/reports/{report_id}/publish", response_model=GeneratedReportResponse)
+async def publish_report(
+    report_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("reporting.distribute")),
+    service: ReportingService = Depends(_get_service),
+) -> GeneratedReportResponse:
+    """Release a generated report to the client portal.
+
+    Only a published report is listed and served to portal users. 404 when
+    the report is missing or its project is not the caller's.
+    """
+    report = await service.get_report(report_id)
+    await verify_project_access(report.project_id, user_id, session)
+    report = await service.set_published(report_id, published=True, user_id=uuid.UUID(str(user_id)))
+    return GeneratedReportResponse.model_validate(report)
+
+
+@router.post("/reports/{report_id}/unpublish", response_model=GeneratedReportResponse)
+async def unpublish_report(
+    report_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("reporting.distribute")),
+    service: ReportingService = Depends(_get_service),
+) -> GeneratedReportResponse:
+    """Take a report back from the client portal. Same gates as publishing."""
+    report = await service.get_report(report_id)
+    await verify_project_access(report.project_id, user_id, session)
+    report = await service.set_published(report_id, published=False, user_id=None)
+    return GeneratedReportResponse.model_validate(report)
+
+
 @router.delete("/reports/{report_id}", status_code=204)
 async def delete_report(
     report_id: uuid.UUID,

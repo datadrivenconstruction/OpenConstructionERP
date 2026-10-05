@@ -2,8 +2,8 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
-import { FileText, ExternalLink, Download, Loader2 } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { FileText, ExternalLink, Download, Loader2, Eye, EyeOff } from 'lucide-react';
 import { Badge, EmptyState, SkeletonTable } from '@/shared/ui';
 import { openInNewTab } from '@/shared/lib/desktop';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
@@ -11,8 +11,14 @@ import { useActiveProjectId } from '@/shared/hooks/useActiveProjectId';
 import { projectsApi } from '@/features/projects/api';
 import { activeLanguageTag, API_BASE, getAuthToken } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { getErrorMessage } from '@/shared/lib/api';
-import { listProgressReports, type ProgressReport } from './api';
+import {
+  listProgressReports,
+  publishProgressReport,
+  unpublishProgressReport,
+  type ProgressReport,
+} from './api';
 
 const inputCls =
   'h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue';
@@ -82,6 +88,13 @@ export function ProgressReportsTab() {
         </div>
       </div>
 
+      <p className="text-xs text-content-tertiary">
+        {t('portal.progress_publish_hint', {
+          defaultValue:
+            'A generated report stays internal. The client sees it only after you choose Show to client.',
+        })}
+      </p>
+
       {!projectId ? (
         <EmptyState
           icon={<FileText size={22} />}
@@ -94,7 +107,7 @@ export function ProgressReportsTab() {
           })}
         />
       ) : reportsQ.isLoading ? (
-        <SkeletonTable rows={6} columns={4} />
+        <SkeletonTable rows={6} columns={5} />
       ) : reportsQ.error ? (
         <EmptyState
           icon={<FileText size={22} />}
@@ -141,6 +154,9 @@ function ReportList({ reports }: { reports: ProgressReport[] }) {
             <th className="px-4 py-2.5 text-left">
               {t('portal.progress_status', { defaultValue: 'Status' })}
             </th>
+            <th className="px-4 py-2.5 text-left">
+              {t('portal.progress_client', { defaultValue: 'Client' })}
+            </th>
             <th className="px-4 py-2.5 text-right">
               {t('common.actions', { defaultValue: 'Actions' })}
             </th>
@@ -159,8 +175,31 @@ function ReportList({ reports }: { reports: ProgressReport[] }) {
 function ReportRow({ report }: { report: ProgressReport }) {
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
+  const queryClient = useQueryClient();
   const [busy, setBusy] = useState<'open' | 'download' | null>(null);
   const ready = !!report.storage_key;
+  const published = !!report.published_at;
+  // Releasing to the client is a manager call; an editor sees the state only.
+  const canPublish = useHasPermission('reporting.distribute');
+
+  const visibilityMut = useMutation({
+    mutationFn: () =>
+      published ? unpublishProgressReport(report.id) : publishProgressReport(report.id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ['portal-progress', 'reports', report.project_id],
+      });
+    },
+    onError: (err) => {
+      addToast({
+        type: 'error',
+        title: t('portal.progress_publish_failed', {
+          defaultValue: 'Could not change what the client sees.',
+        }),
+        message: getErrorMessage(err),
+      });
+    },
+  });
 
   // Fetch the rendered HTML with the bearer token (the endpoint returns
   // text/html, not JSON, so we bypass apiGet) and either open it in a new
@@ -264,7 +303,37 @@ function ReportRow({ report }: { report: ProgressReport }) {
         )}
       </td>
       <td className="px-4 py-2">
+        {published ? (
+          <Badge variant="blue" dot>
+            {t('portal.progress_visible', { defaultValue: 'Visible to client' })}
+          </Badge>
+        ) : (
+          <Badge variant="neutral" dot>
+            {t('portal.progress_internal', { defaultValue: 'Internal only' })}
+          </Badge>
+        )}
+      </td>
+      <td className="px-4 py-2">
         <div className="flex items-center justify-end gap-1.5">
+          {canPublish && (
+          <button
+            type="button"
+            disabled={(!ready && !published) || visibilityMut.isPending}
+            onClick={() => visibilityMut.mutate()}
+            className="inline-flex items-center gap-1 rounded-md border border-border-light bg-surface-primary px-2.5 py-1 text-xs font-medium text-content-secondary transition-colors hover:border-oe-blue hover:text-oe-blue disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {visibilityMut.isPending ? (
+              <Loader2 size={12} className="animate-spin" />
+            ) : published ? (
+              <EyeOff size={12} />
+            ) : (
+              <Eye size={12} />
+            )}
+            {published
+              ? t('portal.progress_unpublish', { defaultValue: 'Hide from client' })
+              : t('portal.progress_publish', { defaultValue: 'Show to client' })}
+          </button>
+          )}
           <button
             type="button"
             disabled={!ready || busy !== null}

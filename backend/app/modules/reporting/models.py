@@ -9,8 +9,9 @@ Tables:
 """
 
 import uuid
+from datetime import datetime
 
-from sqlalchemy import JSON, Boolean, Integer, String, Text, UniqueConstraint
+from sqlalchemy import JSON, Boolean, DateTime, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
@@ -227,6 +228,19 @@ class GeneratedReport(Base):
         nullable=False,
         default=dict,
         server_default="{}",
+    )
+    # Set when a person releases the report to the client portal. A report
+    # nobody published stays internal: the portal lists and serves only rows
+    # with a value here, so a draft with internal notes never reaches a client.
+    published_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        default=None,
+    )
+    published_by: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        nullable=True,
+        default=None,
     )
 
     def __repr__(self) -> str:

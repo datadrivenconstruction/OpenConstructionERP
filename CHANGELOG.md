@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- The client portal no longer shows a progress report the moment it is generated. A report now stays internal until a manager chooses Show to client on the Progress reports tab, and Hide from client takes it back. Reports generated before this release start as internal, so publish the ones your clients should keep seeing. A draft the client cannot see answers exactly like a report that does not exist.
+
 ## [18.4.0] - 2026-10-04
 
 The records of a project now lead to each other. An RFI or a non-conformance that flags a variation drafts a change order for a person to submit, the change order shows where it came from, and once approved it names the bill section and budget line it landed on and moves the contract schedule lines it changes, with a preview before anything is posted. An awarded RFQ drafts its purchase order and points to it, a tender package links to its bill, bid package and award, a contract links back to where it came from, and progress leads to the bill, billing and the schedule.
