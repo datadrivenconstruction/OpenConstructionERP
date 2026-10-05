@@ -51,6 +51,7 @@ from dataclasses import dataclass, field
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.academy_isolation import assert_admin_adds_members
 from app.core.audit_log import log_activity
 from app.core.demo_privacy import anonymize_email, should_redact
 from app.core.events import event_bus
@@ -528,6 +529,7 @@ class TeamService:
         """
         team = await self.get_team(team_id)  # Raises 404 if team not found
         await self._assert_team_access(team, actor_id, admin=True)
+        await assert_admin_adds_members(self.session, actor_id)
         await self._assert_assignable_role(team.project_id, data.role, actor_id)
         await self._assert_user_addable(data.user_id)
 

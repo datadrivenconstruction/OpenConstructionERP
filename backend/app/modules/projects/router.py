@@ -22,6 +22,7 @@ from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.background import BackgroundTask
 
+from app.core.academy_isolation import assert_admin_adds_members
 from app.core.content_disposition import attachment_disposition
 from app.dependencies import CurrentUserId, CurrentUserPayload, RequireRole, SessionDep, SettingsDep
 from app.modules.finance.variance import expected_outturn
@@ -605,6 +606,7 @@ async def add_project_member_endpoint(
 ) -> ProjectMemberResponse:
     """Add a member to the project."""
     await _verify_project_owner(service, project_id, user_id, payload)
+    await assert_admin_adds_members(session, user_id)
     from app.modules.projects.member_service import add_project_member
 
     return await add_project_member(session, project_id, data)
@@ -642,6 +644,7 @@ async def bulk_add_project_members_endpoint(
     or nothing - no half-open CDE.
     """
     await _verify_project_owner(service, project_id, user_id, payload)
+    await assert_admin_adds_members(session, user_id)
 
     # Gate the mass invite on CDE readiness (lazy import to avoid a load-time
     # cycle between the projects and cde modules).

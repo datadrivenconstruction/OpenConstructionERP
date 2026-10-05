@@ -45,6 +45,8 @@ logger = logging.getLogger(__name__)
 
 USER_NOT_IN_PROJECT = "user_not_in_project"
 USER_NOT_IN_PROJECT_MESSAGE = "Everyone you name here must be a member of this project."
+ADMIN_ADDS_MEMBERS = "academy_admin_adds_members"
+ADMIN_ADDS_MEMBERS_MESSAGE = "On the academy only an administrator adds people to a project."
 
 
 def academy_mode_enabled() -> bool:
@@ -180,3 +182,42 @@ async def assert_self_or_admin(user_id: uuid.UUID | str, current_user: Mapping[s
         return
     if str(user_id) != str(current_user.get("sub")):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+
+async def _is_admin_user(session: AsyncSession, user_id: uuid.UUID | str) -> bool:
+    uid = _as_uuid(user_id)
+    if uid is None:
+        return False
+    from app.modules.users.models import User
+
+    try:
+        role = (await session.execute(select(User.role).where(User.id == uid))).scalar_one_or_none()
+    except Exception:
+        logger.exception("academy isolation: role lookup failed for user %s", user_id)
+        return False
+    return role == "admin"
+
+
+async def assert_admin_adds_members(session: AsyncSession, actor_id: uuid.UUID | str | None) -> None:
+    """Refuse a non-admin who adds someone to a project in academy mode.
+
+    A membership row is what every other gate here counts as "in the project",
+    so a learner who could add another learner to their own project would open
+    all of them at once. Learners never share a project, so on an academy box
+    adding people is an admin's job. Call it before the target is looked up, so
+    the answer does not depend on whether the target exists.
+
+    ``actor_id=None`` is a system call (a seeder, a migration helper), as in
+    the teams service, and is let through.
+
+    Raises:
+        HTTPException: 403 with ``{"error": "academy_admin_adds_members"}``.
+    """
+    if not academy_mode_enabled() or actor_id is None:
+        return
+    if await _is_admin_user(session, actor_id):
+        return
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail={"error": ADMIN_ADDS_MEMBERS, "message": ADMIN_ADDS_MEMBERS_MESSAGE},
+    )
