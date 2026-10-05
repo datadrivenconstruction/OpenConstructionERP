@@ -121,13 +121,14 @@ async def _with_service(handler):
 async def _on_schedule_milestone_reached(event: Event) -> dict[str, Any]:
     """React to a ``schedule.milestone.reached`` event.
 
-    Payload (best-effort):
-        sales_contract_id?: UUID - when present, scope to that SPA.
+    Payload:
+        sales_contract_id: UUID - the SPA whose instalments fall due.
         milestone_event: str - e.g. ``foundation_complete``.
-        plot_id?: UUID - fallback when sales_contract_id is missing.
 
-    Marks pending instalments whose ``milestone_event`` matches as due
-    and auto-issues a demand letter for each affected line.
+    Marks the SPA's pending instalments whose ``milestone_event`` matches
+    as due. An event that names no SPA is ignored: milestone names are free
+    text shared by every tenant, so matching on the name alone would mark
+    other companies' buyers as owing money.
     """
     from app.modules.property_dev.service import PropertyDevService
 
@@ -136,27 +137,16 @@ async def _on_schedule_milestone_reached(event: Event) -> dict[str, Any]:
     if not milestone_event:
         return {"status": "ignored", "reason": "no milestone_event in payload"}
     spa_id = payload.get("sales_contract_id") or payload.get("spa_id")
+    if not spa_id:
+        return {"status": "ignored", "reason": "no sales_contract_id in payload"}
+    spa_uuid = _coerce_uuid(spa_id)
+    if spa_uuid is None:
+        return {"status": "ignored", "reason": "bad spa_id"}
 
     try:
         async with async_session_factory() as session:
             svc = PropertyDevService(session)
-            touched = 0
-            if spa_id:
-                import uuid as _uuid
-
-                try:
-                    spa_uuid = _uuid.UUID(str(spa_id))
-                except (TypeError, ValueError):
-                    return {"status": "ignored", "reason": "bad spa_id"}
-                touched = await svc._fire_milestone(spa_uuid, milestone_event)
-            else:
-                # Fan out across every SPA - match by milestone alone.
-                # Only used in tests/diagnostics; production callers
-                # always supply spa_id.
-                instalments = await svc.instalments.list_due_for_milestone(milestone_event)
-                for ins in instalments:
-                    await svc.instalments.update_fields(ins.id, status="due")
-                    touched += 1
+            touched = await svc._fire_milestone(spa_uuid, milestone_event)
             await session.commit()
             return {"status": "ok", "touched": touched}
     except Exception as exc:  # noqa: BLE001 - never crash event loop

@@ -844,14 +844,6 @@ class InstalmentRepository(_BaseRepo):
         )
         return list((await self.session.execute(stmt)).scalars().all())
 
-    async def list_due_for_milestone(self, event: str) -> list[Instalment]:
-        """Find pending instalments whose milestone_event matches ``event``."""
-        stmt = select(Instalment).where(
-            Instalment.milestone_event == event,
-            Instalment.status == "pending",
-        )
-        return list((await self.session.execute(stmt)).scalars().all())
-
     async def list_overdue(self, *, today_iso: str) -> list[Instalment]:
         stmt = select(Instalment).where(
             Instalment.status.in_(("pending", "due")),
