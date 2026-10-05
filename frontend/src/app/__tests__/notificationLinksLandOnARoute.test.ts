@@ -182,6 +182,8 @@ const REVIEWED_OPAQUE: string[] = [
   'backend/app/modules/integrations/router.py: action_url',
   'backend/app/modules/notifications/_collaboration_subscribers.py: action_url',
   'backend/app/modules/notifications/_wave23_subscribers.py: action_url',
+  // The email renderer, which resolves whatever it is given or drops it.
+  'backend/app/modules/notifications/dispatcher.py: payload.get("action_url")',
   'backend/app/modules/notifications/events.py: action_url',
   'backend/app/modules/notifications/router.py: n.action_url',
   'backend/app/modules/notifications/service.py: action_url',

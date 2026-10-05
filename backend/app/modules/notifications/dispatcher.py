@@ -12,7 +12,9 @@ This module wires real sinks:
 * **Email**:  uses :func:`app.core.email.get_email_service` to send a
   rendered HTML message via the configured SMTP/console backend.  The
   body is rendered with :func:`app.modules.notifications.templates.render`
-  so digests respect the i18n template registry.
+  so digests respect the i18n template registry, and wrapped by
+  :mod:`app.modules.notifications.email_render`, which writes the mail in
+  the recipient's language and turns ``action_url`` into an absolute link.
 
 * **Webhook**:  uses ``httpx.AsyncClient`` to POST a JSON envelope to
   every active :class:`WebhookTarget` whose ``event_filter`` matches
@@ -46,6 +48,7 @@ from sqlalchemy import select
 
 from app.core.events import Event, event_bus
 from app.database import async_session_factory
+from app.modules.notifications.email_render import digest_heading, digest_subject, render_notification_email
 from app.modules.notifications.models import WebhookTarget
 from app.modules.notifications.templates import render as render_template
 
@@ -96,30 +99,30 @@ async def close_http_client() -> None:
 # ── Email sink ─────────────────────────────────────────────────────────────
 
 
-async def _resolve_user_email(user_id: str) -> tuple[str | None, str | None]:
-    """Look up the user's email + display name.  Returns ``(None, None)``
-    when the user has been hard-deleted between the dispatch decision
-    and the actual send, or is deactivated or erased: those keep their
-    in-app notifications but get no mail.
+async def _resolve_user_email(user_id: str) -> tuple[str | None, str | None, str | None]:
+    """Look up the user's email, display name and locale.  Returns
+    ``(None, None, None)`` when the user has been hard-deleted between the
+    dispatch decision and the actual send, or is deactivated or erased:
+    those keep their in-app notifications but get no mail.
     """
     try:
         uid = uuid.UUID(str(user_id))
     except (ValueError, TypeError):
-        return None, None
+        return None, None, None
     try:
         async with async_session_factory() as session:
             from app.modules.users.models import User
 
             user = await session.get(User, uid)
             if user is None:
-                return None, None
+                return None, None, None
             if not user.is_active or user.deleted_at is not None:
                 logger.debug("dispatcher: user=%s is deactivated, email skipped", user_id)
-                return None, None
-            return user.email, user.full_name
+                return None, None, None
+            return user.email, user.full_name, user.locale
     except Exception:  # noqa: BLE001
         logger.debug("dispatcher: user lookup failed", exc_info=True)
-        return None, None
+        return None, None, None
 
 
 async def _on_dispatch_email(event: Event) -> None:
@@ -131,7 +134,7 @@ async def _on_dispatch_email(event: Event) -> None:
     if not user_id:
         return
 
-    to, name = await _resolve_user_email(user_id)
+    to, name, locale = await _resolve_user_email(user_id)
     if not to:
         logger.debug(
             "dispatcher: no email on file for user=%s event=%s",
@@ -149,7 +152,7 @@ async def _on_dispatch_email(event: Event) -> None:
     # Digest payloads carry an "events" list - render a small bulleted
     # summary so the recipient gets something readable in one glance.
     if event_type == "notifications.digest" and "events" in payload:
-        lines = ["", "Recent notifications:", ""]
+        lines = ["", digest_heading(locale), ""]
         for entry in payload.get("events", []):
             etype = entry.get("event_type", "")
             ectx = (entry.get("payload") or {}).get("body_context", {}) or {}
@@ -157,9 +160,20 @@ async def _on_dispatch_email(event: Event) -> None:
             etitle = render_template(etitle_key, ectx) or etype
             lines.append(f"  • {etitle}")
         body_text = (body_text + "\n" + "\n".join(lines)).strip()
-        subject = f"OpenConstructionERP digest - {len(payload.get('events') or [])} updates"
+        subject = digest_subject(locale, len(payload.get("events") or []))
 
-    html_body = _render_email_html(name, subject, body_text, payload.get("action_url"))
+    from app.config import get_settings
+
+    # The in-app row keeps the relative path the router needs; only the
+    # email resolves it against the public frontend address.
+    html_body = render_notification_email(
+        locale=locale,
+        recipient_name=name,
+        subject=subject,
+        body_text=body_text,
+        action_url=payload.get("action_url"),
+        base_url=get_settings().resolved_frontend_url,
+    )
 
     try:
         from app.core.email import EmailMessage, get_email_service
@@ -182,44 +196,6 @@ async def _on_dispatch_email(event: Event) -> None:
             )
     except Exception:  # noqa: BLE001
         logger.exception("dispatcher: email send crashed user=%s event=%s", user_id, event_type)
-
-
-def _render_email_html(
-    recipient_name: str | None,
-    subject: str,
-    body_text: str,
-    action_url: str | None,
-) -> str:
-    """Tiny inline-styled HTML so notifications render cleanly across
-    every email client.  We deliberately do not import the marketing
-    template (it pulls a full layout) - these are transactional
-    one-liners with at most an action button.
-    """
-    safe_subject = (subject or "").replace("<", "&lt;").replace(">", "&gt;")
-    safe_body = (body_text or "").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>")
-    greeting = f"Hi {recipient_name}," if recipient_name else "Hi,"
-    button = ""
-    if action_url:
-        safe_url = action_url.replace('"', "")
-        button = (
-            f'<p style="margin:24px 0"><a href="{safe_url}" '
-            f'style="background:#2563eb;color:#fff;padding:10px 18px;'
-            f'text-decoration:none;border-radius:6px;display:inline-block">'
-            f"Open in OpenConstructionERP</a></p>"
-        )
-    return (
-        f'<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;'
-        f'max-width:560px;margin:0 auto;padding:24px;color:#111827">'
-        f'<p style="margin:0 0 12px 0">{greeting}</p>'
-        f'<h2 style="margin:0 0 8px 0;font-size:18px">{safe_subject}</h2>'
-        f'<p style="margin:0;color:#374151;line-height:1.5">{safe_body}</p>'
-        f"{button}"
-        f'<hr style="margin:24px 0;border:none;border-top:1px solid #e5e7eb">'
-        f'<p style="margin:0;font-size:12px;color:#6b7280">'
-        f"You are receiving this because of your notification preferences. "
-        f"Manage them in your profile settings.</p>"
-        f"</div>"
-    )
 
 
 # ── Webhook sink ───────────────────────────────────────────────────────────
