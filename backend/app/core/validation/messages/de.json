@@ -837,5 +837,149 @@
       "fail": "Der Verweis '{code}' in Position {ordinal} nennt keine KNR-Katalogfamilie",
       "suggestion": "Den Verweis mit seiner Katalogfamilie beginnen, etwa KNR, KNNR, KNR-W oder KSNR, oder die Position als kalkulacja indywidualna kennzeichnen"
     }
+  },
+  "trainer": {
+    "task_order_contiguous": {
+      "numbering": "Aufgaben müssen der Reihe nach von 1 bis N nummeriert sein; der Kurs nummeriert sie {numbers}",
+      "duplicate_id": "Die Aufgaben-ID {task_id} wird von mehr als einer Aufgabe verwendet",
+      "suggestion": "Nummerieren Sie die Aufgaben 1, 2, 3 ... in Dateireihenfolge und vergeben Sie eindeutige IDs"
+    },
+    "task_id_fits_storage": {
+      "course_key": "Die Kurs-ID {value} hat {length} Zeichen; die Datenbank speichert höchstens {max}",
+      "version": "Die Version {value} hat {length} Zeichen; die Datenbank speichert höchstens {max}",
+      "title": "Der Kurstitel hat {length} Zeichen; die Datenbank speichert höchstens {max}",
+      "language": "Die Sprache {value} hat {length} Zeichen; die Datenbank speichert höchstens {max}",
+      "task_id": "Die Aufgaben-ID {value} hat {length} Zeichen; die Datenbank speichert höchstens {max}",
+      "answer_name": "Der Antwortname {value} hat {length} Zeichen; die Datenbank speichert höchstens {max}",
+      "suggestion": "Kürzen Sie die ID, damit sie in die Spalte passt"
+    },
+    "opens_known_lock": {
+      "unknown": "Aufgabe {task_id} öffnet {lock_id}, das ist keine registrierte Sperr-ID",
+      "wrong_badge": "Aufgabe {task_id} öffnet {lock_id}, das Abzeichen dieses Kurses ist aber {badge}",
+      "suggestion": "Verwenden Sie eine der gemeinsamen Sperr-IDs oder badge:<Abzeichen-ID> für die letzte Aufgabe"
+    },
+    "answer_tolerance_positive": {
+      "out_of_range": "Aufgabe {task_id}, Antwort {answer}: die Toleranz {tolerance} muss größer als 0 und höchstens 1 sein",
+      "coarser": "Aufgabe {task_id}, Antwort {answer}: die Toleranz {tolerance} ist gröber als die Genauigkeit des Werts {value}",
+      "suggestion": "Wählen Sie eine Toleranz, die nicht gröber ist als die letzte Stelle des erwarteten Werts"
+    },
+    "answer_names_unique": {
+      "duplicate": "Aufgabe {task_id}: der Antwortname {answer} kommt mehrfach vor",
+      "suggestion": "Geben Sie jeder Antwort einer Aufgabe einen eigenen Namen; Ledger-Schlüssel dürfen sich wiederholen"
+    },
+    "every_answer_graded": {
+      "invalid": "Aufgabe {task_id}, Antwort {answer}: graded_by {graded_by} ist weder panel, both noch probe:<Readback-Index>",
+      "index_out_of_range": "Aufgabe {task_id}, Antwort {answer}: Readback {index} existiert nicht",
+      "ledger_mismatch": "Aufgabe {task_id}, Antwort {answer}: Readback {index} erwartet den Ledger-Schlüssel {ledger_key} nicht",
+      "both_needs_one_reader": "Aufgabe {task_id}, Antwort {answer}: bewertet mit both, aber {count} Readbacks lesen ihren Ledger-Schlüssel statt genau einer",
+      "suggestion": "Verweisen Sie graded_by auf genau den Readback, der denselben Ledger-Schlüssel liest"
+    },
+    "numbers_check_subset_of_answer_key": {
+      "unresolved": "Aufgabe {task_id}, Prüfung {check}: {name} ist keine Antwort dieser Aufgabe",
+      "suggestion": "Führen Sie nur Antwortnamen oder Ledger-Schlüssel von Antworten derselben Aufgabe auf"
+    },
+    "numbers_check_lists_only_panel_answers": {
+      "probe_only": "Aufgabe {task_id}, Prüfung {check}: {name} wird mit {graded_by} bewertet und hat kein Eingabefeld, die Prüfung verlangt aber eine Eingabe",
+      "suggestion": "Entfernen Sie den Wert aus der Zahlenprüfung oder bewerten Sie ihn mit both"
+    },
+    "readback_resolves_in_file": {
+      "expects_nothing": "Aufgabe {task_id}, Readback {readback}: die Sonde hat keinen erwarteten Wert",
+      "unresolved": "Aufgabe {task_id}, Readback {readback}: der Ledger-Schlüssel {ledger_key} ist in dieser Datei nicht angegeben",
+      "disagree": "Aufgabe {task_id}, Readback {readback}: der Inline-Erwartungswert widerspricht dem Ledger-Schlüssel {ledger_key}",
+      "suggestion": "Geben Sie den Wert in dieser Datei an oder geben Sie der Sonde einen Inline-Erwartungswert"
+    },
+    "readback_has_probe": {
+      "graded_unprobed": "Aufgabe {task_id}, Readback {readback} bewertet eine Antwort, hat aber keine Sonde",
+      "unprobed": "Aufgabe {task_id}, Readback {readback} hat keine Sonde und wird nicht bewertet",
+      "suggestion": "Fügen Sie eine Sonde aus der geschlossenen Liste hinzu oder entfernen Sie den Readback"
+    },
+    "probe_args_frozen": {
+      "unknown_type": "Aufgabe {task_id}, Readback {readback}: der Sondentyp {type} steht nicht auf der geschlossenen Liste",
+      "bad_args": "Aufgabe {task_id}, Readback {readback}: die Argumente von {type} entsprechen nicht dem festgelegten Modell ({error})",
+      "suggestion": "Verwenden Sie die in trainer/spec.py dokumentierten Sondenargumente"
+    },
+    "task_has_probe_graded_item": {
+      "fail": "Aufgabe {task_id} bewertet nichts über eine Sonde, die das ERP liest",
+      "suggestion": "Bewerten Sie mindestens einen Wert aus dem Projekt des Lernenden, damit reines Eintippen nicht genügt"
+    },
+    "task_discriminates_seed_state": {
+      "fail": "Aufgabe {task_id}: alle {count} per Sonde gelesenen Werte stimmen schon vor der Arbeit des Lernenden",
+      "suggestion": "Bewerten Sie mindestens einen Wert, den nur die Arbeit des Lernenden im ERP erzeugen kann"
+    },
+    "diagnosis_applies_to_resolves": {
+      "fail": "Aufgabe {task_id}, Diagnose {diagnosis}: das Feld {field} ist weder Antwort, Prüffeld noch Readback dieser Aufgabe",
+      "suggestion": "Verweisen Sie applies_to auf einen Antwortnamen derselben Aufgabe"
+    },
+    "diagnosis_unique_per_field": {
+      "equals_correct": "Aufgabe {task_id}, Diagnose {diagnosis}: ihr falscher Wert für {field} liegt innerhalb der Toleranz eines akzeptierten Werts",
+      "collide": "Aufgabe {task_id}: die Diagnosen {diagnosis} und {other} für {field} liegen innerhalb der Toleranz zueinander",
+      "suggestion": "Halten Sie jeden falschen Wert eines Felds weiter als die Toleranz von den richtigen Werten und voneinander entfernt"
+    },
+    "diagnosis_wrong_value_numeric": {
+      "fail": "Aufgabe {task_id}, Diagnose {diagnosis}: wrong_value ist keine Zahl und keine Konvention mit when",
+      "suggestion": "Geben Sie den falschen Wert als Zahl an oder kennzeichnen Sie die Diagnose als Konvention mit Bedingung"
+    },
+    "single_correct_option": {
+      "correct_count": "Aufgabe {task_id}, {question}: {count} Optionen sind als richtig markiert statt genau einer",
+      "feedback_missing": "Aufgabe {task_id}, {question}: Option {option} hat kein Feedback",
+      "suggestion": "Markieren Sie genau eine Option als richtig und schreiben Sie Feedback zu jeder Option"
+    },
+    "check_id_prefix_matches_task": {
+      "fail": "Aufgabe {task_id}: die Prüfung {check} beginnt nicht mit {prefix}",
+      "suggestion": "Benennen Sie die Prüfung so um, dass ihre ID mit der Aufgabennummer beginnt"
+    },
+    "seed_stage_resolvable": {
+      "missing": "Der Seed-Block {block} hat keine Stufe",
+      "invalid": "Seed-Block {block}: die Stufe {stage} ist weder on_enrol noch on_unlock(<Aufgabennummer>)",
+      "task_out_of_range": "Seed-Block {block}: die Stufe {stage} nennt eine Aufgabe jenseits der {count} Aufgaben des Kurses",
+      "suggestion": "Schreiben Sie die Stufe als on_enrol oder on_unlock(n) mit einer Aufgabe dieses Kurses"
+    },
+    "rate_unit_explicit": {
+      "missing": "{where} enthält einen Satz, nennt aber keine Einheit",
+      "invalid": "{where}: die Einheit {unit} ist weder percent noch fraction",
+      "fraction_above_one": "{where}: {value} ist als Bruchteil markiert, liegt aber über 1",
+      "suggestion": "Geben Sie bei jedem Satz die Einheit percent oder fraction an"
+    },
+    "percent_not_written_as_fraction": {
+      "fail": "{where}: {value} geht in eine Prozentspalte (0 bis 100), sieht aber wie ein Bruchteil aus",
+      "suggestion": "Schreiben Sie den Satz in Prozent (3 für 3 Prozent) oder kennzeichnen Sie ihn als Bruchteil"
+    },
+    "einvoice_vat_resolvable": {
+      "missing": "Der angelegte Vertrag nennt keinen vat_rate_percent ({country})",
+      "number_required": "Ein Kurs für {country} muss den Umsatzsteuersatz des Vertrags als Zahl angeben",
+      "null_needs_note": "Der Umsatzsteuersatz des Vertrags ist null, also muss vat_note den Grund nennen ({country})",
+      "not_a_number": "Der Umsatzsteuersatz {value} des Vertrags ist keine Zahl",
+      "out_of_range": "Der Umsatzsteuersatz {value} des Vertrags liegt außerhalb von 0 bis 100",
+      "suggestion": "Geben Sie vat_rate_percent als Prozentzahl an oder null mit vat_note, wo der Kurs es erlaubt"
+    },
+    "sov_signable": {
+      "no_lines": "Der angelegte Vertrag hat keine Leistungsverzeichnis-Zeilen",
+      "flat_classification": "Zeile {line}: classification steht direkt in der Zeile statt unter metadata.classification",
+      "unit_missing": "Zeile {line} hat keine Einheit",
+      "classification_missing": "Zeile {line} hat kein metadata.classification.{standard}",
+      "platform_rule_missing": "Die Unterzeichnungsregel {rule} ist nicht registriert, die Codes konnten nicht geprüft werden",
+      "platform_rule": "Zeile {line} verletzt die Unterzeichnungsregel {rule}",
+      "suggestion": "Geben Sie jeder Zeile eine Einheit und den Klassifikationscode, den die Unterzeichnungsprüfung des Landes akzeptiert"
+    },
+    "project_rule_sets_known": {
+      "unknown": "Der Regelsatz {name} des Projekts ist nicht registriert",
+      "suggestion": "Verwenden Sie einen registrierten Regelsatznamen; ein falsch geschriebener lässt das Projekt ohne Fehlermeldung ungeprüft"
+    },
+    "graded_items_nonzero": {
+      "fail": "Aufgabe {task_id} bewertet überhaupt nichts",
+      "suggestion": "Geben Sie der Aufgabe mindestens eine bewertete Antwort oder einen Readback mit Sonde"
+    },
+    "variation_under_approval_threshold": {
+      "fail": "Aufgabe {task_id}: der Nachtrag über {value} liegt über den {threshold}, die ein einzelner Manager freigeben darf",
+      "suggestion": "Halten Sie den Nachtrag unter der Freigabeschwelle oder planen Sie einen zweiten Freigebenden ein"
+    },
+    "money_scale": {
+      "fail": "{where}: {value} hat mehr als die {places} Nachkommastellen der Kurswährung",
+      "suggestion": "Runden Sie angelegte Beträge auf die kleinste Einheit der Währung"
+    },
+    "version_not_bumped": {
+      "fail": "Kurs {course} Version {version} wurde bereits mit anderem Inhalt geladen",
+      "suggestion": "Erhöhen Sie die Version bei jeder Inhaltsänderung"
+    }
   }
 }

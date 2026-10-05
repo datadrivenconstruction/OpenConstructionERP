@@ -837,5 +837,149 @@
       "fail": "La referencia '{code}' de la posición {ordinal} no nombra ninguna familia de catálogos KNR",
       "suggestion": "Empiece la referencia por su familia de catálogo, como KNR, KNNR, KNR-W o KSNR, o marque la partida como kalkulacja indywidualna"
     }
+  },
+  "trainer": {
+    "task_order_contiguous": {
+      "numbering": "Las tareas deben numerarse de 1 a N en orden; el curso las numera {numbers}",
+      "duplicate_id": "El id de tarea {task_id} lo usa más de una tarea",
+      "suggestion": "Numere las tareas 1, 2, 3 ... en el orden del archivo y dé a cada una un id único"
+    },
+    "task_id_fits_storage": {
+      "course_key": "El id de curso {value} tiene {length} caracteres; la base de datos guarda como máximo {max}",
+      "version": "La versión {value} tiene {length} caracteres; la base de datos guarda como máximo {max}",
+      "title": "El título del curso tiene {length} caracteres; la base de datos guarda como máximo {max}",
+      "language": "El idioma {value} tiene {length} caracteres; la base de datos guarda como máximo {max}",
+      "task_id": "El id de tarea {value} tiene {length} caracteres; la base de datos guarda como máximo {max}",
+      "answer_name": "El nombre de respuesta {value} tiene {length} caracteres; la base de datos guarda como máximo {max}",
+      "suggestion": "Acorte el id para que quepa en la columna"
+    },
+    "opens_known_lock": {
+      "unknown": "La tarea {task_id} abre {lock_id}, que no es un id de bloqueo registrado",
+      "wrong_badge": "La tarea {task_id} abre {lock_id}, pero la insignia de este curso es {badge}",
+      "suggestion": "Use uno de los ids de bloqueo compartidos, o badge:<id de insignia> para la última tarea"
+    },
+    "answer_tolerance_positive": {
+      "out_of_range": "Tarea {task_id}, respuesta {answer}: la tolerancia {tolerance} debe ser mayor que 0 y como máximo 1",
+      "coarser": "Tarea {task_id}, respuesta {answer}: la tolerancia {tolerance} es más gruesa que la precisión del valor {value}",
+      "suggestion": "Fije una tolerancia no más amplia que el último dígito del valor esperado"
+    },
+    "answer_names_unique": {
+      "duplicate": "Tarea {task_id}: el nombre de respuesta {answer} aparece más de una vez",
+      "suggestion": "Dé a cada respuesta de una tarea su propio nombre; las claves del libro pueden repetirse"
+    },
+    "every_answer_graded": {
+      "invalid": "Tarea {task_id}, respuesta {answer}: graded_by {graded_by} no es panel, both ni probe:<índice de lectura>",
+      "index_out_of_range": "Tarea {task_id}, respuesta {answer}: la lectura {index} no existe",
+      "ledger_mismatch": "Tarea {task_id}, respuesta {answer}: la lectura {index} no espera la clave {ledger_key}",
+      "both_needs_one_reader": "Tarea {task_id}, respuesta {answer}: calificada con both, pero {count} lecturas leen su clave en lugar de exactamente una",
+      "suggestion": "Apunte graded_by a la única lectura que lee la misma clave del libro"
+    },
+    "numbers_check_subset_of_answer_key": {
+      "unresolved": "Tarea {task_id}, comprobación {check}: {name} no es una respuesta de esta tarea",
+      "suggestion": "Enumere solo nombres de respuesta o claves del libro de la misma tarea"
+    },
+    "numbers_check_lists_only_panel_answers": {
+      "probe_only": "Tarea {task_id}, comprobación {check}: {name} se califica con {graded_by} y no tiene campo en el panel, pero la comprobación pide escribirlo",
+      "suggestion": "Quítelo de la comprobación de cifras o califíquelo con both"
+    },
+    "readback_resolves_in_file": {
+      "expects_nothing": "Tarea {task_id}, lectura {readback}: la sonda no tiene valor esperado",
+      "unresolved": "Tarea {task_id}, lectura {readback}: la clave {ledger_key} no figura en este archivo",
+      "disagree": "Tarea {task_id}, lectura {readback}: el valor esperado en línea contradice la clave {ledger_key}",
+      "suggestion": "Indique el valor en este archivo o dé a la sonda un valor esperado en línea"
+    },
+    "readback_has_probe": {
+      "graded_unprobed": "Tarea {task_id}, la lectura {readback} califica una respuesta pero no tiene sonda",
+      "unprobed": "Tarea {task_id}, la lectura {readback} no tiene sonda y no se califica",
+      "suggestion": "Añada una sonda de la lista cerrada o elimine la lectura"
+    },
+    "probe_args_frozen": {
+      "unknown_type": "Tarea {task_id}, lectura {readback}: el tipo de sonda {type} no está en la lista cerrada",
+      "bad_args": "Tarea {task_id}, lectura {readback}: los argumentos de {type} no siguen el modelo fijado ({error})",
+      "suggestion": "Use los argumentos de sonda documentados en trainer/spec.py"
+    },
+    "task_has_probe_graded_item": {
+      "fail": "La tarea {task_id} no califica nada mediante una sonda que lea el ERP",
+      "suggestion": "Califique al menos una cifra del proyecto del alumno para que escribir números no baste"
+    },
+    "task_discriminates_seed_state": {
+      "fail": "Tarea {task_id}: los {count} valores leídos por sonda ya coinciden antes de que el alumno actúe",
+      "suggestion": "Califique al menos una cifra que solo el trabajo del alumno en el ERP pueda producir"
+    },
+    "diagnosis_applies_to_resolves": {
+      "fail": "Tarea {task_id}, diagnóstico {diagnosis}: el campo {field} no es respuesta, campo de comprobación ni lectura de esta tarea",
+      "suggestion": "Apunte applies_to a un nombre de respuesta de la misma tarea"
+    },
+    "diagnosis_unique_per_field": {
+      "equals_correct": "Tarea {task_id}, diagnóstico {diagnosis}: su valor erróneo para {field} está dentro de la tolerancia de un valor aceptado",
+      "collide": "Tarea {task_id}: los diagnósticos {diagnosis} y {other} para {field} están dentro de la tolerancia entre sí",
+      "suggestion": "Mantenga cada valor erróneo de un campo a más de la tolerancia de los valores correctos y de los demás"
+    },
+    "diagnosis_wrong_value_numeric": {
+      "fail": "Tarea {task_id}, diagnóstico {diagnosis}: wrong_value no es un número ni una convención con when",
+      "suggestion": "Dé el valor erróneo como número o marque el diagnóstico como convención y diga cuándo aplica"
+    },
+    "single_correct_option": {
+      "correct_count": "Tarea {task_id}, {question}: {count} opciones están marcadas como correctas en lugar de exactamente una",
+      "feedback_missing": "Tarea {task_id}, {question}: la opción {option} no tiene comentario",
+      "suggestion": "Marque exactamente una opción como correcta y escriba un comentario para cada opción"
+    },
+    "check_id_prefix_matches_task": {
+      "fail": "Tarea {task_id}: la comprobación {check} no empieza por {prefix}",
+      "suggestion": "Renombre la comprobación para que su id empiece por el número de tarea"
+    },
+    "seed_stage_resolvable": {
+      "missing": "El bloque de semilla {block} no tiene etapa",
+      "invalid": "Bloque de semilla {block}: la etapa {stage} no es on_enrol ni on_unlock(<número de tarea>)",
+      "task_out_of_range": "Bloque de semilla {block}: la etapa {stage} nombra una tarea más allá de las {count} tareas del curso",
+      "suggestion": "Escriba la etapa como on_enrol u on_unlock(n) con n una tarea de este curso"
+    },
+    "rate_unit_explicit": {
+      "missing": "{where} contiene una tasa pero no indica unidad",
+      "invalid": "{where}: la unidad {unit} no es percent ni fraction",
+      "fraction_above_one": "{where}: {value} está marcado como fracción pero es mayor que 1",
+      "suggestion": "Indique la unidad percent o fraction en cada tasa"
+    },
+    "percent_not_written_as_fraction": {
+      "fail": "{where}: {value} va a una columna de porcentaje (0 a 100) pero parece una fracción",
+      "suggestion": "Escriba la tasa en porcentaje (3 para 3 por ciento) o márquela como fracción"
+    },
+    "einvoice_vat_resolvable": {
+      "missing": "El contrato sembrado no indica vat_rate_percent ({country})",
+      "number_required": "Un curso de {country} debe indicar el tipo de IVA del contrato como número",
+      "null_needs_note": "El tipo de IVA del contrato es null, así que vat_note debe explicar por qué ({country})",
+      "not_a_number": "El tipo de IVA {value} del contrato no es un número",
+      "out_of_range": "El tipo de IVA {value} del contrato está fuera de 0 a 100",
+      "suggestion": "Dé vat_rate_percent como número en porcentaje, o null con vat_note donde el curso lo permita"
+    },
+    "sov_signable": {
+      "no_lines": "El contrato sembrado no tiene líneas de desglose",
+      "flat_classification": "Línea {line}: classification está directamente en la línea en lugar de bajo metadata.classification",
+      "unit_missing": "La línea {line} no tiene unidad",
+      "classification_missing": "La línea {line} no tiene metadata.classification.{standard}",
+      "platform_rule_missing": "La regla de firma {rule} no está registrada, no se pudieron comprobar los códigos",
+      "platform_rule": "La línea {line} incumple la regla de firma {rule}",
+      "suggestion": "Dé a cada línea una unidad y el código de clasificación que acepta la verificación de firma del país"
+    },
+    "project_rule_sets_known": {
+      "unknown": "El conjunto de reglas {name} del proyecto no está registrado",
+      "suggestion": "Use un nombre de conjunto de reglas registrado; uno mal escrito deja el proyecto sin validar y sin ningún error"
+    },
+    "graded_items_nonzero": {
+      "fail": "La tarea {task_id} no califica ningún elemento",
+      "suggestion": "Dé a la tarea al menos una respuesta calificada o una lectura con sonda"
+    },
+    "variation_under_approval_threshold": {
+      "fail": "Tarea {task_id}: la modificación de {value} supera los {threshold} que un solo gestor puede aprobar",
+      "suggestion": "Mantenga la modificación del curso por debajo del umbral de aprobación o prevea un segundo aprobador"
+    },
+    "money_scale": {
+      "fail": "{where}: {value} tiene más de los {places} decimales de la moneda del curso",
+      "suggestion": "Redondee los importes sembrados a la unidad mínima de la moneda"
+    },
+    "version_not_bumped": {
+      "fail": "El curso {course} versión {version} ya se cargó con otro contenido",
+      "suggestion": "Suba la versión cada vez que cambie el contenido del curso"
+    }
   }
 }

@@ -24,7 +24,9 @@ async def on_startup() -> None:
     Permissions are registered on every install so role matrices and the
     permission listing stay the same whether or not the flag is on. With the
     flag off nothing else happens: no rule set, no event subscription and no
-    course load, so a normal install pays nothing for this module.
+    course load, so a normal install pays nothing for this module. With it on,
+    the ``trainer_spec`` rule set is registered and the courses are loaded;
+    neither can raise out of here.
     """
     from app.config import get_settings
     from app.modules.trainer.permissions import register_trainer_permissions
@@ -34,7 +36,15 @@ async def on_startup() -> None:
     if not get_settings().academy_mode:
         return
 
-    # Wave 1 and 2 hook in here: register the ``trainer_spec`` rule set, load
-    # the courses from ``settings.trainer_courses_dir`` and subscribe the
-    # recheck handlers.
-    logger.info("Academy mode is on; the trainer has no startup work yet")
+    # Load the courses from ``settings.trainer_courses_dir`` (Wave 1). Nothing
+    # here may stop the boot: a bad course is stored as invalid, and any other
+    # failure is logged with the stored courses left as they were. Wave 2 adds
+    # the recheck handlers below.
+    try:
+        from app.modules.trainer import loader
+        from app.modules.trainer.validators import register_trainer_rules
+
+        register_trainer_rules()
+        await loader.load_courses_at_startup()
+    except Exception:  # the boot must never crash on the trainer
+        logger.exception("Academy mode is on, but the trainer course load failed")

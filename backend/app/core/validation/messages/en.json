@@ -837,5 +837,149 @@
       "fail": "Reference '{code}' on position {ordinal} names no KNR catalogue family",
       "suggestion": "Start the reference with its catalogue family, such as KNR, KNNR, KNR-W or KSNR, or mark the line as kalkulacja indywidualna"
     }
+  },
+  "trainer": {
+    "task_order_contiguous": {
+      "numbering": "Tasks must be numbered 1 to N in order; the course numbers them {numbers}",
+      "duplicate_id": "Task id {task_id} is used by more than one task",
+      "suggestion": "Number the tasks 1, 2, 3 ... in file order and give each a unique id"
+    },
+    "task_id_fits_storage": {
+      "course_key": "Course id {value} is {length} characters; the database keeps at most {max}",
+      "version": "Version {value} is {length} characters; the database keeps at most {max}",
+      "title": "Course title is {length} characters; the database keeps at most {max}",
+      "language": "Language {value} is {length} characters; the database keeps at most {max}",
+      "task_id": "Task id {value} is {length} characters; the database keeps at most {max}",
+      "answer_name": "Answer name {value} is {length} characters; the database keeps at most {max}",
+      "suggestion": "Shorten the id so it fits the column"
+    },
+    "opens_known_lock": {
+      "unknown": "Task {task_id} opens {lock_id}, which is not a registered lock id",
+      "wrong_badge": "Task {task_id} opens {lock_id}, but this course's badge is {badge}",
+      "suggestion": "Use one of the shared lock ids, or badge:<course badge id> for the last task"
+    },
+    "answer_tolerance_positive": {
+      "out_of_range": "Task {task_id}, answer {answer}: tolerance {tolerance} must be above 0 and at most 1",
+      "coarser": "Task {task_id}, answer {answer}: tolerance {tolerance} is coarser than the value {value} is written to",
+      "suggestion": "Set a tolerance no wider than the last digit of the expected value"
+    },
+    "answer_names_unique": {
+      "duplicate": "Task {task_id}: answer name {answer} appears more than once",
+      "suggestion": "Give every answer of a task its own name; ledger keys may repeat"
+    },
+    "every_answer_graded": {
+      "invalid": "Task {task_id}, answer {answer}: graded_by {graded_by} is not panel, both or probe:<readback index>",
+      "index_out_of_range": "Task {task_id}, answer {answer}: readback {index} does not exist",
+      "ledger_mismatch": "Task {task_id}, answer {answer}: readback {index} does not expect ledger key {ledger_key}",
+      "both_needs_one_reader": "Task {task_id}, answer {answer}: graded by both, but {count} readbacks read its ledger key instead of exactly one",
+      "suggestion": "Point graded_by at the one readback that reads the same ledger key"
+    },
+    "numbers_check_subset_of_answer_key": {
+      "unresolved": "Task {task_id}, check {check}: {name} is not an answer of this task",
+      "suggestion": "List only answer names or answer ledger keys of the same task"
+    },
+    "numbers_check_lists_only_panel_answers": {
+      "probe_only": "Task {task_id}, check {check}: {name} is graded by {graded_by} and has no panel field, yet the check asks the learner to type it",
+      "suggestion": "Remove it from the numbers check, or grade it as both"
+    },
+    "readback_resolves_in_file": {
+      "expects_nothing": "Task {task_id}, readback {readback}: the probe has no expected value",
+      "unresolved": "Task {task_id}, readback {readback}: ledger key {ledger_key} is not stated in this file",
+      "disagree": "Task {task_id}, readback {readback}: the inline expect disagrees with ledger key {ledger_key}",
+      "suggestion": "State the value in this file, or give the probe an inline expect"
+    },
+    "readback_has_probe": {
+      "graded_unprobed": "Task {task_id}, readback {readback} grades an answer but has no probe",
+      "unprobed": "Task {task_id}, readback {readback} has no probe and is not graded",
+      "suggestion": "Add a probe from the closed list, or drop the readback"
+    },
+    "probe_args_frozen": {
+      "unknown_type": "Task {task_id}, readback {readback}: probe type {type} is not on the closed list",
+      "bad_args": "Task {task_id}, readback {readback}: arguments of {type} do not match the frozen model ({error})",
+      "suggestion": "Use the probe arguments documented in trainer/spec.py"
+    },
+    "task_has_probe_graded_item": {
+      "fail": "Task {task_id} grades nothing through a probe that reads the ERP",
+      "suggestion": "Grade at least one figure from the learner's project, so typing numbers alone cannot pass"
+    },
+    "task_discriminates_seed_state": {
+      "fail": "Task {task_id}: all {count} ERP-probed items already match the project before the learner acts",
+      "suggestion": "Grade at least one figure that only the learner's work in the ERP can produce"
+    },
+    "diagnosis_applies_to_resolves": {
+      "fail": "Task {task_id}, diagnosis {diagnosis}: field {field} is not an answer, check field or readback of this task",
+      "suggestion": "Point applies_to at an answer name of the same task"
+    },
+    "diagnosis_unique_per_field": {
+      "equals_correct": "Task {task_id}, diagnosis {diagnosis}: its wrong value for {field} is within tolerance of an accepted value",
+      "collide": "Task {task_id}: diagnoses {diagnosis} and {other} for {field} are within tolerance of each other",
+      "suggestion": "Keep each wrong value of a field further than the tolerance from the right values and from each other"
+    },
+    "diagnosis_wrong_value_numeric": {
+      "fail": "Task {task_id}, diagnosis {diagnosis}: wrong_value is not a number, and it is not a convention with a when",
+      "suggestion": "Give the wrong value as a number, or mark the diagnosis as a convention and say when it applies"
+    },
+    "single_correct_option": {
+      "correct_count": "Task {task_id}, {question}: {count} options are marked correct instead of exactly one",
+      "feedback_missing": "Task {task_id}, {question}: option {option} has no feedback",
+      "suggestion": "Mark exactly one option correct and write feedback for every option"
+    },
+    "check_id_prefix_matches_task": {
+      "fail": "Task {task_id}: check {check} does not start with {prefix}",
+      "suggestion": "Rename the check so its id starts with the task number"
+    },
+    "seed_stage_resolvable": {
+      "missing": "Seed block {block} has no stage",
+      "invalid": "Seed block {block}: stage {stage} is not on_enrol or on_unlock(<task number>)",
+      "task_out_of_range": "Seed block {block}: stage {stage} names a task beyond the {count} tasks of the course",
+      "suggestion": "Write the stage as on_enrol or on_unlock(n) with n a task of this course"
+    },
+    "rate_unit_explicit": {
+      "missing": "{where} carries a rate but states no unit",
+      "invalid": "{where}: unit {unit} is not percent or fraction",
+      "fraction_above_one": "{where}: {value} is marked as a fraction but is above 1",
+      "suggestion": "State unit percent or fraction on every rate"
+    },
+    "percent_not_written_as_fraction": {
+      "fail": "{where}: {value} goes into a percent column (0 to 100) but looks like a fraction",
+      "suggestion": "Write the rate in percent (3 for 3 per cent), or mark it as a fraction"
+    },
+    "einvoice_vat_resolvable": {
+      "missing": "The seeded contract states no vat_rate_percent ({country})",
+      "number_required": "A {country} course must state the contract VAT rate as a number",
+      "null_needs_note": "The contract VAT rate is null, so vat_note must say why ({country})",
+      "not_a_number": "The contract VAT rate {value} is not a number",
+      "out_of_range": "The contract VAT rate {value} is outside 0 to 100",
+      "suggestion": "Give vat_rate_percent as a percent number, or null with a vat_note where the course allows it"
+    },
+    "sov_signable": {
+      "no_lines": "The seeded contract has no schedule-of-values lines",
+      "flat_classification": "SOV line {line}: classification sits flat on the line instead of under metadata.classification",
+      "unit_missing": "SOV line {line} has no unit",
+      "classification_missing": "SOV line {line} has no metadata.classification.{standard}",
+      "platform_rule_missing": "The signing rule {rule} is not registered, so the line codes could not be checked",
+      "platform_rule": "SOV line {line} fails the signing rule {rule}",
+      "suggestion": "Give every SOV line a unit and the classification code the country's signing gate accepts"
+    },
+    "project_rule_sets_known": {
+      "unknown": "Project rule set {name} is not a registered rule set",
+      "suggestion": "Use a registered rule set name; a misspelt one leaves the project unvalidated without any error"
+    },
+    "graded_items_nonzero": {
+      "fail": "Task {task_id} grades no item at all",
+      "suggestion": "Give the task at least one graded answer or probed readback"
+    },
+    "variation_under_approval_threshold": {
+      "fail": "Task {task_id}: the variation of {value} is above the {threshold} a single manager may approve",
+      "suggestion": "Keep the course variation below the approval threshold, or plan a second approver"
+    },
+    "money_scale": {
+      "fail": "{where}: {value} has more than the {places} decimals the course currency has",
+      "suggestion": "Round seeded money to the currency's minor unit"
+    },
+    "version_not_bumped": {
+      "fail": "Course {course} version {version} was loaded before with different content",
+      "suggestion": "Bump the version whenever the course content changes"
+    }
   }
 }

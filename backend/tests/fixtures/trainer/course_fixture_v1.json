@@ -13,6 +13,9 @@
   "contract": "Fictional lump-sum building contract with quantities",
   "fictional_case": true,
   "language": "en",
+  "locale": "en-GB",
+  "date_style": "en-GB long form in learner-facing text; ISO 8601 in data fields",
+  "legal_review": "pending",
   "erp_walked_version": "18.4.0",
   "sources": [
     {"id": "fx-src-1", "title": "Invented case brief for the fixture", "kind": "case_brief"}
@@ -55,7 +58,15 @@
       "as_of": "2026-09-30",
       "effective_from": "2026-10-01",
       "review_by": "2027-09-30",
-      "source_note": "Invented for the fixture."
+      "_source_note": "Invented for the fixture."
+    },
+    {
+      "key": "fx_payment_days",
+      "value": 30,
+      "status": "case_assumption",
+      "source": "fx-src-1",
+      "checked_on": "2026-09-30",
+      "note": "Days from a valuation to its final date for payment; a count, not a rate, so it states no unit."
     }
   ],
   "status_vocabulary": {"case_assumption": "Invented for this course", "fixture": "Test data only"},
@@ -69,7 +80,10 @@
       "location": "Quillmere, a fictional town",
       "description": "Single-storey storage depot, invented for the trainer fixture.",
       "classification_standard": "nrm",
-      "regional_pack": "gb"
+      "regional_pack": "gb",
+      "validation_rule_sets": ["nrm", "boq_quality"],
+      "address": {"street": "1 Invented Lane", "city": "Quillmere", "postcode": "QM1 1AA", "subdivision": "GB-ENG", "country": "GB"},
+      "works": "private"
     },
     "parties": [
       {"name": "Fennick Lane Builders", "role": "contractor", "note": "The learner's firm."},
@@ -86,9 +100,9 @@
         {"ordinal": "01", "title": "Building works", "positions": ["01.001", "01.002", "01.003"]}
       ],
       "positions": [
-        {"code": "01.001", "section": "01", "description": "Strip foundation concrete", "unit": "m3", "qty": 42, "rate": 118.50, "qty_ledger_key": "fx_found_qty", "answer_rate_key": "fx_found_rate", "answer_amount_key": "fx_found_amount"},
-        {"code": "01.002", "section": "01", "description": "Blockwork walls", "unit": "m2", "qty": 310, "rate": null, "qty_ledger_key": "fx_block_qty", "answer_rate_key": "fx_blockwork_rate", "answer_amount_key": "fx_block_amount"},
-        {"code": "01.003", "section": "01", "description": "Roof coverings", "unit": "m2", "qty": 180, "rate": 61.75, "qty_ledger_key": "fx_roof_qty", "answer_rate_key": "fx_roof_rate", "answer_amount_key": "fx_roof_amount"}
+        {"code": "01.001", "section": "01", "description": "Strip foundation concrete", "unit": "m3", "qty": 42, "rate": 118.50, "qty_ledger_key": "fx_found_qty", "answer_rate_key": "fx_found_rate", "answer_amount_key": "fx_found_amount", "classification": {"nrm": "1.1"}},
+        {"code": "01.002", "section": "01", "description": "Blockwork walls", "unit": "m2", "qty": 310, "rate": null, "qty_ledger_key": "fx_block_qty", "answer_rate_key": "fx_blockwork_rate", "answer_amount_key": "fx_block_amount", "classification": {"nrm": "2.5"}},
+        {"code": "01.003", "section": "01", "description": "Roof coverings", "unit": "m2", "qty": 180, "rate": 61.75, "qty_ledger_key": "fx_roof_qty", "answer_rate_key": "fx_roof_rate", "answer_amount_key": "fx_roof_amount", "classification": {"nrm": "2.3"}}
       ],
       "markups": [],
       "direct_cost_before_t1": {"value": 16092.00, "derivation": "4977.00 + 0.00 + 11115.00"},
@@ -109,8 +123,8 @@
       "module": "bid_management",
       "title": "Roof coverings and flashings",
       "currency": "GBP",
-      "code_note": "The seeder suffixes the code per learner; codes are unique across the database.",
-      "invitation_note": "Three invented roofing firms are invited.",
+      "_code_note": "The seeder suffixes the code per learner; codes are unique across the database.",
+      "_invitation_note": "Three invented roofing firms are invited.",
       "status_at_start": "draft",
       "budget": {"value": 11500.00, "ledger_key": "fx_roof_budget"},
       "scope_lines": [
@@ -160,23 +174,24 @@
       "retention_percent": {"value": 5, "unit": "percent", "rate_key": "fx_retention_rate"},
       "vat_rate_percent": 20,
       "schedule_of_values": [
-        {"code": "C01", "description": "Substructure", "amount": 4977.00, "ledger_key": "fx_sov_c01", "classification": {"nrm": "1.1"}, "progress_link": "boq:01.001"},
-        {"code": "C02", "description": "External walls", "amount": 14322.00, "ledger_key": "fx_sov_c02", "classification": {"nrm": "2.5"}, "progress_link": "boq:01.002"},
-        {"code": "C03", "description": "Roof", "amount": 11250.00, "ledger_key": "fx_sov_c03", "classification": {"nrm": "2.3"}, "progress_link": "csa"},
-        {"code": "C04", "description": "Overheads and profit", "amount": 3953.82, "ledger_key": "fx_sov_c04", "classification": {"nrm": "0.5"}, "progress_link": "none"}
+        {"code": "C01", "description": "Substructure", "unit": "item", "amount": 4977.00, "ledger_key": "fx_sov_c01", "metadata": {"classification": {"nrm": "1.1"}}, "progress_link": "boq:01.001"},
+        {"code": "C02", "description": "External walls", "unit": "item", "amount": 14322.00, "ledger_key": "fx_sov_c02", "metadata": {"classification": {"nrm": "2.5"}}, "progress_link": "boq:01.002"},
+        {"code": "C03", "description": "Roof", "unit": "item", "amount": 11250.00, "ledger_key": "fx_sov_c03", "metadata": {"classification": {"nrm": "2.3"}}, "progress_link": "csa"},
+        {"code": "C04", "description": "Overheads and profit", "unit": "item", "amount": 3953.82, "ledger_key": "fx_sov_c04", "metadata": {"classification": {"nrm": "0.5"}}, "progress_link": "none"}
       ],
       "schedule_total": {"value": 34502.82, "derivation": "4977.00 + 14322.00 + 11250.00 + 3953.82"}
     },
-    "progress_readings_valuation_1": {
+    "progress_readings": [{
       "stage": "on_unlock(4)",
-      "period": "2026-10",
+      "period_from": "2026-10-01",
+      "period_to": "2026-10-31",
       "readings": [
-        {"line": "C01", "percent_complete": 100, "value": 4977.00, "ledger_key": "fx_v1_c01"},
-        {"line": "C02", "percent_complete": 50, "value": 7161.00, "ledger_key": "fx_v1_c02"},
-        {"line": "C03", "percent_complete": 0, "value": 0.00, "ledger_key": "fx_v1_c03"}
+        {"line_code": "C01", "percent_complete": 100, "value": 4977.00, "ledger_key": "fx_v1_c01"},
+        {"line_code": "C02", "percent_complete": 50, "value": 7161.00, "ledger_key": "fx_v1_c02"},
+        {"line_code": "C03", "percent_complete": 0, "value": 0.00, "ledger_key": "fx_v1_c03"}
       ]
-    },
-    "variation_01": {
+    }],
+    "variations": [{
       "stage": "on_unlock(5)",
       "title": "Rooflights instead of part of the roof covering",
       "instruction_ref": "FX-INS-01",
@@ -186,7 +201,7 @@
         {"code": "V01", "description": "Add rooflights", "unit": "nr", "qty": 4, "qty_ledger_key": "fx_rl_qty", "rate": 385.00, "rate_ledger_key": "fx_rl_rate"},
         {"code": "V02", "description": "Omit roof covering", "unit": "m2", "qty": -12, "qty_ledger_key": "fx_omit_qty", "rate": 62.50, "rate_ledger_key": "fx_omit_rate"}
       ]
-    },
+    }],
     "subcontract": {"note": "Opaque block, kept only to cover the union of keys."},
     "operation": {"note": "Opaque block, kept only to cover the union of keys."}
   },
@@ -280,11 +295,11 @@
         {"name": "profit_rate", "ledger_key": "fx_profit_rate", "value": 0.05, "tolerance": "0.0001", "graded_by": "probe:1", "unit": "fraction"}
       ],
       "optional_answer_key": [
-        {"name": "profit_amount", "ledger_key": "fx_profit_amount", "value": 1520.70, "tolerance": "0.01"}
+        {"name": "profit_amount", "ledger_key": "fx_profit_amount", "value": 1520.70, "tolerance": "0.01", "graded_by": "panel"}
       ],
       "readback": [
         {"what": "Grand total of the main bill", "expects": ["fx_grand_total"], "probe": {"type": "boq.cost_breakdown", "args": {"boq_ref": "boq.main", "field": "grand_total"}}},
-        {"what": "Percentage of the profit markup", "expects": ["fx_profit_rate"], "probe": {"type": "boq.markup", "args": {"boq_ref": "boq.main", "name": "Profit", "field": "percentage"}, "unit": "percent"}}
+        {"what": "Percentage of the profit markup", "expects": ["fx_profit_rate"], "probe": {"type": "boq.markup", "args": {"boq_ref": "boq.main", "name": "Profit", "field": "percentage"}}}
       ],
       "checks": [
         {"id": "t2-numbers", "kind": "numbers", "prompt": "Type the overheads amount.", "expects": ["overheads_amount"]},
@@ -340,14 +355,14 @@
         {"name": "Flashing length", "value": 64, "ledger_key": "fx_flash_qty"}
       ],
       "answer_key": [
-        {"name": "alderby_normalized", "ledger_key": "fx_alderby_norm", "value": 11780.00, "tolerance": "0.01", "graded_by": "panel"},
+        {"name": "alderby_normalized", "ledger_key": "fx_alderby_norm", "value": 11780.00, "tolerance": "0.01", "graded_by": "panel", "also_accepted": [{"value": 11788.00, "ledger_key": "fx_alderby_norm_alt", "convention": "Flashings priced at the second-highest rate plus a stated allowance."}]},
         {"name": "lowest_normalized", "ledger_key": "fx_lowest_norm", "value": 11250.00, "tolerance": "0.01", "graded_by": "both"},
-        {"name": "award_amount", "ledger_key": "fx_award_amount", "value": 11250.00, "tolerance": "0.01", "graded_by": "probe:1"}
+        {"name": "award_amount", "ledger_key": "fx_award_amount", "value": 11250.00, "tolerance": "0.01", "graded_by": "probe:1", "_unit": "GBP"}
       ],
       "readback": [
-        {"what": "Normalised total of Brackenfold Roofs", "expects": ["fx_lowest_norm"], "probe": {"type": "bid.leveling", "args": {"package_ref": "package.roof", "bidder_name": "Brackenfold Roofs", "field": "normalized_total"}}},
-        {"what": "Awarded amount", "expects": ["fx_award_amount"], "probe": {"type": "bid.award", "args": {"package_ref": "package.roof", "field": "awarded_amount"}}},
-        {"what": "Awarded bidder", "expects": [], "probe": {"type": "bid.award", "args": {"package_ref": "package.roof", "field": "awarded_bidder_name"}, "expect": "Brackenfold Roofs"}}
+        {"what": "Normalised total of Brackenfold Roofs", "expects": ["fx_lowest_norm"], "probe": {"type": "bid.leveling", "args": {"package_ref": "bid_package.main", "bidder_name": "Brackenfold Roofs", "field": "normalized_total"}}},
+        {"what": "Awarded amount", "expects": ["fx_award_amount"], "probe": {"type": "bid.award", "args": {"package_ref": "bid_package.main", "field": "awarded_amount"}}},
+        {"what": "Awarded bidder", "expects": [], "probe": {"type": "bid.award", "args": {"package_ref": "bid_package.main", "field": "awarded_bidder_name"}, "expect": "Brackenfold Roofs", "gate": true}}
       ],
       "checks": [
         {"id": "t3-numbers", "kind": "numbers", "prompt": "Type Alderby's normalised total and the lowest normalised bid.", "expects": ["alderby_normalized", "lowest_normalized"]},
@@ -381,7 +396,7 @@
         "The highest flashing rate received is Corrow's.",
         "Level after you price the gap, then award."
       ],
-      "erp_fit": {"screen": "Bid leveling", "tables": {"oe_bid_management_leveling": "normalised totals"}}
+      "erp_fit": {"screen": "Bid leveling", "tables": {"oe_bid_management_leveling": "normalised totals"}, "_derivation": "Authoring-only, stripped at any depth."}
     },
     {
       "id": "t4-valuation",
@@ -470,7 +485,7 @@
         {"name": "new_contract_sum", "ledger_key": "fx_new_contract_sum", "value": 35292.82, "tolerance": "0.01", "graded_by": "probe:1"}
       ],
       "readback": [
-        {"what": "Agreed cost impact of the variation request", "expects": ["fx_vr_net"], "probe": {"type": "variation.request", "args": {"match": "seeded:vr.1", "field": "agreed_cost_impact"}}},
+        {"what": "Agreed cost impact of the variation request", "expects": ["fx_vr_net"], "probe": {"type": "variation.request", "args": {"variation_ref": "latest", "field": "agreed_cost_impact"}}},
         {"what": "Contract sum after the variation", "expects": ["fx_new_contract_sum"], "probe": {"type": "contract.field", "args": {"contract_ref": "contract.main", "field": "total_value"}}}
       ],
       "checks": [
@@ -517,5 +532,11 @@
   "contract_choice_reason": "A plain lump-sum contract keeps the fixture small.",
   "diagnosis_semantics": "A diagnosis matches only within its own field, within that field's tolerance.",
   "jurisdiction": "Fictional",
-  "schema_additions_vs_uk": {"note": "Opaque block, kept only to cover the union of keys."}
+  "schema_additions_vs_uk": {"note": "Opaque block, kept only to cover the union of keys."},
+  "authoring": {
+    "rewalk": {"required": false, "reason": "Fixture only; never walked."},
+    "provenance_vocabulary": {"script": "Seen in a scripted walk", "derived-likely": "Derived, likely in practice", "founder": "Stated by the founder"},
+    "graded_by_semantics": "Decision 11.",
+    "count_claims": []
+  }
 }

@@ -837,5 +837,149 @@
       "fail": "Ссылка '{code}' у позиции {ordinal} не называет семейство каталогов KNR",
       "suggestion": "Начните ссылку с семейства каталога, например KNR, KNNR, KNR-W или KSNR, или отметьте строку как kalkulacja indywidualna"
     }
+  },
+  "trainer": {
+    "task_order_contiguous": {
+      "numbering": "Задания должны идти по порядку с 1 до N; в курсе они пронумерованы так: {numbers}",
+      "duplicate_id": "Идентификатор задания {task_id} используется больше чем одним заданием",
+      "suggestion": "Пронумеруйте задания 1, 2, 3 ... в порядке файла и дайте каждому уникальный идентификатор"
+    },
+    "task_id_fits_storage": {
+      "course_key": "Идентификатор курса {value} длиной {length} символов; база хранит не больше {max}",
+      "version": "Версия {value} длиной {length} символов; база хранит не больше {max}",
+      "title": "Название курса длиной {length} символов; база хранит не больше {max}",
+      "language": "Язык {value} длиной {length} символов; база хранит не больше {max}",
+      "task_id": "Идентификатор задания {value} длиной {length} символов; база хранит не больше {max}",
+      "answer_name": "Имя ответа {value} длиной {length} символов; база хранит не больше {max}",
+      "suggestion": "Сократите идентификатор, чтобы он поместился в столбец"
+    },
+    "opens_known_lock": {
+      "unknown": "Задание {task_id} открывает {lock_id}, такого зарегистрированного замка нет",
+      "wrong_badge": "Задание {task_id} открывает {lock_id}, но значок этого курса {badge}",
+      "suggestion": "Используйте один из общих идентификаторов замков или badge:<id значка> для последнего задания"
+    },
+    "answer_tolerance_positive": {
+      "out_of_range": "Задание {task_id}, ответ {answer}: допуск {tolerance} должен быть больше 0 и не больше 1",
+      "coarser": "Задание {task_id}, ответ {answer}: допуск {tolerance} грубее точности, с которой записано значение {value}",
+      "suggestion": "Задайте допуск не шире последнего разряда ожидаемого значения"
+    },
+    "answer_names_unique": {
+      "duplicate": "Задание {task_id}: имя ответа {answer} встречается больше одного раза",
+      "suggestion": "Дайте каждому ответу задания своё имя; ключи журнала могут повторяться"
+    },
+    "every_answer_graded": {
+      "invalid": "Задание {task_id}, ответ {answer}: graded_by {graded_by} не panel, не both и не probe:<номер считывания>",
+      "index_out_of_range": "Задание {task_id}, ответ {answer}: считывания {index} нет",
+      "ledger_mismatch": "Задание {task_id}, ответ {answer}: считывание {index} не ожидает ключ журнала {ledger_key}",
+      "both_needs_one_reader": "Задание {task_id}, ответ {answer}: оценивается как both, но его ключ читают {count} считываний вместо ровно одного",
+      "suggestion": "Укажите в graded_by то единственное считывание, которое читает тот же ключ журнала"
+    },
+    "numbers_check_subset_of_answer_key": {
+      "unresolved": "Задание {task_id}, проверка {check}: {name} не является ответом этого задания",
+      "suggestion": "Перечисляйте только имена ответов или ключи журнала ответов того же задания"
+    },
+    "numbers_check_lists_only_panel_answers": {
+      "probe_only": "Задание {task_id}, проверка {check}: {name} оценивается через {graded_by} и не имеет поля в панели, но проверка просит его ввести",
+      "suggestion": "Уберите значение из проверки чисел или оценивайте его как both"
+    },
+    "readback_resolves_in_file": {
+      "expects_nothing": "Задание {task_id}, считывание {readback}: у зонда нет ожидаемого значения",
+      "unresolved": "Задание {task_id}, считывание {readback}: ключ журнала {ledger_key} не указан в этом файле",
+      "disagree": "Задание {task_id}, считывание {readback}: встроенное ожидаемое значение расходится с ключом журнала {ledger_key}",
+      "suggestion": "Укажите значение в этом файле или задайте зонду встроенное ожидаемое значение"
+    },
+    "readback_has_probe": {
+      "graded_unprobed": "Задание {task_id}, считывание {readback} оценивает ответ, но не имеет зонда",
+      "unprobed": "Задание {task_id}, считывание {readback} без зонда и не оценивается",
+      "suggestion": "Добавьте зонд из закрытого списка или уберите считывание"
+    },
+    "probe_args_frozen": {
+      "unknown_type": "Задание {task_id}, считывание {readback}: тип зонда {type} не входит в закрытый список",
+      "bad_args": "Задание {task_id}, считывание {readback}: аргументы {type} не соответствуют зафиксированной модели ({error})",
+      "suggestion": "Используйте аргументы зондов, описанные в trainer/spec.py"
+    },
+    "task_has_probe_graded_item": {
+      "fail": "Задание {task_id} ничего не оценивает через зонд, читающий ERP",
+      "suggestion": "Оцените хотя бы одно число из проекта обучающегося, чтобы одного ввода чисел не хватало"
+    },
+    "task_discriminates_seed_state": {
+      "fail": "Задание {task_id}: все {count} значений, читаемых зондами, совпадают ещё до действий обучающегося",
+      "suggestion": "Оцените хотя бы одно число, которое может дать только работа обучающегося в ERP"
+    },
+    "diagnosis_applies_to_resolves": {
+      "fail": "Задание {task_id}, диагноз {diagnosis}: поле {field} не является ответом, полем проверки или считыванием этого задания",
+      "suggestion": "Укажите в applies_to имя ответа того же задания"
+    },
+    "diagnosis_unique_per_field": {
+      "equals_correct": "Задание {task_id}, диагноз {diagnosis}: его неверное значение для {field} в пределах допуска от принятого значения",
+      "collide": "Задание {task_id}: диагнозы {diagnosis} и {other} для {field} в пределах допуска друг от друга",
+      "suggestion": "Держите каждое неверное значение поля дальше допуска от верных значений и друг от друга"
+    },
+    "diagnosis_wrong_value_numeric": {
+      "fail": "Задание {task_id}, диагноз {diagnosis}: wrong_value не число и не соглашение с условием when",
+      "suggestion": "Задайте неверное значение числом или пометьте диагноз как соглашение с условием"
+    },
+    "single_correct_option": {
+      "correct_count": "Задание {task_id}, {question}: верными отмечены {count} вариантов вместо ровно одного",
+      "feedback_missing": "Задание {task_id}, {question}: у варианта {option} нет пояснения",
+      "suggestion": "Отметьте верным ровно один вариант и напишите пояснение к каждому"
+    },
+    "check_id_prefix_matches_task": {
+      "fail": "Задание {task_id}: проверка {check} не начинается с {prefix}",
+      "suggestion": "Переименуйте проверку, чтобы её идентификатор начинался с номера задания"
+    },
+    "seed_stage_resolvable": {
+      "missing": "У блока посева {block} нет этапа",
+      "invalid": "Блок посева {block}: этап {stage} не on_enrol и не on_unlock(<номер задания>)",
+      "task_out_of_range": "Блок посева {block}: этап {stage} указывает задание за пределами {count} заданий курса",
+      "suggestion": "Запишите этап как on_enrol или on_unlock(n), где n задание этого курса"
+    },
+    "rate_unit_explicit": {
+      "missing": "{where} содержит ставку, но не указывает единицу",
+      "invalid": "{where}: единица {unit} не percent и не fraction",
+      "fraction_above_one": "{where}: {value} помечено как доля, но больше 1",
+      "suggestion": "Указывайте у каждой ставки единицу percent или fraction"
+    },
+    "percent_not_written_as_fraction": {
+      "fail": "{where}: {value} попадает в процентный столбец (0-100), но похоже на долю",
+      "suggestion": "Запишите ставку в процентах (3 для 3 процентов) или пометьте её как долю"
+    },
+    "einvoice_vat_resolvable": {
+      "missing": "В посеянном договоре нет vat_rate_percent ({country})",
+      "number_required": "Курс для {country} должен указать ставку НДС договора числом",
+      "null_needs_note": "Ставка НДС договора null, поэтому vat_note должна объяснить причину ({country})",
+      "not_a_number": "Ставка НДС договора {value} не число",
+      "out_of_range": "Ставка НДС договора {value} вне диапазона 0-100",
+      "suggestion": "Задайте vat_rate_percent числом в процентах или null с vat_note, где курс это допускает"
+    },
+    "sov_signable": {
+      "no_lines": "В посеянном договоре нет строк ведомости стоимости",
+      "flat_classification": "Строка {line}: classification лежит прямо в строке, а не в metadata.classification",
+      "unit_missing": "У строки {line} нет единицы",
+      "classification_missing": "У строки {line} нет metadata.classification.{standard}",
+      "platform_rule_missing": "Правило подписания {rule} не зарегистрировано, коды строк не проверены",
+      "platform_rule": "Строка {line} не проходит правило подписания {rule}",
+      "suggestion": "Дайте каждой строке единицу и код классификации, который принимает проверка подписания страны"
+    },
+    "project_rule_sets_known": {
+      "unknown": "Набор правил проекта {name} не зарегистрирован",
+      "suggestion": "Используйте зарегистрированное имя набора правил; опечатка оставит проект без проверки и без единой ошибки"
+    },
+    "graded_items_nonzero": {
+      "fail": "Задание {task_id} вообще ничего не оценивает",
+      "suggestion": "Дайте заданию хотя бы один оцениваемый ответ или считывание с зондом"
+    },
+    "variation_under_approval_threshold": {
+      "fail": "Задание {task_id}: изменение на {value} больше {threshold}, которые может утвердить один менеджер",
+      "suggestion": "Держите изменение курса ниже порога утверждения или предусмотрите второго утверждающего"
+    },
+    "money_scale": {
+      "fail": "{where}: у {value} больше знаков после запятой, чем {places} у валюты курса",
+      "suggestion": "Округлите посеянные суммы до минимальной единицы валюты"
+    },
+    "version_not_bumped": {
+      "fail": "Курс {course} версии {version} уже загружался с другим содержимым",
+      "suggestion": "Повышайте версию при каждом изменении содержимого курса"
+    }
   }
 }

@@ -11,7 +11,8 @@ away:
 
 * it uses the union of the course-file keys from the backend design, plus the
   new machine fields (``readback[].probe``, ``answer_key[].graded_by``, seed
-  ``stage``, rate ``unit``, ``vat_rate_percent``, SOV ``classification``);
+  ``stage``, rate ``unit``, ``vat_rate_percent``, SOV ``unit`` and
+  ``metadata.classification``, ``probe.gate``);
 * every task opens a registered lock and grades at least one item through a
   probe that reads the ERP (decision 6), so "right numbers in the panel, ERP
   untouched" can fail;
@@ -19,8 +20,10 @@ away:
   right answer, within that field's tolerance;
 * every figure the fixture states adds up.
 
-It reads the file with ``parse_float=Decimal``, as the loader will, so no
-comparison here goes through a float.
+It reads the raw file with ``parse_float=Decimal``, as the loader does, so no
+comparison here goes through a float. Being raw, it still sees the root
+``authoring`` object and the ``_``-prefixed keys the loader strips; the spec
+tests pin the stripping.
 """
 
 from __future__ import annotations
@@ -43,6 +46,7 @@ ROOT_KEYS = {
     "erp_walked_version", "sources", "derivation_language", "constants", "conventions", "rules",
     "status_vocabulary", "seed", "tasks", "badge",
     "contract_choice_reason", "diagnosis_semantics", "jurisdiction", "schema_additions_vs_uk",
+    "locale", "date_style", "legal_review", "authoring",
 }  # fmt: skip
 TASK_KEYS_SHARED = {
     "id", "n", "title", "role", "module", "opens", "opens_label", "estimated_minutes", "brief",
@@ -50,10 +54,9 @@ TASK_KEYS_SHARED = {
     "diagnoses", "hints", "given",
 }  # fmt: skip
 TASK_KEYS_COURSE_ONLY = {"dc4_step", "erp_fit", "optional_answer_key", "panel_notes", "seeder", "video"}
-SEED_BLOCKS_WITH_STAGE = {
-    "project", "boq", "surety_bond_row", "bid_package", "contract",
-    "progress_readings_valuation_1", "variation_01",
-}  # fmt: skip
+SEED_BLOCKS_WITH_STAGE = {"project", "boq", "surety_bond_row", "bid_package", "contract"}
+#: Canonical per-period and per-change lists (coordinator freeze (a)); every entry is staged.
+SEED_LISTS_WITH_STAGE = {"progress_readings", "variations"}
 _STAGE_RE = re.compile(r"^(on_enrol|on_unlock\(([1-9]\d*)\))$")
 _GRADED_BY_RE = re.compile(r"^(panel|both|probe:(\d+))$")
 
@@ -197,13 +200,22 @@ def test_every_seed_block_carries_a_machine_stage(course: dict) -> None:
     seed = course["seed"]
     for block in SEED_BLOCKS_WITH_STAGE:
         assert _STAGE_RE.match(seed[block]["stage"]), f"seed.{block}.stage = {seed[block]['stage']!r}"
+    for name in SEED_LISTS_WITH_STAGE:
+        assert seed[name], f"seed.{name} is empty"
+        for entry in seed[name]:
+            assert _STAGE_RE.match(entry["stage"]), f"seed.{name}[].stage = {entry['stage']!r}"
     stages = {block: seed[block]["stage"] for block in SEED_BLOCKS_WITH_STAGE}
     assert stages["contract"] == "on_unlock(4)"
     assert stages["project"] == "on_enrol"
 
 
 def test_every_rate_states_its_unit(course: dict) -> None:
-    rates = [r for r in course["rules"]]
+    """A unit is required where a value is a rate (coordinator freeze (c)), optional elsewhere."""
+    unitless = [r for r in course["rules"] if "unit" not in r]
+    assert unitless, "a rule that is not a rate must appear, to pin that it may omit its unit"
+    for rule in unitless:
+        assert not 0 < Decimal(str(rule["value"])) <= 1, f"{rule['key']} looks like a fraction and needs a unit"
+    rates = [r for r in course["rules"] if "unit" in r]
     rates.append(course["seed"]["contract"]["retention_percent"])
     rates.append(course["seed"]["surety_bond_row"])
     rates += [a for t in course["tasks"] for a in t["answer_key"] if "unit" in a]
@@ -220,7 +232,9 @@ def test_the_contract_states_vat_and_signable_sov_lines(course: dict) -> None:
     lines = contract["schedule_of_values"]
     assert lines
     for line in lines:
-        assert line["classification"].get("nrm"), line["code"]
+        assert "classification" not in line, f"{line['code']}: flat classification (decision 18)"
+        assert line["unit"], line["code"]
+        assert line["metadata"]["classification"].get("nrm"), line["code"]
         assert re.match(r"^(csa|none|boq:[\d.]+)$", line["progress_link"]), line["progress_link"]
 
 
@@ -248,12 +262,12 @@ def test_the_figures_add_up(course: dict) -> None:
     assert total == Decimal(str(seed["contract"]["schedule_total"]["value"]))
 
     t4 = {a["name"]: Decimal(str(a["value"])) for a in course["tasks"][3]["answer_key"]}
-    gross = sum(Decimal(str(r["value"])) for r in seed["progress_readings_valuation_1"]["readings"])
+    gross = sum(Decimal(str(r["value"])) for r in seed["progress_readings"][0]["readings"])
     assert gross == t4["gross_valuation"]
     assert gross * Decimal("0.05") == t4["retention_amount"]
     assert gross - t4["retention_amount"] == t4["net_due"]
 
     t5 = {a["name"]: Decimal(str(a["value"])) for a in course["tasks"][4]["answer_key"]}
-    vr = sum(Decimal(s["qty"]) * Decimal(str(s["rate"])) for s in seed["variation_01"]["scope"])
+    vr = sum(Decimal(s["qty"]) * Decimal(str(s["rate"])) for s in seed["variations"][0]["scope"])
     assert vr == t5["vr_net"]
     assert total + vr == t5["new_contract_sum"]
