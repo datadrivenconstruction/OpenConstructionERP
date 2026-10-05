@@ -267,8 +267,14 @@ async def clone_route(
 
     Copies the source route's steps into a new project-scoped route with no
     ``system_key`` - editable straight away. The source route (a tenant-wide
-    preset or another project's route) is left untouched.
+    preset or another project's route) is left untouched. A source route
+    that belongs to a project is only readable by people on that project,
+    the same as ``GET /routes/{id}``; otherwise a clone would copy its
+    steps and named approvers out of a project the caller cannot see.
     """
+    source = await service.get_route(route_id)
+    if source.project_id is not None:
+        await verify_project_access(source.project_id, user_id, session)
     await verify_project_access(payload.project_id, user_id, session)
     clone = await service.clone_route(
         route_id,

@@ -322,3 +322,48 @@ async def test_clone_route_produces_editable_project_route(db_session) -> None:
         resp = await client.get(f"/v1/approval-routes/routes/{source_id}")
         assert resp.status_code == 200, resp.text
         assert resp.json()["name"] == "Tenant-wide template"
+
+
+@pytest.mark.tenant_isolation
+@pytest.mark.asyncio
+async def test_a_route_on_someone_elses_project_cannot_be_cloned(db_session) -> None:
+    """Cloning reads the source route, so it needs the same access as reading it.
+
+    The interloper owns a project of their own, so the target check passes;
+    only the source check can refuse, and it must answer 404 like ``GET``.
+    """
+    owner_id = await _make_user(db_session)
+    approver_id = await _make_user(db_session)
+    interloper_id = await _make_user(db_session)
+    owner_project = await _make_project(db_session, owner_id)
+    interloper_project = await _make_project(db_session, interloper_id)
+    await db_session.commit()
+
+    async with _http(_build_app(db_session, caller_id=str(owner_id))) as owner_client:
+        resp = await owner_client.post(
+            "/v1/approval-routes/routes",
+            json={
+                "project_id": str(owner_project),
+                "name": "Owner-only",
+                "target_kind": "rfi",
+                "steps": [{"ordinal": 1, "approver_user_id": str(approver_id), "mode": "all"}],
+            },
+        )
+    assert resp.status_code == 201, resp.text
+    route_id = resp.json()["id"]
+
+    other_app = _build_app(
+        db_session,
+        caller_id=str(interloper_id),
+        role="editor",
+        permissions=["approval_routes.read", "approval_routes.write"],
+    )
+    async with _http(other_app) as other_client:
+        resp = await other_client.post(
+            f"/v1/approval-routes/routes/{route_id}/clone",
+            json={"project_id": str(interloper_project), "name": "Copied"},
+        )
+        assert resp.status_code == 404, resp.text
+        resp = await other_client.get("/v1/approval-routes/routes", params={"project_id": str(interloper_project)})
+    assert resp.status_code == 200, resp.text
+    assert all(r["name"] != "Copied" for r in resp.json())
