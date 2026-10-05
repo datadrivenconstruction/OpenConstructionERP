@@ -14,7 +14,9 @@ net, and its X89 asked the client for 416,663.17.
 
 Four places read the claim's retention as money and must agree: the claim
 itself, the ceiling, the GAEB X89 invoice and the finance receivable. A UK,
-US and French contract built the same way keeps ten percent of the net.
+US and French contract built the same way keeps ten percent of the net (the
+French project records no works; a public one is measured on the TTC, see
+test_contracts_french_public_retention_on_the_ttc_payment.py).
 """
 
 from __future__ import annotations

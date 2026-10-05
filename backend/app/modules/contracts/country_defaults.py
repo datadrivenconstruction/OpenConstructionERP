@@ -571,12 +571,37 @@ COUNTRY_CONTRACT_DEFAULTS: dict[str, dict[str, Any]] = {
 #: Nr. 4, Abs. 5 Satz 2 UStG), which a main contractor does. The sub's invoice
 #: then carries no USt and its retention is measured without it. A contract
 #: that states its own rate overrides the presumption either way.
+#:
+#: ``works`` limits a row to one kind of works (:data:`CEILING_WORKS`), as the
+#: contract's :func:`contract_works` answers it. Any other answer, ``None``
+#: included, measures on the net.
+#:
+#: France, public works only, read on economie.gouv.fr on 2026-10-05. The Code
+#: de la commande publique, art. R2191-33 and R2191-34, caps the retenue at
+#: five percent of the initial amount and withholds it in instalments from
+#: each payment without saying HT or TTC. The Direction des affaires
+#: juridiques of the economy ministry reads both as TTC in its technical fiche
+#: "Les garanties financières" (updated 2019-04-01, page 4): the initial amount
+#: the ceiling is taken on is the acte d'engagement's, "toutes taxes
+#: comprises", and the instalment is taken from the payment after price
+#: revision and after the VAT is added. Private works under loi 71-584 have no
+#: such reading and stay on the net, and so does every subcontract, which
+#: :func:`contract_works` makes private works. Décret n° 2024-1251 changed the
+#: SME ceiling of R2191-33, not its base.
 COUNTRY_RETENTION_BASIS: dict[str, dict[str, str]] = {
     "DE": {
         "basis": RETENTION_BASIS_GROSS,
         "reference": "§ 17 Abs. 6 Nr. 1 VOB/B; VHB Bund Formblatt 214 Nr. 4",
         "subcontract_vat_percent": "0",
         "subcontract_reference": "§ 13b Abs. 2 Nr. 4, Abs. 5 Satz 2 UStG",
+    },
+    "FR": {
+        "basis": RETENTION_BASIS_GROSS,
+        "works": "public",
+        "reference": (
+            "Code de la commande publique, art. R2191-33 and R2191-34; "
+            "DAJ fiche technique « Les garanties financières » (2019-04-01), p. 4"
+        ),
     },
 }
 
@@ -615,7 +640,9 @@ WORKS_NOTE_KEY_PREFIX = "contracts.works_defaults."
 #: de garantie, or of the lifting of reserves notified during it; R2191-36 lets
 #: the contractor substitute a first-demand guarantee or, unless the buyer
 #: objects, a caution. Neither text says whether the base is net or gross of
-#: VAT, so no note claims either.
+#: VAT, so no note claims either. What retention is measured on is not a
+#: figure the parties pick: for public works it is the TTC, from the
+#: ministry's reading, and lives in :data:`COUNTRY_RETENTION_BASIS`.
 WORKS_CONTRACT_DEFAULTS: dict[str, dict[str, dict[str, Any]]] = {
     "FR": {
         "private": {
@@ -695,8 +722,13 @@ def resolve_retention_basis(
     agreed_vat_rate: Any = None,
     project_vat_rate: Any = None,
     subcontract: bool = False,
+    works: str | None = None,
 ) -> RetentionBasis:
     """What retention is measured on for a contract in ``country_code``.
+
+    ``works`` is the contract's kind of works as :func:`contract_works`
+    answers it. A country row limited to one kind (``works`` in
+    :data:`COUNTRY_RETENTION_BASIS`) measures any other on the net.
 
     On a gross basis the VAT is, in order: the rate the contract agreed for
     its invoices (``metadata.einvoice.vat_rate``, where a public client's
@@ -710,6 +742,8 @@ def resolve_retention_basis(
     country = normalise_country(country_code)
     row = COUNTRY_RETENTION_BASIS.get(country)
     if row is None or row["basis"] != RETENTION_BASIS_GROSS:
+        return NET_RETENTION_BASIS
+    if "works" in row and normalise_works(works) != row["works"]:
         return NET_RETENTION_BASIS
     reference = row.get("reference")
     agreed = _vat_percent(agreed_vat_rate)
@@ -808,6 +842,10 @@ def _validate_table() -> None:
             raise ValueError(f"retention basis key {country!r} is not ISO 3166-1 alpha-2")
         if basis.get("basis") not in RETENTION_BASES or not basis.get("reference"):
             raise ValueError(f"the retention basis of {country} must be one of {RETENTION_BASES} with a reference")
+        if "works" in basis and basis["works"] not in CEILING_WORKS:
+            raise ValueError(
+                f"the retention basis of {country} names works {basis['works']!r}, not one of {CEILING_WORKS}"
+            )
         if "subcontract_vat_percent" in basis:
             _check_percent(basis["subcontract_vat_percent"], f"{country}.subcontract_vat_percent")
             if not basis.get("subcontract_reference"):

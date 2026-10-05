@@ -5310,6 +5310,8 @@ class ContractsService:
 
         The country is the project's, the rule is data
         (:data:`~app.modules.contracts.country_defaults.COUNTRY_RETENTION_BASIS`),
+        a row limited to one kind of works (France: public) is read against
+        the contract's works as ``contract_works`` answers them,
         and the VAT of a gross basis is the one the contract agreed for its
         invoices, else for a subcontract the rate the country presumes (none
         in Germany, where it is reverse charge), else the project's default,
@@ -5327,11 +5329,15 @@ class ContractsService:
         if project is None:
             return resolve_retention_basis(None)
         einvoice = (contract.metadata_ or {}).get("einvoice") if isinstance(contract.metadata_, dict) else None
+        counterparty = getattr(contract, "counterparty_type", None) or "client"
         basis = resolve_retention_basis(
             getattr(project, "country_code", None),
             agreed_vat_rate=einvoice.get("vat_rate") if isinstance(einvoice, dict) else None,
             project_vat_rate=getattr(project, "default_vat_rate", None),
-            subcontract=(getattr(contract, "counterparty_type", None) or "client") == "subcontractor",
+            subcontract=counterparty == "subcontractor",
+            # A French public contract is measured on the TTC, its subcontracts
+            # are private works and are not (contract_works).
+            works=contract_works(getattr(project, "works", None), counterparty),
         )
         if basis.vat_source == "none":
             logger.warning(

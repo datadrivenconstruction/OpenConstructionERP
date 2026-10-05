@@ -136,6 +136,14 @@ _RAW: dict[str, dict[str, str]] = {
     "CH": {"standard": "0.081", "reduced": "0.026", "zero": "0.00"},
     # ── UK ───────────────────────────────────────────────────────────────
     "GB": {"standard": "0.20", "reduced": "0.05", "zero": "0.00"},
+    # ── France ───────────────────────────────────────────────────────────
+    # Standard rate only (CGI art. 278, 20 % since 2014-01-01). France has two
+    # lower bands, 10 % and 5.5 %, and this table holds one "reduced", so it
+    # names neither rather than pick. A French public contract's retention is
+    # measured on the TTC (contracts.country_defaults.COUNTRY_RETENTION_BASIS)
+    # and falls back to this rate when neither the contract nor the project
+    # states one.
+    "FR": {"standard": "0.20"},
     # ── Asia-Pacific ─────────────────────────────────────────────────────
     "AU": {"standard": "0.10", "zero": "0.00"},
     "NZ": {"standard": "0.15", "zero": "0.00"},

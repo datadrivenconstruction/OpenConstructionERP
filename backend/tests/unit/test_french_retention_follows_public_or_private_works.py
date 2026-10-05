@@ -105,7 +105,9 @@ def test_the_public_notes_say_what_the_code_says() -> None:
     # R2191-35: 30 days after the délai de garantie, not one year after réception.
     assert "30 days" in notes["retention_release_split"]
     assert "objected" not in notes["retention_release_split"]
-    # Neither text says net or gross of VAT, so no note claims it.
+    # The code does not say net or gross of VAT, so no note claims it. The
+    # basis, TTC for public works on the ministry's reading, is not a figure
+    # the parties pick and lives in COUNTRY_RETENTION_BASIS instead.
     for note in notes.values():
         assert "VAT" not in note and "TTC" not in note and "HT " not in note
 

@@ -99,9 +99,12 @@ def test_every_other_country_in_the_table_keeps_measuring_on_the_net(country: st
     assert (basis.basis, basis.vat_percent) == (RETENTION_BASIS_NET, None)
 
 
-def test_only_germany_is_on_a_gross_basis_today() -> None:
-    # France is deliberately not here: its basis belongs to its own change.
-    assert {c for c, row in COUNTRY_RETENTION_BASIS.items() if row["basis"] == RETENTION_BASIS_GROSS} == {"DE"}
+def test_only_germany_is_on_a_gross_basis_whatever_its_works() -> None:
+    # France is gross for public works only, which its own test file holds.
+    unconditional = {
+        c for c, row in COUNTRY_RETENTION_BASIS.items() if row["basis"] == RETENTION_BASIS_GROSS and "works" not in row
+    }
+    assert unconditional == {"DE"}
 
 
 def test_the_contracts_agreed_vat_comes_before_the_projects_and_the_countrys() -> None:
@@ -236,7 +239,8 @@ def test_percent_complete_and_the_tier_stay_on_the_net() -> None:
         ("GB", "20", D("420485.77")),
         # No federal VAT: the net less 38,225.98.
         ("US", "0", D("344033.81")),
-        # Same VAT as GB. Not changed here: whether France measures on the TTC is its own question.
+        # Same VAT as GB. A French contract with no works recorded stays on the HT;
+        # public works measure on the TTC, see the French public retention tests.
         ("FR", "20", D("420485.77")),
     ],
 )
