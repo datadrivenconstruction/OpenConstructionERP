@@ -24,6 +24,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.academy_isolation import assert_parties_in_project, filter_users_to_project
 from app.core.events import event_bus, publish_after_commit
 from app.core.json_merge import merge_metadata
 from app.modules.rfi.models import RFI
@@ -127,6 +128,7 @@ class RFIService:
         ball_in_court = data.ball_in_court
         if ball_in_court is None and data.assigned_to is not None:
             ball_in_court = data.assigned_to
+        await assert_parties_in_project(self.session, data.project_id, [data.assigned_to, ball_in_court], user_id)
 
         # BUG-RFI-RAISED-SPOOF: ``raised_by`` is part of the audit log
         # (who filed this RFI) and must always be the authenticated
@@ -316,6 +318,16 @@ class RFIService:
                         status_code=status.HTTP_403_FORBIDDEN,
                         detail=("Only managers or admins may (re)assign an RFI."),
                     )
+
+        # Academy mode: a newly named assignee or ball-in-court holder must
+        # be in the project. A no-op otherwise.
+        newly_named = [
+            fields[key]
+            for key in ("assigned_to", "ball_in_court")
+            if fields.get(key) and str(fields[key]) != str(getattr(rfi, key) or "")
+        ]
+        if newly_named:
+            await assert_parties_in_project(self.session, rfi.project_id, newly_named, actor_id)
 
         # Validate status transition if status is being changed
         new_status = fields.get("status")
@@ -950,7 +962,9 @@ class RFIService:
 
         rfi = await self.get_rfi(rfi_id)
         project_name, project_code, currency = await self._project_header(rfi.project_id)
-        people = await self.user_display_names([rfi.raised_by, rfi.assigned_to, rfi.ball_in_court, rfi.responded_by])
+        people = await self.user_display_names(
+            [rfi.raised_by, rfi.assigned_to, rfi.ball_in_court, rfi.responded_by], project_id=rfi.project_id
+        )
         documents, unavailable = await self._linked_document_names(rfi.project_id, rfi.linked_drawing_ids or [])
         variation = await self._variation_label(rfi.project_id, rfi.change_order_id)
 
@@ -987,7 +1001,12 @@ class RFIService:
             return "", None, ""
         return row.name or "", row.project_code or None, (row.currency or "").strip().upper()
 
-    async def user_display_names(self, user_ids: Iterable[Any]) -> dict[str, str]:
+    async def user_display_names(
+        self,
+        user_ids: Iterable[Any],
+        *,
+        project_id: uuid.UUID | None = None,
+    ) -> dict[str, str]:
         """Map user ids to a display name (full name, else email).
 
         The RFI stores people as ids, and a printed log or form that shows a
@@ -995,6 +1014,9 @@ class RFIService:
         are the canonical ``str(uuid)`` and, when it differs, the id exactly
         as it was passed in. Ids that are not UUIDs or match no user are left
         out, so the caller decides what an unknown person looks like.
+
+        With ``project_id`` an academy install names only that project's
+        members, so a printout cannot reveal another learner's name.
         """
         from sqlalchemy import select
 
@@ -1009,6 +1031,9 @@ class RFIService:
             except ValueError:
                 continue
             wanted.setdefault(parsed, set()).add(str(raw))
+        if project_id is not None:
+            kept = set(await filter_users_to_project(self.session, project_id, list(wanted)))
+            wanted = {k: v for k, v in wanted.items() if k in kept}
         if not wanted:
             return {}
         rows = (

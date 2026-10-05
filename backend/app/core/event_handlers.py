@@ -1751,6 +1751,8 @@ async def _notify_rfi_assigned(event: Event) -> None:
                     "subject": str(data.get("subject", ""))[:200],
                 },
                 action_url=f"/projects/{data.get('project_id')}/rfi",
+                # Lets the academy backstop drop one addressed outside the project.
+                metadata={"project_id": data.get("project_id")},
             )
             await session.commit()
 

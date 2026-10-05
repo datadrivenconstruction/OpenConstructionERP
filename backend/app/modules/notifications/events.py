@@ -218,6 +218,8 @@ async def _on_rfi_assigned(event: Event) -> None:
                 entity_type="rfi",
                 entity_id=str(rfi_id),
                 action_url=f"/rfi?id={rfi_id}",
+                # Lets the academy backstop drop one addressed outside the project.
+                metadata={"project_id": data.get("project_id")},
             )
             await session.commit()
     except Exception:

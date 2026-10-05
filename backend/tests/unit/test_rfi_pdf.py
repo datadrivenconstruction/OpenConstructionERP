@@ -538,7 +538,7 @@ def _service(row: SimpleNamespace) -> RFIService:
     async def _project_header(_project_id: uuid.UUID) -> tuple[str, str | None, str]:
         return "Residential House", "RH-01", "USD"
 
-    async def _names(_ids: Any) -> dict[str, str]:
+    async def _names(_ids: Any, **_kwargs: Any) -> dict[str, str]:
         return dict(PEOPLE)
 
     async def _documents(_project_id: uuid.UUID, _ids: Any) -> tuple[list[str], int]:

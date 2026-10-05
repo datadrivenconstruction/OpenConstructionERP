@@ -294,7 +294,8 @@ async def export_rfi_log(
     # reader nothing. An id that matches no user is kept as it is, so the
     # export never loses a value.
     people = await RFIService(session).user_display_names(
-        [value for item in items for value in (item.raised_by, item.assigned_to, item.ball_in_court)]
+        [value for item in items for value in (item.raised_by, item.assigned_to, item.ball_in_court)],
+        project_id=project_id,
     )
 
     def _who(value: object) -> str:
