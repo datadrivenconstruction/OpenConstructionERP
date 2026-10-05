@@ -1523,5 +1523,10 @@
     "en_value": "Subtotal",
     "note": "Subtotal is the ordinary word for this column in da, es (all variants), id, no, pt (both) and ro, so the translation equals English by design",
     "reason_category": "cognate_loanword"
+  },
+  "trainer.rings.count": {
+    "en_value": "{{done}}/{{total}}",
+    "note": "a bare done/total fraction with no word in it, written the same way in every language; the academy rings need no translated noun here",
+    "reason_category": "template_only"
   }
 }

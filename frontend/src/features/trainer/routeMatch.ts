@@ -23,6 +23,12 @@
 import { LOCK_REGISTRY, getLock } from './lockRegistry';
 import type { TrainerMe } from './types';
 
+/**
+ * The course map's route, `/academy`. The one place it is written: every
+ * trainer link, redirect and route check imports it from here.
+ */
+export const COURSE_MAP_ROUTE = '/academy';
+
 const PROJECT_PREFIX = /^\/projects\/[^/]+(?=\/.)/;
 
 /** Path only, lower-cased, no query or hash, no duplicate or trailing slashes. */

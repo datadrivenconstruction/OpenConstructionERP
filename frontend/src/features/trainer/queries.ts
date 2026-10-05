@@ -73,6 +73,14 @@ export function useTrainerQueriesEnabled(): boolean {
 /**
  * The learner's enrolment. `data === null` means "no enrolment" (the 404),
  * which is a state and not an error; `isError` is reserved for real failures.
+ *
+ * `retryOnMount: false`: a failed `/me` is fetched again only on an explicit
+ * refetch (the Retry button) or a window refocus, never because another
+ * observer mounted. React Query v5 puts a query with no data back to
+ * `pending` while it refetches, so with the default every component that
+ * mounts only in the error state (an error card, a locked page) would refetch
+ * on mount, flip the state to loading, unmount, see the error again and
+ * mount again: a request loop.
  */
 export function useTrainerMe() {
   const enabled = useTrainerQueriesEnabled();
@@ -81,6 +89,7 @@ export function useTrainerMe() {
     queryFn: fetchTrainerMe,
     enabled,
     staleTime: 60_000,
+    retryOnMount: false,
   });
 }
 

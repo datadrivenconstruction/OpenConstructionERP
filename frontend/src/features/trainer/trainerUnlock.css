@@ -1,0 +1,101 @@
+/* DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+   Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+
+   The unlock celebration (UnlockModal), after Unlock.dc.html: the padlock
+   shackle lifts, then swings open; the content rises in three beats; the
+   icon tile glows twice.
+
+   Every name carries the `oe-trainer-` prefix, so nothing here can match an
+   element outside the academy. The modal also leaves the animation classes
+   off entirely when the reader asks for reduced motion (it checks
+   `matchMedia` before render); the media query below is the second guard,
+   for a preference that changes while the dialog is open. Under reduced
+   motion the shackle is drawn already open. */
+
+@keyframes oe-trainer-shackle {
+  0% {
+    transform: translateY(0) rotate(0);
+  }
+  45% {
+    transform: translateY(-7px) rotate(0);
+  }
+  100% {
+    transform: translateY(-7px) rotate(-28deg);
+  }
+}
+
+@keyframes oe-trainer-rise {
+  0% {
+    transform: translateY(18px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes oe-trainer-glow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(52, 199, 89, 0.55);
+  }
+  100% {
+    box-shadow: 0 0 0 28px rgba(52, 199, 89, 0);
+  }
+}
+
+@keyframes oe-trainer-glow-badge {
+  0% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.55);
+  }
+  100% {
+    box-shadow: 0 0 0 28px rgba(245, 158, 11, 0);
+  }
+}
+
+/* The pivot sits on the shackle's right foot, in viewBox units (0 0 32 32). */
+.oe-trainer-shackle {
+  transform-origin: 16px 11px;
+}
+
+.oe-trainer-shackle--animate {
+  animation: oe-trainer-shackle 1.1s 0.3s ease-in-out forwards;
+}
+
+.oe-trainer-shackle--open {
+  transform: translateY(-7px) rotate(-28deg);
+}
+
+.oe-trainer-rise {
+  animation: oe-trainer-rise 0.6s ease-out both;
+}
+
+.oe-trainer-rise-2 {
+  animation: oe-trainer-rise 0.6s 0.25s ease-out both;
+}
+
+.oe-trainer-rise-3 {
+  animation: oe-trainer-rise 0.6s 0.45s ease-out both;
+}
+
+.oe-trainer-glow {
+  animation: oe-trainer-glow 1.6s 0.9s ease-out 2;
+}
+
+.oe-trainer-glow-badge {
+  animation: oe-trainer-glow-badge 1.6s 0.9s ease-out 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .oe-trainer-shackle--animate,
+  .oe-trainer-rise,
+  .oe-trainer-rise-2,
+  .oe-trainer-rise-3,
+  .oe-trainer-glow,
+  .oe-trainer-glow-badge {
+    animation: none;
+  }
+  .oe-trainer-shackle--animate {
+    transform: translateY(-7px) rotate(-28deg);
+  }
+}

@@ -99,6 +99,30 @@ describe('trainer queries in academy mode', () => {
     expect(client.getQueryData(['trainer', 'readback', 't2-markups'])).toBe(readbackFixture);
   });
 
+  it('a failed /me is not refetched because another observer mounts', async () => {
+    api.apiGet.mockImplementation(async (path: string) => {
+      if (path === '/system/status') return { academy_mode: true };
+      throw new ApiError(503, 'Unavailable', undefined);
+    });
+    const first = renderHook(() => useTrainerMe(), { wrapper });
+    await waitFor(() => expect(first.result.current.isError).toBe(true));
+    expect(trainerCalls()).toHaveLength(1);
+    // An error card or a locked page mounting in the error state is a new
+    // observer; it must see the error, not start a fetch (and a loop).
+    const second = renderHook(() => useTrainerMe(), { wrapper });
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+    expect(second.result.current.isError).toBe(true);
+    expect(second.result.current.fetchStatus).toBe('idle');
+    expect(trainerCalls()).toHaveLength(1);
+    // The Retry button still fetches.
+    await act(async () => {
+      await second.result.current.refetch();
+    });
+    expect(trainerCalls()).toHaveLength(2);
+  });
+
   it('reads a /me 404 as data null, not as an error', async () => {
     api.apiGet.mockImplementation(async (path: string) => {
       if (path === '/system/status') return { academy_mode: true };

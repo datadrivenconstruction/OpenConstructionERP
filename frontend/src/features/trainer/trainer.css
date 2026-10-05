@@ -1,0 +1,202 @@
+/* DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+   Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+
+   The Academy task dock and its panel, after Task.dc.html: the dark brief
+   card, step marks, the green done card, the ring dots of "This task closes",
+   the `pop` entrance of results, the dock slide and the mobile sheet.
+
+   Every name carries the `oe-trainer-` prefix, so nothing here can match an
+   element outside the academy. The unlock celebration lives in
+   trainerUnlock.css (stream C). The page padding that makes room for the dock
+   (`html[data-trainer-dock]` on `.oe-ai-dock-shell`) lives in index.css
+   (Wave 2): this file never moves the page.
+
+   Colours: the mockup palette in light, lifted for contrast in dark (`.dark`
+   on <html>, tailwind darkMode: 'class'). */
+
+.oe-trainer-dock-root {
+  --oe-trainer-brief-bg: #1d1d1f;
+  --oe-trainer-brief-kicker: #a1a1aa;
+  --oe-trainer-brief-text: #e4e4e7;
+  --oe-trainer-step-todo-bg: #52525b;
+  --oe-trainer-step-todo-fg: #f4f4f5;
+  --oe-trainer-step-done-bg: #1d7a3a;
+  --oe-trainer-done-bg: #ecfdf3;
+  --oe-trainer-done-title: #14532d;
+  --oe-trainer-done-text: #1d4d2c;
+  --oe-trainer-ring-numbers: #0071e3;
+  --oe-trainer-ring-trace: #9333ea;
+  --oe-trainer-ring-explain: #ea580c;
+}
+
+.dark .oe-trainer-dock-root {
+  --oe-trainer-brief-bg: #000000;
+  --oe-trainer-brief-kicker: #b4b4bd;
+  --oe-trainer-brief-text: #ececf0;
+  --oe-trainer-step-todo-bg: #3f3f46;
+  --oe-trainer-step-done-bg: #22a04b;
+  --oe-trainer-done-bg: rgba(52, 199, 89, 0.14);
+  --oe-trainer-done-title: #86efac;
+  --oe-trainer-done-text: #bbf7d0;
+  --oe-trainer-ring-numbers: #4ea1ff;
+  --oe-trainer-ring-trace: #c084fc;
+  --oe-trainer-ring-explain: #fb923c;
+}
+
+/* ── Brief card ─────────────────────────────────────────────────────────── */
+
+.oe-trainer-brief {
+  background: var(--oe-trainer-brief-bg);
+  color: #ffffff;
+}
+.dark .oe-trainer-brief {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.oe-trainer-brief-kicker {
+  color: var(--oe-trainer-brief-kicker);
+}
+.oe-trainer-brief-text,
+.oe-trainer-brief-step {
+  color: var(--oe-trainer-brief-text);
+}
+.oe-trainer-step-mark {
+  background: var(--oe-trainer-step-todo-bg);
+  color: var(--oe-trainer-step-todo-fg);
+}
+.oe-trainer-step-mark.is-done {
+  background: var(--oe-trainer-step-done-bg);
+  color: #ffffff;
+}
+
+/* ── Done card ──────────────────────────────────────────────────────────── */
+
+.oe-trainer-done {
+  background: var(--oe-trainer-done-bg);
+}
+.oe-trainer-done-title {
+  color: var(--oe-trainer-done-title);
+}
+.oe-trainer-done-text {
+  color: var(--oe-trainer-done-text);
+}
+
+/* ── Ring dots ("This task closes") ─────────────────────────────────────── */
+
+.oe-trainer-ring-dot {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 3px solid var(--oe-trainer-ring-numbers);
+  background: transparent;
+  transition: background-color 250ms cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.oe-trainer-ring-trace {
+  border-color: var(--oe-trainer-ring-trace);
+}
+.oe-trainer-ring-explain {
+  border-color: var(--oe-trainer-ring-explain);
+}
+.oe-trainer-ring-numbers.is-closed {
+  background: var(--oe-trainer-ring-numbers);
+}
+.oe-trainer-ring-trace.is-closed {
+  background: var(--oe-trainer-ring-trace);
+}
+.oe-trainer-ring-explain.is-closed {
+  background: var(--oe-trainer-ring-explain);
+}
+
+/* ── Results entrance ───────────────────────────────────────────────────── */
+
+@keyframes oe-trainer-pop {
+  0% {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.oe-trainer-pop {
+  animation: oe-trainer-pop 0.35s ease-out;
+}
+
+/* ── Dock ───────────────────────────────────────────────────────────────── */
+
+/* Side panel and rail: the AI dock's push layer (z-40), beside the AI dock,
+   under modals and AI overlays (z-50). No fill mode, so no transform lingers
+   (a transform would become the containing block of fixed children). */
+.oe-trainer-dock {
+  --oe-trainer-dock-slide: 100%;
+  inset-inline-end: var(--oe-ai-dock-widget-offset, 0px);
+  transition:
+    width 250ms cubic-bezier(0.25, 0.1, 0.25, 1),
+    inset-inline-end 250ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  animation: oe-trainer-dock-in 250ms cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+[dir='rtl'] .oe-trainer-dock {
+  --oe-trainer-dock-slide: -100%;
+}
+.oe-trainer-dock[data-resizing] {
+  transition: none;
+}
+@keyframes oe-trainer-dock-in {
+  from {
+    transform: translateX(var(--oe-trainer-dock-slide));
+    opacity: 0.6;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* The rail's label reads top to bottom. */
+.oe-trainer-rail-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
+
+/* Bottom sheet (phones). */
+.oe-trainer-sheet {
+  transition: height 250ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  animation: oe-trainer-sheet-in 250ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@keyframes oe-trainer-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+.oe-trainer-sheet-backdrop {
+  animation: oe-trainer-fade-in 200ms cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+@keyframes oe-trainer-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ── Reduced motion: nothing slides, pops or sweeps. ─────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .oe-trainer-pop,
+  .oe-trainer-dock,
+  .oe-trainer-sheet,
+  .oe-trainer-sheet-backdrop {
+    animation: none;
+  }
+  .oe-trainer-dock,
+  .oe-trainer-sheet,
+  .oe-trainer-ring-dot {
+    transition: none;
+  }
+}
