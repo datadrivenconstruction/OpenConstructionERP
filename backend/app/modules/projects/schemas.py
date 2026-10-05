@@ -256,6 +256,16 @@ def _validate_percentage(value: str | None, field_name: str) -> str | None:
 # ── Create / Update ───────────────────────────────────────────────────────
 
 
+def _checked_subdivision(value: str | None) -> str | None:
+    """Canonical ISO 3166-2 code, or ``None`` for blank; anything else is refused."""
+    from app.modules.i18n_foundation.subdivisions import SUBDIVISION_CODE_RE, normalize_subdivision
+
+    code = normalize_subdivision(value)
+    if code is not None and not SUBDIVISION_CODE_RE.match(code):
+        raise ValueError("subdivision_code must be an ISO 3166-2 code such as US-CA")
+    return code
+
+
 class ProjectCreate(BaseModel):
     """Create a new project."""
 
@@ -363,6 +373,18 @@ class ProjectCreate(BaseModel):
             return v
         cc = v.strip().upper()
         return cc or None
+
+    subdivision_code: str | None = Field(
+        default=None,
+        max_length=6,
+        description="ISO 3166-2 state or province where the work is (e.g. US-CA, AU-VIC). "
+        "Scopes rules a state sets on its own, such as a cap on the deposit for home improvement.",
+    )
+
+    @field_validator("subdivision_code", mode="after")
+    @classmethod
+    def _normalise_subdivision_code(cls, v: str | None) -> str | None:
+        return _checked_subdivision(v)
 
     contract_value: str | None = Field(default=None, max_length=50)
     planned_start_date: str | None = Field(default=None, max_length=20)
@@ -513,6 +535,18 @@ class ProjectUpdate(BaseModel):
         cc = v.strip().upper()
         return cc or None
 
+    subdivision_code: str | None = Field(
+        default=None,
+        max_length=6,
+        description="ISO 3166-2 state or province where the work is (e.g. US-CA, AU-VIC). "
+        "Scopes rules a state sets on its own, such as a cap on the deposit for home improvement.",
+    )
+
+    @field_validator("subdivision_code", mode="after")
+    @classmethod
+    def _normalise_subdivision_code(cls, v: str | None) -> str | None:
+        return _checked_subdivision(v)
+
     contract_value: str | None = Field(default=None, max_length=50)
     planned_start_date: str | None = Field(default=None, max_length=20)
     planned_end_date: str | None = Field(default=None, max_length=20)
@@ -636,6 +670,7 @@ class ProjectResponse(BaseModel):
     parent_project_id: UUID | None = None
     address: dict[str, Any] | None = None
     country_code: str | None = None
+    subdivision_code: str | None = None
     contract_value: str | None = None
     planned_start_date: str | None = None
     planned_end_date: str | None = None

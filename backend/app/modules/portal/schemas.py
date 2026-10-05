@@ -460,6 +460,50 @@ class PortalMilestoneList(BaseModel):
     window_days: int
 
 
+class PortalPaymentPlanLine(BaseModel):
+    """One instalment a person marked for the client.
+
+    The client sees what is owed, when, and how far the date moved. Claims,
+    notes, metadata, validation findings and the schedule links stay internal.
+    ``status`` is ``upcoming``, ``due``, ``invoiced``, ``paid`` or ``overdue``.
+    """
+
+    id: UUID
+    sequence: int
+    label: str
+    amount: Decimal
+    percent_of_contract: Decimal | None = None
+    status: str
+    milestone_name: str
+    forecast_due_date: str | None = None
+    original_due_date: str | None = None
+    days_moved: int | None = Field(default=None, description="Days the due date moved from the contract's date.")
+    days_until: int | None = Field(default=None, description="Days to the due date, while it is still ahead.")
+    days_overdue: int | None = Field(default=None, description="Days past the due date, while it is unpaid.")
+
+
+class PortalPaymentPlanContract(BaseModel):
+    """A client contract's visible instalments and what they add up to.
+
+    ``paid_total`` and ``outstanding_total`` add up the visible lines only, so
+    the figures always match the rows the client is shown.
+    """
+
+    contract_id: UUID
+    contract_title: str
+    currency: str
+    contract_total: Decimal
+    paid_total: Decimal
+    outstanding_total: Decimal
+    lines: list[PortalPaymentPlanLine] = Field(default_factory=list)
+
+
+class PortalPaymentPlanResponse(BaseModel):
+    """The payment plans of a project's client contracts the caller may see."""
+
+    items: list[PortalPaymentPlanContract] = Field(default_factory=list)
+
+
 class PortalProjectSummary(BaseModel):
     """A project the portal caller can see, with just enough to label it.
 

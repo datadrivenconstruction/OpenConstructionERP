@@ -37,6 +37,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.money import money_quantum
+from app.modules.schedule.milestone_events import announce_if_milestone_reached, is_completed
 from app.modules.schedule.models import (
     EAC_LINK_MODES,
     Activity,
@@ -477,6 +478,7 @@ class ScheduleProgressService:
         self.session.add(entry)
 
         # Roll forward onto the activity.
+        was_completed = is_completed(activity.status, activity.progress_pct)
         activity.progress_pct = str(progress_percent)
         if progress_percent >= 100.0:
             activity.status = STATUS_COMPLETED
@@ -486,6 +488,13 @@ class ScheduleProgressService:
             activity.status = STATUS_NOT_STARTED
 
         await self.session.flush()
+        await announce_if_milestone_reached(
+            self.session,
+            activity,
+            was_completed=was_completed,
+            actor_id=recorded_by_user_id,
+            reached_on=actual_finish_date,
+        )
         return entry
 
     async def history(self, task_id: uuid.UUID) -> list[ScheduleProgressEntry]:

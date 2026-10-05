@@ -85,6 +85,10 @@ class _StubClaimRepo:
     async def outstanding_retention(self, _contract_id: uuid.UUID) -> Decimal:
         return Decimal("10000")
 
+    async def ordered_for_contract(self, contract_id: uuid.UUID) -> list[Any]:
+        """Every claim on the contract, for the one-billing-mode guard."""
+        return [row for row in self.rows.values() if row.contract_id == contract_id]
+
 
 class _StubClaimLineRepo:
     def __init__(self) -> None:

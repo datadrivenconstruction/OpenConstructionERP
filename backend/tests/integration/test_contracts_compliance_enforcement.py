@@ -80,6 +80,17 @@ class _StubRetentionRepo:
         return item
 
 
+class _StubMilestoneRepo:
+    """Activating a contract catches up its payment-plan instalments.
+
+    See ``ContractsService.catch_up_reached_milestones``. These contracts have
+    no instalments, so there is nothing to catch up.
+    """
+
+    async def list_for_contract(self, _contract_id: uuid.UUID) -> list[Any]:
+        return []
+
+
 class _StubSession:
     def __init__(self, project: Any | None = None) -> None:
         self._project = project
@@ -126,6 +137,7 @@ def _make_service(*, contract: Any, lines: list[Any], project: Any) -> Any:
     svc.contract_repo.rows[contract.id] = contract
     svc.line_repo = _StubLineRepo(lines)
     svc.retention_repo = _StubRetentionRepo()
+    svc.milestone_repo = _StubMilestoneRepo()
     return svc
 
 

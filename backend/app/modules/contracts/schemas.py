@@ -1388,6 +1388,9 @@ class ContractDocumentResponse(BaseModel):
 
 MILESTONE_TRIGGERS = "date|completion|approval"
 MILESTONE_STATUSES = "pending|reached|invoiced|paid"
+#: What a payment-plan instalment is for. The statutory deposit ceilings read
+#: ``deposit``; nothing infers it from the order or the dates.
+MILESTONE_KINDS = "deposit|progress|final"
 
 
 class ContractMilestoneCreate(BaseModel):
@@ -1403,6 +1406,10 @@ class ContractMilestoneCreate(BaseModel):
     percent_of_contract: Decimal | None = Field(default=None, ge=0, le=100)
     trigger: str = Field(default="date", pattern=rf"^({MILESTONE_TRIGGERS})$")
     status: str = Field(default="pending", pattern=rf"^({MILESTONE_STATUSES})$")
+    kind: str = Field(default="progress", pattern=rf"^({MILESTONE_KINDS})$")
+    lag_days: int = Field(default=0, ge=0, le=365)
+    payment_terms_days: int | None = Field(default=None, ge=0, le=365)
+    client_visible: bool = False
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -1416,6 +1423,10 @@ class ContractMilestoneUpdate(BaseModel):
     percent_of_contract: Decimal | None = Field(default=None, ge=0, le=100)
     trigger: str | None = Field(default=None, pattern=rf"^({MILESTONE_TRIGGERS})$")
     status: str | None = Field(default=None, pattern=rf"^({MILESTONE_STATUSES})$")
+    kind: str | None = Field(default=None, pattern=rf"^({MILESTONE_KINDS})$")
+    lag_days: int | None = Field(default=None, ge=0, le=365)
+    payment_terms_days: int | None = Field(default=None, ge=0, le=365)
+    client_visible: bool | None = None
     metadata: dict[str, Any] | None = None
 
 
@@ -1431,9 +1442,83 @@ class ContractMilestoneResponse(BaseModel):
     percent_of_contract: Decimal | None = None
     trigger: str
     status: str
+    kind: str = "progress"
+    activity_id: UUID | None = None
+    schedule_id: UUID | None = None
+    lag_days: int = 0
+    payment_terms_days: int | None = None
+    forecast_reached_date: str | None = None
+    forecast_due_date: str | None = None
+    reached_at: str | None = None
+    client_visible: bool = False
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
+
+
+# Payment plan: instalments that follow the schedule =======================
+
+
+class ContractMilestoneActivityLink(BaseModel):
+    """Which schedule activity an instalment follows; ``null`` stops following one."""
+
+    activity_id: UUID | None
+
+
+class ContractMilestoneLinkResponse(ContractMilestoneResponse):
+    """The instalment after linking, with anything the person should know about the link.
+
+    ``warnings`` holds codes, not sentences: ``activity_not_milestone`` (the
+    activity has a duration) and ``date_trigger_ignores_schedule`` (the
+    instalment's trigger is a fixed date, so the link does not move it).
+    """
+
+    warnings: list[str] = Field(default_factory=list)
+
+
+class PaymentPlanLine(ContractMilestoneResponse):
+    """One instalment as the plan reads today.
+
+    ``forecast_reached_date`` and ``forecast_due_date`` are worked out from the
+    linked activity's current finish when the plan is read, not copied from
+    the stored columns, which schedule events refresh.
+    """
+
+    forecast_at: str | None = None
+    #: When the instalment would fall due on the contract's own date, lag and
+    #: terms applied; the baseline ``forecast_due_date`` moved from.
+    planned_due_date: str | None = None
+    amount: Decimal
+    activity_name: str | None = None
+    activity_missing: bool = False
+    client_status: str
+    days_moved: int | None = None
+    claim_id: UUID | None = None
+    claim_status: str | None = None
+
+
+class PaymentPlanFinding(BaseModel):
+    """A failed ``payment_plan`` rule, worded in the caller's language."""
+
+    rule_id: str
+    severity: str
+    message: str
+    element_ref: str | None = None
+    suggestion: str | None = None
+    details: dict[str, str] = Field(default_factory=dict)
+
+
+class PaymentPlanResponse(BaseModel):
+    """A contract's payment plan: its instalments, their totals and the rule findings."""
+
+    contract_id: UUID
+    currency: str
+    contract_total: Decimal
+    scheduled_total: Decimal
+    percent_scheduled: Decimal | None = None
+    default_payment_terms_days: int | None = None
+    lines: list[PaymentPlanLine] = Field(default_factory=list)
+    findings: list[PaymentPlanFinding] = Field(default_factory=list)
 
 
 # Final-account readiness checklist (close-out conditions) ==================

@@ -20,7 +20,8 @@ import hmac
 import logging
 import secrets
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -37,6 +38,7 @@ from app.modules.portal.models import (
 )
 from app.modules.portal.repository import (
     PortalAccessRuleRepository,
+    PortalClientContractRepository,
     PortalDocumentAccessLogRepository,
     PortalMagicLinkRepository,
     PortalNotificationRepository,
@@ -51,6 +53,8 @@ MAGIC_LINK_TTL = timedelta(hours=24)
 #: Shortest gap between two self-service sign-in links for one portal user.
 MAGIC_LINK_REQUEST_INTERVAL = timedelta(seconds=60)
 SESSION_TTL = timedelta(days=7)
+#: Portal roles a project-wide rule shows every client payment plan to.
+PAYMENT_PLAN_PROJECT_ROLES = frozenset({"client", "investor"})
 
 # Permission rank - higher number satisfies all lower-number requirements.
 _PERMISSION_RANK: dict[str, int] = {
@@ -95,6 +99,47 @@ def _ensure_aware(dt: datetime | None) -> datetime | None:
     if dt.tzinfo is None:
         return dt.replace(tzinfo=UTC)
     return dt
+
+
+def _client_plan_line(line: dict[str, Any], sequence: int, contract_total: Decimal, today: date) -> dict[str, Any]:
+    """One payment-plan line cut down to what a client is shown.
+
+    ``days_until`` counts down to a due date still ahead; ``days_overdue``
+    counts up once an unpaid instalment is past it. A paid line has neither.
+    """
+    amount = Decimal(str(line["amount"]))
+    percent = line.get("percent_of_contract")
+    if percent is None and contract_total:
+        percent = (amount * 100 / contract_total).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    status = str(line["client_status"])
+    due = _iso_day(line.get("forecast_due_date"))
+    days_until = days_overdue = None
+    if due is not None and status != "paid":
+        if due >= today:
+            days_until = (due - today).days
+        elif status == "overdue":
+            days_overdue = (today - due).days
+    return {
+        "id": line["id"],
+        "sequence": sequence,
+        "label": line.get("code") or str(sequence),
+        "amount": amount,
+        "percent_of_contract": percent,
+        "status": status,
+        "milestone_name": line.get("name") or "",
+        "forecast_due_date": line.get("forecast_due_date"),
+        "original_due_date": line.get("planned_due_date"),
+        "days_moved": line.get("days_moved"),
+        "days_until": days_until,
+        "days_overdue": days_overdue,
+    }
+
+
+def _iso_day(value: Any) -> date | None:
+    try:
+        return date.fromisoformat(str(value)[:10]) if value else None
+    except ValueError:
+        return None
 
 
 def _permission_satisfies(granted: str, required: str) -> bool:
@@ -623,6 +668,92 @@ class PortalService:
         if expires_at is not None and expires_at < now_utc():
             return False
         return _permission_satisfies(rule.permission, required)
+
+    async def _granted_resource_ids(
+        self,
+        portal_user_id: uuid.UUID,
+        resource_type: str,
+        required: str = "view",
+    ) -> list[uuid.UUID]:
+        """Resources of one type the caller holds a live rule of at least ``required`` on."""
+        now = now_utc()
+        return [
+            rule.resource_id
+            for rule in await self.rule_repo.list_for_user(portal_user_id, resource_type=resource_type)
+            if (_ensure_aware(rule.expires_at) is None or _ensure_aware(rule.expires_at) >= now)
+            and _permission_satisfies(rule.permission, required)
+        ]
+
+    # ── Payment plan (client view) ────────────────────────────────────────
+
+    async def client_payment_plan(
+        self,
+        portal_user_id: uuid.UUID,
+        project_id: uuid.UUID,
+        *,
+        portal_role: str | None,
+        today: date | None = None,
+    ) -> dict[str, Any] | None:
+        """The project's client payment plans, as the caller may see them.
+
+        Access is a live ``project`` rule held by the client side (a
+        ``client`` or ``investor``), which shows every client contract of the
+        project, or ``contract`` rules, which show those contracts only. A
+        subcontractor or consultant let into the project reads documents and
+        RFIs there, not what the client pays: for them a project rule counts
+        for nothing here and only contract rules apply. With neither this
+        returns ``None`` and the route answers 404,
+        so it never confirms the project exists. Only client contracts in
+        force are read, and only the instalments a person marked
+        ``client_visible``. The lines come from the contracts module's own
+        payment plan, so the client sees the same dates and states the team
+        does; the internal parts of it are dropped here.
+        """
+        from app.modules.contracts.service import ContractsService  # noqa: PLC0415
+
+        contracts_repo = PortalClientContractRepository(self.session)
+        if portal_role in PAYMENT_PLAN_PROJECT_ROLES and await self.enforce_rls(
+            portal_user_id, "project", project_id, required="view"
+        ):
+            contracts = await contracts_repo.client_contracts(project_id)
+        else:
+            granted = await self._granted_resource_ids(portal_user_id, "contract")
+            if not granted:
+                return None
+            # Every contract of the project the caller holds a rule on, client
+            # or not: whether a grant exists decides 404 against an empty list,
+            # and must not depend on which contracts have a plan to show.
+            in_project = await contracts_repo.contracts_in_project(project_id, granted)
+            if not in_project:
+                return None
+            contracts = await contracts_repo.client_contracts(project_id, contract_ids=in_project)
+
+        today = today or now_utc().date()
+        contracts_service = ContractsService(self.session)
+        items: list[dict[str, Any]] = []
+        for contract in contracts:
+            plan = await contracts_service.payment_plan(contract.id, today=today, with_findings=False)
+            total = Decimal(str(plan["contract_total"]))
+            lines: list[dict[str, Any]] = []
+            for line in plan["lines"]:
+                if not line["client_visible"]:
+                    continue
+                lines.append(_client_plan_line(line, len(lines) + 1, total, today))
+            if not lines:
+                continue
+            paid = sum((ln["amount"] for ln in lines if ln["status"] == "paid"), Decimal("0"))
+            items.append(
+                {
+                    "contract_id": contract.id,
+                    "contract_title": contract.title or contract.code,
+                    "currency": plan["currency"],
+                    "contract_total": total,
+                    "paid_total": paid,
+                    "outstanding_total": sum((ln["amount"] for ln in lines), Decimal("0")) - paid,
+                    "lines": lines,
+                }
+            )
+        return {"items": items}
 
     # ── Document access log ───────────────────────────────────────────────
 

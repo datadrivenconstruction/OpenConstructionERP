@@ -135,6 +135,11 @@ class Project(Base):
         nullable=True,
         default=None,
     )
+    # ISO 3166-2 state or province where the work is, e.g. "US-CA". Some rules
+    # are set below the country: California caps a home-improvement deposit,
+    # Victoria a domestic-building one. NULL means not recorded, and a rule
+    # scoped to a subdivision then says it could not run rather than guess.
+    subdivision_code: Mapped[str | None] = mapped_column(String(6), nullable=True, default=None)
 
     # ── Phase 12 expansion fields (all nullable for backward compat) ─────
     project_code: Mapped[str | None] = mapped_column(String(50), nullable=True)

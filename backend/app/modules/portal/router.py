@@ -75,6 +75,7 @@ from app.modules.portal.schemas import (
     PortalInvoiceList,
     PortalMilestoneEntry,
     PortalMilestoneList,
+    PortalPaymentPlanResponse,
     PortalProgressReportEntry,
     PortalProgressReportList,
     PortalProjectSummary,
@@ -1227,6 +1228,29 @@ async def portal_list_milestones(
             items.append(entry)
     items.sort(key=lambda e: (e.expected_date, e.name))
     return PortalMilestoneList(items=items, window_days=days)
+
+
+@router.get(
+    "/projects/{project_id}/payment-plan",
+    response_model=PortalPaymentPlanResponse,
+)
+async def portal_payment_plan(
+    project_id: uuid.UUID,
+    user: RequirePortalSession,
+    service: PortalService = Depends(_get_service),
+) -> PortalPaymentPlanResponse:
+    """The payment plans of the project's client contracts, for the client.
+
+    A ``project`` rule held by a client or investor shows every client
+    contract in force; ``contract`` rules show those contracts only. Without either the answer is 404, so the
+    endpoint never confirms a project exists. Only instalments a person marked
+    ``client_visible`` are listed, with their live due dates and how far they
+    moved; claims, findings, notes and metadata stay internal.
+    """
+    plan = await service.client_payment_plan(user.id, project_id, portal_role=user.portal_role)
+    if plan is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    return PortalPaymentPlanResponse.model_validate(plan)
 
 
 def _read_date(value: str | None) -> date | None:

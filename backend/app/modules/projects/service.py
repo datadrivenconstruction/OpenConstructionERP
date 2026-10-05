@@ -654,6 +654,7 @@ class ProjectService:
             parent_project_id=data.parent_project_id,
             address=data.address,
             country_code=country_code,
+            subdivision_code=data.subdivision_code,
             contract_value=data.contract_value,
             planned_start_date=data.planned_start_date,
             planned_end_date=data.planned_end_date,

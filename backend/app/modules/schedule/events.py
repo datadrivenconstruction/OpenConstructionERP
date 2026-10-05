@@ -155,10 +155,13 @@ async def _record_schedule_progress(event: Event) -> None:
                     )
                     continue
 
-                # Re-fetch metadata after .record() in case it expired the
-                # JSON column. Append the report_id and re-flush.
+                # Merge over the metadata as .record() left it, not the copy
+                # read before it: .record() can write keys of its own (the
+                # milestone announcement marker), and the old copy would
+                # erase them. Append the report_id and re-flush.
                 accepted_reports = list(accepted_reports) + [str(report_id_raw)]
-                activity.metadata_ = {**act_md, "field_report_progress": accepted_reports}
+                current_md = activity.metadata_ if isinstance(activity.metadata_, dict) else {}
+                activity.metadata_ = {**current_md, "field_report_progress": accepted_reports}
                 recorded += 1
 
             await session.commit()

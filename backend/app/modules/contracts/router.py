@@ -56,6 +56,7 @@ from app.modules.contracts.models import (
     ProgressClaim,
     ProgressClaimLine,
 )
+from app.modules.contracts.payment_plan import MILESTONE_GROSS_BASIS
 from app.modules.contracts.repository import (
     ContractDocumentRepository,
     ContractMilestoneRepository,
@@ -85,7 +86,9 @@ from app.modules.contracts.schemas import (
     ContractLineResponse,
     ContractLineUpdate,
     ContractListResponse,
+    ContractMilestoneActivityLink,
     ContractMilestoneCreate,
+    ContractMilestoneLinkResponse,
     ContractMilestoneResponse,
     ContractMilestoneUpdate,
     ContractPartyCreate,
@@ -121,6 +124,7 @@ from app.modules.contracts.schemas import (
     LDClauseCreate,
     LDClauseResponse,
     LDClauseUpdate,
+    PaymentPlanResponse,
     ProgressClaimCommitRequest,
     ProgressClaimCreate,
     ProgressClaimLineCreate,
@@ -1379,6 +1383,11 @@ async def create_claim_line(
     # thereby alter) lines on a claim that is already with the payer.
     service = ContractsService(session)
     service._assert_claim_editable(claim)
+    # A line on an instalment claim is a breakdown of its agreed amount; on
+    # any other claim it bills progress, which a contract its payment plan
+    # bills does not take as well.
+    if claim.gross_basis != MILESTONE_GROSS_BASIS:
+        await service.refuse_progress_billing_on_plan_contract(claim)
     repo = ProgressClaimLineRepository(session)
     fields = data.model_dump()
     # A line entered as a percent alone arrives with a zero value, which billed
@@ -2779,6 +2788,66 @@ async def delete_contract_milestone(
     await _verify_contract_access(session, obj.contract_id, user_id)
     service = ContractsService(session)
     await service.delete_milestone(milestone_id)
+
+
+# ── Payment plan ───────────────────────────────────────────────────────────
+
+
+@router.get("/contracts/{contract_id}/payment-plan", response_model=PaymentPlanResponse)
+async def contract_payment_plan(
+    contract_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("contracts.read")),
+) -> PaymentPlanResponse:
+    """The contract's instalments with live forecasts, totals and the payment_plan findings."""
+    await _verify_contract_access(session, contract_id, user_id)
+    service = ContractsService(session)
+    return PaymentPlanResponse.model_validate(await service.payment_plan(contract_id))
+
+
+@router.put("/contracts/milestones/{milestone_id}/activity", response_model=ContractMilestoneLinkResponse)
+async def link_contract_milestone_activity(
+    milestone_id: uuid.UUID,
+    data: ContractMilestoneActivityLink,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("contracts.update")),
+) -> ContractMilestoneLinkResponse:
+    """Link an instalment to the schedule activity it waits for, or unlink it with ``null``.
+
+    A dedicated route because the milestone PATCH drops nulls, so it cannot
+    clear a link.
+    """
+    obj = await session.get(ContractMilestone, milestone_id)
+    if obj is None:
+        raise HTTPException(status_code=404, detail="Contract milestone not found")
+    await _verify_contract_access(session, obj.contract_id, user_id)
+    service = ContractsService(session)
+    milestone, warnings = await service.link_milestone_activity(milestone_id, data.activity_id)
+    response = ContractMilestoneResponse.model_validate(milestone).model_dump()
+    return ContractMilestoneLinkResponse(**response, warnings=warnings)
+
+
+@router.post(
+    "/contracts/milestones/{milestone_id}/raise-claim",
+    response_model=ProgressClaimResponse,
+    status_code=201,
+)
+async def raise_contract_milestone_claim(
+    milestone_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("contracts.submit_claim")),
+) -> ProgressClaimResponse:
+    """Raise the draft claim for a reached instalment. Nothing is submitted or invoiced."""
+    obj = await session.get(ContractMilestone, milestone_id)
+    if obj is None:
+        raise HTTPException(status_code=404, detail="Contract milestone not found")
+    await _verify_contract_access(session, obj.contract_id, user_id)
+    service = ContractsService(session)
+    claim = await service.raise_claim_for_milestone(milestone_id)
+    return _claim_to_response(claim)
 
 
 # ── Completeness validation ────────────────────────────────────────────────

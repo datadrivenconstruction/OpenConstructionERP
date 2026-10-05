@@ -9,7 +9,7 @@ import hashlib
 import logging
 import uuid
 from collections.abc import Sequence
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime, timedelta
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Any
 
@@ -1628,6 +1628,40 @@ class FinanceService:
 
     # ── Gap E: certified claim → receivable invoice ──────────────────────────
 
+    async def _claim_invoice_due_date(self, claim: Any, contract: Any, invoice_date: str) -> str | None:
+        """The day a claim's invoice falls due, from the payment terms agreed for it.
+
+        A claim raised on a payment-plan instalment uses the instalment's own
+        terms, else the contract's payment period, counted from the invoice
+        date. ``None`` when neither states one or the invoice has no date:
+        an invented due date would make the client portal call a bill overdue
+        that nobody agreed a deadline for.
+        """
+        from app.modules.contracts.models import ContractMilestone
+        from app.modules.contracts.service import contract_payment_terms
+
+        try:
+            issued = date.fromisoformat(invoice_date)
+        except ValueError:
+            return None
+        days: Any = None
+        milestone_id = getattr(claim, "milestone_id", None)
+        if milestone_id is not None:
+            milestone = await self.session.get(ContractMilestone, milestone_id)
+            # Only an instalment of the claim's own contract: another
+            # contract's terms say nothing about this bill.
+            if milestone is not None and milestone.contract_id == getattr(claim, "contract_id", None):
+                days = milestone.payment_terms_days
+        if days is None:
+            days = contract_payment_terms(contract).get("payment_period_days")
+        try:
+            days = int(days)
+        except (TypeError, ValueError):
+            return None
+        if days < 0:
+            return None
+        return (issued + timedelta(days=days)).isoformat()
+
     async def create_receivable_from_claim(
         self,
         claim_id: uuid.UUID,
@@ -1776,14 +1810,15 @@ class FinanceService:
             else Decimal("0")
         )
 
+        invoice_date = (claim.claim_date or "")[:10]
         invoice_number = await self.invoices.next_invoice_number(project_id, direction)
         invoice = Invoice(
             project_id=project_id,
             contact_id=contact_id,
             invoice_direction=direction,
             invoice_number=invoice_number,
-            invoice_date=(claim.claim_date or "")[:10],
-            due_date=None,
+            invoice_date=invoice_date,
+            due_date=await self._claim_invoice_due_date(claim, contract, invoice_date),
             currency_code=invoice_currency,
             amount_subtotal=gross_base,
             tax_amount=tax_base,

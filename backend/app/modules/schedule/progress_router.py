@@ -147,7 +147,7 @@ async def set_typed_progress(
     service: ScheduleProgressService = Depends(_get_service),
 ) -> ProgressResultResponse:
     await _verify_activity(service, session, activity_id, user_id)
-    outcome = await service.set_typed_progress(activity_id, body)
+    outcome = await service.set_typed_progress(activity_id, body, actor_id=user_id)
     return _outcome_to_response(outcome)
 
 

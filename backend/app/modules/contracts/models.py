@@ -433,7 +433,8 @@ class ProgressClaim(Base):
     # Optional link to the payment milestone this claim bills against. Plain
     # UUID - may point at an oe_contracts_milestone row OR a milestone owned by
     # the planning / schedule modules, so it is resolved at the service layer.
-    milestone_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    # Indexed: the payment plan looks up the claim behind each instalment.
+    milestone_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     # ── The period as dates (v42) ────────────────────────────────────────
     # The parsed form of period_start, period_end and claim_date, which stay
     # the API contract. Written by the service on every create and update and
@@ -907,6 +908,30 @@ class ContractMilestone(Base):
         server_default="pending",
         index=True,
     )
+    # ── Payment plan (v54) ────────────────────────────────────────────────
+    # The schedule milestone this instalment waits for. Plain UUIDs, like
+    # ``ProgressClaim.milestone_id``: the activity lives in another module.
+    # ``schedule_id`` is copied from the activity so a reschedule finds every
+    # instalment it moves with one indexed lookup.
+    activity_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    schedule_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    # deposit | progress | final. Stated by a person, never guessed from the
+    # dates: the statutory deposit ceilings read it.
+    kind: Mapped[str] = mapped_column(String(20), nullable=False, default="progress", server_default="progress")
+    # Calendar days from the milestone to the claim, and from the claim to
+    # payment. ``payment_terms_days`` NULL falls back to the contract's terms.
+    lag_days: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    payment_terms_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # Forecast refreshed whenever the linked activity moves (ISO dates).
+    forecast_reached_date: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    forecast_due_date: Mapped[str | None] = mapped_column(String(10), nullable=True, index=True)
+    forecast_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    # When the milestone was reached, and by whom (NULL for the schedule).
+    reached_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    reached_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    # Shown in the client portal only once a person says so, like a
+    # schedule milestone or a progress report.
+    client_visible: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,

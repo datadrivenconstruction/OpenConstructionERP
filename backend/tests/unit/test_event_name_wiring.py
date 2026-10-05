@@ -145,7 +145,6 @@ KNOWN_DEAD_SUBSCRIPTIONS: dict[str, str] = {
     "po.issued": "core/event_handlers.py:1835; procurement/service.py:1588 publishes 'procurement.po.issued'",
     "portal.buyer_signup.completed": "nothing publishes a completed buyer signup",
     "qms.inspection.hold_point_failed": "qms subscribes to a hold-point failure no inspection service publishes",
-    "schedule.milestone.reached": "nothing publishes when a schedule milestone is reached",
     "schedule_advanced.task.completed": (
         "bi_dashboards/events.py:104, inside the annotated _PROJECTION_INVALIDATING_EVENTS "
         "tuple; schedule_advanced publishes actuals updates but never a task completion, so "

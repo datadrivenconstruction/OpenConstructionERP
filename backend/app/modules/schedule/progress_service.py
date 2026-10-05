@@ -24,6 +24,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.cpm import readable_exception_dates, readable_work_days
 from app.core.events import publish_after_commit
+from app.modules.schedule.milestone_events import announce_if_milestone_reached
 from app.modules.schedule.models import Activity, ProgressStep, Schedule
 from app.modules.schedule.progress_math import (
     DEFAULT_CALENDAR,
@@ -167,7 +168,13 @@ class ScheduleProgressService:
                 warnings.append(warning)
         return warnings
 
-    async def set_typed_progress(self, activity_id: uuid.UUID, req: TypedProgressRequest) -> ProgressOutcome:
+    async def set_typed_progress(
+        self,
+        activity_id: uuid.UUID,
+        req: TypedProgressRequest,
+        *,
+        actor_id: uuid.UUID | str | None = None,
+    ) -> ProgressOutcome:
         """Resolve and persist progress for one activity via the per-type engine."""
         activity = await self.get_activity(activity_id)
         schedule = await self.get_schedule(activity.schedule_id)
@@ -243,6 +250,7 @@ class ScheduleProgressService:
         )
 
         refreshed = await self.get_activity(activity_id)
+        await announce_if_milestone_reached(self.session, refreshed, was_completed=was_completed, actor_id=actor_id)
         return ProgressOutcome(activity=refreshed, pct_type=pct_type, result=result, warnings=warnings)
 
     async def preview_percent_type(self, activity_id: uuid.UUID, pct_type: str) -> list[str]:

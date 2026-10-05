@@ -116,5 +116,44 @@
     "errors": {
       "signature_blocked": "This contract cannot be signed until these are resolved: {findings}"
     }
+  },
+  "payment_plan": {
+    "triggers": {
+      "completion": "completion",
+      "approval": "approval"
+    },
+    "total_within_contract": {
+      "fail": "The instalments add up to {scheduled}, more than the contract sum of {total}",
+      "suggestion": "Reduce the instalments so they add up to no more than the contract sum"
+    },
+    "percent_sum": {
+      "fail": "The instalments add up to {scheduled} of the contract sum of {total} ({percent}%), so part of the price has no instalment",
+      "suggestion": "Add an instalment for the rest of the contract sum, or adjust the amounts"
+    },
+    "completion_trigger_linked": {
+      "fail": "Instalment {milestone} falls due on {trigger}, but it is not linked to a schedule activity, so its date will not move with the work",
+      "suggestion": "Link the instalment to the schedule milestone it waits for"
+    },
+    "schedule_done_plan_pending": {
+      "fail": "The schedule shows {milestone} reached, but instalment {instalment} is still pending, so it cannot be claimed",
+      "suggestion": "Mark the instalment reached, or check why the contract is not active"
+    },
+    "client_visible_requires_active": {
+      "fail": "Instalment {milestone} is shown to the client, but the contract is {status}; the client sees the plan of an active or completed contract only",
+      "suggestion": "Hide the instalment from the client until the contract is in force"
+    },
+    "consumer_deposit_cap": {
+      "fail": "The up-front payment of {deposit} is above the {ceiling} that {reference} allows in {jurisdiction} (source: {source_url}, checked {checked_on}, not reviewed by a lawyer)",
+      "suggestion": "Reduce the deposit, or confirm with counsel that an exemption applies to this contract",
+      "below_threshold": {
+        "fail": "The contract sum is at or below the amount from which {reference} limits deposits in {jurisdiction}, so the deposit was not checked (source: {source_url})"
+      },
+      "other_currency": {
+        "fail": "The contract is in {currency}, but {reference} states its limit in {limit_currency}, so the deposit in {jurisdiction} was not checked (source: {source_url})"
+      },
+      "unchecked": {
+        "suggestion": "If the statute applies to this contract, check the deposit against it by hand"
+      }
+    }
   }
 }

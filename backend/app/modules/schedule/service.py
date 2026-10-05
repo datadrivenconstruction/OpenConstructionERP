@@ -57,6 +57,7 @@ def _normalize_deps(deps: list | None) -> list[dict]:
     return result
 
 
+from app.modules.schedule.milestone_events import announce_if_milestone_reached
 from app.modules.schedule.models import Activity, Schedule, ScheduleRelationship, WorkOrder
 from app.modules.schedule.ordering import activity_order_terms
 from app.modules.schedule.repository import (
@@ -1819,7 +1820,10 @@ class ScheduleService:
         if fields:
             await self.activity_repo.update_fields(activity_id, **fields)
 
-            await _safe_publish(
+            # After the commit: the payment plan recomputes forecasts from the
+            # new dates in its own session, which cannot see them before then.
+            publish_after_commit(
+                self.session,
                 "schedule.activity.updated",
                 {
                     "activity_id": str(activity_id),
@@ -1847,7 +1851,9 @@ class ScheduleService:
             await self.activity_repo.bulk_update_fields([{"id": aid, "sort_order": o} for aid, o in reorder.items()])
 
         # Re-fetch to return fresh data
-        return await self.get_activity(activity_id)
+        refreshed = await self.get_activity(activity_id)
+        await announce_if_milestone_reached(self.session, refreshed, was_completed=was_completed, actor_id=actor_id)
+        return refreshed
 
     async def delete_activity(self, activity_id: uuid.UUID) -> None:
         """Delete an activity.
@@ -1888,7 +1894,8 @@ class ScheduleService:
         for succ_id, pruned in successors_to_clean:
             await self.activity_repo.update_fields(succ_id, dependencies=pruned)
 
-        await _safe_publish(
+        publish_after_commit(
+            self.session,
             "schedule.activity.deleted",
             {"activity_id": str(activity_id), "schedule_id": schedule_id},
             source_module="oe_schedule",
@@ -1915,7 +1922,8 @@ class ScheduleService:
 
         deleted = await self.activity_repo.delete_for_schedule(schedule_id)
 
-        await _safe_publish(
+        publish_after_commit(
+            self.session,
             "schedule.activities.cleared",
             {"schedule_id": str(schedule_id), "count": deleted},
             source_module="oe_schedule",
@@ -2044,12 +2052,15 @@ class ScheduleService:
         logger.info("BOQ position %s unlinked from activity %s", boq_position_id, activity_id)
         return await self.get_activity(activity_id)
 
-    async def update_progress(self, activity_id: uuid.UUID, progress_pct: float) -> Activity:
+    async def update_progress(
+        self, activity_id: uuid.UUID, progress_pct: float, actor_id: str | None = None
+    ) -> Activity:
         """Update activity progress and auto-adjust status.
 
         Args:
             activity_id: Target activity identifier.
             progress_pct: New progress percentage (0.0 - 100.0).
+            actor_id: The caller, named in a milestone-reached event.
 
         Returns:
             Updated activity.
@@ -2101,7 +2112,9 @@ class ScheduleService:
         if activity.parent_id:
             await self._rollup_summary_progress(activity.parent_id)
 
-        return await self.get_activity(activity_id)
+        refreshed = await self.get_activity(activity_id)
+        await announce_if_milestone_reached(self.session, refreshed, was_completed=was_completed, actor_id=actor_id)
+        return refreshed
 
     async def _rollup_summary_progress(self, summary_id: uuid.UUID, _depth: int = 0) -> None:
         """Recompute a summary activity's progress as the duration-weighted mean of its children.
@@ -2772,7 +2785,8 @@ class ScheduleService:
 
         await self.activity_repo.bulk_update_fields(updates)
 
-        await _safe_publish(
+        publish_after_commit(
+            self.session,
             "schedule.rescheduled",
             {"schedule_id": str(schedule_id), "count": len(updates)},
             source_module="oe_schedule",
@@ -3417,6 +3431,10 @@ class ScheduleService:
                     "activity_type": a.activity_type or "task",
                     "dependencies": _normalize_deps(a.dependencies),
                     "color": a.color or "#0071e3",
+                    # The CPM write below merges into this, so every other
+                    # key (a milestone's reached marker, import provenance,
+                    # links to sales contracts) survives a recalculation.
+                    "metadata_": dict(a.metadata_) if isinstance(a.metadata_, dict) else {},
                 }
             )
 

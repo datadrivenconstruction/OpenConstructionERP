@@ -116,5 +116,44 @@
     "errors": {
       "signature_blocked": "Dieser Vertrag kann erst unterschrieben werden, wenn Folgendes behoben ist: {findings}"
     }
+  },
+  "payment_plan": {
+    "triggers": {
+      "completion": "Fertigstellung",
+      "approval": "Abnahme"
+    },
+    "total_within_contract": {
+      "fail": "Die Raten ergeben zusammen {scheduled} und damit mehr als die Vertragssumme von {total}",
+      "suggestion": "Verringern Sie die Raten, sodass sie die Vertragssumme nicht übersteigen"
+    },
+    "percent_sum": {
+      "fail": "Die Raten ergeben zusammen {scheduled} von der Vertragssumme {total} ({percent} %), ein Teil des Preises hat also keine Rate",
+      "suggestion": "Legen Sie eine Rate für den Rest der Vertragssumme an oder passen Sie die Beträge an"
+    },
+    "completion_trigger_linked": {
+      "fail": "Rate {milestone} wird bei {trigger} fällig, ist aber mit keinem Vorgang im Terminplan verknüpft, daher verschiebt sich ihr Datum nicht mit der Arbeit",
+      "suggestion": "Verknüpfen Sie die Rate mit dem Meilenstein im Terminplan, auf den sie wartet"
+    },
+    "schedule_done_plan_pending": {
+      "fail": "Laut Terminplan ist {milestone} erreicht, die Rate {instalment} steht aber noch aus und kann nicht abgerechnet werden",
+      "suggestion": "Markieren Sie die Rate als erreicht oder prüfen Sie, warum der Vertrag nicht aktiv ist"
+    },
+    "client_visible_requires_active": {
+      "fail": "Rate {milestone} wird dem Auftraggeber angezeigt, der Vertrag ist aber {status}; der Auftraggeber sieht nur den Zahlungsplan eines aktiven oder abgeschlossenen Vertrags",
+      "suggestion": "Blenden Sie die Rate für den Auftraggeber aus, bis der Vertrag in Kraft ist"
+    },
+    "consumer_deposit_cap": {
+      "fail": "Die Anzahlung von {deposit} liegt über den {ceiling}, die {reference} in {jurisdiction} erlaubt (Quelle: {source_url}, geprüft am {checked_on}, nicht juristisch geprüft)",
+      "suggestion": "Verringern Sie die Anzahlung oder lassen Sie rechtlich prüfen, ob für diesen Vertrag eine Ausnahme gilt",
+      "below_threshold": {
+        "fail": "Die Vertragssumme liegt bei oder unter dem Betrag, ab dem {reference} Anzahlungen in {jurisdiction} begrenzt, die Anzahlung wurde daher nicht geprüft (Quelle: {source_url})"
+      },
+      "other_currency": {
+        "fail": "Der Vertrag lautet auf {currency}, {reference} nennt die Grenze aber in {limit_currency}, die Anzahlung in {jurisdiction} wurde daher nicht geprüft (Quelle: {source_url})"
+      },
+      "unchecked": {
+        "suggestion": "Falls die Vorschrift für diesen Vertrag gilt, prüfen Sie die Anzahlung von Hand"
+      }
+    }
   }
 }

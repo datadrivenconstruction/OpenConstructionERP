@@ -17,11 +17,13 @@ from __future__ import annotations
 import dataclasses
 import logging
 import uuid
+from datetime import date
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from types import SimpleNamespace
 from typing import Any
 
 from fastapi import HTTPException, status
+from sqlalchemy import select as sa_select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -76,6 +78,16 @@ from app.modules.contracts.models import (
     RetentionRelease,
     RetentionSchedule,
 )
+from app.modules.contracts.payment_plan import (
+    GROSS_FIXED_BASES,
+    MILESTONE_GROSS_BASIS,
+    REACHED_BY_SCHEDULE,
+    SCHEDULE_DRIVEN_TRIGGERS,
+    SCHEDULE_REACHED_TRIGGER,
+    Forecast,
+    client_status,
+    forecast_dates,
+)
 from app.modules.contracts.periods import claim_dates_for_write, claim_order_key, claims_before
 from app.modules.contracts.repository import (
     PRIOR_CLAIM_IDS_KEY,
@@ -122,6 +134,56 @@ logger = logging.getLogger(__name__)
 
 DEC_ZERO = Decimal("0")
 DEC_HUNDRED = Decimal("100")
+
+#: Instalment fields a payment-plan line carries over as they are stored.
+_MILESTONE_LINE_FIELDS = (
+    "id",
+    "contract_id",
+    "code",
+    "name",
+    "planned_date",
+    "value",
+    "percent_of_contract",
+    "trigger",
+    "status",
+    "kind",
+    "activity_id",
+    "schedule_id",
+    "lag_days",
+    "payment_terms_days",
+    "forecast_at",
+    "reached_at",
+    "client_visible",
+    "created_at",
+    "updated_at",
+)
+
+#: How far along its life an instalment is; it only ever moves forward from a claim.
+_MILESTONE_ORDER: dict[str, int] = {"pending": 0, "reached": 1, "invoiced": 2, "paid": 3}
+
+
+def _utc_now_iso() -> str:
+    from datetime import UTC, datetime  # noqa: PLC0415
+
+    return datetime.now(UTC).isoformat()
+
+
+def _day_or_none(value: Any) -> date | None:
+    """The calendar day an ISO date or timestamp string names, ``None`` when it names none."""
+    if isinstance(value, date):
+        return value
+    try:
+        return date.fromisoformat(str(value)[:10]) if value else None
+    except ValueError:
+        return None
+
+
+def _int_or_none(value: Any) -> int | None:
+    try:
+        return int(value) if value not in (None, "") else None
+    except (TypeError, ValueError):
+        return None
+
 
 #: The parts of a retention policy that decide money. They stop being
 #: editable the moment a claim leaves draft, because from then on the amount
@@ -200,6 +262,22 @@ _CLAIM_TRANSITIONS: dict[str, frozenset[str]] = {
     "paid": frozenset(),
     "rejected": frozenset({"draft"}),
 }
+
+#: The status an instalment takes when the claim billing it moves. Certified
+#: is where the invoice is raised, so the instalment reads as invoiced from
+#: then; paid follows the money.
+_MILESTONE_STATUS_ON_CLAIM: dict[str, str] = {"certified": "invoiced", "paid": "paid"}
+
+#: How a contract is billed, as :meth:`ContractsService._billing_modes` reads it.
+BILLED_BY_PAYMENT_PLAN = "payment_plan"
+BILLED_BY_PROGRESS = "progress"
+#: The refusals when a claim would bill a contract the other way.
+BILLED_BY_PAYMENT_PLAN_ERROR = "contract_billed_by_payment_plan"
+BILLED_BY_PROGRESS_ERROR = "contract_billed_by_progress"
+
+#: Contract statuses whose instalments follow the schedule. A draft is still
+#: being negotiated and a completed or terminated one has stopped billing.
+_PLAN_LIVE_CONTRACT_STATUSES: tuple[str, ...] = ("active",)
 
 _FINAL_ACCOUNT_TRANSITIONS: dict[str, frozenset[str]] = {
     "draft": frozenset({"agreed", "disputed"}),
@@ -383,6 +461,12 @@ def _payment_term_json(value: Any) -> Any:
     if isinstance(value, list):
         return [dict(step) for step in value]
     return value
+
+
+#: Instalment fields an update may set back to null: switching a line from a
+#: fixed amount to a percentage of the contract clears ``value`` (it would win
+#: otherwise), and blank terms or date fall back to the contract's.
+_MILESTONE_CLEARABLE = frozenset({"value", "percent_of_contract", "payment_terms_days", "planned_date"})
 
 
 def contract_payment_terms(contract: Any) -> dict[str, Any]:
@@ -2317,6 +2401,10 @@ class ContractsService:
             )
         await self.contract_repo.update_fields(contract_id, **fields)
         await self.session.refresh(contract)
+        if target_status in _PLAN_LIVE_CONTRACT_STATUSES:
+            # Milestones the schedule announced while the contract was not in
+            # force moved nothing then and will not be announced again.
+            await self.catch_up_reached_milestones(contract)
         return contract
 
     # ── E-signature bridge ───────────────────────────────────────────────
@@ -3837,6 +3925,8 @@ class ContractsService:
                 source_module="contracts",
             )
         await self.claim_repo.update_fields(claim_id, **fields)
+        if getattr(claim, "milestone_id", None) is not None and target_status in _MILESTONE_STATUS_ON_CLAIM:
+            await self._sync_milestone_with_claim(claim, _MILESTONE_STATUS_ON_CLAIM[target_status])
         await self.session.refresh(claim)
         return claim
 
@@ -3870,6 +3960,8 @@ class ContractsService:
                     "claim_status": claim.status,
                 },
             )
+        self._refuse_rebuilding_instalment_claim(claim)
+        await self.refuse_progress_billing_on_plan_contract(claim)
         contract = await self.get_contract(claim.contract_id)
         lines = await self.line_repo.list_for_contract(contract.id)
         fee_structure = await self.fee_repo.get_for_contract(contract.id)
@@ -4031,6 +4123,78 @@ class ContractsService:
                 },
             )
 
+    def _refuse_rebuilding_instalment_claim(self, claim: ProgressClaim) -> None:
+        """Raise HTTP 409 for a claim raised from a payment-plan instalment.
+
+        Generating or populating rebuilds a claim's gross from the schedule of
+        values. An instalment claim bills the amount the plan agreed, so a
+        rebuild would turn it into a progress claim on a contract the payment
+        plan bills. A breakdown line added by hand is still allowed.
+        """
+        if getattr(claim, "gross_basis", None) == MILESTONE_GROSS_BASIS:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "error": "instalment_claim_not_rebuilt",
+                    "message": (
+                        "This claim bills a payment-plan instalment for its agreed amount, so it is not rebuilt "
+                        "from the schedule of values. The contract is billed by its payment plan."
+                    ),
+                    "claim_status": claim.status,
+                },
+            )
+
+    async def _billing_modes(self, contract_id: uuid.UUID, *, except_claim_id: uuid.UUID | None = None) -> set[str]:
+        """How the contract's live claims bill it: ``payment_plan``, ``progress``, both or neither.
+
+        A contract is billed one way. An instalment claim has no lines, so the
+        certificate counts its gross as money outside the schedule of values,
+        and a progress claim after it would bill the same work again at its
+        percent complete. Rejected claims billed nothing and do not count,
+        and neither does an empty draft that has not been given a gross,
+        lines or a basis yet.
+        """
+        claims = [
+            c
+            for c in await self.claim_repo.ordered_for_contract(contract_id)
+            if c.status != "rejected" and c.id != except_claim_id
+        ]
+        with_lines: set[uuid.UUID] = set()
+        if claims:
+            stmt = (
+                sa_select(ProgressClaimLine.progress_claim_id)
+                .where(ProgressClaimLine.progress_claim_id.in_([c.id for c in claims]))
+                .distinct()
+            )
+            with_lines = set((await self.session.execute(stmt)).scalars().all())
+        modes: set[str] = set()
+        for c in claims:
+            if c.gross_basis == MILESTONE_GROSS_BASIS:
+                modes.add(BILLED_BY_PAYMENT_PLAN)
+            elif c.id in with_lines or c.gross_basis is not None or Decimal(str(c.gross_amount or 0)) != DEC_ZERO:
+                modes.add(BILLED_BY_PROGRESS)
+        return modes
+
+    async def refuse_progress_billing_on_plan_contract(self, claim: ProgressClaim) -> None:
+        """Raise HTTP 409 when progress would be billed on a contract its payment plan bills.
+
+        Called before a claim's gross is built from the schedule of values:
+        generation, populate and its commit, and a line added by hand to a
+        claim that is not itself an instalment claim.
+        """
+        if BILLED_BY_PAYMENT_PLAN in await self._billing_modes(claim.contract_id, except_claim_id=claim.id):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "error": BILLED_BY_PAYMENT_PLAN_ERROR,
+                    "message": (
+                        "This contract is billed by its payment plan: an instalment claim is already raised on it. "
+                        "Claim the next instalment instead of measured progress, so the same work is not billed twice."
+                    ),
+                    "claim_status": claim.status,
+                },
+            )
+
     async def populate_claim_from_progress(
         self,
         claim_id: uuid.UUID,
@@ -4061,6 +4225,8 @@ class ContractsService:
         if claim is None:
             raise HTTPException(status_code=404, detail=translate("errors.claim_not_found", locale=get_locale()))
         self._assert_claim_editable(claim)
+        self._refuse_rebuilding_instalment_claim(claim)
+        await self.refuse_progress_billing_on_plan_contract(claim)
         contract = await self.get_contract(claim.contract_id)
         claim_currency = claim.currency or contract.currency or ""
 
@@ -4225,6 +4391,8 @@ class ContractsService:
         if claim is None:
             raise HTTPException(status_code=404, detail=translate("errors.claim_not_found", locale=get_locale()))
         self._assert_claim_editable(claim)
+        self._refuse_rebuilding_instalment_claim(claim)
+        await self.refuse_progress_billing_on_plan_contract(claim)
         contract = await self.get_contract(claim.contract_id)
 
         # Resolve + validate every referenced contract line belongs to this
@@ -5371,6 +5539,11 @@ class ContractsService:
         """
         if contract.contract_type in FLAT_RETENTION_CONTRACT_TYPES:
             return True
+        if getattr(claim, "gross_basis", None) == MILESTONE_GROSS_BASIS:
+            # An instalment is an agreed amount, not work measured on the
+            # schedule of values, so a line typed against it is a breakdown
+            # and the ladder has nothing to measure.
+            return True
         return not lines and Decimal(str(claim.gross_amount or 0)) != DEC_ZERO
 
     async def claim_retention_figures(
@@ -5483,11 +5656,12 @@ class ContractsService:
             # lines it has. Its lines are a breakdown somebody typed against a
             # gross that came from costs, not the thing the gross is made of,
             # and summing them replaces a measured fifty thousand with the
-            # value of one hand-written row. This is the only place the basis
-            # is read; every other caller of this method is unaffected because
+            # value of one hand-written row. A claim raised from a payment-plan
+            # instalment is the same case with an agreed amount in place of the
+            # cost (GROSS_FIXED_BASES). Every other caller is unaffected because
             # a claim made of lines records "lines" and a claim written before
             # the column existed records nothing and behaves as it always did.
-            if (lines or gross_follows_lines) and claim.gross_basis != "cost":
+            if (lines or gross_follows_lines) and claim.gross_basis not in GROSS_FIXED_BASES:
                 gross = sum((Decimal(str(line.period_completed_value or 0)) for line in lines), DEC_ZERO)
             # Retention is derived from the gross and the contract's rate here
             # rather than read back off the claim. It used to be preserved
@@ -5511,7 +5685,12 @@ class ContractsService:
             # stopped retaining on the schedule, and the certificate carries
             # it on a row of its own that a release pays back like any other
             # retention (outside_schedule_retention_held).
-            retention = await self.flat_claim_retention(contract, claim, gross)
+            # A deposit instalment holds no retention: it is paid before there
+            # is work for retention to secure.
+            if await self._is_deposit_claim(claim):
+                retention = DEC_ZERO
+            else:
+                retention = await self.flat_claim_retention(contract, claim, gross)
             billed_here = await self.release_repo.billed_on_claims([claim.id])
             released_here = sum((Decimal(str(r.amount or 0)) for r in billed_here), DEC_ZERO)
             net = gross - retention + released_here
@@ -6653,13 +6832,14 @@ class ContractsService:
             payload["metadata_"] = payload.pop("metadata")
         return payload
 
-    async def _apply_update(self, repo: Any, obj: Any, data: Any) -> Any:
+    async def _apply_update(self, repo: Any, obj: Any, data: Any, *, clearable: frozenset[str] = frozenset()) -> Any:
         """Generic partial update with metadata merge; mirrors update_contract.
 
         Only fields explicitly set on ``data`` are touched. A provided
         ``metadata`` dict is deep-merged into the existing ``metadata_`` (never
         clobbered). None values are dropped so an omitted optional field is not
-        written as NULL, matching the rest of the module's update endpoints.
+        written as NULL, matching the rest of the module's update endpoints,
+        except the ``clearable`` ones: an explicit null there clears the field.
         """
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
         if "metadata" in fields:
@@ -6667,7 +6847,7 @@ class ContractsService:
             fields["metadata_"] = (
                 merge_metadata(getattr(obj, "metadata_", None), incoming) if isinstance(incoming, dict) else incoming
             )
-        fields = {k: v for k, v in fields.items() if v is not None or k == "metadata_"}
+        fields = {k: v for k, v in fields.items() if v is not None or k == "metadata_" or k in clearable}
         if fields:
             await repo.update_fields(obj.id, **fields)
             await self.session.refresh(obj)
@@ -7008,18 +7188,648 @@ class ContractsService:
     # ── Milestones (CRUD + schedule) ─────────────────────────────────────
 
     async def create_milestone(self, data: Any) -> ContractMilestone:
-        await self.get_contract(data.contract_id)
+        contract = await self.get_contract(data.contract_id)
         obj = ContractMilestone(**self._create_kwargs(data))
-        return await self.milestone_repo.create(obj)
+        if obj.status == "reached" and not obj.reached_at:
+            obj.reached_at = _utc_now_iso()
+        obj = await self.milestone_repo.create(obj)
+        await self.recompute_milestone_forecast(obj, contract=contract)
+        return obj
 
     async def update_milestone(self, milestone_id: uuid.UUID, data: Any) -> ContractMilestone:
         obj = await self.milestone_repo.get_by_id(milestone_id)
         if obj is None:
             raise HTTPException(status_code=404, detail="Contract milestone not found")
-        return await self._apply_update(self.milestone_repo, obj, data)
+        was = obj.status
+        obj = await self._apply_update(self.milestone_repo, obj, data, clearable=_MILESTONE_CLEARABLE)
+        # A person marking an instalment reached is the same fact the
+        # schedule reports, so it is dated the same way; moving it back
+        # forgets the day.
+        if obj.status == "reached" and was == "pending" and not obj.reached_at:
+            await self.milestone_repo.update_fields(obj.id, reached_at=_utc_now_iso())
+        elif obj.status == "pending" and was != "pending":
+            await self.milestone_repo.update_fields(obj.id, reached_at=None, reached_by=None)
+        await self.recompute_milestone_forecast(obj)
+        return obj
 
     async def delete_milestone(self, milestone_id: uuid.UUID) -> None:
         await self.milestone_repo.delete(milestone_id)
+
+    # ── Payment plan: instalments that follow the schedule ───────────────
+
+    async def _activity_rows(self, activity_ids: list[uuid.UUID]) -> dict[uuid.UUID, Any]:
+        """The schedule activities behind some instalments, with their project.
+
+        Read with a plain select so the contracts module does not depend on
+        the schedule service. An id with no row (deleted, or the schedule
+        module not installed) is simply absent: the instalment then falls back
+        to the date its contract names.
+        """
+        ids = [i for i in dict.fromkeys(activity_ids) if i is not None]
+        if not ids:
+            return {}
+        try:
+            from app.modules.schedule.milestone_events import (  # noqa: PLC0415
+                REACHED_AT_KEY,
+                is_completed,
+                is_milestone,
+            )
+            from app.modules.schedule.models import Activity, Schedule  # noqa: PLC0415
+        except ImportError:
+            return {}
+        stmt = (
+            sa_select(
+                Activity.id,
+                Activity.schedule_id,
+                Activity.name,
+                Activity.end_date,
+                Activity.activity_type,
+                Activity.status,
+                Activity.progress_pct,
+                Activity.metadata_,
+                Schedule.project_id,
+            )
+            .join(Schedule, Schedule.id == Activity.schedule_id)
+            .where(Activity.id.in_(ids))
+        )
+        rows: dict[uuid.UUID, Any] = {}
+        for row in (await self.session.execute(stmt)).all():
+            # What the schedule itself decides, asked of the schedule: which
+            # activities are milestones, which are complete, and the day one
+            # was reached (its announcement, else its finish).
+            reached_on = (row.metadata_ or {}).get(REACHED_AT_KEY) if isinstance(row.metadata_, dict) else None
+            rows[row.id] = SimpleNamespace(
+                id=row.id,
+                schedule_id=row.schedule_id,
+                name=row.name,
+                end_date=row.end_date,
+                project_id=row.project_id,
+                is_milestone=is_milestone(row),
+                done=is_completed(row.status, row.progress_pct),
+                finished_on=reached_on or row.end_date,
+            )
+        return rows
+
+    @staticmethod
+    def _plan_terms_days(milestone: ContractMilestone, contract: Contract) -> int | None:
+        """Days the client has to pay: the instalment's own figure, else the contract's."""
+        if milestone.payment_terms_days is not None:
+            return milestone.payment_terms_days
+        return _int_or_none(contract_payment_terms(contract).get("payment_period_days"))
+
+    def _milestone_forecast(
+        self,
+        milestone: ContractMilestone,
+        contract: Contract,
+        activity_end_date: date | None,
+    ) -> Forecast:
+        return forecast_dates(
+            trigger=milestone.trigger,
+            planned_date=_day_or_none(milestone.planned_date),
+            activity_finish=activity_end_date if milestone.activity_id is not None else None,
+            reached_on=_day_or_none(milestone.reached_at),
+            lag_days=milestone.lag_days or 0,
+            terms_days=self._plan_terms_days(milestone, contract),
+        )
+
+    async def recompute_milestone_forecast(
+        self,
+        milestone: ContractMilestone,
+        activity_end_date: date | None = None,
+        *,
+        contract: Contract | None = None,
+    ) -> ContractMilestone:
+        """Store when an instalment is now expected to be claimable and to fall due.
+
+        ``activity_end_date`` is the linked activity's live finish
+        (``Activity.end_date``, which a reschedule rewrites; ``early_finish``
+        is a CPM day offset, not a date). Left out, it is read from the
+        activity when the instalment is linked. A date trigger ignores it:
+        the contract fixed that day.
+        """
+        if activity_end_date is None and milestone.activity_id is not None:
+            row = (await self._activity_rows([milestone.activity_id])).get(milestone.activity_id)
+            activity_end_date = _day_or_none(row.end_date) if row is not None else None
+        contract = contract or await self.get_contract(milestone.contract_id)
+        forecast = self._milestone_forecast(milestone, contract, activity_end_date)
+        await self.milestone_repo.update_fields(
+            milestone.id,
+            forecast_reached_date=forecast.reached.isoformat() if forecast.reached else None,
+            forecast_due_date=forecast.due.isoformat() if forecast.due else None,
+            forecast_at=_utc_now_iso(),
+        )
+        return milestone
+
+    async def link_milestone_activity(
+        self,
+        milestone_id: uuid.UUID,
+        activity_id: uuid.UUID | None,
+    ) -> tuple[ContractMilestone, list[str]]:
+        """Make an instalment follow a schedule activity, or stop following one.
+
+        The activity has to be in the contract's own project; one from
+        anywhere else answers 404, the same as one that does not exist, so
+        the route does not confirm another project's ids. It has to be a
+        milestone in the schedule's own sense (``milestone_events.is_milestone``),
+        because only a milestone announces that it was reached; a task linked
+        here would leave the instalment pending for good.
+
+        An instalment due on completion linked to a milestone that is already
+        complete is reached at once, on the day the schedule reached it: the
+        announcement went out before the link existed and will not come again.
+
+        Returns:
+            The instalment and a list of warning codes for the caller to show.
+        """
+        milestone = await self.milestone_repo.get_by_id(milestone_id)
+        if milestone is None:
+            raise HTTPException(status_code=404, detail="Contract milestone not found")
+        contract = await self.get_contract(milestone.contract_id)
+        warnings: list[str] = []
+        if activity_id is None:
+            await self.milestone_repo.update_fields(milestone.id, activity_id=None, schedule_id=None)
+            await self.recompute_milestone_forecast(milestone, contract=contract)
+            return milestone, warnings
+        row = (await self._activity_rows([activity_id])).get(activity_id)
+        if row is None or row.project_id != contract.project_id:
+            raise HTTPException(
+                status_code=404,
+                detail={
+                    "error": "activity_not_found",
+                    "message": "No schedule activity with this id in the contract's project",
+                },
+            )
+        if not row.is_milestone:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail={
+                    "error": "activity_not_milestone",
+                    "message": (
+                        "This activity is not a milestone, so the schedule will never report it reached. "
+                        "Mark it as a milestone in the schedule first."
+                    ),
+                },
+            )
+        if milestone.trigger not in SCHEDULE_DRIVEN_TRIGGERS:
+            warnings.append("date_trigger_ignores_schedule")
+        await self.milestone_repo.update_fields(milestone.id, activity_id=row.id, schedule_id=row.schedule_id)
+        if self._schedule_reaches(milestone, contract) and row.done:
+            await self._mark_reached(milestone, contract, reached_at=row.finished_on, actor_id=None)
+        else:
+            await self.recompute_milestone_forecast(milestone, _day_or_none(row.end_date), contract=contract)
+        return milestone, warnings
+
+    @staticmethod
+    def _schedule_reaches(milestone: ContractMilestone, contract: Contract) -> bool:
+        """Whether the schedule may move this instalment to reached.
+
+        Only an instalment due on completion, still pending, on a contract in
+        force. A date trigger keeps the day the contract names, and an approval
+        waits for a person to approve.
+        """
+        return (
+            milestone.trigger == SCHEDULE_REACHED_TRIGGER
+            and milestone.status == "pending"
+            and contract.status in _PLAN_LIVE_CONTRACT_STATUSES
+        )
+
+    async def _mark_reached(
+        self,
+        milestone: ContractMilestone,
+        contract: Contract,
+        *,
+        reached_at: str | None,
+        actor_id: str | None,
+    ) -> None:
+        """Move an instalment to reached on the schedule's word.
+
+        ``reached_by`` is ``schedule`` whoever completed the activity, so a
+        reopened milestone takes back only what the schedule moved; the person
+        who completed it is kept in the metadata.
+        """
+        stamp = reached_at if _day_or_none(reached_at) is not None else _utc_now_iso()
+        fields: dict[str, Any] = {"status": "reached", "reached_at": stamp, "reached_by": REACHED_BY_SCHEDULE}
+        if actor_id:
+            fields["metadata_"] = {**(milestone.metadata_ or {}), "reached_actor_id": str(actor_id)}
+        await self.milestone_repo.update_fields(milestone.id, **fields)
+        await self.recompute_milestone_forecast(milestone, contract=contract)
+
+    async def catch_up_reached_milestones(self, contract: Contract) -> int:
+        """Reach the instalments whose linked milestone completed while nothing listened.
+
+        Run when a contract comes into force. The schedule announces a
+        milestone once, and an announcement made while the contract was still
+        a draft moved nothing.
+        """
+        pending = [
+            m
+            for m in await self.milestone_repo.list_for_contract(contract.id)
+            if m.activity_id is not None and self._schedule_reaches(m, contract)
+        ]
+        rows = await self._activity_rows([m.activity_id for m in pending])
+        moved = 0
+        for m in pending:
+            row = rows.get(m.activity_id)
+            if row is not None and row.done:
+                await self._mark_reached(m, contract, reached_at=row.finished_on, actor_id=None)
+                moved += 1
+        return moved
+
+    async def payment_plan(
+        self,
+        contract_id: uuid.UUID,
+        *,
+        today: date | None = None,
+        with_findings: bool = True,
+    ) -> dict[str, Any]:
+        """A contract's instalments as the plan reads today.
+
+        Forecasts are worked out here from each linked activity's current
+        finish rather than read back from the stored columns. Those are
+        refreshed by schedule events, and an event can run before the change
+        it reports has been committed, so the stored copy may lag a reschedule
+        by one event; this view never does.
+
+        What the client reads (``client_status``, and ``forecast_due_date``
+        once billed) follows the bill, not the plan. Once the claim behind an
+        instalment has an invoice, the invoice's due date is the due date and
+        decides overdue. Before that nobody has billed the client, so a
+        reached instalment reads ``due`` at most, never ``overdue``, however
+        long ago it was reached.
+        """
+        from datetime import UTC, datetime  # noqa: PLC0415
+
+        contract = await self.get_contract(contract_id)
+        milestones = await self.milestone_repo.list_for_contract(contract_id)
+        today = today or datetime.now(UTC).date()
+        activities = await self._activity_rows([m.activity_id for m in milestones if m.activity_id])
+        claims = await self.claim_repo.open_claims_for_milestones([m.id for m in milestones])
+        invoice_dues = await self._claim_invoice_dues([c.id for c in claims.values()])
+        contract_total = Decimal(str(contract.total_value or 0))
+        amounts: dict[uuid.UUID, Decimal] = {}
+        lines: list[dict[str, Any]] = []
+        for m in milestones:
+            amount = compute_milestone_value(m.value, m.percent_of_contract, contract_total)
+            amounts[m.id] = amount
+            row = activities.get(m.activity_id) if m.activity_id else None
+            forecast = self._milestone_forecast(m, contract, _day_or_none(row.end_date) if row else None)
+            # Movement against the contract's own date, lag included on both
+            # sides, so an instalment nobody moved reads zero.
+            as_planned = forecast_dates(
+                trigger="date",
+                planned_date=_day_or_none(m.planned_date),
+                activity_finish=None,
+                reached_on=None,
+                lag_days=m.lag_days or 0,
+                terms_days=self._plan_terms_days(m, contract),
+            )
+            days_moved = (
+                (forecast.reached - as_planned.reached).days
+                if forecast.reached is not None and as_planned.reached is not None
+                else None
+            )
+            claim = claims.get(m.id)
+            due, status_for_client = self._client_due(m, forecast.due, claim, invoice_dues, today)
+            lines.append(
+                {
+                    **{name: getattr(m, name) for name in _MILESTONE_LINE_FIELDS},
+                    "metadata": m.metadata_ or {},
+                    "forecast_reached_date": forecast.reached.isoformat() if forecast.reached else None,
+                    "forecast_due_date": due.isoformat() if due else None,
+                    "planned_due_date": as_planned.due.isoformat() if as_planned.due else None,
+                    "amount": amount,
+                    "activity_name": row.name if row is not None else None,
+                    "activity_missing": m.activity_id is not None and row is None,
+                    "client_status": status_for_client,
+                    "days_moved": days_moved,
+                    "claim_id": claim.id if claim is not None else None,
+                    "claim_status": claim.status if claim is not None else None,
+                }
+            )
+        scheduled_total = sum(amounts.values(), DEC_ZERO)
+        # The client portal reads the same lines and shows no findings, so it
+        # does not pay for running the rules.
+        report = (
+            await self.run_payment_plan_rules(contract, milestones, amounts, activities=activities)
+            if with_findings
+            else None
+        )
+        return {
+            "contract_id": contract.id,
+            "currency": contract.currency,
+            "contract_total": contract_total,
+            "scheduled_total": scheduled_total,
+            "percent_scheduled": (
+                (scheduled_total * DEC_HUNDRED / contract_total).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+                if contract_total
+                else None
+            ),
+            "default_payment_terms_days": _int_or_none(contract_payment_terms(contract).get("payment_period_days")),
+            "lines": lines,
+            "findings": [
+                {
+                    "rule_id": r.rule_id,
+                    "severity": r.severity.value,
+                    "message": r.message,
+                    "element_ref": r.element_ref,
+                    "suggestion": r.suggestion,
+                    "details": r.details,
+                }
+                for r in (report.results if report is not None else [])
+                if not r.passed and not r.is_engine_error
+            ],
+        }
+
+    async def _claim_invoice_dues(self, claim_ids: list[uuid.UUID]) -> dict[uuid.UUID, str | None]:
+        """The due date on the invoice raised from each claim, for claims that have one.
+
+        A cancelled invoice bills nothing and is left out. With the finance
+        module absent no claim has an invoice.
+        """
+        if not claim_ids:
+            return {}
+        try:
+            from app.modules.finance.models import Invoice  # noqa: PLC0415
+        except ImportError:
+            return {}
+        stmt = sa_select(Invoice.source_claim_id, Invoice.due_date).where(
+            Invoice.source_claim_id.in_(claim_ids), Invoice.status != "cancelled"
+        )
+        return {row.source_claim_id: row.due_date for row in (await self.session.execute(stmt)).all()}
+
+    @staticmethod
+    def _client_due(
+        milestone: ContractMilestone,
+        forecast_due: date | None,
+        claim: ProgressClaim | None,
+        invoice_dues: dict[uuid.UUID, str | None],
+        today: date,
+    ) -> tuple[date | None, str]:
+        """The due date a client reads for an instalment, and its client status.
+
+        Invoiced: the invoice's due date, which alone can make it overdue.
+        Not invoiced: the forecast, capped at ``due``.
+        """
+        if claim is not None and claim.id in invoice_dues:
+            due = _day_or_none(invoice_dues[claim.id])
+            return due, client_status(milestone.status, due, today)
+        state = client_status(milestone.status, forecast_due, today)
+        if state == "overdue":
+            state = "invoiced" if milestone.status == "invoiced" else "due"
+        return forecast_due, state
+
+    async def run_payment_plan_rules(
+        self,
+        contract: Contract,
+        milestones: list[ContractMilestone],
+        amounts: dict[uuid.UUID, Decimal],
+        *,
+        activities: dict[uuid.UUID, Any] | None = None,
+    ) -> ValidationReport:
+        """Run the ``payment_plan`` rule set over a contract's instalments."""
+        from app.modules.contracts.validators import PAYMENT_PLAN_RULE_SET  # noqa: PLC0415
+        from app.modules.projects.models import Project  # noqa: PLC0415
+
+        if activities is None:
+            activities = await self._activity_rows([m.activity_id for m in milestones if m.activity_id])
+        project = await self.session.get(Project, contract.project_id)
+        context = {
+            "contract": {
+                "id": str(contract.id),
+                "status": contract.status,
+                "currency": contract.currency,
+                "total_value": str(contract.total_value or 0),
+            },
+            "project": {"subdivision_code": getattr(project, "subdivision_code", None)},
+            "milestones": [
+                {
+                    "id": str(m.id),
+                    "code": m.code,
+                    "name": m.name,
+                    "kind": m.kind,
+                    "trigger": m.trigger,
+                    "status": m.status,
+                    "amount": str(amounts.get(m.id, DEC_ZERO)),
+                    "activity_id": str(m.activity_id) if m.activity_id else None,
+                    "activity_name": (
+                        activities[m.activity_id].name if m.activity_id and m.activity_id in activities else None
+                    ),
+                    "activity_completed": bool(
+                        m.activity_id is not None
+                        and activities.get(m.activity_id) is not None
+                        and activities[m.activity_id].done
+                    ),
+                    "client_visible": bool(m.client_visible),
+                }
+                for m in milestones
+            ],
+        }
+        return await validation_engine.validate(
+            data=context,
+            rule_sets=[PAYMENT_PLAN_RULE_SET],
+            target_type="contract",
+            target_id=str(contract.id),
+            project_id=str(contract.project_id),
+            metadata={"locale": get_locale()},
+        )
+
+    async def raise_claim_for_milestone(self, milestone_id: uuid.UUID) -> ProgressClaim:
+        """Raise the draft claim for a reached instalment.
+
+        The claim goes through :meth:`create_progress_claim` like any other,
+        then carries the instalment's amount as its gross under the
+        ``milestone`` basis and has its retention rolled. It stays a draft:
+        nothing is submitted or invoiced until a person moves it.
+
+        Retention: a deposit (``kind == "deposit"``) holds none, because it is
+        paid before any work exists to secure; a progress or final instalment
+        holds the contract's flat rate (see :meth:`roll_claim_retention`).
+
+        The period ends on the claim date, the day it is raised, not on the
+        day the milestone was reached: a claim raised a week after the
+        milestone still bills up to the day it is made, and the next claim's
+        period runs on from there.
+
+        Raises:
+            HTTPException: 404 for no such instalment; 409 when it is not
+                reached, a claim that was not rejected already bills it, or
+                the contract is billed by measured progress; 422 when it
+                resolves to no money.
+        """
+        milestone = await self.milestone_repo.get_by_id(milestone_id)
+        if milestone is None:
+            raise HTTPException(status_code=404, detail="Contract milestone not found")
+        if milestone.status != "reached":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "error": "milestone_not_reached",
+                    "message": f"An instalment is claimed once it is reached; this one is {milestone.status!r}.",
+                    "milestone_status": milestone.status,
+                },
+            )
+        existing = (await self.claim_repo.open_claims_for_milestones([milestone.id])).get(milestone.id)
+        if existing is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "error": "milestone_already_claimed",
+                    "message": f"Claim {existing.claim_number} already bills this instalment.",
+                    "claim_id": str(existing.id),
+                    "claim_status": existing.status,
+                },
+            )
+        contract = await self.get_contract(milestone.contract_id)
+        if BILLED_BY_PROGRESS in await self._billing_modes(contract.id):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "error": BILLED_BY_PROGRESS_ERROR,
+                    "message": (
+                        "This contract is billed by measured progress: a claim on its schedule of values is already "
+                        "raised. An instalment claim on top of it would bill the same work twice."
+                    ),
+                },
+            )
+        amount = compute_milestone_value(milestone.value, milestone.percent_of_contract, contract.total_value or 0)
+        if amount <= DEC_ZERO:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail={
+                    "error": "milestone_has_no_value",
+                    "message": "This instalment has neither an amount nor a percent of the contract to bill.",
+                },
+            )
+        from datetime import UTC, datetime, timedelta  # noqa: PLC0415
+
+        today = datetime.now(UTC).date()
+        period_end = today
+        # The period runs on from the last claim that was not rejected, so an
+        # instalment claim sits in billing order like any other and the
+        # period rules read no gap or overlap that is not really there.
+        period_start = period_end
+        for earlier in reversed(await self.claim_repo.ordered_for_contract(contract.id)):
+            if earlier.status == "rejected" or earlier.period_to is None:
+                continue
+            if earlier.period_to < period_end:
+                period_start = earlier.period_to + timedelta(days=1)
+            break
+        claim = await self.create_progress_claim(
+            SimpleNamespace(
+                contract_id=contract.id,
+                claim_number=None,
+                period_start=period_start.isoformat(),
+                period_end=period_end.isoformat(),
+                claim_date=today.isoformat(),
+                currency=contract.currency,
+                milestone_id=milestone.id,
+                metadata={"payment_plan_milestone": {"code": milestone.code, "name": milestone.name}},
+            )
+        )
+        await self.claim_repo.update_fields(claim.id, gross_amount=amount, gross_basis=MILESTONE_GROSS_BASIS)
+        return await self.roll_claim_retention(claim.id)
+
+    async def _is_deposit_claim(self, claim: ProgressClaim) -> bool:
+        """Whether a claim bills a deposit instalment of its own contract."""
+        milestone_id = getattr(claim, "milestone_id", None)
+        if getattr(claim, "gross_basis", None) != MILESTONE_GROSS_BASIS or milestone_id is None:
+            return False
+        milestone = await self.milestone_repo.get_by_id(milestone_id)
+        return milestone is not None and milestone.contract_id == claim.contract_id and milestone.kind == "deposit"
+
+    async def _sync_milestone_with_claim(self, claim: ProgressClaim, target: str) -> None:
+        """Move the instalment a claim bills to ``target`` as the claim is certified or paid.
+
+        ``milestone_id`` on a claim may name a milestone of another module, so
+        only an instalment of the claim's own contract is moved, and never
+        backwards.
+        """
+        milestone = await self.milestone_repo.get_by_id(claim.milestone_id)
+        if milestone is None or milestone.contract_id != claim.contract_id:
+            return
+        if _MILESTONE_ORDER.get(milestone.status, -1) >= _MILESTONE_ORDER[target]:
+            return
+        fields: dict[str, Any] = {"status": target}
+        if not milestone.reached_at:
+            fields["reached_at"] = _utc_now_iso()
+        await self.milestone_repo.update_fields(milestone.id, **fields)
+
+    async def mark_milestones_reached(
+        self,
+        activity_id: uuid.UUID,
+        *,
+        project_id: uuid.UUID | None,
+        reached_at: str | None,
+        actor_id: str | None,
+    ) -> int:
+        """The schedule reports an activity reached: its pending instalments become claimable.
+
+        Only instalments due on completion move (see :meth:`_schedule_reaches`),
+        only on an active contract, and only on the contract's own project when
+        the event names one. Nothing is claimed or invoiced.
+        """
+        moved = 0
+        for m in await self.milestone_repo.list_linked(
+            activity_id=activity_id,
+            statuses=("pending",),
+            triggers=(SCHEDULE_REACHED_TRIGGER,),
+            contract_statuses=_PLAN_LIVE_CONTRACT_STATUSES,
+        ):
+            contract = await self.get_contract(m.contract_id)
+            if project_id is not None and contract.project_id != project_id:
+                continue
+            await self._mark_reached(m, contract, reached_at=reached_at, actor_id=actor_id)
+            moved += 1
+        return moved
+
+    async def reopen_milestones(self, activity_id: uuid.UUID, *, project_id: uuid.UUID | None) -> int:
+        """The schedule takes a reached activity back: so do its instalments, unless claimed.
+
+        An instalment a claim already bills stays reached. Taking it back
+        would leave a claim for an instalment the plan says is not due, and
+        undoing that is the claim's own decision. So does one a person marked
+        reached: only what the schedule moved is the schedule's to take back.
+        """
+        linked = await self.milestone_repo.list_linked(
+            activity_id=activity_id,
+            statuses=("reached",),
+            triggers=(SCHEDULE_REACHED_TRIGGER,),
+            contract_statuses=_PLAN_LIVE_CONTRACT_STATUSES,
+        )
+        claims = await self.claim_repo.open_claims_for_milestones([m.id for m in linked])
+        moved = 0
+        for m in linked:
+            if m.id in claims or m.reached_by != REACHED_BY_SCHEDULE:
+                continue
+            contract = await self.get_contract(m.contract_id)
+            if project_id is not None and contract.project_id != project_id:
+                continue
+            await self.milestone_repo.update_fields(m.id, status="pending", reached_at=None, reached_by=None)
+            await self.recompute_milestone_forecast(m, contract=contract)
+            moved += 1
+        return moved
+
+    async def refresh_linked_forecasts(
+        self,
+        *,
+        activity_id: uuid.UUID | None = None,
+        schedule_id: uuid.UUID | None = None,
+    ) -> int:
+        """Recompute the forecasts of instalments that follow a moved activity or schedule.
+
+        An activity that no longer exists is unlinked, so the instalment falls
+        back to its contract date rather than pointing at nothing. One that is
+        still there is left linked, which also covers an event that arrives
+        before the delete behind it was committed.
+        """
+        linked = await self.milestone_repo.list_linked(activity_id=activity_id, schedule_id=schedule_id)
+        rows = await self._activity_rows([m.activity_id for m in linked if m.activity_id])
+        for m in linked:
+            row = rows.get(m.activity_id) if m.activity_id else None
+            if row is None and m.activity_id is not None:
+                await self.milestone_repo.update_fields(m.id, activity_id=None, schedule_id=None)
+            await self.recompute_milestone_forecast(m, _day_or_none(row.end_date) if row is not None else None)
+        return len(linked)
 
     async def milestone_schedule(self, contract_id: uuid.UUID) -> dict[str, Any]:
         """Resolve each milestone's value and the total scheduled milestone value."""

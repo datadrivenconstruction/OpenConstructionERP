@@ -24,6 +24,7 @@ import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.schedule import realtime_math
+from app.modules.schedule.milestone_events import announce_if_milestone_reached, is_completed
 from app.modules.schedule.models import Activity
 from app.modules.schedule.realtime_math import RevisionCheck
 from app.modules.schedule.service import ScheduleService, _safe_publish
@@ -128,6 +129,7 @@ class ScheduleRealtimeService:
 
         activity = await self.base.get_activity(activity_id)
         schedule_id_str = str(activity.schedule_id)
+        was_completed = is_completed(activity.status, activity.progress_pct)
 
         # ``has_changes`` is true only when at least one supplied field differs
         # from what is already stored, so an idempotent re-submit of identical
@@ -183,4 +185,5 @@ class ScheduleRealtimeService:
         )
 
         refreshed = await self.base.get_activity(activity_id)
+        await announce_if_milestone_reached(self.session, refreshed, was_completed=was_completed, actor_id=user_id)
         return refreshed, check

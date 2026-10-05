@@ -65,6 +65,22 @@ release (``ContractsService.approve_retention_release``)::
         "documents": [{"id", "doc_role", "title"}],   # attached to the release
     }
 
+A fourth, ``payment_plan``, reads a contract's instalments as a whole, over a
+context built by ``ContractsService.run_payment_plan_rules``::
+
+    {
+        "contract": {"id", "status", "currency", "total_value"},
+        "project": {"subdivision_code": "US-CA" | None},
+        "milestones": [{"id", "code", "name", "kind", "trigger", "status",
+                        "amount", "activity_id", "activity_name",
+                        "activity_completed", "client_visible"}],
+    }
+
+``amount`` is the instalment's resolved money (its value, or its percent of
+the contract sum). ``activity_completed`` is the linked activity's state in
+the schedule now. The findings are shown with the plan; none of them gates a
+transition yet.
+
 Dates arrive as ISO strings and amounts as decimal strings, so the context is
 plain data. ``as_of`` is the claim's period end: "the clock is data", so a
 check about what was valid at the end of the period gives the same answer when
@@ -92,6 +108,12 @@ from app.core.validation.engine import (
     rule_registry,
 )
 from app.modules.contracts.messages import translate
+from app.modules.contracts.payment_plan import (
+    GROSS_FIXED_BASES,
+    SCHEDULE_DRIVEN_TRIGGERS,
+    check_deposit,
+    deposit_limit_for,
+)
 from app.modules.contracts.signing_bridge import SIGNING_PARTY_ROLES
 
 logger = logging.getLogger(__name__)
@@ -107,6 +129,12 @@ PAY_APPLICATION_RULE_SET = "pay_application"
 
 #: Rule set that gates the approval of a retention release.
 RETENTION_RELEASE_RULE_SET = "retention_release"
+
+#: Rule set that checks a contract's payment plan, its instalments as a whole.
+PAYMENT_PLAN_RULE_SET = "payment_plan"
+
+#: Contract statuses whose instalments the client portal may show.
+PLAN_CLIENT_VISIBLE_CONTRACT_STATUSES: frozenset[str] = frozenset({"active", "completed"})
 
 #: How many parties have to be nameable before a contract can be executed. Two,
 #: because a contract is an agreement between two sides and a document only one
@@ -980,8 +1008,9 @@ class ClaimTotalsMatchLinesRule(_ClaimRule):
     claim now records that rather than leaving it to be guessed from the
     presence of lines. A claim made of lines, which is every claim that does
     not say otherwise and every claim written before the basis was recorded,
-    must equal them exactly. A claim billed off recorded cost may carry lines
-    as a partial breakdown of a gross that did not come from them, so it is
+    must equal them exactly. A claim billed off recorded cost, or raised for a
+    payment-plan instalment, may carry lines as a partial breakdown of a gross
+    that did not come from them, so it is
     held to the weaker statement that the breakdown cannot exceed the money.
 
     The weaker half still blocks, and it is not decoration. A gross below its
@@ -1006,7 +1035,7 @@ class ClaimTotalsMatchLinesRule(_ClaimRule):
             return []
         currency = str(_data(context).get("currency") or "")
         gross, lines_total = _money(totals.get("gross_amount")), _money(totals.get("lines_total"))
-        if str(totals.get("gross_basis") or "") == "cost":
+        if str(totals.get("gross_basis") or "") in GROSS_FIXED_BASES:
             if lines_total - gross <= _MONEY_EPSILON:
                 return [self._result(context, passed=True, element_ref=str(claim.get("id", "")))]
             return [
@@ -1316,6 +1345,268 @@ RETENTION_RELEASE_RULES: tuple[type[ValidationRule], ...] = (
 )
 
 
+# ── payment_plan: a contract's instalments ───────────────────────────────
+
+
+def _milestone_label(milestone: dict[str, Any]) -> str:
+    return str(milestone.get("code") or milestone.get("name") or milestone.get("id") or "")
+
+
+def _plan_totals(context: ValidationContext) -> tuple[Decimal, Decimal, str]:
+    """The contract sum, what the instalments add up to, and the currency."""
+    contract = _contract(context)
+    scheduled = sum((_money(m.get("amount")) for m in _rows(context, "milestones")), Decimal("0"))
+    return _money(contract.get("total_value")), scheduled, str(contract.get("currency") or "")
+
+
+#: Message keys spelled out rather than built, so the bundle test can see
+#: every key the rules ask for.
+_TRIGGER_KEYS: dict[str, str] = {
+    "completion": "payment_plan.triggers.completion",
+    "approval": "payment_plan.triggers.approval",
+}
+_UNCHECKED_DEPOSIT_KEYS: dict[str, str] = {
+    "below_threshold": "payment_plan.consumer_deposit_cap.below_threshold.fail",
+    "other_currency": "payment_plan.consumer_deposit_cap.other_currency.fail",
+}
+
+
+class _PlanRule(_ClaimRule):
+    """Shared result builder for the payment_plan rules."""
+
+    standard = PAYMENT_PLAN_RULE_SET
+
+
+class PaymentPlanTotalWithinContractRule(_PlanRule):
+    """A payment plan cannot ask for more than the contract sum."""
+
+    rule_id = "payment_plan.total_within_contract"
+    name = "Instalments stay within the contract sum"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "The instalments of a payment plan must not add up to more than the contract sum"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        total, scheduled, currency = _plan_totals(context)
+        if not _rows(context, "milestones") or total <= 0:
+            return []
+        return [
+            self._result(
+                context,
+                passed=scheduled - total <= _MONEY_EPSILON,
+                element_ref=str(_contract(context).get("id", "")),
+                fail_key="payment_plan.total_within_contract.fail",
+                suggestion_key="payment_plan.total_within_contract.suggestion",
+                scheduled=sentence_amount(scheduled, currency),
+                total=sentence_amount(total, currency),
+            )
+        ]
+
+
+class PaymentPlanPercentSumRule(_PlanRule):
+    """A payment plan should schedule the whole contract sum.
+
+    Only the shortfall is reported here; a plan over the sum is
+    ``total_within_contract``'s finding, so one mistake is not shown twice.
+    """
+
+    rule_id = "payment_plan.percent_sum"
+    name = "Instalments cover the contract sum"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "The instalments of a payment plan should add up to the whole contract sum"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        total, scheduled, currency = _plan_totals(context)
+        if not _rows(context, "milestones") or total <= 0:
+            return []
+        return [
+            self._result(
+                context,
+                passed=total - scheduled <= _MONEY_EPSILON,
+                element_ref=str(_contract(context).get("id", "")),
+                fail_key="payment_plan.percent_sum.fail",
+                suggestion_key="payment_plan.percent_sum.suggestion",
+                percent=_percent((scheduled * 100 / total).quantize(Decimal("0.01"))),
+                scheduled=sentence_amount(scheduled, currency),
+                total=sentence_amount(total, currency),
+            )
+        ]
+
+
+class PaymentPlanCompletionTriggerLinkedRule(_PlanRule):
+    """An instalment due on completion should follow the schedule activity it waits for.
+
+    Unlinked, its date is the one typed into the contract and stays there
+    however far the work slips, so the client is shown a date that has
+    already passed. Only instalments still pending are read: once reached,
+    the date is history.
+    """
+
+    rule_id = "payment_plan.completion_trigger_linked"
+    name = "Completion instalments follow the schedule"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "An instalment triggered by completion or approval should be linked to a schedule activity"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        results: list[RuleResult] = []
+        locale = _locale(context)
+        for milestone in _rows(context, "milestones"):
+            trigger = str(milestone.get("trigger") or "")
+            if trigger not in SCHEDULE_DRIVEN_TRIGGERS or milestone.get("status") != "pending":
+                continue
+            results.append(
+                self._result(
+                    context,
+                    passed=bool(milestone.get("activity_id")),
+                    element_ref=str(milestone.get("id", "")),
+                    fail_key="payment_plan.completion_trigger_linked.fail",
+                    suggestion_key="payment_plan.completion_trigger_linked.suggestion",
+                    milestone=_milestone_label(milestone),
+                    trigger=translate(_TRIGGER_KEYS[trigger], locale=locale),
+                )
+            )
+        return results
+
+
+class PaymentPlanScheduleDonePlanPendingRule(_PlanRule):
+    """The schedule says the work is done, the instalment still waits for it.
+
+    The schedule reaches an instalment only while its contract is active, and
+    only one triggered by completion. An instalment linked before activation
+    is caught up when the contract goes active; one the schedule could not
+    move (approval, a contract never activated, a missed event) stays pending
+    with nothing to show for it, and cannot be claimed. Read for instalments
+    linked to an activity the schedule reports complete.
+    """
+
+    rule_id = "payment_plan.schedule_done_plan_pending"
+    name = "Completed milestones release their instalments"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "An instalment linked to a completed schedule milestone should not still be pending"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        return [
+            self._result(
+                context,
+                passed=milestone.get("status") != "pending",
+                element_ref=str(milestone.get("id", "")),
+                fail_key="payment_plan.schedule_done_plan_pending.fail",
+                suggestion_key="payment_plan.schedule_done_plan_pending.suggestion",
+                milestone=str(milestone.get("activity_name") or milestone.get("activity_id") or ""),
+                instalment=_milestone_label(milestone),
+            )
+            for milestone in _rows(context, "milestones")
+            if milestone.get("activity_id") and _truthy(milestone.get("activity_completed"))
+        ]
+
+
+class PaymentPlanClientVisibleRequiresActiveRule(_PlanRule):
+    """An instalment is shown to the client only once the contract is in force.
+
+    The portal shows the plan of an active or completed contract; marking an
+    instalment of a draft visible promises the client dates and amounts that
+    are still being negotiated.
+    """
+
+    rule_id = "payment_plan.client_visible_requires_active"
+    name = "Client sees instalments of a contract in force only"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "An instalment shown to the client must belong to an active or completed contract"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        status = str(_contract(context).get("status") or "")
+        return [
+            self._result(
+                context,
+                passed=status in PLAN_CLIENT_VISIBLE_CONTRACT_STATUSES,
+                element_ref=str(milestone.get("id", "")),
+                fail_key="payment_plan.client_visible_requires_active.fail",
+                suggestion_key="payment_plan.client_visible_requires_active.suggestion",
+                milestone=_milestone_label(milestone),
+                status=status,
+            )
+            for milestone in _rows(context, "milestones")
+            if _truthy(milestone.get("client_visible"))
+        ]
+
+
+class PaymentPlanConsumerDepositCapRule(_PlanRule):
+    """What a plan asks up front, against the statutory ceiling where the project is.
+
+    The ceiling comes from :data:`~app.modules.contracts.payment_plan.DEPOSIT_LIMITS`,
+    found by the project's ISO 3166-2 subdivision. It warns rather than blocks:
+    the table is research nobody has checked for a given contract, a statute
+    covers consumer work of one kind only, and some carry exemptions (a bond,
+    special-order materials) the plan cannot see. Where it cannot compare at
+    all, because the contract is in another currency or below the threshold,
+    it says so as information rather than passing in silence.
+    """
+
+    rule_id = "payment_plan.consumer_deposit_cap"
+    name = "Deposit within the statutory limit"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = "The deposit a plan asks for should not exceed the statutory limit where the project is"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        limit = deposit_limit_for(_section(context, "project").get("subdivision_code"))
+        deposits = [m for m in _rows(context, "milestones") if m.get("kind") == "deposit"]
+        if limit is None or not deposits:
+            return []
+        total, _scheduled, currency = _plan_totals(context)
+        deposit = sum((_money(m.get("amount")) for m in deposits), Decimal("0"))
+        check = check_deposit(limit, price=total, deposit=deposit, currency=currency)
+        element_ref = str(_contract(context).get("id", ""))
+        source = {
+            "jurisdiction": limit.jurisdiction,
+            "reference": limit.reference,
+            "source_url": limit.source_url,
+            "checked_on": limit.checked_on,
+            "verified": limit.verified,
+        }
+        if check.outcome in ("other_currency", "below_threshold"):
+            return [
+                self._result(
+                    context,
+                    passed=False,
+                    element_ref=element_ref,
+                    fail_key=_UNCHECKED_DEPOSIT_KEYS[check.outcome],
+                    suggestion_key="payment_plan.consumer_deposit_cap.unchecked.suggestion",
+                    severity=Severity.INFO,
+                    currency=currency,
+                    limit_currency=limit.currency,
+                    **source,
+                )
+            ]
+        return [
+            self._result(
+                context,
+                passed=check.outcome == "within",
+                element_ref=element_ref,
+                fail_key="payment_plan.consumer_deposit_cap.fail",
+                suggestion_key="payment_plan.consumer_deposit_cap.suggestion",
+                deposit=sentence_amount(deposit, currency),
+                ceiling=sentence_amount(check.ceiling or Decimal("0"), currency),
+                exemption=limit.exemption,
+                **source,
+            )
+        ]
+
+
+PAYMENT_PLAN_RULES: tuple[type[ValidationRule], ...] = (
+    PaymentPlanTotalWithinContractRule,
+    PaymentPlanPercentSumRule,
+    PaymentPlanCompletionTriggerLinkedRule,
+    PaymentPlanScheduleDonePlanPendingRule,
+    PaymentPlanClientVisibleRequiresActiveRule,
+    PaymentPlanConsumerDepositCapRule,
+)
+
+
 def register_contracts_validation_rules() -> None:
     """Register the contracts rules with the platform rule registry."""
     rule_registry.register(ContractPartyRolesRule(), [CONTRACTS_RULE_SET])
@@ -1328,8 +1619,12 @@ def register_contracts_validation_rules() -> None:
         rule_registry.register(rule_class(), [PAY_APPLICATION_RULE_SET])
     for rule_class in RETENTION_RELEASE_RULES:
         rule_registry.register(rule_class(), [RETENTION_RELEASE_RULE_SET])
+    for rule_class in PAYMENT_PLAN_RULES:
+        rule_registry.register(rule_class(), [PAYMENT_PLAN_RULE_SET])
     logger.debug(
-        "contracts: registered 5 contract rules, %d payment application rules and %d retention release rules",
+        "contracts: registered 5 contract rules, %d payment application rules, %d retention release rules "
+        "and %d payment plan rules",
         len(PAY_APPLICATION_RULES),
         len(RETENTION_RELEASE_RULES),
+        len(PAYMENT_PLAN_RULES),
     )

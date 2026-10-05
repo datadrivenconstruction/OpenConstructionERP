@@ -306,6 +306,34 @@ class ProgressClaimRepository(_CRUDBase):
         result = await self.session.execute(select(ProgressClaim).where(ProgressClaim.contract_id == contract_id))
         return sorted(result.scalars().all(), key=claim_order_key)
 
+    async def open_claims_for_milestones(self, milestone_ids: list[uuid.UUID]) -> dict[uuid.UUID, ProgressClaim]:
+        """The claim billing each instalment, rejected claims left out.
+
+        A rejected claim billed nothing, so the instalment is still owed and a
+        new claim may be raised for it. Where more than one claim names the
+        same instalment, the earliest created one answers.
+        """
+        if not milestone_ids:
+            return {}
+        # The claim and the instalment have to be on the same contract: a
+        # claim's milestone_id is a plain UUID, and one naming another
+        # contract's instalment bills nothing here.
+        stmt = (
+            select(ProgressClaim)
+            .join(
+                ContractMilestone,
+                (ContractMilestone.id == ProgressClaim.milestone_id)
+                & (ContractMilestone.contract_id == ProgressClaim.contract_id),
+            )
+            .where(ProgressClaim.milestone_id.in_(milestone_ids), ProgressClaim.status != "rejected")
+            .order_by(ProgressClaim.created_at)
+        )
+        found: dict[uuid.UUID, ProgressClaim] = {}
+        for claim in (await self.session.execute(stmt)).scalars().all():
+            if claim.milestone_id is not None:
+                found.setdefault(claim.milestone_id, claim)
+        return found
+
     async def prior_claims(self, contract_id: uuid.UUID, *, before_claim_id: uuid.UUID | None) -> list[ProgressClaim]:
         """The claims a payment application counts as previously certified.
 
@@ -725,6 +753,38 @@ class ContractMilestoneRepository(_CRUDBase):
             .where(ContractMilestone.contract_id == contract_id)
             .order_by(ContractMilestone.planned_date, ContractMilestone.code)
         )
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
+    async def list_linked(
+        self,
+        *,
+        activity_id: uuid.UUID | None = None,
+        schedule_id: uuid.UUID | None = None,
+        statuses: tuple[str, ...] | None = None,
+        triggers: tuple[str, ...] | None = None,
+        contract_statuses: tuple[str, ...] | None = None,
+    ) -> list[ContractMilestone]:
+        """Instalments that follow one schedule activity, or any activity of one schedule.
+
+        ``contract_statuses`` filters on the contract the instalment belongs
+        to, so a draft or closed contract is never moved by the schedule.
+        """
+        stmt = select(ContractMilestone)
+        if activity_id is not None:
+            stmt = stmt.where(ContractMilestone.activity_id == activity_id)
+        if schedule_id is not None:
+            stmt = stmt.where(ContractMilestone.schedule_id == schedule_id)
+        if activity_id is None and schedule_id is None:
+            return []
+        if statuses is not None:
+            stmt = stmt.where(ContractMilestone.status.in_(statuses))
+        if triggers is not None:
+            stmt = stmt.where(ContractMilestone.trigger.in_(triggers))
+        if contract_statuses is not None:
+            stmt = stmt.join(Contract, Contract.id == ContractMilestone.contract_id).where(
+                Contract.status.in_(contract_statuses)
+            )
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 
