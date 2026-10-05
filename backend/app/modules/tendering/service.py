@@ -17,6 +17,7 @@ from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.academy_isolation import foreign_directory_link
 from app.core.events import event_bus, publish_after_commit
 from app.core.json_merge import merge_metadata
 
@@ -1207,13 +1208,25 @@ class TenderingService:
         package = await self.get_package(package_id)
         return [self._recipient_to_response(r) for r in self._read_recipients(package)]
 
-    async def add_recipient(self, package_id: uuid.UUID, data: RecipientCreate) -> RecipientResponse:
+    async def add_recipient(
+        self,
+        package_id: uuid.UUID,
+        data: RecipientCreate,
+        *,
+        actor_id: str | None = None,
+    ) -> RecipientResponse:
         """Add a subcontractor to a package's distribution list.
 
         De-duplicates on a case-insensitive email match so the same firm is
         not invited twice; returns the existing entry if already present.
         """
         package = await self.get_package(package_id)
+        if data.subcontractor_id and await foreign_directory_link(
+            self.session, actor_id, subcontractor_id=data.subcontractor_id
+        ):
+            # Academy mode: a tender award makes this firm the counterparty,
+            # so a learner invites only their own; another's reads as missing.
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Subcontractor not found")
         recipients = self._read_recipients(package)
         email_norm = data.email.strip().lower()
         for r in recipients:

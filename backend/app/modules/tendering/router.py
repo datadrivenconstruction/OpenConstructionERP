@@ -712,7 +712,7 @@ async def add_package_recipient(
 ) -> RecipientResponse:
     """Add a subcontractor to a package's distribution list."""
     await _verify_package_owner(service, session, package_id, user_id, payload)
-    return await service.add_recipient(package_id, data)
+    return await service.add_recipient(package_id, data, actor_id=user_id)
 
 
 @router.delete(
