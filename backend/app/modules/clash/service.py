@@ -48,6 +48,7 @@ import numpy as np
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.academy_isolation import academy_mode_enabled, assert_parties_in_project
 from app.core.events import event_bus
 from app.modules.bcf.bcf_xml import BCFParseError, parse_bcfzip
 from app.modules.bcf.schemas import PerspectiveCamera, TopicCreate, Vec3, ViewpointCreate
@@ -3967,6 +3968,10 @@ class ClashService:
         result = await self.repo.get_result(run_id, result_id)
         if result is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Clash not found")
+        if assigned_to and assigned_to != result.assigned_to:
+            # Academy mode: the assignee travels on to a punch item, its name
+            # and its deadline mail, so an id must be in the project.
+            await assert_parties_in_project(self.session, project_id, [assigned_to], actor)
         actor_id = str(actor or "system")
         # Track which fields changed so we can fan notifications out once
         # at the end (cheaper than N parallel publish calls).
@@ -4125,6 +4130,8 @@ class ClashService:
         """
         run = await self.get_run(project_id, run_id)  # IDOR + 404 guard
         actor_id = str(actor or "system")
+        if assigned_to:
+            await assert_parties_in_project(self.session, project_id, [assigned_to], actor)
 
         # Validate once - a bad value fails the whole batch before any write.
         if new_status is not None and new_status not in CLASH_STATUSES:
@@ -4299,7 +4306,8 @@ class ClashService:
                 )
                 unmatched += 1
                 continue
-            self._sync_row_from_topic(row, topic, actor=actor)
+            keep_assignee = await self._academy_keeps_assignee(project_id, getattr(topic, "assigned_to", None), actor)
+            self._sync_row_from_topic(row, topic, actor=actor, keep_assignee=keep_assignee)
             matched += 1
 
         if matched:
@@ -4320,7 +4328,28 @@ class ClashService:
         )
         return matched, unmatched, parse_errors
 
-    def _sync_row_from_topic(self, row: ClashResult, topic: object, *, actor: str) -> None:
+    async def _academy_keeps_assignee(self, project_id: uuid.UUID, assignee: str | None, actor: str | None) -> bool:
+        """Whether an imported BCF assignee may be written (always, with the flag off).
+
+        An import is a batch from another tool, so an assignee outside the
+        project is skipped rather than failing the whole archive.
+        """
+        if not assignee or not academy_mode_enabled():
+            return True
+        try:
+            await assert_parties_in_project(self.session, project_id, [assignee.strip()], actor)
+        except HTTPException:
+            return False
+        return True
+
+    def _sync_row_from_topic(
+        self,
+        row: ClashResult,
+        topic: object,
+        *,
+        actor: str,
+        keep_assignee: bool = True,
+    ) -> None:
         """Patch a clash row with a parsed BCF topic's triage state.
 
         Pulled out of :meth:`import_bcf` so the row-merge logic is one
@@ -4333,6 +4362,8 @@ class ClashService:
             self._append_history(row, actor, "status", row.status, new_status)
             row.status = new_status
         new_assignee = (getattr(topic, "assigned_to", None) or "").strip() or None
+        if not keep_assignee:
+            new_assignee = None
         if new_assignee is not None and (row.assigned_to or None) != new_assignee:
             self._append_history(row, actor, "assigned_to", row.assigned_to, new_assignee)
             row.assigned_to = new_assignee
