@@ -1,0 +1,11 @@
+ID,Task Name,Duration,Start,Finish,Predecessors,Resource Names,% Complete,Outline Level
+1,Residential build - 12 Oak Lane,14 days,Mon 5/4/26,Thu 5/21/26,,,20%,1
+2,Site work,5 days,Mon 5/4/26,Fri 5/8/26,,,60%,2
+3,Permits approved,0 days,Mon 5/4/26,Mon 5/4/26,,,100%,3
+4,Clear and grade lot,3 days,Mon 5/4/26,Wed 5/6/26,3,Excavation crew,100%,3
+5,Excavate footings,2 days,Thu 5/7/26,Fri 5/8/26,4,Excavation crew,50%,3
+6,Foundation,8 days,Tue 5/12/26,Thu 5/21/26,,,0%,2
+7,Pour footings,2 days,Tue 5/12/26,Wed 5/13/26,5FS+1 day,"Concrete crew, Pump truck",0%,3
+8,Cure footings,5 days,Thu 5/14/26,Wed 5/20/26,7,,0%,3
+9,Foundation walls,4 days,Mon 5/18/26,Thu 5/21/26,8SS+2 days,Concrete crew,0%,3
+10,Foundation inspection,0 days,Thu 5/21/26,Thu 5/21/26,9,,0%,3

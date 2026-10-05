@@ -1,0 +1,6 @@
+Nr.;Vorgangsname;Dauer;Anfang;Ende;Vorgänger;Meilenstein;Für Kunden sichtbar;Bemerkungen
+10;Baustelleneinrichtung;5 Tage;04.05.2026;08.05.2026;;nein;ja;Kran und Container
+20;Erdarbeiten;2 Tage;11.05.2026;12.05.2026;10EA;nein;nein;
+30;Abnahme Baugrube;0 Tage;12.05.2026;12.05.2026;20;ja;ja;Prüfstatiker
+40;Bodenplatte;4 Tage;01.06.2026;04.06.2026;30EA+1w;nein;nein;
+50;Kellerwände;3 Tage;03.06.2026;05.06.2026;40AA-2d;nein;nein;

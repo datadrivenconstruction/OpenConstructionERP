@@ -1,0 +1,6 @@
+ID,Name,Start,Finish,Duration,Predecessors
+A,Alpha,2026-05-04,2026-05-08,5,C
+B,,2026-05-11,2026-05-12,2,A
+C,Gamma,2026-05-13,not a date,2,B
+D,Delta,2026-05-13,2026-05-14,5ed,ZZ
+A,Alpha again,2026-05-13,2026-05-14,2,

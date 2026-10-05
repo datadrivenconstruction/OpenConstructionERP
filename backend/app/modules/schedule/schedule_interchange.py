@@ -122,6 +122,7 @@ def _activity_document(activity: Any) -> dict[str, Any]:
         "suspended_at": getattr(activity, "suspended_at", None),
         "resumed_at": getattr(activity, "resumed_at", None),
         "suspend_reason": getattr(activity, "suspend_reason", None),
+        "client_visible": bool(getattr(activity, "client_visible", False)),
         "metadata": dict(getattr(activity, "metadata_", None) or {}),
     }
 

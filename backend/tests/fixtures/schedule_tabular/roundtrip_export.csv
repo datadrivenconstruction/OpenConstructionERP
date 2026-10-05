@@ -1,0 +1,6 @@
+Activity Code,Name,WBS,Start,End,Duration (days),Progress (%),Total Float,Critical,Predecessors
+A10,Mobilisation,1,2026-05-04,2026-05-08,5,100.0,0,Yes,
+A20,Excavation,1.1,2026-05-11,2026-05-15,5,40.0,0,Yes,A10FS
+A30,Formwork,1.2,2026-05-13,2026-05-19,5,0.0,2,No,A20SS+2d
+A40,'=Pour slab (night),1.3,2026-05-20,2026-05-20,1,0.0,0,Yes,A30FS; A20FF+3d
+A50,Handover,2,2026-05-21,2026-05-21,0,0.0,0,Yes,A40FS

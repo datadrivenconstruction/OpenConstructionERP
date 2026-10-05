@@ -769,7 +769,7 @@ async def update_activity_progress(
     """Update activity progress percentage. Auto-adjusts status."""
     existing = await service.get_activity(activity_id)
     await _verify_schedule_owner(service, session, existing.schedule_id, _user_id, payload)
-    activity = await service.update_progress(activity_id, body.progress_pct)
+    activity = await service.update_progress(activity_id, body.progress_pct, actor_id=str(_user_id))
     return _activity_to_response(activity)
 
 
@@ -2913,3 +2913,9 @@ router.include_router(_interchange_router)
 from app.modules.schedule.evm_snapshot_router import evm_snapshot_router as _evm_snapshot_router  # noqa: E402
 
 router.include_router(_evm_snapshot_router)
+
+# Schedule import from a spreadsheet (Excel / CSV): preview with column
+# mapping, then commit as a new schedule or into a draft. Same prefix.
+from app.modules.schedule.tabular_import_router import tabular_import_router as _tabular_import_router  # noqa: E402
+
+router.include_router(_tabular_import_router)

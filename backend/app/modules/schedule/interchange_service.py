@@ -117,8 +117,14 @@ class ScheduleInterchangeService:
         *,
         clean: bool = True,
         name_override: str | None = None,
+        apply_client_visible: bool = False,
     ) -> tuple[Schedule, dict[str, uuid.UUID], int, list[CleanAction], dict[str, int]]:
         """Create a new schedule from an interchange document (target-project guarded).
+
+        Every activity is created hidden from the client unless
+        ``apply_client_visible`` is set. Only a caller whose document carries a
+        visibility a person confirmed (the spreadsheet commit) sets it; an
+        uploaded document's own ``client_visible`` is never trusted.
 
         Returns ``(schedule, ref_map, relationship_count, clean_actions, stats)``.
         """
@@ -145,9 +151,77 @@ class ScheduleInterchangeService:
                 )
 
         schedule = await self._create_schedule(project_id, parsed, user_id, name_override)
-        ref_map, objs = await self._create_activities(schedule.id, parsed)
-        rel_count = await self._create_relationships(schedule.id, parsed, ref_map, objs)
+        ref_map, rel_count = await self.populate_schedule(
+            schedule.id, parsed, apply_client_visible=apply_client_visible
+        )
         return schedule, ref_map, rel_count, actions, stats
+
+    async def populate_schedule(
+        self,
+        schedule_id: uuid.UUID,
+        parsed: ParsedDocument,
+        *,
+        apply_client_visible: bool = False,
+    ) -> tuple[dict[str, uuid.UUID], int]:
+        """Write a parsed document's activities and network into an existing schedule.
+
+        No access check: the caller has already verified the schedule's project.
+        ``apply_client_visible`` as in :meth:`import_schedule`.
+        Returns ``(ref_map, relationship_count)``.
+        """
+        ref_map, objs = await self._create_activities(schedule_id, parsed, apply_client_visible=apply_client_visible)
+        rel_count = await self._create_relationships(schedule_id, parsed, ref_map, objs)
+        return ref_map, rel_count
+
+    async def replace_schedule_contents(
+        self,
+        schedule: Schedule,
+        parsed: ParsedDocument,
+        *,
+        apply_client_visible: bool = False,
+    ) -> tuple[dict[str, uuid.UUID], int]:
+        """Swap every activity and relationship of ``schedule`` for the document's.
+
+        The schedule row itself (id, name, status, project) stays; its dates
+        and metadata take the document's. Rows that hang off the old activities
+        (relationships, code assignments, progress steps, EAC links, progress
+        entries, work orders) are deleted explicitly rather than trusting every
+        database to carry the ``ON DELETE CASCADE`` the models declare. The
+        caller is responsible for refusing a schedule whose history matters
+        (baseline, recorded progress, work orders); this method deletes.
+
+        Returns ``(ref_map, relationship_count)`` like :meth:`populate_schedule`.
+        """
+        from sqlalchemy import delete, select, update
+
+        from app.modules.schedule.codes_models import CodeAssignment, ScheduleUdfValue
+        from app.modules.schedule.models import EacScheduleLink, ScheduleProgressEntry, WorkOrder
+        from app.modules.schedule.progress_models import ProgressStep
+
+        schedule_id = schedule.id
+        activity_ids = select(Activity.id).where(Activity.schedule_id == schedule_id).scalar_subquery()
+        await self.session.execute(delete(ScheduleRelationship).where(ScheduleRelationship.schedule_id == schedule_id))
+        for model, column in (
+            (CodeAssignment, CodeAssignment.activity_id),
+            (ScheduleUdfValue, ScheduleUdfValue.activity_id),
+            (ProgressStep, ProgressStep.activity_id),
+            (EacScheduleLink, EacScheduleLink.task_id),
+            (ScheduleProgressEntry, ScheduleProgressEntry.task_id),
+            (WorkOrder, WorkOrder.activity_id),
+        ):
+            await self.session.execute(delete(model).where(column.in_(activity_ids)))
+        await self.session.execute(
+            update(Activity).where(Activity.schedule_id == schedule_id).values(parent_id=None),
+        )
+        await self.session.execute(delete(Activity).where(Activity.schedule_id == schedule_id))
+        await self.session.flush()
+
+        sd = parsed.schedule
+        schedule.start_date = sd.get("start_date")
+        schedule.end_date = sd.get("end_date")
+        schedule.metadata_ = {**dict(schedule.metadata_ or {}), **dict(sd.get("metadata") or {})}
+        await self.session.flush()
+        return await self.populate_schedule(schedule_id, parsed, apply_client_visible=apply_client_visible)
 
     async def _create_schedule(
         self,
@@ -175,6 +249,8 @@ class ScheduleInterchangeService:
         self,
         schedule_id: uuid.UUID,
         parsed: ParsedDocument,
+        *,
+        apply_client_visible: bool = False,
     ) -> tuple[dict[str, uuid.UUID], dict[str, Activity]]:
         ref_map: dict[str, uuid.UUID] = {}
         objs: dict[str, Activity] = {}
@@ -221,6 +297,7 @@ class ScheduleInterchangeService:
                 suspended_at=ad.get("suspended_at"),
                 resumed_at=ad.get("resumed_at"),
                 suspend_reason=ad.get("suspend_reason"),
+                client_visible=apply_client_visible and ad.get("client_visible") is True,
             )
             created = await self.base.activity_repo.create(activity)
             if isinstance(ref, str) and ref:
