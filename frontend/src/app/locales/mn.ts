@@ -14340,7 +14340,7 @@ const resource = {
     "schedule.tabular_import.col_confidence": "Нийцэл",
     "schedule.tabular_import.col_field": "Дараах байдлаар импортлох",
     "schedule.tabular_import.col_field_for": "«{{column}}» баганыг дараах байдлаар импортлох",
-    "schedule.tabular_import.col_header": "Файл дотор баганa",
+    "schedule.tabular_import.col_header": "Файл дотор багана",
     "schedule.tabular_import.col_sample": "Эхний утга",
     "schedule.tabular_import.col_unnamed": "{{number}}-р багана",
     "schedule.tabular_import.commit_errors_title": "Файл дотор эдгээр мөрийг засаад файлыг дахин сонгоно уу",

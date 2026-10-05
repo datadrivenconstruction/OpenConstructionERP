@@ -14,8 +14,8 @@
  * backend's `detail.code`, which the dialog branches on.
  */
 import { API_BASE, ApiError, downloadWithAuth, fetchWithAuth } from '@/shared/lib/api';
+import { fmtList } from '@/shared/lib/formatters';
 
-const BASE = `${API_BASE}/v1/schedule/schedule/import/spreadsheet`;
 
 /** Fields a column can be read as, in the order the mapping table lists them. */
 export const IMPORT_FIELDS = [
@@ -170,12 +170,12 @@ function previewForm(req: PreviewRequest): FormData {
   return form;
 }
 
-async function postForm<T>(path: string, form: FormData): Promise<T> {
-  const response = await fetchWithAuth(`${BASE}/${path}/`, {
-    method: 'POST',
-    headers: { Accept: 'application/json' },
-    body: form,
-  });
+function formPost(form: FormData): RequestInit {
+  return { method: 'POST', headers: { Accept: 'application/json' }, body: form };
+}
+
+async function readJson<T>(pending: Promise<Response>): Promise<T> {
+  const response = await pending;
   if (!response.ok) {
     let body: unknown;
     try {
@@ -189,7 +189,9 @@ async function postForm<T>(path: string, form: FormData): Promise<T> {
 }
 
 export function previewSpreadsheet(req: PreviewRequest): Promise<TabularPreview> {
-  return postForm<TabularPreview>('preview', previewForm(req));
+  return readJson<TabularPreview>(
+    fetchWithAuth(`${API_BASE}/v1/schedule/schedule/import/spreadsheet/preview/`, formPost(previewForm(req))),
+  );
 }
 
 export function commitSpreadsheet(req: CommitRequest): Promise<TabularCommitResult> {
@@ -200,12 +202,14 @@ export function commitSpreadsheet(req: CommitRequest): Promise<TabularCommitResu
   if (req.name && req.name.trim()) form.append('name', req.name.trim());
   if (req.allowDuplicate) form.append('allow_duplicate', 'true');
   form.append('client_visible_refs', JSON.stringify(req.clientVisibleRefs));
-  return postForm<TabularCommitResult>('commit', form);
+  return readJson<TabularCommitResult>(
+    fetchWithAuth(`${API_BASE}/v1/schedule/schedule/import/spreadsheet/commit/`, formPost(form)),
+  );
 }
 
 export function downloadTemplate(lang: TemplateLanguage, format: TemplateFormat): Promise<void> {
   const qs = new URLSearchParams({ lang, format });
-  return downloadWithAuth(`${BASE}/template/?${qs.toString()}`, `schedule_template_${lang}.${format}`);
+  return downloadWithAuth(`${API_BASE}/v1/schedule/schedule/import/spreadsheet/template/?${qs.toString()}`, `schedule_template_${lang}.${format}`);
 }
 
 /** The backend's `detail` object of a refused call, or `null` when it carries none. */
@@ -241,8 +245,8 @@ export function issueParams(
     if (typeof value === 'number') out[key] = value;
     else if (key === 'field' && typeof value === 'string') out[key] = fieldLabel(value);
     else if (key === 'cycle' && Array.isArray(value)) out[key] = value.map(String).join(' → ');
-    else if (Array.isArray(value)) out[key] = value.map(String).join(', ');
-    else if (typeof value === 'object') out[key] = Object.entries(value as Record<string, unknown>).map(([k, v]) => `${k}: ${String(v)}`).join(', ');
+    else if (Array.isArray(value)) out[key] = fmtList(value.map(String));
+    else if (typeof value === 'object') out[key] = fmtList(Object.entries(value as Record<string, unknown>).map(([k, v]) => `${k}: ${String(v)}`));
     else out[key] = String(value);
   }
   return out;

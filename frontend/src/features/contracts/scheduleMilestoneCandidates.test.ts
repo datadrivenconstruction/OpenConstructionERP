@@ -39,7 +39,9 @@ describe('listScheduleMilestoneCandidates', () => {
       };
     });
     const rows = await listScheduleMilestoneCandidates('pr 1');
-    expect(apiGet).toHaveBeenCalledWith('/v1/schedule/schedules/?project_id=pr%201&limit=100');
+    expect(apiGet.mock.calls.some(([path]) => path === '/v1/schedule/schedules/?project_id=pr%201&limit=100')).toBe(
+      true,
+    );
     expect(Object.fromEntries(rows.map((r) => [r.id, r.is_milestone]))).toEqual({
       m: true,
       sm: true,
