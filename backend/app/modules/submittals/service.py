@@ -10,6 +10,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.academy_isolation import assert_users_can_access_project
 from app.core.i18n import get_locale
 from app.core.json_merge import merge_metadata
 from app.core.validation.engine import ValidationReport, validation_engine
@@ -134,6 +135,12 @@ class SubmittalService:
                 ball_in_court = data.reviewer_id
             elif user_id is not None:
                 ball_in_court = user_id
+
+        # Academy mode: everyone the submittal names must be in its project.
+        # A no-op on a normal install.
+        await assert_users_can_access_project(
+            self.session, data.project_id, [ball_in_court, data.reviewer_id, data.approver_id]
+        )
 
         # Description has no dedicated column; persist it into metadata so the
         # create modal's Description textarea is no longer silently dropped.
@@ -297,6 +304,19 @@ class SubmittalService:
                         "dedicated /submit, /review, or /approve endpoint."
                     ),
                 )
+
+        # Academy mode: a person the edit newly names must be in the project.
+        # People already on the submittal are not re-checked. A no-op on a
+        # normal install.
+        await assert_users_can_access_project(
+            self.session,
+            submittal.project_id,
+            [
+                fields[key]
+                for key in ("reviewer_id", "approver_id", "ball_in_court")
+                if fields.get(key) and str(fields[key]) != str(getattr(submittal, key) or "")
+            ],
+        )
 
         if not fields:
             return submittal

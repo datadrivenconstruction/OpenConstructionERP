@@ -29,6 +29,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.academy_isolation import filter_users_to_project
 from app.core.file_signature import (
     SIGNATURE_BYTES_REQUIRED,
     FileSignatureMismatch,
@@ -112,6 +113,7 @@ def _get_service(session: SessionDep) -> SubmittalService:
 async def _fetch_user_names(
     session: AsyncSession,
     user_ids: Iterable[str | None],
+    project_id: uuid.UUID,
 ) -> dict[str, str]:
     """Resolve ``ball_in_court`` user UUIDs -> display name in one round trip.
 
@@ -119,6 +121,10 @@ async def _fetch_user_names(
     (user deleted, typo in the string, etc.) just don't appear in the map,
     so the caller falls back to showing the raw UUID. Mirrors the
     ``_fetch_vendor_names`` pattern used by the procurement module.
+
+    In academy mode only people who can access ``project_id`` are named; an
+    id outside the project stays a raw UUID, so the response cannot be used
+    to read another learner's name.
     """
     from app.modules.users.models import User
 
@@ -130,6 +136,7 @@ async def _fetch_user_names(
             ids.add(uuid.UUID(str(raw)))
         except (ValueError, TypeError):
             continue
+    ids = set(await filter_users_to_project(session, project_id, ids))
     if not ids:
         return {}
     rows = (await session.execute(select(User).where(User.id.in_(ids)))).scalars().all()
@@ -195,7 +202,7 @@ async def list_submittals(
         status_filter=status_filter,
         submittal_type=type_filter,
     )
-    name_map = await _fetch_user_names(session, (s.ball_in_court for s in submittals))
+    name_map = await _fetch_user_names(session, (s.ball_in_court for s in submittals), project_id)
     return [_to_response(s, name_map) for s in submittals]
 
 
@@ -209,7 +216,7 @@ async def create_submittal(
 ) -> SubmittalResponse:
     await verify_project_access(data.project_id, user_id, session)
     submittal = await service.create_submittal(data, user_id=user_id)
-    name_map = await _fetch_user_names(session, [submittal.ball_in_court])
+    name_map = await _fetch_user_names(session, [submittal.ball_in_court], submittal.project_id)
     return _to_response(submittal, name_map)
 
 
@@ -226,7 +233,7 @@ async def get_submittal(
 ) -> SubmittalResponse:
     submittal = await service.get_submittal(submittal_id)
     await verify_project_access(submittal.project_id, str(user_id), session)
-    name_map = await _fetch_user_names(session, [submittal.ball_in_court])
+    name_map = await _fetch_user_names(session, [submittal.ball_in_court], submittal.project_id)
     return _to_response(submittal, name_map)
 
 
@@ -242,7 +249,7 @@ async def update_submittal(
     existing = await service.get_submittal(submittal_id)
     await verify_project_access(existing.project_id, str(user_id), session)
     submittal = await service.update_submittal(submittal_id, data)
-    name_map = await _fetch_user_names(session, [submittal.ball_in_court])
+    name_map = await _fetch_user_names(session, [submittal.ball_in_court], submittal.project_id)
     return _to_response(submittal, name_map)
 
 
@@ -290,7 +297,7 @@ async def submit_submittal(
     existing = await service.get_submittal(submittal_id)
     await verify_project_access(existing.project_id, str(user_id), session)
     submittal = await service.submit_submittal(submittal_id)
-    name_map = await _fetch_user_names(session, [submittal.ball_in_court])
+    name_map = await _fetch_user_names(session, [submittal.ball_in_court], submittal.project_id)
     return _to_response(submittal, name_map)
 
 
@@ -324,7 +331,7 @@ async def review_submittal(
         reviewer_id=user_id,
         notes=body.notes,
     )
-    name_map = await _fetch_user_names(session, [submittal.ball_in_court])
+    name_map = await _fetch_user_names(session, [submittal.ball_in_court], submittal.project_id)
     return _to_response(submittal, name_map)
 
 
@@ -357,7 +364,7 @@ async def approve_submittal(
     existing = await service.get_submittal(submittal_id)
     await verify_project_access(existing.project_id, str(user_id), session)
     submittal = await service.approve_submittal(submittal_id, approver_id=user_id, notes=body.notes if body else None)
-    name_map = await _fetch_user_names(session, [submittal.ball_in_court])
+    name_map = await _fetch_user_names(session, [submittal.ball_in_court], submittal.project_id)
     return _to_response(submittal, name_map)
 
 
