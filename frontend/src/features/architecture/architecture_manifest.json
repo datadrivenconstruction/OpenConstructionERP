@@ -55283,6 +55283,21 @@
               "default": "None"
             },
             {
+              "name": "subdivision_code",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "statutory_ceiling",
+              "type": "dict[str, Any] | None",
+              "default": "None"
+            },
+            {
+              "name": "works",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
               "name": "has_defaults",
               "type": "bool"
             },
@@ -150959,6 +150974,12 @@
               "nullable": true
             },
             {
+              "name": "works",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
               "name": "project_code",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
@@ -152021,6 +152042,11 @@
               "description": "ISO 3166-1 alpha-2 country code (e.g. US, CA, AU, DE, GB). Drives the AIA G702/G703 payment-application gate (US/CA/AU only) and decides which compliance rule pack the new project enforces. Since revision v3319 the stored column is nullable and no longer defaults to DE, so omitting this leaves the project with no country rather than with Germany - unless a country pack is active, in which case the pack's market fills the blank and is recorded as inherited."
             },
             {
+              "name": "works",
+              "type": "str | None",
+              "description": "Whether the client is a public buyer: 'public' or 'private'. Where a country's retention law follows the client (France), new contracts start from that law's terms. Omitted means not recorded, and the country's neutral figures apply."
+            },
+            {
               "name": "contract_value",
               "type": "str | None"
             },
@@ -152155,6 +152181,10 @@
               "name": "country_code",
               "type": "str | None",
               "description": "ISO 3166-1 alpha-2 country code (e.g. US, CA, AU, DE, GB). Drives the AIA G702/G703 payment-application gate (US/CA/AU only)."
+            },
+            {
+              "name": "works",
+              "type": "str | None"
             },
             {
               "name": "contract_value",
@@ -152328,6 +152358,11 @@
             },
             {
               "name": "country_code",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "works",
               "type": "str | None",
               "default": "None"
             },
@@ -233733,10 +233768,10 @@
     },
     {
       "name": "projects",
-      "ts_files": 32,
+      "ts_files": 34,
       "css_files": 0,
-      "test_files": 13,
-      "total_files": 32
+      "test_files": 14,
+      "total_files": 34
     },
     {
       "name": "property-dev",
@@ -235422,13 +235457,13 @@
     "backend_modules": 196,
     "modules_with_manifests": 194,
     "total_models": 623,
-    "total_columns": 7137,
+    "total_columns": 7138,
     "total_relationships": 234,
     "total_routes": 3734,
     "total_schemas": 3520,
     "total_python_files": 2250,
     "frontend_features": 192,
-    "frontend_ts_files": 2863,
+    "frontend_ts_files": 2865,
     "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {
