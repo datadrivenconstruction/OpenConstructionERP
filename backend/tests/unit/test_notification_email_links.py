@@ -166,8 +166,8 @@ def test_the_catalogue_covers_the_languages_the_other_emails_speak():
 
 
 def test_the_digest_subject_is_localised_with_its_count():
-    assert email_render.digest_subject("en", 3) == "Notification digest (3)"
-    assert email_render.digest_subject("de", 3) == "Benachrichtigungsübersicht (3)"
+    assert email_render.digest_subject("en", 3) == "OpenConstructionERP: Notification digest (3)"
+    assert email_render.digest_subject("de", 3) == "OpenConstructionERP: Benachrichtigungsübersicht (3)"
     assert email_render.digest_heading("ru") == "Последние уведомления:"
 
 
@@ -231,7 +231,7 @@ async def test_the_digest_mail_is_localised():
         event_type="notifications.digest",
     )
     assert len(sent) == 1
-    assert sent[0].subject == "Сводка уведомлений (2)"
+    assert sent[0].subject == "OpenConstructionERP: Сводка уведомлений (2)"
     assert "Последние уведомления:" in sent[0].html_body
     assert "Recent notifications" not in sent[0].html_body
     assert "digest" not in sent[0].subject

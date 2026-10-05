@@ -17,7 +17,17 @@ from __future__ import annotations
 from functools import lru_cache
 
 _LOGO_URL = "https://openconstructionerp.com/logo-128.png"
-_APP_NAME = "OpenConstructionERP"
+
+#: The product name every outgoing email carries: the ``From:`` display name,
+#: the line beside the logo and the closing line of the footer. It is a brand,
+#: so it is never translated or shortened, in any language.
+BRAND_NAME = "OpenConstructionERP"
+_APP_NAME = BRAND_NAME
+
+# The footer line of mail that a person receives because they subscribed to
+# notifications. Other mail (a reset link, an invitation, a document) never
+# says so; it closes with the brand line alone.
+_PREFERENCES_FOOTER = f"Sent by {_APP_NAME}. You received this because of your notification preferences."
 
 
 @lru_cache(maxsize=1)
@@ -36,11 +46,13 @@ def wrap(
     *,
     footer: str | None = None,
 ) -> str:
-    """Wrap *body* in the standard email shell (logo, title, CTA, footer).
+    """Wrap *body* in the standard email shell (brand line, title, CTA, footer).
 
-    ``footer`` replaces the default English "notification preferences" line,
-    which is wrong for mail nobody subscribed to, such as an invitation; an
-    empty string leaves the footer out. It is inserted as given, so escape it.
+    Every mail opens with the logo and the brand name beside it, in text so it
+    shows when a mail client blocks images, and closes with the brand name.
+    ``footer`` is an extra line above that closing line, such as why the mail
+    came; ``None`` or an empty string adds none. It is inserted as given, so
+    escape it.
     """
     btn = ""
     if action_url:
@@ -53,8 +65,7 @@ def wrap(
     return (
         f"<!DOCTYPE html><html><head><meta charset='utf-8'></head>"
         f'<body style="{_base_style()}">'
-        f'<img src="{_LOGO_URL}" alt="{_APP_NAME}" width="40" height="40" '
-        f'style="margin-bottom:12px;"/>'
+        f"{brand_header()}"
         f"<h2 style='margin:0 0 12px;'>{title}</h2>"
         f"{body}"
         f"{btn}"
@@ -63,14 +74,22 @@ def wrap(
     )
 
 
+def brand_header() -> str:
+    """The logo and the brand name that open every email, as an HTML fragment."""
+    return (
+        f"<p style='margin:0 0 12px;'>"
+        f'<img src="{_LOGO_URL}" alt="{_APP_NAME}" width="40" height="40" '
+        f'style="vertical-align:middle; margin-right:8px;"/>'
+        f"<strong style='vertical-align:middle; font-size:15px;'>{_APP_NAME}</strong></p>"
+    )
+
+
 def _footer_block(footer: str | None) -> str:
-    if footer is None:
-        footer = f"Sent by {_APP_NAME}. You received this because of your notification preferences."
-    if not footer:
-        return ""
+    extra = f"<p style='font-size:12px; color:#86868b; margin:0 0 6px;'>{footer}</p>" if footer else ""
     return (
         f"<hr style='border:none; border-top:1px solid #e5e5ea; margin:28px 0 12px;'/>"
-        f"<p style='font-size:12px; color:#86868b;'>{footer}</p>"
+        f"{extra}"
+        f"<p style='font-size:12px; color:#86868b; margin:0;'>{_APP_NAME}</p>"
     )
 
 
@@ -87,7 +106,7 @@ def template_task_assigned(
         f"<blockquote style='border-left:3px solid #0071e3; padding-left:12px; margin:12px 0;'>"
         f"{task_title}</blockquote>"
     )
-    return subject, wrap("Task Assigned", body, action_url, "Open Task")
+    return subject, wrap("Task Assigned", body, action_url, "Open Task", footer=_PREFERENCES_FOOTER)
 
 
 def template_invoice_approved(
@@ -101,7 +120,7 @@ def template_invoice_approved(
         f"<p>Invoice <strong>{invoice_number}</strong> for "
         f"<strong>{amount}</strong> in project <em>{project_name}</em> has been approved.</p>"
     )
-    return subject, wrap("Invoice Approved", body, action_url, "View Invoice")
+    return subject, wrap("Invoice Approved", body, action_url, "View Invoice", footer=_PREFERENCES_FOOTER)
 
 
 def template_safety_alert(
@@ -117,7 +136,7 @@ def template_safety_alert(
         f"<blockquote style='border-left:3px solid #ff3b30; padding-left:12px; margin:12px 0;'>"
         f"{description}</blockquote>"
     )
-    return subject, wrap("Safety Alert", body, action_url, "View Observation")
+    return subject, wrap("Safety Alert", body, action_url, "View Observation", footer=_PREFERENCES_FOOTER)
 
 
 def template_meeting_invitation(
@@ -134,7 +153,7 @@ def template_meeting_invitation(
         f"<p><strong>{meeting_title}</strong><br/>"
         f"Date: {meeting_date}{loc}</p>"
     )
-    return subject, wrap("Meeting Scheduled", body, action_url, "View Meeting")
+    return subject, wrap("Meeting Scheduled", body, action_url, "View Meeting", footer=_PREFERENCES_FOOTER)
 
 
 def template_password_reset(
