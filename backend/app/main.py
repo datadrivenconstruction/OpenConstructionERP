@@ -4927,6 +4927,16 @@ def create_app() -> FastAPI:
             attach_runtime_root()
         except Exception:
             logger.warning("Runtime module root not attached", exc_info=True)
+        # Modules built by an older module builder get their code rendered
+        # again from their spec, here, before anything imports them: the first
+        # generator's routers did not check project access. File-only, never
+        # touches data, and a module it cannot refresh keeps its old code.
+        try:
+            from app.modules.module_builder.refresh import refresh_installed
+
+            refresh_installed()
+        except Exception:
+            logger.exception("Built module code refresh failed; installed modules keep their code")
         await module_loader.load_all(app)
 
         # Mount OpenCDE API at the spec-compliant prefix /api/v1/opencde

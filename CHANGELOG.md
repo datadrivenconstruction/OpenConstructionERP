@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Security: a register built with the module builder now checks project access on every record. Before, anyone with its read permission could list, open, change or delete records of projects they were not part of. Registers built earlier are brought up to date automatically when the platform starts; their data is not touched.
 - Recalculating the critical path no longer wipes the other information stored on each activity, such as where an imported activity came from or that a milestone was already announced as reached.
 - An invoice raised from a certified claim now falls due after the agreed payment period instead of carrying no due date.
 - The client portal no longer shows a progress report the moment it is generated. A report now stays internal until a manager chooses Show to client on the Progress reports tab, and Hide from client takes it back. Reports generated before this release start as internal, so publish the ones your clients should keep seeing. A draft the client cannot see answers exactly like a report that does not exist.

@@ -44,6 +44,29 @@ GENERATED_NOTE = (
     "# a new version.\n"
 )
 
+# Written into every spec.json, so an installed module says which generator
+# rendered its code. The version moves when already-installed modules need
+# their code rendered again, which ``refresh.refresh_installed`` does at
+# startup for every module stamped with an older one.
+#
+#   1  the first generator. Its router checked the module permission only, so
+#      a project-scoped module served every project's records to anyone
+#      holding ``<key>.read``.
+#   2  project-scoped routes also check access to the record's project.
+GENERATOR_NAME = "openconstructionerp.module_builder"
+GENERATOR_VERSION = 2
+GENERATOR_STAMP = f"{GENERATOR_NAME}/{GENERATOR_VERSION}"
+
+# The exception to GENERATED_NOTE, carried by the three files a newer builder
+# may render again. Kept out of GENERATED_NOTE itself: the files that hold the
+# table definition must render byte for byte as they always have, or a
+# refresh would refuse them.
+REFRESHED_NOTE = (
+    "# This file is the exception: when a newer builder fixes the code it\n"
+    "# renders here, it renders it again from spec.json at startup. The copy it\n"
+    "# replaces is kept under _module_builder/backups in the module folder.\n"
+)
+
 # SQLAlchemy column type per field type, and the Python annotation that goes
 # with it. Money is Numeric, never float: a rate that loses cents is a defect
 # the user finds in an invoice.
@@ -105,6 +128,10 @@ def write(spec: ModuleSpec, root: Path) -> list[Path]:
     A module directory that already exists is never written into. Overwriting
     is how a user loses the edits they made to a generated module, and the
     builder has no way to tell its own output from work done since.
+
+    The one exception is :mod:`~app.modules.module_builder.refresh`, which
+    renders ``router.py``, ``repository.py`` and ``service.py`` again when
+    the generator version moves, and keeps the copies it replaces.
     """
     target = root / spec.key
     if target.exists():
@@ -219,7 +246,7 @@ def _spec_json(spec: ModuleSpec) -> str:
     """
     payload = spec.model_dump(mode="json")
     payload["generated_at"] = datetime.now(UTC).isoformat()
-    payload["generator"] = "openconstructionerp.module_builder/1"
+    payload["generator"] = GENERATOR_STAMP
     return json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
 
 
@@ -557,17 +584,30 @@ def register_{spec.key}_permissions() -> None:
 
 def _repository(spec: ModuleSpec) -> str:
     entity = spec.entity
-    scope = (
-        "        if project_id is not None:\n"
-        f"            stmt = stmt.where({spec.class_name}.project_id == project_id)\n"
-        if entity.project_scoped
-        else ""
-    )
+    if entity.project_scoped:
+        abc_import = "from collections.abc import Collection\n"
+        within_param = "        within: Collection[uuid.UUID] | None = None,\n"
+        within_doc = (
+            "\n"
+            "        ``within`` is the set of projects the caller may reach. ``None``\n"
+            "        means unrestricted, which the router only passes for an\n"
+            "        administrator; an empty set returns nothing rather than everything.\n"
+            "        Both filters apply before counting, so the total never counts rows\n"
+            "        the caller cannot see.\n"
+        )
+        scope = (
+            "        if project_id is not None:\n"
+            f"            stmt = stmt.where({spec.class_name}.project_id == project_id)\n"
+            "        if within is not None:\n"
+            f"            stmt = stmt.where({spec.class_name}.project_id.in_(list(within)))\n"
+        )
+    else:
+        abc_import = within_param = within_doc = scope = ""
     return f'''{HEADER}"""{spec.display_name} data access."""
 
-{GENERATED_NOTE}
+{GENERATED_NOTE}{REFRESHED_NOTE}
 import uuid
-
+{abc_import}
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -583,14 +623,14 @@ class {spec.class_name}Repository:
     async def list_page(
         self,
         project_id: uuid.UUID | None = None,
-        limit: int = 100,
+{within_param}        limit: int = 100,
         offset: int = 0,
     ) -> tuple[list[{spec.class_name}], int]:
         """One page, plus the total the page was taken from.
 
         The total is counted rather than inferred from the page length, so a
         caller can tell a short last page from an empty result.
-        """
+{within_doc}        """
         stmt = select({spec.class_name})
 {scope}        count_stmt = select(func.count()).select_from(stmt.subquery())
         total = int((await self.session.execute(count_stmt)).scalar_one())
@@ -613,12 +653,31 @@ class {spec.class_name}Repository:
 
 
 def _service(spec: ModuleSpec) -> str:
-    entity = spec.entity
+    if spec.entity.project_scoped:
+        abc_import = "from collections.abc import Collection\n"
+        list_page = (
+            "    async def list_page(\n"
+            "        self,\n"
+            "        project_id: uuid.UUID | None = None,\n"
+            "        within: Collection[uuid.UUID] | None = None,\n"
+            "        limit: int = 100,\n"
+            "        offset: int = 0,\n"
+            f"    ) -> tuple[list[{spec.class_name}], int]:\n"
+            "        return await self.repo.list_page(project_id=project_id, within=within, limit=limit, offset=offset)\n"
+        )
+    else:
+        abc_import = ""
+        list_page = (
+            "    async def list_page(\n"
+            "        self, project_id: uuid.UUID | None = None, limit: int = 100, offset: int = 0\n"
+            f"    ) -> tuple[list[{spec.class_name}], int]:\n"
+            "        return await self.repo.list_page(project_id=project_id, limit=limit, offset=offset)\n"
+        )
     return f'''{HEADER}"""{spec.display_name} business logic."""
 
-{GENERATED_NOTE}
+{GENERATED_NOTE}{REFRESHED_NOTE}
 import uuid
-
+{abc_import}
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.{spec.key}.models import {spec.class_name}
@@ -641,11 +700,7 @@ class {spec.class_name}Service:
     def __init__(self, session: AsyncSession) -> None:
         self.repo = {spec.class_name}Repository(session)
 
-    async def list_page(
-        self, project_id: uuid.UUID | None = None, limit: int = 100, offset: int = 0
-    ) -> tuple[list[{spec.class_name}], int]:
-        return await self.repo.list_page(project_id=project_id, limit=limit, offset=offset)
-
+{list_page}
     async def get(self, record_id: uuid.UUID) -> {spec.class_name} | None:
         return await self.repo.get(record_id)
 
@@ -694,33 +749,131 @@ class _Merged:
 
 
 def _router(spec: ModuleSpec) -> str:
+    """The HTTP API, with the access rule that fits the record.
+
+    A project-scoped record is reachable only through a project the caller may
+    reach, by the same rule the rest of the platform applies: owner, team
+    member or administrator, through ``verify_project_access`` and its set
+    form ``accessible_project_ids``. Refusals answer 404 with the same body as
+    a record that does not exist, so ids from other projects cannot be probed.
+
+    A record that belongs to no project has no narrower scope to check, so the
+    module permission is the whole rule, as for any platform-wide register.
+    """
     entity = spec.entity
-    project_query = (
-        '    project_id: uuid.UUID | None = Query(None, description="Restrict to one project"),\n'
-        if entity.project_scoped
-        else ""
+    name = spec.class_name
+    scoped = entity.project_scoped
+
+    if scoped:
+        dependencies = (
+            "from app.dependencies import (\n"
+            "    CurrentUserId,\n"
+            "    RequirePermission,\n"
+            "    SessionDep,\n"
+            "    accessible_project_ids,\n"
+            "    verify_project_access,\n"
+            ")\n"
+            # The models module rather than the class: a record class called
+            # Path or Query would shadow a name this router already imports.
+            f"from app.modules.{spec.key} import models\n"
+        )
+        access = f'''
+# Every record belongs to a project, and the module permission says nothing
+# about which projects. So each route also applies the platform's project
+# access rule (owner, team member or administrator) and answers 404 where it
+# refuses: the same answer as for a record that does not exist, so a caller
+# cannot learn which ids exist in projects they cannot see.
+
+
+async def _reachable(service: {name}Service, record_id: uuid.UUID, user_id: str, db: SessionDep) -> models.{name}:
+    """The record, if it exists and the caller may reach its project.
+
+    ``verify_project_access`` refuses with "Project not found", which would
+    tell the caller that the record exists. Its 404 is replaced with the one a
+    missing record gets, so both refusals read the same.
+    """
+    record = await service.get(record_id)
+    if record is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "not found")
+    try:
+        await verify_project_access(record.project_id, user_id, db)
+    except HTTPException as exc:
+        if exc.status_code != status.HTTP_404_NOT_FOUND:
+            raise
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "not found") from None
+    return record
+'''
+        user_param = "    user_id: CurrentUserId,\n"
+        list_params = (
+            "    db: SessionDep,\n"
+            "    user_id: CurrentUserId,\n"
+            '    project_id: uuid.UUID | None = Query(None, description="Restrict to one project"),\n'
+        )
+        list_body = f"""    within = None
+    if project_id is not None:
+        await verify_project_access(project_id, user_id, db)
+    else:
+        # The projects this caller may reach. None for an administrator, who is
+        # not restricted; an empty set for someone with no projects, which
+        # lists nothing rather than everything.
+        within = await accessible_project_ids(db, user_id)
+    rows, total = await {name}Service(db).list_page(
+        project_id=project_id, within=within, limit=limit, offset=offset
     )
-    project_arg = "project_id=project_id, " if entity.project_scoped else ""
+"""
+        get_load = f"    record = await _reachable({name}Service(db), record_id, user_id, db)\n"
+        create_check = (
+            "    # The project in the body is the caller's claim, not a fact. A project\n"
+            "    # they cannot reach answers 404, exactly as one that does not exist.\n"
+            "    await verify_project_access(payload.project_id, user_id, db)\n"
+        )
+        service_load = (
+            f"    service = {name}Service(db)\n"
+            "    # Before validation, so a refused record answers 404 and never a 422\n"
+            "    # that would confirm it exists. The update schema has no project_id,\n"
+            "    # so a record cannot be moved into a project from here.\n"
+            "    record = await _reachable(service, record_id, user_id, db)\n"
+        )
+        delete_load = (
+            f"    service = {name}Service(db)\n    record = await _reachable(service, record_id, user_id, db)\n"
+        )
+    else:
+        dependencies = "from app.dependencies import RequirePermission, SessionDep\n"
+        access = """
+# These records belong to no project, so there is no narrower scope to check:
+# the module permission is the whole access rule, as for any register that is
+# shared across the installation. A project-scoped module also checks access to
+# the record's project on every route.
+"""
+        user_param = ""
+        list_params = "    db: SessionDep,\n"
+        list_body = f"    rows, total = await {name}Service(db).list_page(limit=limit, offset=offset)\n"
+        missing = '    if record is None:\n        raise HTTPException(status.HTTP_404_NOT_FOUND, "not found")\n'
+        get_load = f"    record = await {name}Service(db).get(record_id)\n{missing}"
+        create_check = ""
+        service_load = f"    service = {name}Service(db)\n    record = await service.get(record_id)\n{missing}"
+        delete_load = service_load
+
+    service_names = ", ".join(sorted([f"{name}Service", "ValidationRefused"]))
     return f'''{HEADER}"""{spec.display_name} HTTP API."""
 
-{GENERATED_NOTE}
+{GENERATED_NOTE}{REFRESHED_NOTE}
 import json
 import uuid
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app.dependencies import RequirePermission, SessionDep
-from app.modules.{spec.key}.schemas import (
-    {spec.class_name}Create,
-    {spec.class_name}List,
-    {spec.class_name}Read,
-    {spec.class_name}Update,
+{dependencies}from app.modules.{spec.key}.schemas import (
+    {name}Create,
+    {name}List,
+    {name}Read,
+    {name}Update,
 )
-from app.modules.{spec.key}.service import {", ".join(sorted([f"{spec.class_name}Service", "ValidationRefused"]))}
+from app.modules.{spec.key}.service import {service_names}
 
 router = APIRouter()
-
+{access}
 
 @router.get("/ui-spec", summary="The screen description this module renders from")
 async def ui_spec() -> dict:
@@ -736,37 +889,32 @@ async def ui_spec() -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-@router.get("", response_model={spec.class_name}List, summary="List {entity.plural_name.lower()}")
+@router.get("", response_model={name}List, summary="List {entity.plural_name.lower()}")
 async def list_records(
-    db: SessionDep,
-{project_query}    limit: int = Query(100, ge=1, le=500),
+{list_params}    limit: int = Query(100, ge=1, le=500),
     offset: int = Query(0, ge=0),
     _perm: None = Depends(RequirePermission("{spec.key}.read")),
-) -> {spec.class_name}List:
-    rows, total = await {spec.class_name}Service(db).list_page({project_arg}limit=limit, offset=offset)
-    return {spec.class_name}List(items=[{spec.class_name}Read.model_validate(r) for r in rows], total=total)
+) -> {name}List:
+{list_body}    return {name}List(items=[{name}Read.model_validate(r) for r in rows], total=total)
 
 
-@router.get("/{{record_id}}", response_model={spec.class_name}Read, summary="One {entity.display_name.lower()}")
+@router.get("/{{record_id}}", response_model={name}Read, summary="One {entity.display_name.lower()}")
 async def get_record(
     record_id: uuid.UUID,
     db: SessionDep,
-    _perm: None = Depends(RequirePermission("{spec.key}.read")),
-) -> {spec.class_name}Read:
-    record = await {spec.class_name}Service(db).get(record_id)
-    if record is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "not found")
-    return {spec.class_name}Read.model_validate(record)
+{user_param}    _perm: None = Depends(RequirePermission("{spec.key}.read")),
+) -> {name}Read:
+{get_load}    return {name}Read.model_validate(record)
 
 
-@router.post("", response_model={spec.class_name}Read, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model={name}Read, status_code=status.HTTP_201_CREATED)
 async def create_record(
-    payload: {spec.class_name}Create,
+    payload: {name}Create,
     db: SessionDep,
-    _perm: None = Depends(RequirePermission("{spec.key}.write")),
-) -> {spec.class_name}Read:
-    try:
-        record, _findings = await {spec.class_name}Service(db).create(payload)
+{user_param}    _perm: None = Depends(RequirePermission("{spec.key}.write")),
+) -> {name}Read:
+{create_check}    try:
+        record, _findings = await {name}Service(db).create(payload)
     except ValidationRefused as exc:
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_CONTENT,
@@ -774,21 +922,17 @@ async def create_record(
         ) from exc
     await db.commit()
     await db.refresh(record)
-    return {spec.class_name}Read.model_validate(record)
+    return {name}Read.model_validate(record)
 
 
-@router.patch("/{{record_id}}", response_model={spec.class_name}Read)
+@router.patch("/{{record_id}}", response_model={name}Read)
 async def update_record(
     record_id: uuid.UUID,
-    payload: {spec.class_name}Update,
+    payload: {name}Update,
     db: SessionDep,
-    _perm: None = Depends(RequirePermission("{spec.key}.write")),
-) -> {spec.class_name}Read:
-    service = {spec.class_name}Service(db)
-    record = await service.get(record_id)
-    if record is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "not found")
-    try:
+{user_param}    _perm: None = Depends(RequirePermission("{spec.key}.write")),
+) -> {name}Read:
+{service_load}    try:
         record, _findings = await service.update(record, payload)
     except ValidationRefused as exc:
         raise HTTPException(
@@ -797,22 +941,18 @@ async def update_record(
         ) from exc
     await db.commit()
     await db.refresh(record)
-    return {spec.class_name}Read.model_validate(record)
+    return {name}Read.model_validate(record)
 
 
 @router.delete("/{{record_id}}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_record(
     record_id: uuid.UUID,
     db: SessionDep,
-    # Deleting is a manager's action, as it is everywhere else in the platform.
+{user_param}    # Deleting is a manager's action, as it is everywhere else in the platform.
     # Whoever may correct a record is not automatically whoever may remove it.
     _perm: None = Depends(RequirePermission("{spec.key}.delete")),
 ) -> None:
-    service = {spec.class_name}Service(db)
-    record = await service.get(record_id)
-    if record is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "not found")
-    await service.delete(record)
+{delete_load}    await service.delete(record)
     await db.commit()
 '''
 

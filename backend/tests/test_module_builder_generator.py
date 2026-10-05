@@ -14,9 +14,13 @@ from __future__ import annotations
 import compileall
 import subprocess
 import sys
+import uuid
+from contextlib import contextmanager
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
+from fastapi import HTTPException
 from pydantic import ValidationError
 
 from app.modules.module_builder import generator
@@ -631,6 +635,183 @@ def _guards(route: object, kind: type) -> list:
     if dependant is None:
         return []
     return [d.call for d in dependant.dependencies if isinstance(d.call, kind)]
+
+
+@contextmanager
+def _imported_module(spec: ModuleSpec, root: Path):
+    """Write a module under ``root``, make it importable, and clean up after."""
+    import importlib
+
+    from app.core import module_runtime_root as rr
+    from app.database import Base
+
+    generator.write(spec, root)
+    before = list(rr._package_path())
+    rr.attach_runtime_root(root)
+    importlib.invalidate_caches()
+    try:
+        yield importlib.import_module
+    finally:
+        rr._package_path()[:] = before
+        for name in [n for n in list(sys.modules) if n.startswith(f"app.modules.{spec.key}")]:
+            del sys.modules[name]
+        existing = Base.metadata.tables.get(spec.table_name)
+        if existing is not None:
+            Base.metadata.remove(existing)
+        Base.registry._class_registry.pop(spec.class_name, None)
+        importlib.invalidate_caches()
+
+
+_UNREACHABLE = uuid.UUID(int=1)
+_REACHABLE = uuid.UUID(int=2)
+
+
+class TestProjectScopedRoutesCheckProjectAccess:
+    """A project-scoped module answers only inside projects the caller may reach.
+
+    The module permission says what a person may do with this kind of record,
+    not in which projects. Every route therefore has to ask the platform's
+    project access rule as well, and these tests drive each route with that
+    rule refusing and check the refusal is what comes back.
+
+    The endpoints are called directly with the access rule and the service
+    replaced, so nothing here needs a database. The service hands back a record
+    for any id, so a 404 can only have come from the access check; the same
+    behaviour against real users and projects is in
+    ``tests/pg/test_module_builder_project_access.py``.
+    """
+
+    @pytest.fixture
+    def guarded(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+        spec = a_spec()
+        with _imported_module(spec, tmp_path) as import_module:
+            router = import_module(f"app.modules.{spec.key}.router")
+            calls: dict[str, list] = {"checked": [], "scoped": [], "service": []}
+
+            async def verify_project_access(project_id, user_id, session) -> None:
+                calls["checked"].append(project_id)
+                if project_id != _REACHABLE:
+                    raise HTTPException(status_code=404, detail="Project not found")
+
+            async def accessible_project_ids(session, user_id, **kwargs):
+                calls["scoped"].append(user_id)
+                return {_REACHABLE}
+
+            class FakeService:
+                def __init__(self, db: object) -> None:
+                    pass
+
+                async def get(self, record_id):
+                    return SimpleNamespace(id=record_id, project_id=_UNREACHABLE)
+
+                async def list_page(self, **kwargs):
+                    calls["service"].append(("list_page", kwargs))
+                    return [], 0
+
+                async def create(self, payload):
+                    calls["service"].append(("create", payload))
+                    raise AssertionError("created a record in a project the caller cannot reach")
+
+                async def update(self, record, payload):
+                    calls["service"].append(("update", record))
+                    raise AssertionError("updated a record in a project the caller cannot reach")
+
+                async def delete(self, record):
+                    calls["service"].append(("delete", record))
+                    raise AssertionError("deleted a record in a project the caller cannot reach")
+
+            # raising=False, so a router that never imported the access rule
+            # fails below on what it does rather than here on a missing name.
+            monkeypatch.setattr(router, "verify_project_access", verify_project_access, raising=False)
+            monkeypatch.setattr(router, "accessible_project_ids", accessible_project_ids, raising=False)
+            monkeypatch.setattr(router, f"{spec.class_name}Service", FakeService)
+            yield router, calls
+
+    @staticmethod
+    def _arguments(endpoint) -> dict[str, object]:
+        """Arguments for a direct call, naming the unreachable project wherever one is asked for."""
+        import inspect
+
+        arguments: dict[str, object] = {}
+        for name, parameter in inspect.signature(endpoint).parameters.items():
+            if name == "record_id":
+                arguments[name] = uuid.uuid4()
+            elif name == "project_id":
+                arguments[name] = _UNREACHABLE
+            elif name == "payload":
+                model = parameter.annotation
+                fields = {"project_id": _UNREACHABLE} if "project_id" in model.model_fields else {}
+                arguments[name] = model.model_construct(**fields)
+            elif name == "user_id":
+                arguments[name] = "someone-else"
+            elif name == "limit":
+                arguments[name] = 100
+            elif name == "offset":
+                arguments[name] = 0
+            else:
+                arguments[name] = None
+        return arguments
+
+    def test_every_route_refuses_an_unreachable_project(self, guarded) -> None:
+        import asyncio
+
+        router, calls = guarded
+        routes = [r for r in router.router.routes if getattr(r, "path", "") != "/ui-spec"]
+        assert len(routes) == 5, "a route was added or lost; this test must cover each one"
+
+        for route in routes:
+            calls["checked"].clear()
+            with pytest.raises(HTTPException) as refused:
+                asyncio.run(route.endpoint(**self._arguments(route.endpoint)))
+            label = f"{sorted(route.methods)} {route.path or '/'}"
+            assert refused.value.status_code == 404, label
+            assert calls["checked"] == [_UNREACHABLE], f"{label} never asked whether the project is reachable"
+
+        assert calls["service"] == [], "a route reached the service before the access check refused it"
+
+    def test_a_refused_record_reads_like_a_missing_one(self, guarded) -> None:
+        """The access rule says "Project not found"; a record route must not repeat it."""
+        import asyncio
+
+        router, _ = guarded
+        record_routes = [r for r in router.router.routes if getattr(r, "path", "") == "/{record_id}"]
+        assert len(record_routes) == 3
+        for route in record_routes:
+            with pytest.raises(HTTPException) as refused:
+                asyncio.run(route.endpoint(**self._arguments(route.endpoint)))
+            assert refused.value.detail == "not found", sorted(route.methods)
+
+    def test_listing_without_a_project_is_limited_to_reachable_ones(self, guarded) -> None:
+        import asyncio
+
+        router, calls = guarded
+        arguments = self._arguments(router.list_records)
+        arguments["project_id"] = None
+
+        listed = asyncio.run(router.list_records(**arguments))
+
+        assert listed.total == 0
+        assert calls["scoped"] == ["someone-else"]
+        assert [name for name, _ in calls["service"]] == ["list_page"]
+        assert calls["service"][0][1]["within"] == {_REACHABLE}, "the list was not narrowed to the caller's projects"
+
+    def test_a_record_cannot_be_moved_between_projects(self, tmp_path: Path) -> None:
+        """Nothing to check on update when the update cannot name a project at all."""
+        spec = a_spec()
+        with _imported_module(spec, tmp_path) as import_module:
+            schemas = import_module(f"app.modules.{spec.key}.schemas")
+            assert "project_id" in schemas.HireCreate.model_fields
+            assert "project_id" not in schemas.HireUpdate.model_fields
+            with pytest.raises(ValidationError):
+                schemas.HireUpdate(project_id=str(_REACHABLE))
+
+    def test_a_module_without_projects_stays_permission_only(self, tmp_path: Path) -> None:
+        """Its records belong to no project, so there is no project to check."""
+        spec = a_minimal_spec()
+        with _imported_module(spec, tmp_path) as import_module:
+            router = import_module(f"app.modules.{spec.key}.router")
+            assert not hasattr(router, "verify_project_access")
+            assert not hasattr(router, "accessible_project_ids")
 
 
 class TestTheTableActuallyExists:
