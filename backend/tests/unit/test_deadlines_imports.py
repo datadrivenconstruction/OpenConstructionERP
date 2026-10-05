@@ -50,6 +50,8 @@ def test_service_symbols_present() -> None:
         "compliance_docs",
         "bid_management",
         "signing",
+        "contracts_payment_plan_claim",
+        "contracts_payment_plan",
     ]
     # Module keys are unique (they key the notification event type and the
     # ``?module=`` filter) and every collector is callable.

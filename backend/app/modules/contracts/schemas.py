@@ -1468,9 +1468,10 @@ class ContractMilestoneActivityLink(BaseModel):
 class ContractMilestoneLinkResponse(ContractMilestoneResponse):
     """The instalment after linking, with anything the person should know about the link.
 
-    ``warnings`` holds codes, not sentences: ``activity_not_milestone`` (the
-    activity has a duration) and ``date_trigger_ignores_schedule`` (the
-    instalment's trigger is a fixed date, so the link does not move it).
+    ``warnings`` holds codes, not sentences: ``date_trigger_ignores_schedule``
+    (the instalment's trigger is a fixed date, so the link does not move it).
+    Linking an activity that is not a milestone is refused outright (422
+    ``activity_not_milestone``), so it never appears here.
     """
 
     warnings: list[str] = Field(default_factory=list)

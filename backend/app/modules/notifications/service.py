@@ -628,4 +628,19 @@ KNOWN_EVENT_TYPES: list[dict[str, str]] = [
         "module": "deadlines",
         "description": "Signature session past its expiry",
     },
+    {
+        "event_type": "deadlines.contracts_payment_plan_claim.overdue",
+        "module": "deadlines",
+        "description": "Reached payment milestone with no claim raised",
+    },
+    {
+        "event_type": "deadlines.contracts_payment_plan.overdue",
+        "module": "deadlines",
+        "description": "Payment-plan instalment past its due date",
+    },
+    {
+        "event_type": "deadlines.contracts_payment_plan.approaching",
+        "module": "deadlines",
+        "description": "Payment-plan instalment falling due soon",
+    },
 ]

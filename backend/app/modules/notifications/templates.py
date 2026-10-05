@@ -138,6 +138,8 @@ _TEMPLATES: dict[str, str] = {
     "notifications.deadline.overdue.body": '{module} item "{title}" is {days_overdue} day(s) past due.',
     "notifications.deadline.escalated.title": "Escalated overdue item",
     "notifications.deadline.escalated.body": '{module} item "{title}" is still open {days_overdue} day(s) overdue and has been escalated.',
+    "notifications.deadline.approaching.title": "Due soon: {title}",
+    "notifications.deadline.approaching.body": '{module} item "{title}" is due on {due_date}.',
     # ── Document approvals (file_approvals engine) ───────────────────
     "notifications.file_approval.needs_approver.title": "A document needs your approval",
     "notifications.file_approval.needs_approver.body": "A {file_kind} is waiting for your approval.",
@@ -199,6 +201,8 @@ _TYPE_TO_ICON: dict[str, str] = {
     # Cross-module deadline sweep (item #18) - overdue warns, escalation errors
     "deadline_overdue": "warning",
     "deadline_escalated": "error",
+    # ...and a due-soon reminder ahead of the date warns too
+    "deadline_approaching": "warning",
     # Document approvals (file_approvals) - needs action / passed / returned
     "approval_needed": "warning",
     "approval_decided": "success",

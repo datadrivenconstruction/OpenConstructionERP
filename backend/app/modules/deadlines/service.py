@@ -26,6 +26,10 @@ from each source's schema/register layer, never guessed:
 * compliance document expiry - ``oe_compliance_docs_doc``.
 * bid submission deadlines - ``oe_bid_management_package``.
 * signature session expiry - ``oe_signing_session``.
+* payment-plan claims not yet raised - ``oe_contracts_milestone`` (reached, no
+  live ``oe_contracts_progress_claim`` names it).
+* payment-plan instalments falling due - ``oe_contracts_milestone``
+  (``forecast_due_date``).
 
 Inclusion rule: a row belongs on the register when somebody is blocked waiting on
 it AND its status vocabulary has a state that closes it. That rule keeps out the
@@ -41,12 +45,12 @@ from __future__ import annotations
 import logging
 import uuid
 from collections.abc import Awaitable, Callable
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.deadlines.logic import ON_TIME, OVERDUE, build_register, classify, parse_due
+from app.modules.deadlines.logic import APPROACHING, ON_TIME, OVERDUE, build_register, classify, parse_due
 from app.modules.deadlines.schemas import DeadlineItem, DeadlineRegisterResponse
 from app.modules.projects.models import Project
 
@@ -120,6 +124,24 @@ _BID_PACKAGE_TERMINAL = {"closed", "cancelled", "awarded"}
 # signing/schemas.py ``SESSION_STATUSES``: draft|awaiting_signatures|
 # partially_signed|fully_signed|declined|expired.
 _SIGNING_TERMINAL = {"fully_signed", "declined", "expired"}
+
+# contracts/models.py ContractMilestone.status: pending|reached|invoiced|paid.
+# The collectors select the open states in SQL; these sets are what is left
+# for classify, so a pending or paid row can never surface.
+_PLAN_CLAIM_TERMINAL = {"pending", "invoiced", "paid"}
+_PLAN_INSTALMENT_TERMINAL = {"pending", "paid"}
+
+# A reached instalment is claimed only on a contract that is in force. Money
+# already owed is still owed once the works are complete, so the instalment
+# reminder also reads completed contracts; a draft, suspended or terminated
+# contract is out of both.
+_PLAN_CLAIM_CONTRACT_STATUSES = ("active",)
+_PLAN_INSTALMENT_CONTRACT_STATUSES = ("active", "completed")
+
+# Days after an instalment becomes claimable by which the claim should be
+# raised, when the contract's ``terms.payment_plan.claim_within_days`` does not
+# say otherwise.
+DEFAULT_CLAIM_WITHIN_DAYS = 7
 
 # A signature for a source collector.
 _Collector = Callable[
@@ -776,6 +798,169 @@ async def _collect_signing_sessions(
     return items
 
 
+def claim_within_days(terms: object) -> int:
+    """Days a contract allows from a claimable instalment to the claim.
+
+    Read from ``terms.payment_plan.claim_within_days``. Anything that is not a
+    whole number of days, zero or more, falls back to
+    :data:`DEFAULT_CLAIM_WITHIN_DAYS` rather than dropping the reminder.
+    """
+    plan = terms.get("payment_plan") if isinstance(terms, dict) else None
+    raw = plan.get("claim_within_days") if isinstance(plan, dict) else None
+    if isinstance(raw, bool):
+        return DEFAULT_CLAIM_WITHIN_DAYS
+    try:
+        days = int(raw)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return DEFAULT_CLAIM_WITHIN_DAYS
+    return days if days >= 0 else DEFAULT_CLAIM_WITHIN_DAYS
+
+
+def plan_claim_due(reached_at: object, lag_days: int | None, terms: object) -> date | None:
+    """The day by which a reached instalment should have been claimed.
+
+    Counted from the day the instalment becomes claimable, which is the day
+    the milestone was reached plus its ``lag_days`` (the same base
+    ``contracts.payment_plan.forecast_dates`` uses). Counting from the reached
+    day alone would mark a claim late before the contract allows it to be
+    raised whenever the lag is longer than the window.
+    """
+    reached = parse_due(reached_at)
+    if reached is None:
+        return None
+    return reached + timedelta(days=max(lag_days or 0, 0) + claim_within_days(terms))
+
+
+def _plan_title(contract_code: str | None, milestone: object) -> str:
+    """``<contract code> - <instalment name>``; both halves are user data."""
+    label = (getattr(milestone, "name", "") or getattr(milestone, "code", "") or "").strip()
+    return " - ".join(part for part in ((contract_code or "").strip(), label) if part)[:200]
+
+
+async def _collect_plan_claims(
+    session: AsyncSession,
+    project_ids: list[uuid.UUID] | None,
+    now_date: date,
+    approaching_days: int,
+) -> list[DeadlineItem]:
+    """Reached payment-plan instalments that nobody has claimed yet.
+
+    A rejected claim billed nothing, so it does not count as raised (the rule
+    ``ProgressClaimRepository.open_claims_for_milestones`` applies). The
+    "no live claim" test runs in SQL, before the per-source cap, so claimed
+    instalments can never fill the cap and hide unclaimed ones.
+
+    The owner is left empty on purpose: raising a claim is the project
+    managers' job, and the sweep falls back to them for an empty owner.
+    """
+    from app.modules.contracts.models import Contract, ContractMilestone, ProgressClaim  # noqa: PLC0415
+
+    live_claim = (
+        select(ProgressClaim.id)
+        .where(ProgressClaim.milestone_id == ContractMilestone.id, ProgressClaim.status != "rejected")
+        .exists()
+    )
+    stmt = (
+        select(ContractMilestone, Contract.code, Contract.project_id, Contract.terms)
+        .join(Contract, Contract.id == ContractMilestone.contract_id)
+        .where(
+            ContractMilestone.status == "reached",
+            ContractMilestone.reached_at.is_not(None),
+            Contract.status.in_(_PLAN_CLAIM_CONTRACT_STATUSES),
+            ~live_claim,
+        )
+    )
+    if project_ids is not None:
+        stmt = stmt.where(Contract.project_id.in_(project_ids))
+    stmt = stmt.order_by(ContractMilestone.reached_at.asc()).limit(_PER_SOURCE_CAP)
+    rows = (await session.execute(stmt)).all()
+
+    items: list[DeadlineItem] = []
+    for m, contract_code, project_id, terms in rows:
+        due = plan_claim_due(m.reached_at, m.lag_days, terms)
+        cls, days, sev = classify(due, m.status, now_date, _PLAN_CLAIM_TERMINAL, approaching_days)
+        if cls == ON_TIME:
+            continue
+        items.append(
+            DeadlineItem(
+                id=f"contracts_payment_plan_claim:{m.id}",
+                module="contracts_payment_plan_claim",
+                entity_type="contract_milestone",
+                entity_id=str(m.id),
+                project_id=str(project_id),
+                title=_plan_title(contract_code, m),
+                due_date=_iso_date(due),
+                owner_user_id=None,
+                status=m.status,
+                classification=cls,
+                days_overdue=days,
+                severity=sev,
+                # ContractsPage reads ?highlight=<contract id>.
+                action_url=f"/contracts?highlight={m.contract_id}",
+            ),
+        )
+    return items
+
+
+async def _collect_plan_instalments(
+    session: AsyncSession,
+    project_ids: list[uuid.UUID] | None,
+    now_date: date,
+    approaching_days: int,
+) -> list[DeadlineItem]:
+    """Reached or invoiced payment-plan instalments past / near their due date.
+
+    The due date is the stored ``forecast_due_date`` (indexed, kept fresh by
+    the contracts module and healed by the sweep). Only instalments that are
+    owed count: a pending one is not due whatever its forecast says, the same
+    reading ``contracts.payment_plan.client_status`` gives the client.
+
+    These reminders go to the project managers only. Reminding the client is
+    a separate, opt-in behaviour (``terms.payment_plan.client_reminders``) and
+    nothing in this module sends it.
+    """
+    from app.modules.contracts.models import Contract, ContractMilestone  # noqa: PLC0415
+
+    stmt = (
+        select(ContractMilestone, Contract.code, Contract.project_id)
+        .join(Contract, Contract.id == ContractMilestone.contract_id)
+        .where(
+            ContractMilestone.status.in_(("reached", "invoiced")),
+            ContractMilestone.forecast_due_date.is_not(None),
+            Contract.status.in_(_PLAN_INSTALMENT_CONTRACT_STATUSES),
+        )
+    )
+    if project_ids is not None:
+        stmt = stmt.where(Contract.project_id.in_(project_ids))
+    stmt = stmt.order_by(ContractMilestone.forecast_due_date.asc()).limit(_PER_SOURCE_CAP)
+    rows = (await session.execute(stmt)).all()
+
+    items: list[DeadlineItem] = []
+    for m, contract_code, project_id in rows:
+        due = parse_due(m.forecast_due_date)
+        cls, days, sev = classify(due, m.status, now_date, _PLAN_INSTALMENT_TERMINAL, approaching_days)
+        if cls == ON_TIME:
+            continue
+        items.append(
+            DeadlineItem(
+                id=f"contracts_payment_plan:{m.id}",
+                module="contracts_payment_plan",
+                entity_type="contract_milestone",
+                entity_id=str(m.id),
+                project_id=str(project_id),
+                title=_plan_title(contract_code, m),
+                due_date=_iso_date(due),
+                owner_user_id=None,
+                status=m.status,
+                classification=cls,
+                days_overdue=days,
+                severity=sev,
+                action_url=f"/contracts?highlight={m.contract_id}",
+            ),
+        )
+    return items
+
+
 # Collector registry: (module_key, collector, owns_overdue_sweep).
 #
 # ``owns_overdue_sweep`` guards against double-notification (spec risk): a
@@ -813,6 +998,11 @@ _COLLECTORS: list[tuple[str, _Collector, bool]] = [
     ("compliance_docs", _collect_compliance_docs, False),
     ("bid_management", _collect_bid_packages, False),
     ("signing", _collect_signing_sessions, False),
+    # Nothing in the contracts module notifies when an instalment's claim or
+    # payment falls late (its milestone subscribers only move statuses and
+    # forecasts), so neither source owns a sweep of its own.
+    ("contracts_payment_plan_claim", _collect_plan_claims, False),
+    ("contracts_payment_plan", _collect_plan_instalments, False),
 ]
 
 
@@ -989,3 +1179,119 @@ async def collect_overdue_for_sweep(
     overdue = [it for it in collected if it.classification == OVERDUE]
     await _resolve_project_names(session, overdue)
     return overdue
+
+
+async def collect_approaching_for_sweep(
+    session: AsyncSession,
+    module: str,
+    approaching_days: int,
+    *,
+    now: datetime | None = None,
+    project_ids: list[uuid.UUID] | None = None,
+) -> list[DeadlineItem]:
+    """Items of one source due today or within ``approaching_days``, for the sweeper.
+
+    The approaching counterpart of :func:`collect_overdue_for_sweep`, run only
+    for the sources the sweeper lists in ``sweeper.APPROACHING_NOTIFY``.
+    """
+    now_dt = now or datetime.now(UTC)
+    collected = await _collect_all(
+        session,
+        project_ids,
+        now_dt.date(),
+        approaching_days,
+        module=module,
+        for_sweep=True,
+    )
+    approaching = [it for it in collected if it.classification == APPROACHING]
+    await _resolve_project_names(session, approaching)
+    return approaching
+
+
+# Linked instalments whose forecast one sweep may recompute. Each costs an
+# activity read and an UPDATE; whatever is left over is taken next tick.
+_HEAL_BATCH = 100
+
+
+def _aware(value: object) -> datetime | None:
+    """A timestamp as an aware UTC datetime, or None.
+
+    ``forecast_at`` is an ISO string; ``updated_at`` comes back aware on
+    PostgreSQL and naive on SQLite. Comparing the two raw raises TypeError.
+    """
+    if isinstance(value, datetime):
+        moment = value
+    elif value:
+        try:
+            moment = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        except ValueError:
+            return None
+    else:
+        return None
+    return moment if moment.tzinfo is not None else moment.replace(tzinfo=UTC)
+
+
+async def heal_stale_plan_forecasts(session: AsyncSession, *, limit: int = _HEAL_BATCH) -> int:
+    """Recompute linked instalment forecasts older than their activity's last edit.
+
+    The contracts module refreshes a forecast when the schedule announces a
+    move, and an announcement can be lost (published before a commit that
+    then failed, or while the subscriber was down). An instalment whose
+    ``forecast_at`` is missing, or older than its activity's ``updated_at``,
+    is recomputed here through ``ContractsService.recompute_milestone_forecast``
+    so the plan cannot stay wrong for good. Never-stamped rows go first, then
+    the oldest stamps; at most ``limit`` per call.
+
+    This keeps pending instalments honest for the plan and the portal. It
+    does not move any reminder this module sends: a reached or invoiced
+    instalment is forecast from the day it was reached, not from the activity.
+
+    Each recompute runs in its own savepoint and a failure is logged and
+    skipped. The candidate read is not wrapped here; the caller runs the whole
+    call inside a savepoint.
+
+    Returns:
+        How many instalments were recomputed.
+    """
+    try:
+        from app.modules.contracts.models import Contract, ContractMilestone  # noqa: PLC0415
+        from app.modules.contracts.service import ContractsService  # noqa: PLC0415
+        from app.modules.schedule.models import Activity  # noqa: PLC0415
+    except ImportError:
+        return 0
+
+    rows = (
+        await session.execute(
+            select(ContractMilestone.id, ContractMilestone.forecast_at, Activity.updated_at)
+            .join(Activity, Activity.id == ContractMilestone.activity_id)
+            .join(Contract, Contract.id == ContractMilestone.contract_id)
+            .where(
+                ContractMilestone.status != "paid",
+                Contract.status.in_(_PLAN_INSTALMENT_CONTRACT_STATUSES),
+            )
+        )
+    ).all()
+    stale: list[tuple[datetime | None, uuid.UUID]] = []
+    for milestone_id, forecast_at, activity_updated in rows:
+        stamped = _aware(forecast_at)
+        moved = _aware(activity_updated)
+        if stamped is None or (moved is not None and stamped < moved):
+            stale.append((stamped, milestone_id))
+    stale.sort(key=lambda pair: (pair[0] is not None, pair[0] or datetime.min.replace(tzinfo=UTC)))
+
+    svc = ContractsService(session)
+    healed = 0
+    for _stamp, milestone_id in stale[:limit]:
+        try:
+            async with session.begin_nested():
+                milestone = await svc.milestone_repo.get_by_id(milestone_id)
+                if milestone is None:
+                    continue
+                contract = await svc.contract_repo.get_by_id(milestone.contract_id)
+                if contract is None:
+                    continue
+                await svc.recompute_milestone_forecast(milestone, contract=contract)
+                healed += 1
+        except Exception:  # noqa: BLE001 - one bad instalment must not stop the sweep
+            logger.warning("Payment-plan forecast heal failed for milestone %s", milestone_id, exc_info=True)
+    return healed
