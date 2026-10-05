@@ -49,6 +49,7 @@ from app.modules.contracts.country_defaults import (
     normalise_country,
     resolve_contract_defaults,
     subcontract_retention_default,
+    subdivision_from_address,
 )
 from app.modules.contracts.events import CLAIM_POPULATED, EOT_DECIDED, EOT_SUBMITTED
 from app.modules.contracts.final_account import (
@@ -1294,10 +1295,25 @@ class ContractsService:
             return None
         return normalise_country(getattr(project, "country_code", None)) or None
 
+    async def project_jurisdiction(self, project_id: uuid.UUID) -> tuple[str | None, str | None]:
+        """The project's ISO country and, where its address names one, its ISO 3166-2 subdivision.
+
+        The subdivision is what carries state retention law into the defaults
+        (see :func:`subdivision_from_address`); ``None`` when the address
+        names no state, or names one that cannot be read without guessing.
+        """
+        from app.modules.projects.models import Project  # noqa: PLC0415
+
+        project = await self.session.get(Project, project_id)
+        if project is None:
+            return None, None
+        country = normalise_country(getattr(project, "country_code", None)) or None
+        return country, subdivision_from_address(country, getattr(project, "address", None))
+
     async def country_defaults_for_project(self, project_id: uuid.UUID) -> dict[str, Any]:
         """What a new contract on ``project_id`` starts from, for the form to pre-fill."""
-        country = await self.project_country(project_id)
-        defaults = resolve_contract_defaults(country)
+        country, subdivision = await self.project_jurisdiction(project_id)
+        defaults = resolve_contract_defaults(country, subdivision_code=subdivision)
         # A subcontract agreement has no ceiling, so where the country's rate
         # runs above its cap the agreement form starts from the cap. Answered
         # here so the form shows the figure the server will apply.
@@ -1305,6 +1321,8 @@ class ContractsService:
         return {
             "project_id": project_id,
             "country_code": country,
+            "subdivision_code": subdivision,
+            "statutory_ceiling": (defaults or {}).get("statutory_ceiling"),
             "has_defaults": defaults is not None,
             "standard_form": (defaults or {}).get("standard_form"),
             "values": (defaults or {}).get("values") or {},
@@ -1321,7 +1339,7 @@ class ContractsService:
         retention rate, the release event and the stamp for
         ``metadata["country_defaults"]``.
         """
-        country = await self.project_country(data.project_id)
+        country, subdivision = await self.project_jurisdiction(data.project_id)
         explicit = _explicit_payment_terms(data)
         if getattr(data, "retention_release_event", None) is not None:
             # The author named the release event and no split. A defaulted
@@ -1330,7 +1348,13 @@ class ContractsService:
             # left unwritten, and the event decides as it did before country
             # defaults existed.
             explicit.setdefault("retention_release_split", None)
-        values, stamp = apply_contract_defaults(explicit, resolve_contract_defaults(country), country_code=country)
+        # A draft is entered into today at the earliest, so a state ceiling is
+        # read as of today (the resolver's default).
+        values, stamp = apply_contract_defaults(
+            explicit, resolve_contract_defaults(country, subdivision_code=subdivision), country_code=country
+        )
+        if subdivision:
+            stamp["subdivision_code"] = subdivision
         fallback: list[str] = []
 
         retention = values.get("retention_percent")

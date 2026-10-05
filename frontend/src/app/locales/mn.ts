@@ -8557,6 +8557,7 @@ const resource = {
     "contracts.country_defaults.US.payment_period_days.note": "Цэвэр 30 хоног нь түгээмэл тохиролцсон хугацаа юм. Хэлэлцээр төлбөрийн огноог талуудад үлдээдэг, мужийн шуурхай төлбөрийн хууль хуулийн хугацааг тогтоодог.",
     "contracts.country_defaults.US.valuation_interval.note": "Талууд өөр хугацаа бичихгүй бол сарын сүүлийн өдөр дуусдаг нэг календарийн сар.",
     "contracts.country_defaults.US.certificate_name.note": "Архитекторын баталгаажуулсан, үргэлжлэх хуудастай гүйцэтгэгчийн хүсэлт.",
+    "contracts.statutory_ceiling.retention_percent.note": "{{percent}} хувь болгон бууруулсан: {{since}} буюу түүнээс хойш байгуулсан гэрээнд, төрийн болон хувийн аль ч гэрээнд, {{subdivision}} мужийн хууль төлбөр бүрээс үүнээс илүү барьцаа хасахыг зөвшөөрдөггүй. Талууд илүүг тохиролцож болох үл хамаарах тохиолдлыг хууль жагсаасан.",
     "subcontractors.agreement_retention_required": "Энэ хэлэлцээрт заасан барьцааг оруулна уу (байхгүй бол 0).",
     "costs.base_market_unfinished": "Энэ суурийн зах зээлийн сэлгэлт дуусаагүй байна",
     "costs.base_restore_home": "Эх зах зээл рүү буцах",

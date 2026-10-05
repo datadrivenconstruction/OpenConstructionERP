@@ -19267,6 +19267,7 @@ const resource = {
     "contracts.country_defaults.US.payment_period_days.note": "常见约定付款期限为 30 天内。协议将付款日期留给双方约定，各州的及时付款法（prompt payment acts）另有法定期限。",
     "contracts.country_defaults.US.valuation_interval.note": "以月末为结束日的一个日历月，除双方另行约定周期。",
     "contracts.country_defaults.US.certificate_name.note": "承包商提交并由建筑师核证的付款申请书及其续页（continuation sheet）。",
+    "contracts.statutory_ceiling.retention_percent.note": "降至 {{percent}}%：对于 {{since}} 当日及之后签订的合同，无论是公共工程还是私人工程，{{subdivision}}的法律都不允许从每次付款中扣留超过该比例的保留金（retainage）。法律列明了双方可约定更高比例的例外情形。",
     "contracts.release_open_items_project_wide_other": "待处理事项按整个项目统计，而本项目有 {{count}} 份合同，因此此项扣留也包含属于其他合同所结算工程的事项。如果您知道本合同上待处理事项的金额，请自行填写。",
     "contracts.release_open_items_unavailable": "未安装整改清单，因此未统计待处理事项。",
     "contracts.release_open_items_counted_other": "项目上有 {{count}} 项待处理事项，其中 {{without}} 项没有费用。",

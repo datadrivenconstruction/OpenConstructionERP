@@ -4426,6 +4426,7 @@ const resource = {
     "contracts.country_defaults.US.payment_period_days.note": "Таза 30 күн кеңири таралган макулдашылган мөөнөт. Макулдашуу төлөм күнүн тараптарга калтырат, ал эми штаттык тез төлөм мыйзамдары мыйзамдык мөөнөттөрдү белгилейт.",
     "contracts.country_defaults.US.valuation_interval.note": "Тараптар башка мөөнөт жазбаса, айдын акыркы күнүндө бүткөн бир календарлык ай.",
     "contracts.country_defaults.US.certificate_name.note": "Архитектор ырастаган, уландысы бар подрядчиктин арызы.",
+    "contracts.statutory_ceiling.retention_percent.note": "{{percent}} пайызга чейин төмөндөтүлдү: {{since}} же андан кийин түзүлгөн келишимде, мамлекеттик же жеке болсун, {{subdivision}} мыйзамы ар бир төлөмдөн мындан ашык кармап калууга уруксат бербейт. Мыйзамда тараптар көбүрөөк макулдаша ала турган өзгөчөлүктөр санаттап көрсөтүлгөн.",
     "subcontractors.agreement_retention_required": "Бул макулдашуу көрсөткөн кармап калууну киргизиңиз (жок болсо 0).",
     "costs.base_market_unfinished": "Бул базанын рынок алмашуусу бүткөн эмес",
     "costs.base_restore_home": "Негизги рынокко кайтаруу",

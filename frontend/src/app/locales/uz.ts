@@ -8124,6 +8124,7 @@ const resource = {
     "contracts.country_defaults.US.payment_period_days.note": "Sof 30 kun keng tarqalgan kelishilgan muddatdir. Bitim toʻlov sanasini taraflarga qoldiradi, va shtat tezkor toʻlov qonunlari qonuniy muddatlarni belgilaydi.",
     "contracts.country_defaults.US.valuation_interval.note": "Taraflar boshqa muddat yozmasa, oyning oxirgi kunida tugaydigan bir taqvim oyi.",
     "contracts.country_defaults.US.certificate_name.note": "Arxitektor tasdiqlagan, davomiylik varaqasi bilan pudratchining arizasi.",
+    "contracts.statutory_ceiling.retention_percent.note": "{{percent}} foizgacha pasaytirildi: {{since}} yoki undan keyin tuzilgan shartnomada, davlat yoki xususiy boʻlsin, {{subdivision}} qonuni har bir toʻlovdan bundan koʻp ushlab qolishga ruxsat bermaydi. Qonun taraflar koʻproqqa kelisha oladigan istisnolarni sanab oʻtgan.",
     "subcontractors.agreement_retention_required": "Bu bitim koʻrsatgan ushlab qolishni kiriting (yoʻq boʻlsa 0).",
     "costs.base_market_unfinished": "Bu asos uchun bozor almashinuvi tugallanmagan",
     "costs.base_restore_home": "Asosiy bozorga qaytarish",

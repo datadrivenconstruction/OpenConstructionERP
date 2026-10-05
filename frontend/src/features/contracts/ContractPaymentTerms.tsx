@@ -196,7 +196,9 @@ const SOURCE_LABELS: Record<string, string> = {
  * reference as written (a clause or a law is data) and the note in the
  * reader's language. The server sends the note in English; the locale files
  * carry it under `contracts.country_defaults.<CC>.<field>.note`, and the
- * server's English is only the fallback.
+ * server's English is only the fallback. A figure that is not the country's
+ * own (a rate lowered to a state's statutory ceiling) names its key in
+ * `note_key` and fills its placeholders from `note_params`.
  */
 export function sourceTitle(
   t: TFunction,
@@ -208,8 +210,9 @@ export function sourceTitle(
   const kind = t(`contracts.payment_terms.source.${source.source}`, {
     defaultValue: SOURCE_LABELS[source.source] ?? source.source,
   });
+  const noteKey = source.note_key || `contracts.country_defaults.${country}.${field}.note`;
   const note = source.note
-    ? t(`contracts.country_defaults.${country}.${field}.note`, { defaultValue: source.note })
+    ? t(noteKey, { ...(source.note_params ?? {}), defaultValue: source.note })
     : '';
   return [kind, source.reference, note].filter(Boolean).join(' · ');
 }

@@ -9041,6 +9041,7 @@ const resource = {
     "contracts.country_defaults.US.payment_period_days.note": "Net 30, yaygın kararlaştırılan süredir. Sözleşme ödeme tarihini taraflara bırakır ve eyalet hızlı ödeme yasaları yasal süreler belirler.",
     "contracts.country_defaults.US.valuation_interval.note": "Taraflar başka bir süre yazmadıkça, ayın son günüyle sona eren bir takvim ayı.",
     "contracts.country_defaults.US.certificate_name.note": "Mimar tarafından onaylanan, devam sayfasıyla birlikte yüklenicinin başvurusu.",
+    "contracts.statutory_ceiling.retention_percent.note": "Yüzde {{percent}} düzeyine indirildi: {{since}} tarihinde veya sonrasında yapılan, kamu ya da özel bir sözleşmede, {{subdivision}} yasası her ödemeden bundan fazlasının tutulmasına izin vermez. Yasa, tarafların daha fazlasında anlaşabileceği istisnaları sıralar.",
     "subcontractors.agreement_retention_required": "Bu sözleşmede belirtilen teminatı girin (yoksa 0).",
     "costs.base_market_unfinished": "Bu temelin bir pazar değişimi tamamlanmadı",
     "costs.base_restore_home": "Ana pazara geri döndür",

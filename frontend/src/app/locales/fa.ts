@@ -8080,6 +8080,7 @@ const resource = {
     "contracts.country_defaults.US.payment_period_days.note": "خالص ۳۰ روز مدت توافق‌شده رایج است. توافق تاریخ پرداخت را به طرفین می‌سپارد، و قوانین پرداخت سریع ایالتی دوره‌های قانونی تعیین می‌کنند.",
     "contracts.country_defaults.US.valuation_interval.note": "یک ماه تقویمی که در آخرین روز ماه پایان می‌یابد، مگر اینکه طرفین دوره دیگری بنویسند.",
     "contracts.country_defaults.US.certificate_name.note": "درخواست پیمانکار همراه با برگه ادامه، تصدیق‌شده توسط معمار.",
+    "contracts.statutory_ceiling.retention_percent.note": "به {{percent}} درصد کاهش یافته است: در قراردادی که در تاریخ {{since}} یا پس از آن منعقد شده، چه دولتی و چه خصوصی، قانون {{subdivision}} اجازه نمی‌دهد بیش از این مقدار از هر پرداخت نگه داشته شود. قانون استثناهایی را برمی‌شمرد که طرفین در آن‌ها می‌توانند درصد بیشتری توافق کنند.",
     "subcontractors.agreement_retention_required": "تضمین نگه‌داشته‌شده‌ای که این توافق بیان می‌کند را وارد کنید (۰ در صورت نبودن).",
     "costs.base_market_unfinished": "تغییر بازار برای این پایه کامل نشده است",
     "costs.base_restore_home": "بازگشت به بازار اصلی",

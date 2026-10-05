@@ -8134,6 +8134,7 @@ const resource = {
     "contracts.country_defaults.US.payment_period_days.note": "נטו 30 יום הם התקופה המוסכמת הנפוצה. ההסכם משאיר את תאריך התשלום לצדדים, וחוקי תשלום מהיר של המדינה קובעים תקופות חוקיות.",
     "contracts.country_defaults.US.valuation_interval.note": "חודש קלנדרי אחד שמסתיים ביום האחרון של החודש, אלא אם הצדדים כותבים תקופה אחרת.",
     "contracts.country_defaults.US.certificate_name.note": "בקשת הקבלן עם גיליון ההמשך, מאושרת על ידי האדריכל.",
+    "contracts.statutory_ceiling.retention_percent.note": "הופחת ל-{{percent}} אחוז: בחוזה שנחתם ב-{{since}} או לאחר מכן, ציבורי או פרטי, החוק של {{subdivision}} אינו מתיר לנכות מכל תשלום יותר מכך. החוק מפרט את החריגים שבהם הצדדים רשאים להסכים על יותר.",
     "subcontractors.agreement_retention_required": "הזינו את העיכבון שהסכם זה קובע (0 אם אין).",
     "costs.base_market_unfinished": "החלפת שוק לבסיס זה לא הסתיימה",
     "costs.base_restore_home": "חזרה לשוק הבית",

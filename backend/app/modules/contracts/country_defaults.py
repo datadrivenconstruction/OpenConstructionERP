@@ -36,11 +36,26 @@ this table: ``release_percent_of_held`` is the percent of what is *held at that
 event*, not of the original retention. "Half at completion, the rest at the
 end of the defects period" is therefore ``50`` then ``100``. Writing ``50`` and
 ``50`` would leave a quarter of the retention with no event that ever pays it.
+
+**A state's statute can lower the country's usual rate.** The rows here are
+national, but in a federal country the retention law is often the state's. A
+subdivision pack (one with a ``parent_pack``) states that law as data: a
+retainage rule carrying ``per_payment_percent`` and ``works`` is a ceiling on
+what may be withheld from each payment, binding contracts entered into on or
+after its ``effective_date``. :func:`statutory_retention_ceiling` reads those
+rules and :func:`resolve_contract_defaults` lowers the usual rate to the
+ceiling where the rate runs above it. Nothing in this module names a state;
+the state comes from the project address (:func:`subdivision_from_address`).
+A contract does not record whether its works are public or private, so a
+ceiling is applied only on a date when the subdivision caps both kinds; where
+one kind is uncapped the national figure stands, since it may be lawful.
 """
 
 from __future__ import annotations
 
 import copy
+import re
+from datetime import UTC, date, datetime
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
@@ -85,6 +100,30 @@ PLATFORM_FALLBACK: dict[str, Any] = {
 
 #: Other spellings a project may carry for a country this table keys by ISO 3166-1.
 COUNTRY_ALIASES: dict[str, str] = {"UK": "GB"}
+
+#: The kinds of works a statutory retention ceiling is written for. A ceiling
+#: reaches a contract's defaults only when every kind here is capped, because
+#: a contract does not record which kind it is.
+CEILING_WORKS: tuple[str, ...] = ("private", "public")
+
+#: The i18n key the note beside a rate lowered to a statutory ceiling is
+#: rendered through, with ``note_params`` filling its placeholders. Kept out of
+#: :data:`NOTE_KEY_PREFIX`: that namespace holds exactly one note per table
+#: figure, and a test counts it.
+STATUTORY_CEILING_NOTE_KEY = "contracts.statutory_ceiling.retention_percent.note"
+
+#: That note's English text, word for word as ``en.ts`` carries it.
+STATUTORY_CEILING_NOTE = (
+    "Lowered to {{percent}} percent: on a contract entered into on or after {{since}}, public or private, the law "
+    "of {{subdivision}} does not allow more than that to be withheld from each payment. The statute lists "
+    "exceptions under which the parties may agree more."
+)
+
+#: An ISO 3166-2 code, the alpha-2 country, a hyphen, one to three alphanumerics.
+_SUBDIVISION_CODE = re.compile(r"[A-Z]{2}-[A-Z0-9]{1,3}")
+
+#: A bare subdivision part, as a US address writes its state ("CA").
+_SUBDIVISION_PART = re.compile(r"[A-Z0-9]{1,3}")
 
 #: Where the notes live in the client's locale files:
 #: ``contracts.country_defaults.<CC>.<field>.note``.
@@ -601,8 +640,172 @@ def note_key(country: str, field: str) -> str:
     return f"{NOTE_KEY_PREFIX}{country}.{field}.note"
 
 
-def resolve_contract_defaults(country_code: str | None) -> dict[str, Any] | None:
+def _today() -> date:
+    """Today in UTC. A seam, so a test can say which day a contract is entered into."""
+    return datetime.now(UTC).date()
+
+
+def _percent_text(value: Any) -> str:
+    return format(Decimal(str(value)).normalize(), "f")
+
+
+def subdivision_from_address(country_code: str | None, address: Any) -> str | None:
+    """The ISO 3166-2 code of the state an address names, or ``None``.
+
+    Read from ``address["state"]``, where an address in a country with states
+    keeps it (see ``app.core.validation.address``). Three spellings are
+    accepted and nothing else: the full code of this country (``"XX-YY"``),
+    the bare part a postal address writes (``"YY"``), and the exact name a
+    subdivision pack of this country declares as ``subdivision_name``. An
+    abbreviation or a misspelling answers ``None`` rather than a guess, and so
+    does a code of another country.
+    """
+    country = normalise_country(country_code)
+    if not country or not isinstance(address, dict):
+        return None
+    raw = str(address.get("state") or "").strip()
+    if not raw:
+        return None
+    code = raw.upper()
+    if _SUBDIVISION_CODE.fullmatch(code):
+        return code if code.startswith(f"{country}-") else None
+    if _SUBDIVISION_PART.fullmatch(code):
+        return f"{country}-{code}"
+    from app.core.regional_packs import packs_for_country  # noqa: PLC0415
+
+    for config in packs_for_country(country):
+        name = str(config.get("subdivision_name") or "").strip()
+        sub_code = str(config.get("subdivision_code") or "").strip().upper()
+        if config.get("parent_pack") and sub_code and name.casefold() == raw.casefold():
+            return sub_code
+    return None
+
+
+def _subdivision_name(country: str, subdivision_code: str) -> str:
+    """The name the subdivision's pack declares, else the code itself."""
+    from app.core.regional_packs import packs_for_country  # noqa: PLC0415
+
+    for config in packs_for_country(country):
+        if str(config.get("subdivision_code") or "").strip().upper() == subdivision_code:
+            return str(config.get("subdivision_name") or subdivision_code)
+    return subdivision_code
+
+
+def _commenced(rule: dict[str, Any], as_of: date) -> bool:
+    """Whether a ceiling binds a contract entered into on ``as_of``.
+
+    Only a full ISO date can say so. A rule whose commencement is a bare year
+    or was not established is never applied: a ceiling read a day early takes
+    money the parties lawfully agreed to hold.
+    """
+    try:
+        return date.fromisoformat(str(rule.get("effective_date"))) <= as_of
+    except ValueError:
+        return False
+
+
+def statutory_retention_ceiling(
+    country_code: str | None,
+    subdivision_code: str | None,
+    *,
+    as_of: date,
+) -> dict[str, Any] | None:
+    """The ceiling a subdivision's statute puts on retention per payment, for any kind of works.
+
+    Reads the retainage rules of the subdivision pack, through the same
+    resolver the progress billing reads, and keeps the ones that carry
+    ``per_payment_percent`` and a ``works`` from :data:`CEILING_WORKS`. For
+    each kind of works the tightest rule in force on ``as_of`` binds. A
+    contract does not record its kind of works, so the answer is the most
+    permissive of those, and ``None`` when any kind has no ceiling in force:
+    then the country's usual figure may be lawful and is not lowered.
+
+    Args:
+        country_code: The project's ISO 3166-1 country.
+        subdivision_code: The project's ISO 3166-2 subdivision, or ``None``.
+        as_of: The day the contract is entered into. A draft created today is
+            entered into today at the earliest.
+
+    Returns:
+        ``None``, or ``percent`` (a decimal string), ``subdivision_code``,
+        ``subdivision_name``, ``since`` (the ISO date from which every kind of
+        works is capped), ``as_of`` and ``rules`` (one per kind of works:
+        ``code``, ``works``, ``percent``, ``statute_reference``,
+        ``effective_date``).
+    """
+    country = normalise_country(country_code)
+    wanted = (subdivision_code or "").strip().upper()
+    if not country or not wanted:
+        return None
+    from app.core.regional_packs import resolve_progress_billing  # noqa: PLC0415
+
+    subdivision = (resolve_progress_billing(country_code=country, subdivision_code=wanted) or {}).get("subdivision")
+    if not isinstance(subdivision, dict):
+        return None
+    rules = [
+        rule
+        for rule in subdivision.get("retainage") or []
+        if isinstance(rule, dict)
+        and rule.get("per_payment_percent") not in (None, "")
+        and rule.get("works") in CEILING_WORKS
+    ]
+    binding: list[dict[str, Any]] = []
+    for works in CEILING_WORKS:
+        in_force = [rule for rule in rules if rule["works"] == works and _commenced(rule, as_of)]
+        if not in_force:
+            return None
+        binding.append(min(in_force, key=lambda rule: Decimal(str(rule["per_payment_percent"]))))
+    ceiling = max(Decimal(str(rule["per_payment_percent"])) for rule in binding)
+    return {
+        "percent": _percent_text(ceiling),
+        "subdivision_code": wanted,
+        "subdivision_name": _subdivision_name(country, wanted),
+        "since": max(str(rule["effective_date"]) for rule in binding),
+        "as_of": as_of.isoformat(),
+        "rules": [
+            {
+                "code": rule.get("code"),
+                "works": rule["works"],
+                "percent": _percent_text(rule["per_payment_percent"]),
+                "statute_reference": rule.get("statute_reference"),
+                "effective_date": rule.get("effective_date"),
+            }
+            for rule in binding
+        ],
+    }
+
+
+def _ceiling_source(ceiling: dict[str, Any]) -> dict[str, Any]:
+    """The source of a rate lowered to a statutory ceiling, shaped like a table figure's."""
+    params = {
+        "percent": ceiling["percent"],
+        "subdivision": ceiling["subdivision_name"],
+        "since": ceiling["since"],
+    }
+    note = STATUTORY_CEILING_NOTE
+    for name, value in params.items():
+        note = note.replace("{{" + name + "}}", str(value))
+    return {
+        "source": "statute",
+        "reference": "; ".join(str(rule["statute_reference"]) for rule in ceiling["rules"]),
+        "note": note,
+        "note_key": STATUTORY_CEILING_NOTE_KEY,
+        "note_params": params,
+    }
+
+
+def resolve_contract_defaults(
+    country_code: str | None,
+    *,
+    subdivision_code: str | None = None,
+    as_of: date | None = None,
+) -> dict[str, Any] | None:
     """The usual payment terms of ``country_code``, or ``None`` when the table has no row.
+
+    With a ``subdivision_code`` whose pack states a retention ceiling in force
+    on ``as_of`` (today when not given) for every kind of works, a usual rate
+    above it is lowered to it, and its source names the statutes
+    (:func:`statutory_retention_ceiling`).
 
     Returns:
         ``None`` for a blank or unknown country. Never another country's row.
@@ -612,7 +815,8 @@ def resolve_contract_defaults(country_code: str | None) -> dict[str, Any] | None
         ``reference``, ``note`` in English and ``note_key``, the i18n key the
         note is translated under) and ``release_split_source``, which is
         ``"regional_pack"`` when the split was read from the pack and
-        ``"table"`` otherwise.
+        ``"table"`` otherwise, and ``statutory_ceiling``: ``None``, or what
+        :func:`statutory_retention_ceiling` answered for the subdivision.
     """
     country = normalise_country(country_code)
     row = COUNTRY_CONTRACT_DEFAULTS.get(country)
@@ -634,12 +838,20 @@ def resolve_contract_defaults(country_code: str | None) -> dict[str, Any] | None
             "note": figure["note"],
             "note_key": note_key(country, field),
         }
+    ceiling = (
+        statutory_retention_ceiling(country, subdivision_code, as_of=as_of or _today()) if subdivision_code else None
+    )
+    rate = values.get("retention_percent")
+    if ceiling is not None and rate is not None and Decimal(str(rate)) > Decimal(ceiling["percent"]):
+        values["retention_percent"] = ceiling["percent"]
+        sources["retention_percent"] = _ceiling_source(ceiling)
     return {
         "country_code": country,
         "standard_form": row.get("standard_form"),
         "values": values,
         "sources": sources,
         "release_split_source": split_source,
+        "statutory_ceiling": ceiling,
     }
 
 
@@ -758,6 +970,7 @@ def _same(old: Any, new: Any) -> bool:
 
 
 __all__ = [
+    "CEILING_WORKS",
     "CONTRACT_DEFAULT_FIELDS",
     "COUNTRY_ALIASES",
     "COUNTRY_CONTRACT_DEFAULTS",
@@ -767,12 +980,16 @@ __all__ = [
     "PAYMENT_TERMS_KEY",
     "PAYMENT_TERM_FIELDS",
     "PLATFORM_FALLBACK",
+    "STATUTORY_CEILING_NOTE",
+    "STATUTORY_CEILING_NOTE_KEY",
     "VALUATION_INTERVALS",
     "apply_contract_defaults",
     "forget_overridden",
     "normalise_country",
     "note_key",
     "resolve_contract_defaults",
+    "statutory_retention_ceiling",
     "subcontract_retention_default",
+    "subdivision_from_address",
     "validate_release_split",
 ]

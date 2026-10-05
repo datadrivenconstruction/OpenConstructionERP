@@ -19139,6 +19139,7 @@ const resource = {
     "contracts.country_defaults.US.payment_period_days.note": "Net 30 adalah ketentuan yang umum disepakati. Perjanjian menyerahkan tanggal pembayaran pada para pihak, dan undang-undang prompt payment setiap negara bagian menetapkan jangka waktu hukumnya.",
     "contracts.country_defaults.US.valuation_interval.note": "Satu bulan kalender yang berakhir pada hari terakhir bulan, kecuali para pihak menetapkan periode lain.",
     "contracts.country_defaults.US.certificate_name.note": "Permohonan pembayaran kontraktor dengan continuation sheet, disahkan oleh arsitek.",
+    "contracts.statutory_ceiling.retention_percent.note": "Diturunkan menjadi {{percent}} persen: pada kontrak yang dibuat pada atau setelah {{since}}, baik publik maupun swasta, undang-undang {{subdivision}} tidak mengizinkan penahanan lebih dari itu dari setiap pembayaran. Undang-undang mencantumkan pengecualian yang memungkinkan para pihak menyepakati lebih tinggi.",
     "contracts.release_open_items_project_wide_other": "Item terbuka dihitung untuk seluruh proyek, dan proyek ini memiliki {{count}} kontrak, sehingga retensi ini juga mencakup item milik pekerjaan yang ditagih pada kontrak lain. Masukkan sendiri nilainya jika Anda tahu berapa nilai item terbuka pada kontrak ini.",
     "contracts.release_open_items_unavailable": "Daftar punch tidak terpasang, sehingga item terbuka tidak dihitung.",
     "contracts.release_open_items_counted_other": "{{count}} item terbuka pada proyek, {{without}} di antaranya tanpa biaya.",

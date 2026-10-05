@@ -8116,6 +8116,7 @@ const resource = {
     "contracts.country_defaults.US.payment_period_days.note": "خالص 30 دن عام متفقہ مدت ہے۔ معاہدہ ادائیگی کی تاریخ کو فریقین پر چھوڑ دیتا ہے، اور ریاستی فوری ادائیگی کے قوانین قانونی مدتیں طے کرتے ہیں۔",
     "contracts.country_defaults.US.valuation_interval.note": "ایک کیلنڈر مہینہ جو مہینے کے آخری دن ختم ہوتا ہے، جب تک فریقین کوئی دوسری مدت نہ لکھیں۔",
     "contracts.country_defaults.US.certificate_name.note": "ٹھیکیدار کی درخواست اس کی تسلسل شیٹ کے ساتھ، آرکیٹیکٹ کی تصدیق شدہ۔",
+    "contracts.statutory_ceiling.retention_percent.note": "{{percent}} فیصد تک کم کیا گیا: {{since}} یا اس کے بعد کیے گئے معاہدے میں، خواہ سرکاری ہو یا نجی، {{subdivision}} کا قانون ہر ادائیگی سے اس سے زیادہ ریٹینشن روکنے کی اجازت نہیں دیتا۔ قانون ان استثنا کی فہرست دیتا ہے جن میں فریقین زیادہ پر متفق ہو سکتے ہیں۔",
     "subcontractors.agreement_retention_required": "وہ ریٹینشن درج کریں جو یہ معاہدہ بیان کرتا ہے (نہ ہونے پر 0)۔",
     "costs.base_market_unfinished": "اس بیس کی مارکیٹ کی تبدیلی مکمل نہیں ہوئی",
     "costs.base_restore_home": "ہوم مارکیٹ میں واپس جائیں",

@@ -19219,6 +19219,7 @@ const resource = {
     "contracts.country_defaults.US.payment_period_days.note": "Net 30이 흔히 합의되는 조건입니다. 계약서는 지급일을 당사자에게 맡기며, 각 주의 prompt payment acts(즉시지급법)가 법정 기한을 정합니다.",
     "contracts.country_defaults.US.valuation_interval.note": "당사자가 다른 기간을 정하지 않는 한, 월말을 종료일로 하는 한 달의 역월.",
     "contracts.country_defaults.US.certificate_name.note": "건축가가 인증하는, continuation sheet(연속지)가 포함된 시공자의 지급 신청서.",
+    "contracts.statutory_ceiling.retention_percent.note": "{{percent}}%로 낮추었습니다. {{since}} 이후에 체결된 계약(공공공사든 민간공사든)에서는 {{subdivision}}의 법에 따라 매 지급에서 그 이상을 유보할 수 없습니다. 당사자가 더 높게 합의할 수 있는 예외는 법에 열거되어 있습니다.",
     "contracts.release_open_items_project_wide_other": "미처리 항목은 프로젝트 전체를 기준으로 집계되며 이 프로젝트에는 계약이 {{count}}건 있으므로, 이 유보금에는 다른 계약으로 청구된 공사에 속한 항목도 포함됩니다. 이 계약의 미처리 항목 금액을 알고 있다면 금액을 직접 입력하세요.",
     "contracts.release_open_items_unavailable": "펀치 리스트가 설치되어 있지 않아 미처리 항목을 집계하지 않았습니다.",
     "contracts.release_open_items_counted_other": "프로젝트에 미처리 항목이 {{count}}건 있으며, 그중 {{without}}건은 비용이 없습니다.",

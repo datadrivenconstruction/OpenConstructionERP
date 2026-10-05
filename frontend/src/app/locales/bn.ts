@@ -18665,6 +18665,7 @@ const resource = {
     "contracts.country_defaults.US.payment_period_days.note": "Net 30 সাধারণত সম্মত শর্ত। চুক্তিপত্র পেমেন্টের তারিখ পক্ষদের উপর ছেড়ে দেয়, এবং প্রতিটি রাজ্যের prompt payment act আইনি মেয়াদ নির্ধারণ করে।",
     "contracts.country_defaults.US.valuation_interval.note": "মাসের শেষ দিনে শেষ হওয়া একটি ক্যালেন্ডার মাস, যদি না পক্ষরা অন্য মেয়াদ নির্ধারণ করে।",
     "contracts.country_defaults.US.certificate_name.note": "কন্ট্রাক্টরের আবেদন, continuation sheet-সহ, যা আর্কিটেক্ট সত্যায়িত করে।",
+    "contracts.statutory_ceiling.retention_percent.note": "{{percent}} শতাংশে নামানো হয়েছে: {{since}} বা তার পরে সম্পাদিত চুক্তিতে, সরকারি হোক বা বেসরকারি, {{subdivision}}-এর আইন প্রতিটি পেমেন্ট থেকে এর বেশি কেটে রাখার অনুমতি দেয় না। যেসব ব্যতিক্রমে পক্ষগুলো বেশি হারে সম্মত হতে পারে, আইনে তা তালিকাভুক্ত আছে।",
     "contracts.release_open_items_counted_one": "প্রকল্পে {{count}}টি খোলা আইটেম আছে, যার মধ্যে {{without}}টির কোনো খরচ নেই।",
     "contracts.release_open_items_counted_other": "প্রকল্পে {{count}}টি খোলা আইটেম আছে, যার মধ্যে {{without}}টির কোনো খরচ নেই।",
     "contracts.release_open_items_project_wide_one": "খোলা আইটেম পুরো প্রকল্পের জন্য গণনা করা হয় এবং এই প্রকল্পে {{count}}টি চুক্তি আছে, তাই এই ধারণ সেই আইটেমগুলোও অন্তর্ভুক্ত করে যেগুলো অন্য একটিতে বিল করা কাজের সঙ্গে যুক্ত। এই চুক্তির খোলা আইটেমের মূল্য জানা থাকলে পরিমাণ নিজে লিখুন।",

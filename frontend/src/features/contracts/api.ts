@@ -507,12 +507,16 @@ export interface CountryDefaultSource {
   note: string;
   /** That key, as the server spells it; stamps written before it existed lack it. */
   note_key?: string;
+  /** Values for the note's placeholders, where its key has any. */
+  note_params?: Record<string, string>;
 }
 
 /** What a new contract on a project starts from. Never another country's row. */
 export interface ContractCountryDefaults {
   project_id: string;
   country_code: string | null;
+  /** ISO 3166-2, read from the project address; null when it names no state. */
+  subdivision_code?: string | null;
   has_defaults: boolean;
   standard_form: string | null;
   values: Partial<{

@@ -8994,6 +8994,7 @@ const resource = {
     "contracts.country_defaults.US.payment_period_days.note": "صافي 30 يومًا هي المدة المتفق عليها الشائعة. تترك الاتفاقية تاريخ الدفع للطرفين، وتحدد قوانين الدفع الفوري في الولايات فترات قانونية.",
     "contracts.country_defaults.US.valuation_interval.note": "شهر تقويمي واحد ينتهي في آخر يوم من الشهر، إلا أن يكتب الطرفان فترة أخرى.",
     "contracts.country_defaults.US.certificate_name.note": "طلب المقاول مع ورقة الاستمرار، مصدّقًا عليه من المهندس المعماري.",
+    "contracts.statutory_ceiling.retention_percent.note": "خُفِّض إلى {{percent}} بالمئة: في العقد المبرم في {{since}} أو بعده، عاماً كان أو خاصاً، لا يسمح قانون {{subdivision}} باحتجاز أكثر من ذلك من كل دفعة. ويحدد القانون الاستثناءات التي يجوز للطرفين بموجبها الاتفاق على نسبة أعلى.",
     "subcontractors.agreement_retention_required": "أدخل الاحتجاز الذي تحدده هذه الاتفاقية (0 إن لم يوجد).",
     "costs.base_market_unfinished": "لم يكتمل تبديل سوق لهذا الأساس",
     "costs.base_restore_home": "الرجوع إلى السوق الأصلي",

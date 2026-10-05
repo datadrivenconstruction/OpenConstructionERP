@@ -29,6 +29,7 @@ from fastapi import HTTPException
 
 from app.core.events import event_bus
 from app.modules.boq.models import BOQ, Position
+from app.modules.contracts import country_defaults
 from app.modules.contracts.country_defaults import COUNTRY_CONTRACT_DEFAULTS
 from app.modules.contracts.models import Contract, ContractLine, ProgressClaim
 from app.modules.contracts.schemas import AutoGenerateClaimRequest, ContractCreate, ContractUpdate
@@ -60,7 +61,7 @@ def _quiet(monkeypatch):
     register_contracts_validation_rules()
 
 
-async def _project(session, country_code: str | None) -> Project:
+async def _project(session, country_code: str | None, address: dict | None = None) -> Project:
     suffix = uuid.uuid4().hex[:8]
     owner = User(id=uuid.uuid4(), email=f"defaults-{suffix}@site.example", hashed_password="x")
     session.add(owner)
@@ -71,6 +72,7 @@ async def _project(session, country_code: str | None) -> Project:
         owner_id=owner.id,
         currency="EUR",
         country_code=country_code,
+        address=address,
         metadata_={},
     )
     session.add(project)
@@ -607,7 +609,47 @@ async def test_a_schedule_cleared_on_purpose_is_not_given_the_contracts_cap(pg_s
     assert (await svc.retention_policy(contract)).cap_percent_of_contract_sum is None
 
 
+# ── A state's statutory ceiling lowers the US rate ───────────────────
+
+_SACRAMENTO = {"street": "1 Capitol Mall", "city": "Sacramento", "state": "CA", "postcode": "95814"}
+
+
+async def test_a_california_contract_starts_within_the_state_ceiling(pg_session, monkeypatch) -> None:
+    # Civil Code § 8811 caps private work at 5 percent of each payment from
+    # 2026, Public Contract Code § 7201 has capped public work since 2012.
+    monkeypatch.setattr(country_defaults, "_today", lambda: date(2026, 10, 5))
+    contract = await _create(ContractsService(pg_session), await _project(pg_session, "US", _SACRAMENTO))
+
+    assert contract.retention_percent == Decimal("5")
+    stamp = contract.metadata_["country_defaults"]
+    assert stamp["subdivision_code"] == "US-CA"
+    assert stamp["applied"]["retention_percent"] == "5"
+    assert stamp["sources"]["retention_percent"]["source"] == "statute"
+
+
+async def test_a_california_contract_dated_2025_keeps_the_national_rate(pg_session, monkeypatch) -> None:
+    monkeypatch.setattr(country_defaults, "_today", lambda: date(2025, 12, 31))
+    contract = await _create(ContractsService(pg_session), await _project(pg_session, "US", _SACRAMENTO))
+
+    assert contract.retention_percent == Decimal("10")
+
+
+async def test_a_texas_contract_keeps_the_national_rate(pg_session, monkeypatch) -> None:
+    monkeypatch.setattr(country_defaults, "_today", lambda: date(2026, 10, 5))
+    address = {"street": "1100 Congress Ave", "city": "Austin", "state": "TX", "postcode": "78701"}
+    contract = await _create(ContractsService(pg_session), await _project(pg_session, "US", address))
+
+    assert contract.retention_percent == Decimal("10")
+
+
 # ── Subcontracts take the same defaults ──────────────────────────────
+
+
+async def test_a_california_subcontract_starts_within_the_state_ceiling(pg_session, monkeypatch) -> None:
+    monkeypatch.setattr(country_defaults, "_today", lambda: date(2026, 10, 5))
+    agreement = await _agreement(pg_session, await _project(pg_session, "US", _SACRAMENTO))
+
+    assert agreement.retention_percent == Decimal("5")
 
 
 async def _agreement(session, project: Project, **fields):

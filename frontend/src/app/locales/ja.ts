@@ -19219,6 +19219,7 @@ const resource = {
     "contracts.country_defaults.US.payment_period_days.note": "Net 30が一般的な合意条件です。合意書は支払期日を当事者に委ねており、各州のprompt payment acts（即時支払法）が法定期限を定めています。",
     "contracts.country_defaults.US.valuation_interval.note": "当事者が別の期間を定めない限り、月末を終了日とする暦月1か月。",
     "contracts.country_defaults.US.certificate_name.note": "建築家が認証する、continuation sheet（続紙）付きの請負業者の申請書。",
+    "contracts.statutory_ceiling.retention_percent.note": "{{percent}}%に引き下げられています。{{since}}以降に締結された契約（公共工事・民間工事を問わず）では、{{subdivision}}の法律により、各支払からそれを超えて留保することは認められません。当事者がそれ以上を合意できる例外は、法律に列挙されています。",
     "contracts.release_open_items_project_wide_other": "未対応項目はプロジェクト全体で集計され、このプロジェクトには契約が{{count}}件あるため、この保留額には別の契約で請求された工事に属する項目も含まれます。この契約の未対応項目の金額が分かっている場合は、ご自身で金額を入力してください。",
     "contracts.release_open_items_unavailable": "パンチリストがインストールされていないため、未対応項目は集計されませんでした。",
     "contracts.release_open_items_counted_other": "プロジェクトには未対応項目が{{count}}件あり、そのうち{{without}}件は費用が未設定です。",

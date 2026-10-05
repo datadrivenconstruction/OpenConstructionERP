@@ -8116,6 +8116,7 @@ const resource = {
     "contracts.country_defaults.US.payment_period_days.note": "Таза 30 күн - кең таралған келісілген мерзім. Келісім төлем күнін тараптарға қалдырады, ал штаттың жедел төлем туралы заңдары заңды мерзімдер белгілейді.",
     "contracts.country_defaults.US.valuation_interval.note": "Тараптар басқа мерзім жазбаса, айдың соңғы күнінде аяқталатын бір календарлық ай.",
     "contracts.country_defaults.US.certificate_name.note": "Сәулетші растаған, жалғасу парағы бар мердігердің өтінімі.",
+    "contracts.statutory_ceiling.retention_percent.note": "{{percent}} пайызға дейін төмендетілді: {{since}} күні немесе одан кейін жасалған шартта, мемлекеттік немесе жеке болсын, {{subdivision}} заңы әр төлемнен бұдан көп ұстауға рұқсат етпейді. Заңда тараптар көбірек келісе алатын ерекшеліктер санамаланған.",
     "subcontractors.agreement_retention_required": "Осы келісім көрсеткен кепілдік ұстауын енгізіңіз (жоқ болса 0).",
     "costs.base_market_unfinished": "Осы базаның нарық ауысуы аяқталмады",
     "costs.base_restore_home": "Негізгі нарыққа қайтару",

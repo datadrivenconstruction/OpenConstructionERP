@@ -225,6 +225,11 @@ class ContractCountryDefaultsResponse(BaseModel):
 
     project_id: UUID
     country_code: str | None = None
+    # ISO 3166-2, read from the project address; None when it names no state.
+    subdivision_code: str | None = None
+    # The state's ceiling on retention per payment, when one binds every kind
+    # of works on today's date; the retention rate above it was lowered to it.
+    statutory_ceiling: dict[str, Any] | None = None
     has_defaults: bool
     standard_form: str | None = None
     values: dict[str, Any] = Field(default_factory=dict)

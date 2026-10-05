@@ -19375,6 +19375,7 @@ const resource = {
     "contracts.country_defaults.US.payment_period_days.note": "Net 30 सामान्यतः सहमत शर्त है। एग्रीमेंट भुगतान तिथि पक्षों पर छोड़ता है, और हर राज्य के prompt payment acts कानूनी अवधि तय करते हैं।",
     "contracts.country_defaults.US.valuation_interval.note": "एक कैलेंडर महीना जो महीने के आखिरी दिन समाप्त होता है, जब तक पक्ष कोई अन्य अवधि तय न करें।",
     "contracts.country_defaults.US.certificate_name.note": "ठेकेदार का आवेदन, continuation sheet के साथ, जिसे आर्किटेक्ट प्रमाणित करता है।",
+    "contracts.statutory_ceiling.retention_percent.note": "घटाकर {{percent}} प्रतिशत किया गया: {{since}} या उसके बाद हुए अनुबंध में, चाहे वह सार्वजनिक हो या निजी, {{subdivision}} का कानून हर भुगतान से इससे अधिक रोकने की अनुमति नहीं देता। कानून उन अपवादों को सूचीबद्ध करता है जिनमें पक्ष अधिक पर सहमत हो सकते हैं।",
     "contracts.release_open_items_counted_one": "प्रोजेक्ट पर {{count}} खुली मद है, जिसमें से {{without}} की लागत तय नहीं है।",
     "contracts.release_open_items_counted_other": "प्रोजेक्ट पर {{count}} खुली मदें हैं, जिनमें से {{without}} की लागत तय नहीं है।",
     "contracts.release_open_items_project_wide_one": "खुली मदें पूरे प्रोजेक्ट के स्तर पर गिनी जाती हैं और इस प्रोजेक्ट में {{count}} अनुबंध है, इसलिए यह रोक उन मदों को भी कवर करती है जो किसी दूसरे पर बिल किए गए काम से जुड़ी हैं। यदि आप जानते हैं कि इस अनुबंध की खुली मदों का मूल्य क्या है, तो राशि स्वयं दर्ज करें।",

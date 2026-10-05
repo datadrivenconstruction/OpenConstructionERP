@@ -19189,6 +19189,7 @@ const resource = {
     "contracts.country_defaults.US.payment_period_days.note": "Net 30 là điều khoản thỏa thuận phổ biến. Hợp đồng để ngày thanh toán cho các bên tự thỏa thuận, và luật prompt payment của từng tiểu bang quy định thời hạn luật định.",
     "contracts.country_defaults.US.valuation_interval.note": "Một tháng dương lịch kết thúc vào ngày cuối tháng, trừ khi các bên quy định kỳ khác.",
     "contracts.country_defaults.US.certificate_name.note": "Đơn đề nghị thanh toán của nhà thầu kèm continuation sheet, được kiến trúc sư xác nhận.",
+    "contracts.statutory_ceiling.retention_percent.note": "Được hạ xuống {{percent}} phần trăm: với hợp đồng ký từ ngày {{since}} trở đi, công hay tư, luật của {{subdivision}} không cho phép giữ lại từ mỗi lần thanh toán nhiều hơn mức đó. Luật liệt kê các ngoại lệ cho phép các bên thỏa thuận mức cao hơn.",
     "contracts.release_open_items_project_wide_other": "Các mục đang mở được đếm trên toàn dự án, và dự án này có {{count}} hợp đồng, nên khoản giữ lại này bao gồm cả các mục thuộc phần việc được thanh toán theo hợp đồng khác. Hãy tự nhập số tiền nếu bạn biết giá trị các mục đang mở trên hợp đồng này.",
     "contracts.release_open_items_unavailable": "Danh sách lỗi chưa được cài đặt, nên không có mục đang mở nào được đếm.",
     "contracts.release_open_items_counted_other": "Có {{count}} mục đang mở trên dự án, trong đó {{without}} mục chưa có chi phí.",

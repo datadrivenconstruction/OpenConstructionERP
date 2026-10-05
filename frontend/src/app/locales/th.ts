@@ -19265,6 +19265,7 @@ const resource = {
     "contracts.country_defaults.US.payment_period_days.note": "Net 30 เป็นเงื่อนไขที่พบบ่อย ข้อตกลงปล่อยให้วันชำระเงินเป็นไปตามที่ทั้งสองฝ่ายตกลง และ prompt payment acts ของแต่ละรัฐกำหนดระยะเวลาตามกฎหมาย",
     "contracts.country_defaults.US.valuation_interval.note": "หนึ่งเดือนตามปฏิทิน สิ้นสุดวันสุดท้ายของเดือน เว้นแต่ทั้งสองฝ่ายกำหนดช่วงเวลาอื่น",
     "contracts.country_defaults.US.certificate_name.note": "ใบขอเบิกเงินของผู้รับเหมาพร้อม continuation sheet ซึ่งสถาปนิกรับรอง",
+    "contracts.statutory_ceiling.retention_percent.note": "ลดลงเหลือ {{percent}} เปอร์เซ็นต์: สำหรับสัญญาที่ทำตั้งแต่วันที่ {{since}} เป็นต้นไป ไม่ว่าจะเป็นงานภาครัฐหรือเอกชน กฎหมายของ {{subdivision}} ไม่อนุญาตให้หักไว้จากแต่ละงวดจ่ายเกินจากนี้ กฎหมายระบุข้อยกเว้นที่คู่สัญญาตกลงให้สูงกว่านี้ได้",
     "contracts.release_open_items_project_wide_other": "รายการที่เปิดอยู่นับรวมทั้งโครงการ และโครงการนี้มีสัญญา {{count}} ฉบับ เงินที่กันไว้นี้จึงครอบคลุมรายการของงานที่เบิกในสัญญาอื่นด้วย หากคุณทราบว่ารายการที่เปิดอยู่ในสัญญานี้มีมูลค่าเท่าใด ให้กรอกจำนวนเงินเอง",
     "contracts.release_open_items_unavailable": "ยังไม่ได้ติดตั้งรายการงานที่ต้องแก้ไข จึงไม่ได้นับรายการที่เปิดอยู่",
     "contracts.release_open_items_counted_other": "มีรายการที่เปิดอยู่ {{count}} รายการในโครงการ โดย {{without}} รายการยังไม่มีค่าใช้จ่าย",
