@@ -233450,10 +233450,10 @@
     },
     {
       "name": "auth",
-      "ts_files": 16,
+      "ts_files": 20,
       "css_files": 0,
-      "test_files": 5,
-      "total_files": 16
+      "test_files": 7,
+      "total_files": 20
     },
     {
       "name": "authority-submission",
@@ -236020,7 +236020,7 @@
     "total_schemas": 3530,
     "total_python_files": 2257,
     "frontend_features": 192,
-    "frontend_ts_files": 2890,
+    "frontend_ts_files": 2894,
     "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {
