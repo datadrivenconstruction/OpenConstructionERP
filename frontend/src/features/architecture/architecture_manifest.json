@@ -22574,6 +22574,7 @@
         "importers/gaeb_xml.py",
         "importers/hungary_workbook.py",
         "manifest.py",
+        "markup_base.py",
         "markup_templates.py",
         "models.py",
         "pdf_export.py",
@@ -24790,7 +24791,7 @@
           "bases": [
             "_MarkupBase"
           ],
-          "docstring": "Create a markup/overhead line on a BOQ.\n\n``apply_to`` controls the markup base:\n\n* ``direct_cost`` - applies to the BOQ direct-cost subtotal only\n  (excludes every other markup line).\n* ``subtotal`` - applies to the direct-cost subtotal **plus the sum\n  of all preceding markup lines** (e.g. VAT/output tax on the\n  contractor price including overhead & profit). Behaves identically\n  to ``cumulative``; the alias is retained for GAEB/legacy clients\n  that label the tax base \"subtotal\".\n* ``cumulative`` - applies to the running total *including all\n  prior markups*. When multiple markups have ``apply_to='cumulative'``\n  they are evaluated in ``sort_order`` ASC, and each cumulative\n  markup's base is the direct-cost subtotal **plus** every PRIOR\n  markup (cumulative, subtotal or direct_cost) in the same BOQ. This\n  compounds profit-on-overhead-on-cost, the GAEB / DIN 276 default.\n  Reorder markups by changing ``sort_order``; ties are stable by ``id``.\n\n``scope_position_id`` and ``overrides_id`` express inheritance with\noverride. Leaving both unset creates a bill-wide line, the company\nstandard, which is what every markup was before these existed. Naming a\nposition confines the line to that position and everything under it, and\nnaming ``overrides_id`` as well makes it stand in for that bill-wide line\ninside its own subtree. An override keeps the place of the line it\nreplaces in the compounding order, so an exception changes the rate and\nnever the order.",
+          "docstring": "Create a markup/overhead line on a BOQ.\n\n``apply_to`` controls the markup base:\n\n* ``direct_cost`` - applies to the BOQ direct-cost subtotal only\n  (excludes every other markup line).\n* ``subtotal`` - applies to the direct-cost subtotal **plus the sum\n  of all preceding markup lines** (e.g. VAT/output tax on the\n  contractor price including overhead & profit). Behaves identically\n  to ``cumulative``; the alias is retained for GAEB/legacy clients\n  that label the tax base \"subtotal\".\n* ``cumulative`` - applies to the running total *including all\n  prior markups*. When multiple markups have ``apply_to='cumulative'``\n  they are evaluated in ``sort_order`` ASC, and each cumulative\n  markup's base is the direct-cost subtotal **plus** every PRIOR\n  markup (cumulative, subtotal or direct_cost) in the same BOQ. This\n  compounds profit-on-overhead-on-cost, the GAEB / DIN 276 default.\n  Reorder markups by changing ``sort_order``; ties are stable by ``id``.\n* ``same_as_previous`` - exactly the base the nearest active line above\n  was charged on, so two lines (Wagnis and Gewinn on the Selbstkosten)\n  share one base instead of the second compounding on the first. Falls\n  back to ``direct_cost`` for the first line or below a fixed amount.\n  See :mod:`app.modules.boq.markup_base`.\n\n``scope_position_id`` and ``overrides_id`` express inheritance with\noverride. Leaving both unset creates a bill-wide line, the company\nstandard, which is what every markup was before these existed. Naming a\nposition confines the line to that position and everything under it, and\nnaming ``overrides_id`` as well makes it stand in for that bill-wide line\ninside its own subtree. An override keeps the place of the line it\nreplaces in the compounding order, so an exception changes the rate and\nnever the order.",
           "fields": [
             {
               "name": "name",
@@ -232963,10 +232964,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 160,
+      "ts_files": 163,
       "css_files": 0,
-      "test_files": 80,
-      "total_files": 160
+      "test_files": 81,
+      "total_files": 163
     },
     {
       "name": "buyer-portal",
@@ -235461,9 +235462,9 @@
     "total_relationships": 234,
     "total_routes": 3734,
     "total_schemas": 3520,
-    "total_python_files": 2250,
+    "total_python_files": 2251,
     "frontend_features": 192,
-    "frontend_ts_files": 2865,
+    "frontend_ts_files": 2868,
     "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {
