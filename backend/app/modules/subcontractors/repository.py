@@ -109,8 +109,12 @@ class SubcontractorRepository(_BaseRepo):
         prequalification_status: str | None = None,
         trade_category: str | None = None,
         active_only: bool = True,
+        created_by: str | None = None,
     ) -> tuple[list[Subcontractor], int]:
         base = select(Subcontractor)
+        if created_by is not None:
+            # Academy mode: a learner's own register (see the router's academy scope).
+            base = base.where(Subcontractor.created_by == created_by)
         if active_only:
             base = base.where(Subcontractor.is_active.is_(True))
         if prequalification_status is not None:

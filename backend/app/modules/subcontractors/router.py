@@ -25,7 +25,10 @@ from fastapi import (
     UploadFile,
     status,
 )
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.academy_isolation import academy_mode_enabled
 from app.core.file_signature import (
     ALLOWED_DOCUMENT_TYPES,
     SIGNATURE_BYTES_REQUIRED,
@@ -33,7 +36,9 @@ from app.core.file_signature import (
     mime_for_signature,
 )
 from app.core.file_signature import require as require_signature
+from app.core.i18n import get_locale
 from app.core.storage import module_uploads_dir
+from app.core.validation.messages import translate
 from app.dependencies import (
     CurrentUserId,
     RequirePermission,
@@ -41,7 +46,13 @@ from app.dependencies import (
     accessible_project_ids,
     verify_project_access,
 )
-from app.modules.subcontractors.models import LienWaiver
+from app.modules.subcontractors.models import (
+    Certificate,
+    LienWaiver,
+    PrequalificationApplication,
+    Subcontractor,
+    SubcontractorContact,
+)
 from app.modules.subcontractors.repository import PrimeContractReader
 from app.modules.subcontractors.schemas import (
     AgreementCreate,
@@ -176,6 +187,68 @@ async def _verify_claim_project(
     await verify_project_access(contract.project_id, user_id, session)
 
 
+# ── Academy scope ──────────────────────────────────────────────────────
+#
+# The subcontractor directory is install-wide by design: a company keeps one
+# register of the firms it works with. On an academy box every learner is a
+# separate company, so a non-admin there sees and edits only the rows they
+# created. The table has no ``tenant_id``, so ``created_by`` is the scope; a
+# real tenant column, as contacts have, would be the platform-level fix. A row
+# outside the scope answers exactly like a missing one.
+
+
+async def _academy_owner(session: AsyncSession, user_id: str) -> str | None:
+    """The caller's id when academy mode limits them to their own rows, else ``None``.
+
+    ``None`` with the flag off and for an admin.
+    """
+    if not academy_mode_enabled():
+        return None
+    from app.core.tenant_scope import tenant_scope_owner
+
+    return await tenant_scope_owner(session, str(user_id))
+
+
+async def _academy_owned_ids(session: AsyncSession, owner: str) -> set[uuid.UUID]:
+    rows = await session.execute(select(Subcontractor.id).where(Subcontractor.created_by == owner))
+    return set(rows.scalars().all())
+
+
+async def _academy_guard_sub(session: AsyncSession, user_id: str, sub_id: uuid.UUID) -> None:
+    """404 ``Subcontractor not found`` for another learner's subcontractor."""
+    owner = await _academy_owner(session, user_id)
+    if owner is None:
+        return
+    row = (await session.execute(select(Subcontractor.created_by).where(Subcontractor.id == sub_id))).first()
+    if row is None or row[0] != owner:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Subcontractor not found")
+
+
+async def _academy_guard_child(
+    session: AsyncSession,
+    user_id: str,
+    model: Any,
+    row_id: uuid.UUID,
+    missing: str | None = None,
+) -> None:
+    """404 for a row that hangs off another learner's subcontractor.
+
+    ``missing`` is the detail the service answers for a row that does not
+    exist (``None`` for a prequalification, whose answer is translated), so
+    the two cases cannot be told apart. A row that does not exist is left to
+    the service.
+    """
+    owner = await _academy_owner(session, user_id)
+    if owner is None:
+        return
+    row = (await session.execute(select(model.subcontractor_id).where(model.id == row_id))).first()
+    if row is None:
+        return
+    if row[0] not in await _academy_owned_ids(session, owner):
+        detail = missing or translate("errors.prequalification_not_found", locale=get_locale())
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=detail)
+
+
 # ── Subcontractors ──────────────────────────────────────────────────────
 
 
@@ -199,12 +272,17 @@ async def list_subcontractors(
     the yard or the start of it.
     """
     svc = SubcontractorService(session)
+    # Only an academy learner's call carries the scope, so the repository
+    # contract every other caller relies on is untouched.
+    owner = await _academy_owner(session, _user)
+    scope = {"created_by": owner} if owner is not None else {}
     rows, total = await svc.subs.list_all(
         offset=offset,
         limit=limit,
         prequalification_status=prequalification_status,
         trade_category=trade_category,
         active_only=active_only,
+        **scope,
     )
     return SubcontractorListResponse(
         items=[SubcontractorResponse.model_validate(r) for r in rows],
@@ -235,6 +313,7 @@ async def get_subcontractor(
     _perm: None = Depends(RequirePermission("subcontractors.read")),
 ) -> SubcontractorResponse:
     """Return a single subcontractor."""
+    await _academy_guard_sub(session, _user, sub_id)
     svc = SubcontractorService(session)
     entity = await svc.get_subcontractor(sub_id)
     return SubcontractorResponse.model_validate(entity)
@@ -249,6 +328,7 @@ async def update_subcontractor(
     _perm: None = Depends(RequirePermission("subcontractors.update")),
 ) -> SubcontractorResponse:
     """Update a subcontractor."""
+    await _academy_guard_sub(session, _user, sub_id)
     svc = SubcontractorService(session)
     entity = await svc.update_subcontractor(sub_id, data)
     return SubcontractorResponse.model_validate(entity)
@@ -262,6 +342,7 @@ async def delete_subcontractor(
     _perm: None = Depends(RequirePermission("subcontractors.delete")),
 ) -> None:
     """Delete a subcontractor."""
+    await _academy_guard_sub(session, _user, sub_id)
     svc = SubcontractorService(session)
     await svc.delete_subcontractor(sub_id)
 
@@ -277,6 +358,7 @@ async def subcontractor_dashboard(
     _perm: None = Depends(RequirePermission("subcontractors.read")),
 ) -> SubcontractorDashboard:
     """Return aggregated stats for a single subcontractor."""
+    await _academy_guard_sub(session, _user, sub_id)
     svc = SubcontractorService(session)
     return await svc.dashboard(sub_id)
 
@@ -296,6 +378,7 @@ async def subcontractor_award_eligibility(
     Lets the UI show a prequalification banner before anyone tries to activate
     an agreement, instead of only learning about the block on a 409.
     """
+    await _academy_guard_sub(session, _user, sub_id)
     svc = SubcontractorService(session)
     result = await svc.subcontractor_award_eligibility(sub_id)
     return AwardEligibility(
@@ -328,6 +411,10 @@ async def vendor_eligibility_by_contact(
     """
     svc = SubcontractorService(session)
     resolved = await svc.award_eligibility_for_contact(contact_id)
+    owner = await _academy_owner(session, _user)
+    if resolved is not None and owner is not None and resolved[0].created_by != owner:
+        # Another learner's firm reads as an ad-hoc supplier, as an unknown one does.
+        resolved = None
     if resolved is None:
         return VendorEligibility(contact_id=contact_id, known=False, awardable=True)
     sub, block = resolved
@@ -362,6 +449,7 @@ async def get_subcontractor_prequal(
     the prequalification form and the reviewer approval panel can render from
     a single read.
     """
+    await _academy_guard_sub(session, _user, sub_id)
     svc = SubcontractorService(session)
     view = await svc.prequal_view(sub_id)
     return PrequalView.model_validate(view)
@@ -381,6 +469,7 @@ async def list_subcontractor_contacts(
     _perm: None = Depends(RequirePermission("subcontractors.read")),
 ) -> list[SubcontractorContactResponse]:
     """List contacts for a subcontractor."""
+    await _academy_guard_sub(session, _user, sub_id)
     svc = SubcontractorService(session)
     rows = await svc.contacts.list_by_subcontractor(sub_id)
     return [SubcontractorContactResponse.model_validate(r) for r in rows]
@@ -398,6 +487,7 @@ async def create_subcontractor_contact(
     _perm: None = Depends(RequirePermission("subcontractors.update")),
 ) -> SubcontractorContactResponse:
     """Add a contact under a subcontractor."""
+    await _academy_guard_sub(session, _user, data.subcontractor_id)
     svc = SubcontractorService(session)
     entity = await svc.create_contact(data)
     return SubcontractorContactResponse.model_validate(entity)
@@ -412,6 +502,7 @@ async def update_subcontractor_contact(
     _perm: None = Depends(RequirePermission("subcontractors.update")),
 ) -> SubcontractorContactResponse:
     """Update a subcontractor contact."""
+    await _academy_guard_child(session, _user, SubcontractorContact, contact_id, "Contact not found")
     svc = SubcontractorService(session)
     entity = await svc.update_contact(contact_id, data)
     return SubcontractorContactResponse.model_validate(entity)
@@ -425,6 +516,7 @@ async def delete_subcontractor_contact(
     _perm: None = Depends(RequirePermission("subcontractors.update")),
 ) -> None:
     """Remove a subcontractor contact."""
+    await _academy_guard_child(session, _user, SubcontractorContact, contact_id, "Contact not found")
     svc = SubcontractorService(session)
     await svc.delete_contact(contact_id)
 
@@ -443,11 +535,16 @@ async def list_prequalifications(
     """List prequalification applications."""
     svc = SubcontractorService(session)
     if subcontractor_id is not None:
+        await _academy_guard_sub(session, _user, subcontractor_id)
         rows = await svc.prequal.list_for_subcontractor(subcontractor_id)
     elif status_filter is not None:
         rows = await svc.prequal.list_by_status(status_filter)
     else:
         rows = await svc.prequal.list_by_status("submitted")
+    owner = await _academy_owner(session, _user)
+    if owner is not None:
+        owned = await _academy_owned_ids(session, owner)
+        rows = [r for r in rows if r.subcontractor_id in owned]
     return [PrequalificationResponse.model_validate(r) for r in rows]
 
 
@@ -463,6 +560,7 @@ async def create_prequalification(
     _perm: None = Depends(RequirePermission("subcontractors.create")),
 ) -> PrequalificationResponse:
     """Create a draft prequalification application."""
+    await _academy_guard_sub(session, user_id, data.subcontractor_id)
     svc = SubcontractorService(session)
     entity = await svc.create_prequalification(data, user_id=user_id)
     return PrequalificationResponse.model_validate(entity)
@@ -480,6 +578,7 @@ async def update_prequalification(
     _perm: None = Depends(RequirePermission("subcontractors.update")),
 ) -> PrequalificationResponse:
     """Update answers / notes on a prequalification application."""
+    await _academy_guard_child(session, _user, PrequalificationApplication, prequal_id)
     svc = SubcontractorService(session)
     entity = await svc.update_prequalification(prequal_id, data)
     return PrequalificationResponse.model_validate(entity)
@@ -496,6 +595,7 @@ async def submit_prequalification(
     _perm: None = Depends(RequirePermission("subcontractors.update")),
 ) -> PrequalificationResponse:
     """Move a draft prequalification to `submitted`."""
+    await _academy_guard_child(session, _user, PrequalificationApplication, prequal_id)
     svc = SubcontractorService(session)
     entity = await svc.submit_prequalification(prequal_id)
     return PrequalificationResponse.model_validate(entity)
@@ -513,6 +613,7 @@ async def approve_prequalification(
     _perm: None = Depends(RequirePermission("subcontractors.approve_prequalification")),
 ) -> PrequalificationResponse:
     """Approve a prequalification application."""
+    await _academy_guard_child(session, user_id, PrequalificationApplication, prequal_id)
     svc = SubcontractorService(session)
     entity = await svc.approve_prequalification(prequal_id, reviewer_id=user_id, notes=notes)
     return PrequalificationResponse.model_validate(entity)
@@ -530,6 +631,7 @@ async def reject_prequalification(
     _perm: None = Depends(RequirePermission("subcontractors.approve_prequalification")),
 ) -> PrequalificationResponse:
     """Reject a prequalification application."""
+    await _academy_guard_child(session, user_id, PrequalificationApplication, prequal_id)
     svc = SubcontractorService(session)
     entity = await svc.reject_prequalification(prequal_id, reviewer_id=user_id, notes=notes)
     return PrequalificationResponse.model_validate(entity)
@@ -546,6 +648,7 @@ async def list_certificates(
     _perm: None = Depends(RequirePermission("subcontractors.read")),
 ) -> list[CertificateResponse]:
     """List all certificates held by a subcontractor."""
+    await _academy_guard_sub(session, _user, subcontractor_id)
     svc = SubcontractorService(session)
     rows = await svc.certs.list_by_subcontractor(subcontractor_id)
     return [CertificateResponse.model_validate(r) for r in rows]
@@ -560,7 +663,12 @@ async def list_expiring_certificates(
 ) -> list[ExpiryAlert]:
     """List certificates expiring within `days`."""
     svc = SubcontractorService(session)
-    return await svc.list_expiring_certificates(days=days)
+    alerts = await svc.list_expiring_certificates(days=days)
+    owner = await _academy_owner(session, _user)
+    if owner is not None:
+        owned = await _academy_owned_ids(session, owner)
+        alerts = [a for a in alerts if a.subcontractor_id in owned]
+    return alerts
 
 
 @router.post("/certificates/", response_model=CertificateResponse, status_code=201)
@@ -571,6 +679,7 @@ async def create_certificate(
     _perm: None = Depends(RequirePermission("subcontractors.create")),
 ) -> CertificateResponse:
     """Record a new certificate for a subcontractor."""
+    await _academy_guard_sub(session, _user, data.subcontractor_id)
     svc = SubcontractorService(session)
     entity = await svc.record_certificate(data)
     return CertificateResponse.model_validate(entity)
@@ -585,6 +694,7 @@ async def update_certificate(
     _perm: None = Depends(RequirePermission("subcontractors.update")),
 ) -> CertificateResponse:
     """Update a certificate."""
+    await _academy_guard_child(session, _user, Certificate, certificate_id, "Certificate not found")
     svc = SubcontractorService(session)
     entity = await svc.update_certificate(certificate_id, data)
     return CertificateResponse.model_validate(entity)
@@ -598,6 +708,7 @@ async def delete_certificate(
     _perm: None = Depends(RequirePermission("subcontractors.delete")),
 ) -> None:
     """Delete a certificate."""
+    await _academy_guard_child(session, _user, Certificate, certificate_id, "Certificate not found")
     svc = SubcontractorService(session)
     await svc.delete_certificate(certificate_id)
 
@@ -1138,6 +1249,7 @@ async def list_ratings(
     _perm: None = Depends(RequirePermission("subcontractors.read")),
 ) -> list[RatingResponse]:
     """List monthly rating roll-ups for a subcontractor."""
+    await _academy_guard_sub(session, _user, subcontractor_id)
     svc = SubcontractorService(session)
     rows = await svc.ratings.list_for_subcontractor(subcontractor_id)
     return [RatingResponse.model_validate(r) for r in rows]
@@ -1164,6 +1276,7 @@ async def update_rating(
             status_code=422,
             detail="events payload too large (max 50 keys)",
         )
+    await _academy_guard_sub(session, _user, data.subcontractor_id)
     svc = SubcontractorService(session)
     entity = await svc.update_rating(data, events=events)
     return RatingResponse.model_validate(entity)
@@ -1195,6 +1308,7 @@ async def compute_monthly_rating(
     """
     # Validate the period shape through the request model too (defence in depth
     # against a future Query regression dropping the pattern).
+    await _academy_guard_sub(session, _user, sub_id)
     MonthlyRatingComputeRequest(period=period)
     svc = SubcontractorService(session)
     entity = await svc.compute_monthly_rating(sub_id, period)
@@ -1269,6 +1383,7 @@ async def submit_prequal(
     the (optional) caller-supplied score wins over the auto-computed
     value when present. Stamps ``prequal_completed_at`` to now.
     """
+    await _academy_guard_sub(session, _user, sub_id)
     svc = SubcontractorService(session)
     entity = await svc.submit_prequal(
         sub_id,
@@ -1301,6 +1416,9 @@ async def check_insurance_expiry(
     svc = SubcontractorService(session)
     today = _date.today()
     rows = await svc.flag_expiring_insurance(days_ahead=days_ahead, today=today)
+    owner = await _academy_owner(session, _user)
+    if owner is not None:
+        rows = [r for r in rows if r.created_by == owner]
     return [
         InsuranceExpiryEntry(
             id=r.id,
@@ -1330,6 +1448,7 @@ async def block_subcontractor_endpoint(
     (MANAGER-only). Previously the generic ``update`` gate let any
     EDITOR exclude a competing firm from all future bids.
     """
+    await _academy_guard_sub(session, user_id, sub_id)
     svc = SubcontractorService(session)
     entity = await svc.block_subcontractor(sub_id, reason=body.reason, by_user_id=user_id)
     return SubcontractorResponse.model_validate(entity)
@@ -1346,6 +1465,7 @@ async def unblock_subcontractor_endpoint(
     _perm: None = Depends(RequirePermission("subcontractors.block")),
 ) -> SubcontractorResponse:
     """Clear the block flag + reason on a subcontractor."""
+    await _academy_guard_sub(session, user_id, sub_id)
     svc = SubcontractorService(session)
     entity = await svc.unblock_subcontractor(sub_id, by_user_id=user_id)
     return SubcontractorResponse.model_validate(entity)
@@ -1374,6 +1494,7 @@ async def list_lien_waivers(
     Newest first so the most recent waiver wins on the dashboard. Returns
     an empty list when no waivers exist - the UI shows an empty state.
     """
+    await _academy_guard_sub(session, _user, sub_id)
     svc = SubcontractorService(session)
     rows = await svc.lien_waivers.list_for_subcontractor(sub_id)
     return [_serialize_lien_waiver(r) for r in rows]
@@ -1415,6 +1536,7 @@ async def upload_lien_waiver(
     # chunks; we collect into memory here because a lien waiver is
     # tiny relative to a CAD file and we need the bytes for both the
     # magic-byte sniff and the disk write.
+    await _academy_guard_sub(session, user_id, sub_id)
     raw = await file.read(LIEN_WAIVER_MAX_BYTES + 1)
     if len(raw) > LIEN_WAIVER_MAX_BYTES:
         raise HTTPException(
@@ -1588,6 +1710,7 @@ async def delete_lien_waiver(
     different subcontractor. Returning a generic 404 in both cases
     prevents an attacker enumerating waiver UUIDs across the tenant.
     """
+    await _academy_guard_sub(session, _user, sub_id)
     svc = SubcontractorService(session)
     entity = await svc.lien_waivers.get_by_id(waiver_id)
     if entity is None or entity.subcontractor_id != sub_id:
