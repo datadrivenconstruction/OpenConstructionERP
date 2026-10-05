@@ -17,9 +17,12 @@ export const PASSWORD_MAX_LENGTH = 128;
 
 export function meetsPasswordPolicy(password: string): boolean {
   const value = password.trim();
+  // Python's len() counts code points; `.length` counts UTF-16 units and would
+  // read one emoji as two characters.
+  const length = Array.from(value).length;
   return (
-    value.length >= PASSWORD_MIN_LENGTH &&
-    value.length <= PASSWORD_MAX_LENGTH &&
+    length >= PASSWORD_MIN_LENGTH &&
+    length <= PASSWORD_MAX_LENGTH &&
     /\p{L}/u.test(value) &&
     /\p{Nd}/u.test(value)
   );
