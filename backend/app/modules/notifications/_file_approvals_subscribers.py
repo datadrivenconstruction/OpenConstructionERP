@@ -30,12 +30,6 @@ from app.modules.notifications.service import NotificationService
 logger = logging.getLogger(__name__)
 
 
-def _action_url(workflow_id: str) -> str:
-    # Matches the deep link the dashboard inbox already builds for a pending
-    # file-approval step (dashboard/inbox.py), so the bell and the inbox agree.
-    return f"/file-approvals/{workflow_id}"
-
-
 async def _on_file_approval_needs_approver(event: Event) -> None:
     """``file_approval.submitted`` / ``.step_advanced`` -> notify the approver.
 
@@ -63,7 +57,9 @@ async def _on_file_approval_needs_approver(event: Event) -> None:
                 },
                 entity_type="file_approval_workflow",
                 entity_id=str(workflow_id),
-                action_url=_action_url(str(workflow_id)),
+                # The approval register, as the dashboard inbox links it; it
+                # selects no workflow from the URL, the id is in ``entity_id``.
+                action_url="/files/approvals",
             )
             await session.commit()
     except Exception:
@@ -87,7 +83,7 @@ async def _on_file_approval_approved(event: Event) -> None:
                 body_context={"file_kind": str(data.get("file_kind") or "document")},
                 entity_type="file_approval_workflow",
                 entity_id=str(workflow_id),
-                action_url=_action_url(str(workflow_id)),
+                action_url="/files/approvals",
             )
             await session.commit()
     except Exception:
@@ -114,7 +110,7 @@ async def _on_file_approval_rejected(event: Event) -> None:
                 },
                 entity_type="file_approval_workflow",
                 entity_id=str(workflow_id),
-                action_url=_action_url(str(workflow_id)),
+                action_url="/files/approvals",
             )
             await session.commit()
     except Exception:

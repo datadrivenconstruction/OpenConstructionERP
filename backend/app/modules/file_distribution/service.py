@@ -724,7 +724,8 @@ async def on_file_new_revision(
                 },
                 entity_type=f"file_{file_kind}",
                 entity_id=str(file_id),
-                action_url=f"/files?file={file_id}",
+                # ``?file=`` only finds the row inside the listed kind.
+                action_url=f"/projects/{project_id}/files?kind={file_kind}&file={file_id}",
                 metadata={
                     "project_id": str(project_id),
                     "subscription_id": str(sub.id),

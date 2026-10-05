@@ -141,7 +141,7 @@ async def test_file_comment_mention_creates_notification(session) -> None:
         body_context={"excerpt": "Hey @alice can you review?"},
         entity_type="file_comment",
         entity_id=str(uuid.uuid4()),
-        action_url="/files/document/abc?comment=xyz",
+        action_url="/files?kind=document&file=abc&comment=xyz",
     )
 
     rows = list(

@@ -1107,7 +1107,7 @@ class ApprovalRouteService:
                     "target_kind": instance.target_kind,
                     "step_ordinal": instance.current_step_ordinal,
                 },
-                action_url=f"/approvals/{instance.id}",
+                action_url="/governance?tab=approvals",
                 metadata={"step_ordinal": instance.current_step_ordinal},
             )
         except Exception:  # pragma: no cover - defensive

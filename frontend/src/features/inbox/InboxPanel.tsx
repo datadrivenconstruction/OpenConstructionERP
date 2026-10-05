@@ -58,6 +58,7 @@ import {
   sortInboxItems,
   type InboxFilter,
 } from './inboxUtils';
+import { normalizeActionUrl } from '@/shared/lib/notificationActionUrl';
 import { INBOX_QUERY_ROOT, useInboxQuery } from './useInbox';
 
 export interface InboxPanelProps {
@@ -130,7 +131,7 @@ function InboxRow({ item }: { item: InboxItem }) {
   const timeAgo = formatTimeAgo(item.created_at, t);
 
   const onClick = useCallback(() => {
-    if (item.action_url) navigate(item.action_url);
+    if (item.action_url) navigate(normalizeActionUrl(item.action_url));
   }, [item.action_url, navigate]);
 
   // Both the dashboard widget and the /inbox page hold an ['inbox', limit]
