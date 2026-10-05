@@ -1582,6 +1582,60 @@ def _read_bands(metadata: object) -> list[tuple[Decimal | None, Decimal]]:
     return sorted(bands, key=lambda band: (band[0] is None, band[0] or Decimal("0")))
 
 
+def _band_card_problem(metadata: object) -> str | None:
+    """Say what is wrong with a rate card an estimator is about to save, if anything.
+
+    :func:`_read_bands` is lenient on purpose, because it runs inside the
+    rollup and a stored row must never take the whole bill down. That
+    leniency is wrong at the door: an entry it silently drops, or two bands
+    that claim the same ceiling, is a card that prices something other than
+    what the estimator typed, and nothing on the screen would say so. The
+    markups panel now edits cards directly, so the write path checks the card
+    is one the cascade reads exactly one way.
+
+    Tranches are contiguous by construction (each starts where the previous
+    ceiling ends), so the rules are about the ceilings and the rates: every
+    entry readable, ceilings above zero and distinct, at most one open-ended
+    band, every rate from 0 to 100.
+
+    Args:
+        metadata: The row's effective ``metadata`` after the update.
+
+    Returns:
+        A sentence naming the first problem, or None when the card is sound.
+        An absent or empty card is reported by the caller, not here.
+    """
+    if not isinstance(metadata, dict) or not isinstance(metadata.get("bands"), list):
+        return None
+    seen: set[Decimal] = set()
+    open_ended = 0
+    for position, entry in enumerate(metadata["bands"], start=1):
+        if not isinstance(entry, dict):
+            return f"Band {position} cannot be read; each band is an object with up_to and percentage."
+        try:
+            rate = Decimal(str(entry.get("percentage", "0") or "0"))
+        except (InvalidOperation, ValueError):
+            return f"Band {position}: the rate cannot be read as a number."
+        if not rate.is_finite() or rate < 0 or rate > 100:
+            return f"Band {position}: the rate must be a percentage from 0 to 100."
+        ceiling_raw = entry.get("up_to")
+        if ceiling_raw is None or str(ceiling_raw).strip() == "":
+            open_ended += 1
+            if open_ended > 1:
+                return "Only one band can be open-ended (no upper limit); it takes everything above the others."
+            continue
+        try:
+            ceiling = Decimal(str(ceiling_raw))
+        except (InvalidOperation, ValueError):
+            return f"Band {position}: the upper limit cannot be read as a number."
+        if not ceiling.is_finite() or ceiling <= 0:
+            return f"Band {position}: the upper limit must be above zero."
+        if ceiling in seen:
+            return f"Band {position} has the same ceiling as an earlier band; each band needs its own upper limit."
+        seen.add(ceiling)
+    return None
+
+
 def _banded_amount(base: Decimal, metadata: object) -> Decimal:
     """Charge each tranche of ``base`` at its own band rate and add them up.
 
@@ -1712,14 +1766,13 @@ def _calculate_markup_amounts(
     ``frontend/src/features/boq/MarkupPanel.tsx`` needs a per-markup amount
     keyed by markup id (something the ``/cost-breakdown/`` payload does not
     carry) and has to react to a toggle before the round-trip lands. It
-    reproduces ``percentage`` and ``fixed`` exactly: same running sum,
-    ``cumulative``/``subtotal`` based on direct cost + preceding markups,
-    inactive lines contributing zero. It does NOT reproduce ``banded`` or
-    ``escalation`` and must not try. A band table is the surety's rate card and
-    an escalation factor comes from an index series the browser does not hold,
-    so the panel shows the amount the server computed for those and the parity
-    claim is limited to the two types it can actually reproduce. When the two
-    disagree on a type both compute, this one is right.
+    reproduces ``percentage``, ``fixed`` and ``banded`` exactly: same running
+    sum, ``cumulative``/``subtotal`` based on direct cost + preceding markups,
+    inactive lines contributing zero, and the band card read off the row the
+    way :func:`_banded_amount` reads it. It does NOT work out an
+    ``escalation`` factor and must not try: that comes from an index series
+    the browser does not hold, so the server resolves it and the panel
+    multiplies. When the two disagree on a type both compute, this one is right.
 
     ``escalation`` is where this stack meets time. ``apply_to`` still says only
     what the base is, exactly as before; what changes is the type, and the
@@ -5984,6 +6037,9 @@ class BOQService:
         """
         kind = (markup_type or "percentage").lower()
         meta = metadata if isinstance(metadata, dict) else {}
+
+        if kind == "banded" and (problem := _band_card_problem(meta)) is not None:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=problem)
 
         if kind == "banded" and not _read_bands(meta):
             raise HTTPException(

@@ -312,7 +312,8 @@ export interface UpdateMarkupData {
   markup_type?: string;
   category?: string;
   percentage?: number;
-  fixed_amount?: number;
+  /** Money: send the typed amount as a Decimal string so no cent is lost to a float. */
+  fixed_amount?: number | string;
   apply_to?: string;
   sort_order?: number;
   is_active?: boolean;
