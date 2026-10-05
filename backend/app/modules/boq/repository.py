@@ -20,6 +20,7 @@ from sqlalchemy.sql.elements import ClauseElement, ColumnElement
 
 from app.core.sql_numeric import numeric_value
 from app.modules.boq.activity_text import READ_ONLY_ACTIVITY_ACTIONS
+from app.modules.boq.markup_base import has_base, resolve_markup_base
 from app.modules.boq.models import (
     BOQ,
     BOQActivityLog,
@@ -332,14 +333,14 @@ class BOQRepository:
         for boq_id in boq_ids:
             dc = Decimal(str(direct_costs.get(boq_id, 0)))
             running = dc
+            previous_base: Decimal | None = None
             for m in markups_by_boq.get(boq_id, []):
+                # BUG-B-005 and ``same_as_previous``: the base rule is shared
+                # with ``_calculate_markup_amounts`` so list and detail agree.
+                base = resolve_markup_base(m.apply_to, direct_cost=dc, running=running, previous_base=previous_base)
+                previous_base = base if has_base(m.markup_type) else None
                 if m.markup_type == "percentage":
                     pct = Decimal(m.percentage or "0")
-                    # BUG-B-005: ``subtotal`` bases on direct_cost +
-                    # Σ(preceding markups), identical to ``cumulative`` -
-                    # keep list/detail rollup consistent with
-                    # ``_calculate_markup_amounts``.
-                    base = running if m.apply_to in ("cumulative", "subtotal") else dc
                     running += base * pct / Decimal("100")
                 elif m.markup_type == "fixed":
                     running += Decimal(m.fixed_amount or "0")

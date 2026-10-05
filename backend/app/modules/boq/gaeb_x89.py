@@ -77,6 +77,7 @@ from app.modules.boq.gaeb_common import (
 )
 from app.modules.boq.importers._base import ImporterParseError
 from app.modules.boq.importers.gaeb_xml import _find_child, _local, _text_of
+from app.modules.boq.markup_base import has_base, resolve_markup_base
 from app.modules.boq.units import to_gaeb_unit_code
 
 #: ``tgInvoiceType`` values this module writes. Only ``deduction`` (an
@@ -892,6 +893,7 @@ def check_x89(
     # discount category usually comes last in the file anyway.
     items_expected = expected_total
     running = items_expected
+    previous_base: Decimal | None = None
     available = [m for m in markups if _is_bill_markup(m)]
     for item, entry in markup_entries:
         amount = c2(item.amount) if item.amount is not None else _ZERO
@@ -904,8 +906,13 @@ def check_x89(
             entry.update({"expected_amount": None, "difference": str(amount)})
             continue
         available.remove(match)
-        apply_to = str(getattr(match, "apply_to", "") or "direct_cost").lower()
-        base = running if apply_to in ("cumulative", "subtotal") else items_expected
+        base = resolve_markup_base(
+            getattr(match, "apply_to", None),
+            direct_cost=items_expected,
+            running=running,
+            previous_base=previous_base,
+        )
+        previous_base = base if has_base(getattr(match, "markup_type", None)) else None
         expected = c2(base * pct / _HUNDRED)
         expected_total += expected
         running += expected

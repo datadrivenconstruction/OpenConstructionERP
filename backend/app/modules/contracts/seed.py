@@ -53,6 +53,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.demo_showcase import GERMAN_SHOWCASE_DEMO_IDS
+from app.modules.contracts.country_defaults import resolve_retention_basis
 from app.modules.contracts.models import (
     Contract,
     ContractLine,
@@ -66,6 +67,7 @@ from app.modules.contracts.models import (
     RetentionSchedule,
 )
 from app.modules.contracts.periods import claim_dates_for_write
+from app.modules.contracts.retention import on_retention_basis
 from app.modules.projects.models import Project
 
 logger = logging.getLogger(__name__)
@@ -284,9 +286,11 @@ async def seed_progress_claims_demo(
     )
 
     german_rows = await session.execute(
-        select(Project.id).where(Project.id.in_(project_ids)).where(Project.country_code == "DE")
+        select(Project.id, Project.default_vat_rate)
+        .where(Project.id.in_(project_ids))
+        .where(Project.country_code == "DE")
     )
-    german_projects = set(german_rows.scalars().all())
+    german_projects = {project_id: vat_rate for project_id, vat_rate in german_rows.all()}
 
     today = datetime.now(UTC).date()
     claims_written = 0
@@ -308,6 +312,18 @@ async def seed_progress_claims_demo(
 
         rng = random.Random(f"progress-claims:{contract.code}")
         retention_pct = (contract.retention_percent or Decimal("0")) / Decimal("100")
+        # A German claim is cut by its rate of the payment with VAT in it, as
+        # the service holds it (ContractsService.retention_basis); a seeded
+        # Abschlagsrechnung must not hold less than a real one would.
+        basis_vat = None
+        if contract.project_id in german_projects:
+            einvoice = (contract.metadata_ or {}).get("einvoice") if isinstance(contract.metadata_, dict) else None
+            basis_vat = resolve_retention_basis(
+                "DE",
+                agreed_vat_rate=einvoice.get("vat_rate") if isinstance(einvoice, dict) else None,
+                project_vat_rate=german_projects[contract.project_id],
+                subcontract=(contract.counterparty_type or "client") == "subcontractor",
+            ).vat_percent
         monthly_base = total_value / Decimal(contract_months)
 
         # Lifecycle ladder, newest period first: the running month is still in
@@ -329,7 +345,7 @@ async def seed_progress_claims_demo(
             gross = (monthly_base * wobble).quantize(Decimal("1")) + Decimal("0.00")
             if gross <= 0:
                 gross = Decimal("100.00")
-            retention = (gross * retention_pct).quantize(Decimal("0.01"))
+            retention = (on_retention_basis(gross, basis_vat) * retention_pct).quantize(Decimal("0.01"))
 
             # Never stamp a submission in the future: a contract young enough
             # to have only its running period gets "submitted today".

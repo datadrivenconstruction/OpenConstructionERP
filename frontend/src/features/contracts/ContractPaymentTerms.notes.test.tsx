@@ -26,6 +26,8 @@ import type { CountryDefaultSource } from './api';
 
 const GERMAN_NOTE = 'Abschlagszahlungen werden binnen 21 Tagen nach Zugang der Aufstellung fällig.';
 const GERMAN_CAP_NOTE = 'Der Einbehalt endet an der in den Contract Data genannten Grenze.';
+const GERMAN_US_RATE_NOTE = 'Zehn Prozent, die auf fünf sinken, sind das übliche Muster.';
+const GERMAN_CEILING_NOTE = 'Durch das Recht von {{subdivision}} auf {{percent}} Prozent gesenkt, ab {{since}}.';
 
 let i18n: I18n;
 
@@ -39,6 +41,8 @@ beforeAll(async () => {
         translation: {
           'contracts.country_defaults.DE.payment_period_days.note': GERMAN_NOTE,
           'contracts.country_defaults.AE.retention_cap_percent.note': GERMAN_CAP_NOTE,
+          'contracts.country_defaults.US.retention_percent.note': GERMAN_US_RATE_NOTE,
+          'contracts.statutory_ceiling.retention_percent.note': GERMAN_CEILING_NOTE,
         },
       },
     },
@@ -99,6 +103,23 @@ describe('DefaultHint note', () => {
     const title = screen.getByTestId('default-hint-retention_percent').getAttribute('title') ?? '';
     expect(title).toContain(GERMAN_CAP_NOTE);
     expect(title).not.toContain(aeCap.note);
+  });
+
+  it("explains a rate lowered to a state ceiling with the ceiling's note, not the country's", () => {
+    // The rate is the state's, so the country's own note (ten percent stepping
+    // down) beside a five would contradict the figure it explains.
+    const ceiling: CountryDefaultSource = {
+      source: 'statute',
+      reference: 'California Civil Code § 8811; California Public Contract Code § 7201',
+      note: 'Lowered to 5 percent by the law of California.',
+      note_key: 'contracts.statutory_ceiling.retention_percent.note',
+      note_params: { percent: '5', subdivision: 'California', since: '2026-01-01' },
+    };
+    renderHint(<DefaultHint field="retention_percent" country="US" source={ceiling} />);
+    const title = screen.getByTestId('default-hint-retention_percent').getAttribute('title') ?? '';
+    expect(title).toContain('Durch das Recht von California auf 5 Prozent gesenkt, ab 2026-01-01.');
+    expect(title).not.toContain(GERMAN_US_RATE_NOTE);
+    expect(title).not.toContain(ceiling.note);
   });
 
   it('adds no note where the source states none', () => {

@@ -2830,7 +2830,7 @@ export function CreateContractModal({
   // the contract records that it was the country's default rather than
   // claiming the person typed it. A project whose country has no usual terms
   // gets empty fields, never another country's figures.
-  const defaultsQ = useContractCountryDefaults(projectId);
+  const defaultsQ = useContractCountryDefaults(projectId, form.counterparty_type);
   const defaults = defaultsQ.data;
   const knownDefaults = defaults?.has_defaults ? defaults : null;
   const prefill = useMemo<Record<PaymentTermField, string>>(() => {

@@ -44,11 +44,15 @@ from app.modules.contracts.country_defaults import (
     PAYMENT_TERM_FIELDS,
     PAYMENT_TERMS_KEY,
     PLATFORM_FALLBACK,
+    RetentionBasis,
     apply_contract_defaults,
+    contract_works,
     forget_overridden,
     normalise_country,
     resolve_contract_defaults,
+    resolve_retention_basis,
     subcontract_retention_default,
+    subdivision_from_address,
 )
 from app.modules.contracts.events import CLAIM_POPULATED, EOT_DECIDED, EOT_SUBMITTED
 from app.modules.contracts.final_account import (
@@ -108,6 +112,8 @@ from app.modules.contracts.retention import (
     claim_retention,
     compute_retention,
     flat_policy,
+    flat_retention_within_cap,
+    on_retention_basis,
     plan_release,
     policy_from_rule,
     release_spec,
@@ -409,35 +415,6 @@ def contract_retention_cap(contract: Any) -> Decimal | None:
     if not value.is_finite() or value < DEC_ZERO or value > DEC_HUNDRED:
         return None
     return value
-
-
-def flat_retention_within_cap(
-    gross: Decimal,
-    rate: Decimal,
-    *,
-    cap_percent: Decimal | None,
-    contract_sum: Decimal,
-    accrued_before: Decimal,
-) -> Decimal:
-    """Retention a flat-rate claim holds this period, never past the agreed ceiling.
-
-    The ceiling is on what the contract holds in total, so it is measured
-    against what the earlier claims already accrued: once period N reaches it,
-    period N+1 holds nothing more, however large its gross. Checking each
-    period against the cap on its own would let every month hold up to the
-    whole ceiling again.
-
-    A contract with no sum (``contract_sum`` of 0, as a cost-plus or T&M
-    contract whose total nobody entered carries) has no ceiling to measure,
-    so the rate holds uncapped. Reading the cap as a percent of 0 would hold
-    nothing from the first claim on.
-    """
-    retention = (gross * rate / DEC_HUNDRED).quantize(Decimal("0.0001"))
-    if cap_percent is None or retention <= DEC_ZERO or contract_sum <= DEC_ZERO:
-        return retention
-    ceiling = (contract_sum * cap_percent / DEC_HUNDRED).quantize(Decimal("0.01"), ROUND_HALF_UP)
-    room = max(ceiling - max(accrued_before, DEC_ZERO), DEC_ZERO)
-    return min(retention, room)
 
 
 def compute_line_total(line: ContractLine | Any) -> Decimal:
@@ -1294,10 +1271,39 @@ class ContractsService:
             return None
         return normalise_country(getattr(project, "country_code", None)) or None
 
-    async def country_defaults_for_project(self, project_id: uuid.UUID) -> dict[str, Any]:
-        """What a new contract on ``project_id`` starts from, for the form to pre-fill."""
-        country = await self.project_country(project_id)
-        defaults = resolve_contract_defaults(country)
+    async def project_jurisdiction(self, project_id: uuid.UUID) -> tuple[str | None, str | None]:
+        """The project's ISO country and, where its address names one, its ISO 3166-2 subdivision.
+
+        The subdivision is what carries state retention law into the defaults
+        (see :func:`subdivision_from_address`); ``None`` when the address
+        names no state, or names one that cannot be read without guessing.
+        """
+        from app.modules.projects.models import Project  # noqa: PLC0415
+
+        project = await self.session.get(Project, project_id)
+        if project is None:
+            return None, None
+        country = normalise_country(getattr(project, "country_code", None)) or None
+        return country, subdivision_from_address(country, getattr(project, "address", None))
+
+    async def project_works(self, project_id: uuid.UUID) -> str | None:
+        """``"public"`` or ``"private"`` as the project records its client, else ``None``."""
+        from app.modules.projects.models import Project  # noqa: PLC0415
+
+        project = await self.session.get(Project, project_id)
+        return getattr(project, "works", None) if project is not None else None
+
+    async def country_defaults_for_project(
+        self, project_id: uuid.UUID, counterparty_type: str | None = None
+    ) -> dict[str, Any]:
+        """What a new contract on ``project_id`` starts from, for the form to pre-fill.
+
+        ``counterparty_type`` is the contract's: a subcontract follows private
+        law whoever the project's client is (:func:`contract_works`).
+        """
+        country, subdivision = await self.project_jurisdiction(project_id)
+        works = contract_works(await self.project_works(project_id), counterparty_type)
+        defaults = resolve_contract_defaults(country, subdivision_code=subdivision, works=works)
         # A subcontract agreement has no ceiling, so where the country's rate
         # runs above its cap the agreement form starts from the cap. Answered
         # here so the form shows the figure the server will apply.
@@ -1305,6 +1311,9 @@ class ContractsService:
         return {
             "project_id": project_id,
             "country_code": country,
+            "subdivision_code": subdivision,
+            "statutory_ceiling": (defaults or {}).get("statutory_ceiling"),
+            "works": (defaults or {}).get("works"),
             "has_defaults": defaults is not None,
             "standard_form": (defaults or {}).get("standard_form"),
             "values": (defaults or {}).get("values") or {},
@@ -1321,7 +1330,7 @@ class ContractsService:
         retention rate, the release event and the stamp for
         ``metadata["country_defaults"]``.
         """
-        country = await self.project_country(data.project_id)
+        country, subdivision = await self.project_jurisdiction(data.project_id)
         explicit = _explicit_payment_terms(data)
         if getattr(data, "retention_release_event", None) is not None:
             # The author named the release event and no split. A defaulted
@@ -1330,7 +1339,16 @@ class ContractsService:
             # left unwritten, and the event decides as it did before country
             # defaults existed.
             explicit.setdefault("retention_release_split", None)
-        values, stamp = apply_contract_defaults(explicit, resolve_contract_defaults(country), country_code=country)
+        # A draft is entered into today at the earliest, so a state ceiling is
+        # read as of today (the resolver's default).
+        works = contract_works(await self.project_works(data.project_id), getattr(data, "counterparty_type", None))
+        defaults = resolve_contract_defaults(country, subdivision_code=subdivision, works=works)
+        values, stamp = apply_contract_defaults(explicit, defaults, country_code=country)
+        if subdivision:
+            stamp["subdivision_code"] = subdivision
+        if (defaults or {}).get("works"):
+            # The law the figures were read under, public or private works.
+            stamp["works"] = defaults["works"]
         fallback: list[str] = []
 
         retention = values.get("retention_percent")
@@ -3332,6 +3350,22 @@ class ContractsService:
         )
         completed = sum((Decimal(str(row["total_completed_stored"])) for row in rows), DEC_ZERO)
         held = sum((Decimal(str(row["retainage"])) for row in rows), DEC_ZERO)
+        basis_vat = (await self.retention_basis(contract)).vat_percent
+        if basis_vat is not None:
+            # The sheet's column I is the rate on the net. Where retention is
+            # measured on the payment with VAT in it, the claim's own
+            # retention was taken on that, and what is frozen as held must be
+            # the same money, row by row as the sheet rounds it.
+            rate = Decimal(str(contract.retention_percent or 0))
+            held = sum(
+                (
+                    (on_retention_basis(row["total_completed_stored"], basis_vat) * rate / DEC_HUNDRED).quantize(
+                        cents, ROUND_HALF_UP
+                    )
+                    for row in rows
+                ),
+                DEC_ZERO,
+            )
         return completed.quantize(cents), held.quantize(cents)
 
     async def claim_line_running_totals(
@@ -3547,13 +3581,19 @@ class ContractsService:
         Unlike :meth:`_claim_retention_context` this answers for every claim,
         including the flat-retention shapes. A cost-plus claim holds retention
         too, and a cap binds what is held however it was worked out.
+
+        ``contract_sum`` is the sum the ceiling is a share of, on the
+        contract's retention basis: with VAT in it where the country measures
+        retention on the gross payment, as the held figure then is too.
         """
         policy = await self.retention_policy(contract)
         country = ((await self._progress_billing(contract)) or {}).get("country_code")
         held = getattr(claim, "retention_held_to_date", None)
+        basis = await self.retention_basis(contract)
         return {
             "held": None if held is None else str(held),
-            "contract_sum": str(contract.total_value or 0),
+            "contract_sum": str(on_retention_basis(contract.total_value or 0, basis.vat_percent)),
+            "retention_basis": basis.basis,
             "cap_percent": (
                 None if policy.cap_percent_of_contract_sum is None else str(policy.cap_percent_of_contract_sum)
             ),
@@ -5265,6 +5305,47 @@ class ContractsService:
             cap_percent_of_contract_sum=agreed_cap,
         )
 
+    async def retention_basis(self, contract: Contract) -> RetentionBasis:
+        """What this contract's retention and its ceiling are measured on, net or gross of VAT.
+
+        The country is the project's, the rule is data
+        (:data:`~app.modules.contracts.country_defaults.COUNTRY_RETENTION_BASIS`),
+        a row limited to one kind of works (France: public) is read against
+        the contract's works as ``contract_works`` answers them,
+        and the VAT of a gross basis is the one the contract agreed for its
+        invoices, else for a subcontract the rate the country presumes (none
+        in Germany, where it is reverse charge), else the project's default,
+        else the country's standard rate. Every writer of a claim's retention reads it here, and so do the
+        two documents that turn a claim into money (the GAEB X89 invoice and
+        the finance receivable), so the figure a claim holds and the figure
+        its invoice takes off the payment cannot drift apart.
+
+        A gross basis with no VAT anyone can name is measured on the net and
+        logged, not guessed.
+        """
+        from app.modules.projects.models import Project  # noqa: PLC0415
+
+        project = await self.session.get(Project, contract.project_id)
+        if project is None:
+            return resolve_retention_basis(None)
+        einvoice = (contract.metadata_ or {}).get("einvoice") if isinstance(contract.metadata_, dict) else None
+        counterparty = getattr(contract, "counterparty_type", None) or "client"
+        basis = resolve_retention_basis(
+            getattr(project, "country_code", None),
+            agreed_vat_rate=einvoice.get("vat_rate") if isinstance(einvoice, dict) else None,
+            project_vat_rate=getattr(project, "default_vat_rate", None),
+            subcontract=counterparty == "subcontractor",
+            # A French public contract is measured on the TTC, its subcontracts
+            # are private works and are not (contract_works).
+            works=contract_works(getattr(project, "works", None), counterparty),
+        )
+        if basis.vat_source == "none":
+            logger.warning(
+                "contracts: contract %s measures retention gross of VAT but no VAT rate is known; using the net",
+                contract.id,
+            )
+        return basis
+
     async def _flat_retention_cap(self, contract: Contract) -> Decimal | None:
         """The ceiling a flat-rate claim is held to: the policy's, else the contract's agreed one.
 
@@ -5294,8 +5375,14 @@ class ContractsService:
         hold up to the whole ceiling again, so the two together held twice the
         limit once both were submitted. Rejected claims hold nothing and do
         not count.
+
+        On a contract whose country measures retention on the payment with
+        VAT in it (Germany), the rate and the ceiling are both taken on the
+        gross, so ``gross`` here is the net and :meth:`retention_basis` adds
+        the VAT.
         """
         rate = Decimal(str(getattr(contract, "retention_percent", 0) or 0))
+        basis = await self.retention_basis(contract)
         cap_percent = await self._flat_retention_cap(contract)
         accrued_before = DEC_ZERO
         if cap_percent is not None:
@@ -5308,6 +5395,7 @@ class ContractsService:
             cap_percent=cap_percent,
             contract_sum=Decimal(str(getattr(contract, "total_value", 0) or 0)),
             accrued_before=accrued_before,
+            basis_vat_percent=basis.vat_percent,
         )
 
     async def _progress_billing(self, contract: Contract) -> dict[str, Any] | None:
@@ -5421,6 +5509,7 @@ class ContractsService:
             contract_sum=getattr(contract, "total_value", 0) or 0,
             policy=policy,
             stored_by_line=stored,
+            basis_vat_percent=(await self.retention_basis(contract)).vat_percent,
         )
         prior = await self.claim_repo.prior_claims(contract.id, before_claim_id=claim.id)
         on_schedule, outside, released = await self._retention_before(claim, contract.id, prior)

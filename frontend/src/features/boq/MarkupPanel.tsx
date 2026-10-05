@@ -1,21 +1,25 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { Fragment, useState, useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { boqApi, type Markup, type CreateMarkupData, type UpdateMarkupData } from './api';
 import { fmtWithCurrency } from './boqHelpers';
 import { markupRegionLabel, type MarkupRegion } from './markupRegionLabel';
+import { MarkupRowEditor } from './MarkupRowEditor';
+import { markupHasBase, resolveMarkupBase } from './markupBase';
 import { toNum } from '@/shared/lib/money';
 import { parseDecimalInput } from '@/shared/lib/parseDecimal';
 import { useToastStore } from '@/stores/useToastStore';
 import clsx from 'clsx';
 import {
+  ArrowDown,
+  ArrowUp,
   ChevronDown,
   Plus,
+  SlidersHorizontal,
   Trash2,
   Globe,
-  GripVertical,
 } from 'lucide-react';
 
 /**
@@ -185,6 +189,9 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
   const [isOpen, setIsOpen] = useState(true);
   const [editState, setEditState] = useState<EditState | null>(null);
   const [showRegionMenu, setShowRegionMenu] = useState(false);
+  // The one row whose calculation settings are open. One at a time keeps the
+  // table readable and the preview unambiguous about which line it describes.
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   // Re-expand when the host bumps openSignal (toolbar "Markups / OH&P" jump).
   // Ignore the initial 0 so a user who manually collapsed the panel is not
@@ -201,8 +208,10 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
 
   const addMutation = useMutation({
     mutationFn: (data: CreateMarkupData) => boqApi.addMarkup(boqId, data),
-    onSuccess: () => {
+    onSuccess: (created) => {
       invalidate();
+      // Open the new line's settings so its base and type are in view at once.
+      if (created && typeof created.id === 'string') setExpandedId(created.id);
       addToast({ type: 'success', title: t('boq.markup_added', { defaultValue: 'Markup added' }) });
     },
     onError: (err: Error) => {
@@ -218,6 +227,39 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
       addToast({ type: 'error', title: t('boq.markup_update_failed', { defaultValue: 'Failed to update markup' }), message: err.message });
     },
   });
+
+  // Reorder renumbers EVERY line to its new position and saves the ones whose
+  // number changed. Swapping two values would leave any duplicate sort_order
+  // in place, and two lines claiming one place compound in an order nobody
+  // chose (the markup validator flags exactly that).
+  const reorderMutation = useMutation({
+    mutationFn: (updates: { markupId: string; sort_order: number }[]) =>
+      Promise.all(updates.map((u) => boqApi.updateMarkup(boqId, u.markupId, { sort_order: u.sort_order }))),
+    onSuccess: () => invalidate(),
+    onError: (err: Error) => {
+      invalidate();
+      addToast({
+        type: 'error',
+        title: t('boq.markup_reorder_failed', { defaultValue: 'Failed to reorder markups' }),
+        message: err.message,
+      });
+    },
+  });
+
+  const handleMove = useCallback(
+    (index: number, direction: -1 | 1) => {
+      const list = Array.isArray(markups) ? [...markups] : [];
+      const target = index + direction;
+      if (target < 0 || target >= list.length) return;
+      [list[index], list[target]] = [list[target]!, list[index]!];
+      const updates = list
+        .map((m, i) => ({ markupId: m.id, sort_order: i, current: m.sort_order }))
+        .filter((u) => u.current !== u.sort_order)
+        .map(({ markupId, sort_order }) => ({ markupId, sort_order }));
+      if (updates.length > 0) reorderMutation.mutate(updates);
+    },
+    [markups, reorderMutation],
+  );
 
   const deleteMutation = useMutation({
     mutationFn: (markupId: string) => boqApi.deleteMarkup(boqId, markupId),
@@ -284,45 +326,63 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
   // put a second, VAT-inclusive "Net Total" on the same screen as the grid
   // footer's real one. Net-of-tax lives in exactly one place now: the grid
   // footer in ``BOQEditorPage`` (``markupTotals`` filters ``category !== 'tax'``).
-  const { calcMap, grandTotal, calculated } = useMemo(() => {
+  const { calcMap, grandTotal, calculated, runningBeforeMap, previousBaseMap } = useMemo(() => {
     let running = directCost;
-    const calculated = (Array.isArray(markups) ? markups : [])
-      .filter((m) => m && m.is_active !== false)
-      .map((m) => {
-        let amount = 0;
-        const pct = typeof m.percentage === 'number' && Number.isFinite(m.percentage) ? m.percentage : 0;
-        const base = m.apply_to === 'cumulative' || m.apply_to === 'subtotal' ? running : directCost;
-        if (m.markup_type === 'fixed') {
-          // fixed_amount arrives as a Decimal-as-string ("500.00"), so a
-          // ``typeof === 'number'`` guard rejected it and rendered every fixed
-          // markup as 0. Coerce through the shared money primitive instead.
-          amount = toNum(m.fixed_amount);
-        } else if (m.markup_type === 'banded') {
-          // A bond's rate card, charged tranche by tranche. This one IS mirrored
-          // locally because the card is on the row: no server round-trip and no
-          // date arithmetic involved, just the same progressive sum.
-          amount = bandedAmount(base, m.metadata);
-        } else if (m.markup_type === 'escalation') {
-          // The factor is resolved server-side from the cost-index series and
-          // arrives on the row. The browser must NOT work one out: it holds no
-          // series, and a second implementation of the period lookup is exactly
-          // what the backend went out of its way not to have. A line with no
-          // factor is worth nothing here, which is what the server reports too.
-          const factor = toNum(m.escalation_factor ?? 0);
-          amount = factor > 0 ? base * (factor - 1) : 0;
-        } else if (m.apply_to === 'cumulative' || m.apply_to === 'subtotal') {
-          // The backend treats 'subtotal' identically to 'cumulative' (base =
-          // direct cost + the markups before it); GAEB import persists tax
-          // markups as 'subtotal', so basing it on directCost here would
-          // under-state the Amount column and the grand total against the server.
-          amount = running * (pct / 100);
-        } else {
-          amount = directCost * (pct / 100);
-        }
-        running += amount;
-        return { id: m.id, amount };
-      });
-    return { calcMap: new Map(calculated.map((c) => [c.id, c.amount])), grandTotal: running, calculated };
+    // What a running-total line would be charged on at each row (direct cost
+    // plus the active lines above it), and the base the nearest active line
+    // above was charged on, which a ``same_as_previous`` line borrows (null
+    // above the first line and below a fixed one). Recorded for inactive rows
+    // too, so the row editor can preview a line before it is switched back on.
+    const runningBeforeMap = new Map<string, number>();
+    const previousBaseMap = new Map<string, number | null>();
+    let previousBase: number | null = null;
+    const calculated: { id: string; amount: number }[] = [];
+    for (const m of Array.isArray(markups) ? markups : []) {
+      if (!m) continue;
+      runningBeforeMap.set(m.id, running);
+      previousBaseMap.set(m.id, previousBase);
+      if (m.is_active === false) continue;
+      let amount = 0;
+      const pct = typeof m.percentage === 'number' && Number.isFinite(m.percentage) ? m.percentage : 0;
+      // Same rule as the server (``markup_base.py``): ``subtotal`` is the
+      // running total, ``same_as_previous`` the base of the line above.
+      const base = resolveMarkupBase(m.apply_to, directCost, running, previousBase);
+      previousBase = markupHasBase(m.markup_type) ? base : null;
+      if (m.markup_type === 'fixed') {
+        // fixed_amount arrives as a Decimal-as-string ("500.00"), so a
+        // ``typeof === 'number'`` guard rejected it and rendered every fixed
+        // markup as 0. Coerce through the shared money primitive instead.
+        amount = toNum(m.fixed_amount);
+      } else if (m.markup_type === 'banded') {
+        // A bond's rate card, charged tranche by tranche. This one IS mirrored
+        // locally because the card is on the row: no server round-trip and no
+        // date arithmetic involved, just the same progressive sum.
+        amount = bandedAmount(base, m.metadata);
+      } else if (m.markup_type === 'escalation') {
+        // The factor is resolved server-side from the cost-index series and
+        // arrives on the row. The browser must NOT work one out: it holds no
+        // series, and a second implementation of the period lookup is exactly
+        // what the backend went out of its way not to have. A line with no
+        // factor is worth nothing here, which is what the server reports too.
+        const factor = toNum(m.escalation_factor ?? 0);
+        amount = factor > 0 ? base * (factor - 1) : 0;
+      } else {
+        // The backend treats 'subtotal' identically to 'cumulative' (base =
+        // direct cost + the markups before it); GAEB import persists tax
+        // markups as 'subtotal', so basing it on directCost here would
+        // under-state the Amount column and the grand total against the server.
+        amount = base * (pct / 100);
+      }
+      running += amount;
+      calculated.push({ id: m.id, amount });
+    }
+    return {
+      calcMap: new Map(calculated.map((c) => [c.id, c.amount])),
+      grandTotal: running,
+      calculated,
+      runningBeforeMap,
+      previousBaseMap,
+    };
   }, [markups, directCost]);
 
   const handleAddMarkup = useCallback(() => {
@@ -448,6 +508,19 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
     return '—';
   };
 
+  /** Short name of what a line is calculated on, for the table's Base column. */
+  const baseLabel = (markup: Markup): string => {
+    if (markup.markup_type === 'fixed') return '—';
+    if (markup.apply_to === 'cumulative') return t('boq.markup_base_cumulative', { defaultValue: 'Running total incl. rows above' });
+    if (markup.apply_to === 'same_as_previous') {
+      return t('boq.markup_base_same_as_previous', { defaultValue: 'Same base as the row above' });
+    }
+    if (markup.apply_to === 'subtotal') {
+      return t('boq.markup_base_subtotal', { defaultValue: 'Running total incl. rows above (stored as subtotal)' });
+    }
+    return t('boq.markup_base_direct_cost', { defaultValue: 'Sum of positions' });
+  };
+
   return (
     <div id="boq-markups-panel" className="mt-4 rounded-xl border border-border-light bg-surface-elevated shadow-xs scroll-mt-28">
       {/* Header */}
@@ -569,20 +642,22 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
                     <th className="w-6 px-2 py-2" />
                     <th className="text-left px-3 py-2 font-medium">{t('boq.markup_name', { defaultValue: 'Name' })}</th>
                     <th className="text-left px-3 py-2 font-medium">{t('boq.markup_category', { defaultValue: 'Category' })}</th>
+                    <th className="text-left px-3 py-2 font-medium">{t('boq.markup_base_col', { defaultValue: 'Base' })}</th>
                     <th className="text-right px-3 py-2 font-medium w-20">{t('boq.markup_percentage', { defaultValue: '%' })}</th>
                     <th className="text-right px-3 py-2 font-medium w-32">{t('boq.markup_amount', { defaultValue: 'Amount' })}</th>
                     <th className="text-center px-3 py-2 font-medium w-16">{t('boq.markup_active', { defaultValue: 'Active' })}</th>
-                    <th className="w-10 px-2 py-2" />
+                    <th className="w-16 px-2 py-2" />
                   </tr>
                 </thead>
                 <tbody>
-                  {markups.map((markup) => {
+                  {markups.map((markup, index) => {
                     const amount = calcMap.get(markup.id) ?? 0;
                     const isEditing = editState?.markupId === markup.id;
+                    const isExpanded = expandedId === markup.id;
 
                     return (
+                      <Fragment key={markup.id}>
                       <tr
-                        key={markup.id}
                         data-markup-id={markup.id}
                         className={clsx(
                           'group border-b border-border-light last:border-b-0 transition-colors',
@@ -598,7 +673,32 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
                           data-testid="markup-drag-grip"
                           className="px-2 py-2 text-content-secondary group-hover:text-content-primary transition-colors"
                         >
-                          <GripVertical size={14} className="cursor-grab" />
+                          {/* Order is the cascade: a running-total line
+                              compounds on every line above it. Buttons rather
+                              than drag, so it works from the keyboard and with
+                              a screen reader, and each move saves sort_order. */}
+                          <span className="flex flex-col">
+                            <button
+                              type="button"
+                              onClick={() => handleMove(index, -1)}
+                              disabled={index === 0 || reorderMutation.isPending}
+                              aria-label={t('boq.markup_move_up', { defaultValue: 'Move up' })}
+                              title={t('boq.markup_move_up', { defaultValue: 'Move up' })}
+                              className="rounded hover:text-oe-blue disabled:opacity-30 disabled:hover:text-inherit"
+                            >
+                              <ArrowUp size={12} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleMove(index, 1)}
+                              disabled={index === markups.length - 1 || reorderMutation.isPending}
+                              aria-label={t('boq.markup_move_down', { defaultValue: 'Move down' })}
+                              title={t('boq.markup_move_down', { defaultValue: 'Move down' })}
+                              className="rounded hover:text-oe-blue disabled:opacity-30 disabled:hover:text-inherit"
+                            >
+                              <ArrowDown size={12} />
+                            </button>
+                          </span>
                         </td>
 
                         {/* Name */}
@@ -680,6 +780,19 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
                           )}
                         </td>
 
+                        {/* Base: what this line is calculated on. Shown in the
+                            row so the cascade reads top to bottom without
+                            opening anything. */}
+                        <td className="px-3 py-2 text-xs text-content-secondary">
+                          <button
+                            type="button"
+                            onClick={() => setExpandedId(isExpanded ? null : markup.id)}
+                            className="hover:text-oe-blue transition-colors"
+                          >
+                            {baseLabel(markup)}
+                          </button>
+                        </td>
+
                         {/* Percentage. Only a percentage line has one to edit:
                             a fixed line carries an amount, a banded line a rate
                             card, and an escalation line a factor the index
@@ -734,8 +847,21 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
                           </button>
                         </td>
 
-                        {/* Delete */}
+                        {/* Calculation settings + delete */}
                         <td className="px-2 py-2 text-center">
+                          <button
+                            type="button"
+                            onClick={() => setExpandedId(isExpanded ? null : markup.id)}
+                            aria-expanded={isExpanded}
+                            aria-label={t('boq.markup_edit_calc', { defaultValue: 'Edit calculation' })}
+                            title={t('boq.markup_edit_calc', { defaultValue: 'Edit calculation' })}
+                            className={clsx(
+                              'me-2 transition-colors',
+                              isExpanded ? 'text-oe-blue' : 'text-content-tertiary hover:text-oe-blue',
+                            )}
+                          >
+                            <SlidersHorizontal size={14} />
+                          </button>
                           <button
                             onClick={() => deleteMutation.mutate(markup.id)}
                             disabled={deleteMutation.isPending}
@@ -746,6 +872,34 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
                           </button>
                         </td>
                       </tr>
+                      {isExpanded && (
+                        <tr className="border-b border-border-light bg-surface-secondary/20">
+                          <td colSpan={8} className="p-0">
+                            <MarkupRowEditor
+                              key={`${markup.id}-${markup.updated_at}`}
+                              markup={markup}
+                              directCost={directCost}
+                              runningBefore={runningBeforeMap.get(markup.id) ?? directCost}
+                              previousBase={previousBaseMap.get(markup.id) ?? null}
+                              currencyCode={currencyCode}
+                              locale={locale}
+                              saving={updateMutation.isPending}
+                              onCancel={() => setExpandedId(null)}
+                              onSave={(data) => {
+                                if (Object.keys(data).length === 0) {
+                                  setExpandedId(null);
+                                  return;
+                                }
+                                updateMutation.mutate(
+                                  { markupId: markup.id, data },
+                                  { onSuccess: () => setExpandedId(null) },
+                                );
+                              }}
+                            />
+                          </td>
+                        </tr>
+                      )}
+                      </Fragment>
                     );
                   })}
                 </tbody>

@@ -5994,19 +5994,28 @@ def build_gaeb_xml(
         ET.SubElement(mk, "IT").text = _fmt_price(getattr(m, "amount", 0))
         _set_description(mk, str(getattr(m, "name", "") or "Markup"))
 
-    def _markup_base_for(m: Any, running_subtotal: Decimal) -> Decimal:
-        """Resolve a markup's real base, mirroring ``_calculate_markup_amounts``.
+    def _markup_bases(markups: list[Any]) -> list[Decimal]:
+        """Resolve each markup's real base, mirroring ``_calculate_markup_amounts``.
 
-        ``cumulative`` / ``subtotal`` markups base on direct cost plus the sum
-        of preceding markup amounts (``running_subtotal`` already carries
-        ``direct_cost`` as its seed); ``direct_cost`` markups base on the
-        direct-cost subtotal alone.
+        ``cumulative`` / ``subtotal`` lines base on direct cost plus the
+        preceding markup amounts, ``direct_cost`` lines on the direct cost
+        alone, and ``same_as_previous`` lines on the base of the line above.
+        The rule itself lives in :mod:`app.modules.boq.markup_base`.
         """
-        apply_to = str(getattr(m, "apply_to", "") or "direct_cost").lower()
+        from app.modules.boq.markup_base import has_base, resolve_markup_base
+
         direct = _to_dec(boq_data.direct_cost) or Decimal("0")
-        if apply_to in ("cumulative", "subtotal"):
-            return running_subtotal
-        return direct
+        running = direct
+        previous: Decimal | None = None
+        bases: list[Decimal] = []
+        for m in markups:
+            base = resolve_markup_base(
+                getattr(m, "apply_to", None), direct_cost=direct, running=running, previous_base=previous
+            )
+            previous = base if has_base(getattr(m, "markup_type", None)) else None
+            bases.append(base)
+            running += _to_dec(getattr(m, "amount", 0)) or Decimal("0")
+        return bases
 
     def _emit_category_totals(ctgy: ET.Element, subtotal: Any) -> None:
         """Append the per-category ``Totals`` (REQUIRED by the X84 BoQCtgy)."""
@@ -6071,11 +6080,8 @@ def build_gaeb_xml(
             mk_ctgy = ET.SubElement(boq_body, "BoQCtgy", ID=_mint_id("oeCtgy"), RNoPart=_rnopart("Z", 0))
             mk_body = ET.SubElement(mk_ctgy, "BoQBody")
             mk_list = ET.SubElement(mk_body, "Itemlist")
-            running_subtotal = _to_dec(boq_data.direct_cost) or Decimal("0")
-            for idx, m in enumerate(active_markups, start=1):
-                base = _markup_base_for(m, running_subtotal)
+            for idx, (m, base) in enumerate(zip(active_markups, _markup_bases(active_markups), strict=True), start=1):
                 _emit_markup_item(mk_list, m, idx, base)
-                running_subtotal += _to_dec(getattr(m, "amount", 0)) or Decimal("0")
             mk_total = sum(
                 (_to_dec(getattr(m, "amount", 0)) or Decimal("0") for m in active_markups),
                 Decimal("0"),
@@ -6088,11 +6094,8 @@ def build_gaeb_xml(
         for pos in boq_data.positions:
             _emit_item(root_itemlist, pos, "")
         if is_priced and active_markups:
-            running_subtotal = _to_dec(boq_data.direct_cost) or Decimal("0")
-            for idx, m in enumerate(active_markups, start=1):
-                base = _markup_base_for(m, running_subtotal)
+            for idx, (m, base) in enumerate(zip(active_markups, _markup_bases(active_markups), strict=True), start=1):
                 _emit_markup_item(root_itemlist, m, idx, base)
-                running_subtotal += _to_dec(getattr(m, "amount", 0)) or Decimal("0")
 
     # ── BoQInfo / Totals (reconciliation), priced phase only ───────────────
     # The X84 schema places <Totals> as the last child of <BoQInfo> (the X83

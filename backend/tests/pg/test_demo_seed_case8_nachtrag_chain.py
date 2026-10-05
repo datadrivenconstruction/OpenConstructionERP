@@ -222,8 +222,11 @@ async def test_the_claims_backfill_writes_a_german_staged_ladder(pg_session) -> 
         # German market numbering: Abschlagszahlung, not PC.
         assert claim.claim_number.startswith("AZ-"), claim.claim_number
         assert claim.gross_amount > 0
-        # The contract holds 5% retention, so every claim must too.
-        assert claim.retention_amount == (claim.gross_amount * Decimal("0.05")).quantize(Decimal("0.01"))
+        # The contract holds 5% retention, so every claim must too, of the
+        # payment with its 19 % USt in it, as a German claim is cut
+        # (§ 17 Abs. 6 Nr. 1 VOB/B).
+        with_vat = claim.gross_amount + (claim.gross_amount * Decimal("0.19")).quantize(Decimal("0.01"))
+        assert claim.retention_amount == (with_vat * Decimal("0.05")).quantize(Decimal("0.01"))
         assert claim.prior_claims_total == prior, "the cumulative prior-claims figure does not re-add"
         prior += claim.gross_amount
         if claim.submitted_at:

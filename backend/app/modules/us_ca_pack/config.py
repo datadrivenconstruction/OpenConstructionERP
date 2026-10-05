@@ -183,8 +183,26 @@ STATE_RULES: dict[str, list[dict[str, Any]]] = {
         },
     ],
     # ── Retainage ────────────────────────────────────────────────────────────
+    # A rule that carries ``per_payment_percent`` and ``works`` is a ceiling on
+    # the retention withheld from each payment, and the contracts module reads
+    # it into the rate a new contract starts from
+    # (``app.modules.contracts.country_defaults.statutory_retention_ceiling``).
+    # For these rules ``effective_date`` is the day from which a contract
+    # ENTERED INTO binds, which is how both statutes word their reach, so it is
+    # always a full ISO date. ``works`` says which regime the rule belongs to;
+    # a contract does not record whether it is public or private, so a ceiling
+    # reaches its defaults only on a date when every kind of works is capped.
     "retainage": [
         {
+            # Pub. Contract Code § 7201(b)(1): "The retention proceeds withheld
+            # from any payment by a public entity from the original contractor,
+            # by the original contractor from any subcontractor, and by a
+            # subcontractor from any subcontractor thereunder shall not exceed
+            # 5 percent of the payment." The section "shall apply with respect
+            # to all contracts entered into on or after January 1, 2012"; (b)(3)
+            # and (b)(4) allow more on a project found substantially complex
+            # before the bid. Source, read 2026-10-05:
+            # https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PCC&sectionNum=7201
             "code": "ca_public_retention_cap",
             "name": "Public works retention cap",
             "description": (
@@ -194,6 +212,8 @@ STATE_RULES: dict[str, list[dict[str, Any]]] = {
             ),
             "value": "5",
             "unit": "percent",
+            "per_payment_percent": "5",
+            "works": "public",
             "statute_reference": "California Public Contract Code § 7201",
             "effective_date": "2012-01-01",
         },
@@ -215,6 +235,17 @@ STATE_RULES: dict[str, list[dict[str, Any]]] = {
             "effective_date": "2012-01-01",
         },
         {
+            # Civ. Code § 8811, added by Stats. 2025, ch. 49 (SB 61), effective
+            # January 1, 2026. (a): "This section is applicable to a contract
+            # relating to a private work of improvement entered into on or after
+            # January 1, 2026." (b)(1)(A): retention "withheld from a payment by
+            # an owner from the direct contractor, by the direct contractor from
+            # any subcontractor, and by a subcontractor from any subcontractor
+            # thereunder, for a private work of improvement, shall not exceed 5
+            # percent of the payment." (b)(1)(B): in total not over 5 percent of
+            # the contract price. Exceptions in (b)(2) and (b)(3), carried by the
+            # next rule. Source, read 2026-10-05:
+            # https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=CIV&sectionNum=8811
             "code": "ca_private_retention_cap",
             "name": "Private works retention cap",
             "description": (
@@ -229,6 +260,7 @@ STATE_RULES: dict[str, list[dict[str, Any]]] = {
             "unit": "percent",
             "per_payment_percent": "5",
             "aggregate_percent": "5",
+            "works": "private",
             "statute_reference": "California Civil Code § 8811, added by Senate Bill 61",
             "effective_date": "2026-01-01",
         },

@@ -3,12 +3,13 @@
 """The invoice raised from a certified claim carries the claim's retention.
 
 A client claim billed from a schedule of values at 10 % retention: 40 % of a
-60 000 line is 24 000 gross, 2 400 held, 21 600 due. The invoice keeps the
-gross in its subtotal and total and the 2 400 beside it, so the claim invoice
-card's net collectible (total less retention) is the 21 600 the certificate
-says is due, not the gross. The card used to print the subtotal (P-39); it
-now subtracts retention, and this pins that the retention is there to
-subtract.
+60 000 line is 24 000 of work. The project is German, so the retention is ten
+percent of the payment with its 19 % USt in it, 2 856, and 21 144 is due
+before the USt. The invoice keeps the work in its subtotal, the USt beside it
+and the 2 856 beside that, so the claim invoice card's net collectible (total
+less retention) is the 21 144 the certificate says is due plus the 4 560 USt,
+not the gross. The card used to print the subtotal (P-39); it now subtracts
+retention, and this pins that the retention is there to subtract.
 """
 
 from __future__ import annotations
@@ -96,6 +97,12 @@ async def test_the_invoice_from_a_certified_claim_holds_its_retention(session) -
     invoice = await FinanceService(session).create_receivable_from_claim(claim.id)
 
     assert invoice.invoice_direction == "receivable"
-    assert (Decimal(invoice.amount_subtotal), Decimal(invoice.retention_amount)) == (Decimal("24000"), Decimal("2400"))
+    # A German contract: retention is ten percent of the payment with its
+    # 19 % USt in it (§ 17 Abs. 6 Nr. 1 VOB/B), 10 % of 28 560 = 2 856, and
+    # the receivable books that USt. What the card collects is the net due
+    # plus the USt, which is the gross the invoice asks for less retention.
+    assert (Decimal(invoice.amount_subtotal), Decimal(invoice.retention_amount)) == (Decimal("24000"), Decimal("2856"))
+    assert Decimal(invoice.tax_amount) == Decimal("4560")
     collectible = Decimal(invoice.amount_total) - Decimal(invoice.retention_amount)
-    assert collectible == Decimal(claim.net_due) == Decimal("21600")
+    assert Decimal(claim.net_due) == Decimal("21144")
+    assert collectible == Decimal(claim.net_due) + Decimal(invoice.tax_amount) == Decimal("25704")

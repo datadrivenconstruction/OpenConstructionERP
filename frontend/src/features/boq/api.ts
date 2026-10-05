@@ -256,7 +256,11 @@ export interface Markup {
    * ``+`` string-concatenates ("1000" + "500.00" → "1000500.00").
    */
   fixed_amount: number | string;
-  apply_to: 'direct_cost' | 'subtotal' | 'cumulative';
+  /**
+   * ``same_as_previous`` takes exactly the base of the nearest active line
+   * above (see ``markupBase.ts``); ``subtotal`` computes like ``cumulative``.
+   */
+  apply_to: 'direct_cost' | 'subtotal' | 'cumulative' | 'same_as_previous';
   sort_order: number;
   is_active: boolean;
   /**
@@ -312,7 +316,8 @@ export interface UpdateMarkupData {
   markup_type?: string;
   category?: string;
   percentage?: number;
-  fixed_amount?: number;
+  /** Money: send the typed amount as a Decimal string so no cent is lost to a float. */
+  fixed_amount?: number | string;
   apply_to?: string;
   sort_order?: number;
   is_active?: boolean;
