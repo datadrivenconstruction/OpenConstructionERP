@@ -20005,6 +20005,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "Lo stato di avanzamento calcola il suo netto dovuto da tutto quanto certificato finora, incluse somme che nessuna riga del computo porta.",
     "contracts.gaeb_invoice.reason_other": "I valori dello stato di avanzamento sono stati modificati manualmente o non sono aggiornati. Ricalcola lo stato di avanzamento.",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "La fattura è emessa a nome del subappaltatore. Verifica prima dell'invio se si applica il reverse charge (articolo 13b dello UStG); in tal caso, non deve essere indicata l'IVA.",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "La ritenuta potrebbe dover essere calcolata sul pagamento IVA compresa (§ 17, c. 6 VOB/B), ma il contratto non indica un'aliquota IVA, quindi è stata calcolata sull'imponibile. Indicate l'aliquota IVA del contratto per correggere; in inversione contabile è 0 %.",
     "contracts.gaeb_invoice.remapped_title": "Queste righe non possono mantenere la propria OZ e vengono scritte sotto un'altra:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} viene scritto come {{written}} ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "un'altra riga fattura la stessa OZ a un prezzo o un'unità diversa",

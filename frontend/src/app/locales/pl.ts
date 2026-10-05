@@ -20410,6 +20410,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "Roszczenie wylicza swoje netto należne z całości poświadczonej do tej daty, w tym kwot, których nie niesie żadna pozycja kosztorysu.",
     "contracts.gaeb_invoice.reason_other": "Wartości roszczenia zostały zmienione ręcznie lub są nieaktualne. Przelicz roszczenie.",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "Faktura jest wystawiana w imieniu podwykonawcy. Przed wysłaniem sprawdź, czy ma zastosowanie odwrotne obciążenie (reverse charge, paragraf 13b UStG); jeśli tak, nie podaje się stawki VAT.",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "Zatrzymanie może wymagać naliczenia od płatności z VAT (§ 17 ust. 6 VOB/B), ale umowa nie podaje stawki VAT, więc naliczono je od kwoty netto. Podaj stawkę VAT umowy, aby to poprawić; przy odwrotnym obciążeniu wynosi ona 0 %.",
     "contracts.gaeb_invoice.remapped_title": "Te wiersze nie mogą zachować własnej OZ i są zapisywane pod inną:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} jest zapisywana jako {{written}} ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "inny wiersz fakturuje tę samą OZ w innej cenie lub jednostce",

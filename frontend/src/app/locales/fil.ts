@@ -19248,6 +19248,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "Kinukuwenta ng claim ang net na dapat bayaran mula sa lahat ng na-certify hanggang ngayon, kasama ang perang walang linya sa schedule.",
     "contracts.gaeb_invoice.reason_other": "Binago nang mano-mano ang mga numero ng claim o luma na ang mga ito. I-recalculate ang claim.",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "Ibibigay ang invoice sa pangalan ng subcontractor. Tingnan kung naaangkop ang reverse charge (section 13b UStG) bago ito ipadala; kung oo, walang VAT na maaaring isaad.",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "Maaaring kailangang kunin ang retention mula sa bayad na may kasamang VAT (seksyon 17(6) VOB/B), pero walang nakasaad na VAT rate sa kontrata, kaya kinuha ito mula sa net. Ilagay ang VAT rate ng kontrata para maitama ito; sa reverse charge, 0 % ito.",
     "contracts.gaeb_invoice.remapped_title": "Hindi mapapanatili ng mga linyang ito ang sarili nilang OZ at isusulat sa ilalim ng iba:",
     "contracts.gaeb_invoice.remapped_line": "Isusulat ang {{ordinal}} bilang {{written}} ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "may ibang linyang nag-bill ng parehong OZ sa ibang presyo o unit",

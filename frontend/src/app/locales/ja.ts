@@ -19922,6 +19922,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "この請求は、純支払額を今日までに承認されたすべての金額から算出しており、内訳書のどの行にも載っていない金額も含まれます。",
     "contracts.gaeb_invoice.reason_other": "この請求の数値は手動で変更されたか、古くなっています。請求を再計算してください。",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "この請求書は協力会社の名義で発行されます。送付前にリバースチャージ（reverse charge、UStG第13b条）が適用されるか確認してください。適用される場合はVATを記載できません。",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "保留金は付加価値税込みの支払額から計算する必要がある場合があります（VOB/B 第17条第6項）が、契約に税率が記載されていないため、税抜金額から計算しました。修正するには契約の税率を入力してください。リバースチャージの場合は 0 % です。",
     "contracts.gaeb_invoice.remapped_title": "次の明細は自分のOZを保持できず、別のOZの下に書き出されます。",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}}は{{written}}として書き出されました（{{reason}}）",
     "contracts.gaeb_invoice.remap_duplicate": "別の明細が同じOZを別の価格または単位で請求しています",

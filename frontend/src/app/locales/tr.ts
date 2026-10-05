@@ -9289,6 +9289,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "Hakediş, net ödenecek tutarını bugüne kadar onaylanan her şeyden çıkarıyor, hiçbir metraj satırının taşımadığı tutarlar dahil.",
     "contracts.gaeb_invoice.reason_other": "Hakediş rakamları elle değiştirilmiş veya güncel değil. Hakedişi yeniden hesaplayın.",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "Fatura, taşeron adına düzenleniyor. Göndermeden önce tevkifat (reverse charge, madde 13b UStG) uygulanıp uygulanmadığını kontrol edin; uygulanıyorsa KDV belirtilemez.",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "Teminat kesintisinin KDV dahil ödeme üzerinden hesaplanması gerekebilir (VOB/B § 17 f. 6), ancak sözleşmede KDV oranı belirtilmediği için net tutar üzerinden hesaplandı. Bunu düzeltmek için sözleşmenin KDV oranını girin; sorumlu sıfatıyla beyanda oran %0'dır.",
     "contracts.gaeb_invoice.remapped_title": "Bu satırlar kendi OZ'lerini koruyamaz ve başka bir OZ altında yazılır:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}}, {{written}} olarak yazıldı ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "başka bir satır aynı OZ'yi başka bir fiyat veya birimle faturalandırıyor",

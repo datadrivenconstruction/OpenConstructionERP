@@ -8281,6 +8281,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "دعویٰ اپنا خالص واجب الادا آج تک تصدیق شدہ ہر چیز سے نکالتا ہے، بشمول وہ رقم جو بل کی کوئی قطار نہیں اٹھاتی۔",
     "contracts.gaeb_invoice.reason_other": "دعوے کے اعداد ہاتھ سے بدلے گئے ہیں یا پرانے ہیں۔ دعوے کا دوبارہ حساب لگائیں۔",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "انوائس ذیلی ٹھیکیدار کے نام پر جاری ہوئی ہے۔ بھیجنے سے پہلے چیک کریں کہ آیا ریورس چارج (reverse charge، سیکشن 13b UStG) لاگو ہوتا ہے؛ اگر لاگو ہو تو کوئی VAT بیان نہیں کی جا سکتی۔",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "ممکن ہے کہ روکی گئی رقم ویلیو ایڈڈ ٹیکس سمیت ادائیگی پر لگانی ہو (VOB/B کی شق 17(6))، مگر معاہدے میں ٹیکس کی شرح درج نہیں، اس لیے یہ خالص رقم پر لگائی گئی۔ اسے درست کرنے کے لیے معاہدے کی ٹیکس شرح درج کریں؛ ریورس چارج میں یہ 0 % ہے۔",
     "contracts.gaeb_invoice.remapped_title": "یہ قطاریں اپنا OZ برقرار نہیں رکھ سکتیں اور دوسرے کے تحت لکھی جاتی ہیں:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} کو {{written}} کے طور پر لکھا گیا ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "ایک اور قطار وہی OZ دوسری قیمت یا یونٹ پر بل کرتی ہے",

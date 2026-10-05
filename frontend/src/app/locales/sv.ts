@@ -20118,6 +20118,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "Kravet beräknar sitt netto förfallna belopp från allt som certifierats hittills, inklusive belopp som ingen rad i förteckningen bär.",
     "contracts.gaeb_invoice.reason_other": "Kravets siffror har ändrats manuellt eller är inaktuella. Beräkna om kravet.",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "Fakturan utfärdas i underentreprenörens namn. Kontrollera innan den skickas om omvänd skattskyldighet (reverse charge, UStG 13b §) gäller; om så är fallet får ingen momssats anges.",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "Kvarhållandet kan behöva beräknas på betalningen inklusive moms (§ 17 st. 6 VOB/B), men avtalet anger ingen momssats, så det beräknades på nettobeloppet. Ange avtalets momssats för att rätta detta; vid omvänd skattskyldighet är den 0 %.",
     "contracts.gaeb_invoice.remapped_title": "Dessa rader kan inte behålla sin egen OZ och skrivs under en annan:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} skrivs som {{written}} ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "en annan rad fakturerar samma OZ till ett annat pris eller en annan enhet",

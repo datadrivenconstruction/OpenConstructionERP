@@ -19384,6 +19384,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "O pedido calcula o seu líquido devido a partir de tudo o que foi certificado até a data, incluindo valores que nenhuma linha da planilha registra.",
     "contracts.gaeb_invoice.reason_other": "Os valores do pedido foram alterados manualmente ou estão desatualizados. Recalcule o pedido.",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "A fatura é emitida em nome do subcontratado. Verifique antes de enviá-la se o reverse charge (artigo 13b da UStG) se aplica; se aplicável, nenhum IVA deve ser indicado.",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "A retenção pode ter de ser calculada sobre o pagamento com imposto sobre valor agregado (§ 17(6) VOB/B), mas o contrato não informa alíquota, por isso foi calculada sobre o valor líquido. Informe a alíquota do contrato para corrigir isso; na inversão do sujeito passivo ela é 0 %.",
     "contracts.gaeb_invoice.remapped_title": "Estas linhas não podem manter o seu próprio OZ e são escritas sob outro:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} é escrito como {{written}} ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "outra linha fatura o mesmo OZ a outro preço ou unidade",

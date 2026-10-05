@@ -19741,6 +19741,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "De claim berekent het netto verschuldigde bedrag uit alles wat tot nu toe is gecertificeerd, inclusief bedragen die geen enkele regel van de raming draagt.",
     "contracts.gaeb_invoice.reason_other": "De cijfers van de claim zijn handmatig gewijzigd of zijn verouderd. Bereken de claim opnieuw.",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "De factuur wordt op naam van de onderaannemer uitgereikt. Controleer vóór verzending of de verleggingsregeling (reverse charge, artikel 13b UStG) van toepassing is; zo ja, dan mag geen btw worden vermeld.",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "Het ingehouden bedrag moet mogelijk worden berekend over de betaling inclusief btw (§ 17 lid 6 VOB/B), maar het contract vermeldt geen btw-tarief, dus is het over het nettobedrag berekend. Vul het btw-tarief van het contract in om dit te corrigeren; bij verlegging is het 0 %.",
     "contracts.gaeb_invoice.remapped_title": "Deze regels kunnen hun eigen OZ niet behouden en worden onder een andere geschreven:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} wordt geschreven als {{written}} ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "een andere regel factureert dezelfde OZ tegen een andere prijs of eenheid",

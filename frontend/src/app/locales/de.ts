@@ -20210,6 +20210,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "Die Abschlagsrechnung ermittelt ihre Netto-Fälligkeit aus allem bisher Zertifizierten, einschließlich Beträgen, die keine Zeile des Leistungsverzeichnisses trägt.",
     "contracts.gaeb_invoice.reason_other": "Die Zahlen der Abschlagsrechnung wurden händisch geändert oder sind veraltet. Berechnen Sie die Abschlagsrechnung neu.",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "Die Rechnung wird im Namen des Nachunternehmers ausgestellt. Prüfen Sie vor dem Versand, ob Reverse-Charge (Steuerschuldnerschaft des Leistungsempfängers, § 13b UStG) greift; wenn ja, darf keine Umsatzsteuer ausgewiesen werden.",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "Der Sicherheitseinbehalt ist möglicherweise von der Zahlung einschließlich Umsatzsteuer zu berechnen (§ 17 Abs. 6 VOB/B), der Vertrag nennt aber keinen Umsatzsteuersatz, daher wurde er vom Nettobetrag berechnet. Hinterlegen Sie den Umsatzsteuersatz des Vertrags, um das zu korrigieren; bei Reverse-Charge sind es 0 %.",
     "contracts.gaeb_invoice.remapped_title": "Diese Zeilen können ihre eigene OZ nicht behalten und werden unter einer anderen geschrieben:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} wird als {{written}} geschrieben ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "eine andere Zeile rechnet dieselbe OZ mit einem anderen Preis oder einer anderen Einheit ab",

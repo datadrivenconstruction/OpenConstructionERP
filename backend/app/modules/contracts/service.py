@@ -18,7 +18,7 @@ import dataclasses
 import logging
 import uuid
 from datetime import date
-from decimal import ROUND_DOWN, ROUND_HALF_UP, Decimal, InvalidOperation
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from types import SimpleNamespace
 from typing import Any
 
@@ -47,7 +47,9 @@ from app.modules.contracts.country_defaults import (
     PAYMENT_TERM_FIELDS,
     PAYMENT_TERMS_KEY,
     PLATFORM_FALLBACK,
+    RetentionBasis,
     apply_contract_defaults,
+    contract_retention_basis,
     contract_works,
     forget_overridden,
     has_subdivision_rows,
@@ -124,6 +126,8 @@ from app.modules.contracts.retention import (
     claim_retention,
     compute_retention,
     flat_policy,
+    flat_retention_within_cap,
+    on_retention_basis,
     plan_release,
     policy_from_rule,
     release_spec,
@@ -497,40 +501,6 @@ def contract_retention_cap(contract: Any) -> Decimal | None:
     if not value.is_finite() or value < DEC_ZERO or value > DEC_HUNDRED:
         return None
     return value
-
-
-def flat_retention_within_cap(
-    gross: Decimal,
-    rate: Decimal,
-    *,
-    cap_percent: Decimal | None,
-    contract_sum: Decimal,
-    accrued_before: Decimal,
-    currency: str | None = None,
-) -> Decimal:
-    """Retention a flat-rate claim holds this period, never past the agreed ceiling.
-
-    The ceiling is on what the contract holds in total, so it is measured
-    against what the earlier claims already accrued: once period N reaches it,
-    period N+1 holds nothing more, however large its gross. Checking each
-    period against the cap on its own would let every month hold up to the
-    whole ceiling again.
-
-    A contract with no sum (``contract_sum`` of 0, as a cost-plus or T&M
-    contract whose total nobody entered carries) has no ceiling to measure,
-    so the rate holds uncapped. Reading the cap as a percent of 0 would hold
-    nothing from the first claim on. Accrual and cap use the currency's minor
-    unit, with cents as the fallback when no currency is known.
-    """
-    quantum = money_quantum(currency)
-    retention = (gross * rate / DEC_HUNDRED).quantize(quantum, rounding=ROUND_HALF_UP)
-    if cap_percent is None or retention <= DEC_ZERO or contract_sum <= DEC_ZERO:
-        return retention
-    ceiling = (contract_sum * cap_percent / DEC_HUNDRED).quantize(quantum, ROUND_HALF_UP)
-    # Legacy accruals may contain fractions of today's minor unit. Rounding
-    # them down first would create room that the agreed cap does not have.
-    room = max(ceiling - max(accrued_before, DEC_ZERO), DEC_ZERO).quantize(quantum, rounding=ROUND_DOWN)
-    return min(retention, room)
 
 
 def compute_line_total(line: ContractLine | Any) -> Decimal:
@@ -3534,6 +3504,22 @@ class ContractsService:
         )
         completed = sum((Decimal(str(row["total_completed_stored"])) for row in rows), DEC_ZERO)
         held = sum((Decimal(str(row["retainage"])) for row in rows), DEC_ZERO)
+        basis_vat = (await self.retention_basis(contract)).vat_percent
+        if basis_vat is not None:
+            # The sheet's column I is the rate on the net. Where retention is
+            # measured on the payment with VAT in it, the claim's own
+            # retention was taken on that, and what is frozen as held must be
+            # the same money, row by row as the sheet rounds it.
+            rate = Decimal(str(contract.retention_percent or 0))
+            held = sum(
+                (
+                    (on_retention_basis(row["total_completed_stored"], basis_vat) * rate / DEC_HUNDRED).quantize(
+                        cents, ROUND_HALF_UP
+                    )
+                    for row in rows
+                ),
+                DEC_ZERO,
+            )
         return completed.quantize(cents, rounding=ROUND_HALF_UP), held.quantize(cents, rounding=ROUND_HALF_UP)
 
     async def claim_line_running_totals(
@@ -3755,13 +3741,19 @@ class ContractsService:
         Unlike :meth:`_claim_retention_context` this answers for every claim,
         including the flat-retention shapes. A cost-plus claim holds retention
         too, and a cap binds what is held however it was worked out.
+
+        ``contract_sum`` is the sum the ceiling is a share of, on the
+        contract's retention basis: with VAT in it where the country measures
+        retention on the gross payment, as the held figure then is too.
         """
         policy = await self.retention_policy(contract)
         country = ((await self._progress_billing(contract)) or {}).get("country_code")
         held = getattr(claim, "retention_held_to_date", None)
+        basis = await self.retention_basis(contract)
         return {
             "held": None if held is None else str(held),
-            "contract_sum": str(contract.total_value or 0),
+            "contract_sum": str(on_retention_basis(contract.total_value or 0, basis.vat_percent)),
+            "retention_basis": basis.basis,
             "cap_percent": (
                 None if policy.cap_percent_of_contract_sum is None else str(policy.cap_percent_of_contract_sum)
             ),
@@ -5559,6 +5551,36 @@ class ContractsService:
             cap_percent_of_contract_sum=agreed_cap,
         )
 
+    async def retention_basis(self, contract: Contract) -> RetentionBasis:
+        """What this contract's retention and its ceiling are measured on, net or gross of VAT.
+
+        The country is the project's, the rule is data
+        (:data:`~app.modules.contracts.country_defaults.COUNTRY_RETENTION_BASIS`),
+        and the VAT of a gross basis is the one the contract agreed for its
+        invoices. A contract that states none is held on the net, as before
+        (:func:`~app.modules.contracts.country_defaults.contract_retention_basis`).
+        Every writer of a claim's retention reads it here, and so do the
+        two documents that turn a claim into money (the GAEB X89 invoice and
+        the finance receivable), so the figure a claim holds and the figure
+        its invoice takes off the payment cannot drift apart.
+
+        A gross basis with no VAT anyone can name is measured on the net and
+        logged, not guessed.
+        """
+        from app.modules.projects.models import Project  # noqa: PLC0415
+
+        metadata = getattr(contract, "metadata_", None)
+        einvoice = metadata.get("einvoice") if isinstance(metadata, dict) else None
+        agreed = einvoice.get("vat_rate") if isinstance(einvoice, dict) else None
+        if agreed in (None, ""):
+            # No database read for the usual contract that states no rate.
+            return contract_retention_basis(None, None)
+        project = await self.session.get(Project, contract.project_id)
+        if project is None:
+            return contract_retention_basis(None, None)
+        basis = contract_retention_basis(getattr(project, "country_code", None), agreed)
+        return basis
+
     async def _flat_retention_cap(self, contract: Contract) -> Decimal | None:
         """The ceiling a flat-rate claim is held to: the policy's, else the contract's agreed one.
 
@@ -5588,8 +5610,14 @@ class ContractsService:
         hold up to the whole ceiling again, so the two together held twice the
         limit once both were submitted. Rejected claims hold nothing and do
         not count.
+
+        On a contract whose country measures retention on the payment with
+        VAT in it (Germany), the rate and the ceiling are both taken on the
+        gross, so ``gross`` here is the net and :meth:`retention_basis` adds
+        the VAT.
         """
         rate = Decimal(str(getattr(contract, "retention_percent", 0) or 0))
+        basis = await self.retention_basis(contract)
         cap_percent = await self._flat_retention_cap(contract)
         accrued_before = DEC_ZERO
         if cap_percent is not None:
@@ -5603,6 +5631,7 @@ class ContractsService:
             contract_sum=Decimal(str(getattr(contract, "total_value", 0) or 0)),
             accrued_before=accrued_before,
             currency=getattr(claim, "currency", None) or getattr(contract, "currency", None),
+            basis_vat_percent=basis.vat_percent,
         )
 
     async def _outside_sov_claim_retention(self, contract: Contract, claim: ProgressClaim, gross: Decimal) -> Decimal:
@@ -5638,6 +5667,7 @@ class ContractsService:
             cap_percent=policy.cap_percent_of_contract_sum,
             contract_sum=contract_sum,
             accrued_before=accrued_before,
+            basis_vat_percent=(await self.retention_basis(contract)).vat_percent,
             currency=claim.currency or contract.currency,
         )
 
@@ -5757,6 +5787,7 @@ class ContractsService:
             policy=policy,
             stored_by_line=stored,
             currency=currency,
+            basis_vat_percent=(await self.retention_basis(contract)).vat_percent,
         )
         prior = await self.claim_repo.prior_claims(contract.id, before_claim_id=claim.id)
         on_schedule, outside, released = await self._retention_before(claim, contract.id, prior, currency=currency)

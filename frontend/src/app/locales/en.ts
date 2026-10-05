@@ -16777,6 +16777,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "The claim works its net due out from everything certified to date, including money no schedule line carries.",
     "contracts.gaeb_invoice.reason_other": "The claim figures were changed by hand or are out of date. Recalculate the claim.",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "The invoice is issued in the subcontractor's name. Check whether reverse charge (section 13b UStG) applies before it is sent; if it does, no VAT may be stated.",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "Retention may have to be taken on the payment including VAT (section 17(6) VOB/B), but the contract states no VAT rate, so it was taken on the net. State the contract's VAT rate to correct this; under reverse charge it is 0 %.",
     "contracts.gaeb_invoice.remapped_title": "These lines cannot keep their own OZ and are written under another one:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} is written as {{written}} ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "another line bills the same OZ at another price or unit",

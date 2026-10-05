@@ -20086,6 +20086,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "Nárok vypočítává své netto splatné z veškerého k dnešnímu dni certifikovaného, včetně částek, které nenese žádný řádek rozpočtu.",
     "contracts.gaeb_invoice.reason_other": "Hodnoty nároku byly ručně změněny nebo jsou neaktuální. Přepočítejte nárok.",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "Faktura je vystavena na jméno subdodavatele. Před odesláním ověřte, zda se uplatní režim přenesení daňové povinnosti (reverse charge, § 13b UStG); pokud ano, sazba DPH se neuvádí.",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "Zádržné bude možná nutné počítat z platby včetně DPH (§ 17 odst. 6 VOB/B), smlouva ale neuvádí sazbu DPH, proto bylo spočteno z částky bez DPH. Uveďte sazbu DPH smlouvy, aby se to opravilo; při přenesení daňové povinnosti je 0 %.",
     "contracts.gaeb_invoice.remapped_title": "Tyto řádky nemohou zachovat svou vlastní OZ a jsou zapsány pod jinou:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} je zapsána jako {{written}} ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "jiný řádek fakturuje stejnou OZ za jinou cenu nebo v jiné jednotce",

@@ -8351,6 +8351,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "Talabnoma oʻzining sof toʻlanadigan summasini shu kungacha tasdiqlangan hamma narsadan chiqaradi, jadvalning hech bir qatori koʻtarmaydigan pul ham shunga kiradi.",
     "contracts.gaeb_invoice.reason_other": "Talabnoma raqamlari qoʻl bilan oʻzgartirilgan yoki eskirgan. Talabnomani qayta hisoblang.",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "Hisob-faktura pudratchi nomidan chiqarilmoqda. Yuborishdan oldin teskari soliqqa tortish (reverse charge, 13b UStG bandi) qoʻllanilishini tekshiring; agar qoʻllansa, QQS koʻrsatilmasligi kerak.",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "Ushlab qolinadigan summa QQS bilan to'lovdan hisoblanishi kerak bo'lishi mumkin (VOB/B 17(6)-paragraf), lekin shartnomada QQS stavkasi ko'rsatilmagan, shuning uchun u sof summadan hisoblandi. Tuzatish uchun shartnomaning QQS stavkasini kiriting; teskari hisoblashda u 0 %.",
     "contracts.gaeb_invoice.remapped_title": "Bu qatorlar oʻz OZ-ini saqlab qololmaydi va boshqasining ostida yoziladi:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} {{written}} sifatida yozildi ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "boshqa qator xuddi shu OZ-ni boshqa narx yoki birlikda hisobga oladi",

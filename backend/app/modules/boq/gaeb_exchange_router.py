@@ -789,10 +789,11 @@ async def _claim_invoice(
 ) -> _ClaimInvoice:
     """Gather an X89's content from a progress claim, its contract and the bill behind it."""
     from app.modules.boq.models import BOQ, Position
+    from app.modules.contracts.country_defaults import retention_basis_needs_vat_rate
     from app.modules.contracts.models import Contract, ContractLine, ProgressClaim, ProgressClaimLine
     from app.modules.contracts.periods import claims_before
     from app.modules.contracts.repository import ProgressClaimRepository, RetentionReleaseRepository
-    from app.modules.contracts.service import boq_position_id_for_line
+    from app.modules.contracts.service import ContractsService, boq_position_id_for_line
     from app.modules.projects.repository import ProjectRepository
 
     claim = await session.get(ProgressClaim, claim_id)
@@ -856,6 +857,38 @@ async def _claim_invoice(
         warnings=warnings,
         on_date=invoice_date,
     )
+    # A German claim already holds its retention on the payment with VAT in
+    # it (§ 17 Abs. 6 Nr. 1 VOB/B), so the invoice takes the claim's figure
+    # off the gross as it stands. That is right only while this invoice adds
+    # the VAT the claim's retention was measured with; a different rate here
+    # would print a retention that is not ten percent of the gross it shows.
+    basis = await ContractsService(session).retention_basis(contract)
+    if basis.vat_percent is not None and c2(basis.vat_percent) != c2(rate):
+        warnings.append(
+            {
+                "code": "retention_vat_rate_differs",
+                "detail": (
+                    f"The claim's retention was measured on the gross at {basis.vat_percent} % VAT "
+                    f"({basis.vat_source}); this invoice adds {rate} % ({vat_source})."
+                ),
+            }
+        )
+    contract_meta = contract.metadata_ if isinstance(contract.metadata_, dict) else {}
+    contract_einvoice = contract_meta.get("einvoice") if isinstance(contract_meta.get("einvoice"), dict) else {}
+    if retention_basis_needs_vat_rate(getattr(project, "country_code", None), contract_einvoice.get("vat_rate")):
+        # The country measures retention on the payment with VAT in it, but
+        # the contract states no VAT rate, so the claim held it on the net.
+        # Nothing is assumed (reverse charge between contractors carries no
+        # VAT); the invoice says so, and the contract should state its rate.
+        warnings.append(
+            {
+                "code": "retention_basis_vat_not_stated",
+                "detail": (
+                    "Retention here may have to be taken on the payment including VAT. The contract states "
+                    "no VAT rate, so it was taken on the net; state the contract's VAT rate to correct it."
+                ),
+            }
+        )
 
     ours = await _our_party(session) or InvoiceParty()
     is_subcontract = (contract.counterparty_type or "client") == "subcontractor"

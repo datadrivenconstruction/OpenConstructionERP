@@ -19968,6 +19968,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "การเบิกเงินงวดนี้คำนวณยอดสุทธิที่ต้องจ่ายจากทุกสิ่งที่ได้รับการรับรองจนถึงปัจจุบัน รวมถึงเงินที่ไม่มีรายการใดใน BOQ รองรับ",
     "contracts.gaeb_invoice.reason_other": "ตัวเลขของการเบิกเงินงวดนี้ถูกแก้ไขด้วยมือหรือล้าสมัยแล้ว โปรดคำนวณการเบิกเงินงวดนี้ใหม่",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "ใบแจ้งหนี้นี้ออกในนามของผู้รับเหมาช่วง โปรดตรวจสอบว่าภาษีมูลค่าเพิ่มแบบโอนภาระ (reverse charge มาตรา 13b UStG) มีผลหรือไม่ก่อนส่ง หากมีผล ห้ามระบุ VAT",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "เงินประกันผลงานอาจต้องคิดจากยอดชำระที่รวมภาษีมูลค่าเพิ่ม (มาตรา 17(6) VOB/B) แต่สัญญาไม่ได้ระบุอัตราภาษี จึงคิดจากยอดสุทธิ ระบุอัตราภาษีของสัญญาเพื่อแก้ไข กรณีกลไกย้อนกลับอัตราเป็น 0 %",
     "contracts.gaeb_invoice.remapped_title": "รายการต่อไปนี้ไม่สามารถคง OZ ของตนเองได้ และถูกเขียนไว้ภายใต้ OZ อื่น:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} ถูกเขียนเป็น {{written}} ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "มีอีกรายการเรียกเก็บ OZ เดียวกันด้วยราคาหรือหน่วยที่ต่างกัน",

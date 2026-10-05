@@ -19955,6 +19955,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "O auto calcula o seu líquido devido a partir de tudo o que foi certificado até à data, incluindo montantes que nenhuma linha da planilha regista.",
     "contracts.gaeb_invoice.reason_other": "Os valores do auto foram alterados manualmente ou estão desatualizados. Recalcule o auto.",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "A fatura é emitida em nome do subcontratado. Verifique antes de a enviar se se aplica a autoliquidação (reverse charge, parágrafo 13b da UStG); se aplicável, não deve ser indicado IVA.",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "A retenção poderá ter de ser calculada sobre o pagamento com IVA (§ 17(6) VOB/B), mas o contrato não indica taxa de IVA, pelo que foi calculada sobre o valor líquido. Indique a taxa de IVA do contrato para corrigir isto; em autoliquidação é 0 %.",
     "contracts.gaeb_invoice.remapped_title": "Estas linhas não podem manter o seu próprio OZ e são escritas sob outro:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} é escrito como {{written}} ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "outra linha fatura o mesmo OZ a outro preço ou unidade",

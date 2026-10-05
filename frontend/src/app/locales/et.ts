@@ -20116,6 +20116,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "Nõue arvutab oma netosumma kõigest tänaseks kinnitatust, sealhulgas summadest, mida ükski mahutabeli rida ei kanna.",
     "contracts.gaeb_invoice.reason_other": "Nõude arvud on käsitsi muudetud või aegunud. Arvuta nõue uuesti.",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "Arve esitatakse allhankija nimel. Enne saatmist kontrolli, kas kohaldub pöördmaksustamine (reverse charge, UStG § 13b); kui kohaldub, käibemaksumäära ei näidata.",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "Kinnipidamine tuleb võib-olla arvutada käibemaksuga maksest (VOB/B § 17 lg 6), kuid lepingus pole käibemaksumäära, seega arvutati see netosummast. Märkige lepingu käibemaksumäär, et seda parandada; pöördmaksustamisel on see 0 %.",
     "contracts.gaeb_invoice.remapped_title": "Need read ei saa säilitada oma OZ-i ja kirjutatakse teise alla:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} kirjutatakse kui {{written}} ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "teine rida arveldab sama OZ-i teise hinna või ühikuga",

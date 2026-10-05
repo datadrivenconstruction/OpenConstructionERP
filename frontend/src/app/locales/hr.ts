@@ -19943,6 +19943,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "Zahtjev izračunava svoje neto dugovanje iz svega potvrđenog do danas, uključujući iznose koje ne nosi nijedan red troškovnika.",
     "contracts.gaeb_invoice.reason_other": "Vrijednosti zahtjeva su ručno promijenjene ili su zastarjele. Preračunajte zahtjev.",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "Račun se izdaje na ime podizvođača. Prije slanja provjerite primjenjuje li se obrnuta porezna obveza (reverse charge, čl. 13b UStG); ako se primjenjuje, stopa PDV-a se ne navodi.",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "Zadržani iznos možda treba obračunati od plaćanja s PDV-om (§ 17 st. 6 VOB/B), ali ugovor ne navodi stopu PDV-a, pa je obračunat od neto iznosa. Navedite stopu PDV-a u ugovoru kako biste to ispravili; kod prijenosa porezne obveze iznosi 0 %.",
     "contracts.gaeb_invoice.remapped_title": "Ovi redovi ne mogu zadržati svoj vlastiti OZ i zapisuju se pod drugim:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} zapisuje se kao {{written}} ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "drugi red fakturira isti OZ po drugoj cijeni ili jedinici",

@@ -19811,6 +19811,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "La situation calcule son montant net dû à partir de tout ce qui a été certifié à ce jour, y compris des montants qu'aucune ligne du DQE ne porte.",
     "contracts.gaeb_invoice.reason_other": "Les chiffres de la situation ont été modifiés à la main ou sont obsolètes. Recalculez la situation.",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "La facture est émise au nom du sous-traitant. Vérifiez avant son envoi si l'autoliquidation (reverse charge, paragraphe 13b UStG) s'applique ; si oui, aucune TVA ne doit être indiquée.",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "La retenue devrait peut-être être calculée sur le paiement TVA comprise (§ 17, al. 6 VOB/B), mais le contrat n'indique aucun taux de TVA, elle a donc été calculée sur le montant HT. Indiquez le taux de TVA du contrat pour corriger cela ; en autoliquidation, il est de 0 %.",
     "contracts.gaeb_invoice.remapped_title": "Ces lignes ne peuvent pas conserver leur propre OZ et sont écrites sous une autre :",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} est écrit comme {{written}} ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "une autre ligne facture la même OZ à un autre prix ou une autre unité",

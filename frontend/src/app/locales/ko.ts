@@ -19922,6 +19922,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "이 청구는 순지급액을 현재까지 승인된 모든 금액에서 산출하며, 내역서의 어떤 행에도 없는 금액도 포함됩니다.",
     "contracts.gaeb_invoice.reason_other": "이 청구의 수치가 수동으로 변경되었거나 오래되었습니다. 청구를 다시 계산하세요.",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "이 청구서는 하도급사 명의로 발행됩니다. 전송 전에 역진 과세(reverse charge, UStG 제13b조)가 적용되는지 확인하세요. 적용되는 경우 VAT를 표시할 수 없습니다.",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "유보금은 부가가치세를 포함한 지급액에서 계산해야 할 수 있습니다(VOB/B 제17조 제6항). 그러나 계약에 부가가치세율이 없어 순액에서 계산했습니다. 수정하려면 계약의 세율을 입력하세요. 역발행(리버스 차지)이면 0 %입니다.",
     "contracts.gaeb_invoice.remapped_title": "다음 항목은 자신의 OZ를 유지할 수 없어 다른 OZ 아래에 기록됩니다:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}}이(가) {{written}}로 기록되었습니다 ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "다른 항목이 동일한 OZ를 다른 가격 또는 단위로 청구하고 있습니다",

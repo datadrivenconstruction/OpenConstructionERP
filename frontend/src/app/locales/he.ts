@@ -8316,6 +8316,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "התביעה מחשבת את הנטו לתשלום שלה מכל מה שאושר עד כה, כולל כסף שאין לו שורה בכתב הכמויות.",
     "contracts.gaeb_invoice.reason_other": "ספרי התביעה שונו באופן ידני או אינם מעודכנים. חשבו את התביעה מחדש.",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "החשבונית מופקת בשם קבלן המשנה. בדקו אם חל היפוך חיוב במע\"מ (reverse charge, סעיף 13b UStG) לפני שהיא נשלחת; אם כן, אין לנקוב במע\"מ.",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "ייתכן שיש לחשב את העיכבון מהתשלום כולל מע\"מ (סעיף 17(6) של VOB/B), אך החוזה אינו מציין שיעור מע\"מ, ולכן הוא חושב מהסכום נטו. ציינו את שיעור המע\"מ של החוזה כדי לתקן זאת; בחיוב הפוך השיעור הוא 0 %.",
     "contracts.gaeb_invoice.remapped_title": "השורות הבאות אינן יכולות לשמור על ה-OZ שלהן ונכתבות תחת אחר:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} נכתב כ-{{written}} ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "שורה אחרת מחייבת את אותו OZ במחיר או ביחידה אחרת",

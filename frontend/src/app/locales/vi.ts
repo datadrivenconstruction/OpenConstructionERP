@@ -19801,6 +19801,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "Đợt thanh toán này tính giá trị thuần phải trả từ toàn bộ những gì đã được xác nhận đến nay, kể cả số tiền không dòng nào trong BOQ mang theo.",
     "contracts.gaeb_invoice.reason_other": "Số liệu của đợt thanh toán này đã bị sửa tay hoặc đã lỗi thời. Hãy tính lại đợt thanh toán.",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "Hóa đơn này được phát hành dưới tên nhà thầu phụ. Hãy kiểm tra xem cơ chế đảo thuế (reverse charge, điều 13b UStG) có áp dụng trước khi gửi hay không; nếu có, không được ghi VAT.",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "Khoản giữ lại có thể phải tính trên khoản thanh toán đã gồm VAT (Điều 17(6) VOB/B), nhưng hợp đồng không nêu thuế suất VAT nên đã tính trên số tiền chưa thuế. Hãy nhập thuế suất VAT của hợp đồng để sửa; khi áp dụng cơ chế đảo ngược, thuế suất là 0 %.",
     "contracts.gaeb_invoice.remapped_title": "Các dòng sau không thể giữ OZ riêng của mình và được ghi dưới một OZ khác:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} được ghi thành {{written}} ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "một dòng khác xuất hóa đơn cùng OZ này với giá hoặc đơn vị khác",

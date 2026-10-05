@@ -20106,6 +20106,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "Kravet beregner sit netto forfaldne beløb fra alt, der er certificeret til dato, inklusive beløb, som ingen linje i tilbudslisten bærer.",
     "contracts.gaeb_invoice.reason_other": "Kravets tal er ændret manuelt eller er forældede. Genberegn kravet.",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "Fakturaen udstedes i underentreprenørens navn. Kontroller før afsendelse, om omvendt betalingspligt (reverse charge, § 13b i UStG) gælder; hvis den gør, må ingen momssats angives.",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "Tilbageholdelsen skal muligvis beregnes af betalingen inklusive moms (§ 17, stk. 6 VOB/B), men kontrakten angiver ingen momssats, så den blev beregnet af nettobeløbet. Angiv kontraktens momssats for at rette det; ved omvendt betalingspligt er den 0 %.",
     "contracts.gaeb_invoice.remapped_title": "Disse linjer kan ikke bevare deres egen OZ og skrives under en anden:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} skrives som {{written}} ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "en anden linje fakturerer samme OZ til en anden pris eller enhed",

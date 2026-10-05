@@ -19929,6 +19929,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "La certificación calcula su neto a cobrar a partir de todo lo certificado hasta la fecha, incluyendo importes que ninguna línea del presupuesto recoge.",
     "contracts.gaeb_invoice.reason_other": "Las cifras de la certificación se modificaron a mano o están desactualizadas. Vuelva a calcular la certificación.",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "La factura se emite a nombre del subcontratista. Compruebe antes de enviarla si se aplica la inversión del sujeto pasivo (reverse charge, parágrafo 13b UStG); si es así, no debe indicarse IVA.",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "Puede que la retención deba calcularse sobre el pago con IVA (art. 17(6) VOB/B), pero el contrato no indica ningún tipo de IVA, por lo que se calculó sobre el importe neto. Indique el tipo de IVA del contrato para corregirlo; con inversión del sujeto pasivo es 0 %.",
     "contracts.gaeb_invoice.remapped_title": "Estas líneas no pueden conservar su propia OZ y se escriben bajo otra:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} se escribe como {{written}} ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "otra línea factura la misma OZ a otro precio o unidad",

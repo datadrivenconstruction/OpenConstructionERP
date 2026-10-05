@@ -19857,6 +19857,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "Vaatimus laskee netto erääntyvän määränsä kaikesta tähän mennessä varmennetusta, mukaan lukien summat, joita mikään määräluettelon rivi ei kata.",
     "contracts.gaeb_invoice.reason_other": "Vaatimuksen luvut on muutettu käsin tai ne ovat vanhentuneet. Laske vaatimus uudelleen.",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "Lasku laaditaan aliurakoitsijan nimissä. Tarkista ennen lähetystä, sovelletaanko käännettyä verovelvollisuutta (reverse charge, UStG:n 13b §); jos sovelletaan, ALV-kantaa ei saa ilmoittaa.",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "Pidätys on ehkä laskettava arvonlisäverollisesta maksusta (VOB/B 17 § 6 mom.), mutta sopimuksessa ei ole arvonlisäverokantaa, joten se laskettiin nettosummasta. Ilmoita sopimuksen arvonlisäverokanta korjataksesi tämän; käännetyssä verovelvollisuudessa se on 0 %.",
     "contracts.gaeb_invoice.remapped_title": "Näitä rivejä ei voi säilyttää omalla OZ:llaan, ja ne kirjataan toisen alle:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} kirjataan muodossa {{written}} ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "toinen rivi laskuttaa saman OZ:n toisella hinnalla tai yksiköllä",

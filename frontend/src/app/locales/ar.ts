@@ -9373,6 +9373,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "تحسب المطالبة صافيها المستحق من كل ما جرى اعتماده حتى تاريخه، بما فيه أموال لا يحملها أي بند في الجدول.",
     "contracts.gaeb_invoice.reason_other": "تغيّرت أرقام المطالبة يدويًا أو أصبحت قديمة. أعد حساب المطالبة.",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "الفاتورة صادرة باسم مقاول الباطن. تحقق مما إذا كانت آلية نقل الالتزام الضريبي (reverse charge، الفقرة 13b من قانون ضريبة القيمة المضافة الألماني UStG) تنطبق قبل إرسالها؛ وإذا انطبقت، فلا يجوز إدراج ضريبة القيمة المضافة.",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "قد يلزم احتساب المبلغ المحتجز من الدفعة شاملة ضريبة القيمة المضافة (البند 17(6) من VOB/B)، لكن العقد لا يذكر نسبة الضريبة، لذا احتُسب من المبلغ الصافي. أدخل نسبة الضريبة في العقد لتصحيح ذلك؛ وفي حالة الاحتساب العكسي تكون 0 %.",
     "contracts.gaeb_invoice.remapped_title": "هذه البنود لا يمكن أن تحتفظ برقمها الخاص (OZ) وتُكتب تحت رقم آخر:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} يُكتب كـ {{written}} ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "بند آخر يفوتر نفس رقم OZ بسعر أو وحدة أخرى",

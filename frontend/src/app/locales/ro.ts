@@ -20168,6 +20168,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "Situația își calculează netul datorat din tot ce a fost certificat până în prezent, inclusiv sume pe care niciun rând al antemăsurătorii nu le poartă.",
     "contracts.gaeb_invoice.reason_other": "Cifrele situației au fost modificate manual sau sunt depășite. Recalculați situația.",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "Factura este emisă pe numele subcontractantului. Verificați, înainte de trimitere, dacă se aplică taxarea inversă (reverse charge, articolul 13b din UStG); dacă da, nu trebuie indicată TVA.",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "Reținerea ar putea trebui calculată din plata cu TVA (§ 17 alin. 6 VOB/B), dar contractul nu indică o cotă de TVA, așa că a fost calculată din suma netă. Indicați cota de TVA a contractului pentru a corecta acest lucru; în taxare inversă este 0 %.",
     "contracts.gaeb_invoice.remapped_title": "Aceste rânduri nu își pot păstra propriul OZ și sunt scrise sub altul:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} este scris ca {{written}} ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "un alt rând facturează același OZ la un alt preț sau altă unitate",

@@ -19954,6 +19954,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "本次索赔的净应付额是从迄今已核准的全部金额中算出的，其中包含清单中任何一行都没有承载的款项。",
     "contracts.gaeb_invoice.reason_other": "索赔数据被手动改动或已过期。请重新计算索赔。",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "该发票以分包商名义开具。发出前请核实是否适用增值税逆向征收（reverse charge，德国增值税法第13b条 UStG）；若适用，不得注明增值税额。",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "保留金可能应按含增值税的付款额计算（VOB/B 第 17 条第 6 款），但合同未写明增值税税率，因此按不含税金额计算。请填写合同的增值税税率以更正；反向征税时税率为 0 %。",
     "contracts.gaeb_invoice.remapped_title": "以下行无法保留各自的 OZ 编号，被写入另一个编号下：",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} 被写为 {{written}}（{{reason}}）",
     "contracts.gaeb_invoice.remap_duplicate": "另一行以不同的价格或单位对同一 OZ 开票",

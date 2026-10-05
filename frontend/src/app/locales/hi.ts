@@ -20123,6 +20123,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "यह बिल अपनी नेट देय राशि आज तक प्रमाणित हर चीज़ से निकालता है, जिसमें वह राशि भी शामिल है जिसे BOQ की कोई पंक्ति नहीं ढोती।",
     "contracts.gaeb_invoice.reason_other": "बिल के आँकड़े हाथ से बदले गए हैं या पुराने हो गए हैं। बिल की दोबारा गणना करें।",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "यह इनवॉइस उपठेकेदार के नाम पर जारी की गई है। भेजने से पहले जाँच लें कि क्या रिवर्स चार्ज (reverse charge, section 13b UStG) लागू होता है; अगर लागू होता है, तो कोई VAT नहीं दर्शाई जा सकती।",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "प्रतिधारण शायद जीएसटी/वैट सहित भुगतान पर लगाना हो (VOB/B धारा 17(6)), लेकिन अनुबंध में कोई कर दर नहीं दी गई है, इसलिए इसे शुद्ध राशि पर लगाया गया। इसे ठीक करने के लिए अनुबंध की कर दर दर्ज करें; रिवर्स चार्ज में यह 0 % है।",
     "contracts.gaeb_invoice.remapped_title": "ये पंक्तियाँ अपना OZ बरकरार नहीं रख सकतीं और किसी दूसरे OZ के तहत लिखी जाती हैं:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} को {{written}} के रूप में लिखा गया ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "कोई दूसरी पंक्ति उसी OZ को दूसरी कीमत या इकाई पर बिल कर रही है",

@@ -19751,6 +19751,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "Klaim ini menghitung jumlah neto terutangnya dari semua yang telah disertifikasi sampai saat ini, termasuk uang yang tidak dibawa oleh baris BOQ mana pun.",
     "contracts.gaeb_invoice.reason_other": "Angka klaim ini diubah secara manual atau sudah usang. Hitung ulang klaim ini.",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "Faktur ini diterbitkan atas nama subkontraktor. Periksa apakah pengalihan PPN (reverse charge, pasal 13b UStG) berlaku sebelum dikirim; jika berlaku, PPN tidak boleh dicantumkan.",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "Retensi mungkin harus dihitung dari pembayaran termasuk PPN (§ 17 ayat 6 VOB/B), tetapi kontrak tidak mencantumkan tarif PPN, sehingga dihitung dari jumlah neto. Isi tarif PPN kontrak untuk memperbaikinya; pada mekanisme reverse charge tarifnya 0 %.",
     "contracts.gaeb_invoice.remapped_title": "Baris-baris berikut tidak dapat mempertahankan OZ masing-masing dan ditulis di bawah OZ lain:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} ditulis sebagai {{written}} ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "baris lain menagih OZ yang sama dengan harga atau satuan lain",

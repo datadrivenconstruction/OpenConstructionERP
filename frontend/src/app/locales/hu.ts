@@ -19648,6 +19648,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "A követelés a nettó esedékes összegét az eddig igazolt teljes összegből vezeti le, beleértve azokat az összegeket is, amelyeket a költségvetés semelyik sora nem hordoz.",
     "contracts.gaeb_invoice.reason_other": "A követelés adatait kézzel módosították, vagy elavultak. Számolja újra a követelést.",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "A számlát az alvállalkozó nevében állítják ki. Küldés előtt ellenőrizze, hogy vonatkozik-e a fordított adózás (reverse charge, UStG 13b. szakasza); ha igen, áfakulcs nem tüntethető fel.",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "A visszatartást lehet, hogy az áfás kifizetésből kell számítani (VOB/B 17. § (6)), de a szerződés nem ad meg áfakulcsot, ezért a nettó összegből számoltuk. Adja meg a szerződés áfakulcsát a javításhoz; fordított adózásnál ez 0 %.",
     "contracts.gaeb_invoice.remapped_title": "Ezek a sorok nem tarthatják meg a saját OZ-ukat, és egy másik alatt kerülnek rögzítésre:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} {{written}} néven kerül rögzítésre ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "egy másik sor ugyanazt az OZ-t más áron vagy mértékegységben számlázza",

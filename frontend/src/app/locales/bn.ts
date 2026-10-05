@@ -19242,6 +19242,7 @@ const resource = {
     "contracts.gaeb_invoice.reason_certified_to_date": "এই বিল তার নেট প্রদেয় পরিমাণ আজ পর্যন্ত অনুমোদিত সবকিছু থেকে হিসাব করে, যার মধ্যে এমন টাকাও আছে যা BOQ-এর কোনো লাইন বহন করে না।",
     "contracts.gaeb_invoice.reason_other": "এই বিলের সংখ্যাগুলো হাতে পরিবর্তন করা হয়েছে বা পুরনো হয়ে গেছে। বিলটি পুনরায় হিসাব করুন।",
     "contracts.gaeb_invoice.warn_reverse_charge_de": "এই ইনভয়েস সাবকন্ট্রাক্টরের নামে ইস্যু করা হয়েছে। পাঠানোর আগে রিভার্স চার্জ (reverse charge, section 13b UStG) প্রযোজ্য কিনা যাচাই করুন; যদি প্রযোজ্য হয়, তাহলে কোনো VAT উল্লেখ করা যাবে না।",
+    "contracts.gaeb_invoice.warn_retention_vat_not_stated": "রিটেনশন সম্ভবত ভ্যাটসহ পেমেন্টের ওপর ধরতে হবে (VOB/B ধারা 17(6)), কিন্তু চুক্তিতে কোনো ভ্যাট হার নেই, তাই এটি নিট পরিমাণের ওপর ধরা হয়েছে। এটি ঠিক করতে চুক্তির ভ্যাট হার লিখুন; রিভার্স চার্জে এটি 0 %।",
     "contracts.gaeb_invoice.remapped_title": "নিচের লাইনগুলো তাদের নিজের OZ রাখতে পারে না এবং অন্য একটির অধীনে লেখা হয়:",
     "contracts.gaeb_invoice.remapped_line": "{{ordinal}} কে {{written}} হিসেবে লেখা হয়েছে ({{reason}})",
     "contracts.gaeb_invoice.remap_duplicate": "অন্য একটি লাইন একই OZ অন্য দামে বা ইউনিটে বিল করছে",
