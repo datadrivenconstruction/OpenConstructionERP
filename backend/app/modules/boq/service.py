@@ -284,6 +284,7 @@ async def _safe_audit(
 # move. The table itself lives in a module the methodology catalogue can import.
 from app.modules.boq.activity_text import activity_description
 from app.modules.boq.base_date import ACCEPTED_SHAPES, price_base_day
+from app.modules.boq.markup_base import has_base, resolve_markup_base
 from app.modules.boq.markup_templates import (
     CONSTRUCTION_TIER_COUNTRIES,
     CONSTRUCTION_TIER_TAX_CODE,
@@ -1803,23 +1804,26 @@ def _calculate_markup_amounts(
     """
     results: list[tuple[BOQMarkup, Decimal]] = []
     running_sum = Decimal("0")
+    # The base the nearest active line above was charged on, for a
+    # ``same_as_previous`` line; None above the first line and below a fixed one.
+    previous_base: Decimal | None = None
 
     for markup in markups:
         if not markup.is_active:
             results.append((markup, Decimal("0")))
             continue
 
-        # Determine the base for calculation.
-        # BUG-B-005: ``subtotal`` must base the markup on
-        # direct_cost + Σ(preceding markups) - same as ``cumulative``.
-        # Treating it as ``direct_cost`` systematically under-states any
-        # tax-on-subtotal line (VAT on contractor price incl. overhead &
-        # profit), the exact use case the schema offers ``subtotal`` for.
-        apply_to = (markup.apply_to or "direct_cost").lower()
-        if apply_to in ("cumulative", "subtotal"):
-            base = direct_cost + running_sum
-        else:
-            base = direct_cost
+        # Determine the base for calculation. BUG-B-005: ``subtotal`` bases
+        # the markup on direct_cost + Σ(preceding markups), same as
+        # ``cumulative``. ``same_as_previous`` borrows the base of the line
+        # above. The rule is shared with every other walker of the stack.
+        base = resolve_markup_base(
+            markup.apply_to,
+            direct_cost=direct_cost,
+            running=direct_cost + running_sum,
+            previous_base=previous_base,
+        )
+        previous_base = base if has_base(markup.markup_type) else None
 
         # Calculate amount based on type
         markup_type = (markup.markup_type or "percentage").lower()

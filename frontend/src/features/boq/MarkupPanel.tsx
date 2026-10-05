@@ -7,6 +7,7 @@ import { boqApi, type Markup, type CreateMarkupData, type UpdateMarkupData } fro
 import { fmtWithCurrency } from './boqHelpers';
 import { markupRegionLabel, type MarkupRegion } from './markupRegionLabel';
 import { MarkupRowEditor } from './MarkupRowEditor';
+import { markupHasBase, resolveMarkupBase } from './markupBase';
 import { toNum } from '@/shared/lib/money';
 import { parseDecimalInput } from '@/shared/lib/parseDecimal';
 import { useToastStore } from '@/stores/useToastStore';
@@ -325,20 +326,28 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
   // put a second, VAT-inclusive "Net Total" on the same screen as the grid
   // footer's real one. Net-of-tax lives in exactly one place now: the grid
   // footer in ``BOQEditorPage`` (``markupTotals`` filters ``category !== 'tax'``).
-  const { calcMap, grandTotal, calculated, runningBeforeMap } = useMemo(() => {
+  const { calcMap, grandTotal, calculated, runningBeforeMap, previousBaseMap } = useMemo(() => {
     let running = directCost;
-    // What a running-total line would be charged on at each row: direct cost
-    // plus the active lines above it. Recorded for inactive rows too, so the
-    // row editor can preview a line before it is switched back on.
+    // What a running-total line would be charged on at each row (direct cost
+    // plus the active lines above it), and the base the nearest active line
+    // above was charged on, which a ``same_as_previous`` line borrows (null
+    // above the first line and below a fixed one). Recorded for inactive rows
+    // too, so the row editor can preview a line before it is switched back on.
     const runningBeforeMap = new Map<string, number>();
+    const previousBaseMap = new Map<string, number | null>();
+    let previousBase: number | null = null;
     const calculated: { id: string; amount: number }[] = [];
     for (const m of Array.isArray(markups) ? markups : []) {
       if (!m) continue;
       runningBeforeMap.set(m.id, running);
+      previousBaseMap.set(m.id, previousBase);
       if (m.is_active === false) continue;
       let amount = 0;
       const pct = typeof m.percentage === 'number' && Number.isFinite(m.percentage) ? m.percentage : 0;
-      const base = m.apply_to === 'cumulative' || m.apply_to === 'subtotal' ? running : directCost;
+      // Same rule as the server (``markup_base.py``): ``subtotal`` is the
+      // running total, ``same_as_previous`` the base of the line above.
+      const base = resolveMarkupBase(m.apply_to, directCost, running, previousBase);
+      previousBase = markupHasBase(m.markup_type) ? base : null;
       if (m.markup_type === 'fixed') {
         // fixed_amount arrives as a Decimal-as-string ("500.00"), so a
         // ``typeof === 'number'`` guard rejected it and rendered every fixed
@@ -357,14 +366,12 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
         // factor is worth nothing here, which is what the server reports too.
         const factor = toNum(m.escalation_factor ?? 0);
         amount = factor > 0 ? base * (factor - 1) : 0;
-      } else if (m.apply_to === 'cumulative' || m.apply_to === 'subtotal') {
+      } else {
         // The backend treats 'subtotal' identically to 'cumulative' (base =
         // direct cost + the markups before it); GAEB import persists tax
         // markups as 'subtotal', so basing it on directCost here would
         // under-state the Amount column and the grand total against the server.
-        amount = running * (pct / 100);
-      } else {
-        amount = directCost * (pct / 100);
+        amount = base * (pct / 100);
       }
       running += amount;
       calculated.push({ id: m.id, amount });
@@ -374,6 +381,7 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
       grandTotal: running,
       calculated,
       runningBeforeMap,
+      previousBaseMap,
     };
   }, [markups, directCost]);
 
@@ -504,7 +512,12 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
   const baseLabel = (markup: Markup): string => {
     if (markup.markup_type === 'fixed') return '—';
     if (markup.apply_to === 'cumulative') return t('boq.markup_base_cumulative', { defaultValue: 'Running total incl. rows above' });
-    if (markup.apply_to === 'subtotal') return t('boq.markup_base_subtotal', { defaultValue: 'Subtotal above this row' });
+    if (markup.apply_to === 'same_as_previous') {
+      return t('boq.markup_base_same_as_previous', { defaultValue: 'Same base as the row above' });
+    }
+    if (markup.apply_to === 'subtotal') {
+      return t('boq.markup_base_subtotal', { defaultValue: 'Running total incl. rows above (stored as subtotal)' });
+    }
     return t('boq.markup_base_direct_cost', { defaultValue: 'Sum of positions' });
   };
 
@@ -867,6 +880,7 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
                               markup={markup}
                               directCost={directCost}
                               runningBefore={runningBeforeMap.get(markup.id) ?? directCost}
+                              previousBase={previousBaseMap.get(markup.id) ?? null}
                               currencyCode={currencyCode}
                               locale={locale}
                               saving={updateMutation.isPending}

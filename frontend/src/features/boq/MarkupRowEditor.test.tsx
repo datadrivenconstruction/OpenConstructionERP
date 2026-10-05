@@ -50,12 +50,13 @@ function row(overrides: Partial<Markup> = {}): Markup {
   };
 }
 
-function renderEditor(markup: Markup, onSave = vi.fn()) {
+function renderEditor(markup: Markup, onSave = vi.fn(), previousBase: number | null = 105000) {
   render(
     <MarkupRowEditor
       markup={markup}
       directCost={100000}
       runningBefore={110000}
+      previousBase={previousBase}
       currencyCode=""
       locale="en-US"
       onSave={onSave}
@@ -127,11 +128,37 @@ describe('MarkupRowEditor', () => {
     expect(onSave).toHaveBeenCalledWith({ apply_to: 'cumulative' });
   });
 
-  it('explains every base in plain words', () => {
+  it('explains every base in plain words and offers three, not two that mean one thing', () => {
     renderEditor(row());
     expect(screen.getByText(/Only the sum of the positions/)).toBeInTheDocument();
     expect(screen.getByText(/Sum of positions plus every active markup above this line/)).toBeInTheDocument();
-    expect(screen.getByText(/Works the same as running total/)).toBeInTheDocument();
+    expect(screen.getByText(/Uses exactly the base of the nearest active line above/)).toBeInTheDocument();
+    const bases = screen.getAllByRole('radio').filter((r) => (r as HTMLInputElement).name.endsWith('-base'));
+    expect(bases.map((r) => (r as HTMLInputElement).value)).toEqual(['direct_cost', 'cumulative', 'same_as_previous']);
+  });
+
+  it('shows subtotal only on a row that already has it, named as the running total', () => {
+    renderEditor(row({ apply_to: 'subtotal' }));
+    const option = screen.getByRole('radio', { name: /Running total incl. rows above \(stored as subtotal\)/ });
+    expect(option).toBeChecked();
+    expect(preview().base).toBe('110,000.00');
+  });
+
+  it('puts a line on exactly the base of the line above (G on the same base as W)', () => {
+    const onSave = renderEditor(row({ name: 'G', percentage: 3 }), vi.fn(), 105000);
+    fireEvent.click(screen.getByRole('radio', { name: /Same base as the row above/ }));
+    expect(preview()).toEqual({ base: '105,000.00', amount: '3,150.00' });
+    expect(screen.queryByTestId('markup-base-fallback')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
+    expect(onSave).toHaveBeenCalledWith({ apply_to: 'same_as_previous' });
+  });
+
+  it('says so when there is no base above and falls back to the sum of positions', () => {
+    renderEditor(row({ name: 'G', percentage: 3, apply_to: 'same_as_previous' }), vi.fn(), null);
+    expect(screen.getByTestId('markup-base-fallback')).toHaveTextContent(
+      'No line above has a base, so this line uses the sum of positions.',
+    );
+    expect(preview()).toEqual({ base: '100,000.00', amount: '3,000.00' });
   });
 
   it('turns a line into a fixed amount, hides the base and sends money as a string', () => {
@@ -274,5 +301,24 @@ describe('MarkupPanel row order', () => {
     expect(toggles[1]).toHaveAttribute('aria-expanded', 'true');
     // AGK's running total is EKT plus BGK: 100,000 + 10,000.
     expect(preview()).toEqual({ base: '110,000.00', amount: '8,800.00' });
+  });
+
+  it('gives W and G one base in the cascade, the German Selbstkosten', () => {
+    renderPanel([
+      row({ id: 'bgk', name: 'BGK', sort_order: 0, percentage: 8 }),
+      row({ id: 'agk', name: 'AGK', sort_order: 1, percentage: 9, apply_to: 'cumulative' }),
+      row({ id: 'w', name: 'W', sort_order: 2, percentage: 2, apply_to: 'cumulative' }),
+      row({ id: 'g', name: 'G', sort_order: 3, percentage: 3, apply_to: 'same_as_previous' }),
+    ]);
+    expect(screen.getByRole('button', { name: 'Same base as the row above' })).toBeInTheDocument();
+
+    // Direct cost here is 100,000: BGK 8,000, Herstellkosten 108,000, AGK
+    // 9,720, Selbstkosten 117,720, which W and G are both charged on.
+    const toggles = screen.getAllByRole('button', { name: 'Edit calculation' });
+    fireEvent.click(toggles[3]!);
+    expect(preview()).toEqual({ base: '117,720.00', amount: '3,531.60' });
+    fireEvent.click(toggles[3]!);
+    fireEvent.click(toggles[2]!);
+    expect(preview()).toEqual({ base: '117,720.00', amount: '2,354.40' });
   });
 });
