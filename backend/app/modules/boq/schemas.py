@@ -27,6 +27,8 @@ from pydantic import (
     model_validator,
 )
 
+from app.modules.boq.markup_base import APPLY_TO_PATTERN
+
 #: What a price stands on, as a closed vocabulary - issue #453.
 #:
 #: Ordered from the strongest evidence to the weakest, and that order is the
@@ -1083,6 +1085,11 @@ class MarkupCreate(_MarkupBase):
       markup (cumulative, subtotal or direct_cost) in the same BOQ. This
       compounds profit-on-overhead-on-cost, the GAEB / DIN 276 default.
       Reorder markups by changing ``sort_order``; ties are stable by ``id``.
+    * ``same_as_previous`` - exactly the base the nearest active line above
+      was charged on, so two lines (Wagnis and Gewinn on the Selbstkosten)
+      share one base instead of the second compounding on the first. Falls
+      back to ``direct_cost`` for the first line or below a fixed amount.
+      See :mod:`app.modules.boq.markup_base`.
 
     ``scope_position_id`` and ``overrides_id`` express inheritance with
     override. Leaving both unset creates a bill-wide line, the company
@@ -1116,7 +1123,7 @@ class MarkupCreate(_MarkupBase):
     )
     percentage: float = Field(default=0.0, ge=0.0, le=100.0)
     fixed_amount: Decimal = Field(default=Decimal("0"), ge=0)
-    apply_to: str = Field(default="direct_cost", pattern=r"^(direct_cost|subtotal|cumulative)$")
+    apply_to: str = Field(default="direct_cost", pattern=APPLY_TO_PATTERN)
     sort_order: int = Field(default=0, ge=0)
     is_active: bool = True
     scope_position_id: UUID | None = None
@@ -1137,7 +1144,7 @@ class MarkupUpdate(_MarkupBase):
     )
     percentage: float | None = Field(default=None, ge=0.0, le=100.0)
     fixed_amount: Decimal | None = Field(default=None, ge=0)
-    apply_to: str | None = Field(default=None, pattern=r"^(direct_cost|subtotal|cumulative)$")
+    apply_to: str | None = Field(default=None, pattern=APPLY_TO_PATTERN)
     sort_order: int | None = Field(default=None, ge=0)
     is_active: bool | None = None
     # Sent explicitly as null these clear the scope, which is how a section
