@@ -55,11 +55,17 @@ from __future__ import annotations
 
 import copy
 import re
+from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
-from app.modules.contracts.retention import CANONICAL_RELEASE_EVENTS
+from app.modules.contracts.retention import (
+    CANONICAL_RELEASE_EVENTS,
+    RETENTION_BASES,
+    RETENTION_BASIS_GROSS,
+    RETENTION_BASIS_NET,
+)
 
 #: The payment-term fields a country row can pre-fill, in the order a form shows them.
 CONTRACT_DEFAULT_FIELDS: tuple[str, ...] = (
@@ -525,6 +531,120 @@ COUNTRY_CONTRACT_DEFAULTS: dict[str, dict[str, Any]] = {
 }
 
 
+#: What retention, and the ceiling on it, is measured on, per country. A
+#: country with no row here measures on the net, the price of the work before
+#: VAT, which is what every market in the table above does except these.
+#:
+#: Kept out of :data:`CONTRACT_DEFAULT_FIELDS` on purpose. That tuple is what
+#: a contract form pre-fills and a person may change, each figure with a note
+#: translated in every locale. The basis is not a figure the parties pick: it
+#: is how the country's law reads "ten percent of each payment", and every
+#: claim on the contract follows it.
+#:
+#: Germany: § 17 Abs. 6 Nr. 1 VOB/B lets the client cut "jeweils die Zahlung"
+#: by up to ten percent until the agreed security sum is reached, and its
+#: second sentence leaves the VAT out only where the invoice carries none
+#: under § 13b UStG, so the payment it means is the one with VAT in it. The
+#: federal contract form states the security as "fünf Prozent der
+#: Auftragssumme (inkl. Umsatzsteuer, ohne Nachträge)" (VHB Bund, Formblatt
+#: 214 Nr. 4), so the ceiling is measured on the same base.
+#:
+#: ``subcontract_vat_percent`` is the VAT a subcontract's invoice is presumed
+#: to carry when the contract states none. Between a main contractor and its
+#: subcontractor German construction work is reverse charge: the recipient owes
+#: the tax when it "nachhaltig entsprechende Leistungen erbringt" (§ 13b Abs. 2
+#: Nr. 4, Abs. 5 Satz 2 UStG), which a main contractor does. The sub's invoice
+#: then carries no USt and its retention is measured without it. A contract
+#: that states its own rate overrides the presumption either way.
+COUNTRY_RETENTION_BASIS: dict[str, dict[str, str]] = {
+    "DE": {
+        "basis": RETENTION_BASIS_GROSS,
+        "reference": "§ 17 Abs. 6 Nr. 1 VOB/B; VHB Bund Formblatt 214 Nr. 4",
+        "subcontract_vat_percent": "0",
+        "subcontract_reference": "§ 13b Abs. 2 Nr. 4, Abs. 5 Satz 2 UStG",
+    },
+}
+
+
+@dataclass(frozen=True)
+class RetentionBasis:
+    """What a contract's retention is measured on, and the VAT that makes it gross.
+
+    ``vat_percent`` is ``None`` on a net basis and the rate added to the net
+    on a gross one, ``0`` included: an invoice under reverse charge carries no
+    VAT and its retention is measured without it (§ 17 Abs. 6 Nr. 1 Satz 2
+    VOB/B). ``vat_source`` says where that rate came from.
+    """
+
+    basis: str
+    vat_percent: Decimal | None
+    vat_source: str
+    reference: str | None = None
+
+
+#: The basis of a country that measures retention on the net.
+NET_RETENTION_BASIS = RetentionBasis(RETENTION_BASIS_NET, None, "not_applicable")
+
+
+def _vat_percent(raw: Any) -> Decimal | None:
+    """A VAT rate in percent from a stored value, or ``None`` when there is none to read."""
+    if raw in (None, ""):
+        return None
+    try:
+        value = Decimal(str(raw).strip())
+    except (ArithmeticError, ValueError):
+        return None
+    if not value.is_finite() or value < 0 or value > 100:
+        return None
+    return value
+
+
+def resolve_retention_basis(
+    country_code: str | None,
+    *,
+    agreed_vat_rate: Any = None,
+    project_vat_rate: Any = None,
+    subcontract: bool = False,
+) -> RetentionBasis:
+    """What retention is measured on for a contract in ``country_code``.
+
+    On a gross basis the VAT is, in order: the rate the contract agreed for
+    its invoices (``metadata.einvoice.vat_rate``, where a public client's
+    award states the VAT treatment, ``0`` for reverse charge), for a
+    subcontract the rate the country presumes its invoices carry
+    (``subcontract_vat_percent``), the project's default VAT rate, the
+    country's standard rate. A gross basis whose VAT nobody can say is
+    reported with ``vat_source`` ``"none"`` and no rate, and the caller
+    measures on the net and says so rather than inventing one.
+    """
+    country = normalise_country(country_code)
+    row = COUNTRY_RETENTION_BASIS.get(country)
+    if row is None or row["basis"] != RETENTION_BASIS_GROSS:
+        return NET_RETENTION_BASIS
+    reference = row.get("reference")
+    agreed = _vat_percent(agreed_vat_rate)
+    if agreed is not None:
+        return RetentionBasis(RETENTION_BASIS_GROSS, agreed, "contract_einvoice", reference)
+    presumed = _vat_percent(row.get("subcontract_vat_percent")) if subcontract else None
+    if presumed is not None:
+        return RetentionBasis(
+            RETENTION_BASIS_GROSS,
+            presumed,
+            "subcontract_presumed",
+            f"{reference}; {row.get('subcontract_reference')}",
+        )
+    project_rate = _vat_percent(project_vat_rate)
+    if project_rate is not None:
+        return RetentionBasis(RETENTION_BASIS_GROSS, project_rate, "project_default", reference)
+    from app.core.tax import VATNotApplicable, get_vat_rate  # noqa: PLC0415
+
+    try:
+        standard = get_vat_rate(country) * Decimal("100")
+    except VATNotApplicable:
+        return RetentionBasis(RETENTION_BASIS_GROSS, None, "none", reference)
+    return RetentionBasis(RETENTION_BASIS_GROSS, standard, "country_standard", reference)
+
+
 # ── Validation at import ─────────────────────────────────────────────────
 
 
@@ -593,6 +713,15 @@ def _validate_table() -> None:
                     raise ValueError(f"{where} must be one of {', '.join(VALUATION_INTERVALS)}")
             elif field == "certificate_name" and not str(value).strip():
                 raise ValueError(f"{where} must not be blank")
+    for country, basis in COUNTRY_RETENTION_BASIS.items():
+        if len(country) != 2 or not country.isupper():
+            raise ValueError(f"retention basis key {country!r} is not ISO 3166-1 alpha-2")
+        if basis.get("basis") not in RETENTION_BASES or not basis.get("reference"):
+            raise ValueError(f"the retention basis of {country} must be one of {RETENTION_BASES} with a reference")
+        if "subcontract_vat_percent" in basis:
+            _check_percent(basis["subcontract_vat_percent"], f"{country}.subcontract_vat_percent")
+            if not basis.get("subcontract_reference"):
+                raise ValueError(f"{country}.subcontract_vat_percent must name its subcontract_reference")
 
 
 _validate_table()
@@ -974,8 +1103,10 @@ __all__ = [
     "CONTRACT_DEFAULT_FIELDS",
     "COUNTRY_ALIASES",
     "COUNTRY_CONTRACT_DEFAULTS",
+    "COUNTRY_RETENTION_BASIS",
     "DEFAULTS_STAMP_KEY",
     "FROM_REGIONAL_PACK",
+    "NET_RETENTION_BASIS",
     "NOTE_KEY_PREFIX",
     "PAYMENT_TERMS_KEY",
     "PAYMENT_TERM_FIELDS",
@@ -983,11 +1114,13 @@ __all__ = [
     "STATUTORY_CEILING_NOTE",
     "STATUTORY_CEILING_NOTE_KEY",
     "VALUATION_INTERVALS",
+    "RetentionBasis",
     "apply_contract_defaults",
     "forget_overridden",
     "normalise_country",
     "note_key",
     "resolve_contract_defaults",
+    "resolve_retention_basis",
     "statutory_retention_ceiling",
     "subcontract_retention_default",
     "subdivision_from_address",

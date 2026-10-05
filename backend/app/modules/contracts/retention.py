@@ -31,6 +31,18 @@ Percent complete is work completed over the contract sum to date, without
 stored materials: a threshold such as "50% complete" is about the work, and
 counting materials sitting on site would step the rate down before half the
 work is done.
+
+**What retention is measured on is the country's law, not this module's.**
+Most markets hold retention on the price of the work before tax. Germany holds
+it on the payment as invoiced, VAT included: § 17 Abs. 6 Nr. 1 VOB/B lets the
+client cut each payment by up to ten percent, and its second sentence leaves
+the VAT out only where the invoice carries none under § 13b UStG. The ceiling
+follows the same base, five percent of the contract sum including VAT (VHB
+Bund, Formblatt 214 Nr. 4). The caller says which with ``basis_vat_percent``:
+``None`` holds retention on the net, a rate holds it on the net plus that VAT,
+the VAT rounded to the cent as the invoice prints it. Percent complete and the
+tier a claim falls in are still measured on the net, because VAT does not make
+the work any further along.
 """
 
 from __future__ import annotations
@@ -100,6 +112,31 @@ def _decimal(value: Any, *, name: str) -> Decimal:
 
 def _cents(value: Decimal) -> Decimal:
     return value.quantize(CENT, rounding=ROUND_HALF_UP)
+
+
+#: Retention measured on the price of the work before VAT.
+RETENTION_BASIS_NET = "net"
+#: Retention measured on the payment as invoiced, VAT included.
+RETENTION_BASIS_GROSS = "gross"
+RETENTION_BASES = (RETENTION_BASIS_NET, RETENTION_BASIS_GROSS)
+
+
+def on_retention_basis(amount: Any, basis_vat_percent: Any = None) -> Decimal:
+    """``amount`` as retention measures it: as given on a net basis, plus its VAT on a gross one.
+
+    The VAT is rounded to the cent first, because that is the figure the
+    invoice prints and the brutto a ten percent cut is taken from. ``None``
+    and ``0`` both leave the amount as it is: the first is a net basis, the
+    second an invoice with no VAT on it (reverse charge), which § 17 Abs. 6
+    Nr. 1 Satz 2 VOB/B measures without VAT.
+    """
+    value = _decimal(amount or 0, name="amount")
+    if basis_vat_percent in (None, ""):
+        return value
+    rate = _decimal(basis_vat_percent, name="basis_vat_percent")
+    if rate == ZERO:
+        return value
+    return value + _cents(value * rate / HUNDRED)
 
 
 @dataclass(frozen=True)
@@ -262,17 +299,36 @@ def percent_complete(completed: Decimal, contract_sum: Decimal) -> Decimal:
     return completed / contract_sum * HUNDRED
 
 
-def work_retention(completed: Decimal, contract_sum: Decimal, policy: RetentionPolicy) -> Decimal:
+def work_retention(
+    completed: Decimal,
+    contract_sum: Decimal,
+    policy: RetentionPolicy,
+    *,
+    basis_vat_percent: Any = None,
+) -> Decimal:
     """Retention on the work completed to date, for the whole contract, unrounded.
 
     In prospective mode each band of work between two thresholds is retained
     at its tier's rate, so the result depends only on how far the work has
     got. In recompute mode, and whenever there is no contract sum to measure
     percent complete against, the rate in force applies to all of it.
+
+    ``completed`` and ``contract_sum`` are net. With ``basis_vat_percent`` the
+    rate is taken from the work plus its VAT (:func:`on_retention_basis`);
+    which rate applies is still decided on the net, so VAT never moves a
+    claim across a threshold.
     """
     completed = max(completed, ZERO)
     if policy.tier_mode == "recompute" or len(policy.tiers) == 1 or contract_sum <= ZERO:
-        return completed * policy.rate_at(percent_complete(completed, contract_sum)) / HUNDRED
+        base = on_retention_basis(completed, basis_vat_percent)
+        return base * policy.rate_at(percent_complete(completed, contract_sum)) / HUNDRED
+
+    if basis_vat_percent not in (None, ""):
+        # Each band's share of the work carries the same VAT, so the bands are
+        # measured on the net and the sum is taken onto the basis once.
+        on_net = work_retention(completed, contract_sum, policy)
+        rate = _decimal(basis_vat_percent, name="basis_vat_percent")
+        return on_net + on_net * rate / HUNDRED
 
     held = ZERO
     for index, tier in enumerate(policy.tiers):
@@ -346,6 +402,9 @@ class RetentionPosition:
     stored_retention: Decimal
     capped: bool
     lines: dict[Hashable, LineRetention]
+    #: The VAT the money figures were measured with, ``None`` on a net basis.
+    #: :func:`claim_retention` reads it to state each line's rate on the same base.
+    basis_vat_percent: Decimal | None = None
 
     @property
     def total(self) -> Decimal:
@@ -359,6 +418,7 @@ def compute_retention(
     contract_sum: Any,
     policy: RetentionPolicy,
     stored_by_line: Mapping[Hashable, Any] | None = None,
+    basis_vat_percent: Any = None,
 ) -> RetentionPosition:
     """The retention a contract should hold, given work and stored materials per line.
 
@@ -370,6 +430,10 @@ def compute_retention(
             percent complete and a cap are measured against.
         policy: See :func:`policy_from_rule`.
         stored_by_line: Stored materials balance per SoV line (G703 F).
+        basis_vat_percent: ``None`` holds retention on the net. A rate holds
+            it on the net plus that VAT, the cap on the contract sum plus that
+            VAT, as German law measures both (see the module docstring).
+            Percent complete stays on the net.
 
     Returns:
         The contract-wide figures, rounded to cents, and one
@@ -386,9 +450,10 @@ def compute_retention(
     pct = percent_complete(completed_total, total_sum)
     rate_now = policy.rate_at(pct)
 
-    work = _cents(work_retention(completed_total, total_sum, policy))
+    vat = None if basis_vat_percent in (None, "") else _decimal(basis_vat_percent, name="basis_vat_percent")
+    work = _cents(work_retention(completed_total, total_sum, policy, basis_vat_percent=vat))
     stored_rate = policy.stored_materials_rate if policy.stored_materials_rate is not None else rate_now
-    on_stored = _cents(stored_total * stored_rate / HUNDRED)
+    on_stored = _cents(on_retention_basis(stored_total, vat) * stored_rate / HUNDRED)
 
     capped = False
     # A ceiling is a percent of the contract sum, so a contract that states
@@ -396,7 +461,7 @@ def compute_retention(
     # no ceiling anyone can measure. Reading it as 0 percent of 0 would hold
     # nothing at all, which is the opposite of what the cap is for.
     if policy.cap_percent_of_contract_sum is not None and total_sum > ZERO:
-        cap = _cents(total_sum * policy.cap_percent_of_contract_sum / HUNDRED)
+        cap = _cents(on_retention_basis(total_sum, vat) * policy.cap_percent_of_contract_sum / HUNDRED)
         if work + on_stored > cap:
             capped = True
             work = min(work, cap)
@@ -409,8 +474,7 @@ def compute_retention(
     for key in keys:
         base = max(completed.get(key, ZERO), ZERO) + stored.get(key, ZERO)
         held = work_shares[key] + stored_shares[key]
-        rate = (held / base * HUNDRED).quantize(RATE_PLACES, rounding=ROUND_HALF_UP) if base > ZERO else ZERO
-        lines[key] = LineRetention(work_shares[key], stored_shares[key], rate)
+        lines[key] = LineRetention(work_shares[key], stored_shares[key], _line_rate(held, base, vat))
 
     return RetentionPosition(
         completed_to_date=completed_total,
@@ -421,7 +485,61 @@ def compute_retention(
         stored_retention=on_stored,
         capped=capped,
         lines=lines,
+        basis_vat_percent=vat,
     )
+
+
+def _line_rate(held: Decimal, base: Decimal, basis_vat_percent: Decimal | None) -> Decimal:
+    """A line's effective retention rate, measured on the same base its retention was.
+
+    On a gross basis the line's work plus its VAT, so a German line held at
+    ten percent of the brutto reads ten percent, not 11.9 of the net.
+    """
+    measured = on_retention_basis(base, basis_vat_percent)
+    if measured <= ZERO:
+        return ZERO
+    return (held / measured * HUNDRED).quantize(RATE_PLACES, rounding=ROUND_HALF_UP)
+
+
+def flat_retention_within_cap(
+    gross: Decimal,
+    rate: Decimal,
+    *,
+    cap_percent: Decimal | None,
+    contract_sum: Decimal,
+    accrued_before: Decimal,
+    basis_vat_percent: Decimal | None = None,
+) -> Decimal:
+    """Retention a flat-rate claim holds this period, never past the agreed ceiling.
+
+    The ceiling is on what the contract holds in total, so it is measured
+    against what the earlier claims already accrued: once period N reaches it,
+    period N+1 holds nothing more, however large its gross. Checking each
+    period against the cap on its own would let every month hold up to the
+    whole ceiling again.
+
+    A contract with no sum (``contract_sum`` of 0, as a cost-plus or T&M
+    contract whose total nobody entered carries) has no ceiling to measure,
+    so the rate holds uncapped. Reading the cap as a percent of 0 would hold
+    nothing from the first claim on.
+
+    ``gross`` and ``contract_sum`` are net of VAT. ``basis_vat_percent`` is
+    the VAT a gross retention basis adds to both (see
+    :func:`app.modules.contracts.country_defaults.resolve_retention_basis`):
+    a German claim is cut by its rate of the payment with VAT in it, and the
+    ceiling is that share of the contract sum with VAT in it. ``None`` keeps
+    both on the net.
+
+    Lives here rather than in the service, which still exports it, because it
+    is pure arithmetic beside :func:`compute_retention` and is tested without
+    a database.
+    """
+    retention = (on_retention_basis(gross, basis_vat_percent) * rate / HUNDRED).quantize(RATE_PLACES)
+    if cap_percent is None or retention <= ZERO or contract_sum <= ZERO:
+        return retention
+    ceiling = _cents(on_retention_basis(contract_sum, basis_vat_percent) * cap_percent / HUNDRED)
+    room = max(ceiling - max(accrued_before, ZERO), ZERO)
+    return min(retention, room)
 
 
 def step_down_release(
@@ -549,6 +667,9 @@ __all__ = [
     "DEFAULT_TIER_MODE",
     "OTHER_RELEASE_EVENTS",
     "RELEASE_EVENT_ALIASES",
+    "RETENTION_BASES",
+    "RETENTION_BASIS_GROSS",
+    "RETENTION_BASIS_NET",
     "TIER_MODES",
     "LineRetention",
     "ReleasePlan",
@@ -559,6 +680,8 @@ __all__ = [
     "canonical_release_event",
     "compute_retention",
     "flat_policy",
+    "flat_retention_within_cap",
+    "on_retention_basis",
     "percent_complete",
     "plan_release",
     "policy_from_rule",
@@ -645,7 +768,7 @@ def claim_retention(
     for key in keys:
         base = max(completed.get(key, ZERO), ZERO) + stored.get(key, ZERO)
         line_held = work_shares[key] + stored_shares[key]
-        rate = (line_held / base * HUNDRED).quantize(RATE_PLACES, rounding=ROUND_HALF_UP) if base > ZERO else ZERO
+        rate = _line_rate(line_held, base, position.basis_vat_percent)
         lines[key] = LineRetention(work_shares[key], stored_shares[key], rate)
 
     completed_total = sum(completed.values(), ZERO)

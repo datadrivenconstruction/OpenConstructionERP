@@ -396,7 +396,9 @@ async def test_a_cost_plus_contract_with_no_total_keeps_holding_its_rate(pg_sess
         assert claim.net_due == claim.gross_amount - claim.retention_amount
         await svc.transition_claim(claim.id, "submitted", "cap-test")
 
-    assert accruals == [Decimal("1000"), Decimal("1000"), Decimal("2000")]
+    # Five percent of each payment with its 19 % USt in it, the German basis
+    # (§ 17 Abs. 6 Nr. 1 VOB/B): 5 % of 23 800, 23 800 and 47 600.
+    assert accruals == [Decimal("1190"), Decimal("1190"), Decimal("2380")]
 
 
 async def test_a_claim_raised_while_the_one_before_is_a_draft_still_stops_at_the_ceiling(pg_session) -> None:

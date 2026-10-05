@@ -306,16 +306,18 @@ async def test_a_cost_plus_claim_outside_the_aia_countries_still_certifies(sessi
     for target in ("submitted", "approved", "certified"):
         march = await svc.transition_claim(march.id, target, actor_id=str(OWNER_ID))
     assert march.status == "certified"
+    # Held on the payment with its 19 % USt in it, as § 17 Abs. 6 Nr. 1
+    # VOB/B measures a German retention: 10 % of 23 800, not of 20 000.
     assert (march.completed_stored_to_date, march.retention_held_to_date) == (
         Decimal("20000.00"),
-        Decimal("2000.00"),
+        Decimal("2380.00"),
     )
-    # The same figures an American project would have frozen, and the same
-    # ones the next claim reads as previously certified. Reconstructed for
-    # the reason given on the test above: March has no claim lines, so the
-    # cumulative frozen on it is not a basis line 7 can trust.
+    # The figures the claim holds, and the ones the next claim reads as
+    # previously certified. Reconstructed for the reason given on the test
+    # above: March has no claim lines, so the cumulative frozen on it is not
+    # a basis line 7 can trust.
     april = await _claim(session, contract, "PC-2", 4)
-    assert await svc.previous_certificates(april) == (Decimal("18000.0000"), "reconstructed")
+    assert await svc.previous_certificates(april) == (Decimal("17620.0000"), "reconstructed")
 
     # The form itself is still American only: nothing here opened it up.
     with pytest.raises(HTTPException) as refused:

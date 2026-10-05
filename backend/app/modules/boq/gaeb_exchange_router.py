@@ -778,7 +778,7 @@ async def _claim_invoice(
     from app.modules.contracts.models import Contract, ContractLine, ProgressClaim, ProgressClaimLine
     from app.modules.contracts.periods import claims_before
     from app.modules.contracts.repository import ProgressClaimRepository, RetentionReleaseRepository
-    from app.modules.contracts.service import boq_position_id_for_line
+    from app.modules.contracts.service import ContractsService, boq_position_id_for_line
     from app.modules.projects.repository import ProjectRepository
 
     claim = await session.get(ProgressClaim, claim_id)
@@ -842,6 +842,22 @@ async def _claim_invoice(
         warnings=warnings,
         on_date=invoice_date,
     )
+    # A German claim already holds its retention on the payment with VAT in
+    # it (§ 17 Abs. 6 Nr. 1 VOB/B), so the invoice takes the claim's figure
+    # off the gross as it stands. That is right only while this invoice adds
+    # the VAT the claim's retention was measured with; a different rate here
+    # would print a retention that is not ten percent of the gross it shows.
+    basis = await ContractsService(session).retention_basis(contract)
+    if basis.vat_percent is not None and c2(basis.vat_percent) != c2(rate):
+        warnings.append(
+            {
+                "code": "retention_vat_rate_differs",
+                "detail": (
+                    f"The claim's retention was measured on the gross at {basis.vat_percent} % VAT "
+                    f"({basis.vat_source}); this invoice adds {rate} % ({vat_source})."
+                ),
+            }
+        )
 
     ours = await _our_party(session) or InvoiceParty()
     is_subcontract = (contract.counterparty_type or "client") == "subcontractor"
