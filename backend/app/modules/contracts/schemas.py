@@ -230,6 +230,9 @@ class ContractCountryDefaultsResponse(BaseModel):
     # The state's ceiling on retention per payment, when one binds every kind
     # of works on today's date; the retention rate above it was lowered to it.
     statutory_ceiling: dict[str, Any] | None = None
+    # "public" or "private" when the figures follow that law (the project's
+    # client, or private for a subcontract); None when the country row stands.
+    works: str | None = None
     has_defaults: bool
     standard_form: str | None = None
     values: dict[str, Any] = Field(default_factory=dict)

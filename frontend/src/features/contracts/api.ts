@@ -538,9 +538,20 @@ export interface ContractCountryDefaults {
   subcontract_retention_from?: 'retention_percent' | 'retention_cap_percent' | null;
 }
 
-export function getContractCountryDefaults(projectId: string): Promise<ContractCountryDefaults> {
+/**
+ * `counterpartyType` is the new contract's: a subcontract follows private-works
+ * law whoever the project's client is, so where a country's law follows the
+ * client (France) its figures cite that law and not the public one.
+ */
+export function getContractCountryDefaults(
+  projectId: string,
+  counterpartyType?: string,
+): Promise<ContractCountryDefaults> {
+  const counterparty = counterpartyType
+    ? `&counterparty_type=${encodeURIComponent(counterpartyType)}`
+    : '';
   return apiGet<ContractCountryDefaults>(
-    `/v1/contracts/country-defaults/?project_id=${encodeURIComponent(projectId)}`,
+    `/v1/contracts/country-defaults/?project_id=${encodeURIComponent(projectId)}${counterparty}`,
   );
 }
 

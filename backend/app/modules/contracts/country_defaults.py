@@ -49,6 +49,14 @@ the state comes from the project address (:func:`subdivision_from_address`).
 A contract does not record whether its works are public or private, so a
 ceiling is applied only on a date when the subdivision caps both kinds; where
 one kind is uncapped the national figure stands, since it may be lawful.
+
+**Where the law follows the client, the project says which.** A project may
+record its works as ``public`` or ``private`` (``Project.works``). A country
+whose retention law differs between the two (France) carries a dated, cited
+variant in :data:`WORKS_CONTRACT_DEFAULTS`, laid over its row by
+:func:`resolve_contract_defaults`. A subcontract is always private works
+(:func:`contract_works`). Works not recorded leave the country row, which then
+cites both laws, as it is. The state ceilings above do not read the works yet.
 """
 
 from __future__ import annotations
@@ -323,24 +331,31 @@ COUNTRY_CONTRACT_DEFAULTS: dict[str, dict[str, Any]] = {
             "The contractor's application with its continuation sheet, certified by the architect.",
         ),
     },
+    # The row a French contract starts from when nobody recorded whether its
+    # works are public or private. Its references name both laws, since loi
+    # 71-584 governs private works only; WORKS_CONTRACT_DEFAULTS says which one
+    # applies once the project records its works.
     "FR": {
         "standard_form": "NF P03-001 / CCAG-Travaux",
         "retention_percent": _figure(
             "5",
             "statute",
-            "Loi n° 71-584 du 16 juillet 1971, art. 1",
+            "Loi n° 71-584 du 16 juillet 1971, art. 1 (private works); "
+            "Code de la commande publique, art. R2191-33 (public contracts)",
             "The retenue de garantie is kept from each payment and may not exceed five percent of the contract amount.",
         ),
         "retention_cap_percent": _figure(
             "5",
             "statute",
-            "Loi n° 71-584 du 16 juillet 1971, art. 1",
+            "Loi n° 71-584 du 16 juillet 1971, art. 1 (private works); "
+            "Code de la commande publique, art. R2191-33 (public contracts)",
             "Five percent of the contract amount is a legal ceiling, not a usual figure.",
         ),
         "retention_release_split": _figure(
             _split(("defects_period_end", "100")),
             "statute",
-            "Loi n° 71-584 du 16 juillet 1971, art. 2",
+            "Loi n° 71-584 du 16 juillet 1971, art. 2 (private works); "
+            "Code de la commande publique, art. R2191-35 (public contracts)",
             "Paid back one year after acceptance (réception), at the end of the garantie de parfait "
             "achèvement, unless the client has objected. A bank guarantee (caution) can replace it.",
         ),
@@ -566,6 +581,81 @@ COUNTRY_RETENTION_BASIS: dict[str, dict[str, str]] = {
 }
 
 
+# ── Public or private works ──────────────────────────────────────────────
+
+#: Where the notes of a works variant live in the client's locale files:
+#: ``contracts.works_defaults.<CC>.<works>.<field>.note``. Kept out of
+#: :data:`NOTE_KEY_PREFIX`, which holds exactly one note per table figure.
+WORKS_NOTE_KEY_PREFIX = "contracts.works_defaults."
+
+#: Where a country's law on retention depends on who the client is, the
+#: figures that change once the project records its works (``public`` or
+#: ``private``, the vocabulary of :data:`CEILING_WORKS`). A variant names only
+#: what differs from the country row: ``standard_form``, whole figures (made
+#: by :func:`_figure`, with a note under :data:`WORKS_NOTE_KEY_PREFIX`), and
+#: ``references`` that re-cite a row figure whose value and note stand. Works
+#: not recorded leave the country row as it is.
+#:
+#: France, read on legifrance.gouv.fr on 2026-10-05. Private works: loi
+#: n° 71-584 du 16 juillet 1971, art. 1 (in force since 2020-01-01, ordonnance
+#: n° 2019-964, art. 35) caps the retenue at "5 p. 100" of each interim
+#: payment and lets a caution replace it; art. 2 (unchanged since 1971-07-17)
+#: releases it one year after réception unless the client notified a reasoned
+#: objection. Public contracts: Code de la commande publique, art. R2191-32 to
+#: R2191-42. R2191-33 (as amended by décret n° 2024-1251, art. 1, for
+#: consultations engaged from 2025-01-01, art. 7) caps the retenue at 5 % of
+#: the initial contract amount plus modifications, and at 3 % where the
+#: contractor is an SME (R2151-13) and the buyer is the State, a State
+#: établissement public administratif other than a health body with operating
+#: charges over 60 M EUR, or a local authority with operating expenditure over
+#: 60 M EUR. That is a lower ceiling, not a set rate, and the platform records
+#: neither the contractor's size nor the buyer's, so the note names it and the
+#: figure stays at 5. R2191-34 withholds it in instalments from each payment
+#: and the balance; R2191-35 repays it within 30 days of the end of the délai
+#: de garantie, or of the lifting of reserves notified during it; R2191-36 lets
+#: the contractor substitute a first-demand guarantee or, unless the buyer
+#: objects, a caution. Neither text says whether the base is net or gross of
+#: VAT, so no note claims either.
+WORKS_CONTRACT_DEFAULTS: dict[str, dict[str, dict[str, Any]]] = {
+    "FR": {
+        "private": {
+            "standard_form": "NF P03-001",
+            "references": {
+                "retention_percent": "Loi n° 71-584 du 16 juillet 1971, art. 1",
+                "retention_cap_percent": "Loi n° 71-584 du 16 juillet 1971, art. 1",
+                "retention_release_split": "Loi n° 71-584 du 16 juillet 1971, art. 2",
+            },
+        },
+        "public": {
+            "standard_form": "CCAG-Travaux 2021",
+            "retention_percent": _figure(
+                "5",
+                "statute",
+                "Code de la commande publique, art. R2191-33 and R2191-34",
+                "The retenue de garantie is withheld in instalments from each interim payment and the final balance. "
+                "It may not exceed five percent of the initial contract amount plus any modifications.",
+            ),
+            "retention_cap_percent": _figure(
+                "5",
+                "statute",
+                "Code de la commande publique, art. R2191-33",
+                "Five percent of the initial contract amount plus any modifications is a legal ceiling. Where the "
+                "contractor is an SME and the buyer is the State, or a State public body or local authority with more "
+                "than 60 million euros of operating expenditure, the ceiling is three percent.",
+            ),
+            "retention_release_split": _figure(
+                _split(("defects_period_end", "100")),
+                "statute",
+                "Code de la commande publique, art. R2191-35 and R2191-36",
+                "Paid back within 30 days after the warranty period (délai de garantie) ends, or within 30 days "
+                "after reserves notified during it are lifted. The contractor may replace it with a first-demand "
+                "guarantee or, unless the buyer objects, a joint and several surety.",
+            ),
+        },
+    },
+}
+
+
 @dataclass(frozen=True)
 class RetentionBasis:
     """What a contract's retention is measured on, and the VAT that makes it gross.
@@ -727,6 +817,40 @@ def _validate_table() -> None:
 _validate_table()
 
 
+def _validate_works_table() -> None:
+    """Hold each works variant to the rules its country row is held to."""
+    for country, variants in WORKS_CONTRACT_DEFAULTS.items():
+        if country not in COUNTRY_CONTRACT_DEFAULTS:
+            raise ValueError(f"works variants for {country!r}, which has no country row")
+        for works, variant in variants.items():
+            where = f"{country}.{works}"
+            if works not in CEILING_WORKS:
+                raise ValueError(f"{where}: works must be one of {', '.join(CEILING_WORKS)}")
+            unknown = set(variant) - {"standard_form", "references", *CONTRACT_DEFAULT_FIELDS}
+            if unknown:
+                raise ValueError(f"{where} names fields the table does not have: {sorted(unknown)}")
+            for field in CONTRACT_DEFAULT_FIELDS:
+                figure = variant.get(field)
+                if figure is None:
+                    continue
+                if not isinstance(figure, dict) or set(figure) != {"value", "source", "reference", "note"}:
+                    raise ValueError(f"{where}.{field} must be a figure with value, source, reference and note")
+                if figure["source"] not in SOURCES or not figure["note"] or not figure["reference"]:
+                    raise ValueError(f"{where}.{field} must name its source, reference and note")
+                if field not in ("retention_percent", "retention_cap_percent", "retention_release_split"):
+                    raise ValueError(f"{where}.{field}: a works variant changes retention figures only")
+                if field == "retention_release_split":
+                    validate_release_split(figure["value"], f"{where}.{field}")
+                else:
+                    _check_percent(figure["value"], f"{where}.{field}")
+            for field, reference in (variant.get("references") or {}).items():
+                if field not in CONTRACT_DEFAULT_FIELDS or field in variant or not str(reference).strip():
+                    raise ValueError(f"{where}.references.{field} must re-cite a figure the variant leaves standing")
+
+
+_validate_works_table()
+
+
 # ── Reading ──────────────────────────────────────────────────────────────
 
 
@@ -767,6 +891,61 @@ def note_key(country: str, field: str) -> str:
     a form, a law) is data and is shown as written.
     """
     return f"{NOTE_KEY_PREFIX}{country}.{field}.note"
+
+
+def works_note_key(country: str, works: str, field: str) -> str:
+    """The i18n key the note of a works variant's figure is translated under."""
+    return f"{WORKS_NOTE_KEY_PREFIX}{country}.{works}.{field}.note"
+
+
+def normalise_works(works: str | None) -> str | None:
+    """``"public"`` or ``"private"``, or ``None`` when the works are not recorded or not one of those."""
+    value = (works or "").strip().lower()
+    return value if value in CEILING_WORKS else None
+
+
+def contract_works(project_works: str | None, counterparty_type: str | None) -> str | None:
+    """The kind of works a contract on a project is, for the law its defaults follow.
+
+    A project's works say who its client is, and that reaches the contract
+    with the client. A subcontract is never a public contract: the main
+    contractor who lets it is not a public buyer, whoever the project's
+    client is, so it is ``private``. A contract with the client on a project
+    that records no works stays ``None``, unknown.
+    """
+    if (counterparty_type or "").strip().lower() == "subcontractor":
+        return "private"
+    return normalise_works(project_works)
+
+
+def _apply_works(
+    country: str,
+    works: str | None,
+    values: dict[str, Any],
+    sources: dict[str, dict[str, Any]],
+    standard_form: Any,
+) -> tuple[Any, str | None]:
+    """Lay the country's works variant over its resolved row, in place.
+
+    Returns the standard form and the works applied, ``None`` when the country
+    has no variant for ``works`` and the row stands as it is.
+    """
+    variant = (WORKS_CONTRACT_DEFAULTS.get(country) or {}).get(works or "")
+    if variant is None:
+        return standard_form, None
+    for field in CONTRACT_DEFAULT_FIELDS:
+        figure = variant.get(field)
+        if figure is not None:
+            values[field] = copy.deepcopy(figure["value"])
+            sources[field] = {
+                "source": figure["source"],
+                "reference": figure["reference"],
+                "note": figure["note"],
+                "note_key": works_note_key(country, str(works), field),
+            }
+    for field, reference in (variant.get("references") or {}).items():
+        sources[field] = {**sources[field], "reference": reference}
+    return variant.get("standard_form", standard_form), works
 
 
 def _today() -> date:
@@ -928,8 +1107,13 @@ def resolve_contract_defaults(
     *,
     subdivision_code: str | None = None,
     as_of: date | None = None,
+    works: str | None = None,
 ) -> dict[str, Any] | None:
     """The usual payment terms of ``country_code``, or ``None`` when the table has no row.
+
+    With ``works`` (``"public"`` or ``"private"``) and a variant for it in
+    :data:`WORKS_CONTRACT_DEFAULTS`, the figures that law changes are laid
+    over the country row; without it the row stands.
 
     With a ``subdivision_code`` whose pack states a retention ceiling in force
     on ``as_of`` (today when not given) for every kind of works, a usual rate
@@ -945,7 +1129,8 @@ def resolve_contract_defaults(
         note is translated under) and ``release_split_source``, which is
         ``"regional_pack"`` when the split was read from the pack and
         ``"table"`` otherwise, and ``statutory_ceiling``: ``None``, or what
-        :func:`statutory_retention_ceiling` answered for the subdivision.
+        :func:`statutory_retention_ceiling` answered for the subdivision,
+        and ``works``: the variant applied, ``None`` when the row stands.
     """
     country = normalise_country(country_code)
     row = COUNTRY_CONTRACT_DEFAULTS.get(country)
@@ -967,6 +1152,9 @@ def resolve_contract_defaults(
             "note": figure["note"],
             "note_key": note_key(country, field),
         }
+    standard_form, applied_works = _apply_works(
+        country, normalise_works(works), values, sources, row.get("standard_form")
+    )
     ceiling = (
         statutory_retention_ceiling(country, subdivision_code, as_of=as_of or _today()) if subdivision_code else None
     )
@@ -976,11 +1164,12 @@ def resolve_contract_defaults(
         sources["retention_percent"] = _ceiling_source(ceiling)
     return {
         "country_code": country,
-        "standard_form": row.get("standard_form"),
+        "standard_form": standard_form,
         "values": values,
         "sources": sources,
         "release_split_source": split_source,
         "statutory_ceiling": ceiling,
+        "works": applied_works,
     }
 
 
@@ -1114,10 +1303,14 @@ __all__ = [
     "STATUTORY_CEILING_NOTE",
     "STATUTORY_CEILING_NOTE_KEY",
     "VALUATION_INTERVALS",
+    "WORKS_CONTRACT_DEFAULTS",
+    "WORKS_NOTE_KEY_PREFIX",
     "RetentionBasis",
     "apply_contract_defaults",
+    "contract_works",
     "forget_overridden",
     "normalise_country",
+    "normalise_works",
     "note_key",
     "resolve_contract_defaults",
     "resolve_retention_basis",
@@ -1125,4 +1318,5 @@ __all__ = [
     "subcontract_retention_default",
     "subdivision_from_address",
     "validate_release_split",
+    "works_note_key",
 ]
