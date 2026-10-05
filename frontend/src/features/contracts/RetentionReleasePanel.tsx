@@ -403,6 +403,31 @@ export function RetentionReleasePanel({
           </dl>
         )}
 
+        {summary?.retention_basis_reason === 'vat_stated' && (
+          <p className="mt-2 text-xs text-content-tertiary" data-testid="retention-basis">
+            {t('contracts.retention_basis_gross', {
+              defaultValue: 'Retention is taken on the payment including {{vat}} % VAT.',
+              vat: toNum(summary.retention_basis_vat_percent ?? 0),
+            })}
+          </p>
+        )}
+        {summary?.retention_basis_reason === 'vat_not_stated' && (
+          <p className="mt-2 text-xs text-content-tertiary" data-testid="retention-basis">
+            {t('contracts.retention_basis_vat_not_stated', {
+              defaultValue:
+                "Retention is taken on the net amount. It may have to be taken on the payment including VAT: state the contract's VAT rate before the first claim is issued (0 % under reverse charge).",
+            })}
+          </p>
+        )}
+        {summary?.retention_basis_reason === 'claims_issued_on_net' && (
+          <p className="mt-2 text-xs text-content-tertiary" data-testid="retention-basis">
+            {t('contracts.retention_basis_stays_net', {
+              defaultValue:
+                'Retention stays on the net amount: claims on this contract were already issued on that basis.',
+            })}
+          </p>
+        )}
+
         {summary && toNum(summary.pending_release) > 0 && (
           <p className="mt-2 text-xs text-content-tertiary">
             {t('contracts.retention_pending_release', {

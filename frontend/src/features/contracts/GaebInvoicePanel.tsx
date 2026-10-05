@@ -75,6 +75,16 @@ function warningLabel(t: TFunction, code: string, detail: string, reason?: strin
         defaultValue:
           "The invoice is issued in the subcontractor's name. Check whether reverse charge (section 13b UStG) applies before it is sent; if it does, no VAT may be stated.",
       });
+    case 'retention_basis_vat_not_stated':
+      return t('contracts.gaeb_invoice.warn_retention_vat_not_stated', {
+        defaultValue:
+          "Retention may have to be taken on the payment including VAT (section 17(6) VOB/B), but the contract states no VAT rate, so it is taken on the net. State the contract's VAT rate before the first claim is issued to change this; under reverse charge it is 0 %.",
+      });
+    case 'retention_basis_stays_net':
+      return t('contracts.gaeb_invoice.warn_retention_stays_net', {
+        defaultValue:
+          'Retention may have to be taken on the payment including VAT (section 17(6) VOB/B). Claims on this contract were already issued with retention on the net, so it stays on the net.',
+      });
     case 'claim_gross_differs_from_lines':
       return t('contracts.gaeb_invoice.warn_gross_differs', {
         defaultValue: 'The claim gross is not the sum of its lines. The invoice uses the lines.',

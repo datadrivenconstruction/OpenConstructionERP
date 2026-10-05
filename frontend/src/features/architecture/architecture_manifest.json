@@ -56747,6 +56747,21 @@
               "type": "Decimal"
             },
             {
+              "name": "retention_basis",
+              "type": "str",
+              "default": "'net'"
+            },
+            {
+              "name": "retention_basis_vat_percent",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "retention_basis_reason",
+              "type": "str",
+              "default": "'country_net'"
+            },
+            {
               "name": "releases",
               "type": "list[RetentionReleaseResponse]"
             }

@@ -186,6 +186,27 @@ beforeEach(() => {
 });
 
 describe('<RetentionReleasePanel>', () => {
+  it('says which basis the retention is taken on, and nothing where the country takes it on the net', async () => {
+    summaryMock.mockResolvedValue(
+      summary({ retention_basis: 'gross', retention_basis_vat_percent: '19.00', retention_basis_reason: 'vat_stated' }),
+    );
+    const first = renderPanel();
+    expect(await screen.findByTestId('retention-basis')).toHaveTextContent(
+      'Retention is taken on the payment including 19 % VAT.',
+    );
+    first.unmount();
+
+    summaryMock.mockResolvedValue(summary({ retention_basis: 'net', retention_basis_reason: 'claims_issued_on_net' }));
+    const second = renderPanel();
+    expect(await screen.findByTestId('retention-basis')).toHaveTextContent('Retention stays on the net amount');
+    second.unmount();
+
+    summaryMock.mockResolvedValue(summary({ retention_basis: 'net', retention_basis_reason: 'country_net' }));
+    renderPanel();
+    expect(await screen.findByText('Free to release')).toBeInTheDocument();
+    expect(screen.queryByTestId('retention-basis')).not.toBeInTheDocument();
+  });
+
   it('shows what is held and what is free to release', async () => {
     summaryMock.mockResolvedValue(
       summary({ released: '2000.00', held: '3000.0000', pending_release: '1000.00', available_for_release: '2000.0000' }),

@@ -583,6 +583,12 @@ class RetentionSummaryResponse(BaseModel):
     held: Decimal
     pending_release: Decimal
     available_for_release: Decimal
+    #: ``net`` or ``gross``: what the retention rate and ceiling are taken on.
+    retention_basis: str = "net"
+    #: The VAT added to the net on a gross basis; None on the net.
+    retention_basis_vat_percent: Decimal | None = None
+    #: ``country_net``, ``vat_stated``, ``vat_not_stated`` or ``claims_issued_on_net``.
+    retention_basis_reason: str = "country_net"
     releases: list[RetentionReleaseResponse] = Field(default_factory=list)
 
 

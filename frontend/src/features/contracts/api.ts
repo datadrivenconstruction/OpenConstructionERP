@@ -961,6 +961,11 @@ export interface RetentionSummary {
   held: string;
   pending_release: string;
   available_for_release: string;
+  /** What the retention rate and its ceiling are taken on. */
+  retention_basis?: 'net' | 'gross';
+  /** The VAT added to the net on a gross basis. */
+  retention_basis_vat_percent?: string | null;
+  retention_basis_reason?: 'country_net' | 'vat_stated' | 'vat_not_stated' | 'claims_issued_on_net';
   releases: RetentionRelease[];
 }
 

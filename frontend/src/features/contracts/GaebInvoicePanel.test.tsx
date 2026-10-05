@@ -88,6 +88,8 @@ describe('GaebInvoicePanel', () => {
       warnings: [
         { code: 'outstanding_differs_from_net_due', detail: '', reason: 'stored_materials' },
         { code: 'subcontract_reverse_charge_de', detail: '' },
+        { code: 'retention_basis_vat_not_stated', detail: 'raw server text' },
+        { code: 'retention_basis_stays_net', detail: 'raw server text' },
       ],
       remapped: [{ ordinal: 'A/7', written_as: 'ZZ.Z001', reason: 'ordinal_not_representable' }],
     });
@@ -99,6 +101,9 @@ describe('GaebInvoicePanel', () => {
     const warnings = screen.getByTestId('gaeb-invoice-warnings');
     expect(warnings).toHaveTextContent('The claim includes materials stored on site, which an X89 does not bill.');
     expect(warnings).toHaveTextContent('section 13b UStG');
+    expect(warnings).toHaveTextContent("State the contract's VAT rate before the first claim is issued");
+    expect(warnings).toHaveTextContent('so it stays on the net');
+    expect(warnings).not.toHaveTextContent('raw server text');
     expect(screen.getByTestId('gaeb-invoice-remapped')).toHaveTextContent(
       'A/7 is written as ZZ.Z001 (the OZ has characters GAEB cannot write)',
     );
