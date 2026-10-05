@@ -223325,6 +223325,1588 @@
       "import_dependencies": []
     },
     {
+      "module_id": "trainer",
+      "module_label": "Trainer",
+      "module_category": "business",
+      "files": [
+        "__init__.py",
+        "locks.py",
+        "manifest.py",
+        "models.py",
+        "permissions.py",
+        "probe_types.py",
+        "schemas.py"
+      ],
+      "manifest": {
+        "name": "oe_trainer",
+        "version": "0.1.0",
+        "display_name": "Trainer",
+        "description": "Paid course trainer: enrolments, learning lock, deterministic checking",
+        "author": "OpenConstructionERP Core Team",
+        "category": "business",
+        "depends": [
+          "oe_users",
+          "oe_projects",
+          "oe_boq",
+          "oe_bid_management",
+          "oe_contracts",
+          "oe_variations",
+          "oe_progress"
+        ],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [
+        {
+          "class_name": "TrainerCourse",
+          "tablename": "oe_trainer_course",
+          "docstring": "One loaded version of one course file.\n\nThe parsed spec is stored here, so an enrolment pinned to ``sha256`` keeps\ngrading against the content it started on after the file is replaced.",
+          "columns": [
+            {
+              "name": "course_key",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "version",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "country",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "language",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "currency",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "title",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "source_file",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "sha256",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "spec",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "validation_report",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "loaded_at",
+              "annotation": "Mapped[datetime]",
+              "sql_type": "DateTime",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "TrainerOffer",
+          "tablename": "oe_trainer_offer",
+          "docstring": "A store product that grants a course.",
+          "columns": [
+            {
+              "name": "provider",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "product_ref",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "course_key",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "is_active",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "TrainerEnrolment",
+          "tablename": "oe_trainer_enrolment",
+          "docstring": "One learner on one course.\n\n``course_sha256`` pins the course content at enrolment, so a reload never\nchanges the course under a learner who has already started.\n``seeded_refs`` maps stable keys (``boq.main``, ``contract.main``, ...) to\nthe ids the seeder created; every probe reads through it, never by name.",
+          "columns": [
+            {
+              "name": "user_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_users_user.id"
+            },
+            {
+              "name": "course_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_trainer_course.id"
+            },
+            {
+              "name": "course_sha256",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "seeded_refs",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "current_task_n",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "source",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "order_ref",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "stale_since",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "last_checked_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "started_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "completed_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "revoked_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "metadata_",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": [
+            {
+              "name": "task_states",
+              "type": "one-to-many",
+              "annotation": "Mapped[list[TrainerTaskState]]",
+              "back_populates": "enrolment"
+            }
+          ]
+        },
+        {
+          "class_name": "TrainerTaskState",
+          "tablename": "oe_trainer_task_state",
+          "docstring": "Lock, seed and progress state of one task for one enrolment.\n\n``unlock_seen_at`` records that the learner has seen the unlock this task's\npass produced (the lock named by the task's ``opens``). ``hints_revealed``\ncounts the hints the learner has been shown; the task view never sends a\nhint past it. ``answers_revision`` is the optimistic-concurrency token of\nthe answers PUT: a PUT carrying any other revision is refused with 409.",
+          "columns": [
+            {
+              "name": "enrolment_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_trainer_enrolment.id"
+            },
+            {
+              "name": "task_id",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "task_n",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "state",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "unlocked_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "passed_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "unlock_seen_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "seed_status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "seed_error",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "attempts_count",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "best_passed_items",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "total_items",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "hints_revealed",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "answers_revision",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "last_attempt_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            }
+          ],
+          "relationships": [
+            {
+              "name": "enrolment",
+              "type": "many-to-one",
+              "annotation": "Mapped[TrainerEnrolment]",
+              "target_model": "TrainerEnrolment",
+              "back_populates": "task_states"
+            }
+          ]
+        },
+        {
+          "class_name": "TrainerAnswer",
+          "tablename": "oe_trainer_answer",
+          "docstring": "One typed panel answer.\n\nKeyed by answer ``name`` rather than ledger key, because one task may grade\nthe same ledger key twice under two names. ``value_text`` is exactly what\nthe learner typed after trimming and separator normalisation; the checker\nparses it with ``Decimal``. There is deliberately no numeric column, so\nnothing is rounded on the way in. ``revision`` is the task's\n``answers_revision`` at which this row was last written.",
+          "columns": [
+            {
+              "name": "enrolment_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_trainer_enrolment.id"
+            },
+            {
+              "name": "task_id",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "answer_name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "value_text",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "option_index",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "revision",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "TrainerAttempt",
+          "tablename": "oe_trainer_attempt",
+          "docstring": "One run of the checker over one task.\n\n``client_attempt_id`` makes \"Check my work\" idempotent: a retried POST with\nthe same id returns the stored attempt instead of grading twice. It is null\nfor attempts the server starts itself (event rechecks, admin rechecks).\n``result`` holds the per-item list; ``observed`` values in it are strings,\nnever floats, and no expected value is ever stored for the client.",
+          "columns": [
+            {
+              "name": "enrolment_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_trainer_enrolment.id"
+            },
+            {
+              "name": "task_id",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "client_attempt_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "trigger",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "passed",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "graded_items",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "passed_items",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "result",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "spec_sha256",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "engine_version",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "duration_ms",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "TrainerWebhookEvent",
+          "tablename": "oe_trainer_webhook_event",
+          "docstring": "One store webhook delivery.\n\nThe unique ``(provider, event_id)`` pair is the idempotency guarantee: the\nrow is inserted first, and an IntegrityError means a duplicate delivery.\nA delivery with a bad signature is logged without its payload. User and\nenrolment ids are plain ids so the log outlives the rows it points at.",
+          "columns": [
+            {
+              "name": "provider",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "event_id",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "event_type",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "signature_ok",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "email",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "product_ref",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "order_ref",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "payload_sha256",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "payload",
+              "annotation": "Mapped[dict | None]",
+              "sql_type": "JSON",
+              "nullable": true
+            },
+            {
+              "name": "error",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "user_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "enrolment_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "processed_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        }
+      ],
+      "routes": [],
+      "schemas": [
+        {
+          "class_name": "_Schema",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Base for every trainer schema: unknown keys are an error.",
+          "fields": []
+        },
+        {
+          "class_name": "PublicStatus",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "``GET /public/status/``, readable before sign-in.\n\nThe sign-in page of an academy box uses it to hide self-registration and\nto point a buyer at their email or the store.",
+          "fields": [
+            {
+              "name": "academy_mode",
+              "type": "bool"
+            },
+            {
+              "name": "store_url",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "CourseBadge",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "The badge the last task earns.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "title",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "CourseInfo",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "The course the learner is enrolled in. Text is in the course language.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "version",
+              "type": "str"
+            },
+            {
+              "name": "title",
+              "type": "str"
+            },
+            {
+              "name": "summary",
+              "type": "str | None"
+            },
+            {
+              "name": "language",
+              "type": "str"
+            },
+            {
+              "name": "country",
+              "type": "str"
+            },
+            {
+              "name": "locale",
+              "type": "str"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "contract",
+              "type": "str | None"
+            },
+            {
+              "name": "badge",
+              "type": "CourseBadge | None"
+            }
+          ]
+        },
+        {
+          "class_name": "TaskTarget",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "Where in the ERP a task happens. Built server side from seeded refs.",
+          "fields": [
+            {
+              "name": "route",
+              "type": "str"
+            },
+            {
+              "name": "anchor",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "TaskVideo",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "The video episode that goes with a task.",
+          "fields": [
+            {
+              "name": "episode",
+              "type": "str"
+            },
+            {
+              "name": "title",
+              "type": "str"
+            },
+            {
+              "name": "route",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "TaskRings",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "Which of the three rings this task has closed.",
+          "fields": [
+            {
+              "name": "numbers",
+              "type": "bool"
+            },
+            {
+              "name": "trace",
+              "type": "bool"
+            },
+            {
+              "name": "explain",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "class_name": "TaskSummary",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "One task on the course map.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "n",
+              "type": "int"
+            },
+            {
+              "name": "title",
+              "type": "str"
+            },
+            {
+              "name": "module",
+              "type": "str"
+            },
+            {
+              "name": "opens",
+              "type": "str"
+            },
+            {
+              "name": "opens_label",
+              "type": "str"
+            },
+            {
+              "name": "estimated_minutes",
+              "type": "int | None"
+            },
+            {
+              "name": "status",
+              "type": "TaskStatus"
+            },
+            {
+              "name": "rings",
+              "type": "TaskRings"
+            },
+            {
+              "name": "target",
+              "type": "TaskTarget | None"
+            },
+            {
+              "name": "video",
+              "type": "TaskVideo | None"
+            },
+            {
+              "name": "checked_prompt",
+              "type": "str | None"
+            },
+            {
+              "name": "lock_reason",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "UnlockTile",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "One \"what you can do now\" tile on the unlock dialog.",
+          "fields": [
+            {
+              "name": "title",
+              "type": "str"
+            },
+            {
+              "name": "text",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "UnlockInfo",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "One lock id of the course and whether the learner has it yet.\n\n``seen`` is false for an open lock whose unlock dialog the learner has not\nclosed yet; ``POST /unlocks/{lock_id}/seen`` sets it.",
+          "fields": [
+            {
+              "name": "lock_id",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "LockKind"
+            },
+            {
+              "name": "state",
+              "type": "LockState"
+            },
+            {
+              "name": "opened_by_task",
+              "type": "int"
+            },
+            {
+              "name": "opened_at",
+              "type": "dt.datetime | None"
+            },
+            {
+              "name": "seen",
+              "type": "bool"
+            },
+            {
+              "name": "tiles",
+              "type": "list[UnlockTile]"
+            }
+          ]
+        },
+        {
+          "class_name": "NavInfo",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "How the Academy menu treats modules outside the course.",
+          "fields": [
+            {
+              "name": "outside_course",
+              "type": "OutsideCourse"
+            },
+            {
+              "name": "always_open",
+              "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "RingProgress",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "Count of tasks whose ring of this kind is closed.",
+          "fields": [
+            {
+              "name": "done",
+              "type": "int"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "ProgressRings",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "Course-wide progress per ring.",
+          "fields": [
+            {
+              "name": "numbers",
+              "type": "RingProgress"
+            },
+            {
+              "name": "trace",
+              "type": "RingProgress"
+            },
+            {
+              "name": "explain",
+              "type": "RingProgress"
+            }
+          ]
+        },
+        {
+          "class_name": "CourseProgress",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "Course-wide progress: passed tasks and the three rings.",
+          "fields": [
+            {
+              "name": "done",
+              "type": "int"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "rings",
+              "type": "ProgressRings"
+            }
+          ]
+        },
+        {
+          "class_name": "WeekDay",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "One day of the current ISO week.",
+          "fields": [
+            {
+              "name": "date",
+              "type": "dt.date"
+            },
+            {
+              "name": "state",
+              "type": "WeekDayState"
+            }
+          ]
+        },
+        {
+          "class_name": "WeekInfo",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "This ISO week: passed checks against the weekly goal.",
+          "fields": [
+            {
+              "name": "goal",
+              "type": "int"
+            },
+            {
+              "name": "done",
+              "type": "int"
+            },
+            {
+              "name": "days",
+              "type": "list[WeekDay]"
+            }
+          ]
+        },
+        {
+          "class_name": "TrainerMe",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "``GET /me``: the learner's active enrolment. 404 when there is none.",
+          "fields": [
+            {
+              "name": "course",
+              "type": "CourseInfo"
+            },
+            {
+              "name": "tasks",
+              "type": "list[TaskSummary]"
+            },
+            {
+              "name": "unlocks",
+              "type": "list[UnlockInfo]"
+            },
+            {
+              "name": "nav",
+              "type": "NavInfo"
+            },
+            {
+              "name": "progress",
+              "type": "CourseProgress"
+            },
+            {
+              "name": "week",
+              "type": "WeekInfo | None"
+            },
+            {
+              "name": "level",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "GivenItem",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "One given value a task states up front.",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "value",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "ValueKind"
+            }
+          ]
+        },
+        {
+          "class_name": "CheckField",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "One input of a numbers check. ``key`` is the answer name to PUT.",
+          "fields": [
+            {
+              "name": "key",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "ValueKind"
+            },
+            {
+              "name": "currency",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "ChoiceOption",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "One option of a trace or explain question. Never carries ``correct``.",
+          "fields": [
+            {
+              "name": "index",
+              "type": "int"
+            },
+            {
+              "name": "text",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "NumbersCheckView",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "A check where the learner types figures.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "Literal['numbers']"
+            },
+            {
+              "name": "prompt",
+              "type": "str"
+            },
+            {
+              "name": "fields",
+              "type": "list[CheckField]"
+            }
+          ]
+        },
+        {
+          "class_name": "ChoiceCheckView",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "A trace or explain question. The answer name to PUT is the check ``id``.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "Literal['trace', 'explain']"
+            },
+            {
+              "name": "prompt",
+              "type": "str"
+            },
+            {
+              "name": "options",
+              "type": "list[ChoiceOption]"
+            }
+          ]
+        },
+        {
+          "class_name": "ReadbackItemView",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "One value the panel reads back from the ERP while the learner works.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "what",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "ValueKind"
+            }
+          ]
+        },
+        {
+          "class_name": "SavedAnswer",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "One stored answer. Exactly one of ``value_text`` / ``option_index``.",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "AnswerKind"
+            },
+            {
+              "name": "value_text",
+              "type": "str | None"
+            },
+            {
+              "name": "option_index",
+              "type": "int | None"
+            }
+          ]
+        },
+        {
+          "class_name": "RelatedValue",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "One derivation a diagnosis shows.",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "value",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "ValueKind"
+            }
+          ]
+        },
+        {
+          "class_name": "Diagnosis",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "Why a value is wrong, matched within that field only.\n\n``related`` lists the derivations the course author chose to show. There is\nno signed delta: with the observed value it would give away the answer.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "DiagnosisKind"
+            },
+            {
+              "name": "message",
+              "type": "str"
+            },
+            {
+              "name": "related",
+              "type": "list[RelatedValue]"
+            }
+          ]
+        },
+        {
+          "class_name": "FieldResult",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "The verdict on one graded item.\n\n``key`` is the answer name for a panel item, the readback id for an ERP\nitem. ``observed`` is what the checker read (the learner's own figure or\nthe ERP value), as a string. ``feedback`` is the feedback of the option the\nlearner chose, for a trace or explain item; null otherwise.",
+          "fields": [
+            {
+              "name": "key",
+              "type": "str"
+            },
+            {
+              "name": "source",
+              "type": "ItemSource"
+            },
+            {
+              "name": "verdict",
+              "type": "ItemVerdict"
+            },
+            {
+              "name": "observed",
+              "type": "str | None"
+            },
+            {
+              "name": "diagnosis",
+              "type": "Diagnosis | None"
+            },
+            {
+              "name": "feedback",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "AttemptResult",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "``POST /tasks/{task_id}/check``: one run of the checker.\n\nA pass needs at least one graded item and every graded item ``ok``; a check\nover zero items never passes. A pass stays recorded: a later failing check\nreturns ``regressed: true`` and does not lock the task again.",
+          "fields": [
+            {
+              "name": "attempt_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "client_attempt_id",
+              "type": "uuid.UUID | None"
+            },
+            {
+              "name": "task_id",
+              "type": "str"
+            },
+            {
+              "name": "verdict",
+              "type": "AttemptVerdict"
+            },
+            {
+              "name": "graded_items",
+              "type": "int"
+            },
+            {
+              "name": "passed_items",
+              "type": "int"
+            },
+            {
+              "name": "fields",
+              "type": "list[FieldResult]"
+            },
+            {
+              "name": "task_status",
+              "type": "TaskStatus"
+            },
+            {
+              "name": "rings",
+              "type": "TaskRings"
+            },
+            {
+              "name": "progress",
+              "type": "CourseProgress"
+            },
+            {
+              "name": "unlocked",
+              "type": "list[str]"
+            },
+            {
+              "name": "regressed",
+              "type": "bool"
+            },
+            {
+              "name": "revealed_hint",
+              "type": "str | None"
+            },
+            {
+              "name": "checked_at",
+              "type": "dt.datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "TaskView",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "``GET /tasks/{task_id}``: a task with every secret removed.\n\n``hints`` holds only the hints already revealed to this learner;\n``hints_total`` says how many exist. ``answers_revision`` is the token the\nnext ``PUT /answers`` must send back.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "n",
+              "type": "int"
+            },
+            {
+              "name": "title",
+              "type": "str"
+            },
+            {
+              "name": "module",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "TaskStatus"
+            },
+            {
+              "name": "brief",
+              "type": "str"
+            },
+            {
+              "name": "given",
+              "type": "list[GivenItem]"
+            },
+            {
+              "name": "steps",
+              "type": "list[str]"
+            },
+            {
+              "name": "hints",
+              "type": "list[str]"
+            },
+            {
+              "name": "hints_total",
+              "type": "int"
+            },
+            {
+              "name": "panel_notes",
+              "type": "list[str]"
+            },
+            {
+              "name": "has_date_steps",
+              "type": "bool"
+            },
+            {
+              "name": "checks",
+              "type": "list[CheckView]"
+            },
+            {
+              "name": "readback",
+              "type": "list[ReadbackItemView]"
+            },
+            {
+              "name": "answers",
+              "type": "list[SavedAnswer]"
+            },
+            {
+              "name": "answers_revision",
+              "type": "int"
+            },
+            {
+              "name": "last_attempt",
+              "type": "AttemptResult | None"
+            }
+          ]
+        },
+        {
+          "class_name": "AnswerIn",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "One answer to store. Both values null clears the stored answer.\n\n``value_text`` is what the learner typed, already normalised to a plain\ndecimal string by the UI for a number field.",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "value_text",
+              "type": "str | None"
+            },
+            {
+              "name": "option_index",
+              "type": "int | None"
+            }
+          ]
+        },
+        {
+          "class_name": "AnswersPut",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "``PUT /tasks/{task_id}/answers``.\n\n``revision`` is the ``answers_revision`` the client last read. Any other\nvalue is answered 409, so two tabs cannot overwrite each other silently.\nAn unknown answer name is answered 422.",
+          "fields": [
+            {
+              "name": "answers",
+              "type": "list[AnswerIn]"
+            },
+            {
+              "name": "revision",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "AnswersSaved",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "Response to the answers PUT: the new revision and every stored answer.",
+          "fields": [
+            {
+              "name": "task_id",
+              "type": "str"
+            },
+            {
+              "name": "revision",
+              "type": "int"
+            },
+            {
+              "name": "answers",
+              "type": "list[SavedAnswer]"
+            }
+          ]
+        },
+        {
+          "class_name": "CheckRequest",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "``POST /tasks/{task_id}/check``.\n\n``client_attempt_id`` is generated once per click; a retry with the same id\nreturns the stored attempt. ``revision`` names the answers the learner sees;\nwhen it is stale the check is refused with 409 rather than graded against\nanswers the learner never saw.",
+          "fields": [
+            {
+              "name": "client_attempt_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "revision",
+              "type": "int | None"
+            }
+          ]
+        },
+        {
+          "class_name": "ReadbackValue",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "What the ERP holds now for one readback item, never the expected value.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "state",
+              "type": "ReadbackState"
+            },
+            {
+              "name": "app_value",
+              "type": "str | None"
+            },
+            {
+              "name": "kind",
+              "type": "ValueKind"
+            }
+          ]
+        },
+        {
+          "class_name": "ReadbackResponse",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "``GET /tasks/{task_id}/readback``.",
+          "fields": [
+            {
+              "name": "task_id",
+              "type": "str"
+            },
+            {
+              "name": "items",
+              "type": "list[ReadbackValue]"
+            },
+            {
+              "name": "read_at",
+              "type": "dt.datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "AdminEnrolmentCreate",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "``POST /admin/enrolments/``: provision a learner by hand.\n\nRuns the same provisioning as a paid webhook, with ``source=\"admin\"``.",
+          "fields": [
+            {
+              "name": "email",
+              "type": "EmailStr"
+            },
+            {
+              "name": "full_name",
+              "type": "str"
+            },
+            {
+              "name": "course_key",
+              "type": "str"
+            },
+            {
+              "name": "locale",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "AdminEnrolmentOut",
+          "bases": [
+            "_Schema"
+          ],
+          "docstring": "One enrolment as the admin screens show it.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "user_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "email",
+              "type": "str"
+            },
+            {
+              "name": "course_key",
+              "type": "str"
+            },
+            {
+              "name": "course_version",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "EnrolmentStatus"
+            },
+            {
+              "name": "source",
+              "type": "EnrolmentSource"
+            },
+            {
+              "name": "project_id",
+              "type": "uuid.UUID | None"
+            },
+            {
+              "name": "current_task_n",
+              "type": "int"
+            },
+            {
+              "name": "created_at",
+              "type": "dt.datetime"
+            }
+          ]
+        }
+      ],
+      "import_dependencies": []
+    },
+    {
       "module_id": "transmittals",
       "module_label": "Transmittals",
       "module_category": "core",
@@ -234061,6 +235643,13 @@
       "total_files": 5
     },
     {
+      "name": "trainer",
+      "ts_files": 8,
+      "css_files": 0,
+      "test_files": 1,
+      "total_files": 8
+    },
+    {
       "name": "translation",
       "ts_files": 7,
       "css_files": 0,
@@ -235364,6 +236953,15 @@
       "projects",
       "users"
     ],
+    "trainer": [
+      "bid_management",
+      "boq",
+      "contracts",
+      "progress",
+      "projects",
+      "users",
+      "variations"
+    ],
     "transmittals": [
       "contacts",
       "projects",
@@ -235419,17 +237017,17 @@
     ]
   },
   "statistics": {
-    "backend_modules": 196,
-    "modules_with_manifests": 194,
-    "total_models": 623,
-    "total_columns": 7137,
-    "total_relationships": 234,
+    "backend_modules": 197,
+    "modules_with_manifests": 195,
+    "total_models": 630,
+    "total_columns": 7215,
+    "total_relationships": 236,
     "total_routes": 3734,
-    "total_schemas": 3520,
-    "total_python_files": 2250,
-    "frontend_features": 192,
-    "frontend_ts_files": 2863,
-    "frontend_backend_mapped": 171
+    "total_schemas": 3557,
+    "total_python_files": 2257,
+    "frontend_features": 193,
+    "frontend_ts_files": 2871,
+    "frontend_backend_mapped": 172
   },
   "frontend_backend_mapping": {
     "about": null,
@@ -235615,6 +237213,7 @@
     "temporary-works": "temporary_works",
     "tendering": "tendering",
     "timeline": "timeline",
+    "trainer": "trainer",
     "translation": null,
     "transmittals": "transmittals",
     "users": "users",

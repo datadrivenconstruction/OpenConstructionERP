@@ -1,0 +1,80 @@
+{
+  "attempt_id": "5e2d1c0b-9a8f-4e7d-8c6b-5a4f3e2d1c09",
+  "client_attempt_id": "1e0d9c8b-7a6f-4e5d-9c3b-2a1f0e9d8c72",
+  "task_id": "t2-markups",
+  "verdict": "pass",
+  "graded_items": 5,
+  "passed_items": 5,
+  "fields": [
+    {
+      "key": "overheads_amount",
+      "source": "panel",
+      "verdict": "ok",
+      "observed": "2433.12",
+      "diagnosis": null,
+      "feedback": null
+    },
+    {
+      "key": "grand_total",
+      "source": "erp",
+      "verdict": "ok",
+      "observed": "34367.82",
+      "diagnosis": null,
+      "feedback": null
+    },
+    {
+      "key": "profit_rate",
+      "source": "erp",
+      "verdict": "ok",
+      "observed": "5.00",
+      "diagnosis": null,
+      "feedback": null
+    },
+    {
+      "key": "t2-trace",
+      "source": "panel",
+      "verdict": "ok",
+      "observed": "0",
+      "diagnosis": null,
+      "feedback": "Yes: 30414.00 x 5% = 1520.70."
+    },
+    {
+      "key": "t2-explain",
+      "source": "panel",
+      "verdict": "ok",
+      "observed": "0",
+      "diagnosis": null,
+      "feedback": "Right: 5% of 2433.12 is the 121.66 difference."
+    }
+  ],
+  "task_status": "passed",
+  "rings": {
+    "numbers": true,
+    "trace": true,
+    "explain": true
+  },
+  "progress": {
+    "done": 2,
+    "total": 5,
+    "rings": {
+      "numbers": {
+        "done": 2,
+        "total": 5
+      },
+      "trace": {
+        "done": 2,
+        "total": 5
+      },
+      "explain": {
+        "done": 2,
+        "total": 5
+      }
+    }
+  },
+  "unlocked": [
+    "bid_management"
+  ],
+  "regressed": false,
+  "revealed_hint": null,
+  "checked_at": "2026-10-05T11:05:00Z"
+}

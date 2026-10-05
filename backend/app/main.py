@@ -3218,6 +3218,10 @@ def create_app() -> FastAPI:
             "ai": {"providers": []},
             "cache": {"status": "unknown"},
             "demo_mode": demo_mode,
+            # Academy box flag for the trainer UI. Read from Settings at request
+            # time rather than from the ``settings`` captured when the app was
+            # built, so a test (or an operator reload) can flip it.
+            "academy_mode": get_settings().academy_mode,
         }
 
         # Cache check

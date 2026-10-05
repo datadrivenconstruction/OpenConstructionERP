@@ -1,0 +1,240 @@
+{
+  "course": {
+    "id": "fx-quillmere-1",
+    "version": "1.0.0",
+    "title": "Quillmere Depot: from bill to variation (test fixture)",
+    "summary": "A synthetic five-task course for the trainer test suites.",
+    "language": "en",
+    "country": "GB",
+    "locale": "en-GB",
+    "currency": "GBP",
+    "contract": "Fictional lump-sum building contract with quantities",
+    "badge": {
+      "id": "fx-quillmere-1",
+      "title": "Quillmere Depot: bill to variation"
+    }
+  },
+  "tasks": [
+    {
+      "id": "t1-direct-cost",
+      "n": 1,
+      "title": "Price the blockwork and read the direct cost",
+      "module": "boq",
+      "opens": "boq.markups_panel",
+      "opens_label": "Markups",
+      "estimated_minutes": 15,
+      "status": "passed",
+      "rings": {
+        "numbers": true,
+        "trace": true,
+        "explain": true
+      },
+      "target": {
+        "route": "/boq/7a4c1f0e-2b3d-4e5f-8a9b-0c1d2e3f4a5b",
+        "anchor": null
+      },
+      "video": {
+        "episode": "FX01",
+        "title": "Pricing a position",
+        "route": "/videos?episode=FX01"
+      },
+      "checked_prompt": "Type the direct cost the bill shows now.",
+      "lock_reason": null
+    },
+    {
+      "id": "t2-markups",
+      "n": 2,
+      "title": "Add overheads and profit",
+      "module": "boq",
+      "opens": "bid_management",
+      "opens_label": "Bid Management",
+      "estimated_minutes": 20,
+      "status": "needs_revision",
+      "rings": {
+        "numbers": false,
+        "trace": true,
+        "explain": false
+      },
+      "target": {
+        "route": "/boq/7a4c1f0e-2b3d-4e5f-8a9b-0c1d2e3f4a5b",
+        "anchor": "boq-markups-panel"
+      },
+      "video": {
+        "episode": "FX02",
+        "title": "Markups on direct cost",
+        "route": "/videos?episode=FX02"
+      },
+      "checked_prompt": "Type the overheads amount.",
+      "lock_reason": null
+    },
+    {
+      "id": "t3-tender",
+      "n": 3,
+      "title": "Level the roofing bids and award",
+      "module": "bid_management",
+      "opens": "contracts.progress_claims",
+      "opens_label": "Progress claims",
+      "estimated_minutes": 25,
+      "status": "locked",
+      "rings": {
+        "numbers": false,
+        "trace": false,
+        "explain": false
+      },
+      "target": null,
+      "video": null,
+      "checked_prompt": "Type Alderby's normalised total and the lowest normalised bid.",
+      "lock_reason": "Opens when task 2 passes."
+    },
+    {
+      "id": "t4-valuation",
+      "n": 4,
+      "title": "Value the first claim",
+      "module": "contracts",
+      "opens": "variations",
+      "opens_label": "Variations",
+      "estimated_minutes": 25,
+      "status": "locked",
+      "rings": {
+        "numbers": false,
+        "trace": false,
+        "explain": false
+      },
+      "target": null,
+      "video": null,
+      "checked_prompt": "Type the retention on claim 1.",
+      "lock_reason": null
+    },
+    {
+      "id": "t5-variation",
+      "n": 5,
+      "title": "Value the rooflight variation",
+      "module": "variations",
+      "opens": "badge:fx-quillmere-1",
+      "opens_label": "Course badge",
+      "estimated_minutes": 25,
+      "status": "locked",
+      "rings": {
+        "numbers": false,
+        "trace": false,
+        "explain": false
+      },
+      "target": null,
+      "video": null,
+      "checked_prompt": "Type the net value of the variation.",
+      "lock_reason": null
+    }
+  ],
+  "unlocks": [
+    {
+      "lock_id": "boq.markups_panel",
+      "kind": "panel",
+      "state": "open",
+      "opened_by_task": 1,
+      "opened_at": "2026-10-05T09:12:00Z",
+      "seen": true,
+      "tiles": [
+        {
+          "title": "Markups",
+          "text": "Add overheads and profit on the bill."
+        }
+      ]
+    },
+    {
+      "lock_id": "bid_management",
+      "kind": "module",
+      "state": "locked",
+      "opened_by_task": 2,
+      "opened_at": null,
+      "seen": false,
+      "tiles": []
+    },
+    {
+      "lock_id": "contracts.progress_claims",
+      "kind": "tab",
+      "state": "locked",
+      "opened_by_task": 3,
+      "opened_at": null,
+      "seen": false,
+      "tiles": []
+    },
+    {
+      "lock_id": "variations",
+      "kind": "module",
+      "state": "locked",
+      "opened_by_task": 4,
+      "opened_at": null,
+      "seen": false,
+      "tiles": []
+    },
+    {
+      "lock_id": "badge:fx-quillmere-1",
+      "kind": "badge",
+      "state": "locked",
+      "opened_by_task": 5,
+      "opened_at": null,
+      "seen": false,
+      "tiles": []
+    }
+  ],
+  "nav": {
+    "outside_course": "hidden",
+    "always_open": [
+      "projects",
+      "boq"
+    ]
+  },
+  "progress": {
+    "done": 1,
+    "total": 5,
+    "rings": {
+      "numbers": {
+        "done": 1,
+        "total": 5
+      },
+      "trace": {
+        "done": 2,
+        "total": 5
+      },
+      "explain": {
+        "done": 1,
+        "total": 5
+      }
+    }
+  },
+  "week": {
+    "goal": 3,
+    "done": 1,
+    "days": [
+      {
+        "date": "2026-10-05",
+        "state": "done"
+      },
+      {
+        "date": "2026-10-06",
+        "state": "empty"
+      },
+      {
+        "date": "2026-10-07",
+        "state": "empty"
+      },
+      {
+        "date": "2026-10-08",
+        "state": "empty"
+      },
+      {
+        "date": "2026-10-09",
+        "state": "empty"
+      },
+      {
+        "date": "2026-10-10",
+        "state": "off"
+      },
+      {
+        "date": "2026-10-11",
+        "state": "off"
+      }
+    ]
+  },
+  "level": null
+}

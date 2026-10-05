@@ -17,7 +17,7 @@ from importlib.metadata import version as _pkg_version
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field, computed_field, field_validator, model_validator
+from pydantic import Field, SecretStr, computed_field, field_validator, model_validator
 from pydantic_settings import (
     BaseSettings,
     EnvSettingsSource,
@@ -532,6 +532,26 @@ class Settings(BaseSettings):
     # and is read straight from the environment elsewhere; the hosted demo sets
     # both. See :mod:`app.core.demo_read_only`. Env: ``OE_DEMO_READ_ONLY``.
     demo_read_only: bool = False
+
+    # ── Academy (paid course trainer, module ``oe_trainer``) ─────────────
+    # When True, this install runs as an academy box: learners arrive through
+    # the course store webhook or an admin, work one course at a time, and
+    # modules open as they pass checked tasks. Default False: a normal
+    # install behaves byte-for-byte as it does today, every trainer route
+    # answers 404 and every trainer event handler returns at its first line.
+    # Read per request from ``get_settings()``, never cached in a closure, so
+    # the flag can be flipped in tests. Env: ``OE_ACADEMY_MODE``.
+    academy_mode: bool = False
+    # Directory the course loader reads ``course_*_v*.json`` from. Course files
+    # are private content and never ship in this repository. Empty means no
+    # course is loaded. Env: ``OE_TRAINER_COURSES_DIR``.
+    trainer_courses_dir: str = ""
+    # HMAC secret the course store signs its purchase webhooks with. None
+    # means the webhook refuses every delivery. Env: ``OE_TRAINER_WEBHOOK_SECRET``.
+    trainer_webhook_secret: SecretStr | None = None
+    # Public course store link shown on the sign-in page of an academy box.
+    # Empty means no link is shown. Env: ``OE_TRAINER_STORE_URL``.
+    trainer_store_url: str = ""
 
     # ── Public demo upload retention ─────────────────────────────────────
     # How many days a visitor's uploaded file survives on the public demo

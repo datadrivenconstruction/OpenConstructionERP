@@ -1,0 +1,521 @@
+{
+  "id": "fx-quillmere-1",
+  "version": "1.0.0",
+  "status": "fixture",
+  "title": "Quillmere Depot: from bill to variation (test fixture)",
+  "summary": "A synthetic five-task course for the trainer test suites. Every name, figure and rule in it is invented.",
+  "country": "GB",
+  "region": "GB-ENG",
+  "currency": "GBP",
+  "as_of": "2026-09-30",
+  "story_period": "2026-09 to 2026-11",
+  "rules_checked_on": "2026-09-30",
+  "contract": "Fictional lump-sum building contract with quantities",
+  "fictional_case": true,
+  "language": "en",
+  "erp_walked_version": "18.4.0",
+  "sources": [
+    {"id": "fx-src-1", "title": "Invented case brief for the fixture", "kind": "case_brief"}
+  ],
+  "derivation_language": "en",
+  "constants": {"vat_standard_percent": 20, "weeks_per_month": 4},
+  "conventions": [
+    {"key": "fx_money_two_dp", "text": "Money is kept to two decimal places at every step.", "anchor": {"name": "fx_direct_cost", "value": 30414.00, "derivation": "4977.00 + 14322.00 + 11115.00"}}
+  ],
+  "rules": [
+    {
+      "key": "fx_overheads_rate",
+      "value": 0.08,
+      "unit": "fraction",
+      "status": "case_assumption",
+      "source": "fx-src-1",
+      "checked_on": "2026-09-30",
+      "note": "Overheads are added on direct cost.",
+      "applicability": "All work in the bill.",
+      "condition": "Direct cost only, never compounded."
+    },
+    {
+      "key": "fx_profit_rate",
+      "value": 0.05,
+      "unit": "fraction",
+      "status": "case_assumption",
+      "source": "fx-src-1",
+      "checked_on": "2026-09-30",
+      "note": "Profit is added on direct cost, not on direct cost plus overheads.",
+      "text": "Profit is five per cent of direct cost."
+    },
+    {
+      "key": "fx_retention_rate",
+      "value": 5,
+      "unit": "percent",
+      "status": "case_assumption",
+      "source": "fx-src-1",
+      "checked_on": "2026-09-30",
+      "note": "Retention is held on the gross valuation.",
+      "as_of": "2026-09-30",
+      "effective_from": "2026-10-01",
+      "review_by": "2027-09-30",
+      "source_note": "Invented for the fixture."
+    }
+  ],
+  "status_vocabulary": {"case_assumption": "Invented for this course", "fixture": "Test data only"},
+  "seed": {
+    "project": {
+      "stage": "on_enrol",
+      "name": "Quillmere Depot",
+      "country": "GB",
+      "currency": "GBP",
+      "region": "GB-ENG",
+      "location": "Quillmere, a fictional town",
+      "description": "Single-storey storage depot, invented for the trainer fixture.",
+      "classification_standard": "nrm",
+      "regional_pack": "gb"
+    },
+    "parties": [
+      {"name": "Fennick Lane Builders", "role": "contractor", "note": "The learner's firm."},
+      {"name": "Quillmere Storage Trust", "role": "client", "note": "Invented client."}
+    ],
+    "users": [
+      {"role": "learner", "grant": "owner", "note": "The learner owns the seeded project."}
+    ],
+    "boq": {
+      "stage": "on_unlock(1)",
+      "name": "Quillmere Depot main bill",
+      "note": "Position 01.002 is seeded without a rate; the learner prices it.",
+      "sections": [
+        {"ordinal": "01", "title": "Building works", "positions": ["01.001", "01.002", "01.003"]}
+      ],
+      "positions": [
+        {"code": "01.001", "section": "01", "description": "Strip foundation concrete", "unit": "m3", "qty": 42, "rate": 118.50, "qty_ledger_key": "fx_found_qty", "answer_rate_key": "fx_found_rate", "answer_amount_key": "fx_found_amount"},
+        {"code": "01.002", "section": "01", "description": "Blockwork walls", "unit": "m2", "qty": 310, "rate": null, "qty_ledger_key": "fx_block_qty", "answer_rate_key": "fx_blockwork_rate", "answer_amount_key": "fx_block_amount"},
+        {"code": "01.003", "section": "01", "description": "Roof coverings", "unit": "m2", "qty": 180, "rate": 61.75, "qty_ledger_key": "fx_roof_qty", "answer_rate_key": "fx_roof_rate", "answer_amount_key": "fx_roof_amount"}
+      ],
+      "markups": [],
+      "direct_cost_before_t1": {"value": 16092.00, "derivation": "4977.00 + 0.00 + 11115.00"},
+      "direct_cost_after_t1": {"value": 30414.00, "ledger_key": "fx_direct_cost"}
+    },
+    "surety_bond_row": {
+      "stage": "on_unlock(2)",
+      "name": "Performance bond",
+      "markup_type": "banded",
+      "apply_to": "cumulative",
+      "category": "bond",
+      "sort_order": 100,
+      "unit": "percent",
+      "metadata": {"bands": [{"up_to": 100000, "percentage": 1.2}, {"up_to": null, "percentage": 0.9}]}
+    },
+    "bid_package": {
+      "stage": "on_unlock(3)",
+      "module": "bid_management",
+      "title": "Roof coverings and flashings",
+      "currency": "GBP",
+      "code_note": "The seeder suffixes the code per learner; codes are unique across the database.",
+      "invitation_note": "Three invented roofing firms are invited.",
+      "status_at_start": "draft",
+      "budget": {"value": 11500.00, "ledger_key": "fx_roof_budget"},
+      "scope_lines": [
+        {"code": "F01", "description": "Roof covering", "unit": "m2", "qty": 180, "qty_ledger_key": "fx_roof_qty", "mandatory": true},
+        {"code": "F02", "description": "Lead-free flashings", "unit": "m", "qty": 64, "qty_ledger_key": "fx_flash_qty", "mandatory": true}
+      ],
+      "bids": [
+        {
+          "bidder": "Alderby Roofing",
+          "recorded_by": "seed",
+          "total": 10980.00,
+          "total_ledger_key": "fx_alderby_total",
+          "lines": [
+            {"code": "F01", "rate": 61.00, "rate_ledger_key": "fx_alderby_f01_rate", "amount": 10980.00, "note": "Priced."},
+            {"code": "F02", "rate": null, "rate_ledger_key": "fx_alderby_f02_rate", "amount": null, "note": "Left blank: the gap the learner must normalise."}
+          ]
+        },
+        {
+          "bidder": "Brackenfold Roofs",
+          "recorded_by": "seed",
+          "total": 11250.00,
+          "total_ledger_key": "fx_brackenfold_total",
+          "lines": [
+            {"code": "F01", "rate": 58.50, "rate_ledger_key": "fx_brack_f01_rate", "amount": 10530.00, "note": "Priced."},
+            {"code": "F02", "rate": 11.25, "rate_ledger_key": "fx_brack_f02_rate", "amount": 720.00, "note": "Priced."}
+          ]
+        },
+        {
+          "bidder": "Corrow and Sons",
+          "recorded_by": "seed",
+          "total": 11870.00,
+          "total_ledger_key": "fx_corrow_total",
+          "lines": [
+            {"code": "F01", "rate": 61.50, "rate_ledger_key": "fx_corrow_f01_rate", "amount": 11070.00, "note": "Priced."},
+            {"code": "F02", "rate": 12.50, "rate_ledger_key": "fx_corrow_f02_rate", "amount": 800.00, "note": "Highest flashing rate received."}
+          ]
+        }
+      ]
+    },
+    "contract": {
+      "stage": "on_unlock(4)",
+      "title": "Quillmere Depot building contract",
+      "counterparty": "Quillmere Storage Trust",
+      "start_date": "2026-10-01",
+      "status": "draft",
+      "value": {"value": 34502.82, "ledger_key": "fx_contract_sum"},
+      "retention_percent": {"value": 5, "unit": "percent", "rate_key": "fx_retention_rate"},
+      "vat_rate_percent": 20,
+      "schedule_of_values": [
+        {"code": "C01", "description": "Substructure", "amount": 4977.00, "ledger_key": "fx_sov_c01", "classification": {"nrm": "1.1"}, "progress_link": "boq:01.001"},
+        {"code": "C02", "description": "External walls", "amount": 14322.00, "ledger_key": "fx_sov_c02", "classification": {"nrm": "2.5"}, "progress_link": "boq:01.002"},
+        {"code": "C03", "description": "Roof", "amount": 11250.00, "ledger_key": "fx_sov_c03", "classification": {"nrm": "2.3"}, "progress_link": "csa"},
+        {"code": "C04", "description": "Overheads and profit", "amount": 3953.82, "ledger_key": "fx_sov_c04", "classification": {"nrm": "0.5"}, "progress_link": "none"}
+      ],
+      "schedule_total": {"value": 34502.82, "derivation": "4977.00 + 14322.00 + 11250.00 + 3953.82"}
+    },
+    "progress_readings_valuation_1": {
+      "stage": "on_unlock(4)",
+      "period": "2026-10",
+      "readings": [
+        {"line": "C01", "percent_complete": 100, "value": 4977.00, "ledger_key": "fx_v1_c01"},
+        {"line": "C02", "percent_complete": 50, "value": 7161.00, "ledger_key": "fx_v1_c02"},
+        {"line": "C03", "percent_complete": 0, "value": 0.00, "ledger_key": "fx_v1_c03"}
+      ]
+    },
+    "variation_01": {
+      "stage": "on_unlock(5)",
+      "title": "Rooflights instead of part of the roof covering",
+      "instruction_ref": "FX-INS-01",
+      "from": "Quillmere Storage Trust",
+      "erp_request": {"title": "Rooflights instead of part of the roof covering", "contract_clause_ref": "FX clause 5.2"},
+      "scope": [
+        {"code": "V01", "description": "Add rooflights", "unit": "nr", "qty": 4, "qty_ledger_key": "fx_rl_qty", "rate": 385.00, "rate_ledger_key": "fx_rl_rate"},
+        {"code": "V02", "description": "Omit roof covering", "unit": "m2", "qty": -12, "qty_ledger_key": "fx_omit_qty", "rate": 62.50, "rate_ledger_key": "fx_omit_rate"}
+      ]
+    },
+    "subcontract": {"note": "Opaque block, kept only to cover the union of keys."},
+    "operation": {"note": "Opaque block, kept only to cover the union of keys."}
+  },
+  "tasks": [
+    {
+      "id": "t1-direct-cost",
+      "n": 1,
+      "title": "Price the blockwork and read the direct cost",
+      "role": "Estimator, Fennick Lane Builders",
+      "module": "boq",
+      "opens": "boq.markups_panel",
+      "opens_label": "Markups",
+      "estimated_minutes": 15,
+      "brief": "The depot bill came back with one rate missing. Price it from the supplier quote and confirm the direct cost.",
+      "steps": [
+        "Open the main bill.",
+        "Enter 46.20 as the rate of position 01.002.",
+        "Read the direct cost in the footer and type it in the panel."
+      ],
+      "given": [
+        {"name": "Blockwork rate from the supplier quote", "value": 46.20, "ledger_key": "fx_blockwork_rate"}
+      ],
+      "answer_key": [
+        {"name": "blockwork_rate", "ledger_key": "fx_blockwork_rate", "value": 46.20, "tolerance": "0.005", "graded_by": "probe:1"},
+        {"name": "direct_cost", "ledger_key": "fx_direct_cost", "value": 30414.00, "tolerance": "0.01", "graded_by": "both"}
+      ],
+      "readback": [
+        {"what": "Direct cost in the bill footer", "expects": ["fx_direct_cost"], "probe": {"type": "boq.cost_breakdown", "args": {"boq_ref": "boq.main", "field": "direct_cost"}}},
+        {"what": "Rate of position 01.002", "expects": ["fx_blockwork_rate"], "probe": {"type": "boq.position", "args": {"boq_ref": "boq.main", "ordinal": "01.002", "field": "unit_rate"}}}
+      ],
+      "checks": [
+        {"id": "t1-numbers", "kind": "numbers", "prompt": "Type the direct cost the bill shows now.", "expects": ["direct_cost"]},
+        {"id": "t1-trace", "kind": "trace", "prompt": "Where does the direct cost come from?", "expects": []},
+        {"id": "t1-explain", "kind": "explain", "prompt": "Why was the direct cost too low before you priced 01.002?", "expects": []}
+      ],
+      "trace_question": {
+        "prompt": "Where does the direct cost come from?",
+        "options": [
+          {"text": "The sum of quantity times rate over every position.", "correct": true, "feedback": "Yes: 4977.00 + 14322.00 + 11115.00."},
+          {"text": "The supplier quote total.", "correct": false, "feedback": "The quote gives one rate, not the bill total."},
+          {"text": "The client budget.", "correct": false, "feedback": "The budget is a target, not a sum of the bill."}
+        ],
+        "derivations": [
+          {"name": "fx_direct_cost", "value": 30414.00, "derivation": "4977.00 + 14322.00 + 11115.00"}
+        ]
+      },
+      "explain_question": {
+        "prompt": "Why was the direct cost too low before you priced 01.002?",
+        "options": [
+          {"text": "Position 01.002 counted as zero.", "correct": true, "feedback": "Right: 310 m2 at no rate adds nothing."},
+          {"text": "The foundations were measured short.", "correct": false, "feedback": "The quantities were seeded correct."},
+          {"text": "Overheads were missing.", "correct": false, "feedback": "Overheads are not part of direct cost."}
+        ]
+      },
+      "diagnoses": [
+        {"id": "t1-rate-left-zero", "applies_to": "direct_cost", "kind": "error", "provenance": "script", "when": "Position 01.002 still has no rate.", "wrong_value": 16092.00, "derivation": "4977.00 + 0.00 + 11115.00", "message": "The blockwork position still counts as zero.", "related": [{"name": "fx_block_amount", "value": 14322.00, "derivation": "310 x 46.20"}]},
+        {"id": "t1-decimal-slip", "applies_to": "direct_cost", "kind": "error", "provenance": "derived-likely", "when": "The rate was typed as 4.62.", "wrong_value": 17524.20, "derivation": "4977.00 + 310 x 4.62 + 11115.00", "message": "The blockwork rate lost a digit: 4.62 instead of 46.20.", "related": []}
+      ],
+      "hints": [
+        "The missing rate is in the given values.",
+        "The footer shows direct cost before any markup."
+      ],
+      "panel_notes": [
+        {"id": "pn1", "shown": "always", "text": "Direct cost excludes every markup."}
+      ],
+      "video": {"episode": "FX01", "scenes": ["pricing a position"]}
+    },
+    {
+      "id": "t2-markups",
+      "n": 2,
+      "title": "Add overheads and profit",
+      "role": "Estimator, Fennick Lane Builders",
+      "module": "boq",
+      "opens": "bid_management",
+      "opens_label": "Bid Management",
+      "estimated_minutes": 20,
+      "brief": "Add the overheads and profit the firm agreed for this job, both on direct cost.",
+      "steps": [
+        "Open the markups panel of the main bill.",
+        "Add overheads at 8 per cent on direct cost.",
+        "Add profit at 5 per cent on direct cost.",
+        "Type the overheads amount; the checker reads the grand total from the bill."
+      ],
+      "given": [
+        {"name": "Overheads rate", "value": 0.08, "ledger_key": "fx_overheads_rate"},
+        {"name": "Profit rate", "value": 0.05, "ledger_key": "fx_profit_rate"}
+      ],
+      "answer_key": [
+        {"name": "overheads_amount", "ledger_key": "fx_overheads_amount", "value": 2433.12, "tolerance": "0.01", "graded_by": "panel"},
+        {"name": "grand_total", "ledger_key": "fx_grand_total", "value": 34367.82, "tolerance": "0.01", "graded_by": "probe:0"},
+        {"name": "profit_rate", "ledger_key": "fx_profit_rate", "value": 0.05, "tolerance": "0.0001", "graded_by": "probe:1", "unit": "fraction"}
+      ],
+      "optional_answer_key": [
+        {"name": "profit_amount", "ledger_key": "fx_profit_amount", "value": 1520.70, "tolerance": "0.01"}
+      ],
+      "readback": [
+        {"what": "Grand total of the main bill", "expects": ["fx_grand_total"], "probe": {"type": "boq.cost_breakdown", "args": {"boq_ref": "boq.main", "field": "grand_total"}}},
+        {"what": "Percentage of the profit markup", "expects": ["fx_profit_rate"], "probe": {"type": "boq.markup", "args": {"boq_ref": "boq.main", "name": "Profit", "field": "percentage"}, "unit": "percent"}}
+      ],
+      "checks": [
+        {"id": "t2-numbers", "kind": "numbers", "prompt": "Type the overheads amount.", "expects": ["overheads_amount"]},
+        {"id": "t2-trace", "kind": "trace", "prompt": "What is profit calculated on?", "expects": []},
+        {"id": "t2-explain", "kind": "explain", "prompt": "Why does compounding profit change the total?", "expects": []}
+      ],
+      "trace_question": {
+        "prompt": "What is profit calculated on?",
+        "options": [
+          {"text": "Direct cost only.", "correct": true, "feedback": "Yes: 30414.00 x 5% = 1520.70."},
+          {"text": "Direct cost plus overheads.", "correct": false, "feedback": "That compounds the two markups, which this job does not do."},
+          {"text": "The grand total.", "correct": false, "feedback": "Profit on the grand total would include profit on itself."}
+        ],
+        "derivations": [
+          {"name": "fx_profit_amount", "value": 1520.70, "derivation": "30414.00 x 0.05"}
+        ]
+      },
+      "explain_question": {
+        "prompt": "Why does compounding profit change the total?",
+        "options": [
+          {"text": "Profit would also be charged on the overheads.", "correct": true, "feedback": "Right: 5% of 2433.12 is the 121.66 difference."},
+          {"text": "The ERP rounds each markup.", "correct": false, "feedback": "Rounding moves a few pence, not 121.66."},
+          {"text": "Overheads are counted twice.", "correct": false, "feedback": "Overheads appear once either way."}
+        ]
+      },
+      "diagnoses": [
+        {"id": "t2-profit-compounded", "applies_to": "grand_total", "kind": "error", "provenance": "script", "when": "Profit applied to direct cost plus overheads.", "wrong_value": 34489.48, "derivation": "30414.00 + 2433.12 + 32847.12 x 0.05", "message": "Profit was charged on the overheads as well.", "related": [{"name": "fx_profit_amount", "value": 1520.70, "derivation": "30414.00 x 0.05"}]},
+        {"id": "t2-overheads-missing", "applies_to": "grand_total", "kind": "error", "provenance": "script", "when": "Only the profit markup was added.", "wrong_value": 31934.70, "derivation": "30414.00 + 1520.70", "message": "The overheads markup is missing.", "related": [{"name": "fx_overheads_amount", "value": 2433.12, "derivation": "30414.00 x 0.08"}]},
+        {"id": "t2-rounding-convention", "applies_to": "grand_total", "kind": "convention", "provenance": "founder", "when": "The ERP rounds each markup line to two places before summing.", "derivation": "Each markup line is rounded, then summed.", "message": "The ERP rounds each markup line; your own sum may differ by a penny.", "related": []}
+      ],
+      "hints": [
+        "Both markups apply to direct cost.",
+        "Overheads are 30414.00 x 0.08."
+      ],
+      "video": {"episode": "FX02", "scenes": []}
+    },
+    {
+      "id": "t3-tender",
+      "n": 3,
+      "title": "Level the roofing bids and award",
+      "role": "Estimator, Fennick Lane Builders",
+      "module": "bid_management",
+      "opens": "contracts.progress_claims",
+      "opens_label": "Progress claims",
+      "estimated_minutes": 25,
+      "brief": "Three roofers bid. One left the flashings blank. Normalise the gap, find the lowest bid and award it.",
+      "steps": [
+        "Open the roofing package and open the bids.",
+        "Price Alderby's blank flashing line at the highest flashing rate received.",
+        "Level the bids and award the lowest normalised bid."
+      ],
+      "given": [
+        {"name": "Flashing length", "value": 64, "ledger_key": "fx_flash_qty"}
+      ],
+      "answer_key": [
+        {"name": "alderby_normalized", "ledger_key": "fx_alderby_norm", "value": 11780.00, "tolerance": "0.01", "graded_by": "panel"},
+        {"name": "lowest_normalized", "ledger_key": "fx_lowest_norm", "value": 11250.00, "tolerance": "0.01", "graded_by": "both"},
+        {"name": "award_amount", "ledger_key": "fx_award_amount", "value": 11250.00, "tolerance": "0.01", "graded_by": "probe:1"}
+      ],
+      "readback": [
+        {"what": "Normalised total of Brackenfold Roofs", "expects": ["fx_lowest_norm"], "probe": {"type": "bid.leveling", "args": {"package_ref": "package.roof", "bidder_name": "Brackenfold Roofs", "field": "normalized_total"}}},
+        {"what": "Awarded amount", "expects": ["fx_award_amount"], "probe": {"type": "bid.award", "args": {"package_ref": "package.roof", "field": "awarded_amount"}}},
+        {"what": "Awarded bidder", "expects": [], "probe": {"type": "bid.award", "args": {"package_ref": "package.roof", "field": "awarded_bidder_name"}, "expect": "Brackenfold Roofs"}}
+      ],
+      "checks": [
+        {"id": "t3-numbers", "kind": "numbers", "prompt": "Type Alderby's normalised total and the lowest normalised bid.", "expects": ["alderby_normalized", "lowest_normalized"]},
+        {"id": "t3-trace", "kind": "trace", "prompt": "Why is Alderby not the lowest bid?", "expects": []},
+        {"id": "t3-explain", "kind": "explain", "prompt": "What does normalising a blank line protect against?", "expects": []}
+      ],
+      "trace_question": {
+        "prompt": "Why is Alderby not the lowest bid?",
+        "options": [
+          {"text": "Its blank flashings cost 800.00 once priced.", "correct": true, "feedback": "Yes: 10980.00 + 64 x 12.50 = 11780.00."},
+          {"text": "Its roof covering rate is the highest.", "correct": false, "feedback": "Corrow's 61.50 is higher than Alderby's 61.00."},
+          {"text": "It was recorded after the bids were opened.", "correct": false, "feedback": "All three bids were recorded before opening."}
+        ],
+        "derivations": [
+          {"name": "fx_alderby_norm", "value": 11780.00, "derivation": "10980.00 + 64 x 12.50"}
+        ]
+      },
+      "explain_question": {
+        "prompt": "What does normalising a blank line protect against?",
+        "options": [
+          {"text": "Awarding a bid that only looks cheap because it left work out.", "correct": true, "feedback": "Right: the gap would come back as a variation."},
+          {"text": "Rounding differences between bidders.", "correct": false, "feedback": "Normalising prices missing scope, not rounding."},
+          {"text": "Late bids.", "correct": false, "feedback": "Lateness is a validity question, not a pricing one."}
+        ]
+      },
+      "diagnoses": [
+        {"id": "t3-raw-lowest", "applies_to": "lowest_normalized", "kind": "error", "provenance": "script", "when": "The raw totals were compared.", "wrong_value": 10980.00, "derivation": "Alderby raw total", "message": "That is Alderby's raw total, with the flashings left out.", "related": [{"name": "fx_alderby_norm", "value": 11780.00, "derivation": "10980.00 + 64 x 12.50"}]},
+        {"id": "t3-budget-allowance", "applies_to": "alderby_normalized", "kind": "error", "provenance": "derived-likely", "when": "The gap was priced at a lump allowance of 620.00.", "wrong_value": 11600.00, "derivation": "10980.00 + 620.00", "message": "The gap was priced at an allowance, not at the highest flashing rate received.", "related": []}
+      ],
+      "hints": [
+        "The highest flashing rate received is Corrow's.",
+        "Level after you price the gap, then award."
+      ],
+      "erp_fit": {"screen": "Bid leveling", "tables": {"oe_bid_management_leveling": "normalised totals"}}
+    },
+    {
+      "id": "t4-valuation",
+      "n": 4,
+      "title": "Value the first claim",
+      "role": "Quantity surveyor, Fennick Lane Builders",
+      "module": "contracts",
+      "opens": "variations",
+      "opens_label": "Variations",
+      "estimated_minutes": 25,
+      "brief": "The first month's progress is recorded. Build the claim from progress and check the retention and the net due.",
+      "steps": [
+        "Open the contract and create claim 1 for October 2026.",
+        "Populate it from progress.",
+        "Read the gross valuation, the retention and the net due."
+      ],
+      "given": [
+        {"name": "Retention rate", "value": 5, "ledger_key": "fx_retention_rate"}
+      ],
+      "answer_key": [
+        {"name": "gross_valuation", "ledger_key": "fx_v1_gross", "value": 12138.00, "tolerance": "0.01", "graded_by": "probe:0"},
+        {"name": "retention_amount", "ledger_key": "fx_v1_retention", "value": 606.90, "tolerance": "0.01", "graded_by": "both"},
+        {"name": "net_due", "ledger_key": "fx_v1_net", "value": 11531.10, "tolerance": "0.01", "graded_by": "probe:2"}
+      ],
+      "readback": [
+        {"what": "Gross valuation of the latest claim", "expects": ["fx_v1_gross"], "probe": {"type": "claim.field", "args": {"contract_ref": "contract.main", "claim_selector": "latest", "field": "gross_amount"}}},
+        {"what": "Retention on the latest claim", "expects": ["fx_v1_retention"], "probe": {"type": "claim.field", "args": {"contract_ref": "contract.main", "claim_selector": "latest", "field": "retention_amount"}}},
+        {"what": "Net due on the latest claim", "expects": ["fx_v1_net"], "probe": {"type": "claim.field", "args": {"contract_ref": "contract.main", "claim_selector": "latest", "field": "net_due"}}},
+        {"what": "Retention rate on the contract", "expects": [], "table": "oe_contracts_contract", "field": "retention_percent", "probe": {"type": "contract.field", "args": {"contract_ref": "contract.main", "field": "retention_percent"}, "expect": 5, "unit": "percent"}}
+      ],
+      "checks": [
+        {"id": "t4-numbers", "kind": "numbers", "prompt": "Type the retention on claim 1.", "expects": ["retention_amount"]},
+        {"id": "t4-trace", "kind": "trace", "prompt": "Which lines make up the gross valuation?", "expects": []},
+        {"id": "t4-explain", "kind": "explain", "prompt": "Why is retention held at all?", "expects": []}
+      ],
+      "trace_question": {
+        "prompt": "Which lines make up the gross valuation?",
+        "options": [
+          {"text": "C01 at 100 per cent and C02 at 50 per cent.", "correct": true, "feedback": "Yes: 4977.00 + 7161.00 = 12138.00."},
+          {"text": "Every line at 50 per cent.", "correct": false, "feedback": "Each line has its own reading."},
+          {"text": "C01, C02 and C04.", "correct": false, "feedback": "C04 is not linked to progress."}
+        ],
+        "derivations": [
+          {"name": "fx_v1_gross", "value": 12138.00, "derivation": "4977.00 + 7161.00 + 0.00"}
+        ]
+      },
+      "explain_question": {
+        "prompt": "Why is retention held at all?",
+        "options": [
+          {"text": "It secures the client against defects found later.", "correct": true, "feedback": "Right: it is released at completion and after the defects period."},
+          {"text": "It pays the contractor's overheads.", "correct": false, "feedback": "Retention is withheld from the contractor, not paid to it."},
+          {"text": "It is VAT.", "correct": false, "feedback": "VAT is charged on the invoice, separately."}
+        ]
+      },
+      "diagnoses": [
+        {"id": "t4-no-retention", "applies_to": "net_due", "kind": "error", "provenance": "script", "when": "Retention was not deducted.", "wrong_value": 12138.00, "derivation": "Gross valuation, nothing deducted", "message": "The net due still includes the retention.", "related": [{"name": "fx_v1_retention", "value": 606.90, "derivation": "12138.00 x 5%"}]},
+        {"id": "t4-wrong-rate", "applies_to": "retention_amount", "kind": "error", "provenance": "derived-likely", "when": "Retention was taken at 3 per cent.", "wrong_value": 364.14, "derivation": "12138.00 x 3%", "message": "This contract holds 5 per cent, not 3.", "related": []}
+      ],
+      "hints": [
+        "Only lines with a progress reading enter the valuation.",
+        "Retention is 5 per cent of the gross valuation."
+      ],
+      "dc4_step": {"what": "Opaque block, kept only to cover the union of keys."}
+    },
+    {
+      "id": "t5-variation",
+      "n": 5,
+      "title": "Value the rooflight variation",
+      "role": "Quantity surveyor, Fennick Lane Builders",
+      "module": "variations",
+      "opens": "badge:fx-quillmere-1",
+      "opens_label": "Course badge",
+      "estimated_minutes": 25,
+      "brief": "The client asked for four rooflights in place of part of the roof covering. Value the change and carry it to the contract sum.",
+      "steps": [
+        "Open the variation request the seeder created.",
+        "Value the added rooflights and the omitted covering.",
+        "Approve it, issue the order and complete it."
+      ],
+      "given": [
+        {"name": "Rooflight rate", "value": 385.00, "ledger_key": "fx_rl_rate"},
+        {"name": "Omitted covering rate", "value": 62.50, "ledger_key": "fx_omit_rate"}
+      ],
+      "answer_key": [
+        {"name": "vr_net", "ledger_key": "fx_vr_net", "value": 790.00, "tolerance": "0.01", "graded_by": "both"},
+        {"name": "new_contract_sum", "ledger_key": "fx_new_contract_sum", "value": 35292.82, "tolerance": "0.01", "graded_by": "probe:1"}
+      ],
+      "readback": [
+        {"what": "Agreed cost impact of the variation request", "expects": ["fx_vr_net"], "probe": {"type": "variation.request", "args": {"match": "seeded:vr.1", "field": "agreed_cost_impact"}}},
+        {"what": "Contract sum after the variation", "expects": ["fx_new_contract_sum"], "probe": {"type": "contract.field", "args": {"contract_ref": "contract.main", "field": "total_value"}}}
+      ],
+      "checks": [
+        {"id": "t5-numbers", "kind": "numbers", "prompt": "Type the net value of the variation.", "expects": ["vr_net"]},
+        {"id": "t5-trace", "kind": "trace", "prompt": "How is the net value made up?", "expects": []},
+        {"id": "t5-explain", "kind": "explain", "prompt": "Why must the contract sum move only once?", "expects": []}
+      ],
+      "trace_question": {
+        "prompt": "How is the net value made up?",
+        "options": [
+          {"text": "Rooflights added minus covering omitted.", "correct": true, "feedback": "Yes: 4 x 385.00 - 12 x 62.50 = 790.00."},
+          {"text": "Rooflights added only.", "correct": false, "feedback": "The omitted covering comes off."},
+          {"text": "Rooflights plus covering.", "correct": false, "feedback": "The covering is omitted, so it is deducted."}
+        ],
+        "derivations": [
+          {"name": "fx_vr_net", "value": 790.00, "derivation": "4 x 385.00 - 12 x 62.50"}
+        ]
+      },
+      "explain_question": {
+        "prompt": "Why must the contract sum move only once?",
+        "options": [
+          {"text": "Completing the order already adds the variation to the sum.", "correct": true, "feedback": "Right: adding it by hand as well counts it twice."},
+          {"text": "Variations never change the contract sum.", "correct": false, "feedback": "A completed variation does change it."},
+          {"text": "The sum moves when the request is drafted.", "correct": false, "feedback": "Drafting changes nothing; completion does."}
+        ]
+      },
+      "diagnoses": [
+        {"id": "t5-omission-ignored", "applies_to": "vr_net", "kind": "error", "provenance": "script", "when": "The omitted covering was not deducted.", "wrong_value": 1540.00, "derivation": "4 x 385.00", "message": "The omitted roof covering was not deducted.", "related": [{"name": "fx_omit_amount", "value": -750.00, "derivation": "-12 x 62.50"}]},
+        {"id": "t5-omission-added", "applies_to": "vr_net", "kind": "error", "provenance": "derived-likely", "when": "The omission was added instead of deducted.", "wrong_value": 2290.00, "derivation": "4 x 385.00 + 12 x 62.50", "message": "The omission was added instead of deducted.", "related": []},
+        {"id": "t5-sum-twice", "applies_to": "new_contract_sum", "kind": "error", "provenance": "script", "when": "The variation was added to the sum by hand after completing the order.", "wrong_value": 36082.82, "derivation": "34502.82 + 2 x 790.00", "message": "The variation reached the contract sum twice.", "related": [{"name": "fx_contract_sum", "value": 34502.82, "derivation": "Signed contract sum"}]}
+      ],
+      "hints": [
+        "Omissions are deducted at the rate in the instruction.",
+        "Complete the order; do not edit the contract sum by hand."
+      ],
+      "seeder": "The seeder creates the request in draft with no cost; the learner values it."
+    }
+  ],
+  "badge": {
+    "id": "fx-quillmere-1",
+    "title": "Quillmere Depot: bill to variation",
+    "awarded_when": "All five tasks pass."
+  },
+  "contract_choice_reason": "A plain lump-sum contract keeps the fixture small.",
+  "diagnosis_semantics": "A diagnosis matches only within its own field, within that field's tolerance.",
+  "jurisdiction": "Fictional",
+  "schema_additions_vs_uk": {"note": "Opaque block, kept only to cover the union of keys."}
+}
