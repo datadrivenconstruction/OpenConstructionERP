@@ -25,6 +25,7 @@ from typing import Any
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.academy_isolation import academy_mode_enabled, filter_users_to_project
 from app.core.events import event_bus
 from app.modules.notifications.models import (
     Notification,
@@ -35,6 +36,19 @@ from app.modules.notifications.repository import NotificationRepository
 
 logger = logging.getLogger(__name__)
 _logger_ev = logging.getLogger(__name__ + ".events")
+
+
+async def _outside_named_project(session: AsyncSession, user_id: uuid.UUID, project_id: object) -> bool:
+    """True when academy mode is on and ``user_id`` cannot open ``project_id``.
+
+    The academy backstop behind the per-module gates: a notification about a
+    project its recipient cannot open is a message from another learner's
+    course. Nothing is judged without a project id, and nothing at all with
+    the flag off. A failed membership lookup counts as outside (fail closed).
+    """
+    if not project_id or not academy_mode_enabled():
+        return False
+    return not await filter_users_to_project(session, str(project_id), [user_id])
 
 
 async def _safe_publish(name: str, data: dict, source_module: str = "oe_notifications") -> None:
@@ -66,9 +80,22 @@ class NotificationService:
         body_context: dict[str, Any] | None = None,
         action_url: str | None = None,
         metadata: dict[str, Any] | None = None,
-    ) -> Notification:
-        """Create a single notification for one user."""
+    ) -> Notification | None:
+        """Create a single notification for one user.
+
+        Returns ``None`` only in academy mode, when ``metadata.project_id``
+        names a project the recipient cannot open: the notification is dropped
+        with a log line instead of stored.
+        """
         uid = uuid.UUID(str(user_id)) if not isinstance(user_id, uuid.UUID) else user_id
+        if await _outside_named_project(self.session, uid, (metadata or {}).get("project_id")):
+            logger.warning(
+                "Academy isolation: dropped notification type=%s for user=%s outside project=%s",
+                notification_type,
+                uid,
+                (metadata or {}).get("project_id"),
+            )
+            return None
         notification = Notification(
             user_id=uid,
             notification_type=notification_type,
@@ -137,7 +164,8 @@ class NotificationService:
                 action_url=action_url,
                 metadata=metadata,
             )
-            notifications.append(n)
+            if n is not None:
+                notifications.append(n)
         logger.info(
             "Bulk notifications sent: type=%s count=%d title_key=%s",
             notification_type,
@@ -311,6 +339,21 @@ class NotificationService:
         uid = uuid.UUID(str(user_id)) if not isinstance(user_id, uuid.UUID) else user_id
 
         if channel == "none":
+            return "suppressed"
+
+        # Academy backstop: the channel dispatch below never reaches ``create``,
+        # so the project the payload names is judged here as well.
+        body = payload if isinstance(payload, dict) else {}
+        meta = body.get("metadata")
+        named_project = body.get("project_id") or (meta.get("project_id") if isinstance(meta, dict) else None)
+        if await _outside_named_project(self.session, uid, named_project):
+            logger.warning(
+                "Academy isolation: suppressed %s dispatch of %s for user=%s outside project=%s",
+                channel,
+                event_type,
+                uid,
+                named_project,
+            )
             return "suppressed"
 
         pref = await self.get_preference(uid, event_type, channel)
