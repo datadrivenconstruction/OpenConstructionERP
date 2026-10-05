@@ -68,6 +68,10 @@ vi.mock('./ContractAnalyticsPanels', () => ({
   ContractAnalyticsPanels: () => <div data-testid="analytics-panels" />,
 }));
 
+vi.mock('./PaymentPlanPanel', () => ({
+  PaymentPlanPanel: () => <div data-testid="payment-plan-panel" />,
+}));
+
 vi.mock('./ComplianceGate', () => ({
   ComplianceGate: () => <div data-testid="compliance-gate" />,
 }));

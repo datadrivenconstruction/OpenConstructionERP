@@ -42,6 +42,9 @@ export interface Project {
   address?: ProjectAddress | null;
   /** ISO 3166-1 alpha-2 country code (drives the AIA G702/G703 gate). */
   country_code?: string | null;
+  /** ISO 3166-2 state or province (e.g. US-CA). Rules set below the country,
+   *  such as a cap on a home-improvement deposit, read it. */
+  subdivision_code?: string | null;
   /**
    * True when this project may use AIA G702/G703 payment applications
    * (US/CA/AU only). Computed server-side from the project country; the
@@ -78,6 +81,8 @@ export interface CreateProjectData {
   address?: ProjectAddress | null;
   /** ISO 3166-1 alpha-2 country code resolved from address or manual input. */
   country_code?: string | null;
+  /** ISO 3166-2 state or province, e.g. US-CA; null clears it. */
+  subdivision_code?: string | null;
   /** Phase-12 expansion fields — all optional on the backend schema. */
   project_code?: string | null;
   project_type?: string | null;

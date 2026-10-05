@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 //
 // ContractAnalyticsPanels - the "Analytics & close-out" grouping on the
-// contract detail drawer. It surfaces seven read-only backend endpoints that had
+// contract detail drawer. It surfaces six read-only backend endpoints that had
 // no frontend consumer:
 //
 //   • GET /contracts/{id}/sov-status              → SoV billed/earned/paid table
@@ -11,7 +11,9 @@
 //   • GET /contracts/{id}/final-account-checklist → close-out readiness list
 //   • GET /contracts/{id}/gainshare-preview       → GMP gain/pain split preview
 //   • GET /contracts/{id}/security-coverage       → bonds/guarantees coverage
-//   • GET /contracts/{id}/milestone-schedule      → payment milestone schedule
+//
+// The payment milestone schedule used to be the seventh. It became the
+// editable PaymentPlanPanel, which the drawer mounts above this grouping.
 //
 // Each panel owns its React Query (keyed by contract id), renders loading /
 // error / empty states consistent with the rest of the page, degrades a 403 to
@@ -43,7 +45,6 @@ import {
   Info,
   Scale,
   Landmark,
-  Flag,
   Coins,
 } from 'lucide-react';
 
@@ -58,11 +59,9 @@ import {
   getFinalAccountChecklist,
   getGainsharePreview,
   getSecurityCoverage,
-  getMilestoneSchedule,
   listContractLines,
   type CompletenessFinding,
   type FinalAccountCheckItem,
-  type MilestoneScheduleItem,
 } from './api';
 import { fmtPercent } from '@/shared/lib/formatters';
 
@@ -1177,197 +1176,11 @@ function SecurityCoveragePanel({
   );
 }
 
-/* ── 7 · Milestone payment schedule ───────────────────────────────────── */
-
-/** English fallback labels for the stable milestone-status enum. */
-const MILESTONE_STATUS_LABELS: Record<string, string> = {
-  pending: 'Pending',
-  reached: 'Reached',
-  invoiced: 'Invoiced',
-  paid: 'Paid',
-};
-
-function milestoneStatusLabel(t: TFunction, status: string): string {
-  return t(`contracts.milestone_status_${status}`, {
-    defaultValue: MILESTONE_STATUS_LABELS[status] ?? humanize(status),
-  });
-}
-
-function milestoneStatusTone(status: string): BadgeTone {
-  switch (status) {
-    case 'paid':
-      return 'success';
-    case 'invoiced':
-    case 'reached':
-      return 'blue';
-    default:
-      return 'neutral';
-  }
-}
-
-function MilestoneRow({
-  m,
-  currency,
-  label,
-  tone,
-}: {
-  m: MilestoneScheduleItem;
-  currency: string;
-  label: string;
-  tone: BadgeTone;
-}) {
-  return (
-    <tr className="border-t border-border-light">
-      <td className="py-1 pr-2">
-        {m.code && (
-          <span className="mr-1 font-mono text-2xs text-content-tertiary">
-            {m.code}
-          </span>
-        )}
-        <span className="text-content-primary">{m.name}</span>
-      </td>
-      <td className="py-1 pr-2 text-content-secondary">
-        {m.planned_date ? <DateDisplay value={m.planned_date} /> : '-'}
-      </td>
-      <td className="py-1 pr-2 text-2xs text-content-tertiary">
-        {humanize(m.trigger)}
-      </td>
-      <td className="py-1 pr-2">
-        <Badge variant={tone}>{label}</Badge>
-      </td>
-      <td className="py-1 text-right tabular-nums text-content-secondary">
-        <MoneyDisplay amount={toNum(m.value)} currency={currency || undefined} />
-      </td>
-    </tr>
-  );
-}
-
-function MilestoneSchedulePanel({
-  contractId,
-  currency,
-}: {
-  contractId: string;
-  currency: string;
-}) {
-  const { t } = useTranslation();
-  const q = useQuery({
-    queryKey: ['contracts', 'milestone-schedule', contractId],
-    queryFn: () => getMilestoneSchedule(contractId),
-    retry: false,
-  });
-
-  const fallback = fallbackNode(
-    q,
-    t('contracts.milestone_schedule_loading', {
-      defaultValue: 'Loading milestone schedule...',
-    }),
-  );
-
-  let body: ReactNode = fallback;
-  let totalBadge: ReactNode = null;
-  if (!fallback && q.data) {
-    const d = q.data;
-    const cur = d.currency || currency;
-    if (d.count === 0) {
-      body = (
-        <PanelEmpty
-          label={t('contracts.milestone_schedule_empty', {
-            defaultValue: 'No payment milestones defined for this contract.',
-          })}
-        />
-      );
-    } else {
-      totalBadge = (
-        <span className="text-2xs uppercase tracking-wide text-content-tertiary">
-          {t('contracts.milestone_schedule_total', {
-            defaultValue: 'Total scheduled',
-          })}
-          :{' '}
-          <span className="font-medium text-content-secondary">
-            <MoneyDisplay
-              amount={toNum(d.scheduled_value)}
-              currency={cur || undefined}
-            />
-          </span>
-        </span>
-      );
-      // Order by planned date (unscheduled milestones last), then by code.
-      const rows = [...d.milestones].sort((a, b) => {
-        if (a.planned_date && b.planned_date) {
-          return a.planned_date.localeCompare(b.planned_date);
-        }
-        if (a.planned_date) return -1;
-        if (b.planned_date) return 1;
-        return a.code.localeCompare(b.code);
-      });
-      body = (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="text-2xs uppercase tracking-wide text-content-tertiary">
-              <tr>
-                <th className="py-1 text-left">
-                  {t('contracts.milestone_col_milestone', {
-                    defaultValue: 'Milestone',
-                  })}
-                </th>
-                <th className="py-1 text-left">
-                  {t('contracts.milestone_col_date', {
-                    defaultValue: 'Planned date',
-                  })}
-                </th>
-                <th className="py-1 text-left">
-                  {t('contracts.milestone_col_trigger', {
-                    defaultValue: 'Trigger',
-                  })}
-                </th>
-                <th className="py-1 text-left">
-                  {t('contracts.milestone_col_status', {
-                    defaultValue: 'Status',
-                  })}
-                </th>
-                <th className="py-1 text-right">
-                  {t('contracts.milestone_col_value', {
-                    defaultValue: 'Value',
-                  })}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((m) => (
-                <MilestoneRow
-                  key={m.id}
-                  m={m}
-                  currency={cur}
-                  label={milestoneStatusLabel(t, m.status)}
-                  tone={milestoneStatusTone(m.status)}
-                />
-              ))}
-            </tbody>
-          </table>
-        </div>
-      );
-    }
-  }
-
-  return (
-    <Card padding="sm">
-      <PanelHeader
-        icon={<Flag size={14} className="text-oe-blue" />}
-        title={t('contracts.milestone_schedule_title', {
-          defaultValue: 'Milestone schedule',
-        })}
-        right={totalBadge ?? undefined}
-      />
-      {body}
-    </Card>
-  );
-}
-
 /* ── Grouping ─────────────────────────────────────────────────────────── */
 
 /**
  * "Analytics & close-out" grouping for the contract detail drawer. Renders the
- * seven analytics panels as stacked cards, each with its own query so a slow or
+ * six analytics panels as stacked cards, each with its own query so a slow or
  * forbidden endpoint never blocks the others.
  */
 export function ContractAnalyticsPanels({
@@ -1403,7 +1216,6 @@ export function ContractAnalyticsPanels({
       <FinalAccountChecklistPanel contractId={contractId} />
       <GainsharePanel contractId={contractId} currency={currency} />
       <SecurityCoveragePanel contractId={contractId} currency={currency} />
-      <MilestoneSchedulePanel contractId={contractId} currency={currency} />
     </section>
   );
 }

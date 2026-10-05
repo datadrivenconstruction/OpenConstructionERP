@@ -341,6 +341,17 @@ export class PortalUnauthorizedError extends Error {
   }
 }
 
+/** A refused portal request, carrying its HTTP status. Still an `Error` with the server's detail as message. */
+export class PortalHttpError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+  ) {
+    super(message);
+    this.name = 'PortalHttpError';
+  }
+}
+
 async function portalFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const token = getPortalSessionToken();
   if (!token) throw new PortalUnauthorizedError('No portal session');
@@ -359,7 +370,7 @@ async function portalFetch<T>(path: string, init?: RequestInit): Promise<T> {
     const body = (await res.json().catch(() => ({}))) as { detail?: unknown };
     const detail =
       typeof body.detail === 'string' ? body.detail : `Request failed (${res.status})`;
-    throw new Error(detail);
+    throw new PortalHttpError(detail, res.status);
   }
   return (await res.json()) as T;
 }
@@ -477,6 +488,59 @@ export function listProjectMilestones(projectId: string): Promise<PortalMileston
   return portalFetch<PortalMilestoneList>(
     `/api/v1/portal/projects/${encodeURIComponent(projectId)}/milestones`,
   );
+}
+
+/** One instalment of a contract's payment plan, as the client sees it. */
+export interface PortalPaymentPlanLine {
+  id: string;
+  sequence: number;
+  label: string;
+  /** Decimal string. */
+  amount: string;
+  /** Decimal string, or null when the instalment is a fixed amount. */
+  percent_of_contract: string | null;
+  /** Decided by the server; the portal never works out overdue itself. */
+  status: 'upcoming' | 'due' | 'invoiced' | 'paid' | 'overdue' | string;
+  milestone_name: string | null;
+  forecast_due_date: string | null;
+  original_due_date: string | null;
+  /** Days the due date moved against the contract; positive is later. */
+  days_moved: number | null;
+  days_until: number | null;
+  days_overdue: number | null;
+}
+
+export interface PortalPaymentPlan {
+  contract_id: string;
+  contract_title: string;
+  currency: string;
+  contract_total: string;
+  paid_total: string;
+  outstanding_total: string;
+  lines: PortalPaymentPlanLine[];
+}
+
+export interface PortalPaymentPlanList {
+  items: PortalPaymentPlan[];
+}
+
+/**
+ * The payment plans of a project's contracts that the builder shows the client.
+ *
+ * The route answers 404 when the caller holds no project or contract grant
+ * there, so it never confirms a project exists. For the card that means "no
+ * plan to show", not a failure: a consultant who was shared documents only
+ * must not be told their payment plan could not be loaded.
+ */
+export async function listProjectPaymentPlans(projectId: string): Promise<PortalPaymentPlanList> {
+  try {
+    return await portalFetch<PortalPaymentPlanList>(
+      `/api/v1/portal/projects/${encodeURIComponent(projectId)}/payment-plan`,
+    );
+  } catch (err) {
+    if (err instanceof PortalHttpError && err.status === 404) return { items: [] };
+    throw err;
+  }
 }
 
 /**

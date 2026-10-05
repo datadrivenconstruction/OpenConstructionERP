@@ -72,6 +72,7 @@ import {
 import { PortalBrandHeader } from './PortalBrandHeader';
 import { RequestSignInLink } from './RequestSignInLink';
 import { UpcomingMilestones } from './UpcomingMilestones';
+import { PaymentPlanCard } from './PaymentPlanCard';
 import { PORTAL_PAYMENTS_PATH } from './portalLanding';
 
 // English fallbacks for the computed `homeportal.co_status_*` keys. The default used to be
@@ -362,6 +363,10 @@ function PortalHomeContent() {
       )}
 
       <UpcomingMilestones />
+
+      {/* The payment plan is money owed by the client, so it follows the
+          same roles as the invoices tab. */}
+      {showInvoices && <PaymentPlanCard />}
 
       {tabs.length > 1 ? (
         <nav className="flex gap-1 border-b border-border-light">

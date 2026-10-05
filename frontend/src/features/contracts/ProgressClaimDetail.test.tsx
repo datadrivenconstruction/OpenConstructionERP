@@ -527,6 +527,19 @@ describe('PopulatePreviewModal', () => {
     expect(commit?.disabled).toBe(true);
   });
 
+  it('says why a contract its payment plan bills has no preview, instead of calling it empty', async () => {
+    const { ApiError } = await import('@/shared/lib/api');
+    api.populateClaimPreview.mockRejectedValue(
+      new ApiError(409, 'Conflict', {
+        detail: { error: 'contract_billed_by_payment_plan', message: 'Billed by its payment plan.' },
+      }),
+    );
+    renderModal();
+    const alert = await screen.findByTestId('populate-error');
+    expect(alert.textContent).toContain('Claim the next instalment instead of measured progress');
+    expect(screen.queryByTestId('populate-empty')).toBeNull();
+  });
+
   it('commits the selected lines and closes', async () => {
     const onClose = vi.fn();
     const onCommitted = vi.fn();

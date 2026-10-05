@@ -28,6 +28,7 @@ import {
   type ContractLine,
 } from './api';
 import { invalidateClaimAfterLineWrite } from './claimQueries';
+import { billingModeErrorMessage } from './billingModeErrors';
 import { getIntlLocale, fmtPercent } from '@/shared/lib/formatters';
 
 function toNum(v: number | string | null | undefined): number {
@@ -221,7 +222,8 @@ function ClaimLineAddRow({
       });
       onDone();
     },
-    onError: (err) => addToast({ type: 'error', title: getErrorMessage(err) }),
+    onError: (err) =>
+      addToast({ type: 'error', title: billingModeErrorMessage(t, err) ?? getErrorMessage(err) }),
   });
 
   return (

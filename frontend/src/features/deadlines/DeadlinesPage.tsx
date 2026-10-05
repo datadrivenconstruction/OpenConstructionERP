@@ -53,6 +53,14 @@ const MODULE_LABELS: Record<string, { key: string; def: string }> = {
   compliance_docs: { key: 'deadlines.module.compliance_docs', def: 'Compliance documents' },
   bid_management: { key: 'deadlines.module.bid_management', def: 'Bid submissions' },
   signing: { key: 'deadlines.module.signing', def: 'Signatures' },
+  contracts_payment_plan_claim: {
+    key: 'deadlines.module.contracts_payment_plan_claim',
+    def: 'Claims to raise',
+  },
+  contracts_payment_plan: {
+    key: 'deadlines.module.contracts_payment_plan',
+    def: 'Payment instalments',
+  },
 };
 
 // Explainer chips, one per collector, in _COLLECTORS order.
@@ -82,6 +90,10 @@ const PULLS_FROM: { key: string; def: string; to: string }[] = [
   { key: 'deadlines.mod_compliance_docs', def: 'Compliance documents', to: '/projects' },
   { key: 'deadlines.mod_bid_management', def: 'Bid management', to: '/bid-management' },
   { key: 'deadlines.mod_signing', def: 'E-signatures', to: '/signing' },
+  // A reached instalment nobody has claimed yet, and an instalment the client
+  // owes: two collectors, both answered on the contract's payment plan.
+  { key: 'deadlines.mod_contracts_payment_plan_claim', def: 'Instalment claims', to: '/contracts' },
+  { key: 'deadlines.mod_contracts_payment_plan', def: 'Payment plans', to: '/contracts' },
 ];
 
 // Where an overdue date ends up: the sweeper writes deadline_overdue and

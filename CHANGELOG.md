@@ -15,9 +15,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The client portal shows what is coming up on the project: the schedule milestones a person marked with Show this milestone to the client, when they are due within two weeks or running late, with the date first planned when it moved. Milestones stay internal until someone ticks that box, the same rule progress reports follow.
 - Invoices in the client portal say how many days they are overdue.
 - The client portal carries the workspace logo or company name, on the sign-in screen as well as after sign-in.
+- A contract's payment plan can follow the schedule. Link an instalment to a schedule milestone and its expected due date moves when the milestone slips; when the schedule records the milestone as done, the instalment is ready to claim and becomes a draft claim in one click. Only instalments triggered by completion follow the schedule, a fixed date or an approval stays with the person. A contract is billed either by its payment plan or by measured progress, never both, and deposits hold no retention.
+- Clients see the instalments marked for them on the portal, with the expected date, how far it moved and whether it is due, invoiced, paid or overdue. An instalment nobody has billed yet is never shown as overdue.
+- The payment plan checks warn when a deposit is above the statutory ceiling for consumer work in the project's state, for California, Maryland, Massachusetts, New South Wales and Victoria so far, each with its source. The figures are research, not legal advice, so the check warns and never blocks. Projects have a new state or province field in their settings for this.
+- Managers get a reminder a week before an instalment falls due, and an entry in the deadlines register when a reached instalment has not been claimed.
+- A schedule can be imported from an Excel or CSV file. Column headers are recognised in ten languages and can be remapped, dates written either day or month first are settled with the person, durations, links, leads and the outline are read, and every problem is shown by row before anything is written. The import makes a new schedule or replaces a draft that has no progress, baseline or work orders yet, then calculates the critical path. Templates in each language can be downloaded from the import dialog.
 
 ### Fixed
 
+- Recalculating the critical path no longer wipes the other information stored on each activity, such as where an imported activity came from or that a milestone was already announced as reached.
+- An invoice raised from a certified claim now falls due after the agreed payment period instead of carrying no due date.
 - The client portal no longer shows a progress report the moment it is generated. A report now stays internal until a manager chooses Show to client on the Progress reports tab, and Hide from client takes it back. Reports generated before this release start as internal, so publish the ones your clients should keep seeing. A draft the client cannot see answers exactly like a report that does not exist.
 
 ## [18.4.0] - 2026-10-04

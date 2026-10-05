@@ -52464,6 +52464,7 @@
         "manifest.py",
         "messages/__init__.py",
         "models.py",
+        "payment_plan.py",
         "periods.py",
         "permissions.py",
         "repairs.py",
@@ -53578,6 +53579,72 @@
               "name": "status",
               "annotation": "Mapped[str]",
               "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "activity_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "schedule_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "lag_days",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "payment_terms_days",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "forecast_reached_date",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "forecast_due_date",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "forecast_at",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "reached_at",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "reached_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "client_visible",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
               "nullable": false
             },
             {
@@ -54949,6 +55016,27 @@
           "method": "DELETE",
           "path": "/contracts/milestones/{milestone_id}",
           "handler": "delete_contract_milestone",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/contracts/{contract_id}/payment-plan",
+          "handler": "contract_payment_plan",
+          "response_model": "PaymentPlanResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "PUT",
+          "path": "/contracts/milestones/{milestone_id}/activity",
+          "handler": "link_contract_milestone_activity",
+          "response_model": "ContractMilestoneLinkResponse",
+          "request_schema": "ContractMilestoneActivityLink"
+        },
+        {
+          "method": "POST",
+          "path": "/contracts/milestones/{milestone_id}/raise-claim",
+          "handler": "raise_contract_milestone_claim",
+          "response_model": "ProgressClaimResponse",
           "request_schema": "None"
         },
         {
@@ -58294,6 +58382,23 @@
               "type": "str"
             },
             {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "lag_days",
+              "type": "int"
+            },
+            {
+              "name": "payment_terms_days",
+              "type": "int | None"
+            },
+            {
+              "name": "client_visible",
+              "type": "bool",
+              "default": "False"
+            },
+            {
               "name": "metadata",
               "type": "dict[str, Any]"
             }
@@ -58334,6 +58439,23 @@
             {
               "name": "status",
               "type": "str | None"
+            },
+            {
+              "name": "kind",
+              "type": "str | None"
+            },
+            {
+              "name": "lag_days",
+              "type": "int | None"
+            },
+            {
+              "name": "payment_terms_days",
+              "type": "int | None"
+            },
+            {
+              "name": "client_visible",
+              "type": "bool | None",
+              "default": "None"
             },
             {
               "name": "metadata",
@@ -58389,6 +58511,51 @@
               "type": "str"
             },
             {
+              "name": "kind",
+              "type": "str",
+              "default": "'progress'"
+            },
+            {
+              "name": "activity_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "schedule_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "lag_days",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "payment_terms_days",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "forecast_reached_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "forecast_due_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "reached_at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "client_visible",
+              "type": "bool",
+              "default": "False"
+            },
+            {
               "name": "metadata",
               "type": "dict[str, Any]"
             },
@@ -58399,6 +58566,162 @@
             {
               "name": "updated_at",
               "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "ContractMilestoneActivityLink",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Which schedule activity an instalment follows; ``null`` stops following one.",
+          "fields": [
+            {
+              "name": "activity_id",
+              "type": "UUID | None"
+            }
+          ]
+        },
+        {
+          "class_name": "ContractMilestoneLinkResponse",
+          "bases": [
+            "ContractMilestoneResponse"
+          ],
+          "docstring": "The instalment after linking, with anything the person should know about the link.\n\n``warnings`` holds codes, not sentences: ``date_trigger_ignores_schedule``\n(the instalment's trigger is a fixed date, so the link does not move it).\nLinking an activity that is not a milestone is refused outright (422\n``activity_not_milestone``), so it never appears here.",
+          "fields": [
+            {
+              "name": "warnings",
+              "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "PaymentPlanLine",
+          "bases": [
+            "ContractMilestoneResponse"
+          ],
+          "docstring": "One instalment as the plan reads today.\n\n``forecast_reached_date`` and ``forecast_due_date`` are worked out from the\nlinked activity's current finish when the plan is read, not copied from\nthe stored columns, which schedule events refresh.",
+          "fields": [
+            {
+              "name": "forecast_at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "planned_due_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "amount",
+              "type": "Decimal"
+            },
+            {
+              "name": "activity_name",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "activity_missing",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "client_status",
+              "type": "str"
+            },
+            {
+              "name": "days_moved",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "claim_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "claim_status",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PaymentPlanFinding",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A failed ``payment_plan`` rule, worded in the caller's language.",
+          "fields": [
+            {
+              "name": "rule_id",
+              "type": "str"
+            },
+            {
+              "name": "severity",
+              "type": "str"
+            },
+            {
+              "name": "message",
+              "type": "str"
+            },
+            {
+              "name": "element_ref",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "suggestion",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "details",
+              "type": "dict[str, str]"
+            }
+          ]
+        },
+        {
+          "class_name": "PaymentPlanResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A contract's payment plan: its instalments, their totals and the rule findings.",
+          "fields": [
+            {
+              "name": "contract_id",
+              "type": "UUID"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "contract_total",
+              "type": "Decimal"
+            },
+            {
+              "name": "scheduled_total",
+              "type": "Decimal"
+            },
+            {
+              "name": "percent_scheduled",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "default_payment_terms_days",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "lines",
+              "type": "list[PaymentPlanLine]"
+            },
+            {
+              "name": "findings",
+              "type": "list[PaymentPlanFinding]"
             }
           ]
         },
@@ -58926,9 +59249,11 @@
         "boq",
         "changeorders",
         "contacts",
+        "finance",
         "progress",
         "projects",
         "punchlist",
+        "schedule",
         "signing",
         "subcontractors",
         "users",
@@ -79100,6 +79425,7 @@
       "import_dependencies": [
         "bid_management",
         "compliance_docs",
+        "contracts",
         "correspondence",
         "defects_liability",
         "inspections",
@@ -79108,6 +79434,7 @@
         "punchlist",
         "qms",
         "rfi",
+        "schedule",
         "signing",
         "submittals",
         "teams",
@@ -142659,6 +142986,13 @@
         },
         {
           "method": "GET",
+          "path": "/projects/{project_id}/payment-plan",
+          "handler": "portal_payment_plan",
+          "response_model": "PortalPaymentPlanResponse",
+          "request_schema": "PortalService"
+        },
+        {
+          "method": "GET",
           "path": "/projects/{project_id}/progress-reports",
           "handler": "portal_list_progress_reports",
           "response_model": "PortalProgressReportList",
@@ -143692,6 +144026,119 @@
           ]
         },
         {
+          "class_name": "PortalPaymentPlanLine",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One instalment a person marked for the client.\n\nThe client sees what is owed, when, and how far the date moved. Claims,\nnotes, metadata, validation findings and the schedule links stay internal.\n``status`` is ``upcoming``, ``due``, ``invoiced``, ``paid`` or ``overdue``.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "sequence",
+              "type": "int"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "amount",
+              "type": "Decimal"
+            },
+            {
+              "name": "percent_of_contract",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "milestone_name",
+              "type": "str"
+            },
+            {
+              "name": "forecast_due_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "original_due_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "days_moved",
+              "type": "int | None",
+              "description": "Days the due date moved from the contract's date."
+            },
+            {
+              "name": "days_until",
+              "type": "int | None",
+              "description": "Days to the due date, while it is still ahead."
+            },
+            {
+              "name": "days_overdue",
+              "type": "int | None",
+              "description": "Days past the due date, while it is unpaid."
+            }
+          ]
+        },
+        {
+          "class_name": "PortalPaymentPlanContract",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A client contract's visible instalments and what they add up to.\n\n``paid_total`` and ``outstanding_total`` add up the visible lines only, so\nthe figures always match the rows the client is shown.",
+          "fields": [
+            {
+              "name": "contract_id",
+              "type": "UUID"
+            },
+            {
+              "name": "contract_title",
+              "type": "str"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "contract_total",
+              "type": "Decimal"
+            },
+            {
+              "name": "paid_total",
+              "type": "Decimal"
+            },
+            {
+              "name": "outstanding_total",
+              "type": "Decimal"
+            },
+            {
+              "name": "lines",
+              "type": "list[PortalPaymentPlanLine]"
+            }
+          ]
+        },
+        {
+          "class_name": "PortalPaymentPlanResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The payment plans of a project's client contracts the caller may see.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[PortalPaymentPlanContract]"
+            }
+          ]
+        },
+        {
           "class_name": "PortalProjectSummary",
           "bases": [
             "BaseModel"
@@ -144021,6 +144468,7 @@
       "import_dependencies": [
         "bim_hub",
         "changeorders",
+        "contracts",
         "documents",
         "finance",
         "projects",
@@ -151049,6 +151497,12 @@
               "nullable": true
             },
             {
+              "name": "subdivision_code",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
               "name": "project_code",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
@@ -152111,6 +152565,11 @@
               "description": "ISO 3166-1 alpha-2 country code (e.g. US, CA, AU, DE, GB). Drives the AIA G702/G703 payment-application gate (US/CA/AU only) and decides which compliance rule pack the new project enforces. Since revision v3319 the stored column is nullable and no longer defaults to DE, so omitting this leaves the project with no country rather than with Germany - unless a country pack is active, in which case the pack's market fills the blank and is recorded as inherited."
             },
             {
+              "name": "subdivision_code",
+              "type": "str | None",
+              "description": "ISO 3166-2 state or province where the work is (e.g. US-CA, AU-VIC). Scopes rules a state sets on its own, such as a cap on the deposit for home improvement."
+            },
+            {
               "name": "contract_value",
               "type": "str | None"
             },
@@ -152245,6 +152704,11 @@
               "name": "country_code",
               "type": "str | None",
               "description": "ISO 3166-1 alpha-2 country code (e.g. US, CA, AU, DE, GB). Drives the AIA G702/G703 payment-application gate (US/CA/AU only)."
+            },
+            {
+              "name": "subdivision_code",
+              "type": "str | None",
+              "description": "ISO 3166-2 state or province where the work is (e.g. US-CA, AU-VIC). Scopes rules a state sets on its own, such as a cap on the deposit for home improvement."
             },
             {
               "name": "contract_value",
@@ -152418,6 +152882,11 @@
             },
             {
               "name": "country_code",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "subdivision_code",
               "type": "str | None",
               "default": "None"
             },
@@ -154181,6 +154650,7 @@
         "dwg_takeoff",
         "fieldreports",
         "finance",
+        "i18n_foundation",
         "inspections",
         "markups",
         "meetings",
@@ -187592,6 +188062,7 @@
         "interchange_schemas.py",
         "interchange_service.py",
         "manifest.py",
+        "milestone_events.py",
         "models.py",
         "mspdi_export.py",
         "ordering.py",
@@ -187615,6 +188086,10 @@
         "service.py",
         "service_4d.py",
         "snapshot_envelope.py",
+        "tabular_headers.py",
+        "tabular_import.py",
+        "tabular_import_router.py",
+        "tabular_import_service.py",
         "validators.py",
         "wbs_numbering.py",
         "xer_encoding.py"
@@ -233178,10 +233653,10 @@
     },
     {
       "name": "contracts",
-      "ts_files": 60,
+      "ts_files": 66,
       "css_files": 0,
-      "test_files": 29,
-      "total_files": 60
+      "test_files": 31,
+      "total_files": 66
     },
     {
       "name": "coordination",
@@ -233766,10 +234241,10 @@
     },
     {
       "name": "portal",
-      "ts_files": 18,
+      "ts_files": 21,
       "css_files": 0,
-      "test_files": 3,
-      "total_files": 18
+      "test_files": 5,
+      "total_files": 21
     },
     {
       "name": "portfolio",
@@ -233843,10 +234318,10 @@
     },
     {
       "name": "projects",
-      "ts_files": 32,
+      "ts_files": 33,
       "css_files": 0,
       "test_files": 13,
-      "total_files": 32
+      "total_files": 33
     },
     {
       "name": "property-dev",
@@ -233990,10 +234465,10 @@
     },
     {
       "name": "schedule",
-      "ts_files": 46,
+      "ts_files": 57,
       "css_files": 0,
-      "test_files": 20,
-      "total_files": 46
+      "test_files": 23,
+      "total_files": 57
     },
     {
       "name": "schedule-advanced",
@@ -234571,9 +235046,11 @@
       "boq",
       "changeorders",
       "contacts",
+      "finance",
       "progress",
       "projects",
       "punchlist",
+      "schedule",
       "signing",
       "subcontractors",
       "users",
@@ -234687,6 +235164,7 @@
     "deadlines": [
       "bid_management",
       "compliance_docs",
+      "contracts",
       "correspondence",
       "defects_liability",
       "inspections",
@@ -234695,6 +235173,7 @@
       "punchlist",
       "qms",
       "rfi",
+      "schedule",
       "signing",
       "submittals",
       "teams",
@@ -235102,6 +235581,7 @@
     "portal": [
       "bim_hub",
       "changeorders",
+      "contracts",
       "documents",
       "finance",
       "projects",
@@ -235193,6 +235673,7 @@
       "dwg_takeoff",
       "fieldreports",
       "finance",
+      "i18n_foundation",
       "inspections",
       "markups",
       "meetings",
@@ -235533,13 +236014,13 @@
     "backend_modules": 196,
     "modules_with_manifests": 194,
     "total_models": 623,
-    "total_columns": 7138,
+    "total_columns": 7150,
     "total_relationships": 234,
-    "total_routes": 3735,
-    "total_schemas": 3522,
-    "total_python_files": 2251,
+    "total_routes": 3739,
+    "total_schemas": 3530,
+    "total_python_files": 2257,
     "frontend_features": 192,
-    "frontend_ts_files": 2869,
+    "frontend_ts_files": 2890,
     "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {

@@ -1607,5 +1607,16 @@
     ],
     "key_count_at_seed": 3,
     "note": "Code is the ordinary word for a code column in German, French, Dutch and Filipino (bi.kpi_code, cost_plan.col_code, boq.import_preview.col_ordinal as Pos. / Code). Checked in each; Spanish, Italian and Russian write their own word, so it is translated where the language differs."
+  },
+  {
+    "locale_set": [
+      "es",
+      "es-CL",
+      "es-CO",
+      "es-MX",
+      "fil"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Error, spelled the same in all four Spanish locales and borrowed as-is into Filipino: the bare noun (jobs.error = 'Error'), and the singular of a counted label, '{{count}} error', in dashboard.validation_portfolio.errors_count_one and schedule.tabular_import.count_errors_one. Their plural forms (errores, and the unchanged Filipino) are translated."
   }
 ]

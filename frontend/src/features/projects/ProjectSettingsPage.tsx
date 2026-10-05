@@ -38,6 +38,7 @@ import { CURRENCY_GROUPS, CreateProjectModal } from './CreateProjectPage';
 import { getVatPercent } from '../boq/boqHelpers';
 import { TranslationSettingsTab } from '../translation';
 import { MethodologyActiveCard } from '../methodology/MethodologyActiveCard';
+import { ProjectSubdivisionCard } from './ProjectSubdivisionCard';
 import { ruleSetLabel } from '../validation/ruleSetLabels';
 import {
   listComplianceRulePacks,
@@ -1100,6 +1101,9 @@ export function ProjectSettingsPage() {
           </p>
         </form>
       </Card>
+
+      {/* ── State or province, for rules set below the country ─────────── */}
+      <ProjectSubdivisionCard project={project} />
 
       {/* ── Estimating methodology (active switcher) ────────────────────── */}
       {/* The id="methodology" anchor is the deep-link target from the

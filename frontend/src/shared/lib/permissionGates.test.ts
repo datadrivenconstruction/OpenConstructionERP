@@ -29,6 +29,17 @@ describe('roleHasPermission', () => {
     expect(roleHasPermission('owner', 'payroll.read')).toBe(true);
   });
 
+  it('lets an editor change a payment plan and raise its claim, and keeps deleting at manager', () => {
+    // Mirrors contracts/permissions.py: create, update and submit_claim are
+    // EDITOR, delete is MANAGER.
+    for (const permission of ['contracts.create', 'contracts.update', 'contracts.submit_claim'] as const) {
+      expect(roleHasPermission('viewer', permission)).toBe(false);
+      expect(roleHasPermission('editor', permission)).toBe(true);
+    }
+    expect(roleHasPermission('editor', 'contracts.delete')).toBe(false);
+    expect(roleHasPermission('manager', 'contracts.delete')).toBe(true);
+  });
+
   it('never lets a field role through, those rank below the viewer', () => {
     expect(roleHasPermission('site_foreman', 'takeoff.update')).toBe(false);
     expect(roleHasPermission('field_worker', 'takeoff.update')).toBe(false);

@@ -73,6 +73,7 @@ import {
   retentionEventLabel,
 } from './RetentionReleasePanel';
 import { ContractAnalyticsPanels } from './ContractAnalyticsPanels';
+import { PaymentPlanPanel } from './PaymentPlanPanel';
 import { SovReconcilePanel } from './SovReconcilePanel';
 import { contractsGuide } from './contractsGuide';
 import { bidPackageDeepLink, boqDeepLink, contractSource, tenderPackageDeepLink } from '@/shared/lib/awardChainLinks';
@@ -2710,6 +2711,16 @@ export function ContractDetailDrawer({
             contractId={contractId}
             currency={contract.currency}
             contractStatus={contract.status}
+          />
+
+          {/* The instalments the client pays and the schedule milestones they
+              wait for. Above the analytics because it is something people
+              edit and act on (a reached line raises its claim here), not a
+              read-out. */}
+          <PaymentPlanPanel
+            contractId={contractId}
+            projectId={contract.project_id}
+            currency={contract.currency}
           />
 
           {/* Analytics & close-out — four read-only endpoints surfaced as

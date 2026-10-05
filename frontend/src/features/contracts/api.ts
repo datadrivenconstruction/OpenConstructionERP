@@ -1975,6 +1975,228 @@ export function getMilestoneSchedule(
   );
 }
 
+/* ── Payment plan: instalments that follow the schedule ───────────────── */
+
+/** What an instalment is for. The statutory deposit limits read `deposit`. */
+export const MILESTONE_KINDS = ['deposit', 'progress', 'final'] as const;
+export type MilestoneKind = (typeof MILESTONE_KINDS)[number];
+
+/** What makes an instalment payable. Only `date` ignores the schedule. */
+export const MILESTONE_TRIGGERS = ['date', 'completion', 'approval'] as const;
+export type MilestoneTrigger = (typeof MILESTONE_TRIGGERS)[number];
+
+export type MilestoneStatus = 'pending' | 'reached' | 'invoiced' | 'paid';
+
+/**
+ * How an instalment reads to the client, decided by the server. The UI never
+ * works out `overdue` itself: the server knows the payment terms and today.
+ */
+export type PaymentPlanClientStatus = 'upcoming' | 'due' | 'invoiced' | 'paid' | 'overdue';
+
+/** One contract milestone as stored (mirror of ContractMilestoneResponse). */
+export interface ContractMilestone {
+  id: string;
+  contract_id: string;
+  code: string;
+  name: string;
+  planned_date: string | null;
+  value: number | string | null;
+  percent_of_contract: number | string | null;
+  trigger: MilestoneTrigger | string;
+  status: MilestoneStatus | string;
+  kind: MilestoneKind | string;
+  activity_id: string | null;
+  schedule_id: string | null;
+  lag_days: number;
+  payment_terms_days: number | null;
+  forecast_reached_date: string | null;
+  forecast_due_date: string | null;
+  reached_at: string | null;
+  client_visible: boolean;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+/** One instalment as the plan reads today, with its live forecast. */
+export interface PaymentPlanLine extends ContractMilestone {
+  forecast_at: string | null;
+  /** When the instalment would fall due on the contract's own date; the baseline the forecast moved from. */
+  planned_due_date?: string | null;
+  /** Resolved amount (Decimal on the wire). */
+  amount: number | string;
+  activity_name: string | null;
+  /** The linked activity no longer exists; the line falls back to its date. */
+  activity_missing: boolean;
+  client_status: PaymentPlanClientStatus | string;
+  /** Days the forecast moved against the contract's own date; null when either is unknown. */
+  days_moved: number | null;
+  claim_id: string | null;
+  claim_status: string | null;
+}
+
+/** A failed `payment_plan` rule. `message` is worded by the server. */
+export interface PaymentPlanFinding {
+  rule_id: string;
+  severity: string;
+  message: string;
+  element_ref: string | null;
+  suggestion: string | null;
+  details: Record<string, string>;
+}
+
+export interface PaymentPlan {
+  contract_id: string;
+  currency: string;
+  contract_total: number | string;
+  scheduled_total: number | string;
+  percent_scheduled: number | string | null;
+  default_payment_terms_days: number | null;
+  lines: PaymentPlanLine[];
+  findings: PaymentPlanFinding[];
+}
+
+export interface ContractMilestoneCreate {
+  contract_id: string;
+  code?: string;
+  name: string;
+  planned_date?: string | null;
+  value?: string | null;
+  percent_of_contract?: string | null;
+  trigger?: MilestoneTrigger;
+  status?: MilestoneStatus;
+  kind?: MilestoneKind;
+  lag_days?: number;
+  payment_terms_days?: number | null;
+  client_visible?: boolean;
+}
+
+/**
+ * The service drops nulls before it writes, so a null here leaves the stored
+ * value alone. The schedule link has its own route for exactly that reason.
+ */
+export type ContractMilestoneUpdate = Partial<Omit<ContractMilestoneCreate, 'contract_id'>>;
+
+/** Codes the link route returns beside the milestone. */
+export type MilestoneLinkWarning = 'date_trigger_ignores_schedule';
+
+export interface ContractMilestoneLinkResult extends ContractMilestone {
+  warnings: (MilestoneLinkWarning | string)[];
+}
+
+export function paymentPlanKey(contractId: string) {
+  return ['contracts', 'payment-plan', contractId] as const;
+}
+
+export function getPaymentPlan(contractId: string): Promise<PaymentPlan> {
+  return apiGet<PaymentPlan>(`/v1/contracts/contracts/${contractId}/payment-plan`);
+}
+
+export function createContractMilestone(
+  contractId: string,
+  body: ContractMilestoneCreate,
+): Promise<ContractMilestone> {
+  return apiPost<ContractMilestone>(`/v1/contracts/contracts/${contractId}/milestones`, body);
+}
+
+export function updateContractMilestone(
+  milestoneId: string,
+  body: ContractMilestoneUpdate,
+): Promise<ContractMilestone> {
+  return apiPatch<ContractMilestone>(`/v1/contracts/contracts/milestones/${milestoneId}`, body);
+}
+
+export function deleteContractMilestone(milestoneId: string): Promise<void> {
+  return apiDelete(`/v1/contracts/contracts/milestones/${milestoneId}`);
+}
+
+/** Link an instalment to a schedule activity, or unlink it with `null`. */
+export function linkMilestoneActivity(
+  milestoneId: string,
+  activityId: string | null,
+): Promise<ContractMilestoneLinkResult> {
+  return apiPut<ContractMilestoneLinkResult>(
+    `/v1/contracts/contracts/milestones/${milestoneId}/activity`,
+    { activity_id: activityId },
+  );
+}
+
+/** Raise the draft claim for a reached instalment. Nothing is submitted. */
+export function raiseMilestoneClaim(milestoneId: string): Promise<ProgressClaimItem> {
+  return apiPost<ProgressClaimItem>(
+    `/v1/contracts/contracts/milestones/${milestoneId}/raise-claim`,
+    {},
+  );
+}
+
+/** A schedule activity an instalment can follow. */
+export interface ScheduleMilestoneCandidate {
+  id: string;
+  name: string;
+  wbs_code: string;
+  end_date: string | null;
+  schedule_id: string;
+  schedule_name: string;
+  /** A milestone type in the schedule; anything else is offered only when already linked. */
+  is_milestone: boolean;
+}
+
+/** The schedule's own milestone types (schedule/milestone_events.py MILESTONE_ACTIVITY_TYPES). */
+const MILESTONE_ACTIVITY_TYPES: ReadonlySet<string> = new Set([
+  'milestone',
+  'start_milestone',
+  'finish_milestone',
+]);
+
+interface ScheduleListPage {
+  items: { id: string; name: string }[];
+  total: number;
+}
+
+interface ScheduleActivityPage {
+  items: {
+    id: string;
+    name: string;
+    wbs_code?: string | null;
+    end_date?: string | null;
+    activity_type?: string | null;
+  }[];
+  total: number;
+}
+
+/**
+ * The activities of a project's schedules an instalment can follow.
+ *
+ * Read from the schedule module's own list routes rather than a contracts
+ * endpoint, so the picker shows what the schedule shows. The milestone test is
+ * the one the link route enforces: the activity's type, not its duration.
+ */
+export async function listScheduleMilestoneCandidates(
+  projectId: string,
+): Promise<ScheduleMilestoneCandidate[]> {
+  const schedules = await apiGet<ScheduleListPage>(
+    `/v1/schedule/schedules/?project_id=${encodeURIComponent(projectId)}&limit=100`,
+  );
+  const pages = await Promise.all(
+    schedules.items.map((s) =>
+      apiGet<ScheduleActivityPage>(
+        `/v1/schedule/schedules/${encodeURIComponent(s.id)}/activities/?limit=5000`,
+      ).then((page) => ({ schedule: s, page })),
+    ),
+  );
+  return pages.flatMap(({ schedule, page }) =>
+    (page.items ?? []).map((a) => ({
+      id: a.id,
+      name: a.name,
+      wbs_code: a.wbs_code ?? '',
+      end_date: a.end_date ?? null,
+      schedule_id: schedule.id,
+      schedule_name: schedule.name,
+      is_milestone: MILESTONE_ACTIVITY_TYPES.has(a.activity_type ?? ''),
+    })),
+  );
+}
+
 /* ── E-signature bridge ───────────────────────────────────────────────── */
 
 /** One expected signatory on a session, derived from the party register. */

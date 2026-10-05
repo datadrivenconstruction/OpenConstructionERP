@@ -46,6 +46,7 @@ import {
   type ProgressClaimPopulatePreview,
   type ProgressClaimPopulatePreviewItem,
 } from './api';
+import { billingModeErrorMessage } from './billingModeErrors';
 
 function toNum(v: number | string | null | undefined): number {
   if (v === null || v === undefined) return 0;
@@ -233,7 +234,8 @@ export function PopulatePreviewModal({
       onCommitted?.();
       onClose();
     },
-    onError: (err) => addToast({ type: 'error', title: getErrorMessage(err) }),
+    onError: (err) =>
+      addToast({ type: 'error', title: billingModeErrorMessage(t, err) ?? getErrorMessage(err) }),
   });
 
   const skippedHints: string[] = [];
@@ -267,7 +269,12 @@ export function PopulatePreviewModal({
     }
   }
 
-  const emptyPreview = !previewQ.isLoading && items.length === 0;
+  // A refused preview is not an empty one: "no progress recorded" would send
+  // the reader to record progress the server will refuse to bill anyway.
+  const previewError = previewQ.isError
+    ? billingModeErrorMessage(t, previewQ.error) ?? getErrorMessage(previewQ.error)
+    : null;
+  const emptyPreview = !previewQ.isLoading && !previewError && items.length === 0;
 
   return (
     <WideModal
@@ -335,6 +342,15 @@ export function PopulatePreviewModal({
             <Loader2 size={16} className="mr-2 inline animate-spin" />
             {t('common.loading', { defaultValue: 'Loading…' })}
           </p>
+        ) : previewError ? (
+          <div
+            className="flex items-center gap-2 rounded-lg border border-semantic-error/30 bg-semantic-error-bg px-3 py-4 text-sm text-semantic-error"
+            role="alert"
+            data-testid="populate-error"
+          >
+            <AlertTriangle size={16} aria-hidden />
+            {previewError}
+          </div>
         ) : emptyPreview ? (
           <div
             className="flex items-center gap-2 rounded-lg border border-border-light bg-surface-secondary px-3 py-4 text-sm text-content-secondary"

@@ -33,6 +33,7 @@ import {
   ListPlus,
   Trash2,
   PlayCircle,
+  FileSpreadsheet,
 } from 'lucide-react';
 import { Button, Card, Badge, Input, SkeletonTable, Breadcrumb, DismissibleInfo, IntroRichText, GanttChart as SVGGanttChart, ViewInBIMButton, ConfirmDialog, ModuleGuideButton, CollapsibleSection } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -63,6 +64,8 @@ import { generateInWindow, projectWindowDays, refreshAfterGenerate } from './gen
 import { ActivityGrid } from './ActivityGrid';
 import { ancestorsOf, hideCollapsed, orderAsTree, parentIdsOf } from './activityTree';
 import { WorkCalendarManager } from './WorkCalendarManager';
+import { ScheduleSpreadsheetImportDialog } from './tabularImport/ScheduleSpreadsheetImportDialog';
+import { SpreadsheetImportEntry } from './tabularImport/SpreadsheetImportEntry';
 import { scheduleGuide } from './scheduleGuide';
 import { fetchBIMModels } from '@/features/bim/api';
 import type {
@@ -1922,7 +1925,10 @@ export function ScheduleDetail({
                 activitiesById={activitiesById}
               />
             ) : viewMode === 'interchange' ? (
-              <ScheduleInterchangePanel scheduleId={schedule.id} projectId={projectId} />
+              <div className="space-y-4">
+                <SpreadsheetImportEntry projectId={projectId} schedule={schedule} variant="card" />
+                <ScheduleInterchangePanel scheduleId={schedule.id} projectId={projectId} />
+              </div>
             ) : viewMode === 'progress' ? (
               <ProgressRigorPanel
                 scheduleId={schedule.id}
@@ -2016,7 +2022,7 @@ export function ScheduleDetail({
                 </p>
 
                 {/* Quick-start options */}
-                <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-lg">
+                <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-2xl">
                   <button
                     onClick={() => setShowGenerateBOQ(true)}
                     className="group flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-border-light bg-surface-secondary/30 p-6 transition-all hover:border-oe-blue/50 hover:bg-oe-blue-subtle/30"
@@ -2049,6 +2055,7 @@ export function ScheduleDetail({
                       </p>
                     </div>
                   </button>
+                  <SpreadsheetImportEntry projectId={projectId} schedule={schedule} variant="tile" />
                 </div>
 
                 {/* Feature hints */}
@@ -2355,6 +2362,7 @@ function ProjectSchedules({
   const addToast = useToastStore((s) => s.addToast);
   const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
   const [showCreate, setShowCreate] = useState(false);
+  const [showSpreadsheetImport, setShowSpreadsheetImport] = useState(false);
   // Creating a schedule is editor work (schedule.create). A viewer reads the
   // list; the create button stays visible but disabled, with the reason.
   const canCreateSchedule = useHasPermission('schedule.create');
@@ -2453,16 +2461,28 @@ function ProjectSchedules({
             {t('schedule.project_schedules', 'Schedules for this project')}
           </p>
         </div>
-        <Button
-          variant="primary"
-          size="lg"
-          icon={<Plus size={18} />}
-          onClick={() => setShowCreate(true)}
-          disabled={!canCreateSchedule}
-          title={createHint}
-        >
-          {t('schedule.create_schedule', 'Create Schedule')}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="secondary"
+            size="lg"
+            icon={<FileSpreadsheet size={18} />}
+            onClick={() => setShowSpreadsheetImport(true)}
+            disabled={!canCreateSchedule}
+            title={createHint}
+          >
+            {t('schedule.tabular_import.open', { defaultValue: 'Import spreadsheet' })}
+          </Button>
+          <Button
+            variant="primary"
+            size="lg"
+            icon={<Plus size={18} />}
+            onClick={() => setShowCreate(true)}
+            disabled={!canCreateSchedule}
+            title={createHint}
+          >
+            {t('schedule.create_schedule', 'Create Schedule')}
+          </Button>
+        </div>
       </div>
 
       {/* Schedule list */}
@@ -2546,7 +2566,17 @@ function ProjectSchedules({
           </div>
 
           {/* CTA */}
-          <div className="text-center">
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <Button
+              variant="secondary"
+              size="lg"
+              icon={<FileSpreadsheet size={18} />}
+              onClick={() => setShowSpreadsheetImport(true)}
+              disabled={!canCreateSchedule}
+              title={createHint}
+            >
+              {t('schedule.tabular_import.hero_cta', { defaultValue: 'Import from Excel or CSV' })}
+            </Button>
             <Button
               variant="primary"
               size="lg"
@@ -2593,6 +2623,19 @@ function ProjectSchedules({
           ))}
         </div>
       )}
+
+      <ScheduleSpreadsheetImportDialog
+        open={showSpreadsheetImport}
+        onClose={() => setShowSpreadsheetImport(false)}
+        projectId={project.id}
+        onImported={() => queryClient.invalidateQueries({ queryKey: ['schedules', project.id] })}
+        onOpenSchedule={(result) => {
+          setShowSpreadsheetImport(false);
+          scheduleApi.getSchedule(result.schedule_id).then(setSelectedSchedule, (error: Error) =>
+            addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message }),
+          );
+        }}
+      />
 
       {/* Create Schedule Modal */}
       <Modal

@@ -43,6 +43,7 @@ const FAMILIES = [
   'contracts.status_',
   'contracts.claim_status_',
   'contracts.milestone_status_',
+  'payment_plan.status_',
   'projects.status.',
   'submittals.status_',
   'qms.status.',

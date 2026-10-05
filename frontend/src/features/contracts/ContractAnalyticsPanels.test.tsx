@@ -35,7 +35,6 @@ vi.mock('./api', () => ({
   getFinalAccountChecklist: vi.fn(),
   getGainsharePreview: vi.fn(),
   getSecurityCoverage: vi.fn(),
-  getMilestoneSchedule: vi.fn(),
   listContractLines: vi.fn(),
 }));
 
@@ -111,7 +110,7 @@ beforeEach(() => {
   vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => {
     consoleErrors.push(args);
   });
-  // The six panels this file is not about: let them land in their error state
+  // The five panels this file is not about: let them land in their error state
   // rather than invent shapes for them.
   const unrelated = [
     api.getSovStatus,
@@ -119,7 +118,6 @@ beforeEach(() => {
     api.getFinalAccountChecklist,
     api.getGainsharePreview,
     api.getSecurityCoverage,
-    api.getMilestoneSchedule,
     api.listContractLines,
   ];
   for (const fn of unrelated) {

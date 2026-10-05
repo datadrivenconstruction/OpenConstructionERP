@@ -135,6 +135,16 @@ const EMPTY_ANALYTICS: Record<string, unknown> = {
     by_status: {},
     active_types: [],
   },
+  'payment-plan': {
+    contract_id: 'ct-1',
+    currency: 'EUR',
+    contract_total: 0,
+    scheduled_total: 0,
+    percent_scheduled: null,
+    default_payment_terms_days: null,
+    lines: [],
+    findings: [],
+  },
   'milestone-schedule': {
     contract_id: 'ct-1',
     currency: 'EUR',
