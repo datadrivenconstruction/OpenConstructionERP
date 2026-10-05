@@ -38,6 +38,7 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.academy_isolation import filter_users_to_project
 from app.core.events import event_bus
 from app.database import async_session_factory
 from app.modules.deadlines import service as deadlines_service
@@ -163,11 +164,16 @@ async def _overdue_recipients(session: AsyncSession, item: DeadlineItem) -> list
     that merely parses, or names a deactivated account, is exactly the case the
     managers fallback exists to cover. With no active manager either, nobody
     is nudged.
+
+    In academy mode an owner outside the project counts as absent too. The
+    notification backstop would drop their nudge, and with it the row that
+    records the nudge, so every sweep would take the item up again.
     """
     owner = _as_uuid(item.owner_user_id)
-    if owner is not None and await _active_users(session, [owner]):
-        return [owner]
     project_id = _as_uuid(item.project_id)
+    if owner is not None and await _active_users(session, [owner]):
+        if project_id is None or await filter_users_to_project(session, project_id, [owner]):
+            return [owner]
     if project_id is None:
         return []
     managers = await _project_manager_ids(session, project_id)
