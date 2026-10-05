@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Inviting someone to the client portal now emails them the sign-in link when mail is set up on the server, in their language for ten languages so far and in English otherwise, and the staff screen says whether the mail went out or the link should be copied by hand. A client whose link expired can ask for a new one on the portal sign-in screen. The answer is the same whether or not the address has access, a new link is sent at most once a minute per address, and it replaces the one sent before. On a server without mail nothing is sent, so a link copied by hand keeps working.
+- The client portal shows what is coming up on the project: the schedule milestones a person marked with Show this milestone to the client, when they are due within two weeks or running late, with the date first planned when it moved. Milestones stay internal until someone ticks that box, the same rule progress reports follow.
+- Invoices in the client portal say how many days they are overdue.
+- The client portal carries the workspace logo or company name, on the sign-in screen as well as after sign-in.
+
 ### Fixed
 
 - The client portal no longer shows a progress report the moment it is generated. A report now stays internal until a manager chooses Show to client on the Progress reports tab, and Hide from client takes it back. Reports generated before this release start as internal, so publish the ones your clients should keep seeing. A draft the client cannot see answers exactly like a report that does not exist.

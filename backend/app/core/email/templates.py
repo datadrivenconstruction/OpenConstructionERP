@@ -33,8 +33,15 @@ def wrap(
     body: str,
     action_url: str | None = None,
     action_label: str = "View",
+    *,
+    footer: str | None = None,
 ) -> str:
-    """Wrap *body* in the standard email shell (logo, title, CTA, footer)."""
+    """Wrap *body* in the standard email shell (logo, title, CTA, footer).
+
+    ``footer`` replaces the default English "notification preferences" line,
+    which is wrong for mail nobody subscribed to, such as an invitation; an
+    empty string leaves the footer out. It is inserted as given, so escape it.
+    """
     btn = ""
     if action_url:
         btn = (
@@ -51,10 +58,19 @@ def wrap(
         f"<h2 style='margin:0 0 12px;'>{title}</h2>"
         f"{body}"
         f"{btn}"
-        f"<hr style='border:none; border-top:1px solid #e5e5ea; margin:28px 0 12px;'/>"
-        f"<p style='font-size:12px; color:#86868b;'>"
-        f"Sent by {_APP_NAME}. You received this because of your notification preferences.</p>"
+        f"{_footer_block(footer)}"
         f"</body></html>"
+    )
+
+
+def _footer_block(footer: str | None) -> str:
+    if footer is None:
+        footer = f"Sent by {_APP_NAME}. You received this because of your notification preferences."
+    if not footer:
+        return ""
+    return (
+        f"<hr style='border:none; border-top:1px solid #e5e5ea; margin:28px 0 12px;'/>"
+        f"<p style='font-size:12px; color:#86868b;'>{footer}</p>"
     )
 
 

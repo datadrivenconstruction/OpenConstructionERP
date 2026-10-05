@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
@@ -59,6 +60,7 @@ import {
   type DocumentAccessLogEntry,
   type AccessRule,
   type AccessPermission,
+  type InviteEmailStatus,
 } from './api';
 import { ProgressReportsTab } from './ProgressReportsTab';
 import { portalGuide } from './portalGuide';
@@ -121,6 +123,44 @@ function portalResourceLink(type: string, id: string): string | null {
     default:
       return null;
   }
+}
+
+/**
+ * The toast after an invite or resend says whether the server emailed the
+ * link. When it did not, the person is told to send the copy-link themselves,
+ * which the banner below the toast still offers in every case.
+ */
+function inviteEmailToast(
+  t: TFunction,
+  status: InviteEmailStatus | undefined,
+  email: string,
+  fallbackTitle: string,
+): { type: 'success' | 'warning'; title: string; message?: string } {
+  if (status === 'sent') {
+    return {
+      type: 'success',
+      title: t('portal.invite_emailed', { defaultValue: 'Sign-in link emailed to {{email}}', email }),
+    };
+  }
+  if (status === 'not_configured') {
+    return {
+      type: 'success',
+      title: fallbackTitle,
+      message: t('portal.invite_email_not_configured', {
+        defaultValue: 'Email is not set up on this server. Copy the link below and send it yourself.',
+      }),
+    };
+  }
+  if (status === 'failed') {
+    return {
+      type: 'warning',
+      title: t('portal.invite_email_failed', { defaultValue: 'The email could not be sent' }),
+      message: t('portal.invite_email_copy_instead', {
+        defaultValue: 'The invitation is ready. Copy the link below and send it yourself.',
+      }),
+    };
+  }
+  return { type: 'success', title: fallbackTitle };
 }
 
 /* ─── Page ─── */
@@ -948,10 +988,9 @@ function UserDrawer({
   const resendMut = useMutation({
     mutationFn: () => resendInvite(user.id),
     onSuccess: (data) => {
-      addToast({
-        type: 'success',
-        title: t('portal.invite_resent', { defaultValue: 'Invite resent' }),
-      });
+      addToast(
+        inviteEmailToast(t, data.email_status, user.email, t('portal.invite_resent', { defaultValue: 'Invite resent' })),
+      );
       onResent({
         token: data.magic_link_token,
         expires_at: data.magic_link_expires_at,
@@ -1176,10 +1215,9 @@ function InviteModal({
         redirect_path: form.redirect_path || null,
       }),
     onSuccess: (data) => {
-      addToast({
-        type: 'success',
-        title: t('portal.invited_ok', { defaultValue: 'User invited' }),
-      });
+      addToast(
+        inviteEmailToast(t, data.email_status, form.email, t('portal.invited_ok', { defaultValue: 'User invited' })),
+      );
       onInvited(
         form.email,
         data.magic_link_token,

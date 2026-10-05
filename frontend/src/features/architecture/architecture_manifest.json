@@ -142091,6 +142091,7 @@
       "files": [
         "__init__.py",
         "dependencies.py",
+        "login_email.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -142651,6 +142652,13 @@
         },
         {
           "method": "GET",
+          "path": "/projects/{project_id}/milestones",
+          "handler": "portal_list_milestones",
+          "response_model": "PortalMilestoneList",
+          "request_schema": "PortalService"
+        },
+        {
+          "method": "GET",
           "path": "/projects/{project_id}/progress-reports",
           "handler": "portal_list_progress_reports",
           "response_model": "PortalProgressReportList",
@@ -142770,6 +142778,11 @@
             {
               "name": "redirect_path",
               "type": "str | None"
+            },
+            {
+              "name": "send_email",
+              "type": "bool",
+              "description": "Email the invitation link when mail is configured."
             }
           ]
         },
@@ -142935,11 +142948,16 @@
             {
               "name": "magic_link_token",
               "type": "str",
-              "description": "Plaintext one-time token - caller must email this to the user"
+              "description": "Plaintext one-time token. The server emails it when mail is configured; the staff screen still offers it as a copy-link either way."
             },
             {
               "name": "magic_link_expires_at",
               "type": "datetime"
+            },
+            {
+              "name": "email_status",
+              "type": "Literal['sent', 'failed', 'not_configured', 'not_requested']",
+              "description": "What happened to the invitation email, so the screen can say whether to copy the link."
             }
           ]
         },
@@ -143469,6 +143487,16 @@
               "name": "status",
               "type": "str",
               "default": "''"
+            },
+            {
+              "name": "is_overdue",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "days_overdue",
+              "type": "int | None",
+              "description": "Whole days past the due date, when overdue."
             }
           ]
         },
@@ -143599,6 +143627,67 @@
               "name": "total",
               "type": "int",
               "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "PortalMilestoneEntry",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A schedule milestone a person marked for the client.\n\nOnly what the client needs: the name, the date it was planned for, the\ndate the schedule now expects, and whether it is done or running late.\nDependencies, float, resources and costs stay internal.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "planned_date",
+              "type": "str"
+            },
+            {
+              "name": "expected_date",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "is_done",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "is_late",
+              "type": "bool",
+              "description": "Not done and its expected date has passed."
+            },
+            {
+              "name": "days_until",
+              "type": "int",
+              "description": "Days from today to the expected date; negative when late."
+            }
+          ]
+        },
+        {
+          "class_name": "PortalMilestoneList",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Late milestones and the ones expected within the window, soonest first.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[PortalMilestoneEntry]"
+            },
+            {
+              "name": "window_days",
+              "type": "int"
             }
           ]
         },
@@ -143936,6 +144025,7 @@
         "finance",
         "projects",
         "reporting",
+        "schedule",
         "service",
         "subcontractors"
       ]
@@ -187769,6 +187859,12 @@
               "nullable": false
             },
             {
+              "name": "client_visible",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
               "name": "constraint_type",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
@@ -189041,6 +189137,10 @@
               "type": "str | None"
             },
             {
+              "name": "client_visible",
+              "type": "bool"
+            },
+            {
               "name": "dependencies",
               "type": "list[ActivityDependency] | None"
             },
@@ -189231,6 +189331,11 @@
             },
             {
               "name": "is_critical",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "client_visible",
               "type": "bool",
               "default": "False"
             },
@@ -189712,6 +189817,11 @@
               "name": "assignee_name",
               "type": "str | None",
               "default": "None"
+            },
+            {
+              "name": "client_visible",
+              "type": "bool",
+              "default": "False"
             },
             {
               "name": "metadata",
@@ -233656,10 +233766,10 @@
     },
     {
       "name": "portal",
-      "ts_files": 14,
+      "ts_files": 18,
       "css_files": 0,
-      "test_files": 2,
-      "total_files": 14
+      "test_files": 3,
+      "total_files": 18
     },
     {
       "name": "portfolio",
@@ -233880,10 +233990,10 @@
     },
     {
       "name": "schedule",
-      "ts_files": 44,
+      "ts_files": 46,
       "css_files": 0,
-      "test_files": 19,
-      "total_files": 44
+      "test_files": 20,
+      "total_files": 46
     },
     {
       "name": "schedule-advanced",
@@ -234996,6 +235106,7 @@
       "finance",
       "projects",
       "reporting",
+      "schedule",
       "service",
       "subcontractors",
       "users"
@@ -235422,13 +235533,13 @@
     "backend_modules": 196,
     "modules_with_manifests": 194,
     "total_models": 623,
-    "total_columns": 7137,
+    "total_columns": 7138,
     "total_relationships": 234,
-    "total_routes": 3734,
-    "total_schemas": 3520,
-    "total_python_files": 2250,
+    "total_routes": 3735,
+    "total_schemas": 3522,
+    "total_python_files": 2251,
     "frontend_features": 192,
-    "frontend_ts_files": 2863,
+    "frontend_ts_files": 2869,
     "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {

@@ -155,6 +155,9 @@ class Activity(Base):
     total_float: Mapped[int | None] = mapped_column(Integer, nullable=True)
     free_float: Mapped[int | None] = mapped_column(Integer, nullable=True)
     is_critical: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
+    # Shown to the client in the portal's upcoming milestones. Off by default:
+    # an internal milestone reaches the client only when a person marks it.
+    client_visible: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
 
     # ── Constraints ──────────────────────────────────────────────────────────
     constraint_type: Mapped[str | None] = mapped_column(

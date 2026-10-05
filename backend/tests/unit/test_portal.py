@@ -206,6 +206,17 @@ class _StubMagicRepo(_BaseStubRepo):
             for k, v in fields.items():
                 setattr(row, k, v)
 
+    async def last_issued_at(self, portal_user_id: uuid.UUID, *, purpose: str = "login") -> datetime | None:
+        stamps = [
+            r.created_at for r in self.rows.values() if r.portal_user_id == portal_user_id and r.purpose == purpose
+        ]
+        return max(stamps) if stamps else None
+
+    async def expire_open(self, portal_user_id: uuid.UUID, *, purpose: str, now: datetime) -> None:
+        for r in self.rows.values():
+            if r.portal_user_id == portal_user_id and r.purpose == purpose and getattr(r, "consumed_at", None) is None:
+                r.expires_at = now
+
     async def consume(self, link_id: uuid.UUID, *, consumed_at: datetime) -> bool:
         """Atomically flip ``consumed_at`` only when still NULL.
 
@@ -976,6 +987,9 @@ async def test_request_magic_link_returns_token_for_known_email() -> None:
         # mark active so request_magic_link returns the link
         u = await svc.user_repo.get_by_email("active@example.com")
         u.status = "active"
+        # The invitation link is a minute old, so a new request is not throttled.
+        for row in svc.magic_repo.rows.values():
+            row.created_at = now_utc() - timedelta(minutes=2)
         result = await svc.request_magic_link("active@example.com")
     assert result is not None
     _user, plain, _expires = result

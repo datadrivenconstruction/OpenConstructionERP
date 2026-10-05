@@ -904,6 +904,11 @@
     "note": "bare technical/business acronym or initialism",
     "reason_category": "abbreviation"
   },
+  "portal.signin_link_placeholder": {
+    "en_value": "you@example.com",
+    "note": "example email address in the portal sign-in link form; example.com is the reserved documentation domain (RFC 2606) and an address has no language, identical in ru.ts and every other locale",
+    "reason_category": "regex_or_placeholder_pattern"
+  },
   "portfolio.col_ef": {
     "en_value": "EF",
     "note": "bare short acronym/initialism",

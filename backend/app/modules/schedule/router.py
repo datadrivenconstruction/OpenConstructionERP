@@ -187,6 +187,7 @@ def _activity_to_response(activity: object) -> ActivityResponse:
         total_float=getattr(activity, "total_float", None),
         free_float=getattr(activity, "free_float", None),
         is_critical=getattr(activity, "is_critical", False),
+        client_visible=bool(getattr(activity, "client_visible", False)),
         # Constraint, code, BIM fields
         constraint_type=getattr(activity, "constraint_type", None),
         constraint_date=getattr(activity, "constraint_date", None),

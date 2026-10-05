@@ -28,6 +28,8 @@ import { PaymentApplicationForm } from './PaymentApplicationForm';
 import { PaymentApplicationDetailModal } from './PaymentApplicationDetailModal';
 import { PortalProgressReportsTab } from './PortalProgressReportsTab';
 import { consumePortalMagicLink, getPortalSessionToken } from './api';
+import { PortalBrandHeader } from './PortalBrandHeader';
+import { RequestSignInLink } from './RequestSignInLink';
 
 type View = 'list' | 'form';
 type Tab = 'payments' | 'progress';
@@ -138,6 +140,9 @@ export function PortalPaymentsPage() {
               })
             }
           />
+          <div className="border-t border-border-light px-6 pb-6 pt-4">
+            <RequestSignInLink />
+          </div>
         </Card>
         {/* Escape hatch — a stranded internal user (no magic link, no app
             shell) can get back into OpenConstructionERP instead of being
@@ -216,7 +221,10 @@ export function PortalPaymentsPage() {
 function CenteredShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-dvh bg-surface-secondary px-4 py-6">
-      <div className="mx-auto flex w-full max-w-2xl flex-col items-center">{children}</div>
+      <div className="mx-auto flex w-full max-w-2xl flex-col items-center">
+        <PortalBrandHeader />
+        {children}
+      </div>
     </div>
   );
 }

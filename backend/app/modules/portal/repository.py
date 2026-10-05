@@ -259,6 +259,34 @@ class PortalMagicLinkRepository:
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
+    async def last_issued_at(self, portal_user_id: uuid.UUID, *, purpose: str = "login") -> datetime | None:
+        """When the newest link of ``purpose`` was minted for this user."""
+        stmt = select(func.max(PortalMagicLink.created_at)).where(
+            PortalMagicLink.portal_user_id == portal_user_id,
+            PortalMagicLink.purpose == purpose,
+        )
+        return (await self.session.execute(stmt)).scalar_one_or_none()
+
+    async def expire_open(self, portal_user_id: uuid.UUID, *, purpose: str, now: datetime) -> None:
+        """End every unused link of ``purpose`` for this user as of ``now``.
+
+        Called before a new link is minted, so a user holds one live link at a
+        time instead of one per request for a whole day.
+        """
+        stmt = (
+            update(PortalMagicLink)
+            .where(
+                and_(
+                    PortalMagicLink.portal_user_id == portal_user_id,
+                    PortalMagicLink.purpose == purpose,
+                    PortalMagicLink.consumed_at.is_(None),
+                )
+            )
+            .values(expires_at=now)
+        )
+        await self.session.execute(stmt)
+        await self.session.flush()
+
     async def update_fields(self, link_id: uuid.UUID, **fields: Any) -> None:
         stmt = update(PortalMagicLink).where(PortalMagicLink.id == link_id).values(**fields)
         await self.session.execute(stmt)

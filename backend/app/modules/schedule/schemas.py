@@ -335,6 +335,9 @@ class ActivityUpdate(BaseModel):
         pattern=r"^(not_started|in_progress|completed|delayed)$",
     )
     activity_type: str | None = Field(default=None, pattern=r"^(task|milestone|summary)$")
+    # Strict bool with a None default: an omitted field stays out of the
+    # update, and an explicit null is a 422 rather than a NOT NULL error.
+    client_visible: bool = Field(default=None)  # type: ignore[assignment]
     dependencies: list[ActivityDependency] | None = Field(default=None, max_length=1000)
     resources: list[ActivityResource] | None = Field(default=None, max_length=1000)
     boq_position_ids: list[UUID] | None = Field(default=None, max_length=10_000)
@@ -412,6 +415,7 @@ class ActivityResponse(BaseModel):
     total_float: int | None = None
     free_float: int | None = None
     is_critical: bool = False
+    client_visible: bool = False
 
     # Constraint, code, BIM fields
     constraint_type: str | None = None
@@ -651,6 +655,8 @@ class GanttActivity(BaseModel):
     # That contact's display name, resolved on the server so every project
     # member sees it, not only the one whose contact list holds it.
     assignee_name: str | None = None
+    # Shown to the client in the portal's upcoming milestones.
+    client_visible: bool = False
     # Activity metadata passthrough. Generated activities carry provenance
     # markers here (e.g. duration_source/duration_method = "estimated_fallback"
     # when the duration was estimated from unit-based production rates), which

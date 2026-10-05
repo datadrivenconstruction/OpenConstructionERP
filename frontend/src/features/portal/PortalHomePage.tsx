@@ -69,6 +69,9 @@ import {
   type PortalSharedDocument,
   type PortalBimModel,
 } from './api';
+import { PortalBrandHeader } from './PortalBrandHeader';
+import { RequestSignInLink } from './RequestSignInLink';
+import { UpcomingMilestones } from './UpcomingMilestones';
 import { PORTAL_PAYMENTS_PATH } from './portalLanding';
 
 // English fallbacks for the computed `homeportal.co_status_*` keys. The default used to be
@@ -189,6 +192,9 @@ export function PortalHomePage() {
               })
             }
           />
+          <div className="border-t border-border-light px-6 pb-6 pt-4">
+            <RequestSignInLink />
+          </div>
         </Card>
         <Link
           to={escapeTo}
@@ -355,6 +361,8 @@ function PortalHomeContent() {
         </Card>
       )}
 
+      <UpcomingMilestones />
+
       {tabs.length > 1 ? (
         <nav className="flex gap-1 border-b border-border-light">
           {tabs.map((it) => {
@@ -413,7 +421,10 @@ function PortalHomeContent() {
 function CenteredShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-dvh bg-surface-secondary px-4 py-6">
-      <div className="mx-auto flex w-full max-w-2xl flex-col items-center">{children}</div>
+      <div className="mx-auto flex w-full max-w-2xl flex-col items-center">
+        <PortalBrandHeader />
+        {children}
+      </div>
     </div>
   );
 }
@@ -629,6 +640,17 @@ function InvoiceCard({ inv }: { inv: PortalInvoice }) {
           <dd className="text-content-secondary">
             {inv.due_date ? <DateDisplay value={inv.due_date} /> : '-'}
           </dd>
+          {inv.is_overdue && inv.days_overdue ? (
+            <dd className="mt-1">
+              <Badge variant="error" dot>
+                {t('homeportal.inv_overdue_days', {
+                  count: inv.days_overdue,
+                  defaultValue_one: 'Overdue by {{count}} day',
+                  defaultValue_other: 'Overdue by {{count}} days',
+                })}
+              </Badge>
+            </dd>
+          ) : null}
         </div>
       </dl>
     </li>

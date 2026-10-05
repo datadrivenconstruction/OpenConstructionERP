@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_serializer
@@ -62,6 +62,7 @@ class PortalUserInvite(BaseModel):
     language: str = Field(default="en", min_length=2, max_length=10)
     timezone: str = Field(default="UTC", max_length=64)
     redirect_path: str | None = Field(default=None, max_length=512)
+    send_email: bool = Field(default=True, description="Email the invitation link when mail is configured.")
 
 
 class PortalUserResponse(BaseModel):
@@ -129,9 +130,16 @@ class PortalUserInviteResponse(BaseModel):
 
     user: PortalUserResponse
     magic_link_token: str = Field(
-        description="Plaintext one-time token - caller must email this to the user",
+        description=(
+            "Plaintext one-time token. The server emails it when mail is configured; "
+            "the staff screen still offers it as a copy-link either way."
+        ),
     )
     magic_link_expires_at: datetime
+    email_status: Literal["sent", "failed", "not_configured", "not_requested"] = Field(
+        default="not_requested",
+        description="What happened to the invitation email, so the screen can say whether to copy the link.",
+    )
 
 
 # ── Auth ──────────────────────────────────────────────────────────────────
@@ -360,6 +368,8 @@ class PortalInvoiceEntry(BaseModel):
     currency_code: str = ""
     amount_total: Decimal | None = None
     status: str = ""
+    is_overdue: bool = False
+    days_overdue: int | None = Field(default=None, description="Whole days past the due date, when overdue.")
 
 
 class PortalInvoiceList(BaseModel):
@@ -423,6 +433,31 @@ class PortalProgressReportList(BaseModel):
 
     items: list[PortalProgressReportEntry] = Field(default_factory=list)
     total: int = 0
+
+
+class PortalMilestoneEntry(BaseModel):
+    """A schedule milestone a person marked for the client.
+
+    Only what the client needs: the name, the date it was planned for, the
+    date the schedule now expects, and whether it is done or running late.
+    Dependencies, float, resources and costs stay internal.
+    """
+
+    id: UUID
+    name: str
+    planned_date: str
+    expected_date: str
+    status: str
+    is_done: bool = False
+    is_late: bool = Field(default=False, description="Not done and its expected date has passed.")
+    days_until: int = Field(description="Days from today to the expected date; negative when late.")
+
+
+class PortalMilestoneList(BaseModel):
+    """Late milestones and the ones expected within the window, soonest first."""
+
+    items: list[PortalMilestoneEntry] = Field(default_factory=list)
+    window_days: int
 
 
 class PortalProjectSummary(BaseModel):

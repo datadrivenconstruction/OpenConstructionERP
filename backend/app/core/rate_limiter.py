@@ -185,7 +185,7 @@ def _register_hourly_max() -> int:
 
 
 # Hourly cap on anonymous account-creating endpoints (self-registration and
-# the field magic-link request), keyed per client IP. Registration answers
+# the field and client-portal magic-link requests), keyed per client IP. Registration answers
 # 409 for a taken email because the sign-up page shows that message; this cap
 # keeps that answer from being an address-list oracle. REGISTER_RATE_LIMIT_PER_HOUR.
 registration_limiter = RateLimiter(max_requests=_register_hourly_max(), window_seconds=3600)

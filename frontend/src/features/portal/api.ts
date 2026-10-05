@@ -63,10 +63,14 @@ export interface InvitePayload {
   redirect_path?: string | null;
 }
 
+/** What happened to the invitation email; the copy-link is offered either way. */
+export type InviteEmailStatus = 'sent' | 'failed' | 'not_configured' | 'not_requested';
+
 export interface InviteResponse {
   user: PortalUser;
   magic_link_token: string;
   magic_link_expires_at: string;
+  email_status?: InviteEmailStatus;
 }
 
 export interface UserPatch {
@@ -450,6 +454,31 @@ export interface PortalProgressReportList {
   total: number;
 }
 
+/** A schedule milestone someone marked for the client. */
+export interface PortalMilestone {
+  id: string;
+  name: string;
+  planned_date: string;
+  expected_date: string;
+  status: string;
+  is_done: boolean;
+  is_late: boolean;
+  /** Days from today to the expected date; negative when late. */
+  days_until: number;
+}
+
+export interface PortalMilestoneList {
+  items: PortalMilestone[];
+  window_days: number;
+}
+
+/** Late milestones and the ones expected within the next two weeks. */
+export function listProjectMilestones(projectId: string): Promise<PortalMilestoneList> {
+  return portalFetch<PortalMilestoneList>(
+    `/api/v1/portal/projects/${encodeURIComponent(projectId)}/milestones`,
+  );
+}
+
 /**
  * List the projects the portal caller can see, by name. Falls back to the
  * always-present `/me/accessible/project` (UUID-only) endpoint when the named
@@ -587,6 +616,9 @@ export interface PortalInvoice {
   currency_code: string;
   amount_total: string | null;
   status: string;
+  /** Owed by the client and past its due date. */
+  is_overdue?: boolean;
+  days_overdue?: number | null;
 }
 
 export interface PortalInvoiceList {
@@ -773,6 +805,21 @@ export async function fetchMyDocumentBlob(documentId: string): Promise<Blob | nu
     throw new Error(detail);
   }
   return res.blob();
+}
+
+/**
+ * Ask for a new sign-in link by email. The server answers the same way for
+ * every address, so this resolves without saying whether one was sent.
+ */
+export async function requestPortalMagicLink(email: string): Promise<void> {
+  const res = await fetch('/api/v1/portal/auth/magic-link', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+  if (!res.ok) {
+    throw new Error(`Request failed (${res.status})`);
+  }
 }
 
 /** Consume a magic-link token, persist the session, and return it. */

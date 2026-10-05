@@ -31,10 +31,13 @@ from __future__ import annotations
 
 import logging
 import uuid
+from datetime import date, datetime
+from typing import Any, Literal
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, status
+from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException, Query, Request, status
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, Response
 
+from app.core.rate_limiter import client_identifier, registration_limiter
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
 from app.modules.bim_hub import file_storage as bim_file_storage
 from app.modules.bim_hub.models import NON_3D_MODEL_FORMATS, BIMModel
@@ -44,6 +47,8 @@ from app.modules.portal.dependencies import (
     PortalSessionToken,
     RequirePortalSession,
 )
+from app.modules.portal.login_email import EmailKind, EmailStatus, send_login_email
+from app.modules.portal.models import PortalUser
 from app.modules.portal.schemas import (
     AccessRuleCreate,
     AccessRuleList,
@@ -68,6 +73,8 @@ from app.modules.portal.schemas import (
     PortalChangeOrderList,
     PortalInvoiceEntry,
     PortalInvoiceList,
+    PortalMilestoneEntry,
+    PortalMilestoneList,
     PortalProgressReportEntry,
     PortalProgressReportList,
     PortalProjectSummary,
@@ -86,7 +93,7 @@ from app.modules.portal.schemas import (
     PortalWorkPackageEntry,
     SessionResponse,
 )
-from app.modules.portal.service import PortalService
+from app.modules.portal.service import PortalService, now_utc
 
 router = APIRouter(tags=["portal"])
 logger = logging.getLogger(__name__)
@@ -100,6 +107,26 @@ def _client_ip(request: Request) -> str | None:
     if request.client is None:
         return None
     return request.client.host
+
+
+def _link_email_args(kind: EmailKind, user: PortalUser, token: str, expires_at: datetime) -> dict[str, Any]:
+    # Plain values, read now: the self-service email is sent after the
+    # response, when the request's session is already closed.
+    return {
+        "kind": kind,
+        "email": user.email,
+        "full_name": user.full_name or "",
+        "language": user.language,
+        "role": user.portal_role,
+        "token": token,
+        "expires_at": expires_at,
+        "now": now_utc(),
+    }
+
+
+async def _email_link(kind: EmailKind, user: PortalUser, token: str, expires_at: datetime) -> EmailStatus:
+    """Email a portal user their magic link, in their own language."""
+    return await send_login_email(**_link_email_args(kind, user, token, expires_at))
 
 
 # ── Internal-admin endpoints ──────────────────────────────────────────────
@@ -128,10 +155,17 @@ async def admin_invite_user(
         redirect_path=data.redirect_path,
         created_ip=_client_ip(request),
     )
+    email_status: EmailStatus | Literal["not_requested"] = "not_requested"
+    if data.send_email:
+        # Commit first: a link mailed out of a transaction that then fails
+        # would not open.
+        await service.session.commit()
+        email_status = await _email_link("invite", user, plain, expires_at)
     return PortalUserInviteResponse(
         user=PortalUserResponse.model_validate(user),
         magic_link_token=plain,
         magic_link_expires_at=expires_at,
+        email_status=email_status,
     )
 
 
@@ -199,8 +233,14 @@ async def admin_resend_invite(
     _perm: None = Depends(RequirePermission("portal.admin.users.invite")),
     service: PortalService = Depends(_get_service),
 ) -> PortalUserInviteResponse:
-    """Resend the invitation magic-link to an existing portal user."""
+    """Resend the invitation magic-link to an existing portal user.
+
+    A suspended user cannot sign in, so mailing them an invitation would only
+    confuse; reactivate them first.
+    """
     user = await service.get_portal_user(portal_user_id)
+    if user.status == "suspended":
+        raise HTTPException(status.HTTP_409_CONFLICT, "This portal user is suspended. Reactivate them first.")
     user, plain, expires_at = await service.invite_portal_user(
         email=user.email,
         role=user.portal_role,
@@ -210,10 +250,12 @@ async def admin_resend_invite(
         granted_by=user_id,
         created_ip=_client_ip(request),
     )
+    await service.session.commit()
     return PortalUserInviteResponse(
         user=PortalUserResponse.model_validate(user),
         magic_link_token=plain,
         magic_link_expires_at=expires_at,
+        email_status=await _email_link("invite", user, plain, expires_at),
     )
 
 
@@ -315,22 +357,54 @@ async def admin_document_access_log(
 async def portal_request_magic_link(
     data: MagicLinkRequest,
     request: Request,
+    background: BackgroundTasks,
     service: PortalService = Depends(_get_service),
 ) -> MagicLinkResponse:
-    """Request a magic link. Always returns 202 regardless of whether the
-    email exists, to avoid leaking which addresses are registered.
+    """Email a sign-in link to a registered portal user.
 
-    NOTE: this endpoint does NOT return the plaintext token in the body.
-    A future ``notifications`` subscriber should observe the
-    ``portal.notification.created`` event (or a dedicated subscriber) and
-    email the link. Until then, the plaintext token is only obtainable via
-    the internal admin ``POST /admin/users/invite`` flow.
+    Always answers 202 with the same body, whether or not the address is
+    registered, so the endpoint never tells a caller who is a client. The
+    request itself does no work that depends on the address: the lookup, the
+    new link and the email all happen after the response, so a registered
+    address does not answer slower than an unknown one either. The token
+    never appears in the body.
     """
-    await service.request_magic_link(
-        data.email,
-        created_ip=_client_ip(request),
-    )
+    allowed, _ = registration_limiter.is_allowed(client_identifier(request))
+    if not allowed:
+        raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, "Too many requests. Try again later.")
+    background.add_task(_mint_and_email_login_link, data.email, _client_ip(request))
     return MagicLinkResponse()
+
+
+async def _mint_and_email_login_link(email: str, created_ip: str | None) -> None:
+    """Mint a sign-in link for ``email`` if it belongs to a portal user, and mail it.
+
+    Runs after the response, in its own session: the request's session is
+    closed by then. Never raises, there is nobody left to answer.
+
+    Without a mail transport nothing is minted. A new link retires the old
+    ones, and on such a server the link the builder copied by hand is the
+    client's only way in: minting one that nobody receives would lock them
+    out, and would let anyone who knows the address do it to them.
+    """
+    from app.config import get_settings
+    from app.core.email import email_delivery_enabled
+    from app.database import async_session_factory
+
+    if not email_delivery_enabled(get_settings()):
+        return
+    try:
+        async with async_session_factory() as session:
+            minted = await PortalService(session).request_magic_link(email, created_ip=created_ip)
+            if minted is None:
+                return
+            user, plain, expires_at = minted
+            args = _link_email_args("login", user, plain, expires_at)
+            await session.commit()
+    except Exception:
+        logger.exception("Portal sign-in link could not be issued")
+        return
+    await send_login_email(**args)
 
 
 @router.post("/auth/consume", response_model=SessionResponse)
@@ -799,6 +873,7 @@ async def portal_list_invoices(
 
     stmt = base.order_by(_Invoice.created_at.desc()).offset(offset).limit(limit)
     rows = list((await session.execute(stmt)).scalars().all())
+    today = now_utc().date()
 
     items = [
         PortalInvoiceEntry(
@@ -810,10 +885,36 @@ async def portal_list_invoices(
             currency_code=inv.currency_code or "",
             amount_total=inv.amount_total,
             status=inv.status,
+            days_overdue=(late := _days_overdue(inv.due_date, inv.status, today)),
+            is_overdue=late is not None,
         )
         for inv in rows
     ]
     return PortalInvoiceList(items=items, total=total)
+
+
+#: Invoice states that owe nothing, so a past due date is not overdue.
+#: Statuses in which the client still owes the invoice. ``pending`` has not
+#: gone out yet, and ``paid``, ``cancelled`` and ``credit_note_issued`` owe
+#: nothing, so none of them can be overdue whatever the due date says.
+_OWED_INVOICE_STATUSES = frozenset({"approved", "sent"})
+
+
+def _days_overdue(due_date: str | None, status_: str | None, today: date) -> int | None:
+    """Days an unsettled invoice is past its due date, or ``None`` when it is not.
+
+    Only an invoice the client still owes can be late, and a blank due date
+    never counts. ``due_date`` is stored as text, so an unreadable value
+    counts as "no due date" rather than failing the list.
+    """
+    if not due_date or (status_ or "") not in _OWED_INVOICE_STATUSES:
+        return None
+    try:
+        due = date.fromisoformat(due_date.strip()[:10])
+    except ValueError:
+        return None
+    late = (today - due).days
+    return late if late > 0 else None
 
 
 # ── Portal-side BIM/CAD model visibility (view-only) ──────────────────────
@@ -1071,6 +1172,137 @@ async def portal_me_projects(
     projects = await service.list_accessible_projects(user.id)
     items = [PortalProjectSummary(id=p.id, name=p.name, project_code=p.project_code) for p in projects]
     return PortalProjectSummaryList(items=items, total=len(items))
+
+
+#: How far ahead the client's milestone list looks by default.
+_MILESTONE_WINDOW_DAYS = 14
+
+
+@router.get(
+    "/projects/{project_id}/milestones",
+    response_model=PortalMilestoneList,
+)
+async def portal_list_milestones(
+    project_id: uuid.UUID,
+    user: RequirePortalSession,
+    session: SessionDep,
+    service: PortalService = Depends(_get_service),
+    days: int = Query(default=_MILESTONE_WINDOW_DAYS, ge=1, le=90),
+) -> PortalMilestoneList:
+    """The project's next milestones, for a client who can see the project.
+
+    Access follows the progress reports: a non-expired ``project`` rule, else
+    404 so the endpoint never confirms a project exists. Only milestones a
+    person marked ``client_visible`` are listed, from every schedule of the
+    project that is not archived. The list holds the milestones expected
+    within ``days`` and the ones that are late, so a slip stays in view
+    instead of dropping out of the window.
+    """
+    from sqlalchemy import select as _select
+
+    from app.modules.schedule.models import Activity as _Activity
+    from app.modules.schedule.models import Schedule as _Schedule
+
+    if not await service.enforce_rls(user.id, "project", project_id, required="view"):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+
+    stmt = (
+        _select(_Activity)
+        .join(_Schedule, _Schedule.id == _Activity.schedule_id)
+        .where(_Schedule.project_id == project_id)
+        .where(_Schedule.status != "archived")
+        .where(_Activity.activity_type == "milestone")
+        .where(_Activity.client_visible.is_(True))
+    )
+    rows = list((await session.execute(stmt)).scalars().all())
+    baseline_finish = await _baseline_finish_dates(session, project_id, {act.schedule_id for act in rows})
+
+    today = now_utc().date()
+    items: list[PortalMilestoneEntry] = []
+    for act in rows:
+        entry = _milestone_entry(act, today, baseline_finish.get(str(act.id)))
+        if entry is None:
+            continue
+        if entry.is_late or (not entry.is_done and 0 <= entry.days_until <= days):
+            items.append(entry)
+    items.sort(key=lambda e: (e.expected_date, e.name))
+    return PortalMilestoneList(items=items, window_days=days)
+
+
+def _read_date(value: str | None) -> date | None:
+    try:
+        return date.fromisoformat((value or "").strip()[:10])
+    except ValueError:
+        return None
+
+
+async def _baseline_finish_dates(session: Any, project_id: uuid.UUID, schedule_ids: set[uuid.UUID]) -> dict[str, str]:
+    """Activity id to finish date in the newest active baseline of each schedule.
+
+    A baseline is the plan as agreed; the live ``end_date`` is where the
+    milestone sits now. With no baseline there is nothing to compare against
+    and the client simply sees one date.
+    """
+    if not schedule_ids:
+        return {}
+    from sqlalchemy import or_ as _or
+    from sqlalchemy import select as _select
+
+    from app.modules.schedule.models import ScheduleBaseline as _Baseline
+    from app.modules.schedule.snapshot_envelope import normalize_envelope
+
+    stmt = (
+        _select(_Baseline)
+        .where(_Baseline.is_active.is_(True))
+        .where(
+            _or(
+                _Baseline.schedule_id.in_(schedule_ids),
+                (_Baseline.schedule_id.is_(None)) & (_Baseline.project_id == project_id),
+            )
+        )
+        .order_by(_Baseline.created_at.desc())
+    )
+    newest: dict[Any, Any] = {}
+    for baseline in (await session.execute(stmt)).scalars().all():
+        newest.setdefault(baseline.schedule_id, baseline)
+    # A schedule's own baseline wins over a project-wide one.
+    ordered = [b for key, b in newest.items() if key is None] + [b for key, b in newest.items() if key is not None]
+    finish: dict[str, str] = {}
+    for baseline in ordered:
+        for row in normalize_envelope(baseline.snapshot_data)["activities"]:
+            if isinstance(row, dict) and row.get("id") and row.get("end_date"):
+                finish[str(row["id"])] = str(row["end_date"])
+    return finish
+
+
+def _milestone_entry(act: Any, today: date, baseline_end: str | None = None) -> PortalMilestoneEntry | None:
+    """Project an activity for the client, or ``None`` when it has no usable date.
+
+    The expected date is the activity's live end date, which rescheduling
+    moves when the work before it slips. The planned date is the same
+    activity's finish in the active baseline, when one was taken, so the
+    client sees how far it moved. ``early_finish`` is not a date: CPM stores
+    it as a day offset from the schedule start.
+    """
+    expected = _read_date(act.end_date) or _read_date(act.start_date)
+    if expected is None:
+        return None
+    planned = _read_date(baseline_end) or expected
+    try:
+        done = act.status == "completed" or float(act.progress_pct or 0) >= 100
+    except (TypeError, ValueError):
+        done = act.status == "completed"
+    days_until = (expected - today).days
+    return PortalMilestoneEntry(
+        id=act.id,
+        name=act.name,
+        planned_date=planned.isoformat(),
+        expected_date=expected.isoformat(),
+        status=act.status,
+        is_done=done,
+        is_late=not done and days_until < 0,
+        days_until=days_until,
+    )
 
 
 @router.get(

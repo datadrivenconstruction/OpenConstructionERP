@@ -48,6 +48,8 @@ logger = logging.getLogger(__name__)
 
 # ── Defaults (override via env later) ─────────────────────────────────────
 MAGIC_LINK_TTL = timedelta(hours=24)
+#: Shortest gap between two self-service sign-in links for one portal user.
+MAGIC_LINK_REQUEST_INTERVAL = timedelta(seconds=60)
 SESSION_TTL = timedelta(days=7)
 
 # Permission rank - higher number satisfies all lower-number requirements.
@@ -250,8 +252,21 @@ class PortalService:
         if user is None or user.status in ("suspended", "expired"):
             return None
 
-        plain = generate_token()
         now = now_utc()
+        # The request is anonymous and now sends an email, so anyone who knows
+        # a client's address could fill their inbox. One link a minute is
+        # plenty for a person who lost the last one.
+        last = await self.magic_repo.last_issued_at(user.id)
+        if last is not None:
+            if last.tzinfo is None:
+                last = last.replace(tzinfo=now.tzinfo)
+            if now - last < MAGIC_LINK_REQUEST_INTERVAL:
+                return None
+
+        # The new link replaces any the user still holds, so a mailbox never
+        # collects a day's worth of live sign-in links.
+        await self.magic_repo.expire_open(user.id, purpose="login", now=now)
+        plain = generate_token()
         link = PortalMagicLink(
             portal_user_id=user.id,
             token_hash=hash_token(plain),

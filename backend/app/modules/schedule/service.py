@@ -2495,6 +2495,7 @@ class ScheduleService:
                     calendar_id=act.calendar_id,
                     assignee_id=act.assignee_id,
                     assignee_name=assignee_names.get(act.assignee_id) if act.assignee_id else None,
+                    client_visible=bool(act.client_visible),
                     metadata=act.metadata_ or {},
                 )
             )

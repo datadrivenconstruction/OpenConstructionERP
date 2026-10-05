@@ -57,6 +57,7 @@ import { ScheduleCodesPanel } from './ScheduleCodesPanel';
 import { ScheduleResourcePanel } from './ScheduleResourcePanel';
 import { ScheduleRealtimePanel } from './ScheduleRealtimePanel';
 import { DependencyEditor } from './DependencyEditor';
+import { MilestoneClientToggle } from './MilestoneClientToggle';
 import { BoqLinkEditor } from './BoqLinkEditor';
 import { generateInWindow, projectWindowDays, refreshAfterGenerate } from './generateWindow';
 import { ActivityGrid } from './ActivityGrid';
@@ -2202,6 +2203,9 @@ export function ScheduleDetail({
                 {formatDate(selectedActivity.start_date)} &ndash; {formatDate(selectedActivity.end_date)}
               </p>
             </div>
+            {selectedActivity.activity_type === 'milestone' && (
+              <MilestoneClientToggle scheduleId={schedule.id} activity={selectedActivity} />
+            )}
             <DependencyEditor
               scheduleId={schedule.id}
               activity={selectedActivity}

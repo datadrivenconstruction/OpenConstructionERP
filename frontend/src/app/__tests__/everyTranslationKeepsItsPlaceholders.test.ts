@@ -241,6 +241,8 @@ describe('every translation keeps the placeholders its sentence needs', () => {
     // ("תנאי אחד"), as each grammar does, which added 70 and made it 284.
     // The 18.4 GAEB site exchange and resource-index counters brought it to
     // 312 the same way, Arabic and Hebrew again stating one and two in words.
+    // The client portal's milestone and overdue badges made it 322: Hebrew
+    // says "one day" and "two days" as words ("יום אחד", "יומיים").
     let zeroForms = 0;
     let spelledOut = 0;
     for (const { key, missing } of comparisons) {
@@ -249,6 +251,6 @@ describe('every translation keeps the placeholders its sentence needs', () => {
       else if (missing.length === 1 && missing[0] === 'count') spelledOut += 1;
     }
     expect(zeroForms, 'zero forms dropping a placeholder').toBeLessThanOrEqual(60);
-    expect(spelledOut, 'singular or dual forms spelling the number out').toBeLessThanOrEqual(320);
+    expect(spelledOut, 'singular or dual forms spelling the number out').toBeLessThanOrEqual(330);
   });
 });
