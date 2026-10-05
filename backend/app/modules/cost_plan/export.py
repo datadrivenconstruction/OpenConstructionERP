@@ -62,6 +62,7 @@ _LABELS: dict[str, dict[str, str]] = {
         "grand_total": "Cost plan total",
         "basis_direct": "{pct}% on direct cost",
         "basis_running": "{pct}% on running subtotal",
+        "basis_same": "{pct}% on the same base as the line above",
         "basis_lump": "Lump sum",
         "basis_banded": "Banded scale",
         "basis_escalation": "Index escalation",
@@ -105,6 +106,7 @@ _LABELS: dict[str, dict[str, str]] = {
         "grand_total": "Summe Kostenplan",
         "basis_direct": "{pct}% auf direkte Kosten",
         "basis_running": "{pct}% auf laufende Zwischensumme",
+        "basis_same": "{pct}% auf dieselbe Basis wie die Zeile darüber",
         "basis_lump": "Pauschale",
         "basis_banded": "Staffel",
         "basis_escalation": "Indexgleitung",
@@ -148,6 +150,7 @@ _LABELS: dict[str, dict[str, str]] = {
         "grand_total": "Итого по плану затрат",
         "basis_direct": "{pct}% от прямых затрат",
         "basis_running": "{pct}% от нарастающего итога",
+        "basis_same": "{pct}% от той же базы, что у строки выше",
         "basis_lump": "Фиксированная сумма",
         "basis_banded": "Ступенчатая шкала",
         "basis_escalation": "Индексация",
@@ -280,8 +283,11 @@ def _basis(line: MarkupRow, locale: str) -> str:
     if kind == "fixed":
         text = label(locale, "basis_lump")
     elif kind == "percentage":
-        compounding = (line.apply_to or "").lower() in ("cumulative", "subtotal")
-        key = "basis_running" if compounding else "basis_direct"
+        apply_to = (line.apply_to or "").lower()
+        if apply_to == "same_as_previous":
+            key = "basis_same"
+        else:
+            key = "basis_running" if apply_to in ("cumulative", "subtotal") else "basis_direct"
         text = label(locale, key, pct=_plain_pct(line.percentage))
     elif kind == "banded":
         text = label(locale, "basis_banded")

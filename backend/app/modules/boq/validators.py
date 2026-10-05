@@ -67,6 +67,7 @@ from app.core.validation.engine import (
     rule_registry,
 )
 from app.core.validation.messages import DEFAULT_LOCALE, translate
+from app.modules.boq.markup_base import SAME_AS_PREVIOUS, has_base
 from app.modules.boq.resource_norms import REVIEW_CATEGORIES, UNIT_RATE_KEPT_KEY, untrusted_buildup_reason
 
 logger = logging.getLogger(__name__)
@@ -179,10 +180,20 @@ class MarkupContingencyNotOnProfit(ValidationRule):
         for scope in {_scope(m) for m in _get_markups(context)}:
             ordered = [m for m in _active(_get_markups(context)) if _scope(m) == scope]
             profit_before: list[str] = []
+            # Profit lines inside the base of the nearest line above, which a
+            # ``same_as_previous`` line borrows; None when that line has no base.
+            previous_base_profits: list[str] | None = None
             for markup in ordered:
                 cat = str(markup.get("category") or "").lower()
                 applies_to = str(markup.get("apply_to") or "direct_cost").lower()
-                if cat == "contingency" and applies_to in _CUMULATIVE and profit_before:
+                if applies_to == SAME_AS_PREVIOUS:
+                    base_profits = list(previous_base_profits or [])
+                elif applies_to in _CUMULATIVE:
+                    base_profits = list(profit_before)
+                else:
+                    base_profits = []
+                previous_base_profits = base_profits if has_base(markup.get("markup_type")) else None
+                if cat == "contingency" and base_profits:
                     results.append(
                         RuleResult(
                             rule_id=self.rule_id,
@@ -194,11 +205,11 @@ class MarkupContingencyNotOnProfit(ValidationRule):
                                 "boq_markup.contingency_not_on_profit.fail",
                                 locale,
                                 markup=str(markup.get("name") or ""),
-                                profit=profit_before[-1],
+                                profit=base_profits[-1],
                             ),
                             element_ref=_ref(markup),
                             suggestion=translate("boq_markup.contingency_not_on_profit.suggestion", locale),
-                            details={"apply_to": applies_to, "profit_lines": profit_before},
+                            details={"apply_to": applies_to, "profit_lines": base_profits},
                         )
                     )
                 if cat == "profit":

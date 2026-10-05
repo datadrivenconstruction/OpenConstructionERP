@@ -7,6 +7,7 @@ import clsx from 'clsx';
 import type { Markup, UpdateMarkupData } from './api';
 import { formatCurrency, toNum } from '@/shared/lib/money';
 import { parseDecimalInput, parseMoneyInput, stripCurrencySigns, toDecimalPayloadString } from '@/shared/lib/parseDecimal';
+import { resolveMarkupBase } from './markupBase';
 
 /**
  * One row of a banded rate card as the editor holds it: the text the estimator
@@ -23,7 +24,11 @@ export type BandIssue = 'rate' | 'limit' | 'order';
 type MarkupType = Markup['markup_type'];
 type ApplyTo = Markup['apply_to'];
 
-const BASES: ApplyTo[] = ['direct_cost', 'cumulative', 'subtotal'];
+// The three an estimator chooses from. ``subtotal`` computes exactly like
+// ``cumulative``; offering both would be two options that mean one thing, so
+// it is shown only on a row that already carries it (a GAEB import, an
+// older bill) and labelled as the running total it is.
+const BASES: ApplyTo[] = ['direct_cost', 'cumulative', 'same_as_previous'];
 
 /**
  * Read the card stored on a row into editable text, or start one.
@@ -123,6 +128,12 @@ export interface MarkupRowEditorProps {
   directCost: number;
   /** Direct cost plus every active line above this one, the base of a running-total line. */
   runningBefore: number;
+  /**
+   * The base the nearest active line above was charged on, which a
+   * `same_as_previous` line borrows. Null when there is no line above or
+   * it is a fixed amount; the line then falls back to the sum of positions.
+   */
+  previousBase?: number | null;
   currencyCode: string;
   locale: string;
   saving?: boolean;
@@ -140,6 +151,7 @@ export function MarkupRowEditor({
   markup,
   directCost,
   runningBefore,
+  previousBase = null,
   currencyCode,
   locale,
   saving,
@@ -169,7 +181,9 @@ export function MarkupRowEditor({
   const bandIssues = markupType === 'banded' ? validateBandDraft(bands) : [];
   const hasErrors = pctInvalid || fixedInvalid || bandIssues.length > 0;
 
-  const base = applyTo === 'cumulative' || applyTo === 'subtotal' ? runningBefore : directCost;
+  const base = resolveMarkupBase(applyTo, directCost, runningBefore, previousBase);
+  const baseFellBack = applyTo === 'same_as_previous' && previousBase === null;
+  const baseOptions: ApplyTo[] = markup.apply_to === 'subtotal' ? [...BASES, 'subtotal'] : BASES;
   const previewAmount: number | null = (() => {
     if (hasErrors) return null;
     switch (markupType) {
@@ -345,7 +359,7 @@ export function MarkupRowEditor({
             </p>
           ) : (
             <div className="space-y-1.5">
-              {BASES.map((option) => (
+              {baseOptions.map((option) => (
                 <label key={option} className="flex cursor-pointer items-start gap-2">
                   <input
                     type="radio"
@@ -359,7 +373,12 @@ export function MarkupRowEditor({
                     <span className="font-medium text-content-primary">
                       {option === 'direct_cost' && t('boq.markup_base_direct_cost', { defaultValue: 'Sum of positions' })}
                       {option === 'cumulative' && t('boq.markup_base_cumulative', { defaultValue: 'Running total incl. rows above' })}
-                      {option === 'subtotal' && t('boq.markup_base_subtotal', { defaultValue: 'Subtotal above this row' })}
+                      {option === 'same_as_previous' &&
+                        t('boq.markup_base_same_as_previous', { defaultValue: 'Same base as the row above' })}
+                      {option === 'subtotal' &&
+                        t('boq.markup_base_subtotal', {
+                          defaultValue: 'Running total incl. rows above (stored as subtotal)',
+                        })}
                     </span>
                     <span className="block text-content-tertiary">
                       {option === 'direct_cost' &&
@@ -371,9 +390,15 @@ export function MarkupRowEditor({
                           defaultValue:
                             'Sum of positions plus every active markup above this line. Move the line up or down to change what it includes.',
                         })}
+                      {option === 'same_as_previous' &&
+                        t('boq.markup_base_same_as_previous_hint', {
+                          defaultValue:
+                            'Uses exactly the base of the nearest active line above, so two lines such as risk and profit sit on the same amount instead of one compounding on the other.',
+                        })}
                       {option === 'subtotal' &&
                         t('boq.markup_base_subtotal_hint', {
-                          defaultValue: 'Works the same as running total. Kept for tax lines and imported bills.',
+                          defaultValue:
+                            'Works exactly like the running total. This line was stored as a subtotal, for example by a GAEB import.',
                         })}
                     </span>
                   </span>
@@ -484,6 +509,13 @@ export function MarkupRowEditor({
         aria-live="polite"
         className="flex flex-wrap items-center gap-x-6 gap-y-1 rounded-md bg-surface-secondary/50 px-3 py-2"
       >
+        {markupType !== 'fixed' && baseFellBack && (
+          <span data-testid="markup-base-fallback" className="basis-full text-amber-700 dark:text-amber-400">
+            {t('boq.markup_base_fallback_note', {
+              defaultValue: 'No line above has a base, so this line uses the sum of positions.',
+            })}
+          </span>
+        )}
         {markupType !== 'fixed' && (
           <span className="flex items-baseline gap-1.5">
             <span>{t('boq.markup_preview_base', { defaultValue: 'Base amount' })}</span>

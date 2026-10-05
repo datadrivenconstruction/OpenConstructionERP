@@ -51,6 +51,7 @@ from functools import cache
 from pathlib import Path
 from typing import Any, Literal
 
+from app.modules.boq.markup_base import has_base, resolve_markup_base
 from app.modules.cost_plan.schemas import (
     CostPlanResponse,
     ElementRow,
@@ -441,11 +442,15 @@ def build_cost_plan(
     has_scoped = any(m.scoped for m in markups)
     markup_rows: list[MarkupRow] = []
     running = direct_cost
+    previous_base: Decimal | None = None
     for line in markups:
         base: Decimal | None = None
-        if not has_scoped and (line.markup_type or "percentage").lower() != "fixed":
-            compounding = (line.apply_to or "direct_cost").lower() in ("cumulative", "subtotal")
-            base = running if compounding else direct_cost
+        if not has_scoped and has_base(line.markup_type):
+            # Same rule as the bill's own cascade, ``same_as_previous`` included.
+            base = resolve_markup_base(
+                line.apply_to, direct_cost=direct_cost, running=running, previous_base=previous_base
+            )
+        previous_base = base
         running += line.amount
         markup_rows.append(
             MarkupRow(
