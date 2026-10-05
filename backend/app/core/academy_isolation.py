@@ -49,6 +49,8 @@ ADMIN_ADDS_MEMBERS = "academy_admin_adds_members"
 ADMIN_ADDS_MEMBERS_MESSAGE = "On the academy only an administrator adds people to a project."
 ROUTE_NEEDS_PROJECT = "academy_needs_project"
 ROUTE_NEEDS_PROJECT_MESSAGE = "On the academy this has to belong to one of your projects."
+EMAIL_NOT_OWN = "academy_email_not_own"
+EMAIL_NOT_OWN_MESSAGE = "On the academy you can only email this to your own address."
 
 
 def academy_mode_enabled() -> bool:
@@ -316,4 +318,28 @@ async def assert_learner_names_a_project(
     raise HTTPException(
         status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         detail={"error": ROUTE_NEEDS_PROJECT, "message": ROUTE_NEEDS_PROJECT_MESSAGE},
+    )
+
+
+async def assert_own_email(session: AsyncSession, user_id: uuid.UUID | str | None, email: str) -> None:
+    """Refuse a learner who mails a document to anyone but themselves in academy mode.
+
+    A send-by-email endpoint that takes the recipient from the request body is
+    an open relay on an academy box: the platform's mail server carries a
+    learner's attachment and note to any inbox. A learner may send only to
+    their own address; an admin and a system call are not limited.
+
+    Raises:
+        HTTPException: 422 with ``{"error": "academy_email_not_own"}``.
+    """
+    if not await is_academy_learner(session, user_id):
+        return
+    from app.modules.users.models import User
+
+    own = (await session.execute(select(User.email).where(User.id == _as_uuid(user_id)))).scalar_one_or_none()
+    if own and own.strip().lower() == (email or "").strip().lower():
+        return
+    raise HTTPException(
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+        detail={"error": EMAIL_NOT_OWN, "message": EMAIL_NOT_OWN_MESSAGE},
     )

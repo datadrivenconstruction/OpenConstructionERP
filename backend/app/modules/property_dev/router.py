@@ -27,6 +27,7 @@ from fastapi import (
     status,
 )
 
+from app.core.academy_isolation import assert_own_email
 from app.core.content_disposition import attachment_disposition
 from app.core.email import EmailAttachment, get_email_service
 from app.core.file_signature import (
@@ -4543,6 +4544,8 @@ async def email_propdev_document(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="A valid recipient_email is required",
         )
+    # Academy mode: a learner mails only themselves, or this is an open relay.
+    await assert_own_email(service.session, payload.get("sub"), recipient)
     recipient_name = str(body.get("recipient_name", "")).strip() or None
     note = str(body.get("note", "")).strip() or None
 
