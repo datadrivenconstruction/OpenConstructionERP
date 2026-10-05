@@ -48,6 +48,7 @@ import {
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { DismissibleInfo, IntroRichText } from '@/shared/ui/DismissibleInfo';
 import { apiGet, apiPost, apiDelete, type Page } from '@/shared/lib/api';
+import { normalizeActionUrl } from '@/shared/lib/notificationActionUrl';
 import { PreferencesTab } from './PreferencesTab';
 import { notificationsGuide } from './notificationsGuide';
 
@@ -90,19 +91,6 @@ const ICON_MAP: Record<IconCategory, { icon: typeof CheckCircle2; color: string;
   validation: { icon: Shield, color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-900/30' },
   system: { icon: Settings, color: 'text-content-tertiary', bg: 'bg-surface-secondary' },
 };
-
-const ACTION_URL_REWRITES: Array<[RegExp, (m: RegExpMatchArray) => string]> = [
-  [/^\/risk(\?.*)?$/, (m) => `/risks${m[1] ?? ''}`],
-  [/^\/boq\?id=([0-9a-fA-F-]{8,})$/, (m) => `/boq/${m[1]}`],
-];
-
-function normalizeActionUrl(url: string): string {
-  for (const [re, build] of ACTION_URL_REWRITES) {
-    const m = url.match(re);
-    if (m) return build(m);
-  }
-  return url;
-}
 
 /* Last-resort label for a notification whose i18n key is missing from the
    active locale AND has no server-side default. Turn the final segment of a

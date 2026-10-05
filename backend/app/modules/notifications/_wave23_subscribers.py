@@ -88,7 +88,7 @@ async def _on_contract_signed(event: Event) -> None:
         },
         entity_type="contract",
         entity_id=str(contract_id),
-        action_url=f"/contracts/{contract_id}",
+        action_url=f"/contracts?highlight={contract_id}",
     )
 
 
@@ -109,7 +109,7 @@ async def _on_claim_submitted(event: Event) -> None:
         body_context={"amount": str(data.get("amount") or ""), "currency": str(data.get("currency") or "")},
         entity_type="contract_claim",
         entity_id=str(claim_id),
-        action_url=f"/contracts/{data.get('contract_id') or ''}/claims/{claim_id}",
+        action_url="/contracts?tab=claims",
     )
 
 
@@ -130,7 +130,7 @@ async def _on_claim_paid(event: Event) -> None:
         body_context={"amount": str(data.get("amount") or ""), "currency": str(data.get("currency") or "")},
         entity_type="contract_claim",
         entity_id=str(claim_id),
-        action_url=f"/contracts/{data.get('contract_id') or ''}/claims/{claim_id}",
+        action_url="/contracts?tab=claims",
     )
 
 
@@ -154,7 +154,7 @@ async def _on_lead_qualified(event: Event) -> None:
         body_context={"name": str(data.get("name") or "")},
         entity_type="crm_lead",
         entity_id=str(lead_id),
-        action_url=f"/crm/leads/{lead_id}",
+        action_url="/crm",
     )
 
 
@@ -175,7 +175,7 @@ async def _on_opportunity_won(event: Event) -> None:
         body_context={"name": str(data.get("name") or ""), "value": str(data.get("value") or "")},
         entity_type="crm_opportunity",
         entity_id=str(opp_id),
-        action_url=f"/crm/opportunities/{opp_id}",
+        action_url="/crm",
     )
 
 
@@ -202,7 +202,7 @@ async def _on_assignment_proposed(event: Event) -> None:
         },
         entity_type="resource_assignment",
         entity_id=str(aid),
-        action_url=f"/resources/assignments/{aid}",
+        action_url=(f"/resources?resourceId={data['resource_id']}" if data.get("resource_id") else "/resources"),
     )
 
 
@@ -223,7 +223,7 @@ async def _on_assignment_confirmed(event: Event) -> None:
         body_context={"task": str(data.get("task_ref") or "")},
         entity_type="resource_assignment",
         entity_id=str(aid),
-        action_url=f"/resources/assignments/{aid}",
+        action_url=(f"/resources?resourceId={data['resource_id']}" if data.get("resource_id") else "/resources"),
     )
 
 
@@ -250,7 +250,7 @@ async def _on_buyer_contracted(event: Event) -> None:
         },
         entity_type="buyer",
         entity_id=str(buyer_id),
-        action_url=f"/property-dev/buyers/{buyer_id}",
+        action_url=f"/property-dev?buyerId={buyer_id}",
     )
 
 
@@ -274,7 +274,7 @@ async def _on_handover_completed(event: Event) -> None:
             body_context={"plot": str(data.get("plot_code") or "")},
             entity_type="handover",
             entity_id=str(handover_id),
-            action_url=f"/property-dev/handovers/{handover_id}",
+            action_url="/property-dev?tab=handovers",
         )
 
 
@@ -298,7 +298,7 @@ async def _on_warranty_raised(event: Event) -> None:
         },
         entity_type="warranty_claim",
         entity_id=str(claim_id),
-        action_url=f"/property-dev/warranty/{claim_id}",
+        action_url="/property-dev?tab=warranty",
     )
 
 
@@ -325,7 +325,7 @@ async def _on_invitation_sent(event: Event) -> None:
         },
         entity_type="bid_invitation",
         entity_id=str(invitation_id),
-        action_url=f"/bid-management/invitations/{invitation_id}",
+        action_url=(f"/bid-management?highlight={data['package_id']}" if data.get("package_id") else "/bid-management"),
     )
 
 
@@ -373,7 +373,11 @@ async def _on_bid_awarded(event: Event) -> None:
             },
             entity_type="bid_package",
             entity_id=str(pkg_id),
-            action_url=f"/bid-management/packages/{pkg_id}",
+            action_url=(
+                f"/projects/{data['project_id']}/bid-management?highlight={pkg_id}"
+                if data.get("project_id")
+                else f"/bid-management?highlight={pkg_id}"
+            ),
         )
 
 
@@ -397,7 +401,7 @@ async def _on_constraint_cleared(event: Event) -> None:
         body_context={"task": str(data.get("task_ref") or "")},
         entity_type="schedule_constraint",
         entity_id=str(constraint_id),
-        action_url=f"/schedule-advanced/constraints/{constraint_id}",
+        action_url="/schedule-advanced",
     )
 
 
@@ -421,7 +425,7 @@ async def _on_diary_signed(event: Event) -> None:
         body_context={"date": str(data.get("diary_date") or "")},
         entity_type="daily_diary",
         entity_id=str(diary_id),
-        action_url=f"/daily-diary/{diary_id}",
+        action_url=(f"/projects/{data['project_id']}/daily-diary" if data.get("project_id") else "/daily-diary"),
     )
 
 

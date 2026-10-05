@@ -111,7 +111,7 @@ async def _collect_file_approvals(
                 "project_name": None,  # filled in by caller from project map
                 "entity_type": "file_approval_workflow",
                 "entity_id": str(wf_id),
-                "action_url": f"/file-approvals/{wf_id}",
+                "action_url": "/files/approvals",
                 "severity": "warning",
                 "created_at": _iso(submitted_at),
                 "role_label": role_label,
@@ -167,7 +167,7 @@ async def _collect_change_order_approvals(
                 "project_name": project_name_by_id.get(project_id),
                 "entity_type": "change_order",
                 "entity_id": str(co_id),
-                "action_url": f"/changeorders/{co_id}",
+                "action_url": f"/changeorders?highlight={co_id}",
                 "severity": "warning",
                 "created_at": None,
             },

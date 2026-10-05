@@ -95,7 +95,7 @@ async def _on_cert_expiring(event: Event) -> None:
             },
             entity_type="resource_certification",
             entity_id=str(data.get("certification_id", "")),
-            action_url=f"/resources/{resource_id}",
+            action_url=f"/resources?resourceId={resource_id}",
         )
         await session.commit()
 
@@ -135,7 +135,7 @@ async def _on_retention_released(event: Event) -> None:
             },
             entity_type="contract",
             entity_id=str(contract.id),
-            action_url=f"/contracts/{contract.id}",
+            action_url=f"/contracts?highlight={contract.id}",
         )
         await session.commit()
 
@@ -270,7 +270,7 @@ async def _on_opportunity_scored(event: Event) -> None:
             },
             entity_type="crm_opportunity",
             entity_id=str(opp.id),
-            action_url=f"/crm/opportunities/{opp.id}",
+            action_url="/crm",
         )
         await session.commit()
 
@@ -312,7 +312,7 @@ async def _on_boq_position_assigned(event: Event) -> None:
             },
             entity_type="carbon_inventory",
             entity_id=str(inv.id),
-            action_url=f"/carbon/inventories/{inv.id}",
+            action_url=f"/projects/{inv.project_id}/carbon",
         )
         await session.commit()
 
@@ -1045,7 +1045,7 @@ async def _on_qms_ncr_mirrored_from_hse(event: Event) -> None:
                 },
                 entity_type="qms_ncr",
                 entity_id=str(ncr_id),
-                action_url=f"/qms/ncrs/{ncr_id}",
+                action_url=(f"/projects/{data['project_id']}/qms" if data.get("project_id") else "/qms"),
             )
         await session.commit()
 

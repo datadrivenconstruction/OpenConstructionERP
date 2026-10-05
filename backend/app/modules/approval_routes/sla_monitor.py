@@ -156,7 +156,7 @@ async def _raise_breach(
                 "step_ordinal": ordinal,
                 "hours_overdue": overdue,
             },
-            action_url=f"/approvals/{instance.id}",
+            action_url="/governance?tab=approvals",
             metadata={
                 "step_ordinal": ordinal,
                 "hours_overdue": overdue,
@@ -216,7 +216,7 @@ async def _maybe_escalate(
             "step_ordinal": view.current_step_ordinal,
             "level": view.level,
         },
-        action_url=f"/approvals/{instance.id}",
+        action_url="/governance?tab=approvals",
         metadata={
             "step_ordinal": view.current_step_ordinal,
             "escalated_to": view.next_target,
