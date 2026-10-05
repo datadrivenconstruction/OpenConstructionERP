@@ -37,6 +37,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import Select, false, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.academy_isolation import academy_mode_enabled
 from app.core.audit_log import log_activity
 from app.core.demo_privacy import anonymize_email, demo_mode_enabled, should_redact
 from app.core.events import event_bus
@@ -263,8 +264,14 @@ class RosterService:
         # people already on this project, for the rows and the count alike (a
         # count over all users would still answer "does alice@acme.com have
         # an account"), and shows everyone but the caller redacted.
+        #
+        # An academy box narrows the same way, because every other user there
+        # is another paying learner, and also narrows the address book to the
+        # caller's own: contacts carry no project, so the tenant is the
+        # boundary. An admin, who enrols learners, keeps the full picker.
+        academy_owner = await self._academy_scope_owner(actor_id)
         within: set[uuid.UUID] | None = None
-        if demo_mode_enabled():
+        if demo_mode_enabled() or academy_owner is not None:
             within = {uuid.UUID(str(u)) for u in (*access_user_ids, *rostered_users)}
             if actor_id is not None:
                 within.add(uuid.UUID(str(actor_id)))
@@ -287,8 +294,8 @@ class RosterService:
                     has_project_access=user.id in access_user_ids,
                 )
             )
-        candidates.extend(await self._search_contacts(needle, limit, rostered_contacts))
-        total = await self._count_users(needle, within=within) + await self._count_contacts(needle)
+        candidates.extend(await self._search_contacts(needle, limit, rostered_contacts, owner=academy_owner))
+        total = await self._count_users(needle, within=within) + await self._count_contacts(needle, owner=academy_owner)
         # Somebody already on the roster stays in the list, ticked, rather than
         # disappearing: a name that is absent from a search reads as "we do not
         # have them" and sends the user off to create a duplicate.
@@ -605,9 +612,28 @@ class RosterService:
             return None
         return Contact
 
-    def _contacts_stmt(self, needle: str, contact_model: Any) -> Select[Any]:
-        """Active address-book contacts matching ``needle``, unpaged."""
+    async def _academy_scope_owner(self, actor_id: str | uuid.UUID | None) -> str | None:
+        """The caller's tenant when academy mode narrows the picker, else ``None``.
+
+        ``None`` with the flag off, for a system call, and for an admin.
+        """
+        if actor_id is None or not academy_mode_enabled():
+            return None
+        from app.core.tenant_scope import tenant_scope_owner
+
+        return await tenant_scope_owner(self.session, str(actor_id))
+
+    def _contacts_stmt(self, needle: str, contact_model: Any, owner: str | None = None) -> Select[Any]:
+        """Active address-book contacts matching ``needle``, unpaged.
+
+        ``owner`` narrows them to one tenant's address book (academy mode),
+        with the same clause the contacts list uses.
+        """
         stmt = select(contact_model).where(contact_model.is_active.is_(True))
+        if owner is not None:
+            from app.modules.contacts.repository import _tenant_scope
+
+            stmt = stmt.where(_tenant_scope(owner))
         if needle:
             pattern = f"%{needle}%"
             stmt = stmt.where(
@@ -620,12 +646,12 @@ class RosterService:
             )
         return stmt
 
-    async def _count_contacts(self, needle: str) -> int:
+    async def _count_contacts(self, needle: str, *, owner: str | None = None) -> int:
         """How many contacts match ``needle``; zero without the contacts module."""
         contact_model = self._contact_model()
         if contact_model is None:
             return 0
-        stmt = select(func.count()).select_from(self._contacts_stmt(needle, contact_model).subquery())
+        stmt = select(func.count()).select_from(self._contacts_stmt(needle, contact_model, owner).subquery())
         return int((await self.session.execute(stmt)).scalar_one())
 
     async def _search_contacts(
@@ -633,6 +659,8 @@ class RosterService:
         needle: str,
         limit: int,
         rostered_contacts: set[uuid.UUID],
+        *,
+        owner: str | None = None,
     ) -> list[RosterCandidate]:
         """One page of the address-book contacts matching ``needle``.
 
@@ -643,7 +671,7 @@ class RosterService:
         if contact_model is None:
             return []
         stmt = (
-            self._contacts_stmt(needle, contact_model)
+            self._contacts_stmt(needle, contact_model, owner)
             .order_by(contact_model.company_name, contact_model.last_name)
             .limit(limit)
         )
