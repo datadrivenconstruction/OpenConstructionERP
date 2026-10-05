@@ -26,7 +26,9 @@ import {
   type ProjectAddress,
   type WizardPreset,
   type ProfileSpec,
+  type ProjectWorks,
 } from './api';
+import { ProjectWorksField } from './ProjectWorksField';
 import { useTelemetry } from '@/shared/lib/telemetry';
 import { lookupCountryDefault } from './currencyGroups';
 import { regionOptionLabel, type RegionOption } from './regionLabel';
@@ -635,6 +637,7 @@ export function CreateProjectModal({
   // "not provided" and is normalised to null/omitted in the payload.
   const [projectCode, setProjectCode] = useState('');
   const [projectType, setProjectType] = useState('');
+  const [works, setWorks] = useState<ProjectWorks | null>(null);
   const [clientName, setClientName] = useState('');
   const [contractValue, setContractValue] = useState('');
   const [budgetEstimate, setBudgetEstimate] = useState('');
@@ -696,6 +699,7 @@ export function CreateProjectModal({
       setAddressPostal('');
       setProjectCode('');
       setProjectType('');
+      setWorks(null);
       setClientName('');
       setContractValue('');
       setBudgetEstimate('');
@@ -933,6 +937,7 @@ export function CreateProjectModal({
         // so an untouched Quick-create form still posts a minimal body.
         project_code: projectCode.trim() || null,
         project_type: projectType.trim() || null,
+        works,
         client_id: clientName.trim() || null,
         contract_value: contractValue.trim() || null,
         budget_estimate: budgetEstimate.trim() || null,
@@ -1655,6 +1660,9 @@ export function CreateProjectModal({
                       placeholder={t('projects.client_owner_placeholder', { defaultValue: 'Client or owner name' })}
                       className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent"
                     />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <ProjectWorksField id="qc-works" value={works} onChange={setWorks} />
                   </div>
                   </div>
                 </div>

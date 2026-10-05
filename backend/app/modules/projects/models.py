@@ -136,6 +136,14 @@ class Project(Base):
         default=None,
     )
 
+    # Whether the client is a public buyer: "public" or "private", the
+    # vocabulary the state packs write their retention rules in. Where a
+    # country's law on retention follows the client (France: the Code de la
+    # commande publique for public contracts, loi 71-584 for private works),
+    # the contract defaults read it here. NULL means not recorded, not
+    # private, and every reader keeps the country's neutral figures for it.
+    works: Mapped[str | None] = mapped_column(String(16), nullable=True, default=None)
+
     # ── Phase 12 expansion fields (all nullable for backward compat) ─────
     project_code: Mapped[str | None] = mapped_column(String(50), nullable=True)
     project_type: Mapped[str | None] = mapped_column(String(50), nullable=True)

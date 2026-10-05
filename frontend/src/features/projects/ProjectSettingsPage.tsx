@@ -35,6 +35,7 @@ import { useFxRatesStore, getFxRate } from '@/stores/useFxRatesStore';
 import { getErrorMessage } from '@/shared/lib/api';
 import { projectsApi, type Project, type ProjectFxRate } from './api';
 import { CURRENCY_GROUPS, CreateProjectModal } from './CreateProjectPage';
+import { ProjectWorksField } from './ProjectWorksField';
 import { getVatPercent } from '../boq/boqHelpers';
 import { TranslationSettingsTab } from '../translation';
 import { MethodologyActiveCard } from '../methodology/MethodologyActiveCard';
@@ -845,6 +846,18 @@ export function ProjectSettingsPage() {
         onClose={() => setEditSetupOpen(false)}
         editProjectId={project.id}
       />
+
+      {/* ── Client: public buyer or private (retention law follows it) ─── */}
+      <Card padding="lg">
+        <div className="max-w-md">
+          <ProjectWorksField
+            id="project-works-select"
+            value={project.works}
+            disabled={updateMutation.isPending}
+            onChange={(next) => updateMutation.mutate({ works: next } as Partial<Project>)}
+          />
+        </div>
+      </Card>
 
       {/* ── Currencies — base + additional rates merged (#88, #105) ──────── */}
       {/* The id="fx-rates" anchor is the deep-link target for the BOQ
