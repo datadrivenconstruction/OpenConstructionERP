@@ -548,10 +548,20 @@ COUNTRY_CONTRACT_DEFAULTS: dict[str, dict[str, Any]] = {
 #: federal contract form states the security as "fünf Prozent der
 #: Auftragssumme (inkl. Umsatzsteuer, ohne Nachträge)" (VHB Bund, Formblatt
 #: 214 Nr. 4), so the ceiling is measured on the same base.
+#:
+#: ``subcontract_vat_percent`` is the VAT a subcontract's invoice is presumed
+#: to carry when the contract states none. Between a main contractor and its
+#: subcontractor German construction work is reverse charge: the recipient owes
+#: the tax when it "nachhaltig entsprechende Leistungen erbringt" (§ 13b Abs. 2
+#: Nr. 4, Abs. 5 Satz 2 UStG), which a main contractor does. The sub's invoice
+#: then carries no USt and its retention is measured without it. A contract
+#: that states its own rate overrides the presumption either way.
 COUNTRY_RETENTION_BASIS: dict[str, dict[str, str]] = {
     "DE": {
         "basis": RETENTION_BASIS_GROSS,
         "reference": "§ 17 Abs. 6 Nr. 1 VOB/B; VHB Bund Formblatt 214 Nr. 4",
+        "subcontract_vat_percent": "0",
+        "subcontract_reference": "§ 13b Abs. 2 Nr. 4, Abs. 5 Satz 2 UStG",
     },
 }
 
@@ -594,15 +604,18 @@ def resolve_retention_basis(
     *,
     agreed_vat_rate: Any = None,
     project_vat_rate: Any = None,
+    subcontract: bool = False,
 ) -> RetentionBasis:
     """What retention is measured on for a contract in ``country_code``.
 
     On a gross basis the VAT is, in order: the rate the contract agreed for
     its invoices (``metadata.einvoice.vat_rate``, where a public client's
-    award states the VAT treatment, ``0`` for reverse charge), the project's
-    default VAT rate, the country's standard rate. A gross basis whose VAT
-    nobody can say is reported with ``vat_source`` ``"none"`` and no rate,
-    and the caller measures on the net and says so rather than inventing one.
+    award states the VAT treatment, ``0`` for reverse charge), for a
+    subcontract the rate the country presumes its invoices carry
+    (``subcontract_vat_percent``), the project's default VAT rate, the
+    country's standard rate. A gross basis whose VAT nobody can say is
+    reported with ``vat_source`` ``"none"`` and no rate, and the caller
+    measures on the net and says so rather than inventing one.
     """
     country = normalise_country(country_code)
     row = COUNTRY_RETENTION_BASIS.get(country)
@@ -612,6 +625,14 @@ def resolve_retention_basis(
     agreed = _vat_percent(agreed_vat_rate)
     if agreed is not None:
         return RetentionBasis(RETENTION_BASIS_GROSS, agreed, "contract_einvoice", reference)
+    presumed = _vat_percent(row.get("subcontract_vat_percent")) if subcontract else None
+    if presumed is not None:
+        return RetentionBasis(
+            RETENTION_BASIS_GROSS,
+            presumed,
+            "subcontract_presumed",
+            f"{reference}; {row.get('subcontract_reference')}",
+        )
     project_rate = _vat_percent(project_vat_rate)
     if project_rate is not None:
         return RetentionBasis(RETENTION_BASIS_GROSS, project_rate, "project_default", reference)
@@ -697,6 +718,10 @@ def _validate_table() -> None:
             raise ValueError(f"retention basis key {country!r} is not ISO 3166-1 alpha-2")
         if basis.get("basis") not in RETENTION_BASES or not basis.get("reference"):
             raise ValueError(f"the retention basis of {country} must be one of {RETENTION_BASES} with a reference")
+        if "subcontract_vat_percent" in basis:
+            _check_percent(basis["subcontract_vat_percent"], f"{country}.subcontract_vat_percent")
+            if not basis.get("subcontract_reference"):
+                raise ValueError(f"{country}.subcontract_vat_percent must name its subcontract_reference")
 
 
 _validate_table()

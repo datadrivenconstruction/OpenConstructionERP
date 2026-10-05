@@ -1776,8 +1776,10 @@ class FinanceService:
         # with no VAT on it would collect less than the client owes, so the
         # invoice adds the VAT the retention was measured with when the
         # contract states none of its own. A net-basis contract keeps the
-        # contract's rate, or none, exactly as before.
-        if contract_einvoice.get("vat_rate") in (None, ""):
+        # contract's rate, or none, exactly as before, and so does a payable:
+        # a subcontractor's invoice is the subcontractor's to state, and in
+        # Germany it is usually reverse charge with no USt on it at all.
+        if direction == "receivable" and contract_einvoice.get("vat_rate") in (None, ""):
             from app.modules.contracts.service import ContractsService  # noqa: PLC0415
 
             basis = await ContractsService(self.session).retention_basis(contract)

@@ -5292,8 +5292,9 @@ class ContractsService:
         The country is the project's, the rule is data
         (:data:`~app.modules.contracts.country_defaults.COUNTRY_RETENTION_BASIS`),
         and the VAT of a gross basis is the one the contract agreed for its
-        invoices, else the project's default, else the country's standard
-        rate. Every writer of a claim's retention reads it here, and so do the
+        invoices, else for a subcontract the rate the country presumes (none
+        in Germany, where it is reverse charge), else the project's default,
+        else the country's standard rate. Every writer of a claim's retention reads it here, and so do the
         two documents that turn a claim into money (the GAEB X89 invoice and
         the finance receivable), so the figure a claim holds and the figure
         its invoice takes off the payment cannot drift apart.
@@ -5311,6 +5312,7 @@ class ContractsService:
             getattr(project, "country_code", None),
             agreed_vat_rate=einvoice.get("vat_rate") if isinstance(einvoice, dict) else None,
             project_vat_rate=getattr(project, "default_vat_rate", None),
+            subcontract=(getattr(contract, "counterparty_type", None) or "client") == "subcontractor",
         )
         if basis.vat_source == "none":
             logger.warning(

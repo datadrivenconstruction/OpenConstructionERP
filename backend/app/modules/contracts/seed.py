@@ -322,6 +322,7 @@ async def seed_progress_claims_demo(
                 "DE",
                 agreed_vat_rate=einvoice.get("vat_rate") if isinstance(einvoice, dict) else None,
                 project_vat_rate=german_projects[contract.project_id],
+                subcontract=(contract.counterparty_type or "client") == "subcontractor",
             ).vat_percent
         monthly_base = total_value / Decimal(contract_months)
 

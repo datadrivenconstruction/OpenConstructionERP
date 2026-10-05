@@ -157,6 +157,19 @@ async def test_a_reverse_charge_contract_is_measured_without_vat(session) -> Non
     assert D(claim.retention_amount) == D("38225.98")
 
 
+async def test_a_german_subcontract_is_presumed_reverse_charge(session) -> None:
+    """§ 13b UStG: the sub's invoice carries no USt, so neither its retention nor the payable does."""
+    contract, line = await _contract(session, "DE")
+    contract.counterparty_type = "subcontractor"
+    await session.flush()
+    claim = await _certified_claim(session, contract, line, "AR-1", 3, "38.225979")
+    assert D(claim.retention_amount) == D("38225.98")
+
+    invoice = await FinanceService(session).create_receivable_from_claim(claim.id)
+    assert invoice.invoice_direction == "payable"
+    assert (D(invoice.tax_amount), D(invoice.retention_amount)) == (D("0"), D("38225.98"))
+
+
 @pytest.mark.parametrize("country", ["GB", "US", "FR"])
 async def test_a_net_basis_country_still_holds_ten_percent_of_the_net(session, country: str) -> None:
     contract, line = await _contract(session, country)

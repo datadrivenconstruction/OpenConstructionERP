@@ -111,6 +111,21 @@ def test_the_contracts_agreed_vat_comes_before_the_projects_and_the_countrys() -
     assert (project.vat_percent, project.vat_source) == (D("16"), "project_default")
 
 
+def test_a_german_subcontract_is_presumed_reverse_charge_unless_it_states_a_rate() -> None:
+    """§ 13b Abs. 2 Nr. 4, Abs. 5 Satz 2 UStG: a main contractor owes the USt on its sub's work."""
+    presumed = resolve_retention_basis("DE", project_vat_rate="19", subcontract=True)
+    assert (presumed.basis, presumed.vat_percent, presumed.vat_source) == (
+        RETENTION_BASIS_GROSS,
+        D("0"),
+        "subcontract_presumed",
+    )
+    assert "§ 13b" in (presumed.reference or "")
+    stated = resolve_retention_basis("DE", agreed_vat_rate="19", subcontract=True)
+    assert (stated.vat_percent, stated.vat_source) == (D("19"), "contract_einvoice")
+    # Outside Germany a subcontract is on the net like any other contract.
+    assert resolve_retention_basis("GB", subcontract=True).vat_percent is None
+
+
 def test_an_unreadable_agreed_rate_falls_through_rather_than_reading_as_zero() -> None:
     basis = resolve_retention_basis("DE", agreed_vat_rate="nineteen")
     assert (basis.vat_percent, basis.vat_source) == (D("19"), "country_standard")
