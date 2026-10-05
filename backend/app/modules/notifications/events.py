@@ -144,6 +144,8 @@ async def _on_meeting_action_items_created(event: Event) -> None:
                     entity_type="task",
                     entity_id=str(task_id) if task_id else None,
                     action_url=(f"/tasks?id={task_id}" if task_id else None),
+                    # Lets the academy backstop drop one addressed outside the project.
+                    metadata={"project_id": data.get("project_id")},
                 )
             await session.commit()
     except Exception:

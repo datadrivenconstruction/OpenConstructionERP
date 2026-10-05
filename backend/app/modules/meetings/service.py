@@ -22,6 +22,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.academy_isolation import filter_users_to_project
 from app.core.events import event_bus
 from app.core.json_merge import merge_metadata
 from app.modules.meetings import logic
@@ -437,7 +438,14 @@ class MeetingService:
         if open_actions:
             from app.modules.tasks.models import Task
 
+            # These tasks are written directly, around the task service's own
+            # gate, so academy mode drops an owner outside the project here:
+            # the task is created unassigned. A no-op otherwise.
+            named = [ai.get("owner_id") for ai in open_actions if ai.get("owner_id")]
+            kept = set(await filter_users_to_project(self.session, meeting.project_id, named))
             for ai in open_actions:
+                if ai.get("owner_id") and ai.get("owner_id") not in kept:
+                    ai = {**ai, "owner_id": None}  # a copy, the stored item is left as it was
                 try:
                     task = Task(
                         project_id=meeting.project_id,
@@ -1314,6 +1322,8 @@ class MeetingService:
                 continue
             seen.add(uid)
             recipient_ids.append(uid)
+        # Academy mode: only attendees who are in the project. A no-op otherwise.
+        recipient_ids = await filter_users_to_project(self.session, meeting.project_id, recipient_ids)
 
         notified: list[str] = []
         if recipient_ids:
@@ -1333,7 +1343,7 @@ class MeetingService:
                         "title": meeting.title,
                     },
                     action_url="/meetings",
-                    metadata={"minutes_id": str(row.id)},
+                    metadata={"minutes_id": str(row.id), "project_id": str(meeting.project_id)},
                 )
                 notified = recipient_ids
             except Exception:  # best-effort - never fail distribution on the sink
