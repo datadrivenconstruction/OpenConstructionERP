@@ -30,6 +30,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from fastapi.responses import StreamingResponse
 
+from app.core.academy_isolation import academy_mode_enabled, assert_users_can_access_project
 from app.core.bulk_ops import BulkAssignRequest, BulkDeleteRequest, BulkStatusRequest
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.tasks.schemas import (
@@ -850,6 +851,15 @@ async def batch_assign_tasks(
     from app.modules.tasks.models import Task
 
     allowed_ids = await _filter_owned_task_ids(session, user_id, body.ids)
+    # Academy mode: the assignee must be in every project the tasks belong to.
+    if academy_mode_enabled() and allowed_ids:
+        from sqlalchemy import select as _select
+
+        project_ids = set(
+            (await session.execute(_select(Task.project_id).where(Task.id.in_(allowed_ids)))).scalars().all()
+        )
+        for project_id in project_ids:
+            await assert_users_can_access_project(session, project_id, [body.assignee_id])
     updated = await bulk_update_fields(session, Task, allowed_ids, {"responsible_id": body.assignee_id})
     logger.info(
         "Bulk assign tasks: requested=%d updated=%d assignee=%s user=%s",

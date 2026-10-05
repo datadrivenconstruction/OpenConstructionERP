@@ -15,6 +15,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.academy_isolation import assert_users_can_access_project
 from app.core.events import event_bus
 from app.core.json_merge import merge_metadata
 from app.modules.tasks.models import Task
@@ -91,6 +92,12 @@ class TaskService:
             contact_fields = await self._contact_assignee(data.assignee_contact_id, user_id)
             responsible_id = contact_fields.pop("responsible_id")
             metadata.update(contact_fields)
+
+        # Academy mode: the people a task names must be in its project. A no-op
+        # on a normal install.
+        await assert_users_can_access_project(
+            self.session, data.project_id, [responsible_id, *(data.persons_involved or [])]
+        )
 
         # Validate dependency: predecessor must exist in same project
         if data.depends_on:
@@ -483,6 +490,17 @@ class TaskService:
                         f"Allowed transitions: {', '.join(sorted(allowed)) or 'none'}"
                     ),
                 )
+
+        # Academy mode: a person the edit newly names must be in the project.
+        # Names already on the task are not re-checked, so an unrelated edit
+        # still saves. A no-op on a normal install.
+        newly_named: list[Any] = []
+        if fields.get("responsible_id") and str(fields["responsible_id"]) != str(task.responsible_id or ""):
+            newly_named.append(fields["responsible_id"])
+        if fields.get("persons_involved"):
+            already = {str(p) for p in (task.persons_involved or [])}
+            newly_named.extend(p for p in fields["persons_involved"] if str(p) not in already)
+        await assert_users_can_access_project(self.session, task.project_id, newly_named)
 
         if not fields:
             return task
