@@ -34,7 +34,7 @@ _TABLES: dict[str, dict[str, str]] = {
         "greeting_generic": "Hello,",
         "cta": "Open in OpenConstructionERP",
         "footer": "You receive this email because of your notification settings. You can change them in your profile.",
-        "digest_subject": "Notification digest ({count})",
+        "digest_subject": "OpenConstructionERP: Notification digest ({count})",
         "digest_heading": "Recent notifications:",
     },
     "de": {
@@ -45,7 +45,7 @@ _TABLES: dict[str, dict[str, str]] = {
             "Sie erhalten diese E-Mail aufgrund Ihrer Benachrichtigungseinstellungen. "
             "Sie können sie in Ihrem Profil ändern."
         ),
-        "digest_subject": "Benachrichtigungsübersicht ({count})",
+        "digest_subject": "OpenConstructionERP: Benachrichtigungsübersicht ({count})",
         "digest_heading": "Neueste Benachrichtigungen:",
     },
     "fr": {
@@ -56,7 +56,7 @@ _TABLES: dict[str, dict[str, str]] = {
             "Vous recevez cet e-mail en raison de vos paramètres de notification. "
             "Vous pouvez les modifier dans votre profil."
         ),
-        "digest_subject": "Récapitulatif des notifications ({count})",
+        "digest_subject": "OpenConstructionERP: Récapitulatif des notifications ({count})",
         "digest_heading": "Notifications récentes :",
     },
     "es": {
@@ -64,7 +64,7 @@ _TABLES: dict[str, dict[str, str]] = {
         "greeting_generic": "Hola:",
         "cta": "Abrir en OpenConstructionERP",
         "footer": "Recibe este correo por su configuración de notificaciones. Puede cambiarla en su perfil.",
-        "digest_subject": "Resumen de notificaciones ({count})",
+        "digest_subject": "OpenConstructionERP: Resumen de notificaciones ({count})",
         "digest_heading": "Notificaciones recientes:",
     },
     "it": {
@@ -72,7 +72,7 @@ _TABLES: dict[str, dict[str, str]] = {
         "greeting_generic": "Buongiorno,",
         "cta": "Apri in OpenConstructionERP",
         "footer": "Ricevi questa email in base alle tue impostazioni di notifica. Puoi modificarle nel tuo profilo.",
-        "digest_subject": "Riepilogo notifiche ({count})",
+        "digest_subject": "OpenConstructionERP: Riepilogo notifiche ({count})",
         "digest_heading": "Notifiche recenti:",
     },
     "nl": {
@@ -80,7 +80,7 @@ _TABLES: dict[str, dict[str, str]] = {
         "greeting_generic": "Geachte heer, mevrouw,",
         "cta": "Openen in OpenConstructionERP",
         "footer": "U ontvangt deze e-mail vanwege uw meldingsinstellingen. U kunt ze wijzigen in uw profiel.",
-        "digest_subject": "Overzicht van meldingen ({count})",
+        "digest_subject": "OpenConstructionERP: Overzicht van meldingen ({count})",
         "digest_heading": "Recente meldingen:",
     },
     "pl": {
@@ -88,7 +88,7 @@ _TABLES: dict[str, dict[str, str]] = {
         "greeting_generic": "Dzień dobry,",
         "cta": "Otwórz w OpenConstructionERP",
         "footer": "Otrzymujesz tę wiadomość zgodnie z ustawieniami powiadomień. Możesz je zmienić w swoim profilu.",
-        "digest_subject": "Podsumowanie powiadomień ({count})",
+        "digest_subject": "OpenConstructionERP: Podsumowanie powiadomień ({count})",
         "digest_heading": "Ostatnie powiadomienia:",
     },
     "pt": {
@@ -96,7 +96,7 @@ _TABLES: dict[str, dict[str, str]] = {
         "greeting_generic": "Olá,",
         "cta": "Abrir no OpenConstructionERP",
         "footer": "Recebe este e-mail devido às suas definições de notificação. Pode alterá-las no seu perfil.",
-        "digest_subject": "Resumo de notificações ({count})",
+        "digest_subject": "OpenConstructionERP: Resumo de notificações ({count})",
         "digest_heading": "Notificações recentes:",
     },
     "cs": {
@@ -104,7 +104,7 @@ _TABLES: dict[str, dict[str, str]] = {
         "greeting_generic": "Dobrý den,",
         "cta": "Otevřít v OpenConstructionERP",
         "footer": "Tento e-mail dostáváte kvůli svému nastavení oznámení. Můžete ho změnit ve svém profilu.",
-        "digest_subject": "Přehled oznámení ({count})",
+        "digest_subject": "OpenConstructionERP: Přehled oznámení ({count})",
         "digest_heading": "Nedávná oznámení:",
     },
     "ru": {
@@ -112,7 +112,7 @@ _TABLES: dict[str, dict[str, str]] = {
         "greeting_generic": "Здравствуйте!",
         "cta": "Открыть в OpenConstructionERP",
         "footer": "Вы получили это письмо согласно настройкам уведомлений. Изменить их можно в профиле.",
-        "digest_subject": "Сводка уведомлений ({count})",
+        "digest_subject": "OpenConstructionERP: Сводка уведомлений ({count})",
         "digest_heading": "Последние уведомления:",
     },
 }

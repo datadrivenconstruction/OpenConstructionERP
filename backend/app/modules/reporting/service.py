@@ -50,6 +50,28 @@ async def _safe_publish(name: str, data: dict, source_module: str = "oe_reportin
         _logger_ev.debug("Event publish skipped: %s", name)
 
 
+def progress_report_email(title: str, report_html: str) -> tuple[str, str]:
+    """The subject and HTML body that email a rendered report.
+
+    The body is the report document itself, so the brand line every other
+    email opens with goes in right after ``<body>``; the report's own footer
+    already names the product. The subject names the report and the brand.
+
+    Args:
+        title: The report title.
+        report_html: The rendered report (a full HTML document) or a stub.
+
+    Returns:
+        ``(subject, html_body)``.
+    """
+    from app.core.email import BRAND_NAME, brand_header
+
+    subject = f"Progress Report: {title} - {BRAND_NAME}"
+    if "<body>" in report_html:
+        return subject, report_html.replace("<body>", f"<body>{brand_header()}", 1)
+    return subject, f"{brand_header()}{report_html}"
+
+
 # ── System report templates (seeded on first startup) ──────────────────────
 
 SYSTEM_TEMPLATES: list[dict] = [
@@ -938,7 +960,7 @@ class ReportingService:
         from app.core.email.service import get_email_service
 
         service = get_email_service()
-        subject = f"Progress Report: {report.title}"
+        subject, html_content = progress_report_email(report.title, html_content)
         sent = 0
         for address in unique_addresses:
             try:
