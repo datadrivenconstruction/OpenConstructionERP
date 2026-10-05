@@ -37195,6 +37195,7 @@ const resource = {
     "tendering.distribute_done": "Lähetetty {{count}} vastaanottajalle",
     "tendering.distribute_failed": "Jakelu epäonnistui",
     "tendering.distribute_nothing": "Ei mitään lähetettävää",
+    "tendering.academy_invitations_not_emailed": "Akatemiassa tarjoajille ei lähetetä kutsuja sähköpostilla.",
     "tendering.export_failed": "Vienti epäonnistui",
     "tendering.formalise_contract": "Muodollistaa sopimukseksi",
     "tendering.open_award_contract": "Avaa sopimus {{code}}",

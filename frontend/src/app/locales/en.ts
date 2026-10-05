@@ -33868,6 +33868,7 @@ const resource = {
     "tendering.distribute_console": "SMTP is not configured, so emails were logged to the server console (dev mode). Set SMTP_HOST for real delivery.",
     "tendering.distribute_failed": "Distribution failed",
     "tendering.distribute_nothing": "Nothing to send",
+    "tendering.academy_invitations_not_emailed": "In the academy, invitations to bidders are not emailed.",
     "tendering.recipients": "Distribution list",
     "tendering.add_recipient": "Add",
     "tendering.no_recipients": "No recipients yet",

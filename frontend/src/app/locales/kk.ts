@@ -36445,6 +36445,7 @@ const resource = {
     "tendering.distribute_done": "{{count}} алушыға жіберілді",
     "tendering.distribute_failed": "Тарату сәтсіз аяқталды",
     "tendering.distribute_nothing": "Жіберетін ештеңе жоқ",
+    "tendering.academy_invitations_not_emailed": "Академияда тендерге қатысушыларға шақырулар электрондық поштамен жіберілмейді.",
     "tendering.export_failed": "Экспорт сәтсіз аяқталды",
     "tendering.formalise_contract": "Келісімшарт ретінде рәсімдеу",
     "tendering.open_award_contract": "{{code}} шартын ашу",

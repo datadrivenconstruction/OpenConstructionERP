@@ -37592,6 +37592,7 @@ const resource = {
     "tendering.distribute_done": "Odesláno {{count}} příjemcům",
     "tendering.distribute_failed": "Distribuce selhala",
     "tendering.distribute_nothing": "Není co poslat",
+    "tendering.academy_invitations_not_emailed": "V akademii se pozvánky uchazečům neposílají e-mailem.",
     "tendering.export_failed": "Export selhal",
     "tendering.formalise_contract": "Formalizovat jako smlouvu",
     "tendering.open_award_contract": "Otevřít smlouvu {{code}}",

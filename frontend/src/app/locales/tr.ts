@@ -37590,6 +37590,7 @@ const resource = {
     "tendering.distribute_done": "{{count}} alıcıya gönderildi",
     "tendering.distribute_failed": "Dağıtım başarısız",
     "tendering.distribute_nothing": "Gönderilecek hiçbir şey yok",
+    "tendering.academy_invitations_not_emailed": "Akademide teklif verenlere davetler e-postayla gönderilmez.",
     "tendering.export_failed": "Dışa aktarma başarısız",
     "tendering.formalise_contract": "Sözleşme Olarak Resmileştir",
     "tendering.open_award_contract": "{{code}} sözleşmesini aç",

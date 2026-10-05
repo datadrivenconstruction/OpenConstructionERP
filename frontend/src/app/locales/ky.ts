@@ -32893,6 +32893,7 @@ const resource = {
     "tendering.distribute_console": "SMTP конфигурацияланган эмес, ошондуктан электрондук каттар сервер консолуна (dev режими) жазылды. Чыныгы жеткирүү үчүн SMTP_HOST коюңуз.",
     "tendering.distribute_failed": "Жеткирүү ишке ашкан жок",
     "tendering.distribute_nothing": "Жөнөтүүгө эч нерсе жок",
+    "tendering.academy_invitations_not_emailed": "Академияда катышуучуларга чакыруулар электрондук почта аркылуу жиберилбейт.",
     "tendering.recipients": "Жеткирүү тизмеси",
     "tendering.add_recipient": "Кошуу",
     "tendering.no_recipients": "Алуучулар али жок",

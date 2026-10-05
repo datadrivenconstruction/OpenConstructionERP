@@ -37159,6 +37159,7 @@ const resource = {
     "tendering.distribute_done": "{{count}}명의 수신자에게 전송됨",
     "tendering.distribute_failed": "배포 실패",
     "tendering.distribute_nothing": "전송할 항목이 없습니다",
+    "tendering.academy_invitations_not_emailed": "아카데미에서는 입찰자에게 초대장이 이메일로 발송되지 않습니다.",
     "tendering.export_failed": "내보내기 실패",
     "tendering.formalise_contract": "계약으로 공식화",
     "tendering.open_award_contract": "계약 {{code}} 열기",

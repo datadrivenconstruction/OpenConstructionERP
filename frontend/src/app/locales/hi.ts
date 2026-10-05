@@ -37029,6 +37029,7 @@ const resource = {
     "tendering.distribute_done": "{{count}} प्राप्तकर्ता को भेजा गया",
     "tendering.distribute_failed": "वितरण विफल",
     "tendering.distribute_nothing": "भेजने के लिए कुछ नहीं",
+    "tendering.academy_invitations_not_emailed": "अकादमी में बोलीदाताओं को निमंत्रण ईमेल से नहीं भेजे जाते।",
     "tendering.export_failed": "निर्यात विफल",
     "tendering.formalise_contract": "अनुबंध के रूप में औपचारिक बनाएं",
     "tendering.open_award_contract": "अनुबंध {{code}} खोलें",

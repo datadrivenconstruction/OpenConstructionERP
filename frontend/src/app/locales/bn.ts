@@ -36503,6 +36503,7 @@ const resource = {
     "tendering.distribute_done": "{{count}}জন প্রাপকের কাছে পাঠানো হয়েছে",
     "tendering.distribute_failed": "বিতরণ ব্যর্থ হয়েছে",
     "tendering.distribute_nothing": "পাঠানোর কিছু নেই",
+    "tendering.academy_invitations_not_emailed": "অ্যাকাডেমিতে বিডারদের আমন্ত্রণ ইমেইলে পাঠানো হয় না।",
     "tendering.export_failed": "এক্সপোর্ট ব্যর্থ হয়েছে",
     "tendering.formalise_contract": "কন্ট্র্যাক্ট হিসেবে আনুষ্ঠানিক করুন",
     "tendering.open_award_contract": "চুক্তি {{code}} খুলুন",

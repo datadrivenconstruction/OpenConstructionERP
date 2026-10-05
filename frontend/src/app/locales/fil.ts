@@ -36503,6 +36503,7 @@ const resource = {
     "tendering.distribute_done": "Naipadala sa {{count}} tatanggap",
     "tendering.distribute_failed": "Nabigo ang pamamahagi",
     "tendering.distribute_nothing": "Walang ipapadala",
+    "tendering.academy_invitations_not_emailed": "Sa academy, hindi ine-email ang mga imbitasyon sa mga bidder.",
     "tendering.export_failed": "Nabigo ang pag-export",
     "tendering.formalise_contract": "Gawing Kontrata",
     "tendering.open_award_contract": "Buksan ang kontrata {{code}}",

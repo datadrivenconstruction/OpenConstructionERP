@@ -37471,6 +37471,7 @@ const resource = {
     "tendering.distribute_done": "Trimis către {{count}} destinatar(i)",
     "tendering.distribute_failed": "Distribuția a eșuat",
     "tendering.distribute_nothing": "Nimic de trimis",
+    "tendering.academy_invitations_not_emailed": "În academie, invitațiile către ofertanți nu se trimit prin e-mail.",
     "tendering.export_failed": "Exportul a eșuat",
     "tendering.formalise_contract": "Formalizează ca Contract",
     "tendering.open_award_contract": "Deschide contractul {{code}}",

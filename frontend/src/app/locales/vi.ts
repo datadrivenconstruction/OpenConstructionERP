@@ -37218,6 +37218,7 @@ const resource = {
     "tendering.distribute_done": "Đã gửi đến {{count}} người nhận",
     "tendering.distribute_failed": "Phân phối thất bại",
     "tendering.distribute_nothing": "Không có gì để gửi",
+    "tendering.academy_invitations_not_emailed": "Trong học viện, thư mời gửi tới các nhà thầu không được gửi qua email.",
     "tendering.export_failed": "Xuất thất bại",
     "tendering.formalise_contract": "Chính thức hóa thành Hợp đồng",
     "tendering.open_award_contract": "Mở hợp đồng {{code}}",

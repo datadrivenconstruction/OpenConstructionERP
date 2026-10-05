@@ -36507,6 +36507,7 @@ const resource = {
     "tendering.distribute_done": "{{count}} хүлээн авагчд илгээгдсэн",
     "tendering.distribute_failed": "Түгээлт амжилтгүй болсон",
     "tendering.distribute_nothing": "Илгээх зүйл байхгүй",
+    "tendering.academy_invitations_not_emailed": "Академид оруулагчдад илгээх урилгыг имэйлээр явуулдаггүй.",
     "tendering.export_failed": "Экспорт амжилтгүй болсон",
     "tendering.formalise_contract": "Гэрээ болгон албажуулах",
     "tendering.open_award_contract": "{{code}} гэрээг нээх",

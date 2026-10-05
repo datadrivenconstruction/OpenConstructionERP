@@ -37327,6 +37327,7 @@ const resource = {
     "tendering.distribute_done": "Skickat till {{count}} mottagare",
     "tendering.distribute_failed": "Distributionen misslyckades",
     "tendering.distribute_nothing": "Ingenting att skicka",
+    "tendering.academy_invitations_not_emailed": "I akademin skickas inga inbjudningar till anbudsgivare med e-post.",
     "tendering.export_failed": "Exporten misslyckades",
     "tendering.formalise_contract": "Formalisera som kontrakt",
     "tendering.open_award_contract": "Öppna kontrakt {{code}}",

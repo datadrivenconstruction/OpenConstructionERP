@@ -36587,6 +36587,7 @@ const resource = {
     "tendering.distribute_done": "{{count}} وصول کنندہ(گان) کو بھیج دیا گیا",
     "tendering.distribute_failed": "تقسیم ناکام ہو گئی",
     "tendering.distribute_nothing": "بھیجنے کے لیے کچھ نہیں",
+    "tendering.academy_invitations_not_emailed": "اکیڈمی میں بولی دہندگان کو دعوت نامے ای میل نہیں کیے جاتے۔",
     "tendering.export_failed": "ایکسپورٹ ناکام ہو گیا",
     "tendering.formalise_contract": "Contract کے طور پر formalise کریں",
     "tendering.open_award_contract": "کنٹریکٹ {{code}} کھولیں",

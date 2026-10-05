@@ -37380,6 +37380,7 @@ const resource = {
     "tendering.distribute_done": "Poslano {{count}} primatelju/primateljima",
     "tendering.distribute_failed": "Distribucija nije uspjela",
     "tendering.distribute_nothing": "Nema što slati",
+    "tendering.academy_invitations_not_emailed": "U akademiji se pozivi ponuditeljima ne šalju e-poštom.",
     "tendering.export_failed": "Izvoz nije uspio",
     "tendering.formalise_contract": "Formalizuj kao ugovor",
     "tendering.open_award_contract": "Otvori ugovor {{code}}",

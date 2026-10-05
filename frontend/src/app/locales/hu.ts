@@ -37111,6 +37111,7 @@ const resource = {
     "tendering.distribute_done": "{{count}} címzettnek elküldve",
     "tendering.distribute_failed": "A kiküldés sikertelen",
     "tendering.distribute_nothing": "Nincs mit küldeni",
+    "tendering.academy_invitations_not_emailed": "Az akadémián az ajánlattevőknek szóló meghívókat nem küldjük e-mailben.",
     "tendering.export_failed": "Export sikertelen",
     "tendering.formalise_contract": "Szerződéssé formalizálás",
     "tendering.open_award_contract": "{{code}} szerződés megnyitása",

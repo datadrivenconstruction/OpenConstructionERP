@@ -37885,6 +37885,7 @@ const resource = {
     "tendering.distribute_done": "تم الإرسال إلى {{count}} مستقبل",
     "tendering.distribute_failed": "فشل التوزيع",
     "tendering.distribute_nothing": "لا شيء للإرسال",
+    "tendering.academy_invitations_not_emailed": "في الأكاديمية، لا تُرسل دعوات مقدمي العروض بالبريد الإلكتروني.",
     "tendering.export_failed": "فشل التصدير",
     "tendering.formalise_contract": "صيغ كعقد",
     "tendering.open_award_contract": "فتح العقد {{code}}",

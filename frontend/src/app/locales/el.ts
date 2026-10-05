@@ -36476,6 +36476,7 @@ const resource = {
     "tendering.distribute_done": "Στάλθηκε σε {{count}} παραλήπτες",
     "tendering.distribute_failed": "Η διανομή απέτυχε",
     "tendering.distribute_nothing": "Τίποτα για αποστολή",
+    "tendering.academy_invitations_not_emailed": "Στην ακαδημία, οι προσκλήσεις προς τους προσφέροντες δεν αποστέλλονται με email.",
     "tendering.export_failed": "Η εξαγωγή απέτυχε",
     "tendering.formalise_contract": "Επισημοποίηση ως Σύμβαση",
     "tendering.open_award_contract": "Άνοιγμα σύμβασης {{code}}",

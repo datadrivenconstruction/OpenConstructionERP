@@ -45,6 +45,7 @@ import {
   WideModalField,
 } from '@/shared/ui/WideModal';
 import { useConfirm } from '@/shared/hooks/useConfirm';
+import { academyModeFrom, useSystemStatus } from '@/shared/hooks/useSystemStatus';
 import { apiGet, apiPost, apiPatch, getAuthToken, triggerDownload } from '@/shared/lib/api';
 import { fetchProjectList } from '@/shared/lib/projectList';
 import { useToastStore } from '@/stores/useToastStore';
@@ -1063,6 +1064,8 @@ function DistributionPanel({ packageId }: { packageId: string }) {
   const [manualEmail, setManualEmail] = useState('');
   const [message, setMessage] = useState('');
   const [lastResult, setLastResult] = useState<DistributeResponse | null>(null);
+  // The academy server marks recipients as sent without emailing them.
+  const academy = academyModeFrom(useSystemStatus().data);
 
   const recipientsQ = useQuery({
     queryKey: ['tendering-recipients', packageId],
@@ -1111,7 +1114,7 @@ function DistributionPanel({ packageId }: { packageId: string }) {
             defaultValue: 'Sent to {{count}} recipient(s)',
             count: res.sent_count,
           }),
-          message: res.smtp_configured
+          message: res.smtp_configured || academy
             ? undefined
             : t('tendering.distribute_console', {
                 defaultValue:
@@ -1295,6 +1298,13 @@ function DistributionPanel({ packageId }: { packageId: string }) {
                 </Button>
               )}
             </div>
+            {academy && (
+              <p className="text-xs text-content-tertiary">
+                {t('tendering.academy_invitations_not_emailed', {
+                  defaultValue: 'In the academy, invitations to bidders are not emailed.',
+                })}
+              </p>
+            )}
           </div>
         )}
 
@@ -1318,14 +1328,16 @@ function DistributionPanel({ packageId }: { packageId: string }) {
                   {t('tendering.recipient_skipped', { defaultValue: 'Skipped' })}
                 </span>
               )}
-              <span className="text-content-tertiary">
-                {t('tendering.distribute_backend', {
-                  defaultValue: 'via {{backend}}',
-                  backend: lastResult.backend,
-                })}
-              </span>
+              {!academy && (
+                <span className="text-content-tertiary">
+                  {t('tendering.distribute_backend', {
+                    defaultValue: 'via {{backend}}',
+                    backend: lastResult.backend,
+                  })}
+                </span>
+              )}
             </div>
-            {!lastResult.smtp_configured && (
+            {!lastResult.smtp_configured && !academy && (
               <p className="mt-2 text-content-tertiary">
                 {t('tendering.distribute_console', {
                   defaultValue:

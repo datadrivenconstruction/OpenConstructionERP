@@ -37297,6 +37297,7 @@ const resource = {
     "tendering.distribute_done": "Verzonden naar {{count}} ontvanger(s)",
     "tendering.distribute_failed": "Distributie mislukt",
     "tendering.distribute_nothing": "Niets om te verzenden",
+    "tendering.academy_invitations_not_emailed": "In de academie worden uitnodigingen aan inschrijvers niet per e-mail verstuurd.",
     "tendering.export_failed": "Export mislukt",
     "tendering.formalise_contract": "Formaliseren als contract",
     "tendering.open_award_contract": "Contract {{code}} openen",

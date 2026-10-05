@@ -37169,6 +37169,7 @@ const resource = {
     "tendering.distribute_done": "Saadetud {{count}} saajale",
     "tendering.distribute_failed": "Saatmine ebaõnnestus",
     "tendering.distribute_nothing": "Saata pole midagi",
+    "tendering.academy_invitations_not_emailed": "Akadeemias ei saadeta pakkujatele kutseid e-kirjaga.",
     "tendering.export_failed": "Eksport ebaõnnestus",
     "tendering.formalise_contract": "Vormista lepinguks",
     "tendering.open_award_contract": "Ava leping {{code}}",

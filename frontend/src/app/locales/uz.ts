@@ -37951,6 +37951,7 @@ const resource = {
     "tendering.distribute_done": "{{count}} ta qabul qiluvchiga yuborildi",
     "tendering.distribute_failed": "Taqsimlash amalga oshmadi",
     "tendering.distribute_nothing": "Yuboriladigan narsa yoʻq",
+    "tendering.academy_invitations_not_emailed": "Akademiyada taklif beruvchilarga takliflar e-pochta orqali yuborilmaydi.",
     "tendering.export_failed": "Eksport amalga oshmadi",
     "tendering.formalise_contract": "Shartnoma sifatida rasmiylashtirish",
     "tendering.open_award_contract": "{{code}} shartnomasini ochish",

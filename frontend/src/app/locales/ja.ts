@@ -37159,6 +37159,7 @@ const resource = {
     "tendering.distribute_done": "{{count}}人の受取人に送信しました",
     "tendering.distribute_failed": "配信に失敗しました",
     "tendering.distribute_nothing": "送信するものがありません",
+    "tendering.academy_invitations_not_emailed": "アカデミーでは、入札者への招待はメールで送信されません。",
     "tendering.export_failed": "エクスポートに失敗しました",
     "tendering.formalise_contract": "契約として正式化",
     "tendering.open_award_contract": "契約 {{code}} を開く",

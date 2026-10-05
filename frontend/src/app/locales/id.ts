@@ -37060,6 +37060,7 @@ const resource = {
     "tendering.distribute_done": "Terkirim ke {{count}} penerima",
     "tendering.distribute_failed": "Distribusi gagal",
     "tendering.distribute_nothing": "Tidak ada yang dikirim",
+    "tendering.academy_invitations_not_emailed": "Di akademi, undangan untuk penawar tidak dikirim lewat email.",
     "tendering.export_failed": "Ekspor gagal",
     "tendering.formalise_contract": "Formalkan sebagai Kontrak",
     "tendering.open_award_contract": "Buka kontrak {{code}}",

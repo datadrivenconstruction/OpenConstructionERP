@@ -37202,6 +37202,7 @@ const resource = {
     "tendering.distribute_done": "已发送给 {{count}} 个收件人",
     "tendering.distribute_failed": "分发失败",
     "tendering.distribute_nothing": "没有要发送的内容",
+    "tendering.academy_invitations_not_emailed": "在学院中，不会通过电子邮件向投标人发送邀请。",
     "tendering.export_failed": "导出失败",
     "tendering.formalise_contract": "正式化为合同",
     "tendering.open_award_contract": "打开合同 {{code}}",

@@ -17,7 +17,7 @@ from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.academy_isolation import foreign_directory_link
+from app.core.academy_isolation import academy_mode_enabled, foreign_directory_link
 from app.core.events import event_bus, publish_after_commit
 from app.core.json_merge import merge_metadata
 
@@ -1306,7 +1306,12 @@ class TenderingService:
         settings = get_settings()
         smtp_configured = email_delivery_enabled(settings)
         service = get_email_service()
-        backend_name = service.backend_name
+        # Academy mode: no invitation leaves the platform. A recipient's address
+        # is whatever the learner typed and the cover note is free text, so a
+        # send would make the mailer an open relay. Each recipient still gets
+        # its bid link and reads as sent, so the course flow is the same.
+        mail_off = academy_mode_enabled()
+        backend_name = "" if mail_off else service.backend_name
 
         # Each email carries the recipient's own price-entry link (made per
         # send below): the bidder has no account, so the internal
@@ -1399,21 +1404,24 @@ class TenderingService:
                 locale=locale,
             )
 
-            try:
-                result = await service.send(
-                    EmailMessage(
-                        to=to_email,
-                        subject=subject,
-                        html_body=html_body,
-                        tags=["tendering", "distribution", str(package_id)],
-                    ),
-                )
-                ok = bool(getattr(result, "ok", False))
-                reason = getattr(result, "reason", "") or ""
-            except Exception as exc:  # noqa: BLE001 - degrade, never crash distribution
-                ok = False
-                reason = f"send crashed: {type(exc).__name__}"
-                logger.warning("Tender distribution send crashed: package=%s to=%s", package_id, to_email)
+            if mail_off:
+                ok, reason = True, ""
+            else:
+                try:
+                    result = await service.send(
+                        EmailMessage(
+                            to=to_email,
+                            subject=subject,
+                            html_body=html_body,
+                            tags=["tendering", "distribution", str(package_id)],
+                        ),
+                    )
+                    ok = bool(getattr(result, "ok", False))
+                    reason = getattr(result, "reason", "") or ""
+                except Exception as exc:  # noqa: BLE001 - degrade, never crash distribution
+                    ok = False
+                    reason = f"send crashed: {type(exc).__name__}"
+                    logger.warning("Tender distribution send crashed: package=%s to=%s", package_id, to_email)
 
             now = datetime.now(UTC).isoformat()
             if ok:

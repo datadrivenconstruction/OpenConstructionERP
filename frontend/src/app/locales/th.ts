@@ -36994,6 +36994,7 @@ const resource = {
     "tendering.distribute_done": "ส่งให้ {{count}} ผู้รับ",
     "tendering.distribute_failed": "การจัดจำหน่ายล้มเหลว",
     "tendering.distribute_nothing": "ไม่มีอะไรที่จะส่ง",
+    "tendering.academy_invitations_not_emailed": "ในอะคาเดมี คำเชิญถึงผู้เสนอราคาจะไม่ถูกส่งทางอีเมล",
     "tendering.export_failed": "การส่งออกล้มเหลว",
     "tendering.formalise_contract": "ทำให้เป็นทางการเป็นสัญญา",
     "tendering.open_award_contract": "เปิดสัญญา {{code}}",

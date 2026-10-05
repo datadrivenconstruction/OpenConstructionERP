@@ -36706,6 +36706,7 @@ const resource = {
     "tendering.distribute_done": "נשלח ל-{{count}} נמענים",
     "tendering.distribute_failed": "ההפצה נכשלה",
     "tendering.distribute_nothing": "אין מה לשלוח",
+    "tendering.academy_invitations_not_emailed": "באקדמיה, הזמנות למציעים אינן נשלחות בדוא\"ל.",
     "tendering.export_failed": "הייצוא נכשל",
     "tendering.formalise_contract": "הפוך לחוזה",
     "tendering.open_award_contract": "פתיחת חוזה {{code}}",

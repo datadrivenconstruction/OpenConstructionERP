@@ -37312,6 +37312,7 @@ const resource = {
     "tendering.distribute_done": "Envoyé à {{count}} destinataire(s)",
     "tendering.distribute_failed": "Echec de la distribution",
     "tendering.distribute_nothing": "Rien à envoyer",
+    "tendering.academy_invitations_not_emailed": "Dans l'académie, les invitations aux soumissionnaires ne sont pas envoyées par e-mail.",
     "tendering.export_failed": "Echec de l'export",
     "tendering.formalise_contract": "Formaliser en tant que contrat",
     "tendering.open_award_contract": "Ouvrir le contrat {{code}}",

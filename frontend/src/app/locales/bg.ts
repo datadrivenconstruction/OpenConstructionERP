@@ -37306,6 +37306,7 @@ const resource = {
     "tendering.distribute_done": "Изпратено до {{count}} получател(и)",
     "tendering.distribute_failed": "Неуспешно разпределение",
     "tendering.distribute_nothing": "Нищо за изпращане",
+    "tendering.academy_invitations_not_emailed": "В академията поканите към оферентите не се изпращат по имейл.",
     "tendering.export_failed": "Неуспешен експорт",
     "tendering.formalise_contract": "Фармализирай като договор",
     "tendering.open_award_contract": "Отвори договор {{code}}",

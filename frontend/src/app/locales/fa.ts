@@ -36533,6 +36533,7 @@ const resource = {
     "tendering.distribute_done": "به {{count}} گیرنده ارسال شد",
     "tendering.distribute_failed": "توزیع ناموفق بود",
     "tendering.distribute_nothing": "چیزی برای ارسال نیست",
+    "tendering.academy_invitations_not_emailed": "در آکادمی، دعوت‌نامه‌ها برای مناقصه‌گران با ایمیل ارسال نمی‌شود.",
     "tendering.export_failed": "برون‌بری ناموفق بود",
     "tendering.formalise_contract": "رسمی‌سازی به‌عنوان پیمان",
     "tendering.open_award_contract": "باز کردن قرارداد {{code}}",
