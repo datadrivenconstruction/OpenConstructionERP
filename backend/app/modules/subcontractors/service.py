@@ -27,6 +27,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.academy_isolation import foreign_directory_link
 from app.core.events import event_bus, publish_after_commit
 from app.core.i18n import get_locale
 from app.core.validation.engine import ValidationReport, validation_engine
@@ -1182,6 +1183,9 @@ class SubcontractorService:
         user_id: str | None = None,
     ) -> SubcontractAgreement:
         await self.get_subcontractor(data.subcontractor_id)
+        if await foreign_directory_link(self.session, user_id, subcontractor_id=data.subcontractor_id):
+            # Academy mode: another learner's firm reads like a missing one.
+            raise HTTPException(status_code=404, detail="Subcontractor not found")
         if data.prime_contract_id is not None:
             await self._assert_prime_contract(data.prime_contract_id, data.project_id)
         if data.contract_id is not None:
