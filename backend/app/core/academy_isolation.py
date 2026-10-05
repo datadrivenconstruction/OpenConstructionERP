@@ -343,3 +343,54 @@ async def assert_own_email(session: AsyncSession, user_id: uuid.UUID | str | Non
         status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         detail={"error": EMAIL_NOT_OWN, "message": EMAIL_NOT_OWN_MESSAGE},
     )
+
+
+async def academy_directory_owner(session: AsyncSession, user_id: uuid.UUID | str | None) -> str | None:
+    """The owner a learner's directory links must stay with in academy mode.
+
+    ``None`` means nothing limits the caller: the flag is off, the caller is an
+    admin, or there is no caller (a system call or a seeder).
+    """
+    if not academy_mode_enabled() or user_id is None:
+        return None
+    from app.core.tenant_scope import tenant_scope_owner
+
+    return await tenant_scope_owner(session, str(user_id))
+
+
+async def foreign_directory_link(
+    session: AsyncSession,
+    actor_id: uuid.UUID | str | None,
+    *,
+    subcontractor_id: uuid.UUID | str | None = None,
+    contact_id: uuid.UUID | str | None = None,
+) -> str | None:
+    """Which named directory link belongs to someone else, in academy mode.
+
+    A subcontractor is the learner's when they created it (the directory has
+    no tenant column), and a contact when it is in their own address book.
+    Returns ``"subcontractor"``, ``"contact"`` or ``None``; the caller answers
+    with its own "not found", so another learner's row reads like a missing
+    one.
+    """
+    owner = await academy_directory_owner(session, actor_id)
+    if owner is None:
+        return None
+    if subcontractor_id is not None:
+        from app.modules.subcontractors.models import Subcontractor
+
+        sub_id = _as_uuid(subcontractor_id)
+        created_by = (
+            (
+                await session.execute(select(Subcontractor.created_by).where(Subcontractor.id == sub_id))
+            ).scalar_one_or_none()
+            if sub_id is not None
+            else None
+        )
+        if str(created_by or "") != owner:
+            return "subcontractor"
+    if contact_id is not None:
+        cid = _as_uuid(contact_id)
+        if cid is None or cid not in await _contacts_among(session, {cid}, owner):
+            return "contact"
+    return None

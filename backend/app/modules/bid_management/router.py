@@ -567,7 +567,7 @@ async def create_bidder(
 ) -> BidderResponse:
     await _verify_package_access(session, data.package_id, user_id)
     svc = BidManagementService(session)
-    bidder = await svc.create_bidder(data)
+    bidder = await svc.create_bidder(data, actor_id=user_id)
     return BidderResponse.model_validate(bidder)
 
 
@@ -584,7 +584,7 @@ async def update_bidder(
         raise HTTPException(status_code=404, detail=translate("errors.bidder_not_found", locale=get_locale()))
     await _verify_package_access(session, bidder_row.package_id, user_id)
     svc = BidManagementService(session)
-    bidder = await svc.update_bidder(bidder_id, data)
+    bidder = await svc.update_bidder(bidder_id, data, actor_id=user_id)
     return BidderResponse.model_validate(bidder)
 
 

@@ -21,6 +21,7 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.academy_isolation import foreign_directory_link
 from app.core.events import event_bus, publish_after_commit
 from app.core.i18n import get_locale
 from app.core.json_merge import merge_metadata
@@ -1472,6 +1473,7 @@ class BidManagementService:
         self,
         subcontractor_id: uuid.UUID | None,
         contact_id: uuid.UUID | None,
+        actor_id: str | None = None,
     ) -> tuple[uuid.UUID | None, uuid.UUID | None]:
         """Check a bidder's directory links and fill the contact from the subcontractor.
 
@@ -1492,12 +1494,24 @@ class BidManagementService:
 
             if await self.session.get(Contact, contact_id) is None:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Contact not found")
+        # Academy mode: the award makes these the contract counterparty, so a
+        # learner links only their own firm; another's reads as missing.
+        foreign = await foreign_directory_link(
+            self.session, actor_id, subcontractor_id=subcontractor_id, contact_id=contact_id
+        )
+        if foreign is not None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Subcontractor not found" if foreign == "subcontractor" else "Contact not found",
+            )
         return subcontractor_id, contact_id
 
-    async def create_bidder(self, data: BidderCreate) -> Bidder:
+    async def create_bidder(self, data: BidderCreate, *, actor_id: str | None = None) -> Bidder:
         await self.get_package(data.package_id)
         await self._assert_package_parts_editable(data.package_id, "bidders")
-        subcontractor_id, contact_id = await self._resolve_bidder_links(data.subcontractor_id, data.contact_id)
+        subcontractor_id, contact_id = await self._resolve_bidder_links(
+            data.subcontractor_id, data.contact_id, actor_id
+        )
         bidder = Bidder(
             package_id=data.package_id,
             company_name=data.company_name,
@@ -1512,7 +1526,13 @@ class BidManagementService:
         )
         return await self.bidder_repo.create(bidder)
 
-    async def update_bidder(self, bidder_id: uuid.UUID, data: BidderUpdate) -> Bidder:
+    async def update_bidder(
+        self,
+        bidder_id: uuid.UUID,
+        data: BidderUpdate,
+        *,
+        actor_id: str | None = None,
+    ) -> Bidder:
         bidder = await self.bidder_repo.get_by_id(bidder_id)
         if bidder is None:
             raise HTTPException(status_code=404, detail=translate("errors.bidder_not_found", locale=get_locale()))
@@ -1528,7 +1548,9 @@ class BidManagementService:
                 contact_id = None
             else:
                 contact_id = bidder.contact_id
-            fields["subcontractor_id"], fields["contact_id"] = await self._resolve_bidder_links(sub_id, contact_id)
+            fields["subcontractor_id"], fields["contact_id"] = await self._resolve_bidder_links(
+                sub_id, contact_id, actor_id
+            )
         if not fields:
             return bidder
         await self.bidder_repo.update_fields(bidder_id, **fields)
