@@ -37,6 +37,7 @@ from datetime import UTC, datetime
 from sqlalchemy import delete, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.academy_isolation import academy_mode_enabled, filter_users_to_project
 from app.modules.file_comments.models import FileComment, FileCommentMention
 from app.modules.file_comments.schemas import (
     FileCommentCreate,
@@ -437,6 +438,18 @@ async def _extract_and_persist_mentions(
         )
     )
     candidates = list((await session.execute(user_stmt)).scalars().all())
+    # On an academy install the other users are other learners: only people
+    # who can open this comment's project may be found by a handle and pinged.
+    if academy_mode_enabled():
+        project_id = (
+            comment.project_id
+            if comment is not None
+            else (
+                await session.execute(select(FileComment.project_id).where(FileComment.id == comment_id))
+            ).scalar_one_or_none()
+        )
+        allowed = set(await filter_users_to_project(session, project_id, [u.id for u in candidates]))
+        candidates = [u for u in candidates if u.id in allowed]
     resolved_ids = _resolve_mentions(handles, candidates)
 
     rows: list[FileCommentMention] = []
