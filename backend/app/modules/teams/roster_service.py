@@ -37,7 +37,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import Select, false, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.academy_isolation import academy_mode_enabled
+from app.core.academy_isolation import academy_mode_enabled, assert_users_can_access_project
 from app.core.audit_log import log_activity
 from app.core.demo_privacy import anonymize_email, demo_mode_enabled, should_redact
 from app.core.events import event_bus
@@ -321,6 +321,13 @@ class RosterService:
         await self._assert_project_access(project_id, actor_id)
         rostered_users, rostered_contacts = await self.repo.linked_ids(project_id)
         teams = {team.id: team for team in await self.team_repo.list_for_project(project_id, include_inactive=True)}
+        # On an academy box a linked user is copied into the line with their
+        # name and email, so they must already be in the project; the answer
+        # is the same for a learner elsewhere and for an id naming nobody.
+        await assert_users_can_access_project(
+            self.session, project_id, [p.user_id for p in payloads if p.user_id not in rostered_users]
+        )
+        contact_owner = await self._academy_scope_owner(actor_id)
 
         prepared: list[RosterMember] = []
         grants: list[tuple[uuid.UUID, str]] = []
@@ -334,7 +341,7 @@ class RosterService:
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="Team not found",
                 )
-            prepared.append(await self._build_member(project_id, payload))
+            prepared.append(await self._build_member(project_id, payload, contact_owner=contact_owner))
             if payload.grant_project_access and payload.user_id:
                 grants.append((payload.user_id, payload.access_role))
             if payload.user_id:
@@ -434,13 +441,22 @@ class RosterService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Roster entry not found")
         return member
 
-    async def _build_member(self, project_id: uuid.UUID, payload: RosterMemberCreate) -> RosterMember:
+    async def _build_member(
+        self,
+        project_id: uuid.UUID,
+        payload: RosterMemberCreate,
+        *,
+        contact_owner: str | None = None,
+    ) -> RosterMember:
         """Turn one create payload into a row, filling the blanks from the link.
 
         Name, firm, email and phone are taken from the linked user or contact
         whenever the request left them empty. What the request DID send always
         wins: a site phone that differs from the head-office number is the
         normal case, not a mistake to be overwritten.
+
+        ``contact_owner`` limits a linked contact to that tenant's address book
+        (academy mode); a contact outside it answers like a missing one.
         """
         display_name = payload.display_name
         company_name = payload.company_name
@@ -452,7 +468,7 @@ class RosterService:
             display_name = display_name or (user.full_name or "").strip() or user.email
             email = email or user.email
         elif payload.contact_id is not None:
-            contact = await self._load_contact(payload.contact_id)
+            contact = await self._load_contact(payload.contact_id, owner=contact_owner)
             if contact is None:
                 raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found")
             display_name = display_name or _person_name(
@@ -529,16 +545,19 @@ class RosterService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
         return user
 
-    async def _load_contact(self, contact_id: uuid.UUID) -> dict[str, Any] | None:
+    async def _load_contact(self, contact_id: uuid.UUID, *, owner: str | None = None) -> dict[str, Any] | None:
         """One contact as a plain dict, or ``None`` when contacts are unavailable.
 
         Returns a dict rather than the ORM object so the rest of this service
-        never holds a type from an optional module.
+        never holds a type from an optional module. ``owner`` narrows the
+        lookup to one tenant's address book.
         """
-        rows = await self._load_contacts([contact_id])
+        rows = await self._load_contacts({contact_id}, owner=owner)
         return rows.get(contact_id)
 
-    async def _load_contacts(self, contact_ids: set[uuid.UUID]) -> dict[uuid.UUID, dict[str, Any]]:
+    async def _load_contacts(
+        self, contact_ids: set[uuid.UUID], *, owner: str | None = None
+    ) -> dict[uuid.UUID, dict[str, Any]]:
         """Several contacts at once, keyed by id. Empty when contacts are absent."""
         if not contact_ids:
             return {}
@@ -548,6 +567,10 @@ class RosterService:
             logger.debug("contacts module unavailable; roster contact links stay unresolved")
             return {}
         stmt = select(Contact).where(Contact.id.in_(contact_ids))
+        if owner is not None:
+            from app.modules.contacts.repository import _tenant_scope
+
+            stmt = stmt.where(_tenant_scope(owner))
         return {
             contact.id: {
                 "first_name": contact.first_name,
