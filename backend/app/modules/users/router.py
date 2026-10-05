@@ -40,6 +40,7 @@ from typing import Any, Literal
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel
 
+from app.core.academy_isolation import assert_self_or_admin, limits_users_to_self
 from app.core.demo_accounts import DEMO_ACCOUNT_EMAILS
 from app.core.demo_privacy import redact_model
 from app.core.rate_limiter import client_identifier, login_limiter, registration_limiter
@@ -1614,6 +1615,7 @@ async def admin_create_user(
 )
 async def list_users(
     viewer_id: CurrentUserId,
+    current_user: CurrentUserPayload = None,  # type: ignore[assignment]
     service: UserService = Depends(_get_service),
     offset: int = Query(default=0, ge=0),
     # Directory/assignee pickers load the full active-user list in one call,
@@ -1632,8 +1634,17 @@ async def list_users(
     the public demo can show registration counts without leaking PII from
     real users who signed up to try the product. The caller's own row stays
     real.
+
+    Academy privacy: on an academy install every learner is a manager, so a
+    non-admin caller gets their own row only. The directory would otherwise
+    hand one paying learner every other learner's name and email.
     """
-    users, _ = await service.list_users(offset=offset, limit=limit, is_active=is_active)
+    if limits_users_to_self(current_user or {}):
+        me = await service.get_user(uuid.UUID(str(viewer_id)))
+        keep = offset == 0 and (is_active is None or me.is_active == is_active)
+        users = [me] if keep else []
+    else:
+        users, _ = await service.list_users(offset=offset, limit=limit, is_active=is_active)
     return [redact_model(UserResponse.model_validate(u), subject_id=u.id, viewer_id=viewer_id) for u in users]
 
 
@@ -1645,13 +1656,16 @@ async def list_users(
 async def get_user(
     user_id: uuid.UUID,
     viewer_id: CurrentUserId,
+    current_user: CurrentUserPayload = None,  # type: ignore[assignment]
     service: UserService = Depends(_get_service),
 ) -> UserResponse:
     """Get user by ID (admin/manager only).
 
     Redacted in demo mode exactly like the list, so fetching one record by id
-    is not a way around the list's privacy.
+    is not a way around the list's privacy. In academy mode a non-admin reads
+    their own record only; any other id answers 404 like a missing user.
     """
+    await assert_self_or_admin(user_id, current_user or {})
     user = await service.get_user(user_id)
     return redact_model(UserResponse.model_validate(user), subject_id=user.id, viewer_id=viewer_id)
 
@@ -1728,9 +1742,14 @@ class UserModuleAccessPayload(BaseModel):
 )
 async def get_user_module_access(
     user_id: uuid.UUID,
+    current_user: CurrentUserPayload = None,  # type: ignore[assignment]
     service: UserService = Depends(_get_service),
 ) -> UserModuleAccessPayload:
-    """Get per-module access settings for a user (admin/manager)."""
+    """Get per-module access settings for a user (admin/manager).
+
+    Gated like :func:`get_user` in academy mode: another user's record is 404.
+    """
+    await assert_self_or_admin(user_id, current_user or {})
     user = await service.get_user(user_id)
     metadata = user.metadata_ if hasattr(user, "metadata_") else (user.metadata or {})
     access_data = metadata.get("module_access", {})
