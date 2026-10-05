@@ -134,7 +134,7 @@ export function AgreementFormModal({
   // agreement holds every payment at one rate with no ceiling, so where the
   // country's rate runs above its cap (FIDIC: 10% until 5% is held) the
   // server starts the agreement from the cap and says which figure it is.
-  const defaultsQ = useContractCountryDefaults(projectId);
+  const defaultsQ = useContractCountryDefaults(projectId, 'subcontractor');
   const knownDefaults = defaultsQ.data?.has_defaults ? defaultsQ.data : null;
   const countryRetention =
     knownDefaults?.subcontract_retention_percent ?? knownDefaults?.values.retention_percent ?? '';
