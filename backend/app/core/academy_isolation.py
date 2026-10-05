@@ -47,6 +47,8 @@ USER_NOT_IN_PROJECT = "user_not_in_project"
 USER_NOT_IN_PROJECT_MESSAGE = "Everyone you name here must be a member of this project."
 ADMIN_ADDS_MEMBERS = "academy_admin_adds_members"
 ADMIN_ADDS_MEMBERS_MESSAGE = "On the academy only an administrator adds people to a project."
+ROUTE_NEEDS_PROJECT = "academy_needs_project"
+ROUTE_NEEDS_PROJECT_MESSAGE = "On the academy this has to belong to one of your projects."
 
 
 def academy_mode_enabled() -> bool:
@@ -285,3 +287,33 @@ async def _own_contacts_among(session: AsyncSession, ids: set[uuid.UUID], actor_
         logger.exception("academy isolation: tenant lookup failed for %s", actor_id)
         return set()
     return await _contacts_among(session, ids, owner)
+
+
+async def is_academy_learner(session: AsyncSession, user_id: uuid.UUID | str | None) -> bool:
+    """Academy mode is on and ``user_id`` is a learner, not an admin or a system call."""
+    if not academy_mode_enabled() or user_id is None:
+        return False
+    return not await _is_admin_user(session, user_id)
+
+
+async def assert_learner_names_a_project(
+    session: AsyncSession,
+    user_id: uuid.UUID | str | None,
+    project_id: uuid.UUID | str | None,
+) -> None:
+    """Refuse a learner's install-wide record in academy mode.
+
+    Some records may be created without a project (an approval route template,
+    an out-of-office hand-off) and then apply to, or are listed in, every
+    project on the install. On an academy box that is every learner's course,
+    so a learner's record must name one of their projects; an admin's may not.
+
+    Raises:
+        HTTPException: 422 with ``{"error": "academy_needs_project"}``.
+    """
+    if project_id is not None or not await is_academy_learner(session, user_id):
+        return
+    raise HTTPException(
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+        detail={"error": ROUTE_NEEDS_PROJECT, "message": ROUTE_NEEDS_PROJECT_MESSAGE},
+    )

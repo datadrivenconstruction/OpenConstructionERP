@@ -34,6 +34,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.academy_isolation import assert_users_can_access_project
 from app.core.audit_log import log_activity
 from app.core.events import event_bus
 from app.core.permissions import ROLE_HIERARCHY, _resolve_role
@@ -257,6 +258,11 @@ class ApprovalRouteService:
         for step in payload.steps:
             _validate_step_mode(step.mode)
             _validate_step_quorum(step)
+        if payload.project_id is not None:
+            # Academy mode: every named approver must be in the project.
+            await assert_users_can_access_project(
+                self.session, payload.project_id, [s.approver_user_id for s in payload.steps]
+            )
 
         route = Route(
             project_id=payload.project_id,
@@ -366,6 +372,14 @@ class ApprovalRouteService:
         # Replace the step list when supplied. Deleting steps cascades to
         # any StepState rows, so we refuse to touch the steps of a route
         # that already has instances - the decision history would be lost.
+        if payload.steps is not None and route.project_id is not None:
+            # Academy mode: a newly named approver must be in the project.
+            named = {s.approver_user_id for s in await self.repo.list_steps(route_id)}
+            await assert_users_can_access_project(
+                self.session,
+                route.project_id,
+                [s.approver_user_id for s in payload.steps if s.approver_user_id not in named],
+            )
         if payload.steps is not None:
             for step in payload.steps:
                 _validate_step_mode(step.mode)

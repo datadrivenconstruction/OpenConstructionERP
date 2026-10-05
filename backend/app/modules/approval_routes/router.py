@@ -31,6 +31,11 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
+from app.core.academy_isolation import (
+    academy_mode_enabled,
+    assert_learner_names_a_project,
+    assert_users_can_access_project,
+)
 from app.dependencies import (
     CurrentUserId,
     CurrentUserPayload,
@@ -200,6 +205,7 @@ async def create_route(
     service: ApprovalRouteService = Depends(_get_service),
 ) -> RouteResponse:
     """Create a route template + its ordered steps."""
+    await assert_learner_names_a_project(session, user_id, payload.project_id)
     if payload.project_id is not None:
         await verify_project_access(payload.project_id, user_id, session)
     row = await service.create_route(
@@ -270,6 +276,12 @@ async def clone_route(
     preset or another project's route) is left untouched.
     """
     await verify_project_access(payload.project_id, user_id, session)
+    if academy_mode_enabled():
+        # The source may be a tenant-wide preset or another project's route;
+        # on an academy box another project is another learner's course.
+        source = await service.get_route(route_id)
+        if source.project_id is not None:
+            await verify_project_access(source.project_id, user_id, session)
     clone = await service.clone_route(
         route_id,
         project_id=payload.project_id,
@@ -709,8 +721,11 @@ async def create_delegation(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication required",
         )
+    await assert_learner_names_a_project(session, user_id, payload.project_id)
     if payload.project_id is not None:
         await verify_project_access(payload.project_id, user_id, session)
+        # Before the insert, so an unknown id and another learner read alike.
+        await assert_users_can_access_project(session, payload.project_id, [payload.delegate_user_id])
     row = await service.create_delegation(
         delegator_id=me,
         delegate_id=payload.delegate_user_id,

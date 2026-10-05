@@ -162,6 +162,8 @@ async def _raise_breach(
                 "hours_overdue": overdue,
                 "sla_hours": step.sla_hours,
                 "due_at": status.due_at.isoformat() if status.due_at else None,
+                # Lets the academy backstop drop one addressed outside the project.
+                "project_id": str(route.project_id) if route.project_id else None,
             },
         )
 
@@ -222,6 +224,7 @@ async def _maybe_escalate(
             "escalated_to": view.next_target,
             "level": view.level,
             "severity": view.severity,
+            "project_id": str(route.project_id) if route.project_id else None,
         },
     )
 
