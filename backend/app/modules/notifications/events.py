@@ -461,6 +461,8 @@ async def _on_transmittal_issued(event: Event) -> None:
                 entity_type="transmittal",
                 entity_id=str(transmittal_id),
                 action_url=f"/transmittals?id={transmittal_id}",
+                # Lets the academy backstop drop one addressed outside the project.
+                metadata={"project_id": data.get("project_id")},
             )
             await session.commit()
     except Exception:

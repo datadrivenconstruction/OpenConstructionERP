@@ -16,6 +16,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.academy_isolation import assert_users_can_access_project, filter_users_to_project
 from app.core.events import event_bus
 from app.core.json_merge import merge_metadata
 from app.modules.transmittals.logic import (
@@ -133,6 +134,9 @@ class TransmittalService:
         (high contention) we surface HTTP 409 so the client retries - never
         silently writing a duplicate. Mirrors the rfi create_rfi pattern.
         """
+        await assert_users_can_access_project(
+            self.session, data.project_id, [r.recipient_user_id for r in data.recipients]
+        )
         metadata = data.metadata or {}
         number_config = _numbering_config(metadata)
         response_due_date = _resolve_response_due_date(
@@ -249,6 +253,13 @@ class TransmittalService:
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Transmittal is locked after issue and cannot be modified",
             )
+        if data.recipients is not None:
+            already = {r.recipient_user_id for r in (transmittal.recipients or [])}
+            await assert_users_can_access_project(
+                self.session,
+                transmittal.project_id,
+                [r.recipient_user_id for r in data.recipients if r.recipient_user_id not in already],
+            )
 
         fields = data.model_dump(exclude_unset=True, exclude={"recipients", "items"})
         if "metadata" in fields:
@@ -322,6 +333,7 @@ class TransmittalService:
                 status_code=status.HTTP_409_CONFLICT,
                 detail="This transmittal has been issued and its recipients can no longer be changed.",
             )
+        await assert_users_can_access_project(self.session, transmittal.project_id, [data.recipient_user_id])
         recipient = TransmittalRecipient(
             transmittal_id=transmittal_id,
             recipient_org_id=data.recipient_org_id,
@@ -407,6 +419,9 @@ class TransmittalService:
         recipient_user_ids = [
             str(r.recipient_user_id) for r in (transmittal.recipients or []) if r.recipient_user_id is not None
         ]
+        # Academy mode: a recipient written before the gate, or one who has
+        # since left the project, is not told about it. A no-op otherwise.
+        recipient_user_ids = await filter_users_to_project(self.session, transmittal.project_id, recipient_user_ids)
 
         prior_status = transmittal.status
         await self.repo.update_fields(
