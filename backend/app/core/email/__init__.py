@@ -56,6 +56,8 @@ from .service import (
 )
 from .smtp import SmtpEmailBackend
 from .templates import (
+    BRAND_NAME,
+    brand_header,
     template_invoice_approved,
     template_meeting_invitation,
     template_password_reset,
@@ -65,6 +67,7 @@ from .templates import (
 )
 
 __all__ = [
+    "BRAND_NAME",
     "EMAIL_SETUP_DOC",
     "ConsoleEmailBackend",
     "DeliveryResult",
@@ -75,6 +78,7 @@ __all__ = [
     "MemoryEmailBackend",
     "NoopEmailBackend",
     "SmtpEmailBackend",
+    "brand_header",
     "console_delivery_expected",
     "diagnose_email_config",
     "email_delivery_enabled",
