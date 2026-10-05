@@ -80,6 +80,8 @@ from app.core.validation.engine import (
     rule_registry,
 )
 from app.core.validation.messages import translate
+from app.modules.trainer.checker.matching import values_match
+from app.modules.trainer.checker.units import probe_field_kind
 from app.modules.trainer.locks import BADGE_PREFIX, is_badge_lock_id, is_known_lock_id
 from app.modules.trainer.probe_types import ERP_PROBE_TYPE_NAMES, PROBE_TYPE_NAMES
 from app.modules.trainer.spec import (
@@ -163,6 +165,11 @@ def _probe(readback: dict[str, Any]) -> dict[str, Any] | None:
 
 def _probe_field(probe: dict[str, Any]) -> tuple[str, str]:
     return _str(probe.get("type")), _str(_dict(probe.get("args")).get("field"))
+
+
+def _currency(data: Any) -> str | None:
+    currency = _dict(data).get("currency")
+    return currency if isinstance(currency, str) else None
 
 
 def _is_number(value: Any) -> bool:
@@ -265,25 +272,6 @@ def _tolerance_for(task: dict[str, Any], readback: dict[str, Any]) -> Decimal:
             if tol is not None and tol > 0:
                 return tol
     return _DEFAULT_TOLERANCE
-
-
-def values_match(a: Any, b: Any, *, tolerance: Decimal, percent: bool, unit_a: str | None, unit_b: str | None) -> bool:
-    """Compare two expected/observed values the way the checker will.
-
-    Numbers compare within ``tolerance`` after both are put in the same unit
-    (a fraction is scaled to percent for a percent column); text and booleans
-    compare exactly, case-folded. Neither side is rounded.
-    """
-    if isinstance(a, bool) or isinstance(b, bool):
-        return a is b
-    da, db = to_decimal(a), to_decimal(b)
-    if da is not None and db is not None:
-        if percent:
-            da, db = to_percent(da, unit_a), to_percent(db, unit_b)
-        return abs(da - db) <= tolerance
-    if isinstance(a, str) and isinstance(b, str):
-        return a.casefold() == b.casefold()
-    return False
 
 
 # ── Seed-state simulation for the discriminating rule ────────────────────────
@@ -452,13 +440,17 @@ def discriminating_items(data: Any) -> dict[int, list[tuple[int, bool]]]:
             if state == _ABSENT:
                 differs = True
             elif state == _VALUE and baseline is not None:
-                differs = not values_match(
-                    expected.value,
-                    baseline,
-                    tolerance=_tolerance_for(task, readback),
-                    percent=(kind, field) in PERCENT_PROBE_FIELDS,
-                    unit_a=expected.unit,
-                    unit_b=base_unit,
+                differs = (
+                    values_match(
+                        expected.value,
+                        baseline,
+                        kind=probe_field_kind(kind, field),
+                        tolerance=_tolerance_for(task, readback),
+                        unit=expected.unit,
+                        observed_unit=base_unit,
+                        currency=_currency(data),
+                    )
+                    is not True
                 )
             else:
                 differs = False
@@ -797,14 +789,19 @@ class ReadbackResolvesInFile(TrainerRule):
                         continue
                     if has_inline:
                         entry = ledger[key]
-                        kind_field = _probe_field(probe)
-                        if not values_match(
-                            probe["expect"],
-                            entry.value,
-                            tolerance=_tolerance_for(task, readback),
-                            percent=kind_field in PERCENT_PROBE_FIELDS,
-                            unit_a=probe.get("unit") if probe.get("unit") in _UNITS else None,
-                            unit_b=entry.unit,
+                        # The tolerance is the answer's, written in the
+                        # ledger entry's unit, so the entry is the expected side.
+                        if (
+                            values_match(
+                                entry.value,
+                                probe["expect"],
+                                kind=probe_field_kind(*_probe_field(probe)),
+                                tolerance=_tolerance_for(task, readback),
+                                unit=entry.unit,
+                                observed_unit=probe.get("unit") if probe.get("unit") in _UNITS else None,
+                                currency=_currency(data),
+                            )
+                            is not True
                         ):
                             yield Finding("disagree", where, {"task_id": ref, "readback": index, "ledger_key": key})
 

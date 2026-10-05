@@ -290,7 +290,7 @@
         {"name": "Profit rate", "value": 0.05, "ledger_key": "fx_profit_rate"}
       ],
       "answer_key": [
-        {"name": "overheads_amount", "ledger_key": "fx_overheads_amount", "value": 2433.12, "tolerance": "0.01", "graded_by": "panel"},
+        {"name": "overheads_amount", "ledger_key": "fx_overheads_amount", "value": 2433.12, "tolerance": "0.01", "graded_by": "panel", "display_unit": "GBP"},
         {"name": "grand_total", "ledger_key": "fx_grand_total", "value": 34367.82, "tolerance": "0.01", "graded_by": "probe:0"},
         {"name": "profit_rate", "ledger_key": "fx_profit_rate", "value": 0.05, "tolerance": "0.0001", "graded_by": "probe:1", "unit": "fraction"}
       ],
@@ -355,7 +355,7 @@
         {"name": "Flashing length", "value": 64, "ledger_key": "fx_flash_qty"}
       ],
       "answer_key": [
-        {"name": "alderby_normalized", "ledger_key": "fx_alderby_norm", "value": 11780.00, "tolerance": "0.01", "graded_by": "panel", "also_accepted": [{"value": 11788.00, "ledger_key": "fx_alderby_norm_alt", "convention": "Flashings priced at the second-highest rate plus a stated allowance."}]},
+        {"name": "alderby_normalized", "ledger_key": "fx_alderby_norm", "value": 11780.00, "tolerance": "0.01", "graded_by": "panel", "display_unit": "GBP", "also_accepted": [{"value": 11788.00, "ledger_key": "fx_alderby_norm_alt", "convention": "Flashings priced at the second-highest rate plus a stated allowance."}]},
         {"name": "lowest_normalized", "ledger_key": "fx_lowest_norm", "value": 11250.00, "tolerance": "0.01", "graded_by": "both"},
         {"name": "award_amount", "ledger_key": "fx_award_amount", "value": 11250.00, "tolerance": "0.01", "graded_by": "probe:1", "_unit": "GBP"}
       ],

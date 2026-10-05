@@ -839,6 +839,12 @@
     }
   },
   "trainer": {
+    "diag": {
+      "unit_fraction_vs_percent": "You typed the rate as a fraction where a percentage is asked. Enter it as a percentage, for example 5 for 5 %, not 0.05."
+    },
+    "readback": {
+      "open_leveling": "The leveling has not been computed yet. Open this package in Bid Management and press Compute Leveling, then read back again."
+    },
     "task_order_contiguous": {
       "numbering": "Tasks must be numbered 1 to N in order; the course numbers them {numbers}",
       "duplicate_id": "Task id {task_id} is used by more than one task",

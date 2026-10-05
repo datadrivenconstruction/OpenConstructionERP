@@ -839,6 +839,12 @@
     }
   },
   "trainer": {
+    "diag": {
+      "unit_fraction_vs_percent": "Sie haben den Satz als Dezimalbruch eingegeben, gefragt ist ein Prozentwert. Geben Sie ihn in Prozent ein, zum Beispiel 5 für 5 %, nicht 0,05."
+    },
+    "readback": {
+      "open_leveling": "Der Angebotsabgleich ist noch nicht berechnet. Öffnen Sie dieses Paket im Angebotsmanagement und klicken Sie auf „Angebotsabgleich berechnen“, dann lesen Sie die Werte erneut aus."
+    },
     "task_order_contiguous": {
       "numbering": "Aufgaben müssen der Reihe nach von 1 bis N nummeriert sein; der Kurs nummeriert sie {numbers}",
       "duplicate_id": "Die Aufgaben-ID {task_id} wird von mehr als einer Aufgabe verwendet",

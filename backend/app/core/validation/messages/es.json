@@ -839,6 +839,12 @@
     }
   },
   "trainer": {
+    "diag": {
+      "unit_fraction_vs_percent": "Ha escrito el porcentaje como fracción decimal y se pide un porcentaje. Introdúzcalo en porcentaje, por ejemplo 5 para el 5 %, no 0,05."
+    },
+    "readback": {
+      "open_leveling": "La nivelación aún no se ha calculado. Abra este paquete en Gestión de ofertas y pulse Calcular nivelación; después vuelva a leer los valores."
+    },
     "task_order_contiguous": {
       "numbering": "Las tareas deben numerarse de 1 a N en orden; el curso las numera {numbers}",
       "duplicate_id": "El id de tarea {task_id} lo usa más de una tarea",

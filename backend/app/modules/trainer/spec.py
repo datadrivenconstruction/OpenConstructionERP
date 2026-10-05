@@ -63,6 +63,11 @@ Grammars:
   ``n >= 1``, the n-th object in creation order within its scope. For claims
   that is the claim numbered ``PC-{n:04d}``, because ``next_claim_number``
   (``contracts/repository.py``) numbers a contract's claims ``count + 1``.
+  For ``variation.order`` it is the n-th order ON THE SEEDED CONTRACT
+  (``affected_contract_id``) in creation order, NOT the order coded
+  ``VO-{n:04d}``: order codes count every order of the project, so the first
+  order on the contract may well be ``VO-0002``. For ``variation.request``
+  (requests carry no contract) it is the n-th request of the project.
 
 Frozen probe arguments (decision 16; one model per type in
 ``probe_types.PROBE_TYPES``, all ``extra="forbid"``):
@@ -77,9 +82,13 @@ type                   args                                                     
 ``boq.position``       ``boq_ref``, ``ordinal``, ``field`` = quantity |         ``oe_boq_position.quantity / unit_rate /
                        unit_rate | total                                        total`` (String(50)) by ``boq_id`` and
                                                                                 ``ordinal``
-``boq.section_total``  ``boq_ref``, ``section_ordinal``                         sum of ``oe_boq_position.total`` under the
-                                                                                section row (``parent_id``); a section is a
-                                                                                position with unit "" or "section"
+``boq.section_total``  ``boq_ref``, ``section_ordinal``                         sum of ``oe_boq_position.total`` of the
+                                                                                leaf positions under the section row
+                                                                                (``parent_id``, any depth). A section is
+                                                                                what ``boq.service._is_section`` says: unit
+                                                                                "" or "section" (trimmed, case-folded) AND
+                                                                                quantity 0 AND unit_rate 0. A priced row
+                                                                                with an empty unit is a position
 ``boq.markup``         ``boq_ref``, ``name``, ``field`` = percentage |          ``oe_boq_markup`` (``BOQMarkup``), active
                        fixed_amount | markup_type | apply_to | category |       rows with that name; more than one match is
                        sort_order                                               a probe error, never a guess
