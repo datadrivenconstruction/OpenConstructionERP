@@ -656,42 +656,40 @@ def validate_release_split(split: Any, where: str = "retention_release_split") -
     return steps
 
 
-def _check_figure(field: str, figure: Any, where: str) -> None:
-    if not isinstance(figure, dict) or set(figure) != {"value", "source", "reference", "note"}:
-        raise ValueError(f"{where} must be a figure with value, source, reference and note")
-    if figure["source"] not in SOURCES or not figure["note"] or not figure["reference"]:
-        raise ValueError(f"{where} must name its source, reference and note")
-    value = figure["value"]
-    if value is None:
-        return
-    if field in ("retention_percent", "retention_cap_percent"):
-        _check_percent(value, where)
-    elif field == "retention_release_split":
-        if value != FROM_REGIONAL_PACK:
-            validate_release_split(value, where)
-    elif field == "payment_period_days":
-        if not isinstance(value, int) or isinstance(value, bool) or not 0 < value <= 365:
-            raise ValueError(f"{where} must be a whole number of days between 1 and 365")
-    elif field == "valuation_interval":
-        if value not in VALUATION_INTERVALS:
-            raise ValueError(f"{where} must be one of {', '.join(VALUATION_INTERVALS)}")
-    elif field == "certificate_name" and not str(value).strip():
-        raise ValueError(f"{where} must not be blank")
-
-
 def _validate_table() -> None:
     for country, row in COUNTRY_CONTRACT_DEFAULTS.items():
         if len(country) != 2 or not country.isupper():
             raise ValueError(f"country key {country!r} is not ISO 3166-1 alpha-2")
         for field in CONTRACT_DEFAULT_FIELDS:
-            _check_figure(field, row.get(field), f"{country}.{field}")
+            figure = row.get(field)
+            where = f"{country}.{field}"
+            if not isinstance(figure, dict) or set(figure) != {"value", "source", "reference", "note"}:
+                raise ValueError(f"{where} must be a figure with value, source, reference and note")
+            if figure["source"] not in SOURCES or not figure["note"] or not figure["reference"]:
+                raise ValueError(f"{where} must name its source, reference and note")
+            value = figure["value"]
+            if value is None:
+                continue
+            if field in ("retention_percent", "retention_cap_percent"):
+                _check_percent(value, where)
+            elif field == "retention_release_split":
+                if value != FROM_REGIONAL_PACK:
+                    validate_release_split(value, where)
+            elif field == "payment_period_days":
+                if not isinstance(value, int) or isinstance(value, bool) or not 0 < value <= 365:
+                    raise ValueError(f"{where} must be a whole number of days between 1 and 365")
+            elif field == "valuation_interval":
+                if value not in VALUATION_INTERVALS:
+                    raise ValueError(f"{where} must be one of {', '.join(VALUATION_INTERVALS)}")
+            elif field == "certificate_name" and not str(value).strip():
+                raise ValueError(f"{where} must not be blank")
 
 
 _validate_table()
 
 
 def _validate_works_table() -> None:
-    """Hold each works variant to the rules of the country row it changes."""
+    """Hold each works variant to the rules its country row is held to."""
     for country, variants in WORKS_CONTRACT_DEFAULTS.items():
         if country not in COUNTRY_CONTRACT_DEFAULTS:
             raise ValueError(f"works variants for {country!r}, which has no country row")
@@ -703,8 +701,19 @@ def _validate_works_table() -> None:
             if unknown:
                 raise ValueError(f"{where} names fields the table does not have: {sorted(unknown)}")
             for field in CONTRACT_DEFAULT_FIELDS:
-                if field in variant:
-                    _check_figure(field, variant[field], f"{where}.{field}")
+                figure = variant.get(field)
+                if figure is None:
+                    continue
+                if not isinstance(figure, dict) or set(figure) != {"value", "source", "reference", "note"}:
+                    raise ValueError(f"{where}.{field} must be a figure with value, source, reference and note")
+                if figure["source"] not in SOURCES or not figure["note"] or not figure["reference"]:
+                    raise ValueError(f"{where}.{field} must name its source, reference and note")
+                if field not in ("retention_percent", "retention_cap_percent", "retention_release_split"):
+                    raise ValueError(f"{where}.{field}: a works variant changes retention figures only")
+                if field == "retention_release_split":
+                    validate_release_split(figure["value"], f"{where}.{field}")
+                else:
+                    _check_percent(figure["value"], f"{where}.{field}")
             for field, reference in (variant.get("references") or {}).items():
                 if field not in CONTRACT_DEFAULT_FIELDS or field in variant or not str(reference).strip():
                     raise ValueError(f"{where}.references.{field} must re-cite a figure the variant leaves standing")
