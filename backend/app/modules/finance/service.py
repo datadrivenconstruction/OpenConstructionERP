@@ -1770,6 +1770,19 @@ class FinanceService:
         # invoice could have answered from data the platform already had.
         contract_einvoice = dict((contract.metadata_ or {}).get("einvoice") or {})
         vat_rate = _safe_decimal(contract_einvoice.get("vat_rate"), Decimal("0"))
+        # Where the country measures retention on the payment with VAT in it
+        # (Germany, § 17 Abs. 6 Nr. 1 VOB/B), the claim's retention already
+        # includes its share of the VAT. Booking that against a receivable
+        # with no VAT on it would collect less than the client owes, so the
+        # invoice adds the VAT the retention was measured with when the
+        # contract states none of its own. A net-basis contract keeps the
+        # contract's rate, or none, exactly as before.
+        if contract_einvoice.get("vat_rate") in (None, ""):
+            from app.modules.contracts.service import ContractsService  # noqa: PLC0415
+
+            basis = await ContractsService(self.session).retention_basis(contract)
+            if basis.vat_percent is not None:
+                vat_rate = basis.vat_percent
         tax_base = (
             (gross_base * vat_rate / Decimal("100")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
             if vat_rate > 0
