@@ -146,10 +146,14 @@ class SubcontractorRepository(_BaseRepo):
         the digits and their order, so the run is a superset key SQL can
         compute - and the exact comparison happens on the identity key here.
 
-        Used by ``SubcontractorService`` for the happy-path 409 on create and
-        on a PATCH that changes the number. The partial unique index added in
-        ``v3099_subcontractors_unique_tax_id`` stays the backstop for the
-        exact-string race.
+        Used by ``SubcontractorService`` for the 409 on create and on a PATCH
+        that changes the number, and this read is the whole uniqueness rule.
+        Only active rows are compared, so a deactivated firm's number can be
+        registered again. No install carries a unique index on ``tax_id``:
+        ``v3011`` indexes it non-unique, and ``v3099_subcontractors_unique_tax_id``
+        only builds a non-unique index over a ``tenant_id`` column this table
+        never had, so it creates nothing. Two concurrent registrations of one
+        number can therefore both succeed.
         """
         if not tax_id:
             return None
