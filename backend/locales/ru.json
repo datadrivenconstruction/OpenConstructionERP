@@ -135,7 +135,17 @@
     "rate_anomaly": "Расценка {rate} превышает порог ({threshold})"
   },
   "schedule": {
-    "title": "4D График"
+    "title": "4D График",
+    "generated": {
+      "position_label": "Позиция {ordinal}",
+      "section_label": "Раздел {ordinal}",
+      "task_description": "Создано автоматически по позиции {ordinal} сметы ({quantity} {unit})",
+      "section_description": "Сводка: раздел {ordinal} сметы",
+      "start_milestone": "Начало проекта",
+      "start_milestone_description": "Контрольная точка начала проекта",
+      "completion_milestone": "Завершение проекта",
+      "completion_milestone_description": "Контрольная точка завершения проекта"
+    }
   },
   "cad": {
     "title": "Импорт CAD",

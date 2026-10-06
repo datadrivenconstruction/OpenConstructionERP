@@ -135,7 +135,17 @@
     "rate_anomaly": "একক রেট {rate} সীমা অতিক্রম করেছে ({threshold})"
   },
   "schedule": {
-    "title": "4D সময়সূচি"
+    "title": "4D সময়সূচি",
+    "generated": {
+      "position_label": "পজিশন {ordinal}",
+      "section_label": "বিভাগ {ordinal}",
+      "task_description": "BOQ-এর পজিশন {ordinal} থেকে স্বয়ংক্রিয়ভাবে তৈরি ({quantity} {unit})",
+      "section_description": "সারাংশ: BOQ-এর বিভাগ {ordinal}",
+      "start_milestone": "প্রকল্প শুরু",
+      "start_milestone_description": "প্রকল্প শুরুর মাইলফলক",
+      "completion_milestone": "প্রকল্প সমাপ্তি",
+      "completion_milestone_description": "প্রকল্প সমাপ্তির মাইলফলক"
+    }
   },
   "cad": {
     "title": "CAD ইম্পোর্ট",

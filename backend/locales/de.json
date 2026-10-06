@@ -135,7 +135,17 @@
     "rate_anomaly": "Einheitspreis {rate} überschreitet Schwellenwert ({threshold})"
   },
   "schedule": {
-    "title": "4D Bauzeitenplan"
+    "title": "4D Bauzeitenplan",
+    "generated": {
+      "position_label": "Position {ordinal}",
+      "section_label": "Abschnitt {ordinal}",
+      "task_description": "Automatisch generiert aus LV-Position {ordinal} ({quantity} {unit})",
+      "section_description": "Zusammenfassung: LV-Abschnitt {ordinal}",
+      "start_milestone": "Projektstart",
+      "start_milestone_description": "Meilenstein für den Projektstart",
+      "completion_milestone": "Projektabschluss",
+      "completion_milestone_description": "Meilenstein für den Projektabschluss"
+    }
   },
   "cad": {
     "title": "CAD-Import",

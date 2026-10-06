@@ -11,7 +11,10 @@ import { listAssignmentsForActivity, listResources } from '@/features/resources/
 import { AssigneePicker, type AssigneeValue } from '@/features/contacts/AssigneePicker';
 import { scheduleApi, type Activity } from './api';
 import { orderAsTree } from './activityTree';
+import { ActivityDeleteDialog, activityDeleteTarget, type ActivityDeleteTarget } from './ActivityDeleteDialog';
+import { scheduleErrorMessage } from './errors';
 import { fmtList } from '@/shared/lib/formatters';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 
 const TYPES = ['task', 'milestone', 'summary'] as const;
 
@@ -92,6 +95,9 @@ export function ActivityGrid({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
+
+  const [deleteTarget, setDeleteTarget] = useState<ActivityDeleteTarget | null>(null);
+  const canDelete = useHasPermission('schedule.delete');
 
   const invalidateGantt = () =>
     queryClient.invalidateQueries({ queryKey: ['gantt', scheduleId] });
@@ -287,8 +293,9 @@ export function ActivityGrid({
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => scheduleApi.deleteActivity(id),
+    mutationFn: ({ id, cascade }: { id: string; cascade: boolean }) => scheduleApi.deleteActivity(id, cascade),
     onSuccess: () => {
+      setDeleteTarget(null);
       invalidateGantt();
       addToast({
         type: 'success',
@@ -299,9 +306,14 @@ export function ActivityGrid({
       addToast({
         type: 'error',
         title: t('toasts.error', { defaultValue: 'Error' }),
-        message: error.message,
+        message: scheduleErrorMessage(error, t),
       }),
   });
+  // A row is deleted only after a confirmation; a section asks whether its
+  // activities go with it or stay and move up one level.
+  const handleDelete = (activity: Activity) => {
+    setDeleteTarget(activityDeleteTarget(activity, allActivities ?? activities));
+  };
 
   const busy =
     updateMutation.isPending || rescheduleMutation.isPending || setCalendarMutation.isPending;
@@ -659,16 +671,18 @@ export function ActivityGrid({
                       </button>
                     </td>
                     <td className="px-2 py-1.5 text-right align-middle">
-                      <button
-                        type="button"
-                        data-testid={`grid-delete-${a.id}`}
-                        onClick={() => deleteMutation.mutate(a.id)}
-                        disabled={deleteMutation.isPending}
-                        title={t('schedule.delete_activity', { defaultValue: 'Delete activity' })}
-                        className="inline-flex items-center rounded-md p-1 text-content-tertiary transition-colors hover:bg-semantic-error/10 hover:text-semantic-error"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                      {canDelete && (
+                        <button
+                          type="button"
+                          data-testid={`grid-delete-${a.id}`}
+                          onClick={() => handleDelete(a)}
+                          disabled={deleteMutation.isPending}
+                          title={t('schedule.delete_activity', { defaultValue: 'Delete activity' })}
+                          className="inline-flex items-center rounded-md p-1 text-content-tertiary transition-colors hover:bg-semantic-error/10 hover:text-semantic-error"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 );
@@ -677,6 +691,12 @@ export function ActivityGrid({
           </tbody>
         </table>
       </div>
+      <ActivityDeleteDialog
+        target={deleteTarget}
+        loading={deleteMutation.isPending}
+        onCancel={() => setDeleteTarget(null)}
+        onDelete={(cascade) => deleteTarget && deleteMutation.mutate({ id: deleteTarget.id, cascade })}
+      />
     </Card>
   );
 }

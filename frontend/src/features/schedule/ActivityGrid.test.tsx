@@ -12,7 +12,7 @@
  * shared dependency editor / add-activity modal.
  */
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -23,6 +23,7 @@ vi.mock('./api', async () => {
     scheduleApi: {
       updateActivity: vi.fn(),
       reschedule: vi.fn(),
+      deleteActivity: vi.fn(),
     },
   };
 });
@@ -43,6 +44,7 @@ import { scheduleApi } from './api';
 import { listAssignmentsForActivity, listResources } from '@/features/resources/api';
 import { listCalendars } from '@/features/schedule-advanced/api';
 import { ActivityGrid } from './ActivityGrid';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 const A = {
   id: 'a1',
@@ -234,5 +236,64 @@ describe('ActivityGrid', () => {
     renderGrid();
     expect(listAssignmentsForActivity).not.toHaveBeenCalled();
     expect(screen.getByTestId('grid-resources-a1').textContent).toBe('');
+  });
+});
+
+describe('ActivityGrid delete', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useAuthStore.setState({ userRole: 'editor' });
+    (scheduleApi.deleteActivity as any).mockResolvedValue(undefined);
+    (listCalendars as any).mockResolvedValue([]);
+    (listResources as any).mockResolvedValue({ items: [], total: 0, offset: 0, limit: 500 });
+    (listAssignmentsForActivity as any).mockResolvedValue([]);
+  });
+
+  it('asks before deleting a row and deletes only on confirm', async () => {
+    renderGrid();
+    fireEvent.click(screen.getByTestId('grid-delete-a1'));
+    const dialog = await screen.findByRole('alertdialog');
+    expect(dialog).toHaveTextContent('Foundation');
+    expect(scheduleApi.deleteActivity).not.toHaveBeenCalled();
+
+    fireEvent.click(within(dialog).getByRole('button', { name: /cancel/i }));
+    await waitFor(() => expect(screen.queryByRole('alertdialog')).toBeNull());
+    expect(scheduleApi.deleteActivity).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId('grid-delete-a1'));
+    const again = await screen.findByRole('alertdialog');
+    fireEvent.click(within(again).getByRole('button', { name: /^delete$/i }));
+    await waitFor(() => expect(scheduleApi.deleteActivity).toHaveBeenCalledWith('a1', false));
+  });
+
+  const S = { ...A, id: 's1', name: 'Earthworks', activity_type: 'summary' };
+  const SUB = { ...A, id: 'sub', name: 'Trenches', activity_type: 'summary', parent_id: 's1' };
+  const C1 = { ...A, id: 'k1', name: 'Dig', parent_id: 'sub' };
+  const C2 = { ...B, id: 'k2', name: 'Fill', parent_id: 's1' };
+
+  it('offers a viewer no delete, which the server would refuse', async () => {
+    useAuthStore.setState({ userRole: 'viewer' });
+    renderGrid({ activities: [S, SUB, C1, C2], allActivities: [S, SUB, C1, C2] });
+    expect(await screen.findByTestId('grid-deps-s1')).toBeInTheDocument();
+    expect(screen.queryByTestId('grid-delete-s1')).toBeNull();
+  });
+
+  it('asks whether a section goes with its activities, counted at every depth', async () => {
+    renderGrid({ activities: [S, SUB, C1, C2], allActivities: [S, SUB, C1, C2] });
+    fireEvent.click(screen.getByTestId('grid-delete-s1'));
+    const dialog = await screen.findByRole('alertdialog');
+    expect(dialog).toHaveTextContent('Earthworks');
+    expect(dialog).toHaveTextContent(/move up one level/);
+    expect(within(dialog).getByTestId('activity-delete-with-children')).toHaveTextContent('3');
+    fireEvent.click(within(dialog).getByTestId('activity-delete-with-children'));
+    await waitFor(() => expect(scheduleApi.deleteActivity).toHaveBeenCalledWith('s1', true));
+  });
+
+  it('deletes only the section when its activities are kept', async () => {
+    renderGrid({ activities: [S, SUB, C1, C2], allActivities: [S, SUB, C1, C2] });
+    fireEvent.click(screen.getByTestId('grid-delete-s1'));
+    const dialog = await screen.findByRole('alertdialog');
+    fireEvent.click(within(dialog).getByTestId('activity-delete-keep-children'));
+    await waitFor(() => expect(scheduleApi.deleteActivity).toHaveBeenCalledWith('s1', false));
   });
 });

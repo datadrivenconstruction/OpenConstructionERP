@@ -135,7 +135,17 @@
     "rate_anomaly": "یونٹ ریٹ {rate} حد ({threshold}) سے تجاوز کر گیا"
   },
   "schedule": {
-    "title": "4D شیڈول"
+    "title": "4D شیڈول",
+    "generated": {
+      "position_label": "پوزیشن {ordinal}",
+      "section_label": "حصہ {ordinal}",
+      "task_description": "مقدار کے بل کی پوزیشن {ordinal} سے خودکار طور پر تیار کیا گیا ({quantity} {unit})",
+      "section_description": "خلاصہ: مقدار کے بل کا حصہ {ordinal}",
+      "start_milestone": "پروجیکٹ کا آغاز",
+      "start_milestone_description": "پروجیکٹ کے آغاز کا سنگ میل",
+      "completion_milestone": "پروجیکٹ کی تکمیل",
+      "completion_milestone_description": "پروجیکٹ کی تکمیل کا سنگ میل"
+    }
   },
   "cad": {
     "title": "CAD درآمد",

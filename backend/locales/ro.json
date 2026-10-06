@@ -135,7 +135,17 @@
     "rate_anomaly": "Prețul unitar {rate} depășește pragul ({threshold})"
   },
   "schedule": {
-    "title": "Programare 4D"
+    "title": "Programare 4D",
+    "generated": {
+      "position_label": "Poziția {ordinal}",
+      "section_label": "Capitolul {ordinal}",
+      "task_description": "Generat automat din poziția {ordinal} a antemăsurătorii ({quantity} {unit})",
+      "section_description": "Rezumat: capitolul {ordinal} al antemăsurătorii",
+      "start_milestone": "Începutul proiectului",
+      "start_milestone_description": "Reper de început al proiectului",
+      "completion_milestone": "Finalizarea proiectului",
+      "completion_milestone_description": "Reper de finalizare al proiectului"
+    }
   },
   "cad": {
     "title": "Import CAD",

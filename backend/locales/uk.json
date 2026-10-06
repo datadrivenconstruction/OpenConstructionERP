@@ -135,7 +135,17 @@
     "rate_anomaly": "Ціна за одиницю {rate} перевищує поріг ({threshold})"
   },
   "schedule": {
-    "title": "4D календарний графік"
+    "title": "4D календарний графік",
+    "generated": {
+      "position_label": "Позиція {ordinal}",
+      "section_label": "Розділ {ordinal}",
+      "task_description": "Автоматично створено з позиції {ordinal} кошторису ({quantity} {unit})",
+      "section_description": "Підсумок: розділ {ordinal} кошторису",
+      "start_milestone": "Початок проєкту",
+      "start_milestone_description": "Контрольна точка початку проєкту",
+      "completion_milestone": "Завершення проєкту",
+      "completion_milestone_description": "Контрольна точка завершення проєкту"
+    }
   },
   "cad": {
     "title": "Імпорт CAD",

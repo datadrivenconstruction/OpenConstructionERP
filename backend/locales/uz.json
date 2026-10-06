@@ -135,7 +135,17 @@
     "rate_anomaly": "Birlik narxi {rate} chegaradan oshdi ({threshold})"
   },
   "schedule": {
-    "title": "4D jadval"
+    "title": "4D jadval",
+    "generated": {
+      "position_label": "Band {ordinal}",
+      "section_label": "Boʻlim {ordinal}",
+      "task_description": "Qaydnomaning {ordinal}-bandidan avtomatik yaratildi ({quantity} {unit})",
+      "section_description": "Xulosa: qaydnomaning {ordinal}-boʻlimi",
+      "start_milestone": "Loyihaning boshlanishi",
+      "start_milestone_description": "Loyihaning boshlanish bosqichi",
+      "completion_milestone": "Loyihaning tugashi",
+      "completion_milestone_description": "Loyihaning tugash bosqichi"
+    }
   },
   "cad": {
     "title": "CAD import",

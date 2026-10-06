@@ -31,6 +31,7 @@ from app.modules.costmodel.service import CostModelService
 from app.modules.schedule.service import (
     _calc_duration_from_resources,
     estimate_fallback_duration_days,
+    fallback_gang_size,
     fallback_labor_hours,
 )
 
@@ -371,12 +372,52 @@ def test_fallback_unit_aliases_normalized() -> None:
 def test_estimate_fallback_duration_days_minimum_one() -> None:
     # Tiny quantity still yields at least 1 day
     assert estimate_fallback_duration_days("kg", 1) == 1
-    # m3 x 10 -> 40h -> 5 days at 8h/day
-    assert estimate_fallback_duration_days("m3", 10) == 5
-    # lsum -> 8h flat -> 1 day
+    # m3 x 10 -> 40h, a gang of four at 8h/day -> 1.25 -> 2 days
+    assert estimate_fallback_duration_days("m3", 10) == 2
+    # One person, as the table used to assume -> 5 days
+    assert estimate_fallback_duration_days("m3", 10, gang_size=1) == 5
+    # lsum -> 8h flat, one person -> 1 day
     assert estimate_fallback_duration_days("lsum", 50) == 1
-    # Regional calendar hours respected
-    assert estimate_fallback_duration_days("m3", 10, hours_per_day=10.0) == 4
+    # Regional calendar hours respected: 40h / (4 x 10h) -> 1 day
+    assert estimate_fallback_duration_days("m3", 10, hours_per_day=10.0) == 1
+
+
+def test_a_gang_works_a_task_not_one_person() -> None:
+    # 850 m3 at 4 h/m3 is 3,400 hours: 425 days for one person, 107 for the
+    # gang of four the table assumes for volume work.
+    assert fallback_gang_size("m3") == 4
+    assert estimate_fallback_duration_days("m3", 850) == 107
+    assert fallback_gang_size("mq") == 3
+    assert fallback_gang_size("widget") == 2
+
+
+@pytest.mark.parametrize(
+    ("italian", "same_as"),
+    [("mc", "m3"), ("mq", "m2"), ("ml", "m"), ("cad", "pcs"), ("nr", "pcs"), ("n.", "pcs"), ("pz", "pcs")],
+)
+def test_italian_units_read_like_their_symbols(italian: str, same_as: str) -> None:
+    assert fallback_labor_hours(italian, 850) == fallback_labor_hours(same_as, 850)
+    assert estimate_fallback_duration_days(italian, 850) == estimate_fallback_duration_days(same_as, 850)
+
+
+def test_a_quintal_is_a_hundred_kilograms() -> None:
+    assert fallback_labor_hours("q.li", 3) == pytest.approx(fallback_labor_hours("kg", 300))
+
+
+@pytest.mark.parametrize("unit", ["a corpo", "A CORPO", "corpo", "kpl", "psch", "LS"])
+def test_lump_sums_in_any_language_go_by_cost_share(unit: str) -> None:
+    days, source = _calc_duration_from_resources(
+        {},
+        1.0,
+        unit,
+        total_cost=50000.0,
+        grand_total=100000.0,
+        total_days=365,
+        hours_per_day=8.0,
+        work_days_per_week=5,
+    )
+    assert source == "cost_proportional"
+    assert days == round(0.5 * 365)
 
 
 @pytest.mark.parametrize("unit", ["m3", "m2", "m", "kg", "pcs", "stk", "t", "lsum", "unknown"])
@@ -478,7 +519,7 @@ def test_non_lump_sum_units_keep_production_rate_path() -> None:
         work_days_per_week=5,
     )
     assert source == "estimated_fallback"
-    assert days == 5  # 10 m3 x 4 h -> 40h -> 5 days
+    assert days == 2  # 10 m3 x 4 h -> 40h, a gang of four at 8h -> 2 days
 
 
 def test_cost_proportional_for_zero_quantity() -> None:

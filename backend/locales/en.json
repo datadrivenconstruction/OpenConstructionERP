@@ -135,7 +135,17 @@
     "rate_anomaly": "Unit rate {rate} exceeds threshold ({threshold})"
   },
   "schedule": {
-    "title": "4D Schedule"
+    "title": "4D Schedule",
+    "generated": {
+      "position_label": "Position {ordinal}",
+      "section_label": "Section {ordinal}",
+      "task_description": "Auto-generated from BOQ position {ordinal} ({quantity} {unit})",
+      "section_description": "Summary: BOQ section {ordinal}",
+      "start_milestone": "Project Start",
+      "start_milestone_description": "Project kick-off milestone",
+      "completion_milestone": "Project Completion",
+      "completion_milestone_description": "Project completion milestone"
+    }
   },
   "cad": {
     "title": "CAD Import",

@@ -356,6 +356,50 @@ export function calculateArrowPath(
   );
 }
 
+export type GanttDependencyType = 'FS' | 'SS' | 'FF' | 'SF';
+
+/**
+ * Arrow path for a typed link between two bars.
+ *
+ * The anchors follow the type: the first letter names the predecessor's end
+ * the arrow leaves (Start or Finish), the second the successor's end it
+ * arrives at. A start is left on its left side and a finish on its right, so
+ * SS draws a bracket to the left of both bars and FF one to the right of both.
+ * FS keeps the exact geometry of `calculateArrowPath`.
+ */
+export function calculateLinkPath(
+  type: GanttDependencyType,
+  from: { left: number; right: number; row: number },
+  to: { left: number; right: number; row: number },
+  rowHeight: number,
+): string {
+  if (type === 'FS') return calculateArrowPath(from.right, from.row, to.left, to.row, rowHeight);
+
+  const fromY = from.row * rowHeight + rowHeight / 2;
+  const toY = to.row * rowHeight + rowHeight / 2;
+  const offset = 12;
+
+  if (type === 'SS') {
+    const x = Math.min(from.left, to.left) - offset;
+    return `M ${from.left} ${fromY} L ${x} ${fromY} L ${x} ${toY} L ${to.left} ${toY}`;
+  }
+  if (type === 'FF') {
+    const x = Math.max(from.right, to.right) + offset;
+    return `M ${from.right} ${fromY} L ${x} ${fromY} L ${x} ${toY} L ${to.right} ${toY}`;
+  }
+  // SF: out of the predecessor's start to the left, into the successor's
+  // finish from the right, crossing over at mid-height between the rows.
+  const midY = fromY + (toY - fromY) / 2;
+  return (
+    `M ${from.left} ${fromY} ` +
+    `L ${from.left - offset} ${fromY} ` +
+    `L ${from.left - offset} ${midY} ` +
+    `L ${to.right + offset} ${midY} ` +
+    `L ${to.right + offset} ${toY} ` +
+    `L ${to.right} ${toY}`
+  );
+}
+
 /* ── Date range from activities ─────────────────────────────────── */
 
 export interface GanttActivity {
@@ -369,6 +413,12 @@ export interface GanttActivity {
   isGroup?: boolean;
   parentId?: string | null;
   dependencies?: string[];
+  /**
+   * Link type per predecessor id in `dependencies`. A predecessor missing
+   * here (or the whole map absent) is drawn as finish-to-start, which is what
+   * every arrow was before types were carried.
+   */
+  dependencyTypes?: Record<string, GanttDependencyType>;
   baselineStart?: string;
   baselineEnd?: string;
   color?: string;

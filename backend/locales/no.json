@@ -135,7 +135,17 @@
     "rate_anomaly": "Enhetspris {rate} overskrider terskel ({threshold})"
   },
   "schedule": {
-    "title": "4D Fremdriftsplan"
+    "title": "4D Fremdriftsplan",
+    "generated": {
+      "position_label": "Post {ordinal}",
+      "section_label": "Avsnitt {ordinal}",
+      "task_description": "Automatisk generert fra post {ordinal} i mengdefortegnelsen ({quantity} {unit})",
+      "section_description": "Sammendrag: avsnitt {ordinal} i mengdefortegnelsen",
+      "start_milestone": "Prosjektstart",
+      "start_milestone_description": "Milepæl for prosjektstart",
+      "completion_milestone": "Prosjektavslutning",
+      "completion_milestone_description": "Milepæl for prosjektavslutning"
+    }
   },
   "cad": {
     "title": "CAD-import",

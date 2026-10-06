@@ -135,7 +135,17 @@
     "rate_anomaly": "Ühikuhind {rate} ületab piirmäära ({threshold})"
   },
   "schedule": {
-    "title": "4D ajakava"
+    "title": "4D ajakava",
+    "generated": {
+      "position_label": "Rida {ordinal}",
+      "section_label": "Jaotis {ordinal}",
+      "task_description": "Automaatselt loodud mahutabeli rea {ordinal} põhjal ({quantity} {unit})",
+      "section_description": "Kokkuvõte: mahutabeli jaotis {ordinal}",
+      "start_milestone": "Projekti algus",
+      "start_milestone_description": "Projekti alguse verstapost",
+      "completion_milestone": "Projekti lõpetamine",
+      "completion_milestone_description": "Projekti lõpetamise verstapost"
+    }
   },
   "cad": {
     "title": "CAD import",

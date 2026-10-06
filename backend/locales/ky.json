@@ -135,7 +135,17 @@
     "rate_anomaly": "Бирдик баасы {rate} чектен ашты ({threshold})"
   },
   "schedule": {
-    "title": "4D График"
+    "title": "4D График",
+    "generated": {
+      "position_label": "Позиция {ordinal}",
+      "section_label": "Бөлүм {ordinal}",
+      "task_description": "Смета ведомосунун {ordinal}-позициясынан автоматтык түрдө түзүлдү ({quantity} {unit})",
+      "section_description": "Жыйынтык: смета ведомосунун {ordinal}-бөлүмү",
+      "start_milestone": "Долбоордун башталышы",
+      "start_milestone_description": "Долбоордун башталуу мезгили",
+      "completion_milestone": "Долбоордун аякталышы",
+      "completion_milestone_description": "Долбоордун аяктоо мезгили"
+    }
   },
   "cad": {
     "title": "CAD импорту",

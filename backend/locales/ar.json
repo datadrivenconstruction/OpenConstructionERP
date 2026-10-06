@@ -135,7 +135,17 @@
     "rate_anomaly": "سعر الوحدة {rate} يتجاوز الحد ({threshold})"
   },
   "schedule": {
-    "title": "جدول زمني 4D"
+    "title": "جدول زمني 4D",
+    "generated": {
+      "position_label": "البند {ordinal}",
+      "section_label": "القسم {ordinal}",
+      "task_description": "تم إنشاؤه تلقائيًا من البند {ordinal} في جدول الكميات ({quantity} {unit})",
+      "section_description": "ملخص: القسم {ordinal} من جدول الكميات",
+      "start_milestone": "بداية المشروع",
+      "start_milestone_description": "معلم بداية المشروع",
+      "completion_milestone": "اكتمال المشروع",
+      "completion_milestone_description": "معلم اكتمال المشروع"
+    }
   },
   "cad": {
     "title": "استيراد CAD",

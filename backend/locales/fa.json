@@ -135,7 +135,17 @@
     "rate_anomaly": "نرخ واحد {rate} از حد آستانه ({threshold}) فراتر رفته است"
   },
   "schedule": {
-    "title": "زمان‌بندی 4D"
+    "title": "زمان‌بندی 4D",
+    "generated": {
+      "position_label": "ردیف {ordinal}",
+      "section_label": "بخش {ordinal}",
+      "task_description": "به‌صورت خودکار از ردیف {ordinal} صورت مقادیر ایجاد شد ({quantity} {unit})",
+      "section_description": "خلاصه: بخش {ordinal} صورت مقادیر",
+      "start_milestone": "شروع پروژه",
+      "start_milestone_description": "نقطه عطف شروع پروژه",
+      "completion_milestone": "تکمیل پروژه",
+      "completion_milestone_description": "نقطه عطف تکمیل پروژه"
+    }
   },
   "cad": {
     "title": "درون‌ریزی CAD",

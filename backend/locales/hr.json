@@ -346,7 +346,17 @@
     "treatment": "Postupanje"
   },
   "schedule": {
-    "title": "4D vremenski plan"
+    "title": "4D vremenski plan",
+    "generated": {
+      "position_label": "Stavka {ordinal}",
+      "section_label": "Poglavlje {ordinal}",
+      "task_description": "Automatski generirano iz stavke {ordinal} troškovnika ({quantity} {unit})",
+      "section_description": "Sažetak: poglavlje {ordinal} troškovnika",
+      "start_milestone": "Početak projekta",
+      "start_milestone_description": "Prekretnica početka projekta",
+      "completion_milestone": "Dovršetak projekta",
+      "completion_milestone_description": "Prekretnica dovršetka projekta"
+    }
   },
   "settings": {
     "currency": "Valuta",

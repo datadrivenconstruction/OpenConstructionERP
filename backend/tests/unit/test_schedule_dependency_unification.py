@@ -93,6 +93,20 @@ class _StubActivityRepo:
         rows = [r for r in self.rows.values() if r.schedule_id == schedule_id]
         return rows[offset : offset + limit], len(rows)
 
+    async def dependency_mirrors(self, schedule_id: uuid.UUID) -> list[tuple[uuid.UUID, list]]:
+        return [
+            (a.id, list(a.dependencies)) for a in self.rows.values() if a.schedule_id == schedule_id and a.dependencies
+        ]
+
+    async def ids_in_schedule(self, schedule_id: uuid.UUID, activity_ids: set[uuid.UUID]) -> set[uuid.UUID]:
+        return {aid for aid in activity_ids if aid in self.rows and self.rows[aid].schedule_id == schedule_id}
+
+    async def reparent_children(self, parent_id: uuid.UUID, new_parent_id: uuid.UUID | None) -> int:
+        children = [r for r in self.rows.values() if getattr(r, "parent_id", None) == parent_id]
+        for child in children:
+            child.parent_id = new_parent_id
+        return len(children)
+
     async def update_fields(self, activity_id: uuid.UUID, **kwargs: Any) -> None:
         a = self.rows.get(activity_id)
         if a:

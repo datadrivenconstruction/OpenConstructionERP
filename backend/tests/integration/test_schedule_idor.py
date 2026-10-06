@@ -29,6 +29,7 @@ import runs (see ``feedback_test_isolation.md``).
 
 from __future__ import annotations
 
+import asyncio
 import uuid
 
 import pytest
@@ -401,3 +402,220 @@ async def test_csv_export_neutralises_formula_payload(http_client, two_schedule_
     # apostrophe-guarded variant must.
     assert "'" + payload in body, f"formula payload not neutralised: {body!r}"
     assert ",=cmd" not in body and '"=cmd' not in body, f"raw formula leaked into a cell: {body!r}"
+
+
+# ── Cross-tenant content through ids the attacker supplies ─────────────────
+#
+# The vectors above send another tenant's SCHEDULE id. These send the
+# attacker's own schedule with another tenant's BOQ or activity id inside the
+# body: the ownership gate passes (the schedule is theirs), so only a check on
+# the referenced row stops the copy or the cross-tenant edge.
+
+
+@pytest_asyncio.fixture(scope="module")
+async def editor_with_own_schedule(http_client, two_schedule_tenants):
+    """C is an editor with a project and schedule of their own; A owns a BOQ."""
+    from sqlalchemy import update
+
+    from app.database import async_session_factory
+    from app.modules.boq.models import BOQ, Position
+    from app.modules.projects.models import Project
+    from app.modules.users.models import User
+
+    c_uid, c_email, c_password, _ = await _register_and_login(http_client, tenant="c")
+    async with async_session_factory() as s:
+        await s.execute(update(User).where(User.email == c_email.lower()).values(role="editor", is_active=True))
+        project = Project(name=f"Schedule-C {uuid.uuid4().hex[:6]}", owner_id=uuid.UUID(c_uid))
+        s.add(project)
+        a_boq = BOQ(project_id=uuid.UUID(two_schedule_tenants["a"]["project_id"]), name="A confidential bill")
+        s.add(a_boq)
+        await s.flush()
+        s.add(
+            Position(
+                boq_id=a_boq.id,
+                parent_id=None,
+                ordinal="01.001",
+                description="A secret voce of the bill",
+                unit="m3",
+                quantity="10",
+                unit_rate="100",
+                total="1000",
+                metadata_={},
+                sort_order=1,
+            )
+        )
+        await s.commit()
+        c_project_id = str(project.id)
+        a_boq_id = str(a_boq.id)
+
+    login = await http_client.post("/api/v1/users/auth/login", json={"email": c_email, "password": c_password})
+    assert login.status_code == 200, login.text
+    c_headers = {"Authorization": f"Bearer {login.json()['access_token']}"}
+
+    sched = await http_client.post(
+        "/api/v1/schedule/schedules/",
+        json={"project_id": c_project_id, "name": "C schedule", "start_date": "2026-05-01"},
+        headers=c_headers,
+    )
+    assert sched.status_code == 201, sched.text
+    c_schedule_id = sched.json()["id"]
+    act = await http_client.post(
+        f"/api/v1/schedule/schedules/{c_schedule_id}/activities/",
+        json={"name": "C own work", "start_date": "2026-05-04", "end_date": "2026-05-08", "activity_type": "task"},
+        headers=c_headers,
+    )
+    assert act.status_code == 201, act.text
+    return {
+        "headers": c_headers,
+        "schedule_id": c_schedule_id,
+        "activity_id": act.json()["id"],
+        "a_boq_id": a_boq_id,
+    }
+
+
+async def _names_in(http_client, schedule_id: str, headers: dict[str, str]) -> list[str]:
+    resp = await http_client.get(f"/api/v1/schedule/schedules/{schedule_id}/gantt/", headers=headers)
+    assert resp.status_code == 200, resp.text
+    return [a["name"] for a in resp.json()["activities"]]
+
+
+@pytest.mark.asyncio
+async def test_two_generations_at_once_write_one_plan(http_client, editor_with_own_schedule):
+    """Two generate requests racing on one schedule must not both write a plan."""
+    from app.database import async_session_factory
+    from app.modules.boq.models import BOQ, Position
+
+    c = editor_with_own_schedule
+    own = await http_client.get(f"/api/v1/schedule/schedules/{c['schedule_id']}", headers=c["headers"])
+    assert own.status_code == 200, own.text
+    project_id = own.json()["project_id"]
+    async with async_session_factory() as s:
+        boq = BOQ(project_id=uuid.UUID(project_id), name="C bill")
+        s.add(boq)
+        await s.flush()
+        for i in range(3):
+            s.add(
+                Position(
+                    boq_id=boq.id,
+                    parent_id=None,
+                    ordinal=f"0{i + 1}",
+                    description=f"C work {i}",
+                    unit="m2",
+                    quantity="50",
+                    unit_rate="20",
+                    total="1000",
+                    metadata_={},
+                    sort_order=i + 1,
+                )
+            )
+        await s.commit()
+        boq_id = str(boq.id)
+    sched = await http_client.post(
+        "/api/v1/schedule/schedules/",
+        json={"project_id": project_id, "name": "C race", "start_date": "2026-05-04"},
+        headers=c["headers"],
+    )
+    assert sched.status_code == 201, sched.text
+    sid = sched.json()["id"]
+    url = f"/api/v1/schedule/schedules/{sid}/generate-from-boq/"
+
+    async def _count() -> int:
+        listed = await http_client.get(f"/api/v1/schedule/schedules/{sid}/gantt/", headers=c["headers"])
+        assert listed.status_code == 200, listed.text
+        return listed.json()["summary"]["total_activities"]
+
+    first, second = await asyncio.gather(
+        *(http_client.post(url, json={"boq_id": boq_id}, headers=c["headers"]) for _ in range(2))
+    )
+    assert sorted([first.status_code, second.status_code]) == [201, 409], (first.text, second.text)
+    written = next(r for r in (first, second) if r.status_code == 201).json()
+    assert await _count() == len(written)
+
+    replaced = await asyncio.gather(
+        *(http_client.post(url, json={"boq_id": boq_id, "replace": True}, headers=c["headers"]) for _ in range(2))
+    )
+    assert [r.status_code for r in replaced] == [201, 201]
+    assert await _count() == len(written), "two replaces at once must leave one plan, not two"
+
+
+@pytest.mark.tenant_isolation
+@pytest.mark.asyncio
+async def test_editor_cannot_generate_from_another_tenants_boq(http_client, editor_with_own_schedule):
+    c = editor_with_own_schedule
+    resp = await http_client.post(
+        f"/api/v1/schedule/schedules/{c['schedule_id']}/generate-from-boq/",
+        json={"boq_id": c["a_boq_id"], "replace": True},
+        headers=c["headers"],
+    )
+    assert resp.status_code == 404, f"COPY-IDOR: C generated from A's BOQ: {resp.status_code} {resp.text!r}"
+    assert resp.json()["detail"]["error"] == "boq_not_found"
+    names = await _names_in(http_client, c["schedule_id"], c["headers"])
+    assert not any("secret" in n for n in names), names
+    assert "C own work" in names, "a refused generation must leave the schedule as it was"
+
+
+@pytest.mark.tenant_isolation
+@pytest.mark.asyncio
+async def test_editor_cannot_preview_another_tenants_boq(http_client, editor_with_own_schedule):
+    # The preview answers with per-position notes, descriptions included, so
+    # it is a read of the bill and gets the same check as the generation.
+    c = editor_with_own_schedule
+    resp = await http_client.post(
+        f"/api/v1/schedule/schedules/{c['schedule_id']}/generate-from-boq/preview/",
+        json={"boq_id": c["a_boq_id"]},
+        headers=c["headers"],
+    )
+    assert resp.status_code == 404, f"PREVIEW-IDOR: {resp.status_code} {resp.text!r}"
+    assert "secret" not in resp.text
+    assert resp.json()["detail"]["error"] == "boq_not_found"
+
+
+@pytest.mark.tenant_isolation
+@pytest.mark.asyncio
+async def test_editor_cannot_link_another_tenants_activity(http_client, two_schedule_tenants, editor_with_own_schedule):
+    a = two_schedule_tenants["a"]
+    c = editor_with_own_schedule
+    for body in (
+        {"predecessor_id": a["activity_id"], "successor_id": c["activity_id"]},
+        {"predecessor_id": c["activity_id"], "successor_id": a["activity_id"]},
+    ):
+        resp = await http_client.post(
+            f"/api/v1/schedule/schedules/{c['schedule_id']}/relationships/",
+            json={**body, "relationship_type": "FS", "lag_days": 0},
+            headers=c["headers"],
+        )
+        assert resp.status_code == 404, f"EDGE-IDOR: {resp.status_code} {resp.text!r}"
+        assert resp.json()["detail"]["error"] == "schedule_activity_not_in_schedule"
+
+    gantt = await http_client.get(f"/api/v1/schedule/schedules/{a['schedule_id']}/gantt/", headers=a["headers"])
+    a_act = next(x for x in gantt.json()["activities"] if x["id"] == a["activity_id"])
+    assert a_act["dependencies"] == [], "A's activity must not have been rewritten"
+
+
+@pytest.mark.tenant_isolation
+@pytest.mark.asyncio
+async def test_activity_edit_cannot_depend_on_another_tenants_activity(
+    http_client, two_schedule_tenants, editor_with_own_schedule
+):
+    a = two_schedule_tenants["a"]
+    c = editor_with_own_schedule
+    resp = await http_client.patch(
+        f"/api/v1/schedule/activities/{c['activity_id']}",
+        json={"dependencies": [{"activity_id": a["activity_id"], "type": "FS", "lag_days": 0}]},
+        headers=c["headers"],
+    )
+    assert resp.status_code == 404, f"EDGE-IDOR via activity edit: {resp.status_code} {resp.text!r}"
+    assert resp.json()["detail"]["error"] == "schedule_activity_not_in_schedule"
+
+    created = await http_client.post(
+        f"/api/v1/schedule/schedules/{c['schedule_id']}/activities/",
+        json={
+            "name": "C linked work",
+            "start_date": "2026-05-11",
+            "end_date": "2026-05-15",
+            "activity_type": "task",
+            "dependencies": [{"activity_id": a["activity_id"], "type": "FS", "lag_days": 0}],
+        },
+        headers=c["headers"],
+    )
+    assert created.status_code == 404, f"EDGE-IDOR via activity create: {created.status_code} {created.text!r}"

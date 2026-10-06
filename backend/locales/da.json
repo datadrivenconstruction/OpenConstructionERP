@@ -135,7 +135,17 @@
     "rate_anomaly": "Enhedspris {rate} overskrider tærskelværdi ({threshold})"
   },
   "schedule": {
-    "title": "4D Tidsplan"
+    "title": "4D Tidsplan",
+    "generated": {
+      "position_label": "Position {ordinal}",
+      "section_label": "Afsnit {ordinal}",
+      "task_description": "Automatisk genereret fra position {ordinal} i tilbudslisten ({quantity} {unit})",
+      "section_description": "Opsummering: afsnit {ordinal} i tilbudslisten",
+      "start_milestone": "Projektstart",
+      "start_milestone_description": "Milepæl for projektstart",
+      "completion_milestone": "Projektafslutning",
+      "completion_milestone_description": "Milepæl for projektafslutning"
+    }
   },
   "cad": {
     "title": "CAD-import",

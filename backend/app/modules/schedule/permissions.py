@@ -23,6 +23,7 @@ def register_schedule_permissions() -> None:
             "schedule.read": Role.VIEWER,
             "schedule.update": Role.EDITOR,
             "schedule.delete": Role.EDITOR,
+            "schedule.purge": Role.ADMIN,
             "schedule.baselines.delete": Role.ADMIN,
             "schedule.work_orders.manage": Role.EDITOR,
         },

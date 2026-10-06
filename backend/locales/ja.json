@@ -135,7 +135,17 @@
     "rate_anomaly": "単価 {rate} がしきい値を超過 ({threshold})"
   },
   "schedule": {
-    "title": "4D 工程表"
+    "title": "4D 工程表",
+    "generated": {
+      "position_label": "項目 {ordinal}",
+      "section_label": "セクション {ordinal}",
+      "task_description": "数量調書の項目 {ordinal} から自動生成 ({quantity} {unit})",
+      "section_description": "概要: 数量調書のセクション {ordinal}",
+      "start_milestone": "プロジェクト開始",
+      "start_milestone_description": "プロジェクト開始マイルストーン",
+      "completion_milestone": "プロジェクト完了",
+      "completion_milestone_description": "プロジェクト完了マイルストーン"
+    }
   },
   "cad": {
     "title": "CAD インポート",

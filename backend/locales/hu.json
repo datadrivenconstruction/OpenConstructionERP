@@ -135,7 +135,17 @@
     "rate_anomaly": "Az egységár ({rate}) meghaladja a küszöbértéket ({threshold})"
   },
   "schedule": {
-    "title": "4D ütemterv"
+    "title": "4D ütemterv",
+    "generated": {
+      "position_label": "Tétel {ordinal}",
+      "section_label": "Szakasz {ordinal}",
+      "task_description": "Automatikusan létrehozva a költségvetés {ordinal}. tételéből ({quantity} {unit})",
+      "section_description": "Összefoglalás: a költségvetés {ordinal}. szakasza",
+      "start_milestone": "Projekt kezdete",
+      "start_milestone_description": "A projekt kezdetének mérföldköve",
+      "completion_milestone": "Projekt befejezése",
+      "completion_milestone_description": "A projekt befejezésének mérföldköve"
+    }
   },
   "cad": {
     "title": "CAD import",

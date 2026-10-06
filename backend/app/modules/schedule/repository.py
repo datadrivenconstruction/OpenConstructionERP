@@ -7,15 +7,16 @@ No business logic - pure data access.
 """
 
 import uuid
+from typing import Literal
 
-from sqlalchemy import delete, func, select, update
+from sqlalchemy import Select, delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import noload
+from sqlalchemy.orm import noload, raiseload
 from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.orm.util import identity_key
 from sqlalchemy.sql.elements import ClauseElement
 
-from app.modules.schedule.models import Activity, Schedule, ScheduleRelationship, WorkOrder
+from app.modules.schedule.models import Activity, Schedule, ScheduleBaseline, ScheduleRelationship, WorkOrder
 from app.modules.schedule.ordering import activity_order_terms
 
 
@@ -29,18 +30,36 @@ class ScheduleRepository:
         """Get schedule by ID."""
         return await self.session.get(Schedule, schedule_id)
 
+    async def get_for_update(self, schedule_id: uuid.UUID) -> Schedule | None:
+        """Serialize lifecycle transitions without loading or changing activities."""
+        stmt = (
+            select(Schedule)
+            .where(Schedule.id == schedule_id)
+            .with_for_update()
+            .options(raiseload(Schedule.activities, sql_only=True))
+            .execution_options(populate_existing=True)
+        )
+        return (await self.session.execute(stmt)).scalar_one_or_none()
+
     async def list_for_project(
         self,
         project_id: uuid.UUID,
         *,
         offset: int = 0,
         limit: int = 50,
+        archive_state: Literal["current", "archived", "all"] = "all",
     ) -> tuple[list[Schedule], int]:
         """List schedules for a project with pagination. Returns (schedules, total_count).
 
         Activities are NOT loaded in list queries to avoid N+1.
         """
         base = select(Schedule).where(Schedule.project_id == project_id)
+        # Internal financial readers retain their existing all-status default.
+        # The public list explicitly requests current schedules by default.
+        if archive_state == "current":
+            base = base.where(Schedule.status != "archived")
+        elif archive_state == "archived":
+            base = base.where(Schedule.status == "archived")
 
         # Count
         count_stmt = select(func.count()).select_from(base.subquery())
@@ -81,6 +100,21 @@ class ScheduleRepository:
         """Delete a schedule and all its activities (via CASCADE)."""
         stmt = delete(Schedule).where(Schedule.id == schedule_id)
         await self.session.execute(stmt)
+
+    async def count_baselines(self, schedule_id: uuid.UUID) -> int:
+        """How many baselines a schedule has."""
+        stmt = select(func.count()).select_from(ScheduleBaseline).where(ScheduleBaseline.schedule_id == schedule_id)
+        return int((await self.session.execute(stmt)).scalar_one())
+
+    async def delete_baselines(self, schedule_id: uuid.UUID) -> int:
+        """Delete the baselines of a schedule; returns how many went.
+
+        The baseline table keeps the schedule id without a foreign key, so
+        deleting the schedule cascades nothing to it.
+        """
+        stmt = delete(ScheduleBaseline).where(ScheduleBaseline.schedule_id == schedule_id)
+        result = await self.session.execute(stmt)
+        return int(result.rowcount or 0)
 
 
 class ActivityRepository:
@@ -195,6 +229,50 @@ class ActivityRepository:
         stmt = delete(Activity).where(Activity.id == activity_id)
         await self.session.execute(stmt)
 
+    @staticmethod
+    def subtree(schedule_id: uuid.UUID, root_id: uuid.UUID) -> Select:
+        """Ids of ``root_id`` and everything under it, at any depth, as a subquery.
+
+        A recursive query over ``parent_id``, kept inside the schedule. UNION
+        rather than UNION ALL, so a parent loop in bad data still ends.
+        """
+        tree = (
+            select(Activity.id)
+            .where(Activity.id == root_id, Activity.schedule_id == schedule_id)
+            .cte("activity_subtree", recursive=True)
+        )
+        tree = tree.union(
+            select(Activity.id).where(Activity.parent_id == tree.c.id, Activity.schedule_id == schedule_id)
+        )
+        return select(tree.c.id)
+
+    async def delete_subtree(self, schedule_id: uuid.UUID, root_id: uuid.UUID) -> list[uuid.UUID]:
+        """Delete ``root_id`` and everything under it; return the ids removed.
+
+        Deleted through the subquery, not a list of ids, so a section of any
+        size goes in one statement without running into a bound-parameter cap.
+        """
+        ids = list((await self.session.execute(self.subtree(schedule_id, root_id))).scalars().all())
+        await self.session.execute(delete(Activity).where(Activity.id.in_(self.subtree(schedule_id, root_id))))
+        return ids
+
+    async def dependency_mirrors(self, schedule_id: uuid.UUID) -> list[tuple[uuid.UUID, list]]:
+        """``(id, dependencies)`` of every activity of a schedule that lists any.
+
+        A two-column read, so pruning the mirror after a delete never loads
+        whole rows, and finds entries no canonical edge backs (older data).
+        """
+        rows = await self.session.execute(
+            select(Activity.id, Activity.dependencies).where(Activity.schedule_id == schedule_id)
+        )
+        return [(row[0], row[1]) for row in rows.all() if row[1]]
+
+    async def delete_many(self, activity_ids: list[uuid.UUID]) -> None:
+        """Delete several activities in one statement (work orders cascade)."""
+        if not activity_ids:
+            return
+        await self.session.execute(delete(Activity).where(Activity.id.in_(activity_ids)))
+
     async def delete_for_schedule(self, schedule_id: uuid.UUID) -> int:
         """Delete all activities of a schedule in a single statement.
 
@@ -208,6 +286,37 @@ class ActivityRepository:
         stmt = delete(Activity).where(Activity.schedule_id == schedule_id)
         await self.session.execute(stmt)
         return int(total)
+
+    async def create_many(self, activities: list[Activity]) -> None:
+        """Insert many activities with one flush.
+
+        Callers assign ``id`` up front when rows refer to each other.
+        """
+        if not activities:
+            return
+        self.session.add_all(activities)
+        await self.session.flush()
+
+    async def count_started(self, schedule_id: uuid.UUID) -> int:
+        """Count the activities of a schedule that have started (any status past not started)."""
+        stmt = select(func.count()).where(
+            Activity.schedule_id == schedule_id,
+            Activity.status != "not_started",
+        )
+        return int((await self.session.execute(stmt)).scalar_one())
+
+    async def ids_in_schedule(self, schedule_id: uuid.UUID, activity_ids: set[uuid.UUID]) -> set[uuid.UUID]:
+        """Return those of ``activity_ids`` that are activities of ``schedule_id``."""
+        if not activity_ids:
+            return set()
+        stmt = select(Activity.id).where(Activity.schedule_id == schedule_id, Activity.id.in_(activity_ids))
+        return set((await self.session.execute(stmt)).scalars().all())
+
+    async def reparent_children(self, parent_id: uuid.UUID, new_parent_id: uuid.UUID | None) -> None:
+        """Move every child of ``parent_id`` under ``new_parent_id``."""
+        stmt = update(Activity).where(Activity.parent_id == parent_id).values(parent_id=new_parent_id)
+        await self.session.execute(stmt)
+        await self.session.flush()
 
     async def get_max_sort_order(self, schedule_id: uuid.UUID) -> int:
         """Get the highest sort_order for activities in a schedule."""
@@ -374,6 +483,18 @@ class RelationshipRepository:
         self.session.add(relationship)
         await self.session.flush()
         return relationship
+
+    async def create_many(self, relationships: list[ScheduleRelationship]) -> None:
+        """Insert many relationship rows with one flush."""
+        if not relationships:
+            return
+        self.session.add_all(relationships)
+        await self.session.flush()
+
+    async def delete_for_schedule(self, schedule_id: uuid.UUID) -> None:
+        """Delete every relationship row of a schedule."""
+        stmt = delete(ScheduleRelationship).where(ScheduleRelationship.schedule_id == schedule_id)
+        await self.session.execute(stmt)
 
     async def delete_by_id(self, relationship_id: uuid.UUID) -> None:
         """Delete a single relationship by primary key."""

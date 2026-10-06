@@ -39,12 +39,19 @@ import { Button, Card, Badge, Input, SkeletonTable, Breadcrumb, DismissibleInfo,
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import type { GanttActivity as SVGGanttActivity, GanttViewMode } from '@/shared/ui';
+import type { GanttLinkType } from '@/shared/ui/Gantt';
+import { scheduleErrorDetail, scheduleErrorMessage } from './errors';
+import { useGanttLinking } from './useGanttLinking';
+import { replaceInstalmentSentences } from './confirmations';
+import { ScheduleLifecycleActions } from './ScheduleLifecycleActions';
+import { ActivityDeleteDialog, activityDeleteTarget, type ActivityDeleteTarget } from './ActivityDeleteDialog';
+import { GenerationPreviewPanel, isBudgetEstimate } from './GenerationPreviewPanel';
 import { ApiError, apiGet } from '@/shared/lib/api';
 import { fetchProjectList } from '@/shared/lib/projectList';
 import { fmtDate, getIntlLocale } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
-import { scheduleApi } from './api';
+import { scheduleApi, type GenerationPreview } from './api';
 import { PlanningCrossLinks } from './PlanningCrossLinks';
 import { EvmPanel } from './EvmPanel';
 import { Snapshot4DView } from './Snapshot4DView';
@@ -60,7 +67,17 @@ import { ScheduleRealtimePanel } from './ScheduleRealtimePanel';
 import { DependencyEditor } from './DependencyEditor';
 import { MilestoneClientToggle } from './MilestoneClientToggle';
 import { BoqLinkEditor } from './BoqLinkEditor';
-import { generateInWindow, projectWindowDays, refreshAfterGenerate } from './generateWindow';
+import {
+  generateInWindow,
+  generationStamp,
+  generationWarnings,
+  generationWorkers,
+  MAX_WORKERS_PER_POSITION,
+  parseWorkers,
+  previewInWindow,
+  projectWindowDays,
+  refreshAfterGenerate,
+} from './generateWindow';
 import { ActivityGrid } from './ActivityGrid';
 import { ancestorsOf, hideCollapsed, orderAsTree, parentIdsOf } from './activityTree';
 import { WorkCalendarManager } from './WorkCalendarManager';
@@ -91,6 +108,7 @@ interface BOQListItem {
   name: string;
   description: string;
   status: string;
+  estimate_type?: string | null;
 }
 
 interface CreateScheduleForm {
@@ -1120,6 +1138,7 @@ export function ScheduleDetail({
   onBack,
   generateBoqId,
   onConsumeGenerateBoq,
+  onOpenSchedule,
 }: {
   schedule: Schedule;
   projectId: string;
@@ -1128,11 +1147,34 @@ export function ScheduleDetail({
   generateBoqId?: string | null;
   /** Called once the generate modal has consumed the deep-link BOQ id. */
   onConsumeGenerateBoq?: () => void;
+  /**
+   * Switch the page to another schedule of the project. Without it the
+   * "generate into a new schedule" choice is not offered.
+   */
+  onOpenSchedule?: (schedule: Schedule) => void;
 }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const { confirm, ...confirmProps } = useConfirm();
+  // A generation the server refused because the schedule already has
+  // activities: the reader chooses to replace them or to use a new schedule.
+  const [generateConflict, setGenerateConflict] = useState<{
+    boqId: string;
+    activityCount: number;
+    startedCount: number;
+    instalmentsRelinked: number;
+    instalmentsUnlinked: number;
+  } | null>(null);
+  // The generation run whose warnings the reader dismissed.
+  const [dismissedStamp, setDismissedStamp] = useState<string | null>(null);
+  // What the generation would write, shown for the reader to confirm.
+  const [generationPreview, setGenerationPreview] = useState<GenerationPreview | null>(null);
+  // The activity whose delete is being confirmed.
+  const [deleteTarget, setDeleteTarget] = useState<ActivityDeleteTarget | null>(null);
+  // A viewer sees the plan but none of the buttons the server would refuse.
+  const canEditSchedule = useHasPermission('schedule.update');
+  const canDeleteSchedule = useHasPermission('schedule.delete');
   const [zoomLevel, setZoomLevel] = useState<ZoomLevel>('week');
   const [viewMode, setViewMode] = useState<
     'table' | 'gantt' | 'evm' | '4d' | 'quality' | 'risk' | 'compare' | 'progress' | 'delay' | 'codes' | 'calendars' | 'resources' | 'realtime' | 'interchange'
@@ -1148,6 +1190,18 @@ export function ScheduleDetail({
   );
   const [generateEndDate, setGenerateEndDate] = useState('');
   const generateWindowDays = projectWindowDays(generateStartDate, generateEndDate);
+  // An end date is optional; one that is given has to come after the start.
+  const generateWindowInvalid = generateEndDate !== '' && generateWindowDays == null;
+  // Workers per position where the bill gives no crew. Empty asks the server
+  // for the fewest that fit the dates; a number is sent as it is.
+  const [generateWorkers, setGenerateWorkers] = useState('');
+  const generateWorkersValue = parseWorkers(generateWorkers);
+  const generateWorkersInvalid = generateWorkers.trim() !== '' && generateWorkersValue == null;
+  // A preview answers for one bill, one pair of dates and one number of
+  // workers; any change asks again.
+  useEffect(() => {
+    setGenerationPreview(null);
+  }, [selectedBOQId, generateStartDate, generateEndDate, generateWorkers]);
   const [activityFilter, setActivityFilter] = useState('all');
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
   const toggleCollapse = useCallback((id: string) => {
@@ -1246,6 +1300,30 @@ export function ScheduleDetail({
     queryFn: () => scheduleApi.getGantt(schedule.id),
   });
 
+  // The schedule as stored now: the prop is the list row it was opened from,
+  // and generation writes its outcome (and any warning) onto the record.
+  const { data: scheduleRecord } = useQuery({
+    queryKey: ['schedule-record', schedule.id],
+    queryFn: () => scheduleApi.getSchedule(schedule.id),
+  });
+  const planWarnings = generationWarnings(scheduleRecord);
+  // Generating again starts from the workers the last generation was asked
+  // for, once per opening of the dialog, so the same plan comes back.
+  const workersPrefilledRef = useRef(false);
+  useEffect(() => {
+    if (!showGenerateBOQ) {
+      workersPrefilledRef.current = false;
+      return;
+    }
+    if (workersPrefilledRef.current) return;
+    const recorded = generationWorkers(scheduleRecord);
+    if (recorded == null) return;
+    workersPrefilledRef.current = true;
+    setGenerateWorkers((cur) => cur || String(recorded));
+  }, [showGenerateBOQ, scheduleRecord]);
+  const planStamp = generationStamp(scheduleRecord);
+  const showPlanWarnings = planWarnings.length > 0 && dismissedStamp !== planStamp;
+
   // Fetch BOQs for the project (for Generate from BOQ dialog)
   const { data: boqs } = useQuery({
     queryKey: ['boqs', projectId],
@@ -1271,10 +1349,12 @@ export function ScheduleDetail({
   useEffect(() => {
     if (!generateBoqId || generateDeepLinkRef.current) return;
     generateDeepLinkRef.current = true;
-    setSelectedBOQId(generateBoqId);
-    setShowGenerateBOQ(true);
+    if (canEditSchedule) {
+      setSelectedBOQId(generateBoqId);
+      setShowGenerateBOQ(true);
+    }
     onConsumeGenerateBoq?.();
-  }, [generateBoqId, onConsumeGenerateBoq]);
+  }, [generateBoqId, onConsumeGenerateBoq, canEditSchedule]);
 
   // CPM state
   const [cpmResult, setCpmResult] = useState<CriticalPathResponse | null>(null);
@@ -1345,22 +1425,105 @@ export function ScheduleDetail({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showAddActivity]);
 
+  const generateFailed = (error: unknown) =>
+    addToast({
+      type: 'error',
+      title: t('schedule.generate_failed_title', { defaultValue: 'The schedule was not generated' }),
+      message: scheduleErrorMessage(error, t),
+    });
+
+  // Generate writes the plan the preview showed: with the workers it
+  // reported, even when the server chose them.
+  const workersToWrite = generationPreview?.workers_per_position ?? generateWorkersValue;
+
   const generateFromBOQ = useMutation({
-    mutationFn: (boqId: string) => generateInWindow(schedule.id, boqId, generateStartDate, generateEndDate),
+    mutationFn: ({ boqId, replace }: { boqId: string; replace: boolean }) =>
+      generateInWindow(schedule.id, boqId, generateStartDate, generateEndDate, replace, workersToWrite),
     onSuccess: async () => {
       // The dialog stays open with its button spinning until the new plan is
       // loaded, so the toast lands on the generated schedule and not on the
       // empty one it replaces.
       await refreshAfterGenerate(queryClient, schedule.id);
       setShowGenerateBOQ(false);
+      setGenerateConflict(null);
+      setGenerationPreview(null);
       setSelectedBOQId('');
       // Reset CPM/risk results since activities changed
       setCpmResult(null);
       setRiskResult(null);
       addToast({ type: 'success', title: t('toasts.schedule_generated', { defaultValue: 'Schedule generated from BOQ' }) });
     },
+    onError: (error: Error, { boqId, replace }) => {
+      // A populated schedule is not overwritten unasked: the server refuses
+      // and the reader chooses what happens to the activities already there.
+      const detail = scheduleErrorDetail(error);
+      if (detail?.error === 'schedule_has_activities' && !replace) {
+        setShowGenerateBOQ(false);
+        setGenerateConflict({
+          boqId,
+          activityCount: Number(detail.activity_count ?? 0),
+          startedCount: Number(detail.started_count ?? 0),
+          instalmentsRelinked: Number(detail.instalments_relinked ?? 0),
+          instalmentsUnlinked: Number(detail.instalments_unlinked ?? 0),
+        });
+        return;
+      }
+      generateFailed(error);
+    },
+  });
+
+  // Nothing is written until the reader has seen what would be: the counts,
+  // the dates against the window and the positions whose durations are guesses.
+  const previewGeneration = useMutation({
+    mutationFn: (boqId: string) =>
+      previewInWindow(schedule.id, boqId, generateStartDate, generateEndDate, generateWorkersValue),
+    onSuccess: (preview) => setGenerationPreview(preview),
+    onError: (error: Error) => generateFailed(error),
+  });
+
+  // The other answer to a populated schedule: leave it as it is and generate
+  // into a new schedule of the same project, then open that one.
+  const generateIntoNewSchedule = useMutation({
+    mutationFn: async (boqId: string) => {
+      const created = await scheduleApi.createSchedule({
+        project_id: projectId,
+        name: t('schedule.new_schedule_from_boq_name', { defaultValue: '{{name}} (new)', name: schedule.name }),
+        start_date: generateStartDate || undefined,
+      });
+      try {
+        await generateInWindow(created.id, boqId, generateStartDate, generateEndDate, false, workersToWrite);
+      } catch (error) {
+        // Retain the failed attempt in the archive; never silently purge it.
+        try {
+          await scheduleApi.archiveSchedule(created.id);
+          addToast({ type: 'info', title: t('schedule.generation_cleanup_archived') });
+        } catch {
+          addToast({ type: 'warning', title: t('schedule.generation_cleanup_failed') });
+        }
+        await queryClient.invalidateQueries({ queryKey: ['schedules'] });
+        throw error;
+      }
+      return created;
+    },
+    onSuccess: async (created) => {
+      await queryClient.invalidateQueries({ queryKey: ['schedules'] });
+      setGenerateConflict(null);
+      setShowGenerateBOQ(false);
+      setGenerationPreview(null);
+      setSelectedBOQId('');
+      addToast({
+        type: 'success',
+        title: t('toasts.schedule_generated', { defaultValue: 'Schedule generated from BOQ' }),
+        message: t('schedule.generated_into_new_schedule', {
+          defaultValue: 'The plan is in the new schedule "{{name}}". The schedule you were on is unchanged.',
+          name: created.name,
+        }),
+      });
+      onOpenSchedule?.(created);
+    },
     onError: (error: Error) => {
-      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
+      queryClient.invalidateQueries({ queryKey: ['schedules'] });
+      generateFailed(error);
     },
   });
 
@@ -1449,6 +1612,9 @@ export function ScheduleDetail({
     [resizeActivity],
   );
 
+  // Drawing and removing links on the Gantt (only for people who may edit the schedule).
+  const ganttLinking = useGanttLinking(schedule.id, canEditSchedule);
+
   const resetSchedule = useMutation({
     mutationFn: () => scheduleApi.clearActivities(schedule.id),
     onSuccess: () => {
@@ -1456,24 +1622,34 @@ export function ScheduleDetail({
       setCpmResult(null);
       setRiskResult(null);
       setActivityFilter('all');
-      addToast({ type: 'success', title: t('schedule.reset_success', { defaultValue: 'Schedule reset' }) });
+      addToast({ type: 'success', title: t('schedule.clear_all_success', { defaultValue: 'All activities deleted' }) });
     },
     onError: (error: Error) => {
-      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
+      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: scheduleErrorMessage(error, t) });
     },
   });
 
-  const deleteSchedule = useMutation({
-    mutationFn: () => scheduleApi.deleteSchedule(schedule.id),
+  // Deleting from the side panel. A section asks whether its activities go
+  // with it or stay, moving up to the section's own parent.
+  const deleteActivity = useMutation({
+    mutationFn: ({ activityId, cascade }: { activityId: string; cascade: boolean }) =>
+      scheduleApi.deleteActivity(activityId, cascade),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['schedules'] });
-      addToast({ type: 'success', title: t('schedule.deleted', { defaultValue: 'Schedule deleted' }) });
-      onBack();
+      setDeleteTarget(null);
+      setSelectedActivityId(null);
+      setCpmResult(null);
+      setRiskResult(null);
+      queryClient.invalidateQueries({ queryKey: ['gantt', schedule.id] });
+      queryClient.invalidateQueries({ queryKey: ['schedule-relationships', schedule.id] });
+      addToast({ type: 'success', title: t('schedule.activity_deleted', { defaultValue: 'Activity deleted' }) });
     },
     onError: (error: Error) => {
-      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: error.message });
+      addToast({ type: 'error', title: t('toasts.error', { defaultValue: 'Error' }), message: scheduleErrorMessage(error, t) });
     },
   });
+  const handleDeleteActivity = (activity: Activity) => {
+    setDeleteTarget(activityDeleteTarget(activity, ganttData?.activities ?? []));
+  };
 
   const activateSchedule = useMutation({
     mutationFn: () => scheduleApi.updateSchedule(schedule.id, { status: 'active' }),
@@ -1549,6 +1725,13 @@ export function ScheduleDetail({
       isGroup: a.activity_type === 'summary',
       parentId: a.parent_id,
       dependencies: a.dependencies?.map((d) => d.activity_id) ?? [],
+      // So the chart anchors each arrow by its type; an unknown type is left
+      // out and drawn as FS.
+      dependencyTypes: Object.fromEntries(
+        (a.dependencies ?? [])
+          .filter((d) => ['FS', 'SS', 'FF', 'SF'].includes(d.type))
+          .map((d) => [d.activity_id, d.type as GanttLinkType]),
+      ),
       color: a.color || undefined,
     }));
   }, [filteredActivities, criticalActivityIds]);
@@ -1600,14 +1783,41 @@ export function ScheduleDetail({
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button
-            variant="secondary"
-            icon={<FileBarChart size={16} />}
-            onClick={() => setShowGenerateBOQ(true)}
-            data-guide="schedule-generate"
-          >
-            {t('schedule.generate_from_boq', 'Generate from BOQ')}
-          </Button>
+          {canEditSchedule && (
+            <Button
+              variant="secondary"
+              icon={<FileBarChart size={16} />}
+              onClick={() => setShowGenerateBOQ(true)}
+              data-guide="schedule-generate"
+            >
+              {hasActivities
+                ? t('schedule.regenerate_from_boq', { defaultValue: 'Regenerate from BOQ' })
+                : t('schedule.generate_from_boq', 'Generate from BOQ')}
+            </Button>
+          )}
+          {/* Clear all activities, next to Regenerate: the schedule itself stays */}
+          {hasActivities && canDeleteSchedule && (
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={<RotateCcw size={14} />}
+              onClick={async () => {
+                const ok = await confirm({
+                  title: t('schedule.confirm_clear_all_title', { defaultValue: 'Clear all activities?' }),
+                  message: t('schedule.confirm_clear_all', {
+                    defaultValue:
+                      'Delete all {{count}} activities of this schedule and the links between them? The schedule itself stays, and you can generate it again from a BOQ. This cannot be undone.',
+                    count: ganttData?.summary.total_activities ?? 0,
+                  }),
+                  confirmLabel: t('schedule.clear_all', { defaultValue: 'Clear all' }),
+                });
+                if (ok) resetSchedule.mutate();
+              }}
+              loading={resetSchedule.isPending}
+            >
+              {t('schedule.clear_all_activities', { defaultValue: 'Clear all activities' })}
+            </Button>
+          )}
           {hasActivities && (
             <>
               {/* View mode toggle: Table / Gantt / EVM / 4D */}
@@ -1740,23 +1950,6 @@ export function ScheduleDetail({
               >
                 {t('common.export', { defaultValue: 'Export' })}
               </Button>
-              {/* Reset schedule */}
-              <Button
-                variant="ghost"
-                size="sm"
-                icon={<RotateCcw size={14} />}
-                onClick={async () => {
-                  const ok = await confirm({
-                    title: t('schedule.confirm_reset_title', { defaultValue: 'Reset schedule?' }),
-                    message: t('schedule.confirm_reset', { defaultValue: 'Delete all activities in this schedule? This cannot be undone. You can regenerate them afterwards from a BOQ.' }),
-                    confirmLabel: t('schedule.reset', { defaultValue: 'Reset' }),
-                  });
-                  if (ok) resetSchedule.mutate();
-                }}
-                loading={resetSchedule.isPending}
-              >
-                {t('schedule.reset', { defaultValue: 'Reset' })}
-              </Button>
             </>
           )}
           {schedule.status === 'draft' && (
@@ -1770,32 +1963,60 @@ export function ScheduleDetail({
               {t('schedule.activate', { defaultValue: 'Activate' })}
             </Button>
           )}
-          {schedule.status === 'draft' && (
+          <ScheduleLifecycleActions schedule={{ ...schedule, ...scheduleRecord }} onChanged={onBack} />
+          {canEditSchedule && (
             <Button
-              variant="ghost"
-              size="sm"
-              icon={<Trash2 size={14} />}
-              onClick={async () => {
-                const ok = await confirm({
-                  title: t('schedule.confirm_delete_title', { defaultValue: 'Delete schedule?' }),
-                  message: t('schedule.confirm_delete', { defaultValue: 'This will permanently delete the schedule and all its activities. This cannot be undone.' }),
-                });
-                if (ok) deleteSchedule.mutate();
-              }}
-              loading={deleteSchedule.isPending}
+              variant="primary"
+              icon={<Plus size={16} />}
+              onClick={() => setShowAddActivity(true)}
             >
-              {t('common.delete', { defaultValue: 'Delete' })}
+              {t('schedule.add_activity', 'Add Activity')}
             </Button>
           )}
-          <Button
-            variant="primary"
-            icon={<Plus size={16} />}
-            onClick={() => setShowAddActivity(true)}
-          >
-            {t('schedule.add_activity', 'Add Activity')}
-          </Button>
         </div>
       </div>
+
+      {/* What the last generation could not do as asked. It stays until the
+          reader dismisses it, because the dates on screen alone do not say
+          that the plan overran the window or that durations were cut. */}
+      {showPlanWarnings && (
+        <div
+          role="status"
+          data-testid="generation-warning"
+          className="mb-4 flex items-start gap-3 rounded-lg border border-semantic-warning/40 bg-semantic-warning-bg px-4 py-3"
+        >
+          <AlertTriangle size={16} className="mt-0.5 shrink-0 text-semantic-warning" />
+          <div className="min-w-0 flex-1 space-y-1 text-sm text-content-primary">
+            {planWarnings.map((w) =>
+              w.code === 'plan_exceeds_window' ? (
+                <p key={w.code}>
+                  {t('schedule.warning_plan_exceeds_window', {
+                    defaultValue:
+                      'The plan does not fit the dates you asked for: it ends on {{planned}}, you asked for {{requested}}. Four crews work side by side and every duration is already cut to half of its estimate, the shortest a plan is squeezed to. Move the end date, or shorten the plan by hand.',
+                    planned: formatDate(w.planned_end),
+                    requested: formatDate(w.requested_end),
+                  })}
+                </p>
+              ) : (
+                <p key={w.code}>
+                  {t('schedule.warning_durations_shortened', {
+                    defaultValue:
+                      'To fit the dates you asked for, every duration was shortened to {{percent}}% of its estimate. Check that the crews can keep that pace.',
+                    percent: w.percent,
+                  })}
+                </p>
+              ),
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => setDismissedStamp(planStamp)}
+            className="shrink-0 rounded-md px-2 py-0.5 text-xs font-medium text-content-secondary hover:bg-surface-secondary"
+          >
+            {t('common.dismiss', { defaultValue: 'Dismiss' })}
+          </button>
+        </div>
+      )}
 
       {/* Content area: either the populated schedule or the empty state */}
       {hasActivities ? (
@@ -1975,6 +2196,8 @@ export function ScheduleDetail({
                   showCriticalPath={!!cpmResult}
                   todayLine={true}
                   onActivityResize={handleActivityResize}
+                  onCreateLink={ganttLinking.onCreateLink}
+                  onDeleteLink={ganttLinking.onDeleteLink}
                   onActivityClick={(id) => setSelectedActivityId(id)}
                 />
               ) : viewMode === 'table' ? (
@@ -2024,6 +2247,7 @@ export function ScheduleDetail({
                 {/* Quick-start options */}
                 <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-2xl">
                   <button
+                    disabled={!canEditSchedule}
                     onClick={() => setShowGenerateBOQ(true)}
                     className="group flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-border-light bg-surface-secondary/30 p-6 transition-all hover:border-oe-blue/50 hover:bg-oe-blue-subtle/30"
                   >
@@ -2040,8 +2264,9 @@ export function ScheduleDetail({
                     </div>
                   </button>
                   <button
+                    disabled={!canEditSchedule}
                     onClick={() => setShowAddActivity(true)}
-                    className="group flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-border-light bg-surface-secondary/30 p-6 transition-all hover:border-oe-blue/50 hover:bg-oe-blue-subtle/30"
+                    className="group flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-border-light bg-surface-secondary/30 p-6 transition-all hover:border-oe-blue/50 hover:bg-oe-blue-subtle/30 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-secondary text-content-secondary transition-transform group-hover:scale-110">
                       <Plus size={24} />
@@ -2221,7 +2446,21 @@ export function ScheduleDetail({
             <div className="border-t border-border-light pt-4">
               <BoqLinkEditor scheduleId={schedule.id} projectId={projectId} activity={selectedActivity} />
             </div>
-            <div className="flex items-center justify-end pt-1">
+            <div className="flex items-center justify-between pt-1">
+              {canDeleteSchedule ? (
+                <Button
+                  variant="ghost"
+                  type="button"
+                  icon={<Trash2 size={14} />}
+                  onClick={() => handleDeleteActivity(selectedActivity)}
+                  loading={deleteActivity.isPending}
+                  className="text-semantic-error"
+                >
+                  {t('schedule.delete_activity', { defaultValue: 'Delete activity' })}
+                </Button>
+              ) : (
+                <span />
+              )}
               <Button variant="ghost" type="button" onClick={() => setSelectedActivityId(null)}>
                 {t('common.done', { defaultValue: 'Done' })}
               </Button>
@@ -2234,14 +2473,18 @@ export function ScheduleDetail({
       <Modal
         open={showGenerateBOQ}
         onClose={() => setShowGenerateBOQ(false)}
-        title={t('schedule.generate_from_boq', 'Generate from BOQ')}
+        title={
+          hasActivities
+            ? t('schedule.regenerate_from_boq', { defaultValue: 'Regenerate from BOQ' })
+            : t('schedule.generate_from_boq', 'Generate from BOQ')
+        }
       >
         <div className="space-y-4">
           <p className="text-sm text-content-secondary">
-            {t(
-              'schedule.generate_from_boq_description',
-              'Select a BOQ to auto-generate schedule activities. One activity will be created per BOQ section with cost-proportional durations.',
-            )}
+            {t('schedule.generate_from_boq_tree_description', {
+              defaultValue:
+                'Select a BOQ. Every section becomes a summary and every position with a quantity one activity, sized from its labour, else from its unit with a gang of two to four people, else from its cost. Within a section up to four crews work side by side, and each next section starts once half of the work before it is done. You see the plan before anything is written.',
+            })}
           </p>
 
           {/* Start date picker */}
@@ -2275,12 +2518,45 @@ export function ScheduleDetail({
             />
             <p className="mt-1 text-xs text-content-tertiary">
               {!generateEndDate
-                ? t('schedule.end_date_missing', {
-                    defaultValue: 'This project has no planned end date yet. Enter one so the plan fits the project.',
+                ? t('schedule.end_date_optional', {
+                    defaultValue:
+                      'No end date: the plan takes as long as the work needs and nothing is shortened. Enter one to fit the plan between the two dates.',
                   })
                 : generateWindowDays == null
                   ? t('schedule.end_before_start', { defaultValue: 'The end date must be after the start date.' })
                   : t('schedule.end_date_hint', { defaultValue: 'The generated plan is fitted between these two dates.' })}
+            </p>
+          </div>
+
+          {/* Workers: what a bill of hours without crews is worked by. */}
+          <div>
+            <label
+              htmlFor="generate-workers"
+              className="block text-sm font-medium text-content-primary mb-1.5"
+            >
+              {t('schedule.generate_workers_label', { defaultValue: 'Workers per position' })}
+            </label>
+            <input
+              id="generate-workers"
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={MAX_WORKERS_PER_POSITION}
+              step={1}
+              data-testid="generate-workers"
+              value={generateWorkers}
+              placeholder={t('schedule.generate_workers_auto', { defaultValue: 'Auto' })}
+              onChange={(e) => setGenerateWorkers(e.target.value)}
+              aria-invalid={generateWorkersInvalid || undefined}
+              className="h-10 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+            />
+            <p className="mt-1 text-xs text-content-tertiary">
+              {generateWorkersInvalid
+                ? t('schedule.generate_workers_invalid', { defaultValue: 'Enter a whole number from 1 to 20.' })
+                : t('schedule.generate_workers_hint', {
+                    defaultValue:
+                      'For positions whose bill gives hours but no crew. Leave it empty to use the fewest that fit the dates. A crew the bill names is kept.',
+                  })}
             </p>
           </div>
 
@@ -2290,7 +2566,9 @@ export function ScheduleDetail({
             </p>
           ) : (
             <div className="space-y-2">
-              {boqs.map((boq) => (
+              {[...boqs]
+                .sort((a, b) => Number(isBudgetEstimate(a.estimate_type)) - Number(isBudgetEstimate(b.estimate_type)))
+                .map((boq) => (
                 <button
                   key={boq.id}
                   type="button"
@@ -2314,29 +2592,172 @@ export function ScheduleDetail({
                   >
                     {t(`boq.${boq.status}`, { defaultValue: boq.status })}
                   </Badge>
+                  {isBudgetEstimate(boq.estimate_type) && (
+                    <Badge variant="warning" size="sm" className="mt-1 ml-1">
+                      {t('schedule.boq_budget_badge', {
+                        defaultValue: 'Budget estimate: one bar per lump sum',
+                      })}
+                    </Badge>
+                  )}
                 </button>
               ))}
             </div>
           )}
-          <div className="flex items-center justify-end gap-3 pt-2">
+          {generationPreview && <GenerationPreviewPanel preview={generationPreview} />}
+          {generationPreview && generationPreview.existing_activity_count > 0 && (
+            <div className="space-y-1 text-sm">
+              <p className="text-content-primary">
+                {t('schedule.error_schedule_has_activities', {
+                  defaultValue: 'This schedule already has {{count}} activities.',
+                  count: generationPreview.existing_activity_count,
+                })}{' '}
+                {t('schedule.generate_conflict_replace_hint', {
+                  defaultValue:
+                    'Replacing them deletes them and their links, then builds the plan again from the BOQ. A new schedule leaves this one as it is.',
+                })}
+              </p>
+              {generationPreview.existing_started_count > 0 && (
+                <p className="flex items-start gap-2 text-semantic-warning">
+                  <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+                  {t('schedule.generate_conflict_started', {
+                    defaultValue: '{{count}} of them have progress recorded. Replacing them loses that progress.',
+                    count: generationPreview.existing_started_count,
+                  })}
+                </p>
+              )}
+              {replaceInstalmentSentences(
+                t,
+                generationPreview.instalments_relinked,
+                generationPreview.instalments_unlinked,
+              ).map((line) => (
+                <p key={line} className="text-content-secondary" data-testid="replace-instalments">
+                  {line}
+                </p>
+              ))}
+            </div>
+          )}
+          <div className="flex flex-wrap items-center justify-end gap-2 pt-2">
             <Button variant="ghost" onClick={() => setShowGenerateBOQ(false)}>
               {t('common.cancel', 'Cancel')}
             </Button>
-            <Button
-              variant="primary"
-              disabled={!selectedBOQId || generateWindowDays == null}
-              loading={generateFromBOQ.isPending}
-              onClick={() => {
-                if (selectedBOQId) {
-                  generateFromBOQ.mutate(selectedBOQId);
-                }
-              }}
-            >
-              {t('schedule.generate', 'Generate')}
-            </Button>
+            {!generationPreview ? (
+              <Button
+                variant="primary"
+                data-testid="generate-preview"
+                disabled={!selectedBOQId || generateWindowInvalid || generateWorkersInvalid}
+                loading={previewGeneration.isPending}
+                onClick={() => {
+                  if (selectedBOQId) previewGeneration.mutate(selectedBOQId);
+                }}
+              >
+                {t('schedule.generate_preview', { defaultValue: 'Check the plan' })}
+              </Button>
+            ) : generationPreview.existing_activity_count > 0 ? (
+              <>
+                {onOpenSchedule && (
+                  <Button
+                    variant="secondary"
+                    type="button"
+                    loading={generateIntoNewSchedule.isPending}
+                    disabled={generateFromBOQ.isPending}
+                    onClick={() => generateIntoNewSchedule.mutate(generationPreview.boq_id)}
+                  >
+                    {t('schedule.generate_conflict_new_schedule', { defaultValue: 'Create a new schedule' })}
+                  </Button>
+                )}
+                <Button
+                  variant="danger"
+                  type="button"
+                  data-testid="generate-replace"
+                  loading={generateFromBOQ.isPending}
+                  disabled={generateIntoNewSchedule.isPending}
+                  onClick={() => generateFromBOQ.mutate({ boqId: generationPreview.boq_id, replace: true })}
+                >
+                  {t('schedule.generate_replace_and_create', { defaultValue: 'Replace them and create the plan' })}
+                </Button>
+              </>
+            ) : (
+              <Button
+                variant="primary"
+                data-testid="generate-create"
+                loading={generateFromBOQ.isPending}
+                onClick={() => generateFromBOQ.mutate({ boqId: generationPreview.boq_id, replace: false })}
+              >
+                {t('schedule.generate_create', { defaultValue: 'Create the plan' })}
+              </Button>
+            )}
           </div>
         </div>
       </Modal>
+
+      {/* The schedule already has activities: replace them, or generate into a new schedule */}
+      <Modal
+        open={!!generateConflict}
+        onClose={() => setGenerateConflict(null)}
+        title={t('schedule.generate_conflict_title', { defaultValue: 'This schedule already has activities' })}
+      >
+        {generateConflict && (
+          <div className="space-y-4">
+            <p className="text-sm text-content-primary">
+              {t('schedule.error_schedule_has_activities', {
+                defaultValue: 'This schedule already has {{count}} activities.',
+                count: generateConflict.activityCount,
+              })}{' '}
+              {t('schedule.generate_conflict_replace_hint', {
+                defaultValue:
+                  'Replacing them deletes them and their links, then builds the plan again from the BOQ. A new schedule leaves this one as it is.',
+              })}
+            </p>
+            {generateConflict.startedCount > 0 && (
+              <p className="flex items-start gap-2 text-sm text-semantic-warning">
+                <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+                {t('schedule.generate_conflict_started', {
+                  defaultValue: '{{count}} of them have progress recorded. Replacing them loses that progress.',
+                  count: generateConflict.startedCount,
+                })}
+              </p>
+            )}
+            {replaceInstalmentSentences(t, generateConflict.instalmentsRelinked, generateConflict.instalmentsUnlinked).map(
+              (line) => (
+                <p key={line} className="text-sm text-content-secondary">
+                  {line}
+                </p>
+              ),
+            )}
+            <div className="flex flex-wrap items-center justify-end gap-2 pt-2">
+              <Button variant="ghost" type="button" onClick={() => setGenerateConflict(null)}>
+                {t('common.cancel', 'Cancel')}
+              </Button>
+              {onOpenSchedule && (
+                <Button
+                  variant="secondary"
+                  type="button"
+                  loading={generateIntoNewSchedule.isPending}
+                  disabled={generateFromBOQ.isPending}
+                  onClick={() => generateIntoNewSchedule.mutate(generateConflict.boqId)}
+                >
+                  {t('schedule.generate_conflict_new_schedule', { defaultValue: 'Create a new schedule' })}
+                </Button>
+              )}
+              <Button
+                variant="danger"
+                type="button"
+                loading={generateFromBOQ.isPending}
+                disabled={generateIntoNewSchedule.isPending}
+                onClick={() => generateFromBOQ.mutate({ boqId: generateConflict.boqId, replace: true })}
+              >
+                {t('schedule.generate_conflict_replace', { defaultValue: 'Replace them' })}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+      <ActivityDeleteDialog
+        target={deleteTarget}
+        loading={deleteActivity.isPending}
+        onCancel={() => setDeleteTarget(null)}
+        onDelete={(cascade) => deleteTarget && deleteActivity.mutate({ activityId: deleteTarget.id, cascade })}
+      />
       <ConfirmDialog {...confirmProps} />
     </div>
   );
@@ -2344,7 +2765,7 @@ export function ScheduleDetail({
 
 /* ── Schedule List for a Project ───────────────────────────────────────── */
 
-function ProjectSchedules({
+export function ProjectSchedules({
   project,
   onBack,
   generateBoqId,
@@ -2363,9 +2784,13 @@ function ProjectSchedules({
   const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [showSpreadsheetImport, setShowSpreadsheetImport] = useState(false);
+  const [archiveState, setArchiveState] = useState<'current' | 'archived' | 'all'>('current');
+  const [scheduleOffset, setScheduleOffset] = useState(0);
+  const schedulePageSize = 50;
   // Creating a schedule is editor work (schedule.create). A viewer reads the
   // list; the create button stays visible but disabled, with the reason.
   const canCreateSchedule = useHasPermission('schedule.create');
+  const canGenerate = useHasPermission('schedule.update');
   const createHint = canCreateSchedule
     ? undefined
     : t('errors.forbidden', { defaultValue: "You don't have permission to perform this action." });
@@ -2376,10 +2801,16 @@ function ProjectSchedules({
     end_date: '',
   });
 
-  const { data: schedules, isLoading, isError: isScheduleListError } = useQuery({
-    queryKey: ['schedules', project.id],
-    queryFn: () => scheduleApi.listSchedules(project.id).then((page) => page.items),
+  const { data: schedulePage, isLoading, isError: isScheduleListError } = useQuery({
+    queryKey: ['schedules', project.id, archiveState, scheduleOffset],
+    queryFn: () => scheduleApi.listSchedules(project.id, { archiveState, offset: scheduleOffset, limit: schedulePageSize }),
   });
+  const schedules = schedulePage?.items;
+  useEffect(() => {
+    if (schedulePage && scheduleOffset > 0 && scheduleOffset >= schedulePage.total) {
+      setScheduleOffset(Math.max(0, Math.ceil(schedulePage.total / schedulePageSize) - 1) * schedulePageSize);
+    }
+  }, [schedulePage, scheduleOffset]);
 
   // CONN-34: when arriving via the BOQ "Build schedule from this BOQ" deep
   // link, drill straight to a schedule so the Generate-from-BOQ modal (which
@@ -2387,16 +2818,27 @@ function ProjectSchedules({
   // one schedule exists, open the first; if none exist, open the Create modal
   // so the user makes one first — the param survives so generation continues
   // once the schedule is created and selected.
+  //
+  // With schedules already there the reader picks one (or a new one): taking
+  // the first silently sent the BOQ into whatever schedule sorted first, which
+  // usually already had activities, and the generation was refused.
   const generateHandledRef = useRef(false);
+  const [showGenerateTarget, setShowGenerateTarget] = useState(false);
+  const openCreateForGenerate = useCallback(() => {
+    setForm((f) =>
+      f.name ? f : { ...f, name: t('schedule.default_schedule_name', { defaultValue: 'Construction schedule' }) },
+    );
+    setShowCreate(true);
+  }, [t]);
   useEffect(() => {
     if (!generateBoqId || generateHandledRef.current) return;
     if (selectedSchedule) return;
     if (!schedules) return; // wait for the list to load
     generateHandledRef.current = true;
-    if (schedules.length > 0) {
-      setSelectedSchedule(schedules[0]!);
+    if (schedules.some((item) => item.status !== 'archived')) {
+      if (canGenerate) setShowGenerateTarget(true);
     } else if (canCreateSchedule) {
-      setShowCreate(true);
+      openCreateForGenerate();
       addToast({
         type: 'info',
         title: t('schedule.create_before_generate', {
@@ -2404,7 +2846,7 @@ function ProjectSchedules({
         }),
       });
     }
-  }, [generateBoqId, schedules, selectedSchedule, addToast, t, canCreateSchedule]);
+  }, [generateBoqId, schedules, selectedSchedule, addToast, t, canCreateSchedule, canGenerate, openCreateForGenerate]);
 
   const createSchedule = useMutation({
     mutationFn: (data: CreateScheduleForm) =>
@@ -2432,12 +2874,16 @@ function ProjectSchedules({
   // If a schedule is selected, show its detail
   if (selectedSchedule) {
     return (
+      // Keyed by id: switching to another schedule (a plan generated into a
+      // new one) starts its page fresh instead of carrying this one's state.
       <ScheduleDetail
+        key={selectedSchedule.id}
         schedule={selectedSchedule}
         projectId={project.id}
         onBack={() => setSelectedSchedule(null)}
         generateBoqId={generateBoqId}
         onConsumeGenerateBoq={onConsumeGenerateBoq}
+        onOpenSchedule={setSelectedSchedule}
       />
     );
   }
@@ -2485,6 +2931,16 @@ function ProjectSchedules({
         </div>
       </div>
 
+      <label className="mb-4 flex flex-wrap items-center gap-2 text-sm text-content-secondary">
+        {t('schedule.archive_filter')}
+        <select aria-label={t('schedule.archive_filter')} value={archiveState}
+          onChange={(event) => { setArchiveState(event.target.value as typeof archiveState); setScheduleOffset(0); }}
+          className="rounded-md border border-border bg-surface-primary px-3 py-2 text-content-primary">
+          <option value="current">{t('schedule.archive_filter_current')}</option>
+          <option value="archived">{t('schedule.status_archived')}</option>
+          <option value="all">{t('common.all')}</option>
+        </select>
+      </label>
       {/* Schedule list */}
       {isLoading ? (
         <SkeletonTable rows={3} columns={4} />
@@ -2492,6 +2948,8 @@ function ProjectSchedules({
         <div className="w-full py-8 text-center">
           <p className="text-content-secondary">{t('schedule.load_error', { defaultValue: 'Failed to load schedules. Please try again.' })}</p>
         </div>
+      ) : archiveState === 'archived' && !schedules?.length ? (
+        <p className="py-8 text-center text-content-secondary">{t('schedule.archive_empty')}</p>
       ) : !schedules || schedules.length === 0 ? (
         <div className="max-w-3xl mx-auto py-6">
           {/* Hero */}
@@ -2617,6 +3075,7 @@ function ProjectSchedules({
                 <Badge variant={schedule.status === 'active' ? 'blue' : 'neutral'} size="sm">
                   {t(`schedule.status_${schedule.status}`, { defaultValue: schedule.status })}
                 </Badge>
+                <ScheduleLifecycleActions schedule={schedule} compact />
                 <ChevronRight size={16} className="shrink-0 text-content-tertiary" />
               </div>
             </Card>
@@ -2624,6 +3083,92 @@ function ProjectSchedules({
         </div>
       )}
 
+      {!isScheduleListError && (scheduleOffset > 0 || (schedulePage?.total ?? 0) > schedulePageSize) && (
+        <div className="mt-4 flex items-center justify-end gap-2">
+          <Button variant="secondary" disabled={isLoading || scheduleOffset === 0}
+            onClick={() => setScheduleOffset(Math.max(0, scheduleOffset - schedulePageSize))}>
+            {t('common.previous_page')}
+          </Button>
+          <Button variant="secondary" disabled={isLoading || scheduleOffset + schedulePageSize >= (schedulePage?.total ?? 0)}
+            onClick={() => setScheduleOffset(scheduleOffset + schedulePageSize)}>
+            {t('common.next_page')}
+          </Button>
+        </div>
+      )}
+
+      {/* BOQ deep link: which schedule should the plan go into? */}
+      <Modal
+        open={showGenerateTarget}
+        onClose={() => {
+          setShowGenerateTarget(false);
+          onConsumeGenerateBoq?.();
+        }}
+        title={t('schedule.generate_target_title', { defaultValue: 'Which schedule should the BOQ go into?' })}
+      >
+        <div className="space-y-3">
+          <p className="text-sm text-content-secondary">
+            {t('schedule.generate_target_hint', {
+              defaultValue:
+                'Pick a schedule to generate into, or start a new one. A schedule that already has activities asks before anything is replaced.',
+            })}
+          </p>
+          <div className="max-h-72 space-y-2 overflow-y-auto">
+            {(schedules ?? []).filter((item) => item.status !== 'archived').map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => {
+                  setShowGenerateTarget(false);
+                  setSelectedSchedule(s);
+                }}
+                className="flex w-full items-center gap-3 rounded-lg border border-border bg-surface-primary px-4 py-3 text-left transition-all hover:bg-surface-secondary"
+              >
+                <CalendarDays size={16} className="shrink-0 text-oe-blue" />
+                <span className="min-w-0 flex-1 truncate text-sm font-medium text-content-primary">{s.name}</span>
+                <Badge variant={s.status === 'active' ? 'blue' : 'neutral'} size="sm">
+                  {t(`schedule.status_${s.status}`, { defaultValue: s.status })}
+                </Badge>
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center justify-end gap-2 pt-2">
+            {(scheduleOffset > 0 || (schedulePage?.total ?? 0) > schedulePageSize) && <>
+              <Button variant="secondary" type="button" disabled={isLoading || scheduleOffset === 0}
+                onClick={() => setScheduleOffset(Math.max(0, scheduleOffset - schedulePageSize))}>
+                {t('common.previous_page')}
+              </Button>
+              <Button variant="secondary" type="button"
+                disabled={isLoading || scheduleOffset + schedulePageSize >= (schedulePage?.total ?? 0)}
+                onClick={() => setScheduleOffset(scheduleOffset + schedulePageSize)}>
+                {t('common.next_page')}
+              </Button>
+            </>}
+            <Button
+              variant="ghost"
+              type="button"
+              onClick={() => {
+                setShowGenerateTarget(false);
+                onConsumeGenerateBoq?.();
+              }}
+            >
+              {t('common.cancel', 'Cancel')}
+            </Button>
+            <Button
+              variant="primary"
+              type="button"
+              icon={<Plus size={14} />}
+              disabled={!canCreateSchedule}
+              title={createHint}
+              onClick={() => {
+                setShowGenerateTarget(false);
+                openCreateForGenerate();
+              }}
+            >
+              {t('schedule.new_schedule', { defaultValue: 'New schedule' })}
+            </Button>
+          </div>
+        </div>
+      </Modal>
       <ScheduleSpreadsheetImportDialog
         open={showSpreadsheetImport}
         onClose={() => setShowSpreadsheetImport(false)}

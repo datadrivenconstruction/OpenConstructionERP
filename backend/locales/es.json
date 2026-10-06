@@ -135,7 +135,17 @@
     "rate_anomaly": "El precio unitario {rate} supera el umbral ({threshold})"
   },
   "schedule": {
-    "title": "Planificación 4D"
+    "title": "Planificación 4D",
+    "generated": {
+      "position_label": "Partida {ordinal}",
+      "section_label": "Capítulo {ordinal}",
+      "task_description": "Generado automáticamente a partir de la partida {ordinal} del presupuesto ({quantity} {unit})",
+      "section_description": "Resumen: capítulo {ordinal} del presupuesto",
+      "start_milestone": "Inicio del proyecto",
+      "start_milestone_description": "Hito de inicio del proyecto",
+      "completion_milestone": "Finalización del proyecto",
+      "completion_milestone_description": "Hito de finalización del proyecto"
+    }
   },
   "cad": {
     "title": "Importación CAD",

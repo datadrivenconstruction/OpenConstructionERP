@@ -135,7 +135,17 @@
     "rate_anomaly": "Единичната цена {rate} надхвърля прага ({threshold})"
   },
   "schedule": {
-    "title": "4D график"
+    "title": "4D график",
+    "generated": {
+      "position_label": "Позиция {ordinal}",
+      "section_label": "Раздел {ordinal}",
+      "task_description": "Автоматично генерирано от позиция {ordinal} от сметката ({quantity} {unit})",
+      "section_description": "Обобщение: раздел {ordinal} от сметката",
+      "start_milestone": "Начало на проекта",
+      "start_milestone_description": "Крайъгълен камък за начало на проекта",
+      "completion_milestone": "Завършване на проекта",
+      "completion_milestone_description": "Крайъгълен камък за завършване на проекта"
+    }
   },
   "cad": {
     "title": "Импорт на CAD",

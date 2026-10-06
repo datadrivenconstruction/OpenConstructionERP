@@ -135,7 +135,17 @@
     "rate_anomaly": "Jednotková cena {rate} překračuje práh ({threshold})"
   },
   "schedule": {
-    "title": "4D Harmonogram"
+    "title": "4D Harmonogram",
+    "generated": {
+      "position_label": "Položka {ordinal}",
+      "section_label": "Oddíl {ordinal}",
+      "task_description": "Automaticky vygenerováno z položky {ordinal} výkazu výměr ({quantity} {unit})",
+      "section_description": "Souhrn: oddíl {ordinal} výkazu výměr",
+      "start_milestone": "Zahájení projektu",
+      "start_milestone_description": "Milník zahájení projektu",
+      "completion_milestone": "Dokončení projektu",
+      "completion_milestone_description": "Milník dokončení projektu"
+    }
   },
   "cad": {
     "title": "Import CAD",

@@ -135,7 +135,17 @@
     "rate_anomaly": "Il prezzo unitario {rate} supera la soglia ({threshold})"
   },
   "schedule": {
-    "title": "Programma lavori 4D"
+    "title": "Programma lavori 4D",
+    "generated": {
+      "position_label": "Voce {ordinal}",
+      "section_label": "Sezione {ordinal}",
+      "task_description": "Generato automaticamente dalla voce {ordinal} del computo metrico ({quantity} {unit})",
+      "section_description": "Riepilogo: sezione {ordinal} del computo metrico",
+      "start_milestone": "Inizio lavori",
+      "start_milestone_description": "Milestone di inizio lavori",
+      "completion_milestone": "Fine lavori",
+      "completion_milestone_description": "Milestone di fine lavori"
+    }
   },
   "cad": {
     "title": "Importazione CAD",

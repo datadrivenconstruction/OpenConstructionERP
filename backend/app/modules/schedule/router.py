@@ -7,7 +7,9 @@ Endpoints:
     GET    /schedules/?project_id=xxx           - List schedules for a project
     GET    /schedules/{id}                      - Get schedule detail
     PATCH  /schedules/{id}                      - Update schedule
-    DELETE /schedules/{id}                      - Delete schedule
+    DELETE /schedules/{id}                      - Archive schedule
+    POST   /schedules/{id}/restore/             - Restore previous status
+    DELETE /schedules/{id}/permanent/           - Permanently delete (admin)
     POST   /schedules/{id}/activities           - Add activity to schedule
     GET    /schedules/{id}/activities           - List activities for schedule
     GET    /schedules/{id}/next-wbs-code        - Suggest the next WBS code in a section
@@ -31,7 +33,7 @@ import logging
 import uuid
 import xml.etree.ElementTree as ET  # noqa: S405 - types + output tree building only; parsing routed through defusedxml below
 from decimal import Decimal
-from typing import Any
+from typing import Any, Literal
 
 import defusedxml.ElementTree as safe_ET
 from defusedxml.common import DefusedXmlException
@@ -44,7 +46,14 @@ from app.core.content_disposition import attachment_disposition
 from app.core.csv_safety import neutralise_formula
 from app.core.i18n import get_locale
 from app.core.validation.messages import translate
-from app.dependencies import CurrentUserId, CurrentUserPayload, RequirePermission, SessionDep, verify_project_access
+from app.dependencies import (
+    CurrentUserId,
+    CurrentUserPayload,
+    RequirePermission,
+    RequireRole,
+    SessionDep,
+    verify_project_access,
+)
 from app.modules.schedule.schemas import (
     ActivityBimLinkRequest,
     ActivityCreate,
@@ -60,6 +69,7 @@ from app.modules.schedule.schemas import (
     EvmSummaryResponse,
     GanttData,
     GenerateFromBOQRequest,
+    GenerationPreviewResponse,
     ImportResult,
     LaborCostByPhaseResponse,
     LinkPositionRequest,
@@ -73,6 +83,7 @@ from app.modules.schedule.schemas import (
     RelationshipUpdate,
     RiskAnalysisResponse,
     ScheduleCreate,
+    ScheduleDeleteImpactResponse,
     ScheduleDiffRequest,
     ScheduleDiffResponse,
     ScheduleListResponse,
@@ -90,6 +101,7 @@ from app.modules.schedule.service import (
     ScheduleService,
     _effective_activity_status,
     _str_to_float,
+    coded_http_error,
     compute_duration,
     get_work_calendar,
 )
@@ -276,6 +288,7 @@ async def list_schedules(
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
     service: ScheduleService = Depends(_get_service),
+    archive_state: Literal["current", "archived", "all"] = "current",
 ) -> ScheduleListResponse:
     """List schedules for a given project, one page at a time.
 
@@ -284,7 +297,9 @@ async def list_schedules(
     complete list from a truncated one.
     """
     await _verify_schedule_project_owner(session, project_id, _user_id, payload)
-    schedules, total = await service.list_schedules_for_project(project_id, offset=offset, limit=limit)
+    schedules, total = await service.list_schedules_for_project(
+        project_id, offset=offset, limit=limit, archive_state=archive_state
+    )
     return ScheduleListResponse(
         items=[ScheduleResponse.model_validate(s) for s in schedules],
         total=total,
@@ -328,14 +343,14 @@ async def update_schedule(
 ) -> ScheduleResponse:
     """Update schedule metadata (name, description, status, dates)."""
     await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
-    schedule = await service.update_schedule(schedule_id, data)
+    schedule = await service.update_schedule(schedule_id, data, actor_payload=payload)
     return ScheduleResponse.model_validate(schedule)
 
 
 @router.delete(
     "/schedules/{schedule_id}",
     status_code=204,
-    summary="Delete schedule",
+    summary="Archive schedule, preserving activities, baselines and links",
     dependencies=[Depends(RequirePermission("schedule.delete"))],
 )
 async def delete_schedule(
@@ -345,9 +360,75 @@ async def delete_schedule(
     session: SessionDep,
     service: ScheduleService = Depends(_get_service),
 ) -> None:
-    """Delete a schedule and all its activities and work orders."""
+    """Archive, including when called by an admin. Permanent deletion is explicit."""
     await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
-    await service.delete_schedule(schedule_id)
+    await service.delete_schedule(schedule_id, actor_payload=payload)
+
+
+@router.post(
+    "/schedules/{schedule_id}/restore/",
+    response_model=ScheduleResponse,
+    dependencies=[Depends(RequirePermission("schedule.delete"))],
+)
+async def restore_schedule(
+    schedule_id: uuid.UUID,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: ScheduleService = Depends(_get_service),
+) -> ScheduleResponse:
+    """Restore the previous status; legacy archives without history become draft."""
+    await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
+    schedule = await service.restore_schedule(schedule_id, actor_payload=payload)
+    return ScheduleResponse.model_validate(schedule)
+
+
+@router.delete(
+    "/schedules/{schedule_id}/permanent/",
+    status_code=204,
+    dependencies=[Depends(RequireRole("admin")), Depends(RequirePermission("schedule.purge"))],
+)
+async def purge_schedule(
+    schedule_id: uuid.UUID,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: ScheduleService = Depends(_get_service),
+) -> None:
+    """Explicit admin-only destruction; the schedule must already be archived."""
+    await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
+    await service.purge_schedule(schedule_id, actor_payload=payload)
+
+
+@router.get(
+    "/schedules/{schedule_id}/delete-impact/",
+    response_model=ScheduleDeleteImpactResponse,
+    summary="What permanently deleting a schedule takes with it",
+    dependencies=[Depends(RequirePermission("schedule.read"))],
+)
+async def schedule_delete_impact(
+    schedule_id: uuid.UUID,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: ScheduleService = Depends(_get_service),
+) -> ScheduleDeleteImpactResponse:
+    """Count what a delete reaches, and say whether this caller may do it.
+
+    The confirmation reads ``can_delete`` so it never offers a Delete the
+    server would refuse; ``blocked_reason`` says why in that case.
+    """
+    schedule = await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
+    impact = await service.delete_impact(schedule_id)
+    blocked: str | None = None
+    try:
+        await RequireRole("admin")(payload)
+        await RequirePermission("schedule.purge")(payload)
+    except HTTPException:
+        blocked = "permission_denied"
+    if blocked is None and schedule.status != "archived":
+        blocked = "schedule_not_archived"
+    return ScheduleDeleteImpactResponse(**impact, can_delete=blocked is None, blocked_reason=blocked)
 
 
 # ── Activity CRUD ────────────────────────────────────────────────────────────
@@ -489,8 +570,11 @@ async def get_gantt_data(
     response_model=list[ActivityResponse],
     status_code=201,
     summary="Generate activities from BOQ",
-    description="Auto-generate schedule activities from a BOQ. Creates one activity per "
-    "section with cost-proportional durations and sequential FS dependencies.",
+    description="Auto-generate schedule activities from a BOQ at every depth: one summary per "
+    "section, one task per priced position, sections worked by up to four crews to fit "
+    "total_project_days. A schedule that already has activities answers 409 "
+    "schedule_has_activities unless replace=true. The outcome, including warnings such "
+    "as plan_exceeds_window, is stored on the schedule under metadata.boq_generation.",
     dependencies=[Depends(RequirePermission("schedule.update"))],
 )
 async def generate_from_boq(
@@ -503,24 +587,77 @@ async def generate_from_boq(
 ) -> list[ActivityResponse]:
     """Generate schedule activities from a BOQ.
 
-    Creates one activity per BOQ section with cost-proportional durations
-    and sequential finish-to-start dependencies. Verifies the caller owns
-    the parent project (admins bypass) before mutating the schedule.
+    Verifies the caller owns the parent project (admins bypass) before
+    mutating the schedule. Refusals carry a code the client translates
+    (``boq_not_found``, ``boq_has_no_positions``, ``schedule_has_activities``);
+    an unexpected failure answers ``schedule_generation_failed`` with a
+    reference that is also in the server log.
     """
     await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
     try:
-        await service.generate_from_boq(schedule_id, body.boq_id, body.total_project_days)
+        created = await service.generate_from_boq(
+            schedule_id,
+            body.boq_id,
+            body.total_project_days,
+            replace=body.replace,
+            start_date=body.start_date,
+            workers_per_position=body.workers_per_position,
+        )
         # Re-fetch activities to avoid greenlet/lazy-loading issues
-        activities, _ = await service.list_activities_for_schedule(schedule_id, limit=5000)
+        activities, _ = await service.list_activities_for_schedule(schedule_id, limit=max(len(created), 1))
         return [_activity_to_response(a) for a in activities]
     except HTTPException:
         raise
     except Exception as exc:
-        logger.exception("generate_from_boq failed: %s", exc)
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to generate schedule from BOQ. Check server logs for details.",
+        reference = uuid.uuid4().hex[:8]
+        logger.exception("generate_from_boq failed [ref %s]: %s", reference, exc)
+        raise coded_http_error(
+            500,
+            "schedule_generation_failed",
+            f"The schedule could not be generated from this BOQ (reference {reference}).",
+            reference=reference,
         ) from exc
+
+
+@router.post(
+    "/schedules/{schedule_id}/generate-from-boq/preview/",
+    response_model=GenerationPreviewResponse,
+    summary="Preview generating activities from a BOQ",
+    description="Work out what generate-from-boq would write, and write nothing: counts, the planned "
+    "start and end against the window, the activities a confirmed generation would replace, and one "
+    "note per position whose duration is an estimate or that is left out. replace is ignored.",
+    dependencies=[Depends(RequirePermission("schedule.update"))],
+)
+async def preview_generate_from_boq(
+    schedule_id: uuid.UUID,
+    body: GenerateFromBOQRequest,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: ScheduleService = Depends(_get_service),
+) -> GenerationPreviewResponse:
+    """Preview a generation from a BOQ; refusals carry the same codes as the generation."""
+    await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
+    try:
+        preview = await service.preview_generation(
+            schedule_id,
+            body.boq_id,
+            body.total_project_days,
+            start_date=body.start_date,
+            workers_per_position=body.workers_per_position,
+        )
+    except HTTPException:
+        raise
+    except Exception as exc:
+        reference = uuid.uuid4().hex[:8]
+        logger.exception("preview_generation failed [ref %s]: %s", reference, exc)
+        raise coded_http_error(
+            500,
+            "schedule_generation_failed",
+            f"The schedule could not be generated from this BOQ (reference {reference}).",
+            reference=reference,
+        ) from exc
+    return GenerationPreviewResponse(**preview)
 
 
 @router.post(
@@ -703,11 +840,16 @@ async def delete_activity(
     payload: CurrentUserPayload,
     session: SessionDep,
     service: ScheduleService = Depends(_get_service),
+    cascade: bool = Query(
+        default=False,
+        description="Delete a summary together with every activity under it. "
+        "Without it the children move up one level.",
+    ),
 ) -> None:
     """Delete an activity and its work orders."""
     existing = await service.get_activity(activity_id)
     await _verify_schedule_owner(service, session, existing.schedule_id, _user_id, payload)
-    await service.delete_activity(activity_id)
+    await service.delete_activity(activity_id, cascade=cascade)
 
 
 @router.post(
@@ -925,13 +1067,29 @@ async def create_relationship(
     await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
     from sqlalchemy import select
 
-    from app.modules.schedule.models import ScheduleRelationship
+    from app.modules.schedule.models import Activity, ScheduleRelationship
 
     # ── Reject self-referencing dependency ────────────────────────────────
     if data.predecessor_id == data.successor_id:
-        raise HTTPException(
-            status_code=400,
-            detail="An activity cannot depend on itself.",
+        raise coded_http_error(400, "schedule_dependency_self", "An activity cannot depend on itself.")
+
+    # ── Both ends must belong to this schedule ────────────────────────────
+    # The handler rewrites the successor's dependency list below, so an id
+    # from another schedule would let the caller edit a plan they may not
+    # even see. Answers like a missing activity.
+    member_ids = set(
+        (
+            await session.execute(
+                select(Activity.id).where(
+                    Activity.schedule_id == schedule_id,
+                    Activity.id.in_([data.predecessor_id, data.successor_id]),
+                )
+            )
+        ).scalars()
+    )
+    if member_ids != {data.predecessor_id, data.successor_id}:
+        raise coded_http_error(
+            404, "schedule_activity_not_in_schedule", "Both activities must belong to this schedule."
         )
 
     # ── Reject circular dependencies ─────────────────────────────────────
@@ -956,11 +1114,10 @@ async def create_relationship(
     while queue:
         current = queue.pop(0)
         if current == data.predecessor_id:
-            raise HTTPException(
-                status_code=400,
-                detail=(
-                    "Adding this dependency would create a circular reference. Check the dependency chain for cycles."
-                ),
+            raise coded_http_error(
+                400,
+                "schedule_dependency_cycle",
+                "Adding this dependency would create a circular reference. Check the dependency chain for cycles.",
             )
         if current in visited:
             continue
@@ -1005,6 +1162,54 @@ async def create_relationship(
     await service.activity_repo.update_fields(data.successor_id, dependencies=derived)
 
     return response
+
+
+@router.delete(
+    "/schedules/{schedule_id}/relationships/",
+    status_code=204,
+    summary="Delete the link between two activities",
+    dependencies=[Depends(RequirePermission("schedule.update"))],
+)
+async def delete_relationship_between(
+    schedule_id: uuid.UUID,
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    predecessor_id: uuid.UUID = Query(..., description="The activity the link leaves from."),
+    successor_id: uuid.UUID = Query(..., description="The activity the link goes to."),
+    service: ScheduleService = Depends(_get_service),
+) -> None:
+    """Delete the link from ``predecessor_id`` to ``successor_id`` in this schedule.
+
+    For a chart that knows the two bars but not the link's id, so it need not
+    list every link of a large schedule first. There is at most one link per
+    pair. Same checks and effects as deleting by id: the caller must reach the
+    schedule's project, and the successor's ``dependencies`` mirror is rebuilt.
+
+    Raises:
+        HTTPException: 404 ``relationship_not_found`` when the schedule holds
+            no such link.
+    """
+    from sqlalchemy import delete, select
+
+    from app.modules.schedule.models import ScheduleRelationship
+
+    await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
+    rel_id = (
+        await session.execute(
+            select(ScheduleRelationship.id).where(
+                ScheduleRelationship.schedule_id == schedule_id,
+                ScheduleRelationship.predecessor_id == predecessor_id,
+                ScheduleRelationship.successor_id == successor_id,
+            )
+        )
+    ).scalar_one_or_none()
+    if rel_id is None:
+        raise coded_http_error(404, "relationship_not_found", "This schedule has no link between those activities.")
+    await session.execute(delete(ScheduleRelationship).where(ScheduleRelationship.id == rel_id))
+    await session.flush()
+    derived = await service._derive_dependencies_json(successor_id)
+    await service.activity_repo.update_fields(successor_id, dependencies=derived)
 
 
 @router.get(

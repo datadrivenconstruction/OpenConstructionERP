@@ -135,7 +135,17 @@
     "rate_anomaly": "Eenheidsprijs {rate} overschrijdt drempelwaarde ({threshold})"
   },
   "schedule": {
-    "title": "4D Planning"
+    "title": "4D Planning",
+    "generated": {
+      "position_label": "Post {ordinal}",
+      "section_label": "Sectie {ordinal}",
+      "task_description": "Automatisch gegenereerd uit post {ordinal} van de hoeveelhedenstaat ({quantity} {unit})",
+      "section_description": "Samenvatting: sectie {ordinal} van de hoeveelhedenstaat",
+      "start_milestone": "Projectstart",
+      "start_milestone_description": "Mijlpaal voor projectstart",
+      "completion_milestone": "Projectafronding",
+      "completion_milestone_description": "Mijlpaal voor projectafronding"
+    }
   },
   "cad": {
     "title": "CAD-import",

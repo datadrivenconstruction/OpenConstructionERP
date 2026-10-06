@@ -135,7 +135,17 @@
     "rate_anomaly": "Đơn giá {rate} vượt ngưỡng ({threshold})"
   },
   "schedule": {
-    "title": "Tiến độ 4D"
+    "title": "Tiến độ 4D",
+    "generated": {
+      "position_label": "Mục {ordinal}",
+      "section_label": "Phần {ordinal}",
+      "task_description": "Được tạo tự động từ mục {ordinal} trong BOQ ({quantity} {unit})",
+      "section_description": "Tóm tắt: phần {ordinal} trong BOQ",
+      "start_milestone": "Khởi công dự án",
+      "start_milestone_description": "Mốc khởi công dự án",
+      "completion_milestone": "Hoàn thành dự án",
+      "completion_milestone_description": "Mốc hoàn thành dự án"
+    }
   },
   "cad": {
     "title": "Nhập CAD",

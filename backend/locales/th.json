@@ -135,7 +135,17 @@
     "rate_anomaly": "ราคาต่อหน่วย {rate} เกินเกณฑ์ ({threshold})"
   },
   "schedule": {
-    "title": "กำหนดการ 4D"
+    "title": "กำหนดการ 4D",
+    "generated": {
+      "position_label": "รายการที่ {ordinal}",
+      "section_label": "หมวดที่ {ordinal}",
+      "task_description": "สร้างขึ้นโดยอัตโนมัติจากรายการ {ordinal} ของ BOQ ({quantity} {unit})",
+      "section_description": "สรุป: หมวด {ordinal} ของ BOQ",
+      "start_milestone": "เริ่มต้นโครงการ",
+      "start_milestone_description": "หลักไมล์การเริ่มต้นโครงการ",
+      "completion_milestone": "เสร็จสิ้นโครงการ",
+      "completion_milestone_description": "หลักไมล์การเสร็จสิ้นโครงการ"
+    }
   },
   "cad": {
     "title": "นำเข้า CAD",

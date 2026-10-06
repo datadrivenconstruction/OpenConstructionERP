@@ -135,7 +135,17 @@
     "rate_anomaly": "단가 {rate}이(가) 임계값을 초과 ({threshold})"
   },
   "schedule": {
-    "title": "4D 공정표"
+    "title": "4D 공정표",
+    "generated": {
+      "position_label": "항목 {ordinal}",
+      "section_label": "구역 {ordinal}",
+      "task_description": "물량산출서 항목 {ordinal}에서 자동 생성됨 ({quantity} {unit})",
+      "section_description": "요약: 물량산출서 구역 {ordinal}",
+      "start_milestone": "프로젝트 시작",
+      "start_milestone_description": "프로젝트 시작 마일스톤",
+      "completion_milestone": "프로젝트 완료",
+      "completion_milestone_description": "프로젝트 완료 마일스톤"
+    }
   },
   "cad": {
     "title": "CAD 가져오기",

@@ -135,7 +135,17 @@
     "rate_anomaly": "Η τιμή μονάδας {rate} υπερβαίνει το όριο ({threshold})"
   },
   "schedule": {
-    "title": "Χρονοδιάγραμμα 4D"
+    "title": "Χρονοδιάγραμμα 4D",
+    "generated": {
+      "position_label": "Θέση {ordinal}",
+      "section_label": "Ενότητα {ordinal}",
+      "task_description": "Αυτόματη δημιουργία από τη θέση {ordinal} του BOQ ({quantity} {unit})",
+      "section_description": "Σύνοψη: ενότητα {ordinal} του BOQ",
+      "start_milestone": "Έναρξη έργου",
+      "start_milestone_description": "Ορόσημο έναρξης έργου",
+      "completion_milestone": "Ολοκλήρωση έργου",
+      "completion_milestone_description": "Ορόσημο ολοκλήρωσης έργου"
+    }
   },
   "cad": {
     "title": "Εισαγωγή CAD",

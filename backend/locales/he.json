@@ -135,7 +135,17 @@
     "rate_anomaly": "תעריף היחידה {rate} חורג מהסף ({threshold})"
   },
   "schedule": {
-    "title": "לוח זמנים 4D"
+    "title": "לוח זמנים 4D",
+    "generated": {
+      "position_label": "סעיף {ordinal}",
+      "section_label": "פרק {ordinal}",
+      "task_description": "נוצר אוטומטית מסעיף {ordinal} בכתב הכמויות ({quantity} {unit})",
+      "section_description": "סיכום: פרק {ordinal} בכתב הכמויות",
+      "start_milestone": "התחלת הפרויקט",
+      "start_milestone_description": "אבן דרך להתחלת הפרויקט",
+      "completion_milestone": "השלמת הפרויקט",
+      "completion_milestone_description": "אבן דרך להשלמת הפרויקט"
+    }
   },
   "cad": {
     "title": "ייבוא CAD",

@@ -135,7 +135,17 @@
     "rate_anomaly": "Birim fiyat {rate} eşik değeri aşıyor ({threshold})"
   },
   "schedule": {
-    "title": "4D İş Programı"
+    "title": "4D İş Programı",
+    "generated": {
+      "position_label": "Poz {ordinal}",
+      "section_label": "Bölüm {ordinal}",
+      "task_description": "Keşfin {ordinal} numaralı pozundan otomatik oluşturuldu ({quantity} {unit})",
+      "section_description": "Özet: keşfin {ordinal} numaralı bölümü",
+      "start_milestone": "Proje Başlangıcı",
+      "start_milestone_description": "Proje başlangıcı kilometre taşı",
+      "completion_milestone": "Proje Tamamlanması",
+      "completion_milestone_description": "Proje tamamlanması kilometre taşı"
+    }
   },
   "cad": {
     "title": "CAD içe aktarma",

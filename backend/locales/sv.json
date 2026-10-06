@@ -135,7 +135,17 @@
     "rate_anomaly": "À-pris {rate} överstiger gränsvärde ({threshold})"
   },
   "schedule": {
-    "title": "4D Tidsplan"
+    "title": "4D Tidsplan",
+    "generated": {
+      "position_label": "Post {ordinal}",
+      "section_label": "Avsnitt {ordinal}",
+      "task_description": "Automatiskt genererad från post {ordinal} i mängdförteckningen ({quantity} {unit})",
+      "section_description": "Sammanfattning: avsnitt {ordinal} i mängdförteckningen",
+      "start_milestone": "Projektstart",
+      "start_milestone_description": "Milstolpe för projektstart",
+      "completion_milestone": "Projektavslut",
+      "completion_milestone_description": "Milstolpe för projektavslut"
+    }
   },
   "cad": {
     "title": "CAD-import",

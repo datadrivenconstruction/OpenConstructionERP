@@ -135,7 +135,17 @@
     "rate_anomaly": "इकाई दर {rate} सीमा ({threshold}) से अधिक है"
   },
   "schedule": {
-    "title": "4D अनुसूची"
+    "title": "4D अनुसूची",
+    "generated": {
+      "position_label": "मद {ordinal}",
+      "section_label": "खंड {ordinal}",
+      "task_description": "BOQ की मद {ordinal} से स्वचालित रूप से तैयार ({quantity} {unit})",
+      "section_description": "सारांश: BOQ का खंड {ordinal}",
+      "start_milestone": "प्रोजेक्ट प्रारंभ",
+      "start_milestone_description": "प्रोजेक्ट प्रारंभ की माइलस्टोन",
+      "completion_milestone": "प्रोजेक्ट समाप्ति",
+      "completion_milestone_description": "प्रोजेक्ट समाप्ति की माइलस्टोन"
+    }
   },
   "cad": {
     "title": "CAD आयात",

@@ -135,7 +135,17 @@
     "rate_anomaly": "Ang rate na {rate} ay lumagpas sa limitasyon ({threshold})"
   },
   "schedule": {
-    "title": "4D na Iskedyul"
+    "title": "4D na Iskedyul",
+    "generated": {
+      "position_label": "Posisyon {ordinal}",
+      "section_label": "Seksyon {ordinal}",
+      "task_description": "Awtomatikong nabuo mula sa posisyon {ordinal} ng BOQ ({quantity} {unit})",
+      "section_description": "Buod: seksyon {ordinal} ng BOQ",
+      "start_milestone": "Simula ng Proyekto",
+      "start_milestone_description": "Milestone ng simula ng proyekto",
+      "completion_milestone": "Pagkumpleto ng Proyekto",
+      "completion_milestone_description": "Milestone ng pagkumpleto ng proyekto"
+    }
   },
   "cad": {
     "title": "Pag-import ng CAD",

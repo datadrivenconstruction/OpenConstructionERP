@@ -27,6 +27,9 @@ import { ROLE_RANK, normalizeRole } from './roles';
 type RankedRole = keyof typeof ROLE_RANK;
 
 export const PERMISSION_MIN_ROLE = {
+  'schedule.purge': 'admin',
+  'schedule.delete': 'editor',
+  'schedule.update': 'editor',
   'users.list': 'manager',
   'payroll.read': 'manager',
   'certified_payroll.read': 'manager',

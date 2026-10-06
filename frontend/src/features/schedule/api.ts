@@ -19,6 +19,12 @@ export interface Schedule {
   start_date: string | null;
   end_date: string | null;
   status: string;
+  /**
+   * Free-form; generation from a BOQ records its outcome under
+   * `boq_generation`. The API names the field `metadata_` (the response
+   * model serialises by alias).
+   */
+  metadata_?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }
@@ -27,6 +33,102 @@ export interface Schedule {
 export interface BoqSummary {
   id: string;
   name: string;
+  /** detailed, budget, conceptual, order_of_magnitude ... as the bill was saved; often unset. */
+  estimate_type?: string | null;
+}
+
+/** Why one position's duration is an estimate, or why it was left out of a generated plan. */
+export interface GenerationNote {
+  position_id: string;
+  ordinal: string;
+  description: string;
+  note:
+    | 'estimated_from_unit'
+    | 'cost_share'
+    | 'default_duration'
+    | 'spans_works'
+    | 'skipped_zero_qty'
+    | 'empty_section_dropped'
+    | 'blank_row_dropped';
+  days?: number | null;
+  basis?: {
+    unit: string;
+    rate: number;
+    hours: number;
+    gang: number;
+    hours_per_day: number;
+    capped_by_price?: boolean;
+    hours_from_unit?: number;
+  } | null;
+}
+
+/** What generating from a bill would write; nothing is written until a person confirms. */
+export interface GenerationPreview {
+  boq_id: string;
+  boq_name: string;
+  boq_estimate_type: string | null;
+  activity_count: number;
+  positions_scheduled: number;
+  /** Positions priced as a lump sum: each becomes one bar. */
+  lump_sum_positions: number;
+  summary_count: number;
+  estimated_count: number;
+  skipped_count: number;
+  note_counts: Record<string, number>;
+  crews: number;
+  /** Workers on each position whose bill gives hours but no crew, at least. */
+  workers_per_position?: number;
+  /** True when the generator chose that number (the fewest that fit), false when the request did. */
+  workers_assumed?: boolean;
+  /** Positions the number applies to; a crew the bill names is kept. */
+  positions_without_workers?: number;
+  /** The window the workers were fitted to; ``default`` when no end date was given. */
+  fitted_window?: { days: number; end: string; default: boolean; fits?: boolean } | null;
+  compressed_pct: number | null;
+  fits: boolean;
+  planned_start: string;
+  planned_end: string;
+  requested_end: string | null;
+  warnings: Array<Record<string, unknown>>;
+  existing_activity_count: number;
+  existing_started_count: number;
+  /** Contract payment instalments that move to the same milestone in the new plan. */
+  instalments_relinked?: number;
+  /** Contract payment instalments that lose their milestone and go back to their contract dates. */
+  instalments_unlinked?: number;
+  notes: GenerationNote[];
+}
+
+/** What deleting a schedule takes with it. */
+export interface ScheduleDeleteImpact {
+  activity_count: number;
+  baseline_count: number;
+  /** Payment instalments linked to its activities; they stay and go back to their contract dates. */
+  payment_milestone_count: number;
+  /** Whether this caller may delete it; the confirmation is not offered otherwise. */
+  can_delete?: boolean;
+  blocked_reason?: 'permission_denied' | 'schedule_has_baselines' | 'schedule_not_archived' | null;
+}
+
+/** The body of a generation or its preview. */
+export interface GenerateFromBoqOptions {
+  /** Calendar days from the start, both included; omitted = no window, the plan takes what the work needs. */
+  totalProjectDays?: number | null;
+  /** The day the plan starts, written to the schedule with the plan. */
+  startDate?: string | null;
+  replace?: boolean;
+  /** Workers per position where the bill gives no crew, 1 to 20; omitted = the fewest that fit. */
+  workersPerPosition?: number | null;
+}
+
+function generateBody(boqId: string, options: GenerateFromBoqOptions) {
+  return {
+    boq_id: boqId,
+    ...(options.totalProjectDays != null ? { total_project_days: options.totalProjectDays } : {}),
+    ...(options.startDate ? { start_date: options.startDate } : {}),
+    ...(options.replace ? { replace: true } : {}),
+    ...(options.workersPerPosition != null ? { workers_per_position: options.workersPerPosition } : {}),
+  };
 }
 
 /** A BOQ position reduced to what the link picker shows. */
@@ -856,10 +958,11 @@ export const scheduleApi = {
    * and dropped `.total` — so the server could count the full set and the
    * client would still have no idea it had been handed a slice.
    */
-  listSchedules: (projectId: string, opts?: { limit?: number; offset?: number }) => {
+  listSchedules: (projectId: string, opts?: { limit?: number; offset?: number; archiveState?: 'current' | 'archived' | 'all' }) => {
     const qs = new URLSearchParams({ project_id: projectId });
     if (opts?.limit != null) qs.set('limit', String(opts.limit));
     if (opts?.offset != null) qs.set('offset', String(opts.offset));
+    if (opts?.archiveState) qs.set('archive_state', opts.archiveState);
     return apiGet<Page<Schedule>>(`/v1/schedule/schedules/?${qs}`);
   },
   getSchedule: (id: string) => apiGet<Schedule>(`/v1/schedule/schedules/${id}`),
@@ -867,7 +970,14 @@ export const scheduleApi = {
     apiPost<Schedule>('/v1/schedule/schedules/', data),
   updateSchedule: (id: string, data: { name?: string; description?: string; start_date?: string; end_date?: string; status?: string }) =>
     apiPatch<Schedule>(`/v1/schedule/schedules/${id}`, data),
+  /** The legacy DELETE is deliberately reversible: it archives, never purges. */
   deleteSchedule: (id: string) => apiDelete(`/v1/schedule/schedules/${id}`),
+  archiveSchedule: (id: string) => apiDelete(`/v1/schedule/schedules/${id}`),
+  restoreSchedule: (id: string) => apiPost<Schedule>(`/v1/schedule/schedules/${id}/restore/`, {}),
+  purgeSchedule: (id: string) => apiDelete(`/v1/schedule/schedules/${id}/permanent/`),
+  /** Activities, baselines and linked payment instalments a delete reaches, for the confirmation. */
+  getDeleteImpact: (id: string) =>
+    apiGet<ScheduleDeleteImpact>(`/v1/schedule/schedules/${id}/delete-impact/`),
 
   // Activities
   getGantt: (scheduleId: string) =>
@@ -881,8 +991,9 @@ export const scheduleApi = {
     ),
   updateActivity: (activityId: string, data: Partial<Activity>) =>
     apiPatch<Activity>(`/v1/schedule/activities/${activityId}`, data),
-  deleteActivity: (activityId: string) =>
-    apiDelete(`/v1/schedule/activities/${activityId}`),
+  /** `cascade` deletes a summary with every activity under it; without it the children move up one level. */
+  deleteActivity: (activityId: string, cascade = false) =>
+    apiDelete(`/v1/schedule/activities/${activityId}${cascade ? '?cascade=true' : ''}`),
   clearActivities: (scheduleId: string) =>
     apiDelete<{ schedule_id: string; deleted: number }>(
       `/v1/schedule/schedules/${scheduleId}/activities/`,
@@ -908,11 +1019,22 @@ export const scheduleApi = {
     apiPatch(`/v1/schedule/activities/${activityId}/progress/`, { progress_pct: progressPct }),
 
   // CPM & BOQ Generation
-  generateFromBOQ: (scheduleId: string, boqId: string, totalProjectDays?: number) =>
-    apiPost<Activity[]>(`/v1/schedule/schedules/${scheduleId}/generate-from-boq/`, {
-      boq_id: boqId,
-      ...(totalProjectDays != null ? { total_project_days: totalProjectDays } : {}),
+  /**
+   * `replace` deletes the schedule's activities first, in the same transaction;
+   * without it a populated schedule answers 409 `schedule_has_activities`.
+   * A bill of thousands of positions takes a while, so the call is long-running.
+   */
+  generateFromBOQ: (scheduleId: string, boqId: string, options: GenerateFromBoqOptions = {}) =>
+    apiPost<Activity[]>(`/v1/schedule/schedules/${scheduleId}/generate-from-boq/`, generateBody(boqId, options), {
+      longRunning: true,
     }),
+  /** What a generation would write, and nothing written: counts, dates and per-position notes. */
+  previewGenerateFromBOQ: (scheduleId: string, boqId: string, options: GenerateFromBoqOptions = {}) =>
+    apiPost<GenerationPreview>(
+      `/v1/schedule/schedules/${scheduleId}/generate-from-boq/preview/`,
+      generateBody(boqId, options),
+      { longRunning: true },
+    ),
   calculateCPM: (scheduleId: string) =>
     apiPost<CriticalPathResponse>(`/v1/schedule/schedules/${scheduleId}/calculate-cpm/`),
   getRiskAnalysis: (scheduleId: string) =>
@@ -939,6 +1061,11 @@ export const scheduleApi = {
   /** Delete a dependency edge. */
   deleteRelationship: (relationshipId: string) =>
     apiDelete(`/v1/schedule/relationships/${encodeURIComponent(relationshipId)}`),
+  /** Delete the link between two activities without knowing its id (at most one per pair). */
+  deleteRelationshipBetween: (scheduleId: string, predecessorId: string, successorId: string) =>
+    apiDelete(
+      `/v1/schedule/schedules/${encodeURIComponent(scheduleId)}/relationships/?predecessor_id=${encodeURIComponent(predecessorId)}&successor_id=${encodeURIComponent(successorId)}`,
+    ),
   /** Recompute activity dates from the dependency network (CPM); returns the moved activities. */
   reschedule: (scheduleId: string) =>
     apiPost<Activity[]>(`/v1/schedule/schedules/${encodeURIComponent(scheduleId)}/reschedule/`),

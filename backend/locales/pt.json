@@ -135,7 +135,17 @@
     "rate_anomaly": "O preço unitário {rate} excede o limiar ({threshold})"
   },
   "schedule": {
-    "title": "Planeamento 4D"
+    "title": "Planeamento 4D",
+    "generated": {
+      "position_label": "Posição {ordinal}",
+      "section_label": "Capítulo {ordinal}",
+      "task_description": "Gerado automaticamente a partir da posição {ordinal} do mapa de quantidades ({quantity} {unit})",
+      "section_description": "Resumo: capítulo {ordinal} do mapa de quantidades",
+      "start_milestone": "Início do projeto",
+      "start_milestone_description": "Marco de início do projeto",
+      "completion_milestone": "Conclusão do projeto",
+      "completion_milestone_description": "Marco de conclusão do projeto"
+    }
   },
   "cad": {
     "title": "Importação CAD",

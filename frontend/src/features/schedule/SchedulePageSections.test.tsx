@@ -13,6 +13,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 const state = vi.hoisted(() => ({ activities: [] as any[], created: [] as any[] }));
 
@@ -150,6 +151,8 @@ async function createUnderSection() {
 
 describe('ScheduleDetail: a new activity lands inside its section', () => {
   beforeEach(() => {
+    // Adding activities is editor work; a viewer is not offered the button.
+    useAuthStore.setState({ userRole: 'editor' });
     state.activities = SEED.map((a) => ({ ...a }));
     state.created = [];
   });

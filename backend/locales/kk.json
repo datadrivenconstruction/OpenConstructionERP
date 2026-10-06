@@ -135,7 +135,17 @@
     "rate_anomaly": "Бірлік бағасы {rate} шектен асты ({threshold})"
   },
   "schedule": {
-    "title": "4D Кесте"
+    "title": "4D Кесте",
+    "generated": {
+      "position_label": "Позиция {ordinal}",
+      "section_label": "Бөлім {ordinal}",
+      "task_description": "BOQ позициясы {ordinal}-ден автоматты түрде жасалды ({quantity} {unit})",
+      "section_description": "Қысқаша мазмұны: BOQ бөлімі {ordinal}",
+      "start_milestone": "Жобаның басталуы",
+      "start_milestone_description": "Жобаның басталу кезеңі",
+      "completion_milestone": "Жобаның аяқталуы",
+      "completion_milestone_description": "Жобаның аяқталу кезеңі"
+    }
   },
   "cad": {
     "title": "CAD Импорты",

@@ -135,7 +135,17 @@
     "rate_anomaly": "Cena jednostkowa {rate} przekracza próg ({threshold})"
   },
   "schedule": {
-    "title": "Harmonogram 4D"
+    "title": "Harmonogram 4D",
+    "generated": {
+      "position_label": "Pozycja {ordinal}",
+      "section_label": "Dział {ordinal}",
+      "task_description": "Automatycznie wygenerowane z pozycji {ordinal} kosztorysu ({quantity} {unit})",
+      "section_description": "Podsumowanie: dział {ordinal} kosztorysu",
+      "start_milestone": "Rozpoczęcie projektu",
+      "start_milestone_description": "Kamień milowy rozpoczęcia projektu",
+      "completion_milestone": "Zakończenie projektu",
+      "completion_milestone_description": "Kamień milowy zakończenia projektu"
+    }
   },
   "cad": {
     "title": "Import CAD",

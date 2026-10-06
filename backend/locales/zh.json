@@ -135,7 +135,17 @@
     "rate_anomaly": "综合单价 {rate} 超出阈值 ({threshold})"
   },
   "schedule": {
-    "title": "4D 进度计划"
+    "title": "4D 进度计划",
+    "generated": {
+      "position_label": "项 {ordinal}",
+      "section_label": "节 {ordinal}",
+      "task_description": "根据工程量清单第 {ordinal} 项自动生成 ({quantity} {unit})",
+      "section_description": "摘要：工程量清单第 {ordinal} 节",
+      "start_milestone": "项目启动",
+      "start_milestone_description": "项目启动里程碑",
+      "completion_milestone": "项目完工",
+      "completion_milestone_description": "项目完工里程碑"
+    }
   },
   "cad": {
     "title": "CAD 导入",

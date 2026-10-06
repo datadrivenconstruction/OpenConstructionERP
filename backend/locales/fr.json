@@ -135,7 +135,17 @@
     "rate_anomaly": "Le prix unitaire {rate} dépasse le seuil ({threshold})"
   },
   "schedule": {
-    "title": "Planning 4D"
+    "title": "Planning 4D",
+    "generated": {
+      "position_label": "Poste {ordinal}",
+      "section_label": "Section {ordinal}",
+      "task_description": "Généré automatiquement à partir du poste {ordinal} du devis quantitatif ({quantity} {unit})",
+      "section_description": "Récapitulatif : section {ordinal} du devis quantitatif",
+      "start_milestone": "Démarrage du projet",
+      "start_milestone_description": "Jalon de démarrage du projet",
+      "completion_milestone": "Achèvement du projet",
+      "completion_milestone_description": "Jalon d'achèvement du projet"
+    }
   },
   "cad": {
     "title": "Import CAO",

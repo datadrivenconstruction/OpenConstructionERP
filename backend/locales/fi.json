@@ -135,7 +135,17 @@
     "rate_anomaly": "Yksikköhinta {rate} ylittää kynnysarvon ({threshold})"
   },
   "schedule": {
-    "title": "4D Aikataulu"
+    "title": "4D Aikataulu",
+    "generated": {
+      "position_label": "Nimike {ordinal}",
+      "section_label": "Osa {ordinal}",
+      "task_description": "Luotu automaattisesti määräluettelon nimikkeestä {ordinal} ({quantity} {unit})",
+      "section_description": "Yhteenveto: määräluettelon osa {ordinal}",
+      "start_milestone": "Projektin aloitus",
+      "start_milestone_description": "Projektin aloituksen virstanpylväs",
+      "completion_milestone": "Projektin valmistuminen",
+      "completion_milestone_description": "Projektin valmistumisen virstanpylväs"
+    }
   },
   "cad": {
     "title": "CAD-tuonti",

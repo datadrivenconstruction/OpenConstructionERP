@@ -135,7 +135,17 @@
     "rate_anomaly": "Harga satuan {rate} melampaui ambang batas ({threshold})"
   },
   "schedule": {
-    "title": "Jadwal 4D"
+    "title": "Jadwal 4D",
+    "generated": {
+      "position_label": "Posisi {ordinal}",
+      "section_label": "Bagian {ordinal}",
+      "task_description": "Dibuat otomatis dari posisi {ordinal} BOQ ({quantity} {unit})",
+      "section_description": "Ringkasan: bagian {ordinal} BOQ",
+      "start_milestone": "Awal Proyek",
+      "start_milestone_description": "Tonggak awal proyek",
+      "completion_milestone": "Penyelesaian Proyek",
+      "completion_milestone_description": "Tonggak penyelesaian proyek"
+    }
   },
   "cad": {
     "title": "Impor CAD",
