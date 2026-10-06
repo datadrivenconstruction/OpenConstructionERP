@@ -6729,7 +6729,7 @@ const resource = {
     "takeoff_viewer.ortho_lock": "Ortho zaključavanje",
     "takeoff_viewer.ortho_lock_hint": "Ograniči nove segmente na 0, 45 ili 90 stupnjeva (držite Shift ili uključite ovdje)",
     "takeoff_viewer.vertex_snap": "Prioni na vrhove",
-    "takeoff_viewer.vertex_snap_hint": "Prioni nove tocke na kutove postojecih mjerenja",
+    "takeoff_viewer.vertex_snap_hint": "Prioni nove točke na kutove postojećih mjerenja",
     "takeoff_viewer.duplicate_measurement": "Dupliciraj",
     "takeoff_viewer.pan": "Pomicanje",
     "takeoff_viewer.pan_hint": "Povucite za pomicanje prikaza. Držite Space ili upotrijebite srednju tipku miša dok je bilo koji alat aktivan.",

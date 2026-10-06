@@ -1362,3 +1362,15 @@ class FederationDiffResponse(BaseModel):
     unchanged: list[FederationSnapshotMember] = Field(default_factory=list)
     # Net element-count drift across the whole federation.
     total_element_drift: int = 0
+
+
+class BIMDataframeValueCount(BaseModel):
+    value: str
+    count: int
+
+
+class BIMDataframeValuePage(BaseModel):
+    items: list[BIMDataframeValueCount]
+    total: int
+    offset: int
+    limit: int

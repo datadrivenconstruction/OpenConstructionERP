@@ -3512,10 +3512,6 @@ class MatchElementsService:
                 }
                 if ci:
                     metadata["cost_item_id"] = str(ci.id)
-                    # A regional price-list voce keeps saying which list it is from.
-                    from app.modules.boq.price_list_carry import carry_block
-
-                    carry_block(metadata, ci)
                 if resource_previews:
                     metadata["match_components"] = [rp.model_dump(mode="json") for rp in resource_previews]
 

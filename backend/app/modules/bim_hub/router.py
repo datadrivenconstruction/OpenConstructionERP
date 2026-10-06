@@ -87,6 +87,7 @@ from app.modules.bim_hub.schemas import (
     AssetInfoUpdateRequest,
     AssetListResponse,
     AssetSummary,
+    BIMDataframeValuePage,
     BIMElementBulkImport,
     BIMElementGroupCreate,
     BIMElementGroupResponse,
@@ -5618,16 +5619,33 @@ async def get_column_values_by_query(
     model_id: uuid.UUID,
     column: str = Query(..., min_length=1, max_length=500),
     limit: int = Query(default=100, ge=1, le=1000),
+    offset: int = Query(default=0, ge=0),
     service: BIMHubService = Depends(_get_service),
     _user: CurrentUserId = ...,
-) -> list[dict]:
+) -> BIMDataframeValuePage:
     """Return value counts for a column named in the query string.
 
     Same answer as ``.../dataframe/columns/{column}/values/``, but the column
     travels as ``?column=`` so names such as ``Width/Height`` reach the store
     intact. Feeds the value dropdown of the property search panel.
     """
-    return await _column_value_counts(service, model_id, _user, column, limit)
+    model = await _verify_model_access(service, model_id, _user)
+    import asyncio
+
+    from app.modules.bim_hub.dataframe_store import column_value_counts_page
+
+    try:
+        page = await asyncio.to_thread(
+            column_value_counts_page,
+            str(model.project_id),
+            str(model_id),
+            column=column,
+            limit=limit,
+            offset=offset,
+        )
+    except ValueError as exc:
+        raise _dataframe_bad_request(exc) from exc
+    return BIMDataframeValuePage.model_validate(page)
 
 
 async def _column_value_counts(

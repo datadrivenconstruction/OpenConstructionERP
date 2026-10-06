@@ -929,27 +929,37 @@ export async function queryBIMDataframe(
 /** Distinct values of one dataframe column with their counts, most common
  *  first. Feeds the value dropdown of the property search panel. The column
  *  travels as a query parameter so a name containing "/" stays intact. */
+export interface BIMDataframeValuePage {
+  items: BIMDataframeValueCount[];
+  total: number;
+  offset: number;
+  limit: number;
+}
+
 export async function fetchBIMDataframeColumnValues(
   modelId: string,
   column: string,
   limit = 200,
   signal?: AbortSignal,
-): Promise<BIMDataframeValueCount[]> {
+  offset = 0,
+): Promise<BIMDataframeValuePage> {
   const token = useAuthStore.getState().accessToken;
   const headers: Record<string, string> = { Accept: 'application/json' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
-  const params = new URLSearchParams({ column, limit: String(limit) });
+  const params = new URLSearchParams({ column, limit: String(limit), offset: String(offset) });
   const resp = await fetch(
     `/api/v1/bim_hub/models/${encodeURIComponent(modelId)}/dataframe/values/?${params.toString()}`,
     { method: 'GET', headers, signal },
   );
-  if (!resp.ok) {
-    throw await dataframeError(resp, 'Dataframe values fetch');
+  if (!resp.ok) throw await dataframeError(resp, 'Dataframe values fetch');
+  const page = (await resp.json()) as BIMDataframeValuePage;
+  if (!Array.isArray(page.items) || !Number.isInteger(page.total) || page.total < 0 ||
+      page.offset !== offset || !Number.isInteger(page.limit) || page.limit < 1) {
+    throw new Error('Invalid dataframe values page');
   }
-  const rows = (await resp.json()) as { value: unknown; count: unknown }[];
-  return rows
+  return { ...page, items: page.items
     .filter((r) => r.value !== null && r.value !== undefined)
-    .map((r) => ({ value: String(r.value), count: Number(r.count) || 0 }));
+    .map((r) => ({ value: String(r.value), count: Number(r.count) || 0 })) };
 }
 
 /** @deprecated Use fetchGeometryBlobUrl() instead — this exposes the JWT in the URL. */

@@ -78,10 +78,10 @@ beforeEach(() => {
   sidecarMock.mockReset().mockResolvedValue('full');
   schemaMock.mockReset().mockResolvedValue(SCHEMA);
   queryMock.mockReset();
-  valuesMock.mockReset().mockResolvedValue([
+  valuesMock.mockReset().mockResolvedValue({ items: [
     { value: 'Progetto', count: 2 },
     { value: 'Stato di fatto', count: 1 },
-  ]);
+  ], total: 2, offset: 0, limit: 200 });
 });
 
 describe('PropertySearchPanel', () => {
@@ -162,7 +162,7 @@ describe('PropertySearchPanel', () => {
     const { onIsolate } = renderPanel();
     await pickColumn('phase', 'Phase Created');
     fireEvent.change(screen.getByTestId('property-search-op'), { target: { value: '=' } });
-    await waitFor(() => expect(valuesMock).toHaveBeenCalledWith('m1', 'phase created', 200, expect.anything()));
+    await waitFor(() => expect(valuesMock).toHaveBeenCalledWith('m1', 'phase created', 200, expect.anything(), 0));
 
     const valueInput = screen.getByTestId('property-search-value');
     fireEvent.focus(valueInput);
@@ -393,4 +393,25 @@ describe('a model whose property table lost what the import capped', () => {
     await screen.findByTestId('property-search-no-match');
     expect(screen.queryByTestId(NOTICE)).toBeNull();
   });
+});
+
+it('loads later value options only after Load more and keeps manual input', async () => {
+  const first = Array.from({ length: 200 }, (_, i) => ({ value: `v${i}`, count: 1 }));
+  valuesMock.mockResolvedValueOnce({ items: first, total: 201, offset: 0, limit: 200 })
+    .mockResolvedValueOnce({ items: [{ value: 'late option', count: 2 }], total: 201, offset: 200, limit: 200 });
+  renderPanel();
+  await pickColumn('phase', 'Phase Created');
+  fireEvent.change(screen.getByTestId('property-search-op'), { target: { value: '=' } });
+  const more = await screen.findByTestId('property-search-values-more');
+  expect(more.textContent).toContain('200 / 201');
+  expect(valuesMock).toHaveBeenCalledTimes(1);
+  const input = screen.getByTestId('property-search-value');
+  fireEvent.change(input, { target: { value: 'manual value' } });
+  fireEvent.click(more);
+  await waitFor(() => expect(valuesMock).toHaveBeenLastCalledWith('m1', 'phase created', 200, expect.anything(), 200));
+  await waitFor(() => expect(screen.queryByTestId('property-search-values-more')).toBeNull());
+  expect(input).toHaveValue('manual value');
+  fireEvent.change(input, { target: { value: 'late' } });
+  fireEvent.focus(input);
+  expect(await screen.findByText('late option')).toBeInTheDocument();
 });

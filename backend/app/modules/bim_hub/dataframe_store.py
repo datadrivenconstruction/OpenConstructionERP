@@ -732,15 +732,34 @@ def column_value_counts(
     limit: int = 100,
     data_root: Path | None = None,
 ) -> list[dict[str, Any]]:
+    """Compatibility adapter for the original path-based value endpoint."""
+    return column_value_counts_page(project_id, model_id, column, limit, data_root)["items"]
+
+
+def column_value_counts_page(
+    project_id: str,
+    model_id: str,
+    column: str,
+    limit: int = 100,
+    data_root: Path | None = None,
+    *,
+    offset: int = 0,
+) -> dict[str, Any]:
     """Return value counts for a single column (for filter autocomplete).
 
     Returns ``[{"value": "F90", "count": 42}, ...]`` sorted by count desc,
     then by value, so both engines list ties in the same order. Empty values
     are left out.
     """
+    if limit < 1 or limit > 1000 or offset < 0:
+        raise ValueError("limit must be between 1 and 1000 and offset must be nonnegative")
+
+    def page(items: list[dict[str, Any]], total: int) -> dict[str, Any]:
+        return {"items": items, "total": total, "offset": offset, "limit": limit}
+
     parquet_path = _existing_parquet_path(project_id, model_id, data_root)
     if parquet_path is None:
-        return []
+        return page([], 0)
 
     # Validate column name.
     known = _parquet_columns(parquet_path)
@@ -760,13 +779,13 @@ def column_value_counts(
                 f"WHERE {_sql_text(column)} IS NOT NULL "
                 f"GROUP BY 1 "
                 f"ORDER BY count DESC, value ASC "
-                f"LIMIT ?"
             )
             try:
-                result = conn.execute(sql, [str(parquet_path), limit]).fetchall()
+                total = conn.execute(f"SELECT COUNT(*) FROM ({sql}) AS grouped", [str(parquet_path)]).fetchone()[0]
+                result = conn.execute(sql + " LIMIT ? OFFSET ?", [str(parquet_path), limit, offset]).fetchall()
             except duckdb.Error as exc:
                 raise DataframeQueryError("query_failed", _duckdb_error_message(exc)) from exc
-            return [{"value": r[0], "count": r[1]} for r in result]
+            return page([{"value": r[0], "count": r[1]} for r in result], total)
         finally:
             conn.close()
 
@@ -778,7 +797,7 @@ def column_value_counts(
         key = str(cell)
         counts[key] = counts.get(key, 0) + 1
     ordered = sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
-    return [{"value": v, "count": c} for v, c in ordered[:limit]]
+    return page([{"value": v, "count": c} for v, c in ordered[offset : offset + limit]], len(ordered))
 
 
 # ---------------------------------------------------------------------------

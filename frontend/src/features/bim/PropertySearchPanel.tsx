@@ -103,6 +103,10 @@ export default function PropertySearchPanel({
   const [op, setOp] = useState<SearchOp>('LIKE');
   const [value, setValue] = useState<string>('');
   const [valueOptions, setValueOptions] = useState<BIMDataframeValueCount[]>([]);
+  const [valueOffset, setValueOffset] = useState(0);
+  const [valueRequest, setValueRequest] = useState(0);
+  const [valueTotal, setValueTotal] = useState(0);
+  const [valuesLoading, setValuesLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   // Text we wrote, or a failure translated when it renders.
   const [error, setError] = useState<string | Error | null>(null);
@@ -204,24 +208,34 @@ export default function PropertySearchPanel({
   // the value field is a plain text input.
   const wantsValues = op === '=' || op === '!=';
   useEffect(() => {
+    setValueOffset(0);
+    setValueOptions([]);
+    setValueTotal(0);
+  }, [wantsValues, column, targetModelId]);
+  useEffect(() => {
     if (!wantsValues || !column || !targetModelId) {
       setValueOptions([]);
       return;
     }
     let cancelled = false;
     const ctrl = new AbortController();
-    fetchBIMDataframeColumnValues(targetModelId, column, VALUE_OPTIONS_LIMIT, ctrl.signal)
-      .then((rows) => {
-        if (!cancelled) setValueOptions(rows);
+    setValuesLoading(true);
+    fetchBIMDataframeColumnValues(targetModelId, column, VALUE_OPTIONS_LIMIT, ctrl.signal, valueOffset)
+      .then((page) => {
+        if (!cancelled) {
+          setValueOptions((previous) => valueOffset === 0 ? page.items : [...previous, ...page.items]);
+          setValueTotal(page.total);
+        }
       })
       .catch(() => {
-        if (!cancelled) setValueOptions([]);
-      });
+        if (!cancelled && valueOffset === 0) setValueOptions([]);
+      })
+      .finally(() => { if (!cancelled) setValuesLoading(false); });
     return () => {
       cancelled = true;
       ctrl.abort();
     };
-  }, [wantsValues, column, targetModelId]);
+  }, [wantsValues, column, targetModelId, valueOffset, valueRequest]);
 
   const valueComboOptions = useMemo<ComboOption[]>(
     () => valueOptions.map((v) => ({ value: v.value, label: v.value, hint: fmtNumber(v.count, 0) })),
@@ -492,6 +506,18 @@ export default function PropertySearchPanel({
           })}
         />
       </div>
+
+      {wantsValues && valueOptions.length < valueTotal && (
+        <button
+          type="button"
+          disabled={valuesLoading}
+          onClick={() => { setValueOffset(valueOptions.length); setValueRequest((n) => n + 1); }}
+          data-testid="property-search-values-more"
+          className="text-xs text-oe-blue disabled:opacity-50"
+        >
+          {t('boq.load_more', { defaultValue: 'Load more' })} ({valueOptions.length} / {valueTotal})
+        </button>
+      )}
 
       <div className="flex items-center gap-1.5">
         <button

@@ -144,10 +144,10 @@ async function call<T>(path: string, init?: RequestInit & { longRunning?: boolea
   return (await res.json()) as T;
 }
 
-async function uploadSession(path: string, body: FormData, callerSignal?: AbortSignal): Promise<MatchSession> {
+async function uploadSession(url: string, body: FormData, callerSignal?: AbortSignal): Promise<MatchSession> {
   return withLongRunningDeadline(async (signal) => {
     const token = useAuthStore.getState().accessToken;
-    const res = await fetch(`${PREFIX}${path}`, {
+    const res = await fetch(url, {
       method: 'POST',
       headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), Accept: 'application/json' },
       body,
@@ -576,7 +576,7 @@ export const matchElementsApi = {
     if (spec.catalogue_id) fd.append('catalogue_id', spec.catalogue_id);
     if (spec.construction_stage)
       fd.append('construction_stage', spec.construction_stage);
-    return uploadSession('/sessions/from-excel', fd, spec.signal);
+    return uploadSession(`${PREFIX}/sessions/from-excel`, fd, spec.signal);
   },
 
   /** Upload a tender PDF and create a 'pdf' source session in one call.
@@ -599,7 +599,7 @@ export const matchElementsApi = {
     if (spec.catalogue_id) fd.append('catalogue_id', spec.catalogue_id);
     if (spec.construction_stage)
       fd.append('construction_stage', spec.construction_stage);
-    return uploadSession('/sessions/from-pdf', fd, spec.signal);
+    return uploadSession(`${PREFIX}/sessions/from-pdf`, fd, spec.signal);
   },
 
   /** §3.1/§4.1.4 — upload a single photo or drawing snapshot and create
@@ -626,7 +626,7 @@ export const matchElementsApi = {
     if (spec.catalogue_id) fd.append('catalogue_id', spec.catalogue_id);
     if (spec.construction_stage)
       fd.append('construction_stage', spec.construction_stage);
-    return uploadSession('/sessions/from-image', fd, spec.signal);
+    return uploadSession(`${PREFIX}/sessions/from-image`, fd, spec.signal);
   },
 
   listSessions: (
