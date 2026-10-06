@@ -467,6 +467,12 @@ export interface MeasurementSheet {
   /** Only on a read: false when the position has no saved sheet yet. */
   stored?: boolean;
   /**
+   * Decimals every line is rounded to before the lines are added, or null when
+   * the sheet adds the lines as measured. Each line's `quantity` is already
+   * the rounded figure.
+   */
+  row_decimals?: number | null;
+  /**
    * Only on a compute: how the measured total compares with the quantity the
    * position carries right now. `matches` is true when they agree within
    * `tolerance`, which the server sets and does not take from the caller.
@@ -934,6 +940,8 @@ export interface CostAutocompleteBreakdown {
 }
 
 export interface CostAutocompleteItem {
+  /** The cost item's id, so a line picked from the list links to it (absent from older servers). */
+  id?: string;
   code: string;
   description: string;
   unit: string;
@@ -1334,6 +1342,8 @@ export interface ResourceSummaryResponse {
   resources: ResourceSummaryItem[];
   /** Issue #106 — sum of every resource.total_cost in this response. */
   grand_total?: number;
+  /** Native-currency amounts excluded from grand_total due to unusable FX. */
+  unconverted?: Record<string, number | string>;
 }
 
 /* ── Sensitivity Analysis types ───────────────────────────────────────── */
@@ -1907,7 +1917,10 @@ export const boqApi = {
    * which market's rules a sheet is written under, which is the project's
    * property and not the panel's.
    */
-  computeMeasurement: (posId: string, body: { lines: MeasurementLineInput[]; unit?: string }) =>
+  computeMeasurement: (
+    posId: string,
+    body: { lines: MeasurementLineInput[]; unit?: string; row_decimals?: number | null },
+  ) =>
     apiPost<MeasurementSheet>(`/v1/boq/positions/${posId}/measurement/compute/`, {
       ...body,
       strict: false,

@@ -4,6 +4,7 @@ import { describe, it, expect } from 'vitest';
 import { importIssueText } from './importIssueText';
 import hr from '@/app/locales/hr';
 import hu from '@/app/locales/hu';
+import en from '@/app/locales/en';
 
 /** A `t` that reads one locale's flat table and interpolates like i18next. */
 function tFrom(table: Record<string, string>) {
@@ -130,5 +131,74 @@ describe('importIssueText for a column mapping the import could not use', () => 
       importIssueText({ code: 'column_mapping_not_applied', reason }, tFrom({})),
     );
     expect(new Set(texts).size).toBe(3);
+  });
+
+  describe('XPWE notes', () => {
+    const t = tFrom(en.translation);
+
+    it('names the bill item by its ordinal and words the numbers in the reader locale', () => {
+      const text = importIssueText(
+        {
+          code: 'xpwe_quantity_mismatch',
+          ordinal: '1.1.1',
+          computed: 49.11,
+          declared: 50,
+          message: 'Item 1.1.1: the measurement rows add up to 49.11, the file states 50. ...',
+        },
+        t,
+        (value) => value.toFixed(2).replace('.', ','),
+      );
+      expect(text).toBe(
+        'Item 1.1.1: The measurement rows add up to 49,11, the file states 50,00. The measured quantity was imported',
+      );
+    });
+
+    it('has an en.ts wording for every code the importer sends', () => {
+      const codes = [
+        'xpwe_quantity_mismatch',
+        'xpwe_see_item_flattened',
+        'xpwe_see_item_unresolved',
+        'xpwe_expression_unreadable',
+        'xpwe_price_unreadable',
+        'xpwe_description_truncated',
+        'xpwe_encoding_fallback',
+        'xpwe_no_bill_items',
+        'xpwe_more_warnings',
+        'xpwe_price_item_missing',
+        'xpwe_signs_cancel',
+      ];
+      for (const code of codes) {
+        expect(en.translation[`boq.import_issue.${code}`], code).toBeTruthy();
+        const text = importIssueText(
+          { code, ordinal: '2.1', ref: '7', value: 12, computed: 1, declared: 2, text: '2x', count: 3, encoding: 'cp1252', message: 'SERVER' },
+          t,
+        );
+        expect(text, code).not.toContain('SERVER');
+      }
+    });
+
+    it('says how many lines went into the deductions line and how much they take off', () => {
+      expect(en.translation['boq.import_issue.xpwe_deductions_moved_one']).toBeTruthy();
+      expect(en.translation['boq.import_issue.xpwe_deductions_moved_other']).toBeTruthy();
+      const text = importIssueText(
+        { code: 'xpwe_deductions_moved', count: 2, amount: -236.3, message: 'SERVER' },
+        t,
+        (value) => value.toFixed(2),
+      );
+      expect(text).toContain('2 items');
+      expect(text).toContain('236.30');
+      expect(text).not.toContain('-236.30');
+      expect(text).not.toContain('SERVER');
+    });
+
+    it('leaves a whole-file note without an item prefix', () => {
+      expect(importIssueText({ code: 'xpwe_encoding_fallback', encoding: 'cp1252' }, t)).toBe(
+        'The file is not UTF-8 and was read as cp1252',
+      );
+    });
+
+    it('keeps the ordinal of another importer out of its message', () => {
+      expect(importIssueText({ ordinal: '01.02', error: 'Quantity out of range: -1' }, t)).toBe('Quantity out of range: -1');
+    });
   });
 });

@@ -472,6 +472,9 @@ class CostAutocompleteItem(BaseModel):
     autocomplete payload firmly under the lazy-fetch threshold.
     """
 
+    # The item's id, so a bill line picked from the list links to it and
+    # carries its price-list block. None when a vector hit has no row.
+    id: str | None = None
     code: str
     description: str
     unit: str

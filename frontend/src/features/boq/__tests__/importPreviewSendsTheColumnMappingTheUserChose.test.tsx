@@ -113,7 +113,7 @@ describe('import preview column mapping', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Import' }));
 
     await waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(3));
-    expect(sent(fetchSpy)[2]).toEqual({ url: '/api/v1/boq/boqs/boq-1/import/auto/', mapping: expected });
+    expect(sent(fetchSpy)[2]).toEqual({ url: '/api/v1/boq/boqs/boq-1/import/auto/?background=true', mapping: expected });
   });
 
   it('sends no mapping when the user left the importer reading alone', async () => {

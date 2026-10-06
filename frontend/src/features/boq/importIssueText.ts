@@ -14,7 +14,9 @@
  * - `header_not_recognised`: a header row that names no description, or nothing
  *   to price by, with the headings that were not recognised;
  * - `column_mapping_not_applied`: a column mapping chosen in the preview that
- *   the import could not lay over the file, and why.
+ *   the import could not lay over the file, and why;
+ * - `xpwe_*`: the notes of an XPWE (Italian estimating XML) import, which name
+ *   the bill item they concern by its ordinal rather than a row number.
  *
  * Any other issue keeps the server's message. A workbook is read across all its
  * item sheets, so a row number alone is ambiguous: an issue that names its
@@ -41,6 +43,17 @@ export interface ImportIssue {
   value?: number;
   missing?: string[];
   unrecognised?: string[];
+  /** The bill item an XPWE note concerns, by its ordinal in the imported bill. */
+  ordinal?: string;
+  ref?: string;
+  computed?: number;
+  declared?: number;
+  encoding?: string;
+  count?: number;
+  /** The item that first used an ID another item repeats. */
+  first?: string;
+  /** The signed sum of the lines an XPWE import moved into the bill's deductions line. */
+  amount?: number;
 }
 
 function prefixOf(issue: ImportIssue, t: Translate): string {
@@ -52,6 +65,11 @@ function prefixOf(issue: ImportIssue, t: Translate): string {
     })}: `;
   }
   if (issue.row != null) return `${t('import.error_row', { defaultValue: 'Row {{row}}', row: issue.row })}: `;
+  // Only the XPWE notes are worded without their item; other importers'
+  // messages that carry an ordinal already name it.
+  if (issue.ordinal && issue.code?.startsWith('xpwe_')) {
+    return `${t('boq.import_issue.item', { defaultValue: 'Item {{ordinal}}', ordinal: issue.ordinal })}: `;
+  }
   return '';
 }
 
@@ -112,6 +130,106 @@ function mappingNotApplied(issue: ImportIssue, t: Translate): string {
   });
 }
 
+/** An XPWE import note in the reader's language, or null to keep the server's wording. */
+function xpweIssue(issue: ImportIssue, t: Translate, formatNumber: (value: number) => string): string | null {
+  switch (issue.code) {
+    case 'xpwe_quantity_mismatch':
+      if (issue.computed == null || issue.declared == null) return null;
+      return t('boq.import_issue.xpwe_quantity_mismatch', {
+        defaultValue:
+          'The measurement rows add up to {{computed}}, the file states {{declared}}. The measured quantity was imported',
+        computed: formatNumber(issue.computed),
+        declared: formatNumber(issue.declared),
+      });
+    case 'xpwe_see_item_flattened':
+      if (issue.ref == null || issue.value == null) return null;
+      return t('boq.import_issue.xpwe_see_item_flattened', {
+        defaultValue: 'A row repeating the quantity of item {{ref}} was stored as its value, {{value}}',
+        ref: issue.ref,
+        value: formatNumber(issue.value),
+      });
+    case 'xpwe_see_item_unresolved':
+      return t('boq.import_issue.xpwe_see_item_unresolved', {
+        defaultValue: 'A row refers to item {{ref}}, which could not be read. It counts as zero',
+        ref: issue.ref ?? '-',
+      });
+    case 'xpwe_expression_unreadable':
+      return t('boq.import_issue.xpwe_expression_unreadable', {
+        defaultValue: 'The measurement {{text}} could not be read and counts as zero',
+        text: issue.text ?? '',
+      });
+    case 'xpwe_price_unreadable':
+      return t('boq.import_issue.xpwe_price_unreadable', {
+        defaultValue: 'The price {{text}} could not be read. The item was imported at zero',
+        text: issue.text ?? '',
+      });
+    case 'xpwe_description_truncated':
+      return t('boq.import_issue.xpwe_description_truncated', {
+        defaultValue: 'The description was too long and was shortened. The full text is kept with the position',
+      });
+    case 'xpwe_encoding_fallback':
+      return t('boq.import_issue.xpwe_encoding_fallback', {
+        defaultValue: 'The file is not UTF-8 and was read as {{encoding}}',
+        encoding: issue.encoding ?? '',
+      });
+    case 'xpwe_no_bill_items':
+      return t('boq.import_issue.xpwe_no_bill_items', {
+        defaultValue:
+          'The file holds a price list and no measured bill (price-list items: {{count}}). Import it into a cost database instead',
+        count: issue.count ?? 0,
+      });
+    case 'xpwe_more_warnings':
+      return t('boq.import_issue.xpwe_more_warnings', {
+        defaultValue: 'More warnings of the same kind, not listed: {{count}}',
+        count: issue.count ?? 0,
+      });
+    case 'xpwe_price_item_missing':
+      return t('boq.import_issue.xpwe_price_item_missing', {
+        defaultValue: 'It refers to price-list item {{ref}}, which the file does not contain. It was not imported',
+        ref: issue.ref || '-',
+      });
+    case 'xpwe_deductions_moved':
+      if (issue.count == null || issue.amount == null) return null;
+      return t('boq.import_issue.xpwe_deductions_moved', {
+        defaultValue:
+          "{{count}} items with a negative amount were imported without a price. Their {{amount}} is taken off by the deductions line among the bill's markups",
+        count: issue.count,
+        amount: formatNumber(Math.abs(issue.amount)),
+      });
+    case 'xpwe_signs_cancel':
+      return t('boq.import_issue.xpwe_signs_cancel', {
+        defaultValue:
+          'Its quantity and unit rate are both negative, so it adds money. It was imported with both made positive',
+      });
+    case 'xpwe_price_out_of_range':
+      return t('boq.import_issue.xpwe_price_out_of_range', {
+        defaultValue: 'The unit rate {{text}} is outside the range a price can take. It was not imported',
+        text: issue.text ?? '',
+      });
+    case 'xpwe_measurement_out_of_range':
+      return t('boq.import_issue.xpwe_measurement_out_of_range', {
+        defaultValue: 'A measurement row is larger than any real quantity and counts as zero',
+      });
+    case 'xpwe_quantity_out_of_range':
+      return t('boq.import_issue.xpwe_quantity_out_of_range', {
+        defaultValue: 'Its quantity is larger than any real one. It was not imported',
+      });
+    case 'xpwe_item_failed':
+      return t('boq.import_issue.xpwe_item_failed', {
+        defaultValue: 'Its numbers could not be worked out. It was not imported',
+      });
+    case 'xpwe_duplicate_item_id':
+      return t('boq.import_issue.xpwe_duplicate_item_id', {
+        defaultValue:
+          'It has the same ID ({{ref}}) as item {{first}}. Both were imported; rows repeating item {{ref}} follow item {{first}}',
+        ref: issue.ref ?? '-',
+        first: issue.first ?? '-',
+      });
+    default:
+      return null;
+  }
+}
+
 export function importIssueText(
   issue: ImportIssue,
   t: Translate,
@@ -149,7 +267,7 @@ export function importIssueText(
       : '';
     return where + headerNotRecognised(issue, t);
   } else {
-    body = issue.message ?? issue.error ?? '';
+    body = xpweIssue(issue, t, formatNumber) ?? issue.message ?? issue.error ?? '';
   }
   return prefixOf(issue, t) + body;
 }

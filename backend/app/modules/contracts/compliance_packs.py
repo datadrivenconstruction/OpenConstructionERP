@@ -297,6 +297,18 @@ RULE_PACKS: dict[str, dict[str, Any]] = {
         "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
         "rule_sets": ["boq_quality", "din276", "ukraine"],
     },
+    # Italy reads its bill against the prezzario regionale it is priced from.
+    # Every rule in the set is a warning, so the gate reports and never blocks.
+    "it_compliance": {
+        "id": "it_compliance",
+        "name": "Italy Compliance",
+        "description": "Every priced line citing a well-formed prezzario voce or nuovo prezzo, "
+        "safety costs carried on a line of their own, the labour share of imported lines "
+        "stated, plus the universal quality baseline.",
+        "jurisdiction": "IT",
+        "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
+        "rule_sets": ["boq_quality", "italy"],
+    },
 }
 
 #: Default pack every project falls back to when nothing else matches.
@@ -354,9 +366,9 @@ DEFAULT_PACK_ID = "universal"
 #: national one.
 #:
 #: * No rule set in the engine is about the country at all, so the universal
-#:   pack is the honest answer. Italy is the notable one - it ships a demo and
-#:   a case page, and nothing in the engine reads a DEI or computo metrico
-#:   code. Also NL, KR, AE, ZA, SA, AU and NZ.
+#:   pack is the honest answer: NL, KR, AE, ZA, SA, AU and NZ. Italy used to
+#:   head this list and left it when the "italy" set (prezzario voci) was
+#:   registered.
 #:
 #: The other used to read "a national rule set IS registered and no pack
 #: reaches it", and is now empty. Japan ("sekisan"), Turkey ("birimfiyat") and
@@ -423,6 +435,8 @@ PACK_BY_LABEL: dict[str, str] = {
     "magyarország": "hu_compliance",
     "poland": "pl_compliance",
     "polska": "pl_compliance",
+    "italy": "it_compliance",
+    "italia": "it_compliance",
     "china": "cn_compliance",
     "spain": "es_compliance",
     "españa": "es_compliance",

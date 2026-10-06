@@ -1,4 +1,5 @@
 {
+  "costs.catalog_name_unavailable": "Det här namnet kan inte användas för en ny katalog. Välj ett annat namn.",
   "app": {
     "name": "OpenConstructionERP",
     "tagline": "Byggkalkylering med öppen källkod"

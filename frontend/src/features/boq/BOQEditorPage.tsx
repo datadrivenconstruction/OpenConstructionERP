@@ -54,6 +54,9 @@ import { buildLinkFromModelUrl, buildQuantityRulesUrl } from '@/features/bim/qua
 // import { AutocompleteInput } from './AutocompleteInput';
 import { AIChatPanel } from './AIChatPanel';
 import { importLanded, importToastText, type ImportToastResult } from './importToastText';
+import { importProgressText, isImportJob, waitForImportJob, type ImportProgress } from './importJob';
+import { alreadyImported, importFailureFromBody, importFailureText } from './importFailureText';
+import { toolbarImportRoute } from './importRoute';
 import { AICostFinderPanel } from './AICostFinderPanel';
 import { AISmartPanel } from './AISmartPanel';
 import { AIPositionCopilot } from './AIPositionCopilot';
@@ -126,6 +129,7 @@ import { BOQVariablesDialog } from './BOQVariablesDialog';
 import { CostPerAreaBenchmark } from './CostPerAreaBenchmark';
 import { RenumberDialog, type RenumberScheme, type RenumberCustom } from './RenumberDialog';
 import { LinkedPositionsModal } from './LinkedPositionsModal';
+import { repointedMetadata } from './repointedMetadata';
 import { fmtList } from '@/shared/lib/formatters';
 
 /* ── Re-exports for tests ────────────────────────────────────────────── */
@@ -4332,14 +4336,20 @@ export function BOQEditorPage() {
 
   const importInputRef = useRef<HTMLInputElement>(null);
   const [isImporting, setIsImporting] = useState(false);
+  // Progress of a native exchange file the server imports as a background job.
+  const [importJobProgress, setImportJobProgress] = useState<ImportProgress | null>(null);
   const [showImportPreview, setShowImportPreview] = useState(false);
 
+  // The handler, for its own "Import again" (a callback cannot name itself).
+  const importFileRef = useRef<((file: File, force?: boolean) => Promise<void>) | null>(null);
   const handleImportFile = useCallback(
-    async (file: File) => {
+    async (file: File, force = false): Promise<void> => {
       if (!boqId) return;
+      // Which route reads the file is decided by name, see ``toolbarImportRoute``.
+      const route = toolbarImportRoute(file.name);
       // An X31 measurement or an X89 invoice is read against this bill, not
       // imported into it: hand it to the dialog that proposes and checks.
-      if (/\.x(31|89)$/i.test(file.name)) {
+      if (route === 'site') {
         setGaebSiteFile(file);
         setGaebSiteOpen(true);
         return;
@@ -4349,17 +4359,15 @@ export function BOQEditorPage() {
       const form = new FormData();
       form.append('file', file);
 
-      // GAEB DA XML files (.x81/.x83/.x84/.xml) have a dedicated parser on
-      // the backend (``/import/gaeb/``) that understands the GAEB-specific
-      // structure — namespace-agnostic, X81/X83/X84 schema-aware. Smart
-      // import doesn't recognise these, so the file would be silently
-      // rejected. Route by extension before posting.
-      const ext = (file.name.split('.').pop() ?? '').toLowerCase();
-      const isGaeb = ['x81', 'x83', 'x84'].includes(ext) ||
-        (ext === 'xml' && /\.(x8[134]|gaeb)\.xml$/i.test(file.name));
+      const isGaeb = route === 'gaeb';
+      // The auto route imports in the background: it answers at once with a
+      // job to follow, and the same file posted again while that job runs
+      // gets the job back instead of importing the bill a second time.
       const endpoint = isGaeb
         ? `/api/v1/boq/boqs/${boqId}/import/gaeb/`
-        : `/api/v1/boq/boqs/${boqId}/import/smart/`;
+        : route === 'auto'
+          ? `/api/v1/boq/boqs/${boqId}/import/auto/?background=true${force ? '&force=true' : ''}`
+          : `/api/v1/boq/boqs/${boqId}/import/smart/`;
 
       // Tell the user *immediately* that the import is in flight — the server
       // can take 30+ seconds for large XLSX/PDF/CAD files, and without this
@@ -4380,18 +4388,20 @@ export function BOQEditorPage() {
       // the fetch hangs and the user thinks the page froze (Bug 2).
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 90_000);
+      let again = false;
 
       try {
         const lang = activeLanguageTag();
+        // A raw fetch gets no Accept-Language from the api client, and the
+        // refusal it may bring back (a locked bill's 409) is worded by the
+        // server, so name the UI language or it comes in the browser's.
+        const headers = {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...(lang ? { 'Accept-Language': lang } : {}),
+        };
         const res = await fetch(endpoint, {
           method: 'POST',
-          // A raw fetch gets no Accept-Language from the api client, and the
-          // refusal it may bring back (a locked bill's 409) is worded by the
-          // server, so name the UI language or it comes in the browser's.
-          headers: {
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            ...(lang ? { 'Accept-Language': lang } : {}),
-          },
+          headers,
           body: form,
           signal: controller.signal,
         });
@@ -4399,10 +4409,34 @@ export function BOQEditorPage() {
 
         if (!res.ok) {
           const body = await res.json().catch(() => ({ detail: res.statusText }));
-          throw new Error(extractErrorMessageFromBody(body) ?? 'Import failed');
+          const failed = t('boq.import_failed', { defaultValue: 'Import failed' });
+          const done = alreadyImported(res.status, body);
+          if (done) {
+            // Posted again on purpose, not an automatic retry: say so and let
+            // the person decide.
+            again = await confirm({
+              title: t('boq.import_again_title', { defaultValue: 'Import this file again?' }),
+              message: importFailureText(done, t, failed),
+              confirmLabel: t('boq.import_again', { defaultValue: 'Import again' }),
+              variant: 'warning',
+            });
+            return;
+          }
+          throw new Error(importFailureFromBody(body, t, failed) ?? extractErrorMessageFromBody(body) ?? failed);
         }
 
-        const result: ImportToastResult = await res.json();
+        const answer: unknown = await res.json();
+        let result = answer as ImportToastResult;
+        if (isImportJob(answer)) {
+          setImportJobProgress({ percent: answer.progress_percent, phase: null });
+          result = await waitForImportJob<ImportToastResult>({
+            boqId,
+            jobId: answer.job_id,
+            headers,
+            t,
+            onProgress: setImportJobProgress,
+          });
+        }
         const toast = importToastText(result, isGaeb, t);
         addToast({
           type: importLanded(result) ? 'success' : 'warning',
@@ -4425,10 +4459,15 @@ export function BOQEditorPage() {
         });
       } finally {
         setIsImporting(false);
+        setImportJobProgress(null);
+        // In ``finally``: the 409 branch above leaves the ``try`` with ``return``.
+        if (again) await importFileRef.current?.(file, true);
       }
     },
-    [boqId, addToast, queryClient, t],
+    [boqId, addToast, queryClient, t, confirm],
   );
+
+  importFileRef.current = handleImportFile;
 
   const handleImportInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -4482,7 +4521,9 @@ export function BOQEditorPage() {
         name: c.name, code: c.code || '', type: c.type || 'other',
         unit: c.unit, ...catalogComponentAmounts(c),
       }));
-      const newMeta: Record<string, unknown> = { ...pos.metadata, cost_item_code: item.code, source: 'cost_database' };
+      // Picked from another item, the old link and price-list block go; the
+      // server copies the new item's block from the link.
+      const newMeta = repointedMetadata(pos.metadata, item);
       if (resources.length > 0) newMeta.resources = resources;
       // Carry through the scope-of-work bullets from the catalog so the
       // BOQ grid can surface them as a readable (i) hint next to the
@@ -5212,6 +5253,17 @@ export function BOQEditorPage() {
             displayRate: displayCurrencyMeta?.rate ?? null,
           } : null}
         />
+        {importJobProgress && (
+          <div className="mt-2 flex items-center gap-3 text-xs text-content-secondary" role="status" aria-live="polite">
+            <span className="shrink-0">{importProgressText(importJobProgress, t)}</span>
+            <div className="h-1.5 flex-1 max-w-xs rounded-full bg-surface-secondary overflow-hidden">
+              <div
+                className="h-full bg-oe-blue transition-all"
+                style={{ width: `${Math.max(0, Math.min(100, importJobProgress.percent))}%` }}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── Tips panel (collapsed by default, compact) ──────────────── */}
@@ -5970,7 +6022,13 @@ export function BOQEditorPage() {
                   quantity,
                   metadata: {
                     ...pos.metadata,
-                    measurement: { unit: pos.unit, lines },
+                    // Spread first so a rule the sheet carries (row_decimals)
+                    // survives an edit in the drawer, which does not edit it.
+                    measurement: {
+                      ...(pos.metadata?.measurement as Record<string, unknown> | undefined),
+                      unit: pos.unit,
+                      lines,
+                    },
                   },
                 },
               });

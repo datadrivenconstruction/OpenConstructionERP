@@ -97,11 +97,17 @@ async def _read_upload(file: UploadFile, *, extensions: tuple[str, ...], label: 
     if not name.lower().endswith(extensions):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Unsupported file type. Please upload a {label} file ({', '.join(extensions)}).",
+            detail=ImporterParseError(
+                f"Unsupported file type. Please upload a {label} file ({', '.join(extensions)}).",
+                code="gaeb_file_type", params={"format": label, "extensions": ", ".join(extensions)},
+            ).as_detail(),
         )
     content = await file.read()
     if not content:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Uploaded file is empty.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ImporterParseError("Uploaded file is empty.", code="gaeb_empty_file").as_detail(),
+        )
     return content, name
 
 
@@ -145,7 +151,9 @@ async def export_boq_gaeb_x31(
     service = _boq_service(session)
     boq = await service.boq_repo.get_by_id(boq_id)
     if boq is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="BOQ not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=translate("errors.boq_not_found", locale=get_locale())
+        )
     positions = await service.position_repo.list_all_for_boq(boq_id)
 
     entries: list[tuple[str, Decimal]] = []
@@ -168,10 +176,13 @@ async def export_boq_gaeb_x31(
     if not entries:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail=(
-                "No position of this bill has a measurement sheet yet, so there is no measured "
-                "quantity to export. Measure the positions first, or export the bill quantities."
-            ),
+            detail=ImporterParseError(
+                (
+                    "No position of this bill has a measurement sheet yet, so there is no measured "
+                    "quantity to export. Measure the positions first, or export the bill quantities."
+                ) if basis == "measured" else "There are no position quantities to export.",
+                code="gaeb_no_measured_quantities" if basis == "measured" else "gaeb_no_quantities",
+            ).as_detail(),
         )
 
     project = await ProjectRepository(session).get_by_id(boq.project_id)
@@ -225,7 +236,7 @@ async def preview_boq_gaeb_x31(
     try:
         parsed = await asyncio.to_thread(parse_x31, content)
     except ImporterParseError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=exc.as_detail()) from exc
 
     service = _boq_service(session)
     positions = await service.position_repo.list_all_for_boq(boq_id)
@@ -412,7 +423,7 @@ async def check_boq_gaeb_x89(
     try:
         parsed = await asyncio.to_thread(parse_x89, content)
     except ImporterParseError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=exc.as_detail()) from exc
     service = _boq_service(session)
     positions = await service.position_repo.list_all_for_boq(boq_id)
     markups = (
@@ -1028,6 +1039,7 @@ async def export_claim_gaeb_x89(
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail={
+                "code": "gaeb_invoice_fields_missing",
                 "message": "The invoice cannot be written until these fields are known: " + ", ".join(missing),
                 "missing": missing,
             },

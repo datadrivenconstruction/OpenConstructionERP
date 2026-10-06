@@ -333,6 +333,28 @@
       "suggestion": "Jeder Position eine eigene Projekt-Positionsnummer geben, bevor das LV herausgeht"
     }
   },
+  "prezzario": {
+    "voce_code_format_valid": {
+      "fail": "Der Code '{code}' in Zeile {ordinal} lässt nicht erkennen, aus welchem Preisverzeichnis er stammt",
+      "suggestion": "Ein amtlicher Positionscode beginnt mit der Region und dem Ausgabejahr seines Preisverzeichnisses, zum Beispiel TOS25_01.A03.001.001 (Toskana 2025). Den Code genau so übernehmen, wie das regionale Verzeichnis ihn druckt, die Zeile aus dem Verzeichnis importieren oder einen neuen Preis als NP.01 nummerieren"
+    },
+    "voce_reference_present": {
+      "fail": "Position {ordinal} verweist auf keine Position des Preisverzeichnisses",
+      "suggestion": "Die Zeile aus einem importierten regionalen Preisverzeichnis übernehmen oder als neuen Preis (NP) mit Preisanalyse kennzeichnen"
+    },
+    "costi_sicurezza_separated": {
+      "fail": "Das Leistungsverzeichnis enthält keine eigene Zeile für die Sicherheitskosten, die nicht dem Angebotsnachlass unterliegen",
+      "suggestion": "Die oneri della sicurezza als eigenen Abschnitt oder Zuschlag ausweisen, bepreist aus dem Sicherheitskapitel des Verzeichnisses oder dem Sicherheitsplan"
+    },
+    "incidenza_manodopera_documented": {
+      "fail": "Position {ordinal} ({code}) weist keinen Lohnanteil aus",
+      "suggestion": "Den Lohnanteil (incidenza della manodopera) aus dem Preisverzeichnis übernehmen oder eine Lohnressource anlegen, damit die Lohnkosten in der Ausschreibung getrennt ausgewiesen werden können"
+    },
+    "overheads_not_applied_twice": {
+      "fail": "Die Preise regionaler Preisverzeichnisse enthalten bereits Gemeinkosten (13-17 %) und Gewinn (10 %). Sie erneut aufzuschlagen erhöht die Summe um etwa {percent} %.",
+      "suggestion": "Die Zuschläge für Gemeinkosten und Gewinn aus diesem Leistungsverzeichnis entfernen oder nur auf Zeilen mit eigener Preisanalyse (NP) anwenden."
+    }
+  },
   "romania": {
     "deviz_chapter_required": {
       "fail": "Position {ordinal} nennt kein Kapitel des deviz general",
@@ -683,6 +705,7 @@
     "rejection_not_found": "Ablehnung nicht gefunden",
     "claim_not_found": "Abschlagsrechnung nicht gefunden",
     "gaeb_x89_final_account_unsupported": "Eine Schlussrechnung oder Teilschlussrechnung kann noch nicht als GAEB X89 exportiert werden. Sie muss die gesamte Leistung abzüglich früherer Zahlungen abrechnen, aus einer Abrechnung wird nur eine Abschlagsrechnung eines Zeitraums erstellt. Exportieren Sie die Abrechnung als Abschlagsrechnung.",
+    "xpwe_native_file_refused": "Dies ist die eigene Projektdatei eines Kalkulationsprogramms, die nur dieses Programm öffnen kann. Exportieren Sie die Kalkulation in Ihrem Kalkulationsprogramm als XPWE und laden Sie die .xpwe-Datei hoch.",
     "plot_not_found": "Grundstück nicht gefunden",
     "survey_not_found": "Drohnenvermessung nicht gefunden",
     "diary_video_not_found": "Bautagebuch-Video nicht gefunden",

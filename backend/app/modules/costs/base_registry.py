@@ -145,6 +145,11 @@ class BaseFamily:
         variants: Loadable market bases in this family.
         repriceable_markets: Count of additional markets the base can be
             repriced into via resource price sheets (0 when not applicable).
+        attribution: Who published the source data, shown wherever the base is
+            offered or used, when the source licence asks for attribution.
+        licence: The licence the source data is published under, as the
+            publisher states it ("" when the base carries no third-party data
+            under its own licence).
     """
 
     key: str
@@ -155,6 +160,8 @@ class BaseFamily:
     description: str
     variants: list[BaseVariant] = field(default_factory=list)
     repriceable_markets: int = 0
+    attribution: str = ""
+    licence: str = ""
 
 
 @dataclass(frozen=True)
@@ -372,6 +379,8 @@ def _national(
     coefficient: bool = False,
     repriceable_markets: int = 0,
     has_market_reprice: bool = True,
+    attribution: str = "",
+    licence: str = "",
 ) -> BaseFamily:
     """Build a national family: one bundled, offline-ready home market plus, when
     ``has_market_reprice`` is set, one repriced card per market/language.
@@ -411,6 +420,8 @@ def _national(
         description=description,
         variants=variants,
         repriceable_markets=repriceable_markets,
+        attribution=attribution,
+        licence=licence,
     )
 
 
@@ -512,6 +523,11 @@ _NATIONAL_FAMILIES: tuple[BaseFamily, ...] = (
         file_token="IT_TOSCANA",
         catalog_token="IT_TOSCANA",
         repriceable_markets=49,
+        # The 2026 edition, as bundled (TOS26_ codes). Regione Toscana
+        # publishes it as open data; the dati.gov.it catalogue record of the
+        # 2026 list states CC BY 4.0, which asks for this attribution.
+        attribution="Regione Toscana, Prezzario dei Lavori Pubblici della Toscana, edizione 2026",
+        licence="CC BY 4.0",
     ),
     _national(
         "greece",
@@ -628,6 +644,11 @@ def is_national_region(region: str) -> bool:
 def variant_by_region(region: str) -> BaseVariant | None:
     """Return the canonical (home) variant for a platform region id, or ``None``."""
     return _BY_REGION.get(region)
+
+
+def family_by_region(region: str) -> BaseFamily | None:
+    """Return the family whose home base is ``region``, or ``None``."""
+    return next((fam for fam in BASE_FAMILIES if fam.variants and fam.variants[0].region == region), None)
 
 
 def is_known_market(market_token: str) -> bool:
@@ -951,6 +972,8 @@ def public_catalog(
                 "description": fam.description,
                 "market_count": len(fam.variants),
                 "repriceable_markets": fam.repriceable_markets,
+                "attribution": fam.attribution or None,
+                "licence": fam.licence or None,
                 # Representative catalogue size: markets in a family share the
                 # same work-item count, so the first variant is representative.
                 "positions": fam.variants[0].positions if fam.variants else 0,

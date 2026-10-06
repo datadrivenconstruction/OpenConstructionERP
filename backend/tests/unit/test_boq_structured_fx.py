@@ -78,9 +78,9 @@ def test_position_total_in_base_base_currency_passthrough():
     assert _position_total_in_base("1000", "", {"USD": "1.10"}, "EUR") == Decimal("1000")
 
 
-def test_position_total_in_base_missing_rate_not_zeroed():
+def test_position_total_in_base_missing_rate_excluded():
     # GBP has no configured rate — must be summed in its own units, never 0.
-    assert _position_total_in_base("800", "GBP", {"USD": "1.10"}, "EUR") == Decimal("800")
+    assert _position_total_in_base("800", "GBP", {"USD": "1.10"}, "EUR") == Decimal("0")
 
 
 def test_position_total_in_base_garbage_total_is_zero():
@@ -190,7 +190,7 @@ async def test_get_boq_structured_converts_foreign_currency(session):
 
 
 @pytest.mark.asyncio
-async def test_get_boq_structured_missing_rate_not_zeroed(session):
+async def test_get_boq_structured_missing_rate_excluded(session):
     # USD has a rate; the project also has a position implicitly in EUR.
     # Swap the USD leaf's currency to an unconfigured GBP via no GBP rate.
     boq = await _make_boq_with_mixed_currency(session, [{"code": "CHF", "rate": "0.95", "label": "Swiss Franc"}])
@@ -199,7 +199,7 @@ async def test_get_boq_structured_missing_rate_not_zeroed(session):
 
     # USD has no configured rate (only CHF) → the 500 USD leaf is summed
     # in its own units, never dropped: 1000 + 500 = 1500.
-    assert structured.direct_cost == pytest.approx(1500.0)
+    assert structured.direct_cost == pytest.approx(1000.0)
 
 
 @pytest.mark.asyncio
@@ -310,3 +310,33 @@ def test_detect_resource_fx_warnings_handles_malformed_rows() -> None:
     ]
     fx_map: dict[str, str] = {}
     assert _detect_resource_fx_warnings(resources, fx_map, "EUR") == ["USD"]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "fx_rates,expected_total,expected_unconverted",
+    [
+        ([], Decimal("1000"), {"USD": Decimal("500")}),
+        ([{"code": "USD", "rate": "0", "label": "Dollar"}], Decimal("1000"), {"USD": Decimal("500")}),
+        ([{"code": "USD", "rate": "1.1", "label": "Dollar"}], Decimal("1550"), {}),
+    ],
+)
+async def test_summary_and_structured_totals_agree_for_persisted_currency_rows(
+    session,
+    monkeypatch,
+    fx_rates,
+    expected_total,
+    expected_unconverted,
+):
+    from unittest.mock import AsyncMock
+
+    from app.modules.boq import router
+
+    boq = await _make_boq_with_mixed_currency(session, fx_rates)
+    service = BOQService(session)
+    monkeypatch.setattr(router, "_verify_boq_owner", AsyncMock())
+    summary = await router.get_resource_summary(boq.id, OWNER_ID, {}, session, service)
+    structured = await service.get_boq_structured(boq.id)
+    assert summary.grand_total == expected_total
+    assert structured.direct_cost == expected_total
+    assert summary.unconverted == expected_unconverted

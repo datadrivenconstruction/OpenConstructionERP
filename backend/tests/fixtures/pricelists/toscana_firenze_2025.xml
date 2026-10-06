@@ -1,0 +1,718 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Source: Regione Toscana, Prezzario dei Lavori Pubblici della Toscana 2025, Provincia di Firenze, XML edition (dati.toscana.it). Licence as stated in the file: CC BY 3.0. Trimmed for tests: a handful of rows, unchanged otherwise. -->
+<EASY:Prezzario xmlns:EASY="https://prezzariollpp.regione.toscana.it/prezzario.xsd">
+    <EASY:intestazione autore="Regione Toscana" versione="0.2">
+        <EASY:dettaglio anno="2025" versione="0" area="Provincia di Firenze"/>
+        <EASY:copyright tipo="CC BY 3.0" descrizione="Creative commons: CC BY"/>
+    </EASY:intestazione>
+    <EASY:Contenuto>
+        <EASY:Articolo cam="0" codice="TOS25_18.W01.001.002">
+            <EASY:livello1><![CDATA[INDAGINI GEOGNOSTICHE.
+Prezzi relativi ai cantieri presenti nella tipologia a cui appartiene il lavoro svolto. 
+Sono compresi: approntamento dell’area di cantiere, trasporto dell'attrezzatura tra la sede dell'impresa e il sito d'indagine, viaggio del personale tecnico e della mano d'opera di cantiere, installazione dell'attrezzatura per l'esecuzione delle indagini geofisiche, 
+E’ compreso altresì l'onere dello spostamento da una postazione alla successiva, ad esclusione dei casi in cui è prevista una specifica voce per la movimentazione e il posizionamento dell’attrezzatura di prova all'interno dell’area di indagine e l’approvvigionamento dell'acqua necessaria alla perforazione.]]></EASY:livello1>
+            <EASY:livello2><![CDATA[SONDAGGI GEOGNOSTICI]]></EASY:livello2>
+            <EASY:livello3><![CDATA[Ricerca ed individuazione propedeutiche ai sondaggi.]]></EASY:livello3>
+            <EASY:livello4><![CDATA[di beni di interesse archeologico]]></EASY:livello4>
+            <EASY:um><![CDATA[a corpo]]></EASY:um>
+            <EASY:prezzo>1467.4</EASY:prezzo>
+                <EASY:prezzosenzasgutil>1150</EASY:prezzosenzasgutil>
+                <EASY:spesegenerali>184</EASY:spesegenerali>
+                <EASY:utilidiimpresa>133.4</EASY:utilidiimpresa>
+        </EASY:Articolo>
+        <EASY:Articolo cam="0" codice="TOS25_18.W01.002.001">
+            <EASY:livello1><![CDATA[INDAGINI GEOGNOSTICHE.
+Prezzi relativi ai cantieri presenti nella tipologia a cui appartiene il lavoro svolto. 
+Sono compresi: approntamento dell’area di cantiere, trasporto dell'attrezzatura tra la sede dell'impresa e il sito d'indagine, viaggio del personale tecnico e della mano d'opera di cantiere, installazione dell'attrezzatura per l'esecuzione delle indagini geofisiche, 
+E’ compreso altresì l'onere dello spostamento da una postazione alla successiva, ad esclusione dei casi in cui è prevista una specifica voce per la movimentazione e il posizionamento dell’attrezzatura di prova all'interno dell’area di indagine e l’approvvigionamento dell'acqua necessaria alla perforazione.]]></EASY:livello1>
+            <EASY:livello2><![CDATA[SONDAGGI GEOGNOSTICI]]></EASY:livello2>
+            <EASY:livello3><![CDATA[Scavo di pozzetto propedeutico ai sondaggi.]]></EASY:livello3>
+            <EASY:livello4><![CDATA[per individuazione dei sottoservizi]]></EASY:livello4>
+            <EASY:um><![CDATA[a corpo]]></EASY:um>
+            <EASY:prezzo>1339.8</EASY:prezzo>
+                <EASY:prezzosenzasgutil>1050</EASY:prezzosenzasgutil>
+                <EASY:spesegenerali>168</EASY:spesegenerali>
+                <EASY:utilidiimpresa>121.8</EASY:utilidiimpresa>
+        </EASY:Articolo>
+        <EASY:Articolo cam="0" codice="TOS25_18.W01.006.001">
+            <EASY:livello1><![CDATA[INDAGINI GEOGNOSTICHE.
+Prezzi relativi ai cantieri presenti nella tipologia a cui appartiene il lavoro svolto. 
+Sono compresi: approntamento dell’area di cantiere, trasporto dell'attrezzatura tra la sede dell'impresa e il sito d'indagine, viaggio del personale tecnico e della mano d'opera di cantiere, installazione dell'attrezzatura per l'esecuzione delle indagini geofisiche, 
+E’ compreso altresì l'onere dello spostamento da una postazione alla successiva, ad esclusione dei casi in cui è prevista una specifica voce per la movimentazione e il posizionamento dell’attrezzatura di prova all'interno dell’area di indagine e l’approvvigionamento dell'acqua necessaria alla perforazione.]]></EASY:livello1>
+            <EASY:livello2><![CDATA[SONDAGGI GEOGNOSTICI]]></EASY:livello2>
+            <EASY:livello3><![CDATA[Sovrapprezzo per uso di carotieri doppi e tripli Ø 101 mm durante l'esecuzione di sondaggi a rotazione]]></EASY:livello3>
+            <EASY:livello4><![CDATA[T2( U.M. aggiornata nella pubblicazione del Prezzario 2024)]]></EASY:livello4>
+            <EASY:um><![CDATA[m]]></EASY:um>
+            <EASY:prezzo>25.52</EASY:prezzo>
+                <EASY:prezzosenzasgutil>20</EASY:prezzosenzasgutil>
+                <EASY:spesegenerali>3.2</EASY:spesegenerali>
+                <EASY:utilidiimpresa>2.32</EASY:utilidiimpresa>
+        </EASY:Articolo>
+        <EASY:Articolo cam="0" codice="TOS25_01.A03.001.001">
+            <EASY:livello1><![CDATA[NUOVE COSTRUZIONI EDILI.
+Prezzi per una nuova costruzione di edilizia civile.
+Per lavori con normali difficoltà di esecuzione.]]></EASY:livello1>
+            <EASY:livello2><![CDATA[DEMOLIZIONE.
+Eseguita con qualsiasi mezzo, ad esclusione delle mine.
+Compresi gli oneri per le opere provvisionali tra cui:
+- puntellature;
+- ponti di servizio anche esterni fino ad un'altezza di 2,00 m.
+L'accatastamento nell'ambito del cantiere così come il carico, trasporto e scarico dei rifiuti agli impianti autorizzati ai fini del loro recupero o del loro smaltimento possono essere compresi o esclusi dalla lavorazione.
+Esclusi:
+- costi di accesso per il loro conferimento ed eventuali tributi.]]></EASY:livello2>
+            <EASY:livello3><![CDATA[TOTALE O PARZIALE DI EDIFICI]]></EASY:livello3>
+            <EASY:livello4><![CDATA[con struttura portante in pietrame o mattoni e solai in legno, in ferro, in latero-cemento. 
+Eseguita con mezzi meccanici. 
+Per qualsiasi altezza.]]></EASY:livello4>
+            <EASY:um><![CDATA[m³]]></EASY:um>
+            <EASY:prezzo>13.63017</EASY:prezzo>
+            <EASY:Analisi>
+                <EASY:vocedettaglio ordine="1"
+                                   cam="0"
+                                   codice="TOS25_AT.N01.001.205"
+                                   tipo="TOS25_AT"
+                                   udm="ora"
+                                   quantita="0.02"
+                                   prezzo="25.96832"
+                                   importo="0.51937">
+                        <EASY:descrizione><![CDATA[Macchine per movimento terra e accessori - Escavatore cingolato con attrezzatura frontale o rovescia con massa in assetto operativo di 20000 KG - 1 mese]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="2"
+                                   cam="0"
+                                   codice="TOS25_AT.N01.001.902"
+                                   tipo="TOS25_AT"
+                                   udm="ora"
+                                   quantita="0.02"
+                                   prezzo="40.75133"
+                                   importo="0.81503">
+                        <EASY:descrizione><![CDATA[Macchine per movimento terra e accessori - oneri consumo carburanti, oli e altri materiali - macchine movimento terra da 10.000 kg a 25.000 kg - da 126 CV fino a 300 CV]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="3"
+                                   cam="0"
+                                   codice="TOS25_AT.N01.002.006"
+                                   tipo="TOS25_AT"
+                                   udm="ora"
+                                   quantita="0.02"
+                                   prezzo="6.80750"
+                                   importo="0.13615">
+                        <EASY:descrizione><![CDATA[Accessori per demolizioni - Martellone oleodinamico completo di supporto e perni di fissaggio, punta o scalpello da applicare al braccio di miniescavatori, escavatori o terne 350 KG - 1 mese]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="4"
+                                   cam="0"
+                                   codice="TOS25_AT.N02.014.017"
+                                   tipo="TOS25_AT"
+                                   udm="ora"
+                                   quantita="0.11"
+                                   prezzo="64.33743"
+                                   importo="7.07712">
+                        <EASY:descrizione><![CDATA[Autocarri, motocarri e trattori (MTT=Massa totale a terra, Pu Portata utile) - Autocarro ribaltabile con MTT 18000 Kg e pu 12000 Kg, 2 assi - 1 mese (nolo a caldo)]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="5"
+                                   cam="0"
+                                   codice="TOS25_RU.M10.001.002"
+                                   tipo="TOS25_RU"
+                                   udm="ora"
+                                   quantita="0.018"
+                                   prezzo="30.61000"
+                                   importo="0.55098">
+                        <EASY:descrizione><![CDATA[Operaio edile - Specializzato]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="6"
+                                   cam="0"
+                                   codice="TOS25_RU.M10.001.002"
+                                   tipo="TOS25_RU"
+                                   udm="ora"
+                                   quantita="0.02"
+                                   prezzo="30.61000"
+                                   importo="0.61220">
+                        <EASY:descrizione><![CDATA[Operaio edile - Specializzato]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="7"
+                                   cam="0"
+                                   codice="TOS25_RU.M10.001.003"
+                                   tipo="TOS25_RU"
+                                   udm="ora"
+                                   quantita="0.018"
+                                   prezzo="28.44000"
+                                   importo="0.51192">
+                        <EASY:descrizione><![CDATA[Operaio edile - Qualificato]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="8"
+                                   cam="0"
+                                   codice="TOS25_RU.M10.001.004"
+                                   tipo="TOS25_RU"
+                                   udm="ora"
+                                   quantita="0.018"
+                                   prezzo="25.51000"
+                                   importo="0.45918">
+                        <EASY:descrizione><![CDATA[Operaio edile - Comune]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                    <EASY:totaleparziale valore="10.68195"/>
+                    <EASY:spesegenerali percentuale="16" valore="1.70911" />
+                    <EASY:onerisicurezza percentuale="4.5" valore="0.07691" />
+                    <EASY:utileimpresa percentuale="10" valore="1.23911"/>
+                    <EASY:prezzo valore="13.63017"/>
+                    <EASY:incidenzamanodopera percentuale="40.36" valore="5.50138"/>
+                    <EASY:incidenzasicurezza percentuale="0.56"/>
+                </EASY:Analisi>
+        </EASY:Articolo>
+        <EASY:Articolo cam="0" codice="TOS25_01.A03.001.002">
+            <EASY:livello1><![CDATA[NUOVE COSTRUZIONI EDILI.
+Prezzi per una nuova costruzione di edilizia civile.
+Per lavori con normali difficoltà di esecuzione.]]></EASY:livello1>
+            <EASY:livello2><![CDATA[DEMOLIZIONE.
+Eseguita con qualsiasi mezzo, ad esclusione delle mine.
+Compresi gli oneri per le opere provvisionali tra cui:
+- puntellature;
+- ponti di servizio anche esterni fino ad un'altezza di 2,00 m.
+L'accatastamento nell'ambito del cantiere così come il carico, trasporto e scarico dei rifiuti agli impianti autorizzati ai fini del loro recupero o del loro smaltimento possono essere compresi o esclusi dalla lavorazione.
+Esclusi:
+- costi di accesso per il loro conferimento ed eventuali tributi.]]></EASY:livello2>
+            <EASY:livello3><![CDATA[TOTALE O PARZIALE DI EDIFICI]]></EASY:livello3>
+            <EASY:livello4><![CDATA[con struttura portante in calcestruzzo armato.
+Eseguita con mezzi meccanici.
+Per qualsiasi altezza.]]></EASY:livello4>
+            <EASY:um><![CDATA[m³]]></EASY:um>
+            <EASY:prezzo>17.55112</EASY:prezzo>
+            <EASY:Analisi>
+                <EASY:vocedettaglio ordine="1"
+                                   cam="0"
+                                   codice="TOS25_AT.N01.001.205"
+                                   tipo="TOS25_AT"
+                                   udm="ora"
+                                   quantita="0.03"
+                                   prezzo="25.96832"
+                                   importo="0.77905">
+                        <EASY:descrizione><![CDATA[Macchine per movimento terra e accessori - Escavatore cingolato con attrezzatura frontale o rovescia con massa in assetto operativo di 20000 KG - 1 mese]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="2"
+                                   cam="0"
+                                   codice="TOS25_AT.N01.001.902"
+                                   tipo="TOS25_AT"
+                                   udm="ora"
+                                   quantita="0.03"
+                                   prezzo="40.75133"
+                                   importo="1.22254">
+                        <EASY:descrizione><![CDATA[Macchine per movimento terra e accessori - oneri consumo carburanti, oli e altri materiali - macchine movimento terra da 10.000 kg a 25.000 kg - da 126 CV fino a 300 CV]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="3"
+                                   cam="0"
+                                   codice="TOS25_AT.N01.002.006"
+                                   tipo="TOS25_AT"
+                                   udm="ora"
+                                   quantita="0.03"
+                                   prezzo="6.80750"
+                                   importo="0.20423">
+                        <EASY:descrizione><![CDATA[Accessori per demolizioni - Martellone oleodinamico completo di supporto e perni di fissaggio, punta o scalpello da applicare al braccio di miniescavatori, escavatori o terne 350 KG - 1 mese]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="4"
+                                   cam="0"
+                                   codice="TOS25_AT.N01.100.901"
+                                   tipo="TOS25_AT"
+                                   udm="ora"
+                                   quantita="0.03"
+                                   prezzo="16.97972"
+                                   importo="0.50939">
+                        <EASY:descrizione><![CDATA[Oneri per consumo carburanti, oli e altri materiali - per macchine operatrici -fino a 10.000 kg - fino 125 CV.]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="5"
+                                   cam="0"
+                                   codice="TOS25_AT.N02.014.017"
+                                   tipo="TOS25_AT"
+                                   udm="ora"
+                                   quantita="0.11"
+                                   prezzo="64.33743"
+                                   importo="7.07712">
+                        <EASY:descrizione><![CDATA[Autocarri, motocarri e trattori (MTT=Massa totale a terra, Pu Portata utile) - Autocarro ribaltabile con MTT 18000 Kg e pu 12000 Kg, 2 assi - 1 mese (nolo a caldo)]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="6"
+                                   cam="0"
+                                   codice="TOS25_RU.M10.001.002"
+                                   tipo="TOS25_RU"
+                                   udm="ora"
+                                   quantita="0.036"
+                                   prezzo="30.61000"
+                                   importo="1.10196">
+                        <EASY:descrizione><![CDATA[Operaio edile - Specializzato]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="7"
+                                   cam="0"
+                                   codice="TOS25_RU.M10.001.002"
+                                   tipo="TOS25_RU"
+                                   udm="ora"
+                                   quantita="0.03"
+                                   prezzo="30.61000"
+                                   importo="0.91830">
+                        <EASY:descrizione><![CDATA[Operaio edile - Specializzato]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="8"
+                                   cam="0"
+                                   codice="TOS25_RU.M10.001.003"
+                                   tipo="TOS25_RU"
+                                   udm="ora"
+                                   quantita="0.036"
+                                   prezzo="28.44000"
+                                   importo="1.02384">
+                        <EASY:descrizione><![CDATA[Operaio edile - Qualificato]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="9"
+                                   cam="0"
+                                   codice="TOS25_RU.M10.001.004"
+                                   tipo="TOS25_RU"
+                                   udm="ora"
+                                   quantita="0.036"
+                                   prezzo="25.51000"
+                                   importo="0.91836">
+                        <EASY:descrizione><![CDATA[Operaio edile - Comune]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                    <EASY:totaleparziale valore="13.75479"/>
+                    <EASY:spesegenerali percentuale="16" valore="2.20077" />
+                    <EASY:onerisicurezza percentuale="4.5" valore="0.09903" />
+                    <EASY:utileimpresa percentuale="10" valore="1.59556"/>
+                    <EASY:prezzo valore="17.55112"/>
+                    <EASY:incidenzamanodopera percentuale="41.76" valore="7.32956"/>
+                    <EASY:incidenzasicurezza percentuale="0.56"/>
+                </EASY:Analisi>
+        </EASY:Articolo>
+        <EASY:Articolo cam="0" codice="TOS25_01.A03.001.003">
+            <EASY:livello1><![CDATA[NUOVE COSTRUZIONI EDILI.
+Prezzi per una nuova costruzione di edilizia civile.
+Per lavori con normali difficoltà di esecuzione.]]></EASY:livello1>
+            <EASY:livello2><![CDATA[DEMOLIZIONE.
+Eseguita con qualsiasi mezzo, ad esclusione delle mine.
+Compresi gli oneri per le opere provvisionali tra cui:
+- puntellature;
+- ponti di servizio anche esterni fino ad un'altezza di 2,00 m.
+L'accatastamento nell'ambito del cantiere così come il carico, trasporto e scarico dei rifiuti agli impianti autorizzati ai fini del loro recupero o del loro smaltimento possono essere compresi o esclusi dalla lavorazione.
+Esclusi:
+- costi di accesso per il loro conferimento ed eventuali tributi.]]></EASY:livello2>
+            <EASY:livello3><![CDATA[TOTALE O PARZIALE DI EDIFICI]]></EASY:livello3>
+            <EASY:livello4><![CDATA[con struttura portante in pietrame o mattoni e solai in legno, in ferro, in latero-cemento.
+Eseguita a mano e/o con uso di martello demolitore.]]></EASY:livello4>
+            <EASY:um><![CDATA[m³]]></EASY:um>
+            <EASY:prezzo>124.1429</EASY:prezzo>
+            <EASY:Analisi>
+                <EASY:vocedettaglio ordine="1"
+                                   cam="0"
+                                   codice="TOS25_AT.N01.001.032"
+                                   tipo="TOS25_AT"
+                                   udm="ora"
+                                   quantita="0.06"
+                                   prezzo="10.74436"
+                                   importo="0.64466">
+                        <EASY:descrizione><![CDATA[Macchine per movimento terra e accessori - Minipale a ruote gommate potenza motore oltre 40 CV - 1 mese]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="2"
+                                   cam="0"
+                                   codice="TOS25_AT.N01.001.901"
+                                   tipo="TOS25_AT"
+                                   udm="ora"
+                                   quantita="0.06"
+                                   prezzo="16.97972"
+                                   importo="1.01878">
+                        <EASY:descrizione><![CDATA[Macchine per movimento terra e accessori - oneri consumo carburanti, oli e altri materiali - macchine movimento terra fino a 10.000 kg - fino 125 CV]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="3"
+                                   cam="0"
+                                   codice="TOS25_AT.N01.009.016"
+                                   tipo="TOS25_AT"
+                                   udm="ora"
+                                   quantita="0.12"
+                                   prezzo="7.93333"
+                                   importo="0.95200">
+                        <EASY:descrizione><![CDATA[Motocompressori a motore diesel - Motocompressori 4500 litri/minuto / 5000 litri/minuto - 1 mese]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="4"
+                                   cam="0"
+                                   codice="TOS25_AT.N01.065.033"
+                                   tipo="TOS25_AT"
+                                   udm="ora"
+                                   quantita="0.12"
+                                   prezzo="1.53750"
+                                   importo="0.18450">
+                        <EASY:descrizione><![CDATA[Martelli, perforatori elettrici e accessori - Martello demolitore pneumatico silenziato completo di punte, tubi e raccordi massa 8 - 15 Kg - 1 mese]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="5"
+                                   cam="0"
+                                   codice="TOS25_AT.N01.100.901"
+                                   tipo="TOS25_AT"
+                                   udm="ora"
+                                   quantita="0.12"
+                                   prezzo="16.97972"
+                                   importo="2.03757">
+                        <EASY:descrizione><![CDATA[Oneri per consumo carburanti, oli e altri materiali - per macchine operatrici -fino a 10.000 kg - fino 125 CV.]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="6"
+                                   cam="0"
+                                   codice="TOS25_AT.N01.100.901"
+                                   tipo="TOS25_AT"
+                                   udm="ora"
+                                   quantita="0.12"
+                                   prezzo="16.97972"
+                                   importo="2.03757">
+                        <EASY:descrizione><![CDATA[Oneri per consumo carburanti, oli e altri materiali - per macchine operatrici -fino a 10.000 kg - fino 125 CV.]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="7"
+                                   cam="0"
+                                   codice="TOS25_AT.N02.014.017"
+                                   tipo="TOS25_AT"
+                                   udm="ora"
+                                   quantita="0.16"
+                                   prezzo="64.33743"
+                                   importo="10.29399">
+                        <EASY:descrizione><![CDATA[Autocarri, motocarri e trattori (MTT=Massa totale a terra, Pu Portata utile) - Autocarro ribaltabile con MTT 18000 Kg e pu 12000 Kg, 2 assi - 1 mese (nolo a caldo)]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="8"
+                                   cam="0"
+                                   codice="TOS25_PR.P08.020.001"
+                                   tipo="TOS25_PR"
+                                   udm="m³"
+                                   quantita="0.003"
+                                   prezzo="351.00000"
+                                   importo="1.05300">
+                        <EASY:descrizione><![CDATA[LEGNAME PER EDILIZIA.
+ABETE MASSICCIO.
+Certificato CE secondo la:
+- UNI EN 14081-1:2016 per il legno strutturale con sezione rettangolare;
+- UNI EN 15497:2014 per il legno strutturale KVH. - MORALI E MEZZI MORALI 
+Lunghezza: da 3 a 6 m]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="9"
+                                   cam="0"
+                                   codice="TOS25_PR.P08.020.002"
+                                   tipo="TOS25_PR"
+                                   udm="m³"
+                                   quantita="0.004"
+                                   prezzo="282.00000"
+                                   importo="1.12800">
+                        <EASY:descrizione><![CDATA[LEGNAME PER EDILIZIA.
+ABETE MASSICCIO.
+Certificato CE secondo la:
+- UNI EN 14081-1:2016 per il legno strutturale con sezione rettangolare;
+- UNI EN 15497:2014 per il legno strutturale KVH. - SOTTOMISURE PARALLELE
+Larghezze miste 
+Spessore: 2,5 cm
+Lunghezza: 4 m
+Larghezza: 8-15 cm]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="10"
+                                   cam="0"
+                                   codice="TOS25_RU.M10.001.002"
+                                   tipo="TOS25_RU"
+                                   udm="ora"
+                                   quantita="0.9"
+                                   prezzo="30.61000"
+                                   importo="27.54900">
+                        <EASY:descrizione><![CDATA[Operaio edile - Specializzato]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="11"
+                                   cam="0"
+                                   codice="TOS25_RU.M10.001.002"
+                                   tipo="TOS25_RU"
+                                   udm="ora"
+                                   quantita="0.06"
+                                   prezzo="30.61000"
+                                   importo="1.83660">
+                        <EASY:descrizione><![CDATA[Operaio edile - Specializzato]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="12"
+                                   cam="0"
+                                   codice="TOS25_RU.M10.001.003"
+                                   tipo="TOS25_RU"
+                                   udm="ora"
+                                   quantita="0.9"
+                                   prezzo="28.44000"
+                                   importo="25.59600">
+                        <EASY:descrizione><![CDATA[Operaio edile - Qualificato]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="13"
+                                   cam="0"
+                                   codice="TOS25_RU.M10.001.004"
+                                   tipo="TOS25_RU"
+                                   udm="ora"
+                                   quantita="0.9"
+                                   prezzo="25.51000"
+                                   importo="22.95900">
+                        <EASY:descrizione><![CDATA[Operaio edile - Comune]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                    <EASY:totaleparziale valore="97.29067"/>
+                    <EASY:spesegenerali percentuale="16" valore="15.56651" />
+                    <EASY:onerisicurezza percentuale="4.5" valore="0.70049" />
+                    <EASY:utileimpresa percentuale="10" valore="11.28572"/>
+                    <EASY:prezzo valore="124.14290"/>
+                    <EASY:incidenzamanodopera percentuale="66.73" valore="82.8382"/>
+                    <EASY:incidenzasicurezza percentuale="0.56"/>
+                </EASY:Analisi>
+        </EASY:Articolo>
+        <EASY:Articolo cam="0" codice="TOS25_17.N05.002.012">
+            <EASY:livello1><![CDATA[SICUREZZA (Dlgs 81/2008 e s.m.i.)]]></EASY:livello1>
+            <EASY:livello2><![CDATA[NOLEGGI OPERE PROVVISIONALI.
+Previste nel PSC (Apprestamenti - Dlgs 81/08 all. XV punto 4.1.1 lett. a. ): montaggio e smontaggio di strutture provvisorie realizzate in conformità con le norme tecniche vigenti, compresi il noleggio per il primo mese di utilizzo o frazione di mese, trasporto (salvo diversa indicazione) e utilizzo, oltre al costo di redazione del piano di montaggio.
+Compreso formazione di piani di lavoro in tavoloni o lamiera zincata, parapetti e tavole fermapiede, scale di servizio, piani di riposo e botole di sicurezza, spinotti e basette, ancoraggi, eventuali rinforzi di montanti e quanto altro necessario per dare opera compiuta a regola d'arte. 
+Escluse le spese di occupazione suolo pubblico e le spese di progettazione della struttura stessa ove previste dalle norme, che restano a carico dell'Appaltatore. 
+I ponteggi metallici utilizzati devono essere unicamente quelli autorizzati dal Ministero del Lavoro e montati da personale esperto, con carichi di esercizio conformi alle norme tecniche vigenti. 
+I ponteggi complessi e quelli superiori a 20 m di altezza dal piano di appoggio, devono essere realizzati secondo un progetto di calcolo a firma di un ingegnere o architetto abilitato.]]></EASY:livello2>
+            <EASY:livello3><![CDATA[Recinzioni e accessi di cantiere]]></EASY:livello3>
+            <EASY:livello4><![CDATA[Montaggio di recinzione area adibita a cantiere, esclusa idonea segnaletica diurna e notturna – in struttura tubo e giunto con rete plastica rossa, incluso nolo per il primo mese.( U.M. aggiornata nella pubblicazione del Prezzario 2024)]]></EASY:livello4>
+            <EASY:um><![CDATA[m]]></EASY:um>
+            <EASY:prezzo>15.52764</EASY:prezzo>
+            <EASY:Analisi>
+                <EASY:vocedettaglio ordine="1"
+                                   cam="0"
+                                   codice="TOS25_PR.200.004.010"
+                                   tipo="TOS25_PR"
+                                   udm="m²"
+                                   quantita="1"
+                                   prezzo="3.33340"
+                                   importo="3.33340">
+                        <EASY:descrizione><![CDATA[MATERIALI PLASTICI VARI PER RECINZIONI O SEGNALZIONI PROVVISORIE - rete di protezione colorata in teli di plastica. 
+Compresi accessori di fissaggio]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="2"
+                                   cam="0"
+                                   codice="TOS25_PR.P46.101.011"
+                                   tipo="TOS25_PR"
+                                   udm="kg"
+                                   quantita="0.1"
+                                   prezzo="2.31500"
+                                   importo="0.23150">
+                        <EASY:descrizione><![CDATA[Materiali accessori - Filo di ferro per legature]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="3"
+                                   cam="0"
+                                   codice="TOS25_RU.M10.001.002"
+                                   tipo="TOS25_RU"
+                                   udm="ora"
+                                   quantita="0.175"
+                                   prezzo="30.61000"
+                                   importo="5.35675">
+                        <EASY:descrizione><![CDATA[Operaio edile - Specializzato]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="4"
+                                   cam="0"
+                                   codice="TOS25_RU.M10.001.004"
+                                   tipo="TOS25_RU"
+                                   udm="ora"
+                                   quantita="0.175"
+                                   prezzo="25.51000"
+                                   importo="4.46425">
+                        <EASY:descrizione><![CDATA[Operaio edile - Comune]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                    <EASY:totaleparziale valore="13.3859"/>
+                    <EASY:spesegenerali percentuale="16" valore="2.14174" />
+                    <EASY:onerisicurezza percentuale="1" valore="0.02142" />
+                    <EASY:utileimpresa percentuale="0" valore="0"/>
+                    <EASY:prezzo valore="15.52764"/>
+                    <EASY:incidenzamanodopera percentuale="63.25" valore="9.821"/>
+                    <EASY:incidenzasicurezza percentuale="0.14"/>
+                </EASY:Analisi>
+        </EASY:Articolo>
+        <EASY:Articolo cam="0" codice="TOS25_17.N05.002.013">
+            <EASY:livello1><![CDATA[SICUREZZA (Dlgs 81/2008 e s.m.i.)]]></EASY:livello1>
+            <EASY:livello2><![CDATA[NOLEGGI OPERE PROVVISIONALI.
+Previste nel PSC (Apprestamenti - Dlgs 81/08 all. XV punto 4.1.1 lett. a. ): montaggio e smontaggio di strutture provvisorie realizzate in conformità con le norme tecniche vigenti, compresi il noleggio per il primo mese di utilizzo o frazione di mese, trasporto (salvo diversa indicazione) e utilizzo, oltre al costo di redazione del piano di montaggio.
+Compreso formazione di piani di lavoro in tavoloni o lamiera zincata, parapetti e tavole fermapiede, scale di servizio, piani di riposo e botole di sicurezza, spinotti e basette, ancoraggi, eventuali rinforzi di montanti e quanto altro necessario per dare opera compiuta a regola d'arte. 
+Escluse le spese di occupazione suolo pubblico e le spese di progettazione della struttura stessa ove previste dalle norme, che restano a carico dell'Appaltatore. 
+I ponteggi metallici utilizzati devono essere unicamente quelli autorizzati dal Ministero del Lavoro e montati da personale esperto, con carichi di esercizio conformi alle norme tecniche vigenti. 
+I ponteggi complessi e quelli superiori a 20 m di altezza dal piano di appoggio, devono essere realizzati secondo un progetto di calcolo a firma di un ingegnere o architetto abilitato.]]></EASY:livello2>
+            <EASY:livello3><![CDATA[Recinzioni e accessi di cantiere]]></EASY:livello3>
+            <EASY:livello4><![CDATA[Montaggio di recinzione per area adibita a cantiere,esclusa idonea segnaletica diurna e notturna – in struttura tubo e giunto con tavole in legno o metalliche, incluso nolo per il primo mese .( U.M. aggiornata nella pubblicazione del Prezzario 2024)]]></EASY:livello4>
+            <EASY:um><![CDATA[m]]></EASY:um>
+            <EASY:prezzo>17.40472</EASY:prezzo>
+            <EASY:Analisi>
+                <EASY:vocedettaglio ordine="1"
+                                   cam="0"
+                                   codice="TOS25_AT.N01.065.001"
+                                   tipo="TOS25_AT"
+                                   udm="ora"
+                                   quantita="0.05"
+                                   prezzo="2.36250"
+                                   importo="0.11813">
+                        <EASY:descrizione><![CDATA[Martelli, perforatori elettrici e accessori - Trapano con percussione, potenza 450/500 W, per punte da 5-20 mm - 1 giorno]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="2"
+                                   cam="0"
+                                   codice="TOS25_AT.N10.014.P011"
+                                   tipo="TOS25_AT"
+                                   udm="m"
+                                   quantita="1"
+                                   prezzo="1.49865"
+                                   importo="1.49865">
+                        <EASY:descrizione><![CDATA[Recinzione area adibita a cantiere, esclusa la segnaletica diurna e notturna. - Noleggio del primo mese di utilizzo di recinzione in struttura tubo e giunto con tavole in legno o metalliche, calcolato al m.]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="3"
+                                   cam="0"
+                                   codice="TOS25_PR.P46.101.011"
+                                   tipo="TOS25_PR"
+                                   udm="kg"
+                                   quantita="0.1"
+                                   prezzo="2.31500"
+                                   importo="0.23150">
+                        <EASY:descrizione><![CDATA[Materiali accessori - Filo di ferro per legature]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="4"
+                                   cam="1"
+                                   codice="TOS25_PRCAM.P08.020.004"
+                                   tipo="TOS25_PRCAM"
+                                   udm="m³"
+                                   quantita="0.022"
+                                   prezzo="385.50000"
+                                   importo="8.48100">
+                        <EASY:descrizione><![CDATA[PER EDILIZIA. ABETE MASSICCIO.
+Certificato CE secondo la:
+- UNI EN 14081-1:2019 per il legno strutturale con sezione rettangolare;
+- UNI EN 15497:2014 per il legno strutturale KVH.
+Proveniente da boschi/foreste gestiti in maniera sostenibile/responsabile.
+Conforme ai CAM di cui al paragrafo 2.5.6. del DM 23 giugno 2022 n. 256, "CRITERI AMBIENTALI MINIMI PER L’AFFIDAMENTO DEL SERVIZIO DI PROGETTAZIONE ED ESECUZIONE DEI LAVORI DI INTERVENTI EDILIZI. - tavole da ponteggio mm 50 prismate]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="5"
+                                   cam="0"
+                                   codice="TOS25_RU.M10.001.002"
+                                   tipo="TOS25_RU"
+                                   udm="ora"
+                                   quantita="0.0833"
+                                   prezzo="30.61000"
+                                   importo="2.54981">
+                        <EASY:descrizione><![CDATA[Operaio edile - Specializzato]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="6"
+                                   cam="0"
+                                   codice="TOS25_RU.M10.001.004"
+                                   tipo="TOS25_RU"
+                                   udm="ora"
+                                   quantita="0.0833"
+                                   prezzo="25.51000"
+                                   importo="2.12498">
+                        <EASY:descrizione><![CDATA[Operaio edile - Comune]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                    <EASY:totaleparziale valore="15.00407"/>
+                    <EASY:spesegenerali percentuale="16" valore="2.40065" />
+                    <EASY:onerisicurezza percentuale="1" valore="0.02401" />
+                    <EASY:utileimpresa percentuale="0" valore="0"/>
+                    <EASY:prezzo valore="17.40472"/>
+                    <EASY:incidenzamanodopera percentuale="26.86" valore="4.67479"/>
+                    <EASY:incidenzasicurezza percentuale="0.14"/>
+                </EASY:Analisi>
+        </EASY:Articolo>
+        <EASY:Articolo cam="1" codice="TOS25_01CAM.B07.042.001">
+            <EASY:livello1><![CDATA[NUOVE COSTRUZIONI EDILI - CAM
+Prezzi relativi ad una nuova costruzione di edilizia civile.
+Per lavori con normali difficoltà di esecuzione.
+Conformi ai decreti del Ministero della Transizione Ecologica (M.I.T.E.) aventi ad oggetto i Criteri Ambientali Minimi (C.A.M.).]]></EASY:livello1>
+            <EASY:livello2><![CDATA[MURATURA PORTANTE - CAM
+Eseguita con elementi resistenti (mattoni e blocchi) in laterizio, pietra da taglio o calcestruzzo.
+Conformi alle specifiche del marchio CE e ai decreti del Ministero della Transizione Ecologica (M.I.T.E.) aventi ad oggetto i Criteri Ambientali Minimi (C.A.M.).
+I giunti di malta orizzontali e verticali (quando previsti) come dal D.M. 17/01/2018.
+La malta deve garantire classe di resistenza non inferiore a M5 (M10 per muratura armata) e prestazioni adeguate in termini di durabilità secondo il D.M. 17/01/2018, deve essere conforme alla UNI EN 998-2 e recare Marcatura CE. 
+Compreso:
+- ponti di servizio con altezza < 2,00 m e/o trabattelli a norma, anche esterni, mobili o fissi.
+Escluso:
+- ponteggi esterni o piattaforme a cella.]]></EASY:livello2>
+            <EASY:livello3><![CDATA[MURATURA IN BLOCCHI DI LATERIZIO ALLEGGERITO IN PASTA - PORTANTE (zona 4)
+45% < Percentuale di foratura <55%
+Eseguita con malta di cemento.
+Conforme ai CAM, di cui al decreto M.I.T.E 23-06-2022 (Criteri ambientali minimi per l’affidamento del servizio di progettazione di interventi edilizi, per l’affidamento dei lavori per interventi edilizi e per l’affidamento congiunto di progettazione e lavori per interventi edilizi.)]]></EASY:livello3>
+            <EASY:livello4><![CDATA[Spessore: 25 cm]]></EASY:livello4>
+            <EASY:um><![CDATA[m²]]></EASY:um>
+            <EASY:prezzo>101.86644</EASY:prezzo>
+            <EASY:Analisi>
+                <EASY:vocedettaglio ordine="1"
+                                   cam="0"
+                                   codice="TOS25_AT.N01.072.001"
+                                   tipo="TOS25_AT"
+                                   udm="ora"
+                                   quantita="0.02"
+                                   prezzo="1.99875"
+                                   importo="0.03998">
+                        <EASY:descrizione><![CDATA[Betoniere - Betoniera a bicchiere a ribaltamento da 350 l , motore elettrico - 1 mese]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="2"
+                                   cam="0"
+                                   codice="TOS25_AT.N06.016.006"
+                                   tipo="TOS25_AT"
+                                   udm="ora"
+                                   quantita="0.075"
+                                   prezzo="4.16213"
+                                   importo="0.31216">
+                        <EASY:descrizione><![CDATA[Gru a torre - braccio 40-41 m, portata in punta 1000 kg. Nolo da 8 a 12 mesi]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="3"
+                                   cam="0"
+                                   codice="TOS25_PR.P09.014.003"
+                                   tipo="TOS25_PR"
+                                   udm="kg"
+                                   quantita="40"
+                                   prezzo="0.09161"
+                                   importo="3.66440">
+                        <EASY:descrizione><![CDATA[MALTA PER MURATURA. 
+PREMISCELATA. 
+Conforme alla UNI EN 998-2:2016.
+Certificata CE. - CON CEMENTO E SABBIA. 
+Classe M10 
+Sfusa per silos ]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="4"
+                                   cam="1"
+                                   codice="TOS25_PRCAM.P04.002.020"
+                                   tipo="TOS25_PRCAM"
+                                   udm="m³"
+                                   quantita="0.2822"
+                                   prezzo="137.77192"
+                                   importo="38.87924">
+                        <EASY:descrizione><![CDATA[BLOCCO.
+IN LATERIZIO ALLEGGERITO IN PASTA.
+PER MURATURA PORTANTE (zona sismica 4) E DI TAMPONAMENTO (zona sismica 1-2-3).
+45 < % foratura < 55
+Conforme ai CAM, paragrafo 2.5.5 di cui al decreto MITE 23-06-2022. - Spessore: 25 cm]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="5"
+                                   cam="0"
+                                   codice="TOS25_RU.M10.001.002"
+                                   tipo="TOS25_RU"
+                                   udm="ora"
+                                   quantita="0.02"
+                                   prezzo="30.61000"
+                                   importo="0.61220">
+                        <EASY:descrizione><![CDATA[Operaio edile - Specializzato]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="6"
+                                   cam="0"
+                                   codice="TOS25_RU.M10.001.002"
+                                   tipo="TOS25_RU"
+                                   udm="ora"
+                                   quantita="0.72"
+                                   prezzo="30.61000"
+                                   importo="22.03920">
+                        <EASY:descrizione><![CDATA[Operaio edile - Specializzato]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="7"
+                                   cam="0"
+                                   codice="TOS25_RU.M10.001.002"
+                                   tipo="TOS25_RU"
+                                   udm="ora"
+                                   quantita="0.075"
+                                   prezzo="30.61000"
+                                   importo="2.29575">
+                        <EASY:descrizione><![CDATA[Operaio edile - Specializzato]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                <EASY:vocedettaglio ordine="8"
+                                   cam="0"
+                                   codice="TOS25_RU.M10.001.004"
+                                   tipo="TOS25_RU"
+                                   udm="ora"
+                                   quantita="0.47"
+                                   prezzo="25.51000"
+                                   importo="11.98970">
+                        <EASY:descrizione><![CDATA[Operaio edile - Comune]]></EASY:descrizione>
+                </EASY:vocedettaglio>
+                    <EASY:totaleparziale valore="79.83263"/>
+                    <EASY:spesegenerali percentuale="16" valore="12.77322" />
+                    <EASY:onerisicurezza percentuale="1" valore="0.12773" />
+                    <EASY:utileimpresa percentuale="10" valore="9.26059"/>
+                    <EASY:prezzo valore="101.86644"/>
+                    <EASY:incidenzamanodopera percentuale="36.26" valore="36.93685"/>
+                    <EASY:incidenzasicurezza percentuale="0.13"/>
+                </EASY:Analisi>
+        </EASY:Articolo>
+    </EASY:Contenuto>
+</EASY:Prezzario>

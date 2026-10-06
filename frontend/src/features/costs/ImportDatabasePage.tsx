@@ -46,6 +46,7 @@ import {
 } from '@/features/match-elements/catalogues-payload';
 import { fetchCostCatalogs, type CostCatalog } from './api';
 import { ResourcePriceSheetPanel } from './ResourcePriceSheetPanel';
+import { RegionalPriceListImport } from './RegionalPriceListImport';
 import { BaseCatalogBrowser } from './BaseCatalogBrowser';
 import { BaseCatalogError } from './BaseCatalogError';
 import {
@@ -1062,7 +1063,7 @@ async function downloadExcelExport(): Promise<void> {
 
 // ── Loaded Databases Section ────────────────────────────────────────────────
 
-function LoadedDatabasesSection() {
+export function LoadedDatabasesSection() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -1145,6 +1146,21 @@ function LoadedDatabasesSection() {
       });
     },
   });
+
+  // A base whose licence asks to be credited (the Toscana prezzario, CC BY)
+  // keeps its credit on the row once loaded, not only on the card that loads
+  // it. Same query as the catalogue above, so it is read from the cache.
+  const { data: baseCatalog } = useBaseCatalog();
+  const creditByRegion = new Map<string, { attribution: string; licence: string }>();
+  for (const family of baseCatalog?.families ?? []) {
+    if (!family.attribution) continue;
+    for (const variant of family.variants) {
+      creditByRegion.set(variant.base_region || variant.region, {
+        attribution: family.attribution,
+        licence: family.licence ?? '',
+      });
+    }
+  }
 
   const activeDbId = getActiveDatabase();
   const regionCount = regionStats?.length ?? 0;
@@ -1282,6 +1298,15 @@ function LoadedDatabasesSection() {
                           {db && (
                             <span className="text-2xs text-content-tertiary ml-1.5">
                               {db.currency}
+                            </span>
+                          )}
+                          {creditByRegion.has(rs.region) && (
+                            <span className="block text-2xs text-content-tertiary" data-testid="loaded-base-attribution">
+                              {t('costs.base_source_attribution', {
+                                defaultValue: 'Source: {{attribution}}, {{licence}}',
+                                attribution: creditByRegion.get(rs.region)!.attribution,
+                                licence: creditByRegion.get(rs.region)!.licence,
+                              })}
                             </span>
                           )}
                         </div>
@@ -2984,6 +3009,9 @@ export function ImportDatabasePage() {
       {/* Resource prices - price the coefficient bases (Vietnam Dinh Muc,
           Indonesia AHSP) so their zero-rate work items become estimable. */}
       <ResourcePriceSheetPanel />
+
+      {/* Regional price lists (prezzari regionali) from the file the region publishes. */}
+      <RegionalPriceListImport />
 
       {/* Divider */}
       <div className="flex items-center gap-3">

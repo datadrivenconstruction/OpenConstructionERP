@@ -1,4 +1,5 @@
 {
+  "costs.catalog_name_unavailable": "Това име не може да се използва за нов каталог. Изберете друго име.",
   "app": {
     "name": "OpenConstructionERP",
     "tagline": "Остойностяване на строителството с отворен код"

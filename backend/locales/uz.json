@@ -1,4 +1,5 @@
 {
+  "costs.catalog_name_unavailable": "Bu nomdan yangi katalog uchun foydalanib boʻlmaydi. Boshqa nom tanlang.",
   "app": {
     "name": "OpenConstructionERP",
     "tagline": "Ochiq kodli qurilish smetasi"

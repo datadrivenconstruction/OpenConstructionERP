@@ -649,6 +649,15 @@ export function BaseCatalogBrowser({
                     )}
                   </div>
                   <div className="truncate text-xs text-content-tertiary">{family.description}</div>
+                  {family.attribution && (
+                    <div className="truncate text-[11px] text-content-tertiary" data-testid="base-family-attribution">
+                      {t('costs.base_source_attribution', {
+                        defaultValue: 'Source: {{attribution}}, {{licence}}',
+                        attribution: family.attribution,
+                        licence: family.licence ?? '',
+                      })}
+                    </div>
+                  )}
                 </div>
                 <div className="hidden shrink-0 text-right sm:block">
                   <div className="text-sm font-bold tabular-nums text-content-primary">

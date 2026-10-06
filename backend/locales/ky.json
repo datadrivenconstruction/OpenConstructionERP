@@ -1,4 +1,5 @@
 {
+  "costs.catalog_name_unavailable": "Бул атты жаңы каталог үчүн колдонууга болбойт. Башка ат тандаңыз.",
   "app": {
     "name": "OpenConstructionERP",
     "tagline": "Ачык баштапкы код менен курулуш сметасын эсептөө"

@@ -73,6 +73,10 @@ export interface BaseFamily {
   positions: number;
   loaded_count: number;
   variants: BaseVariant[];
+  /** Who published the source data, shown when its licence asks to be credited. */
+  attribution?: string | null;
+  /** The source data licence as the publisher states it. */
+  licence?: string | null;
 }
 
 /**

@@ -30,6 +30,8 @@ export interface ImportToastResult {
   source_format?: string;
   currency?: string;
   warnings?: { code?: string }[];
+  /** What the native importer read, e.g. an XPWE bill's sections and measurement rows. */
+  metadata?: { xpwe_sections?: number; measurement_rows?: number };
 }
 
 export function importToastText(
@@ -43,6 +45,12 @@ export function importToastText(
     const sections = Array.isArray(result.sections) ? result.sections.length : 0;
     method = t('boq.import_toast.method_gaeb', { defaultValue: 'GAEB XML, sections: {{count}}', count: sections });
     if (result.currency) method += `, ${result.currency}`;
+  } else if (result.source_format === 'xpwe') {
+    method = t('boq.import_toast.method_xpwe', {
+      defaultValue: 'XPWE, sections: {{sections}}, measurement rows: {{rows}}',
+      sections: result.metadata?.xpwe_sections ?? 0,
+      rows: result.metadata?.measurement_rows ?? 0,
+    });
   } else if (result.method === 'cad_ai') {
     method = t('boq.import_toast.method_cad', {
       defaultValue: 'CAD + {{model}}, elements: {{count}}',
@@ -92,6 +100,13 @@ export function importToastText(
         count: summaryRows,
       }),
     );
+  }
+  // An XPWE bill's notes (a measured total that differs from the file's, a
+  // flattened cross-reference row) are worth a look; other formats' warnings
+  // are routine normalisations and stay out of the toast.
+  const xpweNotes = result.source_format === 'xpwe' ? (result.warnings ?? []).length : 0;
+  if (xpweNotes > 0) {
+    parts.push(t('boq.import_toast.warnings', { defaultValue: 'Warnings: {{count}}', count: xpweNotes }));
   }
   if (result.errors.length > 0) {
     parts.push(t('boq.import_toast.errors', { defaultValue: 'Errors: {{count}}', count: result.errors.length }));

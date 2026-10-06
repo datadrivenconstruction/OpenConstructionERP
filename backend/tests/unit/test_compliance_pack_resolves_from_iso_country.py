@@ -184,11 +184,12 @@ def test_an_unknown_country_code_does_not_silently_borrow_the_region() -> None:
     """A country we have a code for but no pack for lands on the default.
 
     Not on whatever the region label happens to spell: a project that says it
-    is in Italy is not a Mexican project because its region reads "Ciudad de
-    Mexico". This used to be written with Canada, which has a pack now; Italy
-    is the country that ships a demo and still has no rule set of its own.
+    is in the Netherlands is not a Mexican project because its region reads
+    "Ciudad de Mexico". This was written with Canada and then with Italy, and
+    each moved on when its own rule set and pack arrived; the Netherlands has
+    neither.
     """
-    assert resolve_pack("IT", "Ciudad de Mexico") == DEFAULT_PACK_ID
+    assert resolve_pack("NL", "Ciudad de Mexico") == DEFAULT_PACK_ID
 
 
 # ── The empty string is unknown; "DE" is taken at face value ─────────────
@@ -227,23 +228,23 @@ def test_a_country_code_is_normalised_before_it_is_matched() -> None:
 # ── The gap this fix makes visible ───────────────────────────────────────
 
 
-@pytest.mark.parametrize("code", ["IT"])
+@pytest.mark.parametrize("code", ["NL"])
 def test_countries_with_no_pack_resolve_to_the_default(code: str) -> None:
     """Documents a gap rather than asserting a desired state.
 
-    Resolving from the ISO column is correct and still gives an Italian project
-    the universal pack, because no Italian pack is registered and there is
-    nothing for one to point at: no rule set in the engine reads a DEI or
-    computo metrico code. Writing a pack here would be a claim, not a check.
+    Resolving from the ISO column is correct and still gives a Dutch project
+    the universal pack, because no Dutch pack is registered and there is
+    nothing for one to point at: no rule set in the engine reads an NL-SfB or
+    STABU code. Writing a pack here would be a claim, not a check.
 
-    This list used to read CA, CN, ES, and then JP and TR alongside Italy.
-    All of them now have packs, added after confirming the three conditions
-    below: their sets are registered ("masterformat", "gbt50500", "bc3",
-    "sekisan", "birimfiyat"), each set tests the jurisdiction's own
+    This list used to read CA, CN, ES, then JP and TR, then Italy. All of them
+    now have packs, added after confirming the three conditions below: their
+    sets are registered ("masterformat", "gbt50500", "bc3", "sekisan",
+    "birimfiyat", "italy"), each set tests the jurisdiction's own
     classification rather than only that some code exists, and a project in
     those countries that cannot produce its national codes should not reach
-    signature unnoticed. Italy is the one kind that never satisfies the first
-    condition, which is why it is alone here rather than next in line.
+    signature unnoticed. The Netherlands does not satisfy the first condition,
+    which is why it stands here.
 
     THIS TEST IS MEANT TO GO RED when a pack is added. It is not an obstacle,
     it is the checklist. Before deleting a code from this list, confirm:

@@ -183,7 +183,7 @@ def describe_cost_bases(region_slugs: list[str]) -> list[dict[str, Any]]:
 
     Returns:
         ``[{slug, db_id, loadable, market, currency, lang_code, flag,
-        positions, has_catalog, reason_code}]``. ``db_id`` is None and
+        positions, has_catalog, reason_code, attribution, licence}]``. ``db_id`` is None and
         ``loadable`` False for a slug no published base resolves to.
     """
     from app.modules.catalog.router import REGION_MAP
@@ -194,6 +194,7 @@ def describe_cost_bases(region_slugs: list[str]) -> list[dict[str, Any]]:
     for slug in region_slugs:
         db_id = resolve_cwicr_db_id(slug)
         variant = base_registry.variant_by_region(db_id) if db_id else None
+        family = base_registry.family_by_region(db_id) if db_id else None
         entry: dict[str, Any] = {
             "slug": slug,
             "db_id": db_id,
@@ -205,6 +206,10 @@ def describe_cost_bases(region_slugs: list[str]) -> list[dict[str, Any]]:
             "positions": variant.positions if variant else None,
             "has_catalog": bool(db_id and db_id in REGION_MAP),
             "reason_code": None if db_id else "no_published_base",
+            # Shown beside the base in the activation dialog when the source
+            # licence asks for attribution (the Toscana prezzario does).
+            "attribution": (family.attribution or None) if family else None,
+            "licence": (family.licence or None) if family else None,
         }
         if db_id and db_id in seen:
             # Two slugs naming one base load it once; the first one carries it.

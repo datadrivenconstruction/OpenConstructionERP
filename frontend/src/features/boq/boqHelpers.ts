@@ -488,11 +488,8 @@ export function fmtWithCurrency(
  * with semantics: ``1 unit of the foreign currency = rate base units``.
  * So foreign → base is multiplication.
  *
- * Returns the value unchanged when:
- *   - source currency is empty / undefined / equals base
- *   - no FX rate exists for the source currency (best-effort, with a
- *     console warning so the dev tools surface the gap)
- *   - the rate is non-finite or non-positive
+ * Blank or matching currency keeps the value unchanged. Missing, non-finite
+ * or non-positive foreign rates exclude the amount from the base total.
  *
  * This was missing in v2.9.1's #88 fix — positions priced in a foreign
  * currency had their ``total`` summed into directCost as if it were
@@ -511,20 +508,21 @@ export function convertToBase(
   // letting ``Number.isFinite("123")`` (false) zero a real value (#131).
   const v = typeof value === 'number' ? value : Number(value);
   if (!Number.isFinite(v)) return 0;
-  if (!sourceCurrency) return v;
-  if (!baseCurrency || sourceCurrency === baseCurrency) return v;
+  const source = (sourceCurrency || '').trim().toUpperCase();
+  const base = (baseCurrency || '').trim().toUpperCase();
+  if (!source || !base || source === base) return v;
   const list = fxRates ?? [];
-  const fx = list.find((r) => r.currency === sourceCurrency);
+  const fx = list.find((r) => r.currency.trim().toUpperCase() === source);
   const fxRate = fx ? Number(fx.rate) : NaN;
   if (!fx || !Number.isFinite(fxRate) || fxRate <= 0) {
     // No rate configured — surface the gap in dev tools but don't crash.
     if (typeof console !== 'undefined' && console.warn) {
       console.warn(
         `[boq] no FX rate for ${sourceCurrency} → ${baseCurrency}; ` +
-        `position total left unconverted.`,
+        `amount excluded from base total.`,
       );
     }
-    return v;
+    return 0;
   }
   return v * fxRate;
 }

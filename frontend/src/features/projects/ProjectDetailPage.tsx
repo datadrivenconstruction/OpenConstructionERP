@@ -71,6 +71,7 @@ import {
 import { useWidgetSettingsStore } from '@/stores/useWidgetSettingsStore';
 import { activeLanguageTag, apiGet, apiPatch, ApiError, extractErrorMessageFromBody, type Page } from '@/shared/lib/api';
 import { importIssueText, type ImportIssue } from '@/features/boq/importIssueText';
+import { importFailureFromBody } from '@/features/boq/importFailureText';
 import clsx from 'clsx';
 import { projectsApi, type Project } from './api';
 import { PhotosTab } from './PhotosTab';
@@ -275,7 +276,9 @@ async function importFileToBoq(boqId: string, file: File): Promise<ImportResult>
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error(extractErrorMessageFromBody(body) ?? 'Import failed');
+    const t = (key: string, opts?: Record<string, unknown>): string => String(i18n.t(key, opts));
+    const failed = t('boq.import_failed', { defaultValue: 'Import failed' });
+    throw new Error(importFailureFromBody(body, t, failed) ?? extractErrorMessageFromBody(body) ?? failed);
   }
   return res.json();
 }

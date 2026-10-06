@@ -466,6 +466,11 @@ async def index_one(
         return False
 
 
+def _clip_all(raw_texts: list[str | None]) -> list[str]:
+    """The blocking half of :func:`index_many`, run in a worker thread."""
+    return [_safe_text(text) for text in raw_texts]
+
+
 async def index_many(
     adapter: EmbeddingAdapter,
     rows: list[Any],
@@ -479,6 +484,11 @@ async def index_many(
     Returns the number of rows successfully indexed.  Designed for backfill
     / reindex flows where you want to embed thousands of rows in one shot
     without exhausting GPU memory.
+
+    As in :func:`index_one`, nothing blocking runs on the event loop: the
+    clipping (which can wait on a model load in another thread) and the store
+    write go to worker threads. A BOQ imported row by row is indexed through
+    here, a batch at a time, while the process keeps serving requests.
     """
     if not rows:
         return 0
@@ -486,13 +496,14 @@ async def index_many(
     indexed = 0
     for start in range(0, len(rows), batch_size):
         chunk = rows[start : start + batch_size]
+        # The adapter reads ORM attributes, so it stays on the loop; only
+        # plain strings cross into the worker thread.
+        candidates = [row for row in chunk if _coerce_id(getattr(row, "id", None))]
+        raw_texts = [adapter.to_text(row) for row in candidates]
+        clipped = await asyncio.to_thread(_clip_all, raw_texts)
         texts: list[str] = []
         good_rows: list[Any] = []
-        for row in chunk:
-            row_id = _coerce_id(getattr(row, "id", None))
-            if not row_id:
-                continue
-            text = _safe_text(adapter.to_text(row))
+        for row, text in zip(candidates, clipped, strict=True):
             if not text:
                 continue
             texts.append(text)
@@ -522,7 +533,7 @@ async def index_many(
                 }
             )
         try:
-            n = vector_index_collection(adapter.collection_name, items)
+            n = await asyncio.to_thread(vector_index_collection, adapter.collection_name, items)
             indexed += n
         except Exception as exc:
             logger.debug("index_many: store failed: %s", exc)
@@ -547,12 +558,12 @@ async def delete_one(adapter: EmbeddingAdapter, row_id: str) -> bool:
 
 
 async def delete_many(adapter: EmbeddingAdapter, row_ids: list[str]) -> int:
-    """Remove multiple rows from the adapter's collection."""
+    """Remove multiple rows from the adapter's collection, off the event loop."""
     cleaned = [_coerce_id(r) for r in row_ids if r]
     if not cleaned:
         return 0
     try:
-        return vector_delete_collection(adapter.collection_name, cleaned)
+        return await asyncio.to_thread(vector_delete_collection, adapter.collection_name, cleaned)
     except Exception as exc:
         logger.debug("delete_many(%s) failed: %s", adapter.collection_name, exc)
         return 0

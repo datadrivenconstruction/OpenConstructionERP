@@ -43,6 +43,7 @@ import { SampleTemplateButton } from '../_shared/SampleTemplateButton';
 import type { ExchangePosition, ImportParseResult } from '../_shared/templateTypes';
 import type { RegionalTemplate } from './regionalRegistry';
 import { importDispatcher } from './regionalRegistry';
+import { importFailureFromBody } from '@/features/boq/importFailureText';
 import { fmtList, fmtFixed } from '@/shared/lib/formatters';
 
 /* ── Types from the BOQ module ──────────────────────────────────────── */
@@ -412,10 +413,9 @@ export default function RegionalExchangePage({ template }: RegionalExchangePageP
 
       if (!res.ok) {
         const body = (await res.json().catch(() => ({}))) as { detail?: unknown };
+        const failed = t('regional.import_failed', { defaultValue: 'Import failed' });
         throw new Error(
-          typeof body.detail === 'string'
-            ? body.detail
-            : t('regional.import_failed', { defaultValue: 'Import failed' }),
+          importFailureFromBody(body, t, failed) ?? (typeof body.detail === 'string' ? body.detail : failed),
         );
       }
 

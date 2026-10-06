@@ -81,4 +81,32 @@ describe('importToastText', () => {
     expect(importToastText({ imported: 1, errors: [], method: 'ai', model_used: 'm1' }, false, t).title).toContain('(UI: m1)');
     expect(importToastText({ imported: 1, errors: [], method: 'ai', model_used: null }, false, t).title).toContain('(UI)');
   });
+
+  it('words an XPWE import with its sections and measurement rows', () => {
+    const toast = importToastText(
+      {
+        imported: 5,
+        total_items: 5,
+        errors: [],
+        method: 'native',
+        source_format: 'xpwe',
+        metadata: { xpwe_sections: 6, measurement_rows: 8 },
+      },
+      false,
+      tFrom(en.translation),
+    );
+    expect(toast.title).toBe('Items imported: 5 of 5 (XPWE, sections: 6, measurement rows: 8)');
+    expect(toast.message).toBeUndefined();
+    const noted = importToastText(
+      {
+        imported: 5,
+        errors: [],
+        source_format: 'xpwe',
+        warnings: [{ code: 'xpwe_quantity_mismatch' }, { code: 'xpwe_see_item_flattened' }],
+      },
+      false,
+      tFrom(en.translation),
+    );
+    expect(noted.message).toBe('Warnings: 2');
+  });
 });

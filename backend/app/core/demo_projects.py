@@ -12,7 +12,9 @@ Provides 5 complete demo projects with BOQ, Schedule, Budget, and Tendering data
 
 from __future__ import annotations
 
+import copy
 import logging
+import re
 import uuid
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, timedelta
@@ -486,6 +488,16 @@ class DemoTemplate:
     # (``net_bid / (grand_total / n_packages)``), so its bids keep that base.
     # Every other pack prices a bid off the value of the package's own scope.
     tender_bids_from_equal_shares: bool = False
+    # Optional: keys merged into the metadata of every priced line, on the
+    # bill and on the control budget. The Italian packs state here which
+    # price list their codes are cited from (``{"prezzario": {...}}``), which
+    # is what the Italian voce rules read to accept a list's own numbering.
+    position_metadata: dict = field(default_factory=dict)
+    # Optional: markups seeded on the control budget as well, same shape as
+    # ``markups``. The budget otherwise carries none, which is right for most
+    # packs; an Italian quadro economico states its safety costs on a line of
+    # their own, and a budget without one fails the rule that asks for it.
+    budget_markups: list[tuple[str, float, str, str]] = field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------
@@ -3667,7 +3679,7 @@ def _enrich_position_metadata(
                 ("crane", "equipment", 0.05, 130.0),
             ],
         )
-    elif any(k in desc_lower for k in ["tile", "fliese", "carrelage", "ceramic"]):
+    elif re.search(r"\btiles?\b", desc_lower) or any(k in desc_lower for k in ["fliese", "carrelage", "ceramic"]):
         meta["cwicr_ref"] = "CWICR-TIL-001"
         meta["resources"] = _make_resources(
             unit_rate,
@@ -12215,6 +12227,7 @@ async def install_demo_project(
                 locale=template.locale,
                 explicit_resources=template.position_resources.get(sub_ordinal),
             )
+            pos_meta.update(copy.deepcopy(template.position_metadata))
             # Every 8th position gets a warning status for visual variety
             v_status = "warning" if pos_counter % 8 == 0 else "valid"
             pos = _make_position(
@@ -12277,6 +12290,9 @@ async def install_demo_project(
         # "final". Seeding a status no transition produces put demo data in a
         # state the product could neither reach nor leave.
         status="final",
+        # Says what the bill is, so the pickers that list a project's bills
+        # (the schedule's among them) can label it a budget.
+        estimate_type="budget",
         metadata_={"estimate_class": 2, "accuracy": "±15–20%"},
     )
     session.add(budget_boq)
@@ -12311,7 +12327,7 @@ async def install_demo_project(
                 classification=sec.classification or {},
                 locale=template.locale,
             )
-            b_meta: dict = {}
+            b_meta: dict = copy.deepcopy(template.position_metadata)
             if b_resources:
                 b_meta["resources"] = b_resources
                 breakdown = _resource_breakdown_rollup(b_resources)
@@ -12330,6 +12346,18 @@ async def install_demo_project(
                 metadata=b_meta,
             )
             session.add(b_pos)
+
+    for idx, (m_name, m_pct, m_cat, m_apply) in enumerate(template.budget_markups):
+        session.add(
+            _make_markup(
+                boq_id=budget_boq_id,
+                name=m_name,
+                percentage=m_pct,
+                category=m_cat,
+                sort_order=idx + 1,
+                apply_to=m_apply,
+            )
+        )
 
     await session.flush()
 

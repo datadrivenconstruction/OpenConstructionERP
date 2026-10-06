@@ -39,3 +39,4 @@ steps:
         - set_tax_template: it_iva_22
         - preload_cwicr_regions:
             - cwicr-it-rome
+            - cwicr-it-toscana

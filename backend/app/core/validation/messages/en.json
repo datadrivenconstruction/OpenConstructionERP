@@ -333,6 +333,28 @@
       "suggestion": "Give each position its own project item number before the bill leaves for the client"
     }
   },
+  "prezzario": {
+    "voce_code_format_valid": {
+      "fail": "Code '{code}' on position {ordinal} does not show which price list it comes from",
+      "suggestion": "An official voce code starts with the region and the edition year of its price list, for example TOS25_01.A03.001.001 (Toscana 2025). Copy the code exactly as the regional list prints it, import the line from the list, or number a new price NP.01"
+    },
+    "voce_reference_present": {
+      "fail": "Position {ordinal} cites no prezzario voce",
+      "suggestion": "Pick the line from an imported regional price list, or mark it as a nuovo prezzo (NP) backed by a price analysis"
+    },
+    "costi_sicurezza_separated": {
+      "fail": "The bill carries no separate line for the safety costs not subject to the tender discount",
+      "suggestion": "Add the oneri della sicurezza as their own section or markup line, priced from the safety chapter of the price list or the safety plan"
+    },
+    "incidenza_manodopera_documented": {
+      "fail": "Position {ordinal} ({code}) does not state its labour share",
+      "suggestion": "Take the incidenza della manodopera from the price list, or add a labour resource, so the labour cost can be stated separately in the tender"
+    },
+    "overheads_not_applied_twice": {
+      "fail": "Regional price-list rates already include general expenses (13-17%) and profit (10%). Applying them again raises the total by about {percent}%.",
+      "suggestion": "Remove the general expenses and profit markups from this bill, or keep them only on lines priced by your own analysis (NP)."
+    }
+  },
   "romania": {
     "deviz_chapter_required": {
       "fail": "Position {ordinal} names no deviz general chapter",
@@ -683,6 +705,7 @@
     "rejection_not_found": "Rejection not found",
     "claim_not_found": "Progress claim not found",
     "gaeb_x89_final_account_unsupported": "A final account or part final account cannot be exported as GAEB X89 yet. It has to bill the cumulative work less earlier payments, and only a progress invoice of one period is built from a claim. Export the claim as a progress invoice.",
+    "xpwe_native_file_refused": "This is an estimating program's own project file, which only that program can open. Export the estimate as XPWE from your estimating program and upload the .xpwe file.",
     "plot_not_found": "Plot not found",
     "survey_not_found": "Drone survey not found",
     "diary_video_not_found": "Diary video not found",

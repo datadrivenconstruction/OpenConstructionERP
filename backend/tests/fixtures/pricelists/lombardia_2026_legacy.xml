@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Source: Regione Lombardia, Prezzario regionale 2026, previous layout (office export). The file states no licence. Trimmed for tests: a handful of rows, unchanged otherwise. -->
+<dataroot xmlns:od="urn:schemas-microsoft-com:officedata" generated="2026-05-21T18:13:20">
+<F_x0029__x0020_Parte_x0020_4_x0020_-_x0020_Elenco_x0020_prezzi>
+<Codice>LOM261.1C</Codice>
+<Declaratoria>OPERE COMPIUTE</Declaratoria>
+</F_x0029__x0020_Parte_x0020_4_x0020_-_x0020_Elenco_x0020_prezzi>
+<F_x0029__x0020_Parte_x0020_4_x0020_-_x0020_Elenco_x0020_prezzi>
+<Codice>LOM261.1C.00</Codice>
+<Declaratoria>ANALISI DIAGNOSTICHE</Declaratoria>
+</F_x0029__x0020_Parte_x0020_4_x0020_-_x0020_Elenco_x0020_prezzi>
+<F_x0029__x0020_Parte_x0020_4_x0020_-_x0020_Elenco_x0020_prezzi>
+<Codice>LOM261.1C.00.010</Codice>
+<Declaratoria>CONTROLLI NON DISTRUTTIVI O SEMI-DISTRUTTIVI</Declaratoria>
+</F_x0029__x0020_Parte_x0020_4_x0020_-_x0020_Elenco_x0020_prezzi>
+<F_x0029__x0020_Parte_x0020_4_x0020_-_x0020_Elenco_x0020_prezzi>
+<Codice>LOM261.1C.00.010.0010</Codice>
+<Declaratoria>Misura della durezza superficiale delle strutture in c.a. mediante sclerometro manuale o elettronico. Valutazione della resistenza caratteristica a compressione Rck del calcestruzzo costituente strutture in c.a. a mezzo di prove di misura della durezza superficiale del getto mediante sclerometro manuale o elettronico, al fine di fornire la resistenza caratteristica come media di almeno 10 letture (o battute). E&apos; compreso quanto altro occorre per dare i risultati della misurazione completi. Il prezzo è riferito a ciascuna battuta.</Declaratoria>
+<U_M>cad</U_M>
+<Prezzo>1.44</Prezzo>
+<Importo_senza_SG_e_UI>1.14</Importo_senza_SG_e_UI>
+<Rapporto_RU>0.456140350877193</Rapporto_RU>
+</F_x0029__x0020_Parte_x0020_4_x0020_-_x0020_Elenco_x0020_prezzi>
+<F_x0029__x0020_Parte_x0020_4_x0020_-_x0020_Elenco_x0020_prezzi>
+<Codice>LOM261.1C.00.010.0020</Codice>
+<Declaratoria>Misura della velocità delle onde ultrasoniche su calcestruzzi e murature, attraverso il materiale costituente la struttura, al fine di determinare: presenza di difetti (microfessure, bolle d&apos;aria, discontinuità, etc.), danni provocati dal gelo o incendio, inclusione di corpi estranei, resistenza a compressione del cls, modulo elastico statico e dinamico, omogeneità del materiale. E&apos; compreso quanto altro occorre per dare i risultati della misurazione completi.</Declaratoria>
+<U_M>cad</U_M>
+<Prezzo>36.32</Prezzo>
+<Importo_senza_SG_e_UI>28.71</Importo_senza_SG_e_UI>
+<Rapporto_RU>0.237896203413445</Rapporto_RU>
+</F_x0029__x0020_Parte_x0020_4_x0020_-_x0020_Elenco_x0020_prezzi>
+<F_x0029__x0020_Parte_x0020_4_x0020_-_x0020_Elenco_x0020_prezzi>
+<Codice>LOM261.1C.00.010.0030</Codice>
+<Declaratoria>Prova di estrazione con espansione (pull-out). Valutazione semi distruttiva della resistenza a compressione del cls di strutture in c.a. mediante prova di estrazione (pull-out) eseguita come segue: - esecuzione di foro normalizzato nel getto a mezzo trapano elettrico; - inserimento nel foro di tassello ad espansione di idoneo diametro e resistenza; - estrazione con estrattore oleodinamico del tassello che provoca la rottura del calcestruzzo secondo una superficie troncoconica; - lettura della pressione di rottura del calcestruzzo e correlazione, tramite curve sperimentali di taratura, di tale pressione alla resistenza caratteristica del calcestruzzo. E&apos; compreso quanto altro occorre per dare i risultati della prova completi. Il prezzo è riferito a ciascuna prova e per un limite massimo di resistenza da verificare Rck 800.</Declaratoria>
+<U_M>cad</U_M>
+<Prezzo>72.56</Prezzo>
+<Importo_senza_SG_e_UI>57.36</Importo_senza_SG_e_UI>
+<Rapporto_RU>0.208682008368201</Rapporto_RU>
+</F_x0029__x0020_Parte_x0020_4_x0020_-_x0020_Elenco_x0020_prezzi>
+<F_x0029__x0020_Parte_x0020_4_x0020_-_x0020_Elenco_x0020_prezzi>
+<Codice>LOM261.1C.00.010.0040</Codice>
+<Declaratoria>Prova di carbonatazione. Test colorimetrico, eseguito utilizzando una soluzione di fenolftaleina all&apos;1% di alcool etilico, per determinare la profondità di carbonatazione in campioni di calcestruzzo direttamente prelevati in sito, eseguito spruzzando con un nebulizzatore la soluzione di fenolftaleina sul campione. La determinazione della colorazione risultante, e quindi della profondità di carbonatazione nel getto, sarà effettuata allontanandosi opportunamente da fessure o zone milto porose, ove si avrebbero valori non significativi della superficie saggiata. E&apos; compreso quanto altro occorre per dare i risultati del test completi. Escluso il prelievo dei campioni, per ogni indagine effettuata su un singolo campione.</Declaratoria>
+<U_M>cad</U_M>
+<Prezzo>164.25</Prezzo>
+<Importo_senza_SG_e_UI>129.84</Importo_senza_SG_e_UI>
+<Rapporto_RU>0.263401109057301</Rapporto_RU>
+</F_x0029__x0020_Parte_x0020_4_x0020_-_x0020_Elenco_x0020_prezzi>
+</dataroot>

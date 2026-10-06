@@ -1,0 +1,868 @@
+{
+  "boq_markup": {
+    "contingency_not_on_profit": {
+      "fail": "L'accantonamento per imprevisti \"{markup}\" è calcolato su una base che comprende già la voce di utile \"{profit}\", per cui si applica un margine su somme destinate al rischio",
+      "suggestion": "Applicare questa voce al costo diretto, a meno che il metodo standard di mercato non collochi deliberatamente il rischio dopo spese generali e utile"
+    },
+    "order_is_declared": {
+      "fail": "La posizione {order} nell'ordine è rivendicata da più di una voce di ricarico: {markups}",
+      "suggestion": "Assegnare a ogni voce di ricarico una propria posizione, affinché l'ordine di applicazione non sia lasciato al caso"
+    },
+    "percentage_within_band": {
+      "fail": "\"{markup}\" è {percentage}% come voce di tipo \"{category}\", fuori dalla fascia plausibile da 0 a {ceiling}%",
+      "suggestion": "Controllare la virgola decimale. La voce viene comunque calcolata esattamente come inserita"
+    },
+    "cumulative_base_is_settled": {
+      "fail": "\"{markup}\" si applica a \"{apply_to}\" ma non è preceduta da nulla, quindi viene calcolata solo sul costo diretto",
+      "suggestion": "Spostarla dopo le voci su cui deve essere applicata in cascata, oppure applicarla al costo diretto"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  },
+  "export": {
+    "generated": "Generato",
+    "content_digest": "Impronta del contenuto"
+  },
+  "field_time": {
+    "hours_per_day_max": {
+      "fail": "L'operaio {worker} è registrato per {hours} h in questo giorno, oltre il limite di {max} h",
+      "suggestion": "Suddividere le ore sul giorno o sull'operaio corretto prima di inviare"
+    },
+    "line_complete": {
+      "fail": "La riga {line} è incompleta: {reason}",
+      "labour_xor_plant": "deve registrare manodopera o mezzi, non entrambi né nessuno dei due",
+      "hours_positive": "le ore devono essere maggiori di zero",
+      "cost_code_required": "è richiesto un codice di costo",
+      "suggestion": "Completare la riga prima di inviare il rapportino ore"
+    },
+    "cost_code_resolves": {
+      "fail": "Il codice '{code}' della riga {line} non corrisponde a nessuna voce del BOQ né a una WBS di questo progetto",
+      "suggestion": "Scegliere un codice di costo o una WBS presente nel BOQ del progetto"
+    },
+    "daywork_needs_variation": {
+      "fail": "La riga in economia {line} non è collegata a una variante aperta",
+      "suggestion": "Collegare il lavoro in economia alla variante con cui è stato ordinato"
+    },
+    "plant_needs_equipment": {
+      "fail": "La riga mezzi {line} non indica nessun macchinario",
+      "suggestion": "Associare il macchinario affinché le ore mezzi possano essere valorizzate"
+    },
+    "approved_immutable": {
+      "fail": "Questo rapportino ore è {status} e non può essere modificato",
+      "suggestion": "Registrare un rapportino di storno per correggere le ore approvate"
+    },
+    "offline_clock_plausible": {
+      "fail": "Il dispositivo che ha registrato questo giorno era avanti di {minutes} minuti rispetto all'orologio del server",
+      "suggestion": "Impostare l'orologio del dispositivo affinché gli orari registrati possano essere letti nell'ordine corretto"
+    },
+    "offline_sync_delay": {
+      "fail": "Questo giorno è stato lavorato il {date} ed è arrivato in ufficio solo {days} giorni dopo",
+      "suggestion": "Verificare le ore rispetto al giorno stesso prima di approvare: la valutazione potrebbe essere già chiusa"
+    }
+  },
+  "ai_takeoff": {
+    "unreviewed_proposals": {
+      "fail": "{count} proposte di takeoff sono ancora in attesa di verifica e non sono valorizzate qui",
+      "suggestion": "Esaminare la coda di verifica affinché le quantità confermate corrispondano al disegno"
+    }
+  },
+  "boq_quality": {
+    "position_has_quantity": {
+      "fail": "La voce {ordinal} non deve avere quantità zero o assente",
+      "suggestion": "Impostare una quantità maggiore di 0"
+    },
+    "position_has_unit_rate": {
+      "fail": "Alla voce {ordinal} dovrebbe essere assegnato un prezzo unitario",
+      "suggestion": "Assegnare un prezzo dal database dei costi"
+    },
+    "position_has_description": {
+      "fail": "La voce {ordinal} non può avere una descrizione vuota"
+    },
+    "no_duplicate_ordinals": {
+      "fail": "Numero d'ordine '{ordinal}' duplicato in {count} voci"
+    },
+    "unit_rate_in_range": {
+      "fail": "Voce {ordinal}: il prezzo {rate} è >{threshold} (5 volte la mediana)",
+      "suggestion": "Verificare questo prezzo unitario - è insolitamente alto"
+    },
+    "negative_values": {
+      "fail": "La voce {ordinal} presenta {details} negativo/i",
+      "suggestion": "Correggere i valori negativi - usare numeri positivi"
+    },
+    "unrealistic_rate": {
+      "fail": "Voce {ordinal}: {details}",
+      "suggestion": "Verificare questo valore - sembra irrealisticamente alto",
+      "not_assessed_no_currency": "{count} voce/i non valutate: il computo non indica una valuta, quindi le soglie monetarie (espresse in {reference}) non hanno potuto essere convertite",
+      "not_assessed_no_currency_suggestion": "Impostare la valuta del progetto, oppure registrare una valuta sulle voci",
+      "not_assessed_no_rate": "{count} voce/i in {currency} non valutate: non è registrato nessun cambio da {reference} a {currency}, quindi le soglie monetarie non hanno potuto essere convertite per questo computo",
+      "not_assessed_no_rate_suggestion": "Aggiungere un cambio {reference} per {currency} nel registro dei cambi o nei tassi di cambio del progetto"
+    },
+    "total_mismatch": {
+      "fail": "Voce {ordinal}: importo calcolato {computed} diverso da quello salvato {stored} (differenza={diff})",
+      "suggestion": "Ricalcolare l'importo = quantità × prezzo unitario"
+    },
+    "resource_split_mismatch": {
+      "fail": "Voce {ordinal}: il subtotale delle risorse {subtotal} differisce dal prezzo unitario {rate} di {diff}",
+      "suggestion": "Verificare le quantità e i prezzi delle risorse - la loro somma per unità dovrebbe corrispondere al prezzo unitario della voce"
+    },
+    "empty_unit": {
+      "fail": "La voce {ordinal} ha l'unità di misura vuota o assente",
+      "suggestion": "Assegnare un'unità di misura (m, m2, m3, kg, pz, lsum, ecc.)"
+    },
+    "section_without_items": {
+      "fail": "La sezione {ordinal} ({title}) non contiene voci",
+      "suggestion": "Aggiungere voci sotto questa sezione o eliminare la sezione vuota"
+    },
+    "rate_vs_benchmark": {
+      "fail": "Voce {ordinal}: il prezzo unitario {rate}/{unit} supera la soglia di riferimento {threshold}/{unit} - potenzialmente irrealistico",
+      "suggestion": "Verificare questo prezzo - i prezzi tipici per {unit} dovrebbero essere inferiori a {threshold}. Controllare eventuali errori di unità o di decimali.",
+      "not_assessed_no_currency": "{count} voce/i non valutate: il computo non indica una valuta, quindi le soglie di riferimento (espresse in {reference}) non hanno potuto essere convertite",
+      "not_assessed_no_currency_suggestion": "Impostare la valuta del progetto, oppure registrare una valuta sulle voci",
+      "not_assessed_no_rate": "{count} voce/i in {currency} non valutate: non è registrato nessun cambio da {reference} a {currency}, quindi le soglie di riferimento non hanno potuto essere convertite per questo computo",
+      "not_assessed_no_rate_suggestion": "Aggiungere un cambio {reference} per {currency} nel registro dei cambi o nei tassi di cambio del progetto"
+    },
+    "lump_sum_ratio": {
+      "fail": "{lsum_count} voci su {total_count} ({percent}) sono a corpo - supera la soglia del {threshold}",
+      "suggestion": "Scomporre le voci a corpo in quantità misurate (m, m2, m3, kg, pz) per una stima più precisa"
+    },
+    "cost_concentration": {
+      "fail": "La voce {ordinal} rappresenta il {share} del costo totale del BOQ ({value} su {grand_total}) - supera la soglia del {threshold}",
+      "suggestion": "Scomporre questa voce in elementi più piccoli o verificare il costo - una singola voce non dovrebbe dominare la stima"
+    },
+    "currency_consistency": {
+      "fail": "Rilevate valute mescolate: {currencies}",
+      "suggestion": "Usare un'unica valuta in tutto il BOQ"
+    },
+    "measurement_consistency": {
+      "fail": "Il BOQ mescola unità metriche e imperiali - usare un unico sistema in modo coerente",
+      "suggestion": "Convertire tutte le quantità in un unico sistema, metrico o imperiale"
+    },
+    "revision_cost_impact_review": {
+      "fail": "L'impatto economico della revisione, pari a {amount}, non è ancora registrato come variante",
+      "suggestion": "Creare una bozza di richiesta di variante da questo confronto di revisione per tracciare la variazione di costo"
+    },
+    "tax_date_readable": {
+      "fail": "La data fiscale '{tax_date}' non è una data valida, quindi al computo viene applicata l'aliquota di oggi anziché quella della sua data",
+      "suggestion": "Indicare la data fiscale come giorno, mese, trimestre o anno ({shapes}), oppure cancellarla per applicare al computo l'aliquota della sua data base"
+    },
+    "base_date_readable": {
+      "fail": "La data base '{base_date}' non è una data, quindi il computo viene attualizzato al tasso di oggi invece che al proprio",
+      "suggestion": "Indicare la base dei prezzi come giorno, mese, trimestre o anno ({shapes})"
+    }
+  },
+  "din276": {
+    "cost_group_required": {
+      "fail": "Alla voce {ordinal} manca il KG DIN 276",
+      "suggestion": "Assegnare una Kostengruppe DIN 276 a 3 cifre (es. 330 per le pareti)"
+    },
+    "valid_cost_group": {
+      "fail": "Codice DIN 276 '{code}' non valido nella voce {ordinal}"
+    },
+    "hierarchy": {
+      "fail": "Voce {ordinal}: il KG {child} non è sotto il KG padre {parent} (prefisso atteso '{prefix}')",
+      "suggestion": "Spostare la voce sotto il KG padre corretto oppure aggiornare il codice KG in modo che corrisponda alla gerarchia ({prefix}xx)"
+    },
+    "completeness": {
+      "fail": "Il gruppo KG {group} - {group_name} manca nel BOQ",
+      "suggestion": "Aggiungere voci per il KG {group} ({group_name}) per garantire una copertura completa"
+    }
+  },
+  "gaeb": {
+    "ordinal_format": {
+      "fail": "Il numero d'ordine '{ordinal}' non corrisponde alla OZ-Maske GAEB di questo file",
+      "suggestion": "Usare la OZ-Maske del file, ad es. 001.001.0010 oppure 01.02.0030"
+    },
+    "lv_structure": {
+      "fail": "Voce {ordinal}: la voce terminale non ha una sezione padre - la gerarchia del LV GAEB richiede un padre Leistungsgruppe",
+      "suggestion": "Assegnare questa voce a una sezione padre (Leistungsgruppe / Titel)"
+    },
+    "einheitspreis_sanity": {
+      "negative": "Voce {ordinal}: l'Einheitspreis {rate} è negativo (unità='{unit}') - un prezzo negativo non può essere trasferito in GAEB",
+      "zero": "Voce {ordinal}: l'Einheitspreis è 0,00 (unità='{unit}') - confermare che si tratti di un prezzo zero offerto e non di un prezzo mancante",
+      "suggestion": "Indicare un Einheitspreis positivo, oppure contrassegnare la voce come Bedarfsposition (ambito opzionale) o a corpo (unità='lsum')"
+    },
+    "trade_section_code": {
+      "fail": "La sezione di primo livello '{ordinal}' non ha un codice GAEB Leistungsbereich (atteso un codice di categoria a 3 cifre, ad es. '012')",
+      "suggestion": "Aggiungere alla sezione un codice di categoria a 3 cifre (Leistungsbereich) - ad es. '012' per Erdarbeiten, '013' per Mauerarbeiten"
+    },
+    "quantity_decimals": {
+      "fail": "Voce {ordinal}: la quantità {quantity} ha {decimals} cifre decimali - la convenzione GAEB X83 ne consente al massimo 3",
+      "suggestion": "Arrotondare la quantità ad al massimo 3 cifre decimali secondo GAEB X83"
+    }
+  },
+  "nrm": {
+    "classification_required": {
+      "fail": "Alla voce {ordinal} manca il codice elemento NRM",
+      "suggestion": "Assegnare un codice elemento NRM 1/2 (es. 2.6.1 per le pareti esterne)"
+    },
+    "valid_element": {
+      "fail": "Codice NRM '{code}' non valido nella voce {ordinal}"
+    },
+    "completeness": {
+      "fail": "Il gruppo NRM {group} - {group_name} manca nel BOQ",
+      "suggestion": "Aggiungere voci per il gruppo NRM {group} ({group_name})"
+    },
+    "base_date_declared": {
+      "fail": "Il piano dei costi non indica la data base a cui sono riferiti i suoi prezzi",
+      "suggestion": "Registrare la data base sul computo. Senza di essa nessuno può stabilire se un prezzo è superato né quale inflazione resti da aggiungere"
+    },
+    "cost_plan_stage_declared": {
+      "fail": "Il piano dei costi non indica per quale fase progettuale è stato redatto",
+      "suggestion": "Registrare la fase. La precisione che un lettore può aspettarsi da un piano dei costi è determinata dalla fase in cui è stato redatto, e un piano che non la dichiara induce un'aspettativa sbagliata"
+    },
+    "contractor_costs_present": {
+      "preliminaries": "Il piano dei costi non riporta le spese generali di cantiere dell'impresa principale, né come gruppo {group} né come voce di ricarico",
+      "overheads_and_profit": "Il piano dei costi non riporta spese generali e utile dell'impresa principale, né come gruppo {group} né come voce di ricarico",
+      "suggestion": "Aggiungerlo come elemento di gruppo NRM o come voce di ricarico sulle opere misurate. Entrambe le soluzioni sono corrette; omettendolo, il costo delle opere non è il costo delle opere"
+    },
+    "risk_allowance_present": {
+      "fail": "Il piano dei costi non riporta nessun accantonamento per rischi",
+      "suggestion": "Aggiungere un accantonamento per rischi come gruppo NRM 13 o come voce di imprevisti. Un piano dei costi senza accantonamento per rischi presenta una cifra puntuale come se fosse certa"
+    }
+  },
+  "masterformat": {
+    "classification_required": {
+      "fail": "Alla voce {ordinal} manca il codice MasterFormat",
+      "suggestion": "Assegnare un codice MasterFormat (es. 03 30 00 per il calcestruzzo gettato in opera)"
+    },
+    "valid_division": {
+      "fail": "Codice MasterFormat '{code}' non valido nella voce {ordinal}",
+      "suggestion": "Usare il formato MasterFormat a 6 cifre: XX XX XX (es. 03 30 00)"
+    },
+    "completeness": {
+      "fail": "La Division {division} - {division_name} manca nel BOQ",
+      "suggestion": "Aggiungere voci per la Division {division} ({division_name})"
+    }
+  },
+  "sinapi": {
+    "code_required": {
+      "fail": "Alla voce {ordinal} manca il codice SINAPI",
+      "suggestion": "Assegnare un codice di composizione SINAPI (es. 87878 per calcestruzzo C30)"
+    },
+    "valid_code": {
+      "fail": "Codice SINAPI '{code}' non valido nella voce {ordinal}"
+    }
+  },
+  "nbr": {
+    "classification_required": {
+      "fail": "Alla voce {ordinal} manca la sezione NBR 12721",
+      "suggestion": "Assegnare alla voce una sezione NBR 12721 (S1 = preliminares, S2 = infra-estrutura, ..., S11 = serviços complementares)"
+    },
+    "valid_section": {
+      "fail": "La sezione NBR 12721 '{code}' nella voce {ordinal} non è compresa tra S1 e S11",
+      "suggestion": "Usare i codici da S1 a S11 (es. S3 per supra-estrutura)"
+    }
+  },
+  "gesn": {
+    "code_required": {
+      "fail": "Alla voce {ordinal} manca il codice ГЭСН/ФЕР",
+      "suggestion": "Assegnare un codice ГЭСН (es. 06-01-001-01 per il calcestruzzo)"
+    },
+    "valid_code": {
+      "fail": "Il codice ГЭСН '{code}' non corrisponde al formato XX-XX-XXX-XX",
+      "suggestion": "Usare il formato: NN-NN-NNN-NN (es. 06-01-001-01)"
+    },
+    "resource_breakdown": {
+      "fail": "La voce {ordinal} cita la norma {code} ma non riporta il dettaglio delle risorse",
+      "suggestion": "Importare le quantità di manodopera, mezzi e materiali previste dalla norma, oppure indicare perché questa voce se ne discosta"
+    },
+    "labour_hours_present": {
+      "fail": "La voce {ordinal} ({code}) ha un dettaglio risorse senza ore di manodopera",
+      "suggestion": "Aggiungere le ore-uomo previste dalla norma; spese generali e utile stimato sono calcolati sulla manodopera e non possono essere determinati senza di esse"
+    },
+    "price_level_declared": {
+      "fail": "La stima non indica a quale livello di prezzi si riferiscono i suoi importi",
+      "suggestion": "Dichiarare il livello di prezzi (una data) e l'indice di conversione applicato, affinché un revisore possa ottenere lo stesso totale"
+    }
+  },
+  "dpgf": {
+    "lot_required": {
+      "fail": "La voce {ordinal} non è assegnata a nessun Lot technique",
+      "suggestion": "Assegnare un Lot technique (es. Lot 01 Gros Œuvre)"
+    },
+    "pricing_complete": {
+      "fail": "Solo {priced}/{total} voci ({percent}) sono valorizzate - sotto la soglia dell'80%",
+      "suggestion": "Completare la valorizzazione di tutte le voci prima dell'invio del DPGF"
+    }
+  },
+  "onorm": {
+    "position_format": {
+      "fail": "Il numero d'ordine '{ordinal}' non corrisponde al formato ÖNORM XX.XX.XXXXA",
+      "suggestion": "Usare il formato ÖNORM B 2063 (es. 01.02.01A)"
+    },
+    "description_length": {
+      "fail": "Voce {ordinal}: descrizione troppo breve ({length} caratteri, minimo 20)",
+      "suggestion": "Aggiungere maggiori dettagli alla descrizione della voce secondo ÖNORM B 2063"
+    }
+  },
+  "gbt50500": {
+    "code_required": {
+      "fail": "Alla voce {ordinal} manca il codice GB/T 50500",
+      "suggestion": "Assegnare un codice GB/T 50500 a 9 cifre (es. 010101001)"
+    },
+    "valid_code": {
+      "fail": "Codice GB/T 50500 '{code}' non valido - attese 9 o 12 cifre"
+    }
+  },
+  "cpwd": {
+    "code_required": {
+      "fail": "Alla voce {ordinal} manca il codice CPWD/DSR",
+      "suggestion": "Assegnare un riferimento voce CPWD DSR (es. 4.1.1)"
+    },
+    "measurement_units": {
+      "fail": "L'unità '{unit}' nella voce {ordinal} non è conforme a IS 1200",
+      "suggestion": "Usare le unità standard IS 1200: m, m2, m3, kg, nos, rm, ecc."
+    }
+  },
+  "hungary": {
+    "item_code_required": {
+      "fail": "La voce {ordinal} non riporta nessun codice voce ungherese",
+      "invalid": "Il codice voce '{code}' sulla voce {ordinal} non corrisponde a nessuno dei due ordini di codifica",
+      "suggestion": "Le opere edili usano MA-CC-SS-II (capitoli da 01 a 17), le opere infrastrutturali usano il numero voce a sei o sette cifre del dizionario codici del progetto"
+    },
+    "chapter_recognised": {
+      "fail": "Il capitolo {chapter} sulla voce {ordinal} non è uno dei diciassette previsti dall'ordine di codifica"
+    },
+    "material_fee_split": {
+      "fail": "Voce {ordinal}: materiale {material} più manodopera {fee} non corrisponde al prezzo {rate}",
+      "suggestion": "Correggere i prezzi unitari di materiale e manodopera, o il prezzo complessivo, affinché la scomposizione torni"
+    },
+    "item_number_unique": {
+      "fail": "Il numero voce {number} è usato su {count} voci e deve identificarne una sola",
+      "suggestion": "Assegnare a ogni voce un proprio numero voce di progetto prima che il computo venga inviato al cliente"
+    }
+  },
+  "prezzario": {
+    "voce_code_format_valid": {
+      "fail": "Il codice '{code}' sulla voce {ordinal} non lascia capire da quale prezzario proviene",
+      "suggestion": "Un codice di voce ufficiale inizia con la regione e l'anno di edizione del suo prezzario, ad esempio TOS25_01.A03.001.001 (Toscana 2025). Copiare il codice esattamente come lo riporta il prezzario regionale, importare la voce dal prezzario, oppure numerare un nuovo prezzo come NP.01"
+    },
+    "voce_reference_present": {
+      "fail": "La voce {ordinal} non cita nessuna voce di prezzario",
+      "suggestion": "Prendere la voce da un prezzario regionale importato, oppure contrassegnarla come nuovo prezzo (NP) corredato da un'analisi prezzi"
+    },
+    "costi_sicurezza_separated": {
+      "fail": "Il computo non riporta una voce separata per gli oneri della sicurezza non soggetti al ribasso di gara",
+      "suggestion": "Aggiungere gli oneri della sicurezza come sezione propria o come voce di ricarico, valorizzati dal capitolo sicurezza del prezzario o dal piano di sicurezza"
+    },
+    "incidenza_manodopera_documented": {
+      "fail": "La voce {ordinal} ({code}) non indica la propria incidenza della manodopera",
+      "suggestion": "Prendere l'incidenza della manodopera dal prezzario, oppure aggiungere una risorsa di manodopera, affinché il costo della manodopera possa essere indicato separatamente in gara"
+    },
+    "overheads_not_applied_twice": {
+      "fail": "I prezzi dei prezzari regionali comprendono già spese generali (13-17%) e utile d'impresa (10%). Applicarli di nuovo aumenta il totale di circa {percent}%.",
+      "suggestion": "Eliminare i ricarichi per spese generali e utile d'impresa da questo computo, oppure mantenerli solo sulle voci valorizzate con analisi prezzi propria (NP)."
+    }
+  },
+  "romania": {
+    "deviz_chapter_required": {
+      "fail": "La voce {ordinal} non indica nessun capitolo del deviz general",
+      "suggestion": "Classificare la voce nel proprio capitolo e sottocapitolo secondo HG 907/2016, ad esempio 4.1 per lavori di costruzione e impianti o 5.1 per l'organizzazione di cantiere"
+    },
+    "deviz_chapter_recognised": {
+      "fail": "Il codice deviz '{code}' sulla voce {ordinal} non è un capitolo né un sottocapitolo del deviz general",
+      "suggestion": "Usare un codice dei capitoli da 1 a 6 del deviz general HG 907/2016, ad esempio 1.2, 2, 3.5, 4.1, 5.1 o 6.2"
+    }
+  },
+  "greece": {
+    "net_article_required": {
+      "fail": "La voce {ordinal} non riporta nessun articolo del listino prezzi unificato (ΝΕΤ)",
+      "suggestion": "Indicare l'articolo ΝΕΤ da cui è valorizzata la voce, ad esempio ΟΙΚ 32.01.06, oppure ΝΑΟΙΚ per un articolo nuovo"
+    },
+    "net_article_valid": {
+      "invalid": "L'articolo '{code}' sulla voce {ordinal} non ha la forma di un articolo ΝΕΤ",
+      "chapter": "L'articolo '{code}' sulla voce {ordinal} apre il capitolo {chapter}, che il listino per le opere edili non prevede",
+      "suggestion": "Indicare il prefisso del listino e il numero dell'articolo, ad esempio ΟΙΚ 38.20.02, ΟΔΟ Α-2 o ΑΤΗΕ 8151.1"
+    }
+  },
+  "ukraine": {
+    "zkr_chapter_required": {
+      "fail": "La voce {ordinal} non indica nessun capitolo del preventivo riepilogativo",
+      "suggestion": "Classificare la voce nel proprio capitolo dello зведений кошторисний розрахунок, da 1 a 12; le opere edili dell'oggetto principale rientrano nel capitolo 2"
+    },
+    "zkr_chapter_recognised": {
+      "fail": "Il capitolo {chapter} sulla voce {ordinal} non è uno dei dodici capitoli del preventivo riepilogativo",
+      "suggestion": "Usare un numero di capitolo da 1 a 12"
+    }
+  },
+  "birimfiyat": {
+    "code_required": {
+      "fail": "Alla voce {ordinal} manca il numero poz del birim fiyat",
+      "suggestion": "Assegnare un numero poz Bayındırlık (es. 04.013/1)"
+    },
+    "valid_poz": {
+      "fail": "Il poz '{code}' non è né un numero attuale del listino prezzi unitari (XX.XXX.XXXX) né uno dei precedenti (XX.XXX/X)",
+      "suggestion": "Usare il numero del listino, ad es. 15.140.1002, oppure 04.013/1 su un contratto precedente; numerare le proprie voci analizzate come ÖZEL-1"
+    }
+  },
+  "sekisan": {
+    "code_required": {
+      "fail": "Alla voce {ordinal} manca il codice 積算",
+      "suggestion": "Assegnare un codice voce 積算基準"
+    },
+    "metric_units": {
+      "fail": "L'unità '{unit}' nella voce {ordinal} non è standard",
+      "suggestion": "Usare unità metriche standard: m, m2, m3, kg, t, 式, ecc."
+    }
+  },
+  "bc3": {
+    "code_required": {
+      "fail": "Alla voce {ordinal} manca il codice concetto FIEBDC-3",
+      "suggestion": "Assegnare un codice FIEBDC-3 (es. E04CM040 oppure 01.02.01)"
+    },
+    "valid_code": {
+      "fail": "Codice FIEBDC-3 '{code}' non valido nella voce {ordinal}",
+      "suggestion": "Usare il formato alfanumerico FIEBDC-3 (es. E04CM040, 01.02.01, CAP01#)"
+    }
+  },
+  "mexico": {
+    "apu_completeness": {
+      "fail": "La voce {ordinal} ha un APU incompleto; componenti di costo mancanti: {missing}",
+      "suggestion": "Aggiungere i componenti di costo diretto mancanti (mano de obra, materiales, maquinaria) all'analisi del prezzo unitario"
+    },
+    "iva_rate_valid": {
+      "fail": "La voce {ordinal} ha un'aliquota IVA non valida {rate}; l'IVA messicana è del 16, 8 (regione di frontiera) o 0 per cento",
+      "suggestion": "Impostare l'aliquota IVA al 16 per cento (standard), 8 per cento (regione di frontiera) o 0 per cento"
+    },
+    "subcontract_retencion": {
+      "fail": "La voce di subappalto {ordinal} non indica se si applicano le retenciones IVA/ISR",
+      "suggestion": "Registrare le retenciones IVA e ISR per la voce di subappalto, oppure indicare che non ne sono applicate"
+    },
+    "cfdi_rfc_present": {
+      "missing": "I dati dell'emittente CFDI sono incompleti per l'esportazione della gara; mancanti: {missing}",
+      "invalid_rfc": "L'RFC '{rfc}' non è un RFC CFDI valido (12 caratteri per un'azienda, 13 per una persona fisica)",
+      "suggestion": "Impostare RFC dell'emittente, regimen fiscal e uso CFDI nel profilo del progetto per la fatturazione CFDI 4.0"
+    }
+  },
+  "pipeline": {
+    "side_effecting_requires_gate": {
+      "fail": "Nodo/i con effetti collaterali senza gate: {nodes}",
+      "suggestion": "Aggiungere un gate di validazione o un gate di approvazione umana su ogni percorso da un nodo trigger/IA a ciascun nodo di scrittura prima della pubblicazione."
+    }
+  },
+  "property_dev": {
+    "escrow_account_required": {
+      "fail": "Lo sviluppo immobiliare richiede un conto di garanzia (escrow) attivo per l'ente regolatore '{regulator}'",
+      "suggestion": "Aprire un conto di garanzia presso la banca autorizzata dall'ente regolatore in Compliance → Conti di garanzia"
+    },
+    "escrow_iban_valid": {
+      "fail": "Conto di garanzia {account}: l'IBAN '{iban}' non supera il controllo strutturale ISO 13616",
+      "suggestion": "Correggere l'IBAN: codice paese, lunghezza e carattere di controllo devono essere conformi a ISO 13616"
+    },
+    "escrow_balance_reconciled": {
+      "fail": "Conto di garanzia {account}: il saldo contabile {ledger} si discosta di {drift} dalla somma di {transactions} transazioni",
+      "suggestion": "Riconciliare il conto di garanzia - verificare incassi non registrati o addebiti mancanti"
+    },
+    "sales_contract_party_ownership_sums_to_100": {
+      "fail": "Contratto {contract}: le quote di proprietà sommano al {total}% (deve essere esattamente 100%)",
+      "suggestion": "Correggere le percentuali delle parti affinché il totale sia 100,00%"
+    },
+    "payment_schedule_instalments_sum_to_contract_value": {
+      "fail": "Contratto {contract}: il totale delle rate {instalments} differisce dal valore del contratto {contract_value} (differenza {drift})",
+      "suggestion": "Riequilibrare il piano di pagamento affinché la somma delle rate corrisponda al totale del contratto"
+    },
+    "reservation_expiry_in_future": {
+      "fail": "Prenotazione {reservation}: la scadenza (expires_at) {expires} non è nel futuro",
+      "suggestion": "Prorogare la prenotazione oppure portarla allo stato expired/cancelled"
+    },
+    "broker_commission_rate_within_bounds": {
+      "fail": "Accordo di commissione {agreement}: {issue}",
+      "suggestion": "Usare un'aliquota percentuale tra 0,1% e 15%, un importo fisso, oppure una scala di fasce non vuota"
+    },
+    "price_matrix_no_negative_modifier": {
+      "fail": "Matrice prezzi {matrix}: il moltiplicatore {multiplier} della regola '{factor}' è fuori da [-0,50, 2,00]",
+      "suggestion": "Limitare i modificatori tra -50% e +200% per evitare prezzi di lotto irrealistici"
+    }
+  },
+  "schedule_quality": {
+    "open_ends": {
+      "fail": "L'attività '{activity}' non ha legami di {ends} (estremo aperto / attività isolata)",
+      "both": "predecessore o successore",
+      "predecessor": "predecessore",
+      "successor": "successore",
+      "suggestion": "Collegare l'attività alla rete con un legame predecessore e un legame successore, oppure definirla come milestone di inizio/fine"
+    },
+    "negative_lag": {
+      "fail": "Il legame {predecessor} -> {successor} usa un ritardo negativo ({lag} giorni), cioè un anticipo che distorce il percorso critico",
+      "suggestion": "Sostituire l'anticipo con un'attività esplicita o un legame SS/FF affinché la sequenza resti giustificabile"
+    },
+    "excessive_lag": {
+      "fail": "Il legame {predecessor} -> {successor} ha un ritardo di {lag} giorni, oltre la soglia di {threshold} giorni",
+      "suggestion": "Modellare il tempo di attesa come un'attività propria (approvvigionamento, maturazione, approvazione) in modo che possa avere uno stato ed essere livellata"
+    },
+    "hard_constraints": {
+      "fail": "L'attività '{activity}' ha un vincolo di data rigido ({constraint}) che sovrasta la logica di rete",
+      "suggestion": "Usare un vincolo flessibile (non prima di) oppure determinare la data tramite la logica, affinché l'attività possa muoversi quando i predecessori slittano"
+    },
+    "negative_float": {
+      "fail": "L'attività '{activity}' ha un margine totale negativo ({float} giorni), quindi il programma non è realizzabile così come legato dalla logica",
+      "suggestion": "Ridefinire la sequenza dei lavori, attenuare un vincolo rigido, oppure aggiungere un piano di recupero documentato per riportare il margine a zero o oltre"
+    },
+    "high_float": {
+      "fail": "L'attività '{activity}' ha un margine totale molto elevato ({float} giorni), oltre la soglia di {threshold} giorni",
+      "suggestion": "Verificare se manca un legame successore - un margine elevato indica di solito che l'attività è collegata alla rete solo debolmente"
+    },
+    "missing_duration": {
+      "fail": "L'attività '{activity}' ha una durata non valida ({duration} giorni) per un'attività che non è una milestone",
+      "suggestion": "Impostare una durata positiva in giorni lavorativi, oppure definire la riga come milestone se si tratta effettivamente di un evento a durata zero"
+    },
+    "duration_on_project_week": {
+      "fail": "L'attività '{activity}' è salvata con {stored} giorni lavorativi, il conteggio da lunedì a venerdì tra {start} e {end}; nella settimana lavorativa del progetto, {calendar}, quelle date comprendono {expected}",
+      "suggestion": "Salvare di nuovo le date dell'attività affinché la durata venga ricalcolata sulla settimana lavorativa del progetto, oppure inserire la durata deliberatamente"
+    }
+  },
+  "sheet_completeness": {
+    "missing": {
+      "fail": "La tavola {sheet} è elencata nell'indice degli elaborati ma non è presente nel set caricato",
+      "suggestion": "Caricare la tavola mancante o confermare che è stata ritirata dall'emissione"
+    },
+    "extra": {
+      "fail": "La tavola {sheet} è presente nel set caricato ma non è elencata nell'indice degli elaborati",
+      "suggestion": "Aggiungerla all'indice o al registro di emissione, oppure rimuovere la tavola in eccesso"
+    },
+    "revision_mismatch": {
+      "fail": "La tavola {sheet} è alla revisione {actual_rev} ma l'indice ne prevede {expected_rev}",
+      "suggestion": "Emettere la revisione prevista oppure aggiornare l'indice alla revisione corrente"
+    }
+  },
+  "procurement": {
+    "po_has_lines": {
+      "fail": "Questo ordine di acquisto non ha righe, quindi il suo importo impegnato non è contabilizzato",
+      "suggestion": "Aggiungere gli articoli ordinati prima di approvare l'ordine di acquisto"
+    },
+    "po_line_amount": {
+      "fail": "La riga {line} totalizza {actual} ma quantità per prezzo unitario dà {expected}",
+      "suggestion": "Correggere la quantità, il prezzo unitario o l'importo di riga affinché i tre valori coincidano"
+    },
+    "po_subtotal_matches_lines": {
+      "fail": "Il subtotale è {actual} ma la somma delle righe dà {expected}",
+      "suggestion": "Ricalcolare il subtotale a partire dalle righe attuali"
+    },
+    "po_total_matches_subtotal": {
+      "fail": "Il totale è {actual} ma subtotale più imposta dà {expected}",
+      "suggestion": "Ricalcolare il totale affinché corrisponda a subtotale più imposta"
+    },
+    "po_no_negative_line": {
+      "fail": "La riga {line} ha una quantità non positiva, o un prezzo unitario negativo",
+      "suggestion": "Emettere una nota di credito per lo storno invece di una riga negativa"
+    },
+    "po_currency_set": {
+      "fail": "Questo ordine di acquisto non ha una valuta, quindi il suo importo non può essere consolidato né pagato",
+      "suggestion": "Impostare la valuta, normalmente quella usata dal progetto"
+    },
+    "po_vendor_assigned": {
+      "fail": "Questo ordine di acquisto non indica nessun fornitore",
+      "suggestion": "Selezionare il fornitore prima di approvare l'impegno"
+    },
+    "po_retention_within_bounds": {
+      "fail": "Una ritenuta del {percent}% è fuori dall'intervallo plausibile da 0 a {max}%",
+      "suggestion": "Inserire la ritenuta come percentuale, ad esempio 5 per il cinque per cento"
+    },
+    "po_delivery_after_issue": {
+      "fail": "La consegna è fissata per il {delivery}, prima della data di emissione {issue}",
+      "suggestion": "Spostare la data di consegna alla data di emissione o successiva"
+    },
+    "po_line_cost_coded": {
+      "fail": "La riga {line} non ha WBS, categoria di costo né voce di costo, quindi non apparirà nel riepilogo dei costi",
+      "suggestion": "Assegnare un codice di costo affinché l'impegno sia imputato a un budget"
+    },
+    "invoice_within_order": {
+      "fail": "La fattura {invoice} supera di {excess} il residuo di {remaining} ancora aperto sull'ordine {po}",
+      "suggestion": "Verificare la fattura rispetto all'ordine; se l'eccedenza è stata concordata, registrarla come modifica dell'ordine prima di approvare"
+    },
+    "invoice_quantity_received": {
+      "fail": "La riga {line} verrebbe fatturata per un totale di {invoiced}, ma è stato ricevuto solo {received}",
+      "suggestion": "Attendere il documento di trasporto o confermare il ricevimento della merce prima di approvare questa quantità"
+    },
+    "invoice_value_received": {
+      "fail": "Sull'ordine {po} le fatture totalizzerebbero {invoiced}, ma la merce ricevuta vale solo {received} ai prezzi dell'ordine",
+      "suggestion": "Attendere il documento di trasporto o confermare il ricevimento della merce prima di approvare questo importo"
+    }
+  },
+  "subcontract": {
+    "agreement_has_scope": {
+      "fail": "Questo contratto non ha pacchetti di lavoro, quindi non c'è nulla contro cui una richiesta di pagamento possa essere avanzata",
+      "suggestion": "Scomporre l'oggetto contrattuale in pacchetti di lavoro prima di attivare il contratto"
+    },
+    "package_scope_described": {
+      "fail": "Il pacchetto di lavoro {package} ha un nome ma nessuna descrizione del lavoro che comprende",
+      "suggestion": "Descrivere cosa comprende il pacchetto, affinché un'eventuale futura contestazione su una variante abbia un punto di partenza"
+    },
+    "agreement_value_positive": {
+      "fail": "Il valore del contratto è {value}, quindi ritenuta e schedule of values non hanno una base di calcolo",
+      "suggestion": "Inserire il valore contrattuale concordato prima di attivare il contratto"
+    },
+    "packages_within_value": {
+      "fail": "I pacchetti di lavoro valgono {planned} ma il contratto è di {total}",
+      "suggestion": "Rivalutare i pacchetti o aumentare il valore del contratto affinché copra il proprio oggetto"
+    },
+    "agreement_dates_ordered": {
+      "fail": "Il contratto termina il {end}, prima di iniziare il {start}",
+      "suggestion": "Correggere la data di inizio o di fine affinché il periodo contrattuale proceda in avanti"
+    },
+    "agreement_currency_set": {
+      "fail": "Questo contratto non ha una valuta, quindi i pagamenti non possono essere consolidati né corrisposti",
+      "suggestion": "Impostare la valuta, normalmente quella usata dal progetto"
+    },
+    "retention_within_bounds": {
+      "fail": "Una ritenuta del {percent}% è fuori dall'intervallo plausibile da 0 a {max}%",
+      "suggestion": "Inserire la ritenuta come percentuale di ogni pagamento, non come importo"
+    },
+    "insurance_valid_at_start": {
+      "fail": "L'assicurazione del subappaltatore è scaduta il {expiry}, prima dell'inizio dei lavori il {reference}",
+      "suggestion": "Raccogliere un certificato in corso di validità prima di autorizzare l'accesso del subappaltatore al cantiere"
+    },
+    "unlinked_contract_twin": {
+      "fail": "Il subappalto {agreement} e il contratto {contract} sembrano essere lo stesso subappalto, per cui la contabilità potrebbe contarlo due volte",
+      "suggestion": "Collegarli se sono lo stesso subappalto, oppure contrassegnarli come diversi"
+    }
+  },
+  "submittal": {
+    "reviewer_assigned": {
+      "fail": "Questo documento di trasmissione non indica nessun revisore, quindi viene inviato senza un destinatario responsabile",
+      "suggestion": "Assegnare il revisore che deve rispondere prima dell'invio"
+    },
+    "required_date_present": {
+      "fail": "Questo documento di trasmissione non ha una data richiesta, quindi non potrà mai essere segnalato come in ritardo",
+      "suggestion": "Impostare la data entro cui è necessaria la revisione, determinata dal lavoro che questa trasmissione sblocca"
+    },
+    "required_date_after_submitted": {
+      "fail": "La revisione è prevista per il {required}, prima che la trasmissione sia stata depositata il {submitted}",
+      "suggestion": "Spostare la data richiesta a una data lavorativa successiva alla trasmissione"
+    },
+    "review_window_sufficient": {
+      "fail": "Il revisore ha {days} giorni, meno dei {minimum} giorni normalmente necessari per una revisione",
+      "suggestion": "Concedere il periodo di revisione consueto, oppure concordare prima con il revisore un periodo più breve"
+    },
+    "spec_section_present": {
+      "fail": "Questo documento di trasmissione non indica nessuna sezione del disciplinare, quindi il registro non può classificarlo",
+      "suggestion": "Inserire la sezione del disciplinare a cui risponde questa trasmissione"
+    },
+    "approver_distinct_from_reviewer": {
+      "fail": "La stessa persona ({person}) è sia revisore che approvatore, quindi manca un secondo controllo indipendente",
+      "suggestion": "Assegnare un approvatore diverso dal revisore"
+    },
+    "linked_scope_present": {
+      "fail": "Questo documento di trasmissione non è collegato a nessuna voce di ambito, quindi non confluisce mai in un pacchetto",
+      "suggestion": "Collegare le voci del BOQ che questa trasmissione riguarda"
+    }
+  },
+  "rfq": {
+    "scope_described": {
+      "fail": "Questa richiesta non ha ambito di lavoro né descrizione, quindi non c'è nulla che un fornitore possa valorizzare",
+      "suggestion": "Descrivere l'ambito prima della pubblicazione, affinché le offerte ricevute siano confrontabili"
+    },
+    "deadline_present": {
+      "fail": "Questa richiesta non indica una scadenza di presentazione, quindi la gara non si chiude mai",
+      "suggestion": "Impostare la data e l'ora entro cui le offerte devono arrivare"
+    },
+    "deadline_parseable": {
+      "fail": "La scadenza di presentazione {value} non è una data leggibile dal sistema, e ogni offerta verrà respinta",
+      "suggestion": "Inserire la scadenza come data, ad esempio 2026-08-31"
+    },
+    "deadline_in_future": {
+      "fail": "La scadenza di presentazione {deadline} è già trascorsa al {today}, quindi la richiesta arriva già chiusa",
+      "suggestion": "Spostare la scadenza a una data futura prima della pubblicazione"
+    },
+    "has_recipients": {
+      "fail": "Questa richiesta non è indirizzata a nessun fornitore, quindi pubblicarla non avvisa nessuno",
+      "suggestion": "Aggiungere i fornitori a cui è destinata questa richiesta"
+    },
+    "currency_set": {
+      "fail": "Questa richiesta non indica una valuta, quindi le offerte non possono essere confrontate tra loro",
+      "suggestion": "Impostare la valuta in cui devono essere formulate le offerte"
+    },
+    "bid_currency_matches": {
+      "fail": "L'offerta {bid} è valorizzata in {bid_currency} ma la richiesta è in {rfq_currency}",
+      "suggestion": "Chiedere all'offerente di riformulare l'offerta nella valuta della richiesta, oppure registrare il cambio concordato"
+    },
+    "bid_amounts_parseable": {
+      "fail": "L'offerta {bid} ha un importo di {value}, che non è un numero confrontabile",
+      "suggestion": "Correggere l'importo dell'offerta prima dell'aggiudicazione"
+    },
+    "bids_still_valid": {
+      "fail": "L'offerta {bid} è scaduta il {expired} e oggi è {today}, quindi il suo prezzo non è più vincolante",
+      "suggestion": "Chiedere all'offerente di confermare il prezzo prima dell'aggiudicazione"
+    },
+    "award_has_competition": {
+      "fail": "Questa aggiudicazione si basa su {count} offerte, meno delle {minimum} necessarie per un confronto competitivo",
+      "suggestion": "Documentare il motivo che giustifica un'aggiudicazione a trattativa diretta, oppure invitare altri offerenti"
+    }
+  },
+  "errors": {
+    "resource_not_found": "Risorsa non trovata",
+    "project_not_found": "Progetto non trovato",
+    "vendor_not_found": "Fornitore non trovato",
+    "template_not_found": "Modello non trovato",
+    "position_not_found": "Voce non trovata",
+    "boq_not_found": "BOQ non trovato",
+    "session_not_found": "Sessione non trovata",
+    "document_not_found": "Documento non trovato",
+    "documents_batch_delete_referenced": "Altri record fanno ancora riferimento a documenti di questo lotto. Verificare cosa verrà scollegato dall'eliminazione e confermare con acknowledge_references.",
+    "invitation_not_found": "Invito non trovato",
+    "agreement_not_found": "Contratto non trovato",
+    "rejection_not_found": "Rifiuto non trovato",
+    "claim_not_found": "Certificato di avanzamento lavori non trovato",
+    "gaeb_x89_final_account_unsupported": "Un conto finale o un conto finale parziale non può ancora essere esportato come GAEB X89. Deve contabilizzare il lavoro cumulato meno i pagamenti precedenti, mentre da un certificato di avanzamento si genera solo una fattura parziale di un periodo. Esportare il certificato come fattura parziale.",
+    "xpwe_native_file_refused": "Questo è il file di progetto proprietario di un programma di stima, che solo quel programma può aprire. Esportare la stima come XPWE dal programma di stima e caricare il file .xpwe.",
+    "plot_not_found": "Lotto non trovato",
+    "survey_not_found": "Rilievo con drone non trovato",
+    "diary_video_not_found": "Video del diario di cantiere non trovato",
+    "diary_photo_not_found": "Foto del diario di cantiere non trovata",
+    "bidder_not_found": "Offerente non trovato",
+    "webhook_not_found": "Webhook non trovato",
+    "submission_not_found": "Offerta non trovata",
+    "measurement_not_found": "Misurazione di cantiere non trovata",
+    "salescontract_not_found": "Contratto di vendita non trovato",
+    "prompt_not_found": "Modello di prompt non trovato",
+    "prequalification_not_found": "Prequalifica non trovata",
+    "purchase_requisition_not_found": "Richiesta di acquisto non trovata",
+    "purchase_order_not_found": "Ordine di acquisto non trovato",
+    "group_not_found": "Gruppo non trovato",
+    "final_account_not_found": "Conto finale non trovato",
+    "estimate_job_not_found": "Elaborazione di stima non trovata",
+    "escrow_not_found": "Transazione del conto di garanzia non trovata",
+    "commission_accrual_not_found": "Accantonamento commissioni non trovato",
+    "baseline_not_found": "Linea di base non trovata",
+    "fx_rate_set_locked": "I cambi BCE del {date} sono bloccati, quindi questo aggiornamento non li ha sovrascritti. Sbloccare prima quel set di cambi se deve ricevere la nuova pubblicazione.",
+    "boq_locked": "Il BOQ è bloccato e non può essere modificato. Creare una revisione per apportare modifiche.",
+    "boq_link_owner_locked": "Il codice '{code}' è definito da una riga nel computo bloccato '{bill}', e collegarlo modificherebbe quel computo. Sbloccare prima quel computo, oppure inserire la riga con un nuovo codice."
+  },
+  "variations": {
+    "boq_lines_are_traced": {
+      "fail": "La riga {line} nel computo di questa variante non ha origine - né una riga dello schedule of values né una voce di stima",
+      "suggestion": "Indicare la riga di contratto interessata da questa modifica, oppure la voce di stima da cui deriva l'ambito, affinché l'importo possa essere giustificato"
+    },
+    "boq_total_matches_estimate": {
+      "fail": "La stima complessiva su questa richiesta è {estimate}, ma il computo valorizzato totalizza {priced}",
+      "suggestion": "Adottare il totale valorizzato sulla richiesta, oppure correggere il computo, affinché vi sia un'unica cifra come risposta"
+    },
+    "change_kind_matches_numbers": {
+      "removed_positive": "La riga {line} è contrassegnata come ambito rimosso ma riporta una quantità positiva di {quantity} - una detrazione viene sottratta dal contratto come quantità negativa",
+      "added_negative": "La riga {line} è contrassegnata come ambito aggiunto ma riporta una quantità negativa di {quantity} - l'ambito che viene sottratto dal contratto è rimosso, non aggiunto",
+      "removed_needs_contract_line": "La riga {line} è contrassegnata come ambito rimosso ma non è collegata a nessuna riga dello schedule of values, quindi non esiste una voce contrattuale da rimuovere",
+      "modified_needs_contract_line": "La riga {line} è contrassegnata come ambito modificato ma non è collegata a nessuna riga dello schedule of values, quindi non esiste una voce contrattuale da modificare",
+      "suggestion": "Correggere il tipo di modifica o la quantità sul collegamento della riga, oppure indicare la riga di contratto interessata dalla modifica"
+    }
+  },
+  "cases": {
+    "has_steps": {
+      "fail": "Questo caso non ha ancora passaggi, quindi non c'è nulla che un lettore possa seguire.",
+      "suggestion": "Aggiungere almeno un passaggio che indichi la schermata da aprire e cosa fare lì."
+    },
+    "step_titled": {
+      "fail": "{count} passaggio/i manca/no di un titolo o di una schermata da aprire.",
+      "suggestion": "Assegnare a ogni passaggio un titolo breve e indicare la schermata che apre."
+    },
+    "step_purpose": {
+      "fail": "{count} di {total} passaggio/i non spiega/no perché sono importanti, per cui il caso si legge come un elenco di clic invece che come una spiegazione.",
+      "suggestion": "Aggiungere una riga per ogni passaggio su a cosa serve; è la parte di cui una persona nuova ha bisogno."
+    },
+    "distinct_screens": {
+      "fail": "{count} passaggio/i apre/aprono la stessa schermata del passaggio precedente, per cui il lettore non vede alcun cambiamento e non può distinguere i passaggi.",
+      "suggestion": "Unirli in un unico passaggio, oppure far puntare il secondo alla schermata in cui il lavoro effettivamente si sposta."
+    },
+    "duration_plausible": {
+      "fail": "Questo caso indica {minutes} minuto/i per {steps} passaggio/i. Un lettore che non riesce a starci dietro smette di fidarsi del resto della stima.",
+      "suggestion": "Aumentare la stima ad almeno {minimum} minuti oppure eliminare alcuni passaggi."
+    },
+    "described": {
+      "fail": "Questo caso non ha un riepilogo, quindi l'elenco mostra solo un titolo e nulla altro.",
+      "suggestion": "Aggiungere una frase su cosa il lettore avrà fatto alla fine."
+    }
+  },
+  "uk": {
+    "contract_form_declared": {
+      "fail": "La stima non indica la forma contrattuale su cui è basata la valorizzazione",
+      "suggestion": "Registrare la forma contrattuale. Spese generali di cantiere, rischio e condizioni di pagamento vengono valorizzati diversamente secondo la forma contrattuale, quindi la cifra ha poco significato senza di essa"
+    },
+    "payment_regime_declared": {
+      "fail": "Il meccanismo di pagamento è incompleto: {missing} non registrato/i",
+      "suggestion": "Registrare entrambe le date. Un contratto di costruzione che non le fissa non ne è comunque esente: lo Scheme for Construction Contracts le fornisce entrambe, e le parti si ritrovano così le proprie condizioni di pagamento in una norma di legge invece che in ciò che hanno firmato"
+    },
+    "retention_declared": {
+      "fail": "La stima non indica quale ritenuta si applica",
+      "suggestion": "Registrare la percentuale di ritenuta e la sua liberazione, oppure registrare che non se ne applica nessuna. La ritenuta è liquidità che l'impresa ha già guadagnato ma non può incassare, e una stima che non ne parla non parla del capitale circolante"
+    },
+    "cdm_duty_holders_declared": {
+      "fail": "I soggetti responsabili secondo CDM 2015 non sono registrati: manca/no {missing}",
+      "suggestion": "Registrare le nomine. Quando più di un'impresa lavora su un progetto, il committente deve nominare per iscritto un principal designer e un principal contractor; se non lo fa, quegli obblighi restano in capo al committente stesso"
+    },
+    "hrb_regime_declared": {
+      "fail": "La qualifica di edificio ad alto rischio (higher-risk building) non è risolta: {reason}",
+      "unanswered": "la stima non indica se si tratti di un edificio ad alto rischio",
+      "disagrees": "la stima dichiara {declared} per l'alto rischio, mentre le sue stesse dimensioni danno {derived}",
+      "suggestion": "Un edificio è ad alto rischio quando è alto almeno 18 m o ha almeno 7 piani E contiene almeno due unità residenziali. Contano entrambe le condizioni: un edificio alto senza abitazioni non è ad alto rischio, e trattarlo come tale comporta un programma di gateway che nessuno richiedeva"
+    },
+    "vat_treatment_declared": {
+      "fail": "La stima non indica come viene trattata l'IVA",
+      "suggestion": "Registrare il trattamento: l'aliquota ordinaria, un'aliquota ridotta o zero se il lavoro ne ha i requisiti, oppure il reverse charge interno se la fornitura ne rientra. Il reverse charge trasferisce l'IVA al cliente e modifica ciò che l'impresa può fatturare"
+    }
+  },
+    "project_completeness": {
+      "country_set": {
+        "fail": "Il progetto non indica nessun paese, quindi non è possibile determinare né la base prezzi, né l'aliquota fiscale né il calendario lavorativo",
+        "suggestion": "Impostare il paese del progetto nelle sue impostazioni. Il paese determina quale pacchetto regionale, imposta e calendario vengono usati per interpretare ogni cifra"
+      },
+      "currency_set": {
+        "fail": "Il progetto non indica nessuna valuta, quindi i suoi computi, ricarichi e contratti non possono essere totalizzati",
+        "suggestion": "Scegliere la valuta del progetto nelle sue impostazioni. Ogni computo e ogni contratto è valorizzato in essa e ogni totale viene letto in essa"
+      },
+      "currency_matches_bill": {
+        "fail": "Il progetto è valorizzato in {project_currency}, ma alcune righe di questo computo sono valorizzate in {bill_currencies}",
+        "suggestion": "Convertire le righe nella valuta del progetto a un cambio dichiarato, oppure registrare il cambio sul progetto, affinché il totale del computo sia un'unica cifra"
+      },
+      "priced_bill_present": {
+        "fail": "Il progetto non ha nessun computo metrico con voci, quindi non c'è nulla da cui stimare",
+        "suggestion": "Creare un computo metrico e aggiungere voci, oppure importarne uno da un modello CAD, un foglio di calcolo o un file di interscambio"
+      },
+      "bill_base_date_set": {
+        "fail": "Il computo \"{bill}\" non indica la data base a cui sono riferiti i suoi prezzi",
+        "suggestion": "Registrare la data base sul computo. Senza di essa i prezzi non possono essere aggiornati, attualizzati alla propria data né confrontati con un'altra stima"
+      },
+      "classification_standard_set": {
+        "fail": "Il progetto non ha nessuno standard di classificazione, quindi le sue voci portano codici che nessuno può verificare",
+        "suggestion": "Scegliere lo standard di classificazione secondo cui è codificato il progetto. Determina anche quali set di regole nazionali esegue la validazione"
+      },
+      "planned_dates_set": {
+        "both_missing": "Il progetto non ha né una data di inizio prevista né una data di fine prevista",
+        "start_missing": "Il progetto ha una data di fine prevista ma non una data di inizio prevista",
+        "end_missing": "Il progetto ha una data di inizio prevista ma non una data di fine prevista",
+        "unreadable": "La data prevista \"{value}\" non può essere letta come data",
+        "suggestion": "Inserire le date di inizio e fine previste del progetto come date. I costi legati al tempo, la revisione prezzi e il programma lavori sono valorizzati tra queste due date"
+      },
+      "planned_dates_ordered": {
+        "fail": "Il progetto è previsto iniziare il {start} e terminare il {end}, che è prima dell'inizio",
+        "suggestion": "Scambiare o correggere le date previste affinché l'inizio preceda la fine"
+      },
+      "client_recorded": {
+        "fail": "Il progetto non registra nessun committente, e nessun contratto indica un employer",
+        "suggestion": "Registrare il committente sul progetto, oppure aggiungere l'employer come parte nel contratto, affinché la stima abbia un destinatario"
+      },
+      "procurement_started": {
+        "fail": "Il progetto è nella fase {phase}, eppure non ha nessun contratto né nessun pacchetto di gara",
+        "suggestion": "Creare un pacchetto di gara a partire dal computo o registrare il contratto, oppure riportare la fase allo stadio di stima in cui il progetto effettivamente si trova"
+      }
+    },
+  "boq_resources": {
+    "unit_rate_not_rederived": {
+      "fail": "Voce {ordinal}: le righe delle risorse non possono valorizzare la voce, quindi il prezzo unitario non è stato ricalcolato a partire da esse",
+      "fallback_allowance": "Voce {ordinal}: le righe delle risorse sono una ripartizione forfettaria stimata che riporta la quantità della voce, quindi il prezzo unitario non è stato ricalcolato a partire da esse",
+      "assumed_norm": "Voce {ordinal}: le righe delle risorse riportano rendimenti che il catalogo non ha mai indicato, quindi il prezzo unitario non è stato ricalcolato a partire da esse",
+      "norm_collapsed": "Voce {ordinal}: le righe delle risorse hanno perso il rendimento di catalogo e riportano invece la quantità della voce, quindi il prezzo unitario non è stato ricalcolato a partire da esse",
+      "whole_position_quantities": "Voce {ordinal}: le righe delle risorse riportano le quantità dell'intera voce invece dei rendimenti per unità, quindi il prezzo unitario non è stato ricalcolato a partire da esse",
+      "suggestion": "Verificare l'analisi di prezzo - ricalcolare la voce a partire dal suo elemento di catalogo tramite la revisione dei rendimenti delle risorse, oppure correggere manualmente le righe"
+    }
+  },
+  "poland": {
+    "knr_reference_required": {
+      "fail": "La voce {ordinal} non cita nessuna tabella del catalogo KNR",
+      "suggestion": "Indicare nel campo podstawa la tabella di catalogo da cui provengono i rendimenti, ad esempio KNR 2-02 0201-01, oppure scrivere kalkulacja indywidualna per una voce valorizzata con calcolo proprio"
+    },
+    "knr_reference_recognised": {
+      "fail": "Il riferimento '{code}' sulla voce {ordinal} non indica nessuna famiglia di catalogo KNR",
+      "suggestion": "Iniziare il riferimento con la relativa famiglia di catalogo, come KNR, KNNR, KNR-W o KSNR, oppure contrassegnare la voce come kalkulacja indywidualna"
+    }
+  }
+}

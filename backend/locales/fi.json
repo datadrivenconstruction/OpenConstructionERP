@@ -1,4 +1,5 @@
 {
+  "costs.catalog_name_unavailable": "Tätä nimeä ei voi käyttää uudelle luettelolle. Valitse toinen nimi.",
   "app": {
     "name": "OpenConstructionERP",
     "tagline": "Avoimen lähdekoodin rakennuskustannuslaskenta"

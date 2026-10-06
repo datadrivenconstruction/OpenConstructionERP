@@ -18,7 +18,15 @@ import { useToastStore } from '@/stores/useToastStore';
 import { activeLanguageTag, extractErrorMessageFromBody } from '@/shared/lib/api';
 import { fmtFixed } from '@/shared/lib/formatters';
 import { importIssueText, type ImportIssue } from './importIssueText';
+import { alreadyImported, importFailureFromBody, importFailureText } from './importFailureText';
 import { chooseColumn, columnMappingField, type ColumnMapping } from './columnMappingOverride';
+import {
+  ImportJobFailedError,
+  importProgressText,
+  isImportJob,
+  waitForImportJob,
+  type ImportProgress,
+} from './importJob';
 
 /* ── Types ──────────────────────────────────────────────────────────── */
 
@@ -49,6 +57,8 @@ interface PreviewResponse {
   metadata?: {
     original_columns?: string[];
     column_mapping?: Record<string, string>;
+    /** Measured rows read from an XPWE bill's measurement sheets. */
+    measurement_rows?: number;
     [key: string]: unknown;
   };
 }
@@ -81,6 +91,7 @@ const FORMAT_EXTS: Record<string, string[]> = {
   Excel: ['xlsx', 'xls'],
   CSV: ['csv'],
   PDF: ['pdf'],
+  XPWE: ['xpwe'],
 };
 
 function detectFormat(filename: string): string {
@@ -94,7 +105,7 @@ function detectFormat(filename: string): string {
   return ext.toUpperCase() || 'Unknown';
 }
 
-const SUPPORTED_FORMATS = ['GAEB', 'Excel', 'PDF', 'CSV'] as const;
+const SUPPORTED_FORMATS = ['GAEB', 'Excel', 'PDF', 'CSV', 'XPWE'] as const;
 
 const MAX_PREVIEW_ROWS = 500;
 
@@ -116,7 +127,16 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
   const [preview, setPreview] = useState<PreviewResponse | null>(null);
   const [parsing, setParsing] = useState(false);
   const [importing, setImporting] = useState(false);
+  // Progress of the background job the import runs as; null before it answers.
+  const [jobProgress, setJobProgress] = useState<ImportProgress | null>(null);
+  // Stops polling when the editor goes away. Closing the dialog does not: the
+  // import goes on on the server and its result toast still comes.
+  const jobWaitRef = useRef<AbortController | null>(null);
+  useEffect(() => () => jobWaitRef.current?.abort(), []);
   const [error, setError] = useState<string | null>(null);
+  // The file was imported into this bill before: said in words, with the
+  // choice to import it again.
+  const [alreadyDone, setAlreadyDone] = useState<string | null>(null);
   const [warningsExpanded, setWarningsExpanded] = useState(false);
   const [errorsExpanded, setErrorsExpanded] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -139,6 +159,7 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
       setPreview(null);
       setParsing(false);
       setImporting(false);
+      setJobProgress(null);
       setError(null);
       setWarningsExpanded(false);
       setErrorsExpanded(false);
@@ -173,6 +194,7 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
         setStep('upload'); // Stay on upload step while parsing
       }
       setError(null);
+      setAlreadyDone(null);
       setParsing(true);
 
       const token = useAuthStore.getState().accessToken;
@@ -194,7 +216,8 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
 
         if (!res.ok) {
           const body = await res.json().catch(() => ({ detail: res.statusText }));
-          throw new Error(extractErrorMessageFromBody(body) ?? 'Preview failed');
+          const failed = t('boq.import_failed', { defaultValue: 'Import failed' });
+          throw new Error(importFailureFromBody(body, t, failed) ?? extractErrorMessageFromBody(body) ?? failed);
         }
 
         const data: PreviewResponse = await res.json();
@@ -230,10 +253,12 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
 
   /* ── Step 3: Confirm import ─────────────────────────────────────── */
 
-  const handleImport = useCallback(async () => {
+  const handleImport = useCallback(async (force = false) => {
     if (!file) return;
     setImporting(true);
+    setJobProgress(null);
     setError(null);
+    setAlreadyDone(null);
 
     const token = useAuthStore.getState().accessToken;
     const form = new FormData();
@@ -248,12 +273,19 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
       // refusal it may bring back (a locked bill's 409) is worded by the
       // server, so name the UI language or it comes in the browser's.
       const lang = activeLanguageTag();
-      const res = await fetch(`/api/v1/boq/boqs/${boqId}/import/auto/`, {
+      const headers = {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(lang ? { 'Accept-Language': lang } : {}),
+      };
+      // In the background: the server answers at once with a job to follow,
+      // and the same file posted again while that job runs gets the job back
+      // instead of importing the bill a second time. A file imported before
+      // is answered 409 and imports again only on ``force``. The 90 s limit
+      // is for this answer.
+      const query = force ? '?background=true&force=true' : '?background=true';
+      const res = await fetch(`/api/v1/boq/boqs/${boqId}/import/auto/${query}`, {
         method: 'POST',
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          ...(lang ? { 'Accept-Language': lang } : {}),
-        },
+        headers,
         body: form,
         signal: controller.signal,
       });
@@ -261,10 +293,32 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
 
       if (!res.ok) {
         const body = await res.json().catch(() => ({ detail: res.statusText }));
-        throw new Error(extractErrorMessageFromBody(body) ?? 'Import failed');
+        const done = alreadyImported(res.status, body);
+        if (done) {
+          setAlreadyDone(importFailureText(done, t, t('boq.import_failed', { defaultValue: 'Import failed' })));
+          return;
+        }
+        const failed = t('boq.import_failed', { defaultValue: 'Import failed' });
+        throw new Error(importFailureFromBody(body, t, failed) ?? extractErrorMessageFromBody(body) ?? failed);
       }
 
-      const result: {
+      const answer: unknown = await res.json();
+      let body = answer;
+      if (isImportJob(answer)) {
+        const wait = new AbortController();
+        jobWaitRef.current = wait;
+        setJobProgress({ percent: answer.progress_percent, phase: null });
+        body = await waitForImportJob({
+          boqId,
+          jobId: answer.job_id,
+          headers,
+          t,
+          onProgress: setJobProgress,
+          signal: wait.signal,
+        });
+      }
+
+      const result = body as {
         imported?: number;
         created?: number;
         updated?: number;
@@ -273,7 +327,7 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
         source_format?: string;
         currency?: string;
         warnings?: ImportIssue[];
-      } = await res.json();
+      };
 
       const imported = result.imported ?? ((result.created ?? 0) + (result.updated ?? 0));
       const unmapped = (result.warnings ?? []).filter((w) => w.code === 'column_mapping_not_applied');
@@ -290,6 +344,18 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
       onClose();
     } catch (err) {
       clearTimeout(timeoutId);
+      if (err instanceof DOMException && err.name === 'AbortError' && jobWaitRef.current?.signal.aborted) {
+        // The editor went away while the job ran; nothing to tell.
+        return;
+      }
+      if (err instanceof ImportJobFailedError) {
+        // Also as a toast: the dialog may have been closed while the job ran.
+        addToast({
+          type: 'error',
+          title: t('boq.import_failed', { defaultValue: 'Import failed' }),
+          message: err.message,
+        });
+      }
       const isTimeout = err instanceof DOMException && err.name === 'AbortError';
       setError(
         isTimeout
@@ -302,6 +368,8 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
       );
     } finally {
       setImporting(false);
+      setJobProgress(null);
+      jobWaitRef.current = null;
     }
   }, [file, boqId, addToast, t, onImported, onClose, previewedMapping]);
 
@@ -415,7 +483,7 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".xlsx,.xls,.csv,.pdf,.x81,.x83,.x84,.xml"
+                accept=".xlsx,.xls,.csv,.pdf,.x81,.x83,.x84,.xml,.xpwe"
                 className="hidden"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
@@ -480,6 +548,12 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
                   label={t('boq.import_preview.stats_format', { defaultValue: 'Format' })}
                   value={preview.source_format || fileFormat}
                 />
+                {(preview.metadata?.measurement_rows ?? 0) > 0 && (
+                  <StatCard
+                    label={t('boq.import_preview.stats_measurement_rows', { defaultValue: 'Measurement rows' })}
+                    value={String(preview.metadata?.measurement_rows)}
+                  />
+                )}
               </div>
 
               {/* Column mapping */}
@@ -701,10 +775,50 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
                 </div>
               )}
 
+              {importing && jobProgress && (
+                <div className="space-y-1.5" role="status" aria-live="polite">
+                  <div className="flex items-center gap-2 text-xs text-content-secondary">
+                    <Loader2 size={12} className="animate-spin shrink-0" />
+                    <span>{importProgressText(jobProgress, t)}</span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-surface-secondary overflow-hidden">
+                    <div
+                      className="h-full bg-oe-blue transition-all"
+                      style={{ width: `${Math.max(0, Math.min(100, jobProgress.percent))}%` }}
+                    />
+                  </div>
+                  <p className="text-2xs text-content-tertiary">
+                    {t('boq.import_job_running_hint', {
+                      defaultValue: 'Closing this window does not stop the import. Importing the same file again picks up this import instead of starting a second one.',
+                    })}
+                  </p>
+                </div>
+              )}
+
               {error && (
                 <div className="flex items-start gap-2 p-2.5 rounded-lg bg-semantic-error/10 text-semantic-error text-xs">
                   <AlertTriangle size={14} className="shrink-0 mt-0.5" />
                   <p>{error}</p>
+                </div>
+              )}
+
+              {alreadyDone && (
+                <div
+                  className="flex items-start gap-2 p-2.5 rounded-lg bg-semantic-warning/10 text-content-primary text-xs"
+                  role="alert"
+                >
+                  <AlertTriangle size={14} className="shrink-0 mt-0.5 text-semantic-warning" />
+                  <div className="space-y-2">
+                    <p>{alreadyDone}</p>
+                    <button
+                      type="button"
+                      onClick={() => handleImport(true)}
+                      disabled={importing}
+                      className="px-3 py-1 text-xs font-medium rounded-lg border border-border bg-surface-primary hover:bg-surface-secondary disabled:opacity-50 transition-colors"
+                    >
+                      {t('boq.import_again', { defaultValue: 'Import again' })}
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -752,7 +866,7 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
           {step === 'confirm' && (
             <button
               type="button"
-              onClick={handleImport}
+              onClick={() => handleImport()}
               disabled={importing}
               className="px-4 py-1.5 text-xs font-medium rounded-lg bg-oe-blue text-white hover:bg-oe-blue/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5"
             >

@@ -172,20 +172,20 @@ async def test_a_country_with_no_pack_lands_on_universal_and_says_why(
     owner_id: uuid.UUID,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Italy registers no national rule set, so universal is the right answer.
+    """The Netherlands registers no national rule set, so universal is the right answer.
 
     Right, and until now indistinguishable from the wrong one. The record has
     to separate "this country claims no pack" from "nobody named a country",
     because those two produce the same pack id and mean opposite things.
     """
     _activate(monkeypatch, None)
-    project = await _service(session).create_project(_wizard_payload(country_code="IT"), owner_id)
+    project = await _service(session).create_project(_wizard_payload(country_code="NL"), owner_id)
     await session.flush()
 
-    assert project.country_code == "IT"
+    assert project.country_code == "NL"
     assert project.compliance_rule_packs == ["universal"]
     assert project.metadata_.get("compliance_pack_source") == "country_without_pack", (
-        "an Italian project falls into the universal pack with nothing on the row saying it was "
+        "a Dutch project falls into the universal pack with nothing on the row saying it was "
         "the country that claimed no pack. That reads exactly like a project nobody gave a "
         "country to."
     )
@@ -282,15 +282,15 @@ async def test_a_region_with_no_pack_is_not_reported_as_nothing_named(
 ) -> None:
     """The same conflation, one axis over, which is the easy one to leave in.
 
-    A project whose region reads "Italy" reaches the universal pack for exactly
-    the reason an Italian ``country_code`` does - no Italian rule set is
+    A project whose region reads "Netherlands" reaches the universal pack for
+    exactly the reason a Dutch ``country_code`` does - no Dutch rule set is
     registered - and calling that ``default`` would say nobody named a
     jurisdiction when somebody did. Most of the countries that have no national
     rule set ship a demo and a region label, so this is the common way in, not
     a corner.
     """
     _activate(monkeypatch, None)
-    project = await _service(session).create_project(_wizard_payload(region="Italy"), owner_id)
+    project = await _service(session).create_project(_wizard_payload(region="Netherlands"), owner_id)
     await session.flush()
 
     assert project.compliance_rule_packs == ["universal"]

@@ -1,4 +1,5 @@
 {
+  "costs.catalog_name_unavailable": "ไม่สามารถใช้ชื่อนี้สำหรับแคตตาล็อกใหม่ได้ กรุณาเลือกชื่ออื่น",
   "app": {
     "name": "OpenConstructionERP",
     "tagline": "การประมาณราคาก่อสร้างแบบโอเพนซอร์ส"

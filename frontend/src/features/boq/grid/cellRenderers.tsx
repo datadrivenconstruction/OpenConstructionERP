@@ -5431,6 +5431,39 @@ export function UnitRateCellRenderer(params: ICellRendererParams) {
     [ctx, data, meta, numericVal, stats],
   );
 
+  // An imported deduction line has no price on purpose: the bill's deductions
+  // markup line takes its amount off. Show its own signed rate with a badge so
+  // the zero does not read as a missing price.
+  if (meta.deduction === true) {
+    const money = (raw: unknown) => {
+      const n = parseFloat(String(raw ?? ''));
+      if (isNaN(n)) return '';
+      return reuseNumberFormat(`cell.fixed2|${ctx?.locale ?? getNumberLocale()}`, () => new Intl.NumberFormat(ctx?.locale ?? getNumberLocale(), {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })).format(n);
+    };
+    return (
+      <span
+        className="flex items-center justify-end gap-1 w-full h-full text-xs tabular-nums leading-[32px] text-content-tertiary"
+        title={t('boq.deduction_rate_tooltip', {
+          defaultValue:
+            'A deduction of {{amount}}. The line adds nothing itself: its amount is taken off by the deductions line among the bill markups.',
+          amount: money(meta.deduction_amount),
+        })}
+        data-testid={`boq-deduction-rate-${data.id}`}
+      >
+        <span
+          className="shrink-0 inline-flex items-center h-4 px-1 rounded text-[9px] font-semibold
+                     bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300"
+        >
+          {t('boq.deduction_badge', { defaultValue: 'Deduction' })}
+        </span>
+        <span>{money(meta.deduction_unit_rate)}</span>
+      </span>
+    );
+  }
+
   // No variant cache → render the formatted number, prefixed with a
   // compact currency badge when the position is priced in a non-base
   // currency. Cell is still editable (click → AG Grid mounts the number

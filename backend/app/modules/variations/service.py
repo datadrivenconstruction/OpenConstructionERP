@@ -2072,6 +2072,7 @@ class VariationsService:
         change rather than in whatever order the database returned.
         """
         from app.modules.boq.models import Position
+        from app.modules.boq.price_list_carry import provenance_of
 
         positions: list[Any] = []
         pending: list[dict[str, Any]] = []
@@ -2092,6 +2093,9 @@ class VariationsService:
                     unit_rate=format(rate, "f"),
                     total=format(quantity * rate, "f"),
                     classification=dict(source.classification or {}),
+                    # Where the rate came from (the price list, the item it
+                    # was picked from), so the copy is judged like its source.
+                    metadata_=provenance_of(source.metadata_),
                     source="manual",
                     cad_element_ids=[],
                     sort_order=index,

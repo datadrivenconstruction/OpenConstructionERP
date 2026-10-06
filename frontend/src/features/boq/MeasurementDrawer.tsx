@@ -226,9 +226,16 @@ export function MeasurementDrawer({
   // Typed explicitly rather than inferred: the success handler feeds a state
   // setter, and an inferred `unknown` there is accepted by the compiler right
   // up until it is not.
+  // The line rounding rule lives on the saved sheet and is not edited here; it
+  // goes out with every recompute so the drawer totals the way the position does.
+  const rowDecimals = stored.data?.row_decimals ?? null;
   const compute = useMutation<MeasurementSheet, Error, MeasurementLineInput[]>({
     mutationFn: (lines) =>
-      boqApi.computeMeasurement(positionId as string, { lines, unit: position?.unit }),
+      boqApi.computeMeasurement(positionId as string, {
+        lines,
+        unit: position?.unit,
+        row_decimals: rowDecimals,
+      }),
   });
 
   // The last answer is kept while a new one is in flight, so the totals do not
@@ -262,7 +269,7 @@ export function MeasurementDrawer({
     // payloadKey rather than payload: the array is rebuilt on every render and
     // would restart the timer forever.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [payloadKey, positionId]);
+  }, [payloadKey, positionId, rowDecimals]);
 
   const patch = (index: number, field: keyof Row, value: string) =>
     setRows((prev) => prev.map((r, i) => (i === index ? { ...r, [field]: value } : r)));

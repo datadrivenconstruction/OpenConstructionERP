@@ -238,7 +238,6 @@ NO_NATIONAL_RULES_REGISTERED: dict[str, str] = {
     "HR": "No Croatian rule set is registered; the Croatian demos measure to DIN 276.",
     "ID": "No Indonesian rule set is registered; nothing reads an SNI code.",
     "IE": "No Irish rule set is registered; the pack declares NRM.",
-    "IT": "No Italian rule set is registered. Nothing in the engine reads a DEI or computo metrico code.",
     "KR": "No Korean rule set is registered.",
     "Middle East": "Not a country. The built-in Dubai demo carries it as free text.",
     "NG": "No Nigerian rule set is registered; nothing reads a BMPIU or FMW code.",
@@ -352,6 +351,7 @@ NATIONAL_RULE_SET_BY_COUNTRY: dict[str, str] = {
     "GR": "greece",
     "HU": "hungary",
     "IN": "cpwd",
+    "IT": "italy",
     "JP": "sekisan",
     "MX": "mexico",
     "PL": "poland",
@@ -546,10 +546,11 @@ def test_no_national_rule_set_is_inert_on_the_payload_the_gate_builds() -> None:
 
 
 #: The packs whose lines this file writes out in full, with a compliant and a
-#: malformed code apiece. Six and not eighteen on purpose: a compliant line has
+#: malformed code apiece. Seven and not nineteen on purpose: a compliant line has
 #: to be written against the standard itself, and inventing the rest from the
 #: rule sources would be asserting what the regex says rather than what the
-#: standard says. Romania, Greece and Ukraine are here because their lines were
+#: standard says. Italy's compliant code is a voce of the Toscana 2025 list as
+#: published. Romania, Greece and Ukraine are here because their lines were
 #: written from the sources their packs cite. The test above covers every
 #: national set for the weaker property, that none of them is inert.
 _DISCRIMINATION_CASES: dict[str, dict[str, list[ContractLine]]] = {
@@ -579,6 +580,20 @@ _DISCRIMINATION_CASES: dict[str, dict[str, list[ContractLine]]] = {
         "bare": [_sov_line("1", "Excavation", "m3")],
         "compliant": [_sov_line("1.1", "Excavation", "m3", {"net": "ΟΙΚ 20.05.01"})],
         "malformed": [_sov_line("1.1", "Excavation", "m3", {"net": "ΟΙΚ 99.05.01"})],
+    },
+    # The prezzario voce a line is priced from (region, edition year, item
+    # path), with the safety costs on a line of their own as the code of
+    # public contracts asks (D.Lgs. 36/2023 art. 41).
+    "IT": {
+        "bare": [_sov_line("1", "Excavation", "m3")],
+        "compliant": [
+            _sov_line("1.1", "Demolizione totale di edifici", "m3", {"voci": "TOS25_01.A03.001.001"}),
+            _sov_line("1.2", "Oneri della sicurezza non soggetti a ribasso", "pcs", {"voci": "NP.01"}),
+        ],
+        "malformed": [
+            _sov_line("1.1", "Demolizione totale di edifici", "m3", {"voci": "see specification"}),
+            _sov_line("1.2", "Oneri della sicurezza non soggetti a ribasso", "pcs", {"voci": "NP.01"}),
+        ],
     },
     # The chapter of the Ukrainian summary estimate, one to twelve.
     "UA": {

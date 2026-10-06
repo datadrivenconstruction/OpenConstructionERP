@@ -1,0 +1,102 @@
+<?mso-application progid="Synthetic.Fixture.Document"?><PweDocumento><CopyRight>Synthetic test fixture</CopyRight><TipoDocumento>1</TipoDocumento><TipoFormato>XMLPwe</TipoFormato><Versione>5.05</Versione><SourceVersione>0</SourceVersione><SourceNome>fixture</SourceNome><FileNameDocumento>computo_small</FileNameDocumento>
+<PweDatiGenerali>
+  <PweDGProgetto>
+    <PweDGDatiGenerali>
+      <PercPrezzi>0</PercPrezzi>
+      <Comune>Comune di Esempio</Comune>
+      <Provincia>EX</Provincia>
+      <Oggetto>Ristrutturazione della scuola elementare</Oggetto>
+      <Committente>Amministrazione di prova</Committente>
+      <Impresa></Impresa>
+      <ParteOpera></ParteOpera>
+    </PweDGDatiGenerali>
+  </PweDGProgetto>
+  <PweDGCapitoliCategorie>
+    <PweDGSuperCapitoli>
+      <DGSuperCapitoliItem ID="1"><DesSintetica>OPERE EDILI</DesSintetica><DesEstesa></DesEstesa><Codice>E</Codice><Percentuale>0</Percentuale></DGSuperCapitoliItem>
+      <DGSuperCapitoliItem ID="2"><DesSintetica>SICUREZZA</DesSintetica><DesEstesa></DesEstesa><Codice>S</Codice><Percentuale>0</Percentuale></DGSuperCapitoliItem>
+    </PweDGSuperCapitoli>
+    <PweDGCapitoli>
+      <DGCapitoliItem ID="1"><DesSintetica>Demolizioni</DesSintetica><DesEstesa></DesEstesa><Codice>E.01</Codice><Percentuale>0</Percentuale></DGCapitoliItem>
+      <DGCapitoliItem ID="2"><DesSintetica>Murature</DesSintetica><DesEstesa></DesEstesa><Codice>E.02</Codice><Percentuale>0</Percentuale></DGCapitoliItem>
+    </PweDGCapitoli>
+    <PweDGSubCapitoli>
+      <DGSubCapitoliItem ID="1"><DesSintetica>Murature portanti</DesSintetica><DesEstesa></DesEstesa><Codice>E.02.a</Codice><Percentuale>0</Percentuale></DGSubCapitoliItem>
+    </PweDGSubCapitoli>
+    <PweDGSuperCategorie>
+      <DGSuperCategorieItem ID="1"><DesSintetica>Piano terra</DesSintetica><DesEstesa></DesEstesa><Codice>PT</Codice><Percentuale>0</Percentuale></DGSuperCategorieItem>
+      <DGSuperCategorieItem ID="2"><DesSintetica>Piano primo</DesSintetica><DesEstesa></DesEstesa><Codice>P1</Codice><Percentuale>0</Percentuale></DGSuperCategorieItem>
+    </PweDGSuperCategorie>
+    <PweDGCategorie>
+      <DGCategorieItem ID="1"><DesSintetica>Demolizioni</DesSintetica><DesEstesa></DesEstesa><Codice>D</Codice><Percentuale>0</Percentuale></DGCategorieItem>
+      <DGCategorieItem ID="2"><DesSintetica>Murature</DesSintetica><DesEstesa></DesEstesa><Codice>M</Codice><Percentuale>0</Percentuale></DGCategorieItem>
+    </PweDGCategorie>
+    <PweDGSubCategorie>
+      <DGSubCategorieItem ID="1"><DesSintetica>Ala nord</DesSintetica><DesEstesa></DesEstesa><Codice>N</Codice><Percentuale>0</Percentuale></DGSubCategorieItem>
+    </PweDGSubCategorie>
+  </PweDGCapitoliCategorie>
+  <PweDGModuli>
+    <PweDGAnalisi>
+      <SpeseGenerali>15</SpeseGenerali>
+      <UtiliImpresa>10</UtiliImpresa>
+      <OneriAccessoriSc>0</OneriAccessoriSc>
+      <ConfQuantita>0</ConfQuantita>
+    </PweDGAnalisi>
+  </PweDGModuli>
+  <PweDGConfigurazione>
+    <PweDGConfigNumeri>
+      <Divisa>Euro</Divisa>
+      <PartiUguali>9.2|0</PartiUguali>
+      <Lunghezza>9.2|0</Lunghezza>
+      <Larghezza>9.2|0</Larghezza>
+      <HPeso>9.3|0</HPeso>
+      <Quantita>10.2|0</Quantita>
+      <Prezzi>10.2|0</Prezzi>
+      <PrezziTotale>14.2|0</PrezziTotale>
+    </PweDGConfigNumeri>
+  </PweDGConfigurazione>
+</PweDatiGenerali>
+<PweMisurazioni>
+  <PweVociComputo>
+    <VCItem ID="1"><IDEP>1</IDEP><Quantita>49.11</Quantita><DataMis>01/03/2026</DataMis><Flags>0</Flags><IDSpCat>1</IDSpCat><IDCat>1</IDCat><IDSbCat>0</IDSbCat>
+      <PweVCMisure>
+        <RGItem ID="1"><IDVV>-2</IDVV><Descrizione>Pareti interne aula 1</Descrizione><PartiUguali>2</PartiUguali><Lunghezza>5.00</Lunghezza><Larghezza></Larghezza><HPeso>3.00</HPeso><Quantita>30.00</Quantita><Flags>0</Flags></RGItem>
+        <RGItem ID="2"><IDVV>-2</IDVV><Descrizione>Tramezzo corridoio</Descrizione><PartiUguali></PartiUguali><Lunghezza>2(3+4)</Lunghezza><Larghezza></Larghezza><HPeso>1,5</HPeso><Quantita>21.00</Quantita><Flags>0</Flags></RGItem>
+        <RGItem ID="3"><IDVV>-2</IDVV><Descrizione>A detrarre vano porta</Descrizione><PartiUguali>1</PartiUguali><Lunghezza>0.90</Lunghezza><Larghezza></Larghezza><HPeso>2.10</HPeso><Quantita>-1.89</Quantita><Flags>0</Flags></RGItem>
+        <RGItem ID="4"><IDVV>-2</IDVV><Descrizione>Lato cortile</Descrizione><PartiUguali></PartiUguali><Lunghezza></Lunghezza><Larghezza></Larghezza><HPeso></HPeso><Quantita></Quantita><Flags>0</Flags></RGItem>
+      </PweVCMisure>
+    </VCItem>
+    <VCItem ID="2"><IDEP>2</IDEP><Quantita>12.00</Quantita><DataMis>01/03/2026</DataMis><Flags>0</Flags><IDSpCat>1</IDSpCat><IDCat>2</IDCat><IDSbCat>0</IDSbCat>
+      <PweVCMisure>
+        <RGItem ID="5"><IDVV>-2</IDVV><Descrizione>Muro di spina</Descrizione><PartiUguali>3</PartiUguali><Lunghezza>4.00</Lunghezza><Larghezza></Larghezza><HPeso></HPeso><Quantita>12.00</Quantita><Flags>0</Flags></RGItem>
+      </PweVCMisure>
+    </VCItem>
+    <VCItem ID="3"><IDEP>3</IDEP><Quantita>1.00</Quantita><DataMis>01/03/2026</DataMis><Flags>0</Flags><IDSpCat>2</IDSpCat><IDCat>0</IDCat><IDSbCat>1</IDSbCat>
+      <PweVCMisure></PweVCMisure>
+    </VCItem>
+    <VCItem ID="4"><IDEP>2</IDEP><Quantita>24.00</Quantita><DataMis>02/03/2026</DataMis><Flags>0</Flags><IDSpCat>2</IDSpCat><IDCat>2</IDCat><IDSbCat>0</IDSbCat>
+      <PweVCMisure>
+        <RGItem ID="6"><IDVV>2</IDVV><Descrizione>Come al piano terra</Descrizione><PartiUguali>2</PartiUguali><Lunghezza></Lunghezza><Larghezza></Larghezza><HPeso></HPeso><Quantita>24.00</Quantita><Flags>0</Flags></RGItem>
+        <RGItem ID="7"><IDVV>-2</IDVV><Descrizione>Sommano parziale</Descrizione><PartiUguali></PartiUguali><Lunghezza></Lunghezza><Larghezza></Larghezza><HPeso></HPeso><Quantita>24.00</Quantita><Flags>2</Flags></RGItem>
+      </PweVCMisure>
+    </VCItem>
+    <VCItem ID="5"><IDEP>1</IDEP><Quantita>10.00</Quantita><DataMis>02/03/2026</DataMis><Flags>0</Flags><IDSpCat>0</IDSpCat><IDCat>0</IDCat><IDSbCat>0</IDSbCat>
+      <PweVCMisure>
+        <RGItem ID="8"><IDVV>-2</IDVV><Descrizione>Recinzione esterna</Descrizione><PartiUguali></PartiUguali><Lunghezza>10</Lunghezza><Larghezza></Larghezza><HPeso></HPeso><Quantita>10.00</Quantita><Flags>0</Flags></RGItem>
+      </PweVCMisure>
+    </VCItem>
+  </PweVociComputo>
+  <PweElencoPrezzi>
+    <EPItem ID="1"><TipoEP>0</TipoEP><Tariffa>EX26_01.A03.001.001</Tariffa><Articolo></Articolo><DesRidotta>Demolizione di muratura</DesRidotta><DesEstesa>Demolizione totale di muratura in mattoni pieni, eseguita con mezzi manuali, compreso il carico e il trasporto a discarica autorizzata.</DesEstesa><DesBreve>Demolizione muratura</DesBreve><UnMisura>mq</UnMisura><Prezzo1>13.63</Prezzo1><Prezzo2>0</Prezzo2><Prezzo3>0</Prezzo3><Prezzo4>0</Prezzo4><Prezzo5>0</Prezzo5><IDSpCap>1</IDSpCap><IDCap>1</IDCap><IDSbCap>0</IDSbCap><Flags>0</Flags><Data>01/01/2026</Data><AdrInternet></AdrInternet><IncSIC>2.5</IncSIC><IncMDO>35.44</IncMDO><IncMAT>10</IncMAT><IncATTR>54.56</IncATTR>
+      <PweEPAnalisi>
+        <PweEPAR>
+          <EPARItem ID="1"><Tipo>1</Tipo><IDEP>0</IDEP><Descrizione>Operaio comune</Descrizione><Misura>ora</Misura><Qt>0.15</Qt><Prezzo>32.17</Prezzo></EPARItem>
+          <EPARItem ID="2"><Tipo>1</Tipo><IDEP>0</IDEP><Descrizione>Escavatore con operatore</Descrizione><Misura>ora</Misura><Qt>0.02</Qt><Prezzo>25.97</Prezzo></EPARItem>
+        </PweEPAR>
+      </PweEPAnalisi>
+    </EPItem>
+    <EPItem ID="2"><TipoEP>0</TipoEP><Tariffa>EX26_01.B02.004.002</Tariffa><Articolo></Articolo><DesRidotta>Muratura in blocchi</DesRidotta><DesEstesa>Muratura portante in blocchi di laterizio porizzato, spessore 30 cm, con malta cementizia.</DesEstesa><DesBreve>Muratura blocchi</DesBreve><UnMisura>m²</UnMisura><Prezzo1>48,20</Prezzo1><Prezzo2></Prezzo2><Prezzo3></Prezzo3><Prezzo4></Prezzo4><Prezzo5></Prezzo5><IDSpCap>1</IDSpCap><IDCap>2</IDCap><IDSbCap>1</IDSbCap><Flags>0</Flags><Data>01/01/2026</Data><AdrInternet></AdrInternet><IncSIC>0</IncSIC><IncMDO>40,5</IncMDO><IncMAT>52</IncMAT><IncATTR>7,5</IncATTR></EPItem>
+    <EPItem ID="3"><TipoEP>0</TipoEP><Tariffa>EX26_17.S01.001.001</Tariffa><Articolo></Articolo><DesRidotta>Recinzione di cantiere</DesRidotta><DesEstesa>Recinzione provvisoria di cantiere con pannelli metallici su basi in calcestruzzo, per tutta la durata dei lavori.</DesEstesa><DesBreve>Recinzione cantiere</DesBreve><UnMisura>cad</UnMisura><Prezzo1>250.00</Prezzo1><Prezzo2>0</Prezzo2><Prezzo3>0</Prezzo3><Prezzo4>0</Prezzo4><Prezzo5>0</Prezzo5><IDSpCap>2</IDSpCap><IDCap>0</IDCap><IDSbCap>0</IDSbCap><Flags>134217728</Flags><Data>01/01/2026</Data><AdrInternet></AdrInternet><IncSIC>100</IncSIC><IncMDO>20</IncMDO><IncMAT>80</IncMAT><IncATTR>0</IncATTR></EPItem>
+  </PweElencoPrezzi>
+</PweMisurazioni>
+</PweDocumento>

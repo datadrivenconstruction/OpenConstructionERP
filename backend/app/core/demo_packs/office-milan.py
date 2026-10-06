@@ -843,4 +843,28 @@ TEMPLATE = DemoTemplate(
             "I subappalti nel settore edile sono soggetti a inversione contabile."
         ),
     },
+    # The price list every line is cited from, so the Italian voce rules read
+    # the list's own numbering as such. The codes illustrate that numbering;
+    # they are not copied from the published list. The rates are direct cost,
+    # net of the spese generali and utile carried as markups, which
+    # rate_includes_overheads states so they are not taken as counted twice.
+    # The quadro economico carries the same safety line as the bill: the costs
+    # not subject to the tender discount stand apart in both.
+    budget_markups=[
+        (
+            "Oneri della sicurezza non soggetti a ribasso (Safety costs, not subject to discount)",
+            2.5,
+            "other",
+            "direct_cost",
+        ),
+    ],
+    position_metadata={
+        "prezzario": {
+            "region": "Lombardia",
+            "region_code": "LOM",
+            "edition": "2026",
+            "rate_includes_overheads": False,
+            "list": "Prezzario Camera di Commercio di Milano",
+        }
+    },
 )

@@ -222,6 +222,9 @@ def _call_auto(
             session=None,
             delete_missing=False,
             column_mapping=column_mapping,
+            # Called directly, a Query default is a truthy marker, not False.
+            background=False,
+            force=False,
         )
     )
     return body, persisted

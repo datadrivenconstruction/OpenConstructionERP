@@ -1,4 +1,5 @@
 {
+  "costs.catalog_name_unavailable": "この名前は新しいカタログに使用できません。別の名前を選んでください。",
   "app": {
     "name": "OpenConstructionERP",
     "tagline": "オープンソース建設コスト見積"

@@ -1,4 +1,5 @@
 {
+  "costs.catalog_name_unavailable": "Không thể dùng tên này cho danh mục mới. Hãy chọn tên khác.",
   "app": {
     "name": "OpenConstructionERP",
     "tagline": "Dự toán chi phí xây dựng mã nguồn mở"

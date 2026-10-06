@@ -72,6 +72,7 @@ from app.modules.costs.matcher import (
     match_cwicr_items,
 )
 from app.modules.costs.models import CostItem
+from app.modules.costs.pricelist_router import router as pricelist_router
 from app.modules.costs.region_currency import REGION_CURRENCY
 from app.modules.costs.repository import synonym_text_predicate  # noqa: F401
 from app.modules.costs.resource_pricing import ResourcePriceService
@@ -128,6 +129,7 @@ _MAX_COST_ZIP_ENTRIES = 10_000
 _ALLOWED_COST_IMPORT_SIGNATURES: frozenset[str] = frozenset({"zip", "ole"})
 
 router = APIRouter(tags=["costs"])
+router.include_router(pricelist_router)  # the loader mounts this router only
 logger = logging.getLogger(__name__)
 
 
@@ -464,11 +466,13 @@ async def autocomplete_cost_items(
                     codes = [r.get("code", "") for r in results]
                     components_map: dict[str, list[dict[str, Any]]] = {}
                     metadata_map: dict[str, dict[str, Any]] = {}
+                    id_map: dict[str, str] = {}
                     try:
                         items_from_db = await service.get_by_codes(codes)
                         for db_item in items_from_db:
                             components_map[db_item.code] = db_item.components or []
                             metadata_map[db_item.code] = db_item.metadata_ or {}
+                            id_map[db_item.code] = str(db_item.id)
                     except Exception:
                         logger.debug("Cost search: component lookup failed", exc_info=True)
 
@@ -488,6 +492,7 @@ async def autocomplete_cost_items(
                         slim_md = _slim_autocomplete_metadata(md_full)
                         out.append(
                             CostAutocompleteItem(
+                                id=id_map.get(r.get("code", "")),
                                 code=r.get("code", ""),
                                 description=r.get("description", ""),
                                 unit=r.get("unit", ""),
@@ -537,6 +542,7 @@ async def autocomplete_cost_items(
         slim_md = _slim_autocomplete_metadata(md_full)
         out.append(
             CostAutocompleteItem(
+                id=str(item.id),
                 code=item.code,
                 description=item.description,
                 unit=item.unit,

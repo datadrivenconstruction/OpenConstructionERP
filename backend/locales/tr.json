@@ -1,4 +1,5 @@
 {
+  "costs.catalog_name_unavailable": "Bu ad yeni bir katalog için kullanılamaz. Başka bir ad seçin.",
   "app": {
     "name": "OpenConstructionERP",
     "tagline": "Açık kaynak inşaat maliyet tahmini"

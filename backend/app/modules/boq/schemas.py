@@ -520,10 +520,10 @@ class PositionCreate(BaseModel):
     )
     source: str = Field(
         default="manual",
-        pattern=r"^(manual|cad_import|ai_takeoff|gaeb_import|excel_import|bc3_import|takeoff|smart_import|smart_import_ai|cad_import_ai|cost_database|assembly|cwicr|enriched|ai_match|formwork)$",
+        pattern=r"^(manual|cad_import|ai_takeoff|gaeb_import|excel_import|bc3_import|xpwe_import|takeoff|smart_import|smart_import_ai|cad_import_ai|cost_database|assembly|cwicr|enriched|ai_match|formwork)$",
         description=(
             "Data source. One of: manual, cad_import, ai_takeoff, gaeb_import, "
-            "excel_import, bc3_import, takeoff, smart_import, smart_import_ai, "
+            "excel_import, bc3_import, xpwe_import, takeoff, smart_import, smart_import_ai, "
             "cad_import_ai, cost_database, assembly, cwicr, enriched, ai_match, "
             "formwork."
         ),
@@ -1809,22 +1809,7 @@ class ResourceSummaryResponse(BaseModel):
     # without recomputing, and to validate that the per-row percentages
     # sum to 100 (rounding tolerance ≤ 0.01).
     grand_total: Decimal = Decimal("0")
-    # How much of ``grand_total`` went in WITHOUT being converted, keyed by the
-    # currency it is still denominated in.
-    #
-    # A resource priced in a foreign currency is converted to the project base
-    # before it is aggregated. When the project holds no usable rate for that
-    # currency the amount is summed in its own units anyway, deliberately, so a
-    # row is never zeroed and the rollup stays deterministic. The consequence
-    # is that ``grand_total`` can be a blend, and until now nothing on this
-    # response said so: the missing-rate warning exists, but it reaches the
-    # grid per position, names only the CODE, and never reaches this surface at
-    # all. A warning that names a problem without sizing it invites the reader
-    # to assume it is small.
-    #
-    # Empty is the normal case and means every amount in ``grand_total`` is in
-    # the base currency. Non-empty does not make the total wrong to display, it
-    # makes it a figure the reader is entitled to qualify.
+    # Native-currency amounts excluded from grand_total due to unusable FX.
     unconverted: dict[str, Decimal] = Field(default_factory=dict)
 
     @field_serializer("grand_total", when_used="json")

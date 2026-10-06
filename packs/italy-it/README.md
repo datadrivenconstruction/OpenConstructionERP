@@ -33,7 +33,18 @@ rate under specific conditions.
 
 - **Currency EUR**, the `it_iva_22` tax template and the `italy` estimating
   methodology, with an Italian interface.
-- **One cost catalogue**, `cwicr-it-rome`, resolving to IT_ROME.
+- **Two cost bases**: `cwicr-it-rome`, resolving to IT_ROME, and
+  `cwicr-it-toscana`, resolving to IT_TOSCANA, the base built from the
+  Prezzario dei Lavori Pubblici della Toscana.
+- **Regional price lists from the source**: Cost databases, then Import a
+  regional price list, reads the file a region publishes (Toscana and
+  Lombardia XML, Veneto XML, SIX XML, and the CSV, XLSX and JSON tables of
+  Puglia, Campania, Piemonte, Umbria and Lazio, plain or as the ZIP
+  downloaded), shows what it holds with its edition and licence, and imports
+  it as a catalogue named after the region and edition once confirmed.
+- **The `italy` validation rule set**: four prezzario rules run on every
+  Italian bill (voce code format, voce reference present, safety costs
+  carried separately, labour share documented).
 - **A three-step onboarding wizard** that collects the company profile and
   P.IVA, the prezzario and standards selection, and confirms the setup, in
   Italian and English.
@@ -41,9 +52,20 @@ rate under specific conditions.
 
 ## Cost data
 
-No commercial prezzario is bundled. The regional price lists and the DEI
-reference are published documents with their own terms, and the pack references
-them without redistributing the rates.
+One regional price list is redistributed, as a derived base: IT_TOSCANA is
+built from the 2026 edition of the Prezzario dei Lavori Pubblici della Toscana,
+which Regione Toscana publishes as open data. The open-data catalogue record of
+that edition states the licence as CC BY 4.0 (the XML file of the 2025 edition
+names CC BY 3.0 in its own header). The base carries the attribution "Regione
+Toscana, Prezzario dei Lavori Pubblici della Toscana, edizione 2026, CC BY 4.0",
+shown wherever the base is offered or loaded.
+
+No other regional list is bundled, and neither is the DEI reference, which is a
+commercial publication. A list the user imports is read from the file they
+downloaded from the region; each imported item keeps the region, edition and
+the licence and attribution the file or its catalogue record states, and the
+preview says when a file states no licence at all (Veneto, Lombardia and Lazio
+files name none).
 
 ## Standards referenced
 
@@ -54,16 +76,18 @@ them without redistributing the rates.
 - Testo Unico Edilizia (D.P.R. 380/2001)
 - Codice Civile artt. 1655-1677 (appalto)
 
-These are referenced for interoperability and compliance checking. The
-publishers' own text, tables and rates are not reproduced here. Nothing in
+These are referenced for interoperability and compliance checking. Apart from
+the Toscana base described under Cost data, the publishers' own text, tables
+and rates are not reproduced here. Nothing in
 this pack is legal or tax advice.
 
 ## Review status
 
 The regulatory references are drawn from public sources and are pending review
 by an Italian geometra or quantity surveyor before they are relied on for a
-public tender. No engine rule set is active yet; when one is built it will
-carry rules for prezzario item references and voci numbering.
+public tender. The `italy` engine rule set implements five of the twelve
+rules declared in `rule_packs/prezzario_regionale.json`; the other seven are
+declared only and do not run yet.
 
 ## Install
 

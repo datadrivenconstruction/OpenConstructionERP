@@ -1,4 +1,5 @@
 {
+  "costs.catalog_name_unavailable": "Цю назву не можна використати для нового каталогу. Виберіть іншу назву.",
   "app": {
     "name": "OpenConstructionERP",
     "tagline": "Кошторисна справа з відкритим кодом"

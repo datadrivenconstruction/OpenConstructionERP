@@ -1,0 +1,23 @@
+Source: Regione Lazio - Tariffa dei prezzi 2023 - open data edition - PARTE A OPERE EDILI 2023. Licence not checked. Trimmed for tests: a handful of rows, unchanged otherwise.
+;;;;;;;;;;
+;1;INDAGINI GEOGNOSTICHE ANALISI DIAGNOSTICHE DELLE STRUTTURE PROVE GEOFISICHE;;;;;;;;
+;;;;;;;;;;
+;;;;;;;;;;
+A;1.01.;SONDAGGI GEOGNOSTICI A ROTAZIONE;;;;;;;;
+;;;;;;;;;;
+A;1.01.1.;"Trasporto dell’attrezzatura di perforazione a rotazione. Sono compresi: il trasporto di andata e ritorno; l’approntamento dell’attrezzatura di perforazione a rotazione; il carico; lo scarico; il personale necessario.";cad;€ 1 826,34;;;;;;
+;;;;;;;;;;
+A;1.01.2.;Installazione di attrezzatura per sondaggio, a rotazione in corrispondenza di ciascun punto di perforazione, su aree accessibili alle attrezzature di perforazione, compreso l’onere per lo spostamento da un foro al successivo. È compreso quanto occorre per dare l’installazione completa. Per ogni installazione compresa la prima e l’ultima:;;;;;;;;
+A;1.01.2.a.;per distanza fino a 300 m;cad;€ 263,12;;;;;;
+A;1.01.2.b.;per distanza superiore a 300 m;cad;€ 360,53;;;;;;
+;;;;;;;;;;
+A;1.01.3.;Perforazione ad andamento verticale eseguita a rotazione a carotaggio continuo, anche di tipo Wireline, con carotieri di diametro minimo 85 mm, escluso l’uso del diamante. È compreso il tubo di rivestimento in terreni coesivi, l’uso di tutti gli attrezzi e gli accorgimenti necessari ad ottenere la percentuale di carotaggio richiesta. È inoltre compreso quanto altro occorre per dare la perforazione completa. Per ogni metro e per profondità misurate a partire dal piano di campagna:;;;;;;;;
+A;1.01.3.a.;in terreni a granulometria fine (argille, limi sabbiosi):;;;;;;;;
+A;1.01.3.a.1.;da 0,00 m a 20,00 m;m;€ 80,37;;;;;;
+A;1.01.3.a.2.;da 20,01 m a 40,00 m;m;€ 98,04;;;;;;
+A;1.01.3.a.3.;oltre i 40,00 m;m;€ 118,94;;;;;;
+A;1.01.3.b.;in terreni ed in rocce di durezza media (marne, sabbie e tufi):;;;;;;;;
+A;1.01.3.b.1.;da 0,00 m a 20,00 m;m;€ 153,42;;;;;;
+A;1.01.3.b.2.;da 20,01 m a 40,00 m;m;€ 159,11;;;;;;
+A;1.01.3.b.3.;oltre i 40,00 m;m;€ 205,71;;;;;;
+A;1.01.3.c.;in terreni a granulometria grossolana (ghiaie, ciottoli e rocce):;;;;;;;;

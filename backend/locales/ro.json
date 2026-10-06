@@ -1,4 +1,5 @@
 {
+  "costs.catalog_name_unavailable": "Acest nume nu poate fi folosit pentru un catalog nou. Alegeți alt nume.",
   "app": {
     "name": "OpenConstructionERP",
     "tagline": "Estimare de costuri în construcții open-source"

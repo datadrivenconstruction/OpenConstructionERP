@@ -11,6 +11,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { fetchProjectList } from '@/shared/lib/projectList';
 import { boqApi } from './api';
+import { importFailureFromBody } from './importFailureText';
 
 interface Project {
   id: string;
@@ -185,7 +186,10 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
           clearTimeout(timeoutId);
           if (!res.ok) {
             const body = (await res.json().catch(() => ({}))) as { detail?: unknown };
-            throw new Error(typeof body.detail === 'string' ? body.detail : t('boq.import_failed', { defaultValue: 'Import failed' }));
+            const failed = t('boq.import_failed', { defaultValue: 'Import failed' });
+            throw new Error(
+              importFailureFromBody(body, t, failed) ?? (typeof body.detail === 'string' ? body.detail : failed),
+            );
           }
           const result = (await res.json()) as {
             imported: number;

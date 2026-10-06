@@ -1,4 +1,5 @@
 {
+  "costs.catalog_name_unavailable": "该名称不能用于新目录，请换一个名称。",
   "app": {
     "name": "OpenConstructionERP",
     "tagline": "开源建筑工程造价"

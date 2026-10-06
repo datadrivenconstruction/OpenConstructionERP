@@ -2354,6 +2354,10 @@ class AiEstimatorService:
             }
             if grp.candidate_id:
                 metadata["cost_item_id"] = grp.candidate_id
+                # A regional price-list voce keeps saying which list it is from.
+                from app.modules.boq.price_list_carry import carry_from_link
+
+                await carry_from_link(self.session, metadata)
 
             pos = Position(
                 boq_id=boq_id,

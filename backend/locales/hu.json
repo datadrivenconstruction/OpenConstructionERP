@@ -1,4 +1,5 @@
 {
+  "costs.catalog_name_unavailable": "Ez a név nem használható az új katalógushoz. Válasszon másik nevet.",
   "app": {
     "name": "OpenConstructionERP",
     "tagline": "Nyílt forráskódú építési költségbecslés"

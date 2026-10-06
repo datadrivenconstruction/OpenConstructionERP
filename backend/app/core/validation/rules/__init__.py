@@ -670,7 +670,11 @@ class PositionHasUnitRate(ValidationRule):
         for pos in _get_leaf_positions(context):
             rate = pos.get("unit_rate", 0)
             rate_num = _to_number(rate)
-            passed = (
+            # An imported deduction line has no price on purpose: the bill's
+            # deductions markup line takes its amount off.
+            meta = pos.get("metadata")
+            deduction = isinstance(meta, dict) and meta.get("deduction") is True
+            passed = deduction or (
                 rate_num is not None and rate_num is not _NOT_A_NUMBER and rate_num > 0  # type: ignore[operator]
             )
             if passed:
@@ -3166,6 +3170,22 @@ class NRMBaseDateDeclared(ValidationRule):
         ]
 
 
+#: The estimates NRM 1 names by stage: the order of cost estimate, formal cost
+#: plans 1 to 3, the pre-tender estimate, or the RIBA stage itself. A bill's
+#: ``estimate_type`` declares a stage only when it is one of these. The field
+#: also holds labels such as "budget" or "detailed" (the demo seeder writes
+#: "budget" on every control budget), which say what kind of bill it is and
+#: nothing about the design stage behind it.
+_NRM_STAGE_RE = re.compile(
+    r"\b(?:cost\s*plan|order\s+of\s+cost|pre\s*-?\s*tender|riba\s*(?:stage\s*)?[0-7]|stage\s*[0-7])",
+    re.IGNORECASE,
+)
+
+
+def _estimate_type_names_a_stage(value: Any) -> bool:
+    return bool(_NRM_STAGE_RE.search(str(value or "").replace("_", " ")))
+
+
 class NRMCostPlanStageDeclared(ValidationRule):
     rule_id = "nrm.cost_plan_stage_declared"
     name = "NRM Cost Plan Stage Declared"
@@ -3179,11 +3199,12 @@ class NRMCostPlanStageDeclared(ValidationRule):
             return []
         locale = _get_locale(context)
         meta = _boq_document_metadata(context)
+        estimate_type = _boq_document(context).get("estimate_type")
         declared = (
             meta.get("phase")
             or meta.get("riba_stage")
             or meta.get("stage")
-            or _boq_document(context).get("estimate_type")
+            or (estimate_type if _estimate_type_names_a_stage(estimate_type) else None)
         )
         passed = bool(str(declared or "").strip())
         return [
@@ -10415,6 +10436,7 @@ def register_builtin_rules() -> None:
     # Imported here and not at the top of the file: the module reads its
     # locale, position and currency helpers from this package, so a top-level
     # import would run before those names exist.
+    from app.core.validation.rules.italy_prezzario import ITALY_PREZZARIO_RULES
     from app.core.validation.rules.project_completeness import PROJECT_COMPLETENESS_RULES
 
     rules: list[tuple[ValidationRule, list[str] | None]] = [
@@ -10637,6 +10659,8 @@ def register_builtin_rules() -> None:
         # this set while nothing registered into it; the rules live in their own
         # module and read the project record the shared payload builder carries.
         *((rule_class(), None) for rule_class in PROJECT_COMPLETENESS_RULES),
+        # Italy (prezzario regionale voci, safety costs, labour share)
+        *((rule_class(), None) for rule_class in ITALY_PREZZARIO_RULES),
     ]
 
     for rule, sets in rules:

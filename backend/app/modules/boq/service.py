@@ -299,6 +299,7 @@ from app.modules.boq.models import (
     Position,
     QuantityLink,
 )
+from app.modules.boq.price_list_carry import PRICE_LIST_KEY, carry_from_link, linked_cost_item_id
 from app.modules.boq.repository import (
     ActivityLogRepository,
     BOQRepository,
@@ -675,25 +676,10 @@ def _resource_total_in_base(
     fx_rates_map: dict[str, str] | None,
     base_currency: str,
 ) -> Decimal:
-    """Sum resource subtotals in the project's BASE currency.
+    """Sum convertible resource subtotals in base currency.
 
-    Issue #88 - each resource dict may carry an optional ``currency``. When
-    present and different from ``base_currency``, the row's contribution is
-    converted via ``fx_rates_map[currency]`` (units of base per 1 unit of
-    foreign). Missing currency → treated as base. Missing rate for a
-    foreign currency → resource is summed in its own units anyway, but
-    the caller is expected to surface a "missing FX rate" warning at UI
-    time (this function silently skips the conversion to keep the rollup
-    deterministic and never zero out a row).
-
-    The rollup is accumulated with ``Decimal`` (qty, rate and fx are coerced
-    via ``_to_decimal``) so summing many lines never drifts in binary float
-    before the caller's ``_quantize_money_str`` snaps to 4dp. Returns a
-    ``Decimal``; callers already wrap it via ``_quantize_money_str`` /
-    ``_to_decimal(str(...))``.
-
-    Pure function - no DB I/O - so it's cheap to call from update_position
-    and reusable from snapshot/export paths.
+    Missing or unusable foreign FX excludes that amount from the base total.
+    The resource-summary response reports excluded amounts by source currency.
     """
     if not resources:
         return Decimal("0")
@@ -706,12 +692,7 @@ def _resource_total_in_base(
         rate = _to_decimal(r.get("unit_rate"))
         sub = qty * rate
         code = str(r.get("currency") or "").strip().upper()
-        if code and code != base and fx_rates_map:
-            fx = fx_rates_map.get(code)
-            if fx:
-                fx_dec = _to_decimal(fx)
-                if fx_dec.is_finite() and fx_dec != 0:
-                    sub = sub * fx_dec
+        sub = _position_total_in_base(str(sub), code, fx_rates_map, base)
         total += sub
     return total
 
@@ -721,29 +702,14 @@ def _detect_resource_fx_warnings(
     fx_rates_map: dict[str, str] | None,
     base_currency: str,
 ) -> list[str]:
-    """Issue #157 (skolodi): collect resource currency codes that have no FX
-    rate in the project's ``fx_rates`` table.
+    """Collect foreign resource currencies with missing or unusable FX.
 
-    The rollup at ``_resource_total_in_base`` silently no-ops the conversion
-    when a foreign-currency resource has no rate (preserves the value in its
-    own units to keep the rollup deterministic and never zero a row). The
-    side effect is the bug skolodi recorded on video: changing a resource's
-    currency from EUR to USD with no USD rate produces an identical sum
-    (`sub = qty * rate * 1` == `sub = qty * rate * <missing>` because the
-    multiplication is skipped) - so the section total appears unchanged
-    even though the user just touched the row. ARS has a rate in his
-    project, hence "ARS updates but USD doesn't."
-
-    Returning the list of missing codes lets the API surface a per-position
-    warning so the UI can prompt "Add USD to Project Settings" instead of
-    silently producing a math-correct-but-user-confusing no-op.
-
-    Pure function - no DB I/O - safe to call from any write path.
+    The base rollup excludes these amounts; callers surface the codes so the
+    user can add or repair rates in Project Settings. Pure function, no DB I/O.
     """
     if not isinstance(resources, list) or not resources:
         return []
     base = (base_currency or "").strip().upper()
-    have = {k.upper() for k in (fx_rates_map or {}).keys()}
     missing: list[str] = []
     seen: set[str] = set()
     for r in resources:
@@ -760,7 +726,7 @@ def _detect_resource_fx_warnings(
         code = raw.strip().upper()
         if not code or code == base:
             continue
-        if code in have:
+        if resource_fx_factor(code, base, fx_rates_map) is not None:
             continue
         if code in seen:
             continue
@@ -876,26 +842,18 @@ def _position_total_in_base(
     CSV / Excel / PDF exports and was summing foreign-currency ``total``
     strings straight into the base-currency Direct Cost / Grand Total.
 
-    Semantics match ``_resource_total_in_base``: a position priced in a
-    non-base currency contributes ``total * fx_rates_map[currency]`` (units
-    of base per 1 unit of foreign). Missing currency → treated as base.
-    Missing rate for a foreign currency → summed in its own units anyway
-    (never zeroed) so the rollup stays deterministic and a forgotten FX
-    rate degrades visibly rather than silently dropping money.
+    Missing currency is treated as base. A foreign amount with no usable
+    positive rate is excluded from the base total and reported separately by
+    the resource summary. Negative amounts remain valid credits.
     """
     amount = _to_decimal(total)
     base = (base_currency or "").strip().upper()
     code = (currency_code or "").strip().upper()
-    if code and code != base and fx_rates_map:
-        fx = fx_rates_map.get(code)
-        if fx:
-            # Default 0 (not 1) so a present-but-unparseable rate
-            # ("n/a", "1,5", ...) fails the > 0 guard below and the amount
-            # stays in its own units instead of silently converting at 1:1.
-            # Matches _resource_total_in_base's bad-rate handling.
-            converted = _to_decimal(fx)
-            if converted > 0:
-                amount = amount * converted
+    factor = resource_fx_factor(code, base, fx_rates_map)
+    if factor is None:
+        return Decimal("0")
+    if code and base and code != base:
+        amount *= _to_decimal((fx_rates_map or {}).get(code))
     return amount
 
 
@@ -2082,6 +2040,14 @@ def _same_resource_value(field: str, old: Any, new: Any) -> bool:
 # bulk_add_positions / create_section) and the parent_id-move path of
 # update_position so a deep tree can never be assembled by either route.
 MAX_NESTING_DEPTH = 8
+
+
+class BulkCreateNotApplicable(Exception):
+    """The rows passed to :meth:`BOQService.add_positions_in_document_order` need the per-row path.
+
+    Raised before anything is written; the argument names the first row that
+    could not go in the batch.
+    """
 
 
 def _generate_internal_reference_code() -> str:
@@ -3529,6 +3495,12 @@ class BOQService:
             )
         else:
             _cost_compat_warned = False
+        # A line made from a regional price list keeps the list's region,
+        # edition and shares. The editor's add-from-database modal names its
+        # item inside the metadata rather than at the top level.
+        await carry_from_link(
+            self.session, merged_metadata, cost_item=cost_item if data.cost_item_id is not None else None
+        )
 
         # Stamp the CWICR variant snapshot so the position's unit_rate is
         # immutable from the cost-database side: a later re-import or rate
@@ -3693,6 +3665,175 @@ class BOQService:
 
         logger.info("Position added: %s to BOQ %s", data.ordinal, data.boq_id)
         return position
+
+    async def add_positions_in_document_order(
+        self,
+        boq_id: uuid.UUID,
+        items: Sequence[tuple[uuid.UUID, PositionCreate]],
+        *,
+        chunk_size: int = 500,
+    ) -> list[uuid.UUID]:
+        """Create an imported bill's rows in the order the file lists them, in one transaction.
+
+        The import path for a bill whose rows arrive in tree order: every
+        section before the rows filed under it, a section's own items before
+        its sub-sections. Each item carries the id it will be stored under, so
+        a row can name a section created in the same call as its parent.
+
+        It writes what :meth:`add_position` writes for the same payload (the
+        duplicate-content warning, the internal reference code, the variant
+        and resource stamps, the nesting cap), but with a fixed number of
+        queries instead of about a dozen per row: ``add_position`` re-reads
+        the parent's children, shifts the sort order of every later row and
+        rescans the bill for duplicates on each call, so a bill of a few
+        thousand rows did not finish inside a request. Rows are flushed in
+        chunks and leave the session's identity map once written, so the
+        session does not grow with the bill (the payloads passed in still
+        do). One ``boq.positions.bulk_created`` event names every created id,
+        for the search index.
+
+        Raises:
+            BulkCreateNotApplicable: The rows need what only the per-row path
+                does (a cost-item link, a reference code to reuse, an anchor
+                row), an ordinal is taken or repeated, a parent is not a
+                section created earlier in the same call, or a row would sit
+                deeper than the nesting cap. Nothing has been written; the
+                caller creates the rows one by one instead.
+        """
+        if not items:
+            return []
+        await self._ensure_not_locked(boq_id)
+
+        seen: set[str] = set()
+        tier: dict[uuid.UUID, int] = {}
+        for position_id, data in items:
+            if (
+                data.boq_id != boq_id
+                or data.cost_item_id is not None
+                or (getattr(data, "reference_code", None) or "").strip()
+                or getattr(data, "after_position_id", None) is not None
+                or data.ordinal in seen
+            ):
+                raise BulkCreateNotApplicable(data.ordinal)
+            seen.add(data.ordinal)
+            if data.parent_id is None:
+                tier[position_id] = 1
+            elif data.parent_id in tier:
+                tier[position_id] = tier[data.parent_id] + 1
+            else:
+                raise BulkCreateNotApplicable(data.ordinal)
+            if tier[position_id] > MAX_NESTING_DEPTH:
+                raise BulkCreateNotApplicable(data.ordinal)
+        if await self.position_repo.ordinals_taken(boq_id, seen):
+            raise BulkCreateNotApplicable("ordinal taken")
+
+        project_id = await self.position_repo.project_id_for_boq(boq_id)
+        max_order = await self.position_repo.get_max_sort_order(boq_id)
+        # First ordinal per content fingerprint, existing rows first: the row
+        # ``_find_content_duplicate`` would name, as the rows are added in order.
+        first_with: dict[tuple[str, str, str, str], str] = {}
+        for row in await self.position_repo.list_content_keys_for_boq(boq_id):
+            first_with.setdefault(
+                _content_fingerprint(row.description, row.unit, row.quantity, row.unit_rate), row.ordinal
+            )
+        codes = await self._fresh_reference_codes(project_id, len(items))
+
+        created: list[uuid.UUID] = []
+        pending: list[Position] = []
+        for offset, ((position_id, data), code) in enumerate(zip(items, codes, strict=True), start=1):
+            metadata: dict[str, Any] = dict(data.metadata) if isinstance(data.metadata, dict) else {}
+            currency_hint = metadata.get("currency")
+            _stamp_variant_snapshot(
+                metadata,
+                unit_rate=data.unit_rate,
+                currency=currency_hint if isinstance(currency_hint, str) else None,
+            )
+            _stamp_resource_variant_snapshots(
+                metadata,
+                position_currency=currency_hint if isinstance(currency_hint, str) else None,
+            )
+            _stamp_resource_breakdown(metadata)
+            fingerprint = _content_fingerprint(data.description, data.unit, data.quantity, data.unit_rate)
+            duplicate_of = first_with.setdefault(fingerprint, data.ordinal)
+            if duplicate_of != data.ordinal:
+                _apply_duplicate_warning(metadata, duplicate_of)
+            norm_id, norm_work_key = _norm_provenance_from_metadata(metadata)
+            pending.append(
+                Position(
+                    id=position_id,
+                    boq_id=boq_id,
+                    parent_id=data.parent_id,
+                    ordinal=data.ordinal,
+                    description=data.description,
+                    unit=data.unit,
+                    quantity=_quantize_money_str(data.quantity),
+                    unit_rate=_quantize_money_str(data.unit_rate),
+                    total=_compute_total(data.quantity, data.unit_rate),
+                    classification=data.classification,
+                    source=data.source,
+                    confidence=str(data.confidence) if data.confidence is not None else None,
+                    risk_dispersion=(str(data.risk_dispersion) if data.risk_dispersion is not None else None),
+                    price_basis=data.price_basis,
+                    cad_element_ids=data.cad_element_ids,
+                    metadata_=metadata,
+                    norm_id=norm_id,
+                    norm_work_key=norm_work_key,
+                    validation_status="warnings" if duplicate_of != data.ordinal else "pending",
+                    sort_order=max_order + offset,
+                    reference_code=code,
+                    link_group_id=None,
+                    link_role=None,
+                )
+            )
+            if len(pending) >= chunk_size:
+                created.extend(await self._flush_and_release(pending))
+                pending = []
+        created.extend(await self._flush_and_release(pending))
+
+        await _safe_publish(
+            "boq.positions.bulk_created",
+            {"boq_id": str(boq_id), "count": len(created), "position_ids": [str(pid) for pid in created]},
+            source_module="oe_boq",
+            session=self.session,
+        )
+        await _safe_audit(
+            self.session,
+            action="bulk_create",
+            entity_type="position",
+            entity_id=str(boq_id),
+            details={"count": len(created)},
+        )
+        logger.info("Imported %d positions into BOQ %s in document order", len(created), boq_id)
+        return created
+
+    async def _flush_and_release(self, positions: list[Position]) -> list[uuid.UUID]:
+        """Write ``positions`` and drop them from the identity map; their ids in order."""
+        if not positions:
+            return []
+        self.session.add_all(positions)
+        await self.session.flush()
+        ids = [position.id for position in positions]
+        for position in positions:
+            self.session.expunge(position)
+        return ids
+
+    async def _fresh_reference_codes(self, project_id: uuid.UUID | None, count: int) -> list[str]:
+        """``count`` internal reference codes no position of the project uses yet, in one query per round."""
+        codes: list[str] = []
+        for _ in range(8):
+            wanted = count - len(codes)
+            if wanted <= 0:
+                break
+            candidates = list(dict.fromkeys(_generate_internal_reference_code() for _ in range(wanted)))
+            candidates = [c for c in candidates if c not in codes]
+            if project_id is not None:
+                used = await self.position_repo.reference_codes_used_in_project(project_id, candidates)
+                candidates = [c for c in candidates if c not in used]
+            codes.extend(candidates)
+        while len(codes) < count:
+            # Astronomically unlikely: the same fallback as a single create.
+            codes.append(f"{_generate_internal_reference_code()}{uuid.uuid4().hex[:4].upper()}"[:64])
+        return codes[:count]
 
     async def _create_reused_position(
         self,
@@ -3935,6 +4076,9 @@ class BOQService:
                 )
             else:
                 _bulk_cost_warned = False
+            await carry_from_link(
+                self.session, merged_metadata, cost_item=cost_item if data.cost_item_id is not None else None
+            )
 
             currency_hint = merged_metadata.get("currency") if isinstance(merged_metadata, dict) else None
             _stamp_variant_snapshot(
@@ -3978,7 +4122,7 @@ class BOQService:
 
         await _safe_publish(
             "boq.positions.bulk_created",
-            {"boq_id": str(boq_id), "count": len(inserted)},
+            {"boq_id": str(boq_id), "count": len(inserted), "position_ids": [str(p.id) for p in inserted]},
             source_module="oe_boq",
             session=self.session,
         )
@@ -4189,6 +4333,20 @@ class BOQService:
             ):
                 fields["validation_status"] = "warnings"
             fields["metadata"] = base_meta
+
+        # Linking a line to a cost item, or to another one, carries that
+        # item's price-list block and drops the one the previous item left.
+        if isinstance(fields.get("metadata"), dict):
+            _new_link = linked_cost_item_id(fields["metadata"])
+            _old_link = linked_cost_item_id(position.metadata_ if isinstance(position.metadata_, dict) else None)
+            if _new_link is not None and (_new_link != _old_link or PRICE_LIST_KEY not in fields["metadata"]):
+                fields["metadata"] = dict(fields["metadata"])
+                await carry_from_link(
+                    self.session,
+                    fields["metadata"],
+                    cost_item=cost_item if client_cost_item_id is not None else None,
+                    replace=_new_link != _old_link,
+                )
 
         # ── BUG-CONCURRENCY01: optimistic concurrency check ──────────────
         # Pop the client-supplied ``version`` so it never reaches the SQL
@@ -8095,12 +8253,10 @@ class BOQService:
                     if not math.isfinite(weight):
                         weight = 0.0
                     res_currency = str(res.get("currency") or "").strip().upper()
-                    if res_currency and res_currency != base_currency and fx_map:
-                        fx = fx_map.get(res_currency)
-                        if fx:
-                            fx_f = _str_to_float(fx)
-                            if math.isfinite(fx_f) and fx_f > 0:
-                                weight = weight * fx_f
+                    factor = resource_fx_factor(res_currency, base_currency, fx_map)
+                    if factor is None:
+                        continue
+                    weight *= factor
                     shares.append(
                         (
                             self._normalize_resource_category(str(res.get("type", "other")).lower()),

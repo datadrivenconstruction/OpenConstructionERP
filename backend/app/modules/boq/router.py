@@ -65,7 +65,7 @@ import re
 import tempfile
 import uuid
 import zipfile
-from collections.abc import Iterator, Mapping, Sequence
+from collections.abc import Awaitable, Callable, Iterator, Mapping, Sequence
 from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
@@ -3335,6 +3335,9 @@ _STANDARD_RULE_SETS: dict[str, str] = {
     # Poland. A kosztorys cites the KNR catalogue table of every line under
     # ``knr``; the rule set that checks it is ``poland``.
     "knr": "poland",
+    # Italy. A computo cites the prezzario voce of every line under ``voci``,
+    # the registry's standard for IT; the rule set that checks it is ``italy``.
+    "voci": "italy",
 }
 
 
@@ -3360,6 +3363,7 @@ _CLASSIFICATION_CODE_SETS: dict[str, str] = {
     "sekisan": "sekisan",
     "bc3": "bc3_code",
     "poland": "knr",
+    "italy": "voci",
 }
 
 # The code sets a spreadsheet import carries its code column into. Each is a
@@ -3377,7 +3381,7 @@ _CLASSIFICATION_CODE_SETS: dict[str, str] = {
 # the national code and copying it under ``din276`` would turn a missing
 # cost group into a wrong one.
 _IMPORT_CARRIED_CODE_SETS: frozenset[str] = frozenset(
-    {"sinapi", "gesn", "gbt50500", "cpwd", "hungary", "birimfiyat", "sekisan", "bc3", "poland"}
+    {"sinapi", "gesn", "gbt50500", "cpwd", "hungary", "birimfiyat", "sekisan", "bc3", "poland", "italy"}
 )
 
 
@@ -3448,6 +3452,16 @@ def _national_code_value(key: str, value: str, classification: dict[str, Any]) -
     if key == "bc3_code":
         shaped = national_rules.BC3ValidCode._PATTERN.match(value) and not value.startswith(".")
         return value if shaped else None
+    if key == "voci":
+        # The tariffa column of a computo: a ministry coded voce, a nuovo
+        # prezzo, or the item path of a list that prints no region prefix
+        # (Lazio, Umbria). A path is carried and left to the format rule to
+        # judge; a word is not a voce.
+        from app.core.validation.rules import italy_prezzario
+
+        if italy_prezzario.voce_code_is_well_formed(value):
+            return value
+        return value if italy_prezzario.looks_like_item_path(value) else None
     return value
 
 
@@ -3575,6 +3589,9 @@ _COUNTRY_RULE_SETS: dict[str, list[str]] = {
     "CZ": ["din276"],
     "BE": ["din276"],
     "PL": ["poland"],
+    # Italy. Without this row an Italian project created with no pack active
+    # validated its computo against no Italian rule at all.
+    "IT": ["italy"],
 }
 
 
@@ -3947,6 +3964,12 @@ async def validate_boq(
         }
         for markup in await service.list_markups(boq_id)
     ]
+    # Each line's amount as the bill's own markup engine computes it, so a
+    # rule that reports what the markups add quotes the bill's figure instead
+    # of working out a second one.
+    from app.modules.boq.markup_rule_inputs import markup_amounts_for_rules
+
+    markup_context = await markup_amounts_for_rules(service, boq_id, markups_data)
 
     # Determine rule sets from project config. Empty classification /
     # region means "no preference"; the rule registry resolves to a
@@ -3970,7 +3993,7 @@ async def validate_boq(
         data=await with_project_context(
             session,
             boq_data.project_id,
-            {"positions": positions_data, "markups": markups_data},
+            {"positions": positions_data, "markups": markups_data, **markup_context},
         ),
         rule_sets=rule_sets,
         target_type="boq",
@@ -6277,17 +6300,20 @@ def _prepared_row_to_create(
     boq_id: uuid.UUID,
     pr: Mapping[str, Any],
     parent_id: uuid.UUID | None = None,
+    after_position_id: uuid.UUID | None = None,
 ) -> PositionCreate:
     """Map a validated round-trip row to a ``PositionCreate`` (new position).
 
     ``parent_id`` carries the section link resolved by the create loop -
     without it every imported row landed flat (parent NULL), so an imported
     GAEB LV kept its section rows but they had zero children and every real
-    item fell into the ungrouped bucket.
+    item fell into the ungrouped bucket. ``after_position_id`` places the row
+    straight after the one created before it, see the create loop.
     """
     return PositionCreate(
         boq_id=boq_id,
         parent_id=parent_id,
+        after_position_id=after_position_id,
         ordinal=pr["ordinal"],
         description=pr.get("description", "") or "",
         unit=pr["unit"],
@@ -6320,8 +6346,9 @@ def _resolve_import_parent(
       dotted ordinal is a proper prefix of its own ("01.02" under "01");
       no such ancestor means top-level;
     * an ITEM that names its enclosing section (the GAEB importer stamps
-      ``gaeb_section`` into metadata/classification) attaches to that
-      section's row; an explicitly empty name means top-level;
+      ``gaeb_section`` into metadata/classification, the XPWE importer the
+      neutral ``import_section`` into metadata) attaches to that section's
+      row; an explicitly empty name means top-level;
     * an ITEM with no signal at all (flat Excel / BC3 sheets) attaches to
       the nearest section row above it - exactly how the sheet reads. With
       no section rows in the upload this stays ``None``, so flat imports
@@ -6338,6 +6365,8 @@ def _resolve_import_parent(
     meta = pr.get("metadata") or {}
     cls = pr.get("classification") or {}
     explicit = meta.get("gaeb_section", cls.get("gaeb_section", _NO_SECTION_SIGNAL))
+    if explicit is _NO_SECTION_SIGNAL:
+        explicit = meta.get("import_section", _NO_SECTION_SIGNAL)
     if explicit is not _NO_SECTION_SIGNAL:
         key = str(explicit or "").strip()
         return section_id_by_ordinal.get(key) if key else None
@@ -6380,6 +6409,59 @@ def _prepared_row_to_update(pr: Mapping[str, Any], stored: Any) -> PositionUpdat
     return PositionUpdate(**changed)
 
 
+async def _create_in_document_order(
+    boq_id: uuid.UUID,
+    creates: Sequence[Any],
+    *,
+    service: BOQService,
+    apply_errors: list[dict[str, Any]],
+) -> int | None:
+    """Write an importer's new rows in one batch; ``None`` when they need the per-row path.
+
+    The rows get the parents, the per-row errors and the stored values the
+    loop in :func:`_apply_boq_roundtrip` would give them: parents are resolved
+    the same way, against ids assigned up front, and a row ``PositionCreate``
+    refuses is reported and left out as it is there. Returns how many rows
+    were created. Nothing has been written when it returns ``None``.
+    """
+    from app.modules.boq.service import BulkCreateNotApplicable
+
+    section_id_by_ordinal: dict[str, uuid.UUID] = {}
+    last_section_id: uuid.UUID | None = None
+    items: list[tuple[uuid.UUID, PositionCreate]] = []
+    row_errors: list[dict[str, Any]] = []
+    for action in creates:
+        row_payload = action.row.payload
+        parent_id = _resolve_import_parent(row_payload, section_id_by_ordinal, last_section_id)
+        try:
+            data = _prepared_row_to_create(boq_id, row_payload, parent_id=parent_id)
+        except Exception as exc:  # noqa: BLE001 - reported per row, as the loop does
+            row_errors.append({"row": action.row.row_index, "error": str(exc)})
+            continue
+        position_id = uuid.uuid4()
+        items.append((position_id, data))
+        if row_payload.get("is_section"):
+            ordinal_key = str(row_payload.get("ordinal") or "").strip()
+            if ordinal_key:
+                section_id_by_ordinal[ordinal_key] = position_id
+            last_section_id = position_id
+    from sqlalchemy.exc import SQLAlchemyError
+
+    try:
+        # A savepoint, so a statement that fails part way through the batch
+        # takes the whole batch back and the rows are written one by one,
+        # each with its own error, as before.
+        async with service.session.begin_nested():
+            created = await service.add_positions_in_document_order(boq_id, items)
+    except (BulkCreateNotApplicable, HTTPException):
+        return None
+    except SQLAlchemyError:
+        logger.warning("Batch import into BOQ %s failed; writing the rows one by one", boq_id, exc_info=True)
+        return None
+    apply_errors.extend(row_errors)
+    return len(created)
+
+
 async def _apply_boq_roundtrip(
     boq_id: uuid.UUID,
     prepared_rows: list[dict[str, Any]],
@@ -6387,8 +6469,14 @@ async def _apply_boq_roundtrip(
     service: BOQService,
     delete_missing: bool = False,
     actor_id: uuid.UUID | None = None,
+    document_order: bool = False,
 ) -> dict[str, Any]:
     """Apply validated import rows to a BOQ using the round-trip differ.
+
+    ``document_order`` is the importer's word that the rows are in tree order
+    (see ``ImportedBOQ.document_order``): a plain append is then written in
+    one batch, falling back to one row at a time when the batch cannot take
+    the rows.
 
     ``prepared_rows`` items are dicts with keys ``row_index``,
     ``position_id`` (raw id cell or ``None``), ``ordinal``, ``description``,
@@ -6463,12 +6551,28 @@ async def _apply_boq_roundtrip(
     section_id_by_ordinal: dict[str, uuid.UUID] = {}
     last_section_id: uuid.UUID | None = None
 
-    for action in plan.creates:
+    creates = plan.creates
+    if document_order and not round_trip and creates:
+        batch_created = await _create_in_document_order(boq_id, creates, service=service, apply_errors=apply_errors)
+        if batch_created is not None:
+            created += batch_created
+            creates = []
+
+    # Each row goes straight after the row created before it, so the rows
+    # keep the file's order. Placed by its parent alone, a section went ahead
+    # of its parent's earlier sub-sections (the anchoring that keeps a
+    # hand-added item above the sub-sections), and a file's sub-sections came
+    # out last to first.
+    previous_id: uuid.UUID | None = None
+    for action in creates:
         row_payload = action.row.payload
         parent_id = _resolve_import_parent(row_payload, section_id_by_ordinal, last_section_id)
         try:
-            created_row = await service.add_position(_prepared_row_to_create(boq_id, row_payload, parent_id=parent_id))
+            created_row = await service.add_position(
+                _prepared_row_to_create(boq_id, row_payload, parent_id=parent_id, after_position_id=previous_id)
+            )
             created += 1
+            previous_id = getattr(created_row, "id", None) or previous_id
             if row_payload.get("is_section"):
                 created_id = getattr(created_row, "id", None)
                 if created_id is not None:
@@ -7074,7 +7178,7 @@ async def import_boq_gaeb(
     except ImporterParseError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to parse GAEB XML: {exc}",
+            detail=exc.as_detail(),
         ) from exc
 
     apply_summary = await _persist_imported_boq(
@@ -7197,6 +7301,7 @@ async def _persist_imported_boq(
         service=service,
         delete_missing=delete_missing,
         actor_id=actor_id,
+        document_order=bool(getattr(imported, "document_order", False)),
     )
 
     # Persist parsed markups (GAEB Zuschlagsposition / MarkupItem). The GAEB
@@ -7207,8 +7312,75 @@ async def _persist_imported_boq(
     # natively created one (and a later GAEB export round-trips it).
     if (summary["created"] + summary["updated"] + summary["deleted"]) > 0:
         await _persist_imported_markups(boq_id, imported, service=service, errors=summary["apply_errors"])
+        await _persist_import_deductions(boq_id, imported, service=service, errors=summary["apply_errors"])
 
     return summary
+
+
+# The bill's one deductions line, found again by this role on every import.
+_DEDUCTIONS_ROLE = "import_deductions"
+_DEDUCTIONS_NAME = "Detrazioni / minori lavori"
+
+
+async def _persist_import_deductions(
+    boq_id: uuid.UUID,
+    imported: "ImportedBOQ",  # noqa: F821 - resolved at call site
+    *,
+    service: BOQService,
+    errors: list[dict[str, Any]],
+) -> None:
+    """Take the bill's deduction lines off its total with one fixed markup line.
+
+    An importer that met items with a negative amount imports them without a
+    price, flagged ``metadata.deduction`` with the signed amount kept, and says
+    so in ``imported.metadata['deductions']``. The markup line carries minus
+    the sum of every such line on the bill, read from the stored rows, so a
+    second import of the same file updates the one line instead of adding
+    another, and the line always matches the deductions the bill holds.
+
+    The amount is negative, which ``MarkupCreate`` refuses from a client
+    (``fixed_amount >= 0``), so the payload is built without validation; the
+    engine adds a fixed amount as it is. Failures never abort the import.
+    """
+    meta = getattr(imported, "metadata", None)
+    try:
+        existing = next(
+            (
+                m
+                for m in await service.list_markups(boq_id)
+                if isinstance(m.metadata_, dict) and m.metadata_.get("role") == _DEDUCTIONS_ROLE
+            ),
+            None,
+        )
+        # A positive replacement file can remove the last deduction position.
+        # Reconcile an existing import credit even when this file has none.
+        if existing is None and not (isinstance(meta, dict) and meta.get("deductions")):
+            return
+        positions = await service.position_repo.list_all_for_boq(boq_id)
+        lines = [
+            p.metadata_ for p in positions if isinstance(p.metadata_, dict) and p.metadata_.get("deduction") is True
+        ]
+        amount = sum((Decimal(str(m.get("deduction_amount") or "0")) for m in lines), Decimal(0))
+        line_meta = {"source": "import", "role": _DEDUCTIONS_ROLE, "lines": len(lines)}
+        if existing is not None:
+            await service.update_markup(
+                existing.id, MarkupUpdate.model_construct(fixed_amount=amount, metadata=line_meta)
+            )
+        else:
+            await service.add_markup(
+                boq_id,
+                MarkupCreate.model_construct(
+                    name=_DEDUCTIONS_NAME,
+                    markup_type="fixed",
+                    category="other",
+                    fixed_amount=amount,
+                    apply_to="direct_cost",
+                    metadata=line_meta,
+                ),
+            )
+    except Exception as exc:  # noqa: BLE001 - never abort an import on a markup
+        errors.append({"ordinal": "", "code": "import_deductions_failed", "error": f"Deductions line failed: {exc}"})
+        logger.warning("Deductions line for BOQ %s failed: %s", boq_id, exc)
 
 
 async def _persist_imported_markups(
@@ -7354,6 +7526,7 @@ async def import_boq_auto(
     ),
     service: BOQService = Depends(_get_service),
     session: SessionDep = None,  # type: ignore[assignment]
+    response: Response = None,  # type: ignore[assignment]
     delete_missing: bool = Query(
         False,
         description=(
@@ -7361,6 +7534,29 @@ async def import_boq_auto(
             "Excel/CSV carrying a Position ID column, positions absent from "
             "the sheet are DELETED. Off by default; the response always "
             "reports how many WOULD be deleted so nothing is removed silently."
+        ),
+    ),
+    background: bool = Query(
+        False,
+        description=(
+            "Read and write the file in a background job and answer 202 with "
+            "its ``job_id`` at once; poll ``GET /boqs/{boq_id}/import/jobs/"
+            "{job_id}/`` for progress and, once it succeeded, the response "
+            "the synchronous call would have given. The same file posted "
+            "again to the same bill with the same options gets the same job "
+            "back while it runs, so a retry never imports a bill twice; "
+            "posted after it was imported, while what it imported is still "
+            "there, it is answered 409 ``import_already_done`` with the date "
+            "(see ``force``). A file no native reader claims is still "
+            "answered synchronously."
+        ),
+    ),
+    force: bool = Query(
+        False,
+        description=(
+            "With ``background``: import the file again although it was "
+            "imported into this bill before. Sent when the person chose "
+            '"Import again" after the 409 ``import_already_done``.'
         ),
     ),
     column_mapping: str | None = Form(
@@ -7392,6 +7588,9 @@ async def import_boq_auto(
     (LLM) path so legacy ``smart_import`` behaviour remains the
     last-chance fallback.
 
+    With ``background=true`` and a native reader, the answer is 202
+    ``{job_id, status, progress_percent, phase, reused}`` instead.
+
     Returns:
         ``{imported, skipped, errors, warnings, source_format,
           format_id, currency, validation_report, metadata, method}``.
@@ -7399,7 +7598,7 @@ async def import_boq_auto(
     # Import here to avoid a circular at module load (importers package
     # depends on ``app.core.file_signature`` which is fine, but the
     # registry is consulted only at request time).
-    from app.modules.boq.importers import REGISTERED_IMPORTERS, ImportedBOQ, ImporterParseError
+    from app.modules.boq.importers import REGISTERED_IMPORTERS
 
     # Verify BOQ exists AND the caller owns its project (IDOR guard).
     await _verify_boq_owner(session, boq_id, user_id, payload)
@@ -7465,12 +7664,104 @@ async def import_boq_auto(
             result["warnings"] = [*(result.get("warnings") or []), column_mapping_warning("format")]
         return result
 
+    if background:
+        from app.modules.boq.import_jobs import enqueue_boq_import
+
+        job = await enqueue_boq_import(
+            session,
+            boq_id=boq_id,
+            actor_id=user_id,
+            content=content,
+            file_name=file_name,
+            format_id=chosen.format_id,
+            delete_missing=delete_missing,
+            column_mapping=column_mapping,
+            force=force,
+        )
+        response.status_code = status.HTTP_202_ACCEPTED
+        return job
+
+    return await _run_native_import(
+        boq_id,
+        chosen,
+        content,
+        file_name=file_name,
+        overrides=overrides,
+        delete_missing=delete_missing,
+        actor_id=user_id,
+        service=service,
+    )
+
+
+@router.get(
+    "/boqs/{boq_id}/import/jobs/{job_id}/",
+    summary="Progress and result of a background BOQ import",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def get_boq_import_job(
+    boq_id: uuid.UUID,
+    job_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+) -> dict[str, Any]:
+    """The state of an import started with ``POST /import/auto/?background=true``.
+
+    ``{job_id, status, progress_percent, phase}``, plus ``result`` (what the
+    synchronous import would have answered) once it succeeded, or ``error``
+    (the reason the file was refused, worded for the reader, or null for an
+    internal failure) once it failed. A job is found only through the bill it
+    imports into, by someone with access to that bill.
+    """
+    from app.modules.boq.import_jobs import read_boq_import_job
+
+    await _verify_boq_owner(session, boq_id, user_id, payload)
+    return await read_boq_import_job(session, boq_id=boq_id, job_id=job_id)
+
+
+def _unexpected_parse_failure(chosen: type) -> dict[str, Any]:
+    """The 400 ``detail`` for an importer that failed in a way it did not word itself.
+
+    Coded like an :class:`ImporterParseError` detail, so the import dialog
+    words it in the reader's language; ``format`` is the importer's id.
+    """
+    return {
+        "code": "import_parse_unexpected",
+        "params": {"format": chosen.format_id},
+        "message": f"Could not read the file as {chosen.display_name}.",
+    }
+
+
+async def _run_native_import(
+    boq_id: uuid.UUID,
+    chosen: type,
+    content: bytes,
+    *,
+    file_name: str,
+    overrides: dict[int, str] | None,
+    delete_missing: bool,
+    actor_id: uuid.UUID | None,
+    service: BOQService,
+    on_phase: Callable[[str], Awaitable[None]] | None = None,
+) -> dict[str, Any]:
+    """Read ``content`` with the importer ``chosen`` and write it into the bill: the body of ``/import/auto/``.
+
+    The synchronous route and the background import job both run it, so a
+    job's result is exactly the response the route would have given.
+    ``on_phase`` hears ``"writing"`` once the file is read and
+    ``"validating"`` once the rows are committed.
+
+    Raises:
+        HTTPException 400: the file could not be read as ``chosen``'s format.
+    """
+    from app.modules.boq.importers import ImportedBOQ, ImporterParseError
+
     try:
         imported_boq: ImportedBOQ = await _parse_with_mapping(chosen, content, overrides)
     except ImporterParseError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Could not parse file as {chosen.display_name}: {exc}",
+            detail=exc.as_detail(),
         ) from exc
     except Exception as exc:  # noqa: BLE001 - log + sanitise
         logger.exception(
@@ -7481,16 +7772,18 @@ async def import_boq_auto(
         )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Could not parse file as {chosen.display_name}: unexpected error.",
+            detail=_unexpected_parse_failure(chosen),
         ) from exc
 
+    if on_phase is not None:
+        await on_phase("writing")
     apply_summary = await _persist_imported_boq(
         boq_id,
         imported_boq,
         file_name=file_name,
         service=service,
         delete_missing=delete_missing,
-        actor_id=user_id,
+        actor_id=actor_id,
     )
     created = int(apply_summary["created"])
     updated = int(apply_summary["updated"])
@@ -7527,6 +7820,8 @@ async def import_boq_auto(
     # (philosophy: validation is a first-class citizen of every import).
     validation_report = None
     if (created + updated) > 0:
+        if on_phase is not None:
+            await on_phase("validating")
         validation_report = await _run_import_validation(boq_id, service, service.session)
 
     logger.info(
@@ -7651,7 +7946,7 @@ async def import_preview(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=(
                 "No native importer recognised this file format. "
-                "Supported formats: GAEB XML, BC3 / FIEBDC-3, Excel (.xlsx, .xls), CSV."
+                "Supported formats: GAEB XML, BC3 / FIEBDC-3, XPWE, Excel (.xlsx, .xls), CSV."
             ),
         )
 
@@ -7660,7 +7955,7 @@ async def import_preview(
     except ImporterParseError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Could not parse file as {chosen.display_name}: {exc}",
+            detail=exc.as_detail(),
         ) from exc
     except Exception as exc:  # noqa: BLE001 - log + sanitise
         logger.exception(
@@ -7670,7 +7965,7 @@ async def import_preview(
         )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Could not parse file as {chosen.display_name}: unexpected error.",
+            detail=_unexpected_parse_failure(chosen),
         ) from exc
 
     all_positions = imported_boq.positions
@@ -8449,6 +8744,10 @@ async def get_resource_summary(
         ResourceSummaryResponse with per-type counts/totals and a flat
         resource list sorted by total_cost descending.
     """
+    from decimal import Decimal as Money
+
+    from app.core.currency_registry import money_quantum
+
     await _verify_boq_owner(session, boq_id, _user_id, payload)
     boq_data = await service.get_boq_with_positions(boq_id)
 
@@ -8456,15 +8755,15 @@ async def get_resource_summary(
     # foreign currency are converted to the base before they are aggregated.
     # Without this the per-type totals and grand_total would blend currencies
     # (adding raw EUR and USD numbers). Mirrors BOQService.get_cost_breakdown;
-    # a foreign currency with no FX rate is left in its own units (never zeroed).
+    # foreign amounts without usable FX are excluded and reported separately.
     base_currency, fx_map = await service.get_export_fx(boq_id)
     _base_cur = (base_currency or "").strip().upper()
 
     # Aggregation key: (name_lower, type_lower) → accumulator
     agg: dict[tuple[str, str], dict[str, Any]] = {}
-    # Foreign-currency money that reached ``grand_total`` without conversion,
+    # Foreign-currency money excluded from ``grand_total`` without conversion,
     # keyed by the currency it is still in. Populated by ``_add_resource``.
-    unconverted: dict[str, float] = {}
+    unconverted: dict[str, Money] = {}
 
     def _add_resource(
         raw: dict[str, Any],
@@ -8491,31 +8790,18 @@ async def get_resource_summary(
         except (ValueError, TypeError):
             return
 
-        cost = qty * rate * max(pos_qty, 1.0)
-        # Convert this resource's subtotal into the project base currency
-        # before aggregating, so mixed-currency BOQs never blend raw numbers.
-        # A foreign currency whose rate is missing/non-positive is left in its
-        # own units (deterministic, never zeroed) - same policy as
-        # BOQService._resource_total_in_base.
-        #
-        # That amount still enters ``grand_total``, so it is recorded here in
-        # the currency it is still denominated in. The total is unchanged by
-        # this; what changes is that the response can now say how much of it
-        # was never converted, instead of leaving the reader to assume none of
-        # it. The missing-rate warning elsewhere carries the code only, and a
-        # code without an amount cannot be weighed.
-        # The policy itself now lives in ``resource_fx_factor`` rather than
-        # being written out again here. This block previously carried its own
-        # copy, including an ``and fx_map`` guard that skipped the whole branch
-        # when a project had no FX table at all - which is the case where the
-        # most value goes unconverted, and so the worst one to stay silent
-        # about. Conversion behaviour is unchanged, since no rate is no rate.
+        cost = Money(str(raw.get("quantity", 1.0))) * Money(str(raw.get("unit_rate", 0))) * Money(str(pos_qty))
+        if not cost.is_finite():
+            return
+        # Unconvertible amounts are reported separately, never mixed into
+        # base-currency totals or ABC percentages.
         rcur = str(raw.get("currency") or "").strip().upper()
         factor = resource_fx_factor(rcur, _base_cur, fx_map)
         if factor is None:
-            unconverted[rcur] = unconverted.get(rcur, 0.0) + cost
+            unconverted[rcur] = unconverted.get(rcur, Money("0")) + cost
+            cost = Money("0")
         else:
-            cost = cost * factor
+            cost *= Money(str(fx_map[rcur])) if rcur and _base_cur and rcur != _base_cur else Money("1")
         key = (name.lower(), rtype)
 
         if key not in agg:
@@ -8524,7 +8810,7 @@ async def get_resource_summary(
                 "type": rtype,
                 "unit": unit,
                 "total_quantity": 0.0,
-                "total_cost": 0.0,
+                "total_cost": Money("0"),
                 "rates": [],
                 "positions": set(),
                 # Variant surface - first-seen wins for the catalog/stats,
@@ -8541,7 +8827,7 @@ async def get_resource_summary(
             }
 
         entry = agg[key]
-        entry["total_quantity"] += qty * max(pos_qty, 1.0)
+        entry["total_quantity"] += qty * pos_qty
         entry["total_cost"] += cost
         entry["rates"].append(rate)
         entry["positions"].add(pos_id)
@@ -8588,15 +8874,15 @@ async def get_resource_summary(
             for idx, raw in enumerate(resources):
                 if not isinstance(raw, dict):
                     continue
-                _add_resource(raw, str(pos.id), resource_idx=idx)
+                _add_resource(raw, str(pos.id), pos_qty=pos_qty, resource_idx=idx)
         else:
             # Fast heuristic: classify by description and create a synthetic resource
             desc = pos.description or ""
             if not desc.strip():
                 continue
             rate = float(pos.unit_rate or 0) if hasattr(pos, "unit_rate") else 0.0
-            total = rate * max(pos_qty, 1.0)
-            if total <= 0:
+            total = rate * pos_qty
+            if total == 0:
                 continue
             cat = BOQService._classify_position_category(desc)
             _add_resource(
@@ -8606,6 +8892,7 @@ async def get_resource_summary(
                     "unit": str(getattr(pos, "unit", "") or ""),
                     "quantity": pos_qty,
                     "unit_rate": rate,
+                    "currency": meta.get("currency") or meta.get("position_currency"),
                 },
                 str(pos.id),
             )
@@ -8754,12 +9041,10 @@ async def get_resource_summary(
         by_type=by_type,
         resources=resource_items,
         grand_total=grand_total,
-        # Quantised with the same quantum AND the same rounding mode as
-        # ``grand_total`` just above. A reader subtracting one from the other
-        # is the whole point of publishing it, and two figures rounded
-        # differently do not subtract cleanly.
+        # Excluded native-currency amounts, independent of the base total.
         unconverted={
-            code: Decimal(str(amount)).quantize(_Q2, rounding=_RHU) for code, amount in sorted(unconverted.items())
+            code: Decimal(str(amount)).quantize(money_quantum(code), rounding=_RHU)
+            for code, amount in sorted(unconverted.items())
         },
     )
 
@@ -9363,7 +9648,10 @@ async def compute_position_measurement(
     """Compute a quantity from formula-based take-off lines without saving.
 
     Body: ``{"lines": [{"description", "formula", "variables", "factor",
-    "sign"}], "unit"?, "strict"?}``. Each line's formula (for example
+    "sign"}], "unit"?, "strict"?, "row_decimals"?}``. ``row_decimals`` (0 to
+    6) rounds every line to that many decimals before the lines are added,
+    the way a sheet imported from a market that rounds partial quantities is
+    totalled; it is stored beside the lines under ``metadata.measurement``. Each line's formula (for example
     ``3.50 * 2.40`` or ``L * B * H``) is evaluated safely and the signed
     partial quantities are totalled, so the number is auditable. The UI can then
     persist the accepted quantity and the lines with a normal position update
@@ -9400,6 +9688,7 @@ async def compute_position_measurement(
             unit=str(data.get("unit") or existing.unit or ""),
             lines=list(data.get("lines") or []),
             strict=bool(data.get("strict", False)),
+            row_decimals=data.get("row_decimals"),
         )
     except MeasurementError as exc:
         raise HTTPException(
@@ -9445,7 +9734,10 @@ async def get_position_measurement(
     """Return the measurement sheet stored on a position (``metadata.measurement``).
 
     Bad stored formulas are kept as per-line errors (quantity 0) rather than
-    failing the whole read, so a saved sheet always renders.
+    failing the whole read, so a saved sheet always renders. A stored
+    ``row_decimals`` rounds each line before the total and the reconcile, so
+    a sheet imported with its partial quantities rounded reconciles with the
+    quantity it was imported with.
 
     Omitting ``preset`` resolves it from the project's country, exactly as the
     compute endpoint does. The pair has to answer the same way: a sheet
@@ -9482,6 +9774,7 @@ async def get_position_measurement(
         unit=str(stored.get("unit") or existing.unit or ""),
         lines=lines,
         strict=False,
+        row_decimals=stored.get("row_decimals"),
     )
     if preset is None:
         project = await service.project_for_boq(existing.boq_id)

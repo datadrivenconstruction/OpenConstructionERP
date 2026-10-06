@@ -49,9 +49,10 @@ from app.core.demo_projects import DemoTemplate
 #    construction chain run under reverse charge and carry no IVA at all,
 #    which is why only one tax line appears here.
 #
-# 5. The validation rule sets are the two registered generic ones. There is
-#    no Italian rule set in the engine yet, and naming one that is not
-#    registered would be skipped in silence rather than reported.
+# 5. The validation rule sets are the two registered generic ones. The
+#    Italian set, "italy", is not named here: validating the bill adds it
+#    from the project's country and its "voci" standard, so naming it twice
+#    would change nothing.
 # ---------------------------------------------------------------------------
 
 TEMPLATE = DemoTemplate(
@@ -436,4 +437,23 @@ TEMPLATE = DemoTemplate(
     actual_spend_ratio=0.38,
     spi_override=0.97,
     cpi_override=1.01,
+    # The price list every line is cited from, so the Italian voce rules read
+    # the list's own numbering as such. The codes illustrate that numbering;
+    # they are not copied from the published list. The rates are direct cost,
+    # net of the spese generali and utile carried as markups, which
+    # rate_includes_overheads states so they are not taken as counted twice.
+    # The quadro economico carries the same safety line as the bill: the costs
+    # not subject to the tender discount stand apart in both.
+    budget_markups=[
+        ("Oneri della sicurezza non soggetti a ribasso (Safety costs, not subject to discount)", 2.5, "other", "direct_cost"),
+    ],
+    position_metadata={
+        "prezzario": {
+            "region": "Lazio",
+            "region_code": "LAZ",
+            "edition": "2026",
+            "rate_includes_overheads": False,
+            "list": "Prezzario Regionale delle Opere Pubbliche della Regione Lazio",
+        }
+    },
 )

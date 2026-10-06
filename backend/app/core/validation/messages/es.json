@@ -333,6 +333,28 @@
       "suggestion": "Asigne a cada posición su propio número de partida antes de enviar el presupuesto"
     }
   },
+  "prezzario": {
+    "voce_code_format_valid": {
+      "fail": "El código '{code}' de la posición {ordinal} no indica de qué lista de precios procede",
+      "suggestion": "Un código oficial empieza por la región y el año de edición de su lista de precios, por ejemplo TOS25_01.A03.001.001 (Toscana 2025). Copie el código tal como lo imprime la lista regional, importe la línea desde la lista o numere un precio nuevo como NP.01"
+    },
+    "voce_reference_present": {
+      "fail": "La posición {ordinal} no cita ninguna partida de la lista de precios",
+      "suggestion": "Tome la línea de una lista de precios regional importada o márquela como precio nuevo (NP) con su análisis de precio"
+    },
+    "costi_sicurezza_separated": {
+      "fail": "El presupuesto no tiene una línea propia para los costes de seguridad no sujetos a la baja de la oferta",
+      "suggestion": "Añada los oneri della sicurezza como capítulo o línea de recargo propia, valorada con el capítulo de seguridad de la lista o el plan de seguridad"
+    },
+    "incidenza_manodopera_documented": {
+      "fail": "La posición {ordinal} ({code}) no indica su incidencia de mano de obra",
+      "suggestion": "Tome la incidencia de mano de obra de la lista de precios o añada un recurso de mano de obra, para que el coste laboral figure por separado en la licitación"
+    },
+    "overheads_not_applied_twice": {
+      "fail": "Los precios de las listas regionales ya incluyen gastos generales (13-17 %) y beneficio (10 %). Aplicarlos de nuevo eleva el total en torno a un {percent} %.",
+      "suggestion": "Elimine los recargos de gastos generales y beneficio de este presupuesto, o manténgalos solo en las líneas con análisis de precio propio (NP)."
+    }
+  },
   "romania": {
     "deviz_chapter_required": {
       "fail": "La posición {ordinal} no indica ningún capítulo del deviz general",
@@ -683,6 +705,7 @@
     "rejection_not_found": "Rechazo no encontrado",
     "claim_not_found": "Certificación de avance no encontrada",
     "gaeb_x89_final_account_unsupported": "Una liquidación final o liquidación final parcial todavía no se puede exportar como GAEB X89. Debe facturar la obra acumulada menos los pagos anteriores, y a partir de una certificación solo se genera una factura parcial de un período. Exporte la certificación como factura parcial.",
+    "xpwe_native_file_refused": "Este es el archivo de proyecto propio de un programa de presupuestos, que solo ese programa puede abrir. Exporte el presupuesto como XPWE desde su programa de presupuestos y suba el archivo .xpwe.",
     "plot_not_found": "Parcela no encontrada",
     "survey_not_found": "Levantamiento con dron no encontrado",
     "diary_video_not_found": "Vídeo del diario de obra no encontrado",

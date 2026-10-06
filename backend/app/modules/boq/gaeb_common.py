@@ -37,7 +37,7 @@ from datetime import date
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Any
 
-from app.modules.boq.importers._base import ImporterParseError
+from app.modules.boq.importers._base import ImporterParseError, xml_error_position
 from app.modules.boq.importers.gaeb_xml import (
     _build_oz,
     _find_child,
@@ -117,16 +117,21 @@ def parse_xml(content: bytes, *, label: str) -> ET.Element:
     failure comes back as :class:`ImporterParseError` with a message that is
     safe to show to the person who uploaded the file.
     """
+    from defusedxml.common import DefusedXmlException
     from defusedxml.ElementTree import fromstring as _safe_fromstring
 
     if not content:
-        raise ImporterParseError(f"{label} upload is empty")
+        raise ImporterParseError(f"{label} upload is empty", code="gaeb_empty_file")
     try:
         return _safe_fromstring(content)
     except ET.ParseError as exc:
-        raise ImporterParseError(f"Failed to parse {label}: {exc}") from exc
-    except Exception as exc:  # noqa: BLE001 - defusedxml raises its own classes
-        raise ImporterParseError(f"{label} rejected by security parser: {exc}") from exc
+        raise ImporterParseError(
+            f"Failed to parse {label}: {exc}", code="gaeb_not_well_formed", params=xml_error_position(exc)
+        ) from exc
+    except DefusedXmlException as exc:
+        raise ImporterParseError(f"{label} rejected by security parser: {exc}", code="gaeb_refused") from exc
+    except Exception as exc:  # noqa: BLE001 - unsupported encodings are not security refusals
+        raise ImporterParseError(f"Failed to parse {label}: {exc}", code="import_parse_failed") from exc
 
 
 def exchange_phase(root: ET.Element) -> str:

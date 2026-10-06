@@ -122,6 +122,25 @@ class TestWildcardHandlerRegistration:
 # ---------------------------------------------------------------------------
 
 
+def _index_session(position_ids: list[uuid.UUID]) -> AsyncMock:
+    """A session whose reads find *position_ids* in one bill of one project.
+
+    The index worker reads the rows and then their bills' projects; one result
+    object answers both reads.
+    """
+    boq_id, project_id = uuid.uuid4(), uuid.uuid4()
+    rows = [MagicMock(id=pid, boq_id=boq_id) for pid in position_ids]
+    fake_session = AsyncMock()
+    fake_session.expunge_all = MagicMock()
+    fake_session.execute = AsyncMock(
+        return_value=MagicMock(
+            scalars=MagicMock(return_value=rows),
+            all=MagicMock(return_value=[(boq_id, project_id)]),
+        )
+    )
+    return fake_session
+
+
 class TestVectorIndexFailureLogging:
     @pytest.mark.asyncio
     async def test_single_failure_logs_at_warning(self, caplog):
@@ -136,17 +155,18 @@ class TestVectorIndexFailureLogging:
                 "vector_index_one",
                 AsyncMock(side_effect=ConnectionError("embeddings-down")),
             ),
+            patch.object(
+                mod,
+                "vector_index_many",
+                AsyncMock(side_effect=ConnectionError("embeddings-down")),
+            ),
             patch.object(mod, "async_session_factory") as session_factory,
         ):
-            fake_row = MagicMock(boq=MagicMock(project_id=uuid.uuid4()))
-            fake_session = AsyncMock()
-            fake_session.execute = AsyncMock(
-                return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=fake_row))
-            )
+            pid = uuid.uuid4()
+            fake_session = _index_session([pid])
             session_factory.return_value.__aenter__ = AsyncMock(return_value=fake_session)
             session_factory.return_value.__aexit__ = AsyncMock(return_value=None)
 
-            pid = uuid.uuid4()
             evt = Event(name="boq.position.created", data={"position_id": str(pid)})
             await mod._on_position_created(evt)
 
@@ -175,20 +195,22 @@ class TestVectorIndexFailureLogging:
                 "vector_index_one",
                 AsyncMock(side_effect=ConnectionError("embeddings-down")),
             ),
+            patch.object(
+                mod,
+                "vector_index_many",
+                AsyncMock(side_effect=ConnectionError("embeddings-down")),
+            ),
             patch.object(mod, "async_session_factory") as session_factory,
         ):
-            fake_row = MagicMock(boq=MagicMock(project_id=uuid.uuid4()))
-            fake_session = AsyncMock()
-            fake_session.execute = AsyncMock(
-                return_value=MagicMock(scalar_one_or_none=MagicMock(return_value=fake_row))
-            )
+            pids = [uuid.uuid4() for _ in range(5)]
+            fake_session = _index_session(pids)
             session_factory.return_value.__aenter__ = AsyncMock(return_value=fake_session)
             session_factory.return_value.__aexit__ = AsyncMock(return_value=None)
 
-            for _ in range(5):
+            for pid in pids:
                 evt = Event(
                     name="boq.position.created",
-                    data={"position_id": str(uuid.uuid4())},
+                    data={"position_id": str(pid)},
                 )
                 await mod._on_position_created(evt)
 

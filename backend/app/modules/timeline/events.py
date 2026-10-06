@@ -8,10 +8,9 @@ cross-module domain event (see :mod:`app.modules.timeline.mapping`), writes one
 :class:`app.core.audit_log.ActivityLog` row so the unified project timeline
 survives a process restart.
 
-The handler is best-effort: it opens its own async session (publishers may
-already hold one; on embedded PostgreSQL a concurrent second session for a
-short write is fine), and the whole body is wrapped so a failure here can
-*never* break the publisher. Registration is idempotent.
+The handler is best-effort. Bursts share bounded sessions, but never share a
+session across different request contexts. Each event still owns its commit
+and rollback boundary. Registration is idempotent.
 """
 
 from __future__ import annotations
@@ -20,6 +19,7 @@ import logging
 from typing import TYPE_CHECKING
 
 from app.core.audit_log import log_activity
+from app.core.event_batches import ContextBatchQueue, run_session_batch
 from app.core.events import event_bus
 from app.database import async_session_factory
 from app.modules.timeline import mapping
@@ -64,26 +64,33 @@ async def _record_event(event: Event) -> None:
             "event_id": event.id,
         }
 
-        async with async_session_factory() as session:
-            await log_activity(
-                session,
-                actor_id=mapped["actor_id"],
-                action=mapped["action"],
-                entity_type=mapped["entity_type"],
-                entity_id=mapped["entity_id"],
-                module=mapped["module"],
-                parent_entity_type=mapped["parent_entity_type"],
-                parent_entity_id=mapped["parent_entity_id"],
-                metadata=metadata,
-            )
-            await session.commit()
-        logger.debug("timeline: recorded event %s (%s)", event.name, event.id)
+        await _timeline_queue.submit({**mapped, "metadata": metadata})
     except Exception:  # noqa: BLE001 - best-effort, never break the publisher
         logger.warning(
             "timeline: failed to record event %s",
             getattr(event, "name", "<unknown>"),
             exc_info=True,
         )
+
+
+async def _write_timeline_batch(rows: list[dict]) -> None:
+    async def record(session, row) -> None:
+        await log_activity(
+            session,
+            actor_id=row["actor_id"],
+            action=row["action"],
+            entity_type=row["entity_type"],
+            entity_id=row["entity_id"],
+            module=row["module"],
+            parent_entity_type=row["parent_entity_type"],
+            parent_entity_id=row["parent_entity_id"],
+            metadata=row["metadata"],
+        )
+
+    await run_session_batch("timeline", rows, async_session_factory, record)
+
+
+_timeline_queue = ContextBatchQueue("timeline", _write_timeline_batch)
 
 
 def register_timeline_subscribers() -> None:

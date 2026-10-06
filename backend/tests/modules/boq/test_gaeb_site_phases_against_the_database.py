@@ -357,6 +357,7 @@ async def test_an_explicit_rate_wins_and_a_missing_seller_is_named(session) -> N
     with pytest.raises(HTTPException) as refused:
         await export_claim_gaeb_x89(second.id, str(owner.id), session, vat_rate=None, invoice_type="deduction")
     assert refused.value.status_code == 422
+    assert refused.value.detail["code"] == "gaeb_invoice_fields_missing"
     assert "creator.street" in refused.value.detail["missing"]
 
 

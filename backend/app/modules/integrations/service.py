@@ -118,10 +118,11 @@ class WebhookService:
 
         matched = []
         for hook in all_hooks:
-            # Filter by project scope
-            if hook.project_id is not None and project_id is not None:
-                if str(hook.project_id) != str(project_id):
-                    continue
+            # A scoped endpoint requires a matching project. A missing or
+            # malformed event project must not turn it into a global endpoint.
+            # Explicitly global endpoints retain their existing behaviour.
+            if hook.project_id is not None and str(hook.project_id) != str(project_id):
+                continue
             # Filter by event subscription (support wildcard "*")
             events = hook.events or []
             if "*" not in events and event_type not in events:

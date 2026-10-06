@@ -50,6 +50,7 @@ from app.modules.boq.importers._base import (
     ImportedBOQ,
     ImportedPosition,
     ImporterParseError,
+    xml_error_position,
 )
 
 logger = logging.getLogger(__name__)
@@ -438,27 +439,31 @@ class GAEBXMLImporter:
         from defusedxml.ElementTree import fromstring as _safe_fromstring
 
         if not content:
-            raise ImporterParseError("GAEB XML upload is empty")
+            raise ImporterParseError("GAEB XML upload is empty", code="gaeb_empty_file")
 
         try:
             root = _safe_fromstring(content)
         except ET.ParseError as exc:
-            raise ImporterParseError(f"Failed to parse GAEB XML: {exc}") from exc
+            raise ImporterParseError(
+                f"Failed to parse GAEB XML: {exc}", code="gaeb_not_well_formed", params=xml_error_position(exc)
+            ) from exc
         except Exception as exc:  # noqa: BLE001
-            raise ImporterParseError(f"GAEB XML rejected by security parser: {exc}") from exc
+            raise ImporterParseError(f"GAEB XML rejected by security parser: {exc}", code="gaeb_refused") from exc
 
         site_phase = _site_phase(root)
         if site_phase == "31":
             raise ImporterParseError(
                 "This is a GAEB X31 quantity determination (Mengenermittlung), not a bill of quantities. "
                 "It carries measured quantities for positions that already exist: open the bill and use "
-                "the GAEB X31 / X89 dialog to import them."
+                "the GAEB X31 / X89 dialog to import them.",
+                code="gaeb_x31_not_a_bill",
             )
         if site_phase == "89":
             raise ImporterParseError(
                 "This is a GAEB X89 invoice (Rechnung), not a bill of quantities. Importing it would add "
                 "the invoiced lines as new positions: open the bill and use the GAEB X31 / X89 dialog to "
-                "check it instead."
+                "check it instead.",
+                code="gaeb_x89_not_a_bill",
             )
 
         da_kind = _detect_da_kind(root)
@@ -476,7 +481,9 @@ class GAEBXMLImporter:
                 if top_body is not None:
                     break
         if top_body is None:
-            raise ImporterParseError("No <BoQBody> element found. Is this a valid GAEB DA XML?")
+            raise ImporterParseError(
+                "No <BoQBody> element found. Is this a valid GAEB DA XML?", code="gaeb_no_bill_body"
+            )
 
         # Currency from <Award><Cur> with <AwardInfo><Cur> fallback (3.3
         # nests it under AwardInfo).

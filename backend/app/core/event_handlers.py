@@ -2142,12 +2142,31 @@ async def _notify_document_uploaded(event: Event) -> None:
 # ---------------------------------------------------------------------------
 
 
+_WEBHOOK_CONCURRENCY = 4
+_webhook_slots: tuple["asyncio.AbstractEventLoop", "asyncio.Semaphore"] | None = None
+
+
+def _webhook_gate() -> "asyncio.Semaphore":
+    """One gate per running application loop; tests can start a fresh loop."""
+    import asyncio
+
+    global _webhook_slots
+    loop = asyncio.get_running_loop()
+    if _webhook_slots is None or _webhook_slots[0] is not loop:
+        _webhook_slots = (loop, asyncio.Semaphore(_WEBHOOK_CONCURRENCY))
+    return _webhook_slots[1]
+
+
 async def _dispatch_to_webhooks(event: Event) -> None:
     """Forward all events to registered webhooks.
 
     This is a wildcard handler - it receives every event published on the
     bus and dispatches it to matching WebhookEndpoint rows via the
-    integrations module's WebhookService.
+    integrations module's WebhookService. Admission happens before opening a
+    session, so an import burst cannot exhaust the connection pool. Keep the
+    publisher's own task/context and the existing await-delivery contract.
+    Four deliveries can progress independently: one slow endpoint must not
+    monopolise a serial batch worker. Total sessions remain one per event.
     """
     try:
         from app.database import async_session_factory
@@ -2162,16 +2181,19 @@ async def _dispatch_to_webhooks(event: Event) -> None:
             "source_module": event.source_module,
         }
 
-        async with async_session_factory() as session:
-            svc = WebhookService(session)
-            count = await svc.dispatch_event(event.name, payload, project_id=project_id)
-            await session.commit()
+        async with _webhook_gate():
+            async with async_session_factory() as session:
+                svc = WebhookService(session)
+                count = await svc.dispatch_event(event.name, payload, project_id=project_id)
+                await session.commit()
 
         if count:
             logger.debug("Dispatched event '%s' to %d webhooks", event.name, count)
 
     except Exception:
-        logger.exception("Error dispatching event '%s' to webhooks", event.name)
+        # Never repeat a failed dispatch: HTTP may have succeeded before its
+        # audit commit failed. Closing the session rolls its transaction back.
+        logger.exception("Error dispatching event '%s' to webhooks (not retried)", event.name)
 
 
 # ---------------------------------------------------------------------------

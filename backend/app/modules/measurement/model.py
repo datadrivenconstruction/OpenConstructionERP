@@ -21,6 +21,9 @@ from app.modules.measurement.formula import MeasurementError, safe_eval
 _3P = Decimal("0.001")
 _4P = Decimal("0.0001")
 
+#: The finest and coarsest rounding a sheet may ask its lines for.
+ROW_DECIMALS_RANGE = range(0, 7)
+
 
 def _dec(value: Any, default: str = "0") -> Decimal:
     if isinstance(value, Decimal):
@@ -82,19 +85,51 @@ class MeasurementLine:
         return _dec(self.factor, "1") * signed
 
 
+def row_decimals_or_none(value: Any) -> int | None:
+    """The sheet's line-rounding rule, or ``None`` when *value* is not one.
+
+    An int from 0 to 6, or the same written as digits (a stored sheet arrives
+    from JSON). Anything else, a bool included, is no rule at all: the sheet
+    then totals its lines unrounded, as a sheet without the setting does.
+    """
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, str) and value.strip().isdigit():
+        value = int(value.strip())
+    if isinstance(value, int) and value in ROW_DECIMALS_RANGE:
+        return value
+    return None
+
+
 @dataclass
 class MeasurementSheet:
-    """All take-off lines for one BoQ item, totalling its quantity."""
+    """All take-off lines for one BoQ item, totalling its quantity.
+
+    ``row_decimals`` is the convention of a market (and of the files it
+    exchanges) that rounds every partial quantity before adding them: each
+    line's signed value is quantized half-up, away from zero, to that many
+    decimals, and the rounded lines are what the total, the reconcile and the
+    written sheet use. The lines keep their formulas and dimensions; only
+    their contribution is rounded. ``None`` totals the lines as they come.
+    """
 
     item_ref: str
     description: str
     unit: str
     lines: list[MeasurementLine]
     currency: str = ""  # unused, kept for symmetry with priced views
+    row_decimals: int | None = None
+
+    def line_quantity(self, line: MeasurementLine) -> Decimal:
+        """What *line* adds to the total: its signed quantity, rounded when the sheet says so."""
+        value = line.raw_quantity
+        if self.row_decimals is None:
+            return value
+        return value.quantize(Decimal(1).scaleb(-self.row_decimals), rounding=ROUND_HALF_UP)
 
     @property
     def total_quantity(self) -> Decimal:
-        return sum((ln.raw_quantity for ln in self.lines), Decimal("0"))
+        return sum((self.line_quantity(ln) for ln in self.lines), Decimal("0"))
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -110,7 +145,7 @@ class MeasurementSheet:
                     "factor": str(_dec(ln.factor, "1")),
                     "sign": "-" if str(ln.sign).strip() == "-" else "+",
                     "unit": ln.unit or self.unit,
-                    "quantity": _q(ln.raw_quantity, _3P),
+                    "quantity": _q(self.line_quantity(ln), _3P),
                     "nos": str(ln.nos) if ln.nos is not None else None,
                     "length": str(ln.length) if ln.length is not None else None,
                     "breadth": str(ln.breadth) if ln.breadth is not None else None,
@@ -122,6 +157,7 @@ class MeasurementSheet:
             "total_quantity": _q(self.total_quantity, _3P),
             "line_count": len(self.lines),
             "has_errors": any(ln.error for ln in self.lines),
+            "row_decimals": self.row_decimals,
         }
 
 
@@ -204,6 +240,7 @@ def build_sheet(
     unit: str,
     lines: list[dict[str, Any] | MeasurementLine],
     strict: bool = True,
+    row_decimals: Any = None,
 ) -> MeasurementSheet:
     """Assemble a :class:`MeasurementSheet` from plain dicts or lines.
 
@@ -213,6 +250,9 @@ def build_sheet(
         unit: Unit of measurement (m, m2, m3, etc.).
         lines: Raw dicts or pre-built :class:`MeasurementLine` instances.
         strict: Passed through to :func:`build_line` for dict entries.
+        row_decimals: Round every line to this many decimals before the
+            lines are added (an int from 0 to 6, or the same as digits).
+            Anything else is ignored, see :func:`row_decimals_or_none`.
 
     Returns:
         A :class:`MeasurementSheet` with all lines built and validated.
@@ -234,4 +274,5 @@ def build_sheet(
         description=str(description or "").strip(),
         unit=str(unit or ""),
         lines=built,
+        row_decimals=row_decimals_or_none(row_decimals),
     )

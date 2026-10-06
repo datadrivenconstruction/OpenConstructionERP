@@ -1,0 +1,102 @@
+{
+ "2025 - capitolo 1": [
+  {
+   "Numero d'ordine": "1",
+   "Descrizione dell'articolo": "INDAGINI GEOGNOSTICHE E GEOTECNICHE - FONDAZIONI SPECIALI E DI SOSTEGNO - POZZI PER ACQUA",
+   "u.m.": null,
+   "prezzo €": null,
+   "costo minimo manodopera €": null
+  },
+  {
+   "Numero d'ordine": "1.1",
+   "Descrizione dell'articolo": "SONDAGGI GEOGNOSTICI A ROTAZIONE",
+   "u.m.": null,
+   "prezzo €": null,
+   "costo minimo manodopera €": null
+  },
+  {
+   "Numero d'ordine": "1.1.10",
+   "Descrizione dell'articolo": "TRASPORTO E APPRONTAMENTO DELL'ATTREZZATURA DI PERFORAZIONE A ROTAZIONE.   Trasporto dell'attrezzatura di perforazione a rotazione. Sono compresi: il trasporto di andata e ritorno, dalla sede legale al cantiere; l'approntamento dell'attrezzatura di perforazione a rotazione; il carico, lo scarico; il personale necessario.",
+   "u.m.": "cad",
+   "prezzo €": 1125,
+   "costo minimo manodopera €": 418
+  },
+  {
+   "Numero d'ordine": "1.1.20.0",
+   "Descrizione dell'articolo": "INSTALLAZIONE DI ATTREZZATURA PER SONDAGGIO.   Installazione di attrezzatura per sondaggio, a rotazione in corrispondenza di ciascun punto di perforazione, compreso il primo, su aree accessibili alle attrezzature di perforazione, compreso l'onere per lo spostamento da un foro al successivo. E' compreso quanto occorre per dare l'installazione completa. Per ogni installazione compresa la prima e l'ultima.",
+   "u.m.": null,
+   "prezzo €": null,
+   "costo minimo manodopera €": null
+  },
+  {
+   "Numero d'ordine": "1.1.20.1",
+   "Descrizione dell'articolo": "Per distanza fino a m 300.",
+   "u.m.": "cad",
+   "prezzo €": 184,
+   "costo minimo manodopera €": 55
+  },
+  {
+   "Numero d'ordine": "1.1.20.2",
+   "Descrizione dell'articolo": "Per distanza superiore a m 300.",
+   "u.m.": "cad",
+   "prezzo €": 287,
+   "costo minimo manodopera €": 86
+  },
+  {
+   "Numero d'ordine": "1.1.30.0",
+   "Descrizione dell'articolo": "PERFORAZIONE AD ANDAMENTO VERTICALE ESEGUITA IN TERRENI A GRANULOMETRIA FINE.   Perforazione ad andamento verticale eseguita a rotazione a carotaggio continuo, anche di tipo Wereline, con carotieri di diametro minimo mm 101, in terreni a granulometria fine quali argille, limi, limi sabbiosi e rocce tenere tipo tufiti. La perforazione dovrà essere eseguita a secco o con una quantità minima di fluido di circolazione secondo le indicazione del direttore lavori. E' compreso quanto altro occorre per dare la perforazione completa. Per ogni metro e per profondità misurate a partire dal piano di campagna.",
+   "u.m.": null,
+   "prezzo €": null,
+   "costo minimo manodopera €": null
+  },
+  {
+   "Numero d'ordine": "1.1.30.1",
+   "Descrizione dell'articolo": "Da m 0 a m 20.",
+   "u.m.": "m",
+   "prezzo €": 68,
+   "costo minimo manodopera €": 18
+  },
+  {
+   "Numero d'ordine": "1.1.30.2",
+   "Descrizione dell'articolo": "Da m 20,01 a m 40.",
+   "u.m.": "m",
+   "prezzo €": 74,
+   "costo minimo manodopera €": 20.5
+  },
+  {
+   "Numero d'ordine": "1.1.30.3",
+   "Descrizione dell'articolo": "Da m 40,01 a m 60.",
+   "u.m.": "m",
+   "prezzo €": 82,
+   "costo minimo manodopera €": 23.1
+  },
+  {
+   "Numero d'ordine": "1.1.40.0",
+   "Descrizione dell'articolo": "PERFORAZIONE AD ANDAMENTO VERTICALE ESEGUITA IN TERRENI A GRANULOMETRIA MEDIA.   Perforazione ad andamento verticale eseguita a rotazione a carotaggio continuo, anche di tipo Wereline, con carotieri di diametro minimo mm 101, in terreni a granulometria media costituiti da sabbie ghiaiose anche con qualche ciottolo, ed in rocce di durezza media che non richiedono l'uso del diamante. E' compreso l'uso di tutti gli accorgimenti necessari ad ottenere la percentuale di carotaggio richiesta. La perforazione dovrà essere eseguita a secco o con una quantità minima di fluido di circolazione secondo le indicazione del direttore lavori. E' inoltre compreso quanto altro occorre per dare la perforazione completa.Per ogni metro e per profondità misurate a partire dal piano di campagna.",
+   "u.m.": null,
+   "prezzo €": null,
+   "costo minimo manodopera €": null
+  },
+  {
+   "Numero d'ordine": "1.1.40.4",
+   "Descrizione dell'articolo": "Da m 0 a m 20.",
+   "u.m.": "m",
+   "prezzo €": 82,
+   "costo minimo manodopera €": 23.1
+  },
+  {
+   "Numero d'ordine": "1.1.40.5",
+   "Descrizione dell'articolo": "Da m 20,01 a m 40.",
+   "u.m.": "m",
+   "prezzo €": 100,
+   "costo minimo manodopera €": 28.1
+  },
+  {
+   "Numero d'ordine": "1.1.40.6",
+   "Descrizione dell'articolo": "Da m 40,01 a m 60.",
+   "u.m.": "m",
+   "prezzo €": 108,
+   "costo minimo manodopera €": 30.6
+  }
+ ]
+}

@@ -834,6 +834,35 @@ class PositionRepository:
         result = (await self.session.execute(stmt)).scalar_one()
         return int(result) > 0
 
+    async def reference_codes_used_in_project(self, project_id: uuid.UUID, codes: Iterable[str]) -> set[str]:
+        """The subset of ``codes`` some position of the project already carries.
+
+        The batch form of :meth:`reference_code_exists_in_project`, for an
+        import that stamps a fresh code on every row: one query per 500 codes
+        instead of one per row.
+        """
+        wanted = sorted({c.strip() for c in codes if c and c.strip()})
+        used: set[str] = set()
+        for start in range(0, len(wanted), 500):
+            stmt = (
+                select(Position.reference_code)
+                .join(BOQ, BOQ.id == Position.boq_id)
+                .where(BOQ.project_id == project_id, Position.reference_code.in_(wanted[start : start + 500]))
+            )
+            used.update(code for code in (await self.session.execute(stmt)).scalars() if code)
+        return used
+
+    async def ordinals_taken(self, boq_id: uuid.UUID, ordinals: Iterable[str]) -> set[str]:
+        """The subset of ``ordinals`` some position of the BOQ already uses, one query per 500."""
+        wanted = sorted(set(ordinals))
+        taken: set[str] = set()
+        for start in range(0, len(wanted), 500):
+            stmt = select(Position.ordinal).where(
+                Position.boq_id == boq_id, Position.ordinal.in_(wanted[start : start + 500])
+            )
+            taken.update((await self.session.execute(stmt)).scalars())
+        return taken
+
 
 class MarkupRepository:
     """Data access for BOQMarkup model."""

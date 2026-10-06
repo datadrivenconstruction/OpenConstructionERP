@@ -1200,7 +1200,9 @@ def _apply_column_mapping(column_map: dict[int, str], overrides: dict[int, str],
     for index, target in overrides.items():
         if index >= width:
             raise ImporterParseError(
-                f"The column mapping names column {index + 1}, and the header row has {width} columns."
+                f"The column mapping names column {index + 1}, and the header row has {width} columns.",
+                code="column_mapping_out_of_range",
+                params={"column": index + 1, "width": width},
             )
         if target:
             mapped[index] = target
@@ -1211,7 +1213,9 @@ def _apply_column_mapping(column_map: dict[int, str], overrides: dict[int, str],
         if len(columns) > 1:
             raise ImporterParseError(
                 f"The column mapping leaves columns {', '.join(map(str, columns))} all feeding {target}. "
-                "Map the others to something else or leave them out."
+                "Map the others to something else or leave them out.",
+                code="column_mapping_shared_target",
+                params={"columns": columns, "field": target},
             )
     return mapped
 
@@ -1497,7 +1501,7 @@ def _parse_csv(
     reader = csv.reader(io.StringIO(text, newline=""), delimiter=delimiter)
     raw_headers, header_number, rows_iter = _locate_header(reader)
     if not raw_headers:
-        raise ImporterParseError("CSV file is empty or has no header row")
+        raise ImporterParseError("CSV file is empty or has no header row", code="spreadsheet_no_header")
 
     column_map = _map_columns(raw_headers)
     display, display_row = _display_header(raw_headers, header_number, column_map, top_rows())
@@ -1749,7 +1753,7 @@ def _parse_rows_from_excel(
     """
     wb = open_workbook(content_bytes)
     if wb.active is None:
-        raise ImporterParseError("Excel file has no worksheets")
+        raise ImporterParseError("Excel file has no worksheets", code="spreadsheet_no_worksheets")
     sheet_names = wb.sheetnames
     worksheets, notes = _pick_item_sheets(wb)
 
@@ -1783,7 +1787,7 @@ def _parse_rows_from_excel(
     wb.close()
 
     if not read:
-        raise ImporterParseError("Excel file is empty or has no header row")
+        raise ImporterParseError("Excel file is empty or has no header row", code="spreadsheet_no_header")
 
     first = read[0]
     if len(read) == 1:
@@ -2745,7 +2749,7 @@ class ExcelImporter:
         importer's own reading.
         """
         if not content:
-            raise ImporterParseError("Spreadsheet upload is empty")
+            raise ImporterParseError("Spreadsheet upload is empty", code="spreadsheet_empty_file")
 
         fmt = _detect_file_format(content[:4096])
 
@@ -2773,18 +2777,22 @@ class ExcelImporter:
                 rows, import_meta = _parse_csv(content, column_mapping)
                 source_format = "csv"
             else:
-                raise ImporterParseError(f"Unsupported spreadsheet format: detected {fmt!r}")
+                raise ImporterParseError(
+                    f"Unsupported spreadsheet format: detected {fmt!r}", code="spreadsheet_format_unknown"
+                )
         except ImporterParseError:
             raise
         except Exception as exc:  # noqa: BLE001
-            raise ImporterParseError(f"Could not parse spreadsheet: {exc}") from exc
+            raise ImporterParseError(f"Could not parse spreadsheet: {exc}", code="spreadsheet_unreadable") from exc
 
         # A header that names no description or no quantity, unit or rate is
         # reported as a coded error with what it did and did not recognise,
         # which the import dialog words in the reader's language. Only a file
         # whose header is fine and holds no rows is refused outright.
         if not rows and not (import_meta.get("header_report") or {}).get("missing"):
-            raise ImporterParseError("No data rows found. Check that the header row names the columns.")
+            raise ImporterParseError(
+                "No data rows found. Check that the header row names the columns.", code="spreadsheet_no_rows"
+            )
 
         language = import_meta.get("header_language")
         result = _rows_to_positions(

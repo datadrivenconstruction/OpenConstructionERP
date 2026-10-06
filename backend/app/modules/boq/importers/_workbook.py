@@ -75,13 +75,17 @@ def _open_legacy(content: bytes) -> LegacyWorkbook:
         # can spell anything in a cell, the stream name included.
         if "encrypted" in text.lower() or _ENCRYPTED_PACKAGE in content:
             raise ImporterParseError(
-                "This workbook is protected with a password. Open it, remove the password and save it again."
+                "This workbook is protected with a password. Open it, remove the password and save it again.",
+                code="workbook_password_protected",
             ) from exc
         raise ImporterParseError(
-            "This file is an Office document but holds no Excel workbook that can be read: " + text
+            "This file is an Office document but holds no Excel workbook that can be read: " + text,
+            code="workbook_not_found",
         ) from exc
     except Exception as exc:  # noqa: BLE001 - xlrd raises plain errors on truncated files
-        raise ImporterParseError(f"Could not read the Excel 97-2003 workbook: {exc}") from exc
+        raise ImporterParseError(
+            f"Could not read the Excel 97-2003 workbook: {exc}", code="workbook_unreadable"
+        ) from exc
     return LegacyWorkbook(book)
 
 

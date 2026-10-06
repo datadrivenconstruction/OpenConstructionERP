@@ -2,18 +2,8 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """An amount that could not be converted is reported, not hidden in the total.
 
-A BOQ resource priced in a foreign currency is converted to the project base
-before it joins the rollup. When the project holds no usable rate, the amount
-is summed in its own units anyway - deliberately, so a row is never zeroed and
-the rollup stays deterministic. The cost of that choice is that the total can
-be a blend, and nothing on the resource-summary response said so.
-
-A user hit this. They changed a resource's currency from one code to another
-and the total did not move. The reason was that the first currency had a rate
-in their project and the second did not, so the conversion was skipped rather
-than applied. The pair is what made it diagnosable: one unchanged total looks
-like a screen that did not refresh, whereas two currencies behaving differently
-under the same action on the same screen is a diagnosis.
+Unusable foreign FX excludes money from the base total. The response carries
+excluded amounts in their native currencies so no source money is hidden.
 
 These tests cover the policy itself, ``resource_fx_factor``, which existed as
 four separate hand-written copies before it had a name.
@@ -94,33 +84,17 @@ def test_unconvertible_is_none_and_never_one() -> None:
     assert resource_fx_factor("USD", "EUR", RATES) == 0.92
 
 
-def test_the_total_is_not_changed_by_reporting() -> None:
-    """Part one promises the published totals do not move.
-
-    An unconvertible amount was previously left in its own units and added as
-    it stood. It still is: the caller multiplies only when a factor comes back,
-    so a ``None`` leaves the amount exactly as it was. This pins that promise
-    at the point it could break.
-    """
-    amount = 50_000.0
-    factor = resource_fx_factor("USD", "EUR", {})
-    assert factor is None
-    # The caller's contract: no factor, no multiplication.
-    unchanged = amount if factor is None else amount * factor
-    assert unchanged == amount
-
-
 def test_the_response_carries_the_unconverted_amounts_as_decimal_strings() -> None:
     """Money leaves this response as a plain-decimal string, per §10."""
     response = ResourceSummaryResponse(
         total_resources=1,
-        grand_total=Decimal("50000.00"),
+        grand_total=Decimal("0.00"),
         unconverted={"USD": Decimal("50000.00")},
     )
     dumped = response.model_dump(mode="json")
 
     assert dumped["unconverted"] == {"USD": "50000.00"}
-    assert dumped["grand_total"] == "50000.00"
+    assert dumped["grand_total"] == "0.00"
     # Same shape as the total it qualifies, so a reader can subtract one from
     # the other without reformatting either.
     assert isinstance(dumped["unconverted"]["USD"], type(dumped["grand_total"]))

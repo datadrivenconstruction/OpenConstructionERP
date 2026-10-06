@@ -1,4 +1,5 @@
 {
+  "costs.catalog_name_unavailable": "این نام را نمی‌توان برای کاتالوگ جدید استفاده کرد. نام دیگری انتخاب کنید.",
   "app": {
     "name": "OpenConstructionERP",
     "tagline": "برآورد متن‌باز هزینه ساخت‌وساز"

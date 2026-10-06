@@ -1,4 +1,5 @@
 {
+  "costs.catalog_name_unavailable": "Hindi magagamit ang pangalang ito para sa bagong katalogo. Pumili ng ibang pangalan.",
   "app": {
     "name": "OpenConstructionERP",
     "tagline": "Open-source na pagtantya ng gastos sa konstruksyon"

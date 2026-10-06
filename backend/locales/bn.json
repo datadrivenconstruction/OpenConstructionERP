@@ -1,4 +1,5 @@
 {
+  "costs.catalog_name_unavailable": "এই নাম নতুন ক্যাটালগের জন্য ব্যবহার করা যাবে না। অন্য নাম বেছে নিন।",
   "app": {
     "name": "OpenConstructionERP",
     "tagline": "ওপেন-সোর্স নির্মাণ ব্যয় এস্টিমেশন"

@@ -1,4 +1,5 @@
 {
+  "costs.catalog_name_unavailable": "یہ نام نئے کیٹلاگ کے لیے استعمال نہیں ہو سکتا۔ کوئی اور نام منتخب کریں۔",
   "app": {
     "name": "OpenConstructionERP",
     "tagline": "اوپن سورس تعمیراتی لاگت تخمینہ"

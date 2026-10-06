@@ -248,3 +248,26 @@ async def test_frankfurt_rohbau_imports_all_positions(http_client, auth_headers,
         assert item["parent_id"] == sections[section_oz]["id"], (
             f"item {item['ordinal']} persisted without its section link"
         )
+
+
+@pytest.mark.asyncio
+async def test_nested_sections_keep_the_order_the_file_lists_them_in(http_client, auth_headers, project_id) -> None:
+    """Sub-sections and their items come in file order, the way the editor lists siblings.
+
+    GAEB rows are written one at a time, and placing each sub-section ahead
+    of its section's earlier sub-sections (the anchoring that keeps a hand-added
+    item above the sub-sections) listed 01.05 first and 01.01 last.
+    """
+    boq_id = await _fresh_boq(http_client, auth_headers, project_id)
+    await _import_auto(http_client, auth_headers, boq_id, _FRANKFURT)
+
+    positions = await _persisted_positions(http_client, auth_headers, boq_id)
+    by_id = {p["id"]: p for p in positions}
+    siblings: dict[str, list[tuple[int, str]]] = {}
+    for p in positions:
+        parent = by_id[p["parent_id"]]["ordinal"] if p.get("parent_id") else ""
+        siblings.setdefault(parent, []).append((int(p["sort_order"]), p["ordinal"]))
+    listed = {parent: [ordinal for _so, ordinal in sorted(kids)] for parent, kids in siblings.items()}
+    assert listed["01"] == ["01.01", "01.02", "01.03", "01.04", "01.05"]
+    for parent, kids in listed.items():
+        assert kids == sorted(kids), (parent, kids)

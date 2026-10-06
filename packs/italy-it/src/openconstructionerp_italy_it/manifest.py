@@ -23,10 +23,13 @@ MANIFEST = PartnerPackManifest(
     default_locale="it",
     additional_locales={},
     cwicr_regions=[
-        # One Italian catalogue exists under this marketplace slug. It
-        # resolves to IT_ROME. Additional cities (Milan, Naples, Turin)
-        # are planned but no catalogue is published for them yet.
+        # The Rome catalogue, and the base built from the Prezzario dei
+        # Lavori Pubblici della Toscana (IT_TOSCANA, 2026 edition, CC BY 4.0,
+        # credited to Regione Toscana wherever it is offered). Other
+        # regions' lists are imported by the user from the files the
+        # region publishes (Cost databases, Import a regional price list).
         "cwicr-it-rome",
+        "cwicr-it-toscana",
     ],
     default_currency="EUR",
     default_tax_template="it_iva_22",
@@ -37,7 +40,7 @@ MANIFEST = PartnerPackManifest(
         "uni_standards",
         "ntc_2018",
     ],
-    validation_rule_sets=[],
+    validation_rule_sets=["italy"],
     default_modules=[],  # empty = show all
     hidden_modules=[],
     demo_template_ids=["residential-rome"],

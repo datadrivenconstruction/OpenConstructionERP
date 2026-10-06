@@ -11,10 +11,14 @@ import i18n from '@/app/i18n';
 import {
   apiGet,
   apiPost,
+  activeLanguageTag,
   extractErrorMessageFromBody,
   fetchWithAuth,
   triggerDownload,
 } from '@/shared/lib/api';
+import { fmtList } from '@/shared/lib/formatters';
+import { importFailureFromBody } from './importFailureText';
+import { missingInvoiceFieldLabel } from './gaebInvoiceFieldText';
 
 export interface X31MatchedItem {
   oz: string;
@@ -154,11 +158,20 @@ async function failure(res: Response, fallback: string): Promise<Error> {
   const body = await res.json().catch(() => null);
   if (body && typeof body === 'object' && 'detail' in body) {
     const detail = (body as { detail: unknown }).detail;
-    if (detail && typeof detail === 'object' && 'message' in detail) {
-      return new Error(String((detail as { message: unknown }).message));
+    if (detail && typeof detail === 'object' && 'code' in detail
+      && detail.code === 'gaeb_invoice_fields_missing' && 'missing' in detail && Array.isArray(detail.missing)) {
+      const labels = detail.missing.filter((field): field is string => typeof field === 'string')
+        .map((field) => missingInvoiceFieldLabel(i18n.t.bind(i18n), field));
+      return new Error(`${i18n.t('contracts.gaeb_invoice.missing_title')} ${fmtList(labels)}`);
     }
   }
-  return new Error(extractErrorMessageFromBody(body) ?? fallback);
+  return new Error(importFailureFromBody(body, i18n.t.bind(i18n), fallback) ?? extractErrorMessageFromBody(body) ?? fallback);
+}
+
+/** fetchWithAuth refreshes tokens, but raw GAEB transfers must name the UI language. */
+function languageHeaders(): Record<string, string> {
+  const language = activeLanguageTag();
+  return language ? { 'Accept-Language': language } : {};
 }
 
 function exportFailed(status: number): string {
@@ -168,7 +181,7 @@ function exportFailed(status: number): string {
 async function upload<T>(url: string, file: File): Promise<T> {
   const form = new FormData();
   form.append('file', file);
-  const res = await fetchWithAuth(url, { method: 'POST', body: form });
+  const res = await fetchWithAuth(url, { method: 'POST', body: form, headers: languageHeaders() });
   if (!res.ok) {
     throw await failure(
       res,
@@ -203,6 +216,7 @@ export async function downloadX31(
 ): Promise<{ written: number; skipped: number }> {
   const res = await fetchWithAuth(
     `/api/v1/boq/boqs/${encodeURIComponent(boqId)}/export/gaeb-x31/?basis=${basis}`,
+    { headers: languageHeaders() },
   );
   if (!res.ok) throw await failure(res, exportFailed(res.status));
   const blob = await res.blob();
@@ -234,6 +248,7 @@ export function previewClaimInvoice(claimId: string, vatRate = ''): Promise<Clai
 export async function downloadClaimInvoice(claimId: string, fallbackName: string, vatRate = ''): Promise<void> {
   const res = await fetchWithAuth(
     `/api/v1/boq/claims/${encodeURIComponent(claimId)}/export/gaeb-x89/${claimQuery(vatRate)}`,
+    { headers: languageHeaders() },
   );
   if (!res.ok) throw await failure(res, exportFailed(res.status));
   const blob = await res.blob();

@@ -15,6 +15,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from decimal import ROUND_HALF_UP, Decimal
 
+from app.core.csv_safety import neutralise_formula
 from app.modules.measurement.model import MeasurementSheet, _dec
 
 
@@ -158,7 +159,7 @@ def render_markdown(sheet: MeasurementSheet, *, preset: str = "international") -
         out.append(
             f"| {ln.ref} | {ln.description} | {formula} | "
             f"{_dec(ln.factor, '1')} | {'-' if str(ln.sign).strip() == '-' else '+'} | "
-            f"{_q(ln.raw_quantity, p.decimals)} |"
+            f"{_q(sheet.line_quantity(ln), p.decimals)} |"
         )
     out.append("")
     out.append(f"Total quantity: {_q(sheet.total_quantity, p.decimals)} {sheet.unit}")
@@ -170,6 +171,11 @@ def render_csv(sheet: MeasurementSheet, *, preset: str = "international") -> str
 
     Suitable for spreadsheet import. Includes a header row, one row per
     line, and a TOTAL row at the bottom.
+
+    The text cells (reference, description, formula, unit, error) come from
+    users and imported files, so one that a spreadsheet would run as a
+    formula is written as text (:func:`~app.core.csv_safety.neutralise_formula`).
+    The factor, sign and quantity are the sheet's own figures and stay numbers.
 
     Args:
         sheet: The measurement sheet to render.
@@ -185,18 +191,20 @@ def render_csv(sheet: MeasurementSheet, *, preset: str = "international") -> str
         rows.append(
             _csv_row(
                 [
-                    ln.ref,
-                    ln.description,
-                    ln.formula,
+                    neutralise_formula(ln.ref),
+                    neutralise_formula(ln.description),
+                    neutralise_formula(ln.formula),
                     str(_dec(ln.factor, "1")),
                     "-" if str(ln.sign).strip() == "-" else "+",
-                    ln.unit or sheet.unit,
-                    _q(ln.raw_quantity, p.decimals),
-                    ln.error,
+                    neutralise_formula(ln.unit or sheet.unit),
+                    _q(sheet.line_quantity(ln), p.decimals),
+                    neutralise_formula(ln.error),
                 ]
             )
         )
-    rows.append(_csv_row(["", "TOTAL", "", "", "", sheet.unit, _q(sheet.total_quantity, p.decimals), ""]))
+    rows.append(
+        _csv_row(["", "TOTAL", "", "", "", neutralise_formula(sheet.unit), _q(sheet.total_quantity, p.decimals), ""])
+    )
     return "\r\n".join(rows) + "\r\n"
 
 

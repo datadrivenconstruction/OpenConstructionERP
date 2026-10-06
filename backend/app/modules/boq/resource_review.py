@@ -29,6 +29,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.boq.models import BOQ, Position
+from app.modules.boq.price_list_carry import carry_block
 from app.modules.boq.repository import PositionRepository
 from app.modules.boq.resource_norms import (
     REVIEW_CATEGORIES,
@@ -183,6 +184,8 @@ class ResourceNormReviewService:
         previous = meta.get("resources")
         before = resource_subtotal(previous)
         meta["resources"] = new_rows
+        # Re-read from the linked item, so its price-list block comes along.
+        carry_block(meta, cost_item)
         meta[REVIEW_KEY] = {
             "action": "rederived",
             "category": verdict.category,

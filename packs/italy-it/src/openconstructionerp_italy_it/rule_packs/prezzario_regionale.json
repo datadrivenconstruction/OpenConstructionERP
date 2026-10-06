@@ -16,6 +16,7 @@
     "prezzario.analisi_prezzi_for_rate_deviation",
     "prezzario.incidenza_manodopera_documented",
     "prezzario.costi_sicurezza_separated",
+    "prezzario.overheads_not_applied_twice",
     "prezzario.aggiornamento_istat_applied"
   ],
   "regulator": "Regioni (regional governments) / DEI (Tipografia del Genio Civile)",

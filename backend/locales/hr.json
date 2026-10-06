@@ -1,4 +1,5 @@
 {
+  "costs.catalog_name_unavailable": "Ovaj naziv ne može se koristiti za novi katalog. Odaberite drugi naziv.",
   "app": {
     "name": "OpenConstructionERP",
     "tagline": "Open-source procjena građevinskih troškova"

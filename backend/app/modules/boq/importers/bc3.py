@@ -318,16 +318,18 @@ class BC3Importer:
     async def parse(cls, content: bytes, *, locale: str = "en") -> ImportedBOQ:
         """Parse a BC3 buffer into :class:`ImportedBOQ`."""
         if not content:
-            raise ImporterParseError("BC3 upload is empty")
+            raise ImporterParseError("BC3 upload is empty", code="bc3_empty_file")
 
         try:
             text, encoding_used, declared_charset = _decode_bc3(content)
         except UnicodeDecodeError as exc:
-            raise ImporterParseError(f"BC3 file uses an unsupported encoding: {exc}") from exc
+            raise ImporterParseError(
+                f"BC3 file uses an unsupported encoding: {exc}", code="bc3_encoding_unknown"
+            ) from exc
 
         records = _split_logical_records(text)
         if not records:
-            raise ImporterParseError("BC3 file contains no recognisable records")
+            raise ImporterParseError("BC3 file contains no recognisable records", code="bc3_no_records")
 
         # First pass: collect concept records into a map keyed by code so
         # ~T (extended text) and ~M (measurements) records can backfill

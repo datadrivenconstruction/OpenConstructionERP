@@ -352,6 +352,14 @@ async def accept_match(
         boosts_applied=dict(accepted_candidate.boosts_applied or {}),
         bim_element_id=bim_element_id,
     )
+    # A voce of a regional price list keeps saying which list it is from. The
+    # candidate's id is the cost item's for a cost-database hit.
+    from app.modules.boq.price_list_carry import PRICE_LIST_KEY, carry_block, load_cost_item
+
+    matched_item = await load_cost_item(db, accepted_candidate.id)
+    if matched_item is not None:
+        match_metadata["cost_item_id"] = str(matched_item.id)
+        carry_block(match_metadata, matched_item)
 
     actor_id: uuid.UUID | None
     try:
@@ -376,6 +384,10 @@ async def accept_match(
                 detail="existing_position_id does not belong to the supplied boq_id",
             )
         merged_metadata: dict[str, Any] = dict(existing.metadata_) if isinstance(existing.metadata_, dict) else {}
+        # The row is re-priced from the match: the item and the list it came
+        # from before no longer speak for it.
+        merged_metadata.pop(PRICE_LIST_KEY, None)
+        merged_metadata.pop("cost_item_id", None)
         merged_metadata.update(match_metadata)
 
         update_payload = PositionUpdate(

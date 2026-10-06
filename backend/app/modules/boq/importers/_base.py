@@ -36,7 +36,31 @@ class ImporterParseError(ValueError):
     """Raised by an importer's ``parse()`` when the bytes can't be turned
     into positions. The dispatcher translates this into HTTP 400 - the
     message must be user-safe (no stack traces, no internal paths).
+
+    ``code`` names the failure and ``params`` carries the values its wording
+    needs: the import dialog words it in the reader's language from
+    ``boq.import_error.<code>``. The message is the English fallback for
+    logs and for a client that does not know the code. Every raise in the
+    importers passes a code; a test walks them and checks the frontend
+    has a wording for each.
     """
+
+    def __init__(self, message: str, *, code: str = "import_parse_failed", params: dict[str, Any] | None = None):
+        super().__init__(message)
+        self.code = code
+        self.params: dict[str, Any] = dict(params or {})
+
+    def as_detail(self) -> dict[str, Any]:
+        """The 400 body's ``detail``: the code, its values and the English fallback."""
+        return {"code": self.code, "params": self.params, "message": str(self)}
+
+
+def xml_error_position(exc: BaseException) -> dict[str, int]:
+    """Where an XML parser stopped, as the ``line`` and ``column`` a parse error's wording names."""
+    position = getattr(exc, "position", None)
+    if isinstance(position, tuple) and len(position) == 2:
+        return {"line": int(position[0]), "column": int(position[1])}
+    return {}
 
 
 @dataclass(slots=True)
@@ -101,6 +125,11 @@ class ImportedBOQ:
     # Currency captured from the source file (GAEB ``<Cur>``, BC3 ``DC``
     # record). Empty if the source did not carry one.
     currency: str = ""
+    # The rows are in tree order (every section before the rows filed under
+    # it, a section's own items before its sub-sections) and every item names
+    # its section, so persistence may write them in one batch instead of one
+    # row at a time. Off by default: a flat sheet relies on the per-row path.
+    document_order: bool = False
 
 
 @runtime_checkable

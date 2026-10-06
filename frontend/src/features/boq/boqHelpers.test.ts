@@ -50,21 +50,21 @@ describe('convertToBase - multi-currency rebase', () => {
     expect(convertToBase(100, 'EUR', 'USD', fxRates)).toBeCloseTo(108, 4);
   });
 
-  it('returns value unchanged + warns when FX rate is missing for source', () => {
+  it('excludes the value and warns when FX rate is missing for source', () => {
     // No JPY in fxRates — fallback returns value as-is (graceful degradation)
     const result = convertToBase(100, 'JPY', 'USD', fxRates);
-    expect(result).toBe(100);
+    expect(result).toBe(0);
   });
 
-  it('returns value unchanged when rate is non-finite or non-positive', () => {
+  it('excludes the value when rate is non-finite or non-positive', () => {
     const bad = [
       { currency: 'XXX', rate: 0 },
       { currency: 'YYY', rate: -1 },
       { currency: 'ZZZ', rate: NaN },
     ];
-    expect(convertToBase(100, 'XXX', 'USD', bad)).toBe(100);
-    expect(convertToBase(100, 'YYY', 'USD', bad)).toBe(100);
-    expect(convertToBase(100, 'ZZZ', 'USD', bad)).toBe(100);
+    expect(convertToBase(100, 'XXX', 'USD', bad)).toBe(0);
+    expect(convertToBase(100, 'YYY', 'USD', bad)).toBe(0);
+    expect(convertToBase(100, 'ZZZ', 'USD', bad)).toBe(0);
   });
 
   it('returns 0 when value is non-finite', () => {
@@ -73,9 +73,9 @@ describe('convertToBase - multi-currency rebase', () => {
   });
 
   it('handles empty/missing fxRates list', () => {
-    expect(convertToBase(100, 'ARS', 'USD', null)).toBe(100);
-    expect(convertToBase(100, 'ARS', 'USD', undefined)).toBe(100);
-    expect(convertToBase(100, 'ARS', 'USD', [])).toBe(100);
+    expect(convertToBase(100, 'ARS', 'USD', null)).toBe(0);
+    expect(convertToBase(100, 'ARS', 'USD', undefined)).toBe(0);
+    expect(convertToBase(100, 'ARS', 'USD', [])).toBe(0);
   });
 });
 
@@ -169,7 +169,7 @@ describe('resourceAwareTotalInBase - resource-currency rebase', () => {
     expect(resourceAwareTotalInBase(pos, 'ARS', fx)).toBeCloseTo(707500, 2);
   });
 
-  it('missing FX rate degrades visibly (never zeroes the row)', () => {
+  it('missing FX excludes the foreign amount', () => {
     const pos = {
       total: 25000,
       quantity: 1,
@@ -178,7 +178,7 @@ describe('resourceAwareTotalInBase - resource-currency rebase', () => {
       },
     };
     // GBP has no rate — summed in its own units, not dropped.
-    expect(resourceAwareTotalInBase(pos, 'ARS', fx)).toBe(25000);
+    expect(resourceAwareTotalInBase(pos, 'ARS', fx)).toBe(0);
   });
 });
 

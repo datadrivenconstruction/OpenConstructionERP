@@ -1,4 +1,5 @@
 {
+  "costs.catalog_name_unavailable": "אי אפשר להשתמש בשם זה לקטלוג חדש. בחרו שם אחר.",
   "app": {
     "name": "OpenConstructionERP",
     "tagline": "אומדן עלויות בנייה בקוד פתוח"

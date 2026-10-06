@@ -284,7 +284,7 @@ export function ResourceSummary({
   // Hide only when the server confirmed there is nothing to show. While the
   // panel is collapsed the query has not run yet (lazy fetch), and returning
   // null then would remove the header the user needs to click to load it.
-  if (data && summary.total_resources === 0 && !isLoading && !isError) {
+  if (data && summary.total_resources === 0 && !Object.keys(summary.unconverted ?? {}).length && !isLoading && !isError) {
     return null;
   }
 
@@ -361,6 +361,22 @@ export function ResourceSummary({
 
       {!collapsed && (
         <div className="border-t border-border-light">
+          {Object.keys(summary.unconverted ?? {}).length > 0 && (
+            <div role="status" className="px-4 py-2 text-xs text-amber-700">
+              {Object.entries(summary.unconverted ?? {}).map(([code, amount]) => (
+                <div key={code} data-testid={`unconverted-${code}`}>
+                  {t('boq.rs_unconverted', {
+                    defaultValue: 'Excluded from total: {{amount}} {{currency}}',
+                    amount: createRSMoneyFormatter(locale, code).format(toNum(amount)),
+                    currency: code,
+                  })}
+                </div>
+              ))}
+              <p>{t('boq.rs_unconverted_hint', {
+                defaultValue: 'No usable exchange rate. Set a positive rate in Project Settings to include these amounts.',
+              })}</p>
+            </div>
+          )}
           {/* ── Summary stats row ───────────────────────────────────────── */}
           <div className="flex flex-wrap items-center gap-3 px-4 py-2.5 bg-surface-secondary/30">
             {Object.entries(summary.by_type).map(([type, info]) => (
