@@ -55,9 +55,6 @@ export interface ReferenceDataApplyResult {
   preview: ReferenceDataPreview;
 }
 
-export const REFERENCE_DATA_PREVIEW_URL = '/v1/i18n-foundation/reference-data/updates/';
-export const REFERENCE_DATA_APPLY_URL = '/v1/i18n-foundation/reference-data/updates/apply/';
-
 const STATUS_ORDER: ReferenceChangeStatus[] = ['ready', 'review', 'kept'];
 
 /** The preview split by status, in the order the panel shows the groups. */
@@ -130,7 +127,7 @@ export function ReferenceDataPanel() {
   };
 
   const checkMutation = useMutation({
-    mutationFn: () => apiGet<ReferenceDataPreview>(REFERENCE_DATA_PREVIEW_URL),
+    mutationFn: () => apiGet<ReferenceDataPreview>('/v1/i18n-foundation/reference-data/updates/'),
     onSuccess: (data) => setPreview(data),
     onError: (error: Error) =>
       addToast({
@@ -147,7 +144,7 @@ export function ReferenceDataPanel() {
   const grouped = useMemo(() => groupByStatus(preview?.changes ?? []), [preview]);
 
   const applyMutation = useMutation({
-    mutationFn: (keys: string[]) => apiPost<ReferenceDataApplyResult>(REFERENCE_DATA_APPLY_URL, { keys }),
+    mutationFn: (keys: string[]) => apiPost<ReferenceDataApplyResult>('/v1/i18n-foundation/reference-data/updates/apply/', { keys }),
     onSuccess: (data) => {
       setConfirming(false);
       setPreview(data.preview);

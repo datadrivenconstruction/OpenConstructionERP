@@ -17,8 +17,6 @@ vi.mock('@/shared/lib/api', () => ({
 
 import {
   ReferenceDataPanel,
-  REFERENCE_DATA_APPLY_URL,
-  REFERENCE_DATA_PREVIEW_URL,
   groupByStatus,
   type ReferenceChange,
   type ReferenceDataPreview,
@@ -82,7 +80,7 @@ describe('ReferenceDataPanel', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /check for updates/i }));
     await waitFor(() => expect(screen.getByTestId('reference-data-preview')).toBeInTheDocument());
-    expect(apiGet).toHaveBeenCalledWith(REFERENCE_DATA_PREVIEW_URL);
+    expect(apiGet).toHaveBeenCalledWith('/v1/i18n-foundation/reference-data/updates/');
     expect(screen.getByText('IE VAT_RED_9 VAT Second Reduced')).toBeInTheDocument();
     expect(screen.getByTestId('reference-data-review')).toHaveTextContent('AT VAT VAT Standard');
     expect(screen.getByTestId('reference-data-kept')).toHaveTextContent('DE VAT Our label');
@@ -94,7 +92,7 @@ describe('ReferenceDataPanel', () => {
     fireEvent.click(buttons[buttons.length - 1]!);
 
     await waitFor(() => expect(apiPost).toHaveBeenCalledTimes(1));
-    expect(apiPost).toHaveBeenCalledWith(REFERENCE_DATA_APPLY_URL, { keys: ['tax:IE/VAT_RED_9', 'tax:HU/AFA_5'] });
+    expect(apiPost).toHaveBeenCalledWith('/v1/i18n-foundation/reference-data/updates/apply/', { keys: ['tax:IE/VAT_RED_9', 'tax:HU/AFA_5'] });
     await waitFor(() => expect(screen.queryByTestId('reference-data-ready')).toBeNull());
   });
 

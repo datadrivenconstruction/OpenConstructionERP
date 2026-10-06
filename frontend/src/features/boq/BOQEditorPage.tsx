@@ -4363,12 +4363,6 @@ export function BOQEditorPage() {
       // The auto route imports in the background: it answers at once with a
       // job to follow, and the same file posted again while that job runs
       // gets the job back instead of importing the bill a second time.
-      const endpoint = isGaeb
-        ? `/api/v1/boq/boqs/${boqId}/import/gaeb/`
-        : route === 'auto'
-          ? `/api/v1/boq/boqs/${boqId}/import/auto/?background=true${force ? '&force=true' : ''}`
-          : `/api/v1/boq/boqs/${boqId}/import/smart/`;
-
       // Tell the user *immediately* that the import is in flight — the server
       // can take 30+ seconds for large XLSX/PDF/CAD files, and without this
       // toast the UI looks frozen (Bug 2).
@@ -4399,7 +4393,11 @@ export function BOQEditorPage() {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
           ...(lang ? { 'Accept-Language': lang } : {}),
         };
-        const res = await fetch(endpoint, {
+        const res = await fetch(isGaeb
+          ? `/api/v1/boq/boqs/${boqId}/import/gaeb/`
+          : route === 'auto'
+            ? `/api/v1/boq/boqs/${boqId}/import/auto/${force ? '?background=true&force=true' : '?background=true'}`
+            : `/api/v1/boq/boqs/${boqId}/import/smart/`, {
           method: 'POST',
           headers,
           body: form,

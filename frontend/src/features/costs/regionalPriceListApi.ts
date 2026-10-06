@@ -167,7 +167,6 @@ interface JobStarted {
   job_id: string;
 }
 
-const BASE = '/api/v1/costs/import/pricelist';
 /** How often a running job is asked how far it got. */
 export const PRICE_LIST_POLL_MS = 1000;
 
@@ -180,7 +179,7 @@ function overridesForm(overrides: PriceListOverrides): FormData {
 
 async function waitForJob<T>(jobId: string, onProgress?: (progress: PriceListProgress) => void): Promise<T> {
   for (;;) {
-    const job = await send<PriceListJob<T>>(`${BASE}/jobs/${jobId}`);
+    const job = await send<PriceListJob<T>>(`/api/v1/costs/import/pricelist/jobs/${jobId}`);
     if (job.status === 'success' && job.result !== undefined) return job.result;
     if (job.status === 'failed' || job.status === 'cancelled') {
       const error = job.error ?? { code: 'import_failed' };
@@ -204,7 +203,7 @@ export async function uploadPriceList(
 ): Promise<{ uploadId: string; preview: PriceListPreview }> {
   const data = overridesForm(overrides);
   data.append('file', file);
-  const started = await send<JobStarted>(`${BASE}/uploads/`, { method: 'POST', body: data });
+  const started = await send<JobStarted>('/api/v1/costs/import/pricelist/uploads/', { method: 'POST', body: data });
   try {
     const preview = await waitForJob<PriceListPreview>(started.job_id, onProgress);
     return { uploadId: started.upload_id, preview };
@@ -221,7 +220,7 @@ export async function repreviewPriceList(
   overrides: PriceListOverrides,
   onProgress?: (progress: PriceListProgress) => void,
 ): Promise<PriceListPreview> {
-  const started = await send<JobStarted>(`${BASE}/uploads/${uploadId}/preview/`, {
+  const started = await send<JobStarted>(`/api/v1/costs/import/pricelist/uploads/${uploadId}/preview/`, {
     method: 'POST',
     body: overridesForm(overrides),
   });
@@ -239,14 +238,14 @@ export async function importUploadedPriceList(
   const data = overridesForm(overrides);
   data.append('catalog_name', catalogName.trim());
   if (expectedRows) data.append('expected_rows', String(expectedRows));
-  const started = await send<JobStarted>(`${BASE}/uploads/${uploadId}/import/`, { method: 'POST', body: data });
+  const started = await send<JobStarted>(`/api/v1/costs/import/pricelist/uploads/${uploadId}/import/`, { method: 'POST', body: data });
   return waitForJob<PriceListImportResult>(started.job_id, onProgress);
 }
 
 /** Forget an upload the user cancelled; best effort, the server sweeps it after a day anyway. */
 export async function discardPriceListUpload(uploadId: string): Promise<void> {
   try {
-    await fetch(`${BASE}/uploads/${uploadId}/`, { method: 'DELETE', headers: authHeaders() });
+    await fetch(`/api/v1/costs/import/pricelist/uploads/${uploadId}/`, { method: 'DELETE', headers: authHeaders() });
   } catch {
     // nothing to do: an upload left behind is swept by the server
   }
