@@ -260,7 +260,9 @@ async def test_bim_hub_writes_into_the_bill_the_caller_names(session) -> None:
     model = await _mk_model_with_wall(session, project_id)
     await _mk_auto_create_rule(session, project_id)
 
-    result = await BIMHubService(session).apply_quantity_maps(await _apply_request(session, model.id, target_boq_id=newer.id))
+    result = await BIMHubService(session).apply_quantity_maps(
+        await _apply_request(session, model.id, target_boq_id=newer.id)
+    )
 
     assert result.positions_created == 1
     assert await _count_positions(session, older) == 0
@@ -287,7 +289,9 @@ async def test_bim_hub_rejects_a_bill_that_belongs_to_another_project(session) -
     await _mk_auto_create_rule(session, project_id)
 
     with pytest.raises(HTTPException) as exc:
-        await BIMHubService(session).apply_quantity_maps(await _apply_request(session, model.id, target_boq_id=foreign.id))
+        await BIMHubService(session).apply_quantity_maps(
+            await _apply_request(session, model.id, target_boq_id=foreign.id)
+        )
 
     assert exc.value.status_code == 409
     assert exc.value.detail["error"] == "boq_project_mismatch"
