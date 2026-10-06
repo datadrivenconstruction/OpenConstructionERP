@@ -83,6 +83,7 @@ import { AssigneeLabel } from './assignee';
 import { formatReworkCost, parseReworkCostInput, projectCurrencyCode } from './reworkCost';
 import { VoiceEntry, getField } from '@/features/voice';
 import { fmtDate } from '@/shared/lib/formatters';
+import { PunchContractField } from './PunchContractField';
 import { isDateOnlyPast } from '@/shared/lib/dates';
 import { IssueHubLink } from '@/features/issues/IssueHubLink';
 
@@ -426,6 +427,7 @@ function PunchKpiBand({
 /* ── Add Punch Item Modal ─────────────────────────────────────────────── */
 
 interface PunchFormData {
+  contract_id: string;
   title: string;
   description: string;
   priority: PunchPriority;
@@ -444,6 +446,7 @@ interface PunchFormData {
 }
 
 const EMPTY_FORM: PunchFormData = {
+  contract_id: '',
   title: '',
   description: '',
   priority: 'medium',
@@ -487,6 +490,7 @@ const PRIORITY_RADIO_COLORS: Record<PunchPriority, string> = {
 };
 
 function AddPunchModal({
+  projectId,
   onClose,
   onSubmit,
   isPending,
@@ -494,6 +498,7 @@ function AddPunchModal({
   drawings,
   currency,
 }: {
+  projectId: string;
   onClose: () => void;
   onSubmit: (data: PunchFormData) => void;
   isPending: boolean;
@@ -732,6 +737,8 @@ function AddPunchModal({
 
         {/* Without a project currency there is nothing honest to record the
             amount in: the API would stamp USD on it. */}
+        <PunchContractField projectId={projectId} value={form.contract_id || null}
+          onChange={value => set('contract_id', value ?? '')} disabled={isPending} />
         <WideModalField
           label={t('punch.field_rework_cost', { defaultValue: 'Rework cost' })}
           htmlFor="punch-rework-cost"
@@ -1389,6 +1396,7 @@ export function PunchListPage() {
       createMut.mutate({
         project_id: projectId,
         title: formData.title,
+        contract_id: formData.contract_id || null,
         description: formData.description || undefined,
         priority: formData.priority,
         category: formData.category,
@@ -1947,6 +1955,7 @@ export function PunchListPage() {
       {/* Add modal */}
       {showAddModal && (
         <AddPunchModal
+          projectId={projectId}
           onClose={() => setShowAddModal(false)}
           onSubmit={handleCreateSubmit}
           isPending={createMut.isPending}

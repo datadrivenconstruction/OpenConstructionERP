@@ -27,6 +27,10 @@ class PunchItem(Base):
         nullable=False,
         index=True,
     )
+    # Optional module link: NULL explicitly means no contract was assigned.
+    # Keep punchlist installable without the contracts module; the service
+    # validates that an assigned contract belongs to this same project.
+    contract_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     document_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     page: Mapped[int | None] = mapped_column(Integer, nullable=True)
     location_x: Mapped[float | None] = mapped_column(Float, nullable=True)

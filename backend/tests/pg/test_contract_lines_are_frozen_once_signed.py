@@ -29,9 +29,13 @@ from decimal import Decimal
 
 import pytest
 import pytest_asyncio
-from fastapi import HTTPException
+from fastapi import FastAPI, HTTPException
+from httpx import ASGITransport, AsyncClient
 
+from app.dependencies import get_current_user_payload, get_session
+from app.modules.contracts import router as contracts_router
 from app.modules.contracts.models import Contract, ContractLine
+from app.modules.contracts.permissions import register_contracts_permissions
 from app.modules.contracts.schemas import ContractLineUpdate
 from app.modules.contracts.service import ContractsService
 from app.modules.projects.models import Project
@@ -127,3 +131,41 @@ async def test_a_draft_contract_still_edits_its_lines(session) -> None:
     assert updated.total_value == Decimal("200000")
     await svc.delete_line(line.id)
     assert await svc.line_repo.get_by_id(line.id) is None
+
+
+@pytest.mark.parametrize("contract_status", ["active", "suspended", "completed", "terminated", "draft"])
+@pytest.mark.parametrize("bulk", [False, True])
+async def test_direct_http_cannot_append_to_a_signed_schedule_of_values(session, contract_status, bulk) -> None:
+    """Both append routes enforce the same boundary as edits and deletions."""
+    register_contracts_permissions()
+    contract, original = await _contract_with_a_line(session, status=contract_status)
+    app = FastAPI()
+    app.include_router(contracts_router.router, prefix="/contracts")
+
+    async def current_session():
+        yield session
+
+    app.dependency_overrides[get_session] = current_session
+    app.dependency_overrides[get_current_user_payload] = lambda: {"sub": str(OWNER_ID), "role": "editor"}
+    line = {
+        "contract_id": str(contract.id),
+        "description": "Unapproved extra scope",
+        "quantity": "2",
+        "unit_rate": "50",
+    }
+    body = {"lines": [line, {**line, "description": "Second extra line"}]} if bulk else line
+    endpoint = f"/contracts/contracts/{contract.id}/lines" + ("/bulk" if bulk else "")
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        response = await client.post(endpoint, json=body)
+
+    rows = await ContractsService(session).line_repo.list_for_contract(contract.id)
+    if contract_status == "draft":
+        assert response.status_code == 201, response.text
+        assert len(rows) == (3 if bulk else 2)
+        assert all(row.total_value == Decimal("100") for row in rows if row.id != original.id)
+    else:
+        assert response.status_code == 409, response.text
+        assert response.json()["detail"]["error"] == "contract_lines_frozen"
+        assert response.json()["detail"]["contract_status"] == contract_status
+        assert [row.id for row in rows] == [original.id]
+        assert original.total_value == Decimal("100000")

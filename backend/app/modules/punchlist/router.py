@@ -74,6 +74,7 @@ def _item_to_response(item: object, names: Mapping[str, str] | None = None) -> P
     return PunchItemResponse(
         id=item.id,  # type: ignore[attr-defined]
         project_id=item.project_id,  # type: ignore[attr-defined]
+        contract_id=getattr(item, "contract_id", None),
         title=item.title,  # type: ignore[attr-defined]
         description=item.description,  # type: ignore[attr-defined]
         document_id=item.document_id,  # type: ignore[attr-defined]

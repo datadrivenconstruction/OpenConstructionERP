@@ -214,9 +214,9 @@ def validate_submission_pre_open(
     if deadline is not None and submitted_at is not None and submitted_at > deadline:
         errors.append("submission_after_deadline")
 
-    package_currency = (getattr(package, "currency", "") or "").upper()
-    submission_currency = (getattr(submission, "currency", "") or "").upper()
-    if package_currency and submission_currency and package_currency != submission_currency:
+    package_currency = (getattr(package, "currency", "") or "").strip().upper()
+    submission_currency = (getattr(submission, "currency", "") or "").strip().upper()
+    if not package_currency or not submission_currency or package_currency != submission_currency:
         errors.append("currency_mismatch")
 
     priced_line_ids = {
@@ -964,6 +964,7 @@ class BidManagementService:
     # ── Packages ──────────────────────────────────────────────────────
 
     async def create_package(self, data: BidPackageCreate, user_id: str | None = None) -> BidPackage:
+        currency = self._require_package_currency(data.currency)
         existing = await self.package_repo.get_by_code(data.code)
         if existing is not None:
             raise HTTPException(status_code=409, detail="Package code already exists")
@@ -977,7 +978,7 @@ class BidManagementService:
             instructions_to_bidders=data.instructions_to_bidders,
             submission_deadline=data.submission_deadline,
             decision_due_by=data.decision_due_by,
-            currency=data.currency,
+            currency=currency,
             total_budget_estimate=str(data.total_budget_estimate),
             status=data.status,
             confidentiality_level=data.confidentiality_level,
@@ -1005,6 +1006,8 @@ class BidManagementService:
     async def update_package(self, package_id: uuid.UUID, data: BidPackageUpdate) -> BidPackage:
         package = await self.get_package(package_id)
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
+        if "currency" in fields:
+            fields["currency"] = self._require_package_currency(fields["currency"])
         # Lifecycle status is owned by the state machine. A generic PATCH
         # must not be able to jump (e.g. draft → awarded) bypassing the
         # transition guards, timestamp stamping, auto-rejections and
@@ -1104,8 +1107,19 @@ class BidManagementService:
         package.status = new_status
         await self.session.flush()
 
+    @staticmethod
+    def _require_package_currency(currency: str | None) -> str:
+        normalized = (currency or "").strip().upper()
+        if not normalized:
+            raise HTTPException(
+                status_code=409,
+                detail={"code": "bid_package_currency_required", "message": "Set the bid package currency first."},
+            )
+        return normalized
+
     async def publish_package(self, package_id: uuid.UUID, user_id: str | None = None) -> BidPackage:
         package = await self.get_package(package_id)
+        self._require_package_currency(package.currency)
         await self._transition_package(package, "published")
         package.published_at = _now_iso()
         await self.session.flush()
@@ -1124,6 +1138,7 @@ class BidManagementService:
     async def open_bids(self, package_id: uuid.UUID, *, now: datetime | None = None) -> BidPackage:
         """Move a published package to ``open`` and flip invitation flags."""
         package = await self.get_package(package_id)
+        self._require_package_currency(package.currency)
         # Allow open from either ``published`` or ``open`` (idempotent).
         if package.status == "published":
             await self._transition_package(package, "open")
@@ -1202,6 +1217,7 @@ class BidManagementService:
 
     async def award_package(self, package_id: uuid.UUID, data: BidAwardCreate, user_id: str | None = None) -> BidAward:
         package = await self.get_package(package_id)
+        self._require_package_currency(package.currency)
         if package.status != "closed":
             raise HTTPException(
                 status_code=409,

@@ -244,26 +244,14 @@ async def test_the_contract_stops_at_the_blank(session, monkeypatch, caplog) -> 
 
 
 @pytest.mark.asyncio
-async def test_one_award_is_labelled_two_different_ways(session, monkeypatch, patched: _FakeStore) -> None:
-    """THE CONTROL. Expected to FAIL until the award resolves its own currency.
+async def test_repaired_package_award_labels_every_downstream_record_consistently(
+    session, monkeypatch, patched: _FakeStore
+) -> None:
+    """Repair a legacy blank package before award; every consumer uses its currency.
 
-    Everything above documents one chain each, given a blank payload. This is
-    the assertion that matters: for a single award, every record describing it
-    should agree on what money it is. The failure message prints the
-    disagreement rather than a boolean.
-
-    The currency is NOT written here. It is taken from the payload
-    ``award_package`` actually publishes, captured by standing in for
-    ``publish_after_commit``, so the test measures the shipping path rather
-    than a payload of the author's own construction. The real award row, the
-    real payload and both consumers then appear side by side.
-
-    Two harnesses in one test on purpose. The contracts handler runs against
-    the same PostgreSQL rows the award was made on, and the procurement
-    handler against the in-memory store its own suite uses, because that is
-    how each is reachable. The fake package is blanked the same way the real
-    one is, so the only input the comparison depends on is the currency the
-    publisher computed.
+    The real award and event run against PostgreSQL. The procurement consumer
+    retains its own legacy blank snapshot, so its agreement still depends on
+    the actual published currency rather than a manufactured event payload.
     """
     from decimal import Decimal
 
@@ -271,7 +259,7 @@ async def test_one_award_is_labelled_two_different_ways(session, monkeypatch, pa
 
     from app.modules.bid_management import service as bid_service
     from app.modules.bid_management.models import Bidder, BidInvitation, BidPackage, BidSubmission
-    from app.modules.bid_management.schemas import BidAwardCreate
+    from app.modules.bid_management.schemas import BidAwardCreate, BidPackageUpdate
     from app.modules.contracts.models import Contract
     from app.modules.notifications import _wave5_cross_module_subscribers as w5
     from app.modules.projects.models import Project
@@ -290,8 +278,8 @@ async def test_one_award_is_labelled_two_different_ways(session, monkeypatch, pa
     await session.flush()
 
     code = f"BP-{uuid.uuid4().hex[:8]}"
-    # Unlabelled, and closed so that it is awardable. Nothing here is contrived
-    # for the test: a package created without a currency is the default.
+    # Legacy installs can still hold blank packages. They must be repaired
+    # explicitly before an award; new packages cannot omit their currency.
     package = BidPackage(project_id=project.id, code=code, title="Concrete works", currency="", status="closed")
     session.add(package)
     await session.flush()
@@ -301,9 +289,8 @@ async def test_one_award_is_labelled_two_different_ways(session, monkeypatch, pa
     invitation = BidInvitation(package_id=package.id, bidder_ref_id=bidder.id, invitee_company_name="ACME Bau GmbH")
     session.add(invitation)
     await session.flush()
-    # EUR, and valid: an unlabelled package plus a labelled submission is not a
-    # currency_mismatch, so this bid passes validation and is awardable. That
-    # is the reachability the module docstring sets out.
+    # A historical validity flag does not bypass the currency guard. Repair
+    # the package below before attempting to award this submission.
     submission = BidSubmission(
         invitation_id=invitation.id,
         bidder_id=bidder.id,
@@ -321,7 +308,9 @@ async def test_one_award_is_labelled_two_different_ways(session, monkeypatch, pa
 
     monkeypatch.setattr(bid_service, "publish_after_commit", _capture)
 
-    award = await bid_service.BidManagementService(session).award_package(
+    service = bid_service.BidManagementService(session)
+    await service.update_package(package.id, BidPackageUpdate(currency="EUR"))
+    award = await service.award_package(
         package.id,
         BidAwardCreate(
             package_id=package.id,

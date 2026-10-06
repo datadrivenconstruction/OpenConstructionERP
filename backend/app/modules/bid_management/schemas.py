@@ -9,7 +9,7 @@ from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 # ── BidPackage ────────────────────────────────────────────────────────────
 
@@ -18,6 +18,12 @@ _CONFIDENTIALITY = r"^(public|limited|confidential)$"
 _INVITATION_STATUS = r"^(pending|sent|opened|submitted|declined|expired)$"
 _BIDDER_STATUS = r"^(active|disqualified|withdrawn)$"
 _REJECTION_CODE = r"^(price|scope|completeness|qualification|other)$"
+
+
+def _required_package_currency(value: str | None) -> str:
+    if not value or not value.strip():
+        raise ValueError("Bid package currency is required")
+    return value.strip().upper()
 
 
 class BidPackageCreate(BaseModel):
@@ -33,11 +39,13 @@ class BidPackageCreate(BaseModel):
     instructions_to_bidders: str = ""
     submission_deadline: str | None = Field(default=None, max_length=40)
     decision_due_by: str | None = Field(default=None, max_length=40)
-    currency: str = Field(default="", max_length=10)
+    currency: str = Field(..., min_length=1, max_length=10)
     total_budget_estimate: Decimal = Decimal("0")
     status: str = Field(default="draft", pattern=_PACKAGE_STATUS)
     confidentiality_level: str = Field(default="limited", pattern=_CONFIDENTIALITY)
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+    _currency_required = field_validator("currency")(_required_package_currency)
 
 
 class BidPackageUpdate(BaseModel):
@@ -56,6 +64,8 @@ class BidPackageUpdate(BaseModel):
     status: str | None = Field(default=None, pattern=_PACKAGE_STATUS)
     confidentiality_level: str | None = Field(default=None, pattern=_CONFIDENTIALITY)
     metadata: dict[str, Any] | None = None
+
+    _currency_required = field_validator("currency")(_required_package_currency)
 
 
 class BidPackageResponse(BaseModel):

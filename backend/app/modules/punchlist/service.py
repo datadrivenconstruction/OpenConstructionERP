@@ -207,8 +207,10 @@ class PunchListService:
         user_id: str | None = None,
     ) -> PunchItem:
         """Create a new punch list item."""
+        await self._verify_contract_project(data.contract_id, data.project_id)
         item = PunchItem(
             project_id=data.project_id,
+            contract_id=data.contract_id,
             title=data.title,
             description=data.description,
             document_id=data.document_id,
@@ -307,6 +309,16 @@ class PunchListService:
 
     # ── Update ────────────────────────────────────────────────────────────
 
+    async def _verify_contract_project(self, contract_id: uuid.UUID | None, project_id: uuid.UUID) -> None:
+        """Accept only a contract from the item's project; hide foreign ids."""
+        if contract_id is None:
+            return
+        from app.modules.contracts.models import Contract
+
+        contract = await self.session.get(Contract, contract_id)
+        if contract is None or contract.project_id != project_id:
+            raise HTTPException(status_code=404, detail="Contract not found")
+
     async def update_item(
         self,
         item_id: uuid.UUID,
@@ -316,6 +328,8 @@ class PunchListService:
         item = await self.get_item(item_id)
 
         fields = data.model_dump(exclude_unset=True)
+        if "contract_id" in fields:
+            await self._verify_contract_project(fields["contract_id"], item.project_id)
         if "metadata" in fields:
             _incoming = fields.pop("metadata")
             fields["metadata_"] = (

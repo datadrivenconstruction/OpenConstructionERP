@@ -2775,6 +2775,7 @@ class ContractsService:
         )
 
     async def create_line(self, data: Any) -> ContractLine:
+        await self._assert_contract_lines_editable(data.contract_id)
         qty = Decimal(str(data.quantity or 0))
         rate = Decimal(str(data.unit_rate or 0))
         total = qty * rate
@@ -2800,7 +2801,7 @@ class ContractsService:
         contract_id: uuid.UUID,
         items: list[Any],
     ) -> list[ContractLine]:
-        await self.get_contract(contract_id)
+        await self._assert_contract_lines_editable(contract_id)
         lines: list[ContractLine] = []
         for it in items:
             qty = Decimal(str(it.quantity or 0))
@@ -5847,7 +5848,7 @@ class ContractsService:
         }
 
     async def _open_items(self, contract: Contract) -> dict[str, Any]:
-        """The open punch items on the contract's project and what they are estimated to cost.
+        """The open punch items assigned to this contract and their estimated cost.
 
         Only items costed in the contract's currency are added up; the others
         are counted as without a cost, so the preview can say the withholding
@@ -5864,6 +5865,7 @@ class ContractsService:
         result = await self.session.execute(
             select(PunchItem).where(
                 PunchItem.project_id == contract.project_id,
+                PunchItem.contract_id == contract.id,
                 PunchItem.status.notin_(tuple(DONE_STATUSES)),
             )
         )

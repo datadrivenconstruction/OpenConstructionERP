@@ -49,6 +49,7 @@ export type PunchCategory =
 export interface PunchItem {
   id: string;
   project_id: string;
+  contract_id?: string | null;
   title: string;
   description: string;
   priority: PunchPriority;
@@ -139,6 +140,7 @@ export interface PunchFilters {
 
 export interface CreatePunchPayload {
   project_id: string;
+  contract_id?: string | null;
   title: string;
   description?: string;
   priority?: PunchPriority;
@@ -158,6 +160,7 @@ export interface CreatePunchPayload {
 }
 
 export interface UpdatePunchPayload {
+  contract_id?: string | null;
   title?: string;
   description?: string;
   priority?: PunchPriority;

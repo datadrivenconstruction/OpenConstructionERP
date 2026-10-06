@@ -48,6 +48,7 @@ class PunchItemCreate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     project_id: UUID
+    contract_id: UUID | None = None
     title: str = Field(..., min_length=1, max_length=255)
     description: str = Field(default="", max_length=5000)
     document_id: str | None = Field(default=None, max_length=36)
@@ -107,6 +108,7 @@ class PunchItemUpdate(BaseModel):
     """Partial update for a punch list item."""
 
     model_config = ConfigDict(str_strip_whitespace=True)
+    contract_id: UUID | None = None
 
     title: str | None = Field(default=None, min_length=1, max_length=255)
     description: str | None = Field(default=None, max_length=5000)
@@ -162,6 +164,7 @@ class PunchItemResponse(BaseModel):
 
     id: UUID
     project_id: UUID
+    contract_id: UUID | None = None
     title: str
     description: str = ""
     document_id: str | None = None

@@ -19,6 +19,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
 
+from app.core.currency_registry import minor_units as currency_minor_units
 from app.modules.full_evm.metrics import EAC_METHODS
 from app.modules.full_evm.models import BASELINE_STATUSES, MEASURE_SOURCES
 
@@ -296,7 +297,12 @@ class BaselineCreate(BaseModel):
     description: str | None = None
     bac: Decimal = Field(description="Budget At Completion for the scope this baseline measures")
     currency: str | None = Field(default=None, min_length=3, max_length=3, description="ISO 4217 code, label only")
-    minor_units: int = Field(default=2, ge=0, le=4, description="Decimal places the currency uses")
+    minor_units: int = Field(
+        default_factory=lambda data: currency_minor_units(data.get("currency")),
+        ge=0,
+        le=4,
+        description="Decimal places; defaults to the currency registry unless explicitly supplied",
+    )
     start_date: date | None = None
     finish_date: date | None = None
     periods: list[BaselinePeriodWrite] = Field(default_factory=list, max_length=2000)

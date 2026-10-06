@@ -30,6 +30,7 @@ import {
 } from './api';
 import { PunchClosureStepper } from './PunchClosureStepper';
 import { PunchPhotoGallery } from './PunchPhotoGallery';
+import { PunchContractAssignment } from './PunchContractField';
 import { AssigneeLabel } from './assignee';
 import {
   formatReworkCost,
@@ -379,6 +380,7 @@ export function PunchDetailDrawer({
         </section>
 
         {/* ── Rework cost ─────────────────────────────────────────────── */}
+        <PunchContractAssignment item={item} onSaved={refresh} />
         <ReworkCostSection
           key={item.id}
           item={item}

@@ -140,6 +140,35 @@ async def _foots(svc: ContractsService, claim: ProgressClaim) -> dict:
     return application
 
 
+async def test_punch_withholding_stays_with_its_contract_and_never_guesses_legacy_links(session, world) -> None:
+    svc = ContractsService(session)
+    january = await _generate(svc, world, await _claim(session, world, "PC-1", 1), "50", "50")
+    await _approve(svc, january)
+    other = Contract(
+        project_id=world.project.id, code="OTHER", title="Other contractor", status="active", currency="USD"
+    )
+    session.add(other)
+    await session.flush()
+    for contract_id, cost in ((world.contract.id, "1000"), (other.id, "9000"), (None, "50000")):
+        session.add(
+            PunchItem(
+                project_id=world.project.id,
+                contract_id=contract_id,
+                title="Outstanding work",
+                status="open",
+                rework_cost=cost,
+                rework_cost_currency="USD",
+            )
+        )
+    await session.flush()
+    preview = await svc.preview_retention_release(world.contract.id, _request("practical_completion"))
+    assert preview["open_items_count"] == 1
+    assert preview["withheld_for_open_items"] == Decimal("1500.00")
+    assert preview["amount"] == Decimal("3500.00")
+    other_items = await svc._open_items(other)
+    assert (other_items["count"], other_items["value"]) == (1, Decimal("9000"))
+
+
 async def test_a_billed_release_takes_line_5_down_and_is_paid_with_the_claim(session, world) -> None:
     svc = ContractsService(session)
     january = await _generate(svc, world, await _claim(session, world, "PC-1", 1), "50", "50")
@@ -155,6 +184,7 @@ async def test_a_billed_release_takes_line_5_down_and_is_paid_with_the_claim(ses
     session.add(
         PunchItem(
             project_id=world.project.id,
+            contract_id=world.contract.id,
             title="Door closer",
             status="open",
             rework_cost="1000",

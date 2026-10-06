@@ -37,6 +37,7 @@ export const PERMISSION_MIN_ROLE = {
   'takeoff.update': 'editor',
   'dwg_takeoff.create': 'editor',
   'schedule.create': 'editor',
+  'punchlist.update': 'editor',
   'qms.itp.write': 'editor',
   'qms.inspection.write': 'editor',
   'qms.ncr.write': 'editor',
