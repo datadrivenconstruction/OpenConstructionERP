@@ -407,3 +407,58 @@ class WorkingDaysResponse(BaseModel):
     working_days: int
     calendar_days: int
     years: list[WorkingDaysYear] = Field(default_factory=list)
+
+
+# ── Reference data update ────────────────────────────────────────────────
+
+
+class ReferenceFieldChange(BaseModel):
+    """One field that differs between this database and the shipped seed file."""
+
+    field: str
+    before: Any = None
+    after: Any = None
+
+
+class ReferenceChangeResponse(BaseModel):
+    """One entry of the reference data preview.
+
+    ``status`` is ``ready`` (applied on confirmation), ``kept`` (this
+    database's version stays) or ``review`` (shown for a person to settle by
+    hand, never written by the update). ``reason`` is a stable code.
+    """
+
+    key: str
+    kind: Literal["country", "calendar", "tax"]
+    action: Literal["add", "update", "none"]
+    status: Literal["ready", "kept", "review"]
+    reason: str
+    label: str
+    detail: str = ""
+    rows_added: int = 0
+    fields: list[ReferenceFieldChange] = Field(default_factory=list)
+
+
+class ReferenceDataPreviewResponse(BaseModel):
+    """What updating the reference data would change, written nowhere yet."""
+
+    ready: int
+    kept: int
+    review: int
+    changes: list[ReferenceChangeResponse] = Field(default_factory=list)
+
+
+class ReferenceDataApplyRequest(BaseModel):
+    """The preview keys an administrator confirmed."""
+
+    keys: list[str] = Field(..., max_length=5000)
+
+
+class ReferenceDataApplyResponse(BaseModel):
+    """What an apply wrote, and the preview as it reads afterwards."""
+
+    applied: list[str]
+    skipped: list[str]
+    rows_added: int
+    rows_updated: int
+    preview: ReferenceDataPreviewResponse

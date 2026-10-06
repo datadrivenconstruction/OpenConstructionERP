@@ -2127,6 +2127,94 @@ def cmd_demo_cleanup(args: argparse.Namespace) -> None:
     asyncio.run(run_demo_cleanup(bool(args.apply)))
 
 
+# ── Reference data update ───────────────────────────────────────────────────
+# The seeder fills countries, work calendars and tax rates only while each table
+# is empty, so an install set up on an older release keeps the copy it started
+# with. This prints what the shipped files would add or change and, with
+# --apply, writes the changes marked ready. The rule for what may be written is
+# in app/modules/i18n_foundation/reference_data_update.py.
+
+
+def _format_reference_value(value: Any) -> str:
+    import json
+
+    if isinstance(value, (dict, list)):
+        text = json.dumps(value, ensure_ascii=False, sort_keys=True)
+        return text if len(text) <= 60 else text[:57] + "..."
+    return "-" if value is None else str(value)
+
+
+async def run_reference_data_update(apply: bool, write: Callable[[str], None] = print) -> Any:
+    """Preview, and with ``apply`` write, the shipped reference data this database lacks.
+
+    Opens its session from ``app.database`` at call time, so whatever database
+    the process is pointed at is the one compared. Commits only on ``apply``.
+    """
+    from app.database import async_session_factory
+    from app.modules.i18n_foundation.reference_data_update import apply_reference_update, compute_reference_diff
+
+    async with async_session_factory() as session:
+        if apply:
+            result = await apply_reference_update(session, None)
+            await session.commit()
+            diff = result.after
+        else:
+            result = None
+            diff = await compute_reference_diff(session)
+            await session.rollback()
+
+    if result is not None:
+        write(
+            _green(
+                f"Applied {len(result.applied)} change(s): {result.rows_added} row(s) added, "
+                f"{result.rows_updated} row(s) updated."
+            )
+        )
+        for key in result.applied:
+            write(f"  {key}")
+
+    headings = {
+        "ready": "Ready to apply:",
+        "kept": "Kept as they are (this database's version stays):",
+        "review": "Needs a person to decide, never applied by this command:",
+    }
+    for status, heading in headings.items():
+        entries = [change for change in diff.changes if change.status == status]
+        if not entries:
+            continue
+        write(heading)
+        for change in entries:
+            extra = f", {change.rows_added} row(s) to add" if change.rows_added and status == "ready" else ""
+            write(f"  {change.key}  {change.label}  ({change.reason}{extra})")
+            for item in change.fields:
+                write(
+                    f"      {item.field}: {_format_reference_value(item.before)} -> "
+                    f"{_format_reference_value(item.after)}"
+                )
+            if change.detail:
+                write(f"      {change.detail}")
+
+    ready = diff.count("ready")
+    if apply:
+        return diff
+    if ready:
+        write(_yellow(f"Dry run, nothing changed. Run again with --apply to write the {ready} ready change(s)."))
+    else:
+        write(_green("Reference data already matches this release. Nothing to apply."))
+    return diff
+
+
+def cmd_update_reference_data(args: argparse.Namespace) -> None:
+    """Show, and with --apply write, the shipped countries, calendars and tax rates this install lacks."""
+    data_dir = _data_dir_from_args(args)
+    _setup_env(data_dir, DEFAULT_HOST, DEFAULT_PORT)
+
+    import asyncio
+
+    _register_all_module_models()
+    asyncio.run(run_reference_data_update(bool(args.apply)))
+
+
 # ── Module management (install / list / uninstall) ─────────────────────────
 # A module is a Python package under ``app/modules/`` that carries a
 # ``manifest.py`` exposing a module-level ``manifest = ModuleManifest(...)``.
@@ -2772,6 +2860,24 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     _add_data_dir_arg(demo_cleanup_p)
 
+    # update-reference-data - shipped countries, calendars and tax rates an older install lacks
+    refdata_p = subparsers.add_parser(
+        "update-reference-data",
+        help="Show the shipped countries, work calendars and tax rates this install lacks; --apply writes them",
+    )
+    refdata_mode = refdata_p.add_mutually_exclusive_group()
+    refdata_mode.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Only print what would change (the default).",
+    )
+    refdata_mode.add_argument(
+        "--apply",
+        action="store_true",
+        help="Write the changes marked ready. Rows you created or edited are never changed.",
+    )
+    _add_data_dir_arg(refdata_p)
+
     # module - install / list / uninstall business modules
     module_p = subparsers.add_parser(
         "module",
@@ -2880,6 +2986,8 @@ def main() -> None:
         cmd_promote_admin(args)
     elif args.command == "demo-cleanup":
         cmd_demo_cleanup(args)
+    elif args.command == "update-reference-data":
+        cmd_update_reference_data(args)
     elif args.command == "module":
         cmd_module(args)
     elif args.command == "pack":

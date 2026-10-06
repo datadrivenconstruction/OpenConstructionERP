@@ -26,6 +26,10 @@ permission is the whole guard and there is no ownership check underneath it to
 fall back on. Changing a VAT rate here changes what every tenant's estimates
 and invoices are computed from, which makes it an install-level administrative
 act rather than an ordinary write.
+
+The reference data update adds two more, preview and apply, both ADMIN for the
+same reason: applying it writes shipped countries, calendars and tax rates into
+those same global tables, and the preview is the first half of that write.
 """
 
 from app.core.permissions import Role, permission_registry
@@ -44,5 +48,7 @@ def register_i18n_foundation_permissions() -> None:
             "i18n_foundation.work_calendars.update": Role.ADMIN,
             "i18n_foundation.tax_configs.create": Role.ADMIN,
             "i18n_foundation.tax_configs.update": Role.ADMIN,
+            "i18n_foundation.reference_data.preview": Role.ADMIN,
+            "i18n_foundation.reference_data.apply": Role.ADMIN,
         },
     )
