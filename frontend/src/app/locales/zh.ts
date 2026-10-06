@@ -47670,6 +47670,11 @@ const resource = {
     "tendering.bid_late": "逾期",
     "tendering.bidder_note": "投标人备注",
     // --- /Bidder price-entry link ---
+    "boq.base_date_label": "价格基准日",
+    "boq.tax_date_label": "计税日期",
+    "boq.tax_date_placeholder": "与价格基准日相同",
+    "boq.tax_date_hint": "增值税按该日期适用的税率计算。留空则使用价格基准日。",
+    "boq.date_shape_error": "请输入日、月、季度或年：2026-03-15、2026-03、2026-Q1 或 2026",
   }
 } as { translation: Record<string, string> };
 

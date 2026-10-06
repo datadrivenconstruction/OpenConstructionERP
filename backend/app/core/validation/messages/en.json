@@ -145,6 +145,10 @@
     "base_date_readable": {
       "fail": "Base date '{base_date}' is not a date, so the bill is taxed at today's rate rather than its own",
       "suggestion": "State the price base as a day, a month, a quarter or a year ({shapes})"
+    },
+    "tax_date_readable": {
+      "fail": "Tax date '{tax_date}' is not a date, so the bill is taxed at today's rate rather than its own",
+      "suggestion": "State the tax date as a day, a month, a quarter or a year ({shapes}), or clear it to tax the bill on its base date"
     }
   },
   "din276": {

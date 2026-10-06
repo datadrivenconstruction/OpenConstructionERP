@@ -6467,6 +6467,13 @@ class BOQBaseDateReadable(ValidationRule):
     never read. The parser is shared with the pricing path
     (``app.modules.boq.base_date``) so that this rule cannot pass a value the
     tax lookup then rejects.
+
+    A bill that states a ``tax_date`` is taxed on that instead, so the rule
+    reads whichever field :func:`app.modules.boq.base_date.tax_point` says the
+    bill is taxed on and names it in the finding. A readable tax date passes
+    the rule whatever the base date says, because the base date then no longer
+    decides the tax. The API refuses an unreadable tax date, so that branch
+    speaks only for rows written past the API.
     """
 
     rule_id = "boq_quality.base_date_readable"
@@ -6477,10 +6484,12 @@ class BOQBaseDateReadable(ValidationRule):
     description = "Flags a stated base date that is not a date, which taxes the bill at today's rate"
 
     async def validate(self, context: ValidationContext) -> list[RuleResult]:
-        from app.modules.boq.base_date import ACCEPTED_SHAPES, price_base_day
+        from app.modules.boq.base_date import ACCEPTED_SHAPES, price_base_day, tax_point
 
         locale = _get_locale(context)
-        stated = str(_boq_document(context).get("base_date") or "").strip()
+        document = _boq_document(context)
+        field, value = tax_point(document.get("tax_date"), document.get("base_date"))
+        stated = str(value or "").strip()
         if not stated:
             # A bill with no price base has nothing to be wrong about, and a
             # passing row here would claim this was checked on every payload
@@ -6495,9 +6504,11 @@ class BOQBaseDateReadable(ValidationRule):
                     category=self.category,
                     passed=True,
                     message=_ok(locale),
-                    details={"base_date": stated},
+                    details={field: stated},
                 )
             ]
+        # ``field`` is ``base_date`` or ``tax_date``, and each has its own
+        # message pair so the finding names the field the person has to fix.
         return [
             RuleResult(
                 rule_id=self.rule_id,
@@ -6505,10 +6516,10 @@ class BOQBaseDateReadable(ValidationRule):
                 severity=self.severity,
                 category=self.category,
                 passed=False,
-                message=translate("boq_quality.base_date_readable.fail", locale=locale, base_date=stated),
-                details={"base_date": stated},
+                message=translate(f"boq_quality.{field}_readable.fail", locale=locale, **{field: stated}),
+                details={field: stated},
                 suggestion=translate(
-                    "boq_quality.base_date_readable.suggestion",
+                    f"boq_quality.{field}_readable.suggestion",
                     locale=locale,
                     shapes=", ".join(ACCEPTED_SHAPES),
                 ),

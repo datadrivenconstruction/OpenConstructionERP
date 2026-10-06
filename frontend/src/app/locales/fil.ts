@@ -45372,6 +45372,11 @@ const resource = {
     "tendering.bid_late": "Huli",
     "tendering.bidder_note": "Tala mula sa bidder",
     // --- /Bidder price-entry link ---
+    "boq.base_date_label": "Petsa ng batayang presyo",
+    "boq.tax_date_label": "Petsa ng buwis",
+    "boq.tax_date_placeholder": "Kapareho ng petsa ng batayang presyo",
+    "boq.tax_date_hint": "Sinisingil ang VAT sa rate na umiiral sa petsang ito. Iwanang blangko para gamitin ang petsa ng batayang presyo.",
+    "boq.date_shape_error": "Gumamit ng araw, buwan, quarter o taon: 2026-03-15, 2026-03, 2026-Q1 o 2026",
   }
 } as { translation: Record<string, string> };
 

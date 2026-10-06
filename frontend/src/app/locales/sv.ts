@@ -46007,6 +46007,11 @@ const resource = {
     "tendering.bid_late": "Sen",
     "tendering.bidder_note": "Anteckning från anbudsgivaren",
     // --- /Bidder price-entry link ---
+    "boq.base_date_label": "Prisbasdatum",
+    "boq.tax_date_label": "Skattedatum",
+    "boq.tax_date_placeholder": "Samma som prisbasdatum",
+    "boq.tax_date_hint": "Moms beräknas med den skattesats som gäller detta datum. Lämna tomt för att använda prisbasdatumet.",
+    "boq.date_shape_error": "Ange en dag, en månad, ett kvartal eller ett år: 2026-03-15, 2026-03, 2026-Q1 eller 2026",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

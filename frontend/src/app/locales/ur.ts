@@ -45374,6 +45374,11 @@ const resource = {
     "tendering.bid_late": "تاخیر سے",
     "tendering.bidder_note": "بولی دہندہ کا نوٹ",
     // --- /Bidder price-entry link ---
+    "boq.base_date_label": "قیمت کی بنیادی تاریخ",
+    "boq.tax_date_label": "ٹیکس کی تاریخ",
+    "boq.tax_date_placeholder": "قیمت کی بنیادی تاریخ کے مطابق",
+    "boq.tax_date_hint": "اس تاریخ کو نافذ شرح سے ٹیکس لگایا جاتا ہے۔ قیمت کی بنیادی تاریخ استعمال کرنے کے لیے خالی چھوڑ دیں۔",
+    "boq.date_shape_error": "دن، مہینہ، سہ ماہی یا سال درج کریں: 2026-03-15، 2026-03، 2026-Q1 یا 2026",
   }
 } as { translation: Record<string, string> };
 

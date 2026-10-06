@@ -47308,6 +47308,11 @@ const resource = {
     "tendering.bid_late": "Запізніла",
     "tendering.bidder_note": "Примітка від учасника",
     // --- /Bidder price-entry link ---
+    "boq.base_date_label": "Дата цінової бази",
+    "boq.tax_date_label": "Дата оподаткування",
+    "boq.tax_date_placeholder": "Як дата цінової бази",
+    "boq.tax_date_hint": "ПДВ нараховується за ставкою, чинною на цю дату. Залиште порожнім, щоб використати дату цінової бази.",
+    "boq.date_shape_error": "Вкажіть день, місяць, квартал або рік: 2026-03-15, 2026-03, 2026-Q1 або 2026",
   }
 } as { translation: Record<string, string> };
 

@@ -46733,6 +46733,11 @@ const resource = {
     "tendering.bid_late": "遅延",
     "tendering.bidder_note": "入札者からのメモ",
     // --- /Bidder price-entry link ---
+    "boq.base_date_label": "価格基準日",
+    "boq.tax_date_label": "課税基準日",
+    "boq.tax_date_placeholder": "価格基準日と同じ",
+    "boq.tax_date_hint": "消費税はこの日に有効な税率で計算されます。価格基準日を使う場合は空欄のままにしてください。",
+    "boq.date_shape_error": "日、月、四半期、または年で入力してください: 2026-03-15、2026-03、2026-Q1、2026",
   }
 } as { translation: Record<string, string> };
 

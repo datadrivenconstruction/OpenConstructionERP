@@ -45392,6 +45392,11 @@ const resource = {
     "tendering.bid_late": "Forsinket",
     "tendering.bidder_note": "Note fra den bydende",
     // --- /Bidder price-entry link ---
+    "boq.base_date_label": "Prisbasisdato",
+    "boq.tax_date_label": "Momsdato",
+    "boq.tax_date_placeholder": "Samme som prisbasisdato",
+    "boq.tax_date_hint": "Moms beregnes med den sats, der gælder på denne dato. Lad feltet stå tomt for at bruge prisbasisdatoen.",
+    "boq.date_shape_error": "Angiv en dag, en måned, et kvartal eller et år: 2026-03-15, 2026-03, 2026-Q1 eller 2026",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

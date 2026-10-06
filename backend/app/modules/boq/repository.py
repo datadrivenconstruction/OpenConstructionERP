@@ -127,6 +127,7 @@ BOQ_HEADER_COLUMNS = (
     BOQ.approved_by,
     BOQ.approved_at,
     BOQ.base_date,
+    BOQ.tax_date,
     BOQ.estimate_type,
     BOQ.parent_estimate_id,
     BOQ.variation_request_id,

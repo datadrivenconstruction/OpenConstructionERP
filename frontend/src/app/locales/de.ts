@@ -48034,6 +48034,11 @@ const resource = {
     "tendering.bid_late": "Verspätet",
     "tendering.bidder_note": "Notiz des Bieters",
     // --- /Bidder price-entry link ---
+    "boq.base_date_label": "Preisbasisdatum",
+    "boq.tax_date_label": "Steuerstichtag",
+    "boq.tax_date_placeholder": "Wie Preisbasisdatum",
+    "boq.tax_date_hint": "Die Umsatzsteuer wird mit dem an diesem Tag geltenden Satz berechnet. Leer lassen, um das Preisbasisdatum zu verwenden.",
+    "boq.date_shape_error": "Tag, Monat, Quartal oder Jahr angeben: 2026-03-15, 2026-03, 2026-Q1 oder 2026",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

@@ -45209,6 +45209,11 @@ const resource = {
     "tendering.bid_late": "Trễ hạn",
     "tendering.bidder_note": "Ghi chú từ nhà thầu",
     // --- /Bidder price-entry link ---
+    "boq.base_date_label": "Ngày cơ sở giá",
+    "boq.tax_date_label": "Ngày tính thuế",
+    "boq.tax_date_placeholder": "Giống ngày cơ sở giá",
+    "boq.tax_date_hint": "Thuế GTGT được tính theo thuế suất có hiệu lực vào ngày này. Để trống để dùng ngày cơ sở giá.",
+    "boq.date_shape_error": "Nhập ngày, tháng, quý hoặc năm: 2026-03-15, 2026-03, 2026-Q1 hoặc 2026",
   }
 } as { translation: Record<string, string> };
 

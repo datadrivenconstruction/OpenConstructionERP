@@ -48206,6 +48206,11 @@ const resource = {
     "tendering.bid_late": "Tardía",
     "tendering.bidder_note": "Nota del licitante",
     // --- /Bidder price-entry link ---
+    "boq.base_date_label": "Fecha base de precios",
+    "boq.tax_date_label": "Fecha fiscal",
+    "boq.tax_date_placeholder": "Igual que la fecha base de precios",
+    "boq.tax_date_hint": "El IVA se aplica al tipo vigente en esta fecha. Déjelo vacío para usar la fecha base de precios.",
+    "boq.date_shape_error": "Indique un día, un mes, un trimestre o un año: 2026-03-15, 2026-03, 2026-Q1 o 2026",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

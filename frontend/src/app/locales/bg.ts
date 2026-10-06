@@ -45396,6 +45396,11 @@ const resource = {
     "tendering.bid_late": "Закъсняла",
     "tendering.bidder_note": "Бележка от оферента",
     // --- /Bidder price-entry link ---
+    "boq.base_date_label": "Дата на ценовата база",
+    "boq.tax_date_label": "Данъчна дата",
+    "boq.tax_date_placeholder": "Като датата на ценовата база",
+    "boq.tax_date_hint": "ДДС се начислява по ставката, действаща към тази дата. Оставете празно, за да се използва датата на ценовата база.",
+    "boq.date_shape_error": "Въведете ден, месец, тримесечие или година: 2026-03-15, 2026-03, 2026-Q1 или 2026",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

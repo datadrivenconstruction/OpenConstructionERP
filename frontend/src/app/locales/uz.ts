@@ -46309,6 +46309,11 @@ const resource = {
     "tendering.bid_late": "Kechikkan",
     "tendering.bidder_note": "Taklif beruvchidan izoh",
     // --- /Bidder price-entry link ---
+    "boq.base_date_label": "Narx bazasi sanasi",
+    "boq.tax_date_label": "Soliq sanasi",
+    "boq.tax_date_placeholder": "Narx bazasi sanasi bilan bir xil",
+    "boq.tax_date_hint": "QQS shu sanada amalda boʻlgan stavka boʻyicha hisoblanadi. Narx bazasi sanasidan foydalanish uchun boʻsh qoldiring.",
+    "boq.date_shape_error": "Kun, oy, chorak yoki yilni kiriting: 2026-03-15, 2026-03, 2026-Q1 yoki 2026",
   }
 } as { translation: Record<string, string> };
 

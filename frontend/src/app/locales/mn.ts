@@ -45078,6 +45078,11 @@ const resource = {
     "tendering.bid_late": "Хоцорсон",
     "tendering.bidder_note": "Санал өгөгчийн тэмдэглэл",
     // --- /Bidder price-entry link ---
+    "boq.base_date_label": "Үнийн суурь огноо",
+    "boq.tax_date_label": "Татварын огноо",
+    "boq.tax_date_placeholder": "Үнийн суурь огноотой адил",
+    "boq.tax_date_hint": "НӨАТ-ыг энэ огноонд мөрдөж буй хувиар тооцно. Үнийн суурь огноог ашиглах бол хоосон үлдээнэ үү.",
+    "boq.date_shape_error": "Өдөр, сар, улирал эсвэл жил оруулна уу: 2026-03-15, 2026-03, 2026-Q1 эсвэл 2026",
   }
 } as { translation: Record<string, string> };
 

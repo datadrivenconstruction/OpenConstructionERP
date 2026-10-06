@@ -47915,6 +47915,11 @@ const resource = {
     "tendering.bid_late": "متأخر",
     "tendering.bidder_note": "ملاحظة من مقدم العرض",
     // --- /Bidder price-entry link ---
+    "boq.base_date_label": "تاريخ أساس الأسعار",
+    "boq.tax_date_label": "تاريخ الضريبة",
+    "boq.tax_date_placeholder": "مطابق لتاريخ أساس الأسعار",
+    "boq.tax_date_hint": "تُحتسب ضريبة القيمة المضافة بالمعدل الساري في هذا التاريخ. اتركه فارغًا لاستخدام تاريخ أساس الأسعار.",
+    "boq.date_shape_error": "استخدم يومًا أو شهرًا أو ربعًا أو سنة: 2026-03-15 أو 2026-03 أو 2026-Q1 أو 2026",
   }
 } as { translation: Record<string, string> };
 

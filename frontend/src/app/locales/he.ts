@@ -45606,6 +45606,11 @@ const resource = {
     "tendering.bid_late": "באיחור",
     "tendering.bidder_note": "הערה מהמציע",
     // --- /Bidder price-entry link ---
+    "boq.base_date_label": "תאריך בסיס מחירים",
+    "boq.tax_date_label": "תאריך מס",
+    "boq.tax_date_placeholder": "זהה לתאריך בסיס המחירים",
+    "boq.tax_date_hint": "המע״מ מחושב לפי השיעור התקף בתאריך זה. השאירו ריק כדי להשתמש בתאריך בסיס המחירים.",
+    "boq.date_shape_error": "הזינו יום, חודש, רבעון או שנה: 2026-03-15, 2026-03, 2026-Q1 או 2026",
   }
 } as { translation: Record<string, string> };
 

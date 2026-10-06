@@ -45374,6 +45374,11 @@ const resource = {
     "tendering.bid_late": "با تأخیر",
     "tendering.bidder_note": "یادداشت مناقصه‌گر",
     // --- /Bidder price-entry link ---
+    "boq.base_date_label": "تاریخ مبنای قیمت",
+    "boq.tax_date_label": "تاریخ مالیاتی",
+    "boq.tax_date_placeholder": "همان تاریخ مبنای قیمت",
+    "boq.tax_date_hint": "مالیات بر ارزش افزوده با نرخ معتبر در این تاریخ محاسبه می‌شود. برای استفاده از تاریخ مبنای قیمت، خالی بگذارید.",
+    "boq.date_shape_error": "روز، ماه، فصل یا سال وارد کنید: 2026-03-15، 2026-03، 2026-Q1 یا 2026",
   }
 } as { translation: Record<string, string> };
 

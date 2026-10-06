@@ -1379,6 +1379,9 @@ class BackupBOQData(BaseModel):
     approved_by: str | None = None
     approved_at: str | None = None
     base_date: str | None = None
+    #: Absent from backups taken before the field existed, which restore as
+    #: NULL: taxed on the base date, as those bills always were.
+    tax_date: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
     positions: list[BackupPositionData] = Field(default_factory=list)
     markups: list[BackupMarkupData] = Field(default_factory=list)

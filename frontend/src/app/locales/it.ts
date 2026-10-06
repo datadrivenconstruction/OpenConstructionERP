@@ -46508,6 +46508,11 @@ const resource = {
     "tendering.bid_late": "In ritardo",
     "tendering.bidder_note": "Nota dell'offerente",
     // --- /Bidder price-entry link ---
+    "boq.base_date_label": "Data base dei prezzi",
+    "boq.tax_date_label": "Data fiscale",
+    "boq.tax_date_placeholder": "Uguale alla data base dei prezzi",
+    "boq.tax_date_hint": "L'IVA è calcolata con l'aliquota in vigore a questa data. Lascia vuoto per usare la data base dei prezzi.",
+    "boq.date_shape_error": "Indica un giorno, un mese, un trimestre o un anno: 2026-03-15, 2026-03, 2026-Q1 o 2026",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

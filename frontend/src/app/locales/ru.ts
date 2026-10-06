@@ -48403,6 +48403,11 @@ const resource = {
     "tendering.bid_late": "С опозданием",
     "tendering.bidder_note": "Примечание от участника",
     // --- /Bidder price-entry link ---
+    "boq.base_date_label": "Дата базиса цен",
+    "boq.tax_date_label": "Дата налогообложения",
+    "boq.tax_date_placeholder": "Как дата базиса цен",
+    "boq.tax_date_hint": "НДС начисляется по ставке, действующей на эту дату. Оставьте пустым, чтобы использовать дату базиса цен.",
+    "boq.date_shape_error": "Укажите день, месяц, квартал или год: 2026-03-15, 2026-03, 2026-Q1 или 2026",
   }
 } as { translation: Record<string, string> };
 

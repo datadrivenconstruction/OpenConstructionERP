@@ -46273,6 +46273,11 @@ const resource = {
     "tendering.bid_late": "Te laat",
     "tendering.bidder_note": "Opmerking van de inschrijver",
     // --- /Bidder price-entry link ---
+    "boq.base_date_label": "Prijspeildatum",
+    "boq.tax_date_label": "Belastingdatum",
+    "boq.tax_date_placeholder": "Gelijk aan prijspeildatum",
+    "boq.tax_date_hint": "De btw wordt berekend tegen het tarief dat op deze datum geldt. Laat leeg om de prijspeildatum te gebruiken.",
+    "boq.date_shape_error": "Gebruik een dag, maand, kwartaal of jaar: 2026-03-15, 2026-03, 2026-Q1 of 2026",
     // --- /Learn ---
   }
 } as { translation: Record<string, string> };

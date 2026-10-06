@@ -45684,6 +45684,11 @@ const resource = {
     "tendering.bid_late": "দেরিতে",
     "tendering.bidder_note": "বিডারের নোট",
     // --- /Bidder price-entry link ---
+    "boq.base_date_label": "মূল্যভিত্তি তারিখ",
+    "boq.tax_date_label": "কর তারিখ",
+    "boq.tax_date_placeholder": "মূল্যভিত্তি তারিখের মতোই",
+    "boq.tax_date_hint": "এই তারিখে কার্যকর হারে কর ধার্য হয়। মূল্যভিত্তি তারিখ ব্যবহার করতে খালি রাখুন।",
+    "boq.date_shape_error": "দিন, মাস, ত্রৈমাসিক বা বছর লিখুন: 2026-03-15, 2026-03, 2026-Q1 অথবা 2026",
   }
 } as { translation: Record<string, string> };
 

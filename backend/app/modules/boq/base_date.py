@@ -11,9 +11,22 @@ into ``boq_metadata`` rather than into this column, so what reaches the column
 is what a person or an integration put there.
 
 Anything that dates a bill needs one day rather than a period, and the platform
-now has one: a bill of quantities is taxed at its own base date, so the string
-has to become a date somewhere. This module is that somewhere, so that a second
+now has one: a bill of quantities is taxed at its own tax date, which is its
+base date unless the bill states a ``tax_date`` of its own, so the string has
+to become a date somewhere. This module is that somewhere, so that a second
 reader cannot answer the question differently.
+
+Price base and tax date
+-----------------------
+The two used to be one column and are not one thing. ``base_date`` is the price
+level reference, the day the unit rates are current at. ``tax_date`` is the day
+the bill's VAT is resolved on. They part whenever a bill is priced off one
+year's rate book for works carried out in the next: Russia's standard rate went
+from 20 to 22 on 2026-01-01, and a bill priced at 2025 rates for 2026 works is
+taxed at 22. ``tax_date`` is nullable and NULL means "same as the price base",
+which is what every bill that predates the column says. :func:`tax_point` is
+the one place that rule lives, read by the pricing path and by the validation
+rule alike. Both fields take the same shapes and are read by the same parser.
 
 Which day inside the period, and why that end
 ---------------------------------------------
@@ -57,7 +70,7 @@ import re
 from collections.abc import Iterable
 from datetime import date
 
-__all__ = ["ACCEPTED_SHAPES", "latest_base_date", "price_base_day"]
+__all__ = ["ACCEPTED_SHAPES", "latest_base_date", "price_base_day", "tax_point"]
 
 #: Every shape :func:`price_base_day` reads, most precise first. Quoted at the
 #: reader in the log line and in the validation rule's suggestion, so a person
@@ -123,6 +136,27 @@ def price_base_day(base_date: str | None) -> date | None:
         # "2026-13". Refusing it here is what stops an impossible day from
         # travelling on as a string that string comparisons would happily rank.
         return None
+
+
+def tax_point(tax_date: str | None, base_date: str | None) -> tuple[str, str | None]:
+    """Which stated date a bill is taxed on, and the field it came from.
+
+    Args:
+        tax_date: The bill's ``tax_date`` as stored. ``None`` or blank means the
+            bill states no tax date of its own.
+        base_date: The bill's ``base_date`` as stored.
+
+    Returns:
+        ``("tax_date", <stripped value>)`` when a tax date is stated, otherwise
+        ``("base_date", base_date)`` unchanged. The field name travels with the
+        value so that a caller reporting an unreadable date names the field the
+        person has to fix. The value is still text: reading it into a day is
+        :func:`price_base_day`'s job.
+    """
+    stated = (tax_date or "").strip()
+    if stated:
+        return "tax_date", stated
+    return "base_date", base_date
 
 
 def latest_base_date(values: Iterable[str | None]) -> str | None:
