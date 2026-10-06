@@ -1,6 +1,6 @@
 # Repo hygiene gate.
 #
-# Guards: 85. They run on every push and pull request, grouped into three
+# Guards: 86. They run on every push and pull request, grouped into three
 # jobs. A guard is a named step that is not a tooling install, and that rule is
 # not a matter of taste: it is the one that reproduces both counts this header
 # carried when it was written on 2026-08-24 - twenty-one guards, over jobs of
@@ -995,6 +995,15 @@ jobs:
         if: ${{ !cancelled() }}
         run: node scripts/check-locales-parse.mjs
         working-directory: frontend
+
+      # Reuse this job's TypeScript parser for the release page too; the
+      # structural changelog mirror check cannot detect malformed TSX.
+      - name: Check the release page syntax and prove the guard refuses broken TSX
+        if: ${{ !cancelled() }}
+        working-directory: frontend
+        run: |
+          node scripts/check-changelog-syntax.mjs --self-test
+          node scripts/check-changelog-syntax.mjs --index
 
       # Next after the parse guard, because it asks the next question in the
       # same chain. That one asks whether a bundle can be loaded at all. This

@@ -112,6 +112,15 @@ repos:
         pass_filenames: false
         files: ^(CHANGELOG\.md|frontend/src/features/about/Changelog\.tsx)$
 
+      # Parse both the page on disk and the exact staged version. A release
+      # note with an unescaped apostrophe must fail before the full build.
+      - id: changelog-syntax-check
+        name: Check the release page parses as TSX
+        entry: node frontend/scripts/check-changelog-syntax.mjs --index
+        language: system
+        pass_filenames: false
+        files: ^frontend/(src/features/about/Changelog\.tsx|scripts/check-changelog-syntax\.mjs)$
+
       # backend/NOTICE is a byte copy of the root NOTICE, carried because PEP 639
       # cannot reach outside the project root. Nothing local stopped an edit
       # landing on one side alone: the enforcement was a pytest in the backend
