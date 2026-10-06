@@ -429,18 +429,47 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
             // ag-grid cell renderers (which mount/unmount unpredictably).
             (ctx as FullGridContext).onDeleteSection!(data.id);
           }}
-          className="shrink-0 h-5 flex items-center gap-0.5 px-1.5 rounded
-                     text-[10px] font-medium
+          // Always drawn, dimmed at rest: a control that only hover reveals
+          // does not exist on a touch screen, and a section once added could
+          // not be removed there. Full strength on hover and keyboard focus.
+          className="shrink-0 h-6 w-6 flex items-center justify-center rounded
                      text-content-tertiary hover:text-red-600
                      bg-transparent hover:bg-red-50 dark:hover:bg-red-950/30
-                     opacity-0 group-hover/section:opacity-100
+                     opacity-50 group-hover/section:opacity-100 focus-visible:opacity-100
+                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/60
                      transition-all"
           title={t('boq.delete_section', { defaultValue: 'Delete section with all positions' })}
           aria-label={t('boq.delete_section', { defaultValue: 'Delete section with all positions' })}
         >
-          <Trash2 size={10} />
+          <Trash2 size={12} />
         </button>
       )}
+
+      {/* The same actions button the position rows carry, opening the section
+          context menu (add position, sub-section, collapse, delete) for
+          anyone who does not know about right-click, or has none. */}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          ctx.onShowContextMenu?.(e, 'section', data);
+        }}
+        className="shrink-0 flex h-6 w-6 items-center justify-center rounded
+                   text-content-tertiary hover:text-content-primary
+                   hover:bg-surface-tertiary
+                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue
+                   transition-all"
+        title={t('boq.section_actions', { defaultValue: 'Section actions' })}
+        // Named per section: a screen reader lists every row's button, and
+        // twenty identical "Section actions" say nothing about which is which.
+        aria-label={t('boq.section_actions_named', {
+          defaultValue: 'Actions for section {{name}}',
+          name: description || ordinal,
+        })}
+        aria-haspopup="menu"
+      >
+        <MoreHorizontal size={14} />
+      </button>
 
       {/* Issue #157 (skolodi) — FX-missing warning at the section level.
           Bubbled up by BOQGrid's collectFxWarnings: when any descendant
@@ -652,6 +681,9 @@ export type FullGridContext = ActionsContext & ResourceGridContext & SectionGrou
   onUpdatePosition?: (id: string, data: Record<string, unknown>, oldData: Record<string, unknown>) => void;
   /** Highlight linked BIM elements in the 3D viewer (triggered from ordinal badge). */
   onHighlightBIMElements?: (elementIds: string[]) => void;
+  /** Open the project's BIM model to pick elements for a position that has
+   *  no model links yet. Absent on a locked bill. */
+  onLinkFromModel?: (positionId: string) => void;
   /** Delete a section with all its child positions. */
   onDeleteSection?: (sectionId: string) => void;
   /** Reorder sections via drag-and-drop. */
@@ -5655,8 +5687,33 @@ export function BimQtyPickerCellRenderer(params: ICellRendererParams) {
     setShowPicker(true);
   }, []);
 
-  // Picking a quantity from the model writes it; a locked bill offers no picker.
-  if (!hasBimLink || ctx?.readOnly) return null;
+  // A locked bill takes no writes: no picker and no linking.
+  if (ctx?.readOnly) return null;
+
+  // No links yet: offer to pick elements in the project's model for this
+  // position, the way in that used to exist only from the BIM side. Faint
+  // at rest because it sits on every unlinked row.
+  if (!hasBimLink) {
+    const onLinkFromModel = ctx?.onLinkFromModel;
+    if (!onLinkFromModel || !ctx?.bimModelId || cadElementIds.length > 0) return null;
+    const label = t('boq.link_from_model', { defaultValue: 'Pick elements in the 3D model' });
+    return (
+      <div className="flex items-center justify-center h-full w-full">
+        <button
+          type="button"
+          onClick={() => onLinkFromModel(data.id)}
+          data-testid="boq-link-from-model"
+          className="h-6 w-6 flex items-center justify-center rounded
+                     text-content-quaternary opacity-60 hover:opacity-100 hover:text-oe-blue hover:bg-oe-blue/10
+                     transition-colors cursor-pointer"
+          title={label}
+          aria-label={label}
+        >
+          <Cuboid size={13} />
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center justify-center h-full w-full">

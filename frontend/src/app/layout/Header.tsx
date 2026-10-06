@@ -101,6 +101,7 @@ export const TITLE_I18N_MAP: Record<string, string> = {
   'BIM Viewer': 'nav.bim_viewer',
   'BIM Federations': 'nav.bim_federations',
   'BIM Rules': 'nav.bim_rules',
+  'Quantity Rules': 'nav.quantity_rules',
   'Clash Detection': 'nav.clash_detection',
   'Model Coordination': 'nav.coordination_hub',
   'EIR Matrix': 'nav.eir_matrix',
@@ -358,7 +359,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
   // the very top. `null` when the route has no sidebar entry (then nothing
   // renders and the layout is unchanged).
   const RouteIcon = getRouteIcon(location.pathname);
-  const currentLang = getLanguageByCode(i18n.language) ?? { code: 'en', name: 'English', flag: '', country: 'xx' };
+  const currentLang = getLanguageByCode(i18n.language) ?? { code: 'en', name: 'English (International)', flag: '', country: 'xx' };
   const openCommandPalette = useCallback(() => {
     // Dispatch Ctrl+K to open the CommandPalette managed by App.tsx
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true }));

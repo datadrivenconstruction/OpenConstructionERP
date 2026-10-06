@@ -1,0 +1,54 @@
+{
+  "_about": "One table, two engines. The quantity-rule sandbox (frontend ruleSandbox.ts ruleMatchesElement) and the server apply (backend BIMHubService._rule_matches_element) must select the same elements for every rule below, and read the same raw quantity for every quantity case (sandbox extractRawQuantity, server _extract_quantity; null = skipped as missing). Read by frontend/src/features/bim/__tests__/ruleMatchingParity.test.ts and backend/tests/unit/test_rule_matching_parity.py. Add a case here, not to one side.",
+  "elements": [
+    { "id": "wall-existing", "element_type": "Walls", "properties": { "category": "Walls", "phase created": "Stato di fatto", "type name": "Muro 30" } },
+    { "id": "wall-new", "element_type": "Walls", "properties": { "category": "Walls", "phase created": "Progetto", "type name": "Muro 12" } },
+    { "id": "ifc-wall", "element_type": "IfcWallStandardCase", "properties": { "category": "Walls", "phase created": "Progetto" } },
+    { "id": "curtain", "element_type": "Curtain Walls", "properties": { "category": "Curtain Walls" } },
+    { "id": "door", "element_type": "Doors", "properties": { "category": "Doors", "Phase Created": "Progetto", "mark": "D-01" } },
+    { "id": "untyped", "element_type": "", "properties": { "phase created": "Progetto" } }
+  ],
+  "cases": [
+    { "name": "empty filter matches every element", "rule": { "element_type_filter": "", "property_filter": {} }, "expected": ["wall-existing", "wall-new", "ifc-wall", "curtain", "door", "untyped"] },
+    { "name": "star matches every element", "rule": { "element_type_filter": "*", "property_filter": {} }, "expected": ["wall-existing", "wall-new", "ifc-wall", "curtain", "door", "untyped"] },
+    { "name": "single wildcard", "rule": { "element_type_filter": "Wall*", "property_filter": {} }, "expected": ["wall-existing", "wall-new"] },
+    { "name": "comma list with spaces, any pattern is enough", "rule": { "element_type_filter": "Wall*, IfcWall*", "property_filter": {} }, "expected": ["wall-existing", "wall-new", "ifc-wall"] },
+    { "name": "comma list is case-insensitive and ignores empty items", "rule": { "element_type_filter": " walls ,, curtain*, ", "property_filter": {} }, "expected": ["wall-existing", "wall-new", "curtain"] },
+    { "name": "padded filter is trimmed", "rule": { "element_type_filter": "  Doors  ", "property_filter": {} }, "expected": ["door"] },
+    { "name": "a type filter never matches an element without a type", "rule": { "element_type_filter": "*s", "property_filter": {} }, "expected": ["wall-existing", "wall-new", "curtain", "door"] },
+    { "name": "property key typed as Revit spells it", "rule": { "element_type_filter": "Wall*, IfcWall*", "property_filter": { "Phase Created": "progetto" } }, "expected": ["wall-new", "ifc-wall"] },
+    { "name": "property key padded and upper-cased", "rule": { "element_type_filter": "", "property_filter": { " PHASE CREATED ": "Progetto" } }, "expected": ["wall-new", "ifc-wall", "door", "untyped"] },
+    { "name": "property value wildcard", "rule": { "element_type_filter": "", "property_filter": { "type name": "muro*" } }, "expected": ["wall-existing", "wall-new"] },
+    { "name": "two property filters must both hold", "rule": { "element_type_filter": "", "property_filter": { "category": "Doors", "Mark": "d-*" } }, "expected": ["door"] },
+    { "name": "missing property fails", "rule": { "element_type_filter": "", "property_filter": { "phase demolished": "*" } }, "expected": [] },
+    { "name": "blank property key is ignored", "rule": { "element_type_filter": "Doors", "property_filter": { "  ": "anything" } }, "expected": ["door"] }
+  ],
+  "single_cases": [
+    { "name": "bracket value picked from the model matches itself", "element": { "element_type": "Walls", "properties": { "type name": "Muro [30 cm]" } }, "rule": { "element_type_filter": "", "property_filter": { "type name": "Muro [30 cm]" } }, "expected": true },
+    { "name": "star after a literal bracket", "element": { "element_type": "Walls", "properties": { "type name": "Muro [30 cm]" } }, "rule": { "element_type_filter": "", "property_filter": { "type name": "muro [*" } }, "expected": true },
+    { "name": "brackets in a type filter are literal", "element": { "element_type": "Walls", "properties": {} }, "rule": { "element_type_filter": "[WD]*", "property_filter": {} }, "expected": false },
+    { "name": "bang bracket is literal too", "element": { "element_type": "Walls", "properties": {} }, "rule": { "element_type_filter": "[!D]*", "property_filter": {} }, "expected": false },
+    { "name": "star runs across a line break", "element": { "element_type": "Walls", "properties": { "comments": "riga 1\nriga 2" } }, "rule": { "element_type_filter": "", "property_filter": { "comments": "riga*" } }, "expected": true },
+    { "name": "whole-number float matches integer text", "element": { "element_type": "Walls", "properties": { "width": 300.0 } }, "rule": { "element_type_filter": "", "property_filter": { "width": "300" } }, "expected": true },
+    { "name": "whole-number float matches its float spelling from the value list", "element": { "element_type": "Walls", "properties": { "width": 300.0 } }, "rule": { "element_type_filter": "", "property_filter": { "width": "300.0" } }, "expected": true },
+    { "name": "integer matches its float spelling too", "element": { "element_type": "Walls", "properties": { "width": 300 } }, "rule": { "element_type_filter": "", "property_filter": { "width": "300.0" } }, "expected": true },
+    { "name": "float spelling with two zeros is not the value list's", "element": { "element_type": "Walls", "properties": { "width": 300.0 } }, "rule": { "element_type_filter": "", "property_filter": { "width": "300.00" } }, "expected": false },
+    { "name": "decimal float matches its text", "element": { "element_type": "Walls", "properties": { "width": 0.25 } }, "rule": { "element_type_filter": "", "property_filter": { "width": "0.25" } }, "expected": true },
+    { "name": "decimal float does not match a padded spelling", "element": { "element_type": "Walls", "properties": { "width": 0.3 } }, "rule": { "element_type_filter": "", "property_filter": { "width": "0.30" } }, "expected": false },
+    { "name": "boolean matches true text", "element": { "element_type": "Walls", "properties": { "structural": true } }, "rule": { "element_type_filter": "", "property_filter": { "structural": "TRUE" } }, "expected": true },
+    { "name": "only commas select nothing", "element": { "element_type": "Walls", "properties": {} }, "rule": { "element_type_filter": ",", "property_filter": {} }, "expected": false }
+  ],
+  "quantity_cases": [
+    { "name": "property source by its stored key", "source": "property:spessore", "element": { "properties": { "spessore": "0.30" }, "quantities": {} }, "expected": 0.3 },
+    { "name": "property source in Revit case", "source": "property:Spessore", "element": { "properties": { "spessore": "0.30" }, "quantities": {} }, "expected": 0.3 },
+    { "name": "property source with padding", "source": "property: SPESSORE ", "element": { "properties": { "spessore": "0.30" }, "quantities": {} }, "expected": 0.3 },
+    { "name": "exact property key wins over a case variant", "source": "property:Mark", "element": { "properties": { "mark": "1", "Mark": "2" }, "quantities": {} }, "expected": 2 },
+    { "name": "padded number value", "source": "property:spessore", "element": { "properties": { "spessore": " 0.30 " }, "quantities": {} }, "expected": 0.3 },
+    { "name": "decimal comma is not a number", "source": "property:spessore", "element": { "properties": { "spessore": "0,30" }, "quantities": {} }, "expected": null },
+    { "name": "text property is not a number", "source": "property:spessore", "element": { "properties": { "spessore": "trenta" }, "quantities": {} }, "expected": null },
+    { "name": "missing property", "source": "property:spessore", "element": { "properties": {}, "quantities": {} }, "expected": null },
+    { "name": "quantity key", "source": "area", "element": { "properties": {}, "quantities": { "area": 12.5 } }, "expected": 12.5 },
+    { "name": "quantity key stays exact", "source": "Area", "element": { "properties": {}, "quantities": { "area": 12.5 } }, "expected": null },
+    { "name": "count is one", "source": "count", "element": { "properties": {}, "quantities": {} }, "expected": 1 }
+  ]
+}

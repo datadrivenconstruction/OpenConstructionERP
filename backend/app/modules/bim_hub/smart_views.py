@@ -279,6 +279,21 @@ def validate_rule_tree(tree: Any) -> dict[str, Any]:
 # ── Field resolution ───────────────────────────────────────────────────────
 
 
+def _lookup_key(mapping: dict[str, Any], key: str) -> Any:
+    """Value under *key*: exact key first, then trimmed and case-insensitive.
+
+    The exact key wins so a mapping holding both ``Mark`` and ``mark`` still
+    answers each by its own name.
+    """
+    if key in mapping:
+        return mapping[key]
+    wanted = key.strip().lower()
+    for k, v in mapping.items():
+        if isinstance(k, str) and k.strip().lower() == wanted:
+            return v
+    return None
+
+
 def _resolve_field(element: Any, field: str) -> Any:
     """Extract the value of *field* from a BIMElement-like object/dict.
 
@@ -322,28 +337,18 @@ def _resolve_field(element: Any, field: str) -> Any:
         props = _get(element, "properties") or {}
         if not isinstance(props, dict):
             return None
-        if key in props:
-            return props[key]
         # Case-insensitive fallback so IFC PropertySet keys (often
-        # MixedCase) match the catalog-displayed key.
-        lower = key.lower()
-        for k, v in props.items():
-            if isinstance(k, str) and k.lower() == lower:
-                return v
-        return None
+        # MixedCase) match the catalog-displayed key, and so a rule naming
+        # a Revit parameter as Revit spells it ("Phase Created") finds the
+        # lowercased key the DDC import stored ("phase created").
+        return _lookup_key(props, key)
 
     if field.startswith("quantities."):
         key = field[len("quantities.") :]
         qty = _get(element, "quantities") or {}
         if not isinstance(qty, dict):
             return None
-        if key in qty:
-            return qty[key]
-        lower = key.lower()
-        for k, v in qty.items():
-            if isinstance(k, str) and k.lower() == lower:
-                return v
-        return None
+        return _lookup_key(qty, key)
 
     if field.startswith("geometry."):
         key = field[len("geometry.") :]

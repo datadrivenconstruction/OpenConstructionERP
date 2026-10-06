@@ -16,7 +16,9 @@ import {
   Fragment,
   useCallback,
   useEffect,
+  useId,
   useMemo,
+  useRef,
   useState,
   type ChangeEvent,
   type FormEvent,
@@ -71,19 +73,38 @@ import BIMRequirementsImport from './BIMRequirementsImport';
 import { RulePackLibrary } from '@/features/bim_requirements/RulePackLibrary';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
-import { downloadWithAuth } from '@/shared/lib/api';
+import { ApiError, apiGet, downloadWithAuth } from '@/shared/lib/api';
 import {
   applyQuantityMaps,
   createQuantityMap,
   fetchBIMElements,
+  fetchBIMDataframeSchema,
   fetchBIMModels,
+  fetchSmartViewProperties,
   listQuantityMaps,
   patchQuantityMap,
+  previewQuantityRule,
   type BIMQuantityMap,
   type CreateBIMQuantityMapRequest,
   type QuantityMapApplyResult,
   type QuantityMapTarget,
+  type SmartViewPropertyCatalog,
 } from './api';
+import {
+  NEW_RULE_PARAMS,
+  RULES_CONTEXT_PARAMS,
+  readQuantityRulesContext,
+  rulesTabFromParams,
+  type NewRulePrefill,
+  type RulesTab,
+  type RulesTabsAvailable,
+} from './quantityRuleLinks';
+import {
+  isWildcardSample,
+  propertyLabelMap,
+  rulePropertyOptions,
+  ruleQuantitySourceOptions,
+} from './rulePropertyCatalog';
 import { boqApi, type BOQ, type Position } from '@/features/boq/api';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import {
@@ -102,7 +123,7 @@ import {
   formulaSignature,
   pushVersion,
   readVersions,
-  runSandbox,
+  resultCounts,
   type RuleFormulaFields,
   type RuleVersionSnapshot,
   type SandboxElement,
@@ -303,6 +324,26 @@ function toFormState(rule: BIMQuantityMap, boqPositionLookup: Map<string, string
   };
 }
 
+/** The editor form for a new rule handed over in the URL (right-click
+ *  "Create quantity rule" in the 3D viewer). A quantity source the presets do
+ *  not name, such as the `Area` key converter output carries, goes into the
+ *  custom field verbatim, because the rule engine reads it verbatim. */
+function formFromPrefill(prefill: NewRulePrefill, boqId: string, name: string): RuleFormState {
+  const base = blankForm();
+  const source = prefill.quantitySource;
+  const preset = source ? presetFromQuantitySource(source) : base.quantity_source;
+  return {
+    ...base,
+    name,
+    element_type_filter: prefill.elementType,
+    property_filter: prefill.propKey ? [{ key: prefill.propKey, value: prefill.propValue }] : [],
+    quantity_source: preset,
+    custom_quantity_source: source && preset === 'custom' ? source : '',
+    unit: prefill.unit || base.unit,
+    target_boq_id: boqId,
+  };
+}
+
 /** Context the payload builder needs to maintain the metadata-stored version
  *  history when editing an existing rule. ``previousFields`` is the rule's
  *  formula *before* this edit; ``baseMetadata`` is its current metadata bag so
@@ -429,33 +470,60 @@ function SandboxResultView({ result, unit }: { result: SandboxRunResult; unit: s
   const q = useDisplayQuantity();
   const displayUnit = q.unitFor(unit);
   const conv = (v: number) => q.convert(v, unit).value;
+  // The server lists the first rows only; the counts cover every element.
+  const { matched, skipped } = resultCounts(result);
 
-  if (result.matches.length === 0 && result.skips.length === 0) {
-    return (
-      <div className="mt-2 rounded-md border border-dashed border-border-light px-3 py-3 text-center text-[11px] text-content-tertiary">
-        {t('bim_rules.sandbox_no_match', {
+  // A short result on a model whose full property table is gone: the filter
+  // may be right and the property simply not there, so say so.
+  const cappedNotice =
+    result.sidecar !== undefined &&
+    result.sidecar !== 'full' &&
+    (matched === 0 || result.skips.some((s) => s.reason === 'missing_property')) ? (
+      <p
+        className="flex items-start gap-1.5 rounded-md bg-amber-50 px-2 py-1.5 text-[10px] text-amber-800 dark:bg-amber-900/20 dark:text-amber-300"
+        data-testid="rule-test-capped-properties"
+      >
+        <AlertCircle size={11} className="mt-0.5 shrink-0" />
+        {t('bim_rules.sandbox_capped_properties', {
           defaultValue:
-            'No elements matched in the {{n}} scanned. Loosen the element type or property filter.',
-          n: result.scanned,
+            'This model only has the 30 properties per element kept in the database, because its full property table was rebuilt or is missing. Re-import the model to get every property back.',
         })}
+      </p>
+    ) : null;
+
+  if (matched === 0 && skipped === 0) {
+    return (
+      <div className="mt-2 space-y-2">
+        <div
+          className="rounded-md border border-dashed border-border-light px-3 py-3 text-center text-[11px] text-content-tertiary"
+          data-testid="rule-test-no-match"
+        >
+          {t('bim_rules.sandbox_no_match', {
+            defaultValue:
+              'No elements matched in the {{n}} scanned. Loosen the element type or property filter.',
+            n: result.scanned,
+          })}
+        </div>
+        {cappedNotice}
       </div>
     );
   }
 
   return (
     <div className="mt-3 space-y-2.5">
+      {cappedNotice}
       <div className="flex flex-wrap items-center gap-2 text-[11px]">
-        <span className="rounded-md bg-oe-blue/10 px-2 py-0.5 font-medium text-oe-blue">
+        <span className="rounded-md bg-oe-blue/10 px-2 py-0.5 font-medium text-oe-blue" data-testid="rule-test-matched">
           {t('bim_rules.sandbox_matched', {
             defaultValue: '{{n}} matched',
-            n: result.matches.length,
+            n: matched,
           })}
         </span>
-        {result.skips.length > 0 && (
+        {skipped > 0 && (
           <span className="rounded-md bg-amber-100 px-2 py-0.5 font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
             {t('bim_rules.sandbox_skipped', {
               defaultValue: '{{n}} skipped (no quantity)',
-              n: result.skips.length,
+              n: skipped,
             })}
           </span>
         )}
@@ -525,12 +593,12 @@ function SandboxResultView({ result, unit }: { result: SandboxRunResult; unit: s
           </tbody>
         </table>
       </div>
-      {result.matches.length > sample.length && (
+      {matched > sample.length && (
         <p className="text-[10px] text-content-tertiary">
           {t('bim_rules.sandbox_more', {
             defaultValue: 'Showing first {{shown}} of {{total}} matched elements.',
             shown: sample.length,
-            total: result.matches.length,
+            total: matched,
           })}
         </p>
       )}
@@ -576,10 +644,10 @@ function RuleEditorModal({
   }, [open, initial]);
 
   // ── Live test sandbox ────────────────────────────────────────────────
-  // Runs the DRAFT rule against the selected model's elements client-side,
-  // mirroring the backend engine, so the user sees matched elements +
-  // per-element computed quantities before ever saving. AI-augmented,
-  // human-confirmed: this is a preview, the apply still happens server-side.
+  // Runs the DRAFT rule on the server through the apply engine (a dry run,
+  // nothing written), so the user sees matched elements + per-element
+  // computed quantities before ever saving, exactly as Apply will count
+  // them. AI-augmented, human-confirmed: this is a preview.
   const [sandboxResult, setSandboxResult] = useState<SandboxRunResult | null>(null);
   const [sandboxBusy, setSandboxBusy] = useState(false);
   const [sandboxError, setSandboxError] = useState<string | null>(null);
@@ -613,13 +681,19 @@ function RuleEditorModal({
     setSandboxBusy(true);
     setSandboxError(null);
     try {
-      // Skeleton fetch carries element_type + quantities + properties, which
-      // is everything the rule engine reads - no geometry round-trip needed.
-      const resp = await fetchBIMElements(modelId, { skeleton: true });
-      const elements = resp.items as unknown as SandboxElement[];
-      setSandboxResult(runSandbox(formula, elements));
+      // The unsaved rule runs on the server through the apply engine, so the
+      // test selects and counts exactly what Apply will. (The skeleton element
+      // list carries no properties, so a local run matched no property filter.)
+      setSandboxResult(await previewQuantityRule(modelId, formula));
     } catch (err) {
-      setSandboxError(err instanceof Error ? err.message : String(err));
+      // The reader gets our sentence, not the server's; the cause goes to
+      // the console for whoever debugs it.
+      console.warn('Rule test failed', err);
+      setSandboxError(
+        t('bim_rules.sandbox_failed', {
+          defaultValue: 'The test could not run. Check that you can open this model, then try again.',
+        }),
+      );
       setSandboxResult(null);
     } finally {
       setSandboxBusy(false);
@@ -663,6 +737,42 @@ function RuleEditorModal({
   });
 
   const [positionSearch, setPositionSearch] = useState('');
+
+  // Property names and sample values the picked model actually carries, from
+  // the same catalog the Smart View builder reads (shared cache key). They
+  // feed suggestion lists only: any name or value can still be typed.
+  const catalogQuery = useQuery<SmartViewPropertyCatalog>({
+    queryKey: ['bim-smart-view-properties', modelId],
+    queryFn: () => fetchSmartViewProperties(modelId),
+    enabled: open && !!modelId,
+    staleTime: 5 * 60 * 1000,
+  });
+  // The headers the model was exported with ("Phase Created" for the key
+  // "phase created"), the same labels the property search shows. A model
+  // without a dataframe sidecar answers with an error; then keys show alone.
+  const schemaQuery = useQuery({
+    queryKey: ['bim-dataframe-schema', modelId],
+    queryFn: ({ signal }) => fetchBIMDataframeSchema(modelId, signal),
+    enabled: open && !!modelId,
+    retry: false,
+    staleTime: 5 * 60 * 1000,
+  });
+  const propertyLabels = useMemo(() => propertyLabelMap(schemaQuery.data), [schemaQuery.data]);
+  const propertyOptions = useMemo(
+    () => rulePropertyOptions(catalogQuery.data, propertyLabels),
+    [catalogQuery.data, propertyLabels],
+  );
+  const samplesByKey = useMemo(
+    () => new Map(propertyOptions.map((o) => [o.key, o.samples])),
+    [propertyOptions],
+  );
+  const quantitySourceOptions = useMemo(
+    () => ruleQuantitySourceOptions(catalogQuery.data),
+    [catalogQuery.data],
+  );
+  const pickerId = useId();
+  const keyListId = `${pickerId}-prop-keys`;
+  const sourceListId = `${pickerId}-qty-sources`;
 
   const filteredPositions = useMemo<Position[]>(() => {
     const all = positionsQuery.data?.positions ?? [];
@@ -825,6 +935,24 @@ function RuleEditorModal({
                   {t('bim_rules.add_property', { defaultValue: 'Add property' })}
                 </button>
               </div>
+              <p className="mb-1.5 text-[11px] text-content-tertiary">
+                {!modelId
+                  ? t('bim_rules.property_suggest_no_model', {
+                      defaultValue: 'Pick a BIM model in the toolbar to get the property names it carries as suggestions.',
+                    })
+                  : propertyOptions.length > 0
+                    ? t('bim_rules.property_suggest_hint', {
+                        defaultValue:
+                          'Names and values are suggested from {{model}}. You can still type any name or a pattern such as Ext*.',
+                        model: modelName ?? '',
+                      })
+                    : null}
+              </p>
+              <datalist id={keyListId}>
+                {propertyOptions.map((o) => (
+                  <option key={o.key} value={o.key} label={o.label !== o.key ? o.label : undefined} />
+                ))}
+              </datalist>
               {form.property_filter.length === 0 ? (
                 <p className="rounded-lg border border-dashed border-border-light px-3 py-2 text-[11px] text-content-tertiary">
                   {t('bim_rules.no_properties', {
@@ -834,13 +962,20 @@ function RuleEditorModal({
               ) : (
                 <div className="space-y-2">
                   {form.property_filter.map((row, index) => (
-                    <div key={`prop-${row.key}-${index}`} className="flex items-center gap-2">
+                    // Keyed by position only: a key containing the typed name
+                    // remounted the row on every keystroke and dropped focus.
+                    <div key={index}>
+                    <div className="flex items-center gap-2">
                       <input
                         type="text"
                         value={row.key}
                         onChange={(e) =>
                           handleUpdatePropertyRow(index, 'key', e.target.value)
                         }
+                        list={keyListId}
+                        autoComplete="off"
+                        data-testid={`rule-prop-key-${index}`}
+                        aria-label={t('bim_rules.property_key', { defaultValue: 'Property key' })}
                         placeholder={t('bim_rules.property_key', { defaultValue: 'Property key' })}
                         className="flex-1 rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 font-mono text-xs text-content-primary focus:border-oe-blue focus:outline-none"
                       />
@@ -851,9 +986,18 @@ function RuleEditorModal({
                         onChange={(e) =>
                           handleUpdatePropertyRow(index, 'value', e.target.value)
                         }
+                        list={`${pickerId}-prop-values-${index}`}
+                        autoComplete="off"
+                        data-testid={`rule-prop-value-${index}`}
+                        aria-label={t('bim_rules.property_value', { defaultValue: 'Value (wildcards OK)' })}
                         placeholder={t('bim_rules.property_value', { defaultValue: 'Value (wildcards OK)' })}
                         className="flex-1 rounded-lg border border-border-light bg-surface-primary px-2 py-1.5 font-mono text-xs text-content-primary focus:border-oe-blue focus:outline-none"
                       />
+                      <datalist id={`${pickerId}-prop-values-${index}`}>
+                        {(samplesByKey.get(row.key.trim()) ?? []).map((v) => (
+                          <option key={v} value={v} />
+                        ))}
+                      </datalist>
                       <button
                         type="button"
                         onClick={() => handleRemovePropertyRow(index)}
@@ -862,6 +1006,18 @@ function RuleEditorModal({
                       >
                         <Trash2 size={13} />
                       </button>
+                    </div>
+                    {isWildcardSample(row.value, samplesByKey.get(row.key.trim()) ?? []) && (
+                      <p
+                        data-testid={`rule-prop-wildcard-hint-${index}`}
+                        className="mt-1 text-[11px] text-amber-700 dark:text-amber-400"
+                      >
+                        {t('bim_rules.value_has_wildcard', {
+                          defaultValue:
+                            'This value contains * or ?, which match any text in a rule, so it can pick more elements than this exact value.',
+                        })}
+                      </p>
+                    )}
                     </div>
                   ))}
                 </div>
@@ -926,6 +1082,8 @@ function RuleEditorModal({
                   type="text"
                   value={form.custom_quantity_source}
                   onChange={(e) => updateField('custom_quantity_source', e.target.value)}
+                  list={sourceListId}
+                  autoComplete="off"
                   placeholder="property:net_area"
                   className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 font-mono text-sm text-content-primary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
                 />
@@ -970,6 +1128,12 @@ function RuleEditorModal({
               </div>
             </div>
 
+            <datalist id={sourceListId}>
+              {quantitySourceOptions.map((o) => (
+                <option key={o} value={o} />
+              ))}
+            </datalist>
+
             {/* Unit-safety guard - warns when the declared unit's dimension
                 disagrees with the quantity source (e.g. an area_m2 rule that
                 declares an m³ unit). Silent when either side is unknown. */}
@@ -1004,7 +1168,9 @@ function RuleEditorModal({
                   type="button"
                   onClick={runTest}
                   disabled={sandboxBusy}
+                  aria-busy={sandboxBusy}
                   className="flex items-center gap-1.5 rounded-lg border border-oe-blue/40 bg-oe-blue/5 px-2.5 py-1 text-[11px] font-medium text-oe-blue hover:bg-oe-blue/10 disabled:cursor-not-allowed disabled:opacity-60"
+                  data-testid="rule-test-run"
                 >
                   {sandboxBusy ? <Loader2 size={11} className="animate-spin" /> : <Play size={11} />}
                   {modelName
@@ -1016,14 +1182,20 @@ function RuleEditorModal({
                 </button>
               </div>
               <p className="mt-1 text-[10px] text-content-tertiary">
-                {t('bim_rules.sandbox_hint', {
+                {t('bim_rules.sandbox_hint_server', {
                   defaultValue:
-                    'Runs the current draft against the selected model in your browser. Nothing is saved or linked until you press Save.',
+                    'Runs the current draft on the selected model the way Apply does. Nothing is saved or linked until you press Save.',
                 })}
               </p>
 
+              {sandboxBusy && (
+                <p className="mt-2 text-[11px] text-content-tertiary" role="status" data-testid="rule-test-running">
+                  {t('bim_rules.sandbox_running', { defaultValue: 'Testing the rule on the model…' })}
+                </p>
+              )}
+
               {sandboxError && (
-                <div className="mt-2 flex items-center gap-1.5 text-[11px] text-red-600">
+                <div className="mt-2 flex items-center gap-1.5 text-[11px] text-red-600" role="alert" data-testid="rule-test-error">
                   <AlertCircle size={12} />
                   {sandboxError}
                 </div>
@@ -1340,9 +1512,12 @@ interface PreviewModalProps {
   onClose: () => void;
   result: QuantityMapApplyResult | null;
   loading: boolean;
+  onApply: () => void;
+  applying: boolean;
+  canApply: boolean;
 }
 
-function PreviewModal({ open, onClose, result, loading }: PreviewModalProps) {
+function PreviewModal({ open, onClose, result, loading, onApply, applying, canApply }: PreviewModalProps) {
   const { t } = useTranslation();
   // Display-only metric->imperial conversion for the dry-run sample (#285).
   // Each row carries its own declared unit, so quantity + unit are converted
@@ -1384,7 +1559,20 @@ function PreviewModal({ open, onClose, result, loading }: PreviewModalProps) {
           )}
           {!loading && result && (
             <>
-              <div className="mb-4 grid grid-cols-4 gap-3">
+              <p className="mb-3 text-xs text-content-secondary">
+                {t('bim_rules.preview_effects_note', { defaultValue: 'Applying creates the listed links and new positions. Quantities and prices of existing positions stay unchanged.' })}
+              </p>
+              {(result.positions_to_create ?? 0) > 0 && (
+                <p className="mb-3 text-sm font-semibold text-content-primary" role="status">
+                  {t('bim_rules.preview_create_notice', { defaultValue: 'Applying will create {{count}} new BOQ positions.', count: result.positions_to_create })}
+                </p>
+              )}
+              {result.target_boq_ambiguous && (
+                <p className="mb-3 text-sm text-content-secondary" role="alert">
+                  {t('bim_rules.preview_target_required', { defaultValue: 'Choose an available, unlocked BOQ and run a new preview.' })}
+                </p>
+              )}
+              <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <StatCard
                   label={t('bim_rules.stat_matched', { defaultValue: 'Matched elements' })}
                   value={result.matched_elements}
@@ -1395,11 +1583,11 @@ function PreviewModal({ open, onClose, result, loading }: PreviewModalProps) {
                 />
                 <StatCard
                   label={t('bim_rules.stat_links', { defaultValue: 'Links that would be created' })}
-                  value={result.links_created}
+                  value={result.links_to_create ?? 0}
                 />
                 <StatCard
                   label={t('bim_rules.stat_positions', { defaultValue: 'Positions that would be created' })}
-                  value={result.positions_created}
+                  value={result.positions_to_create ?? 0}
                 />
               </div>
 
@@ -1469,6 +1657,12 @@ function PreviewModal({ open, onClose, result, loading }: PreviewModalProps) {
             </>
           )}
         </div>
+        <div className="flex justify-end border-t border-border-light p-4">
+          <button type="button" onClick={onApply} disabled={!canApply || applying || loading}
+            className="rounded-lg bg-oe-blue px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">
+            {t('bim_rules.apply', { defaultValue: 'Apply rules' })}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -1482,10 +1676,6 @@ function StatCard({ label, value }: { label: string; value: number }) {
     </div>
   );
 }
-
-/* ── Tabs ─────────────────────────────────────────────────────────────── */
-
-type RulesTab = 'quantity_rules' | 'requirements' | 'rule_library';
 
 /* ── Requirements Rule Editor (three-column) ─────────────────────────── */
 
@@ -3175,8 +3365,59 @@ export function BIMQuantityRulesPage() {
   // canonical value server-side. Unmapped / free units pass through unchanged.
   const q = useDisplayQuantity();
 
-  const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+  const storeProjectId = useProjectContextStore((s) => s.activeProjectId);
   const activeProjectName = useProjectContextStore((s) => s.activeProjectName);
+  const setActiveProject = useProjectContextStore((s) => s.setActiveProject);
+
+  // Context handed over in the URL by the BIM page, the 3D viewer's
+  // right-click menu or the BOQ editor (see quantityRuleLinks.ts): project,
+  // model, BOQ and optionally a new rule to open pre-filled. Read once on
+  // mount and then stripped from the URL, so a refresh or Back does not
+  // reopen the editor and a later project switch in the header is not
+  // overridden by a stale project_id.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [urlContext] = useState(() => readQuantityRulesContext(searchParams));
+  useEffect(() => {
+    const next = new URLSearchParams(searchParams);
+    let changed = false;
+    for (const key of [...RULES_CONTEXT_PARAMS, ...NEW_RULE_PARAMS]) {
+      if (next.has(key)) {
+        next.delete(key);
+        changed = true;
+      }
+    }
+    if (changed) setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // A link naming another project than the active one switches the active
+  // project once, the same way the project picker does. Until that has
+  // happened the page already reads the linked project.
+  const needsProjectSwitch = !!urlContext.projectId && urlContext.projectId !== storeProjectId;
+  const [projectSwitchDone, setProjectSwitchDone] = useState(false);
+  const linkedProjectsQuery = useQuery({
+    queryKey: ['projects'],
+    queryFn: () => fetchProjectList<ProjectOption[]>(),
+    enabled: needsProjectSwitch && !projectSwitchDone,
+    staleTime: 5 * 60_000,
+  });
+  useEffect(() => {
+    if (projectSwitchDone || !needsProjectSwitch || linkedProjectsQuery.isLoading) return;
+    const linked = linkedProjectsQuery.data?.find((p) => p.id === urlContext.projectId);
+    // A project the user cannot list is not switched to; the page stays on
+    // the active one.
+    if (linked) setActiveProject(linked.id, linked.name);
+    setProjectSwitchDone(true);
+  }, [
+    projectSwitchDone,
+    needsProjectSwitch,
+    linkedProjectsQuery.isLoading,
+    linkedProjectsQuery.data,
+    urlContext.projectId,
+    setActiveProject,
+  ]);
+  const activeProjectId =
+    needsProjectSwitch && !projectSwitchDone ? urlContext.projectId : storeProjectId;
 
   /* ── Queries ───────────────────────────────────────────────────────── */
 
@@ -3192,6 +3433,9 @@ export function BIMQuantityRulesPage() {
         ? fetchBIMModels(activeProjectId)
         : Promise.resolve({ items: [], total: 0 }),
     enabled: !!activeProjectId,
+    refetchInterval: (query) => query.state.data?.items.some((model) =>
+      ['pending', 'queued', 'processing', 'converting', 'importing'].includes(model.status),
+    ) ? 5000 : false,
   });
 
   const rules = useMemo<BIMQuantityMap[]>(() => {
@@ -3241,40 +3485,92 @@ export function BIMQuantityRulesPage() {
 
   /* ── State ─────────────────────────────────────────────────────────── */
 
-  const [modelId, setModelId] = useState<string>('');
+  const [modelId, setModelId] = useState<string>(urlContext.modelId);
   // BOQ the apply writes auto-created positions into. Empty means "let the
   // project decide", which is what a project with a single unlocked BOQ has
   // always done. A project holding several gets a 409 from the backend
   // instead of a silent write into the oldest one, and this picker is how
   // the user answers it. Ids that no longer belong to the active project
   // (the user switched projects) fall back to letting the project decide.
-  const [applyBoqId, setApplyBoqId] = useState<string>('');
+  const [applyBoqId, setApplyBoqId] = useState<string>(urlContext.boqId);
 
   // Locked BOQs are not candidates: the apply refuses to write into one, so
   // offering it would be offering a refusal.
   const boqOptions = (boqsListQuery.data ?? []).filter((b) => !b.is_locked);
   const targetBoqId = boqOptions.some((b) => b.id === applyBoqId) ? applyBoqId : '';
-  // URL param ?mode=requirements locks the page to the Requirements tab so
-  // the sidebar can expose the compliance half as its own entry under
-  // Takeoff, while /bim/rules (no param) remains the Estimation-side
-  // Quantity Rules editor. Keeping a single page component avoids code
-  // duplication; the mode flag just hides the tab switcher + fixes the
-  // active tab.
-  const [searchParams] = useSearchParams();
-  const lockedMode = searchParams.get('mode') === 'requirements' ? 'requirements' : null;
-  const [activeTab, setActiveTab] = useState<RulesTab>(
-    lockedMode === 'requirements' ? 'requirements' : 'quantity_rules',
+  // URL param ?mode=requirements locks the page to the Requirements tab:
+  // that is the "BIM Rules" entry under Model Coordination (advanced view),
+  // the compliance half. /bim/rules with no mode is the Quantity Rules
+  // editor, reached from the "Quantity rules" entry under Takeoff (shown in
+  // the simple view too), the BIM page header and the BOQ editor. One page
+  // component serves both; the mode only hides the Quantity Rules tab and
+  // fixes the active tab.
+  //
+  // The page draws on three backend modules: quantity maps are BIM Hub, the
+  // requirements are oe_requirements, and the IDS/COBie import and the Rule
+  // Library are oe_bim_requirements. A tab or block whose module is switched
+  // off on the System Modules tab goes away, so nothing here calls a disabled
+  // API; with both off the locked mode goes too and the page is the quantity
+  // rules alone. Read from the catalogue the sidebar shares; fail-open while
+  // it loads or fails.
+  const { data: backendModules } = useQuery({
+    queryKey: ['system-modules'],
+    queryFn: () => apiGet<{ name: string; enabled: boolean; is_core: boolean }[]>('/v1/modules/'),
+    staleTime: 30 * 1000,
+    gcTime: 5 * 60 * 1000,
+  });
+  const moduleOff = (name: string) =>
+    (backendModules ?? []).some((m) => m.name === name && !m.is_core && !m.enabled);
+  const available: RulesTabsAvailable = {
+    requirements: !moduleOff('oe_requirements'),
+    ruleLibrary: !moduleOff('oe_bim_requirements'),
+  };
+  // The IDS/COBie import block is oe_bim_requirements, like the Rule Library.
+  const bimRequirementsOn = available.ruleLibrary;
+  const lockedMode =
+    (available.requirements || available.ruleLibrary) && searchParams.get('mode') === 'requirements'
+      ? 'requirements'
+      : null;
+  // The tab lives in the URL (`tab=`), not in state: the top bar title only
+  // sees the URL, and a tab kept here alone let it name the other half.
+  const activeTab = rulesTabFromParams(searchParams, available);
+  const setActiveTab = useCallback(
+    (tab: RulesTab) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (tab === 'quantity_rules') next.delete('tab');
+          else next.set('tab', tab);
+          return next;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
   );
+  // A tab or compliance mode in the URL that the page cannot show (its
+  // module is off) would keep the top bar on "BIM Rules" over another half.
+  const tabParam = searchParams.get('tab');
+  const staleTab = tabParam !== null && tabParam !== activeTab;
+  const staleMode = searchParams.has('mode') && !lockedMode;
   useEffect(() => {
-    if (lockedMode === 'requirements' && activeTab !== 'requirements') {
-      setActiveTab('requirements');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lockedMode]);
+    if (!staleTab && !staleMode) return;
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (staleTab) next.delete('tab');
+        if (staleMode) next.delete('mode');
+        return next;
+      },
+      { replace: true },
+    );
+  }, [staleTab, staleMode, setSearchParams]);
 
+  // Default to the first model, also when the picked one (a linked model_id,
+  // or the previous project's model) is not in this project's list.
   useEffect(() => {
     const items = modelsQuery.data?.items ?? [];
-    if (!modelId && items.length > 0 && items[0]) {
+    if (items.length > 0 && items[0] && !items.some((m) => m.id === modelId)) {
       setModelId(items[0].id);
     }
   }, [modelsQuery.data, modelId]);
@@ -3322,6 +3618,24 @@ export function BIMQuantityRulesPage() {
 
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewResult, setPreviewResult] = useState<QuantityMapApplyResult | null>(null);
+  const [previewContext, setPreviewContext] = useState<string | null>(null);
+  // A response belongs to the exact selection/rule/model data it was asked
+  // for. A late reply from another selection must never arm Apply here.
+  const context = JSON.stringify([activeProjectId, modelId, targetBoqId, rules, modelsQuery.data]);
+  const contextRef = useRef(context);
+  contextRef.current = context;
+  const previewSequence = useRef(0);
+  const applyInFlight = useRef(false);
+  useEffect(() => {
+    setPreviewResult(null);
+    setPreviewContext(null);
+    setPreviewOpen(false);
+  }, [context]);
+  const canApplyPreview = !!previewResult?.preview_fingerprint && previewContext === context
+    && !previewResult.target_boq_ambiguous
+    && ((previewResult.links_to_create ?? 0) > 0 || (previewResult.positions_to_create ?? 0) > 0);
+
+  type PreviewSelection = { modelId: string; targetBoqId: string | null; context: string; sequence: number };
 
   /* ── Mutations ─────────────────────────────────────────────────────── */
 
@@ -3411,27 +3725,34 @@ export function BIMQuantityRulesPage() {
   });
 
   const previewMutation = useMutation({
-    mutationFn: (id: string) => applyQuantityMaps(id, true, targetBoqId || null),
+    mutationFn: (selection: PreviewSelection) => applyQuantityMaps(selection.modelId, true, selection.targetBoqId),
     onMutate: () => {
       setPreviewResult(null);
       setPreviewOpen(true);
     },
-    onSuccess: (data) => {
+    onSuccess: (data, selection) => {
+      if (selection.context !== contextRef.current || selection.sequence !== previewSequence.current) return;
       setPreviewResult(data);
+      setPreviewContext(selection.context);
     },
-    onError: (err: unknown) => {
+    onError: (_err: unknown, selection) => {
+      if (selection.context !== contextRef.current || selection.sequence !== previewSequence.current) return;
       setPreviewOpen(false);
       addToast({
         type: 'error',
         title: t('bim_rules.toast_preview_failed', { defaultValue: 'Preview failed' }),
-        message: err instanceof Error ? err.message : String(err),
+        message: t('bim_rules.preview_apply_error', { defaultValue: 'The preview could not be applied. Nothing was changed. Run a new preview and try again.' }),
       });
     },
   });
 
   const applyMutation = useMutation({
-    mutationFn: (id: string) => applyQuantityMaps(id, false, targetBoqId || null),
+    mutationFn: (selection: PreviewSelection & { fingerprint: string }) =>
+      applyQuantityMaps(selection.modelId, false, selection.targetBoqId, selection.fingerprint),
     onSuccess: (data) => {
+      setPreviewResult(null);
+      setPreviewContext(null);
+      setPreviewOpen(false);
       queryClient.invalidateQueries({ queryKey: ['bim-quantity-maps'] });
       // The apply result does not carry a single BOQ id (positions can land
       // across several BOQs), so the "View in BOQ" action opens the active
@@ -3442,7 +3763,7 @@ export function BIMQuantityRulesPage() {
       addToast({
         type: 'success',
         title: t('bim_rules.toast_applied_title', { defaultValue: 'Rules applied' }),
-        message: t('bim_rules.toast_applied_msg', {
+        message: data.replayed ? t('bim_rules.preview_replayed', { defaultValue: 'This preview has already been applied. No new writes were made.' }) : t('bim_rules.toast_applied_msg', {
           defaultValue: '{{links}} links created, {{positions}} positions created.',
           links: data.links_created,
           positions: data.positions_created,
@@ -3460,12 +3781,25 @@ export function BIMQuantityRulesPage() {
       });
     },
     onError: (err: unknown) => {
+      setPreviewResult(null);
+      setPreviewContext(null);
+      setPreviewOpen(false);
+      const body = err instanceof ApiError ? err.body as { detail?: { code?: string; error?: string } } : undefined;
+      const code = body?.detail?.code;
+      const message = code === 'quantity_preview_stale'
+        ? t('bim_rules.preview_stale', { defaultValue: 'The model, rules or BOQ changed. Run a new preview before applying.' })
+        : code === 'quantity_preview_required'
+          ? t('bim_rules.preview_required', { defaultValue: 'Run a preview before applying rules.' })
+          : code === 'quantity_preview_model_not_ready'
+            ? t('bim_rules.preview_model_not_ready', { defaultValue: 'The model is not ready. Wait for the import to finish, then run a preview.' })
+            : t('bim_rules.preview_apply_error', { defaultValue: 'The preview could not be applied. Nothing was changed. Run a new preview and try again.' });
       addToast({
         type: 'error',
         title: t('bim_rules.toast_apply_failed', { defaultValue: 'Apply failed' }),
-        message: err instanceof Error ? err.message : String(err),
+        message,
       });
     },
+    onSettled: () => { applyInFlight.current = false; },
   });
 
   /* ── Handlers ──────────────────────────────────────────────────────── */
@@ -3527,6 +3861,26 @@ export function BIMQuantityRulesPage() {
     setEditorOpen(true);
   }, []);
 
+  // Right-click "Create quantity rule" in the 3D viewer: open the editor
+  // once with the rule it handed over. Nothing is saved until the user does.
+  const prefillOpenedRef = useRef(false);
+  useEffect(() => {
+    const prefill = urlContext.newRule;
+    if (!prefill || prefillOpenedRef.current) return;
+    prefillOpenedRef.current = true;
+    const name = prefill.elementType
+      ? t('bim_rules.prefill_rule_name', {
+          defaultValue: '{{type}} - quantity',
+          type: prefill.elementType,
+        })
+      : '';
+    setEditorMode('create');
+    setEditingRuleId(null);
+    setEditingRule(null);
+    setEditorInitial(formFromPrefill(prefill, urlContext.boqId, name));
+    setEditorOpen(true);
+  }, [urlContext, t]);
+
   const handleSubmit = useCallback(
     (payload: CreateBIMQuantityMapRequest) => {
       if (editorMode === 'edit' && editingRuleId) {
@@ -3549,10 +3903,26 @@ export function BIMQuantityRulesPage() {
       });
       return;
     }
-    previewMutation.mutate(modelId);
-  }, [modelId, previewMutation, addToast, t]);
+    previewMutation.mutate({ modelId, targetBoqId: targetBoqId || null, context, sequence: ++previewSequence.current });
+  }, [modelId, targetBoqId, context, previewMutation, addToast, t]);
+
+  // Prepare once for each ready selection/version. This only opens the
+  // review dialog; writing still requires the person's Apply click.
+  const autoPreviewContext = useRef<string | null>(null);
+  const readyModel = modelsQuery.data?.items.find((model) => model.id === modelId);
+  const { mutate: preparePreview } = previewMutation;
+  useEffect(() => {
+    if (activeTab !== 'quantity_rules' || !activeProjectId || !readyModel
+      || !['active', 'ready', 'degraded', 'complete', 'completed', 'done'].includes(readyModel.status)
+      || !rules.some((rule) => rule.is_active) || !boqsListQuery.isSuccess
+      || applyInFlight.current || autoPreviewContext.current === context) return;
+    autoPreviewContext.current = context;
+    preparePreview({ modelId, targetBoqId: targetBoqId || null, context, sequence: ++previewSequence.current });
+  }, [activeTab, activeProjectId, readyModel, rules, boqsListQuery.isSuccess,
+    context, modelId, targetBoqId, preparePreview]);
 
   const handleApply = useCallback(() => {
+    if (!canApplyPreview || !previewResult?.preview_fingerprint || applyInFlight.current) return;
     if (!modelId) {
       addToast({
         type: 'warning',
@@ -3563,8 +3933,10 @@ export function BIMQuantityRulesPage() {
       });
       return;
     }
-    applyMutation.mutate(modelId);
-  }, [modelId, applyMutation, addToast, t]);
+    applyInFlight.current = true;
+    applyMutation.mutate({ modelId, targetBoqId: targetBoqId || null, context,
+      sequence: previewSequence.current, fingerprint: previewResult.preview_fingerprint });
+  }, [modelId, targetBoqId, context, canApplyPreview, previewResult, applyMutation, addToast, t]);
 
   const modelOptions = modelsQuery.data?.items ?? [];
   const selectedModelName = modelOptions.find((m) => m.id === modelId)?.name;
@@ -3596,13 +3968,17 @@ export function BIMQuantityRulesPage() {
             ...(activeProjectId && activeProjectName
               ? [{ label: activeProjectName, to: `/projects/${activeProjectId}` }]
               : []),
-            { label: t('nav.bim_rules', { defaultValue: 'BIM Rules' }) },
+            // The crumb names the half on screen, like the title in the top
+            // bar: Quantity Rules unless the requirements side is showing.
+            activeTab === 'quantity_rules'
+              ? { label: t('nav.quantity_rules', { defaultValue: 'Quantity Rules' }) }
+              : { label: t('nav.bim_rules', { defaultValue: 'BIM Rules' }) },
           ]}
           className="mb-3"
         />
         <PageHeader
           srTitle={
-            lockedMode === 'requirements'
+            activeTab !== 'quantity_rules'
               ? t('bim_rules.page_title_requirements', {
                   defaultValue: 'BIM Rules (Compliance)',
                 })
@@ -3611,14 +3987,14 @@ export function BIMQuantityRulesPage() {
                 })
           }
           subtitle={
-            lockedMode === 'requirements'
+            activeTab !== 'quantity_rules'
               ? t('bim_rules.page_subtitle_requirements', {
                   defaultValue:
                     'Import and check BIM requirements (IDS, COBie, Excel) for your project.',
                 })
-              : t('bim_rules.page_subtitle_quantity', {
+              : t('bim_rules.what_a_rule_does', {
                   defaultValue:
-                    'Bulk-link BIM elements to BOQ positions via pattern-based rules.',
+                    'A quantity rule picks model elements by category and properties, such as walls built in a given phase, and writes their total area, volume, length or count into a BOQ position.',
                 })
           }
           actions={
@@ -3658,14 +4034,11 @@ export function BIMQuantityRulesPage() {
           })}
         </DismissibleInfo>
 
-        {/* Tabs - hidden when the URL locks the page to a single mode so
-            the Takeoff "BIM Rules" and Estimation "Quantity Rules" sidebar
-            entries read as dedicated pages, not as two tabs on the same
-            screen. */}
         {/* Tab bar. In locked requirements mode we keep the Requirements +
             Rule Library tabs (so the Revit/IFC template library is reachable
             at ?mode=requirements) and hide only the Estimation-side Quantity
-            Rules tab. Unlocked, all three show. */}
+            Rules tab. Unlocked, all three show. Either of the other two
+            goes when its module is off. */}
         <div className="mt-4 flex border-b border-border-light -mb-px">
             {!lockedMode && (
             <button
@@ -3682,6 +4055,7 @@ export function BIMQuantityRulesPage() {
               {t('bim_rules.tab_quantity_rules', { defaultValue: 'Quantity Rules' })}
             </button>
             )}
+            {available.requirements && (
             <button
               type="button"
               onClick={() => setActiveTab('requirements')}
@@ -3695,6 +4069,8 @@ export function BIMQuantityRulesPage() {
               <ClipboardCheck size={13} />
               {t('bim_rules.tab_requirements', { defaultValue: 'Requirements' })}
             </button>
+            )}
+            {available.ruleLibrary && (
             <button
               type="button"
               onClick={() => setActiveTab('rule_library')}
@@ -3709,6 +4085,7 @@ export function BIMQuantityRulesPage() {
               <BookOpen size={13} />
               {t('rulePacks.title', { defaultValue: 'Rule Library' })}
             </button>
+            )}
           </div>
 
         {/* Toolbar - model picker for both tabs (Requirements uses it to
@@ -3789,7 +4166,8 @@ export function BIMQuantityRulesPage() {
             <button
               type="button"
               onClick={handleApply}
-              disabled={!modelId || applyMutation.isPending}
+              disabled={!canApplyPreview || applyMutation.isPending || previewMutation.isPending}
+              title={!canApplyPreview ? t('bim_rules.preview_required', { defaultValue: 'Run a preview before applying rules.' }) : undefined}
               className="flex items-center gap-1.5 rounded-lg bg-oe-blue px-3 py-1.5 text-[11px] font-semibold text-white shadow-sm hover:bg-oe-blue-dark disabled:cursor-not-allowed disabled:opacity-60"
             >
               {applyMutation.isPending ? (
@@ -4068,8 +4446,8 @@ export function BIMQuantityRulesPage() {
 
       {/* BIM Requirements Import - only shown on the Requirements tab (or
           requirements-locked page), since it has no relevance to Quantity
-          Rules. */}
-      {activeTab === 'requirements' && (
+          Rules, and only while its module (oe_bim_requirements) is on. */}
+      {activeTab === 'requirements' && bimRequirementsOn && (
         <div className="border-t border-border-light bg-surface-primary px-6 py-4">
           <details className="group" open>
             <summary className="cursor-pointer text-sm font-semibold text-content-primary flex items-center gap-2">
@@ -4089,6 +4467,9 @@ export function BIMQuantityRulesPage() {
         onClose={() => setPreviewOpen(false)}
         result={previewResult}
         loading={previewMutation.isPending}
+        onApply={handleApply}
+        applying={applyMutation.isPending}
+        canApply={canApplyPreview}
       />
 
       {/* Delete confirm */}

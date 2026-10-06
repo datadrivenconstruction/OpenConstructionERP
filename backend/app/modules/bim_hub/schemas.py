@@ -725,6 +725,7 @@ class QuantityMapApplyRequest(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     model_id: UUID
+    preview_fingerprint: str | None = Field(default=None, min_length=64, max_length=64)
     dry_run: bool = Field(
         default=True,
         description=(
@@ -764,6 +765,10 @@ class QuantityMapApplyResult(BaseModel):
     rules_applied: int = 0
     links_created: int = 0
     positions_created: int = 0
+    preview_fingerprint: str | None = None
+    links_to_create: int = 0
+    positions_to_create: int = 0
+    replayed: bool = False
     skipped_count: int = 0
     results: list[dict[str, Any]] = Field(default_factory=list)
     skipped: list[dict[str, Any]] = Field(default_factory=list)
@@ -778,6 +783,68 @@ class QuantityMapApplyResult(BaseModel):
             "time instead of promising a destination it cannot keep."
         ),
     )
+
+
+class QuantityRuleDraft(BaseModel):
+    """A quantity rule as the editor holds it, saved or not.
+
+    No multiplier / waste validators on purpose: a half-typed value is what
+    the person is testing, and the preview reports it the way apply would,
+    as an ``invalid_decimal`` skip.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    element_type_filter: str | None = Field(default=None, max_length=100)
+    property_filter: dict[str, Any] | None = None
+    quantity_source: str = Field(default="count", min_length=1, max_length=100)
+    multiplier: str = Field(default="1", max_length=20)
+    waste_factor_pct: str = Field(default="0", max_length=10)
+    unit: str | None = Field(default=None, max_length=20)
+
+
+class QuantityRulePreviewRequest(BaseModel):
+    """Run one unsaved rule against a model, through the apply engine."""
+
+    model_id: UUID
+    rule: QuantityRuleDraft
+
+
+class QuantityRulePreviewMatch(BaseModel):
+    """An element the rule selects, with its quantity."""
+
+    element_id: str
+    stable_id: str
+    element_type: str
+    name: str
+    raw_quantity: float
+    adjusted_quantity: float
+
+
+class QuantityRulePreviewSkip(BaseModel):
+    """An element the rule selects but cannot take a quantity from."""
+
+    element_id: str
+    stable_id: str
+    element_type: str
+    reason: str
+
+
+class QuantityRulePreviewResult(BaseModel):
+    """What applying the rule would select; nothing is written."""
+
+    matches: list[QuantityRulePreviewMatch] = Field(default_factory=list)
+    skips: list[QuantityRulePreviewSkip] = Field(default_factory=list)
+    # Every match and skip, while the lists above hold the first ones only.
+    match_count: int = 0
+    skip_count: int = 0
+    matched_types: list[str] = Field(default_factory=list)
+    total_adjusted: float = 0.0
+    scanned: int = 0
+    # Where properties the import's 30-per-element cap left out come from:
+    # "full" (the converter's sidecar), "rebuilt" (rebuilt from the database
+    # rows, so they are gone until a re-import) or "missing" (no sidecar).
+    sidecar: str = "full"
 
 
 # ── BIMModelDiff schemas ─────────────────────────────────────────────────────

@@ -172,8 +172,11 @@ interface BackendModuleState {
   is_core: boolean;
 }
 
-/** Maps a sidebar route (`NavItem.to`, query string stripped) to the backend
- *  module manifest name (`oe_*`) that powers it. When that backend module is
+/** Maps a sidebar route (`NavItem.to`) to the backend module manifest name
+ *  (`oe_*`) that powers it. The full `to` is looked up first and the path
+ *  without its query string second, so two rows on one path can belong to
+ *  different modules (`/bim/rules` is the quantity rules of BIM Hub,
+ *  `/bim/rules?mode=requirements` the compliance requirements). When that backend module is
  *  *explicitly* disabled on the System Modules tab, the route below is hidden
  *  so the sidebar never links to a 404/blank surface (the two enable systems
  *  — frontend `useModuleStore` and the backend module loader — were
@@ -182,8 +185,13 @@ interface BackendModuleState {
  *  Only optional (non-core) modules that own a sidebar route need an entry;
  *  core modules (Dashboard, Projects, BOQ, Costs, Settings, Modules, Users)
  *  can never be disabled and are intentionally absent. Routes not listed here
- *  are never gated by backend state (fail-open). */
-const ROUTE_BACKEND_MODULE: Record<string, string> = {
+ *  are never gated by backend state (fail-open).
+ *
+ *  A list means the route draws on several modules and stays while any of
+ *  them is on: the compliance view is the Requirements tab (oe_requirements)
+ *  and the Rule Library (oe_bim_requirements), and the page drops the tab of
+ *  whichever is off. */
+const ROUTE_BACKEND_MODULE: Record<string, string | readonly string[]> = {
   // Takeoff
   '/quantities': 'oe_takeoff',
   '/takeoff': 'oe_takeoff',
@@ -194,7 +202,8 @@ const ROUTE_BACKEND_MODULE: Record<string, string> = {
   '/coordination': 'oe_coordination_hub',
   '/bim/federations': 'oe_bim_hub',
   '/clash': 'oe_clash',
-  '/bim/rules': 'oe_bim_requirements',
+  '/bim/rules': 'oe_bim_hub',
+  '/bim/rules?mode=requirements': ['oe_requirements', 'oe_bim_requirements'],
   '/requirements/matrix': 'oe_requirements',
   '/geo': 'oe_geo_hub',
   // AI & tools
@@ -547,8 +556,10 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   const isRouteBackendDisabled = useCallback(
     (to: string) => {
       const path = to.split('?')[0]!;
-      const moduleName = ROUTE_BACKEND_MODULE[path];
-      return moduleName ? disabledBackendModules.has(moduleName) : false;
+      const owner = ROUTE_BACKEND_MODULE[to] ?? ROUTE_BACKEND_MODULE[path];
+      if (!owner) return false;
+      if (typeof owner === 'string') return disabledBackendModules.has(owner);
+      return owner.every((name) => disabledBackendModules.has(name));
     },
     [disabledBackendModules],
   );

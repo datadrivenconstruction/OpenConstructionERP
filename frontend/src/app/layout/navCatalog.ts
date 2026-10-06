@@ -272,6 +272,12 @@ export const navGroups: NavGroup[] = [
       { labelKey: 'nav.pdf_measurements', to: '/takeoff?tab=measurements', icon: Ruler },
       { labelKey: 'nav.dwg_takeoff', to: '/dwg-takeoff', icon: PencilRuler },
       { labelKey: 'nav.bim_viewer', to: '/bim', icon: Box },
+      // Quantity rules: model elements by category and properties into BOQ
+      // positions. Back in the menu after release 17c62d2fa dropped it, which
+      // left only the compliance row under Model Coordination, a group the
+      // simple view hides. Same icon as that row: the route-icon map is keyed
+      // by pathname and both rows open /bim/rules.
+      { labelKey: 'nav.quantity_rules', defaultLabel: 'Quantity Rules', to: '/bim/rules', icon: SlidersHorizontal },
       { labelKey: 'nav.quantities', to: '/quantities', icon: Ruler },
       { labelKey: 'nav.rebar_schedule', defaultLabel: 'Rebar Schedule', to: '/rebar-schedule', icon: Construction, advancedOnly: true },
     ],

@@ -123,6 +123,8 @@ from app.modules.bim_hub.schemas import (
     FederationUpdate,
     QuantityMapApplyRequest,
     QuantityMapApplyResult,
+    QuantityRulePreviewRequest,
+    QuantityRulePreviewResult,
     SmartViewPreviewRequest,
     SmartViewPreviewResponse,
     SmartViewPropertyCatalogResponse,
@@ -1599,6 +1601,7 @@ async def _process_cad_in_background(
                         project_id=project_id,
                         model_id=model_id,
                         rows=raw_elements,
+                        labels=result.get("raw_element_labels"),
                     )
                     parquet_status = "ok"
                 except Exception as exc:
@@ -2890,6 +2893,10 @@ async def get_parquet_status(
     the background ingester so the UI can show a "Parquet sidecar failed -
     retry?" affordance instead of silently serving an empty dataframe.
     """
+    import asyncio
+
+    from app.modules.bim_hub.dataframe_store import sidecar_state
+
     model = await _verify_model_access(service, model_id, user_id or "")
     meta = model.metadata_ or {}
     return {
@@ -2898,6 +2905,10 @@ async def get_parquet_status(
         "error": meta.get("parquet_error"),
         "attempted_at": meta.get("parquet_attempted_at"),
         "retry_endpoint": f"/api/v1/bim-hub/models/{model_id}/parquet/retry/",
+        # "full", "rebuilt" (from the database rows, so the properties the
+        # import's 30-per-element cap left out are gone until a re-import) or
+        # "missing". The property search panel says so when a property is not there.
+        "sidecar": await asyncio.to_thread(sidecar_state, str(model.project_id), str(model_id)),
     }
 
 
@@ -2914,7 +2925,7 @@ async def retry_parquet_write(
     (elements landed in ``oe_bim_element``) but the Parquet write failed
     (disk full, permission denied, pyarrow crash). Does NOT re-run DDC.
     """
-    from app.modules.bim_hub.dataframe_store import write_dataframe
+    from app.modules.bim_hub.dataframe_store import SOURCE_DATABASE, write_dataframe
     from app.modules.bim_hub.models import BIMElement
 
     model = await _verify_model_access(service, model_id, user_id or "")
@@ -2945,6 +2956,10 @@ async def retry_parquet_write(
             row.update(el.properties)
         if isinstance(el.quantities, dict):
             row.update(el.quantities)
+        # Property search and the rule engine pair a sidecar row with its
+        # element by ``id`` (== mesh_ref, else stable_id), as ``ensure_parquet``
+        # writes it. Set last so no flattened property can shadow it.
+        row["id"] = el.mesh_ref or el.stable_id
         rows.append(row)
 
     import asyncio as _asyncio
@@ -2957,6 +2972,9 @@ async def retry_parquet_write(
             project_id=str(model.project_id),
             model_id=str(model_id),
             rows=rows,
+            # The rows hold at most 30 properties per element: the sidecar says
+            # so, and the rule test tells the user a re-import brings the rest.
+            source=SOURCE_DATABASE,
         )
         new_status, new_error = "ok", None
     except Exception as exc:
@@ -4121,6 +4139,21 @@ async def apply_quantity_maps(
     """Apply quantity mapping rules to all elements in a model."""
     await _verify_model_access(service, data.model_id, user_id)
     return await service.apply_quantity_maps(data)
+
+
+@router.post("/quantity-maps/preview/", response_model=QuantityRulePreviewResult)
+async def preview_quantity_rule(
+    data: QuantityRulePreviewRequest,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("bim.read")),
+    service: BIMHubService = Depends(_get_service),
+) -> QuantityRulePreviewResult:
+    """Run one unsaved rule against a model through the apply engine ("Test this rule").
+
+    Read-only: nothing is linked or created, so viewing the model is enough.
+    """
+    await _verify_model_access(service, data.model_id, user_id)
+    return await service.preview_quantity_rule(data)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -5499,6 +5532,21 @@ async def get_dataframe_schema(
     )
 
 
+def _dataframe_bad_request(exc: ValueError) -> HTTPException:
+    """A 400 whose ``detail`` carries a code the client translates.
+
+    ``message`` stays for API clients and logs; the UI maps ``code`` to its own
+    text, so the reader never sees the server's English.
+    """
+    from app.modules.bim_hub.dataframe_store import DataframeQueryError
+
+    if isinstance(exc, DataframeQueryError):
+        detail = {"code": exc.code, "message": str(exc), "params": exc.params}
+    else:
+        detail = {"code": "query_failed", "message": str(exc), "params": {}}
+    return HTTPException(status.HTTP_400_BAD_REQUEST, detail=detail)
+
+
 @router.post("/models/{model_id}/dataframe/query/")
 async def query_dataframe(
     model_id: uuid.UUID,
@@ -5540,7 +5588,7 @@ async def query_dataframe(
             limit=min(body.get("limit", 10_000), 50_000),
         )
     except ValueError as exc:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc))
+        raise _dataframe_bad_request(exc) from exc
     return rows
 
 
@@ -5556,10 +5604,40 @@ async def get_column_values(
 
     Returns ``[{"value": "F90", "count": 42}, ...]`` sorted by count desc.
 
+    Kept for existing callers. A column name containing ``/`` cannot travel
+    in a path segment, so new callers use ``GET .../dataframe/values/?column=``.
+
     Audit B1 - same IDOR class as the two endpoints above. Gated here
     via ``_verify_model_access``.
     """
-    model = await _verify_model_access(service, model_id, _user)
+    return await _column_value_counts(service, model_id, _user, column, limit)
+
+
+@router.get("/models/{model_id}/dataframe/values/")
+async def get_column_values_by_query(
+    model_id: uuid.UUID,
+    column: str = Query(..., min_length=1, max_length=500),
+    limit: int = Query(default=100, ge=1, le=1000),
+    service: BIMHubService = Depends(_get_service),
+    _user: CurrentUserId = ...,
+) -> list[dict]:
+    """Return value counts for a column named in the query string.
+
+    Same answer as ``.../dataframe/columns/{column}/values/``, but the column
+    travels as ``?column=`` so names such as ``Width/Height`` reach the store
+    intact. Feeds the value dropdown of the property search panel.
+    """
+    return await _column_value_counts(service, model_id, _user, column, limit)
+
+
+async def _column_value_counts(
+    service: BIMHubService,
+    model_id: uuid.UUID,
+    user_id: str,
+    column: str,
+    limit: int,
+) -> list[dict]:
+    model = await _verify_model_access(service, model_id, user_id)
 
     import asyncio
 
@@ -5574,7 +5652,7 @@ async def get_column_values(
             limit=limit,
         )
     except ValueError as exc:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc))
+        raise _dataframe_bad_request(exc) from exc
     return counts
 
 

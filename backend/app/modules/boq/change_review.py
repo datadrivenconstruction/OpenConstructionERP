@@ -440,6 +440,9 @@ class _Elem:
     quantities: dict[str, Any]
     properties: dict[str, Any]
     element_type: str | None = None
+    # Pairs the element with its Parquet sidecar row, where a rule reads a
+    # property the import's 30-key cap left out of ``properties``.
+    mesh_ref: str | None = None
 
 
 def _elem_changed(old: _Elem, new: _Elem) -> bool:
@@ -454,9 +457,11 @@ def _type_filter_as_like(pattern: str | None) -> str | None:
     that is not ASCII: the database may fold the case of non-ASCII letters
     differently from Python (a cluster created with the C locale does not fold
     them at all), and a narrowing that drops a real match would be a wrong
-    quantity.
+    quantity. A comma list ("Wall*, IfcWall*") is several globs, any of which
+    selects an element, so it is not narrowed either.
     """
-    if not pattern or pattern == "*" or "[" in pattern or not pattern.isascii():
+    pattern = (pattern or "").strip()
+    if not pattern or pattern == "*" or "[" in pattern or "," in pattern or not pattern.isascii():
         return None
     out: list[str] = []
     for char in pattern.lower():
@@ -472,7 +477,7 @@ def _type_filter_as_like(pattern: str | None) -> str | None:
 
 
 def _row_elem(row: Sequence[Any]) -> _Elem:
-    """Build an element from ``(id, model_id, stable_id, geometry_hash, quantities, properties, element_type)``."""
+    """Build an element from ``(id, model_id, stable_id, geometry_hash, quantities, properties, element_type, mesh_ref)``."""
     return _Elem(
         element_id=row[0],
         model_id=row[1],
@@ -481,6 +486,7 @@ def _row_elem(row: Sequence[Any]) -> _Elem:
         quantities=row[4] if isinstance(row[4], dict) else {},
         properties=row[5] if isinstance(row[5], dict) else {},
         element_type=row[6],
+        mesh_ref=row[7],
     )
 
 
@@ -962,6 +968,7 @@ class ChangeReviewService:
                     BIMElement.quantities,
                     BIMElement.properties,
                     BIMElement.element_type,
+                    BIMElement.mesh_ref,
                 ).where(BIMElement.model_id == model_id, BIMElement.stable_id.in_(list(chunk)))
             )
             for row in rows:
@@ -994,12 +1001,43 @@ class ChangeReviewService:
             BIMElement.quantities,
             BIMElement.properties if needs_properties else null(),
             BIMElement.element_type,
+            BIMElement.mesh_ref,
         ).where(BIMElement.model_id == model_id)
         like = _type_filter_as_like(rule.element_type_filter)
         if like is not None:
             stmt = stmt.where(func.lower(BIMElement.element_type).like(like, escape="\\"))
-        cache[key] = [_row_elem(row) for row in await self.session.execute(stmt)]
+        elems = [_row_elem(row) for row in await self.session.execute(stmt)]
+        if needs_properties:
+            await self._fill_capped_properties(elems, rule)
+        cache[key] = elems
         return cache[key]
+
+    async def _fill_capped_properties(self, elems: list[_Elem], rule: Any, *, check_type: bool = True) -> None:
+        """Add the properties a rule reads that the import's 30-key cap left out.
+
+        Element rows keep at most 30 properties; the model's Parquet sidecar
+        keeps them all, and property search and the quantity-rule apply read
+        it. Reading the same here keeps the review counting what Apply counted.
+        ``_Elem`` holds a copy of the row, so the database is not touched.
+        """
+        from app.modules.bim_hub.rule_properties import fill_missing_properties, missing_keys, rule_property_keys
+        from app.modules.bim_hub.service import BIMHubService
+
+        keys = rule_property_keys(rule.property_filter, rule.quantity_source)
+        if not keys:
+            return
+        wants = [
+            (elem, missing)
+            for elem in elems
+            if (not check_type or BIMHubService._type_filter_matches(rule.element_type_filter, elem.element_type))
+            and (missing := missing_keys(elem, keys))
+        ]
+        if not wants:
+            return
+        found = await fill_missing_properties(self.session, wants)
+        for (elem, _keys), extra in zip(wants, found, strict=True):
+            if extra:
+                elem.properties = {**elem.properties, **extra}
 
     async def _load_bim_context(
         self,
@@ -1026,6 +1064,7 @@ class ChangeReviewService:
                 BIMElement.quantities,
                 BIMElement.properties,
                 BIMElement.element_type,
+                BIMElement.mesh_ref,
             )
             .join(BIMElement, BIMElement.id == BOQElementLink.bim_element_id)
             .join(Position, Position.id == BOQElementLink.boq_position_id)
@@ -1550,6 +1589,8 @@ class ChangeReviewService:
                 old_elems = [p.old for p in ctx.pairs if p.old is not None]
                 new_elems = [p.new for p in ctx.pairs if p.new is not None]
                 if ctx.method == "rule_linked":
+                    # Linked elements count whatever their type, so no type check.
+                    await self._fill_capped_properties([*old_elems, *new_elems], ctx.rule, check_type=False)
                     previous = rule_method_quantity(ctx.rule, old_elems)
                     proposed = rule_method_quantity(ctx.rule, new_elems)
                 else:

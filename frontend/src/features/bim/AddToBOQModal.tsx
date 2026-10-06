@@ -58,6 +58,12 @@ interface AddToBOQModalProps {
   /** Called after a successful link (or bulk link) so the parent can
    *  refetch the element list and pick up the new boq_links. */
   onLinked?: () => void;
+  /** BOQ to open on instead of the project's first one. Set when the user
+   *  came from a BOQ position via "Link from model". */
+  initialBoqId?: string | null;
+  /** Position the user came from. The dialog opens on "Link to existing"
+   *  (also for a bulk selection) and offers this position first. */
+  targetPositionId?: string | null;
 }
 
 type Tab = 'existing' | 'new';
@@ -110,6 +116,8 @@ export default function AddToBOQModal({
   elements,
   onClose,
   onLinked,
+  initialBoqId = null,
+  targetPositionId = null,
 }: AddToBOQModalProps) {
   const { t } = useTranslation();
   const qc = useQueryClient();
@@ -120,7 +128,7 @@ export default function AddToBOQModal({
   // quantity; the create path uses the canonical `quantity` state untouched).
   const displayQty = useDisplayQuantity();
 
-  const [tab, setTab] = useState<Tab>(elements.length > 1 ? 'new' : 'existing');
+  const [tab, setTab] = useState<Tab>(targetPositionId || elements.length <= 1 ? 'existing' : 'new');
   const [search, setSearch] = useState('');
   // User's explicit BOQ pick.  `null` = "use the default" (first BOQ in the
   // list once it loads).  We derive the effective id via useMemo below so
@@ -171,12 +179,15 @@ export default function AddToBOQModal({
     setDescription(buildDefaultDescription(elements));
     setUnit(d.unit);
     setQuantity(d.quantity.toFixed(3));
-    setTab(elements.length > 1 ? 'new' : 'existing');
+    setTab(targetPositionId || elements.length <= 1 ? 'existing' : 'new');
     setSearch('');
     setOrdinal('');
     setUnitRate('0');
     setUserSelectedBOQId(null);
     setUserEditedQty(false);
+    // targetPositionId only steers the first tab; it is fixed for the
+    // lifetime of one "Link from model" visit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [elements]);
 
   // Focus the Target BOQ select as soon as the modal mounts - it's Step 1
@@ -247,8 +258,11 @@ export default function AddToBOQModal({
     if (userSelectedBOQId && boqs.some((b) => b.id === userSelectedBOQId)) {
       return userSelectedBOQId;
     }
+    if (initialBoqId && boqs.some((b) => b.id === initialBoqId)) {
+      return initialBoqId;
+    }
     return boqs[0]?.id ?? null;
-  }, [boqs, userSelectedBOQId]);
+  }, [boqs, userSelectedBOQId, initialBoqId]);
 
   // ── Fetch positions for the selected BOQ (for the existing tab) ─────
   // Guard is doubled: only fire once the BOQ list has actually loaded AND
@@ -259,6 +273,9 @@ export default function AddToBOQModal({
     enabled: !!selectedBOQId && !boqsQuery.isLoading,
   });
   const positions: Position[] = positionsQuery.data?.positions ?? [];
+  const targetPosition = targetPositionId
+    ? positions.find((p) => p.id === targetPositionId) ?? null
+    : null;
 
   // Filter out sections (pure headers) from the pickable list - you link
   // to real cost-bearing positions, not to their parent headers. A row is
@@ -485,6 +502,28 @@ export default function AddToBOQModal({
         <div className="flex-1 overflow-y-auto">
           {tab === 'existing' ? (
             <div className="p-5">
+              {/* The position the user came from ("Link from model" in the
+                  BOQ editor), offered as one click above the full list. */}
+              {targetPosition && (
+                <button
+                  type="button"
+                  onClick={() => linkExistingMut.mutate(targetPosition.id)}
+                  disabled={busy}
+                  data-testid="add-to-boq-target-position"
+                  className="mb-3 w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-start bg-oe-blue/5 border border-oe-blue/40 hover:bg-oe-blue/10 disabled:opacity-50 transition-colors"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[10px] font-semibold uppercase tracking-wide text-oe-blue">
+                      {t('bim.link_target_position', { defaultValue: 'Link to the position you came from' })}
+                    </div>
+                    <div className="text-xs text-content-primary truncate">
+                      <span className="font-mono font-semibold tabular-nums me-2">{targetPosition.ordinal}</span>
+                      {targetPosition.description}
+                    </div>
+                  </div>
+                  <Link2 size={14} className="text-oe-blue shrink-0" />
+                </button>
+              )}
               {/* Search */}
               <div className="relative mb-3">
                 <Search

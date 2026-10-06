@@ -1847,6 +1847,25 @@ async def convert_cad_to_excel(
         return None
 
 
+def _cad_excel_header_keys(header_row: tuple | list) -> tuple[list[str], dict[str, str]]:
+    """Normalise a DDC Excel header row into row keys plus their display labels.
+
+    Keys are lowercased with the DDC type suffix (``" : String"``) removed:
+    element properties, rules and lookups all key on that form. The label map
+    sends each key back to the header as the converter wrote it
+    (``"phase created" -> "Phase Created"``). When two headers collapse onto
+    one key the first header's text wins.
+    """
+    raw_headers = [str(h or "").strip() for h in header_row]
+    display = [h.split(" : ")[0].strip() if " : " in h else h for h in raw_headers]
+    keys = [h.lower() for h in display]
+    labels: dict[str, str] = {}
+    for key, text in zip(keys, display, strict=True):
+        if key and key not in labels:
+            labels[key] = text
+    return keys, labels
+
+
 def parse_cad_excel(excel_path: Path) -> list[dict]:
     """Parse the Excel output produced by a DDC converter.
 
@@ -1874,8 +1893,7 @@ def parse_cad_excel(excel_path: Path) -> list[dict]:
         return []
 
     # First row is the header; strip DDC type suffixes like " : String", " : Double"
-    raw_headers = [str(h or "").strip() for h in rows[0]]
-    headers = [h.split(" : ")[0].strip().lower() if " : " in h else h.lower() for h in raw_headers]
+    headers, _labels = _cad_excel_header_keys(rows[0])
 
     elements: list[dict] = []
     for row in rows[1:]:
@@ -1894,6 +1912,31 @@ def parse_cad_excel(excel_path: Path) -> list[dict]:
 
     wb.close()
     return elements
+
+
+def read_cad_excel_labels(excel_path: Path) -> dict[str, str]:
+    """Return ``{row key: original header text}`` for a DDC Excel export.
+
+    Reads only the header row. Best-effort: an unreadable file gives ``{}``,
+    and the property panel then shows each column by its key.
+    """
+    try:
+        import openpyxl
+
+        wb = openpyxl.load_workbook(excel_path, read_only=True, data_only=True)
+        try:
+            ws = wb.active
+            if ws is None:
+                return {}
+            header = next(ws.iter_rows(max_row=1, values_only=True), None)
+            if not header:
+                return {}
+            return _cad_excel_header_keys(header)[1]
+        finally:
+            wb.close()
+    except Exception:  # noqa: BLE001 - labels are cosmetic, never block an import
+        logger.debug("read_cad_excel_labels: could not read headers of %s", excel_path, exc_info=True)
+        return {}
 
 
 def summarize_cad_elements(elements: list[dict]) -> str:

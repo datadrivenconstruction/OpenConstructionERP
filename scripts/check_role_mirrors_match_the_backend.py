@@ -351,7 +351,19 @@ def _register_for(permission: str) -> None:
     try:
         module = importlib.import_module(f"app.modules.{prefix}.permissions")
     except ImportError as exc:
-        raise LookupError(f"no permissions module for {permission!r} ({exc})") from exc
+        # The prefix is not always the package: `bim.*` is registered by
+        # `bim_hub`. Fall back to the one module that declares the name.
+        quoted = f'"{permission}"'
+        owners = sorted(
+            p.parent.name
+            for p in (BACKEND / "app" / "modules").glob("*/permissions.py")
+            if quoted in p.read_text(encoding="utf-8")
+        )
+        if len(owners) != 1:
+            raise LookupError(
+                f"no permissions module for {permission!r} ({exc}; declared in {owners or 'none'})"
+            ) from exc
+        module = importlib.import_module(f"app.modules.{owners[0]}.permissions")
     for name in dir(module):
         func = getattr(module, name)
         if name.startswith("register_") and callable(func) and getattr(func, "__module__", "") == module.__name__:

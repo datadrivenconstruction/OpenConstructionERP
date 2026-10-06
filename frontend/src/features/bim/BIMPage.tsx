@@ -89,6 +89,14 @@ import { InstallConverterPrompt } from './InstallConverterPrompt';
 import { AutoInstallConverterNotice } from './AutoInstallConverterNotice';
 import { useAutoInstallConverter, converterIdForFile } from './useAutoInstallConverter';
 import AddToBOQModal from './AddToBOQModal';
+import { LinkToPositionBanner } from './LinkToPositionBanner';
+import {
+  buildQuantityRulesUrl,
+  elementTypeToPattern,
+  readLinkFromModelTarget,
+  suggestQuantitySource,
+  type LinkFromModelTarget,
+} from './quantityRuleLinks';
 import SaveGroupModal from './SaveGroupModal';
 import CreateTaskFromBIMModal from './CreateTaskFromBIMModal';
 import LinkDocumentToBIMModal from './LinkDocumentToBIMModal';
@@ -114,6 +122,7 @@ import { useSmartViewState } from '@/features/smart_views/useSmartViewState';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { useBIMLinkSelectionStore } from '@/stores/useBIMLinkSelectionStore';
 import { useBIMUploadStore, type BIMUploadJob } from '@/stores/useBIMUploadStore';
 import { useDwgUploadStore } from '@/stores/useDwgUploadStore';
@@ -2228,6 +2237,14 @@ export function BIMPage() {
   // the matching element as soon as the elements list resolves.  Cleared
   // from the URL after one shot so a refresh doesn't reapply it.
   const [searchParams, setSearchParams] = useSearchParams();
+  // Linking elements to a position (POST /bim_hub/links/) needs bim.create.
+  const canCreateBimLinks = useHasPermission('bim.create');
+  // "Link from model" in the BOQ editor lands here with one position in the
+  // query. Read once, on mount: the model-URL sync below rewrites the path
+  // and drops the query string.
+  const [linkTarget, setLinkTarget] = useState<LinkFromModelTarget | null>(() =>
+    readLinkFromModelTarget(searchParams),
+  );
   const deepLinkElementId = searchParams.get('element');
   const deepLinkDocName = searchParams.get('docName');
   const deepLinkDocId = searchParams.get('docId');
@@ -3029,6 +3046,27 @@ export function BIMPage() {
     if (elements.length > 0) setLinkCandidates(elements);
   }, []);
 
+  // Right-click "Create quantity rule": open the Quantity Rules page in this
+  // tab with a new rule pre-filled from the element (its type, and the
+  // quantity it actually carries). Nothing is saved until the user does.
+  const handleCreateQuantityRule = useCallback(
+    (element: BIMElementData) => {
+      const { quantitySource, unit } = suggestQuantitySource(element.quantities);
+      navigate(
+        buildQuantityRulesUrl({
+          projectId,
+          modelId: activeModelId,
+          newRule: {
+            elementType: element.element_type ? elementTypeToPattern(element.element_type) : '',
+            quantitySource,
+            unit,
+          },
+        }),
+      );
+    },
+    [navigate, projectId, activeModelId],
+  );
+
   // Cross-module navigation handlers - fired when the user clicks a row
   // in the Linked Documents / Tasks / Activities sections of the
   // selected-element panel.  Each one takes them to the relevant module
@@ -3068,12 +3106,11 @@ export function BIMPage() {
   const handleLinkRequirement = useCallback((element: BIMElementData) => {
     setLinkRequirementFor([element]);
   }, []);
-  const handleOpenRequirement = useCallback(
-    (requirementId: string) => {
-      navigate(`/bim/rules?id=${encodeURIComponent(requirementId)}`);
-    },
-    [navigate],
-  );
+  // Requirements are the Requirements tab of /bim/rules. The page reads no
+  // requirement id, so the link names the tab and nothing it would ignore.
+  const handleOpenRequirement = useCallback(() => {
+    navigate('/bim/rules?tab=requirements');
+  }, [navigate]);
 
   // "Ask AI about this element" - build a full-context prompt from the
   // (Wave D enriched) element and seed the shared AI assistant with it. We
@@ -3511,16 +3548,33 @@ export function BIMPage() {
             content={bimGuide}
             onCta={() => setUploadOpen(true)}
           />
-          {elements.length > 0 && (
-            <a
-              href="/bim/rules?mode=requirements"
-              target="_blank"
-              rel="noopener noreferrer"
-              data-testid="bim-rules-link-top"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-content-secondary bg-surface-secondary border border-border-light hover:bg-surface-tertiary transition-colors"
+          {/* Quantity Rules, in this tab and for this project and model. It
+              used to open the compliance requirements in a new tab, which
+              hid the quantity rules and, in the desktop app, opened nothing.
+              Shown for any loaded model; disabled until it has elements. */}
+          {activeModelId && (
+            <span
+              title={
+                elements.length > 0
+                  ? t('bim.rules_button_hint', {
+                      defaultValue:
+                        'Quantity rules pick model elements by category and properties and send their quantities to BOQ positions.',
+                    })
+                  : t('bim.rules_button_no_elements', {
+                      defaultValue: 'Quantity rules need model elements. They become available once the model has loaded.',
+                    })
+              }
             >
-              <SlidersHorizontal size={13} /> {t('bim.rules_button', { defaultValue: 'Rules' })}
-            </a>
+              <button
+                type="button"
+                onClick={() => navigate(buildQuantityRulesUrl({ projectId, modelId: activeModelId }))}
+                disabled={elements.length === 0}
+                data-testid="bim-rules-link-top"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium text-content-secondary bg-surface-secondary border border-border-light hover:bg-surface-tertiary transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <SlidersHorizontal size={13} /> {t('bim.rules_button', { defaultValue: 'Rules' })}
+              </button>
+            </span>
           )}
           {elements.length > 0 && (
             <>
@@ -3973,7 +4027,8 @@ export function BIMPage() {
           clash deep-link use) so matches highlight via the existing
           isolation pipeline. v3.12.0 / Stream D. The fixed positioning
           keeps the popover anchored to the viewport edge regardless of the
-          outer flex layout. */}
+          outer flex layout. ``elements`` lets the panel translate Parquet
+          hits (Revit ElementIds) into the element ids the viewer keys by. */}
       {propertySearchOpen && activeModelId && (
         <div
           className="fixed right-6 z-30 w-72 rounded-xl border border-border-light bg-surface-primary shadow-lg"
@@ -3982,6 +4037,7 @@ export function BIMPage() {
         >
           <PropertySearchPanel
             modelId={activeModelId}
+            elements={elements}
             onIsolate={(ids) => setIsolatedIds(ids.length > 0 ? ids : null)}
             onClear={() => setIsolatedIds(null)}
           />
@@ -4280,6 +4336,7 @@ export function BIMPage() {
             onCreateTask={handleCreateTask}
             onLinkDocument={handleLinkDocument}
             onLinkActivity={handleLinkActivity}
+            onCreateQuantityRule={handleCreateQuantityRule}
             onLinkRequirement={handleLinkRequirement}
             onSmartFilter={handleSmartFilter}
             leftPanelOpen={filterPanelOpen && elements.length > 0}
@@ -4287,6 +4344,21 @@ export function BIMPage() {
             smartViewEvalResult={smartViewEvalStates}
             className="h-full"
           />
+
+          {linkTarget && (
+            <LinkToPositionBanner
+              target={linkTarget}
+              selectionCount={selectedElementData.length}
+              canLink={canCreateBimLinks}
+              onLink={() => handleAddToBOQ(selectedElementData)}
+              onBack={() =>
+                navigate(
+                  `/boq/${encodeURIComponent(linkTarget.boqId)}?highlight=${encodeURIComponent(linkTarget.positionId)}`,
+                )
+              }
+              onCancel={() => setLinkTarget(null)}
+            />
+          )}
 
           {/* Lazy-load info bar - shown when viewing a group subset */}
           {activeGroupId && !fullModelRequested && (
@@ -4445,6 +4517,8 @@ export function BIMPage() {
           projectId={projectId}
           modelId={activeModelId ?? ''}
           elements={linkCandidates}
+          initialBoqId={linkTarget?.boqId ?? null}
+          targetPositionId={linkTarget?.positionId ?? null}
           onClose={() => setLinkCandidates(null)}
           onLinked={() => {
             queryClient.invalidateQueries({ queryKey: ['bim-elements', activeModelId] });

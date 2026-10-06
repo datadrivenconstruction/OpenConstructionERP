@@ -181,6 +181,7 @@ export async function fetchSimilarItems(
  *    /tasks?id=<task_id>                     → TasksPage
  *    /risks?id=<risk_id>                     → RiskRegisterPage
  *    /bim?element=<element_id>               → BIMPage
+ *    /bim/rules?tab=requirements             → BIMQuantityRulesPage (Requirements tab)
  *    /validation?id=<report_id>              → ValidationPage
  *    /chat?session=<session_id>              → ERP Chat full page
  *    /changeorders?highlight=<order_id>      → ChangeOrdersPage
@@ -226,7 +227,10 @@ export function hitToHref(hit: UnifiedSearchHit): string {
     case 'oe_bim_elements':
       return `/bim?element=${encodeURIComponent(hit.id)}`;
     case 'oe_requirements':
-      return `/bim/rules?id=${encodeURIComponent(hit.id)}`;
+      // Requirements are the Requirements tab of /bim/rules, which opens on
+      // the quantity rules unless the URL names the tab. The page reads no
+      // requirement id, so the tab is where the link honestly lands.
+      return '/bim/rules?tab=requirements';
     case 'oe_rfi_rfis':
       // RFI has a dedicated detail route that self-resolves its project.
       return `/rfi/${encodeURIComponent(hit.id)}`;

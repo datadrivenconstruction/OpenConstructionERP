@@ -169,6 +169,15 @@ describe('the rest of the editor keys', () => {
     expect(resolveBoqShortcut({ key: 'Delete' }, { isEditing: false, hasSelection: false })).toBeNull();
     expect(resolveBoqShortcut({ key: 'Backspace' }, { isEditing: true, hasSelection: true })).toBeNull();
   });
+
+  it('Delete does nothing for a user without the delete permission', () => {
+    // A viewer could tick rows and press Delete: the rows vanished, the undo
+    // toast ran and only the server's 403 five seconds later said otherwise.
+    const noDelete = { isEditing: false, hasSelection: true, canDelete: false };
+    expect(resolveBoqShortcut({ key: 'Delete' }, noDelete)).toBeNull();
+    expect(resolveBoqShortcut({ key: 'Backspace' }, noDelete)).toBeNull();
+    expect(resolveBoqShortcut({ key: 'Delete' }, { ...noDelete, canDelete: true })).toBe('delete_selected');
+  });
 });
 
 describe('isTextEntryElement', () => {

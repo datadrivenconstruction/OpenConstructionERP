@@ -160,6 +160,9 @@ const TODAYS_SIMPLE = [
   '/takeoff?tab=measurements',
   '/dwg-takeoff',
   '/bim',
+  // Quantity rules, back in Takeoff for the simple view (it had no menu
+  // path there at all).
+  '/bim/rules',
   '/quantities',
   '/costs',
   '/catalog',

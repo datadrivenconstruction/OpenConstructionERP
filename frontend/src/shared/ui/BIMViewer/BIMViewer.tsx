@@ -275,6 +275,10 @@ export interface BIMViewerProps {
   onLinkDocument?: (element: BIMElementData) => void;
   /** User clicked "+ Link" in the Schedule Activities section. */
   onLinkActivity?: (element: BIMElementData) => void;
+  /** User picked "Create quantity rule" in the right-click menu - parent
+   *  opens the Quantity Rules editor pre-filled from this element. Without
+   *  it the menu does not offer the item. */
+  onCreateQuantityRule?: (element: BIMElementData) => void;
   /** User clicked "+ Link" in the Linked Requirements section — parent
    *  opens the LinkRequirementToBIMModal picker. */
   onLinkRequirement?: (element: BIMElementData) => void;
@@ -747,6 +751,7 @@ export function BIMViewer({
   onCreateTask,
   onLinkDocument,
   onLinkActivity,
+  onCreateQuantityRule,
   onLinkRequirement,
   onSmartFilter,
   leftPanelOpen = false,
@@ -772,6 +777,7 @@ export function BIMViewer({
     onCreateTask = undefined;
     onLinkDocument = undefined;
     onLinkActivity = undefined;
+    onCreateQuantityRule = undefined;
     onLinkRequirement = undefined;
     onSmartFilter = undefined;
   }
@@ -2970,6 +2976,12 @@ export function BIMViewer({
     const el = contextMenu.element ?? contextMenu.selectedElements[0];
     if (el && onCreateTask) onCreateTask(el);
   }, [contextMenu, onCreateTask]);
+
+  const handleCtxCreateQuantityRule = useCallback(() => {
+    if (!contextMenu) return;
+    const el = contextMenu.element ?? contextMenu.selectedElements[0];
+    if (el && onCreateQuantityRule) onCreateQuantityRule(el);
+  }, [contextMenu, onCreateQuantityRule]);
 
   const handleCtxIsolate = useCallback(() => {
     if (!contextMenu || !elementMgrRef.current) return;
@@ -6201,6 +6213,7 @@ export function BIMViewer({
             onLinkDocument: onLinkDocument ? handleCtxLinkDocument : undefined,
             onLinkActivity: onLinkActivity ? handleCtxLinkActivity : undefined,
             onCreateTask: onCreateTask ? handleCtxCreateTask : undefined,
+            onCreateQuantityRule: onCreateQuantityRule ? handleCtxCreateQuantityRule : undefined,
             onIsolate: handleCtxIsolate,
             onHide: handleCtxHide,
             // W6.6 Stream C — Solo Mode: surface "Show all" in the context

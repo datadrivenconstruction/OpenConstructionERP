@@ -12,12 +12,13 @@
  *
  * Run:  npx vitest run src/features/boq/__tests__/lockedBillIsReadOnly.test.tsx
  */
-import { describe, it, expect, vi, beforeAll, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeAll, afterAll, afterEach } from 'vitest';
 import { render, cleanup, fireEvent, act } from '@testing-library/react';
 import { createElement } from 'react';
 
 import BOQGrid from '../BOQGrid';
 import type { Position } from '../api';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 vi.mock('@/features/collab_locks', () => ({
   acquireLock: vi.fn(async () => ({ ok: true, lock: { id: 'lock-test' } })),
@@ -44,6 +45,14 @@ beforeAll(() => {
     get() { return this.parentElement; },
   });
   Element.prototype.scrollIntoView = vi.fn();
+  // Delete is also gated on `boq.delete` (EDITOR). Sign in as an editor so the
+  // lock, and only the lock, is what takes Delete away in the locked case,
+  // and the open-bill contrast still has a Delete to find.
+  useAuthStore.setState({ userRole: 'editor' });
+});
+
+afterAll(() => {
+  useAuthStore.setState({ userRole: null });
 });
 
 afterEach(() => {

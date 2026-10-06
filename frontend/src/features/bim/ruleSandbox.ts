@@ -46,11 +46,12 @@ export interface SandboxRule {
 
 /* ── fnmatch-equivalent (matches Python's case-insensitive fnmatch) ───────── */
 
-/** Translate a shell wildcard pattern (``*`` and ``?``) into a RegExp, exactly
- *  like Python's ``fnmatch.translate`` for the subset we use. Case-insensitive
+/** Translate a wildcard pattern (``*`` and ``?`` only) into a RegExp, the same
+ *  vocabulary as the server's ``_glob_match``: brackets are literal. Case-insensitive
  *  to mirror the backend's ``.lower()`` on both sides. Any regex-special chars
  *  in the literal portions are escaped so a pattern like ``Wall (Ext)`` is
- *  matched literally rather than throwing. */
+ *  matched literally rather than throwing. The ``s`` flag lets ``*`` run
+ *  across line breaks, as the server's does. */
 export function wildcardToRegExp(pattern: string): RegExp {
   let out = '';
   for (const ch of pattern) {
@@ -58,7 +59,7 @@ export function wildcardToRegExp(pattern: string): RegExp {
     else if (ch === '?') out += '.';
     else out += ch.replace(/[.+^${}()|[\]\\]/g, '\\$&');
   }
-  return new RegExp(`^${out}$`, 'i');
+  return new RegExp(`^${out}$`, 'is');
 }
 
 /** Case-insensitive fnmatch for a single value against a single pattern. */
@@ -104,6 +105,18 @@ export function propertyValueMatches(actual: unknown, expected: unknown): boolea
     return fnmatchCI(actual, expected);
   }
 
+  // A whole number also matches its float spelling ("300.0"), which is how
+  // the editor's value list writes a width stored as 300.0. Below 1e16, as on
+  // the server, where Python stops writing floats that way.
+  if (
+    typeof actual === 'number' &&
+    Number.isInteger(actual) &&
+    Math.abs(actual) < 1e16 &&
+    String(expected).toLowerCase() === `${actual}.0`
+  ) {
+    return true;
+  }
+
   // Mixed / numeric / boolean: exact equality after string coercion.
   return String(actual).toLowerCase() === String(expected).toLowerCase();
 }
@@ -118,9 +131,8 @@ export function ruleMatchesElement(rule: SandboxRule, element: SandboxElement): 
     if (!et) return false;
     // The filter field accepts a comma-separated list of patterns (the editor
     // placeholder shows "Wall*, IfcWall, Curtainwall*"); a single one matching
-    // is enough. The backend stores the raw string and fnmatches it whole, but
-    // a comma list there never matches, so splitting here is strictly more
-    // forgiving and matches what users plainly intend.
+    // is enough. The backend splits the same way; both engines read the case
+    // table in __tests__/fixtures/ruleMatchingParity.json.
     const patterns = typeFilter
       .split(',')
       .map((p) => p.trim())
@@ -133,9 +145,21 @@ export function ruleMatchesElement(rule: SandboxRule, element: SandboxElement): 
   const props = element.properties ?? {};
   for (const [key, pattern] of Object.entries(pf)) {
     if (!key.trim()) continue;
-    if (!propertyValueMatches(props[key], pattern)) return false;
+    if (!propertyValueMatches(lookupPropertyKey(props, key), pattern)) return false;
   }
   return true;
+}
+
+/** Value under a property key the way the server resolves it: exact key first,
+ *  then trimmed and case-insensitive, so a rule naming "Phase Created" reads
+ *  the "phase created" key the DDC import stored. */
+export function lookupPropertyKey(props: Record<string, unknown>, key: string): unknown {
+  if (Object.prototype.hasOwnProperty.call(props, key)) return props[key];
+  const wanted = key.trim().toLowerCase();
+  for (const [k, v] of Object.entries(props)) {
+    if (k.trim().toLowerCase() === wanted) return v;
+  }
+  return undefined;
 }
 
 /* ── Quantity extraction (mirror of _extract_quantity) ─────────────────────── */
@@ -152,8 +176,9 @@ export function extractRawQuantity(
 
   let value: unknown;
   if (src.startsWith('property:')) {
+    // Resolved like a property-filter key, as the server does.
     const propName = src.slice('property:'.length);
-    value = (element.properties ?? {})[propName];
+    value = lookupPropertyKey(element.properties ?? {}, propName);
   } else if (src === 'count') {
     return 1;
   } else {
@@ -214,6 +239,22 @@ export interface SandboxRunResult {
   totalAdjusted: number;
   /** Number of elements scanned. */
   scanned: number;
+  /** Every match / skip when the server sends only the first rows of each
+   *  list; absent for a local run, where the lists are complete. */
+  matchCount?: number;
+  skipCount?: number;
+  /** Where properties the import's 30-per-element cap left out come from
+   *  (server runs only): the converter's sidecar, a sidecar rebuilt from the
+   *  database (they are gone until a re-import), or none. */
+  sidecar?: 'full' | 'rebuilt' | 'missing';
+}
+
+/** How many elements matched and were skipped, whether the lists are complete or not. */
+export function resultCounts(result: SandboxRunResult): { matched: number; skipped: number } {
+  return {
+    matched: result.matchCount ?? result.matches.length,
+    skipped: result.skipCount ?? result.skips.length,
+  };
 }
 
 /**
@@ -550,9 +591,10 @@ export function draftConfidence(result: SandboxRunResult): {
   confidence: DraftConfidence;
   ratio: number;
 } {
-  const considered = result.matches.length + result.skips.length;
+  const { matched, skipped } = resultCounts(result);
+  const considered = matched + skipped;
   if (considered === 0) return { confidence: 'low', ratio: 0 };
-  const ratio = result.matches.length / considered;
+  const ratio = matched / considered;
   let confidence: DraftConfidence = 'low';
   if (ratio >= 0.9) confidence = 'high';
   else if (ratio >= 0.6) confidence = 'medium';

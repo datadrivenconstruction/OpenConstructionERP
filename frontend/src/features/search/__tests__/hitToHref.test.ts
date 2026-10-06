@@ -86,6 +86,14 @@ describe('hitToHref', () => {
     expect(hitToHref(hit({ collection: 'oe_cost_items' }))).toBe('/costs');
   });
 
+  it('opens a requirement on the requirements tab, not on the quantity rules', () => {
+    // The requirements (oe_requirements sets and items) are the Requirements
+    // tab of /bim/rules. That page opens on the quantity rules unless the URL
+    // names the tab, and it reads no requirement id, so the tab is the honest
+    // destination and an `id=` would be a parameter nothing reads.
+    expect(hitToHref(hit({ collection: 'oe_requirements' }))).toBe('/bim/rules?tab=requirements');
+  });
+
   it('still refuses to invent a route for a collection it does not know', () => {
     // The modal renders this row non-navigable rather than letting the click
     // do nothing in silence.

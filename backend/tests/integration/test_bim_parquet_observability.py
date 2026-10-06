@@ -342,8 +342,10 @@ class TestBimParquetObservability:
 
         # Swap in a no-op writer so the retry succeeds. The patch path is
         # the source module so both call sites pick it up.
-        def _ok(**_kwargs: Any) -> None:
-            return None
+        written: dict[str, Any] = {}
+
+        def _ok(**kwargs: Any) -> None:
+            written.update(kwargs)
 
         monkeypatch.setattr(
             "app.modules.bim_hub.dataframe_store.write_dataframe",
@@ -358,6 +360,13 @@ class TestBimParquetObservability:
         retry_body = retry_resp.json()
         assert retry_body["status"] == "ok", retry_body
         assert retry_body["rows_attempted"] >= 1
+        # Every rebuilt row carries the id property search pairs a hit with
+        # (mesh_ref, else stable_id); without it the model cannot be searched.
+        assert written["rows"], written
+        assert all(row.get("id") for row in written["rows"]), written["rows"][:3]
+        # Rebuilt from rows that hold at most 30 properties each: the sidecar
+        # says so, and the rule test tells the user a re-import is needed.
+        assert written.get("source") == "database", written.get("source")
 
         # The model row's metadata is now updated.
         post = await pq_client.get(
@@ -399,3 +408,4 @@ class TestBimParquetObservability:
         assert body["error"] in (None, "")
         assert body["attempted_at"], body
         assert body["retry_endpoint"].endswith(f"/models/{model_id}/parquet/retry/")
+        assert body["sidecar"] in ("full", "rebuilt", "missing"), body

@@ -441,6 +441,7 @@ def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "
             detect_converter_capabilities,
             ensure_converter,
             parse_cad_excel,
+            read_cad_excel_labels,
         )
 
         # Resolve the converter, auto-downloading it on first use when it is
@@ -816,6 +817,7 @@ def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "
                     return None
 
                 raw_elements = parse_cad_excel(excel_path)
+                raw_element_labels = read_cad_excel_labels(excel_path)
                 if not raw_elements:
                     logger.warning("DDC Excel pass produced empty file")
                     _record_ddc_failure(
@@ -894,6 +896,9 @@ def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "
             # nudged to reinstall before the next file fails.
             if outdated_cli_observed:
                 result_excel["converter_cli_outdated"] = True
+            # Original header text per lowercased column key, so the Parquet
+            # sidecar can show "Phase Created" for ``phase created``.
+            result_excel["raw_element_labels"] = raw_element_labels
             return result_excel
     except ImportError:
         logger.debug("cad_import module not available")
@@ -1565,7 +1570,10 @@ def _excel_elements_to_bim_result(
         # Cap properties at 30 entries to keep per-element payloads small -
         # RVT/IFC exports often expose 100+ parameters, most irrelevant.
         # Priority order: critical DDC/hierarchy keys win, then remaining
-        # properties by insertion order (stable output across runs).
+        # properties by insertion order (stable output across runs). Every
+        # column stays in the Parquet sidecar, and quantity rules, dynamic
+        # groups and the change review read a capped-out key back from there
+        # (``bim_hub.rule_properties``).
         _PRIORITY_KEYS = (
             "category",
             "family",
@@ -1574,6 +1582,12 @@ def _excel_elements_to_bim_result(
             "material",
             "fire_rating",
             "phase",
+            # Revit phases decide what a restoration or renovation estimate
+            # counts, and a 60-parameter wall exports them near the end: kept
+            # under the header key a rule names ("Phase Created") and the alias.
+            "phase created",
+            "phase demolished",
+            "phase_created",
             "assembly_code",
             "assembly_description",
             "mark",

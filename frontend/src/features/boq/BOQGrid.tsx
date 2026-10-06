@@ -115,6 +115,7 @@ import { VariantPicker } from '@/features/costs/VariantPicker';
 import type { CostVariant, VariantStats } from '@/features/costs/api';
 import { copyToClipboard, readClipboard } from '@/shared/lib/browser';
 import { parseDecimalInput } from '@/shared/lib/parseDecimal';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { isAltOrAltGraph } from './boqShortcuts';
 
 /* ── Column width persistence ─────────────────────────────────────── */
@@ -571,6 +572,9 @@ export interface BOQGridProps {
   onUnlinkPosition?: (positionId: string) => void;
   /** Feature 1 — open the model→quantity binding panel for a position. */
   onModelLink?: (positionId: string) => void;
+  /** Open the project's BIM model to pick elements for a position that has no
+   *  model links yet (needs `bimModelId`). Omitted on a locked bill. */
+  onLinkFromModel?: (positionId: string) => void;
   /* AI features */
   onSuggestRate?: (positionId: string) => void;
   onClassify?: (positionId: string) => void;
@@ -719,6 +723,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   onShowLinks,
   onUnlinkPosition,
   onModelLink,
+  onLinkFromModel,
   onSuggestRate,
   onClassify,
   // onCheckAnomalies is consumed by BOQToolbar, not directly by the grid
@@ -734,6 +739,10 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   onResourceExpansionChange,
 }, ref) {
   const { t, i18n } = useTranslation();
+  // Deleting a section or a position is `boq.delete` on the server, a rank
+  // above the `boq.update` that editing needs. A role below it is not offered
+  // the controls at all rather than shown a button the server will refuse.
+  const canDelete = useHasPermission('boq.delete');
   // `t` is a fresh function on every render which would invalidate the
   // `columnDefs` useMemo every render and force AG Grid to rebuild its
   // column model (resets sort, width, pinning state). Mirror the latest
@@ -859,9 +868,18 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   const showContextMenu = useCallback(
     (e: React.MouseEvent, type: ContextMenuTarget, data: Record<string, unknown>) => {
       e.preventDefault();
+      // Enter or Space on a "(...)" button is a click with detail 0 and no
+      // pointer position (clientX/Y 0), which opened the menu in the screen's
+      // top-left corner. Anchor that case under the button that was pressed.
+      let { clientX, clientY } = e;
+      if (e.detail === 0 && e.currentTarget instanceof Element) {
+        const rect = e.currentTarget.getBoundingClientRect();
+        clientX = rect.left;
+        clientY = rect.bottom;
+      }
       // Position adjusted to not overflow viewport
-      const x = Math.min(e.clientX, window.innerWidth - 220);
-      const y = Math.min(e.clientY, window.innerHeight - 300);
+      const x = Math.min(clientX, window.innerWidth - 220);
+      const y = Math.min(clientY, window.innerHeight - 300);
       setContextMenu({ x, y, type, data });
     },
     [],
@@ -1392,7 +1410,10 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       // locked bill hands them nothing to call.
       onUpdatePosition: readOnly ? undefined : onUpdatePosition,
       onHighlightBIMElements,
-      onDeleteSection: onDeleteSection ?? (() => {}),
+      onLinkFromModel: readOnly ? undefined : onLinkFromModel,
+      // Undefined, not a no-op, when there is nothing to call: the section
+      // renderer draws its delete control only when this is set.
+      onDeleteSection: canDelete && !readOnly ? onDeleteSection : undefined,
       onReorderSections: onReorderSections ?? (() => {}),
       // Issue #90: FormulaCellEditor reads onFormulaApplied via context
       // because the Quantity column doesn't supply cellEditorParams.
@@ -1424,9 +1445,9 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
      openVariantPickerSignal, openVariantPickerFor, clearOpenVariantPicker, openPositionVariantPicker, onUpdateVariantHeader,
      onDeletePosition, onSaveToDatabase, onAddComment,
      onDuplicatePosition, showContextMenu, anomalyMap, onApplyAnomalySuggestion, bimModelId,
-     onUpdatePosition, onHighlightBIMElements, onDeleteSection, onReorderSections, onFormulaApplied,
+     onUpdatePosition, onHighlightBIMElements, onLinkFromModel, onDeleteSection, onReorderSections, onFormulaApplied,
      positions, boqVariablesMap, customColumns, showResourceSplit, showResourceSplitPill, renderInlineCopilot, displayQuantity,
-     sectionTotalBasis, variationTraces, variationUntracedBadge, readOnly],
+     sectionTotalBasis, variationTraces, variationUntracedBadge, readOnly, canDelete],
   );
 
   /* ── Column defs (standard + custom) ─────────────────────────────── */
@@ -3287,7 +3308,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                 {/* ── Feature 1: live model→quantity binding ───────── */}
                 {onModelLink && !readOnly && (
                   <CtxItem icon={<Cuboid size={14} className="text-oe-blue"/>}
-                    label={t('boq.model_link_action', { defaultValue: 'Model link…' })}
+                    label={t('boq.model_link_action_sync', { defaultValue: 'Sync quantity with model elements…' })}
                     onClick={() => { onModelLink(d.id as string); closeContextMenu(); }}
                   />
                 )}
@@ -3353,7 +3374,16 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                 {(() => {
                   const cadIds = d.cad_element_ids as string[] | undefined;
                   const bimIds = Array.isArray(cadIds) ? cadIds.filter((x) => typeof x === 'string' && x.length > 0) : [];
-                  if (bimIds.length === 0) return null;
+                  // No links yet: offer to pick them in the project's model.
+                  if (bimIds.length === 0) {
+                    if (!onLinkFromModel || readOnly || !bimModelId) return null;
+                    return (
+                      <CtxItem icon={<Cuboid size={14}/>}
+                        label={t('boq.link_from_model', { defaultValue: 'Pick elements in the 3D model' })}
+                        onClick={() => { onLinkFromModel(d.id as string); closeContextMenu(); }}
+                      />
+                    );
+                  }
                   return (
                     <CtxItem icon={<Cuboid size={14}/>}
                       label={t('boq.view_in_bim', { defaultValue: 'View in BIM 3D ({{count}})', count: bimIds.length })}
@@ -3417,12 +3447,14 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                     />
                   );
                 })()}
+                {canDelete && <>
                 <CtxSeparator />
                 <CtxItem icon={<Trash2 size={14}/>}
                   label={t('common.delete', { defaultValue: 'Delete' })}
                   danger
                   onClick={() => { onDeletePosition(d.id as string); closeContextMenu(); }}
                 />
+                </>}
                 </>}
               </>;
             })()}
@@ -3480,6 +3512,16 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                   label={isCollapsed ? t('boq.expand_section', { defaultValue: 'Expand Section' }) : t('boq.collapse_section', { defaultValue: 'Collapse Section' })}
                   onClick={() => { onToggleSection(d.id as string); closeContextMenu(); }}
                 />
+                {/* The editor page confirms, naming how many positions go with
+                    the section, then deletes the subtree in one cascade call. */}
+                {onDeleteSection && canDelete && !readOnly && <>
+                <CtxSeparator />
+                <CtxItem icon={<Trash2 size={14}/>}
+                  label={t('boq.delete_section', { defaultValue: 'Delete section with all positions' })}
+                  danger
+                  onClick={() => { onDeleteSection(d.id as string); closeContextMenu(); }}
+                />
+                </>}
               </>;
             })()}
 

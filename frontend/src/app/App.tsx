@@ -18,6 +18,8 @@ import { BOQListPage } from '@/features/boq/BOQListPage';
 import { CreateBOQPage } from '@/features/boq/CreateBOQPage';
 import { TemplatesPage } from '@/features/boq/TemplatesPage';
 import { syncCustomUnitsFromServer } from '@/features/boq/boqHelpers';
+// Pure URL helpers, no React or grid code: safe on the eager edge.
+import { rulesTabFromParams } from '@/features/bim/quantityRuleLinks';
 import { NlRuleBuilderPanel } from '@/features/compliance';
 import { useModuleRouteElements } from '@/modules/ModuleRoutes';
 import { DatabaseSetupPage } from '@/features/setup';
@@ -864,6 +866,20 @@ function P({ title, children }: { title: string; children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+/** /bim/rules is one page with two halves: the quantity rules and the
+ *  compliance requirements (`?mode=requirements`, or a tab picked on the page,
+ *  which the page writes as `?tab=`). The top bar names the half on screen,
+ *  read from the URL by the same function the page uses. It reads as if every
+ *  tab were available: the page strips a tab or mode whose module is off, so
+ *  the URL it leaves names a half it shows. Both branches are the same
+ *  element type, so switching half does not remount. */
+function BimRulesRoute() {
+  const params = new URLSearchParams(useLocation().search);
+  return rulesTabFromParams(params, { requirements: true, ruleLibrary: true }) !== 'quantity_rules'
+    ? <P title="BIM Rules"><BIMQuantityRulesPage /></P>
+    : <P title="Quantity Rules"><BIMQuantityRulesPage /></P>;
+}
+
 /** Mounts global keyboard shortcuts, the shortcuts help dialog, and the command palette. */
 function GlobalShortcuts() {
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
@@ -1236,7 +1252,7 @@ export default function App() {
         <Route path="/pipelines" element={<P title="Pipelines"><PipelinesPage /></P>} />
         <Route path="/bim" element={<P title="BIM Viewer"><BIMPage /></P>} />
         <Route path="/bim/federations" element={<P title="BIM Federations"><FederationsPage /></P>} />
-        <Route path="/bim/rules" element={<P title="BIM Rules"><BIMQuantityRulesPage /></P>} />
+        <Route path="/bim/rules" element={<BimRulesRoute />} />
         {/* Legacy alias — must come BEFORE /bim/:modelId so the literal
             "quantity-rules" segment isn't swallowed as a UUID model id. */}
         <Route path="/bim/quantity-rules" element={<Navigate to="/bim/rules" replace />} />
@@ -1360,8 +1376,9 @@ export default function App() {
             Register tab so there is one way in; old deep links still resolve. */}
         <Route path="/risk-analysis" element={<Navigate to="/risks?tab=montecarlo" replace />} />
 
-        {/* Requirements merged into BIM Rules page */}
-        <Route path="/requirements" element={<Navigate to="/bim/rules" replace />} />
+        {/* Requirements merged into BIM Rules page, as its Requirements tab
+            (the page drops the tab when oe_requirements is off). */}
+        <Route path="/requirements" element={<Navigate to="/bim/rules?tab=requirements" replace />} />
         <Route
           path="/requirements/matrix"
           element={<P title="EIR Matrix"><RequirementsMatrixPage /></P>}

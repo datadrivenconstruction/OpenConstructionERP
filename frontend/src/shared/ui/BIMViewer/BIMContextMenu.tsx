@@ -125,6 +125,16 @@ export function BIMContextMenu({ menu, actions, onClose }: BIMContextMenuProps) 
   const isMulti = menu.selectedElements.length > 1;
   const count = menu.selectedElements.length;
 
+  // Which groups have at least one wired item, so empty groups draw neither
+  // their header nor the divider in front of them.
+  const hasView = !isMulti && !!(actions.onZoomToElement || actions.onCopyProperties);
+  const hasLinking =
+    !!actions.onAddToBOQ ||
+    (!isMulti &&
+      !!(actions.onCreateQuantityRule || actions.onLinkDocument || actions.onLinkActivity || actions.onCreateTask));
+  const hasVisibility = !!(actions.onIsolate || actions.onHide || actions.onColorByCategory || actions.onShowAll);
+  const hasNavigation = !!actions.onShowInFilterPanel || (!isMulti && !!actions.onShowSimilar);
+
   // Close on click outside
   const handleClickOutside = useCallback(
     (e: MouseEvent) => {
@@ -200,123 +210,150 @@ export function BIMContextMenu({ menu, actions, onClose }: BIMContextMenuProps) 
         ) : null}
       </div>
 
-      {/* Action groups */}
+      {/* Action groups. An item renders only when the host wired its
+          handler (see MenuItem), and a group's divider and header render
+          only when at least one of its items does, so the menu can never
+          offer a click that does nothing. */}
       <div className="py-1">
         {/* Group 1: View */}
-        {!isMulti && (
+        {hasView && (
           <>
             <MenuItem
               icon={ZoomIn}
               label={t('bim.ctx_zoom', { defaultValue: 'Zoom to element' })}
-              onClick={() => { actions.onZoomToElement?.(); onClose(); }}
+              action={actions.onZoomToElement}
+              onClose={onClose}
             />
             <MenuItem
               icon={Clipboard}
               label={t('bim.ctx_copy_props', { defaultValue: 'Copy properties' })}
-              onClick={() => { actions.onCopyProperties?.(); onClose(); }}
+              action={actions.onCopyProperties}
+              onClose={onClose}
             />
-            <MenuDivider />
           </>
         )}
 
         {/* Group 2: Linking */}
-        <MenuItem
-          icon={Plus}
-          label={
-            isMulti
-              ? t('bim.ctx_add_n_boq', {
-                  defaultValue: 'Add {{count}} to BOQ',
-                  count,
-                })
-              : t('bim.ctx_add_boq', { defaultValue: 'Add to BOQ' })
-          }
-          onClick={() => { actions.onAddToBOQ?.(); onClose(); }}
-        />
-        {!isMulti && (
+        {hasLinking && (
           <>
+            {hasView && <MenuDivider />}
             <MenuItem
-              icon={Ruler}
-              label={t('bim.ctx_quantity_rule', { defaultValue: 'Create quantity rule' })}
-              onClick={() => { actions.onCreateQuantityRule?.(); onClose(); }}
+              icon={Plus}
+              label={
+                isMulti
+                  ? t('bim.ctx_add_n_boq', {
+                      defaultValue: 'Add {{count}} to BOQ',
+                      count,
+                    })
+                  : t('bim.ctx_add_boq', { defaultValue: 'Add to BOQ' })
+              }
+              action={actions.onAddToBOQ}
+              onClose={onClose}
+            />
+            {!isMulti && (
+              <>
+                <MenuItem
+                  icon={Ruler}
+                  label={t('bim.ctx_quantity_rule', { defaultValue: 'Create quantity rule' })}
+                  action={actions.onCreateQuantityRule}
+                  onClose={onClose}
+                  testId="bim-ctx-quantity-rule"
+                />
+                <MenuItem
+                  icon={Paperclip}
+                  label={t('bim.ctx_link_doc', { defaultValue: 'Link to document' })}
+                  action={actions.onLinkDocument}
+                  onClose={onClose}
+                />
+                <MenuItem
+                  icon={CalendarPlus}
+                  label={t('bim.ctx_link_activity', { defaultValue: 'Link to schedule activity' })}
+                  action={actions.onLinkActivity}
+                  onClose={onClose}
+                />
+                <MenuItem
+                  icon={ListTodo}
+                  label={t('bim.ctx_create_task', { defaultValue: 'Create task / issue' })}
+                  action={actions.onCreateTask}
+                  onClose={onClose}
+                />
+              </>
+            )}
+          </>
+        )}
+
+        {/* Group 3: Visibility - labelled "Solo Mode" (W6.6 Stream C) so the
+            hide / isolate / show-all triad reads as one feature. */}
+        {hasVisibility && (
+          <>
+            {(hasView || hasLinking) && <MenuDivider />}
+            <MenuGroupHeader
+              label={t('bim.solo_mode.group_header', { defaultValue: 'Solo Mode' })}
             />
             <MenuItem
-              icon={Paperclip}
-              label={t('bim.ctx_link_doc', { defaultValue: 'Link to document' })}
-              onClick={() => { actions.onLinkDocument?.(); onClose(); }}
+              icon={Eye}
+              label={
+                isMulti
+                  ? t('bim.ctx_isolate_selection', { defaultValue: 'Isolate selection' })
+                  : t('bim.ctx_isolate', { defaultValue: 'Isolate (hide all others)' })
+              }
+              action={actions.onIsolate}
+              onClose={onClose}
+              testId="bim-ctx-isolate"
             />
             <MenuItem
-              icon={CalendarPlus}
-              label={t('bim.ctx_link_activity', { defaultValue: 'Link to schedule activity' })}
-              onClick={() => { actions.onLinkActivity?.(); onClose(); }}
+              icon={EyeOff}
+              label={
+                isMulti
+                  ? t('bim.ctx_hide_selection', { defaultValue: 'Hide selection' })
+                  : t('bim.ctx_hide', { defaultValue: 'Hide element' })
+              }
+              action={actions.onHide}
+              onClose={onClose}
+              testId="bim-ctx-hide"
             />
             <MenuItem
-              icon={ListTodo}
-              label={t('bim.ctx_create_task', { defaultValue: 'Create task / issue' })}
-              onClick={() => { actions.onCreateTask?.(); onClose(); }}
+              icon={Palette}
+              label={
+                isMulti
+                  ? t('bim.ctx_color_selection', { defaultValue: 'Color selection' })
+                  : t('bim.ctx_color_category', { defaultValue: 'Color by category' })
+              }
+              action={actions.onColorByCategory}
+              onClose={onClose}
+            />
+            {/* W6.6 - restore visibility of all hidden elements. Disabled when
+                nothing is hidden so the menu doesn't lie. */}
+            <MenuItem
+              icon={RotateCcw}
+              label={t('bim.ctx_show_all', { defaultValue: 'Show all' })}
+              action={actions.onShowAll}
+              onClose={onClose}
+              disabled={!actions.hasHidden}
+              testId="bim-ctx-show-all"
             />
           </>
         )}
 
-        <MenuDivider />
-
-        {/* Group 3: Visibility - labelled "Solo Mode" (W6.6 Stream C) so the
-            hide / isolate / show-all triad reads as one feature. */}
-        <MenuGroupHeader
-          label={t('bim.solo_mode.group_header', { defaultValue: 'Solo Mode' })}
-        />
-        <MenuItem
-          icon={Eye}
-          label={
-            isMulti
-              ? t('bim.ctx_isolate_selection', { defaultValue: 'Isolate selection' })
-              : t('bim.ctx_isolate', { defaultValue: 'Isolate (hide all others)' })
-          }
-          onClick={() => { actions.onIsolate?.(); onClose(); }}
-          testId="bim-ctx-isolate"
-        />
-        <MenuItem
-          icon={EyeOff}
-          label={
-            isMulti
-              ? t('bim.ctx_hide_selection', { defaultValue: 'Hide selection' })
-              : t('bim.ctx_hide', { defaultValue: 'Hide element' })
-          }
-          onClick={() => { actions.onHide?.(); onClose(); }}
-          testId="bim-ctx-hide"
-        />
-        <MenuItem
-          icon={Palette}
-          label={
-            isMulti
-              ? t('bim.ctx_color_selection', { defaultValue: 'Color selection' })
-              : t('bim.ctx_color_category', { defaultValue: 'Color by category' })
-          }
-          onClick={() => { actions.onColorByCategory?.(); onClose(); }}
-        />
-        {/* W6.6 - restore visibility of all hidden elements. Disabled when
-            nothing is hidden so the menu doesn't lie. */}
-        <MenuItem
-          icon={RotateCcw}
-          label={t('bim.ctx_show_all', { defaultValue: 'Show all' })}
-          onClick={() => { actions.onShowAll?.(); onClose(); }}
-          disabled={!actions.hasHidden}
-          testId="bim-ctx-show-all"
-        />
-
-        <MenuDivider />
-
         {/* Group 4: Navigation */}
-        <MenuItem
-          icon={SlidersHorizontal}
-          label={t('bim.ctx_show_filter', { defaultValue: 'Show in filter panel' })}
-          onClick={() => { actions.onShowInFilterPanel?.(); onClose(); }}
-        />
-        {!isMulti && (
-          <MenuItem
-            icon={Search}
-            label={t('bim.ctx_show_similar', { defaultValue: 'Show similar elements' })}
-            onClick={() => { actions.onShowSimilar?.(); onClose(); }}
-          />
+        {hasNavigation && (
+          <>
+            {(hasView || hasLinking || hasVisibility) && <MenuDivider />}
+            <MenuItem
+              icon={SlidersHorizontal}
+              label={t('bim.ctx_show_filter', { defaultValue: 'Show in filter panel' })}
+              action={actions.onShowInFilterPanel}
+              onClose={onClose}
+            />
+            {!isMulti && (
+              <MenuItem
+                icon={Search}
+                label={t('bim.ctx_show_similar', { defaultValue: 'Show similar elements' })}
+                action={actions.onShowSimilar}
+                onClose={onClose}
+              />
+            )}
+          </>
         )}
       </div>
     </div>
@@ -325,23 +362,29 @@ export function BIMContextMenu({ menu, actions, onClose }: BIMContextMenuProps) 
 
 /* ── Sub-components ───────────────────────────────────────────────────── */
 
+/** One menu row. `action` is the host's handler as received in
+ *  `BIMContextMenuActions`; when the host did not wire it the row is not
+ *  drawn at all, because a row that only closes the menu reads as broken. */
 function MenuItem({
   icon: Icon,
   label,
-  onClick,
+  action,
+  onClose,
   disabled = false,
   testId,
 }: {
   icon: React.ElementType;
   label: string;
-  onClick: () => void;
+  action: (() => void) | undefined;
+  onClose: () => void;
   disabled?: boolean;
   testId?: string;
 }) {
+  if (!action) return null;
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={() => { action(); onClose(); }}
       disabled={disabled}
       aria-disabled={disabled || undefined}
       data-testid={testId}
@@ -354,7 +397,7 @@ function MenuItem({
 }
 
 function MenuDivider() {
-  return <div className="my-1 mx-2 border-t border-border-light" />;
+  return <div data-testid="bim-ctx-divider" className="my-1 mx-2 border-t border-border-light" />;
 }
 
 /** Small section header rendered between groups (e.g. "Solo Mode"). Uses

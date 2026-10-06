@@ -11,15 +11,17 @@ Stateless service layer. Handles:
 """
 
 import asyncio
-import fnmatch
 import json
 import logging
+import re
 import shutil
 import uuid
+from collections.abc import Sequence
 from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
+from functools import lru_cache
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 from fastapi import HTTPException, status
 from sqlalchemy import func, select
@@ -30,6 +32,7 @@ from sqlalchemy.orm import noload, selectinload
 from app.core.boq_target import BOQTargetRefused, require_project_boq
 from app.core.events import event_bus
 from app.modules.bim_hub import file_storage as bim_file_storage
+from app.modules.bim_hub.dataframe_store import sidecar_state
 from app.modules.bim_hub.models import (
     BIMElement,
     BIMElementGroup,
@@ -47,6 +50,12 @@ from app.modules.bim_hub.repository import (
     BIMModelRepository,
     BIMQuantityMapRepository,
     BOQElementLinkRepository,
+)
+from app.modules.bim_hub.rule_properties import (
+    fill_missing_properties,
+    missing_keys,
+    rule_property_keys,
+    with_properties,
 )
 from app.modules.bim_hub.schemas import (
     BIMElementCreate,
@@ -76,11 +85,48 @@ from app.modules.bim_hub.schemas import (
     FederationUpdate,
     QuantityMapApplyRequest,
     QuantityMapApplyResult,
+    QuantityRulePreviewMatch,
+    QuantityRulePreviewRequest,
+    QuantityRulePreviewResult,
+    QuantityRulePreviewSkip,
     RequirementBrief,
 )
+from app.modules.bim_hub.smart_views import _resolve_field
 from app.modules.boq.models import BOQ, Position
 
 logger = logging.getLogger(__name__)
+
+# How many matched and skipped elements "Test this rule" sends back. The counts
+# and the total always cover every element; only the listed rows are capped.
+PREVIEW_SAMPLE_LIMIT = 200
+
+
+class _RuleOutcome(NamedTuple):
+    """A rule's quantity for one matched element, or the reason it has none."""
+
+    raw: Decimal | None = None
+    adjusted: Decimal | None = None
+    skip_reason: str | None = None
+    detail: str | None = None
+
+
+@lru_cache(maxsize=1024)
+def _glob_regex(pattern: str) -> re.Pattern[str]:
+    parts = (".*" if ch == "*" else "." if ch == "?" else re.escape(ch) for ch in pattern.lower())
+    return re.compile("".join(parts), re.DOTALL)
+
+
+def _glob_match(text: str, pattern: str) -> bool:
+    """Case-insensitive match where only ``*`` and ``?`` are wildcards.
+
+    The rules editor offers just these two, and the sandbox
+    (``ruleSandbox.ts`` ``wildcardToRegExp``) reads brackets literally. So did
+    nothing here: ``fnmatch`` took ``[30 cm]`` in a value picked from the model
+    ("Muro [30 cm]") as a character class, and the value stopped matching
+    itself. ``*`` runs across line breaks, so "riga*" finds a multi-line comment.
+    """
+    return _glob_regex(pattern).fullmatch(text.lower()) is not None
+
 
 # Free disk required before baking a tileset, as a multiple of the source GLB.
 # Tiles come out around 1.07x the monolith, so this is mostly headroom: a bake
@@ -773,6 +819,8 @@ class BIMHubService:
         user_id: str | None = None,
     ) -> BIMModel:
         """Create a new BIM model record."""
+        from app.modules.bim_hub.quantity_previews import RECEIPTS_KEY
+
         model = BIMModel(
             project_id=data.project_id,
             name=data.name,
@@ -786,7 +834,7 @@ class BIMHubService:
             canonical_file_path=data.canonical_file_path,
             parent_model_id=data.parent_model_id,
             created_by=user_id,
-            metadata_=data.metadata,
+            metadata_={key: value for key, value in data.metadata.items() if key != RECEIPTS_KEY},
         )
         model = await self.model_repo.create(model)
         logger.info("BIM model created: %s (project=%s)", data.name, data.project_id)
@@ -1132,6 +1180,7 @@ class BIMHubService:
                 project_id=project_id,
                 model_id=model_id,
                 rows=rows,
+                source=dataframe_store.SOURCE_DATABASE,
             )
         except Exception:  # noqa: BLE001 - the property panel is best-effort
             logger.exception("ensure_parquet: failed to synthesize sidecar for model %s", model_id)
@@ -1209,11 +1258,17 @@ class BIMHubService:
         data: BIMModelUpdate,
     ) -> BIMModel:
         """Update a BIM model's fields."""
+        from app.modules.bim_hub.quantity_previews import RECEIPTS_KEY
+
         model = await self.get_model(model_id)  # 404 check
 
         fields = data.model_dump(exclude_unset=True)
         if "metadata" in fields:
             _incoming = fields.pop("metadata")
+            if isinstance(_incoming, dict):
+                _incoming = {key: value for key, value in _incoming.items() if key != RECEIPTS_KEY}
+            else:
+                _incoming = {}
             fields["metadata_"] = (
                 {**(getattr(model, "metadata_", None) or {}), **_incoming} if isinstance(_incoming, dict) else _incoming
             )
@@ -2758,6 +2813,17 @@ class BIMHubService:
         self,
         request: QuantityMapApplyRequest,
     ) -> QuantityMapApplyResult:
+        """Read-only preview, or atomic Apply bound to that preview's fingerprint."""
+        from app.modules.bim_hub.quantity_previews import apply_with_preview
+
+        return await apply_with_preview(self, request)
+
+    async def _apply_quantity_maps(
+        self,
+        request: QuantityMapApplyRequest,
+        *,
+        prepared: tuple,
+    ) -> QuantityMapApplyResult:
         """Apply quantity mapping rules to all elements in a model.
 
         Two modes, selected by ``request.dry_run``:
@@ -2787,20 +2853,12 @@ class BIMHubService:
         Raises:
             HTTPException: 409 when a rule would auto-create a position and
                 the project cannot say which bill it belongs in.
-            * Each rule's writes run inside a single savepoint
-              (``session.begin_nested``) - a failure while processing one
-              rule rolls that rule back cleanly without aborting the
-              others or the outer request transaction.
+            * The guarded public method owns one savepoint for all rules;
+              any failure rolls the whole Apply back.
             * Also keeps ``Position.cad_element_ids`` in sync via
               ``_append_cad_element_id``.
         """
-        model = await self.get_model(request.model_id)
-
-        # Get all elements for the model
-        elements, _ = await self.element_repo.list_for_model(model.id, offset=0, limit=50000)
-
-        # Get active rules (project-scoped first, then global)
-        rules = await self.qmap_repo.list_active(project_id=model.project_id)
+        model, elements, rules, subjects = prepared
 
         # ── Step 1: compute matches per rule (same math regardless of
         # dry_run so the preview stays identical across modes). ───────────
@@ -2820,56 +2878,13 @@ class BIMHubService:
         skipped: list[dict[str, Any]] = []
         matched_element_ids: set[uuid.UUID] = set()
 
-        for element in elements:
-            for rule in rules:
-                if not self._rule_matches_element(rule, element):
-                    continue
-
-                qty = self._extract_quantity(element, rule.quantity_source)
-                if qty is None:
-                    per_rule_skips[rule.id] = per_rule_skips.get(rule.id, 0) + 1
-                    skipped.append(
-                        {
-                            "element_id": str(element.id),
-                            "stable_id": element.stable_id,
-                            "element_type": element.element_type,
-                            "rule_id": str(rule.id),
-                            "rule_name": rule.name,
-                            "quantity_source": rule.quantity_source,
-                            "reason": "missing_property",
-                            "detail": (f"element has no value for '{rule.quantity_source}' (property/quantity key)"),
-                        }
-                    )
-                    continue
-
-                try:
-                    multiplier = Decimal(rule.multiplier or "1")
-                    waste_pct = Decimal(rule.waste_factor_pct or "0")
-                    adjusted = qty * multiplier * (Decimal("1") + waste_pct / Decimal("100"))
-                except (InvalidOperation, ValueError) as exc:
-                    per_rule_skips[rule.id] = per_rule_skips.get(rule.id, 0) + 1
-                    skipped.append(
-                        {
-                            "element_id": str(element.id),
-                            "stable_id": element.stable_id,
-                            "element_type": element.element_type,
-                            "rule_id": str(rule.id),
-                            "rule_name": rule.name,
-                            "quantity_source": rule.quantity_source,
-                            "reason": "invalid_decimal",
-                            "detail": (
-                                f"could not convert quantity {qty!r} with "
-                                f"multiplier={rule.multiplier!r} / "
-                                f"waste={rule.waste_factor_pct!r}: {exc}"
-                            ),
-                        }
-                    )
-                    continue
-
-                per_rule_matches.setdefault(rule.id, []).append((element, qty, adjusted))
-                matched_element_ids.add(element.id)
-
-                results.append(
+        # One engine for apply (dry run or not) and the unsaved-rule preview,
+        # see _evaluate_rules: rules read a copy with the properties the 30-key
+        # cap left out, filled from the sidecar; writes below use the row.
+        for element, rule, outcome in await self._evaluate_rules(elements, rules, subjects=subjects):
+            if outcome.skip_reason is not None:
+                per_rule_skips[rule.id] = per_rule_skips.get(rule.id, 0) + 1
+                skipped.append(
                     {
                         "element_id": str(element.id),
                         "stable_id": element.stable_id,
@@ -2877,12 +2892,30 @@ class BIMHubService:
                         "rule_id": str(rule.id),
                         "rule_name": rule.name,
                         "quantity_source": rule.quantity_source,
-                        "raw_quantity": float(qty),
-                        "adjusted_quantity": float(adjusted),
-                        "unit": rule.unit,
-                        "boq_target": rule.boq_target,
+                        "reason": outcome.skip_reason,
+                        "detail": outcome.detail,
                     }
                 )
+                continue
+            qty, adjusted = outcome.raw, outcome.adjusted
+
+            per_rule_matches.setdefault(rule.id, []).append((element, qty, adjusted))
+            matched_element_ids.add(element.id)
+
+            results.append(
+                {
+                    "element_id": str(element.id),
+                    "stable_id": element.stable_id,
+                    "element_type": element.element_type,
+                    "rule_id": str(rule.id),
+                    "rule_name": rule.name,
+                    "quantity_source": rule.quantity_source,
+                    "raw_quantity": float(qty),
+                    "adjusted_quantity": float(adjusted),
+                    "unit": rule.unit,
+                    "boq_target": rule.boq_target,
+                }
+            )
 
         matched_elements = len(matched_element_ids)
         rules_applied = sum(1 for matches in per_rule_matches.values() if matches)
@@ -2941,24 +2974,15 @@ class BIMHubService:
                     matched=len(matches),
                     skipped=per_rule_skips.get(rule_id, 0),
                 )
-                try:
-                    async with self.session.begin_nested():
-                        created_links, created_positions = await self._persist_rule_matches(
-                            rule=rule,
-                            model=model,
-                            matches=matches,
-                            confidence=confidence,
-                            auto_create_boq=auto_create_boq,
-                        )
-                        links_created += created_links
-                        positions_created += created_positions
-                except Exception:  # noqa: BLE001 - per-rule isolation
-                    logger.exception(
-                        "Failed to persist quantity map rule %s on model %s",
-                        rule_id,
-                        model.id,
-                    )
-                    # Savepoint already rolled back; continue with next rule.
+                created_links, created_positions = await self._persist_rule_matches(
+                    rule=rule,
+                    model=model,
+                    matches=matches,
+                    confidence=confidence,
+                    auto_create_boq=auto_create_boq,
+                )
+                links_created += created_links
+                positions_created += created_positions
 
         # Surface skip count alongside match counts so operators can
         # tell at-a-glance whether the population is honest.  A high
@@ -3088,15 +3112,19 @@ class BIMHubService:
                 )
                 return 0, 0
 
-            position = await self._auto_create_position_for_rule(
-                rule=rule,
-                boq=auto_create_boq,
-                matches=matches,
-                confidence=confidence,
-            )
+            position = await self._quantity_map_created_position(rule, model, auto_create_boq)
+            if position is None:
+                position = await self._auto_create_position_for_rule(
+                    rule=rule,
+                    boq=auto_create_boq,
+                    matches=matches,
+                    confidence=confidence,
+                )
+                if position is not None:
+                    position.metadata_ = {**(position.metadata_ or {}), "quantity_map_model_id": str(model.id)}
+                    positions_created = 1
             if position is None:
                 return 0, 0
-            positions_created = 1
 
         # ── Create links for every matched element ────────────────────
         links_created = 0
@@ -3114,22 +3142,42 @@ class BIMHubService:
                 rule_id=str(rule.id),
                 metadata_={},
             )
-            try:
-                await self.link_repo.create(link)
-            except IntegrityError:
-                # Race with a concurrent writer - treat as already linked.
-                logger.debug(
-                    "IntegrityError creating link pos=%s elem=%s (treated as duplicate)",
-                    position.id,
-                    element.id,
-                )
-                continue
+            await self.link_repo.create(link)
 
             await self._append_cad_element_id(position.id, element.id)
             existing_elem_ids.add(element.id)
             links_created += 1
 
         return links_created, positions_created
+
+    async def _quantity_map_created_position(self, rule: BIMQuantityMap, model: BIMModel, boq: BOQ) -> Position | None:
+        """Reuse this rule/model's explicitly created position, never reprice it."""
+        rows = (await self.session.execute(select(Position).where(Position.boq_id == boq.id))).scalars().all()
+        # Pre-contract positions have rule provenance but no model stamp.
+        # Their existing rule links supply that identity without a migration.
+        linked = set(
+            (
+                await self.session.execute(
+                    select(BOQElementLink.boq_position_id)
+                    .join(BIMElement, BIMElement.id == BOQElementLink.bim_element_id)
+                    .where(BIMElement.model_id == model.id, BOQElementLink.rule_id == str(rule.id))
+                )
+            )
+            .scalars()
+            .all()
+        )
+        matches = [
+            position
+            for position in rows
+            if (position.metadata_ or {}).get("auto_created_by_rule") == str(rule.id)
+            and (
+                (position.metadata_ or {}).get("quantity_map_model_id") == str(model.id)
+                or (not (position.metadata_ or {}).get("quantity_map_model_id") and position.id in linked)
+            )
+        ]
+        if len(matches) > 1:
+            raise HTTPException(status_code=409, detail={"code": "quantity_preview_ambiguous_position"})
+        return matches[0] if matches else None
 
     async def _resolve_boq_target_position(
         self,
@@ -3431,14 +3479,14 @@ class BIMHubService:
 
     @staticmethod
     def _rule_matches_element(rule: BIMQuantityMap, element: BIMElement) -> bool:
-        """Check if a quantity map rule matches an element."""
-        # Check element_type_filter
-        if rule.element_type_filter:
-            if rule.element_type_filter != "*":
-                if not element.element_type:
-                    return False
-                if not fnmatch.fnmatch(element.element_type.lower(), rule.element_type_filter.lower()):
-                    return False
+        """Check if a quantity map rule matches an element.
+
+        Same semantics as the rules-page sandbox (``ruleSandbox.ts``
+        ``ruleMatchesElement``); both read the case table in
+        ``frontend/src/features/bim/__tests__/fixtures/ruleMatchingParity.json``.
+        """
+        if not BIMHubService._type_filter_matches(rule.element_type_filter, element.element_type):
+            return False
 
         # Check property_filter via the shared type-aware helper so we
         # match dynamic-element-group semantics: list values fall back
@@ -3447,13 +3495,175 @@ class BIMHubService:
         # str()'d everything, which collapsed ``["steel","concrete"]``
         # into the literal string ``"['steel', 'concrete']"`` and made
         # multi-valued IFC properties unmatchable.
+        # Keys resolve like Smart Views ``properties.<key>``: exact first, then
+        # trimmed and case-insensitive, so "Phase Created" finds the
+        # lowercased "phase created" the DDC import stored.
+        # A blank key is an unfinished editor row, not a filter; the sandbox
+        # skips it too.
         if rule.property_filter:
-            props = element.properties or {}
             for key, pattern in rule.property_filter.items():
-                if not BIMHubService._property_value_matches(props.get(key), pattern):
+                if not str(key).strip():
+                    continue
+                actual = _resolve_field(element, f"properties.{key}")
+                if not BIMHubService._property_value_matches(actual, pattern):
                     return False
 
         return True
+
+    @staticmethod
+    def _rule_outcome(rule: Any, subject: Any) -> _RuleOutcome:
+        """The quantity a matched element gives a rule, or why it gives none.
+
+        One place for apply and for "Test this rule" (``preview_quantity_rule``),
+        so the preview cannot count differently from the apply.
+        """
+        qty = BIMHubService._extract_quantity(subject, rule.quantity_source)
+        if qty is None:
+            return _RuleOutcome(
+                skip_reason="missing_property",
+                detail=f"element has no value for '{rule.quantity_source}' (property/quantity key)",
+            )
+        try:
+            multiplier = Decimal(rule.multiplier or "1")
+            waste_pct = Decimal(rule.waste_factor_pct or "0")
+            adjusted = qty * multiplier * (Decimal("1") + waste_pct / Decimal("100"))
+        except (InvalidOperation, ValueError) as exc:
+            return _RuleOutcome(
+                skip_reason="invalid_decimal",
+                detail=(
+                    f"could not convert quantity {qty!r} with "
+                    f"multiplier={rule.multiplier!r} / "
+                    f"waste={rule.waste_factor_pct!r}: {exc}"
+                ),
+            )
+        return _RuleOutcome(raw=qty, adjusted=adjusted)
+
+    async def preview_quantity_rule(self, request: QuantityRulePreviewRequest) -> QuantityRulePreviewResult:
+        """Run one unsaved rule against a model exactly as apply would; write nothing.
+
+        The rules page's "Test this rule" used to run a browser copy of the
+        engine on element rows the list endpoint sends without properties, so
+        a property filter matched nothing there while apply matched. This is
+        the apply path itself: same element read (50 000 cap), same sidecar
+        read for properties the import's 30-key cap dropped, same matcher and
+        quantity math.
+        """
+        model = await self.get_model(request.model_id)
+        elements, _ = await self.element_repo.list_for_model(model.id, offset=0, limit=50000)
+
+        matches: list[QuantityRulePreviewMatch] = []
+        skips: list[QuantityRulePreviewSkip] = []
+        match_count = 0
+        skip_count = 0
+        matched_types: set[str] = set()
+        total = Decimal("0")
+        for element, _rule, outcome in await self._evaluate_rules(elements, [request.rule]):
+            matched_types.add(element.element_type or "")
+            if outcome.skip_reason is not None or outcome.raw is None or outcome.adjusted is None:
+                skip_count += 1
+                if len(skips) < PREVIEW_SAMPLE_LIMIT:
+                    skips.append(
+                        QuantityRulePreviewSkip(
+                            element_id=str(element.id),
+                            stable_id=element.stable_id or "",
+                            element_type=element.element_type or "",
+                            reason=outcome.skip_reason or "missing_property",
+                        )
+                    )
+                continue
+            match_count += 1
+            total += outcome.adjusted
+            if len(matches) < PREVIEW_SAMPLE_LIMIT:
+                matches.append(
+                    QuantityRulePreviewMatch(
+                        element_id=str(element.id),
+                        stable_id=element.stable_id or "",
+                        element_type=element.element_type or "",
+                        name=element.name or "",
+                        raw_quantity=float(outcome.raw),
+                        adjusted_quantity=float(outcome.adjusted),
+                    )
+                )
+        return QuantityRulePreviewResult(
+            matches=matches,
+            skips=skips,
+            match_count=match_count,
+            skip_count=skip_count,
+            matched_types=sorted(t for t in matched_types if t),
+            total_adjusted=float(total),
+            scanned=len(elements),
+            sidecar=await asyncio.to_thread(sidecar_state, str(model.project_id), str(model.id)),
+        )
+
+    async def _evaluate_rules(
+        self, elements: Sequence[BIMElement], rules: Sequence[Any], *, subjects: dict | None = None
+    ) -> list[tuple[BIMElement, Any, _RuleOutcome]]:
+        """Every (element, rule) pair a rule selects, with its quantity outcome.
+
+        The one matching engine: ``apply_quantity_maps`` (dry run or not) and
+        the unsaved-rule preview both read this, so "Test this rule" cannot
+        select or count differently from Apply. Rules read a copy carrying the
+        properties the import's 30-key cap left out of the row, read back from
+        the model's sidecar, so a rule finds what property search finds. The
+        pairs hold the ORM row, which is what any write uses.
+        """
+        if subjects is None:
+            subjects = await self._rule_subjects(elements, rules)
+        hits: list[tuple[BIMElement, Any, _RuleOutcome]] = []
+        for element in elements:
+            subject = subjects.get(element.id, element)
+            for rule in rules:
+                if self._rule_matches_element(rule, subject):
+                    hits.append((element, rule, self._rule_outcome(rule, subject)))
+        return hits
+
+    async def _rule_subjects(
+        self, elements: Sequence[BIMElement], rules: Sequence[BIMQuantityMap]
+    ) -> dict[uuid.UUID, Any]:
+        """Copies of the elements a rule needs a property for that their rows lack.
+
+        Only elements some rule's type filter selects, and only the keys that
+        rule reads and the row does not answer, are looked up in the sidecar.
+        Elements with nothing to add are left out: the caller reads the row.
+        """
+        rule_keys = [
+            (rule, keys) for rule in rules if (keys := rule_property_keys(rule.property_filter, rule.quantity_source))
+        ]
+        if not rule_keys:
+            return {}
+        wants: list[tuple[BIMElement, list[str]]] = []
+        for element in elements:
+            needed: list[str] = []
+            for rule, keys in rule_keys:
+                if self._type_filter_matches(rule.element_type_filter, element.element_type):
+                    needed.extend(missing_keys(element, keys))
+            if needed:
+                wants.append((element, list(dict.fromkeys(needed))))
+        if not wants:
+            return {}
+        found = await fill_missing_properties(self.session, wants)
+        return {
+            element.id: with_properties(element, extra)
+            for (element, _keys), extra in zip(wants, found, strict=True)
+            if extra
+        }
+
+    @staticmethod
+    def _type_filter_matches(type_filter: str | None, element_type: str | None) -> bool:
+        """Does a rule's ``element_type_filter`` select an element of this type?
+
+        The filter is a comma-separated list of case-insensitive wildcard
+        patterns ("Wall*, IfcWall*"); one match is enough. It used to be
+        fnmatched as ONE string, so every comma list (all four starter presets)
+        matched nothing here while the sandbox showed matches.
+        """
+        type_filter = (type_filter or "").strip()
+        if not type_filter or type_filter == "*":
+            return True
+        if not element_type:
+            return False
+        patterns = [p.strip() for p in type_filter.split(",") if p.strip()] or [type_filter]
+        return any(_glob_match(element_type, p) for p in patterns)
 
     @staticmethod
     def _property_value_matches(actual: Any, expected: Any) -> bool:  # noqa: PLR0911
@@ -3502,15 +3712,24 @@ class BIMHubService:
         if isinstance(actual, dict) and isinstance(expected, dict):
             return all(BIMHubService._property_value_matches(actual.get(k), v) for k, v in expected.items())
 
-        # String values: fnmatch wildcards (existing _rule_matches_element
-        # behaviour, kept for backwards compatibility with rules that use
-        # ``*`` and ``?`` patterns).
+        # String values: ``*`` and ``?`` wildcards (existing _rule_matches_element
+        # behaviour, kept for backwards compatibility with rules that use them).
         if isinstance(actual, str) and isinstance(expected, str):
-            return fnmatch.fnmatch(actual.lower(), expected.lower())
+            return _glob_match(actual, expected)
 
         # Booleans / numerics / mixed types → fall back to exact equality
         # via string coercion.  This handles e.g. ``actual=42`` against
         # ``expected="42"`` and ``actual=True`` against ``expected="true"``.
+        # A whole-number float reads as the integer, as the sandbox's
+        # ``String(300.0)`` gives "300": a width stored as 300.0 matches "300".
+        # A whole number also matches its float spelling ("300.0"), which is
+        # how the editor's value list writes a width stored as 300.0. Below
+        # 1e16, where Python stops writing floats that way, on both sides.
+        if isinstance(actual, (int, float)) and not isinstance(actual, bool):
+            if isinstance(actual, float) and actual.is_integer() and abs(actual) < 1e21:
+                actual = int(actual)
+            if isinstance(actual, int) and abs(actual) < 10**16 and str(expected).lower() == f"{actual}.0":
+                return True
         return str(actual).lower() == str(expected).lower()
 
     @staticmethod
@@ -3545,13 +3764,15 @@ class BIMHubService:
 
         Supports:
         - Direct quantity keys: area_m2, volume_m3, length_m, weight_kg, count
-        - Property references: property:xxx (e.g., property:fire_rating)
+        - Property references: property:xxx (e.g., property:fire_rating), the
+          key resolved like a property filter key (exact, then trimmed and
+          case-insensitive)
         """
         quantities = element.quantities or {}
 
         if source.startswith("property:"):
             prop_name = source[len("property:") :]
-            value = (element.properties or {}).get(prop_name)
+            value = _resolve_field(element, f"properties.{prop_name}")
         elif source == "count":
             return Decimal("1")
         else:
@@ -3991,6 +4212,15 @@ class BIMHubService:
         result = await self.session.execute(base)
         elements = list(result.scalars().all())
 
+        # A property the import's 30-key cap left out of an element's row is
+        # read back from its model's sidecar, as the quantity rules do.
+        keys = rule_property_keys(expected_props)
+        wants = [(e, missing) for e in elements if keys and (missing := missing_keys(e, keys))]
+        found = await fill_missing_properties(self.session, wants) if wants else []
+        subjects: dict[uuid.UUID, Any] = {
+            e.id: with_properties(e, extra) for (e, _keys), extra in zip(wants, found, strict=True) if extra
+        }
+
         def _matches(elem: BIMElement) -> bool:
             props = elem.properties or {}
             if category_values:
@@ -4001,8 +4231,10 @@ class BIMHubService:
             # property values match consistently with the quantity-map
             # rule engine.  Previously this used exact equality which
             # silently failed for multi-valued IFC properties.
+            subject = subjects.get(elem.id, elem)
             return all(
-                BIMHubService._property_value_matches(props.get(key), value) for key, value in expected_props.items()
+                BIMHubService._property_value_matches(_resolve_field(subject, f"properties.{key}"), value)
+                for key, value in expected_props.items()
             )
 
         return [e.id for e in elements if _matches(e)]

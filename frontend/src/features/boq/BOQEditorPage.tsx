@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 // lucide-react icons used by sub-components (BOQToolbar, BOQGrid, etc.) — none needed directly here
-import { Database, Download, ExternalLink, X, Sparkles, AlertTriangle as WarnTriangle, Lock, Copy, Wallet, Keyboard, GitCompare, RefreshCw, ShieldCheck, FlaskConical, Send, Percent, CheckCircle, ArrowLeft, LayoutList } from 'lucide-react';
+import { Database, Download, ExternalLink, X, Sparkles, AlertTriangle as WarnTriangle, Lock, Copy, Wallet, Keyboard, GitCompare, RefreshCw, ShieldCheck, FlaskConical, Send, Percent, CheckCircle, ArrowLeft, LayoutList, SlidersHorizontal } from 'lucide-react';
 import { Button, Badge, Breadcrumb, ModuleHelpButton, ModuleGuideButton, ConfirmDialog, DismissibleInfo, IntroRichText } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useProgressStore } from '@/shared/ui/GlobalProgress';
@@ -20,6 +20,8 @@ import { toNum } from '@/shared/lib/money';
 import { useToastStore } from '@/stores/useToastStore';
 import { useRecentStore } from '@/stores/useRecentStore';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useHasPermission } from '@/shared/lib/permissionGates';
+import { useBackendModuleOff } from '@/shared/hooks/useBackendModuleOff';
 import { useBIMLinkSelectionStore } from '@/stores/useBIMLinkSelectionStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { usePreferencesStore, useNumberLocale } from '@/stores/usePreferencesStore';
@@ -47,6 +49,7 @@ import { resourceSplitMoneyTotals, nextResourceSplitMode, type ResourceSplitMode
 import { ApiError } from '@/shared/lib/api';
 import { projectsApi, type Project, type ProjectFxRate } from '@/features/projects/api';
 import { fetchBIMModels } from '@/features/bim/api';
+import { buildLinkFromModelUrl, buildQuantityRulesUrl } from '@/features/bim/quantityRuleLinks';
 // AutocompleteInput used in sub-components, not directly here
 // import { AutocompleteInput } from './AutocompleteInput';
 import { AIChatPanel } from './AIChatPanel';
@@ -2030,6 +2033,8 @@ export function BOQEditorPage() {
 
   /** Container ref for keyboard shortcut listener. */
   const editorContainerRef = useRef<HTMLDivElement>(null);
+  // The Delete key asks the same role gate as the grid's delete controls.
+  const canDeletePositions = useHasPermission('boq.delete');
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -2041,6 +2046,7 @@ export function BOQEditorPage() {
         // asked too: in the capture phase it is the element being typed into.
         isEditing: isTextEntryElement(document.activeElement) || isTextEntryElement(e.target),
         hasSelection: selectedPositionIds.length > 0,
+        canDelete: canDeletePositions,
       });
       if (!action) return;
 
@@ -2118,7 +2124,7 @@ export function BOQEditorPage() {
     // these app-level shortcuts before we see them.
     document.addEventListener('keydown', handleKeyDown, true);
     return () => document.removeEventListener('keydown', handleKeyDown, true);
-  }, [handleUndo, handleRedo, selectedPositionIds, handleLock, handleUnlock, boq?.is_locked]);
+  }, [handleUndo, handleRedo, selectedPositionIds, handleLock, handleUnlock, boq?.is_locked, canDeletePositions]);
 
   /* ── Activity panel ───────────────────────────────────────────────── */
 
@@ -2891,6 +2897,34 @@ export function BOQEditorPage() {
       setModelLinkFor({ id: positionId, ordinal: pos?.ordinal ?? '' });
     },
     [boq],
+  );
+
+  // Both ways into the model end in a BIM Hub write: linking elements
+  // (POST /bim_hub/links/) and applying rules (POST /bim_hub/quantity-maps/
+  // apply/) need bim.create. A role without it, or BIM Hub switched off, would
+  // only reach a refusal, so neither entry point is offered then.
+  const canCreateBimLinks = useHasPermission('bim.create');
+  const backendModuleOff = useBackendModuleOff();
+  const offerModelEntryPoints = canCreateBimLinks && !backendModuleOff('oe_bim_hub');
+
+  // Pick elements in the 3D model for one position: the BIM page opens on the
+  // project's model in a "link to this position" mode, and the usual
+  // Add-to-BOQ dialog there offers this position first.
+  const handleLinkFromModel = useCallback(
+    (positionId: string) => {
+      if (!boq || !bimModelId) return;
+      const pos = (boq.positions ?? []).find((p) => p.id === positionId);
+      navigate(
+        buildLinkFromModelUrl({
+          projectId: boq.project_id,
+          modelId: bimModelId,
+          boqId: boq.id,
+          positionId,
+          label: pos ? `${pos.ordinal} ${pos.description}`.trim() : '',
+        }),
+      );
+    },
+    [boq, bimModelId, navigate],
   );
 
   // ── Feature 2: estimate baseline / line-level compare ──────────────────
@@ -4916,6 +4950,40 @@ export function BOQEditorPage() {
               <RefreshCw size={14} className="mr-1" />
               {t('boq.model_review_btn', { defaultValue: 'Model sync' })}
             </Button>
+            {/* Quantity rules scoped to this bill: the rules page opens with
+                this project, BOQ and model preselected. A locked bill cannot
+                take the positions a rule writes, so the action says why
+                instead of disappearing. Hidden for a role without bim.create
+                and with BIM Hub off (see offerModelEntryPoints). */}
+            {offerModelEntryPoints && (
+            <span
+              title={
+                boq.is_locked
+                  ? t('boq.qty_from_model_locked', {
+                      defaultValue: 'This estimate is locked. Unlock it or create a revision to add quantities from the model.',
+                    })
+                  : t('bim_rules.what_a_rule_does', {
+                      defaultValue:
+                        'A quantity rule picks model elements by category and properties, such as walls built in a given phase, and writes their total area, volume, length or count into a BOQ position.',
+                    })
+              }
+            >
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={boq.is_locked}
+                data-testid="boq-quantities-from-model"
+                onClick={() =>
+                  navigate(
+                    buildQuantityRulesUrl({ projectId: boq.project_id, boqId: boq.id, modelId: bimModelId }),
+                  )
+                }
+              >
+                <SlidersHorizontal size={14} className="mr-1" />
+                {t('boq.qty_from_model_btn', { defaultValue: 'Quantities from the model' })}
+              </Button>
+            </span>
+            )}
             {boqId && <ChangeReviewButton boqId={boqId} onClick={() => setChangeReviewOpen(true)} />}
             {/* Deep link OUT to the Validation dashboard, carrying this BOQ and
                 its project so the target lands pre-selected (2 clicks to a
@@ -5239,6 +5307,7 @@ export function BOQEditorPage() {
           onShowLinks={handleShowLinks}
           onUnlinkPosition={handleUnlinkPosition}
           onModelLink={handleModelLink}
+          onLinkFromModel={boq.is_locked || !offerModelEntryPoints ? undefined : handleLinkFromModel}
           onSuggestRate={handleSuggestRate}
           onClassify={handleClassify}
           onCheckAnomalies={handleCheckAnomalies}

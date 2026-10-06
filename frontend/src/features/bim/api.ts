@@ -24,6 +24,7 @@ import {
 import { isModuleLoaded } from '@/shared/lib/moduleProbe';
 import { useAuthStore } from '@/stores/useAuthStore';
 import type { BIMElementData, BIMModelData } from '@/shared/ui/BIMViewer';
+import type { SandboxMatchRow, SandboxRule, SandboxRunResult, SandboxSkipRow } from './ruleSandbox';
 
 /* ── Format helpers ────────────────────────────────────────────────────── */
 
@@ -792,8 +793,74 @@ export async function fetchBIMElementContext(
  * Returned by ``GET /models/{id}/dataframe/schema/``.
  */
 export interface BIMDataframeColumn {
+  /** Column key every query uses (lowercase for DDC exports). */
   name: string;
   type: string;
+  /** Header as the converter wrote it ("Phase Created"). Absent on servers
+   *  that predate labels; equals `name` for sidecars written without one. */
+  label?: string;
+}
+
+/** One distinct value of a dataframe column and how many elements carry it. */
+export interface BIMDataframeValueCount {
+  value: string;
+  count: number;
+}
+
+/** A failed dataframe call. `code` is what the panel translates
+ *  (`unknown_column`, `needs_number`, `query_failed`, ...); `message` is the
+ *  server's English, kept for the console and never shown to the reader.
+ *  `code` is empty when the server sent none (an older server, a proxy). */
+export class BIMDataframeError extends Error {
+  readonly code: string;
+  readonly params: Record<string, string>;
+
+  constructor(message: string, code: string, params: Record<string, string> = {}) {
+    super(message);
+    this.name = 'BIMDataframeError';
+    this.code = code;
+    this.params = params;
+  }
+}
+
+/** Read the server's coded `detail` from a failed dataframe call. */
+async function dataframeError(resp: Response, what: string): Promise<BIMDataframeError> {
+  const fallback = `${what} failed (HTTP ${resp.status})`;
+  try {
+    const body = (await resp.json()) as { detail?: unknown };
+    const detail = body?.detail;
+    if (typeof detail === 'string') return new BIMDataframeError(detail || fallback, '');
+    if (detail && typeof detail === 'object') {
+      const d = detail as { code?: unknown; message?: unknown; params?: unknown };
+      const params: Record<string, string> = {};
+      if (d.params && typeof d.params === 'object') {
+        for (const [k, v] of Object.entries(d.params as Record<string, unknown>)) params[k] = String(v);
+      }
+      return new BIMDataframeError(
+        typeof d.message === 'string' && d.message ? d.message : fallback,
+        typeof d.code === 'string' ? d.code : '',
+        params,
+      );
+    }
+  } catch {
+    /* body was not JSON */
+  }
+  return new BIMDataframeError(fallback, '');
+}
+
+/** Whether the model's property table still holds every property: written by
+ *  the converter ("full"), rebuilt from the database rows, which keep at most
+ *  30 properties per element ("rebuilt"), or absent ("missing"). */
+export type BIMSidecarState = 'full' | 'rebuilt' | 'missing';
+
+/** The sidecar state from the model's Parquet status. An older server that
+ *  does not say reads as "full", so nothing is claimed that is not known. */
+export async function fetchBIMSidecarState(modelId: string, signal?: AbortSignal): Promise<BIMSidecarState> {
+  const body = await apiGet<{ sidecar?: unknown }>(
+    `/v1/bim_hub/models/${encodeURIComponent(modelId)}/parquet-status/`,
+    { signal },
+  );
+  return body?.sidecar === 'rebuilt' || body?.sidecar === 'missing' ? body.sidecar : 'full';
 }
 
 /** Fetch the column schema for the model's Parquet dataframe. Used by the
@@ -821,6 +888,10 @@ export interface BIMDataframeFilter {
   column: string;
   op: '=' | '!=' | '<' | '<=' | '>' | '>=' | 'LIKE' | 'IN' | 'NOT IN';
   value: string | number | (string | number)[];
+  /** "=" / "!=" only: the number the text reads as in the reader's
+   *  convention, or null when it is no number. When present the server
+   *  matches the text or this number and never reads the text itself. */
+  number?: number | null;
 }
 
 export interface BIMDataframeQueryBody {
@@ -850,9 +921,35 @@ export async function queryBIMDataframe(
     },
   );
   if (!resp.ok) {
-    throw new Error(`Dataframe query failed (HTTP ${resp.status})`);
+    throw await dataframeError(resp, 'Dataframe query');
   }
   return (await resp.json()) as Record<string, unknown>[];
+}
+
+/** Distinct values of one dataframe column with their counts, most common
+ *  first. Feeds the value dropdown of the property search panel. The column
+ *  travels as a query parameter so a name containing "/" stays intact. */
+export async function fetchBIMDataframeColumnValues(
+  modelId: string,
+  column: string,
+  limit = 200,
+  signal?: AbortSignal,
+): Promise<BIMDataframeValueCount[]> {
+  const token = useAuthStore.getState().accessToken;
+  const headers: Record<string, string> = { Accept: 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const params = new URLSearchParams({ column, limit: String(limit) });
+  const resp = await fetch(
+    `/api/v1/bim_hub/models/${encodeURIComponent(modelId)}/dataframe/values/?${params.toString()}`,
+    { method: 'GET', headers, signal },
+  );
+  if (!resp.ok) {
+    throw await dataframeError(resp, 'Dataframe values fetch');
+  }
+  const rows = (await resp.json()) as { value: unknown; count: unknown }[];
+  return rows
+    .filter((r) => r.value !== null && r.value !== undefined)
+    .map((r) => ({ value: String(r.value), count: Number(r.count) || 0 }));
 }
 
 /** @deprecated Use fetchGeometryBlobUrl() instead — this exposes the JWT in the URL. */
@@ -1111,6 +1208,7 @@ export type PatchBIMQuantityMapRequest = Partial<CreateBIMQuantityMapRequest>;
 export interface QuantityMapApplyRequest {
   model_id: string;
   dry_run: boolean;
+  preview_fingerprint?: string;
   /** BOQ the auto-created positions land in. Omit it and the backend picks
    *  the project's only unlocked BOQ; when the project holds several it
    *  refuses with 409 rather than guessing, and this field is the answer. */
@@ -1135,6 +1233,10 @@ export interface QuantityMapApplyResult {
   rules_applied: number;
   links_created: number;
   positions_created: number;
+  preview_fingerprint?: string | null;
+  links_to_create?: number;
+  positions_to_create?: number;
+  replayed?: boolean;
   results: QuantityMapApplyResultItem[];
   /** Dry run only: the preview could not name the BOQ the auto-created
    *  positions would land in, because the project holds more than one
@@ -1178,21 +1280,61 @@ export async function patchQuantityMap(
  * When `dry_run` is true (the default), the endpoint returns a preview of
  * what would be linked without writing anything.  When false, it creates
  * real `BOQElementLink` rows (and, for rules with `auto_create: true`,
- * creates fresh BOQ positions) inside a transaction per rule.
+ * creates BOQ positions) atomically, bound to the reviewed fingerprint.
  */
 export async function applyQuantityMaps(
   modelId: string,
   dryRun = true,
   targetBoqId?: string | null,
+  previewFingerprint?: string,
 ): Promise<QuantityMapApplyResult> {
   return apiPost<QuantityMapApplyResult, QuantityMapApplyRequest>(
     '/v1/bim_hub/quantity-maps/apply/',
     {
       model_id: modelId,
       dry_run: dryRun,
+      ...(previewFingerprint ? { preview_fingerprint: previewFingerprint } : {}),
       ...(targetBoqId ? { target_boq_id: targetBoqId } : {}),
     },
   );
+}
+
+/** Server reply of ``POST /quantity-maps/preview/`` (snake_case). */
+export interface QuantityRulePreviewResponse {
+  matches: SandboxMatchRow[];
+  skips: SandboxSkipRow[];
+  /** Every match / skip; `matches` and `skips` hold the first rows only. */
+  match_count: number;
+  skip_count: number;
+  matched_types: string[];
+  total_adjusted: number;
+  scanned: number;
+  sidecar: 'full' | 'rebuilt' | 'missing';
+}
+
+/** The preview reply in the shape the sandbox panel renders. */
+export function toSandboxRunResult(resp: QuantityRulePreviewResponse): SandboxRunResult {
+  return {
+    matches: resp.matches,
+    skips: resp.skips,
+    matchCount: resp.match_count ?? resp.matches.length,
+    skipCount: resp.skip_count ?? resp.skips.length,
+    matchedTypes: resp.matched_types,
+    totalAdjusted: resp.total_adjusted,
+    scanned: resp.scanned,
+    sidecar: resp.sidecar ?? 'full',
+  };
+}
+
+/** Run one unsaved rule on the server through the apply engine ("Test this
+ *  rule"). Same matcher, quantity math and property read as Apply, so what
+ *  the test shows is what Apply writes. Read-only. */
+export async function previewQuantityRule(modelId: string, rule: SandboxRule): Promise<SandboxRunResult> {
+  const resp = await apiPost<QuantityRulePreviewResponse, { model_id: string; rule: SandboxRule }>(
+    '/v1/bim_hub/quantity-maps/preview/',
+    { model_id: modelId, rule },
+  );
+  return toSandboxRunResult(resp);
 }
 
 /* ── BIM Element Groups (saved selections) ────────────────────────────── */

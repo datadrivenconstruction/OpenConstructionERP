@@ -55,6 +55,9 @@ export interface BoqShortcutState {
   isEditing: boolean;
   /** At least one position is ticked in the grid. */
   hasSelection: boolean;
+  /** The user may delete positions (`boq.delete`). Only `false` disables
+   *  the Delete key, so a caller that does not gate keeps working. */
+  canDelete?: boolean;
 }
 
 /**
@@ -129,7 +132,9 @@ export function resolveBoqShortcut(e: BoqShortcutKey, state: BoqShortcutState): 
     && !(typeof e.getModifierState === 'function' && e.getModifierState('AltGraph') === true);
   if (plainAlt && !shift && isLetter('i')) return 'toggle_ai_copilot';
 
-  if ((key === 'Delete' || key === 'Backspace') && state.hasSelection) return 'delete_selected';
+  if ((key === 'Delete' || key === 'Backspace') && state.hasSelection && state.canDelete !== false) {
+    return 'delete_selected';
+  }
 
   if (isCmd && !shift && isLetter('d')) return 'duplicate';
 

@@ -197,3 +197,11 @@ def test_type_glob_that_cannot_be_narrowed_safely_reads_everything():
     assert _type_filter_as_like("wall[12]") is None
     # The database may fold non-ASCII case differently from Python.
     assert _type_filter_as_like("плитка*") is None
+
+
+def test_type_glob_list_reads_everything_and_padding_is_trimmed():
+    # A comma list is several globs; one LIKE built from the whole string would
+    # read none of the elements the rule matches ("wall%, ifcwall%").
+    assert _type_filter_as_like("Wall*, IfcWall*") is None
+    assert _type_filter_as_like("  Wall*  ") == "wall%"
+    assert _type_filter_as_like("   ") is None

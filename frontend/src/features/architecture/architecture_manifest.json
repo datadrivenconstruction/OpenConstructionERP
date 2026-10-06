@@ -18295,8 +18295,10 @@
         "models.py",
         "permissions.py",
         "quantity_fallback.py",
+        "quantity_previews.py",
         "repository.py",
         "router.py",
+        "rule_properties.py",
         "schemas.py",
         "seed.py",
         "service.py",
@@ -19067,6 +19069,13 @@
           "request_schema": "QuantityMapApplyRequest"
         },
         {
+          "method": "POST",
+          "path": "/quantity-maps/preview/",
+          "handler": "preview_quantity_rule",
+          "response_model": "QuantityRulePreviewResult",
+          "request_schema": "QuantityRulePreviewRequest"
+        },
+        {
           "method": "GET",
           "path": "/element-groups/",
           "handler": "list_element_groups",
@@ -19264,6 +19273,12 @@
           "method": "GET",
           "path": "/models/{model_id}/dataframe/columns/{column}/values/",
           "handler": "get_column_values",
+          "request_schema": "BIMHubService"
+        },
+        {
+          "method": "GET",
+          "path": "/models/{model_id}/dataframe/values/",
+          "handler": "get_column_values_by_query",
           "request_schema": "BIMHubService"
         },
         {
@@ -20721,6 +20736,10 @@
           "docstring": "Request to apply quantity mapping rules to a model's elements.",
           "fields": [
             {
+              "name": "preview_fingerprint",
+              "type": "str | None"
+            },
+            {
               "name": "dry_run",
               "type": "bool",
               "description": "If True (default), return the preview without creating any BOQElementLink or BOQPosition rows. Set to False to actually persist links and auto-created positions."
@@ -20760,6 +20779,26 @@
               "default": "0"
             },
             {
+              "name": "preview_fingerprint",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "links_to_create",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "positions_to_create",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "replayed",
+              "type": "bool",
+              "default": "False"
+            },
+            {
               "name": "skipped_count",
               "type": "int",
               "default": "0"
@@ -20776,6 +20815,157 @@
               "name": "target_boq_ambiguous",
               "type": "bool",
               "description": "Set on a dry run when at least one rule would auto-create a position and the project cannot say which bill of quantities it would land in - it holds more than one unlocked bill, or none that can be written to. The apply itself refuses with 409 rather than guessing; this flag is how the preview says so ahead of time instead of promising a destination it cannot keep."
+            }
+          ]
+        },
+        {
+          "class_name": "QuantityRuleDraft",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A quantity rule as the editor holds it, saved or not.\n\nNo multiplier / waste validators on purpose: a half-typed value is what\nthe person is testing, and the preview reports it the way apply would,\nas an ``invalid_decimal`` skip.",
+          "fields": [
+            {
+              "name": "element_type_filter",
+              "type": "str | None"
+            },
+            {
+              "name": "property_filter",
+              "type": "dict[str, Any] | None",
+              "default": "None"
+            },
+            {
+              "name": "quantity_source",
+              "type": "str"
+            },
+            {
+              "name": "multiplier",
+              "type": "str"
+            },
+            {
+              "name": "waste_factor_pct",
+              "type": "str"
+            },
+            {
+              "name": "unit",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "QuantityRulePreviewRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Run one unsaved rule against a model, through the apply engine.",
+          "fields": [
+            {
+              "name": "rule",
+              "type": "QuantityRuleDraft"
+            }
+          ]
+        },
+        {
+          "class_name": "QuantityRulePreviewMatch",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "An element the rule selects, with its quantity.",
+          "fields": [
+            {
+              "name": "element_id",
+              "type": "str"
+            },
+            {
+              "name": "stable_id",
+              "type": "str"
+            },
+            {
+              "name": "element_type",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "raw_quantity",
+              "type": "float"
+            },
+            {
+              "name": "adjusted_quantity",
+              "type": "float"
+            }
+          ]
+        },
+        {
+          "class_name": "QuantityRulePreviewSkip",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "An element the rule selects but cannot take a quantity from.",
+          "fields": [
+            {
+              "name": "element_id",
+              "type": "str"
+            },
+            {
+              "name": "stable_id",
+              "type": "str"
+            },
+            {
+              "name": "element_type",
+              "type": "str"
+            },
+            {
+              "name": "reason",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "QuantityRulePreviewResult",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What applying the rule would select; nothing is written.",
+          "fields": [
+            {
+              "name": "matches",
+              "type": "list[QuantityRulePreviewMatch]"
+            },
+            {
+              "name": "skips",
+              "type": "list[QuantityRulePreviewSkip]"
+            },
+            {
+              "name": "match_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "skip_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "matched_types",
+              "type": "list[str]"
+            },
+            {
+              "name": "total_adjusted",
+              "type": "float",
+              "default": "0.0"
+            },
+            {
+              "name": "scanned",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "sidecar",
+              "type": "str",
+              "default": "'full'"
             }
           ]
         },
@@ -233895,10 +234085,10 @@
     },
     {
       "name": "bim",
-      "ts_files": 96,
+      "ts_files": 112,
       "css_files": 0,
-      "test_files": 26,
-      "total_files": 96
+      "test_files": 37,
+      "total_files": 113
     },
     {
       "name": "bim_requirements",
@@ -233909,10 +234099,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 160,
+      "ts_files": 167,
       "css_files": 0,
-      "test_files": 80,
-      "total_files": 160
+      "test_files": 87,
+      "total_files": 167
     },
     {
       "name": "buyer-portal",
@@ -236421,11 +236611,11 @@
     "total_models": 623,
     "total_columns": 7150,
     "total_relationships": 234,
-    "total_routes": 3744,
-    "total_schemas": 3544,
-    "total_python_files": 2264,
+    "total_routes": 3746,
+    "total_schemas": 3549,
+    "total_python_files": 2266,
     "frontend_features": 192,
-    "frontend_ts_files": 2914,
+    "frontend_ts_files": 2937,
     "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {

@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Trash2, Ruler, X, ChevronDown, Percent, Hash, Tag, Replace, Equal } from 'lucide-react';
 import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 import { parseDecimalInput } from '@/shared/lib/parseDecimal';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { getUnitsForLocale } from './boqHelpers';
 
 const UNITS = getUnitsForLocale();
@@ -80,6 +81,8 @@ export function BatchActionBar({
   onBatchSetValue,
 }: BatchActionBarProps) {
   const { t } = useTranslation();
+  // Same gate as the grid's delete controls: the server answers `boq.delete`.
+  const canDelete = useHasPermission('boq.delete');
   const [unitDropdownOpen, setUnitDropdownOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [factorDialog, setFactorDialog] = useState<FactorDialogState | null>(null);
@@ -221,6 +224,7 @@ export function BatchActionBar({
           <div className="h-5 w-px bg-border-light" />
 
           {/* Delete selected */}
+          {canDelete && (
           <button
             type="button"
             onClick={handleDeleteClick}
@@ -230,6 +234,7 @@ export function BatchActionBar({
             <Trash2 size={14} />
             {t('boq.batch_delete', { defaultValue: 'Delete selected' })}
           </button>
+          )}
 
           {/* Change unit */}
           <div ref={unitDropdownRef} className="relative">
