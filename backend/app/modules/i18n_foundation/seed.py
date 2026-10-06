@@ -45,26 +45,42 @@ async def _seed_countries(session: AsyncSession) -> int:
         logger.info("oe_i18n_country already has %d rows, skipping seed.", count)
         return 0
 
-    data = _load_json("countries.json")
-    objects = [
-        Country(
-            iso_code=row["iso_code"],
-            iso_code_3=row.get("iso_code_3"),
-            name_en=row["name_en"],
-            name_translations=row["name_translations"],
-            currency_default=row.get("currency_default"),
-            measurement_default=row.get("measurement_default"),
-            phone_code=row.get("phone_code"),
-            region_group=row.get("region_group"),
-            is_active=True,
-            metadata_={},
-        )
-        for row in data
-    ]
+    objects = [country_from_seed_row(row) for row in load_country_seed_rows()]
     session.add_all(objects)
     await session.flush()
     logger.info("Seeded %d countries.", len(objects))
     return len(objects)
+
+
+def load_country_seed_rows() -> list[dict]:
+    """Every country this release ships, straight out of the seed file.
+
+    Public for the reason :func:`load_tax_seed_rows` is: the explicit reference
+    data update in :mod:`app.modules.i18n_foundation.reference_data_update`
+    compares an installed database against these rows and must read the same
+    file the seeder does, not a copy of it.
+    """
+    return _load_json("countries.json")
+
+
+def country_from_seed_row(row: dict) -> Country:
+    """Build one ORM row from one country seed line.
+
+    Shared by the seeder and the reference data update so that a country added
+    to an old install is field for field the one a new install is seeded with.
+    """
+    return Country(
+        iso_code=row["iso_code"],
+        iso_code_3=row.get("iso_code_3"),
+        name_en=row["name_en"],
+        name_translations=row["name_translations"],
+        currency_default=row.get("currency_default"),
+        measurement_default=row.get("measurement_default"),
+        phone_code=row.get("phone_code"),
+        region_group=row.get("region_group"),
+        is_active=True,
+        metadata_={},
+    )
 
 
 async def _seed_work_calendars(session: AsyncSession) -> int:
@@ -202,9 +218,11 @@ async def seed_i18n_data(session: AsyncSession) -> dict[str, int]:
     :mod:`app.modules.i18n_foundation.tax_seed_reconcile` for the rows a later
     release added to the file and this install therefore never received.
 
-    Countries and work calendars carry the same early return and have no
-    reconciler. See ``tax_seed_reconcile`` for why that was left rather than
-    generalised.
+    Countries carry the same early return and have no boot reconciler; see
+    ``tax_seed_reconcile`` for why that was left rather than generalised. What
+    covers them, and every field change the boot path may not make on its own,
+    is the explicit update an administrator previews and confirms:
+    :mod:`app.modules.i18n_foundation.reference_data_update`.
     """
     countries = await _seed_countries(session)
     calendars = await _seed_work_calendars(session)

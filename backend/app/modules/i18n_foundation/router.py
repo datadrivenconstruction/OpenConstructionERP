@@ -39,6 +39,11 @@ import uuid
 from fastapi import APIRouter, Depends, Query, status
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.modules.i18n_foundation.reference_data_update import (
+    ReferenceDiff,
+    apply_reference_update,
+    compute_reference_diff,
+)
 from app.modules.i18n_foundation.schemas import (
     ConvertResponse,
     CountryListResponse,
@@ -47,6 +52,11 @@ from app.modules.i18n_foundation.schemas import (
     ExchangeRateListResponse,
     ExchangeRateResponse,
     ExchangeRateUpdate,
+    ReferenceChangeResponse,
+    ReferenceDataApplyRequest,
+    ReferenceDataApplyResponse,
+    ReferenceDataPreviewResponse,
+    ReferenceFieldChange,
     SubdivisionListResponse,
     SubdivisionResponse,
     TaxConfigCreate,
@@ -446,3 +456,67 @@ async def update_tax_config(
     """Update a tax configuration (admin only)."""
     config = await service.update_tax_config(config_id, data.model_dump(exclude_unset=True))
     return TaxConfigResponse.model_validate(config)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Reference data update
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# The explicit half of keeping shipped reference data current on an install
+# seeded from an older release; the docstring of ``reference_data_update`` has
+# the rule. Both routes are ADMIN, the preview included: it is the first half
+# of an install-wide write.
+
+
+def _preview_response(diff: ReferenceDiff) -> ReferenceDataPreviewResponse:
+    return ReferenceDataPreviewResponse(
+        ready=diff.count("ready"),
+        kept=diff.count("kept"),
+        review=diff.count("review"),
+        changes=[
+            ReferenceChangeResponse(
+                key=change.key,
+                kind=change.kind,
+                action=change.action,
+                status=change.status,
+                reason=change.reason,
+                label=change.label,
+                detail=change.detail,
+                rows_added=change.rows_added,
+                fields=[ReferenceFieldChange(field=f.field, before=f.before, after=f.after) for f in change.fields],
+            )
+            for change in diff.changes
+        ],
+    )
+
+
+@router.get("/reference-data/updates/", response_model=ReferenceDataPreviewResponse)
+async def preview_reference_data_update(
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    _admin: None = Depends(RequirePermission("i18n_foundation.reference_data.preview")),
+) -> ReferenceDataPreviewResponse:
+    """Show what updating the shipped reference data would change (admin only). Writes nothing."""
+    return _preview_response(await compute_reference_diff(session))
+
+
+@router.post("/reference-data/updates/apply/", response_model=ReferenceDataApplyResponse)
+async def apply_reference_data_update(
+    data: ReferenceDataApplyRequest,
+    session: SessionDep,
+    _user_id: CurrentUserId,
+    _admin: None = Depends(RequirePermission("i18n_foundation.reference_data.apply")),
+) -> ReferenceDataApplyResponse:
+    """Apply the confirmed reference data changes (admin only).
+
+    Only the keys named are written, and only those still ``ready`` when the
+    difference is recomputed here; the rest come back in ``skipped``.
+    """
+    result = await apply_reference_update(session, data.keys)
+    return ReferenceDataApplyResponse(
+        applied=result.applied,
+        skipped=result.skipped,
+        rows_added=result.rows_added,
+        rows_updated=result.rows_updated,
+        preview=_preview_response(result.after),
+    )

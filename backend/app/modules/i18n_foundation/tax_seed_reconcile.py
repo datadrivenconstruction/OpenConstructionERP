@@ -415,6 +415,19 @@ def _refusal(existing: Sequence[TaxRateRow], planned: Sequence[TaxRateRow], coun
     return ""
 
 
+def jurisdiction_refusal(existing: Sequence[TaxRateRow], planned: Sequence[TaxRateRow], country: str) -> str:
+    """Why a whole rate line must not be added beside ``existing``, or ``""``.
+
+    The public face of :func:`_refusal`, for the explicit reference data update
+    in :mod:`app.modules.i18n_foundation.reference_data_update`. That pass adds
+    absent rate lines too, on an administrator's confirmation rather than at
+    boot, and a confirmation does not make a second standard rate for one
+    country any less of a broken answer, so it asks the same guard rather than
+    carrying its own copy of it.
+    """
+    return _refusal(existing, planned, country)
+
+
 def _is_a_reduced_tier(planned: Sequence[TaxRateRow]) -> bool:
     """Whether every planned row is a country-wide rate that does not claim to be the standard one.
 

@@ -67,6 +67,7 @@ import { BIMConverterStatusBanner } from '@/features/bim/BIMConverterStatusBanne
 import { DataSecurityPanel } from '@/features/data-security';
 import { DeleteAccountDialog } from './DeleteAccountDialog';
 import { DemoLeftoversPanel } from './DemoLeftoversPanel';
+import { ReferenceDataPanel } from './ReferenceDataPanel';
 import { invalidateProjectLists } from '@/features/projects/invalidateProjectLists';
 
 // Audit log now lives as a Settings section (moved out of the sidebar admin
@@ -1916,6 +1917,9 @@ export function SettingsPage() {
 
               {/* Regional Settings (timezone, units, formats, currency) */}
               <RegionalSettings />
+
+              {/* Shipped countries, work calendars and tax rates (admin only) */}
+              {profile?.role === 'admin' && <ReferenceDataPanel />}
 
               {/* Translation Manager */}
               <div>

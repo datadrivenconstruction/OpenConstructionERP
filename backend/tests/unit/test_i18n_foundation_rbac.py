@@ -41,6 +41,10 @@ WRITE_ROUTES: tuple[tuple[str, str, str], ...] = (
     ("PATCH", "/work-calendars/{calendar_id}", "i18n_foundation.work_calendars.update"),
     ("POST", "/tax-configs/", "i18n_foundation.tax_configs.create"),
     ("PATCH", "/tax-configs/{config_id}", "i18n_foundation.tax_configs.update"),
+    # The reference data update. The preview is a read, gated anyway because it
+    # is the first half of an install-wide write; see the router.
+    ("GET", "/reference-data/updates/", "i18n_foundation.reference_data.preview"),
+    ("POST", "/reference-data/updates/apply/", "i18n_foundation.reference_data.apply"),
 )
 
 WRITE_KEYS: tuple[str, ...] = tuple(key for _, _, key in WRITE_ROUTES)

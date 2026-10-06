@@ -122053,6 +122053,7 @@
         "manifest.py",
         "models.py",
         "permissions.py",
+        "reference_data_update.py",
         "repairs.py",
         "repository.py",
         "romania_vat.py",
@@ -122490,6 +122491,20 @@
           "handler": "update_tax_config",
           "response_model": "TaxConfigResponse",
           "request_schema": "TaxConfigUpdate"
+        },
+        {
+          "method": "GET",
+          "path": "/reference-data/updates/",
+          "handler": "preview_reference_data_update",
+          "response_model": "ReferenceDataPreviewResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/reference-data/updates/apply/",
+          "handler": "apply_reference_data_update",
+          "response_model": "ReferenceDataApplyResponse",
+          "request_schema": "ReferenceDataApplyRequest"
         }
       ],
       "schemas": [
@@ -123335,6 +123350,143 @@
             {
               "name": "years",
               "type": "list[WorkingDaysYear]"
+            }
+          ]
+        },
+        {
+          "class_name": "ReferenceFieldChange",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One field that differs between this database and the shipped seed file.",
+          "fields": [
+            {
+              "name": "field",
+              "type": "str"
+            },
+            {
+              "name": "before",
+              "type": "Any",
+              "default": "None"
+            },
+            {
+              "name": "after",
+              "type": "Any",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "ReferenceChangeResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One entry of the reference data preview.\n\n``status`` is ``ready`` (applied on confirmation), ``kept`` (this\ndatabase's version stays) or ``review`` (shown for a person to settle by\nhand, never written by the update). ``reason`` is a stable code.",
+          "fields": [
+            {
+              "name": "key",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "Literal['country', 'calendar', 'tax']"
+            },
+            {
+              "name": "action",
+              "type": "Literal['add', 'update', 'none']"
+            },
+            {
+              "name": "status",
+              "type": "Literal['ready', 'kept', 'review']"
+            },
+            {
+              "name": "reason",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "detail",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "rows_added",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "fields",
+              "type": "list[ReferenceFieldChange]"
+            }
+          ]
+        },
+        {
+          "class_name": "ReferenceDataPreviewResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What updating the reference data would change, written nowhere yet.",
+          "fields": [
+            {
+              "name": "ready",
+              "type": "int"
+            },
+            {
+              "name": "kept",
+              "type": "int"
+            },
+            {
+              "name": "review",
+              "type": "int"
+            },
+            {
+              "name": "changes",
+              "type": "list[ReferenceChangeResponse]"
+            }
+          ]
+        },
+        {
+          "class_name": "ReferenceDataApplyRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The preview keys an administrator confirmed.",
+          "fields": [
+            {
+              "name": "keys",
+              "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "ReferenceDataApplyResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What an apply wrote, and the preview as it reads afterwards.",
+          "fields": [
+            {
+              "name": "applied",
+              "type": "list[str]"
+            },
+            {
+              "name": "skipped",
+              "type": "list[str]"
+            },
+            {
+              "name": "rows_added",
+              "type": "int"
+            },
+            {
+              "name": "rows_updated",
+              "type": "int"
+            },
+            {
+              "name": "preview",
+              "type": "ReferenceDataPreviewResponse"
             }
           ]
         }
@@ -234889,10 +235041,10 @@
     },
     {
       "name": "settings",
-      "ts_files": 28,
+      "ts_files": 30,
       "css_files": 0,
-      "test_files": 9,
-      "total_files": 28
+      "test_files": 10,
+      "total_files": 30
     },
     {
       "name": "setup",
@@ -236421,11 +236573,11 @@
     "total_models": 623,
     "total_columns": 7150,
     "total_relationships": 234,
-    "total_routes": 3744,
-    "total_schemas": 3544,
-    "total_python_files": 2264,
+    "total_routes": 3746,
+    "total_schemas": 3549,
+    "total_python_files": 2265,
     "frontend_features": 192,
-    "frontend_ts_files": 2914,
+    "frontend_ts_files": 2916,
     "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {
