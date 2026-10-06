@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+﻿import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fetchBIMDataframeColumnValues } from '../api';
 
 afterEach(() => vi.unstubAllGlobals());
@@ -21,7 +21,7 @@ describe('column values pagination', () => {
     expect(first.total).toBe(205);
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const next = await fetchBIMDataframeColumnValues('model', 'Width/Height', 100, ctrl.signal, 100);
-    expect(next.items[0].value).toBe('v100');
+    expect(next.items[0]?.value).toBe('v100');
     expect(next.offset).toBe(100);
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });

@@ -21,7 +21,8 @@ describe('schedule lifecycle API contract', () => {
   });
   it.each(['current', 'archived', 'all'] as const)('serializes %s filter alongside pagination', (archiveState) => {
     scheduleApi.listSchedules('project', { archiveState, offset: 3, limit: 20 });
-    const query = new URL(String(vi.mocked(apiGet).mock.calls[0][0]), 'https://test').searchParams;
+    expect(apiGet).toHaveBeenCalledTimes(1);
+    const query = new URL(String(vi.mocked(apiGet).mock.calls[0]?.[0]), 'https://test').searchParams;
     expect(query.get('archive_state')).toBe(archiveState);
     expect(query.get('project_id')).toBe('project');
     expect(query.get('offset')).toBe('3');

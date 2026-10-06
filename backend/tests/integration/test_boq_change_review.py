@@ -427,13 +427,8 @@ async def test_rule_created_position_is_recomputed_with_its_rule(client: AsyncCl
         headers=auth,
     )
     assert rule.status_code == 201, rule.text
-    applied = await client.post(
-        "/api/v1/bim_hub/quantity-maps/apply/",
-        json={"model_id": v1, "dry_run": False, "target_boq_id": boq_id},
-        headers=auth,
-    )
-    assert applied.status_code == 200, applied.text
-    assert applied.json()["positions_created"] == 1
+    applied = await _apply_rules(client, auth, v1, boq_id)
+    assert applied["positions_created"] == 1
     created = [p for p in (await _positions(client, auth, boq_id)).values() if p["unit"] == "m2"]
     assert len(created) == 1
     assert _d(created[0]["quantity"]) == Decimal("31.5")

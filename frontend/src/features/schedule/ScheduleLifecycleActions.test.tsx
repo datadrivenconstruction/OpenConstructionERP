@@ -135,7 +135,8 @@ describe('permanent deletion is a separate administrator action', () => {
 
   it('honours server refusal even if the UI role says admin', async () => {
     useAuthStore.setState({ userRole: 'admin' });
-    vi.mocked(scheduleApi.getDeleteImpact).mockResolvedValue({ activity_count: 3, can_delete: false,
+    vi.mocked(scheduleApi.getDeleteImpact).mockResolvedValue({ activity_count: 3, baseline_count: 0,
+      payment_milestone_count: 0, can_delete: false,
       blocked_reason: 'schedule_not_archived' });
     view({ status: 'archived' });
     fireEvent.click(screen.getByRole('button', { name: 'Permanently delete Contract plan' }));
