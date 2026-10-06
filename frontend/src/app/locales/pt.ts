@@ -48059,6 +48059,12 @@ const resource = {
     "tendering.bidder_note": "Nota do proponente",
     // --- /Bidder price-entry link ---
     // --- /Learn ---
+    // --- BOQ price base date and tax date ---
+    "boq.base_date_label": "Data base dos preços",
+    "boq.tax_date_label": "Data fiscal",
+    "boq.tax_date_placeholder": "Igual à data base dos preços",
+    "boq.tax_date_hint": "O IVA é calculado à taxa em vigor nesta data. Deixe em branco para usar a data base dos preços.",
+    "boq.date_shape_error": "Indique um dia, um mês, um trimestre ou um ano: 2026-03-15, 2026-03, 2026-Q1 ou 2026",
   }
 } as { translation: Record<string, string> };
 

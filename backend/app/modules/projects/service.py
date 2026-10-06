@@ -1806,6 +1806,7 @@ class ProjectService:
                         approved_by=boq.approved_by,
                         approved_at=boq.approved_at,
                         base_date=boq.base_date,
+                        tax_date=boq.tax_date,
                         metadata=dict(getattr(boq, "metadata_", None) or {}),
                         positions=positions_data,
                         markups=markups_data,
@@ -1953,6 +1954,7 @@ class ProjectService:
                     approved_by=boq_data.approved_by,
                     approved_at=boq_data.approved_at,
                     base_date=boq_data.base_date,
+                    tax_date=boq_data.tax_date,
                     metadata_=dict(boq_data.metadata or {}),
                 )
                 self.session.add(boq)

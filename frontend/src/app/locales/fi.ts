@@ -45261,6 +45261,12 @@ const resource = {
     "tendering.bidder_note": "Tarjoajan huomautus",
     // --- /Bidder price-entry link ---
     // --- /Learn ---
+    // --- BOQ price base date and tax date ---
+    "boq.base_date_label": "Hintatason päivämäärä",
+    "boq.tax_date_label": "Veropäivä",
+    "boq.tax_date_placeholder": "Sama kuin hintatason päivämäärä",
+    "boq.tax_date_hint": "Arvonlisävero lasketaan tänä päivänä voimassa olevan verokannan mukaan. Jätä tyhjäksi, jos haluat käyttää hintatason päivämäärää.",
+    "boq.date_shape_error": "Anna päivä, kuukausi, vuosineljännes tai vuosi: 2026-03-15, 2026-03, 2026-Q1 tai 2026",
   }
 } as { translation: Record<string, string> };
 

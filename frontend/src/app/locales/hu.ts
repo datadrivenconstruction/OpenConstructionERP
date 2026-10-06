@@ -47846,6 +47846,12 @@ const resource = {
     "tendering.bidder_note": "Az ajánlattevő megjegyzése",
     // --- /Bidder price-entry link ---
     // --- /Learn ---
+    // --- BOQ price base date and tax date ---
+    "boq.base_date_label": "Árbázis dátuma",
+    "boq.tax_date_label": "Adózási dátum",
+    "boq.tax_date_placeholder": "Megegyezik az árbázis dátumával",
+    "boq.tax_date_hint": "Az áfát az ezen a napon hatályos kulccsal számítjuk. Hagyja üresen az árbázis dátumának használatához.",
+    "boq.date_shape_error": "Adjon meg napot, hónapot, negyedévet vagy évet: 2026-03-15, 2026-03, 2026-Q1 vagy 2026",
   }
 } as { translation: Record<string, string> };
 

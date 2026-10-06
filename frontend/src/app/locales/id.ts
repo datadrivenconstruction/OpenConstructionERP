@@ -45070,6 +45070,12 @@ const resource = {
     "tendering.bid_late": "Terlambat",
     "tendering.bidder_note": "Catatan dari penawar",
     // --- /Bidder price-entry link ---
+    // --- BOQ price base date and tax date ---
+    "boq.base_date_label": "Tanggal dasar harga",
+    "boq.tax_date_label": "Tanggal pajak",
+    "boq.tax_date_placeholder": "Sama dengan tanggal dasar harga",
+    "boq.tax_date_hint": "PPN dikenakan dengan tarif yang berlaku pada tanggal ini. Kosongkan untuk memakai tanggal dasar harga.",
+    "boq.date_shape_error": "Gunakan hari, bulan, kuartal, atau tahun: 2026-03-15, 2026-03, 2026-Q1, atau 2026",
   }
 } as { translation: Record<string, string> };
 

@@ -26,6 +26,13 @@ export interface BOQ {
    * that existed before variation bills did.
    */
   variation_request_id?: string | null;
+  /** Price level reference (a day, month, quarter or year), or null. */
+  base_date?: string | null;
+  /**
+   * The date the bill's VAT is resolved on. Null means the bill is taxed on
+   * its `base_date`, which is every bill created before the field existed.
+   */
+  tax_date?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -328,6 +335,10 @@ export interface CreateBOQData {
   project_id: string;
   name: string;
   description?: string;
+  /** Price level reference: the date the unit rates are current at. */
+  base_date?: string | null;
+  /** The date VAT is resolved on. Null or omitted means "same as base_date". */
+  tax_date?: string | null;
 }
 
 /**

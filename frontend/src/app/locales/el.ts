@@ -45238,6 +45238,12 @@ const resource = {
     "tendering.bidder_note": "Σημείωση από τον προσφέροντα",
     // --- /Bidder price-entry link ---
     // --- /Learn ---
+    // --- BOQ price base date and tax date ---
+    "boq.base_date_label": "Ημερομηνία βάσης τιμών",
+    "boq.tax_date_label": "Ημερομηνία φορολογίας",
+    "boq.tax_date_placeholder": "Ίδια με την ημερομηνία βάσης τιμών",
+    "boq.tax_date_hint": "Ο ΦΠΑ υπολογίζεται με τον συντελεστή που ισχύει σε αυτή την ημερομηνία. Αφήστε το κενό για να χρησιμοποιηθεί η ημερομηνία βάσης τιμών.",
+    "boq.date_shape_error": "Χρησιμοποιήστε ημέρα, μήνα, τρίμηνο ή έτος: 2026-03-15, 2026-03, 2026-Q1 ή 2026",
   }
 } as { translation: Record<string, string> };
 

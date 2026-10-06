@@ -144,7 +144,14 @@ async def _install_tax_seed(session) -> int:
     return len(rows)
 
 
-async def _bill_for(session, country: str | None, *, vat: str | None = None, base_date: str | None = None) -> BOQ:
+async def _bill_for(
+    session,
+    country: str | None,
+    *,
+    vat: str | None = None,
+    base_date: str | None = None,
+    tax_date: str | None = None,
+) -> BOQ:
     """A stored project in one country and an empty bill on it."""
     tag = uuid.uuid4().hex[:8]
     owner = User(email=f"vat-{tag}@example.test", hashed_password="x", full_name="VAT")
@@ -161,7 +168,7 @@ async def _bill_for(session, country: str | None, *, vat: str | None = None, bas
     session.add(project)
     await session.flush()
 
-    boq = BOQ(project_id=project.id, name=f"Bill {tag}", base_date=base_date)
+    boq = BOQ(project_id=project.id, name=f"Bill {tag}", base_date=base_date, tax_date=tax_date)
     session.add(boq)
     await session.flush()
     return boq
@@ -591,6 +598,32 @@ async def test_a_russian_bill_priced_to_2025_is_taxed_at_2025s_rate(pg_session) 
             f"{label!r} produced the right number off the region's stack rather than off the "
             f"dated seed, which would go wrong the moment the region's line is edited"
         )
+
+
+async def test_a_bill_priced_at_2025_rates_for_2026_works_is_taxed_on_its_tax_date(pg_session) -> None:
+    """The price base and the tax date are two days, and the tax date decides the tax.
+
+    A bill indexed to 2025 prices for works carried out in 2026 states
+    ``base_date`` 2025 and ``tax_date`` 2026, and is charged 2026's 22. The
+    same bill without a tax date is charged 20 as before, read back off the
+    stored line in both cases.
+    """
+    await _install_tax_seed(pg_session)
+
+    for base_date, tax_date, expected in (
+        ("2025-06", "2026-01-01", "22"),
+        ("2025-Q2", "2026", "22"),
+        ("2026-Q1", "2025-12-31", "20"),
+        ("2025-06", None, "20"),
+    ):
+        boq = await _bill_for(pg_session, "RU", base_date=base_date, tax_date=tax_date)
+        await BOQService(pg_session).apply_default_markups(boq.id)
+        line = (await _tax_lines(pg_session, boq.id))[0]
+        assert Decimal(line.percentage) == Decimal(expected), (
+            f"a Russian bill with base date {base_date!r} and tax date {tax_date!r} was charged "
+            f"{line.percentage} rather than {expected}"
+        )
+        assert line.metadata_["vat_rate_source"] == "country_seed"
 
 
 async def test_a_base_date_nothing_can_read_is_dated_today_and_says_so(pg_session, caplog) -> None:

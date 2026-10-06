@@ -45071,6 +45071,12 @@ const resource = {
     "tendering.bid_late": "ล่าช้า",
     "tendering.bidder_note": "หมายเหตุจากผู้เสนอราคา",
     // --- /Bidder price-entry link ---
+    // --- BOQ price base date and tax date ---
+    "boq.base_date_label": "วันที่ฐานราคา",
+    "boq.tax_date_label": "วันที่ภาษี",
+    "boq.tax_date_placeholder": "เหมือนกับวันที่ฐานราคา",
+    "boq.tax_date_hint": "ภาษีมูลค่าเพิ่มคิดตามอัตราที่มีผลในวันที่นี้ เว้นว่างไว้เพื่อใช้วันที่ฐานราคา",
+    "boq.date_shape_error": "ระบุเป็นวัน เดือน ไตรมาส หรือปี: 2026-03-15, 2026-03, 2026-Q1 หรือ 2026",
   }
 } as { translation: Record<string, string> };
 

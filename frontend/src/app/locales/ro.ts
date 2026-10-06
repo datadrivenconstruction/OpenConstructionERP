@@ -45489,6 +45489,12 @@ const resource = {
     "tendering.bidder_note": "Notă de la ofertant",
     // --- /Bidder price-entry link ---
     // --- /Learn ---
+    // --- BOQ price base date and tax date ---
+    "boq.base_date_label": "Data bazei de preț",
+    "boq.tax_date_label": "Data fiscală",
+    "boq.tax_date_placeholder": "Aceeași cu data bazei de preț",
+    "boq.tax_date_hint": "TVA se calculează la cota în vigoare la această dată. Lăsați gol pentru a folosi data bazei de preț.",
+    "boq.date_shape_error": "Introduceți o zi, o lună, un trimestru sau un an: 2026-03-15, 2026-03, 2026-Q1 sau 2026",
   }
 } as { translation: Record<string, string> };
 

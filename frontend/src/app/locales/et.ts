@@ -45199,6 +45199,12 @@ const resource = {
     "tendering.bidder_note": "Pakkuja märkus",
     // --- /Bidder price-entry link ---
     // --- /Learn ---
+    // --- BOQ price base date and tax date ---
+    "boq.base_date_label": "Hinnabaasi kuupäev",
+    "boq.tax_date_label": "Maksukuupäev",
+    "boq.tax_date_placeholder": "Sama mis hinnabaasi kuupäev",
+    "boq.tax_date_hint": "Käibemaks arvestatakse sellel kuupäeval kehtiva määraga. Jätke tühjaks, et kasutada hinnabaasi kuupäeva.",
+    "boq.date_shape_error": "Sisestage päev, kuu, kvartal või aasta: 2026-03-15, 2026-03, 2026-Q1 või 2026",
   }
 } as { translation: Record<string, string> };
 

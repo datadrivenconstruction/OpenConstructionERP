@@ -45257,6 +45257,12 @@ const resource = {
     "tendering.bidder_note": "Notat fra tilbyderen",
     // --- /Bidder price-entry link ---
     // --- /Learn ---
+    // --- BOQ price base date and tax date ---
+    "boq.base_date_label": "Prisbasisdato",
+    "boq.tax_date_label": "Mva-dato",
+    "boq.tax_date_placeholder": "Samme som prisbasisdato",
+    "boq.tax_date_hint": "Merverdiavgift beregnes med satsen som gjelder på denne datoen. La feltet stå tomt for å bruke prisbasisdatoen.",
+    "boq.date_shape_error": "Oppgi en dag, en måned, et kvartal eller et år: 2026-03-15, 2026-03, 2026-Q1 eller 2026",
   }
 } as { translation: Record<string, string> };
 

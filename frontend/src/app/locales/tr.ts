@@ -46105,6 +46105,12 @@ const resource = {
     "tendering.bid_late": "Gecikmiş",
     "tendering.bidder_note": "Teklif sahibinden not",
     // --- /Bidder price-entry link ---
+    // --- BOQ price base date and tax date ---
+    "boq.base_date_label": "Fiyat esas tarihi",
+    "boq.tax_date_label": "Vergi tarihi",
+    "boq.tax_date_placeholder": "Fiyat esas tarihiyle aynı",
+    "boq.tax_date_hint": "KDV bu tarihte geçerli olan oranla hesaplanır. Fiyat esas tarihini kullanmak için boş bırakın.",
+    "boq.date_shape_error": "Gün, ay, çeyrek veya yıl girin: 2026-03-15, 2026-03, 2026-Q1 ya da 2026",
   }
 } as { translation: Record<string, string> };
 

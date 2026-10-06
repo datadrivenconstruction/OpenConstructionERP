@@ -46,6 +46,12 @@ class BOQ(Base):
     approved_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     approved_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     base_date: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    #: The day the bill's VAT is resolved on, when it is not the price base.
+    #: NULL means "same as ``base_date``", which is every bill that predates
+    #: the column, so none of them is taxed differently for its arrival. The
+    #: rule for which of the two decides lives in
+    #: :func:`app.modules.boq.base_date.tax_point`.
+    tax_date: Mapped[str | None] = mapped_column(String(40), nullable=True)
 
     # ── Issue #435: the variation request this bill was raised for ───────
     # NULL is the whole existing world: a bill of the project at large, the

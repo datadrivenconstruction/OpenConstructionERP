@@ -45689,6 +45689,12 @@ const resource = {
     "tendering.bid_late": "지연",
     "tendering.bidder_note": "입찰자의 메모",
     // --- /Bidder price-entry link ---
+    // --- BOQ price base date and tax date ---
+    "boq.base_date_label": "가격 기준일",
+    "boq.tax_date_label": "과세 기준일",
+    "boq.tax_date_placeholder": "가격 기준일과 동일",
+    "boq.tax_date_hint": "부가가치세는 이 날짜에 적용되는 세율로 계산됩니다. 가격 기준일을 사용하려면 비워 두세요.",
+    "boq.date_shape_error": "일, 월, 분기 또는 연도로 입력하세요: 2026-03-15, 2026-03, 2026-Q1 또는 2026",
   }
 } as { translation: Record<string, string> };
 

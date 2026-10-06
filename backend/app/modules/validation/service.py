@@ -793,6 +793,7 @@ class ValidationModuleService:
             "status": boq.status,
             "estimate_type": boq.estimate_type,
             "base_date": boq.base_date,
+            "tax_date": boq.tax_date,
             "currency": (getattr(boq, "currency", "") or "").strip().upper(),
             "metadata": boq.metadata_ or {},
         }

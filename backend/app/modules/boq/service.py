@@ -283,7 +283,7 @@ async def _safe_audit(
 # DEFAULT_MARKUP_TEMPLATES`` keeps resolving for the readers that predate the
 # move. The table itself lives in a module the methodology catalogue can import.
 from app.modules.boq.activity_text import activity_description
-from app.modules.boq.base_date import ACCEPTED_SHAPES, price_base_day
+from app.modules.boq.base_date import ACCEPTED_SHAPES, price_base_day, tax_point
 from app.modules.boq.markup_templates import (
     CONSTRUCTION_TIER_COUNTRIES,
     CONSTRUCTION_TIER_TAX_CODE,
@@ -2796,6 +2796,7 @@ class BOQService:
             status="draft",
             estimate_type=data.estimate_type,
             base_date=data.base_date,
+            tax_date=data.tax_date,
             metadata_={"display_columns": default_display_columns},
         )
         boq = await self.boq_repo.create(boq)
@@ -6425,7 +6426,14 @@ class BOQService:
             logger.debug("project lookup failed for boq %s", boq_id, exc_info=True)
             return None
 
-    async def _seeded_vat_rate(self, country_code: str | None, base_date: str | None, boq_id: uuid.UUID) -> _SeededVat:
+    async def _seeded_vat_rate(
+        self,
+        country_code: str | None,
+        base_date: str | None,
+        boq_id: uuid.UUID,
+        *,
+        field: str = "base_date",
+    ) -> _SeededVat:
         """The VAT rate a bill of quantities in this country is charged, from the tax seed.
 
         That is the country's standard rate almost everywhere. In a country
@@ -6449,9 +6457,14 @@ class BOQService:
 
         Args:
             country_code: The project's ISO 3166-1 alpha-2 code, or None.
-            base_date: The bill's own base date. A bill of quantities is taxed
-                at its own base date, so this is the date the rate is resolved
-                on - not today. The column is ``String(40)`` free text and a
+            base_date: The bill's own tax date, which is its ``tax_date`` when
+                it states one and its ``base_date`` otherwise; the caller picks
+                through :func:`app.modules.boq.base_date.tax_point` and passes
+                what it picked here. A bill of quantities is taxed at its own
+                date, so this is the date the rate is resolved on - not today.
+                The parameter keeps its old name because ``base_date`` is what
+                every bill without a tax date still passes. The column is
+                ``String(40)`` free text and a
                 price base is legitimately stated as a day, a month, a quarter
                 or a year, so it is read by
                 :func:`app.modules.boq.base_date.price_base_day`, which owns
@@ -6462,6 +6475,8 @@ class BOQService:
                 windows in opposite directions without failing.
             boq_id: The bill being priced, so that a base date nothing can read
                 names the bill it came from in the log rather than only itself.
+            field: Which column the date came from, ``base_date`` or
+                ``tax_date``, so that the log names the field to fix.
 
         Returns:
             A :class:`_SeededVat`. Its ``rate`` is the rate as a decimal-string
@@ -6506,9 +6521,10 @@ class BOQService:
             # stop it - refusing to price a project is worse than pricing it at
             # today's rate - so the log is the only thing that reports it.
             logger.warning(
-                "BOQ %s states base date %r, which is not a date the platform reads (%s); "
+                "BOQ %s states %s %r, which is not a date the platform reads (%s); "
                 "the bill is taxed at today's rate instead of its own",
                 boq_id,
+                "tax date" if field == "tax_date" else "base date",
                 stated,
                 ", ".join(ACCEPTED_SHAPES),
             )
@@ -6649,7 +6665,11 @@ class BOQService:
         rate_source = "project"
         unanswered_on: str | None = None
         if vat_rate is None:
-            seeded = await self._seeded_vat_rate(country_code, getattr(boq, "base_date", None), boq_id)
+            # The tax date, not the price base: a bill priced at 2025 rates
+            # for works in 2026 is taxed at 2026's rate. A bill that states no
+            # tax date is taxed on its base date, exactly as before the field.
+            tax_field, tax_day = tax_point(getattr(boq, "tax_date", None), getattr(boq, "base_date", None))
+            seeded = await self._seeded_vat_rate(country_code, tax_day, boq_id, field=tax_field)
             vat_rate, unanswered_on = seeded.rate, seeded.unanswered_on
             rate_source = "country_seed"
         if vat_rate is None:
@@ -7735,6 +7755,7 @@ class BOQService:
             approved_by=boq["approved_by"],
             approved_at=boq["approved_at"],
             base_date=boq["base_date"],
+            tax_date=boq["tax_date"],
             estimate_type=boq["estimate_type"],
             parent_estimate_id=boq["parent_estimate_id"],
             variation_request_id=boq["variation_request_id"],
@@ -7926,6 +7947,7 @@ class BOQService:
             approved_by=boq.approved_by,
             approved_at=boq.approved_at,
             base_date=boq.base_date,
+            tax_date=boq.tax_date,
             estimate_type=boq.estimate_type,
             parent_estimate_id=boq.parent_estimate_id,
             variation_request_id=boq.variation_request_id,

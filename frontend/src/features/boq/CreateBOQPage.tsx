@@ -42,6 +42,15 @@ const IMPORT_STANDARDS: { region: string; standard: string; exts: string[] }[] =
 
 const IMPORT_ACCEPT = Array.from(new Set(IMPORT_STANDARDS.flatMap((s) => s.exts))).join(',');
 
+/**
+ * The shapes the server reads a price base or a tax date in: a day, a month, a
+ * quarter or a year (`app.modules.boq.base_date`). Mirrored here only so the
+ * form can say what is wrong before the round trip; the server stays the judge.
+ */
+const DATE_SHAPE = /^\d{4}(-\d{2}(-\d{2})?|-[Qq][1-4])?$/;
+
+const isReadableDate = (value: string): boolean => value === '' || DATE_SHAPE.test(value);
+
 export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQModalProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -55,6 +64,11 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
   const [selectedProjectId, setSelectedProjectId] = useState(initialProjectId);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  // Blank tax date means "same as the price base": the server stores null
+  // and taxes the bill on its base date, so a later change to the base date
+  // still moves the tax date of a bill that never chose its own.
+  const [baseDate, setBaseDate] = useState('');
+  const [taxDate, setTaxDate] = useState('');
   const [startMode, setStartMode] = useState<StartMode>('empty');
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
@@ -74,6 +88,8 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
       setSelectedProjectId(initialProjectId);
       setName('');
       setDescription('');
+      setBaseDate('');
+      setTaxDate('');
       setStartMode('empty');
       setFile(null);
       setBusy(false);
@@ -101,6 +117,11 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
     touched && startMode === 'import' && !file
       ? t('boq.import_needs_file', { defaultValue: 'Choose a file to import, or switch to an empty BOQ.' })
       : undefined;
+  const dateShapeError = t('boq.date_shape_error', {
+    defaultValue: 'Use a day, a month, a quarter or a year: 2026-03-15, 2026-03, 2026-Q1 or 2026',
+  });
+  const baseDateError = isReadableDate(baseDate.trim()) ? undefined : dateShapeError;
+  const taxDateError = isReadableDate(taxDate.trim()) ? undefined : dateShapeError;
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -110,6 +131,7 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
 
     if (!selectedProjectId || !effectiveName) return;
     if (startMode === 'import' && !file) return;
+    if (baseDateError || taxDateError) return;
 
     setBusy(true);
     try {
@@ -117,6 +139,8 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
         project_id: selectedProjectId,
         name: effectiveName,
         description,
+        base_date: baseDate.trim() || null,
+        tax_date: taxDate.trim() || null,
       });
 
       if (startMode === 'import' && file) {
@@ -389,6 +413,33 @@ export function CreateBOQModal({ open, onClose, defaultProjectId }: CreateBOQMod
               placeholder={t('boq.scope_placeholder', { defaultValue: 'Scope of this BOQ...' })}
               rows={2}
               className="w-full rounded-lg border border-border px-3 py-2.5 text-sm text-content-primary placeholder:text-content-tertiary bg-surface-primary focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent transition-all duration-fast ease-oe hover:border-content-tertiary resize-none"
+            />
+          </div>
+
+          {/* Price base date and tax date. Two days, not one: a bill priced at
+              last year's rates for works carried out this year is taxed at
+              this year's rate. Blank tax date follows the price base. */}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:items-start">
+            <Input
+              label={t('boq.base_date_label', { defaultValue: 'Price base date' })}
+              value={baseDate}
+              onChange={(e) => setBaseDate(e.target.value)}
+              placeholder="2026-Q1"
+              maxLength={20}
+              error={baseDateError}
+              data-testid="create-boq-base-date"
+            />
+            <Input
+              label={t('boq.tax_date_label', { defaultValue: 'Tax date' })}
+              value={taxDate}
+              onChange={(e) => setTaxDate(e.target.value)}
+              placeholder={baseDate.trim() || t('boq.tax_date_placeholder', { defaultValue: 'Same as price base date' })}
+              maxLength={20}
+              error={taxDateError}
+              hint={t('boq.tax_date_hint', {
+                defaultValue: 'VAT is charged at the rate in force on this date. Leave it empty to use the price base date.',
+              })}
+              data-testid="create-boq-tax-date"
             />
           </div>
 

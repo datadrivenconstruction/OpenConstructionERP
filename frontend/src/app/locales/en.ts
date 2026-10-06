@@ -39969,6 +39969,12 @@ const resource = {
     "tendering.bid_late": "Late",
     "tendering.bidder_note": "Note from the bidder",
     // --- /Bidder price-entry link ---
+    // --- BOQ price base date and tax date ---
+    "boq.base_date_label": "Price base date",
+    "boq.tax_date_label": "Tax date",
+    "boq.tax_date_placeholder": "Same as price base date",
+    "boq.tax_date_hint": "VAT is charged at the rate in force on this date. Leave it empty to use the price base date.",
+    "boq.date_shape_error": "Use a day, a month, a quarter or a year: 2026-03-15, 2026-03, 2026-Q1 or 2026",
   }
 } as { translation: Record<string, string> };
 

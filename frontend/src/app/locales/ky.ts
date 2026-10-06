@@ -45373,6 +45373,12 @@ const resource = {
     "tendering.bid_late": "Кечиктирилген",
     "tendering.bidder_note": "Катышуучудан эскертүү",
     // --- /Bidder price-entry link ---
+    // --- BOQ price base date and tax date ---
+    "boq.base_date_label": "Баа базасынын күнү",
+    "boq.tax_date_label": "Салык күнү",
+    "boq.tax_date_placeholder": "Баа базасынын күнү менен бирдей",
+    "boq.tax_date_hint": "КНС ушул күнү колдонулган чен боюнча эсептелет. Баа базасынын күнүн колдонуу үчүн бош калтырыңыз.",
+    "boq.date_shape_error": "Күндү, айды, чейректи же жылды киргизиңиз: 2026-03-15, 2026-03, 2026-Q1 же 2026",
   }
 } as { translation: Record<string, string> };
 

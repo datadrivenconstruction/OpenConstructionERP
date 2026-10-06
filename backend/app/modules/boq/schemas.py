@@ -27,6 +27,8 @@ from pydantic import (
     model_validator,
 )
 
+from app.modules.boq.base_date import ACCEPTED_SHAPES, price_base_day
+
 #: What a price stands on, as a closed vocabulary - issue #453.
 #:
 #: Ordered from the strongest evidence to the weakest, and that order is the
@@ -188,6 +190,43 @@ def _refuse_stored_tax_rate(value: Any) -> Any:
     return value
 
 
+#: The ``tax_date`` field's description, shared by create and update.
+TAX_DATE_DESCRIPTION = (
+    "The date the bill's VAT is resolved on, when it differs from the price base: a bill priced "
+    "at 2025 rates for works carried out in 2026 is taxed at the 2026 rate. Same shapes as "
+    "base_date (2026-03-15, 2026-03, 2026-Q1, 2026; a period is read as its first day). Null or "
+    "blank means the bill is taxed on its base_date."
+)
+
+
+def _readable_tax_date(value: str | None) -> str | None:
+    """Accept a tax date only in a shape the tax lookup can read.
+
+    ``base_date`` stores whatever it is sent and reports an unreadable value,
+    because rows written before its parser existed hold such values. A tax
+    date has no such rows, and storing one the lookup cannot read would tax
+    the bill at today's rate while its own field said otherwise, so it is
+    refused here instead.
+
+    Args:
+        value: The stripped ``tax_date`` the caller sent, or ``None``.
+
+    Returns:
+        The value, or ``None`` for a blank, which means "follow the base date".
+
+    Raises:
+        ValueError: When the value is not a day, month, quarter or year.
+    """
+    if value is None or not value.strip():
+        return None
+    if price_base_day(value) is None:
+        raise ValueError(
+            f"tax_date {value!r} is not a date the tax lookup can read; "
+            f"state a day, a month, a quarter or a year ({', '.join(ACCEPTED_SHAPES)})"
+        )
+    return value.strip()
+
+
 # ── BOQ schemas ───────────────────────────────────────────────────────────────
 
 
@@ -221,12 +260,18 @@ class BOQCreate(BaseModel):
         max_length=20,
         description=(
             "Base date / price level reference: the date the unit rates are current at, and the "
-            "date the bill's tax is resolved on. A day (2026-03-15), a month (2026-03), a quarter "
-            "(2026-Q1) or a year (2026); a period is read as its first day. Free text by design, "
-            "so anything else is stored and reported rather than refused - see "
-            "app.modules.boq.base_date."
+            "date the bill's tax is resolved on unless tax_date says otherwise. A day "
+            "(2026-03-15), a month (2026-03), a quarter (2026-Q1) or a year (2026); a period is "
+            "read as its first day. Free text by design, so anything else is stored and reported "
+            "rather than refused - see app.modules.boq.base_date."
         ),
         examples=["2026-Q2"],
+    )
+    tax_date: str | None = Field(
+        default=None,
+        max_length=20,
+        description=TAX_DATE_DESCRIPTION,
+        examples=["2026-01-01"],
     )
     #: Accepted as ``null`` and refused otherwise - see
     #: :data:`TAX_RATE_NOT_STORED_MESSAGE` for where a bill's tax lives and
@@ -258,6 +303,11 @@ class BOQCreate(BaseModel):
     def _no_stored_tax_rate(cls, v: Any) -> Any:
         return _refuse_stored_tax_rate(v)
 
+    @field_validator("tax_date", mode="after")
+    @classmethod
+    def _tax_date_readable(cls, v: str | None) -> str | None:
+        return _readable_tax_date(v)
+
 
 class BOQUpdate(BaseModel):
     """Partial update for a BOQ."""
@@ -281,6 +331,9 @@ class BOQUpdate(BaseModel):
     metadata: dict[str, Any] | None = None
     estimate_type: str | None = Field(default=None, max_length=50)
     base_date: str | None = Field(default=None, max_length=20)
+    #: An explicit ``null`` (or blank) clears it, which makes the bill follow
+    #: its base date again; leaving the key out leaves it alone.
+    tax_date: str | None = Field(default=None, max_length=20, description=TAX_DATE_DESCRIPTION)
     #: Same contract as ``BOQCreate.tax_rate``, plus ``exclude``, which is
     #: load-bearing here and only here. ``BOQService.update_boq`` dumps this
     #: model with ``exclude_unset=True`` and hands the result to
@@ -311,6 +364,11 @@ class BOQUpdate(BaseModel):
     def _no_stored_tax_rate(cls, v: Any) -> Any:
         return _refuse_stored_tax_rate(v)
 
+    @field_validator("tax_date", mode="after")
+    @classmethod
+    def _tax_date_readable(cls, v: str | None) -> str | None:
+        return _readable_tax_date(v)
+
 
 class BOQResponse(BaseModel):
     """BOQ returned from the API."""
@@ -332,6 +390,8 @@ class BOQResponse(BaseModel):
 
     # Phase 12.2 lock & revision fields
     base_date: str | None = None
+    #: Null when the bill is taxed on its base date.
+    tax_date: str | None = None
     estimate_type: str | None = None
     is_locked: bool = False
     parent_estimate_id: UUID | None = None

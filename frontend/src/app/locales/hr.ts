@@ -45500,6 +45500,12 @@ const resource = {
     "tendering.bidder_note": "Napomena ponuditelja",
     // --- /Bidder price-entry link ---
     // --- /Learn ---
+    // --- BOQ price base date and tax date ---
+    "boq.base_date_label": "Datum cjenovne osnovice",
+    "boq.tax_date_label": "Datum oporezivanja",
+    "boq.tax_date_placeholder": "Isto kao datum cjenovne osnovice",
+    "boq.tax_date_hint": "PDV se obračunava po stopi koja vrijedi na taj datum. Ostavite prazno za korištenje datuma cjenovne osnovice.",
+    "boq.date_shape_error": "Unesite dan, mjesec, tromjesečje ili godinu: 2026-03-15, 2026-03, 2026-Q1 ili 2026",
   }
 } as { translation: Record<string, string> };
 

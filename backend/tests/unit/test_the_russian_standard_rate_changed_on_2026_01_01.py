@@ -76,9 +76,12 @@ What the decision does not claim is that the base date and the tax point are
 the same thing in law. ``base_date`` is the price level reference, the date the
 unit rates are indexed to, while the tax service wording keys the new rate on
 realisation of the works from 1 January 2026 whatever date the contract
-carries. Those remain two axes, and a bill indexed to 2025 prices for works
-performed in 2026 is now seeded at 20 where the works themselves attract 22.
-That is deliberate: the seeded number is a suggestion about the money the bill
+carries. Those are two axes, and the bill now carries both: ``BOQ.tax_date``,
+when stated, is the date the rate is resolved on, and ``base_date`` decides
+only when it is blank. A bill indexed to 2025 prices for works performed in
+2026 states tax date 2026 and is seeded at 22; see
+``tests/unit/test_a_bill_priced_at_last_years_rates_is_taxed_on_its_own_tax_date``.
+Either way the seeded number is a suggestion about the money the bill
 is written in, and both the project's ``default_vat_rate`` and the bill's own
 ``tax_rate`` override it where the works say otherwise.
 """

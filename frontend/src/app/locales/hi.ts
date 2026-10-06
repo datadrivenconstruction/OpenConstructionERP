@@ -45260,6 +45260,12 @@ const resource = {
     "tendering.bid_late": "देर से",
     "tendering.bidder_note": "बोलीदाता का नोट",
     // --- /Bidder price-entry link ---
+    // --- BOQ price base date and tax date ---
+    "boq.base_date_label": "मूल्य आधार तिथि",
+    "boq.tax_date_label": "कर तिथि",
+    "boq.tax_date_placeholder": "मूल्य आधार तिथि के समान",
+    "boq.tax_date_hint": "इस तिथि को लागू दर से कर लगाया जाता है। मूल्य आधार तिथि का उपयोग करने के लिए इसे खाली छोड़ें।",
+    "boq.date_shape_error": "दिन, महीना, तिमाही या वर्ष लिखें: 2026-03-15, 2026-03, 2026-Q1 या 2026",
   }
 } as { translation: Record<string, string> };
 

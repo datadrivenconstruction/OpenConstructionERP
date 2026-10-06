@@ -46562,6 +46562,12 @@ const resource = {
     "tendering.bidder_note": "Uwaga od oferenta",
     // --- /Bidder price-entry link ---
     // --- /Learn ---
+    // --- BOQ price base date and tax date ---
+    "boq.base_date_label": "Data bazy cenowej",
+    "boq.tax_date_label": "Data podatkowa",
+    "boq.tax_date_placeholder": "Taka sama jak data bazy cenowej",
+    "boq.tax_date_hint": "VAT jest naliczany według stawki obowiązującej w tym dniu. Pozostaw puste, aby użyć daty bazy cenowej.",
+    "boq.date_shape_error": "Podaj dzień, miesiąc, kwartał lub rok: 2026-03-15, 2026-03, 2026-Q1 lub 2026",
   }
 } as { translation: Record<string, string> };
 

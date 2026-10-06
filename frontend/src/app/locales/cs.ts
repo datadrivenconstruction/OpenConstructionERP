@@ -46331,6 +46331,12 @@ const resource = {
     "tendering.bidder_note": "Poznámka od uchazeče",
     // --- /Bidder price-entry link ---
     // --- /Learn ---
+    // --- BOQ price base date and tax date ---
+    "boq.base_date_label": "Datum cenové základny",
+    "boq.tax_date_label": "Datum zdanitelného plnění",
+    "boq.tax_date_placeholder": "Stejné jako datum cenové základny",
+    "boq.tax_date_hint": "DPH se účtuje sazbou platnou k tomuto datu. Ponechte prázdné, chcete-li použít datum cenové základny.",
+    "boq.date_shape_error": "Zadejte den, měsíc, čtvrtletí nebo rok: 2026-03-15, 2026-03, 2026-Q1 nebo 2026",
   }
 } as { translation: Record<string, string> };
 

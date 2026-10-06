@@ -145,6 +145,10 @@
     "base_date_readable": {
       "fail": "La fecha base '{base_date}' no es una fecha, por lo que la medición se grava al tipo de hoy y no al suyo propio",
       "suggestion": "Indique la base de precios como día, mes, trimestre o año ({shapes})"
+    },
+    "tax_date_readable": {
+      "fail": "La fecha fiscal '{tax_date}' no es una fecha, por lo que la medición se grava al tipo de hoy y no al suyo propio",
+      "suggestion": "Indique la fecha fiscal como día, mes, trimestre o año ({shapes}), o déjela vacía para gravar la medición según su fecha base"
     }
   },
   "din276": {
