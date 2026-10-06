@@ -524,6 +524,9 @@ _unit_test_scope = False
 # collect them mid-flight (which would raise "Task was destroyed but it is
 # pending"). The done-callback drops each task once it finishes.
 _pending_event_tasks: set = set()
+# The shim replaces production publish_detached, so its tasks must remain
+# visible to the same lifespan drain before a later test replaces DB factories.
+_event_bus._extra_task_sets.append(_pending_event_tasks)
 
 
 def _schedule_publish(coro):

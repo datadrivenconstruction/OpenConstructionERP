@@ -92,12 +92,14 @@ describe('AIConfigurationCard, OpenAI-compatible endpoint', () => {
   });
 
   it('refuses a timeout outside the range and names the range', async () => {
-    getSettings.mockResolvedValue(settingsFor('vllm'));
+    getSettings.mockResolvedValue(settingsFor('vllm', { timeouts: { vllm: 240 } }));
     renderCard();
 
-    // The timeout field shows for every provider, so wait until the saved
-    // settings have picked the endpoint before typing into it.
+    // The provider control renders before the effect hydrates its saved options.
+    // Observe the saved timeout itself before editing, so that pending hydration
+    // cannot replace the invalid value this test is checking.
     await screen.findByLabelText('Tool calling');
+    await waitFor(() => expect(screen.getByLabelText('Timeout (seconds)')).toHaveValue(240));
     fireEvent.change(screen.getByLabelText('Timeout (seconds)'), { target: { value: '5' } });
 
     // i18next may group the upper bound ("1,800"), so match the digits loosely.

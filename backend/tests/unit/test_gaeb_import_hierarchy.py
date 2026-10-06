@@ -89,6 +89,10 @@ class _RecordingService:
     async def add_markup(self, *args: Any, **kwargs: Any) -> Any:
         raise AssertionError("the Frankfurt fixture carries no markup items")
 
+    async def list_markups(self, boq_id: Any) -> list[Any]:  # noqa: ARG002
+        """The empty destination has no earlier imported deduction credit."""
+        return []
+
 
 def _by_ordinal(service: _RecordingService) -> dict[str, _CreatedPosition]:
     return {p.ordinal: p for p in service.created}

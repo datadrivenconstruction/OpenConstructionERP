@@ -183,6 +183,31 @@ def test_the_application_bus_tracks_log_failures_tasks() -> None:
     assert any(s is events_module._DETACHED_TASKS for s in events_module.event_bus._extra_task_sets)
 
 
+async def test_application_drain_waits_for_the_test_publish_shim() -> None:
+    """API lifespans must drain shim publications before the next test patches DB sessions."""
+    import sys
+
+    conftest_path = pathlib.Path(__file__).resolve().parents[1] / "conftest.py"
+    shim = next(
+        module
+        for module in tuple(sys.modules.values())
+        if getattr(module, "__file__", None) and pathlib.Path(module.__file__).resolve() == conftest_path
+    )
+    seen = []
+
+    async def publication():
+        await asyncio.sleep(0)
+        seen.append("costs.items.bulk_imported")
+
+    task = shim._schedule_publish(publication())
+    try:
+        assert task in events_module.event_bus.pending_tasks()
+        await events_module.event_bus.drain(timeout=2)
+        assert task.done() and seen == ["costs.items.bulk_imported"]
+    finally:
+        await task
+
+
 async def test_a_zero_budget_cancels_without_waiting() -> None:
     bus = EventBus()
 
