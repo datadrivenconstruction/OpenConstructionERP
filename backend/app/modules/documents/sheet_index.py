@@ -20,11 +20,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-# Separator characters that only differ by drafting style. Collapsing them lets
-# 'A-101', 'A 101' and 'a.101' all key to the same normalized 'A101'. Kept
-# deliberately small (hyphen / dot / underscore / whitespace) so genuinely
-# different numbers are not merged.
-_SEPARATORS = re.compile(r"[\s._\-]+")
+from app.modules.documents.sheet_fields import extract_inline_revision, sheet_chain_key
 
 # A cell "looks like" a sheet number when it is short, carries at least one
 # digit, and reads as an optional discipline prefix followed by digits and a
@@ -32,10 +28,6 @@ _SEPARATORS = re.compile(r"[\s._\-]+")
 # find the number column in a table whose header is unclear.
 _SHEET_NUMBER_CELL = re.compile(r"^[A-Za-z]{0,4}[\s._\-]?\d[\w.\-/]*$")
 
-# Revision token embedded in free text ("Rev C", "REVISION: 3"). Mirrors the
-# revision pattern in ``documents.service.detect_sheet_info`` so the pasted and
-# title-block vocabularies stay in step.
-_REVISION_INLINE = re.compile(r"(?:REV(?:ISION)?\.?\s*(?:NO\.?|#|:)?\s*)([A-Z0-9]+)", re.IGNORECASE)
 
 # Header cell vocabulary for column identification.
 _NUMBER_HEADERS = ("SHEET", "DWG", "DRAWING", "NO", "NUMBER", "REF")
@@ -68,25 +60,25 @@ class ReconcileResult:
 def normalize_sheet_number(raw: str | None) -> str:
     """Normalize a sheet number to a comparison key.
 
-    Uppercases, strips, and drops the separator characters that only differ by
-    drafting style so 'A-101', 'A 101' and 'a.101' all key to 'A101'. Every
-    alphanumeric character is preserved, so genuinely different numbers stay
-    distinct. The same function must be applied to expected and actual numbers,
-    or every sheet mis-matches.
+    The revision stack's own key, :func:`sheet_chain_key`: case, separators
+    and leading zeros are drafting style, so 'A-101', 'A 101', 'a.101' and
+    'A-0101' all key to 'A101', and 'A-01' to 'A1' like 'A-1'. It used to keep
+    leading zeros, so the register stacked A-01 and A-1 as one drawing while
+    this check reported one of them missing. The same function must be applied
+    to expected and actual numbers, or every sheet mis-matches.
     """
-    if not raw:
-        return ""
-    return _SEPARATORS.sub("", raw.strip().upper())
+    return sheet_chain_key(raw)
 
 
 def _extract_inline_revision(text: str | None) -> str | None:
-    """Pull a trailing revision token ('Rev C') out of a free-text cell/line."""
-    if not text:
-        return None
-    match = _REVISION_INLINE.search(text)
-    if match:
-        return match.group(1).strip()
-    return None
+    """Pull a revision token ('Rev C') out of a free-text cell/line.
+
+    Read through the title block reader's own pattern, so a pasted register and
+    a drawing page cannot disagree about what a revision label is. It used to be
+    a copy of the old page pattern, which read "Pianta porta scorrevole" as
+    revision "ole".
+    """
+    return extract_inline_revision(text)
 
 
 def _looks_like_sheet_number(cell: str | None) -> bool:
@@ -292,7 +284,10 @@ def reconcile(expected: list[ExpectedSheet], actual: list[dict]) -> ReconcileRes
     """
     expected_by_norm: dict[str, ExpectedSheet] = {}
     for e in expected:
-        norm = e.sheet_number_norm or normalize_sheet_number(e.sheet_number)
+        # Recomputed from the number whenever there is one: a key stored by an
+        # earlier normaliser (a saved report's "A01") must not keep apart what
+        # the current one joins.
+        norm = normalize_sheet_number(e.sheet_number) or e.sheet_number_norm
         if norm:
             expected_by_norm[norm] = e
 

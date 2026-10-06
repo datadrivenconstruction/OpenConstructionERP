@@ -166,10 +166,10 @@ async def test_split_creates_one_row_per_page_in_page_order(session: AsyncSessio
 async def test_split_reads_the_title_block_fields_the_drawer_shows(session: AsyncSession) -> None:
     """Number, title, scale and revision come off the page; discipline does not.
 
-    Discipline is a lookup of the number's first character, not anything read
-    from the drawing. Two columns the drawer has are never written by the
-    split at all: ``revision_date`` is not parsed, and ``previous_version_id``
-    is never set, so a split row's version history is always empty.
+    Discipline is a lookup of the number's prefix, not anything read from the
+    drawing. This page carries no issue date, so ``revision_date`` stays unset
+    (a labelled date is read, see ``test_sheet_title_block_fields``), and a
+    first upload has nothing to stack on, so ``previous_version_id`` is unset.
     """
     project_id, user_id = await _seed_project(session)
     pdf = _pdf_with_pages([["SHEET NO: M-401", "SHEET TITLE: Ventilation Layout", "REV C", "SCALE: 1:50"]])
@@ -608,9 +608,10 @@ async def test_which_row_a_revision_supersedes_does_not_depend_on_insertion_orde
 ) -> None:
     """Two current rows on one number resolve to the same one either way round.
 
-    ``current_by_sheet_numbers`` is what decides which row an incoming revision
-    records as its predecessor, and it picks by reading the rows in ascending
-    order and letting the last one win. It ordered on ``created_at`` alone.
+    ``current_by_chain_key`` is what decides which row an incoming revision
+    records as its predecessor: the stacker takes the last row of a key's
+    group, read in ascending order. The lookup this replaced,
+    ``current_by_sheet_numbers``, once ordered on ``created_at`` alone.
 
     That column is written per row by a Python default, so it is only as fine as
     the clock underneath it, and on a coarse one an entire import batch carries
@@ -675,8 +676,9 @@ async def test_which_row_a_revision_supersedes_does_not_depend_on_insertion_orde
         await session.flush()
 
     repo = SheetRepository(session)
-    picked_forwards = (await repo.current_by_sheet_numbers(forwards, ["A-101"]))["A-101"]
-    picked_backwards = (await repo.current_by_sheet_numbers(backwards_project, ["A-101"]))["A-101"]
+    # The stacker takes the last row of a key's group as the latest.
+    picked_forwards = (await repo.current_by_chain_key(forwards))["A101"][-1]
+    picked_backwards = (await repo.current_by_chain_key(backwards_project))["A101"][-1]
 
     # Both projects hold the same two rows. The one written second in each is a
     # different id, so a resolution that follows arrival returns the high id for

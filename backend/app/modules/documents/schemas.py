@@ -7,11 +7,11 @@ Defines create, update, and response schemas for documents.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.modules.validation.schemas import ValidationResultItem
 
@@ -255,6 +255,40 @@ class SheetUpdate(BaseModel):
     scale: str | None = Field(default=None, max_length=50)
     is_current: bool | None = None
     metadata: dict[str, Any] | None = None
+
+    @field_validator("sheet_number", "sheet_title", "discipline", "revision", "scale", mode="after")
+    @classmethod
+    def _blank_is_unset(cls, value: str | None) -> str | None:
+        """A field cleared in the edit form is stored as unset, not as "".
+
+        An empty sheet number would otherwise be a value two sheets could stack
+        on, and an empty revision one the order comparison would have to rank.
+        """
+        return value or None
+
+    @field_validator("revision_date", mode="after")
+    @classmethod
+    def _date_is_utc(cls, value: datetime | None) -> datetime | None:
+        """A bare date from the edit form ("2025-03-12") is that day at midnight UTC."""
+        if value is not None and value.tzinfo is None:
+            return value.replace(tzinfo=UTC)
+        return value
+
+
+class SheetRereadSummary(BaseModel):
+    """What re-reading a project's title blocks from the stored drawings changed."""
+
+    sheets_checked: int = Field(description="Sheets of the project that were considered.")
+    sheets_updated: int = Field(description="Sheets with at least one field changed by the re-read.")
+    fields_updated: int = Field(description="Fields changed across all sheets, discipline included.")
+    files_missing: int = Field(description="Sheets left as they were because their PDF could not be read.")
+    current_conflicts: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Ids of sheets made current or superseded by hand whose corrected revisions say otherwise. "
+            "The hand setting was kept; the sheet needs a look."
+        ),
+    )
 
 
 class SheetResponse(BaseModel):

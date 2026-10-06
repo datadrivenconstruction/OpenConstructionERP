@@ -30,10 +30,12 @@ vi.mock('@/shared/lib/api', async () => {
   return {
     ...actual,
     apiGet: vi.fn(),
+    apiPost: vi.fn(),
   };
 });
 
-import { apiGet } from '@/shared/lib/api';
+import { apiGet, apiPost } from '@/shared/lib/api';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { SheetsIndexPage } from './SheetsIndexPage';
 
@@ -506,5 +508,70 @@ describe('SheetsIndexPage', () => {
     // The chip row comes from its own query and goes stale in exactly the
     // same way, so it has to be invalidated too.
     expect(screen.getByRole('button', { name: /Structural/ })).toBeInTheDocument();
+  });
+});
+
+describe('SheetsIndexPage - re-reading title blocks', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useProjectContextStore.getState().clearProject();
+    useProjectContextStore.getState().setActiveProject('proj-1', 'Riverside HQ');
+    useAuthStore.setState({ userRole: 'editor' });
+  });
+
+  afterEach(() => {
+    useAuthStore.setState({ userRole: null });
+  });
+
+  it('asks before re-reading, then posts for the active project and reports the outcome', async () => {
+    routeApi();
+    (apiPost as any).mockResolvedValue({
+      sheets_checked: 2,
+      sheets_updated: 1,
+      fields_updated: 3,
+      files_missing: 1,
+      current_conflicts: ['sheet-1'],
+    });
+    renderPage();
+
+    fireEvent.click(await screen.findByRole('button', { name: /Re-read title blocks/ }));
+    // Nothing is sent until the confirmation is accepted.
+    const dialog = await screen.findByRole('alertdialog');
+    expect(dialog).toHaveTextContent('Fields you corrected by hand are not changed');
+    expect(apiPost).not.toHaveBeenCalled();
+
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Re-read' }));
+
+    await waitFor(() =>
+      expect(apiPost).toHaveBeenCalledWith(
+        '/v1/documents/sheets/reread-title-blocks/?project_id=proj-1',
+      ),
+    );
+    expect(await screen.findByText(/Sheets updated: 1 of 2\./)).toBeInTheDocument();
+    // The plural form depends on whether the test i18n loaded en.ts, the reason does not.
+    expect(screen.getByRole('status')).toHaveTextContent(/PDF could not be read/);
+    // A current state set by hand that the revisions contradict is kept and named, not resolved.
+    expect(screen.getByRole('alert')).toHaveTextContent(/set by hand/);
+  });
+
+  it('sends nothing when the confirmation is cancelled', async () => {
+    routeApi();
+    renderPage();
+
+    fireEvent.click(await screen.findByRole('button', { name: /Re-read title blocks/ }));
+    const dialog = await screen.findByRole('alertdialog');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+
+    await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument());
+    expect(apiPost).not.toHaveBeenCalled();
+  });
+
+  it('is not offered to a viewer', async () => {
+    useAuthStore.setState({ userRole: 'viewer' });
+    routeApi();
+    renderPage();
+
+    expect(await screen.findByText('A-101')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Re-read title blocks/ })).not.toBeInTheDocument();
   });
 });

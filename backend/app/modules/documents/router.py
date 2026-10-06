@@ -68,6 +68,7 @@ from app.modules.documents.schemas import (
     SheetCompletenessRequest,
     SheetCompletenessResponse,
     SheetListResponse,
+    SheetRereadSummary,
     SheetResponse,
     SheetUpdate,
     SheetVersionHistory,
@@ -1052,6 +1053,24 @@ async def split_pdf(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to split PDF into sheets",
         )
+
+
+@router.post("/sheets/reread-title-blocks/", response_model=SheetRereadSummary)
+async def reread_title_blocks(
+    session: SessionDep,
+    project_id: uuid.UUID = Query(...),
+    user_id: CurrentUserId = "",  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("documents.update")),
+    service: SheetService = Depends(_get_sheet_service),
+) -> SheetRereadSummary:
+    """Read every sheet's title block again from the PDF already stored.
+
+    For a register imported before the title block reader was fixed: the
+    fields it got wrong are read again and the revision stacks rebuilt, with
+    no re-upload. A field somebody corrected by hand is left alone.
+    """
+    await verify_project_access(project_id, user_id, session)
+    return SheetRereadSummary.model_validate(await service.reread_title_blocks(project_id))
 
 
 # ── Sheet completeness (drawing index reconciliation) ──────────────────

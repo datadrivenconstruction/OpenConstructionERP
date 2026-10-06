@@ -7,11 +7,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router-dom';
 import clsx from 'clsx';
 import {
+  AlertTriangle,
   ArrowRight,
   Check,
   FileStack,
   FileText,
   Layers,
+  RefreshCw,
   Ruler,
   Search,
   Upload,
@@ -29,12 +31,15 @@ import {
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { apiGet, type Page } from '@/shared/lib/api';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { fetchProjectList } from '@/shared/lib/projectList';
+import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
-import { splitPdfIntoSheets } from './api';
+import { rereadTitleBlocks, splitPdfIntoSheets, type SheetRereadSummary } from './api';
 import { SheetDetailDrawer } from './SheetDetailDrawer';
 import { buildSheetsInsights } from './sheetsInsights';
+import { earlierRevisionCounts, revisionOrderUnclear } from './sheetStack';
 import type { SheetRow } from './types';
 import { getIntlLocale } from '@/shared/lib/formatters';
 
@@ -112,9 +117,11 @@ function HowSheetsWork() {
     {
       icon: <FileStack size={14} className="text-oe-blue" />,
       title: t('sheets.flow_2_title', { defaultValue: 'Pages become sheets' }),
-      desc: t('sheets.flow_2_desc', {
+      // New key, not an edit of `sheets.flow_2_desc`, which is translated in
+      // every bundle and says nothing about dates, file names or stacking.
+      desc: t('sheets.flow_2_desc_stack', {
         defaultValue:
-          'Each page is read for its sheet number, title, scale and revision, and the discipline is taken from the number prefix.',
+          'Each page is read for its number, title, scale, revision and date, and a single-drawing PDF also by its file name. A newer revision of a sheet already here stacks on top of it.',
       }),
     },
     {
@@ -215,9 +222,14 @@ export function SheetsIndexPage() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [disciplineFilter, setDisciplineFilter] = useState<string | null>(null);
+  const [currentOnly, setCurrentOnly] = useState(false);
   const [openSheet, setOpenSheet] = useState<SheetRow | null>(null);
   const [splitError, setSplitError] = useState<string | null>(null);
   const [splitAdded, setSplitAdded] = useState<number | null>(null);
+  const [rereadAsked, setRereadAsked] = useState(false);
+  const [rereadResult, setRereadResult] = useState<SheetRereadSummary | null>(null);
+  const [rereadError, setRereadError] = useState<string | null>(null);
+  const canEdit = useHasPermission('documents.update');
   // One input for the whole page - both triggers open it. A second one would
   // duplicate the accessible name and give the register two half-states.
   const pdfInputRef = useRef<HTMLInputElement>(null);
@@ -274,6 +286,27 @@ export function SheetsIndexPage() {
     },
   });
 
+  /* For a register imported before the title block reader was fixed: every
+     sheet is read again from the PDF already stored, so a revision read as
+     "ole" or a number not read at all is corrected without a re-upload, which
+     would add a second copy of every drawing. Fields corrected by hand stay. */
+  const rereadMutation = useMutation({
+    mutationFn: () => rereadTitleBlocks(projectId),
+    onSuccess: (summary) => {
+      setRereadAsked(false);
+      setRereadError(null);
+      setRereadResult(summary);
+      queryClient.invalidateQueries({ queryKey: ['sheets', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['sheet-versions'] });
+      queryClient.invalidateQueries({ queryKey: ['sheet-disciplines', projectId] });
+    },
+    onError: (err: unknown) => {
+      setRereadAsked(false);
+      setRereadResult(null);
+      setRereadError(err instanceof Error ? err.message : String(err));
+    },
+  });
+
   function onPickPdf(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     // Clear the input, or picking the same file after a failure fires no
@@ -309,6 +342,7 @@ export function SheetsIndexPage() {
     const q = searchQuery.trim().toLowerCase();
     return sheets.filter((s) => {
       if (disciplineFilter && s.discipline !== disciplineFilter) return false;
+      if (currentOnly && !s.is_current) return false;
       if (!q) return true;
       const hay = [
         s.sheet_number,
@@ -322,7 +356,11 @@ export function SheetsIndexPage() {
         .toLowerCase();
       return hay.includes(q);
     });
-  }, [sheets, disciplineFilter, searchQuery]);
+  }, [sheets, disciplineFilter, currentOnly, searchQuery]);
+
+  /* How many revisions each row stands on, read off the loaded rows' links, so
+     a current sheet can say it is the top of a stack and not a lone upload. */
+  const earlierCounts = useMemo(() => earlierRevisionCounts(sheets), [sheets]);
 
   /* Insights are built from the rows the page already holds - no extra
      request. Built from the project's whole set rather than `filtered`: the
@@ -443,8 +481,55 @@ export function SheetsIndexPage() {
                 className={inputCls + ' pl-9'}
               />
             </div>
-            <div className="sm:ms-auto">{splitButton}</div>
+            <label className="inline-flex items-center gap-2 text-sm text-content-secondary">
+              <input
+                type="checkbox"
+                checked={currentOnly}
+                onChange={(e) => setCurrentOnly(e.target.checked)}
+                className="h-4 w-4 rounded border-border accent-oe-blue"
+              />
+              {t('sheets.filter_current_only', { defaultValue: 'Current revisions only' })}
+            </label>
+            <div className="sm:ms-auto flex flex-wrap items-center gap-2">
+              {canEdit && sheets.length > 0 && (
+                <Button
+                  variant="secondary"
+                  icon={<RefreshCw size={14} />}
+                  loading={rereadMutation.isPending}
+                  disabled={splitMutation.isPending}
+                  title={t('sheets.reread_hint', {
+                    defaultValue:
+                      'Read every sheet again from the stored PDFs. Fields you corrected by hand are kept.',
+                  })}
+                  onClick={() => {
+                    setRereadResult(null);
+                    setRereadError(null);
+                    setRereadAsked(true);
+                  }}
+                >
+                  {t('sheets.reread_cta', { defaultValue: 'Re-read title blocks' })}
+                </Button>
+              )}
+              {splitButton}
+            </div>
           </div>
+
+          <ConfirmDialog
+            open={rereadAsked}
+            variant="warning"
+            loading={rereadMutation.isPending}
+            title={t('sheets.reread_confirm_title', {
+              defaultValue: 'Re-read all title blocks?',
+            })}
+            message={t('sheets.reread_confirm_body', {
+              defaultValue:
+                'Every sheet in this project is read again from its stored PDF. Number, title, revision, date, scale and discipline are replaced with what is read now, and revision stacks are rebuilt. Fields you corrected by hand are not changed. Nothing is uploaded or deleted.',
+            })}
+            confirmLabel={t('sheets.reread_confirm_action', { defaultValue: 'Re-read' })}
+            cancelLabel={t('sheets.edit_cancel', { defaultValue: 'Cancel' })}
+            onConfirm={() => rereadMutation.mutate()}
+            onCancel={() => setRereadAsked(false)}
+          />
 
           {/* Hidden native input - both split triggers proxy their click here. */}
           <input
@@ -487,6 +572,53 @@ export function SheetsIndexPage() {
             </p>
           )}
 
+          {rereadMutation.isPending && (
+            <p role="status" className="mb-4 text-sm text-content-secondary">
+              {t('sheets.reread_running', {
+                defaultValue: 'Reading the stored drawings again. A large register takes a few minutes.',
+              })}
+            </p>
+          )}
+          {rereadError && (
+            <p
+              role="alert"
+              className="mb-4 rounded-lg border border-semantic-error/30 bg-semantic-error/5 px-3 py-2 text-sm text-semantic-error"
+            >
+              {t('sheets.reread_failed', { defaultValue: 'The title blocks could not be re-read.' })}{' '}
+              {rereadError}
+            </p>
+          )}
+          {rereadResult && !rereadMutation.isPending && (
+            <p role="status" className="mb-4 text-sm text-semantic-success">
+              {t('sheets.reread_done', {
+                defaultValue: 'Sheets updated: {{updated}} of {{checked}}.',
+                updated: rereadResult.sheets_updated,
+                checked: rereadResult.sheets_checked,
+              })}
+              {rereadResult.files_missing > 0 && (
+                <>
+                  {' '}
+                  {t('sheets.reread_missing', {
+                    defaultValue: '{{count}} sheets were left as they were: their PDF could not be read.',
+                    count: rereadResult.files_missing,
+                  })}
+                </>
+              )}
+            </p>
+          )}
+          {rereadResult && rereadResult.current_conflicts.length > 0 && !rereadMutation.isPending && (
+            <p
+              role="alert"
+              className="mb-4 rounded-lg border border-semantic-warning/30 bg-semantic-warning/5 px-3 py-2 text-sm text-content-primary"
+            >
+              {t('sheets.reread_conflicts', {
+                defaultValue:
+                  '{{count}} sheets keep the current or superseded state set by hand, although their revisions now say otherwise. Check them.',
+                count: rereadResult.current_conflicts.length,
+              })}
+            </p>
+          )}
+
           {/* Table */}
           {isLoading ? (
             <SkeletonTable rows={6} columns={7} />
@@ -494,12 +626,12 @@ export function SheetsIndexPage() {
             <EmptyState
               icon={<FileText size={28} strokeWidth={1.5} />}
               title={
-                searchQuery || disciplineFilter
+                searchQuery || disciplineFilter || currentOnly
                   ? t('sheets.no_results', { defaultValue: 'No matching sheets' })
                   : t('sheets.no_sheets', { defaultValue: 'No sheets indexed yet' })
               }
               description={
-                searchQuery || disciplineFilter
+                searchQuery || disciplineFilter || currentOnly
                   ? t('sheets.no_results_hint', {
                       defaultValue:
                         'Try adjusting the search box or pick a different discipline.',
@@ -516,7 +648,7 @@ export function SheetsIndexPage() {
               // Only on the "nothing indexed" branch. A search that matched
               // nothing is not fixed by uploading, and offering the upload
               // there would read as if the filter had eaten the register.
-              action={searchQuery || disciplineFilter ? undefined : splitButton}
+              action={searchQuery || disciplineFilter || currentOnly ? undefined : splitButton}
             />
           ) : (
             <>
@@ -595,12 +727,36 @@ export function SheetsIndexPage() {
                           )}
                         </td>
                         <td className="px-4 py-3">
-                          {s.revision ? (
-                            <Badge variant="neutral" size="sm">
-                              {s.revision}
-                            </Badge>
-                          ) : (
-                            <span className="text-content-quaternary">&mdash;</span>
+                          <span className="inline-flex items-center gap-1.5">
+                            {s.revision ? (
+                              <Badge variant="neutral" size="sm">
+                                {s.revision}
+                              </Badge>
+                            ) : (
+                              <span className="text-content-quaternary">&mdash;</span>
+                            )}
+                            {revisionOrderUnclear(s) && (
+                              <span
+                                role="img"
+                                title={t('sheets.revision_order_unclear', {
+                                  defaultValue: 'Revision order unclear, check',
+                                })}
+                                aria-label={t('sheets.revision_order_unclear', {
+                                  defaultValue: 'Revision order unclear, check',
+                                })}
+                                className="inline-flex text-semantic-warning"
+                              >
+                                <AlertTriangle size={14} aria-hidden="true" />
+                              </span>
+                            )}
+                          </span>
+                          {s.is_current && (earlierCounts.get(s.id) ?? 0) > 0 && (
+                            <span className="mt-0.5 block text-2xs text-content-tertiary">
+                              {t('sheets.stack_earlier', {
+                                defaultValue: '{{count}} earlier revisions',
+                                count: earlierCounts.get(s.id) ?? 0,
+                              })}
+                            </span>
                           )}
                         </td>
                         <td className="px-4 py-3 text-content-secondary">
@@ -652,7 +808,11 @@ export function SheetsIndexPage() {
         </>
       )}
 
-      <SheetDetailDrawer sheet={openSheet} onClose={() => setOpenSheet(null)} />
+      <SheetDetailDrawer
+        sheet={openSheet}
+        onClose={() => setOpenSheet(null)}
+        onSheetChange={setOpenSheet}
+      />
     </div>
   );
 }

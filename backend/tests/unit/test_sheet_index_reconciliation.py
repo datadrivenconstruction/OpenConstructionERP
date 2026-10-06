@@ -77,6 +77,22 @@ class TestNormalize:
         assert normalize_sheet_number(None) == ""
         assert normalize_sheet_number("   ") == ""
 
+    def test_leading_zeros_key_like_the_revision_stack(self) -> None:
+        # The register stacks A-01 and A-1 as one drawing, so the completeness
+        # check has to count them as one sheet too, or it reports missing a
+        # sheet the stack shows as present.
+        assert normalize_sheet_number("A-01") == normalize_sheet_number("A-1") == normalize_sheet_number("a_001")
+        assert normalize_sheet_number("TAV_01") == normalize_sheet_number("TAV-1")
+        assert normalize_sheet_number("A-10") != normalize_sheet_number("A-1")
+
+    def test_reconcile_matches_a_number_written_with_leading_zeros(self) -> None:
+        # The expected key is recomputed from the number, so a key stored by an
+        # older normaliser ("A01") cannot keep the two apart either.
+        result = reconcile([ExpectedSheet("A-01", "A01", revision="B")], [_act("A-1", rev="B")])
+        assert result.missing == []
+        assert result.extra == []
+        assert result.matched == ["A-01"]
+
 
 # ── reconcile ───────────────────────────────────────────────────────────────
 

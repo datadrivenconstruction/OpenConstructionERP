@@ -50,6 +50,7 @@ export const PERMISSION_MIN_ROLE = {
   'contracts.update': 'editor',
   'contracts.delete': 'manager',
   'contracts.submit_claim': 'editor',
+  'documents.update': 'editor',
   'boq.delete': 'editor',
   'bim.create': 'editor',
 } as const satisfies Record<string, RankedRole>;

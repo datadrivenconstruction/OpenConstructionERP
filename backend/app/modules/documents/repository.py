@@ -17,6 +17,7 @@ from sqlalchemy.sql.elements import ClauseElement
 
 from app.modules.documents.folder_permissions_models import FOLDER_SCOPED_CATEGORIES
 from app.modules.documents.models import Document, ProjectPhoto, Sheet
+from app.modules.documents.sheet_fields import sheet_chain_key
 
 # Columns a client is allowed to sort the document list by. Everything
 # else (dunder attributes like ``__class__`` that ``getattr`` happily
@@ -463,64 +464,89 @@ class SheetRepository:
                 forward_ids.add(s.id)
                 chain.append(s)
 
-        # Oldest first. The tiebreak matters: rows written by one ``create_many``
-        # share a flush and therefore a ``created_at``, so sorting on the
-        # timestamp alone leaves ties to whatever order the walk happened to
-        # append. The id is not chronological, but it is stable, which is what a
-        # caller reading a version history needs.
-        chain.sort(key=lambda s: (s.created_at, str(s.id)))
+        # Oldest first, in the order the links say. That is not always upload
+        # order: an older revision uploaded after a newer one is linked in
+        # beneath it, so its place is its depth below the root, not its
+        # timestamp. Rows at one depth (two pages of one upload claiming the
+        # same predecessor) fall back to the instant and then the id. The id
+        # tiebreak matters: rows written by one ``create_many`` share a flush
+        # and therefore a ``created_at``; the id is not chronological, but it is
+        # stable, which is what a caller reading a version history needs.
+        by_id = {s.id: s for s in chain}
+        depth: dict[uuid.UUID, int] = {}
+        for sheet in chain:
+            walk: list[uuid.UUID] = []
+            node: Sheet | None = sheet
+            while node is not None and node.id not in depth and node.id not in walk:
+                walk.append(node.id)
+                node = by_id.get(node.previous_version_id) if node.previous_version_id else None
+            base = depth.get(node.id, -1) if node is not None else -1
+            for offset, sheet_id in enumerate(reversed(walk), start=1):
+                depth[sheet_id] = base + offset
+        chain.sort(key=lambda s: (depth[s.id], s.created_at, str(s.id)))
         return chain
 
-    async def current_by_sheet_numbers(
-        self,
-        project_id: uuid.UUID,
-        sheet_numbers: list[str],
-    ) -> dict[str, Sheet]:
-        """Return the current sheet per number, for the numbers asked about.
+    async def all_for_project(self, project_id: uuid.UUID) -> list[Sheet]:
+        """Every sheet of a project, current and retired, oldest upload first."""
+        stmt = select(Sheet).where(Sheet.project_id == project_id).order_by(Sheet.created_at, Sheet.id)
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
 
-        The chain key for a sheet is ``(project_id, sheet_number)`` and not the
+    async def successors_of(self, sheet_id: uuid.UUID) -> list[Sheet]:
+        """Rows that name ``sheet_id`` as the revision they replaced."""
+        stmt = select(Sheet).where(Sheet.previous_version_id == sheet_id).order_by(Sheet.created_at, Sheet.id)
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())
+
+    async def current_by_chain_key(self, project_id: uuid.UUID) -> dict[str, list[Sheet]]:
+        """Return the project's current numbered sheets grouped by stack key.
+
+        The stack key is :func:`sheet_chain_key` of the number, and not the
         parent document, because a revised drawing set arrives as a new PDF and
         the whole point is to recognise that its A-201 supersedes the previous
-        A-201. That is deliberately a different key from the one
-        ``canonical_name_for`` builds for the ``FileVersion`` index, which
+        A-201, or A201, or A-0201. That is deliberately a different key from the
+        one ``canonical_name_for`` builds for the ``FileVersion`` index, which
         composes the document id in so that two unrelated PDFs do not merge into
         one history. The two answer different questions: this one answers what
         the project's current drawing set is.
 
+        The key is computed in Python, so every current numbered row of the
+        project is read. A register is hundreds of rows, not millions, and the
+        alternative is a normalised column every writer would have to keep in
+        step.
+
         Args:
             project_id: Project to look in.
-            sheet_numbers: Numbers to resolve. Empty input returns empty output
-                without a query.
 
         Returns:
-            Mapping of sheet number to its current row. A number with no current
-            row is absent from the mapping. A number that somehow has more than
-            one current row resolves to the later of them, and to one of them
-            rather than to whichever the plan happened to return, so a register
-            already carrying duplicates converges rather than forking further.
+            Mapping of stack key to its current rows, oldest first. More than
+            one row per key is normal for a bare number ("TAVOLA 1" of two
+            disciplines), and is also what a register already carrying
+            duplicates looks like; the caller picks among them. The order is
+            total, so the same rows always resolve the same way.
         """
-        if not sheet_numbers:
-            return {}
-
         stmt = (
             select(Sheet)
             .where(Sheet.project_id == project_id)
             .where(Sheet.is_current.is_(True))
-            .where(Sheet.sheet_number.in_(sheet_numbers))
+            .where(Sheet.sheet_number.isnot(None))
             # The id is not decoration. ``created_at`` is written per row by a
             # Python default, so it is only as fine as the clock underneath it,
             # and on a coarse one an entire import batch carries a single value.
             # Duplicates in this register come from exactly that, one import
             # writing the same number twice, which is the case where the
-            # timestamp has nothing left to order by. What this returns decides
-            # which row the incoming revision records as the one it replaces, so
-            # leaving that to the plan would let one upload link to a different
-            # predecessor than the same upload against the same rows elsewhere.
-            # Same tiebreak and same direction as ``get_version_chain`` above,
-            # so the two cannot disagree about which row is the later one.
+            # timestamp has nothing left to order by. Which row is the later one
+            # decides what an incoming revision records as the one it replaces,
+            # so leaving that to the plan would let one upload link to a
+            # different predecessor than the same upload against the same rows
+            # elsewhere. Same tiebreak and same direction as
+            # ``get_version_chain`` above, so the two cannot disagree.
             .order_by(Sheet.created_at.asc(), Sheet.id.asc())
         )
         result = await self.session.execute(stmt)
-        # Ascending order plus overwrite leaves the last row per number, which
-        # the total order above makes the later one rather than an arbitrary one.
-        return {s.sheet_number: s for s in result.scalars().all() if s.sheet_number}
+        grouped: dict[str, list[Sheet]] = {}
+        for sheet in result.scalars().all():
+            key = sheet_chain_key(sheet.sheet_number)
+            if key:
+                grouped.setdefault(key, []).append(sheet)
+        return grouped

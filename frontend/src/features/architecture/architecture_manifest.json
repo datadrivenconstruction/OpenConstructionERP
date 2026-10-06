@@ -82021,6 +82021,7 @@
         "service.py",
         "share_models.py",
         "share_service.py",
+        "sheet_fields.py",
         "sheet_index.py",
         "vector_adapter.py"
       ],
@@ -82523,6 +82524,13 @@
           "handler": "split_pdf",
           "response_model": "list[SheetResponse]",
           "request_schema": "UploadFile"
+        },
+        {
+          "method": "POST",
+          "path": "/sheets/reread-title-blocks/",
+          "handler": "reread_title_blocks",
+          "response_model": "SheetRereadSummary",
+          "request_schema": "None"
         },
         {
           "method": "POST",
@@ -83163,6 +83171,40 @@
               "name": "metadata",
               "type": "dict[str, Any] | None",
               "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "SheetRereadSummary",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What re-reading a project's title blocks from the stored drawings changed.",
+          "fields": [
+            {
+              "name": "sheets_checked",
+              "type": "int",
+              "description": "Sheets of the project that were considered."
+            },
+            {
+              "name": "sheets_updated",
+              "type": "int",
+              "description": "Sheets with at least one field changed by the re-read."
+            },
+            {
+              "name": "fields_updated",
+              "type": "int",
+              "description": "Fields changed across all sheets, discipline included."
+            },
+            {
+              "name": "files_missing",
+              "type": "int",
+              "description": "Sheets left as they were because their PDF could not be read."
+            },
+            {
+              "name": "current_conflicts",
+              "type": "list[str]",
+              "description": "Ids of sheets made current or superseded by hand whose corrected revisions say otherwise. The hand setting was kept; the sheet needs a look."
             }
           ]
         },
@@ -234491,10 +234533,10 @@
     },
     {
       "name": "file-manager",
-      "ts_files": 48,
+      "ts_files": 51,
       "css_files": 0,
-      "test_files": 11,
-      "total_files": 48
+      "test_files": 12,
+      "total_files": 51
     },
     {
       "name": "file-references",
@@ -236611,11 +236653,11 @@
     "total_models": 623,
     "total_columns": 7150,
     "total_relationships": 234,
-    "total_routes": 3746,
-    "total_schemas": 3549,
-    "total_python_files": 2266,
+    "total_routes": 3747,
+    "total_schemas": 3550,
+    "total_python_files": 2267,
     "frontend_features": 192,
-    "frontend_ts_files": 2937,
+    "frontend_ts_files": 2940,
     "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {

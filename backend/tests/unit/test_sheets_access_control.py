@@ -484,3 +484,43 @@ async def test_the_owner_can_check_completeness_of_their_own_project(
         )
 
     assert resp.status_code == 200, resp.text
+
+
+# ── Re-read title blocks ──────────────────────────────────────────────────
+
+
+async def test_rereading_a_foreign_registers_title_blocks_is_404_and_changes_nothing(
+    sheets_app: Any,
+    db_session: AsyncSession,
+) -> None:
+    """The re-read rewrites a whole project's sheets, so it is scoped like the split."""
+    from app.modules.documents.models import Sheet
+
+    project_id, sheet_id, attacker_id = await _seed_victim_and_attacker(db_session)
+
+    async with _as_user(sheets_app, attacker_id) as client:
+        resp = await client.post(f"{SHEETS_BASE}/reread-title-blocks/?project_id={project_id}")
+
+    assert resp.status_code == 404, resp.text
+    db_session.expire_all()
+    row = (await db_session.execute(select(Sheet).where(Sheet.id == sheet_id))).scalar_one()
+    assert row.sheet_title == "Floor Plan Level 1"
+
+
+async def test_the_owner_can_reread_their_own_title_blocks(sheets_app: Any, db_session: AsyncSession) -> None:
+    """Positive control for the re-read URL. The seeded sheet has no stored file."""
+    owner_id = await _seed_user(db_session, role="manager")
+    project_id = await _seed_project(db_session, owner_id)
+    await _seed_sheet(db_session, project_id)
+
+    async with _as_user(sheets_app, owner_id) as client:
+        resp = await client.post(f"{SHEETS_BASE}/reread-title-blocks/?project_id={project_id}")
+
+    assert resp.status_code == 200, resp.text
+    assert resp.json() == {
+        "sheets_checked": 1,
+        "sheets_updated": 0,
+        "fields_updated": 0,
+        "files_missing": 1,
+        "current_conflicts": [],
+    }
