@@ -203,7 +203,7 @@ async def test_a_correction_previews_the_stored_upload_again(http_client, header
 
 @pytest.mark.asyncio
 async def test_an_upload_and_its_jobs_belong_to_whoever_made_them(http_client, headers) -> None:
-    upload_id, preview = await _upload(http_client, headers, "prezzi.json", _file("umbria_2025.json"))
+    upload_id, preview = await _upload(http_client, headers, "prezzi.json", _file("umbria_2025.json.cp1252"))
     stranger = await _sign_in(http_client)
     seen = await http_client.get(f"{BASE}/jobs/{preview['job_id']}", headers=stranger)
     assert seen.status_code == 404
@@ -268,7 +268,7 @@ async def test_the_suggested_name_is_one_a_new_catalogue_can_take(http_client, h
     from app.modules.costs.schemas import CostCatalogCreate
     from app.modules.costs.service import CostCatalogService
 
-    upload_id, first = await _upload(http_client, headers, "prezzi.json", _file("umbria_2025.json"))
+    upload_id, first = await _upload(http_client, headers, "prezzi.json", _file("umbria_2025.json.cp1252"))
     natural = first["result"]["source"]["suggested_catalog_name"]
     assert natural and not natural.endswith(")")
     # Another user's catalogues, one in other letter case: the lookup ignores case.

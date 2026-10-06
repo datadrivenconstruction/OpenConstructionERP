@@ -12,7 +12,7 @@ unchanged. Each file names its source in its first line or comment.
 | `lombardia_2026_legacy.xml` | the same list in its previous layout, from the same archive | none stated in the file |
 | `lazio_2023_parte_a.csv` | Regione Lazio, Tariffa dei prezzi 2023, part A (Windows-1252) | not checked |
 | `lazio_2023_parte_e.csv` | Regione Lazio, Tariffa dei prezzi 2023, part E (UTF-8) | not checked |
-| `umbria_2025.json` | Regione Umbria, Elenco regionale dei prezzi 2025, JSON (Windows-1252) | CC BY 4.0, open-data catalogue record |
+| `umbria_2025.json.cp1252` | Regione Umbria, Elenco regionale dei prezzi 2025, JSON (Windows-1252, original bytes preserved; tests upload it as `.json`) | CC BY 4.0, open-data catalogue record |
 | `campania_2024.csv` | Regione Campania, Prezzario dei lavori pubblici 2024 | CC BY 4.0, open-data catalogue record |
 | `puglia_2026.csv` | Regione Puglia, Prezzario regionale 2026 | CC BY 4.0, open-data catalogue record |
 | `piemonte_2023.csv` | Regione Piemonte, Prezzario regionale 2023 | CC BY 4.0, open-data catalogue record |

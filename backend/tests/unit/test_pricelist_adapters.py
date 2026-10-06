@@ -141,7 +141,7 @@ _ALL_LISTS = [
     ("campania_2024.csv", "prezzario_llpp2024_articoli.csv"),
     ("puglia_2026.csv", "2026_prezzario_regione_puglia.csv"),
     ("piemonte_2023.csv", "prezzi.csv"),
-    ("umbria_2025.json", "Elenco_regionale_prezzi_2025.json"),
+    ("umbria_2025.json.cp1252", "Elenco_regionale_prezzi_2025.json"),
     ("lazio_2023_parte_a.csv", "PARTE A OPERE EDILI 2023.csv"),
     ("lazio_2023_parte_e.csv", "PARTE E IMPIANTI TECNOLOGICI 2023.csv"),
 ]
@@ -316,7 +316,7 @@ def test_piemonte_region_is_a_layout_guess_the_preview_asks_to_confirm() -> None
 
 
 def test_umbria_json_in_cp1252_with_dot_zero_headings() -> None:
-    plan, rows = _rows(_bytes("umbria_2025.json"), "Elenco_regionale_prezzi_2025.json")
+    plan, rows = _rows(_bytes("umbria_2025.json.cp1252"), "Elenco_regionale_prezzi_2025.json")
     assert plan.format.format_id == "tabular_json"
     assert plan.source.edition == "2025"
     by_code = {r.code: r for r in rows}
@@ -332,7 +332,7 @@ def test_umbria_json_in_cp1252_with_dot_zero_headings() -> None:
 def _umbria_workbook() -> bytes:
     from openpyxl import Workbook
 
-    records = json.loads(_bytes("umbria_2025.json").decode("cp1252"))
+    records = json.loads(_bytes("umbria_2025.json.cp1252").decode("cp1252"))
     ((title, rows),) = records.items()
     wb = Workbook()
     ws = wb.active
@@ -350,7 +350,7 @@ def test_umbria_zip_with_xlsx_and_json_reads_the_workbook_once() -> None:
     data = _zip(
         {
             "2025/Elenco regionale dei prezzi 2025 - Capitoli da 1 a 13.xlsx": _umbria_workbook(),
-            "2025/Elenco_regionale_prezzi_2025 - Capitoli da 1 a 21.json": _bytes("umbria_2025.json"),
+            "2025/Elenco_regionale_prezzi_2025 - Capitoli da 1 a 21.json": _bytes("umbria_2025.json.cp1252"),
             "2025/Prezzario 2025 Scheda metadatazione.docx": b"PK not really",
         }
     )
