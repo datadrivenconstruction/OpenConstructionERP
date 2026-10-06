@@ -63,6 +63,7 @@ export function FloatingChatButton() {
   if (hidden) return null;
 
   const label = t('chat.floating.open', { defaultValue: 'Ask AI about your data' });
+  const identity = t('chat.panel.title_default', { defaultValue: 'AI assistant' });
   const badgeLabel = t('chat.floating.unread_badge', {
     defaultValue: '{{count}} new',
     count: unreadCount,
@@ -82,18 +83,18 @@ export function FloatingChatButton() {
       type="button"
       onClick={toggle}
       data-testid="floating-chat-button"
-      aria-label={label}
-      // The button's name is fixed ("Ask AI ..."); the waiting changes are
-      // its description, read right after the name.
+      aria-label={`${identity}: ${label}`}
+      // Include the visible identity in the accessible name (voice control),
+      // while waiting changes remain its separately announced description.
       aria-describedby={showPending ? pendingId : undefined}
       aria-expanded={isOpen}
       aria-keyshortcuts={DOCK_SHORTCUT_ARIA}
       title={`${label} (${shortcut})`}
       className={[
-        'fixed bottom-4 right-4 z-50',
-        'h-14 w-14 rounded-full',
+        'fixed bottom-4 end-4 z-50',
+        'min-h-14 min-w-14 max-w-[calc(100vw-2rem)] rounded-full px-4 py-3',
         isOpen ? 'hidden' : 'flex',
-        'items-center justify-center',
+        'items-center justify-center gap-2',
         'text-white shadow-lg',
         'bg-gradient-to-br from-oe-blue to-oe-blue-dark',
         'transition-all duration-200 ease-out',
@@ -108,7 +109,10 @@ export function FloatingChatButton() {
           'linear-gradient(135deg, var(--oe-blue, #2563eb) 0%, var(--oe-blue-dark, #1d4ed8) 100%)',
       }}
     >
-      <MessageCircle size={24} strokeWidth={2} aria-hidden />
+      <MessageCircle size={24} strokeWidth={2} aria-hidden className="shrink-0" />
+      <span className="min-w-0 break-words text-start text-sm font-semibold leading-snug">
+        {identity}
+      </span>
       {unreadCount > 0 && !isOpen && (
         <span
           aria-label={badgeLabel}

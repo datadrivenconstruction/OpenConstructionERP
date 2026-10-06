@@ -27,9 +27,17 @@ _ERRORS = {"ImporterParseError", "XpweNativeFileError"}
 
 def _raises() -> list[tuple[str, int, ast.Call]]:
     found = []
-    paths = [*IMPORTERS.glob("*.py"), *(IMPORTERS.parent / name for name in (
-        "gaeb_common.py", "gaeb_x31.py", "gaeb_x89.py",
-    ))]
+    paths = [
+        *IMPORTERS.glob("*.py"),
+        *(
+            IMPORTERS.parent / name
+            for name in (
+                "gaeb_common.py",
+                "gaeb_x31.py",
+                "gaeb_x89.py",
+            )
+        ),
+    ]
     for path in sorted(paths):
         tree = ast.parse(path.read_text(encoding="utf-8"))
         for node in ast.walk(tree):
@@ -43,7 +51,16 @@ def _raises() -> list[tuple[str, int, ast.Call]]:
 
 def test_the_walk_finds_the_raises() -> None:
     files = {name for name, _line, _call in _raises()}
-    assert {"xpwe.py", "excel.py", "gaeb_xml.py", "bc3.py", "_workbook.py", "gaeb_common.py", "gaeb_x31.py", "gaeb_x89.py"} <= files
+    assert {
+        "xpwe.py",
+        "excel.py",
+        "gaeb_xml.py",
+        "bc3.py",
+        "_workbook.py",
+        "gaeb_common.py",
+        "gaeb_x31.py",
+        "gaeb_x89.py",
+    } <= files
 
 
 def test_every_importer_refusal_names_a_literal_code() -> None:

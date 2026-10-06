@@ -1,6 +1,7 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """Site-phase refusals reach the UI as codes, not English parser strings."""
+
 from io import BytesIO
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
@@ -16,12 +17,15 @@ from app.modules.boq.importers._base import ImporterParseError
 
 
 @pytest.mark.parametrize("reader", [parse_x31, parse_x89])
-@pytest.mark.parametrize("content,code", [
-    (b"", "gaeb_empty_file"),
-    (b"<GAEB>\n<broken>", "gaeb_not_well_formed"),
-    (b'<!DOCTYPE GAEB [<!ENTITY x "unsafe">]><GAEB>&x;</GAEB>', "gaeb_refused"),
-    (b"<different/>", "gaeb_wrong_root"),
-])
+@pytest.mark.parametrize(
+    "content,code",
+    [
+        (b"", "gaeb_empty_file"),
+        (b"<GAEB>\n<broken>", "gaeb_not_well_formed"),
+        (b'<!DOCTYPE GAEB [<!ENTITY x "unsafe">]><GAEB>&x;</GAEB>', "gaeb_refused"),
+        (b"<different/>", "gaeb_wrong_root"),
+    ],
+)
 def test_shared_parse_failures_name_the_reason(reader, content, code):
     with pytest.raises(ImporterParseError) as caught:
         reader(content)
@@ -53,11 +57,14 @@ def test_wrong_phase_names_both_phases(reader, expected):
     assert caught.value.params == {"phase": "X83", "expected": expected}
 
 
-@pytest.mark.parametrize("reader,content,element,format_name", [
-    (parse_x31, b"<GAEB/>", "QtyDeterm", "GAEB X31"),
-    (parse_x31, b"<GAEB><QtyDeterm/></GAEB>", "BoQ", "GAEB X31"),
-    (parse_x89, b"<GAEB/>", "Invoice", "GAEB X89"),
-])
+@pytest.mark.parametrize(
+    "reader,content,element,format_name",
+    [
+        (parse_x31, b"<GAEB/>", "QtyDeterm", "GAEB X31"),
+        (parse_x31, b"<GAEB><QtyDeterm/></GAEB>", "BoQ", "GAEB X31"),
+        (parse_x89, b"<GAEB/>", "Invoice", "GAEB X89"),
+    ],
+)
 def test_missing_structure_is_specific(reader, content, element, format_name):
     with pytest.raises(ImporterParseError) as caught:
         reader(content)
@@ -65,19 +72,31 @@ def test_missing_structure_is_specific(reader, content, element, format_name):
     assert caught.value.params == {"element": element, "format": format_name}
 
 
-@pytest.mark.parametrize("route,extension,format_name", [
-    (routes.preview_boq_gaeb_x31, ".x31", "GAEB X31"),
-    (routes.check_boq_gaeb_x89, ".x89", "GAEB X89"),
-])
-@pytest.mark.parametrize("filename,content,code", [
-    ("input.pdf", b"file", "gaeb_file_type"),
-    ("input.xml", b"", "gaeb_empty_file"),
-    ("input.xml", b"<GAEB>", "gaeb_not_well_formed"),
-    ("input.xml", b"<wrong/>", "gaeb_wrong_root"),
-    ("input.xml", b"<GAEB/>", "gaeb_missing_element"),
-])
+@pytest.mark.parametrize(
+    "route,extension,format_name",
+    [
+        (routes.preview_boq_gaeb_x31, ".x31", "GAEB X31"),
+        (routes.check_boq_gaeb_x89, ".x89", "GAEB X89"),
+    ],
+)
+@pytest.mark.parametrize(
+    "filename,content,code",
+    [
+        ("input.pdf", b"file", "gaeb_file_type"),
+        ("input.xml", b"", "gaeb_empty_file"),
+        ("input.xml", b"<GAEB>", "gaeb_not_well_formed"),
+        ("input.xml", b"<wrong/>", "gaeb_wrong_root"),
+        ("input.xml", b"<GAEB/>", "gaeb_missing_element"),
+    ],
+)
 async def test_both_upload_routes_keep_structured_errors(
-    monkeypatch, route, extension, format_name, filename, content, code,
+    monkeypatch,
+    route,
+    extension,
+    format_name,
+    filename,
+    content,
+    code,
 ):
     access = AsyncMock()
     monkeypatch.setattr(routes, "_verify_boq", access)
@@ -101,10 +120,13 @@ async def test_access_is_checked_before_reading_any_file(monkeypatch, route):
     upload.read.assert_not_awaited()
 
 
-@pytest.mark.parametrize("basis,code", [
-    ("measured", "gaeb_no_measured_quantities"),
-    ("quantity", "gaeb_no_quantities"),
-])
+@pytest.mark.parametrize(
+    "basis,code",
+    [
+        ("measured", "gaeb_no_measured_quantities"),
+        ("quantity", "gaeb_no_quantities"),
+    ],
+)
 async def test_empty_export_does_not_misdescribe_its_basis(monkeypatch, basis, code):
     monkeypatch.setattr(routes, "_verify_boq", AsyncMock())
     service = SimpleNamespace(

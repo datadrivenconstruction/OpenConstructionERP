@@ -190,10 +190,15 @@ async def _mk_match_session_with_custom_group(s: AsyncSession, project_id: uuid.
 # ════════════════════════════════════════════════════════════════════════
 
 
-def _apply_request(model_id: uuid.UUID, **over):
+async def _apply_request(session: AsyncSession, model_id: uuid.UUID, **over):
     from app.modules.bim_hub.schemas import QuantityMapApplyRequest
+    from app.modules.bim_hub.service import BIMHubService
 
-    return QuantityMapApplyRequest(**{"model_id": model_id, "dry_run": False, **over})
+    request = QuantityMapApplyRequest(**{"model_id": model_id, "dry_run": False, **over})
+    if not request.dry_run:
+        preview = await BIMHubService(session).apply_quantity_maps(request.model_copy(update={"dry_run": True}))
+        request.preview_fingerprint = preview.preview_fingerprint
+    return request
 
 
 @pytest.mark.asyncio
@@ -207,7 +212,7 @@ async def test_bim_hub_still_auto_creates_into_a_lone_unlocked_bill(session) -> 
     model = await _mk_model_with_wall(session, project_id)
     await _mk_auto_create_rule(session, project_id)
 
-    result = await BIMHubService(session).apply_quantity_maps(_apply_request(model.id))
+    result = await BIMHubService(session).apply_quantity_maps(await _apply_request(session, model.id))
 
     assert result.target_boq_ambiguous is False
     assert result.positions_created == 1
@@ -230,7 +235,7 @@ async def test_bim_hub_refuses_two_unlocked_bills_instead_of_taking_the_oldest(s
     await _mk_auto_create_rule(session, project_id)
 
     with pytest.raises(HTTPException) as exc:
-        await BIMHubService(session).apply_quantity_maps(_apply_request(model.id))
+        await BIMHubService(session).apply_quantity_maps(await _apply_request(session, model.id))
 
     assert exc.value.status_code == 409
     assert exc.value.detail["error"] == "ambiguous_boq"
@@ -255,7 +260,7 @@ async def test_bim_hub_writes_into_the_bill_the_caller_names(session) -> None:
     model = await _mk_model_with_wall(session, project_id)
     await _mk_auto_create_rule(session, project_id)
 
-    result = await BIMHubService(session).apply_quantity_maps(_apply_request(model.id, target_boq_id=newer.id))
+    result = await BIMHubService(session).apply_quantity_maps(await _apply_request(session, model.id, target_boq_id=newer.id))
 
     assert result.positions_created == 1
     assert await _count_positions(session, older) == 0
@@ -282,7 +287,7 @@ async def test_bim_hub_rejects_a_bill_that_belongs_to_another_project(session) -
     await _mk_auto_create_rule(session, project_id)
 
     with pytest.raises(HTTPException) as exc:
-        await BIMHubService(session).apply_quantity_maps(_apply_request(model.id, target_boq_id=foreign.id))
+        await BIMHubService(session).apply_quantity_maps(await _apply_request(session, model.id, target_boq_id=foreign.id))
 
     assert exc.value.status_code == 409
     assert exc.value.detail["error"] == "boq_project_mismatch"
@@ -302,7 +307,7 @@ async def test_bim_hub_refuses_to_auto_create_inside_a_locked_bill(session) -> N
     await _mk_auto_create_rule(session, project_id)
 
     with pytest.raises(HTTPException) as exc:
-        await BIMHubService(session).apply_quantity_maps(_apply_request(model.id))
+        await BIMHubService(session).apply_quantity_maps(await _apply_request(session, model.id))
 
     assert exc.value.status_code == 409
     assert exc.value.detail["error"] == "boq_locked"
@@ -322,7 +327,7 @@ async def test_bim_hub_preview_says_it_cannot_name_a_bill(session) -> None:
     model = await _mk_model_with_wall(session, project_id)
     await _mk_auto_create_rule(session, project_id)
 
-    result = await BIMHubService(session).apply_quantity_maps(_apply_request(model.id, dry_run=True))
+    result = await BIMHubService(session).apply_quantity_maps(await _apply_request(session, model.id, dry_run=True))
 
     # The preview still shows the matched population - it just refuses to
     # promise a destination it cannot keep.
@@ -350,7 +355,7 @@ async def test_bim_hub_preview_with_a_named_bill_is_answered_not_flagged(session
     await _mk_auto_create_rule(session, project_id)
 
     result = await BIMHubService(session).apply_quantity_maps(
-        _apply_request(model.id, dry_run=True, target_boq_id=newer.id)
+        await _apply_request(session, model.id, dry_run=True, target_boq_id=newer.id)
     )
 
     assert result.target_boq_ambiguous is False
@@ -370,7 +375,7 @@ async def test_bim_hub_preview_on_a_single_bill_is_not_flagged(session) -> None:
     model = await _mk_model_with_wall(session, project_id)
     await _mk_auto_create_rule(session, project_id)
 
-    result = await BIMHubService(session).apply_quantity_maps(_apply_request(model.id, dry_run=True))
+    result = await BIMHubService(session).apply_quantity_maps(await _apply_request(session, model.id, dry_run=True))
 
     assert result.target_boq_ambiguous is False
     assert result.matched_elements == 1

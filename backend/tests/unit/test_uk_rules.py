@@ -123,6 +123,24 @@ async def test_the_stage_is_read_from_the_phase_or_from_the_estimate_type() -> N
     assert not (await NRMCostPlanStageDeclared().validate(bill()))[0].passed
 
 
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "estimate_type",
+    ["Cost Plan 2", "formal_cost_plan_1", "Order of Cost Estimate", "pre-tender estimate", "RIBA Stage 3", "Stage 4"],
+)
+async def test_an_estimate_type_naming_a_stage_declares_it(estimate_type: str) -> None:
+    assert (await NRMCostPlanStageDeclared().validate(bill(estimate_type=estimate_type)))[0].passed
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("estimate_type", ["budget", "detailed", "order_of_magnitude", "preliminary", "conceptual"])
+async def test_an_estimate_type_that_is_no_stage_does_not_declare_one(estimate_type: str) -> None:
+    """The field also says what kind of bill it is. The demo seeder labels
+    every control budget "budget", and the warning must not go quiet because
+    of a label that says nothing about the design stage."""
+    assert not (await NRMCostPlanStageDeclared().validate(bill(estimate_type=estimate_type)))[0].passed
+
+
 # ── The money that is never measured ─────────────────────────────────────
 
 

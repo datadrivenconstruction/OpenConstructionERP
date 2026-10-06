@@ -173,6 +173,18 @@ _CONTAINER_FORMATS: tuple[ExchangeFormat, ...] = (
         primary_for=("ES",),
     ),
     ExchangeFormat(
+        format_id="xpwe",
+        name="XPWE",
+        countries=("IT", "SM"),
+        extensions=(".xpwe",),
+        summary=(
+            "The XML exchange file Italian estimating programs write: the computo metrico "
+            "with its chapters, price list and measurement rows."
+        ),
+        reader="xpwe",
+        primary_for=("IT",),
+    ),
+    ExchangeFormat(
         format_id="oenorm_a2063",
         name="ÖNORM A 2063",
         countries=("AT",),

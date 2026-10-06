@@ -8,8 +8,9 @@ verified, and the absent revision was the only durable record that the database
 was not at head.
 
 Refusing to stamp is reversible; the database can always be stamped later once
-the repair for this cohort is decided. Stamping is not. While the decision is
-open, these tests pin the reversible branch.
+the repair for this cohort is verified. Stamping is not. MISC-14 (6 October
+2026) confirms refusal rather than automatic revision inference; these tests
+pin that branch independently of the health endpoint's degraded signal.
 """
 
 from __future__ import annotations

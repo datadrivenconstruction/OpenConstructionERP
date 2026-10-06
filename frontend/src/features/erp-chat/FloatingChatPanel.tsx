@@ -70,6 +70,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import DOMPurify from 'isomorphic-dompurify';
+import { AiDisclosure } from './AiDisclosure';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useThemeStore } from '@/stores/useThemeStore';
@@ -1454,6 +1455,7 @@ function DockResizeHandle({
 // ── Main panel ─────────────────────────────────────────────────────────────
 export function FloatingChatPanel() {
   const { t, i18n } = useTranslation();
+  const disclosureId = useId();
   const navigate = useNavigate();
   const location = useLocation();
   const isOpen = useFloatingChatStore((s) => s.isOpen);
@@ -2313,7 +2315,8 @@ export function FloatingChatPanel() {
         id={DOCK_ELEMENT_ID}
         role="dialog"
         aria-modal={overlay ? 'true' : 'false'}
-        aria-label={panelTitle}
+        aria-label={panelTitle.trim() || t('chat.panel.title_default', { defaultValue: 'AI assistant' })}
+        aria-describedby={disclosureId}
         aria-hidden={presence.closing ? true : undefined}
         data-testid="floating-chat-panel"
         data-chat-theme={resolvedTheme}
@@ -2419,6 +2422,10 @@ export function FloatingChatPanel() {
             activeId={activeSessionId}
           />
         </div>
+
+        {/* Outside the editable header and scrollable/tabbed content so a
+            rename, cleared title or session change cannot conceal AI identity. */}
+        <AiDisclosure id={disclosureId} />
 
         <DockTabsRow
           active={activeTab}

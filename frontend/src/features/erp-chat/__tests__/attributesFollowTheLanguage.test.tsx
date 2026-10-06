@@ -210,5 +210,12 @@ describe('the chat dialog announces itself in the reader language', () => {
     // The chrome around it translated; the user's own words did not.
     expect(panel.controlName()).toBe(DE['chat.panel.title_edit']);
     expect(panel.dialogName()).toBe(RENAMED);
+    const disclosure = panel.view.getByTestId('chat-ai-disclosure');
+    expect(disclosure).toBeVisible();
+    expect(disclosure).toHaveTextContent(DE['chat.panel.title_default']);
+    expect(panel.view.getByRole('dialog')).toHaveAccessibleDescription(DE['chat.panel.title_default']);
+    await panel.switchTo('en');
+    expect(disclosure).toHaveTextContent(EN['chat.panel.title_default']);
+    expect(panel.dialogName()).toBe(RENAMED);
   });
 });

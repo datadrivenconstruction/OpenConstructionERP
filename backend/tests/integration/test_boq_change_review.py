@@ -1181,9 +1181,16 @@ async def _rule(client: AsyncClient, auth: dict[str, str], project_id: str, kind
 
 
 async def _apply_rules(client: AsyncClient, auth: dict[str, str], model_id: str, boq_id: str) -> dict:
+    preview = await client.post(
+        "/api/v1/bim_hub/quantity-maps/apply/",
+        json={"model_id": model_id, "dry_run": True, "target_boq_id": boq_id},
+        headers=auth,
+    )
+    assert preview.status_code == 200, preview.text
     resp = await client.post(
         "/api/v1/bim_hub/quantity-maps/apply/",
-        json={"model_id": model_id, "dry_run": False, "target_boq_id": boq_id},
+        json={"model_id": model_id, "dry_run": False, "target_boq_id": boq_id,
+              "preview_fingerprint": preview.json()["preview_fingerprint"]},
         headers=auth,
     )
     assert resp.status_code == 200, resp.text

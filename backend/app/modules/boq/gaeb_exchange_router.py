@@ -99,7 +99,8 @@ async def _read_upload(file: UploadFile, *, extensions: tuple[str, ...], label: 
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=ImporterParseError(
                 f"Unsupported file type. Please upload a {label} file ({', '.join(extensions)}).",
-                code="gaeb_file_type", params={"format": label, "extensions": ", ".join(extensions)},
+                code="gaeb_file_type",
+                params={"format": label, "extensions": ", ".join(extensions)},
             ).as_detail(),
         )
     content = await file.read()
@@ -180,7 +181,9 @@ async def export_boq_gaeb_x31(
                 (
                     "No position of this bill has a measurement sheet yet, so there is no measured "
                     "quantity to export. Measure the positions first, or export the bill quantities."
-                ) if basis == "measured" else "There are no position quantities to export.",
+                )
+                if basis == "measured"
+                else "There are no position quantities to export.",
                 code="gaeb_no_measured_quantities" if basis == "measured" else "gaeb_no_quantities",
             ).as_detail(),
         )

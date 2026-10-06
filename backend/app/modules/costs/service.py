@@ -28,6 +28,7 @@ from sqlalchemy import update as sa_update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
+from app.core.i18n import t as translate
 from app.core.json_merge import merge_metadata
 
 _logger_ev = __import__("logging").getLogger(__name__ + ".events")
@@ -1303,6 +1304,17 @@ class CostCatalogService:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
+    async def _lock_catalog_name(self, name: str) -> None:
+        """Serialize supported create/rename paths until their transaction ends.
+
+        Names are globally reserved because imports use them as region tags.
+        A check followed by INSERT alone admits duplicates under concurrency.
+        Use a namespaced PostgreSQL transaction lock so different names do not
+        block each other and a worker crash cannot leave a lock behind.
+        """
+        key = f"oe_costs_catalog:{name.strip().lower()}"
+        await self.session.execute(select(func.pg_advisory_xact_lock(func.hashtextextended(key, 0))))
+
     async def _assert_name_available(
         self,
         name: str,
@@ -1322,7 +1334,10 @@ class CostCatalogService:
         if existing is not None:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=f"A cost catalog named '{name.strip()}' already exists. Choose a different name.",
+                detail={
+                    "code": "catalog_name_unavailable",
+                    "message": translate("costs.catalog_name_unavailable"),
+                },
             )
 
     async def create_catalog(
@@ -1338,6 +1353,7 @@ class CostCatalogService:
         (case-insensitive) - the import dedup key uses the catalog name as
         region, so same-name catalogs would silently collide.
         """
+        await self._lock_catalog_name(data.name)
         await self._assert_name_available(data.name)
         catalog = CostCatalog(
             name=data.name.strip(),
@@ -1445,6 +1461,7 @@ class CostCatalogService:
 
         new_name = fields.get("name")
         if isinstance(new_name, str) and new_name.strip():
+            await self._lock_catalog_name(new_name)
             await self._assert_name_available(new_name, exclude_id=catalog_id)
 
         new_currency = fields.get("currency")

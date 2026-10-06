@@ -15,7 +15,7 @@ export const SUPPORTED_LANGUAGES = [
   // no flag is claimed, `detectCountry` offers no pack off the back of a bare
   // `en` browser, and `homeMarketForLanguage` steers nobody at the British
   // cases who did not ask for Britain.
-  { code: 'en', name: 'English', flag: '🌐', country: 'xx' },
+  { code: 'en', name: 'English (International)', flag: '🌐', country: 'xx' },
   // British and American English are regional variants of the entry above, in
   // the same sense es-MX is one of es: the files under `locales/en-GB.ts` and
   // `locales/en-US.ts` hold only the words that region names differently, and

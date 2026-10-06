@@ -28,7 +28,7 @@ nothing a reader could see - so the one cohort that cannot vouch for its own
 schema published ``alembic_head_matches: null``, the same null a desktop bundle
 shipping no migration tree publishes, and called itself healthy.
 
-Two of the three leave the status alone and one degrades, and each answer has
+One of the three leaves the status alone and two degrade, and each answer has
 its own reason rather than one policy.
 
 A crashed diagnostic says nothing about the deployment. Degrading on it would
@@ -69,8 +69,11 @@ that is caught and logged one screen further down. The tables predate the boot
 in both cases and the predicate cannot separate them. Worse, it cannot recover:
 once it answers true the stamp is refused, so it answers true on every boot
 afterwards. Degrading would hold a current schema at degraded for the life of
-the database over one lost write. So the fact is published and the status is
-left alone.
+the database over one lost write. The founder's MISC-14 decision on 6 October
+2026 nevertheless chooses an explicit ``degraded`` signal for this unverified
+cohort, without guessing a revision or stamping it automatically. The signal
+means an operator must investigate; it is not proof that the schema is broken.
+Unknown and false answers do not degrade, and the endpoint remains HTTP 200.
 
 What none of this closes: the heal also pre-flights a unique constraint with a
 duplicate probe and skips it outright when the table already holds duplicates.
@@ -231,10 +234,38 @@ def test_a_database_that_arrived_populated_and_unstamped_says_so() -> None:
     payload = _health(app)
 
     assert payload["arrived_populated_unstamped"] is True
-    assert payload["status"] == "healthy", (
-        "the predicate cannot separate a part-migrated database from one that lost a stamp write, "
-        "and it never clears once true"
+    assert payload["status"] == "degraded", (
+        "MISC-14 requires an operator-visible signal for an unverified populated database; "
+        "this does not assert that its schema is corrupt"
     )
+
+
+@pytest.mark.parametrize("arrived", [None, False, True])
+@pytest.mark.parametrize("heal_failed", [False, True])
+@pytest.mark.parametrize("constraints_validated", [False, True])
+def test_the_unstamped_signal_combines_with_other_health_causes_without_changing_http_status(
+    arrived: bool | None, heal_failed: bool, constraints_validated: bool
+) -> None:
+    """Unknown/false cannot erase another cause, and true is never a clean bill."""
+    from fastapi.testclient import TestClient
+
+    app = _fresh_app()
+    app.state.arrived_populated_unstamped = arrived
+    app.state.schema_heal_failed = heal_failed
+    app.state.schema_constraints_validated = constraints_validated
+    client = TestClient(app)  # no lifespan: verdicts above are the controlled inputs
+    try:
+        response = client.get("/api/health")
+    finally:
+        client.close()
+
+    payload = response.json()
+    assert response.status_code == 200, "readiness detail must not change the existing health HTTP contract"
+    assert payload["arrived_populated_unstamped"] is arrived
+    assert payload["schema_heal_failed"] is heal_failed
+    assert payload["schema_constraints_validated"] is constraints_validated
+    degraded = arrived is True or heal_failed or not constraints_validated
+    assert payload["status"] == ("degraded" if degraded else "healthy")
 
 
 def test_an_ordinary_install_reports_false() -> None:
@@ -272,12 +303,10 @@ def test_the_three_keys_are_always_present() -> None:
 def test_none_of_the_three_can_be_read_with_a_bare_truth_test() -> None:
     """Polarity, held against the neighbours a monitor rule is written beside.
 
-    ``schema_match_check_failed`` reads ``true`` for bad news, like the three
-    ``_failed`` fields it sits with. The other two read ``true`` for good news,
-    like ``schema_matches_models`` and ``alembic_head_matches``. A field whose
-    name says "failed" and whose ``true`` meant good news is how a rule ends up
-    written the wrong way round, so the naming carries the polarity and this
-    asserts it does.
+    ``schema_match_check_failed`` and ``arrived_populated_unstamped`` read
+    ``true`` for an issue to investigate. ``schema_constraints_validated``
+    reads ``true`` for good news. None is not interchangeable with False:
+    consumers must check each field's documented polarity explicitly.
     """
     app = _fresh_app()
     app.state.schema_match_check_failed = True

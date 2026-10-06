@@ -550,6 +550,7 @@ SOURCE_FAMILIES: dict[str, str] = {
     "gaeb_import": "imported",
     "excel_import": "imported",
     "bc3_import": "imported",
+    "xpwe_import": "imported",
     "smart_import": "imported",
     "smart_import_ai": "imported",
     # Lines generated from a reference cost database, assembly or price match.

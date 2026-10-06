@@ -53,7 +53,7 @@ KNOWN_UNBACKED_RULE_IDS = {
     "france-fr": 71,
     "germany-de": 67,
     "india-cpwd": 119,
-    "italy-it": 48,
+    "italy-it": 44,
     "japan-jp": 46,
     "korea-kr": 43,
     "modular-prefab": 111,

@@ -21984,6 +21984,48 @@
               "default": "0"
             }
           ]
+        },
+        {
+          "class_name": "BIMDataframeValueCount",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "value",
+              "type": "str"
+            },
+            {
+              "name": "count",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "BIMDataframeValuePage",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[BIMDataframeValueCount]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int"
+            },
+            {
+              "name": "limit",
+              "type": "int"
+            }
+          ]
         }
       ],
       "import_dependencies": [
@@ -22792,6 +22834,7 @@
         "gaeb_exchange_router.py",
         "gaeb_x31.py",
         "gaeb_x89.py",
+        "import_jobs.py",
         "importers/__init__.py",
         "importers/_base.py",
         "importers/_encoding.py",
@@ -22800,11 +22843,14 @@
         "importers/excel.py",
         "importers/gaeb_xml.py",
         "importers/hungary_workbook.py",
+        "importers/xpwe.py",
         "manifest.py",
+        "markup_rule_inputs.py",
         "markup_templates.py",
         "models.py",
         "pdf_export.py",
         "permissions.py",
+        "price_list_carry.py",
         "quantity_baseline.py",
         "quantity_formula.py",
         "repository.py",
@@ -22899,6 +22945,12 @@
             },
             {
               "name": "base_date",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "tax_date",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
               "nullable": true
@@ -24010,6 +24062,11 @@
           "request_schema": "UploadFile"
         },
         {
+          "method": "GET",
+          "path": "/boqs/{boq_id}/import/jobs/{job_id}/",
+          "handler": "get_boq_import_job"
+        },
+        {
           "method": "POST",
           "path": "/import/preview/",
           "handler": "import_preview",
@@ -24225,7 +24282,11 @@
             {
               "name": "base_date",
               "type": "str | None",
-              "description": "Base date / price level reference: the date the unit rates are current at, and the date the bill's tax is resolved on. A day (2026-03-15), a month (2026-03), a quarter (2026-Q1) or a year (2026); a period is read as its first day. Free text by design, so anything else is stored and reported rather than refused - see app.modules.boq.base_date."
+              "description": "Base date / price level reference: the date the unit rates are current at, and the date the bill's tax is resolved on unless tax_date says otherwise. A day (2026-03-15), a month (2026-03), a quarter (2026-Q1) or a year (2026); a period is read as its first day. Free text by design, so anything else is stored and reported rather than refused - see app.modules.boq.base_date."
+            },
+            {
+              "name": "tax_date",
+              "type": "str | None"
             },
             {
               "name": "tax_rate",
@@ -24265,6 +24326,10 @@
             },
             {
               "name": "base_date",
+              "type": "str | None"
+            },
+            {
+              "name": "tax_date",
               "type": "str | None"
             },
             {
@@ -24315,6 +24380,11 @@
             },
             {
               "name": "base_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "tax_date",
               "type": "str | None",
               "default": "None"
             },
@@ -24464,7 +24534,7 @@
             {
               "name": "source",
               "type": "str",
-              "description": "Data source. One of: manual, cad_import, ai_takeoff, gaeb_import, excel_import, bc3_import, takeoff, smart_import, smart_import_ai, cad_import_ai, cost_database, assembly, cwicr, enriched, ai_match, formwork."
+              "description": "Data source. One of: manual, cad_import, ai_takeoff, gaeb_import, excel_import, bc3_import, xpwe_import, takeoff, smart_import, smart_import_ai, cad_import_ai, cost_database, assembly, cwicr, enriched, ai_match, formwork."
             },
             {
               "name": "confidence",
@@ -66322,6 +66392,20 @@
         "models.py",
         "parquet_lookup.py",
         "permissions.py",
+        "pricelist_import.py",
+        "pricelist_jobs.py",
+        "pricelist_router.py",
+        "pricelists/__init__.py",
+        "pricelists/base.py",
+        "pricelists/containers.py",
+        "pricelists/lombardia.py",
+        "pricelists/service.py",
+        "pricelists/six.py",
+        "pricelists/tabular.py",
+        "pricelists/toscana.py",
+        "pricelists/veneto.py",
+        "pricelists/xml_stream.py",
+        "pricelists/xpwe.py",
         "qdrant_adapter.py",
         "qdrant_snapshot_loader.py",
         "query_builder.py",
@@ -67465,6 +67549,11 @@
           ],
           "docstring": "Compact cost item result for autocomplete dropdown.\n\nPhase F (v2.7.0): the response carries a slim ``cost_breakdown`` block\n(labor / material / equipment) plus the region tag and a thinned-out\n``metadata_`` so the BOQ description-cell hover tooltip can render a\nrich preview without a second round-trip. The added bytes are bounded\n(< 200 B / item with the variant array left out) which keeps the\nautocomplete payload firmly under the lazy-fetch threshold.",
           "fields": [
+            {
+              "name": "id",
+              "type": "str | None",
+              "default": "None"
+            },
             {
               "name": "code",
               "type": "str"
@@ -111274,7 +111363,7 @@
             {
               "name": "minor_units",
               "type": "int",
-              "description": "Decimal places the currency uses"
+              "description": "Decimal places; defaults to the currency registry unless explicitly supplied"
             },
             {
               "name": "start_date",
@@ -122322,6 +122411,7 @@
         "manifest.py",
         "models.py",
         "permissions.py",
+        "reference_data_update.py",
         "repairs.py",
         "repository.py",
         "romania_vat.py",
@@ -122759,6 +122849,20 @@
           "handler": "update_tax_config",
           "response_model": "TaxConfigResponse",
           "request_schema": "TaxConfigUpdate"
+        },
+        {
+          "method": "GET",
+          "path": "/reference-data/updates/",
+          "handler": "preview_reference_data_update",
+          "response_model": "ReferenceDataPreviewResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/reference-data/updates/apply/",
+          "handler": "apply_reference_data_update",
+          "response_model": "ReferenceDataApplyResponse",
+          "request_schema": "ReferenceDataApplyRequest"
         }
       ],
       "schemas": [
@@ -123604,6 +123708,143 @@
             {
               "name": "years",
               "type": "list[WorkingDaysYear]"
+            }
+          ]
+        },
+        {
+          "class_name": "ReferenceFieldChange",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One field that differs between this database and the shipped seed file.",
+          "fields": [
+            {
+              "name": "field",
+              "type": "str"
+            },
+            {
+              "name": "before",
+              "type": "Any",
+              "default": "None"
+            },
+            {
+              "name": "after",
+              "type": "Any",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "ReferenceChangeResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One entry of the reference data preview.\n\n``status`` is ``ready`` (applied on confirmation), ``kept`` (this\ndatabase's version stays) or ``review`` (shown for a person to settle by\nhand, never written by the update). ``reason`` is a stable code.",
+          "fields": [
+            {
+              "name": "key",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "Literal['country', 'calendar', 'tax']"
+            },
+            {
+              "name": "action",
+              "type": "Literal['add', 'update', 'none']"
+            },
+            {
+              "name": "status",
+              "type": "Literal['ready', 'kept', 'review']"
+            },
+            {
+              "name": "reason",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "detail",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "rows_added",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "fields",
+              "type": "list[ReferenceFieldChange]"
+            }
+          ]
+        },
+        {
+          "class_name": "ReferenceDataPreviewResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What updating the reference data would change, written nowhere yet.",
+          "fields": [
+            {
+              "name": "ready",
+              "type": "int"
+            },
+            {
+              "name": "kept",
+              "type": "int"
+            },
+            {
+              "name": "review",
+              "type": "int"
+            },
+            {
+              "name": "changes",
+              "type": "list[ReferenceChangeResponse]"
+            }
+          ]
+        },
+        {
+          "class_name": "ReferenceDataApplyRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The preview keys an administrator confirmed.",
+          "fields": [
+            {
+              "name": "keys",
+              "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "ReferenceDataApplyResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What an apply wrote, and the preview as it reads afterwards.",
+          "fields": [
+            {
+              "name": "applied",
+              "type": "list[str]"
+            },
+            {
+              "name": "skipped",
+              "type": "list[str]"
+            },
+            {
+              "name": "rows_added",
+              "type": "int"
+            },
+            {
+              "name": "rows_updated",
+              "type": "int"
+            },
+            {
+              "name": "preview",
+              "type": "ReferenceDataPreviewResponse"
             }
           ]
         }
@@ -155046,6 +155287,11 @@
               "default": "None"
             },
             {
+              "name": "tax_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
               "name": "metadata",
               "type": "dict[str, Any]"
             },
@@ -168344,6 +168590,12 @@
               "fk_target": "oe_projects_project.id"
             },
             {
+              "name": "contract_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
               "name": "document_id",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
@@ -168613,6 +168865,11 @@
               "type": "UUID"
             },
             {
+              "name": "contract_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
               "name": "title",
               "type": "str"
             },
@@ -168686,6 +168943,11 @@
           ],
           "docstring": "Partial update for a punch list item.",
           "fields": [
+            {
+              "name": "contract_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
             {
               "name": "title",
               "type": "str | None"
@@ -168772,6 +169034,11 @@
             {
               "name": "project_id",
               "type": "UUID"
+            },
+            {
+              "name": "contract_id",
+              "type": "UUID | None",
+              "default": "None"
             },
             {
               "name": "title",
@@ -169095,6 +169362,7 @@
         }
       ],
       "import_dependencies": [
+        "contracts",
         "documents",
         "projects",
         "property_dev"
@@ -188813,6 +189081,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "boq_plan.py",
         "codes_bandtree.py",
         "codes_grouped.py",
         "codes_models.py",
@@ -189688,6 +189957,26 @@
         },
         {
           "method": "POST",
+          "path": "/schedules/{schedule_id}/restore/",
+          "handler": "restore_schedule",
+          "response_model": "ScheduleResponse",
+          "request_schema": "ScheduleService"
+        },
+        {
+          "method": "DELETE",
+          "path": "/schedules/{schedule_id}/permanent/",
+          "handler": "purge_schedule",
+          "request_schema": "ScheduleService"
+        },
+        {
+          "method": "GET",
+          "path": "/schedules/{schedule_id}/delete-impact/",
+          "handler": "schedule_delete_impact",
+          "response_model": "ScheduleDeleteImpactResponse",
+          "request_schema": "ScheduleService"
+        },
+        {
+          "method": "POST",
           "path": "/schedules/{schedule_id}/activities/",
           "handler": "create_activity",
           "response_model": "ActivityResponse",
@@ -189726,6 +190015,13 @@
           "path": "/schedules/{schedule_id}/generate-from-boq/",
           "handler": "generate_from_boq",
           "response_model": "list[ActivityResponse]",
+          "request_schema": "GenerateFromBOQRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/schedules/{schedule_id}/generate-from-boq/preview/",
+          "handler": "preview_generate_from_boq",
+          "response_model": "GenerationPreviewResponse",
           "request_schema": "GenerateFromBOQRequest"
         },
         {
@@ -189824,6 +190120,12 @@
           "handler": "create_relationship",
           "response_model": "RelationshipResponse",
           "request_schema": "RelationshipCreate"
+        },
+        {
+          "method": "DELETE",
+          "path": "/schedules/{schedule_id}/relationships/",
+          "handler": "delete_relationship_between",
+          "request_schema": "ScheduleService"
         },
         {
           "method": "GET",
@@ -190063,7 +190365,7 @@
             },
             {
               "name": "status",
-              "type": "str | None"
+              "type": "str"
             },
             {
               "name": "data_date",
@@ -191250,6 +191552,40 @@
           ]
         },
         {
+          "class_name": "ScheduleDeleteImpactResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What deleting a schedule takes with it, for the confirmation to name.",
+          "fields": [
+            {
+              "name": "activity_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "baseline_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "payment_milestone_count",
+              "type": "int",
+              "description": "Contract payment instalments linked to an activity of this schedule. They stay, but go back to their contract dates."
+            },
+            {
+              "name": "can_delete",
+              "type": "bool",
+              "description": "Whether the caller may permanently delete this archived schedule."
+            },
+            {
+              "name": "blocked_reason",
+              "type": "str | None",
+              "description": "Why not: permission_denied or schedule_not_archived. Permanent deletion is admin-only."
+            }
+          ]
+        },
+        {
           "class_name": "GenerateFromBOQRequest",
           "bases": [
             "BaseModel"
@@ -191264,6 +191600,185 @@
               "name": "total_project_days",
               "type": "int | None",
               "description": "Total project duration in calendar days. If omitted, defaults to 365 (residential) or 540 (office) based on BOQ metadata."
+            },
+            {
+              "name": "replace",
+              "type": "bool",
+              "description": "Delete the schedule's existing activities and links first, in the same transaction. Without it a schedule that already has activities answers 409 schedule_has_activities."
+            },
+            {
+              "name": "start_date",
+              "type": "date | None",
+              "description": "The day the plan starts, written to the schedule together with the plan. When omitted: the schedule's start, else the project's planned start, else today. total_project_days counts from this day."
+            },
+            {
+              "name": "workers_per_position",
+              "type": "int | None",
+              "description": "Workers on each position whose bill gives hours but no crew, at least. When omitted, the fewest from 1 to 20 that fit the window without shortening any duration (without total_project_days, the default window). Send the value the preview returned to write that plan."
+            }
+          ]
+        },
+        {
+          "class_name": "GenerationNote",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Why one position's duration is an estimate, or why it was left out.",
+          "fields": [
+            {
+              "name": "position_id",
+              "type": "str"
+            },
+            {
+              "name": "ordinal",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "description",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "note",
+              "type": "str",
+              "description": "estimated_from_unit, cost_share, default_duration, skipped_zero_qty, empty_section_dropped or blank_row_dropped."
+            },
+            {
+              "name": "days",
+              "type": "int | None",
+              "description": "Working days planned for the position."
+            },
+            {
+              "name": "basis",
+              "type": "dict[str, Any] | None",
+              "description": "For estimated_from_unit: unit, rate (hours per unit), hours, gang (people), hours_per_day, and capped_by_price with hours_from_unit when the price held the guess down."
+            }
+          ]
+        },
+        {
+          "class_name": "GenerationPreviewResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What generating from a bill would write, for a person to confirm.",
+          "fields": [
+            {
+              "name": "boq_id",
+              "type": "str"
+            },
+            {
+              "name": "boq_name",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "boq_estimate_type",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "activity_count",
+              "type": "int"
+            },
+            {
+              "name": "positions_scheduled",
+              "type": "int"
+            },
+            {
+              "name": "lump_sum_positions",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "summary_count",
+              "type": "int"
+            },
+            {
+              "name": "estimated_count",
+              "type": "int"
+            },
+            {
+              "name": "skipped_count",
+              "type": "int"
+            },
+            {
+              "name": "note_counts",
+              "type": "dict[str, int]"
+            },
+            {
+              "name": "crews",
+              "type": "int"
+            },
+            {
+              "name": "workers_per_position",
+              "type": "int",
+              "default": "1"
+            },
+            {
+              "name": "workers_assumed",
+              "type": "bool",
+              "default": "True"
+            },
+            {
+              "name": "positions_without_workers",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "fitted_window",
+              "type": "dict[str, Any] | None",
+              "default": "None"
+            },
+            {
+              "name": "compressed_pct",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "fits",
+              "type": "bool"
+            },
+            {
+              "name": "planned_start",
+              "type": "str"
+            },
+            {
+              "name": "planned_end",
+              "type": "str"
+            },
+            {
+              "name": "requested_end",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "warnings",
+              "type": "list[dict[str, Any]]"
+            },
+            {
+              "name": "existing_activity_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "existing_started_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "instalments_relinked",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "instalments_unlinked",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "notes",
+              "type": "list[GenerationNote]"
             }
           ]
         },
@@ -192215,6 +192730,7 @@
         "boq",
         "collaboration_locks",
         "contacts",
+        "contracts",
         "eac",
         "projects",
         "saved_views",
@@ -234269,10 +234785,10 @@
     },
     {
       "name": "bim",
-      "ts_files": 112,
+      "ts_files": 113,
       "css_files": 0,
-      "test_files": 37,
-      "total_files": 113
+      "test_files": 38,
+      "total_files": 114
     },
     {
       "name": "bim_requirements",
@@ -234283,10 +234799,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 167,
+      "ts_files": 183,
       "css_files": 0,
-      "test_files": 87,
-      "total_files": 167
+      "test_files": 98,
+      "total_files": 183
     },
     {
       "name": "buyer-portal",
@@ -234479,10 +234995,10 @@
     },
     {
       "name": "costs",
-      "ts_files": 41,
+      "ts_files": 46,
       "css_files": 0,
-      "test_files": 17,
-      "total_files": 41
+      "test_files": 20,
+      "total_files": 46
     },
     {
       "name": "credentials",
@@ -234598,10 +235114,10 @@
     },
     {
       "name": "erp-chat",
-      "ts_files": 70,
+      "ts_files": 72,
       "css_files": 2,
-      "test_files": 12,
-      "total_files": 72
+      "test_files": 13,
+      "total_files": 74
     },
     {
       "name": "esg",
@@ -235102,10 +235618,10 @@
     },
     {
       "name": "punchlist",
-      "ts_files": 19,
+      "ts_files": 21,
       "css_files": 0,
-      "test_files": 7,
-      "total_files": 19
+      "test_files": 8,
+      "total_files": 21
     },
     {
       "name": "qms",
@@ -235235,10 +235751,10 @@
     },
     {
       "name": "schedule",
-      "ts_files": 57,
+      "ts_files": 69,
       "css_files": 0,
-      "test_files": 23,
-      "total_files": 57
+      "test_files": 29,
+      "total_files": 69
     },
     {
       "name": "schedule-advanced",
@@ -235263,10 +235779,10 @@
     },
     {
       "name": "settings",
-      "ts_files": 29,
+      "ts_files": 31,
       "css_files": 0,
-      "test_files": 10,
-      "total_files": 29
+      "test_files": 11,
+      "total_files": 31
     },
     {
       "name": "setup",
@@ -236484,6 +237000,7 @@
       "users"
     ],
     "punchlist": [
+      "contracts",
       "documents",
       "projects",
       "property_dev"
@@ -236609,6 +237126,7 @@
       "boq",
       "collaboration_locks",
       "contacts",
+      "contracts",
       "eac",
       "projects",
       "saved_views",
@@ -236794,13 +237312,13 @@
     "backend_modules": 196,
     "modules_with_manifests": 194,
     "total_models": 623,
-    "total_columns": 7150,
+    "total_columns": 7152,
     "total_relationships": 234,
-    "total_routes": 3748,
-    "total_schemas": 3553,
-    "total_python_files": 2268,
+    "total_routes": 3756,
+    "total_schemas": 3563,
+    "total_python_files": 2288,
     "frontend_features": 192,
-    "frontend_ts_files": 2947,
+    "frontend_ts_files": 2987,
     "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {

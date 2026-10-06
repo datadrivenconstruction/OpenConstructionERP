@@ -205,7 +205,6 @@ COUNTRIES_WITHOUT_NATIONAL_RULES: dict[str, str] = {
     "NO": "NS 3451 is not a classification the platform can check yet.",
     "SE": "BSAB is not a classification the platform can check yet.",
     "NL": "NL/SfB has a label but no rule set yet.",
-    "IT": "The voci of a regional prezzario have no rule set yet.",
     "PT": (
         "ProNIC is not in the platform, and MasterFormat, which the registry uses as Portugal's "
         "fallback, is not what a Portuguese bill is coded in, so it is not run on every Portuguese project."

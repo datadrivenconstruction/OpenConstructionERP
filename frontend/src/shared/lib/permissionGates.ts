@@ -27,9 +27,6 @@ import { ROLE_RANK, normalizeRole } from './roles';
 type RankedRole = keyof typeof ROLE_RANK;
 
 export const PERMISSION_MIN_ROLE = {
-  'schedule.purge': 'admin',
-  'schedule.delete': 'editor',
-  'schedule.update': 'editor',
   'users.list': 'manager',
   'payroll.read': 'manager',
   'certified_payroll.read': 'manager',
@@ -40,6 +37,9 @@ export const PERMISSION_MIN_ROLE = {
   'takeoff.update': 'editor',
   'dwg_takeoff.create': 'editor',
   'schedule.create': 'editor',
+  'schedule.update': 'editor',
+  'schedule.delete': 'editor',
+  'schedule.purge': 'admin',
   'punchlist.update': 'editor',
   'qms.itp.write': 'editor',
   'qms.inspection.write': 'editor',

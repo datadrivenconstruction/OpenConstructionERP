@@ -8,6 +8,7 @@ import { useChatFullPage } from './useChatFullPage';
 import ChatLeftPanel from './left/ChatLeftPanel';
 import DataRightPanel from './right/DataRightPanel';
 import AIConfigBanner from './AIConfigBanner';
+import { AiDisclosure } from '../AiDisclosure';
 import { useThemeStore } from '@/stores/useThemeStore';
 
 const PANEL_STORAGE_KEY = 'chat-panel-sizes';
@@ -87,6 +88,9 @@ export default function ChatFullPage() {
           provides a header, so the chat bar duplicated UI and didn't
           match the rest of the site. Clear chat now lives in the input
           bar (left panel). */}
+      {/* The route header and old ChatTopBar are not the chat's persistent
+          identity. Keep disclosure visible independently of setup or history. */}
+      <AiDisclosure />
       <AIConfigBanner />
 
       <div style={{ flex: 1, overflow: 'hidden' }}>

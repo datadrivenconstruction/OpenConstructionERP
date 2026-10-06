@@ -1317,6 +1317,15 @@ export function PartnerPackApplyDialog({
                                     defaultValue: 'resource catalogue available',
                                   })}`}
                               </span>
+                              {b.attribution && (
+                                <span className="block text-xs text-content-tertiary">
+                                  {t('costs.base_source_attribution', {
+                                    defaultValue: 'Source: {{attribution}}, {{licence}}',
+                                    attribution: b.attribution,
+                                    licence: b.licence ?? '',
+                                  })}
+                                </span>
+                              )}
                             </span>
                           </label>
                         ) : (

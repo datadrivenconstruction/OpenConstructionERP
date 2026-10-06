@@ -634,19 +634,22 @@ def parse_x89(content: bytes) -> ParsedX89:
     if _local(root.tag) != "GAEB":
         raise ImporterParseError(
             "Not a GAEB DA XML document (root element is not <GAEB>).",
-            code="gaeb_wrong_root", params={"root": _local(root.tag)},
+            code="gaeb_wrong_root",
+            params={"root": _local(root.tag)},
         )
     phase = exchange_phase(root)
     if phase and phase != "89":
         raise ImporterParseError(
             f"This is a GAEB X{phase} file, not an X89 invoice.",
-            code="gaeb_wrong_phase", params={"phase": f"X{phase}", "expected": "X89"},
+            code="gaeb_wrong_phase",
+            params={"phase": f"X{phase}", "expected": "X89"},
         )
     invoice = _find_child(root, "Invoice")
     if invoice is None:
         raise ImporterParseError(
             "No <Invoice> element found. Is this a GAEB X89 file?",
-            code="gaeb_missing_element", params={"element": "Invoice", "format": "GAEB X89"},
+            code="gaeb_missing_element",
+            params={"element": "Invoice", "format": "GAEB X89"},
         )
 
     header_el = _find_child(invoice, "InvoiceHeader")

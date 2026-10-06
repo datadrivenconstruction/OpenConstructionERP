@@ -170,6 +170,26 @@ function layeredConfirm() {
 }
 
 describe('push mode on a wide screen', () => {
+  it.each(['Customer support', ''])('keeps a visible AI identity when the conversation is renamed to %j', async (title) => {
+    const ui = await mount();
+    fireEvent.change(ui.titleInput()!, { target: { value: title } });
+    const disclosure = ui.view.getByTestId('chat-ai-disclosure');
+    expect(disclosure).toBeVisible();
+    expect(disclosure).toHaveTextContent('AI assistant');
+    expect(disclosure.closest('input, textarea, [contenteditable="true"]')).toBeNull();
+    expect(ui.dialog()).toHaveAccessibleDescription('AI assistant');
+    expect(ui.dialog()).toHaveAccessibleName(title || 'AI assistant');
+  });
+
+  it('keeps the AI identity outside the scrolling transcript and chat tabs on a phone', async () => {
+    setViewport(320);
+    const ui = await mount();
+    const disclosure = ui.view.getByTestId('chat-ai-disclosure');
+    expect(disclosure).toBeVisible();
+    expect(disclosure.closest('[role="log"], [role="tabpanel"]')).toBeNull();
+    expect(ui.dialog()).toHaveAccessibleDescription('AI assistant');
+  });
+
   it('docks beside the page: no backdrop, not modal, the page makes room', async () => {
     const ui = await mount();
     const dialog = ui.dialog();
@@ -598,6 +618,14 @@ describe('the full-page chat route', () => {
 });
 
 describe('the round button', () => {
+  it('visibly identifies AI before opening, and includes that text in its accessible name', async () => {
+    const ui = await mount({ open: false });
+    const fab = ui.fab()!;
+    expect(fab).toHaveTextContent('AI assistant');
+    expect(fab).toHaveAccessibleName(/AI assistant/);
+    expect(fab.querySelector('span')).toBeVisible();
+  });
+
   it('is shown while the dock is closed and names its shortcut', async () => {
     const ui = await mount({ open: false });
     const fab = ui.fab()!;

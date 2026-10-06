@@ -90,6 +90,10 @@ export interface PackCostBase {
   /** A resource catalogue is published for this base. */
   has_catalog: boolean;
   reason_code: string | null;
+  /** Who published the source data, when its licence asks to be credited. */
+  attribution?: string | null;
+  /** The source data licence as the publisher states it. */
+  licence?: string | null;
 }
 
 export interface PackDemoProject {

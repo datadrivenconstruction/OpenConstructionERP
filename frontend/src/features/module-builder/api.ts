@@ -394,7 +394,7 @@ export async function fetchVocabulary(): Promise<Vocabulary> {
  * Turn a description into a specification. Writes nothing.
  *
  * `longRunning` because this one call goes out to an AI provider, and the
- * default 45s budget is a client timeout on a request that is still working.
+ * default 90s budget is a client timeout on a request that is still working.
  */
 export async function draftSpec(description: string, locale?: string): Promise<DraftResponse> {
   // `locale` only when the caller has one to give: the old request model is

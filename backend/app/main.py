@@ -2062,14 +2062,15 @@ def create_app() -> FastAPI:
     # that was never asked to.
     #
     # Three states: ``True`` it held application tables and named no revision,
-    # ``False`` it did not, ``None`` the question could not be put. It does NOT
-    # degrade, and the reason is a cohort the predicate cannot separate out:
+    # ``False`` it did not, ``None`` the question could not be put. MISC-14
+    # (founder decision 2026-10-06) makes only True degrade, while preserving
+    # the missing stamp for investigation. This is not proof of a broken schema:
     # ``True`` is equally what an install gets whose schema ``create_all`` built
     # correctly and whose stamp write then failed - that failure is caught and
     # logged further down, and the boot after it sees tables with no revision
-    # and refuses the stamp, permanently. Degrading here would pin a current
-    # schema to degraded for the life of the database on the strength of one
-    # lost write.
+    # and refuses the stamp on subsequent boots. That installation also needs
+    # an operator to verify its history; it must not be "repaired" by guessing
+    # a revision just to clear the signal. None and False leave status alone.
     app.state.arrived_populated_unstamped = None
 
     # ── Boot-time data-repair verdict ────────────────────────────────────
@@ -2883,10 +2884,9 @@ def create_app() -> FastAPI:
         # shipped, no revision ever recorded, the check itself blew up - and one
         # of the three is a database that held application tables and named no
         # revision when this process started. That cohort is the one whose
-        # schema nothing can vouch for: ``create_all`` builds the tables that
-        # are wholly absent and alters none of the ones already there, so it is
-        # left part-migrated, and the missing revision was the only thing that
-        # ever said so. The boot refuses to stamp it for exactly that reason.
+        # schema cannot be inferred from its missing history: ``create_all``
+        # builds wholly absent tables but cannot prove existing tables were
+        # migrated. The boot refuses to stamp it to preserve that uncertainty.
         # Until this key existed the refusal was recorded nowhere a reader could
         # reach and the install answered ``null`` and ``healthy`` like any other.
         #
@@ -2895,14 +2895,15 @@ def create_app() -> FastAPI:
         # every deployment whose database is not PostgreSQL, and the window
         # before startup answers it. Read with ``is True``.
         #
-        # It does not degrade, and the reason is worth stating rather than
-        # leaving as a choice: ``true`` is also what an install reports whose
-        # schema was built correctly and whose stamp write then failed, because
-        # the boot after that failure finds tables with no revision and cannot
-        # tell the two apart - and, having refused the stamp, will find the same
-        # thing on every boot afterwards. Degrading would hold a current schema
-        # at degraded for the life of the database over one lost write.
-        result["arrived_populated_unstamped"] = getattr(app.state, "arrived_populated_unstamped", None)
+        # MISC-14 chooses an explicit degraded signal, not an automatic stamp.
+        # True also covers a correctly created schema whose stamp write failed;
+        # it asks for investigation, not a conclusion that data is corrupt.
+        # Keep the HTTP/liveness contract unchanged, and never turn an unknown
+        # answer into either a failure or a reassuring False.
+        _arrived_unstamped = getattr(app.state, "arrived_populated_unstamped", None)
+        result["arrived_populated_unstamped"] = _arrived_unstamped
+        if _arrived_unstamped is True:
+            result["status"] = "degraded"
 
         # Did the boot-time schema heal finish? This is the one signal an
         # external-PostgreSQL operator has that their role cannot issue DDL.

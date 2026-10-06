@@ -195,26 +195,30 @@ def parse_x31(content: bytes) -> ParsedX31:
     if _local(root.tag) != "GAEB":
         raise ImporterParseError(
             "Not a GAEB DA XML document (root element is not <GAEB>).",
-            code="gaeb_wrong_root", params={"root": _local(root.tag)},
+            code="gaeb_wrong_root",
+            params={"root": _local(root.tag)},
         )
     phase = exchange_phase(root)
     if phase and phase != "31":
         raise ImporterParseError(
             f"This is a GAEB X{phase} file, not an X31 quantity determination. "
             "Import tender phases (X81 to X86) through the normal BOQ import.",
-            code="gaeb_wrong_phase", params={"phase": f"X{phase}", "expected": "X31"},
+            code="gaeb_wrong_phase",
+            params={"phase": f"X{phase}", "expected": "X31"},
         )
     container = _find_child(root, "QtyDeterm")
     if container is None:
         raise ImporterParseError(
             "No <QtyDeterm> element found. Is this a GAEB X31 file?",
-            code="gaeb_missing_element", params={"element": "QtyDeterm", "format": "GAEB X31"},
+            code="gaeb_missing_element",
+            params={"element": "QtyDeterm", "format": "GAEB X31"},
         )
     boq = _find_child(container, "BoQ")
     if boq is None:
         raise ImporterParseError(
             "The X31 file has no <BoQ>, so it names no positions.",
-            code="gaeb_missing_element", params={"element": "BoQ", "format": "GAEB X31"},
+            code="gaeb_missing_element",
+            params={"element": "BoQ", "format": "GAEB X31"},
         )
 
     info = _find_child(container, "QtyDetermInfo")
