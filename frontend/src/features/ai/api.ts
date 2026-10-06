@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { apiGet, apiPost, apiPatch, extractErrorMessageFromBody } from '@/shared/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { withLongRunningDeadline } from '@/shared/lib/longRunningDeadline';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -28,6 +29,13 @@ export type AIProvider =
 
 export type AIConnectionStatus = 'connected' | 'not_configured' | 'error';
 
+/** Whether the assistant offers its tools to a self-hosted endpoint. */
+export type ToolCallingMode = 'auto' | 'on' | 'off';
+
+/** Range accepted for a per-provider AI timeout, in seconds. */
+export const AI_TIMEOUT_MIN_S = 10;
+export const AI_TIMEOUT_MAX_S = 1800;
+
 export interface AISettings {
   id: string;
   user_id: string;
@@ -50,6 +58,14 @@ export interface AISettings {
   gigachat_api_key_set: boolean; kimi_api_key_set: boolean;
   // Self-hosted runtimes carry an endpoint instead of a key flag; null when unset.
   ollama_base_url: string | null; vllm_base_url: string | null;
+  /** The OpenAI-compatible endpoint (id `vllm`) takes an optional key. */
+  vllm_api_key_set?: boolean;
+  /** Saved tool calling mode per self-hosted endpoint, and the server default. */
+  tool_calling?: Record<string, ToolCallingMode>;
+  tool_calling_defaults?: Record<string, ToolCallingMode>;
+  /** Saved per-provider AI timeout in seconds, and the default that applies otherwise. */
+  timeouts?: Record<string, number>;
+  default_timeout_seconds?: number;
   /**
    * Authoritative "AI is usable" flag from the backend. True when a usable
    * cloud key is set OR a local provider (Ollama / vLLM) is configured via its
@@ -95,6 +111,12 @@ export interface AISettingsUpdate {
   gigachat_api_key?: string | null; kimi_api_key?: string | null;
   // Optional endpoint overrides for the self-hosted runtimes.
   ollama_base_url?: string | null; vllm_base_url?: string | null;
+  /** Optional key of the OpenAI-compatible endpoint. A blank string clears it. */
+  vllm_api_key?: string | null;
+  /** Per self-hosted endpoint; a blank string returns it to the server default. */
+  tool_calling?: Record<string, ToolCallingMode | ''>;
+  /** Per-provider timeout in seconds; null clears it. */
+  timeouts?: Record<string, number | null>;
 }
 
 export interface AITestResult {
@@ -235,12 +257,14 @@ export const aiApi = {
    * uses that signal to distinguish user-cancelled runs (status: 'cancelled')
    * from real failures (status: 'error').
    */
-  quickEstimate: (data: QuickEstimateRequest, opts?: { signal?: AbortSignal }) =>
-    apiPost<EstimateJobResponse, QuickEstimateRequest>(
-      '/v1/ai/quick-estimate/',
-      data,
-      opts?.signal ? { signal: opts.signal } : undefined,
-    ),
+  quickEstimate: (data: QuickEstimateRequest, opts?: { signal?: AbortSignal }) => {
+    const send = (signal?: AbortSignal) => apiPost<EstimateJobResponse, QuickEstimateRequest>(
+      '/v1/ai/quick-estimate/', data, { longRunning: true, signal },
+    );
+    // The shared client defers to a supplied signal; keep both Cancel and
+    // the heavy-request budget when this screen owns the controller.
+    return opts?.signal ? withLongRunningDeadline(send, opts.signal) : send();
+  },
 
   /** Upload a photo and get an AI estimate via Vision model. */
   photoEstimate: async (params: {
@@ -256,17 +280,19 @@ export const aiApi = {
     if (params.currency) form.append('currency', params.currency);
     if (params.standard) form.append('standard', params.standard);
 
-    const res = await fetch('/api/v1/ai/photo-estimate/', {
-      method: 'POST',
-      headers: { ...getAuthHeaders(), Accept: 'application/json' },
-      body: form,
-      signal: params.signal,
-    });
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({ detail: res.statusText }));
-      throw new Error(extractErrorMessageFromBody(body) ?? 'Photo estimate failed');
-    }
-    return res.json();
+    return withLongRunningDeadline(async (signal) => {
+      const res = await fetch('/api/v1/ai/photo-estimate/', {
+        method: 'POST',
+        headers: { ...getAuthHeaders(), Accept: 'application/json' },
+        body: form,
+        signal,
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({ detail: res.statusText }));
+        throw new Error(extractErrorMessageFromBody(body) ?? 'Photo estimate failed');
+      }
+      return res.json();
+    }, params.signal);
   },
 
   /** Upload any file (PDF, Excel, CSV, CAD, image) for standalone AI estimate. */
@@ -283,17 +309,19 @@ export const aiApi = {
     if (params.currency) form.append('currency', params.currency);
     if (params.standard) form.append('standard', params.standard);
 
-    const res = await fetch('/api/v1/ai/file-estimate/', {
-      method: 'POST',
-      headers: { ...getAuthHeaders(), Accept: 'application/json' },
-      body: form,
-      signal: params.signal,
-    });
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({ detail: res.statusText }));
-      throw new Error(extractErrorMessageFromBody(body) ?? 'File estimate failed');
-    }
-    return res.json();
+    return withLongRunningDeadline(async (signal) => {
+      const res = await fetch('/api/v1/ai/file-estimate/', {
+        method: 'POST',
+        headers: { ...getAuthHeaders(), Accept: 'application/json' },
+        body: form,
+        signal,
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({ detail: res.statusText }));
+        throw new Error(extractErrorMessageFromBody(body) ?? 'File estimate failed');
+      }
+      return res.json();
+    }, params.signal);
   },
 
   createBOQFromEstimate: (jobId: string, data: CreateBOQFromEstimate) =>

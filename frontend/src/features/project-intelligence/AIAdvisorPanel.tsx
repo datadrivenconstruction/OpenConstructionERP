@@ -73,6 +73,8 @@ export function AIAdvisorPanel({ projectId, role }: AIAdvisorPanelProps) {
       const data = await apiPost<{ text: string; role: string; language: string }>(
         `/v1/project_intelligence/recommendations/?project_id=${projectId}`,
         { role, language: 'en' },
+        // The answer waits for an AI provider (issue #499).
+        { longRunning: true },
       );
       const text = data.text || '';
       setRecommendation(text);
@@ -106,6 +108,7 @@ export function AIAdvisorPanel({ projectId, role }: AIAdvisorPanelProps) {
       const data = await apiPost<{ text: string; question: string }>(
         `/v1/project_intelligence/chat/?project_id=${projectId}`,
         { question, role, language: 'en' },
+        { longRunning: true },
       );
       setChatMessages((prev) => [
         ...prev,

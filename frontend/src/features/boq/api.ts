@@ -2037,7 +2037,8 @@ export const boqApi = {
 
   /* AI Chat */
   aiChat: (boqId: string, data: AIChatRequest) =>
-    apiPost<AIChatResponse>(`/v1/boq/boqs/${boqId}/ai-chat/`, data),
+    // longRunning: the call waits for an AI provider (issue #499).
+    apiPost<AIChatResponse>(`/v1/boq/boqs/${boqId}/ai-chat/`, data, { longRunning: true }),
 
   /* ── Per-position AI copilot ──────────────────────────────────────── */
   /**
@@ -2057,6 +2058,7 @@ export const boqApi = {
     apiPost<CopilotChatResponse, { message: string }>(
       `/v1/boq/positions/${positionId}/copilot/`,
       { message },
+      { longRunning: true },
     ),
   /** Human-confirmed apply of a single ``needs_review`` action (server write). */
   positionCopilotApply: (positionId: string, action: CopilotAction) =>
@@ -2271,7 +2273,7 @@ export const boqApi = {
     unit?: string;
     classification?: Record<string, string>;
     locale?: string;
-  }) => apiPost<EnhanceDescriptionResponse>('/v1/boq/boqs/enhance-description/', data),
+  }) => apiPost<EnhanceDescriptionResponse>('/v1/boq/boqs/enhance-description/', data, { longRunning: true }),
 
   /* AI: Suggest prerequisites via LLM */
   suggestPrerequisites: (data: {
@@ -2280,7 +2282,7 @@ export const boqApi = {
     classification?: Record<string, string>;
     existing_descriptions?: string[];
     locale?: string;
-  }) => apiPost<SuggestPrerequisitesResponse>('/v1/boq/boqs/suggest-prerequisites/', data),
+  }) => apiPost<SuggestPrerequisitesResponse>('/v1/boq/boqs/suggest-prerequisites/', data, { longRunning: true }),
 
   /* AI: Check scope completeness via LLM */
   checkScope: (boqId: string, data: {
@@ -2288,7 +2290,7 @@ export const boqApi = {
     region?: string;
     currency?: string;
     locale?: string;
-  }) => apiPost<CheckScopeResponse>(`/v1/boq/boqs/${boqId}/check-scope/`, data),
+  }) => apiPost<CheckScopeResponse>(`/v1/boq/boqs/${boqId}/check-scope/`, data, { longRunning: true }),
 
   /* AI: Escalate rate via LLM */
   escalateRate: (data: {
@@ -2300,7 +2302,7 @@ export const boqApi = {
     target_year?: number;
     region?: string;
     locale?: string;
-  }) => apiPost<EscalateRateResponse>('/v1/boq/boqs/escalate-rate/', data),
+  }) => apiPost<EscalateRateResponse>('/v1/boq/boqs/escalate-rate/', data, { longRunning: true }),
 
   /* Custom Columns — manage user-defined fields per BOQ */
   listCustomColumns: (boqId: string) =>

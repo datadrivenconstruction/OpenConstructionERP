@@ -8,6 +8,7 @@ Tables:
 """
 
 import uuid
+from typing import Any
 
 from sqlalchemy import JSON, Float, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
@@ -53,8 +54,40 @@ class AISettings(Base):
         server_default="{}",
     )
 
+    # The key of the self-hosted OpenAI-compatible endpoint (provider id
+    # "vllm", issue #499) lives in ``metadata`` rather than in a column, so an
+    # upgraded install needs no schema change. Like the columns above it holds
+    # Fernet ciphertext; the property keeps every ``f"{provider}_api_key"``
+    # reader working unchanged.
+    @property
+    def vllm_api_key(self) -> str | None:
+        """Ciphertext of the endpoint key, or None when none is stored."""
+        meta = self.metadata_ if isinstance(self.metadata_, dict) else {}
+        value = meta.get(VLLM_API_KEY_META)
+        return value if isinstance(value, str) and value else None
+
+    @vllm_api_key.setter
+    def vllm_api_key(self, ciphertext: str | None) -> None:
+        # A new dict, never an in-place edit: a plain JSON column does not
+        # track mutation, so changing the existing dict would not be saved.
+        self.metadata_ = with_vllm_api_key(self.metadata_, ciphertext)
+
     def __repr__(self) -> str:
         return f"<AISettings user={self.user_id} model={self.preferred_model}>"
+
+
+#: ``metadata`` key holding the endpoint key ciphertext. Never echoed to clients.
+VLLM_API_KEY_META = "vllm_api_key"
+
+
+def with_vllm_api_key(metadata: Any, ciphertext: str | None) -> dict[str, Any]:
+    """Return a copy of *metadata* holding *ciphertext*, or without it when empty."""
+    merged: dict[str, Any] = dict(metadata) if isinstance(metadata, dict) else {}
+    if ciphertext:
+        merged[VLLM_API_KEY_META] = ciphertext
+    else:
+        merged.pop(VLLM_API_KEY_META, None)
+    return merged
 
 
 class AIEstimateJob(Base):

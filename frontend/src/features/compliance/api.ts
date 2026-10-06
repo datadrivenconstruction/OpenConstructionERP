@@ -56,7 +56,8 @@ export interface DSLCompileResult {
 export async function parseNlToDsl(
   body: NlBuildRequest,
 ): Promise<NlBuildResult> {
-  return apiPost<NlBuildResult>('/v1/compliance/dsl/from-nl', body);
+  // longRunning: the call waits for an AI provider (issue #499).
+  return apiPost<NlBuildResult>('/v1/compliance/dsl/from-nl', body, { longRunning: true });
 }
 
 /** List the supported NL → DSL patterns for the hints panel. */

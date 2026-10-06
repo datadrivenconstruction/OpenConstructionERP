@@ -53,6 +53,8 @@ The same history is part of the platform's audit trail. Every applied or undone 
 
 The assistant uses the AI provider your organisation connects under Settings, AI, with your own API key. Preparing changes needs a provider that supports tool calling; with a provider that does not, the assistant still answers in plain text and tells you it cannot prepare changes. Without any key the rest of the platform works as usual and the assistant explains how to connect one.
 
+A model you run yourself connects as an OpenAI-compatible endpoint: vLLM, an Ollama-style server, or a gateway in front of them. Enter its address, the model name and, if the server checks one, its key. Tool calling for such an endpoint is off by default because many local servers reject it; switch it to Auto to try tools and fall back to plain text when the server refuses, or to On when you know the server supports them. A slow model can be given a longer timeout, up to 30 minutes, in the same settings card. An administrator can set the same defaults for the whole install with `OE_VLLM_API_KEY`, `OE_AI_TOOLS_SELF_HOSTED`, `OE_AI_TIMEOUT` and `OE_CHAT_AI_TIMEOUT`, described in `backend/.env.example`.
+
 ## How it connects
 
 The assistant works on the same records as the rest of the platform, so a position it prepares lands in the [bill of quantities](./estimating-and-boq.md) like any other, is checked by the [validation pipeline](./validation.md), and flows on into [planning and cost control](./planning-and-cost-control.md). Tasks, RFIs, risks and punch items it prepares appear in the project's lists and in [field and site operations](./field-and-site.md) exactly as if a person had entered them, with the difference that the audit trail also names the assistant.

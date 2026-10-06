@@ -13,6 +13,7 @@ Apply request (another session) finds it, and the person applies it through
 """
 
 import asyncio
+import contextlib
 import json
 import logging
 import time
@@ -29,6 +30,7 @@ from sqlalchemy import inspect as sa_inspect
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.modules.ai.ai_client import SELF_HOSTED_PROVIDERS
 from app.modules.erp_chat.actions import registry as action_registry
 from app.modules.erp_chat.actions.base import ActionConflictError
 from app.modules.erp_chat.actions.service import ChatActionService, propose_tool_result
@@ -65,19 +67,82 @@ MAX_AGENT_ROUNDS = 5
 # Widening this set is per provider and on evidence, not by category. Response
 # shapes already diverge INSIDE the OpenAI-compatible group - ai_client keeps a
 # provider-keyed text extractor for exactly that reason - Cohere is a different
-# contract outright, and ollama/vllm must keep the SSRF-guarded transport they
-# have today.
+# contract outright.
+#
+# The self-hosted endpoints (ollama, vllm) are the exception that proves the
+# rule: what they support is a fact about the operator's own server, so the
+# operator states it per endpoint in Settings > AI (auto / on / off, issue
+# #499) - see ``ai_client.tool_calling_mode``. Their calls keep the
+# SSRF-guarded transport, which every OpenAI-compatible request goes through.
 TOOL_CAPABLE_OPENAI_COMPAT = frozenset({"openrouter"})
 
 # Every provider whose response is shaped like an OpenAI chat completion. The
 # three response parsers below key off this set rather than a single literal:
 # widening the dispatch alone is the half-applied fix, and it fails silently -
 # tool calls read as absent, appended results are dropped, and the user gets a
-# blank bubble instead of an answer.
-OPENAI_WIRE_PROVIDERS = frozenset({"openai"}) | TOOL_CAPABLE_OPENAI_COMPAT
+# blank bubble instead of an answer. The self-hosted endpoints are in it
+# because the parsers only ever see a response from the tool path, which they
+# reach only when tool calling is on for them.
+OPENAI_WIRE_PROVIDERS = frozenset({"openai"}) | TOOL_CAPABLE_OPENAI_COMPAT | frozenset(SELF_HOSTED_PROVIDERS)
 
-# Timeout for AI API calls
+# Built-in timeout for the chat's own Anthropic and OpenAI calls. Every other
+# chat call goes through ai_client and its built-in 240 s; see
+# :func:`chat_ai_timeout` for what overrides both.
 AI_TIMEOUT = 120.0
+
+# Seconds between SSE comment frames while a provider call is in flight. The
+# reply is not token-streamed, so without them nothing crosses the wire until
+# the model has answered, and a reverse proxy cuts the request at its read
+# timeout (120 s in our own nginx config) whatever the AI timeout says. Well
+# under the common proxy defaults of 60 s and up.
+HEARTBEAT_INTERVAL_S = 15.0
+_KEEPALIVE_FRAME = ": keepalive\n\n"
+
+
+def chat_ai_timeout(provider: str) -> float:
+    """Seconds the chat waits for *provider* (issue #499).
+
+    The user's per-provider value from Settings > AI wins, then
+    ``OE_CHAT_AI_TIMEOUT``, then today's built-in values: 120 s for the chat's
+    direct Anthropic and OpenAI calls and the general AI timeout (240 s unless
+    ``OE_AI_TIMEOUT`` says otherwise) for everything that goes through ai_client.
+    """
+    from app.config import get_settings
+    from app.modules.ai.ai_client import effective_ai_timeout, user_ai_timeout
+
+    user = user_ai_timeout()
+    if user is not None:
+        return user
+    env = get_settings().chat_ai_timeout
+    if env is not None:
+        return env
+    if provider in ("anthropic", "openai"):
+        return AI_TIMEOUT
+    return effective_ai_timeout()
+
+
+async def _keepalive_until(task: "asyncio.Future[Any]", interval: float | None = None) -> AsyncGenerator[str, None]:
+    """Yield an SSE comment frame every *interval* seconds until *task* is done.
+
+    Comment frames (a line starting with ``:``) are ignored by every SSE
+    reader, ours included, so they keep a proxy's read timer from firing
+    without adding anything to the conversation. The task is cancelled if this
+    generator is closed or cancelled before it finishes - the browser went
+    away, so nobody is waiting for the answer and the provider call should not
+    hold a worker until it times out. Its result or error is left on the task
+    for the caller to read.
+    """
+    try:
+        while not task.done():
+            done, _pending = await asyncio.wait({task}, timeout=interval or HEARTBEAT_INTERVAL_S)
+            if not done:
+                yield _KEEPALIVE_FRAME
+    finally:
+        if not task.done():
+            task.cancel()
+            with contextlib.suppress(asyncio.CancelledError, Exception):
+                await task
+
 
 # Maximum serialized size of a single tool result re-fed to the LLM.
 # ~8000 chars ≈ 2000 tokens - keeps the agent loop from blowing up the
@@ -520,24 +585,24 @@ class ERPChatService:
 
             for _round in range(MAX_AGENT_ROUNDS):
                 try:
-                    if provider == "anthropic":
-                        result, tokens = await self._call_anthropic(api_key, messages, preferred_model)
-                    elif provider == "openai":
-                        result, tokens = await self._call_openai(api_key, messages, preferred_model)
-                    elif provider in TOOL_CAPABLE_OPENAI_COMPAT:
-                        result, tokens = await self._call_openai_compat_tools(
-                            provider, api_key, messages, preferred_model
-                        )
-                    else:
+                    # The provider call runs as a task so the stream can send
+                    # keepalive frames while it waits (issue #499); closing
+                    # the stream cancels it.
+                    call = asyncio.ensure_future(
+                        self._call_round(provider, api_key, messages, preferred_model, request.message)
+                    )
+                    async with contextlib.aclosing(_keepalive_until(call)) as beats:
+                        async for beat in beats:
+                            yield beat
+                    plain_text, result, tokens = call.result()
+                    if plain_text is not None:
                         # Fallback: no tool support - a single plain-text call.
                         # Break into the shared tail below instead of streaming
                         # and returning here, so this provider class gets the
                         # same persistence, token accounting and ``done``
                         # payload as the tool-capable ones (issue #417).
-                        assistant_text, fallback_tokens = await self._call_fallback(
-                            provider, api_key, request.message, preferred_model
-                        )
-                        total_tokens += fallback_tokens
+                        assistant_text = plain_text
+                        total_tokens += tokens
                         break
                 except ValueError as exc:
                     # Expected user-facing errors from ai_client (bad API key,
@@ -894,6 +959,40 @@ class ERPChatService:
         used = int((await self.session.execute(stmt)).scalar_one() or 0)
         return used < DAILY_TOKEN_BUDGET, used
 
+    # ── One provider round ───────────────────────────────────────────────
+
+    async def _call_round(
+        self,
+        provider: str,
+        api_key: str,
+        messages: list[dict[str, Any]],
+        preferred_model: str | None,
+        user_message: str,
+    ) -> tuple[str | None, dict[str, Any], int]:
+        """Make this round's provider call, choosing the path by provider.
+
+        Returns:
+            ``(None, raw_body, tokens)`` from a call that carried the tool
+            schema, or ``(text, {}, tokens)`` from the plain-text fallback,
+            which ends the turn.
+        """
+        from app.modules.ai.ai_client import tool_calling_mode
+
+        if provider == "anthropic":
+            result, tokens = await self._call_anthropic(api_key, messages, preferred_model)
+            return None, result, tokens
+        if provider == "openai":
+            result, tokens = await self._call_openai(api_key, messages, preferred_model)
+            return None, result, tokens
+        mode = tool_calling_mode(provider)
+        if provider in TOOL_CAPABLE_OPENAI_COMPAT or mode != "off":
+            result, tokens = await self._call_openai_compat_tools(
+                provider, api_key, messages, preferred_model, remember_refusal=mode == "auto"
+            )
+            return None, result, tokens
+        text, tokens = await self._call_fallback(provider, api_key, user_message, preferred_model)
+        return text, {}, tokens
+
     # ── Anthropic API ────────────────────────────────────────────────────
 
     async def _call_anthropic(
@@ -920,7 +1019,7 @@ class ERPChatService:
         model = resolve_anthropic_model(preferred_model)
 
         t0 = time.perf_counter()
-        async with httpx.AsyncClient(timeout=AI_TIMEOUT) as client:
+        async with httpx.AsyncClient(timeout=chat_ai_timeout("anthropic")) as client:
             resp = await client.post(
                 "https://api.anthropic.com/v1/messages",
                 headers={
@@ -979,7 +1078,7 @@ class ERPChatService:
         openai_messages = [{"role": "system", "content": self._system_prompt}] + messages
 
         t0 = time.perf_counter()
-        async with httpx.AsyncClient(timeout=AI_TIMEOUT) as client:
+        async with httpx.AsyncClient(timeout=chat_ai_timeout("openai")) as client:
             resp = await client.post(
                 "https://api.openai.com/v1/chat/completions",
                 headers={
@@ -1020,6 +1119,8 @@ class ERPChatService:
         api_key: str,
         messages: list[dict[str, Any]],
         preferred_model: str | None,
+        *,
+        remember_refusal: bool = False,
     ) -> tuple[dict[str, Any], int]:
         """Call an OpenAI-compatible provider with a tool schema (issue #424).
 
@@ -1034,10 +1135,13 @@ class ERPChatService:
         holding a prompt that advertises tools (issue #417).
 
         Args:
-            provider: Provider id, one of :data:`TOOL_CAPABLE_OPENAI_COMPAT`.
+            provider: Provider id, one of :data:`TOOL_CAPABLE_OPENAI_COMPAT`,
+                or a self-hosted endpoint with tool calling on.
             api_key: Provider API key.
             messages: Chat messages without the system turn.
             preferred_model: The user's per-provider model id override.
+            remember_refusal: The endpoint's "auto" mode - remember a refusal
+                of the schema rather than paying for it every turn.
 
         Returns:
             Tuple of (raw response body, tokens_used).
@@ -1060,6 +1164,8 @@ class ERPChatService:
             tools=_openai_tool_schema(),
             model=model,
             max_tokens=4096,
+            timeout=chat_ai_timeout(provider),
+            remember_refusal=remember_refusal,
         )
         latency_ms = int((time.perf_counter() - t0) * 1000)
 
@@ -1112,6 +1218,7 @@ class ERPChatService:
             system=self._system_prompt_no_tools,
             prompt=message,
             model=model,
+            timeout=chat_ai_timeout(provider),
         )
         # No ``_record_turn_metrics`` call: ``call_ai`` reports only a total,
         # so the input/output split and the cache flag are genuinely unknown

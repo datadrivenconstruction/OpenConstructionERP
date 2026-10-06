@@ -48,6 +48,23 @@ DEFAULT_LLM_STEP_TIMEOUT = 45.0
 DEFAULT_MAX_OBSERVATION_CHARS = 8_000
 
 
+def effective_step_timeout(configured: float) -> float:
+    """The per-step LLM cap for an agent whose own setting is *configured*.
+
+    The 45 s default exists to bound the provider's built-in timeout. When the
+    operator chose an AI timeout themselves (``OE_AI_TIMEOUT`` or a value saved
+    in Settings > AI for the provider, issue #499), that choice is the cap, or
+    a slow self-hosted model they deliberately allowed more time would still be
+    cut at 45 s. An agent that set a cap of its own keeps it.
+    """
+    if configured != DEFAULT_LLM_STEP_TIMEOUT:
+        return configured
+    from app.modules.ai.ai_client import configured_ai_timeout
+
+    chosen = configured_ai_timeout()
+    return chosen if chosen is not None else configured
+
+
 def _truncate_observation(value: Any, cap: int) -> Any:
     """Bound the size of a tool observation before it re-enters the LLM context.
 
@@ -388,7 +405,7 @@ class AgentRunner:
         wall_budget = max(0.0, float(agent.max_wall_seconds or 0.0))
         token_budget = max(0, int(agent.max_total_tokens or 0))
         obs_cap = max(0, int(agent.max_observation_chars or 0))
-        step_timeout = max(0.0, float(agent.llm_step_timeout or 0.0))
+        step_timeout = max(0.0, effective_step_timeout(float(agent.llm_step_timeout or 0.0)))
 
         def _wall_exceeded() -> bool:
             return wall_budget > 0 and (time.monotonic() - run_started) >= wall_budget

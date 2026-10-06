@@ -297,6 +297,7 @@ const CWICR_DATABASES: CWICRDatabase[] = [
 interface ProviderOption {
   id: AIProvider;
   name: string;
+  nameKey?: string;
   description: string;
   docsUrl: string;
   recommended?: boolean;
@@ -419,12 +420,14 @@ const AI_PROVIDERS: ProviderOption[] = [
   {
     id: 'ollama',
     name: 'Ollama (local)',
+    nameKey: 'settings.ai_name_ollama',
     description: 'Runs models on your machine',
     docsUrl: 'https://ollama.com/',
   },
   {
     id: 'vllm',
-    name: 'vLLM (self-hosted)',
+    name: 'OpenAI-compatible endpoint',
+    nameKey: 'settings.ai_name_openai_compatible',
     description: 'Your own OpenAI-compatible server',
     docsUrl: 'https://docs.vllm.ai/',
   },
@@ -4228,7 +4231,7 @@ export function StepDataSetup({
               >
                 {AI_PROVIDERS.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.name}
+                    {p.nameKey ? t(p.nameKey, { defaultValue: p.name }) : p.name}
                     {p.recommended ? ' *' : ''}
                   </option>
                 ))}

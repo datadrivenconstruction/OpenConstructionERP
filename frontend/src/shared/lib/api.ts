@@ -30,12 +30,11 @@ export const API_BASE = BASE_URL;
  *
  * The deployed app often runs on a small single-core box where, under
  * concurrent multi-user load or a cold cache, ordinary reads can briefly take
- * 20-40s. A 45s budget tolerates those without a false "timed out" abort while
- * still failing a genuinely hung request promptly. Crucially, timeouts are NO
- * LONGER retried by React Query (see the retry predicate in main.tsx), so the
- * worst-case wait is a single 45s attempt - shorter than the old 30s + retry
- * (~60s) path - and a slow-but-valid 30-45s response now succeeds instead of
- * being killed mid-flight.
+ * 20-40s. A 90s budget tolerates those without a false "timed out" abort while
+ * still failing a genuinely hung request. Crucially, timeouts are NO LONGER
+ * retried by React Query (see the retry predicate in main.tsx), so the
+ * worst-case wait is a single 90s attempt, and a slow-but-valid response now
+ * succeeds instead of being killed mid-flight.
  *
  * The long budget is kept for genuinely heavy operations (CWICR import, AI
  * estimation, CAD/BIM conversion) and must be opted into via `longRunning`.
@@ -564,6 +563,10 @@ async function request<TResponse>(
     clearTimeout(timeoutId);
   } catch (err) {
     clearTimeout(timeoutId);
+    // A caller's cancellation (including its own deadline) is not an
+    // offline write to replay later. In particular, cancelling an AI run
+    // while connectivity drops must not silently schedule another run.
+    if (init?.signal?.aborted) throw err;
     // A timeout fired by our own controller (not a caller-supplied signal).
     // Surface it as a clear, actionable timeout error rather than a generic
     // "Failed to fetch", and notify the user so the screen doesn't just sit

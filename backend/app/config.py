@@ -35,6 +35,11 @@ _CONFIG_BUILD_TAG: str = "a5e797ddb2104903"
 # forgery via brute-force is computationally infeasible.
 _JWT_SECRET_MIN_LENGTH = 32
 
+# Range accepted for an AI provider timeout, in seconds, from the environment
+# and from Settings > AI alike (issue #499).
+AI_TIMEOUT_MIN_S = 10.0
+AI_TIMEOUT_MAX_S = 1800.0
+
 # Known-weak default values the validator MUST reject in non-development
 # environments. The bundled dev default is here too because anyone reading
 # the open-source repo can forge admin tokens against any deployment that
@@ -319,6 +324,19 @@ class Settings(BaseSettings):
     # "ollama.internal,10.20.0.0/16") to lock AI provider URLs to a known set;
     # anything outside it is then rejected. Binds OE_AI_PROVIDER_ALLOWLIST.
     ai_provider_allowlist: str = ""
+    # Seconds to wait for an AI provider to answer. Unset keeps the built-in
+    # values (240 s for AI calls, 120 s for the assistant chat's own Anthropic
+    # and OpenAI calls). A per-provider value saved in Settings > AI wins over
+    # these. Values outside 10..1800 are pulled into that range. Binds
+    # OE_AI_TIMEOUT and OE_CHAT_AI_TIMEOUT (issue #499).
+    ai_timeout: float | None = None
+    chat_ai_timeout: float | None = None
+    # Self-hosted AI providers ("vllm", "ollama", comma-separated) that the
+    # assistant offers its tool schema to by default ("auto": try with tools,
+    # fall back without them if the endpoint refuses). Empty keeps tool calling
+    # off unless a user turns it on for their endpoint in Settings > AI. Binds
+    # OE_AI_TOOLS_SELF_HOSTED (issue #499).
+    ai_tools_self_hosted: str = ""
 
     # ── Database ─────────────────────────────────────────────────────────
     # PostgreSQL is required; embedded PostgreSQL boots by default (no Docker),
@@ -775,6 +793,19 @@ class Settings(BaseSettings):
     def _canonical_sync_db_url(cls, value: str) -> str:
         """Accept any postgres:// form for the sync engine, normalize to psycopg2."""
         return _canonicalize_db_url(value, driver="psycopg2")
+
+    @field_validator("ai_timeout", "chat_ai_timeout", mode="after")
+    @classmethod
+    def _clamp_ai_timeout(cls, value: float | None) -> float | None:
+        """Pull an AI timeout into the supported range instead of refusing to boot.
+
+        A typo in an env var should not take the whole server down; a value of
+        5 s would fail every call and one of a day would pin a worker, so both
+        ends are clamped.
+        """
+        if value is None:
+            return None
+        return min(max(float(value), AI_TIMEOUT_MIN_S), AI_TIMEOUT_MAX_S)
 
     @model_validator(mode="after")
     def _compose_db_url_from_parts(self) -> "Settings":

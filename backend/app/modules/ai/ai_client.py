@@ -13,6 +13,7 @@ import json
 import logging
 import os
 import re
+import time
 from collections.abc import Awaitable, Callable
 from contextvars import ContextVar
 from typing import Any
@@ -158,8 +159,55 @@ def fallback_models_for(provider: str, attempted: str) -> list[str]:
     return out
 
 
-# Timeout for AI API calls (2 minutes - large BOQ generation can be slow)
+# Built-in timeout for AI API calls (4 minutes - large BOQ generation can be
+# slow). Used only when neither the caller, the user's settings nor the
+# environment names one; see :func:`effective_ai_timeout`.
 AI_TIMEOUT = 240.0
+
+# The user's per-provider timeout for the settings resolved in this request,
+# bound next to the self-hosted endpoints (issue #499). None means the user set
+# none, which is different from the built-in value: an explicit timeout also
+# lifts caps that exist only to bound the built-in one (the agents' step cap).
+_USER_AI_TIMEOUT: ContextVar[float | None] = ContextVar("oe_ai_user_timeout", default=None)
+
+
+def _saved_timeouts(saved_meta: dict | None) -> dict[str, float]:
+    """The per-provider timeouts one user's settings metadata names, in range."""
+    from app.config import AI_TIMEOUT_MAX_S, AI_TIMEOUT_MIN_S
+
+    raw = saved_meta.get("timeouts") if isinstance(saved_meta, dict) else None
+    found: dict[str, float] = {}
+    if isinstance(raw, dict):
+        for provider, seconds in raw.items():
+            if isinstance(seconds, int | float) and not isinstance(seconds, bool) and seconds > 0:
+                found[str(provider)] = min(max(float(seconds), AI_TIMEOUT_MIN_S), AI_TIMEOUT_MAX_S)
+    return found
+
+
+def user_ai_timeout() -> float | None:
+    """The timeout the current user saved for the provider being called, if any."""
+    return _USER_AI_TIMEOUT.get()
+
+
+def configured_ai_timeout() -> float | None:
+    """The timeout someone chose: the user's for this provider, else ``OE_AI_TIMEOUT``.
+
+    None when nobody did, so callers can tell a chosen value from the default.
+    """
+    user = _USER_AI_TIMEOUT.get()
+    if user is not None:
+        return user
+    from app.config import get_settings
+
+    return get_settings().ai_timeout
+
+
+def effective_ai_timeout(timeout: float | None = None) -> float:
+    """Seconds to wait for a provider: explicit argument, then user, then env, then built-in."""
+    if timeout is not None:
+        return timeout
+    configured = configured_ai_timeout()
+    return configured if configured is not None else AI_TIMEOUT
 
 
 # ── Anthropic Claude ─────────────────────────────────────────────────────────
@@ -226,7 +274,7 @@ async def call_anthropic(
             "https://api.anthropic.com/v1/messages",
             headers=headers,
             json=payload,
-            timeout=timeout if timeout is not None else AI_TIMEOUT,
+            timeout=effective_ai_timeout(timeout),
         )
         response.raise_for_status()
         data = response.json()
@@ -367,7 +415,7 @@ async def call_openai(
             "https://api.openai.com/v1/chat/completions",
             headers=headers,
             json=payload,
-            timeout=timeout if timeout is not None else AI_TIMEOUT,
+            timeout=effective_ai_timeout(timeout),
         )
         response.raise_for_status()
         data = response.json()
@@ -430,7 +478,7 @@ async def call_gemini(
         response = await client.post(
             url,
             json=payload,
-            timeout=timeout if timeout is not None else AI_TIMEOUT,
+            timeout=effective_ai_timeout(timeout),
         )
         response.raise_for_status()
         data = response.json()
@@ -514,13 +562,13 @@ _OPENAI_COMPAT_CONFIG = {
         "url": "https://api.moonshot.cn/v1/chat/completions",
         "model": KIMI_MODEL,
     },
-    # Local LLM runtimes - OpenAI-compatible REST API, no key required.
-    # Override base URL via OE_OLLAMA_URL / OE_VLLM_URL env vars to point at
-    # a non-default host (default Ollama :11434, default VLLM :8001 to avoid
-    # colliding with our backend on :8000). An "api_key" stored in user
-    # settings is sent as bearer when present; without one the Authorization
-    # header is omitted entirely (vLLM may still require a key depending on
-    # its `--api-key` startup flag).
+    # Self-hosted endpoints - OpenAI-compatible REST API. Override the base URL
+    # via OE_OLLAMA_URL / OE_VLLM_URL env vars to point at a non-default host
+    # (default Ollama :11434, default VLLM :8001 to avoid colliding with our
+    # backend on :8000). "vllm" doubles as the generic OpenAI-compatible
+    # endpoint (issue #499): its optional key is the one saved in Settings > AI
+    # or OE_VLLM_API_KEY, sent as a bearer token. Without a key the
+    # Authorization header is omitted entirely. Ollama takes no key.
     "ollama": {
         "url": os.environ.get("OE_OLLAMA_URL", "http://localhost:11434/v1/chat/completions"),
         "model": os.environ.get("OE_OLLAMA_MODEL", "llama3.1"),
@@ -544,14 +592,19 @@ def _normalise_self_hosted_url(candidate: str) -> str:
     """Return *candidate* as a full chat-completions endpoint.
 
     Users save the runtime's root ("http://gpu-box:11434") far more often than
-    its chat path, so the path is appended when it is missing. Kept separate
-    from any storage so the same normalisation applies to a row that was
-    written before it existed.
+    its chat path, so the path is completed when it is missing. Gateways are
+    usually written with their API root ("https://gw.example/v1"), which only
+    lacks the last two segments, and a full ".../chat/completions" path is
+    taken as given. Kept separate from any storage so the same normalisation
+    applies to a row that was written before it existed, and shared with the
+    connection test so a test cannot pass on a URL the real call never uses.
     """
     endpoint = candidate.strip().rstrip("/")
-    if not endpoint.endswith("/v1/chat/completions"):
-        endpoint += "/v1/chat/completions"
-    return endpoint
+    if endpoint.endswith("/chat/completions"):
+        return endpoint
+    if endpoint.endswith("/v1"):
+        return endpoint + "/chat/completions"
+    return endpoint + "/v1/chat/completions"
 
 
 def self_hosted_endpoints(saved_meta: dict | None) -> dict[str, str]:
@@ -586,8 +639,98 @@ def use_self_hosted_endpoints(saved_meta: dict | None) -> None:
     fixed here: the value is bound per call rather than per process, and it is
     always bound, so settings without an endpoint clear whatever the previous
     resolution in this task left behind.
+
+    The tool calling modes saved for those endpoints travel with them, for the
+    same reason and with the same clearing rule.
     """
     _SELF_HOSTED_ENDPOINTS.set(self_hosted_endpoints(saved_meta))
+    _SELF_HOSTED_TOOL_MODES.set(_saved_tool_modes(saved_meta))
+
+
+# ── Tool calling on self-hosted endpoints (issue #499) ───────────────────────
+
+#: "auto" sends the tool schema and falls back to a plain request when the
+#: endpoint refuses it, remembering the refusal; "on" always sends it; "off"
+#: never does.
+TOOL_CALLING_MODES: tuple[str, ...] = ("auto", "on", "off")
+
+_SELF_HOSTED_TOOL_MODES: ContextVar[dict[str, str] | None] = ContextVar("oe_ai_self_hosted_tool_modes", default=None)
+
+
+def _saved_tool_modes(saved_meta: dict | None) -> dict[str, str]:
+    """The tool calling modes one user's settings name for their self-hosted endpoints."""
+    raw = saved_meta.get("tool_calling") if isinstance(saved_meta, dict) else None
+    if not isinstance(raw, dict):
+        return {}
+    return {
+        provider: mode
+        for provider, mode in raw.items()
+        if provider in SELF_HOSTED_PROVIDERS and mode in TOOL_CALLING_MODES
+    }
+
+
+def default_tool_calling_mode(provider: str) -> str:
+    """The server default: "auto" for providers listed in ``OE_AI_TOOLS_SELF_HOSTED``, else "off"."""
+    if provider not in SELF_HOSTED_PROVIDERS:
+        return "off"
+    from app.config import get_settings
+
+    listed = {p.strip().lower() for p in (get_settings().ai_tools_self_hosted or "").split(",")}
+    return "auto" if provider in listed else "off"
+
+
+def tool_calling_mode(provider: str) -> str:
+    """Whether the assistant offers its tools to *provider* for the settings resolved now.
+
+    Only the self-hosted endpoints are configurable; every other provider is
+    "off" here and keeps the routing the assistant decides on by name.
+    """
+    if provider not in SELF_HOSTED_PROVIDERS:
+        return "off"
+    return (_SELF_HOSTED_TOOL_MODES.get() or {}).get(provider) or default_tool_calling_mode(provider)
+
+
+# ── Optional key of the OpenAI-compatible endpoint (issue #499) ──────────────
+
+#: Server-wide fallback key per self-hosted provider, for headless deploys.
+_SELF_HOSTED_KEY_ENV: dict[str, str] = {"vllm": "OE_VLLM_API_KEY"}
+
+
+def self_hosted_api_key(settings: Any, provider: str) -> str:
+    """The bearer key for a self-hosted endpoint, or "" when it takes none.
+
+    The key saved in Settings > AI wins over the environment one. A saved key
+    that no longer decrypts is an error, not a silent anonymous request: the
+    gateway would answer 401 and the user would be told their key is wrong
+    when it is the server's encryption key that changed.
+
+    Raises:
+        ValueError: If a saved key cannot be decrypted.
+    """
+    from app.core.crypto import decrypt_secret
+
+    raw = getattr(settings, f"{provider}_api_key", None) if settings else None
+    if isinstance(raw, str) and raw:
+        decrypted = decrypt_secret(raw)
+        if decrypted:
+            return decrypted
+        msg = (
+            "The saved key of the OpenAI-compatible endpoint could not be decrypted - the backend "
+            "encryption key has rotated since it was saved. Please re-enter it in Settings > AI."
+        )
+        raise ValueError(msg)
+    env_name = _SELF_HOSTED_KEY_ENV.get(provider)
+    return (os.environ.get(env_name) or "").strip() if env_name else ""
+
+
+def _openai_compat_endpoint(provider: str, base_url: str | None = None) -> str:
+    """The URL a call to *provider* goes to.
+
+    An explicit argument wins, then the endpoint bound for the settings this
+    call was resolved from, then the process default. The middle term is what
+    makes one user's self-hosted runtime theirs alone.
+    """
+    return base_url or (_SELF_HOSTED_ENDPOINTS.get() or {}).get(provider) or _OPENAI_COMPAT_CONFIG[provider]["url"]
 
 
 async def _post_openai_compat(
@@ -651,10 +794,7 @@ async def _post_openai_compat(
     if tools:
         payload["tools"] = tools
 
-    # An explicit argument wins, then the endpoint bound for the settings this
-    # call was resolved from, then the process default. The middle term is what
-    # makes one user's self-hosted runtime theirs alone.
-    endpoint = base_url or (_SELF_HOSTED_ENDPOINTS.get() or {}).get(provider) or config["url"]
+    endpoint = _openai_compat_endpoint(provider, base_url)
     # SSRF guard for self-hosted runtimes: their endpoint is user-supplied, so
     # re-resolve and re-check it at this single dispatch choke point (every
     # Ollama / vLLM call funnels through here). Loopback / private stay allowed;
@@ -669,7 +809,7 @@ async def _post_openai_compat(
             endpoint,
             headers=headers,
             json=payload,
-            timeout=timeout if timeout is not None else AI_TIMEOUT,
+            timeout=effective_ai_timeout(timeout),
         )
         response.raise_for_status()
         return response.json()
@@ -748,7 +888,36 @@ _TOOLS_REJECTED_KEYWORDS = (
     "unknown parameter: 'tools'",
     "invalid parameter: 'tools'",
     "tool_choice",
+    # vLLM started without a tool parser, verbatim from
+    # vllm/renderers/online_renderer.py (HTTP 400): '"auto" tool choice
+    # requires --enable-auto-tool-choice and --tool-call-parser to be set'.
+    # Spelled with a space, so "tool_choice" above never matched it and the
+    # retry did not fire (issue #499).
+    "tool choice requires",
+    "enable-auto-tool-choice",
 )
+
+#: How long an endpoint's refusal of the tool schema is remembered in "auto"
+#: mode before it is asked again, in seconds. Long enough that a chat does not
+#: pay a refused request per turn, short enough that restarting the runtime
+#: with a tool parser takes effect within the hour without a backend restart.
+TOOLS_REFUSAL_TTL_S = 3600.0
+
+# (endpoint URL, model id) -> monotonic time the refusal expires. Keyed by the
+# endpoint and model rather than the provider id: two users can point "vllm"
+# at different hosts, and one gateway serves models with and without tools.
+# In-process on purpose - losing it on restart costs one refused request.
+_TOOLS_REFUSED: dict[tuple[str, str], float] = {}
+
+
+def _tools_refused(key: tuple[str, str]) -> bool:
+    expires = _TOOLS_REFUSED.get(key)
+    if expires is None:
+        return False
+    if time.monotonic() >= expires:
+        _TOOLS_REFUSED.pop(key, None)
+        return False
+    return True
 
 
 def _is_tools_rejection(status_code: int, detail: str) -> bool:
@@ -778,6 +947,7 @@ async def call_openai_compatible_tools(
     model: str | None = None,
     max_tokens: int = 4096,
     timeout: float | None = None,
+    remember_refusal: bool = False,
 ) -> tuple[dict[str, Any], int]:
     """Call an OpenAI-compatible provider WITH a tool schema on the wire.
 
@@ -801,6 +971,10 @@ async def call_openai_compatible_tools(
         model: Model id override. When falsy the provider default is used.
         max_tokens: Maximum response tokens.
         timeout: Request timeout in seconds.
+        remember_refusal: Remember a refusal for this endpoint and model for
+            :data:`TOOLS_REFUSAL_TTL_S`, and while it is remembered send the
+            plain request straight away. The "auto" mode of a self-hosted
+            endpoint (issue #499); other callers ask every time.
 
     Returns:
         Tuple of (raw response body, tokens_used). The body is returned
@@ -810,6 +984,19 @@ async def call_openai_compatible_tools(
         httpx.HTTPStatusError: On a non-2xx response that is not a tools
             rejection, and on a failed retry.
     """
+    config = _OPENAI_COMPAT_CONFIG.get(provider) or {}
+    refusal_key = (_openai_compat_endpoint(provider), model or config.get("model", ""))
+    if remember_refusal and _tools_refused(refusal_key):
+        data = await _post_openai_compat(
+            provider,
+            api_key,
+            [{"role": "system", "content": system_without_tools}, *messages],
+            model=model,
+            max_tokens=max_tokens,
+            timeout=timeout,
+        )
+        return data, int((data.get("usage") or {}).get("total_tokens", 0) or 0)
+
     try:
         data = await _post_openai_compat(
             provider,
@@ -830,6 +1017,8 @@ async def call_openai_compatible_tools(
             exc.response.status_code,
             detail[:200],
         )
+        if remember_refusal:
+            _TOOLS_REFUSED[refusal_key] = time.monotonic() + TOOLS_REFUSAL_TTL_S
         data = await _post_openai_compat(
             provider,
             api_key,
@@ -1063,6 +1252,7 @@ async def call_ai_tools(
     model: str | None = None,
     max_tokens: int = 4096,
     timeout: float | None = None,
+    remember_refusal: bool = False,
 ) -> tuple[dict[str, Any], int]:
     """Route a tool-carrying call to an OpenAI-compatible provider (issue #424).
 
@@ -1087,6 +1277,7 @@ async def call_ai_tools(
         model: Model id override. When falsy the provider default is used.
         max_tokens: Maximum response tokens.
         timeout: Request timeout in seconds.
+        remember_refusal: See :func:`call_openai_compatible_tools`.
 
     Returns:
         Tuple of (raw response body, tokens_used).
@@ -1111,6 +1302,7 @@ async def call_ai_tools(
                 model=model_id,
                 max_tokens=max_tokens,
                 timeout=timeout,
+                remember_refusal=remember_refusal,
             )
 
         return _call
@@ -1267,6 +1459,10 @@ def resolve_provider_and_key(
     :func:`resolve_provider_key_model` (or call :func:`_model_override_for`
     with the returned provider).
 
+    Also binds, for the rest of this request, what these settings say about
+    how to call the provider: the self-hosted endpoints and their tool calling
+    modes, and the user's timeout for the provider resolved (issue #499).
+
     Args:
         settings: AISettings ORM object with api key fields.
         preferred_model: Optional model preference override.
@@ -1277,19 +1473,29 @@ def resolve_provider_and_key(
     Raises:
         ValueError: If no API key is configured.
     """
-    from app.core.crypto import decrypt_secret
+    meta = getattr(settings, "metadata_", None) if settings else None
+    # Bind before resolving: whichever provider this resolves to, the dispatch
+    # that follows in this task must use THESE settings' endpoints, and a
+    # failed resolution must not leave the previous user's timeout behind.
+    use_self_hosted_endpoints(meta)
+    _USER_AI_TIMEOUT.set(None)
+    provider, api_key = _resolve_provider_and_key(settings, preferred_model)
+    _USER_AI_TIMEOUT.set(_saved_timeouts(meta).get(provider))
+    return provider, api_key
 
-    # Bind before any branch returns: whichever provider this resolves to, the
-    # dispatch that follows in this task must use THESE settings' endpoints.
-    use_self_hosted_endpoints(getattr(settings, "metadata_", None) if settings else None)
+
+def _resolve_provider_and_key(settings: Any, preferred_model: str | None) -> tuple[str, str]:
+    """The provider choice behind :func:`resolve_provider_and_key`, without the bindings."""
+    from app.core.crypto import decrypt_secret
 
     model = preferred_model or (settings.preferred_model if settings else "claude-sonnet")
 
     # Map model preferences to providers
-    # The key slot is ``str | None``: the self-hosted runtimes below genuinely
-    # have no API-key setting to read, and that absence is the thing the loop
-    # branches on. An empty string here would be worse than no annotation - it
-    # reads the same as None to ``if key_attr:`` but not to ``getattr``.
+    # The key slot is ``str | None``: the self-hosted runtimes below have no
+    # REQUIRED key, and that is the thing the loop branches on - their optional
+    # one comes from :func:`self_hosted_api_key`. An empty string here would be
+    # worse than no annotation - it reads the same as None to ``if key_attr:``
+    # but not to ``getattr``.
     _MODEL_PROVIDER_MAP: list[tuple[list[str], str, str | None]] = [
         (["claude", "anthropic"], "anthropic", "anthropic_api_key"),
         (["gpt", "openai"], "openai", "openai_api_key"),
@@ -1322,8 +1528,8 @@ def resolve_provider_and_key(
     for keywords, provider_name, key_attr in _MODEL_PROVIDER_MAP:
         if any(kw in model for kw in keywords):
             matched_provider = provider_name
-            if key_attr is None:  # keyless self-hosted provider
-                return provider_name, ""  # no credential to resolve
+            if key_attr is None:  # self-hosted provider, key optional
+                return provider_name, self_hosted_api_key(settings, provider_name)
             raw = getattr(settings, key_attr, None) if settings else None
             if raw:
                 decrypted = decrypt_secret(raw)
@@ -1371,8 +1577,8 @@ def resolve_provider_and_key(
     # Local-runtime fallback: a user who configured ONLY Ollama / vLLM (saved a
     # base_url, no cloud key) keeps the default preferred_model="claude-sonnet",
     # so the primary model->provider match above never routes to them. Honour
-    # the saved local endpoint here - keyless, returning an empty api_key - so a
-    # local-only setup is genuinely usable rather than collapsing into the
+    # the saved local endpoint here - with its optional key, empty when it has
+    # none - so a local-only setup is genuinely usable rather than collapsing into the
     # "No AI API key configured" error. An explicit cloud key still wins (above).
     if settings:
         # Read through the same helper the dispatch uses rather than walking
@@ -1382,7 +1588,7 @@ def resolve_provider_and_key(
         configured = self_hosted_endpoints(getattr(settings, "metadata_", None))
         for local_provider in SELF_HOSTED_PROVIDERS:
             if local_provider in configured:
-                return local_provider, ""  # keyless local runtime
+                return local_provider, self_hosted_api_key(settings, local_provider)
 
     # Fallback to environment variables / ~/.openestimate/config.json. Tried
     # AFTER the DB (an explicitly-saved key wins) but BEFORE raising - a working

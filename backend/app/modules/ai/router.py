@@ -42,9 +42,13 @@ from app.dependencies import (
     verify_project_access,
 )
 from app.modules.ai.ai_client import (
+    DEFAULT_MODELS,
+    SELF_HOSTED_PROVIDERS,
     call_ai,
     default_model_for,
     resolve_provider_key_model,
+    self_hosted_api_key,
+    self_hosted_endpoints,
 )
 from app.modules.ai.schemas import (
     AISettingsResponse,
@@ -150,8 +154,10 @@ _AI_PROVIDERS: list[dict[str, Any]] = [
         "model_choices": [],
     },
     {
+        # The generic OpenAI-compatible endpoint (issue #499). The id stays
+        # "vllm" so saved settings, OE_VLLM_* and model routing keep working.
         "id": "vllm",
-        "display_name": "vLLM (Local)",
+        "display_name": "OpenAI-compatible endpoint",
         "supports_streaming": True,
         "model_choices": [],
     },
@@ -243,28 +249,9 @@ async def test_ai_connection(
 
     Returns success status and response latency.
     """
-    _VALID_PROVIDERS = (
-        "anthropic",
-        "openai",
-        "gemini",
-        "openrouter",
-        "mistral",
-        "groq",
-        "deepseek",
-        "together",
-        "fireworks",
-        "perplexity",
-        "cohere",
-        "ai21",
-        "xai",
-        "zhipu",
-        "baidu",
-        "yandex",
-        "gigachat",
-        "ollama",
-        "kimi",
-        "vllm",
-    )
+    # Every provider the dispatch knows, read from the same table rather than
+    # listed again here, so a provider added there is testable at once.
+    _VALID_PROVIDERS = tuple(DEFAULT_MODELS)
     provider = body.get("provider", "").strip()
     if provider not in _VALID_PROVIDERS:
         raise HTTPException(
@@ -281,19 +268,26 @@ async def test_ai_connection(
     # Fernet-encrypted - passing the ciphertext straight to the provider
     # triggers a 401 ("AI API key is invalid or expired") even for a
     # fresh, valid key the user just pasted.
-    # Ollama and vLLM are self-hosted and authenticate by endpoint URL, not an
-    # API key, so a missing key must not block their connection test. It used to
-    # return "No API key configured" and the test could never run for them.
-    _self_hosted = provider in ("ollama", "vllm")
-    key_attr = f"{provider}_api_key"
-    raw = getattr(settings, key_attr, None) if settings else None
-    if not raw and not _self_hosted:
-        return {
-            "success": False,
-            "message": f"No API key configured for {provider}. Please save your key first.",
-            "latency_ms": None,
-        }
-    api_key = decrypt_secret(raw) if raw else ""
+    # Self-hosted endpoints need no key, so a missing one must not block their
+    # connection test. It used to return "No API key configured" and the test
+    # could never run for them. Their optional key (issue #499) is read by the
+    # same helper the real call uses, saved key first, then OE_VLLM_API_KEY.
+    _self_hosted = provider in SELF_HOSTED_PROVIDERS
+    if _self_hosted:
+        try:
+            api_key = self_hosted_api_key(settings, provider)
+        except ValueError as exc:
+            return {"success": False, "message": str(exc), "latency_ms": None}
+        raw = None
+    else:
+        raw = getattr(settings, f"{provider}_api_key", None) if settings else None
+        if not raw:
+            return {
+                "success": False,
+                "message": f"No API key configured for {provider}. Please save your key first.",
+                "latency_ms": None,
+            }
+        api_key = decrypt_secret(raw) or ""
     if raw and not api_key:
         return {
             "success": False,
@@ -313,20 +307,12 @@ async def test_ai_connection(
     model_override = _model_override_for(settings, provider)
     effective_model = model_override or default_model_for(provider)
 
-    # Self-hosted backends (Ollama, vLLM) may carry a user-supplied endpoint
-    # in the saved metadata; everything else uses the built-in URL.
-    resolved_url: str | None = None
+    # Self-hosted endpoints may carry a user-supplied URL in the saved
+    # metadata; everything else uses the built-in URL. Read through the helper
+    # the real dispatch uses, so the test exercises the URL real calls go to.
     # settings can be None for a self-hosted test with no saved row (the old
     # missing-key early return used to make this unreachable).
-    saved_meta = (settings.metadata_ if settings else None) or {}
-    if provider in ("ollama", "vllm") and isinstance(saved_meta, dict):
-        raw_url = saved_meta.get(f"{provider}_base_url")
-        has_custom_url = isinstance(raw_url, str) and bool(raw_url.strip())
-        if has_custom_url:
-            normalized = raw_url.strip().rstrip("/")
-            if not normalized.endswith("/v1/chat/completions"):
-                normalized += "/v1/chat/completions"
-            resolved_url = normalized
+    resolved_url = self_hosted_endpoints(settings.metadata_ if settings else None).get(provider)
     # Make a minimal test call
     try:
         t0 = time.monotonic()

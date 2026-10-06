@@ -1709,6 +1709,21 @@
               "default": "None"
             },
             {
+              "name": "vllm_api_key",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "tool_calling",
+              "type": "dict[str, str] | None",
+              "default": "None"
+            },
+            {
+              "name": "timeouts",
+              "type": "dict[str, int | None] | None",
+              "default": "None"
+            },
+            {
               "name": "preferred_model",
               "type": "str | None"
             }
@@ -1820,6 +1835,11 @@
               "default": "False"
             },
             {
+              "name": "vllm_api_key_set",
+              "type": "bool",
+              "default": "False"
+            },
+            {
               "name": "ollama_base_url",
               "type": "str | None",
               "default": "None"
@@ -1828,6 +1848,23 @@
               "name": "vllm_base_url",
               "type": "str | None",
               "default": "None"
+            },
+            {
+              "name": "tool_calling",
+              "type": "dict[str, str]"
+            },
+            {
+              "name": "tool_calling_defaults",
+              "type": "dict[str, str]"
+            },
+            {
+              "name": "timeouts",
+              "type": "dict[str, int]"
+            },
+            {
+              "name": "default_timeout_seconds",
+              "type": "float",
+              "default": "240.0"
             },
             {
               "name": "ai_ready",
@@ -234120,10 +234157,10 @@
     },
     {
       "name": "ai",
-      "ts_files": 22,
+      "ts_files": 23,
       "css_files": 0,
-      "test_files": 4,
-      "total_files": 22
+      "test_files": 5,
+      "total_files": 23
     },
     {
       "name": "ai-agents",
@@ -235226,10 +235263,10 @@
     },
     {
       "name": "settings",
-      "ts_files": 28,
+      "ts_files": 29,
       "css_files": 0,
-      "test_files": 9,
-      "total_files": 28
+      "test_files": 10,
+      "total_files": 29
     },
     {
       "name": "setup",
@@ -236763,7 +236800,7 @@
     "total_schemas": 3553,
     "total_python_files": 2268,
     "frontend_features": 192,
-    "frontend_ts_files": 2945,
+    "frontend_ts_files": 2947,
     "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {

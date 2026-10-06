@@ -247,5 +247,6 @@ export interface AIDraftResponse {
 
 /** Draft a change order from source text (AI when a key is set, else heuristic). */
 export function aiDraftChangeOrder(body: AIDraftBody): Promise<AIDraftResponse> {
-  return apiPost<AIDraftResponse, AIDraftBody>(`/v1/changeorders/ai-draft/`, body);
+  // longRunning: the call waits for an AI provider (issue #499).
+  return apiPost<AIDraftResponse, AIDraftBody>(`/v1/changeorders/ai-draft/`, body, { longRunning: true });
 }

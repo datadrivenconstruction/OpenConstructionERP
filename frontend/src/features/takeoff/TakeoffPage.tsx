@@ -1565,7 +1565,8 @@ export function TakeoffPage() {
 
   const analyzeMutation = useMutation({
     mutationFn: async (docId: string) => {
-      return apiPost<AnalysisResult>(`/v1/takeoff/documents/${docId}/analyze/`);
+      // longRunning: the analysis waits for an AI provider (issue #499).
+      return apiPost<AnalysisResult>(`/v1/takeoff/documents/${docId}/analyze/`, undefined, { longRunning: true });
     },
     onMutate: (docId) => {
       setDocuments((prev) =>

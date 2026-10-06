@@ -66,7 +66,16 @@ class AISettingsUpdate(BaseModel):
     # Self-hosted endpoints (Ollama / vLLM); accepts a host root such as
     # "http://host:11434" and the path is appended downstream.
     ollama_base_url: str | None = None  # Ollama host root
-    vllm_base_url: str | None = None  # vLLM host root
+    vllm_base_url: str | None = None  # OpenAI-compatible endpoint root (provider id "vllm")
+    # Optional bearer key for the OpenAI-compatible endpoint (issue #499). An
+    # empty string clears it.
+    vllm_api_key: str | None = None
+    # Per self-hosted endpoint: offer the assistant's tool schema ("auto" tries
+    # and falls back if refused, "on" always sends it, "off" never). An empty
+    # value returns the endpoint to the server default.
+    tool_calling: dict[str, str] | None = None
+    # Per-provider AI timeout in seconds (10..1800); null clears the override.
+    timeouts: dict[str, int | None] | None = None
     preferred_model: str | None = Field(default=None, max_length=100)
     # Per-provider model-id override, e.g. {"gemini": "gemini-2.5-flash",
     # "openrouter": "anthropic/claude-sonnet-4"}. Lets users track provider
@@ -99,6 +108,41 @@ class AISettingsUpdate(BaseModel):
             raise ValueError(str(exc)) from exc
         return v
 
+    @field_validator("tool_calling")
+    @classmethod
+    def _known_tool_modes(cls, v: dict[str, str] | None) -> dict[str, str] | None:
+        """Only self-hosted endpoints are configurable, and only to a known mode."""
+        if v is None:
+            return v
+        from app.modules.ai.ai_client import SELF_HOSTED_PROVIDERS, TOOL_CALLING_MODES
+
+        for provider, mode in v.items():
+            if provider not in SELF_HOSTED_PROVIDERS:
+                msg = f"Tool calling is configurable only for {', '.join(SELF_HOSTED_PROVIDERS)}, not {provider!r}"
+                raise ValueError(msg)
+            if mode and mode not in TOOL_CALLING_MODES:
+                msg = f"Tool calling mode must be one of {', '.join(TOOL_CALLING_MODES)}, not {mode!r}"
+                raise ValueError(msg)
+        return v
+
+    @field_validator("timeouts")
+    @classmethod
+    def _bounded_timeouts(cls, v: dict[str, int | None] | None) -> dict[str, int | None] | None:
+        """A timeout names a known provider and lies in the supported range."""
+        if v is None:
+            return v
+        from app.config import AI_TIMEOUT_MAX_S, AI_TIMEOUT_MIN_S
+        from app.modules.ai.ai_client import DEFAULT_MODELS
+
+        for provider, seconds in v.items():
+            if provider not in DEFAULT_MODELS:
+                msg = f"Unknown AI provider {provider!r}"
+                raise ValueError(msg)
+            if seconds is not None and not AI_TIMEOUT_MIN_S <= seconds <= AI_TIMEOUT_MAX_S:
+                msg = f"Timeout must be between {AI_TIMEOUT_MIN_S:g} and {AI_TIMEOUT_MAX_S:g} seconds"
+                raise ValueError(msg)
+        return v
+
 
 class AISettingsResponse(BaseModel):
     """AI settings returned from the API.
@@ -128,9 +172,16 @@ class AISettingsResponse(BaseModel):
     baidu_api_key_set: bool = False
     yandex_api_key_set: bool = False
     gigachat_api_key_set: bool = False
+    vllm_api_key_set: bool = False
     # Echo back any saved self-hosted endpoints so the UI can prefill them.
     ollama_base_url: str | None = None  # saved Ollama host root
-    vllm_base_url: str | None = None  # saved vLLM host root
+    vllm_base_url: str | None = None  # saved OpenAI-compatible endpoint root
+    # Saved per-endpoint tool calling modes and per-provider timeouts (issue
+    # #499), plus the server defaults the UI shows when none is saved.
+    tool_calling: dict[str, str] = Field(default_factory=dict)
+    tool_calling_defaults: dict[str, str] = Field(default_factory=dict)
+    timeouts: dict[str, int] = Field(default_factory=dict)
+    default_timeout_seconds: float = 240.0
     # Authoritative "is AI usable" flag computed server-side. True when a
     # usable cloud key is set OR a local provider (Ollama / vLLM) is configured
     # via its base_url - local runtimes legitimately need no api_key. The
