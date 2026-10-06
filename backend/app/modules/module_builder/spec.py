@@ -22,7 +22,8 @@ from __future__ import annotations
 
 import keyword
 import re
-from typing import Annotated, Literal
+import unicodedata
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -42,7 +43,24 @@ FieldType = Literal[
     "datetime",
     "boolean",
     "select",
+    "link",
 ]
+
+# What a ``link`` field may point at. Each one is a record type another module
+# owns; :mod:`app.modules.module_builder.links` says which table, which label,
+# which project and which permission, and the generator renders the foreign key
+# from it. A closed list on purpose: a link is a foreign key into someone
+# else's table, and every target here has been read for how its own module
+# decides who may see a row.
+LinkTarget = Literal["contract", "contact", "schedule_activity", "document", "user"]
+
+# PostgreSQL silently truncates longer names, and SQLAlchemy refuses an explicit
+# index name past it, so a module whose names do not fit cannot be installed.
+MAX_IDENTIFIER_BYTES = 63
+
+# The newest spec layout. 1 is everything written before links and features;
+# 2 is the wizard that knows them. Both validate.
+SCHEMA_VERSION = 2
 
 # Names the generated module already uses on its own row or that SQLAlchemy and
 # Pydantic claim. A user field of any of these names would shadow something.
@@ -100,6 +118,37 @@ def url_prefix_for(key: str) -> str:
     return f"/api/v1/{key.replace('_', '-')}"
 
 
+def _check_name(value: str, what: str) -> str:
+    """A name a person reads: no control characters, which no name needs.
+
+    Quotes, backslashes and every script are fine; the generator escapes them
+    where it writes names into code. A tab, a newline or a NUL in a name is
+    never meant, and in a label or a spreadsheet cell it breaks the line.
+    """
+    for char in value:
+        if unicodedata.category(char) in ("Cc", "Cs", "Zl", "Zp"):
+            raise ValueError(f"{what} {value!r} holds a control character ({ord(char):#06x}); remove it.")
+    return value
+
+
+def _no_lone_surrogates(value: Any, where: str = "the module") -> None:
+    """Refuse text that cannot be written to a file at all.
+
+    A lone surrogate arrives through JSON escapes and is a valid Python
+    string, but no UTF-8 file can hold it, so the install would fail while
+    writing ``spec.json``. Checked on every string, descriptions included.
+    """
+    if isinstance(value, str):
+        if any(unicodedata.category(c) == "Cs" for c in value):
+            raise ValueError(f"{where} holds a character that cannot be stored (a lone surrogate).")
+    elif isinstance(value, dict):
+        for key, item in value.items():
+            _no_lone_surrogates(item, f"{where} > {key}")
+    elif isinstance(value, list | tuple):
+        for item in value:
+            _no_lone_surrogates(item, where)
+
+
 def _check_identifier(value: str, what: str) -> str:
     value = (value or "").strip()
     if not IDENTIFIER_RE.match(value):
@@ -128,6 +177,9 @@ class FieldSpec(BaseModel):
     # Shown in the list view. A table of forty columns is not a table, so the
     # generator caps what it renders and this is how a spec says which matter.
     in_list: bool = True
+    # link only: the record type the field points at. Absent on every other
+    # type, and on every spec written before links existed.
+    target: LinkTarget | None = None
 
     @field_validator("name")
     @classmethod
@@ -145,6 +197,18 @@ class FieldSpec(BaseModel):
         value = (value or "").strip()
         if not value:
             raise ValueError("every field needs a label - it is what the user reads.")
+        return _check_name(value, "field label")
+
+    @field_validator("unit")
+    @classmethod
+    def _unit_is_a_name(cls, value: str) -> str:
+        return _check_name(value, "unit")
+
+    @field_validator("options")
+    @classmethod
+    def _options_are_names(cls, value: list[str]) -> list[str]:
+        for option in value:
+            _check_name(option, "option")
         return value
 
     @model_validator(mode="after")
@@ -161,6 +225,10 @@ class FieldSpec(BaseModel):
             object.__setattr__(self, "options", cleaned)
         elif self.options:
             raise ValueError(f"field {self.name!r} is {self.type} but carries select options.")
+        if self.type == "link" and self.target is None:
+            raise ValueError(f"field {self.name!r} is a link but does not say what it links to.")
+        if self.type != "link" and self.target is not None:
+            raise ValueError(f"field {self.name!r} is {self.type} but names a link target.")
         return self
 
 
@@ -233,6 +301,11 @@ class EntitySpec(BaseModel):
     def _entity_name(cls, value: str) -> str:
         return _check_identifier(value, "entity name")
 
+    @field_validator("display_name", "plural_name")
+    @classmethod
+    def _entity_names(cls, value: str) -> str:
+        return _check_name(value, "record name")
+
     @model_validator(mode="after")
     def _fields_are_distinct(self) -> EntitySpec:
         names = [f.name for f in self.fields]
@@ -242,6 +315,80 @@ class EntitySpec(BaseModel):
         if not self.plural_name:
             object.__setattr__(self, "plural_name", f"{self.display_name}s")
         return self
+
+
+# The status column is String(32), so a code longer than that cannot be stored.
+STATUS_CODE_MAX = 32
+
+
+class StateSpec(BaseModel):
+    """One stage a record moves through, such as "open" or "approved"."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    code: str
+    label: str
+    # A record in a done state is finished: it is not reminded of its date.
+    done: bool = False
+
+    @field_validator("code")
+    @classmethod
+    def _code_shape(cls, value: str) -> str:
+        value = _check_identifier(value, "status code")
+        if len(value) > STATUS_CODE_MAX:
+            raise ValueError(f"status code {value!r} is longer than {STATUS_CODE_MAX} characters.")
+        return value
+
+    @field_validator("label")
+    @classmethod
+    def _label_present(cls, value: str) -> str:
+        value = (value or "").strip()
+        if not value:
+            raise ValueError("every status needs a label - it is what the user reads.")
+        return _check_name(value, "status label")
+
+
+class StatusFeature(BaseModel):
+    """Records move through a short list of states. The first is where they start."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    states: Annotated[list[StateSpec], Field(min_length=2, max_length=8)]
+
+    @model_validator(mode="after")
+    def _distinct(self) -> StatusFeature:
+        codes = [s.code for s in self.states]
+        duplicates = sorted({c for c in codes if codes.count(c) > 1})
+        if duplicates:
+            raise ValueError(f"duplicate status code(s): {', '.join(duplicates)}")
+        return self
+
+
+class DueFeature(BaseModel):
+    """One date field is a deadline: it shows up in the deadline register and is reminded."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    field: str
+    remind_days_before: int = Field(default=3, ge=0, le=30)
+
+
+class FeatureSpec(BaseModel):
+    """What a module does besides keeping records. Every part is off by default."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    status: StatusFeature | None = None
+    due: DueFeature | None = None
+    export: bool = False
+    comments: bool = False
+
+
+FEATURE_NAMES = ("status", "due", "export", "comments")
+
+# The column the status feature adds, and the code of the rule that checks it.
+STATUS_COLUMN = "status"
+STATUS_RULE_CODE = "STATUS_KNOWN"
 
 
 class ModuleSpec(BaseModel):
@@ -274,6 +421,13 @@ class ModuleSpec(BaseModel):
     #: remains true: the module the generator emits calls no model.
     drafted_by: Literal["assistant", "wizard"] = "wizard"
 
+    #: Which layout this spec was written in. Absent from every spec.json
+    #: written before links and features, which therefore reads as 1.
+    schema_version: int = Field(default=1, ge=1, le=SCHEMA_VERSION)
+
+    #: Off unless asked for. A spec without it is exactly the module it always was.
+    features: FeatureSpec = Field(default_factory=FeatureSpec)
+
     @field_validator("key")
     @classmethod
     def _key_shape(cls, value: str) -> str:
@@ -296,7 +450,13 @@ class ModuleSpec(BaseModel):
         value = (value or "").strip()
         if not value:
             raise ValueError("a module needs a name a person can read.")
-        return value
+        return _check_name(value, "module name")
+
+    @model_validator(mode="before")
+    @classmethod
+    def _storable(cls, data: Any) -> Any:
+        _no_lone_surrogates(data)
+        return data
 
     @model_validator(mode="after")
     def _coherent(self) -> ModuleSpec:
@@ -334,7 +494,75 @@ class ModuleSpec(BaseModel):
         duplicates = sorted({c for c in codes if codes.count(c) > 1})
         if duplicates:
             raise ValueError(f"duplicate rule code(s): {', '.join(duplicates)}")
+
+        self._features_fit(known)
+        self._names_fit()
         return self
+
+    def _features_fit(self, known: dict[str, FieldSpec]) -> None:
+        features = self.features
+        if features.status is not None:
+            # Reserved only while the feature is on: modules built before it
+            # may well have a field called status, and they still validate.
+            if STATUS_COLUMN in known:
+                raise ValueError(
+                    "a field is called status and the status feature would add a column of the same "
+                    "name. Rename the field or leave the feature off."
+                )
+            if STATUS_RULE_CODE in {r.code for r in self.rules}:
+                raise ValueError(f"rule code {STATUS_RULE_CODE} is used by the status feature.")
+        if features.due is not None:
+            field = known.get(features.due.field)
+            if field is None:
+                raise ValueError(f"the deadline is field {features.due.field!r}, which does not exist.")
+            if field.type not in {"date", "datetime"}:
+                raise ValueError(f"the deadline field {field.name!r} is {field.type}, not a date.")
+            if not self.entity.project_scoped:
+                raise ValueError("deadlines are reminded per project, so they need records that belong to one.")
+        if features.comments and not self.entity.project_scoped:
+            raise ValueError("comments are shared within a project, so they need records that belong to one.")
+
+    def _names_fit(self) -> None:
+        """Every name the generator gives the database fits PostgreSQL's limit.
+
+        Checked for the names links and the status feature add, and for every
+        name once a spec is written in the current layout. Specs written before
+        are not held to it, so a module already installed keeps validating.
+        """
+        names = list(self.new_index_names)
+        if self.schema_version >= 2:
+            names += [self.table_name, *self.base_index_names]
+        for name in names:
+            if len(name.encode("utf-8")) > MAX_IDENTIFIER_BYTES:
+                raise ValueError(
+                    f"the database name {name!r} is longer than {MAX_IDENTIFIER_BYTES} bytes. "
+                    "Use a shorter module key, record name or field name."
+                )
+
+    @property
+    def link_fields(self) -> list[FieldSpec]:
+        return [f for f in self.entity.fields if f.type == "link"]
+
+    @property
+    def base_index_names(self) -> list[str]:
+        """The indexes every generated table has carried since the first generator."""
+        names = [f"ix_{self.table_name}_created"]
+        if self.entity.project_scoped:
+            names.insert(0, f"ix_{self.table_name}_project")
+        return names
+
+    @property
+    def new_index_names(self) -> list[str]:
+        """The indexes links and the status feature add."""
+        names = [f"ix_{self.table_name}_{f.name}" for f in self.link_fields]
+        if self.features.status is not None:
+            names.append(f"ix_{self.table_name}_{STATUS_COLUMN}")
+        return names
+
+    @property
+    def status_codes(self) -> list[str]:
+        status = self.features.status
+        return [s.code for s in status.states] if status is not None else []
 
     @property
     def table_name(self) -> str:

@@ -1,0 +1,32 @@
+# DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+# Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+"""Scaffold Hire.
+
+Track hired scaffolding, its rate and its off-hire date.
+
+Generated from a module specification. ``spec.json`` beside this file is the
+description the code came from, and is what the interface renders the module's
+screens out of.
+"""
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+async def on_startup() -> None:
+    """Register permissions and make sure the module's table is there.
+
+    Called by the module loader once the package has been imported.
+    """
+    from app.database import engine
+    from app.modules.scaffold_hire.permissions import register_scaffold_hire_permissions
+    from app.modules.scaffold_hire.schema import ensure_table
+
+    register_scaffold_hire_permissions()
+
+    # A module installed at runtime lives outside the repository and therefore
+    # outside Alembic, so nothing else will ever create this table. Checked
+    # first, so this is a no-op on every start after the first.
+    await ensure_table(engine)
+    logger.info("oe_scaffold_hire: table %s is present", 'oe_scaffold_hire_hire')

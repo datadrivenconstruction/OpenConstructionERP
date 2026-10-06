@@ -1,0 +1,15 @@
+{
+  "site_notice": {
+    "title": "Site Notice",
+    "description": "",
+    "entity": "Notice",
+    "entityPlural": "Notices",
+    "fields": {
+      "title": "Title"
+    },
+    "help": {},
+    "rules": {
+      "TITLE_REQUIRED": "A notice needs a title."
+    }
+  }
+}

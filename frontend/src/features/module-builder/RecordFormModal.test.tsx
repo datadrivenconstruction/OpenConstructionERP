@@ -11,14 +11,29 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 vi.mock('./api', async () => {
   const actual = await vi.importActual<typeof import('./api')>('./api');
-  return { ...actual, createModuleRecord: vi.fn(), updateModuleRecord: vi.fn() };
+  return {
+    ...actual,
+    createModuleRecord: vi.fn(),
+    updateModuleRecord: vi.fn(),
+    lookupRecords: vi.fn(),
+    lookupLabels: vi.fn(),
+  };
 });
+
+vi.mock('@/shared/ui/CommentThread', () => ({
+  CommentThread: ({ entityType, entityId }: { entityType: string; entityId: string }) => (
+    <div data-testid="comment-thread">{`${entityType}/${entityId}`}</div>
+  ),
+}));
 
 import {
   createModuleRecord,
+  lookupLabels,
+  lookupRecords,
   updateModuleRecord,
   type GeneratedRecord,
   type ModuleUiSpec,
@@ -79,7 +94,13 @@ function renderForm(over: Partial<Parameters<typeof RecordFormModal>[0]> = {}) {
     onSaved: vi.fn(),
     ...over,
   };
-  render(<RecordFormModal {...props} />);
+  // A link field searches through React Query, so the form needs a client.
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  render(
+    <QueryClientProvider client={client}>
+      <RecordFormModal {...props} />
+    </QueryClientProvider>,
+  );
   return props;
 }
 
@@ -87,6 +108,8 @@ beforeEach(() => {
   vi.clearAllMocks();
   create.mockResolvedValue(RECORD);
   update.mockResolvedValue(RECORD);
+  vi.mocked(lookupRecords).mockResolvedValue({ items: [{ id: 'u-7', label: 'Dana Site', sublabel: null }] });
+  vi.mocked(lookupLabels).mockResolvedValue({ labels: {} });
 });
 
 describe('opening the form', () => {
@@ -167,5 +190,53 @@ describe('saving', () => {
     // The test process is pinned to UTC, so the instant reads back the same;
     // what is asserted is that an offset was attached at all.
     expect(create.mock.calls[0]?.[1]?.started_at).toBe('2026-08-07T09:30:00.000Z');
+  });
+});
+
+describe('links, stages and comments', () => {
+  const withFeatures = (): ModuleUiSpec =>
+    spec({
+      entity: {
+        ...spec().entity,
+        fields: [
+          ...spec().entity.fields,
+          { name: 'foreman', label: 'Foreman', type: 'link', target: 'user', required: false, help_text: '', unit: '', options: [], in_list: true },
+        ],
+      },
+      features: {
+        status: { states: [{ code: 'open', label: 'Open', done: false }, { code: 'closed', label: 'Closed', done: true }] },
+        comments: true,
+      },
+    });
+
+  it('picks a linked record by name and sends its id', async () => {
+    const user = userEvent.setup();
+    renderForm({ spec: withFeatures() });
+    await user.type(await screen.findByLabelText(/^Reference/), 'SD-010');
+    await user.click(screen.getByRole('combobox'));
+    await user.click(await screen.findByRole('option', { name: /Dana Site/ }));
+    await user.click(screen.getByTestId('runtime-module-save'));
+
+    await waitFor(() => expect(create).toHaveBeenCalled());
+    expect(create.mock.calls[0]?.[1]).toMatchObject({ foreman: 'u-7', status: 'open' });
+  });
+
+  it('starts a new record in the first stage and lets it be moved in one click', async () => {
+    const user = userEvent.setup();
+    renderForm({ spec: withFeatures() });
+    expect(await screen.findByRole('radio', { name: 'Open' })).toHaveAttribute('aria-checked', 'true');
+    await user.click(screen.getByRole('radio', { name: 'Closed' }));
+    expect(screen.getByRole('radio', { name: 'Closed' })).toHaveAttribute('aria-checked', 'true');
+  });
+
+  it('offers comments only on a record that exists', async () => {
+    renderForm({ spec: withFeatures() });
+    await screen.findByLabelText(/^Reference/);
+    expect(screen.queryByTestId('comment-thread')).toBeNull();
+  });
+
+  it('threads comments on the record under the module key', async () => {
+    renderForm({ spec: withFeatures(), record: { ...RECORD, status: 'open' } });
+    expect(await screen.findByTestId('comment-thread')).toHaveTextContent('built.site_diary/r1');
   });
 });

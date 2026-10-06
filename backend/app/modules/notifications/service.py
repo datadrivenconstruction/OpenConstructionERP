@@ -643,4 +643,15 @@ KNOWN_EVENT_TYPES: list[dict[str, str]] = [
         "module": "deadlines",
         "description": "Payment-plan instalment falling due soon",
     },
+    # Records of modules built with the module builder that have a deadline.
+    {
+        "event_type": "deadlines.built_modules.overdue",
+        "module": "deadlines",
+        "description": "Record of a module you built, past its deadline",
+    },
+    {
+        "event_type": "deadlines.built_modules.approaching",
+        "module": "deadlines",
+        "description": "Record of a module you built, falling due soon",
+    },
 ]

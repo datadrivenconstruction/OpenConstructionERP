@@ -18,10 +18,13 @@ import {
   REQUIRED_CODE,
   blankValues,
   canSubmit,
+  dueState,
   evaluateDraft,
   formatValue,
   isBlank,
+  isDoneStatus,
   listColumns,
+  statusStates,
   toCreatePayload,
   toLocalInputValue,
   toUpdatePayload,
@@ -422,5 +425,81 @@ describe('isBlank', () => {
     expect(isBlank('')).toBe(true);
     expect(isBlank(undefined)).toBe(true);
     expect(isBlank(false)).toBe(false);
+  });
+});
+
+describe('a module that tracks a status', () => {
+  const STAGES = {
+    status: {
+      states: [
+        { code: 'open', label: 'Open', done: false },
+        { code: 'checked', label: 'Checked', done: false },
+        { code: 'closed', label: 'Closed', done: true },
+      ],
+    },
+  };
+  const tracked = () => diarySpec({ features: STAGES });
+
+  it('starts a new record in the first stage and sends it', () => {
+    const values = blankValues(tracked());
+    expect(values.status).toBe('open');
+    expect(toCreatePayload(tracked(), { ...values, reference: 'SD-1' })).toMatchObject({ status: 'open' });
+  });
+
+  it('sends nothing about a status the module does not track', () => {
+    expect(blankValues(diarySpec())).not.toHaveProperty('status');
+    expect(toCreatePayload(diarySpec(), { ...blankValues(diarySpec()), reference: 'SD-1', status: 'open' })).not.toHaveProperty('status');
+  });
+
+  it('sends a stage change on update, and only when it changed', () => {
+    const record = { id: 'r1', reference: 'SD-1', status: 'open' } as unknown as GeneratedRecord;
+    const values = valuesFromRecord(tracked(), record);
+    expect(values.status).toBe('open');
+    expect(toUpdatePayload(tracked(), values, record)).not.toHaveProperty('status');
+    expect(toUpdatePayload(tracked(), { ...values, status: 'closed' }, record)).toEqual({ status: 'closed' });
+  });
+
+  it('knows which stages count as finished', () => {
+    expect(statusStates(tracked()).map((s) => s.code)).toEqual(['open', 'checked', 'closed']);
+    expect(isDoneStatus(tracked(), 'closed')).toBe(true);
+    expect(isDoneStatus(tracked(), 'checked')).toBe(false);
+    expect(isDoneStatus(diarySpec(), 'closed')).toBe(false);
+  });
+});
+
+describe('a module with a due date', () => {
+  const date = field({ name: 'due_on', type: 'date' });
+  const at = field({ name: 'due_at', type: 'datetime' });
+  const NOW = new Date('2026-10-05T12:00:00Z');
+
+  it('lists the due date even when it was not marked for the list', () => {
+    const spec = diarySpec({
+      entity: {
+        ...diarySpec().entity,
+        fields: [...diarySpec().entity.fields, { ...date, in_list: false }],
+      },
+      features: { due: { field: 'due_on', remind_days_before: 3 } },
+    });
+    expect(listColumns(spec).map((f) => f.name)).toContain('due_on');
+  });
+
+  it('marks a past date overdue and a near one soon, counted in calendar days', () => {
+    expect(dueState(date, '2026-10-04', 3, false, NOW)).toBe('overdue');
+    // Today is not overdue yet, however late in the day it is.
+    expect(dueState(date, '2026-10-05', 3, false, NOW)).toBe('soon');
+    expect(dueState(date, '2026-10-08', 3, false, NOW)).toBe('soon');
+    expect(dueState(date, '2026-10-09', 3, false, NOW)).toBeNull();
+  });
+
+  it('reads a date and time to the minute', () => {
+    expect(dueState(at, '2026-10-05T11:00:00Z', 1, false, NOW)).toBe('overdue');
+    expect(dueState(at, '2026-10-06T11:00:00Z', 1, false, NOW)).toBe('soon');
+  });
+
+  it('never flags a finished record or an empty date', () => {
+    expect(dueState(date, '2026-01-01', 3, true, NOW)).toBeNull();
+    expect(dueState(date, '', 3, false, NOW)).toBeNull();
+    expect(dueState(date, null, 3, false, NOW)).toBeNull();
+    expect(dueState(date, 'not a date', 3, false, NOW)).toBeNull();
   });
 });

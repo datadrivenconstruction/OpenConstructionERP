@@ -44,10 +44,13 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import {
   fetchInstalledModules,
   fetchVocabulary,
+  isQuarantined,
   uninstallModule,
   type InstalledModule,
 } from './api';
+import { QuarantineBadge, QuarantineMessage } from './QuarantineNotice';
 import { ModuleBuilderWizard } from './ModuleBuilderWizard';
+import { ExtendModuleButton } from './ExtendModuleButton';
 import { RUNTIME_MODULE_QUERY_KEY } from './GeneratedModulePage';
 
 function ModLink({ to, children }: { to: string; children: ReactNode }) {
@@ -162,9 +165,9 @@ export function ModuleBuilderPage() {
         >
           <AlertTriangle size={13} strokeWidth={1.9} className="shrink-0" />
           <span>
-            {t('module_builder.ai_missing', {
+            {t('module_builder.ai_missing_v2', {
               defaultValue:
-                'No AI provider is connected. The builder still works: you describe the module by hand, and everything after that step is the same either way.',
+                'No AI is connected. The builder still works: start from a template or build the register by hand.',
             })}
           </span>
           <Link
@@ -187,38 +190,38 @@ export function ModuleBuilderPage() {
         })}
       >
         <p className="text-sm text-content-secondary">
-          {t('module_builder.how_intro', {
+          {t('module_builder.how_intro_v2', {
             defaultValue:
-              'A module built here is a working part of the platform: the same models, rules, screen and API any shipped module has. Its files are written into a module directory that belongs to this instance, outside the platform source tree, and the running server picks them up the moment they land - nothing is restarted, and an upgrade cannot overwrite them.',
+              'Build your own register for anything the site keeps track of, such as pours, permits, deliveries or briefings. It works like every other part of the platform, with its own list, form and checks, and it is ready the moment you create it.',
           })}
         </p>
         <ol className="mt-2 list-decimal space-y-1 pl-4 text-sm text-content-secondary">
           <li>
-            {t('module_builder.how_1', {
-              defaultValue: 'Describe the register you need, in a sentence or by hand.',
+            {t('module_builder.how_1_v2', {
+              defaultValue: 'Say what you want to keep track of, in a sentence or by picking a template.',
             })}
           </li>
           <li>
-            {t('module_builder.how_2', {
-              defaultValue: 'Say what one record holds and what the module must check.',
-            })}
-          </li>
-          <li>
-            {t('module_builder.how_3', {
-              defaultValue: 'Read every file it would write, then install it. No restart.',
-            })}
-          </li>
-          <li>
-            {t('module_builder.how_4', {
+            {t('module_builder.how_2_v2', {
               defaultValue:
-                'The module lives in this instance data directory, so a platform upgrade leaves it alone.',
+                'Look over what each entry holds and switch on the extras you want, such as stages, reminders or export.',
+            })}
+          </li>
+          <li>
+            {t('module_builder.how_3_v2', {
+              defaultValue: 'Create it. It appears in the menu straight away, with no restart.',
+            })}
+          </li>
+          <li>
+            {t('module_builder.how_4_v2', {
+              defaultValue: 'It belongs to this instance, so a platform upgrade leaves it and its entries alone.',
             })}
           </li>
         </ol>
         <p className="mt-2 text-sm text-content-secondary">
-          {t('module_builder.how_ai', {
+          {t('module_builder.how_ai_v2', {
             defaultValue:
-              'An AI provider, where one is connected, only ever drafts the description of the module - what a record holds and what the module checks. It never writes the code. The platform renders the files from that description, you read every one of them on the review step, and nothing is written until you press install.',
+              'Where an AI is connected, it only suggests the fields, the checks and the extras. Nothing is added until you switch it on, and nothing is created until you press Create module.',
           })}
         </p>
         <p className="mt-2 text-sm text-content-secondary">
@@ -230,10 +233,15 @@ export function ModuleBuilderPage() {
               'A module is removed from the list below. It stops serving straight away, and what was recorded with it is kept unless you ask for that to go too - reinstalling then brings it back.',
           })}
         </p>
+        {/* The server path is for the administrator taking backups, not for
+            the reader learning what the page is, so it stays folded away. */}
         {installedQuery.data?.runtime_root && (
-          <p className="mt-2 font-mono text-xs text-content-tertiary">
-            {installedQuery.data.runtime_root}
-          </p>
+          <details className="mt-2 text-xs text-content-tertiary" data-testid="module-builder-files-location">
+            <summary className="cursor-pointer select-none hover:text-content-secondary">
+              {t('module_builder.files_location', { defaultValue: 'Where these modules are stored on the server' })}
+            </summary>
+            <p className="mt-1 break-all font-mono">{installedQuery.data.runtime_root}</p>
+          </details>
         )}
         <div className="mt-3 flex flex-col gap-1.5 border-t border-border-light pt-3 text-2xs text-content-tertiary sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-1">
           <span>
@@ -291,6 +299,7 @@ export function ModuleBuilderPage() {
                     <Badge variant="neutral" size="sm">
                       v{module.version}
                     </Badge>
+                    {isQuarantined(module) && <QuarantineBadge />}
                   </p>
                   <p className="mt-0.5 text-xs text-content-tertiary">
                     {t('module_builder.module_summary', {
@@ -306,19 +315,31 @@ export function ModuleBuilderPage() {
               {/* Kept on its own line and allowed to wrap. It is the answer to
                   "where did this actually go", and truncating a path hides the
                   part that differs between one instance and another. */}
-              <p className="break-all font-mono text-[11px] leading-relaxed text-content-quaternary">
-                {module.base_path}
-              </p>
+              {/* A module switched off for safety answers nothing at its
+                  address, so the card says why instead of offering to open
+                  it or add to it. Removing it still works. */}
+              {isQuarantined(module) ? (
+                <QuarantineMessage problem={module.problem} testId={`module-builder-quarantined-${module.key}`} />
+              ) : (
+                <p className="break-all font-mono text-[11px] leading-relaxed text-content-quaternary">
+                  {module.base_path}
+                </p>
+              )}
 
-              <div className="mt-auto flex items-center justify-between gap-2 border-t border-border-light pt-3">
-                <Link
-                  to={`/modules/${module.key}`}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-border-light px-2.5 py-1.5 text-xs font-medium text-content-secondary transition-colors hover:bg-surface-secondary hover:text-content-primary"
-                  data-testid={`module-builder-open-${module.key}`}
-                >
-                  <ExternalLink size={12} />
-                  {t('module_builder.open_module', { defaultValue: 'Open the module' })}
-                </Link>
+              <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-border-light pt-3">
+                {!isQuarantined(module) && (
+                  <>
+                    <Link
+                      to={`/modules/${module.key}`}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-border-light px-2.5 py-1.5 text-xs font-medium text-content-secondary transition-colors hover:bg-surface-secondary hover:text-content-primary"
+                      data-testid={`module-builder-open-${module.key}`}
+                    >
+                      <ExternalLink size={12} />
+                      {t('module_builder.open_module', { defaultValue: 'Open the module' })}
+                    </Link>
+                    <ExtendModuleButton moduleKey={module.key} basePath={module.base_path} className="me-auto" />
+                  </>
+                )}
                 {isAdmin && (
                   <button
                     type="button"

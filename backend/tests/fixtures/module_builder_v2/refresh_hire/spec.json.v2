@@ -1,0 +1,62 @@
+{
+  "key": "refresh_hire",
+  "display_name": "Plant Hire",
+  "description": "Hired plant per project, with its weekly rate.",
+  "category": "community",
+  "icon": "Boxes",
+  "version": "0.1.0",
+  "author": "",
+  "entity": {
+    "name": "hire",
+    "display_name": "Hire",
+    "plural_name": "Hires",
+    "fields": [
+      {
+        "name": "reference",
+        "label": "Reference",
+        "type": "text",
+        "required": true,
+        "help_text": "",
+        "unit": "",
+        "options": [],
+        "in_list": true
+      },
+      {
+        "name": "weekly_rate",
+        "label": "Weekly rate",
+        "type": "money",
+        "required": true,
+        "help_text": "",
+        "unit": "",
+        "options": [],
+        "in_list": true
+      },
+      {
+        "name": "on_hire_date",
+        "label": "On hire",
+        "type": "date",
+        "required": false,
+        "help_text": "",
+        "unit": "",
+        "options": [],
+        "in_list": true
+      }
+    ],
+    "project_scoped": true
+  },
+  "rules": [
+    {
+      "code": "RATE_POSITIVE",
+      "message": "A weekly rate must be above zero.",
+      "kind": "positive",
+      "field": "weekly_rate",
+      "min_value": null,
+      "max_value": null,
+      "other_field": "",
+      "severity": "error"
+    }
+  ],
+  "drafted_by": "wizard",
+  "generated_at": "2026-08-10T09:00:00+00:00",
+  "generator": "openconstructionerp.module_builder/2"
+}

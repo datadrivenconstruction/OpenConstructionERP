@@ -1,0 +1,29 @@
+{
+  "scaffold_hire": {
+    "title": "Scaffold Hire",
+    "description": "Track hired scaffolding, its rate and its off-hire date.",
+    "entity": "Hire",
+    "entityPlural": "Hires",
+    "fields": {
+      "reference": "Reference",
+      "notes": "Notes",
+      "bay_count": "Bays",
+      "area_m2": "Area",
+      "weekly_rate": "Weekly rate",
+      "on_hire_date": "On hire",
+      "off_hire_date": "Off hire",
+      "inspected_at": "Last inspection",
+      "is_tagged": "Tagged",
+      "status": "Status"
+    },
+    "help": {},
+    "rules": {
+      "REFERENCE_REQUIRED": "A hire needs a reference to be found by.",
+      "RATE_POSITIVE": "A weekly rate must be above zero.",
+      "BAYS_IN_RANGE": "A hire covers between 1 and 500 bays.",
+      "STATUS_KNOWN": "Status must be one the register recognises.",
+      "INSPECTION_NOT_FUTURE": "An inspection cannot be recorded before it happens.",
+      "OFF_HIRE_AFTER_ON_HIRE": "Off hire cannot precede on hire."
+    }
+  }
+}

@@ -30,10 +30,25 @@ vi.mock('./api', async () => {
     createModuleRecord: vi.fn(),
     updateModuleRecord: vi.fn(),
     deleteModuleRecord: vi.fn(),
+    lookupLabels: vi.fn(),
+    lookupRecords: vi.fn(),
   };
 });
 
-import { ApiError } from '@/shared/lib/api';
+vi.mock('@/shared/lib/api', async () => {
+  const actual = await vi.importActual<typeof import('@/shared/lib/api')>('@/shared/lib/api');
+  return { ...actual, downloadWithAuth: vi.fn() };
+});
+
+// The thread itself has its own tests and its own server; here the question is
+// only whether the record's form offers one, and for which entity.
+vi.mock('@/shared/ui/CommentThread', () => ({
+  CommentThread: ({ entityType, entityId }: { entityType: string; entityId: string }) => (
+    <div data-testid="comment-thread">{`${entityType}/${entityId}`}</div>
+  ),
+}));
+
+import { ApiError, downloadWithAuth } from '@/shared/lib/api';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
 import {
@@ -42,6 +57,7 @@ import {
   fetchInstalledModules,
   fetchModuleRecords,
   fetchModuleUiSpec,
+  lookupLabels,
   updateModuleRecord,
   type GeneratedRecord,
   type InstalledList,
@@ -187,6 +203,21 @@ describe('reading a module it has never seen', () => {
     expect(await screen.findByText(/No such module on this instance/i)).toBeTruthy();
     // And it does not go on to ask a module that is not there for its spec.
     expect(uiSpec).not.toHaveBeenCalled();
+  });
+
+  it('says in words that a module switched off for safety was switched off, and asks it nothing', async () => {
+    const [module] = INSTALLED.items;
+    installed.mockResolvedValue({
+      ...INSTALLED,
+      items: [{ ...module!, status: 'quarantined', problem: { code: 'unverifiable' } }],
+    });
+    renderPage();
+    const notice = await screen.findByTestId('runtime-module-quarantined');
+    expect(notice.textContent).toMatch(/Switched off for safety/);
+    expect(notice.textContent).toMatch(/could not be checked\. Its records are kept/);
+    // Its address answers nothing, so neither the spec nor the records are asked for.
+    expect(uiSpec).not.toHaveBeenCalled();
+    expect(records).not.toHaveBeenCalled();
   });
 
   it('offers to record the first one when there is nothing yet', async () => {
@@ -471,5 +502,136 @@ describe('the generated register fetching a real second page', () => {
     await waitFor(() => expect(records).toHaveBeenCalledTimes(2));
     await waitFor(() => expect(screen.getByText('A-001')).toBeTruthy());
     expect(screen.queryByText('P-014')).toBeNull();
+  });
+});
+
+/**
+ * The functions a module can carry: a status, a deadline, links to other
+ * records, an export and comments. Each is read off the spec, so a module
+ * without one must show none of its controls.
+ */
+const FEATURED: ModuleUiSpec = {
+  ...SPEC,
+  schema_version: 2,
+  entity: {
+    ...SPEC.entity,
+    // Two columns out of the table, so the link fits under the column cap.
+    fields: [
+      ...SPEC.entity.fields.map((f) => (f.name === 'cost' || f.name === 'mix' ? { ...f, in_list: false } : f)),
+      { name: 'contract', label: 'Contract', type: 'link', target: 'contract', required: false, help_text: '', unit: '', options: [], in_list: true },
+    ],
+  },
+  features: {
+    status: {
+      states: [
+        { code: 'planned', label: 'Planned', done: false },
+        { code: 'poured', label: 'Poured', done: false },
+        { code: 'approved', label: 'Approved', done: true },
+      ],
+    },
+    due: { field: 'poured_on', remind_days_before: 3 },
+    export: true,
+    comments: true,
+  },
+};
+
+const PLANNED: GeneratedRecord = { ...ROW, id: 'rec-p', reference: 'P-100', status: 'planned', poured_on: '2020-01-01', contract: 'c-1' };
+const APPROVED: GeneratedRecord = { ...ROW, id: 'rec-a', reference: 'P-200', status: 'approved', poured_on: '2020-01-01', contract: 'c-2' };
+
+const labels = vi.mocked(lookupLabels);
+const download = vi.mocked(downloadWithAuth);
+
+describe('a module with functions switched on', () => {
+  beforeEach(() => {
+    uiSpec.mockResolvedValue(FEATURED);
+    records.mockResolvedValue({ items: [PLANNED, APPROVED], total: 2 });
+    labels.mockResolvedValue({ labels: { 'c-1': 'Frame works' } });
+    download.mockResolvedValue(undefined);
+  });
+
+  it('shows the stage of every record as a badge', async () => {
+    renderPage();
+    const table = await screen.findByTestId('runtime-module-table');
+    expect(within(table).getByText('Planned')).toBeTruthy();
+    expect(within(table).getByText('Approved')).toBeTruthy();
+  });
+
+  it('filters by stage, and All brings every row back', async () => {
+    const user = userEvent.setup();
+    renderPage();
+    await screen.findByTestId('runtime-module-table');
+    const chips = screen.getByTestId('runtime-module-status-filter');
+
+    await user.click(within(chips).getByRole('button', { name: /Approved/ }));
+    await waitFor(() => expect(screen.getByTestId('runtime-module-count').textContent).toBe('Showing 1 of 2'));
+    expect(screen.queryByText('P-100')).toBeNull();
+    expect(screen.getByText('P-200')).toBeTruthy();
+
+    await user.click(within(chips).getByRole('button', { name: /All/ }));
+    await waitFor(() => expect(screen.getByTestId('runtime-module-count').textContent).toBe('Showing 2 of 2'));
+  });
+
+  it('names linked records, asking once per target, and says which it may not show', async () => {
+    renderPage();
+    const table = await screen.findByTestId('runtime-module-table');
+    expect(await within(table).findByText('Frame works')).toBeTruthy();
+    expect(within(table).getByText('Not visible to you')).toBeTruthy();
+    expect(within(table).queryByText('c-1')).toBeNull();
+    expect(labels).toHaveBeenCalledTimes(1);
+    expect(labels).toHaveBeenCalledWith('contract', ['c-1', 'c-2']);
+  });
+
+  it('marks an overdue date, unless the record is finished', async () => {
+    renderPage();
+    const table = await screen.findByTestId('runtime-module-table');
+    const planned = within(table).getByText('P-100').closest('tr');
+    const approved = within(table).getByText('P-200').closest('tr');
+    expect(planned?.querySelector('[data-due="overdue"]')).not.toBeNull();
+    expect(approved?.querySelector('[data-due]')).toBeNull();
+  });
+
+  it('exports the register of this project', async () => {
+    const user = userEvent.setup();
+    renderPage();
+    await screen.findByTestId('runtime-module-table');
+    await user.click(screen.getByTestId('runtime-module-export'));
+    await user.click(screen.getByTestId('runtime-module-export-xlsx'));
+    await waitFor(() =>
+      expect(download).toHaveBeenCalledWith(`${BASE_PATH}/export?format=xlsx&project_id=p1`, 'pour_register.xlsx'),
+    );
+  });
+
+  it('offers comments on a record that exists, for that record', async () => {
+    const user = userEvent.setup();
+    renderPage();
+    const table = await screen.findByTestId('runtime-module-table');
+    await user.click(within(table).getAllByLabelText('Edit')[0]!);
+    expect(await screen.findByTestId('comment-thread')).toHaveTextContent('built.pour_register/rec-p');
+  });
+
+  it('moves a record on to the next stage from the form', async () => {
+    const user = userEvent.setup();
+    renderPage();
+    const table = await screen.findByTestId('runtime-module-table');
+    await user.click(within(table).getAllByLabelText('Edit')[0]!);
+    const picker = await screen.findByTestId('runtime-module-status-picker');
+    await user.click(within(picker).getByRole('radio', { name: 'Poured' }));
+    await user.click(screen.getByTestId('runtime-module-save'));
+    await waitFor(() => expect(update).toHaveBeenCalled());
+    expect(update.mock.calls[0]?.[2]).toEqual({ status: 'poured' });
+  });
+});
+
+describe('a module with no functions switched on', () => {
+  it('shows none of their controls', async () => {
+    const user = userEvent.setup();
+    renderPage();
+    const table = await screen.findByTestId('runtime-module-table');
+    expect(screen.queryByTestId('runtime-module-export')).toBeNull();
+    expect(screen.queryByTestId('runtime-module-status-filter')).toBeNull();
+    await user.click(within(table).getByLabelText('Edit'));
+    await screen.findByLabelText(/Pour reference/);
+    expect(screen.queryByTestId('runtime-module-comments')).toBeNull();
+    expect(screen.queryByTestId('runtime-module-status-picker')).toBeNull();
   });
 });

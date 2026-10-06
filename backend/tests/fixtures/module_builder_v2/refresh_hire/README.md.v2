@@ -1,0 +1,29 @@
+# Plant Hire
+
+Hired plant per project, with its weekly rate.
+
+This module was generated from a specification rather than written by hand.
+`spec.json` beside this file is that specification, and it is also what the
+platform renders the screen from.
+
+## Record: Hire
+
+| Field | Label | Type | Required |
+|---|---|---|---|
+| `reference` | Reference | text | yes |
+| `weekly_rate` | Weekly rate | money | yes |
+| `on_hire_date` | On hire | date | no |
+
+## Rules
+
+- `RATE_POSITIVE` (error): A weekly rate must be above zero.
+
+## API
+
+Mounted at `/api/v1/refresh-hire`.
+
+- `GET /ui-spec` the screen description
+- `GET /` list, `GET /{id}` one
+- `POST /` create, `PATCH /{id}` update, `DELETE /{id}` remove
+
+Reading needs `refresh_hire.read`, writing needs `refresh_hire.write`.

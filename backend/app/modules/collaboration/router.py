@@ -65,6 +65,25 @@ _ALLOWED_ENTITY_TYPES: frozenset[str] = frozenset(
 )
 
 
+# Records of modules built with the module builder take comments as
+# ``built.<key>`` when their spec turns comments on. Those modules are
+# installed at runtime, so they cannot be listed above: the shape is accepted
+# here and everything else is decided per request by
+# :func:`_resolve_built_project_id`, which fails closed for a key that is not
+# a loaded built module with comments on.
+_BUILT_PREFIX = "built."
+
+
+def _built_key(entity_type: str) -> str | None:
+    """The module key of a ``built.<key>`` entity type, or None for any other."""
+    if not entity_type.startswith(_BUILT_PREFIX):
+        return None
+    from app.modules.module_builder.spec import IDENTIFIER_RE
+
+    key = entity_type[len(_BUILT_PREFIX) :]
+    return key if IDENTIFIER_RE.match(key) else None
+
+
 def _get_service(session: SessionDep) -> CollaborationService:
     return CollaborationService(session)
 
@@ -76,7 +95,7 @@ def _validate_entity_type(entity_type: str) -> None:
     entity_type strings (``"unicorn"``, ``"foo"``, etc.) which become
     orphaned metadata that nothing can clean up.
     """
-    if entity_type not in _ALLOWED_ENTITY_TYPES:
+    if entity_type not in _ALLOWED_ENTITY_TYPES and _built_key(entity_type) is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=(f"Unsupported entity_type '{entity_type}'. Allowed: {sorted(_ALLOWED_ENTITY_TYPES)}"),
@@ -103,6 +122,11 @@ async def _resolve_entity_project_id(
         return None
     try:
         from sqlalchemy import select
+
+        # ── A record of a module built with the module builder ──────────
+        built_key = _built_key(entity_type)
+        if built_key is not None:
+            return await _resolve_built_project_id(built_key, eid, session)
 
         # ── Direct project_id on the primary model ──────────────────────
         if entity_type == "boq":
@@ -206,6 +230,35 @@ async def _resolve_entity_project_id(
     return None
 
 
+async def _resolve_built_project_id(key: str, eid: uuid.UUID, session: SessionDep) -> uuid.UUID | None:
+    """The project of a built module's record, when that module takes comments.
+
+    ``None`` - and so a 404 - unless the module is installed by the builder,
+    loaded, project-scoped and has comments turned on in its spec. Which table
+    to read comes from that spec, never from the request.
+    """
+    from sqlalchemy import select
+
+    from app.modules.module_builder.runtime import loaded_built_module
+
+    built = loaded_built_module(key)
+    if built is None or not built.spec.features.comments or not built.spec.entity.project_scoped:
+        return None
+    model = built.model
+    return (await session.execute(select(model.project_id).where(model.id == eid))).scalar_one_or_none()
+
+
+async def _may_read_built(key: str, user_id: str, session: SessionDep) -> bool:
+    """The built module's own read permission, decided as ``RequirePermission`` decides it."""
+    from app.core.permissions import permission_registry
+    from app.modules.module_builder.links import caller_for
+
+    caller = await caller_for(session, user_id)
+    if caller.user_id is None:
+        return False
+    return caller.is_admin or bool(permission_registry.role_has_permission(caller.role, f"{key}.read"))
+
+
 async def _verify_entity_access(
     entity_type: str,
     entity_id: str,
@@ -236,6 +289,22 @@ async def _verify_entity_access(
         return
 
     resolved = await _resolve_entity_project_id(entity_type, entity_id, session)
+    built_key = _built_key(entity_type)
+    if resolved is not None and built_key is not None and not await _may_read_built(built_key, user_id, session):
+        # Someone who may not open the record in its module may not read or
+        # write its thread either. Answered like a missing record.
+        resolved = None
+    if resolved is not None and built_key is not None:
+        # The project refusal says "Project not found", which would tell the
+        # caller the record exists. A built record answers exactly as a
+        # missing one does, as its own module's routes do.
+        try:
+            await verify_project_access(resolved, str(user_id), session)
+        except HTTPException as exc:
+            if exc.status_code != status.HTTP_404_NOT_FOUND:
+                raise
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entity not found") from None
+        return
     if resolved is None:
         # Fail closed: a target we cannot tie to a project the caller can
         # reach is treated as not found (never silently ungated).

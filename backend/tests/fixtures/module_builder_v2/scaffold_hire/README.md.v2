@@ -1,0 +1,41 @@
+# Scaffold Hire
+
+Track hired scaffolding, its rate and its off-hire date.
+
+This module was generated from a specification rather than written by hand.
+`spec.json` beside this file is that specification, and it is also what the
+platform renders the screen from.
+
+## Record: Hire
+
+| Field | Label | Type | Required |
+|---|---|---|---|
+| `reference` | Reference | text | yes |
+| `notes` | Notes | long_text | no |
+| `bay_count` | Bays | integer | yes |
+| `area_m2` | Area | number | no |
+| `weekly_rate` | Weekly rate | money | yes |
+| `on_hire_date` | On hire | date | yes |
+| `off_hire_date` | Off hire | date | no |
+| `inspected_at` | Last inspection | datetime | no |
+| `is_tagged` | Tagged | boolean | no |
+| `status` | Status | select | yes |
+
+## Rules
+
+- `REFERENCE_REQUIRED` (error): A hire needs a reference to be found by.
+- `RATE_POSITIVE` (error): A weekly rate must be above zero.
+- `BAYS_IN_RANGE` (error): A hire covers between 1 and 500 bays.
+- `STATUS_KNOWN` (error): Status must be one the register recognises.
+- `INSPECTION_NOT_FUTURE` (error): An inspection cannot be recorded before it happens.
+- `OFF_HIRE_AFTER_ON_HIRE` (error): Off hire cannot precede on hire.
+
+## API
+
+Mounted at `/api/v1/scaffold-hire`.
+
+- `GET /ui-spec` the screen description
+- `GET /` list, `GET /{id}` one
+- `POST /` create, `PATCH /{id}` update, `DELETE /{id}` remove
+
+Reading needs `scaffold_hire.read`, writing needs `scaffold_hire.write`.

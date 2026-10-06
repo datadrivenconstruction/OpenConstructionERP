@@ -17,12 +17,13 @@
  * with a message in the reader's own language, which is more useful than an
  * input that silently blanks itself.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, MessageSquare } from 'lucide-react';
 import clsx from 'clsx';
 
 import { Button, Input, WideModal } from '@/shared/ui';
+import { CommentThread } from '@/shared/ui/CommentThread';
 import { ApiError, getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 
@@ -37,15 +38,28 @@ import {
 import {
   NOT_A_NUMBER_CODE,
   REQUIRED_CODE,
+  STATUS_KEY,
   blankValues,
   canSubmit,
   evaluateDraft,
+  statusStates,
   toCreatePayload,
   toUpdatePayload,
   valuesFromRecord,
   type DraftFinding,
   type FormValues,
 } from './fields';
+import { LinkPicker } from './LinkPicker';
+import { statusVariant } from './StatusBadge';
+
+/**
+ * The collaboration module's entity type for a record of a generated module.
+ * The server resolves `built.<key>` to the record's project and checks access
+ * there, so a comment thread here is exactly as private as the record.
+ */
+export function commentEntityType(key: string): string {
+  return `built.${key}`;
+}
 
 export interface RecordFormModalProps {
   open: boolean;
@@ -89,6 +103,8 @@ export function RecordFormModal({
   const drafted = useMemo(() => evaluateDraft(spec, values), [spec, values]);
   const findings = useMemo(() => [...drafted, ...refused], [drafted, refused]);
   const submittable = canSubmit(drafted);
+  const states = statusStates(spec);
+  const statusLabelId = useId();
 
   const set = (name: string, value: string | boolean) => {
     setValues((prev) => ({ ...prev, [name]: value }));
@@ -211,6 +227,46 @@ export function RecordFormModal({
             })}
           </p>
         )}
+        {states.length > 0 && (
+          <div>
+            <p id={statusLabelId} className="mb-1.5 text-sm font-medium text-content-secondary">
+              {t('runtime_module.status', { defaultValue: 'Status' })}
+            </p>
+            {/* All stages in one row of buttons rather than a dropdown: moving
+                a record on is the most common edit, and this makes it one
+                click. The stage names are the module author's own. */}
+            <div
+              role="radiogroup"
+              aria-labelledby={statusLabelId}
+              className="flex flex-wrap gap-1.5"
+              data-testid="runtime-module-status-picker"
+            >
+              {states.map((state) => {
+                const on = values[STATUS_KEY] === state.code;
+                const variant = statusVariant(states, state.code);
+                return (
+                  <button
+                    key={state.code}
+                    type="button"
+                    role="radio"
+                    aria-checked={on}
+                    onClick={() => set(STATUS_KEY, state.code)}
+                    className={clsx(
+                      'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+                      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40',
+                      !on && 'border-border-light text-content-secondary hover:bg-surface-secondary',
+                      on && variant === 'success' && 'border-semantic-success bg-semantic-success-bg text-semantic-success',
+                      on && variant === 'blue' && 'border-oe-blue bg-oe-blue-subtle text-oe-blue-text',
+                      on && variant === 'neutral' && 'border-content-tertiary bg-surface-secondary text-content-primary',
+                    )}
+                  >
+                    {state.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
         {spec.entity.fields.map((field) => (
           <FieldInput
             key={field.name}
@@ -218,8 +274,24 @@ export function RecordFormModal({
             value={values[field.name] ?? ''}
             errors={errorsFor(field.name).map(messageFor)}
             onChange={(next) => set(field.name, next)}
+            projectId={projectId}
           />
         ))}
+
+        {/* Only on a record that exists: a comment needs something to hang on,
+            and a thread on a form that is never saved would be lost with it. */}
+        {record && spec.features?.comments && (
+          <section
+            className="border-t border-border-light pt-4"
+            data-testid="runtime-module-comments"
+          >
+            <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-content-primary">
+              <MessageSquare size={14} className="text-content-tertiary" />
+              {t('runtime_module.comments', { defaultValue: 'Comments' })}
+            </h3>
+            <CommentThread entityType={commentEntityType(spec.key)} entityId={record.id} />
+          </section>
+        )}
       </div>
     </WideModal>
   );
@@ -230,6 +302,8 @@ interface FieldInputProps {
   value: string | boolean;
   errors: string[];
   onChange: (value: string | boolean) => void;
+  /** The record's project; a link picker searches inside it. */
+  projectId: string | null;
 }
 
 /**
@@ -238,11 +312,32 @@ interface FieldInputProps {
  * The label and the help text are the module author's own words and are
  * rendered as they were written.
  */
-function FieldInput({ field, value, errors, onChange }: FieldInputProps) {
+function FieldInput({ field, value, errors, onChange, projectId }: FieldInputProps) {
   const { t } = useTranslation();
   const id = `runtime-field-${field.name}`;
   const error = errors[0];
   const text = typeof value === 'string' ? value : '';
+
+  if (field.type === 'link' && field.target) {
+    return (
+      <div>
+        <label htmlFor={id} className="mb-1 block text-sm font-medium text-content-secondary">
+          {field.label}
+          {field.required && <span className="ml-0.5 text-semantic-error">*</span>}
+        </label>
+        <LinkPicker
+          id={id}
+          target={field.target}
+          projectId={projectId}
+          value={text}
+          onChange={onChange}
+          label={field.label}
+          invalid={Boolean(error)}
+        />
+        <FieldFooter help={field.help_text} error={error} />
+      </div>
+    );
+  }
 
   if (field.type === 'boolean') {
     return (

@@ -22,6 +22,11 @@ The token binds three things, and each one closes a different hole:
 * the user, so one person's preview cannot authorise another person's install;
 * the issue time, so a token cannot be kept and replayed indefinitely.
 
+An upgrade of an installed module is reviewed the same way, and its token also
+names what it is for: a token issued for an upgrade does not install, and one
+issued for an install does not upgrade. The key needs no claim of its own,
+since it is part of the spec the digest covers.
+
 Within that window a token is not spent by using it, and saying so is part of
 the claim: spending one would need a record of the tokens already seen, which is
 exactly the state this refuses to keep. Reuse buys very little, because a spec
@@ -56,6 +61,11 @@ REVIEW_TOKEN_TTL_SECONDS = 3600
 #: cleanly rather than mis-parsed.
 _VERSION = "v1"
 
+#: What a token authorises. An install token carries no purpose claim, so the
+#: tokens issued before upgrades existed still read as install tokens.
+INSTALL = "install"
+UPGRADE = "upgrade"
+
 
 class ReviewTokenInvalid(Exception):
     """The token does not prove that this exact spec was previewed by this user."""
@@ -87,16 +97,19 @@ def _sign(body: str) -> str:
     return _b64(hmac.new(secret, body.encode("utf-8"), hashlib.sha256).digest())
 
 
-def issue(spec: ModuleSpec, user_id: uuid.UUID | str, *, now: float | None = None) -> str:
-    """Issue a review token for *spec* previewed by *user_id*."""
+def issue(spec: ModuleSpec, user_id: uuid.UUID | str, *, now: float | None = None, purpose: str = INSTALL) -> str:
+    """Issue a review token for *spec* previewed by *user_id*, for *purpose*."""
+    claims = {
+        "v": _VERSION,
+        "d": spec_digest(spec),
+        "u": str(user_id),
+        "t": int(now if now is not None else time.time()),
+    }
+    if purpose != INSTALL:
+        claims["p"] = purpose
     body = _b64(
         json.dumps(
-            {
-                "v": _VERSION,
-                "d": spec_digest(spec),
-                "u": str(user_id),
-                "t": int(now if now is not None else time.time()),
-            },
+            claims,
             sort_keys=True,
             separators=(",", ":"),
         ).encode("utf-8")
@@ -104,7 +117,9 @@ def issue(spec: ModuleSpec, user_id: uuid.UUID | str, *, now: float | None = Non
     return f"{body}.{_sign(body)}"
 
 
-def verify(token: str, spec: ModuleSpec, user_id: uuid.UUID | str, *, now: float | None = None) -> None:
+def verify(
+    token: str, spec: ModuleSpec, user_id: uuid.UUID | str, *, now: float | None = None, purpose: str = INSTALL
+) -> None:
     """Raise :class:`ReviewTokenInvalid` unless *token* proves the review.
 
     Signature first, then contents: a forged token is rejected before anything
@@ -127,6 +142,8 @@ def verify(token: str, spec: ModuleSpec, user_id: uuid.UUID | str, *, now: float
         raise ReviewTokenInvalid("the spec being installed is not the spec that was previewed")
     if claims.get("u") != str(user_id):
         raise ReviewTokenInvalid("the review token was issued to a different user")
+    if claims.get("p", INSTALL) != purpose:
+        raise ReviewTokenInvalid(f"the review token was issued for another action than this {purpose}")
 
     age = (now if now is not None else time.time()) - float(claims.get("t", 0))
     if age > REVIEW_TOKEN_TTL_SECONDS:

@@ -99,9 +99,13 @@ describe('the register', () => {
     expect(within(list).getByText(/6 fields/)).toBeTruthy();
   });
 
-  it('names the directory on the server the modules live in', async () => {
+  it('keeps the server directory out of the explainer prose, folded away for an administrator', async () => {
     renderPage();
-    expect(await screen.findByText('/home/oe/.openestimate/modules')).toBeTruthy();
+    const path = await screen.findByText('/home/oe/.openestimate/modules');
+    const folded = path.closest('details');
+    expect(folded).toBeTruthy();
+    expect(folded?.hasAttribute('open')).toBe(false);
+    expect(folded?.getAttribute('data-testid')).toBe('module-builder-files-location');
   });
 
   it('links each module to the screen it renders on, by key', async () => {
@@ -114,6 +118,43 @@ describe('the register', () => {
     installed.mockResolvedValue({ items: [], total: 0, runtime_root: '/tmp' });
     renderPage();
     expect(await screen.findByText(/Nothing has been built here yet/i)).toBeTruthy();
+  });
+});
+
+describe('a module switched off for safety', () => {
+  function quarantined(problem: { code: string; params?: Record<string, unknown> }) {
+    const [module] = LIST.items;
+    installed.mockResolvedValue({ ...LIST, items: [{ ...module!, status: 'quarantined', problem }] });
+  }
+
+  it('says why in plain words, naming the files, and offers neither opening nor adding to it', async () => {
+    quarantined({ code: 'unsafe_code', params: { files: ['router.py', 'service.py'] } });
+    renderPage();
+    const message = await screen.findByTestId('module-builder-quarantined-pour_register');
+    expect(message.textContent).toMatch(/code that its description does not produce \(router\.py.+service\.py\)/);
+    expect(message.textContent).toMatch(/Its records are kept/);
+    expect(screen.getByText('Switched off for safety')).toBeTruthy();
+    expect(screen.queryByTestId('module-builder-open-pour_register')).toBeNull();
+    expect(screen.queryByTestId('module-builder-extend-pour_register')).toBeNull();
+    // Its address answers nothing, so the card does not print it as if it did.
+    expect(screen.queryByText('/api/v1/pour-register')).toBeNull();
+    // Removing it still works.
+    expect(screen.getByTestId('module-builder-remove-pour_register')).toBeTruthy();
+  });
+
+  it('explains a module from an older builder that could not be checked', async () => {
+    quarantined({ code: 'unverifiable' });
+    renderPage();
+    const message = await screen.findByTestId('module-builder-quarantined-pour_register');
+    expect(message.textContent).toMatch(/older version of the builder and could not be checked/);
+  });
+
+  it('still reads as a sentence for a reason this screen does not know yet', async () => {
+    quarantined({ code: 'something_new' });
+    renderPage();
+    const message = await screen.findByTestId('module-builder-quarantined-pour_register');
+    expect(message.textContent).toMatch(/switched off for safety\. Its records are kept/);
+    expect(message.textContent).not.toMatch(/something_new/);
   });
 });
 

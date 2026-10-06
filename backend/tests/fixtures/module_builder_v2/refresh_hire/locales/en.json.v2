@@ -1,0 +1,17 @@
+{
+  "refresh_hire": {
+    "title": "Plant Hire",
+    "description": "Hired plant per project, with its weekly rate.",
+    "entity": "Hire",
+    "entityPlural": "Hires",
+    "fields": {
+      "reference": "Reference",
+      "weekly_rate": "Weekly rate",
+      "on_hire_date": "On hire"
+    },
+    "help": {},
+    "rules": {
+      "RATE_POSITIVE": "A weekly rate must be above zero."
+    }
+  }
+}

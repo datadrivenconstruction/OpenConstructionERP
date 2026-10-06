@@ -31,6 +31,14 @@ class DeadlineItem(BaseModel):
     days_overdue: int = Field(description="Signed: >0 overdue, <0 days until due, 0 due today.")
     severity: str = Field(description="'critical' (overdue) | 'warning' (approaching) | 'info'.")
     action_url: str = Field(description="Relative app route the row links to.")
+    source_label: str | None = Field(
+        default=None,
+        description="Readable name of the source when ``module`` alone does not say it (built modules).",
+    )
+    remind_days: int | None = Field(
+        default=None,
+        description="Days ahead the source wants its due-soon reminder; None uses the sweeper's window.",
+    )
 
 
 class DeadlineRegisterResponse(BaseModel):

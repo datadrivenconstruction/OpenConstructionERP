@@ -140,6 +140,8 @@ _TEMPLATES: dict[str, str] = {
     "notifications.deadline.escalated.body": '{module} item "{title}" is still open {days_overdue} day(s) overdue and has been escalated.',
     "notifications.deadline.approaching.title": "Due soon: {title}",
     "notifications.deadline.approaching.body": '{module} item "{title}" is due on {due_date}.',
+    "notifications.deadline.built.approaching.title": "Due soon: {title}",
+    "notifications.deadline.built.approaching.body": '{module}: "{title}" is due on {due_date}.',
     # ── Document approvals (file_approvals engine) ───────────────────
     "notifications.file_approval.needs_approver.title": "A document needs your approval",
     "notifications.file_approval.needs_approver.body": "A {file_kind} is waiting for your approval.",

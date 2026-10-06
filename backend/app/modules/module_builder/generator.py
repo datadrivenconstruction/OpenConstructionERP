@@ -22,11 +22,14 @@ always in step beats a generated one that cannot be installed.
 from __future__ import annotations
 
 import json
+import re
+import unicodedata
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
-from app.modules.module_builder.spec import FieldSpec, ModuleSpec
+from app.modules.module_builder.links import LINK_TARGETS
+from app.modules.module_builder.spec import STATUS_CODE_MAX, STATUS_COLUMN, STATUS_RULE_CODE, FieldSpec, ModuleSpec
 
 HEADER = """\
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
@@ -53,8 +56,11 @@ GENERATED_NOTE = (
 #      a project-scoped module served every project's records to anyone
 #      holding ``<key>.read``.
 #   2  project-scoped routes also check access to the record's project.
+#   3  names and descriptions are escaped where they land in docstrings and
+#      string literals. Before, a name holding quotes could end the string
+#      it was written into and put code of its own in the module.
 GENERATOR_NAME = "openconstructionerp.module_builder"
-GENERATOR_VERSION = 2
+GENERATOR_VERSION = 3
 GENERATOR_STAMP = f"{GENERATOR_NAME}/{GENERATOR_VERSION}"
 
 # The exception to GENERATED_NOTE, carried by the three files a newer builder
@@ -80,12 +86,73 @@ COLUMN_TYPES: dict[str, tuple[str, str]] = {
     "datetime": ("DateTime(timezone=True)", "datetime"),
     "boolean": ("Boolean", "bool"),
     "select": ("String(64)", "str"),
+    "link": ("GUID()", "uuid.UUID"),
 }
 
 # Where each column type is imported from. Computed rather than emitted as a
 # fixed block: a spec with no dates and no numbers would otherwise render
 # imports nothing uses, and ruff refuses the module the builder just wrote.
 _SQLALCHEMY_NAMES = {"String", "Text", "Integer", "Date", "DateTime", "Boolean"}
+
+
+# ── user text in generated code ─────────────────────────────────────────────
+#
+# Names, labels and descriptions are whatever a person or the assistant wrote,
+# in any of the platform's languages, where quotes and backslashes are
+# ordinary. They reach generated Python in two kinds of place: inside a
+# docstring, and as a string literal. Each kind has one helper below, and
+# every such place goes through it (``!r`` is the third, already safe way).
+# Banning the characters instead would refuse names people really use.
+#
+# Both helpers return text that was already safe unchanged, byte for byte. A
+# module rendered before them renders the same files after, which is what lets
+# a refresh rewrite its code instead of refusing a table it no longer matches.
+
+# Characters written as escapes rather than as themselves: control characters,
+# line and paragraph separators, and lone surrogates (which cannot even be
+# written to a UTF-8 file).
+_ESCAPED_CATEGORIES = frozenset({"Cc", "Cs", "Zl", "Zp"})
+
+
+def _escape(char: str) -> str:
+    code = ord(char)
+    return f"\\x{code:02x}" if code < 0x100 else f"\\u{code:04x}"
+
+
+def _doc(text: str) -> str:
+    """User text for the inside of a triple-double-quoted docstring.
+
+    A backslash is doubled, so it reads as itself rather than starting an
+    escape. In a run of three or more double quotes, which would end the
+    docstring, every quote is escaped. Characters in
+    :data:`_ESCAPED_CATEGORIES` become escapes, except the newline and tab a
+    description may hold.
+    """
+    text = text.replace("\\", "\\\\")
+    text = "".join(
+        _escape(c) if unicodedata.category(c) in _ESCAPED_CATEGORIES and c not in "\n\t" else c for c in text
+    )
+    return re.sub(r'"{3,}', lambda run: '\\"' * len(run.group()), text)
+
+
+def _lit(text: str) -> str:
+    """User text as a double-quoted Python string literal.
+
+    JSON's string syntax is a subset of Python's, so ``json.dumps`` does the
+    quoting; what it leaves raw from :data:`_ESCAPED_CATEGORIES` is escaped on
+    top. Plain text comes out as ``"text"``, as the templates always wrote it.
+    """
+    quoted = json.dumps(text, ensure_ascii=False)
+    return "".join(_escape(c) if unicodedata.category(c) in _ESCAPED_CATEGORIES else c for c in quoted)
+
+
+def _first_party(*imports: str) -> str:
+    """``from app... import ...`` lines in the order ruff's isort wants them.
+
+    Used where links or features add an import to a block whose other lines
+    are fixed, so the added line lands where a reviewer running ruff expects.
+    """
+    return "".join(sorted(imports, key=lambda line: line.split()[1]))
 
 
 @dataclass(frozen=True)
@@ -129,9 +196,11 @@ def write(spec: ModuleSpec, root: Path) -> list[Path]:
     is how a user loses the edits they made to a generated module, and the
     builder has no way to tell its own output from work done since.
 
-    The one exception is :mod:`~app.modules.module_builder.refresh`, which
-    renders ``router.py``, ``repository.py`` and ``service.py`` again when
-    the generator version moves, and keeps the copies it replaces.
+    The exceptions are :mod:`~app.modules.module_builder.refresh`, which
+    renders the code files again when the generator version moves, and
+    :mod:`~app.modules.module_builder.upgrade`, which writes a whole new
+    version beside the module and swaps it in. Both keep the copies they
+    replace.
     """
     target = root / spec.key
     if target.exists():
@@ -173,9 +242,9 @@ def _init(spec: ModuleSpec) -> str:
     nobody else. And the table has to exist, because a module installed at
     runtime has no migration to create it.
     """
-    return f'''{HEADER}"""{spec.display_name}.
+    return f'''{HEADER}"""{_doc(spec.display_name)}.
 
-{spec.description or "Generated by the OpenConstructionERP module builder."}
+{_doc(spec.description or "Generated by the OpenConstructionERP module builder.")}
 
 Generated from a module specification. ``spec.json`` beside this file is the
 description the code came from, and is what the interface renders the module's
@@ -206,8 +275,18 @@ async def on_startup() -> None:
 '''
 
 
+def _depends(spec: ModuleSpec) -> list[str]:
+    """The modules this one needs: projects when scoped, and each link's owner."""
+    depends = ["oe_projects"] if spec.entity.project_scoped else []
+    for field in spec.link_fields:
+        module = LINK_TARGETS[field.target].module
+        if module not in depends:
+            depends.append(module)
+    return depends
+
+
 def _manifest(spec: ModuleSpec) -> str:
-    return f'''{HEADER}"""{spec.display_name} module manifest."""
+    return f'''{HEADER}"""{_doc(spec.display_name)} module manifest."""
 
 {GENERATED_NOTE}
 from app.core.module_loader import InferenceDeclaration, InferenceRole, ModuleManifest
@@ -219,7 +298,7 @@ manifest = ModuleManifest(
     description={spec.description!r},
     author={(spec.author or "Built with the OpenConstructionERP module builder")!r},
     category={spec.category!r},
-    depends={["oe_projects"] if spec.entity.project_scoped else []!r},
+    depends={_depends(spec)!r},
     auto_install=False,
     enabled=True,
     inference=InferenceDeclaration(
@@ -258,13 +337,17 @@ def _models(spec: ModuleSpec) -> str:
     # Always present: the row carries created_at and updated_at whatever the
     # spec says, and both of those need DateTime, func and datetime.
     sqlalchemy_names = {"DateTime", "Index", "func"} | (columns & _SQLALCHEMY_NAMES)
-    if entity.project_scoped:
+    links = spec.link_fields
+    status = spec.features.status
+    if entity.project_scoped or links:
         sqlalchemy_names.add("ForeignKey")
+    if status is not None:
+        sqlalchemy_names.add("String")
     stdlib_datetime = {"datetime"} | (annotations & {"date"})
 
     lines = [
         HEADER,
-        f'"""{spec.display_name} ORM model.\n\nTable:\n    {spec.table_name}\n"""\n',
+        f'"""{_doc(spec.display_name)} ORM model.\n\nTable:\n    {spec.table_name}\n"""\n',
         GENERATED_NOTE,
         "import uuid",
         f"from datetime import {', '.join(sorted(stdlib_datetime))}",
@@ -277,6 +360,13 @@ def _models(spec: ModuleSpec) -> str:
         "from sqlalchemy.orm import Mapped, mapped_column",
         "",
     ]
+    target_models = sorted({LINK_TARGETS[f.target].models for f in links})
+    if target_models:
+        # The foreign key names a table by string. Importing the module that
+        # owns it puts that table on the shared metadata, so creating this
+        # table resolves the key even when nothing else imported it first.
+        lines.append("# The tables the link fields point at, so their foreign keys resolve.")
+        lines += [f"import {models}  # noqa: F401" for models in target_models]
     if "MoneyType" in columns:
         # The house decimal column. Plain Numeric hands back a float on some
         # backends, and a rate that arrives as 1450.7499999 is a defect the
@@ -287,7 +377,7 @@ def _models(spec: ModuleSpec) -> str:
         "",
         "",
         f"class {spec.class_name}(Base):",
-        f'    """{entity.display_name}."""',
+        f'    """{_doc(entity.display_name)}."""',
         "",
         f"    __tablename__ = {spec.table_name!r}",
         "",
@@ -300,12 +390,32 @@ def _models(spec: ModuleSpec) -> str:
             "    )"
         )
     for field in entity.fields:
+        if field.type == "link":
+            # Nullable whatever the spec says. The record it points at belongs
+            # to another module and may be deleted there; SET NULL keeps this
+            # row and drops only the link, where NOT NULL would block that
+            # delete or cascade it into this module's data. "Required" is the
+            # create schema's to enforce.
+            lines.append(
+                f"    {field.name}: Mapped[uuid.UUID | None] = mapped_column(\n"
+                f'        GUID(), ForeignKey("{LINK_TARGETS[field.target].table}.id", ondelete="SET NULL"), '
+                "nullable=True, default=None\n"
+                "    )"
+            )
+            continue
         column, annotation = COLUMN_TYPES[field.type]
         optional = "" if field.required else " | None"
         default = "" if field.required else ", default=None"
         lines.append(
             f"    {field.name}: Mapped[{annotation}{optional}] = mapped_column("
             f"{column}, nullable={not field.required}{default})"
+        )
+    if status is not None:
+        first = status.states[0].code
+        lines.append(
+            f"    {STATUS_COLUMN}: Mapped[str] = mapped_column(\n"
+            f"        String({STATUS_CODE_MAX}), nullable=False, default={first!r}, server_default={first!r}\n"
+            "    )"
         )
     lines += [
         "    created_at: Mapped[datetime] = mapped_column(",
@@ -319,8 +429,12 @@ def _models(spec: ModuleSpec) -> str:
     ]
     if entity.project_scoped:
         lines.append(f'        Index("ix_{spec.table_name}_project", "project_id"),')
+    lines.append(f'        Index("ix_{spec.table_name}_created", "created_at"),')
+    for field in links:
+        lines.append(f'        Index("ix_{spec.table_name}_{field.name}", "{field.name}"),')
+    if status is not None:
+        lines.append(f'        Index("ix_{spec.table_name}_{STATUS_COLUMN}", "{STATUS_COLUMN}"),')
     lines += [
-        f'        Index("ix_{spec.table_name}_created", "created_at"),',
         "    )",
         "",
     ]
@@ -340,7 +454,7 @@ def _schema(spec: ModuleSpec) -> str:
     one table and checked first. That is idempotent across restarts and across
     reinstalls, and it touches nothing the platform owns.
     """
-    return f'''{HEADER}"""Physical table for {spec.display_name}.
+    return f'''{HEADER}"""Physical table for {_doc(spec.display_name)}.
 
 Table:
     {spec.table_name}
@@ -412,14 +526,22 @@ def _schemas(spec: ModuleSpec) -> str:
         annotation = _pydantic_type(field)
         default = "" if field.required else " = None"
         create_fields.append(f"    {field.name}: {annotation}{default}")
-        read_fields.append(f"    {field.name}: {annotation}")
+        # A link reads back as None once the record it pointed at is deleted,
+        # required or not: the column is SET NULL (see the model).
+        read_fields.append(f"    {field.name}: {'uuid.UUID | None' if field.type == 'link' else annotation}")
         _, base = COLUMN_TYPES[field.type]
         update_fields.append(f"    {field.name}: {base} | None = None")
+    status = spec.features.status
+    if status is not None:
+        # Optional on create: a new record starts in the first state.
+        create_fields.append(f"    {STATUS_COLUMN}: str = {status.states[0].code!r}")
+        update_fields.append(f"    {STATUS_COLUMN}: str | None = None")
+        read_fields.append(f"    {STATUS_COLUMN}: str")
 
     project_create = "    project_id: uuid.UUID\n" if entity.project_scoped else ""
     project_read = "    project_id: uuid.UUID\n" if entity.project_scoped else ""
 
-    return f'''{HEADER}"""{spec.display_name} request and response schemas."""
+    return f'''{HEADER}"""{_doc(spec.display_name)} request and response schemas."""
 
 {GENERATED_NOTE}
 import uuid
@@ -430,7 +552,7 @@ from pydantic import BaseModel, ConfigDict
 
 
 class {spec.class_name}Create(BaseModel):
-    """Payload for creating one {entity.display_name.lower()}."""
+    """Payload for creating one {_doc(entity.display_name.lower())}."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -446,7 +568,7 @@ class {spec.class_name}Update(BaseModel):
 
 
 class {spec.class_name}Read(BaseModel):
-    """One {entity.display_name.lower()} as the API returns it."""
+    """One {_doc(entity.display_name.lower())} as the API returns it."""
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -457,7 +579,7 @@ class {spec.class_name}Read(BaseModel):
 
 
 class {spec.class_name}List(BaseModel):
-    """A page of {entity.plural_name.lower()}."""
+    """A page of {_doc(entity.plural_name.lower())}."""
 
     items: list[{spec.class_name}Read]
     total: int
@@ -500,8 +622,22 @@ def _validators(spec: ModuleSpec) -> str:
             f"            )\n"
             f"        )"
         )
+    if spec.features.status is not None:
+        codes = tuple(spec.status_codes)
+        message = f"Status must be one of: {', '.join(codes)}."
+        checks.append(
+            f"    if value.{STATUS_COLUMN} not in {codes!r}:\n"
+            f"        findings.append(\n"
+            f"            Finding(\n"
+            f"                code={STATUS_RULE_CODE!r},\n"
+            f"                message={message!r},\n"
+            f"                field={STATUS_COLUMN!r},\n"
+            f"                severity='error',\n"
+            f"            )\n"
+            f"        )"
+        )
 
-    return f'''{HEADER}"""{spec.display_name} validation rules.
+    return f'''{HEADER}"""{_doc(spec.display_name)} validation rules.
 
 Validation is part of the workflow rather than an option, so these run on
 every write and their findings travel with the response.
@@ -555,7 +691,7 @@ def blocking(findings: list[Finding]) -> list[Finding]:
 
 
 def _permissions(spec: ModuleSpec) -> str:
-    return f'''{HEADER}"""{spec.display_name} permissions.
+    return f'''{HEADER}"""{_doc(spec.display_name)} permissions.
 
 Registered rather than merely referenced: a permission the registry has never
 heard of is denied to everyone except an administrator, and a test run as an
@@ -603,7 +739,7 @@ def _repository(spec: ModuleSpec) -> str:
         )
     else:
         abc_import = within_param = within_doc = scope = ""
-    return f'''{HEADER}"""{spec.display_name} data access."""
+    return f'''{HEADER}"""{_doc(spec.display_name)} data access."""
 
 {GENERATED_NOTE}{REFRESHED_NOTE}
 import uuid
@@ -673,18 +809,72 @@ def _service(spec: ModuleSpec) -> str:
             f"    ) -> tuple[list[{spec.class_name}], int]:\n"
             "        return await self.repo.list_page(project_id=project_id, limit=limit, offset=offset)\n"
         )
-    return f'''{HEADER}"""{spec.display_name} business logic."""
+    name = spec.class_name
+    local_imports = [
+        f"from app.modules.{spec.key}.models import {name}\n",
+        f"from app.modules.{spec.key}.repository import {name}Repository\n",
+        f"from app.modules.{spec.key}.schemas import {name}Create, {name}Update\n",
+        f"from app.modules.{spec.key}.validators import Finding, blocking, validate\n",
+    ]
+    link_fields = spec.link_fields
+    if link_fields:
+        project_of_new = "payload.project_id" if spec.entity.project_scoped else "None"
+        project_of_record = "record.project_id" if spec.entity.project_scoped else "None"
+        targets = ", ".join(f"{f.name!r}: {f.target!r}" for f in link_fields)
+        local_imports.append("from app.modules.module_builder import links\n")
+        link_table = f"""
+# Each link field and the kind of record it points at. A link is checked
+# against what the caller may see, so an id from a project they cannot reach,
+# or a record in another project than this one, is refused rather than stored.
+LINKS: dict[str, str] = {{{targets}}}
+"""
+        create_def = (
+            "    async def create(\n"
+            f"        self, payload: {name}Create, user_id: object = None\n"
+            f"    ) -> tuple[{name}, list[Finding]]:\n"
+            "        findings = validate(payload)\n"
+            f"        findings += await self._link_findings({project_of_new}, payload.model_dump(), user_id)\n"
+        )
+        update_def = (
+            "    async def update(\n"
+            f"        self, record: {name}, payload: {name}Update, user_id: object = None\n"
+            f"    ) -> tuple[{name}, list[Finding]]:\n"
+        )
+        update_links = (
+            "        # Only the links this write changes. One set earlier that has since\n"
+            "        # left the caller's sight is not this write's to refuse.\n"
+            f"        findings += await self._link_findings({project_of_record}, changes, user_id)\n"
+        )
+        link_method = '''
+    async def _link_findings(
+        self, project_id: uuid.UUID | None, values: dict[str, object], user_id: object
+    ) -> list[Finding]:
+        """Refusals for links to records the caller may not see, or in another project."""
+        chosen = {field: (target, values[field]) for field, target in LINKS.items() if field in values}
+        if not chosen:
+            return []
+        problems = await links.link_problems(self.repo.session, user_id, project_id, chosen)
+        return [Finding(code=code, message=message, field=field) for field, code, message in problems]
+'''
+    else:
+        link_table = update_links = link_method = ""
+        create_def = (
+            f"    async def create(self, payload: {name}Create) -> tuple[{name}, list[Finding]]:\n"
+            "        findings = validate(payload)\n"
+        )
+        update_def = (
+            "    async def update(\n"
+            f"        self, record: {name}, payload: {name}Update\n"
+            f"    ) -> tuple[{name}, list[Finding]]:\n"
+        )
+    return f'''{HEADER}"""{_doc(spec.display_name)} business logic."""
 
 {GENERATED_NOTE}{REFRESHED_NOTE}
 import uuid
 {abc_import}
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.{spec.key}.models import {spec.class_name}
-from app.modules.{spec.key}.repository import {spec.class_name}Repository
-from app.modules.{spec.key}.schemas import {spec.class_name}Create, {spec.class_name}Update
-from app.modules.{spec.key}.validators import Finding, blocking, validate
-
+{_first_party(*local_imports)}{link_table}
 
 class ValidationRefused(Exception):
     """A write that the module's own rules will not allow."""
@@ -704,23 +894,18 @@ class {spec.class_name}Service:
     async def get(self, record_id: uuid.UUID) -> {spec.class_name} | None:
         return await self.repo.get(record_id)
 
-    async def create(self, payload: {spec.class_name}Create) -> tuple[{spec.class_name}, list[Finding]]:
-        findings = validate(payload)
-        if blocking(findings):
+{create_def}        if blocking(findings):
             raise ValidationRefused(blocking(findings))
         record = {spec.class_name}(**payload.model_dump())
         await self.repo.add(record)
         return record, findings
 
-    async def update(
-        self, record: {spec.class_name}, payload: {spec.class_name}Update
-    ) -> tuple[{spec.class_name}, list[Finding]]:
-        # Validate the record as it will be, not the patch on its own: a rule
+{update_def}        # Validate the record as it will be, not the patch on its own: a rule
         # about two fields cannot be judged from whichever one was sent.
         changes = payload.model_dump(exclude_unset=True)
         merged = _Merged(record, changes)
         findings = validate(merged)
-        if blocking(findings):
+{update_links}        if blocking(findings):
             raise ValidationRefused(blocking(findings))
         for key, value in changes.items():
             setattr(record, key, value)
@@ -728,7 +913,7 @@ class {spec.class_name}Service:
 
     async def delete(self, record: {spec.class_name}) -> None:
         await self.repo.delete(record)
-
+{link_method}
 
 class _Merged:
     """A read-only view of a record with pending changes applied.
@@ -763,6 +948,22 @@ def _router(spec: ModuleSpec) -> str:
     entity = spec.entity
     name = spec.class_name
     scoped = entity.project_scoped
+    has_links = bool(spec.link_fields)
+    export = spec.features.export
+
+    def scoped_rows(limit: str, offset: str, total: str = "total") -> str:
+        return f"""    within = None
+    if project_id is not None:
+        await verify_project_access(project_id, user_id, db)
+    else:
+        # The projects this caller may reach. None for an administrator, who is
+        # not restricted; an empty set for someone with no projects, which
+        # lists nothing rather than everything.
+        within = await accessible_project_ids(db, user_id)
+    rows, {total} = await {name}Service(db).list_page(
+        project_id=project_id, within=within, limit={limit}, offset={offset}
+    )
+"""
 
     if scoped:
         dependencies = (
@@ -773,10 +974,10 @@ def _router(spec: ModuleSpec) -> str:
             "    accessible_project_ids,\n"
             "    verify_project_access,\n"
             ")\n"
-            # The models module rather than the class: a record class called
-            # Path or Query would shadow a name this router already imports.
-            f"from app.modules.{spec.key} import models\n"
         )
+        # The models module rather than the class: a record class called
+        # Path or Query would shadow a name this router already imports.
+        models_import = [f"from app.modules.{spec.key} import models\n"]
         access = f'''
 # Every record belongs to a project, and the module permission says nothing
 # about which projects. So each route also applies the platform's project
@@ -809,18 +1010,9 @@ async def _reachable(service: {name}Service, record_id: uuid.UUID, user_id: str,
             "    user_id: CurrentUserId,\n"
             '    project_id: uuid.UUID | None = Query(None, description="Restrict to one project"),\n'
         )
-        list_body = f"""    within = None
-    if project_id is not None:
-        await verify_project_access(project_id, user_id, db)
-    else:
-        # The projects this caller may reach. None for an administrator, who is
-        # not restricted; an empty set for someone with no projects, which
-        # lists nothing rather than everything.
-        within = await accessible_project_ids(db, user_id)
-    rows, total = await {name}Service(db).list_page(
-        project_id=project_id, within=within, limit=limit, offset=offset
-    )
-"""
+        list_body = scoped_rows("limit", "offset")
+        export_params = list_params
+        export_body = scoped_rows("MAX_EXPORT_ROWS", "0")
         get_load = f"    record = await _reachable({name}Service(db), record_id, user_id, db)\n"
         create_check = (
             "    # The project in the body is the caller's claim, not a fact. A project\n"
@@ -838,14 +1030,21 @@ async def _reachable(service: {name}Service, record_id: uuid.UUID, user_id: str,
             f"    service = {name}Service(db)\n    record = await _reachable(service, record_id, user_id, db)\n"
         )
     else:
-        dependencies = "from app.dependencies import RequirePermission, SessionDep\n"
+        if has_links or export:
+            # Links are checked, and exported links labelled, as the caller sees them.
+            dependencies = "from app.dependencies import CurrentUserId, RequirePermission, SessionDep\n"
+        else:
+            dependencies = "from app.dependencies import RequirePermission, SessionDep\n"
+        models_import = []
+        export_params = "    db: SessionDep,\n    user_id: CurrentUserId,\n"
+        export_body = f"    rows, total = await {name}Service(db).list_page(limit=MAX_EXPORT_ROWS)\n"
         access = """
 # These records belong to no project, so there is no narrower scope to check:
 # the module permission is the whole access rule, as for any register that is
 # shared across the installation. A project-scoped module also checks access to
 # the record's project on every route.
 """
-        user_param = ""
+        user_param = "    user_id: CurrentUserId,\n" if has_links else ""
         list_params = "    db: SessionDep,\n"
         list_body = f"    rows, total = await {name}Service(db).list_page(limit=limit, offset=offset)\n"
         missing = '    if record is None:\n        raise HTTPException(status.HTTP_404_NOT_FOUND, "not found")\n'
@@ -855,23 +1054,49 @@ async def _reachable(service: {name}Service, record_id: uuid.UUID, user_id: str,
         delete_load = service_load
 
     service_names = ", ".join(sorted([f"{name}Service", "ValidationRefused"]))
-    return f'''{HEADER}"""{spec.display_name} HTTP API."""
+    fastapi_names = (
+        "APIRouter, Depends, HTTPException, Query, Response, status"
+        if export
+        else ("APIRouter, Depends, HTTPException, Query, status")
+    )
+    local_imports = [
+        *models_import,
+        f"from app.modules.{spec.key}.schemas import (\n    {name}Create,\n    {name}List,\n    {name}Read,\n"
+        f"    {name}Update,\n)\n",
+        f"from app.modules.{spec.key}.service import {service_names}\n",
+    ]
+    if export:
+        local_imports.append("from app.modules.module_builder.export import MAX_EXPORT_ROWS, export_response\n")
+    user_arg = ", user_id=user_id" if has_links else ""
+    export_route = (
+        f'''
+
+@router.get("/export", summary={_lit(f"Download {entity.plural_name.lower()} as a spreadsheet")})
+async def export_records(
+{export_params}    fmt: str = Query("csv", alias="format", pattern="^(csv|xlsx)$"),
+    _perm: None = Depends(RequirePermission("{spec.key}.read")),
+) -> Response:
+    """The records the list would show, as CSV or Excel.
+
+    The same access rule as the list, so the file never holds a row the
+    screen would not. Declared before ``/{{record_id}}`` so the path is not
+    read as an id.
+    """
+{export_body}    return await export_response(db, user_id, Path(__file__).parent / "spec.json", rows, fmt, total=total)
+'''
+        if export
+        else ""
+    )
+    return f'''{HEADER}"""{_doc(spec.display_name)} HTTP API."""
 
 {GENERATED_NOTE}{REFRESHED_NOTE}
 import json
 import uuid
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import {fastapi_names}
 
-{dependencies}from app.modules.{spec.key}.schemas import (
-    {name}Create,
-    {name}List,
-    {name}Read,
-    {name}Update,
-)
-from app.modules.{spec.key}.service import {service_names}
-
+{dependencies}{_first_party(*local_imports)}
 router = APIRouter()
 {access}
 
@@ -889,16 +1114,16 @@ async def ui_spec() -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-@router.get("", response_model={name}List, summary="List {entity.plural_name.lower()}")
+@router.get("", response_model={name}List, summary={_lit(f"List {entity.plural_name.lower()}")})
 async def list_records(
 {list_params}    limit: int = Query(100, ge=1, le=500),
     offset: int = Query(0, ge=0),
     _perm: None = Depends(RequirePermission("{spec.key}.read")),
 ) -> {name}List:
 {list_body}    return {name}List(items=[{name}Read.model_validate(r) for r in rows], total=total)
+{export_route}
 
-
-@router.get("/{{record_id}}", response_model={name}Read, summary="One {entity.display_name.lower()}")
+@router.get("/{{record_id}}", response_model={name}Read, summary={_lit(f"One {entity.display_name.lower()}")})
 async def get_record(
     record_id: uuid.UUID,
     db: SessionDep,
@@ -914,7 +1139,7 @@ async def create_record(
 {user_param}    _perm: None = Depends(RequirePermission("{spec.key}.write")),
 ) -> {name}Read:
 {create_check}    try:
-        record, _findings = await {name}Service(db).create(payload)
+        record, _findings = await {name}Service(db).create(payload{user_arg})
     except ValidationRefused as exc:
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_CONTENT,
@@ -933,7 +1158,7 @@ async def update_record(
 {user_param}    _perm: None = Depends(RequirePermission("{spec.key}.write")),
 ) -> {name}Read:
 {service_load}    try:
-        record, _findings = await service.update(record, payload)
+        record, _findings = await service.update(record, payload{user_arg})
     except ValidationRefused as exc:
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_CONTENT,
@@ -976,6 +1201,9 @@ def _locale(spec: ModuleSpec) -> str:
             "rules": {r.code: r.message for r in spec.rules},
         }
     }
+    status = spec.features.status
+    if status is not None:
+        payload[spec.key]["states"] = {s.code: s.label for s in status.states}
     return json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
 
 
@@ -1018,10 +1246,20 @@ def _tests(spec: ModuleSpec) -> str:
             f"        assert {rule.code!r} in [f.code for f in findings]\n"
         )
     field_defaults = ", ".join(f"{f.name}={_sample_source(f)}" for f in spec.entity.fields)
-    return f'''{HEADER}"""Tests for {spec.display_name}."""
+    status = spec.features.status
+    if status is not None:
+        field_defaults += f", {STATUS_COLUMN}={status.states[0].code!r}"
+        cases.append(
+            "    def test_an_unknown_status_is_refused(self) -> None:\n"
+            "        record = _sound()\n"
+            f"        record.{STATUS_COLUMN} = 'definitely-not-a-state'\n"
+            f"        assert {STATUS_RULE_CODE!r} in [f.code for f in validate(record)]\n"
+        )
+    uuid_import = "import uuid\n" if spec.link_fields else ""
+    return f'''{HEADER}"""Tests for {_doc(spec.display_name)}."""
 
 {GENERATED_NOTE}
-from datetime import UTC, datetime, timedelta  # noqa: F401
+{uuid_import}from datetime import UTC, datetime, timedelta  # noqa: F401
 from types import SimpleNamespace
 
 from app.modules.{spec.key}.validators import validate
@@ -1100,6 +1338,8 @@ def _sample_source(field: FieldSpec) -> str:
         return "datetime.now(UTC) - timedelta(days=2)"
     if field.type == "select":
         return repr(field.options[0])
+    if field.type == "link":
+        return "uuid.uuid4()"
     if field.type == "long_text":
         return repr(f"About {field.label.lower()}")
     return repr(field.label)
@@ -1107,9 +1347,26 @@ def _sample_source(field: FieldSpec) -> str:
 
 def _readme(spec: ModuleSpec) -> str:
     rows = "\n".join(
-        f"| `{f.name}` | {f.label} | {f.type} | {'yes' if f.required else 'no'} |" for f in spec.entity.fields
+        f"| `{f.name}` | {f.label} | {f'link to {f.target}' if f.type == 'link' else f.type} | "
+        f"{'yes' if f.required else 'no'} |"
+        for f in spec.entity.fields
     )
     rules = "\n".join(f"- `{r.code}` ({r.severity}): {r.message}" for r in spec.rules)
+    features = spec.features
+    extra_api = ""
+    if features.export:
+        extra_api += "- `GET /export?format=csv|xlsx` the list as a spreadsheet\n"
+    status_section = ""
+    if features.status is not None:
+        states = "\n".join(f"- `{s.code}` {s.label}{' (done)' if s.done else ''}" for s in features.status.states)
+        status_section = f"\n## Status\n\nA new record starts as `{features.status.states[0].code}`.\n\n{states}\n"
+    if features.due is not None:
+        status_section += (
+            f"\n## Deadline\n\n`{features.due.field}` is the deadline. It shows in the deadline register and is "
+            f"reminded {features.due.remind_days_before} day(s) before.\n"
+        )
+    if features.comments:
+        status_section += f"\n## Comments\n\nRecords take comments as `built.{spec.key}`.\n"
     return f"""# {spec.display_name}
 
 {spec.description or "Generated with the OpenConstructionERP module builder."}
@@ -1127,7 +1384,7 @@ platform renders the screen from.
 ## Rules
 
 {rules}
-
+{status_section}
 ## API
 
 Mounted at `{spec.url_prefix}`.
@@ -1135,6 +1392,6 @@ Mounted at `{spec.url_prefix}`.
 - `GET /ui-spec` the screen description
 - `GET /` list, `GET /{{id}}` one
 - `POST /` create, `PATCH /{{id}}` update, `DELETE /{{id}}` remove
-
+{extra_api}
 Reading needs `{spec.key}.read`, writing needs `{spec.key}.write`.
 """

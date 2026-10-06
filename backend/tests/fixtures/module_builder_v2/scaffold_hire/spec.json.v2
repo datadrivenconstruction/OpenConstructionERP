@@ -1,0 +1,186 @@
+{
+  "key": "scaffold_hire",
+  "display_name": "Scaffold Hire",
+  "description": "Track hired scaffolding, its rate and its off-hire date.",
+  "category": "community",
+  "icon": "Boxes",
+  "version": "0.1.0",
+  "author": "",
+  "entity": {
+    "name": "hire",
+    "display_name": "Hire",
+    "plural_name": "Hires",
+    "fields": [
+      {
+        "name": "reference",
+        "label": "Reference",
+        "type": "text",
+        "required": true,
+        "help_text": "",
+        "unit": "",
+        "options": [],
+        "in_list": true
+      },
+      {
+        "name": "notes",
+        "label": "Notes",
+        "type": "long_text",
+        "required": false,
+        "help_text": "",
+        "unit": "",
+        "options": [],
+        "in_list": true
+      },
+      {
+        "name": "bay_count",
+        "label": "Bays",
+        "type": "integer",
+        "required": true,
+        "help_text": "",
+        "unit": "",
+        "options": [],
+        "in_list": true
+      },
+      {
+        "name": "area_m2",
+        "label": "Area",
+        "type": "number",
+        "required": false,
+        "help_text": "",
+        "unit": "m2",
+        "options": [],
+        "in_list": true
+      },
+      {
+        "name": "weekly_rate",
+        "label": "Weekly rate",
+        "type": "money",
+        "required": true,
+        "help_text": "",
+        "unit": "",
+        "options": [],
+        "in_list": true
+      },
+      {
+        "name": "on_hire_date",
+        "label": "On hire",
+        "type": "date",
+        "required": true,
+        "help_text": "",
+        "unit": "",
+        "options": [],
+        "in_list": true
+      },
+      {
+        "name": "off_hire_date",
+        "label": "Off hire",
+        "type": "date",
+        "required": false,
+        "help_text": "",
+        "unit": "",
+        "options": [],
+        "in_list": true
+      },
+      {
+        "name": "inspected_at",
+        "label": "Last inspection",
+        "type": "datetime",
+        "required": false,
+        "help_text": "",
+        "unit": "",
+        "options": [],
+        "in_list": true
+      },
+      {
+        "name": "is_tagged",
+        "label": "Tagged",
+        "type": "boolean",
+        "required": false,
+        "help_text": "",
+        "unit": "",
+        "options": [],
+        "in_list": true
+      },
+      {
+        "name": "status",
+        "label": "Status",
+        "type": "select",
+        "required": true,
+        "help_text": "",
+        "unit": "",
+        "options": [
+          "erected",
+          "struck",
+          "on hold"
+        ],
+        "in_list": true
+      }
+    ],
+    "project_scoped": true
+  },
+  "rules": [
+    {
+      "code": "REFERENCE_REQUIRED",
+      "message": "A hire needs a reference to be found by.",
+      "kind": "required",
+      "field": "reference",
+      "min_value": null,
+      "max_value": null,
+      "other_field": "",
+      "severity": "error"
+    },
+    {
+      "code": "RATE_POSITIVE",
+      "message": "A weekly rate must be above zero.",
+      "kind": "positive",
+      "field": "weekly_rate",
+      "min_value": null,
+      "max_value": null,
+      "other_field": "",
+      "severity": "error"
+    },
+    {
+      "code": "BAYS_IN_RANGE",
+      "message": "A hire covers between 1 and 500 bays.",
+      "kind": "range",
+      "field": "bay_count",
+      "min_value": 1.0,
+      "max_value": 500.0,
+      "other_field": "",
+      "severity": "error"
+    },
+    {
+      "code": "STATUS_KNOWN",
+      "message": "Status must be one the register recognises.",
+      "kind": "one_of",
+      "field": "status",
+      "min_value": null,
+      "max_value": null,
+      "other_field": "",
+      "severity": "error"
+    },
+    {
+      "code": "INSPECTION_NOT_FUTURE",
+      "message": "An inspection cannot be recorded before it happens.",
+      "kind": "not_future",
+      "field": "inspected_at",
+      "min_value": null,
+      "max_value": null,
+      "other_field": "",
+      "severity": "error"
+    },
+    {
+      "code": "OFF_HIRE_AFTER_ON_HIRE",
+      "message": "Off hire cannot precede on hire.",
+      "kind": "order",
+      "field": "on_hire_date",
+      "min_value": null,
+      "max_value": null,
+      "other_field": "off_hire_date",
+      "severity": "error"
+    }
+  ],
+  "drafted_by": "wizard",
+  "generated_at": "2026-08-10T09:00:00+00:00",
+  "generator": "openconstructionerp.module_builder/2"
+}

@@ -1,0 +1,27 @@
+# Site Notice
+
+Generated with the OpenConstructionERP module builder.
+
+This module was generated from a specification rather than written by hand.
+`spec.json` beside this file is that specification, and it is also what the
+platform renders the screen from.
+
+## Record: Notice
+
+| Field | Label | Type | Required |
+|---|---|---|---|
+| `title` | Title | text | yes |
+
+## Rules
+
+- `TITLE_REQUIRED` (error): A notice needs a title.
+
+## API
+
+Mounted at `/api/v1/site-notice`.
+
+- `GET /ui-spec` the screen description
+- `GET /` list, `GET /{id}` one
+- `POST /` create, `PATCH /{id}` update, `DELETE /{id}` remove
+
+Reading needs `site_notice.read`, writing needs `site_notice.write`.

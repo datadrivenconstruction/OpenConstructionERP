@@ -48,7 +48,26 @@ export type ModuleFieldType =
   | 'date'
   | 'datetime'
   | 'boolean'
-  | 'select';
+  | 'select'
+  | 'link';
+
+/**
+ * What a `link` field may point at (``LinkTarget`` in spec.py). A link is a
+ * reference to a record another module owns, stored as its id.
+ */
+export type LinkTarget = 'contract' | 'contact' | 'schedule_activity' | 'document' | 'user';
+
+/** Every link target, in the order the wizard offers them. */
+export const LINK_TARGETS: readonly LinkTarget[] = [
+  'contract',
+  'contact',
+  'schedule_activity',
+  'document',
+  'user',
+];
+
+/** The optional functions a generated module can carry (``FeatureSpec``). */
+export type ModuleFeatureName = 'status' | 'due' | 'export' | 'comments';
 
 /** ``RuleKind`` in spec.py. */
 export type ModuleRuleKind = 'required' | 'positive' | 'not_future' | 'range' | 'one_of' | 'order';
@@ -69,6 +88,46 @@ export interface ModuleFieldSpec {
   options: string[];
   /** Whether the list view shows this column. */
   in_list: boolean;
+  /**
+   * `link` only: what the field points at. Optional because a spec written
+   * before links existed has no such key, and a non-link field must not send
+   * one (the server's FieldSpec forbids it there).
+   */
+  target?: LinkTarget | null;
+  /**
+   * Wizard only, never sent: the field as it was before a link suggestion
+   * took it over, so unticking the suggestion gives the person their column
+   * back exactly. `toWireSpec` drops it.
+   */
+  replaced?: Omit<ModuleFieldSpec, 'replaced'>;
+}
+
+/** One stage a record moves through (``StateSpec``). */
+export interface ModuleStateSpec {
+  code: string;
+  /** The author's wording, in their language. Data, never translated. */
+  label: string;
+  /** A record in a done state is finished: no reminders, shown as complete. */
+  done: boolean;
+}
+
+/** ``StatusFeature``: 2 to 8 states, the first one is where a record starts. */
+export interface ModuleStatusFeature {
+  states: ModuleStateSpec[];
+}
+
+/** ``DueFeature``: which date is the deadline, and how early to remind. */
+export interface ModuleDueFeature {
+  field: string;
+  remind_days_before: number;
+}
+
+/** ``FeatureSpec``. Every part optional: a spec from before features has none. */
+export interface ModuleFeatures {
+  status?: ModuleStatusFeature | null;
+  due?: ModuleDueFeature | null;
+  export?: boolean;
+  comments?: boolean;
 }
 
 /** A validation rule (``RuleSpec``). */
@@ -114,6 +173,9 @@ export interface ModuleSpec {
    * person then corrected was still drafted by a model.
    */
   drafted_by: 'assistant' | 'wizard';
+  /** 1 for specs written before links and features, 2 for the current wizard. */
+  schema_version?: number;
+  features?: ModuleFeatures;
 }
 
 /**
@@ -160,12 +222,94 @@ export interface Vocabulary {
   max_fields: number;
   /** False when no AI provider is configured; the wizard then offers only the by-hand path. */
   assistant_available: boolean;
+  /**
+   * Which link targets exist on this instance. Absent on a server from before
+   * links, and that absence is what tells the wizard to send the old shape.
+   */
+  link_targets?: LinkTargetInfo[];
+  /** The functions a module may carry. Absent on a server from before features. */
+  features?: ModuleFeatureName[];
+  /** True when an installed module can take new fields and functions in place. */
+  upgrade?: boolean;
+}
+
+export interface LinkTargetInfo {
+  target: LinkTarget;
+  /** The module that owns the target table, added to the manifest's `depends`. */
+  module: string;
+  /** False when that module is switched off here; a link to it cannot be built. */
+  available: boolean;
+}
+
+/**
+ * True when the server understands links and features.
+ *
+ * Every request model on the server is `extra="forbid"`, so sending `locale`,
+ * `schema_version`, `features` or a field `target` to a server from before them
+ * is a 422, not a harmless extra key. One probe decides the shape of everything
+ * the wizard sends.
+ */
+export function supportsFeatures(vocabulary: Vocabulary | undefined): boolean {
+  return Array.isArray(vocabulary?.features) || Array.isArray(vocabulary?.link_targets);
+}
+
+/** True when the server can add fields and functions to an installed module. */
+export function supportsUpgrade(vocabulary: Vocabulary | undefined): boolean {
+  return vocabulary?.upgrade === true && supportsFeatures(vocabulary);
+}
+
+/** What applying a suggestion changes. Exactly one part is set. */
+export interface SuggestionPatch {
+  field?: ModuleFieldSpec;
+  status?: ModuleStatusFeature;
+  due?: ModuleDueFeature;
+  export?: true;
+  comments?: true;
+}
+
+/**
+ * Something the module could also do, proposed by the assistant or by the
+ * server's rules. Never applied until a person ticks it.
+ */
+export interface Suggestion {
+  /** Stable, e.g. `link:contract` or `feature:status`; suggestions are merged by it. */
+  id: string;
+  kind: 'link' | 'feature';
+  target?: LinkTarget;
+  feature?: ModuleFeatureName;
+  confidence: 'high' | 'medium' | 'low';
+  /** Resolved as `module_builder.reason.<reason_code>` with `reason_params`. */
+  reason_code?: string;
+  reason_params?: Record<string, string | number>;
+  /** Already in the user's language; shown when there is no reason_code. */
+  reason?: string;
+  patch: SuggestionPatch;
 }
 
 export interface DraftResponse {
   spec: ModuleSpec;
   /** `assistant` when drafted from a sentence, `wizard` when filled in by hand. */
-  source: string;
+  source?: string;
+  /** Absent on a server from before suggestions; read as none. */
+  suggestions?: Suggestion[];
+}
+
+export interface SuggestResponse {
+  suggestions: Suggestion[];
+}
+
+export interface LookupItem {
+  id: string;
+  label: string;
+  sublabel?: string | null;
+}
+
+export interface LookupResponse {
+  items: LookupItem[];
+}
+
+export interface LookupLabelsResponse {
+  labels: Record<string, string>;
 }
 
 export interface PreviewFile {
@@ -200,6 +344,23 @@ export interface InstalledModule {
   rule_count: number;
   /** Where this module answers. The screen fetches everything under it. */
   base_path: string;
+  /**
+   * `quarantined` when the server found code in its files it could not vouch
+   * for and left the module unloaded. Its records are kept, its routes are
+   * not mounted, and `base_path` then answers nothing. Absent on older servers.
+   */
+  status?: 'installed' | 'quarantined';
+  problem?: ModuleProblem | null;
+}
+
+/** Why a module was switched off: `unsafe_code` (params.files) or `unverifiable`. */
+export interface ModuleProblem {
+  code: string;
+  params?: Record<string, unknown>;
+}
+
+export function isQuarantined(module: Pick<InstalledModule, 'status'> | undefined): boolean {
+  return module?.status === 'quarantined';
 }
 
 export interface InstalledList {
@@ -218,6 +379,12 @@ export interface UninstallResponse {
 
 const BASE = '/v1/module-builder';
 
+/**
+ * Shared by every query on a generated module's page, so an install, an
+ * upgrade or a save invalidates them together.
+ */
+export const RUNTIME_MODULE_QUERY_KEY = 'runtime-module';
+
 /** The field types and rule kinds the wizard may offer, read from the server's spec. */
 export async function fetchVocabulary(): Promise<Vocabulary> {
   return apiGet<Vocabulary>(`${BASE}/vocabulary`);
@@ -229,10 +396,62 @@ export async function fetchVocabulary(): Promise<Vocabulary> {
  * `longRunning` because this one call goes out to an AI provider, and the
  * default 45s budget is a client timeout on a request that is still working.
  */
-export async function draftSpec(description: string): Promise<DraftResponse> {
-  return apiPost<DraftResponse, { description: string }>(`${BASE}/draft`, { description }, {
+export async function draftSpec(description: string, locale?: string): Promise<DraftResponse> {
+  // `locale` only when the caller has one to give: the old request model is
+  // extra="forbid", and the wizard passes it only to a server that knows it.
+  const body = locale ? { description, locale } : { description };
+  return apiPost<DraftResponse, { description: string; locale?: string }>('/v1/module-builder/draft', body, {
     longRunning: true,
   });
+}
+
+/**
+ * Rule-based suggestions for a spec: which records it could point at and which
+ * functions it could carry. Deterministic and AI-free, so templates and the
+ * by-hand path get the same proposals an assistant draft does.
+ */
+export async function suggestForSpec(spec: ModuleSpec, locale?: string): Promise<SuggestResponse> {
+  const body = locale ? { spec, locale } : { spec };
+  return apiPost<SuggestResponse, { spec: ModuleSpec; locale?: string }>('/v1/module-builder/suggest', body);
+}
+
+export interface LookupQuery {
+  projectId?: string | null;
+  q?: string;
+  limit?: number;
+}
+
+/** Records of `target` a link field may point at, for the picker. */
+export async function lookupRecords(target: LinkTarget, query: LookupQuery = {}): Promise<LookupResponse> {
+  const qs = new URLSearchParams();
+  if (query.projectId) qs.set('project_id', query.projectId);
+  if (query.q) qs.set('q', query.q);
+  qs.set('limit', String(query.limit ?? 20));
+  return apiGet<LookupResponse>(`/v1/module-builder/lookup/${encodeURIComponent(target)}?${qs.toString()}`);
+}
+
+/** The most ids the labels endpoint takes in one request; it refuses more with a 422. */
+export const MAX_LABEL_IDS = 500;
+
+/**
+ * Readable labels for stored link ids, in one request per target.
+ *
+ * Ids the caller may not see are simply absent from the answer, so a missing
+ * label means "not visible to you", not "still loading". A long register can
+ * hold more ids than one request may carry, so those go in batches.
+ */
+export async function lookupLabels(target: LinkTarget, ids: string[]): Promise<LookupLabelsResponse> {
+  const batches: string[][] = [];
+  for (let i = 0; i < ids.length; i += MAX_LABEL_IDS) batches.push(ids.slice(i, i + MAX_LABEL_IDS));
+  const answers = await Promise.all(
+    batches.map((batch) => {
+      const qs = new URLSearchParams({ ids: batch.join(',') });
+      return apiGet<LookupLabelsResponse>(
+        `/v1/module-builder/lookup/${encodeURIComponent(target)}/labels?${qs.toString()}`,
+      );
+    }),
+  );
+  return { labels: Object.assign({}, ...answers.map((a) => a?.labels ?? {})) };
 }
 
 /** Render every file the module would consist of, without writing any. */
@@ -258,6 +477,55 @@ export async function installModule(
 }
 
 /** Every module built on this instance. Readable by any signed-in user. */
+/** One thing an upgrade adds or rewords. */
+export interface UpgradeChange {
+  kind: string;
+  field?: string;
+  feature?: string;
+  state?: string;
+  rule?: string;
+}
+
+export interface UpgradePreviewResponse extends PreviewResponse {
+  changes?: UpgradeChange[];
+  record_count?: number;
+}
+
+export interface UpgradeResult {
+  key: string;
+  module_name: string;
+  base_path: string;
+  record_count: number;
+  changes: UpgradeChange[];
+}
+
+/**
+ * Render the files an installed module would have after adding to it.
+ *
+ * The token that comes back binds this key and this spec, and only the upgrade
+ * call below accepts it.
+ */
+export async function previewUpgrade(key: string, spec: ModuleSpec): Promise<UpgradePreviewResponse> {
+  return apiPost<UpgradePreviewResponse, { spec: ModuleSpec }>(
+    `/v1/module-builder/${encodeURIComponent(key)}/upgrade/preview`,
+    { spec },
+  );
+}
+
+/**
+ * Add the reviewed fields and functions to an installed module, in one go.
+ *
+ * Records already kept stay as they are: a new field starts empty, a new link
+ * unset, and a new status at its first stage.
+ */
+export async function upgradeModule(key: string, spec: ModuleSpec, reviewToken: string): Promise<UpgradeResult> {
+  return apiPost<UpgradeResult, { spec: ModuleSpec; review_token: string }>(
+    `/v1/module-builder/${encodeURIComponent(key)}/upgrade`,
+    { spec, review_token: reviewToken },
+    { longRunning: true },
+  );
+}
+
 export async function fetchInstalledModules(): Promise<InstalledList> {
   return apiGet<InstalledList>(BASE);
 }
@@ -312,6 +580,91 @@ export interface GeneratedFinding {
 }
 
 /**
+ * One part of a module that already holds records which a change would have
+ * rewritten rather than added to. `field` is the column name, `label` what
+ * people read; `empty` counts the records that leave a newly required field
+ * blank.
+ */
+export interface UpgradeProblem {
+  code: string;
+  field?: string;
+  label?: string;
+  feature?: string;
+  state?: string;
+  rule?: string;
+  empty?: number;
+}
+
+/**
+ * A refused change to a module that holds records, by the server's code.
+ *
+ * `upgrade_not_additive` and `layout_conflict` (an install over a table kept
+ * from an earlier build) carry the record count and the problems;
+ * `module_quarantined`, `links_switched_off` (params.targets), `upgrade_failed`
+ * and `not_installed` carry only what happened.
+ */
+export interface UpgradeRefusal {
+  code: string;
+  records: number | null;
+  problems: UpgradeProblem[];
+  params: Record<string, unknown>;
+}
+
+/** The install refusal's per-column words, as the upgrade's problem codes. */
+const LAYOUT_PROBLEMS: Record<string, string> = {
+  removed: 'field_removed',
+  changed: 'field_retyped',
+  new_required: 'field_new_required',
+  now_required: 'field_now_required',
+  now_optional: 'field_now_optional',
+};
+
+function asProblem(entry: unknown, layout: boolean): UpgradeProblem | null {
+  if (!entry || typeof entry !== 'object') return null;
+  const p = entry as Record<string, unknown>;
+  const raw = layout ? p.problem : p.code;
+  if (typeof raw !== 'string') return null;
+  const field = layout ? p.name : p.field;
+  const problem: UpgradeProblem = { code: layout ? LAYOUT_PROBLEMS[raw] ?? raw : raw };
+  if (typeof field === 'string') problem.field = field;
+  for (const key of ['label', 'feature', 'state', 'rule'] as const) {
+    if (typeof p[key] === 'string') problem[key] = p[key] as string;
+  }
+  if (typeof p.empty === 'number') problem.empty = p.empty;
+  return problem;
+}
+
+/**
+ * The structured refusal an upgrade or an install can come back with, or null
+ * for any other error (a plain string detail stays a plain message).
+ *
+ * Read off the body rather than trusted: a refusal that is missing a part still
+ * gets shown, with whatever it does say.
+ */
+export function upgradeRefusalFrom(error: unknown): UpgradeRefusal | null {
+  if (!error || typeof error !== 'object') return null;
+  const status = (error as { status?: unknown }).status;
+  if (status !== 409 && status !== 404) return null;
+  const body = (error as { body?: unknown }).body;
+  const detail = body && typeof body === 'object' ? (body as { detail?: unknown }).detail : undefined;
+  if (!detail || typeof detail !== 'object' || Array.isArray(detail)) return null;
+  const d = detail as Record<string, unknown>;
+  if (typeof d.code !== 'string') return null;
+  const params = d.params && typeof d.params === 'object' ? (d.params as Record<string, unknown>) : {};
+  const layout = d.code === 'layout_conflict';
+  const entries = layout ? params.fields : params.problems;
+  const problems = (Array.isArray(entries) ? entries : [])
+    .map((entry) => asProblem(entry, layout))
+    .filter((p): p is UpgradeProblem => p !== null);
+  return {
+    code: d.code,
+    records: typeof params.records === 'number' ? params.records : null,
+    problems,
+    params,
+  };
+}
+
+/**
  * Pull the module's own findings out of an `ApiError` body, if that is what it is.
  *
  * Returns an empty list for every other kind of 422 (FastAPI's own body shape,
@@ -362,6 +715,23 @@ export async function fetchModuleRecords(
   if (query.offset !== undefined) qs.set('offset', String(query.offset));
   const suffix = qs.toString();
   return apiGet<GeneratedRecordPage>(suffix ? `${basePath}?${suffix}` : basePath);
+}
+
+/**
+ * Where a module with `export` on hands out its register as a file.
+ *
+ * A URL rather than a call: the file goes to the browser through
+ * `downloadWithAuth`, which wants the full `/api/...` path that `basePath`
+ * already is.
+ */
+export function moduleExportUrl(
+  basePath: string,
+  format: 'csv' | 'xlsx',
+  projectId?: string | null,
+): string {
+  const qs = new URLSearchParams({ format });
+  if (projectId) qs.set('project_id', projectId);
+  return `${basePath}/export?${qs.toString()}`;
 }
 
 export async function fetchModuleRecord(basePath: string, id: string): Promise<GeneratedRecord> {

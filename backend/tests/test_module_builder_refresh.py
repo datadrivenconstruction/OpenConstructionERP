@@ -35,7 +35,6 @@ from app.modules.module_builder.spec import EntitySpec, FieldSpec, ModuleSpec, R
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures" / "module_builder_v1"
 V1_STAMP = "openconstructionerp.module_builder/1"
-V1_GENERATED_AT = "2026-08-10T09:00:00+00:00"
 CODE_FILES = ("router.py", "repository.py", "service.py")
 
 
@@ -169,6 +168,7 @@ class TestRefreshingAnOldInstall:
 
     def test_the_spec_is_restamped_and_keeps_its_date(self, root: Path) -> None:
         target = install_as_v1(root, hire_spec())
+        built_at = json.loads((target / "spec.json").read_text(encoding="utf-8"))["generated_at"]
 
         refresh.refresh_installed(root)
 
@@ -176,7 +176,7 @@ class TestRefreshingAnOldInstall:
         assert payload["generator"] == generator.GENERATOR_STAMP
         # When the module was built, which the builder lists, not when its code
         # was last refreshed.
-        assert payload["generated_at"] == V1_GENERATED_AT
+        assert payload["generated_at"] == built_at
         payload.pop("generator")
         payload.pop("generated_at")
         assert ModuleSpec.model_validate(payload) == hire_spec()

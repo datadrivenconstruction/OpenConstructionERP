@@ -16,15 +16,17 @@
  * which is stable and readable; the URL the key resolves to is the server's
  * business.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  AlarmClock,
   ArrowDown,
   ArrowUp,
   Boxes,
   ChevronsUpDown,
+  Download,
   FolderOpen,
   Loader2,
   Pencil,
@@ -34,6 +36,7 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
+import clsx from 'clsx';
 
 import {
   Button,
@@ -44,22 +47,43 @@ import {
   PageHeader,
   SkeletonTable,
 } from '@/shared/ui';
-import { getErrorMessage } from '@/shared/lib/api';
+import { ChipBar } from '@/shared/ui/ChipBar';
+import { downloadWithAuth, getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 
 import {
+  RUNTIME_MODULE_QUERY_KEY,
   deleteModuleRecord,
   fetchInstalledModules,
   fetchModuleRecords,
   fetchModuleUiSpec,
+  isQuarantined,
+  moduleExportUrl,
   type GeneratedRecord,
+  type LinkTarget,
+  type ModuleFieldSpec,
 } from './api';
-import { compareByField, formatValue, listColumns } from './fields';
+import {
+  STATUS_KEY,
+  compareByField,
+  dueState,
+  formatValue,
+  isDoneStatus,
+  listColumns,
+  statusStates,
+} from './fields';
+import { useLinkLabelsByTarget } from './LinkPicker';
 import { RecordFormModal } from './RecordFormModal';
+import { StatusBadge } from './StatusBadge';
+import { ExtendModuleButton } from './ExtendModuleButton';
+import { QuarantineBadge, QuarantineMessage } from './QuarantineNotice';
 
-/** Shared by every query on this page so an install or a save invalidates them together. */
-export const RUNTIME_MODULE_QUERY_KEY = 'runtime-module';
+/** The chip that clears the status filter. Not a stage code: those are snake_case. */
+const ALL_STATUSES = '__all__';
+
+// Kept where the wizard can reach it without loading this page.
+export { RUNTIME_MODULE_QUERY_KEY };
 
 /**
  * Rows per request. The generated router caps `limit` at 500 and defaults to
@@ -89,7 +113,10 @@ export function GeneratedModulePage() {
     staleTime: 5 * 60_000,
   });
   const installed = installedQuery.data?.items.find((m) => m.key === moduleKey);
-  const basePath = installed?.base_path ?? '';
+  // A module switched off for safety answers nothing at its address, so its
+  // spec and records are not asked for at all.
+  const quarantined = isQuarantined(installed);
+  const basePath = quarantined ? '' : (installed?.base_path ?? '');
 
   const specQuery = useQuery({
     queryKey: [RUNTIME_MODULE_QUERY_KEY, 'ui-spec', basePath],
@@ -137,11 +164,33 @@ export function GeneratedModulePage() {
   const total = recordsQuery.data?.pages[0]?.total ?? 0;
   const { hasNextPage, isFetchingNextPage, fetchNextPage } = recordsQuery;
 
-  // A search over a partly loaded register answers "nothing found" about rows
-  // it never looked at, which is a wrong answer rather than a partial one. So
-  // typing pulls the rest in first. Each fetch settles, this runs again, and it
-  // stops when there is no next page.
-  const searching = query.trim() !== '';
+  const states = useMemo(() => (spec ? statusStates(spec) : []), [spec]);
+  const due = spec?.features?.due ?? null;
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+
+  // One labels request per target for everything loaded, rather than one per
+  // cell: a register of 200 rows linking to contracts asks once.
+  const linkRequests = useMemo(
+    () =>
+      columns
+        .filter((c) => c.type === 'link' && c.target)
+        .map((c) => ({
+          target: c.target as LinkTarget,
+          ids: loaded
+            .map((r) => r[c.name])
+            .filter((v): v is string => typeof v === 'string' && v !== ''),
+        })),
+    [columns, loaded],
+  );
+  const { labels: linkLabels, loaded: linkLoaded } = useLinkLabelsByTarget(linkRequests);
+
+  // A search or a stage filter over a partly loaded register answers "nothing
+  // found" about rows it never looked at, which is a wrong answer rather than
+  // a partial one. So either one pulls the rest in first. Each fetch settles,
+  // this runs again, and it stops when there is no next page.
+  const searching = query.trim() !== '' || statusFilter.length > 0;
   useEffect(() => {
     if (searching && hasNextPage && !isFetchingNextPage) void fetchNextPage();
   }, [searching, hasNextPage, isFetchingNextPage, fetchNextPage]);
@@ -168,17 +217,49 @@ export function GeneratedModulePage() {
     [t],
   );
 
+  /**
+   * A cell as the reader sees it. A link shows the name of what it points at;
+   * one the reader may not see says so instead of showing an id.
+   */
+  const cellText = useCallback(
+    (column: ModuleFieldSpec, record: GeneratedRecord): string => {
+      if (column.type === 'link' && column.target) {
+        const id = record[column.name];
+        if (typeof id !== 'string' || id === '') return labels.empty;
+        const name = linkLabels[column.target]?.[id];
+        if (name) return name;
+        return linkLoaded[column.target]
+          ? t('runtime_module.link_hidden', { defaultValue: 'Not visible to you' })
+          : '…';
+      }
+      return formatValue(column, record[column.name], labels);
+    },
+    [labels, linkLabels, linkLoaded, t],
+  );
+
+  const statusCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const record of loaded) {
+      const code = record[STATUS_KEY];
+      if (typeof code === 'string') counts.set(code, (counts.get(code) ?? 0) + 1);
+    }
+    return counts;
+  }, [loaded]);
+
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase();
     let rows = loaded;
+    if (statusFilter.length > 0) {
+      rows = rows.filter((record) => statusFilter.includes(String(record[STATUS_KEY] ?? '')));
+    }
     if (needle) {
       // Matched against the text the user can actually see, so a search for
       // "1 234,50" finds the row that renders that, not only the row whose
       // stored value happens to be spelled the same way.
-      rows = rows.filter((record) =>
-        columns.some((column) =>
-          formatValue(column, record[column.name], labels).toLowerCase().includes(needle),
-        ),
+      rows = rows.filter(
+        (record) =>
+          columns.some((column) => cellText(column, record).toLowerCase().includes(needle)) ||
+          (states.find((s) => s.code === record[STATUS_KEY])?.label.toLowerCase().includes(needle) ?? false),
       );
     }
     if (sort) {
@@ -198,12 +279,32 @@ export function GeneratedModulePage() {
           if (aBlank && bBlank) return 0;
           if (aBlank) return 1;
           if (bBlank) return -1;
+          // A link sorts by the name on screen; its id is meaningless order.
+          if (column.type === 'link') {
+            return cellText(column, a).localeCompare(cellText(column, b)) * factor;
+          }
           return compareByField(column, av, bv) * factor;
         });
       }
     }
     return rows;
-  }, [loaded, query, sort, columns, labels]);
+  }, [loaded, query, sort, columns, statusFilter, states, cellText]);
+
+  const runExport = async (format: 'csv' | 'xlsx') => {
+    if (!spec) return;
+    setExportOpen(false);
+    setExporting(true);
+    try {
+      await downloadWithAuth(
+        moduleExportUrl(basePath, format, scoped ? projectId : null),
+        `${spec.key}.${format}`,
+      );
+    } catch (err) {
+      addToast({ type: 'error', title: getErrorMessage(err) });
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const removal = useMutation({
     mutationFn: (record: GeneratedRecord) => deleteModuleRecord(basePath, record.id),
@@ -253,6 +354,21 @@ export function GeneratedModulePage() {
     );
   }
 
+  if (quarantined) {
+    return (
+      <div className="mx-auto max-w-xl space-y-3 py-10" data-testid="runtime-module-quarantined">
+        <p className="flex flex-wrap items-center gap-2 text-lg font-semibold text-content-primary">
+          {installed.display_name}
+          <QuarantineBadge />
+        </p>
+        <QuarantineMessage problem={installed.problem} />
+        <Link to="/module-builder" className="inline-block text-sm font-medium text-oe-blue-text hover:text-oe-blue-hover">
+          {t('module_builder.title', { defaultValue: 'Module builder' })}
+        </Link>
+      </div>
+    );
+  }
+
   if (specQuery.isError) {
     return (
       <ErrorState
@@ -273,22 +389,67 @@ export function GeneratedModulePage() {
         srTitle={spec.display_name}
         subtitle={spec.description || undefined}
         actions={
-          <Button
-            variant="primary"
-            size="sm"
-            icon={<Plus size={14} />}
-            disabled={missingProject}
-            onClick={() => {
-              setEditing(null);
-              setFormOpen(true);
-            }}
-            data-testid="runtime-module-new"
-          >
-            {t('runtime_module.new_record', {
-              entity: spec.entity.display_name,
-              defaultValue: 'New {{entity}}',
-            })}
-          </Button>
+          <div className="flex items-center gap-2">
+            {moduleKey && basePath && <ExtendModuleButton moduleKey={moduleKey} basePath={basePath} />}
+            {spec.features?.export && (
+              <div className="relative">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  icon={<Download size={14} />}
+                  loading={exporting}
+                  disabled={missingProject}
+                  onClick={() => setExportOpen((v) => !v)}
+                  aria-haspopup="menu"
+                  aria-expanded={exportOpen}
+                  data-testid="runtime-module-export"
+                >
+                  {t('runtime_module.export', { defaultValue: 'Export' })}
+                </Button>
+                {exportOpen && (
+                  <div
+                    role="menu"
+                    className="absolute end-0 z-30 mt-1 min-w-[10rem] rounded-lg border border-border-light bg-surface-primary py-1 shadow-lg"
+                  >
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => void runExport('xlsx')}
+                      className="block w-full px-3 py-1.5 text-start text-sm text-content-primary hover:bg-surface-secondary"
+                      data-testid="runtime-module-export-xlsx"
+                    >
+                      {t('runtime_module.export_xlsx', { defaultValue: 'Excel workbook' })}
+                    </button>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      onClick={() => void runExport('csv')}
+                      className="block w-full px-3 py-1.5 text-start text-sm text-content-primary hover:bg-surface-secondary"
+                      data-testid="runtime-module-export-csv"
+                    >
+                      {t('runtime_module.export_csv', { defaultValue: 'CSV file' })}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+            <Button
+              variant="primary"
+              size="sm"
+              icon={<Plus size={14} />}
+              disabled={missingProject}
+              onClick={() => {
+                setEditing(null);
+                setFormOpen(true);
+              }}
+              data-testid="runtime-module-new"
+            >
+              {t('runtime_module.new_record', {
+                entity: spec.entity.display_name,
+                defaultValue: 'New {{entity}}',
+              })}
+            </Button>
+          </div>
         }
       />
 
@@ -429,6 +590,35 @@ export function GeneratedModulePage() {
             )}
           </div>
 
+          {states.length > 0 && (
+            <div data-testid="runtime-module-status-filter">
+              <ChipBar<string>
+                size="sm"
+                chips={[
+                  { value: ALL_STATUSES, label: t('runtime_module.all_statuses', { defaultValue: 'All' }) },
+                  ...states.map((state) => ({
+                    value: state.code,
+                    // The author's own stage name. The count is only shown
+                    // once every row is here, since a count over part of the
+                    // register would be a wrong number, not a partial one.
+                    label: state.label,
+                    count: hasNextPage ? undefined : (statusCounts.get(state.code) ?? 0),
+                  })),
+                ]}
+                selected={statusFilter.length > 0 ? statusFilter : [ALL_STATUSES]}
+                onToggle={(code) => {
+                  if (code === ALL_STATUSES) {
+                    setStatusFilter([]);
+                    return;
+                  }
+                  setStatusFilter((prev) =>
+                    prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code],
+                  );
+                }}
+              />
+            </div>
+          )}
+
           <div className="overflow-x-auto rounded-xl border border-border-light bg-surface-primary">
           <table className="w-full text-sm" data-testid="runtime-module-table">
             <thead>
@@ -482,6 +672,11 @@ export function GeneratedModulePage() {
                     </th>
                   );
                 })}
+                {states.length > 0 && (
+                  <th scope="col" className="px-3 py-2 font-medium">
+                    {t('runtime_module.status', { defaultValue: 'Status' })}
+                  </th>
+                )}
                 <th scope="col" className="w-20 px-3 py-2 text-right font-medium">
                   {t('common.actions', { defaultValue: 'Actions' })}
                 </th>
@@ -493,11 +688,49 @@ export function GeneratedModulePage() {
                   key={record.id}
                   className="border-b border-border-light/60 last:border-0 hover:bg-surface-secondary/60"
                 >
-                  {columns.map((column) => (
-                    <td key={column.name} className="px-3 py-2 text-content-primary">
-                      {formatValue(column, record[column.name], labels)}
+                  {columns.map((column) => {
+                    const text = cellText(column, record);
+                    const deadline =
+                      due && due.field === column.name
+                        ? dueState(
+                            column,
+                            record[column.name],
+                            due.remind_days_before,
+                            isDoneStatus(spec, record[STATUS_KEY]),
+                          )
+                        : null;
+                    return (
+                      <td
+                        key={column.name}
+                        className={clsx(
+                          'px-3 py-2',
+                          deadline === 'overdue'
+                            ? 'font-medium text-semantic-error'
+                            : deadline === 'soon'
+                              ? 'font-medium text-semantic-warning'
+                              : 'text-content-primary',
+                        )}
+                        data-due={deadline ?? undefined}
+                      >
+                        <span className="inline-flex items-center gap-1.5">
+                          {deadline && <AlarmClock size={13} aria-hidden className="shrink-0" />}
+                          {text}
+                          {deadline && (
+                            <span className="sr-only">
+                              {deadline === 'overdue'
+                                ? t('runtime_module.overdue', { defaultValue: 'Overdue' })
+                                : t('runtime_module.due_soon', { defaultValue: 'Due soon' })}
+                            </span>
+                          )}
+                        </span>
+                      </td>
+                    );
+                  })}
+                  {states.length > 0 && (
+                    <td className="px-3 py-2">
+                      <StatusBadge spec={spec} code={record[STATUS_KEY]} />
                     </td>
-                  ))}
+                  )}
                   <td className="px-3 py-2">
                     <div className="flex items-center justify-end gap-1">
                       <button

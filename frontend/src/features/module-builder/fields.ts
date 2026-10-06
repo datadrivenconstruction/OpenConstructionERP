@@ -33,7 +33,23 @@
  */
 import { fmtDate, fmtNumber, getIntlLocale } from '@/shared/lib/formatters';
 
-import type { GeneratedRecord, ModuleFieldSpec, ModuleSpec } from './api';
+import type { GeneratedRecord, ModuleFieldSpec, ModuleSpec, ModuleStateSpec } from './api';
+
+/**
+ * The form value the status feature uses. `status` is a reserved field name
+ * while the feature is on, so it cannot collide with one of the user's fields.
+ */
+export const STATUS_KEY = 'status';
+
+/** The stages of a module with the status feature, or none. */
+export function statusStates(spec: Pick<ModuleSpec, 'features'>): ModuleStateSpec[] {
+  return spec.features?.status?.states ?? [];
+}
+
+/** True when this stage code is one of the module's finished stages. */
+export function isDoneStatus(spec: Pick<ModuleSpec, 'features'>, code: unknown): boolean {
+  return statusStates(spec).some((s) => s.code === code && s.done);
+}
 
 /** What one input holds. Everything is text except a checkbox. */
 export type FieldValue = string | boolean;
@@ -83,7 +99,16 @@ export function listColumns(spec: ModuleSpec, max = MAX_LIST_COLUMNS): ModuleFie
   const marked = spec.entity.fields.filter((f) => f.in_list);
   // A spec that marks nothing still needs a readable table, so fall back to the
   // first few fields rather than rendering a grid of ids.
-  return (marked.length > 0 ? marked : spec.entity.fields).slice(0, max);
+  const columns = (marked.length > 0 ? marked : spec.entity.fields).slice(0, max);
+  // The due date is what the overdue highlight is drawn on, so a module that
+  // reminds about a date always shows that date, even when it fell outside
+  // the first few columns or was not marked for the table.
+  const dueName = spec.features?.due?.field;
+  const due = dueName ? spec.entity.fields.find((f) => f.name === dueName) : undefined;
+  if (due && !columns.includes(due)) {
+    return [...columns.slice(0, Math.max(0, max - 1)), due];
+  }
+  return columns;
 }
 
 /** An empty form: every field present, so a controlled input never goes uncontrolled. */
@@ -92,6 +117,9 @@ export function blankValues(spec: ModuleSpec): FormValues {
   for (const field of spec.entity.fields) {
     values[field.name] = field.type === 'boolean' ? false : '';
   }
+  // A new record starts in the first stage, which is also the server's default.
+  const first = statusStates(spec)[0];
+  if (first) values[STATUS_KEY] = first.code;
   return values;
 }
 
@@ -131,6 +159,9 @@ export function valuesFromRecord(spec: ModuleSpec, record: GeneratedRecord): For
       continue;
     }
     values[field.name] = String(raw);
+  }
+  if (statusStates(spec).length > 0 && typeof record[STATUS_KEY] === 'string') {
+    values[STATUS_KEY] = record[STATUS_KEY] as string;
   }
   return values;
 }
@@ -192,6 +223,10 @@ export function toCreatePayload(
     if (converted === null && !field.required) continue;
     payload[field.name] = converted;
   }
+  const status = values[STATUS_KEY];
+  if (statusStates(spec).length > 0 && typeof status === 'string' && status !== '') {
+    payload[STATUS_KEY] = status;
+  }
   return payload;
 }
 
@@ -214,7 +249,48 @@ export function toUpdatePayload(
     if (next === original[field.name]) continue;
     payload[field.name] = toApiValue(field, next);
   }
+  const status = values[STATUS_KEY];
+  if (
+    statusStates(spec).length > 0 &&
+    typeof status === 'string' &&
+    status !== '' &&
+    status !== original[STATUS_KEY]
+  ) {
+    payload[STATUS_KEY] = status;
+  }
   return payload;
+}
+
+/** Where a deadline stands. `null` when there is nothing to say about it. */
+export type DueState = 'overdue' | 'soon' | null;
+
+/**
+ * Whether a due date has passed or is close.
+ *
+ * "Soon" is the same window the reminder uses, so the highlight and the
+ * notification agree about which records need attention. A finished record
+ * is never overdue: once the work is done, the date is history. Dates are
+ * compared as calendar days in UTC, the way the server reads a `date`.
+ */
+export function dueState(
+  field: ModuleFieldSpec,
+  value: unknown,
+  remindDaysBefore: number,
+  done: boolean,
+  now: Date = new Date(),
+): DueState {
+  if (done || value === null || value === undefined || value === '') return null;
+  const text = String(value);
+  const at = field.type === 'date' ? Date.parse(`${text.slice(0, 10)}T00:00:00Z`) : Date.parse(text);
+  if (Number.isNaN(at)) return null;
+  const DAY = 86_400_000;
+  if (field.type === 'date') {
+    const today = Date.parse(`${now.toISOString().slice(0, 10)}T00:00:00Z`);
+    if (at < today) return 'overdue';
+    return at - today <= remindDaysBefore * DAY ? 'soon' : null;
+  }
+  if (at < now.getTime()) return 'overdue';
+  return at - now.getTime() <= remindDaysBefore * DAY ? 'soon' : null;
 }
 
 /** The number a numeric rule reads, or null when the text is not one. */

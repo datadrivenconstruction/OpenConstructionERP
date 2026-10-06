@@ -289,6 +289,16 @@ CLEARED_BY_READING: dict[tuple[str, str, str], str] = {
         "three module constants in SYSTEM_PROMPTS by role, with a default, and formats {language} "
         "and {standard} into it. The role only chooses between constants; it cannot supply text."
     ),
+    (
+        "backend/app/modules/module_builder/service.py",
+        "draft",
+        "system_prompt(locale)",
+    ): (
+        "Returns the module constant SYSTEM_PROMPT, plus LANGUAGE_INSTRUCTION formatted with a name "
+        "from the module-level LANGUAGE_NAMES table. A tag outside the table is named as it is, and "
+        "only a tag matching LOCALE_PATTERN (16 characters at most) reaches the call, so the hole "
+        "holds a language tag, never caller text. The person's description goes in the user turn."
+    ),
 }
 
 #: Call sites where the instruction text genuinely is not a constant. Each entry

@@ -87,7 +87,17 @@ ESCALATE_GRACE_DAYS = 3
 # Sources that are reminded ahead of their date, keyed by collector module key,
 # with how many days ahead. A source not listed here is only nudged once it is
 # overdue.
-APPROACHING_NOTIFY: dict[str, int] = {"contracts_payment_plan": 7}
+#
+# Built modules are listed with the widest window a spec may ask for
+# (``DueFeature.remind_days_before`` is at most 30). Each record then carries
+# its own module's window in ``remind_days`` and is reminded only inside it,
+# see :func:`_inside_own_window`.
+APPROACHING_NOTIFY: dict[str, int] = {"contracts_payment_plan": 7, deadlines_service.BUILT_MODULES: 30}
+
+# A built module's reminder names the module the person built rather than a
+# platform source, so it has its own wording.
+BUILT_APPROACHING_TITLE_KEY = "notifications.deadline.built.approaching.title"
+BUILT_APPROACHING_BODY_KEY = "notifications.deadline.built.approaching.body"
 
 APPROACHING_TYPE = "deadline_approaching"
 
@@ -267,7 +277,20 @@ async def _already_escalated(session: AsyncSession, item: DeadlineItem) -> bool:
 
 
 def _overdue_context(item: DeadlineItem) -> dict[str, object]:
-    return {"module": item.module, "title": item.title, "days_overdue": item.days_overdue}
+    # ``source_label`` when there is one: "built_modules" would mean nothing to
+    # the reader, the module's own name does.
+    return {"module": item.source_label or item.module, "title": item.title, "days_overdue": item.days_overdue}
+
+
+def _inside_own_window(item: DeadlineItem) -> bool:
+    """Whether a due-soon item is within the window its own source asked for."""
+    return item.remind_days is None or -item.days_overdue <= item.remind_days
+
+
+def _approaching_keys(item: DeadlineItem) -> tuple[str, str]:
+    if item.module == deadlines_service.BUILT_MODULES:
+        return BUILT_APPROACHING_TITLE_KEY, BUILT_APPROACHING_BODY_KEY
+    return "notifications.deadline.approaching.title", "notifications.deadline.approaching.body"
 
 
 async def _notify_overdue(
@@ -394,7 +417,7 @@ async def _already_reminded(session: AsyncSession, item: DeadlineItem) -> bool:
 
 def _approaching_context(item: DeadlineItem) -> dict[str, object]:
     return {
-        "module": item.module,
+        "module": item.source_label or item.module,
         "title": item.title,
         "due_date": item.due_date,
         "days_until": -item.days_overdue,
@@ -410,14 +433,15 @@ async def _notify_approaching(
     """The approaching twin of :func:`_notify_overdue`, with the same outbox rule."""
     svc = NotificationService(session)
     context = _approaching_context(item)
+    title_key, body_key = _approaching_keys(item)
     for recipient in recipients:
         await svc.create(
             user_id=recipient,
             notification_type=APPROACHING_TYPE,
-            title_key="notifications.deadline.approaching.title",
+            title_key=title_key,
             entity_type=item.entity_type,
             entity_id=item.entity_id,
-            body_key="notifications.deadline.approaching.body",
+            body_key=body_key,
             body_context=context,
             action_url=item.action_url,
             metadata={"module": item.module, "due_date": item.due_date, "level": 0},
@@ -426,8 +450,8 @@ async def _notify_approaching(
             event_type=f"deadlines.{item.module}.approaching",
             user_id=recipient,
             payload={
-                "title_key": "notifications.deadline.approaching.title",
-                "body_key": "notifications.deadline.approaching.body",
+                "title_key": title_key,
+                "body_key": body_key,
                 "body_context": context,
                 "action_url": item.action_url,
                 "entity_type": item.entity_type,
@@ -500,6 +524,7 @@ async def sweep_overdue(session: AsyncSession, *, now: datetime | None = None) -
     approaching: list[DeadlineItem] = []
     for module, days in APPROACHING_NOTIFY.items():
         approaching.extend(await deadlines_service.collect_approaching_for_sweep(session, module, days, now=now))
+    approaching = [item for item in approaching if _inside_own_window(item)]
     try:
         async with session.begin_nested():
             await deadlines_service.heal_stale_plan_forecasts(session)

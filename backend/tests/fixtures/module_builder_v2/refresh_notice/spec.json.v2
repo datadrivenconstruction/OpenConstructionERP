@@ -1,0 +1,42 @@
+{
+  "key": "refresh_notice",
+  "display_name": "Site Notice",
+  "description": "",
+  "category": "community",
+  "icon": "Boxes",
+  "version": "0.1.0",
+  "author": "",
+  "entity": {
+    "name": "notice",
+    "display_name": "Notice",
+    "plural_name": "Notices",
+    "fields": [
+      {
+        "name": "title",
+        "label": "Title",
+        "type": "text",
+        "required": true,
+        "help_text": "",
+        "unit": "",
+        "options": [],
+        "in_list": true
+      }
+    ],
+    "project_scoped": false
+  },
+  "rules": [
+    {
+      "code": "TITLE_REQUIRED",
+      "message": "A notice needs a title.",
+      "kind": "required",
+      "field": "title",
+      "min_value": null,
+      "max_value": null,
+      "other_field": "",
+      "severity": "error"
+    }
+  ],
+  "drafted_by": "wizard",
+  "generated_at": "2026-08-10T09:00:00+00:00",
+  "generator": "openconstructionerp.module_builder/2"
+}

@@ -35,10 +35,20 @@ import {
   fetchVocabulary,
   findingsFromError,
   installModule,
+  lookupLabels,
+  lookupRecords,
+  moduleExportUrl,
   previewModule,
+  previewUpgrade,
+  suggestForSpec,
+  supportsFeatures,
+  supportsUpgrade,
+  upgradeModule,
+  upgradeRefusalFrom,
   uninstallModule,
   updateModuleRecord,
   type ModuleSpec,
+  type Vocabulary,
 } from './api';
 
 const get = vi.mocked(apiGet);
@@ -181,5 +191,158 @@ describe('findingsFromError', () => {
     };
     expect(findingsFromError(body)).toHaveLength(1);
     expect(findingsFromError(body)[0]?.code).toBe('REF_REQUIRED');
+  });
+});
+
+describe('links and functions', () => {
+  it("sends the reader's language with a draft only when asked to", async () => {
+    await draftSpec('a register of concrete pours', 'de');
+    expect(post).toHaveBeenCalledWith(
+      '/v1/module-builder/draft',
+      { description: 'a register of concrete pours', locale: 'de' },
+      { longRunning: true },
+    );
+  });
+
+  it('asks for suggestions on the spec as it stands', async () => {
+    await suggestForSpec(SPEC);
+    expect(post).toHaveBeenLastCalledWith('/v1/module-builder/suggest', { spec: SPEC });
+    await suggestForSpec(SPEC, 'fr');
+    expect(post).toHaveBeenLastCalledWith('/v1/module-builder/suggest', { spec: SPEC, locale: 'fr' });
+  });
+
+  it('searches the records a link can point at, inside the project', async () => {
+    await lookupRecords('contract', { projectId: 'p1', q: 'frame' });
+    expect(get).toHaveBeenCalledWith('/v1/module-builder/lookup/contract?project_id=p1&q=frame&limit=20');
+    await lookupRecords('user');
+    expect(get).toHaveBeenLastCalledWith('/v1/module-builder/lookup/user?limit=20');
+  });
+
+  it('asks for the names of stored links in one batch', async () => {
+    await lookupLabels('document', ['a', 'b']);
+    expect(get).toHaveBeenCalledWith('/v1/module-builder/lookup/document/labels?ids=a%2Cb');
+  });
+
+  it('splits a long list of ids into batches the server takes, and merges the answers', async () => {
+    const ids = Array.from({ length: 501 }, (_, i) => `id-${i}`);
+    get.mockImplementation(async (url: string) => {
+      const asked = new URL(url, 'http://x').searchParams.get('ids')!.split(',');
+      return { labels: Object.fromEntries(asked.map((id) => [id, id.toUpperCase()])) } as never;
+    });
+    const result = await lookupLabels('contract', ids);
+    expect(get).toHaveBeenCalledTimes(2);
+    expect(Object.keys(result.labels)).toHaveLength(501);
+    expect(result.labels['id-500']).toBe('ID-500');
+  });
+
+  it("builds the export address on the module's own path", () => {
+    expect(moduleExportUrl(BASE_PATH, 'xlsx')).toBe('/api/v1/pour-register/export?format=xlsx');
+    expect(moduleExportUrl(BASE_PATH, 'csv', 'p1')).toBe('/api/v1/pour-register/export?format=csv&project_id=p1');
+  });
+
+  it('tells a server that knows links and functions from one that does not', () => {
+    const old = { field_types: [], rule_kinds: [], reserved_field_names: [], reserved_keys: [], max_fields: 40, assistant_available: false } as Vocabulary;
+    expect(supportsFeatures(undefined)).toBe(false);
+    expect(supportsFeatures(old)).toBe(false);
+    expect(supportsFeatures({ ...old, features: [] })).toBe(true);
+    expect(supportsFeatures({ ...old, link_targets: [] })).toBe(true);
+  });
+});
+
+describe('adding to an installed module', () => {
+  it("previews and applies under the module's own key", async () => {
+    await previewUpgrade('pour_register', SPEC);
+    expect(post).toHaveBeenCalledWith('/v1/module-builder/pour_register/upgrade/preview', { spec: SPEC });
+    await upgradeModule('pour_register', SPEC, 'tok');
+    expect(post).toHaveBeenLastCalledWith(
+      '/v1/module-builder/pour_register/upgrade',
+      { spec: SPEC, review_token: 'tok' },
+      { longRunning: true },
+    );
+  });
+
+  it('is offered only by a server that says it can', () => {
+    const v = { field_types: [], rule_kinds: [], reserved_field_names: [], reserved_keys: [], max_fields: 40, assistant_available: false, features: [] } as Vocabulary;
+    expect(supportsUpgrade(v)).toBe(false);
+    expect(supportsUpgrade({ ...v, upgrade: true })).toBe(true);
+    expect(supportsUpgrade(undefined)).toBe(false);
+  });
+
+  it('reads the refusal of a change that is not an addition, and nothing else', () => {
+    const refused = Object.assign(new Error('Conflict'), {
+      status: 409,
+      body: {
+        detail: {
+          code: 'upgrade_not_additive',
+          message: 'Not additive.',
+          params: {
+            records: 3,
+            problems: [
+              { code: 'field_removed', field: 'notes', label: 'Notes' },
+              { code: 'field_now_required', field: 'cast_on', empty: 2 },
+              { nope: 1 },
+            ],
+          },
+        },
+      },
+    });
+    expect(upgradeRefusalFrom(refused)).toEqual({
+      code: 'upgrade_not_additive',
+      records: 3,
+      problems: [
+        { code: 'field_removed', field: 'notes', label: 'Notes' },
+        { code: 'field_now_required', field: 'cast_on', empty: 2 },
+      ],
+      params: expect.objectContaining({ records: 3 }),
+    });
+    expect(upgradeRefusalFrom(Object.assign(new Error('x'), { status: 409, body: { detail: 'taken' } }))).toBeNull();
+    expect(upgradeRefusalFrom(Object.assign(new Error('x'), { status: 422, body: { detail: { code: 'x' } } }))).toBeNull();
+  });
+
+  it('reads an install over kept entries in the same words as an upgrade, by field', () => {
+    const refused = Object.assign(new Error('Conflict'), {
+      status: 409,
+      body: {
+        detail: {
+          code: 'layout_conflict',
+          message: 'The table exists with a different layout.',
+          params: {
+            records: 5,
+            fields: [
+              { name: 'notes', label: 'Notes', problem: 'removed' },
+              { name: 'poured_on', label: 'Poured on', problem: 'changed' },
+              { name: 'volume', label: 'Volume', problem: 'now_required', empty: 4 },
+            ],
+          },
+        },
+      },
+    });
+    expect(upgradeRefusalFrom(refused)).toMatchObject({
+      code: 'layout_conflict',
+      records: 5,
+      problems: [
+        { code: 'field_removed', field: 'notes', label: 'Notes' },
+        { code: 'field_retyped', field: 'poured_on', label: 'Poured on' },
+        { code: 'field_now_required', field: 'volume', label: 'Volume', empty: 4 },
+      ],
+    });
+  });
+
+  it('reads a refusal that says only what happened, and an upgrade of a module no longer there', () => {
+    const offline = Object.assign(new Error('Conflict'), {
+      status: 409,
+      body: { detail: { code: 'links_switched_off', message: 'x', params: { targets: ['contract'] } } },
+    });
+    expect(upgradeRefusalFrom(offline)).toEqual({
+      code: 'links_switched_off',
+      records: null,
+      problems: [],
+      params: { targets: ['contract'] },
+    });
+    const gone = Object.assign(new Error('Not Found'), {
+      status: 404,
+      body: { detail: { code: 'not_installed', message: 'x' } },
+    });
+    expect(upgradeRefusalFrom(gone)?.code).toBe('not_installed');
   });
 });

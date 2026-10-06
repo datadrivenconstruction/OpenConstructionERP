@@ -30,6 +30,9 @@ from each source's schema/register layer, never guessed:
   live ``oe_contracts_progress_claim`` names it).
 * payment-plan instalments falling due - ``oe_contracts_milestone``
   (``forecast_due_date``).
+* records of modules built with the module builder that have a deadline -
+  each such module's own table, the field its spec names in ``features.due``,
+  closed by the states its spec marks ``done``.
 
 Inclusion rule: a row belongs on the register when somebody is blocked waiting on
 it AND its status vocabulary has a state that closes it. That rule keeps out the
@@ -46,8 +49,9 @@ import logging
 import uuid
 from collections.abc import Awaitable, Callable
 from datetime import UTC, date, datetime, timedelta
+from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.deadlines.logic import APPROACHING, ON_TIME, OVERDUE, build_register, classify, parse_due
@@ -142,6 +146,11 @@ _PLAN_INSTALMENT_CONTRACT_STATUSES = ("active", "completed")
 # raised, when the contract's ``terms.payment_plan.claim_within_days`` does not
 # say otherwise.
 DEFAULT_CLAIM_WITHIN_DAYS = 7
+
+# The one collector key every module built with the module builder arrives
+# under, whatever it is called. Each record still names its own module in
+# ``entity_type`` (``built.<key>``) and ``source_label``.
+BUILT_MODULES = "built_modules"
 
 # A signature for a source collector.
 _Collector = Callable[
@@ -961,6 +970,141 @@ async def _collect_plan_instalments(
     return items
 
 
+async def _collect_built_modules(
+    session: AsyncSession,
+    project_ids: list[uuid.UUID] | None,
+    now_date: date,
+    approaching_days: int,
+) -> list[DeadlineItem]:
+    """Records of modules built with the module builder whose deadline is past or near.
+
+    One collector for every such module: which ones, and which of their fields
+    is the deadline, is read from each module's own spec (``features.due``),
+    not registered here, because they are installed at runtime. A record in a
+    state its spec marks ``done`` is finished and never surfaces; a module
+    without the status feature has no way to finish a record, so its records
+    surface until the date is cleared. Each module is fail-soft on its own, so
+    one whose table is missing blanks only its rows.
+
+    Rows are chosen in SQL, in two sets, each capped at ``_PER_SOURCE_CAP``:
+    the overdue ones and the ones due inside the approaching window. Rows
+    further out are never read. Within each set every project takes its turn
+    (see :func:`_fair_ids`), so one project's backlog cannot fill the cap and
+    hide another project's reminder.
+    """
+    from app.modules.module_builder.runtime import loaded_built_modules  # noqa: PLC0415
+    from app.modules.module_builder.spec import STATUS_COLUMN  # noqa: PLC0415
+
+    items: list[DeadlineItem] = []
+    for built in loaded_built_modules():
+        spec = built.spec
+        due_feature = spec.features.due
+        if due_feature is None or not spec.entity.project_scoped:
+            continue
+        model = built.model
+        status = spec.features.status
+        done = {s.code for s in status.states if s.done} if status is not None else set()
+        due_column = getattr(model, due_feature.field)
+        due_type = next(f.type for f in spec.entity.fields if f.name == due_feature.field)
+        today, window_end = _due_bounds(now_date, approaching_days, as_datetime=due_type == "datetime")
+        try:
+            open_rows = [due_column.is_not(None)]
+            if done:
+                open_rows.append(getattr(model, STATUS_COLUMN).not_in(done))
+            if project_ids is not None:
+                open_rows.append(model.project_id.in_(project_ids))
+            ids = await _fair_ids(session, model, due_column, [*open_rows, due_column < today], newest_first=True)
+            ids += await _fair_ids(
+                session,
+                model,
+                due_column,
+                [*open_rows, due_column >= today, due_column < window_end],
+                newest_first=False,
+            )
+            rows = (await session.execute(select(model).where(model.id.in_(ids)))).scalars().all() if ids else []
+        except Exception as exc:  # noqa: BLE001 - one broken built module != a blank register
+            logger.warning("Deadline source built.%s failed: %s", built.key, exc, exc_info=True)
+            try:
+                await session.rollback()
+            except Exception:  # noqa: BLE001
+                pass
+            continue
+
+        title_field = next((f.name for f in spec.entity.fields if f.type == "text"), None)
+        owner_field = next((f.name for f in spec.link_fields if f.target == "user"), None)
+        for r in rows:
+            due = parse_due(getattr(r, due_feature.field))
+            state = str(getattr(r, STATUS_COLUMN)) if status is not None else "open"
+            cls, days, sev = classify(due, state, now_date, done, approaching_days)
+            if cls == ON_TIME:
+                continue
+            title = (getattr(r, title_field, None) or "").strip() if title_field else ""
+            items.append(
+                DeadlineItem(
+                    id=f"built.{built.key}:{r.id}",
+                    module=BUILT_MODULES,
+                    entity_type=f"built.{built.key}",
+                    entity_id=str(r.id),
+                    project_id=str(r.project_id),
+                    title=title or f"{spec.entity.display_name} {str(r.id)[:8]}",
+                    due_date=_iso_date(due),
+                    owner_user_id=_owner_id(getattr(r, owner_field, None)) if owner_field else None,
+                    status=state,
+                    classification=cls,
+                    days_overdue=days,
+                    severity=sev,
+                    action_url=f"/projects/{r.project_id}/modules/{built.key}",
+                    source_label=spec.display_name,
+                    remind_days=due_feature.remind_days_before,
+                ),
+            )
+    return items
+
+
+def _due_bounds(now_date: date, approaching_days: int, *, as_datetime: bool) -> tuple[date | datetime, date | datetime]:
+    """The start of today and the end of the approaching window, as the due column compares them.
+
+    The same lines :func:`classify` draws on the date: before today is
+    overdue, today up to ``approaching_days`` ahead is approaching. A datetime
+    deadline is compared at UTC midnight, which is the date ``parse_due``
+    reads off the stored value.
+    """
+    start, end = now_date, now_date + timedelta(days=max(0, approaching_days) + 1)
+    if as_datetime:
+        return datetime(start.year, start.month, start.day, tzinfo=UTC), datetime(
+            end.year, end.month, end.day, tzinfo=UTC
+        )
+    return start, end
+
+
+async def _fair_ids(
+    session: AsyncSession,
+    model: Any,
+    due_column: Any,
+    conditions: list[Any],
+    *,
+    newest_first: bool,
+) -> list[Any]:
+    """Up to ``_PER_SOURCE_CAP`` matching ids, every project taking its turn.
+
+    Each project's rows are numbered by due date, and the cap is filled by
+    number: every project's first row, then every project's second, and so
+    on. A project with five hundred forgotten records therefore takes one
+    place per round, not all of them.
+
+    Overdue rows are numbered newest first: one that has just gone overdue
+    has not been nudged yet, while the oldest of a long backlog have used up
+    their nudges (``sweeper.MAX_OVERDUE_NUDGES``). Approaching rows are
+    numbered soonest first.
+    """
+    order = due_column.desc() if newest_first else due_column.asc()
+    rank = func.row_number().over(partition_by=model.project_id, order_by=(order, model.id)).label("rank")
+    ranked = select(model.id.label("id"), due_column.label("due"), rank).where(*conditions).subquery()
+    by_due = ranked.c.due.desc() if newest_first else ranked.c.due.asc()
+    stmt = select(ranked.c.id).order_by(ranked.c.rank, by_due, ranked.c.id).limit(_PER_SOURCE_CAP)
+    return list((await session.execute(stmt)).scalars().all())
+
+
 # Collector registry: (module_key, collector, owns_overdue_sweep).
 #
 # ``owns_overdue_sweep`` guards against double-notification (spec risk): a
@@ -1003,6 +1147,8 @@ _COLLECTORS: list[tuple[str, _Collector, bool]] = [
     # forecasts), so neither source owns a sweep of its own.
     ("contracts_payment_plan_claim", _collect_plan_claims, False),
     ("contracts_payment_plan", _collect_plan_instalments, False),
+    # A generated module has no sweep of its own; the builder renders none.
+    (BUILT_MODULES, _collect_built_modules, False),
 ]
 
 

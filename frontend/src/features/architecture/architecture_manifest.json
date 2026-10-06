@@ -45080,6 +45080,7 @@
         "documents",
         "inspections",
         "meetings",
+        "module_builder",
         "ncr",
         "punchlist",
         "requirements",
@@ -79376,6 +79377,16 @@
               "name": "action_url",
               "type": "str",
               "description": "Relative app route the row links to."
+            },
+            {
+              "name": "source_label",
+              "type": "str | None",
+              "description": "Readable name of the source when ``module`` alone does not say it (built modules)."
+            },
+            {
+              "name": "remind_days",
+              "type": "int | None",
+              "description": "Days ahead the source wants its due-soon reminder; None uses the sweeper's window."
             }
           ]
         },
@@ -79429,6 +79440,7 @@
         "correspondence",
         "defects_liability",
         "inspections",
+        "module_builder",
         "notifications",
         "projects",
         "punchlist",
@@ -134450,15 +134462,21 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "export.py",
         "generator.py",
+        "layout.py",
+        "links.py",
         "manifest.py",
         "permissions.py",
         "refresh.py",
         "review_token.py",
         "router.py",
+        "runtime.py",
         "schemas.py",
         "service.py",
-        "spec.py"
+        "spec.py",
+        "suggest.py",
+        "upgrade.py"
       ],
       "manifest": {
         "name": "oe_module_builder",
@@ -134489,6 +134507,27 @@
         },
         {
           "method": "POST",
+          "path": "/suggest",
+          "handler": "suggest_for",
+          "response_model": "SuggestResponse",
+          "request_schema": "SuggestRequest"
+        },
+        {
+          "method": "GET",
+          "path": "/lookup/{target}",
+          "handler": "lookup",
+          "response_model": "LookupResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/lookup/{target}/labels",
+          "handler": "lookup_labels",
+          "response_model": "LookupLabelsResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
           "path": "/preview",
           "handler": "preview",
           "response_model": "PreviewResponse",
@@ -134500,6 +134539,20 @@
           "handler": "install",
           "response_model": "InstalledModuleRead",
           "request_schema": "InstallRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/{key}/upgrade/preview",
+          "handler": "upgrade_preview",
+          "response_model": "UpgradePreviewResponse",
+          "request_schema": "PreviewRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/{key}/upgrade",
+          "handler": "upgrade_module",
+          "response_model": "UpgradeResponse",
+          "request_schema": "UpgradeRequest"
         },
         {
           "method": "GET",
@@ -134527,6 +134580,102 @@
             {
               "name": "description",
               "type": "str"
+            },
+            {
+              "name": "locale",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "_WithoutNulls",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Leaves unset optional keys out of the JSON, as the contract's ``?`` reads.",
+          "fields": []
+        },
+        {
+          "class_name": "SuggestionPatch",
+          "bases": [
+            "_WithoutNulls"
+          ],
+          "docstring": "What applying a suggestion changes. Exactly one part is set.",
+          "fields": [
+            {
+              "name": "field",
+              "type": "FieldSpec | None",
+              "default": "None"
+            },
+            {
+              "name": "status",
+              "type": "StatusFeature | None",
+              "default": "None"
+            },
+            {
+              "name": "due",
+              "type": "DueFeature | None",
+              "default": "None"
+            },
+            {
+              "name": "export",
+              "type": "Literal[True] | None",
+              "default": "None"
+            },
+            {
+              "name": "comments",
+              "type": "Literal[True] | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "Suggestion",
+          "bases": [
+            "_WithoutNulls"
+          ],
+          "docstring": "Something the module could also do. Never applied until a person ticks it.\n\n``id`` is stable (``link:contract``, ``feature:status``), so suggestions\nfrom the assistant and from the rules merge by it.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "Literal['link', 'feature']"
+            },
+            {
+              "name": "target",
+              "type": "LinkTarget | None",
+              "default": "None"
+            },
+            {
+              "name": "feature",
+              "type": "FeatureName | None",
+              "default": "None"
+            },
+            {
+              "name": "confidence",
+              "type": "Confidence"
+            },
+            {
+              "name": "reason_code",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "reason_params",
+              "type": "dict[str, str | int] | None",
+              "default": "None"
+            },
+            {
+              "name": "reason",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "patch",
+              "type": "SuggestionPatch"
             }
           ]
         },
@@ -134535,7 +134684,7 @@
           "bases": [
             "BaseModel"
           ],
-          "docstring": "A spec the wizard can now show, edit and install. Nothing was written.",
+          "docstring": "A spec the wizard can now show, edit and install. Nothing was written.\n\nThe spec carries no links and no functions: the assistant's ideas for those\narrive as ``suggestions`` and reach the spec only when a person ticks them.",
           "fields": [
             {
               "name": "spec",
@@ -134545,6 +134694,109 @@
               "name": "source",
               "type": "str",
               "description": "assistant when drafted from a sentence, wizard when filled in by hand"
+            },
+            {
+              "name": "suggestions",
+              "type": "list[Suggestion]"
+            }
+          ]
+        },
+        {
+          "class_name": "SuggestRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Ask what a spec could also do, by the rules rather than an assistant.",
+          "fields": [
+            {
+              "name": "spec",
+              "type": "ModuleSpec"
+            },
+            {
+              "name": "locale",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "SuggestResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "suggestions",
+              "type": "list[Suggestion]"
+            }
+          ]
+        },
+        {
+          "class_name": "LookupItem",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "sublabel",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "LookupResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[LookupItem]"
+            }
+          ]
+        },
+        {
+          "class_name": "LookupLabelsResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "labels",
+              "type": "dict[str, str]"
+            }
+          ]
+        },
+        {
+          "class_name": "LinkTargetInfo",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "target",
+              "type": "str"
+            },
+            {
+              "name": "module",
+              "type": "str"
+            },
+            {
+              "name": "available",
+              "type": "bool"
             }
           ]
         },
@@ -134629,6 +134881,23 @@
           ]
         },
         {
+          "class_name": "InstalledProblem",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "params",
+              "type": "dict[str, Any]"
+            }
+          ]
+        },
+        {
           "class_name": "InstalledModuleRead",
           "bases": [
             "BaseModel"
@@ -134670,6 +134939,112 @@
             {
               "name": "base_path",
               "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "Literal['installed', 'quarantined']",
+              "default": "'installed'"
+            },
+            {
+              "name": "problem",
+              "type": "InstalledProblem | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "UpgradeChange",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One thing an upgrade adds or rewords.",
+          "fields": [
+            {
+              "name": "kind",
+              "type": "Literal['field_added', 'link_added', 'feature_added', 'feature_changed', 'state_added', 'rule_added', 'field_changed', 'label_changed']"
+            },
+            {
+              "name": "field",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "feature",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "state",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "rule",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "UpgradePreviewResponse",
+          "bases": [
+            "PreviewResponse"
+          ],
+          "docstring": "The files of the upgraded module, and what the upgrade changes.\n\nThe review token is for this upgrade only: install refuses it, and the\nupgrade refuses an install token.",
+          "fields": [
+            {
+              "name": "changes",
+              "type": "list[UpgradeChange]"
+            },
+            {
+              "name": "record_count",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "UpgradeRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Upgrade an installed module to a spec previewed for that upgrade.",
+          "fields": [
+            {
+              "name": "spec",
+              "type": "ModuleSpec"
+            },
+            {
+              "name": "review_token",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "UpgradeResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "key",
+              "type": "str"
+            },
+            {
+              "name": "module_name",
+              "type": "str"
+            },
+            {
+              "name": "base_path",
+              "type": "str"
+            },
+            {
+              "name": "record_count",
+              "type": "int"
+            },
+            {
+              "name": "changes",
+              "type": "list[UpgradeChange]"
             }
           ]
         },
@@ -134805,12 +135180,32 @@
             {
               "name": "assistant_available",
               "type": "bool"
+            },
+            {
+              "name": "link_targets",
+              "type": "list[LinkTargetInfo]"
+            },
+            {
+              "name": "features",
+              "type": "list[str]"
+            },
+            {
+              "name": "upgrade",
+              "type": "bool",
+              "default": "False"
             }
           ]
         }
       ],
       "import_dependencies": [
-        "ai"
+        "ai",
+        "contacts",
+        "contracts",
+        "documents",
+        "projects",
+        "schedule",
+        "teams",
+        "users"
       ]
     },
     {
@@ -234158,10 +234553,10 @@
     },
     {
       "name": "module-builder",
-      "ts_files": 17,
+      "ts_files": 37,
       "css_files": 0,
-      "test_files": 8,
-      "total_files": 17
+      "test_files": 13,
+      "total_files": 37
     },
     {
       "name": "modules",
@@ -234977,6 +235372,7 @@
       "documents",
       "inspections",
       "meetings",
+      "module_builder",
       "ncr",
       "punchlist",
       "requirements",
@@ -235169,6 +235565,7 @@
       "correspondence",
       "defects_liability",
       "inspections",
+      "module_builder",
       "notifications",
       "projects",
       "punchlist",
@@ -235496,7 +235893,14 @@
       "variations"
     ],
     "module_builder": [
-      "ai"
+      "ai",
+      "contacts",
+      "contracts",
+      "documents",
+      "projects",
+      "schedule",
+      "teams",
+      "users"
     ],
     "ncr": [
       "changeorders",
@@ -236017,11 +236421,11 @@
     "total_models": 623,
     "total_columns": 7150,
     "total_relationships": 234,
-    "total_routes": 3739,
-    "total_schemas": 3530,
-    "total_python_files": 2258,
+    "total_routes": 3744,
+    "total_schemas": 3544,
+    "total_python_files": 2264,
     "frontend_features": 192,
-    "frontend_ts_files": 2894,
+    "frontend_ts_files": 2914,
     "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {
