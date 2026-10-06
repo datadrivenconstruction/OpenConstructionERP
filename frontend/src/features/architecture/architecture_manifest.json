@@ -105385,14 +105385,14 @@
         },
         {
           "method": "GET",
-          "path": "/{invoice_id}",
+          "path": "/{invoice_id:uuid}",
           "handler": "get_invoice",
           "response_model": "InvoiceResponse",
           "request_schema": "None"
         },
         {
           "method": "PATCH",
-          "path": "/{invoice_id}",
+          "path": "/{invoice_id:uuid}",
           "handler": "update_invoice",
           "response_model": "InvoiceResponse",
           "request_schema": "InvoiceUpdate"

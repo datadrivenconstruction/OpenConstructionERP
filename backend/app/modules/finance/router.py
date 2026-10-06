@@ -2050,10 +2050,16 @@ async def list_connector_logs(
 
 
 # ── Invoice by ID (parametric routes LAST) ──────────────────────────────────
+#
+# ``:uuid`` and not a bare ``{invoice_id}``: the GAAP and inbox sub-routers are
+# included at the bottom of this file, after these routes, so a bare parameter
+# took ``GET /finance/inbox`` and answered 422 ("inbox" is not a UUID) instead
+# of the inbox list. The convertor only matches a UUID, so a static path under
+# /finance falls through to the router that declares it.
 
 
 @router.get(
-    "/{invoice_id}",
+    "/{invoice_id:uuid}",
     response_model=InvoiceResponse,
     summary="Get invoice",
     description="Retrieve a single invoice by its UUID, including line items and payment history.",
@@ -2073,7 +2079,7 @@ async def get_invoice(
 
 
 @router.patch(
-    "/{invoice_id}",
+    "/{invoice_id:uuid}",
     response_model=InvoiceResponse,
     summary="Update invoice",
     description="Partially update an invoice. Only provided fields are modified.",

@@ -17,10 +17,22 @@ calls every mounted GET route:
 * routes without path parameters directly;
 * ``project_id`` and its spellings with a seeded demo project;
 * any other id with a value taken from the matching list route, resolved left
-  to right so nested routes get a parent id first. A parameter nothing can
-  resolve is skipped and the reason is written into the report;
+  to right so nested routes get a parent id first, and only a value the
+  parameter's declared type accepts. A parameter nothing can resolve is skipped
+  and the reason is written into the report;
+* a route that needs one of several query parameters with the one
+  :data:`_EITHER_OR` names;
 * every route that declares ``project_id``, ``limit`` or ``offset`` a second
-  time with the values the frontend sends.
+  time with the values the frontend sends, clamped to the route's own bounds.
+
+The routes come from :func:`app.core.module_loader.served_routes`, one URL per
+endpoint. ``app.routes`` is not enough: since FastAPI 0.141 an include adds one
+marker instead of copying the router's routes, and this test walked the 13
+routes the application declares itself, on every run, while reporting green.
+A floor (served GET paths >= GET paths in the OpenAPI document) now fails a
+walk that shrinks like that again, and the counts are printed into the log.
+The same table is checked for routes an earlier route answers in their place
+(``tests/_route_shadowing.py``).
 
 A failure is a 5xx, a 422 on a call whose every parameter was resolved, a body
 that does not validate against the route's ``response_model``, or an answer
@@ -72,11 +84,51 @@ _PROJECT_PARAMS = frozenset({"project_id", "projectId", "pid"})
 #: Names too generic to look up in another module's list route.
 _GENERIC_PARAMS = frozenset({"id", "item_id", "entry_id", "record_id", "key", "name", "slug", "code", "uid"})
 
-#: Routes that are exempt, with the reason. A route belongs here only when the
-#: failure is not a defect: it streams, it needs an upstream service a fresh
-#: install does not have, or it answers a question that has no data on a fresh
-#: install by design. Keyed by the route's path template.
-ALLOWLIST: dict[str, str] = {}
+#: Routes that are exempt, with the outcomes they are excused for and the
+#: reason. A route belongs here only when the failure is not a defect: it
+#: streams, it needs an upstream service a fresh install does not have, or it
+#: refuses on purpose for data the demo seed does not carry. Keyed by the full
+#: path template. An entry excuses only the outcomes it names, so the same route
+#: answering 500 still fails, and every excused call is listed in the report.
+ALLOWLIST: dict[str, tuple[frozenset[str], str]] = {
+    "/api/v1/boq/boqs/{boq_id}/export/gaeb-x31/": (
+        frozenset({"422"}),
+        "X31 carries measured quantities; the demo bills have no measurement sheet, and the route says so",
+    ),
+    "/api/v1/finance/invoices/{invoice_id}/einvoice": (
+        frozenset({"422"}),
+        "the demo contacts lack the buyer name, country and city EN 16931 requires; the route lists what is missing",
+    ),
+    "/api/v1/bim-hub/models/{model_id}/download/": (
+        frozenset({"timeout", "slow"}),
+        "streams the model file; the test transport buffers the whole body, so a large model reaches the ceiling",
+    ),
+}
+
+#: Routes that need one of several query parameters, none of them required on
+#: its own, so the signature cannot tell the walker. Each entry names the
+#: parameter the walker sends, the list route its value comes from (None: the
+#: demo project) and the alternatives the route accepts. Called bare, these
+#: answer 422 with a plain-text detail.
+_EITHER_OR: dict[str, tuple[str, str | None, str]] = {
+    "/api/v1/documents/bim-links/": ("document_id", "/api/v1/documents/", "element_id or document_id"),
+    "/api/v1/property-dev/instalments/": (
+        "schedule_id",
+        "/api/v1/property-dev/payment-schedules/",
+        "schedule_id or sales_contract_id",
+    ),
+    "/api/v1/property-dev/payment-schedules/": (
+        "development_id",
+        "/api/v1/property-dev/developments/",
+        "sales_contract_id or development_id",
+    ),
+    "/api/v1/property-dev/sales-contracts/": (
+        "development_id",
+        "/api/v1/property-dev/developments/",
+        "plot_id, development_id or reservation_id",
+    ),
+    "/api/v1/schedule/critical-path/": ("project_id", None, "project_id or schedule_id"),
+}
 
 #: GET routes that change state on the server. Calling one mid-walk would sign
 #: the admin out, stop the app or purge the demo data every later call reads.
@@ -102,9 +154,31 @@ class Call:
 class Report:
     project_id: str = ""
     boot_seconds: float = 0.0
+    walk_seconds: float = 0.0
     routes: int = 0
+    served_get_paths: int = 0
+    openapi_get_paths: int = 0
+    aliases: int = 0
     calls: list[Call] = field(default_factory=list)
     skipped: list[dict[str, str]] = field(default_factory=list)
+    shadowed: list[str] = field(default_factory=list)
+
+
+class _Served:
+    """A served route under the full URL it answers on.
+
+    ``route.path`` is the path the route was declared with, without the prefixes
+    of the includes above it; the URL is known only to the include tree
+    (:func:`app.core.module_loader.served_routes`). Everything else is the
+    route's own.
+    """
+
+    def __init__(self, path: str, route: Any) -> None:
+        self.path = path
+        self.route = route
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self.route, name)
 
 
 class _ErrorCapture(logging.Handler):
@@ -157,18 +231,40 @@ def _items(body: Any) -> list[dict[str, Any]]:
     return []
 
 
-def _pick(row: dict[str, Any], param: str) -> str | None:
+def _accepts(field_: Any | None, value: str) -> bool:
+    """Whether ``value`` passes the parameter's declared type.
+
+    A row can carry the parameter's name with another meaning: an EPD row's
+    ``epd_id`` is the business code ("EPD-CONCRETE-001") while the route's
+    ``{epd_id}`` is the row's UUID. Without this check the walker sent the code
+    and reported the route's correct 422 as a failure.
+    """
+    annotation = getattr(getattr(field_, "field_info", None), "annotation", None)
+    if annotation is None:
+        return True
+    from pydantic import TypeAdapter, ValidationError
+
+    try:
+        TypeAdapter(annotation).validate_python(value)
+    except ValidationError:
+        return False
+    except Exception:  # noqa: BLE001 - an annotation no adapter takes decides nothing
+        return True
+    return True
+
+
+def _pick(row: dict[str, Any], param: str, field_: Any | None = None) -> str | None:
     for key in (param, "id") if param.endswith("_id") or param == "id" else (param,):
         value = row.get(key)
-        if isinstance(value, (str, int)) and str(value):
+        if isinstance(value, (str, int)) and str(value) and _accepts(field_, str(value)):
             return str(value)
     return None
 
 
-def _query_fields(route: Any) -> list[Any]:
-    """Every query parameter of the route, including those its dependencies declare.
+def _dependant_fields(route: Any, kind: str) -> list[Any]:
+    """Every ``kind`` parameter of the route, including those its dependencies declare.
 
-    Walked by hand over ``Dependant.query_params`` and ``Dependant.dependencies``
+    Walked by hand over ``Dependant.<kind>`` and ``Dependant.dependencies``
     rather than through FastAPI's flattening helper, which is private and has
     changed shape between releases.
     """
@@ -180,10 +276,36 @@ def _query_fields(route: Any) -> list[Any]:
         if id(dependant) in seen:
             continue
         seen.add(id(dependant))
-        for f in getattr(dependant, "query_params", None) or []:
+        for f in getattr(dependant, kind, None) or []:
             fields.setdefault(_alias(f), f)
         stack.extend(getattr(dependant, "dependencies", None) or [])
     return list(fields.values())
+
+
+def _query_fields(route: Any) -> list[Any]:
+    return _dependant_fields(route, "query_params")
+
+
+def _path_field(route: Any, param: str) -> Any | None:
+    return next((f for f in _dependant_fields(route, "path_params") if f.name == param), None)
+
+
+def _clamp(field_: Any, value: int) -> int:
+    """``value`` moved inside the parameter's own ``ge``/``gt``/``le``/``lt`` bounds.
+
+    The frontend's list screens send ``limit=50``; a route capped lower (a
+    "similar items" panel takes 20) answers that with a correct 422.
+    """
+    for bound in getattr(field_.field_info, "metadata", None) or []:
+        if getattr(bound, "le", None) is not None:
+            value = min(value, bound.le)
+        if getattr(bound, "lt", None) is not None:
+            value = min(value, bound.lt - 1)
+        if getattr(bound, "ge", None) is not None:
+            value = max(value, bound.ge)
+        if getattr(bound, "gt", None) is not None:
+            value = max(value, bound.gt + 1)
+    return value
 
 
 def _is_required(field_: Any) -> bool:
@@ -256,6 +378,8 @@ class _Walker:
         if route is None:
             return []
         resolved = await self.resolve(route, values, depth + 1)
+        if resolved is not None:
+            resolved = await self.either_or(route, resolved, depth + 1)
         if resolved is None:
             return []
         url = _fill(route.path, resolved)
@@ -290,10 +414,11 @@ class _Walker:
             if param not in _GENERIC_PARAMS:
                 candidates += [c for c in self.list_for.get(param, []) if c != prefix]
             found = None
+            field_ = _path_field(route, param)
             for candidate in candidates:
                 sub = {k: v for k, v in values.items() if "{" + k in candidate}
                 for row in await self._list_rows(candidate, sub, depth):
-                    found = _pick(row, param)
+                    found = _pick(row, param, field_)
                     if found:
                         break
                 if found:
@@ -303,13 +428,34 @@ class _Walker:
             values[param] = found
         return values
 
+    async def either_or(self, route: Any, values: dict[str, str], depth: int = 0) -> dict[str, str] | None:
+        """``values`` plus the parameter :data:`_EITHER_OR` names for ``route``.
+
+        None when that parameter has no value: the source list is empty or
+        answers nothing the parameter's type accepts.
+        """
+        entry = _EITHER_OR.get(route.path)
+        if entry is None:
+            return values
+        param, source, _alternatives = entry
+        if param in values:
+            return values
+        if source is None:
+            return {**values, param: self.project_id}
+        field_ = next((f for f in _query_fields(route) if _alias(f) == param), None)
+        for row in await self._list_rows(source, {}, depth):
+            found = _pick(row, param, field_)
+            if found:
+                return {**values, param: found}
+        return None
+
     def query_for(self, route: Any, values: dict[str, str], *, list_call: bool) -> dict[str, Any] | None:
         """The query string for a well-formed call, or None when a required value is unknown."""
         query: dict[str, Any] = {}
         for f in _query_fields(route):
             name = _alias(f)
             if name in _PROJECT_PARAMS or f.name in _PROJECT_PARAMS:
-                if _is_required(f) or list_call:
+                if _is_required(f) or list_call or name in values:
                     query[name] = self.project_id
             elif name in values:
                 query[name] = values[name]
@@ -379,6 +525,22 @@ def _classify(call: Call, resp: Any, err: str, fully_resolved: bool, route: Any)
 _FAILING = {"5xx", "422", "schema", "slow", "timeout", "exception"}
 
 
+def _excuse(path: str, outcome: str) -> str:
+    """The allowlist reason for ``outcome`` on ``path``, or empty."""
+    outcomes, reason = ALLOWLIST.get(path, (frozenset(), ""))
+    return reason if outcome in outcomes else ""
+
+
+def _counts(report: Report, failing: list[Call]) -> str:
+    allowlisted = sum(1 for c in report.calls if c.allowlisted)
+    return (
+        f"GET routes {report.routes} (served GET paths {report.served_get_paths}, OpenAPI GET paths "
+        f"{report.openapi_get_paths}, aliases folded {report.aliases}), calls {len(report.calls)}, "
+        f"failing {len(failing)}, skipped {len(report.skipped)}, allowlisted {allowlisted}, "
+        f"shadowed {len(report.shadowed)}"
+    )
+
+
 def _write_report(report: Report, directory: Path) -> tuple[Path, list[Call]]:
     """Write the JSON and Markdown report. Called during the walk too, so a run
     killed by a timeout still leaves the calls it made."""
@@ -388,9 +550,8 @@ def _write_report(report: Report, directory: Path) -> tuple[Path, list[Call]]:
     lines = [
         "# API smoke on a fresh install",
         "",
-        f"Demo project: `{report.project_id}`. Boot {report.boot_seconds:.0f}s. "
-        f"GET routes {report.routes}, calls {len(report.calls)}, failing {len(failing)}, "
-        f"skipped {len(report.skipped)}.",
+        f"Demo project: `{report.project_id}`. Boot {report.boot_seconds:.0f}s, walk {report.walk_seconds:.0f}s. "
+        f"{_counts(report, failing)}.",
         "",
         "## Failing",
         "",
@@ -400,6 +561,12 @@ def _write_report(report: Report, directory: Path) -> tuple[Path, list[Call]]:
     for c in sorted(failing, key=lambda c: (c.module, c.route)):
         err = c.error.replace("|", "\\|").replace("\n", " ")
         lines.append(f"| {c.module} | `{c.route}` | {c.variant} | {c.status} | {c.outcome} | {err} |")
+    lines += ["", "## Shadowed (an earlier route answers these URLs)", ""]
+    lines += [f"- `{entry}`" for entry in report.shadowed] or ["None."]
+    lines += ["", "## Allowlisted", "", "| module | route | outcome | reason |", "|---|---|---|---|"]
+    for c in sorted(report.calls, key=lambda c: (c.module, c.route)):
+        if c.allowlisted:
+            lines.append(f"| {c.module} | `{c.route}` | {c.outcome} | {c.allowlisted} |")
     lines += ["", "## Other non-200 answers", "", "| module | route | status | detail |", "|---|---|---|---|"]
     for c in sorted(report.calls, key=lambda c: (c.module, c.route)):
         if c.outcome.startswith("info-"):
@@ -422,7 +589,9 @@ async def test_every_get_route_answers_the_demo_admin_on_a_fresh_install() -> No
     from fastapi.routing import APIRoute
     from httpx import ASGITransport, AsyncClient
 
+    from app.core.module_loader import served_routes
     from app.main import create_app
+    from tests._route_shadowing import shadowed_routes
 
     report = Report()
     capture = _ErrorCapture()
@@ -435,8 +604,29 @@ async def test_every_get_route_answers_the_demo_admin_on_a_fresh_install() -> No
             report.boot_seconds = time.perf_counter() - started
             transport = ASGITransport(app=app, raise_app_exceptions=False)
             async with AsyncClient(transport=transport, base_url="http://localhost", timeout=None) as client:
-                routes = [r for r in app.routes if isinstance(r, APIRoute) and "GET" in r.methods]
+                served = list(served_routes(app))
+                gets = [(path, r) for path, r in served if isinstance(r, APIRoute) and "GET" in r.methods]
+                # One URL per endpoint: the legacy underscore mirror and a
+                # trailing-slash twin are the same function a second time.
+                first_url: dict[Any, _Served] = {}
+                for path, r in gets:
+                    first_url.setdefault(r.endpoint, _Served(path, r))
+                routes = list(first_url.values())
                 report.routes = len(routes)
+                report.served_get_paths = len({path for path, _r in gets})
+                report.aliases = len(gets) - len(routes)
+                report.openapi_get_paths = sum(1 for ops in app.openapi()["paths"].values() if "get" in ops)
+                report.shadowed = [f"{','.join(s.methods)} {s.hidden} <- {s.by}" for s in shadowed_routes(served)]
+                print(f"API smoke population: {_counts(report, [])}", flush=True)  # noqa: T201
+                # A walk that shrinks fails here, before it can pass on nothing.
+                assert report.openapi_get_paths > 100, (
+                    f"the OpenAPI document lists {report.openapi_get_paths} GET paths; modules did not mount"
+                )
+                assert report.served_get_paths >= report.openapi_get_paths, (
+                    f"served_routes found {report.served_get_paths} GET paths, the OpenAPI document "
+                    f"{report.openapi_get_paths}: the route walk no longer sees every module"
+                )
+                walk_started = time.perf_counter()
                 walker = _Walker(client, routes, "", capture)
                 assert await walker.login(), "the demo admin could not sign in through /auth/demo-login/"
 
@@ -446,12 +636,7 @@ async def test_every_get_route_answers_the_demo_admin_on_a_fresh_install() -> No
                 assert rows, "a fresh install with the demo seed on has no project for the demo admin"
                 walker.project_id = report.project_id = str(rows[0]["id"])
 
-                # A route mounted with and without the trailing slash is one
-                # endpoint; calling both doubles the run and the report.
-                unique: dict[tuple[Any, str], Any] = {}
-                for route in sorted(routes, key=lambda r: r.path):
-                    unique.setdefault((route.endpoint, route.path.rstrip("/")), route)
-                for index, route in enumerate(unique.values()):
+                for index, route in enumerate(sorted(routes, key=lambda r: r.path)):
                     if index % 100 == 0:
                         _write_report(report, report_dir)
                     module = _module_of(route)
@@ -467,6 +652,14 @@ async def test_every_get_route_answers_the_demo_admin_on_a_fresh_install() -> No
                             {"module": module, "route": route.path, "reason": f"no list value for {missing}"}
                         )
                         continue
+                    with_choice = await walker.either_or(route, values)
+                    if with_choice is None:
+                        param, source, _alternatives = _EITHER_OR[route.path]
+                        report.skipped.append(
+                            {"module": module, "route": route.path, "reason": f"no {param} from {source}"}
+                        )
+                        continue
+                    values = with_choice
                     missing_q = walker.unresolved_required(route, values)
                     if missing_q:
                         report.skipped.append(
@@ -477,14 +670,14 @@ async def test_every_get_route_answers_the_demo_admin_on_a_fresh_install() -> No
                     variants: list[tuple[str, dict[str, Any]]] = [
                         ("plain", walker.query_for(route, values, list_call=False) or {})
                     ]
-                    declared = {_alias(f) for f in _query_fields(route)}
+                    declared = {_alias(f): f for f in _query_fields(route)}
                     common = {}
-                    if declared & _PROJECT_PARAMS:
-                        common[next(iter(declared & _PROJECT_PARAMS))] = walker.project_id
+                    if declared.keys() & _PROJECT_PARAMS:
+                        common[next(iter(declared.keys() & _PROJECT_PARAMS))] = walker.project_id
                     if "limit" in declared:
-                        common["limit"] = _LIST_LIMIT
+                        common["limit"] = _clamp(declared["limit"], _LIST_LIMIT)
                     if "offset" in declared:
-                        common["offset"] = _LIST_OFFSET
+                        common["offset"] = _clamp(declared["offset"], _LIST_OFFSET)
                     if common:
                         variants.append(("list", {**variants[0][1], **common}))
                     for variant, query in variants:
@@ -493,16 +686,22 @@ async def test_every_get_route_answers_the_demo_admin_on_a_fresh_install() -> No
                         _classify(call, resp, err, True, route)
                         if call.outcome == "5xx" and capture.last:
                             call.error = capture.last
-                        if call.outcome in _FAILING and route.path in ALLOWLIST:
-                            call.allowlisted = ALLOWLIST[route.path]
+                        if call.outcome in _FAILING:
+                            call.allowlisted = _excuse(route.path, call.outcome)
                         report.calls.append(call)
+                report.walk_seconds = time.perf_counter() - walk_started
     finally:
         logging.getLogger().removeHandler(capture)
         md, failing = _write_report(report, report_dir)
 
+    print(f"API smoke: {_counts(report, failing)}", flush=True)  # noqa: T201
     print(md.read_text(encoding="utf-8")[:20000])  # noqa: T201 - the job log shows the table
     # An exemption for a route that was renamed or removed hides nothing and
     # would silently cover whatever takes its path next.
     stale = sorted(set(ALLOWLIST) - {c.route for c in report.calls})
     assert not stale, f"allowlisted routes this install never called: {stale}"
+    walked = {r.path for r in routes}
+    stale_choice = sorted(set(_EITHER_OR) - walked)
+    assert not stale_choice, f"either-or entries for routes this install does not serve: {stale_choice}"
+    assert not report.shadowed, "routes answered by an earlier route:\n" + "\n".join(report.shadowed)
     assert not failing, f"{len(failing)} GET calls failed on a fresh install; see {md}"
