@@ -921,8 +921,13 @@ def _score_payload_against_envelope(
     region_score = 0.0
     if project_region:
         pay_country = str(payload.get("country") or "").upper()
-        proj_head = project_region.upper()[:2]
-        if pay_country and pay_country.startswith(proj_head):
+        # ``project_region`` is a form label ("Spain"), so its first two
+        # letters are not a country ("SP"); resolve it. A label that names
+        # no single country ("Nordics") scores nothing rather than "NO".
+        from app.core.match_service.region_language import project_country  # noqa: PLC0415
+
+        proj_head = project_country(project_region)
+        if proj_head and pay_country and pay_country.startswith(proj_head):
             region_score = 1.0
 
     env_material = (envelope.properties or {}).get("material") if envelope.properties else None
@@ -1128,7 +1133,11 @@ async def rank(
     envelope = req.envelope
 
     # ── Catalogue binding ────────────────────────────────────────────
-    catalog_id: str | None = getattr(settings, "cost_database_id", None) or None
+    # A catalogue the user picked for this run wins over the project's
+    # binding (see ``catalogue_scope``).
+    from app.core.match_service import catalogue_scope  # noqa: PLC0415
+
+    catalog_id: str | None = catalogue_scope.current() or getattr(settings, "cost_database_id", None) or None
     catalog_status, catalog_count, catalog_vec = await _resolve_catalog_status(db, catalog_id)
     if catalog_status != "ok":
         return MatchResponse(

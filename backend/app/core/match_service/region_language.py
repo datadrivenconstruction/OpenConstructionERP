@@ -316,9 +316,13 @@ def language_for(code: str | None) -> str:
     fallback = _default_fallback_language()
     if not code:
         return fallback
-    key = code.strip().upper()
+    return _resolve(code.strip().upper()) or fallback
+
+
+def _resolve(key: str) -> str | None:
+    """Steps 1-4 of :func:`language_for` on an upper-cased key, no fallback."""
     if not key:
-        return fallback
+        return None
     if key in REGION_LANGUAGE:
         return REGION_LANGUAGE[key]
     canonical = _ALIASES.get(key)
@@ -337,7 +341,237 @@ def language_for(code: str | None) -> str:
             return _HEAD_LANGUAGE[head]
     elif key in _HEAD_LANGUAGE:
         return _HEAD_LANGUAGE[key]
-    return fallback
+    return None
+
+
+def resolve_language(code: str | None) -> str | None:
+    """Like :func:`language_for`, but ``None`` when nothing resolves.
+
+    ``language_for`` answers every input, falling back to ``"en"``. That is
+    right for stamping catalogue rows, and wrong for deciding what language
+    a PROJECT wants: an unknown value is "no opinion", not "English".
+    """
+    if not code:
+        return None
+    return _resolve(code.strip().upper())
+
+
+# Region values the project form stores in ``project.region``: the option
+# ``value`` strings of REGION_GROUPS in
+# ``frontend/src/features/projects/CreateProjectPage.tsx`` (its "Custom..."
+# option stores the typed text instead, which the country-name step of
+# :func:`project_language` reads). They are labels,
+# not catalogue ids, so :func:`language_for` read every one of them as
+# English. Each entry is ``(representative ISO country, catalogue language)``;
+# ``None`` means the label does not name one (a multi-country group spanning
+# several languages). ``test_match_project_language`` fails when the form
+# gains a value this table does not know.
+PROJECT_REGION_LABELS: dict[str, tuple[str | None, str | None]] = {
+    # Europe
+    "DACH": ("DE", "de"),
+    "UK": ("GB", "en"),
+    "Ireland": ("IE", "en"),
+    "Nordics": (None, None),  # Swedish, Norwegian, Danish, Finnish
+    "France": ("FR", "fr"),
+    "Spain": ("ES", "es"),
+    "Italy": ("IT", "it"),
+    "Netherlands": ("NL", "nl"),
+    "Poland": ("PL", "pl"),
+    "Czech": ("CZ", "cs"),
+    "Croatia": ("HR", "hr"),
+    "Turkey": ("TR", "tr"),
+    "Russia": ("RU", "ru"),
+    # Americas
+    "US": ("US", "en"),
+    "Canada": ("CA", "en"),
+    "Brazil": ("BR", "pt"),
+    "Mexico": ("MX", "es"),
+    "LatinAmerica": (None, "es"),
+    # Asia & Middle East
+    "China": ("CN", "zh"),
+    "Japan": ("JP", "ja"),
+    "Korea": ("KR", "ko"),
+    "India": ("IN", "en"),
+    "SoutheastAsia": (None, None),  # Indonesian, Thai, Vietnamese, English
+    "MiddleEast": (None, "ar"),
+    "GulfStates": (None, "ar"),
+    # Africa
+    "NorthAfrica": (None, "ar"),
+    "SouthAfrica": ("ZA", "en"),
+    "EastAfrica": (None, "en"),
+    "WestAfrica": (None, None),  # English and French catalogues
+    # Oceania
+    "Australia": ("AU", "en"),
+    "NewZealand": ("NZ", "en"),
+    # Other
+    "INTL": (None, None),
+}
+
+_PROJECT_REGION_LABELS_FOLDED: dict[str, tuple[str | None, str | None]] = {
+    k.lower(): v for k, v in PROJECT_REGION_LABELS.items()
+}
+
+# Countries a group label covers, most likely first, for picking a catalogue
+# from inside the group. A single-country label needs no entry here: its
+# country in :data:`PROJECT_REGION_LABELS` is the list. Ireland has no
+# catalogue of its own and is priced closest by the London one.
+PROJECT_REGION_COUNTRIES: dict[str, tuple[str, ...]] = {
+    "DACH": ("DE", "AT", "CH"),
+    "UK": ("GB",),
+    "Ireland": ("IE", "GB"),
+    "Nordics": ("SE", "NO", "DK", "FI"),
+    "LatinAmerica": ("MX", "AR", "CO", "CL", "PE"),
+    "SoutheastAsia": ("ID", "TH", "VN", "SG", "MY", "PH"),
+    "MiddleEast": ("AE", "SA", "EG", "JO"),
+    "GulfStates": ("AE", "SA", "QA", "KW"),
+    "NorthAfrica": ("MA", "EG", "TN", "DZ"),
+    "EastAfrica": ("KE", "UG", "TZ", "RW", "ET"),
+    "WestAfrica": ("NG", "GH", "SN", "CI", "CM"),
+}
+
+_PROJECT_REGION_COUNTRIES_FOLDED: dict[str, tuple[str, ...]] = {
+    k.lower(): v for k, v in PROJECT_REGION_COUNTRIES.items()
+}
+
+
+def _catalogue_country_languages() -> dict[str, str]:
+    """``{"SE": "sv", "US": "en", ...}`` from the published catalogue registry.
+
+    The registry is the authority on which language a country's catalogue
+    is in; the general table above is keyed by catalogue ids and misses
+    countries whose id head is not their ISO code (``SV_STOCKHOLM``,
+    ``USA_USD``). First catalogue wins for a country.
+    """
+    global _CATALOGUE_COUNTRY_LANGUAGES
+    if _CATALOGUE_COUNTRY_LANGUAGES is None:
+        from app.modules.costs.cwicr_v3_catalogue import CWICR_V3_CATALOGUES  # noqa: PLC0415
+
+        table: dict[str, str] = {}
+        for cat in CWICR_V3_CATALOGUES:
+            if cat.available and cat.country_iso:
+                table.setdefault(cat.country_iso.upper(), cat.language)
+        _CATALOGUE_COUNTRY_LANGUAGES = table
+    return _CATALOGUE_COUNTRY_LANGUAGES
+
+
+_CATALOGUE_COUNTRY_LANGUAGES: dict[str, str] | None = None
+
+
+def _country_language(iso: str | None) -> str | None:
+    """Catalogue language for an ISO country: the registry first, then the table."""
+    if not iso or not iso.strip():
+        return None
+    key = iso.strip().upper()
+    return _catalogue_country_languages().get(key) or resolve_language(key)
+
+
+# Catalogue-id heads that are not the ISO country of the rates behind them
+# (language-prefixed or historical ids, see ``_ALIASES``).
+_ID_HEAD_COUNTRY: dict[str, str] = {
+    "USA": "US",
+    "GBR": "GB",
+    "UK": "GB",
+    "ENG": "CA",
+    "ZH": "CN",
+    "SV": "SE",
+    "VI": "VN",
+    "JA": "JP",
+    "KO": "KR",
+    "HI": "IN",
+    "SP": "ES",
+    "CS": "CZ",
+}
+
+
+def _country_from_code(code: str | None) -> str | None:
+    """ISO-3166 alpha-2 country for a catalogue id or bare country code."""
+    if not code or not code.strip():
+        return None
+    head = code.strip().upper().split("_", 1)[0]
+    head = _ID_HEAD_COUNTRY.get(head, head)
+    return head if len(head) == 2 and head.isalpha() else None
+
+
+def project_language(region: str | None, country_code: str | None = None) -> str | None:
+    """Catalogue language a project wants, or ``None`` when it states none.
+
+    Resolution order, most specific first:
+
+        1. ``country_code`` (ISO alpha-2 from the address), when a catalogue
+           language is known for it (catalogue registry first).
+        2. A project-form region label (``"Italy"``, ``"DACH"``), see
+           :data:`PROJECT_REGION_LABELS`. A label that maps to ``None`` stops
+           here: the region spans several languages.
+        3. A free-text country name (``"Italia"``, ``"Deutschland"``).
+        4. A catalogue id or bare code stored as the region (``"IT_ROME"``).
+    """
+    lang = _country_language(country_code)
+    if lang:
+        return lang
+    if not region or not region.strip():
+        return None
+    folded = region.strip().lower()
+    if folded in _PROJECT_REGION_LABELS_FOLDED:
+        return _PROJECT_REGION_LABELS_FOLDED[folded][1]
+    from app.core.country_resolver import resolve_country_code  # noqa: PLC0415
+
+    iso = resolve_country_code(region)
+    if iso:
+        lang = _country_language(iso)
+        if lang:
+            return lang
+    return resolve_language(region)
+
+
+def project_country(region: str | None, country_code: str | None = None) -> str | None:
+    """ISO alpha-2 country a project is in, or ``None`` when it names none.
+
+    Same order as :func:`project_language`. For a group label that has a
+    dominant country (``"DACH"`` -> ``"DE"``) the representative is returned.
+    """
+    if country_code and country_code.strip():
+        return country_code.strip().upper()
+    if not region or not region.strip():
+        return None
+    folded = region.strip().lower()
+    if folded in _PROJECT_REGION_LABELS_FOLDED:
+        return _PROJECT_REGION_LABELS_FOLDED[folded][0]
+    from app.core.country_resolver import resolve_country_code  # noqa: PLC0415
+
+    iso = resolve_country_code(region)
+    if iso:
+        return iso
+    if resolve_language(region) is None:
+        return None
+    return _country_from_code(region)
+
+
+def project_countries(region: str | None, country_code: str | None = None) -> tuple[str, ...]:
+    """Countries a project could be priced from, most likely first.
+
+    The address country alone when there is one. Otherwise the group's
+    list from :data:`PROJECT_REGION_COUNTRIES`, or the single country
+    :func:`project_country` reads. Empty when the project names none.
+    """
+    if country_code and country_code.strip():
+        return (country_code.strip().upper(),)
+    folded = (region or "").strip().lower()
+    if folded in _PROJECT_REGION_COUNTRIES_FOLDED:
+        return _PROJECT_REGION_COUNTRIES_FOLDED[folded]
+    iso = project_country(region)
+    return (iso,) if iso else ()
+
+
+def is_multi_language_group(region: str | None) -> bool:
+    """A form label for a group of countries that speak different languages.
+
+    ``"Nordics"`` is; ``"INTL"`` is not (it names no place at all), and
+    neither is free text we could not read. The readiness card words the
+    two cases differently.
+    """
+    folded = (region or "").strip().lower()
+    entry = _PROJECT_REGION_LABELS_FOLDED.get(folded)
+    return entry is not None and entry[1] is None and folded in _PROJECT_REGION_COUNTRIES_FOLDED
 
 
 def country_head(code: str | None) -> str | None:
@@ -363,4 +597,15 @@ def country_head(code: str | None) -> str | None:
     return head or None
 
 
-__all__ = ["REGION_LANGUAGE", "country_head", "language_for"]
+__all__ = [
+    "PROJECT_REGION_COUNTRIES",
+    "PROJECT_REGION_LABELS",
+    "REGION_LANGUAGE",
+    "country_head",
+    "is_multi_language_group",
+    "language_for",
+    "project_countries",
+    "project_country",
+    "project_language",
+    "resolve_language",
+]

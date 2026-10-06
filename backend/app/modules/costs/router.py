@@ -1909,14 +1909,15 @@ async def _detect_language_mismatch(
     language-aware fix landed (#236).
 
     Status values:
-        - ``unknown``      - project not found, or no region set
+        - ``unknown``      - project not found, no region set, or a region
+                             that names no single language
         - ``unbound``      - project has no cost_database_id yet
         - ``ok``           - languages match (or both fall back to default)
         - ``mismatch``     - project language ≠ catalogue language
     """
     from sqlalchemy import select  # noqa: PLC0415
 
-    from app.core.match_service.region_language import language_for
+    from app.core.match_service.region_language import project_language, resolve_language
     from app.modules.projects.models import MatchProjectSettings, Project
 
     out: dict[str, Any] = {
@@ -1931,7 +1932,11 @@ async def _detect_language_mismatch(
         if not project or not project.region:
             return out
         out["project_region"] = project.region
-        out["project_language"] = language_for(project.region)
+        # A region the project states without one language ("Nordics")
+        # stays "unknown" rather than being read as English.
+        out["project_language"] = project_language(project.region, getattr(project, "country_code", None)) or ""
+        if not out["project_language"]:
+            return out
 
         # MatchProjectSettings uses an ``id`` PK with a unique FK on
         # ``project_id``; ``db.get`` cannot be used here.
@@ -1941,7 +1946,9 @@ async def _detect_language_mismatch(
             out["status"] = "unbound"
             return out
         out["bound_catalogue"] = settings.cost_database_id
-        out["bound_language"] = language_for(settings.cost_database_id)
+        # A catalogue id with no known language stays "unknown" rather than
+        # being read as English and flagged against every other language.
+        out["bound_language"] = resolve_language(settings.cost_database_id) or ""
 
         if out["project_language"] and out["bound_language"]:
             out["status"] = "ok" if out["project_language"] == out["bound_language"] else "mismatch"

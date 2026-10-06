@@ -321,6 +321,26 @@ def _build_country_prefix_table() -> dict[str, tuple[str, ...]]:
 _AUTO_COUNTRY_PREFIXES: dict[str, tuple[str, ...]] = _build_country_prefix_table()
 
 
+def _country_prefixes(iso: str) -> tuple[str, ...]:
+    """Every id prefix a catalogue of ISO country ``iso`` can carry.
+
+    The table above is keyed by catalogue-id heads, and some heads are not
+    the country's ISO code: Sweden's catalogue is ``SV_STOCKHOLM``, China's
+    ``ZH_CHINA``, Vietnam's ``VI_HANOI``. The catalogue registry knows each
+    catalogue's country, so its heads are added for that country.
+    """
+    from app.modules.costs.cwicr_v3_catalogue import CWICR_V3_CATALOGUES  # noqa: PLC0415
+
+    key = iso.strip().upper()
+    out = list(_AUTO_COUNTRY_PREFIXES.get(key.lower(), (f"{key}_",)))
+    for cat in CWICR_V3_CATALOGUES:
+        if cat.available and cat.country_iso.upper() == key:
+            head = f"{cat.region.split('_', 1)[0].upper()}_"
+            if head not in out:
+                out.append(head)
+    return tuple(out)
+
+
 def _project_region_prefixes(settings: Any) -> tuple[str, ...]:
     """Resolve the region-prefix tuple from project / match settings.
 
@@ -332,12 +352,14 @@ def _project_region_prefixes(settings: Any) -> tuple[str, ...]:
     """
     project = getattr(settings, "project", None)
     region_raw: str = ""
+    country_code: str = ""
     if project is not None:
         region_raw = str(getattr(project, "region", "") or "")
+        country_code = str(getattr(project, "country_code", "") or "")
     if not region_raw:
         # ``settings`` itself sometimes carries the region (test stubs).
         region_raw = str(getattr(settings, "region", "") or "")
-    if not region_raw:
+    if not region_raw and not country_code:
         return ()
 
     region = region_raw.strip()
@@ -356,7 +378,20 @@ def _project_region_prefixes(settings: Any) -> tuple[str, ...]:
     # prefixes - operators picking "Iberia" expect ES+PT, not just one.
     if key in _REGION_GROUP_ALIASES:
         return _REGION_GROUP_ALIASES[key]
-    return _AUTO_COUNTRY_PREFIXES.get(key, ())
+    if len(key) == 2 and key.isalpha():
+        # A bare ISO country code.
+        return _country_prefixes(key)
+    if key in _AUTO_COUNTRY_PREFIXES:
+        return _AUTO_COUNTRY_PREFIXES[key]
+    # A project-form label ("Italy", "Spain"), a country name, or a group
+    # label narrowed by the address country ("Nordics" + SE): resolve it to
+    # its ISO country. A label that names no single country gets no boost.
+    from app.core.match_service.region_language import project_country  # noqa: PLC0415
+
+    iso = project_country(region, country_code or None)
+    if not iso:
+        return ()
+    return _country_prefixes(iso)
 
 
 def boost(

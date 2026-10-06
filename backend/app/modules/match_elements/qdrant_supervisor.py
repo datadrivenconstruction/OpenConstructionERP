@@ -121,6 +121,11 @@ QDRANT_STORAGE_DIR: Path = QDRANT_HOME / "storage"
 QDRANT_SNAPSHOTS_DIR: Path = QDRANT_HOME / "snapshots"
 QDRANT_CONFIG_DIR: Path = QDRANT_HOME / "config"
 
+#: HTTP port the native binary listens on; ``_write_default_config`` writes it.
+LOCAL_HTTP_PORT = 6333
+#: Where the native binary answers once it runs.
+LOCAL_URL = f"http://127.0.0.1:{LOCAL_HTTP_PORT}"
+
 # GitHub Releases API for the official Qdrant repository. We pin to a
 # specific tag rather than `/releases/latest` because Qdrant 1.17+
 # introduced WAL clock replication (`newest_clocks.json`) which trips
@@ -276,6 +281,23 @@ def _is_loopback(url: str) -> bool:
         return False
 
 
+def serves_url(url: str | None) -> bool:
+    """Whether the native binary, once running, is what answers on ``url``.
+
+    True only for this machine on :data:`LOCAL_HTTP_PORT`. Callers use it to
+    decide whether installing the binary would change anything for a store
+    configured at ``url``; for any other address it would not.
+    """
+
+    if not url:
+        return False
+    try:
+        port = urllib.parse.urlsplit(url).port
+    except ValueError:
+        return False
+    return port == LOCAL_HTTP_PORT and _is_loopback(url)
+
+
 def _probe_once(target: str, timeout_s: float, *, direct: bool) -> bool:
     """One ``GET``; ``True`` on 2xx, ``False`` on any transport or HTTP error.
 
@@ -358,7 +380,7 @@ def _write_default_config() -> Path:
         f"  snapshots_path: {json.dumps(str(QDRANT_SNAPSHOTS_DIR))}\n"
         "service:\n"
         "  host: 127.0.0.1\n"
-        "  http_port: 6333\n"
+        f"  http_port: {LOCAL_HTTP_PORT}\n"
         "  grpc_port: 6334\n",
         encoding="utf-8",
     )
@@ -743,6 +765,8 @@ def ensure_qdrant_running(url: str | None, *, spawn_if_installed: bool = True) -
 
 
 __all__ = [
+    "LOCAL_HTTP_PORT",
+    "LOCAL_URL",
     "QDRANT_HOME",
     "QDRANT_STORAGE_DIR",
     "QdrantHealth",
@@ -750,5 +774,6 @@ __all__ = [
     "find_qdrant_binary",
     "install_qdrant_native",
     "probe_qdrant",
+    "serves_url",
     "spawn_qdrant",
 ]

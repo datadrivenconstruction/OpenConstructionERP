@@ -7,6 +7,7 @@
 
 import { apiGet } from '@/shared/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { withLongRunningDeadline } from '@/shared/lib/longRunningDeadline';
 
 const PREFIX = '/api/v1/match_elements';
 
@@ -45,7 +46,58 @@ function formatErrorDetail(body: unknown): string {
   try { return JSON.stringify(body); } catch { return String(body); }
 }
 
-async function call<T>(path: string, init?: RequestInit): Promise<T> {
+/** Names of the fields a FastAPI 422 rejected (the last part of each ``loc``). */
+function rejectedFields(body: unknown): string[] {
+  if (!body || typeof body !== 'object') return [];
+  const d = (body as Record<string, unknown>).detail;
+  if (!Array.isArray(d)) return [];
+  const out: string[] = [];
+  for (const item of d) {
+    if (!item || typeof item !== 'object') continue;
+    const loc = (item as Record<string, unknown>).loc;
+    if (!Array.isArray(loc)) continue;
+    const last = [...loc].reverse().find((p) => typeof p === 'string');
+    if (typeof last === 'string' && last !== 'body' && !out.includes(last)) out.push(last);
+  }
+  return out;
+}
+
+/**
+ * A failed match-elements request, with what kind of failure it was.
+ *
+ * ``message`` keeps the historical ``"<status> <detail>"`` text so callers
+ * that show it raw are unchanged; ``kind`` / ``status`` / ``detail`` let
+ * the page say what happened in the reader's language instead
+ * (see ``describeMatchError``).
+ */
+export class MatchApiError extends Error {
+  readonly kind: 'http' | 'timeout' | 'network';
+  readonly status: number | null;
+  readonly detail: string;
+  /** Fields a 422 rejected, by name; empty for every other failure. */
+  readonly fields: string[];
+
+  constructor(
+    kind: 'http' | 'timeout' | 'network',
+    message: string,
+    status: number | null = null,
+    detail = '',
+    fields: string[] = [],
+  ) {
+    super(message);
+    this.name = 'MatchApiError';
+    this.kind = kind;
+    this.status = status;
+    this.detail = detail;
+    this.fields = fields;
+  }
+}
+
+async function call<T>(path: string, init?: RequestInit & { longRunning?: boolean }): Promise<T> {
+  if (init?.longRunning) {
+    const { longRunning: _longRunning, ...request } = init;
+    return withLongRunningDeadline((signal) => call<T>(path, { ...request, signal }), init.signal);
+  }
   const token = useAuthStore.getState().accessToken;
   let res: Response;
   try {
@@ -66,24 +118,48 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
     // ``[object Object]`` or a silent "still running" spinner.
     const name = err instanceof Error ? err.name : '';
     if (name === 'AbortError' || name === 'TimeoutError') {
-      throw new Error(
+      throw new MatchApiError(
+        'timeout',
         'Request cancelled or timed out - the backend did not respond in time.',
       );
+    }
+    if (err instanceof TypeError) {
+      throw new MatchApiError('network', err.message);
     }
     throw err;
   }
   if (!res.ok) {
     let detail = res.statusText;
+    let fields: string[] = [];
     try {
       const body = await res.json();
       detail = formatErrorDetail(body) || res.statusText;
+      fields = rejectedFields(body);
     } catch {
       // ignore
     }
-    throw new Error(`${res.status} ${detail}`);
+    throw new MatchApiError('http', `${res.status} ${detail}`, res.status, detail, fields);
   }
   if (res.status === 204) return undefined as unknown as T;
   return (await res.json()) as T;
+}
+
+async function uploadSession(path: string, body: FormData, callerSignal?: AbortSignal): Promise<MatchSession> {
+  return withLongRunningDeadline(async (signal) => {
+    const token = useAuthStore.getState().accessToken;
+    const res = await fetch(`${PREFIX}${path}`, {
+      method: 'POST',
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), Accept: 'application/json' },
+      body,
+      signal,
+    });
+    if (!res.ok) {
+      let detail = res.statusText;
+      try { detail = formatErrorDetail(await res.json()) || res.statusText; } catch { /* keep HTTP fallback */ }
+      throw new Error(`${res.status} ${detail}`);
+    }
+    return res.json();
+  }, callerSignal);
 }
 
 export type SourceName = 'bim' | 'dwg' | 'boq' | 'text' | 'pdf' | 'photo' | 'image';
@@ -487,12 +563,12 @@ export const matchElementsApi = {
     spec: {
       project_id: string;
       file: File;
+      signal?: AbortSignal;
       name?: string;
       catalogue_id?: string | null;
       construction_stage?: ConstructionStage | null;
     },
   ): Promise<MatchSession> => {
-    const token = useAuthStore.getState().accessToken;
     const fd = new FormData();
     fd.append('project_id', spec.project_id);
     fd.append('file', spec.file);
@@ -500,25 +576,7 @@ export const matchElementsApi = {
     if (spec.catalogue_id) fd.append('catalogue_id', spec.catalogue_id);
     if (spec.construction_stage)
       fd.append('construction_stage', spec.construction_stage);
-    const res = await fetch(`${PREFIX}/sessions/from-excel`, {
-      method: 'POST',
-      headers: {
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        Accept: 'application/json',
-      },
-      body: fd,
-    });
-    if (!res.ok) {
-      let detail = res.statusText;
-      try {
-        const body = await res.json();
-        detail = formatErrorDetail(body) || res.statusText;
-      } catch {
-        /* ignore */
-      }
-      throw new Error(`${res.status} ${detail}`);
-    }
-    return (await res.json()) as MatchSession;
+    return uploadSession('/sessions/from-excel', fd, spec.signal);
   },
 
   /** Upload a tender PDF and create a 'pdf' source session in one call.
@@ -528,12 +586,12 @@ export const matchElementsApi = {
     spec: {
       project_id: string;
       file: File;
+      signal?: AbortSignal;
       name?: string;
       catalogue_id?: string | null;
       construction_stage?: ConstructionStage | null;
     },
   ): Promise<MatchSession> => {
-    const token = useAuthStore.getState().accessToken;
     const fd = new FormData();
     fd.append('project_id', spec.project_id);
     fd.append('file', spec.file);
@@ -541,25 +599,7 @@ export const matchElementsApi = {
     if (spec.catalogue_id) fd.append('catalogue_id', spec.catalogue_id);
     if (spec.construction_stage)
       fd.append('construction_stage', spec.construction_stage);
-    const res = await fetch(`${PREFIX}/sessions/from-pdf`, {
-      method: 'POST',
-      headers: {
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        Accept: 'application/json',
-      },
-      body: fd,
-    });
-    if (!res.ok) {
-      let detail = res.statusText;
-      try {
-        const body = await res.json();
-        detail = formatErrorDetail(body) || res.statusText;
-      } catch {
-        /* ignore */
-      }
-      throw new Error(`${res.status} ${detail}`);
-    }
-    return (await res.json()) as MatchSession;
+    return uploadSession('/sessions/from-pdf', fd, spec.signal);
   },
 
   /** §3.1/§4.1.4 — upload a single photo or drawing snapshot and create
@@ -573,12 +613,12 @@ export const matchElementsApi = {
     spec: {
       project_id: string;
       file: File;
+      signal?: AbortSignal;
       name?: string;
       catalogue_id?: string | null;
       construction_stage?: ConstructionStage | null;
     },
   ): Promise<MatchSession> => {
-    const token = useAuthStore.getState().accessToken;
     const fd = new FormData();
     fd.append('project_id', spec.project_id);
     fd.append('image', spec.file);
@@ -586,25 +626,7 @@ export const matchElementsApi = {
     if (spec.catalogue_id) fd.append('catalogue_id', spec.catalogue_id);
     if (spec.construction_stage)
       fd.append('construction_stage', spec.construction_stage);
-    const res = await fetch(`${PREFIX}/sessions/from-image`, {
-      method: 'POST',
-      headers: {
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        Accept: 'application/json',
-      },
-      body: fd,
-    });
-    if (!res.ok) {
-      let detail = res.statusText;
-      try {
-        const body = await res.json();
-        detail = formatErrorDetail(body) || res.statusText;
-      } catch {
-        /* ignore */
-      }
-      throw new Error(`${res.status} ${detail}`);
-    }
-    return (await res.json()) as MatchSession;
+    return uploadSession('/sessions/from-image', fd, spec.signal);
   },
 
   listSessions: (
@@ -704,6 +726,7 @@ export const matchElementsApi = {
       method: 'POST',
       body: JSON.stringify(spec),
       signal: opts?.signal,
+      longRunning: true,
     }),
 
   confirm: (
@@ -827,7 +850,7 @@ export const matchElementsApi = {
   ) =>
     call<RunStageResponse>(
       `/sessions/${sessionId}/stages/${stageName}/run`,
-      { method: 'POST', body: JSON.stringify(body) },
+      { method: 'POST', body: JSON.stringify(body), longRunning: true },
     ),
 
   /** List system + own prompt templates, optionally filtered by stage
@@ -1041,8 +1064,50 @@ export interface QdrantHealth {
   client_installed?: boolean;
 }
 
-export async function fetchQdrantHealth(): Promise<QdrantHealth> {
-  return call<QdrantHealth>('/qdrant/health', { method: 'GET' });
+/** Why matching can or cannot work for a project, before any upload.
+ *  Mirrors backend ``MatchReadiness`` (match_elements/schemas.py). */
+export type MatchReadinessCode =
+  | 'demo_mode'
+  | 'search_client_missing'
+  | 'search_unreachable'
+  | 'search_not_configured'
+  | 'no_catalogue_installed'
+  | 'embedder_missing'
+  | 'no_catalogue_for_language'
+  | 'region_language_unknown'
+  | 'region_unknown'
+  | 'binding_language_differs';
+
+export interface MatchReadinessItem {
+  code: MatchReadinessCode;
+  params: Record<string, string>;
+}
+
+export interface MatchReadiness {
+  can_match: boolean;
+  blockers: MatchReadinessItem[];
+  warnings: MatchReadinessItem[];
+  project_region: string;
+  /** The backend's reading of the project's region; the same reading
+   *  auto-bind uses, so the wizard never re-derives it. */
+  project_language: string | null;
+  project_country: string | null;
+  installed_languages: string[];
+  recommended_catalogue: {
+    region: string;
+    language: string;
+    country_iso: string;
+    installed: boolean;
+  } | null;
+  bound_catalogue: string | null;
+  /** Owner or admin: may change the project's match settings. */
+  can_change_catalogue: boolean;
+}
+
+export async function fetchMatchReadiness(projectId: string): Promise<MatchReadiness> {
+  return call<MatchReadiness>(`/readiness?project_id=${encodeURIComponent(projectId)}`, {
+    method: 'GET',
+  });
 }
 
 export async function installQdrantNative(): Promise<QdrantHealth> {

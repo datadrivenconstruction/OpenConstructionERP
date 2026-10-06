@@ -43,6 +43,7 @@ from app.core.classification_registry import (
     classification_order,
 )
 from app.core.i18n import get_locale
+from app.core.match_service import catalogue_scope
 from app.core.match_service.boosts import prior_pick
 from app.core.match_service.config import (
     CONFIDENCE_HIGH_THRESHOLD,
@@ -86,6 +87,14 @@ logger = logging.getLogger(__name__)
 # ── Helpers ──────────────────────────────────────────────────────────────
 
 
+def _session_catalogue_region(row: MatchSession) -> str | None:
+    """The CWICR v3 catalogue the user picked for the session, if any."""
+    region = (row.metadata_ or {}).get("catalogue_region")
+    if isinstance(region, str) and region.strip():
+        return region.strip()
+    return None
+
+
 def _to_session_read(row: MatchSession) -> schemas.SessionRead:
     # Catalogue id is either a legacy CostDatabase UUID (stored on the
     # ``catalogue_id`` column) or a CWICR v3 region string like
@@ -97,9 +106,7 @@ def _to_session_read(row: MatchSession) -> schemas.SessionRead:
     if row.catalogue_id is not None:
         cat_id = str(row.catalogue_id)
     else:
-        region = (row.metadata_ or {}).get("catalogue_region")
-        if isinstance(region, str) and region:
-            cat_id = region
+        cat_id = _session_catalogue_region(row)
     return schemas.SessionRead(
         id=row.id,
         project_id=row.project_id,
@@ -2162,23 +2169,31 @@ class MatchElementsService:
         # Auto-bind catalogue late: existing sessions created before this
         # check landed don't trigger the create_session path again, so we
         # repeat the bind here. Idempotent - no-op when already bound.
+        # A catalogue the user picked in the wizard is the binding for this
+        # run; auto-bind only answers for sessions left on "Auto". The pick
+        # used to be stored on the session and never read, so the run
+        # searched whatever auto-bind chose and the picker did nothing.
+        picked_catalogue_id = _session_catalogue_region(sess)
         bound_catalogue_id: str | None = None
         if spec.method == "vector":
-            try:
-                from app.modules.projects.service import (  # noqa: PLC0415
-                    auto_bind_dominant_catalogue,
-                )
+            if picked_catalogue_id:
+                bound_catalogue_id = picked_catalogue_id
+            else:
+                try:
+                    from app.modules.projects.service import (  # noqa: PLC0415
+                        auto_bind_dominant_catalogue,
+                    )
 
-                bound_catalogue_id = await auto_bind_dominant_catalogue(
-                    db,
-                    sess.project_id,
-                )
-            except Exception as exc:  # noqa: BLE001
-                logger.info(
-                    "match_elements: late auto-bind skipped for %s: %s",
-                    sess.project_id,
-                    exc,
-                )
+                    bound_catalogue_id = await auto_bind_dominant_catalogue(
+                        db,
+                        sess.project_id,
+                    )
+                except Exception as exc:  # noqa: BLE001
+                    logger.info(
+                        "match_elements: late auto-bind skipped for %s: %s",
+                        sess.project_id,
+                        exc,
+                    )
 
             # Stale-binding short-circuit: when ``auto_bind`` returns
             # ``None`` (no catalogue has rows in the active DB) or the
@@ -2431,6 +2446,7 @@ class MatchElementsService:
                 # confidence band is derived, then re-pin the result as a
                 # backstop against a large cosine gap swamping the nudge.
                 token = prior_pick.bind(prior_ctx) if prior_ctx is not None else None
+                scope_token = catalogue_scope.bind(picked_catalogue_id) if picked_catalogue_id else None
                 try:
                     candidates = await matcher.rank(
                         envelope=envelope,
@@ -2447,6 +2463,8 @@ class MatchElementsService:
                     )
                     candidates = []
                 finally:
+                    if scope_token is not None:
+                        catalogue_scope.reset(scope_token)
                     if token is not None:
                         prior_pick.reset(token)
                 if prior_ctx is not None and candidates:
@@ -3494,6 +3512,10 @@ class MatchElementsService:
                 }
                 if ci:
                     metadata["cost_item_id"] = str(ci.id)
+                    # A regional price-list voce keeps saying which list it is from.
+                    from app.modules.boq.price_list_carry import carry_block
+
+                    carry_block(metadata, ci)
                 if resource_previews:
                     metadata["match_components"] = [rp.model_dump(mode="json") for rp in resource_previews]
 

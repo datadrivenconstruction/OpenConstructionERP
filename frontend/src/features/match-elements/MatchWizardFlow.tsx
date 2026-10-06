@@ -69,7 +69,13 @@ import {
   type MatchSession,
 } from './api';
 import { matchGuide } from './matchGuide';
-import { QdrantHealthCard } from './QdrantHealthCard';
+import { MatchReadinessCard, useMatchReadiness } from './MatchReadinessCard';
+import { describeMatchError } from './matchErrors';
+import {
+  autoBlockedReason,
+  sessionCatalogueValue,
+  useCataloguePreselect,
+} from './catalogueChoice';
 import { MatchProgressCard, type MatchProgressStatus } from './MatchProgressCard';
 import { MatchDetailPanel } from './MatchDetailPanel';
 import { GroupingPanel } from './GroupingPanel';
@@ -648,20 +654,46 @@ export function MatchWizardFlow() {
     [cataloguesQ.data],
   );
 
-  // Auto-pre-select the catalogue whose region matches the project's
-  // region (case-insensitive) the first time we have both lists. Without
-  // this the dropdown would show "—" until the user manually picks one,
-  // even though auto_bind would have used the same row anyway.
+  // What the backend reads from the project's region: its language, the
+  // catalogue that fits it, and whether matching can run at all. The
+  // region is stored as a form label ("Italy", "DACH") that is neither a
+  // catalogue id nor a country code, so comparing it to the catalogue
+  // list here never matched; the backend's reading is the one auto-bind
+  // uses, so the picker and the run agree.
+  const readinessQ = useMatchReadiness(projectId);
+  const recommendedRegion = readinessQ.data?.recommended_catalogue?.region ?? null;
+
+  // Pre-select the installed catalogue that fits the project, once, and
+  // never over the project's own binding or over the user's choice of Auto
+  // (see catalogueChoice.ts). When the project states no language and has
+  // no binding, Auto has nothing to bind from, so the user must pick.
+  const loadedRegions = useMemo(() => loadedCatalogues.map((c) => c.region), [loadedCatalogues]);
+  const { choose: chooseCatalogue } = useCataloguePreselect(
+    readinessQ.data,
+    loadedRegions,
+    catalogueId,
+    setCatalogueId,
+  );
+  const autoBlocked = autoBlockedReason(readinessQ.data);
+
+  // A catalogue install finishing changes the readiness answer; re-ask
+  // then instead of leaving "no catalogue installed" up until it goes stale.
+  const loadedKey = loadedCatalogues.map((c) => c.region).join(',');
+  const prevLoadedKey = useRef<string | null>(null);
   useEffect(() => {
-    if (catalogueId || !project?.region || loadedCatalogues.length === 0) return;
-    const want = String(project.region).toLowerCase();
-    const hit = loadedCatalogues.find(
-      (c) =>
-        c.region.toLowerCase() === want ||
-        c.country_iso.toLowerCase() === want,
-    );
-    if (hit) setCatalogueId(hit.region);
-  }, [catalogueId, project?.region, loadedCatalogues]);
+    if (prevLoadedKey.current !== null && prevLoadedKey.current !== loadedKey && projectId) {
+      qc.invalidateQueries({ queryKey: ['match-readiness', projectId] });
+    }
+    prevLoadedKey.current = loadedKey;
+  }, [loadedKey, projectId, qc]);
+
+  // "Setup & tools" is opened from the readiness card's next-step link.
+  const setupRef = useRef<HTMLDetailsElement | null>(null);
+  const [setupOpen, setSetupOpen] = useState(false);
+  const openSetup = useCallback(() => {
+    setSetupOpen(true);
+    setupRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
 
   useEffect(() => {
     if (displayCurrency || !project?.currency) return;
@@ -775,7 +807,7 @@ export function MatchWizardFlow() {
         title: t('match.wizard.sessionFailed', {
           defaultValue: 'Could not create match session',
         }),
-        message: e.message,
+        message: describeMatchError(e, t, 'session'),
       }),
   });
 
@@ -897,7 +929,9 @@ export function MatchWizardFlow() {
         construction_stage: stageHint || null,
         use_net_quantities: useNet,
         auto_confirm_threshold: autoThreshold,
-        catalogue_id: catalogueId,
+        // "" and not null: the PATCH reads null as "not sent", so choosing
+        // Auto after a pick would otherwise keep the old pick.
+        catalogue_id: sessionCatalogueValue(catalogueId),
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['match-groups'] });
@@ -973,11 +1007,13 @@ export function MatchWizardFlow() {
       // right before it aborts.
       if (cancelledRef.current) return;
       setMatchStatus('error');
-      setMatchError(e instanceof Error ? e.message : String(e));
+      // In the reader's language, with the next step, instead of the
+      // transport text ("500 Internal server error").
+      setMatchError(describeMatchError(e, t));
     } finally {
       if (runAbortRef.current === ac) runAbortRef.current = null;
     }
-  }, [sessionId, runMatchM]);
+  }, [sessionId, runMatchM, t]);
 
   // User-initiated cancel of an in-flight match. Aborts the POST, returns
   // the wizard to the ready Grouping stage (no stuck spinner), and lets
@@ -1044,7 +1080,7 @@ export function MatchWizardFlow() {
       case 'model':
         return !!modelId;
       case 'catalogue':
-        return true;
+        return !(autoBlocked && !catalogueId);
       case 'scope':
         return true;
       case 'grouping':
@@ -1056,7 +1092,7 @@ export function MatchWizardFlow() {
       default:
         return false;
     }
-  }, [stage, projectId, modelId, sessionId, groups.length, matchStatus]);
+  }, [stage, projectId, modelId, sessionId, groups.length, matchStatus, autoBlocked, catalogueId]);
 
   const goNext = useCallback(async () => {
     switch (stage) {
@@ -1207,12 +1243,12 @@ export function MatchWizardFlow() {
         </a>
       </div>
 
-      {/* Vector-DB readiness — probed up front so the user knows whether
-          semantic search is available before investing time in setup.
-          QdrantHealthCard self-hides when Qdrant is healthy (stage 3
-          carries the green confirmation) and renders the actionable
-          one-click installer card the moment it is unreachable. */}
-      <QdrantHealthCard />
+      {/* Can matching work for this project at all? Answered before the
+          user uploads anything, with the next step for each gap. It is the
+          page's only card about the search service: a second one probed a
+          different vector database and could say "running" while this one
+          said "blocked". */}
+      <MatchReadinessCard projectId={projectId} onOpenSetup={openSetup} />
 
       {/* Setup & tools — dead_button fix. These panels were built and
           tested but never reachable from the route: the embedder install
@@ -1222,7 +1258,12 @@ export function MatchWizardFlow() {
           tenant-scoped template library. Collapsed by default so the
           first-screen wizard stays tidy; one click reveals every
           previously-orphaned control. */}
-      <details className="group rounded-xl border border-border-light bg-surface-primary">
+      <details
+        ref={setupRef}
+        open={setupOpen}
+        onToggle={(e) => setSetupOpen((e.currentTarget as HTMLDetailsElement).open)}
+        className="group rounded-xl border border-border-light bg-surface-primary"
+      >
         <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-medium text-content-primary">
           <Wrench className="h-4 w-4 shrink-0 text-oe-blue" />
           {t('match.wizard.setupTools', {
@@ -1235,7 +1276,7 @@ export function MatchWizardFlow() {
           <EmbedderStatusCard />
           {/* Cost-catalogue install — pinned to the active project's region
               so the matching catalogue is one click away. */}
-          <CataloguesPanelCard preferredRegion={project?.region ?? null} />
+          <CataloguesPanelCard preferredRegion={recommendedRegion} />
           {/* §10 production observability for matches in this project. */}
           <MatchAnalyticsCard projectId={projectId} />
           {/* Launcher for the tenant-scoped template library slide-over. */}
@@ -1396,10 +1437,10 @@ export function MatchWizardFlow() {
                       <select
                         value={catalogueId ?? ''}
                         disabled={cataloguesQ.isLoading}
-                        onChange={(e) => setCatalogueId(e.target.value || null)}
+                        onChange={(e) => chooseCatalogue(e.target.value || null)}
                         className="w-full rounded-lg border border-border-light bg-surface-elevated px-3 py-2 text-sm disabled:opacity-60"
                       >
-                        <option value="">
+                        <option value="" disabled={!!autoBlocked}>
                           {t('match.wizard.catalogueAuto', {
                             defaultValue: 'Auto (from project region: {{region}})',
                             region: project?.region || '—',
@@ -1417,6 +1458,22 @@ export function MatchWizardFlow() {
                           </option>
                         ))}
                       </select>
+                      {autoBlocked && (
+                        <p
+                          data-testid="catalogue-auto-blocked"
+                          className="mt-1 text-xs font-medium text-amber-700 dark:text-amber-300"
+                        >
+                          {autoBlocked === 'region_language_unknown'
+                            ? t('match.wizard.catalogueAutoMultiLanguage', {
+                                defaultValue:
+                                  'Choose a catalogue: the project region spans several languages, so Auto cannot pick one.',
+                              })
+                            : t('match.wizard.catalogueAutoUnknown', {
+                                defaultValue:
+                                  "Choose a catalogue: the project's region does not tell its language, so Auto cannot pick one.",
+                              })}
+                        </p>
+                      )}
                       <p className="mt-1 text-xs text-content-tertiary">
                         {cataloguesQ.isError
                           ? t('match.wizard.catalogueLoadError', {
@@ -1519,8 +1576,6 @@ export function MatchWizardFlow() {
                       </p>
                     </div>
                   </div>
-
-                  <QdrantHealthCard alwaysShow />
 
                   <div className="rounded-lg border border-border-light bg-surface-secondary p-4 text-sm text-content-secondary">
                     {t('match.wizard.catalogueNote', {

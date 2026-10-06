@@ -128400,6 +128400,7 @@
         "permissions.py",
         "pipeline.py",
         "qdrant_supervisor.py",
+        "readiness.py",
         "revit_ifc_map.py",
         "router.py",
         "schemas.py",
@@ -129034,6 +129035,12 @@
         }
       ],
       "routes": [
+        {
+          "method": "GET",
+          "path": "/readiness",
+          "handler": "match_readiness",
+          "response_model": "schemas.MatchReadiness"
+        },
         {
           "method": "POST",
           "path": "/sessions",
@@ -130877,6 +130884,103 @@
               "name": "allowed_providers",
               "type": "str | None",
               "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "ReadinessItem",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One reason the page shows, as a code plus the values its sentence names.",
+          "fields": [
+            {
+              "name": "code",
+              "type": "ReadinessCode"
+            },
+            {
+              "name": "params",
+              "type": "dict[str, str]"
+            }
+          ]
+        },
+        {
+          "class_name": "RecommendedCatalogue",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "region",
+              "type": "str"
+            },
+            {
+              "name": "language",
+              "type": "str"
+            },
+            {
+              "name": "country_iso",
+              "type": "str"
+            },
+            {
+              "name": "installed",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "class_name": "MatchReadiness",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What /match-elements can do for a project, answered before any upload.\n\n``can_match`` is False exactly when ``blockers`` is non-empty.\n``project_language`` / ``project_country`` are the backend's reading of\nthe project's region, the same reading auto-bind uses, so the wizard\npre-selects from one source instead of re-deriving it.",
+          "fields": [
+            {
+              "name": "can_match",
+              "type": "bool"
+            },
+            {
+              "name": "blockers",
+              "type": "list[ReadinessItem]"
+            },
+            {
+              "name": "warnings",
+              "type": "list[ReadinessItem]"
+            },
+            {
+              "name": "project_region",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "project_language",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "project_country",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "installed_languages",
+              "type": "list[str]"
+            },
+            {
+              "name": "recommended_catalogue",
+              "type": "RecommendedCatalogue | None",
+              "default": "None"
+            },
+            {
+              "name": "bound_catalogue",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "can_change_catalogue",
+              "type": "bool",
+              "default": "False"
             }
           ]
         }
@@ -155281,6 +155385,7 @@
         "i18n_foundation",
         "inspections",
         "markups",
+        "match_elements",
         "meetings",
         "methodology",
         "ncr",
@@ -234757,10 +234862,10 @@
     },
     {
       "name": "match-elements",
-      "ts_files": 36,
+      "ts_files": 41,
       "css_files": 0,
-      "test_files": 11,
-      "total_files": 36
+      "test_files": 14,
+      "total_files": 41
     },
     {
       "name": "meetings",
@@ -236313,6 +236418,7 @@
       "i18n_foundation",
       "inspections",
       "markups",
+      "match_elements",
       "meetings",
       "methodology",
       "ncr",
@@ -236653,11 +236759,11 @@
     "total_models": 623,
     "total_columns": 7150,
     "total_relationships": 234,
-    "total_routes": 3747,
-    "total_schemas": 3550,
-    "total_python_files": 2267,
+    "total_routes": 3748,
+    "total_schemas": 3553,
+    "total_python_files": 2268,
     "frontend_features": 192,
-    "frontend_ts_files": 2940,
+    "frontend_ts_files": 2945,
     "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {

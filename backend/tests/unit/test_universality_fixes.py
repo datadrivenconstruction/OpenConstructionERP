@@ -49,7 +49,7 @@ from app.core.match_service.boosts.region import (
         ("LT", ("LT_",)),  # Lithuania — Vilnius
         ("ID", ("ID_",)),  # Indonesia — Jakarta
         ("TH", ("TH_",)),  # Thailand — Bangkok
-        ("VN", ("VN_",)),  # Vietnam — Hanoi
+        ("VN", ("VN_", "VI_")),  # Vietnam — the published catalogue id is VI_HANOI
         ("KR", ("KR_",)),  # Korea — Seoul
         ("SA", ("SA_",)),  # Saudi Arabia
         ("HI", ("HI_",)),  # India / Hindi catalogue prefix

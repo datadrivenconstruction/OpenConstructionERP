@@ -1806,6 +1806,7 @@ class ProjectService:
                         approved_by=boq.approved_by,
                         approved_at=boq.approved_at,
                         base_date=boq.base_date,
+                        tax_date=boq.tax_date,
                         metadata=dict(getattr(boq, "metadata_", None) or {}),
                         positions=positions_data,
                         markups=markups_data,
@@ -1953,6 +1954,7 @@ class ProjectService:
                     approved_by=boq_data.approved_by,
                     approved_at=boq_data.approved_at,
                     base_date=boq_data.base_date,
+                    tax_date=boq_data.tax_date,
                     metadata_=dict(boq_data.metadata or {}),
                 )
                 self.session.add(boq)
@@ -2064,6 +2066,26 @@ def _settings_snapshot(row: object) -> dict:
     }
 
 
+# MatchGroup statuses that record a person's decision on a match.
+SETTLED_MATCH_STATUSES: tuple[str, ...] = ("confirmed", "overridden", "applied")
+
+
+async def project_has_settled_matches(db: AsyncSession, project_id: uuid.UUID) -> bool:
+    """True when any match session of the project holds a confirmed match."""
+    from sqlalchemy import select  # noqa: PLC0415
+
+    from app.modules.match_elements.models import MatchGroup, MatchSession  # noqa: PLC0415
+
+    stmt = (
+        select(MatchGroup.id)
+        .join(MatchSession, MatchSession.id == MatchGroup.session_id)
+        .where(MatchSession.project_id == project_id)
+        .where(MatchGroup.status.in_(SETTLED_MATCH_STATUSES))
+        .limit(1)
+    )
+    return (await db.execute(stmt)).first() is not None
+
+
 async def auto_bind_dominant_catalogue(
     db: AsyncSession,
     project_id: uuid.UUID,
@@ -2095,7 +2117,11 @@ async def auto_bind_dominant_catalogue(
     """
     from sqlalchemy import func, select  # noqa: PLC0415
 
-    from app.core.match_service.region_language import language_for  # noqa: PLC0415
+    from app.core.match_service.region_language import (  # noqa: PLC0415
+        language_for,
+        project_language,
+        resolve_language,
+    )
     from app.core.vector import vector_count_with_payload_substring  # noqa: PLC0415
     from app.core.vector_index import COLLECTION_COSTS  # noqa: PLC0415
     from app.modules.costs.models import CostItem  # noqa: PLC0415
@@ -2104,24 +2130,29 @@ async def auto_bind_dominant_catalogue(
     row = await get_or_create_match_settings(db, project_id)
     # Resolve the project's preferred catalogue language early - we need
     # it both to decide whether to keep the current binding and to seed
-    # Pass 1 below. Two signals, in order of trust:
-    #   1. ``match_settings.target_language`` - explicit user choice, the
-    #      most direct signal of what language descriptions they want.
-    #   2. ``project.region`` → ``language_for()`` - geographic inference,
-    #      used when the user hasn't picked a target language.
-    # Without the target_language fallback, projects with an empty region
-    # (E2E fixtures, freshly-created projects, or anything imported without
-    # a country tag) get ``project_lang=None`` and skip Pass 1+1b entirely,
-    # falling through to Pass 2 which binds whichever catalogue has the
-    # most SQL rows - typically Russian.
+    # Pass 1 below. ``project_language`` reads the address country code,
+    # then the region label the project form stores ("Italy", "DACH").
+    # It returns None when the project states no single language, e.g. a
+    # "Nordics" project; such a project is not steered to any language.
+    #
+    # ``match_settings.target_language`` is consulted only when the
+    # project states no geography at all (E2E fixtures, imports without a
+    # country tag). It is NOT NULL with an "en" default, so it cannot tell
+    # a user's choice from the default, and letting it answer for a
+    # project that named its region would re-steer that project to
+    # English, which is the bug ``project_language`` exists to fix.
     project_lang: str | None = None
+    states_geography = False
     try:
         proj = await db.get(Project, project_id)
-        if proj and proj.region:
-            project_lang = language_for(proj.region)
+        if proj is not None:
+            region = (proj.region or "").strip()
+            country = (getattr(proj, "country_code", None) or "").strip()
+            states_geography = bool(region or country)
+            project_lang = project_language(region, country)
     except Exception:
         project_lang = None
-    if not project_lang:
+    if not project_lang and not states_geography:
         tl = (getattr(row, "target_language", None) or "").strip().lower()
         if tl:
             project_lang = tl
@@ -2178,12 +2209,28 @@ async def auto_bind_dominant_catalogue(
             except Exception:  # noqa: BLE001 - degrade to SQL-only signal
                 pass
 
-        current_lang = language_for(row.cost_database_id) if row.cost_database_id else None
+        # ``resolve_language``, not ``language_for``: a catalogue id we cannot
+        # place (a custom import) has no known language, and reading it as
+        # English would re-bind it away from every non-English project.
+        current_lang = resolve_language(row.cost_database_id) if row.cost_database_id else None
         # Language mismatch is only a reason to re-bind when we actually
         # have a language target - otherwise we'd thrash on projects with
         # no resolvable region.
         lang_mismatch = bool(project_lang and current_lang and project_lang != current_lang)
         if current_count > 0 and not lang_mismatch:
+            return row.cost_database_id
+        if current_count > 0 and await project_has_settled_matches(db, project_id):
+            # The project already has matches a person confirmed against
+            # this catalogue. Re-binding now would price the rest of the
+            # model from a different rate book mid-work. Keep it; the
+            # /match-elements readiness card offers the switch instead.
+            logger.info(
+                "auto_bind_dominant_catalogue: keeping %r for %s despite language %r != project %r (settled matches)",
+                row.cost_database_id,
+                project_id,
+                current_lang,
+                project_lang,
+            )
             return row.cost_database_id
         reason = "0 rows" if current_count == 0 else f"language {current_lang!r} != project {project_lang!r}"
         logger.info(
@@ -2259,6 +2306,14 @@ async def auto_bind_dominant_catalogue(
         "pl": "PL",
         "ar": "AE",
     }
+    # Every other language with a published catalogue gets that catalogue's
+    # id (``"sv"`` -> ``"SV_STOCKHOLM"``); without it a Swedish project bound
+    # nothing even with the Swedish collection installed.
+    from app.modules.costs.cwicr_v3_catalogue import CWICR_V3_CATALOGUES  # noqa: PLC0415
+
+    for _cat in CWICR_V3_CATALOGUES:
+        if _cat.available:
+            _LANG_TO_REGION.setdefault(_cat.language, _cat.region)
     if project_lang:
         fallback_region = _LANG_TO_REGION.get(project_lang)
         if fallback_region:

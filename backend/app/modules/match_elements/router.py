@@ -47,12 +47,19 @@ from app.core.i18n import get_locale
 from app.core.upload_guards import reject_if_xlsx_bomb
 from app.core.upload_streaming import stream_upload_to_temp
 from app.core.validation.messages import translate
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.dependencies import (
+    CurrentUserId,
+    CurrentUserPayload,
+    RequirePermission,
+    SessionDep,
+    verify_project_access,
+)
 from app.modules.match_elements import pipeline, schemas
 from app.modules.match_elements.analytics import compute_match_analytics
 from app.modules.match_elements.excel_import import parse_boq_xlsx
 from app.modules.match_elements.models import MatchGroup, MatchPromptTemplate, MatchSession
 from app.modules.match_elements.pdf_import import parse_boq_pdf
+from app.modules.match_elements.readiness import can_change_catalogue, compute_readiness
 from app.modules.match_elements.service import get_service
 from app.modules.match_elements.signature_match_service import (
     descriptor_from_group_row,
@@ -183,6 +190,28 @@ async def _assert_session_access(
     project_id = row[0]
     await verify_project_access(project_id, user_id, db)
     return project_id
+
+
+# ── Readiness ────────────────────────────────────────────────────────────
+
+
+@router.get("/readiness", response_model=schemas.MatchReadiness)
+async def match_readiness(
+    project_id: uuid.UUID,
+    session: SessionDep,
+    current_user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+) -> schemas.MatchReadiness:
+    """Say whether matching can work for this project before anything is uploaded.
+
+    Blockers name what stops a run (no search service, no catalogue, the
+    public demo); warnings name what makes it worse (no catalogue in the
+    project's language, no language model). Each carries a code the page
+    turns into a sentence with the next step.
+    """
+    await verify_project_access(project_id, current_user_id, session)
+    may_change = await can_change_catalogue(session, project_id, current_user_id, payload)
+    return await compute_readiness(session, project_id, may_change_catalogue=may_change)
 
 
 # ── Sessions ─────────────────────────────────────────────────────────────
@@ -1325,8 +1354,7 @@ async def get_match_analytics(
 def _qdrant_health_to_dict(health: object) -> dict[str, object]:
     """Render a ``QdrantHealth`` dataclass as a JSON-safe dict.
 
-    Frontend ``QdrantHealthCard`` consumes these fields verbatim; the
-    shape is locked to the dataclass in ``qdrant_supervisor.py``.
+    The shape is locked to the dataclass in ``qdrant_supervisor.py``.
     """
     return {
         "reachable": getattr(health, "reachable", False),
@@ -1346,8 +1374,10 @@ def _qdrant_health_to_dict(health: object) -> dict[str, object]:
 async def qdrant_health(_current_user_id: CurrentUserId) -> dict[str, object]:
     """Probe Qdrant and (if a local binary exists) auto-spawn it.
 
-    Used by ``QdrantHealthCard`` on /match-elements to detect when the
-    vector DB is down and surface a one-click install / refresh flow.
+    /match-elements no longer calls this: its readiness card probes the
+    CWICR store the ranker reads, which this route does not (it probes
+    ``qdrant_url``), and ``readiness.ensure_local_server`` took over the
+    auto-spawn. Kept for API clients and the operator.
     Authentication is required so anonymous probes can't enumerate
     binary paths on disk.
 

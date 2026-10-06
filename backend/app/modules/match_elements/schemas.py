@@ -689,3 +689,60 @@ class PromptTemplateUpdate(BaseModel):
     system_prompt: str | None = None
     user_template: str | None = None
     allowed_providers: str | None = None
+
+
+# ── Readiness ────────────────────────────────────────────────────────────
+
+
+ReadinessCode = Literal[
+    # Blockers: matching cannot produce a result on this instance.
+    "demo_mode",
+    "search_client_missing",
+    "search_unreachable",
+    "search_not_configured",
+    "no_catalogue_installed",
+    # Warnings: matching runs, but not as well as it could.
+    "embedder_missing",
+    "no_catalogue_for_language",
+    "region_language_unknown",
+    "region_unknown",
+    "binding_language_differs",
+]
+
+
+class ReadinessItem(BaseModel):
+    """One reason the page shows, as a code plus the values its sentence names."""
+
+    code: ReadinessCode
+    params: dict[str, str] = Field(default_factory=dict)
+
+
+class RecommendedCatalogue(BaseModel):
+    region: str
+    language: str
+    country_iso: str
+    installed: bool
+
+
+class MatchReadiness(BaseModel):
+    """What /match-elements can do for a project, answered before any upload.
+
+    ``can_match`` is False exactly when ``blockers`` is non-empty.
+    ``project_language`` / ``project_country`` are the backend's reading of
+    the project's region, the same reading auto-bind uses, so the wizard
+    pre-selects from one source instead of re-deriving it.
+    """
+
+    can_match: bool
+    blockers: list[ReadinessItem] = Field(default_factory=list)
+    warnings: list[ReadinessItem] = Field(default_factory=list)
+    project_region: str = ""
+    project_language: str | None = None
+    project_country: str | None = None
+    installed_languages: list[str] = Field(default_factory=list)
+    recommended_catalogue: RecommendedCatalogue | None = None
+    bound_catalogue: str | None = None
+    # Whether the caller may change the project's match settings (owner or
+    # admin, the rule the match-settings PATCH enforces). The card offers
+    # the catalogue switch only then.
+    can_change_catalogue: bool = False
