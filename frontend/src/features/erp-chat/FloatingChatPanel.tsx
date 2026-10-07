@@ -2340,16 +2340,18 @@ export function FloatingChatPanel() {
           color: 'var(--chat-text-primary)',
         }}
       >
-        {/* Header. Same height as the app header, so the two bottom lines
-            meet in one line across the screen. The title input stays the
+        {/* Header. Matches the app header when the controls fit, and wraps
+            at narrow zoomed widths so Close remains reachable. The title input stays the
             FIRST input[aria-label] in the dialog (a test depends on it). */}
         <div
           style={{
             display: 'flex',
+            flexWrap: 'wrap',
             alignItems: 'center',
             gap: 4,
-            height: 'var(--oe-header-height, 52px)',
+            minHeight: 'var(--oe-header-height, 52px)',
             flexShrink: 0,
+            paddingBlock: 8,
             paddingInline: '12px 8px',
             borderBottom: '1px solid var(--chat-border)',
             background: 'var(--chat-surface-1)',
