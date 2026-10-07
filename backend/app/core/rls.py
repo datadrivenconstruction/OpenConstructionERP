@@ -76,13 +76,12 @@ _installed: set[int] = set()
 def rls_enabled() -> bool:
     """Return True when row-level-security enforcement is switched on.
 
-    Reads the cached settings singleton. Never raises: a settings hiccup
-    degrades to "disabled" so a misconfiguration cannot wedge every query.
+    Reads the cached settings singleton. A settings failure must propagate:
+    treating an unreadable flag as disabled would let request transactions
+    retain the connecting role and silently bypass tenant policies. This also
+    prevents background transactions from starting until settings recover.
     """
-    try:
-        return bool(get_settings().rls_enforce)
-    except Exception:  # noqa: BLE001 - a query must never die on a settings read
-        return False
+    return bool(get_settings().rls_enforce)
 
 
 def set_request_tenant(tenant_id: str | None) -> Token[Any]:

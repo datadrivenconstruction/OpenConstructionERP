@@ -313,6 +313,50 @@ async def test_tenant_tables_selects_tenant_columns_only(rls_probe):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("after_commit", [False, True])
+async def test_settings_failure_cannot_turn_off_request_isolation(rls_probe, monkeypatch, after_commit):
+    """An unreadable flag must abort before SQL, including after a request commit."""
+    from sqlalchemy import event
+
+    from app.core import rls
+    from app.database import async_session_factory
+
+    expected = RuntimeError("injected settings failure")
+    query = f'SELECT tenant_id FROM "{_PROBE_TABLE}"'
+    executed = []
+
+    def record_query(conn, cursor, statement, parameters, context, executemany):
+        if statement == query:
+            executed.append(statement)
+
+    def unavailable_settings():
+        raise expected
+
+    token = rls.set_request_tenant(_TENANT_A)
+    try:
+        async with async_session_factory() as session:
+            if after_commit:
+                assert set((await session.execute(text(query))).scalars()) == {_TENANT_A, None}
+                await session.commit()
+            event.listen(rls_probe.sync_engine, "before_cursor_execute", record_query)
+            try:
+                with monkeypatch.context() as patch:
+                    patch.setattr(rls, "get_settings", unavailable_settings)
+                    with pytest.raises(RuntimeError) as error:
+                        await session.execute(text(query))
+                    assert error.value is expected
+                assert executed == [], "the tenant query reached PostgreSQL without a verified RLS setting"
+            finally:
+                event.remove(rls_probe.sync_engine, "before_cursor_execute", record_query)
+                await session.rollback()
+            # The same session works again after rollback and settings recovery,
+            # and still cannot read tenant B despite using an unfiltered query.
+            assert set((await session.execute(text(query))).scalars()) == {_TENANT_A, None}
+    finally:
+        rls.reset_request_tenant(token)
+
+
+@pytest.mark.asyncio
 async def test_disabled_flag_bypasses_policies(rls_probe):
     """With the flag off, a request-context session sees every row (superuser).
 
