@@ -1,0 +1,868 @@
+{
+  "boq_markup": {
+    "contingency_not_on_profit": {
+      "fail": "Riziková přirážka \"{markup}\" se počítá ze základu, který již obsahuje řádek zisku \"{profit}\", takže se marže účtuje i z peněz vyčleněných na riziko",
+      "suggestion": "Počítejte tento řádek z přímých nákladů, pokud standardní tržní metoda záměrně nezařazuje riziko až za režii a zisk"
+    },
+    "order_is_declared": {
+      "fail": "Pořadí {order} používá více řádků přirážek: {markups}",
+      "suggestion": "Každému řádku přirážky přidělte vlastní pořadí, aby bylo jednoznačné, které přirážky vstupují do základu dalších"
+    },
+    "percentage_within_band": {
+      "fail": "\"{markup}\" má jako řádek kategorie {category} hodnotu {percentage}%, mimo přiměřené rozpětí 0 až {ceiling}%",
+      "suggestion": "Zkontrolujte desetinnou čárku. Řádek se v každém případě oceňuje přesně podle zadání"
+    },
+    "cumulative_base_is_settled": {
+      "fail": "\"{markup}\" se vztahuje na \"{apply_to}\", ale žádný řádek mu nepředchází, takže se počítá pouze z přímých nákladů",
+      "suggestion": "Přesuňte jej za řádky, které mají vstoupit do jeho základu, nebo jej počítejte z přímých nákladů"
+    }
+  },
+  "common": {
+    "ok": "V pořádku"
+  },
+  "export": {
+    "generated": "Vygenerováno",
+    "content_digest": "Kontrolní otisk obsahu"
+  },
+  "field_time": {
+    "hours_per_day_max": {
+      "fail": "Pracovník {worker} má na tento den vykázáno {hours} h, což překračuje limit {max} h",
+      "suggestion": "Před odesláním přiřaďte hodiny ke správnému dni nebo pracovníkovi"
+    },
+    "line_complete": {
+      "fail": "Řádek {line} není úplný: {reason}",
+      "labour_xor_plant": "musí být vykázána buď práce, nebo stroj, nikoli obojí ani žádná z možností",
+      "hours_positive": "počet hodin musí být větší než nula",
+      "cost_code_required": "je vyžadován nákladový kód",
+      "suggestion": "Před odesláním výkazu práce doplňte řádek"
+    },
+    "cost_code_resolves": {
+      "fail": "Kód '{code}' na řádku {line} neodpovídá žádné položce soupisu prací ani WBS v tomto projektu",
+      "suggestion": "Vyberte nákladový kód nebo WBS, který existuje v projektovém soupisu prací"
+    },
+    "daywork_needs_variation": {
+      "fail": "Řádek práce v režii {line} není propojen s otevřenou změnou",
+      "suggestion": "Propojte práci v režii se změnou, na jejímž základě byla zadána"
+    },
+    "plant_needs_equipment": {
+      "fail": "Řádek stroje {line} neuvádí žádné zařízení",
+      "suggestion": "Přiřaďte stroj, aby bylo možné ocenit strojohodiny"
+    },
+    "approved_immutable": {
+      "fail": "Tento výkaz práce má stav {status} a nelze jej upravovat",
+      "suggestion": "Pro opravu schválených hodin zaúčtujte storno výkaz práce"
+    },
+    "offline_clock_plausible": {
+      "fail": "Zařízení, které tento den zaznamenalo, mělo čas o {minutes} minut napřed oproti serveru",
+      "suggestion": "Nastavte čas zařízení, aby bylo možné záznamy seřadit správně"
+    },
+    "offline_sync_delay": {
+      "fail": "Práce proběhla dne {date}, ale do kanceláře se údaje dostaly až o {days} dní později",
+      "suggestion": "Před schválením ověřte hodiny podle skutečného pracovního dne; vyúčtování již může být uzavřeno"
+    }
+  },
+  "ai_takeoff": {
+    "unreviewed_proposals": {
+      "fail": "{count} návrhů výměr stále čeká na kontrolu a zde se neoceňuje",
+      "suggestion": "Projděte frontu ke kontrole, aby potvrzené výměry odpovídaly výkresu"
+    }
+  },
+  "boq_quality": {
+    "position_has_quantity": {
+      "fail": "Položka {ordinal} nesmí mít nulové nebo chybějící množství",
+      "suggestion": "Zadejte množství větší než 0"
+    },
+    "position_has_unit_rate": {
+      "fail": "Položka {ordinal} by měla mít přiřazenou jednotkovou cenu",
+      "suggestion": "Přiřaďte cenu z cenové databáze"
+    },
+    "position_has_description": {
+      "fail": "Položka {ordinal} nesmí mít prázdný popis"
+    },
+    "no_duplicate_ordinals": {
+      "fail": "Duplicitní číslo '{ordinal}' bylo nalezeno u {count} položek"
+    },
+    "unit_rate_in_range": {
+      "fail": "Položka {ordinal}: cena {rate} je >{threshold} (5násobek mediánu)",
+      "suggestion": "Ověřte tuto jednotkovou cenu – je neobvykle vysoká"
+    },
+    "negative_values": {
+      "fail": "Položka {ordinal} má záporné hodnoty: {details}",
+      "suggestion": "Opravte záporné hodnoty – použijte kladná čísla"
+    },
+    "unrealistic_rate": {
+      "fail": "Položka {ordinal}: podrobnosti: {details}",
+      "suggestion": "Ověřte tuto hodnotu – zdá se nereálně vysoká",
+      "not_assessed_no_currency": "{count} položek nebylo posouzeno: soupis prací neuvádí měnu, takže peněžní limity (uvedené v {reference}) nebylo možné přepočítat do jeho měny",
+      "not_assessed_no_currency_suggestion": "Nastavte měnu projektu nebo u položek uveďte měnu",
+      "not_assessed_no_rate": "{count} položek v {currency} nebylo posouzeno: není uložen kurz z {reference} do {currency}, takže peněžní limity nebylo možné přepočítat pro tento soupis prací",
+      "not_assessed_no_rate_suggestion": "Přidejte kurz z {reference} do {currency} do kurzovního lístku nebo projektových směnných kurzů"
+    },
+    "total_mismatch": {
+      "fail": "Položka {ordinal}: vypočteno {computed} != uloženo {stored} (rozdíl={diff})",
+      "suggestion": "Přepočítejte celkovou cenu = množství × jednotková cena"
+    },
+    "resource_split_mismatch": {
+      "fail": "Položka {ordinal}: mezisoučet zdrojů {subtotal} se liší od jednotkové ceny {rate} o {diff}",
+      "suggestion": "Zkontrolujte množství a ceny zdrojů – jejich součet na jednotku musí odpovídat jednotkové ceně položky"
+    },
+    "empty_unit": {
+      "fail": "Položka {ordinal} má prázdnou nebo chybějící měrnou jednotku",
+      "suggestion": "Přiřaďte měrnou jednotku (m, m2, m3, kg, ks, soubor apod.)"
+    },
+    "section_without_items": {
+      "fail": "Oddíl {ordinal} ({title}) neobsahuje podřízené položky",
+      "suggestion": "Přidejte položky do tohoto oddílu nebo prázdný oddíl odstraňte"
+    },
+    "rate_vs_benchmark": {
+      "fail": "Položka {ordinal}: jednotková cena {rate}/{unit} překračuje referenční limit {threshold}/{unit} – může být nereálná",
+      "suggestion": "Ověřte cenu – obvyklé ceny pro {unit} by měly být pod {threshold}. Zkontrolujte jednotky a desetinná místa.",
+      "not_assessed_no_currency": "{count} položek nebylo posouzeno: soupis prací neuvádí měnu, takže referenční limity (uvedené v {reference}) nebylo možné přepočítat do jeho měny",
+      "not_assessed_no_currency_suggestion": "Nastavte měnu projektu nebo u položek uveďte měnu",
+      "not_assessed_no_rate": "{count} položek v {currency} nebylo posouzeno: není uložen kurz z {reference} do {currency}, takže referenční limity nebylo možné přepočítat pro tento soupis prací",
+      "not_assessed_no_rate_suggestion": "Přidejte kurz z {reference} do {currency} do kurzovního lístku nebo projektových směnných kurzů"
+    },
+    "lump_sum_ratio": {
+      "fail": "{lsum_count} z {total_count} položek ({percent}) používá paušální cenu – překročen limit {threshold}",
+      "suggestion": "Pro přesnější kalkulaci rozepište paušální položky na měřitelné množství (m, m2, m3, kg, ks)"
+    },
+    "cost_concentration": {
+      "fail": "Položka {ordinal} tvoří {share} celkové ceny soupisu prací ({value} z {grand_total}) – překročen limit {threshold}",
+      "suggestion": "Rozdělte položku na menší části nebo ověřte cenu – jedna položka by neměla dominovat rozpočtu"
+    },
+    "currency_consistency": {
+      "fail": "Nalezeny různé měny: {currencies}",
+      "suggestion": "V celém soupisu prací používejte jednu měnu"
+    },
+    "measurement_consistency": {
+      "fail": "Soupis prací kombinuje metrické a imperiální jednotky – používejte jednotný systém",
+      "suggestion": "Převeďte všechna množství buď na metrické, nebo na imperiální jednotky"
+    },
+    "revision_cost_impact_review": {
+      "fail": "Cenový dopad revize ve výši {amount} dosud není zachycen jako změna",
+      "suggestion": "Z tohoto porovnání revizí vytvořte návrh žádosti o změnu, abyste mohli sledovat cenový dopad"
+    },
+    "base_date_readable": {
+      "fail": "Základní datum '{base_date}' není platné datum, proto se soupis prací daní dnešní sazbou místo sazby platné k jeho datu",
+      "suggestion": "Uveďte cenovou základnu jako den, měsíc, čtvrtletí nebo rok ({shapes})"
+    },
+    "tax_date_readable": {
+      "fail": "Daňové datum '{tax_date}' není platné datum, proto se soupis prací daní dnešní sazbou místo sazby platné k jeho datu",
+      "suggestion": "Uveďte daňové datum jako den, měsíc, čtvrtletí nebo rok ({shapes}), nebo jej vymažte pro použití základního data soupisu prací"
+    }
+  },
+  "din276": {
+    "cost_group_required": {
+      "fail": "Položce {ordinal} chybí nákladová skupina DIN 276 KG",
+      "suggestion": "Přiřaďte třímístnou nákladovou skupinu DIN 276 (např. 330 pro stěny)"
+    },
+    "valid_cost_group": {
+      "fail": "Neplatný kód DIN 276 '{code}' u položky {ordinal}"
+    },
+    "hierarchy": {
+      "fail": "Položka {ordinal}: KG {child} nespadá pod nadřazenou KG {parent} (očekávaná předpona '{prefix}')",
+      "suggestion": "Přesuňte položku pod správnou nadřazenou položku nebo upravte kód KG podle hierarchie ({prefix}xx)"
+    },
+    "completeness": {
+      "fail": "V soupisu prací chybí skupina KG {group} – {group_name}",
+      "suggestion": "Pro úplné pokrytí doplňte položky pro KG {group} ({group_name})"
+    }
+  },
+  "gaeb": {
+    "ordinal_format": {
+      "fail": "Číslo položky '{ordinal}' neodpovídá masce GAEB OZ-Maske tohoto souboru",
+      "suggestion": "Použijte OZ-Maske souboru, např. 001.001.0010 nebo 01.02.0030"
+    },
+    "lv_structure": {
+      "fail": "Položka {ordinal}: koncová položka nemá nadřazený oddíl – hierarchie GAEB LV vyžaduje nadřazenou Leistungsgruppe",
+      "suggestion": "Přiřaďte položku k nadřazenému oddílu (Leistungsgruppe / Titel)"
+    },
+    "einheitspreis_sanity": {
+      "negative": "Položka {ordinal}: jednotková cena (Einheitspreis) {rate} je záporná (jednotka='{unit}') – zápornou cenu nelze přenést v GAEB",
+      "zero": "Položka {ordinal}: jednotková cena (Einheitspreis) je 0.00 (jednotka='{unit}') – potvrďte, že jde o nabídnutou nulovou cenu, nikoli o chybějící cenu",
+      "suggestion": "Zadejte kladnou jednotkovou cenu (Einheitspreis) nebo označte položku jako Bedarfsposition (volitelné práce) či paušál (jednotka='lsum')"
+    },
+    "trade_section_code": {
+      "fail": "Hlavnímu oddílu '{ordinal}' chybí kód GAEB Leistungsbereich (očekáván třímístný kód oboru, např. '012')",
+      "suggestion": "Doplňte třímístný kód oboru (Leistungsbereich) do oddílu – např. '012' pro zemní práce, '013' pro zednické práce"
+    },
+    "quantity_decimals": {
+      "fail": "Položka {ordinal}: množství {quantity} má {decimals} desetinných míst – konvence GAEB X83 povoluje nejvýše 3",
+      "suggestion": "Zaokrouhlete množství nejvýše na 3 desetinná místa podle GAEB X83"
+    }
+  },
+  "nrm": {
+    "classification_required": {
+      "fail": "Položce {ordinal} chybí kód prvku NRM",
+      "suggestion": "Přiřaďte kód prvku NRM 1/2 (např. 2.6.1 pro obvodové stěny)"
+    },
+    "valid_element": {
+      "fail": "Neplatný kód NRM '{code}' u položky {ordinal}"
+    },
+    "completeness": {
+      "fail": "V soupisu prací chybí skupina NRM {group} – {group_name}",
+      "suggestion": "Doplňte položky pro skupinu NRM {group} ({group_name})"
+    },
+    "base_date_declared": {
+      "fail": "Nákladový plán neuvádí základní datum, ke kterému platí jeho ceny",
+      "suggestion": "Zaznamenejte základní datum do soupisu prací. Bez něj nelze určit, zda je cena zastaralá nebo jakou inflaci je ještě nutné započítat"
+    },
+    "cost_plan_stage_declared": {
+      "fail": "Nákladový plán neuvádí, pro jakou fázi projektování byl sestaven",
+      "suggestion": "Zaznamenejte fázi. Očekávaná přesnost nákladového plánu závisí na fázi jeho zpracování; neuvedená fáze vyvolává nesprávná očekávání"
+    },
+    "contractor_costs_present": {
+      "preliminaries": "Nákladový plán neobsahuje náklady hlavního dodavatele na zařízení a provoz staveniště ani ve skupině {group}, ani jako přirážku",
+      "overheads_and_profit": "Nákladový plán neobsahuje režii a zisk hlavního dodavatele ani ve skupině {group}, ani jako přirážku",
+      "suggestion": "Přidejte tyto náklady jako prvek skupiny NRM nebo jako přirážku k vyměřeným pracím. Oba postupy jsou správné; bez nich jsou náklady stavby neúplné"
+    },
+    "risk_allowance_present": {
+      "fail": "Nákladový plán neobsahuje rezervu na rizika",
+      "suggestion": "Přidejte rezervu na rizika jako skupinu NRM 13 nebo jako rizikovou přirážku. Plán bez rezervy předkládá jedinou částku, jako by byla jistá"
+    }
+  },
+  "masterformat": {
+    "classification_required": {
+      "fail": "Položce {ordinal} chybí kód MasterFormat",
+      "suggestion": "Přiřaďte kód MasterFormat (např. 03 30 00 pro monolitický beton)"
+    },
+    "valid_division": {
+      "fail": "Neplatný kód MasterFormat '{code}' u položky {ordinal}",
+      "suggestion": "Použijte šestimístný formát MasterFormat: XX XX XX (např. 03 30 00)"
+    },
+    "completeness": {
+      "fail": "V soupisu prací chybí oddíl {division} – {division_name}",
+      "suggestion": "Doplňte položky pro oddíl {division} ({division_name})"
+    }
+  },
+  "sinapi": {
+    "code_required": {
+      "fail": "Položce {ordinal} chybí kód SINAPI",
+      "suggestion": "Přiřaďte kód skladby SINAPI (např. 87878 pro beton C30)"
+    },
+    "valid_code": {
+      "fail": "Neplatný kód SINAPI '{code}' u položky {ordinal}"
+    }
+  },
+  "nbr": {
+    "classification_required": {
+      "fail": "Položce {ordinal} chybí oddíl NBR 12721",
+      "suggestion": "Označte položku oddílem NBR 12721 (S1 = preliminares, S2 = infra-estrutura, ..., S11 = serviços complementares)"
+    },
+    "valid_section": {
+      "fail": "Oddíl NBR 12721 '{code}' u položky {ordinal} není jedním z S1..S11",
+      "suggestion": "Použijte kódy S1 až S11 (např. S3 pro supra-estrutura)"
+    }
+  },
+  "gesn": {
+    "code_required": {
+      "fail": "Položce {ordinal} chybí kód ГЭСН/ФЕР",
+      "suggestion": "Přiřaďte kód ГЭСН (např. 06-01-001-01 pro beton)"
+    },
+    "valid_code": {
+      "fail": "Kód ГЭСН '{code}' neodpovídá formátu XX-XX-XXX-XX",
+      "suggestion": "Použijte formát NN-NN-NNN-NN (např. 06-01-001-01)"
+    },
+    "resource_breakdown": {
+      "fail": "Položka {ordinal} odkazuje na normu {code}, ale neobsahuje rozpad zdrojů",
+      "suggestion": "Importujte normované množství práce, strojů a materiálů nebo uveďte důvod odchylky této položky"
+    },
+    "labour_hours_present": {
+      "fail": "Položka {ordinal} ({code}) má rozpad zdrojů bez pracovních hodin",
+      "suggestion": "Doplňte normované člověkohodiny; režie a kalkulovaný zisk se normují z mezd a bez nich je nelze vypočítat"
+    },
+    "price_level_declared": {
+      "fail": "Rozpočet neuvádí cenovou úroveň svých částek",
+      "suggestion": "Uveďte cenovou úroveň (datum) a použitý přepočtový index, aby kontrolující mohl dospět ke stejnému součtu"
+    }
+  },
+  "dpgf": {
+    "lot_required": {
+      "fail": "Položka {ordinal} není přiřazena k žádnému Lot technique",
+      "suggestion": "Přiřaďte technický oddíl (Lot technique), např. Lot 01 Gros Œuvre"
+    },
+    "pricing_complete": {
+      "fail": "Oceněno je pouze {priced}/{total} položek ({percent}) – pod hranicí 80%",
+      "suggestion": "Před odevzdáním DPGF oceňte všechny položky"
+    }
+  },
+  "onorm": {
+    "position_format": {
+      "fail": "Číslo položky '{ordinal}' neodpovídá formátu ÖNORM XX.XX.XXXXA",
+      "suggestion": "Použijte formát ÖNORM B 2063 (např. 01.02.01A)"
+    },
+    "description_length": {
+      "fail": "Položka {ordinal}: popis je příliš krátký ({length} znaků, minimum 20)",
+      "suggestion": "Doplňte podrobnosti do popisu položky podle ÖNORM B 2063"
+    }
+  },
+  "gbt50500": {
+    "code_required": {
+      "fail": "Položce {ordinal} chybí kód GB/T 50500",
+      "suggestion": "Přiřaďte devítimístný kód GB/T 50500 (např. 010101001)"
+    },
+    "valid_code": {
+      "fail": "Neplatný kód GB/T 50500 '{code}' – očekáváno 9 nebo 12 číslic"
+    }
+  },
+  "cpwd": {
+    "code_required": {
+      "fail": "Položce {ordinal} chybí kód CPWD/DSR",
+      "suggestion": "Přiřaďte odkaz na položku CPWD DSR (např. 4.1.1)"
+    },
+    "measurement_units": {
+      "fail": "Jednotka '{unit}' u položky {ordinal} není standardní podle IS 1200",
+      "suggestion": "Použijte standardní jednotky IS 1200: m, m2, m3, kg, nos, rm apod."
+    }
+  },
+  "hungary": {
+    "item_code_required": {
+      "fail": "Položka {ordinal} nemá maďarský kód položky",
+      "invalid": "Kód '{code}' u položky {ordinal} neodpovídá ani jednomu ze dvou číselníků položek",
+      "suggestion": "Pro pozemní stavby se používá MA-CC-SS-II (kapitoly 01 až 17), pro infrastrukturu šesti- nebo sedmimístné číslo položky z projektového číselníku"
+    },
+    "chapter_recognised": {
+      "fail": "Kapitola {chapter} u položky {ordinal} není jednou ze sedmnácti kapitol číselníku položek"
+    },
+    "material_fee_split": {
+      "fail": "Položka {ordinal}: materiál {material} plus cena práce {fee} se nerovná ceně {rate}",
+      "suggestion": "Opravte jednotkové ceny materiálu a práce nebo výslednou cenu, aby rozdělení souhlasilo"
+    },
+    "item_number_unique": {
+      "fail": "Číslo {number} je použito u {count} položek, ale musí označovat jedinou",
+      "suggestion": "Před předáním soupisu prací objednateli přidělte každé položce vlastní projektové číslo"
+    }
+  },
+  "prezzario": {
+    "voce_code_format_valid": {
+      "fail": "Kód '{code}' u položky {ordinal} neuvádí, z jakého ceníku pochází",
+      "suggestion": "Oficiální kód voce začíná regionem a rokem vydání ceníku, například TOS25_01.A03.001.001 (Toscana 2025). Zkopírujte kód přesně podle regionálního ceníku, importujte položku z ceníku nebo novou cenu označte NP.01"
+    },
+    "voce_reference_present": {
+      "fail": "Položka {ordinal} neodkazuje na žádnou položku prezzario",
+      "suggestion": "Vyberte položku z importovaného regionálního ceníku nebo ji označte jako nuovo prezzo (NP) doložené cenovou kalkulací"
+    },
+    "costi_sicurezza_separated": {
+      "fail": "Soupis prací neobsahuje samostatný řádek bezpečnostních nákladů, na které se nevztahuje nabídková sleva",
+      "suggestion": "Přidejte oneri della sicurezza jako samostatný oddíl nebo přirážku, oceněnou podle bezpečnostní kapitoly ceníku nebo plánu bezpečnosti"
+    },
+    "incidenza_manodopera_documented": {
+      "fail": "Položka {ordinal} ({code}) neuvádí podíl mzdových nákladů",
+      "suggestion": "Převezměte incidenza della manodopera z ceníku nebo přidejte pracovní zdroj, aby bylo možné mzdové náklady v nabídce uvést samostatně"
+    },
+    "overheads_not_applied_twice": {
+      "fail": "Ceny regionálního ceníku již zahrnují režii (13–17%) a zisk (10%). Jejich opětovné přidání zvyšuje celkovou cenu přibližně o {percent}%.",
+      "suggestion": "Odstraňte ze soupisu prací přirážky režie a zisku nebo je ponechte pouze u položek oceněných vlastní kalkulací (NP)."
+    }
+  },
+  "romania": {
+    "deviz_chapter_required": {
+      "fail": "Položka {ordinal} neuvádí kapitolu deviz general",
+      "suggestion": "Zařaďte řádek do příslušné kapitoly a podkapitoly HG 907/2016, například 4.1 pro stavební a montážní práce nebo 5.1 pro zařízení staveniště"
+    },
+    "deviz_chapter_recognised": {
+      "fail": "Kód deviz '{code}' u položky {ordinal} není kapitolou ani podkapitolou deviz general",
+      "suggestion": "Použijte kód z kapitol 1 až 6 deviz general podle HG 907/2016, například 1.2, 2, 3.5, 4.1, 5.1 nebo 6.2"
+    }
+  },
+  "greece": {
+    "net_article_required": {
+      "fail": "Položka {ordinal} neobsahuje položku jednotného ceníku (ΝΕΤ)",
+      "suggestion": "Uveďte položku ΝΕΤ, podle které je řádek oceněn, například ΟΙΚ 32.01.06, nebo ΝΑΟΙΚ pro novou položku"
+    },
+    "net_article_valid": {
+      "invalid": "Položka '{code}' na řádku {ordinal} nemá formát položky ΝΕΤ",
+      "chapter": "Položka '{code}' na řádku {ordinal} začíná kapitolou {chapter}, kterou ceník pozemních staveb neobsahuje",
+      "suggestion": "Uveďte předponu ceníku a číslo položky, například ΟΙΚ 38.20.02, ΟΔΟ Α-2 nebo ΑΤΗΕ 8151.1"
+    }
+  },
+  "ukraine": {
+    "zkr_chapter_required": {
+      "fail": "Položka {ordinal} neuvádí kapitolu souhrnného rozpočtu",
+      "suggestion": "Zařaďte řádek do příslušné kapitoly зведений кошторисний розрахунок, 1 až 12; stavební práce hlavního objektu patří do kapitoly 2"
+    },
+    "zkr_chapter_recognised": {
+      "fail": "Kapitola {chapter} u položky {ordinal} není jednou z dvanácti kapitol souhrnného rozpočtu",
+      "suggestion": "Použijte číslo kapitoly od 1 do 12"
+    }
+  },
+  "birimfiyat": {
+    "code_required": {
+      "fail": "Položce {ordinal} chybí číslo birim fiyat poz",
+      "suggestion": "Přiřaďte číslo Bayındırlık poz (např. 04.013/1)"
+    },
+    "valid_poz": {
+      "fail": "Poz '{code}' není ani aktuálním číslem jednotkového ceníku (XX.XXX.XXXX), ani starším číslem (XX.XXX/X)",
+      "suggestion": "Použijte číslo z ceníku, např. 15.140.1002, nebo 04.013/1 u starší smlouvy; vlastní kalkulované položky číslujte jako ÖZEL-1"
+    }
+  },
+  "sekisan": {
+    "code_required": {
+      "fail": "Položce {ordinal} chybí kód 積算",
+      "suggestion": "Přiřaďte kód položky 積算基準"
+    },
+    "metric_units": {
+      "fail": "Jednotka '{unit}' u položky {ordinal} není standardní",
+      "suggestion": "Použijte standardní metrické jednotky: m, m2, m3, kg, t, 式 apod."
+    }
+  },
+  "bc3": {
+    "code_required": {
+      "fail": "Položce {ordinal} chybí kód konceptu FIEBDC-3",
+      "suggestion": "Přiřaďte kód FIEBDC-3 (např. E04CM040 nebo 01.02.01)"
+    },
+    "valid_code": {
+      "fail": "Neplatný kód FIEBDC-3 '{code}' u položky {ordinal}",
+      "suggestion": "Použijte alfanumerický formát FIEBDC-3 (např. E04CM040, 01.02.01, CAP01#)"
+    }
+  },
+  "mexico": {
+    "apu_completeness": {
+      "fail": "Položka {ordinal} má neúplnou kalkulaci APU; chybějí nákladové složky: {missing}",
+      "suggestion": "Doplňte chybějící složky přímých nákladů (práce, materiály, stroje) do kalkulace jednotkové ceny"
+    },
+    "iva_rate_valid": {
+      "fail": "Položka {ordinal} má neplatnou sazbu IVA {rate}; mexická IVA činí 16, 8 (pohraniční oblast) nebo 0 procent",
+      "suggestion": "Nastavte sazbu IVA na 16 procent (základní), 8 procent (pohraniční oblast) nebo 0 procent"
+    },
+    "subcontract_retencion": {
+      "fail": "Subdodavatelská položka {ordinal} neuvádí, zda se uplatňují daňové srážky IVA/ISR",
+      "suggestion": "Zaznamenejte srážky IVA a ISR u subdodavatelské položky nebo uveďte, že se neuplatňují"
+    },
+    "cfdi_rfc_present": {
+      "missing": "Údaje vystavitele CFDI nejsou úplné pro export nabídky; chybí: {missing}",
+      "invalid_rfc": "RFC '{rfc}' není platné CFDI RFC (12 znaků pro společnost, 13 pro fyzickou osobu)",
+      "suggestion": "V projektovém profilu nastavte RFC vystavitele, regimen fiscal a uso CFDI pro fakturaci CFDI 4.0"
+    }
+  },
+  "pipeline": {
+    "side_effecting_requires_gate": {
+      "fail": "Uzly s vedlejšími účinky nemají kontrolní bránu: {nodes}",
+      "suggestion": "Před publikováním přidejte validační bránu nebo bránu lidského schválení na každou cestu od spouštěcího/AI uzlu ke každému zapisujícímu uzlu."
+    }
+  },
+  "property_dev": {
+    "escrow_account_required": {
+      "fail": "Developerský projekt vyžaduje aktivní vázaný účet podle regulátora '{regulator}'",
+      "suggestion": "Otevřete vázaný účet u banky s licencí regulátora v části Soulad s předpisy → Vázané účty"
+    },
+    "escrow_iban_valid": {
+      "fail": "Vázaný účet {account}: IBAN '{iban}' nevyhovuje strukturální kontrole ISO 13616",
+      "suggestion": "Opravte IBAN: kód země, délka a kontrolní součet musí odpovídat ISO 13616"
+    },
+    "escrow_balance_reconciled": {
+      "fail": "Vázaný účet {account}: účetní zůstatek {ledger} se liší o {drift} od součtu transakcí {transactions}",
+      "suggestion": "Odsouhlaste vázaný účet – prověřte nezaúčtované příjmy nebo chybějící debety"
+    },
+    "sales_contract_party_ownership_sums_to_100": {
+      "fail": "Smlouva {contract}: vlastnické podíly dávají součet {total}% (musí být přesně 100%)",
+      "suggestion": "Upravte procentní podíly stran tak, aby jejich součet byl 100.00%"
+    },
+    "payment_schedule_instalments_sum_to_contract_value": {
+      "fail": "Smlouva {contract}: součet splátek {instalments} se liší od hodnoty smlouvy {contract_value} (rozdíl {drift})",
+      "suggestion": "Upravte platební kalendář tak, aby součet splátek odpovídal celkové hodnotě smlouvy"
+    },
+    "reservation_expiry_in_future": {
+      "fail": "Rezervace {reservation}: expires_at {expires} není v budoucnosti",
+      "suggestion": "Prodlužte rezervaci nebo změňte její stav na vypršela/zrušena"
+    },
+    "broker_commission_rate_within_bounds": {
+      "fail": "Provizní smlouva {agreement}: problém: {issue}",
+      "suggestion": "Použijte sazbu od 0.1% do 15%, pevnou částku nebo neprázdnou stupnici pásem"
+    },
+    "price_matrix_no_negative_modifier": {
+      "fail": "Cenová matice {matrix}: násobitel {multiplier} pravidla '{factor}' je mimo [-0.50, 2.00]",
+      "suggestion": "Omezte úpravy na -50% až +200%, abyste předešli nereálným cenám pozemků"
+    }
+  },
+  "schedule_quality": {
+    "open_ends": {
+      "fail": "Činnost '{activity}' nemá vazbu typu {ends} (otevřený konec / nepropojená činnost)",
+      "both": "předchůdce ani následník",
+      "predecessor": "předchůdce",
+      "successor": "následník",
+      "suggestion": "Zapojte činnost do sítě vazbou na předchůdce i následníka nebo ji označte jako počáteční/koncový milník"
+    },
+    "negative_lag": {
+      "fail": "Vazba {predecessor} -> {successor} používá záporný odstup ({lag} dní), tedy předstih, který zkresluje kritickou cestu",
+      "suggestion": "Nahraďte předstih samostatnou činností nebo vazbou SS/FF, aby posloupnost zůstala obhajitelná"
+    },
+    "excessive_lag": {
+      "fail": "Vazba {predecessor} -> {successor} má odstup {lag} dní, nad limitem {threshold} dní",
+      "suggestion": "Modelujte čekání jako samostatnou činnost (nákup, zrání, schválení), aby bylo možné sledovat její stav a vyrovnávat zdroje"
+    },
+    "hard_constraints": {
+      "fail": "Činnost '{activity}' má pevné datumové omezení ({constraint}), které přebíjí logiku sítě",
+      "suggestion": "Použijte měkké omezení (zahájení nejdříve) nebo určete datum pomocí vazeb, aby se činnost mohla posunout při zpoždění předchůdců"
+    },
+    "negative_float": {
+      "fail": "Činnost '{activity}' má zápornou celkovou časovou rezervu ({float} dní), takže harmonogram nelze splnit při daných vazbách",
+      "suggestion": "Změňte pořadí prací, zmírněte pevné omezení nebo přidejte doložený plán nápravy, aby rezerva byla nulová či kladná"
+    },
+    "high_float": {
+      "fail": "Činnost '{activity}' má velmi vysokou celkovou časovou rezervu ({float} dní), nad limitem {threshold} dní",
+      "suggestion": "Zkontrolujte chybějící vazbu na následníka – vysoká rezerva obvykle znamená slabé propojení činnosti se sítí"
+    },
+    "missing_duration": {
+      "fail": "Činnost '{activity}' má neplatné trvání ({duration} dní) pro úkol, který není milníkem",
+      "suggestion": "Zadejte kladné trvání v pracovních dnech nebo řádek označte jako milník, pokud skutečně jde o událost s nulovým trváním"
+    },
+    "duration_on_project_week": {
+      "fail": "Činnost '{activity}' je uložena jako {stored} pracovních dní, spočítaných od pondělí do pátku mezi {start} a {end}; podle projektového týdne {calendar} tyto termíny zahrnují {expected}",
+      "suggestion": "Znovu uložte termíny činnosti, aby se trvání přepočítalo podle pracovního týdne projektu, nebo trvání zadejte záměrně"
+    }
+  },
+  "sheet_completeness": {
+    "missing": {
+      "fail": "Výkres {sheet} je uveden v seznamu výkresů, ale chybí v nahrané sadě",
+      "suggestion": "Nahrajte chybějící výkres nebo potvrďte jeho stažení z vydání"
+    },
+    "extra": {
+      "fail": "Výkres {sheet} je v nahrané sadě, ale není v seznamu výkresů",
+      "suggestion": "Přidejte jej do seznamu nebo evidence vydání, případně odstraňte nadbytečný výkres"
+    },
+    "revision_mismatch": {
+      "fail": "Výkres {sheet} má revizi {actual_rev}, ale seznam očekává {expected_rev}",
+      "suggestion": "Vydejte očekávanou revizi nebo aktualizujte seznam na aktuální revizi"
+    }
+  },
+  "procurement": {
+    "po_has_lines": {
+      "fail": "Objednávka neobsahuje řádky, takže její závazná částka není zohledněna",
+      "suggestion": "Před schválením objednávky přidejte objednané položky"
+    },
+    "po_line_amount": {
+      "fail": "Řádek {line} má cenu {actual}, ale množství krát jednotková cena je {expected}",
+      "suggestion": "Opravte množství, jednotkovou cenu nebo cenu řádku, aby všechny tři údaje souhlasily"
+    },
+    "po_subtotal_matches_lines": {
+      "fail": "Mezisoučet je {actual}, ale součet řádků činí {expected}",
+      "suggestion": "Přepočítejte mezisoučet z aktuálních řádků"
+    },
+    "po_total_matches_subtotal": {
+      "fail": "Celková cena je {actual}, ale mezisoučet plus daň činí {expected}",
+      "suggestion": "Přepočítejte celkovou cenu tak, aby odpovídala mezisoučtu a dani"
+    },
+    "po_no_negative_line": {
+      "fail": "Řádek {line} má nekladné množství nebo zápornou jednotkovou cenu",
+      "suggestion": "Pro storno vystavte dobropis místo záporného řádku"
+    },
+    "po_currency_set": {
+      "fail": "Objednávka nemá měnu, takže její částku nelze souhrnně vykázat ani zaplatit",
+      "suggestion": "Nastavte měnu, obvykle tu, kterou používá projekt"
+    },
+    "po_vendor_assigned": {
+      "fail": "Objednávka neuvádí dodavatele",
+      "suggestion": "Před schválením závazku vyberte dodavatele"
+    },
+    "po_retention_within_bounds": {
+      "fail": "Zádržné {percent}% je mimo přiměřené rozpětí 0 až {max}%",
+      "suggestion": "Zadejte zádržné v procentech, například 5 pro pět procent"
+    },
+    "po_delivery_after_issue": {
+      "fail": "Dodání je nastaveno na {delivery}, před datum vystavení {issue}",
+      "suggestion": "Posuňte datum dodání na datum vystavení nebo později"
+    },
+    "po_line_cost_coded": {
+      "fail": "Řádek {line} nemá WBS, nákladovou kategorii ani nákladový řádek, takže se neobjeví v nákladovém rozpadu",
+      "suggestion": "Přiřaďte nákladový kód, aby byl závazek vykazován vůči rozpočtu"
+    },
+    "invoice_within_order": {
+      "fail": "Faktura {invoice} převyšuje zbývající částku {remaining} objednávky {po} o {excess}",
+      "suggestion": "Porovnejte fakturu s objednávkou; pokud byl příplatek dohodnut, zaznamenejte jej před schválením jako změnu objednávky"
+    },
+    "invoice_quantity_received": {
+      "fail": "Řádek {line} by byl celkem fakturován v množství {invoiced}, ale přijato bylo pouze {received}",
+      "suggestion": "Před schválením tohoto množství vyčkejte na dodací list nebo potvrďte příjem zboží"
+    },
+    "invoice_value_received": {
+      "fail": "Faktury objednávky {po} by celkem činily {invoiced}, ale přijaté zboží má v objednávkových cenách hodnotu jen {received}",
+      "suggestion": "Před schválením této částky vyčkejte na dodací list nebo potvrďte příjem zboží"
+    }
+  },
+  "subcontract": {
+    "agreement_has_scope": {
+      "fail": "Smlouva nemá pracovní balíčky, takže žádost o platbu nemá podklad pro vyúčtování",
+      "suggestion": "Před aktivací smlouvy rozdělte sjednaný rozsah prací do pracovních balíčků"
+    },
+    "package_scope_described": {
+      "fail": "Pracovní balíček {package} má název, ale chybí popis prací, které zahrnuje",
+      "suggestion": "Popište obsah balíčku, aby bylo z čeho vycházet při pozdějším sporu o změny"
+    },
+    "agreement_value_positive": {
+      "fail": "Hodnota smlouvy je {value}, takže zádržné a rozpis smluvní ceny nemají výpočtový základ",
+      "suggestion": "Před aktivací smlouvy zadejte sjednanou smluvní cenu"
+    },
+    "packages_within_value": {
+      "fail": "Pracovní balíčky mají hodnotu {planned}, ale smlouva činí {total}",
+      "suggestion": "Přeceňte balíčky nebo zvyšte smluvní cenu tak, aby smlouva pokryla vlastní rozsah prací"
+    },
+    "agreement_dates_ordered": {
+      "fail": "Smlouva končí {end}, dříve než začíná {start}",
+      "suggestion": "Opravte počáteční nebo koncové datum, aby smluvní období běželo dopředu"
+    },
+    "agreement_currency_set": {
+      "fail": "Smlouva nemá měnu, takže její platby nelze souhrnně vykázat ani uhradit",
+      "suggestion": "Nastavte měnu, obvykle tu, kterou používá projekt"
+    },
+    "retention_within_bounds": {
+      "fail": "Zádržné {percent}% je mimo přiměřené rozpětí 0 až {max}%",
+      "suggestion": "Zadejte zádržné jako procento z každé platby, nikoli jako částku"
+    },
+    "insurance_valid_at_start": {
+      "fail": "Pojištění subdodavatele skončilo {expiry}, před zahájením prací dne {reference}",
+      "suggestion": "Před vstupem subdodavatele na staveniště si vyžádejte platné potvrzení o pojištění"
+    },
+    "unlinked_contract_twin": {
+      "fail": "Subdodavatelská dohoda {agreement} a smlouva {contract} zřejmě představují tutéž subdodávku, takže finance ji mohou započítat dvakrát",
+      "suggestion": "Propojte je, pokud jde o stejnou subdodávku, nebo je označte jako odlišné"
+    }
+  },
+  "submittal": {
+    "reviewer_assigned": {
+      "fail": "Předkládaná dokumentace neuvádí kontrolujícího, takže není předána nikomu odpovědnému za odpověď",
+      "suggestion": "Před odesláním přiřaďte kontrolujícího, který má odpovědět"
+    },
+    "required_date_present": {
+      "fail": "Předkládaná dokumentace nemá požadovaný termín, takže ji nikdy nelze vykázat jako opožděnou",
+      "suggestion": "Nastavte požadovaný termín kontroly podle prací, které dokumentace umožní zahájit"
+    },
+    "required_date_after_submitted": {
+      "fail": "Kontrola má být hotova {required}, před předložením dokumentace dne {submitted}",
+      "suggestion": "Posuňte požadovaný termín na pracovní den po předložení"
+    },
+    "review_window_sufficient": {
+      "fail": "Kontrolující má {days} dní, méně než {minimum} dní obvykle potřebných ke kontrole",
+      "suggestion": "Poskytněte obvyklou lhůtu pro kontrolu nebo kratší lhůtu nejprve dohodněte s kontrolujícím"
+    },
+    "spec_section_present": {
+      "fail": "Předkládaná dokumentace neuvádí oddíl specifikace, takže ji evidence nemůže zařadit",
+      "suggestion": "Zadejte oddíl specifikace, ke kterému se dokumentace vztahuje"
+    },
+    "approver_distinct_from_reviewer": {
+      "fail": "Stejná osoba ({person}) je kontrolujícím i schvalujícím, takže chybí nezávislá druhá kontrola",
+      "suggestion": "Přiřaďte jiného schvalujícího než kontrolujícího"
+    },
+    "linked_scope_present": {
+      "fail": "Předkládaná dokumentace není propojena s žádnou položkou rozsahu prací, takže se nezahrne do žádného balíčku",
+      "suggestion": "Propojte položky soupisu prací, kterých se dokumentace týká"
+    }
+  },
+  "rfq": {
+    "scope_described": {
+      "fail": "Poptávka neobsahuje rozsah prací ani popis, takže dodavatel nemá co ocenit",
+      "suggestion": "Před zveřejněním popište rozsah prací, aby byly nabídky porovnatelné"
+    },
+    "deadline_present": {
+      "fail": "Poptávka neuvádí lhůtu pro podání nabídek, takže příjem nabídek nikdy neskončí",
+      "suggestion": "Nastavte datum a čas, do kdy musí být nabídky doručeny"
+    },
+    "deadline_parseable": {
+      "fail": "Lhůta pro podání {value} není datum, které systém dokáže přečíst, a všechny nabídky budou odmítnuty",
+      "suggestion": "Zadejte lhůtu jako datum, například 2026-08-31"
+    },
+    "deadline_in_future": {
+      "fail": "Lhůta pro podání {deadline} již k dnešku {today} uplynula, takže poptávka přichází uzavřená",
+      "suggestion": "Před zveřejněním posuňte lhůtu na budoucí datum"
+    },
+    "has_recipients": {
+      "fail": "Poptávka není adresována žádnému dodavateli, takže zveřejnění nikoho neupozorní",
+      "suggestion": "Přidejte dodavatele, kterým má být poptávka odeslána"
+    },
+    "currency_set": {
+      "fail": "Poptávka neuvádí měnu, takže nabídky nelze vzájemně seřadit",
+      "suggestion": "Nastavte měnu, ve které mají být nabídky oceněny"
+    },
+    "bid_currency_matches": {
+      "fail": "Nabídka {bid} je oceněna v {bid_currency}, ale poptávka je v {rfq_currency}",
+      "suggestion": "Požádejte uchazeče o cenu v měně poptávky nebo zaznamenejte dohodnutý přepočet"
+    },
+    "bid_amounts_parseable": {
+      "fail": "Nabídka {bid} má částku {value}, která není číslem použitelným pro porovnání",
+      "suggestion": "Před zadáním zakázky opravte nabídkovou částku"
+    },
+    "bids_still_valid": {
+      "fail": "Platnost nabídky {bid} skončila {expired} a dnes je {today}, takže její cena již není závazná",
+      "suggestion": "Před zadáním zakázky požádejte uchazeče o potvrzení ceny"
+    },
+    "award_has_competition": {
+      "fail": "Zadání vychází z {count} nabídek, méně než {minimum} potřebných pro soutěžní porovnání",
+      "suggestion": "Zaznamenejte důvod zadání jedinému dodavateli nebo oslovte další uchazeče"
+    }
+  },
+  "errors": {
+    "resource_not_found": "Zdroj nebyl nalezen",
+    "project_not_found": "Projekt nebyl nalezen",
+    "vendor_not_found": "Dodavatel nebyl nalezen",
+    "template_not_found": "Šablona nebyla nalezena",
+    "position_not_found": "Položka nebyla nalezena",
+    "boq_not_found": "Soupis prací nebyl nalezen",
+    "session_not_found": "Relace nebyla nalezena",
+    "document_not_found": "Dokument nebyl nalezen",
+    "documents_batch_delete_referenced": "Jiné záznamy stále odkazují na dokumenty v této dávce. Zkontrolujte, které vazby odstranění přeruší, a potvrďte pomocí acknowledge_references.",
+    "invitation_not_found": "Pozvánka nebyla nalezena",
+    "agreement_not_found": "Dohoda nebyla nalezena",
+    "rejection_not_found": "Zamítnutí nebylo nalezeno",
+    "claim_not_found": "Žádost o průběžnou platbu nebyla nalezena",
+    "gaeb_x89_final_account_unsupported": "Konečné ani dílčí konečné vyúčtování zatím nelze exportovat jako GAEB X89. Musí účtovat kumulované práce po odečtení dřívějších plateb, zatímco ze žádosti o platbu vzniká pouze průběžná faktura za jedno období. Exportujte žádost jako průběžnou fakturu.",
+    "xpwe_native_file_refused": "Toto je vlastní projektový soubor rozpočtového programu, který dokáže otevřít pouze tento program. Exportujte rozpočet ze svého programu do XPWE a nahrajte soubor .xpwe.",
+    "plot_not_found": "Pozemek nebyl nalezen",
+    "survey_not_found": "Zaměření dronem nebylo nalezeno",
+    "diary_video_not_found": "Video stavebního deníku nebylo nalezeno",
+    "diary_photo_not_found": "Fotografie stavebního deníku nebyla nalezena",
+    "bidder_not_found": "Uchazeč nebyl nalezen",
+    "webhook_not_found": "Webhook nebyl nalezen",
+    "submission_not_found": "Podání nebylo nalezeno",
+    "measurement_not_found": "Staveništní měření nebylo nalezeno",
+    "salescontract_not_found": "Prodejní smlouva nebyla nalezena",
+    "prompt_not_found": "Šablona zadání nebyla nalezena",
+    "prequalification_not_found": "Předkvalifikace nebyla nalezena",
+    "purchase_requisition_not_found": "Požadavek na nákup nebyl nalezen",
+    "purchase_order_not_found": "Objednávka nebyla nalezena",
+    "group_not_found": "Skupina nebyla nalezena",
+    "final_account_not_found": "Konečné vyúčtování nebylo nalezeno",
+    "estimate_job_not_found": "Úloha rozpočtu nebyla nalezena",
+    "escrow_not_found": "Transakce vázaného účtu nebyla nalezena",
+    "commission_accrual_not_found": "Časově rozlišená provize nebyla nalezena",
+    "baseline_not_found": "Výchozí plán nebyl nalezen",
+    "fx_rate_set_locked": "Kurzy ECB pro {date} jsou uzamčeny, takže je tato aktualizace nepřepsala. Pokud se má použít nové zveřejnění, nejprve tuto sadu kurzů odemkněte.",
+    "boq_locked": "Soupis prací je uzamčen a nelze jej měnit. Pro změny vytvořte revizi.",
+    "boq_link_owner_locked": "Kód '{code}' definuje řádek v uzamčeném soupisu prací '{bill}' a propojení na něj by tento soupis změnilo. Nejprve soupis odemkněte nebo řádek zadejte pod novým kódem."
+  },
+  "variations": {
+    "boq_lines_are_traced": {
+      "fail": "Řádek {line} v soupisu této změny nemá původ v žádném řádku rozpisu smluvní ceny ani v rozpočtové položce",
+      "suggestion": "Uveďte smluvní řádek, který změna ovlivňuje, nebo rozpočtovou položku, ze které rozsah prací vychází, aby bylo možné částku obhájit"
+    },
+    "boq_total_matches_estimate": {
+      "fail": "Souhrnný odhad této žádosti je {estimate}, ale oceněný soupis prací má celkem {priced}",
+      "suggestion": "Převezměte oceněnou celkovou částku do žádosti nebo opravte soupis, aby platil jeden údaj"
+    },
+    "change_kind_matches_numbers": {
+      "removed_positive": "Řádek {line} je označen jako vypuštěné práce, ale má kladné množství {quantity} – méněpráce se ze smlouvy odečítají záporným množstvím",
+      "added_negative": "Řádek {line} je označen jako přidané práce, ale má záporné množství {quantity} – práce odečítané ze smlouvy jsou vypuštěné, nikoli přidané",
+      "removed_needs_contract_line": "Řádek {line} je označen jako vypuštěné práce, ale neodkazuje na řádek rozpisu smluvní ceny, takže neexistuje smluvní položka k odebrání",
+      "modified_needs_contract_line": "Řádek {line} je označen jako upravené práce, ale neodkazuje na řádek rozpisu smluvní ceny, takže neexistuje smluvní položka k úpravě",
+      "suggestion": "Opravte druh změny nebo množství ve vazbě řádku, případně uveďte smluvní řádek, kterého se změna týká"
+    }
+  },
+  "cases": {
+    "has_steps": {
+      "fail": "Tento příklad zatím nemá žádné kroky, takže čtenář nemá podle čeho postupovat.",
+      "suggestion": "Přidejte alespoň jeden krok s názvem obrazovky, kterou otevřít, a popisem činnosti."
+    },
+    "step_titled": {
+      "fail": "{count} krokům chybí název nebo obrazovka k otevření.",
+      "suggestion": "Každému kroku dejte stručný název a vyberte obrazovku, kterou otevře."
+    },
+    "step_purpose": {
+      "fail": "{count} z {total} kroků neuvádí svůj účel, takže příklad působí jako seznam kliknutí místo vysvětlení.",
+      "suggestion": "Ke každému kroku přidejte jednu větu o jeho účelu; tu nový uživatel potřebuje."
+    },
+    "distinct_screens": {
+      "fail": "{count} kroků otevírá stejnou obrazovku jako předchozí krok, takže čtenář nevidí změnu a nedokáže je rozlišit.",
+      "suggestion": "Sloučte je do jednoho kroku nebo druhý nasměrujte na obrazovku, kde práce skutečně pokračuje."
+    },
+    "duration_plausible": {
+      "fail": "Příklad uvádí {minutes} minut na {steps} kroků. Čtenář, který nestíhá, přestane věřit zbytku časového odhadu.",
+      "suggestion": "Zvyšte odhad alespoň na {minimum} minut nebo některé kroky odeberte."
+    },
+    "described": {
+      "fail": "Příklad nemá shrnutí, takže seznam zobrazuje jen název.",
+      "suggestion": "Přidejte jednu větu o tom, co bude mít čtenář na konci hotovo."
+    }
+  },
+  "uk": {
+    "contract_form_declared": {
+      "fail": "Rozpočet neuvádí smluvní formu, podle které je oceněn",
+      "suggestion": "Zaznamenejte smluvní formu. Náklady zařízení staveniště, rizika a platební podmínky se u různých forem oceňují odlišně, takže bez ní částka mnoho neříká"
+    },
+    "payment_regime_declared": {
+      "fail": "Platební mechanismus není úplný: není zaznamenáno {missing}",
+      "suggestion": "Zaznamenejte oba termíny. Stavební smlouva, která je nestanoví, se jim nevyhne; oba určuje Scheme for Construction Contracts a strany pak najdou platební podmínky v právním předpisu místo v podepsané smlouvě"
+    },
+    "retention_declared": {
+      "fail": "Rozpočet neuvádí, jaké zádržné se uplatňuje",
+      "suggestion": "Zaznamenejte procento zádržného a jeho uvolnění nebo uveďte, že se zádržné neuplatňuje. Jde o peníze, které dodavatel vydělal, ale nemůže je čerpat; rozpočet bez tohoto údaje opomíjí potřebu pracovního kapitálu"
+    },
+    "cdm_duty_holders_declared": {
+      "fail": "Nejsou zaznamenány odpovědné osoby podle CDM 2015: chybí {missing}",
+      "suggestion": "Zaznamenejte jmenování. Pokud na projektu pracuje více dodavatelů, objednatel musí písemně jmenovat principal designer a principal contractor; pokud tak neučiní, nese tyto povinnosti sám"
+    },
+    "hrb_regime_declared": {
+      "fail": "Otázka budovy s vyšším rizikem není vyřešena: {reason}",
+      "unanswered": "rozpočet neuvádí, zda jde o budovu s vyšším rizikem",
+      "disagrees": "rozpočet uvádí vyšší riziko jako {declared}, ale jeho vlastní rozměry dávají {derived}",
+      "suggestion": "Budova má vyšší riziko, pokud je vysoká alespoň 18 m nebo má alespoň 7 podlaží A ZÁROVEŇ obsahuje alespoň dvě bytové jednotky. Musí platit obě části: vysoká budova bez bytů nemá vyšší riziko a takové zařazení by vyvolalo zbytečný program kontrolních bran"
+    },
+    "vat_treatment_declared": {
+      "fail": "Rozpočet neuvádí způsob uplatnění DPH",
+      "suggestion": "Zaznamenejte režim: základní sazbu, sníženou nebo nulovou sazbu, pokud práce splňují podmínky, nebo tuzemské přenesení daňové povinnosti u příslušných plnění. Přenesení přesouvá DPH na odběratele a mění částku, kterou smí dodavatel fakturovat"
+    }
+  },
+  "project_completeness": {
+    "country_set": {
+      "fail": "Projekt neuvádí zemi, takže nelze určit cenovou základnu, daňovou sazbu ani pracovní kalendář",
+      "suggestion": "Nastavte zemi projektu v jeho nastavení. Země určuje regionální balíček, daň a kalendář, podle kterých se údaje posuzují"
+    },
+    "currency_set": {
+      "fail": "Projekt neuvádí měnu, takže nelze sčítat jeho soupisy prací, přirážky ani smlouvy",
+      "suggestion": "Vyberte měnu projektu v nastavení. V ní se oceňuje každý soupis prací a smlouva a v ní se čtou všechny součty"
+    },
+    "currency_matches_bill": {
+      "fail": "Projekt je oceněn v {project_currency}, ale řádky tohoto soupisu jsou v {bill_currencies}",
+      "suggestion": "Převeďte řádky do měny projektu uvedeným kurzem nebo zaznamenejte směnný kurz v projektu, aby soupis měl jednu celkovou částku"
+    },
+    "priced_bill_present": {
+      "fail": "Projekt nemá soupis prací s položkami, takže chybí podklad pro rozpočet",
+      "suggestion": "Vytvořte soupis prací a doplňte položky nebo jej importujte z CAD modelu, tabulky či výměnného souboru"
+    },
+    "bill_base_date_set": {
+      "fail": "Soupis prací \"{bill}\" neuvádí základní datum platnosti cen",
+      "suggestion": "Zaznamenejte základní datum do soupisu. Bez něj nelze ceny indexovat, zdanit sazbou k jejich datu ani porovnat s jiným rozpočtem"
+    },
+    "classification_standard_set": {
+      "fail": "Projekt nemá klasifikační standard, takže kódy jeho položek nelze ověřit",
+      "suggestion": "Vyberte klasifikační standard používaný v projektu. Určuje také, která národní pravidla validace použije"
+    },
+    "planned_dates_set": {
+      "both_missing": "Projekt nemá plánované datum zahájení ani ukončení",
+      "start_missing": "Projekt má plánované datum ukončení, ale nemá plánované datum zahájení",
+      "end_missing": "Projekt má plánované datum zahájení, ale nemá plánované datum ukončení",
+      "unreadable": "Plánované datum \"{value}\" nelze přečíst jako datum",
+      "suggestion": "Zadejte plánované datum zahájení a ukončení projektu jako data. Časově závislé náklady, cenový růst a harmonogram se oceňují pro období mezi nimi"
+    },
+    "planned_dates_ordered": {
+      "fail": "Projekt má začít {start} a skončit {end}, tedy před zahájením",
+      "suggestion": "Prohoďte nebo opravte plánované termíny tak, aby zahájení předcházelo ukončení"
+    },
+    "client_recorded": {
+      "fail": "Projekt neuvádí klienta a žádná smlouva neuvádí objednatele",
+      "suggestion": "Zaznamenejte klienta do projektu nebo přidejte objednatele jako smluvní stranu, aby rozpočet měl adresáta"
+    },
+    "procurement_started": {
+      "fail": "Projekt je ve fázi {phase}, ale nemá smlouvu ani zadávací balíček",
+      "suggestion": "Vytvořte zadávací balíček ze soupisu, zaznamenejte smlouvu nebo vraťte fázi na rozpočtování, ve kterém projekt skutečně je"
+    }
+  },
+  "boq_resources": {
+    "unit_rate_not_rederived": {
+      "fail": "Položka {ordinal}: řádky zdrojů nelze použít k ocenění položky, takže z nich nebyla znovu odvozena jednotková cena",
+      "fallback_allowance": "Položka {ordinal}: řádky zdrojů jsou odhadovaným rozdělením nákladů s množstvím celé položky, takže z nich nebyla znovu odvozena jednotková cena",
+      "assumed_norm": "Položka {ordinal}: řádky zdrojů obsahují normy, které katalog nikdy neuvedl, takže z nich nebyla znovu odvozena jednotková cena",
+      "norm_collapsed": "Položka {ordinal}: řádky zdrojů ztratily katalogovou normu a místo ní obsahují množství položky, takže z nich nebyla znovu odvozena jednotková cena",
+      "whole_position_quantities": "Položka {ordinal}: řádky zdrojů obsahují množství celé položky místo norem na jednotku, takže z nich nebyla znovu odvozena jednotková cena",
+      "suggestion": "Zkontrolujte kalkulaci – znovu odvoďte položku z katalogu prostřednictvím kontroly norem zdrojů nebo řádky opravte ručně"
+    }
+  },
+  "poland": {
+    "knr_reference_required": {
+      "fail": "Položka {ordinal} neodkazuje na tabulku katalogu KNR",
+      "suggestion": "V poli podstawa uveďte katalogovou tabulku, ze které normy pocházejí, například KNR 2-02 0201-01, nebo napište kalkulacja indywidualna pro položku oceněnou vlastní kalkulací"
+    },
+    "knr_reference_recognised": {
+      "fail": "Odkaz '{code}' u položky {ordinal} neuvádí rodinu katalogů KNR",
+      "suggestion": "Začněte odkaz rodinou katalogů, například KNR, KNNR, KNR-W nebo KSNR, nebo položku označte jako kalkulacja indywidualna"
+    }
+  }
+}

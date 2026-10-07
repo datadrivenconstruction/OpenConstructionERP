@@ -1,6 +1,7 @@
 {
   "catalogues": {
     "backend/app/core/validation/messages": [
+      "cs",
       "da",
       "de",
       "en",
@@ -11,6 +12,7 @@
       "ja",
       "ko",
       "nl",
+      "no",
       "pl",
       "pt",
       "ru",

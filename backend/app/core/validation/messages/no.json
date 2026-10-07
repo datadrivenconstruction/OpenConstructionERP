@@ -1,0 +1,868 @@
+{
+  "boq_markup": {
+    "contingency_not_on_profit": {
+      "fail": "Risikopåslaget \"{markup}\" beregnes på et grunnlag som allerede inneholder fortjenestelinjen \"{profit}\", slik at det legges margin på penger satt av til risiko",
+      "suggestion": "Beregn denne linjen på direkte kostnader, med mindre markedets standardmetode bevisst plasserer risiko etter indirekte kostnader og fortjeneste"
+    },
+    "order_is_declared": {
+      "fail": "Flere påslagslinjer bruker plass {order} i beregningsrekkefølgen: {markups}",
+      "suggestion": "Gi hver påslagslinje sin egen plass, slik at det er entydig hvilke påslag som inngår i grunnlaget for de neste"
+    },
+    "percentage_within_band": {
+      "fail": "\"{markup}\" er {percentage}% som linje i kategorien {category}, utenfor det rimelige intervallet fra 0 til {ceiling}%",
+      "suggestion": "Kontroller desimaltegnet. Linjen prises uansett nøyaktig som angitt"
+    },
+    "cumulative_base_is_settled": {
+      "fail": "\"{markup}\" gjelder \"{apply_to}\", men ingen linjer står foran den, så den beregnes bare på direkte kostnader",
+      "suggestion": "Flytt den etter linjene som skal inngå i beregningsgrunnlaget, eller beregn den på direkte kostnader"
+    }
+  },
+  "common": {
+    "ok": "Godkjent"
+  },
+  "export": {
+    "generated": "Generert",
+    "content_digest": "Kontrollsum for innhold"
+  },
+  "field_time": {
+    "hours_per_day_max": {
+      "fail": "Arbeider {worker} er registrert med {hours} timer denne dagen, over grensen på {max} timer",
+      "suggestion": "Fordel timene på riktig dag eller arbeider før innsending"
+    },
+    "line_complete": {
+      "fail": "Linje {line} er ufullstendig: {reason}",
+      "labour_xor_plant": "enten arbeid eller maskintid må føres, ikke begge deler eller ingen av delene",
+      "hours_positive": "antall timer må være større enn null",
+      "cost_code_required": "en kostnadskode er påkrevd",
+      "suggestion": "Fullfør linjen før timelisten sendes inn"
+    },
+    "cost_code_resolves": {
+      "fail": "Koden '{code}' på linje {line} samsvarer ikke med noen post i mengdefortegnelsen eller WBS i prosjektet",
+      "suggestion": "Velg en kostnadskode eller WBS som finnes i prosjektets mengdefortegnelse"
+    },
+    "daywork_needs_variation": {
+      "fail": "Regningsarbeidslinje {line} er ikke knyttet til en åpen endring",
+      "suggestion": "Knytt regningsarbeidet til endringen det ble bestilt under"
+    },
+    "plant_needs_equipment": {
+      "fail": "Maskinlinje {line} angir ikke noe utstyr",
+      "suggestion": "Knytt til maskinen slik at maskintimene kan kostnadsberegnes"
+    },
+    "approved_immutable": {
+      "fail": "Denne timelisten har status {status} og kan ikke redigeres",
+      "suggestion": "Registrer en reverserende timeliste for å korrigere godkjente timer"
+    },
+    "offline_clock_plausible": {
+      "fail": "Enheten som registrerte denne dagen, lå {minutes} minutter foran serverklokken",
+      "suggestion": "Still enhetens klokke slik at registrerte tidspunkt kan leses i riktig rekkefølge"
+    },
+    "offline_sync_delay": {
+      "fail": "Arbeidet ble utført {date}, men opplysningene kom til kontoret først {days} dager senere",
+      "suggestion": "Kontroller timene mot den faktiske arbeidsdagen før godkjenning; avregningen kan allerede være avsluttet"
+    }
+  },
+  "ai_takeoff": {
+    "unreviewed_proposals": {
+      "fail": "{count} forslag til mengdeuttak venter fortsatt på gjennomgang og prises ikke her",
+      "suggestion": "Gå gjennom forslagene slik at bekreftede mengder stemmer med tegningen"
+    }
+  },
+  "boq_quality": {
+    "position_has_quantity": {
+      "fail": "Post {ordinal} kan ikke ha null eller manglende mengde",
+      "suggestion": "Angi en mengde større enn 0"
+    },
+    "position_has_unit_rate": {
+      "fail": "Post {ordinal} bør ha en enhetspris",
+      "suggestion": "Tilordne en pris fra kostnadsdatabasen"
+    },
+    "position_has_description": {
+      "fail": "Post {ordinal} kan ikke ha tom beskrivelse"
+    },
+    "no_duplicate_ordinals": {
+      "fail": "Duplisert postnummer '{ordinal}' finnes i {count} poster"
+    },
+    "unit_rate_in_range": {
+      "fail": "Post {ordinal}: prisen {rate} er >{threshold} (5 ganger medianen)",
+      "suggestion": "Kontroller denne enhetsprisen – den er uvanlig høy"
+    },
+    "negative_values": {
+      "fail": "Post {ordinal} har negative verdier: {details}",
+      "suggestion": "Korriger negative verdier – bruk positive tall"
+    },
+    "unrealistic_rate": {
+      "fail": "Post {ordinal}: opplysninger: {details}",
+      "suggestion": "Kontroller denne verdien – den virker urealistisk høy",
+      "not_assessed_no_currency": "{count} post(er) er ikke vurdert: mengdefortegnelsen angir ingen valuta, så beløpsgrensene (angitt i {reference}) kunne ikke omregnes til dens valuta",
+      "not_assessed_no_currency_suggestion": "Angi prosjektets valuta, eller registrer en valuta på postene",
+      "not_assessed_no_rate": "{count} post(er) i {currency} er ikke vurdert: ingen kurs fra {reference} til {currency} er registrert, så beløpsgrensene kunne ikke omregnes for denne mengdefortegnelsen",
+      "not_assessed_no_rate_suggestion": "Legg til en kurs fra {reference} til {currency} i valutakursregisteret eller prosjektets valutakurser"
+    },
+    "total_mismatch": {
+      "fail": "Post {ordinal}: beregnet {computed} != lagret {stored} (avvik={diff})",
+      "suggestion": "Beregn totalbeløpet på nytt = mengde × enhetspris"
+    },
+    "resource_split_mismatch": {
+      "fail": "Post {ordinal}: ressursenes delsum {subtotal} avviker fra enhetsprisen {rate} med {diff}",
+      "suggestion": "Kontroller ressursmengder og priser – summen per enhet skal stemme med postens enhetspris"
+    },
+    "empty_unit": {
+      "fail": "Post {ordinal} har tom eller manglende enhet",
+      "suggestion": "Angi en måleenhet (m, m2, m3, kg, stk., rundsum osv.)"
+    },
+    "section_without_items": {
+      "fail": "Avsnitt {ordinal} ({title}) har ingen underordnede poster",
+      "suggestion": "Legg til poster under avsnittet, eller fjern det tomme avsnittet"
+    },
+    "rate_vs_benchmark": {
+      "fail": "Post {ordinal}: enhetsprisen {rate}/{unit} overstiger referansegrensen {threshold}/{unit} – kan være urealistisk",
+      "suggestion": "Kontroller prisen – typiske priser for {unit} bør være under {threshold}. Se etter enhets- eller desimalfeil.",
+      "not_assessed_no_currency": "{count} post(er) er ikke vurdert: mengdefortegnelsen angir ingen valuta, så referansegrensene (angitt i {reference}) kunne ikke omregnes til dens valuta",
+      "not_assessed_no_currency_suggestion": "Angi prosjektets valuta, eller registrer en valuta på postene",
+      "not_assessed_no_rate": "{count} post(er) i {currency} er ikke vurdert: ingen kurs fra {reference} til {currency} er registrert, så referansegrensene kunne ikke omregnes for denne mengdefortegnelsen",
+      "not_assessed_no_rate_suggestion": "Legg til en kurs fra {reference} til {currency} i valutakursregisteret eller prosjektets valutakurser"
+    },
+    "lump_sum_ratio": {
+      "fail": "{lsum_count} av {total_count} poster ({percent}) bruker rundsum – over grensen {threshold}",
+      "suggestion": "Del opp rundsumsposter i målbare mengder (m, m2, m3, kg, stk.) for mer nøyaktig kalkulasjon"
+    },
+    "cost_concentration": {
+      "fail": "Post {ordinal} utgjør {share} av mengdefortegnelsens totale kostnad ({value} av {grand_total}) – over grensen {threshold}",
+      "suggestion": "Del posten i mindre poster, eller kontroller kostnaden – én enkelt post bør ikke dominere kalkylen"
+    },
+    "currency_consistency": {
+      "fail": "Blandede valutaer funnet: {currencies}",
+      "suggestion": "Bruk én valuta gjennom hele mengdefortegnelsen"
+    },
+    "measurement_consistency": {
+      "fail": "Mengdefortegnelsen blander metriske og britiske enheter – bruk ett system konsekvent",
+      "suggestion": "Omregn alle mengder til enten metriske eller britiske enheter"
+    },
+    "revision_cost_impact_review": {
+      "fail": "Revisjonens kostnadsvirkning på {amount} er ennå ikke registrert som en endring",
+      "suggestion": "Opprett et utkast til endringsforespørsel fra denne revisjonssammenligningen for å følge kostnadsendringen"
+    },
+    "base_date_readable": {
+      "fail": "Basisdatoen '{base_date}' er ikke en dato, så mengdefortegnelsen avgiftsberegnes etter dagens sats i stedet for satsen på dens egen dato",
+      "suggestion": "Angi prisgrunnlaget som en dag, måned, et kvartal eller år ({shapes})"
+    },
+    "tax_date_readable": {
+      "fail": "Avgiftsdatoen '{tax_date}' er ikke en dato, så mengdefortegnelsen avgiftsberegnes etter dagens sats i stedet for satsen på dens egen dato",
+      "suggestion": "Angi avgiftsdatoen som en dag, måned, et kvartal eller år ({shapes}), eller tøm feltet for å bruke mengdefortegnelsens basisdato"
+    }
+  },
+  "din276": {
+    "cost_group_required": {
+      "fail": "Post {ordinal} mangler kostnadsgruppe DIN 276 KG",
+      "suggestion": "Tilordne en tresifret DIN 276-kostnadsgruppe (f.eks. 330 for vegger)"
+    },
+    "valid_cost_group": {
+      "fail": "Ugyldig DIN 276-kode '{code}' i post {ordinal}"
+    },
+    "hierarchy": {
+      "fail": "Post {ordinal}: KG {child} ligger ikke under overordnet KG {parent} (forventet prefiks '{prefix}')",
+      "suggestion": "Flytt posten til riktig overordnet post, eller oppdater KG-koden slik at den følger hierarkiet ({prefix}xx)"
+    },
+    "completeness": {
+      "fail": "Kostnadsgruppe {group} – {group_name} mangler i mengdefortegnelsen",
+      "suggestion": "Legg til poster for KG {group} ({group_name}) for å sikre full dekning"
+    }
+  },
+  "gaeb": {
+    "ordinal_format": {
+      "fail": "Postnummeret '{ordinal}' følger ikke filens GAEB OZ-Maske",
+      "suggestion": "Bruk filens OZ-Maske, f.eks. 001.001.0010 eller 01.02.0030"
+    },
+    "lv_structure": {
+      "fail": "Post {ordinal}: nederste post mangler overordnet avsnitt – GAEB LV-hierarkiet krever en overordnet Leistungsgruppe",
+      "suggestion": "Tilordne posten et overordnet avsnitt (Leistungsgruppe / Titel)"
+    },
+    "einheitspreis_sanity": {
+      "negative": "Post {ordinal}: enhetsprisen (Einheitspreis) {rate} er negativ (enhet='{unit}') – en negativ pris kan ikke overføres i GAEB",
+      "zero": "Post {ordinal}: enhetsprisen (Einheitspreis) er 0.00 (enhet='{unit}') – bekreft at dette er en tilbudt nullpris og ikke en manglende pris",
+      "suggestion": "Angi en positiv enhetspris (Einheitspreis), eller merk posten som Bedarfsposition (valgfritt arbeid) eller rundsum (enhet='lsum')"
+    },
+    "trade_section_code": {
+      "fail": "Hovedavsnittet '{ordinal}' mangler GAEB Leistungsbereich-kode (forventet tresifret fagkode, f.eks. '012')",
+      "suggestion": "Legg til en tresifret fagkode (Leistungsbereich) på avsnittet – f.eks. '012' for grunnarbeid, '013' for murarbeid"
+    },
+    "quantity_decimals": {
+      "fail": "Post {ordinal}: mengden {quantity} har {decimals} desimaler – GAEB X83-konvensjonen begrenser antallet til 3",
+      "suggestion": "Avrund mengden til høyst 3 desimaler etter GAEB X83"
+    }
+  },
+  "nrm": {
+    "classification_required": {
+      "fail": "Post {ordinal} mangler NRM-elementkode",
+      "suggestion": "Tilordne en NRM 1/2-elementkode (f.eks. 2.6.1 for yttervegger)"
+    },
+    "valid_element": {
+      "fail": "Ugyldig NRM-kode '{code}' i post {ordinal}"
+    },
+    "completeness": {
+      "fail": "NRM-gruppe {group} – {group_name} mangler i mengdefortegnelsen",
+      "suggestion": "Legg til poster for NRM-gruppe {group} ({group_name})"
+    },
+    "base_date_declared": {
+      "fail": "Kostnadsplanen angir ikke basisdatoen prisene gjelder for",
+      "suggestion": "Registrer basisdatoen i mengdefortegnelsen. Uten den kan ingen avgjøre om en pris er utdatert, eller hvilken inflasjon som fortsatt må legges til"
+    },
+    "cost_plan_stage_declared": {
+      "fail": "Kostnadsplanen angir ikke hvilken prosjekteringsfase den ble utarbeidet for",
+      "suggestion": "Registrer fasen. Forventet nøyaktighet avhenger av fasen da planen ble laget; en plan uten angitt fase kan gi feil forventninger"
+    },
+    "contractor_costs_present": {
+      "preliminaries": "Kostnadsplanen mangler hovedentreprenørens rigg- og driftskostnader, både som gruppe {group} og som påslagslinje",
+      "overheads_and_profit": "Kostnadsplanen mangler hovedentreprenørens indirekte kostnader og fortjeneste, både som gruppe {group} og som påslagslinje",
+      "suggestion": "Legg til kostnaden som et NRM-gruppeelement eller som et påslag på målte arbeider. Begge deler er riktig; uten den er byggekostnaden ufullstendig"
+    },
+    "risk_allowance_present": {
+      "fail": "Kostnadsplanen mangler en risikoreserve",
+      "suggestion": "Legg til en risikoreserve som NRM-gruppe 13 eller som et risikopåslag. En kostnadsplan uten risikoreserve fremstiller ett beløp som om det var sikkert"
+    }
+  },
+  "masterformat": {
+    "classification_required": {
+      "fail": "Post {ordinal} mangler MasterFormat-kode",
+      "suggestion": "Tilordne en MasterFormat-kode (f.eks. 03 30 00 for plasstøpt betong)"
+    },
+    "valid_division": {
+      "fail": "Ugyldig MasterFormat-kode '{code}' i post {ordinal}",
+      "suggestion": "Bruk sekssifret MasterFormat-format: XX XX XX (f.eks. 03 30 00)"
+    },
+    "completeness": {
+      "fail": "Divisjon {division} – {division_name} mangler i mengdefortegnelsen",
+      "suggestion": "Legg til poster for divisjon {division} ({division_name})"
+    }
+  },
+  "sinapi": {
+    "code_required": {
+      "fail": "Post {ordinal} mangler SINAPI-kode",
+      "suggestion": "Tilordne en SINAPI-kode for arbeidsoperasjonen (f.eks. 87878 for betong C30)"
+    },
+    "valid_code": {
+      "fail": "Ugyldig SINAPI-kode '{code}' i post {ordinal}"
+    }
+  },
+  "nbr": {
+    "classification_required": {
+      "fail": "Post {ordinal} mangler NBR 12721-avsnitt",
+      "suggestion": "Merk posten med et NBR 12721-avsnitt (S1 = preliminares, S2 = infra-estrutura, ..., S11 = serviços complementares)"
+    },
+    "valid_section": {
+      "fail": "NBR 12721-avsnittet '{code}' i post {ordinal} er ikke ett av S1..S11",
+      "suggestion": "Bruk kodene S1 til S11 (f.eks. S3 for supra-estrutura)"
+    }
+  },
+  "gesn": {
+    "code_required": {
+      "fail": "Post {ordinal} mangler ГЭСН/ФЕР-kode",
+      "suggestion": "Tilordne en ГЭСН-kode (f.eks. 06-01-001-01 for betong)"
+    },
+    "valid_code": {
+      "fail": "ГЭСН-koden '{code}' følger ikke formatet XX-XX-XXX-XX",
+      "suggestion": "Bruk formatet NN-NN-NNN-NN (f.eks. 06-01-001-01)"
+    },
+    "resource_breakdown": {
+      "fail": "Post {ordinal} viser til norm {code}, men mangler ressursfordeling",
+      "suggestion": "Importer normens arbeids-, maskin- og materialmengder, eller angi hvorfor posten avviker fra dem"
+    },
+    "labour_hours_present": {
+      "fail": "Post {ordinal} ({code}) har en ressursfordeling uten arbeidstimer",
+      "suggestion": "Legg til normens persontimer; indirekte kostnader og kalkulert fortjeneste normeres på lønnskostnaden og kan ikke beregnes uten dem"
+    },
+    "price_level_declared": {
+      "fail": "Kalkylen angir ikke hvilket prisnivå beløpene er i",
+      "suggestion": "Angi prisnivået (en dato) og omregningsindeksen som er brukt, slik at en kontrollør kan komme frem til samme totalbeløp"
+    }
+  },
+  "dpgf": {
+    "lot_required": {
+      "fail": "Post {ordinal} er ikke tilordnet noe Lot technique",
+      "suggestion": "Tilordne et fagområde (Lot technique), f.eks. Lot 01 Gros Œuvre"
+    },
+    "pricing_complete": {
+      "fail": "Bare {priced}/{total} poster ({percent}) er priset – under grensen på 80%",
+      "suggestion": "Pris alle poster før DPGF leveres"
+    }
+  },
+  "onorm": {
+    "position_format": {
+      "fail": "Postnummeret '{ordinal}' følger ikke ÖNORM-formatet XX.XX.XXXXA",
+      "suggestion": "Bruk formatet etter ÖNORM B 2063 (f.eks. 01.02.01A)"
+    },
+    "description_length": {
+      "fail": "Post {ordinal}: beskrivelsen er for kort ({length} tegn, minst 20)",
+      "suggestion": "Legg til flere detaljer i postbeskrivelsen etter ÖNORM B 2063"
+    }
+  },
+  "gbt50500": {
+    "code_required": {
+      "fail": "Post {ordinal} mangler GB/T 50500-kode",
+      "suggestion": "Tilordne en nisifret GB/T 50500-kode (f.eks. 010101001)"
+    },
+    "valid_code": {
+      "fail": "Ugyldig GB/T 50500-kode '{code}' – forventer 9 eller 12 sifre"
+    }
+  },
+  "cpwd": {
+    "code_required": {
+      "fail": "Post {ordinal} mangler CPWD/DSR-kode",
+      "suggestion": "Tilordne en CPWD DSR-postreferanse (f.eks. 4.1.1)"
+    },
+    "measurement_units": {
+      "fail": "Enheten '{unit}' i post {ordinal} følger ikke standarden IS 1200",
+      "suggestion": "Bruk standardenheter etter IS 1200: m, m2, m3, kg, nos, rm osv."
+    }
+  },
+  "hungary": {
+    "item_code_required": {
+      "fail": "Post {ordinal} mangler ungarsk postkode",
+      "invalid": "Postkoden '{code}' på post {ordinal} følger ingen av de to kodeordningene",
+      "suggestion": "Bygningsarbeider bruker MA-CC-SS-II (kapittel 01 til 17); infrastrukturarbeider bruker det seks- eller sjusifrede postnummeret fra prosjektets kodeverk"
+    },
+    "chapter_recognised": {
+      "fail": "Kapittel {chapter} på post {ordinal} er ikke ett av kodeordningens sytten kapitler"
+    },
+    "material_fee_split": {
+      "fail": "Post {ordinal}: materialer {material} pluss arbeidsvederlag {fee} blir ikke prisen {rate}",
+      "suggestion": "Korriger enhetsprisene for materialer og arbeidsvederlag eller totalprisen, slik at fordelingen stemmer"
+    },
+    "item_number_unique": {
+      "fail": "Postnummer {number} brukes på {count} poster og må identifisere én",
+      "suggestion": "Gi hver post sitt eget prosjektpostnummer før mengdefortegnelsen sendes til oppdragsgiveren"
+    }
+  },
+  "prezzario": {
+    "voce_code_format_valid": {
+      "fail": "Koden '{code}' på post {ordinal} viser ikke hvilken prisliste den kommer fra",
+      "suggestion": "En offisiell voce-kode starter med prislistens region og utgivelsesår, for eksempel TOS25_01.A03.001.001 (Toscana 2025). Kopier koden nøyaktig fra den regionale listen, importer posten derfra, eller nummerer en ny pris NP.01"
+    },
+    "voce_reference_present": {
+      "fail": "Post {ordinal} viser ikke til noen prezzario-post",
+      "suggestion": "Velg posten fra en importert regional prisliste, eller merk den som nuovo prezzo (NP) underbygget av en prisanalyse"
+    },
+    "costi_sicurezza_separated": {
+      "fail": "Mengdefortegnelsen mangler en egen linje for sikkerhetskostnader som ikke omfattes av tilbudsrabatten",
+      "suggestion": "Legg til oneri della sicurezza som eget avsnitt eller påslagslinje, priset etter prislistens sikkerhetskapittel eller sikkerhetsplanen"
+    },
+    "incidenza_manodopera_documented": {
+      "fail": "Post {ordinal} ({code}) angir ikke sin arbeidskostnadsandel",
+      "suggestion": "Hent incidenza della manodopera fra prislisten, eller legg til en arbeidsressurs, slik at arbeidskostnaden kan oppgis separat i tilbudet"
+    },
+    "overheads_not_applied_twice": {
+      "fail": "Den regionale prislistens priser inkluderer allerede indirekte kostnader (13–17%) og fortjeneste (10%). Å legge dem til igjen øker totalbeløpet med omtrent {percent}%.",
+      "suggestion": "Fjern påslagene for indirekte kostnader og fortjeneste fra mengdefortegnelsen, eller behold dem bare på poster priset med egen analyse (NP)."
+    }
+  },
+  "romania": {
+    "deviz_chapter_required": {
+      "fail": "Post {ordinal} angir ikke noe kapittel i deviz general",
+      "suggestion": "Plasser posten i riktig kapittel og underkapittel etter HG 907/2016, for eksempel 4.1 for bygge- og installasjonsarbeider eller 5.1 for rigg og anleggsorganisering"
+    },
+    "deviz_chapter_recognised": {
+      "fail": "Deviz-koden '{code}' på post {ordinal} er ikke et kapittel eller underkapittel i deviz general",
+      "suggestion": "Bruk en kode fra kapittel 1 til 6 i deviz general etter HG 907/2016, som 1.2, 2, 3.5, 4.1, 5.1 eller 6.2"
+    }
+  },
+  "greece": {
+    "net_article_required": {
+      "fail": "Post {ordinal} mangler en artikkel fra den felles prislisten (ΝΕΤ)",
+      "suggestion": "Angi ΝΕΤ-artikkelen posten prises etter, for eksempel ΟΙΚ 32.01.06, eller ΝΑΟΙΚ for en ny artikkel"
+    },
+    "net_article_valid": {
+      "invalid": "Artikkelen '{code}' på post {ordinal} har ikke formatet til en ΝΕΤ-artikkel",
+      "chapter": "Artikkelen '{code}' på post {ordinal} starter med kapittel {chapter}, som ikke finnes i prislisten for bygningsarbeider",
+      "suggestion": "Skriv listens prefiks og artikkelnummer, for eksempel ΟΙΚ 38.20.02, ΟΔΟ Α-2 eller ΑΤΗΕ 8151.1"
+    }
+  },
+  "ukraine": {
+    "zkr_chapter_required": {
+      "fail": "Post {ordinal} angir ikke noe kapittel i den samlede kostnadskalkylen",
+      "suggestion": "Plasser posten i riktig kapittel i зведений кошторисний розрахунок, 1 til 12; hovedobjektets bygningsarbeider ligger i kapittel 2"
+    },
+    "zkr_chapter_recognised": {
+      "fail": "Kapittel {chapter} på post {ordinal} er ikke ett av de tolv kapitlene i den samlede kalkylen",
+      "suggestion": "Bruk et kapittelnummer fra 1 til 12"
+    }
+  },
+  "birimfiyat": {
+    "code_required": {
+      "fail": "Post {ordinal} mangler birim fiyat poz-nummer",
+      "suggestion": "Tilordne et Bayındırlık poz-nummer (f.eks. 04.013/1)"
+    },
+    "valid_poz": {
+      "fail": "Poz '{code}' er verken et nåværende nummer i enhetsprisboken (XX.XXX.XXXX) eller et eldre nummer (XX.XXX/X)",
+      "suggestion": "Bruk nummeret fra boken, f.eks. 15.140.1002, eller 04.013/1 for en eldre kontrakt; nummerer egne analyserte poster som ÖZEL-1"
+    }
+  },
+  "sekisan": {
+    "code_required": {
+      "fail": "Post {ordinal} mangler 積算-kode",
+      "suggestion": "Tilordne en postkode etter 積算基準"
+    },
+    "metric_units": {
+      "fail": "Enheten '{unit}' i post {ordinal} er ikke standard",
+      "suggestion": "Bruk metriske standardenheter: m, m2, m3, kg, t, 式 osv."
+    }
+  },
+  "bc3": {
+    "code_required": {
+      "fail": "Post {ordinal} mangler FIEBDC-3-begrepskode",
+      "suggestion": "Tilordne en FIEBDC-3-kode (f.eks. E04CM040 eller 01.02.01)"
+    },
+    "valid_code": {
+      "fail": "Ugyldig FIEBDC-3-kode '{code}' i post {ordinal}",
+      "suggestion": "Bruk FIEBDC-3s alfanumeriske format (f.eks. E04CM040, 01.02.01, CAP01#)"
+    }
+  },
+  "mexico": {
+    "apu_completeness": {
+      "fail": "Post {ordinal} har en ufullstendig APU; manglende kostnadskomponenter: {missing}",
+      "suggestion": "Legg til de manglende direkte kostnadskomponentene (arbeidskraft, materialer, maskiner) i enhetsprisanalysen"
+    },
+    "iva_rate_valid": {
+      "fail": "Post {ordinal} har en ugyldig IVA-sats {rate}; meksikansk IVA er 16, 8 (grenseregion) eller 0 prosent",
+      "suggestion": "Sett IVA-satsen til 16 prosent (standard), 8 prosent (grenseregion) eller 0 prosent"
+    },
+    "subcontract_retencion": {
+      "fail": "Underentreprisepost {ordinal} angir ikke om IVA/ISR-skattetrekk gjelder",
+      "suggestion": "Registrer IVA- og ISR-trekkene for underentrepriseposten, eller angi at ingen gjelder"
+    },
+    "cfdi_rfc_present": {
+      "missing": "CFDI-utstederens opplysninger er ufullstendige for tilbudseksport; mangler: {missing}",
+      "invalid_rfc": "RFC '{rfc}' er ikke en gyldig CFDI RFC (12 tegn for et selskap, 13 for en person)",
+      "suggestion": "Angi utstederens RFC, regimen fiscal og uso CFDI i prosjektprofilen for CFDI 4.0-fakturering"
+    }
+  },
+  "pipeline": {
+    "side_effecting_requires_gate": {
+      "fail": "Noder med skrivende sideeffekter mangler kontrolltrinn: {nodes}",
+      "suggestion": "Legg til et valideringstrinn eller et trinn for menneskelig godkjenning på hver vei fra en utløser-/AI-node til hver skrivenode før publisering."
+    }
+  },
+  "property_dev": {
+    "escrow_account_required": {
+      "fail": "Eiendomsutviklingen krever en aktiv sperret konto etter tilsynsmyndigheten '{regulator}'",
+      "suggestion": "Åpne en sperret konto i en bank med tillatelse fra tilsynsmyndigheten under Regelverksetterlevelse → Sperrede kontoer"
+    },
+    "escrow_iban_valid": {
+      "fail": "Sperret konto {account}: IBAN '{iban}' består ikke strukturkontrollen etter ISO 13616",
+      "suggestion": "Korriger IBAN: landkode, lengde og kontrollsum må følge ISO 13616"
+    },
+    "escrow_balance_reconciled": {
+      "fail": "Sperret konto {account}: bokført saldo {ledger} avviker med {drift} fra transaksjonssummen {transactions}",
+      "suggestion": "Avstem den sperrede kontoen – undersøk uregistrerte innbetalinger eller manglende belastninger"
+    },
+    "sales_contract_party_ownership_sums_to_100": {
+      "fail": "Kontrakt {contract}: eierandelene summerer til {total}% (må være nøyaktig 100%)",
+      "suggestion": "Juster partenes prosentandeler slik at summen blir 100.00%"
+    },
+    "payment_schedule_instalments_sum_to_contract_value": {
+      "fail": "Kontrakt {contract}: avdragssummen {instalments} avviker fra kontraktsverdien {contract_value} (avvik {drift})",
+      "suggestion": "Juster betalingsplanen slik at avdragene summerer til kontraktens totalbeløp"
+    },
+    "reservation_expiry_in_future": {
+      "fail": "Reservasjon {reservation}: expires_at {expires} ligger ikke i fremtiden",
+      "suggestion": "Forleng reservasjonen, eller endre status til utløpt/kansellert"
+    },
+    "broker_commission_rate_within_bounds": {
+      "fail": "Provisjonsavtale {agreement}: problem: {issue}",
+      "suggestion": "Bruk en prosentsats mellom 0.1% og 15%, et fast beløp eller en trappemodell med minst ett trinn"
+    },
+    "price_matrix_no_negative_modifier": {
+      "fail": "Prismatrise {matrix}: regelen '{factor}' har multiplikatoren {multiplier} utenfor [-0.50, 2.00]",
+      "suggestion": "Begrens justeringene til mellom -50% og +200% for å unngå urealistiske tomtepriser"
+    }
+  },
+  "schedule_quality": {
+    "open_ends": {
+      "fail": "Aktiviteten '{activity}' mangler logikkobling for {ends} (åpen ende / frakoblet aktivitet)",
+      "both": "forgjenger eller etterfølger",
+      "predecessor": "forgjenger",
+      "successor": "etterfølger",
+      "suggestion": "Knytt aktiviteten til nettverket med en forgjenger- og en etterfølgerrelasjon, eller angi den som start-/sluttmilepæl"
+    },
+    "negative_lag": {
+      "fail": "Relasjonen {predecessor} -> {successor} bruker negativ forskyvning ({lag} dager), altså overlapp, som forvrenger kritisk linje",
+      "suggestion": "Erstatt overlappen med en eksplisitt aktivitet eller en SS/FF-relasjon slik at rekkefølgen fortsatt kan begrunnes"
+    },
+    "excessive_lag": {
+      "fail": "Relasjonen {predecessor} -> {successor} har en forskyvning på {lag} dager, over grensen på {threshold} dager",
+      "suggestion": "Modeller ventetiden som en egen aktivitet (innkjøp, herding, godkjenning), slik at den kan statusrapporteres og ressursutjevnes"
+    },
+    "hard_constraints": {
+      "fail": "Aktiviteten '{activity}' har en hard datobegrensning ({constraint}) som overstyrer nettverkslogikken",
+      "suggestion": "Bruk en myk begrensning (start tidligst), eller styr datoen gjennom logikken slik at aktiviteten kan flyttes når forgjengere forsinkes"
+    },
+    "negative_float": {
+      "fail": "Aktiviteten '{activity}' har negativ total slakk ({float} dager), så fremdriftsplanen kan ikke gjennomføres med de angitte koblingene",
+      "suggestion": "Endre arbeidsrekkefølgen, lemp på en hard begrensning, eller legg til en dokumentert innhentingsplan for å få slakken til null eller høyere"
+    },
+    "high_float": {
+      "fail": "Aktiviteten '{activity}' har svært høy total slakk ({float} dager), over grensen på {threshold} dager",
+      "suggestion": "Kontroller om en etterfølgerkobling mangler – stor slakk betyr ofte at aktiviteten bare er løst knyttet til nettverket"
+    },
+    "missing_duration": {
+      "fail": "Aktiviteten '{activity}' har ugyldig varighet ({duration} dager) for en oppgave som ikke er en milepæl",
+      "suggestion": "Angi en positiv varighet i arbeidsdager, eller klassifiser raden som en milepæl hvis den faktisk er en hendelse uten varighet"
+    },
+    "duration_on_project_week": {
+      "fail": "Aktiviteten '{activity}' er lagret som {stored} arbeidsdager, talt mandag til fredag fra {start} til {end}; etter prosjektets arbeidsuke, {calendar}, omfatter disse datoene {expected}",
+      "suggestion": "Lagre aktivitetens datoer på nytt slik at varigheten telles etter prosjektets arbeidsuke, eller angi varigheten bevisst"
+    }
+  },
+  "sheet_completeness": {
+    "missing": {
+      "fail": "Tegning {sheet} står i tegningslisten, men mangler i det opplastede settet",
+      "suggestion": "Last opp den manglende tegningen, eller bekreft at den ble trukket fra utgivelsen"
+    },
+    "extra": {
+      "fail": "Tegning {sheet} finnes i det opplastede settet, men står ikke i tegningslisten",
+      "suggestion": "Legg den til i listen eller utgivelsesregisteret, eller fjern den feilaktig inkluderte tegningen"
+    },
+    "revision_mismatch": {
+      "fail": "Tegning {sheet} har revisjon {actual_rev}, men listen forventer {expected_rev}",
+      "suggestion": "Utgi forventet revisjon, eller oppdater listen til gjeldende revisjon"
+    }
+  },
+  "procurement": {
+    "po_has_lines": {
+      "fail": "Innkjøpsordren har ingen linjer, så det forpliktede beløpet blir ikke medregnet",
+      "suggestion": "Legg til de bestilte varene før innkjøpsordren godkjennes"
+    },
+    "po_line_amount": {
+      "fail": "Linje {line} har totalbeløpet {actual}, men mengde ganger enhetspris er {expected}",
+      "suggestion": "Korriger mengden, enhetsprisen eller linjebeløpet slik at alle tre stemmer"
+    },
+    "po_subtotal_matches_lines": {
+      "fail": "Delsummen er {actual}, men linjene summerer til {expected}",
+      "suggestion": "Beregn delsummen på nytt fra gjeldende linjer"
+    },
+    "po_total_matches_subtotal": {
+      "fail": "Totalbeløpet er {actual}, men delsum pluss avgift er {expected}",
+      "suggestion": "Beregn totalbeløpet på nytt slik at det tilsvarer delsummen pluss avgiften"
+    },
+    "po_no_negative_line": {
+      "fail": "Linje {line} har en mengde som ikke er positiv, eller en negativ enhetspris",
+      "suggestion": "Utsted en kreditnota for en reversering i stedet for å bruke en negativ linje"
+    },
+    "po_currency_set": {
+      "fail": "Innkjøpsordren mangler valuta, så beløpet kan ikke summeres eller betales",
+      "suggestion": "Angi valutaen, normalt den prosjektet bruker"
+    },
+    "po_vendor_assigned": {
+      "fail": "Innkjøpsordren angir ingen leverandør",
+      "suggestion": "Velg leverandør før forpliktelsen godkjennes"
+    },
+    "po_retention_within_bounds": {
+      "fail": "Den tilbakeholdte andelen på {percent}% er utenfor det rimelige intervallet fra 0 til {max}%",
+      "suggestion": "Angi tilbakeholdelsen som en prosentsats, for eksempel 5 for fem prosent"
+    },
+    "po_delivery_after_issue": {
+      "fail": "Leveringen er satt til {delivery}, før utstedelsesdatoen {issue}",
+      "suggestion": "Flytt leveringsdatoen til utstedelsesdatoen eller senere"
+    },
+    "po_line_cost_coded": {
+      "fail": "Linje {line} mangler WBS, kostnadskategori eller kostnadslinje og vil derfor ikke vises i kostnadsfordelingen",
+      "suggestion": "Tilordne en kostnadskode slik at forpliktelsen rapporteres mot et budsjett"
+    },
+    "invoice_within_order": {
+      "fail": "Faktura {invoice} overstiger det gjenstående beløpet {remaining} på ordre {po} med {excess}",
+      "suggestion": "Kontroller fakturaen mot ordren; hvis tillegget er avtalt, registrer det som en ordreendring før godkjenning"
+    },
+    "invoice_quantity_received": {
+      "fail": "Linje {line} ville bli fakturert for totalt {invoiced}, men bare {received} er mottatt",
+      "suggestion": "Vent på følgeseddelen, eller bekreft varemottaket før denne mengden godkjennes"
+    },
+    "invoice_value_received": {
+      "fail": "Fakturaene på ordre {po} ville utgjøre {invoiced}, men mottatte varer er bare verdt {received} til ordreprisene",
+      "suggestion": "Vent på følgeseddelen, eller bekreft varemottaket før dette beløpet godkjennes"
+    }
+  },
+  "subcontract": {
+    "agreement_has_scope": {
+      "fail": "Avtalen har ingen arbeidspakker, så en betalingsanmodning mangler grunnlag",
+      "suggestion": "Del det avtalte arbeidsomfanget i arbeidspakker før avtalen aktiveres"
+    },
+    "package_scope_described": {
+      "fail": "Arbeidspakke {package} har et navn, men ingen beskrivelse av arbeidet den omfatter",
+      "suggestion": "Beskriv hva pakken omfatter, slik at en senere endringstvist har et utgangspunkt"
+    },
+    "agreement_value_positive": {
+      "fail": "Kontraktsverdien er {value}, så tilbakeholdelse og verdifordelingen mangler beregningsgrunnlag",
+      "suggestion": "Angi avtalt kontraktsverdi før avtalen aktiveres"
+    },
+    "packages_within_value": {
+      "fail": "Arbeidspakkene er verdt {planned}, men kontrakten er på {total}",
+      "suggestion": "Pris pakkene på nytt, eller øk kontraktsverdien slik at avtalen dekker sitt eget arbeidsomfang"
+    },
+    "agreement_dates_ordered": {
+      "fail": "Avtalen slutter {end}, før den begynner {start}",
+      "suggestion": "Korriger start- eller sluttdatoen slik at kontraktsperioden går fremover"
+    },
+    "agreement_currency_set": {
+      "fail": "Avtalen mangler valuta, så betalingene under den kan ikke summeres eller betales",
+      "suggestion": "Angi valutaen, normalt den prosjektet bruker"
+    },
+    "retention_within_bounds": {
+      "fail": "Den tilbakeholdte andelen på {percent}% er utenfor det rimelige intervallet fra 0 til {max}%",
+      "suggestion": "Angi tilbakeholdelsen som en prosentandel av hver betaling, ikke som et beløp"
+    },
+    "insurance_valid_at_start": {
+      "fail": "Underentreprenørens forsikring utløp {expiry}, før arbeidet starter {reference}",
+      "suggestion": "Innhent et gyldig forsikringsbevis før underentreprenøren får tilgang til byggeplassen"
+    },
+    "unlinked_contract_twin": {
+      "fail": "Underentrepriseavtalen {agreement} og kontrakten {contract} ser ut til å gjelde samme underentreprise, så økonomien kan telle den to ganger",
+      "suggestion": "Knytt dem sammen hvis de gjelder samme underentreprise, eller merk dem som forskjellige"
+    }
+  },
+  "submittal": {
+    "reviewer_assigned": {
+      "fail": "Dette innsendte materialet angir ingen kontrollør og sendes dermed ikke til noen ansvarlig mottaker",
+      "suggestion": "Tilordne kontrolløren som skal svare, før innsending"
+    },
+    "required_date_present": {
+      "fail": "Det innsendte materialet har ingen påkrevd svardato, så det kan aldri rapporteres som forsinket",
+      "suggestion": "Angi når kontrollen må være ferdig, ut fra arbeidet som materialet skal frigjøre"
+    },
+    "required_date_after_submitted": {
+      "fail": "Kontrollen skal være ferdig {required}, før materialet ble sendt inn {submitted}",
+      "suggestion": "Flytt påkrevd svardato til en arbeidsdag etter innsending"
+    },
+    "review_window_sufficient": {
+      "fail": "Kontrolløren har {days} dager, mindre enn de {minimum} dagene en kontroll normalt krever",
+      "suggestion": "Gi vanlig kontrolltid, eller avtal først en kortere frist med kontrolløren"
+    },
+    "spec_section_present": {
+      "fail": "Det innsendte materialet angir ikke noe spesifikasjonsavsnitt, så registeret kan ikke plassere det",
+      "suggestion": "Angi spesifikasjonsavsnittet materialet gjelder"
+    },
+    "approver_distinct_from_reviewer": {
+      "fail": "Samme person ({person}) er både kontrollør og godkjenner, så det mangler en uavhengig kontroll",
+      "suggestion": "Tilordne en annen godkjenner enn kontrolløren"
+    },
+    "linked_scope_present": {
+      "fail": "Det innsendte materialet er ikke knyttet til noen arbeidspost og blir derfor aldri samlet under en pakke",
+      "suggestion": "Knytt til postene i mengdefortegnelsen som materialet omfatter"
+    }
+  },
+  "rfq": {
+    "scope_described": {
+      "fail": "Forespørselen mangler arbeidsomfang og beskrivelse, så leverandøren har ingenting å prise",
+      "suggestion": "Beskriv arbeidsomfanget før publisering, slik at tilbudene blir sammenlignbare"
+    },
+    "deadline_present": {
+      "fail": "Forespørselen angir ingen tilbudsfrist, så tilbudsperioden avsluttes aldri",
+      "suggestion": "Angi dato og klokkeslett for når tilbudene senest må være mottatt"
+    },
+    "deadline_parseable": {
+      "fail": "Tilbudsfristen {value} er ikke en dato systemet kan lese, og alle tilbud vil bli avvist",
+      "suggestion": "Angi fristen som en dato, for eksempel 2026-08-31"
+    },
+    "deadline_in_future": {
+      "fail": "Tilbudsfristen {deadline} er allerede passert på dagens dato {today}, så forespørselen kommer som avsluttet",
+      "suggestion": "Flytt fristen til en fremtidig dato før publisering"
+    },
+    "has_recipients": {
+      "fail": "Forespørselen er ikke adressert til noen leverandør, så publisering varsler ingen",
+      "suggestion": "Legg til leverandørene forespørselen skal sendes til"
+    },
+    "currency_set": {
+      "fail": "Forespørselen angir ingen valuta, så tilbudene kan ikke rangeres mot hverandre",
+      "suggestion": "Angi valutaen tilbudene skal prises i"
+    },
+    "bid_currency_matches": {
+      "fail": "Tilbud {bid} er priset i {bid_currency}, men forespørselen er i {rfq_currency}",
+      "suggestion": "Be tilbyderen prise på nytt i forespørselens valuta, eller registrer den avtalte omregningen"
+    },
+    "bid_amounts_parseable": {
+      "fail": "Tilbud {bid} har beløpet {value}, som ikke er et tall som kan rangeres",
+      "suggestion": "Korriger tilbudsbeløpet før tildeling"
+    },
+    "bids_still_valid": {
+      "fail": "Tilbud {bid} utløp {expired}, og i dag er det {today}, så prisen er ikke lenger bindende",
+      "suggestion": "Be tilbyderen bekrefte prisen før tildeling"
+    },
+    "award_has_competition": {
+      "fail": "Tildelingen bygger på {count} tilbud, færre enn de {minimum} en konkurransebasert sammenligning krever",
+      "suggestion": "Registrer hvorfor direkte tildeling til én leverandør er berettiget, eller inviter flere tilbydere"
+    }
+  },
+  "errors": {
+    "resource_not_found": "Ressursen ble ikke funnet",
+    "project_not_found": "Prosjektet ble ikke funnet",
+    "vendor_not_found": "Leverandøren ble ikke funnet",
+    "template_not_found": "Malen ble ikke funnet",
+    "position_not_found": "Posten ble ikke funnet",
+    "boq_not_found": "Mengdefortegnelsen ble ikke funnet",
+    "session_not_found": "Økten ble ikke funnet",
+    "document_not_found": "Dokumentet ble ikke funnet",
+    "documents_batch_delete_referenced": "Andre poster peker fortsatt til dokumenter i denne gruppen. Gjennomgå hvilke koblinger slettingen bryter, og bekreft med acknowledge_references.",
+    "invitation_not_found": "Invitasjonen ble ikke funnet",
+    "agreement_not_found": "Avtalen ble ikke funnet",
+    "rejection_not_found": "Avvisningen ble ikke funnet",
+    "claim_not_found": "Fremdriftskravet ble ikke funnet",
+    "gaeb_x89_final_account_unsupported": "Et sluttoppgjør eller delsluttoppgjør kan ennå ikke eksporteres som GAEB X89. Det må fakturere samlet utført arbeid minus tidligere betalinger, mens et fremdriftskrav bare danner en avdragsfaktura for én periode. Eksporter kravet som en avdragsfaktura.",
+    "xpwe_native_file_refused": "Dette er kalkulasjonsprogrammets egen prosjektfil, som bare det programmet kan åpne. Eksporter kalkylen som XPWE fra kalkulasjonsprogrammet, og last opp .xpwe-filen.",
+    "plot_not_found": "Tomten ble ikke funnet",
+    "survey_not_found": "Droneoppmålingen ble ikke funnet",
+    "diary_video_not_found": "Dagbokvideoen ble ikke funnet",
+    "diary_photo_not_found": "Dagbokbildet ble ikke funnet",
+    "bidder_not_found": "Tilbyderen ble ikke funnet",
+    "webhook_not_found": "Webhooken ble ikke funnet",
+    "submission_not_found": "Innsendingen ble ikke funnet",
+    "measurement_not_found": "Byggeplassmålingen ble ikke funnet",
+    "salescontract_not_found": "Salgskontrakten ble ikke funnet",
+    "prompt_not_found": "Promptmalen ble ikke funnet",
+    "prequalification_not_found": "Prekvalifiseringen ble ikke funnet",
+    "purchase_requisition_not_found": "Innkjøpsanmodningen ble ikke funnet",
+    "purchase_order_not_found": "Innkjøpsordren ble ikke funnet",
+    "group_not_found": "Gruppen ble ikke funnet",
+    "final_account_not_found": "Sluttoppgjøret ble ikke funnet",
+    "estimate_job_not_found": "Kalkulasjonsjobben ble ikke funnet",
+    "escrow_not_found": "Transaksjonen på sperret konto ble ikke funnet",
+    "commission_accrual_not_found": "Den opptjente provisjonen ble ikke funnet",
+    "baseline_not_found": "Basisplanen ble ikke funnet",
+    "fx_rate_set_locked": "ECB-kursene for {date} er låst, så denne oppdateringen overskrev dem ikke. Lås først opp kurssamlingen hvis den skal erstattes av den nye publiseringen.",
+    "boq_locked": "Mengdefortegnelsen er låst og kan ikke endres. Opprett en revisjon for å gjøre endringer.",
+    "boq_link_owner_locked": "Koden '{code}' er definert av en linje i den låste mengdefortegnelsen '{bill}', og en kobling til den ville endre denne mengdefortegnelsen. Lås den opp først, eller registrer linjen under en ny kode."
+  },
+  "variations": {
+    "boq_lines_are_traced": {
+      "fail": "Linje {line} i denne endringens mengdefortegnelse kan ikke spores til noen verdifordelingslinje eller kalkylepost",
+      "suggestion": "Angi kontraktslinjen endringen påvirker, eller kalkyleposten arbeidsomfanget ble hentet fra, slik at beløpet kan begrunnes"
+    },
+    "boq_total_matches_estimate": {
+      "fail": "Det oppgitte overslaget i forespørselen er {estimate}, men den prisede mengdefortegnelsen summerer til {priced}",
+      "suggestion": "Overfør det prisede totalbeløpet til forespørselen, eller korriger mengdefortegnelsen slik at ett beløp gjelder"
+    },
+    "change_kind_matches_numbers": {
+      "removed_positive": "Linje {line} er merket som utgående arbeid, men har en positiv mengde på {quantity} – utgående arbeid trekkes fra kontrakten med negativ mengde",
+      "added_negative": "Linje {line} er merket som tilleggsarbeid, men har en negativ mengde på {quantity} – arbeid som trekkes fra kontrakten, er utgående, ikke tilleggsarbeid",
+      "removed_needs_contract_line": "Linje {line} er merket som utgående arbeid, men viser ikke til noen verdifordelingslinje, så det finnes ingen kontraktspost å fjerne",
+      "modified_needs_contract_line": "Linje {line} er merket som endret arbeid, men viser ikke til noen verdifordelingslinje, så det finnes ingen kontraktspost å endre",
+      "suggestion": "Korriger endringstypen eller mengden i linjens sporbarhet, eller angi kontraktslinjen endringen påvirker"
+    }
+  },
+  "cases": {
+    "has_steps": {
+      "fail": "Dette eksemplet har ingen trinn ennå, så leseren har ingenting å følge.",
+      "suggestion": "Legg til minst ett trinn som angir hvilken visning som skal åpnes, og hva som skal gjøres der."
+    },
+    "step_titled": {
+      "fail": "{count} trinn mangler en tittel eller en visning å åpne.",
+      "suggestion": "Gi hvert trinn en kort tittel, og velg visningen det åpner."
+    },
+    "step_purpose": {
+      "fail": "{count} av {total} trinn forklarer ikke formålet, så eksemplet fremstår som en liste med klikk i stedet for en forklaring.",
+      "suggestion": "Legg til én linje om formålet med hvert trinn; det trenger en ny bruker."
+    },
+    "distinct_screens": {
+      "fail": "{count} trinn åpner samme visning som forrige trinn, så leseren ser ingen endring og kan ikke skille trinnene fra hverandre.",
+      "suggestion": "Slå dem sammen til ett trinn, eller la det andre peke til visningen der arbeidet faktisk fortsetter."
+    },
+    "duration_plausible": {
+      "fail": "Eksemplet angir {minutes} minutt(er) for {steps} trinn. En leser som ikke rekker å følge med, mister tilliten til resten av tidsanslaget.",
+      "suggestion": "Øk anslaget til minst {minimum} minutter, eller fjern noen trinn."
+    },
+    "described": {
+      "fail": "Eksemplet mangler et sammendrag, så listen viser bare en tittel.",
+      "suggestion": "Legg til én setning om hva leseren vil ha gjennomført til slutt."
+    }
+  },
+  "uk": {
+    "contract_form_declared": {
+      "fail": "Kalkylen angir ikke hvilken kontraktsform den er priset etter",
+      "suggestion": "Registrer kontraktsformen. Rigg og drift, risiko og betalingsvilkår prises forskjellig under ulike former, så beløpet sier lite uten den"
+    },
+    "payment_regime_declared": {
+      "fail": "Betalingsmekanismen er ufullstendig: {missing} er ikke registrert",
+      "suggestion": "Registrer begge datoene. En byggekontrakt som ikke fastsetter dem, slipper dem ikke; Scheme for Construction Contracts fastsetter begge, og partene finner da betalingsvilkårene i regelverket fremfor i det de undertegnet"
+    },
+    "retention_declared": {
+      "fail": "Kalkylen angir ikke hvilken tilbakeholdelse av betaling som gjelder",
+      "suggestion": "Registrer tilbakeholdelsesprosenten og frigivelsen, eller angi at ingen tilbakeholdelse gjelder. Tilbakeholdte beløp er penger entreprenøren har tjent, men ikke kan disponere; en kalkyle som utelater dette, utelater arbeidskapitalbehovet"
+    },
+    "cdm_duty_holders_declared": {
+      "fail": "Ansvarlige etter CDM 2015 er ikke registrert: {missing} mangler",
+      "suggestion": "Registrer utnevnelsene. Når flere entreprenører arbeider på et prosjekt, må byggherren skriftlig utnevne en principal designer og en principal contractor; hvis byggherren ikke gjør det, har byggherren selv disse pliktene"
+    },
+    "hrb_regime_declared": {
+      "fail": "Spørsmålet om bygning med høyere risiko er uavklart: {reason}",
+      "unanswered": "kalkylen angir ikke om dette er en bygning med høyere risiko",
+      "disagrees": "kalkylen oppgir høyere risiko som {declared}, mens egne dimensjoner gir {derived}",
+      "suggestion": "En bygning har høyere risiko når den er minst 18 m høy eller har minst 7 etasjer OG inneholder minst to boenheter. Begge delene må være oppfylt: en høy bygning uten boliger har ikke høyere risiko, og å behandle den slik gir et unødvendig program av kontrolltrinn"
+    },
+    "vat_treatment_declared": {
+      "fail": "Kalkylen angir ikke hvordan merverdiavgift behandles",
+      "suggestion": "Registrer behandlingen: ordinær sats, redusert sats eller nullsats der arbeidet oppfyller vilkårene, eller innenlandsk omvendt avgiftsplikt der leveransen omfattes. Omvendt avgiftsplikt flytter merverdiavgiften til kunden og endrer hva entreprenøren kan fakturere"
+    }
+  },
+  "project_completeness": {
+    "country_set": {
+      "fail": "Prosjektet angir ikke noe land, så prisgrunnlag, avgiftssats og arbeidskalender kan ikke fastsettes",
+      "suggestion": "Angi prosjektets land i innstillingene. Landet bestemmer hvilken regional pakke, avgift og kalender alle beløp skal leses mot"
+    },
+    "currency_set": {
+      "fail": "Prosjektet angir ingen valuta, så mengdefortegnelser, påslag og kontrakter kan ikke summeres",
+      "suggestion": "Velg prosjektets valuta i innstillingene. Hver mengdefortegnelse og kontrakt prises i den, og alle totalbeløp leses i den"
+    },
+    "currency_matches_bill": {
+      "fail": "Prosjektet er priset i {project_currency}, men rader i denne mengdefortegnelsen er priset i {bill_currencies}",
+      "suggestion": "Omregn radene til prosjektets valuta med en oppgitt kurs, eller registrer valutakursen på prosjektet slik at mengdefortegnelsens total er ett beløp"
+    },
+    "priced_bill_present": {
+      "fail": "Prosjektet har ingen mengdefortegnelse med poster, så det finnes ikke noe kalkulasjonsgrunnlag",
+      "suggestion": "Opprett en mengdefortegnelse og legg til poster, eller importer en fra en CAD-modell, et regneark eller en utvekslingsfil"
+    },
+    "bill_base_date_set": {
+      "fail": "Mengdefortegnelsen \"{bill}\" angir ikke basisdatoen prisene gjelder for",
+      "suggestion": "Registrer basisdatoen i mengdefortegnelsen. Uten den kan prisene ikke indeksreguleres, avgiftsberegnes etter sin egen dato eller sammenlignes med en annen kalkyle"
+    },
+    "classification_standard_set": {
+      "fail": "Prosjektet har ingen klassifikasjonsstandard, så postenes koder kan ikke kontrolleres",
+      "suggestion": "Velg klassifikasjonsstandarden prosjektet er kodet etter. Den bestemmer også hvilke landsregelsett valideringen kjører"
+    },
+    "planned_dates_set": {
+      "both_missing": "Prosjektet mangler både planlagt startdato og planlagt sluttdato",
+      "start_missing": "Prosjektet har planlagt sluttdato, men ingen planlagt startdato",
+      "end_missing": "Prosjektet har planlagt startdato, men ingen planlagt sluttdato",
+      "unreadable": "Den planlagte datoen \"{value}\" kan ikke leses som en dato",
+      "suggestion": "Angi prosjektets planlagte start- og sluttdatoer som datoer. Tidsavhengige kostnader, prisstigning og fremdriftsplan beregnes for perioden mellom dem"
+    },
+    "planned_dates_ordered": {
+      "fail": "Prosjektet er planlagt å starte {start} og avsluttes {end}, som er før starten",
+      "suggestion": "Bytt om eller korriger de planlagte datoene slik at starten kommer før avslutningen"
+    },
+    "client_recorded": {
+      "fail": "Prosjektet har ingen registrert kunde, og ingen kontrakt angir en byggherre",
+      "suggestion": "Registrer kunden på prosjektet, eller legg til byggherren som kontraktspart slik at kalkylen har en mottaker"
+    },
+    "procurement_started": {
+      "fail": "Prosjektet er i fasen {phase}, men har verken kontrakt eller konkurransepakke",
+      "suggestion": "Opprett en konkurransepakke fra mengdefortegnelsen, registrer kontrakten, eller sett fasen tilbake til kalkulasjonsfasen prosjektet faktisk er i"
+    }
+  },
+  "boq_resources": {
+    "unit_rate_not_rederived": {
+      "fail": "Post {ordinal}: ressursradene kan ikke prise posten, så enhetsprisen ble ikke beregnet på nytt fra dem",
+      "fallback_allowance": "Post {ordinal}: ressursradene er en anslått kostnadsfordeling som inneholder postens mengde, så enhetsprisen ble ikke beregnet på nytt fra dem",
+      "assumed_norm": "Post {ordinal}: ressursradene inneholder normer som katalogen aldri oppga, så enhetsprisen ble ikke beregnet på nytt fra dem",
+      "norm_collapsed": "Post {ordinal}: ressursradene har mistet katalognormen og inneholder postens mengde i stedet, så enhetsprisen ble ikke beregnet på nytt fra dem",
+      "whole_position_quantities": "Post {ordinal}: ressursradene inneholder mengder for hele posten i stedet for normer per enhet, så enhetsprisen ble ikke beregnet på nytt fra dem",
+      "suggestion": "Kontroller prisoppbyggingen – beregn posten på nytt fra katalogposten gjennom gjennomgangen av ressursnormer, eller korriger radene manuelt"
+    }
+  },
+  "poland": {
+    "knr_reference_required": {
+      "fail": "Post {ordinal} viser ikke til noen KNR-katalogtabell",
+      "suggestion": "Angi katalogtabellen normene kommer fra i podstawa, for eksempel KNR 2-02 0201-01, eller skriv kalkulacja indywidualna for en post priset med egen kalkulasjon"
+    },
+    "knr_reference_recognised": {
+      "fail": "Referansen '{code}' på post {ordinal} angir ingen KNR-katalogfamilie",
+      "suggestion": "Start referansen med katalogfamilien, som KNR, KNNR, KNR-W eller KSNR, eller merk posten som kalkulacja indywidualna"
+    }
+  }
+}
