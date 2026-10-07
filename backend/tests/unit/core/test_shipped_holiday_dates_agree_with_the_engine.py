@@ -1,7 +1,7 @@
 """Every shipped calendar is compared against the engine that computes it.
 
 We ship holiday dates twice. ``app/core/calendar.py`` computes them, and
-``i18n_foundation/seed_data/work_calendars.json`` states them as data for 36
+``i18n_foundation/seed_data/work_calendars.json`` states them as data for 37
 countries. Until this file existed, nothing put the two side by side, and the
 suite was green while they disagreed.
 
@@ -35,8 +35,8 @@ deliberately does not adjudicate, because fixing them changes date arithmetic
 for real users and that is a decision to take explicitly rather than as a side
 effect of writing a test.
 
-**The denominator is printed.** 36 countries are seeded, 19 are bound to an
-engine function, 17 are unbound. A gate whose population is invisible can be
+**The denominator is printed.** 37 countries are seeded, 19 are bound to an
+engine function, 18 are unbound. A gate whose population is invisible can be
 satisfied by narrowing it, so the unbound countries are named in the output
 rather than silently absent from it, and floors below stop the bound set from
 being trimmed to make a failure go away.
@@ -265,9 +265,9 @@ _DIVERGENCES: dict[str, Divergence] = {
 }
 
 #: Floors. These stop a future failure from being resolved by trimming the
-#: population instead of the defect. Measured, not guessed: 36 seeded countries,
+#: population instead of the defect. Measured, not guessed: 37 seeded countries,
 #: of which 19 have an engine function.
-_MIN_SEEDED = 36
+_MIN_SEEDED = 37
 _MIN_BOUND = 19
 
 #: The countries that ship a calendar nothing computes, named rather than
@@ -290,6 +290,7 @@ _EXPECTED_UNBOUND: tuple[str, ...] = (
     "NO",
     "NZ",
     "PL",
+    "PT",  # JUR-03: sourced 2026 seed only; the separate core engine remains future work.
     "SE",
     "TR",
     "UA",

@@ -26,7 +26,7 @@ wrongly.
 from __future__ import annotations
 
 import logging
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import pytest
 import pytest_asyncio
@@ -233,7 +233,8 @@ async def test_a_country_that_already_has_a_calendar_is_left_alone(repair_factor
 async def test_a_deleted_calendar_is_not_resurrected(repair_factory) -> None:
     """An install seeded after the calendars shipped removed them on purpose."""
     cohort = _cohort_without_the_dated_rows()
-    await _install(repair_factory, cohort, "2026-08-30")
+    after_last_shipment = datetime.fromisoformat(max(CALENDAR_FIRST_SHIPPED.values())) + timedelta(days=1)
+    await _install(repair_factory, cohort, after_last_shipment.date().isoformat())
 
     report = await run_data_repairs(repair_factory)
     outcome = _outcome(report, REPAIR_ID)

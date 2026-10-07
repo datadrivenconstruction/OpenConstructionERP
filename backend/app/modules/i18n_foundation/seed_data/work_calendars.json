@@ -901,5 +901,31 @@
       {"date": "2026-12-25", "name": {"en": "Christmas Day"}, "type": "public_holiday"},
       {"date": "2026-12-26", "name": {"en": "Boxing Day"}, "type": "public_holiday"}
     ]
+  },
+  {
+    "country_code": "PT",
+    "name": "Portugal National Holidays 2026 (Mon-Fri planning default)",
+    "name_translations": {
+      "en": "Portugal National Holidays 2026 (Mon-Fri planning default)",
+      "pt": "Feriados nacionais de Portugal 2026 (planeamento padrão de segunda a sexta-feira)"
+    },
+    "year": "2026",
+    "work_hours_per_day": "8",
+    "work_days": [1, 2, 3, 4, 5],
+    "exceptions": [
+      {"date": "2026-01-01", "name": {"en": "New Year's Day", "pt": "Ano Novo"}, "type": "public_holiday"},
+      {"date": "2026-04-03", "name": {"en": "Good Friday", "pt": "Sexta-Feira Santa"}, "type": "public_holiday"},
+      {"date": "2026-04-05", "name": {"en": "Easter Sunday", "pt": "Domingo de Páscoa"}, "type": "public_holiday"},
+      {"date": "2026-04-25", "name": {"en": "Freedom Day", "pt": "Dia da Liberdade"}, "type": "public_holiday"},
+      {"date": "2026-05-01", "name": {"en": "Labour Day", "pt": "Dia do Trabalhador"}, "type": "public_holiday"},
+      {"date": "2026-06-04", "name": {"en": "Corpus Christi", "pt": "Corpo de Deus"}, "type": "public_holiday"},
+      {"date": "2026-06-10", "name": {"en": "Portugal Day", "pt": "Dia de Portugal"}, "type": "public_holiday"},
+      {"date": "2026-08-15", "name": {"en": "Assumption of Mary", "pt": "Assunção de Nossa Senhora"}, "type": "public_holiday"},
+      {"date": "2026-10-05", "name": {"en": "Republic Day", "pt": "Implantação da República"}, "type": "public_holiday"},
+      {"date": "2026-11-01", "name": {"en": "All Saints' Day", "pt": "Dia de Todos os Santos"}, "type": "public_holiday"},
+      {"date": "2026-12-01", "name": {"en": "Restoration of Independence", "pt": "Restauração da Independência"}, "type": "public_holiday"},
+      {"date": "2026-12-08", "name": {"en": "Immaculate Conception", "pt": "Imaculada Conceição"}, "type": "public_holiday"},
+      {"date": "2026-12-25", "name": {"en": "Christmas Day", "pt": "Natal"}, "type": "public_holiday"}
+    ]
   }
 ]

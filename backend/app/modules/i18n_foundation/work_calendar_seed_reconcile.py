@@ -122,6 +122,8 @@ CALENDAR_FIRST_SHIPPED: Final[dict[CalendarSlot, str]] = {
     ("KW", "2026"): "2026-08-29",
     ("BH", "2026"): "2026-08-29",
     ("OM", "2026"): "2026-08-29",
+    # Portugal national holidays, 2026-only planning calendar (JUR-03).
+    ("PT", "2026"): "2026-10-07",
 }
 
 
