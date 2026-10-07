@@ -11,8 +11,29 @@
  *   GET    /v1/dashboards/snapshots/{snapshot_id}/manifest   — manifest.json
  */
 
-import { apiGet, apiDelete, apiPatch, apiPost } from '@/shared/lib/api';
+import {
+  activeLanguageTag,
+  apiGet as sharedGet,
+  apiDelete as sharedDelete,
+  apiPatch as sharedPatch,
+  apiPost as sharedPost,
+} from '@/shared/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
+
+// Dashboard routes consume an explicit locale query parameter. Their English
+// default takes precedence over the shared client's Accept-Language header.
+// Resolve it per request so changing the UI language also changes API findings.
+function withReaderLocale(path: string): string {
+  const [pathname, query = ''] = path.split('?', 2);
+  const params = new URLSearchParams(query);
+  params.set('locale', activeLanguageTag() || 'en');
+  return `${pathname}?${params.toString()}`;
+}
+
+const apiGet: typeof sharedGet = (path, init) => sharedGet(withReaderLocale(path), init);
+const apiPost: typeof sharedPost = (path, body, init) => sharedPost(withReaderLocale(path), body, init);
+const apiPatch: typeof sharedPatch = (path, body, init) => sharedPatch(withReaderLocale(path), body, init);
+const apiDelete: typeof sharedDelete = (path, body, init) => sharedDelete(withReaderLocale(path), body, init);
 
 /* ── Types ──────────────────────────────────────────────────────────────── */
 
@@ -134,7 +155,7 @@ export async function createSnapshot(input: CreateSnapshotInput): Promise<Snapsh
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const resp = await fetch(
-    `/api/v1/dashboards/projects/${encodeURIComponent(input.projectId)}/snapshots?locale=en`,
+    withReaderLocale(`/api/v1/dashboards/projects/${encodeURIComponent(input.projectId)}/snapshots`),
     { method: 'POST', headers, body: formData },
   );
 
@@ -535,9 +556,9 @@ export function buildSnapshotExportUrl(
 ): string {
   const params = _rowsQueryParams(opts);
   params.set('format', format);
-  return `/api/v1/dashboards/snapshots/${encodeURIComponent(
+  return withReaderLocale(`/api/v1/dashboards/snapshots/${encodeURIComponent(
     snapshotId,
-  )}/export?${params.toString()}`;
+  )}/export?${params.toString()}`);
 }
 
 /* ── Dataset Integrity Overview (T07) ────────────────────────────────────── */
