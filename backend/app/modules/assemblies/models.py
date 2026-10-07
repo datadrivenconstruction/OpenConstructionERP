@@ -56,7 +56,7 @@ class Assembly(Base):
         nullable=True,
         index=True,
     )
-    owner_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    owner_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",

@@ -41,7 +41,7 @@ class WebhookSource(Base):
     __tablename__ = "oe_webhook_leads_source"
 
     # Optional delivery-project scope. Plain GUID, no DB FK (see header).
-    project_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    project_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     slug: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)
     # api_key | hmac | jwt
@@ -56,7 +56,7 @@ class WebhookSource(Base):
     rate_limit_per_min: Mapped[int] = mapped_column(Integer, nullable=False, default=60, server_default="60")
     # Default CRM lead source label applied when a mapping does not set it.
     default_lead_source: Mapped[str] = mapped_column(String(32), nullable=False, default="web", server_default="web")
-    created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
 
     def __repr__(self) -> str:
         return f"<WebhookSource {self.slug} ({self.auth_method})>"

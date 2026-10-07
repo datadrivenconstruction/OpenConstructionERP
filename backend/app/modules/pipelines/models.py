@@ -76,7 +76,7 @@ class Pipeline(Base):
     )
     is_published: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
-    created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
 
     def __repr__(self) -> str:
         return f"<Pipeline {self.name} v{self.version} published={self.is_published}>"
