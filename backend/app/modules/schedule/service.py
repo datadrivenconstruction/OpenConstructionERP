@@ -1360,7 +1360,7 @@ class ScheduleService:
                 # generated marker would let regeneration discard site closures.
                 edited_calendar = fields["metadata_"].get("calendar")
                 if isinstance(edited_calendar, dict):
-                    for key in ("regional_holiday_country", "holiday_coverage"):
+                    for key in ("regional_holiday_country", "holiday_coverage", "week_fallback"):
                         edited_calendar.pop(key, None)
 
         if target_status == "archived" and schedule.status != "archived":
@@ -3092,16 +3092,21 @@ class ScheduleService:
         return {"work_days": work_days or [0, 1, 2, 3, 4], "exceptions": exceptions}
 
     async def _generation_calendar(
-        self, schedule: Schedule, region_week: set[int], holiday_country: str | None = None
+        self,
+        schedule: Schedule,
+        region_week: set[int],
+        holiday_country: str | None = None,
+        *,
+        week_fallback: bool | None = None,
     ) -> tuple[dict, dict | None]:
         """The calendar a generated plan is drawn on, and the one to record on the schedule.
 
         The plan is drawn on the calendar :meth:`reschedule` will recount it
         on, holidays included, so the first reschedule moves no bar: the
         schedule's own calendar, else the project's default calendar. Without
-        either, the project region's week is used, and recorded on the
-        schedule when it is not Monday to Friday, which is what reschedule
-        would otherwise fall back to.
+        either, the project region's week and holiday coverage are recorded
+        on the schedule. Record a known fallback flag with that snapshot;
+        absence means unknown, not a confirmed regional week.
 
         Returns:
             ``(calendar, calendar_to_record)``; the second is ``None`` when
@@ -3120,6 +3125,8 @@ class ScheduleService:
             "regional_holiday_country": holiday_country,
             "holiday_coverage": [],
         }
+        if week_fallback is not None:
+            week["week_fallback"] = week_fallback
         return week, week
 
     async def reschedule(self, schedule_id: uuid.UUID) -> list[Activity]:
@@ -3344,7 +3351,7 @@ class ScheduleService:
         cal = get_work_calendar(project_region)
         hours_per_day = cal["hours_per_day"]
         plan_calendar, calendar_to_record = await self._generation_calendar(
-            schedule, set(cal["work_days"]), cal.get("holiday_country")
+            schedule, set(cal["work_days"]), cal.get("holiday_country"), week_fallback=cal.get("week_fallback")
         )
         work_days_set = set(plan_calendar["work_days"])
         holidays = {d for d in (normalise_exception_date(e) for e in plan_calendar.get("exceptions") or []) if d}
