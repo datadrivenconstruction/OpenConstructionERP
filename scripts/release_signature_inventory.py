@@ -37,7 +37,7 @@ whole point:
     whether or not it is notarised, and nothing in its name or size says. So by
     default they are answered from the credentials: no Developer ID certificate
     and no notarisation credentials means no build could have been notarised,
-    and no AZURE_KV_* secrets means no installer could have been Authenticode
+    and no ARTIFACT_SIGNING_* secrets means no installer could have been Authenticode
     signed. That is an argument from the cause rather than an observation of
     the effect, and it is labelled as such everywhere it appears.
 
@@ -106,12 +106,16 @@ WINDOWS_SUFFIXES = (".exe", ".msi")
 MACOS_SUFFIXES = (".dmg", ".app.tar.gz")
 DESKTOP_SUFFIXES = (*WINDOWS_SUFFIXES, *MACOS_SUFFIXES, ".AppImage", ".deb", ".rpm")
 
+# Artifact Signing, the one Windows signing path the release workflow keeps.
+# Only the three names the consuming step receives under their own secret name
+# are listed; the tenant, client id and client secret reach it renamed to the
+# AZURE_* variables the Azure SDK reads, so their step env keys never match a
+# secret name. Releases cut while the older Key Vault path existed were
+# measured against AZURE_KV_* secrets that were never configured.
 WINDOWS_SECRETS = (
-    "AZURE_KV_URL",
-    "AZURE_KV_CERT_NAME",
-    "AZURE_KV_CLIENT_ID",
-    "AZURE_KV_CLIENT_SECRET",
-    "AZURE_KV_TENANT_ID",
+    "ARTIFACT_SIGNING_ENDPOINT",
+    "ARTIFACT_SIGNING_ACCOUNT",
+    "ARTIFACT_SIGNING_PROFILE",
 )
 
 # A credential is "wired" when the step that runs the signing TOOL receives it,
@@ -126,10 +130,10 @@ WINDOWS_SECRETS = (
 # (uses-prefix, invoked command, alternative credential sets the tool accepts)
 #
 # The command is matched as an INVOCATION, not as a mention. Matching the text
-# "azuresigntool" anywhere in a step picked out the preflight step, whose
-# comment explains what azuresigntool would do with empty secrets, and reported
-# the preflight as the signing tool. That reads as "Windows signing is wired"
-# because the preflight is, of course, handed all five names.
+# a tool name anywhere in a step once picked out a preflight step, whose
+# comment explained what the tool would do with empty secrets, and reported the
+# preflight as the signing tool. That read as "Windows signing is wired"
+# because the preflight is, of course, handed every name.
 #
 # Notarisation takes either an app specific password or an App Store Connect
 # API key, so alternatives are a list. Only one set has to be complete.
@@ -153,7 +157,7 @@ CONSUMERS = {
             ("APPLE_API_ISSUER", "APPLE_API_KEY", "APPLE_API_KEY_PATH"),
         ),
     ),
-    "Windows Authenticode": (None, "azuresigntool", (WINDOWS_SECRETS,)),
+    "Windows Authenticode": (None, "setup_windows_signing.py", (WINDOWS_SECRETS,)),
 }
 
 
@@ -310,8 +314,15 @@ def invokes(script: str, command: str) -> bool:
         line = raw.strip()
         if not line or line.startswith("#"):
             continue
-        head = line.split()[0]
-        if head == command:
+        words = line.split()
+        if words[0] == command:
+            return True
+        # A script is invoked through its interpreter, so `python x.py` calls x.py.
+        if (
+            words[0] in ("python", "python3", "py")
+            and len(words) > 1
+            and words[1].replace("\\", "/").rsplit("/", 1)[-1] == command
+        ):
             return True
     return False
 
