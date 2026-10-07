@@ -110,12 +110,13 @@ def _resolve_pool_kind() -> str:
     return raw
 
 
-def init_pool() -> int:
+def init_pool(*, warmup: bool = True) -> int:
     """Initialise the worker pool. Idempotent. Returns the worker count.
 
     Returns 0 if the pool is disabled (env var = 0) or initialisation
     failed - callers fall back to the default asyncio executor in
-    either case.
+    either case. ``warmup=False`` creates the executor without loading a model
+    or waiting for inference; startup can run :func:`warm_pool` off-thread.
     """
     global _pool, _pool_size, _pool_kind
     if _pool is not None:
@@ -141,48 +142,9 @@ def init_pool() -> int:
         _pool_size = size
         _pool_kind = kind
 
-        # Warm the workers synchronously so the first user-facing
-        # request doesn't pay the cold-start cost. For the thread pool
-        # the workers share one model, so we load it here, in the
-        # caller's thread, and the jobs below then only exercise each
-        # worker once. For the process pool we need ``size * 2`` jobs
-        # because each worker has its own model that must be loaded +
-        # ONNX-compiled.
-        #
-        # That parent load used to be conditional: the comment here said
-        # the model was already loaded by ``maybe_preload_in_process``,
-        # which only runs under ``OE_VECTOR_PRELOAD=1`` and is off by
-        # default. So on a default startup the ``size`` jobs below were
-        # the first thing to ask for the model, they asked at the same
-        # instant, and each built its own copy. ``get_embedder`` now
-        # serialises that, and loading here means the serialisation has
-        # nothing to do: one thread asks, the workers all hit the warm
-        # singleton. It costs no extra work either - the jobs called
-        # ``get_embedder`` anyway, and it honours the same download lock,
-        # so a deployment with no encoder and downloads off gets the same
-        # fast "nothing to load" it gets today.
-        warmup_started = time.monotonic()
-        if kind == "thread":
-            try:
-                from app.core.vector import get_embedder
-
-                get_embedder()
-            except Exception as exc:  # noqa: BLE001 - a pool is not worth a failed startup
-                logger.debug("Parent embedder warm before pool warmup failed: %s", exc)
-        warmup_jobs = size * 2 if kind == "process" else size
-        futures = [_pool.submit(encode_in_worker, ["warm"]) for _ in range(warmup_jobs)]
-        for f in futures:
-            try:
-                f.result(timeout=180)
-            except Exception as exc:
-                logger.debug("warmup encode failed: %s", exc)
-        warmup_ms = (time.monotonic() - warmup_started) * 1000
-        logger.info(
-            "Embedding pool initialised: %d %s workers (warmup %.0f ms)",
-            size,
-            kind,
-            warmup_ms,
-        )
+        if warmup:
+            warm_pool()
+        logger.info("Embedding pool initialised: %d %s workers", size, kind)
         return size
     except Exception as exc:
         logger.warning(
@@ -198,6 +160,53 @@ def init_pool() -> int:
         _pool_size = 0
         _pool_kind = ""
         return 0
+
+
+def warm_pool(*, expected_pool: Executor | None = None) -> bool:
+    """Warm the existing executor; never create or republish a pool.
+
+    Capture its identity before the potentially slow model load. Shutdown (or
+    replacement) during that load must not submit jobs to either the old pool
+    or a replacement. The default init path still warms synchronously for
+    existing callers; application startup can invoke this in a worker thread.
+    ``expected_pool`` also protects work scheduled before a separate preload:
+    an older startup task must not warm a replacement created in the meantime.
+    """
+    pool, size, kind = _pool, _pool_size, _pool_kind
+    if pool is None or (expected_pool is not None and pool is not expected_pool):
+        return False
+    started = time.monotonic()
+    if kind == "thread":
+        try:
+            from app.core.vector import get_embedder
+
+            # Load once before dispatch; all thread workers share this model.
+            get_embedder()
+        except Exception as exc:  # noqa: BLE001 - optional warm-up
+            logger.debug("Parent embedder warm before pool warmup failed: %s", exc)
+    if _pool is not pool:
+        return False
+    futures = []
+    for _ in range(size * 2 if kind == "process" else size):
+        if _pool is not pool:
+            return False
+        try:
+            futures.append(pool.submit(encode_in_worker, ["warm"]))
+        except RuntimeError:
+            # shutdown can close the captured executor between check/submit.
+            logger.debug("Embedding pool closed during warm-up submission", exc_info=True)
+            return False
+    for future in futures:
+        if _pool is not pool:
+            return False
+        try:
+            future.result(timeout=180)
+        except Exception as exc:  # noqa: BLE001 - inference is optional
+            logger.debug("warmup encode failed: %s", exc)
+    if _pool is not pool:
+        return False
+    logger.info("Embedding pool warmed: %d %s workers (%.0f ms)", size, kind, (time.monotonic() - started) * 1000)
+    return True
 
 
 def shutdown_pool() -> None:
@@ -341,4 +350,5 @@ __all__ = [
     "pool_size",
     "reset_for_tests",
     "shutdown_pool",
+    "warm_pool",
 ]

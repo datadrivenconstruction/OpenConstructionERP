@@ -778,6 +778,32 @@ def configure_logging(settings: Settings) -> None:
     install_url_redaction()
 
 
+def _start_embedding_pool_warmup():
+    """Create the executor now; load models and warm workers off the server loop."""
+    import asyncio
+
+    from app.core.embedding_pool import get_pool, init_pool, maybe_preload_in_process, warm_pool
+
+    # Creating an executor does not load a model or submit inference jobs.
+    # The default pool is enabled even when OE_VECTOR_PRELOAD is unset.
+    workers = init_pool(warmup=False)
+    pool = get_pool()
+
+    def warm() -> None:
+        preloaded = maybe_preload_in_process()
+        warmed = warm_pool(expected_pool=pool) if pool is not None else False
+        if get_pool() is pool and (preloaded or warmed):
+            logger.info("Embedding background warm-up complete: preload=%s pool_workers=%d", preloaded, workers)
+
+    async def run() -> None:
+        try:
+            await asyncio.to_thread(warm)
+        except Exception:
+            logger.warning("Embedding background warm-up failed; application remains available", exc_info=True)
+
+    return asyncio.create_task(run(), name="embedding-pool-warmup")
+
+
 def _init_vector_db() -> None:
     """Initialize vector database on startup (non-blocking, never fatal).
 
@@ -5123,6 +5149,7 @@ def create_app() -> FastAPI:
         # work in tests because get_embedder() loads the model lazily on the
         # first call that actually needs it.
         _section("Vector DB")
+        app.state.embedding_warmup_task = None
         _fast_startup = os.environ.get("OE_TEST_FAST_STARTUP", "").lower() in (
             "1",
             "true",
@@ -5151,10 +5178,8 @@ def create_app() -> FastAPI:
             except Exception:
                 logger.debug("Could not schedule vector DB init", exc_info=True)
 
-            # Pre-warm the embedder + boot the inference process pool. Both
-            # are env-var-gated so dev startup stays fast unless the
-            # operator opted in. See ``app.core.embedding_pool`` for the
-            # full rationale and trade-offs.
+            # The executor is enabled by default. Model loading and inference
+            # warm-up must stay off the critical startup path.
             #
             # Prime the embedder in a DETACHED background task. Loading the
             # SentenceTransformer blocks for up to ~45s, and doing it inline
@@ -5215,16 +5240,7 @@ def create_app() -> FastAPI:
                 logger.debug("Could not schedule embedder prime", exc_info=True)
 
             try:
-                from app.core.embedding_pool import init_pool, maybe_preload_in_process
-
-                preloaded = maybe_preload_in_process()
-                workers = init_pool()
-                if preloaded or workers:
-                    logger.info(
-                        "Embedding warm-up: preload=%s pool_workers=%d",
-                        preloaded,
-                        workers,
-                    )
+                app.state.embedding_warmup_task = _start_embedding_pool_warmup()
             except Exception as exc:  # noqa: BLE001 - never fatal for startup
                 logger.warning("Embedding pool init skipped: %s", exc)
 
@@ -5711,6 +5727,9 @@ def create_app() -> FastAPI:
         try:
             from app.core.embedding_pool import shutdown_pool
 
+            warmup_task = getattr(app.state, "embedding_warmup_task", None)
+            if warmup_task is not None:
+                warmup_task.cancel()
             shutdown_pool()
         except Exception:
             logger.debug("embedding pool shutdown failed", exc_info=True)

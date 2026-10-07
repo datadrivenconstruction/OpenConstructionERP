@@ -9,11 +9,130 @@ fallback path, and lifecycle.
 
 from __future__ import annotations
 
+import threading
 import time
 
 import pytest
 
 from app.core import embedding_pool
+
+
+def test_executor_creation_does_not_wait_for_slow_model_when_warmup_disabled(monkeypatch):
+    from app.core import vector
+
+    embedding_pool.reset_for_tests()
+    monkeypatch.setenv("OE_VECTOR_POOL_WORKERS", "1")
+    monkeypatch.setenv("OE_VECTOR_POOL_KIND", "thread")
+    loading = threading.Event()
+    release = threading.Event()
+    returned = threading.Event()
+    results = []
+
+    def slow_load():
+        loading.set()
+        release.wait(timeout=10)
+
+    def construct():
+        results.append(embedding_pool.init_pool(warmup=False))
+        returned.set()
+
+    monkeypatch.setattr(vector, "get_embedder", slow_load)
+    worker = threading.Thread(target=construct, daemon=True)
+    try:
+        worker.start()
+        assert returned.wait(timeout=5), "executor construction waited for the blocked model loader"
+        assert not loading.is_set()
+        assert results == [1]
+        assert embedding_pool.get_pool() is not None
+    finally:
+        release.set()
+        worker.join(timeout=5)
+        embedding_pool.shutdown_pool()
+
+
+@pytest.mark.parametrize("replace", [False, True])
+def test_shutdown_during_parent_load_cannot_submit_or_republish_pool(monkeypatch, replace):
+    from app.core import vector
+
+    embedding_pool.reset_for_tests()
+    monkeypatch.setenv("OE_VECTOR_POOL_WORKERS", "1")
+    monkeypatch.setenv("OE_VECTOR_POOL_KIND", "thread")
+    loading = threading.Event()
+    release = threading.Event()
+    submitted = []
+    results = []
+
+    def slow_load():
+        loading.set()
+        release.wait(timeout=10)
+
+    monkeypatch.setattr(vector, "get_embedder", slow_load)
+    monkeypatch.setattr(embedding_pool, "encode_in_worker", lambda texts: submitted.append(texts) or [])
+    embedding_pool.init_pool(warmup=False)
+    old_pool = embedding_pool.get_pool()
+    original_submit = old_pool.submit
+
+    def track_submit(*args, **kwargs):
+        submitted.append("submit")
+        return original_submit(*args, **kwargs)
+
+    monkeypatch.setattr(old_pool, "submit", track_submit)
+    worker = threading.Thread(target=lambda: results.append(embedding_pool.warm_pool()), daemon=True)
+    try:
+        worker.start()
+        assert loading.wait(timeout=5)
+        embedding_pool.shutdown_pool()
+        replacement = None
+        if replace:
+            embedding_pool.init_pool(warmup=False)
+            replacement = embedding_pool.get_pool()
+            assert replacement is not old_pool
+        release.set()
+        worker.join(timeout=5)
+        assert not worker.is_alive()
+        assert results == [False]
+        assert submitted == []
+        assert embedding_pool.get_pool() is replacement
+        assert embedding_pool.pool_size() == (1 if replace else 0)
+    finally:
+        release.set()
+        worker.join(timeout=5)
+        embedding_pool.shutdown_pool()
+
+
+def test_warm_after_shutdown_never_loads_a_model_or_recreates_executor(monkeypatch):
+    from app.core import vector
+
+    embedding_pool.reset_for_tests()
+    calls = []
+    monkeypatch.setattr(vector, "get_embedder", lambda: calls.append("load"))
+    assert embedding_pool.warm_pool() is False
+    assert embedding_pool.get_pool() is None
+    assert calls == []
+
+
+def test_wrong_expected_pool_returns_without_model_load_or_jobs(monkeypatch):
+    from app.core import vector
+
+    embedding_pool.reset_for_tests()
+    monkeypatch.setenv("OE_VECTOR_POOL_WORKERS", "1")
+    monkeypatch.setenv("OE_VECTOR_POOL_KIND", "thread")
+    calls = []
+    monkeypatch.setattr(vector, "get_embedder", lambda: calls.append("load"))
+    embedding_pool.init_pool(warmup=False)
+    old_pool = embedding_pool.get_pool()
+    embedding_pool.shutdown_pool()
+    embedding_pool.init_pool(warmup=False)
+    replacement = embedding_pool.get_pool()
+    monkeypatch.setattr(replacement, "submit", lambda *args, **kwargs: calls.append("submit"))
+    try:
+        assert embedding_pool.warm_pool(expected_pool=old_pool) is False
+        assert calls == []
+        assert embedding_pool.get_pool() is replacement
+        assert embedding_pool.pool_size() == 1
+    finally:
+        embedding_pool.shutdown_pool()
+
 
 # ── Pool size resolution ────────────────────────────────────────────────
 
