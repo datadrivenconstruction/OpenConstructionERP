@@ -66387,6 +66387,7 @@
         "events.py",
         "hazards.py",
         "intelligence.py",
+        "list_projection.py",
         "manifest.py",
         "matcher.py",
         "models.py",
@@ -237327,7 +237328,7 @@
     "total_relationships": 234,
     "total_routes": 3756,
     "total_schemas": 3563,
-    "total_python_files": 2288,
+    "total_python_files": 2289,
     "frontend_features": 192,
     "frontend_ts_files": 2987,
     "frontend_backend_mapped": 171

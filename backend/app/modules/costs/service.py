@@ -20,6 +20,7 @@ import re
 import uuid
 from datetime import UTC, date, datetime
 from decimal import Decimal, InvalidOperation
+from types import SimpleNamespace
 from typing import Any, Literal
 
 from fastapi import HTTPException, status
@@ -725,7 +726,8 @@ class CostItemService:
         query: CostSearchQuery,
         *,
         skip_count: bool = False,
-    ) -> tuple[list[CostItem], int | None, bool, str | None]:
+        lite: bool = False,
+    ) -> tuple[list[CostItem | SimpleNamespace], int | None, bool, str | None]:
         """Search with cursor-aware pagination.
 
         Returns ``(items, total_or_None, has_more, next_cursor_or_None)``.
@@ -739,6 +741,9 @@ class CostItemService:
         ``_region_cache["stats"]`` totals) and wants to skip the COUNT(*)
         on the first page. Cursor-paginated requests still skip count
         automatically - this flag is for first-page no-filter fast paths.
+
+        ``lite`` projects compact inputs for list serialization in SQL. These
+        rows are detached, read-only values; the default returns full ORM items.
         """
         # Fuzzy (trigram-ranked) branch: relevance ordering cannot use the
         # (code, id) keyset cursor, so it paginates by OFFSET and encodes the
@@ -747,7 +752,7 @@ class CostItemService:
         # bound PostgreSQL database; otherwise we fall through to the keyset
         # path below unchanged.
         if await self.repo.fuzzy_search_enabled(query.q, query.fuzzy):
-            return await self._search_fuzzy_paginated(query, skip_count=skip_count)
+            return await self._search_fuzzy_paginated(query, skip_count=skip_count, lite=lite)
 
         decoded_cursor: tuple[str, str] | None = None
         if query.cursor:
@@ -777,6 +782,7 @@ class CostItemService:
             limit=query.limit,
             cursor=decoded_cursor,
             skip_count=skip_count or decoded_cursor is not None,
+            lite=lite,
         )
 
         next_cursor: str | None = None
@@ -791,7 +797,8 @@ class CostItemService:
         query: CostSearchQuery,
         *,
         skip_count: bool,
-    ) -> tuple[list[CostItem], int | None, bool, str | None]:
+        lite: bool = False,
+    ) -> tuple[list[CostItem | SimpleNamespace], int | None, bool, str | None]:
         """OFFSET-paginated fuzzy search returning the same 4-tuple shape.
 
         Rows are ranked by trigram relevance (exact, then prefix, then
@@ -831,6 +838,7 @@ class CostItemService:
             cursor=None,
             skip_count=skip_count or bool(query.cursor),
             fuzzy=True,
+            lite=lite,
         )
 
         next_cursor = encode_offset_cursor(page_offset + query.limit) if has_more else None

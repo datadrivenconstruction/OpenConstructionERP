@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import uuid
 from decimal import Decimal
+from types import SimpleNamespace
 from typing import Any
 
 from sqlalchemy import String, and_, case, cast, func, or_, select, text, update
@@ -342,7 +343,8 @@ class CostItemRepository:
         cursor: tuple[str, str] | None = None,
         skip_count: bool = False,
         fuzzy: bool = True,
-    ) -> tuple[list[CostItem], int | None, bool]:
+        lite: bool = False,
+    ) -> tuple[list[CostItem | SimpleNamespace], int | None, bool]:
         """Advanced search with multiple filters and keyset pagination.
 
         Args:
@@ -483,6 +485,11 @@ class CostItemRepository:
             count_stmt = select(func.count()).select_from(base.subquery())
             total = (await self.session.execute(count_stmt)).scalar_one()
 
+        if lite:
+            from app.modules.costs.list_projection import lite_columns
+
+            base = base.with_only_columns(*lite_columns(), maintain_column_froms=True)
+
         if use_fuzzy and q:
             # Relevance-ranked page. This branch cannot use the (code, id)
             # keyset cursor because rows are ordered by a computed relevance
@@ -503,7 +510,7 @@ class CostItemRepository:
                 ordering.insert(0, hazard_sql_flag(CostItem.description).asc())
             page_stmt = base.order_by(*ordering).offset(offset).limit(limit + 1)
             result = await self.session.execute(page_stmt)
-            rows = list(result.scalars().all())
+            rows = [SimpleNamespace(**row) for row in result.mappings()] if lite else list(result.scalars().all())
             has_more = len(rows) > limit
             return rows[:limit], total, has_more
 
@@ -536,7 +543,7 @@ class CostItemRepository:
             .limit(limit + 1)
         )
         result = await self.session.execute(page_stmt)
-        rows = list(result.scalars().all())
+        rows = [SimpleNamespace(**row) for row in result.mappings()] if lite else list(result.scalars().all())
         has_more = len(rows) > limit
         items = rows[:limit]
 

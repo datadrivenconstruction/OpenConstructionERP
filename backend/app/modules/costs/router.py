@@ -601,16 +601,7 @@ async def create_cost_item(
 # the list views render or copy onto a new BOQ position. It drops ``variants``
 # (a CWICR row's alternate price catalogue, kilobytes per row) and any other
 # large array; a caller that needs them reads ``GET /v1/costs/{id}``.
-_LITE_METADATA_KEYS: tuple[str, ...] = (
-    "variant_stats",
-    "labor_cost",
-    "material_cost",
-    "equipment_cost",
-    "other_cost",
-    "labor_hours",
-    "workers_per_unit",
-    "scope_of_work",
-)
+from app.modules.costs.list_projection import LITE_METADATA_KEYS as _LITE_METADATA_KEYS
 
 
 def _slim_list_row(payload: dict[str, Any]) -> dict[str, Any]:
@@ -717,7 +708,7 @@ async def search_cost_items(
         description=(
             "Return a slim payload - strip the per-row ``components`` "
             "array (cwicr items can carry 16+ resource entries averaging "
-            "~31 KB/row) and reduce ``metadata_`` to ``variant_stats`` only. "
+            "~31 KB/row) and reduce ``metadata_`` to the list-view fields. "
             "Adds a ``components_count`` integer so list UIs can still show "
             "the breakdown badge without the full array. When the user "
             "drills into a row, callers fetch the full document via "
@@ -827,10 +818,11 @@ async def search_cost_items(
         items, _, has_more, next_cursor = await service.search_costs_paginated(
             query,
             skip_count=True,
+            lite=lite,
         )
         total = cached_total
     else:
-        items, total, has_more, next_cursor = await service.search_costs_paginated(query)
+        items, total, has_more, next_cursor = await service.search_costs_paginated(query, lite=lite)
     resolved_locale = _resolve_cost_locale(locale, accept_language)
 
     # Currency-fallback warnings - accumulate per-row issues so the FE can
@@ -839,7 +831,9 @@ async def search_cost_items(
     # payload paths below) appends de-duplicated messages here.
     currency_warnings: list[str] = []
 
-    # Lite payload trim - drops the heavy ``components`` array and trims
+    # SQL already projects compact inputs for lite requests, retaining the
+    # prices and variant markers needed by buildup_rate. The final trim drops
+    # those inputs from the public ``components`` array and trims
     # ``metadata_`` to a small whitelist. CWICR rows average ~38 KB each
     # (31 KB components + 6.6 KB metadata); a 10-row page is 380 KB on
     # the wire, which dominates the perceived load time of /costs even
