@@ -1,0 +1,868 @@
+{
+  "boq_markup": {
+    "contingency_not_on_profit": {
+      "fail": "Ang contingency na \"{markup}\" ay kinukuwenta sa base na kasama na ang linya ng tubo na \"{profit}\", kaya pinapatungan ng tubo ang perang nakalaan para sa panganib",
+      "suggestion": "Ilapat ang linyang ito sa direktang gastos, maliban kung sadyang inilalagay ng pamantayang pamamaraan ng merkado ang panganib pagkatapos ng overhead at tubo"
+    },
+    "order_is_declared": {
+      "fail": "Higit sa isang markup line ang gumagamit ng puwestong {order} sa pagkakasunod-sunod: {markups}",
+      "suggestion": "Bigyan ng sariling puwesto ang bawat markup line upang malinaw kung alin ang kinukuwenta nang patong sa alin"
+    },
+    "percentage_within_band": {
+      "fail": "Ang \"{markup}\" ay {percentage}% bilang linyang {category}, labas sa makatwirang saklaw na 0 hanggang {ceiling}%",
+      "suggestion": "Suriin ang decimal point. Sa alinmang kaso, eksaktong ayon sa inilagay na halaga ang pagpepresyo sa linya"
+    },
+    "cumulative_base_is_settled": {
+      "fail": "Inilalapat ang \"{markup}\" sa \"{apply_to}\" ngunit wala itong nauunang linya, kaya direktang gastos lamang ang base nito",
+      "suggestion": "Ilipat ito pagkatapos ng mga linyang dapat nitong patungan, o ilapat ito sa direktang gastos"
+    }
+  },
+  "common": {
+    "ok": "Wasto"
+  },
+  "export": {
+    "generated": "Nabuo",
+    "content_digest": "Hash ng nilalaman"
+  },
+  "field_time": {
+    "hours_per_day_max": {
+      "fail": "Nakatala ang manggagawang {worker} nang {hours} oras sa araw na ito, lampas sa limitasyong {max} oras",
+      "suggestion": "Ilipat ang mga oras sa tamang araw o manggagawa bago isumite"
+    },
+    "line_complete": {
+      "fail": "Hindi kumpleto ang linyang {line}: {reason}",
+      "labour_xor_plant": "dapat eksaktong isa lamang sa paggawa o makinarya ang itala; hindi maaaring pareho o wala sa dalawa",
+      "hours_positive": "dapat mas malaki sa zero ang bilang ng oras",
+      "cost_code_required": "kailangan ang cost code",
+      "suggestion": "Kumpletuhin ang linya bago isumite ang timesheet"
+    },
+    "cost_code_resolves": {
+      "fail": "Ang code na '{code}' sa linyang {line} ay walang katugmang BOQ position o WBS sa proyektong ito",
+      "suggestion": "Pumili ng cost code o WBS na nasa BOQ ng proyekto"
+    },
+    "daywork_needs_variation": {
+      "fail": "Ang daywork line na {line} ay hindi naka-link sa isang bukas na variation",
+      "suggestion": "I-link ang daywork sa variation na pinagmulan ng utos na gawin ito"
+    },
+    "plant_needs_equipment": {
+      "fail": "Walang tinukoy na kagamitan ang linyang pangmakinarya na {line}",
+      "suggestion": "Ikabit ang makina upang makuwenta ang gastos sa mga oras ng paggamit nito"
+    },
+    "approved_immutable": {
+      "fail": "Ang timesheet na ito ay {status} at hindi maaaring i-edit",
+      "suggestion": "Mag-post ng reversing timesheet upang itama ang mga oras na naaprubahan na"
+    },
+    "offline_clock_plausible": {
+      "fail": "Ang device na nagtala ng araw na ito ay {minutes} minuto na mas maaga kaysa sa oras ng server",
+      "suggestion": "Itakda nang tama ang orasan ng device upang mabasa ang mga naitalang oras sa tamang pagkakasunod-sunod"
+    },
+    "offline_sync_delay": {
+      "fail": "Ginawa ang trabahong ito noong {date} ngunit nakarating lamang sa opisina pagkalipas ng {days} araw",
+      "suggestion": "Ihambing ang mga oras sa mismong araw ng trabaho bago aprubahan; maaaring sarado na ang valuation period"
+    }
+  },
+  "ai_takeoff": {
+    "unreviewed_proposals": {
+      "fail": "May {count} mungkahing quantity takeoff na naghihintay pa ng pagsusuri at hindi pa napresyuhan dito",
+      "suggestion": "Suriin ang mga nakapila upang tumugma ang mga nakumpirmang dami sa drawing"
+    }
+  },
+  "boq_quality": {
+    "position_has_quantity": {
+      "fail": "Hindi dapat zero o walang dami ang posisyong {ordinal}",
+      "suggestion": "Magtakda ng daming mas malaki sa 0"
+    },
+    "position_has_unit_rate": {
+      "fail": "Dapat may nakatalagang unit rate ang posisyong {ordinal}",
+      "suggestion": "Magtalaga ng presyo mula sa cost database"
+    },
+    "position_has_description": {
+      "fail": "Hindi maaaring walang paglalarawan ang posisyong {ordinal}"
+    },
+    "no_duplicate_ordinals": {
+      "fail": "Nakita ang dobleng ordinal na '{ordinal}' sa {count} posisyon"
+    },
+    "unit_rate_in_range": {
+      "fail": "Posisyong {ordinal}: ang rate na {rate} ay >{threshold} (5 beses ng median)",
+      "suggestion": "Suriin ang unit rate na ito dahil hindi karaniwan ang taas nito"
+    },
+    "negative_values": {
+      "fail": "May negatibong {details} ang posisyong {ordinal}",
+      "suggestion": "Itama ang mga negatibong halaga; gumamit ng positibong numero"
+    },
+    "unrealistic_rate": {
+      "fail": "Posisyong {ordinal}: {details}",
+      "suggestion": "Suriin ang halagang ito dahil tila hindi makatotohanan ang taas nito",
+      "not_assessed_no_currency": "Hindi nasuri ang {count} posisyon: walang currency ang bill, kaya hindi ma-convert dito ang mga limitasyon sa pera na nakasaad sa {reference}",
+      "not_assessed_no_currency_suggestion": "Itakda ang currency ng proyekto o magtala ng currency sa mga posisyon",
+      "not_assessed_no_rate": "Hindi nasuri ang {count} posisyon sa {currency}: walang nakatalang rate mula {reference} tungong {currency}, kaya hindi ma-convert ang mga limitasyon sa pera para sa bill na ito",
+      "not_assessed_no_rate_suggestion": "Magdagdag ng rate mula {reference} tungong {currency} sa FX rate register o sa mga exchange rate ng proyekto"
+    },
+    "total_mismatch": {
+      "fail": "Posisyong {ordinal}: nakuwenta {computed} != nakatala {stored} (pagkakaiba={diff})",
+      "suggestion": "Kuwentahin muli ang kabuuan = dami × unit rate"
+    },
+    "resource_split_mismatch": {
+      "fail": "Posisyong {ordinal}: ang subtotal ng mga resource na {subtotal} ay may diperensiyang {diff} sa unit rate na {rate}",
+      "suggestion": "Suriin ang dami at presyo ng mga resource; dapat tumugma ang kabuuan nila bawat yunit sa unit rate ng posisyon"
+    },
+    "empty_unit": {
+      "fail": "Walang yunit o blangko ang yunit ng posisyong {ordinal}",
+      "suggestion": "Magtalaga ng yunit ng sukat (m, m2, m3, kg, piraso, lump sum, atbp.)"
+    },
+    "section_without_items": {
+      "fail": "Walang mga anak na item ang seksiyong {ordinal} ({title})",
+      "suggestion": "Magdagdag ng mga posisyon sa seksiyong ito o alisin ang blangkong seksiyon"
+    },
+    "rate_vs_benchmark": {
+      "fail": "Posisyong {ordinal}: ang unit rate na {rate}/{unit} ay lampas sa benchmark na {threshold}/{unit} at maaaring hindi makatotohanan",
+      "suggestion": "Suriin ang rate na ito; dapat mas mababa sa {threshold} ang karaniwang rate para sa {unit}. Tingnan kung may mali sa yunit o decimal.",
+      "not_assessed_no_currency": "Hindi nasuri ang {count} posisyon: walang currency ang bill, kaya hindi ma-convert dito ang mga benchmark na nakasaad sa {reference}",
+      "not_assessed_no_currency_suggestion": "Itakda ang currency ng proyekto o magtala ng currency sa mga posisyon",
+      "not_assessed_no_rate": "Hindi nasuri ang {count} posisyon sa {currency}: walang nakatalang rate mula {reference} tungong {currency}, kaya hindi ma-convert ang mga benchmark para sa bill na ito",
+      "not_assessed_no_rate_suggestion": "Magdagdag ng rate mula {reference} tungong {currency} sa FX rate register o sa mga exchange rate ng proyekto"
+    },
+    "lump_sum_ratio": {
+      "fail": "Gumagamit ng lump sum ang {lsum_count} sa {total_count} posisyon ({percent}), lampas sa limitasyong {threshold}",
+      "suggestion": "Hatiin ang mga lump-sum position sa nasusukat na dami (m, m2, m3, kg, piraso) para sa mas tumpak na estimate"
+    },
+    "cost_concentration": {
+      "fail": "Ang posisyong {ordinal} ay {share} ng kabuuang BOQ cost ({value} sa {grand_total}), lampas sa limitasyong {threshold}",
+      "suggestion": "Hatiin ang posisyong ito sa mas maliliit na item o tiyakin ang gastos; hindi dapat mangibabaw ang isang posisyon sa estimate"
+    },
+    "currency_consistency": {
+      "fail": "May magkakaibang currency: {currencies}",
+      "suggestion": "Gumamit ng iisang currency sa buong BOQ"
+    },
+    "measurement_consistency": {
+      "fail": "Magkahalo ang metric at imperial na yunit sa BOQ; gumamit nang pare-pareho ng isang sistema",
+      "suggestion": "I-convert ang lahat ng dami sa metric o imperial na yunit"
+    },
+    "revision_cost_impact_review": {
+      "fail": "Hindi pa naitala bilang variation ang epekto sa gastos na {amount} ng rebisyon",
+      "suggestion": "Gumawa ng draft variation request mula sa paghahambing na ito ng rebisyon upang masubaybayan ang pagbabago sa gastos"
+    },
+    "base_date_readable": {
+      "fail": "Hindi wastong petsa ang base date na '{base_date}', kaya ang rate ng buwis ngayong araw ang ginagamit sa bill sa halip na ang rate sa sarili nitong petsa",
+      "suggestion": "Ihayag ang price base bilang araw, buwan, quarter o taon ({shapes})"
+    },
+    "tax_date_readable": {
+      "fail": "Hindi wastong petsa ang tax date na '{tax_date}', kaya ang rate ng buwis ngayong araw ang ginagamit sa bill sa halip na ang rate sa sarili nitong petsa",
+      "suggestion": "Ihayag ang tax date bilang araw, buwan, quarter o taon ({shapes}), o burahin ito upang gamitin ang base date ng bill sa pagbubuwis"
+    }
+  },
+  "din276": {
+    "cost_group_required": {
+      "fail": "Walang DIN 276 KG ang posisyong {ordinal}",
+      "suggestion": "Magtalaga ng 3-digit DIN 276 Kostengruppe (halimbawa, 330 para sa mga pader)"
+    },
+    "valid_cost_group": {
+      "fail": "Hindi wasto ang DIN 276 code na '{code}' sa posisyong {ordinal}"
+    },
+    "hierarchy": {
+      "fail": "Posisyong {ordinal}: wala ang KG {child} sa ilalim ng parent KG {parent} (inaasahang prefix na '{prefix}')",
+      "suggestion": "Ilipat ang posisyon sa tamang parent o baguhin ang KG code upang tumugma sa hierarchy ng parent ({prefix}xx)"
+    },
+    "completeness": {
+      "fail": "Wala sa BOQ ang KG group {group} - {group_name}",
+      "suggestion": "Magdagdag ng mga posisyon para sa KG {group} ({group_name}) upang matiyak ang kumpletong saklaw"
+    }
+  },
+  "gaeb": {
+    "ordinal_format": {
+      "fail": "Hindi tumutugma ang ordinal na '{ordinal}' sa GAEB OZ-Maske ng file na ito",
+      "suggestion": "Gamitin ang OZ-Maske ng file, halimbawa 001.001.0010 o 01.02.0030"
+    },
+    "lv_structure": {
+      "fail": "Posisyong {ordinal}: walang parent section ang leaf position; kailangan ng GAEB LV hierarchy ang isang Leistungsgruppe na parent",
+      "suggestion": "Italaga ang posisyong ito sa parent section (Leistungsgruppe / Titel)"
+    },
+    "einheitspreis_sanity": {
+      "negative": "Posisyong {ordinal}: negatibo ang Einheitspreis na {rate} (yunit='{unit}'); hindi maaaring ilipat sa GAEB ang negatibong presyo",
+      "zero": "Posisyong {ordinal}: 0.00 ang Einheitspreis (yunit='{unit}'); tiyaking ito ay inialok na zero na presyo at hindi nawawalang rate",
+      "suggestion": "Magbigay ng positibong Einheitspreis o markahan ang posisyon bilang Bedarfsposition (opsiyonal na trabaho) o lump sum (yunit='lsum')"
+    },
+    "trade_section_code": {
+      "fail": "Walang GAEB Leistungsbereich code ang top-level section na '{ordinal}' (inaasahan ang 3-digit trade code, halimbawa '012')",
+      "suggestion": "Magdagdag ng 3-digit trade code (Leistungsbereich) sa seksiyon, halimbawa '012' para sa Erdarbeiten at '013' para sa Mauerarbeiten"
+    },
+    "quantity_decimals": {
+      "fail": "Posisyong {ordinal}: may {decimals} decimal place ang daming {quantity}; nililimitahan ng kombensiyong GAEB X83 sa 3",
+      "suggestion": "I-round ang dami sa hindi hihigit sa 3 decimal place ayon sa GAEB X83"
+    }
+  },
+  "nrm": {
+    "classification_required": {
+      "fail": "Walang NRM element code ang posisyong {ordinal}",
+      "suggestion": "Magtalaga ng NRM 1/2 element code (halimbawa, 2.6.1 para sa panlabas na pader)"
+    },
+    "valid_element": {
+      "fail": "Hindi wasto ang NRM code na '{code}' sa posisyong {ordinal}"
+    },
+    "completeness": {
+      "fail": "Wala sa BOQ ang NRM group {group} - {group_name}",
+      "suggestion": "Magdagdag ng mga posisyon para sa NRM group {group} ({group_name})"
+    },
+    "base_date_declared": {
+      "fail": "Hindi nakasaad sa cost plan ang base date kung kailan umiiral ang mga rate nito",
+      "suggestion": "Itala ang base date sa bill. Kung wala ito, hindi malalaman kung luma na ang rate o gaano pang inflation ang kailangang idagdag"
+    },
+    "cost_plan_stage_declared": {
+      "fail": "Hindi sinasabi ng cost plan kung para saang yugto ng disenyo ito ginawa",
+      "suggestion": "Itala ang yugto. Nakabatay sa yugto ng paggawa ang katumpakang maaasahan sa cost plan; ang pagtatago nito ay humahantong sa maling inaasahan"
+    },
+    "contractor_costs_present": {
+      "preliminaries": "Walang preliminaries ng pangunahing kontratista ang cost plan, bilang group {group} man o markup line",
+      "overheads_and_profit": "Walang overhead at tubo ng pangunahing kontratista ang cost plan, bilang group {group} man o markup line",
+      "suggestion": "Idagdag ito bilang NRM group element o markup line sa nasukat na trabaho. Tama ang alinman; kapag iniwan, hindi kumpleto ang gastos ng mga trabaho"
+    },
+    "risk_allowance_present": {
+      "fail": "Walang risk allowance ang cost plan",
+      "suggestion": "Magdagdag ng risk allowance bilang NRM group 13 o contingency line. Ang cost plan na walang risk allowance ay nagpapakita ng iisang halaga na para bang tiyak ito"
+    }
+  },
+  "masterformat": {
+    "classification_required": {
+      "fail": "Walang MasterFormat code ang posisyong {ordinal}",
+      "suggestion": "Magtalaga ng MasterFormat code (halimbawa, 03 30 00 para sa cast-in-place concrete work)"
+    },
+    "valid_division": {
+      "fail": "Hindi wasto ang MasterFormat code na '{code}' sa posisyong {ordinal}",
+      "suggestion": "Gamitin ang 6-digit MasterFormat format: XX XX XX (halimbawa, 03 30 00)"
+    },
+    "completeness": {
+      "fail": "Wala sa BOQ ang Division {division} - {division_name}",
+      "suggestion": "Magdagdag ng mga posisyon para sa Division {division} ({division_name})"
+    }
+  },
+  "sinapi": {
+    "code_required": {
+      "fail": "Walang SINAPI code ang posisyong {ordinal}",
+      "suggestion": "Magtalaga ng SINAPI composition code (halimbawa, 87878 para sa concrete C30)"
+    },
+    "valid_code": {
+      "fail": "Hindi wasto ang SINAPI code na '{code}' sa posisyong {ordinal}"
+    }
+  },
+  "nbr": {
+    "classification_required": {
+      "fail": "Walang NBR 12721 section ang posisyong {ordinal}",
+      "suggestion": "Lagyan ang posisyon ng NBR 12721 section (S1 = preliminares, S2 = infra-estrutura, ..., S11 = serviços complementares)"
+    },
+    "valid_section": {
+      "fail": "Ang NBR 12721 section na '{code}' sa posisyong {ordinal} ay wala sa S1..S11",
+      "suggestion": "Gumamit ng mga code mula S1 hanggang S11 (halimbawa, S3 para sa supra-estrutura)"
+    }
+  },
+  "gesn": {
+    "code_required": {
+      "fail": "Walang ГЭСН/ФЕР code ang posisyong {ordinal}",
+      "suggestion": "Magtalaga ng ГЭСН code (halimbawa, 06-01-001-01 para sa kongkreto)"
+    },
+    "valid_code": {
+      "fail": "Hindi tumutugma ang ГЭСН code na '{code}' sa format na XX-XX-XXX-XX",
+      "suggestion": "Gamitin ang format na NN-NN-NNN-NN (halimbawa, 06-01-001-01)"
+    },
+    "resource_breakdown": {
+      "fail": "Binabanggit ng posisyong {ordinal} ang norm na {code} ngunit walang resource breakdown",
+      "suggestion": "I-import ang dami ng paggawa, makinarya at materyales ng norm o ipaliwanag kung bakit naiiba ang linyang ito"
+    },
+    "labour_hours_present": {
+      "fail": "May resource breakdown ang posisyong {ordinal} ({code}) ngunit walang oras ng paggawa",
+      "suggestion": "Idagdag ang man-hours na kailangan ng norm; nakabatay sa payroll ang mga norm para sa overhead at tinatayang tubo at hindi makukuwenta kung wala ang mga ito"
+    },
+    "price_level_declared": {
+      "fail": "Hindi sinasabi ng estimate kung anong price level ang gamit sa mga halaga nito",
+      "suggestion": "Ihayag ang price level bilang petsa at ang conversion index na inilapat upang makuha rin ng tagasuri ang parehong kabuuan"
+    }
+  },
+  "dpgf": {
+    "lot_required": {
+      "fail": "Hindi nakatalaga ang posisyong {ordinal} sa anumang Lot technique",
+      "suggestion": "Magtalaga ng Lot technique (halimbawa, Lot 01 Gros Œuvre)"
+    },
+    "pricing_complete": {
+      "fail": "{priced}/{total} posisyon lamang ({percent}) ang may presyo, mas mababa sa 80% na limitasyon",
+      "suggestion": "Kumpletuhin ang presyo ng lahat ng posisyon bago isumite ang DPGF"
+    }
+  },
+  "onorm": {
+    "position_format": {
+      "fail": "Hindi tumutugma ang ordinal na '{ordinal}' sa ÖNORM format na XX.XX.XXXXA",
+      "suggestion": "Gamitin ang ÖNORM B 2063 format (halimbawa, 01.02.01A)"
+    },
+    "description_length": {
+      "fail": "Posisyong {ordinal}: masyadong maikli ang paglalarawan ({length} character, hindi bababa sa 20)",
+      "suggestion": "Dagdagan ang detalye ng paglalarawan ng posisyon ayon sa ÖNORM B 2063"
+    }
+  },
+  "gbt50500": {
+    "code_required": {
+      "fail": "Walang GB/T 50500 code ang posisyong {ordinal}",
+      "suggestion": "Magtalaga ng 9-digit GB/T 50500 code (halimbawa, 010101001)"
+    },
+    "valid_code": {
+      "fail": "Hindi wasto ang GB/T 50500 code na '{code}'; inaasahan ang 9 o 12 digit"
+    }
+  },
+  "cpwd": {
+    "code_required": {
+      "fail": "Walang CPWD/DSR code ang posisyong {ordinal}",
+      "suggestion": "Magtalaga ng CPWD DSR item reference (halimbawa, 4.1.1)"
+    },
+    "measurement_units": {
+      "fail": "Ang yunit na '{unit}' sa posisyong {ordinal} ay hindi ayon sa pamantayang IS 1200",
+      "suggestion": "Gamitin ang mga karaniwang yunit ng IS 1200: m, m2, m3, kg, nos, rm, atbp."
+    }
+  },
+  "hungary": {
+    "item_code_required": {
+      "fail": "Walang Hungarian item code ang posisyong {ordinal}",
+      "invalid": "Ang item code na '{code}' sa posisyong {ordinal} ay hindi tumutugma sa alinman sa dalawang sistema ng pagnunumero ng item",
+      "suggestion": "Gumagamit ang mga gawaing panggusali ng MA-CC-SS-II (chapter 01 hanggang 17); ang imprastraktura ay gumagamit ng anim o pitong digit na item number mula sa code dictionary ng proyekto"
+    },
+    "chapter_recognised": {
+      "fail": "Ang chapter {chapter} sa posisyong {ordinal} ay wala sa labimpitong chapter ng sistema ng mga item"
+    },
+    "material_fee_split": {
+      "fail": "Posisyong {ordinal}: ang materyal na {material} at bayad sa paggawa na {fee} ay hindi katumbas ng rate na {rate}",
+      "suggestion": "Itama ang unit price ng materyal at bayad sa paggawa, o ang kabuuang rate, upang magtugma ang breakdown"
+    },
+    "item_number_unique": {
+      "fail": "Ginagamit ang item number na {number} sa {count} posisyon ngunit dapat iisang posisyon lamang ang tukuyin nito",
+      "suggestion": "Bigyan ang bawat posisyon ng sariling project item number bago ipadala ang bill sa kliyente"
+    }
+  },
+  "prezzario": {
+    "voce_code_format_valid": {
+      "fail": "Hindi ipinapakita ng code na '{code}' sa posisyong {ordinal} kung saang price list ito nagmula",
+      "suggestion": "Nagsisimula ang opisyal na voce code sa rehiyon at taon ng edisyon ng price list, halimbawa TOS25_01.A03.001.001 (Toscana 2025). Kopyahin nang eksakto ang code sa regional list, i-import ang linya mula rito, o bilangin ang bagong presyo bilang NP.01"
+    },
+    "voce_reference_present": {
+      "fail": "Walang binanggit na prezzario voce ang posisyong {ordinal}",
+      "suggestion": "Piliin ang linya mula sa na-import na regional price list o markahan ito bilang nuovo prezzo (NP) na may suportang price analysis"
+    },
+    "costi_sicurezza_separated": {
+      "fail": "Walang hiwalay na linya sa bill para sa safety costs na hindi sakop ng tender discount",
+      "suggestion": "Idagdag ang oneri della sicurezza bilang sariling seksiyon o markup line, gamit ang presyo mula sa safety chapter ng price list o sa safety plan"
+    },
+    "incidenza_manodopera_documented": {
+      "fail": "Hindi nakasaad ang bahagi ng paggawa sa posisyong {ordinal} ({code})",
+      "suggestion": "Kunin ang incidenza della manodopera mula sa price list o magdagdag ng labor resource upang mailahad nang hiwalay ang gastos sa paggawa sa tender"
+    },
+    "overheads_not_applied_twice": {
+      "fail": "Kasama na sa regional price-list rates ang general expenses (13-17%) at tubo (10%). Kapag inilapat muli, tataas ang kabuuan nang humigit-kumulang {percent}%.",
+      "suggestion": "Alisin ang general expenses at profit markups sa bill na ito o panatilihin lamang ang mga ito sa mga linyang pinresyuhan gamit ang sariling analysis (NP)."
+    }
+  },
+  "romania": {
+    "deviz_chapter_required": {
+      "fail": "Walang tinukoy na deviz general chapter ang posisyong {ordinal}",
+      "suggestion": "Ilagay ang linya sa chapter at subchapter nito ayon sa HG 907/2016, halimbawa 4.1 para sa construction at installation works o 5.1 para sa site organisation"
+    },
+    "deviz_chapter_recognised": {
+      "fail": "Ang deviz code na '{code}' sa posisyong {ordinal} ay hindi chapter o subchapter ng deviz general",
+      "suggestion": "Gumamit ng code mula sa chapters 1 hanggang 6 ng HG 907/2016 deviz general, gaya ng 1.2, 2, 3.5, 4.1, 5.1 o 6.2"
+    }
+  },
+  "greece": {
+    "net_article_required": {
+      "fail": "Walang unified price list (ΝΕΤ) article ang posisyong {ordinal}",
+      "suggestion": "Tukuyin ang ΝΕΤ article na pinagmulan ng presyo ng linya, halimbawa ΟΙΚ 32.01.06, o ΝΑΟΙΚ para sa bagong article"
+    },
+    "net_article_valid": {
+      "invalid": "Ang article na '{code}' sa posisyong {ordinal} ay hindi nasa anyo ng ΝΕΤ article",
+      "chapter": "Ang article na '{code}' sa posisyong {ordinal} ay nagsisimula sa chapter {chapter}, na wala sa building-works price list",
+      "suggestion": "Isulat ang list prefix at article number, halimbawa ΟΙΚ 38.20.02, ΟΔΟ Α-2 o ΑΤΗΕ 8151.1"
+    }
+  },
+  "ukraine": {
+    "zkr_chapter_required": {
+      "fail": "Walang tinukoy na chapter ng summary estimate ang posisyong {ordinal}",
+      "suggestion": "Ilagay ang linya sa chapter nito sa зведений кошторисний розрахунок, mula 1 hanggang 12; nasa chapter 2 ang building works ng pangunahing pasilidad"
+    },
+    "zkr_chapter_recognised": {
+      "fail": "Ang chapter {chapter} sa posisyong {ordinal} ay wala sa labindalawang chapter ng summary estimate",
+      "suggestion": "Gumamit ng chapter number mula 1 hanggang 12"
+    }
+  },
+  "birimfiyat": {
+    "code_required": {
+      "fail": "Walang birim fiyat poz number ang posisyong {ordinal}",
+      "suggestion": "Magtalaga ng Bayındırlık poz number (halimbawa, 04.013/1)"
+    },
+    "valid_poz": {
+      "fail": "Ang poz na '{code}' ay hindi numero mula sa kasalukuyang unit-price book (XX.XXX.XXXX) o sa mas lumang bersiyon (XX.XXX/X)",
+      "suggestion": "Gamitin ang numero sa aklat, halimbawa 15.140.1002, o 04.013/1 sa lumang kontrata; bilangin ang sariling analysed item bilang ÖZEL-1"
+    }
+  },
+  "sekisan": {
+    "code_required": {
+      "fail": "Walang 積算 code ang posisyong {ordinal}",
+      "suggestion": "Magtalaga ng 積算基準 item code"
+    },
+    "metric_units": {
+      "fail": "Hindi pamantayan ang yunit na '{unit}' sa posisyong {ordinal}",
+      "suggestion": "Gumamit ng mga pamantayang metric unit: m, m2, m3, kg, t, 式, atbp."
+    }
+  },
+  "bc3": {
+    "code_required": {
+      "fail": "Walang FIEBDC-3 concept code ang posisyong {ordinal}",
+      "suggestion": "Magtalaga ng FIEBDC-3 code (halimbawa, E04CM040 o 01.02.01)"
+    },
+    "valid_code": {
+      "fail": "Hindi wasto ang FIEBDC-3 code na '{code}' sa posisyong {ordinal}",
+      "suggestion": "Gamitin ang alphanumeric format ng FIEBDC-3 (halimbawa, E04CM040, 01.02.01, CAP01#)"
+    }
+  },
+  "mexico": {
+    "apu_completeness": {
+      "fail": "Hindi kumpleto ang APU ng posisyong {ordinal}; kulang ang mga sangkap ng gastos: {missing}",
+      "suggestion": "Idagdag ang nawawalang costo directo components (mano de obra, materiales, maquinaria) sa unit-price analysis"
+    },
+    "iva_rate_valid": {
+      "fail": "Hindi wasto ang IVA rate na {rate} sa posisyong {ordinal}; ang Mexican IVA ay 16, 8 (border region) o 0 porsiyento",
+      "suggestion": "Itakda ang IVA rate sa 16 porsiyento (standard), 8 porsiyento (border region) o 0 porsiyento"
+    },
+    "subcontract_retencion": {
+      "fail": "Hindi nakatala sa subcontract position na {ordinal} kung may naaangkop na IVA/ISR retenciones",
+      "suggestion": "Itala ang IVA at ISR retenciones para sa subcontract line o markahang walang naaangkop"
+    },
+    "cfdi_rfc_present": {
+      "missing": "Hindi kumpleto ang datos ng CFDI issuer para sa tender export; kulang: {missing}",
+      "invalid_rfc": "Ang RFC na '{rfc}' ay hindi wastong CFDI RFC (12 character para sa kumpanya, 13 para sa indibidwal)",
+      "suggestion": "Itakda ang issuer RFC, regimen fiscal at uso CFDI sa project profile para sa CFDI 4.0 invoicing"
+    }
+  },
+  "pipeline": {
+    "side_effecting_requires_gate": {
+      "fail": "Mga node na nagbabago ng datos ngunit walang gate: {nodes}",
+      "suggestion": "Magdagdag ng Validation gate o Human-approval gate sa bawat landas mula sa trigger/AI node patungo sa bawat write node bago ilathala."
+    }
+  },
+  "property_dev": {
+    "escrow_account_required": {
+      "fail": "Kailangan ng development ang aktibong escrow account para sa regulator na '{regulator}'",
+      "suggestion": "Magbukas ng escrow account sa bangkong lisensiyado ng regulator sa Compliance → Escrow accounts"
+    },
+    "escrow_iban_valid": {
+      "fail": "Escrow account {account}: hindi pumasa ang IBAN na '{iban}' sa ISO 13616 structural check",
+      "suggestion": "Itama ang IBAN: dapat tumugma sa ISO 13616 ang country code, haba at checksum"
+    },
+    "escrow_balance_reconciled": {
+      "fail": "Escrow account {account}: may diperensiyang {drift} ang ledger balance na {ledger} sa kabuuang transaksiyong {transactions}",
+      "suggestion": "I-reconcile ang escrow account; imbestigahan ang hindi naitalang resibo o nawawalang debit"
+    },
+    "sales_contract_party_ownership_sums_to_100": {
+      "fail": "Kontrata {contract}: {total}% ang kabuuang ownership share (dapat eksaktong 100%)",
+      "suggestion": "Ayusin ang mga porsiyento ng mga partido upang umabot sa 100.00%"
+    },
+    "payment_schedule_instalments_sum_to_contract_value": {
+      "fail": "Kontrata {contract}: naiiba ang kabuuang hulog na {instalments} sa contract value na {contract_value} (diperensiya {drift})",
+      "suggestion": "Ayusin ang iskedyul ng bayad upang tumugma ang kabuuang hulog sa kabuuang halaga ng kontrata"
+    },
+    "reservation_expiry_in_future": {
+      "fail": "Reservation {reservation}: hindi nasa hinaharap ang oras ng pag-expire na {expires}",
+      "suggestion": "Palawigin ang reservation o ilipat ito sa expired/cancelled na estado"
+    },
+    "broker_commission_rate_within_bounds": {
+      "fail": "Kasunduan sa komisyon {agreement}: {issue}",
+      "suggestion": "Gumamit ng porsiyentong rate na 0.1% hanggang 15%, nakapirming halaga, o hindi blangkong hanay ng mga tier"
+    },
+    "price_matrix_no_negative_modifier": {
+      "fail": "Price matrix {matrix}: ang multiplier na {multiplier} ng rule na '{factor}' ay labas sa [-0.50, 2.00]",
+      "suggestion": "Limitahan ang mga adjustment sa -50% hanggang +200% upang maiwasan ang hindi makatotohanang presyo ng lote"
+    }
+  },
+  "schedule_quality": {
+    "open_ends": {
+      "fail": "Walang logic link sa {ends} ang activity na '{activity}' (bukas na dulo / hindi kumpletong konektadong activity)",
+      "both": "predecessor o successor",
+      "predecessor": "naunang activity",
+      "successor": "kasunod na activity",
+      "suggestion": "Ikabit ang activity sa network gamit ang predecessor at successor link o itakda ito bilang start/finish milestone"
+    },
+    "negative_lag": {
+      "fail": "Gumagamit ang ugnayang {predecessor} -> {successor} ng negatibong lag ({lag} araw), na isang lead at nagpapalihis sa critical path",
+      "suggestion": "Palitan ang lead ng hiwalay na activity o SS/FF relationship upang manatiling may batayan ang pagkakasunod-sunod"
+    },
+    "excessive_lag": {
+      "fail": "May lag na {lag} araw ang ugnayang {predecessor} -> {successor}, lampas sa limitasyong {threshold} araw",
+      "suggestion": "Gawing sariling activity ang paghihintay (procurement, curing, approval) upang magkaroon ng status at ma-level ang mga resource"
+    },
+    "hard_constraints": {
+      "fail": "May hard date constraint ({constraint}) ang activity na '{activity}' na nangingibabaw sa network logic",
+      "suggestion": "Gumamit ng soft constraint (start-no-earlier-than) o itakda ang petsa sa pamamagitan ng logic upang makagalaw ang activity kapag nahuli ang mga predecessor"
+    },
+    "negative_float": {
+      "fail": "May negatibong total float ({float} araw) ang activity na '{activity}', kaya hindi maisasakatuparan ang iskedyul gamit ang kasalukuyang logic links",
+      "suggestion": "Baguhin ang pagkakasunod-sunod ng trabaho, luwagan ang hard constraint, o magdagdag ng dokumentadong recovery plan upang maging zero o positibo ang float"
+    },
+    "high_float": {
+      "fail": "Napakataas ng total float ng activity na '{activity}' ({float} araw), lampas sa limitasyong {threshold} araw",
+      "suggestion": "Tingnan kung may nawawalang successor link; karaniwang nangangahulugan ang mataas na float na maluwag lamang ang pagkakaugnay sa network"
+    },
+    "missing_duration": {
+      "fail": "May hindi wastong tagal ({duration} araw) ang activity na '{activity}' para sa gawaing hindi milestone",
+      "suggestion": "Magtakda ng positibong tagal sa working days o gawing milestone ang row kung talagang zero-duration event ito"
+    },
+    "duration_on_project_week": {
+      "fail": "Nakatala ang activity na '{activity}' bilang {stored} working days, bilang ng Lunes hanggang Biyernes mula {start} hanggang {end}; sa linggo ng proyekto na {calendar}, may {expected} araw sa mga petsang iyon",
+      "suggestion": "I-save muli ang mga petsa ng activity upang mabilang ang tagal ayon sa working week ng proyekto o sadyang ilagay ang tagal"
+    }
+  },
+  "sheet_completeness": {
+    "missing": {
+      "fail": "Nakalista ang sheet na {sheet} sa drawing index ngunit wala sa na-upload na set",
+      "suggestion": "I-upload ang nawawalang sheet o kumpirmahing inalis ito sa issuance"
+    },
+    "extra": {
+      "fail": "Nasa na-upload na set ang sheet na {sheet} ngunit wala sa drawing index",
+      "suggestion": "Idagdag ito sa index o issue register o alisin ang sobrang sheet"
+    },
+    "revision_mismatch": {
+      "fail": "Nasa revision {actual_rev} ang sheet na {sheet} ngunit {expected_rev} ang inaasahan sa index",
+      "suggestion": "I-issue ang inaasahang revision o i-update ang index sa kasalukuyang revision"
+    }
+  },
+  "procurement": {
+    "po_has_lines": {
+      "fail": "Walang mga linya ang purchase order na ito, kaya hindi naisasama sa accounting ang committed amount nito",
+      "suggestion": "Idagdag ang mga inorder na item bago aprubahan ang purchase order"
+    },
+    "po_line_amount": {
+      "fail": "{actual} ang kabuuan ng linyang {line} ngunit {expected} ang dami na pinarami sa unit rate",
+      "suggestion": "Itama ang dami, unit rate o halaga ng linya upang magtugma ang tatlo"
+    },
+    "po_subtotal_matches_lines": {
+      "fail": "{actual} ang subtotal ngunit {expected} ang kabuuan ng mga linya",
+      "suggestion": "Kuwentahin muli ang subtotal mula sa kasalukuyang mga linya"
+    },
+    "po_total_matches_subtotal": {
+      "fail": "{actual} ang kabuuan ngunit {expected} ang subtotal kasama ang buwis",
+      "suggestion": "Kuwentahin muli ang kabuuan upang tumugma sa subtotal kasama ang buwis"
+    },
+    "po_no_negative_line": {
+      "fail": "Hindi positibo ang dami o negatibo ang unit rate sa linyang {line}",
+      "suggestion": "Gumawa ng credit note para sa reversal sa halip na negatibong linya"
+    },
+    "po_currency_set": {
+      "fail": "Walang currency ang purchase order na ito, kaya hindi mapagsasama o mababayaran ang halaga nito",
+      "suggestion": "Itakda ang currency, karaniwan ay ang ginagamit ng proyekto"
+    },
+    "po_vendor_assigned": {
+      "fail": "Walang nakatalagang vendor ang purchase order na ito",
+      "suggestion": "Piliin ang vendor bago aprubahan ang commitment"
+    },
+    "po_retention_within_bounds": {
+      "fail": "Ang retention na {percent}% ay labas sa makatwirang saklaw na 0 hanggang {max}%",
+      "suggestion": "Ilagay ang retention bilang porsiyento, halimbawa 5 para sa limang porsiyento"
+    },
+    "po_delivery_after_issue": {
+      "fail": "Nakatakda ang delivery sa {delivery}, bago ang issue date na {issue}",
+      "suggestion": "Ilipat ang delivery date sa issue date o pagkatapos nito"
+    },
+    "po_line_cost_coded": {
+      "fail": "Walang WBS, cost category o cost line ang linyang {line}, kaya hindi ito lilitaw sa cost breakdown",
+      "suggestion": "Magtalaga ng cost code upang maihambing ang commitment sa budget sa ulat"
+    },
+    "invoice_within_order": {
+      "fail": "Ang invoice na {invoice} ay lampas nang {excess} sa natitirang bukas na halaga na {remaining} sa order na {po}",
+      "suggestion": "Ihambing ang invoice sa order; kung napagkasunduan ang dagdag, itala ito bilang pagbabago sa order bago aprubahan"
+    },
+    "invoice_quantity_received": {
+      "fail": "Mai-invoice ang linyang {line} para sa kabuuang {invoiced}, ngunit {received} lamang ang natanggap",
+      "suggestion": "Hintayin ang delivery note o kumpirmahin ang pagtanggap ng mga kalakal bago aprubahan ang daming ito"
+    },
+    "invoice_value_received": {
+      "fail": "Sa order na {po}, aabot sa {invoiced} ang mga invoice, ngunit {received} lamang ang halaga ng mga natanggap na kalakal ayon sa presyo ng order",
+      "suggestion": "Hintayin ang delivery note o kumpirmahin ang pagtanggap ng mga kalakal bago aprubahan ang halagang ito"
+    }
+  },
+  "subcontract": {
+    "agreement_has_scope": {
+      "fail": "Walang work package ang kasunduang ito, kaya walang trabahong pagbabatayan ang payment application",
+      "suggestion": "Hatiin ang saklaw ng kontrata sa mga work package bago i-activate ang kasunduan"
+    },
+    "package_scope_described": {
+      "fail": "May pangalan ang work package na {package} ngunit walang paglalarawan ng mga trabahong sakop nito",
+      "suggestion": "Isulat ang sakop ng package upang may batayan ang posibleng usapin sa variation sa hinaharap"
+    },
+    "agreement_value_positive": {
+      "fail": "{value} ang contract value, kaya walang basehan ang retention at schedule of values",
+      "suggestion": "Ilagay ang napagkasunduang contract value bago i-activate ang kasunduan"
+    },
+    "packages_within_value": {
+      "fail": "{planned} ang halaga ng mga work package ngunit {total} ang kontrata",
+      "suggestion": "Presyuhan muli ang mga package o dagdagan ang contract value upang masakop ng kasunduan ang sarili nitong saklaw ng trabaho"
+    },
+    "agreement_dates_ordered": {
+      "fail": "Nagtatapos ang kasunduan sa {end}, bago ito magsimula sa {start}",
+      "suggestion": "Itama ang simula o katapusang petsa upang pasulong ang panahon ng kontrata"
+    },
+    "agreement_currency_set": {
+      "fail": "Walang currency ang kasunduang ito, kaya hindi mapagsasama o maisasagawa ang mga bayad sa ilalim nito",
+      "suggestion": "Itakda ang currency, karaniwan ay ang ginagamit ng proyekto"
+    },
+    "retention_within_bounds": {
+      "fail": "Ang retention na {percent}% ay labas sa makatwirang saklaw na 0 hanggang {max}%",
+      "suggestion": "Ilagay ang retention bilang porsiyento ng bawat bayad, hindi bilang halaga ng pera"
+    },
+    "insurance_valid_at_start": {
+      "fail": "Nag-expire ang insurance ng subcontractor noong {expiry}, bago magsimula ang trabaho sa {reference}",
+      "suggestion": "Kumuha ng kasalukuyang sertipiko bago papasukin sa site ang subcontractor"
+    },
+    "unlinked_contract_twin": {
+      "fail": "Mukhang iisang subcontract ang {agreement} at ang kontratang {contract}, kaya maaaring madoble ang bilang nito sa pananalapi",
+      "suggestion": "I-link ang mga ito kung iisang subcontract o markahang magkaiba"
+    }
+  },
+  "submittal": {
+    "reviewer_assigned": {
+      "fail": "Walang nakatalagang reviewer ang submittal na ito, kaya wala itong mapupuntahang responsable",
+      "suggestion": "Italaga ang reviewer na dapat tumugon bago isumite"
+    },
+    "required_date_present": {
+      "fail": "Walang required date ang submittal na ito, kaya hindi ito maiuulat na nahuli",
+      "suggestion": "Itakda kung kailan kailangang matapos ang review, ayon sa trabahong mapapahintulutan ng submittal na ito"
+    },
+    "required_date_after_submitted": {
+      "fail": "Nakatakdang matapos ang review sa {required}, bago isinumite ang submittal noong {submitted}",
+      "suggestion": "Ilipat ang required date sa isang working date pagkatapos ng pagsusumite"
+    },
+    "review_window_sufficient": {
+      "fail": "May {days} araw ang reviewer, mas kaunti sa {minimum} araw na karaniwang kailangan para sa review",
+      "suggestion": "Maglaan ng karaniwang review period o pagkasunduan muna sa reviewer ang mas maikling panahon"
+    },
+    "spec_section_present": {
+      "fail": "Walang tinukoy na specification section ang submittal na ito, kaya hindi ito maikategorya sa register",
+      "suggestion": "Ilagay ang specification section na tinutugunan ng submittal na ito"
+    },
+    "approver_distinct_from_reviewer": {
+      "fail": "Iisang tao ({person}) ang reviewer at approver, kaya walang ikalawang taong nagsusuri",
+      "suggestion": "Magtalaga ng approver na iba sa reviewer"
+    },
+    "linked_scope_present": {
+      "fail": "Walang naka-link na scope item ang submittal na ito, kaya hindi ito maisasama sa anumang package",
+      "suggestion": "I-link ang mga BOQ item na sakop ng submittal na ito"
+    }
+  },
+  "rfq": {
+    "scope_described": {
+      "fail": "Walang saklaw ng trabaho at walang paglalarawan ang request na ito, kaya walang mapepresyuhan ang vendor",
+      "suggestion": "Ilarawan ang saklaw bago ilathala upang maihambing ang mga bid na matatanggap"
+    },
+    "deadline_present": {
+      "fail": "Walang submission deadline ang request na ito, kaya hindi nagsasara ang bidding",
+      "suggestion": "Itakda ang petsa at oras kung kailan dapat dumating ang mga bid"
+    },
+    "deadline_parseable": {
+      "fail": "Ang submission deadline na {value} ay hindi petsang mababasa ng sistema, at tatanggihan ang lahat ng bid",
+      "suggestion": "Ilagay ang deadline bilang petsa, halimbawa 2026-08-31"
+    },
+    "deadline_in_future": {
+      "fail": "Lumipas na ang submission deadline na {deadline} ngayong {today}, kaya dumarating na sarado ang request",
+      "suggestion": "Ilipat ang deadline sa hinaharap bago ilathala"
+    },
+    "has_recipients": {
+      "fail": "Walang vendor na pinatutunguhan ang request na ito, kaya walang maaabisuhan sa paglalathala",
+      "suggestion": "Idagdag ang mga vendor na padadalhan ng request na ito"
+    },
+    "currency_set": {
+      "fail": "Walang currency na nakasaad sa request na ito, kaya hindi mairaranggo ang mga bid laban sa isa't isa",
+      "suggestion": "Itakda ang currency na gagamitin sa pagpepresyo ng mga bid"
+    },
+    "bid_currency_matches": {
+      "fail": "Nakapresyo sa {bid_currency} ang bid na {bid} ngunit nasa {rfq_currency} ang request",
+      "suggestion": "Hilingin sa bidder na magbigay muli ng presyo sa currency ng request o itala ang napagkasunduang conversion"
+    },
+    "bid_amounts_parseable": {
+      "fail": "May halagang {value} ang bid na {bid}, na hindi numerong magagamit sa pagraranggo",
+      "suggestion": "Itama ang halaga ng bid bago igawad ang kontrata"
+    },
+    "bids_still_valid": {
+      "fail": "Nag-expire ang bid na {bid} noong {expired} at ngayon ay {today}, kaya hindi na umiiral ang obligasyon sa presyong iyon",
+      "suggestion": "Hilingin sa bidder na kumpirmahin ang presyo bago igawad ang kontrata"
+    },
+    "award_has_competition": {
+      "fail": "Nakabatay ang paggawad na ito sa {count} bid, mas kaunti sa {minimum} na kailangan para sa mapagkumpitensiyang paghahambing",
+      "suggestion": "Itala kung bakit may katwiran ang single-source award o mag-imbita ng higit pang bidder"
+    }
+  },
+  "errors": {
+    "resource_not_found": "Hindi nakita ang resource",
+    "project_not_found": "Hindi nakita ang proyekto",
+    "vendor_not_found": "Hindi nakita ang vendor",
+    "template_not_found": "Hindi nakita ang template",
+    "position_not_found": "Hindi nakita ang posisyon",
+    "boq_not_found": "Hindi nakita ang BOQ",
+    "session_not_found": "Hindi nakita ang session",
+    "document_not_found": "Hindi nakita ang dokumento",
+    "documents_batch_delete_referenced": "May mga rekord sa ibang bahagi na tumutukoy pa rin sa mga dokumento sa batch na ito. Suriin ang mga ugnayang mapuputol sa pagbura at kumpirmahin gamit ang acknowledge_references.",
+    "invitation_not_found": "Hindi nakita ang imbitasyon",
+    "agreement_not_found": "Hindi nakita ang kasunduan",
+    "rejection_not_found": "Hindi nakita ang rejection",
+    "claim_not_found": "Hindi nakita ang progress claim",
+    "gaeb_x89_final_account_unsupported": "Hindi pa maaaring i-export ang final account o part final account bilang GAEB X89. Dapat nitong singilin ang pinagsama-samang trabaho na binawasan ng mga naunang bayad, samantalang progress invoice para sa isang panahon lamang ang nabubuo mula sa claim. I-export ang claim bilang progress invoice.",
+    "xpwe_native_file_refused": "Ito ay sariling project file ng isang estimating program, na tanging programang iyon lamang ang makapagbubukas. I-export ang estimate bilang XPWE mula sa iyong estimating program at i-upload ang .xpwe file.",
+    "plot_not_found": "Hindi nakita ang lote",
+    "survey_not_found": "Hindi nakita ang drone survey",
+    "diary_video_not_found": "Hindi nakita ang diary video",
+    "diary_photo_not_found": "Hindi nakita ang diary photo",
+    "bidder_not_found": "Hindi nakita ang bidder",
+    "webhook_not_found": "Hindi nakita ang webhook",
+    "submission_not_found": "Hindi nakita ang submission",
+    "measurement_not_found": "Hindi nakita ang site measurement",
+    "salescontract_not_found": "Hindi nakita ang sales contract",
+    "prompt_not_found": "Hindi nakita ang prompt template",
+    "prequalification_not_found": "Hindi nakita ang prequalification",
+    "purchase_requisition_not_found": "Hindi nakita ang purchase requisition",
+    "purchase_order_not_found": "Hindi nakita ang purchase order",
+    "group_not_found": "Hindi nakita ang grupo",
+    "final_account_not_found": "Hindi nakita ang final account",
+    "estimate_job_not_found": "Hindi nakita ang estimate job",
+    "escrow_not_found": "Hindi nakita ang escrow transaction",
+    "commission_accrual_not_found": "Hindi nakita ang commission accrual",
+    "baseline_not_found": "Hindi nakita ang baseline",
+    "fx_rate_set_locked": "Naka-lock ang ECB rates para sa {date}, kaya hindi sila pinalitan ng refresh na ito. I-unlock muna ang rate set na iyon kung dapat nitong tanggapin ang bagong inilathalang rates.",
+    "boq_locked": "Naka-lock ang BOQ at hindi maaaring baguhin. Gumawa ng rebisyon upang makapagbago.",
+    "boq_link_owner_locked": "Ang code na '{code}' ay tinukoy ng isang linya sa naka-lock na bill na '{bill}', at mababago ang bill na iyon kapag nag-link dito. I-unlock muna ang bill o ilagay ang linya sa ilalim ng bagong code."
+  },
+  "variations": {
+    "boq_lines_are_traced": {
+      "fail": "Ang linyang {line} sa bill ng variation na ito ay walang pinagmumulang schedule-of-values line o estimating position",
+      "suggestion": "Tukuyin ang contract line na naaapektuhan ng pagbabagong ito o ang estimate position na pinagmulan ng saklaw ng trabaho upang maipagtanggol ang halaga"
+    },
+    "boq_total_matches_estimate": {
+      "fail": "{estimate} ang pangunahing estimate sa request na ito ngunit {priced} ang kabuuan ng napresyuhang bill",
+      "suggestion": "Gamitin ang napresyuhang kabuuan sa request o itama ang bill upang iisa ang halagang ginagamit"
+    },
+    "change_kind_matches_numbers": {
+      "removed_positive": "Minarkahang inalis na trabaho ang linyang {line} ngunit positibo ang dami nitong {quantity}; ang inalis na trabaho ay ibinabawas sa kontrata bilang negatibong dami",
+      "added_negative": "Minarkahang dagdag na trabaho ang linyang {line} ngunit negatibo ang dami nitong {quantity}; ang trabahong ibinabawas sa kontrata ay inaalis, hindi idinadagdag",
+      "removed_needs_contract_line": "Minarkahang inalis na trabaho ang linyang {line} ngunit wala itong pinagmumulang schedule-of-values line, kaya walang contracted item na maaalis",
+      "modified_needs_contract_line": "Minarkahang binagong trabaho ang linyang {line} ngunit wala itong pinagmumulang schedule-of-values line, kaya walang contracted item na mababago",
+      "suggestion": "Itama ang uri ng pagbabago o ang dami sa trace ng linya o tukuyin ang contract line na naaapektuhan"
+    }
+  },
+  "cases": {
+    "has_steps": {
+      "fail": "Wala pang mga hakbang ang case na ito, kaya walang masusundan ang mambabasa.",
+      "suggestion": "Magdagdag ng kahit isang hakbang na tumutukoy sa screen na bubuksan at sa gagawin doon."
+    },
+    "step_titled": {
+      "fail": "May {count} hakbang na walang pamagat o screen na bubuksan.",
+      "suggestion": "Bigyan ang bawat hakbang ng maikling pamagat at piliin ang screen na bubuksan nito."
+    },
+    "step_purpose": {
+      "fail": "Hindi sinasabi ng {count} sa {total} hakbang kung bakit mahalaga ang mga ito, kaya tila listahan lamang ng mga click ang case sa halip na paliwanag.",
+      "suggestion": "Magdagdag ng isang pangungusap bawat hakbang tungkol sa layunin nito; iyon ang kailangan ng bagong gumagamit."
+    },
+    "distinct_screens": {
+      "fail": "May {count} hakbang na nagbubukas ng parehong screen gaya ng naunang hakbang, kaya walang makitang pagbabago ang mambabasa at hindi niya maihiwalay ang mga hakbang.",
+      "suggestion": "Pagsamahin ang mga ito sa isang hakbang o ituro ang ikalawa sa screen kung saan talaga nagpapatuloy ang trabaho."
+    },
+    "duration_plausible": {
+      "fail": "Nagsasaad ang case na ito ng {minutes} minuto para sa {steps} hakbang. Ang mambabasang hindi makasabay ay titigil sa pagtitiwala sa natitirang tantiya ng oras.",
+      "suggestion": "Taasan ang tantiya sa hindi bababa sa {minimum} minuto o magbawas ng ilang hakbang."
+    },
+    "described": {
+      "fail": "Walang buod ang case na ito, kaya pamagat lamang ang nakikita sa listahan.",
+      "suggestion": "Magdagdag ng isang pangungusap tungkol sa matatapos ng mambabasa sa dulo."
+    }
+  },
+  "uk": {
+    "contract_form_declared": {
+      "fail": "Hindi tinutukoy ng estimate ang contract form na pinagbatayan ng presyo",
+      "suggestion": "Itala ang contract form. Iba-iba ang pagpepresyo ng preliminaries, panganib at payment terms ayon sa form, kaya kaunti ang kahulugan ng halaga kung wala ito"
+    },
+    "payment_regime_declared": {
+      "fail": "Hindi kumpleto ang mekanismo ng pagbabayad: hindi nakatala ang {missing}",
+      "suggestion": "Itala ang parehong petsa. Hindi nalilibre sa mga ito ang construction contract na walang itinakdang alinman; itinatakda ng Scheme for Construction Contracts ang dalawa, at makikita ng mga partido ang payment terms sa isang statutory instrument sa halip na sa pinirmahan nila"
+    },
+    "retention_declared": {
+      "fail": "Hindi sinasabi ng estimate kung anong retention ang naaangkop",
+      "suggestion": "Itala ang porsiyento ng retention at ang paglalabas nito o itala na walang naaangkop. Ang retention ay perang kinita na ng kontratista ngunit hindi pa makuha; ang estimate na walang sinasabi tungkol dito ay tahimik din tungkol sa working capital"
+    },
+    "cdm_duty_holders_declared": {
+      "fail": "Hindi nakatala ang mga duty holder sa ilalim ng CDM 2015: kulang ang {missing}",
+      "suggestion": "Itala ang mga pagtatalaga. Kapag higit sa isang kontratista ang nagtatrabaho sa proyekto, dapat magtalaga ang kliyente ng principal designer at principal contractor nang nakasulat; kung hindi, ang kliyente mismo ang may hawak ng mga tungkuling iyon"
+    },
+    "hrb_regime_declared": {
+      "fail": "Hindi pa nalutas kung higher-risk building ito: {reason}",
+      "unanswered": "hindi sinasabi ng estimate kung higher-risk building ito",
+      "disagrees": "sinasabi ng estimate na {declared} ang higher-risk status, ngunit {derived} ang resulta mula sa sarili nitong sukat",
+      "suggestion": "Higher-risk ang gusali kung hindi bababa sa 18 m ang taas o may hindi bababa sa 7 palapag AT naglalaman ng hindi bababa sa dalawang residential unit. Mahalaga ang parehong bahagi: hindi higher-risk ang mataas na gusaling walang tirahan, at ang pagtrato rito nang ganoon ay magdadagdag ng gateway programme na hindi naman kailangan"
+    },
+    "vat_treatment_declared": {
+      "fail": "Hindi sinasabi ng estimate kung paano hinahawakan ang VAT",
+      "suggestion": "Itala ang paraan: standard rate, reduced o zero rate kung kuwalipikado ang trabaho, o domestic reverse charge kung sakop nito ang supply. Inililipat ng reverse charge ang VAT sa customer at binabago kung ano ang maaaring i-invoice ng kontratista"
+    }
+  },
+  "project_completeness": {
+    "country_set": {
+      "fail": "Walang bansang nakasaad sa proyekto, kaya hindi matukoy ang price base, tax rate o working calendar nito",
+      "suggestion": "Itakda ang bansa sa settings ng proyekto. Ang bansa ang nagpapasya kung aling regional pack, buwis at kalendaryo ang batayan ng bawat halaga"
+    },
+    "currency_set": {
+      "fail": "Walang currency ang proyekto, kaya hindi mapagsasama ang mga bill, markup at kontrata nito",
+      "suggestion": "Piliin ang currency sa settings ng proyekto. Dito pinapresyuhan ang bawat bill at kontrata at binabasa ang bawat kabuuan"
+    },
+    "currency_matches_bill": {
+      "fail": "Nakapresyo sa {project_currency} ang proyekto ngunit nasa {bill_currencies} ang mga row ng bill na ito",
+      "suggestion": "I-convert ang mga row sa currency ng proyekto gamit ang nakasaad na rate o itala ang exchange rate sa proyekto upang maging isang numero ang kabuuan ng bill"
+    },
+    "priced_bill_present": {
+      "fail": "Walang bill of quantities na may mga posisyon ang proyekto, kaya walang mapagbatayan ng estimate",
+      "suggestion": "Gumawa ng bill of quantities at magdagdag ng mga posisyon o mag-import mula sa CAD model, spreadsheet o exchange file"
+    },
+    "bill_base_date_set": {
+      "fail": "Hindi nakasaad sa bill na \"{bill}\" ang base date kung kailan umiiral ang mga rate nito",
+      "suggestion": "Itala ang base date sa bill. Kung wala ito, hindi mai-index ang mga rate, mabubuwisan ayon sa sarili nilang petsa o maihahambing sa ibang estimate"
+    },
+    "classification_standard_set": {
+      "fail": "Walang classification standard ang proyekto, kaya walang mapagbatayan upang suriin ang mga code ng posisyon",
+      "suggestion": "Piliin ang classification standard na ginagamit sa pag-code ng proyekto. Ito rin ang nagpapasya kung aling country rule sets ang gagamitin sa validation"
+    },
+    "planned_dates_set": {
+      "both_missing": "Walang nakaplanong simula o pagtatapos na petsa ang proyekto",
+      "start_missing": "May nakaplanong pagtatapos na petsa ang proyekto ngunit walang simula",
+      "end_missing": "May nakaplanong simula na petsa ang proyekto ngunit walang pagtatapos",
+      "unreadable": "Hindi mabasa bilang petsa ang nakaplanong halagang \"{value}\"",
+      "suggestion": "Ilagay ang nakaplanong simula at pagtatapos ng proyekto bilang mga petsa. Sa pagitan nila pinapresyuhan ang time-related cost, escalation at programme"
+    },
+    "planned_dates_ordered": {
+      "fail": "Nakaplanong magsimula ang proyekto sa {start} at matapos sa {end}, na nauuna sa simula nito",
+      "suggestion": "Pagpalitin o itama ang mga nakaplanong petsa upang mauna ang simula sa pagtatapos"
+    },
+    "client_recorded": {
+      "fail": "Walang naitalang kliyente sa proyekto at walang kontratang tumutukoy sa employer",
+      "suggestion": "Itala ang kliyente sa proyekto o idagdag ang employer bilang partido sa kontrata upang may tatanggap ang estimate"
+    },
+    "procurement_started": {
+      "fail": "Nasa yugtong {phase} ang proyekto ngunit wala itong kontrata o tender package",
+      "suggestion": "Gumawa ng tender package mula sa bill o itala ang kontrata o ibalik ang yugto sa estimating stage kung saan talaga naroon ang proyekto"
+    }
+  },
+  "boq_resources": {
+    "unit_rate_not_rederived": {
+      "fail": "Posisyong {ordinal}: hindi kayang presyuhan ng mga resource row ang linya, kaya hindi muling kinalkula ang unit rate mula sa mga ito",
+      "fallback_allowance": "Posisyong {ordinal}: ang mga resource row ay paghahati ng tinatayang allowance na naglalaman ng dami ng buong posisyon, kaya hindi muling kinalkula ang unit rate mula sa mga ito",
+      "assumed_norm": "Posisyong {ordinal}: may mga norm sa resource rows na hindi kailanman nakasaad sa catalogue, kaya hindi muling kinalkula ang unit rate mula sa mga ito",
+      "norm_collapsed": "Posisyong {ordinal}: nawala ang catalogue norm sa resource rows at dami ng posisyon ang laman sa halip, kaya hindi muling kinalkula ang unit rate mula sa mga ito",
+      "whole_position_quantities": "Posisyong {ordinal}: dami ng buong posisyon ang laman ng resource rows sa halip na per-unit norms, kaya hindi muling kinalkula ang unit rate mula sa mga ito",
+      "suggestion": "Suriin ang buildup; kalkulahin muli ang posisyon mula sa catalogue item nito sa pamamagitan ng resource norm review o itama ang mga row nang mano-mano"
+    }
+  },
+  "poland": {
+    "knr_reference_required": {
+      "fail": "Walang binanggit na KNR catalogue table ang posisyong {ordinal}",
+      "suggestion": "Tukuyin sa podstawa ang catalogue table na pinagmulan ng mga norm, halimbawa KNR 2-02 0201-01, o isulat ang kalkulacja indywidualna para sa linyang pinresyuhan gamit ang sariling kalkulasyon"
+    },
+    "knr_reference_recognised": {
+      "fail": "Walang tinukoy na KNR catalogue family ang reference na '{code}' sa posisyong {ordinal}",
+      "suggestion": "Simulan ang reference sa catalogue family nito, gaya ng KNR, KNNR, KNR-W o KSNR, o markahan ang linya bilang kalkulacja indywidualna"
+    }
+  }
+}
