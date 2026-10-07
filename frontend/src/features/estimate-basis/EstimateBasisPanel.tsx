@@ -62,6 +62,7 @@ import {
 } from './api';
 import {
   basisFilename,
+  editableBasisClasses,
   makeItemId,
   newManualItem,
   parseAccuracyPct,
@@ -189,6 +190,7 @@ export function EstimateBasisPanel({ projectId, boqId, currency, baseDate }: Est
   const classesQuery = useQuery({
     queryKey: ['estimate-basis', 'classes'],
     queryFn: listEstimateClasses,
+    select: (catalog) => ({ ...catalog, items: editableBasisClasses(catalog.items) }),
     staleTime: Infinity,
   });
 
@@ -321,6 +323,7 @@ export function EstimateBasisPanel({ projectId, boqId, currency, baseDate }: Est
    */
   function setEstimateClass(next: number | string) {
     const option = classesQuery.data?.items.find((o) => o.estimate_class === next);
+    if (next !== 0 && next !== '' && !option) return;
     setDraft((prev) => {
       if (!prev) return prev;
       if (next === 0 || next === '') {

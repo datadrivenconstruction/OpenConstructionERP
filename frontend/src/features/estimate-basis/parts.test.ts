@@ -1,8 +1,9 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 import { describe, expect, it } from 'vitest';
-import type { EstimateBasisDocument, QualificationItem } from './api';
+import type { EstimateBasisDocument, EstimateClassOption, QualificationItem } from './api';
 import {
   basisFilename,
+  editableBasisClasses,
   enabledItems,
   newManualItem,
   parseAccuracyPct,
@@ -115,6 +116,21 @@ function doc(over: Partial<EstimateBasisDocument>): EstimateBasisDocument {
     ...over,
   };
 }
+
+describe('editableBasisClasses', () => {
+  it('keeps saveable AACE classes and their published bands without offering CCA values the PATCH rejects', () => {
+    const option = (estimate_class: number | string, classification_system = 'aace'): EstimateClassOption => ({
+      estimate_class, classification_system, label: String(estimate_class),
+      accuracy_low: '-10%', accuracy_high: '+20%',
+      definition_level_low: 10, definition_level_high: 40, methodology: '',
+    });
+    const aace = [1, 2, 3, 4, 5].map((value) => option(value));
+    const catalog = [...aace, option('A', 'ca_cca'), option('D', 'ca_cca'),
+      option(1, 'future_system'), option('3'), option(0), option(6), option(2.5)];
+    expect(editableBasisClasses(catalog)).toEqual(aace);
+    expect(catalog).toHaveLength(12);
+  });
+});
 
 describe('enabledItems', () => {
   it('keeps only enabled lines', () => {

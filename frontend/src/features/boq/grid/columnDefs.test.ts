@@ -251,6 +251,19 @@ describe('unit_rate column editability', () => {
     return ed({ data });
   };
 
+  it('shows the project classification code without requiring a column toggle', () => {
+    const context = { ...ctx, classificationStandard: 'gesn' };
+    const column = getColumnDefs(context).find((candidate) => candidate.field === 'classification');
+    expect(column).toBeDefined();
+    expect(column?.hide).not.toBe(true);
+    const getValue = column?.valueGetter as (params: {
+      data: Record<string, unknown>;
+      context: BOQColumnContext;
+    }) => string;
+    expect(getValue({ data: { classification: { gesn: '06-01-001-01' } }, context })).toBe('06-01-001-01');
+    expect(getValue({ data: { _isSection: true, classification: { gesn: '06-01-001-01' } }, context })).toBe('');
+  });
+
   it('is editable for a position with no resources', () => {
     expect(isEditable({ id: 'p1', unit_rate: 10, metadata: {} })).toBe(true);
   });

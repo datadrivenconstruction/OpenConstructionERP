@@ -956,6 +956,7 @@ async def commercial_records(http_client, rw_project_world):
             "project_id": project_id,
             "code": f"BM-{uuid.uuid4().hex[:6]}",
             "title": "A-owned bid package",
+            "currency": "EUR",
         },
         headers=owner,
     )

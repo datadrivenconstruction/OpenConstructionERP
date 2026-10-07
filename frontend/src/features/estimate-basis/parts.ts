@@ -7,7 +7,17 @@
 // browser. All user-facing labels are passed in (already translated) so nothing
 // here hardcodes a display string.
 
-import type { EstimateBasisDocument, QualificationCategory, QualificationItem } from './api';
+import type { EstimateBasisDocument, EstimateClassOption, QualificationCategory, QualificationItem } from './api';
+
+/** The basis PATCH and persisted document currently support only AACE 1-5. */
+export function editableBasisClasses(classes: EstimateClassOption[]): EstimateClassOption[] {
+  return classes.filter((option) =>
+    option.classification_system === 'aace' &&
+    typeof option.estimate_class === 'number' &&
+    Number.isInteger(option.estimate_class) &&
+    option.estimate_class >= 1 && option.estimate_class <= 5,
+  );
+}
 
 /** Only the lines the estimator has left enabled. */
 export function enabledItems(items: QualificationItem[]): QualificationItem[] {

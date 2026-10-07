@@ -167,6 +167,7 @@ export function BasisHeadline({
               className="text-xs font-medium uppercase tracking-wide text-content-tertiary"
             >
               {t('estimateBasis.headline.classLabel', { defaultValue: 'Accuracy class' })}
+              {' (AACE)'}
             </label>
             <select
               id="estimate-basis-class"

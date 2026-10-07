@@ -708,7 +708,6 @@ export function getColumnDefs(context: BOQColumnContext): ColDef[] {
       headerName: t('boq.classification', { defaultValue: 'Code' }),
       field: 'classification',
       width: 100,
-      hide: true,
       editable: false,
       valueGetter: (params) => {
         if (params.data?._isSection || params.data?._isFooter) return '';
