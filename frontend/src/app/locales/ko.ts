@@ -45511,7 +45511,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "수량이 실제로 있을 수 없는 크기여서 이 항목은 가져오지 않았습니다",
     "boq.import_issue.xpwe_item_failed": "수치를 계산할 수 없어 이 항목은 가져오지 않았습니다",
     "boq.import_issue.xpwe_duplicate_item_id": "항목 {{first}}과 같은 ID({{ref}})를 가지고 있습니다. 둘 다 가져왔으며, {{ref}}가 반복되는 행은 항목 {{first}} 뒤에 이어집니다",
-    "boq.import_error.import_persistence_failed": "가져온 물량내역서를 저장하지 못했습니다. 가져온 행이 없습니다.",
+    "boq.import_error.import_persistence_failed": "가져온 내역서를 저장하지 못했습니다. 가져온 행이 없습니다.",
     "boq.import_error.gaeb_empty_file": "이 GAEB 파일이 비어 있습니다.",
     "boq.import_error.gaeb_file_type": "{{format}} 파일({{extensions}})을 업로드하세요.",
     "boq.import_error.gaeb_wrong_root": "이 파일은 XML이지만 GAEB 문서가 아닙니다. 루트 요소는 <{{root}}>입니다.",
