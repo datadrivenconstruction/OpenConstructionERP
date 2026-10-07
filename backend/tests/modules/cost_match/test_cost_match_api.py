@@ -63,6 +63,84 @@ class TestHealth:
 
 
 class TestSubmitBatch:
+    @pytest.mark.parametrize("submitted", ["omitted", "null", "forged"])
+    @pytest.mark.parametrize("claim", ["actor", "tenant", "non_uuid"])
+    async def test_run_tenant_comes_from_authenticated_scope(
+        self, client, header, project_id, cost_base, monkeypatch, submitted, claim
+    ):
+        from app.config import get_settings
+        from app.database import async_session_factory
+        from app.modules.cost_match import events
+        from app.modules.cost_match.models import MatchRun
+        from app.modules.cost_match.service import event_bus
+        from app.modules.users.models import User
+        from app.modules.users.service import create_access_token
+
+        me = await client.get("/api/v1/users/me", headers=header)
+        assert me.status_code == 200, me.text
+        actor = uuid.UUID(me.json()["id"])
+        trusted = str(uuid.uuid4()) if claim == "tenant" else "external-tenant-key"
+        async with async_session_factory() as session:
+            user = await session.get(User, actor)
+            token = create_access_token(user, get_settings(), {} if claim == "actor" else {"tenant_id": trusted})
+        scoped_header = {"Authorization": f"Bearer {token}"}
+        expected = str(actor) if claim == "actor" else trusted if claim == "tenant" else None
+        published = []
+        monkeypatch.setattr(
+            event_bus,
+            "publish_detached",
+            lambda name, data, **kwargs: published.append((name, data)),
+        )
+        fields = {} if submitted == "omitted" else {"tenant_id": None if submitted == "null" else str(uuid.uuid4())}
+        run = await _create_run(
+            client, scoped_header, project_id, [{"description": WALL, "unit": "m3", "quantity": "1"}], **fields
+        )
+        assert run["tenant_id"] == expected
+        assert run["created_by"] == str(actor)
+        async with async_session_factory() as session:
+            stored = await session.get(MatchRun, uuid.UUID(run["id"]))
+            assert (str(stored.tenant_id) if stored.tenant_id else None) == expected
+        completed = [data for name, data in published if name == events.MATCH_COMPLETED]
+        assert len(completed) == 1
+        assert completed[0]["run_id"] == run["id"]
+        assert completed[0]["tenant_id"] == expected
+
+    async def test_tenant_attribution_does_not_grant_access_to_a_foreign_project(
+        self, client, header, project_id, cost_base
+    ):
+        from sqlalchemy import func, select
+
+        from app.config import get_settings
+        from app.database import async_session_factory
+        from app.modules.cost_match.models import MatchRun
+        from app.modules.users.models import User
+        from app.modules.users.service import create_access_token
+
+        owner = (await client.get("/api/v1/users/me", headers=header)).json()["id"]
+        async with async_session_factory() as session:
+            stranger = User(
+                email=f"cost-match-stranger-{uuid.uuid4().hex}@test.invalid",
+                hashed_password="unused-signed-token-fixture",
+                role="editor",
+                is_active=True,
+            )
+            session.add(stranger)
+            await session.commit()
+            token = create_access_token(stranger, get_settings(), {"tenant_id": owner})
+            before = await session.scalar(select(func.count()).select_from(MatchRun))
+        response = await client.post(
+            f"{BASE}/runs/",
+            headers={"Authorization": f"Bearer {token}"},
+            json={
+                "project_id": project_id,
+                "tenant_id": owner,
+                "lines": [{"description": WALL, "unit": "m3", "quantity": "1"}],
+            },
+        )
+        assert response.status_code == 404, response.text
+        async with async_session_factory() as session:
+            assert await session.scalar(select(func.count()).select_from(MatchRun)) == before
+
     async def test_a_batch_comes_back_as_a_queue(self, client: AsyncClient, header, project_id, cost_base) -> None:
         run = await _create_run(
             client,

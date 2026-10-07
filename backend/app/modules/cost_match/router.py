@@ -33,7 +33,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.core.permissions import Role, permission_registry
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.dependencies import CurrentTenantId, CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.cost_match.manifest import manifest
 from app.modules.cost_match.models import (
     DECISION_STATES,
@@ -169,6 +169,7 @@ async def create_run(
     data: MatchRunCreate,
     session: SessionDep,
     user_id: CurrentUserId,
+    tenant_id: CurrentTenantId,
 ) -> MatchRunResponse:
     """Match a pasted batch of descriptions against one cost base.
 
@@ -178,6 +179,10 @@ async def create_run(
     waits for a person, whatever tier it landed in.
     """
     await verify_project_access(data.project_id, user_id, session)
+    # HTTP callers cannot assign a run (or its events) to an arbitrary tenant.
+    # Keep the nullable UUID compatibility for unrepresentable trusted IDs;
+    # never substitute a body value when authenticated scope is unavailable.
+    data = data.model_copy(update={"tenant_id": _as_uuid(tenant_id)})
     service = CostMatchService(session)
     run = await service.create_run(data, created_by=_as_uuid(user_id))
     return await service.run_response(run)
