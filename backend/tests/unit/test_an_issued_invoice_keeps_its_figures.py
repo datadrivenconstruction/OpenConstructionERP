@@ -95,6 +95,78 @@ async def test_an_issued_invoice_keeps_its_lines() -> None:
     assert exc.value.status_code == 409
 
 
+@pytest.mark.parametrize("status", ["approved", "sent", "paid", "cancelled"])
+@pytest.mark.parametrize("field", ["amount_subtotal", "tax_amount", "retention_amount", "amount_total"])
+async def test_an_issued_invoice_rejects_a_milliunit_header_change(status: str, field: str) -> None:
+    """Transient fixtures isolate the guard from database storage rounding."""
+    service, invoice = await _invoice(status)
+    original = Decimal(str(getattr(invoice, field) or "0")) + Decimal("0.001")
+    setattr(invoice, field, original)
+    change = {field: str(original + Decimal("0.001"))}
+
+    with pytest.raises(HTTPException) as exc:
+        await service.update_invoice(invoice.id, InvoiceUpdate.model_validate(change))
+
+    assert exc.value.status_code == 409
+    assert field in exc.value.detail
+    assert Decimal(str(getattr(invoice, field))) == original
+    assert invoice.status == status
+
+
+@pytest.mark.parametrize("status", ["approved", "sent", "paid", "cancelled"])
+async def test_an_issued_invoice_rejects_a_milliunit_line_change(status: str) -> None:
+    service, invoice = await _invoice(status)
+    invoice.line_items[0].amount = Decimal("1000.001")
+
+    with pytest.raises(HTTPException) as exc:
+        await service.update_invoice(invoice.id, InvoiceUpdate(line_items=[_line("1000.002")]))
+
+    assert exc.value.status_code == 409
+    assert "line_items" in exc.value.detail
+    assert invoice.line_items[0].amount == Decimal("1000.001")
+
+
+async def test_an_issued_invoice_does_not_treat_an_infinite_line_as_zero() -> None:
+    # The existing nonnegative schema accepts positive Infinity; the issued
+    # guard must reject it before amount-consistency checks or line writes.
+    service, invoice = await _invoice("sent")
+    invoice.line_items = [InvoiceLineItem(description="Zero allowance", amount=Decimal("0"))]
+
+    with pytest.raises(HTTPException) as exc:
+        await service.update_invoice(invoice.id, InvoiceUpdate(line_items=[_line("Infinity")]))
+
+    assert exc.value.status_code == 409
+    assert "line_items" in exc.value.detail
+    assert invoice.line_items[0].amount == Decimal("0")
+
+
+async def test_exact_milliunit_echo_accepts_trailing_zeros_and_reordered_lines() -> None:
+    service, invoice = await _invoice("sent")
+    invoice.amount_subtotal = Decimal("1000.003")
+    invoice.tax_amount = Decimal("190.001")
+    invoice.retention_amount = Decimal("0.001")
+    invoice.amount_total = Decimal("1190.004")
+    invoice.line_items = [
+        InvoiceLineItem(description="First", amount=Decimal("600.001")),
+        InvoiceLineItem(description="Second", amount=Decimal("400.002")),
+    ]
+    updated = await service.update_invoice(
+        invoice.id,
+        InvoiceUpdate(
+            amount_subtotal="1000.0030",
+            tax_amount="190.0010",
+            retention_amount="0.0010",
+            amount_total="1190.0040",
+            line_items=[_line("400.0020"), _line("600.0010")],
+            notes="Equivalent figures, reordered descriptions",
+        ),
+    )
+
+    assert Decimal(updated.amount_total) == Decimal("1190.004")
+    assert Decimal(updated.retention_amount) == Decimal("0.001")
+    assert updated.notes == "Equivalent figures, reordered descriptions"
+
+
 # ── What still goes through ─────────────────────────────────────────────────
 
 
