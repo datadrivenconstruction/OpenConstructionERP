@@ -117,6 +117,44 @@ describe('MoneyDisplay - em-dash placeholders', () => {
 });
 
 describe('MoneyDisplay - valid currency formatting', () => {
+  it.each(['always', 'never', 'exceptZero', 'auto'] as const)(
+    'keeps Intl sign policy %s for decimal strings', (signDisplay) => {
+      const amount = '-0.000';
+      const expected = new Intl.NumberFormat('en-US', {
+        style: 'currency', currency: 'USD', signDisplay,
+      }).format(-0);
+      const { container } = render(<MoneyDisplay amount={amount} currency="USD" signDisplay={signDisplay} />);
+      expect(container.textContent).toBe(expected);
+    },
+  );
+
+  it.each([true, false])('keeps compact notation with showCode=%s', (showCode) => {
+    const { container } = render(<MoneyDisplay amount="1234567.89" currency="USD" compact showCode={showCode} />);
+    expect(container.textContent).toBe(showCode ? '1.2M USD' : '$1.2M');
+  });
+
+  it.each([
+    ['9007199254740993.01', 'USD', '9,007,199,254,740,993.01 USD'],
+    ['9007199254740993', 'JPY', '9,007,199,254,740,993 JPY'],
+    ['900719925474099.123', 'KWD', '900,719,925,474,099.123 KWD'],
+    ['99.9900', 'USD', '99.99 USD'],
+    ['9.999', 'KWD', '9.999 KWD'],
+  ])('preserves decimal-string digits for %s %s', (amount, currency, expected) => {
+    const { container } = render(<MoneyDisplay amount={amount} currency={currency} showCode />);
+    expect(container.textContent).toBe(expected);
+  });
+
+  it('preserves the final cent when formatting a currency symbol', () => {
+    const { container } = render(<MoneyDisplay amount="9007199254740993.01" currency="USD" />);
+    expect(container.textContent).toBe('$9,007,199,254,740,993.01');
+  });
+
+  it('localizes an exact large decimal with the reader preference', () => {
+    setLocale('de-DE');
+    const { container } = render(<MoneyDisplay amount="9007199254740993.01" currency="EUR" showCode />);
+    expect(container.textContent).toBe('9.007.199.254.740.993,01 EUR');
+  });
+
   it('formats a positive integer amount with USD', () => {
     render(<MoneyDisplay amount={1234.56} currency="USD" />);
     // Intl renders "$1,234.56" — any whitespace variants from a future
@@ -191,6 +229,79 @@ describe('MoneyDisplay - valid currency formatting', () => {
   it('trims whitespace inside the currency prop', () => {
     render(<MoneyDisplay amount={100} currency="  USD  " />);
     expect(screen.getByText(/\$100\.00/)).toBeInTheDocument();
+  });
+});
+
+describe('MoneyDisplay exact fallback', () => {
+  function emulateNumberOnlyEngine() {
+    const Native = Intl.NumberFormat;
+    return vi.spyOn(Intl, 'NumberFormat').mockImplementation(function (locales, options) {
+      const formatter = new Native(locales, options);
+      Object.defineProperty(formatter, 'format', {
+        value: (value: string | number | bigint) => new Native(locales, options).format(Number(value)),
+      });
+      return formatter;
+    });
+  }
+
+  it('rechecks capabilities after the Intl constructor is replaced', () => {
+    const oldEngine = emulateNumberOnlyEngine();
+    const first = render(<MoneyDisplay amount="9007199254740993.01" currency="USD" />);
+    expect(first.container.textContent).toBe('9007199254740993.01 USD');
+    first.unmount();
+    oldEngine.mockRestore();
+    const second = render(<MoneyDisplay amount="9007199254740993.01" currency="USD" />);
+    expect(second.container.textContent).toBe('$9,007,199,254,740,993.01');
+  });
+
+  it('keeps existing numeric formatting on a number-only engine', () => {
+    emulateNumberOnlyEngine();
+    const { container } = render(<MoneyDisplay amount={1234.5} currency="USD" />);
+    expect(container.textContent).toBe('$1,234.50');
+  });
+
+  it.each([
+    ['9007199254740993.0100', undefined, '9007199254740993.0100 USD'],
+    ['9007199254740993.0100', 'always', '+9007199254740993.0100 USD'],
+    ['-9007199254740993.0100', 'never', '9007199254740993.0100 USD'],
+    ['-0.000', 'exceptZero', '0.000 USD'],
+    ['-0.000', 'negative', '0.000 USD'],
+    ['-0.000', 'auto', '-0.000 USD'],
+    ['0.000', 'always', '+0.000 USD'],
+    ['1.000', 'exceptZero', '+1.000 USD'],
+    ['-1.000', 'always', '-1.000 USD'],
+  ] as const)('keeps exact raw %s with sign policy %s on old engines', (amount, signDisplay, expected) => {
+    emulateNumberOnlyEngine();
+    const { container } = render(<MoneyDisplay amount={amount} currency="USD" signDisplay={signDisplay} compact />);
+    expect(container.textContent).toBe(expected);
+  });
+
+  it('keeps exact digits when Intl throws', () => {
+    vi.spyOn(Intl, 'NumberFormat').mockImplementation(function () {
+      throw new RangeError('unavailable formatter');
+    });
+    const { container } = render(<MoneyDisplay amount="9007199254740993.0100" currency="USD" />);
+    expect(container.textContent).toBe('9007199254740993.0100 USD');
+  });
+
+  it('preserves the raw amount when capability succeeds but currency formatting fails', () => {
+    const Native = Intl.NumberFormat;
+    vi.spyOn(Intl, 'NumberFormat').mockImplementation(function (locales, options) {
+      const formatter = new Native(locales, options);
+      if (options?.style === 'currency') {
+        Object.defineProperty(formatter, 'format', {
+          value: () => { throw new RangeError('currency formatting failed'); },
+        });
+      }
+      return formatter;
+    });
+    const { container } = render(<MoneyDisplay amount="9007199254740993.0100" currency="USD" signDisplay="always" />);
+    expect(container.textContent).toBe('+9007199254740993.0100 USD');
+  });
+
+  it('colors a tiny negative decimal without underflow through Number', () => {
+    const { container } = render(<MoneyDisplay amount={`-0.${'0'.repeat(330)}1`} currency="USD" colorize />);
+    expect(container.querySelector('.text-semantic-error')).not.toBeNull();
   });
 });
 

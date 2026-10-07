@@ -5,6 +5,40 @@ import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNumberLocale } from '../../stores/usePreferencesStore';
 import { currencyFractionDigits } from '../lib/money';
+import { isDecimalString } from '../lib/exactDecimal';
+
+// Older engines silently convert strings to Number. Detect actual precision,
+// including the fractional digits, and recheck if a polyfill replaces Intl.
+const exactStringSupport = new WeakMap<typeof Intl.NumberFormat, boolean>();
+
+function formatDecimal(formatter: Intl.NumberFormat, value: number | string): string {
+  // TypeScript's ES2023 Intl declaration predates the decimal-string overload.
+  return (formatter.format as (input: number | string) => string)(value);
+}
+
+function supportsExactStrings(): boolean {
+  const constructor = Intl.NumberFormat;
+  const cached = exactStringSupport.get(constructor);
+  if (cached !== undefined) return cached;
+  let supported = false;
+  try {
+    const probe = new Intl.NumberFormat('en-US', { useGrouping: false, maximumFractionDigits: 2 });
+    supported = formatDecimal(probe, '9007199254740993.01') === '9007199254740993.01';
+  } catch {
+    // Missing/throwing Intl is also an exact-raw-text fallback.
+  }
+  exactStringSupport.set(constructor, supported);
+  return supported;
+}
+
+function rawDecimalWithSign(value: string, policy: MoneyDisplayProps['signDisplay']): string {
+  const negative = value.startsWith('-');
+  const magnitude = negative ? value.slice(1) : value;
+  const zero = !/[1-9]/.test(magnitude);
+  if (policy === 'never' || (zero && (policy === 'exceptZero' || policy === 'negative'))) return magnitude;
+  if (negative) return value;
+  return policy === 'always' || (policy === 'exceptZero' && !zero) ? `+${value}` : value;
+}
 
 export interface MoneyDisplayProps {
   amount: number | string | null | undefined;
@@ -88,7 +122,13 @@ export function MoneyDisplay({
     return <span className={clsx('text-content-tertiary', className)}>&mdash;</span>;
   }
 
-  const numericValue = typeof amount === 'string' ? parseFloat(amount) : amount;
+  const exactDecimal = typeof amount === 'string' && isDecimalString(amount) ? amount : null;
+  // For canonical strings this is only a sign indicator, never the amount.
+  // Preserve even underflow-sized nonzero values for color decisions.
+  const numericValue = exactDecimal !== null
+    ? /[1-9]/.test(exactDecimal) ? exactDecimal.startsWith('-') ? -1 : 1 : 0
+    : typeof amount === 'string' ? parseFloat(amount) : amount;
+  const formatValue = exactDecimal ?? numericValue;
 
   if (Number.isNaN(numericValue)) {
     return <span className={clsx('text-content-tertiary', className)}>&mdash;</span>;
@@ -154,6 +194,9 @@ export function MoneyDisplay({
 
   let formatted: string;
   try {
+    if (exactDecimal !== null && !supportsExactStrings()) {
+      throw new Error('Intl does not preserve decimal strings');
+    }
     if (showCode) {
       // Format number without currency, then append ISO code
       const numFmt = new Intl.NumberFormat(numberLocale, {
@@ -162,7 +205,7 @@ export function MoneyDisplay({
         ...(compact ? { notation: 'compact' as const } : {}),
         ...(signDisplay ? { signDisplay } : {}),
       });
-      formatted = `${numFmt.format(numericValue)} ${safeCurrency}`;
+      formatted = `${formatDecimal(numFmt, formatValue)} ${safeCurrency}`;
     } else {
       const opts: Intl.NumberFormatOptions = {
         style: 'currency',
@@ -174,17 +217,19 @@ export function MoneyDisplay({
       if (compact) {
         opts.notation = 'compact';
       }
-      formatted = new Intl.NumberFormat(numberLocale, opts).format(numericValue);
+      formatted = formatDecimal(new Intl.NumberFormat(numberLocale, opts), formatValue);
     }
   } catch {
-    // numericValue is guaranteed numeric (parseFloat above) but be paranoid
-    // — Number.isFinite guards against ±Infinity sneaking past the NaN gate.
-    const n = Number.isFinite(numericValue) ? numericValue : 0;
-    // The sign survives the fallback too. A caller asks for it because the
-    // alternative is writing one by hand next to the number, and a path that
-    // drops it hands that problem straight back on whichever host took it.
-    const plus = signDisplay === 'always' && n >= 0 ? '+' : '';
-    formatted = `${plus}${n.toFixed(minorUnits)} ${safeCurrency}`;
+    if (exactDecimal !== null) {
+      // Preserve all digits on old engines or failed formatting. This plain
+      // fallback deliberately does not claim localized/compact formatting.
+      formatted = `${rawDecimalWithSign(exactDecimal, signDisplay)} ${safeCurrency}`;
+    } else {
+      // Keep the existing numeric-input fallback independently of exact text.
+      const n = Number.isFinite(numericValue) ? numericValue : 0;
+      const plus = signDisplay === 'always' && n >= 0 ? '+' : '';
+      formatted = `${plus}${n.toFixed(minorUnits)} ${safeCurrency}`;
+    }
   }
 
   const colorClass = colorize
