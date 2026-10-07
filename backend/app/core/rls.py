@@ -117,7 +117,6 @@ def install(session_class: type[Session]) -> None:
     key = id(session_class)
     if key in _installed:
         return
-    _installed.add(key)
 
     @event.listens_for(session_class, "after_begin")
     def _scope_transaction(session, transaction, connection) -> None:  # noqa: ANN001, ARG001
@@ -138,3 +137,6 @@ def install(session_class: type[Session]) -> None:
             text("SELECT set_config(:name, :val, true)"),
             {"name": GUC_NAME, "val": value or ""},
         )
+
+    # Failed registration must remain retryable, not masquerade as installed.
+    _installed.add(key)

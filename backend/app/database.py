@@ -365,8 +365,8 @@ async_session_factory = async_sessionmaker(engine, class_=AsyncSession, expire_o
 
 # Register the row-level-security tenant GUC listener on the sync Session class
 # that AsyncSession drives. It is a no-op until OE_RLS_ENFORCE is enabled AND a
-# request binds a tenant, so this changes nothing on a default install. Guarded
-# so an RLS import problem can never break engine/session creation.
+# request binds a tenant, so this changes nothing on a default install. An
+# enabled deployment must not start with its tenant listener missing.
 try:
     from sqlalchemy.orm import Session as _SyncSession
 
@@ -374,6 +374,10 @@ try:
 
     _rls.install(_SyncSession)
 except Exception as _rls_exc:  # noqa: BLE001
+    # Consult settings directly: the RLS module itself may have failed to import.
+    # An unreadable flag must also propagate, never imply enforcement is off.
+    if get_settings().rls_enforce:
+        raise
     logging.getLogger(__name__).warning("RLS tenant listener not registered: %r", _rls_exc)
 
 # Register the read-only-demo write tripwire on the Engine class, next to the
