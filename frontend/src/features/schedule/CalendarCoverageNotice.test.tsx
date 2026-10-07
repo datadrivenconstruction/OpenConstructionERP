@@ -1,6 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import i18next from 'i18next';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CalendarCoverageNotice } from './CalendarCoverageNotice';
@@ -27,10 +28,33 @@ function mount(schedule = plan) {
   return { ...view, switchTo: (value: Schedule) => view.rerender(wrap(value)) };
 }
 
-beforeEach(() => { mocks.get.mockReset().mockResolvedValue(regional); mocks.calendars.mockReset().mockResolvedValue([]); });
+const originalLanguage = i18next.language;
+void i18next.init({ lng: 'en', resources: {}, initAsync: false });
+beforeEach(async () => {
+  await i18next.changeLanguage('en');
+  mocks.get.mockReset().mockResolvedValue(regional);
+  mocks.calendars.mockReset().mockResolvedValue([]);
+});
 afterEach(cleanup);
+afterAll(async () => { await i18next.changeLanguage(originalLanguage ?? 'en'); });
 
 describe('calendar coverage presented to the planner', () => {
+
+  it.each(['ja', 'ar'])('renders both year lists in the reader language %s', async language => {
+    await i18next.changeLanguage(language);
+    mount({ ...plan, end_date: '2031-01-05', metadata_: { calendar: {
+      work_days: [0, 1, 2, 3, 4], regional_holiday_country: 'PT',
+      holiday_coverage: [2029, 2030, 2031].map(year => ({ ...complete(year), omitted: ['Festival'] })),
+    } } });
+    const formatter = new Intl.ListFormat(language, { style: 'narrow', type: 'conjunction' });
+    const missing = screen.getByText(/Public holidays are not available/);
+    const partial = screen.getByText(/Public holiday coverage is incomplete/);
+    expect(missing).toHaveTextContent(formatter.format(['2026', '2027', '2028']));
+    expect(partial).toHaveTextContent(formatter.format(['2029', '2030', '2031']));
+    expect(missing).not.toHaveTextContent('2026, 2027, 2028');
+    expect(partial).not.toHaveTextContent('2029, 2030, 2031');
+    expect(mocks.get).not.toHaveBeenCalled();
+  });
 
   it.each([true, false, undefined])('uses only explicit saved fallback %s without a regional fetch', fallback => {
     mount({ ...plan, metadata_: { calendar: { work_days: [0, 1, 2, 3, 4], regional_holiday_country: 'ZZ',

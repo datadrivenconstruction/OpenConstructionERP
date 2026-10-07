@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { listCalendars } from '@/features/schedule-advanced/api';
 import { apiGet } from '@/shared/lib/api';
+import { fmtList } from '@/shared/lib/formatters';
 import type { HolidayCoverage, Schedule, WorkCalendarResponse } from './api';
 
 const answered = new Set(['declared', 'project', 'platform']);
@@ -85,10 +86,10 @@ export function CalendarCoverageNotice({ schedule }: { schedule: Schedule }) {
       {t('schedule.calendar.week_fallback', { defaultValue: 'The regional working week is unavailable. A standard planning week is used.' })}
     </p>}
     {missing.length > 0 && <p role="status" className="text-semantic-warning">
-      {t('schedule.calendar.holidays_missing', { defaultValue: 'Public holidays are not available for {{years}}. Check the calendar before relying on these dates.', years: missing.join(', ') })}
+      {t('schedule.calendar.holidays_missing', { defaultValue: 'Public holidays are not available for {{years}}. Check the calendar before relying on these dates.', years: fmtList(missing.map(String)) })}
     </p>}
     {partial.length > 0 && <p role="status" className="text-semantic-warning">
-      {t('schedule.calendar.holidays_partial', { defaultValue: 'Public holiday coverage is incomplete for {{years}}. Check the calendar before relying on these dates.', years: partial.join(', ') })}
+      {t('schedule.calendar.holidays_partial', { defaultValue: 'Public holiday coverage is incomplete for {{years}}. Check the calendar before relying on these dates.', years: fmtList(partial.map(String)) })}
     </p>}
   </div>;
 }
