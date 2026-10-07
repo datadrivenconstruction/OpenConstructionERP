@@ -3607,7 +3607,7 @@ export function BIMQuantityRulesPage() {
     );
   }, [elementsQuery.data, rules]);
 
-  const [editorOpen, setEditorOpen] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(() => !!urlContext.newRule);
   const [editorMode, setEditorMode] = useState<'create' | 'edit' | 'duplicate'>('create');
   const [editorInitial, setEditorInitial] = useState<RuleFormState>(blankForm());
   const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
@@ -3908,17 +3908,25 @@ export function BIMQuantityRulesPage() {
 
   // Prepare once for each ready selection/version. This only opens the
   // review dialog; writing still requires the person's Apply click.
+  useEffect(() => {
+    if (!editorOpen) return;
+    // Editing takes precedence over an in-flight review of saved rules.
+    previewSequence.current += 1;
+    setPreviewOpen(false);
+    setPreviewResult(null);
+    setPreviewContext(null);
+  }, [editorOpen]);
   const autoPreviewContext = useRef<string | null>(null);
   const readyModel = modelsQuery.data?.items.find((model) => model.id === modelId);
   const { mutate: preparePreview } = previewMutation;
   useEffect(() => {
-    if (activeTab !== 'quantity_rules' || !activeProjectId || !readyModel
+    if (editorOpen || activeTab !== 'quantity_rules' || !activeProjectId || !readyModel
       || !['active', 'ready', 'degraded', 'complete', 'completed', 'done'].includes(readyModel.status)
       || !rules.some((rule) => rule.is_active) || !boqsListQuery.isSuccess
       || applyInFlight.current || autoPreviewContext.current === context) return;
     autoPreviewContext.current = context;
     preparePreview({ modelId, targetBoqId: targetBoqId || null, context, sequence: ++previewSequence.current });
-  }, [activeTab, activeProjectId, readyModel, rules, boqsListQuery.isSuccess,
+  }, [editorOpen, activeTab, activeProjectId, readyModel, rules, boqsListQuery.isSuccess,
     context, modelId, targetBoqId, preparePreview]);
 
   const handleApply = useCallback(() => {

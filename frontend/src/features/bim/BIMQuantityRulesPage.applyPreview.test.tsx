@@ -45,9 +45,14 @@ const result: QuantityMapApplyResult = {
 };
 let client: QueryClient;
 
-async function page() {
+async function page(url = '/bim/rules', warm = false) {
   client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
-  render(<QueryClientProvider client={client}><MemoryRouter initialEntries={['/bim/rules']}>
+  if (warm) {
+    client.setQueryData(['bim-quantity-maps'], await mocks.listQuantityMaps());
+    client.setQueryData(['bim-models', 'p-1'], await mocks.fetchBIMModels());
+    client.setQueryData(['boqs', 'p-1'], await mocks.boqList());
+  }
+  render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[url]}>
     <BIMQuantityRulesPage />
   </MemoryRouter></QueryClientProvider>);
   await waitFor(() => expect((screen.getByLabelText('BIM model') as HTMLSelectElement).value).toBe('m-1'));
@@ -81,6 +86,20 @@ beforeEach(() => {
 afterEach(() => { cleanup(); client?.clear(); });
 
 describe('Apply the reviewed quantity-map preview', () => {
+  it.each([false, true])('keeps a linked new-rule editor above automatic review (warm cache: %s)', async (warm) => {
+    mocks.listQuantityMaps.mockResolvedValue({ items: [{ id: 'r-1', name: 'Walls', is_active: true }], total: 1 });
+    await page('/bim/rules?new=1&element_type=Wall&qty_source=area', warm);
+    expect(await screen.findByRole('heading', { name: 'New rule' })).toBeTruthy();
+    expect(mocks.applyQuantityMaps).not.toHaveBeenCalled();
+    expect(screen.queryByText('Dry-run preview')).toBeNull();
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Cancel' }));
+    await screen.findByText('Applying will create 1 new BOQ positions.');
+    expect(mocks.applyQuantityMaps).toHaveBeenCalledExactlyOnceWith('m-1', true, null);
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Close' }));
+    await preview();
+    expect(mocks.applyQuantityMaps).toHaveBeenCalledTimes(2);
+  });
+
   it('does not apply on mount or before preview; shows the actual effects', async () => {
     await page();
     expect(mocks.applyQuantityMaps).not.toHaveBeenCalled();
@@ -89,6 +108,25 @@ describe('Apply the reviewed quantity-map preview', () => {
     expect(button.disabled).toBe(false);
     expect(screen.getByText(/Quantities and prices of existing positions stay unchanged/)).toBeTruthy();
     expect(mocks.applyQuantityMaps).toHaveBeenCalledExactlyOnceWith('m-1', true, null);
+  });
+
+  it('discards a pending saved-rule review when the rule editor opens', async () => {
+    let finish: (value: QuantityMapApplyResult) => void = () => {};
+    mocks.applyQuantityMaps.mockReturnValue(new Promise<QuantityMapApplyResult>((resolve) => { finish = resolve; }));
+    await page();
+    fireEvent.click(screen.getByRole('button', { name: 'Preview (dry run)' }));
+    await waitFor(() => expect(mocks.applyQuantityMaps).toHaveBeenCalledTimes(1));
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Close' }));
+    fireEvent.click(screen.getByRole('button', { name: 'New rule' }));
+    await screen.findByRole('heading', { name: 'New rule' });
+    await act(async () => finish(result));
+    expect(screen.getAllByRole('dialog')).toHaveLength(1);
+    expect(screen.queryByText('Dry-run preview')).toBeNull();
+    expect((screen.getByRole('button', { name: 'Apply rules' }) as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Cancel' }));
+    mocks.applyQuantityMaps.mockResolvedValue(result);
+    expect((await preview()).disabled).toBe(false);
+    expect(mocks.applyQuantityMaps).toHaveBeenCalledTimes(2);
   });
 
   it('sends the reviewed fingerprint and blocks a rapid double click', async () => {
