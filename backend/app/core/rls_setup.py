@@ -195,8 +195,9 @@ async def provision_rls(engine: AsyncEngine, base) -> dict[str, int]:  # noqa: A
     a time, and bounds each DDL with ``lock_timeout`` so it never stalls live
     traffic. A no-op that never opens a transaction while the flag is off.
 
-    Wrapped by the caller (``main`` lifespan / ``cli init-db``) so a role
-    without DDL rights, or any other failure, only logs and never breaks boot.
+    Provisioning failures are logged by the caller (``main`` startup /
+    ``cli init-db``). Server startup separately requires the runtime-role
+    preflight to pass; provisioning success alone cannot establish that.
     """
     if not rls_enabled():
         return {"roles": 0, "tables": 0}
@@ -248,57 +249,55 @@ async def _take_rls_lock(conn: AsyncConnection) -> bool:
         await asyncio.sleep(_RLS_LOCK_POLL_SECONDS)
 
 
+class RLSConfigurationError(RuntimeError):
+    """Explicitly enabled RLS cannot safely assume the request role."""
+
+
 async def verify_rls_role(engine: AsyncEngine) -> bool:
-    """Warn loudly at startup if enforcement is on but ``oe_app`` is unusable.
+    """Require an assumable, non-bypassing request role when RLS is enabled.
 
-    When the flag is on, every request transaction issues ``SET LOCAL ROLE
-    "oe_app"`` (see :func:`app.core.rls.install`). If that role was never
-    created - the common case being an external PostgreSQL whose app login lacks
-    CREATEROLE, so :func:`provision_rls` could not create it and its best-effort
-    SAVEPOINT swallowed the failure - every request then fails with a 500. This
-    surfaces that misconfiguration at boot with an unmistakable error instead of
-    leaving it to the first request.
+    Disabled mode returns False without opening a connection. Enabled mode
+    raises RLSConfigurationError on any failed check so startup cannot silently
+    serve requests with a missing, inaccessible or RLS-bypassing role. This is
+    only a role precondition, not proof of policy or tenant coverage.
 
-    Never raises: a misconfigured flag must not by itself crash startup, so any
-    failure only logs. A no-op that returns ``False`` while the flag is off.
-
-    Returns True only when the role exists *and* is assumable by the connecting
-    user; False otherwise (including the flag-off no-op).
+    The connecting role may still be privileged for migrations/background work;
+    this check concerns only oe_app, which request transactions assume.
     """
     if not rls_enabled():
         return False
     try:
         async with engine.begin() as conn:
-            exists = (
-                await conn.execute(
-                    text("SELECT 1 FROM pg_roles WHERE rolname = :r"),
-                    {"r": APP_ROLE},
+            role = (
+                (
+                    await conn.execute(
+                        text("SELECT rolsuper, rolbypassrls FROM pg_roles WHERE rolname = :r"),
+                        {"r": APP_ROLE},
+                    )
                 )
-            ).scalar()
-            if not exists:
-                logger.error(
-                    "RLS ENFORCEMENT IS ON (rls_enforce=true) BUT ROLE %r DOES NOT EXIST. "
-                    "provision_rls could not create it - the database login most likely lacks "
-                    "CREATEROLE (common on managed/external PostgreSQL). Every request will "
-                    "fail with 500 on 'SET LOCAL ROLE \"%s\"'. Create the role and grant it to "
-                    "the app login, or turn rls_enforce off.",
-                    APP_ROLE,
-                    APP_ROLE,
+                .mappings()
+                .one_or_none()
+            )
+            if role is None:
+                raise RLSConfigurationError(
+                    f"RLS is enabled but runtime role {APP_ROLE!r} does not exist. "
+                    "Provision the request role and grant it to the application login."
                 )
-                return False
-            # Existing in the catalog is not enough: the connecting user must be
-            # able to assume it (provision_rls grants it to CURRENT_USER, but that
-            # grant is best-effort too). Prove it in this throwaway transaction;
-            # SET LOCAL ROLE resets on commit, so nothing leaks to the pool.
+            if role["rolsuper"] or role["rolbypassrls"]:
+                raise RLSConfigurationError(
+                    f"RLS is enabled but runtime role {APP_ROLE!r} has SUPERUSER or BYPASSRLS. "
+                    "The request role must have NOSUPERUSER and NOBYPASSRLS; "
+                    "existing role attributes require administrator review."
+                )
+            # Prove membership/SET permissions, not merely catalog presence.
+            # SET LOCAL resets on commit; no role change leaks into the pool.
             await conn.execute(text(f'SET LOCAL ROLE "{APP_ROLE}"'))
-        logger.info("RLS enforcement: runtime role %r present and assumable", APP_ROLE)
+        logger.info("RLS request role %r is assumable, NOSUPERUSER and NOBYPASSRLS", APP_ROLE)
         return True
-    except Exception as exc:  # noqa: BLE001 - a boot check must never crash boot
-        logger.error(
-            "RLS enforcement is ON but runtime role %r could not be verified: %s. "
-            "Requests may fail with 500 until the role exists and is granted to the app "
-            "login. Create it manually or turn rls_enforce off.",
-            APP_ROLE,
-            exc,
-        )
-        return False
+    except RLSConfigurationError:
+        raise
+    except Exception as exc:
+        raise RLSConfigurationError(
+            f"RLS is enabled but runtime role {APP_ROLE!r} could not be verified or assumed. "
+            "Check database connectivity and the application login's permission to SET ROLE."
+        ) from exc

@@ -1636,6 +1636,8 @@ def cmd_init_db(args: argparse.Namespace) -> None:
             logger.error("init-db: data repairs could not run: %s", exc, exc_info=True)
         # Provision row-level-security roles + policies when enabled. No-op
         # while settings.rls_enforce is off, so a default init-db is unchanged.
+        # init-db provisions only; server startup separately requires a safe,
+        # assumable request role before it can serve with RLS enabled.
         try:
             from app.core.rls_setup import provision_rls
 

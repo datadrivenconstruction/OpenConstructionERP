@@ -4936,18 +4936,19 @@ def create_app() -> FastAPI:
             # create_all so every tenant table exists on both fresh and upgraded
             # databases; a no-op that never touches the database while
             # settings.rls_enforce is off, so it is inert on a default install.
-            try:
-                from app.core.rls_setup import provision_rls, verify_rls_role
+            from app.core.rls_setup import provision_rls, verify_rls_role
 
+            try:
                 rls_stats = await provision_rls(engine, Base)
                 if rls_stats.get("tables"):
-                    logger.info("RLS enforcement active: %d tenant tables policied", rls_stats["tables"])
-                # With the flag on, every request downgrades to oe_app; if that
-                # role is absent (external PG without CREATEROLE) requests 500.
-                # Surface it once at boot instead of on every request. No-op off.
-                await verify_rls_role(engine)
+                    logger.info("RLS provisioning: %d tenant tables policied", rls_stats["tables"])
             except Exception:
                 logger.warning("RLS provisioning skipped (non-fatal)", exc_info=True)
+            # Provisioning is best-effort, but an explicitly enabled request
+            # role must exist, be assumable and not bypass RLS. Keep this outside
+            # the provisioning handler: the startup wrapper reports and re-raises
+            # configuration errors. Disabled mode performs no SQL.
+            await verify_rls_role(engine)
         else:
             logger.info("Using external database (Alembic manages schema)")
 
