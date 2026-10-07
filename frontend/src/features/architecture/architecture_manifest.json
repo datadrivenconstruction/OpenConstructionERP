@@ -235290,10 +235290,10 @@
     },
     {
       "name": "finance",
-      "ts_files": 31,
+      "ts_files": 34,
       "css_files": 0,
-      "test_files": 12,
-      "total_files": 31
+      "test_files": 14,
+      "total_files": 34
     },
     {
       "name": "forms",
@@ -237362,7 +237362,7 @@
     "total_schemas": 3564,
     "total_python_files": 2290,
     "frontend_features": 192,
-    "frontend_ts_files": 2990,
+    "frontend_ts_files": 2993,
     "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {
