@@ -186,7 +186,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    visualizer({
+    process.env.ANALYZE === '1' && visualizer({
       filename: 'stats.html',
       gzipSize: true,
       brotliSize: true,

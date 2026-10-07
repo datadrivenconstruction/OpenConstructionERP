@@ -60,6 +60,26 @@ npm run build
 
 This runs `tsc -b` first and then `vite build`. The output goes to `dist/`.
 
+Bundle size analysis is opt-in because calculating gzip and maximum-quality Brotli sizes is expensive. To generate `frontend/stats.html` (relative to the repository root), run from `frontend/`:
+
+```bash
+ANALYZE=1 npm run build
+```
+
+In PowerShell, restore the previous environment value after the build:
+
+```powershell
+$previousAnalyze = $env:ANALYZE
+try {
+    $env:ANALYZE = '1'
+    npm run build
+} finally {
+    $env:ANALYZE = $previousAnalyze
+}
+```
+
+Ordinary builds skip this analysis. A previous `stats.html` remains on disk until another analysis replaces it.
+
 Treat `npm run build` as the real gate, not just an editor typecheck. The `tsc -b` step compiles against the project `tsconfig.json`, which turns on `noUnusedLocals`, `noUnusedParameters`, and `noUncheckedIndexedAccess`. That means the build fails on unused locals, unused parameters, and unchecked index access that a looser editor check can let through. If the build is green, the types are green.
 
 Preview the production build locally:
