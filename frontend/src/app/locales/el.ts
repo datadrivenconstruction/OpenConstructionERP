@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "Πρόσφατες συνομιλίες",
+    "chat.history.just_now": "μόλις τώρα",
+    "chat.history.loading": "Φόρτωση…",
+    "chat.history.empty": "Δεν υπάρχουν ακόμη προηγούμενες συνομιλίες.",
+    "chat.history.untitled": "Συνομιλία χωρίς τίτλο",
+    "chat.history.delete": "Διαγραφή συνομιλίας",
+    "chat.suggestion.projects": "Εμφάνιση όλων των έργων",
+    "chat.suggestion.boq": "Επισκόπηση του προμετρητικού πίνακα αυτού του έργου",
+    "chat.suggestion.validation": "Εκτέλεση ελέγχου",
+    "chat.suggestion.risks": "Επισκόπηση κινδύνων",
+    "chat.suggestion.costs": "Αναζήτηση στη βάση δεδομένων CWICR",
     "modules.catalog.accommodation": "Στέγαση",
     "modules.catalog.admin": "Διαχειριστής",
     "modules.catalog.ai": "Εκτίμηση με AI",

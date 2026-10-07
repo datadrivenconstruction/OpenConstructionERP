@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "Son konuşmalar",
+    "chat.history.just_now": "az önce",
+    "chat.history.loading": "Yükleniyor…",
+    "chat.history.empty": "Henüz geçmiş konuşma yok.",
+    "chat.history.untitled": "Başlıksız sohbet",
+    "chat.history.delete": "Konuşmayı sil",
+    "chat.suggestion.projects": "Tüm projeleri göster",
+    "chat.suggestion.boq": "Bu projenin keşif özeti",
+    "chat.suggestion.validation": "Doğrulamayı çalıştır",
+    "chat.suggestion.risks": "Risk özeti",
+    "chat.suggestion.costs": "CWICR veritabanında ara",
     "modules.catalog.accommodation": "Konaklama",
     "modules.catalog.admin": "Yönetici",
     "modules.catalog.ai": "YZ Keşfi",

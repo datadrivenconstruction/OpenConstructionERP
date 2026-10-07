@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "حالیہ گفتگوئیں",
+    "chat.history.just_now": "ابھی ابھی",
+    "chat.history.loading": "لوڈ ہو رہا ہے…",
+    "chat.history.empty": "ابھی تک کوئی پچھلی گفتگو نہیں ہے۔",
+    "chat.history.untitled": "بلا عنوان گفتگو",
+    "chat.history.delete": "گفتگو حذف کریں",
+    "chat.suggestion.projects": "تمام منصوبے دکھائیں",
+    "chat.suggestion.boq": "اس منصوبے کے جدولِ مقدار کا جائزہ",
+    "chat.suggestion.validation": "توثیق چلائیں",
+    "chat.suggestion.risks": "خطرات کا جائزہ",
+    "chat.suggestion.costs": "CWICR ڈیٹابیس میں تلاش کریں",
     "boq.rs_unconverted": "مجموعے میں شامل نہیں: {{amount}} {{currency}}",
     "boq.rs_unconverted_hint": "قابلِ استعمال شرحِ تبادلہ موجود نہیں۔ یہ رقوم شامل کرنے کے لیے منصوبے کی ترتیبات میں مثبت شرح درج کریں۔",
     "modules.catalog.accommodation": "رہائش",

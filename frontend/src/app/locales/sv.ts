@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "Senaste konversationerna",
+    "chat.history.just_now": "nyss",
+    "chat.history.loading": "Läser in…",
+    "chat.history.empty": "Det finns inga tidigare konversationer ännu.",
+    "chat.history.untitled": "Chatt utan titel",
+    "chat.history.delete": "Ta bort konversation",
+    "chat.suggestion.projects": "Visa alla projekt",
+    "chat.suggestion.boq": "Översikt över projektets mängdförteckning",
+    "chat.suggestion.validation": "Kör validering",
+    "chat.suggestion.risks": "Risköversikt",
+    "chat.suggestion.costs": "Sök i CWICR-databasen",
     "modules.catalog.accommodation": "Boende",
     "modules.catalog.admin": "Administratör",
     "modules.catalog.ai": "AI-kalkylering",

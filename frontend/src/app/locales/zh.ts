@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "最近的对话",
+    "chat.history.just_now": "刚刚",
+    "chat.history.loading": "加载中…",
+    "chat.history.empty": "暂无历史对话。",
+    "chat.history.untitled": "未命名对话",
+    "chat.history.delete": "删除对话",
+    "chat.suggestion.projects": "显示所有项目",
+    "chat.suggestion.boq": "此项目的工程量清单概览",
+    "chat.suggestion.validation": "运行验证",
+    "chat.suggestion.risks": "风险概览",
+    "chat.suggestion.costs": "搜索 CWICR 数据库",
     "boq.rs_unconverted": "未计入总额：{{amount}} {{currency}}",
     "boq.rs_unconverted_hint": "没有可用的汇率。请在项目设置中填写大于零的汇率，以将这些金额计入总额。",
     "modules.catalog.accommodation": "住宿",

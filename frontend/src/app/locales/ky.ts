@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "Акыркы сүйлөшүүлөр",
+    "chat.history.just_now": "азыр эле",
+    "chat.history.loading": "Жүктөлүүдө…",
+    "chat.history.empty": "Мурунку сүйлөшүүлөр азырынча жок.",
+    "chat.history.untitled": "Аталышы жок чат",
+    "chat.history.delete": "Сүйлөшүүнү өчүрүү",
+    "chat.suggestion.projects": "Бардык долбоорлорду көрсөтүү",
+    "chat.suggestion.boq": "Бул долбоордун сметасына сереп",
+    "chat.suggestion.validation": "Текшерүүнү иштетүү",
+    "chat.suggestion.risks": "Тобокелдиктерге сереп",
+    "chat.suggestion.costs": "CWICR маалымат базасынан издөө",
     "modules.catalog.accommodation": "Жашоо жайы",
     "modules.catalog.admin": "Администратор",
     "modules.catalog.ai": "AI сметалоо",

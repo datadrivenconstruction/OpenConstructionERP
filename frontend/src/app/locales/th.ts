@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "การสนทนาล่าสุด",
+    "chat.history.just_now": "เมื่อสักครู่",
+    "chat.history.loading": "กำลังโหลด…",
+    "chat.history.empty": "ยังไม่มีการสนทนาก่อนหน้า",
+    "chat.history.untitled": "แชตไม่มีชื่อ",
+    "chat.history.delete": "ลบการสนทนา",
+    "chat.suggestion.projects": "แสดงโครงการทั้งหมด",
+    "chat.suggestion.boq": "ภาพรวมบัญชีปริมาณงานของโครงการนี้",
+    "chat.suggestion.validation": "เรียกใช้การตรวจสอบ",
+    "chat.suggestion.risks": "ภาพรวมความเสี่ยง",
+    "chat.suggestion.costs": "ค้นหาในฐานข้อมูล CWICR",
     "boq.rs_unconverted": "ไม่รวมในยอดรวม: {{amount}} {{currency}}",
     "boq.rs_unconverted_hint": "ไม่มีอัตราแลกเปลี่ยนที่ใช้ได้ โปรดตั้งค่าอัตราที่มากกว่าศูนย์ในการตั้งค่าโครงการเพื่อรวมจำนวนเงินเหล่านี้ในยอดรวม",
     "modules.catalog.accommodation": "ที่พัก",

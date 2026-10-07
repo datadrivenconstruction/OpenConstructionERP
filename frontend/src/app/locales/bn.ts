@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "সাম্প্রতিক কথোপকথন",
+    "chat.history.just_now": "এইমাত্র",
+    "chat.history.loading": "লোড হচ্ছে…",
+    "chat.history.empty": "এখনও কোনো আগের কথোপকথন নেই।",
+    "chat.history.untitled": "শিরোনামহীন চ্যাট",
+    "chat.history.delete": "কথোপকথন মুছুন",
+    "chat.suggestion.projects": "সব প্রকল্প দেখান",
+    "chat.suggestion.boq": "এই প্রকল্পের পরিমাণ তালিকার সারসংক্ষেপ",
+    "chat.suggestion.validation": "যাচাইকরণ চালান",
+    "chat.suggestion.risks": "ঝুঁকির সারসংক্ষেপ",
+    "chat.suggestion.costs": "CWICR ডেটাবেসে খুঁজুন",
     "boq.rs_unconverted": "মোট থেকে বাদ: {{amount}} {{currency}}",
     "boq.rs_unconverted_hint": "ব্যবহারযোগ্য বিনিময় হার নেই। এই অর্থ মোটে অন্তর্ভুক্ত করতে প্রকল্পের সেটিংসে ধনাত্মক হার দিন।",
     "modules.catalog.accommodation": "আবাসন",

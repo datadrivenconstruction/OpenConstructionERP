@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "Nedavni razgovori",
+    "chat.history.just_now": "upravo sada",
+    "chat.history.loading": "Učitavanje…",
+    "chat.history.empty": "Još nema prethodnih razgovora.",
+    "chat.history.untitled": "Razgovor bez naslova",
+    "chat.history.delete": "Izbriši razgovor",
+    "chat.suggestion.projects": "Prikaži sve projekte",
+    "chat.suggestion.boq": "Pregled troškovnika ovog projekta",
+    "chat.suggestion.validation": "Pokreni provjeru",
+    "chat.suggestion.risks": "Pregled rizika",
+    "chat.suggestion.costs": "Pretraži bazu podataka CWICR",
     "modules.catalog.accommodation": "Smještaj",
     "modules.catalog.admin": "Administrator",
     "modules.catalog.ai": "AI Procjena troškova",

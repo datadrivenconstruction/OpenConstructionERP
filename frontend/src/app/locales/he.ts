@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "שיחות אחרונות",
+    "chat.history.just_now": "ממש עכשיו",
+    "chat.history.loading": "בטעינה…",
+    "chat.history.empty": "עדיין אין שיחות קודמות.",
+    "chat.history.untitled": "שיחה ללא כותרת",
+    "chat.history.delete": "מחיקת שיחה",
+    "chat.suggestion.projects": "הצגת כל הפרויקטים",
+    "chat.suggestion.boq": "סקירת כתב הכמויות של הפרויקט הזה",
+    "chat.suggestion.validation": "הפעלת בדיקה",
+    "chat.suggestion.risks": "סקירת סיכונים",
+    "chat.suggestion.costs": "חיפוש במסד הנתונים CWICR",
     "boq.rs_unconverted": "לא נכלל בסכום הכולל: {{amount}} {{currency}}",
     "boq.rs_unconverted_hint": "אין שער חליפין תקין. יש להגדיר שער חיובי בהגדרות הפרויקט כדי לכלול סכומים אלה.",
     "modules.catalog.accommodation": "אכסניה",

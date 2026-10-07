@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "Сүүлийн харилцан ярианууд",
+    "chat.history.just_now": "дөнгөж сая",
+    "chat.history.loading": "Ачаалж байна…",
+    "chat.history.empty": "Өмнөх харилцан яриа хараахан алга.",
+    "chat.history.untitled": "Нэргүй чат",
+    "chat.history.delete": "Харилцан яриаг устгах",
+    "chat.suggestion.projects": "Бүх төслийг харуулах",
+    "chat.suggestion.boq": "Энэ төслийн ажлын тоо хэмжээний жагсаалтын тойм",
+    "chat.suggestion.validation": "Шалгалт эхлүүлэх",
+    "chat.suggestion.risks": "Эрсдэлийн тойм",
+    "chat.suggestion.costs": "CWICR мэдээллийн сангаас хайх",
     "boq.rs_unconverted": "Нийт дүнд ороогүй: {{amount}} {{currency}}",
     "boq.rs_unconverted_hint": "Ашиглах боломжтой ханш алга. Эдгээр дүнг нийтэд оруулахын тулд төслийн тохиргоонд тэгээс их ханш оруулна уу.",
     "modules.catalog.accommodation": "Байрны захиалга",

@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "Ostatnie rozmowy",
+    "chat.history.just_now": "przed chwilą",
+    "chat.history.loading": "Ładowanie…",
+    "chat.history.empty": "Nie ma jeszcze wcześniejszych rozmów.",
+    "chat.history.untitled": "Czat bez tytułu",
+    "chat.history.delete": "Usuń rozmowę",
+    "chat.suggestion.projects": "Pokaż wszystkie projekty",
+    "chat.suggestion.boq": "Przegląd przedmiaru tego projektu",
+    "chat.suggestion.validation": "Uruchom walidację",
+    "chat.suggestion.risks": "Przegląd ryzyk",
+    "chat.suggestion.costs": "Przeszukaj bazę CWICR",
     "modules.catalog.accommodation": "Zakwaterowanie",
     "modules.catalog.admin": "Administrator",
     "modules.catalog.ai": "AI Kosztorysowanie",

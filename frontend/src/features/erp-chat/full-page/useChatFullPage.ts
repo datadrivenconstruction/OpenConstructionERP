@@ -30,12 +30,12 @@ interface PersistedMessage {
 }
 
 const DEFAULT_SUGGESTIONS = [
-  'Show all projects',
-  'BOQ overview for this project',
-  'Run validation',
-  'Risk overview',
-  'Search CWICR database',
-];
+  ['chat.suggestion.projects', 'Show all projects'],
+  ['chat.suggestion.boq', 'BOQ overview for this project'],
+  ['chat.suggestion.validation', 'Run validation'],
+  ['chat.suggestion.risks', 'Risk overview'],
+  ['chat.suggestion.costs', 'Search CWICR database'],
+] as const;
 
 function uid(): string {
   return uuid();
@@ -121,7 +121,7 @@ export function useChatFullPage(): UseChatFullPageReturn {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [suggestions, setSuggestions] = useState<string[]>(DEFAULT_SUGGESTIONS);
+  const [showSuggestions, setShowSuggestions] = useState(true);
   const [dataPanelEntries, setDataPanelEntries] = useState<DataPanelEntry[]>([]);
   const [activePanelIndex, setActivePanelIndex] = useState(-1);
   const [aiConfigured, setAiConfigured] = useState<boolean | null>(null);
@@ -133,7 +133,10 @@ export function useChatFullPage(): UseChatFullPageReturn {
   const abortRef = useRef<AbortController | null>(null);
 
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const suggestions = showSuggestions
+    ? DEFAULT_SUGGESTIONS.map(([key, defaultValue]) => t(key, { defaultValue }))
+    : [];
 
   // Check if any AI provider is configured
   useEffect(() => {
@@ -207,7 +210,7 @@ export function useChatFullPage(): UseChatFullPageReturn {
         setDataPanelEntries(entries);
         setActivePanelIndex(entries.length > 0 ? entries.length - 1 : -1);
         setSessionId(id);
-        setSuggestions([]);
+        setShowSuggestions(false);
       } catch {
         // Surface a non-destructive system note rather than wiping the UI.
         setMessages((prev) => [
@@ -243,7 +246,7 @@ export function useChatFullPage(): UseChatFullPageReturn {
             setMessages([]);
             setDataPanelEntries([]);
             setActivePanelIndex(-1);
-            setSuggestions(DEFAULT_SUGGESTIONS);
+            setShowSuggestions(true);
             return null;
           }
           return current;
@@ -298,7 +301,7 @@ export function useChatFullPage(): UseChatFullPageReturn {
 
       setMessages((prev) => [...prev, userMsg, aiMsg]);
       setIsStreaming(true);
-      setSuggestions([]);
+      setShowSuggestions(false);
 
       const token = useAuthStore.getState().accessToken;
 
@@ -587,7 +590,7 @@ export function useChatFullPage(): UseChatFullPageReturn {
     setMessages([]);
     setIsStreaming(false);
     setSessionId(null);
-    setSuggestions(DEFAULT_SUGGESTIONS);
+    setShowSuggestions(true);
     setDataPanelEntries([]);
     setActivePanelIndex(-1);
   }, []);

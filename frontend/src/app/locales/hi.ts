@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "हाल की बातचीत",
+    "chat.history.just_now": "अभी-अभी",
+    "chat.history.loading": "लोड हो रहा है…",
+    "chat.history.empty": "अभी तक कोई पिछली बातचीत नहीं है।",
+    "chat.history.untitled": "बिना शीर्षक की बातचीत",
+    "chat.history.delete": "बातचीत हटाएँ",
+    "chat.suggestion.projects": "सभी परियोजनाएँ दिखाएँ",
+    "chat.suggestion.boq": "इस परियोजना की मात्रा-सूची का अवलोकन",
+    "chat.suggestion.validation": "सत्यापन चलाएँ",
+    "chat.suggestion.risks": "जोखिमों का अवलोकन",
+    "chat.suggestion.costs": "CWICR डेटाबेस में खोजें",
     "boq.rs_unconverted": "कुल में शामिल नहीं: {{amount}} {{currency}}",
     "boq.rs_unconverted_hint": "मान्य विनिमय दर उपलब्ध नहीं है। इन राशियों को शामिल करने के लिए परियोजना की सेटिंग में धनात्मक दर दर्ज करें।",
     "modules.catalog.accommodation": "आवास",

@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "Viimeisimmät keskustelut",
+    "chat.history.just_now": "juuri nyt",
+    "chat.history.loading": "Ladataan…",
+    "chat.history.empty": "Ei vielä aiempia keskusteluja.",
+    "chat.history.untitled": "Nimetön keskustelu",
+    "chat.history.delete": "Poista keskustelu",
+    "chat.suggestion.projects": "Näytä kaikki projektit",
+    "chat.suggestion.boq": "Tämän projektin määräluettelon yleiskuva",
+    "chat.suggestion.validation": "Suorita tarkistus",
+    "chat.suggestion.risks": "Riskien yleiskuva",
+    "chat.suggestion.costs": "Hae CWICR-tietokannasta",
     "modules.catalog.accommodation": "Majoitus",
     "modules.catalog.admin": "Ylläpitäjä",
     "modules.catalog.ai": "Tekoäly",

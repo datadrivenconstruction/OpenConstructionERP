@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "گفتگوهای اخیر",
+    "chat.history.just_now": "همین حالا",
+    "chat.history.loading": "در حال بارگذاری…",
+    "chat.history.empty": "هنوز گفتگوی قبلی وجود ندارد.",
+    "chat.history.untitled": "گفتگوی بدون عنوان",
+    "chat.history.delete": "حذف گفتگو",
+    "chat.suggestion.projects": "نمایش همه پروژه‌ها",
+    "chat.suggestion.boq": "نمای کلی صورت مقادیر این پروژه",
+    "chat.suggestion.validation": "اجرای اعتبارسنجی",
+    "chat.suggestion.risks": "نمای کلی ریسک‌ها",
+    "chat.suggestion.costs": "جستجو در پایگاه داده CWICR",
     "boq.rs_unconverted": "از مجموع حذف شده: {{amount}} {{currency}}",
     "boq.rs_unconverted_hint": "نرخ تبدیل معتبری وجود ندارد. برای احتساب این مبالغ، نرخ مثبتی در تنظیمات پروژه وارد کنید.",
     "modules.catalog.accommodation": "اقامتگاه",

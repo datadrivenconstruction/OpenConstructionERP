@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "Recent conversations",
+    "chat.history.just_now": "just now",
+    "chat.history.loading": "Loading…",
+    "chat.history.empty": "No past conversations yet.",
+    "chat.history.untitled": "Untitled chat",
+    "chat.history.delete": "Delete conversation",
+    "chat.suggestion.projects": "Show all projects",
+    "chat.suggestion.boq": "BOQ overview for this project",
+    "chat.suggestion.validation": "Run validation",
+    "chat.suggestion.risks": "Risk overview",
+    "chat.suggestion.costs": "Search CWICR database",
     "boq.rs_unconverted": "Excluded from total: {{amount}} {{currency}}",
     "boq.rs_unconverted_hint": "No usable exchange rate. Set a positive rate in Project Settings to include these amounts.",
     "modules.catalog.accommodation": "Accommodation",

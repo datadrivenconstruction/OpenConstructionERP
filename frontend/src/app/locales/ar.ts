@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "المحادثات الأخيرة",
+    "chat.history.just_now": "الآن",
+    "chat.history.loading": "جارٍ التحميل…",
+    "chat.history.empty": "لا توجد محادثات سابقة بعد.",
+    "chat.history.untitled": "محادثة بلا عنوان",
+    "chat.history.delete": "حذف المحادثة",
+    "chat.suggestion.projects": "عرض جميع المشاريع",
+    "chat.suggestion.boq": "نظرة عامة على جدول كميات هذا المشروع",
+    "chat.suggestion.validation": "تشغيل التحقق",
+    "chat.suggestion.risks": "نظرة عامة على المخاطر",
+    "chat.suggestion.costs": "البحث في قاعدة بيانات CWICR",
     "boq.rs_unconverted": "مستبعد من الإجمالي: {{amount}} {{currency}}",
     "boq.rs_unconverted_hint": "لا يتوفر سعر صرف صالح. أدخل سعرًا موجبًا في إعدادات المشروع لتضمين هذه المبالغ.",
     "modules.catalog.accommodation": "السكن",

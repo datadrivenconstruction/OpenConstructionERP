@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "Последни разговори",
+    "chat.history.just_now": "току-що",
+    "chat.history.loading": "Зареждане…",
+    "chat.history.empty": "Все още няма предишни разговори.",
+    "chat.history.untitled": "Чат без заглавие",
+    "chat.history.delete": "Изтрий разговора",
+    "chat.suggestion.projects": "Покажи всички проекти",
+    "chat.suggestion.boq": "Преглед на количествената сметка на този проект",
+    "chat.suggestion.validation": "Стартирай проверката",
+    "chat.suggestion.risks": "Преглед на рисковете",
+    "chat.suggestion.costs": "Търси в базата данни CWICR",
     "modules.catalog.accommodation": "Настаняване",
     "modules.catalog.admin": "Администратор",
     "modules.catalog.ai": "AI Остойностяване",

@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "Недавние беседы",
+    "chat.history.just_now": "только что",
+    "chat.history.loading": "Загрузка…",
+    "chat.history.empty": "Прошлых бесед пока нет.",
+    "chat.history.untitled": "Чат без названия",
+    "chat.history.delete": "Удалить беседу",
+    "chat.suggestion.projects": "Показать все проекты",
+    "chat.suggestion.boq": "Обзор сметы этого проекта",
+    "chat.suggestion.validation": "Запустить проверку",
+    "chat.suggestion.risks": "Обзор рисков",
+    "chat.suggestion.costs": "Поиск в базе CWICR",
     "modules.catalog.accommodation": "Размещение",
     "modules.catalog.admin": "Администратор",
     "modules.catalog.ai": "ИИ-расчёт сметы",

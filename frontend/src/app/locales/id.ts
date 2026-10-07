@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "Percakapan terbaru",
+    "chat.history.just_now": "baru saja",
+    "chat.history.loading": "Memuat…",
+    "chat.history.empty": "Belum ada percakapan sebelumnya.",
+    "chat.history.untitled": "Percakapan tanpa judul",
+    "chat.history.delete": "Hapus percakapan",
+    "chat.suggestion.projects": "Tampilkan semua proyek",
+    "chat.suggestion.boq": "Ringkasan daftar kuantitas proyek ini",
+    "chat.suggestion.validation": "Jalankan validasi",
+    "chat.suggestion.risks": "Ringkasan risiko",
+    "chat.suggestion.costs": "Cari di basis data CWICR",
     "boq.rs_unconverted": "Tidak termasuk dalam total: {{amount}} {{currency}}",
     "boq.rs_unconverted_hint": "Tidak ada kurs yang dapat digunakan. Tetapkan kurs positif di Pengaturan Proyek untuk memasukkan jumlah ini.",
     "modules.catalog.accommodation": "Akomodasi",

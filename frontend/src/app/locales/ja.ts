@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "最近の会話",
+    "chat.history.just_now": "たった今",
+    "chat.history.loading": "読み込み中…",
+    "chat.history.empty": "過去の会話はまだありません。",
+    "chat.history.untitled": "無題のチャット",
+    "chat.history.delete": "会話を削除",
+    "chat.suggestion.projects": "すべてのプロジェクトを表示",
+    "chat.suggestion.boq": "このプロジェクトの内訳書の概要",
+    "chat.suggestion.validation": "検証を実行",
+    "chat.suggestion.risks": "リスクの概要",
+    "chat.suggestion.costs": "CWICR データベースを検索",
     "boq.rs_unconverted": "合計から除外：{{amount}} {{currency}}",
     "boq.rs_unconverted_hint": "有効な為替レートがありません。これらの金額を合計に含めるには、プロジェクト設定で正のレートを設定してください。",
     "modules.catalog.accommodation": "宿泊",

@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "최근 대화",
+    "chat.history.just_now": "방금",
+    "chat.history.loading": "불러오는 중…",
+    "chat.history.empty": "아직 이전 대화가 없습니다.",
+    "chat.history.untitled": "제목 없는 대화",
+    "chat.history.delete": "대화 삭제",
+    "chat.suggestion.projects": "모든 프로젝트 표시",
+    "chat.suggestion.boq": "이 프로젝트의 공사 내역서 개요",
+    "chat.suggestion.validation": "검증 실행",
+    "chat.suggestion.risks": "위험 개요",
+    "chat.suggestion.costs": "CWICR 데이터베이스 검색",
     "boq.rs_unconverted": "합계에서 제외: {{amount}} {{currency}}",
     "boq.rs_unconverted_hint": "사용 가능한 환율이 없습니다. 이 금액을 합계에 포함하려면 프로젝트 설정에서 양수 환율을 입력하세요.",
     "modules.catalog.accommodation": "숙소",

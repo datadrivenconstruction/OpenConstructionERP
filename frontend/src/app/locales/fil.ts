@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "Mga kamakailang usapan",
+    "chat.history.just_now": "ngayon lang",
+    "chat.history.loading": "Naglo-load…",
+    "chat.history.empty": "Wala pang mga nakaraang usapan.",
+    "chat.history.untitled": "Usapang walang pamagat",
+    "chat.history.delete": "Burahin ang usapan",
+    "chat.suggestion.projects": "Ipakita ang lahat ng proyekto",
+    "chat.suggestion.boq": "Pangkalahatang-ideya ng talaan ng dami ng proyektong ito",
+    "chat.suggestion.validation": "Patakbuhin ang pagpapatunay",
+    "chat.suggestion.risks": "Pangkalahatang-ideya ng mga panganib",
+    "chat.suggestion.costs": "Maghanap sa database ng CWICR",
     "boq.rs_unconverted": "Hindi kasama sa kabuuan: {{amount}} {{currency}}",
     "boq.rs_unconverted_hint": "Walang magagamit na halaga ng palitan. Magtakda ng positibong halaga sa mga setting ng proyekto upang isama ang mga halagang ito.",
     "modules.catalog.accommodation": "Tuluyan",

@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "Hiljutised vestlused",
+    "chat.history.just_now": "just praegu",
+    "chat.history.loading": "Laadimine…",
+    "chat.history.empty": "Varasemaid vestlusi veel pole.",
+    "chat.history.untitled": "Pealkirjata vestlus",
+    "chat.history.delete": "Kustuta vestlus",
+    "chat.suggestion.projects": "Näita kõiki projekte",
+    "chat.suggestion.boq": "Selle projekti mahutabeli ülevaade",
+    "chat.suggestion.validation": "Käivita kontroll",
+    "chat.suggestion.risks": "Riskide ülevaade",
+    "chat.suggestion.costs": "Otsi CWICR-i andmebaasist",
     "modules.catalog.accommodation": "Majutus",
     "modules.catalog.admin": "Haldus",
     "modules.catalog.ai": "AI hinnastamine",

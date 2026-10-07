@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "Nedávné konverzace",
+    "chat.history.just_now": "právě teď",
+    "chat.history.loading": "Načítání…",
+    "chat.history.empty": "Zatím žádné předchozí konverzace.",
+    "chat.history.untitled": "Chat bez názvu",
+    "chat.history.delete": "Smazat konverzaci",
+    "chat.suggestion.projects": "Zobrazit všechny projekty",
+    "chat.suggestion.boq": "Přehled výkazu výměr tohoto projektu",
+    "chat.suggestion.validation": "Spustit kontrolu",
+    "chat.suggestion.risks": "Přehled rizik",
+    "chat.suggestion.costs": "Hledat v databázi CWICR",
     "modules.catalog.accommodation": "Ubytování",
     "modules.catalog.admin": "Správce",
     "modules.catalog.ai": "AI Rozpočtování",

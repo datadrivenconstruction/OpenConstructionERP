@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "Нещодавні бесіди",
+    "chat.history.just_now": "щойно",
+    "chat.history.loading": "Завантаження…",
+    "chat.history.empty": "Попередніх бесід поки немає.",
+    "chat.history.untitled": "Чат без назви",
+    "chat.history.delete": "Видалити бесіду",
+    "chat.suggestion.projects": "Показати всі проєкти",
+    "chat.suggestion.boq": "Огляд кошторису цього проєкту",
+    "chat.suggestion.validation": "Запустити перевірку",
+    "chat.suggestion.risks": "Огляд ризиків",
+    "chat.suggestion.costs": "Пошук у базі CWICR",
     "modules.catalog.accommodation": "Розміщення персоналу",
     "modules.catalog.admin": "Адміністрування",
     "modules.catalog.ai": "Кошторисування ШІ",

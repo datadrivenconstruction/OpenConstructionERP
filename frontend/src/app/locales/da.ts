@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "Seneste samtaler",
+    "chat.history.just_now": "lige nu",
+    "chat.history.loading": "Indlæser…",
+    "chat.history.empty": "Der er ingen tidligere samtaler endnu.",
+    "chat.history.untitled": "Chat uden titel",
+    "chat.history.delete": "Slet samtale",
+    "chat.suggestion.projects": "Vis alle projekter",
+    "chat.suggestion.boq": "Oversigt over projektets mængdefortegnelse",
+    "chat.suggestion.validation": "Kør validering",
+    "chat.suggestion.risks": "Risikooversigt",
+    "chat.suggestion.costs": "Søg i CWICR-databasen",
     "modules.catalog.accommodation": "Indkvartering",
     "modules.catalog.admin": "Administrator",
     "modules.catalog.ai": "AI-kalkulation",

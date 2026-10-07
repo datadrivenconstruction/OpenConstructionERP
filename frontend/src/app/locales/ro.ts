@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "Conversații recente",
+    "chat.history.just_now": "chiar acum",
+    "chat.history.loading": "Se încarcă…",
+    "chat.history.empty": "Nu există încă conversații anterioare.",
+    "chat.history.untitled": "Conversație fără titlu",
+    "chat.history.delete": "Șterge conversația",
+    "chat.suggestion.projects": "Afișează toate proiectele",
+    "chat.suggestion.boq": "Prezentarea devizului acestui proiect",
+    "chat.suggestion.validation": "Rulează validarea",
+    "chat.suggestion.risks": "Prezentarea riscurilor",
+    "chat.suggestion.costs": "Caută în baza de date CWICR",
     "modules.catalog.accommodation": "Cazare",
     "modules.catalog.admin": "Administrator",
     "modules.catalog.ai": "AI Estimare",

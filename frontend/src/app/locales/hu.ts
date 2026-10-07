@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "Legutóbbi beszélgetések",
+    "chat.history.just_now": "éppen most",
+    "chat.history.loading": "Betöltés…",
+    "chat.history.empty": "Még nincsenek korábbi beszélgetések.",
+    "chat.history.untitled": "Névtelen beszélgetés",
+    "chat.history.delete": "Beszélgetés törlése",
+    "chat.suggestion.projects": "Összes projekt megjelenítése",
+    "chat.suggestion.boq": "A projekt tételes költségvetésének áttekintése",
+    "chat.suggestion.validation": "Ellenőrzés indítása",
+    "chat.suggestion.risks": "Kockázatok áttekintése",
+    "chat.suggestion.costs": "Keresés a CWICR-adatbázisban",
     "modules.catalog.accommodation": "Szállás",
     "modules.catalog.admin": "Adminisztráció",
     "modules.catalog.ai": "AI-alapú kalkuláció",

@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "Cuộc trò chuyện gần đây",
+    "chat.history.just_now": "vừa xong",
+    "chat.history.loading": "Đang tải…",
+    "chat.history.empty": "Chưa có cuộc trò chuyện trước đây.",
+    "chat.history.untitled": "Cuộc trò chuyện chưa có tiêu đề",
+    "chat.history.delete": "Xóa cuộc trò chuyện",
+    "chat.suggestion.projects": "Hiển thị tất cả dự án",
+    "chat.suggestion.boq": "Tổng quan bảng khối lượng của dự án này",
+    "chat.suggestion.validation": "Chạy kiểm tra",
+    "chat.suggestion.risks": "Tổng quan rủi ro",
+    "chat.suggestion.costs": "Tìm trong cơ sở dữ liệu CWICR",
     "boq.rs_unconverted": "Không tính vào tổng: {{amount}} {{currency}}",
     "boq.rs_unconverted_hint": "Không có tỷ giá hợp lệ. Đặt tỷ giá dương trong phần cài đặt dự án để tính các khoản này vào tổng.",
     "modules.catalog.accommodation": "Chỗ ở",

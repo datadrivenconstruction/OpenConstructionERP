@@ -3,6 +3,17 @@
 
 const resource = {
   "translation": {
+    "chat.history.title": "Recente gesprekken",
+    "chat.history.just_now": "zojuist",
+    "chat.history.loading": "Laden…",
+    "chat.history.empty": "Nog geen eerdere gesprekken.",
+    "chat.history.untitled": "Chat zonder titel",
+    "chat.history.delete": "Gesprek verwijderen",
+    "chat.suggestion.projects": "Alle projecten tonen",
+    "chat.suggestion.boq": "Overzicht van de hoeveelhedenstaat van dit project",
+    "chat.suggestion.validation": "Validatie uitvoeren",
+    "chat.suggestion.risks": "Risico-overzicht",
+    "chat.suggestion.costs": "Zoeken in de CWICR-database",
     "modules.catalog.accommodation": "Accommodatie",
     "modules.catalog.admin": "Beheerder",
     "modules.catalog.ai": "AI Calculatie",
