@@ -1483,6 +1483,14 @@ jobs:
       # OpenConstructionERP_<version>_aarch64.app.tar.gz where 0.x left the
       # version out. Every reader of that file, here, in the app's update
       # notice and on the download page, matches the suffix, so nothing cares.
+      # Fail before tauri-action can upload an unnotarized installer.
+      - name: Enforce the macOS notarization policy before publishing
+        if: runner.os == 'macOS'
+        shell: bash
+        env:
+          MACOS_NOTARIZATION_REQUIRED: ${{ vars.MACOS_NOTARIZATION_REQUIRED }}
+        run: bash desktop/check-macos-notarization-policy.sh
+
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v1
         env:
@@ -1742,67 +1750,6 @@ jobs:
             echo "Bundled sidecar census: MISMATCH or inconclusive over $census_n member(s) inspected, see the Build Desktop (macos-latest) log." >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
-
-      # What the macOS leg publishes is ad-hoc signed and has never been
-      # notarised by Apple, and until now nothing in the run said so. That
-      # silence is how the seal integrity fix in 0c94892b0 came to be recorded
-      # as "macOS signing resolved": a real fix to a real bug, filed as a
-      # different guarantee than the one it delivers. The two claims are
-      # separate. An ad-hoc signature seals the bundle so its contents cannot
-      # be changed without breaking the seal, and only that claim is true here.
-      # It does not identify a publisher, Gatekeeper does not accept it, and it
-      # is why the release body asks people to clear the quarantine attribute
-      # by hand.
-      #
-      # This step decides which of the two the run produced by reading whether
-      # the Developer ID and notarisation credentials exist, rather than by
-      # stating a fixed answer, so it starts reporting the other outcome on its
-      # own the day someone configures them. A hardcoded "not notarised" line
-      # would become the next thing that is true until it quietly is not. Only
-      # emptiness is read; no secret value is printed or tested for content.
-      - name: State the macOS signing status
-        if: ${{ runner.os == 'macOS' && !cancelled() }}
-        env:
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          # The explanatory note is chosen per branch, not printed after them.
-          # A fixed paragraph reading "only the seal holds" would keep being
-          # printed under a Developer ID build and would then be exactly the
-          # kind of confidently wrong line this step was added to remove.
-          if [ -n "${APPLE_CERTIFICATE:-}" ] && [ -n "${APPLE_SIGNING_IDENTITY:-}" ]; then
-            identity="Developer ID credentials are configured"
-            note="Developer ID credentials are present, so this build is no longer ad-hoc by configuration. Read the codesign output in this job's log before repeating that anywhere: what is measured below is which credentials exist, and a credential is a precondition for a signature rather than evidence of one."
-          else
-            identity="**ad-hoc**, not Developer ID (\`signingIdentity\` is \`\"-\"\` in \`tauri.conf.json\`)"
-            note="An ad-hoc signature seals the bundle so its contents cannot be changed without breaking the seal. It does not identify a publisher and Gatekeeper does not accept it, which is why the release body asks people to clear the quarantine attribute by hand. Those are two separate claims and only the first one holds here."
-          fi
-
-          if [ -n "${APPLE_ID:-}" ] || [ -n "${APPLE_API_KEY:-}" ]; then
-            notarisation="notarisation credentials are configured"
-          else
-            notarisation="**none**, no notarisation credentials are configured"
-          fi
-
-          echo "macOS signature: ${identity}"
-          echo "macOS notarisation: ${notarisation}"
-          {
-            echo "### macOS signing status for this build"
-            echo
-            echo "| | |"
-            echo "| --- | --- |"
-            echo "| Signature | ${identity} |"
-            echo "| Notarisation | ${notarisation} |"
-            echo
-            echo "${note}"
-            echo
-            echo "See \`docs/desktop/MACOS_NOTARIZATION.md\` and \`docs/desktop/RELEASE_SIGNATURE_INVENTORY.md\`."
-          } >> "$GITHUB_STEP_SUMMARY"
 
   # The Linux .rpm, on its own, because it costs more than everything else in
   # this workflow put together.

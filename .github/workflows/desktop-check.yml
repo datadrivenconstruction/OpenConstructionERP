@@ -15,16 +15,9 @@
 # other arms, because code behind a cfg that does not match is parsed and then
 # discarded without being type checked.
 #
-# Why cargo check and not a build. check runs build.rs, expands the
-# generate_context! macro and type checks every arm the target selects, which is
-# the whole class of error a tag build exposes us to. It skips code generation
-# and linking, which is where the time goes. The release matrix is capped at two
-# hours; this finishes in a few minutes, and a lane people wait for is a lane
-# people read.
-#
-# What it deliberately does not catch: anything that only appears when the code
-# is linked or bundled, and anything about the installers. Those belong to
-# desktop-release.yml and stay there.
+# cargo check reports type errors quickly; cargo test then links and executes
+# the launcher regression suite on every matching push. This does not package
+# or install the application: installer validation belongs to desktop-release.
 
 name: Desktop Compile Check
 
@@ -34,6 +27,7 @@ on:
     paths:
       - "desktop/**"
       - ".github/workflows/desktop-check.yml"
+      - ".github/workflows/desktop-release.yml"
   # So the lane can be pointed at a branch. That is how it gets tested: put a
   # deliberate error behind a platform gate on a throwaway branch, dispatch this
   # against it, and read which jobs go red. A lane that has only ever been green
@@ -42,11 +36,11 @@ on:
     inputs:
       run_tests:
         description: >-
-          Also run cargo test and report whether the build rewrote the tracked
-          ACL schemas under gen/. Off by default: the launcher's tests have no
-          other place to run in the cloud, and a cold test build is long.
+          Run cargo test and report whether the build rewrote the tracked
+          ACL schemas under gen/. Enabled automatically on pushes; disable only
+          for a manual compile-only diagnostic.
         type: boolean
-        default: false
+        default: true
 
 permissions:
   contents: read
@@ -82,10 +76,10 @@ jobs:
   compile:
     name: Compile (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    # Generous next to the few minutes a cached run takes, and short enough that
-    # a wedged job does not sit there for an hour. A cold cache on Linux, which
+    # Allow a cold test build to link the webview dependencies, while ensuring
+    # a wedged job eventually terminates. A cold cache on Linux, which
     # compiles the whole GTK stack, is the slow case this has to fit.
-    timeout-minutes: 30
+    timeout-minutes: 60
     strategy:
       # One platform failing must not cancel the others. Which platforms stay
       # green is the most useful thing this lane tells you, because it says
@@ -100,6 +94,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+
+      - name: Test the macOS publication policy
+        run: python desktop/tests/test_notarization_policy.py
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
@@ -188,12 +185,14 @@ jobs:
         # nobody changed anything, and a lane that cries wolf stops being read.
         run: cargo check --locked --all-targets
 
-      # Only on a dispatch that asks for it. The generated ACL schemas are
+      # Every matching push runs the launcher tests on all three platforms.
+      # A manual dispatch can opt out for a compile-only diagnostic.
+      # The generated ACL schemas are
       # tracked in git and rewritten by any build, so a permission edited by
       # hand shows up here as a diff; printed rather than failed, because the
       # same files can differ by platform and that is not this lane's question.
       - name: Test
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_tests }}
+        if: ${{ github.event_name == 'push' || inputs.run_tests }}
         shell: bash
         working-directory: desktop/src-tauri
         run: |

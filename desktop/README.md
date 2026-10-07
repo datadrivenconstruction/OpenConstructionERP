@@ -90,3 +90,9 @@ desktop/
 ```
 
 Questions: info@datadrivenconstruction.io. Licensed under AGPL-3.0.
+
+## Desktop regression checks
+
+The Desktop Compile Check workflow runs cargo check and cargo test on Windows, macOS, and Linux for every push to main that touches desktop files. Manual dispatch runs tests by default; turn off run_tests only for a compile-only diagnostic. This validates the launcher, not installation or uninstallation.
+
+Before the macOS bundler can upload installers, the release workflow emits an explicit warning that notarization is not activated. Setting the repository variable MACOS_NOTARIZATION_REQUIRED to true refuses that build before publication. Credentials alone cannot satisfy this guard: activating Developer ID signing must also replace it with checks against the signed and stapled artifact. No Apple account or credentials are configured by this guard.
