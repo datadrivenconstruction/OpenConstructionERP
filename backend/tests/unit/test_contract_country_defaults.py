@@ -45,7 +45,7 @@ from app.modules.contracts.service import (
 )
 
 #: The countries the brief names; every one must answer on its own row.
-REQUIRED = ("DE", "GB", "US", "FR", "RU", "AE", "SA", "IN", "BR", "CN")
+REQUIRED = ("DE", "GB", "US", "CA", "FR", "RU", "AE", "SA", "IN", "BR", "CN")
 
 
 # ── Every country resolves its own figures ─────────────────────────────
@@ -92,6 +92,25 @@ def test_the_figures_that_tell_the_markets_apart() -> None:
         assert values[gulf]["payment_period_days"] == 56
     assert values["CN"]["retention_cap_percent"] == "3"
     assert "КС-2" in values["RU"]["certificate_name"]
+    assert values["CA"]["retention_percent"] == "10"
+    assert values["CA"]["payment_period_days"] == 28
+
+
+def test_the_canadian_holdback_is_statute_and_names_the_province_that_differs() -> None:
+    """Ten percent is the statutory holdback in Ontario, BC and Alberta; Manitoba holds 7.5."""
+    resolved = resolve_contract_defaults("CA")
+    assert resolved is not None
+    holdback = resolved["sources"]["retention_percent"]
+    assert holdback["source"] == "statute"
+    assert "Construction Act" in holdback["reference"]
+    assert "7.5" in holdback["note"] and "Manitoba" in holdback["note"]
+    # The holdback is a fixed percentage of every payment, not a running total
+    # that stops at a ceiling, so no cap is offered.
+    assert resolved["values"]["retention_cap_percent"] is None
+    assert resolved["values"]["retention_release_split"] == [
+        {"event": "substantial_completion", "release_percent_of_held": "100"},
+        {"event": "final_completion", "release_percent_of_held": "100"},
+    ]
 
 
 def test_uk_is_read_as_great_britain() -> None:

@@ -278,6 +278,55 @@ COUNTRY_CONTRACT_DEFAULTS: dict[str, dict[str, Any]] = {
             "The contractor's application with its continuation sheet, certified by the architect.",
         ),
     },
+    "CA": {
+        # Holdback is provincial law, and this row is one figure for the whole
+        # country. It states the Ontario Construction Act, which most provinces
+        # match at ten percent, and names in the notes where they differ. A
+        # province-keyed table does not exist yet: Manitoba's 7.5 percent, the
+        # British Columbia joint holdback account and Ontario's annual release
+        # (s. 26, in force 1 January 2026) are not modelled here.
+        "standard_form": "CCDC 2-2020",
+        "retention_percent": _figure(
+            "10",
+            "statute",
+            "Construction Act, R.S.O. 1990, c. C.30, s. 22; Builders Lien Act (BC), s. 4; "
+            "Prompt Payment and Construction Lien Act (AB), s. 18",
+            "The owner holds back ten percent of the value of work done under Ontario's Construction Act, and "
+            "British Columbia and Alberta hold the same. Manitoba holds 7.5 percent; change the rate there.",
+        ),
+        "retention_cap_percent": _figure(
+            None,
+            "statute",
+            "Construction Act, R.S.O. 1990, c. C.30, s. 22",
+            "No ceiling. The holdback is a fixed share of every payment until it is released.",
+        ),
+        "retention_release_split": _figure(
+            _split(("substantial_completion", "100"), ("final_completion", "100")),
+            "statute",
+            "Construction Act, R.S.O. 1990, c. C.30, ss. 26, 31 and 32",
+            "Paid once the lien period after the published certificate of substantial performance expires "
+            "with no lien preserved; holdback on work done after that is paid when the contract is "
+            "completed. Ontario also releases holdback each contract year from 2026.",
+        ),
+        "payment_period_days": _figure(
+            28,
+            "statute",
+            "Construction Act, R.S.O. 1990, c. C.30, s. 6.4; Federal Prompt Payment for Construction Work Act",
+            "The owner pays a proper invoice within 28 days of receiving it, unless it gives a notice of non-payment.",
+        ),
+        "valuation_interval": _figure(
+            "monthly",
+            "statute",
+            "Construction Act, R.S.O. 1990, c. C.30, s. 6.3",
+            "The contractor gives a proper invoice every month, unless the contract sets another interval.",
+        ),
+        "certificate_name": _figure(
+            "Certificate for Payment",
+            "standard_form",
+            "CCDC 2-2020, GC 5.2 and GC 5.3",
+            "The Consultant certifies the contractor's monthly application for payment.",
+        ),
+    },
     "FR": {
         "standard_form": "NF P03-001 / CCAG-Travaux",
         "retention_percent": _figure(
