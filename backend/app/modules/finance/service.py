@@ -395,8 +395,10 @@ def compute_payment_withholding(
     gross can never produce a negative cash payment (which would be a phantom
     refund) nor a withholding larger than the claim.
 
-    Returns ``(amount_to_pay, withheld)`` both quantized to 2dp. Pure function:
-    no DB, no I/O - the unit suite asserts exact Decimals against it.
+    Returns ``(amount_to_pay, withheld)`` at 2dp. Retainage is rounded half-up;
+    cash is the rounded gross less that rounded retainage, so the two legs
+    conserve the rounded gross. Percentages use the original gross. Pure
+    function: no DB, no I/O - the unit suite asserts exact Decimals against it.
     """
     g = _safe_decimal(gross)
     if g < 0:
@@ -411,8 +413,8 @@ def compute_payment_withholding(
         withheld = Decimal("0")
     if withheld > g:
         withheld = g
-    amount_to_pay = g - withheld
-    return _q2(amount_to_pay), _q2(withheld)
+    rounded_withheld = _q2(withheld)
+    return _q2(g) - rounded_withheld, rounded_withheld
 
 
 def _line_item_from(
@@ -1997,22 +1999,22 @@ class FinanceService:
         *,
         actor_id: str | None = None,
     ) -> Payment:
-        """Record a payment that holds back retainage, then post the cash actual.
+        """Record a payment that holds back retainage and sync payable budgets.
 
         Splits the gross into (cash paid, retainage withheld) via
         :func:`compute_payment_withholding`. When the caller omits
         ``withholding_amount`` it is derived from the invoice
-        ``retention_amount``; when the caller omits ``amount`` the invoice net
-        (``amount_total - retention_amount``) is paid out. Both are then re-split
-        so the stored breakdown is always internally consistent.
+        ``retention_amount``. When ``amount`` is omitted, the invoice total is
+        settled: cash is the rounded total less the resolved rounded withholding.
+        When ``amount`` is supplied, it is the intended cash and gross is that
+        cash plus the resolved withholding. Both paths use the same rounded split.
 
         Idempotent on ``idempotency_key`` (a replay returns the existing row).
 
-        After the payment is written, the cash paid out (NOT the withheld
-        retainage - that is not yet a realised cost to the client/payer) is
-        posted to the cost spine via
-        :meth:`CostSpineService.post_actual_to_budget_line`. The spine call is
-        non-fatal: a failure there must never roll back the payment.
+        After the payment is written, payable invoices trigger a best-effort
+        budget sync. This method posts nothing directly to the cost spine:
+        supplier invoice costs are posted when the invoice is marked paid,
+        and receipts against client invoices are income rather than costs.
         """
         # ── Idempotency check first (cheapest path) ──────────────────────────
         if data.idempotency_key:
