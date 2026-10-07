@@ -11,7 +11,7 @@
 // `getLastError()` now prefers the most recent level=error entry over
 // warning-level noise. These tests lock that contract in.
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from 'vitest';
 import {
   getLastError,
   logApiError,
@@ -194,6 +194,73 @@ describe('errorLogger recording whitelist', () => {
     ).toBe(false);
     // Empty input never matches.
     expect(shouldSuppress({})).toBe(false);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────
+// Expected missing claim invoice — the lookup documents this one 404 as empty.
+describe('expected missing claim invoice reporting', () => {
+  const claimId = 'f1a95000-0001-4a00-8b00-000000000001';
+  const endpoint = `/v1/finance/claims/${claimId}/receivable-invoice/`;
+  const detail = 'No receivable invoice exists for this claim';
+  const fetchSpy = vi.fn<typeof fetch>();
+  let reporter: typeof import('./errorLogger');
+
+  beforeAll(async () => {
+    // The earlier buffer tests can open their module's transport circuit
+    // through the generic fetch mock. Give these transport assertions a
+    // fresh reporter instead of changing the production circuit breaker.
+    vi.resetModules();
+    reporter = await import('./errorLogger');
+  });
+
+  beforeEach(() => {
+    reporter.clearErrorLog();
+    vi.stubEnv('VITE_ENABLE_ERROR_REPORTING', 'true');
+    fetchSpy.mockReset().mockResolvedValue(new Response('{}', { status: 202 }));
+    vi.stubGlobal('fetch', fetchSpy);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  });
+
+  it.each([
+    endpoint,
+    endpoint.slice(0, -1),
+    `/api${endpoint}`,
+    `${endpoint}?lookup=1`,
+    endpoint.replace(claimId, claimId.toUpperCase()),
+  ])('does not record or send the documented absence at %s', async (path) => {
+    reporter.logApiError(path, 404, JSON.stringify({ detail }));
+    expect(reporter.getErrorLog()).toHaveLength(0);
+    expect(reporter.getLastError()).toBeNull();
+    expect(fetchSpy).not.toHaveBeenCalled();
+    await Promise.resolve();
+  });
+
+  it.each([
+    ['permission refusal', endpoint, 403, JSON.stringify({ detail })],
+    ['server failure', endpoint, 500, JSON.stringify({ detail })],
+    ['generic routing miss', endpoint, 404, JSON.stringify({ detail: 'Not Found' })],
+    ['different detail', endpoint, 404, JSON.stringify({ detail: 'Invoice lookup failed' })],
+    ['missing detail', endpoint, 404, '{}'],
+    ['malformed body', endpoint, 404, '{'],
+    ['plain text', endpoint, 404, detail],
+    ['array body', endpoint, 404, JSON.stringify([{ detail }])],
+    ['null body', endpoint, 404, 'null'],
+    ['other endpoint', `/v1/finance/claims/${claimId}/`, 404, JSON.stringify({ detail })],
+    ['child route', `${endpoint}details/`, 404, JSON.stringify({ detail })],
+    ['invalid UUID', endpoint.replace(claimId, 'not-a-uuid'), 404, JSON.stringify({ detail })],
+    ['duplicate API prefix', `/api/api${endpoint}`, 404, JSON.stringify({ detail })],
+  ] as const)('keeps %s observable', async (_case, path, status, message) => {
+    reporter.logApiError(path, status, message);
+    expect(reporter.getErrorLog()).toHaveLength(1);
+    expect(fetchSpy).toHaveBeenCalledWith(
+      '/api/v1/client-errors/', expect.objectContaining({ method: 'POST' }),
+    );
+    await Promise.resolve();
   });
 });
 
