@@ -42345,6 +42345,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "Su cantidad es mayor que cualquier cantidad real. No se importó",
     "boq.import_issue.xpwe_item_failed": "No se pudieron calcular sus cifras. No se importó",
     "boq.import_issue.xpwe_duplicate_item_id": "Tiene el mismo ID ({{ref}}) que el concepto {{first}}. Se importaron ambos; las filas que repiten el concepto {{ref}} van a continuación del concepto {{first}}",
+    "boq.import_error.import_persistence_failed": "No se pudo guardar el presupuesto importado. No se importó ninguna fila.",
     "boq.import_error.gaeb_empty_file": "El archivo GAEB está vacío.",
     "boq.import_error.gaeb_file_type": "Sube un archivo {{format}} ({{extensions}}).",
     "boq.import_error.gaeb_wrong_root": "El archivo es XML, pero no es un documento GAEB: su elemento raíz es <{{root}}>.",

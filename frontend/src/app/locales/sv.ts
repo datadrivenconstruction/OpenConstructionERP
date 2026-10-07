@@ -45715,6 +45715,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "Mängden är större än någon verklig mängd. Posten importerades inte",
     "boq.import_issue.xpwe_item_failed": "Dess tal kunde inte beräknas. Posten importerades inte",
     "boq.import_issue.xpwe_duplicate_item_id": "Den har samma ID ({{ref}}) som post {{first}}. Båda importerades; rader som upprepar post {{ref}} följer efter post {{first}}",
+    "boq.import_error.import_persistence_failed": "Den importerade mängdförteckningen kunde inte sparas. Inga rader importerades.",
     "boq.import_error.gaeb_empty_file": "GAEB-filen är tom.",
     "boq.import_error.gaeb_file_type": "Ladda upp en {{format}}-fil ({{extensions}}).",
     "boq.import_error.gaeb_wrong_root": "Filen är XML men inte ett GAEB-dokument: dess rotelement är <{{root}}>.",

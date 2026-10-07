@@ -44893,6 +44893,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "ปริมาณงานของรายการนี้เกินกว่าปริมาณงานจริงที่เป็นไปได้ รายการนี้ไม่ได้ถูกนำเข้า",
     "boq.import_issue.xpwe_item_failed": "ไม่สามารถคำนวณค่าของรายการนี้ได้ รายการนี้ไม่ได้ถูกนำเข้า",
     "boq.import_issue.xpwe_duplicate_item_id": "รายการนี้มี ID ({{ref}}) เดียวกับรายการที่ {{first}} ทั้งสองถูกนำเข้าแล้ว แถวที่ซ้ำ {{ref}} ตามอยู่หลังรายการที่ {{first}}",
+    "boq.import_error.import_persistence_failed": "ไม่สามารถบันทึกบัญชีปริมาณงานที่นำเข้าได้ ไม่มีการนำเข้าแถวใด ๆ",
     "boq.import_error.gaeb_empty_file": "ไฟล์ GAEB นี้ว่างเปล่า",
     "boq.import_error.gaeb_file_type": "อัปโหลดไฟล์ {{format}} ({{extensions}})",
     "boq.import_error.gaeb_wrong_root": "ไฟล์นี้เป็น XML แต่ไม่ใช่เอกสาร GAEB: องค์ประกอบรากคือ <{{root}}>",

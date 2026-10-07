@@ -46460,6 +46460,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "Jej ilość jest większa od jakiejkolwiek realnej. Nie zaimportowano",
     "boq.import_issue.xpwe_item_failed": "Nie udało się obliczyć jej liczb. Nie zaimportowano",
     "boq.import_issue.xpwe_duplicate_item_id": "Ma ten sam ID ({{ref}}) co pozycja {{first}}. Zaimportowano obie; wiersze powtarzające pozycję {{ref}} następują po pozycji {{first}}",
+    "boq.import_error.import_persistence_failed": "Nie udało się zapisać zaimportowanego przedmiaru robót. Nie zaimportowano żadnych wierszy.",
     "boq.import_error.gaeb_empty_file": "Plik GAEB jest pusty.",
     "boq.import_error.gaeb_file_type": "Prześlij plik {{format}} ({{extensions}}).",
     "boq.import_error.gaeb_wrong_root": "Plik ma format XML, ale nie jest dokumentem GAEB: jego element główny to <{{root}}>.",

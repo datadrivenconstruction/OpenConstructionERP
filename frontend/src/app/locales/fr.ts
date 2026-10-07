@@ -47937,6 +47937,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "Sa quantité dépasse toute quantité réelle. Il n'a pas été importé",
     "boq.import_issue.xpwe_item_failed": "Ses chiffres n'ont pas pu être calculés. Il n'a pas été importé",
     "boq.import_issue.xpwe_duplicate_item_id": "Il a le même ID ({{ref}}) que le poste {{first}}. Les deux ont été importés ; les lignes qui répètent le poste {{ref}} suivent le poste {{first}}",
+    "boq.import_error.import_persistence_failed": "Le bordereau de quantités importé n’a pas pu être enregistré. Aucune ligne n’a été importée.",
     "boq.import_error.gaeb_empty_file": "Le fichier GAEB est vide.",
     "boq.import_error.gaeb_file_type": "Importez un fichier {{format}} ({{extensions}}).",
     "boq.import_error.gaeb_wrong_root": "Le fichier est au format XML, mais ce n’est pas un document GAEB : son élément racine est <{{root}}>.",

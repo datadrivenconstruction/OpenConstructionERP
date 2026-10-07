@@ -47046,6 +47046,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "Її обсяг більший за будь-який реальний. Не імпортована",
     "boq.import_issue.xpwe_item_failed": "Її числа не вдалося обчислити. Не імпортована",
     "boq.import_issue.xpwe_duplicate_item_id": "Вона має той самий ID ({{ref}}), що й позиція {{first}}. Імпортовано обидві; рядки, що повторюють позицію {{ref}}, йдуть після позиції {{first}}",
+    "boq.import_error.import_persistence_failed": "Не вдалося зберегти імпортовану відомість обсягів робіт. Жодного рядка не імпортовано.",
     "boq.import_error.gaeb_empty_file": "Файл GAEB порожній.",
     "boq.import_error.gaeb_file_type": "Завантажте файл {{format}} ({{extensions}}).",
     "boq.import_error.gaeb_wrong_root": "Файл має формат XML, але не є документом GAEB: його кореневий елемент — <{{root}}>.",

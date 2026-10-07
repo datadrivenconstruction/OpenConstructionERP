@@ -45106,6 +45106,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "इस आइटम की मात्रा किसी भी संभावित वास्तविक मात्रा से बड़ी है। यह आइटम आयात नहीं किया गया",
     "boq.import_issue.xpwe_item_failed": "इसके आंकड़े गणना नहीं किए जा सके। यह आइटम आयात नहीं किया गया",
     "boq.import_issue.xpwe_duplicate_item_id": "इस आइटम का ID ({{ref}}) आइटम {{first}} के समान है। दोनों आयात किए गए हैं; {{ref}} दोहराने वाली रो आइटम {{first}} के बाद आती हैं",
+    "boq.import_error.import_persistence_failed": "आयातित मात्रा सूची सहेजी नहीं जा सकी। कोई पंक्ति आयात नहीं हुई।",
     "boq.import_error.gaeb_empty_file": "यह GAEB फ़ाइल खाली है।",
     "boq.import_error.gaeb_file_type": "{{format}} फ़ाइल अपलोड करें ({{extensions}})।",
     "boq.import_error.gaeb_wrong_root": "फ़ाइल XML है, लेकिन GAEB दस्तावेज़ नहीं है: इसका मूल तत्व <{{root}}> है।",

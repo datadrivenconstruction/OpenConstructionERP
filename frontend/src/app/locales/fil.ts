@@ -45086,6 +45086,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "Mas malaki sa anumang posibleng aktwal na dami ang dami ng item na ito. Hindi na-import ang item na ito",
     "boq.import_issue.xpwe_item_failed": "Hindi makalkula ang mga figure nito. Hindi na-import ang item na ito",
     "boq.import_issue.xpwe_duplicate_item_id": "May parehong ID ({{ref}}) ang item na ito sa item {{first}}. Na-import ang dalawa; sumusunod sa item {{first}} ang mga row na umuulit ng {{ref}}",
+    "boq.import_error.import_persistence_failed": "Hindi mai-save ang na-import na talaan ng mga dami. Walang na-import na hilera.",
     "boq.import_error.gaeb_empty_file": "Walang laman ang file na GAEB na ito.",
     "boq.import_error.gaeb_file_type": "Mag-upload ng {{format}} file ({{extensions}}).",
     "boq.import_error.gaeb_wrong_root": "XML ang file ngunit hindi ito GAEB na dokumento: ang root element nito ay <{{root}}>.",

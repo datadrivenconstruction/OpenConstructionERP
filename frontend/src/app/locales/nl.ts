@@ -45982,6 +45982,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "De hoeveelheid is groter dan elke echte hoeveelheid. Hij is niet geïmporteerd",
     "boq.import_issue.xpwe_item_failed": "De getallen ervan konden niet berekend worden. Hij is niet geïmporteerd",
     "boq.import_issue.xpwe_duplicate_item_id": "Hij heeft dezelfde ID ({{ref}}) als post {{first}}. Beide zijn geïmporteerd; regels die post {{ref}} herhalen volgen op post {{first}}",
+    "boq.import_error.import_persistence_failed": "De geïmporteerde hoeveelhedenstaat kon niet worden opgeslagen. Er zijn geen rijen geïmporteerd.",
     "boq.import_error.gaeb_empty_file": "Het GAEB-bestand is leeg.",
     "boq.import_error.gaeb_file_type": "Upload een {{format}}-bestand ({{extensions}}).",
     "boq.import_error.gaeb_wrong_root": "Het bestand is XML, maar geen GAEB-document: het hoofdelement is <{{root}}>.",

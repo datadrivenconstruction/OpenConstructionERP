@@ -47709,6 +47709,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "كميته أكبر من أي كمية حقيقية. لم يُستورد البند",
     "boq.import_issue.xpwe_item_failed": "تعذّر حساب أرقامه. لم يُستورد البند",
     "boq.import_issue.xpwe_duplicate_item_id": "له المعرّف نفسه ({{ref}}) الخاص بالبند {{first}}. استُورد كلاهما؛ والصفوف التي تكرر البند {{ref}} تأتي بعد البند {{first}}",
+    "boq.import_error.import_persistence_failed": "تعذّر حفظ جدول الكميات المستورد. لم يتم استيراد أي صفوف.",
     "boq.import_error.gaeb_empty_file": "ملف GAEB فارغ.",
     "boq.import_error.gaeb_file_type": "ارفع ملفًا بصيغة {{format}} ({{extensions}}).",
     "boq.import_error.gaeb_wrong_root": "الملف بصيغة XML، لكنه ليس مستند GAEB: عنصره الجذر هو <{{root}}>.",

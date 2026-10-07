@@ -45937,6 +45937,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "Miktarı gerçek bir miktardan büyük. İçe aktarılmadı",
     "boq.import_issue.xpwe_item_failed": "Sayıları hesaplanamadı. İçe aktarılmadı",
     "boq.import_issue.xpwe_duplicate_item_id": "{{first}} kalemiyle aynı kimliğe ({{ref}}) sahip. İkisi de içe aktarıldı; {{ref}} kalemini tekrarlayan satırlar {{first}} kaleminin ardından gelir",
+    "boq.import_error.import_persistence_failed": "İçe aktarılan metraj cetveli kaydedilemedi. Hiçbir satır içe aktarılmadı.",
     "boq.import_error.gaeb_empty_file": "GAEB dosyası boş.",
     "boq.import_error.gaeb_file_type": "Bir {{format}} dosyası yükleyin ({{extensions}}).",
     "boq.import_error.gaeb_wrong_root": "Dosya XML biçimindedir ancak GAEB belgesi değildir: kök öğesi <{{root}}>.",

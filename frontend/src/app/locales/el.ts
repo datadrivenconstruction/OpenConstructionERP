@@ -45070,6 +45070,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "Η ποσότητά του είναι μεγαλύτερη από οποιαδήποτε πραγματική. Δεν εισήχθη",
     "boq.import_issue.xpwe_item_failed": "Οι αριθμοί του δεν μπόρεσαν να υπολογιστούν. Δεν εισήχθη",
     "boq.import_issue.xpwe_duplicate_item_id": "Έχει το ίδιο ID ({{ref}}) με το είδος {{first}}. Εισήχθησαν και τα δύο· οι γραμμές που επαναλαμβάνουν το είδος {{ref}} έπονται του είδους {{first}}",
+    "boq.import_error.import_persistence_failed": "Δεν ήταν δυνατή η αποθήκευση του εισαγόμενου πίνακα ποσοτήτων. Δεν εισήχθη καμία γραμμή.",
     "boq.import_error.gaeb_empty_file": "Το αρχείο GAEB είναι κενό.",
     "boq.import_error.gaeb_file_type": "Μεταφορτώστε ένα αρχείο {{format}} ({{extensions}}).",
     "boq.import_error.gaeb_wrong_root": "Το αρχείο είναι XML αλλά δεν είναι έγγραφο GAEB: το ριζικό του στοιχείο είναι <{{root}}>.",

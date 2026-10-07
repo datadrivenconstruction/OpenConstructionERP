@@ -45084,6 +45084,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "مقدار این ردیف بزرگ‌تر از هر مقدار واقعی ممکن است. این ردیف وارد نشد",
     "boq.import_issue.xpwe_item_failed": "ارقام آن قابل محاسبه نبود. این ردیف وارد نشد",
     "boq.import_issue.xpwe_duplicate_item_id": "این ردیف همان شناسهٔ ({{ref}}) ردیف {{first}} را دارد. هر دو وارد شده‌اند؛ خط‌هایی که {{ref}} را تکرار می‌کنند پس از ردیف {{first}} می‌آیند",
+    "boq.import_error.import_persistence_failed": "ذخیرهٔ فهرست مقادیر واردشده ممکن نشد. هیچ ردیفی وارد نشد.",
     "boq.import_error.gaeb_empty_file": "این فایل GAEB خالی است.",
     "boq.import_error.gaeb_file_type": "یک فایل {{format}} بارگذاری کنید ({{extensions}}).",
     "boq.import_error.gaeb_wrong_root": "فایل از نوع XML است، اما سند GAEB نیست: عنصر ریشهٔ آن <{{root}}> است.",

@@ -45094,6 +45094,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "Количеството ѝ е по-голямо от всяко реално. Не е импортирана",
     "boq.import_issue.xpwe_item_failed": "Числата ѝ не можаха да бъдат изчислени. Не е импортирана",
     "boq.import_issue.xpwe_duplicate_item_id": "Има същия ID ({{ref}}) като позиция {{first}}. И двете са импортирани; редовете, повтарящи позиция {{ref}}, следват позиция {{first}}",
+    "boq.import_error.import_persistence_failed": "Импортираната количествена сметка не можа да бъде запазена. Не са импортирани редове.",
     "boq.import_error.gaeb_empty_file": "GAEB файлът е празен.",
     "boq.import_error.gaeb_file_type": "Качете файл {{format}} ({{extensions}}).",
     "boq.import_error.gaeb_wrong_root": "Файлът е XML, но не е документ GAEB: неговият коренов елемент е <{{root}}>.",

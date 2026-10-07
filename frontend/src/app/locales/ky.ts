@@ -45205,6 +45205,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "Анын көлөмү ар кандай чыныгы көлөмдөн чоң. Импорттолгон жок",
     "boq.import_issue.xpwe_item_failed": "Анын сандарын эсептөө мүмкүн болгон жок. Импорттолгон жок",
     "boq.import_issue.xpwe_duplicate_item_id": "Анын ID ({{ref}}) {{first}} позициясы менен бирдей. Экөө тең импорттолду; {{ref}} позициясын кайталаган саптар {{first}} позициясынан кийин турат",
+    "boq.import_error.import_persistence_failed": "???????????? ?? ???????????? ???????? ?????? ?????? ?????? ???. ?? ??? ??? ???????????? ???.",
     "boq.import_error.gaeb_empty_file": "GAEB файлы бош.",
     "boq.import_error.gaeb_file_type": "{{format}} файлын жүктөп бериңиз ({{extensions}}).",
     "boq.import_error.gaeb_wrong_root": "Файл XML форматында, бирок GAEB документи эмес: анын түпкү элементи — <{{root}}>.",

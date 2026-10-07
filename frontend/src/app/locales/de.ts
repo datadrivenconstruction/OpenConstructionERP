@@ -47743,6 +47743,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "Ihre Menge ist größer als jede reale Menge. Sie wurde nicht importiert",
     "boq.import_issue.xpwe_item_failed": "Ihre Zahlen konnten nicht berechnet werden. Sie wurde nicht importiert",
     "boq.import_issue.xpwe_duplicate_item_id": "Sie hat dieselbe ID ({{ref}}) wie Position {{first}}. Beide wurden importiert; Zeilen, die Position {{ref}} wiederholen, folgen auf Position {{first}}",
+    "boq.import_error.import_persistence_failed": "Das importierte Leistungsverzeichnis konnte nicht gespeichert werden. Es wurden keine Zeilen importiert.",
     "boq.import_error.gaeb_empty_file": "Die GAEB-Datei ist leer.",
     "boq.import_error.gaeb_file_type": "Laden Sie eine {{format}}-Datei ({{extensions}}) hoch.",
     "boq.import_error.gaeb_wrong_root": "Die Datei ist XML, aber kein GAEB-Dokument: Ihr Wurzelelement ist <{{root}}>.",

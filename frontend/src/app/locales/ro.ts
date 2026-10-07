@@ -45359,6 +45359,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "Cantitatea ei este mai mare decât orice cantitate reală. Nu a fost importată",
     "boq.import_issue.xpwe_item_failed": "Cifrele ei nu au putut fi calculate. Nu a fost importată",
     "boq.import_issue.xpwe_duplicate_item_id": "Are același ID ({{ref}}) ca poziția {{first}}. Ambele au fost importate; rândurile care repetă poziția {{ref}} urmează după poziția {{first}}",
+    "boq.import_error.import_persistence_failed": "Lista de cantități importată nu a putut fi salvată. Nu a fost importat niciun rând.",
     "boq.import_error.gaeb_empty_file": "Fișierul GAEB este gol.",
     "boq.import_error.gaeb_file_type": "Încărcați un fișier {{format}} ({{extensions}}).",
     "boq.import_error.gaeb_wrong_root": "Fișierul este XML, dar nu este un document GAEB: elementul său rădăcină este <{{root}}>.",

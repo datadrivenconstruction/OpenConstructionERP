@@ -45398,6 +45398,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "এই আইটেমের পরিমাণ যে কোনো সম্ভাব্য বাস্তব পরিমাণের চেয়ে বড়। এই আইটেমটি আমদানি করা হয়নি",
     "boq.import_issue.xpwe_item_failed": "এর হিসাব গণনা করা সম্ভব হয়নি। এই আইটেমটি আমদানি করা হয়নি",
     "boq.import_issue.xpwe_duplicate_item_id": "এই আইটেমের ID ({{ref}}) আইটেম {{first}}-এর সাথে একই। দুটিই আমদানি করা হয়েছে; {{ref}} পুনরাবৃত্তি করা রো-গুলো আইটেম {{first}}-এর পরে আসে",
+    "boq.import_error.import_persistence_failed": "আমদানি করা পরিমাণের তালিকা সংরক্ষণ করা যায়নি। কোনো সারি আমদানি করা হয়নি।",
     "boq.import_error.gaeb_empty_file": "এই GAEB ফাইলটি খালি।",
     "boq.import_error.gaeb_file_type": "একটি {{format}} ফাইল আপলোড করুন ({{extensions}})।",
     "boq.import_error.gaeb_wrong_root": "ফাইলটি XML, তবে GAEB নথি নয়: এর মূল উপাদান হলো <{{root}}>।",

@@ -45093,6 +45093,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "Sen määrä on suurempi kuin mikään todellinen määrä. Sitä ei tuotu",
     "boq.import_issue.xpwe_item_failed": "Sen lukuja ei voitu laskea. Sitä ei tuotu",
     "boq.import_issue.xpwe_duplicate_item_id": "Sillä on sama tunnus ({{ref}}) kuin nimikkeellä {{first}}. Molemmat tuotiin; nimikettä {{ref}} toistavat rivit seuraavat nimikettä {{first}}",
+    "boq.import_error.import_persistence_failed": "Tuotua määräluetteloa ei voitu tallentaa. Yhtään riviä ei tuotu.",
     "boq.import_error.gaeb_empty_file": "GAEB-tiedosto on tyhjä.",
     "boq.import_error.gaeb_file_type": "Lataa {{format}}-tiedosto ({{extensions}}).",
     "boq.import_error.gaeb_wrong_root": "Tiedosto on XML-muotoinen, mutta se ei ole GAEB-asiakirja: sen juurielementti on <{{root}}>.",

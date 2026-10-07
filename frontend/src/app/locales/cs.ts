@@ -46229,6 +46229,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "Její množství je větší než jakékoli reálné. Nebyla importována",
     "boq.import_issue.xpwe_item_failed": "Její čísla se nepodařilo vypočítat. Nebyla importována",
     "boq.import_issue.xpwe_duplicate_item_id": "Má stejné ID ({{ref}}) jako položka {{first}}. Obě byly importovány; řádky opakující položku {{ref}} následují za položkou {{first}}",
+    "boq.import_error.import_persistence_failed": "Importovaný výkaz výměr se nepodařilo uložit. Nebyly importovány žádné řádky.",
     "boq.import_error.gaeb_empty_file": "Soubor GAEB je prázdný.",
     "boq.import_error.gaeb_file_type": "Nahrajte soubor {{format}} ({{extensions}}).",
     "boq.import_error.gaeb_wrong_root": "Soubor je ve formátu XML, ale není dokumentem GAEB: jeho kořenový prvek je <{{root}}>.",

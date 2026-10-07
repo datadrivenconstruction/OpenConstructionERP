@@ -44901,6 +44901,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "Khối lượng của mục này lớn hơn bất kỳ khối lượng thực nào. Mục này không được nhập",
     "boq.import_issue.xpwe_item_failed": "Không tính được các số liệu của mục này. Mục này không được nhập",
     "boq.import_issue.xpwe_duplicate_item_id": "Mục này có cùng ID ({{ref}}) với mục {{first}}. Cả hai đều đã được nhập; các dòng lặp lại {{ref}} theo sau mục {{first}}",
+    "boq.import_error.import_persistence_failed": "Không thể lưu bảng khối lượng đã nhập. Không có dòng nào được nhập.",
     "boq.import_error.gaeb_empty_file": "Tệp GAEB này trống.",
     "boq.import_error.gaeb_file_type": "Tải lên tệp {{format}} ({{extensions}}).",
     "boq.import_error.gaeb_wrong_root": "Tệp có định dạng XML nhưng không phải tài liệu GAEB: phần tử gốc là <{{root}}>.",

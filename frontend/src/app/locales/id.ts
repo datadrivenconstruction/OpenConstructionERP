@@ -44881,6 +44881,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "Kuantitas item ini lebih besar dari kuantitas nyata yang mungkin. Item ini tidak diimpor",
     "boq.import_issue.xpwe_item_failed": "Nilainya tidak dapat dihitung. Item ini tidak diimpor",
     "boq.import_issue.xpwe_duplicate_item_id": "Item ini memiliki ID ({{ref}}) yang sama dengan item {{first}}. Keduanya telah diimpor; baris yang mengulang {{ref}} mengikuti item {{first}}",
+    "boq.import_error.import_persistence_failed": "Daftar kuantitas yang diimpor tidak dapat disimpan. Tidak ada baris yang diimpor.",
     "boq.import_error.gaeb_empty_file": "Berkas GAEB ini kosong.",
     "boq.import_error.gaeb_file_type": "Unggah berkas {{format}} ({{extensions}}).",
     "boq.import_error.gaeb_wrong_root": "Berkas berformat XML, tetapi bukan dokumen GAEB: elemen akarnya adalah <{{root}}>.",

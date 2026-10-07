@@ -45360,6 +45360,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "Njezina količina veća je od bilo koje stvarne. Nije uvezena",
     "boq.import_issue.xpwe_item_failed": "Njezine brojke nije bilo moguće izračunati. Nije uvezena",
     "boq.import_issue.xpwe_duplicate_item_id": "Ima isti ID ({{ref}}) kao stavka {{first}}. Obje su uvezene; retci koji ponavljaju stavku {{ref}} slijede iza stavke {{first}}",
+    "boq.import_error.import_persistence_failed": "Uvezeni troškovnik nije bilo moguće spremiti. Nijedan redak nije uvezen.",
     "boq.import_error.gaeb_empty_file": "GAEB datoteka je prazna.",
     "boq.import_error.gaeb_file_type": "Prenesite datoteku {{format}} ({{extensions}}).",
     "boq.import_error.gaeb_wrong_root": "Datoteka je u XML formatu, ali nije GAEB dokument: njezin korijenski element je <{{root}}>.",

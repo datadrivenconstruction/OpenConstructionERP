@@ -46005,6 +46005,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "Uning miqdori har qanday haqiqiy miqdordan katta. Import qilinmadi",
     "boq.import_issue.xpwe_item_failed": "Uning raqamlarini hisoblab boʻlmadi. Import qilinmadi",
     "boq.import_issue.xpwe_duplicate_item_id": "U {{first}} pozitsiyasi bilan bir xil ID ({{ref}}) ga ega. Ikkalasi ham import qilindi; {{ref}} pozitsiyasini takrorlovchi qatorlar {{first}} pozitsiyasidan keyin keladi",
+    "boq.import_error.import_persistence_failed": "Import qilingan ish hajmlari qaydnomasini saqlab bo‘lmadi. Hech bir qator import qilinmadi.",
     "boq.import_error.gaeb_empty_file": "GAEB fayli boʻsh.",
     "boq.import_error.gaeb_file_type": "{{format}} faylini yuklang ({{extensions}}).",
     "boq.import_error.gaeb_wrong_root": "Fayl XML formatida, lekin GAEB hujjati emas: uning ildiz elementi — <{{root}}>.",

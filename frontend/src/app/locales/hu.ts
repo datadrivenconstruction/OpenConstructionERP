@@ -47689,6 +47689,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "A mennyisége nagyobb bármely valósnál. Nem lett beolvasva",
     "boq.import_issue.xpwe_item_failed": "A számait nem sikerült kiszámítani. Nem lett beolvasva",
     "boq.import_issue.xpwe_duplicate_item_id": "Ugyanaz az azonosítója ({{ref}}), mint a(z) {{first}} tételnek. Mindkettő beolvasva; a(z) {{ref}} tételt ismétlő sorok a(z) {{first}} tétel után következnek",
+    "boq.import_error.import_persistence_failed": "Az importált költségvetést nem sikerült menteni. Egyetlen sor sem lett importálva.",
     "boq.import_error.gaeb_empty_file": "A GAEB fájl üres.",
     "boq.import_error.gaeb_file_type": "Töltsön fel egy {{format}}-fájlt ({{extensions}}).",
     "boq.import_error.gaeb_wrong_root": "A fájl XML formátumú, de nem GAEB-dokumentum: a gyökéreleme <{{root}}>.",

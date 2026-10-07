@@ -47362,6 +47362,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "其工程量大于任何实际数值，该项未被导入",
     "boq.import_issue.xpwe_item_failed": "无法算出其数值，该项未被导入",
     "boq.import_issue.xpwe_duplicate_item_id": "它与第 {{first}} 项使用了相同的 ID（{{ref}}）。两者均已导入；重复 {{ref}} 的行紧跟在第 {{first}} 项之后",
+    "boq.import_error.import_persistence_failed": "无法保存导入的工程量清单。未导入任何行。",
     "boq.import_error.gaeb_empty_file": "该 GAEB 文件为空。",
     "boq.import_error.gaeb_file_type": "请上传 {{format}} 文件（{{extensions}}）。",
     "boq.import_error.gaeb_wrong_root": "该文件是 XML，但不是 GAEB 文档：其根元素为 <{{root}}>。",

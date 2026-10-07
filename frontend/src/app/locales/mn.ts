@@ -44781,6 +44781,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "Хэмжээ нь бодит хэмжээнээс том. Импортолсонгүй",
     "boq.import_issue.xpwe_item_failed": "Түүний тоог бодож чадсангүй. Импортолсонгүй",
     "boq.import_issue.xpwe_duplicate_item_id": "{{first}} байртай ижил ID ({{ref}}) байна. Хоёуланг нь импортолсон; {{ref}} байрыг давтсан мөрүүд {{first}} байрын дараа орно",
+    "boq.import_error.import_persistence_failed": "Импортолсон ажлын тоо хэмжээний жагсаалтыг хадгалж чадсангүй. Ямар ч мөр импортлоогүй.",
     "boq.import_error.gaeb_empty_file": "GAEB файл хоосон байна.",
     "boq.import_error.gaeb_file_type": "{{format}} файл байршуулна уу ({{extensions}}).",
     "boq.import_error.gaeb_wrong_root": "Файл XML форматтай боловч GAEB баримт биш: үндсэн элемент нь <{{root}}> байна.",

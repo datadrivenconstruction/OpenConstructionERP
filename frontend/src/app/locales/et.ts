@@ -45031,6 +45031,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "Selle kogus on suurem kui ükski tegelik kogus. Seda ei imporditud",
     "boq.import_issue.xpwe_item_failed": "Selle arve ei saanud arvutada. Seda ei imporditud",
     "boq.import_issue.xpwe_duplicate_item_id": "Sellel on sama ID ({{ref}}) mis real {{first}}. Imporditi mõlemad; rida {{ref}} kordavad read järgnevad reale {{first}}",
+    "boq.import_error.import_persistence_failed": "Imporditud mahutabelit ei saanud salvestada. Ühtegi rida ei imporditud.",
     "boq.import_error.gaeb_empty_file": "GAEB-fail on tühi.",
     "boq.import_error.gaeb_file_type": "Laadige üles {{format}}-fail ({{extensions}}).",
     "boq.import_error.gaeb_wrong_root": "Fail on XML-vormingus, kuid pole GAEB-dokument: selle juurelement on <{{root}}>.",

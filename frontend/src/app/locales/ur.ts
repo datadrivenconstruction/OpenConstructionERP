@@ -45084,6 +45084,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "اس آئٹم کی مقدار کسی بھی ممکنہ حقیقی مقدار سے بڑی ہے۔ یہ آئٹم درآمد نہیں ہوا",
     "boq.import_issue.xpwe_item_failed": "اس کے اعداد و شمار شمار نہیں کیے جا سکے۔ یہ آئٹم درآمد نہیں ہوا",
     "boq.import_issue.xpwe_duplicate_item_id": "اس آئٹم کا ID ({{ref}}) آئٹم {{first}} جیسا ہی ہے۔ دونوں درآمد ہو چکے ہیں؛ {{ref}} کو دہرانے والی قطاریں آئٹم {{first}} کے بعد آتی ہیں",
+    "boq.import_error.import_persistence_failed": "درآمد کردہ مقداروں کی فہرست محفوظ نہیں کی جا سکی۔ کوئی قطار درآمد نہیں ہوئی۔",
     "boq.import_error.gaeb_empty_file": "یہ GAEB فائل خالی ہے۔",
     "boq.import_error.gaeb_file_type": "{{format}} فائل اپ لوڈ کریں ({{extensions}})۔",
     "boq.import_error.gaeb_wrong_root": "فائل XML ہے، لیکن GAEB دستاویز نہیں ہے: اس کا بنیادی عنصر <{{root}}> ہے۔",

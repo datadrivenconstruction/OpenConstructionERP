@@ -46425,6 +46425,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "数量が実際にありえない大きさのため、この項目はインポートされませんでした",
     "boq.import_issue.xpwe_item_failed": "数値を計算できなかったため、この項目はインポートされませんでした",
     "boq.import_issue.xpwe_duplicate_item_id": "項目 {{first}} と同じ ID（{{ref}}）を持っています。両方がインポートされました。{{ref}} を繰り返す行は項目 {{first}} の後に続きます",
+    "boq.import_error.import_persistence_failed": "インポートした数量明細書を保存できませんでした。行はインポートされていません。",
     "boq.import_error.gaeb_empty_file": "この GAEB ファイルは空です。",
     "boq.import_error.gaeb_file_type": "{{format}} ファイル（{{extensions}}）をアップロードしてください。",
     "boq.import_error.gaeb_wrong_root": "このファイルは XML ですが、GAEB 文書ではありません。ルート要素は <{{root}}> です。",

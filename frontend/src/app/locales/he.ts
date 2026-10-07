@@ -45337,6 +45337,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "הכמות שלה גדולה מכל כמות אמיתית. הסעיף לא יובא",
     "boq.import_issue.xpwe_item_failed": "לא ניתן היה לחשב את המספרים שלו. הסעיף לא יובא",
     "boq.import_issue.xpwe_duplicate_item_id": "יש לו אותו מזהה ({{ref}}) כמו לסעיף {{first}}. שניהם יובאו; שורות החוזרות על סעיף {{ref}} באות אחרי סעיף {{first}}",
+    "boq.import_error.import_persistence_failed": "לא ניתן היה לשמור את כתב הכמויות שיובא. לא יובאו שורות.",
     "boq.import_error.gaeb_empty_file": "קובץ ה-GAEB ריק.",
     "boq.import_error.gaeb_file_type": "העלו קובץ {{format}} ({{extensions}}).",
     "boq.import_error.gaeb_wrong_root": "הקובץ הוא XML אך אינו מסמך GAEB: אלמנט השורש שלו הוא <{{root}}>.",

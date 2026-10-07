@@ -47926,6 +47926,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "A sua quantidade é maior que qualquer quantidade real. Não foi importado",
     "boq.import_issue.xpwe_item_failed": "Não foi possível calcular os seus números. Não foi importado",
     "boq.import_issue.xpwe_duplicate_item_id": "Tem o mesmo ID ({{ref}}) que o artigo {{first}}. Ambos foram importados; as linhas que repetem o artigo {{ref}} vêm a seguir ao artigo {{first}}",
+    "boq.import_error.import_persistence_failed": "Não foi possível guardar o mapa de quantidades importado. Não foi importada nenhuma linha.",
     "boq.import_error.gaeb_empty_file": "O ficheiro GAEB está vazio.",
     "boq.import_error.gaeb_file_type": "Carregue um ficheiro {{format}} ({{extensions}}).",
     "boq.import_error.gaeb_wrong_root": "O ficheiro é XML, mas não é um documento GAEB: o seu elemento raiz é <{{root}}>.",

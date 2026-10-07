@@ -46238,6 +46238,7 @@ const resource = {
     "boq.import_issue.xpwe_quantity_out_of_range": "La sua quantità è maggiore di qualsiasi quantità reale. Non è stata importata",
     "boq.import_issue.xpwe_item_failed": "Non è stato possibile calcolarne i numeri. Non è stata importata",
     "boq.import_issue.xpwe_duplicate_item_id": "Ha lo stesso ID ({{ref}}) della voce {{first}}. Sono state importate entrambe; i righi che ripetono la voce {{ref}} seguono la voce {{first}}",
+    "boq.import_error.import_persistence_failed": "Non è stato possibile salvare il computo metrico importato. Nessuna riga è stata importata.",
     "boq.import_error.gaeb_empty_file": "Il file GAEB è vuoto.",
     "boq.import_error.gaeb_file_type": "Carica un file {{format}} ({{extensions}}).",
     "boq.import_error.gaeb_wrong_root": "Il file è in formato XML ma non è un documento GAEB: il suo elemento radice è <{{root}}>.",
