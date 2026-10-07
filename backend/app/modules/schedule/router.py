@@ -967,6 +967,17 @@ async def list_activities_by_bim_element(
 # ── Work Order CRUD ──────────────────────────────────────────────────────────
 
 
+async def _verify_work_order_assembly(session: SessionDep, assembly_id: uuid.UUID, user_id: str, payload: dict) -> None:
+    """Reuse assembly visibility without restricting owned global templates."""
+    from app.modules.assemblies.router import _verify_assembly_owner
+    from app.modules.assemblies.service import AssemblyService
+
+    await _verify_assembly_owner(session, assembly_id, user_id, payload)
+    # The ownership helper bypasses lookup for admins; references must still exist.
+    if payload.get("role") == "admin":
+        await AssemblyService(session).get_assembly(assembly_id)
+
+
 @router.post(
     "/activities/{activity_id}/work-orders/",
     response_model=WorkOrderResponse,
@@ -988,6 +999,8 @@ async def create_work_order(
     """
     existing = await service.get_activity(activity_id)
     await _verify_schedule_owner(service, session, existing.schedule_id, _user_id, payload)
+    if data.assembly_id is not None:
+        await _verify_work_order_assembly(session, data.assembly_id, _user_id, payload)
     # Override body activity_id with URL path parameter
     data.activity_id = activity_id
     work_order = await service.create_work_order(data)
@@ -1036,6 +1049,8 @@ async def update_work_order(
     existing_wo = await service.get_work_order(work_order_id)
     existing_act = await service.get_activity(existing_wo.activity_id)
     await _verify_schedule_owner(service, session, existing_act.schedule_id, _user_id, payload)
+    if data.assembly_id is not None:
+        await _verify_work_order_assembly(session, data.assembly_id, _user_id, payload)
     work_order = await service.update_work_order(work_order_id, data)
     return _work_order_to_response(work_order)
 

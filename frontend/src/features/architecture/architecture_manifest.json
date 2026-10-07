@@ -192768,6 +192768,7 @@
         }
       ],
       "import_dependencies": [
+        "assemblies",
         "bim_hub",
         "boq",
         "collaboration_locks",
@@ -237164,6 +237165,7 @@
       "users"
     ],
     "schedule": [
+      "assemblies",
       "bim_hub",
       "boq",
       "collaboration_locks",
