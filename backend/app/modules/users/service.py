@@ -20,7 +20,6 @@ from datetime import UTC, datetime, timedelta
 
 import bcrypt
 from fastapi import BackgroundTasks, HTTPException, status
-from jose import jwt
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -28,6 +27,7 @@ from app.config import Settings
 from app.core.demo_accounts import DEMO_ACCOUNT_EMAILS
 from app.core.email import get_email_service
 from app.core.events import event_bus
+from app.core.jwt_keys import decode_jwt, encode_jwt
 
 _logger_ev = __import__("logging").getLogger(__name__ + ".events")
 
@@ -161,7 +161,7 @@ def create_access_token(
         payload["sid"] = sid
     if extra_claims:
         payload.update(extra_claims)
-    return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+    return encode_jwt(payload, settings)
 
 
 def create_refresh_token(user: User, settings: Settings, *, sid: str | None = None) -> str:
@@ -182,7 +182,7 @@ def create_refresh_token(user: User, settings: Settings, *, sid: str | None = No
     }
     if sid:
         payload["sid"] = sid
-    return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+    return encode_jwt(payload, settings)
 
 
 # Password-reset token lifetime. Single source of truth: the token's actual
@@ -204,7 +204,7 @@ def create_reset_token(user: User, settings: Settings) -> str:
         "type": "reset",
         "jti": _new_jti(),
     }
-    return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+    return encode_jwt(payload, settings)
 
 
 async def _send_reset_email(to: str, reset_url: str, recipient_name: str, log_url: bool) -> None:
@@ -995,11 +995,7 @@ class UserService:
         from jose import JWTError
 
         try:
-            payload = jwt.decode(
-                refresh_token,
-                self.settings.jwt_secret,
-                algorithms=[self.settings.jwt_algorithm],
-            )
+            payload = decode_jwt(refresh_token, self.settings)
         except JWTError as exc:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -1128,11 +1124,7 @@ class UserService:
         from jose import JWTError
 
         try:
-            payload = jwt.decode(
-                data.token,
-                self.settings.jwt_secret,
-                algorithms=[self.settings.jwt_algorithm],
-            )
+            payload = decode_jwt(data.token, self.settings)
         except JWTError as exc:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

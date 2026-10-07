@@ -477,6 +477,11 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 60
     jwt_refresh_expire_days: int = 30
+    # Earlier signing secrets still accepted for verification, comma-separated.
+    # New tokens are always signed with ``jwt_secret``; listing the old secret
+    # here after a rotation keeps existing sessions alive until they expire.
+    # See docs/jwt-key-rotation.md. Binds JWT_PREVIOUS_SECRETS / OE_JWT_PREVIOUS_SECRETS.
+    jwt_previous_secrets: str = ""
     # OIDC / Keycloak (all optional - local auth remains the default)
     oidc_enabled: bool = False
     oidc_issuer_url: str = ""
