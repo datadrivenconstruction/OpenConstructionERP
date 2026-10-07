@@ -19,6 +19,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Badge, Card, CardContent, CardHeader } from '@/shared/ui';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { ApiError, apiGet, apiPost, getErrorMessage } from '@/shared/lib/api';
+import { subtractDecimalStrings } from '@/shared/lib/exactDecimal';
 
 interface ClaimInvoiceLineItem {
   id: string;
@@ -126,7 +127,7 @@ export function ClaimInvoicePreview({
   // The invoice stores the gross in its subtotal and holds retention beside
   // it, so what changes hands now is the total less the retention.
   const netNow = invoice
-    ? String(Math.round((Number(invoice.amount_total) - Number(invoice.retention_amount)) * 100) / 100)
+    ? subtractDecimalStrings(invoice.amount_total, invoice.retention_amount)
     : '0';
 
   return (

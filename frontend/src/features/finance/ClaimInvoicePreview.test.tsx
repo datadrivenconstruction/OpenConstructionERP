@@ -22,6 +22,7 @@ vi.mock('@/shared/lib/api', async (importOriginal) => ({
 }));
 
 import * as api from '@/shared/lib/api';
+import { usePreferencesStore } from '@/stores/usePreferencesStore';
 import { ClaimInvoicePreview } from './ClaimInvoicePreview';
 
 // No i18n instance is set up here, so labels render as their keys.
@@ -57,9 +58,27 @@ const absent = () => new api.ApiError(404, 'Not Found', {
 beforeEach(() => {
   vi.clearAllMocks();
   getMock.mockReset();
+  usePreferencesStore.setState({ numberLocale: 'en-US' });
 });
 
 describe('ClaimInvoicePreview', () => {
+  // These wire-value fixtures exercise frontend precision only, not backend storage scale.
+  it.each([
+    ['JPY', '1000', '1', '\u00a5999'],
+    ['USD', '10.00', '0.01', '$9.99'],
+    ['KWD', '10.000', '0.001', 'KWD9.999'],
+    ['USD', '9007199254740993.01', '0.01', '$9,007,199,254,740,993.00'],
+    ['USD', '10.0000', '1.0000', '$9.00'],
+    ['USD', '0.00', '0.01', '-$0.01'],
+    ['USD', 'invalid', '0.01', '\u2014'],
+  ])('renders exact net for %s gross=%s retention=%s', async (currency, gross, retention, expected) => {
+    getMock.mockResolvedValue({ ...payable, currency_code: currency, amount_total: gross, retention_amount: retention });
+    renderPreview({ direction: 'payable' });
+    await screen.findByText('INV-P-001');
+    const row = screen.getByText('finance.claimInvoice.netPayable').parentElement;
+    expect(row?.querySelector('dd')?.textContent?.replace(/\s/g, '')).toBe(expected);
+  });
+
   it('shows a subcontract claim as a payable with the net after retention', async () => {
     getMock.mockResolvedValue(payable);
     renderPreview({ direction: 'payable' });
