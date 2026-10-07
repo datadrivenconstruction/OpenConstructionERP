@@ -43173,6 +43173,7 @@ const resource = {
     "onboarding.semantic_model_retry": "Riprova",
     "onboarding.semantic_model_title": "Modello di ricerca semantica",
     "onboarding.semantic_model_optional": "Facoltativo - si scarica in background. La ricerca funziona anche senza.",
+    "onboarding.semantic_model_consent": "Circa 470 MB, scaricato solo quando lo attivi. Permette alla ricerca di trovare le voci per significato, non solo per parole esatte.",
     "onboarding.semantic_model_downloading": "Download di {{done}} file su {{total}}",
     "onboarding.semantic_model_ready": "Installato",
     "onboarding.semantic_model_unavailable": "Non disponibile qui",

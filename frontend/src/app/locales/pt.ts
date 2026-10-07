@@ -43119,6 +43119,7 @@ const resource = {
     "onboarding.semantic_model_retry": "Tentar novamente",
     "onboarding.semantic_model_title": "Modelo de pesquisa semântica",
     "onboarding.semantic_model_optional": "Opcional - descarrega em segundo plano. A pesquisa funciona sem ele.",
+    "onboarding.semantic_model_consent": "Cerca de 470 MB, transferido apenas quando o ativar. Permite que a pesquisa encontre itens pelo significado, não só por palavras exatas.",
     "onboarding.semantic_model_downloading": "A descarregar {{done}} de {{total}} ficheiros",
     "onboarding.semantic_model_ready": "Instalado",
     "onboarding.semantic_model_unavailable": "Não disponível aqui",

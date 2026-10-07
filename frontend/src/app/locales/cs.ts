@@ -43315,6 +43315,7 @@ const resource = {
     "onboarding.semantic_model_retry": "Zkusit znovu",
     "onboarding.semantic_model_title": "Model sémantického vyhledávání",
     "onboarding.semantic_model_optional": "Nepovinné - stahuje se na pozadí. Vyhledávání funguje i bez něj.",
+    "onboarding.semantic_model_consent": "Asi 470 MB, stáhne se jen tehdy, když to zapnete. Vyhledávání pak najde položky podle významu, nejen podle přesných slov.",
     "onboarding.semantic_model_downloading": "Stahování {{done}} z {{total}} souborů",
     "onboarding.semantic_model_ready": "Nainstalováno",
     "onboarding.semantic_model_unavailable": "Zde není k dispozici",

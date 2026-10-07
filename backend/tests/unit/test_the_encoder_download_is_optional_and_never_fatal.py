@@ -1,9 +1,9 @@
-"""The encoder download is on by default locally, off on a server, never fatal.
+"""The encoder download happens only when asked, and is never fatal.
 
 Three properties are being pinned here, and the third is the one that is easy to
 lose while building the first two:
 
-1. A local install fetches the encoder weights; a server deploy does not.
+1. Nothing fetches the weights unasked, the desktop included; a click does.
 2. The fetch happens in the background and blocks nothing.
 3. Nothing breaks while the weights are missing, failed, or half-arrived.
 
@@ -159,15 +159,45 @@ def test_a_server_deploy_does_not_start_a_download(monkeypatch: pytest.MonkeyPat
     assert _FakeHub.requested == []
 
 
-def test_a_desktop_install_starts_the_download(monkeypatch: pytest.MonkeyPatch, hub) -> None:
+def test_a_desktop_install_does_not_download_until_asked(monkeypatch: pytest.MonkeyPatch, hub) -> None:
+    """Windows-trust rule: no network fetch on the desktop without a user action.
+
+    The desktop used to start a ~470 MB transfer on first boot. The same boot
+    now does nothing, and the click (wizard tick or settings card) does it.
+    """
     monkeypatch.setenv("OE_DESKTOP", "1")
     monkeypatch.delenv(installer.ENV_DOWNLOAD, raising=False)
 
-    assert installer.download_enabled() is True
-    assert installer.start_background_download() is True
+    assert installer.download_enabled() is False
+    assert installer.start_background_download() is False
+    assert _FakeHub.requested == []
+    status = installer.download_status()
+    assert status["enabled"] is False
+    assert status["locked"] is False
+    assert "470 MB" in status["message"]
 
+    assert installer.start_background_download(requested=True) is True
     _await_state(installer.STATE_READY)
     assert installer.find_installed_model(REPO) is not None
+
+
+def test_the_desktop_loader_does_not_reach_the_hub_unasked(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """A lazy first embed must not become the download the boot no longer makes."""
+    monkeypatch.setattr(installer, "find_installed_model", lambda name: None)
+    monkeypatch.setenv("OE_DESKTOP", "1")
+    monkeypatch.delenv(installer.ENV_DOWNLOAD, raising=False)
+    assert vector._candidate_sources(REPO) == []
+
+    # An operator who opts in gets the hub back.
+    monkeypatch.setenv(installer.ENV_DOWNLOAD, "1")
+    assert vector._candidate_sources(REPO) == [REPO]
+
+    # Once the click has installed it, the local copy loads with no network.
+    monkeypatch.delenv(installer.ENV_DOWNLOAD, raising=False)
+    local = tmp_path / "weights"
+    local.mkdir()
+    monkeypatch.setattr(installer, "find_installed_model", lambda name: local)
+    assert vector._candidate_sources(REPO) == [str(local)]
 
 
 def test_one_variable_overrides_the_default_in_both_directions(monkeypatch: pytest.MonkeyPatch, hub) -> None:

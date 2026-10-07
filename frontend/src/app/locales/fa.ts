@@ -42820,6 +42820,7 @@ const resource = {
     "onboarding.semantic_model_retry": "دوباره تلاش کنید",
     "onboarding.semantic_model_title": "مدل جستوجوی معنایی",
     "onboarding.semantic_model_optional": "اختیاری - در پسزمینه دانلود میشود. جستوجو بدون آن هم کار میکند.",
+    "onboarding.semantic_model_consent": "حدود 470 مگابایت، فقط وقتی آن را روشن کنید دانلود می‌شود. جستجو را قادر می‌سازد اقلام هزینه را بر اساس معنا پیدا کند، نه فقط کلمات دقیق.",
     "onboarding.semantic_model_downloading": "در حال دانلود {{done}} از {{total}} فایل",
     "onboarding.semantic_model_ready": "نصب شد",
     "onboarding.semantic_model_unavailable": "اینجا در دسترس نیست",

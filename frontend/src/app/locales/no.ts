@@ -42890,6 +42890,7 @@ const resource = {
     "onboarding.semantic_model_retry": "Prov igjen",
     "onboarding.semantic_model_title": "Modell for semantisk søk",
     "onboarding.semantic_model_optional": "Valgfritt - lastes ned i bakgrunnen. Søk virker uten det.",
+    "onboarding.semantic_model_consent": "Omtrent 470 MB, lastes bare ned når du slår det på. Det lar søket finne poster etter betydning, ikke bare etter eksakte ord.",
     "onboarding.semantic_model_downloading": "Laster ned {{done}} av {{total}} filer",
     "onboarding.semantic_model_ready": "Installert",
     "onboarding.semantic_model_unavailable": "Ikke tilgjengelig her",

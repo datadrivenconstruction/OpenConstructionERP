@@ -42684,6 +42684,7 @@ const resource = {
     "onboarding.semantic_model_retry": "重试",
     "onboarding.semantic_model_title": "语义检索模型",
     "onboarding.semantic_model_optional": "可选 - 在后台下载。没有它检索也能用。",
+    "onboarding.semantic_model_consent": "约 470 MB，仅在您开启后才会下载。可让搜索按含义查找费用条目，而不仅是精确匹配词语。",
     "onboarding.semantic_model_downloading": "正在下载 {{total}} 个文件中的 {{done}} 个",
     "onboarding.semantic_model_ready": "已安装",
     "onboarding.semantic_model_unavailable": "此处不可用",

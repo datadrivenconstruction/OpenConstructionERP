@@ -42712,6 +42712,7 @@ const resource = {
     "onboarding.semantic_model_retry": "Proovi uuesti",
     "onboarding.semantic_model_title": "Semantilise otsingu mudel",
     "onboarding.semantic_model_optional": "Valikuline - laaditakse taustal. Otsing töötab ka ilma selleta.",
+    "onboarding.semantic_model_consent": "Umbes 470 MB, laaditakse alla ainult siis, kui selle sisse lülitate. Otsing leiab siis kirjeid tähenduse, mitte ainult täpsete sõnade järgi.",
     "onboarding.semantic_model_downloading": "Laadin alla {{done}} / {{total}} failist",
     "onboarding.semantic_model_ready": "Paigaldatud",
     "onboarding.semantic_model_unavailable": "Siin ei ole saadaval",

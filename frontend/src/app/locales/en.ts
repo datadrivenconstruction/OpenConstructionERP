@@ -38365,6 +38365,7 @@ const resource = {
     "onboarding.semantic_model_retry": "Try again",
     "onboarding.semantic_model_title": "Semantic search model",
     "onboarding.semantic_model_optional": "Optional - downloads in the background. Search works without it.",
+    "onboarding.semantic_model_consent": "About 470 MB, downloaded only when you switch this on. It lets search find cost items by meaning, not only by exact words.",
     "onboarding.semantic_model_downloading": "Downloading {{done}} of {{total}} files",
     "onboarding.semantic_model_ready": "Installed",
     "onboarding.semantic_model_unavailable": "Not available here",

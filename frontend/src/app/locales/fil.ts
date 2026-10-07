@@ -42790,6 +42790,7 @@ const resource = {
     "onboarding.semantic_model_retry": "Subukan ulit",
     "onboarding.semantic_model_title": "Modelo ng semantikong paghahanap",
     "onboarding.semantic_model_optional": "Opsyonal - nagda-download sa background. Gumagana ang paghahanap kahit wala ito.",
+    "onboarding.semantic_model_consent": "Mga 470 MB, dina-download lang kapag binuksan mo ito. Hinahayaan nitong mahanap ng search ang mga cost item ayon sa kahulugan, hindi lang sa eksaktong salita.",
     "onboarding.semantic_model_downloading": "Dina-download ang {{done}} sa {{total}} na file",
     "onboarding.semantic_model_ready": "Naka-install",
     "onboarding.semantic_model_unavailable": "Hindi available dito",

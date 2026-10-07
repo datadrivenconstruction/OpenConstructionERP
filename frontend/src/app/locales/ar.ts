@@ -43766,6 +43766,7 @@ const resource = {
     "onboarding.semantic_model_retry": "حاول مرة أخرى",
     "onboarding.semantic_model_title": "نموذج البحث الدلالي",
     "onboarding.semantic_model_optional": "اختياري - يُنزَّل في الخلفية. والبحث يعمل بدونه.",
+    "onboarding.semantic_model_consent": "حوالي 470 ميغابايت، ولا يُنزَّل إلا عند تفعيله. يتيح للبحث العثور على بنود التكلفة حسب المعنى، لا بالكلمات المطابقة فقط.",
     "onboarding.semantic_model_downloading": "جارٍ تنزيل {{done}} من {{total}} ملفات",
     "onboarding.semantic_model_ready": "مثبَّت",
     "onboarding.semantic_model_unavailable": "غير متاح هنا",

@@ -42682,6 +42682,7 @@ const resource = {
     "onboarding.semantic_model_retry": "ลองอีกครั้ง",
     "onboarding.semantic_model_title": "โมเดลการค้นหาเชิงความหมาย",
     "onboarding.semantic_model_optional": "ไม่บังคับ - ดาวน์โหลดอยู่เบื้องหลัง การค้นหาทำงานได้แม้ไม่มีสิ่งนี้",
+    "onboarding.semantic_model_consent": "ประมาณ 470 MB ดาวน์โหลดเฉพาะเมื่อคุณเปิดใช้งาน ช่วยให้การค้นหาพบรายการต้นทุนตามความหมาย ไม่ใช่แค่คำที่ตรงกันเท่านั้น",
     "onboarding.semantic_model_downloading": "กำลังดาวน์โหลด {{done}} จาก {{total}} ไฟล์",
     "onboarding.semantic_model_ready": "ติดตั้งแล้ว",
     "onboarding.semantic_model_unavailable": "ไม่มีให้ใช้ที่นี่",

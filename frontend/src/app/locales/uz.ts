@@ -43217,6 +43217,7 @@ const resource = {
     "onboarding.semantic_model_failed": "Modelni yuklab boʻlmadi. Qolgan hamma narsa ishlashda davom etadi.",
     "onboarding.semantic_model_library_missing": "Semantik qidiruv ushbu oʻrnatishga kiritilmagan. Qolgan hamma narsa usiz ishlaydi.",
     "onboarding.semantic_model_optional": "Ixtiyoriy - fonda yuklab olinadi. Qidiruv usiz ham ishlaydi.",
+    "onboarding.semantic_model_consent": "Taxminan 470 MB, faqat yoqganingizda yuklab olinadi. Qidiruv xarajat bandlarini faqat aniq so'zlar bo'yicha emas, ma'nosi bo'yicha ham topadi.",
     "onboarding.semantic_model_ready": "Oʻrnatilgan",
     "onboarding.semantic_model_retry": "Qayta urinib koʻring",
     "onboarding.semantic_model_title": "Semantik qidiruv modeli",

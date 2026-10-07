@@ -43042,6 +43042,7 @@ const resource = {
     "onboarding.semantic_model_retry": "Pokušaj ponovno",
     "onboarding.semantic_model_title": "Model semantičkog pretraživanja",
     "onboarding.semantic_model_optional": "Neobavezno - preuzima se u pozadini. Pretraživanje radi i bez njega.",
+    "onboarding.semantic_model_consent": "Oko 470 MB, preuzima se samo kada to uključite. Omogućuje pretraživanju da pronalazi stavke po značenju, a ne samo po točnim riječima.",
     "onboarding.semantic_model_downloading": "Preuzimanje {{done}} od {{total}} datoteka",
     "onboarding.semantic_model_ready": "Instalirano",
     "onboarding.semantic_model_unavailable": "Ovdje nije dostupno",

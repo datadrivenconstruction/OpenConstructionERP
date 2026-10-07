@@ -3548,19 +3548,17 @@ export function StepDataSetup({
   const [showKey, setShowKey] = useState(false);
 
   // ── Semantic search model state ──
-  // Pre-ticked, then corrected to whatever this deployment does by default:
-  // a local install fetches the encoder, a server deploy does not need it.
-  // Seeding the tick from the server rather than hardcoding `true` is what
-  // keeps a click-through of the wizard on a server from starting a download
-  // nobody asked for. Shares its query key with the card below, so the two
-  // read one cache entry and not two requests.
+  // Unticked unless an operator opted the deployment in. The tick is the
+  // user's consent to a ~470 MB download, so a click-through of the wizard
+  // must never start it, desktop included. Shares its query key with the card
+  // below, so the two read one cache entry and not two requests.
   const { data: semanticStatus } = useQuery({
     queryKey: ['embedding-model-status'],
     queryFn: aiEstimatorApi.embeddingModelStatus,
     retry: false,
   });
   const [semanticChoice, setSemanticChoice] = useState<boolean | null>(null);
-  const installSemanticModel = semanticChoice ?? semanticStatus?.enabled ?? true;
+  const installSemanticModel = semanticChoice ?? semanticStatus?.enabled ?? false;
 
   // ── Country Pack state ──
   // Default-select the preset for the browser's country, else the one for the

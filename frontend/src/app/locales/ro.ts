@@ -43124,6 +43124,7 @@ const resource = {
     "onboarding.semantic_model_retry": "Încearcă din nou",
     "onboarding.semantic_model_title": "Model de căutare semantică",
     "onboarding.semantic_model_optional": "Opțional - se descarcă în fundal. Căutarea funcționează și fără el.",
+    "onboarding.semantic_model_consent": "Aproximativ 470 MB, descărcat doar când îl activați. Permite căutării să găsească articolele după sens, nu doar după cuvinte exacte.",
     "onboarding.semantic_model_downloading": "Se descarcă {{done}} din {{total}} fișiere",
     "onboarding.semantic_model_ready": "Instalat",
     "onboarding.semantic_model_unavailable": "Indisponibil aici",

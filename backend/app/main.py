@@ -5231,8 +5231,8 @@ def create_app() -> FastAPI:
                     if find_installed_model() is None and not download_enabled():
                         logger.info(
                             "Embedder prime skipped: no encoder installed and the background "
-                            "download is off for this deployment (set OE_DOWNLOAD_EMBEDDING_MODEL=1 "
-                            "to fetch it). Semantic search reports its state honestly meanwhile."
+                            "download was not requested (download it from the setup wizard or Settings, or set "
+                            "OE_DOWNLOAD_EMBEDDING_MODEL=1). Semantic search reports its state honestly meanwhile."
                         )
                         return
 

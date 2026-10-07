@@ -42790,6 +42790,7 @@ const resource = {
     "onboarding.semantic_model_retry": "আবার চেষ্টা করুন",
     "onboarding.semantic_model_title": "সিমান্টিক সার্চ মডেল",
     "onboarding.semantic_model_optional": "ঐচ্ছিক - পটভূমিতে ডাউনলোড হয়। এটি ছাড়াও সার্চ কাজ করে।",
+    "onboarding.semantic_model_consent": "প্রায় 470 MB, শুধু আপনি এটি চালু করলে ডাউনলোড হয়। এটি সার্চকে শুধু হুবহু শব্দ নয়, অর্থ দিয়েও খরচের আইটেম খুঁজতে দেয়।",
     "onboarding.semantic_model_downloading": "{{total}}টির মধ্যে {{done}}টি ফাইল ডাউনলোড হচ্ছে",
     "onboarding.semantic_model_ready": "ইনস্টল হয়েছে",
     "onboarding.semantic_model_unavailable": "এখানে পাওয়া যাচ্ছে না",

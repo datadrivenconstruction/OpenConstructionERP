@@ -42690,6 +42690,7 @@ const resource = {
     "onboarding.semantic_model_retry": "Thử lại",
     "onboarding.semantic_model_title": "Mô hình tìm kiếm ngữ nghĩa",
     "onboarding.semantic_model_optional": "Tùy chọn - tải về ở chế độ nền. Không có nó thì tìm kiếm vẫn chạy.",
+    "onboarding.semantic_model_consent": "Khoảng 470 MB, chỉ tải xuống khi bạn bật. Giúp tìm kiếm tìm hạng mục chi phí theo ý nghĩa, không chỉ theo từ chính xác.",
     "onboarding.semantic_model_downloading": "Đang tải {{done}} trên {{total}} tệp",
     "onboarding.semantic_model_ready": "Đã cài đặt",
     "onboarding.semantic_model_unavailable": "Không có ở đây",

@@ -43108,6 +43108,7 @@ const resource = {
     "onboarding.semantic_model_retry": "ניסיון חוזר",
     "onboarding.semantic_model_title": "מודל לחיפוש סמנטי",
     "onboarding.semantic_model_optional": "רשות - מורד ברקע. החיפוש עובד גם בלעדיו.",
+    "onboarding.semantic_model_consent": "כ-470 MB, יורד רק כשמפעילים אותו. מאפשר לחיפוש למצוא פריטי עלות לפי משמעות, ולא רק לפי מילים מדויקות.",
     "onboarding.semantic_model_downloading": "מוריד {{done}} מתוך {{total}} קבצים",
     "onboarding.semantic_model_ready": "מותקן",
     "onboarding.semantic_model_unavailable": "לא זמין כאן",

@@ -42642,6 +42642,7 @@ const resource = {
     "onboarding.semantic_model_retry": "Próbálja újra",
     "onboarding.semantic_model_title": "Szemantikus keresési modell",
     "onboarding.semantic_model_optional": "Nem kötelező - a háttérben töltődik le. A keresés nélküle is működik.",
+    "onboarding.semantic_model_consent": "Körülbelül 470 MB, csak akkor töltődik le, ha bekapcsolja. Így a keresés jelentés szerint is megtalálja a tételeket, nem csak pontos szavak alapján.",
     "onboarding.semantic_model_downloading": "{{done}} / {{total}} fájl letöltése",
     "onboarding.semantic_model_ready": "Telepítve",
     "onboarding.semantic_model_unavailable": "Itt nem érhető el",

@@ -42636,6 +42636,7 @@ const resource = {
     "onboarding.semantic_model_retry": "다시 시도",
     "onboarding.semantic_model_title": "의미 검색 모델",
     "onboarding.semantic_model_optional": "선택 사항 - 백그라운드에서 내려받습니다. 없어도 검색은 작동합니다.",
+    "onboarding.semantic_model_consent": "약 470MB이며 켤 때만 다운로드됩니다. 정확한 단어뿐 아니라 의미로도 비용 항목을 찾을 수 있게 해 줍니다.",
     "onboarding.semantic_model_downloading": "{{total}}개 중 {{done}}개 파일 내려받는 중",
     "onboarding.semantic_model_ready": "설치됨",
     "onboarding.semantic_model_unavailable": "여기서는 사용할 수 없음",

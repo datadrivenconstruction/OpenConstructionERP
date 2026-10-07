@@ -42880,6 +42880,7 @@ const resource = {
     "onboarding.semantic_model_retry": "دوبارہ کوشش کریں",
     "onboarding.semantic_model_title": "معنوی تلاش کا ماڈل",
     "onboarding.semantic_model_optional": "اختیاری - پس منظر میں ڈاؤن لوڈ ہوتا ہے۔ اس کے بغیر بھی تلاش چلتی ہے۔",
+    "onboarding.semantic_model_consent": "تقریباً 470 MB، صرف اسے آن کرنے پر ڈاؤن لوڈ ہوتا ہے۔ اس سے تلاش لاگت کی اشیاء کو صرف درست الفاظ سے نہیں بلکہ معنی سے بھی ڈھونڈ سکتی ہے۔",
     "onboarding.semantic_model_downloading": "{{total}} میں سے {{done}} فائلیں ڈاؤن لوڈ ہو رہی ہیں",
     "onboarding.semantic_model_ready": "انسٹال ہو گیا",
     "onboarding.semantic_model_unavailable": "یہاں دستیاب نہیں",

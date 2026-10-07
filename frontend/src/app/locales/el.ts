@@ -42760,6 +42760,7 @@ const resource = {
     "onboarding.semantic_model_retry": "Δοκιμάστε ξανά",
     "onboarding.semantic_model_title": "Μοντέλο σημασιολογικής αναζήτησης",
     "onboarding.semantic_model_optional": "Προαιρετικό - κατεβαίνει στο παρασκήνιο. Η αναζήτηση λειτουργεί και χωρίς αυτό.",
+    "onboarding.semantic_model_consent": "Περίπου 470 MB, λαμβάνεται μόνο όταν το ενεργοποιήσετε. Επιτρέπει στην αναζήτηση να βρίσκει είδη κόστους με βάση το νόημα, όχι μόνο τις ακριβείς λέξεις.",
     "onboarding.semantic_model_downloading": "Λήψη {{done}} από {{total}} αρχεία",
     "onboarding.semantic_model_ready": "Εγκαταστάθηκε",
     "onboarding.semantic_model_unavailable": "Μη διαθέσιμο εδώ",

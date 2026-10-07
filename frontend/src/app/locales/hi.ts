@@ -42896,6 +42896,7 @@ const resource = {
     "onboarding.semantic_model_retry": "पुनः प्रयास करें",
     "onboarding.semantic_model_title": "सिमेंटिक खोज मॉडल",
     "onboarding.semantic_model_optional": "वैकल्पिक - पृष्ठभूमि में डाउनलोड होता है। इसके बिना भी खोज चलती है।",
+    "onboarding.semantic_model_consent": "लगभग 470 MB, केवल तब डाउनलोड होता है जब आप इसे चालू करते हैं। इससे खोज केवल सटीक शब्दों से नहीं, अर्थ से भी लागत आइटम ढूंढ पाती है।",
     "onboarding.semantic_model_downloading": "{{total}} में से {{done}} फ़ाइलें डाउनलोड हो रही हैं",
     "onboarding.semantic_model_ready": "इंस्टॉल किया गया",
     "onboarding.semantic_model_unavailable": "यहाँ उपलब्ध नहीं",

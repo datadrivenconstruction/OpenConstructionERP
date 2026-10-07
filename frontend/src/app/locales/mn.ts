@@ -42616,6 +42616,7 @@ const resource = {
     "onboarding.semantic_model_retry": "Дахин оролдоно уу",
     "onboarding.semantic_model_title": "Утгын хайлтын загвар",
     "onboarding.semantic_model_optional": "Заавал биш - арын дэвсгэрт татна. Үүнгүйгээр ч хайлт ажиллана.",
+    "onboarding.semantic_model_consent": "Ойролцоогоор 470 МБ, зөвхөн та асаахад татагдана. Хайлт зардлын зүйлсийг яг тохирох үгээр төдийгүй утгаар нь олох боломжтой болно.",
     "onboarding.semantic_model_downloading": "{{total}} файлын {{done}}-г татаж байна",
     "onboarding.semantic_model_ready": "Суулгасан",
     "onboarding.semantic_model_unavailable": "Энд боломжгүй",

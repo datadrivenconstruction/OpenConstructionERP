@@ -42854,6 +42854,7 @@ const resource = {
     "onboarding.semantic_model_retry": "Prøv igen",
     "onboarding.semantic_model_title": "Model til semantisk søgning",
     "onboarding.semantic_model_optional": "Valgfrit - hentes i baggrunden. Søgning virker uden det.",
+    "onboarding.semantic_model_consent": "Ca. 470 MB, hentes kun, når du slår det til. Det lader søgningen finde poster ud fra betydning, ikke kun ud fra præcise ord.",
     "onboarding.semantic_model_downloading": "Henter {{done}} af {{total}} filer",
     "onboarding.semantic_model_ready": "Installeret",
     "onboarding.semantic_model_unavailable": "Ikke tilgængelig her",

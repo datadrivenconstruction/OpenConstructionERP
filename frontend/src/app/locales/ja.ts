@@ -42636,6 +42636,7 @@ const resource = {
     "onboarding.semantic_model_retry": "もう一度試す",
     "onboarding.semantic_model_title": "意味検索モデル",
     "onboarding.semantic_model_optional": "任意 - バックグラウンドでダウンロードします。なくても検索は使えます。",
+    "onboarding.semantic_model_consent": "約470 MB。オンにしたときだけダウンロードされます。完全一致の語句だけでなく、意味でコスト項目を検索できるようになります。",
     "onboarding.semantic_model_downloading": "{{total}} 件中 {{done}} 件をダウンロード中",
     "onboarding.semantic_model_ready": "インストール済み",
     "onboarding.semantic_model_unavailable": "ここでは利用できません",

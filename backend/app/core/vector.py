@@ -184,9 +184,11 @@ def _candidate_sources(name: str) -> list[str]:
         local = None
 
     try:
-        from app.core.embedding_installer import download_locked_off
+        from app.core.embedding_installer import hub_fetch_allowed
 
-        locked = download_locked_off()
+        # On the desktop the hub id is also withheld until the user asks for
+        # the model, because resolving it is an unasked download.
+        locked = not hub_fetch_allowed()
     except Exception:  # noqa: BLE001 - same reasoning as above
         locked = False
 

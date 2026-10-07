@@ -42869,6 +42869,7 @@ const resource = {
     "onboarding.semantic_model_retry": "Кайра аракет кылуу",
     "onboarding.semantic_model_title": "Семантикалык издөө модели",
     "onboarding.semantic_model_optional": "Милдеттүү эмес - фондо жүктөлөт. Издөө ансыз да иштейт.",
+    "onboarding.semantic_model_consent": "Болжол менен 470 МБ, аны күйгүзгөндө гана жүктөлөт. Издөө баа позицияларын так сөздөр боюнча гана эмес, маанисине карап да табат.",
     "onboarding.semantic_model_downloading": "{{total}} файлдын {{done}} жүктөлүүдө",
     "onboarding.semantic_model_ready": "Орнотулду",
     "onboarding.semantic_model_unavailable": "Бул жерде жеткиликсиз",

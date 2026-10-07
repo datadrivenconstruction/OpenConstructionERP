@@ -44155,6 +44155,7 @@ const resource = {
     "onboarding.semantic_model_failed": "Не вдалося завантажити модель. Усе інше продовжує працювати.",
     "onboarding.semantic_model_library_missing": "Семантичний пошук не входить до цієї інсталяції. Усе інше працює без нього.",
     "onboarding.semantic_model_optional": "Необов'язково - завантажується у фоні. Пошук працює й без нього.",
+    "onboarding.semantic_model_consent": "Близько 470 МБ, завантажується лише після ввімкнення. Дає змогу пошуку знаходити позиції за змістом, а не лише за точними словами.",
     "onboarding.semantic_model_ready": "Встановлено",
     "onboarding.semantic_model_retry": "Спробувати ще раз",
     "onboarding.semantic_model_title": "Модель семантичного пошуку",

@@ -42538,6 +42538,7 @@ const resource = {
     "onboarding.semantic_model_retry": "Coba lagi",
     "onboarding.semantic_model_title": "Model pencarian semantik",
     "onboarding.semantic_model_optional": "Opsional - diunduh di latar belakang. Pencarian tetap bekerja tanpa itu.",
+    "onboarding.semantic_model_consent": "Sekitar 470 MB, hanya diunduh saat Anda mengaktifkannya. Pencarian dapat menemukan item biaya berdasarkan makna, bukan hanya kata yang persis.",
     "onboarding.semantic_model_downloading": "Mengunduh {{done}} dari {{total}} berkas",
     "onboarding.semantic_model_ready": "Terpasang",
     "onboarding.semantic_model_unavailable": "Tidak tersedia di sini",

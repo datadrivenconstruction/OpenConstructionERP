@@ -42848,6 +42848,7 @@ const resource = {
     "onboarding.semantic_model_retry": "Opnieuw proberen",
     "onboarding.semantic_model_title": "Model voor semantisch zoeken",
     "onboarding.semantic_model_optional": "Optioneel - wordt op de achtergrond gedownload. Zoeken werkt ook zonder.",
+    "onboarding.semantic_model_consent": "Ongeveer 470 MB, wordt alleen gedownload als u het inschakelt. Zo vindt zoeken posten op betekenis, niet alleen op exacte woorden.",
     "onboarding.semantic_model_downloading": "{{done}} van {{total}} bestanden downloaden",
     "onboarding.semantic_model_ready": "Geïnstalleerd",
     "onboarding.semantic_model_unavailable": "Hier niet beschikbaar",

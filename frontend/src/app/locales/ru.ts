@@ -43331,6 +43331,7 @@ const resource = {
     "onboarding.semantic_model_retry": "Попробовать снова",
     "onboarding.semantic_model_title": "Модель семантического поиска",
     "onboarding.semantic_model_optional": "Необязательно - загружается в фоне. Поиск работает и без неё.",
+    "onboarding.semantic_model_consent": "Около 470 МБ, загружается только после включения. Позволяет поиску находить позиции по смыслу, а не только по точным словам.",
     "onboarding.semantic_model_downloading": "Загрузка {{done}} из {{total}} файлов",
     "onboarding.semantic_model_ready": "Установлена",
     "onboarding.semantic_model_unavailable": "Здесь недоступно",

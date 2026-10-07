@@ -42864,6 +42864,7 @@ const resource = {
     "onboarding.semantic_model_retry": "Опитайте отново",
     "onboarding.semantic_model_title": "Модел за семантично търсене",
     "onboarding.semantic_model_optional": "По избор - изтегля се на заден план. Търсенето работи и без него.",
+    "onboarding.semantic_model_consent": "Около 470 MB, изтегля се само когато го включите. Позволява търсенето да намира позиции по смисъл, а не само по точни думи.",
     "onboarding.semantic_model_downloading": "Изтегляне на {{done}} от {{total}} файла",
     "onboarding.semantic_model_ready": "Инсталиран",
     "onboarding.semantic_model_unavailable": "Не е налично тук",

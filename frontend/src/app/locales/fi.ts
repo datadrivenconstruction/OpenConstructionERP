@@ -42863,6 +42863,7 @@ const resource = {
     "onboarding.semantic_model_retry": "Yritä uudelleen",
     "onboarding.semantic_model_title": "Semanttisen haun malli",
     "onboarding.semantic_model_optional": "Valinnainen - ladataan taustalla. Haku toimii ilman sitä.",
+    "onboarding.semantic_model_consent": "Noin 470 Mt, ladataan vain, kun otat sen käyttöön. Haku löytää silloin nimikkeet merkityksen eikä vain tarkkojen sanojen perusteella.",
     "onboarding.semantic_model_downloading": "Ladataan {{done}} / {{total}} tiedostosta",
     "onboarding.semantic_model_ready": "Asennettu",
     "onboarding.semantic_model_unavailable": "Ei saatavilla täällä",

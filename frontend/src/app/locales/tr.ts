@@ -42831,6 +42831,7 @@ const resource = {
     "onboarding.semantic_model_retry": "Tekrar dene",
     "onboarding.semantic_model_title": "Anlamsal arama modeli",
     "onboarding.semantic_model_optional": "İsteğe bağlı - arka planda iner. Arama onsuz da çalışır.",
+    "onboarding.semantic_model_consent": "Yaklaşık 470 MB, yalnızca siz açtığınızda indirilir. Aramanın kalemleri yalnızca tam kelimelerle değil, anlamlarıyla da bulmasını sağlar.",
     "onboarding.semantic_model_downloading": "{{total}} dosyadan {{done}} iniyor",
     "onboarding.semantic_model_ready": "Kuruldu",
     "onboarding.semantic_model_unavailable": "Burada kullanılamaz",

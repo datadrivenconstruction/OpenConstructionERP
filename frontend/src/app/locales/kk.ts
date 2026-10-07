@@ -42735,6 +42735,7 @@ const resource = {
     "onboarding.semantic_model_retry": "Қайталап көру",
     "onboarding.semantic_model_title": "Семантикалық іздеу моделі",
     "onboarding.semantic_model_optional": "Міндетті емес - фонда жүктеледі. Іздеу онсыз да жұмыс істейді.",
+    "onboarding.semantic_model_consent": "Шамамен 470 МБ, тек қосқанда ғана жүктеледі. Іздеу шығын позицияларын нақты сөздер бойынша ғана емес, мағынасы бойынша да табады.",
     "onboarding.semantic_model_downloading": "{{total}} файлдың {{done}} жүктелуде",
     "onboarding.semantic_model_ready": "Орнатылды",
     "onboarding.semantic_model_unavailable": "Мұнда қолжетімді емес",

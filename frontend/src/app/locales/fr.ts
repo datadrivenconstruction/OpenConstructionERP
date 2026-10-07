@@ -43130,6 +43130,7 @@ const resource = {
     "onboarding.semantic_model_retry": "Réessayer",
     "onboarding.semantic_model_title": "Modèle de recherche sémantique",
     "onboarding.semantic_model_optional": "Facultatif - se télécharge en arrière-plan. La recherche fonctionne sans lui.",
+    "onboarding.semantic_model_consent": "Environ 470 Mo, téléchargé uniquement si vous l'activez. La recherche trouve alors les postes par leur sens, pas seulement par mots exacts.",
     "onboarding.semantic_model_downloading": "Téléchargement de {{done}} fichiers sur {{total}}",
     "onboarding.semantic_model_ready": "Installé",
     "onboarding.semantic_model_unavailable": "Non disponible ici",
