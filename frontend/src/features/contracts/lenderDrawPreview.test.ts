@@ -24,6 +24,39 @@ function application(currency: string, amount: string): PaymentApplication {
   };
 }
 
+function subcontractorRollup(): ClaimSubRollup {
+  return {
+    claim_id: context.claimId, contract_id: context.contractId, project_id: context.projectId,
+    claim_status: 'draft', currency: 'EUR', period_from: null, period_to: null,
+    period_matching: 'explicit_only', as_of: null, skipped_foreign_currency: 2,
+    lines: [], candidates: [], unmapped_lines: [], agreements: [],
+    sub_period_approved_total: '0.00', gc_period_total: '5.00',
+    requirements: {
+      certificate_types: [], lien_waiver_required: true, source: 'contract', reference: null,
+    },
+    included: [{
+      payment_application_id: 'pay-app', application_number: '1', agreement_id: 'agreement-1',
+      agreement_title: 'Subcontract', subcontractor_id: 'sub-1', subcontractor_name: 'Subcontractor',
+      status: 'submitted', period_start: null, period_end: null, currency: 'EUR',
+      gross_amount: '5.00', net_amount: '5.00', claimed_amount: '5.00',
+      certified_amount: '0.00', approved_amount: '0.00', line_count: 1,
+      progress_claim_id: context.claimId, in_period: null, requires_lien_waiver: true,
+      waiver: {
+        state: 'none', amount_covered: '0.00', covers_net: false,
+        through_date: null, through_date_basis: null,
+      },
+      certificates_ok: null, certificate_findings: [], foreign_currency: false,
+    }],
+  };
+}
+
+function contractDocument(id: string, contractId: string): ContractDocument {
+  return {
+    id, contract_id: contractId, doc_role: 'contract', title: 'Contract document', version: '1',
+    metadata: {}, created_at: '2026-02-01T00:00:00Z', updated_at: '2026-02-01T00:00:00Z',
+  };
+}
+
 describe('draft lender preparation composition', () => {
   it.each([['JPY', '9007199254740993'], ['EUR', '123.40'], ['KWD', '123.457']])(
     'preserves canonical %s decimal strings and period without recalculation', (currency, amount) => {
@@ -66,11 +99,7 @@ describe('draft lender preparation composition', () => {
   });
 
   it('preserves explicit-only matching, skipped currencies and waiver evidence from the rollup', () => {
-    const rollup = {
-      claim_id: context.claimId, contract_id: context.contractId, project_id: context.projectId,
-      currency: 'EUR', period_matching: 'explicit_only', as_of: null, skipped_foreign_currency: 2,
-      included: [{ id: 'pay-app', lien_waiver_received: false }],
-    } as unknown as ClaimSubRollup;
+    const rollup = subcontractorRollup();
     const draft = composeLenderPreparation(context, application('EUR', '5.00'), {
       subcontractors: { status: 'available', data: rollup }, documents: unavailable, waivers: unavailable,
     }, 'now');
@@ -81,10 +110,7 @@ describe('draft lender preparation composition', () => {
   });
 
   it.each(['claim_id', 'contract_id', 'project_id'] as const)('omits a rollup with mismatched %s', (field) => {
-    const rollup = {
-      claim_id: context.claimId, contract_id: context.contractId, project_id: context.projectId,
-      currency: 'EUR', [field]: 'other',
-    } as ClaimSubRollup;
+    const rollup: ClaimSubRollup = { ...subcontractorRollup(), [field]: 'other' };
     const draft = composeLenderPreparation(context, application('EUR', '5.00'), {
       subcontractors: { status: 'available', data: rollup }, documents: unavailable, waivers: unavailable,
     }, 'now');
@@ -92,10 +118,10 @@ describe('draft lender preparation composition', () => {
   });
 
   it('omits a document source containing a foreign contract reference', () => {
-    const documents = [
-      { id: 'own-document', contract_id: context.contractId },
-      { id: 'foreign-document', contract_id: 'other-contract' },
-    ] as ContractDocument[];
+    const documents: ContractDocument[] = [
+      contractDocument('own-document', context.contractId),
+      contractDocument('foreign-document', 'other-contract'),
+    ];
     const draft = composeLenderPreparation(context, application('EUR', '5.00'), {
       subcontractors: unavailable, documents: { status: 'available', data: documents }, waivers: unavailable,
     }, 'now');
