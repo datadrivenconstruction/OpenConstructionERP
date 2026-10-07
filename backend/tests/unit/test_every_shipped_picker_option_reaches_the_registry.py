@@ -781,7 +781,7 @@ STANDARD_PICKERS: dict[str, tuple[Path, str]] = {
 #: catches one that reads the wrong literal entirely and still finds a coherent
 #: handful. Changing a picker means changing the number here, deliberately.
 STANDARD_PICKER_OPTION_COUNTS: dict[str, int] = {
-    "CreateProjectPage.STANDARD_GROUPS": 14,
+    "CreateProjectPage.STANDARD_GROUPS": 15,
     "QuickEstimatePage.STANDARDS": 4,
     "CreateAssemblyPage.STANDARDS": 3,
 }

@@ -212,7 +212,8 @@ const STANDARD_GROUPS: OptionGroup[] = [
     options: [
       { value: 'gesn', label: 'GESN / FER (Russia, CIS)' },
       { value: 'bc3', label: 'BC3 (Spain)' },
-      { value: 'untec', label: 'UNTEC (France)' },
+      { value: 'dpgf', label: 'DPGF (France)' },
+      { value: 'untec', label: 'UNTEC (Senegal, Cameroon)' },
       { value: 'voci', label: 'VOCI (Italy)' },
       { value: 'sinapi', label: 'SINAPI (Brazil)' },
       { value: 'sekisan', label: 'Sekisan (Japan)' },

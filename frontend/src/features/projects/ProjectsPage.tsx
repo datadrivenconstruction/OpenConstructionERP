@@ -1274,6 +1274,7 @@ export function ProjectCard({
     gesn: 'GESN / FER',
     bc3: 'BC3',
     untec: 'UNTEC',
+    dpgf: 'DPGF',
     voci: 'VOCI',
     onorm: 'ÖNORM',
     gaeb: 'GAEB',

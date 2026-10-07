@@ -81,6 +81,7 @@ CLASSIFICATION_STANDARD_LABELS: Mapping[str, str] = MappingProxyType(
         "masterformat": "MasterFormat",
         "nrm": "NRM",
         "untec": "UNTEC",
+        "dpgf": "DPGF",
         "voci": "VOCI",
         "bc3": "BC3",
         "gb50500": "GB50500",
@@ -208,9 +209,15 @@ COUNTRY_TO_STANDARD: Mapping[str, str] = MappingProxyType(
         "VN": "masterformat",
         "PH": "masterformat",
         # ── Native systems ───────────────────────────────────────────
-        # France and the Francophone West African markets that tender
-        # against the same DTU lineage.
-        "FR": "untec",
+        # France reads DPGF, the lot-by-lot price breakdown a French bill
+        # is tendered in. Every French line the product ships is keyed
+        # ``dpgf`` and the French rule set reads that key. This read untec
+        # until 2026-10, a standard with no rules in the engine; projects
+        # already stored under untec keep it, because an explicit standard
+        # wins over the region, and the French rule row still applies.
+        "FR": "dpgf",
+        # The Francophone West African markets that tender against the
+        # same DTU lineage. They keep UNTEC, which also keeps it storable.
         "SN": "untec",
         "CI": "untec",
         "CM": "untec",
