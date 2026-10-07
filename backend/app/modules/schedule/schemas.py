@@ -1010,6 +1010,7 @@ class BaselineCreate(BaseModel):
     baseline_date: str = Field(..., max_length=20)
     snapshot_data: dict[str, Any] = Field(..., description="Complete snapshot of activities")
     is_active: bool = True
+    # Accepted for compatibility; the route always records the authenticated author.
     created_by: UUID | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 

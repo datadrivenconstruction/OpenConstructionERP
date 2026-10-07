@@ -1616,7 +1616,7 @@ async def create_baseline(
         baseline_date=data.baseline_date,
         snapshot_data=data.snapshot_data,
         is_active=data.is_active,
-        created_by=data.created_by,
+        created_by=uuid.UUID(_user_id),
         metadata_=data.metadata,
     )
     session.add(baseline)

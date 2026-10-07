@@ -137,6 +137,38 @@ async def test_baseline_schedule_must_belong_to_submitted_project(association):
 
 @pytest.mark.asyncio
 @pytest.mark.tenant_isolation
+@pytest.mark.parametrize("submitted_author", ["omitted", "null", "other_user"])
+async def test_baseline_author_is_authenticated_user(submitted_author):
+    async with api() as (client, session, _service, schedule, project, payload):
+        body = {
+            "project_id": str(project.id),
+            "schedule_id": str(schedule.id),
+            "name": "Attributed baseline",
+            "baseline_date": "2026-10-01",
+            "snapshot_data": {"preserved": True},
+        }
+        if submitted_author == "null":
+            body["created_by"] = None
+        elif submitted_author == "other_user":
+            other = User(
+                email=f"author-{uuid.uuid4()}@example.test",
+                full_name="Other author",
+                hashed_password="x",
+                role="editor",
+            )
+            session.add(other)
+            await session.flush()
+            body["created_by"] = str(other.id)
+        response = await client.post("/schedule/baselines/", json=body)
+        assert response.status_code == 201, response.text
+        assert response.json()["created_by"] == payload["sub"]
+        row = await session.get(ScheduleBaseline, uuid.UUID(response.json()["id"]))
+        assert row.created_by == uuid.UUID(payload["sub"])
+        assert row.snapshot_data == {"preserved": True}
+
+
+@pytest.mark.asyncio
+@pytest.mark.tenant_isolation
 async def test_baseline_permission_checked_before_schedule_lookup():
     async with api("viewer") as (client, session, _service, schedule, project, _payload):
         for schedule_id in (schedule.id, uuid.uuid4(), None):
