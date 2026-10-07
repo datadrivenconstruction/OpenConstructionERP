@@ -22834,6 +22834,7 @@
         "gaeb_exchange_router.py",
         "gaeb_x31.py",
         "gaeb_x89.py",
+        "import_append.py",
         "import_jobs.py",
         "importers/__init__.py",
         "importers/_base.py",
@@ -235155,10 +235156,10 @@
     },
     {
       "name": "erp-chat",
-      "ts_files": 72,
+      "ts_files": 73,
       "css_files": 2,
-      "test_files": 13,
-      "total_files": 74
+      "test_files": 14,
+      "total_files": 75
     },
     {
       "name": "esg",
@@ -237357,9 +237358,9 @@
     "total_relationships": 234,
     "total_routes": 3757,
     "total_schemas": 3564,
-    "total_python_files": 2289,
+    "total_python_files": 2290,
     "frontend_features": 192,
-    "frontend_ts_files": 2987,
+    "frontend_ts_files": 2988,
     "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {
