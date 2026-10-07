@@ -1837,62 +1837,77 @@ async def vector_v3_status(
             else:
                 payload["language_mismatch"] = await _detect_language_mismatch(db, project_id)
 
-    # Reaching the store at all is its own outcome, separate from what the
-    # store then says about the collection. Kept ahead of the no_country
-    # branch so that band keeps meaning "store is reachable, caller did not
-    # name a collection" rather than becoming silent about reachability.
+    # Preserve the shared client's initialization thread and lifecycle. In
+    # particular, embedded Qdrant owns thread-affine SQLite persistence.
     try:
         client = _get_client()
-        names = {c.name for c in client.get_collections().collections}
     except Exception as exc:
-        # The reason names the failure class, not the resolved location.
-        # This endpoint answers anonymous callers, so the URL or on-disk
-        # path of the store is not ours to hand out; the detail goes to the
-        # log, where an operator can already see the address anyway.
         logger.warning("CWICR v3 status: store unreachable", exc_info=True)
-        payload["status_band"] = "disconnected"
         payload["error"] = f"CWICR vector store unreachable ({type(exc).__name__})"
         return payload
 
-    payload["connected"] = True
+    def _read_status() -> dict[str, Any]:
+        # Reaching the store at all is its own outcome, separate from what the
+        # store then says about the collection. Kept ahead of the no_country
+        # branch so that band keeps meaning "store is reachable, caller did not
+        # name a collection" rather than becoming silent about reachability.
+        try:
+            names = {c.name for c in client.get_collections().collections}
+        except Exception as exc:
+            # The reason names the failure class, not the resolved location.
+            # This endpoint answers anonymous callers, so the URL or on-disk
+            # path of the store is not ours to hand out; the detail goes to the
+            # log, where an operator can already see the address anyway.
+            logger.warning("CWICR v3 status: store unreachable", exc_info=True)
+            payload["status_band"] = "disconnected"
+            payload["error"] = f"CWICR vector store unreachable ({type(exc).__name__})"
+            return payload
 
-    if not country:
-        # Store reachable but the caller didn't ask about a specific collection.
-        payload["status_band"] = "no_country"
+        payload["connected"] = True
+
+        if not country:
+            # Store reachable but the caller didn't ask about a specific collection.
+            payload["status_band"] = "no_country"
+            return payload
+
+        payload["collection"] = country_to_collection(country)
+
+        if payload["collection"] not in names:
+            payload["status_band"] = "missing"
+            return payload
+
+        payload["exists"] = True
+
+        try:
+            col = client.get_collection(payload["collection"])
+            # Version-tolerant: ``points_count`` → ``vectors_count``
+            # (older qdrant-client) → live count().
+            pc_raw = getattr(col, "points_count", None)
+            if pc_raw is None:
+                pc_raw = getattr(col, "vectors_count", None)
+            if pc_raw is None:
+                pc_raw = client.count(payload["collection"]).count
+            pc = int(pc_raw or 0)
+        except Exception as exc:
+            # This used to report "ready". A collection we could not read was
+            # being described with the one band that means "go ahead", which is
+            # a confident answer produced without looking. The caller now gets a
+            # third outcome it can tell apart from both present and absent, and
+            # a reason, because "we could not look" is not a kind of "no".
+            logger.warning("CWICR v3 status: collection found but unreadable", exc_info=True)
+            payload["status_band"] = "unreadable"
+            payload["error"] = f"collection exists but could not be read ({type(exc).__name__})"
+            return payload
+
+        payload["points_count"] = pc
+        payload["status_band"] = "ready" if pc > 0 else "empty"
         return payload
 
-    payload["collection"] = country_to_collection(country)
-
-    if payload["collection"] not in names:
-        payload["status_band"] = "missing"
-        return payload
-
-    payload["exists"] = True
-
-    try:
-        col = client.get_collection(payload["collection"])
-        # Version-tolerant: ``points_count`` → ``vectors_count``
-        # (older qdrant-client) → live count().
-        pc_raw = getattr(col, "points_count", None)
-        if pc_raw is None:
-            pc_raw = getattr(col, "vectors_count", None)
-        if pc_raw is None:
-            pc_raw = client.count(payload["collection"]).count
-        pc = int(pc_raw or 0)
-    except Exception as exc:
-        # This used to report "ready". A collection we could not read was
-        # being described with the one band that means "go ahead", which is
-        # a confident answer produced without looking. The caller now gets a
-        # third outcome it can tell apart from both present and absent, and
-        # a reason, because "we could not look" is not a kind of "no".
-        logger.warning("CWICR v3 status: collection found but unreadable", exc_info=True)
-        payload["status_band"] = "unreadable"
-        payload["error"] = f"collection exists but could not be read ({type(exc).__name__})"
-        return payload
-
-    payload["points_count"] = pc
-    payload["status_band"] = "ready" if pc > 0 else "empty"
-    return payload
+    if target.is_server:
+        return await asyncio.to_thread(_read_status)
+    # Embedded read/init latency remains unchanged: do not broaden the
+    # shared local client's threading contract as part of a network fix.
+    return _read_status()
 
 
 async def _detect_language_mismatch(

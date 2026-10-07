@@ -25,14 +25,83 @@ and it carries a reason.
 
 from __future__ import annotations
 
+import asyncio
+import threading
 from typing import Any
 
+import httpx
 import pytest
+from fastapi import FastAPI
 
 from app.config import Settings
 from app.modules.costs.router import vector_v3_status
 
 DE_COLLECTION = "cwicr_de_v3"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("stage", ["get_collections", "get_collection", "count"])
+async def test_health_progresses_during_status_reads(monkeypatch, stage):
+    from app.modules.costs import qdrant_adapter
+
+    started, release = threading.Event(), threading.Event()
+    released_by_health = []
+    threads = []
+    loop_thread = threading.get_ident()
+    initialization_threads = []
+
+    class Client:
+        def record(self, name):
+            threads.append(threading.get_ident())
+            if name == stage:
+                started.set()
+                released_by_health.append(release.wait(5))
+
+        def get_collections(self):
+            self.record("get_collections")
+            return _Collections([DE_COLLECTION])
+
+        def get_collection(self, name):
+            self.record("get_collection")
+            return type("Info", (), {"points_count": None})()
+
+        def count(self, name):
+            self.record("count")
+            return type("Count", (), {"count": 7})()
+
+    monkeypatch.setattr(qdrant_adapter, "get_settings", lambda: _settings(cwicr_qdrant_url="http://qdrant.invalid"))
+    def get_client():
+        initialization_threads.append(threading.get_ident())
+        return Client()
+
+    monkeypatch.setattr(qdrant_adapter, "_get_client", get_client)
+    monkeypatch.setattr(qdrant_adapter, "country_to_collection", lambda country: DE_COLLECTION)
+    app = FastAPI()
+
+    @app.get("/status")
+    async def status():
+        return await vector_v3_status(db=None, user=None, country="DE", project_id=None)
+
+    @app.get("/health")
+    async def health():
+        release.set()
+        return {"ok": True}
+
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
+        pending = asyncio.create_task(client.get("/status"))
+        try:
+            assert await asyncio.to_thread(started.wait, 5)
+            assert (await client.get("/health")).json() == {"ok": True}
+            payload = (await pending).json()
+            assert payload["status_band"] == "ready"
+            assert payload["points_count"] == 7
+            assert released_by_health == [True]
+            assert len(set(threads)) == 1
+            assert threads[0] != loop_thread
+            assert initialization_threads == [loop_thread]
+        finally:
+            release.set()
+            await pending
 
 
 def _settings(**kw: Any) -> Settings:
