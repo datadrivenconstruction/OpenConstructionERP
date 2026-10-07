@@ -80,3 +80,31 @@
     transform: none;
   }
 }
+
+[data-chat-theme] .chat-config-banner-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+[data-chat-theme] .chat-intro-steps {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 767px) {
+  [data-chat-theme] .chat-config-banner {
+    flex-wrap: wrap;
+    flex-shrink: 0;
+  }
+
+  [data-chat-theme] .chat-config-banner-copy {
+    flex-basis: calc(100% - 44px);
+  }
+
+  [data-chat-theme] .chat-config-banner > a {
+    margin-inline-start: 44px;
+  }
+
+  [data-chat-theme] .chat-intro-steps {
+    grid-template-columns: 1fr;
+  }
+}

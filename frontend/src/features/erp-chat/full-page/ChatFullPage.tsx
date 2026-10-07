@@ -1,36 +1,47 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { Group, Panel, Separator } from 'react-resizable-panels';
-import type { Layout } from 'react-resizable-panels';
+import type { GroupImperativeHandle, Layout, LayoutChangedMeta } from 'react-resizable-panels';
 import './chat-tokens.css';
 import { useChatFullPage } from './useChatFullPage';
 import ChatLeftPanel from './left/ChatLeftPanel';
 import DataRightPanel from './right/DataRightPanel';
 import AIConfigBanner from './AIConfigBanner';
 import { AiDisclosure } from '../AiDisclosure';
+import { useIsMobileViewport } from '../useFloatingChat';
 import { useThemeStore } from '@/stores/useThemeStore';
 
 const PANEL_STORAGE_KEY = 'chat-panel-sizes';
+const LEFT_PANEL_ID = 'chat-left';
+const RIGHT_PANEL_ID = 'chat-right';
 
 function loadSavedLayout(): Layout | undefined {
   try {
     const raw = localStorage.getItem(PANEL_STORAGE_KEY);
     if (!raw) return undefined;
     const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-      return parsed as Layout;
-    }
-    return undefined;
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return undefined;
+    if (Object.keys(parsed).length !== 2) return undefined;
+    const left: unknown = parsed[LEFT_PANEL_ID];
+    const right: unknown = parsed[RIGHT_PANEL_ID];
+    if (typeof left !== 'number' || typeof right !== 'number') return undefined;
+    if (!Number.isFinite(left) || !Number.isFinite(right) || left <= 0 || right <= 0) return undefined;
+    if (Math.abs(left + right - 100) > 0.01) return undefined;
+    return { [LEFT_PANEL_ID]: left, [RIGHT_PANEL_ID]: right };
   } catch {
     return undefined;
   }
 }
 
-const LEFT_PANEL_ID = 'chat-left';
-const RIGHT_PANEL_ID = 'chat-right';
-
 export default function ChatFullPage() {
+  const mobile = useIsMobileViewport(768);
+  const groupRef = useRef<GroupImperativeHandle>(null);
+  useEffect(() => {
+    groupRef.current?.setLayout(mobile
+      ? { [LEFT_PANEL_ID]: 60, [RIGHT_PANEL_ID]: 40 }
+      : loadSavedLayout() ?? { [LEFT_PANEL_ID]: 38, [RIGHT_PANEL_ID]: 62 });
+  }, [mobile]);
   const {
     messages,
     isStreaming,
@@ -55,7 +66,8 @@ export default function ChatFullPage() {
 
   const savedLayout = loadSavedLayout();
 
-  const handleLayoutChanged = useCallback((layout: Layout) => {
+  const handleLayoutChanged = useCallback((layout: Layout, meta: LayoutChangedMeta) => {
+    if (!meta.isUserInteraction) return;
     try {
       localStorage.setItem(PANEL_STORAGE_KEY, JSON.stringify(layout));
     } catch {
@@ -72,10 +84,10 @@ export default function ChatFullPage() {
 
   return (
     <div
-      className="-mx-4 sm:-mx-7 -mt-6 -mb-6 border-l border-border-light"
+      className="-mx-4 sm:-mx-7 -mt-6 -mb-6 min-w-0 border-l border-border-light"
       data-chat-theme={resolvedTheme}
       style={{
-        height: 'calc(100vh - 56px)',
+        height: 'calc(100dvh - 56px)',
         display: 'flex',
         flexDirection: 'column',
         background: 'var(--chat-bg)',
@@ -93,17 +105,18 @@ export default function ChatFullPage() {
       <AiDisclosure />
       <AIConfigBanner />
 
-      <div style={{ flex: 1, overflow: 'hidden' }}>
+      <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
         <Group
-          orientation="horizontal"
-          onLayoutChanged={handleLayoutChanged}
-          defaultLayout={savedLayout}
+          groupRef={groupRef}
+          orientation={mobile ? 'vertical' : 'horizontal'}
+          onLayoutChanged={mobile ? undefined : handleLayoutChanged}
+          defaultLayout={mobile ? undefined : savedLayout}
         >
           <Panel
             id={LEFT_PANEL_ID}
-            defaultSize="38%"
-            minSize="28%"
-            maxSize="55%"
+            defaultSize={mobile ? '60%' : '38%'}
+            minSize={mobile ? '40%' : '28%'}
+            maxSize={mobile ? '80%' : '55%'}
           >
             <ChatLeftPanel
               messages={messages}
@@ -124,17 +137,18 @@ export default function ChatFullPage() {
 
           <Separator
             style={{
-              width: 4,
+              width: mobile ? '100%' : 4,
+              height: mobile ? 4 : undefined,
               background: 'var(--chat-border)',
-              cursor: 'col-resize',
+              cursor: mobile ? 'row-resize' : 'col-resize',
               transition: 'background 0.15s',
             }}
           />
 
           <Panel
             id={RIGHT_PANEL_ID}
-            defaultSize="62%"
-            minSize="40%"
+            defaultSize={mobile ? '40%' : '62%'}
+            minSize={mobile ? '20%' : '40%'}
           >
             <DataRightPanel
               entries={dataPanelEntries}

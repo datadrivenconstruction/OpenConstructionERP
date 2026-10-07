@@ -131,7 +131,7 @@ export function ProjectJourneyButton() {
         )}
       >
         <RouteIcon size={14} strokeWidth={1.75} className="shrink-0 text-oe-blue" aria-hidden />
-        <span className="whitespace-nowrap text-xs font-semibold">{label}</span>
+        <span className="whitespace-nowrap text-xs font-semibold max-[399px]:sr-only">{label}</span>
         <ChevronDown size={12} strokeWidth={2} className="shrink-0 text-content-quaternary" aria-hidden />
       </button>
       {open && (

@@ -198,9 +198,9 @@ export default function DataPanelEmpty({ onSuggestion }: DataPanelEmptyProps) {
 
         {/* How it works (3 steps) */}
         <div
+          className="chat-intro-steps"
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
             gap: 12,
             marginBottom: 32,
           }}

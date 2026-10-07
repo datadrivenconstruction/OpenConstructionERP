@@ -58,6 +58,7 @@ export default function InputBar({ onSend, onClear, hasMessages, isStreaming, su
   return (
     <div
       style={{
+        flexShrink: 0,
         borderTop: '1px solid var(--chat-border-subtle)',
         padding: '10px 4px 12px',
         background: 'var(--chat-surface-1)',
@@ -176,6 +177,7 @@ export default function InputBar({ onSend, onClear, hasMessages, isStreaming, su
           rows={1}
           style={{
             flex: 1,
+            minWidth: 0,
             resize: 'none',
             padding: '10px 12px',
             fontSize: 14,

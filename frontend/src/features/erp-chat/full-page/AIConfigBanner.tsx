@@ -50,6 +50,7 @@ export default function AIConfigBanner() {
 
   return (
     <div
+      className="chat-config-banner"
       style={{
         background: 'var(--chat-surface-1)',
         borderBottom: '1px solid var(--chat-border)',
@@ -76,7 +77,7 @@ export default function AIConfigBanner() {
       >
         <Settings size={16} strokeWidth={1.85} />
       </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div className="chat-config-banner-copy">
         <div style={{ fontWeight: 600, color: 'var(--chat-text-primary)' }}>
           {t('chat.config_banner_title', { defaultValue: 'AI provider not configured' })}
         </div>

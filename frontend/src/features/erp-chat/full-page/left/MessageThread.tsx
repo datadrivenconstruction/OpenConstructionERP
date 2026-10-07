@@ -30,10 +30,12 @@ export default function MessageThread({ messages, isStreaming, aiConfigured }: M
           ref={scrollRef}
           style={{
             flex: 1,
+            minHeight: 0,
+            overflowY: 'auto',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'center',
+            justifyContent: 'safe center',
             padding: 24,
             fontFamily: 'var(--chat-font-body)',
             gap: 8,
@@ -42,6 +44,7 @@ export default function MessageThread({ messages, isStreaming, aiConfigured }: M
           <div
             style={{
               maxWidth: 380,
+              flexShrink: 0,
               padding: '24px 28px',
               borderRadius: 16,
               background: 'var(--chat-surface-1)',
@@ -115,10 +118,12 @@ export default function MessageThread({ messages, isStreaming, aiConfigured }: M
         aria-live="polite"
         style={{
           flex: 1,
+          minHeight: 0,
+          overflowY: 'auto',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
+          justifyContent: 'safe center',
           padding: 24,
           color: 'var(--chat-text-tertiary)',
           fontFamily: 'var(--chat-font-body)',
@@ -145,6 +150,7 @@ export default function MessageThread({ messages, isStreaming, aiConfigured }: M
       ref={scrollRef}
       style={{
         flex: 1,
+        minHeight: 0,
         overflowY: 'auto',
         padding: '16px 4px 8px',
         display: 'flex',
