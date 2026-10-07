@@ -43,6 +43,7 @@
     "backend/app/modules/bcf/messages": [
       "de",
       "en",
+      "it",
       "ru"
     ],
     "backend/app/modules/compliance/messages": [

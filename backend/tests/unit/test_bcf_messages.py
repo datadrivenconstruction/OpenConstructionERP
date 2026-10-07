@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import logging
 from pathlib import Path
+from string import Formatter
 
 import pytest
 
@@ -30,16 +31,16 @@ _MESSAGES_DIR = Path(__file__).resolve().parents[2] / "app" / "modules" / "bcf" 
 
 def _load_locale_keys(locale: str) -> set[str]:
     with (_MESSAGES_DIR / f"{locale}.json").open(encoding="utf-8") as fh:
-        return set(json.load(fh).keys())
+        return set(json.load(fh)["bcf"].keys())
 
 
 class TestMessages:
     def test_default_locale_is_english(self) -> None:
         assert DEFAULT_LOCALE == "en"
 
-    def test_en_de_ru_present(self) -> None:
+    def test_en_de_it_ru_present(self) -> None:
         locales = set(available_locales())
-        for required in ("en", "de", "ru"):
+        for required in ("en", "de", "it", "ru"):
             assert required in locales, f"missing locale bundle: {required}"
 
     def test_translate_resolves_known_key(self) -> None:
@@ -96,5 +97,51 @@ class TestLocaleKeyParity:
         en_keys = _load_locale_keys("en")
         de_keys = _load_locale_keys("de")
         ru_keys = _load_locale_keys("ru")
+        it_keys = _load_locale_keys("it")
+        assert len(en_keys) == 13
         assert en_keys == de_keys, f"DE missing: {en_keys - de_keys}; DE extra: {de_keys - en_keys}"
         assert en_keys == ru_keys, f"RU missing: {en_keys - ru_keys}; RU extra: {ru_keys - en_keys}"
+        assert en_keys == it_keys, f"IT missing: {en_keys - it_keys}; IT extra: {it_keys - en_keys}"
+
+
+class TestItalianMessages:
+    def test_every_translation_preserves_its_formatter_contract(self) -> None:
+        en = json.loads((_MESSAGES_DIR / "en.json").read_text(encoding="utf-8"))["bcf"]
+        it = json.loads((_MESSAGES_DIR / "it.json").read_text(encoding="utf-8"))["bcf"]
+        for key, source in en.items():
+            target = it[key]
+            assert isinstance(target, str) and target.strip(), key
+            assert target != source, key
+            source_fields = [
+                (field, spec, conversion)
+                for _, field, spec, conversion in Formatter().parse(source)
+                if field is not None
+            ]
+            target_fields = [
+                (field, spec, conversion)
+                for _, field, spec, conversion in Formatter().parse(target)
+                if field is not None
+            ]
+            assert sorted(target_fields) == sorted(source_fields), key
+
+    @pytest.mark.parametrize("locale", ["it", "it-IT"])
+    def test_every_message_renders_without_english_fallback(self, locale: str, caplog) -> None:
+        reload_bundle()
+        it = json.loads((_MESSAGES_DIR / "it.json").read_text(encoding="utf-8"))["bcf"]
+        with caplog.at_level(logging.WARNING, logger="app.core.validation.messages"):
+            for key, template in it.items():
+                params = {
+                    field: f"VALUE_{field}" for _, field, _, _ in Formatter().parse(template) if field is not None
+                }
+                assert translate(f"bcf.{key}", locale=locale, **params) == template.format(**params), key
+        assert not caplog.records
+
+    def test_unsupported_version_keeps_both_dynamic_values(self) -> None:
+        assert translate("bcf.version_unsupported", locale="it-IT", version="1.0", supported="2.1, 3.0") == (
+            "Versione BCF '1.0' non supportata. Versioni supportate: 2.1, 3.0."
+        )
+
+    def test_missing_key_retains_readable_fallback(self, caplog) -> None:
+        with caplog.at_level(logging.WARNING, logger="app.core.validation.messages"):
+            assert translate("bcf.missing_item", locale="it-IT") == "Missing item"
+        assert "not found in any locale" in caplog.text
