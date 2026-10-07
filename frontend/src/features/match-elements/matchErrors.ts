@@ -10,6 +10,7 @@
 // backend words those for people already.
 
 import type { TFunction } from 'i18next';
+import { fmtList } from '@/shared/lib/formatters';
 
 import { MatchApiError } from './api';
 
@@ -70,7 +71,7 @@ export function describeMatchError(
       return err.fields.length > 0
         ? t('match_elements.error.invalid_input', {
             defaultValue: 'Some settings were not accepted: {{fields}}. Check them and try again.',
-            fields: err.fields.join(', '),
+            fields: fmtList(err.fields),
           })
         : t('match_elements.error.invalid_input_any', {
             defaultValue: 'Some settings were not accepted. Check them and try again.',

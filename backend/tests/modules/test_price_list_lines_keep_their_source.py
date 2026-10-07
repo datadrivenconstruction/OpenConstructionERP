@@ -71,7 +71,7 @@ REGIONS: list[tuple[str, str, bytes, str | None]] = [
         ),
         "LAZ",
     ),
-    ("umbria", "Elenco_regionale_prezzi_2025.json", _file("umbria_2025.json"), "UMB"),
+    ("umbria", "Elenco_regionale_prezzi_2025.json", _file("umbria_2025.json.cp1252"), "UMB"),
     ("campania", "prezzario_llpp2024_articoli.csv", _file("campania_2024.csv"), None),
     ("puglia", "2026_prezzario_regione_puglia.csv", _file("puglia_2026.csv"), None),
     ("piemonte", "prezzi.csv", _file("piemonte_2023.csv"), "PIE"),

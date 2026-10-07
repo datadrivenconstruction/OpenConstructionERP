@@ -3273,7 +3273,7 @@ class ScheduleService:
         tasks = list(iter_tasks(tree.roots))
         if not tasks:
             raise coded_http_error(
-                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status.HTTP_422_UNPROCESSABLE_CONTENT,
                 "boq_has_no_positions",
                 "This BOQ has no positions with work to schedule. Add positions to its sections first.",
             )
