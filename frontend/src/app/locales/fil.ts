@@ -45992,7 +45992,7 @@ const resource = {
     "contracts.lender_preparation.download": "I-download ang burador na JSON",
     "contracts.lender_preparation.certified": "Naitalang sertipikadong halaga",
     "contracts.lender_preparation.findings": "Mga naitalang natuklasan tungkol sa mga sertipiko",
-    "contracts.lender_preparation.no_period": "Walang mga petsa ng panahon ang kahilingang ito. Hindi itinutugma ayon sa petsa ang mga aplikasyon sa pagbabayad ng mga subcontractor.",
+    "contracts.lender_preparation.no_period": "Walang mga petsa ng panahon ang kahilingang ito. Hindi itinutugma ayon sa petsa ang mga kahilingan sa pagbabayad ng mga subcontractor.",
     // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
