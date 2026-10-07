@@ -268,6 +268,8 @@ _BARE_COUNTRY_OVERRIDES: dict[str, str] = {
     "JP": "ja",  # Japan
     "KR": "ko",  # Korea
     "MN": "mn",  # Mongolia
+    "HU": "hu",  # Hungary: language target, not a claim of an available catalogue
+    "UA": "uk",  # Ukraine: country UA, language uk
     "RO": "ro",  # Romania
     "TH": "th",  # Thailand
     "TR": "tr",  # Turkey
@@ -379,6 +381,8 @@ PROJECT_REGION_LABELS: dict[str, tuple[str | None, str | None]] = {
     "Poland": ("PL", "pl"),
     "Czech": ("CZ", "cs"),
     "Croatia": ("HR", "hr"),
+    "HU": ("HU", "hu"),
+    "UA": ("UA", "uk"),
     "Turkey": ("TR", "tr"),
     "Russia": ("RU", "ru"),
     # Americas

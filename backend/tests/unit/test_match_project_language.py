@@ -61,6 +61,8 @@ def test_no_stale_label_entries() -> None:
         ("UK", "en", "GB"),
         ("US", "en", "US"),
         ("Czech", "cs", "CZ"),
+        ("HU", "hu", "HU"),
+        ("UA", "uk", "UA"),
         ("Korea", "ko", "KR"),
         ("Brazil", "pt", "BR"),
         ("Mexico", "es", "MX"),
@@ -132,6 +134,8 @@ def test_resolve_language_has_no_fallback() -> None:
     ("region", "expected"),
     [
         ("Italy", ("IT_",)),
+        ("HU", ("HU_",)),
+        ("UA", ("UA_",)),
         ("Spain", ("ES_",)),
         ("DACH", ("DE_", "AT_", "CH_")),
         ("IT_ROME", ("IT_ROME",)),
@@ -266,3 +270,26 @@ def test_metadata_scorer_has_no_two_letter_guess_for_unplaceable_labels(region) 
         {"country": first_two}, envelope=envelope, project_region=region
     )
     assert breakdown.get("region", 0.0) == 0.0
+
+
+@pytest.mark.parametrize(("iso", "language"), [("HU", "hu"), ("UA", "uk")])
+def test_new_project_countries_use_native_language_for_region_and_address(iso, language):
+    from app.core.match_service.region_language import project_countries
+
+    assert project_language("DACH", iso.lower()) == language
+    assert project_language(f"  {iso.lower()}  ") == language
+    assert resolve_language(iso) == language
+    assert project_country(iso.lower()) == iso
+    assert project_countries(iso) == (iso,)
+
+
+@pytest.mark.parametrize("iso", ["HU", "UA"])
+def test_unpublished_project_language_does_not_recommend_unrelated_catalogue(monkeypatch, iso):
+    from app.core.match_service.region_language import project_countries
+    from app.modules.costs import cwicr_v3_catalogue
+    from app.modules.match_elements.readiness import recommend_catalogue
+
+    unrelated = [cat for cat in cwicr_v3_catalogue.CWICR_V3_CATALOGUES if cat.region in {"DE_BERLIN", "FR_PARIS"}]
+    assert len(unrelated) == 2
+    monkeypatch.setattr(cwicr_v3_catalogue, "CWICR_V3_CATALOGUES", unrelated)
+    assert recommend_catalogue(project_language(iso), project_countries(iso), {"de", "fr"}) is None
