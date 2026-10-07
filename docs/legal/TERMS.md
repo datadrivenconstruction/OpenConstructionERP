@@ -55,7 +55,7 @@ output is preliminary and advisory only.** It must be verified by a
 qualified construction-estimation professional before being used in any
 tender, contract, or binding cost commitment. DDC disclaims all
 liability for commercial decisions made on the basis of unverified AI
-output. See the AI dialog box disclaimer in the user interface.
+output. The chat interface identifies the assistant as AI.
 
 ## 5. Data ownership
 
