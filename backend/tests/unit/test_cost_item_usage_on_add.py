@@ -237,3 +237,118 @@ async def test_usage_count_grouped_query_omits_zero(session):
     assert counts == {str(used_id): 1}
     # The unused id is absent (client treats a missing id as 0).
     assert str(unused_id) not in counts
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "metadata,expected", [({}, "EUR"), ({"currency": " gbp "}, "GBP"), ({"position_currency": "JPY"}, "JPY")]
+)
+async def test_usage_snapshots_applied_position_currency_not_current_catalog(session, metadata, expected):
+    project_id, boq_id, item_id = await _make_project_boq_item(session)
+    await BOQService(session).add_position(
+        PositionCreate(
+            boq_id=boq_id,
+            ordinal="snapshot",
+            description="Applied rate",
+            unit="m3",
+            quantity="1",
+            unit_rate="123.45678",
+            cost_item_id=item_id,
+            metadata=metadata,
+        )
+    )
+    row = (await session.execute(select(CostItemUsage).where(CostItemUsage.cost_item_id == item_id))).scalar_one()
+    assert row.currency_at_use == expected
+    from decimal import Decimal
+
+    assert row.unit_rate_at_use == Decimal("123.4568")
+    item = await session.get(CostItem, item_id)
+    project = await session.get(Project, project_id)
+    item.currency = "USD"
+    project.currency = "KWD"
+    await session.flush()
+    await session.refresh(row)
+    assert row.currency_at_use == expected
+    assert row.unit_rate_at_use == Decimal("123.4568")
+
+
+@pytest.mark.asyncio
+async def test_usage_endpoint_preserves_explicit_currency_and_keeps_omitted_currency_unknown(session):
+    from app.modules.costs.router import record_cost_item_usage
+    from app.modules.costs.schemas import RecordUsageRequest
+
+    project_id, _boq_id, item_id = await _make_project_boq_item(session)
+    for currency in (" kwd ", None):
+        result = await record_cost_item_usage(
+            item_id,
+            RecordUsageRequest(
+                project_id=project_id,
+                unit_rate_at_use="17.125",
+                currency_at_use=currency,
+            ),
+            session,
+            {"sub": str(OWNER_ID)},
+        )
+        row = await session.get(CostItemUsage, uuid.UUID(result["id"]))
+        assert row.currency_at_use == ("KWD" if currency else None)
+        assert result["currency_at_use"] == row.currency_at_use
+    item = await session.get(CostItem, item_id)
+    item.currency = "JPY"
+    await session.flush()
+    snapshots = (
+        (await session.execute(select(CostItemUsage.currency_at_use).where(CostItemUsage.cost_item_id == item_id)))
+        .scalars()
+        .all()
+    )
+    assert set(snapshots) == {"KWD", None}
+
+
+@pytest.mark.asyncio
+async def test_direct_recorder_uses_only_supplied_currency(session):
+    from app.modules.costs.intelligence import CostUsageRecorder
+
+    project_id, _boq_id, item_id = await _make_project_boq_item(session)
+    recorder = CostUsageRecorder(session)
+    explicit = await recorder.record(item_id, project_id=project_id, unit_rate_at_use="12", currency_at_use=" usd ")
+    unknown = await recorder.record(item_id, project_id=project_id, unit_rate_at_use="12")
+    assert explicit.currency_at_use == "USD"
+    assert unknown.currency_at_use is None
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("applied_currency,applied_rate", [("EUR", "100"), ("USD", "110")])
+async def test_fx_applied_rate_snapshot_matches_storage_and_rollup(session, applied_currency, applied_rate):
+    from decimal import Decimal
+
+    project_id, boq_id, item_id = await _make_project_boq_item(session)
+    project = await session.get(Project, project_id)
+    project.currency = "USD"
+    project.fx_rates = [{"code": "EUR", "rate": "1.10", "label": "Euro"}]
+    item = await session.get(CostItem, item_id)
+    item.rate = "100"
+    item.currency = "EUR"
+    await session.flush()
+    service = BOQService(session)
+    position = await service.add_position(
+        PositionCreate(
+            boq_id=boq_id,
+            ordinal="fx",
+            description="EUR catalogue rate",
+            unit="m3",
+            quantity="1",
+            unit_rate=applied_rate,
+            cost_item_id=item_id,
+            metadata={"currency": applied_currency},
+        )
+    )
+    row = (await session.execute(select(CostItemUsage).where(CostItemUsage.cost_item_id == item_id))).scalar_one()
+    assert Decimal(position.unit_rate) == Decimal(applied_rate)
+    assert row.unit_rate_at_use == Decimal(applied_rate)
+    assert row.currency_at_use == applied_currency
+    assert (await service.get_boq_structured(boq_id)).direct_cost == Decimal("110")
+    item.currency = "JPY"
+    project.currency = "KWD"
+    await session.flush()
+    await session.refresh(row)
+    assert row.currency_at_use == applied_currency
+    assert row.unit_rate_at_use == Decimal(applied_rate)

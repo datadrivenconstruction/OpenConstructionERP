@@ -341,6 +341,8 @@ export interface RecordUsageRequest {
   project_id: string;
   context: 'boq' | 'assembly' | 'tender';
   unit_rate_at_use: number;
+  /** Currency of this applied rate; omitted/null means unknown. */
+  currency_at_use?: string | null;
 }
 
 /** Fetch the certainty badge for a cost item.  Returns null on 404 so
@@ -404,9 +406,9 @@ export async function fetchUsageCounts(
 export async function recordCostItemUsage(
   costItemId: string,
   body: RecordUsageRequest,
-): Promise<{ id: string; certainty: CertaintyBadge }> {
+): Promise<{ id: string; currency_at_use: string | null; certainty: CertaintyBadge }> {
   return apiPost<
-    { id: string; certainty: CertaintyBadge },
+    { id: string; currency_at_use: string | null; certainty: CertaintyBadge },
     RecordUsageRequest
   >(`/v1/costs/${costItemId}/record-usage/`, body);
 }

@@ -1330,6 +1330,7 @@ export function CostDatabaseSearchModal({
           unit: item.unit || 'pcs',
           quantity: positionQty,
           unit_rate: unitRate,
+          cost_item_id: item.id,
           classification: item.classification || {},
           source: 'cost_database',
           metadata: {

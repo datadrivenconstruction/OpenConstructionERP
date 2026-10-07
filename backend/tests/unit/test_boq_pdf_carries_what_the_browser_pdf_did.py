@@ -183,11 +183,12 @@ def test_ungrouped_lines_are_summed_in_the_base_currency_too() -> None:
     assert "1,000.00 EUR" not in summary
 
 
-def test_a_rate_with_no_usable_fx_entry_is_left_as_the_rollup_leaves_it() -> None:
-    # No rate for the line's currency: the rollup sums it in its own units
-    # rather than dropping it, and the line has to agree with that.
+@pytest.mark.parametrize("fx", [{}, {"USD": "0"}, {"USD": "-1"}, {"USD": "bad"}])
+def test_a_rate_with_no_usable_fx_entry_is_excluded_from_base_money(fx: dict[str, str]) -> None:
+    # Unconverted dollars must never appear under the EUR column headings.
     dollar = _position("01.002", "10", "100", "1000", metadata={"currency": "USD"})
-    assert _line_money(dollar, "EUR", {}) == (Decimal("1000"), Decimal("100"))
+    assert _line_money(dollar, "EUR", fx) == (Decimal("0"), Decimal("0"))
+    assert (dollar.total, dollar.unit_rate) == (Decimal("1000"), Decimal("100"))
 
 
 def test_a_single_currency_line_prints_exactly_as_stored() -> None:
@@ -298,13 +299,26 @@ def test_resources_of_a_foreign_line_are_converted_by_the_lines_currency() -> No
     assert not any("1,000.00" in cell for row in rows for cell in row)
 
 
-def test_a_foreign_line_with_no_rate_keeps_its_rows_in_its_own_units() -> None:
-    # No USD rate on the project: the rollup sums the line in dollars, and the
-    # rows stay in dollars with it rather than being converted on their own.
+def test_a_foreign_line_with_no_rate_excludes_its_resource_money_from_base_columns() -> None:
+    # The build-up follows the same missing-FX policy as the parent line.
     line = _dollar_assembly_line()
-    assert _line_money(line, "EUR", {}) == (Decimal("1000"), Decimal("100"))
+    assert _line_money(line, "EUR", {}) == (Decimal("0"), Decimal("0"))
     (crew,) = _resource_lines(line, "EUR", {})
-    assert (crew.unit_rate, crew.total) == (Decimal("50"), Decimal("1000"))
+    assert (crew.quantity, crew.unit_rate, crew.total) == (Decimal("20"), Decimal("0"), Decimal("0"))
+    rows = _rows(
+        _build_boq_table(
+            _bill([_section([line], "0")]),
+            "EUR",
+            _build_styles(),
+            country_code="IE",
+            base_currency="EUR",
+            fx_rates={},
+            include_resources=True,
+        )
+    )
+    at = next(i for i, row in enumerate(rows) if row[0] == "01.004")
+    assert rows[at][4:] == ["0.00", "0.00"]
+    assert rows[at + 1][1:] == ["Crew", "h", "20.00", "0.00", "0.00"]
 
 
 def test_a_resource_naming_a_foreign_currency_is_converted_on_its_own() -> None:

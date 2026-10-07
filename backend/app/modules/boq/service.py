@@ -3629,7 +3629,8 @@ class BOQService:
                 await CostUsageRecorder(self.session).record(
                     data.cost_item_id,
                     project_id=project_id,
-                    unit_rate_at_use=data.unit_rate,
+                    unit_rate_at_use=position.unit_rate,
+                    currency_at_use=_position_currency(position) or await self._resolve_project_currency(data.boq_id),
                     context="boq",
                 )
             except Exception:  # noqa: BLE001 - ledger is best-effort

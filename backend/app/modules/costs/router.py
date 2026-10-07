@@ -7886,6 +7886,7 @@ async def record_cost_item_usage(
         item_id,
         project_id=body.project_id,
         unit_rate_at_use=body.unit_rate_at_use,
+        currency_at_use=body.currency_at_use,
         context=body.context,
         used_by=used_by,
     )
@@ -7896,6 +7897,7 @@ async def record_cost_item_usage(
         "id": str(row.id),
         "cost_item_id": str(item_id),
         "used_at": row.used_at.isoformat() if row.used_at else None,
+        "currency_at_use": row.currency_at_use,
         "certainty": CertaintyBadge.model_validate(certainty).model_dump(mode="json"),
     }
 

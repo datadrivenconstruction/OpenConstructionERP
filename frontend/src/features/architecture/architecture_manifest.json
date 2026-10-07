@@ -66660,6 +66660,12 @@
               "nullable": false
             },
             {
+              "name": "currency_at_use",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
               "name": "context",
               "annotation": "Mapped[str]",
               "sql_type": "String",
@@ -68103,6 +68109,11 @@
               "name": "unit_rate_at_use",
               "type": "DecimalMoney",
               "description": "Rate as it was at the moment of apply."
+            },
+            {
+              "name": "currency_at_use",
+              "type": "str | None",
+              "description": "Currency of the applied rate; omitted means unknown, never inferred from the current catalogue."
             }
           ]
         },
@@ -237312,7 +237323,7 @@
     "backend_modules": 196,
     "modules_with_manifests": 194,
     "total_models": 623,
-    "total_columns": 7152,
+    "total_columns": 7153,
     "total_relationships": 234,
     "total_routes": 3756,
     "total_schemas": 3563,

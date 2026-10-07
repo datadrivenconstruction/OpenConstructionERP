@@ -190,6 +190,7 @@ describe('CostDatabaseSearchModal - add reads the picked items in full', () => {
     expect(detailReads()).toEqual(['/v1/costs/item-1']);
     const posts = positionPosts();
     expect(posts).toHaveLength(1);
+    expect(posts[0]?.[1]).toMatchObject({ cost_item_id: 'item-1' });
     const body = posts[0]?.[1] as {
       unit_rate: number;
       metadata: { resources?: Array<{ name: string; total: number }>; scope_of_work?: string[] };

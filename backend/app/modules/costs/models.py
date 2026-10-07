@@ -243,6 +243,8 @@ class CostItemUsage(Base):
     )
     used_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     unit_rate_at_use: Mapped[Decimal] = mapped_column(Numeric(18, 4), nullable=False, default=Decimal("0"))
+    # NULL means the currency was not captured; never infer historical currency.
+    currency_at_use: Mapped[str | None] = mapped_column(String(10), nullable=True)
     # "boq" | "assembly" | "tender"
     context: Mapped[str] = mapped_column(String(32), nullable=False, default="boq", server_default="boq")
 

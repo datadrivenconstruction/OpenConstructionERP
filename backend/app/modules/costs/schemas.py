@@ -864,6 +864,16 @@ class RecordUsageRequest(BaseModel):
     project_id: UUID
     context: Literal["boq", "assembly", "tender"] = "boq"
     unit_rate_at_use: DecimalMoney = Field(..., ge=0, description="Rate as it was at the moment of apply.")
+    currency_at_use: str | None = Field(
+        default=None,
+        max_length=10,
+        description="Currency of the applied rate; omitted means unknown, never inferred from the current catalogue.",
+    )
+
+    @field_validator("currency_at_use")
+    @classmethod
+    def _normalise_usage_currency(cls, value: str | None) -> str | None:
+        return (value.strip().upper() or None) if value is not None else None
 
 
 # ── Cost benchmarks: own-portfolio distribution (Cost Benchmarks Phase 2) ──

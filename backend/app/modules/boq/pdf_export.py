@@ -763,7 +763,8 @@ def _resource_lines(pos: Any, base_currency: str, fx_rates: Mapping[str, str] | 
       under a dollar line it is scaled by the dollar rate too, exactly as the
       line's total is.
 
-    A currency with no usable rate stays in its own units, as in the rollup.
+    A foreign currency with no usable positive rate contributes zero to the
+    base-currency columns, as in the rollup; its stored amount is unchanged.
     """
     from app.modules.boq.service import (
         _position_currency,

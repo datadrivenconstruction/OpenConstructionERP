@@ -221,6 +221,7 @@ class CostUsageRecorder:
         *,
         project_id: uuid.UUID,
         unit_rate_at_use: Decimal | float | str,
+        currency_at_use: str | None = None,
         context: str = "boq",
         used_by: uuid.UUID | None = None,
     ) -> CostItemUsage:
@@ -236,6 +237,7 @@ class CostUsageRecorder:
             cost_item_id=cost_item_id,
             project_id=project_id,
             unit_rate_at_use=amount,
+            currency_at_use=(currency_at_use.strip().upper() or None) if currency_at_use is not None else None,
             context=context,
             used_by=used_by,
         )
