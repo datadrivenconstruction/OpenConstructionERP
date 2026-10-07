@@ -1,0 +1,868 @@
+{
+  "boq_markup": {
+    "contingency_not_on_profit": {
+      "fail": "予備費「{markup}」の計算基礎に利益項目「{profit}」が既に含まれているため、リスクに備えた資金にも利益率が適用されています",
+      "suggestion": "市場の標準方式でリスク費を一般管理費と利益の後に計上する場合を除き、この項目は直接工事費を基礎として計算してください"
+    },
+    "order_is_declared": {
+      "fail": "計算順序 {order} が複数の加算項目に割り当てられています: {markups}",
+      "suggestion": "各加算項目に固有の順序を設定し、どの費用を次の計算基礎に含めるかを明確にしてください"
+    },
+    "percentage_within_band": {
+      "fail": "「{markup}」は区分 {category} で {percentage}% となっており、妥当な範囲である 0～{ceiling}% を外れています",
+      "suggestion": "小数点の位置を確認してください。いずれの場合も、入力された値をそのまま使って計算されます"
+    },
+    "cumulative_base_is_settled": {
+      "fail": "「{markup}」は「{apply_to}」に適用されますが、先行する項目がないため、直接工事費だけを基礎として計算されます",
+      "suggestion": "計算基礎に含める項目の後に移動するか、直接工事費に適用してください"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  },
+  "export": {
+    "generated": "生成",
+    "content_digest": "内容のハッシュ値"
+  },
+  "field_time": {
+    "hours_per_day_max": {
+      "fail": "作業員 {worker} の当日の計上時間は {hours} 時間で、上限の {max} 時間を超えています",
+      "suggestion": "提出前に、正しい日付または作業員に時間を振り分けてください"
+    },
+    "line_complete": {
+      "fail": "行 {line} が未完成です: {reason}",
+      "labour_xor_plant": "労務または機械のどちらか一方を計上してください。両方の指定や両方の未指定はできません",
+      "hours_positive": "時間はゼロより大きい値にしてください",
+      "cost_code_required": "原価コードが必要です",
+      "suggestion": "作業時間表を提出する前に行を完成させてください"
+    },
+    "cost_code_resolves": {
+      "fail": "行 {line} のコード「{code}」に一致する内訳書の項目または WBS が、このプロジェクトにありません",
+      "suggestion": "プロジェクトの内訳書に存在する原価コードまたは WBS を選択してください"
+    },
+    "daywork_needs_variation": {
+      "fail": "実費精算工事の行 {line} が、未完了の変更に関連付けられていません",
+      "suggestion": "実費精算工事を、その実施指示の根拠となった変更に関連付けてください"
+    },
+    "plant_needs_equipment": {
+      "fail": "機械作業の行 {line} に機械が指定されていません",
+      "suggestion": "機械の稼働時間を原価計算できるように、機械を関連付けてください"
+    },
+    "approved_immutable": {
+      "fail": "この作業時間表の状態は {status} のため、編集できません",
+      "suggestion": "承認済みの時間を訂正するには、取消計上用の作業時間表を登録してください"
+    },
+    "offline_clock_plausible": {
+      "fail": "この日の記録に使用した端末の時計は、サーバーの時計より {minutes} 分進んでいました",
+      "suggestion": "記録時刻の順序を正しく把握できるように、端末の時計を合わせてください"
+    },
+    "offline_sync_delay": {
+      "fail": "この作業日は {date} ですが、事務所に届いたのは {days} 日後です",
+      "suggestion": "承認前に当日の実績と照合してください。該当する出来高査定が既に締め切られている可能性があります"
+    }
+  },
+  "ai_takeoff": {
+    "unreviewed_proposals": {
+      "fail": "{count} 件の数量拾い提案が未確認のため、ここでは金額に含まれていません",
+      "suggestion": "確認待ちの提案を処理し、確定数量を図面と一致させてください"
+    }
+  },
+  "boq_quality": {
+    "position_has_quantity": {
+      "fail": "項目 {ordinal} の数量は、ゼロまたは未入力にできません",
+      "suggestion": "0 より大きい数量を設定してください"
+    },
+    "position_has_unit_rate": {
+      "fail": "項目 {ordinal} に単価を設定してください",
+      "suggestion": "原価データベースから単価を割り当ててください"
+    },
+    "position_has_description": {
+      "fail": "項目 {ordinal} の説明を空にすることはできません"
+    },
+    "no_duplicate_ordinals": {
+      "fail": "番号「{ordinal}」が {count} 項目で重複しています"
+    },
+    "unit_rate_in_range": {
+      "fail": "項目 {ordinal}: 単価 {rate} が {threshold}（中央値の 5 倍）を超えています",
+      "suggestion": "この単価は通常より高いため、確認してください"
+    },
+    "negative_values": {
+      "fail": "項目 {ordinal} に負の値があります: {details}",
+      "suggestion": "負の値を修正し、正の数値を使用してください"
+    },
+    "unrealistic_rate": {
+      "fail": "項目 {ordinal}: {details}",
+      "suggestion": "この値は現実的な範囲を大きく超えているようです。確認してください",
+      "not_assessed_no_currency": "{count} 項目を評価できませんでした。内訳書に通貨がないため、{reference} 建ての金額しきい値を換算できませんでした",
+      "not_assessed_no_currency_suggestion": "プロジェクトの通貨を設定するか、各項目に通貨を記録してください",
+      "not_assessed_no_rate": "{currency} 建ての {count} 項目を評価できませんでした。{reference} から {currency} への為替レートが未登録のため、金額しきい値をこの内訳書に換算できませんでした",
+      "not_assessed_no_rate_suggestion": "為替レート台帳またはプロジェクトの為替レートに、{reference} から {currency} へのレートを追加してください"
+    },
+    "total_mismatch": {
+      "fail": "項目 {ordinal}: 計算値 {computed} != 保存値 {stored}（差額={diff}）",
+      "suggestion": "合計 = 数量 × 単価として再計算してください"
+    },
+    "resource_split_mismatch": {
+      "fail": "項目 {ordinal}: 資源の小計 {subtotal} と単価 {rate} に {diff} の差があります",
+      "suggestion": "資源の数量と単価を確認してください。単位当たりの合計は、項目の単価と一致する必要があります"
+    },
+    "empty_unit": {
+      "fail": "項目 {ordinal} の単位が空または未入力です",
+      "suggestion": "計量単位を割り当ててください（m、m2、m3、kg、pcs、lsum など）"
+    },
+    "section_without_items": {
+      "fail": "区分 {ordinal}（{title}）に下位項目がありません",
+      "suggestion": "この区分に項目を追加するか、空の区分を削除してください"
+    },
+    "rate_vs_benchmark": {
+      "fail": "項目 {ordinal}: 単価 {rate}/{unit} が基準しきい値 {threshold}/{unit} を超えており、非現実的な可能性があります",
+      "suggestion": "この単価を確認してください。通常の {unit} 当たりの単価は {threshold} 未満です。単位や小数点の誤りを確認してください。",
+      "not_assessed_no_currency": "{count} 項目を評価できませんでした。内訳書に通貨がないため、{reference} 建ての基準しきい値を換算できませんでした",
+      "not_assessed_no_currency_suggestion": "プロジェクトの通貨を設定するか、各項目に通貨を記録してください",
+      "not_assessed_no_rate": "{currency} 建ての {count} 項目を評価できませんでした。{reference} から {currency} への為替レートが未登録のため、基準しきい値をこの内訳書に換算できませんでした",
+      "not_assessed_no_rate_suggestion": "為替レート台帳またはプロジェクトの為替レートに、{reference} から {currency} へのレートを追加してください"
+    },
+    "lump_sum_ratio": {
+      "fail": "全 {total_count} 項目のうち {lsum_count} 項目（{percent}）が一式計上で、しきい値 {threshold} を超えています",
+      "suggestion": "積算精度を高めるため、一式項目を測定可能な数量（m、m2、m3、kg、pcs）に分解してください"
+    },
+    "cost_concentration": {
+      "fail": "項目 {ordinal} が内訳書の総額の {share}（{grand_total} のうち {value}）を占め、しきい値 {threshold} を超えています",
+      "suggestion": "この項目を小さな項目に分割するか、費用を確認してください。単一項目が見積額の大部分を占める状態は避けてください"
+    },
+    "currency_consistency": {
+      "fail": "通貨が混在しています: {currencies}",
+      "suggestion": "内訳書全体で単一の通貨を使用してください"
+    },
+    "measurement_consistency": {
+      "fail": "内訳書にメートル法とヤード・ポンド法の単位が混在しています。単位系を統一してください",
+      "suggestion": "すべての数量をメートル法またはヤード・ポンド法のいずれかに換算してください"
+    },
+    "revision_cost_impact_review": {
+      "fail": "改訂による費用への影響額 {amount} が、まだ変更として記録されていません",
+      "suggestion": "この改訂比較から変更申請の下書きを作成し、費用の変化を追跡してください"
+    },
+    "base_date_readable": {
+      "fail": "基準日「{base_date}」を日付として解釈できないため、内訳書には基準日の税率ではなく本日の税率が適用されています",
+      "suggestion": "価格の基準時点を日、月、四半期、または年で指定してください（{shapes}）"
+    },
+    "tax_date_readable": {
+      "fail": "課税日「{tax_date}」を日付として解釈できないため、内訳書には課税日の税率ではなく本日の税率が適用されています",
+      "suggestion": "課税日を日、月、四半期、または年で指定してください（{shapes}）。内訳書の基準日で課税する場合は空にしてください"
+    }
+  },
+  "din276": {
+    "cost_group_required": {
+      "fail": "項目 {ordinal} に DIN 276 の費用グループ（KG）がありません",
+      "suggestion": "3 桁の DIN 276 費用グループを割り当ててください（例: 壁は 330）"
+    },
+    "valid_cost_group": {
+      "fail": "項目 {ordinal} の DIN 276 コード「{code}」が無効です"
+    },
+    "hierarchy": {
+      "fail": "項目 {ordinal}: KG {child} は上位 KG {parent} に属していません（必要な接頭辞:「{prefix}」）",
+      "suggestion": "正しい上位区分に項目を移動するか、上位階層に合う KG コード（{prefix}xx）に変更してください"
+    },
+    "completeness": {
+      "fail": "内訳書に KG グループ {group} — {group_name} がありません",
+      "suggestion": "対象範囲を網羅するため、KG {group}（{group_name}）の項目を追加してください"
+    }
+  },
+  "gaeb": {
+    "ordinal_format": {
+      "fail": "番号「{ordinal}」が、このファイルの GAEB OZ-Maske と一致しません",
+      "suggestion": "ファイルの OZ-Maske に従ってください（例: 001.001.0010 または 01.02.0030）"
+    },
+    "lv_structure": {
+      "fail": "項目 {ordinal}: 末端項目に上位区分がありません。GAEB LV の階層では上位の Leistungsgruppe が必要です",
+      "suggestion": "この項目を上位区分（Leistungsgruppe / Titel）に割り当ててください"
+    },
+    "einheitspreis_sanity": {
+      "negative": "項目 {ordinal}: Einheitspreis（単価）{rate} が負です（単位='{unit}'）。負の価格は GAEB で転送できません",
+      "zero": "項目 {ordinal}: Einheitspreis（単価）が 0.00 です（単位='{unit}'）。単価の未入力ではなく、提示価格がゼロであることを確認してください",
+      "suggestion": "正の Einheitspreis を入力するか、項目を Bedarfsposition（任意工事範囲）または一式（単位='lsum'）に設定してください"
+    },
+    "trade_section_code": {
+      "fail": "最上位区分「{ordinal}」に GAEB Leistungsbereich コードがありません（「012」などの 3 桁の工種コードが必要です）",
+      "suggestion": "区分に 3 桁の工種コード（Leistungsbereich）を追加してください。例: 土工は「012」、組積工事は「013」"
+    },
+    "quantity_decimals": {
+      "fail": "項目 {ordinal}: 数量 {quantity} の小数点以下は {decimals} 桁です。GAEB X83 の慣例では 3 桁までです",
+      "suggestion": "GAEB X83 に従い、数量を小数点以下 3 桁以内に丸めてください"
+    }
+  },
+  "nrm": {
+    "classification_required": {
+      "fail": "項目 {ordinal} に NRM 要素コードがありません",
+      "suggestion": "NRM 1/2 要素コードを割り当ててください（例: 外壁は 2.6.1）"
+    },
+    "valid_element": {
+      "fail": "項目 {ordinal} の NRM コード「{code}」が無効です"
+    },
+    "completeness": {
+      "fail": "内訳書に NRM グループ {group} — {group_name} がありません",
+      "suggestion": "NRM グループ {group}（{group_name}）の項目を追加してください"
+    },
+    "base_date_declared": {
+      "fail": "コスト計画に、単価の基準日が記載されていません",
+      "suggestion": "内訳書に基準日を記録してください。基準日がなければ、単価が古いかどうか、また追加すべき物価上昇分を判断できません"
+    },
+    "cost_plan_stage_declared": {
+      "fail": "コスト計画に、対象となる設計段階が記載されていません",
+      "suggestion": "設計段階を記録してください。コスト計画に期待できる精度は作成時の設計段階によって決まるため、段階が不明だと誤った期待を招きます"
+    },
+    "contractor_costs_present": {
+      "preliminaries": "コスト計画に元請業者の仮設・現場運営費がなく、グループ {group} にも加算項目にも計上されていません",
+      "overheads_and_profit": "コスト計画に元請業者の一般管理費と利益がなく、グループ {group} にも加算項目にも計上されていません",
+      "suggestion": "NRM グループの要素または数量計上した工事への加算として追加してください。どちらの方式でも構いませんが、省略すると工事費が不完全になります"
+    },
+    "risk_allowance_present": {
+      "fail": "コスト計画にリスク引当額がありません",
+      "suggestion": "NRM グループ 13 または予備費の項目としてリスク引当額を追加してください。リスク引当額がない計画は、単一の推定額を確実な値のように示してしまいます"
+    }
+  },
+  "masterformat": {
+    "classification_required": {
+      "fail": "項目 {ordinal} に MasterFormat コードがありません",
+      "suggestion": "MasterFormat コードを割り当ててください（例: 現場打ちコンクリート工事は 03 30 00）"
+    },
+    "valid_division": {
+      "fail": "項目 {ordinal} の MasterFormat コード「{code}」が無効です",
+      "suggestion": "6 桁の MasterFormat 形式 XX XX XX を使用してください（例: 03 30 00）"
+    },
+    "completeness": {
+      "fail": "内訳書に部門 {division} — {division_name} がありません",
+      "suggestion": "部門 {division}（{division_name}）の項目を追加してください"
+    }
+  },
+  "sinapi": {
+    "code_required": {
+      "fail": "項目 {ordinal} に SINAPI コードがありません",
+      "suggestion": "SINAPI 複合単価コードを割り当ててください（例: コンクリート C30 は 87878）"
+    },
+    "valid_code": {
+      "fail": "項目 {ordinal} の SINAPI コード「{code}」が無効です"
+    }
+  },
+  "nbr": {
+    "classification_required": {
+      "fail": "項目 {ordinal} に NBR 12721 区分がありません",
+      "suggestion": "項目に NBR 12721 区分を付けてください（S1 = preliminares、S2 = infra-estrutura、...、S11 = serviços complementares）"
+    },
+    "valid_section": {
+      "fail": "項目 {ordinal} の NBR 12721 区分「{code}」は S1～S11 のいずれでもありません",
+      "suggestion": "S1～S11 のコードを使用してください（例: supra-estrutura は S3）"
+    }
+  },
+  "gesn": {
+    "code_required": {
+      "fail": "項目 {ordinal} に ГЭСН/ФЕР コードがありません",
+      "suggestion": "ГЭСН コードを割り当ててください（例: コンクリートは 06-01-001-01）"
+    },
+    "valid_code": {
+      "fail": "ГЭСН コード「{code}」が XX-XX-XXX-XX 形式に一致しません",
+      "suggestion": "NN-NN-NNN-NN 形式を使用してください（例: 06-01-001-01）"
+    },
+    "resource_breakdown": {
+      "fail": "項目 {ordinal} は標準 {code} を引用していますが、資源内訳がありません",
+      "suggestion": "標準に定められた労務・機械・材料の数量を取り込むか、この項目が標準と異なる理由を記載してください"
+    },
+    "labour_hours_present": {
+      "fail": "項目 {ordinal}（{code}）の資源内訳に労務時間がありません",
+      "suggestion": "標準に定められた労務時間を追加してください。一般管理費と予定利益は労務費を基礎とするため、労務時間がないと計算できません"
+    },
+    "price_level_declared": {
+      "fail": "見積額がどの時点の価格水準に基づくか記載されていません",
+      "suggestion": "価格水準（日付）と適用した換算指数を明記し、確認者が同じ合計を再現できるようにしてください"
+    }
+  },
+  "dpgf": {
+    "lot_required": {
+      "fail": "項目 {ordinal} がどの専門工事区分（Lot technique）にも割り当てられていません",
+      "suggestion": "専門工事区分を割り当ててください（例: Lot 01 Gros Œuvre）"
+    },
+    "pricing_complete": {
+      "fail": "価格が設定された項目は {priced}/{total}（{percent}）のみで、80% のしきい値を下回っています",
+      "suggestion": "DPGF を提出する前に、すべての項目の価格を設定してください"
+    }
+  },
+  "onorm": {
+    "position_format": {
+      "fail": "番号「{ordinal}」が ÖNORM の XX.XX.XXXXA 形式に一致しません",
+      "suggestion": "ÖNORM B 2063 形式を使用してください（例: 01.02.01A）"
+    },
+    "description_length": {
+      "fail": "項目 {ordinal}: 説明が短すぎます（{length} 文字、最低 20 文字）",
+      "suggestion": "ÖNORM B 2063 に従い、項目の説明を詳しくしてください"
+    }
+  },
+  "gbt50500": {
+    "code_required": {
+      "fail": "項目 {ordinal} に GB/T 50500 コードがありません",
+      "suggestion": "9 桁の GB/T 50500 コードを割り当ててください（例: 010101001）"
+    },
+    "valid_code": {
+      "fail": "GB/T 50500 コード「{code}」が無効です。9 桁または 12 桁が必要です"
+    }
+  },
+  "cpwd": {
+    "code_required": {
+      "fail": "項目 {ordinal} に CPWD/DSR コードがありません",
+      "suggestion": "CPWD DSR の項目参照を割り当ててください（例: 4.1.1）"
+    },
+    "measurement_units": {
+      "fail": "項目 {ordinal} の単位「{unit}」は IS 1200 の標準単位ではありません",
+      "suggestion": "IS 1200 の標準単位を使用してください（m、m2、m3、kg、nos、rm など）"
+    }
+  },
+  "hungary": {
+    "item_code_required": {
+      "fail": "項目 {ordinal} にハンガリーの項目コードがありません",
+      "invalid": "項目 {ordinal} のコード「{code}」は、どちらの項目体系にも一致しません",
+      "suggestion": "建築工事には MA-CC-SS-II（章 01～17）を使用し、インフラ工事にはプロジェクトのコード辞書にある 6 桁または 7 桁の項目番号を使用してください"
+    },
+    "chapter_recognised": {
+      "fail": "項目 {ordinal} の章 {chapter} は、項目体系の 17 章のいずれでもありません"
+    },
+    "material_fee_split": {
+      "fail": "項目 {ordinal}: 材料費 {material} と施工費 {fee} の合計が単価 {rate} に一致しません",
+      "suggestion": "材料費と施工費の単価、または項目の単価を修正し、内訳を一致させてください"
+    },
+    "item_number_unique": {
+      "fail": "項目番号 {number} は {count} 項目で使用されていますが、1 項目だけを識別する必要があります",
+      "suggestion": "内訳書を顧客に提出する前に、各項目にプロジェクト内で固有の項目番号を付けてください"
+    }
+  },
+  "prezzario": {
+    "voce_code_format_valid": {
+      "fail": "項目 {ordinal} のコード「{code}」から、出典の価格表を特定できません",
+      "suggestion": "正式な voce コードは、価格表の地域名と版の年から始まります。例: TOS25_01.A03.001.001（Toscana 2025）。地域価格表のコードを正確に転記するか、その表から項目を取り込むか、新規価格を NP.01 として採番してください"
+    },
+    "voce_reference_present": {
+      "fail": "項目 {ordinal} に prezzario の voce が引用されていません",
+      "suggestion": "取り込んだ地域価格表から項目を選択するか、単価分析に基づく nuovo prezzo（NP）として指定してください"
+    },
+    "costi_sicurezza_separated": {
+      "fail": "内訳書に、入札値引きの対象外となる安全費の独立項目がありません",
+      "suggestion": "価格表の安全費の章または安全計画に基づいて、oneri della sicurezza を独立した区分または加算項目として追加してください"
+    },
+    "incidenza_manodopera_documented": {
+      "fail": "項目 {ordinal}（{code}）に労務費の割合が記載されていません",
+      "suggestion": "価格表の incidenza della manodopera を採用するか、労務資源を追加して、入札時に労務費を別途明示できるようにしてください"
+    },
+    "overheads_not_applied_twice": {
+      "fail": "地域価格表の単価には、一般管理費（13～17%）と利益（10%）が既に含まれています。再度加算すると合計が約 {percent}% 増加します。",
+      "suggestion": "この内訳書から一般管理費と利益の加算を削除するか、独自の単価分析（NP）で見積もった項目だけに適用してください。"
+    }
+  },
+  "romania": {
+    "deviz_chapter_required": {
+      "fail": "項目 {ordinal} に deviz general の章が指定されていません",
+      "suggestion": "該当する HG 907/2016 の章と節に項目を分類してください。例: 建設・設備工事は 4.1、現場整備は 5.1"
+    },
+    "deviz_chapter_recognised": {
+      "fail": "項目 {ordinal} の deviz コード「{code}」は、deviz general の章または節ではありません",
+      "suggestion": "HG 907/2016 の deviz general の第 1～6 章のコードを使用してください（例: 1.2、2、3.5、4.1、5.1、6.2）"
+    }
+  },
+  "greece": {
+    "net_article_required": {
+      "fail": "項目 {ordinal} に統一価格表（ΝΕΤ）の項目番号がありません",
+      "suggestion": "単価の根拠となる ΝΕΤ 項目を指定してください（例: ΟΙΚ 32.01.06）。新規項目の場合は ΝΑΟΙΚ を使用してください"
+    },
+    "net_article_valid": {
+      "invalid": "項目 {ordinal} の「{code}」は ΝΕΤ 項目の形式ではありません",
+      "chapter": "項目 {ordinal} の「{code}」は章 {chapter} を指定していますが、建築工事価格表にその章はありません",
+      "suggestion": "価格表の接頭辞と項目番号を記載してください（例: ΟΙΚ 38.20.02、ΟΔΟ Α-2、ΑΤΗΕ 8151.1）"
+    }
+  },
+  "ukraine": {
+    "zkr_chapter_required": {
+      "fail": "項目 {ordinal} に総括見積の章が指定されていません",
+      "suggestion": "項目を зведений кошторисний розрахунок の第 1～12 章に分類してください。主要施設の建築工事は第 2 章に属します"
+    },
+    "zkr_chapter_recognised": {
+      "fail": "項目 {ordinal} の章 {chapter} は、総括見積の 12 章のいずれでもありません",
+      "suggestion": "1～12 の章番号を使用してください"
+    }
+  },
+  "birimfiyat": {
+    "code_required": {
+      "fail": "項目 {ordinal} に birim fiyat の poz 番号がありません",
+      "suggestion": "Bayındırlık の poz 番号を割り当ててください（例: 04.013/1）"
+    },
+    "valid_poz": {
+      "fail": "Poz「{code}」は、現行の単価表番号（XX.XXX.XXXX）にも旧形式（XX.XXX/X）にも一致しません",
+      "suggestion": "単価表の番号（例: 15.140.1002）を使用してください。旧契約では 04.013/1 などを使用し、独自に分析した項目は ÖZEL-1 のように採番してください"
+    }
+  },
+  "sekisan": {
+    "code_required": {
+      "fail": "項目 {ordinal} に積算コードがありません",
+      "suggestion": "積算基準の項目コードを割り当ててください"
+    },
+    "metric_units": {
+      "fail": "項目 {ordinal} の単位「{unit}」は標準単位ではありません",
+      "suggestion": "標準のメートル法単位を使用してください（m、m2、m3、kg、t、式など）"
+    }
+  },
+  "bc3": {
+    "code_required": {
+      "fail": "項目 {ordinal} に FIEBDC-3 の概念コードがありません",
+      "suggestion": "FIEBDC-3 コードを割り当ててください（例: E04CM040 または 01.02.01）"
+    },
+    "valid_code": {
+      "fail": "項目 {ordinal} の FIEBDC-3 コード「{code}」が無効です",
+      "suggestion": "FIEBDC-3 の英数字形式を使用してください（例: E04CM040、01.02.01、CAP01#）"
+    }
+  },
+  "mexico": {
+    "apu_completeness": {
+      "fail": "項目 {ordinal} の単価分析 APU が不完全です。不足している原価要素: {missing}",
+      "suggestion": "単価分析に、不足している直接費の要素（労務、材料、機械）を追加してください"
+    },
+    "iva_rate_valid": {
+      "fail": "項目 {ordinal} の IVA 税率 {rate} が無効です。メキシコの IVA は 16%、8%（国境地域）、または 0% です",
+      "suggestion": "IVA 税率を 16%（標準）、8%（国境地域）、または 0% に設定してください"
+    },
+    "subcontract_retencion": {
+      "fail": "下請項目 {ordinal} に IVA/ISR の源泉徴収の適用有無が記録されていません",
+      "suggestion": "下請項目の IVA と ISR の源泉徴収を記録するか、適用なしと指定してください"
+    },
+    "cfdi_rfc_present": {
+      "missing": "入札データのエクスポートに必要な CFDI 発行者情報が不完全です。不足情報: {missing}",
+      "invalid_rfc": "RFC「{rfc}」は有効な CFDI RFC ではありません（法人は 12 文字、個人は 13 文字）",
+      "suggestion": "CFDI 4.0 の請求に備え、プロジェクト設定に発行者の RFC、regimen fiscal、uso CFDI を設定してください"
+    }
+  },
+  "pipeline": {
+    "side_effecting_requires_gate": {
+      "fail": "外部への変更を伴うノードに制御ゲートがありません: {nodes}",
+      "suggestion": "公開前に、トリガーまたは AI ノードから各書き込みノードに至るすべての経路に、検証ゲートまたは人による承認ゲートを追加してください。"
+    }
+  },
+  "property_dev": {
+    "escrow_account_required": {
+      "fail": "この開発事業には、規制当局「{regulator}」に対応する有効なエスクロー口座が必要です",
+      "suggestion": "「コンプライアンス → エスクロー口座」で、規制当局が認可した銀行にエスクロー口座を開設してください"
+    },
+    "escrow_iban_valid": {
+      "fail": "エスクロー口座 {account}: IBAN「{iban}」が ISO 13616 の構造チェックに合格しません",
+      "suggestion": "IBAN を修正してください。国コード、桁数、チェックサムが ISO 13616 に適合する必要があります"
+    },
+    "escrow_balance_reconciled": {
+      "fail": "エスクロー口座 {account}: 帳簿残高 {ledger} が取引合計 {transactions} と {drift} 相違しています",
+      "suggestion": "エスクロー口座を照合し、未記帳の入金や不足している出金記録を調べてください"
+    },
+    "sales_contract_party_ownership_sums_to_100": {
+      "fail": "契約 {contract}: 所有持分の合計が {total}% です（正確に 100% である必要があります）",
+      "suggestion": "各当事者の持分を調整し、合計を 100.00% にしてください"
+    },
+    "payment_schedule_instalments_sum_to_contract_value": {
+      "fail": "契約 {contract}: 分割払額の合計 {instalments} が契約金額 {contract_value} と一致しません（差額 {drift}）",
+      "suggestion": "支払予定を調整し、分割払額の合計を契約総額に一致させてください"
+    },
+    "reservation_expiry_in_future": {
+      "fail": "予約 {reservation}: 有効期限 expires_at {expires} が将来の日時ではありません",
+      "suggestion": "予約期限を延長するか、状態を期限切れまたはキャンセルに変更してください"
+    },
+    "broker_commission_rate_within_bounds": {
+      "fail": "仲介手数料契約 {agreement}: {issue}",
+      "suggestion": "0.1～15% の料率、定額、または空でない段階別料率表を使用してください"
+    },
+    "price_matrix_no_negative_modifier": {
+      "fail": "価格マトリクス {matrix}: ルール「{factor}」の係数 {multiplier} が [-0.50, 2.00] の範囲外です",
+      "suggestion": "土地価格が非現実的にならないように、調整率を -50～+200% に制限してください"
+    }
+  },
+  "schedule_quality": {
+    "open_ends": {
+      "fail": "作業「{activity}」に {ends} の論理関係がありません（開放端／未接続の作業）",
+      "both": "先行作業または後続作業",
+      "predecessor": "先行作業",
+      "successor": "後続作業",
+      "suggestion": "先行作業と後続作業への関係を設定してネットワークに組み込むか、開始または終了のマイルストーンに設定してください"
+    },
+    "negative_lag": {
+      "fail": "関係 {predecessor} -> {successor} に負のラグ（{lag} 日）があります。これは前倒しであり、クリティカルパスを歪めます",
+      "suggestion": "前倒しを明示的な作業または開始－開始／終了－終了の関係に置き換え、順序を説明できるようにしてください"
+    },
+    "excessive_lag": {
+      "fail": "関係 {predecessor} -> {successor} のラグは {lag} 日で、しきい値 {threshold} 日を超えています",
+      "suggestion": "待ち時間を独立した作業（調達、養生、承認）として表し、進捗状態の管理と資源平準化を可能にしてください"
+    },
+    "hard_constraints": {
+      "fail": "作業「{activity}」に、ネットワークの論理より優先される厳格な日付制約（{constraint}）があります",
+      "suggestion": "緩やかな制約（指定日以降に開始）を使うか、論理関係から日付を決め、先行作業が遅れたときに作業を移動できるようにしてください"
+    },
+    "negative_float": {
+      "fail": "作業「{activity}」のトータルフロートが負（{float} 日）であり、現在の論理関係では工程を実現できません",
+      "suggestion": "作業順序を見直す、厳格な制約を緩める、または文書化した挽回計画を追加し、フロートをゼロ以上にしてください"
+    },
+    "high_float": {
+      "fail": "作業「{activity}」のトータルフロートが非常に大きく（{float} 日）、しきい値 {threshold} 日を超えています",
+      "suggestion": "後続作業への関係が欠けていないか確認してください。大きなフロートは通常、作業とネットワークの結び付きが弱いことを示します"
+    },
+    "missing_duration": {
+      "fail": "作業「{activity}」の期間（{duration} 日）は、マイルストーン以外の作業として無効です",
+      "suggestion": "正の稼働日数を設定するか、実際に期間ゼロのイベントである場合はマイルストーンに設定してください"
+    },
+    "duration_on_project_week": {
+      "fail": "作業「{activity}」には、{start} から {end} までの月曜～金曜を数えた {stored} 稼働日が保存されています。プロジェクトの稼働週 {calendar} では、この期間は {expected} です",
+      "suggestion": "作業の日付を再保存し、プロジェクトの稼働週に従って期間を再計算するか、意図する期間を直接入力してください"
+    }
+  },
+  "sheet_completeness": {
+    "missing": {
+      "fail": "図面 {sheet} は図面目録にありますが、アップロードした図面一式に含まれていません",
+      "suggestion": "不足している図面をアップロードするか、この発行分から取り下げられたことを確認してください"
+    },
+    "extra": {
+      "fail": "図面 {sheet} はアップロードした図面一式に含まれていますが、図面目録にありません",
+      "suggestion": "目録または発行台帳に追加するか、余分な図面を削除してください"
+    },
+    "revision_mismatch": {
+      "fail": "図面 {sheet} の改訂番号は {actual_rev} ですが、目録では {expected_rev} となっています",
+      "suggestion": "指定された改訂版を発行するか、目録を現在の改訂番号に更新してください"
+    }
+  },
+  "procurement": {
+    "po_has_lines": {
+      "fail": "この発注書には明細行がないため、発注済み金額が集計されません",
+      "suggestion": "発注書を承認する前に、発注品目を追加してください"
+    },
+    "po_line_amount": {
+      "fail": "行 {line} の金額は {actual} ですが、数量と単価の積は {expected} です",
+      "suggestion": "数量、単価、または行の金額を修正し、整合させてください"
+    },
+    "po_subtotal_matches_lines": {
+      "fail": "小計は {actual} ですが、明細行の合計は {expected} です",
+      "suggestion": "現在の明細行から小計を再計算してください"
+    },
+    "po_total_matches_subtotal": {
+      "fail": "合計は {actual} ですが、小計と税額の合計は {expected} です",
+      "suggestion": "小計と税額の合計に一致するように、総額を再計算してください"
+    },
+    "po_no_negative_line": {
+      "fail": "行 {line} の数量がゼロ以下、または単価が負です",
+      "suggestion": "取消計上には、負の明細行ではなくクレジットノートを発行してください"
+    },
+    "po_currency_set": {
+      "fail": "この発注書に通貨がないため、金額を集計または支払うことができません",
+      "suggestion": "通貨を設定してください。通常はプロジェクトと同じ通貨を使用します"
+    },
+    "po_vendor_assigned": {
+      "fail": "この発注書に仕入先が指定されていません",
+      "suggestion": "発注額を承認する前に仕入先を選択してください"
+    },
+    "po_retention_within_bounds": {
+      "fail": "留保率 {percent}% が、妥当な範囲の 0～{max}% を外れています",
+      "suggestion": "留保率を百分率で入力してください。例えば 5% の場合は 5 と入力します"
+    },
+    "po_delivery_after_issue": {
+      "fail": "納品日 {delivery} が発行日 {issue} より前に設定されています",
+      "suggestion": "納品日を発行日以降に変更してください"
+    },
+    "po_line_cost_coded": {
+      "fail": "行 {line} に WBS、原価区分、原価明細のいずれもないため、原価内訳に表示されません",
+      "suggestion": "原価コードを割り当て、発注済み金額を予算と対比できるようにしてください"
+    },
+    "invoice_within_order": {
+      "fail": "請求書 {invoice} が、発注 {po} の未消化残高 {remaining} を {excess} 超過しています",
+      "suggestion": "請求書と発注内容を照合してください。追加分が合意済みなら、承認前に発注変更として記録してください"
+    },
+    "invoice_quantity_received": {
+      "fail": "行 {line} の累計請求数量は {invoiced} になりますが、受領済み数量は {received} のみです",
+      "suggestion": "この数量を承認する前に、納品書を待つか、受領を確認してください"
+    },
+    "invoice_value_received": {
+      "fail": "発注 {po} の請求合計は {invoiced} になりますが、発注単価での受領済み品の価額は {received} のみです",
+      "suggestion": "この金額を承認する前に、納品書を待つか、受領を確認してください"
+    }
+  },
+  "subcontract": {
+    "agreement_has_scope": {
+      "fail": "この契約には工事パッケージがないため、支払申請の対象となる範囲がありません",
+      "suggestion": "契約を有効化する前に、契約範囲を工事パッケージに分割してください"
+    },
+    "package_scope_described": {
+      "fail": "工事パッケージ {package} には名称がありますが、対象工事の説明がありません",
+      "suggestion": "後の変更に関する議論の基準となるように、パッケージに含まれる工事を記載してください"
+    },
+    "agreement_value_positive": {
+      "fail": "契約金額が {value} のため、留保金と契約金額内訳の計算基礎がありません",
+      "suggestion": "契約を有効化する前に、合意した契約金額を入力してください"
+    },
+    "packages_within_value": {
+      "fail": "工事パッケージの金額は {planned} ですが、契約金額は {total} です",
+      "suggestion": "パッケージを再評価するか契約金額を増額し、契約の対象範囲を金額でカバーしてください"
+    },
+    "agreement_dates_ordered": {
+      "fail": "契約終了日 {end} が開始日 {start} より前になっています",
+      "suggestion": "開始日または終了日を修正し、契約期間を時系列順にしてください"
+    },
+    "agreement_currency_set": {
+      "fail": "この契約に通貨がないため、契約上の支払額を集計または支払うことができません",
+      "suggestion": "通貨を設定してください。通常はプロジェクトと同じ通貨を使用します"
+    },
+    "retention_within_bounds": {
+      "fail": "留保率 {percent}% が、妥当な範囲の 0～{max}% を外れています",
+      "suggestion": "留保を金額ではなく、各支払額に対する割合で入力してください"
+    },
+    "insurance_valid_at_start": {
+      "fail": "下請業者の保険は {expiry} に失効しており、工事開始日 {reference} をカバーしていません",
+      "suggestion": "下請業者を現場に入れる前に、有効な保険証明書を取得してください"
+    },
+    "unlinked_contract_twin": {
+      "fail": "下請契約 {agreement} と契約 {contract} は同じ下請契約の可能性があり、金額が二重計上されるおそれがあります",
+      "suggestion": "同じ下請契約であれば関連付け、異なる契約であれば別物として指定してください"
+    }
+  },
+  "submittal": {
+    "reviewer_assigned": {
+      "fail": "この承認用提出資料には確認担当者が指定されておらず、回答責任者がいません",
+      "suggestion": "提出前に、回答する確認担当者を指定してください"
+    },
+    "required_date_present": {
+      "fail": "この承認用提出資料には必要期日がないため、遅延として報告できません",
+      "suggestion": "この資料の承認によって着手できる工事に合わせ、確認完了が必要な日を設定してください"
+    },
+    "required_date_after_submitted": {
+      "fail": "確認期日 {required} が、資料の提出日 {submitted} より前です",
+      "suggestion": "必要期日を提出後の稼働日に変更してください"
+    },
+    "review_window_sufficient": {
+      "fail": "確認担当者に与えられた期間は {days} 日で、通常必要な {minimum} 日を下回っています",
+      "suggestion": "通常の確認期間を確保するか、短縮する場合は事前に確認担当者と合意してください"
+    },
+    "spec_section_present": {
+      "fail": "この承認用提出資料には仕様書の節が指定されておらず、台帳で分類できません",
+      "suggestion": "この提出資料が対応する仕様書の節を入力してください"
+    },
+    "approver_distinct_from_reviewer": {
+      "fail": "同じ人（{person}）が確認と承認を担当しており、別の担当者による確認がありません",
+      "suggestion": "確認担当者とは別の承認者を指定してください"
+    },
+    "linked_scope_present": {
+      "fail": "この承認用提出資料は工事範囲の項目に関連付けられていないため、パッケージに集計されません",
+      "suggestion": "この提出資料が対象とする内訳書の項目を関連付けてください"
+    }
+  },
+  "rfq": {
+    "scope_described": {
+      "fail": "この見積依頼には工事範囲も説明もなく、業者が見積もる対象がありません",
+      "suggestion": "比較可能な見積を得られるように、公開前に工事範囲を記載してください"
+    },
+    "deadline_present": {
+      "fail": "この見積依頼には提出期限がなく、見積受付が終了しません",
+      "suggestion": "見積の必着日時を設定してください"
+    },
+    "deadline_parseable": {
+      "fail": "提出期限 {value} をシステムが日付として解釈できず、すべての見積が拒否されます",
+      "suggestion": "提出期限を日付で入力してください（例: 2026-08-31）"
+    },
+    "deadline_in_future": {
+      "fail": "提出期限 {deadline} は本日 {today} の時点で過ぎているため、この依頼は受付終了状態で届きます",
+      "suggestion": "公開前に提出期限を将来の日付に変更してください"
+    },
+    "has_recipients": {
+      "fail": "この見積依頼には送信先の業者がなく、公開しても誰にも通知されません",
+      "suggestion": "見積依頼の送信先となる業者を追加してください"
+    },
+    "currency_set": {
+      "fail": "この見積依頼には通貨がないため、各見積を比較して順位付けできません",
+      "suggestion": "見積価格を提示する通貨を設定してください"
+    },
+    "bid_currency_matches": {
+      "fail": "見積 {bid} は {bid_currency} 建てですが、見積依頼は {rfq_currency} 建てです",
+      "suggestion": "依頼の通貨で再見積を求めるか、合意した換算内容を記録してください"
+    },
+    "bid_amounts_parseable": {
+      "fail": "見積 {bid} の金額 {value} は、順位付けに使用できる数値ではありません",
+      "suggestion": "発注先を決定する前に見積金額を修正してください"
+    },
+    "bids_still_valid": {
+      "fail": "見積 {bid} の有効期限は {expired} で、本日は {today} のため、その価格は既に拘束力を失っています",
+      "suggestion": "発注先を決定する前に、業者へ価格の再確認を依頼してください"
+    },
+    "award_has_competition": {
+      "fail": "この発注先決定は {count} 件の見積に基づいており、競争比較に必要な {minimum} 件を下回っています",
+      "suggestion": "単独業者からの調達が妥当な理由を記録するか、追加の業者に見積を依頼してください"
+    }
+  },
+  "errors": {
+    "resource_not_found": "資源が見つかりません",
+    "project_not_found": "プロジェクトが見つかりません",
+    "vendor_not_found": "業者が見つかりません",
+    "template_not_found": "テンプレートが見つかりません",
+    "position_not_found": "項目が見つかりません",
+    "boq_not_found": "内訳書が見つかりません",
+    "session_not_found": "セッションが見つかりません",
+    "document_not_found": "文書が見つかりません",
+    "documents_batch_delete_referenced": "この一括処理の文書は、他のレコードからまだ参照されています。削除によって失われる関連を確認し、acknowledge_references で承認してください。",
+    "invitation_not_found": "招待が見つかりません",
+    "agreement_not_found": "契約が見つかりません",
+    "rejection_not_found": "却下記録が見つかりません",
+    "claim_not_found": "出来高支払申請が見つかりません",
+    "gaeb_x89_final_account_unsupported": "最終精算または部分的な最終精算は、まだ GAEB X89 にエクスポートできません。最終精算では累計出来高から過去の支払を控除する必要がありますが、支払申請から作成されるのは単一期間の出来高請求書のみです。出来高請求書としてエクスポートしてください。",
+    "xpwe_native_file_refused": "これは積算ソフト専用のプロジェクトファイルで、そのソフトでしか開けません。元の積算ソフトから見積を XPWE 形式で出力し、.xpwe ファイルをアップロードしてください。",
+    "plot_not_found": "区画が見つかりません",
+    "survey_not_found": "ドローン測量が見つかりません",
+    "diary_video_not_found": "日報の動画が見つかりません",
+    "diary_photo_not_found": "日報の写真が見つかりません",
+    "bidder_not_found": "入札者が見つかりません",
+    "webhook_not_found": "Webhook が見つかりません",
+    "submission_not_found": "提出記録が見つかりません",
+    "measurement_not_found": "現場の出来形計測が見つかりません",
+    "salescontract_not_found": "売買契約が見つかりません",
+    "prompt_not_found": "プロンプトテンプレートが見つかりません",
+    "prequalification_not_found": "事前資格審査が見つかりません",
+    "purchase_requisition_not_found": "購買申請が見つかりません",
+    "purchase_order_not_found": "発注書が見つかりません",
+    "group_not_found": "グループが見つかりません",
+    "final_account_not_found": "最終精算が見つかりません",
+    "estimate_job_not_found": "積算ジョブが見つかりません",
+    "escrow_not_found": "エスクロー取引が見つかりません",
+    "commission_accrual_not_found": "未払手数料の計上記録が見つかりません",
+    "baseline_not_found": "ベースラインが見つかりません",
+    "fx_rate_set_locked": "{date} の ECB 為替レートはロックされているため、この更新では上書きされませんでした。新しい公表値を反映する場合は、先にそのレートセットのロックを解除してください。",
+    "boq_locked": "内訳書はロックされているため変更できません。変更するには改訂版を作成してください。",
+    "boq_link_owner_locked": "コード「{code}」はロック済みの内訳書「{bill}」の項目で定義されており、関連付けるとその内訳書が変更されます。先にその内訳書のロックを解除するか、新しいコードで項目を入力してください。"
+  },
+  "variations": {
+    "boq_lines_are_traced": {
+      "fail": "この変更の内訳書の行 {line} には、契約金額内訳の行も積算項目も、出典として関連付けられていません",
+      "suggestion": "金額の根拠を説明できるように、この変更が対象とする契約明細、または工事範囲の出典となる積算項目を指定してください"
+    },
+    "boq_total_matches_estimate": {
+      "fail": "この申請に示された見積額は {estimate} ですが、価格設定済みの内訳書の合計は {priced} です",
+      "suggestion": "内訳書の合計を申請に反映するか内訳書を修正し、金額を統一してください"
+    },
+    "change_kind_matches_numbers": {
+      "removed_positive": "行 {line} は削除範囲として指定されていますが、数量が正の {quantity} です。工事範囲の削除は負の数量として契約から差し引きます",
+      "added_negative": "行 {line} は追加範囲として指定されていますが、数量が負の {quantity} です。契約から差し引く範囲は追加ではなく削除です",
+      "removed_needs_contract_line": "行 {line} は削除範囲として指定されていますが、契約金額内訳の行に関連付けられていないため、削除対象の契約項目がありません",
+      "modified_needs_contract_line": "行 {line} は変更範囲として指定されていますが、契約金額内訳の行に関連付けられていないため、変更対象の契約項目がありません",
+      "suggestion": "行の追跡情報にある変更種別または数量を修正するか、変更対象の契約明細を指定してください"
+    }
+  },
+  "cases": {
+    "has_steps": {
+      "fail": "このケースにはまだ手順がないため、読む人が実行できる内容がありません。",
+      "suggestion": "開く画面とそこで行う操作を示した手順を、少なくとも 1 つ追加してください。"
+    },
+    "step_titled": {
+      "fail": "{count} 件の手順に、見出しまたは開く画面がありません。",
+      "suggestion": "各手順に短い見出しを付け、開く画面を選択してください。"
+    },
+    "step_purpose": {
+      "fail": "全 {total} 件のうち {count} 件の手順に目的の説明がなく、ケースが説明ではなくクリック操作の一覧になっています。",
+      "suggestion": "各手順の目的を 1 文で追加してください。新しい担当者に必要なのはその説明です。"
+    },
+    "distinct_screens": {
+      "fail": "{count} 件の手順が直前の手順と同じ画面を開くため、読む人には変化が見えず、手順を区別できません。",
+      "suggestion": "1 つの手順にまとめるか、後の手順を実際に作業が移る画面に向けてください。"
+    },
+    "duration_plausible": {
+      "fail": "このケースは {steps} 件の手順に {minutes} 分を見込んでいます。追い付けない読者は、他の所要時間の見積も信頼しなくなります。",
+      "suggestion": "所要時間を少なくとも {minimum} 分に増やすか、手順を減らしてください。"
+    },
+    "described": {
+      "fail": "このケースには要約がないため、一覧に見出ししか表示されません。",
+      "suggestion": "完了時に何を達成できるかを 1 文で追加してください。"
+    }
+  },
+  "uk": {
+    "contract_form_declared": {
+      "fail": "見積に、価格算定の前提となる契約形式が記載されていません",
+      "suggestion": "契約形式を記録してください。仮設・現場運営費、リスク、支払条件の見積は契約形式によって変わるため、形式がなければ金額の意味が不明確です"
+    },
+    "payment_regime_declared": {
+      "fail": "支払方式が不完全です。未記録の項目: {missing}",
+      "suggestion": "両方の日付を記録してください。工事契約がどちらも定めていなくても免除されるわけではありません。Scheme for Construction Contracts が両方を補完するため、当事者は署名した契約ではなく法令の中に支払条件を求めることになります"
+    },
+    "retention_declared": {
+      "fail": "見積に、適用される留保金が記載されていません",
+      "suggestion": "留保率と解除条件を記録するか、留保なしと明記してください。留保金は施工者が既に稼得していても引き出せない資金であり、これを省略すると運転資金の必要額が見えなくなります"
+    },
+    "cdm_duty_holders_declared": {
+      "fail": "CDM 2015 に基づく責任者が記録されていません。不足: {missing}",
+      "suggestion": "責任者の選任を記録してください。複数の施工者が関与する場合、発注者は principal designer と principal contractor を書面で選任する必要があり、選任しなければ発注者自身がその義務を負います"
+    },
+    "hrb_regime_declared": {
+      "fail": "高リスク建築物に該当するか未確定です: {reason}",
+      "unanswered": "見積に、高リスク建築物に該当するか記載されていません",
+      "disagrees": "見積では高リスクの該当性を {declared} としていますが、その寸法からは {derived} となります",
+      "suggestion": "高リスク建築物は、高さ 18 m 以上または 7 階建て以上で、かつ 2 戸以上の住宅を含む建物です。両方の条件が必要です。住宅のない高い建物は該当せず、該当すると扱えば不要なゲートウェイ承認工程が発生します"
+    },
+    "vat_treatment_declared": {
+      "fail": "見積に VAT の取扱いが記載されていません",
+      "suggestion": "標準税率、対象工事に認められる軽減税率またはゼロ税率、あるいは対象取引に適用される国内リバースチャージを記録してください。リバースチャージは VAT の納税義務を顧客に移し、施工者が請求できる内容を変えます"
+    }
+  },
+  "project_completeness": {
+    "country_set": {
+      "fail": "プロジェクトに国が指定されていないため、価格基準、税率、稼働カレンダーを決定できません",
+      "suggestion": "プロジェクト設定で国を指定してください。国によって、各金額の解釈に使用する地域パック、税制、カレンダーが決まります"
+    },
+    "currency_set": {
+      "fail": "プロジェクトに通貨が指定されていないため、内訳書、加算額、契約金額を合算できません",
+      "suggestion": "プロジェクト設定で通貨を選択してください。すべての内訳書、契約、合計はその通貨で表されます"
+    },
+    "currency_matches_bill": {
+      "fail": "プロジェクトは {project_currency} 建てですが、この内訳書の行は {bill_currencies} 建てです",
+      "suggestion": "内訳書の合計を単一の金額にするため、明示したレートで各行をプロジェクト通貨に換算するか、プロジェクトに為替レートを記録してください"
+    },
+    "priced_bill_present": {
+      "fail": "プロジェクトに項目を含む内訳書がないため、積算の基礎がありません",
+      "suggestion": "内訳書を作成して項目を追加するか、CAD モデル、表計算ファイル、または交換ファイルから取り込んでください"
+    },
+    "bill_base_date_set": {
+      "fail": "内訳書「{bill}」に単価の基準日が記載されていません",
+      "suggestion": "内訳書に基準日を記録してください。基準日がなければ、指数による価格調整、該当日の税率適用、他の見積との比較ができません"
+    },
+    "classification_standard_set": {
+      "fail": "プロジェクトに分類規格がないため、各項目のコードを検証できません",
+      "suggestion": "プロジェクトで使用する分類規格を選択してください。検証で実行する国別ルールセットも、この規格によって決まります"
+    },
+    "planned_dates_set": {
+      "both_missing": "プロジェクトに予定開始日も予定終了日もありません",
+      "start_missing": "プロジェクトに予定終了日はありますが、予定開始日がありません",
+      "end_missing": "プロジェクトに予定開始日はありますが、予定終了日がありません",
+      "unreadable": "予定日「{value}」を日付として解釈できません",
+      "suggestion": "プロジェクトの予定開始日と予定終了日を日付として入力してください。期間に応じた費用、物価変動分、工程はその間を対象に計算されます"
+    },
+    "planned_dates_ordered": {
+      "fail": "プロジェクトは {start} に開始して {end} に終了する予定ですが、終了日が開始日より前です",
+      "suggestion": "予定日を入れ替えるか修正し、開始日が終了日より前になるようにしてください"
+    },
+    "client_recorded": {
+      "fail": "プロジェクトに顧客が記録されておらず、どの契約にも発注者が指定されていません",
+      "suggestion": "見積の提出先が分かるように、プロジェクトに顧客を記録するか、契約当事者として発注者を追加してください"
+    },
+    "procurement_started": {
+      "fail": "プロジェクトは {phase} 段階ですが、契約も入札パッケージもありません",
+      "suggestion": "内訳書から入札パッケージを作成するか契約を記録してください。実際には積算段階である場合は、段階をその状態に戻してください"
+    }
+  },
+  "boq_resources": {
+    "unit_rate_not_rederived": {
+      "fail": "項目 {ordinal}: 資源行から項目を見積もれないため、資源行に基づく単価の再計算は行われませんでした",
+      "fallback_allowance": "項目 {ordinal}: 資源行は概算引当額を配分したもので、項目全体の数量を保持しているため、資源行に基づく単価の再計算は行われませんでした",
+      "assumed_norm": "項目 {ordinal}: 資源行にはカタログに記載のない歩掛が設定されているため、資源行に基づく単価の再計算は行われませんでした",
+      "norm_collapsed": "項目 {ordinal}: 資源行のカタログ歩掛が失われ、代わりに項目の数量が設定されているため、資源行に基づく単価の再計算は行われませんでした",
+      "whole_position_quantities": "項目 {ordinal}: 資源行には単位当たりの歩掛ではなく項目全体の数量が設定されているため、資源行に基づく単価の再計算は行われませんでした",
+      "suggestion": "単価構成を確認してください。資源歩掛の確認を通じてカタログ項目から再計算するか、各行を手作業で修正してください"
+    }
+  },
+  "poland": {
+    "knr_reference_required": {
+      "fail": "項目 {ordinal} に KNR カタログの表が引用されていません",
+      "suggestion": "podstawa に歩掛の出典となるカタログ表（例: KNR 2-02 0201-01）を記載してください。独自計算で見積もった項目には kalkulacja indywidualna と記載してください"
+    },
+    "knr_reference_recognised": {
+      "fail": "項目 {ordinal} の参照「{code}」は、KNR カタログの系列を指定していません",
+      "suggestion": "参照を KNR、KNNR、KNR-W、KSNR などのカタログ系列名で始めるか、項目を kalkulacja indywidualna と指定してください"
+    }
+  }
+}

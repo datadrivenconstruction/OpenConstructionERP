@@ -1,0 +1,868 @@
+{
+  "boq_markup": {
+    "contingency_not_on_profit": {
+      "fail": "De risicopost \"{markup}\" wordt berekend over een grondslag waarin de winstpost \"{profit}\" al is opgenomen; daardoor wordt ook marge berekend over het voor risico gereserveerde bedrag",
+      "suggestion": "Bereken deze post over de directe kosten, tenzij de gebruikelijke marktmethode risico bewust na algemene kosten en winst plaatst"
+    },
+    "order_is_declared": {
+      "fail": "Volgnummer {order} wordt door meerdere opslagregels gebruikt: {markups}",
+      "suggestion": "Geef elke opslagregel een eigen volgnummer, zodat vaststaat welke opslagen in elkaars grondslag worden opgenomen"
+    },
+    "percentage_within_band": {
+      "fail": "\"{markup}\" bedraagt {percentage}% als post van categorie {category}, buiten de aannemelijke bandbreedte van 0 tot {ceiling}%",
+      "suggestion": "Controleer het decimaalteken. De post wordt hoe dan ook exact volgens de ingevoerde waarde berekend"
+    },
+    "cumulative_base_is_settled": {
+      "fail": "\"{markup}\" wordt toegepast op \"{apply_to}\", maar er gaan geen posten aan vooraf; de berekening gebruikt daarom alleen de directe kosten",
+      "suggestion": "Plaats deze post na de posten die in de grondslag moeten worden opgenomen, of bereken hem over de directe kosten"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  },
+  "export": {
+    "generated": "Gegenereerd",
+    "content_digest": "Inhoudshash"
+  },
+  "field_time": {
+    "hours_per_day_max": {
+      "fail": "Voor medewerker {worker} is op deze dag {hours} uur geboekt, boven de limiet van {max} uur",
+      "suggestion": "Verdeel de uren vóór indiening over de juiste dag of medewerker"
+    },
+    "line_complete": {
+      "fail": "Regel {line} is onvolledig: {reason}",
+      "labour_xor_plant": "boek óf arbeid óf materieel, niet beide en ook niet geen van beide",
+      "hours_positive": "het aantal uren moet groter zijn dan nul",
+      "cost_code_required": "een kostencode is verplicht",
+      "suggestion": "Vul de regel aan voordat u de urenstaat indient"
+    },
+    "cost_code_resolves": {
+      "fail": "Code '{code}' op regel {line} komt niet overeen met een hoeveelhedenstaatpost of WBS-element in dit project",
+      "suggestion": "Kies een kostencode of WBS-element dat in de hoeveelhedenstaat van het project bestaat"
+    },
+    "daywork_needs_variation": {
+      "fail": "Regiewerkregel {line} is niet gekoppeld aan een open wijziging",
+      "suggestion": "Koppel het regiewerk aan de wijziging op grond waarvan het is opgedragen"
+    },
+    "plant_needs_equipment": {
+      "fail": "Materieelregel {line} vermeldt geen materieelstuk",
+      "suggestion": "Koppel de machine zodat de materieeluren kunnen worden gewaardeerd"
+    },
+    "approved_immutable": {
+      "fail": "Deze urenstaat heeft de status {status} en kan niet worden gewijzigd",
+      "suggestion": "Boek een tegenboeking op een urenstaat om goedgekeurde uren te corrigeren"
+    },
+    "offline_clock_plausible": {
+      "fail": "De klok van het apparaat dat deze dag registreerde, liep {minutes} minuten voor op de serverklok",
+      "suggestion": "Stel de apparaatklok juist in zodat geregistreerde tijden in de juiste volgorde staan"
+    },
+    "offline_sync_delay": {
+      "fail": "Het werk is uitgevoerd op {date}, maar de registratie bereikte het kantoor pas {days} dagen later",
+      "suggestion": "Controleer vóór goedkeuring de uren tegen de werkelijke werkdag; de waarderingsperiode kan al zijn afgesloten"
+    }
+  },
+  "ai_takeoff": {
+    "unreviewed_proposals": {
+      "fail": "Er wachten nog {count} voorstellen voor hoeveelhedenbepaling op beoordeling; ze zijn hier niet geprijsd",
+      "suggestion": "Werk de beoordelingswachtrij af zodat de bevestigde hoeveelheden overeenkomen met de tekening"
+    }
+  },
+  "boq_quality": {
+    "position_has_quantity": {
+      "fail": "Post {ordinal} mag geen hoeveelheid nul of ontbrekende hoeveelheid hebben",
+      "suggestion": "Voer een hoeveelheid groter dan 0 in"
+    },
+    "position_has_unit_rate": {
+      "fail": "Aan post {ordinal} moet een eenheidsprijs zijn toegewezen",
+      "suggestion": "Wijs een prijs uit de kostendatabase toe"
+    },
+    "position_has_description": {
+      "fail": "De omschrijving van post {ordinal} mag niet leeg zijn"
+    },
+    "no_duplicate_ordinals": {
+      "fail": "Volgnummer '{ordinal}' komt dubbel voor in {count} posten"
+    },
+    "unit_rate_in_range": {
+      "fail": "Post {ordinal}: prijs {rate} is groter dan {threshold} (5 maal de mediaan)",
+      "suggestion": "Controleer deze eenheidsprijs; hij is ongebruikelijk hoog"
+    },
+    "negative_values": {
+      "fail": "Post {ordinal} heeft negatieve waarden voor {details}",
+      "suggestion": "Corrigeer de negatieve waarden en gebruik positieve getallen"
+    },
+    "unrealistic_rate": {
+      "fail": "Post {ordinal}: {details}",
+      "suggestion": "Controleer deze waarde; ze lijkt onrealistisch hoog",
+      "not_assessed_no_currency": "{count} post(en) niet beoordeeld: de hoeveelhedenstaat vermeldt geen valuta, waardoor de geldgrenzen in {reference} niet konden worden omgerekend",
+      "not_assessed_no_currency_suggestion": "Stel de projectvaluta in of leg een valuta vast op de posten",
+      "not_assessed_no_rate": "{count} post(en) in {currency} niet beoordeeld: er is geen koers van {reference} naar {currency} vastgelegd, waardoor de geldgrenzen niet naar deze hoeveelhedenstaat konden worden omgerekend",
+      "not_assessed_no_rate_suggestion": "Voeg een koers van {reference} naar {currency} toe aan het wisselkoersregister of aan de projectwisselkoersen"
+    },
+    "total_mismatch": {
+      "fail": "Post {ordinal}: berekend {computed} is niet gelijk aan opgeslagen {stored} (verschil={diff})",
+      "suggestion": "Bereken opnieuw: totaal = hoeveelheid × eenheidsprijs"
+    },
+    "resource_split_mismatch": {
+      "fail": "Post {ordinal}: het subtotaal van de middelen {subtotal} wijkt {diff} af van de eenheidsprijs {rate}",
+      "suggestion": "Controleer de hoeveelheden en prijzen van de middelen; hun som per eenheid moet overeenkomen met de eenheidsprijs van de post"
+    },
+    "empty_unit": {
+      "fail": "Post {ordinal} heeft een lege of ontbrekende eenheid",
+      "suggestion": "Wijs een maateenheid toe (m, m2, m3, kg, pcs, lsum enz.)"
+    },
+    "section_without_items": {
+      "fail": "Onderdeel {ordinal} ({title}) bevat geen onderliggende posten",
+      "suggestion": "Voeg posten toe aan dit onderdeel of verwijder het lege onderdeel"
+    },
+    "rate_vs_benchmark": {
+      "fail": "Post {ordinal}: eenheidsprijs {rate}/{unit} overschrijdt de referentiegrens van {threshold}/{unit} en is mogelijk onrealistisch",
+      "suggestion": "Controleer deze prijs; gebruikelijke prijzen per {unit} moeten lager zijn dan {threshold}. Controleer op fouten in eenheden of decimalen.",
+      "not_assessed_no_currency": "{count} post(en) niet beoordeeld: de hoeveelhedenstaat vermeldt geen valuta, waardoor de referentiegrenzen in {reference} niet konden worden omgerekend",
+      "not_assessed_no_currency_suggestion": "Stel de projectvaluta in of leg een valuta vast op de posten",
+      "not_assessed_no_rate": "{count} post(en) in {currency} niet beoordeeld: er is geen koers van {reference} naar {currency} vastgelegd, waardoor de referentiegrenzen niet naar deze hoeveelhedenstaat konden worden omgerekend",
+      "not_assessed_no_rate_suggestion": "Voeg een koers van {reference} naar {currency} toe aan het wisselkoersregister of aan de projectwisselkoersen"
+    },
+    "lump_sum_ratio": {
+      "fail": "{lsum_count} van {total_count} posten ({percent}) gebruiken een forfaitair bedrag; dit overschrijdt de grens van {threshold}",
+      "suggestion": "Splits forfaitaire posten uit in gemeten hoeveelheden (m, m2, m3, kg, pcs) voor een nauwkeurigere raming"
+    },
+    "cost_concentration": {
+      "fail": "Post {ordinal} vertegenwoordigt {share} van de totale kosten van de hoeveelhedenstaat ({value} van {grand_total}); dit overschrijdt de grens van {threshold}",
+      "suggestion": "Splits deze post in kleinere posten of controleer de kosten; één post mag de raming niet overheersen"
+    },
+    "currency_consistency": {
+      "fail": "Er zijn meerdere valuta's aangetroffen: {currencies}",
+      "suggestion": "Gebruik één valuta in de hele hoeveelhedenstaat"
+    },
+    "measurement_consistency": {
+      "fail": "De hoeveelhedenstaat combineert metrische en imperiale eenheden; gebruik consequent één stelsel",
+      "suggestion": "Reken alle hoeveelheden om naar metrische of naar imperiale eenheden"
+    },
+    "revision_cost_impact_review": {
+      "fail": "Het kosteneffect van de revisie, {amount}, is nog niet vastgelegd als wijziging",
+      "suggestion": "Maak vanuit deze revisievergelijking een conceptwijzigingsverzoek om de kostenverandering te volgen"
+    },
+    "base_date_readable": {
+      "fail": "Basisdatum '{base_date}' is geen geldige datum; daarom gebruikt de hoeveelhedenstaat het belastingtarief van vandaag in plaats van dat van de basisdatum",
+      "suggestion": "Geef het prijspeil op als dag, maand, kwartaal of jaar ({shapes})"
+    },
+    "tax_date_readable": {
+      "fail": "Belastingdatum '{tax_date}' is geen geldige datum; daarom gebruikt de hoeveelhedenstaat het belastingtarief van vandaag in plaats van dat van de belastingdatum",
+      "suggestion": "Geef de belastingdatum op als dag, maand, kwartaal of jaar ({shapes}), of maak het veld leeg om de basisdatum van de hoeveelhedenstaat te gebruiken"
+    }
+  },
+  "din276": {
+    "cost_group_required": {
+      "fail": "Post {ordinal} mist een DIN 276-kostengroep (KG)",
+      "suggestion": "Wijs een driecijferige DIN 276 Kostengruppe toe (bijvoorbeeld 330 voor wanden)"
+    },
+    "valid_cost_group": {
+      "fail": "Ongeldige DIN 276-code '{code}' in post {ordinal}"
+    },
+    "hierarchy": {
+      "fail": "Post {ordinal}: KG {child} valt niet onder bovenliggende KG {parent} (verwacht voorvoegsel '{prefix}')",
+      "suggestion": "Verplaats de post naar de juiste bovenliggende groep of pas de KG-code aan de hiërarchie aan ({prefix}xx)"
+    },
+    "completeness": {
+      "fail": "KG-groep {group} - {group_name} ontbreekt in de hoeveelhedenstaat",
+      "suggestion": "Voeg posten voor KG {group} ({group_name}) toe voor een volledige dekking"
+    }
+  },
+  "gaeb": {
+    "ordinal_format": {
+      "fail": "Volgnummer '{ordinal}' komt niet overeen met de GAEB OZ-Maske van dit bestand",
+      "suggestion": "Gebruik de OZ-Maske van het bestand, bijvoorbeeld 001.001.0010 of 01.02.0030"
+    },
+    "lv_structure": {
+      "fail": "Post {ordinal}: de eindpost heeft geen bovenliggend onderdeel; de GAEB LV-hiërarchie vereist een bovenliggende Leistungsgruppe",
+      "suggestion": "Wijs deze post toe aan een bovenliggend onderdeel (Leistungsgruppe / Titel)"
+    },
+    "einheitspreis_sanity": {
+      "negative": "Post {ordinal}: Einheitspreis {rate} is negatief (eenheid='{unit}'); negatieve prijzen kunnen niet via GAEB worden overgedragen",
+      "zero": "Post {ordinal}: Einheitspreis is 0,00 (eenheid='{unit}'); bevestig dat dit een bewust aangeboden nulprijs is en geen ontbrekende prijs",
+      "suggestion": "Voer een positieve Einheitspreis in, of markeer de post als Bedarfsposition (optionele werkzaamheden) of forfaitaire post (unit='lsum')"
+    },
+    "trade_section_code": {
+      "fail": "Hoofdonderdeel '{ordinal}' heeft geen GAEB Leistungsbereich-code (verwacht wordt een driecijferige vakcode, bijvoorbeeld '012')",
+      "suggestion": "Voeg een driecijferige vakcode (Leistungsbereich) toe, bijvoorbeeld '012' voor grondwerk en '013' voor metselwerk"
+    },
+    "quantity_decimals": {
+      "fail": "Post {ordinal}: hoeveelheid {quantity} heeft {decimals} decimalen; GAEB X83 hanteert maximaal 3",
+      "suggestion": "Rond de hoeveelheid volgens GAEB X83 af op maximaal 3 decimalen"
+    }
+  },
+  "nrm": {
+    "classification_required": {
+      "fail": "Post {ordinal} mist een NRM-elementcode",
+      "suggestion": "Wijs een NRM 1/2-elementcode toe (bijvoorbeeld 2.6.1 voor buitenwanden)"
+    },
+    "valid_element": {
+      "fail": "Ongeldige NRM-code '{code}' in post {ordinal}"
+    },
+    "completeness": {
+      "fail": "NRM-groep {group} - {group_name} ontbreekt in de hoeveelhedenstaat",
+      "suggestion": "Voeg posten toe voor NRM-groep {group} ({group_name})"
+    },
+    "base_date_declared": {
+      "fail": "Het kostenplan vermeldt niet op welke basisdatum de prijzen gelden",
+      "suggestion": "Leg de basisdatum vast op de hoeveelhedenstaat. Zonder die datum is niet vast te stellen of een prijs verouderd is en welke inflatie nog moet worden toegevoegd"
+    },
+    "cost_plan_stage_declared": {
+      "fail": "Het kostenplan vermeldt niet voor welke ontwerpfase het is opgesteld",
+      "suggestion": "Leg de fase vast. De te verwachten nauwkeurigheid hangt af van de fase waarin het plan is opgesteld; een ontbrekende fase wekt verkeerde verwachtingen"
+    },
+    "contractor_costs_present": {
+      "preliminaries": "Het kostenplan bevat geen bouwplaatskosten van de hoofdaannemer, noch als groep {group}, noch als opslagregel",
+      "overheads_and_profit": "Het kostenplan bevat geen algemene kosten en winst van de hoofdaannemer, noch als groep {group}, noch als opslagregel",
+      "suggestion": "Voeg deze toe als NRM-groepselement of als opslag op het gemeten werk. Beide zijn juist; zonder deze kosten zijn de bouwkosten onvolledig"
+    },
+    "risk_allowance_present": {
+      "fail": "Het kostenplan bevat geen risicoreservering",
+      "suggestion": "Voeg een risicoreservering toe als NRM-groep 13 of als risicopost. Een kostenplan zonder risicoreservering presenteert een enkele raming alsof die zeker is"
+    }
+  },
+  "masterformat": {
+    "classification_required": {
+      "fail": "Post {ordinal} mist een MasterFormat-code",
+      "suggestion": "Wijs een MasterFormat-code toe (bijvoorbeeld 03 30 00 voor in het werk gestort beton)"
+    },
+    "valid_division": {
+      "fail": "Ongeldige MasterFormat-code '{code}' in post {ordinal}",
+      "suggestion": "Gebruik het zescijferige MasterFormat-formaat: XX XX XX (bijvoorbeeld 03 30 00)"
+    },
+    "completeness": {
+      "fail": "Afdeling {division} - {division_name} ontbreekt in de hoeveelhedenstaat",
+      "suggestion": "Voeg posten toe voor afdeling {division} ({division_name})"
+    }
+  },
+  "sinapi": {
+    "code_required": {
+      "fail": "Post {ordinal} mist een SINAPI-code",
+      "suggestion": "Wijs een SINAPI-samenstellingscode toe (bijvoorbeeld 87878 voor beton C30)"
+    },
+    "valid_code": {
+      "fail": "Ongeldige SINAPI-code '{code}' in post {ordinal}"
+    }
+  },
+  "nbr": {
+    "classification_required": {
+      "fail": "Post {ordinal} mist een NBR 12721-onderdeel",
+      "suggestion": "Ken een NBR 12721-onderdeel toe aan de post (S1 = preliminares, S2 = infra-estrutura, ..., S11 = serviços complementares)"
+    },
+    "valid_section": {
+      "fail": "NBR 12721-onderdeel '{code}' in post {ordinal} valt niet binnen S1..S11",
+      "suggestion": "Gebruik codes S1 tot en met S11 (bijvoorbeeld S3 voor supra-estrutura)"
+    }
+  },
+  "gesn": {
+    "code_required": {
+      "fail": "Post {ordinal} mist een ГЭСН/ФЕР-code",
+      "suggestion": "Wijs een ГЭСН-code toe (bijvoorbeeld 06-01-001-01 voor beton)"
+    },
+    "valid_code": {
+      "fail": "ГЭСН-code '{code}' voldoet niet aan het formaat XX-XX-XXX-XX",
+      "suggestion": "Gebruik het formaat NN-NN-NNN-NN (bijvoorbeeld 06-01-001-01)"
+    },
+    "resource_breakdown": {
+      "fail": "Post {ordinal} verwijst naar norm {code}, maar bevat geen uitsplitsing van middelen",
+      "suggestion": "Importeer de hoeveelheden arbeid, materieel en materiaal uit de norm, of verklaar waarom deze regel daarvan afwijkt"
+    },
+    "labour_hours_present": {
+      "fail": "Post {ordinal} ({code}) bevat een middelenopbouw zonder arbeidsuren",
+      "suggestion": "Voeg de arbeidsuren volgens de norm toe; algemene kosten en geraamde winst worden op de loonsom gebaseerd en zijn zonder die uren niet te berekenen"
+    },
+    "price_level_declared": {
+      "fail": "De raming vermeldt niet op welk prijspeil de bedragen zijn gebaseerd",
+      "suggestion": "Vermeld het prijspeil (een datum) en de toegepaste omrekenindex, zodat een beoordelaar hetzelfde totaal kan reproduceren"
+    }
+  },
+  "dpgf": {
+    "lot_required": {
+      "fail": "Post {ordinal} is aan geen Lot technique toegewezen",
+      "suggestion": "Wijs een Lot technique toe (bijvoorbeeld Lot 01 Gros Œuvre)"
+    },
+    "pricing_complete": {
+      "fail": "Slechts {priced}/{total} posten ({percent}) zijn geprijsd; dit ligt onder de grens van 80%",
+      "suggestion": "Prijs alle posten voordat u de DPGF indient"
+    }
+  },
+  "onorm": {
+    "position_format": {
+      "fail": "Volgnummer '{ordinal}' voldoet niet aan het ÖNORM-formaat XX.XX.XXXXA",
+      "suggestion": "Gebruik het ÖNORM B 2063-formaat (bijvoorbeeld 01.02.01A)"
+    },
+    "description_length": {
+      "fail": "Post {ordinal}: de omschrijving is te kort ({length} tekens, minimaal 20)",
+      "suggestion": "Vul de omschrijving aan volgens ÖNORM B 2063"
+    }
+  },
+  "gbt50500": {
+    "code_required": {
+      "fail": "Post {ordinal} mist een GB/T 50500-code",
+      "suggestion": "Wijs een negencijferige GB/T 50500-code toe (bijvoorbeeld 010101001)"
+    },
+    "valid_code": {
+      "fail": "Ongeldige GB/T 50500-code '{code}'; verwacht worden 9 of 12 cijfers"
+    }
+  },
+  "cpwd": {
+    "code_required": {
+      "fail": "Post {ordinal} mist een CPWD/DSR-code",
+      "suggestion": "Wijs een CPWD DSR-postreferentie toe (bijvoorbeeld 4.1.1)"
+    },
+    "measurement_units": {
+      "fail": "Eenheid '{unit}' in post {ordinal} voldoet niet aan IS 1200",
+      "suggestion": "Gebruik standaardeenheden volgens IS 1200: m, m2, m3, kg, nos, rm enz."
+    }
+  },
+  "hungary": {
+    "item_code_required": {
+      "fail": "Post {ordinal} bevat geen Hongaarse artikelcode",
+      "invalid": "Artikelcode '{code}' in post {ordinal} komt met geen van beide coderingsstelsels overeen",
+      "suggestion": "Bouwwerken gebruiken MA-CC-SS-II (hoofdstuk 01 tot en met 17); infrastructuurwerken gebruiken het zes- of zevencijferige postnummer uit het projectcoderegister"
+    },
+    "chapter_recognised": {
+      "fail": "Hoofdstuk {chapter} in post {ordinal} behoort niet tot de zeventien hoofdstukken van het coderingsstelsel"
+    },
+    "material_fee_split": {
+      "fail": "Post {ordinal}: materiaal {material} plus vergoeding {fee} is niet gelijk aan de prijs {rate}",
+      "suggestion": "Corrigeer de eenheidsprijzen voor materiaal en vergoeding, of de prijs, zodat de uitsplitsing aansluit"
+    },
+    "item_number_unique": {
+      "fail": "Postnummer {number} wordt gebruikt voor {count} posten, maar moet één post identificeren",
+      "suggestion": "Geef elke post een eigen projectpostnummer voordat de hoeveelhedenstaat naar de opdrachtgever gaat"
+    }
+  },
+  "prezzario": {
+    "voce_code_format_valid": {
+      "fail": "Code '{code}' in post {ordinal} maakt niet duidelijk uit welke prijslijst de post komt",
+      "suggestion": "Een officiële voce-code begint met de regio en het uitgavejaar van de prijslijst, bijvoorbeeld TOS25_01.A03.001.001 (Toscana 2025). Neem de code exact over, importeer de regel uit de regionale lijst of nummer een nieuwe prijs als NP.01"
+    },
+    "voce_reference_present": {
+      "fail": "Post {ordinal} verwijst niet naar een prezzario voce",
+      "suggestion": "Kies de regel uit een geïmporteerde regionale prijslijst, of markeer hem als nuovo prezzo (NP) met een onderbouwde prijsanalyse"
+    },
+    "costi_sicurezza_separated": {
+      "fail": "De hoeveelhedenstaat bevat geen afzonderlijke regel voor veiligheidskosten waarop de inschrijvingskorting niet van toepassing is",
+      "suggestion": "Voeg de oneri della sicurezza toe als eigen onderdeel of opslagregel, geprijsd vanuit het veiligheidshoofdstuk van de prijslijst of het veiligheidsplan"
+    },
+    "incidenza_manodopera_documented": {
+      "fail": "Post {ordinal} ({code}) vermeldt het aandeel arbeidskosten niet",
+      "suggestion": "Neem de incidenza della manodopera over uit de prijslijst of voeg een arbeidscomponent toe, zodat de arbeidskosten afzonderlijk in de inschrijving kunnen worden vermeld"
+    },
+    "overheads_not_applied_twice": {
+      "fail": "Regionale prijslijstprijzen bevatten al algemene kosten (13–17%) en winst (10%). Nogmaals toepassen verhoogt het totaal met ongeveer {percent}%.",
+      "suggestion": "Verwijder de opslagen voor algemene kosten en winst uit deze hoeveelhedenstaat, of behoud ze uitsluitend voor posten met een eigen prijsanalyse (NP)."
+    }
+  },
+  "romania": {
+    "deviz_chapter_required": {
+      "fail": "Post {ordinal} vermeldt geen hoofdstuk van de deviz general",
+      "suggestion": "Deel de regel in onder het hoofdstuk en subhoofdstuk van HG 907/2016, bijvoorbeeld 4.1 voor bouw- en installatiewerk of 5.1 voor bouwplaatsinrichting"
+    },
+    "deviz_chapter_recognised": {
+      "fail": "Deviz-code '{code}' in post {ordinal} is geen hoofdstuk of subhoofdstuk van de deviz general",
+      "suggestion": "Gebruik een code uit hoofdstukken 1 tot en met 6 van de HG 907/2016 deviz general, zoals 1.2, 2, 3.5, 4.1, 5.1 of 6.2"
+    }
+  },
+  "greece": {
+    "net_article_required": {
+      "fail": "Post {ordinal} bevat geen artikel uit de uniforme prijslijst (ΝΕΤ)",
+      "suggestion": "Vermeld het ΝΕΤ-artikel waarop de prijs is gebaseerd, bijvoorbeeld ΟΙΚ 32.01.06, of ΝΑΟΙΚ voor een nieuw artikel"
+    },
+    "net_article_valid": {
+      "invalid": "Artikel '{code}' in post {ordinal} heeft niet het formaat van een ΝΕΤ-artikel",
+      "chapter": "Artikel '{code}' in post {ordinal} begint met hoofdstuk {chapter}, dat niet in de prijslijst voor bouwwerken voorkomt",
+      "suggestion": "Noteer het lijstvoorvoegsel en artikelnummer, bijvoorbeeld ΟΙΚ 38.20.02, ΟΔΟ Α-2 of ΑΤΗΕ 8151.1"
+    }
+  },
+  "ukraine": {
+    "zkr_chapter_required": {
+      "fail": "Post {ordinal} vermeldt geen hoofdstuk van de totaalraming",
+      "suggestion": "Deel de regel in onder hoofdstuk 1 tot en met 12 van de зведений кошторисний розрахунок; bouwwerk aan het hoofdobject hoort in hoofdstuk 2"
+    },
+    "zkr_chapter_recognised": {
+      "fail": "Hoofdstuk {chapter} in post {ordinal} behoort niet tot de twaalf hoofdstukken van de totaalraming",
+      "suggestion": "Gebruik een hoofdstuknummer van 1 tot en met 12"
+    }
+  },
+  "birimfiyat": {
+    "code_required": {
+      "fail": "Post {ordinal} mist een birim fiyat poz-nummer",
+      "suggestion": "Wijs een Bayındırlık poz-nummer toe (bijvoorbeeld 04.013/1)"
+    },
+    "valid_poz": {
+      "fail": "Poz '{code}' is noch een huidig nummer uit het eenheidsprijzenboek (XX.XXX.XXXX), noch een ouder nummer (XX.XXX/X)",
+      "suggestion": "Gebruik het nummer uit het prijzenboek, bijvoorbeeld 15.140.1002, of 04.013/1 bij een ouder contract; nummer eigen geanalyseerde posten als ÖZEL-1"
+    }
+  },
+  "sekisan": {
+    "code_required": {
+      "fail": "Post {ordinal} mist een 積算-code",
+      "suggestion": "Wijs een artikelcode uit 積算基準 toe"
+    },
+    "metric_units": {
+      "fail": "Eenheid '{unit}' in post {ordinal} is geen standaardeenheid",
+      "suggestion": "Gebruik standaard metrische eenheden: m, m2, m3, kg, t, 式 enz."
+    }
+  },
+  "bc3": {
+    "code_required": {
+      "fail": "Post {ordinal} mist een FIEBDC-3-conceptcode",
+      "suggestion": "Wijs een FIEBDC-3-code toe (bijvoorbeeld E04CM040 of 01.02.01)"
+    },
+    "valid_code": {
+      "fail": "Ongeldige FIEBDC-3-code '{code}' in post {ordinal}",
+      "suggestion": "Gebruik het alfanumerieke FIEBDC-3-formaat (bijvoorbeeld E04CM040, 01.02.01, CAP01#)"
+    }
+  },
+  "mexico": {
+    "apu_completeness": {
+      "fail": "Post {ordinal} heeft een onvolledige APU; ontbrekende kostencomponenten: {missing}",
+      "suggestion": "Voeg de ontbrekende directe kostencomponenten (mano de obra, materiales, maquinaria) toe aan de eenheidsprijsanalyse"
+    },
+    "iva_rate_valid": {
+      "fail": "Post {ordinal} heeft een ongeldig IVA-tarief {rate}; de Mexicaanse IVA bedraagt 16, 8 (grensregio) of 0 procent",
+      "suggestion": "Stel het IVA-tarief in op 16 procent (standaard), 8 procent (grensregio) of 0 procent"
+    },
+    "subcontract_retencion": {
+      "fail": "Onderaannemingspost {ordinal} vermeldt niet of IVA/ISR-inhoudingen van toepassing zijn",
+      "suggestion": "Leg de IVA- en ISR-inhoudingen vast voor de onderaannemingsregel, of vermeld dat ze niet van toepassing zijn"
+    },
+    "cfdi_rfc_present": {
+      "missing": "De CFDI-gegevens van de uitgevende partij zijn onvolledig voor de inschrijvingsexport; ontbrekend: {missing}",
+      "invalid_rfc": "RFC '{rfc}' is geen geldige CFDI RFC (12 tekens voor een onderneming, 13 voor een natuurlijk persoon)",
+      "suggestion": "Stel de RFC, het regimen fiscal en het uso CFDI van de uitgevende partij in het projectprofiel in voor CFDI 4.0-facturering"
+    }
+  },
+  "pipeline": {
+    "side_effecting_requires_gate": {
+      "fail": "Knooppunten met externe gevolgen zonder controlepoort: {nodes}",
+      "suggestion": "Voeg vóór publicatie op elk pad van een trigger-/AI-knooppunt naar een schrijfknooppunt een validatiepoort of menselijke goedkeuringspoort toe."
+    }
+  },
+  "property_dev": {
+    "escrow_account_required": {
+      "fail": "De ontwikkeling vereist een actieve geblokkeerde rekening voor toezichthouder '{regulator}'",
+      "suggestion": "Open onder Compliance → Geblokkeerde rekeningen een rekening bij een bank met een vergunning van de toezichthouder"
+    },
+    "escrow_iban_valid": {
+      "fail": "Geblokkeerde rekening {account}: IBAN '{iban}' voldoet niet aan de structuurcontrole volgens ISO 13616",
+      "suggestion": "Corrigeer het IBAN: landcode, lengte en controlegetal moeten overeenkomen met ISO 13616"
+    },
+    "escrow_balance_reconciled": {
+      "fail": "Geblokkeerde rekening {account}: boekhoudkundig saldo {ledger} wijkt {drift} af van transactietotaal {transactions}",
+      "suggestion": "Stem de geblokkeerde rekening af en onderzoek niet-geboekte ontvangsten of ontbrekende afschrijvingen"
+    },
+    "sales_contract_party_ownership_sums_to_100": {
+      "fail": "Contract {contract}: de eigendomsaandelen tellen op tot {total}% (dit moet exact 100% zijn)",
+      "suggestion": "Pas de aandelen van de partijen aan zodat ze samen 100,00% vormen"
+    },
+    "payment_schedule_instalments_sum_to_contract_value": {
+      "fail": "Contract {contract}: de termijnen tellen op tot {instalments}, afwijkend van de contractwaarde {contract_value} (verschil {drift})",
+      "suggestion": "Pas het betalingsschema aan zodat de termijnbedragen samen gelijk zijn aan de contractwaarde"
+    },
+    "reservation_expiry_in_future": {
+      "fail": "Reservering {reservation}: expires_at {expires} ligt niet in de toekomst",
+      "suggestion": "Verleng de reservering of zet deze op verlopen/geannuleerd"
+    },
+    "broker_commission_rate_within_bounds": {
+      "fail": "Commissieovereenkomst {agreement}: {issue}",
+      "suggestion": "Gebruik een percentage tussen 0,1% en 15%, een vast bedrag of een niet-lege staffel"
+    },
+    "price_matrix_no_negative_modifier": {
+      "fail": "Prijsmatrix {matrix}: vermenigvuldigingsfactor {multiplier} voor regel '{factor}' ligt buiten [-0.50, 2.00]",
+      "suggestion": "Beperk prijsaanpassingen tot -50% tot +200% om onrealistische kavelprijzen te voorkomen"
+    }
+  },
+  "schedule_quality": {
+    "open_ends": {
+      "fail": "Activiteit '{activity}' mist een logische relatie met een {ends} (open einde / losstaande activiteit)",
+      "both": "voorganger of opvolger",
+      "predecessor": "voorganger",
+      "successor": "opvolger",
+      "suggestion": "Koppel de activiteit aan een voorganger en een opvolger in het netwerk, of definieer haar als start- of eindmijlpaal"
+    },
+    "negative_lag": {
+      "fail": "Relatie {predecessor} -> {successor} gebruikt een negatieve vertraging ({lag} dagen), dus een vervroeging, die het kritieke pad vertekent",
+      "suggestion": "Vervang de vervroeging door een expliciete activiteit of een SS/FF-relatie, zodat de volgorde onderbouwd blijft"
+    },
+    "excessive_lag": {
+      "fail": "Relatie {predecessor} -> {successor} heeft een vertraging van {lag} dagen, boven de grens van {threshold} dagen",
+      "suggestion": "Modelleer de wachttijd als afzonderlijke activiteit (inkoop, uitharding, goedkeuring), zodat de status kan worden gevolgd en de inzet kan worden geëgaliseerd"
+    },
+    "hard_constraints": {
+      "fail": "Activiteit '{activity}' heeft een harde datumbeperking ({constraint}) die de netwerklogica overschrijft",
+      "suggestion": "Gebruik een zachte beperking (start niet eerder dan) of laat logische relaties de datum bepalen, zodat de activiteit kan verschuiven bij vertraging van voorgangers"
+    },
+    "negative_float": {
+      "fail": "Activiteit '{activity}' heeft negatieve totale speling ({float} dagen); de planning is met deze logische relaties niet haalbaar",
+      "suggestion": "Pas de werkvolgorde aan, versoepel een harde beperking of voeg een gedocumenteerd herstelplan toe om de speling weer op nul of hoger te brengen"
+    },
+    "high_float": {
+      "fail": "Activiteit '{activity}' heeft zeer veel totale speling ({float} dagen), boven de grens van {threshold} dagen",
+      "suggestion": "Controleer of een opvolgerrelatie ontbreekt; grote speling wijst vaak op een te losse koppeling aan het netwerk"
+    },
+    "missing_duration": {
+      "fail": "Activiteit '{activity}' heeft een ongeldige duur ({duration} dagen) voor een taak die geen mijlpaal is",
+      "suggestion": "Geef een positieve duur in werkdagen op, of markeer de regel als mijlpaal als het werkelijk een gebeurtenis zonder duur is"
+    },
+    "duration_on_project_week": {
+      "fail": "Activiteit '{activity}' is opgeslagen met {stored} werkdagen, geteld van maandag tot vrijdag tussen {start} en {end}; volgens de projectwerkweek {calendar} bevatten die datums {expected} werkdagen",
+      "suggestion": "Sla de datums opnieuw op om de duur volgens de projectwerkweek te berekenen, of voer de duur bewust handmatig in"
+    }
+  },
+  "sheet_completeness": {
+    "missing": {
+      "fail": "Tekening {sheet} staat in de tekeningenlijst, maar ontbreekt in de geüploade set",
+      "suggestion": "Upload de ontbrekende tekening of bevestig dat deze uit de uitgifte is teruggetrokken"
+    },
+    "extra": {
+      "fail": "Tekening {sheet} staat in de geüploade set, maar ontbreekt in de tekeningenlijst",
+      "suggestion": "Voeg de tekening toe aan de lijst of het uitgifteregister, of verwijder de losstaande tekening"
+    },
+    "revision_mismatch": {
+      "fail": "Tekening {sheet} heeft revisie {actual_rev}, terwijl de lijst {expected_rev} verwacht",
+      "suggestion": "Geef de verwachte revisie uit of werk de lijst bij naar de huidige revisie"
+    }
+  },
+  "procurement": {
+    "po_has_lines": {
+      "fail": "Deze inkooporder heeft geen regels, waardoor het verplichtingsbedrag niet wordt verantwoord",
+      "suggestion": "Voeg de bestelde artikelen toe voordat u de inkooporder goedkeurt"
+    },
+    "po_line_amount": {
+      "fail": "Regel {line} heeft een totaal van {actual}, maar hoeveelheid maal eenheidsprijs is {expected}",
+      "suggestion": "Corrigeer de hoeveelheid, eenheidsprijs of het regelbedrag zodat ze op elkaar aansluiten"
+    },
+    "po_subtotal_matches_lines": {
+      "fail": "Het subtotaal is {actual}, maar de regels tellen op tot {expected}",
+      "suggestion": "Bereken het subtotaal opnieuw vanuit de huidige regels"
+    },
+    "po_total_matches_subtotal": {
+      "fail": "Het totaal is {actual}, maar subtotaal plus belasting is {expected}",
+      "suggestion": "Bereken het totaal opnieuw zodat het gelijk is aan subtotaal plus belasting"
+    },
+    "po_no_negative_line": {
+      "fail": "Regel {line} heeft een hoeveelheid die niet positief is, of een negatieve eenheidsprijs",
+      "suggestion": "Maak voor een terugboeking een creditnota in plaats van een negatieve regel"
+    },
+    "po_currency_set": {
+      "fail": "Deze inkooporder heeft geen valuta, waardoor het bedrag niet kan worden geconsolideerd of betaald",
+      "suggestion": "Stel de valuta in, doorgaans de projectvaluta"
+    },
+    "po_vendor_assigned": {
+      "fail": "Deze inkooporder vermeldt geen leverancier",
+      "suggestion": "Selecteer de leverancier voordat u de verplichting goedkeurt"
+    },
+    "po_retention_within_bounds": {
+      "fail": "Een inhouding van {percent}% valt buiten de aannemelijke bandbreedte van 0 tot {max}%",
+      "suggestion": "Voer de inhouding in als percentage, bijvoorbeeld 5 voor vijf procent"
+    },
+    "po_delivery_after_issue": {
+      "fail": "De levering staat op {delivery}, vóór de uitgiftedatum {issue}",
+      "suggestion": "Verplaats de leverdatum naar de uitgiftedatum of later"
+    },
+    "po_line_cost_coded": {
+      "fail": "Regel {line} heeft geen WBS, kostencategorie of kostenregel en verschijnt daardoor niet in de kostenopbouw",
+      "suggestion": "Wijs een kostencode toe zodat de verplichting tegen een budget wordt gerapporteerd"
+    },
+    "invoice_within_order": {
+      "fail": "Factuur {invoice} overschrijdt het nog openstaande bedrag {remaining} op order {po} met {excess}",
+      "suggestion": "Controleer de factuur tegen de order; als het extra bedrag is overeengekomen, leg dit vóór goedkeuring vast als orderwijziging"
+    },
+    "invoice_quantity_received": {
+      "fail": "Regel {line} zou in totaal voor {invoiced} worden gefactureerd, terwijl slechts {received} is ontvangen",
+      "suggestion": "Wacht op de leverbon of bevestig de goederenontvangst voordat u deze hoeveelheid goedkeurt"
+    },
+    "invoice_value_received": {
+      "fail": "Voor order {po} zouden de facturen samen {invoiced} bedragen, maar de ontvangen goederen zijn tegen de orderprijzen slechts {received} waard",
+      "suggestion": "Wacht op de leverbon of bevestig de goederenontvangst voordat u dit bedrag goedkeurt"
+    }
+  },
+  "subcontract": {
+    "agreement_has_scope": {
+      "fail": "Deze overeenkomst heeft geen werkpakketten, zodat een betalingsaanvraag nergens op kan worden gebaseerd",
+      "suggestion": "Verdeel de gecontracteerde werkzaamheden in werkpakketten voordat u de overeenkomst activeert"
+    },
+    "package_scope_described": {
+      "fail": "Werkpakket {package} heeft een naam, maar geen omschrijving van het werk dat het omvat",
+      "suggestion": "Leg vast wat het pakket omvat, zodat een latere discussie over wijzigingen een uitgangspunt heeft"
+    },
+    "agreement_value_positive": {
+      "fail": "De contractwaarde is {value}, waardoor de inhouding en de waardeverdeling geen berekeningsgrondslag hebben",
+      "suggestion": "Voer de overeengekomen contractwaarde in voordat u de overeenkomst activeert"
+    },
+    "packages_within_value": {
+      "fail": "De werkpakketten zijn {planned} waard, maar het contract bedraagt {total}",
+      "suggestion": "Prijs de pakketten opnieuw of verhoog de contractwaarde zodat de overeenkomst haar eigen werkbereik dekt"
+    },
+    "agreement_dates_ordered": {
+      "fail": "De overeenkomst eindigt op {end}, vóór de start op {start}",
+      "suggestion": "Corrigeer de start- of einddatum zodat de contractperiode vooruitloopt"
+    },
+    "agreement_currency_set": {
+      "fail": "Deze overeenkomst heeft geen valuta, waardoor betalingen eruit niet kunnen worden geconsolideerd of betaald",
+      "suggestion": "Stel de valuta in, doorgaans de projectvaluta"
+    },
+    "retention_within_bounds": {
+      "fail": "Een inhouding van {percent}% valt buiten de aannemelijke bandbreedte van 0 tot {max}%",
+      "suggestion": "Voer de inhouding in als percentage van elke betaling, niet als bedrag"
+    },
+    "insurance_valid_at_start": {
+      "fail": "De verzekering van de onderaannemer is verlopen op {expiry}, vóór de start van het werk op {reference}",
+      "suggestion": "Vraag een geldig verzekeringsbewijs op voordat u de onderaannemer tot de bouwplaats toelaat"
+    },
+    "unlinked_contract_twin": {
+      "fail": "Onderaannemingsovereenkomst {agreement} en contract {contract} lijken dezelfde onderaanneming te betreffen, waardoor deze financieel dubbel kan worden geteld",
+      "suggestion": "Koppel ze als het dezelfde onderaanneming betreft, of markeer ze als verschillend"
+    }
+  },
+  "submittal": {
+    "reviewer_assigned": {
+      "fail": "Dit goedkeuringsstuk vermeldt geen beoordelaar, zodat niemand verantwoordelijk is voor de afhandeling",
+      "suggestion": "Wijs vóór indiening de beoordelaar aan die moet reageren"
+    },
+    "required_date_present": {
+      "fail": "Dit goedkeuringsstuk heeft geen vereiste afhandeldatum en kan daardoor nooit als te laat worden gerapporteerd",
+      "suggestion": "Stel de uiterste beoordelingsdatum vast op basis van het werk dat dit stuk moet vrijgeven"
+    },
+    "required_date_after_submitted": {
+      "fail": "De beoordeling is vereist op {required}, vóór de indiening op {submitted}",
+      "suggestion": "Verplaats de vereiste datum naar een werkdag na indiening"
+    },
+    "review_window_sufficient": {
+      "fail": "De beoordelaar heeft {days} dagen, minder dan de gebruikelijke {minimum} dagen voor beoordeling",
+      "suggestion": "Houd de gebruikelijke beoordelingstermijn aan, of spreek vooraf een kortere termijn af met de beoordelaar"
+    },
+    "spec_section_present": {
+      "fail": "Dit goedkeuringsstuk vermeldt geen bestekonderdeel, waardoor het register het niet kan indelen",
+      "suggestion": "Vermeld het bestekonderdeel waarop dit goedkeuringsstuk betrekking heeft"
+    },
+    "approver_distinct_from_reviewer": {
+      "fail": "Dezelfde persoon ({person}) is zowel beoordelaar als goedkeurder; er is dus geen onafhankelijke tweede controle",
+      "suggestion": "Wijs een andere goedkeurder aan dan de beoordelaar"
+    },
+    "linked_scope_present": {
+      "fail": "Dit goedkeuringsstuk is niet gekoppeld aan een werkpost en wordt daardoor niet bij een werkpakket opgeteld",
+      "suggestion": "Koppel de hoeveelhedenstaatposten waarop dit stuk betrekking heeft"
+    }
+  },
+  "rfq": {
+    "scope_described": {
+      "fail": "Dit verzoek heeft geen werkomschrijving en geen beschrijving, zodat een leverancier niets kan prijzen",
+      "suggestion": "Beschrijf het werk vóór publicatie, zodat de ontvangen offertes vergelijkbaar zijn"
+    },
+    "deadline_present": {
+      "fail": "Dit verzoek vermeldt geen indieningsdeadline, waardoor de inschrijving nooit sluit",
+      "suggestion": "Stel de datum en het tijdstip vast waarop offertes uiterlijk binnen moeten zijn"
+    },
+    "deadline_parseable": {
+      "fail": "De indieningsdeadline {value} is geen herkenbare datum; elke offerte zal worden geweigerd",
+      "suggestion": "Voer de deadline in als datum, bijvoorbeeld 2026-08-31"
+    },
+    "deadline_in_future": {
+      "fail": "De indieningsdeadline {deadline} is op {today} al verstreken, zodat het verzoek bij publicatie al gesloten is",
+      "suggestion": "Verplaats de deadline vóór publicatie naar een toekomstige datum"
+    },
+    "has_recipients": {
+      "fail": "Dit verzoek is aan geen leverancier gericht, zodat publicatie niemand op de hoogte brengt",
+      "suggestion": "Voeg de leveranciers toe aan wie dit verzoek wordt verzonden"
+    },
+    "currency_set": {
+      "fail": "Dit verzoek vermeldt geen valuta, waardoor offertes niet onderling kunnen worden gerangschikt",
+      "suggestion": "Stel de valuta vast waarin de offertes moeten worden uitgebracht"
+    },
+    "bid_currency_matches": {
+      "fail": "Offerte {bid} is geprijsd in {bid_currency}, maar het verzoek gebruikt {rfq_currency}",
+      "suggestion": "Vraag een nieuwe offerte in de gevraagde valuta, of leg de overeengekomen omrekening vast"
+    },
+    "bid_amounts_parseable": {
+      "fail": "Offerte {bid} heeft een bedrag van {value}; dit is geen getal dat kan worden gerangschikt",
+      "suggestion": "Corrigeer het offertebedrag vóór gunning"
+    },
+    "bids_still_valid": {
+      "fail": "Offerte {bid} is verlopen op {expired} en vandaag is {today}; de prijs is niet langer bindend",
+      "suggestion": "Vraag de inschrijver de prijs te bevestigen vóór gunning"
+    },
+    "award_has_competition": {
+      "fail": "Deze gunning is gebaseerd op {count} offertes, minder dan de {minimum} die voor een concurrerende vergelijking nodig zijn",
+      "suggestion": "Leg vast waarom een enkelvoudige gunning gerechtvaardigd is, of nodig meer inschrijvers uit"
+    }
+  },
+  "errors": {
+    "resource_not_found": "Middel niet gevonden",
+    "project_not_found": "Project niet gevonden",
+    "vendor_not_found": "Leverancier niet gevonden",
+    "template_not_found": "Sjabloon niet gevonden",
+    "position_not_found": "Post niet gevonden",
+    "boq_not_found": "Hoeveelhedenstaat niet gevonden",
+    "session_not_found": "Sessie niet gevonden",
+    "document_not_found": "Document niet gevonden",
+    "documents_batch_delete_referenced": "Records elders verwijzen nog naar documenten in deze batch. Controleer welke koppelingen bij verwijdering worden verbroken en bevestig met acknowledge_references.",
+    "invitation_not_found": "Uitnodiging niet gevonden",
+    "agreement_not_found": "Overeenkomst niet gevonden",
+    "rejection_not_found": "Afwijzing niet gevonden",
+    "claim_not_found": "Voortgangsdeclaratie niet gevonden",
+    "gaeb_x89_final_account_unsupported": "Een eindafrekening of gedeeltelijke eindafrekening kan nog niet als GAEB X89 worden geëxporteerd. Daarvoor moet het cumulatieve werk minus eerdere betalingen worden gefactureerd, terwijl een declaratie alleen een termijnfactuur voor één periode oplevert. Exporteer de declaratie als termijnfactuur.",
+    "xpwe_native_file_refused": "Dit is het eigen projectbestand van een calculatieprogramma en kan alleen door dat programma worden geopend. Exporteer de raming vanuit uw calculatieprogramma als XPWE en upload het .xpwe-bestand.",
+    "plot_not_found": "Kavel niet gevonden",
+    "survey_not_found": "Dronemeting niet gevonden",
+    "diary_video_not_found": "Dagboekvideo niet gevonden",
+    "diary_photo_not_found": "Dagboekfoto niet gevonden",
+    "bidder_not_found": "Inschrijver niet gevonden",
+    "webhook_not_found": "Webhook niet gevonden",
+    "submission_not_found": "Indiening niet gevonden",
+    "measurement_not_found": "Bouwplaatsmeting niet gevonden",
+    "salescontract_not_found": "Verkoopcontract niet gevonden",
+    "prompt_not_found": "Promptsjabloon niet gevonden",
+    "prequalification_not_found": "Prekwalificatie niet gevonden",
+    "purchase_requisition_not_found": "Inkoopaanvraag niet gevonden",
+    "purchase_order_not_found": "Inkooporder niet gevonden",
+    "group_not_found": "Groep niet gevonden",
+    "final_account_not_found": "Eindafrekening niet gevonden",
+    "estimate_job_not_found": "Ramingstaak niet gevonden",
+    "escrow_not_found": "Transactie op geblokkeerde rekening niet gevonden",
+    "commission_accrual_not_found": "Commissieopbouw niet gevonden",
+    "baseline_not_found": "Basisplanning niet gevonden",
+    "fx_rate_set_locked": "De ECB-koersen voor {date} zijn vergrendeld en zijn bij deze vernieuwing niet overschreven. Ontgrendel eerst deze koersset als de nieuwe publicatie moet worden overgenomen.",
+    "boq_locked": "De hoeveelhedenstaat is vergrendeld en kan niet worden gewijzigd. Maak een revisie om wijzigingen door te voeren.",
+    "boq_link_owner_locked": "Code '{code}' is vastgelegd door een regel in de vergrendelde hoeveelhedenstaat '{bill}'; een koppeling zou die staat wijzigen. Ontgrendel eerst die hoeveelhedenstaat of voer de regel onder een nieuwe code in."
+  },
+  "variations": {
+    "boq_lines_are_traced": {
+      "fail": "Regel {line} in de hoeveelhedenstaat van deze wijziging heeft geen herkomst: noch een regel in de contractwaardeverdeling, noch een ramingspost",
+      "suggestion": "Vermeld de contractregel waarop de wijziging betrekking heeft, of de ramingspost waaruit het werk is overgenomen, zodat het bedrag kan worden onderbouwd"
+    },
+    "boq_total_matches_estimate": {
+      "fail": "De raming op dit verzoek bedraagt {estimate}, maar de geprijsde hoeveelhedenstaat telt op tot {priced}",
+      "suggestion": "Neem het geprijsde totaal over op het verzoek of corrigeer de hoeveelhedenstaat, zodat er één eenduidig bedrag is"
+    },
+    "change_kind_matches_numbers": {
+      "removed_positive": "Regel {line} is gemarkeerd als vervallen werk, maar heeft een positieve hoeveelheid {quantity}; vervallen werk wordt als negatieve hoeveelheid van het contract afgetrokken",
+      "added_negative": "Regel {line} is gemarkeerd als toegevoegd werk, maar heeft een negatieve hoeveelheid {quantity}; werk dat van het contract afgaat is vervallen, niet toegevoegd",
+      "removed_needs_contract_line": "Regel {line} is gemarkeerd als vervallen werk, maar verwijst niet naar een contractwaardeverdelingsregel; er is dus geen gecontracteerde post om te laten vervallen",
+      "modified_needs_contract_line": "Regel {line} is gemarkeerd als gewijzigd werk, maar verwijst niet naar een contractwaardeverdelingsregel; er is dus geen gecontracteerde post om te wijzigen",
+      "suggestion": "Corrigeer het wijzigingstype of de hoeveelheid in de herkomstregistratie van de regel, of vermeld de betreffende contractregel"
+    }
+  },
+  "cases": {
+    "has_steps": {
+      "fail": "Deze casus heeft nog geen stappen; de lezer kan daarom niets volgen.",
+      "suggestion": "Voeg minimaal één stap toe met het te openen scherm en de uit te voeren handeling."
+    },
+    "step_titled": {
+      "fail": "Bij {count} stap(pen) ontbreekt een titel of een te openen scherm.",
+      "suggestion": "Geef elke stap een korte titel en kies het bijbehorende scherm."
+    },
+    "step_purpose": {
+      "fail": "{count} van {total} stap(pen) leggen niet uit waarom ze belangrijk zijn, waardoor de casus een kliklijst wordt in plaats van een uitleg.",
+      "suggestion": "Voeg per stap één zin toe over het doel; juist die informatie heeft een nieuwe gebruiker nodig."
+    },
+    "distinct_screens": {
+      "fail": "{count} stap(pen) openen hetzelfde scherm als de voorgaande stap; de lezer ziet geen verandering en kan de stappen niet onderscheiden.",
+      "suggestion": "Voeg ze samen tot één stap, of laat de tweede stap het scherm openen waar het werk werkelijk verdergaat."
+    },
+    "duration_plausible": {
+      "fail": "Deze casus noemt {minutes} minuten voor {steps} stappen. Een lezer die dat tempo niet kan bijhouden, verliest vertrouwen in de overige tijdsinschattingen.",
+      "suggestion": "Verhoog de geschatte duur tot minimaal {minimum} minuten of schrap enkele stappen."
+    },
+    "described": {
+      "fail": "Deze casus heeft geen samenvatting; de lijst toont daarom alleen een titel.",
+      "suggestion": "Voeg één zin toe over wat de lezer aan het einde heeft bereikt."
+    }
+  },
+  "uk": {
+    "contract_form_declared": {
+      "fail": "De raming noemt niet de contractvorm waarop de prijzen zijn gebaseerd",
+      "suggestion": "Leg de contractvorm vast. Bouwplaatskosten, risico en betalingsvoorwaarden worden per contractvorm anders geprijsd; zonder die informatie zegt het bedrag weinig"
+    },
+    "payment_regime_declared": {
+      "fail": "Het betalingsmechanisme is onvolledig: {missing} is niet vastgelegd",
+      "suggestion": "Leg beide datums vast. Een bouwcontract dat geen van beide vastlegt, is er niet van vrijgesteld: de Scheme for Construction Contracts vult ze aan. De betalingsvoorwaarden volgen dan uit een wettelijke regeling in plaats van uit de ondertekende overeenkomst"
+    },
+    "retention_declared": {
+      "fail": "De raming vermeldt niet welke inhouding van toepassing is",
+      "suggestion": "Leg het inhoudingspercentage en de vrijgavevoorwaarden vast, of vermeld dat geen inhouding geldt. Ingehouden geld is al door de aannemer verdiend maar nog niet opneembaar; een raming die dit weglaat, verzwijgt de behoefte aan werkkapitaal"
+    },
+    "cdm_duty_holders_declared": {
+      "fail": "De verantwoordelijken volgens CDM 2015 zijn niet vastgelegd: {missing} ontbreekt",
+      "suggestion": "Leg de aanstellingen vast. Als meer dan één aannemer aan het project werkt, moet de opdrachtgever schriftelijk een principal designer en principal contractor aanstellen; anders draagt de opdrachtgever die verantwoordelijkheden zelf"
+    },
+    "hrb_regime_declared": {
+      "fail": "De vraag of dit een gebouw met verhoogd risico is, is niet opgelost: {reason}",
+      "unanswered": "de raming vermeldt niet of dit een gebouw met verhoogd risico is",
+      "disagrees": "volgens de raming is de classificatie verhoogd risico {declared}, maar de eigen afmetingen leiden tot {derived}",
+      "suggestion": "Een gebouw heeft verhoogd risico wanneer het minimaal 18 m hoog is of minimaal 7 bouwlagen heeft EN ten minste twee wooneenheden bevat. Beide delen tellen: een hoog gebouw zonder woningen valt hier niet onder; het toch zo behandelen leidt tot een onnodig gateway-goedkeuringstraject"
+    },
+    "vat_treatment_declared": {
+      "fail": "De raming vermeldt niet hoe de btw wordt behandeld",
+      "suggestion": "Leg de behandeling vast: het standaardtarief, een verlaagd of nultarief voor kwalificerend werk, of binnenlandse btw-verlegging als de levering daaronder valt. Verlegging verschuift de btw naar de klant en verandert wat de aannemer mag factureren"
+    }
+  },
+  "project_completeness": {
+    "country_set": {
+      "fail": "Het project vermeldt geen land, waardoor prijsbasis, belastingtarief en werkkalender niet kunnen worden bepaald",
+      "suggestion": "Stel het land in bij de projectinstellingen. Het land bepaalt welk regiopakket, welke belasting en welke kalender bij de bedragen horen"
+    },
+    "currency_set": {
+      "fail": "Het project vermeldt geen valuta, waardoor hoeveelhedenstaten, opslagen en contracten niet kunnen worden opgeteld",
+      "suggestion": "Kies de projectvaluta in de instellingen. Elke hoeveelhedenstaat en elk contract wordt daarin geprijsd en elk totaal wordt daarin gelezen"
+    },
+    "currency_matches_bill": {
+      "fail": "Het project is geprijsd in {project_currency}, maar regels van deze hoeveelhedenstaat gebruiken {bill_currencies}",
+      "suggestion": "Reken de regels met een vermelde koers om naar de projectvaluta, of leg de wisselkoers op het project vast, zodat het totaal één bedrag vormt"
+    },
+    "priced_bill_present": {
+      "fail": "Het project heeft geen hoeveelhedenstaat met posten, waardoor er geen basis is voor een raming",
+      "suggestion": "Maak een hoeveelhedenstaat en voeg posten toe, of importeer er een uit een CAD-model, spreadsheet of uitwisselingsbestand"
+    },
+    "bill_base_date_set": {
+      "fail": "Hoeveelhedenstaat \"{bill}\" vermeldt niet de basisdatum waarop de prijzen gelden",
+      "suggestion": "Leg de basisdatum vast. Zonder die datum kunnen prijzen niet worden geïndexeerd, belast tegen het bijbehorende tarief of vergeleken met een andere raming"
+    },
+    "classification_standard_set": {
+      "fail": "Het project heeft geen classificatiestandaard, waardoor de codes van de posten niet kunnen worden gecontroleerd",
+      "suggestion": "Kies de classificatiestandaard waarmee het project is gecodeerd. Die bepaalt ook welke nationale regelsets bij validatie worden uitgevoerd"
+    },
+    "planned_dates_set": {
+      "both_missing": "Het project heeft noch een geplande startdatum, noch een geplande einddatum",
+      "start_missing": "Het project heeft een geplande einddatum, maar geen geplande startdatum",
+      "end_missing": "Het project heeft een geplande startdatum, maar geen geplande einddatum",
+      "unreadable": "De geplande datum \"{value}\" is niet als datum te lezen",
+      "suggestion": "Voer de geplande start- en einddatum in als datums. Tijdsgebonden kosten, prijsstijgingen en de planning worden over die periode berekend"
+    },
+    "planned_dates_ordered": {
+      "fail": "Het project begint volgens planning op {start} en eindigt op {end}, dus vóór de start",
+      "suggestion": "Wissel de geplande datums om of corrigeer ze, zodat de start vóór het einde ligt"
+    },
+    "client_recorded": {
+      "fail": "Het project vermeldt geen klant en geen enkel contract noemt een opdrachtgever",
+      "suggestion": "Leg de klant op het project vast of voeg de opdrachtgever als contractpartij toe, zodat de raming een geadresseerde heeft"
+    },
+    "procurement_started": {
+      "fail": "Het project bevindt zich in fase {phase}, maar heeft geen contract en geen aanbestedingspakket",
+      "suggestion": "Maak een aanbestedingspakket vanuit de hoeveelhedenstaat, leg het contract vast of zet de fase terug naar de ramingsfase waarin het project werkelijk zit"
+    }
+  },
+  "boq_resources": {
+    "unit_rate_not_rederived": {
+      "fail": "Post {ordinal}: de middelenregels bieden geen basis voor de prijs; de eenheidsprijs is daarom niet opnieuw uit die regels afgeleid",
+      "fallback_allowance": "Post {ordinal}: de middelenregels zijn een geschatte verdeling van een reservering en bevatten de totale posthoeveelheid; de eenheidsprijs is daarom niet opnieuw uit die regels afgeleid",
+      "assumed_norm": "Post {ordinal}: de middelenregels bevatten verbruiksnormen die de catalogus nooit vermeldde; de eenheidsprijs is daarom niet opnieuw uit die regels afgeleid",
+      "norm_collapsed": "Post {ordinal}: de middelenregels zijn hun catalogusnorm kwijt en bevatten in plaats daarvan de totale posthoeveelheid; de eenheidsprijs is daarom niet opnieuw uit die regels afgeleid",
+      "whole_position_quantities": "Post {ordinal}: de middelenregels bevatten hoeveelheden voor de hele post in plaats van verbruiksnormen per eenheid; de eenheidsprijs is daarom niet opnieuw uit die regels afgeleid",
+      "suggestion": "Controleer de prijsopbouw: leid de post via de beoordeling van de middelennormen opnieuw af uit de cataloguspost, of corrigeer de regels handmatig"
+    }
+  },
+  "poland": {
+    "knr_reference_required": {
+      "fail": "Post {ordinal} verwijst niet naar een KNR-catalogustabel",
+      "suggestion": "Vermeld in de podstawa de catalogustabel waaruit de normen komen, bijvoorbeeld KNR 2-02 0201-01, of noteer kalkulacja indywidualna voor een eigen calculatie"
+    },
+    "knr_reference_recognised": {
+      "fail": "Verwijzing '{code}' in post {ordinal} vermeldt geen KNR-catalogusfamilie",
+      "suggestion": "Begin de verwijzing met de catalogusfamilie, zoals KNR, KNNR, KNR-W of KSNR, of markeer de regel als kalkulacja indywidualna"
+    }
+  }
+}

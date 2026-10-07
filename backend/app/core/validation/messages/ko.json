@@ -1,0 +1,868 @@
+{
+  "boq_markup": {
+    "contingency_not_on_profit": {
+      "fail": "예비비 \"{markup}\"의 산정 기준에 이윤 항목 \"{profit}\"이 이미 포함되어 있어, 위험 대비 자금에도 이윤이 부과됩니다",
+      "suggestion": "해당 시장의 표준 방식에서 위험비를 일반관리비와 이윤 뒤에 명시적으로 배치하는 경우가 아니라면 이 항목을 직접비에 적용하세요"
+    },
+    "order_is_declared": {
+      "fail": "산정 순서 {order}가 여러 할증 항목에 중복 지정되어 있습니다: {markups}",
+      "suggestion": "각 할증 항목에 고유한 순서를 지정하여 어떤 비용이 다음 항목의 산정 기준에 포함되는지 명확히 하세요"
+    },
+    "percentage_within_band": {
+      "fail": "\"{markup}\"은 {category} 항목으로 {percentage}%이며, 타당한 범위인 0~{ceiling}%를 벗어납니다",
+      "suggestion": "소수점 위치를 확인하세요. 어느 경우든 입력한 값을 그대로 사용하여 계산합니다"
+    },
+    "cumulative_base_is_settled": {
+      "fail": "\"{markup}\"은 \"{apply_to}\"에 적용되지만 앞선 항목이 없어 직접비만을 기준으로 계산됩니다",
+      "suggestion": "산정 기준에 포함할 항목 뒤로 이동하거나 직접비에 적용하세요"
+    }
+  },
+  "common": {
+    "ok": "확인"
+  },
+  "export": {
+    "generated": "생성됨",
+    "content_digest": "내용 해시"
+  },
+  "field_time": {
+    "hours_per_day_max": {
+      "fail": "근로자 {worker}의 당일 투입 시간이 {hours}시간으로, 한도인 {max}시간을 초과합니다",
+      "suggestion": "제출 전에 시간을 올바른 날짜 또는 근로자에게 배분하세요"
+    },
+    "line_complete": {
+      "fail": "행 {line}이 완성되지 않았습니다: {reason}",
+      "labour_xor_plant": "노무 또는 장비 중 하나만 계상해야 하며, 둘 다 지정하거나 둘 다 비워 둘 수 없습니다",
+      "hours_positive": "시간은 0보다 커야 합니다",
+      "cost_code_required": "원가 코드가 필요합니다",
+      "suggestion": "작업시간표를 제출하기 전에 행을 완성하세요"
+    },
+    "cost_code_resolves": {
+      "fail": "행 {line}의 코드 '{code}'와 일치하는 내역서 항목 또는 WBS가 이 프로젝트에 없습니다",
+      "suggestion": "프로젝트 내역서에 존재하는 원가 코드 또는 WBS를 선택하세요"
+    },
+    "daywork_needs_variation": {
+      "fail": "실비 정산 작업 행 {line}이 진행 중인 변경에 연결되어 있지 않습니다",
+      "suggestion": "실비 정산 작업을 해당 작업을 지시한 변경에 연결하세요"
+    },
+    "plant_needs_equipment": {
+      "fail": "장비 작업 행 {line}에 장비가 지정되어 있지 않습니다",
+      "suggestion": "장비 가동 시간의 원가를 계산할 수 있도록 장비를 연결하세요"
+    },
+    "approved_immutable": {
+      "fail": "이 작업시간표의 상태는 {status}이며 수정할 수 없습니다",
+      "suggestion": "승인된 시간을 정정하려면 취소 분개용 작업시간표를 등록하세요"
+    },
+    "offline_clock_plausible": {
+      "fail": "이 날짜를 기록한 기기의 시계가 서버보다 {minutes}분 빨랐습니다",
+      "suggestion": "기록된 시간을 올바른 순서로 확인할 수 있도록 기기의 시계를 맞추세요"
+    },
+    "offline_sync_delay": {
+      "fail": "이 작업은 {date}에 수행되었으나 {days}일 후에야 사무실에 도착했습니다",
+      "suggestion": "승인 전에 해당 날짜의 실제 작업 시간과 대조하세요. 해당 기성 정산이 이미 마감되었을 수 있습니다"
+    }
+  },
+  "ai_takeoff": {
+    "unreviewed_proposals": {
+      "fail": "물량 산출 제안 {count}건이 아직 검토 대기 중이며 여기서는 금액에 반영되지 않았습니다",
+      "suggestion": "검토 대기 항목을 처리하여 확정 물량이 도면과 일치하도록 하세요"
+    }
+  },
+  "boq_quality": {
+    "position_has_quantity": {
+      "fail": "항목 {ordinal}의 수량은 0이거나 누락될 수 없습니다",
+      "suggestion": "0보다 큰 수량을 입력하세요"
+    },
+    "position_has_unit_rate": {
+      "fail": "항목 {ordinal}에 단가를 지정해야 합니다",
+      "suggestion": "원가 데이터베이스에서 단가를 지정하세요"
+    },
+    "position_has_description": {
+      "fail": "항목 {ordinal}의 설명은 비워 둘 수 없습니다"
+    },
+    "no_duplicate_ordinals": {
+      "fail": "번호 '{ordinal}'이 {count}개 항목에서 중복됩니다"
+    },
+    "unit_rate_in_range": {
+      "fail": "항목 {ordinal}: 단가 {rate}가 {threshold}(중앙값의 5배)를 초과합니다",
+      "suggestion": "이 단가가 비정상적으로 높으므로 확인하세요"
+    },
+    "negative_values": {
+      "fail": "항목 {ordinal}에 음수 값이 있습니다: {details}",
+      "suggestion": "음수 값을 수정하고 양수를 사용하세요"
+    },
+    "unrealistic_rate": {
+      "fail": "항목 {ordinal}: {details}",
+      "suggestion": "이 값이 현실적으로 지나치게 높아 보이므로 확인하세요",
+      "not_assessed_no_currency": "{count}개 항목을 평가하지 못했습니다. 내역서에 통화가 없어 {reference}로 표시된 금액 기준치를 환산할 수 없습니다",
+      "not_assessed_no_currency_suggestion": "프로젝트 통화를 설정하거나 항목에 통화를 기록하세요",
+      "not_assessed_no_rate": "{currency} 표시 항목 {count}개를 평가하지 못했습니다. {reference}에서 {currency}로의 환율이 등록되어 있지 않아 금액 기준치를 이 내역서에 맞게 환산할 수 없습니다",
+      "not_assessed_no_rate_suggestion": "환율 대장 또는 프로젝트 환율에 {reference}에서 {currency}로의 환율을 추가하세요"
+    },
+    "total_mismatch": {
+      "fail": "항목 {ordinal}: 계산값 {computed} != 저장값 {stored}(차이={diff})",
+      "suggestion": "합계 = 수량 × 단가로 다시 계산하세요"
+    },
+    "resource_split_mismatch": {
+      "fail": "항목 {ordinal}: 자원 소계 {subtotal}와 단가 {rate}의 차이가 {diff}입니다",
+      "suggestion": "자원 수량과 단가를 검토하세요. 단위당 합계가 항목의 단가와 일치해야 합니다"
+    },
+    "empty_unit": {
+      "fail": "항목 {ordinal}의 단위가 비어 있거나 누락되었습니다",
+      "suggestion": "측정 단위를 지정하세요(m, m2, m3, kg, pcs, lsum 등)"
+    },
+    "section_without_items": {
+      "fail": "구분 {ordinal}({title})에 하위 항목이 없습니다",
+      "suggestion": "이 구분에 항목을 추가하거나 빈 구분을 삭제하세요"
+    },
+    "rate_vs_benchmark": {
+      "fail": "항목 {ordinal}: 단가 {rate}/{unit}가 기준치 {threshold}/{unit}를 초과하여 비현실적일 수 있습니다",
+      "suggestion": "이 단가를 확인하세요. 일반적인 {unit}당 단가는 {threshold} 미만이어야 합니다. 단위나 소수점 오류를 확인하세요.",
+      "not_assessed_no_currency": "{count}개 항목을 평가하지 못했습니다. 내역서에 통화가 없어 {reference}로 표시된 비교 기준치를 환산할 수 없습니다",
+      "not_assessed_no_currency_suggestion": "프로젝트 통화를 설정하거나 항목에 통화를 기록하세요",
+      "not_assessed_no_rate": "{currency} 표시 항목 {count}개를 평가하지 못했습니다. {reference}에서 {currency}로의 환율이 등록되어 있지 않아 비교 기준치를 이 내역서에 맞게 환산할 수 없습니다",
+      "not_assessed_no_rate_suggestion": "환율 대장 또는 프로젝트 환율에 {reference}에서 {currency}로의 환율을 추가하세요"
+    },
+    "lump_sum_ratio": {
+      "fail": "전체 {total_count}개 중 {lsum_count}개 항목({percent})이 일식 금액을 사용하여 기준치 {threshold}를 초과합니다",
+      "suggestion": "견적 정확도를 높이려면 일식 항목을 측정 가능한 수량(m, m2, m3, kg, pcs)으로 분해하세요"
+    },
+    "cost_concentration": {
+      "fail": "항목 {ordinal}이 내역서 총액의 {share}({grand_total} 중 {value})를 차지하여 기준치 {threshold}를 초과합니다",
+      "suggestion": "이 항목을 작은 항목으로 분할하거나 비용을 확인하세요. 한 항목이 견적의 대부분을 차지하지 않도록 하세요"
+    },
+    "currency_consistency": {
+      "fail": "여러 통화가 혼재합니다: {currencies}",
+      "suggestion": "내역서 전체에서 하나의 통화를 사용하세요"
+    },
+    "measurement_consistency": {
+      "fail": "내역서에 미터법과 야드파운드법 단위가 혼재합니다. 하나의 단위계를 일관되게 사용하세요",
+      "suggestion": "모든 수량을 미터법 또는 야드파운드법 중 하나로 환산하세요"
+    },
+    "revision_cost_impact_review": {
+      "fail": "개정으로 인한 비용 영향 {amount}가 아직 변경으로 기록되지 않았습니다",
+      "suggestion": "이 개정 비교에서 변경 요청 초안을 만들어 비용 변동을 추적하세요"
+    },
+    "base_date_readable": {
+      "fail": "기준일 '{base_date}'을 날짜로 해석할 수 없어 내역서에 해당 기준일의 세율 대신 오늘의 세율이 적용됩니다",
+      "suggestion": "가격 기준 시점을 일, 월, 분기 또는 연도로 지정하세요({shapes})"
+    },
+    "tax_date_readable": {
+      "fail": "과세일 '{tax_date}'을 날짜로 해석할 수 없어 내역서에 해당 과세일의 세율 대신 오늘의 세율이 적용됩니다",
+      "suggestion": "과세일을 일, 월, 분기 또는 연도로 지정하세요({shapes}). 내역서 기준일에 따라 과세하려면 비워 두세요"
+    }
+  },
+  "din276": {
+    "cost_group_required": {
+      "fail": "항목 {ordinal}에 DIN 276 원가 그룹(KG)이 없습니다",
+      "suggestion": "3자리 DIN 276 원가 그룹을 지정하세요(예: 벽체는 330)"
+    },
+    "valid_cost_group": {
+      "fail": "항목 {ordinal}의 DIN 276 코드 '{code}'가 유효하지 않습니다"
+    },
+    "hierarchy": {
+      "fail": "항목 {ordinal}: KG {child}는 상위 KG {parent}에 속하지 않습니다(필요한 접두어: '{prefix}')",
+      "suggestion": "항목을 올바른 상위 그룹으로 이동하거나 상위 계층에 맞게 KG 코드를 수정하세요({prefix}xx)"
+    },
+    "completeness": {
+      "fail": "내역서에 KG 그룹 {group} — {group_name}이 없습니다",
+      "suggestion": "전체 범위를 포함하도록 KG {group}({group_name})의 항목을 추가하세요"
+    }
+  },
+  "gaeb": {
+    "ordinal_format": {
+      "fail": "번호 '{ordinal}'이 이 파일의 GAEB OZ-Maske와 일치하지 않습니다",
+      "suggestion": "파일의 OZ-Maske를 사용하세요(예: 001.001.0010 또는 01.02.0030)"
+    },
+    "lv_structure": {
+      "fail": "항목 {ordinal}: 말단 항목에 상위 구분이 없습니다. GAEB LV 계층에서는 상위 Leistungsgruppe가 필요합니다",
+      "suggestion": "이 항목을 상위 구분(Leistungsgruppe / Titel)에 지정하세요"
+    },
+    "einheitspreis_sanity": {
+      "negative": "항목 {ordinal}: Einheitspreis(단가) {rate}가 음수입니다(단위='{unit}'). 음수 가격은 GAEB로 전송할 수 없습니다",
+      "zero": "항목 {ordinal}: Einheitspreis(단가)가 0.00입니다(단위='{unit}'). 단가 누락이 아니라 실제로 제시한 영(0)의 가격인지 확인하세요",
+      "suggestion": "양수 Einheitspreis를 입력하거나 해당 항목을 Bedarfsposition(선택 범위) 또는 일식(단위='lsum')으로 지정하세요"
+    },
+    "trade_section_code": {
+      "fail": "최상위 구분 '{ordinal}'에 GAEB Leistungsbereich 코드가 없습니다(예: '012'와 같은 3자리 공종 코드 필요)",
+      "suggestion": "구분에 3자리 공종 코드(Leistungsbereich)를 추가하세요. 예: 토공은 '012', 조적공사는 '013'"
+    },
+    "quantity_decimals": {
+      "fail": "항목 {ordinal}: 수량 {quantity}의 소수 자릿수는 {decimals}자리입니다. GAEB X83 관례상 최대 3자리입니다",
+      "suggestion": "GAEB X83에 따라 수량을 소수점 이하 최대 3자리로 반올림하세요"
+    }
+  },
+  "nrm": {
+    "classification_required": {
+      "fail": "항목 {ordinal}에 NRM 요소 코드가 없습니다",
+      "suggestion": "NRM 1/2 요소 코드를 지정하세요(예: 외벽은 2.6.1)"
+    },
+    "valid_element": {
+      "fail": "항목 {ordinal}의 NRM 코드 '{code}'가 유효하지 않습니다"
+    },
+    "completeness": {
+      "fail": "내역서에 NRM 그룹 {group} — {group_name}이 없습니다",
+      "suggestion": "NRM 그룹 {group}({group_name})의 항목을 추가하세요"
+    },
+    "base_date_declared": {
+      "fail": "공사비 계획에 단가의 기준일이 명시되어 있지 않습니다",
+      "suggestion": "내역서에 기준일을 기록하세요. 기준일이 없으면 단가가 오래된 것인지, 추가해야 할 물가상승분이 얼마인지 판단할 수 없습니다"
+    },
+    "cost_plan_stage_declared": {
+      "fail": "공사비 계획에 어떤 설계 단계를 대상으로 작성되었는지 명시되어 있지 않습니다",
+      "suggestion": "설계 단계를 기록하세요. 공사비 계획에 기대할 수 있는 정확도는 작성 단계에 따라 결정되므로, 단계를 숨기면 잘못된 기대를 불러옵니다"
+    },
+    "contractor_costs_present": {
+      "preliminaries": "공사비 계획에 원도급사의 가설 및 현장운영비가 없으며, 그룹 {group}이나 할증 항목에도 반영되어 있지 않습니다",
+      "overheads_and_profit": "공사비 계획에 원도급사의 일반관리비와 이윤이 없으며, 그룹 {group}이나 할증 항목에도 반영되어 있지 않습니다",
+      "suggestion": "NRM 그룹 요소 또는 수량 산출된 공사에 대한 할증으로 추가하세요. 두 방식 모두 가능하지만 누락하면 공사비가 불완전해집니다"
+    },
+    "risk_allowance_present": {
+      "fail": "공사비 계획에 위험 대비 충당액이 없습니다",
+      "suggestion": "NRM 그룹 13 또는 예비비 항목으로 위험 대비 충당액을 추가하세요. 이를 제외하면 하나의 추정치를 확정된 금액처럼 제시하게 됩니다"
+    }
+  },
+  "masterformat": {
+    "classification_required": {
+      "fail": "항목 {ordinal}에 MasterFormat 코드가 없습니다",
+      "suggestion": "MasterFormat 코드를 지정하세요(예: 현장타설 콘크리트는 03 30 00)"
+    },
+    "valid_division": {
+      "fail": "항목 {ordinal}의 MasterFormat 코드 '{code}'가 유효하지 않습니다",
+      "suggestion": "6자리 MasterFormat 형식 XX XX XX를 사용하세요(예: 03 30 00)"
+    },
+    "completeness": {
+      "fail": "내역서에 부문 {division} — {division_name}이 없습니다",
+      "suggestion": "부문 {division}({division_name})의 항목을 추가하세요"
+    }
+  },
+  "sinapi": {
+    "code_required": {
+      "fail": "항목 {ordinal}에 SINAPI 코드가 없습니다",
+      "suggestion": "SINAPI 일위대가 코드를 지정하세요(예: C30 콘크리트는 87878)"
+    },
+    "valid_code": {
+      "fail": "항목 {ordinal}의 SINAPI 코드 '{code}'가 유효하지 않습니다"
+    }
+  },
+  "nbr": {
+    "classification_required": {
+      "fail": "항목 {ordinal}에 NBR 12721 구분이 없습니다",
+      "suggestion": "항목에 NBR 12721 구분을 지정하세요(S1 = preliminares, S2 = infra-estrutura, ..., S11 = serviços complementares)"
+    },
+    "valid_section": {
+      "fail": "항목 {ordinal}의 NBR 12721 구분 '{code}'는 S1~S11에 해당하지 않습니다",
+      "suggestion": "S1부터 S11까지의 코드를 사용하세요(예: supra-estrutura는 S3)"
+    }
+  },
+  "gesn": {
+    "code_required": {
+      "fail": "항목 {ordinal}에 ГЭСН/ФЕР 코드가 없습니다",
+      "suggestion": "ГЭСН 코드를 지정하세요(예: 콘크리트는 06-01-001-01)"
+    },
+    "valid_code": {
+      "fail": "ГЭСН 코드 '{code}'가 XX-XX-XXX-XX 형식과 일치하지 않습니다",
+      "suggestion": "NN-NN-NNN-NN 형식을 사용하세요(예: 06-01-001-01)"
+    },
+    "resource_breakdown": {
+      "fail": "항목 {ordinal}이 기준 {code}를 인용하지만 자원 내역이 없습니다",
+      "suggestion": "기준의 노무·장비·자재 수량을 가져오거나 이 항목이 기준과 다른 이유를 명시하세요"
+    },
+    "labour_hours_present": {
+      "fail": "항목 {ordinal}({code})의 자원 내역에 노무 시간이 없습니다",
+      "suggestion": "기준에서 정한 노무 시간을 추가하세요. 일반관리비와 예정이윤은 노무비를 기준으로 하므로 노무 시간이 없으면 계산할 수 없습니다"
+    },
+    "price_level_declared": {
+      "fail": "견적 금액의 가격 수준이 어느 시점을 기준으로 하는지 명시되어 있지 않습니다",
+      "suggestion": "검토자가 같은 합계를 재현할 수 있도록 가격 수준(날짜)과 적용한 환산지수를 명시하세요"
+    }
+  },
+  "dpgf": {
+    "lot_required": {
+      "fail": "항목 {ordinal}이 어떤 전문공사 패키지(Lot technique)에도 지정되지 않았습니다",
+      "suggestion": "전문공사 패키지를 지정하세요(예: Lot 01 Gros Œuvre)"
+    },
+    "pricing_complete": {
+      "fail": "가격이 입력된 항목은 {priced}/{total}개({percent})로, 기준치 80% 미만입니다",
+      "suggestion": "DPGF를 제출하기 전에 모든 항목의 가격을 완성하세요"
+    }
+  },
+  "onorm": {
+    "position_format": {
+      "fail": "번호 '{ordinal}'이 ÖNORM의 XX.XX.XXXXA 형식과 일치하지 않습니다",
+      "suggestion": "ÖNORM B 2063 형식을 사용하세요(예: 01.02.01A)"
+    },
+    "description_length": {
+      "fail": "항목 {ordinal}: 설명이 너무 짧습니다({length}자, 최소 20자)",
+      "suggestion": "ÖNORM B 2063에 따라 항목 설명을 보완하세요"
+    }
+  },
+  "gbt50500": {
+    "code_required": {
+      "fail": "항목 {ordinal}에 GB/T 50500 코드가 없습니다",
+      "suggestion": "9자리 GB/T 50500 코드를 지정하세요(예: 010101001)"
+    },
+    "valid_code": {
+      "fail": "GB/T 50500 코드 '{code}'가 유효하지 않습니다. 9자리 또는 12자리여야 합니다"
+    }
+  },
+  "cpwd": {
+    "code_required": {
+      "fail": "항목 {ordinal}에 CPWD/DSR 코드가 없습니다",
+      "suggestion": "CPWD DSR 항목 참조를 지정하세요(예: 4.1.1)"
+    },
+    "measurement_units": {
+      "fail": "항목 {ordinal}의 단위 '{unit}'는 IS 1200 표준 단위가 아닙니다",
+      "suggestion": "IS 1200 표준 단위를 사용하세요(m, m2, m3, kg, nos, rm 등)"
+    }
+  },
+  "hungary": {
+    "item_code_required": {
+      "fail": "항목 {ordinal}에 헝가리 항목 코드가 없습니다",
+      "invalid": "항목 {ordinal}의 코드 '{code}'가 두 항목 체계 중 어느 것과도 일치하지 않습니다",
+      "suggestion": "건축공사는 MA-CC-SS-II(장 01~17)를 사용하고, 기반시설 공사는 프로젝트 코드 사전의 6자리 또는 7자리 항목 번호를 사용합니다"
+    },
+    "chapter_recognised": {
+      "fail": "항목 {ordinal}의 장 {chapter}는 항목 체계의 17개 장에 속하지 않습니다"
+    },
+    "material_fee_split": {
+      "fail": "항목 {ordinal}: 재료비 {material}와 시공비 {fee}의 합계가 단가 {rate}와 일치하지 않습니다",
+      "suggestion": "재료비와 시공비 단가 또는 항목 단가를 수정하여 내역을 일치시키세요"
+    },
+    "item_number_unique": {
+      "fail": "항목 번호 {number}가 {count}개 항목에 사용되고 있으나 하나의 항목만 식별해야 합니다",
+      "suggestion": "내역서를 고객에게 보내기 전에 각 항목에 고유한 프로젝트 항목 번호를 지정하세요"
+    }
+  },
+  "prezzario": {
+    "voce_code_format_valid": {
+      "fail": "항목 {ordinal}의 코드 '{code}'로는 출처 가격표를 알 수 없습니다",
+      "suggestion": "공식 voce 코드는 가격표의 지역과 발행 연도로 시작합니다. 예: TOS25_01.A03.001.001(Toscana 2025). 지역 가격표의 코드를 그대로 복사하거나 해당 항목을 가져오세요. 새 단가는 NP.01과 같이 번호를 지정하세요"
+    },
+    "voce_reference_present": {
+      "fail": "항목 {ordinal}에 prezzario voce 참조가 없습니다",
+      "suggestion": "가져온 지역 가격표에서 항목을 선택하거나, 단가 분석으로 뒷받침되는 nuovo prezzo(NP)로 표시하세요"
+    },
+    "costi_sicurezza_separated": {
+      "fail": "내역서에 입찰 할인 대상이 아닌 안전비의 별도 항목이 없습니다",
+      "suggestion": "가격표의 안전비 장 또는 안전계획을 기준으로 oneri della sicurezza를 별도 구분이나 할증 항목으로 추가하세요"
+    },
+    "incidenza_manodopera_documented": {
+      "fail": "항목 {ordinal}({code})에 노무비 비중이 명시되어 있지 않습니다",
+      "suggestion": "가격표의 incidenza della manodopera를 사용하거나 노무 자원을 추가하여 입찰에서 노무비를 별도로 표시할 수 있게 하세요"
+    },
+    "overheads_not_applied_twice": {
+      "fail": "지역 가격표 단가에는 일반관리비(13~17%)와 이윤(10%)이 이미 포함되어 있습니다. 이를 다시 적용하면 합계가 약 {percent}% 증가합니다.",
+      "suggestion": "이 내역서에서 일반관리비와 이윤 할증을 제거하거나, 자체 분석(NP)으로 산정한 항목에만 적용하세요."
+    }
+  },
+  "romania": {
+    "deviz_chapter_required": {
+      "fail": "항목 {ordinal}에 deviz general의 장이 지정되어 있지 않습니다",
+      "suggestion": "해당 HG 907/2016 장과 절에 항목을 분류하세요. 예: 건설·설치공사는 4.1, 현장 조성은 5.1"
+    },
+    "deviz_chapter_recognised": {
+      "fail": "항목 {ordinal}의 deviz 코드 '{code}'는 deviz general의 장이나 절이 아닙니다",
+      "suggestion": "HG 907/2016 deviz general의 1~6장 코드를 사용하세요(예: 1.2, 2, 3.5, 4.1, 5.1, 6.2)"
+    }
+  },
+  "greece": {
+    "net_article_required": {
+      "fail": "항목 {ordinal}에 통합 가격표(ΝΕΤ)의 항목 번호가 없습니다",
+      "suggestion": "단가 산정 근거인 ΝΕΤ 항목을 지정하세요(예: ΟΙΚ 32.01.06). 새 항목은 ΝΑΟΙΚ로 표시하세요"
+    },
+    "net_article_valid": {
+      "invalid": "항목 {ordinal}의 '{code}'는 ΝΕΤ 항목 형식이 아닙니다",
+      "chapter": "항목 {ordinal}의 '{code}'는 건축공사 가격표에 없는 장 {chapter}를 지정합니다",
+      "suggestion": "가격표 접두어와 항목 번호를 입력하세요(예: ΟΙΚ 38.20.02, ΟΔΟ Α-2, ΑΤΗΕ 8151.1)"
+    }
+  },
+  "ukraine": {
+    "zkr_chapter_required": {
+      "fail": "항목 {ordinal}에 총괄 견적의 장이 지정되어 있지 않습니다",
+      "suggestion": "항목을 зведений кошторисний розрахунок의 1~12장에 분류하세요. 주 시설의 건축공사는 2장에 속합니다"
+    },
+    "zkr_chapter_recognised": {
+      "fail": "항목 {ordinal}의 장 {chapter}는 총괄 견적의 12개 장에 속하지 않습니다",
+      "suggestion": "1~12의 장 번호를 사용하세요"
+    }
+  },
+  "birimfiyat": {
+    "code_required": {
+      "fail": "항목 {ordinal}에 birim fiyat poz 번호가 없습니다",
+      "suggestion": "Bayındırlık poz 번호를 지정하세요(예: 04.013/1)"
+    },
+    "valid_poz": {
+      "fail": "Poz '{code}'는 현행 단가집 번호(XX.XXX.XXXX)나 구형 번호(XX.XXX/X)에 해당하지 않습니다",
+      "suggestion": "단가집 번호(예: 15.140.1002)를 사용하세요. 구형 계약에는 04.013/1 등을 사용하고 자체 분석 항목은 ÖZEL-1과 같이 번호를 지정하세요"
+    }
+  },
+  "sekisan": {
+    "code_required": {
+      "fail": "항목 {ordinal}에 積算 코드가 없습니다",
+      "suggestion": "積算基準 항목 코드를 지정하세요"
+    },
+    "metric_units": {
+      "fail": "항목 {ordinal}의 단위 '{unit}'는 표준 단위가 아닙니다",
+      "suggestion": "표준 미터법 단위를 사용하세요(m, m2, m3, kg, t, 式 등)"
+    }
+  },
+  "bc3": {
+    "code_required": {
+      "fail": "항목 {ordinal}에 FIEBDC-3 개념 코드가 없습니다",
+      "suggestion": "FIEBDC-3 코드를 지정하세요(예: E04CM040 또는 01.02.01)"
+    },
+    "valid_code": {
+      "fail": "항목 {ordinal}의 FIEBDC-3 코드 '{code}'가 유효하지 않습니다",
+      "suggestion": "FIEBDC-3 영숫자 형식을 사용하세요(예: E04CM040, 01.02.01, CAP01#)"
+    }
+  },
+  "mexico": {
+    "apu_completeness": {
+      "fail": "항목 {ordinal}의 단가 분석 APU가 불완전합니다. 누락된 원가 요소: {missing}",
+      "suggestion": "단가 분석에 누락된 직접비 요소(노무, 자재, 장비)를 추가하세요"
+    },
+    "iva_rate_valid": {
+      "fail": "항목 {ordinal}의 IVA 세율 {rate}가 유효하지 않습니다. 멕시코 IVA는 16%, 8%(국경 지역) 또는 0%입니다",
+      "suggestion": "IVA 세율을 16%(표준), 8%(국경 지역) 또는 0%로 설정하세요"
+    },
+    "subcontract_retencion": {
+      "fail": "하도급 항목 {ordinal}에 IVA/ISR 원천징수 적용 여부가 기록되어 있지 않습니다",
+      "suggestion": "하도급 항목의 IVA 및 ISR 원천징수를 기록하거나 적용하지 않는다고 표시하세요"
+    },
+    "cfdi_rfc_present": {
+      "missing": "입찰 자료를 내보내기 위한 CFDI 발행자 정보가 불완전합니다. 누락 정보: {missing}",
+      "invalid_rfc": "RFC '{rfc}'는 유효한 CFDI RFC가 아닙니다(법인은 12자, 개인은 13자)",
+      "suggestion": "CFDI 4.0 청구를 위해 프로젝트 프로필에 발행자의 RFC, regimen fiscal 및 uso CFDI를 설정하세요"
+    }
+  },
+  "pipeline": {
+    "side_effecting_requires_gate": {
+      "fail": "외부 변경을 일으키는 노드에 제어 게이트가 없습니다: {nodes}",
+      "suggestion": "게시 전에 트리거 또는 AI 노드에서 각 쓰기 노드로 이어지는 모든 경로에 검증 게이트 또는 사람의 승인 게이트를 추가하세요."
+    }
+  },
+  "property_dev": {
+    "escrow_account_required": {
+      "fail": "이 개발사업에는 규제기관 '{regulator}'에 대응하는 활성 에스크로 계좌가 필요합니다",
+      "suggestion": "준수 관리 → 에스크로 계좌에서 규제기관이 허가한 은행의 에스크로 계좌를 개설하세요"
+    },
+    "escrow_iban_valid": {
+      "fail": "에스크로 계좌 {account}: IBAN '{iban}'가 ISO 13616 구조 검사를 통과하지 못했습니다",
+      "suggestion": "IBAN을 수정하세요. 국가 코드, 길이 및 체크섬이 ISO 13616과 일치해야 합니다"
+    },
+    "escrow_balance_reconciled": {
+      "fail": "에스크로 계좌 {account}: 장부 잔액 {ledger}와 거래 합계 {transactions} 사이에 {drift}의 차이가 있습니다",
+      "suggestion": "에스크로 계좌를 대사하고 미기록 입금 또는 누락된 출금을 조사하세요"
+    },
+    "sales_contract_party_ownership_sums_to_100": {
+      "fail": "계약 {contract}: 소유 지분 합계가 {total}%입니다(정확히 100%여야 함)",
+      "suggestion": "당사자별 지분율을 조정하여 합계가 100.00%가 되도록 하세요"
+    },
+    "payment_schedule_instalments_sum_to_contract_value": {
+      "fail": "계약 {contract}: 분할 지급액 합계 {instalments}가 계약 금액 {contract_value}와 다릅니다(차이 {drift})",
+      "suggestion": "지급 일정을 조정하여 분할 지급액 합계가 계약 총액과 일치하도록 하세요"
+    },
+    "reservation_expiry_in_future": {
+      "fail": "예약 {reservation}: 만료일 expires_at {expires}가 미래 시점이 아닙니다",
+      "suggestion": "예약을 연장하거나 상태를 만료 또는 취소로 변경하세요"
+    },
+    "broker_commission_rate_within_bounds": {
+      "fail": "중개 수수료 계약 {agreement}: {issue}",
+      "suggestion": "0.1~15%의 요율, 고정 금액 또는 비어 있지 않은 구간별 요율표를 사용하세요"
+    },
+    "price_matrix_no_negative_modifier": {
+      "fail": "가격 매트릭스 {matrix}: 규칙 '{factor}'의 배수 {multiplier}가 [-0.50, 2.00] 범위를 벗어납니다",
+      "suggestion": "비현실적인 필지 가격을 피하려면 조정률을 -50%에서 +200% 사이로 제한하세요"
+    }
+  },
+  "schedule_quality": {
+    "open_ends": {
+      "fail": "작업 '{activity}'에 {ends} 논리 관계가 없습니다(열린 끝 / 연결되지 않은 작업)",
+      "both": "선행 작업 또는 후속 작업",
+      "predecessor": "선행 작업",
+      "successor": "후속 작업",
+      "suggestion": "선행 및 후속 작업과 연결하여 네트워크에 포함하거나 시작·종료 마일스톤으로 지정하세요"
+    },
+    "negative_lag": {
+      "fail": "관계 {predecessor} -> {successor}에 음수 지연({lag}일)이 적용되어 있습니다. 이는 선행 착수를 뜻하며 주공정 경로를 왜곡합니다",
+      "suggestion": "선행 착수를 별도 작업이나 시작-시작/종료-종료 관계로 대체하여 작업 순서를 설명할 수 있도록 하세요"
+    },
+    "excessive_lag": {
+      "fail": "관계 {predecessor} -> {successor}의 지연은 {lag}일로, 기준치 {threshold}일을 초과합니다",
+      "suggestion": "대기 시간을 별도 작업(조달, 양생, 승인)으로 모델링하여 상태 관리와 자원 평준화가 가능하도록 하세요"
+    },
+    "hard_constraints": {
+      "fail": "작업 '{activity}'에 네트워크 논리보다 우선하는 강제 날짜 제약({constraint})이 있습니다",
+      "suggestion": "유연한 제약(지정일 이후 시작)을 사용하거나 논리 관계로 날짜를 정하여, 선행 작업이 지연되면 작업도 이동할 수 있도록 하세요"
+    },
+    "negative_float": {
+      "fail": "작업 '{activity}'의 총여유 시간이 음수({float}일)이므로 현재 논리 관계로는 공정을 달성할 수 없습니다",
+      "suggestion": "작업 순서를 변경하거나 강제 제약을 완화하거나 문서화된 만회 계획을 추가하여 여유 시간을 0 이상으로 만드세요"
+    },
+    "high_float": {
+      "fail": "작업 '{activity}'의 총여유 시간이 매우 커서({float}일) 기준치 {threshold}일을 초과합니다",
+      "suggestion": "후속 작업 연결이 누락되었는지 확인하세요. 큰 여유 시간은 보통 작업이 네트워크에 느슨하게 연결되어 있음을 뜻합니다"
+    },
+    "missing_duration": {
+      "fail": "작업 '{activity}'의 기간({duration}일)은 마일스톤이 아닌 작업에 유효하지 않습니다",
+      "suggestion": "양수 작업일수를 설정하거나 실제로 기간이 0인 사건이라면 마일스톤으로 지정하세요"
+    },
+    "duration_on_project_week": {
+      "fail": "작업 '{activity}'에 {start}부터 {end}까지 월요일~금요일을 센 {stored}작업일이 저장되어 있습니다. 프로젝트의 주간 작업 기준 {calendar}에서는 이 기간이 {expected}입니다",
+      "suggestion": "작업 날짜를 다시 저장하여 프로젝트의 주간 작업 기준으로 기간을 재계산하거나, 의도한 기간을 직접 입력하세요"
+    }
+  },
+  "sheet_completeness": {
+    "missing": {
+      "fail": "도면 {sheet}가 도면 목록에는 있지만 업로드한 도면 묶음에는 없습니다",
+      "suggestion": "누락된 도면을 업로드하거나 해당 발행본에서 철회되었는지 확인하세요"
+    },
+    "extra": {
+      "fail": "도면 {sheet}가 업로드한 도면 묶음에는 있지만 도면 목록에는 없습니다",
+      "suggestion": "목록 또는 발행 대장에 추가하거나 불필요한 도면을 제거하세요"
+    },
+    "revision_mismatch": {
+      "fail": "도면 {sheet}의 개정은 {actual_rev}이지만 목록에서 요구하는 개정은 {expected_rev}입니다",
+      "suggestion": "요구되는 개정본을 발행하거나 목록을 현재 개정으로 갱신하세요"
+    }
+  },
+  "procurement": {
+    "po_has_lines": {
+      "fail": "이 구매 주문에는 명세 행이 없어 발주 확정액이 집계되지 않습니다",
+      "suggestion": "구매 주문을 승인하기 전에 주문 품목을 추가하세요"
+    },
+    "po_line_amount": {
+      "fail": "행 {line}의 금액은 {actual}이지만 수량과 단가의 곱은 {expected}입니다",
+      "suggestion": "수량, 단가 또는 행 금액을 수정하여 세 값이 일치하도록 하세요"
+    },
+    "po_subtotal_matches_lines": {
+      "fail": "소계는 {actual}이지만 행 합계는 {expected}입니다",
+      "suggestion": "현재 행을 기준으로 소계를 다시 계산하세요"
+    },
+    "po_total_matches_subtotal": {
+      "fail": "총액은 {actual}이지만 소계와 세액의 합계는 {expected}입니다",
+      "suggestion": "총액이 소계에 세액을 더한 값과 일치하도록 재계산하세요"
+    },
+    "po_no_negative_line": {
+      "fail": "행 {line}의 수량이 0 이하이거나 단가가 음수입니다",
+      "suggestion": "취소 처리에는 음수 행 대신 대변전표를 발행하세요"
+    },
+    "po_currency_set": {
+      "fail": "이 구매 주문에 통화가 없어 금액을 합산하거나 지급할 수 없습니다",
+      "suggestion": "통화를 설정하세요. 일반적으로 프로젝트와 같은 통화를 사용합니다"
+    },
+    "po_vendor_assigned": {
+      "fail": "이 구매 주문에 공급업체가 지정되어 있지 않습니다",
+      "suggestion": "발주 확정액을 승인하기 전에 공급업체를 선택하세요"
+    },
+    "po_retention_within_bounds": {
+      "fail": "유보율 {percent}%가 타당한 범위인 0~{max}%를 벗어납니다",
+      "suggestion": "유보율을 백분율로 입력하세요. 예를 들어 5%는 5로 입력합니다"
+    },
+    "po_delivery_after_issue": {
+      "fail": "납품일 {delivery}가 발행일 {issue}보다 앞섭니다",
+      "suggestion": "납품일을 발행일 또는 그 이후로 변경하세요"
+    },
+    "po_line_cost_coded": {
+      "fail": "행 {line}에 WBS, 원가 범주 또는 원가 항목이 없어 원가 내역에 표시되지 않습니다",
+      "suggestion": "원가 코드를 지정하여 발주 확정액을 예산과 대비해 보고할 수 있게 하세요"
+    },
+    "invoice_within_order": {
+      "fail": "청구서 {invoice}가 주문 {po}의 미소진 잔액 {remaining}를 {excess}만큼 초과합니다",
+      "suggestion": "청구서와 주문을 대조하세요. 추가분이 합의되었다면 승인 전에 주문 변경으로 기록하세요"
+    },
+    "invoice_quantity_received": {
+      "fail": "행 {line}의 누적 청구 수량이 {invoiced}이 되지만 실제 수령 수량은 {received}뿐입니다",
+      "suggestion": "이 수량을 승인하기 전에 납품서를 기다리거나 입고를 확인하세요"
+    },
+    "invoice_value_received": {
+      "fail": "주문 {po}의 청구 합계는 {invoiced}이 되지만 주문 단가로 평가한 수령 물품의 가치는 {received}뿐입니다",
+      "suggestion": "이 금액을 승인하기 전에 납품서를 기다리거나 입고를 확인하세요"
+    }
+  },
+  "subcontract": {
+    "agreement_has_scope": {
+      "fail": "이 계약에는 작업 패키지가 없어 지급 신청의 근거가 될 범위가 없습니다",
+      "suggestion": "계약을 활성화하기 전에 계약 범위를 작업 패키지로 나누세요"
+    },
+    "package_scope_described": {
+      "fail": "작업 패키지 {package}에 이름은 있지만 포함된 작업의 설명이 없습니다",
+      "suggestion": "추후 변경 분쟁의 기준이 되도록 패키지에 포함되는 내용을 명시하세요"
+    },
+    "agreement_value_positive": {
+      "fail": "계약 금액이 {value}이므로 유보금과 계약금액 내역의 계산 근거가 없습니다",
+      "suggestion": "계약을 활성화하기 전에 합의된 계약 금액을 입력하세요"
+    },
+    "packages_within_value": {
+      "fail": "작업 패키지의 가치는 {planned}이지만 계약 금액은 {total}입니다",
+      "suggestion": "패키지를 재산정하거나 계약 금액을 높여 계약이 자체 범위를 충당하도록 하세요"
+    },
+    "agreement_dates_ordered": {
+      "fail": "계약 종료일 {end}가 시작일 {start}보다 앞섭니다",
+      "suggestion": "시작일 또는 종료일을 수정하여 계약 기간이 시간 순서를 따르도록 하세요"
+    },
+    "agreement_currency_set": {
+      "fail": "이 계약에 통화가 없어 계약에 따른 지급액을 합산하거나 지급할 수 없습니다",
+      "suggestion": "통화를 설정하세요. 일반적으로 프로젝트와 같은 통화를 사용합니다"
+    },
+    "retention_within_bounds": {
+      "fail": "유보율 {percent}%가 타당한 범위인 0~{max}%를 벗어납니다",
+      "suggestion": "유보금을 금액이 아니라 각 지급액에 대한 백분율로 입력하세요"
+    },
+    "insurance_valid_at_start": {
+      "fail": "하도급업체의 보험이 {expiry}에 만료되어 작업 시작일 {reference}를 보장하지 못합니다",
+      "suggestion": "하도급업체가 현장에 진입하기 전에 유효한 보험 증명서를 확보하세요"
+    },
+    "unlinked_contract_twin": {
+      "fail": "하도급 계약 {agreement}와 계약 {contract}가 같은 하도급 계약으로 보여 금액이 이중 집계될 수 있습니다",
+      "suggestion": "같은 하도급 계약이면 연결하고, 다른 계약이면 서로 다름을 표시하세요"
+    }
+  },
+  "submittal": {
+    "reviewer_assigned": {
+      "fail": "이 승인 요청 자료에 검토자가 지정되어 있지 않아 답변할 책임자가 없습니다",
+      "suggestion": "제출 전에 답변할 검토자를 지정하세요"
+    },
+    "required_date_present": {
+      "fail": "이 승인 요청 자료에 필요 기한이 없어 지연으로 보고될 수 없습니다",
+      "suggestion": "이 자료의 승인으로 착수할 수 있는 작업에 맞춰 검토 완료가 필요한 날짜를 설정하세요"
+    },
+    "required_date_after_submitted": {
+      "fail": "검토 기한 {required}가 자료 제출일 {submitted}보다 앞섭니다",
+      "suggestion": "필요 기한을 제출 후의 작업일로 변경하세요"
+    },
+    "review_window_sufficient": {
+      "fail": "검토자에게 주어진 기간은 {days}일로, 통상 필요한 {minimum}일보다 짧습니다",
+      "suggestion": "통상적인 검토 기간을 확보하거나 더 짧은 기간을 검토자와 먼저 합의하세요"
+    },
+    "spec_section_present": {
+      "fail": "이 승인 요청 자료에 시방서 절이 지정되어 있지 않아 대장에서 분류할 수 없습니다",
+      "suggestion": "이 자료가 대응하는 시방서 절을 입력하세요"
+    },
+    "approver_distinct_from_reviewer": {
+      "fail": "동일인({person})이 검토자와 승인자를 겸하여 별도의 이차 검토가 없습니다",
+      "suggestion": "검토자와 다른 승인자를 지정하세요"
+    },
+    "linked_scope_present": {
+      "fail": "이 승인 요청 자료가 범위 항목에 연결되어 있지 않아 패키지에 집계되지 않습니다",
+      "suggestion": "이 자료가 다루는 내역서 항목을 연결하세요"
+    }
+  },
+  "rfq": {
+    "scope_described": {
+      "fail": "이 견적 요청에 작업 범위와 설명이 모두 없어 업체가 견적할 내용이 없습니다",
+      "suggestion": "받은 견적을 비교할 수 있도록 게시 전에 범위를 설명하세요"
+    },
+    "deadline_present": {
+      "fail": "이 견적 요청에 제출 마감이 없어 견적 접수가 종료되지 않습니다",
+      "suggestion": "견적이 도착해야 할 날짜와 시간을 설정하세요"
+    },
+    "deadline_parseable": {
+      "fail": "제출 마감 {value}를 시스템이 날짜로 해석할 수 없어 모든 견적이 거부됩니다",
+      "suggestion": "마감을 날짜로 입력하세요(예: 2026-08-31)"
+    },
+    "deadline_in_future": {
+      "fail": "제출 마감 {deadline}이 오늘 {today} 기준으로 이미 지나 요청이 마감된 상태로 전달됩니다",
+      "suggestion": "게시 전에 마감을 미래 날짜로 변경하세요"
+    },
+    "has_recipients": {
+      "fail": "이 견적 요청에 수신 업체가 없어 게시해도 아무에게도 알리지 않습니다",
+      "suggestion": "견적 요청을 보낼 업체를 추가하세요"
+    },
+    "currency_set": {
+      "fail": "이 견적 요청에 통화가 없어 견적을 비교하여 순위를 매길 수 없습니다",
+      "suggestion": "견적 가격을 표시할 통화를 설정하세요"
+    },
+    "bid_currency_matches": {
+      "fail": "견적 {bid}의 통화는 {bid_currency}이지만 요청 통화는 {rfq_currency}입니다",
+      "suggestion": "업체에 요청 통화로 재견적을 요구하거나 합의된 환산을 기록하세요"
+    },
+    "bid_amounts_parseable": {
+      "fail": "견적 {bid}의 금액 {value}는 순위 평가에 사용할 수 있는 숫자가 아닙니다",
+      "suggestion": "낙찰 전에 견적 금액을 수정하세요"
+    },
+    "bids_still_valid": {
+      "fail": "견적 {bid}가 {expired}에 만료되었고 오늘은 {today}이므로 가격의 구속력이 더 이상 없습니다",
+      "suggestion": "낙찰 전에 업체에 가격을 재확인하세요"
+    },
+    "award_has_competition": {
+      "fail": "이 낙찰은 {count}개 견적을 근거로 하며, 경쟁 비교에 필요한 {minimum}개보다 적습니다",
+      "suggestion": "단일 공급처 선정의 정당한 사유를 기록하거나 더 많은 업체를 초청하세요"
+    }
+  },
+  "errors": {
+    "resource_not_found": "자원을 찾을 수 없습니다",
+    "project_not_found": "프로젝트를 찾을 수 없습니다",
+    "vendor_not_found": "공급업체를 찾을 수 없습니다",
+    "template_not_found": "템플릿을 찾을 수 없습니다",
+    "position_not_found": "항목을 찾을 수 없습니다",
+    "boq_not_found": "내역서를 찾을 수 없습니다",
+    "session_not_found": "세션을 찾을 수 없습니다",
+    "document_not_found": "문서를 찾을 수 없습니다",
+    "documents_batch_delete_referenced": "다른 기록이 이 묶음의 문서를 아직 참조하고 있습니다. 삭제로 끊어지는 연결을 검토하고 acknowledge_references로 확인하세요.",
+    "invitation_not_found": "초대를 찾을 수 없습니다",
+    "agreement_not_found": "계약을 찾을 수 없습니다",
+    "rejection_not_found": "반려 기록을 찾을 수 없습니다",
+    "claim_not_found": "기성 지급 청구를 찾을 수 없습니다",
+    "gaeb_x89_final_account_unsupported": "최종 정산 또는 부분 최종 정산은 아직 GAEB X89로 내보낼 수 없습니다. 누적 기성에서 이전 지급액을 차감하여 청구해야 하지만, 지급 청구에서는 한 기간의 기성 청구서만 생성됩니다. 기성 청구서로 내보내세요.",
+    "xpwe_native_file_refused": "이 파일은 특정 적산 프로그램의 고유 프로젝트 파일로, 해당 프로그램에서만 열 수 있습니다. 원래 적산 프로그램에서 견적을 XPWE로 내보낸 후 .xpwe 파일을 업로드하세요.",
+    "plot_not_found": "필지를 찾을 수 없습니다",
+    "survey_not_found": "드론 측량을 찾을 수 없습니다",
+    "diary_video_not_found": "일지 동영상을 찾을 수 없습니다",
+    "diary_photo_not_found": "일지 사진을 찾을 수 없습니다",
+    "bidder_not_found": "입찰자를 찾을 수 없습니다",
+    "webhook_not_found": "웹훅을 찾을 수 없습니다",
+    "submission_not_found": "제출 자료를 찾을 수 없습니다",
+    "measurement_not_found": "현장 실측을 찾을 수 없습니다",
+    "salescontract_not_found": "매매계약을 찾을 수 없습니다",
+    "prompt_not_found": "프롬프트 템플릿을 찾을 수 없습니다",
+    "prequalification_not_found": "사전 자격심사를 찾을 수 없습니다",
+    "purchase_requisition_not_found": "구매 요청을 찾을 수 없습니다",
+    "purchase_order_not_found": "구매 주문을 찾을 수 없습니다",
+    "group_not_found": "그룹을 찾을 수 없습니다",
+    "final_account_not_found": "최종 정산을 찾을 수 없습니다",
+    "estimate_job_not_found": "견적 작업을 찾을 수 없습니다",
+    "escrow_not_found": "에스크로 거래를 찾을 수 없습니다",
+    "commission_accrual_not_found": "발생 수수료 기록을 찾을 수 없습니다",
+    "baseline_not_found": "기준 계획을 찾을 수 없습니다",
+    "fx_rate_set_locked": "{date}의 ECB 환율이 잠겨 있어 이번 갱신에서 덮어쓰지 않았습니다. 새 공시를 반영해야 한다면 먼저 해당 환율 묶음의 잠금을 해제하세요.",
+    "boq_locked": "내역서가 잠겨 있어 수정할 수 없습니다. 변경하려면 개정본을 만드세요.",
+    "boq_link_owner_locked": "코드 '{code}'는 잠긴 내역서 '{bill}'의 항목에서 정의되어 있으며, 연결하면 해당 내역서가 변경됩니다. 먼저 내역서의 잠금을 해제하거나 새 코드로 항목을 입력하세요."
+  },
+  "variations": {
+    "boq_lines_are_traced": {
+      "fail": "이 변경의 내역서 행 {line}에 출처가 없습니다. 계약금액 내역 행이나 견적 항목에 연결되어 있지 않습니다",
+      "suggestion": "금액을 입증할 수 있도록 이 변경이 영향을 미치는 계약 항목 또는 범위의 출처인 견적 항목을 지정하세요"
+    },
+    "boq_total_matches_estimate": {
+      "fail": "이 요청에 표시된 견적액은 {estimate}이지만 가격이 산정된 내역서 합계는 {priced}입니다",
+      "suggestion": "산정된 합계를 요청에 반영하거나 내역서를 수정하여 금액을 일치시키세요"
+    },
+    "change_kind_matches_numbers": {
+      "removed_positive": "행 {line}이 삭제 범위로 표시되었지만 양수 수량 {quantity}를 갖습니다. 삭제는 음수 수량으로 계약에서 차감해야 합니다",
+      "added_negative": "행 {line}이 추가 범위로 표시되었지만 음수 수량 {quantity}를 갖습니다. 계약에서 차감되는 범위는 추가가 아니라 삭제입니다",
+      "removed_needs_contract_line": "행 {line}이 삭제 범위로 표시되었지만 계약금액 내역 행에 연결되지 않아 삭제할 계약 항목이 없습니다",
+      "modified_needs_contract_line": "행 {line}이 수정 범위로 표시되었지만 계약금액 내역 행에 연결되지 않아 수정할 계약 항목이 없습니다",
+      "suggestion": "행의 추적 정보에서 변경 유형이나 수량을 수정하거나 변경 대상 계약 항목을 지정하세요"
+    }
+  },
+  "cases": {
+    "has_steps": {
+      "fail": "이 사례에는 아직 단계가 없어 독자가 따라 할 내용이 없습니다.",
+      "suggestion": "열 화면과 수행할 작업을 지정하는 단계를 하나 이상 추가하세요."
+    },
+    "step_titled": {
+      "fail": "{count}개 단계에 제목 또는 열 화면이 없습니다.",
+      "suggestion": "각 단계에 짧은 제목을 붙이고 열 화면을 선택하세요."
+    },
+    "step_purpose": {
+      "fail": "전체 {total}개 중 {count}개 단계가 중요한 이유를 설명하지 않아 사례가 설명보다는 클릭 목록처럼 보입니다.",
+      "suggestion": "각 단계의 목적을 한 줄씩 추가하세요. 처음 사용하는 사람에게 필요한 부분입니다."
+    },
+    "distinct_screens": {
+      "fail": "{count}개 단계가 바로 앞 단계와 같은 화면을 열어 독자가 변화를 확인하거나 단계를 구별할 수 없습니다.",
+      "suggestion": "하나의 단계로 합치거나 두 번째 단계를 실제로 작업이 이동하는 화면으로 연결하세요."
+    },
+    "duration_plausible": {
+      "fail": "이 사례는 {steps}개 단계에 {minutes}분을 예상합니다. 따라가지 못하는 독자는 나머지 시간 추정도 신뢰하지 않게 됩니다.",
+      "suggestion": "예상 시간을 최소 {minimum}분으로 늘리거나 일부 단계를 줄이세요."
+    },
+    "described": {
+      "fail": "이 사례에는 요약이 없어 목록에 제목만 표시됩니다.",
+      "suggestion": "마지막에 독자가 무엇을 완료하게 되는지 한 문장으로 추가하세요."
+    }
+  },
+  "uk": {
+    "contract_form_declared": {
+      "fail": "견적에 가격 산정의 기준이 되는 계약 형식이 명시되어 있지 않습니다",
+      "suggestion": "계약 형식을 기록하세요. 가설·현장운영비, 위험 및 지급 조건의 가격은 계약 형식에 따라 달라지므로 형식 없이 금액만으로는 의미가 불명확합니다"
+    },
+    "payment_regime_declared": {
+      "fail": "지급 체계가 불완전합니다. 미기록 항목: {missing}",
+      "suggestion": "두 날짜를 모두 기록하세요. 건설계약이 어느 날짜도 정하지 않았다고 면제되는 것은 아닙니다. Scheme for Construction Contracts가 두 날짜를 정하므로 당사자는 서명한 계약이 아니라 법령에서 지급 조건을 찾게 됩니다"
+    },
+    "retention_declared": {
+      "fail": "견적에 적용되는 유보금이 명시되어 있지 않습니다",
+      "suggestion": "유보율과 해제 조건을 기록하거나 유보가 없음을 명시하세요. 유보금은 시공자가 벌었지만 인출할 수 없는 자금이므로 이를 생략하면 운전자금 필요액이 드러나지 않습니다"
+    },
+    "cdm_duty_holders_declared": {
+      "fail": "CDM 2015에 따른 책임자가 기록되어 있지 않습니다. 누락: {missing}",
+      "suggestion": "선임 내용을 기록하세요. 여러 시공자가 참여하는 프로젝트에서는 발주자가 principal designer와 principal contractor를 서면으로 선임해야 하며, 선임하지 않으면 그 의무를 직접 부담합니다"
+    },
+    "hrb_regime_declared": {
+      "fail": "고위험 건축물 해당 여부가 해결되지 않았습니다: {reason}",
+      "unanswered": "견적에 고위험 건축물 해당 여부가 명시되어 있지 않습니다",
+      "disagrees": "견적은 고위험 해당 여부를 {declared}로 선언하지만 자체 치수로는 {derived}로 산정됩니다",
+      "suggestion": "고위험 건축물은 높이가 18m 이상이거나 7층 이상이며, 동시에 주거 단위가 2개 이상 있는 건물입니다. 두 조건 모두 중요합니다. 주거가 없는 고층 건물은 해당하지 않으며, 해당한다고 취급하면 불필요한 게이트웨이 승인 일정이 발생합니다"
+    },
+    "vat_treatment_declared": {
+      "fail": "견적에 VAT 처리 방식이 명시되어 있지 않습니다",
+      "suggestion": "일반 세율, 요건을 충족하는 공사의 경감 또는 영세율, 또는 해당 거래에 적용되는 국내 매입자 납부 방식(reverse charge)을 기록하세요. 매입자 납부는 VAT 납부 의무를 고객에게 이전하여 시공자가 청구할 수 있는 내용을 바꿉니다"
+    }
+  },
+  "project_completeness": {
+    "country_set": {
+      "fail": "프로젝트에 국가가 없어 가격 기준, 세율 또는 작업 달력을 결정할 수 없습니다",
+      "suggestion": "프로젝트 설정에서 국가를 지정하세요. 국가는 각 금액에 적용되는 지역 패키지, 세제 및 달력을 결정합니다"
+    },
+    "currency_set": {
+      "fail": "프로젝트에 통화가 없어 내역서, 할증 및 계약 금액을 합산할 수 없습니다",
+      "suggestion": "프로젝트 설정에서 통화를 선택하세요. 모든 내역서, 계약 및 합계는 해당 통화로 표시됩니다"
+    },
+    "currency_matches_bill": {
+      "fail": "프로젝트 통화는 {project_currency}이지만 이 내역서의 행은 {bill_currencies}로 산정되어 있습니다",
+      "suggestion": "명시한 환율로 행을 프로젝트 통화로 환산하거나 프로젝트에 환율을 기록하여 내역서 합계를 하나의 금액으로 만드세요"
+    },
+    "priced_bill_present": {
+      "fail": "프로젝트에 항목이 있는 내역서가 없어 견적의 근거가 없습니다",
+      "suggestion": "내역서를 만들고 항목을 추가하거나 CAD 모델, 스프레드시트 또는 교환 파일에서 가져오세요"
+    },
+    "bill_base_date_set": {
+      "fail": "내역서 \"{bill}\"에 단가 기준일이 명시되어 있지 않습니다",
+      "suggestion": "내역서에 기준일을 기록하세요. 기준일이 없으면 지수 조정, 해당 시점의 과세 또는 다른 견적과의 비교가 불가능합니다"
+    },
+    "classification_standard_set": {
+      "fail": "프로젝트에 분류 표준이 없어 항목 코드를 검증할 수 없습니다",
+      "suggestion": "프로젝트에서 사용하는 분류 표준을 선택하세요. 이 표준은 검증에 적용할 국가별 규칙 집합도 결정합니다"
+    },
+    "planned_dates_set": {
+      "both_missing": "프로젝트에 계획 시작일과 계획 종료일이 모두 없습니다",
+      "start_missing": "프로젝트에 계획 종료일은 있지만 계획 시작일이 없습니다",
+      "end_missing": "프로젝트에 계획 시작일은 있지만 계획 종료일이 없습니다",
+      "unreadable": "계획일 \"{value}\"를 날짜로 해석할 수 없습니다",
+      "suggestion": "프로젝트의 계획 시작일과 종료일을 날짜로 입력하세요. 시간 관련 비용, 물가 변동 및 공정은 이 기간을 기준으로 산정됩니다"
+    },
+    "planned_dates_ordered": {
+      "fail": "프로젝트는 {start}에 시작하여 {end}에 끝날 예정이나 종료일이 시작일보다 앞섭니다",
+      "suggestion": "계획일을 서로 바꾸거나 수정하여 시작일이 종료일보다 앞서도록 하세요"
+    },
+    "client_recorded": {
+      "fail": "프로젝트에 고객이 기록되어 있지 않고 어떤 계약에도 발주자가 지정되어 있지 않습니다",
+      "suggestion": "견적 수신자가 명확하도록 프로젝트에 고객을 기록하거나 계약 당사자로 발주자를 추가하세요"
+    },
+    "procurement_started": {
+      "fail": "프로젝트는 {phase} 단계이지만 계약과 입찰 패키지가 모두 없습니다",
+      "suggestion": "내역서에서 입찰 패키지를 만들거나 계약을 기록하세요. 또는 실제 견적 단계로 프로젝트 단계를 되돌리세요"
+    }
+  },
+  "boq_resources": {
+    "unit_rate_not_rederived": {
+      "fail": "항목 {ordinal}: 자원 행으로 항목 가격을 산정할 수 없어 자원 행에 따른 단가 재계산을 하지 않았습니다",
+      "fallback_allowance": "항목 {ordinal}: 자원 행이 개략 충당액을 배분한 내역이며 항목 전체 수량을 담고 있어, 자원 행에 따른 단가 재계산을 하지 않았습니다",
+      "assumed_norm": "항목 {ordinal}: 자원 행에 카탈로그에 명시되지 않은 품셈이 설정되어 있어, 자원 행에 따른 단가 재계산을 하지 않았습니다",
+      "norm_collapsed": "항목 {ordinal}: 자원 행의 카탈로그 품셈이 사라지고 그 대신 항목 수량이 들어 있어, 자원 행에 따른 단가 재계산을 하지 않았습니다",
+      "whole_position_quantities": "항목 {ordinal}: 자원 행에 단위당 품셈 대신 항목 전체 수량이 들어 있어, 자원 행에 따른 단가 재계산을 하지 않았습니다",
+      "suggestion": "단가 구성을 검토하세요. 자원 품셈 검토를 통해 카탈로그 항목에서 다시 산정하거나 행을 수동으로 수정하세요"
+    }
+  },
+  "poland": {
+    "knr_reference_required": {
+      "fail": "항목 {ordinal}에 KNR 카탈로그 표가 인용되어 있지 않습니다",
+      "suggestion": "podstawa에 품셈의 출처인 카탈로그 표를 명시하세요(예: KNR 2-02 0201-01). 자체 계산한 항목은 kalkulacja indywidualna로 표시하세요"
+    },
+    "knr_reference_recognised": {
+      "fail": "항목 {ordinal}의 참조 '{code}'에 KNR 카탈로그 계열이 지정되어 있지 않습니다",
+      "suggestion": "KNR, KNNR, KNR-W 또는 KSNR과 같은 카탈로그 계열로 참조를 시작하거나 항목을 kalkulacja indywidualna로 표시하세요"
+    }
+  }
+}
