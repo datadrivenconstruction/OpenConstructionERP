@@ -35,6 +35,8 @@ def _validate_non_negative_decimal(v: str, field_name: str = "value") -> str:
         d = Decimal(v)
     except (InvalidOperation, ValueError, TypeError) as exc:
         raise ValueError(f"Invalid decimal value for {field_name}: {v!r}") from exc
+    if not d.is_finite():
+        raise ValueError(f"{field_name} must be finite, got {v!r}")
     if d < 0:
         raise ValueError(f"{field_name} must be non-negative, got {v!r}")
     return v
@@ -43,9 +45,11 @@ def _validate_non_negative_decimal(v: str, field_name: str = "value") -> str:
 def _validate_decimal(v: str, field_name: str = "value") -> str:
     """Validate that a string is a valid decimal number (allows negative for EVM)."""
     try:
-        Decimal(v)
+        d = Decimal(v)
     except (InvalidOperation, ValueError, TypeError) as exc:
         raise ValueError(f"Invalid decimal value for {field_name}: {v!r}") from exc
+    if not d.is_finite():
+        raise ValueError(f"{field_name} must be finite, got {v!r}")
     return v
 
 
@@ -55,6 +59,8 @@ def _validate_positive_decimal(v: str, field_name: str = "value") -> str:
         d = Decimal(v)
     except (InvalidOperation, ValueError, TypeError) as exc:
         raise ValueError(f"Invalid decimal value for {field_name}: {v!r}") from exc
+    if not d.is_finite():
+        raise ValueError(f"{field_name} must be finite, got {v!r}")
     if d <= 0:
         raise ValueError(f"{field_name} must be positive, got {v!r}")
     return v

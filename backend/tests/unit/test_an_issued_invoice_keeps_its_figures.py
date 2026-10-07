@@ -127,13 +127,17 @@ async def test_an_issued_invoice_rejects_a_milliunit_line_change(status: str) ->
 
 
 async def test_an_issued_invoice_does_not_treat_an_infinite_line_as_zero() -> None:
-    # The existing nonnegative schema accepts positive Infinity; the issued
-    # guard must reject it before amount-consistency checks or line writes.
+    # Bypass request validation only to exercise the internal service guard.
+    # It must reject nonfinite amounts before consistency checks or line writes.
     service, invoice = await _invoice("sent")
     invoice.line_items = [InvoiceLineItem(description="Zero allowance", amount=Decimal("0"))]
 
+    invalid_line = InvoiceLineItemCreate.model_construct(
+        description="Works", quantity="1", unit="lsum", unit_rate="Infinity", amount="Infinity"
+    )
+    request = InvoiceUpdate.model_construct(line_items=[invalid_line])
     with pytest.raises(HTTPException) as exc:
-        await service.update_invoice(invoice.id, InvoiceUpdate(line_items=[_line("Infinity")]))
+        await service.update_invoice(invoice.id, request)
 
     assert exc.value.status_code == 409
     assert "line_items" in exc.value.detail

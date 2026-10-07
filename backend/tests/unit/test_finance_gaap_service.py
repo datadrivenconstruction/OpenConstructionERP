@@ -216,11 +216,15 @@ async def test_journal_rejects_nonfinite_amounts_before_writing(debit: str, cred
     svc = _make_service()
     recorder = _RecordingJournalSession()
     svc.session = recorder
-    data = JournalEntryCreate(
+    # Internal callers still need the service guard after request validation.
+    data = JournalEntryCreate.model_construct(
         project_id=PROJECT_ID,
         transaction_ref="JE-NONFINITE",
         currency_code="USD",
-        lines=[_line("1000", debit=debit), _line("4000", credit=credit)],
+        lines=[
+            JournalLineInput.model_construct(account_code="1000", debit=debit, credit="0"),
+            JournalLineInput.model_construct(account_code="4000", debit="0", credit=credit),
+        ],
     )
     with pytest.raises(HTTPException) as exc:
         await svc.post_journal_entry(data)
