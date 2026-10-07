@@ -6462,6 +6462,15 @@ class ContractsService:
         net = _safe_decimal(md.get("change_order_total")) + _safe_decimal(md.get("variation_total"))
         return count, net
 
+    def _payment_change_orders_net(self, contract: Contract) -> Decimal:
+        """Use the same approved-change basis in dashboards and applications."""
+        _count, tracked_net = self._change_order_rollup(contract)
+        metadata = contract.metadata_ if isinstance(contract.metadata_, dict) else {}
+        # Presence matters: a tracked zero must not resurrect stale manual terms.
+        if "change_order_total" in metadata or "variation_total" in metadata:
+            return tracked_net
+        return Decimal(str((contract.terms or {}).get("change_orders_net", 0) or 0))
+
     async def contract_dashboard(self, contract_id: uuid.UUID) -> dict[str, Any]:
         contract = await self.get_contract(contract_id)
         paid = await self.claim_repo.paid_total(contract_id)
@@ -6486,12 +6495,17 @@ class ContractsService:
                 )
                 gainshare_estimate = share["savings"] - share["overrun"]
         outstanding = Decimal(str(contract.total_value or 0)) - paid
-        change_orders_count, change_orders_net = self._change_order_rollup(contract)
+        change_orders_count, _tracked_net = self._change_order_rollup(contract)
+        change_orders_net = self._payment_change_orders_net(contract)
 
         # Commercial breakdown (PR-14 / PR-15 of issue #435).
         original = contract.original_contract_value
         current_value = Decimal(str(contract.total_value or 0))
         agreed_variations = change_orders_net
+        # Legacy contracts predate the immutable baseline column. Reconstruct
+        # for this read just as the canonical application does; never backfill.
+        if original is None:
+            original = current_value - agreed_variations
 
         # Pending variations: sum of VR cost impacts that are submitted or
         # under review but not yet approved.  This is a cross-module query
@@ -6725,14 +6739,7 @@ class ContractsService:
         # tracked rollup that legitimately nets to zero must not resurrect a
         # stale manual figure. Never add the two - a contract that mirrors
         # the rollup into terms would double-count.
-        _co_count, meta_change_orders_net = self._change_order_rollup(contract)
-        contract_md = contract.metadata_ if isinstance(contract.metadata_, dict) else {}
-        rollup_tracked = "change_order_total" in contract_md or "variation_total" in contract_md
-        change_orders_net = (
-            meta_change_orders_net
-            if rollup_tracked
-            else Decimal(str((contract.terms or {}).get("change_orders_net", 0) or 0))
-        )
+        change_orders_net = self._payment_change_orders_net(contract)
         # Prefer the immutable stored baseline when available; fall back
         # to the subtraction reconstruction for contracts that were active
         # before the column existed.
