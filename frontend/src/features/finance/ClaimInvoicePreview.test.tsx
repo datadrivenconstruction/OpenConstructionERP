@@ -12,7 +12,7 @@
 //     "Not raised": a certified claim looks again until the invoice lands.
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 vi.mock('@/shared/lib/api', async (importOriginal) => ({
@@ -42,15 +42,21 @@ const payable = {
 
 function renderPreview(props: Partial<Parameters<typeof ClaimInvoicePreview>[0]> = {}) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(
+  const view = render(
     <QueryClientProvider client={qc}>
       <ClaimInvoicePreview claimId="claim-1" certified {...props} />
     </QueryClientProvider>,
   );
+  return { ...view, qc };
 }
+
+const absent = () => new api.ApiError(404, 'Not Found', {
+  detail: 'No receivable invoice exists for this claim',
+});
 
 beforeEach(() => {
   vi.clearAllMocks();
+  getMock.mockReset();
 });
 
 describe('ClaimInvoicePreview', () => {
@@ -85,17 +91,68 @@ describe('ClaimInvoicePreview', () => {
   });
 
   it('offers to raise a payable before the invoice exists', async () => {
-    getMock.mockRejectedValue(new Error('404'));
+    getMock.mockRejectedValue(absent());
     renderPreview({ direction: 'payable', certified: false });
 
     expect(await screen.findByText('finance.claimInvoice.raiseActionPayable')).toBeInTheDocument();
   });
 
   it('keeps looking for the invoice a certified claim raises', async () => {
-    getMock.mockRejectedValueOnce(new Error('404')).mockResolvedValue(payable);
+    getMock.mockRejectedValueOnce(absent()).mockResolvedValue(payable);
     renderPreview({ direction: 'payable' });
 
     await waitFor(() => expect(screen.getByText('INV-P-001')).toBeInTheDocument(), { timeout: 6000 });
     expect(getMock).toHaveBeenCalledTimes(2);
+  }, 10000);
+
+  it.each([
+    ['forbidden', new api.ApiError(403, 'Forbidden', { detail: 'Denied' })],
+    ['server failure', new api.ApiError(500, 'Server Error', { detail: 'Unavailable' })],
+    ['network failure', new Error('Network unavailable')],
+    ['unrelated 404', new api.ApiError(404, 'Not Found', { detail: 'Claim not found' })],
+  ])('shows %s as a retryable error, never as an absent invoice', async (_name, failure) => {
+    getMock.mockRejectedValue(failure);
+    renderPreview();
+    expect(await screen.findByRole('alert')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'common.retry' })).toBeInTheDocument();
+    expect(screen.queryByText('finance.claimInvoice.notRaised')).not.toBeInTheDocument();
+    expect(screen.queryByText('finance.claimInvoice.raiseAction')).not.toBeInTheDocument();
+  });
+
+  it('does not claim absence while the lookup is pending', () => {
+    getMock.mockReturnValue(new Promise(() => {}));
+    renderPreview();
+    expect(screen.queryByText('finance.claimInvoice.notRaised')).not.toBeInTheDocument();
+    expect(screen.queryByText('finance.claimInvoice.raiseAction')).not.toBeInTheDocument();
+  });
+
+  it('retries a failed lookup and displays the recovered invoice', async () => {
+    getMock.mockRejectedValueOnce(new Error('Offline')).mockResolvedValue(payable);
+    renderPreview();
+    fireEvent.click(await screen.findByRole('button', { name: 'common.retry' }));
+    expect(await screen.findByText('INV-P-001')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('hides stale invoice details when refetch fails and allows recovery', async () => {
+    getMock.mockResolvedValueOnce(payable).mockRejectedValueOnce(new Error('Offline')).mockResolvedValue(payable);
+    const { qc } = renderPreview();
+    await screen.findByText('INV-P-001');
+    await act(async () => { await qc.invalidateQueries({ queryKey: ['finance', 'claim-receivable'] }); });
+    expect(await screen.findByRole('alert')).toBeInTheDocument();
+    expect(screen.queryByText('INV-P-001')).not.toBeInTheDocument();
+    expect(screen.queryByText('finance.claimInvoice.raised')).not.toBeInTheDocument();
+    expect(screen.queryByText('finance.claimInvoice.notRaised')).not.toBeInTheDocument();
+    expect(screen.queryByText('finance.claimInvoice.raiseAction')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'common.retry' }));
+    expect(await screen.findByText('INV-P-001')).toBeInTheDocument();
+  });
+
+  it('does not poll failed lookups as though an invoice were absent', async () => {
+    getMock.mockRejectedValue(new Error('Offline'));
+    renderPreview();
+    await waitFor(() => expect(getMock).toHaveBeenCalledTimes(1));
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 3200)); });
+    expect(getMock).toHaveBeenCalledTimes(1);
   }, 10000);
 });
