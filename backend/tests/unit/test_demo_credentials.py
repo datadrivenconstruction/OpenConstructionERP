@@ -18,7 +18,52 @@ import os
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
 from app.main import _persist_demo_credentials, _resolve_demo_password
+
+
+@pytest.fixture(autouse=True)
+def isolated_credential_environment(monkeypatch, tmp_path):
+    for name in ("OE_DATA_DIR", "DATA_DIR", "OE_CLI_DATA_DIR"):
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.setattr(Path, "home", lambda: tmp_path)
+
+
+@pytest.mark.parametrize("override", ["OE_DATA_DIR", "DATA_DIR", "OE_CLI_DATA_DIR"])
+def test_isolated_runs_preserve_home_credentials(monkeypatch, tmp_path, override):
+    legacy = tmp_path / ".openestimator" / ".demo_credentials.json"
+    legacy.parent.mkdir()
+    original = b'{"demo@example.test": "original-home-secret"}'
+    legacy.write_bytes(original)
+    for index in range(2):
+        isolated = tmp_path / f"isolated-{index}"
+        monkeypatch.setenv(override, str(isolated))
+        credentials = {"demo@example.test": f"isolated-secret-{index}"}
+        result = _persist_demo_credentials(credentials)
+        assert result == isolated / ".demo_credentials.json"
+        assert json.loads(result.read_text(encoding="utf-8")) == credentials
+        assert legacy.read_bytes() == original
+
+
+@pytest.mark.parametrize("blank_count", [0, 1, 2, 3])
+def test_data_directory_precedence_skips_blank_overrides(monkeypatch, tmp_path, blank_count):
+    names = ("OE_DATA_DIR", "DATA_DIR", "OE_CLI_DATA_DIR")
+    for index, name in enumerate(names):
+        monkeypatch.setenv(name, "  " if index < blank_count else str(tmp_path / name))
+    expected = tmp_path / (names[blank_count] if blank_count < len(names) else ".openestimator")
+    assert _persist_demo_credentials({"demo@example.test": "synthetic"}) == expected / ".demo_credentials.json"
+
+
+def test_unresolvable_home_override_does_not_block_startup(monkeypatch):
+    monkeypatch.setenv("OE_DATA_DIR", "~unresolvable-user/data")
+
+    def fail_expansion(_path):
+        raise RuntimeError("Could not determine home directory")
+
+    monkeypatch.setattr(Path, "expanduser", fail_expansion)
+    assert _persist_demo_credentials({"demo@example.test": "synthetic"}) is None
+
 
 # ─────────────────────────────────────────────────────────────────────────
 # _resolve_demo_password

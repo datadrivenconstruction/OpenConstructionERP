@@ -1159,20 +1159,29 @@ def _resolve_demo_password(env_var: str) -> tuple[str, bool]:
 def _persist_demo_credentials(creds: dict[str, str]) -> Path | None:
     """Write generated demo credentials to a 0600 file.
 
-    Falls back to ``~/.openestimator/.demo_credentials.json`` when the CLI
-    didn't expose a data directory. Returns the path written, or ``None``
+    Honours OE_DATA_DIR, DATA_DIR, then OE_CLI_DATA_DIR. Falls back to
+    ``~/.openestimator/.demo_credentials.json`` without an override.
+    Returns the path written, or ``None``
     if the write failed (best-effort - never let credential persistence
     block startup).
     """
     import json as _json
     import stat as _stat
 
-    target_dir = os.environ.get("OE_CLI_DATA_DIR")
+    target_dir = next(
+        (
+            value
+            for name in ("OE_DATA_DIR", "DATA_DIR", "OE_CLI_DATA_DIR")
+            if (value := os.environ.get(name, "").strip())
+        ),
+        None,
+    )
     if target_dir:
         base = Path(target_dir)
     else:
         base = Path.home() / ".openestimator"
     try:
+        base = base.expanduser()
         base.mkdir(parents=True, exist_ok=True)
         path = base / ".demo_credentials.json"
         # Merge with existing values so we don't overwrite earlier entries
@@ -1194,7 +1203,7 @@ def _persist_demo_credentials(creds: dict[str, str]) -> Path | None:
             # Best-effort on Windows - chmod is a no-op there
             pass
         return path
-    except OSError as exc:
+    except (OSError, RuntimeError) as exc:
         logger.warning("Could not persist demo credentials: %s", exc)
         return None
 
