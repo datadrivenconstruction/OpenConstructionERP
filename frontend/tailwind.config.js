@@ -1,7 +1,9 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   darkMode: 'class',
-  content: ['./index.html', './src/**/*.{ts,tsx}'],
+  // Translation dictionaries contain text, not UI class names. Avoid scanning
+  // their large prose payloads on every build and development-server restart.
+  content: ['./index.html', './src/**/*.{ts,tsx}', '!./src/app/locales/**/*.ts'],
   theme: {
     extend: {
       colors: {
