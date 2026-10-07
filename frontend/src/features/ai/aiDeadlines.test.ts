@@ -174,3 +174,37 @@ it.each([
   expect(form.get('catalogue_id')).toBe('catalog');
   expect(form.get('construction_stage')).toBe('04_Foundations');
 });
+
+
+it.each([false, true])('quick estimate bounds a stalled response body (caller signal: %s)', async (withCaller) => {
+  let signal: AbortSignal | undefined;
+  let finish = () => {};
+  const response = new Response('{}', { headers: { 'Content-Type': 'application/json' } });
+  vi.spyOn(response, 'json').mockImplementation(() => new Promise((resolve, reject) => {
+    finish = () => resolve({ ok: true });
+    signal?.addEventListener('abort', () => reject(signal?.reason), { once: true });
+  }));
+  const fetch = vi.fn((_url: RequestInfo | URL, init?: RequestInit) => {
+    signal = init?.signal ?? undefined;
+    return Promise.resolve(response);
+  });
+  vi.stubGlobal('fetch', fetch);
+  const caller = new AbortController();
+  const outcome = aiApi.quickEstimate(quick, withCaller ? { signal: caller.signal } : undefined)
+    .catch((error: unknown) => error);
+  try {
+    await vi.advanceTimersByTimeAsync(90_001);
+    expect(response.json).toHaveBeenCalledOnce();
+    expect(signal?.aborted).toBe(false);
+    await vi.advanceTimersByTimeAsync(209_999);
+    expect(signal?.aborted).toBe(true);
+    expect(await outcome).toBeInstanceOf(Error);
+    expect(caller.signal.aborted).toBe(false);
+    expect(fetch).toHaveBeenCalledOnce();
+    expect(queueMutation).not.toHaveBeenCalled();
+    expect(vi.getTimerCount()).toBe(0);
+  } finally {
+    finish();
+    await outcome;
+  }
+});

@@ -261,9 +261,9 @@ export const aiApi = {
     const send = (signal?: AbortSignal) => apiPost<EstimateJobResponse, QuickEstimateRequest>(
       '/v1/ai/quick-estimate/', data, { longRunning: true, signal },
     );
-    // The shared client defers to a supplied signal; keep both Cancel and
-    // the heavy-request budget when this screen owns the controller.
-    return opts?.signal ? withLongRunningDeadline(send, opts.signal) : send();
+    // Bound the entire response body as well as the headers, with or without
+    // a caller controller. Preserve Cancel without replaying the request.
+    return withLongRunningDeadline(send, opts?.signal);
   },
 
   /** Upload a photo and get an AI estimate via Vision model. */
