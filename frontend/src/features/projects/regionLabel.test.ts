@@ -35,7 +35,7 @@ describe('Hungarian and Ukrainian project regions', () => {
   ])('offers %s with its localized country name', (iso, lang, localized) => {
     const block = projectPageSource.split('const REGION_GROUPS')[1]?.split('\n];')[0] ?? '';
     const options = [...block.matchAll(/value: '([^']+)', label: '([^']+)', iso: '([^']+)'/g)]
-      .map((match) => ({ value: match[1], label: match[2], iso: match[3] }));
+      .map((match) => ({ value: match[1]!, label: match[2]!, iso: match[3]! }));
     const matches = options.filter((option) => option.iso === iso);
     expect(matches).toHaveLength(1);
     const option = matches[0];
