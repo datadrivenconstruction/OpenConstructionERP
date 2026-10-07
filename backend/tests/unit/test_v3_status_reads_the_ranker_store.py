@@ -70,6 +70,7 @@ async def test_health_progresses_during_status_reads(monkeypatch, stage):
             return type("Count", (), {"count": 7})()
 
     monkeypatch.setattr(qdrant_adapter, "get_settings", lambda: _settings(cwicr_qdrant_url="http://qdrant.invalid"))
+
     def get_client():
         initialization_threads.append(threading.get_ident())
         return Client()

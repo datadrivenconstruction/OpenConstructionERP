@@ -36,9 +36,7 @@ from pathlib import Path
 # configuration and per-test monkeypatch overrides remain authoritative.
 # TemporaryDirectory owns cleanup at process exit, after app fixture teardown.
 if not os.environ.get("OE_RUNTIME_MODULES_DIR", "").strip():
-    _SUITE_RUNTIME_MODULES = tempfile.TemporaryDirectory(
-        prefix="oe-tests-runtime-modules-", ignore_cleanup_errors=True
-    )
+    _SUITE_RUNTIME_MODULES = tempfile.TemporaryDirectory(prefix="oe-tests-runtime-modules-", ignore_cleanup_errors=True)
     os.environ["OE_RUNTIME_MODULES_DIR"] = _SUITE_RUNTIME_MODULES.name
 
 if _sys.platform == "win32":
