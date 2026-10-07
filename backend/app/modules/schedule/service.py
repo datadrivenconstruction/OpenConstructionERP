@@ -2683,8 +2683,10 @@ class ScheduleService:
         Raises:
             HTTPException 404 if the target activity doesn't exist.
         """
-        # Verify activity exists
-        await self.get_activity(data.activity_id)
+        # Validate links before constructing or persisting the work order.
+        activity = await self.get_activity(data.activity_id)
+        if data.boq_position_id is not None:
+            await self._assert_positions_in_project(activity.schedule_id, [str(data.boq_position_id)])
 
         work_order = WorkOrder(
             activity_id=data.activity_id,
@@ -2763,6 +2765,10 @@ class ScheduleService:
         work_order = await self.get_work_order(work_order_id)
 
         fields = data.model_dump(exclude_unset=True)
+
+        if fields.get("boq_position_id") is not None:
+            activity = await self.get_activity(work_order.activity_id)
+            await self._assert_positions_in_project(activity.schedule_id, [str(fields["boq_position_id"])])
 
         # Convert float values to strings for storage
         if "planned_cost" in fields:
