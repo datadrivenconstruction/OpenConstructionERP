@@ -31,6 +31,22 @@ beforeEach(() => { mocks.get.mockReset().mockResolvedValue(regional); mocks.cale
 afterEach(cleanup);
 
 describe('calendar coverage presented to the planner', () => {
+
+  it.each([true, false, undefined])('uses only explicit saved fallback %s without a regional fetch', fallback => {
+    mount({ ...plan, metadata_: { calendar: { work_days: [0, 1, 2, 3, 4], regional_holiday_country: 'ZZ',
+      ...(fallback === undefined ? {} : { week_fallback: fallback }), holiday_coverage: [] } } });
+    expect(screen.queryByText(/regional working week is unavailable/) !== null).toBe(fallback === true);
+    expect(mocks.get).not.toHaveBeenCalled();
+    expect(mocks.calendars).not.toHaveBeenCalled();
+  });
+
+  it('ignores a stale fallback marker on a manual calendar', () => {
+    const { container } = mount({ ...plan, metadata_: { calendar: { work_days: [0, 2, 4],
+      week_fallback: true, exceptions: [] } } });
+    expect(container).toBeEmptyDOMElement();
+    expect(mocks.get).not.toHaveBeenCalled();
+  });
+
   it('shows loading without an invented DACH week while the project calendars are pending', () => {
     mocks.calendars.mockReturnValue(new Promise(() => {}));
     mount();

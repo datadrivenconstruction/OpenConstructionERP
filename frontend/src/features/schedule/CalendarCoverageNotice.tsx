@@ -81,7 +81,7 @@ export function CalendarCoverageNotice({ schedule }: { schedule: Schedule }) {
       defaultValue: '{{hours}}h/day, {{days}} days/week',
       hours: String(region.data.hours_per_day), days: String(region.data.work_days_per_week),
     })}</span>}
-    {!hasOwn && region.data?.week_fallback && <p role="status" className="text-semantic-warning">
+    {(hasOwn ? own?.week_fallback === true : region.data?.week_fallback === true) && <p role="status" className="text-semantic-warning">
       {t('schedule.calendar.week_fallback', { defaultValue: 'The regional working week is unavailable. A standard planning week is used.' })}
     </p>}
     {missing.length > 0 && <p role="status" className="text-semantic-warning">
