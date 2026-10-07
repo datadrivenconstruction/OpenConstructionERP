@@ -3,6 +3,7 @@
     "backend/app/core/validation/messages": [
       "ar",
       "bg",
+      "bn",
       "cs",
       "da",
       "de",
@@ -34,6 +35,7 @@
       "th",
       "tr",
       "uk",
+      "ur",
       "uz",
       "vi",
       "zh"
