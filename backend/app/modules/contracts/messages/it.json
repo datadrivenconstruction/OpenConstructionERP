@@ -1,0 +1,159 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "period_present": {
+      "fail": "La richiesta di pagamento {claim} non ha una data di fine periodo e quindi non può essere collocata in ordine tra le richieste del contratto",
+      "suggestion": "Inserire l'ultimo giorno del periodo coperto da questa richiesta di pagamento"
+    },
+    "period_order": {
+      "fail": "La richiesta di pagamento {claim} inizia il {period_from} e termina il {period_to}, quindi il suo periodo finisce prima di iniziare",
+      "suggestion": "Correggere la data di inizio o di fine del periodo in modo che l'inizio preceda la fine"
+    },
+    "period_overlap": {
+      "fail": "La richiesta di pagamento {claim} inizia il {period_from}, ma la precedente richiesta {previous} copre il periodo fino al {previous_to}, quindi entrambe contabilizzano gli stessi giorni",
+      "suggestion": "Far iniziare questa richiesta il giorno successivo alla fine del periodo della richiesta precedente"
+    },
+    "period_gap": {
+      "fail": "La richiesta di pagamento {claim} inizia il {period_from}, ma la precedente richiesta {previous} terminava il {previous_to}, quindi nessuna richiesta contabilizza i giorni intermedi (giorni non contabilizzati: {days})",
+      "suggestion": "Far iniziare questa richiesta il giorno successivo alla fine del periodo della precedente, oppure verificare che non manchi una richiesta"
+    },
+    "period_unparsed": {
+      "fail": "Nella richiesta di pagamento {claim}, il campo {field} riporta '{value}', che non è interpretabile come data",
+      "suggestion": "Inserire la data nel formato anno-mese-giorno, ad esempio 2026-03-31",
+      "fields": {
+        "period_start": "inizio del periodo",
+        "period_end": "fine del periodo",
+        "claim_date": "data della richiesta"
+      }
+    },
+    "line_overbilled": {
+      "fail": "Per la voce {line} sono stati contabilizzati finora {billed}, più del suo valore previsto di {scheduled}; eseguire nuovamente Compila dall'avanzamento oppure ridurre l'importo della voce per questo periodo",
+      "suggestion": "Compila dall'avanzamento contabilizza per ogni voce solo il nuovo avanzamento rispetto alle richieste precedenti. Se l'ambito dei lavori della voce è effettivamente aumentato, registrare prima l'ordine di modifica che ne aumenta il valore previsto"
+    },
+    "percent_regressed": {
+      "fail": "La voce {line} risulta completata al {percent}% ad oggi, per un importo di {requested}, inferiore ai {previous} già contabilizzati nelle richieste precedenti; quindi per questa voce non viene contabilizzato nulla nel periodo corrente",
+      "suggestion": "Verificare la percentuale di completamento della voce, oppure correggere la richiesta precedente che l'ha sovrastimata"
+    },
+    "errors": {
+      "submission_blocked": "Questa richiesta di pagamento non può essere presentata finché non vengono risolti questi problemi: {findings}",
+      "rules_unavailable": "Le regole per le richieste di pagamento non sono caricate in questa installazione, quindi non è possibile verificare questa richiesta prima della presentazione.",
+      "later_claim_already_issued": "La richiesta {claims} è successiva a questa ed è già stata emessa. È stata predisposta mentre questa richiesta era in bozza, quindi include già il pagamento di questi lavori. Eliminare questa bozza oppure spostarne il periodo dopo l'ultima richiesta emessa"
+    },
+    "totals_match_lines": {
+      "fail": "La richiesta di pagamento {claim} richiede {gross}, ma le voci che la compongono sommano a {lines_total}: la richiesta non è stata ricalcolata dopo la modifica delle voci",
+      "suggestion": "Salvare una qualsiasi voce di questa richiesta oppure eseguire nuovamente Compila dall'avanzamento per aggiornare i totali"
+    },
+    "totals_below_lines": {
+      "fail": "La richiesta di pagamento {claim} contabilizza {gross} in base ai costi registrati, meno dei {lines_total} risultanti dalle sue voci: il dettaglio non può richiedere più della richiesta complessiva",
+      "suggestion": "In una richiesta basata sui costi, le voci costituiscono la ripartizione dell'importo, non la sua origine. Ridurre o rimuovere le voci sovrastimate, oppure generare nuovamente la richiesta dal costo dei lavori per far coincidere gli importi"
+    },
+    "prior_matches_earlier_claims": {
+      "line_fail": "La richiesta di pagamento {claim} riporta {stored} come già contabilizzato per la voce {line}, ma le richieste precedenti contabilizzano attualmente {now} per tale voce",
+      "total_fail": "La richiesta di pagamento {claim} riporta {stored} come già certificato, ma le richieste precedenti certificano attualmente {now}",
+      "suggestion": "Generare nuovamente questa richiesta affinché legga gli importi attualmente contabilizzati dalle richieste precedenti"
+    },
+    "within_nte_cap": {
+      "fail": "La richiesta di pagamento {claim} contabilizza {this} oltre ai {billed} già contabilizzati, superando così il limite massimo di {cap}",
+      "suggestion": "Contabilizzare in questa richiesta solo fino al limite e concordare un ordine di modifica per la parte restante"
+    },
+    "retention_matches_policy": {
+      "fail": "La richiesta di pagamento {claim} applica una ritenuta di {held}, ma la relativa politica di ritenuta dà attualmente {expected}: una richiesta precedente, uno svincolo o la politica sono cambiati dopo il calcolo di questa richiesta",
+      "suggestion": "Eseguire nuovamente Compila dall'avanzamento oppure salvare una qualsiasi voce di questa richiesta per ricalcolarne la ritenuta"
+    },
+    "retention_above_cap": {
+      "fail": "La richiesta di pagamento {claim} applica una ritenuta di {held}, superiore al limite del {percent}% stabilito dalla relativa politica, pari a {cap} per questo contratto",
+      "suggestion": "Ricalcolare la richiesta oppure aumentare il limite nella politica di ritenuta del contratto se le parti hanno concordato un limite superiore",
+      "state_cap_unread": "Richiesta di pagamento {claim}: la politica di ritenuta non stabilisce alcun limite e {country} limita le ritenute mediante leggi statali. Non è stato possibile determinare lo Stato perché il progetto non riporta un codice di suddivisione territoriale, quindi non è stato verificato alcun limite di legge",
+      "state_cap_suggestion": "Inserire il limite dello Stato come massimale nella politica di ritenuta del contratto: ogni richiesta relativa a questo contratto sarà verificata rispetto a tale limite"
+    },
+    "retention_release_within_held": {
+      "fail": "Gli svincoli contabilizzati fino alla richiesta {claim} restituiscono {released}, più dei {accrued} di ritenuta accumulati fino a tale richiesta",
+      "suggestion": "Annullare lo svincolo eccessivo oppure contabilizzarlo in una richiesta successiva, quando sarà stata accumulata una ritenuta maggiore"
+    },
+    "sov_reconciles_contract_sum": {
+      "fail": "Il quadro dei valori contrattuali somma a {scheduled}, ma l'importo contrattuale aggiornato è {contract_sum}: le voci su cui si basa questa richiesta lasciano {difference} del contratto senza una voce corrispondente",
+      "suggestion": "Aggiungere o correggere le voci del quadro dei valori contrattuali fino a raggiungere l'importo del contratto",
+      "suggestion_reconcile": "{count} ordini di modifica o varianti approvati hanno modificato l'importo contrattuale prima di essere recepiti nel quadro dei valori contrattuali. Usare Riconcilia ordini di modifica sul contratto per aggiungere una voce per ciascuno"
+    }
+  },
+  "retention_release": {
+    "documents_attached": {
+      "fail": "Questo svincolo richiede il documento {document}, ma non ne è allegato alcuno",
+      "suggestion": "Registrare il documento sul contratto, allegarlo allo svincolo e approvare nuovamente lo svincolo"
+    },
+    "within_available": {
+      "fail": "Questo svincolo restituisce {amount}, ma solo {available} di ritenuta sono ancora trattenuti e non impegnati in un altro svincolo",
+      "suggestion": "Annullare questo svincolo e riproporlo affinché l'importo sia calcolato sulla ritenuta attualmente trattenuta"
+    },
+    "document_roles": {
+      "certificate_substantial_completion": "certificato di sostanziale completamento",
+      "acceptance_protocol": "verbale di accettazione",
+      "affidavit_payment_of_debts": "dichiarazione giurata di pagamento dei debiti e delle pretese creditorie",
+      "affidavit_release_of_liens": "dichiarazione giurata di liberazione dai vincoli di garanzia",
+      "consent_of_surety": "consenso del garante",
+      "final_lien_waiver": "rinuncia definitiva ai diritti di garanzia",
+      "final_invoice": "fattura finale"
+    },
+    "errors": {
+      "approval_blocked": "Questo svincolo di ritenuta non può essere approvato finché non vengono risolti questi problemi: {findings}",
+      "rules_unavailable": "Le regole per lo svincolo delle ritenute non sono caricate in questa installazione, quindi non è possibile verificare questo svincolo prima dell'approvazione."
+    }
+  },
+  "aia": {
+    "g703": {
+      "billed_not_on_a_schedule_line": "Lavori contabilizzati non presenti in alcuna voce del quadro dei valori contrattuali"
+    }
+  },
+  "sov_reconcile": {
+    "errors": {
+      "not_active": "Gli ordini di modifica vengono riconciliati nel quadro dei valori contrattuali solo per un contratto attivo; questo contratto è {status}",
+      "preview_stale": "L'elenco degli ordini di modifica da riconciliare è cambiato da quando è stato aperto. Riaprire l'anteprima e confermare ciò che mostra adesso"
+    }
+  },
+  "compliance_gate": {
+    "errors": {
+      "signature_blocked": "Questo contratto non può essere firmato finché non vengono risolti questi problemi: {findings}"
+    }
+  },
+  "payment_plan": {
+    "triggers": {
+      "completion": "completamento",
+      "approval": "approvazione"
+    },
+    "total_within_contract": {
+      "fail": "Le rate sommano a {scheduled}, più dell'importo contrattuale di {total}",
+      "suggestion": "Ridurre le rate affinché la loro somma non superi l'importo contrattuale"
+    },
+    "percent_sum": {
+      "fail": "Le rate sommano a {scheduled} rispetto all'importo contrattuale di {total} ({percent}%), quindi una parte del prezzo non è coperta da alcuna rata",
+      "suggestion": "Aggiungere una rata per il resto dell'importo contrattuale oppure adeguare gli importi"
+    },
+    "completion_trigger_linked": {
+      "fail": "La rata {milestone} scade al verificarsi di {trigger}, ma non è collegata a un'attività del cronoprogramma, quindi la sua data non seguirà l'andamento dei lavori",
+      "suggestion": "Collegare la rata alla milestone del cronoprogramma da cui dipende"
+    },
+    "schedule_done_plan_pending": {
+      "fail": "Il cronoprogramma indica che {milestone} è stata raggiunta, ma la rata {instalment} è ancora in attesa, quindi non può essere richiesta in pagamento",
+      "suggestion": "Contrassegnare come raggiunta la scadenza della rata oppure verificare perché il contratto non è attivo"
+    },
+    "client_visible_requires_active": {
+      "fail": "La rata {milestone} è mostrata al cliente, ma il contratto è {status}; il cliente vede il piano solo per un contratto attivo o completato",
+      "suggestion": "Nascondere la rata al cliente finché il contratto non è in vigore"
+    },
+    "consumer_deposit_cap": {
+      "fail": "L'anticipo di {deposit} supera il limite di {ceiling} consentito da {reference} in {jurisdiction} (fonte: {source_url}, verificato il {checked_on}, non esaminato da un avvocato)",
+      "suggestion": "Ridurre l'anticipo oppure verificare con un legale che al contratto si applichi un'esenzione",
+      "below_threshold": {
+        "fail": "L'importo contrattuale è pari o inferiore alla soglia a partire dalla quale {reference} limita gli anticipi in {jurisdiction}, quindi l'anticipo non è stato verificato (fonte: {source_url})"
+      },
+      "other_currency": {
+        "fail": "Il contratto è in {currency}, ma {reference} esprime il limite in {limit_currency}, quindi l'anticipo in {jurisdiction} non è stato verificato (fonte: {source_url})"
+      },
+      "unchecked": {
+        "suggestion": "Se la norma si applica a questo contratto, verificare manualmente che l'anticipo la rispetti"
+      }
+    }
+  }
+}

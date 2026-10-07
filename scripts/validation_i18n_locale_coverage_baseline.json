@@ -58,6 +58,7 @@
     "backend/app/modules/contracts/messages": [
       "de",
       "en",
+      "it",
       "ru"
     ],
     "backend/app/modules/cost_match/messages": [
