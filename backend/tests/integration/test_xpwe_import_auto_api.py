@@ -628,6 +628,8 @@ async def test_a_file_imported_before_is_named_as_such_and_imports_again_only_wh
     done = await _finished_job(http_client, auth_headers, boq, first["job_id"])
     assert done["status"] == "success", done
 
+    before = (await http_client.get(f"/api/v1/boq/boqs/{boq}", headers=auth_headers)).json()["positions"]
+    before_by_id = {p["id"]: p for p in before}
     again = await _post_background(http_client, auth_headers, boq, _CONTENT)
     assert again.status_code == 409, again.text[:300]
     detail = again.json()["detail"]
@@ -643,7 +645,23 @@ async def test_a_file_imported_before_is_named_as_such_and_imports_again_only_wh
     )
     assert forced.status_code == 202, forced.text[:300]
     assert forced.json()["job_id"] != first["job_id"]
-    assert (await _finished_job(http_client, auth_headers, boq, forced.json()["job_id"]))["status"] == "success"
+    repeated = await _finished_job(http_client, auth_headers, boq, forced.json()["job_id"])
+    assert repeated["status"] == "success"
+    assert repeated["result"]["created"] == _SECTIONS + 5
+    assert repeated["result"]["errors"] == []
+    after = (await http_client.get(f"/api/v1/boq/boqs/{boq}", headers=auth_headers)).json()["positions"]
+    assert len(after) == 2 * (_SECTIONS + 5)
+    for row in after:
+        if row["id"] in before_by_id:
+            assert row == before_by_id[row["id"]]
+    added = [p for p in after if p["id"] not in before_by_id]
+    by_id = {p["id"]: p for p in added}
+    assert len({p["ordinal"] for p in after}) == len(after)
+    for row in added:
+        original = row["metadata"]["import_original_ordinal"]
+        expected_parent = _TREE[original]
+        parent = by_id.get(row["parent_id"])
+        assert (parent["metadata"]["import_original_ordinal"] if parent else "") == expected_parent
 
 
 def _uploads() -> set[str]:
@@ -854,3 +872,17 @@ async def test_a_large_bill_imports_completely(http_client, auth_headers, monkey
     )
     assert body["errors"] == [], body["errors"][:3]
     assert body["created"] == items + categories
+
+
+@pytest.mark.asyncio
+async def test_all_rejected_rows_fail_background_job(http_client, auth_headers):
+    boq = await _new_boq(http_client, auth_headers)
+    # Synchronous import has no background hash entry. A new background job
+    # collides with every stored ordinal and must fail, not report success.
+    await _import(http_client, auth_headers, boq, _CONTENT)
+    queued = await _post_background(http_client, auth_headers, boq, _CONTENT)
+    assert queued.status_code == 202
+    job = await _finished_job(http_client, auth_headers, boq, queued.json()["job_id"])
+    assert job["status"] == "failed"
+    assert "import_persistence_failed" in str(job)
+    assert await _row_count(http_client, auth_headers, boq) == _SECTIONS + 5

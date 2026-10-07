@@ -260,6 +260,7 @@ async def enqueue_boq_import(
         "upload": upload,
         "delete_missing": delete_missing,
         "column_mapping": column_mapping,
+        "force": force,
     }
     try:
         row = await submit_job(JOB_KIND, payload, idempotency_key=key)
@@ -335,6 +336,7 @@ async def run_boq_import_job(job_run: JobRun, payload: dict[str, Any]) -> dict[s
                     actor_id=uuid.UUID(str(actor_raw)) if actor_raw else None,
                     service=service,
                     on_phase=lambda phase: _report_phase(job_run.id, phase),
+                    append_on_collision=bool(payload.get("force")),
                 )
             except HTTPException as exc:
                 await session.rollback()

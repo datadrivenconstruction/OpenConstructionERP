@@ -7254,6 +7254,7 @@ async def _persist_imported_boq(
     service: BOQService,
     delete_missing: bool = False,
     actor_id: uuid.UUID | None = None,
+    append_on_collision: bool = False,
 ) -> dict[str, Any]:
     """Persist an :class:`ImportedBOQ` via the round-trip differ (GitHub #360).
 
@@ -7294,6 +7295,12 @@ async def _persist_imported_boq(
                 "is_section": is_section,
             }
         )
+
+    if append_on_collision:
+        from app.modules.boq.import_append import append_import_ordinals
+
+        existing = await service.position_repo.list_all_for_boq(boq_id)
+        append_import_ordinals(prepared, (position.ordinal for position in existing))
 
     summary = await _apply_boq_roundtrip(
         boq_id,
@@ -7743,6 +7750,7 @@ async def _run_native_import(
     actor_id: uuid.UUID | None,
     service: BOQService,
     on_phase: Callable[[str], Awaitable[None]] | None = None,
+    append_on_collision: bool = False,
 ) -> dict[str, Any]:
     """Read ``content`` with the importer ``chosen`` and write it into the bill: the body of ``/import/auto/``.
 
@@ -7784,11 +7792,22 @@ async def _run_native_import(
         service=service,
         delete_missing=delete_missing,
         actor_id=actor_id,
+        append_on_collision=append_on_collision,
     )
     created = int(apply_summary["created"])
     updated = int(apply_summary["updated"])
     deleted = int(apply_summary["deleted"])
     persistence_errors = apply_summary["apply_errors"]
+    errors = imported_boq.errors + persistence_errors
+    if not (created + updated + deleted + int(apply_summary["unchanged"])) and errors:
+        first = errors[0]
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "code": "import_persistence_failed",
+                "message": f"Import failed: {first.get('error', 'No rows could be imported')}",
+            },
+        )
 
     # Persist top-level import metadata so the round-trip exporter can
     # reproduce the original layout.
