@@ -1,0 +1,868 @@
+{
+  "boq_markup": {
+    "contingency_not_on_profit": {
+      "fail": "Riskivaraus ”{markup}” lasketaan pohjasta, joka sisältää jo voittorivin ”{profit}”, joten riskeihin varatulle rahalle lisätään kate",
+      "suggestion": "Kohdista tämä rivi välittömiin kustannuksiin, ellei markkinan vakiomenetelmä sijoita riskiä tarkoituksella yleiskulujen ja voiton jälkeen"
+    },
+    "order_is_declared": {
+      "fail": "Järjestyssijan {order} jakaa useampi lisärivi: {markups}",
+      "suggestion": "Anna kullekin lisäriville oma järjestyssija, jotta lisien laskentajärjestys ei jää sattuman varaan"
+    },
+    "percentage_within_band": {
+      "fail": "”{markup}” on {category}-rivinä {percentage} %, mikä ylittää tai alittaa uskottavan välin 0–{ceiling} %",
+      "suggestion": "Tarkista desimaalierotin. Rivi hinnoitellaan joka tapauksessa täsmälleen syötetyn arvon mukaan"
+    },
+    "cumulative_base_is_settled": {
+      "fail": "”{markup}” kohdistuu pohjaan ”{apply_to}”, mutta sitä ei edellä mitään, joten se lasketaan vain välittömistä kustannuksista",
+      "suggestion": "Siirrä se niiden rivien jälkeen, joiden päälle se lasketaan, tai kohdista se välittömiin kustannuksiin"
+    }
+  },
+  "common": {
+    "ok": "Kunnossa"
+  },
+  "export": {
+    "generated": "Luotu",
+    "content_digest": "Sisällön tiiviste"
+  },
+  "field_time": {
+    "hours_per_day_max": {
+      "fail": "Työntekijälle {worker} on kirjattu tälle päivälle {hours} h, mikä ylittää {max} h:n rajan",
+      "suggestion": "Kohdista tunnit oikealle päivälle tai työntekijälle ennen lähettämistä"
+    },
+    "line_complete": {
+      "fail": "Rivi {line} on puutteellinen: {reason}",
+      "labour_xor_plant": "on kirjattava joko työvoimaa tai kalustoa, ei molempia eikä jättää molempia kirjaamatta",
+      "hours_positive": "tuntimäärän on oltava suurempi kuin nolla",
+      "cost_code_required": "kustannuskoodi vaaditaan",
+      "suggestion": "Täydennä rivi ennen tuntikirjauksen lähettämistä"
+    },
+    "cost_code_resolves": {
+      "fail": "Rivin {line} koodi '{code}' ei vastaa mitään tämän hankkeen määräluettelon nimikettä tai WBS:ää",
+      "suggestion": "Valitse kustannuskoodi tai WBS, joka on hankkeen määräluettelossa"
+    },
+    "daywork_needs_variation": {
+      "fail": "Laskutyöriviä {line} ei ole yhdistetty avoimeen muutokseen",
+      "suggestion": "Yhdistä laskutyö muutokseen, jonka perusteella se tilattiin"
+    },
+    "plant_needs_equipment": {
+      "fail": "Kalustorivi {line} ei määritä kalustoyksikköä",
+      "suggestion": "Liitä kone, jotta kalustotunnit voidaan hinnoitella"
+    },
+    "approved_immutable": {
+      "fail": "Tämän tuntikirjauksen tila on {status}, eikä sitä voi muokata",
+      "suggestion": "Korjaa hyväksytyt tunnit kirjaamalla vastakirjaava tuntikirjaus"
+    },
+    "offline_clock_plausible": {
+      "fail": "Tämän päivän kirjanneen laitteen kello oli {minutes} minuuttia palvelimen kelloa edellä",
+      "suggestion": "Aseta laitteen kello oikein, jotta kirjausajat voidaan lukea oikeassa järjestyksessä"
+    },
+    "offline_sync_delay": {
+      "fail": "Työpäivä oli {date}, mutta tiedot saapuivat toimistoon vasta {days} päivää myöhemmin",
+      "suggestion": "Tarkista tunnit kyseisen päivän tiedoista ennen hyväksymistä; maksatuskausi voi olla jo suljettu"
+    }
+  },
+  "ai_takeoff": {
+    "unreviewed_proposals": {
+      "fail": "{count} määrälaskentaehdotusta odottaa vielä tarkastusta, eikä niitä ole hinnoiteltu tässä",
+      "suggestion": "Käy tarkastusjono läpi, jotta vahvistetut määrät vastaavat piirustusta"
+    }
+  },
+  "boq_quality": {
+    "position_has_quantity": {
+      "fail": "Nimikkeen {ordinal} määrä ei saa olla nolla tai puuttua",
+      "suggestion": "Aseta määrä, joka on suurempi kuin 0"
+    },
+    "position_has_unit_rate": {
+      "fail": "Nimikkeelle {ordinal} tulee määrittää yksikköhinta",
+      "suggestion": "Valitse hinta kustannustietokannasta"
+    },
+    "position_has_description": {
+      "fail": "Nimikkeen {ordinal} kuvaus ei saa olla tyhjä"
+    },
+    "no_duplicate_ordinals": {
+      "fail": "Järjestysnumero '{ordinal}' esiintyy {count} nimikkeessä"
+    },
+    "unit_rate_in_range": {
+      "fail": "Nimike {ordinal}: hinta {rate} on >{threshold} (5 × mediaani)",
+      "suggestion": "Tarkista tämä yksikköhinta; se on poikkeuksellisen korkea"
+    },
+    "negative_values": {
+      "fail": "Nimikkeessä {ordinal} on negatiivisia arvoja: {details}",
+      "suggestion": "Korjaa negatiiviset arvot; käytä positiivisia lukuja"
+    },
+    "unrealistic_rate": {
+      "fail": "Nimike {ordinal}: {details}",
+      "suggestion": "Tarkista tämä arvo; se vaikuttaa epärealistisen korkealta",
+      "not_assessed_no_currency": "{count} nimikettä jäi arvioimatta: määräluettelo ei ilmoita valuuttaa, joten valuutassa {reference} määritettyjä rahamääräisiä rajoja ei voitu muuntaa siihen",
+      "not_assessed_no_currency_suggestion": "Aseta hankkeen valuutta tai kirjaa valuutta nimikkeille",
+      "not_assessed_no_rate": "{count} nimikettä valuutassa {currency} jäi arvioimatta: kurssia valuutasta {reference} valuuttaan {currency} ei ole kirjattu, joten rahamääräisiä rajoja ei voitu sovittaa tähän määräluetteloon",
+      "not_assessed_no_rate_suggestion": "Lisää valuutan {reference} kurssi valuutalle {currency} valuuttakurssirekisteriin tai hankkeen valuuttakursseihin"
+    },
+    "total_mismatch": {
+      "fail": "Nimike {ordinal}: laskettu {computed} != tallennettu {stored} (ero={diff})",
+      "suggestion": "Laske summa uudelleen: määrä × yksikköhinta"
+    },
+    "resource_split_mismatch": {
+      "fail": "Nimike {ordinal}: resurssien välisumma {subtotal} poikkeaa yksikköhinnasta {rate} määrällä {diff}",
+      "suggestion": "Tarkista resurssimäärät ja hinnat; niiden yksikkökohtaisen summan tulee vastata nimikkeen yksikköhintaa"
+    },
+    "empty_unit": {
+      "fail": "Nimikkeen {ordinal} yksikkö on tyhjä tai puuttuu",
+      "suggestion": "Määritä mittayksikkö (m, m2, m3, kg, kpl, kokonaishinta jne.)"
+    },
+    "section_without_items": {
+      "fail": "Osiossa {ordinal} ({title}) ei ole alanimikkeitä",
+      "suggestion": "Lisää osioon nimikkeitä tai poista tyhjä osio"
+    },
+    "rate_vs_benchmark": {
+      "fail": "Nimike {ordinal}: yksikköhinta {rate}/{unit} ylittää vertailurajan {threshold}/{unit} ja voi olla epärealistinen",
+      "suggestion": "Tarkista tämä hinta; yksikön {unit} tavanomaisten hintojen tulisi olla alle {threshold}. Tarkista yksikkö- ja desimaalivirheet.",
+      "not_assessed_no_currency": "{count} nimikettä jäi arvioimatta: määräluettelo ei ilmoita valuuttaa, joten valuutassa {reference} määritettyjä vertailurajoja ei voitu muuntaa siihen",
+      "not_assessed_no_currency_suggestion": "Aseta hankkeen valuutta tai kirjaa valuutta nimikkeille",
+      "not_assessed_no_rate": "{count} nimikettä valuutassa {currency} jäi arvioimatta: kurssia valuutasta {reference} valuuttaan {currency} ei ole kirjattu, joten vertailurajoja ei voitu sovittaa tähän määräluetteloon",
+      "not_assessed_no_rate_suggestion": "Lisää valuutan {reference} kurssi valuutalle {currency} valuuttakurssirekisteriin tai hankkeen valuuttakursseihin"
+    },
+    "lump_sum_ratio": {
+      "fail": "{lsum_count} nimikettä {total_count} nimikkeestä ({percent}) on kokonaishintaisia; osuus ylittää rajan {threshold}",
+      "suggestion": "Jaa kokonaishintaiset nimikkeet mitattuihin määriin (m, m2, m3, kg, kpl) arvion tarkkuuden parantamiseksi"
+    },
+    "cost_concentration": {
+      "fail": "Nimike {ordinal} muodostaa osuuden {share} määräluettelon kokonaiskustannuksesta ({value} summasta {grand_total}); osuus ylittää rajan {threshold}",
+      "suggestion": "Jaa nimike pienempiin osiin tai tarkista kustannus; yhden nimikkeen ei tulisi hallita kustannusarviota"
+    },
+    "currency_consistency": {
+      "fail": "Löytyi eri valuuttoja: {currencies}",
+      "suggestion": "Käytä koko määräluettelossa yhtä valuuttaa"
+    },
+    "measurement_consistency": {
+      "fail": "Määräluettelo sekoittaa metrisiä ja brittiläisiä yksiköitä; käytä yhtä järjestelmää johdonmukaisesti",
+      "suggestion": "Muunna kaikki määrät joko metrisiin tai brittiläisiin yksiköihin"
+    },
+    "revision_cost_impact_review": {
+      "fail": "Revision kustannusvaikutusta {amount} ei ole vielä kirjattu muutokseksi",
+      "suggestion": "Luo tästä revisiovertailusta muutospyyntöluonnos kustannusmuutoksen seuraamiseksi"
+    },
+    "base_date_readable": {
+      "fail": "Perusajankohta '{base_date}' ei ole kelvollinen päivämäärä, joten määräluettelo verotetaan tämän päivän eikä oman ajankohtansa verokannalla",
+      "suggestion": "Ilmoita hintojen perusajankohta päivänä, kuukautena, vuosineljänneksenä tai vuotena ({shapes})"
+    },
+    "tax_date_readable": {
+      "fail": "Verotusajankohta '{tax_date}' ei ole kelvollinen päivämäärä, joten määräluettelo verotetaan tämän päivän eikä oman ajankohtansa verokannalla",
+      "suggestion": "Ilmoita verotusajankohta päivänä, kuukautena, vuosineljänneksenä tai vuotena ({shapes}) tai tyhjennä kenttä käyttääksesi määräluettelon perusajankohtaa"
+    }
+  },
+  "din276": {
+    "cost_group_required": {
+      "fail": "Nimikkeeltä {ordinal} puuttuu DIN 276 KG",
+      "suggestion": "Määritä kolminumeroinen DIN 276 -kustannusryhmä (esim. 330 seinille)"
+    },
+    "valid_cost_group": {
+      "fail": "Virheellinen DIN 276 -koodi '{code}' nimikkeessä {ordinal}"
+    },
+    "hierarchy": {
+      "fail": "Nimike {ordinal}: KG {child} ei kuulu pääryhmään KG {parent} (odotettu etuliite '{prefix}')",
+      "suggestion": "Siirrä nimike oikeaan pääryhmään tai sovita KG-koodi pääryhmän hierarkiaan ({prefix}xx)"
+    },
+    "completeness": {
+      "fail": "KG-ryhmä {group} - {group_name} puuttuu määräluettelosta",
+      "suggestion": "Lisää nimikkeet ryhmälle KG {group} ({group_name}) täyden kattavuuden varmistamiseksi"
+    }
+  },
+  "gaeb": {
+    "ordinal_format": {
+      "fail": "Järjestysnumero '{ordinal}' ei vastaa tämän tiedoston GAEB OZ-Maske -muotoa",
+      "suggestion": "Käytä tiedoston OZ-Maske-muotoa, esim. 001.001.0010 tai 01.02.0030"
+    },
+    "lv_structure": {
+      "fail": "Nimike {ordinal}: alimman tason nimikkeeltä puuttuu pääosio; GAEB LV -hierarkia edellyttää Leistungsgruppe-pääryhmää",
+      "suggestion": "Liitä nimike pääosioon (Leistungsgruppe / Titel)"
+    },
+    "einheitspreis_sanity": {
+      "negative": "Nimike {ordinal}: Einheitspreis {rate} on negatiivinen (yksikkö='{unit}'); negatiivista hintaa ei voi siirtää GAEB-muodossa",
+      "zero": "Nimike {ordinal}: Einheitspreis on 0.00 (yksikkö='{unit}'); vahvista, että kyseessä on tarjottu nollahinta eikä puuttuva hinta",
+      "suggestion": "Anna positiivinen Einheitspreis tai merkitse nimike Bedarfsposition-nimikkeeksi (valinnainen työ) tai kokonaishintaiseksi (yksikkö='lsum')"
+    },
+    "trade_section_code": {
+      "fail": "Ylimmän tason osiolta '{ordinal}' puuttuu GAEB Leistungsbereich -koodi (odotettu kolminumeroinen työlajikoodi, esim. '012')",
+      "suggestion": "Lisää osioon kolminumeroinen työlajikoodi (Leistungsbereich), esim. '012' maanrakennukselle ja '013' muuraukselle"
+    },
+    "quantity_decimals": {
+      "fail": "Nimike {ordinal}: määrässä {quantity} on {decimals} desimaalia; GAEB X83 -käytäntö sallii enintään 3",
+      "suggestion": "Pyöristä määrä enintään 3 desimaaliin GAEB X83:n mukaisesti"
+    }
+  },
+  "nrm": {
+    "classification_required": {
+      "fail": "Nimikkeeltä {ordinal} puuttuu NRM-elementtikoodi",
+      "suggestion": "Määritä NRM 1/2 -elementtikoodi (esim. 2.6.1 ulkoseinille)"
+    },
+    "valid_element": {
+      "fail": "Virheellinen NRM-koodi '{code}' nimikkeessä {ordinal}"
+    },
+    "completeness": {
+      "fail": "NRM-ryhmä {group} - {group_name} puuttuu määräluettelosta",
+      "suggestion": "Lisää nimikkeet NRM-ryhmälle {group} ({group_name})"
+    },
+    "base_date_declared": {
+      "fail": "Kustannussuunnitelma ei ilmoita perusajankohtaa, jona sen hinnat ovat voimassa",
+      "suggestion": "Kirjaa määräluetteloon perusajankohta. Ilman sitä ei voida sanoa, onko hinta vanhentunut tai paljonko inflaatiokorjausta vielä tarvitaan"
+    },
+    "cost_plan_stage_declared": {
+      "fail": "Kustannussuunnitelma ei kerro, mitä suunnitteluvaihetta varten se laadittiin",
+      "suggestion": "Kirjaa vaihe. Odotettava tarkkuus riippuu laatimisvaiheesta; vaiheen salaaminen luo vääriä odotuksia"
+    },
+    "contractor_costs_present": {
+      "preliminaries": "Kustannussuunnitelmassa ei ole pääurakoitsijan työmaan yleiskustannuksia ryhmänä {group} eikä lisärivinä",
+      "overheads_and_profit": "Kustannussuunnitelmassa ei ole pääurakoitsijan yleiskuluja ja voittoa ryhmänä {group} eikä lisärivinä",
+      "suggestion": "Lisää ne NRM-ryhmän osana tai mitattuihin töihin kohdistuvana lisärivinä. Molemmat tavat ovat oikein; pois jättäminen aliarvioi töiden kustannuksen"
+    },
+    "risk_allowance_present": {
+      "fail": "Kustannussuunnitelmasta puuttuu riskivaraus",
+      "suggestion": "Lisää riskivaraus NRM-ryhmänä 13 tai ennakoimattomien kustannusten rivinä. Ilman riskivarausta yksittäinen kustannusarvio esitetään varmana lukuna"
+    }
+  },
+  "masterformat": {
+    "classification_required": {
+      "fail": "Nimikkeeltä {ordinal} puuttuu MasterFormat-koodi",
+      "suggestion": "Määritä MasterFormat-koodi (esim. 03 30 00 paikallavaletulle betonille)"
+    },
+    "valid_division": {
+      "fail": "Virheellinen MasterFormat-koodi '{code}' nimikkeessä {ordinal}",
+      "suggestion": "Käytä kuusinumeroista MasterFormat-muotoa: XX XX XX (esim. 03 30 00)"
+    },
+    "completeness": {
+      "fail": "Osasto {division} - {division_name} puuttuu määräluettelosta",
+      "suggestion": "Lisää nimikkeet osastolle {division} ({division_name})"
+    }
+  },
+  "sinapi": {
+    "code_required": {
+      "fail": "Nimikkeeltä {ordinal} puuttuu SINAPI-koodi",
+      "suggestion": "Määritä SINAPI-analyysikoodi (esim. 87878 C30-betonille)"
+    },
+    "valid_code": {
+      "fail": "Virheellinen SINAPI-koodi '{code}' nimikkeessä {ordinal}"
+    }
+  },
+  "nbr": {
+    "classification_required": {
+      "fail": "Nimikkeeltä {ordinal} puuttuu NBR 12721 -osio",
+      "suggestion": "Merkitse nimikkeelle NBR 12721 -osio (S1 = valmistelutyöt, S2 = alusrakenne, ..., S11 = täydentävät työt)"
+    },
+    "valid_section": {
+      "fail": "Nimikkeen {ordinal} NBR 12721 -osio '{code}' ei ole välillä S1..S11",
+      "suggestion": "Käytä koodeja S1–S11 (esim. S3 päällysrakenteelle)"
+    }
+  },
+  "gesn": {
+    "code_required": {
+      "fail": "Nimikkeeltä {ordinal} puuttuu ГЭСН/ФЕР-koodi",
+      "suggestion": "Määritä ГЭСН-koodi (esim. 06-01-001-01 betonille)"
+    },
+    "valid_code": {
+      "fail": "ГЭСН-koodi '{code}' ei vastaa muotoa XX-XX-XXX-XX",
+      "suggestion": "Käytä muotoa NN-NN-NNN-NN (esim. 06-01-001-01)"
+    },
+    "resource_breakdown": {
+      "fail": "Nimike {ordinal} viittaa normiin {code}, mutta siinä ei ole resurssierittelyä",
+      "suggestion": "Tuo normin työvoima-, kalusto- ja materiaalimäärät tai kerro, miksi rivi poikkeaa niistä"
+    },
+    "labour_hours_present": {
+      "fail": "Nimikkeen {ordinal} ({code}) resurssierittelystä puuttuvat työtunnit",
+      "suggestion": "Lisää normin edellyttämät henkilötyötunnit; yleiskulut ja arvioitu voitto normitetaan palkkakustannuksista, eikä niitä voi laskea ilman tunteja"
+    },
+    "price_level_declared": {
+      "fail": "Kustannusarvio ei ilmoita lukujensa hintatasoa",
+      "suggestion": "Ilmoita hintataso (päivämäärä) ja käytetty muuntoindeksi, jotta tarkastaja voi päätyä samaan loppusummaan"
+    }
+  },
+  "dpgf": {
+    "lot_required": {
+      "fail": "Nimikettä {ordinal} ei ole liitetty mihinkään tekniseen urakkaosaan (Lot technique)",
+      "suggestion": "Määritä tekninen urakkaosa (esim. Lot 01 Gros Œuvre)"
+    },
+    "pricing_complete": {
+      "fail": "Vain {priced}/{total} nimikettä ({percent}) on hinnoiteltu; alle 80 %:n rajan",
+      "suggestion": "Hinnoittele kaikki nimikkeet ennen DPGF:n lähettämistä"
+    }
+  },
+  "onorm": {
+    "position_format": {
+      "fail": "Järjestysnumero '{ordinal}' ei vastaa ÖNORM-muotoa XX.XX.XXXXA",
+      "suggestion": "Käytä ÖNORM B 2063 -muotoa (esim. 01.02.01A)"
+    },
+    "description_length": {
+      "fail": "Nimike {ordinal}: kuvaus on liian lyhyt ({length} merkkiä, vähintään 20)",
+      "suggestion": "Lisää nimikkeen kuvaukseen yksityiskohtia ÖNORM B 2063:n mukaisesti"
+    }
+  },
+  "gbt50500": {
+    "code_required": {
+      "fail": "Nimikkeeltä {ordinal} puuttuu GB/T 50500 -koodi",
+      "suggestion": "Määritä yhdeksännumeroinen GB/T 50500 -koodi (esim. 010101001)"
+    },
+    "valid_code": {
+      "fail": "Virheellinen GB/T 50500 -koodi '{code}'; odotetaan 9 tai 12 numeroa"
+    }
+  },
+  "cpwd": {
+    "code_required": {
+      "fail": "Nimikkeeltä {ordinal} puuttuu CPWD/DSR-koodi",
+      "suggestion": "Määritä CPWD DSR -nimikeviite (esim. 4.1.1)"
+    },
+    "measurement_units": {
+      "fail": "Nimikkeen {ordinal} yksikkö '{unit}' ei ole IS 1200 -standardin mukainen",
+      "suggestion": "Käytä IS 1200 -yksiköitä: m, m2, m3, kg, nos, rm jne."
+    }
+  },
+  "hungary": {
+    "item_code_required": {
+      "fail": "Nimikkeellä {ordinal} ei ole unkarilaista nimikekoodia",
+      "invalid": "Nimikkeen {ordinal} koodi '{code}' ei vastaa kumpaakaan nimikejärjestystä",
+      "suggestion": "Talonrakennuksessa käytetään muotoa MA-CC-SS-II (luvut 01–17), infratöissä hankkeen koodisanaston kuusi- tai seitsennumeroista nimikenumeroa"
+    },
+    "chapter_recognised": {
+      "fail": "Nimikkeen {ordinal} luku {chapter} ei ole yksi nimikejärjestyksen seitsemästätoista luvusta"
+    },
+    "material_fee_split": {
+      "fail": "Nimike {ordinal}: materiaalin {material} ja työkorvauksen {fee} summa ei vastaa hintaa {rate}",
+      "suggestion": "Korjaa materiaalin ja työkorvauksen yksikköhinnat tai kokonaishinta niin, että erittely täsmää"
+    },
+    "item_number_unique": {
+      "fail": "Nimikenumeroa {number} käytetään {count} nimikkeessä, vaikka sen on yksilöitävä yksi nimike",
+      "suggestion": "Anna jokaiselle nimikkeelle oma hankekohtainen numero ennen määräluettelon lähettämistä asiakkaalle"
+    }
+  },
+  "prezzario": {
+    "voce_code_format_valid": {
+      "fail": "Nimikkeen {ordinal} koodi '{code}' ei kerro, mistä hinnastosta se on peräisin",
+      "suggestion": "Virallinen voce-koodi alkaa hinnaston alueella ja julkaisuvuodella, esimerkiksi TOS25_01.A03.001.001 (Toscana 2025). Kopioi koodi täsmälleen aluehinnaston mukaisesti, tuo rivi hinnastosta tai numeroi uusi hinta NP.01"
+    },
+    "voce_reference_present": {
+      "fail": "Nimike {ordinal} ei viittaa prezzario voce -nimikkeeseen",
+      "suggestion": "Valitse rivi tuodusta aluehinnastosta tai merkitse se hinta-analyysiin perustuvaksi uudeksi hinnaksi (nuovo prezzo, NP)"
+    },
+    "costi_sicurezza_separated": {
+      "fail": "Määräluettelossa ei ole erillistä riviä turvallisuuskustannuksille, joihin tarjousalennusta ei sovelleta",
+      "suggestion": "Lisää turvallisuuskustannukset (oneri della sicurezza) omana osionaan tai lisärivinään, hinnoiteltuna hinnaston turvallisuusluvusta tai turvallisuussuunnitelmasta"
+    },
+    "incidenza_manodopera_documented": {
+      "fail": "Nimike {ordinal} ({code}) ei ilmoita työvoiman osuutta",
+      "suggestion": "Ota incidenza della manodopera hinnastosta tai lisää työvoimaresurssi, jotta työvoimakustannus voidaan eritellä tarjouksessa"
+    },
+    "overheads_not_applied_twice": {
+      "fail": "Aluehinnaston hinnat sisältävät jo yleiskulut (13–17 %) ja voiton (10 %). Niiden lisääminen uudelleen nostaa summaa noin {percent} %.",
+      "suggestion": "Poista yleiskulu- ja voittolisät tästä määräluettelosta tai säilytä ne vain oman analyysin perusteella hinnoitelluilla riveillä (NP)."
+    }
+  },
+  "romania": {
+    "deviz_chapter_required": {
+      "fail": "Nimike {ordinal} ei nimeä deviz general -lukua",
+      "suggestion": "Sijoita rivi HG 907/2016:n mukaiseen lukuun ja alalukuun, esimerkiksi 4.1 rakennus- ja asennustöille tai 5.1 työmaajärjestelyille"
+    },
+    "deviz_chapter_recognised": {
+      "fail": "Nimikkeen {ordinal} deviz-koodi '{code}' ei ole deviz general -luku tai -alaluku",
+      "suggestion": "Käytä HG 907/2016:n deviz general -lukujen 1–6 koodia, kuten 1.2, 2, 3.5, 4.1, 5.1 tai 6.2"
+    }
+  },
+  "greece": {
+    "net_article_required": {
+      "fail": "Nimikkeellä {ordinal} ei ole yhtenäisen hinnaston (ΝΕΤ) nimikettä",
+      "suggestion": "Nimeä ΝΕΤ-nimike, josta rivin hinta on peräisin, esimerkiksi ΟΙΚ 32.01.06 tai uudelle nimikkeelle ΝΑΟΙΚ"
+    },
+    "net_article_valid": {
+      "invalid": "Nimikkeen {ordinal} koodi '{code}' ei ole ΝΕΤ-nimikkeen muodossa",
+      "chapter": "Nimikkeen {ordinal} koodi '{code}' alkaa luvulla {chapter}, jota talonrakennushinnastossa ei ole",
+      "suggestion": "Kirjoita hinnaston etuliite ja nimikenumero, esimerkiksi ΟΙΚ 38.20.02, ΟΔΟ Α-2 tai ΑΤΗΕ 8151.1"
+    }
+  },
+  "ukraine": {
+    "zkr_chapter_required": {
+      "fail": "Nimike {ordinal} ei nimeä yhteenvetokustannusarvion lukua",
+      "suggestion": "Sijoita rivi omaan lukuunsa зведений кошторисний розрахунок -yhteenvedossa, välille 1–12; pääkohteen rakennustyöt kuuluvat lukuun 2"
+    },
+    "zkr_chapter_recognised": {
+      "fail": "Nimikkeen {ordinal} luku {chapter} ei ole yksi yhteenvetokustannusarvion kahdestatoista luvusta",
+      "suggestion": "Käytä luvun numeroa 1–12"
+    }
+  },
+  "birimfiyat": {
+    "code_required": {
+      "fail": "Nimikkeeltä {ordinal} puuttuu birim fiyat -poz-numero",
+      "suggestion": "Määritä Bayındırlık-poz-numero (esim. 04.013/1)"
+    },
+    "valid_poz": {
+      "fail": "Poz '{code}' ei ole nykyisen yksikköhintakirjan numero (XX.XXX.XXXX) eikä vanhan muodon numero (XX.XXX/X)",
+      "suggestion": "Käytä kirjan numeroa, esim. 15.140.1002 tai vanhassa sopimuksessa 04.013/1; numeroi omat analysoidut nimikkeet muodossa ÖZEL-1"
+    }
+  },
+  "sekisan": {
+    "code_required": {
+      "fail": "Nimikkeeltä {ordinal} puuttuu 積算-koodi",
+      "suggestion": "Määritä 積算基準-nimikekoodi"
+    },
+    "metric_units": {
+      "fail": "Nimikkeen {ordinal} yksikkö '{unit}' ei ole standardin mukainen",
+      "suggestion": "Käytä standardeja metrisiä yksiköitä: m, m2, m3, kg, t, 式 jne."
+    }
+  },
+  "bc3": {
+    "code_required": {
+      "fail": "Nimikkeeltä {ordinal} puuttuu FIEBDC-3-käsitekoodi",
+      "suggestion": "Määritä FIEBDC-3-koodi (esim. E04CM040 tai 01.02.01)"
+    },
+    "valid_code": {
+      "fail": "Virheellinen FIEBDC-3-koodi '{code}' nimikkeessä {ordinal}",
+      "suggestion": "Käytä FIEBDC-3:n aakkosnumeerista muotoa (esim. E04CM040, 01.02.01, CAP01#)"
+    }
+  },
+  "mexico": {
+    "apu_completeness": {
+      "fail": "Nimikkeen {ordinal} APU on puutteellinen; puuttuvat kustannusosat: {missing}",
+      "suggestion": "Lisää yksikköhinta-analyysiin puuttuvat välittömät kustannusosat (costo directo: työvoima, materiaalit, koneet)"
+    },
+    "iva_rate_valid": {
+      "fail": "Nimikkeen {ordinal} IVA-verokanta {rate} on virheellinen; Meksikon IVA on 16, 8 (raja-alue) tai 0 prosenttia",
+      "suggestion": "Aseta IVA-verokannaksi 16 % (yleinen), 8 % (raja-alue) tai 0 %"
+    },
+    "subcontract_retencion": {
+      "fail": "Aliurakkanimike {ordinal} ei ilmoita, sovelletaanko IVA/ISR-pidätyksiä",
+      "suggestion": "Kirjaa aliurakkarivin IVA- ja ISR-pidätykset tai merkitse, ettei niitä sovelleta"
+    },
+    "cfdi_rfc_present": {
+      "missing": "CFDI-laskun laatijan tiedot ovat puutteelliset tarjousvientiä varten; puuttuu: {missing}",
+      "invalid_rfc": "RFC '{rfc}' ei ole kelvollinen CFDI RFC (yrityksellä 12 merkkiä, yksityishenkilöllä 13)",
+      "suggestion": "Aseta laatijan RFC, regimen fiscal ja uso CFDI hankkeen profiiliin CFDI 4.0 -laskutusta varten"
+    }
+  },
+  "pipeline": {
+    "side_effecting_requires_gate": {
+      "fail": "Tietoja muuttavat solmut ilman hyväksyntäporttia: {nodes}",
+      "suggestion": "Lisää ennen julkaisua validointi- tai ihmishyväksyntäportti jokaiselle reitille käynnistys-/AI-solmusta kuhunkin kirjoittavaan solmuun."
+    }
+  },
+  "property_dev": {
+    "escrow_account_required": {
+      "fail": "Kiinteistökehitys edellyttää aktiivista sulkutiliä valvojalle '{regulator}'",
+      "suggestion": "Avaa sulkutili valvojan hyväksymässä pankissa kohdasta Vaatimustenmukaisuus → Sulkutilit"
+    },
+    "escrow_iban_valid": {
+      "fail": "Sulkutili {account}: IBAN '{iban}' ei läpäise ISO 13616 -rakennetarkistusta",
+      "suggestion": "Korjaa IBAN: maakoodin, pituuden ja tarkistussumman on vastattava ISO 13616:ta"
+    },
+    "escrow_balance_reconciled": {
+      "fail": "Sulkutili {account}: kirjanpidon saldo {ledger} poikkeaa tapahtumien summasta {transactions} määrällä {drift}",
+      "suggestion": "Täsmäytä sulkutili; selvitä kirjaamattomat suoritukset tai puuttuvat veloitukset"
+    },
+    "sales_contract_party_ownership_sums_to_100": {
+      "fail": "Sopimus {contract}: omistusosuuksien summa on {total} % (sen on oltava täsmälleen 100 %)",
+      "suggestion": "Korjaa osapuolten prosenttiosuudet niin, että summa on 100.00 %"
+    },
+    "payment_schedule_instalments_sum_to_contract_value": {
+      "fail": "Sopimus {contract}: erien summa {instalments} poikkeaa sopimusarvosta {contract_value} (ero {drift})",
+      "suggestion": "Tasapainota maksuaikataulu niin, että maksuerät summautuvat sopimuksen kokonaisarvoon"
+    },
+    "reservation_expiry_in_future": {
+      "fail": "Varaus {reservation}: päättymisaika {expires} ei ole tulevaisuudessa",
+      "suggestion": "Jatka varausta tai muuta sen tilaksi päättynyt/peruttu"
+    },
+    "broker_commission_rate_within_bounds": {
+      "fail": "Välityspalkkiosopimus {agreement}: {issue}",
+      "suggestion": "Käytä 0.1–15 %:n prosenttiosuutta, kiinteää summaa tai ei-tyhjää porrastettua asteikkoa"
+    },
+    "price_matrix_no_negative_modifier": {
+      "fail": "Hintamatriisi {matrix}: säännön '{factor}' kerroin {multiplier} on välin [-0.50, 2.00] ulkopuolella",
+      "suggestion": "Rajaa korjauskertoimet välille -50 % – +200 %, jotta tonttien hinnat pysyvät realistisina"
+    }
+  },
+  "schedule_quality": {
+    "open_ends": {
+      "fail": "Tehtävältä '{activity}' puuttuu {ends}-kytkentä (avoin pää / irrallinen tehtävä)",
+      "both": "edeltäjä- tai seuraaja",
+      "predecessor": "edeltäjä",
+      "successor": "seuraaja",
+      "suggestion": "Kytke tehtävä verkkoon edeltäjä- ja seuraajayhteydellä tai määritä se aloitus-/lopetusvälitavoitteeksi"
+    },
+    "negative_lag": {
+      "fail": "Riippuvuus {predecessor} -> {successor} käyttää negatiivista viivettä ({lag} päivää), eli ennakkoa, joka vääristää kriittistä polkua",
+      "suggestion": "Korvaa ennakko erillisellä tehtävällä tai SS/FF-riippuvuudella, jotta järjestys pysyy perusteltavissa"
+    },
+    "excessive_lag": {
+      "fail": "Riippuvuuden {predecessor} -> {successor} viive on {lag} päivää, yli {threshold} päivän rajan",
+      "suggestion": "Mallinna odotusaika omaksi tehtäväkseen (hankinta, kovettuminen, hyväksyntä), jotta sen tilaa voidaan seurata ja resursseja tasata"
+    },
+    "hard_constraints": {
+      "fail": "Tehtävällä '{activity}' on ehdoton päivämäärärajoite ({constraint}), joka ohittaa verkon logiikan",
+      "suggestion": "Käytä joustavaa rajoitetta (aloitus aikaisintaan) tai ohjaa päivämäärää riippuvuuksilla, jotta tehtävä voi siirtyä edeltäjien viivästyessä"
+    },
+    "negative_float": {
+      "fail": "Tehtävän '{activity}' kokonaispelivara on negatiivinen ({float} päivää), joten aikataulu ei ole toteutettavissa nykyisillä riippuvuuksilla",
+      "suggestion": "Järjestä työt uudelleen, lievennä ehdotonta rajoitetta tai lisää dokumentoitu kiinniottosuunnitelma, jotta pelivara on vähintään nolla"
+    },
+    "high_float": {
+      "fail": "Tehtävän '{activity}' kokonaispelivara on hyvin suuri ({float} päivää), yli {threshold} päivän rajan",
+      "suggestion": "Tarkista puuttuva seuraajayhteys; suuri pelivara tarkoittaa yleensä, että tehtävä on vain löyhästi kytketty verkkoon"
+    },
+    "missing_duration": {
+      "fail": "Tehtävän '{activity}' kesto ({duration} päivää) on virheellinen tehtävälle, joka ei ole välitavoite",
+      "suggestion": "Aseta positiivinen kesto työpäivinä tai määritä rivi välitavoitteeksi, jos kyseessä on aidosti nollakestoinen tapahtuma"
+    },
+    "duration_on_project_week": {
+      "fail": "Tehtävä '{activity}' on tallennettu {stored} työpäivän pituisena maanantai–perjantai-laskennalla välillä {start}–{end}; hankkeen työviikolla {calendar} nämä päivämäärät antavat {expected}",
+      "suggestion": "Tallenna tehtävän päivämäärät uudelleen, jotta kesto lasketaan hankkeen työviikolla, tai syötä kesto tarkoituksellisesti"
+    }
+  },
+  "sheet_completeness": {
+    "missing": {
+      "fail": "Lehti {sheet} on piirustusluettelossa mutta puuttuu ladatusta aineistosta",
+      "suggestion": "Lataa puuttuva lehti tai vahvista, että se on vedetty pois julkaisusta"
+    },
+    "extra": {
+      "fail": "Lehti {sheet} on ladatussa aineistossa mutta ei piirustusluettelossa",
+      "suggestion": "Lisää se luetteloon tai julkaisurekisteriin tai poista ylimääräinen lehti"
+    },
+    "revision_mismatch": {
+      "fail": "Lehden {sheet} revisio on {actual_rev}, mutta luettelo odottaa revisiota {expected_rev}",
+      "suggestion": "Julkaise odotettu revisio tai päivitä luettelo nykyiseen revisioon"
+    }
+  },
+  "procurement": {
+    "po_has_lines": {
+      "fail": "Tällä ostotilauksella ei ole rivejä, joten sen sidottua summaa ei huomioida",
+      "suggestion": "Lisää tilatut nimikkeet ennen ostotilauksen hyväksymistä"
+    },
+    "po_line_amount": {
+      "fail": "Rivin {line} summa on {actual}, mutta määrä × yksikköhinta on {expected}",
+      "suggestion": "Korjaa määrä, yksikköhinta tai rivisumma niin, että kaikki kolme täsmäävät"
+    },
+    "po_subtotal_matches_lines": {
+      "fail": "Välisumma on {actual}, mutta rivien summa on {expected}",
+      "suggestion": "Laske välisumma uudelleen nykyisistä riveistä"
+    },
+    "po_total_matches_subtotal": {
+      "fail": "Kokonaissumma on {actual}, mutta välisumma ja vero ovat yhteensä {expected}",
+      "suggestion": "Laske kokonaissumma uudelleen niin, että se vastaa välisummaa ja veroa"
+    },
+    "po_no_negative_line": {
+      "fail": "Rivin {line} määrä ei ole positiivinen tai yksikköhinta on negatiivinen",
+      "suggestion": "Tee vastakirjausta varten hyvityslasku negatiivisen rivin sijaan"
+    },
+    "po_currency_set": {
+      "fail": "Tällä ostotilauksella ei ole valuuttaa, joten sen summaa ei voi yhdistää muihin eikä maksaa",
+      "suggestion": "Aseta valuutta, yleensä hankkeen käyttämä valuutta"
+    },
+    "po_vendor_assigned": {
+      "fail": "Tämä ostotilaus ei nimeä toimittajaa",
+      "suggestion": "Valitse toimittaja ennen sitoumuksen hyväksymistä"
+    },
+    "po_retention_within_bounds": {
+      "fail": "Pidätysprosentti {percent} % on uskottavan välin 0–{max} % ulkopuolella",
+      "suggestion": "Anna pidätys prosenttina, esimerkiksi 5 tarkoittaa viittä prosenttia"
+    },
+    "po_delivery_after_issue": {
+      "fail": "Toimitus on asetettu päivälle {delivery}, ennen tilauksen päiväystä {issue}",
+      "suggestion": "Siirrä toimituspäivä tilauksen päiväykseen tai sen jälkeiseen aikaan"
+    },
+    "po_line_cost_coded": {
+      "fail": "Riviltä {line} puuttuu WBS, kustannusluokka tai kustannusrivi, joten se ei näy kustannuserittelyssä",
+      "suggestion": "Määritä kustannuskoodi, jotta sitoumus raportoidaan budjettia vasten"
+    },
+    "invoice_within_order": {
+      "fail": "Lasku {invoice} ylittää tilauksen {po} avoimen saldon {remaining} määrällä {excess}",
+      "suggestion": "Vertaa laskua tilaukseen; jos lisä on sovittu, kirjaa se tilausmuutokseksi ennen hyväksymistä"
+    },
+    "invoice_quantity_received": {
+      "fail": "Riviltä {line} laskutettaisiin yhteensä {invoiced}, mutta vastaanotettu määrä on vain {received}",
+      "suggestion": "Odota lähetyslistaa tai vahvista tavaran vastaanotto ennen tämän määrän hyväksymistä"
+    },
+    "invoice_value_received": {
+      "fail": "Tilauksen {po} laskujen summa olisi {invoiced}, mutta vastaanotettujen tavaroiden arvo tilauksen hinnoilla on vain {received}",
+      "suggestion": "Odota lähetyslistaa tai vahvista tavaran vastaanotto ennen tämän summan hyväksymistä"
+    }
+  },
+  "subcontract": {
+    "agreement_has_scope": {
+      "fail": "Tällä sopimuksella ei ole työpaketteja, joten maksuhakemuksella ei ole laskutettavaa perustetta",
+      "suggestion": "Jaa sovittu työsisältö työpaketteihin ennen sopimuksen aktivointia"
+    },
+    "package_scope_described": {
+      "fail": "Työpaketilla {package} on nimi mutta ei kuvausta sen sisältämistä töistä",
+      "suggestion": "Kirjaa paketin sisältö, jotta myöhemmälle muutoskiistalle on vertailuperusta"
+    },
+    "agreement_value_positive": {
+      "fail": "Sopimusarvo on {value}, joten pidätykselle ja sopimusarvojen erittelylle ei ole laskentapohjaa",
+      "suggestion": "Anna sovittu sopimusarvo ennen sopimuksen aktivointia"
+    },
+    "packages_within_value": {
+      "fail": "Työpakettien arvo on {planned}, mutta sopimusarvo on {total}",
+      "suggestion": "Hinnoittele paketit uudelleen tai nosta sopimusarvoa niin, että sopimus kattaa oman työsisältönsä"
+    },
+    "agreement_dates_ordered": {
+      "fail": "Sopimus päättyy {end}, ennen alkamista {start}",
+      "suggestion": "Korjaa alkamis- tai päättymispäivä niin, että sopimuskausi etenee ajassa"
+    },
+    "agreement_currency_set": {
+      "fail": "Tällä sopimuksella ei ole valuuttaa, joten sen maksuja ei voi yhdistää muihin eikä maksaa",
+      "suggestion": "Aseta valuutta, yleensä hankkeen käyttämä valuutta"
+    },
+    "retention_within_bounds": {
+      "fail": "Pidätysprosentti {percent} % on uskottavan välin 0–{max} % ulkopuolella",
+      "suggestion": "Anna pidätys prosenttina kustakin maksusta, älä rahamääränä"
+    },
+    "insurance_valid_at_start": {
+      "fail": "Aliurakoitsijan vakuutus päättyi {expiry}, ennen töiden alkamista {reference}",
+      "suggestion": "Hanki voimassa oleva todistus ennen aliurakoitsijan päästämistä työmaalle"
+    },
+    "unlinked_contract_twin": {
+      "fail": "Aliurakka {agreement} ja sopimus {contract} näyttävät samalta aliurakalta, joten taloustiedot voivat laskea sen kahdesti",
+      "suggestion": "Yhdistä ne, jos ne ovat sama aliurakka, tai merkitse ne erillisiksi"
+    }
+  },
+  "submittal": {
+    "reviewer_assigned": {
+      "fail": "Tämä hyväksyntäaineisto ei nimeä tarkastajaa, joten se ei mene kenenkään käsiteltäväksi",
+      "suggestion": "Määritä vastaava tarkastaja ennen lähettämistä"
+    },
+    "required_date_present": {
+      "fail": "Tällä hyväksyntäaineistolla ei ole tarvepäivää, joten sitä ei voi raportoida myöhästyneeksi",
+      "suggestion": "Aseta tarkastuksen tarvepäivä niiden töiden perusteella, jotka tämä aineisto vapauttaa"
+    },
+    "required_date_after_submitted": {
+      "fail": "Tarkastuksen määräpäivä {required} on ennen aineiston jättöpäivää {submitted}",
+      "suggestion": "Siirrä tarvepäivä lähettämisen jälkeiseen työpäivään"
+    },
+    "review_window_sufficient": {
+      "fail": "Tarkastajalla on {days} päivää, vähemmän kuin tarkastuksen tavallisesti vaatimat {minimum} päivää",
+      "suggestion": "Varaa tavanomainen tarkastusaika tai sovi lyhyemmästä ajasta ensin tarkastajan kanssa"
+    },
+    "spec_section_present": {
+      "fail": "Tämä hyväksyntäaineisto ei nimeä työselostuksen osiota, joten rekisteri ei voi luokitella sitä",
+      "suggestion": "Anna työselostuksen osio, johon aineisto vastaa"
+    },
+    "approver_distinct_from_reviewer": {
+      "fail": "Sama henkilö ({person}) on sekä tarkastaja että hyväksyjä, joten riippumaton toinen tarkastus puuttuu",
+      "suggestion": "Määritä hyväksyjäksi muu henkilö kuin tarkastaja"
+    },
+    "linked_scope_present": {
+      "fail": "Tätä hyväksyntäaineistoa ei ole yhdistetty yhteenkään työsisältönimikkeeseen, joten se ei kohdistu pakettiin",
+      "suggestion": "Yhdistä määräluettelon nimikkeet, jotka tämä aineisto kattaa"
+    }
+  },
+  "rfq": {
+    "scope_described": {
+      "fail": "Tällä tarjouspyynnöllä ei ole työn laajuutta eikä kuvausta, joten toimittajalla ei ole hinnoiteltavaa",
+      "suggestion": "Kuvaa työsisältö ennen julkaisua, jotta saapuvat tarjoukset ovat vertailukelpoisia"
+    },
+    "deadline_present": {
+      "fail": "Tämä tarjouspyyntö ei määritä jättöaikaa, joten tarjousvaihe ei sulkeudu",
+      "suggestion": "Aseta päivämäärä ja kellonaika, johon mennessä tarjousten on saavuttava"
+    },
+    "deadline_parseable": {
+      "fail": "Jättöaika {value} ei ole järjestelmän luettavissa oleva päivämäärä, joten jokainen tarjous hylätään",
+      "suggestion": "Anna määräaika päivämääränä, esimerkiksi 2026-08-31"
+    },
+    "deadline_in_future": {
+      "fail": "Jättöaika {deadline} on jo ohitettu tänään {today}, joten tarjouspyyntö saapuu suljettuna",
+      "suggestion": "Siirrä määräaika tulevaisuuteen ennen julkaisua"
+    },
+    "has_recipients": {
+      "fail": "Tämä tarjouspyyntö ei ole osoitettu millekään toimittajalle, joten julkaisu ei ilmoita kenellekään",
+      "suggestion": "Lisää toimittajat, joille tarjouspyyntö lähetetään"
+    },
+    "currency_set": {
+      "fail": "Tämä tarjouspyyntö ei määritä valuuttaa, joten tarjouksia ei voida asettaa keskinäiseen järjestykseen",
+      "suggestion": "Aseta valuutta, jossa tarjoukset hinnoitellaan"
+    },
+    "bid_currency_matches": {
+      "fail": "Tarjous {bid} on hinnoiteltu valuutassa {bid_currency}, mutta tarjouspyyntö käyttää valuuttaa {rfq_currency}",
+      "suggestion": "Pyydä tarjoajaa antamaan uusi tarjous pyynnön valuutassa tai kirjaa sovittu valuuttamuunnos"
+    },
+    "bid_amounts_parseable": {
+      "fail": "Tarjouksen {bid} summa {value} ei ole vertailukelpoinen lukuarvo",
+      "suggestion": "Korjaa tarjoussumma ennen hankintapäätöstä"
+    },
+    "bids_still_valid": {
+      "fail": "Tarjous {bid} päättyi {expired} ja tänään on {today}, joten sen hinta ei enää sido tarjoajaa",
+      "suggestion": "Pyydä tarjoajaa vahvistamaan hinta ennen hankintapäätöstä"
+    },
+    "award_has_competition": {
+      "fail": "Tämä hankintapäätös perustuu {count} tarjoukseen, vähempään kuin kilpailullisen vertailun vaatimat {minimum}",
+      "suggestion": "Kirjaa yhden toimittajan hankinnan perustelu tai kutsu lisää tarjoajia"
+    }
+  },
+  "errors": {
+    "resource_not_found": "Resurssia ei löytynyt",
+    "project_not_found": "Hanketta ei löytynyt",
+    "vendor_not_found": "Toimittajaa ei löytynyt",
+    "template_not_found": "Mallipohjaa ei löytynyt",
+    "position_not_found": "Nimikettä ei löytynyt",
+    "boq_not_found": "Määräluetteloa ei löytynyt",
+    "session_not_found": "Istuntoa ei löytynyt",
+    "document_not_found": "Asiakirjaa ei löytynyt",
+    "documents_batch_delete_referenced": "Muualla olevat tietueet viittaavat edelleen tämän erän asiakirjoihin. Tarkista poistossa katkeavat yhteydet ja vahvista acknowledge_references-parametrilla.",
+    "invitation_not_found": "Kutsua ei löytynyt",
+    "agreement_not_found": "Sopimusta ei löytynyt",
+    "rejection_not_found": "Hylkäystä ei löytynyt",
+    "claim_not_found": "Maksuhakemusta ei löytynyt",
+    "gaeb_x89_final_account_unsupported": "Loppuselvitystä tai osittaista loppuselvitystä ei voi vielä viedä GAEB X89 -muodossa. Siinä on laskutettava kumulatiivinen työ vähennettynä aiemmilla maksuilla, mutta maksuhakemuksesta muodostetaan vain yhden kauden välilasku. Vie hakemus välilaskuna.",
+    "xpwe_native_file_refused": "Tämä on kustannuslaskentaohjelman oma projektitiedosto, jonka voi avata vain kyseisellä ohjelmalla. Vie kustannusarvio ohjelmastasi XPWE-muodossa ja lataa .xpwe-tiedosto.",
+    "plot_not_found": "Tonttia ei löytynyt",
+    "survey_not_found": "Drone-kartoitusta ei löytynyt",
+    "diary_video_not_found": "Päiväkirjavideota ei löytynyt",
+    "diary_photo_not_found": "Päiväkirjakuvaa ei löytynyt",
+    "bidder_not_found": "Tarjoajaa ei löytynyt",
+    "webhook_not_found": "Webhookia ei löytynyt",
+    "submission_not_found": "Lähetystä ei löytynyt",
+    "measurement_not_found": "Työmaamittausta ei löytynyt",
+    "salescontract_not_found": "Myyntisopimusta ei löytynyt",
+    "prompt_not_found": "Kehotemallia ei löytynyt",
+    "prequalification_not_found": "Esikarsintaa ei löytynyt",
+    "purchase_requisition_not_found": "Ostoehdotusta ei löytynyt",
+    "purchase_order_not_found": "Ostotilausta ei löytynyt",
+    "group_not_found": "Ryhmää ei löytynyt",
+    "final_account_not_found": "Loppuselvitystä ei löytynyt",
+    "estimate_job_not_found": "Kustannusarviotyötä ei löytynyt",
+    "escrow_not_found": "Sulkutilitapahtumaa ei löytynyt",
+    "commission_accrual_not_found": "Palkkiokertymää ei löytynyt",
+    "baseline_not_found": "Vertailutasoa ei löytynyt",
+    "fx_rate_set_locked": "Päivän {date} EKP-kurssit ovat lukittuina, joten tämä päivitys ei korvannut niitä. Avaa kyseisen kurssijoukon lukitus ensin, jos sen tulee vastaanottaa uusi julkaisu.",
+    "boq_locked": "Määräluettelo on lukittu eikä sitä voi muokata. Luo revisio muutoksia varten.",
+    "boq_link_owner_locked": "Koodin '{code}' määrittää lukitun määräluettelon '{bill}' rivi, ja siihen yhdistäminen muuttaisi kyseistä määräluetteloa. Avaa ensin sen lukitus tai kirjaa rivi uudella koodilla."
+  },
+  "variations": {
+    "boq_lines_are_traced": {
+      "fail": "Tämän muutoksen määräluettelon rivi {line} ei palaudu mihinkään lähteeseen: ei sopimusarvojen erittelyriviin eikä kustannusarvion nimikkeeseen",
+      "suggestion": "Nimeä muutoksen kohteena oleva sopimusrivi tai nimike, josta työsisältö on otettu, jotta summa voidaan perustella"
+    },
+    "boq_total_matches_estimate": {
+      "fail": "Tämän pyynnön otsikkotason arvio on {estimate}, mutta sen hinnoiteltu määräluettelo on yhteensä {priced}",
+      "suggestion": "Siirrä hinnoiteltu summa pyynnölle tai korjaa määräluettelo niin, että käytössä on yksi summa"
+    },
+    "change_kind_matches_numbers": {
+      "removed_positive": "Rivi {line} on merkitty poistuvaksi työksi, mutta sen määrä {quantity} on positiivinen; poisjättö vähennetään sopimuksesta negatiivisena määränä",
+      "added_negative": "Rivi {line} on merkitty lisätyöksi, mutta sen määrä {quantity} on negatiivinen; sopimuksesta vähennettävä työ on poistuvaa, ei lisättävää",
+      "removed_needs_contract_line": "Rivi {line} on merkitty poistuvaksi työksi, mutta se ei viittaa sopimusarvojen erittelyriviin, joten poistettavaa sopimusnimikettä ei ole",
+      "modified_needs_contract_line": "Rivi {line} on merkitty muuttuvaksi työksi, mutta se ei viittaa sopimusarvojen erittelyriviin, joten muutettavaa sopimusnimikettä ei ole",
+      "suggestion": "Korjaa muutostyyppi tai määrä rivin lähdeviitteessä tai nimeä sopimusrivi, johon muutos kohdistuu"
+    }
+  },
+  "cases": {
+    "has_steps": {
+      "fail": "Tässä käyttötapauksessa ei vielä ole vaiheita, joten lukijalla ei ole seurattavaa.",
+      "suggestion": "Lisää vähintään yksi vaihe, joka nimeää avattavan näkymän ja siellä tehtävän toimenpiteen."
+    },
+    "step_titled": {
+      "fail": "{count} vaiheelta puuttuu otsikko tai avattava näkymä.",
+      "suggestion": "Anna jokaiselle vaiheelle lyhyt otsikko ja valitse sen avaama näkymä."
+    },
+    "step_purpose": {
+      "fail": "{count} vaihetta {total} vaiheesta ei kerro tarkoitustaan, joten tapaus näyttää klikkauslistalta selityksen sijaan.",
+      "suggestion": "Lisää kuhunkin vaiheeseen yksi rivi sen tarkoituksesta; juuri sitä uusi käyttäjä tarvitsee."
+    },
+    "distinct_screens": {
+      "fail": "{count} vaihetta avaa saman näkymän kuin edeltävä vaihe, joten lukija ei näe muutosta eikä erota vaiheita toisistaan.",
+      "suggestion": "Yhdistä ne yhdeksi vaiheeksi tai ohjaa toinen näkymään, johon työ tosiasiassa siirtyy."
+    },
+    "duration_plausible": {
+      "fail": "Tämä tapaus arvioi {steps} vaiheelle {minutes} minuuttia. Lukija, joka ei pysy mukana, lakkaa luottamasta loppuarvioon.",
+      "suggestion": "Nosta arvio vähintään {minimum} minuuttiin tai poista joitakin vaiheita."
+    },
+    "described": {
+      "fail": "Tällä tapauksella ei ole yhteenvetoa, joten luettelossa näkyy vain otsikko.",
+      "suggestion": "Lisää yksi lause siitä, mitä lukija on lopuksi saanut tehtyä."
+    }
+  },
+  "uk": {
+    "contract_form_declared": {
+      "fail": "Kustannusarvio ei nimeä sopimusmuotoa, jonka perusteella se on hinnoiteltu",
+      "suggestion": "Kirjaa sopimusmuoto. Työmaan yleiskustannukset, riski ja maksuehdot hinnoitellaan eri sopimusmuodoissa eri tavalla, joten summa kertoo vähän ilman tätä tietoa"
+    },
+    "payment_regime_declared": {
+      "fail": "Maksumekanismi on puutteellinen: {missing} on kirjaamatta",
+      "suggestion": "Kirjaa molemmat päivämäärät. Rakennussopimus, joka ei määritä kumpaakaan, ei vapaudu niistä: Scheme for Construction Contracts määrää molemmat, jolloin maksuehdot tulevat säädöksestä allekirjoitetun sopimuksen sijaan"
+    },
+    "retention_declared": {
+      "fail": "Kustannusarvio ei kerro, mitä pidätystä sovelletaan",
+      "suggestion": "Kirjaa pidätysprosentti ja pidätyksen vapautus tai ilmoita, ettei pidätystä ole. Pidätys on urakoitsijan ansaitsemaa rahaa, jota se ei voi nostaa; siitä vaikeneva arvio vaikenee myös käyttöpääomasta"
+    },
+    "cdm_duty_holders_declared": {
+      "fail": "CDM 2015:n vastuuhenkilöitä ei ole kirjattu: puuttuu {missing}",
+      "suggestion": "Kirjaa nimitykset. Kun hankkeessa toimii useampi kuin yksi urakoitsija, tilaajan on nimettävä kirjallisesti pääsuunnittelija ja pääurakoitsija; ellei se tee niin, vastuut jäävät tilaajalle itselleen"
+    },
+    "hrb_regime_declared": {
+      "fail": "Korkeamman riskin rakennusta koskeva kysymys on ratkaisematta: {reason}",
+      "unanswered": "kustannusarvio ei kerro, onko kyseessä korkeamman riskin rakennus",
+      "disagrees": "arvio ilmoittaa korkeamman riskin tilaksi {declared}, mutta sen omat mitat antavat tuloksen {derived}",
+      "suggestion": "Rakennus on korkeamman riskin rakennus, kun se on vähintään 18 m korkea tai siinä on vähintään 7 kerrosta JA siinä on vähintään kaksi asuntoa. Molempien ehtoryhmien on täytyttävä: korkea rakennus ilman asuntoja ei ole korkeamman riskin rakennus, ja sellaisena käsittely aiheuttaa tarpeettoman vaiheistetun lupamenettelyn"
+    },
+    "vat_treatment_declared": {
+      "fail": "Kustannusarvio ei kerro arvonlisäveron käsittelyä",
+      "suggestion": "Kirjaa käsittely: yleinen verokanta, alennettu tai nollaverokanta työn täyttäessä ehdot tai kotimainen käännetty verovelvollisuus soveltamisalaan kuuluvassa myynnissä. Käännetty verovelvollisuus siirtää ALV:n asiakkaalle ja muuttaa urakoitsijan laskutettavaa summaa"
+    }
+  },
+  "project_completeness": {
+    "country_set": {
+      "fail": "Hanke ei määritä maata, joten sille ei voida valita hintapohjaa, verokantaa tai työkalenteria",
+      "suggestion": "Aseta hankkeen maa sen asetuksissa. Maa ratkaisee aluepaketin, verotuksen ja kalenterin, joiden perusteella luvut tulkitaan"
+    },
+    "currency_set": {
+      "fail": "Hanke ei ilmoita valuuttaa, joten sen määräluetteloita, lisiä ja sopimuksia ei voida laskea yhteen",
+      "suggestion": "Valitse hankkeen valuutta asetuksista. Jokainen määräluettelo ja sopimus hinnoitellaan siinä, ja jokainen summa tulkitaan siinä"
+    },
+    "currency_matches_bill": {
+      "fail": "Hanke on hinnoiteltu valuutassa {project_currency}, mutta tämän määräluettelon rivit valuutoissa {bill_currencies}",
+      "suggestion": "Muunna rivit hankkeen valuuttaan ilmoitetulla kurssilla tai kirjaa kurssi hankkeelle, jotta määräluettelon yhteissumma on yksi luku"
+    },
+    "priced_bill_present": {
+      "fail": "Hankkeella ei ole nimikkeitä sisältävää määräluetteloa, joten kustannusarviolle ei ole lähtökohtaa",
+      "suggestion": "Luo määräluettelo ja lisää nimikkeitä tai tuo se CAD-mallista, laskentataulukosta tai tiedonsiirtotiedostosta"
+    },
+    "bill_base_date_set": {
+      "fail": "Määräluettelo ”{bill}” ei ilmoita perusajankohtaa, jona sen hinnat ovat voimassa",
+      "suggestion": "Kirjaa perusajankohta määräluetteloon. Ilman sitä hintoja ei voi indeksoida, verottaa oman ajankohtansa mukaan tai verrata toiseen arvioon"
+    },
+    "classification_standard_set": {
+      "fail": "Hankkeella ei ole luokitusstandardia, joten sen nimikkeiden koodeja ei voida tarkistaa",
+      "suggestion": "Valitse luokitusstandardi, jonka mukaan hanke on koodattu. Se määrää myös, mitä maakohtaisia sääntökokonaisuuksia validointi käyttää"
+    },
+    "planned_dates_set": {
+      "both_missing": "Hankkeelta puuttuvat sekä suunniteltu alkamis- että päättymispäivä",
+      "start_missing": "Hankkeella on suunniteltu päättymispäivä mutta ei alkamispäivää",
+      "end_missing": "Hankkeella on suunniteltu alkamispäivä mutta ei päättymispäivää",
+      "unreadable": "Suunniteltua arvoa ”{value}” ei voi tulkita päivämääräksi",
+      "suggestion": "Anna hankkeen suunniteltu alkamis- ja päättymispäivä päivämäärinä. Aikaan sidotut kustannukset, hinnannousu ja aikataulu hinnoitellaan niiden välille"
+    },
+    "planned_dates_ordered": {
+      "fail": "Hankkeen on suunniteltu alkavan {start} ja päättyvän {end}, ennen alkamistaan",
+      "suggestion": "Vaihda suunnitellut päivämäärät keskenään tai korjaa ne niin, että alku edeltää loppua"
+    },
+    "client_recorded": {
+      "fail": "Hankkeelle ei ole kirjattu asiakasta eikä mikään sopimus nimeä tilaajaa",
+      "suggestion": "Kirjaa asiakas hankkeelle tai lisää tilaaja sopimusosapuoleksi, jotta kustannusarviolla on vastaanottaja"
+    },
+    "procurement_started": {
+      "fail": "Hanke on vaiheessa {phase}, mutta sillä ei ole sopimusta eikä tarjouspakettia",
+      "suggestion": "Luo määräluettelosta tarjouspaketti, kirjaa sopimus tai palauta vaihe kustannusarviovaiheeseen, jossa hanke todellisuudessa on"
+    }
+  },
+  "boq_resources": {
+    "unit_rate_not_rederived": {
+      "fail": "Nimike {ordinal}: resurssirivit eivät pysty hinnoittelemaan riviä, joten yksikköhintaa ei johdettu niistä uudelleen",
+      "fallback_allowance": "Nimike {ordinal}: resurssirivit ovat arvioidun varauksen erittely, joka sisältää nimikkeen kokonaismäärän, joten yksikköhintaa ei johdettu niistä uudelleen",
+      "assumed_norm": "Nimike {ordinal}: resurssirivit sisältävät normeja, joita luettelo ei ole ilmoittanut, joten yksikköhintaa ei johdettu niistä uudelleen",
+      "norm_collapsed": "Nimike {ordinal}: resurssirivit ovat menettäneet luettelon normin ja sisältävät sen sijaan nimikkeen määrän, joten yksikköhintaa ei johdettu niistä uudelleen",
+      "whole_position_quantities": "Nimike {ordinal}: resurssirivit sisältävät koko nimikkeen määrät yksikkökohtaisten normien sijaan, joten yksikköhintaa ei johdettu niistä uudelleen",
+      "suggestion": "Tarkista analyysi; johda nimike uudelleen luettelon nimikkeestä resurssinormien tarkastuksen kautta tai korjaa rivit käsin"
+    }
+  },
+  "poland": {
+    "knr_reference_required": {
+      "fail": "Nimike {ordinal} ei viittaa KNR-luettelotaulukkoon",
+      "suggestion": "Nimeä normien lähdetaulukko podstawa-kentässä, esimerkiksi KNR 2-02 0201-01, tai kirjoita kalkulacja indywidualna omalla laskennalla hinnoitellulle riville"
+    },
+    "knr_reference_recognised": {
+      "fail": "Nimikkeen {ordinal} viite '{code}' ei nimeä KNR-luetteloperhettä",
+      "suggestion": "Aloita viite luetteloperheellä, kuten KNR, KNNR, KNR-W tai KSNR, tai merkitse rivi kalkulacja indywidualna -riviksi"
+    }
+  }
+}
