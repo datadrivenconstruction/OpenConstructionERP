@@ -1577,13 +1577,13 @@ jobs:
         # it is the only reason they belong in this file.
         #
         # vite build, not npm run build. That script is
-        # "tsc -b && npm run typecheck:e2e && vite build", and tsconfig.json
-        # sets noEmit, so neither type-checking pass produces a file the bundle
-        # step consumes. Both already have their own step in the CI workflow.
-        # Running them here would add minutes and cover nothing new.
+        # "npm run typecheck && vite build", and all four TypeScript projects
+        # set noEmit, so the type checks produce no file the bundle consumes.
+        # They already have their own step in the CI workflow. Running them
+        # here would repeat those checks without extending coverage.
         #
         # "Produces no file" is only half of what that drops, and the other half
-        # should be written down rather than discovered. tsc -b is also a gate:
+        # should be written down rather than discovered. Type checking is a gate:
         # today a type error stops the build before vite build is reached. Here
         # it will not, because esbuild strips types instead of checking them, so
         # this step will build code that does not type-check. That is the

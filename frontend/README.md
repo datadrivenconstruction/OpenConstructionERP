@@ -58,7 +58,9 @@ $env:VITE_API_TARGET = "http://127.0.0.1:9090"; npm run dev
 npm run build
 ```
 
-This runs `tsc -b` first and then `vite build`. The output goes to `dist/`.
+This runs `npm run typecheck` first and then `vite build`. Type checking covers `src` through `tsconfig.json`, both end-to-end test projects, and the root configuration files. The bundle output goes to `dist/`.
+
+The main TypeScript check reuses its incremental cache at `node_modules/.cache/typecheck.tsbuildinfo`, including when a build follows `npm run typecheck`. Changed sources still undergo type checking. The cache is disposable: `npm ci` removes it, so the next check starts cold. The three additional projects still undergo type checking on every invocation.
 
 Bundle size analysis is opt-in because calculating gzip and maximum-quality Brotli sizes is expensive. To generate `frontend/stats.html` (relative to the repository root), run from `frontend/`:
 
@@ -80,7 +82,7 @@ try {
 
 Ordinary builds skip this analysis. A previous `stats.html` remains on disk until another analysis replaces it.
 
-Treat `npm run build` as the real gate, not just an editor typecheck. The `tsc -b` step compiles against the project `tsconfig.json`, which turns on `noUnusedLocals`, `noUnusedParameters`, and `noUncheckedIndexedAccess`. That means the build fails on unused locals, unused parameters, and unchecked index access that a looser editor check can let through. If the build is green, the types are green.
+Treat `npm run build` as the real gate, not just an editor typecheck. Its `npm run typecheck` step uses the same project `tsconfig.json`, which turns on `strict`, `noUnusedLocals`, `noUnusedParameters`, and `noUncheckedIndexedAccess`. No compiler checks are weakened by the incremental cache. Type errors stop the build before Vite runs.
 
 Preview the production build locally:
 
@@ -95,7 +97,7 @@ All scripts are defined in `package.json` and run with `npm run <name>`.
 | Script | Command | What it does |
 | --- | --- | --- |
 | `dev` | `vite` | Start the dev server on port 5173 with hot module reload. |
-| `build` | `tsc -b && vite build` | Type-check the project, then build the production bundle into `dist/`. |
+| `build` | `npm run typecheck && vite build` | Type-check the application, both end-to-end projects and root configuration files, then build the production bundle into `dist/`. |
 | `preview` | `vite preview` | Serve the built `dist/` locally to check the production build. |
 | `test` | `vitest` | Run the unit and component tests. |
 | `test:e2e` | `playwright test` | Run the end-to-end browser tests. |

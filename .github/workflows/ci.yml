@@ -503,8 +503,9 @@ jobs:
         run: npm run typecheck
 
       - name: Build
-        # `tsc -b && vite build` runs another whole-program compile, so it needs
-        # the same 12 GB heap and likewise cannot fit the 7 GB macOS runner.
+        # Build reuses the main incremental typecheck cache from the step above
+        # and checks all three additional projects again before Vite. A cold
+        # check still needs the 12 GB heap and cannot fit the 7 GB macOS runner.
         if: matrix.os != 'macos-latest'
         env:
           NODE_OPTIONS: --max-old-space-size=12288
