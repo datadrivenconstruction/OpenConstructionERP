@@ -38,9 +38,9 @@ class TestMessages:
     def test_default_locale_is_english(self) -> None:
         assert DEFAULT_LOCALE == "en"
 
-    def test_en_de_it_ru_present(self) -> None:
+    def test_supported_locales_present(self) -> None:
         locales = set(available_locales())
-        for required in ("en", "de", "it", "ru"):
+        for required in ("en", "de", "es", "fr", "it", "ru"):
             assert required in locales, f"missing locale bundle: {required}"
 
     def test_translate_resolves_known_key(self) -> None:
@@ -93,23 +93,21 @@ class TestRegionalLocaleChaining:
 
 
 class TestLocaleKeyParity:
-    def test_locale_key_parity(self) -> None:
+    @pytest.mark.parametrize("locale", ["de", "es", "fr", "it", "ru"])
+    def test_locale_key_parity(self, locale: str) -> None:
         en_keys = _load_locale_keys("en")
-        de_keys = _load_locale_keys("de")
-        ru_keys = _load_locale_keys("ru")
-        it_keys = _load_locale_keys("it")
+        locale_keys = _load_locale_keys(locale)
         assert len(en_keys) == 13
-        assert en_keys == de_keys, f"DE missing: {en_keys - de_keys}; DE extra: {de_keys - en_keys}"
-        assert en_keys == ru_keys, f"RU missing: {en_keys - ru_keys}; RU extra: {ru_keys - en_keys}"
-        assert en_keys == it_keys, f"IT missing: {en_keys - it_keys}; IT extra: {it_keys - en_keys}"
+        assert en_keys == locale_keys, f"{locale} missing: {en_keys - locale_keys}; extra: {locale_keys - en_keys}"
 
 
-class TestItalianMessages:
-    def test_every_translation_preserves_its_formatter_contract(self) -> None:
+class TestTranslatedMessages:
+    @pytest.mark.parametrize("language", ["es", "fr", "it"])
+    def test_every_translation_preserves_its_formatter_contract(self, language: str) -> None:
         en = json.loads((_MESSAGES_DIR / "en.json").read_text(encoding="utf-8"))["bcf"]
-        it = json.loads((_MESSAGES_DIR / "it.json").read_text(encoding="utf-8"))["bcf"]
+        translated = json.loads((_MESSAGES_DIR / f"{language}.json").read_text(encoding="utf-8"))["bcf"]
         for key, source in en.items():
-            target = it[key]
+            target = translated[key]
             assert isinstance(target, str) and target.strip(), key
             assert target != source, key
             source_fields = [
@@ -124,24 +122,36 @@ class TestItalianMessages:
             ]
             assert sorted(target_fields) == sorted(source_fields), key
 
-    @pytest.mark.parametrize("locale", ["it", "it-IT"])
-    def test_every_message_renders_without_english_fallback(self, locale: str, caplog) -> None:
+    @pytest.mark.parametrize(
+        ("language", "locale"),
+        [("it", "it"), ("it", "it-IT"), ("fr", "fr"), ("fr", "fr-CA"), ("es", "es"), ("es", "es-MX")],
+    )
+    def test_every_message_renders_without_english_fallback(self, language: str, locale: str, caplog) -> None:
         reload_bundle()
-        it = json.loads((_MESSAGES_DIR / "it.json").read_text(encoding="utf-8"))["bcf"]
+        translated = json.loads((_MESSAGES_DIR / f"{language}.json").read_text(encoding="utf-8"))["bcf"]
         with caplog.at_level(logging.WARNING, logger="app.core.validation.messages"):
-            for key, template in it.items():
+            for key, template in translated.items():
                 params = {
                     field: f"VALUE_{field}" for _, field, _, _ in Formatter().parse(template) if field is not None
                 }
                 assert translate(f"bcf.{key}", locale=locale, **params) == template.format(**params), key
         assert not caplog.records
 
-    def test_unsupported_version_keeps_both_dynamic_values(self) -> None:
-        assert translate("bcf.version_unsupported", locale="it-IT", version="1.0", supported="2.1, 3.0") == (
-            "Versione BCF '1.0' non supportata. Versioni supportate: 2.1, 3.0."
-        )
+    @pytest.mark.parametrize(
+        ("locale", "expected"),
+        [
+            ("it-IT", "Versione BCF '1.0' non supportata. Versioni supportate: 2.1, 3.0."),
+            ("fr-CA", "Version BCF '1.0' non prise en charge. Versions prises en charge : 2.1, 3.0."),
+            ("es-MX", "Versión BCF '1.0' no compatible. Versiones compatibles: 2.1, 3.0."),
+        ],
+    )
+    def test_unsupported_version_keeps_both_dynamic_values(self, locale: str, expected: str) -> None:
+        assert translate("bcf.version_unsupported", locale=locale, version="1.0", supported="2.1, 3.0") == expected
 
-    def test_missing_key_retains_readable_fallback(self, caplog) -> None:
+    @pytest.mark.parametrize("locale", ["it-IT", "fr-CA", "es-MX"])
+    def test_missing_key_retains_readable_fallback(self, locale: str, caplog) -> None:
+        # Missing-key warnings are deduplicated across locales by the shared bundle.
+        reload_bundle()
         with caplog.at_level(logging.WARNING, logger="app.core.validation.messages"):
-            assert translate("bcf.missing_item", locale="it-IT") == "Missing item"
+            assert translate("bcf.missing_item", locale=locale) == "Missing item"
         assert "not found in any locale" in caplog.text
