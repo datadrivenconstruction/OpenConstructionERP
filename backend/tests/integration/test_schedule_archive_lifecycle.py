@@ -22,7 +22,7 @@ from app.modules.contracts.models import Contract, ContractMilestone
 from app.modules.projects.models import Project
 from app.modules.schedule import router as schedule_router
 from app.modules.schedule import service as schedule_service
-from app.modules.schedule.models import Activity, Schedule, ScheduleBaseline, ScheduleRelationship
+from app.modules.schedule.models import Activity, ProgressUpdate, Schedule, ScheduleBaseline, ScheduleRelationship
 from app.modules.schedule.permissions import register_schedule_permissions
 from app.modules.schedule.schemas import ScheduleCreate
 from app.modules.schedule.service import ScheduleService
@@ -184,6 +184,85 @@ async def test_baseline_permission_checked_before_schedule_lookup():
             )
             assert response.status_code == 403, response.text
         assert (await session.execute(select(func.count()).select_from(ScheduleBaseline))).scalar_one() == 0
+
+
+@pytest.mark.asyncio
+@pytest.mark.tenant_isolation
+@pytest.mark.parametrize(
+    "association", ["same_owner_other_project", "foreign_owner", "missing", "matching", "project_only"]
+)
+async def test_progress_activity_must_belong_to_submitted_project(association):
+    async with api() as (client, session, service, schedule, project, _payload):
+        activity_schedule = schedule
+        if association in {"same_owner_other_project", "foreign_owner"}:
+            owner_id = project.owner_id
+            if association == "foreign_owner":
+                other = User(
+                    email=f"progress-{uuid.uuid4()}@example.test",
+                    full_name="Other owner",
+                    hashed_password="x",
+                    role="editor",
+                )
+                session.add(other)
+                await session.flush()
+                owner_id = other.id
+            other_project = Project(name="Other progress project", owner_id=owner_id)
+            session.add(other_project)
+            await session.flush()
+            activity_schedule = await service.create_schedule(
+                ScheduleCreate(project_id=other_project.id, name="Other progress schedule")
+            )
+        activity = Activity(
+            schedule_id=activity_schedule.id, name="Reported work", start_date="2026-10-01", end_date="2026-10-01"
+        )
+        session.add(activity)
+        await session.flush()
+        activity_id = activity.id
+        if association == "missing":
+            activity_id = uuid.uuid4()
+        elif association == "project_only":
+            activity_id = None
+        response = await client.post(
+            "/schedule/progress-updates/",
+            json={
+                "project_id": str(project.id),
+                "activity_id": str(activity_id) if activity_id else None,
+                "update_date": "2026-10-01",
+                "progress_pct": "25",
+            },
+        )
+        valid = association in {"matching", "project_only"}
+        assert response.status_code == (201 if valid else 404), response.text
+        rows = list((await session.scalars(select(ProgressUpdate))).all())
+        assert len(rows) == int(valid)
+        if valid:
+            assert rows[0].project_id == project.id
+            assert rows[0].activity_id == activity_id
+            assert rows[0].progress_pct == "25"
+        else:
+            assert response.json() == {"detail": "Activity not found"}
+
+
+@pytest.mark.asyncio
+@pytest.mark.tenant_isolation
+async def test_progress_permission_checked_before_activity_lookup():
+    async with api("viewer") as (client, session, _service, schedule, project, _payload):
+        activity = Activity(
+            schedule_id=schedule.id, name="Protected work", start_date="2026-10-01", end_date="2026-10-01"
+        )
+        session.add(activity)
+        await session.flush()
+        for activity_id in (activity.id, uuid.uuid4(), None):
+            response = await client.post(
+                "/schedule/progress-updates/",
+                json={
+                    "project_id": str(project.id),
+                    "activity_id": str(activity_id) if activity_id else None,
+                    "update_date": "2026-10-01",
+                },
+            )
+            assert response.status_code == 403, response.text
+        assert await session.scalar(select(func.count()).select_from(ProgressUpdate)) == 0
 
 
 @pytest.mark.asyncio

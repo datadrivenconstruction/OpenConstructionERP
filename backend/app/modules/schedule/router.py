@@ -266,7 +266,7 @@ async def create_schedule(
     """Create a new schedule."""
     await _verify_schedule_project_owner(session, data.project_id, _user_id, payload)
     try:
-        schedule = await service.create_schedule(data)
+        schedule = await service.create_schedule(data.model_copy(update={"created_by": uuid.UUID(_user_id)}))
         return ScheduleResponse.model_validate(schedule)
     except HTTPException:
         raise
@@ -1751,7 +1751,19 @@ async def create_progress_update(
 ) -> ProgressUpdateResponse:
     """Create a progress update record."""
     await verify_project_access(data.project_id, _user_id, session)
+    from sqlalchemy import select
+
+    from app.modules.schedule.models import Activity, Schedule
     from app.modules.schedule.models import ProgressUpdate as ProgressUpdateModel
+
+    if data.activity_id is not None:
+        activity_id = await session.scalar(
+            select(Activity.id)
+            .join(Schedule, Schedule.id == Activity.schedule_id)
+            .where(Activity.id == data.activity_id, Schedule.project_id == data.project_id)
+        )
+        if activity_id is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Activity not found")
 
     record = ProgressUpdateModel(
         project_id=data.project_id,

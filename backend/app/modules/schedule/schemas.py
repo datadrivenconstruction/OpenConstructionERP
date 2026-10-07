@@ -152,6 +152,7 @@ class ScheduleCreate(BaseModel):
     start_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20, examples=["2026-05-01"])
     end_date: str | None = Field(default=None, pattern=r"^\d{4}-\d{2}-\d{2}$", max_length=20, examples=["2027-03-31"])
     data_date: str | None = Field(default=None, max_length=20)
+    # Accepted for compatibility; the HTTP route records the authenticated author.
     created_by: UUID | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 
