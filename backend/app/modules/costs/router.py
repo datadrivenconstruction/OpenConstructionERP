@@ -3047,7 +3047,7 @@ async def list_v3_catalogues() -> dict:
         try:
             from app.modules.costs.qdrant_snapshot_loader import server_collections as _probe
 
-            server_collections = set(_probe(qdrant_url=qdrant_url))
+            server_collections = set(_probe(qdrant_url=qdrant_url, strict=True))
             server_reachable = True
         except Exception as exc:  # pragma: no cover - defensive
             logger.debug("v3 catalogues: server probe failed: %s", exc)

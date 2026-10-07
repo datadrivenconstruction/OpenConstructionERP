@@ -482,6 +482,7 @@ def server_collections(
     qdrant_url: str,
     api_key: str | None = None,
     timeout_s: int = 30,
+    strict: bool = False,
 ) -> list[str]:
     """List the collections currently visible on a server-mode Qdrant.
 
@@ -490,6 +491,8 @@ def server_collections(
     Tolerates a missing /collections endpoint (returns empty list with
     a WARN log) so the CLI doesn't crash on an unexpected response -
     surfacing the snapshot summary is more useful than a stack trace.
+    Status callers use ``strict=True`` so a failed probe cannot masquerade
+    as a reachable server with zero collections.
     """
 
     try:
@@ -510,6 +513,8 @@ def server_collections(
         resp.raise_for_status()
         data: dict[str, Any] = resp.json()
     except (httpx.HTTPError, ValueError) as exc:
+        if strict:
+            raise
         logger.warning("server_collections probe failed: %s", exc)
         return []
 
