@@ -71,13 +71,24 @@ vi.mock('../locales/en', () => ({ default: { translation: EN } }));
 
 // Imported statically, not inside the hook: the module-level cost of `i18n.ts` is
 // paid during collection, which is not charged against the 10s hook timeout.
-import i18n, { loadLocaleResource } from '../i18n';
+import i18n, { isLocaleLoaded, loadLocaleResource, matchSupportedLanguage } from '../i18n';
 
 beforeAll(async () => {
   await loadLocaleResource('es-MX');
 });
 
 describe('a regional variant loads the base language it falls back to', () => {
+  it('leaves unsupported Mongolian unloaded, including a regional request', async () => {
+    const englishBefore = i18n.getResourceBundle('en', 'translation');
+    for (const code of ['mn', 'mn-MN']) {
+      await expect(loadLocaleResource(code)).resolves.toBeUndefined();
+      expect(matchSupportedLanguage(code)).toBeNull();
+      expect(isLocaleLoaded(code)).toBe(false);
+      expect(i18n.getResourceBundle(code, 'translation')).toBeUndefined();
+    }
+    expect(i18n.getResourceBundle('en', 'translation')).toEqual(englishBefore);
+  });
+
   it('puts the base bundle in the store, not just in the fallback map', () => {
     // Asserted on the bundle's actual contents, not with `hasResourceBundle`.
     // That was the first thing written here and it passed against the unfixed

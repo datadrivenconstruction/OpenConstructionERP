@@ -295,13 +295,18 @@ const moduleTranslations: Record<string, Record<string, Record<string, string>>>
 // the same chunk twice (e.g. on every ``languageChanged`` round trip).
 const loadedLocales = new Set<string>(['en']);
 
+// Keep unfinished Mongolian source available to translation tests without
+// shipping a chunk for a language the runtime deliberately does not offer.
+const localeLoaders = import.meta.glob<{ default: { translation: Record<string, string> } }>([
+  './locales/*.ts',
+  '!./locales/mn.ts',
+]);
+
 /**
  * Load and register exactly one locale chunk. Never throws.
  *
- * Vite turns the dynamic ``import(`./locales/${code}.ts`)`` literal into
- * one chunk per matching file under ``src/app/locales/``, so a French
- * user only downloads ``fr.ts`` (~50 KB gzip) instead of the previous
- * ~1.28 MB monolithic ``i18n-data`` chunk.
+ * The lazy import map gives each offered locale its own chunk, so a
+ * French reader downloads French without fetching every other language.
  *
  * Idempotent. Returns whether this call actually put a new bundle in the
  * store, which is what tells the caller a re-render is worth emitting.
@@ -312,7 +317,9 @@ async function loadLocaleChunk(code: string): Promise<boolean> {
   if (loadedLocales.has(code)) return false;
   if (!SUPPORTED_LANGUAGES.some((l) => l.code === code)) return false;
   try {
-    const mod = await import(`./locales/${code}.ts`);
+    const load = localeLoaders[`./locales/${code}.ts`];
+    if (!load) throw new Error(`No locale chunk registered for "${code}"`);
+    const mod = await load();
     const resource = (mod.default ?? mod) as { translation: Record<string, string> };
     // ``deep=false`` keeps the resource bundle as a flat dictionary —
     // critical because every locale file ships dotted keys like
