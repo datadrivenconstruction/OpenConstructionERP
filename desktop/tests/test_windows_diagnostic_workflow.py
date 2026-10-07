@@ -87,6 +87,56 @@ class WindowsDiagnosticWorkflowTests(unittest.TestCase):
         self.assertIn('DIAGNOSTIC_SOURCE_SHA', fingerprint['run'])
         self.assertIn('openconstructionerp-server-x86_64-pc-windows-msvc.exe', fingerprint['run'])
 
+    def test_only_diagnostic_reuses_the_tested_frontend_without_rebuilding(self):
+        sidecar = self.jobs['build-sidecar']['steps']
+        desktop = self.jobs['build-tauri']['steps']
+        source_build = next(s for s in sidecar if s.get('name') == 'Build frontend')
+        self.assertNotIn('if', source_build)
+        target_build = next(s for s in desktop if s.get('name') == 'Build frontend')
+        self.assertFalse(condition(target_build['if'], diagnostic=True))
+        self.assertTrue(condition(target_build['if'], event='push', ref='v18.4.0'))
+        names = [s.get('name') for s in desktop]
+        for name in ('Set up Python for diagnostic frontend verification',
+                     'Download diagnostic sidecar before frontend verification',
+                     'Download the tested diagnostic frontend',
+                     'Verify and restore the tested diagnostic frontend'):
+            step = next(s for s in desktop if s.get('name') == name)
+            self.assertTrue(condition(step['if'], diagnostic=True))
+            self.assertFalse(condition(step['if']))
+        normal_sidecar = next(s for s in desktop if s.get('name') == 'Download sidecar')
+        self.assertTrue(condition(normal_sidecar['if']))
+        self.assertFalse(condition(normal_sidecar['if'], diagnostic=True))
+        self.assertEqual(normal_sidecar['with']['name'], 'sidecar-${{ matrix.target }}')
+        sidecar_upload = next(s for s in sidecar if s.get('name') == 'Upload sidecar artifact')
+        diagnostic_sidecar = next(s for s in desktop if s.get('name') == 'Download diagnostic sidecar before frontend verification')
+        self.assertEqual(sidecar_upload['with']['name'], "${{ inputs.build_only_windows && format('sidecar-{0}-{1}-{2}', matrix.target, github.sha, github.run_attempt) || format('sidecar-{0}', matrix.target) }}")
+        self.assertEqual(diagnostic_sidecar['with']['name'], 'sidecar-${{ matrix.target }}-${{ github.sha }}-${{ github.run_attempt }}')
+        self.assertNotIn('overwrite', sidecar_upload['with'])
+        self.assertLess(names.index('Download diagnostic sidecar before frontend verification'),
+                        names.index('Verify and restore the tested diagnostic frontend'))
+        self.assertLess(names.index('Verify and restore the tested diagnostic frontend'),
+                        names.index('Check the frontend build carries the splash screen'))
+        self.assertLess(names.index('Check the frontend build carries the splash screen'),
+                        names.index('Build Windows diagnostic installer without publishing'))
+        upload = next(s for s in sidecar if s.get('name') == 'Upload the tested diagnostic frontend')
+        download = next(s for s in desktop if s.get('name') == 'Download the tested diagnostic frontend')
+        self.assertEqual(upload['with']['name'], 'frontend-windows-${{ github.sha }}-${{ github.run_attempt }}')
+        self.assertEqual(upload['with']['name'], download['with']['name'])
+        self.assertNotIn('run-id', download['with'])  # Never consume a different run's build.
+        self.assertEqual(upload['with']['if-no-files-found'], 'error')
+        for steps, name in ((sidecar, 'Package the tested diagnostic frontend'),
+                            (desktop, 'Verify and restore the tested diagnostic frontend')):
+            step = next(s for s in steps if s.get('name') == name)
+            self.assertTrue(condition(step['if'], diagnostic=True))
+            self.assertFalse(condition(step['if']))
+            for token in ('git rev-parse HEAD', '--source-sha', '--run-id', '--run-attempt', '--sidecar'):
+                self.assertIn(token, step['run'])
+        source_names = [s.get('name') for s in sidecar]
+        self.assertLess(source_names.index('Check the sidecar serves an answer on a cold start and a restart'),
+                        source_names.index('Package the tested diagnostic frontend'))
+        config = json.loads((ROOT / 'desktop/src-tauri/tauri.conf.json').read_text(encoding='utf-8'))
+        self.assertEqual(config['build']['beforeBuildCommand'], '')
+
 
 if __name__ == '__main__':
     unittest.main()
