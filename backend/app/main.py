@@ -5549,6 +5549,16 @@ def create_app() -> FastAPI:
         if not _fast_startup:
             asyncio.create_task(_risk_escalation_sweeper())
 
+        # Call recordings expire after OE_PHONELOG_AUDIO_RETENTION_DAYS (default
+        # 90); the transcript stays. Daily sweep, fail-soft like the ones above.
+        try:
+            if not _fast_startup:
+                from app.modules.phonelog.retention import retention_loop
+
+                asyncio.create_task(retention_loop())
+        except Exception:  # noqa: BLE001 - never block startup on the sweeper
+            logger.exception("Phone log retention sweeper failed to start")
+
         _section("Ready")
         # Friendly multi-line ready banner. The CLI (`openestimate serve`)
         # exposes OE_CLI_HOST / OE_CLI_PORT / OE_CLI_DATA_DIR so we can show
