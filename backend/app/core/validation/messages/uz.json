@@ -1,0 +1,868 @@
+{
+  "boq_markup": {
+    "contingency_not_on_profit": {
+      "fail": "\"{markup}\" tavakkal zaxirasi \"{profit}\" foyda satri allaqachon kiritilgan baza asosida hisoblanadi, shu sababli xavf uchun ajratilgan mablagʻga foyda marjasi qoʻshiladi",
+      "suggestion": "Bozorning standart usuli tavakkalni ustama xarajatlar va foydadan keyin ataylab joylashtirmasa, bu satrni bevosita xarajatlarga qoʻllang"
+    },
+    "order_is_declared": {
+      "fail": "{order} tartib oʻrnini bir nechta ustama satri egallagan: {markups}",
+      "suggestion": "Qaysi ustama qaysi birining ustiga hisoblanishi tasodifga qolmasligi uchun har bir satrga alohida tartib oʻrni bering"
+    },
+    "percentage_within_band": {
+      "fail": "\"{markup}\" {category} turidagi satr sifatida {percentage}%; bu 0 dan {ceiling}% gacha boʻlgan asosli oraliqdan tashqarida",
+      "suggestion": "Oʻnli kasr ajratgichini tekshiring. Har qanday holatda satr aynan kiritilgan qiymat boʻyicha baholanadi"
+    },
+    "cumulative_base_is_settled": {
+      "fail": "\"{markup}\" \"{apply_to}\" bazasiga qoʻllanadi, lekin undan oldin hech qanday satr yoʻq, shu sababli faqat bevosita xarajatlardan hisoblanadi",
+      "suggestion": "Uni hisoblash bazasiga kirishi kerak boʻlgan satrlardan keyin joylashtiring yoki bevosita xarajatlarga qoʻllang"
+    }
+  },
+  "common": {
+    "ok": "Toʻgʻri"
+  },
+  "export": {
+    "generated": "Yaratildi",
+    "content_digest": "Mazmun nazorat qiymati"
+  },
+  "field_time": {
+    "hours_per_day_max": {
+      "fail": "{worker} ishchisiga shu kuni {hours} soat yozilgan, bu {max} soatlik chegaradan ortiq",
+      "suggestion": "Yuborishdan oldin soatlarni toʻgʻri kunga yoki ishchiga ajrating"
+    },
+    "line_complete": {
+      "fail": "{line} satri toʻliq emas: {reason}",
+      "labour_xor_plant": "mehnat yoki texnikadan faqat bittasi qayd etilishi kerak; ikkalasini birga kiritish ham, ikkalasini ham boʻsh qoldirish ham mumkin emas",
+      "hours_positive": "soatlar soni noldan katta boʻlishi kerak",
+      "cost_code_required": "xarajat kodi talab etiladi",
+      "suggestion": "Ish vaqti tabelini yuborishdan oldin satrni toʻldiring"
+    },
+    "cost_code_resolves": {
+      "fail": "{line} satridagi '{code}' kodi ushbu loyihadagi ish hajmlari qaydnomasining hech bir pozitsiyasiga yoki WBSga mos kelmaydi",
+      "suggestion": "Loyiha ish hajmlari qaydnomasida mavjud xarajat kodi yoki WBSni tanlang"
+    },
+    "daywork_needs_variation": {
+      "fail": "{line} kunbay hisoblanadigan ish satri ochiq oʻzgarishga bogʻlanmagan",
+      "suggestion": "Kunbay ishni uni bajarishga koʻrsatma berilgan oʻzgarishga bogʻlang"
+    },
+    "plant_needs_equipment": {
+      "fail": "{line} texnika satrida uskuna koʻrsatilmagan",
+      "suggestion": "Mashina soatlarini baholash uchun mashinani biriktiring"
+    },
+    "approved_immutable": {
+      "fail": "Bu ish vaqti tabelining holati {status}; uni tahrirlab boʻlmaydi",
+      "suggestion": "Tasdiqlangan soatlarni tuzatish uchun teskari yozuvli ish vaqti tabelini kiriting"
+    },
+    "offline_clock_plausible": {
+      "fail": "Shu kunni qayd etgan qurilma soati server soatidan {minutes} daqiqa oldinda boʻlgan",
+      "suggestion": "Qayd etilgan vaqtlar toʻgʻri tartibda oʻqilishi uchun qurilma soatini sozlang"
+    },
+    "offline_sync_delay": {
+      "fail": "Ish {date} kuni bajarilgan, lekin ofisga faqat {days} kundan keyin yetib kelgan",
+      "suggestion": "Tasdiqlashdan oldin soatlarni shu kunning yozuvlari bilan tekshiring; toʻlovni baholash davri allaqachon yopilgan boʻlishi mumkin"
+    }
+  },
+  "ai_takeoff": {
+    "unreviewed_proposals": {
+      "fail": "{count} hajm hisoblash taklifi hali koʻrib chiqishni kutmoqda va bu yerda narxlanmagan",
+      "suggestion": "Tasdiqlangan miqdorlar chizmaga mos kelishi uchun koʻrib chiqish navbatini yakunlang"
+    }
+  },
+  "boq_quality": {
+    "position_has_quantity": {
+      "fail": "{ordinal} pozitsiyasining miqdori nol yoki kiritilmagan boʻlmasligi kerak",
+      "suggestion": "0 dan katta miqdorni belgilang"
+    },
+    "position_has_unit_rate": {
+      "fail": "{ordinal} pozitsiyasiga birlik narxi tayinlanishi kerak",
+      "suggestion": "Xarajatlar bazasidan narx tayinlang"
+    },
+    "position_has_description": {
+      "fail": "{ordinal} pozitsiyasining tavsifi boʻsh boʻlishi mumkin emas"
+    },
+    "no_duplicate_ordinals": {
+      "fail": "'{ordinal}' tartib raqami {count} pozitsiyada takrorlangan"
+    },
+    "unit_rate_in_range": {
+      "fail": "{ordinal} pozitsiyasi: {rate} narxi >{threshold} (medianadan 5 baravar)",
+      "suggestion": "Bu birlik narxini tekshiring; u noodatiy darajada yuqori"
+    },
+    "negative_values": {
+      "fail": "{ordinal} pozitsiyasida manfiy qiymatlar bor: {details}",
+      "suggestion": "Manfiy qiymatlarni tuzating; musbat sonlardan foydalaning"
+    },
+    "unrealistic_rate": {
+      "fail": "{ordinal} pozitsiyasi: {details}",
+      "suggestion": "Bu qiymatni tekshiring; u haqiqatga mos kelmaydigan darajada yuqori koʻrinadi",
+      "not_assessed_no_currency": "{count} pozitsiya baholanmadi: qaydnomada valyuta koʻrsatilmagan, shu sababli {reference} valyutasidagi pul chegaralarini unga oʻtkazib boʻlmadi",
+      "not_assessed_no_currency_suggestion": "Loyiha valyutasini belgilang yoki pozitsiyalarga valyuta yozing",
+      "not_assessed_no_rate": "{currency} valyutasidagi {count} pozitsiya baholanmadi: {reference} dan {currency} ga kurs qayd etilmagan, shu sababli pul chegaralarini ushbu qaydnomaga moslab boʻlmadi",
+      "not_assessed_no_rate_suggestion": "Valyuta kurslari reyestriga yoki loyiha kurslariga {currency} uchun {reference} kursini qoʻshing"
+    },
+    "total_mismatch": {
+      "fail": "{ordinal} pozitsiyasi: hisoblangan {computed} != saqlangan {stored} (farq={diff})",
+      "suggestion": "Jami summani qayta hisoblang: miqdor × birlik narxi"
+    },
+    "resource_split_mismatch": {
+      "fail": "{ordinal} pozitsiyasi: resurslar oraliq jami {subtotal} birlik narxi {rate} dan {diff} ga farq qiladi",
+      "suggestion": "Resurs miqdorlari va narxlarini koʻrib chiqing; ularning birlik boshiga jami pozitsiya birlik narxiga mos kelishi kerak"
+    },
+    "empty_unit": {
+      "fail": "{ordinal} pozitsiyasining birligi boʻsh yoki kiritilmagan",
+      "suggestion": "Oʻlchov birligini tayinlang (m, m2, m3, kg, dona, umumiy qatʼiy summa va hokazo)"
+    },
+    "section_without_items": {
+      "fail": "{ordinal} ({title}) boʻlimida quyi pozitsiyalar yoʻq",
+      "suggestion": "Bu boʻlimga pozitsiyalar qoʻshing yoki boʻsh boʻlimni olib tashlang"
+    },
+    "rate_vs_benchmark": {
+      "fail": "{ordinal} pozitsiyasi: {rate}/{unit} birlik narxi {threshold}/{unit} taqqoslash chegarasidan yuqori va haqiqatga mos boʻlmasligi mumkin",
+      "suggestion": "Bu narxni tekshiring; {unit} uchun odatiy narxlar {threshold} dan past boʻlishi kerak. Birlik yoki oʻnli kasr xatolarini tekshiring.",
+      "not_assessed_no_currency": "{count} pozitsiya baholanmadi: qaydnomada valyuta koʻrsatilmagan, shu sababli {reference} valyutasidagi taqqoslash chegaralarini unga oʻtkazib boʻlmadi",
+      "not_assessed_no_currency_suggestion": "Loyiha valyutasini belgilang yoki pozitsiyalarga valyuta yozing",
+      "not_assessed_no_rate": "{currency} valyutasidagi {count} pozitsiya baholanmadi: {reference} dan {currency} ga kurs qayd etilmagan, shu sababli taqqoslash chegaralarini ushbu qaydnomaga moslab boʻlmadi",
+      "not_assessed_no_rate_suggestion": "Valyuta kurslari reyestriga yoki loyiha kurslariga {currency} uchun {reference} kursini qoʻshing"
+    },
+    "lump_sum_ratio": {
+      "fail": "{total_count} pozitsiyadan {lsum_count} tasi ({percent}) umumiy qatʼiy summadan foydalanadi; bu {threshold} chegarasidan yuqori",
+      "suggestion": "Baholash aniqligini oshirish uchun qatʼiy summali pozitsiyalarni oʻlchanadigan miqdorlarga (m, m2, m3, kg, dona) ajrating"
+    },
+    "cost_concentration": {
+      "fail": "{ordinal} pozitsiyasi qaydnoma umumiy qiymatining {share} qismini tashkil qiladi ({grand_total} dan {value}); bu {threshold} chegarasidan yuqori",
+      "suggestion": "Pozitsiyani kichikroq qismlarga ajrating yoki qiymatini tekshiring; bitta pozitsiya smetada ustunlik qilmasligi kerak"
+    },
+    "currency_consistency": {
+      "fail": "Turli valyutalar topildi: {currencies}",
+      "suggestion": "Butun ish hajmlari qaydnomasida bitta valyutadan foydalaning"
+    },
+    "measurement_consistency": {
+      "fail": "Qaydnomada metrik va imperial birliklar aralashgan; bitta tizimdan izchil foydalaning",
+      "suggestion": "Barcha miqdorlarni metrik yoki imperial birliklarga oʻtkazing"
+    },
+    "revision_cost_impact_review": {
+      "fail": "Reviziyaning {amount} miqdoridagi xarajat taʼsiri hali oʻzgarish sifatida qayd etilmagan",
+      "suggestion": "Xarajat oʻzgarishini kuzatish uchun ushbu reviziyalar taqqoslashidan oʻzgarish soʻrovi loyihasini yarating"
+    },
+    "base_date_readable": {
+      "fail": "'{base_date}' bazaviy sana yaroqli sana emas, shuning uchun qaydnomaga oʻz sanasidagi emas, bugungi soliq stavkasi qoʻllanadi",
+      "suggestion": "Narx bazasini kun, oy, chorak yoki yil sifatida koʻrsating ({shapes})"
+    },
+    "tax_date_readable": {
+      "fail": "'{tax_date}' soliq sanasi yaroqli sana emas, shuning uchun qaydnomaga oʻz sanasidagi emas, bugungi soliq stavkasi qoʻllanadi",
+      "suggestion": "Soliq sanasini kun, oy, chorak yoki yil sifatida koʻrsating ({shapes}) yoki qaydnomaning bazaviy sanasini qoʻllash uchun maydonni tozalang"
+    }
+  },
+  "din276": {
+    "cost_group_required": {
+      "fail": "{ordinal} pozitsiyasida DIN 276 KG yoʻq",
+      "suggestion": "Uch xonali DIN 276 xarajat guruhini tayinlang (masalan, devorlar uchun 330)"
+    },
+    "valid_cost_group": {
+      "fail": "{ordinal} pozitsiyasidagi DIN 276 '{code}' kodi yaroqsiz"
+    },
+    "hierarchy": {
+      "fail": "{ordinal} pozitsiyasi: KG {child} yuqori KG {parent} guruhiga kirmaydi (kutilgan prefiks '{prefix}')",
+      "suggestion": "Pozitsiyani toʻgʻri yuqori guruhga koʻchiring yoki KG kodini uning iyerarxiyasiga moslang ({prefix}xx)"
+    },
+    "completeness": {
+      "fail": "Qaydnomada KG {group} - {group_name} guruhi yoʻq",
+      "suggestion": "Toʻliq qamrov uchun KG {group} ({group_name}) pozitsiyalarini qoʻshing"
+    }
+  },
+  "gaeb": {
+    "ordinal_format": {
+      "fail": "'{ordinal}' tartib raqami ushbu faylning GAEB OZ-Maske formatiga mos kelmaydi",
+      "suggestion": "Faylning OZ-Maske formatidan foydalaning, masalan 001.001.0010 yoki 01.02.0030"
+    },
+    "lv_structure": {
+      "fail": "{ordinal} pozitsiyasi: oxirgi darajadagi pozitsiyaning yuqori boʻlimi yoʻq; GAEB LV iyerarxiyasi yuqori Leistungsgruppe guruhini talab qiladi",
+      "suggestion": "Pozitsiyani yuqori boʻlimga tayinlang (Leistungsgruppe / Titel)"
+    },
+    "einheitspreis_sanity": {
+      "negative": "{ordinal} pozitsiyasi: Einheitspreis {rate} manfiy (birlik='{unit}'); GAEB orqali manfiy narxni uzatib boʻlmaydi",
+      "zero": "{ordinal} pozitsiyasi: Einheitspreis 0.00 (birlik='{unit}'); bu yetishmayotgan narx emas, taklif qilingan nol narx ekanini tasdiqlang",
+      "suggestion": "Musbat Einheitspreis kiriting yoki pozitsiyani Bedarfsposition (ixtiyoriy ish hajmi) yoxud umumiy qatʼiy summa (birlik='lsum') sifatida belgilang"
+    },
+    "trade_section_code": {
+      "fail": "Yuqori darajadagi '{ordinal}' boʻlimida GAEB Leistungsbereich kodi yoʻq (uch xonali ish turi kodi kutiladi, masalan '012')",
+      "suggestion": "Boʻlimga uch xonali ish turi kodini (Leistungsbereich) qoʻshing, masalan yer ishlariga '012', gʻisht terish ishlariga '013'"
+    },
+    "quantity_decimals": {
+      "fail": "{ordinal} pozitsiyasi: {quantity} miqdorida {decimals} kasr xonasi bor; GAEB X83 qoidasi 3 tagacha ruxsat beradi",
+      "suggestion": "GAEB X83 boʻyicha miqdorni koʻpi bilan 3 kasr xonasigacha yaxlitlang"
+    }
+  },
+  "nrm": {
+    "classification_required": {
+      "fail": "{ordinal} pozitsiyasida NRM element kodi yoʻq",
+      "suggestion": "NRM 1/2 element kodini tayinlang (masalan, tashqi devorlar uchun 2.6.1)"
+    },
+    "valid_element": {
+      "fail": "{ordinal} pozitsiyasidagi NRM '{code}' kodi yaroqsiz"
+    },
+    "completeness": {
+      "fail": "Qaydnomada NRM {group} - {group_name} guruhi yoʻq",
+      "suggestion": "NRM {group} ({group_name}) guruhi uchun pozitsiyalar qoʻshing"
+    },
+    "base_date_declared": {
+      "fail": "Xarajat rejasi narxlari amal qiladigan bazaviy sanani koʻrsatmaydi",
+      "suggestion": "Qaydnomaga bazaviy sanani yozing. Usiz narx eskirganini yoki yana qancha inflyatsiya qoʻshish kerakligini aytib boʻlmaydi"
+    },
+    "cost_plan_stage_declared": {
+      "fail": "Xarajat rejasi loyihalashning qaysi bosqichi uchun tuzilganini koʻrsatmaydi",
+      "suggestion": "Bosqichni yozing. Kutiladigan aniqlik tuzilgan bosqichga bogʻliq; bosqichni yashirish notoʻgʻri kutilmalarni tugʻdiradi"
+    },
+    "contractor_costs_present": {
+      "preliminaries": "Xarajat rejasida bosh pudratchining qurilish maydoni umumiy xarajatlari na {group} guruhi, na ustama satri sifatida kiritilgan",
+      "overheads_and_profit": "Xarajat rejasida bosh pudratchining umumiy xarajatlari va foydasi na {group} guruhi, na ustama satri sifatida kiritilgan",
+      "suggestion": "Ularni NRM guruhi elementi yoki oʻlchangan ishlarga ustama satri sifatida qoʻshing. Ikkalasi ham toʻgʻri; ularni chiqarib tashlash ishlarning haqiqiy qiymatini kamaytirib koʻrsatadi"
+    },
+    "risk_allowance_present": {
+      "fail": "Xarajat rejasida tavakkal zaxirasi yoʻq",
+      "suggestion": "Tavakkal zaxirasini NRM 13 guruhi yoki kutilmagan xarajatlar satri sifatida qoʻshing. Zaxirasiz reja bitta taxminiy qiymatni aniq summa sifatida koʻrsatadi"
+    }
+  },
+  "masterformat": {
+    "classification_required": {
+      "fail": "{ordinal} pozitsiyasida MasterFormat kodi yoʻq",
+      "suggestion": "MasterFormat kodini tayinlang (masalan, joyida quyiladigan beton ishlari uchun 03 30 00)"
+    },
+    "valid_division": {
+      "fail": "{ordinal} pozitsiyasidagi MasterFormat '{code}' kodi yaroqsiz",
+      "suggestion": "Olti xonali MasterFormat formatidan foydalaning: XX XX XX (masalan, 03 30 00)"
+    },
+    "completeness": {
+      "fail": "Qaydnomada {division} - {division_name} boʻlimi yoʻq",
+      "suggestion": "{division} ({division_name}) boʻlimi uchun pozitsiyalar qoʻshing"
+    }
+  },
+  "sinapi": {
+    "code_required": {
+      "fail": "{ordinal} pozitsiyasida SINAPI kodi yoʻq",
+      "suggestion": "SINAPI tahlil kodini tayinlang (masalan, C30 beton uchun 87878)"
+    },
+    "valid_code": {
+      "fail": "{ordinal} pozitsiyasidagi SINAPI '{code}' kodi yaroqsiz"
+    }
+  },
+  "nbr": {
+    "classification_required": {
+      "fail": "{ordinal} pozitsiyasida NBR 12721 boʻlimi yoʻq",
+      "suggestion": "Pozitsiyani NBR 12721 boʻlimi bilan belgilang (S1 = tayyorgarlik ishlari, S2 = quyi konstruksiya, ..., S11 = qoʻshimcha ishlar)"
+    },
+    "valid_section": {
+      "fail": "{ordinal} pozitsiyasidagi NBR 12721 '{code}' boʻlimi S1..S11 qatoriga kirmaydi",
+      "suggestion": "S1 dan S11 gacha kodlardan foydalaning (masalan, yuqori konstruksiya uchun S3)"
+    }
+  },
+  "gesn": {
+    "code_required": {
+      "fail": "{ordinal} pozitsiyasida ГЭСН/ФЕР kodi yoʻq",
+      "suggestion": "ГЭСН kodini tayinlang (masalan, beton uchun 06-01-001-01)"
+    },
+    "valid_code": {
+      "fail": "ГЭСН '{code}' kodi XX-XX-XXX-XX formatiga mos kelmaydi",
+      "suggestion": "NN-NN-NNN-NN formatidan foydalaning (masalan, 06-01-001-01)"
+    },
+    "resource_breakdown": {
+      "fail": "{ordinal} pozitsiyasi {code} normasiga havola qiladi, ammo resurslar tahlili yoʻq",
+      "suggestion": "Normaning mehnat, mashina va material miqdorlarini import qiling yoki satr nega ulardan farq qilishini koʻrsating"
+    },
+    "labour_hours_present": {
+      "fail": "{ordinal} ({code}) pozitsiyasining resurslar tahlilida mehnat soatlari yoʻq",
+      "suggestion": "Norma talab qiladigan kishi-soatlarni qoʻshing; ustama xarajatlar va smeta foydasi ish haqi asosida meʼyorlanadi va ularsiz hisoblab boʻlmaydi"
+    },
+    "price_level_declared": {
+      "fail": "Smeta summalari qaysi narx darajasida ekanini koʻrsatmaydi",
+      "suggestion": "Tekshiruvchi bir xil jamiga kelishi uchun narx darajasini (sanani) va qoʻllangan qayta hisoblash indeksini koʻrsating"
+    }
+  },
+  "dpgf": {
+    "lot_required": {
+      "fail": "{ordinal} pozitsiyasi hech bir texnik ish paketiga (Lot technique) tayinlanmagan",
+      "suggestion": "Texnik ish paketini tayinlang (masalan, Lot 01 Gros Œuvre)"
+    },
+    "pricing_complete": {
+      "fail": "Faqat {priced}/{total} pozitsiyada ({percent}) narx bor; bu 80% chegarasidan past",
+      "suggestion": "DPGFni topshirishdan oldin barcha pozitsiyalar narxlarini toʻldiring"
+    }
+  },
+  "onorm": {
+    "position_format": {
+      "fail": "'{ordinal}' tartib raqami ÖNORM XX.XX.XXXXA formatiga mos kelmaydi",
+      "suggestion": "ÖNORM B 2063 formatidan foydalaning (masalan, 01.02.01A)"
+    },
+    "description_length": {
+      "fail": "{ordinal} pozitsiyasi: tavsif juda qisqa ({length} belgi, kamida 20)",
+      "suggestion": "ÖNORM B 2063 boʻyicha pozitsiya tavsifiga batafsil maʼlumot qoʻshing"
+    }
+  },
+  "gbt50500": {
+    "code_required": {
+      "fail": "{ordinal} pozitsiyasida GB/T 50500 kodi yoʻq",
+      "suggestion": "Toʻqqiz xonali GB/T 50500 kodini tayinlang (masalan, 010101001)"
+    },
+    "valid_code": {
+      "fail": "GB/T 50500 '{code}' kodi yaroqsiz; 9 yoki 12 raqam kutiladi"
+    }
+  },
+  "cpwd": {
+    "code_required": {
+      "fail": "{ordinal} pozitsiyasida CPWD/DSR kodi yoʻq",
+      "suggestion": "CPWD DSR pozitsiya havolasini tayinlang (masalan, 4.1.1)"
+    },
+    "measurement_units": {
+      "fail": "{ordinal} pozitsiyasidagi '{unit}' birligi IS 1200 standartiga mos emas",
+      "suggestion": "IS 1200 standart birliklaridan foydalaning: m, m2, m3, kg, nos, rm va hokazo"
+    }
+  },
+  "hungary": {
+    "item_code_required": {
+      "fail": "{ordinal} pozitsiyasida Vengriya pozitsiya kodi yoʻq",
+      "invalid": "{ordinal} pozitsiyasidagi '{code}' kodi pozitsiyalar tartibining ikkala tizimiga ham mos kelmaydi",
+      "suggestion": "Bino ishlarida MA-CC-SS-II (01 dan 17 gacha boblar), infratuzilma ishlarida loyiha kodlari lugʻatidagi olti yoki yetti xonali pozitsiya raqami ishlatiladi"
+    },
+    "chapter_recognised": {
+      "fail": "{ordinal} pozitsiyasidagi {chapter} bobi pozitsiyalar tartibidagi oʻn yetti bobdan biri emas"
+    },
+    "material_fee_split": {
+      "fail": "{ordinal} pozitsiyasi: material {material} va ish haqi {fee} yigʻindisi {rate} narxiga teng emas",
+      "suggestion": "Ajratma mos kelishi uchun material va ish haqi birlik narxlarini yoki umumiy narxni tuzating"
+    },
+    "item_number_unique": {
+      "fail": "{number} pozitsiya raqami {count} pozitsiyada ishlatilgan, holbuki u bitta pozitsiyani aniqlashi kerak",
+      "suggestion": "Qaydnoma mijozga yuborilishidan oldin har bir pozitsiyaga alohida loyiha raqamini bering"
+    }
+  },
+  "prezzario": {
+    "voce_code_format_valid": {
+      "fail": "{ordinal} pozitsiyasidagi '{code}' kodi qaysi narxlar roʻyxatidan olinganini koʻrsatmaydi",
+      "suggestion": "Rasmiy voce kodi narxlar roʻyxatining hududi va nashr yilidan boshlanadi, masalan TOS25_01.A03.001.001 (Toscana 2025). Kodni hududiy roʻyxatdagidek aynan koʻchiring, satrni import qiling yoki yangi narxni NP.01 deb raqamlang"
+    },
+    "voce_reference_present": {
+      "fail": "{ordinal} pozitsiyasida prezzario voce havolasi yoʻq",
+      "suggestion": "Satrni import qilingan hududiy narxlar roʻyxatidan tanlang yoki narx tahlili bilan asoslangan nuovo prezzo (NP) sifatida belgilang"
+    },
+    "costi_sicurezza_separated": {
+      "fail": "Qaydnomada tender chegirmasi qoʻllanmaydigan xavfsizlik xarajatlari uchun alohida satr yoʻq",
+      "suggestion": "Xavfsizlik xarajatlarini (oneri della sicurezza) narxlar roʻyxatining xavfsizlik bobi yoki xavfsizlik rejasidan baholangan alohida boʻlim yoki ustama satri sifatida qoʻshing"
+    },
+    "incidenza_manodopera_documented": {
+      "fail": "{ordinal} ({code}) pozitsiyasi mehnat ulushini koʻrsatmaydi",
+      "suggestion": "Tenderda mehnat xarajatini alohida koʻrsatish uchun incidenza della manodopera qiymatini narxlar roʻyxatidan oling yoki mehnat resursini qoʻshing"
+    },
+    "overheads_not_applied_twice": {
+      "fail": "Hududiy narxlar roʻyxati narxlari umumiy xarajatlar (13–17%) va foydani (10%) allaqachon oʻz ichiga oladi. Ularni qayta qoʻllash jami summani taxminan {percent}% oshiradi.",
+      "suggestion": "Ushbu qaydnomadan umumiy xarajatlar va foyda ustamalarini olib tashlang yoki faqat oʻz tahlilingiz bilan baholangan satrlarda (NP) qoldiring."
+    }
+  },
+  "romania": {
+    "deviz_chapter_required": {
+      "fail": "{ordinal} pozitsiyasida deviz general bobi koʻrsatilmagan",
+      "suggestion": "Satrni HG 907/2016 bobi va kichik bobiga joylashtiring, masalan qurilish-montaj ishlari uchun 4.1 yoki qurilish maydonini tashkil etish uchun 5.1"
+    },
+    "deviz_chapter_recognised": {
+      "fail": "{ordinal} pozitsiyasidagi deviz '{code}' kodi deviz general bobi yoki kichik bobi emas",
+      "suggestion": "HG 907/2016 deviz general hujjatining 1 dan 6 gacha boblaridagi koddan foydalaning, masalan 1.2, 2, 3.5, 4.1, 5.1 yoki 6.2"
+    }
+  },
+  "greece": {
+    "net_article_required": {
+      "fail": "{ordinal} pozitsiyasida yagona narxlar roʻyxati (ΝΕΤ) moddasi yoʻq",
+      "suggestion": "Satr narxi olingan ΝΕΤ moddasini koʻrsating, masalan ΟΙΚ 32.01.06 yoki yangi modda uchun ΝΑΟΙΚ"
+    },
+    "net_article_valid": {
+      "invalid": "{ordinal} pozitsiyasidagi '{code}' moddasi ΝΕΤ moddasi shakliga mos kelmaydi",
+      "chapter": "{ordinal} pozitsiyasidagi '{code}' moddasi bino ishlari narxlar roʻyxatida yoʻq {chapter} bobidan boshlanadi",
+      "suggestion": "Roʻyxat prefiksi va modda raqamini yozing, masalan ΟΙΚ 38.20.02, ΟΔΟ Α-2 yoki ΑΤΗΕ 8151.1"
+    }
+  },
+  "ukraine": {
+    "zkr_chapter_required": {
+      "fail": "{ordinal} pozitsiyasida yigʻma smeta bobi koʻrsatilmagan",
+      "suggestion": "Satrni зведений кошторисний розрахунок hujjatining 1 dan 12 gacha tegishli bobiga joylashtiring; asosiy obyektning bino ishlari 2-bobga kiradi"
+    },
+    "zkr_chapter_recognised": {
+      "fail": "{ordinal} pozitsiyasidagi {chapter} bobi yigʻma smetaning oʻn ikki bobidan biri emas",
+      "suggestion": "1 dan 12 gacha bob raqamidan foydalaning"
+    }
+  },
+  "birimfiyat": {
+    "code_required": {
+      "fail": "{ordinal} pozitsiyasida birim fiyat poz raqami yoʻq",
+      "suggestion": "Bayındırlık poz raqamini tayinlang (masalan, 04.013/1)"
+    },
+    "valid_poz": {
+      "fail": "'{code}' poz kodi hozirgi birlik narxlari kitobi raqami (XX.XXX.XXXX) ham, eski raqam (XX.XXX/X) ham emas",
+      "suggestion": "Kitobdagi raqamdan foydalaning, masalan 15.140.1002 yoki eski shartnomada 04.013/1; oʻz tahlilingizdagi pozitsiyalarni ÖZEL-1 deb raqamlang"
+    }
+  },
+  "sekisan": {
+    "code_required": {
+      "fail": "{ordinal} pozitsiyasida 積算 kodi yoʻq",
+      "suggestion": "積算基準 pozitsiya kodini tayinlang"
+    },
+    "metric_units": {
+      "fail": "{ordinal} pozitsiyasidagi '{unit}' birligi standart emas",
+      "suggestion": "Standart metrik birliklardan foydalaning: m, m2, m3, kg, t, 式 va hokazo"
+    }
+  },
+  "bc3": {
+    "code_required": {
+      "fail": "{ordinal} pozitsiyasida FIEBDC-3 tushuncha kodi yoʻq",
+      "suggestion": "FIEBDC-3 kodini tayinlang (masalan, E04CM040 yoki 01.02.01)"
+    },
+    "valid_code": {
+      "fail": "{ordinal} pozitsiyasidagi FIEBDC-3 '{code}' kodi yaroqsiz",
+      "suggestion": "FIEBDC-3 harf-raqam formatidan foydalaning (masalan, E04CM040, 01.02.01, CAP01#)"
+    }
+  },
+  "mexico": {
+    "apu_completeness": {
+      "fail": "{ordinal} pozitsiyasining APU tahlili toʻliq emas; yetishmayotgan xarajat qismlari: {missing}",
+      "suggestion": "Birlik narxi tahliliga yetishmayotgan bevosita xarajat qismlarini (costo directo: mehnat, materiallar, mashinalar) qoʻshing"
+    },
+    "iva_rate_valid": {
+      "fail": "{ordinal} pozitsiyasidagi IVA {rate} stavkasi yaroqsiz; Meksika IVA stavkasi 16, 8 (chegara hududi) yoki 0 foiz",
+      "suggestion": "IVA stavkasini 16 foiz (standart), 8 foiz (chegara hududi) yoki 0 foizga belgilang"
+    },
+    "subcontract_retencion": {
+      "fail": "{ordinal} subpudrat pozitsiyasida IVA/ISR ushlanmalari qoʻllanishi qayd etilmagan",
+      "suggestion": "Subpudrat satriga IVA va ISR ushlanmalarini yozing yoki hech biri qoʻllanmasligini belgilang"
+    },
+    "cfdi_rfc_present": {
+      "missing": "Tender eksporti uchun CFDI chiqaruvchisi maʼlumotlari toʻliq emas; yetishmaydi: {missing}",
+      "invalid_rfc": "RFC '{rfc}' yaroqli CFDI RFC emas (kompaniya uchun 12 belgi, jismoniy shaxs uchun 13)",
+      "suggestion": "CFDI 4.0 hisob-fakturalari uchun loyiha profilida chiqaruvchining RFC, regimen fiscal va uso CFDI maʼlumotlarini belgilang"
+    }
+  },
+  "pipeline": {
+    "side_effecting_requires_gate": {
+      "fail": "Nazorat darvozasi yoʻq, maʼlumotlarni oʻzgartiradigan tugunlar: {nodes}",
+      "suggestion": "Nashr qilishdan oldin ishga tushiruvchi/AI tugunidan har bir yozuvchi tugungacha boʻlgan barcha yoʻllarga tekshiruv yoki inson tasdigʻi darvozasini qoʻshing."
+    }
+  },
+  "property_dev": {
+    "escrow_account_required": {
+      "fail": "Koʻchmas mulkni rivojlantirish uchun '{regulator}' regulyatoriga mos faol eskrou hisobi talab etiladi",
+      "suggestion": "Muvofiqlik → Eskrou hisoblari boʻlimida regulyator litsenziyalagan bankda eskrou hisobini oching"
+    },
+    "escrow_iban_valid": {
+      "fail": "{account} eskrou hisobi: '{iban}' IBAN ISO 13616 tuzilma tekshiruvidan oʻtmadi",
+      "suggestion": "IBANni tuzating: mamlakat kodi, uzunlik va nazorat summasi ISO 13616 ga mos boʻlishi kerak"
+    },
+    "escrow_balance_reconciled": {
+      "fail": "{account} eskrou hisobi: bosh daftar qoldigʻi {ledger} operatsiyalar jami {transactions} dan {drift} ga farq qiladi",
+      "suggestion": "Eskrou hisobini solishtiring; qayd etilmagan tushumlar yoki yetishmayotgan debetlarni tekshiring"
+    },
+    "sales_contract_party_ownership_sums_to_100": {
+      "fail": "{contract} shartnomasi: mulk ulushlari jami {total}% (aynan 100% boʻlishi kerak)",
+      "suggestion": "Tomonlarning foizlarini jami 100.00% boʻladigan qilib moslang"
+    },
+    "payment_schedule_instalments_sum_to_contract_value": {
+      "fail": "{contract} shartnomasi: boʻlib toʻlash jami {instalments} shartnoma qiymati {contract_value} dan farq qiladi (farq {drift})",
+      "suggestion": "Boʻlib toʻlash summalari shartnoma jamiga teng boʻlishi uchun toʻlov jadvalini muvozanatlang"
+    },
+    "reservation_expiry_in_future": {
+      "fail": "{reservation} bandi: tugash vaqti {expires} kelajakda emas",
+      "suggestion": "Band qilish muddatini uzaytiring yoki holatini muddati oʻtgan/bekor qilingan deb oʻzgartiring"
+    },
+    "broker_commission_rate_within_bounds": {
+      "fail": "{agreement} komissiya kelishuvi: {issue}",
+      "suggestion": "0.1% dan 15% gacha stavka, qatʼiy summa yoki boʻsh boʻlmagan pogʻonali shkaladan foydalaning"
+    },
+    "price_matrix_no_negative_modifier": {
+      "fail": "{matrix} narx matritsasi: '{factor}' qoidasining {multiplier} koʻpaytiruvchisi [-0.50, 2.00] oraligʻidan tashqarida",
+      "suggestion": "Yer uchastkalarining noreal narxlarini oldini olish uchun tuzatishlarni -50% dan +200% gacha cheklang"
+    }
+  },
+  "schedule_quality": {
+    "open_ends": {
+      "fail": "'{activity}' faoliyatida {ends} bogʻlanishi yoʻq (ochiq uch / uzilgan faoliyat)",
+      "both": "oldingi yoki keyingi faoliyat",
+      "predecessor": "oldingi faoliyat",
+      "successor": "keyingi faoliyat",
+      "suggestion": "Faoliyatni tarmoqqa oldingi va keyingi bogʻlanishlar bilan ulang yoki boshlanish/tugash marrasi sifatida belgilang"
+    },
+    "negative_lag": {
+      "fail": "{predecessor} -> {successor} bogʻlanishi manfiy kechikishdan ({lag} kun) foydalanadi; bu oldinga surish boʻlib, kritik yoʻlni buzadi",
+      "suggestion": "Ketma-ketlik asosli boʻlib qolishi uchun oldinga surishni aniq faoliyat yoki SS/FF bogʻlanishi bilan almashtiring"
+    },
+    "excessive_lag": {
+      "fail": "{predecessor} -> {successor} bogʻlanishining kechikishi {lag} kun, bu {threshold} kunlik chegaradan yuqori",
+      "suggestion": "Kutish vaqtini alohida faoliyat (xarid, betonning qotishi, tasdiqlash) sifatida modellashtiring, shunda uning holatini kuzatish va resurslarni tekislashda hisobga olish mumkin"
+    },
+    "hard_constraints": {
+      "fail": "'{activity}' faoliyatida tarmoq mantiqini chetlab oʻtadigan qatʼiy sana cheklovi ({constraint}) bor",
+      "suggestion": "Oldingi faoliyatlar kechikkanda faoliyat siljishi uchun yumshoq cheklovdan (bundan oldin boshlanmasin) foydalaning yoki sanani bogʻlanish mantiqi bilan boshqaring"
+    },
+    "negative_float": {
+      "fail": "'{activity}' faoliyatining umumiy vaqt zaxirasi manfiy ({float} kun), shuning uchun jadval mavjud bogʻlanishlar bilan bajarilmaydi",
+      "suggestion": "Vaqt zaxirasini nol yoki undan yuqoriga chiqarish uchun ishlarni qayta tartiblang, qatʼiy cheklovni yumshating yoki hujjatlashtirilgan tiklash rejasini qoʻshing"
+    },
+    "high_float": {
+      "fail": "'{activity}' faoliyatining umumiy vaqt zaxirasi juda katta ({float} kun), bu {threshold} kunlik chegaradan yuqori",
+      "suggestion": "Keyingi faoliyat bilan bogʻlanish yetishmasligini tekshiring; katta zaxira odatda faoliyat tarmoqqa sust ulanganini bildiradi"
+    },
+    "missing_duration": {
+      "fail": "'{activity}' faoliyatining davomiyligi ({duration} kun) marra boʻlmagan vazifa uchun yaroqsiz",
+      "suggestion": "Ish kunlarida musbat davomiylik belgilang yoki u haqiqatan nol davomiylikdagi hodisa boʻlsa, satrni marra deb belgilang"
+    },
+    "duration_on_project_week": {
+      "fail": "'{activity}' faoliyati {start} dan {end} gacha dushanba–juma hisobida {stored} ish kuni sifatida saqlangan; loyihaning {calendar} ish haftasi boʻyicha shu sanalar {expected} beradi",
+      "suggestion": "Davomiylik loyiha ish haftasi boʻyicha qayta sanalishi uchun faoliyat sanalarini qayta saqlang yoki davomiylikni ongli ravishda kiriting"
+    }
+  },
+  "sheet_completeness": {
+    "missing": {
+      "fail": "{sheet} varagʻi chizmalar roʻyxatida bor, ammo yuklangan toʻplamda yoʻq",
+      "suggestion": "Yetishmayotgan varaqni yuklang yoki u nashrdan qaytarib olinganini tasdiqlang"
+    },
+    "extra": {
+      "fail": "{sheet} varagʻi yuklangan toʻplamda bor, ammo chizmalar roʻyxatida yoʻq",
+      "suggestion": "Uni roʻyxat yoki nashr reyestriga qoʻshing yoki ortiqcha varaqni olib tashlang"
+    },
+    "revision_mismatch": {
+      "fail": "{sheet} varagʻining reviziyasi {actual_rev}, ammo roʻyxat {expected_rev} ni kutmoqda",
+      "suggestion": "Kutilgan reviziyani chiqaring yoki roʻyxatni joriy reviziyaga yangilang"
+    }
+  },
+  "procurement": {
+    "po_has_lines": {
+      "fail": "Bu xarid buyurtmasida satrlar yoʻq, shuning uchun uning majburiyat summasi hisobga olinmaydi",
+      "suggestion": "Xarid buyurtmasini tasdiqlashdan oldin buyurtma qilingan pozitsiyalarni qoʻshing"
+    },
+    "po_line_amount": {
+      "fail": "{line} satrining jami {actual}, ammo miqdor va birlik narxi koʻpaytmasi {expected}",
+      "suggestion": "Uchala qiymat mos kelishi uchun miqdor, birlik narxi yoki satr summasini tuzating"
+    },
+    "po_subtotal_matches_lines": {
+      "fail": "Oraliq jami {actual}, ammo satrlar yigʻindisi {expected}",
+      "suggestion": "Oraliq jamini joriy satrlardan qayta hisoblang"
+    },
+    "po_total_matches_subtotal": {
+      "fail": "Jami {actual}, ammo oraliq jami va soliq yigʻindisi {expected}",
+      "suggestion": "Jami summani oraliq jami va soliqqa mos ravishda qayta hisoblang"
+    },
+    "po_no_negative_line": {
+      "fail": "{line} satrining miqdori musbat emas yoki birlik narxi manfiy",
+      "suggestion": "Teskari yozuv uchun manfiy satr oʻrniga kredit hujjatini rasmiylashtiring"
+    },
+    "po_currency_set": {
+      "fail": "Bu xarid buyurtmasida valyuta yoʻq, shuning uchun summasini jamlash yoki toʻlash mumkin emas",
+      "suggestion": "Valyutani, odatda loyiha ishlatadigan valyutani belgilang"
+    },
+    "po_vendor_assigned": {
+      "fail": "Bu xarid buyurtmasida yetkazib beruvchi koʻrsatilmagan",
+      "suggestion": "Majburiyatni tasdiqlashdan oldin yetkazib beruvchini tanlang"
+    },
+    "po_retention_within_bounds": {
+      "fail": "{percent}% kafolat ushlanmasi stavkasi 0 dan {max}% gacha boʻlgan asosli oraliqdan tashqarida",
+      "suggestion": "Ushlanmani foiz sifatida kiriting, masalan besh foiz uchun 5"
+    },
+    "po_delivery_after_issue": {
+      "fail": "Yetkazib berish {delivery} kuniga belgilangan, bu chiqarish sanasi {issue} dan oldin",
+      "suggestion": "Yetkazib berish sanasini chiqarish sanasiga yoki undan keyinga koʻchiring"
+    },
+    "po_line_cost_coded": {
+      "fail": "{line} satrida WBS, xarajat toifasi yoki xarajat satri yoʻq, shu sababli xarajatlar tarkibida koʻrinmaydi",
+      "suggestion": "Majburiyat budjetga nisbatan aks etishi uchun xarajat kodini tayinlang"
+    },
+    "invoice_within_order": {
+      "fail": "{invoice} hisob-fakturasi {po} buyurtmasining qolgan ochiq summasi {remaining} dan {excess} ga ortiq",
+      "suggestion": "Hisob-fakturani buyurtma bilan tekshiring; qoʻshimcha summa kelishilgan boʻlsa, tasdiqlashdan oldin uni buyurtma oʻzgarishi sifatida qayd eting"
+    },
+    "invoice_quantity_received": {
+      "fail": "{line} satri boʻyicha jami {invoiced} miqdoriga hisob qoʻyilmoqda, ammo faqat {received} qabul qilingan",
+      "suggestion": "Bu miqdorni tasdiqlashdan oldin yuk xatini kuting yoki tovar qabul qilinganini tasdiqlang"
+    },
+    "invoice_value_received": {
+      "fail": "{po} buyurtmasi hisoblari jami {invoiced} boʻladi, ammo qabul qilingan tovarlar buyurtma narxlarida faqat {received} turadi",
+      "suggestion": "Bu summani tasdiqlashdan oldin yuk xatini kuting yoki tovar qabul qilinganini tasdiqlang"
+    }
+  },
+  "subcontract": {
+    "agreement_has_scope": {
+      "fail": "Bu kelishuvda ish paketlari yoʻq, shuning uchun toʻlov talabining tayanchi boʻladigan ish hajmi yoʻq",
+      "suggestion": "Kelishuvni faollashtirishdan oldin shartnomaviy ish hajmini paketlarga ajrating"
+    },
+    "package_scope_described": {
+      "fail": "{package} ish paketining nomi bor, lekin qamrab oladigan ishlari tavsiflanmagan",
+      "suggestion": "Keyingi oʻzgarish nizosi uchun asos boʻlishi uchun paket nimalarni oʻz ichiga olishini yozing"
+    },
+    "agreement_value_positive": {
+      "fail": "Shartnoma qiymati {value}, shuning uchun ushlanma va shartnoma qiymatlari jadvalining hisoblash bazasi yoʻq",
+      "suggestion": "Kelishuvni faollashtirishdan oldin kelishilgan shartnoma qiymatini kiriting"
+    },
+    "packages_within_value": {
+      "fail": "Ish paketlari qiymati {planned}, lekin shartnoma qiymati {total}",
+      "suggestion": "Kelishuv oʻz ish hajmini qoplashi uchun paketlarni qayta narxlang yoki shartnoma qiymatini oshiring"
+    },
+    "agreement_dates_ordered": {
+      "fail": "Kelishuv {end} kuni tugaydi, bu {start} boshlanish kunidan oldin",
+      "suggestion": "Shartnoma davri vaqt boʻyicha oldinga yurishi uchun boshlanish yoki tugash sanasini tuzating"
+    },
+    "agreement_currency_set": {
+      "fail": "Bu kelishuvda valyuta yoʻq, shuning uchun uning toʻlovlarini jamlash yoki amalga oshirish mumkin emas",
+      "suggestion": "Valyutani, odatda loyiha ishlatadigan valyutani belgilang"
+    },
+    "retention_within_bounds": {
+      "fail": "{percent}% kafolat ushlanmasi stavkasi 0 dan {max}% gacha boʻlgan asosli oraliqdan tashqarida",
+      "suggestion": "Ushlab qolishni pul summasi sifatida emas, har bir toʻlovning foizi sifatida kiriting"
+    },
+    "insurance_valid_at_start": {
+      "fail": "Subpudratchining sugʻurtasi {expiry} kuni, ishlar {reference} kuni boshlanishidan oldin tugagan",
+      "suggestion": "Subpudratchini qurilish maydoniga qoʻyishdan oldin amaldagi sugʻurta guvohnomasini oling"
+    },
+    "unlinked_contract_twin": {
+      "fail": "{agreement} subpudrat kelishuvi va {contract} shartnomasi bir xil subpudratga oʻxshaydi, shu sababli moliyaviy hisobda u ikki marta hisoblanishi mumkin",
+      "suggestion": "Agar ular bitta subpudratga tegishli boʻlsa, ularni bogʻlang; aks holda ularni alohida deb belgilang"
+    }
+  },
+  "submittal": {
+    "reviewer_assigned": {
+      "fail": "Bu taqdim etilgan hujjat uchun tekshiruvchi belgilanmagan, shu sababli u hech kimga koʻrib chiqish uchun topshirilmaydi",
+      "suggestion": "Taqdim etishdan oldin javob berishi kerak boʻlgan tekshiruvchini tayinlang"
+    },
+    "required_date_present": {
+      "fail": "Bu taqdim etilgan hujjat uchun talab etilgan sana belgilanmagan, shu sababli uning kechikishini hisobotda koʻrsatib boʻlmaydi",
+      "suggestion": "Ushbu hujjat tasdiqlangach boshlanadigan ishlarga qarab, koʻrib chiqish tugashi kerak boʻlgan sanani belgilang"
+    },
+    "required_date_after_submitted": {
+      "fail": "Koʻrib chiqish muddati {required} kuni, hujjat {submitted} kuni taqdim etilishidan oldin tugaydi",
+      "suggestion": "Talab etilgan sanani hujjat taqdim etilgandan keyingi ish kuniga koʻchiring"
+    },
+    "review_window_sufficient": {
+      "fail": "Tekshiruvchiga {days} kun berilgan, bu odatda koʻrib chiqish uchun zarur boʻlgan {minimum} kundan kam",
+      "suggestion": "Odatdagi koʻrib chiqish muddatini ajrating yoki qisqaroq muddatni tekshiruvchi bilan oldindan kelishing"
+    },
+    "spec_section_present": {
+      "fail": "Bu taqdim etilgan hujjatda spetsifikatsiya boʻlimi koʻrsatilmagan, shu sababli uni reyestrda tegishli boʻlimga joylashtirib boʻlmaydi",
+      "suggestion": "Ushbu hujjat tegishli boʻlgan spetsifikatsiya boʻlimini kiriting"
+    },
+    "approver_distinct_from_reviewer": {
+      "fail": "Bir shaxs ({person}) ham tekshiruvchi, ham tasdiqlovchi boʻlib belgilangan, shu sababli ikkinchi mustaqil tekshiruv yoʻq",
+      "suggestion": "Tekshiruvchidan boshqa tasdiqlovchini tayinlang"
+    },
+    "linked_scope_present": {
+      "fail": "Bu taqdim etilgan hujjat hech qanday ish bandiga bogʻlanmagan, shu sababli u hech bir ishlar paketida jamlanmaydi",
+      "suggestion": "Ushbu hujjat qamrab oladigan ish hajmlari qaydnomasi bandlarini bogʻlang"
+    }
+  },
+  "rfq": {
+    "scope_described": {
+      "fail": "Bu soʻrovda ishlar mazmuni ham, tavsifi ham yoʻq, shu sababli yetkazib beruvchi narxlashi uchun hech narsa yoʻq",
+      "suggestion": "Olingan takliflarni taqqoslash mumkin boʻlishi uchun eʼlon qilishdan oldin ishlar mazmunini tavsiflang"
+    },
+    "deadline_present": {
+      "fail": "Bu soʻrovda taklif topshirish muddati koʻrsatilmagan, shu sababli takliflarni qabul qilish hech qachon yopilmaydi",
+      "suggestion": "Takliflar kelib tushishi kerak boʻlgan sana va vaqtni belgilang"
+    },
+    "deadline_parseable": {
+      "fail": "Taklif topshirish muddati {value} tizim oʻqiy oladigan sana emas va har bir taklif rad etiladi",
+      "suggestion": "Muddatni sana sifatida kiriting, masalan, 2026-08-31"
+    },
+    "deadline_in_future": {
+      "fail": "Taklif topshirish muddati {deadline} bugungi {today} sanasiga kelib oʻtib ketgan, shu sababli soʻrov yopiq holda keladi",
+      "suggestion": "Eʼlon qilishdan oldin muddatni kelajakdagi sanaga koʻchiring"
+    },
+    "has_recipients": {
+      "fail": "Bu soʻrov hech bir yetkazib beruvchiga yoʻllanmagan, shu sababli uni eʼlon qilish hech kimga bildirishnoma yubormaydi",
+      "suggestion": "Ushbu soʻrov yuboriladigan yetkazib beruvchilarni qoʻshing"
+    },
+    "currency_set": {
+      "fail": "Bu soʻrovda valyuta koʻrsatilmagan, shu sababli takliflarni oʻzaro saralab boʻlmaydi",
+      "suggestion": "Takliflar narxi koʻrsatilishi kerak boʻlgan valyutani belgilang"
+    },
+    "bid_currency_matches": {
+      "fail": "{bid} taklifi {bid_currency} valyutasida narxlangan, ammo soʻrov valyutasi {rfq_currency}",
+      "suggestion": "Taklif beruvchidan soʻrov valyutasida qayta taklif berishni soʻrang yoki kelishilgan konvertatsiyani qayd eting"
+    },
+    "bid_amounts_parseable": {
+      "fail": "{bid} taklifining summasi {value}; bu saralash uchun yaroqli son emas",
+      "suggestion": "Gʻolibni tanlashdan oldin taklif summasini tuzating"
+    },
+    "bids_still_valid": {
+      "fail": "{bid} taklifining amal qilish muddati {expired} kuni tugagan, bugun esa {today}, shu sababli uning narxi endi majburiy kuchga ega emas",
+      "suggestion": "Gʻolibni tanlashdan oldin taklif beruvchidan narxni tasdiqlashni soʻrang"
+    },
+    "award_has_competition": {
+      "fail": "Bu tanlov {count} ta taklifga asoslangan, bu raqobatli taqqoslash uchun zarur boʻlgan {minimum} tadan kam",
+      "suggestion": "Bitta manbadan xarid qilish nega asosli ekanini qayd eting yoki koʻproq taklif beruvchilarni taklif qiling"
+    }
+  },
+  "errors": {
+    "resource_not_found": "Resurs topilmadi",
+    "project_not_found": "Loyiha topilmadi",
+    "vendor_not_found": "Yetkazib beruvchi topilmadi",
+    "template_not_found": "Andoza topilmadi",
+    "position_not_found": "Pozitsiya topilmadi",
+    "boq_not_found": "Ish hajmlari qaydnomasi topilmadi",
+    "session_not_found": "Seans topilmadi",
+    "document_not_found": "Hujjat topilmadi",
+    "documents_batch_delete_referenced": "Boshqa yozuvlar ushbu guruhdagi hujjatlarga hali ham havola qilmoqda. Oʻchirish qaysi bogʻlanishlarni uzishini tekshiring va acknowledge_references bilan tasdiqlang.",
+    "invitation_not_found": "Taklifnoma topilmadi",
+    "agreement_not_found": "Kelishuv topilmadi",
+    "rejection_not_found": "Rad etish yozuvi topilmadi",
+    "claim_not_found": "Bajarilgan ishlar boʻyicha toʻlov talabnomasi topilmadi",
+    "gaeb_x89_final_account_unsupported": "Yakuniy hisobni yoki qisman yakuniy hisobni hozircha GAEB X89 sifatida eksport qilib boʻlmaydi. Unda jami bajarilgan ishlar qiymatidan avvalgi toʻlovlar chegirilishi kerak, talabnomadan esa faqat bitta davr uchun oraliq hisob-faktura tuziladi. Talabnomani oraliq hisob-faktura sifatida eksport qiling.",
+    "xpwe_native_file_refused": "Bu smeta dasturining oʻz loyiha fayli boʻlib, uni faqat oʻsha dastur ochishi mumkin. Smeta dasturingizdan smetani XPWE formatida eksport qiling va .xpwe faylini yuklang.",
+    "plot_not_found": "Yer uchastkasi topilmadi",
+    "survey_not_found": "Dron bilan oʻlchash topilmadi",
+    "diary_video_not_found": "Kundalik videosi topilmadi",
+    "diary_photo_not_found": "Kundalik fotosurati topilmadi",
+    "bidder_not_found": "Taklif beruvchi topilmadi",
+    "webhook_not_found": "Vebhuk topilmadi",
+    "submission_not_found": "Taqdim etilgan yozuv topilmadi",
+    "measurement_not_found": "Qurilish maydonidagi oʻlchov topilmadi",
+    "salescontract_not_found": "Sotish shartnomasi topilmadi",
+    "prompt_not_found": "Soʻrov andozasi topilmadi",
+    "prequalification_not_found": "Dastlabki malaka baholashi topilmadi",
+    "purchase_requisition_not_found": "Xarid talabnomasi topilmadi",
+    "purchase_order_not_found": "Xarid buyurtmasi topilmadi",
+    "group_not_found": "Guruh topilmadi",
+    "final_account_not_found": "Yakuniy hisob topilmadi",
+    "estimate_job_not_found": "Smeta hisoblash vazifasi topilmadi",
+    "escrow_not_found": "Eskrou operatsiyasi topilmadi",
+    "commission_accrual_not_found": "Komissiya hisoblanishi topilmadi",
+    "baseline_not_found": "Bazaviy reja topilmadi",
+    "fx_rate_set_locked": "{date} sanasi uchun ECB kurslari qulflangan, shu sababli bu yangilash ularni almashtirmadi. Agar ushbu kurslar toʻplamiga yangi eʼlon qilingan qiymatlar olinishi kerak boʻlsa, avval qulfini oching.",
+    "boq_locked": "Ish hajmlari qaydnomasi qulflangan va uni oʻzgartirib boʻlmaydi. Oʻzgartirish uchun yangi tahrir yarating.",
+    "boq_link_owner_locked": "'{code}' kodi qulflangan '{bill}' qaydnomasidagi satrda belgilangan va unga bogʻlanish ushbu qaydnomani oʻzgartiradi. Avval qaydnomaning qulfini oching yoki satrni yangi kod bilan kiriting."
+  },
+  "variations": {
+    "boq_lines_are_traced": {
+      "fail": "Ushbu oʻzgartirish qaydnomasidagi {line} satri hech qanday manbaga — na shartnoma qiymatlari jadvalidagi satrga, na smeta pozitsiyasiga — bogʻlanmagan",
+      "suggestion": "Summani asoslash mumkin boʻlishi uchun ushbu oʻzgartirish taʼsir qiladigan shartnoma satrini yoki ishlar mazmuni olingan smeta pozitsiyasini koʻrsating"
+    },
+    "boq_total_matches_estimate": {
+      "fail": "Bu soʻrovdagi umumiy smeta qiymati {estimate}, ammo uning narxlangan qaydnomasi jami {priced}",
+      "suggestion": "Yagona qiymatni olish uchun narxlangan jami summani soʻrovga qabul qiling yoki qaydnomani tuzating"
+    },
+    "change_kind_matches_numbers": {
+      "removed_positive": "{line} satri chiqarib tashlangan ish deb belgilangan, ammo miqdori musbat: {quantity}; chiqarib tashlangan ish shartnomadan manfiy miqdor sifatida ayriladi",
+      "added_negative": "{line} satri qoʻshilgan ish deb belgilangan, ammo miqdori manfiy: {quantity}; shartnomadan ayriladigan ish qoʻshilgan emas, chiqarib tashlangan ishdir",
+      "removed_needs_contract_line": "{line} satri chiqarib tashlangan ish deb belgilangan, ammo shartnoma qiymatlari jadvalidagi hech bir satrga bogʻlanmagan, shu sababli chiqarib tashlanadigan shartnoma bandi yoʻq",
+      "modified_needs_contract_line": "{line} satri oʻzgartirilgan ish deb belgilangan, ammo shartnoma qiymatlari jadvalidagi hech bir satrga bogʻlanmagan, shu sababli oʻzgartiriladigan shartnoma bandi yoʻq",
+      "suggestion": "Satrning manba bogʻlanishidagi oʻzgartirish turini yoki miqdorini tuzating yoxud ushbu oʻzgartirish taʼsir qiladigan shartnoma satrini koʻrsating"
+    }
+  },
+  "cases": {
+    "has_steps": {
+      "fail": "Bu misolda hali qadamlar yoʻq, shu sababli oʻquvchi amal qilishi uchun hech narsa yoʻq.",
+      "suggestion": "Ochish kerak boʻlgan ekranni va unda bajariladigan ishni koʻrsatuvchi kamida bitta qadam qoʻshing."
+    },
+    "step_titled": {
+      "fail": "{count} ta qadamda sarlavha yoki ochiladigan ekran koʻrsatilmagan.",
+      "suggestion": "Har bir qadamga qisqa sarlavha bering va u ochadigan ekranni tanlang."
+    },
+    "step_purpose": {
+      "fail": "{total} ta qadamdan {count} tasida nima uchun muhimligi aytilmagan, shu sababli misol tushuntirish emas, bosishlar roʻyxatiga oʻxshaydi.",
+      "suggestion": "Har bir qadam nima uchun kerakligi haqida bir satr qoʻshing; yangi ish boshlagan kishiga aynan shu kerak."
+    },
+    "distinct_screens": {
+      "fail": "{count} ta qadam oʻzidan oldingi qadam bilan bir xil ekranni ochadi, shu sababli oʻquvchi oʻzgarishni koʻrmaydi va qadamlarni farqlay olmaydi.",
+      "suggestion": "Ularni bitta qadamga birlashtiring yoki ikkinchisini ish amalda davom etadigan ekranga yoʻnaltiring."
+    },
+    "duration_plausible": {
+      "fail": "Bu misolda {steps} ta qadam uchun {minutes} daqiqa koʻrsatilgan. Bunga ulgura olmaydigan oʻquvchi qolgan vaqt baholariga ham ishonmay qoʻyadi.",
+      "suggestion": "Vaqt bahosini kamida {minimum} daqiqaga oshiring yoki ayrim qadamlarni olib tashlang."
+    },
+    "described": {
+      "fail": "Bu misolning qisqacha tavsifi yoʻq, shu sababli roʻyxatda faqat sarlavha koʻrinadi.",
+      "suggestion": "Oxirida oʻquvchi nimani bajargan boʻlishi haqida bir jumla qoʻshing."
+    }
+  },
+  "uk": {
+    "contract_form_declared": {
+      "fail": "Smetada narxlash uchun asos boʻlgan shartnoma shakli koʻrsatilmagan",
+      "suggestion": "Shartnoma shaklini qayd eting. Tayyorgarlik va umumiy qurilish xarajatlari, xavf hamda toʻlov shartlari turli shartnoma shakllarida turlicha narxlanadi, shu sababli busiz qiymat kam maʼno anglatadi"
+    },
+    "payment_regime_declared": {
+      "fail": "Toʻlov mexanizmi toʻliq emas: {missing} qayd etilmagan",
+      "suggestion": "Ikkala sanani ham qayd eting. Hech birini belgilamagan qurilish shartnomasi ulardan ozod boʻlmaydi; Scheme for Construction Contracts ikkala sanani ham belgilaydi va tomonlar toʻlov shartlarini oʻzlari imzolagan hujjatdan emas, normativ hujjatdan topadi"
+    },
+    "retention_declared": {
+      "fail": "Smetada qanday ushlab qolish qoʻllanishi koʻrsatilmagan",
+      "suggestion": "Ushlab qolish foizini va uni qaytarish shartlarini qayd eting yoki ushlab qolish qoʻllanmasligini koʻrsating. Ushlab qolingan mablagʻ pudratchi ishlab topgan, ammo ololmaydigan puldir; bu haqda maʼlumot bermaydigan smeta aylanma mablagʻ haqida ham maʼlumot bermaydi"
+    },
+    "cdm_duty_holders_declared": {
+      "fail": "CDM 2015 boʻyicha masʼullar qayd etilmagan: {missing} yetishmaydi",
+      "suggestion": "Tayinlovlarni qayd eting. Loyihada bir nechta pudratchi ishlasa, buyurtmachi bosh loyihachini va bosh pudratchini yozma ravishda tayinlashi shart; tayinlamasa, ushbu majburiyatlar buyurtmachining oʻziga yuklanadi"
+    },
+    "hrb_regime_declared": {
+      "fail": "Binoning yuqori xavfli toifaga kirishi masalasi hal etilmagan: {reason}",
+      "unanswered": "smetada bu bino yuqori xavfli bino ekanligi koʻrsatilmagan",
+      "disagrees": "smetada yuqori xavflilik {declared} deb koʻrsatilgan, uning oʻlchamlaridan esa {derived} kelib chiqadi",
+      "suggestion": "Bino balandligi kamida 18 m yoki qavatlari soni kamida 7 boʻlsa VA unda kamida ikkita turar joy birligi mavjud boʻlsa, u yuqori xavfli hisoblanadi. Shartning ikkala qismi ham muhim: turar joysiz baland bino yuqori xavfli emas va uni shunday deb hisoblash hech kimga kerak boʻlmagan bosqichma-bosqich tasdiqlash dasturi xarajatini keltirib chiqaradi"
+    },
+    "vat_treatment_declared": {
+      "fail": "Smetada QQS qanday hisobga olinishi koʻrsatilmagan",
+      "suggestion": "Tartibni qayd eting: standart stavka, ishlar talablarga javob bersa kamaytirilgan yoki nol stavka yoxud yetkazib berish tegishli doiraga kirsa ichki teskari hisoblash tartibi. Teskari hisoblash QQS majburiyatini buyurtmachiga oʻtkazadi va pudratchi hisob-fakturada koʻrsata oladigan summani oʻzgartiradi"
+    }
+  },
+  "project_completeness": {
+    "country_set": {
+      "fail": "Loyihada mamlakat koʻrsatilmagan, shu sababli uning narx bazasi, soliq stavkasi yoki ish kalendarini aniqlab boʻlmaydi",
+      "suggestion": "Loyiha sozlamalarida mamlakatni belgilang. Mamlakat har bir qiymat qaysi hududiy paket, soliq va kalendar asosida talqin qilinishini belgilaydi"
+    },
+    "currency_set": {
+      "fail": "Loyihada valyuta koʻrsatilmagan, shu sababli uning qaydnomalari, ustamalari va shartnomalarini jamlab boʻlmaydi",
+      "suggestion": "Loyiha sozlamalarida valyutani tanlang. Har bir qaydnoma va shartnoma shu valyutada narxlanadi va barcha jami summalar shu valyutada oʻqiladi"
+    },
+    "currency_matches_bill": {
+      "fail": "Loyiha {project_currency} valyutasida narxlangan, ammo bu qaydnoma satrlari {bill_currencies} valyutalarida narxlangan",
+      "suggestion": "Qaydnoma jami yagona son boʻlishi uchun satrlarni koʻrsatilgan kurs boʻyicha loyiha valyutasiga aylantiring yoki loyiha uchun ayirboshlash kursini qayd eting"
+    },
+    "priced_bill_present": {
+      "fail": "Loyihada pozitsiyalari bor ish hajmlari qaydnomasi yoʻq, shu sababli smeta tuzish uchun asos yoʻq",
+      "suggestion": "Ish hajmlari qaydnomasini yarating va pozitsiyalar qoʻshing yoki uni CAD modeli, elektron jadval yoxud almashinuv faylidan import qiling"
+    },
+    "bill_base_date_set": {
+      "fail": "\"{bill}\" qaydnomasida uning narxlari qaysi bazaviy sanaga tegishli ekanligi koʻrsatilmagan",
+      "suggestion": "Qaydnomada bazaviy sanani qayd eting. Busiz narxlarni indekslab, oʻz sanasidagi soliqqa tortib yoki boshqa smeta bilan taqqoslab boʻlmaydi"
+    },
+    "classification_standard_set": {
+      "fail": "Loyihada tasniflash standarti yoʻq, shu sababli uning pozitsiyalaridagi kodlarni hech kim tekshira olmaydi",
+      "suggestion": "Loyiha qaysi tasniflash standarti boʻyicha kodlanganini tanlang. Bu tekshiruvda qaysi mamlakat qoidalari qoʻllanishini ham belgilaydi"
+    },
+    "planned_dates_set": {
+      "both_missing": "Loyihada rejalashtirilgan boshlanish sanasi ham, tugash sanasi ham yoʻq",
+      "start_missing": "Loyihada rejalashtirilgan tugash sanasi bor, ammo boshlanish sanasi yoʻq",
+      "end_missing": "Loyihada rejalashtirilgan boshlanish sanasi bor, ammo tugash sanasi yoʻq",
+      "unreadable": "Rejalashtirilgan \"{value}\" qiymatini sana sifatida oʻqib boʻlmaydi",
+      "suggestion": "Loyihada rejalashtirilgan boshlanish va tugash sanalarini sana sifatida kiriting. Vaqtga bogʻliq xarajatlar, narxlar oʻsishi va ishlar jadvali shu sanalar oraligʻi uchun hisoblanadi"
+    },
+    "planned_dates_ordered": {
+      "fail": "Loyiha {start} kuni boshlanishi va {end} kuni tugashi rejalashtirilgan, ammo tugash sanasi boshlanishidan oldin",
+      "suggestion": "Boshlanish tugashdan oldin kelishi uchun rejalashtirilgan sanalarni almashtiring yoki tuzating"
+    },
+    "client_recorded": {
+      "fail": "Loyihada buyurtmachi qayd etilmagan va hech bir shartnomada ish buyurtmachisi koʻrsatilmagan",
+      "suggestion": "Smetaning kimga moʻljallangani aniq boʻlishi uchun loyihada buyurtmachini qayd eting yoki uni shartnoma tomoni sifatida qoʻshing"
+    },
+    "procurement_started": {
+      "fail": "Loyiha {phase} bosqichida, ammo unda shartnoma ham, tender paketi ham yoʻq",
+      "suggestion": "Qaydnoma asosida tender paketini yarating yoki shartnomani qayd eting yoxud bosqichni loyiha amalda turgan smeta tuzish bosqichiga qaytaring"
+    }
+  },
+  "boq_resources": {
+    "unit_rate_not_rederived": {
+      "fail": "{ordinal} pozitsiya: resurs satrlari asosida satr narxini hisoblab boʻlmaydi, shu sababli birlik narxi ular asosida qayta hisoblanmadi",
+      "fallback_allowance": "{ordinal} pozitsiya: resurs satrlari pozitsiya miqdorini saqlovchi taxminiy xarajatlar taqsimotidir, shu sababli birlik narxi ular asosida qayta hisoblanmadi",
+      "assumed_norm": "{ordinal} pozitsiya: resurs satrlarida katalogda hech qachon koʻrsatilmagan meʼyorlar bor, shu sababli birlik narxi ular asosida qayta hisoblanmadi",
+      "norm_collapsed": "{ordinal} pozitsiya: resurs satrlari katalog meʼyorini yoʻqotib, uning oʻrniga pozitsiya miqdorini saqlamoqda, shu sababli birlik narxi ular asosida qayta hisoblanmadi",
+      "whole_position_quantities": "{ordinal} pozitsiya: resurs satrlarida birlik meʼyorlari oʻrniga butun pozitsiya miqdorlari bor, shu sababli birlik narxi ular asosida qayta hisoblanmadi",
+      "suggestion": "Narx tarkibini tekshiring: resurs meʼyorlarini koʻrib chiqish orqali pozitsiyani uning katalog bandidan qayta hisoblang yoki satrlarni qoʻlda tuzating"
+    }
+  },
+  "poland": {
+    "knr_reference_required": {
+      "fail": "{ordinal} pozitsiyada KNR katalog jadvaliga havola yoʻq",
+      "suggestion": "podstawa maydonida meʼyorlar olingan katalog jadvalini koʻrsating, masalan, KNR 2-02 0201-01 yoki oʻz hisob-kitobi asosida narxlangan satr uchun kalkulacja indywidualna yozing"
+    },
+    "knr_reference_recognised": {
+      "fail": "{ordinal} pozitsiyadagi '{code}' havolasida KNR katalog oilasi koʻrsatilmagan",
+      "suggestion": "Havolani KNR, KNNR, KNR-W yoki KSNR kabi katalog oilasi bilan boshlang yoki satrni kalkulacja indywidualna deb belgilang"
+    }
+  }
+}

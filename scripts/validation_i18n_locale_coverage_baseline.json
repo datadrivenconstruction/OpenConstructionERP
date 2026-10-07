@@ -18,6 +18,7 @@
       "id",
       "it",
       "ja",
+      "kk",
       "ko",
       "nl",
       "no",
@@ -28,6 +29,7 @@
       "sv",
       "tr",
       "uk",
+      "uz",
       "zh"
     ],
     "backend/app/modules/bcf/messages": [
