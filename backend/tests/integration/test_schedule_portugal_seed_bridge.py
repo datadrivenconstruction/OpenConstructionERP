@@ -1,43 +1,71 @@
 """PT/2026 seed dates reach actual generated schedules, with explicit year gaps."""
 
+import uuid
 from datetime import date
 
 import pytest
 
+from app.modules.boq.models import BOQ, Position
 from app.modules.projects.models import Project
-from app.modules.schedule.schemas import ScheduleUpdate
+from app.modules.schedule.schemas import ScheduleCreate, ScheduleUpdate
+from app.modules.schedule.service import ScheduleService
 from app.modules.schedule_advanced.models import Calendar
+from app.modules.users.models import User
 from tests._pg import transactional_session
-from tests.integration.test_schedule_generate_from_boq_tree import _activities, _setup
 
 
-async def _portugal_task(session):
-    service, schedule_id, bill, project_id = await _setup(session)
-    project = await session.get(Project, project_id)
-    project.region = "PT"
-    project.country_code = "PT"
-    await bill.position(
-        None,
-        "1",
-        "Two working days on the fixture calendar",
-        "m2",
-        "1",
-        "10",
-        # The existing estimator adds mobilization and rounds calendar days
-        # before converting back to working days. Twelve hours yield two days.
-        meta={"labor_hours": 12, "workers_per_unit": 1},
+async def _portugal_task(session, start_date: date):
+    # Keep this small fixture local: importing another test module also brings
+    # its module-level date anchor into the Portugal calendar cases.
+    user = User(
+        email=f"pt-calendar-{uuid.uuid4().hex}@example.test",
+        hashed_password="x",
+        full_name="Portugal calendar fixture",
+        role="editor",
+        is_active=True,
+    )
+    session.add(user)
+    await session.flush()
+    project = Project(name="Portugal calendar QA", owner_id=user.id, region="PT", country_code="PT")
+    session.add(project)
+    await session.flush()
+    service = ScheduleService(session)
+    schedule = await service.create_schedule(
+        ScheduleCreate(project_id=project.id, name="Portugal calendar", start_date=start_date.isoformat())
+    )
+    boq = BOQ(project_id=project.id, name="Portugal calendar bill")
+    session.add(boq)
+    await session.flush()
+    session.add(
+        Position(
+            boq_id=boq.id,
+            ordinal="1",
+            description="Two working days on the fixture calendar",
+            unit="m2",
+            quantity="1",
+            unit_rate="10",
+            total="10",
+            sort_order=1,
+            # The estimator adds mobilization before converting calendar days
+            # back to working days. Twelve hours yield two working days.
+            metadata_={"labor_hours": 12, "workers_per_unit": 1},
+        )
     )
     await session.flush()
-    return service, schedule_id, bill, project_id
+    return service, schedule.id, boq.id, project.id
+
+
+async def _activities(service, schedule_id):
+    service.session.expire_all()
+    rows, _ = await service.list_activities_for_schedule(schedule_id, limit=100_000)
+    return rows
 
 
 @pytest.mark.asyncio
 async def test_portugal_day_moves_the_actual_task_finish_and_first_cpm_keeps_dates():
     async with transactional_session() as session:
-        service, schedule_id, bill, _ = await _portugal_task(session)
-        await service.generate_from_boq(
-            schedule_id, bill.boq_id, 10, start_date=date(2026, 6, 9), workers_per_position=1
-        )
+        service, schedule_id, boq_id, _ = await _portugal_task(session, date(2026, 6, 9))
+        await service.generate_from_boq(schedule_id, boq_id, 10, start_date=date(2026, 6, 9), workers_per_position=1)
         schedule = await service.get_schedule(schedule_id)
         calendar = schedule.metadata_["calendar"]
         assert "2026-06-10" in calendar["exceptions"]
@@ -59,10 +87,8 @@ async def test_portugal_day_moves_the_actual_task_finish_and_first_cpm_keeps_dat
 @pytest.mark.asyncio
 async def test_year_boundary_records_missing_2027_without_copying_the_2026_roster():
     async with transactional_session() as session:
-        service, schedule_id, bill, _ = await _portugal_task(session)
-        await service.generate_from_boq(
-            schedule_id, bill.boq_id, 10, start_date=date(2026, 12, 31), workers_per_position=1
-        )
+        service, schedule_id, boq_id, _ = await _portugal_task(session, date(2026, 12, 31))
+        await service.generate_from_boq(schedule_id, boq_id, 10, start_date=date(2026, 12, 31), workers_per_position=1)
         schedule = await service.get_schedule(schedule_id)
         calendar = schedule.metadata_["calendar"]
         coverage = {entry["year"]: entry for entry in calendar["holiday_coverage"]}
@@ -83,7 +109,7 @@ async def test_year_boundary_records_missing_2027_without_copying_the_2026_roste
 @pytest.mark.parametrize("manual", [False, True])
 async def test_an_explicit_site_calendar_still_overrides_the_seeded_holiday(manual):
     async with transactional_session() as session:
-        service, schedule_id, bill, project_id = await _portugal_task(session)
+        service, schedule_id, boq_id, project_id = await _portugal_task(session, date(2026, 6, 9))
         if manual:
             await service.update_schedule(
                 schedule_id,
@@ -96,9 +122,7 @@ async def test_an_explicit_site_calendar_still_overrides_the_seeded_holiday(manu
                 )
             )
             await session.flush()
-        await service.generate_from_boq(
-            schedule_id, bill.boq_id, 10, start_date=date(2026, 6, 9), workers_per_position=1
-        )
+        await service.generate_from_boq(schedule_id, boq_id, 10, start_date=date(2026, 6, 9), workers_per_position=1)
         task = next(
             activity for activity in await _activities(service, schedule_id) if activity.activity_type == "task"
         )
