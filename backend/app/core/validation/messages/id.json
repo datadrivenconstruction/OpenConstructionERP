@@ -1,0 +1,868 @@
+{
+  "boq_markup": {
+    "contingency_not_on_profit": {
+      "fail": "Cadangan risiko \"{markup}\" dihitung dari dasar yang sudah memuat baris laba \"{profit}\", sehingga margin dibebankan pada dana yang disisihkan untuk risiko",
+      "suggestion": "Terapkan baris ini pada biaya langsung, kecuali metode standar pasar memang menempatkan risiko setelah biaya umum dan laba"
+    },
+    "order_is_declared": {
+      "fail": "Urutan {order} digunakan oleh lebih dari satu baris tambahan: {markups}",
+      "suggestion": "Berikan urutan tersendiri pada setiap baris tambahan agar dasar pengenaan tiap tambahan tidak ditentukan secara kebetulan"
+    },
+    "percentage_within_band": {
+      "fail": "\"{markup}\" sebesar {percentage}% sebagai baris {category}, di luar rentang wajar 0 hingga {ceiling}%",
+      "suggestion": "Periksa tanda desimal. Baris tetap dihargai persis sesuai nilai yang dimasukkan"
+    },
+    "cumulative_base_is_settled": {
+      "fail": "\"{markup}\" diterapkan pada \"{apply_to}\", tetapi tidak ada baris sebelumnya, sehingga hanya dihitung dari biaya langsung",
+      "suggestion": "Pindahkan ke setelah baris yang harus menjadi dasarnya, atau terapkan pada biaya langsung"
+    }
+  },
+  "common": {
+    "ok": "Baik"
+  },
+  "export": {
+    "generated": "Dibuat",
+    "content_digest": "Ringkasan isi"
+  },
+  "field_time": {
+    "hours_per_day_max": {
+      "fail": "Pekerja {worker} tercatat bekerja {hours} jam pada hari ini, melebihi batas {max} jam",
+      "suggestion": "Alokasikan jam ke hari atau pekerja yang benar sebelum mengirimkan"
+    },
+    "line_complete": {
+      "fail": "Baris {line} belum lengkap: {reason}",
+      "labour_xor_plant": "harus memilih tepat satu: tenaga kerja atau alat; tidak boleh memilih keduanya atau tidak memilih apa pun",
+      "hours_positive": "jam harus lebih besar dari nol",
+      "cost_code_required": "kode biaya wajib diisi",
+      "suggestion": "Lengkapi baris sebelum mengirim lembar waktu"
+    },
+    "cost_code_resolves": {
+      "fail": "Kode '{code}' pada baris {line} tidak cocok dengan item daftar kuantitas atau WBS mana pun dalam proyek ini",
+      "suggestion": "Pilih kode biaya atau WBS yang ada dalam daftar kuantitas proyek"
+    },
+    "daywork_needs_variation": {
+      "fail": "Baris pekerjaan harian {line} tidak terhubung ke perubahan yang masih terbuka",
+      "suggestion": "Hubungkan pekerjaan harian dengan perubahan yang menjadi dasar instruksinya"
+    },
+    "plant_needs_equipment": {
+      "fail": "Baris alat {line} tidak menyebutkan peralatan",
+      "suggestion": "Lampirkan mesin agar biaya jam alat dapat dihitung"
+    },
+    "approved_immutable": {
+      "fail": "Lembar waktu ini berstatus {status} dan tidak dapat diedit",
+      "suggestion": "Buat lembar waktu pembalik untuk memperbaiki jam yang sudah disetujui"
+    },
+    "offline_clock_plausible": {
+      "fail": "Jam perangkat yang mencatat hari ini lebih cepat {minutes} menit daripada jam server",
+      "suggestion": "Atur jam perangkat agar waktu pencatatan dapat dibaca dalam urutan yang benar"
+    },
+    "offline_sync_delay": {
+      "fail": "Pekerjaan dilakukan pada {date}, tetapi baru diterima kantor {days} hari kemudian",
+      "suggestion": "Periksa jam terhadap catatan hari tersebut sebelum menyetujui; periode penilaian pembayaran mungkin sudah ditutup"
+    }
+  },
+  "ai_takeoff": {
+    "unreviewed_proposals": {
+      "fail": "{count} usulan perhitungan kuantitas masih menunggu tinjauan dan belum diberi harga di sini",
+      "suggestion": "Selesaikan antrean tinjauan agar kuantitas yang dikonfirmasi sesuai dengan gambar"
+    }
+  },
+  "boq_quality": {
+    "position_has_quantity": {
+      "fail": "Item {ordinal} tidak boleh memiliki kuantitas nol atau kosong",
+      "suggestion": "Tetapkan kuantitas lebih besar dari 0"
+    },
+    "position_has_unit_rate": {
+      "fail": "Item {ordinal} seharusnya memiliki harga satuan",
+      "suggestion": "Tetapkan harga dari basis data biaya"
+    },
+    "position_has_description": {
+      "fail": "Item {ordinal} tidak boleh memiliki uraian kosong"
+    },
+    "no_duplicate_ordinals": {
+      "fail": "Nomor urut '{ordinal}' ditemukan berulang pada {count} item"
+    },
+    "unit_rate_in_range": {
+      "fail": "Item {ordinal}: harga {rate} adalah >{threshold} (5 kali median)",
+      "suggestion": "Periksa harga satuan ini; nilainya tidak lazim tinggi"
+    },
+    "negative_values": {
+      "fail": "Item {ordinal} memiliki nilai negatif: {details}",
+      "suggestion": "Perbaiki nilai negatif; gunakan angka positif"
+    },
+    "unrealistic_rate": {
+      "fail": "Item {ordinal}: {details}",
+      "suggestion": "Periksa nilai ini; tampaknya terlalu tinggi dan tidak realistis",
+      "not_assessed_no_currency": "{count} item tidak dinilai: daftar kuantitas tidak menyebutkan mata uang, sehingga ambang nilai uang dalam {reference} tidak dapat dikonversi ke mata uangnya",
+      "not_assessed_no_currency_suggestion": "Tetapkan mata uang proyek atau catat mata uang pada item",
+      "not_assessed_no_rate": "{count} item dalam {currency} tidak dinilai: kurs dari {reference} ke {currency} belum tercatat, sehingga ambang nilai uang tidak dapat disesuaikan untuk daftar kuantitas ini",
+      "not_assessed_no_rate_suggestion": "Tambahkan kurs {reference} untuk {currency} ke register kurs valuta asing atau kurs proyek"
+    },
+    "total_mismatch": {
+      "fail": "Item {ordinal}: hasil hitung {computed} != tersimpan {stored} (selisih={diff})",
+      "suggestion": "Hitung ulang total = kuantitas × harga satuan"
+    },
+    "resource_split_mismatch": {
+      "fail": "Item {ordinal}: subtotal sumber daya {subtotal} berbeda dari harga satuan {rate} sebesar {diff}",
+      "suggestion": "Tinjau kuantitas dan harga sumber daya; jumlah per satuannya harus sesuai dengan harga satuan item"
+    },
+    "empty_unit": {
+      "fail": "Item {ordinal} memiliki satuan kosong atau tidak diisi",
+      "suggestion": "Tetapkan satuan ukur (m, m2, m3, kg, buah, lumpsum, dan sebagainya)"
+    },
+    "section_without_items": {
+      "fail": "Bagian {ordinal} ({title}) tidak memiliki item turunan",
+      "suggestion": "Tambahkan item di bawah bagian ini atau hapus bagian yang kosong"
+    },
+    "rate_vs_benchmark": {
+      "fail": "Item {ordinal}: harga satuan {rate}/{unit} melebihi ambang acuan {threshold}/{unit} dan mungkin tidak realistis",
+      "suggestion": "Periksa harga ini; harga lazim untuk {unit} seharusnya di bawah {threshold}. Periksa kesalahan satuan atau desimal.",
+      "not_assessed_no_currency": "{count} item tidak dinilai: daftar kuantitas tidak menyebutkan mata uang, sehingga ambang acuan dalam {reference} tidak dapat dikonversi ke mata uangnya",
+      "not_assessed_no_currency_suggestion": "Tetapkan mata uang proyek atau catat mata uang pada item",
+      "not_assessed_no_rate": "{count} item dalam {currency} tidak dinilai: kurs dari {reference} ke {currency} belum tercatat, sehingga ambang acuan tidak dapat disesuaikan untuk daftar kuantitas ini",
+      "not_assessed_no_rate_suggestion": "Tambahkan kurs {reference} untuk {currency} ke register kurs valuta asing atau kurs proyek"
+    },
+    "lump_sum_ratio": {
+      "fail": "{lsum_count} dari {total_count} item ({percent}) menggunakan lumpsum, melebihi ambang {threshold}",
+      "suggestion": "Uraikan item lumpsum menjadi kuantitas terukur (m, m2, m3, kg, buah) agar estimasi lebih akurat"
+    },
+    "cost_concentration": {
+      "fail": "Item {ordinal} menyumbang {share} dari total biaya daftar kuantitas ({value} dari {grand_total}), melebihi ambang {threshold}",
+      "suggestion": "Pecah item ini menjadi item lebih kecil atau periksa biayanya; satu item seharusnya tidak mendominasi estimasi"
+    },
+    "currency_consistency": {
+      "fail": "Ditemukan mata uang campuran: {currencies}",
+      "suggestion": "Gunakan satu mata uang di seluruh daftar kuantitas"
+    },
+    "measurement_consistency": {
+      "fail": "Daftar kuantitas mencampur satuan metrik dan imperial; gunakan satu sistem secara konsisten",
+      "suggestion": "Konversikan semua kuantitas ke satuan metrik atau imperial"
+    },
+    "revision_cost_impact_review": {
+      "fail": "Dampak biaya revisi sebesar {amount} belum dicatat sebagai perubahan",
+      "suggestion": "Buat draf permintaan perubahan dari perbandingan revisi ini untuk melacak perubahan biaya"
+    },
+    "base_date_readable": {
+      "fail": "Tanggal dasar '{base_date}' bukan tanggal yang valid, sehingga daftar kuantitas dikenai tarif pajak hari ini, bukan tarif pada tanggalnya",
+      "suggestion": "Nyatakan dasar harga sebagai hari, bulan, triwulan, atau tahun ({shapes})"
+    },
+    "tax_date_readable": {
+      "fail": "Tanggal pajak '{tax_date}' bukan tanggal yang valid, sehingga daftar kuantitas dikenai tarif pajak hari ini, bukan tarif pada tanggalnya",
+      "suggestion": "Nyatakan tanggal pajak sebagai hari, bulan, triwulan, atau tahun ({shapes}), atau kosongkan untuk memakai tanggal dasar daftar kuantitas"
+    }
+  },
+  "din276": {
+    "cost_group_required": {
+      "fail": "Item {ordinal} belum memiliki DIN 276 KG",
+      "suggestion": "Tetapkan kelompok biaya DIN 276 tiga digit (misalnya 330 untuk dinding)"
+    },
+    "valid_cost_group": {
+      "fail": "Kode DIN 276 '{code}' tidak valid pada item {ordinal}"
+    },
+    "hierarchy": {
+      "fail": "Item {ordinal}: KG {child} tidak berada di bawah KG induk {parent} (awalan yang diharapkan '{prefix}')",
+      "suggestion": "Pindahkan item ke induk yang benar atau sesuaikan kode KG dengan hierarki induk ({prefix}xx)"
+    },
+    "completeness": {
+      "fail": "Kelompok KG {group} - {group_name} tidak ada dalam daftar kuantitas",
+      "suggestion": "Tambahkan item untuk KG {group} ({group_name}) agar cakupan lengkap"
+    }
+  },
+  "gaeb": {
+    "ordinal_format": {
+      "fail": "Nomor urut '{ordinal}' tidak sesuai dengan GAEB OZ-Maske file ini",
+      "suggestion": "Gunakan OZ-Maske file, misalnya 001.001.0010 atau 01.02.0030"
+    },
+    "lv_structure": {
+      "fail": "Item {ordinal}: item tingkat akhir tidak memiliki bagian induk; hierarki GAEB LV memerlukan induk Leistungsgruppe",
+      "suggestion": "Tetapkan item ini ke bagian induk (Leistungsgruppe / Titel)"
+    },
+    "einheitspreis_sanity": {
+      "negative": "Item {ordinal}: Einheitspreis {rate} negatif (satuan='{unit}'); harga negatif tidak dapat ditransfer dalam GAEB",
+      "zero": "Item {ordinal}: Einheitspreis adalah 0.00 (satuan='{unit}'); pastikan ini harga nol yang ditawarkan, bukan harga yang belum diisi",
+      "suggestion": "Berikan Einheitspreis positif, atau tandai item sebagai Bedarfsposition (lingkup opsional) atau lumpsum (satuan='lsum')"
+    },
+    "trade_section_code": {
+      "fail": "Bagian tingkat atas '{ordinal}' tidak memiliki kode GAEB Leistungsbereich (diharapkan kode bidang pekerjaan tiga digit, misalnya '012')",
+      "suggestion": "Tambahkan kode bidang pekerjaan tiga digit (Leistungsbereich) ke bagian, misalnya '012' untuk pekerjaan tanah, '013' untuk pasangan dinding"
+    },
+    "quantity_decimals": {
+      "fail": "Item {ordinal}: kuantitas {quantity} memiliki {decimals} angka desimal; konvensi GAEB X83 membatasi hingga 3",
+      "suggestion": "Bulatkan kuantitas hingga paling banyak 3 angka desimal sesuai GAEB X83"
+    }
+  },
+  "nrm": {
+    "classification_required": {
+      "fail": "Item {ordinal} belum memiliki kode elemen NRM",
+      "suggestion": "Tetapkan kode elemen NRM 1/2 (misalnya 2.6.1 untuk dinding luar)"
+    },
+    "valid_element": {
+      "fail": "Kode NRM '{code}' tidak valid pada item {ordinal}"
+    },
+    "completeness": {
+      "fail": "Kelompok NRM {group} - {group_name} tidak ada dalam daftar kuantitas",
+      "suggestion": "Tambahkan item untuk kelompok NRM {group} ({group_name})"
+    },
+    "base_date_declared": {
+      "fail": "Rencana biaya tidak menyatakan tanggal dasar berlakunya harga",
+      "suggestion": "Catat tanggal dasar pada daftar kuantitas. Tanpanya, tidak dapat ditentukan apakah harga sudah usang atau berapa inflasi yang masih perlu ditambahkan"
+    },
+    "cost_plan_stage_declared": {
+      "fail": "Rencana biaya tidak menyebutkan tahap desain yang menjadi dasar penyusunannya",
+      "suggestion": "Catat tahapnya. Akurasi yang dapat diharapkan dari rencana biaya ditentukan oleh tahap penyusunannya; menyembunyikan tahap menimbulkan harapan yang keliru"
+    },
+    "contractor_costs_present": {
+      "preliminaries": "Rencana biaya tidak memuat biaya pendahuluan kontraktor utama, baik sebagai kelompok {group} maupun baris tambahan",
+      "overheads_and_profit": "Rencana biaya tidak memuat biaya umum dan laba kontraktor utama, baik sebagai kelompok {group} maupun baris tambahan",
+      "suggestion": "Tambahkan sebagai elemen kelompok NRM atau baris tambahan pada pekerjaan terukur. Keduanya benar; menghilangkannya membuat biaya pekerjaan tidak mencerminkan biaya sebenarnya"
+    },
+    "risk_allowance_present": {
+      "fail": "Rencana biaya tidak memuat cadangan risiko",
+      "suggestion": "Tambahkan cadangan risiko sebagai kelompok NRM 13 atau baris biaya tak terduga. Rencana tanpa cadangan risiko menyajikan satu angka estimasi seolah pasti"
+    }
+  },
+  "masterformat": {
+    "classification_required": {
+      "fail": "Item {ordinal} belum memiliki kode MasterFormat",
+      "suggestion": "Tetapkan kode MasterFormat (misalnya 03 30 00 untuk pekerjaan beton cor di tempat)"
+    },
+    "valid_division": {
+      "fail": "Kode MasterFormat '{code}' tidak valid pada item {ordinal}",
+      "suggestion": "Gunakan format MasterFormat enam digit: XX XX XX (misalnya 03 30 00)"
+    },
+    "completeness": {
+      "fail": "Divisi {division} - {division_name} tidak ada dalam daftar kuantitas",
+      "suggestion": "Tambahkan item untuk Divisi {division} ({division_name})"
+    }
+  },
+  "sinapi": {
+    "code_required": {
+      "fail": "Item {ordinal} belum memiliki kode SINAPI",
+      "suggestion": "Tetapkan kode komposisi SINAPI (misalnya 87878 untuk beton C30)"
+    },
+    "valid_code": {
+      "fail": "Kode SINAPI '{code}' tidak valid pada item {ordinal}"
+    }
+  },
+  "nbr": {
+    "classification_required": {
+      "fail": "Item {ordinal} belum memiliki bagian NBR 12721",
+      "suggestion": "Tandai item dengan bagian NBR 12721 (S1 = pekerjaan pendahuluan, S2 = struktur bawah, ..., S11 = pekerjaan pelengkap)"
+    },
+    "valid_section": {
+      "fail": "Bagian NBR 12721 '{code}' pada item {ordinal} bukan salah satu dari S1..S11",
+      "suggestion": "Gunakan kode S1 sampai S11 (misalnya S3 untuk struktur atas)"
+    }
+  },
+  "gesn": {
+    "code_required": {
+      "fail": "Item {ordinal} belum memiliki kode ГЭСН/ФЕР",
+      "suggestion": "Tetapkan kode ГЭСН (misalnya 06-01-001-01 untuk beton)"
+    },
+    "valid_code": {
+      "fail": "Kode ГЭСН '{code}' tidak sesuai dengan format XX-XX-XXX-XX",
+      "suggestion": "Gunakan format NN-NN-NNN-NN (misalnya 06-01-001-01)"
+    },
+    "resource_breakdown": {
+      "fail": "Item {ordinal} mengacu pada norma {code} tetapi tidak memiliki rincian sumber daya",
+      "suggestion": "Impor kuantitas tenaga kerja, alat, dan material dari norma, atau nyatakan alasan baris ini menyimpang darinya"
+    },
+    "labour_hours_present": {
+      "fail": "Item {ordinal} ({code}) memiliki rincian sumber daya tanpa jam tenaga kerja",
+      "suggestion": "Tambahkan jam-orang yang dibutuhkan norma; biaya umum dan estimasi laba dinormakan berdasarkan biaya upah dan tidak dapat dihitung tanpanya"
+    },
+    "price_level_declared": {
+      "fail": "Estimasi tidak menyebutkan tingkat harga yang digunakan dalam angkanya",
+      "suggestion": "Nyatakan tingkat harga (tanggal) dan indeks konversi yang diterapkan agar peninjau dapat memperoleh total yang sama"
+    }
+  },
+  "dpgf": {
+    "lot_required": {
+      "fail": "Item {ordinal} belum ditetapkan ke Lot technique mana pun",
+      "suggestion": "Tetapkan Lot technique (misalnya Lot 01 Gros Œuvre)"
+    },
+    "pricing_complete": {
+      "fail": "Hanya {priced}/{total} item ({percent}) yang memiliki harga, di bawah ambang 80%",
+      "suggestion": "Lengkapi harga semua item sebelum pengajuan DPGF"
+    }
+  },
+  "onorm": {
+    "position_format": {
+      "fail": "Nomor urut '{ordinal}' tidak sesuai dengan format ÖNORM XX.XX.XXXXA",
+      "suggestion": "Gunakan format ÖNORM B 2063 (misalnya 01.02.01A)"
+    },
+    "description_length": {
+      "fail": "Item {ordinal}: uraian terlalu singkat ({length} karakter, minimum 20)",
+      "suggestion": "Tambahkan detail pada uraian item sesuai ÖNORM B 2063"
+    }
+  },
+  "gbt50500": {
+    "code_required": {
+      "fail": "Item {ordinal} belum memiliki kode GB/T 50500",
+      "suggestion": "Tetapkan kode GB/T 50500 sembilan digit (misalnya 010101001)"
+    },
+    "valid_code": {
+      "fail": "Kode GB/T 50500 '{code}' tidak valid; diharapkan 9 atau 12 digit"
+    }
+  },
+  "cpwd": {
+    "code_required": {
+      "fail": "Item {ordinal} belum memiliki kode CPWD/DSR",
+      "suggestion": "Tetapkan referensi item CPWD DSR (misalnya 4.1.1)"
+    },
+    "measurement_units": {
+      "fail": "Satuan '{unit}' pada item {ordinal} tidak sesuai standar IS 1200",
+      "suggestion": "Gunakan satuan standar IS 1200: m, m2, m3, kg, nos, rm, dan sebagainya"
+    }
+  },
+  "hungary": {
+    "item_code_required": {
+      "fail": "Item {ordinal} tidak memiliki kode item Hungaria",
+      "invalid": "Kode '{code}' pada item {ordinal} tidak cocok dengan kedua sistem urutan item",
+      "suggestion": "Pekerjaan gedung menggunakan MA-CC-SS-II (bab 01 sampai 17), sedangkan pekerjaan infrastruktur menggunakan nomor item enam atau tujuh digit dari kamus kode proyek"
+    },
+    "chapter_recognised": {
+      "fail": "Bab {chapter} pada item {ordinal} bukan salah satu dari tujuh belas bab dalam urutan item"
+    },
+    "material_fee_split": {
+      "fail": "Item {ordinal}: material {material} ditambah biaya pekerjaan {fee} tidak sama dengan harga {rate}",
+      "suggestion": "Perbaiki harga satuan material dan biaya pekerjaan, atau harga total, agar rinciannya sesuai"
+    },
+    "item_number_unique": {
+      "fail": "Nomor item {number} digunakan pada {count} item, padahal harus mengidentifikasi satu item",
+      "suggestion": "Berikan nomor item proyek tersendiri pada setiap item sebelum daftar kuantitas dikirim ke klien"
+    }
+  },
+  "prezzario": {
+    "voce_code_format_valid": {
+      "fail": "Kode '{code}' pada item {ordinal} tidak menunjukkan daftar harga asalnya",
+      "suggestion": "Kode voce resmi diawali wilayah dan tahun edisi daftar harganya, misalnya TOS25_01.A03.001.001 (Toscana 2025). Salin kode persis seperti tercetak pada daftar regional, impor baris dari daftar, atau beri nomor harga baru NP.01"
+    },
+    "voce_reference_present": {
+      "fail": "Item {ordinal} tidak mencantumkan prezzario voce",
+      "suggestion": "Pilih baris dari daftar harga regional yang diimpor atau tandai sebagai nuovo prezzo (NP) yang didukung analisis harga"
+    },
+    "costi_sicurezza_separated": {
+      "fail": "Daftar kuantitas tidak memuat baris terpisah untuk biaya keselamatan yang tidak terkena diskon tender",
+      "suggestion": "Tambahkan oneri della sicurezza sebagai bagian atau baris tambahan tersendiri, dengan harga dari bab keselamatan pada daftar harga atau rencana keselamatan"
+    },
+    "incidenza_manodopera_documented": {
+      "fail": "Item {ordinal} ({code}) tidak menyatakan porsi tenaga kerjanya",
+      "suggestion": "Ambil incidenza della manodopera dari daftar harga atau tambahkan sumber daya tenaga kerja agar biaya tenaga kerja dapat dinyatakan terpisah dalam tender"
+    },
+    "overheads_not_applied_twice": {
+      "fail": "Harga daftar regional sudah mencakup biaya umum (13–17%) dan laba (10%). Menerapkannya kembali menaikkan total sekitar {percent}%.",
+      "suggestion": "Hapus tambahan biaya umum dan laba dari daftar kuantitas ini, atau pertahankan hanya pada baris yang dihargai berdasarkan analisis sendiri (NP)."
+    }
+  },
+  "romania": {
+    "deviz_chapter_required": {
+      "fail": "Item {ordinal} tidak menyebutkan bab deviz general",
+      "suggestion": "Tempatkan baris pada bab dan subbab HG 907/2016 yang sesuai, misalnya 4.1 untuk pekerjaan konstruksi dan instalasi atau 5.1 untuk organisasi lokasi kerja"
+    },
+    "deviz_chapter_recognised": {
+      "fail": "Kode deviz '{code}' pada item {ordinal} bukan bab atau subbab deviz general",
+      "suggestion": "Gunakan kode dari bab 1 sampai 6 deviz general HG 907/2016, seperti 1.2, 2, 3.5, 4.1, 5.1, atau 6.2"
+    }
+  },
+  "greece": {
+    "net_article_required": {
+      "fail": "Item {ordinal} tidak mencantumkan artikel daftar harga terpadu (ΝΕΤ)",
+      "suggestion": "Sebutkan artikel ΝΕΤ yang menjadi dasar harga baris, misalnya ΟΙΚ 32.01.06, atau ΝΑΟΙΚ untuk artikel baru"
+    },
+    "net_article_valid": {
+      "invalid": "Artikel '{code}' pada item {ordinal} tidak berbentuk artikel ΝΕΤ",
+      "chapter": "Artikel '{code}' pada item {ordinal} diawali bab {chapter}, yang tidak ada dalam daftar harga pekerjaan gedung",
+      "suggestion": "Tuliskan awalan daftar dan nomor artikel, misalnya ΟΙΚ 38.20.02, ΟΔΟ Α-2, atau ΑΤΗΕ 8151.1"
+    }
+  },
+  "ukraine": {
+    "zkr_chapter_required": {
+      "fail": "Item {ordinal} tidak menyebutkan bab estimasi ringkasan",
+      "suggestion": "Tempatkan baris pada babnya dalam зведений кошторисний розрахунок, 1 sampai 12; pekerjaan gedung objek utama berada pada bab 2"
+    },
+    "zkr_chapter_recognised": {
+      "fail": "Bab {chapter} pada item {ordinal} bukan salah satu dari dua belas bab estimasi ringkasan",
+      "suggestion": "Gunakan nomor bab 1 sampai 12"
+    }
+  },
+  "birimfiyat": {
+    "code_required": {
+      "fail": "Item {ordinal} belum memiliki nomor poz birim fiyat",
+      "suggestion": "Tetapkan nomor poz Bayındırlık (misalnya 04.013/1)"
+    },
+    "valid_poz": {
+      "fail": "Poz '{code}' bukan nomor buku harga satuan saat ini (XX.XXX.XXXX) maupun nomor lama (XX.XXX/X)",
+      "suggestion": "Gunakan nomor dalam buku, misalnya 15.140.1002, atau 04.013/1 pada kontrak lama; beri nomor item hasil analisis sendiri sebagai ÖZEL-1"
+    }
+  },
+  "sekisan": {
+    "code_required": {
+      "fail": "Item {ordinal} belum memiliki kode 積算",
+      "suggestion": "Tetapkan kode item 積算基準"
+    },
+    "metric_units": {
+      "fail": "Satuan '{unit}' pada item {ordinal} tidak standar",
+      "suggestion": "Gunakan satuan metrik standar: m, m2, m3, kg, t, 式, dan sebagainya"
+    }
+  },
+  "bc3": {
+    "code_required": {
+      "fail": "Item {ordinal} belum memiliki kode konsep FIEBDC-3",
+      "suggestion": "Tetapkan kode FIEBDC-3 (misalnya E04CM040 atau 01.02.01)"
+    },
+    "valid_code": {
+      "fail": "Kode FIEBDC-3 '{code}' tidak valid pada item {ordinal}",
+      "suggestion": "Gunakan format alfanumerik FIEBDC-3 (misalnya E04CM040, 01.02.01, CAP01#)"
+    }
+  },
+  "mexico": {
+    "apu_completeness": {
+      "fail": "Item {ordinal} memiliki APU yang belum lengkap; komponen biaya yang hilang: {missing}",
+      "suggestion": "Tambahkan komponen biaya langsung (costo directo: tenaga kerja, material, mesin) yang belum ada ke analisis harga satuan"
+    },
+    "iva_rate_valid": {
+      "fail": "Item {ordinal} memiliki tarif IVA {rate} yang tidak valid; IVA Meksiko adalah 16, 8 (wilayah perbatasan), atau 0 persen",
+      "suggestion": "Tetapkan tarif IVA ke 16 persen (standar), 8 persen (wilayah perbatasan), atau 0 persen"
+    },
+    "subcontract_retencion": {
+      "fail": "Item subkontrak {ordinal} tidak mencatat apakah pemotongan IVA/ISR berlaku",
+      "suggestion": "Catat pemotongan IVA dan ISR untuk baris subkontrak, atau tandai bahwa tidak ada yang berlaku"
+    },
+    "cfdi_rfc_present": {
+      "missing": "Data penerbit CFDI belum lengkap untuk ekspor tender; yang hilang: {missing}",
+      "invalid_rfc": "RFC '{rfc}' bukan RFC CFDI yang valid (12 karakter untuk perusahaan, 13 untuk individu)",
+      "suggestion": "Tetapkan RFC penerbit, regimen fiscal, dan uso CFDI dalam profil proyek untuk penagihan CFDI 4.0"
+    }
+  },
+  "pipeline": {
+    "side_effecting_requires_gate": {
+      "fail": "Simpul yang mengubah data tanpa gerbang persetujuan: {nodes}",
+      "suggestion": "Tambahkan gerbang Validasi atau Persetujuan Manusia pada setiap jalur dari simpul pemicu/AI ke setiap simpul penulisan sebelum menerbitkan."
+    }
+  },
+  "property_dev": {
+    "escrow_account_required": {
+      "fail": "Pengembangan memerlukan rekening escrow aktif untuk regulator '{regulator}'",
+      "suggestion": "Buka rekening escrow di bank berlisensi regulator melalui Kepatuhan → Rekening escrow"
+    },
+    "escrow_iban_valid": {
+      "fail": "Rekening escrow {account}: IBAN '{iban}' gagal dalam pemeriksaan struktur ISO 13616",
+      "suggestion": "Perbaiki IBAN: kode negara, panjang, dan checksum harus sesuai ISO 13616"
+    },
+    "escrow_balance_reconciled": {
+      "fail": "Rekening escrow {account}: saldo buku besar {ledger} berbeda {drift} dari jumlah transaksi {transactions}",
+      "suggestion": "Rekonsiliasi rekening escrow; selidiki penerimaan yang belum dicatat atau debit yang hilang"
+    },
+    "sales_contract_party_ownership_sums_to_100": {
+      "fail": "Kontrak {contract}: jumlah porsi kepemilikan adalah {total}% (harus tepat 100%)",
+      "suggestion": "Sesuaikan persentase para pihak agar berjumlah 100.00%"
+    },
+    "payment_schedule_instalments_sum_to_contract_value": {
+      "fail": "Kontrak {contract}: total angsuran {instalments} berbeda dari nilai kontrak {contract_value} (selisih {drift})",
+      "suggestion": "Seimbangkan ulang jadwal pembayaran agar jumlah angsuran sama dengan total kontrak"
+    },
+    "reservation_expiry_in_future": {
+      "fail": "Reservasi {reservation}: waktu kedaluwarsa {expires} bukan di masa depan",
+      "suggestion": "Perpanjang reservasi atau ubah status menjadi kedaluwarsa/dibatalkan"
+    },
+    "broker_commission_rate_within_bounds": {
+      "fail": "Perjanjian komisi {agreement}: {issue}",
+      "suggestion": "Gunakan persentase antara 0.1% dan 15%, jumlah tetap, atau jenjang tarif yang tidak kosong"
+    },
+    "price_matrix_no_negative_modifier": {
+      "fail": "Matriks harga {matrix}: pengali {multiplier} pada aturan '{factor}' berada di luar [-0.50, 2.00]",
+      "suggestion": "Batasi penyesuaian antara -50% dan +200% untuk menghindari harga kavling yang tidak realistis"
+    }
+  },
+  "schedule_quality": {
+    "open_ends": {
+      "fail": "Aktivitas '{activity}' tidak memiliki hubungan {ends} (ujung terbuka / aktivitas terputus)",
+      "both": "pendahulu atau penerus",
+      "predecessor": "pendahulu",
+      "successor": "penerus",
+      "suggestion": "Hubungkan aktivitas ke jaringan dengan hubungan pendahulu dan penerus, atau tetapkan sebagai tonggak awal/akhir"
+    },
+    "negative_lag": {
+      "fail": "Hubungan {predecessor} -> {successor} menggunakan jeda negatif ({lag} hari), yaitu lead yang mendistorsi jalur kritis",
+      "suggestion": "Ganti lead dengan aktivitas eksplisit atau hubungan SS/FF agar urutan tetap dapat dipertanggungjawabkan"
+    },
+    "excessive_lag": {
+      "fail": "Hubungan {predecessor} -> {successor} memiliki jeda {lag} hari, melebihi ambang {threshold} hari",
+      "suggestion": "Modelkan waktu tunggu sebagai aktivitas tersendiri (pengadaan, perawatan beton, persetujuan) agar dapat memiliki status dan diperhitungkan dalam pemerataan sumber daya"
+    },
+    "hard_constraints": {
+      "fail": "Aktivitas '{activity}' memiliki batas tanggal kaku ({constraint}) yang mengesampingkan logika jaringan",
+      "suggestion": "Gunakan batas lunak (mulai tidak lebih awal dari) atau tentukan tanggal melalui logika agar aktivitas dapat bergeser saat pendahulunya terlambat"
+    },
+    "negative_float": {
+      "fail": "Aktivitas '{activity}' memiliki kelonggaran total negatif ({float} hari), sehingga jadwal tidak dapat dicapai dengan hubungan yang ada",
+      "suggestion": "Atur ulang urutan pekerjaan, longgarkan batas kaku, atau tambahkan rencana pemulihan terdokumentasi agar kelonggaran kembali nol atau lebih"
+    },
+    "high_float": {
+      "fail": "Aktivitas '{activity}' memiliki kelonggaran total sangat tinggi ({float} hari), melebihi ambang {threshold} hari",
+      "suggestion": "Periksa hubungan penerus yang hilang; kelonggaran tinggi biasanya berarti aktivitas hanya terhubung lemah ke jaringan"
+    },
+    "missing_duration": {
+      "fail": "Aktivitas '{activity}' memiliki durasi tidak valid ({duration} hari) untuk tugas yang bukan tonggak",
+      "suggestion": "Tetapkan durasi hari kerja positif, atau tandai baris sebagai tonggak jika memang merupakan peristiwa berdurasi nol"
+    },
+    "duration_on_project_week": {
+      "fail": "Aktivitas '{activity}' tersimpan sebagai {stored} hari kerja, dengan hitungan Senin–Jumat dari {start} hingga {end}; menurut minggu kerja proyek {calendar}, tanggal tersebut berisi {expected}",
+      "suggestion": "Simpan ulang tanggal aktivitas agar durasi dihitung menurut minggu kerja proyek, atau masukkan durasinya secara sengaja"
+    }
+  },
+  "sheet_completeness": {
+    "missing": {
+      "fail": "Lembar {sheet} tercantum pada indeks gambar tetapi tidak ada dalam kumpulan yang diunggah",
+      "suggestion": "Unggah lembar yang hilang atau konfirmasikan bahwa lembar tersebut ditarik dari penerbitan"
+    },
+    "extra": {
+      "fail": "Lembar {sheet} ada dalam kumpulan yang diunggah tetapi tidak tercantum pada indeks gambar",
+      "suggestion": "Tambahkan ke indeks atau register penerbitan, atau hapus lembar yang tidak semestinya ada"
+    },
+    "revision_mismatch": {
+      "fail": "Lembar {sheet} berada pada revisi {actual_rev}, tetapi indeks mengharapkan {expected_rev}",
+      "suggestion": "Terbitkan revisi yang diharapkan atau perbarui indeks ke revisi terkini"
+    }
+  },
+  "procurement": {
+    "po_has_lines": {
+      "fail": "Pesanan pembelian ini tidak memiliki baris, sehingga nilai komitmennya tidak diperhitungkan",
+      "suggestion": "Tambahkan item pesanan sebelum menyetujui pesanan pembelian"
+    },
+    "po_line_amount": {
+      "fail": "Total baris {line} adalah {actual}, tetapi kuantitas dikali harga satuan adalah {expected}",
+      "suggestion": "Perbaiki kuantitas, harga satuan, atau jumlah baris agar ketiganya sesuai"
+    },
+    "po_subtotal_matches_lines": {
+      "fail": "Subtotal adalah {actual}, tetapi jumlah seluruh baris adalah {expected}",
+      "suggestion": "Hitung ulang subtotal dari baris yang ada"
+    },
+    "po_total_matches_subtotal": {
+      "fail": "Total adalah {actual}, tetapi subtotal ditambah pajak adalah {expected}",
+      "suggestion": "Hitung ulang total agar sesuai dengan subtotal ditambah pajak"
+    },
+    "po_no_negative_line": {
+      "fail": "Baris {line} memiliki kuantitas yang tidak positif atau harga satuan negatif",
+      "suggestion": "Buat nota kredit untuk pembalikan, bukan baris negatif"
+    },
+    "po_currency_set": {
+      "fail": "Pesanan pembelian ini tidak memiliki mata uang, sehingga nilainya tidak dapat diagregasi atau dibayar",
+      "suggestion": "Tetapkan mata uang, biasanya yang digunakan proyek"
+    },
+    "po_vendor_assigned": {
+      "fail": "Pesanan pembelian ini tidak menyebutkan pemasok",
+      "suggestion": "Pilih pemasok sebelum menyetujui komitmen"
+    },
+    "po_retention_within_bounds": {
+      "fail": "Persentase retensi {percent}% berada di luar rentang wajar 0 hingga {max}%",
+      "suggestion": "Masukkan retensi sebagai persentase, misalnya 5 untuk lima persen"
+    },
+    "po_delivery_after_issue": {
+      "fail": "Pengiriman ditetapkan pada {delivery}, sebelum tanggal penerbitan {issue}",
+      "suggestion": "Pindahkan tanggal pengiriman ke tanggal penerbitan atau setelahnya"
+    },
+    "po_line_cost_coded": {
+      "fail": "Baris {line} tidak memiliki WBS, kategori biaya, atau baris biaya, sehingga tidak muncul dalam rincian biaya",
+      "suggestion": "Tetapkan kode biaya agar komitmen dilaporkan terhadap anggaran"
+    },
+    "invoice_within_order": {
+      "fail": "Faktur {invoice} melebihi sisa terbuka {remaining} pada pesanan {po} sebesar {excess}",
+      "suggestion": "Periksa faktur terhadap pesanan; jika tambahan telah disepakati, catat sebagai perubahan pesanan sebelum menyetujui"
+    },
+    "invoice_quantity_received": {
+      "fail": "Baris {line} akan difakturkan dengan total kuantitas {invoiced}, tetapi yang diterima baru {received}",
+      "suggestion": "Tunggu surat jalan atau konfirmasikan penerimaan barang sebelum menyetujui kuantitas ini"
+    },
+    "invoice_value_received": {
+      "fail": "Pada pesanan {po}, total faktur akan menjadi {invoiced}, tetapi nilai barang yang diterima hanya {received} berdasarkan harga pesanan",
+      "suggestion": "Tunggu surat jalan atau konfirmasikan penerimaan barang sebelum menyetujui jumlah ini"
+    }
+  },
+  "subcontract": {
+    "agreement_has_scope": {
+      "fail": "Perjanjian ini tidak memiliki paket pekerjaan, sehingga tidak ada dasar lingkup untuk klaim pembayaran",
+      "suggestion": "Uraikan lingkup kontrak menjadi paket pekerjaan sebelum mengaktifkan perjanjian"
+    },
+    "package_scope_described": {
+      "fail": "Paket pekerjaan {package} memiliki nama tetapi tidak memiliki uraian pekerjaan yang dicakup",
+      "suggestion": "Tuliskan isi paket agar ada dasar untuk pembahasan perubahan di kemudian hari"
+    },
+    "agreement_value_positive": {
+      "fail": "Nilai kontrak adalah {value}, sehingga retensi dan daftar nilai pekerjaan tidak memiliki dasar perhitungan",
+      "suggestion": "Masukkan nilai kontrak yang disepakati sebelum mengaktifkan perjanjian"
+    },
+    "packages_within_value": {
+      "fail": "Nilai paket pekerjaan adalah {planned}, tetapi kontrak bernilai {total}",
+      "suggestion": "Hargai ulang paket atau naikkan nilai kontrak agar perjanjian mencakup lingkupnya sendiri"
+    },
+    "agreement_dates_ordered": {
+      "fail": "Perjanjian berakhir pada {end}, sebelum dimulai pada {start}",
+      "suggestion": "Perbaiki tanggal mulai atau akhir agar periode kontrak berjalan maju"
+    },
+    "agreement_currency_set": {
+      "fail": "Perjanjian ini tidak memiliki mata uang, sehingga pembayarannya tidak dapat diagregasi atau dibayarkan",
+      "suggestion": "Tetapkan mata uang, biasanya yang digunakan proyek"
+    },
+    "retention_within_bounds": {
+      "fail": "Persentase retensi {percent}% berada di luar rentang wajar 0 hingga {max}%",
+      "suggestion": "Masukkan retensi sebagai persentase setiap pembayaran, bukan sebagai jumlah uang"
+    },
+    "insurance_valid_at_start": {
+      "fail": "Asuransi subkontraktor berakhir pada {expiry}, sebelum pekerjaan dimulai pada {reference}",
+      "suggestion": "Minta sertifikat yang masih berlaku sebelum mengizinkan subkontraktor masuk ke lokasi"
+    },
+    "unlinked_contract_twin": {
+      "fail": "Subkontrak {agreement} dan kontrak {contract} tampaknya merupakan subkontrak yang sama, sehingga keuangan mungkin menghitungnya dua kali",
+      "suggestion": "Hubungkan jika keduanya merupakan subkontrak yang sama, atau tandai sebagai berbeda"
+    }
+  },
+  "submittal": {
+    "reviewer_assigned": {
+      "fail": "Dokumen pengajuan ini tidak menyebutkan peninjau, sehingga tidak masuk ke tanggung jawab siapa pun",
+      "suggestion": "Tetapkan peninjau yang harus merespons sebelum mengirim"
+    },
+    "required_date_present": {
+      "fail": "Dokumen pengajuan ini tidak memiliki tanggal dibutuhkan, sehingga tidak pernah dapat dilaporkan terlambat",
+      "suggestion": "Tetapkan tanggal tinjauan dibutuhkan berdasarkan pekerjaan yang dapat dimulai setelah dokumen ini disetujui"
+    },
+    "required_date_after_submitted": {
+      "fail": "Tinjauan jatuh tempo pada {required}, sebelum dokumen diajukan pada {submitted}",
+      "suggestion": "Pindahkan tanggal dibutuhkan ke hari kerja setelah pengajuan"
+    },
+    "review_window_sufficient": {
+      "fail": "Peninjau memiliki {days} hari, kurang dari {minimum} hari yang biasanya diperlukan untuk tinjauan",
+      "suggestion": "Sediakan masa tinjauan yang lazim atau sepakati terlebih dahulu masa yang lebih singkat dengan peninjau"
+    },
+    "spec_section_present": {
+      "fail": "Dokumen pengajuan ini tidak menyebutkan bagian spesifikasi, sehingga register tidak dapat mengelompokkannya",
+      "suggestion": "Masukkan bagian spesifikasi yang dijawab oleh dokumen ini"
+    },
+    "approver_distinct_from_reviewer": {
+      "fail": "Orang yang sama ({person}) menjadi peninjau sekaligus pemberi persetujuan, sehingga tidak ada pemeriksaan kedua yang independen",
+      "suggestion": "Tetapkan pemberi persetujuan yang berbeda dari peninjau"
+    },
+    "linked_scope_present": {
+      "fail": "Dokumen pengajuan ini tidak terhubung ke item lingkup mana pun, sehingga tidak pernah diagregasi ke paket",
+      "suggestion": "Hubungkan item daftar kuantitas yang dicakup dokumen ini"
+    }
+  },
+  "rfq": {
+    "scope_described": {
+      "fail": "Permintaan ini tidak memiliki lingkup kerja maupun uraian, sehingga pemasok tidak memiliki dasar untuk memberi harga",
+      "suggestion": "Jelaskan lingkup sebelum menerbitkan agar penawaran yang diterima dapat dibandingkan"
+    },
+    "deadline_present": {
+      "fail": "Permintaan ini tidak menyebutkan batas waktu pengajuan, sehingga penawaran tidak pernah ditutup",
+      "suggestion": "Tetapkan tanggal dan waktu terakhir penawaran harus diterima"
+    },
+    "deadline_parseable": {
+      "fail": "Batas waktu pengajuan {value} bukan tanggal yang dapat dibaca sistem, sehingga semua penawaran akan ditolak",
+      "suggestion": "Masukkan batas waktu sebagai tanggal, misalnya 2026-08-31"
+    },
+    "deadline_in_future": {
+      "fail": "Batas waktu pengajuan {deadline} sudah lewat pada hari ini {today}, sehingga permintaan tiba dalam keadaan tertutup",
+      "suggestion": "Pindahkan batas waktu ke tanggal mendatang sebelum menerbitkan"
+    },
+    "has_recipients": {
+      "fail": "Permintaan ini tidak ditujukan kepada pemasok mana pun, sehingga penerbitan tidak memberi tahu siapa pun",
+      "suggestion": "Tambahkan pemasok yang akan menerima permintaan ini"
+    },
+    "currency_set": {
+      "fail": "Permintaan ini tidak menyebutkan mata uang, sehingga penawaran tidak dapat diperingkat satu sama lain",
+      "suggestion": "Tetapkan mata uang yang harus digunakan dalam harga penawaran"
+    },
+    "bid_currency_matches": {
+      "fail": "Penawaran {bid} dihargai dalam {bid_currency}, tetapi permintaan menggunakan {rfq_currency}",
+      "suggestion": "Minta penawar mengajukan ulang dalam mata uang permintaan atau catat konversi yang disepakati"
+    },
+    "bid_amounts_parseable": {
+      "fail": "Penawaran {bid} memiliki jumlah {value}, yang bukan angka yang dapat diperingkat",
+      "suggestion": "Perbaiki jumlah penawaran sebelum penetapan pemenang"
+    },
+    "bids_still_valid": {
+      "fail": "Penawaran {bid} berakhir pada {expired} dan hari ini {today}, sehingga harganya tidak lagi mengikat",
+      "suggestion": "Minta penawar mengonfirmasi harga sebelum penetapan pemenang"
+    },
+    "award_has_competition": {
+      "fail": "Penetapan ini didasarkan pada {count} penawaran, kurang dari {minimum} yang diperlukan untuk perbandingan kompetitif",
+      "suggestion": "Catat alasan pembenaran penunjukan satu sumber atau undang lebih banyak penawar"
+    }
+  },
+  "errors": {
+    "resource_not_found": "Sumber daya tidak ditemukan",
+    "project_not_found": "Proyek tidak ditemukan",
+    "vendor_not_found": "Pemasok tidak ditemukan",
+    "template_not_found": "Templat tidak ditemukan",
+    "position_not_found": "Item tidak ditemukan",
+    "boq_not_found": "Daftar kuantitas tidak ditemukan",
+    "session_not_found": "Sesi tidak ditemukan",
+    "document_not_found": "Dokumen tidak ditemukan",
+    "documents_batch_delete_referenced": "Catatan di tempat lain masih merujuk pada dokumen dalam kelompok ini. Tinjau hubungan yang akan terputus oleh penghapusan dan konfirmasikan dengan acknowledge_references.",
+    "invitation_not_found": "Undangan tidak ditemukan",
+    "agreement_not_found": "Perjanjian tidak ditemukan",
+    "rejection_not_found": "Penolakan tidak ditemukan",
+    "claim_not_found": "Klaim pembayaran progres tidak ditemukan",
+    "gaeb_x89_final_account_unsupported": "Perhitungan akhir atau perhitungan akhir sebagian belum dapat diekspor sebagai GAEB X89. Perhitungan tersebut harus menagihkan pekerjaan kumulatif dikurangi pembayaran sebelumnya, sedangkan dari klaim hanya dibuat faktur progres untuk satu periode. Ekspor klaim sebagai faktur progres.",
+    "xpwe_native_file_refused": "Ini adalah file proyek asli milik program estimasi, yang hanya dapat dibuka oleh program tersebut. Ekspor estimasi sebagai XPWE dari program estimasi Anda, lalu unggah file .xpwe.",
+    "plot_not_found": "Kavling tidak ditemukan",
+    "survey_not_found": "Survei drone tidak ditemukan",
+    "diary_video_not_found": "Video harian tidak ditemukan",
+    "diary_photo_not_found": "Foto harian tidak ditemukan",
+    "bidder_not_found": "Penawar tidak ditemukan",
+    "webhook_not_found": "Webhook tidak ditemukan",
+    "submission_not_found": "Pengajuan tidak ditemukan",
+    "measurement_not_found": "Pengukuran lapangan tidak ditemukan",
+    "salescontract_not_found": "Kontrak penjualan tidak ditemukan",
+    "prompt_not_found": "Templat prompt tidak ditemukan",
+    "prequalification_not_found": "Prakualifikasi tidak ditemukan",
+    "purchase_requisition_not_found": "Permintaan pembelian tidak ditemukan",
+    "purchase_order_not_found": "Pesanan pembelian tidak ditemukan",
+    "group_not_found": "Kelompok tidak ditemukan",
+    "final_account_not_found": "Perhitungan akhir tidak ditemukan",
+    "estimate_job_not_found": "Tugas estimasi tidak ditemukan",
+    "escrow_not_found": "Transaksi escrow tidak ditemukan",
+    "commission_accrual_not_found": "Akrual komisi tidak ditemukan",
+    "baseline_not_found": "Baseline tidak ditemukan",
+    "fx_rate_set_locked": "Kurs ECB untuk {date} terkunci, sehingga penyegaran ini tidak menimpanya. Buka kunci set kurs tersebut terlebih dahulu jika harus menerima publikasi baru.",
+    "boq_locked": "Daftar kuantitas terkunci dan tidak dapat diubah. Buat revisi untuk melakukan perubahan.",
+    "boq_link_owner_locked": "Kode '{code}' ditetapkan oleh baris dalam daftar kuantitas terkunci '{bill}', dan menautkannya akan mengubah daftar tersebut. Buka kunci daftar itu terlebih dahulu atau masukkan baris dengan kode baru."
+  },
+  "variations": {
+    "boq_lines_are_traced": {
+      "fail": "Baris {line} dalam daftar kuantitas perubahan ini tidak memiliki sumber, baik baris daftar nilai pekerjaan maupun item estimasi",
+      "suggestion": "Sebutkan baris kontrak yang terpengaruh atau item estimasi asal lingkup agar jumlahnya dapat dipertanggungjawabkan"
+    },
+    "boq_total_matches_estimate": {
+      "fail": "Estimasi utama pada permintaan ini adalah {estimate}, tetapi total daftar kuantitas yang dihargai adalah {priced}",
+      "suggestion": "Terapkan total yang sudah dihargai pada permintaan atau perbaiki daftar kuantitas agar hanya ada satu angka"
+    },
+    "change_kind_matches_numbers": {
+      "removed_positive": "Baris {line} ditandai sebagai lingkup yang dihapus, tetapi memiliki kuantitas positif {quantity}; pengurangan dari kontrak harus berupa kuantitas negatif",
+      "added_negative": "Baris {line} ditandai sebagai lingkup tambahan, tetapi memiliki kuantitas negatif {quantity}; lingkup yang dikurangi dari kontrak adalah penghapusan, bukan penambahan",
+      "removed_needs_contract_line": "Baris {line} ditandai sebagai lingkup yang dihapus, tetapi tidak merujuk ke baris daftar nilai pekerjaan, sehingga tidak ada item kontrak yang dapat dihapus",
+      "modified_needs_contract_line": "Baris {line} ditandai sebagai lingkup yang diubah, tetapi tidak merujuk ke baris daftar nilai pekerjaan, sehingga tidak ada item kontrak yang dapat diubah",
+      "suggestion": "Perbaiki jenis perubahan atau kuantitas pada jejak sumber baris, atau sebutkan baris kontrak yang terpengaruh"
+    }
+  },
+  "cases": {
+    "has_steps": {
+      "fail": "Kasus ini belum memiliki langkah, sehingga pembaca tidak memiliki alur untuk diikuti.",
+      "suggestion": "Tambahkan setidaknya satu langkah yang menyebutkan layar yang dibuka dan tindakan di sana."
+    },
+    "step_titled": {
+      "fail": "{count} langkah belum memiliki judul atau layar yang harus dibuka.",
+      "suggestion": "Berikan judul singkat untuk setiap langkah dan pilih layar yang dibukanya."
+    },
+    "step_purpose": {
+      "fail": "{count} dari {total} langkah tidak menjelaskan manfaatnya, sehingga kasus terbaca sebagai daftar klik, bukan penjelasan.",
+      "suggestion": "Tambahkan satu baris per langkah tentang tujuannya; itulah bagian yang dibutuhkan pengguna baru."
+    },
+    "distinct_screens": {
+      "fail": "{count} langkah membuka layar yang sama dengan langkah sebelumnya, sehingga pembaca tidak melihat perubahan dan tidak dapat membedakannya.",
+      "suggestion": "Gabungkan menjadi satu langkah atau arahkan langkah kedua ke layar tempat pekerjaan benar-benar berlanjut."
+    },
+    "duration_plausible": {
+      "fail": "Kasus ini mengalokasikan {minutes} menit untuk {steps} langkah. Pembaca yang tidak dapat mengikutinya akan kehilangan kepercayaan pada sisa estimasi.",
+      "suggestion": "Naikkan estimasi menjadi setidaknya {minimum} menit atau kurangi beberapa langkah."
+    },
+    "described": {
+      "fail": "Kasus ini tidak memiliki ringkasan, sehingga daftar hanya menampilkan judul.",
+      "suggestion": "Tambahkan satu kalimat tentang hasil yang akan dicapai pembaca pada akhir proses."
+    }
+  },
+  "uk": {
+    "contract_form_declared": {
+      "fail": "Estimasi tidak menyebutkan bentuk kontrak yang menjadi dasar harganya",
+      "suggestion": "Catat bentuk kontraknya. Biaya pendahuluan, risiko, dan syarat pembayaran dihargai berbeda menurut bentuk kontrak, sehingga angkanya kurang bermakna tanpa informasi ini"
+    },
+    "payment_regime_declared": {
+      "fail": "Mekanisme pembayaran belum lengkap: {missing} belum dicatat",
+      "suggestion": "Catat kedua tanggal. Kontrak konstruksi yang tidak menetapkan keduanya bukan berarti bebas darinya; Scheme for Construction Contracts menetapkan keduanya, sehingga para pihak memperoleh syarat pembayaran dari peraturan, bukan dari dokumen yang ditandatangani"
+    },
+    "retention_declared": {
+      "fail": "Estimasi tidak menyatakan retensi yang berlaku",
+      "suggestion": "Catat persentase retensi dan pelepasannya, atau nyatakan bahwa retensi tidak berlaku. Retensi adalah uang yang sudah diperoleh kontraktor tetapi belum dapat dicairkan; estimasi yang tidak membahasnya juga tidak membahas modal kerja"
+    },
+    "cdm_duty_holders_declared": {
+      "fail": "Pemegang kewajiban CDM 2015 belum dicatat: {missing} belum ada",
+      "suggestion": "Catat penunjukannya. Jika lebih dari satu kontraktor bekerja pada proyek, klien harus menunjuk perancang utama dan kontraktor utama secara tertulis; jika tidak, klien menanggung kewajiban tersebut sendiri"
+    },
+    "hrb_regime_declared": {
+      "fail": "Status bangunan berisiko lebih tinggi belum diputuskan: {reason}",
+      "unanswered": "estimasi tidak menyatakan apakah ini bangunan berisiko lebih tinggi",
+      "disagrees": "estimasi menyatakan risiko lebih tinggi sebagai {declared}, tetapi dimensinya sendiri menghasilkan {derived}",
+      "suggestion": "Bangunan berisiko lebih tinggi jika tingginya setidaknya 18 m atau memiliki setidaknya 7 lantai DAN memuat setidaknya dua unit hunian. Kedua bagian syarat harus terpenuhi: bangunan tinggi tanpa hunian bukan berisiko lebih tinggi, dan memperlakukannya demikian menimbulkan proses persetujuan bertahap yang tidak diperlukan"
+    },
+    "vat_treatment_declared": {
+      "fail": "Estimasi tidak menyatakan perlakuan PPN",
+      "suggestion": "Catat perlakuannya: tarif standar, tarif rendah atau nol jika pekerjaan memenuhi syarat, atau mekanisme reverse charge domestik jika penyerahan termasuk cakupannya. Reverse charge memindahkan kewajiban PPN kepada pelanggan dan mengubah jumlah yang boleh ditagihkan kontraktor"
+    }
+  },
+  "project_completeness": {
+    "country_set": {
+      "fail": "Proyek tidak menyebutkan negara, sehingga dasar harga, tarif pajak, atau kalender kerja tidak dapat ditentukan",
+      "suggestion": "Tetapkan negara proyek dalam pengaturan. Negara menentukan paket regional, pajak, dan kalender yang menjadi acuan setiap angka"
+    },
+    "currency_set": {
+      "fail": "Proyek tidak menyatakan mata uang, sehingga daftar kuantitas, tambahan biaya, dan kontraknya tidak dapat dijumlahkan",
+      "suggestion": "Pilih mata uang proyek dalam pengaturan. Setiap daftar kuantitas dan kontrak dihargai dalam mata uang itu, dan setiap total dibaca dalam mata uang itu"
+    },
+    "currency_matches_bill": {
+      "fail": "Proyek dihargai dalam {project_currency}, tetapi baris daftar kuantitas ini dalam {bill_currencies}",
+      "suggestion": "Konversikan baris ke mata uang proyek dengan kurs yang dinyatakan, atau catat kurs pada proyek, agar total daftar kuantitas menjadi satu angka"
+    },
+    "priced_bill_present": {
+      "fail": "Proyek tidak memiliki daftar kuantitas dengan item, sehingga tidak ada dasar untuk estimasi",
+      "suggestion": "Buat daftar kuantitas dan tambahkan item, atau impor dari model CAD, lembar kerja, atau file pertukaran"
+    },
+    "bill_base_date_set": {
+      "fail": "Daftar kuantitas \"{bill}\" tidak menyatakan tanggal dasar berlakunya harga",
+      "suggestion": "Catat tanggal dasar pada daftar kuantitas. Tanpanya, harga tidak dapat diindeks, dikenai pajak sesuai tanggalnya, atau dibandingkan dengan estimasi lain"
+    },
+    "classification_standard_set": {
+      "fail": "Proyek tidak memiliki standar klasifikasi, sehingga kode itemnya tidak dapat diperiksa",
+      "suggestion": "Pilih standar klasifikasi yang digunakan proyek. Ini juga menentukan kumpulan aturan negara yang dijalankan validasi"
+    },
+    "planned_dates_set": {
+      "both_missing": "Proyek tidak memiliki tanggal mulai rencana maupun tanggal selesai rencana",
+      "start_missing": "Proyek memiliki tanggal selesai rencana tetapi tidak memiliki tanggal mulai rencana",
+      "end_missing": "Proyek memiliki tanggal mulai rencana tetapi tidak memiliki tanggal selesai rencana",
+      "unreadable": "Tanggal rencana \"{value}\" tidak dapat dibaca sebagai tanggal",
+      "suggestion": "Masukkan tanggal mulai dan selesai rencana proyek sebagai tanggal. Biaya terkait waktu, eskalasi, dan jadwal dihitung di antara keduanya"
+    },
+    "planned_dates_ordered": {
+      "fail": "Proyek direncanakan mulai pada {start} dan selesai pada {end}, yang lebih awal dari tanggal mulai",
+      "suggestion": "Tukar atau perbaiki tanggal rencana agar awal berada sebelum akhir"
+    },
+    "client_recorded": {
+      "fail": "Proyek tidak mencatat klien dan tidak ada kontrak yang menyebutkan pemberi kerja",
+      "suggestion": "Catat klien pada proyek atau tambahkan pemberi kerja sebagai pihak kontrak agar estimasi memiliki penerima yang jelas"
+    },
+    "procurement_started": {
+      "fail": "Proyek berada pada tahap {phase}, tetapi belum memiliki kontrak atau paket tender",
+      "suggestion": "Buat paket tender dari daftar kuantitas, catat kontrak, atau kembalikan tahap ke tahap estimasi yang sebenarnya"
+    }
+  },
+  "boq_resources": {
+    "unit_rate_not_rederived": {
+      "fail": "Item {ordinal}: baris sumber daya tidak dapat menghargai item, sehingga harga satuan tidak dihitung ulang darinya",
+      "fallback_allowance": "Item {ordinal}: baris sumber daya merupakan rincian alokasi perkiraan yang memuat kuantitas item, sehingga harga satuan tidak dihitung ulang darinya",
+      "assumed_norm": "Item {ordinal}: baris sumber daya memuat norma yang tidak pernah dinyatakan katalog, sehingga harga satuan tidak dihitung ulang darinya",
+      "norm_collapsed": "Item {ordinal}: baris sumber daya kehilangan norma katalog dan memuat kuantitas item sebagai gantinya, sehingga harga satuan tidak dihitung ulang darinya",
+      "whole_position_quantities": "Item {ordinal}: baris sumber daya memuat kuantitas seluruh item, bukan norma per satuan, sehingga harga satuan tidak dihitung ulang darinya",
+      "suggestion": "Tinjau analisisnya; hitung ulang item dari katalog melalui tinjauan norma sumber daya atau perbaiki baris secara manual"
+    }
+  },
+  "poland": {
+    "knr_reference_required": {
+      "fail": "Item {ordinal} tidak mengacu pada tabel katalog KNR",
+      "suggestion": "Sebutkan tabel katalog asal norma dalam podstawa, misalnya KNR 2-02 0201-01, atau tulis kalkulacja indywidualna untuk baris yang dihargai dengan perhitungan sendiri"
+    },
+    "knr_reference_recognised": {
+      "fail": "Referensi '{code}' pada item {ordinal} tidak menyebutkan keluarga katalog KNR",
+      "suggestion": "Awali referensi dengan keluarga katalognya, seperti KNR, KNNR, KNR-W, atau KSNR, atau tandai baris sebagai kalkulacja indywidualna"
+    }
+  }
+}
