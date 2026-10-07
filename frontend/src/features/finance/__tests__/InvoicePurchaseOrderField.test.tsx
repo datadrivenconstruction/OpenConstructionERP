@@ -122,4 +122,47 @@ describe('InvoicePurchaseOrderField', () => {
     await screen.findByRole('option', { name: 'PO-0007' });
     expect(api.apiPost).not.toHaveBeenCalled();
   });
+
+  it.each([
+    ['9007199254740993.01', '9007199254740993.00', '$9,007,199,254,740,993.01', '$9,007,199,254,740,993.00', '$0.01'],
+    ['10.10', '0.10', '$10.10', '$0.10', '$10.00'],
+    ['10.00', '10.01', '$10.00', '$10.01', '$0.00'],
+    ['-1.00', '0.00', '-$1.00', '$0.00', '$0.00'],
+    ['10.00', '-1.00', '$10.00', '-$1.00', '$11.00'],
+    ['10.00', undefined, '$10.00', '$0.00', '$10.00'],
+  ])('keeps exact order %s and invoiced %s figures without negative open balance', async (
+    ordered, invoiced, orderedText, invoicedText, openText,
+  ) => {
+    api.apiGet.mockResolvedValue({ items: [{ ...ORDERS[0], currency_code: 'USD',
+      amount_subtotal: ordered, invoiced_net: invoiced }], total: 1 });
+    renderField({ value: 'po-issued' });
+    const figures = await screen.findByTestId('invoice-po-figures');
+    const values = Array.from(figures.querySelectorAll('dd')).map((node) => node.textContent);
+    expect(values).toEqual([orderedText, invoicedText, openText]);
+  });
+
+  it.each(['NaN', 'Infinity', 'not-money'])('does not present invalid order %s as a zero balance', async (ordered) => {
+    api.apiGet.mockResolvedValue({ items: [{ ...ORDERS[0], currency_code: 'USD',
+      amount_subtotal: ordered, invoiced_net: '1.00' }], total: 1 });
+    renderField({ value: 'po-issued' });
+    const figures = await screen.findByTestId('invoice-po-figures');
+    const values = Array.from(figures.querySelectorAll('dd')).map((node) => node.textContent);
+    expect(values).toEqual(['—', '$1.00', '—']);
+  });
+
+  it('does not fabricate figures when the selected order cannot be loaded', async () => {
+    api.apiGet.mockRejectedValue(new Error('Unavailable'));
+    renderField({ value: 'po-issued' });
+    await screen.findByTestId('invoice-po-no-orders');
+    expect(screen.queryByTestId('invoice-po-figures')).not.toBeInTheDocument();
+  });
+
+  it.each(['Infinity', 'NaN'])('does not present invalid invoiced %s as a known balance', async (invoiced) => {
+    api.apiGet.mockResolvedValue({ items: [{ ...ORDERS[0], currency_code: 'USD',
+      amount_subtotal: '10.00', invoiced_net: invoiced }], total: 1 });
+    renderField({ value: 'po-issued' });
+    const figures = await screen.findByTestId('invoice-po-figures');
+    const values = Array.from(figures.querySelectorAll('dd')).map((node) => node.textContent);
+    expect(values).toEqual(['$10.00', '—', '—']);
+  });
 });

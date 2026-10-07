@@ -18,6 +18,8 @@ import { Button, Input } from '@/shared/ui';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { apiPost, getErrorMessage } from '@/shared/lib/api';
 import { invalidateFinanceFigures } from './financeQueryKeys';
+import { subtractDecimalStrings } from '@/shared/lib/exactDecimal';
+import { paymentDecimalInput, paymentIdempotencyKey } from './paymentDecimalInput';
 
 export interface PaymentModalProps {
   open: boolean;
@@ -31,9 +33,15 @@ export interface PaymentModalProps {
   onPaid?: () => void;
 }
 
-function toNum(v: string | undefined): number {
-  const n = Number(v ?? '');
-  return Number.isFinite(n) ? n : 0;
+function paymentBreakdown(total: string, input: string) {
+  const gross = subtractDecimalStrings(total, '0');
+  // Clearing the optional holdback field retains the existing zero behavior.
+  const normalized = paymentDecimalInput(input);
+  const entered = normalized === null ? null : subtractDecimalStrings(normalized, '0');
+  if (gross === null || gross.startsWith('-') || entered === null) return null;
+  const difference = subtractDecimalStrings(gross, entered)!;
+  const withheld = entered.startsWith('-') ? '0' : difference.startsWith('-') ? gross : entered;
+  return { gross, withheld, cash: subtractDecimalStrings(gross, withheld)! };
 }
 
 export function PaymentModal({
@@ -50,14 +58,16 @@ export function PaymentModal({
 
   const [paymentDate, setPaymentDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [withholding, setWithholding] = useState(retentionAmount);
+  const [withholdingBadInput, setWithholdingBadInput] = useState(false);
   const [releaseDate, setReleaseDate] = useState('');
   const [reference, setReference] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   // Live breakdown: gross = invoice total, cash = gross - withheld (clamped).
-  const gross = toNum(amountTotal);
-  const withheld = Math.min(Math.max(toNum(withholding), 0), gross);
-  const cash = gross - withheld;
+  const breakdown = withholdingBadInput ? null : paymentBreakdown(amountTotal, withholding);
+  const gross = breakdown?.gross ?? null;
+  const withheld = breakdown?.withheld ?? null;
+  const cash = breakdown?.cash ?? null;
 
   const idempotencyKey = useMemo(
     () => `pay-${invoiceId}-${paymentDate}-${withholding}`,
@@ -66,12 +76,19 @@ export function PaymentModal({
 
   const pay = useMutation({
     mutationFn: async () => {
+      if (!breakdown) throw new Error(t('common.invalid_form', { defaultValue: 'Invalid form' }));
+      let key: string;
+      try {
+        key = await paymentIdempotencyKey(idempotencyKey);
+      } catch {
+        throw new Error(t('common.error', { defaultValue: 'Error' }));
+      }
       return apiPost(`/api/v1/finance/invoices/${encodeURIComponent(invoiceId)}/record-payment/`, {
         payment_date: paymentDate,
-        withholding_amount: String(withheld),
+        withholding_amount: breakdown.withheld,
         withholding_release_date: releaseDate || null,
         reference: reference || null,
-        idempotency_key: idempotencyKey,
+        idempotency_key: key,
       });
     },
     onSuccess: () => {
@@ -99,7 +116,11 @@ export function PaymentModal({
             min="0"
             step="0.01"
             value={withholding}
-            onChange={(e) => setWithholding(e.target.value)}
+            onInput={(e) => setWithholdingBadInput(e.currentTarget.validity.badInput)}
+            onChange={(e) => {
+              setWithholding(e.target.value);
+              setWithholdingBadInput(e.target.validity.badInput);
+            }}
           />
         </WideModalField>
         <WideModalField label={t('finance.payment.releaseDate')}>
@@ -133,13 +154,15 @@ export function PaymentModal({
         </dl>
       </WideModalSection>
 
-      {error && <p className="px-4 text-xs text-[var(--error)]">{error}</p>}
+      {(error || breakdown === null) && <p role="alert" className="px-4 text-xs text-[var(--error)]">
+        {error || t('common.invalid_form', { defaultValue: 'Invalid form' })}
+      </p>}
 
       <div className="flex justify-end gap-2 px-4 py-3">
         <Button variant="ghost" onClick={onClose} disabled={pay.isPending}>
           {t('common.cancel')}
         </Button>
-        <Button onClick={() => pay.mutate()} disabled={pay.isPending}>
+        <Button onClick={() => pay.mutate()} disabled={pay.isPending || breakdown === null}>
           {pay.isPending ? t('finance.payment.recording') : t('finance.payment.record')}
         </Button>
       </div>
