@@ -104,6 +104,7 @@ PICKER_REGIONS_THAT_ARE_MONDAY_TO_FRIDAY: dict[str, str] = {
     "Poland": "Saturday-Sunday weekend.",
     "SouthAfrica": "Saturday-Sunday weekend.",
     "Turkey": "Saturday-Sunday weekend; Turkey has never used a Friday rest day.",
+    "UA": "Existing i18n_foundation work_calendars.json UA seed declares ISO weekdays 1-5; holidays are separate.",
 }
 
 #: Options whose week is a genuinely open question, kept apart from the table
@@ -112,6 +113,11 @@ PICKER_REGIONS_THAT_ARE_MONDAY_TO_FRIDAY: dict[str, str] = {
 #: says what would settle it. Splitting the option or sourcing a calendar is a
 #: product decision, not a test's to make.
 PICKER_REGIONS_WHOSE_WEEK_IS_UNSETTLED: dict[str, str] = {
+    "HU": (
+        "JUR-03: neither core working-week registry nor i18n calendar seeds contains Hungary. "
+        "Verify the standard week and annual exchanged working Saturdays before adding a country calendar; "
+        "the selector exposes the existing DEFAULT with week_fallback=true meanwhile."
+    ),
     "NorthAfrica": (
         "Genuinely split: Egypt, Libya, Algeria and Sudan rest Friday-Saturday and work "
         "Sunday-Thursday, while Morocco and Tunisia rest Saturday-Sunday. No single week is right "

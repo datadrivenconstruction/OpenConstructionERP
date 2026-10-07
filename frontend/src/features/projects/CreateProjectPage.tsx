@@ -78,6 +78,8 @@ const REGION_GROUPS: OptionGroup[] = [
       { value: 'Poland', label: 'Poland', iso: 'PL' },
       { value: 'Czech', label: 'Czech Republic', iso: 'CZ' },
       { value: 'Croatia', label: 'Croatia', iso: 'HR' },
+      { value: 'HU', label: 'Hungary', iso: 'HU' },
+      { value: 'UA', label: 'Ukraine', iso: 'UA' },
       { value: 'Turkey', label: 'Turkey', iso: 'TR' },
       { value: 'Russia', label: 'Russia', iso: 'RU' },
     ],
