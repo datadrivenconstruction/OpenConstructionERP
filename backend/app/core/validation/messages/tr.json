@@ -1,0 +1,868 @@
+{
+  "boq_markup": {
+    "contingency_not_on_profit": {
+      "fail": "\"{markup}\" risk payı, \"{profit}\" kâr kalemini zaten içeren bir matrah üzerinden hesaplanıyor; böylece risk için ayrılan tutara kâr marjı uygulanıyor",
+      "suggestion": "Piyasanın standart yöntemi riski bilinçli olarak genel gider ve kârdan sonra konumlandırmıyorsa bu kalemi doğrudan maliyete uygulayın"
+    },
+    "order_is_declared": {
+      "fail": "Sıralamadaki {order} konumu birden fazla ilave kaleminde kullanılıyor: {markups}",
+      "suggestion": "Hangi kalemin hangisinin üzerine hesaplandığının tesadüfe kalmaması için her ilave kalemine ayrı bir sıra verin"
+    },
+    "percentage_within_band": {
+      "fail": "\"{markup}\", {category} kalemi olarak %{percentage}; 0 ile %{ceiling} arasındaki makul aralığın dışında",
+      "suggestion": "Ondalık ayıracı kontrol edin. Her durumda kalem, girildiği değer üzerinden fiyatlandırılır"
+    },
+    "cumulative_base_is_settled": {
+      "fail": "\"{markup}\", \"{apply_to}\" üzerine uygulanıyor ancak öncesinde kalem yok; bu yüzden yalnızca doğrudan maliyet üzerinden hesaplanıyor",
+      "suggestion": "Üzerine hesaplanması gereken kalemlerden sonraya taşıyın veya doğrudan maliyete uygulayın"
+    }
+  },
+  "common": {
+    "ok": "Uygun"
+  },
+  "export": {
+    "generated": "Oluşturuldu",
+    "content_digest": "İçerik özeti"
+  },
+  "field_time": {
+    "hours_per_day_max": {
+      "fail": "{worker} çalışanına bu gün için {hours} saat kaydedilmiş; {max} saat sınırı aşılıyor",
+      "suggestion": "Göndermeden önce saatleri doğru güne veya çalışana dağıtın"
+    },
+    "line_complete": {
+      "fail": "{line} satırı eksik: {reason}",
+      "labour_xor_plant": "işçilik veya makineden yalnızca biri kaydedilmelidir; ikisi birden veya hiçbiri olamaz",
+      "hours_positive": "saat sıfırdan büyük olmalıdır",
+      "cost_code_required": "maliyet kodu gereklidir",
+      "suggestion": "Puantajı göndermeden önce satırı tamamlayın"
+    },
+    "cost_code_resolves": {
+      "fail": "{line} satırındaki '{code}' kodu, bu projedeki hiçbir keşif pozuna veya iş kırılım yapısına (WBS) karşılık gelmiyor",
+      "suggestion": "Proje keşfinde bulunan bir maliyet kodu veya WBS seçin"
+    },
+    "daywork_needs_variation": {
+      "fail": "{line} yevmiyeli iş satırı açık bir değişiklik emrine bağlı değil",
+      "suggestion": "Yevmiyeli işi, yapılmasının talimatlandırıldığı değişiklik emrine bağlayın"
+    },
+    "plant_needs_equipment": {
+      "fail": "{line} makine satırında ekipman belirtilmemiş",
+      "suggestion": "Makine saatlerinin maliyetlendirilmesi için makineyi ekleyin"
+    },
+    "approved_immutable": {
+      "fail": "Bu puantajın durumu {status}; düzenlenemez",
+      "suggestion": "Onaylanan saatleri düzeltmek için ters kayıt niteliğinde bir puantaj girin"
+    },
+    "offline_clock_plausible": {
+      "fail": "Bu günü kaydeden cihazın saati sunucunun saatinden {minutes} dakika ilerideydi",
+      "suggestion": "Kayıt zamanlarının doğru sırada okunabilmesi için cihaz saatini ayarlayın"
+    },
+    "offline_sync_delay": {
+      "fail": "Bu iş günü {date} tarihinde gerçekleşti ancak ofise {days} gün sonra ulaştı",
+      "suggestion": "Onaylamadan önce saatleri ilgili günün kayıtlarıyla karşılaştırın; hakediş dönemi kapanmış olabilir"
+    }
+  },
+  "ai_takeoff": {
+    "unreviewed_proposals": {
+      "fail": "{count} metraj önerisi hâlâ inceleme bekliyor ve burada fiyatlandırılmıyor",
+      "suggestion": "Onaylanan miktarların çizimle eşleşmesi için inceleme kuyruğunu tamamlayın"
+    }
+  },
+  "boq_quality": {
+    "position_has_quantity": {
+      "fail": "{ordinal} pozunun miktarı sıfır veya eksik olamaz",
+      "suggestion": "0'dan büyük bir miktar girin"
+    },
+    "position_has_unit_rate": {
+      "fail": "{ordinal} pozuna birim fiyat atanmalıdır",
+      "suggestion": "Maliyet veritabanından bir fiyat atayın"
+    },
+    "position_has_description": {
+      "fail": "{ordinal} pozunun açıklaması boş olamaz"
+    },
+    "no_duplicate_ordinals": {
+      "fail": "'{ordinal}' sıra numarası {count} pozda yineleniyor"
+    },
+    "unit_rate_in_range": {
+      "fail": "{ordinal} pozu: {rate} fiyatı >{threshold} (medyanın 5 katı)",
+      "suggestion": "Bu birim fiyatı doğrulayın; olağandışı yüksek"
+    },
+    "negative_values": {
+      "fail": "{ordinal} pozunda negatif değer var: {details}",
+      "suggestion": "Negatif değerleri düzeltin; pozitif sayılar kullanın"
+    },
+    "unrealistic_rate": {
+      "fail": "{ordinal} pozu: {details}",
+      "suggestion": "Bu değeri doğrulayın; gerçekçi olmayacak kadar yüksek görünüyor",
+      "not_assessed_no_currency": "{count} poz değerlendirilmedi: keşifte para birimi belirtilmediğinden {reference} cinsinden tanımlı parasal eşikler bu para birimine dönüştürülemedi",
+      "not_assessed_no_currency_suggestion": "Projenin para birimini belirleyin veya pozlara para birimi kaydedin",
+      "not_assessed_no_rate": "{currency} cinsinden {count} poz değerlendirilmedi: kayıtlı {reference} → {currency} kuru bulunmadığından parasal eşikler bu keşfe uyarlanamadı",
+      "not_assessed_no_rate_suggestion": "Döviz kuru siciline veya projenin döviz kurlarına {currency} için bir {reference} kuru ekleyin"
+    },
+    "total_mismatch": {
+      "fail": "{ordinal} pozu: hesaplanan {computed} != kayıtlı {stored} (fark={diff})",
+      "suggestion": "Toplamı yeniden hesaplayın: miktar × birim fiyat"
+    },
+    "resource_split_mismatch": {
+      "fail": "{ordinal} pozu: {subtotal} kaynak ara toplamı ile {rate} birim fiyatı arasında {diff} fark var",
+      "suggestion": "Kaynak miktarlarını ve fiyatlarını inceleyin; birim başına toplamları pozun birim fiyatına eşit olmalıdır"
+    },
+    "empty_unit": {
+      "fail": "{ordinal} pozunun birimi boş veya eksik",
+      "suggestion": "Bir ölçü birimi atayın (m, m2, m3, kg, adet, götürü vb.)"
+    },
+    "section_without_items": {
+      "fail": "{ordinal} ({title}) bölümünde alt kalem yok",
+      "suggestion": "Bu bölümün altına poz ekleyin veya boş bölümü kaldırın"
+    },
+    "rate_vs_benchmark": {
+      "fail": "{ordinal} pozu: {rate}/{unit} birim fiyatı, {threshold}/{unit} kıyas eşiğini aşıyor; gerçekçi olmayabilir",
+      "suggestion": "Bu fiyatı doğrulayın; {unit} için tipik fiyatlar {threshold} altında olmalıdır. Birim veya ondalık hatalarını kontrol edin.",
+      "not_assessed_no_currency": "{count} poz değerlendirilmedi: keşifte para birimi belirtilmediğinden {reference} cinsinden tanımlı kıyas eşikleri bu para birimine dönüştürülemedi",
+      "not_assessed_no_currency_suggestion": "Projenin para birimini belirleyin veya pozlara para birimi kaydedin",
+      "not_assessed_no_rate": "{currency} cinsinden {count} poz değerlendirilmedi: kayıtlı {reference} → {currency} kuru bulunmadığından kıyas eşikleri bu keşfe uyarlanamadı",
+      "not_assessed_no_rate_suggestion": "Döviz kuru siciline veya projenin döviz kurlarına {currency} için bir {reference} kuru ekleyin"
+    },
+    "lump_sum_ratio": {
+      "fail": "{total_count} pozun {lsum_count} tanesi ({percent}) götürü bedelli; {threshold} eşiğini aşıyor",
+      "suggestion": "Tahmin doğruluğunu artırmak için götürü bedelli pozları ölçülmüş miktarlara (m, m2, m3, kg, adet) ayırın"
+    },
+    "cost_concentration": {
+      "fail": "{ordinal} pozu toplam keşif maliyetinin {share} kadarını oluşturuyor ({grand_total} içinde {value}); {threshold} eşiğini aşıyor",
+      "suggestion": "Bu pozu daha küçük kalemlere ayırın veya maliyeti doğrulayın; tek bir poz maliyet tahminine hâkim olmamalıdır"
+    },
+    "currency_consistency": {
+      "fail": "Farklı para birimleri bulundu: {currencies}",
+      "suggestion": "Keşfin tamamında tek para birimi kullanın"
+    },
+    "measurement_consistency": {
+      "fail": "Keşifte metrik ve emperyal birimler karışık; tek sistemi tutarlı biçimde kullanın",
+      "suggestion": "Tüm miktarları metrik veya emperyal birimlere dönüştürün"
+    },
+    "revision_cost_impact_review": {
+      "fail": "Revizyonun {amount} tutarındaki maliyet etkisi henüz değişiklik emri olarak kaydedilmedi",
+      "suggestion": "Maliyet değişikliğini izlemek için bu revizyon karşılaştırmasından bir taslak değişiklik talebi oluşturun"
+    },
+    "base_date_readable": {
+      "fail": "'{base_date}' baz tarihi geçerli bir tarih değil; bu yüzden keşif kendi tarihinin oranı yerine bugünkü vergi oranıyla vergilendiriliyor",
+      "suggestion": "Fiyat bazını gün, ay, çeyrek veya yıl olarak belirtin ({shapes})"
+    },
+    "tax_date_readable": {
+      "fail": "'{tax_date}' vergi tarihi geçerli bir tarih değil; bu yüzden keşif kendi tarihinin oranı yerine bugünkü vergi oranıyla vergilendiriliyor",
+      "suggestion": "Vergi tarihini gün, ay, çeyrek veya yıl olarak belirtin ({shapes}); keşfin baz tarihinde vergilendirilmesi için alanı boşaltın"
+    }
+  },
+  "din276": {
+    "cost_group_required": {
+      "fail": "{ordinal} pozunda DIN 276 KG eksik",
+      "suggestion": "Üç haneli DIN 276 maliyet grubu atayın (ör. duvarlar için 330)"
+    },
+    "valid_cost_group": {
+      "fail": "{ordinal} pozunda geçersiz DIN 276 kodu '{code}'"
+    },
+    "hierarchy": {
+      "fail": "{ordinal} pozu: KG {child}, üst KG {parent} altında değil (beklenen ön ek: '{prefix}')",
+      "suggestion": "Pozu doğru üst gruba taşıyın veya KG kodunu üst grubun hiyerarşisine uyarlayın ({prefix}xx)"
+    },
+    "completeness": {
+      "fail": "Keşifte KG {group} - {group_name} grubu eksik",
+      "suggestion": "Tam kapsam sağlamak için KG {group} ({group_name}) pozlarını ekleyin"
+    }
+  },
+  "gaeb": {
+    "ordinal_format": {
+      "fail": "'{ordinal}' sıra numarası bu dosyanın GAEB OZ-Maske biçimine uymuyor",
+      "suggestion": "Dosyanın OZ-Maske biçimini kullanın; ör. 001.001.0010 veya 01.02.0030"
+    },
+    "lv_structure": {
+      "fail": "{ordinal} pozu: son düzey pozun üst bölümü yok; GAEB LV hiyerarşisi üst Leistungsgruppe gerektirir",
+      "suggestion": "Bu pozu bir üst bölüme atayın (Leistungsgruppe / Titel)"
+    },
+    "einheitspreis_sanity": {
+      "negative": "{ordinal} pozu: Einheitspreis {rate} negatif (birim='{unit}'); GAEB üzerinden negatif fiyat aktarılamaz",
+      "zero": "{ordinal} pozu: Einheitspreis 0.00 (birim='{unit}'); bunun eksik fiyat değil, teklif edilmiş sıfır fiyat olduğunu doğrulayın",
+      "suggestion": "Pozitif bir Einheitspreis girin veya pozu Bedarfsposition (isteğe bağlı iş kapsamı) ya da götürü bedelli (birim='lsum') olarak işaretleyin"
+    },
+    "trade_section_code": {
+      "fail": "Üst düzey '{ordinal}' bölümünde GAEB Leistungsbereich kodu yok (üç haneli iş kolu kodu bekleniyor, ör. '012')",
+      "suggestion": "Bölüme üç haneli iş kolu kodu (Leistungsbereich) ekleyin; ör. kazı işleri için '012', duvar işleri için '013'"
+    },
+    "quantity_decimals": {
+      "fail": "{ordinal} pozu: {quantity} miktarında {decimals} ondalık basamak var; GAEB X83 kuralı 3 ile sınırlar",
+      "suggestion": "GAEB X83'e göre miktarı en fazla 3 ondalık basamağa yuvarlayın"
+    }
+  },
+  "nrm": {
+    "classification_required": {
+      "fail": "{ordinal} pozunda NRM eleman kodu eksik",
+      "suggestion": "NRM 1/2 eleman kodu atayın (ör. dış duvarlar için 2.6.1)"
+    },
+    "valid_element": {
+      "fail": "{ordinal} pozunda geçersiz NRM kodu '{code}'"
+    },
+    "completeness": {
+      "fail": "Keşifte NRM {group} - {group_name} grubu eksik",
+      "suggestion": "NRM {group} ({group_name}) grubu için poz ekleyin"
+    },
+    "base_date_declared": {
+      "fail": "Maliyet planında fiyatların geçerli olduğu baz tarih belirtilmiyor",
+      "suggestion": "Baz tarihi keşfe kaydedin. Bu tarih olmadan bir fiyatın güncelliğini veya eklenmesi gereken enflasyon farkını kimse belirleyemez"
+    },
+    "cost_plan_stage_declared": {
+      "fail": "Maliyet planı hangi tasarım aşaması için hazırlandığını belirtmiyor",
+      "suggestion": "Aşamayı kaydedin. Maliyet planından beklenen doğruluk, hazırlandığı aşamaya bağlıdır; aşamasını belirtmeyen plan yanlış beklenti yaratır"
+    },
+    "contractor_costs_present": {
+      "preliminaries": "Maliyet planında ana yüklenicinin şantiye genel giderleri ne {group} grubu ne de bir ilave kalemi olarak yer alıyor",
+      "overheads_and_profit": "Maliyet planında ana yüklenicinin merkez genel giderleri ve kârı ne {group} grubu ne de bir ilave kalemi olarak yer alıyor",
+      "suggestion": "Bunu NRM grup elemanı veya ölçülmüş işlere uygulanan ilave kalemi olarak ekleyin. İkisi de doğrudur; hariç bırakılması işlerin gerçek maliyetini eksik gösterir"
+    },
+    "risk_allowance_present": {
+      "fail": "Maliyet planında risk karşılığı yok",
+      "suggestion": "NRM 13 grubu veya beklenmeyen gider kalemi olarak risk karşılığı ekleyin. Risk karşılığı olmayan maliyet planı, tek bir tahmini kesinmiş gibi sunar"
+    }
+  },
+  "masterformat": {
+    "classification_required": {
+      "fail": "{ordinal} pozunda MasterFormat kodu eksik",
+      "suggestion": "MasterFormat kodu atayın (ör. yerinde dökme beton işleri için 03 30 00)"
+    },
+    "valid_division": {
+      "fail": "{ordinal} pozunda geçersiz MasterFormat kodu '{code}'",
+      "suggestion": "Altı haneli MasterFormat biçimini kullanın: XX XX XX (ör. 03 30 00)"
+    },
+    "completeness": {
+      "fail": "Keşifte {division} - {division_name} bölümü eksik",
+      "suggestion": "{division} ({division_name}) bölümü için poz ekleyin"
+    }
+  },
+  "sinapi": {
+    "code_required": {
+      "fail": "{ordinal} pozunda SINAPI kodu eksik",
+      "suggestion": "SINAPI analiz kodu atayın (ör. C30 beton için 87878)"
+    },
+    "valid_code": {
+      "fail": "{ordinal} pozunda geçersiz SINAPI kodu '{code}'"
+    }
+  },
+  "nbr": {
+    "classification_required": {
+      "fail": "{ordinal} pozunda NBR 12721 bölümü eksik",
+      "suggestion": "Pozu bir NBR 12721 bölümüyle etiketleyin (S1 = hazırlık işleri, S2 = altyapı, ..., S11 = tamamlayıcı işler)"
+    },
+    "valid_section": {
+      "fail": "{ordinal} pozundaki NBR 12721 bölümü '{code}', S1..S11 aralığında değil",
+      "suggestion": "S1 ile S11 arasındaki kodları kullanın (ör. üstyapı için S3)"
+    }
+  },
+  "gesn": {
+    "code_required": {
+      "fail": "{ordinal} pozunda ГЭСН/ФЕР kodu eksik",
+      "suggestion": "ГЭСН kodu atayın (ör. beton için 06-01-001-01)"
+    },
+    "valid_code": {
+      "fail": "ГЭСН kodu '{code}', XX-XX-XXX-XX biçimine uymuyor",
+      "suggestion": "NN-NN-NNN-NN biçimini kullanın (ör. 06-01-001-01)"
+    },
+    "resource_breakdown": {
+      "fail": "{ordinal} pozu {code} normuna atıf yapıyor ancak kaynak dökümü içermiyor",
+      "suggestion": "Normun işçilik, makine ve malzeme miktarlarını içe aktarın veya bu kalemin bunlardan neden saptığını belirtin"
+    },
+    "labour_hours_present": {
+      "fail": "{ordinal} ({code}) pozunun kaynak dökümünde işçilik saati yok",
+      "suggestion": "Normun gerektirdiği adam-saat miktarını ekleyin; genel gider ve tahmini kâr, ücret maliyeti üzerinden normlandırılır ve bu miktar olmadan hesaplanamaz"
+    },
+    "price_level_declared": {
+      "fail": "Maliyet tahmini, tutarların hangi fiyat seviyesinde olduğunu belirtmiyor",
+      "suggestion": "İnceleyenin aynı toplama ulaşabilmesi için fiyat seviyesini (tarih) ve uygulanan dönüşüm endeksini belirtin"
+    }
+  },
+  "dpgf": {
+    "lot_required": {
+      "fail": "{ordinal} pozu herhangi bir teknik iş paketine (Lot technique) atanmamış",
+      "suggestion": "Bir teknik iş paketi atayın (ör. Lot 01 Gros Œuvre)"
+    },
+    "pricing_complete": {
+      "fail": "Yalnızca {priced}/{total} poz ({percent}) fiyatlandırılmış; %80 eşiğinin altında",
+      "suggestion": "DPGF sunumundan önce tüm pozların fiyatlandırmasını tamamlayın"
+    }
+  },
+  "onorm": {
+    "position_format": {
+      "fail": "'{ordinal}' sıra numarası ÖNORM XX.XX.XXXXA biçimine uymuyor",
+      "suggestion": "ÖNORM B 2063 biçimini kullanın (ör. 01.02.01A)"
+    },
+    "description_length": {
+      "fail": "{ordinal} pozu: açıklama çok kısa ({length} karakter, en az 20)",
+      "suggestion": "ÖNORM B 2063'e göre poz açıklamasına daha fazla ayrıntı ekleyin"
+    }
+  },
+  "gbt50500": {
+    "code_required": {
+      "fail": "{ordinal} pozunda GB/T 50500 kodu eksik",
+      "suggestion": "Dokuz haneli GB/T 50500 kodu atayın (ör. 010101001)"
+    },
+    "valid_code": {
+      "fail": "Geçersiz GB/T 50500 kodu '{code}'; 9 veya 12 hane bekleniyor"
+    }
+  },
+  "cpwd": {
+    "code_required": {
+      "fail": "{ordinal} pozunda CPWD/DSR kodu eksik",
+      "suggestion": "CPWD DSR poz referansı atayın (ör. 4.1.1)"
+    },
+    "measurement_units": {
+      "fail": "{ordinal} pozundaki '{unit}' birimi IS 1200 standardına uymuyor",
+      "suggestion": "Standart IS 1200 birimlerini kullanın: m, m2, m3, kg, nos, rm vb."
+    }
+  },
+  "hungary": {
+    "item_code_required": {
+      "fail": "{ordinal} pozunda Macaristan poz kodu yok",
+      "invalid": "{ordinal} pozundaki '{code}' kodu iki poz sınıflandırmasından hiçbirine uymuyor",
+      "suggestion": "Bina işlerinde MA-CC-SS-II (01 ile 17 arası bölüm), altyapı işlerinde proje kod sözlüğündeki altı veya yedi haneli poz numarası kullanılır"
+    },
+    "chapter_recognised": {
+      "fail": "{ordinal} pozundaki {chapter} bölümü, poz sınıflandırmasındaki on yedi bölümden biri değil"
+    },
+    "material_fee_split": {
+      "fail": "{ordinal} pozu: {material} malzeme bedeli ile {fee} yapım bedelinin toplamı {rate} birim fiyatını vermiyor",
+      "suggestion": "Ayrışımın tutması için malzeme ve yapım birim bedellerini veya birim fiyatı düzeltin"
+    },
+    "item_number_unique": {
+      "fail": "{number} poz numarası {count} pozda kullanılıyor; tek bir pozu tanımlaması gerekir",
+      "suggestion": "Keşif müşteriye gönderilmeden önce her poza ayrı proje poz numarası verin"
+    }
+  },
+  "prezzario": {
+    "voce_code_format_valid": {
+      "fail": "{ordinal} pozundaki '{code}' kodu hangi fiyat listesinden geldiğini göstermiyor",
+      "suggestion": "Resmî voce kodu, fiyat listesinin bölgesi ve yayın yılıyla başlar; ör. TOS25_01.A03.001.001 (Toscana 2025). Kodu bölgesel listede yazıldığı gibi kopyalayın, kalemi listeden içe aktarın veya yeni fiyatı NP.01 olarak numaralandırın"
+    },
+    "voce_reference_present": {
+      "fail": "{ordinal} pozu herhangi bir prezzario voce referansı içermiyor",
+      "suggestion": "Kalemi içe aktarılmış bölgesel fiyat listesinden seçin veya fiyat analiziyle desteklenen yeni fiyat (nuovo prezzo, NP) olarak işaretleyin"
+    },
+    "costi_sicurezza_separated": {
+      "fail": "Keşifte ihale indirimine tabi olmayan güvenlik maliyetleri için ayrı kalem yok",
+      "suggestion": "Güvenlik maliyetlerini (oneri della sicurezza), fiyat listesinin güvenlik bölümünden veya güvenlik planından fiyatlandırılmış ayrı bölüm ya da ilave kalemi olarak ekleyin"
+    },
+    "incidenza_manodopera_documented": {
+      "fail": "{ordinal} ({code}) pozu işçilik payını belirtmiyor",
+      "suggestion": "İşçilik maliyetinin ihalede ayrı gösterilebilmesi için incidenza della manodopera değerini fiyat listesinden alın veya işçilik kaynağı ekleyin"
+    },
+    "overheads_not_applied_twice": {
+      "fail": "Bölgesel fiyat listesi fiyatları genel gideri (%13-17) ve kârı (%10) zaten içerir. Yeniden uygulanmaları toplamı yaklaşık %{percent} artırır.",
+      "suggestion": "Bu keşiften genel gider ve kâr ilavelerini kaldırın veya yalnızca kendi analizinizle fiyatlandırılan kalemlerde (NP) tutun."
+    }
+  },
+  "romania": {
+    "deviz_chapter_required": {
+      "fail": "{ordinal} pozunda deviz general bölümü belirtilmemiş",
+      "suggestion": "Kalemi HG 907/2016 bölüm ve alt bölümüne yerleştirin; ör. inşaat ve tesisat işleri için 4.1 veya şantiye organizasyonu için 5.1"
+    },
+    "deviz_chapter_recognised": {
+      "fail": "{ordinal} pozundaki '{code}' deviz kodu, deviz general bölüm veya alt bölümü değil",
+      "suggestion": "HG 907/2016 deviz general içindeki 1 ile 6 arasındaki bölümlerden bir kod kullanın; ör. 1.2, 2, 3.5, 4.1, 5.1 veya 6.2"
+    }
+  },
+  "greece": {
+    "net_article_required": {
+      "fail": "{ordinal} pozunda birleşik fiyat listesi (ΝΕΤ) maddesi yok",
+      "suggestion": "Kalemin fiyatlandırıldığı ΝΕΤ maddesini belirtin; ör. ΟΙΚ 32.01.06 veya yeni madde için ΝΑΟΙΚ"
+    },
+    "net_article_valid": {
+      "invalid": "{ordinal} pozundaki '{code}' maddesi ΝΕΤ maddesi biçimine uymuyor",
+      "chapter": "{ordinal} pozundaki '{code}' maddesi, bina işleri fiyat listesinde bulunmayan {chapter} bölümüyle başlıyor",
+      "suggestion": "Liste ön ekini ve madde numarasını yazın; ör. ΟΙΚ 38.20.02, ΟΔΟ Α-2 veya ΑΤΗΕ 8151.1"
+    }
+  },
+  "ukraine": {
+    "zkr_chapter_required": {
+      "fail": "{ordinal} pozunda özet maliyet hesabının bölümü belirtilmemiş",
+      "suggestion": "Kalemi зведений кошторисний розрахунок içindeki 1 ile 12 arasındaki bölümüne yerleştirin; ana yapının bina işleri 2. bölümdedir"
+    },
+    "zkr_chapter_recognised": {
+      "fail": "{ordinal} pozundaki {chapter} bölümü, özet maliyet hesabının on iki bölümünden biri değil",
+      "suggestion": "1 ile 12 arasında bir bölüm numarası kullanın"
+    }
+  },
+  "birimfiyat": {
+    "code_required": {
+      "fail": "{ordinal} pozunda birim fiyat poz numarası eksik",
+      "suggestion": "Bayındırlık poz numarası atayın (ör. 04.013/1)"
+    },
+    "valid_poz": {
+      "fail": "'{code}' pozu ne güncel birim fiyat kitabı numarası (XX.XXX.XXXX) ne de eski biçimdeki numara (XX.XXX/X)",
+      "suggestion": "Kitaptaki numarayı kullanın; ör. 15.140.1002 veya eski sözleşmelerde 04.013/1; kendi analiz pozlarınızı ÖZEL-1 olarak numaralandırın"
+    }
+  },
+  "sekisan": {
+    "code_required": {
+      "fail": "{ordinal} pozunda 積算 kodu eksik",
+      "suggestion": "積算基準 poz kodu atayın"
+    },
+    "metric_units": {
+      "fail": "{ordinal} pozundaki '{unit}' birimi standart değil",
+      "suggestion": "Standart metrik birimleri kullanın: m, m2, m3, kg, t, 式 vb."
+    }
+  },
+  "bc3": {
+    "code_required": {
+      "fail": "{ordinal} pozunda FIEBDC-3 kavram kodu eksik",
+      "suggestion": "FIEBDC-3 kodu atayın (ör. E04CM040 veya 01.02.01)"
+    },
+    "valid_code": {
+      "fail": "{ordinal} pozunda geçersiz FIEBDC-3 kodu '{code}'",
+      "suggestion": "FIEBDC-3 alfanümerik biçimini kullanın (ör. E04CM040, 01.02.01, CAP01#)"
+    }
+  },
+  "mexico": {
+    "apu_completeness": {
+      "fail": "{ordinal} pozunun APU analizi eksik; eksik maliyet bileşenleri: {missing}",
+      "suggestion": "Birim fiyat analizine eksik doğrudan maliyet (costo directo) bileşenlerini ekleyin: işçilik, malzeme, makine"
+    },
+    "iva_rate_valid": {
+      "fail": "{ordinal} pozundaki IVA oranı {rate} geçersiz; Meksika IVA oranı yüzde 16, 8 (sınır bölgesi) veya 0'dır",
+      "suggestion": "IVA oranını yüzde 16 (standart), yüzde 8 (sınır bölgesi) veya yüzde 0 olarak ayarlayın"
+    },
+    "subcontract_retencion": {
+      "fail": "{ordinal} alt yüklenici pozunda IVA/ISR tevkifatlarının uygulanıp uygulanmadığı kaydedilmemiş",
+      "suggestion": "Alt yüklenici kalemine IVA ve ISR tevkifatlarını kaydedin veya hiçbirinin uygulanmadığını işaretleyin"
+    },
+    "cfdi_rfc_present": {
+      "missing": "İhale dışa aktarımı için CFDI düzenleyen bilgileri eksik: {missing}",
+      "invalid_rfc": "RFC '{rfc}' geçerli bir CFDI RFC değil (şirket için 12, gerçek kişi için 13 karakter)",
+      "suggestion": "CFDI 4.0 faturalandırması için proje profilinde düzenleyenin RFC, regimen fiscal ve uso CFDI bilgilerini ayarlayın"
+    }
+  },
+  "pipeline": {
+    "side_effecting_requires_gate": {
+      "fail": "Onay kapısı bulunmayan, veri değiştiren düğümler: {nodes}",
+      "suggestion": "Yayımlamadan önce tetikleyici/AI düğümünden her yazma düğümüne uzanan tüm yollara doğrulama veya insan onayı kapısı ekleyin."
+    }
+  },
+  "property_dev": {
+    "escrow_account_required": {
+      "fail": "Gayrimenkul geliştirme için '{regulator}' düzenleyicisine uygun aktif bir emanet hesabı gerekir",
+      "suggestion": "Uyum → Emanet hesapları altında düzenleyici tarafından lisanslanmış bankada bir emanet hesabı açın"
+    },
+    "escrow_iban_valid": {
+      "fail": "{account} emanet hesabı: '{iban}' IBAN'ı ISO 13616 yapısal kontrolünü geçemedi",
+      "suggestion": "IBAN'ı düzeltin: ülke kodu, uzunluk ve kontrol toplamı ISO 13616 ile uyumlu olmalıdır"
+    },
+    "escrow_balance_reconciled": {
+      "fail": "{account} emanet hesabı: {ledger} defter bakiyesi ile {transactions} işlem toplamı arasında {drift} fark var",
+      "suggestion": "Emanet hesabını mutabık hale getirin; kaydedilmemiş tahsilatları veya eksik borç kayıtlarını araştırın"
+    },
+    "sales_contract_party_ownership_sums_to_100": {
+      "fail": "{contract} sözleşmesi: mülkiyet payları toplamı %{total} (tam olarak %100 olmalıdır)",
+      "suggestion": "Tarafların yüzdelerini toplam %100.00 olacak şekilde düzenleyin"
+    },
+    "payment_schedule_instalments_sum_to_contract_value": {
+      "fail": "{contract} sözleşmesi: {instalments} taksit toplamı, {contract_value} sözleşme bedelinden farklı (fark {drift})",
+      "suggestion": "Taksitlerin toplamı sözleşme bedeline eşit olacak şekilde ödeme planını dengeleyin"
+    },
+    "reservation_expiry_in_future": {
+      "fail": "{reservation} rezervasyonu: expires_at {expires} gelecekte değil",
+      "suggestion": "Rezervasyonu uzatın veya süresi dolmuş/iptal edilmiş durumuna geçirin"
+    },
+    "broker_commission_rate_within_bounds": {
+      "fail": "{agreement} komisyon sözleşmesi: {issue}",
+      "suggestion": "%0.1 ile %15 arasında oran, sabit tutar veya boş olmayan kademeli tarife kullanın"
+    },
+    "price_matrix_no_negative_modifier": {
+      "fail": "{matrix} fiyat matrisi: '{factor}' kuralının {multiplier} çarpanı [-0.50, 2.00] aralığı dışında",
+      "suggestion": "Gerçekçi olmayan parsel fiyatlarından kaçınmak için düzeltmeleri -%50 ile +%200 arasında sınırlayın"
+    }
+  },
+  "schedule_quality": {
+    "open_ends": {
+      "fail": "'{activity}' faaliyetinde {ends} bağlantısı yok (açık uç / bağlantısız faaliyet)",
+      "both": "öncül veya ardıl",
+      "predecessor": "öncül",
+      "successor": "ardıl",
+      "suggestion": "Faaliyeti öncül ve ardıl bağlantılarıyla ağa bağlayın veya başlangıç/bitiş kilometre taşı olarak tanımlayın"
+    },
+    "negative_lag": {
+      "fail": "{predecessor} -> {successor} ilişkisi negatif gecikme ({lag} gün) kullanıyor; bu, öne çekme anlamına gelir ve kritik yolu bozar",
+      "suggestion": "Sıralamanın gerekçelendirilebilir kalması için öne çekmeyi açık bir faaliyet veya SS/FF ilişkisiyle değiştirin"
+    },
+    "excessive_lag": {
+      "fail": "{predecessor} -> {successor} ilişkisinin {lag} günlük gecikmesi {threshold} günlük eşiğin üzerinde",
+      "suggestion": "Durumu izlenebilsin ve kaynak dengelemesine katılabilsin diye bekleme süresini ayrı bir faaliyet (tedarik, kür, onay) olarak modelleyin"
+    },
+    "hard_constraints": {
+      "fail": "'{activity}' faaliyetinde ağ mantığını geçersiz kılan kesin tarih kısıtı ({constraint}) var",
+      "suggestion": "Öncüller geciktiğinde faaliyetin kayabilmesi için esnek kısıt (belirtilen tarihten önce başlamama) kullanın veya tarihi bağlantı mantığıyla belirleyin"
+    },
+    "negative_float": {
+      "fail": "'{activity}' faaliyetinin toplam bolluğu negatif ({float} gün); mevcut mantıksal bağlantılarla iş programı gerçekleştirilemez",
+      "suggestion": "Bolluğu sıfıra veya üzerine çıkarmak için işleri yeniden sıralayın, kesin kısıtı esnetin veya belgeli bir telafi planı ekleyin"
+    },
+    "high_float": {
+      "fail": "'{activity}' faaliyetinin toplam bolluğu çok yüksek ({float} gün); {threshold} günlük eşiğin üzerinde",
+      "suggestion": "Eksik ardıl bağlantısı olup olmadığını kontrol edin; yüksek bolluk genellikle faaliyetin ağa zayıf bağlandığını gösterir"
+    },
+    "missing_duration": {
+      "fail": "'{activity}' faaliyetinin süresi ({duration} gün), kilometre taşı olmayan iş için geçersiz",
+      "suggestion": "Pozitif iş günü süresi girin veya gerçekten sıfır süreli olay ise satırı kilometre taşı olarak tanımlayın"
+    },
+    "duration_on_project_week": {
+      "fail": "'{activity}' faaliyeti, {start} ile {end} arasındaki Pazartesi-Cuma sayımıyla {stored} iş günü olarak kayıtlı; proje haftası {calendar} esas alındığında bu tarihler {expected} gün içeriyor",
+      "suggestion": "Sürenin projenin çalışma haftasına göre yeniden sayılması için faaliyet tarihlerini tekrar kaydedin veya süreyi bilinçli olarak girin"
+    }
+  },
+  "sheet_completeness": {
+    "missing": {
+      "fail": "{sheet} paftası çizim listesinde var ancak yüklenen sette yok",
+      "suggestion": "Eksik paftayı yükleyin veya yayından çekildiğini doğrulayın"
+    },
+    "extra": {
+      "fail": "{sheet} paftası yüklenen sette var ancak çizim listesinde yok",
+      "suggestion": "Paftayı çizim listesine veya yayın siciline ekleyin ya da fazladan paftayı kaldırın"
+    },
+    "revision_mismatch": {
+      "fail": "{sheet} paftasının revizyonu {actual_rev}; listede {expected_rev} bekleniyor",
+      "suggestion": "Beklenen revizyonu yayımlayın veya listeyi mevcut revizyona güncelleyin"
+    }
+  },
+  "procurement": {
+    "po_has_lines": {
+      "fail": "Bu satınalma siparişinde kalem yok; bu nedenle taahhüt tutarı hesaba katılmıyor",
+      "suggestion": "Satınalma siparişini onaylamadan önce sipariş edilen kalemleri ekleyin"
+    },
+    "po_line_amount": {
+      "fail": "{line} kaleminin toplamı {actual}, ancak miktar × birim fiyat {expected}",
+      "suggestion": "Üç değerin uyuşması için miktarı, birim fiyatı veya kalem tutarını düzeltin"
+    },
+    "po_subtotal_matches_lines": {
+      "fail": "Ara toplam {actual}, ancak kalemlerin toplamı {expected}",
+      "suggestion": "Ara toplamı mevcut kalemlerden yeniden hesaplayın"
+    },
+    "po_total_matches_subtotal": {
+      "fail": "Toplam {actual}, ancak ara toplam ve vergi toplamı {expected}",
+      "suggestion": "Toplamı ara toplam artı vergiye eşit olacak şekilde yeniden hesaplayın"
+    },
+    "po_no_negative_line": {
+      "fail": "{line} kaleminin miktarı pozitif değil veya birim fiyatı negatif",
+      "suggestion": "Ters kayıt için negatif kalem yerine alacak dekontu düzenleyin"
+    },
+    "po_currency_set": {
+      "fail": "Bu satınalma siparişinde para birimi yok; tutarı toplulaştırılamaz veya ödenemez",
+      "suggestion": "Para birimini, normalde projenin kullandığı para birimini belirleyin"
+    },
+    "po_vendor_assigned": {
+      "fail": "Bu satınalma siparişinde tedarikçi belirtilmemiş",
+      "suggestion": "Taahhüdü onaylamadan önce tedarikçiyi seçin"
+    },
+    "po_retention_within_bounds": {
+      "fail": "%{percent} teminat kesintisi oranı 0 ile %{max} arasındaki makul aralığın dışında",
+      "suggestion": "Teminat kesintisini yüzde olarak girin; ör. yüzde beş için 5"
+    },
+    "po_delivery_after_issue": {
+      "fail": "Teslimat tarihi {delivery}, düzenleme tarihi {issue} öncesinde",
+      "suggestion": "Teslimat tarihini düzenleme tarihine veya sonrasına taşıyın"
+    },
+    "po_line_cost_coded": {
+      "fail": "{line} kaleminde WBS, maliyet kategorisi veya maliyet kalemi yok; bu nedenle maliyet dökümünde görünmeyecek",
+      "suggestion": "Taahhüdün bütçeye karşı raporlanması için bir maliyet kodu atayın"
+    },
+    "invoice_within_order": {
+      "fail": "{invoice} faturası, {po} siparişinin kalan {remaining} tutarını {excess} aşıyor",
+      "suggestion": "Faturayı siparişle karşılaştırın; ek tutar kararlaştırıldıysa onaylamadan önce sipariş değişikliği olarak kaydedin"
+    },
+    "invoice_quantity_received": {
+      "fail": "{line} kalemi toplam {invoiced} miktarında faturalandırılacak, ancak yalnızca {received} teslim alınmış",
+      "suggestion": "Bu miktarı onaylamadan önce irsaliyeyi bekleyin veya mal kabulünü doğrulayın"
+    },
+    "invoice_value_received": {
+      "fail": "{po} siparişinin faturaları toplam {invoiced} olacak, ancak teslim alınan malların sipariş fiyatlarıyla değeri yalnızca {received}",
+      "suggestion": "Bu tutarı onaylamadan önce irsaliyeyi bekleyin veya mal kabulünü doğrulayın"
+    }
+  },
+  "subcontract": {
+    "agreement_has_scope": {
+      "fail": "Bu sözleşmede iş paketi yok; dolayısıyla hakediş talebinin dayanacağı bir kapsam bulunmuyor",
+      "suggestion": "Sözleşmeyi etkinleştirmeden önce sözleşme kapsamını iş paketlerine ayırın"
+    },
+    "package_scope_described": {
+      "fail": "{package} iş paketinin adı var, ancak kapsadığı işin açıklaması yok",
+      "suggestion": "İlerideki değişiklik anlaşmazlıkları için dayanak oluşturması amacıyla paketin neleri içerdiğini yazın"
+    },
+    "agreement_value_positive": {
+      "fail": "Sözleşme bedeli {value}; teminat kesintisinin ve bedel dağılım cetvelinin hesaplanacağı bir temel yok",
+      "suggestion": "Sözleşmeyi etkinleştirmeden önce kararlaştırılan sözleşme bedelini girin"
+    },
+    "packages_within_value": {
+      "fail": "İş paketlerinin değeri {planned}, ancak sözleşme bedeli {total}",
+      "suggestion": "Sözleşmenin kendi iş kapsamını karşılaması için paketleri yeniden fiyatlandırın veya sözleşme bedelini artırın"
+    },
+    "agreement_dates_ordered": {
+      "fail": "Sözleşme {end} tarihinde bitiyor; bu tarih {start} başlangıcından önce",
+      "suggestion": "Sözleşme süresinin ileriye doğru işlemesi için başlangıç veya bitiş tarihini düzeltin"
+    },
+    "agreement_currency_set": {
+      "fail": "Bu sözleşmede para birimi yok; kapsamındaki ödemeler toplulaştırılamaz veya ödenemez",
+      "suggestion": "Para birimini, normalde projenin kullandığı para birimini belirleyin"
+    },
+    "retention_within_bounds": {
+      "fail": "%{percent} teminat kesintisi oranı 0 ile %{max} arasındaki makul aralığın dışında",
+      "suggestion": "Teminat kesintisini tutar olarak değil, her ödemenin yüzdesi olarak girin"
+    },
+    "insurance_valid_at_start": {
+      "fail": "Alt yüklenicinin sigortası {expiry} tarihinde, {reference} iş başlangıcından önce sona ermiş",
+      "suggestion": "Alt yükleniciyi sahaya almadan önce güncel sigorta belgesini alın"
+    },
+    "unlinked_contract_twin": {
+      "fail": "{agreement} alt yüklenici sözleşmesi ile {contract} sözleşmesi aynı işi temsil ediyor gibi görünüyor; finansal hesaplarda iki kez sayılabilir",
+      "suggestion": "Aynı alt yüklenici sözleşmesiyse ilişkilendirin, değilse farklı olduklarını işaretleyin"
+    }
+  },
+  "submittal": {
+    "reviewer_assigned": {
+      "fail": "Bu onay sunumunda inceleyen belirtilmemiş; dolayısıyla sunum kimsenin sorumluluğuna girmiyor",
+      "suggestion": "Sunmadan önce yanıt verecek inceleyeni atayın"
+    },
+    "required_date_present": {
+      "fail": "Bu onay sunumunda gereken tarih yok; bu nedenle hiçbir zaman gecikmiş olarak raporlanamaz",
+      "suggestion": "Bu sunumun başlamasına izin verdiği işe göre incelemenin tamamlanması gereken tarihi belirleyin"
+    },
+    "required_date_after_submitted": {
+      "fail": "İnceleme {required} tarihinde gerekiyor; bu tarih {submitted} sunum tarihinden önce",
+      "suggestion": "Gereken tarihi, sunumdan sonraki bir iş gününe taşıyın"
+    },
+    "review_window_sufficient": {
+      "fail": "İnceleyenin {days} günü var; olağan inceleme için gereken {minimum} günden az",
+      "suggestion": "Olağan inceleme süresini tanıyın veya daha kısa süreyi önce inceleyenle kararlaştırın"
+    },
+    "spec_section_present": {
+      "fail": "Bu onay sunumunda şartname bölümü belirtilmemiş; sicilde sınıflandırılamaz",
+      "suggestion": "Bu sunumun yanıt verdiği şartname bölümünü girin"
+    },
+    "approver_distinct_from_reviewer": {
+      "fail": "Aynı kişi ({person}) hem inceleyen hem onaylayan; ikinci bir gözün kontrolü yok",
+      "suggestion": "İnceleyenden farklı bir onaylayan atayın"
+    },
+    "linked_scope_present": {
+      "fail": "Bu sunum hiçbir iş kapsamı kalemine bağlı değil; hiçbir paketin toplamına dahil edilmez",
+      "suggestion": "Bu sunumun kapsadığı keşif pozlarını ilişkilendirin"
+    }
+  },
+  "rfq": {
+    "scope_described": {
+      "fail": "Bu talepte iş kapsamı ve açıklama yok; tedarikçinin fiyatlandırabileceği bir içerik bulunmuyor",
+      "suggestion": "Gelen tekliflerin karşılaştırılabilmesi için yayımlamadan önce kapsamı açıklayın"
+    },
+    "deadline_present": {
+      "fail": "Bu talepte son teklif tarihi belirtilmemiş; teklif verme süreci kapanmaz",
+      "suggestion": "Tekliflerin ulaşması gereken tarih ve saati belirleyin"
+    },
+    "deadline_parseable": {
+      "fail": "Son teklif tarihi {value}, sistemin okuyabileceği bir tarih değil; tüm teklifler reddedilecek",
+      "suggestion": "Son tarihi tarih biçiminde girin; ör. 2026-08-31"
+    },
+    "deadline_in_future": {
+      "fail": "Son teklif tarihi {deadline}, bugün ({today}) itibarıyla geçmiş; talep kapalı olarak iletiliyor",
+      "suggestion": "Yayımlamadan önce son tarihi gelecekteki bir tarihe taşıyın"
+    },
+    "has_recipients": {
+      "fail": "Bu talep hiçbir tedarikçiye yöneltilmemiş; yayımlanması kimseye bildirim göndermez",
+      "suggestion": "Bu talebin gönderileceği tedarikçileri ekleyin"
+    },
+    "currency_set": {
+      "fail": "Bu talepte para birimi belirtilmemiş; teklifler birbirine göre sıralanamaz",
+      "suggestion": "Tekliflerin fiyatlandırılacağı para birimini belirleyin"
+    },
+    "bid_currency_matches": {
+      "fail": "{bid} teklifi {bid_currency} cinsinden, talep ise {rfq_currency} cinsinden",
+      "suggestion": "Teklif verenden talebin para birimiyle yeniden teklif isteyin veya kararlaştırılan dönüşümü kaydedin"
+    },
+    "bid_amounts_parseable": {
+      "fail": "{bid} teklifinin {value} tutarı sıralamada kullanılabilecek bir sayı değil",
+      "suggestion": "İşi vermeden önce teklif tutarını düzeltin"
+    },
+    "bids_still_valid": {
+      "fail": "{bid} teklifinin geçerliliği {expired} tarihinde sona ermiş; bugün {today}, dolayısıyla fiyat artık bağlayıcı değil",
+      "suggestion": "İşi vermeden önce teklif verenden fiyatı teyit etmesini isteyin"
+    },
+    "award_has_competition": {
+      "fail": "Bu iş verme kararı {count} teklife dayanıyor; rekabetçi karşılaştırma için gereken {minimum} tekliften az",
+      "suggestion": "Tek kaynaktan iş vermenin gerekçesini kaydedin veya daha fazla teklif vereni davet edin"
+    }
+  },
+  "errors": {
+    "resource_not_found": "Kaynak bulunamadı",
+    "project_not_found": "Proje bulunamadı",
+    "vendor_not_found": "Tedarikçi bulunamadı",
+    "template_not_found": "Şablon bulunamadı",
+    "position_not_found": "Poz bulunamadı",
+    "boq_not_found": "Keşif bulunamadı",
+    "session_not_found": "Oturum bulunamadı",
+    "document_not_found": "Belge bulunamadı",
+    "documents_batch_delete_referenced": "Başka yerlerdeki kayıtlar bu gruptaki belgelere hâlâ işaret ediyor. Silmenin koparacağı bağlantıları inceleyin ve acknowledge_references ile onaylayın.",
+    "invitation_not_found": "Davet bulunamadı",
+    "agreement_not_found": "Anlaşma bulunamadı",
+    "rejection_not_found": "Ret kaydı bulunamadı",
+    "claim_not_found": "Hakediş talebi bulunamadı",
+    "gaeb_x89_final_account_unsupported": "Kesin hesap veya kısmi kesin hesap henüz GAEB X89 olarak dışa aktarılamaz. Önceki ödemeler düşülmüş kümülatif iş bedelinin faturalandırılması gerekir; hakedişten ise yalnızca tek dönemlik ara fatura oluşturulur. Hakedişi ara fatura olarak dışa aktarın.",
+    "xpwe_native_file_refused": "Bu dosya, bir maliyet hesaplama programının yalnızca o programda açılabilen kendi proje dosyasıdır. Maliyet hesabını programınızdan XPWE biçiminde dışa aktarın ve .xpwe dosyasını yükleyin.",
+    "plot_not_found": "Parsel bulunamadı",
+    "survey_not_found": "Drone ölçümü bulunamadı",
+    "diary_video_not_found": "Günlük videosu bulunamadı",
+    "diary_photo_not_found": "Günlük fotoğrafı bulunamadı",
+    "bidder_not_found": "Teklif veren bulunamadı",
+    "webhook_not_found": "Webhook bulunamadı",
+    "submission_not_found": "Sunum bulunamadı",
+    "measurement_not_found": "Saha ölçümü bulunamadı",
+    "salescontract_not_found": "Satış sözleşmesi bulunamadı",
+    "prompt_not_found": "İstem şablonu bulunamadı",
+    "prequalification_not_found": "Ön yeterlilik bulunamadı",
+    "purchase_requisition_not_found": "Satınalma talebi bulunamadı",
+    "purchase_order_not_found": "Satınalma siparişi bulunamadı",
+    "group_not_found": "Grup bulunamadı",
+    "final_account_not_found": "Kesin hesap bulunamadı",
+    "estimate_job_not_found": "Maliyet tahmini işi bulunamadı",
+    "escrow_not_found": "Emanet hesabı işlemi bulunamadı",
+    "commission_accrual_not_found": "Komisyon tahakkuku bulunamadı",
+    "baseline_not_found": "Baz plan bulunamadı",
+    "fx_rate_set_locked": "{date} tarihli ECB kurları kilitli; bu yenileme üzerlerine yazmadı. Yeni yayını almaları gerekiyorsa önce bu kur setinin kilidini açın.",
+    "boq_locked": "Keşif kilitli ve değiştirilemez. Değişiklik yapmak için revizyon oluşturun.",
+    "boq_link_owner_locked": "'{code}' kodu kilitli '{bill}' keşfindeki bir kalem tarafından tanımlanıyor; bu koda bağlanmak o keşfi değiştirir. Önce keşfin kilidini açın veya kalemi yeni bir kodla girin."
+  },
+  "variations": {
+    "boq_lines_are_traced": {
+      "fail": "Bu değişikliğin keşfindeki {line} kaleminin kaynağı yok; ne bedel dağılım cetveli kalemine ne de maliyet tahmini pozuna bağlı",
+      "suggestion": "Tutarın gerekçelendirilebilmesi için değişikliğin etkilediği sözleşme kalemini veya iş kapsamının alındığı maliyet tahmini pozunu belirtin"
+    },
+    "boq_total_matches_estimate": {
+      "fail": "Bu talebin üst bilgideki tahmini {estimate}, ancak fiyatlandırılmış keşfin toplamı {priced}",
+      "suggestion": "Tek bir doğru tutar olması için fiyatlandırılmış toplamı talebe aktarın veya keşfi düzeltin"
+    },
+    "change_kind_matches_numbers": {
+      "removed_positive": "{line} kalemi çıkarılan iş kapsamı olarak işaretli, ancak {quantity} pozitif miktarını taşıyor; eksiltme sözleşmeden negatif miktarla düşülür",
+      "added_negative": "{line} kalemi eklenen iş kapsamı olarak işaretli, ancak {quantity} negatif miktarını taşıyor; sözleşmeden düşülen kapsam eklenen değil, çıkarılan kapsamdır",
+      "removed_needs_contract_line": "{line} kalemi çıkarılan iş kapsamı olarak işaretli, ancak bedel dağılım cetvelinde kaynak kalemi yok; çıkarılacak sözleşme kalemi bulunmuyor",
+      "modified_needs_contract_line": "{line} kalemi değiştirilen iş kapsamı olarak işaretli, ancak bedel dağılım cetvelinde kaynak kalemi yok; değiştirilecek sözleşme kalemi bulunmuyor",
+      "suggestion": "Kalemin kaynak bağlantısındaki değişiklik türünü veya miktarı düzeltin ya da değişikliğin etkilediği sözleşme kalemini belirtin"
+    }
+  },
+  "cases": {
+    "has_steps": {
+      "fail": "Bu senaryoda henüz adım yok; okuyucunun izleyebileceği bir yol bulunmuyor.",
+      "suggestion": "Açılacak ekranı ve yapılacak işi belirten en az bir adım ekleyin."
+    },
+    "step_titled": {
+      "fail": "{count} adımın başlığı veya açılacak ekranı eksik.",
+      "suggestion": "Her adıma kısa bir başlık verin ve açacağı ekranı seçin."
+    },
+    "step_purpose": {
+      "fail": "{total} adımın {count} tanesi neden gerekli olduğunu söylemiyor; senaryo açıklama yerine tıklama listesi gibi okunuyor.",
+      "suggestion": "Her adımın amacını bir satırla açıklayın; yeni başlayanların ihtiyaç duyduğu kısım budur."
+    },
+    "distinct_screens": {
+      "fail": "{count} adım bir önceki adımla aynı ekranı açıyor; okuyucu değişiklik görmediğinden adımları ayırt edemiyor.",
+      "suggestion": "Bu adımları birleştirin veya ikinci adımı işin gerçekten devam ettiği ekrana yönlendirin."
+    },
+    "duration_plausible": {
+      "fail": "Bu senaryo {steps} adım için {minutes} dakika öngörüyor. Yetişemeyen okuyucu tahminin geri kalanına da güvenini kaybeder.",
+      "suggestion": "Tahmini en az {minimum} dakikaya çıkarın veya bazı adımları kaldırın."
+    },
+    "described": {
+      "fail": "Bu senaryonun özeti yok; listede yalnızca başlık görünüyor.",
+      "suggestion": "Okuyucunun sonunda neyi tamamlamış olacağını anlatan bir cümle ekleyin."
+    }
+  },
+  "uk": {
+    "contract_form_declared": {
+      "fail": "Maliyet tahmini, fiyatlandırmanın dayandığı sözleşme türünü belirtmiyor",
+      "suggestion": "Sözleşme türünü kaydedin. Şantiye genel giderleri, risk ve ödeme koşulları türe göre farklı fiyatlandırılır; bu bilgi olmadan tutarın anlamı sınırlıdır"
+    },
+    "payment_regime_declared": {
+      "fail": "Ödeme mekanizması eksik: {missing} kaydedilmemiş",
+      "suggestion": "Her iki tarihi de kaydedin. İkisini de belirlemeyen yapım sözleşmesi bu tarihlerden muaf değildir; Scheme for Construction Contracts ikisini de sağlar ve tarafların ödeme koşulları imzaladıkları metin yerine yasal düzenlemeden kaynaklanır"
+    },
+    "retention_declared": {
+      "fail": "Maliyet tahmini hangi teminat kesintisinin uygulanacağını belirtmiyor",
+      "suggestion": "Teminat kesintisinin yüzdesini ve iadesini kaydedin veya uygulanmadığını belirtin. Kesinti, yüklenicinin hak ettiği ancak çekemediği paradır; bunu belirtmeyen tahmin işletme sermayesini de açıklamaz"
+    },
+    "cdm_duty_holders_declared": {
+      "fail": "CDM 2015 sorumluları kaydedilmemiş: {missing} eksik",
+      "suggestion": "Atamaları kaydedin. Projede birden fazla yüklenici çalışıyorsa işveren bir baş tasarımcı ve ana yükleniciyi yazılı olarak atamalıdır; atamazsa bu sorumlulukları kendisi üstlenir"
+    },
+    "hrb_regime_declared": {
+      "fail": "Yüksek riskli bina konusu netleştirilmemiş: {reason}",
+      "unanswered": "maliyet tahmini bunun yüksek riskli bir bina olup olmadığını belirtmiyor",
+      "disagrees": "maliyet tahmini yüksek risk durumunu {declared} olarak bildiriyor, kendi boyutları ise {derived} sonucunu veriyor",
+      "suggestion": "Bina en az 18 m yüksekliğindeyse veya en az 7 katlıysa VE en az iki konut birimi içeriyorsa yüksek risklidir. İki koşul grubu da önemlidir: konut içermeyen yüksek bir bina yüksek riskli değildir; öyle ele almak gereksiz bir aşamalı onay programına yol açar"
+    },
+    "vat_treatment_declared": {
+      "fail": "Maliyet tahmini KDV'nin nasıl ele alınacağını belirtmiyor",
+      "suggestion": "Uygulamayı kaydedin: standart oran, işin uygun olduğu indirimli veya sıfır oran ya da tedarikin kapsamına girdiği yurt içi ters vergi yükümlülüğü. Ters vergi yükümlülüğü KDV'yi müşteriye aktarır ve yüklenicinin faturalandırabileceği tutarı değiştirir"
+    }
+  },
+  "project_completeness": {
+    "country_set": {
+      "fail": "Projede ülke belirtilmemiş; fiyat bazı, vergi oranı veya çalışma takvimi belirlenemiyor",
+      "suggestion": "Proje ayarlarında ülkeyi belirleyin. Ülke, tüm tutarların hangi bölgesel paket, vergi ve takvime göre yorumlanacağını belirler"
+    },
+    "currency_set": {
+      "fail": "Projede para birimi belirtilmemiş; keşifleri, ilaveleri ve sözleşmeleri toplanamaz",
+      "suggestion": "Proje ayarlarında para birimini seçin. Her keşif ve sözleşme bu para birimiyle fiyatlandırılır, her toplam bu para birimiyle okunur"
+    },
+    "currency_matches_bill": {
+      "fail": "Proje {project_currency} cinsinden fiyatlandırılmış, ancak bu keşfin satırları {bill_currencies} cinsinden",
+      "suggestion": "Keşif toplamının tek tutar olması için satırları belirtilen kurla proje para birimine dönüştürün veya kuru projeye kaydedin"
+    },
+    "priced_bill_present": {
+      "fail": "Projede poz içeren bir keşif yok; maliyet tahminine temel olacak veri bulunmuyor",
+      "suggestion": "Keşif oluşturup poz ekleyin veya CAD modelinden, hesap tablosundan ya da veri alışveriş dosyasından içe aktarın"
+    },
+    "bill_base_date_set": {
+      "fail": "\"{bill}\" keşfi, fiyatlarının geçerli olduğu baz tarihi belirtmiyor",
+      "suggestion": "Baz tarihi keşfe kaydedin. Bu tarih olmadan fiyatlar endekslenemez, kendi tarihindeki vergiyle hesaplanamaz veya başka tahminle karşılaştırılamaz"
+    },
+    "classification_standard_set": {
+      "fail": "Projede sınıflandırma standardı yok; pozların kodları denetlenemiyor",
+      "suggestion": "Projenin kodlandığı sınıflandırma standardını seçin. Bu seçim doğrulamada hangi ülke kural kümelerinin çalışacağını da belirler"
+    },
+    "planned_dates_set": {
+      "both_missing": "Projenin ne planlanan başlangıç ne de planlanan bitiş tarihi var",
+      "start_missing": "Projenin planlanan bitiş tarihi var ancak planlanan başlangıç tarihi yok",
+      "end_missing": "Projenin planlanan başlangıç tarihi var ancak planlanan bitiş tarihi yok",
+      "unreadable": "Planlanan tarih \"{value}\" tarih olarak okunamıyor",
+      "suggestion": "Projenin planlanan başlangıç ve bitişini tarih olarak girin. Süreye bağlı maliyet, fiyat artışı ve iş programı bu tarihler arasında hesaplanır"
+    },
+    "planned_dates_ordered": {
+      "fail": "Projenin {start} tarihinde başlaması ve başlangıcından önceki {end} tarihinde bitmesi planlanmış",
+      "suggestion": "Başlangıcın bitişten önce olması için planlanan tarihleri değiştirin veya düzeltin"
+    },
+    "client_recorded": {
+      "fail": "Projede müşteri kaydı yok ve hiçbir sözleşmede işveren belirtilmemiş",
+      "suggestion": "Maliyet tahmininin muhatabı olması için müşteriyi projeye kaydedin veya işvereni sözleşme tarafı olarak ekleyin"
+    },
+    "procurement_started": {
+      "fail": "Proje {phase} aşamasında, ancak sözleşmesi ve ihale paketi yok",
+      "suggestion": "Keşiften ihale paketi oluşturun, sözleşmeyi kaydedin veya aşamayı projenin gerçekte bulunduğu maliyet tahmini aşamasına geri alın"
+    }
+  },
+  "boq_resources": {
+    "unit_rate_not_rederived": {
+      "fail": "{ordinal} pozu: kaynak satırları kalemi fiyatlandıramıyor; bu nedenle birim fiyat bunlardan yeniden türetilmedi",
+      "fallback_allowance": "{ordinal} pozu: kaynak satırları poz miktarını taşıyan tahmini bir maliyet paylaştırmasıdır; bu nedenle birim fiyat bunlardan yeniden türetilmedi",
+      "assumed_norm": "{ordinal} pozu: kaynak satırları katalogda hiç belirtilmemiş normlar içeriyor; bu nedenle birim fiyat bunlardan yeniden türetilmedi",
+      "norm_collapsed": "{ordinal} pozu: kaynak satırları katalog normunu kaybedip yerine poz miktarını taşıyor; bu nedenle birim fiyat bunlardan yeniden türetilmedi",
+      "whole_position_quantities": "{ordinal} pozu: kaynak satırları birim başına norm yerine tüm pozun miktarlarını taşıyor; bu nedenle birim fiyat bunlardan yeniden türetilmedi",
+      "suggestion": "Analizi inceleyin; kaynak normu incelemesi yoluyla pozu katalog kaleminden yeniden türetin veya satırları elle düzeltin"
+    }
+  },
+  "poland": {
+    "knr_reference_required": {
+      "fail": "{ordinal} pozu herhangi bir KNR katalog tablosuna atıf yapmıyor",
+      "suggestion": "Normların alındığı katalog tablosunu podstawa alanında belirtin; ör. KNR 2-02 0201-01; kendi hesabınızla fiyatlandırılan kalem için kalkulacja indywidualna yazın"
+    },
+    "knr_reference_recognised": {
+      "fail": "{ordinal} pozundaki '{code}' referansı herhangi bir KNR katalog ailesini belirtmiyor",
+      "suggestion": "Referansı KNR, KNNR, KNR-W veya KSNR gibi katalog ailesiyle başlatın veya kalemi kalkulacja indywidualna olarak işaretleyin"
+    }
+  }
+}
