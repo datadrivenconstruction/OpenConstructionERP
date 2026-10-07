@@ -1,0 +1,868 @@
+{
+  "boq_markup": {
+    "contingency_not_on_profit": {
+      "fail": "Rezerva de risc „{markup}” se calculează pe o bază care include deja linia de profit „{profit}”, astfel încât se aplică o marjă banilor rezervați pentru risc",
+      "suggestion": "Aplicați această linie la costul direct, cu excepția cazului în care metoda standard a pieței plasează deliberat riscul după cheltuielile indirecte și profit"
+    },
+    "order_is_declared": {
+      "fail": "Locul {order} din ordinea de calcul este folosit de mai multe linii de adaos: {markups}",
+      "suggestion": "Atribuiți fiecărei linii un loc distinct, pentru a stabili clar ce adaosuri intră în baza următoarelor"
+    },
+    "percentage_within_band": {
+      "fail": "„{markup}” este {percentage}% ca linie din categoria {category}, în afara intervalului plauzibil de la 0 la {ceiling}%",
+      "suggestion": "Verificați separatorul zecimal. Linia este oricum calculată exact conform valorii introduse"
+    },
+    "cumulative_base_is_settled": {
+      "fail": "„{markup}” se aplică la „{apply_to}”, dar nu există linii precedente, deci se calculează doar asupra costului direct",
+      "suggestion": "Mutați-o după liniile care trebuie să intre în baza sa sau aplicați-o la costul direct"
+    }
+  },
+  "common": {
+    "ok": "În regulă"
+  },
+  "export": {
+    "generated": "Generat",
+    "content_digest": "Amprenta conținutului"
+  },
+  "field_time": {
+    "hours_per_day_max": {
+      "fail": "Lucrătorul {worker} are înregistrate {hours} h în această zi, peste limita de {max} h",
+      "suggestion": "Repartizați orele pe ziua sau lucrătorul corect înainte de trimitere"
+    },
+    "line_complete": {
+      "fail": "Linia {line} este incompletă: {reason}",
+      "labour_xor_plant": "trebuie înregistrată fie manoperă, fie utilaj, nu ambele și nici niciuna",
+      "hours_positive": "numărul de ore trebuie să fie mai mare decât zero",
+      "cost_code_required": "este necesar un cod de cost",
+      "suggestion": "Completați linia înainte de trimiterea pontajului"
+    },
+    "cost_code_resolves": {
+      "fail": "Codul '{code}' de pe linia {line} nu corespunde niciunei poziții din lista de cantități sau WBS din acest proiect",
+      "suggestion": "Alegeți un cod de cost sau WBS care există în lista de cantități a proiectului"
+    },
+    "daywork_needs_variation": {
+      "fail": "Linia {line} de lucrări în regie nu este legată de o modificare deschisă",
+      "suggestion": "Legați lucrările în regie de modificarea în baza căreia au fost dispuse"
+    },
+    "plant_needs_equipment": {
+      "fail": "Linia {line} de utilaj nu indică niciun echipament",
+      "suggestion": "Atașați utilajul pentru a putea calcula costul orelor de funcționare"
+    },
+    "approved_immutable": {
+      "fail": "Acest pontaj are starea {status} și nu poate fi editat",
+      "suggestion": "Înregistrați un pontaj de stornare pentru a corecta orele aprobate"
+    },
+    "offline_clock_plausible": {
+      "fail": "Dispozitivul care a înregistrat această zi era cu {minutes} minute înaintea ceasului serverului",
+      "suggestion": "Reglați ceasul dispozitivului pentru a putea citi orele înregistrate în ordinea corectă"
+    },
+    "offline_sync_delay": {
+      "fail": "Lucrările au fost executate la {date}, dar datele au ajuns la birou abia după {days} zile",
+      "suggestion": "Verificați orele față de ziua efectiv lucrată înainte de aprobare; decontarea poate fi deja închisă"
+    }
+  },
+  "ai_takeoff": {
+    "unreviewed_proposals": {
+      "fail": "{count} propuneri de extragere a cantităților așteaptă încă verificarea și nu sunt evaluate aici",
+      "suggestion": "Parcurgeți lista de verificare pentru ca volumele confirmate să corespundă desenului"
+    }
+  },
+  "boq_quality": {
+    "position_has_quantity": {
+      "fail": "Poziția {ordinal} nu poate avea cantitatea zero sau lipsă",
+      "suggestion": "Introduceți o cantitate mai mare decât 0"
+    },
+    "position_has_unit_rate": {
+      "fail": "Poziția {ordinal} ar trebui să aibă un preț unitar",
+      "suggestion": "Atribuiți un preț din baza de costuri"
+    },
+    "position_has_description": {
+      "fail": "Poziția {ordinal} nu poate avea descrierea goală"
+    },
+    "no_duplicate_ordinals": {
+      "fail": "Numărul duplicat '{ordinal}' a fost găsit în {count} poziții"
+    },
+    "unit_rate_in_range": {
+      "fail": "Poziția {ordinal}: prețul {rate} este >{threshold} (de 5 ori mediana)",
+      "suggestion": "Verificați acest preț unitar – este neobișnuit de mare"
+    },
+    "negative_values": {
+      "fail": "Poziția {ordinal} are valori negative: {details}",
+      "suggestion": "Corectați valorile negative – folosiți numere pozitive"
+    },
+    "unrealistic_rate": {
+      "fail": "Poziția {ordinal}: detalii: {details}",
+      "suggestion": "Verificați această valoare – pare nerealist de mare",
+      "not_assessed_no_currency": "{count} poziții nu au fost evaluate: lista de cantități nu indică moneda, deci pragurile monetare (exprimate în {reference}) nu au putut fi convertite în moneda sa",
+      "not_assessed_no_currency_suggestion": "Setați moneda proiectului sau înregistrați o monedă pentru poziții",
+      "not_assessed_no_rate": "{count} poziții în {currency} nu au fost evaluate: nu există un curs de la {reference} la {currency}, deci pragurile monetare nu au putut fi convertite pentru această listă de cantități",
+      "not_assessed_no_rate_suggestion": "Adăugați un curs de la {reference} la {currency} în registrul cursurilor valutare sau în cursurile proiectului"
+    },
+    "total_mismatch": {
+      "fail": "Poziția {ordinal}: calculat {computed} != stocat {stored} (diferență={diff})",
+      "suggestion": "Recalculați totalul = cantitate × preț unitar"
+    },
+    "resource_split_mismatch": {
+      "fail": "Poziția {ordinal}: subtotalul resurselor {subtotal} diferă de prețul unitar {rate} cu {diff}",
+      "suggestion": "Verificați cantitățile și prețurile resurselor – suma lor pe unitate trebuie să corespundă prețului unitar al poziției"
+    },
+    "empty_unit": {
+      "fail": "Poziția {ordinal} are unitatea de măsură goală sau lipsă",
+      "suggestion": "Atribuiți o unitate de măsură (m, m2, m3, kg, buc., sumă forfetară etc.)"
+    },
+    "section_without_items": {
+      "fail": "Secțiunea {ordinal} ({title}) nu are poziții subordonate",
+      "suggestion": "Adăugați poziții în această secțiune sau eliminați secțiunea goală"
+    },
+    "rate_vs_benchmark": {
+      "fail": "Poziția {ordinal}: prețul unitar {rate}/{unit} depășește pragul de referință {threshold}/{unit} – poate fi nerealist",
+      "suggestion": "Verificați prețul – prețurile obișnuite pentru {unit} ar trebui să fie sub {threshold}. Verificați unitatea și separatorul zecimal.",
+      "not_assessed_no_currency": "{count} poziții nu au fost evaluate: lista de cantități nu indică moneda, deci pragurile de referință (exprimate în {reference}) nu au putut fi convertite în moneda sa",
+      "not_assessed_no_currency_suggestion": "Setați moneda proiectului sau înregistrați o monedă pentru poziții",
+      "not_assessed_no_rate": "{count} poziții în {currency} nu au fost evaluate: nu există un curs de la {reference} la {currency}, deci pragurile de referință nu au putut fi convertite pentru această listă de cantități",
+      "not_assessed_no_rate_suggestion": "Adăugați un curs de la {reference} la {currency} în registrul cursurilor valutare sau în cursurile proiectului"
+    },
+    "lump_sum_ratio": {
+      "fail": "{lsum_count} din {total_count} poziții ({percent}) folosesc sume forfetare – peste pragul {threshold}",
+      "suggestion": "Descompuneți pozițiile forfetare în cantități măsurate (m, m2, m3, kg, buc.) pentru o estimare mai precisă"
+    },
+    "cost_concentration": {
+      "fail": "Poziția {ordinal} reprezintă {share} din costul total al listei de cantități ({value} din {grand_total}) – peste pragul {threshold}",
+      "suggestion": "Împărțiți poziția în elemente mai mici sau verificați costul – o singură poziție nu ar trebui să domine devizul"
+    },
+    "currency_consistency": {
+      "fail": "Au fost găsite monede diferite: {currencies}",
+      "suggestion": "Folosiți o singură monedă în întreaga listă de cantități"
+    },
+    "measurement_consistency": {
+      "fail": "Lista de cantități combină unități metrice și imperiale – folosiți consecvent un singur sistem",
+      "suggestion": "Convertiți toate cantitățile fie în unități metrice, fie în unități imperiale"
+    },
+    "revision_cost_impact_review": {
+      "fail": "Impactul reviziei asupra costului, de {amount}, nu este încă înregistrat ca modificare",
+      "suggestion": "Creați o cerere de modificare în ciornă din această comparație de revizii pentru a urmări variația costului"
+    },
+    "base_date_readable": {
+      "fail": "Data de bază '{base_date}' nu este o dată validă, deci devizul este taxat la cota de azi în loc de cota aferentă datei sale",
+      "suggestion": "Indicați baza de preț ca zi, lună, trimestru sau an ({shapes})"
+    },
+    "tax_date_readable": {
+      "fail": "Data fiscală '{tax_date}' nu este o dată validă, deci devizul este taxat la cota de azi în loc de cota aferentă datei sale",
+      "suggestion": "Indicați data fiscală ca zi, lună, trimestru sau an ({shapes}), sau ștergeți-o pentru a folosi data de bază a devizului"
+    }
+  },
+  "din276": {
+    "cost_group_required": {
+      "fail": "Poziției {ordinal} îi lipsește grupa de cost DIN 276 KG",
+      "suggestion": "Atribuiți o grupă de cost DIN 276 din 3 cifre (de exemplu, 330 pentru pereți)"
+    },
+    "valid_cost_group": {
+      "fail": "Cod DIN 276 nevalid '{code}' la poziția {ordinal}"
+    },
+    "hierarchy": {
+      "fail": "Poziția {ordinal}: KG {child} nu aparține grupei părinte KG {parent} (prefix așteptat '{prefix}')",
+      "suggestion": "Mutați poziția sub părintele corect sau actualizați codul KG pentru a respecta ierarhia ({prefix}xx)"
+    },
+    "completeness": {
+      "fail": "Grupa KG {group} – {group_name} lipsește din lista de cantități",
+      "suggestion": "Adăugați poziții pentru KG {group} ({group_name}) pentru o acoperire completă"
+    }
+  },
+  "gaeb": {
+    "ordinal_format": {
+      "fail": "Numărul '{ordinal}' nu respectă GAEB OZ-Maske a acestui fișier",
+      "suggestion": "Folosiți OZ-Maske a fișierului, de exemplu 001.001.0010 sau 01.02.0030"
+    },
+    "lv_structure": {
+      "fail": "Poziția {ordinal}: poziția terminală nu are secțiune părinte – ierarhia GAEB LV impune o Leistungsgruppe părinte",
+      "suggestion": "Atribuiți poziției o secțiune părinte (Leistungsgruppe / Titel)"
+    },
+    "einheitspreis_sanity": {
+      "negative": "Poziția {ordinal}: prețul unitar (Einheitspreis) {rate} este negativ (unitate='{unit}') – un preț negativ nu poate fi transferat în GAEB",
+      "zero": "Poziția {ordinal}: prețul unitar (Einheitspreis) este 0.00 (unitate='{unit}') – confirmați că este un preț zero ofertat și nu un preț lipsă",
+      "suggestion": "Introduceți un preț unitar (Einheitspreis) pozitiv sau marcați poziția drept Bedarfsposition (lucrări opționale) ori sumă forfetară (unitate='lsum')"
+    },
+    "trade_section_code": {
+      "fail": "Secțiunea principală '{ordinal}' nu are cod GAEB Leistungsbereich (se așteaptă un cod de meserie din 3 cifre, de exemplu '012')",
+      "suggestion": "Adăugați un cod de meserie din 3 cifre (Leistungsbereich) la secțiune – de exemplu '012' pentru terasamente, '013' pentru zidărie"
+    },
+    "quantity_decimals": {
+      "fail": "Poziția {ordinal}: cantitatea {quantity} are {decimals} zecimale – convenția GAEB X83 limitează numărul la 3",
+      "suggestion": "Rotunjiți cantitatea la cel mult 3 zecimale conform GAEB X83"
+    }
+  },
+  "nrm": {
+    "classification_required": {
+      "fail": "Poziției {ordinal} îi lipsește codul de element NRM",
+      "suggestion": "Atribuiți un cod de element NRM 1/2 (de exemplu, 2.6.1 pentru pereți exteriori)"
+    },
+    "valid_element": {
+      "fail": "Cod NRM nevalid '{code}' la poziția {ordinal}"
+    },
+    "completeness": {
+      "fail": "Grupa NRM {group} – {group_name} lipsește din lista de cantități",
+      "suggestion": "Adăugați poziții pentru grupa NRM {group} ({group_name})"
+    },
+    "base_date_declared": {
+      "fail": "Planul de costuri nu indică data de bază la care sunt valabile prețurile",
+      "suggestion": "Înregistrați data de bază în deviz. Fără ea nu se poate stabili dacă un preț este depășit sau ce inflație mai trebuie adăugată"
+    },
+    "cost_plan_stage_declared": {
+      "fail": "Planul de costuri nu indică etapa de proiectare pentru care a fost întocmit",
+      "suggestion": "Înregistrați etapa. Precizia așteptată depinde de etapa în care a fost întocmit planul; omiterea ei creează așteptări greșite"
+    },
+    "contractor_costs_present": {
+      "preliminaries": "Planul de costuri nu cuprinde cheltuielile antreprenorului general cu organizarea și funcționarea șantierului, nici ca grupa {group}, nici ca adaos",
+      "overheads_and_profit": "Planul de costuri nu cuprinde cheltuielile indirecte și profitul antreprenorului general, nici ca grupa {group}, nici ca adaos",
+      "suggestion": "Adăugați costul ca element al unei grupe NRM sau ca adaos la lucrările măsurate. Ambele variante sunt corecte; omiterea lui face costul lucrărilor incomplet"
+    },
+    "risk_allowance_present": {
+      "fail": "Planul de costuri nu are rezervă de risc",
+      "suggestion": "Adăugați o rezervă de risc ca grupa NRM 13 sau ca linie de rezervă. Un plan fără rezervă prezintă o singură valoare ca și cum ar fi certă"
+    }
+  },
+  "masterformat": {
+    "classification_required": {
+      "fail": "Poziției {ordinal} îi lipsește codul MasterFormat",
+      "suggestion": "Atribuiți un cod MasterFormat (de exemplu, 03 30 00 pentru beton turnat la fața locului)"
+    },
+    "valid_division": {
+      "fail": "Cod MasterFormat nevalid '{code}' la poziția {ordinal}",
+      "suggestion": "Folosiți formatul MasterFormat din 6 cifre: XX XX XX (de exemplu, 03 30 00)"
+    },
+    "completeness": {
+      "fail": "Diviziunea {division} – {division_name} lipsește din lista de cantități",
+      "suggestion": "Adăugați poziții pentru diviziunea {division} ({division_name})"
+    }
+  },
+  "sinapi": {
+    "code_required": {
+      "fail": "Poziției {ordinal} îi lipsește codul SINAPI",
+      "suggestion": "Atribuiți un cod de compoziție SINAPI (de exemplu, 87878 pentru beton C30)"
+    },
+    "valid_code": {
+      "fail": "Cod SINAPI nevalid '{code}' la poziția {ordinal}"
+    }
+  },
+  "nbr": {
+    "classification_required": {
+      "fail": "Poziției {ordinal} îi lipsește secțiunea NBR 12721",
+      "suggestion": "Etichetați poziția cu o secțiune NBR 12721 (S1 = preliminares, S2 = infra-estrutura, ..., S11 = serviços complementares)"
+    },
+    "valid_section": {
+      "fail": "Secțiunea NBR 12721 '{code}' la poziția {ordinal} nu este una dintre S1..S11",
+      "suggestion": "Folosiți codurile de la S1 la S11 (de exemplu, S3 pentru supra-estrutura)"
+    }
+  },
+  "gesn": {
+    "code_required": {
+      "fail": "Poziției {ordinal} îi lipsește codul ГЭСН/ФЕР",
+      "suggestion": "Atribuiți un cod ГЭСН (de exemplu, 06-01-001-01 pentru beton)"
+    },
+    "valid_code": {
+      "fail": "Codul ГЭСН '{code}' nu respectă formatul XX-XX-XXX-XX",
+      "suggestion": "Folosiți formatul NN-NN-NNN-NN (de exemplu, 06-01-001-01)"
+    },
+    "resource_breakdown": {
+      "fail": "Poziția {ordinal} citează norma {code}, dar nu are defalcare pe resurse",
+      "suggestion": "Importați cantitățile normate de manoperă, utilaje și materiale sau explicați abaterea acestei linii"
+    },
+    "labour_hours_present": {
+      "fail": "Poziția {ordinal} ({code}) are o defalcare pe resurse fără ore de manoperă",
+      "suggestion": "Adăugați orele-om consumate de normă; cheltuielile indirecte și profitul estimat sunt normate pe fondul de salarii și nu se pot calcula fără acestea"
+    },
+    "price_level_declared": {
+      "fail": "Devizul nu indică nivelul de preț al valorilor sale",
+      "suggestion": "Declarați nivelul de preț (o dată) și indicele de conversie aplicat, pentru ca verificatorul să poată obține același total"
+    }
+  },
+  "dpgf": {
+    "lot_required": {
+      "fail": "Poziția {ordinal} nu este atribuită niciunui Lot technique",
+      "suggestion": "Atribuiți un lot tehnic (de exemplu, Lot 01 Gros Œuvre)"
+    },
+    "pricing_complete": {
+      "fail": "Doar {priced}/{total} poziții ({percent}) sunt evaluate – sub pragul de 80%",
+      "suggestion": "Completați prețurile tuturor pozițiilor înainte de depunerea DPGF"
+    }
+  },
+  "onorm": {
+    "position_format": {
+      "fail": "Numărul '{ordinal}' nu respectă formatul ÖNORM XX.XX.XXXXA",
+      "suggestion": "Folosiți formatul ÖNORM B 2063 (de exemplu, 01.02.01A)"
+    },
+    "description_length": {
+      "fail": "Poziția {ordinal}: descriere prea scurtă ({length} caractere, minimum 20)",
+      "suggestion": "Adăugați detalii în descrierea poziției conform ÖNORM B 2063"
+    }
+  },
+  "gbt50500": {
+    "code_required": {
+      "fail": "Poziției {ordinal} îi lipsește codul GB/T 50500",
+      "suggestion": "Atribuiți un cod GB/T 50500 din 9 cifre (de exemplu, 010101001)"
+    },
+    "valid_code": {
+      "fail": "Cod GB/T 50500 nevalid '{code}' – sunt necesare 9 sau 12 cifre"
+    }
+  },
+  "cpwd": {
+    "code_required": {
+      "fail": "Poziției {ordinal} îi lipsește codul CPWD/DSR",
+      "suggestion": "Atribuiți o referință de articol CPWD DSR (de exemplu, 4.1.1)"
+    },
+    "measurement_units": {
+      "fail": "Unitatea '{unit}' la poziția {ordinal} nu este standard conform IS 1200",
+      "suggestion": "Folosiți unități standard IS 1200: m, m2, m3, kg, nos, rm etc."
+    }
+  },
+  "hungary": {
+    "item_code_required": {
+      "fail": "Poziția {ordinal} nu are cod de articol maghiar",
+      "invalid": "Codul '{code}' de la poziția {ordinal} nu corespunde niciunuia dintre cele două nomenclatoare",
+      "suggestion": "Lucrările de clădiri folosesc MA-CC-SS-II (capitolele 01–17), iar infrastructura folosește numărul de articol din șase sau șapte cifre din dicționarul de coduri al proiectului"
+    },
+    "chapter_recognised": {
+      "fail": "Capitolul {chapter} de la poziția {ordinal} nu este unul dintre cele șaptesprezece din nomenclator"
+    },
+    "material_fee_split": {
+      "fail": "Poziția {ordinal}: materialul {material} plus tariful lucrării {fee} nu dau prețul {rate}",
+      "suggestion": "Corectați prețurile unitare pentru material și lucrare sau prețul total, astfel încât defalcarea să corespundă"
+    },
+    "item_number_unique": {
+      "fail": "Numărul {number} este folosit pentru {count} poziții și trebuie să identifice una singură",
+      "suggestion": "Atribuiți fiecărei poziții un număr propriu în proiect înainte de a trimite devizul clientului"
+    }
+  },
+  "prezzario": {
+    "voce_code_format_valid": {
+      "fail": "Codul '{code}' de la poziția {ordinal} nu indică lista de prețuri din care provine",
+      "suggestion": "Un cod voce oficial începe cu regiunea și anul ediției listei de prețuri, de exemplu TOS25_01.A03.001.001 (Toscana 2025). Copiați codul exact din lista regională, importați linia din listă sau numerotați un preț nou NP.01"
+    },
+    "voce_reference_present": {
+      "fail": "Poziția {ordinal} nu citează niciun articol prezzario",
+      "suggestion": "Alegeți linia dintr-o listă regională de prețuri importată sau marcați-o ca nuovo prezzo (NP), susținută de o analiză de preț"
+    },
+    "costi_sicurezza_separated": {
+      "fail": "Devizul nu are o linie separată pentru costurile de securitate care nu fac obiectul reducerii de ofertă",
+      "suggestion": "Adăugați oneri della sicurezza ca secțiune sau adaos separat, evaluat după capitolul de securitate al listei de prețuri ori după planul de securitate"
+    },
+    "incidenza_manodopera_documented": {
+      "fail": "Poziția {ordinal} ({code}) nu indică ponderea manoperei",
+      "suggestion": "Preluați incidenza della manodopera din lista de prețuri sau adăugați o resursă de manoperă, pentru a declara separat costul manoperei în ofertă"
+    },
+    "overheads_not_applied_twice": {
+      "fail": "Prețurile din lista regională includ deja cheltuieli generale (13–17%) și profit (10%). Aplicarea lor din nou mărește totalul cu aproximativ {percent}%.",
+      "suggestion": "Eliminați adaosurile pentru cheltuieli generale și profit din acest deviz sau păstrați-le numai pentru liniile evaluate prin analiză proprie (NP)."
+    }
+  },
+  "romania": {
+    "deviz_chapter_required": {
+      "fail": "Poziția {ordinal} nu indică un capitol din devizul general",
+      "suggestion": "Încadrați linia în capitolul și subcapitolul HG 907/2016 corespunzător, de exemplu 4.1 pentru construcții și instalații sau 5.1 pentru organizarea de șantier"
+    },
+    "deviz_chapter_recognised": {
+      "fail": "Codul de deviz '{code}' de la poziția {ordinal} nu este un capitol sau subcapitol al devizului general",
+      "suggestion": "Folosiți un cod din capitolele 1–6 ale devizului general conform HG 907/2016, precum 1.2, 2, 3.5, 4.1, 5.1 sau 6.2"
+    }
+  },
+  "greece": {
+    "net_article_required": {
+      "fail": "Poziția {ordinal} nu are articol din lista unificată de prețuri (ΝΕΤ)",
+      "suggestion": "Indicați articolul ΝΕΤ după care este evaluată linia, de exemplu ΟΙΚ 32.01.06, sau ΝΑΟΙΚ pentru un articol nou"
+    },
+    "net_article_valid": {
+      "invalid": "Articolul '{code}' de la poziția {ordinal} nu are formatul unui articol ΝΕΤ",
+      "chapter": "Articolul '{code}' de la poziția {ordinal} începe cu capitolul {chapter}, care nu există în lista de prețuri pentru clădiri",
+      "suggestion": "Scrieți prefixul listei și numărul articolului, de exemplu ΟΙΚ 38.20.02, ΟΔΟ Α-2 sau ΑΤΗΕ 8151.1"
+    }
+  },
+  "ukraine": {
+    "zkr_chapter_required": {
+      "fail": "Poziția {ordinal} nu indică un capitol din devizul centralizator",
+      "suggestion": "Încadrați linia în capitolul corespunzător din зведений кошторисний розрахунок, de la 1 la 12; lucrările de construcții ale obiectului principal sunt în capitolul 2"
+    },
+    "zkr_chapter_recognised": {
+      "fail": "Capitolul {chapter} de la poziția {ordinal} nu este unul dintre cele douăsprezece capitole ale devizului centralizator",
+      "suggestion": "Folosiți un număr de capitol de la 1 la 12"
+    }
+  },
+  "birimfiyat": {
+    "code_required": {
+      "fail": "Poziției {ordinal} îi lipsește numărul birim fiyat poz",
+      "suggestion": "Atribuiți un număr Bayındırlık poz (de exemplu, 04.013/1)"
+    },
+    "valid_poz": {
+      "fail": "Poz '{code}' nu este nici un număr actual din cartea de prețuri unitare (XX.XXX.XXXX), nici unul vechi (XX.XXX/X)",
+      "suggestion": "Folosiți numărul din carte, de exemplu 15.140.1002, sau 04.013/1 pentru un contract mai vechi; numerotați articolele analizate propriu ca ÖZEL-1"
+    }
+  },
+  "sekisan": {
+    "code_required": {
+      "fail": "Poziției {ordinal} îi lipsește codul 積算",
+      "suggestion": "Atribuiți un cod de articol 積算基準"
+    },
+    "metric_units": {
+      "fail": "Unitatea '{unit}' la poziția {ordinal} nu este standard",
+      "suggestion": "Folosiți unități metrice standard: m, m2, m3, kg, t, 式 etc."
+    }
+  },
+  "bc3": {
+    "code_required": {
+      "fail": "Poziției {ordinal} îi lipsește codul de concept FIEBDC-3",
+      "suggestion": "Atribuiți un cod FIEBDC-3 (de exemplu, E04CM040 sau 01.02.01)"
+    },
+    "valid_code": {
+      "fail": "Cod FIEBDC-3 nevalid '{code}' la poziția {ordinal}",
+      "suggestion": "Folosiți formatul alfanumeric FIEBDC-3 (de exemplu, E04CM040, 01.02.01, CAP01#)"
+    }
+  },
+  "mexico": {
+    "apu_completeness": {
+      "fail": "Poziția {ordinal} are o APU incompletă; componente de cost lipsă: {missing}",
+      "suggestion": "Adăugați componentele lipsă ale costului direct (manoperă, materiale, utilaje) în analiza prețului unitar"
+    },
+    "iva_rate_valid": {
+      "fail": "Poziția {ordinal} are o cotă IVA nevalidă {rate}; IVA mexican este de 16, 8 (regiune de frontieră) sau 0 procente",
+      "suggestion": "Setați cota IVA la 16 procente (standard), 8 procente (regiune de frontieră) sau 0 procente"
+    },
+    "subcontract_retencion": {
+      "fail": "Poziția de subcontractare {ordinal} nu indică dacă se aplică rețineri fiscale IVA/ISR",
+      "suggestion": "Înregistrați reținerile IVA și ISR pentru linia subcontractată sau indicați că nu se aplică"
+    },
+    "cfdi_rfc_present": {
+      "missing": "Datele emitentului CFDI sunt incomplete pentru exportul ofertei; lipsesc: {missing}",
+      "invalid_rfc": "RFC '{rfc}' nu este un RFC CFDI valid (12 caractere pentru o companie, 13 pentru o persoană fizică)",
+      "suggestion": "Setați RFC-ul emitentului, regimen fiscal și uso CFDI în profilul proiectului pentru facturarea CFDI 4.0"
+    }
+  },
+  "pipeline": {
+    "side_effecting_requires_gate": {
+      "fail": "Noduri cu efecte secundare fără un punct de control: {nodes}",
+      "suggestion": "Înainte de publicare, adăugați un punct de validare sau aprobare umană pe fiecare traseu de la un nod declanșator/AI la fiecare nod de scriere."
+    }
+  },
+  "property_dev": {
+    "escrow_account_required": {
+      "fail": "Dezvoltarea imobiliară necesită un cont escrow activ pentru autoritatea '{regulator}'",
+      "suggestion": "Deschideți un cont escrow la o bancă autorizată de autoritate în Conformitate → Conturi escrow"
+    },
+    "escrow_iban_valid": {
+      "fail": "Cont escrow {account}: IBAN '{iban}' nu trece verificarea structurală ISO 13616",
+      "suggestion": "Corectați IBAN-ul: codul țării, lungimea și suma de control trebuie să respecte ISO 13616"
+    },
+    "escrow_balance_reconciled": {
+      "fail": "Cont escrow {account}: soldul contabil {ledger} diferă cu {drift} față de suma tranzacțiilor {transactions}",
+      "suggestion": "Reconciliați contul escrow – verificați încasările neînregistrate sau debitele lipsă"
+    },
+    "sales_contract_party_ownership_sums_to_100": {
+      "fail": "Contractul {contract}: cotele de proprietate însumează {total}% (trebuie să fie exact 100%)",
+      "suggestion": "Ajustați procentele părților astfel încât să însumeze 100.00%"
+    },
+    "payment_schedule_instalments_sum_to_contract_value": {
+      "fail": "Contractul {contract}: totalul ratelor {instalments} diferă de valoarea contractului {contract_value} (diferență {drift})",
+      "suggestion": "Reechilibrați graficul de plăți astfel încât ratele să însumeze valoarea totală a contractului"
+    },
+    "reservation_expiry_in_future": {
+      "fail": "Rezervarea {reservation}: expires_at {expires} nu este în viitor",
+      "suggestion": "Prelungiți rezervarea sau treceți-o în starea expirată/anulată"
+    },
+    "broker_commission_rate_within_bounds": {
+      "fail": "Acordul de comision {agreement}: problemă: {issue}",
+      "suggestion": "Folosiți o cotă între 0.1% și 15%, o sumă fixă sau o scară cu cel puțin o treaptă"
+    },
+    "price_matrix_no_negative_modifier": {
+      "fail": "Matricea de prețuri {matrix}: multiplicatorul {multiplier} al regulii '{factor}' este în afara [-0.50, 2.00]",
+      "suggestion": "Limitați ajustările între -50% și +200% pentru a evita prețuri nerealiste ale parcelelor"
+    }
+  },
+  "schedule_quality": {
+    "open_ends": {
+      "fail": "Activitatea '{activity}' nu are legătură logică de tip {ends} (capăt deschis / activitate neconectată)",
+      "both": "predecesor sau succesor",
+      "predecessor": "predecesor",
+      "successor": "succesor",
+      "suggestion": "Conectați activitatea la rețea cu un predecesor și un succesor sau definiți-o ca jalon de început/sfârșit"
+    },
+    "negative_lag": {
+      "fail": "Relația {predecessor} -> {successor} folosește un decalaj negativ ({lag} zile), adică un avans care denaturează drumul critic",
+      "suggestion": "Înlocuiți avansul cu o activitate explicită sau cu o relație SS/FF, pentru ca succesiunea să rămână justificabilă"
+    },
+    "excessive_lag": {
+      "fail": "Relația {predecessor} -> {successor} are un decalaj de {lag} zile, peste pragul de {threshold} zile",
+      "suggestion": "Modelați așteptarea ca activitate separată (aprovizionare, întărire, aprobare), astfel încât să poată avea stare și să intre în nivelarea resurselor"
+    },
+    "hard_constraints": {
+      "fail": "Activitatea '{activity}' are o constrângere rigidă de dată ({constraint}) care suprascrie logica rețelei",
+      "suggestion": "Folosiți o constrângere flexibilă (început nu mai devreme de) sau determinați data prin relații, pentru a putea deplasa activitatea dacă predecesorii întârzie"
+    },
+    "negative_float": {
+      "fail": "Activitatea '{activity}' are rezervă totală de timp negativă ({float} zile), deci graficul nu este realizabil cu relațiile actuale",
+      "suggestion": "Reordonați lucrările, relaxați o constrângere rigidă sau adăugați un plan documentat de recuperare pentru a readuce rezerva la zero sau peste"
+    },
+    "high_float": {
+      "fail": "Activitatea '{activity}' are rezervă totală de timp foarte mare ({float} zile), peste pragul de {threshold} zile",
+      "suggestion": "Verificați dacă lipsește o legătură cu un succesor – o rezervă mare indică de obicei o conectare slabă la rețea"
+    },
+    "missing_duration": {
+      "fail": "Activitatea '{activity}' are o durată nevalidă ({duration} zile) pentru o sarcină care nu este jalon",
+      "suggestion": "Setați o durată pozitivă în zile lucrătoare sau definiți rândul ca jalon dacă reprezintă într-adevăr un eveniment cu durată zero"
+    },
+    "duration_on_project_week": {
+      "fail": "Activitatea '{activity}' este stocată cu {stored} zile lucrătoare, numărate de luni până vineri între {start} și {end}; în săptămâna proiectului, {calendar}, acele date cuprind {expected}",
+      "suggestion": "Salvați din nou datele activității pentru a recalcula durata după săptămâna de lucru a proiectului sau introduceți durata în mod deliberat"
+    }
+  },
+  "sheet_completeness": {
+    "missing": {
+      "fail": "Planșa {sheet} figurează în borderoul de planșe, dar lipsește din setul încărcat",
+      "suggestion": "Încărcați planșa lipsă sau confirmați că a fost retrasă din ediție"
+    },
+    "extra": {
+      "fail": "Planșa {sheet} este în setul încărcat, dar nu figurează în borderou",
+      "suggestion": "Adăugați-o în borderou sau în registrul de emiteri, ori eliminați planșa în plus"
+    },
+    "revision_mismatch": {
+      "fail": "Planșa {sheet} are revizia {actual_rev}, dar borderoul așteaptă {expected_rev}",
+      "suggestion": "Emiteți revizia așteptată sau actualizați borderoul la revizia curentă"
+    }
+  },
+  "procurement": {
+    "po_has_lines": {
+      "fail": "Comanda de achiziție nu are linii, deci valoarea angajată nu este contabilizată",
+      "suggestion": "Adăugați articolele comandate înainte de aprobarea comenzii"
+    },
+    "po_line_amount": {
+      "fail": "Linia {line} are totalul {actual}, dar cantitatea înmulțită cu prețul unitar este {expected}",
+      "suggestion": "Corectați cantitatea, prețul unitar sau suma liniei astfel încât cele trei să corespundă"
+    },
+    "po_subtotal_matches_lines": {
+      "fail": "Subtotalul este {actual}, dar liniile însumează {expected}",
+      "suggestion": "Recalculați subtotalul din liniile curente"
+    },
+    "po_total_matches_subtotal": {
+      "fail": "Totalul este {actual}, dar subtotalul plus taxa este {expected}",
+      "suggestion": "Recalculați totalul astfel încât să corespundă subtotalului plus taxei"
+    },
+    "po_no_negative_line": {
+      "fail": "Linia {line} are o cantitate care nu este pozitivă sau un preț unitar negativ",
+      "suggestion": "Emiteți o notă de credit pentru stornare în locul unei linii negative"
+    },
+    "po_currency_set": {
+      "fail": "Comanda de achiziție nu are monedă, deci suma nu poate fi agregată sau plătită",
+      "suggestion": "Setați moneda, de regulă cea utilizată de proiect"
+    },
+    "po_vendor_assigned": {
+      "fail": "Comanda de achiziție nu indică niciun furnizor",
+      "suggestion": "Selectați furnizorul înainte de aprobarea angajamentului"
+    },
+    "po_retention_within_bounds": {
+      "fail": "Procentul reținut de {percent}% este în afara intervalului plauzibil de la 0 la {max}%",
+      "suggestion": "Introduceți reținerea ca procent, de exemplu 5 pentru cinci procente"
+    },
+    "po_delivery_after_issue": {
+      "fail": "Livrarea este stabilită pentru {delivery}, înaintea datei de emitere {issue}",
+      "suggestion": "Mutați data livrării la data emiterii sau ulterior"
+    },
+    "po_line_cost_coded": {
+      "fail": "Linia {line} nu are WBS, categorie de cost sau linie de cost, deci nu va apărea în defalcarea costurilor",
+      "suggestion": "Atribuiți un cod de cost pentru a raporta angajamentul față de un buget"
+    },
+    "invoice_within_order": {
+      "fail": "Factura {invoice} depășește cu {excess} suma de {remaining} rămasă deschisă pe comanda {po}",
+      "suggestion": "Verificați factura față de comandă; dacă suplimentul a fost convenit, înregistrați-l ca modificare a comenzii înainte de aprobare"
+    },
+    "invoice_quantity_received": {
+      "fail": "Linia {line} ar fi facturată pentru un total de {invoiced}, dar s-a recepționat doar {received}",
+      "suggestion": "Așteptați avizul de însoțire sau confirmați recepția mărfurilor înainte de aprobarea acestei cantități"
+    },
+    "invoice_value_received": {
+      "fail": "Facturile comenzii {po} ar totaliza {invoiced}, dar mărfurile recepționate valorează doar {received} la prețurile comenzii",
+      "suggestion": "Așteptați avizul de însoțire sau confirmați recepția mărfurilor înainte de aprobarea acestei sume"
+    }
+  },
+  "subcontract": {
+    "agreement_has_scope": {
+      "fail": "Acordul nu are pachete de lucrări, deci cererea de plată nu are un temei de decontare",
+      "suggestion": "Împărțiți obiectul lucrărilor contractate în pachete înainte de activarea acordului"
+    },
+    "package_scope_described": {
+      "fail": "Pachetul {package} are un nume, dar nu descrie lucrările pe care le acoperă",
+      "suggestion": "Descrieți ce include pachetul, pentru a exista un punct de plecare într-o eventuală dispută privind modificările"
+    },
+    "agreement_value_positive": {
+      "fail": "Valoarea contractului este {value}, deci reținerile și defalcarea valorii contractuale nu au bază de calcul",
+      "suggestion": "Introduceți valoarea contractuală convenită înainte de activarea acordului"
+    },
+    "packages_within_value": {
+      "fail": "Pachetele de lucrări valorează {planned}, dar contractul este de {total}",
+      "suggestion": "Reevaluați pachetele sau majorați valoarea contractului astfel încât acordul să acopere propriul obiect al lucrărilor"
+    },
+    "agreement_dates_ordered": {
+      "fail": "Acordul se încheie la {end}, înainte de începerea la {start}",
+      "suggestion": "Corectați data de început sau de sfârșit, astfel încât perioada contractuală să fie în ordine cronologică"
+    },
+    "agreement_currency_set": {
+      "fail": "Acordul nu are monedă, deci plățile aferente nu pot fi agregate sau efectuate",
+      "suggestion": "Setați moneda, de regulă cea utilizată de proiect"
+    },
+    "retention_within_bounds": {
+      "fail": "Procentul reținut de {percent}% este în afara intervalului plauzibil de la 0 la {max}%",
+      "suggestion": "Introduceți reținerea ca procent din fiecare plată, nu ca sumă"
+    },
+    "insurance_valid_at_start": {
+      "fail": "Asigurarea subcontractantului a expirat la {expiry}, înainte de începerea lucrărilor la {reference}",
+      "suggestion": "Obțineți un certificat valabil înainte de a permite accesul subcontractantului pe șantier"
+    },
+    "unlinked_contract_twin": {
+      "fail": "Subcontractul {agreement} și contractul {contract} par să reprezinte aceeași subcontractare, astfel încât finanțele o pot număra de două ori",
+      "suggestion": "Legați-le dacă sunt aceeași subcontractare sau marcați-le ca diferite"
+    }
+  },
+  "submittal": {
+    "reviewer_assigned": {
+      "fail": "Documentația înaintată nu indică un verificator, deci este trimisă fără un responsabil care să răspundă",
+      "suggestion": "Atribuiți verificatorul care trebuie să răspundă înainte de trimitere"
+    },
+    "required_date_present": {
+      "fail": "Documentația înaintată nu are termen necesar, deci nu poate fi niciodată raportată ca întârziată",
+      "suggestion": "Setați termenul până la care este necesară verificarea în funcție de lucrările pe care documentația le permite"
+    },
+    "required_date_after_submitted": {
+      "fail": "Verificarea este scadentă la {required}, înainte ca documentația să fi fost depusă la {submitted}",
+      "suggestion": "Mutați termenul necesar la o zi lucrătoare după depunere"
+    },
+    "review_window_sufficient": {
+      "fail": "Verificatorul are {days} zile, mai puțin decât cele {minimum} zile necesare în mod normal",
+      "suggestion": "Acordați perioada obișnuită de verificare sau conveniți mai întâi cu verificatorul o perioadă mai scurtă"
+    },
+    "spec_section_present": {
+      "fail": "Documentația înaintată nu indică secțiunea specificației, deci registrul nu o poate clasifica",
+      "suggestion": "Introduceți secțiunea specificației la care răspunde documentația"
+    },
+    "approver_distinct_from_reviewer": {
+      "fail": "Aceeași persoană ({person}) este și verificator, și aprobator, deci lipsește o a doua verificare independentă",
+      "suggestion": "Atribuiți un aprobator diferit de verificator"
+    },
+    "linked_scope_present": {
+      "fail": "Documentația înaintată nu este legată de nicio poziție de lucrări, deci nu este agregată la niciun pachet",
+      "suggestion": "Legați pozițiile din lista de cantități pe care le acoperă documentația"
+    }
+  },
+  "rfq": {
+    "scope_described": {
+      "fail": "Cererea nu are obiect al lucrărilor și nici descriere, deci furnizorul nu are ce evalua",
+      "suggestion": "Descrieți obiectul lucrărilor înainte de publicare, astfel încât ofertele primite să fie comparabile"
+    },
+    "deadline_present": {
+      "fail": "Cererea nu indică un termen de depunere, deci ofertarea nu se închide niciodată",
+      "suggestion": "Setați data și ora până la care trebuie primite ofertele"
+    },
+    "deadline_parseable": {
+      "fail": "Termenul de depunere {value} nu este o dată pe care sistemul o poate citi, iar toate ofertele vor fi respinse",
+      "suggestion": "Introduceți termenul ca dată, de exemplu 2026-08-31"
+    },
+    "deadline_in_future": {
+      "fail": "Termenul de depunere {deadline} a trecut deja la data de azi {today}, deci cererea ajunge închisă",
+      "suggestion": "Mutați termenul la o dată viitoare înainte de publicare"
+    },
+    "has_recipients": {
+      "fail": "Cererea nu este adresată niciunui furnizor, deci publicarea nu notifică pe nimeni",
+      "suggestion": "Adăugați furnizorii cărora le va fi trimisă cererea"
+    },
+    "currency_set": {
+      "fail": "Cererea nu indică o monedă, deci ofertele nu pot fi clasate una față de alta",
+      "suggestion": "Setați moneda în care trebuie evaluate ofertele"
+    },
+    "bid_currency_matches": {
+      "fail": "Oferta {bid} este exprimată în {bid_currency}, dar cererea este în {rfq_currency}",
+      "suggestion": "Cereți ofertantului să refacă oferta în moneda cererii sau înregistrați conversia convenită"
+    },
+    "bid_amounts_parseable": {
+      "fail": "Oferta {bid} are suma {value}, care nu este un număr utilizabil pentru clasare",
+      "suggestion": "Corectați suma ofertei înainte de atribuire"
+    },
+    "bids_still_valid": {
+      "fail": "Oferta {bid} a expirat la {expired}, iar azi este {today}, deci prețul nu mai este obligatoriu",
+      "suggestion": "Cereți ofertantului să confirme prețul înainte de atribuire"
+    },
+    "award_has_competition": {
+      "fail": "Atribuirea se bazează pe {count} oferte, mai puține decât cele {minimum} necesare pentru o comparație competitivă",
+      "suggestion": "Înregistrați justificarea atribuirii către o singură sursă sau invitați mai mulți ofertanți"
+    }
+  },
+  "errors": {
+    "resource_not_found": "Resursa nu a fost găsită",
+    "project_not_found": "Proiectul nu a fost găsit",
+    "vendor_not_found": "Furnizorul nu a fost găsit",
+    "template_not_found": "Șablonul nu a fost găsit",
+    "position_not_found": "Poziția nu a fost găsită",
+    "boq_not_found": "Lista de cantități nu a fost găsită",
+    "session_not_found": "Sesiunea nu a fost găsită",
+    "document_not_found": "Documentul nu a fost găsit",
+    "documents_batch_delete_referenced": "Alte înregistrări încă trimit la documente din acest lot. Verificați ce legături întrerupe ștergerea și confirmați cu acknowledge_references.",
+    "invitation_not_found": "Invitația nu a fost găsită",
+    "agreement_not_found": "Acordul nu a fost găsit",
+    "rejection_not_found": "Respingerea nu a fost găsită",
+    "claim_not_found": "Cererea de plată intermediară nu a fost găsită",
+    "gaeb_x89_final_account_unsupported": "Decontul final sau decontul final parțial nu poate fi încă exportat ca GAEB X89. Acesta trebuie să factureze lucrările cumulate minus plățile anterioare, iar dintr-o cerere se generează doar o factură intermediară pentru o singură perioadă. Exportați cererea ca factură intermediară.",
+    "xpwe_native_file_refused": "Acesta este fișierul de proiect propriu al unui program de devize, pe care numai acel program îl poate deschide. Exportați devizul ca XPWE din programul dumneavoastră și încărcați fișierul .xpwe.",
+    "plot_not_found": "Parcela nu a fost găsită",
+    "survey_not_found": "Ridicarea cu drona nu a fost găsită",
+    "diary_video_not_found": "Videoclipul din jurnal nu a fost găsit",
+    "diary_photo_not_found": "Fotografia din jurnal nu a fost găsită",
+    "bidder_not_found": "Ofertantul nu a fost găsit",
+    "webhook_not_found": "Webhook-ul nu a fost găsit",
+    "submission_not_found": "Depunerea nu a fost găsită",
+    "measurement_not_found": "Măsurătoarea de șantier nu a fost găsită",
+    "salescontract_not_found": "Contractul de vânzare nu a fost găsit",
+    "prompt_not_found": "Șablonul de instrucțiuni nu a fost găsit",
+    "prequalification_not_found": "Precalificarea nu a fost găsită",
+    "purchase_requisition_not_found": "Referatul de necesitate pentru achiziție nu a fost găsit",
+    "purchase_order_not_found": "Comanda de achiziție nu a fost găsită",
+    "group_not_found": "Grupul nu a fost găsit",
+    "final_account_not_found": "Decontul final nu a fost găsit",
+    "estimate_job_not_found": "Sarcina de estimare nu a fost găsită",
+    "escrow_not_found": "Tranzacția escrow nu a fost găsită",
+    "commission_accrual_not_found": "Comisionul acumulat nu a fost găsit",
+    "baseline_not_found": "Planul de referință nu a fost găsit",
+    "fx_rate_set_locked": "Cursurile BCE pentru {date} sunt blocate, deci această actualizare nu le-a suprascris. Deblocați mai întâi setul de cursuri dacă trebuie să preia noua publicare.",
+    "boq_locked": "Lista de cantități este blocată și nu poate fi modificată. Creați o revizie pentru modificări.",
+    "boq_link_owner_locked": "Codul '{code}' este definit de o linie din devizul blocat '{bill}', iar legarea la el ar modifica acel deviz. Deblocați mai întâi devizul sau introduceți linia cu un cod nou."
+  },
+  "variations": {
+    "boq_lines_are_traced": {
+      "fail": "Linia {line} din devizul acestei modificări nu are trasabilitate către nimic – nici o linie a defalcării valorii contractuale, nici o poziție de deviz",
+      "suggestion": "Indicați linia contractuală afectată de schimbare sau poziția de deviz din care provin lucrările, pentru a putea justifica suma"
+    },
+    "boq_total_matches_estimate": {
+      "fail": "Estimarea principală a acestei cereri este {estimate}, dar devizul evaluat totalizează {priced}",
+      "suggestion": "Preluați totalul evaluat în cerere sau corectați devizul, astfel încât să existe o singură valoare"
+    },
+    "change_kind_matches_numbers": {
+      "removed_positive": "Linia {line} este marcată drept lucrări eliminate, dar are o cantitate pozitivă de {quantity} – renunțările se scad din contract prin cantitate negativă",
+      "added_negative": "Linia {line} este marcată drept lucrări adăugate, dar are o cantitate negativă de {quantity} – lucrările scoase din contract sunt eliminate, nu adăugate",
+      "removed_needs_contract_line": "Linia {line} este marcată drept lucrări eliminate, dar nu trimite la nicio linie a defalcării valorii contractuale, deci nu există o poziție contractată de eliminat",
+      "modified_needs_contract_line": "Linia {line} este marcată drept lucrări modificate, dar nu trimite la nicio linie a defalcării valorii contractuale, deci nu există o poziție contractată de modificat",
+      "suggestion": "Corectați tipul modificării sau cantitatea din legătura de trasabilitate a liniei ori indicați linia contractuală afectată"
+    }
+  },
+  "cases": {
+    "has_steps": {
+      "fail": "Acest exemplu nu are încă pași, deci cititorul nu are ce urma.",
+      "suggestion": "Adăugați cel puțin un pas care indică ecranul de deschis și acțiunea de efectuat."
+    },
+    "step_titled": {
+      "fail": "La {count} pași lipsește titlul sau ecranul de deschis.",
+      "suggestion": "Dați fiecărui pas un titlu scurt și alegeți ecranul pe care îl deschide."
+    },
+    "step_purpose": {
+      "fail": "{count} din {total} pași nu explică de ce contează, astfel încât exemplul devine o listă de clicuri, nu o explicație.",
+      "suggestion": "Adăugați câte un rând despre scopul fiecărui pas; de acesta are nevoie un utilizator nou."
+    },
+    "distinct_screens": {
+      "fail": "{count} pași deschid același ecran ca pasul anterior, deci cititorul nu vede schimbarea și nu poate distinge pașii.",
+      "suggestion": "Combinați-i într-un singur pas sau îndreptați al doilea pas către ecranul unde continuă efectiv lucrul."
+    },
+    "duration_plausible": {
+      "fail": "Exemplul indică {minutes} minute pentru {steps} pași. Un cititor care nu poate ține ritmul își pierde încrederea în restul estimării.",
+      "suggestion": "Măriți estimarea la cel puțin {minimum} minute sau eliminați câțiva pași."
+    },
+    "described": {
+      "fail": "Exemplul nu are rezumat, deci lista afișează doar titlul.",
+      "suggestion": "Adăugați o propoziție despre ce va fi realizat cititorul la final."
+    }
+  },
+  "uk": {
+    "contract_form_declared": {
+      "fail": "Devizul nu indică forma contractuală în baza căreia este evaluat",
+      "suggestion": "Înregistrați forma contractuală. Organizarea de șantier, riscul și condițiile de plată sunt evaluate diferit pentru fiecare formă, deci valoarea spune puțin fără aceasta"
+    },
+    "payment_regime_declared": {
+      "fail": "Mecanismul de plată este incomplet: {missing} nu este înregistrat",
+      "suggestion": "Înregistrați ambele date. Un contract de construcții care nu le stabilește nu este scutit de ele; Scheme for Construction Contracts le furnizează pe ambele, iar părțile găsesc apoi condițiile de plată în legislație, nu în documentul semnat"
+    },
+    "retention_declared": {
+      "fail": "Devizul nu indică reținerile aplicabile",
+      "suggestion": "Înregistrați procentul de reținere și eliberarea lui sau indicați că nu se aplică rețineri. Reținerea reprezintă bani câștigați de antreprenor pe care acesta nu îi poate încasa; un deviz care o omite nu prezintă necesarul de capital de lucru"
+    },
+    "cdm_duty_holders_declared": {
+      "fail": "Responsabilii conform CDM 2015 nu sunt înregistrați: lipsesc {missing}",
+      "suggestion": "Înregistrați desemnările. Când mai mulți antreprenori lucrează la un proiect, beneficiarul trebuie să desemneze în scris un principal designer și un principal contractor; în lipsa desemnării, aceste obligații îi revin beneficiarului"
+    },
+    "hrb_regime_declared": {
+      "fail": "Întrebarea privind clădirea cu risc mai ridicat este nerezolvată: {reason}",
+      "unanswered": "devizul nu indică dacă aceasta este o clădire cu risc mai ridicat",
+      "disagrees": "devizul declară riscul mai ridicat ca {declared}, dar propriile dimensiuni dau {derived}",
+      "suggestion": "O clădire are risc mai ridicat când are cel puțin 18 m înălțime sau cel puțin 7 niveluri ȘI conține cel puțin două locuințe. Ambele părți contează: o clădire înaltă fără locuințe nu are risc mai ridicat, iar tratarea ei astfel creează un program inutil de puncte de control"
+    },
+    "vat_treatment_declared": {
+      "fail": "Devizul nu indică tratamentul TVA",
+      "suggestion": "Înregistrați tratamentul: cota standard, o cotă redusă sau zero dacă lucrările sunt eligibile, ori taxare inversă internă dacă livrarea intră în domeniul ei. Taxarea inversă transferă TVA la client și schimbă ceea ce antreprenorul poate factura"
+    }
+  },
+  "project_completeness": {
+    "country_set": {
+      "fail": "Proiectul nu indică țara, deci nu se pot determina baza de preț, cota fiscală sau calendarul de lucru",
+      "suggestion": "Setați țara în configurarea proiectului. Țara stabilește pachetul regional, fiscalitatea și calendarul în raport cu care se citesc toate valorile"
+    },
+    "currency_set": {
+      "fail": "Proiectul nu indică moneda, deci listele de cantități, adaosurile și contractele sale nu pot fi însumate",
+      "suggestion": "Alegeți moneda proiectului în setări. Fiecare deviz și contract este evaluat în ea, iar toate totalurile sunt citite în ea"
+    },
+    "currency_matches_bill": {
+      "fail": "Proiectul este evaluat în {project_currency}, dar rândurile acestui deviz sunt în {bill_currencies}",
+      "suggestion": "Convertiți rândurile în moneda proiectului la un curs declarat sau înregistrați cursul pe proiect, astfel încât totalul devizului să fie o singură valoare"
+    },
+    "priced_bill_present": {
+      "fail": "Proiectul nu are o listă de cantități cu poziții, deci nu există bază pentru estimare",
+      "suggestion": "Creați o listă de cantități și adăugați poziții sau importați una dintr-un model CAD, o foaie de calcul ori un fișier de schimb"
+    },
+    "bill_base_date_set": {
+      "fail": "Devizul „{bill}” nu indică data de bază la care sunt valabile prețurile",
+      "suggestion": "Înregistrați data de bază în deviz. Fără ea, prețurile nu pot fi indexate, taxate la data proprie sau comparate cu alt deviz"
+    },
+    "classification_standard_set": {
+      "fail": "Proiectul nu are standard de clasificare, deci codurile pozițiilor nu pot fi verificate",
+      "suggestion": "Alegeți standardul de clasificare folosit în proiect. Acesta stabilește și seturile de reguli naționale rulate de validare"
+    },
+    "planned_dates_set": {
+      "both_missing": "Proiectul nu are nici dată planificată de început, nici dată planificată de sfârșit",
+      "start_missing": "Proiectul are dată planificată de sfârșit, dar nu are dată planificată de început",
+      "end_missing": "Proiectul are dată planificată de început, dar nu are dată planificată de sfârșit",
+      "unreadable": "Data planificată „{value}” nu poate fi citită ca dată",
+      "suggestion": "Introduceți datele planificate de început și sfârșit ale proiectului ca date. Costurile dependente de timp, escaladarea și graficul se calculează între ele"
+    },
+    "planned_dates_ordered": {
+      "fail": "Proiectul este planificat să înceapă la {start} și să se termine la {end}, adică înainte de început",
+      "suggestion": "Inversați sau corectați datele planificate astfel încât începutul să fie înaintea sfârșitului"
+    },
+    "client_recorded": {
+      "fail": "Proiectul nu înregistrează niciun client și niciun contract nu indică un beneficiar",
+      "suggestion": "Înregistrați clientul în proiect sau adăugați beneficiarul ca parte contractuală, astfel încât devizul să aibă un destinatar"
+    },
+    "procurement_started": {
+      "fail": "Proiectul este în faza {phase}, dar nu are nici contract, nici pachet de licitație",
+      "suggestion": "Creați un pachet de licitație din deviz, înregistrați contractul sau reveniți la faza de estimare în care proiectul se află efectiv"
+    }
+  },
+  "boq_resources": {
+    "unit_rate_not_rederived": {
+      "fail": "Poziția {ordinal}: rândurile de resurse nu pot evalua linia, deci prețul unitar nu a fost recalculat din ele",
+      "fallback_allowance": "Poziția {ordinal}: rândurile de resurse sunt o repartizare estimată a costului care conține cantitatea poziției, deci prețul unitar nu a fost recalculat din ele",
+      "assumed_norm": "Poziția {ordinal}: rândurile de resurse conțin norme pe care catalogul nu le-a declarat, deci prețul unitar nu a fost recalculat din ele",
+      "norm_collapsed": "Poziția {ordinal}: rândurile de resurse și-au pierdut norma de catalog și conțin în schimb cantitatea poziției, deci prețul unitar nu a fost recalculat din ele",
+      "whole_position_quantities": "Poziția {ordinal}: rândurile de resurse conțin cantități pentru întreaga poziție în loc de norme pe unitate, deci prețul unitar nu a fost recalculat din ele",
+      "suggestion": "Verificați analiza – recalculați poziția din articolul său de catalog prin verificarea normelor de resurse sau corectați rândurile manual"
+    }
+  },
+  "poland": {
+    "knr_reference_required": {
+      "fail": "Poziția {ordinal} nu citează nicio tabelă de catalog KNR",
+      "suggestion": "Indicați în podstawa tabela din care provin normele, de exemplu KNR 2-02 0201-01, sau scrieți kalkulacja indywidualna pentru o linie evaluată prin calcul propriu"
+    },
+    "knr_reference_recognised": {
+      "fail": "Referința '{code}' de la poziția {ordinal} nu indică o familie de cataloage KNR",
+      "suggestion": "Începeți referința cu familia catalogului, precum KNR, KNNR, KNR-W sau KSNR, sau marcați linia drept kalkulacja indywidualna"
+    }
+  }
+}
