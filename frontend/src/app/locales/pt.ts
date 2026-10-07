@@ -48846,6 +48846,21 @@ const resource = {
     "schedule.calendar.week_fallback": "A semana de trabalho regional não está disponível. É utilizada uma semana de planeamento padrão.",
     "schedule.calendar.holidays_missing": "Os feriados não estão disponíveis para {{years}}. Verifique o calendário antes de se basear nestas datas.",
     "schedule.calendar.holidays_partial": "Os dados de feriados para {{years}} estão incompletos. Verifique o calendário antes de se basear nestas datas.",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "Rascunho de preparação para o financiador",
+    "contracts.lender_preparation.notice": "Cópia de trabalho só de leitura. Não constitui uma submissão ao financiador, certificação ou desembolso. Os registos de origem são lidos separadamente e podem mudar.",
+    "contracts.lender_preparation.missing": "Não inclui: linha de crédito, aprovação do financiador, comprovativos dos materiais armazenados e registo de ordens de alteração específico do contrato.",
+    "contracts.lender_preparation.error": "Não foi possível carregar o pedido de pagamento. Atualize para tentar novamente.",
+    "contracts.lender_preparation.subcontractors": "Pedidos de pagamento de subempreiteiros",
+    "contracts.lender_preparation.documents": "Referências a documentos do contrato",
+    "contracts.lender_preparation.waivers": "Referências a renúncias associadas ao pedido",
+    "contracts.lender_preparation.loaded": "{{count}} registados; sem verificação independente",
+    "contracts.lender_preparation.unavailable": "Indisponível; omitido deste rascunho",
+    "contracts.lender_preparation.download": "Descarregar rascunho JSON",
+    "contracts.lender_preparation.certified": "Montante certificado registado",
+    "contracts.lender_preparation.findings": "Constatações registadas sobre certificados",
+    "contracts.lender_preparation.no_period": "Este pedido não tem datas de período. Os pedidos de pagamento dos subempreiteiros não são associados por data.",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

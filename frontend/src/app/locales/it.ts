@@ -47154,6 +47154,21 @@ const resource = {
     "schedule.calendar.week_fallback": "La settimana lavorativa regionale non è disponibile. Viene utilizzata una settimana standard per la pianificazione.",
     "schedule.calendar.holidays_missing": "I dati sui giorni festivi per {{years}} non sono disponibili. Verificare il calendario prima di fare affidamento su queste date.",
     "schedule.calendar.holidays_partial": "I dati sui giorni festivi per {{years}} sono incompleti. Verificare il calendario prima di fare affidamento su queste date.",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "Bozza di preparazione per il finanziatore",
+    "contracts.lender_preparation.notice": "Copia di lavoro in sola lettura. Non costituisce una presentazione al finanziatore, una certificazione o un'erogazione. I dati di origine vengono letti separatamente e possono cambiare.",
+    "contracts.lender_preparation.missing": "Non inclusi: linea di credito, approvazione del finanziatore, prove relative ai materiali stoccati e registro degli ordini di modifica specifico del contratto.",
+    "contracts.lender_preparation.error": "Impossibile caricare la richiesta di pagamento. Aggiornare per riprovare.",
+    "contracts.lender_preparation.subcontractors": "Richieste di pagamento dei subappaltatori",
+    "contracts.lender_preparation.documents": "Riferimenti ai documenti contrattuali",
+    "contracts.lender_preparation.waivers": "Riferimenti alle rinunce associate alla richiesta",
+    "contracts.lender_preparation.loaded": "{{count}} registrati; non verificati indipendentemente",
+    "contracts.lender_preparation.unavailable": "Non disponibile; omesso da questa bozza",
+    "contracts.lender_preparation.download": "Scarica bozza JSON",
+    "contracts.lender_preparation.certified": "Importo certificato registrato",
+    "contracts.lender_preparation.findings": "Rilievi registrati sui certificati",
+    "contracts.lender_preparation.no_period": "Questa richiesta non ha date di periodo. Le richieste di pagamento dei subappaltatori non vengono abbinate per data.",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

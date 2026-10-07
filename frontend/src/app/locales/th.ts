@@ -45770,6 +45770,21 @@ const resource = {
     "schedule.calendar.week_fallback": "ไม่มีข้อมูลสัปดาห์ทำงานของภูมิภาค จึงใช้สัปดาห์มาตรฐานในการวางแผน",
     "schedule.calendar.holidays_missing": "ไม่มีข้อมูลวันหยุดราชการสำหรับปี {{years}} โปรดตรวจสอบปฏิทินก่อนยึดวันที่เหล่านี้เป็นหลัก",
     "schedule.calendar.holidays_partial": "ข้อมูลวันหยุดราชการสำหรับปี {{years}} ไม่ครบถ้วน โปรดตรวจสอบปฏิทินก่อนยึดวันที่เหล่านี้เป็นหลัก",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "ร่างเตรียมข้อมูลสำหรับผู้ให้กู้",
+    "contracts.lender_preparation.notice": "สำเนาทำงานแบบอ่านอย่างเดียว ไม่ใช่การยื่นต่อผู้ให้กู้ การรับรอง หรือการเบิกจ่าย ข้อมูลต้นทางถูกอ่านแยกกันและอาจเปลี่ยนแปลงได้",
+    "contracts.lender_preparation.missing": "ไม่รวม: วงเงินสินเชื่อ การอนุมัติของผู้ให้กู้ หลักฐานวัสดุที่เก็บไว้ และทะเบียนคำสั่งเปลี่ยนแปลงเฉพาะสัญญา",
+    "contracts.lender_preparation.error": "ไม่สามารถโหลดคำขอชำระเงินได้ โปรดรีเฟรชเพื่อลองอีกครั้ง",
+    "contracts.lender_preparation.subcontractors": "คำขอชำระเงินของผู้รับเหมาช่วง",
+    "contracts.lender_preparation.documents": "รายการอ้างอิงเอกสารสัญญา",
+    "contracts.lender_preparation.waivers": "รายการอ้างอิงการสละสิทธิหลักประกันที่เกี่ยวข้องกับคำขอ",
+    "contracts.lender_preparation.loaded": "บันทึกแล้ว {{count}} รายการ ยังไม่ได้ตรวจสอบโดยอิสระ",
+    "contracts.lender_preparation.unavailable": "ไม่พร้อมใช้งาน จึงไม่รวมในร่างนี้",
+    "contracts.lender_preparation.download": "ดาวน์โหลดร่าง JSON",
+    "contracts.lender_preparation.certified": "ยอดเงินที่รับรองซึ่งบันทึกไว้",
+    "contracts.lender_preparation.findings": "ข้อค้นพบเกี่ยวกับใบรับรองที่บันทึกไว้",
+    "contracts.lender_preparation.no_period": "คำขอนี้ไม่มีวันที่ของงวด คำขอชำระเงินของผู้รับเหมาช่วงจะไม่ถูกจับคู่ตามวันที่",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

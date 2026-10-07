@@ -46251,6 +46251,21 @@ const resource = {
     "schedule.calendar.week_fallback": "שבוע העבודה האזורי אינו זמין. נעשה שימוש בשבוע תקני לתכנון.",
     "schedule.calendar.holidays_missing": "נתוני החגים הרשמיים אינם זמינים עבור {{years}}. יש לבדוק את לוח השנה לפני שמסתמכים על תאריכים אלה.",
     "schedule.calendar.holidays_partial": "נתוני החגים הרשמיים עבור {{years}} אינם מלאים. יש לבדוק את לוח השנה לפני שמסתמכים על תאריכים אלה.",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "טיוטת הכנה למלווה",
+    "contracts.lender_preparation.notice": "עותק עבודה לקריאה בלבד. אין זו הגשה למלווה, אישור סכום או העברת כספים. רשומות המקור נקראות בנפרד ועשויות להשתנות.",
+    "contracts.lender_preparation.missing": "לא נכללים: מסגרת אשראי, אישור המלווה, אסמכתאות לחומרים מאוחסנים ויומן הוראות שינוי הייחודי לחוזה.",
+    "contracts.lender_preparation.error": "לא ניתן לטעון את בקשת התשלום. יש לרענן כדי לנסות שוב.",
+    "contracts.lender_preparation.subcontractors": "בקשות תשלום של קבלני משנה",
+    "contracts.lender_preparation.documents": "הפניות למסמכי החוזה",
+    "contracts.lender_preparation.waivers": "הפניות לוויתורים על זכויות שעבוד הקשורים לבקשה",
+    "contracts.lender_preparation.loaded": "{{count}} רשומים; ללא אימות עצמאי",
+    "contracts.lender_preparation.unavailable": "לא זמין; הושמט מטיוטה זו",
+    "contracts.lender_preparation.download": "הורדת טיוטת JSON",
+    "contracts.lender_preparation.certified": "סכום מאושר שנרשם",
+    "contracts.lender_preparation.findings": "ממצאים רשומים לגבי אישורים",
+    "contracts.lender_preparation.no_period": "אין בבקשה זו תאריכי תקופה. בקשות התשלום של קבלני המשנה אינן מותאמות לפי תאריך.",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

@@ -48853,6 +48853,21 @@ const resource = {
     "schedule.calendar.week_fallback": "La semaine de travail régionale n’est pas disponible. Une semaine de planification standard est utilisée.",
     "schedule.calendar.holidays_missing": "Les jours fériés ne sont pas disponibles pour {{years}}. Vérifiez le calendrier avant de vous fier à ces dates.",
     "schedule.calendar.holidays_partial": "Les jours fériés ne sont pas tous recensés pour {{years}}. Vérifiez le calendrier avant de vous fier à ces dates.",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "Brouillon de préparation pour le prêteur",
+    "contracts.lender_preparation.notice": "Copie de travail en lecture seule. Il ne s’agit ni d’un dépôt auprès du prêteur, ni d’une certification, ni d’un décaissement. Les données sources sont lues séparément et peuvent changer.",
+    "contracts.lender_preparation.missing": "Non inclus : facilité de crédit, approbation du prêteur, justificatifs des matériaux stockés et registre des ordres de modification propre au contrat.",
+    "contracts.lender_preparation.error": "La demande de paiement n’a pas pu être chargée. Actualisez pour réessayer.",
+    "contracts.lender_preparation.subcontractors": "Demandes de paiement des sous-traitants",
+    "contracts.lender_preparation.documents": "Références aux documents du contrat",
+    "contracts.lender_preparation.waivers": "Références aux renonciations liées à la demande",
+    "contracts.lender_preparation.loaded": "{{count}} enregistrés ; sans vérification indépendante",
+    "contracts.lender_preparation.unavailable": "Indisponible ; omis de ce brouillon",
+    "contracts.lender_preparation.download": "Télécharger le brouillon JSON",
+    "contracts.lender_preparation.certified": "Montant certifié enregistré",
+    "contracts.lender_preparation.findings": "Constats enregistrés sur les certificats",
+    "contracts.lender_preparation.no_period": "Cette demande de paiement ne comporte pas de dates de période. Les demandes de paiement des sous-traitants ne sont pas rapprochées par date.",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

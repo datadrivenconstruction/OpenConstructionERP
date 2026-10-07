@@ -42941,6 +42941,21 @@ const resource = {
     "schedule.calendar.week_fallback": "A semana de trabalho regional não está disponível. É utilizada uma semana de planejamento padrão.",
     "schedule.calendar.holidays_missing": "Os feriados não estão disponíveis para {{years}}. Verifique o calendário antes de se basear nestas datas.",
     "schedule.calendar.holidays_partial": "Os dados de feriados para {{years}} estão incompletos. Verifique o calendário antes de se basear nestas datas.",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "Rascunho de preparação para o financiador",
+    "contracts.lender_preparation.notice": "Cópia de trabalho só de leitura. Não constitui uma submissão ao financiador, certificação ou desembolso. Os registros de origem são lidos separadamente e podem mudar.",
+    "contracts.lender_preparation.missing": "Não inclui: linha de crédito, aprovação do financiador, comprovantes dos materiais armazenados e registro de ordens de alteração específico do contrato.",
+    "contracts.lender_preparation.error": "Não foi possível carregar o pedido de pagamento. Atualize para tentar novamente.",
+    "contracts.lender_preparation.subcontractors": "Pedidos de pagamento de subcontratados",
+    "contracts.lender_preparation.documents": "Referências a documentos do contrato",
+    "contracts.lender_preparation.waivers": "Referências a renúncias associadas ao pedido",
+    "contracts.lender_preparation.loaded": "{{count}} registrados; sem verificação independente",
+    "contracts.lender_preparation.unavailable": "Indisponível; omitido deste rascunho",
+    "contracts.lender_preparation.download": "Baixar rascunho JSON",
+    "contracts.lender_preparation.certified": "Montante certificado registrado",
+    "contracts.lender_preparation.findings": "Constatações registradas sobre certificados",
+    "contracts.lender_preparation.no_period": "Esta solicitação não tem datas de período. As solicitações de pagamento dos subempreiteiros não são associadas por data.",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

@@ -47302,6 +47302,21 @@ const resource = {
     "schedule.calendar.week_fallback": "地域の週間勤務日設定を利用できないため、標準の週間設定で計画します。",
     "schedule.calendar.holidays_missing": "{{years}} 年の祝日データを利用できません。これらの日付を前提にする前に、カレンダーを確認してください。",
     "schedule.calendar.holidays_partial": "{{years}} 年の祝日データは不完全です。これらの日付を前提にする前に、カレンダーを確認してください。",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "貸し手向け準備資料の下書き",
+    "contracts.lender_preparation.notice": "読み取り専用の作業用コピーです。貸し手への提出、証明、融資実行を行うものではありません。元の記録は個別に読み取られ、変更される場合があります。",
+    "contracts.lender_preparation.missing": "含まれないもの：融資枠、貸し手の承認、保管材料の証拠資料、この契約固有の変更指示台帳。",
+    "contracts.lender_preparation.error": "支払申請を読み込めませんでした。更新して再試行してください。",
+    "contracts.lender_preparation.subcontractors": "下請業者の支払申請",
+    "contracts.lender_preparation.documents": "契約文書への参照",
+    "contracts.lender_preparation.waivers": "申請に関連する担保権放棄書への参照",
+    "contracts.lender_preparation.loaded": "記録済み {{count}} 件；独立した確認は未実施",
+    "contracts.lender_preparation.unavailable": "利用不可；この下書きには含まれません",
+    "contracts.lender_preparation.download": "下書きを JSON でダウンロード",
+    "contracts.lender_preparation.certified": "記録された支払査定額",
+    "contracts.lender_preparation.findings": "記録された証明書の確認事項",
+    "contracts.lender_preparation.no_period": "この支払申請には期間の日付がありません。下請業者の支払申請は日付で照合されません。",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

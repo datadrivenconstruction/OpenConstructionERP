@@ -45981,6 +45981,21 @@ const resource = {
     "schedule.calendar.week_fallback": "Η περιφερειακή εβδομάδα εργασίας δεν είναι διαθέσιμη. Χρησιμοποιείται τυπική εβδομάδα για τον προγραμματισμό.",
     "schedule.calendar.holidays_missing": "Δεν υπάρχουν διαθέσιμα δεδομένα επίσημων αργιών για τα έτη {{years}}. Ελέγξτε το ημερολόγιο πριν βασιστείτε σε αυτές τις ημερομηνίες.",
     "schedule.calendar.holidays_partial": "Τα δεδομένα επίσημων αργιών για τα έτη {{years}} είναι ελλιπή. Ελέγξτε το ημερολόγιο πριν βασιστείτε σε αυτές τις ημερομηνίες.",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "Προσχέδιο προετοιμασίας για τον δανειστή",
+    "contracts.lender_preparation.notice": "Αντίγραφο εργασίας μόνο για ανάγνωση. Δεν αποτελεί υποβολή στον δανειστή, πιστοποίηση ή εκταμίευση. Οι εγγραφές πηγής διαβάζονται χωριστά και ενδέχεται να αλλάξουν.",
+    "contracts.lender_preparation.missing": "Δεν περιλαμβάνονται: πιστωτική γραμμή, έγκριση δανειστή, τεκμήρια αποθηκευμένων υλικών και μητρώο εντολών αλλαγής της συγκεκριμένης σύμβασης.",
+    "contracts.lender_preparation.error": "Δεν ήταν δυνατή η φόρτωση της αίτησης πληρωμής. Ανανεώστε για να δοκιμάσετε ξανά.",
+    "contracts.lender_preparation.subcontractors": "Αιτήσεις πληρωμής υπεργολάβων",
+    "contracts.lender_preparation.documents": "Αναφορές σε έγγραφα σύμβασης",
+    "contracts.lender_preparation.waivers": "Αναφορές σε παραιτήσεις από δικαιώματα εξασφάλισης της αίτησης",
+    "contracts.lender_preparation.loaded": "{{count}} καταγεγραμμένα· χωρίς ανεξάρτητη επαλήθευση",
+    "contracts.lender_preparation.unavailable": "Μη διαθέσιμο· παραλείπεται από αυτό το προσχέδιο",
+    "contracts.lender_preparation.download": "Λήψη προσχεδίου JSON",
+    "contracts.lender_preparation.certified": "Καταγεγραμμένο πιστοποιημένο ποσό",
+    "contracts.lender_preparation.findings": "Καταγεγραμμένα ευρήματα πιστοποιητικών",
+    "contracts.lender_preparation.no_period": "Αυτό το αίτημα δεν έχει ημερομηνίες περιόδου. Τα αιτήματα πληρωμής υπεργολάβων δεν αντιστοιχίζονται βάσει ημερομηνίας.",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

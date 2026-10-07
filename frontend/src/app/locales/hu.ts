@@ -48589,6 +48589,21 @@ const resource = {
     "schedule.calendar.week_fallback": "A regionális munkahét nem érhető el. A tervezés szabványos munkahéttel történik.",
     "schedule.calendar.holidays_missing": "A munkaszüneti napok adatai nem érhetők el ezekre az évekre: {{years}}. Ellenőrizze a naptárt, mielőtt ezekre a dátumokra támaszkodik.",
     "schedule.calendar.holidays_partial": "A munkaszüneti napok adatai hiányosak ezekre az évekre: {{years}}. Ellenőrizze a naptárt, mielőtt ezekre a dátumokra támaszkodik.",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "Tervezet a hitelezőnek szánt előkészítéshez",
+    "contracts.lender_preparation.notice": "Csak olvasható munkapéldány. Ez nem a hitelezőnek benyújtott kérelem, igazolás vagy folyósítás. A forrásrekordok külön kerülnek beolvasásra, és változhatnak.",
+    "contracts.lender_preparation.missing": "Nem tartalmazza a hitelkeretet, a hitelező jóváhagyását, a tárolt anyagok bizonylatait és az adott szerződés módosítási utasításainak nyilvántartását.",
+    "contracts.lender_preparation.error": "A fizetési kérelmet nem sikerült betölteni. Frissítsen az újrapróbálkozáshoz.",
+    "contracts.lender_preparation.subcontractors": "Alvállalkozói fizetési kérelmek",
+    "contracts.lender_preparation.documents": "Hivatkozások a szerződés dokumentumaira",
+    "contracts.lender_preparation.waivers": "Hivatkozások a kérelemhez kapcsolódó biztosítéki jogokról való lemondásokra",
+    "contracts.lender_preparation.loaded": "{{count}} rögzítve; független ellenőrzés nélkül",
+    "contracts.lender_preparation.unavailable": "Nem érhető el; kimaradt ebből a tervezetből",
+    "contracts.lender_preparation.download": "JSON-tervezet letöltése",
+    "contracts.lender_preparation.certified": "Rögzített igazolt összeg",
+    "contracts.lender_preparation.findings": "Az igazolásokkal kapcsolatos rögzített megállapítások",
+    "contracts.lender_preparation.no_period": "Ehhez az igényléshez nincsenek időszakdátumok. Az alvállalkozók fizetési kérelmei nem dátum alapján kerülnek hozzárendelésre.",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

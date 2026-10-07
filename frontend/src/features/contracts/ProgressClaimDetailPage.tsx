@@ -63,6 +63,7 @@ import { ProgressClaimLineTable } from './ProgressClaimLineTable';
 import { AIAApplicationPanel } from './AIAApplicationPanel';
 import { GaebInvoicePanel } from './GaebInvoicePanel';
 import { SubRollupPanel } from './SubRollupPanel';
+import { LenderDrawPreviewPanel } from './LenderDrawPreviewPanel';
 import { ClaimInvoicePreview } from '@/features/finance';
 import { projectsApi } from '@/features/projects/api';
 
@@ -467,6 +468,14 @@ export function ProgressClaimDetailPage() {
         currency={claim.currency}
         editable={editable}
       />
+
+      {projectId && (
+        <LenderDrawPreviewPanel
+          projectId={projectId}
+          contractId={claim.contract_id}
+          claimId={claim.id}
+        />
+      )}
 
       {/* The receivable invoice this claim spawns. The component names this
           panel as its home ("drops into the contracts claim detail panel");

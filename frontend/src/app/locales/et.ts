@@ -45942,6 +45942,21 @@ const resource = {
     "schedule.calendar.week_fallback": "Piirkondlik töönädal pole saadaval. Planeerimisel kasutatakse standardset töönädalat.",
     "schedule.calendar.holidays_missing": "Aastate {{years}} riigipühade andmed pole saadaval. Kontrollige kalendrit enne nendele kuupäevadele tuginemist.",
     "schedule.calendar.holidays_partial": "Aastate {{years}} riigipühade andmed on puudulikud. Kontrollige kalendrit enne nendele kuupäevadele tuginemist.",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "Laenuandjale ettevalmistatava materjali mustand",
+    "contracts.lender_preparation.notice": "Kirjutuskaitstud töökoopia. See ei ole laenuandjale esitatav taotlus, kinnitamine ega väljamakse. Lähtekirjed loetakse eraldi ja võivad muutuda.",
+    "contracts.lender_preparation.missing": "Ei sisalda: krediidiliini, laenuandja heakskiitu, ladustatud materjalide tõendeid ega lepingupõhist muudatuskorralduste registrit.",
+    "contracts.lender_preparation.error": "Maksetaotlust ei õnnestunud laadida. Uuesti proovimiseks värskendage.",
+    "contracts.lender_preparation.subcontractors": "Alltöövõtjate maksetaotlused",
+    "contracts.lender_preparation.documents": "Viited lepingudokumentidele",
+    "contracts.lender_preparation.waivers": "Viited taotlusega seotud tagatisõigustest loobumistele",
+    "contracts.lender_preparation.loaded": "Kirjeid: {{count}}; sõltumatult kontrollimata",
+    "contracts.lender_preparation.unavailable": "Pole saadaval; sellest mustandist välja jäetud",
+    "contracts.lender_preparation.download": "Laadi alla JSON-mustand",
+    "contracts.lender_preparation.certified": "Registreeritud kinnitatud summa",
+    "contracts.lender_preparation.findings": "Registreeritud tähelepanekud tõendite kohta",
+    "contracts.lender_preparation.no_period": "Sellel maksetaotlusel puuduvad perioodi kuupäevad. Alltöövõtjate maksetaotlusi ei seostata kuupäeva järgi.",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

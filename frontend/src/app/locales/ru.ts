@@ -49086,6 +49086,21 @@ const resource = {
     "schedule.calendar.week_fallback": "Региональная рабочая неделя недоступна. Для планирования используется стандартная неделя.",
     "schedule.calendar.holidays_missing": "Данные о праздничных нерабочих днях за {{years}} недоступны. Проверьте календарь, прежде чем полагаться на эти даты.",
     "schedule.calendar.holidays_partial": "Данные о праздничных нерабочих днях за {{years}} неполны. Проверьте календарь, прежде чем полагаться на эти даты.",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "Черновик подготовки для кредитора",
+    "contracts.lender_preparation.notice": "Рабочая копия только для чтения. Это не подача кредитору, не подтверждение суммы и не выдача транша. Исходные записи читаются отдельно и могут изменяться.",
+    "contracts.lender_preparation.missing": "Не включены: кредитная линия, одобрение кредитора, подтверждения по складским материалам и журнал изменений именно этого договора.",
+    "contracts.lender_preparation.error": "Не удалось загрузить заявку на оплату. Обновите, чтобы повторить попытку.",
+    "contracts.lender_preparation.subcontractors": "Заявки субподрядчиков на оплату",
+    "contracts.lender_preparation.documents": "Ссылки на документы договора",
+    "contracts.lender_preparation.waivers": "Ссылки на отказы от обеспечительных прав по заявке",
+    "contracts.lender_preparation.loaded": "Записей: {{count}}; независимая проверка не выполнена",
+    "contracts.lender_preparation.unavailable": "Недоступно; исключено из этого черновика",
+    "contracts.lender_preparation.download": "Скачать черновик JSON",
+    "contracts.lender_preparation.certified": "Записанная подтверждённая сумма",
+    "contracts.lender_preparation.findings": "Записанные замечания по сертификатам",
+    "contracts.lender_preparation.no_period": "В заявке не указаны даты периода. Заявки субподрядчиков на оплату не сопоставляются по датам.",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

@@ -46003,6 +46003,21 @@ const resource = {
     "schedule.calendar.week_fallback": "क्षेत्रीय कार्य सप्ताह उपलब्ध नहीं है। योजना के लिए मानक सप्ताह का उपयोग किया जा रहा है।",
     "schedule.calendar.holidays_missing": "{{years}} के लिए सार्वजनिक अवकाशों का डेटा उपलब्ध नहीं है। इन तारीखों पर निर्भर करने से पहले कैलेंडर जाँचें।",
     "schedule.calendar.holidays_partial": "{{years}} के लिए सार्वजनिक अवकाशों का डेटा अधूरा है। इन तारीखों पर निर्भर करने से पहले कैलेंडर जाँचें।",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "ऋणदाता के लिए तैयारी का मसौदा",
+    "contracts.lender_preparation.notice": "केवल पढ़ने योग्य कार्य प्रति। यह ऋणदाता को प्रस्तुत आवेदन, प्रमाणन या ऋण वितरण नहीं है। स्रोत रिकॉर्ड अलग-अलग पढ़े जाते हैं और बदल सकते हैं।",
+    "contracts.lender_preparation.missing": "शामिल नहीं: ऋण सुविधा, ऋणदाता की स्वीकृति, भंडारित सामग्री के साक्ष्य और अनुबंध-विशिष्ट परिवर्तन आदेश रजिस्टर।",
+    "contracts.lender_preparation.error": "भुगतान आवेदन लोड नहीं हो सका। फिर से प्रयास करने के लिए रीफ़्रेश करें।",
+    "contracts.lender_preparation.subcontractors": "उपठेकेदारों के भुगतान आवेदन",
+    "contracts.lender_preparation.documents": "अनुबंध दस्तावेज़ों के संदर्भ",
+    "contracts.lender_preparation.waivers": "आवेदन से जुड़े सुरक्षा अधिकार त्याग के संदर्भ",
+    "contracts.lender_preparation.loaded": "{{count}} दर्ज; स्वतंत्र सत्यापन नहीं किया गया",
+    "contracts.lender_preparation.unavailable": "उपलब्ध नहीं; इस मसौदे से बाहर रखा गया",
+    "contracts.lender_preparation.download": "JSON मसौदा डाउनलोड करें",
+    "contracts.lender_preparation.certified": "दर्ज प्रमाणित राशि",
+    "contracts.lender_preparation.findings": "प्रमाणपत्रों से संबंधित दर्ज निष्कर्ष",
+    "contracts.lender_preparation.no_period": "इस दावे में अवधि की तारीखें नहीं हैं। उपठेकेदारों के भुगतान आवेदनों का तारीख के आधार पर मिलान नहीं किया जाता है।",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

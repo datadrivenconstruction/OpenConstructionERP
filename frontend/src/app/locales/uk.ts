@@ -47991,6 +47991,21 @@ const resource = {
     "schedule.calendar.week_fallback": "Регіональний робочий тиждень недоступний. Для планування використовується стандартний тиждень.",
     "schedule.calendar.holidays_missing": "Дані про офіційні неробочі святкові дні за {{years}} недоступні. Перевірте календар, перш ніж покладатися на ці дати.",
     "schedule.calendar.holidays_partial": "Дані про офіційні неробочі святкові дні за {{years}} неповні. Перевірте календар, перш ніж покладатися на ці дати.",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "Чернетка підготовки для кредитора",
+    "contracts.lender_preparation.notice": "Робоча копія лише для читання. Це не подання кредитору, не засвідчення суми й не видача траншу. Вихідні записи зчитуються окремо та можуть змінюватися.",
+    "contracts.lender_preparation.missing": "Не включено: кредитну лінію, схвалення кредитора, підтвердження щодо складських матеріалів і журнал змін саме цього договору.",
+    "contracts.lender_preparation.error": "Не вдалося завантажити заявку на оплату. Оновіть, щоб повторити спробу.",
+    "contracts.lender_preparation.subcontractors": "Заявки субпідрядників на оплату",
+    "contracts.lender_preparation.documents": "Посилання на документи договору",
+    "contracts.lender_preparation.waivers": "Посилання на відмови від забезпечувальних прав за заявкою",
+    "contracts.lender_preparation.loaded": "Записів: {{count}}; незалежну перевірку не виконано",
+    "contracts.lender_preparation.unavailable": "Недоступно; вилучено з цієї чернетки",
+    "contracts.lender_preparation.download": "Завантажити чернетку JSON",
+    "contracts.lender_preparation.certified": "Зареєстрована засвідчена сума",
+    "contracts.lender_preparation.findings": "Зареєстровані зауваження щодо сертифікатів",
+    "contracts.lender_preparation.no_period": "У заявці не вказано дати періоду. Заявки субпідрядників на оплату не зіставляються за датами.",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

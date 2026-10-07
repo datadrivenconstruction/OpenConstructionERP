@@ -46116,6 +46116,21 @@ const resource = {
     "schedule.calendar.week_fallback": "Аймактык жумуш жумасы жеткиликсиз. Пландоо үчүн стандарттуу жума колдонулат.",
     "schedule.calendar.holidays_missing": "{{years}} жылдары үчүн расмий майрам күндөрү тууралуу маалымат жеткиликсиз. Бул даталарга таянуудан мурун календарды текшериңиз.",
     "schedule.calendar.holidays_partial": "{{years}} жылдары үчүн расмий майрам күндөрү тууралуу маалымат толук эмес. Бул даталарга таянуудан мурун календарды текшериңиз.",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "Насыя берүүчү үчүн даярдыктын долбоору",
+    "contracts.lender_preparation.notice": "Окуу үчүн гана жумушчу көчүрмө. Бул насыя берүүчүгө тапшыруу, күбөлөндүрүү же каражат берүү эмес. Булак жазуулары өз-өзүнчө окулат жана өзгөрүшү мүмкүн.",
+    "contracts.lender_preparation.missing": "Кирбейт: насыя линиясы, насыя берүүчүнүн макулдугу, кампадагы материалдардын далилдери жана ушул келишимдин өзгөртүү буйруктарынын журналы.",
+    "contracts.lender_preparation.error": "Төлөм өтүнмөсүн жүктөө мүмкүн болгон жок. Кайра аракет кылуу үчүн жаңыртыңыз.",
+    "contracts.lender_preparation.subcontractors": "Субподрядчылардын төлөм өтүнмөлөрү",
+    "contracts.lender_preparation.documents": "Келишим документтерине шилтемелер",
+    "contracts.lender_preparation.waivers": "Өтүнмөгө байланыштуу камсыздоо укуктарынан баш тартуу документтерине шилтемелер",
+    "contracts.lender_preparation.loaded": "{{count}} жазылган; көз карандысыз текшерилген эмес",
+    "contracts.lender_preparation.unavailable": "Жеткиликсиз; бул долбоорго киргизилген эмес",
+    "contracts.lender_preparation.download": "JSON долбоорун жүктөп алуу",
+    "contracts.lender_preparation.certified": "Жазылган күбөлөндүрүлгөн сумма",
+    "contracts.lender_preparation.findings": "Күбөлүктөр боюнча жазылган табылгалар",
+    "contracts.lender_preparation.no_period": "Бул өтүнмөдө мезгилдин даталары жок. Субподрядчылардын төлөм өтүнмөлөрү дата боюнча дал келтирилбейт.",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

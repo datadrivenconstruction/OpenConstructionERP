@@ -48239,6 +48239,21 @@ const resource = {
     "schedule.calendar.week_fallback": "地区工作周不可用，现使用标准规划工作周。",
     "schedule.calendar.holidays_missing": "{{years}} 年的法定节假日数据不可用。请先核查日历，再依据这些日期安排计划。",
     "schedule.calendar.holidays_partial": "{{years}} 年的法定节假日数据不完整。请先核查日历，再依据这些日期安排计划。",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "贷款方资料准备草稿",
+    "contracts.lender_preparation.notice": "只读工作副本。这不是向贷款方提交的申请、认证或放款。源记录分别读取，可能发生变化。",
+    "contracts.lender_preparation.missing": "不包括：授信安排、贷款方批准、库存材料证明以及本合同专属的变更指令台账。",
+    "contracts.lender_preparation.error": "无法加载付款申请。请刷新后重试。",
+    "contracts.lender_preparation.subcontractors": "分包商付款申请",
+    "contracts.lender_preparation.documents": "合同文件引用",
+    "contracts.lender_preparation.waivers": "申请相关权利放弃文件引用",
+    "contracts.lender_preparation.loaded": "已记录 {{count}} 项；未经独立核验",
+    "contracts.lender_preparation.unavailable": "不可用；未纳入此草稿",
+    "contracts.lender_preparation.download": "下载 JSON 草稿",
+    "contracts.lender_preparation.certified": "已记录的认证金额",
+    "contracts.lender_preparation.findings": "已记录的证书检查发现",
+    "contracts.lender_preparation.no_period": "此付款申请没有期间日期。分包商付款申请不按日期匹配。",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

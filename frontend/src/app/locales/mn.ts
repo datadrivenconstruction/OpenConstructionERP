@@ -45685,6 +45685,21 @@ const resource = {
     "schedule.calendar.week_fallback": "Бүс нутгийн ажлын долоо хоногийн мэдээлэл байхгүй тул төлөвлөлтөд стандарт ажлын долоо хоногийг ашиглаж байна.",
     "schedule.calendar.holidays_missing": "{{years}} оны нийтээр амрах баярын өдрүүдийн мэдээлэл байхгүй. Эдгээр огноонд тулгуурлахаас өмнө хуанлийг шалгана уу.",
     "schedule.calendar.holidays_partial": "{{years}} оны нийтээр амрах баярын өдрүүдийн мэдээлэл бүрэн биш байна. Эдгээр огноонд тулгуурлахаас өмнө хуанлийг шалгана уу.",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "Зээлдүүлэгчид зориулсан бэлтгэл ноорог",
+    "contracts.lender_preparation.notice": "Зөвхөн унших зориулалттай ажлын хуулбар. Энэ нь зээлдүүлэгчид хүргүүлсэн хүсэлт, төлбөрийн дүнгийн баталгаажуулалт эсвэл санхүүжилт олголт биш. Эх бүртгэлүүдийг тус тусад нь унших тул өөрчлөгдсөн байж болно.",
+    "contracts.lender_preparation.missing": "Зээлийн шугам, зээлдүүлэгчийн зөвшөөрөл, агуулах дахь материалын нотлох баримт болон тухайн гэрээний өөрчлөлтийн бүртгэл ороогүй.",
+    "contracts.lender_preparation.error": "Төлбөрийн хүсэлтийг ачаалж чадсангүй. Дахин оролдохын тулд шинэчилнэ үү.",
+    "contracts.lender_preparation.subcontractors": "Туслан гүйцэтгэгчдийн төлбөрийн хүсэлтүүд",
+    "contracts.lender_preparation.documents": "Гэрээний баримт бичгийн холбоосууд",
+    "contracts.lender_preparation.waivers": "Энэ төлбөрийн хүсэлтэд хамаарах барьцааны эрхээс татгалзах мэдэгдлийн холбоосууд",
+    "contracts.lender_preparation.loaded": "{{count}} бүртгэлтэй; хараат бусаар шалгаагүй",
+    "contracts.lender_preparation.unavailable": "Боломжгүй; энэ ноорогт оруулаагүй",
+    "contracts.lender_preparation.download": "Нооргийг JSON файлаар татах",
+    "contracts.lender_preparation.certified": "Бүртгэлд буй баталгаажсан дүн",
+    "contracts.lender_preparation.findings": "Батламжтай холбоотой бүртгэгдсэн асуудлууд",
+    "contracts.lender_preparation.no_period": "Энэ төлбөрийн хүсэлтэд хугацааны огноо байхгүй. Туслан гүйцэтгэгчдийн төлбөрийн хүсэлтийг огноогоор нь тохируулдаггүй.",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

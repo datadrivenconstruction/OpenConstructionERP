@@ -46004,6 +46004,21 @@ const resource = {
     "schedule.calendar.week_fallback": "Регионалната работна седмица не е налична. За планиране се използва стандартна седмица.",
     "schedule.calendar.holidays_missing": "Данните за официалните празници за {{years}} не са налични. Проверете календара, преди да разчитате на тези дати.",
     "schedule.calendar.holidays_partial": "Данните за официалните празници за {{years}} са непълни. Проверете календара, преди да разчитате на тези дати.",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "Чернова на подготовката за кредитора",
+    "contracts.lender_preparation.notice": "Работно копие само за четене. Това не е подаване до кредитора, удостоверяване или отпускане на транш. Изходните записи се четат поотделно и може да се променят.",
+    "contracts.lender_preparation.missing": "Не включва: кредитна линия, одобрение от кредитора, доказателства за складирани материали и регистър на нарежданията за промяна по конкретния договор.",
+    "contracts.lender_preparation.error": "Заявката за плащане не можа да бъде заредена. Обновете, за да опитате отново.",
+    "contracts.lender_preparation.subcontractors": "Заявки за плащане на подизпълнители",
+    "contracts.lender_preparation.documents": "Препратки към документи по договора",
+    "contracts.lender_preparation.waivers": "Препратки към откази от обезпечителни права по заявката",
+    "contracts.lender_preparation.loaded": "Записани: {{count}}; без независима проверка",
+    "contracts.lender_preparation.unavailable": "Недостъпно; пропуснато в тази чернова",
+    "contracts.lender_preparation.download": "Изтегляне на чернова JSON",
+    "contracts.lender_preparation.certified": "Записана удостоверена сума",
+    "contracts.lender_preparation.findings": "Записани констатации по удостоверенията",
+    "contracts.lender_preparation.no_period": "Това искане няма дати на периода. Исканията за плащане на подизпълнителите не се съпоставят по дата.",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 
