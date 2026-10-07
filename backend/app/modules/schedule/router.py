@@ -1598,7 +1598,16 @@ async def create_baseline(
 ) -> BaselineResponse:
     """Create a schedule baseline snapshot."""
     await verify_project_access(data.project_id, _user_id, session)
-    from app.modules.schedule.models import ScheduleBaseline
+    from sqlalchemy import select
+
+    from app.modules.schedule.models import Schedule, ScheduleBaseline
+
+    if data.schedule_id is not None:
+        schedule_id = await session.scalar(
+            select(Schedule.id).where(Schedule.id == data.schedule_id, Schedule.project_id == data.project_id)
+        )
+        if schedule_id is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Schedule not found")
 
     baseline = ScheduleBaseline(
         schedule_id=data.schedule_id,

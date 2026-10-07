@@ -85,6 +85,74 @@ def url(schedule, suffix=""):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "association", ["same_owner_other_project", "foreign_owner", "missing", "matching", "project_only"]
+)
+async def test_baseline_schedule_must_belong_to_submitted_project(association):
+    async with api() as (client, session, service, schedule, project, _payload):
+        schedule_id = schedule.id
+        if association in {"same_owner_other_project", "foreign_owner"}:
+            owner_id = project.owner_id
+            if association == "foreign_owner":
+                owner = User(
+                    email=f"baseline-{uuid.uuid4()}@example.test", full_name="Other", hashed_password="x", role="editor"
+                )
+                session.add(owner)
+                await session.flush()
+                owner_id = owner.id
+            other_project = Project(name="Different baseline project", owner_id=owner_id)
+            session.add(other_project)
+            await session.flush()
+            other = await service.create_schedule(ScheduleCreate(project_id=other_project.id, name="Other schedule"))
+            schedule_id = other.id
+        elif association == "missing":
+            schedule_id = uuid.uuid4()
+        elif association == "project_only":
+            schedule_id = None
+        response = await client.post(
+            "/schedule/baselines/",
+            json={
+                "project_id": str(project.id),
+                "schedule_id": str(schedule_id) if schedule_id else None,
+                "name": "Scoped baseline",
+                "baseline_date": "2026-10-01",
+                "snapshot_data": {"preserved": True},
+            },
+        )
+        valid = association in {"matching", "project_only"}
+        assert response.status_code == (201 if valid else 404), response.text
+        rows = (
+            (await session.execute(select(ScheduleBaseline).where(ScheduleBaseline.project_id == project.id)))
+            .scalars()
+            .all()
+        )
+        assert len(rows) == int(valid)
+        if valid:
+            assert rows[0].schedule_id == schedule_id
+            assert rows[0].snapshot_data == {"preserved": True}
+        else:
+            assert response.json() == {"detail": "Schedule not found"}
+
+
+@pytest.mark.asyncio
+async def test_baseline_permission_checked_before_schedule_lookup():
+    async with api("viewer") as (client, session, _service, schedule, project, _payload):
+        for schedule_id in (schedule.id, uuid.uuid4(), None):
+            response = await client.post(
+                "/schedule/baselines/",
+                json={
+                    "project_id": str(project.id),
+                    "schedule_id": str(schedule_id) if schedule_id else None,
+                    "name": "Denied baseline",
+                    "baseline_date": "2026-10-01",
+                    "snapshot_data": {},
+                },
+            )
+            assert response.status_code == 403, response.text
+        assert (await session.execute(select(func.count()).select_from(ScheduleBaseline))).scalar_one() == 0
+
+
+@pytest.mark.asyncio
 async def test_lifecycle_lock_does_not_present_unloaded_activities_as_empty():
     async with api() as (_client, session, service, schedule, _project, _payload):
         activity = Activity(
