@@ -9,6 +9,7 @@
 #   - Linux: .deb, .AppImage, and .rpm from a job of its own (see build-linux-rpm)
 
 name: Desktop Release
+run-name: ${{ inputs.build_only_windows && format('Windows diagnostic {0}', github.sha) || format('Desktop Release {0}', inputs.tag || github.ref_name) }}
 
 on:
   push:
@@ -16,12 +17,16 @@ on:
       - 'v*'
   workflow_dispatch:
     inputs:
+      build_only_windows:
+        description: Build a Windows diagnostic installer as an Actions artifact; never publish a release. Source is this run's immutable SHA; tag input is ignored.
+        type: boolean
+        default: false
       sidecar_only:
         description: >-
           Kept for the dispatch form and for anything that still passes it, but
           it no longer decides anything. A dispatch bundles and releases only
           when the tag box below holds a version tag, so a run started from a
-          branch is sidecar-only whatever this box says. It used to be the only
+          branch is sidecar-only unless build_only_windows is selected. It used to be the only
           thing standing between a manual run and a public release named after
           the branch it was started from.
         type: boolean
@@ -47,7 +52,7 @@ permissions:
 # two cannot be read from the same place and every job that touches the release
 # reads this instead of the ref it happens to be running on.
 env:
-  RELEASE_REF: ${{ inputs.tag || github.ref_name }}
+  RELEASE_REF: ${{ inputs.build_only_windows && github.sha || inputs.tag || github.ref_name }}
   # The Tauri CLI every bundling step runs. Nothing pinned it before: the action
   # resolves a CLI by itself, the repository declares none, and the README told
   # developers to `cargo install tauri-cli` with no version. So the bundler that
@@ -100,16 +105,7 @@ jobs:
       # cancels the others and we still ship the installers that did build.
       fail-fast: false
       matrix:
-        include:
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-            ext: .exe
-          - os: macos-latest
-            target: aarch64-apple-darwin
-            ext: ""
-          - os: ubuntu-22.04
-            target: x86_64-unknown-linux-gnu
-            ext: ""
+        include: ${{ fromJSON(inputs.build_only_windows && '[{"os":"windows-latest","target":"x86_64-pc-windows-msvc","ext":".exe"}]' || '[{"os":"windows-latest","target":"x86_64-pc-windows-msvc","ext":".exe"},{"os":"macos-latest","target":"aarch64-apple-darwin","ext":""},{"os":"ubuntu-22.04","target":"x86_64-unknown-linux-gnu","ext":""}]') }}
 
     steps:
       - uses: actions/checkout@v7
@@ -181,6 +177,10 @@ jobs:
           pip install -r requirements-desktop.lock \
             --extra-index-url https://download.pytorch.org/whl/cpu
           pip install -e . --no-deps
+
+      - name: Check diagnostic publication guards
+        if: inputs.build_only_windows
+        run: python desktop/tests/test_windows_diagnostic_workflow.py
 
       # Windows 11 Smart App Control checks every executable file as it is
       # loaded and has no per-app exception, so a signature on the installer
@@ -1021,8 +1021,8 @@ jobs:
   build-tauri:
     name: Build Desktop (${{ matrix.os }})
     needs: build-sidecar
-    # Bundling is what publishes, so the condition for bundling is the
-    # condition for being allowed to publish, and only a version tag qualifies.
+    # Normal bundling publishes and requires a version tag. Diagnostic mode
+    # uses a separate CLI step and uploads only an Actions artifact.
     #
     # A tag push takes the first clause and always bundles. A dispatch has to
     # name a tag that starts with "v", which is the shape the release path
@@ -1042,7 +1042,7 @@ jobs:
     # here at all: the release is looked up by id in "Find the release" below,
     # and a branch name finds none. The guard stays because it stops the job
     # before the frontend build rather than after it.
-    if: github.event_name != 'workflow_dispatch' || startsWith(inputs.tag, 'v')
+    if: inputs.build_only_windows || github.event_name != 'workflow_dispatch' || startsWith(inputs.tag, 'v')
     runs-on: ${{ matrix.os }}
     # Windows 27.8 to 33.2 min, macOS 26.4 to 52.9, Linux 26.5 once the rpm is
     # out of this job. The earlier reading of 119 to 123 min for Linux was read
@@ -1057,27 +1057,7 @@ jobs:
       # cancels the others and we still ship the installers that did build.
       fail-fast: false
       matrix:
-        include:
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-            # Windows ships the NSIS installer only. The .msi was a second
-            # installer for the same platform, which meant two downloads to
-            # choose between, two things to sign and two ways for a release to
-            # be half Windows. The NSIS one is the one that carries our hooks,
-            # our language selector and the per-machine install mode.
-            bundles: "--bundles nsis"
-          - os: macos-latest
-            target: aarch64-apple-darwin
-            # Empty means the config's own target list, which is what macOS
-            # wants: the dmg and the app archive.
-            bundles: ""
-          - os: ubuntu-22.04
-            target: x86_64-unknown-linux-gnu
-            # The deb only. The AppImage follows in a step of its own and the
-            # rpm in a job of its own, both for the same reason: neither is
-            # allowed to cost us a package that had already been built. See
-            # "Bundle the AppImage" below and build-linux-rpm.
-            bundles: "--bundles deb"
+        include: ${{ fromJSON(inputs.build_only_windows && '[{"os":"windows-latest","target":"x86_64-pc-windows-msvc","bundles":"--bundles nsis"}]' || '[{"os":"windows-latest","target":"x86_64-pc-windows-msvc","bundles":"--bundles nsis"},{"os":"macos-latest","target":"aarch64-apple-darwin","bundles":""},{"os":"ubuntu-22.04","target":"x86_64-unknown-linux-gnu","bundles":"--bundles deb"}]') }}
 
     steps:
       - uses: actions/checkout@v7
@@ -1460,6 +1440,7 @@ jobs:
       # Polled rather than read once, because both workflows start from the
       # same tag push and nothing orders them.
       - name: Find the release release.yml published for this tag
+        if: ${{ !inputs.build_only_windows }}
         id: release
         shell: bash
         env:
@@ -1492,6 +1473,7 @@ jobs:
         run: bash desktop/check-macos-notarization-policy.sh
 
       - name: Build Tauri app
+        if: ${{ !inputs.build_only_windows }}
         uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -1511,6 +1493,38 @@ jobs:
           args: ${{ matrix.bundles }} ${{ env.TAURI_SIGN_ARGS }}
           # By id, not by tagName: see "Find the release" above.
           releaseId: ${{ steps.release.outputs.id }}
+
+      - name: Build Windows diagnostic installer without publishing
+        if: inputs.build_only_windows
+        shell: pwsh
+        working-directory: desktop
+        run: npx --yes @tauri-apps/cli@${{ env.TAURI_CLI_VERSION }} build --bundles nsis
+
+      - name: Fingerprint the diagnostic installer and sidecar
+        if: inputs.build_only_windows
+        shell: pwsh
+        env:
+          DIAGNOSTIC_SOURCE_SHA: ${{ github.sha }}
+        run: |
+          $actual = (git rev-parse HEAD).Trim()
+          if ($actual -ne $env:DIAGNOSTIC_SOURCE_SHA) { throw 'Diagnostic checkout does not match workflow SHA' }
+          $installers = @(Get-ChildItem -LiteralPath desktop/src-tauri/target/release/bundle/nsis -Filter '*.exe')
+          if ($installers.Count -eq 0) { throw 'NSIS installer missing' }
+          $sidecar = Get-Item -LiteralPath desktop/src-tauri/binaries/openconstructionerp-server-x86_64-pc-windows-msvc.exe
+          $files = @($installers) + @($sidecar)
+          $fingerprints = @($files | ForEach-Object { @{ name = $_.Name; bytes = $_.Length; sha256 = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant() } })
+          $manifest = @{ purpose = 'diagnostic-only; not a published update'; source_sha = $actual; run_id = '${{ github.run_id }}'; run_attempt = '${{ github.run_attempt }}'; version = (Get-Content desktop/src-tauri/tauri.conf.json -Raw | ConvertFrom-Json).version; files = $fingerprints }
+          $manifest | ConvertTo-Json -Depth 5 | Set-Content -Encoding utf8 desktop/src-tauri/target/release/bundle/nsis/diagnostic-manifest.json
+          "Diagnostic source: $actual. Product version unchanged; not published to releases or update feeds." >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Upload Windows diagnostic installer
+        if: inputs.build_only_windows
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-diagnostic-${{ github.sha }}-${{ github.run_attempt }}
+          path: desktop/src-tauri/target/release/bundle/nsis/
+          if-no-files-found: error
+          retention-days: 14
 
       # The AppImage, on its own, and allowed to fail.
       #
@@ -1809,7 +1823,7 @@ jobs:
     # Same condition as build-tauri, and for the same reason: this job also
     # attaches a package to the tag's release, and a run started from a branch
     # has no release to find.
-    if: github.event_name != 'workflow_dispatch' || startsWith(inputs.tag, 'v')
+    if: ${{ !inputs.build_only_windows && (github.event_name != 'workflow_dispatch' || startsWith(inputs.tag, 'v')) }}
     runs-on: ubuntu-22.04
     # Twice the v15.0.0 payload at the measured rate, plus the half hour the
     # rest of the job takes. A cap above six hours is not available.
@@ -1944,7 +1958,7 @@ jobs:
     # So: run whenever build-tauri reached a conclusion, and stay out of the
     # way only when it was skipped, which is the sidecar-only dispatch where
     # there is no release to sign against.
-    if: ${{ !cancelled() && needs.build-tauri.result != 'skipped' }}
+    if: ${{ !inputs.build_only_windows && !cancelled() && needs.build-tauri.result != 'skipped' }}
     runs-on: windows-latest
     # Measured at 0.3 to 0.6 min, because there are no signing secrets and the
     # job downloads nothing. The cap is deliberately far above that: if the
@@ -2307,7 +2321,7 @@ jobs:
   request-signing:
     name: Start Release Signing
     needs: [build-tauri, sign-windows]
-    if: ${{ !cancelled() && needs.build-tauri.result != 'skipped' && (github.ref_type == 'tag' || startsWith(inputs.tag, 'v')) }}
+    if: ${{ !inputs.build_only_windows && !cancelled() && needs.build-tauri.result != 'skipped' && (github.ref_type == 'tag' || startsWith(inputs.tag, 'v')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     # Narrower than the `contents: write` this workflow grants by default.
@@ -2422,7 +2436,7 @@ jobs:
   report:
     name: Say what reached the release
     needs: [build-sidecar, build-tauri, build-linux-rpm, sign-windows, request-signing]
-    if: ${{ always() && (github.ref_type == 'tag' || startsWith(inputs.tag, 'v')) }}
+    if: ${{ !inputs.build_only_windows && always() && (github.ref_type == 'tag' || startsWith(inputs.tag, 'v')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     # Red on the job tile, with the annotation and the summary block, but the

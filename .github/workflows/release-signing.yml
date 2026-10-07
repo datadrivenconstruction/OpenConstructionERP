@@ -95,7 +95,8 @@ jobs:
     # now reaches it and gets an answer about what is actually published.
     if: >-
       github.event_name != 'workflow_run' ||
-      startsWith(github.event.workflow_run.head_branch, 'v')
+      (startsWith(github.event.workflow_run.head_branch, 'v') &&
+       !startsWith(github.event.workflow_run.display_title, 'Windows diagnostic '))
     outputs:
       tag: ${{ steps.tag.outputs.tag }}
     steps:

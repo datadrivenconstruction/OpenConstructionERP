@@ -96,3 +96,9 @@ Questions: info@datadrivenconstruction.io. Licensed under AGPL-3.0.
 The Desktop Compile Check workflow runs cargo check and cargo test on Windows, macOS, and Linux for every push to main that touches desktop files. Manual dispatch runs tests by default; turn off run_tests only for a compile-only diagnostic. This validates the launcher, not installation or uninstallation.
 
 Before the macOS bundler can upload installers, the release workflow emits an explicit warning that notarization is not activated. Setting the repository variable MACOS_NOTARIZATION_REQUIRED to true refuses that build before publication. Credentials alone cannot satisfy this guard: activating Developer ID signing must also replace it with checks against the signed and stapled artifact. No Apple account or credentials are configured by this guard.
+
+## Windows diagnostic installer without a release
+
+Manually dispatch Desktop Release from the intended branch with `build_only_windows=true` and leave `tag` empty. The workflow checks out the immutable run SHA, builds only Windows, keeps the existing frozen sidecar cold-start/restart and NSIS checks, and uploads `windows-diagnostic-<SHA>-<attempt>` to Actions for 14 days. It never invokes the release-upload action, release signing, or the update feed. Version numbers stay unchanged; this is a diagnostic build, not a new release.
+
+The artifact includes the NSIS installer and `diagnostic-manifest.json` with the source SHA, run identity, unchanged product version, and SHA-256 fingerprints of the installer and input sidecar. Check that manifest when handing the installer to a tester. Selecting this mode ignores the release-tag input. A normal tag release or tag-repair dispatch retains its existing publication behavior.
