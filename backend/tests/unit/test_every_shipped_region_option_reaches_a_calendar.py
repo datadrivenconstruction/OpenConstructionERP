@@ -224,7 +224,7 @@ def test_a_shipped_region_option_reaches_a_calendar_or_is_declared_monday_to_fri
     Monday-Friday planning week for four years of Friday rest days.
     """
     calendar = get_work_calendar(value)
-    if calendar is not WORK_CALENDARS["DEFAULT"]:
+    if not calendar["week_fallback"]:
         return
 
     declared = value in PICKER_REGIONS_THAT_ARE_MONDAY_TO_FRIDAY or value in PICKER_REGIONS_WHOSE_WEEK_IS_UNSETTLED
@@ -261,7 +261,7 @@ def test_neither_declaration_table_holds_an_option_the_picker_no_longer_ships() 
         for value in sorted(table):
             if value not in shipped:
                 problems.append(f"  {table_name}[{value!r}]: the picker no longer ships this option")
-            elif get_work_calendar(value) is not WORK_CALENDARS["DEFAULT"]:
+            elif not get_work_calendar(value)["week_fallback"]:
                 problems.append(
                     f"  {table_name}[{value!r}]: now resolves to {get_work_calendar(value)['label']}, "
                     "so the entry is stale and should be deleted"

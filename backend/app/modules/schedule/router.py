@@ -32,6 +32,7 @@ import io
 import logging
 import uuid
 import xml.etree.ElementTree as ET  # noqa: S405 - types + output tree building only; parsing routed through defusedxml below
+from datetime import date
 from decimal import Decimal
 from typing import Any, Literal
 
@@ -101,6 +102,7 @@ from app.modules.schedule.service import (
     ScheduleService,
     _effective_activity_status,
     _str_to_float,
+    calendar_holiday_coverage,
     coded_http_error,
     compute_duration,
     get_work_calendar,
@@ -2822,6 +2824,9 @@ async def schedule_work_calendar(
         hours_per_day=cal["hours_per_day"],
         work_days_per_week=len(cal["work_days"]),
         label=cal["label"],
+        holiday_country=cal.get("holiday_country"),
+        week_fallback=cal["week_fallback"],
+        holiday_coverage=calendar_holiday_coverage(cal.get("holiday_country"), date.today().year),
     )
 
 

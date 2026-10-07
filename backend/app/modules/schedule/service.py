@@ -17,7 +17,7 @@ import asyncio
 import logging
 import math
 import uuid
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from datetime import UTC, date, datetime, timedelta
 from typing import Any, Literal
 
@@ -26,7 +26,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import noload
 
-from app.core.calendar import _holidays_cn
+from app.core.calendar import _holidays_cn, resolve_holidays
 from app.core.cpm import normalise_exception_date, readable_exception_dates, readable_work_days
 from app.core.events import event_bus, publish_after_commit
 from app.core.json_merge import merge_metadata
@@ -755,7 +755,7 @@ _CALENDAR_BY_LABEL: dict[str, str] = {
 }
 
 
-def get_work_calendar(region: str | None = None) -> dict:
+def _get_work_week(region: str | None = None) -> dict:
     """Get the work calendar for a region, falling back to DEFAULT.
 
     A region may be a calendar key ("GULF"), an ISO 3166-1 alpha-2 country code
@@ -798,6 +798,41 @@ def get_work_calendar(region: str | None = None) -> dict:
     return WORK_CALENDARS["DEFAULT"]
 
 
+def get_work_calendar(region: str | None = None) -> dict:
+    """Resolve the planning week and the holiday country independently.
+
+    A macro-region never supplies a neighbouring country's public holidays.
+    Holiday coverage remains explicit, including partial tables and years.
+    """
+    from app.core.classification_registry import is_macro_region, normalise_region
+
+    week = _get_work_week(region)
+    country = None if is_macro_region(region) else normalise_region(region)
+    calendar = {**week, "holiday_country": country, "week_fallback": week is WORK_CALENDARS["DEFAULT"]}
+    calendar.pop("holidays", None)
+    if country:
+        calendar["holidays"] = lambda year: calendar_holiday_dates(country, year)
+    return calendar
+
+
+def calendar_holiday_dates(country: str | None, year: int) -> frozenset[date]:
+    """Never import a neighbouring country's holiday table into a project."""
+    answer = resolve_holidays(country or "", year)
+    return answer["dates"] if answer["jurisdiction"].answered else frozenset()
+
+
+def calendar_holiday_coverage(country: str | None, year: int) -> dict:
+    """JSON-safe evidence for the holidays actually available to the planner."""
+    answer = resolve_holidays(country or "", year)
+    return {
+        "year": year,
+        "applied": answer["jurisdiction"].answered,
+        **{axis: asdict(answer[axis]) for axis in ("jurisdiction", "effective_year", "holiday_extent")},
+        "omitted": list(answer["omitted"]),
+        "placeholder_spans": list(answer["placeholder_spans"]),
+    }
+
+
 def calendar_region_for(region: str | None, country_code: str | None) -> str | None:
     """The string a project's working week is resolved from: its region, or its country.
 
@@ -836,7 +871,7 @@ def calendar_region_for(region: str | None, country_code: str | None) -> str | N
 
     if is_macro_region(region):
         return country
-    own = get_work_calendar(region)
+    own = _get_work_week(region)
     if own is not WORK_CALENDARS["DEFAULT"]:
         return region
     named = normalise_region(region)
@@ -845,7 +880,7 @@ def calendar_region_for(region: str | None, country_code: str | None) -> str | N
         # already reaches that country's week, which is also what the
         # /work-calendar badge echoes back; a spelling only the registry reads
         # ("United_States") is handed on as the code it names.
-        return region if get_work_calendar(named) is own else named
+        return region if _get_work_week(named) is own else named
     return country
 
 
@@ -875,8 +910,8 @@ def compute_duration(
 
     When the resolved calendar carries a ``holidays`` callable (year ->
     set[date]), those dates are skipped even if they fall on a working weekday.
-    Currently only CHINA carries one (Spring Festival, Qingming, Dragon Boat,
-    Mid-Autumn and the fixed Gregorian holidays).
+    Named countries use the available jurisdiction-specific holiday table;
+    coverage and omissions are exposed separately by calendar_holiday_coverage.
 
     Args:
         start_date: ISO date string (e.g. "2026-04-01").
@@ -1320,6 +1355,13 @@ class ScheduleService:
                 if isinstance(_incoming, dict)
                 else metadata
             )
+            if isinstance(_incoming, dict) and "calendar" in _incoming:
+                # An explicit edit owns this calendar from now on. Keeping the
+                # generated marker would let regeneration discard site closures.
+                edited_calendar = fields["metadata_"].get("calendar")
+                if isinstance(edited_calendar, dict):
+                    for key in ("regional_holiday_country", "holiday_coverage"):
+                        edited_calendar.pop(key, None)
 
         if target_status == "archived" and schedule.status != "archived":
             metadata = dict(fields.get("metadata_", metadata))
@@ -3043,7 +3085,9 @@ class ScheduleService:
         )
         return {"work_days": work_days or [0, 1, 2, 3, 4], "exceptions": exceptions}
 
-    async def _generation_calendar(self, schedule: Schedule, region_week: set[int]) -> tuple[dict, dict | None]:
+    async def _generation_calendar(
+        self, schedule: Schedule, region_week: set[int], holiday_country: str | None = None
+    ) -> tuple[dict, dict | None]:
         """The calendar a generated plan is drawn on, and the one to record on the schedule.
 
         The plan is drawn on the calendar :meth:`reschedule` will recount it
@@ -3059,13 +3103,18 @@ class ScheduleService:
         """
         meta = schedule.metadata_ if isinstance(schedule.metadata_, dict) else {}
         own = meta.get("calendar")
-        if isinstance(own, dict) and own.get("work_days"):
+        if isinstance(own, dict) and own.get("work_days") and "regional_holiday_country" not in own:
             return resolve_calendar(schedule), None
         default_cal = await self._project_default_calendar(schedule.project_id)
         if default_cal is not None:
             return default_cal, None
-        week = {"work_days": sorted(region_week), "exceptions": []}
-        return week, (week if set(region_week) != {0, 1, 2, 3, 4} else None)
+        week = {
+            "work_days": sorted(region_week),
+            "exceptions": [],
+            "regional_holiday_country": holiday_country,
+            "holiday_coverage": [],
+        }
+        return week, week
 
     async def reschedule(self, schedule_id: uuid.UUID) -> list[Activity]:
         """Recompute activity dates from the dependency network via CPM.
@@ -3288,12 +3337,21 @@ class ScheduleService:
         project_region = await self.resolve_project_region(schedule_project_id)
         cal = get_work_calendar(project_region)
         hours_per_day = cal["hours_per_day"]
-        plan_calendar, calendar_to_record = await self._generation_calendar(schedule, set(cal["work_days"]))
+        plan_calendar, calendar_to_record = await self._generation_calendar(
+            schedule, set(cal["work_days"]), cal.get("holiday_country")
+        )
         work_days_set = set(plan_calendar["work_days"])
         holidays = {d for d in (normalise_exception_date(e) for e in plan_calendar.get("exceptions") or []) if d}
         work_days_per_week = len(work_days_set)
+        holiday_years: set[int] = set()
 
         def _works(day: date) -> bool:
+            if calendar_to_record is not None and day.year not in holiday_years:
+                country = calendar_to_record.get("regional_holiday_country")
+                holidays.update(calendar_holiday_dates(country, day.year))
+                holiday_years.add(day.year)
+                calendar_to_record["exceptions"] = sorted(holiday.isoformat() for holiday in holidays)
+                calendar_to_record["holiday_coverage"].append(calendar_holiday_coverage(country, day.year))
             return day.weekday() in work_days_set and day not in holidays
 
         grand_total = sum(float(task.row.data["total"]) for task in tasks)

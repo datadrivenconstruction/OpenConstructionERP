@@ -96,7 +96,7 @@ def test_a_country_whose_week_is_not_monday_to_friday_is_routed_explicitly(count
 
     calendar = get_work_calendar(country)
 
-    assert calendar is not WORK_CALENDARS["DEFAULT"], (
+    assert not calendar["week_fallback"], (
         f"{country} works {_names(country_week)}, which is not the default week, but the resolver "
         "falls through to WORK_CALENDARS['DEFAULT'] (Mon-Fri) because the country has no entry. "
         "Add it to _CALENDAR_BY_COUNTRY: a missing country looks exactly like a country with no "

@@ -170,7 +170,7 @@ def test_the_week_comes_from_the_region_unless_the_country_is_the_more_precise_s
     region: str | None, country: str | None, expected: str
 ) -> None:
     calendar = get_work_calendar(calendar_region_for(region, country))
-    assert calendar is WORK_CALENDARS[expected], (
+    assert all(calendar[key] == WORK_CALENDARS[expected][key] for key in ("work_days", "hours_per_day", "label")), (
         f"region {region!r} with country {country!r} resolved to {calendar['label']!r}, "
         f"expected {WORK_CALENDARS[expected]['label']!r}"
     )
@@ -209,6 +209,12 @@ def test_the_population_holds_regions_that_name_a_standard_week_country() -> Non
     assert len(_region_population()) >= 80, f"only {len(_region_population())} region spellings were read"
 
 
+def _calendar_contract(calendar: dict) -> dict:
+    # Resolved calendars now include a country-bound holiday callable; compare
+    # its explicit country together with every concrete week field, not dict identity.
+    return {key: value for key, value in calendar.items() if key != "holidays"}
+
+
 @pytest.mark.parametrize("column", ["SA", "IN", "CN", "AE", "US", "PL"])
 def test_the_week_is_planned_for_the_country_the_bill_is_validated_as(column: str) -> None:
     """The schedule and the BOQ router read one project's two columns into one country.
@@ -223,7 +229,7 @@ def test_the_week_is_planned_for_the_country_the_bill_is_validated_as(column: st
         country = _router_country(region, column)
         assert country is not None, f"region {region!r} with column {column} names no country at all"
         planned = get_work_calendar(calendar_region_for(region, column))
-        if planned is not get_work_calendar(country):
+        if _calendar_contract(planned) != _calendar_contract(get_work_calendar(country)):
             wrong.append(f"{region!r}: validated as {country}, planned on {planned['label']!r}")
     assert wrong == [], f"with country column {column}: {wrong}"
 
@@ -233,14 +239,18 @@ def test_the_agreement_check_catches_a_region_that_gives_way_to_the_column() -> 
     from app.core.classification_registry import is_macro_region
 
     def _first_version(region: str | None, country_code: str | None) -> str | None:
-        if get_work_calendar(region) is WORK_CALENDARS["DEFAULT"] or is_macro_region(region):
+        if get_work_calendar(region)["week_fallback"] or is_macro_region(region):
             return country_code
         return region
 
     region, column = "PL_WARSAW", "SA"
     assert _router_country(region, column) == "PL"
-    assert get_work_calendar(_first_version(region, column)) is not get_work_calendar("PL")
-    assert get_work_calendar(calendar_region_for(region, column)) is get_work_calendar("PL")
+    assert _calendar_contract(get_work_calendar(_first_version(region, column))) != _calendar_contract(
+        get_work_calendar("PL")
+    )
+    assert _calendar_contract(get_work_calendar(calendar_region_for(region, column))) == _calendar_contract(
+        get_work_calendar("PL")
+    )
 
 
 # ── Every country pack ───────────────────────────────────────────────────────
@@ -296,7 +306,7 @@ def test_the_schedule_service_hands_the_resolver_the_country_of_a_pack_project()
     warsaw = _service(SimpleNamespace(id=pid, region="PL_WARSAW", country_code="SA"))
     region = asyncio.run(warsaw.resolve_project_region(pid))
     assert region == "PL_WARSAW"
-    assert get_work_calendar(region) is WORK_CALENDARS["DEFAULT"]
+    assert get_work_calendar(region)["week_fallback"]
 
     gone = _service(None)
     assert asyncio.run(gone.resolve_project_region(pid)) is None

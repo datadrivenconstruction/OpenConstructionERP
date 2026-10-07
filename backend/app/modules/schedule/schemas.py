@@ -724,6 +724,9 @@ class WorkCalendarResponse(BaseModel):
     hours_per_day: float = Field(description="Working hours per day")
     work_days_per_week: int = Field(description="Number of working days per week")
     label: str = Field(description="Human-readable calendar label")
+    holiday_country: str | None = None
+    week_fallback: bool = False
+    holiday_coverage: dict[str, Any] = Field(default_factory=dict)
 
 
 class ClearActivitiesResponse(BaseModel):

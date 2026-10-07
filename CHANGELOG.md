@@ -9,8 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Schedule durations and newly generated BOQ plans now use the project's country holiday data wherever available. Regeneration can move dates that previously treated holidays as working days. Generated calendars retain the holiday dates and coverage for every year used by the plan, so the first CPM recalculation agrees with generation; regenerate when extending a plan into an uncovered year. Explicit site calendars remain authoritative. Unknown countries and partial holiday tables expose coverage, and macro-regions no longer supply a neighbouring country's holidays. New ORM-created projects no longer default to DACH.
+
 ### Added
 
+- Progress claims expose country-independent payment-application figures through `/progress-claims/{id}/payment-application`, using the same calculations and project access checks as the existing regional AIA view. The AIA JSON and PDF endpoints retain their country restrictions.
 - Bills can keep a tax date separately from the date their prices refer to. VAT uses the tax date when one is supplied, and otherwise keeps using the price reference date. Both dates survive copying a bill or creating a revision; impossible calendar dates are refused in the form.
 - Administrators can preview and apply shipped country, work-calendar and tax-reference updates from Regional settings or the command line. Locally created or edited rows are preserved, conflicting rates are left for review, and concurrent applications do not duplicate delivered rows.
 - Punch items can be assigned to a contract in their project. A contract's open-item retention includes only its assigned items; existing unassigned items are not charged to every contract in the project.

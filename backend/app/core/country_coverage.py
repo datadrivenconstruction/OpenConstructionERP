@@ -536,7 +536,7 @@ _SCHEDULE_SERVICE = "app.modules.schedule.service"
 
 #: What the schedule probe needs out of that module: the table, the resolver
 #: standing in front of it, and the ISO axis that says which countries to ask.
-_SCHEDULE_WANTED = ("WORK_CALENDARS", "get_work_calendar", "_CALENDAR_BY_COUNTRY")
+_SCHEDULE_WANTED = ("WORK_CALENDARS", "_get_work_week", "_CALENDAR_BY_COUNTRY")
 
 
 def _schedule_registry() -> tuple[dict, Callable[[str], dict], dict[str, str], str]:
@@ -564,13 +564,16 @@ def _schedule_registry() -> tuple[dict, Callable[[str], dict], dict[str, str], s
         method = f"source ({type(exc).__name__} on import)"
         return (
             namespace["WORK_CALENDARS"],
-            namespace["get_work_calendar"],
+            namespace["_get_work_week"],
             namespace["_CALENDAR_BY_COUNTRY"],
             method,
         )
     # Outside the handler on purpose: if the import worked and a name has moved,
     # that AttributeError is the finding and must not reach the fallback.
-    return module.WORK_CALENDARS, module.get_work_calendar, module._CALENDAR_BY_COUNTRY, "import"
+    # The public calendar now adds a country holiday callable to a copy. This
+    # dimension measures the regional working week; holiday coverage is a
+    # separate probe. Read the very same week resolver used by that wrapper.
+    return module.WORK_CALENDARS, module._get_work_week, module._CALENDAR_BY_COUNTRY, "import"
 
 
 def _calendar_rows(calendars: dict, resolve: Callable[[str], dict], axis: dict[str, str]) -> dict[str, tuple[str, ...]]:
@@ -640,7 +643,7 @@ def _schedule_calendar(country: str) -> DimensionReport:
     the tree, and the second path exists to survive a missing database rather
     than to route around a missing name.
     """
-    source = "app.modules.schedule.service.get_work_calendar"
+    source = "app.modules.schedule.service._get_work_week"
     calendars, resolve, axis, method = _schedule_registry()
     known = tuple(sorted(k for k in calendars if k != "DEFAULT"))
     # Identity, not equality: "has a row of its own" is a question about which

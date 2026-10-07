@@ -54853,6 +54853,13 @@
         },
         {
           "method": "GET",
+          "path": "/progress-claims/{claim_id}/payment-application",
+          "handler": "get_payment_application",
+          "response_model": "PaymentApplicationResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
           "path": "/progress-claims/{claim_id}/aia-application",
           "handler": "get_aia_application",
           "response_model": "AIAApplicationResponse",
@@ -57941,11 +57948,11 @@
           ]
         },
         {
-          "class_name": "AIAApplicationResponse",
+          "class_name": "PaymentApplicationResponse",
           "bases": [
             "BaseModel"
           ],
-          "docstring": "Full AIA G702 + G703 payment-application view for one progress claim.",
+          "docstring": "Country-independent claim figures; regional document rendering is separate.",
           "fields": [
             {
               "name": "claim_id",
@@ -58003,6 +58010,14 @@
               "type": "AIACertification"
             }
           ]
+        },
+        {
+          "class_name": "AIAApplicationResponse",
+          "bases": [
+            "PaymentApplicationResponse"
+          ],
+          "docstring": "Full AIA G702 + G703 payment-application view for one progress claim.",
+          "fields": []
         },
         {
           "class_name": "ContractPartyCreate",
@@ -191525,6 +191540,20 @@
               "name": "label",
               "type": "str",
               "description": "Human-readable calendar label"
+            },
+            {
+              "name": "holiday_country",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "week_fallback",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "holiday_coverage",
+              "type": "dict[str, Any]"
             }
           ]
         },
@@ -237326,8 +237355,8 @@
     "total_models": 623,
     "total_columns": 7153,
     "total_relationships": 234,
-    "total_routes": 3756,
-    "total_schemas": 3563,
+    "total_routes": 3757,
+    "total_schemas": 3564,
     "total_python_files": 2289,
     "frontend_features": 192,
     "frontend_ts_files": 2987,

@@ -3,10 +3,10 @@
 Two registries answer "which days does this country work":
 
 * ``core.calendar._WORKING_WEEK``, keyed by ISO country code.
-* ``schedule.service``, reached through ``get_work_calendar``, keyed by a project's
+* ``schedule.service``, reached through ``_get_work_week``, keyed by a project's
   free-text region and resolved through several paths.
 
-Both substitute silently for a country they do not carry. ``get_work_calendar``
+Both substitute silently for a country they do not carry. ``_get_work_week``
 returns ``WORK_CALENDARS["DEFAULT"]``, a Monday-Friday week, and
 ``core.calendar.is_working_day`` reads ``_WORKING_WEEK.get(cc, _DEFAULT_WORKING_WEEK)``
 and answers Monday-Friday with no holidays. Neither says it has done so.
@@ -34,7 +34,7 @@ against the ``DEFAULT`` object is the only cheap proof that a lookup found somet
 ``test_no_country_resolves_to_the_default_calendar_object`` guards the premise that
 makes identity valid.
 
-**Why the resolver is asked rather than the country map read.** ``get_work_calendar``
+**Why the resolver is asked rather than the country map read.** ``_get_work_week``
 resolves a calendar key before it consults ``_CALENDAR_BY_COUNTRY``, so a code that is
 also a calendar key resolves without appearing in that map. Reading the map and
 reading the resolver give different answers, and only one of them is what the product
@@ -60,7 +60,7 @@ from app.core.calendar import _WORKING_WEEK
 from app.modules.schedule.service import (
     _CALENDAR_BY_COUNTRY,
     WORK_CALENDARS,
-    get_work_calendar,
+    _get_work_week,
 )
 
 COMPARABLE = "comparable"
@@ -120,7 +120,7 @@ def _unmeasured(population: list[str], **kwargs: Any) -> dict[str, str]:
 def _live() -> dict[str, Any]:
     return {
         "core_weeks": _WORKING_WEEK,
-        "resolve": get_work_calendar,
+        "resolve": _get_work_week,
         "default_calendar": WORK_CALENDARS["DEFAULT"],
     }
 

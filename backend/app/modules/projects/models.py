@@ -72,7 +72,7 @@ class Project(Base):
 
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
-    region: Mapped[str] = mapped_column(String(50), nullable=False, default="DACH")
+    region: Mapped[str] = mapped_column(String(50), nullable=False, default="")
     classification_standard: Mapped[str] = mapped_column(String(50), nullable=False, default="din276")
     # No EUR bias: empty string means "not chosen yet", mirroring the
     # ProjectCreate schema default. API creates always pass an explicit
