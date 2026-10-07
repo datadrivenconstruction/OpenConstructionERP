@@ -1149,15 +1149,15 @@ export function AboutPage() {
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {[
-                { href: 'https://github.com/datadrivenconstruction/OpenConstructionERP/tree/main/docs', label: t('about.docs_pop_quickstart', { defaultValue: 'Quick start - Docker compose' }) },
-                { href: 'https://github.com/datadrivenconstruction/OpenConstructionERP/blob/main/docs/BIM-STORAGE-ARCHITECTURE.md', label: t('about.docs_pop_bim', { defaultValue: 'Import BIM (RVT/IFC) → BOQ' }) },
-                { href: 'https://github.com/datadrivenconstruction/OpenConstructionERP/tree/main/docs', label: t('about.docs_pop_gaeb', { defaultValue: 'GAEB X83/X84 import & export' }) },
-                { href: 'https://github.com/datadrivenconstruction/OpenConstructionERP/tree/main/docs', label: t('about.docs_pop_takeoff', { defaultValue: 'PDF takeoff with annotations' }) },
-                { href: 'https://github.com/datadrivenconstruction/OpenConstructionERP/tree/main/docs/module-development', label: t('about.docs_pop_sdk', { defaultValue: 'Module SDK · write a plugin' }) },
-                { href: 'https://github.com/datadrivenconstruction/OpenConstructionERP/blob/main/docs/INSTALL_LINUX.md', label: t('about.docs_pop_deploy', { defaultValue: 'VPS deployment guide' }) },
+                { id: 'quickstart', href: 'https://github.com/datadrivenconstruction/OpenConstructionERP/tree/main/docs', label: t('about.docs_pop_quickstart', { defaultValue: 'Quick start - Docker compose' }) },
+                { id: 'bim', href: 'https://github.com/datadrivenconstruction/OpenConstructionERP/blob/main/docs/BIM-STORAGE-ARCHITECTURE.md', label: t('about.docs_pop_bim', { defaultValue: 'Import BIM (RVT/IFC) → BOQ' }) },
+                { id: 'gaeb', href: 'https://github.com/datadrivenconstruction/OpenConstructionERP/tree/main/docs', label: t('about.docs_pop_gaeb', { defaultValue: 'GAEB X83/X84 import & export' }) },
+                { id: 'takeoff', href: 'https://github.com/datadrivenconstruction/OpenConstructionERP/tree/main/docs', label: t('about.docs_pop_takeoff', { defaultValue: 'PDF takeoff with annotations' }) },
+                { id: 'sdk', href: 'https://github.com/datadrivenconstruction/OpenConstructionERP/tree/main/docs/module-development', label: t('about.docs_pop_sdk', { defaultValue: 'Module SDK · write a plugin' }) },
+                { id: 'deploy', href: 'https://github.com/datadrivenconstruction/OpenConstructionERP/blob/main/docs/INSTALL_LINUX.md', label: t('about.docs_pop_deploy', { defaultValue: 'VPS deployment guide' }) },
               ].map(topic => (
                 <a
-                  key={topic.href}
+                  key={topic.id}
                   href={topic.href}
                   target="_blank"
                   rel="noopener noreferrer"
