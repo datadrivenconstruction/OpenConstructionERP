@@ -63,8 +63,19 @@ def test_webview_is_installed_offline(tauri_conf: dict) -> None:
     )
 
 
-def windows_matrix_entry(workflow: dict) -> dict:
+def windows_matrix_entry(workflow: dict, *, diagnostic: bool = False) -> dict:
     entries = workflow["jobs"]["build-tauri"]["strategy"]["matrix"]["include"]
+    if isinstance(entries, str):
+        # Decode both literal JSON arms, never eval a workflow expression.
+        # A different expression must fail explicitly instead of silently
+        # reading no Windows entries or checking only the release arm.
+        match = re.fullmatch(
+            r"\$\{\{\s*fromJSON\(inputs\.build_only_windows\s*&&\s*'([^']*)'\s*\|\|\s*'([^']*)'\)\s*\}\}",
+            entries,
+        )
+        assert match, f"unsupported build-tauri matrix expression: {entries}"
+        entries = json.loads(match.group(1 if diagnostic else 2))
+    assert isinstance(entries, list) and all(isinstance(entry, dict) for entry in entries), entries
     windows = [e for e in entries if "windows" in str(e.get("os", ""))]
     print(f"build-tauri matrix: {len(entries)} entries, {len(windows)} of them Windows")
     assert len(windows) == 1, (
@@ -73,7 +84,8 @@ def windows_matrix_entry(workflow: dict) -> dict:
     return windows[0]
 
 
-def test_windows_builds_the_nsis_installer_only(workflow: dict) -> None:
+@pytest.mark.parametrize("diagnostic", [False, True], ids=["release", "diagnostic"])
+def test_windows_builds_the_nsis_installer_only(workflow: dict, diagnostic: bool) -> None:
     """One installer per platform.
 
     Windows shipped both an .exe and an .msi until 15.2.0. They installed the
@@ -82,7 +94,7 @@ def test_windows_builds_the_nsis_installer_only(workflow: dict) -> None:
     with the app listed twice. The .exe is the one that carries our installer
     hooks, our language selector and the per-machine install mode.
     """
-    entry = windows_matrix_entry(workflow)
+    entry = windows_matrix_entry(workflow, diagnostic=diagnostic)
     bundles = str(entry.get("bundles", ""))
     print(f"Windows bundles argument: {bundles!r}")
     assert "--bundles" in bundles, (
@@ -92,6 +104,13 @@ def test_windows_builds_the_nsis_installer_only(workflow: dict) -> None:
     named = bundles.split("--bundles", 1)[1].strip().split(",")
     named = [n.strip() for n in named if n.strip()]
     assert named == ["nsis"], f"Windows builds {named}, expected ['nsis'] alone."
+    steps = workflow["jobs"]["build-tauri"]["steps"]
+    if diagnostic:
+        step = next(s for s in steps if s.get("name") == "Build Windows diagnostic installer without publishing")
+        assert re.findall(r"--bundles\s+([^\s]+)", step["run"]) == ["nsis"], step["run"]
+    else:
+        step = next(s for s in steps if s.get("name") == "Build Tauri app")
+        assert "${{ matrix.bundles }}" in step["with"]["args"], step["with"]["args"]
 
 
 def test_nothing_in_the_release_workflow_still_reaches_for_an_msi(workflow: dict) -> None:
