@@ -18876,7 +18876,7 @@ const resource = {
     "contracts.claim_validation.hint_submitted": "Comprobado con el estado actual de la certificación, incluidos los cambios hechos después de presentarla.",
     "contracts.claim_validation.recheck": "Volver a comprobar",
     "contracts.claim_validation.load_failed": "No se pudo ejecutar la comprobación de presentación. Presentar la ejecuta igualmente en el servidor.",
-    "contracts.claim_validation.reconstructed": "La línea 7 del G702, certificados de pago anteriores, se reconstruye a partir de las certificaciones anteriores porque la certificación previa aún no almacena totales certificados. Compruébela con lo que realmente se certificó.",
+    "contracts.claim_validation.reconstructed": "Los importes certificados anteriormente se reconstruyen a partir de las certificaciones anteriores porque la certificación previa aún no almacena totales certificados. Compruébelos con lo que realmente se certificó.",
     "contracts.claim_lines_locked": "Solo se pueden modificar las líneas de una certificación de obra en borrador.",
     "contracts.claim_lines_locked_reopen": "Recházela y cree una nueva certificación en borrador con los importes corregidos.",
     "contracts.agreed_variations": "Variaciones acordadas",

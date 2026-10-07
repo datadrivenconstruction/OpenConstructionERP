@@ -19255,7 +19255,7 @@ const resource = {
     "contracts.claim_validation.hint_submitted": "Diperiksa sesuai keadaan klaim saat ini, termasuk perubahan yang dibuat setelah diajukan.",
     "contracts.claim_validation.recheck": "Periksa ulang",
     "contracts.claim_validation.load_failed": "Pemeriksaan sebelum pengajuan tidak dapat dijalankan. Ajukan tetap akan menjalankannya di server.",
-    "contracts.claim_validation.reconstructed": "Baris 7 formulir G702, sertifikat pembayaran sebelumnya, disusun ulang dari klaim-klaim sebelumnya karena klaim sebelumnya belum menyimpan total yang disertifikasi. Cocokkan dengan yang benar-benar disertifikasi.",
+    "contracts.claim_validation.reconstructed": "Jumlah yang sebelumnya disertifikasi disusun kembali dari klaim terdahulu karena klaim sebelumnya belum menyimpan total yang disertifikasi. Cocokkan dengan jumlah yang benar-benar disertifikasi.",
     "contracts.clone": "Klon",
     "contracts.cloned_ok": "Kontrak dikloning (draf)",
     "contracts.delete": "Hapus",

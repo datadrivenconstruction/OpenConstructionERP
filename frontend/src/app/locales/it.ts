@@ -19482,7 +19482,7 @@ const resource = {
     "contracts.claim_validation.hint_submitted": "Controllato sullo stato attuale dello stato di avanzamento, comprese le modifiche fatte dopo l'invio.",
     "contracts.claim_validation.recheck": "Ricontrolla",
     "contracts.claim_validation.load_failed": "Impossibile eseguire il controllo di invio. Invia lo esegue comunque sul server.",
-    "contracts.claim_validation.reconstructed": "La riga 7 del G702, certificati di pagamento precedenti, viene ricostruita dagli stati di avanzamento precedenti perché lo stato di avanzamento precedente non memorizza ancora totali certificati. Verificala rispetto a quanto effettivamente certificato.",
+    "contracts.claim_validation.reconstructed": "Gli importi precedentemente certificati sono ricostruiti dagli stati di avanzamento precedenti perché quello precedente non memorizza ancora i totali certificati. Verificateli rispetto a quanto effettivamente certificato.",
     "contracts.claim_lines_locked": "Solo le righe di uno stato di avanzamento in bozza possono essere modificate.",
     "contracts.claim_lines_locked_reopen": "Rifiutalo e crea un nuovo stato di avanzamento in bozza con gli importi corretti.",
     "contracts.agreed_variations": "Varianti concordate",

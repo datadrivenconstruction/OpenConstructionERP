@@ -32,11 +32,13 @@ import { Badge, Button, Card } from '@/shared/ui';
 import {
   getAiaApplication,
   getClaimValidation,
+  getPaymentApplication,
   type AIAApplication,
   type ClaimValidationFinding,
   type ClaimValidationReport,
 } from './api';
 import { findingKeys } from './findingKeys';
+import { aiaApplicationKey, paymentApplicationKey } from './claimQueries';
 
 /**
  * Under the claim's key on purpose: invalidating `['contracts', 'claim', id]`
@@ -74,15 +76,14 @@ export function ClaimValidationPanel({ claimId, awaitingSubmit, aiaEligible }: C
     enabled: !!claimId,
   });
 
-  // Where G702 line 7 came from is on the application, not on the report.
-  // Same key as AIAApplicationPanel, so this shares its request rather than
-  // making a second one.
-  const aiaQ = useQuery<AIAApplication>({
-    queryKey: ['contracts', 'aia-application', claimId],
-    queryFn: () => getAiaApplication(claimId),
-    enabled: !!claimId && aiaEligible,
+  // Previous certified amounts matter in every country. AIA projects share
+  // their panel's cached request; other projects use the common figures API.
+  const applicationQ = useQuery<AIAApplication>({
+    queryKey: aiaEligible ? aiaApplicationKey(claimId) : paymentApplicationKey(claimId),
+    queryFn: () => (aiaEligible ? getAiaApplication(claimId) : getPaymentApplication(claimId)),
+    enabled: !!claimId,
   });
-  const reconstructed = aiaEligible && aiaQ.data?.summary.previous_certificates_basis === 'reconstructed';
+  const reconstructed = applicationQ.data?.summary.previous_certificates_basis === 'reconstructed';
 
   const recheck = (
     <Button
@@ -193,7 +194,7 @@ export function ClaimValidationPanel({ claimId, awaitingSubmit, aiaEligible }: C
           <span>
             {t('contracts.claim_validation.reconstructed', {
               defaultValue:
-                'Line 7 of the G702, previous certificates, is rebuilt from the earlier claims because the previous claim stores no certified totals yet. Check it against what was actually certified.',
+                'Previous certified amounts are rebuilt from earlier claims because the previous claim stores no certified totals yet. Check them against what was actually certified.',
             })}
           </span>
         </p>

@@ -19617,7 +19617,7 @@ const resource = {
     "contracts.claim_validation.hint_submitted": "Kontrollitud nõude praeguse seisu järgi, sealhulgas pärast esitamist tehtud muudatused.",
     "contracts.claim_validation.recheck": "Kontrolli uuesti",
     "contracts.claim_validation.load_failed": "Kontrolli enne esitamist ei õnnestunud käivitada. Esitamine käivitab selle ikkagi serveris.",
-    "contracts.claim_validation.reconstructed": "G702 vormi rida 7, eelmised maksesertifikaadid, on taastatud varasemate nõuete põhjal, kuna eelmine nõue ei salvesta veel kinnitatud summasid. Kontrolli seda selle vastu, mis tegelikult kinnitati.",
+    "contracts.claim_validation.reconstructed": "Varem kinnitatud summad taastatakse varasemate taotluste põhjal, sest eelmine taotlus ei salvesta veel kinnitatud kogusummasid. Võrrelge neid tegelikult kinnitatud summadega.",
     "contracts.clone": "Klooni",
     "contracts.cloned_ok": "Leping kloonitud (mustand)",
     "contracts.delete": "Kustuta",

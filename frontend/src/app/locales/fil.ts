@@ -18894,7 +18894,7 @@ const resource = {
     "contracts.claim_validation.hint_submitted": "Na-check batay sa kasalukuyang estado ng paghahabol, kasama ang mga pagbabagong ginawa pagkatapos itong isumite.",
     "contracts.claim_validation.recheck": "I-check ulit",
     "contracts.claim_validation.load_failed": "Hindi maisagawa ang pag-check bago isumite. Isasagawa pa rin ito ng Isumite sa server.",
-    "contracts.claim_validation.reconstructed": "Ang linya 7 ng G702, mga naunang sertipiko, ay muling binuo mula sa mga naunang paghahabol dahil wala pang naitalang naaprubahang kabuuang halaga ang naunang paghahabol. Itumbas ito sa aktwal na sinertipikahang halaga.",
+    "contracts.claim_validation.reconstructed": "Muling binubuo ang mga dating sinertipikahang halaga mula sa mga naunang paghahabol dahil wala pang nakaimbak na sinertipikahang kabuuang halaga ang nakaraang paghahabol. Ihambing ang mga ito sa mga halagang aktwal na sinertipikahan.",
     "contracts.claim_lines_locked": "Mababago lang ang mga linya kung ang claim ay nasa katayuang draft.",
     "contracts.claim_lines_locked_reopen": "Tanggihan ito at gumawa ng bagong draft na claim na may itinamang halaga.",
     "contracts.sov_locked": "Ang nilagdaang kontrata ay binibilyan batay sa mga linyang ito, kaya hindi ito puwedeng baguhin o alisin dito. Iayos ang saklaw sa pamamagitan ng isang pagbabago.",

@@ -18878,7 +18878,7 @@ const resource = {
     "contracts.claim_validation.hint_submitted": "Verificado com o estado atual do auto de medição, incluindo alterações feitas depois da submissão.",
     "contracts.claim_validation.recheck": "Verificar novamente",
     "contracts.claim_validation.load_failed": "Não foi possível executar a verificação de submissão. Submeter continua a executá-la no servidor.",
-    "contracts.claim_validation.reconstructed": "A linha 7 do G702, certificados de pagamento anteriores, é reconstruída a partir dos autos de medição anteriores porque o auto de medição anterior ainda não guarda totais certificados. Verifique-a face ao que foi efetivamente certificado.",
+    "contracts.claim_validation.reconstructed": "Os montantes anteriormente certificados são reconstruídos a partir dos autos de medição anteriores porque o auto de medição anterior ainda não guarda totais certificados. Confira-os com o que foi efetivamente certificado.",
     "contracts.claim_lines_locked": "Só as linhas de um auto de medição em rascunho podem ser alteradas.",
     "contracts.claim_lines_locked_reopen": "Rejeite-a e crie uma nova medição em rascunho com os valores corrigidos.",
     "contracts.agreed_variations": "Variações acordadas",

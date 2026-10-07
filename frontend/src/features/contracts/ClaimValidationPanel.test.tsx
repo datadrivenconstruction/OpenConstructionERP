@@ -19,6 +19,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 vi.mock('./api', () => ({
   getClaimValidation: vi.fn(),
   getAiaApplication: vi.fn(),
+  getPaymentApplication: vi.fn(),
 }));
 
 import * as api from './api';
@@ -28,6 +29,7 @@ const CLAIM_ID = '00000000-0000-0000-0000-0000000000c1';
 
 const getReportMock = vi.mocked(api.getClaimValidation);
 const getAiaMock = vi.mocked(api.getAiaApplication);
+const getPaymentMock = vi.mocked(api.getPaymentApplication);
 
 function finding(overrides: Partial<api.ClaimValidationFinding> = {}): api.ClaimValidationFinding {
   return {
@@ -110,6 +112,7 @@ describe('ClaimValidationPanel', () => {
     // would otherwise answer the next test's first request.
     vi.resetAllMocks();
     getReportMock.mockResolvedValue(report());
+    getPaymentMock.mockResolvedValue(aiaApplication('snapshot'));
   });
 
   it('lists errors and warnings in the words the server sent', async () => {
@@ -207,7 +210,7 @@ describe('ClaimValidationPanel', () => {
     getAiaMock.mockResolvedValue(aiaApplication('reconstructed'));
     const { unmount } = renderPanel({ aiaEligible: true });
     expect(await screen.findByTestId('claim-validation-reconstructed')).toHaveTextContent(
-      'Line 7 of the G702, previous certificates, is rebuilt from the earlier claims',
+      'Previous certified amounts are rebuilt from earlier claims',
     );
     unmount();
 
@@ -221,9 +224,24 @@ describe('ClaimValidationPanel', () => {
   });
 
   it('does not ask for a G702 outside the AIA countries', async () => {
+    getPaymentMock.mockResolvedValue(aiaApplication('reconstructed'));
     renderPanel({ aiaEligible: false });
     await screen.findByTestId('claim-validation-state');
     expect(getAiaMock).not.toHaveBeenCalled();
-    expect(screen.queryByTestId('claim-validation-reconstructed')).toBeNull();
+    expect(getPaymentMock).toHaveBeenCalledWith(CLAIM_ID);
+    expect(await screen.findByTestId('claim-validation-reconstructed')).toHaveTextContent(
+      'Previous certified amounts are rebuilt from earlier claims',
+    );
+  });
+
+  it('refreshes the common certificate basis when the claim changes', async () => {
+    getPaymentMock.mockResolvedValueOnce(aiaApplication('reconstructed'));
+    const { client } = renderPanel();
+    await screen.findByTestId('claim-validation-reconstructed');
+    await act(async () => {
+      await client.invalidateQueries({ queryKey: ['contracts', 'claim', CLAIM_ID] });
+    });
+    await waitFor(() => expect(screen.queryByTestId('claim-validation-reconstructed')).toBeNull());
+    expect(getPaymentMock).toHaveBeenCalledTimes(2);
   });
 });

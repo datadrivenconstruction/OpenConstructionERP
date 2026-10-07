@@ -20009,7 +20009,7 @@ const resource = {
     "contracts.claim_validation.hint_submitted": "Talabnomaning hozirgi holatiga koʻra tekshirildi, yuborilgandan keyin kiritilgan tahrirlarni ham qoʻshib.",
     "contracts.claim_validation.recheck": "Qayta tekshirish",
     "contracts.claim_validation.load_failed": "Yuborishdan oldingi tekshiruvni ishga tushirib boʻlmadi. Yuborish uni baribir serverda ishga tushiradi.",
-    "contracts.claim_validation.reconstructed": "G702 shaklining 7-qatori, oldingi sertifikatlar, avvalgi talabnomalardan qayta tiklangan, chunki avvalgi talabnoma hali tasdiqlangan yakuniy summalarni saqlamaydi. Uni haqiqatda tasdiqlangan narsa bilan solishtiring.",
+    "contracts.claim_validation.reconstructed": "Oldingi talabnomada tasdiqlangan jami summalar hali saqlanmagani uchun avval tasdiqlangan summalar oldingi talabnomalardan qayta tiklanadi. Ularni amalda tasdiqlangan summalar bilan solishtiring.",
     "contracts.clone": "Nusxalash",
     "contracts.cloned_ok": "Shartnoma nusxalandi (qoralama)",
     "contracts.delete": "Oʻchirish",

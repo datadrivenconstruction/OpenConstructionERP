@@ -27,6 +27,11 @@ export function aiaApplicationKey(claimId: string) {
   return ['contracts', 'aia-application', claimId] as const;
 }
 
+/** Nest under the claim so every existing claim refresh also updates these figures. */
+export function paymentApplicationKey(claimId: string) {
+  return [...claimKey(claimId), 'payment-application'] as const;
+}
+
 /** Every claims list, whichever contract it is filtered to. */
 export const CLAIMS_LIST_KEY = ['contracts', 'claims'] as const;
 

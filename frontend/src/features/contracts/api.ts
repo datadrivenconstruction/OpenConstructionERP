@@ -1467,6 +1467,15 @@ export function getAiaApplication(claimId: string): Promise<AIAApplication> {
   );
 }
 
+/** Shared claim figures; this endpoint does not select a regional legal form. */
+export type PaymentApplication = AIAApplication;
+
+export function getPaymentApplication(claimId: string): Promise<PaymentApplication> {
+  return apiGet<PaymentApplication>(
+    `/v1/contracts/progress-claims/${encodeURIComponent(claimId)}/payment-application`,
+  );
+}
+
 /**
  * Download the AIA G702/G703 application as a PDF.
  *

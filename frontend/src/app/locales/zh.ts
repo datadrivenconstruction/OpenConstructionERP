@@ -19447,7 +19447,7 @@ const resource = {
     "contracts.claim_validation.hint_submitted": "按结算申请当前状态检查，包括提交后所做的修改。",
     "contracts.claim_validation.recheck": "重新检查",
     "contracts.claim_validation.load_failed": "无法运行提交检查，提交时仍会在服务器上执行该检查。",
-    "contracts.claim_validation.reconstructed": "G702 第 7 行「先前付款证书」是根据以往结算申请重建的，因为上一份结算申请尚未存储已核证总额。请对照实际核证的金额核实。",
+    "contracts.claim_validation.reconstructed": "先前已核证金额根据以往结算申请重建，因为上一份结算申请尚未存储已核证总额。请对照实际核证的金额核实。",
     "contracts.claim_lines_locked": "只有草稿状态的结算申请才能修改其行项。",
     "contracts.claim_lines_locked_reopen": "请驳回并以更正后的金额新建一个草稿申请。",
     "contracts.sov_locked": "已签署的合同按这些行项计费，此处不能修改或删除。如需调整范围，请通过变更处理。",

@@ -16243,7 +16243,7 @@ const resource = {
     "contracts.claim_validation.hint_submitted": "Checked as the claim stands now, including edits made after it was submitted.",
     "contracts.claim_validation.recheck": "Re-check",
     "contracts.claim_validation.load_failed": "Could not run the submission check. Submit still runs it on the server.",
-    "contracts.claim_validation.reconstructed": "Line 7 of the G702, previous certificates, is rebuilt from the earlier claims because the previous claim stores no certified totals yet. Check it against what was actually certified.",
+    "contracts.claim_validation.reconstructed": "Previous certified amounts are rebuilt from earlier claims because the previous claim stores no certified totals yet. Check them against what was actually certified.",
     "contracts.claim_lines_locked": "Only a draft claim's lines can be changed.",
     "contracts.claim_lines_locked_reopen": "Reject it and raise a new draft claim for the corrected figures.",
     "contracts.sov_locked": "A signed contract is billed on these lines, so they cannot be changed or removed here. Adjust the scope with a variation.",

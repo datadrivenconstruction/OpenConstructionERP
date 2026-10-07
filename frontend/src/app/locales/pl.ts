@@ -19868,7 +19868,7 @@ const resource = {
     "contracts.claim_validation.hint_submitted": "Sprawdzono zgodnie z bieżącym stanem wniosku, łącznie ze zmianami wprowadzonymi po jego złożeniu.",
     "contracts.claim_validation.recheck": "Sprawdź ponownie",
     "contracts.claim_validation.load_failed": "Nie udało się uruchomić kontroli złożenia. Złóż nadal uruchamia ją na serwerze.",
-    "contracts.claim_validation.reconstructed": "Wiersz 7 formularza G702, wcześniejsze świadectwa płatności, jest odtwarzany z wcześniejszych wniosków, ponieważ poprzedni wniosek nie przechowuje jeszcze certyfikowanych sum. Sprawdź go względem tego, co faktycznie zostało certyfikowane.",
+    "contracts.claim_validation.reconstructed": "Wcześniej certyfikowane kwoty są odtwarzane z wcześniejszych wniosków, ponieważ poprzedni wniosek nie przechowuje jeszcze certyfikowanych sum. Sprawdź je względem kwot faktycznie certyfikowanych.",
     "contracts.claim_lines_locked": "Tylko wiersze wniosku w wersji roboczej można zmienić.",
     "contracts.claim_lines_locked_reopen": "Odrzuć go i utwórz nowy wniosek roboczy z poprawionymi kwotami.",
     "contracts.agreed_variations": "Uzgodnione zmiany",

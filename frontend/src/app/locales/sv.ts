@@ -19592,7 +19592,7 @@ const resource = {
     "contracts.claim_validation.hint_submitted": "Kontrollerat mot avbetalningskravets nuvarande skick, inklusive ändringar gjorda efter att det skickades in.",
     "contracts.claim_validation.recheck": "Kontrollera igen",
     "contracts.claim_validation.load_failed": "Det gick inte att köra inlämningskontrollen. Skicka in kör den ändå på servern.",
-    "contracts.claim_validation.reconstructed": "Rad 7 i G702, tidigare betalningsintyg, är återskapad från tidigare avbetalningskrav eftersom det föregående kravet ännu inte lagrar intygade summor. Kontrollera den mot vad som faktiskt intygades.",
+    "contracts.claim_validation.reconstructed": "Tidigare attesterade belopp återskapas från tidigare ansökningar eftersom den föregående ansökan ännu inte lagrar attesterade totalsummor. Kontrollera dem mot de belopp som faktiskt attesterades.",
     "contracts.claim_lines_locked": "Endast raderna i ett avbetalningskrav i utkast kan ändras.",
     "contracts.claim_lines_locked_reopen": "Avvisa den och skapa en ny delfaktura som utkast med de rättade beloppen.",
     "contracts.agreed_variations": "Överenskomna ÄTA-arbeten",

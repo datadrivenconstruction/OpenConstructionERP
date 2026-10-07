@@ -19399,7 +19399,7 @@ const resource = {
     "contracts.claim_validation.hint_submitted": "提出後の編集も含め、出来高請求の現在の状態で確認しています。",
     "contracts.claim_validation.recheck": "再チェック",
     "contracts.claim_validation.load_failed": "提出前チェックを実行できませんでした。提出時にはサーバー側で改めて実行されます。",
-    "contracts.claim_validation.reconstructed": "G702の7行目「前回までの支払認証額」は、前回の出来高請求に認証済み合計額がまだ保存されていないため、それ以前の出来高請求から再構築されています。実際に認証された金額と照合してください。",
+    "contracts.claim_validation.reconstructed": "前回の請求に認証済み合計額がまだ保存されていないため、過去の請求から以前の認証済み金額を再構成しています。実際に認証された金額と照合してください。",
     "contracts.claim_lines_locked": "出来高請求がドラフト状態のときだけ、明細を変更できます。",
     "contracts.claim_lines_locked_reopen": "却下して、修正した金額で新しい下書きの請求を作成してください。",
     "contracts.sov_locked": "署名済みの契約はこれらの明細に基づいて請求されるため、ここでは変更や削除ができません。範囲を調整するには変更で対応してください。",

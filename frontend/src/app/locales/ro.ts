@@ -19640,7 +19640,7 @@ const resource = {
     "contracts.claim_validation.hint_submitted": "Verificat conform stării actuale a situației, inclusiv modificările făcute după depunere.",
     "contracts.claim_validation.recheck": "Reverificare",
     "contracts.claim_validation.load_failed": "Verificarea la depunere nu a putut fi rulată. Depune o rulează totuși pe server.",
-    "contracts.claim_validation.reconstructed": "Linia 7 din G702, certificatele anterioare de plată, este reconstituită din situațiile anterioare deoarece situația precedentă nu stochează încă sume certificate. Verificați-o față de ce a fost efectiv certificat.",
+    "contracts.claim_validation.reconstructed": "Sumele certificate anterior sunt reconstituite din situațiile anterioare, deoarece situația precedentă nu stochează încă totaluri certificate. Verificați-le față de sumele efectiv certificate.",
     "contracts.claim_lines_locked": "Doar liniile unei situații în stare de ciornă pot fi modificate.",
     "contracts.claim_lines_locked_reopen": "Respingeți-o și creați o nouă situație ciornă cu sumele corectate.",
     "contracts.agreed_variations": "Variații convenite",

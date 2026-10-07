@@ -19557,7 +19557,7 @@ const resource = {
     "contracts.claim_validation.hint_submitted": "Zkontrolováno podle aktuálního stavu žádosti, včetně úprav provedených po jejím odeslání.",
     "contracts.claim_validation.recheck": "Znovu zkontrolovat",
     "contracts.claim_validation.load_failed": "Kontrolu podání se nepodařilo spustit. Odeslat ji přesto spustí na serveru.",
-    "contracts.claim_validation.reconstructed": "Řádek 7 formuláře G702, předchozí certifikáty k platbě, je rekonstruován z dřívějších žádostí, protože předchozí žádost zatím neukládá certifikované částky. Zkontrolujte jej oproti tomu, co bylo skutečně certifikováno.",
+    "contracts.claim_validation.reconstructed": "Dříve certifikované částky jsou rekonstruovány z dřívějších žádostí, protože předchozí žádost zatím neukládá certifikované součty. Zkontrolujte je oproti skutečně certifikovaným částkám.",
     "contracts.claim_lines_locked": "Měnit lze pouze řádky žádosti ve stavu koncept.",
     "contracts.claim_lines_locked_reopen": "Zamítněte ji a vytvořte novou fakturaci v konceptu s opravenými částkami.",
     "contracts.agreed_variations": "Schválené změny",

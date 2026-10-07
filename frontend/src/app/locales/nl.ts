@@ -19220,7 +19220,7 @@ const resource = {
     "contracts.claim_validation.hint_submitted": "Gecontroleerd op basis van de huidige stand van de voortgangsdeclaratie, inclusief wijzigingen na de indiening.",
     "contracts.claim_validation.recheck": "Opnieuw controleren",
     "contracts.claim_validation.load_failed": "De indieningscontrole kon niet worden uitgevoerd. Indienen voert deze nog steeds op de server uit.",
-    "contracts.claim_validation.reconstructed": "Regel 7 van de G702, eerdere betalingscertificaten, wordt gereconstrueerd uit de eerdere declaraties omdat de vorige declaratie nog geen gecertificeerde totalen opslaat. Controleer deze tegen wat daadwerkelijk is gecertificeerd.",
+    "contracts.claim_validation.reconstructed": "Eerder gecertificeerde bedragen worden gereconstrueerd uit eerdere declaraties omdat de vorige declaratie nog geen gecertificeerde totalen opslaat. Controleer ze aan de hand van wat daadwerkelijk is gecertificeerd.",
     "contracts.claim_lines_locked": "Alleen de regels van een voortgangsdeclaratie in concept kunnen worden gewijzigd.",
     "contracts.claim_lines_locked_reopen": "Wijs hem af en maak een nieuwe concepttermijnstaat met de gecorrigeerde bedragen.",
     "contracts.agreed_variations": "Overeengekomen meerwerk",

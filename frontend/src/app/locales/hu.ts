@@ -19117,7 +19117,7 @@ const resource = {
     "contracts.claim_validation.hint_submitted": "Az igénylés jelenlegi állapota szerint ellenőrizve, beleértve a benyújtás utáni módosításokat is.",
     "contracts.claim_validation.recheck": "Újraellenőrzés",
     "contracts.claim_validation.load_failed": "A beadási ellenőrzést nem sikerült futtatni. A Benyújtás továbbra is lefuttatja a szerveren.",
-    "contracts.claim_validation.reconstructed": "A G702 7. sora, a korábbi kifizetési igazolások, a korábbi igénylésekből lett újraépítve, mert az előző igénylés még nem tárol hitelesített összegeket. Ellenőrizze a ténylegesen hitelesített adatokhoz képest.",
+    "contracts.claim_validation.reconstructed": "A korábban igazolt összegek a korábbi elszámolásokból kerülnek újra összeállításra, mert az előző elszámolás még nem tárol igazolt végösszegeket. Ellenőrizze őket a ténylegesen igazolt összegek alapján.",
     "contracts.claim_lines_locked": "Csak a piszkozat állapotú igénylés sorai módosíthatók.",
     "contracts.claim_lines_locked_reopen": "Utasítsa el, és hozzon létre új piszkozat részszámlát a javított összegekkel.",
     "contracts.agreed_variations": "Jóváhagyott pótmunkák",

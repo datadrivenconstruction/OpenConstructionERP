@@ -19278,7 +19278,7 @@ const resource = {
     "contracts.claim_validation.hint_submitted": "Được kiểm tra theo trạng thái hiện tại của yêu cầu thanh toán, kể cả các chỉnh sửa sau khi đã gửi.",
     "contracts.claim_validation.recheck": "Kiểm tra lại",
     "contracts.claim_validation.load_failed": "Không thể chạy kiểm tra trước khi gửi. Khi Gửi, hệ thống vẫn sẽ chạy kiểm tra này trên máy chủ.",
-    "contracts.claim_validation.reconstructed": "Dòng 7 của G702, các chứng nhận thanh toán trước đó, được dựng lại từ các yêu cầu thanh toán trước vì yêu cầu thanh toán trước đó chưa lưu tổng số tiền đã chứng nhận. Hãy đối chiếu với số tiền thực sự đã được chứng nhận.",
+    "contracts.claim_validation.reconstructed": "Các khoản tiền đã được xác nhận trước đây được dựng lại từ các đề nghị thanh toán trước vì đề nghị liền trước chưa lưu tổng số tiền đã xác nhận. Hãy đối chiếu với số tiền thực tế đã được xác nhận.",
     "contracts.claim_lines_locked": "Chỉ có thể thay đổi các dòng khi yêu cầu thanh toán đang ở trạng thái bản nháp.",
     "contracts.claim_lines_locked_reopen": "Hãy từ chối và tạo một đợt thanh toán nháp mới với số tiền đã sửa.",
     "contracts.sov_locked": "Hợp đồng đã ký được tính phí theo các dòng này, nên không thể thay đổi hoặc xóa tại đây. Điều chỉnh phạm vi bằng một khoản phát sinh.",

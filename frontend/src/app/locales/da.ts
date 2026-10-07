@@ -19580,7 +19580,7 @@ const resource = {
     "contracts.claim_validation.hint_submitted": "Kontrolleret ud fra anmodningens nuværende tilstand, inklusive ændringer foretaget efter indsendelsen.",
     "contracts.claim_validation.recheck": "Kontrollér igen",
     "contracts.claim_validation.load_failed": "Kunne ikke køre indsendelseskontrollen. Indsend kører den stadig på serveren.",
-    "contracts.claim_validation.reconstructed": "Linje 7 i G702, tidligere betalingscertifikater, genopbygges ud fra tidligere anmodninger, fordi den foregående anmodning endnu ikke gemmer certificerede summer. Kontrollér den mod det, der faktisk blev certificeret.",
+    "contracts.claim_validation.reconstructed": "Tidligere certificerede beløb genopbygges ud fra tidligere anmodninger, fordi den foregående anmodning endnu ikke gemmer certificerede totalbeløb. Kontrollér dem mod de faktisk certificerede beløb.",
     "contracts.claim_lines_locked": "Kun linjerne i en anmodning i kladde kan ændres.",
     "contracts.claim_lines_locked_reopen": "Afvis den, og opret en ny acontoopgørelse som kladde med de rettede beløb.",
     "contracts.agreed_variations": "Aftalte ekstraarbejder",

@@ -19443,7 +19443,7 @@ const resource = {
     "contracts.claim_validation.hint_submitted": "Provjereno prema trenutnom stanju zahtjeva, uključujući izmjene napravljene nakon podnošenja.",
     "contracts.claim_validation.recheck": "Ponovno provjeri",
     "contracts.claim_validation.load_failed": "Provjeru prije podnošenja nije bilo moguće pokrenuti. Podnošenje će je svejedno pokrenuti na poslužitelju.",
-    "contracts.claim_validation.reconstructed": "Redak 7 obrasca G702, prethodne potvrde, rekonstruiran je iz ranijih zahtjeva jer prethodni zahtjev još ne pohranjuje ovjerene iznose. Provjerite ga u odnosu na ono što je stvarno ovjereno.",
+    "contracts.claim_validation.reconstructed": "Prethodno ovjereni iznosi rekonstruirani su iz ranijih situacija jer prethodna situacija još ne pohranjuje ovjerene ukupne iznose. Provjerite ih prema stvarno ovjerenim iznosima.",
     "contracts.clone": "Kloniraj",
     "contracts.cloned_ok": "Ugovor kloniran (nacrt)",
     "contracts.delete": "Obriši",

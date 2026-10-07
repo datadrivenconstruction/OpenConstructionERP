@@ -78,6 +78,7 @@ vi.mock('./api', () => ({
   // basis from on AIA projects.
   getClaimValidation: vi.fn(),
   getAiaApplication: vi.fn(),
+  getPaymentApplication: vi.fn().mockResolvedValue({ summary: { previous_certificates_basis: 'snapshot' } }),
 }));
 
 vi.mock('@/stores/useToastStore', () => ({

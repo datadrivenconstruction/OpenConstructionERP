@@ -19358,7 +19358,7 @@ const resource = {
     "contracts.claim_validation.hint_submitted": "Tarkistettu maksuerän nykyisen tilan mukaan, mukaan lukien lähetyksen jälkeen tehdyt muutokset.",
     "contracts.claim_validation.recheck": "Tarkista uudelleen",
     "contracts.claim_validation.load_failed": "Tarkistusta ennen lähetystä ei voitu suorittaa. Lähetys suorittaa sen silti palvelimella.",
-    "contracts.claim_validation.reconstructed": "G702-lomakkeen rivi 7, aiemmat maksutodistukset, on koottu uudelleen aiempien maksuerien perusteella, koska edellinen maksuerä ei vielä tallenna todistettuja loppusummia. Vertaa sitä siihen, mikä todella todistettiin.",
+    "contracts.claim_validation.reconstructed": "Aiemmin vahvistetut summat muodostetaan aiemmista maksuhakemuksista, koska edellinen hakemus ei vielä sisällä vahvistettuja kokonaissummia. Tarkista ne tosiasiallisesti vahvistetuista summista.",
     "contracts.clone": "Kopioi",
     "contracts.cloned_ok": "Sopimus kopioitu (luonnos)",
     "contracts.delete": "Poista",

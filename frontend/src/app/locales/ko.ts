@@ -19399,7 +19399,7 @@ const resource = {
     "contracts.claim_validation.hint_submitted": "제출 후에 이루어진 수정을 포함해, 기성 청구의 현재 상태를 기준으로 점검했습니다.",
     "contracts.claim_validation.recheck": "다시 점검",
     "contracts.claim_validation.load_failed": "제출 전 점검을 실행할 수 없습니다. 제출 시 서버에서 다시 실행됩니다.",
-    "contracts.claim_validation.reconstructed": "G702의 7행 '이전 지급 인증서'는 이전 기성 청구에 아직 인증된 합계가 저장되어 있지 않아 앞선 기성 청구들로부터 재구성되었습니다. 실제로 인증된 금액과 대조하세요.",
+    "contracts.claim_validation.reconstructed": "이전 청구에 아직 인증된 합계 금액이 저장되어 있지 않아 과거 청구에서 이전 인증 금액을 재구성합니다. 실제로 인증된 금액과 대조하여 확인하세요.",
     "contracts.claim_lines_locked": "기성 청구가 초안 상태일 때만 항목을 변경할 수 있습니다.",
     "contracts.claim_lines_locked_reopen": "거부하고 수정된 금액으로 새 초안 청구를 만드세요.",
     "contracts.sov_locked": "서명된 계약은 이 항목들을 기준으로 청구되므로 여기서는 변경하거나 삭제할 수 없습니다. 범위를 조정하려면 변경으로 처리하세요.",

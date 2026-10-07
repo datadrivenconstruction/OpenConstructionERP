@@ -46,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Payment-application figures use the contract currency's minor unit, including zero- and three-decimal currencies, with displayed rows and totals kept consistent. Claims outside AIA countries now also show when prior certified amounts were reconstructed instead of read from stored certification totals.
 - Application startup no longer waits for the embedding worker pool to load or warm its model. A slow or unavailable encoder can prepare in the background while the server becomes available; shutting down does not let a delayed warm-up revive the executor.
 - Bill totals, resource summaries and ABC analysis exclude amounts without a usable positive exchange rate and show those amounts separately in their original currency. Resource summaries scale norms by the position quantity and retain legitimate negative credits. Tender packages require a currency before publishing, opening or awarding.
 - Adding single or bulk schedule-of-values lines now follows the same draft-only contract rule as editing and deleting them.

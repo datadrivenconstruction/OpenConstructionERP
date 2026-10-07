@@ -19400,7 +19400,7 @@ const resource = {
     "contracts.claim_validation.hint_submitted": "Kontrollert mot kravets nåværende tilstand, inkludert endringer gjort etter at det ble sendt inn.",
     "contracts.claim_validation.recheck": "Kontroller på nytt",
     "contracts.claim_validation.load_failed": "Kunne ikke kjøre innsendingskontrollen. Send inn kjører den likevel på serveren.",
-    "contracts.claim_validation.reconstructed": "Linje 7 i G702, tidligere betalingsattester, gjenoppbygges fra tidligere krav fordi det forrige kravet ennå ikke lagrer attesterte summer. Kontroller den mot det som faktisk ble attestert.",
+    "contracts.claim_validation.reconstructed": "Tidligere attesterte beløp gjenoppbygges fra tidligere krav fordi det forrige kravet ennå ikke lagrer attesterte totalbeløp. Kontroller dem mot beløpene som faktisk ble attestert.",
     "contracts.claim_lines_locked": "Kun linjene i et krav i utkast kan endres.",
     "contracts.claim_lines_locked_reopen": "Avvis det, og opprett et nytt avdragskrav som utkast med de rettede beløpene.",
     "contracts.agreed_variations": "Avtalte endringsarbeider",

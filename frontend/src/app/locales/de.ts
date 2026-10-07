@@ -19689,7 +19689,7 @@ const resource = {
     "contracts.claim_validation.hint_submitted": "Geprüft anhand des aktuellen Stands der Abschlagsrechnung, einschließlich Änderungen nach der Einreichung.",
     "contracts.claim_validation.recheck": "Erneut prüfen",
     "contracts.claim_validation.load_failed": "Die Einreichungsprüfung konnte nicht ausgeführt werden. Einreichen führt sie weiterhin auf dem Server aus.",
-    "contracts.claim_validation.reconstructed": "Zeile 7 des G702, frühere Zahlungsbescheinigungen, wird aus den früheren Abschlagsrechnungen rekonstruiert, da die vorherige Abschlagsrechnung noch keine bescheinigten Summen speichert. Prüfen Sie sie gegen das, was tatsächlich bescheinigt wurde.",
+    "contracts.claim_validation.reconstructed": "Frühere bescheinigte Beträge werden aus früheren Abschlagsrechnungen rekonstruiert, da die vorherige Abschlagsrechnung noch keine bescheinigten Summen speichert. Prüfen Sie sie gegen die tatsächlich bescheinigten Beträge.",
     "contracts.claim_lines_locked": "Nur die Positionen einer Abschlagsrechnung im Entwurf können geändert werden.",
     "contracts.claim_lines_locked_reopen": "Lehnen Sie sie ab und erstellen Sie eine neue Entwurfsrechnung mit den korrigierten Beträgen.",
     "contracts.agreed_variations": "Vereinbarte Nachträge",

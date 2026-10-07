@@ -18973,7 +18973,7 @@ const resource = {
     "contracts.claim_validation.hint_submitted": "Contrôlé sur l'état actuel de la situation de travaux, y compris les modifications faites après sa soumission.",
     "contracts.claim_validation.recheck": "Recontrôler",
     "contracts.claim_validation.load_failed": "Impossible d'exécuter le contrôle de soumission. Soumettre l'exécute quand même sur le serveur.",
-    "contracts.claim_validation.reconstructed": "La ligne 7 du G702, certificats de paiement précédents, est reconstituée à partir des situations antérieures car la situation précédente ne stocke pas encore de totaux certifiés. Vérifiez-la par rapport à ce qui a réellement été certifié.",
+    "contracts.claim_validation.reconstructed": "Les montants précédemment certifiés sont reconstitués à partir des situations antérieures car la situation précédente ne stocke pas encore de totaux certifiés. Vérifiez-les par rapport aux montants réellement certifiés.",
     "contracts.claim_lines_locked": "Seules les lignes d'une situation de travaux à l'état brouillon peuvent être modifiées.",
     "contracts.claim_lines_locked_reopen": "Rejetez-la et créez une nouvelle situation en brouillon avec les montants corrigés.",
     "contracts.aia.title": "AIA G702 / G703 Demande de paiement",

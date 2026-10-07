@@ -19977,7 +19977,7 @@ const resource = {
     "contracts.claim_validation.hint_submitted": "Hakedişin şu anki haliyle kontrol edildi, gönderildikten sonra yapılan düzenlemeler dahil.",
     "contracts.claim_validation.recheck": "Yeniden kontrol et",
     "contracts.claim_validation.load_failed": "Gönderim öncesi kontrol çalıştırılamadı. Gönder yine de bunu sunucuda çalıştırır.",
-    "contracts.claim_validation.reconstructed": "G702 formunun 7. satırı, önceki sertifikalar, önceki hakedişlerden yeniden oluşturuldu; çünkü önceki hakediş henüz onaylanmış toplamları saklamıyor. Bunu gerçekte onaylanan tutarla karşılaştırın.",
+    "contracts.claim_validation.reconstructed": "Önceden onaylanan tutarlar, önceki hakedişte henüz onaylanmış toplamlar saklanmadığı için önceki hakedişlerden yeniden oluşturulur. Bunları fiilen onaylanan tutarlarla karşılaştırın.",
     "contracts.clone": "Çoğalt",
     "contracts.cloned_ok": "Sözleşme çoğaltıldı (taslak)",
     "contracts.delete": "Sil",
