@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle } from 'lucide-react';
 import { apiGet, apiPost, type Page } from '@/shared/lib/api';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
+import { isDecimalString, subtractDecimalStrings } from '@/shared/lib/exactDecimal';
 
 /** The slice of a purchase order the picker reads (POResponse on the wire). */
 export interface LinkableOrder {
@@ -106,9 +107,10 @@ export function InvoicePurchaseOrderField({
     );
   }
 
-  const ordered = Number(selected?.amount_subtotal ?? 0) || 0;
-  const invoicedToDate = Number(selected?.invoiced_net ?? 0) || 0;
-  const open = Math.max(0, ordered - invoicedToDate);
+  const ordered = selected?.amount_subtotal ?? '0';
+  const invoicedToDate = selected?.invoiced_net ?? '0';
+  const difference = subtractDecimalStrings(ordered, invoicedToDate);
+  const open = difference?.startsWith('-') ? '0' : difference;
 
   return (
     <div className="space-y-2">
@@ -143,7 +145,7 @@ export function InvoicePurchaseOrderField({
           <div>
             <dt className="text-content-tertiary">{t('finance.po_link_ordered', { defaultValue: 'Ordered' })}</dt>
             <dd className="tabular-nums font-medium text-content-primary">
-              <MoneyDisplay amount={ordered} currency={selected.currency_code} />
+              <MoneyDisplay amount={isDecimalString(ordered) ? ordered : null} currency={selected.currency_code} />
             </dd>
           </div>
           <div>
@@ -151,7 +153,7 @@ export function InvoicePurchaseOrderField({
               {t('finance.po_link_invoiced', { defaultValue: 'Invoiced to date' })}
             </dt>
             <dd className="tabular-nums font-medium text-content-primary">
-              <MoneyDisplay amount={invoicedToDate} currency={selected.currency_code} />
+              <MoneyDisplay amount={isDecimalString(invoicedToDate) ? invoicedToDate : null} currency={selected.currency_code} />
             </dd>
           </div>
           <div>
