@@ -64,6 +64,29 @@ def runtime_root(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
 
 
 class TestResolution:
+    def test_suite_excludes_home_plugins_but_keeps_bundled_modules(self, tmp_path, monkeypatch):
+        from app import modules
+        from app.core.module_loader import ModuleLoader
+
+        fake_home_modules = tmp_path / "user-home-modules"
+        write_module(fake_home_modules, "zz_home_only", name="oe_zz_home_only")
+        monkeypatch.setattr(rr, "default_runtime_modules_dir", lambda: fake_home_modules)
+        # Preserve the actual fixture environment; replacing it here would
+        # merely test the application's override, not the suite's isolation.
+        monkeypatch.setattr(modules, "__path__", [str(Path(modules.__file__).parent)])
+        try:
+            attached = rr.attach_runtime_root()
+            names = {manifest.name for manifest in ModuleLoader().discover()}
+            assert attached != fake_home_modules
+            assert "oe_zz_home_only" not in names
+            assert {"oe_users", "oe_projects", "oe_cost_match"} <= names
+            assert (fake_home_modules / "zz_home_only" / "manifest.py").exists()
+        finally:
+            for name in list(sys.modules):
+                if name.startswith("app.modules.zz_home_only"):
+                    del sys.modules[name]
+            importlib.invalidate_caches()
+
     def test_env_override_wins(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.setenv(rr.ENV_VAR, str(tmp_path / "elsewhere"))
         assert rr.runtime_modules_dir() == tmp_path / "elsewhere"
