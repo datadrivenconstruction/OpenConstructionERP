@@ -1173,7 +1173,7 @@ function PortfolioOverview() {
           {t('dashboard.portfolio_overview', { defaultValue: 'Portfolio Overview' })}
         </h3>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-3 gap-3">
         <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-3 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm">
           <div className="text-2xs font-medium uppercase tracking-wider text-content-tertiary">
             {t('dashboard.active_projects', { defaultValue: 'Active Projects' })}
