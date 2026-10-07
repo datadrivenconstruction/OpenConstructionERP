@@ -235311,10 +235311,10 @@
     },
     {
       "name": "full-evm",
-      "ts_files": 6,
+      "ts_files": 7,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 6
+      "test_files": 2,
+      "total_files": 7
     },
     {
       "name": "funding",
@@ -237362,7 +237362,7 @@
     "total_schemas": 3564,
     "total_python_files": 2290,
     "frontend_features": 192,
-    "frontend_ts_files": 2988,
+    "frontend_ts_files": 2989,
     "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {

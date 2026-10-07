@@ -51,6 +51,7 @@ import { EmptyState } from '@/shared/ui/EmptyState';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { useToastStore } from '@/stores/useToastStore';
+import { projectsApi } from '@/features/projects/api';
 
 import {
   type Baseline,
@@ -547,6 +548,15 @@ export function FullEvmPanel() {
   const [forecastMethod, setForecastMethod] = useState<ForecastMethod>('auto');
   const [glossaryOpen, setGlossaryOpen] = useState(false);
 
+  const projectQuery = useQuery({
+    queryKey: ['project', activeProjectId],
+    queryFn: () => projectsApi.get(activeProjectId as string),
+    enabled: !!activeProjectId && creating,
+    staleTime: 0,
+  });
+  const projectReady = projectQuery.isSuccess && projectQuery.fetchStatus === 'idle'
+    && projectQuery.data.id === activeProjectId;
+
   const baselinesQuery = useQuery({
     queryKey: ['full-evm', 'baselines', activeProjectId],
     queryFn: () => listBaselines({ projectId: activeProjectId as string, limit: 50 }),
@@ -595,12 +605,17 @@ export function FullEvmPanel() {
   );
 
   const createMutation = useMutation({
-    mutationFn: () =>
-      createBaseline({
+    mutationFn: () => {
+      if (!projectReady) throw new Error(t('common.error', { defaultValue: 'Error' }));
+      return createBaseline({
         project_id: activeProjectId as string,
         name: newName.trim(),
         bac: newBac.trim(),
-      }),
+        // A successfully read but unset denomination stays unknown. The
+        // server chooses precision; never relabel existing baselines here.
+        currency: projectQuery.data.currency?.trim().toUpperCase() || null,
+      });
+    },
     onSuccess: (baseline) => {
       setCreating(false);
       setNewName('');
@@ -756,6 +771,20 @@ export function FullEvmPanel() {
 
       {creating && (
         <div className="space-y-2 rounded-lg border border-border bg-surface-primary p-3">
+          {!projectReady && (
+            projectQuery.fetchStatus === 'fetching' ? (
+              <p role="status" className="text-xs text-content-tertiary">
+                {t('common.loading', { defaultValue: 'Loading...' })}
+              </p>
+            ) : (
+              <div role="alert" className="flex items-center gap-2 text-xs text-semantic-error">
+                <span>{projectQuery.error ? getErrorMessage(projectQuery.error) : t('common.error', { defaultValue: 'Error' })}</span>
+                <Button variant="ghost" size="sm" onClick={() => void projectQuery.refetch()}>
+                  {t('common.retry', { defaultValue: 'Retry' })}
+                </Button>
+              </div>
+            )
+          )}
           <div className="grid gap-2 sm:grid-cols-2">
             <label className="block">
               <span className="text-xs text-content-secondary">
@@ -792,7 +821,7 @@ export function FullEvmPanel() {
             <Button
               variant="primary"
               size="sm"
-              disabled={newName.trim() === '' || newBac.trim() === ''}
+              disabled={!projectReady || newName.trim() === '' || newBac.trim() === ''}
               loading={createMutation.isPending}
               onClick={() => createMutation.mutate()}
             >
