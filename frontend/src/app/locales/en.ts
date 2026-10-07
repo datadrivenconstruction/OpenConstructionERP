@@ -3949,6 +3949,7 @@ const resource = {
     "boq.import_error.xpwe_not_well_formed": "The XPWE file is not well-formed XML: it breaks off at line {{line}}, column {{column}}.",
     "boq.import_error.import_parse_failed": "The file could not be read. Nothing was imported.",
     "boq.import_error.import_parse_unexpected": "The file could not be read: the reader stopped on something it did not expect. Nothing was imported.",
+    "boq.import_error.import_persistence_failed": "The imported bill could not be saved. No rows were imported.",
     "boq.import_error.import_already_done": "This file was already imported into this bill on {{imported_at}}.",
     "boq.import_error.import_deductions_failed": "The deductions line could not be added to the bill markups, so the bill total does not take the deductions off. Add a fixed markup line for them by hand.",
     "boq.deduction_badge": "Deduction",
