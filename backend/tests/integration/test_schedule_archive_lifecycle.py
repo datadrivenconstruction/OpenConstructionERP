@@ -85,6 +85,7 @@ def url(schedule, suffix=""):
 
 
 @pytest.mark.asyncio
+@pytest.mark.tenant_isolation
 @pytest.mark.parametrize(
     "association", ["same_owner_other_project", "foreign_owner", "missing", "matching", "project_only"]
 )
@@ -135,6 +136,7 @@ async def test_baseline_schedule_must_belong_to_submitted_project(association):
 
 
 @pytest.mark.asyncio
+@pytest.mark.tenant_isolation
 async def test_baseline_permission_checked_before_schedule_lookup():
     async with api("viewer") as (client, session, _service, schedule, project, _payload):
         for schedule_id in (schedule.id, uuid.uuid4(), None):
