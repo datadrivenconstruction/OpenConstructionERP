@@ -1296,6 +1296,13 @@ def cmd_serve(args: argparse.Namespace) -> None:
     """Start the OpenConstructionERP server."""
     data_dir = _data_dir_from_args(args)
 
+    # First, before anything native is imported: a crash inside torch, Arrow or
+    # the PostgreSQL driver leaves no Python traceback, and this file is the
+    # only place its stack can land. The desktop launcher reads its tail.
+    from app.core.crash_diagnostics import enable_crash_log
+
+    enable_crash_log(data_dir)
+
     # ``serve --no-demo``: skip demo accounts / showcase projects for this
     # start AND remember the choice in the data dir so subsequent bare
     # starts honour it too (read by app.main's demo seeder when SEED_DEMO

@@ -5249,6 +5249,20 @@ def create_app() -> FastAPI:
             except Exception:
                 logger.debug("Could not schedule embedder prime", exc_info=True)
 
+            # Desktop only: the hang that comes before a native crash is the one
+            # moment the culprit is still on a stack, so dump them all then.
+            try:
+                from app.config import desktop_mode as _desktop_mode_wd
+
+                if _desktop_mode_wd():
+                    import asyncio as _asyncio_wd
+
+                    from app.core.crash_diagnostics import start_loop_stall_watchdog
+
+                    start_loop_stall_watchdog(_asyncio_wd.get_running_loop())
+            except Exception:  # noqa: BLE001 - diagnostics are never fatal
+                logger.debug("Loop stall watchdog not started", exc_info=True)
+
             try:
                 app.state.embedding_warmup_task = _start_embedding_pool_warmup()
             except Exception as exc:  # noqa: BLE001 - never fatal for startup
