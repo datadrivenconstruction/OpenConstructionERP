@@ -40,6 +40,8 @@ from dataclasses import dataclass
 from decimal import ROUND_DOWN, ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Any
 
+from app.core.currency_registry import money_quantum
+
 ZERO = Decimal("0")
 HUNDRED = Decimal("100")
 CENT = Decimal("0.01")
@@ -98,8 +100,8 @@ def _decimal(value: Any, *, name: str) -> Decimal:
     return result
 
 
-def _cents(value: Decimal) -> Decimal:
-    return value.quantize(CENT, rounding=ROUND_HALF_UP)
+def _cents(value: Decimal, currency: str | None = None) -> Decimal:
+    return value.quantize(money_quantum(currency), rounding=ROUND_HALF_UP)
 
 
 @dataclass(frozen=True)
@@ -287,11 +289,13 @@ def work_retention(completed: Decimal, contract_sum: Decimal, policy: RetentionP
     return held
 
 
-def allocate_cents(total: Decimal, weights: Mapping[Hashable, Decimal]) -> dict[Hashable, Decimal]:
-    """Split ``total`` over ``weights`` pro rata, in cents that add up to ``total`` exactly.
+def allocate_cents(
+    total: Decimal, weights: Mapping[Hashable, Decimal], *, currency: str | None = None
+) -> dict[Hashable, Decimal]:
+    """Split ``total`` pro rata in currency units (cents when unspecified).
 
-    Largest remainder: every share is rounded down to the cent, and the cents
-    left over go one each to the shares that lost the most in rounding, ties
+    Largest remainder: every share is rounded down to the minor unit, and the
+    units left over go one each to the shares that lost the most in rounding, ties
     in the order the weights were given. Only positive weights take a share:
     a credit line has no retention of its own to carry. When no weight is
     positive every share is 0, and a nonzero ``total`` is reported by raising,
@@ -300,7 +304,8 @@ def allocate_cents(total: Decimal, weights: Mapping[Hashable, Decimal]) -> dict[
     Raises:
         ValueError: ``total`` is not zero but no weight is positive.
     """
-    total = _cents(total)
+    quantum = money_quantum(currency)
+    total = _cents(total, currency)
     shares: dict[Hashable, Decimal] = dict.fromkeys(weights, ZERO)
     positive = {key: weight for key, weight in weights.items() if weight > ZERO}
     weight_sum = sum(positive.values(), ZERO)
@@ -312,14 +317,14 @@ def allocate_cents(total: Decimal, weights: Mapping[Hashable, Decimal]) -> dict[
     remainders: list[tuple[Decimal, int, Hashable]] = []
     for order, (key, weight) in enumerate(positive.items()):
         exact = total * weight / weight_sum
-        floored = exact.quantize(CENT, rounding=ROUND_DOWN)
+        floored = exact.quantize(quantum, rounding=ROUND_DOWN)
         shares[key] = floored
         remainders.append((exact - floored, order, key))
-    left = int((total - sum(shares.values(), ZERO)) / CENT)
+    left = int((total - sum(shares.values(), ZERO)) / quantum)
     # Largest remainder first, then input order, so equal remainders are stable.
     remainders.sort(key=lambda item: (-item[0], item[1]))
     for _remainder, _order, key in remainders[:left]:
-        shares[key] += CENT
+        shares[key] += quantum
     return shares
 
 
@@ -346,6 +351,7 @@ class RetentionPosition:
     stored_retention: Decimal
     capped: bool
     lines: dict[Hashable, LineRetention]
+    currency: str | None = None
 
     @property
     def total(self) -> Decimal:
@@ -359,6 +365,7 @@ def compute_retention(
     contract_sum: Any,
     policy: RetentionPolicy,
     stored_by_line: Mapping[Hashable, Any] | None = None,
+    currency: str | None = None,
 ) -> RetentionPosition:
     """The retention a contract should hold, given work and stored materials per line.
 
@@ -370,11 +377,12 @@ def compute_retention(
             percent complete and a cap are measured against.
         policy: See :func:`policy_from_rule`.
         stored_by_line: Stored materials balance per SoV line (G703 F).
+        currency: Currency code governing rounding; unspecified means cents.
 
     Returns:
-        The contract-wide figures, rounded to cents, and one
+        The contract-wide figures, rounded to the currency's minor unit, and one
         :class:`LineRetention` per line in ``completed_by_line`` or
-        ``stored_by_line``, whose cents add up exactly to the totals. A cap
+        ``stored_by_line``, whose amounts add up exactly to the totals. A cap
         cuts work retention first, then stored.
     """
     total_sum = _decimal(contract_sum or 0, name="contract_sum")
@@ -386,9 +394,9 @@ def compute_retention(
     pct = percent_complete(completed_total, total_sum)
     rate_now = policy.rate_at(pct)
 
-    work = _cents(work_retention(completed_total, total_sum, policy))
+    work = _cents(work_retention(completed_total, total_sum, policy), currency)
     stored_rate = policy.stored_materials_rate if policy.stored_materials_rate is not None else rate_now
-    on_stored = _cents(stored_total * stored_rate / HUNDRED)
+    on_stored = _cents(stored_total * stored_rate / HUNDRED, currency)
 
     capped = False
     # A ceiling is a percent of the contract sum, so a contract that states
@@ -396,15 +404,15 @@ def compute_retention(
     # no ceiling anyone can measure. Reading it as 0 percent of 0 would hold
     # nothing at all, which is the opposite of what the cap is for.
     if policy.cap_percent_of_contract_sum is not None and total_sum > ZERO:
-        cap = _cents(total_sum * policy.cap_percent_of_contract_sum / HUNDRED)
+        cap = _cents(total_sum * policy.cap_percent_of_contract_sum / HUNDRED, currency)
         if work + on_stored > cap:
             capped = True
             work = min(work, cap)
             on_stored = min(on_stored, cap - work)
 
     keys = list(dict.fromkeys([*completed, *stored]))
-    work_shares = allocate_cents(work, {key: completed.get(key, ZERO) for key in keys})
-    stored_shares = allocate_cents(on_stored, {key: stored.get(key, ZERO) for key in keys})
+    work_shares = allocate_cents(work, {key: completed.get(key, ZERO) for key in keys}, currency=currency)
+    stored_shares = allocate_cents(on_stored, {key: stored.get(key, ZERO) for key in keys}, currency=currency)
     lines: dict[Hashable, LineRetention] = {}
     for key in keys:
         base = max(completed.get(key, ZERO), ZERO) + stored.get(key, ZERO)
@@ -421,6 +429,7 @@ def compute_retention(
         stored_retention=on_stored,
         capped=capped,
         lines=lines,
+        currency=currency,
     )
 
 
@@ -431,6 +440,7 @@ def step_down_release(
     required_now: Any,
     rate_before: Any,
     rate_now: Any,
+    currency: str | None = None,
 ) -> Decimal:
     """What a recompute-mode rate reduction releases; 0 in every other case.
 
@@ -445,7 +455,7 @@ def step_down_release(
     if _decimal(rate_now or 0, name="rate_now") >= _decimal(rate_before or 0, name="rate_before"):
         return ZERO
     freed = _decimal(held_before or 0, name="held_before") - _decimal(required_now or 0, name="required_now")
-    return max(_cents(freed), ZERO)
+    return max(_cents(freed, currency), ZERO)
 
 
 @dataclass(frozen=True)
@@ -487,6 +497,7 @@ def plan_release(
     *,
     open_items_value: Any = 0,
     amount: Any = None,
+    currency: str | None = None,
 ) -> ReleasePlan:
     """What ``event`` releases from ``held``, the retention held at that event.
 
@@ -527,16 +538,16 @@ def plan_release(
         percent = min(max(_decimal(raw, name="release_percent_of_held"), ZERO), HUNDRED)
         gross = held_now * percent / HUNDRED
         open_items = max(_decimal(open_items_value or 0, name="open_items_value"), ZERO)
-        withheld = _cents(open_items * _open_items_multiplier(spec))
+        withheld = _cents(open_items * _open_items_multiplier(spec), currency)
 
-    released = min(max(_cents(gross) - withheld, ZERO), _cents(held_now))
+    released = min(max(_cents(gross, currency) - withheld, ZERO), _cents(held_now, currency))
     return ReleasePlan(
         event=canonical,
-        held=_cents(held_now),
+        held=_cents(held_now, currency),
         percent_of_held=percent,
         withheld_for_open_items=withheld,
         amount=released,
-        remaining=_cents(held_now) - released,
+        remaining=_cents(held_now, currency) - released,
         required_documents=tuple(spec.get("required_documents") or ()),
         required_documents_when_bonded=tuple(spec.get("required_documents_when_bonded") or ()),
         statute_reference=spec.get("statute_reference"),
@@ -620,10 +631,14 @@ def claim_retention(
     is the last to go, because the materials are not yet part of the work.
     """
     required = position.total
-    before = _cents(_decimal(accrued_before or 0, name="accrued_before"))
-    released = _cents(_decimal(released_to_date or 0, name="released_to_date"))
-    accrual = max(required - before, ZERO)
-    held = max(before + accrual - released, ZERO)
+    currency = position.currency
+    # Historical certificates can predate currency-aware rounding. Rounding
+    # their accrual down first creates fictitious room under the requirement.
+    # Only whole minor units of the actual remaining room may be newly held.
+    before = _decimal(accrued_before or 0, name="accrued_before")
+    released = _decimal(released_to_date or 0, name="released_to_date")
+    accrual = max(required - before, ZERO).quantize(money_quantum(currency), rounding=ROUND_DOWN)
+    held = _cents(max(before + accrual - released, ZERO), currency)
     on_stored = min(position.stored_retention, held)
     on_work = held - on_stored
 
@@ -638,8 +653,8 @@ def claim_retention(
         work_weights = {key: max(completed.get(key, ZERO), ZERO) + stored.get(key, ZERO) for key in keys}
     if on_work > ZERO and not any(weight > ZERO for weight in work_weights.values()):
         work_weights = dict.fromkeys(keys, Decimal("1"))
-    work_shares = allocate_cents(on_work, work_weights) if keys else {}
-    stored_shares = allocate_cents(on_stored, stored_weights) if keys else {}
+    work_shares = allocate_cents(on_work, work_weights, currency=currency) if keys else {}
+    stored_shares = allocate_cents(on_stored, stored_weights, currency=currency) if keys else {}
 
     lines: dict[Hashable, LineRetention] = {}
     for key in keys:
@@ -656,8 +671,8 @@ def claim_retention(
         held=held,
         held_on_work=on_work,
         held_on_stored=on_stored,
-        completed_stored_to_date=_cents(completed_total + stored_total),
+        completed_stored_to_date=_cents(completed_total + stored_total, currency),
         lines=lines,
-        accrued_to_date=before + accrual,
-        released_to_date=released,
+        accrued_to_date=_cents(before + accrual, currency),
+        released_to_date=_cents(released, currency),
     )

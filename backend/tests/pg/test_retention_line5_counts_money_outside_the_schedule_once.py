@@ -70,7 +70,7 @@ LADDER_ZERO_PAST_HALF = {
 }
 
 
-async def _job(session, lines, *, ladder=None):
+async def _job(session, lines, *, ladder=None, currency="USD"):
     suffix = uuid.uuid4().hex[:8]
     owner = User(id=uuid.uuid4(), email=f"line5-{suffix}@site.example", hashed_password="x")
     session.add(owner)
@@ -79,7 +79,7 @@ async def _job(session, lines, *, ladder=None):
         id=uuid.uuid4(),
         name="Line 5",
         owner_id=owner.id,
-        currency="USD",
+        currency=currency,
         country_code="US",
         metadata_={},
     )
@@ -92,7 +92,7 @@ async def _job(session, lines, *, ladder=None):
         title="Main works",
         project_id=project.id,
         contract_type="lump_sum",
-        currency="USD",
+        currency=currency,
         total_value=total,
         original_contract_value=total,
         retention_percent=Decimal("10"),
@@ -130,7 +130,7 @@ async def _claim(svc, job, month):
             period_start=start,
             period_end=end,
             claim_date=end,
-            currency="USD",
+            currency=job.contract.currency,
             metadata={},
         )
     )
@@ -297,3 +297,61 @@ async def test_a_flat_rate_accrues_the_schedule_in_full_after_a_lineless_month(p
     assert m3.line7 == Decimal("72000.00")
     assert m3.line8 == Decimal("36000.00")
     assert m3.net_due == Decimal("36000.00")
+
+
+@pytest.mark.parametrize(
+    ("currency", "gross", "retention"), [("JPY", "123", "12"), ("EUR", "12.35", "1.24"), ("KWD", "12.345", "1.235")]
+)
+async def test_currency_precision_survives_certification_outside_schedule_and_full_release(
+    pg_session, currency, gross, retention
+) -> None:
+    """Accrual, stored snapshots and the payment application must agree beyond cents."""
+    svc = ContractsService(pg_session)
+    job = await _job(
+        pg_session,
+        [("A", gross)],
+        currency=currency,
+        ladder={"tiers": [{"from_percent_complete": 0, "rate": 10}]},
+    )
+    amount, held = Decimal(gross), Decimal(retention)
+    first = await _lineless_month(svc, pg_session, job, 1, gross)
+    assert first.retention_amount == held
+    first_snapshot = (first.net_due, first.retention_held_to_date, first.completed_stored_to_date)
+    second = await _schedule_month(svc, pg_session, job, 2, {"A": gross})
+    assert second.retention_amount == second.retention_held_to_date == held
+    assert second.net_due == amount - held
+    application = await svc.build_aia_application(second.id)
+    assert Decimal(str(application["summary"]["retainage"])) == held * 2
+    assert Decimal(str(application["summary"]["current_payment_due"])) == second.net_due
+    assert sum(Decimal(str(row["retainage"])) for row in application["lines"]) == held * 2
+    released = await _release_month(svc, pg_session, job, 3, str(held * 2))
+    application = await svc.build_aia_application(released.id)
+    assert Decimal(str(application["summary"]["retainage"])) == 0
+    assert sum(Decimal(str(row["retainage"])) for row in application["lines"]) == 0
+    assert released.net_due == held * 2
+    await pg_session.refresh(first)
+    assert (first.net_due, first.retention_held_to_date, first.completed_stored_to_date) == first_snapshot
+
+
+async def test_reading_a_legacy_certificate_does_not_rewrite_sub_yen_retention(pg_session) -> None:
+    svc = ContractsService(pg_session)
+    job = await _job(
+        pg_session,
+        [("A", "123")],
+        currency="JPY",
+        ladder={"tiers": [{"from_percent_complete": 0, "rate": 10}]},
+    )
+    claim = await _schedule_month(svc, pg_session, job, 1, {"A": "123"})
+    # Simulate a certificate stored by the old cents-only engine. A read must
+    # neither silently repair this historical amount nor change certification.
+    await svc.claim_repo.update_fields(
+        claim.id,
+        retention_amount=Decimal("12.30"),
+        retention_held_to_date=Decimal("12.30"),
+        net_due=Decimal("110.70"),
+    )
+    await pg_session.refresh(claim)
+    before = (claim.status, claim.retention_amount, claim.retention_held_to_date, claim.net_due)
+    await svc.build_aia_application(claim.id)
+    await pg_session.refresh(claim)
+    assert (claim.status, claim.retention_amount, claim.retention_held_to_date, claim.net_due) == before

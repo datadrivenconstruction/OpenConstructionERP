@@ -18,7 +18,7 @@ import dataclasses
 import logging
 import uuid
 from datetime import date
-from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
+from decimal import ROUND_DOWN, ROUND_HALF_UP, Decimal, InvalidOperation
 from types import SimpleNamespace
 from typing import Any
 
@@ -27,6 +27,7 @@ from sqlalchemy import select as sa_select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.currency_registry import money_quantum
 from app.core.events import event_bus, publish_after_commit
 from app.core.i18n import get_locale
 from app.core.json_merge import merge_metadata
@@ -502,6 +503,7 @@ def flat_retention_within_cap(
     cap_percent: Decimal | None,
     contract_sum: Decimal,
     accrued_before: Decimal,
+    currency: str | None = None,
 ) -> Decimal:
     """Retention a flat-rate claim holds this period, never past the agreed ceiling.
 
@@ -514,13 +516,17 @@ def flat_retention_within_cap(
     A contract with no sum (``contract_sum`` of 0, as a cost-plus or T&M
     contract whose total nobody entered carries) has no ceiling to measure,
     so the rate holds uncapped. Reading the cap as a percent of 0 would hold
-    nothing from the first claim on.
+    nothing from the first claim on. Accrual and cap use the currency's minor
+    unit, with cents as the fallback when no currency is known.
     """
-    retention = (gross * rate / DEC_HUNDRED).quantize(Decimal("0.0001"))
+    quantum = money_quantum(currency)
+    retention = (gross * rate / DEC_HUNDRED).quantize(quantum, rounding=ROUND_HALF_UP)
     if cap_percent is None or retention <= DEC_ZERO or contract_sum <= DEC_ZERO:
         return retention
-    ceiling = (contract_sum * cap_percent / DEC_HUNDRED).quantize(Decimal("0.01"), ROUND_HALF_UP)
-    room = max(ceiling - max(accrued_before, DEC_ZERO), DEC_ZERO)
+    ceiling = (contract_sum * cap_percent / DEC_HUNDRED).quantize(quantum, ROUND_HALF_UP)
+    # Legacy accruals may contain fractions of today's minor unit. Rounding
+    # them down first would create room that the agreed cap does not have.
+    room = max(ceiling - max(accrued_before, DEC_ZERO), DEC_ZERO).quantize(quantum, rounding=ROUND_DOWN)
     return min(retention, room)
 
 
@@ -682,12 +688,14 @@ def _contract_release_rule(contract: Any, pack_rule: dict[str, Any] | None) -> d
     return {"events": events}
 
 
-def _release_share_outside_schedule(released: Decimal, *, schedule_pool: Decimal, outside_pool: Decimal) -> Decimal:
+def _release_share_outside_schedule(
+    released: Decimal, *, schedule_pool: Decimal, outside_pool: Decimal, currency: str | None = None
+) -> Decimal:
     """The part of the releases billed to date that comes off retention held outside the schedule.
 
     Pro rata to what each pool has accrued: ``schedule_pool`` is the retention
     accrued on schedule lines to date, ``outside_pool`` the retention earlier
-    claims held on money no schedule line carries. Rounded to the cent and
+    claims held on money no schedule line carries. Rounded to the currency's minor unit and
     never more than ``outside_pool``, so a release beyond everything held
     lands on the schedule's side, where ``retention_release_within_held``
     reports it.
@@ -695,7 +703,7 @@ def _release_share_outside_schedule(released: Decimal, *, schedule_pool: Decimal
     if released <= DEC_ZERO or outside_pool <= DEC_ZERO:
         return DEC_ZERO
     pool = max(schedule_pool, DEC_ZERO) + outside_pool
-    share = (released * outside_pool / pool).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    share = (released * outside_pool / pool).quantize(money_quantum(currency), rounding=ROUND_HALF_UP)
     return min(share, outside_pool)
 
 
@@ -1266,9 +1274,9 @@ class ContractsService:
         # Memo for prior_gross_without_schedule_lines, which a certificate
         # build asks twice. Per request, like the service itself.
         self._prior_without_lines_cache: dict[tuple[Any, Any], Decimal] = {}
-        # Its retention twin, prior_retention_without_schedule_lines. Same
-        # key shape, its own dict, so neither can answer for the other.
-        self._prior_retention_without_lines_cache: dict[tuple[Any, Any], Decimal] = {}
+        # Its retention twin also keys by the rounding quantum so previews
+        # with different currency precision cannot share a rounded result.
+        self._prior_retention_without_lines_cache: dict[tuple[Any, Any, Decimal], Decimal] = {}
         self.final_account_repo = FinalAccountRepository(session)
         self.party_repo = ContractPartyRepository(session)
         self.security_repo = ContractSecurityRepository(session)
@@ -3198,6 +3206,7 @@ class ContractsService:
         *,
         before_claim_id: uuid.UUID | None,
         prior_claims: list[Any] | None = None,
+        currency: str | None = None,
     ) -> Decimal:
         """Retention earlier claims held on the gross no line of theirs accounts for.
 
@@ -3220,7 +3229,7 @@ class ContractsService:
         retention refuses a claim that is not a draft, and the claims this
         measures come before the one being worked on.
 
-        Returns: the retention, at cents, never negative.
+        Returns: the retention, at the currency minor unit, never negative.
         """
         prior = (
             prior_claims
@@ -3229,7 +3238,8 @@ class ContractsService:
         )
         if not prior:
             return DEC_ZERO
-        cache_key = (contract_id, before_claim_id)
+        quantum = money_quantum(currency)
+        cache_key = (contract_id, before_claim_id, quantum)
         if cache_key in self._prior_retention_without_lines_cache:
             return self._prior_retention_without_lines_cache[cache_key]
         line_totals = await self.claim_line_repo.period_value_by_claim(contract_id)
@@ -3240,7 +3250,7 @@ class ContractsService:
                 continue
             residual = max(gross - line_totals.get(c.id, DEC_ZERO), DEC_ZERO)
             held += Decimal(str(c.retention_amount or 0)) * residual / gross
-        held = max(held, DEC_ZERO).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        held = max(held, DEC_ZERO).quantize(quantum, rounding=ROUND_HALF_UP)
         self._prior_retention_without_lines_cache[cache_key] = held
         return held
 
@@ -3249,6 +3259,8 @@ class ContractsService:
         claim: ProgressClaim,
         contract_id: uuid.UUID,
         prior: list[Any],
+        *,
+        currency: str | None = None,
     ) -> tuple[Decimal, Decimal, Decimal]:
         """What the claims before ``claim`` accrued, by where it sits, and every release billed so far.
 
@@ -3263,6 +3275,7 @@ class ContractsService:
             contract_id,
             before_claim_id=claim.id,
             prior_claims=prior,
+            currency=currency,
         )
         billed = await self.release_repo.billed_on_claims([c.id for c in prior] + [claim.id])
         released = sum((Decimal(str(r.amount or 0)) for r in billed), DEC_ZERO)
@@ -3307,13 +3320,15 @@ class ContractsService:
             if prior_claims is not None
             else await self.claim_repo.prior_claims(contract.id, before_claim_id=claim.id)
         )
-        on_schedule, outside, released = await self._retention_before(claim, contract.id, prior)
+        currency = getattr(claim, "currency", None) or getattr(contract, "currency", None)
+        on_schedule, outside, released = await self._retention_before(claim, contract.id, prior, currency=currency)
         if outside <= DEC_ZERO or not releases_come_off_it:
             return outside
         share = _release_share_outside_schedule(
             released,
-            schedule_pool=on_schedule.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) + schedule_accrual,
+            schedule_pool=on_schedule.quantize(money_quantum(currency), rounding=ROUND_HALF_UP) + schedule_accrual,
             outside_pool=outside,
+            currency=currency,
         )
         return max(outside - share, DEC_ZERO)
 
@@ -3388,7 +3403,6 @@ class ContractsService:
         Returns:
             ``(completed_stored_to_date, retention_held_to_date)``, at the currency minor unit.
         """
-        from app.core.currency_registry import money_quantum  # noqa: PLC0415
         from app.modules.contracts.aia import (  # noqa: PLC0415
             bills_without_schedule,
             build_g703,
@@ -5488,6 +5502,7 @@ class ContractsService:
             cap_percent=cap_percent,
             contract_sum=Decimal(str(getattr(contract, "total_value", 0) or 0)),
             accrued_before=accrued_before,
+            currency=getattr(claim, "currency", None) or getattr(contract, "currency", None),
         )
 
     async def _progress_billing(self, contract: Contract) -> dict[str, Any] | None:
@@ -5601,21 +5616,23 @@ class ContractsService:
         for line in lines:
             completed[line.contract_line_id] = self._line_work_to_date(line)
             stored[line.contract_line_id] = Decimal(str(getattr(line, "materials_stored_value", 0) or 0))
+        currency = getattr(claim, "currency", None) or getattr(contract, "currency", None)
         position = compute_retention(
             completed,
             contract_sum=getattr(contract, "total_value", 0) or 0,
             policy=policy,
             stored_by_line=stored,
+            currency=currency,
         )
         prior = await self.claim_repo.prior_claims(contract.id, before_claim_id=claim.id)
-        on_schedule, outside, released = await self._retention_before(claim, contract.id, prior)
-        on_schedule = on_schedule.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        on_schedule, outside, released = await self._retention_before(claim, contract.id, prior, currency=currency)
         # claim_retention accrues max(required - before, 0), so the schedule
         # has accrued the larger of the two once this claim is counted.
         released_outside = _release_share_outside_schedule(
             released,
             schedule_pool=max(position.total, on_schedule),
             outside_pool=outside,
+            currency=currency,
         )
         return claim_retention(
             position,
@@ -5776,6 +5793,7 @@ class ContractsService:
             required_now=figures.position.total,
             rate_before=rate_before,
             rate_now=figures.position.rate_now,
+            currency=getattr(claim, "currency", None) or getattr(contract, "currency", None),
         )
         mine = [
             row
@@ -5955,7 +5973,9 @@ class ContractsService:
         else:
             items = await self._open_items(contract)
         try:
-            plan = plan_release(held, event, rule, open_items_value=items["value"], amount=data.amount)
+            plan = plan_release(
+                held, event, rule, open_items_value=items["value"], amount=data.amount, currency=contract.currency
+            )
         except ValueError as exc:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
