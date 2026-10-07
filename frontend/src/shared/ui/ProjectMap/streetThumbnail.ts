@@ -28,6 +28,7 @@
  * picture.
  */
 import type { Map as MaplibreMap } from 'maplibre-gl';
+import { createStreetThumbnailContainer } from './streetThumbnailContainer';
 
 import { VECTOR_BASEMAP_STYLE_URL } from './basemap';
 
@@ -230,28 +231,22 @@ async function renderOnce(opts: StreetThumbnailRequest): Promise<string | null> 
   const height = Math.max(1, Math.round(opts.height));
 
   let container: HTMLDivElement | null = null;
+  let host: HTMLDivElement | null = null;
   let map: MaplibreMap | null = null;
   try {
     // Imported here rather than at module scope so a page that never
     // renders a thumbnail never pays for the library, and so a failure to
     // load it is just another null.
-    const { Map } = await import('maplibre-gl');
+    const { Map } = await import('@/shared/lib/mapLibre');
     if (aborted(signal)) return null;
 
     // ATTACHED, not detached, and deliberately not display:none. MapLibre
     // sizes its canvas to ``container.clientWidth * pixelRatio``, and an
     // element outside the document - or hidden - measures zero, so the
     // snapshot comes back blank however correct the rest of this is.
-    // Parked off-screen instead, which measures normally.
-    container = document.createElement('div');
-    container.setAttribute('aria-hidden', 'true');
-    container.style.position = 'absolute';
-    container.style.left = '-10000px';
-    container.style.top = '0';
-    container.style.width = `${width}px`;
-    container.style.height = `${height}px`;
-    container.style.pointerEvents = 'none';
-    document.body.appendChild(container);
+    // A clipped fixed host avoids the huge RTL scroll range caused by
+    // parking a canvas at left:-10000px, while preserving its dimensions.
+    ({ host, container } = createStreetThumbnailContainer(width, height));
 
     map = new Map({
       container,
@@ -301,7 +296,7 @@ async function renderOnce(opts: StreetThumbnailRequest): Promise<string | null> 
     } catch {
       /* removing a map that never finished constructing can throw */
     }
-    container?.remove();
+    host?.remove();
   }
 }
 

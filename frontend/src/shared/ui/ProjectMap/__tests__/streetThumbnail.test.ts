@@ -127,6 +127,7 @@ class FakeMap {
 }
 
 vi.mock('maplibre-gl', () => ({
+  setWorkerUrl: vi.fn(),
   default: { Map: FakeMap },
   Map: FakeMap,
 }));

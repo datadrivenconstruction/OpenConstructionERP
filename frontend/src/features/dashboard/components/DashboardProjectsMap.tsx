@@ -206,7 +206,7 @@ export function DashboardProjectsMap({ projects, className, heightClass: heightC
   // route-split via DashboardPage).
   useEffect(() => {
     let cancelled = false;
-    import('react-map-gl/maplibre').then((mod) => {
+    Promise.all([import('@/shared/lib/mapLibre'), import('react-map-gl/maplibre')]).then(([, mod]) => {
       if (!cancelled) setMapLib(mod);
     });
     return () => {

@@ -64,6 +64,7 @@ import { useTranslation } from 'react-i18next';
 import { MapPin, Loader2 } from 'lucide-react';
 import Map, { Marker, Popup, NavigationControl, AttributionControl } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import '@/shared/lib/mapLibre';
 import clsx from 'clsx';
 
 import { geocodeSuggest } from '@/features/geo-hub/api';

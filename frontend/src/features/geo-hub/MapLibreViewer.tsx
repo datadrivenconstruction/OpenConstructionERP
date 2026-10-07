@@ -49,6 +49,7 @@ import Map, {
   type ViewStateChangeEvent,
 } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import '@/shared/lib/mapLibre';
 
 import { colorForProjectStatus, pinTooltipLabel } from './projectPinUtils';
 import { geoAuthHeaders, listRasterOverlays, rasterOverlayImageUrl } from './api';
