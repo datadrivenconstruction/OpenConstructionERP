@@ -79,7 +79,7 @@ beforeAll(async () => {
 
 describe('a regional variant loads the base language it falls back to', () => {
   it('leaves unsupported Mongolian unloaded, including a regional request', async () => {
-    const englishBefore = i18n.getResourceBundle('en', 'translation');
+    const englishBefore = { ...i18n.getResourceBundle('en', 'translation') };
     for (const code of ['mn', 'mn-MN']) {
       await expect(loadLocaleResource(code)).resolves.toBeUndefined();
       expect(matchSupportedLanguage(code)).toBeNull();
