@@ -3386,8 +3386,9 @@ class ContractsService:
             contract: its contract, when the caller already has it.
 
         Returns:
-            ``(completed_stored_to_date, retention_held_to_date)``, at cents.
+            ``(completed_stored_to_date, retention_held_to_date)``, at the currency minor unit.
         """
+        from app.core.currency_registry import money_quantum  # noqa: PLC0415
         from app.modules.contracts.aia import (  # noqa: PLC0415
             bills_without_schedule,
             build_g703,
@@ -3398,15 +3399,18 @@ class ContractsService:
             contract = await self.get_contract(claim.contract_id)
         claim_lines = await self.claim_line_repo.list_for_claim(claim.id)
         gross = Decimal(str(claim.gross_amount or 0))
-        cents = Decimal("0.01")
+        currency = getattr(claim, "currency", None) or getattr(contract, "currency", None) or ""
+        cents = money_quantum(currency)
 
         if bills_without_schedule(claim, claim_lines):
             prior = await self.claim_repo.prior_claims(contract.id, before_claim_id=claim.id)
-            completed = sum((Decimal(str(c.gross_amount or 0)) for c in prior), DEC_ZERO) + gross
+            previous = sum((Decimal(str(c.gross_amount or 0)) for c in prior), DEC_ZERO)
+            # Match the cost-of-work row's displayed previous/current operands.
+            completed = previous.quantize(cents, rounding=ROUND_HALF_UP) + gross.quantize(cents, rounding=ROUND_HALF_UP)
             held = sum((Decimal(str(c.retention_amount or 0)) for c in prior), DEC_ZERO) + Decimal(
                 str(claim.retention_amount or 0)
             )
-            return completed.quantize(cents), held.quantize(cents)
+            return completed.quantize(cents, rounding=ROUND_HALF_UP), held.quantize(cents, rounding=ROUND_HALF_UP)
 
         contract_lines = await self.line_repo.list_for_contract(contract.id)
         prior_by_line = await self.claim_line_repo.prior_period_value_by_line(contract.id, before_claim_id=claim.id)
@@ -3418,10 +3422,11 @@ class ContractsService:
             by_contract_line,
             retainage_percent=Decimal(str(contract.retention_percent or 0)),
             prior_by_line=prior_by_line,
+            currency=currency,
         )
         completed = sum((Decimal(str(row["total_completed_stored"])) for row in rows), DEC_ZERO)
         held = sum((Decimal(str(row["retainage"])) for row in rows), DEC_ZERO)
-        return completed.quantize(cents), held.quantize(cents)
+        return completed.quantize(cents, rounding=ROUND_HALF_UP), held.quantize(cents, rounding=ROUND_HALF_UP)
 
     async def claim_line_running_totals(
         self,
@@ -3533,7 +3538,13 @@ class ContractsService:
                 continue
             # The continuation-sheet row itself, so "billed to date" here is
             # column G exactly as the payment application adds it up.
-            row = build_g703_line(contract_line, claim_line, line_number=index, retainage_percent=DEC_ZERO)
+            row = build_g703_line(
+                contract_line,
+                claim_line,
+                line_number=index,
+                retainage_percent=DEC_ZERO,
+                currency=getattr(claim, "currency", None) or getattr(contract, "currency", None) or "",
+            )
             lines.append(
                 {
                     "contract_line_id": str(contract_line.id),
@@ -6673,6 +6684,7 @@ class ContractsService:
                 detail=translate("errors.claim_not_found", locale=get_locale()),
             )
         contract = await self.get_contract(claim.contract_id)
+        currency = claim.currency or contract.currency or ""
         if require_aia:
             await self.assert_contract_aia_eligible(contract)
 
@@ -6733,6 +6745,7 @@ class ContractsService:
                     previous=sum((Decimal(str(c.gross_amount or 0)) for c in prior_claims), DEC_ZERO),
                     this_period=Decimal(str(claim.gross_amount or 0)),
                     retainage=held,
+                    currency=currency,
                 )
             ]
         else:
@@ -6784,6 +6797,7 @@ class ContractsService:
                     "aia.g703.billed_not_on_a_schedule_line",
                     locale=locale or get_locale(),
                 ),
+                currency=currency,
             )
             if claim.retention_held_to_date is not None:
                 # Worked out by the retention engine: column I and line 5 are the
@@ -6802,6 +6816,7 @@ class ContractsService:
                     sov_lines,
                     by_contract_line,
                     held=claim.retention_held_to_date,
+                    currency=currency,
                 )
 
         g702 = build_g702_summary(
@@ -6810,6 +6825,7 @@ class ContractsService:
             change_orders_net=change_orders_net,
             previous_certificates_total=previous_certificates_total,
             previous_certificates_basis=previous_certificates_basis,
+            currency=currency,
         )
 
         cert = (claim.metadata_ or {}).get("aia_certification", {}) or {}

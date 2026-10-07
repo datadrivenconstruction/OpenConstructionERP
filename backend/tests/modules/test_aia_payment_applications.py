@@ -371,3 +371,24 @@ async def test_canonical_route_enforces_project_ownership(session) -> None:
     with pytest.raises(HTTPException) as exc:
         await get_payment_application(claim.id, session, str(outsider_id), None)
     assert exc.value.status_code == 404
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("currency,amount,retained", [("KWD", "100.125", "5.006"), ("JPY", "101", "5")])
+async def test_canonical_and_aia_use_claim_currency_for_shared_math(session, currency, amount, retained):
+    claim = await _seed_claim(session, country_code="US")
+    service = ContractsService(session)
+    # Claim currency takes priority over a contract's legacy default.
+    claim.currency = currency
+    lines = await service.claim_line_repo.list_for_claim(claim.id)
+    lines[0].period_completed_value = Decimal(amount)
+    lines[0].cumulative_completed_value = Decimal(amount)
+    await session.flush()
+    application = await service.build_payment_application(claim.id)
+    assert application["currency"] == currency
+    assert application["summary"]["total_completed_stored"] == Decimal(amount)
+    assert application["summary"]["retainage"] == Decimal(retained)
+    assert application == await service.build_aia_application(claim.id)
+    assert await service.claim_completed_and_held(claim) == (Decimal(amount), Decimal(retained))
+    context = await service.claim_rule_context(claim)
+    assert Decimal(context["lines"][0]["total_completed_stored"]) == Decimal(amount)

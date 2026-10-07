@@ -24,7 +24,10 @@ What it adds is the AIA presentation layer:
 
 All money is ``Decimal``; no float ever touches a currency value. The builders
 are pure functions with hand-verifiable arithmetic so they can be unit-tested
-against fixtures without a database.
+against fixtures without a database. Monetary rounding uses the supplied currency's
+minor unit (two decimals when unspecified); percentages retain two decimals.
+This presentation layer does not recompute stored retention or recover precision
+already rounded by an upstream accrual or certification calculation.
 """
 
 from __future__ import annotations
@@ -32,11 +35,10 @@ from __future__ import annotations
 from decimal import ROUND_FLOOR, ROUND_HALF_UP, Decimal
 from typing import Any
 
-from app.modules.contracts.retention import allocate_cents
+from app.core.currency_registry import money_quantum
 
 DEC_ZERO = Decimal("0")
 DEC_HUNDRED = Decimal("100")
-_QUANT = Decimal("0.01")
 
 #: ISO 3166-1 alpha-2 codes whose projects may use AIA G702/G703.
 AIA_COUNTRY_CODES: frozenset[str] = frozenset({"US", "CA", "AU"})
@@ -99,13 +101,15 @@ def _dec(value: Any) -> Decimal:
     return Decimal(str(value))
 
 
-def _q(value: Decimal) -> Decimal:
-    """Round to 2 dp, the AIA presentation precision (cents)."""
-    return value.quantize(_QUANT, rounding=ROUND_HALF_UP)
+def _q(value: Decimal, currency: str = "") -> Decimal:
+    """Round money to the currency unit; unspecified currencies retain 2 dp."""
+    return value.quantize(money_quantum(currency), rounding=ROUND_HALF_UP)
 
 
-def _allocate_to_cents(exact: list[Decimal]) -> list[Decimal]:
-    """Round a column to cents so its rows add up to the column's own total.
+def _allocate_to_cents(exact: list[Decimal], currency: str = "") -> list[Decimal]:
+    """Round a column to currency units so its rows add up to its rounded total.
+
+    The historical helper name refers to the default two-decimal currency.
 
     Each row goes down to the cent below it (towards minus infinity, so a
     credit row behaves like any other), and the cents the column is then short
@@ -123,12 +127,13 @@ def _allocate_to_cents(exact: list[Decimal]) -> list[Decimal]:
     """
     if not exact:
         return []
-    floors = [value.quantize(_QUANT, rounding=ROUND_FLOOR) for value in exact]
-    short = int((_q(sum(exact, DEC_ZERO)) - sum(floors, DEC_ZERO)) / _QUANT)
+    quantum = money_quantum(currency)
+    floors = [value.quantize(quantum, rounding=ROUND_FLOOR) for value in exact]
+    short = int((_q(sum(exact, DEC_ZERO), currency) - sum(floors, DEC_ZERO)) / quantum)
     allocated = list(floors)
     # Largest rounding loss first, then row order, so the result is stable.
     for index in sorted(range(len(exact)), key=lambda i: (-(exact[i] - floors[i]), i))[:short]:
-        allocated[index] += _QUANT
+        allocated[index] += quantum
     return allocated
 
 
@@ -139,6 +144,7 @@ def build_g703_line(
     line_number: int,
     retainage_percent: Decimal,
     previous_when_unbilled: Decimal = DEC_ZERO,
+    currency: str = "",
 ) -> dict[str, Any]:
     """Build one G703 continuation row from a SoV line + its claim line.
 
@@ -164,7 +170,7 @@ def build_g703_line(
     materials (column F) come from ``materials_stored_value`` if present, else
     from the claim-line metadata key ``materials_stored_value`` (no DDL needed).
 
-    All amounts are ``Decimal`` rounded to cents.
+    All amounts are ``Decimal`` rounded to the currency's minor unit.
     """
     exact = _exact_columns(
         contract_line,
@@ -177,11 +183,12 @@ def build_g703_line(
         item_number=_item_number(contract_line, line_number),
         description=getattr(contract_line, "description", "") or "",
         scheduled=exact["scheduled"],
-        previous=_q(exact["previous"]),
-        stored=_q(exact["stored"]),
-        total=_q(exact["total"]),
-        retainage=_q(exact["retainage"]),
-        retainage_stored=_q(exact["retainage_stored"]),
+        previous=_q(exact["previous"], currency),
+        stored=_q(exact["stored"], currency),
+        total=_q(exact["total"], currency),
+        retainage=_q(exact["retainage"], currency),
+        retainage_stored=_q(exact["retainage_stored"], currency),
+        currency=currency,
     )
 
 
@@ -255,6 +262,7 @@ def _fill_row(
     total: Decimal,
     retainage: Decimal,
     retainage_stored: Decimal,
+    currency: str = "",
 ) -> dict[str, Any]:
     """Assemble one printed G703 row from its columns, already in cents.
 
@@ -273,7 +281,7 @@ def _fill_row(
         percent: Decimal | None = None
         balance: Decimal | None = None
     else:
-        scheduled = _q(scheduled)
+        scheduled = _q(scheduled, currency)
         percent = _q(total / scheduled * DEC_HUNDRED) if scheduled > DEC_ZERO else DEC_ZERO
         balance = scheduled - total
     return {
@@ -370,6 +378,7 @@ def build_g703(
     prior_without_schedule: Decimal = DEC_ZERO,
     out_of_schedule_retainage: Decimal | None = None,
     out_of_schedule_label: str = "",
+    currency: str = "",
 ) -> list[dict[str, Any]]:
     """Build the full G703 continuation sheet, one row per SoV line.
 
@@ -446,20 +455,21 @@ def build_g703(
         )
         captions.append((OUT_OF_SCHEDULE_ITEM_NUMBER, out_of_schedule_label))
 
-    totals = _allocate_to_cents([columns["total"] for columns in exact])
-    retainages = _allocate_to_cents([columns["retainage"] for columns in exact])
-    stored_retainages = _allocate_to_cents([columns["retainage_stored"] for columns in exact])
+    totals = _allocate_to_cents([columns["total"] for columns in exact], currency)
+    retainages = _allocate_to_cents([columns["retainage"] for columns in exact], currency)
+    stored_retainages = _allocate_to_cents([columns["retainage_stored"] for columns in exact], currency)
     return [
         _fill_row(
             line_number=idx,
             item_number=item_number,
             description=description,
             scheduled=columns["scheduled"],
-            previous=_q(columns["previous"]),
-            stored=_q(columns["stored"]),
+            previous=_q(columns["previous"], currency),
+            stored=_q(columns["stored"], currency),
             total=total,
             retainage=retainage,
             retainage_stored=retainage_stored,
+            currency=currency,
         )
         for idx, ((item_number, description), columns, total, retainage, retainage_stored) in enumerate(
             zip(captions, exact, totals, retainages, stored_retainages, strict=True), start=1
@@ -475,6 +485,7 @@ def build_cost_of_work_row(
     previous: Decimal,
     this_period: Decimal,
     retainage: Decimal,
+    currency: str = "",
 ) -> dict[str, Any]:
     """The one G703 row for a claim billed without a schedule of values.
 
@@ -492,11 +503,12 @@ def build_cost_of_work_row(
         item_number=item_number,
         description=description,
         scheduled=scheduled,
-        previous=_q(previous),
+        previous=_q(previous, currency),
         stored=DEC_ZERO,
-        total=_q(previous) + _q(this_period),
-        retainage=_q(retainage),
+        total=_q(previous, currency) + _q(this_period, currency),
+        retainage=_q(retainage, currency),
         retainage_stored=DEC_ZERO,
+        currency=currency,
     )
 
 
@@ -506,6 +518,7 @@ def apply_retention_snapshot(
     claim_lines_by_contract_line: dict[Any, Any],
     *,
     held: Decimal,
+    currency: str = "",
 ) -> list[dict[str, Any]]:
     """Put the retention engine's column I on the rows of a claim it has worked out.
 
@@ -543,15 +556,24 @@ def apply_retention_snapshot(
             stored[index] = _dec(getattr(claim_line, "retention_stored_to_date", None))
         else:
             unbilled[index] = _dec(row["previous_value"]) + _dec(row["this_period_value"])
-    rest = _q(_dec(held)) - sum(work.values(), DEC_ZERO) - sum(stored.values(), DEC_ZERO)
+    # Round the snapshot as a column, not each component independently:
+    # two 0.60 snapshots in a zero-decimal currency represent one unit.
+    entries = [(work, key) for key in work] + [(stored, key) for key in stored]
+    rounded = _allocate_to_cents([mapping[key] for mapping, key in entries], currency)
+    for (mapping, key), value in zip(entries, rounded, strict=True):
+        mapping[key] = value
+    rest = _q(_dec(held), currency) - sum(work.values(), DEC_ZERO) - sum(stored.values(), DEC_ZERO)
     if unbilled and rest > DEC_ZERO and any(weight > DEC_ZERO for weight in unbilled.values()):
-        work.update(allocate_cents(rest, unbilled))
+        positive = {key: value for key, value in unbilled.items() if value > DEC_ZERO}
+        weight_sum = sum(positive.values(), DEC_ZERO)
+        shares = _allocate_to_cents([rest * value / weight_sum for value in positive.values()], currency)
+        work.update(zip(positive, shares, strict=True))
     for index, row in enumerate(rows):
         on_work = work.get(index, DEC_ZERO)
         on_stored = stored.get(index, DEC_ZERO)
-        row["retainage_completed_work"] = _q(on_work)
-        row["retainage_stored_materials"] = _q(on_stored)
-        row["retainage"] = _q(on_work + on_stored)
+        row["retainage_completed_work"] = _q(on_work, currency)
+        row["retainage_stored_materials"] = _q(on_stored, currency)
+        row["retainage"] = _q(on_work + on_stored, currency)
     return rows
 
 
@@ -562,6 +584,7 @@ def build_g702_summary(
     change_orders_net: Decimal = DEC_ZERO,
     previous_certificates_total: Decimal = DEC_ZERO,
     previous_certificates_basis: str | None = None,
+    currency: str = "",
 ) -> dict[str, Any]:
     """Roll the G703 rows into the G702 summary (the certificate face).
 
@@ -584,6 +607,10 @@ def build_g702_summary(
     stored gross and retention, and is passed through so a reader of the
     figure can tell an exact line 7 from a rebuilt one.
     """
+    # Dependent cells must use the same rounded operands the reader sees.
+    original_contract_sum = _q(original_contract_sum, currency)
+    change_orders_net = _q(change_orders_net, currency)
+    previous_certificates_total = _q(previous_certificates_total, currency)
     contract_sum_to_date = original_contract_sum + change_orders_net
     total_completed_stored = sum((_dec(r["total_completed_stored"]) for r in g703_rows), DEC_ZERO)
     total_retainage = sum((_dec(r["retainage"]) for r in g703_rows), DEC_ZERO)
@@ -595,16 +622,16 @@ def build_g702_summary(
     balance_to_finish = contract_sum_to_date - total_earned_less_retainage
 
     return {
-        "original_contract_sum": _q(original_contract_sum),
-        "change_orders_net": _q(change_orders_net),
-        "contract_sum_to_date": _q(contract_sum_to_date),
-        "total_completed_stored": _q(total_completed_stored),
-        "retainage": _q(total_retainage),
-        "retainage_completed_work": _q(total_retainage - retainage_stored),
-        "retainage_stored_materials": _q(retainage_stored),
-        "total_earned_less_retainage": _q(total_earned_less_retainage),
-        "previous_certificates_total": _q(previous_certificates_total),
+        "original_contract_sum": _q(original_contract_sum, currency),
+        "change_orders_net": _q(change_orders_net, currency),
+        "contract_sum_to_date": _q(contract_sum_to_date, currency),
+        "total_completed_stored": _q(total_completed_stored, currency),
+        "retainage": _q(total_retainage, currency),
+        "retainage_completed_work": _q(total_retainage - retainage_stored, currency),
+        "retainage_stored_materials": _q(retainage_stored, currency),
+        "total_earned_less_retainage": _q(total_earned_less_retainage, currency),
+        "previous_certificates_total": _q(previous_certificates_total, currency),
         "previous_certificates_basis": previous_certificates_basis,
-        "current_payment_due": _q(current_payment_due),
-        "balance_to_finish": _q(balance_to_finish),
+        "current_payment_due": _q(current_payment_due, currency),
+        "balance_to_finish": _q(balance_to_finish, currency),
     }
