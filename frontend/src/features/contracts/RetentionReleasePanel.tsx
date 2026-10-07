@@ -486,7 +486,7 @@ export function RetentionReleasePanel({
                   </div>
                   <div>
                     <dt className={labelCls}>
-                      {t('contracts.release_amount', { defaultValue: 'Released' })}
+                      {t('finance.amount', { defaultValue: 'Amount' })}
                     </dt>
                     <dd className="font-semibold">{money(preview.amount)}</dd>
                   </div>

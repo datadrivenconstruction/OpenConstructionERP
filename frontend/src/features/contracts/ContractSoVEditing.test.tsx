@@ -434,3 +434,63 @@ describe('a claim just created', () => {
     expect(client.getQueryData(['contracts', 'claims', 'ctr-2'])).toMatchObject({ total: 1 });
   });
 });
+
+describe('invoice retention and approved contract retention are distinct', () => {
+  const emptyDescription = 'No invoice retention or payment withholding has been recorded on this project yet. Retainage appears here once invoices carry a retention amount or payments hold back a withholding.';
+
+  function seedRetention(finance: 'empty' | 'unavailable' | 'recorded') {
+    const previous = api.apiGet.getMockImplementation()!;
+    api.apiGet.mockImplementation((path: string) => {
+      if (path.startsWith('/v1/finance/retention-ledger/?')) {
+        if (finance === 'unavailable') return Promise.reject(new Error('Finance ledger unavailable'));
+        return Promise.resolve({
+          project_id: 'p-1', as_of: null, groups: [],
+          totals: finance === 'empty' ? [] : [{
+            currency_code: 'USD', direction: 'receivable', contact_id: null, counterparty_name: null,
+            scheduled: '1200', held_to_date: '800', released_to_date: '200', outstanding: '600',
+            payment_count: 1, released_pct: '25', outstanding_pct: '75', held_vs_scheduled_pct: null,
+            earliest_release_date: null, latest_release_date: null,
+          }],
+        });
+      }
+      if (path === `/v1/contracts/contracts/${CONTRACT_ID}/retention`) {
+        return Promise.resolve({
+          contract_id: CONTRACT_ID, currency: 'USD', accrued: '5000', released: '0', held: '5000',
+          pending_release: '0', available_for_release: '5000', releases: [],
+        });
+      }
+      return previous(path);
+    });
+  }
+
+  function invoiceCard() {
+    return screen.getByText('Across this project').parentElement!.parentElement!;
+  }
+
+  it('explains an empty invoice ledger while the real contract panel shows held retention', async () => {
+    seedRetention('empty');
+    renderDrawer(contract({ status: 'active' }));
+    expect(await screen.findByText(emptyDescription)).toBeTruthy();
+    expect(await screen.findAllByText('$5,000.00')).not.toHaveLength(0);
+    expect(within(invoiceCard()).queryByText('$5,000.00')).toBeNull();
+    expect(screen.queryByText('No retention held or scheduled yet.')).toBeNull();
+    expect(api.apiPost).not.toHaveBeenCalled();
+  });
+
+  it('keeps a finance read failure unavailable rather than claiming no records', async () => {
+    seedRetention('unavailable');
+    renderDrawer(contract({ status: 'active' }));
+    expect(await within(invoiceCard()).findByText('Retention ledger is unavailable right now.')).toBeTruthy();
+    expect(screen.queryByText(emptyDescription)).toBeNull();
+  });
+
+  it('keeps recorded finance amounts distinct from the contract retained balance', async () => {
+    seedRetention('recorded');
+    renderDrawer(contract({ status: 'active' }));
+    expect(await within(invoiceCard()).findByText('$800.00')).toBeTruthy();
+    expect(within(invoiceCard()).getByText('$600.00')).toBeTruthy();
+    expect(within(invoiceCard()).queryByText('$5,000.00')).toBeNull();
+    expect(await screen.findAllByText('$5,000.00')).not.toHaveLength(0);
+    expect(screen.queryByText(emptyDescription)).toBeNull();
+  });
+});

@@ -206,6 +206,12 @@ describe('<RetentionReleasePanel>', () => {
     fireEvent.click(screen.getByText('Preview'));
 
     expect(await screen.findByText('Propose this release')).toBeInTheDocument();
+    // Previewing a possible release has not paid any retention back.
+    expect(screen.getByText('Amount', { selector: 'dt' }).nextElementSibling)
+      .toHaveTextContent('$3,500.00');
+    expect(screen.getByText('Paid back', { selector: 'dt' }).nextElementSibling)
+      .toHaveTextContent('$0.00');
+    expect(screen.queryByText('Released', { selector: 'dt' })).not.toBeInTheDocument();
     expect(createMock).not.toHaveBeenCalled();
     // The withholding and the amount are the server's figures, printed as sent.
     expect(document.body.textContent).toContain('Withheld for open items');
