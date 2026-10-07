@@ -47100,6 +47100,9 @@ const resource = {
     "boq.rs_unconverted": "Wyłączono z sumy: {{amount}} {{currency}}",
     "boq.rs_unconverted_hint": "Brak prawidłowego kursu walutowego. Ustaw dodatni kurs w ustawieniach projektu, aby uwzględnić te kwoty.",
     // --- /Learn ---
+    "schedule.calendar.week_fallback": "Regionalny tydzień pracy jest niedostępny. Do planowania używany jest standardowy tydzień pracy.",
+    "schedule.calendar.holidays_missing": "Dane o dniach ustawowo wolnych od pracy dla lat {{years}} są niedostępne. Sprawdź kalendarz, zanim oprzesz się na tych datach.",
+    "schedule.calendar.holidays_partial": "Dane o dniach ustawowo wolnych od pracy dla lat {{years}} są niekompletne. Sprawdź kalendarz, zanim oprzesz się na tych datach.",
   }
 } as { translation: Record<string, string> };
 

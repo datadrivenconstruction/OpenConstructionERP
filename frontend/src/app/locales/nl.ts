@@ -46594,6 +46594,9 @@ const resource = {
     "boq.rs_unconverted": "Niet opgenomen in het totaal: {{amount}} {{currency}}",
     "boq.rs_unconverted_hint": "Geen bruikbare wisselkoers. Stel in de projectinstellingen een positieve wisselkoers in om deze bedragen op te nemen.",
     // --- /Learn ---
+    "schedule.calendar.week_fallback": "De regionale werkweek is niet beschikbaar. Voor de planning wordt een standaardwerkweek gebruikt.",
+    "schedule.calendar.holidays_missing": "Er zijn geen gegevens over officiële feestdagen beschikbaar voor {{years}}. Controleer de kalender voordat u op deze datums vertrouwt.",
+    "schedule.calendar.holidays_partial": "De gegevens over officiële feestdagen voor {{years}} zijn onvolledig. Controleer de kalender voordat u op deze datums vertrouwt.",
   }
 } as { translation: Record<string, string> };
 

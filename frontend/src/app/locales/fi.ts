@@ -45716,6 +45716,9 @@ const resource = {
     "boq.tax_date_hint": "Arvonlisävero lasketaan tänä päivänä voimassa olevan verokannan mukaan. Jätä tyhjäksi, jos haluat käyttää hintatason päivämäärää.",
     "boq.date_shape_error": "Anna päivä, kuukausi, vuosineljännes tai vuosi: 2026-03-15, 2026-03, 2026-Q1 tai 2026",
     // --- /Learn ---
+    "schedule.calendar.week_fallback": "Alueellista työviikkoa ei ole saatavilla. Suunnittelussa käytetään vakiotyöviikkoa.",
+    "schedule.calendar.holidays_missing": "Pyhäpäivätietoja ei ole saatavilla vuosille {{years}}. Tarkista kalenteri ennen kuin luotat näihin päivämääriin.",
+    "schedule.calendar.holidays_partial": "Vuosien {{years}} pyhäpäivätiedot ovat puutteelliset. Tarkista kalenteri ennen kuin luotat näihin päivämääriin.",
   }
 } as { translation: Record<string, string> };
 

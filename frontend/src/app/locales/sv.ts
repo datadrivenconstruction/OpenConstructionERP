@@ -46327,6 +46327,9 @@ const resource = {
     "boq.tax_date_hint": "Moms beräknas med den skattesats som gäller detta datum. Lämna tomt för att använda prisbasdatumet.",
     "boq.date_shape_error": "Ange en dag, en månad, ett kvartal eller ett år: 2026-03-15, 2026-03, 2026-Q1 eller 2026",
     // --- /Learn ---
+    "schedule.calendar.week_fallback": "Den regionala arbetsveckan är inte tillgänglig. En standardvecka används för planeringen.",
+    "schedule.calendar.holidays_missing": "Uppgifter om helgdagar saknas för {{years}}. Kontrollera kalendern innan du förlitar dig på dessa datum.",
+    "schedule.calendar.holidays_partial": "Uppgifterna om helgdagar för {{years}} är ofullständiga. Kontrollera kalendern innan du förlitar dig på dessa datum.",
   }
 } as { translation: Record<string, string> };
 

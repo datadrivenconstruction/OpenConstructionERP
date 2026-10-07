@@ -311,6 +311,18 @@ beforeEach(() => {
 });
 
 describe('generating from a BOQ', () => {
+  it('shows holiday coverage from the refreshed schedule record, not the stale list row', async () => {
+    state.record = { ...SCHEDULE, start_date: '2026-12-21', end_date: '2027-01-05', metadata_: {
+      calendar: { work_days: [0, 1, 2, 3, 4], regional_holiday_country: 'DE', holiday_coverage: [
+        { year: 2026, applied: true, jurisdiction: { source: 'declared' },
+          effective_year: { source: 'declared' }, holiday_extent: { source: 'fallback' } },
+      ] },
+    } };
+    renderDetail();
+    expect(await screen.findByText(/coverage is incomplete for 2026/)).toBeInTheDocument();
+    expect(screen.getByText(/are not available for 2027/)).toBeInTheDocument();
+  });
+
   it('reads Regenerate once the schedule has activities', async () => {
     state.activities = THREE;
     renderDetail();

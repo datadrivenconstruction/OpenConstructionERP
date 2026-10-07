@@ -45692,6 +45692,9 @@ const resource = {
     "boq.tax_date_placeholder": "Kapareho ng petsa ng batayang presyo",
     "boq.tax_date_hint": "Sinisingil ang VAT sa rate na umiiral sa petsang ito. Iwanang blangko para gamitin ang petsa ng batayang presyo.",
     "boq.date_shape_error": "Gumamit ng araw, buwan, quarter o taon: 2026-03-15, 2026-03, 2026-Q1 o 2026",
+    "schedule.calendar.week_fallback": "Hindi available ang rehiyonal na linggo ng trabaho. Karaniwang linggo ang ginagamit sa pagpaplano.",
+    "schedule.calendar.holidays_missing": "Walang datos ng mga pampublikong pista opisyal para sa {{years}}. Suriin ang kalendaryo bago umasa sa mga petsang ito.",
+    "schedule.calendar.holidays_partial": "Hindi kumpleto ang datos ng mga pampublikong pista opisyal para sa {{years}}. Suriin ang kalendaryo bago umasa sa mga petsang ito.",
   }
 } as { translation: Record<string, string> };
 

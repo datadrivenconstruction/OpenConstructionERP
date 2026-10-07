@@ -47018,6 +47018,9 @@ const resource = {
     "boq.tax_date_placeholder": "価格基準日と同じ",
     "boq.tax_date_hint": "消費税はこの日に有効な税率で計算されます。価格基準日を使う場合は空欄のままにしてください。",
     "boq.date_shape_error": "日、月、四半期、または年で入力してください: 2026-03-15、2026-03、2026-Q1、2026",
+    "schedule.calendar.week_fallback": "地域の週間勤務日設定を利用できないため、標準の週間設定で計画します。",
+    "schedule.calendar.holidays_missing": "{{years}} 年の祝日データを利用できません。これらの日付を前提にする前に、カレンダーを確認してください。",
+    "schedule.calendar.holidays_partial": "{{years}} 年の祝日データは不完全です。これらの日付を前提にする前に、カレンダーを確認してください。",
   }
 } as { translation: Record<string, string> };
 

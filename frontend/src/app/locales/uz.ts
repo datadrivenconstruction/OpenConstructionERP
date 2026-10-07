@@ -46628,6 +46628,9 @@ const resource = {
     "boq.tax_date_placeholder": "Narx bazasi sanasi bilan bir xil",
     "boq.tax_date_hint": "QQS shu sanada amalda boʻlgan stavka boʻyicha hisoblanadi. Narx bazasi sanasidan foydalanish uchun boʻsh qoldiring.",
     "boq.date_shape_error": "Kun, oy, chorak yoki yilni kiriting: 2026-03-15, 2026-03, 2026-Q1 yoki 2026",
+    "schedule.calendar.week_fallback": "Mintaqaviy ish haftasi mavjud emas. Rejalashtirish uchun standart hafta ishlatiladi.",
+    "schedule.calendar.holidays_missing": "{{years}} yillari uchun rasmiy bayram kunlari maʼlumotlari mavjud emas. Ushbu sanalarga tayanishdan oldin taqvimni tekshiring.",
+    "schedule.calendar.holidays_partial": "{{years}} yillari uchun rasmiy bayram kunlari maʼlumotlari toʻliq emas. Ushbu sanalarga tayanishdan oldin taqvimni tekshiring.",
   }
 } as { translation: Record<string, string> };
 

@@ -42956,6 +42956,9 @@ const resource = {
     "boq.rs_unconverted": "Excluido del total: {{amount}} {{currency}}",
     "boq.rs_unconverted_hint": "No hay un tipo de cambio válido. Establece un tipo de cambio positivo en la configuración del proyecto para incluir estos montos.",
     // --- /Learn ---
+    "schedule.calendar.week_fallback": "La semana laboral regional no está disponible. Se utiliza una semana de planificación estándar.",
+    "schedule.calendar.holidays_missing": "No hay datos de días festivos para {{years}}. Revise el calendario antes de basarse en estas fechas.",
+    "schedule.calendar.holidays_partial": "Los datos de días festivos para {{years}} están incompletos. Revise el calendario antes de basarse en estas fechas.",
   }
 } as { translation: Record<string, string> };
 

@@ -45485,6 +45485,9 @@ const resource = {
     "boq.tax_date_placeholder": "Sama dengan tanggal dasar harga",
     "boq.tax_date_hint": "PPN dikenakan dengan tarif yang berlaku pada tanggal ini. Kosongkan untuk memakai tanggal dasar harga.",
     "boq.date_shape_error": "Gunakan hari, bulan, kuartal, atau tahun: 2026-03-15, 2026-03, 2026-Q1, atau 2026",
+    "schedule.calendar.week_fallback": "Pekan kerja regional tidak tersedia. Pekan standar digunakan untuk perencanaan.",
+    "schedule.calendar.holidays_missing": "Data hari libur nasional untuk {{years}} tidak tersedia. Periksa kalender sebelum mengandalkan tanggal-tanggal ini.",
+    "schedule.calendar.holidays_partial": "Data hari libur nasional untuk {{years}} belum lengkap. Periksa kalender sebelum mengandalkan tanggal-tanggal ini.",
   }
 } as { translation: Record<string, string> };
 

@@ -45654,6 +45654,9 @@ const resource = {
     "boq.tax_date_hint": "Käibemaks arvestatakse sellel kuupäeval kehtiva määraga. Jätke tühjaks, et kasutada hinnabaasi kuupäeva.",
     "boq.date_shape_error": "Sisestage päev, kuu, kvartal või aasta: 2026-03-15, 2026-03, 2026-Q1 või 2026",
     // --- /Learn ---
+    "schedule.calendar.week_fallback": "Piirkondlik töönädal pole saadaval. Planeerimisel kasutatakse standardset töönädalat.",
+    "schedule.calendar.holidays_missing": "Aastate {{years}} riigipühade andmed pole saadaval. Kontrollige kalendrit enne nendele kuupäevadele tuginemist.",
+    "schedule.calendar.holidays_partial": "Aastate {{years}} riigipühade andmed on puudulikud. Kontrollige kalendrit enne nendele kuupäevadele tuginemist.",
   }
 } as { translation: Record<string, string> };
 

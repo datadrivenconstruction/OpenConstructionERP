@@ -81,6 +81,7 @@ import {
 import { ActivityGrid } from './ActivityGrid';
 import { ancestorsOf, hideCollapsed, orderAsTree, parentIdsOf } from './activityTree';
 import { WorkCalendarManager } from './WorkCalendarManager';
+import { CalendarCoverageNotice } from './CalendarCoverageNotice';
 import { ScheduleSpreadsheetImportDialog } from './tabularImport/ScheduleSpreadsheetImportDialog';
 import { SpreadsheetImportEntry } from './tabularImport/SpreadsheetImportEntry';
 import { scheduleGuide } from './scheduleGuide';
@@ -205,23 +206,8 @@ function statusColor(status: string): {
   }
 }
 
-/* ── Work Calendar Info ────────────────────────────────────────────────── */
 
-const WORK_CALENDAR_INFO: Record<string, { hours: number; days: number }> = {
-  DACH: { hours: 8, days: 5 },
-  UK: { hours: 8, days: 5 },
-  US: { hours: 8, days: 5 },
-  GULF: { hours: 10, days: 6 },
-  RU: { hours: 8, days: 5 },
-  // Backend maps NORDIC -> DACH (8h/5d); keep the fallback in sync.
-  NORDIC: { hours: 8, days: 5 },
-  FRANCE: { hours: 7, days: 5 },
-  BRAZIL: { hours: 8, days: 6 },
-  CHINA: { hours: 8, days: 6 },
-  INDIA: { hours: 8, days: 6 },
-  CANADA: { hours: 8, days: 5 },
-  SPAIN: { hours: 8, days: 5 },
-};
+
 
 /* ── Modal Overlay ─────────────────────────────────────────────────────── */
 
@@ -1275,26 +1261,6 @@ export function ScheduleDetail({
   // (never mislabel a non-EUR amount). The activity cost columns are all
   // project-scoped so they share this single currency.
   const projectCurrency = projectData?.currency ?? '';
-  // Resolve the work calendar from the backend so the badge matches the
-  // hours-per-day / days-per-week the schedule math actually uses. The
-  // client-side WORK_CALENDAR_INFO map only covers 12 exact keys and diverges
-  // for stored region values like "Middle East" / "United States" / "DE_BERLIN"
-  // / "NORDIC"; it is kept only as a pre-fetch fallback.
-  const { data: workCalendar } = useQuery({
-    queryKey: ['work-calendar', projectId],
-    queryFn: () =>
-      apiGet<{ region: string | null; hours_per_day: number; work_days_per_week: number; label: string }>(
-        `/v1/schedule/work-calendar/?project_id=${projectId}`,
-      ),
-    enabled: !!projectId,
-    staleTime: 300_000,
-  });
-  const fallbackCal =
-    WORK_CALENDAR_INFO[projectData?.region ?? ''] ?? WORK_CALENDAR_INFO['DACH'] ?? { hours: 8, days: 5 };
-  const calInfo = workCalendar
-    ? { hours: workCalendar.hours_per_day, days: workCalendar.work_days_per_week }
-    : fallbackCal;
-
   const { data: ganttData, isLoading } = useQuery({
     queryKey: ['gantt', schedule.id],
     queryFn: () => scheduleApi.getGantt(schedule.id),
@@ -1771,15 +1737,7 @@ export function ScheduleDetail({
                 })}
               </Badge>
             )}
-            {/* Work calendar indicator */}
-            <Badge variant="neutral" size="sm" className="flex items-center gap-1">
-              <Clock size={11} />
-              {t('schedule.work_calendar', {
-                defaultValue: '{{hours}}h/day, {{days}} days/week',
-                hours: String(calInfo.hours),
-                days: String(calInfo.days),
-              })}
-            </Badge>
+            <CalendarCoverageNotice schedule={{ ...schedule, ...scheduleRecord }} />
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
