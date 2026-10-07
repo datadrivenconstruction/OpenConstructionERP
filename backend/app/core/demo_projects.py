@@ -3081,7 +3081,19 @@ def _make_resources(
         code = f"{cwicr_ref}-{code_suffix}{type_counter[res_type]}"
         share = (rate_dec * Decimal(str(pct))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
-        res: dict = {"name": name, "code": code, "type": res_type}
+        res: dict = {
+            "name": name,
+            "code": code,
+            "type": res_type,
+            # Cost allocation is not evidence of physical productivity.
+            "demo_provenance": {
+                "source": "synthetic_cost_allocation",
+                "quantity_basis": "price_share_divided_by_hourly_rate"
+                if hourly_rate and hourly_rate > 0
+                else "allowance",
+                "productivity_verified": False,
+            },
+        }
         if hourly_rate and hourly_rate > 0:
             hourly = Decimal(str(hourly_rate))
             qty = (share / hourly).quantize(_HOURLY_QUANTITY_PLACES, rounding=ROUND_HALF_UP)
@@ -3316,6 +3328,11 @@ def _resources_for_position(
                 "unit_rate": format(leaf_rate, "f"),
                 "quantity": 1.0,
                 "estimated": True,
+                "demo_provenance": {
+                    "source": "synthetic_cost_allocation",
+                    "quantity_basis": "allowance",
+                    "productivity_verified": False,
+                },
             }
         )
     return out
@@ -3364,10 +3381,11 @@ def _explicit_resources(
 ) -> list[dict] | None:
     """Build the leaves of a hand-written build-up, or ``None`` if it does not add up.
 
-    Each row is a real norm: a quantity per unit of the position (metres of
+    Each row supplies a quantity per unit of the position (metres of
     stud per m2 of wall, hours per m2) against a unit rate. Nothing is scaled
     or absorbed, because a remainder pushed into one row would turn a quoted
-    price into an invented one. The rows either sum to the position's unit
+    price into an invented one. This validates arithmetic, not external
+    productivity provenance. The rows either sum to the position's unit
     rate to the cent or they are refused.
 
     Args:
@@ -3395,6 +3413,11 @@ def _explicit_resources(
                 "quantity": float(quantity),
                 "unit_rate": float(rate),
                 "total": float(money),
+                "demo_provenance": {
+                    "source": "template_explicit_build_up",
+                    "quantity_basis": "template_quantity",
+                    "productivity_verified": False,
+                },
             }
         )
     if money_sum != Decimal(str(unit_rate)):
