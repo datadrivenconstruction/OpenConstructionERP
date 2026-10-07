@@ -620,6 +620,9 @@ PREVIOUS_CERTIFICATES_RECONSTRUCTED = "reconstructed"
 #: (its snapshot of lines 4 and 5), which is what the form asks for.
 PREVIOUS_CERTIFICATES_SNAPSHOT = "snapshot"
 
+#: Server-owned cohort marker; absent on claims issued before this calculation.
+OUTSIDE_SOV_RETENTION_VERSION = "outside_sov_retention_version"
+
 #: Contract types billed without a schedule of values. Their claims keep the
 #: flat retention their generator works out; the engine needs SoV lines to
 #: measure percent complete on.
@@ -2960,7 +2963,7 @@ class ContractsService:
             **claim_dates_for_write(period),
             currency=data.currency or contract.currency,
             milestone_id=getattr(data, "milestone_id", None),
-            metadata_=data.metadata,
+            metadata_={**(data.metadata or {}), OUTSIDE_SOV_RETENTION_VERSION: 1},
             status="draft",
         )
         return await self.claim_repo.create(claim)
@@ -3027,6 +3030,12 @@ class ContractsService:
                         "locked_fields": frozen,
                     },
                 )
+        if "metadata_" in fields:
+            metadata = dict(fields["metadata_"] or {})
+            metadata.pop(OUTSIDE_SOV_RETENTION_VERSION, None)
+            if OUTSIDE_SOV_RETENTION_VERSION in (claim.metadata_ or {}):
+                metadata[OUTSIDE_SOV_RETENTION_VERSION] = claim.metadata_[OUTSIDE_SOV_RETENTION_VERSION]
+            fields = {**fields, "metadata_": metadata}
         if "metadata_" in fields and PRIOR_CLAIM_IDS_KEY in (claim.metadata_ or {}):
             # The claims this one counted as previous when it went out. A
             # metadata write must not change them, or the issued claim would
@@ -5505,6 +5514,42 @@ class ContractsService:
             currency=getattr(claim, "currency", None) or getattr(contract, "currency", None),
         )
 
+    async def _outside_sov_claim_retention(self, contract: Contract, claim: ProgressClaim, gross: Decimal) -> Decimal:
+        """Use the current SOV ladder rate for eligible new outside-SOV drafts.
+
+        Previous issued SOV work selects the rate. Outside-SOV money and stored
+        materials do not advance that measure. Legacy claims, instalments and
+        cost-based contracts retain their existing calculation; this helper is
+        deliberately separate from previews that are about to create SOV lines.
+        """
+        contract_sum = Decimal(str(contract.total_value or 0))
+        if (
+            (claim.metadata_ or {}).get(OUTSIDE_SOV_RETENTION_VERSION) != 1
+            or claim.status != "draft"
+            or contract.contract_type in FLAT_RETENTION_CONTRACT_TYPES
+            or claim.gross_basis == MILESTONE_GROSS_BASIS
+            or contract_sum <= DEC_ZERO
+            or not await self.line_repo.list_for_contract(contract.id)
+        ):
+            return await self.flat_claim_retention(contract, claim, gross)
+
+        policy = await self.retention_policy(contract)
+        prior_work = await self.claim_line_repo.prior_period_value_by_line(contract.id, before_claim_id=claim.id)
+        rate = policy.rate_at(retention_percent_complete(sum(prior_work.values(), DEC_ZERO), contract_sum))
+        accrued_before = DEC_ZERO
+        if policy.cap_percent_of_contract_sum is not None:
+            ordered = await self.claim_repo.ordered_for_contract(contract.id)
+            earlier = [c for c in claims_before(ordered, claim.id) if c.status != "rejected"]
+            accrued_before = sum((Decimal(str(c.retention_amount or 0)) for c in earlier), DEC_ZERO)
+        return flat_retention_within_cap(
+            gross,
+            rate,
+            cap_percent=policy.cap_percent_of_contract_sum,
+            contract_sum=contract_sum,
+            accrued_before=accrued_before,
+            currency=claim.currency or contract.currency,
+        )
+
     async def _progress_billing(self, contract: Contract) -> dict[str, Any] | None:
         """The progress billing block of the project's national pack, or None when none answers."""
         from app.core.regional_packs import resolve_progress_billing  # noqa: PLC0415
@@ -5556,13 +5601,11 @@ class ContractsService:
     def _uses_flat_retention(self, contract: Contract, claim: ProgressClaim, lines: list[Any]) -> bool:
         """Cost-plus and T&M claims, and a claim that carries a gross with no lines behind it.
 
-        Those keep the flat retention their generator worked out: there is no
-        schedule of values for the engine to measure percent complete on.
-
-        The lineless claim is held at the contract's flat retention percent
-        even where a retention schedule sets a ladder, because the ladder
-        measures percent complete on schedule lines and this money is on none
-        of them (see the flat branch of :meth:`roll_claim_retention`).
+        These bypass per-line accrual. Cost-based and milestone claims keep
+        their flat rate. Eligible new lineless drafts instead select a ladder
+        rate from prior SOV work, without advancing that work by their own
+        gross (see the flat branch of :meth:`roll_claim_retention`). Legacy
+        lineless claims retain their original flat-rate calculation.
         """
         if contract.contract_type in FLAT_RETENTION_CONTRACT_TYPES:
             return True
@@ -5692,34 +5735,18 @@ class ContractsService:
             # the column existed records nothing and behaves as it always did.
             if (lines or gross_follows_lines) and claim.gross_basis not in GROSS_FIXED_BASES:
                 gross = sum((Decimal(str(line.period_completed_value or 0)) for line in lines), DEC_ZERO)
-            # Retention is derived from the gross and the contract's rate here
-            # rather than read back off the claim. It used to be preserved
-            # whenever the gross was, which is the same number for every claim
-            # any current writer produces, because every generator computes it
-            # with this formula. What it is not is a guarantee: a future writer
-            # that sets a gross and forgets the retention would have billed the
-            # whole gross with nothing held and said nothing about it, in the
-            # direction of paying out too much. The ladder branch below already
-            # restates retention in full, so the flat branch preserving it was
-            # the odd one out rather than a decision.
-            #
-            # The rate is the contract's own flat percentage, and that holds
-            # for a claim with a gross and no lines on a contract whose
-            # retention the engine otherwise works out, on a ladder too. That
-            # is a decision, not a gap. A ladder is a rate against percent
-            # complete on the schedule of values, and money no schedule line
-            # carries is not on that measure: whether the ladder has stepped
-            # down says nothing about it. So it is held at the rate the
-            # contract states, even past the point where the ladder has
-            # stopped retaining on the schedule, and the certificate carries
-            # it on a row of its own that a release pays back like any other
-            # retention (outside_schedule_retention_held).
+            # Derive retention from the current gross rather than trusting a
+            # generator's previously written amount.
+            # Eligible new outside-SOV drafts use the ladder rate selected by
+            # prior SOV work. The outside money does not advance completion.
+            # Unstamped legacy claims and cost/milestone claims keep the old
+            # flat calculation. Neither path rewrites earlier certificates.
             # A deposit instalment holds no retention: it is paid before there
             # is work for retention to secure.
             if await self._is_deposit_claim(claim):
                 retention = DEC_ZERO
             else:
-                retention = await self.flat_claim_retention(contract, claim, gross)
+                retention = await self._outside_sov_claim_retention(contract, claim, gross)
             billed_here = await self.release_repo.billed_on_claims([claim.id])
             released_here = sum((Decimal(str(r.amount or 0)) for r in billed_here), DEC_ZERO)
             net = gross - retention + released_here

@@ -183,6 +183,12 @@ async def _schedule_month(svc, session, job, month, bills):
 
 async def _lineless_month(svc, session, job, month, gross):
     claim = await _claim(svc, job, month)
+    # These historical certificate cases deliberately represent pre-change
+    # claims. Remove only the new server stamp in the fixture, never through
+    # the public PATCH path; keep every existing monetary expectation intact.
+    legacy_metadata = dict(claim.metadata_ or {})
+    legacy_metadata.pop("outside_sov_retention_version", None)
+    await svc.claim_repo.update_fields(claim.id, metadata_=legacy_metadata)
     await svc.claim_repo.update_fields(claim.id, gross_amount=Decimal(gross))
     await svc.roll_claim_retention(claim.id)
     return await _certify(svc, session, claim, engine_worked=False)

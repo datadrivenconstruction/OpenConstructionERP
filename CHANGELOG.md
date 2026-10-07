@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- New eligible outside-SOV progress claims use the retention ladder rate selected by prior SOV work, with existing caps and currency precision. Claims created before this change keep their flat-rate calculation, and issued certificates are not recalculated. Milestone, cost-plus and time-and-materials claims retain their existing rules.
 - Progress claims expose country-independent payment-application figures through `/progress-claims/{id}/payment-application`, using the same calculations and project access checks as the existing regional AIA view. The AIA JSON and PDF endpoints retain their country restrictions.
 - Bills can keep a tax date separately from the date their prices refer to. VAT uses the tax date when one is supplied, and otherwise keeps using the price reference date. Both dates survive copying a bill or creating a revision; impossible calendar dates are refused in the form.
 - Administrators can preview and apply shipped country, work-calendar and tax-reference updates from Regional settings or the command line. Locally created or edited rows are preserved, conflicting rates are left for review, and concurrent applications do not duplicate delivered rows.

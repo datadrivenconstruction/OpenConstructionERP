@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Money no schedule line carries is held at the contract's own rate, whatever a ladder says.
+"""Legacy money outside the schedule keeps its original flat-rate calculation.
 
 A retention ladder is a rate against percent complete on the schedule of
 values: here 10% until the job is half done, then nothing. A month billed
@@ -9,9 +9,9 @@ flat retention percent the contract states, even at a point where the ladder
 has stopped retaining on the schedule, and the continuation sheet carries it
 on a row of its own.
 
-This pins that choice. A change that starts reading the ladder for such money
-would hold nothing on it past half way, and has to change this test and say
-why.
+This pins the pre-change cohort, explicitly unstamped by _lineless_month.
+MISC-06 changes new eligible claims only; these historical amounts and their
+certificate accounting must not be rewritten to the new ladder rate.
 """
 
 from __future__ import annotations
@@ -38,7 +38,7 @@ def _rules():
     register_contracts_validation_rules()
 
 
-async def test_a_lineless_month_past_the_ladder_step_is_held_at_the_contract_rate(pg_session) -> None:
+async def test_a_legacy_lineless_month_past_the_ladder_step_keeps_the_contract_rate(pg_session) -> None:
     svc = ContractsService(pg_session)
     job = await _job(pg_session, [("A", "100000"), ("B", "100000")], ladder=LADDER_ZERO_PAST_HALF)
     await _schedule_month(svc, pg_session, job, 1, {"A": "100000"})
