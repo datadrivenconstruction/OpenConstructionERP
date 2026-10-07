@@ -48,9 +48,9 @@ endpoint is changed by merely importing this module - it is plumbing plus
 one or two reference usages until Phase 2 rolls it out per module.
 
 This is the app-layer half of the multi-tenant plan. PostgreSQL-native
-RLS is a later, optional phase and is a deliberate no-op today (the
-embedded cluster connects as the ``postgres`` superuser, which bypasses
-RLS unless every table also sets ``FORCE ROW LEVEL SECURITY``).
+RLS is a later, optional phase and is disabled by default. PostgreSQL
+superusers and BYPASSRLS roles bypass policies even with ``FORCE ROW LEVEL
+SECURITY``; enforced requests therefore need a separate non-bypassing role.
 
 Import safety
 -------------
