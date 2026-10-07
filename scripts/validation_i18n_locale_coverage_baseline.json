@@ -27,9 +27,11 @@
       "ro",
       "ru",
       "sv",
+      "th",
       "tr",
       "uk",
       "uz",
+      "vi",
       "zh"
     ],
     "backend/app/modules/bcf/messages": [

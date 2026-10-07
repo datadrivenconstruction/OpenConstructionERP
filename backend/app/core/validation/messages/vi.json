@@ -1,0 +1,868 @@
+{
+  "boq_markup": {
+    "contingency_not_on_profit": {
+      "fail": "Dự phòng \"{markup}\" được tính trên cơ sở đã bao gồm dòng lợi nhuận \"{profit}\", nên phần tiền dành cho rủi ro cũng bị tính thêm lợi nhuận",
+      "suggestion": "Áp dụng dòng này cho chi phí trực tiếp, trừ khi phương pháp tiêu chuẩn của thị trường chủ ý đặt dự phòng rủi ro sau chi phí chung và lợi nhuận"
+    },
+    "order_is_declared": {
+      "fail": "Nhiều dòng phụ phí cùng dùng vị trí {order} trong thứ tự: {markups}",
+      "suggestion": "Gán vị trí riêng cho từng dòng phụ phí để xác định rõ dòng nào được tính cộng dồn trên dòng nào"
+    },
+    "percentage_within_band": {
+      "fail": "\"{markup}\" có tỷ lệ {percentage}% thuộc loại {category}, nằm ngoài khoảng hợp lý từ 0 đến {ceiling}%",
+      "suggestion": "Kiểm tra dấu thập phân. Trong mọi trường hợp, dòng này được tính đúng theo giá trị đã nhập"
+    },
+    "cumulative_base_is_settled": {
+      "fail": "\"{markup}\" áp dụng cho \"{apply_to}\" nhưng không có dòng nào đứng trước, nên chỉ được tính trên chi phí trực tiếp",
+      "suggestion": "Chuyển dòng này xuống sau các dòng cần tính cộng dồn hoặc áp dụng cho chi phí trực tiếp"
+    }
+  },
+  "common": {
+    "ok": "Hợp lệ"
+  },
+  "export": {
+    "generated": "Đã tạo",
+    "content_digest": "Mã băm nội dung"
+  },
+  "field_time": {
+    "hours_per_day_max": {
+      "fail": "Người lao động {worker} được ghi nhận {hours} giờ trong ngày này, vượt giới hạn {max} giờ",
+      "suggestion": "Phân bổ giờ cho đúng ngày hoặc đúng người lao động trước khi gửi"
+    },
+    "line_complete": {
+      "fail": "Dòng {line} chưa đầy đủ: {reason}",
+      "labour_xor_plant": "phải ghi nhận đúng một trong hai loại: nhân công hoặc máy thi công; không được chọn cả hai hoặc bỏ trống cả hai",
+      "hours_positive": "số giờ phải lớn hơn không",
+      "cost_code_required": "bắt buộc có mã chi phí",
+      "suggestion": "Hoàn thiện dòng này trước khi gửi bảng chấm công"
+    },
+    "cost_code_resolves": {
+      "fail": "Mã '{code}' tại dòng {line} không khớp với công tác trong bảng khối lượng hoặc WBS nào của dự án này",
+      "suggestion": "Chọn mã chi phí hoặc WBS có trong bảng khối lượng của dự án"
+    },
+    "daywork_needs_variation": {
+      "fail": "Dòng công nhật {line} chưa được liên kết với một thay đổi đang mở",
+      "suggestion": "Liên kết công nhật với thay đổi đã chỉ thị thực hiện công việc đó"
+    },
+    "plant_needs_equipment": {
+      "fail": "Dòng máy thi công {line} chưa chỉ rõ thiết bị",
+      "suggestion": "Gắn máy vào dòng để có thể tính chi phí giờ máy"
+    },
+    "approved_immutable": {
+      "fail": "Bảng chấm công này ở trạng thái {status} và không thể chỉnh sửa",
+      "suggestion": "Ghi một bảng chấm công đảo để điều chỉnh số giờ đã duyệt"
+    },
+    "offline_clock_plausible": {
+      "fail": "Thiết bị ghi nhận ngày này chạy nhanh hơn đồng hồ máy chủ {minutes} phút",
+      "suggestion": "Đặt lại đồng hồ thiết bị để các thời điểm được ghi nhận theo đúng thứ tự"
+    },
+    "offline_sync_delay": {
+      "fail": "Ngày công này được thực hiện vào {date} nhưng {days} ngày sau mới gửi đến văn phòng",
+      "suggestion": "Đối chiếu số giờ với ngày thực tế trước khi duyệt vì kỳ xác định giá trị có thể đã khóa"
+    }
+  },
+  "ai_takeoff": {
+    "unreviewed_proposals": {
+      "fail": "{count} đề xuất bóc tách khối lượng vẫn chờ xem xét và chưa được tính giá ở đây",
+      "suggestion": "Xử lý hàng đợi xem xét để khối lượng đã xác nhận khớp với bản vẽ"
+    }
+  },
+  "boq_quality": {
+    "position_has_quantity": {
+      "fail": "Công tác {ordinal} không được có khối lượng bằng không hoặc thiếu khối lượng",
+      "suggestion": "Đặt khối lượng lớn hơn 0"
+    },
+    "position_has_unit_rate": {
+      "fail": "Công tác {ordinal} cần được gán đơn giá",
+      "suggestion": "Gán đơn giá từ cơ sở dữ liệu chi phí"
+    },
+    "position_has_description": {
+      "fail": "Công tác {ordinal} không được để trống mô tả"
+    },
+    "no_duplicate_ordinals": {
+      "fail": "Số thứ tự '{ordinal}' bị trùng ở {count} công tác"
+    },
+    "unit_rate_in_range": {
+      "fail": "Công tác {ordinal}: đơn giá {rate} >{threshold} (gấp 5 lần trung vị)",
+      "suggestion": "Kiểm tra đơn giá này vì giá cao bất thường"
+    },
+    "negative_values": {
+      "fail": "Công tác {ordinal} có giá trị âm ở {details}",
+      "suggestion": "Sửa các giá trị âm, sử dụng số dương"
+    },
+    "unrealistic_rate": {
+      "fail": "Công tác {ordinal}: {details}",
+      "suggestion": "Kiểm tra giá trị này vì có vẻ cao không thực tế",
+      "not_assessed_no_currency": "{count} công tác chưa được đánh giá: bảng khối lượng không nêu tiền tệ, nên không thể quy đổi các ngưỡng tiền (được ghi bằng {reference}) sang tiền tệ của bảng",
+      "not_assessed_no_currency_suggestion": "Đặt tiền tệ cho dự án hoặc ghi tiền tệ trên các công tác",
+      "not_assessed_no_rate": "{count} công tác bằng {currency} chưa được đánh giá: chưa có tỷ giá từ {reference} sang {currency}, nên không thể quy đổi các ngưỡng tiền cho bảng khối lượng này",
+      "not_assessed_no_rate_suggestion": "Thêm tỷ giá từ {reference} sang {currency} vào sổ tỷ giá hoặc danh sách tỷ giá của dự án"
+    },
+    "total_mismatch": {
+      "fail": "Công tác {ordinal}: giá trị tính toán {computed} != giá trị đã lưu {stored} (chênh lệch={diff})",
+      "suggestion": "Tính lại thành tiền = khối lượng × đơn giá"
+    },
+    "resource_split_mismatch": {
+      "fail": "Công tác {ordinal}: tổng chi phí nguồn lực {subtotal} chênh lệch {diff} so với đơn giá {rate}",
+      "suggestion": "Kiểm tra lượng và giá nguồn lực; tổng chi phí nguồn lực trên một đơn vị phải khớp với đơn giá công tác"
+    },
+    "empty_unit": {
+      "fail": "Công tác {ordinal} để trống hoặc thiếu đơn vị",
+      "suggestion": "Gán đơn vị đo (m, m2, m3, kg, cái, trọn gói, v.v.)"
+    },
+    "section_without_items": {
+      "fail": "Mục {ordinal} ({title}) không có công tác con",
+      "suggestion": "Thêm công tác vào mục này hoặc xóa mục trống"
+    },
+    "rate_vs_benchmark": {
+      "fail": "Công tác {ordinal}: đơn giá {rate}/{unit} vượt ngưỡng tham chiếu {threshold}/{unit}, có thể không thực tế",
+      "suggestion": "Kiểm tra đơn giá này; đơn giá điển hình cho {unit} phải dưới {threshold}. Kiểm tra lỗi đơn vị hoặc dấu thập phân.",
+      "not_assessed_no_currency": "{count} công tác chưa được đánh giá: bảng khối lượng không nêu tiền tệ, nên không thể quy đổi các ngưỡng tham chiếu (được ghi bằng {reference}) sang tiền tệ của bảng",
+      "not_assessed_no_currency_suggestion": "Đặt tiền tệ cho dự án hoặc ghi tiền tệ trên các công tác",
+      "not_assessed_no_rate": "{count} công tác bằng {currency} chưa được đánh giá: chưa có tỷ giá từ {reference} sang {currency}, nên không thể quy đổi các ngưỡng tham chiếu cho bảng khối lượng này",
+      "not_assessed_no_rate_suggestion": "Thêm tỷ giá từ {reference} sang {currency} vào sổ tỷ giá hoặc danh sách tỷ giá của dự án"
+    },
+    "lump_sum_ratio": {
+      "fail": "{lsum_count} trong tổng số {total_count} công tác ({percent}) dùng giá trọn gói, vượt ngưỡng {threshold}",
+      "suggestion": "Phân chia công tác trọn gói thành khối lượng đo được (m, m2, m3, kg, cái) để tăng độ chính xác của dự toán"
+    },
+    "cost_concentration": {
+      "fail": "Công tác {ordinal} chiếm {share} tổng chi phí bảng khối lượng ({value} trên {grand_total}), vượt ngưỡng {threshold}",
+      "suggestion": "Chia công tác này thành các phần nhỏ hơn hoặc kiểm tra chi phí; một công tác không nên chi phối dự toán"
+    },
+    "currency_consistency": {
+      "fail": "Phát hiện nhiều loại tiền tệ: {currencies}",
+      "suggestion": "Sử dụng một loại tiền tệ thống nhất trong toàn bộ bảng khối lượng"
+    },
+    "measurement_consistency": {
+      "fail": "Bảng khối lượng trộn đơn vị hệ mét và hệ Anh; hãy thống nhất một hệ đơn vị",
+      "suggestion": "Quy đổi toàn bộ khối lượng sang hệ mét hoặc hệ Anh"
+    },
+    "revision_cost_impact_review": {
+      "fail": "Tác động chi phí {amount} của bản sửa đổi chưa được ghi nhận thành thay đổi",
+      "suggestion": "Tạo dự thảo yêu cầu thay đổi từ kết quả so sánh bản sửa đổi này để theo dõi biến động chi phí"
+    },
+    "base_date_readable": {
+      "fail": "Ngày cơ sở '{base_date}' không phải ngày hợp lệ, nên bảng khối lượng được tính thuế theo mức hôm nay thay vì ngày cơ sở của nó",
+      "suggestion": "Ghi thời điểm cơ sở giá dưới dạng ngày, tháng, quý hoặc năm ({shapes})"
+    },
+    "tax_date_readable": {
+      "fail": "Ngày tính thuế '{tax_date}' không phải ngày hợp lệ, nên bảng khối lượng được tính thuế theo mức hôm nay thay vì ngày tính thuế của nó",
+      "suggestion": "Ghi ngày tính thuế dưới dạng ngày, tháng, quý hoặc năm ({shapes}), hoặc xóa để tính thuế theo ngày cơ sở của bảng khối lượng"
+    }
+  },
+  "din276": {
+    "cost_group_required": {
+      "fail": "Công tác {ordinal} thiếu nhóm chi phí DIN 276 KG",
+      "suggestion": "Gán Kostengruppe DIN 276 gồm 3 chữ số (ví dụ 330 cho tường)"
+    },
+    "valid_cost_group": {
+      "fail": "Mã DIN 276 '{code}' tại công tác {ordinal} không hợp lệ"
+    },
+    "hierarchy": {
+      "fail": "Công tác {ordinal}: KG {child} không thuộc KG cha {parent} (tiền tố yêu cầu '{prefix}')",
+      "suggestion": "Chuyển công tác về đúng nhóm cha hoặc sửa mã KG cho khớp phân cấp cha ({prefix}xx)"
+    },
+    "completeness": {
+      "fail": "Bảng khối lượng thiếu nhóm KG {group} - {group_name}",
+      "suggestion": "Thêm công tác cho KG {group} ({group_name}) để bảo đảm đầy đủ"
+    }
+  },
+  "gaeb": {
+    "ordinal_format": {
+      "fail": "Số thứ tự '{ordinal}' không khớp OZ-Maske GAEB của tệp này",
+      "suggestion": "Sử dụng OZ-Maske của tệp, ví dụ 001.001.0010 hoặc 01.02.0030"
+    },
+    "lv_structure": {
+      "fail": "Công tác {ordinal}: công tác lá không có mục cha; phân cấp GAEB LV yêu cầu mục cha Leistungsgruppe",
+      "suggestion": "Gán công tác này vào mục cha (Leistungsgruppe / Titel)"
+    },
+    "einheitspreis_sanity": {
+      "negative": "Công tác {ordinal}: Einheitspreis {rate} âm (đơn vị='{unit}'); không thể truyền giá âm qua GAEB",
+      "zero": "Công tác {ordinal}: Einheitspreis bằng 0.00 (đơn vị='{unit}'); xác nhận đây là giá chào bằng không chứ không phải thiếu đơn giá",
+      "suggestion": "Nhập Einheitspreis dương hoặc đánh dấu công tác là Bedarfsposition (phạm vi tùy chọn) hay trọn gói (đơn vị='lsum')"
+    },
+    "trade_section_code": {
+      "fail": "Mục cấp cao nhất '{ordinal}' thiếu mã GAEB Leistungsbereich (yêu cầu mã loại công việc gồm 3 chữ số, ví dụ '012')",
+      "suggestion": "Thêm mã loại công việc 3 chữ số (Leistungsbereich) cho mục, ví dụ '012' cho Erdarbeiten, '013' cho Mauerarbeiten"
+    },
+    "quantity_decimals": {
+      "fail": "Công tác {ordinal}: khối lượng {quantity} có {decimals} chữ số thập phân; quy ước GAEB X83 giới hạn ở 3",
+      "suggestion": "Làm tròn khối lượng đến tối đa 3 chữ số thập phân theo GAEB X83"
+    }
+  },
+  "nrm": {
+    "classification_required": {
+      "fail": "Công tác {ordinal} thiếu mã bộ phận NRM",
+      "suggestion": "Gán mã bộ phận NRM 1/2 (ví dụ 2.6.1 cho tường ngoài)"
+    },
+    "valid_element": {
+      "fail": "Mã NRM '{code}' tại công tác {ordinal} không hợp lệ"
+    },
+    "completeness": {
+      "fail": "Bảng khối lượng thiếu nhóm NRM {group} - {group_name}",
+      "suggestion": "Thêm công tác cho nhóm NRM {group} ({group_name})"
+    },
+    "base_date_declared": {
+      "fail": "Kế hoạch chi phí chưa nêu ngày cơ sở mà các đơn giá có hiệu lực",
+      "suggestion": "Ghi ngày cơ sở trên bảng khối lượng. Nếu thiếu ngày này, không ai xác định được đơn giá đã lỗi thời hay còn phải cộng thêm mức lạm phát nào"
+    },
+    "cost_plan_stage_declared": {
+      "fail": "Kế hoạch chi phí chưa cho biết được lập cho giai đoạn thiết kế nào",
+      "suggestion": "Ghi giai đoạn. Độ chính xác có thể kỳ vọng ở kế hoạch chi phí phụ thuộc vào giai đoạn lập; che giấu giai đoạn sẽ dẫn đến kỳ vọng sai"
+    },
+    "contractor_costs_present": {
+      "preliminaries": "Kế hoạch chi phí chưa có chi phí phục vụ thi công chung của nhà thầu chính, cả ở nhóm {group} lẫn dòng phụ phí",
+      "overheads_and_profit": "Kế hoạch chi phí chưa có chi phí chung và lợi nhuận của nhà thầu chính, cả ở nhóm {group} lẫn dòng phụ phí",
+      "suggestion": "Thêm dưới dạng bộ phận thuộc nhóm NRM hoặc dòng phụ phí trên công việc được đo bóc. Cả hai cách đều đúng; bỏ qua sẽ khiến chi phí công trình không phản ánh đủ chi phí"
+    },
+    "risk_allowance_present": {
+      "fail": "Kế hoạch chi phí chưa có dự phòng rủi ro",
+      "suggestion": "Thêm dự phòng rủi ro vào nhóm NRM 13 hoặc dòng dự phòng. Kế hoạch không có dự phòng rủi ro đang trình bày một giá trị duy nhất như thể chắc chắn"
+    }
+  },
+  "masterformat": {
+    "classification_required": {
+      "fail": "Công tác {ordinal} thiếu mã MasterFormat",
+      "suggestion": "Gán mã MasterFormat (ví dụ 03 30 00 cho công tác bê tông đổ tại chỗ)"
+    },
+    "valid_division": {
+      "fail": "Mã MasterFormat '{code}' tại công tác {ordinal} không hợp lệ",
+      "suggestion": "Sử dụng định dạng MasterFormat 6 chữ số: XX XX XX (ví dụ 03 30 00)"
+    },
+    "completeness": {
+      "fail": "Bảng khối lượng thiếu phân nhóm {division} - {division_name}",
+      "suggestion": "Thêm công tác cho phân nhóm {division} ({division_name})"
+    }
+  },
+  "sinapi": {
+    "code_required": {
+      "fail": "Công tác {ordinal} thiếu mã SINAPI",
+      "suggestion": "Gán mã tổ hợp công tác SINAPI (ví dụ 87878 cho bê tông C30)"
+    },
+    "valid_code": {
+      "fail": "Mã SINAPI '{code}' tại công tác {ordinal} không hợp lệ"
+    }
+  },
+  "nbr": {
+    "classification_required": {
+      "fail": "Công tác {ordinal} thiếu mục NBR 12721",
+      "suggestion": "Gắn công tác với mục NBR 12721 (S1 = preliminares, S2 = infra-estrutura, ..., S11 = serviços complementares)"
+    },
+    "valid_section": {
+      "fail": "Mục NBR 12721 '{code}' tại công tác {ordinal} không thuộc S1..S11",
+      "suggestion": "Sử dụng mã từ S1 đến S11 (ví dụ S3 cho supra-estrutura)"
+    }
+  },
+  "gesn": {
+    "code_required": {
+      "fail": "Công tác {ordinal} thiếu mã ГЭСН/ФЕР",
+      "suggestion": "Gán mã ГЭСН (ví dụ 06-01-001-01 cho bê tông)"
+    },
+    "valid_code": {
+      "fail": "Mã ГЭСН '{code}' không khớp định dạng XX-XX-XXX-XX",
+      "suggestion": "Sử dụng định dạng NN-NN-NNN-NN (ví dụ 06-01-001-01)"
+    },
+    "resource_breakdown": {
+      "fail": "Công tác {ordinal} viện dẫn định mức {code} nhưng không có phân tích nguồn lực",
+      "suggestion": "Nhập lượng nhân công, máy thi công và vật liệu của định mức hoặc nêu lý do dòng này khác định mức"
+    },
+    "labour_hours_present": {
+      "fail": "Công tác {ordinal} ({code}) có phân tích nguồn lực nhưng thiếu giờ công",
+      "suggestion": "Thêm số giờ công theo định mức; chi phí chung và lợi nhuận dự toán được định mức theo tiền lương nên không thể tính nếu thiếu chúng"
+    },
+    "price_level_declared": {
+      "fail": "Dự toán chưa nêu mặt bằng giá của các số liệu",
+      "suggestion": "Khai báo mặt bằng giá (ngày) và chỉ số chuyển đổi đã áp dụng để người kiểm tra có thể tính ra cùng tổng giá trị"
+    }
+  },
+  "dpgf": {
+    "lot_required": {
+      "fail": "Công tác {ordinal} chưa được gán vào Lot technique nào",
+      "suggestion": "Gán Lot technique (ví dụ Lot 01 Gros Œuvre)"
+    },
+    "pricing_complete": {
+      "fail": "Chỉ {priced}/{total} công tác ({percent}) có giá, dưới ngưỡng 80%",
+      "suggestion": "Hoàn thành tính giá cho mọi công tác trước khi nộp DPGF"
+    }
+  },
+  "onorm": {
+    "position_format": {
+      "fail": "Số thứ tự '{ordinal}' không khớp định dạng ÖNORM XX.XX.XXXXA",
+      "suggestion": "Sử dụng định dạng ÖNORM B 2063 (ví dụ 01.02.01A)"
+    },
+    "description_length": {
+      "fail": "Công tác {ordinal}: mô tả quá ngắn ({length} ký tự, tối thiểu 20)",
+      "suggestion": "Thêm chi tiết vào mô tả công tác theo ÖNORM B 2063"
+    }
+  },
+  "gbt50500": {
+    "code_required": {
+      "fail": "Công tác {ordinal} thiếu mã GB/T 50500",
+      "suggestion": "Gán mã GB/T 50500 gồm 9 chữ số (ví dụ 010101001)"
+    },
+    "valid_code": {
+      "fail": "Mã GB/T 50500 '{code}' không hợp lệ; yêu cầu 9 hoặc 12 chữ số"
+    }
+  },
+  "cpwd": {
+    "code_required": {
+      "fail": "Công tác {ordinal} thiếu mã CPWD/DSR",
+      "suggestion": "Gán mã tham chiếu công tác CPWD DSR (ví dụ 4.1.1)"
+    },
+    "measurement_units": {
+      "fail": "Đơn vị '{unit}' tại công tác {ordinal} không theo tiêu chuẩn IS 1200",
+      "suggestion": "Sử dụng đơn vị tiêu chuẩn IS 1200: m, m2, m3, kg, nos, rm, v.v."
+    }
+  },
+  "hungary": {
+    "item_code_required": {
+      "fail": "Công tác {ordinal} chưa có mã công tác Hungary",
+      "invalid": "Mã '{code}' tại công tác {ordinal} không khớp với hệ thống đánh số công tác nào trong hai hệ",
+      "suggestion": "Công trình xây dựng dùng MA-CC-SS-II (chương 01 đến 17); công trình hạ tầng dùng mã công tác sáu hoặc bảy chữ số trong từ điển mã của dự án"
+    },
+    "chapter_recognised": {
+      "fail": "Chương {chapter} tại công tác {ordinal} không thuộc mười bảy chương của hệ thống công tác"
+    },
+    "material_fee_split": {
+      "fail": "Công tác {ordinal}: vật liệu {material} cộng chi phí thi công {fee} không bằng đơn giá {rate}",
+      "suggestion": "Sửa đơn giá vật liệu và chi phí thi công hoặc đơn giá tổng để các thành phần khớp nhau"
+    },
+    "item_number_unique": {
+      "fail": "Mã công tác {number} được dùng cho {count} công tác nhưng phải xác định duy nhất một công tác",
+      "suggestion": "Gán mã riêng trong dự án cho từng công tác trước khi gửi bảng khối lượng cho khách hàng"
+    }
+  },
+  "prezzario": {
+    "voce_code_format_valid": {
+      "fail": "Mã '{code}' tại công tác {ordinal} không cho biết xuất xứ từ bảng giá nào",
+      "suggestion": "Mã voce chính thức bắt đầu bằng vùng và năm phiên bản của bảng giá, ví dụ TOS25_01.A03.001.001 (Toscana 2025). Sao chép chính xác mã in trong bảng giá vùng, nhập dòng từ bảng giá hoặc đánh số đơn giá mới là NP.01"
+    },
+    "voce_reference_present": {
+      "fail": "Công tác {ordinal} chưa viện dẫn voce trong prezzario",
+      "suggestion": "Chọn dòng từ bảng giá vùng đã nhập hoặc đánh dấu là nuovo prezzo (NP) có phân tích đơn giá làm căn cứ"
+    },
+    "costi_sicurezza_separated": {
+      "fail": "Bảng khối lượng chưa có dòng riêng cho chi phí an toàn không thuộc phần giảm giá dự thầu",
+      "suggestion": "Thêm oneri della sicurezza thành mục hoặc dòng phụ phí riêng, tính giá theo chương an toàn của bảng giá hoặc kế hoạch an toàn"
+    },
+    "incidenza_manodopera_documented": {
+      "fail": "Công tác {ordinal} ({code}) chưa nêu tỷ trọng nhân công",
+      "suggestion": "Lấy incidenza della manodopera từ bảng giá hoặc thêm nguồn lực nhân công để có thể nêu riêng chi phí nhân công trong hồ sơ dự thầu"
+    },
+    "overheads_not_applied_twice": {
+      "fail": "Đơn giá trong bảng giá vùng đã bao gồm chi phí chung (13-17%) và lợi nhuận (10%). Áp dụng lần nữa sẽ tăng tổng giá trị khoảng {percent}%.",
+      "suggestion": "Xóa các phụ phí chi phí chung và lợi nhuận khỏi bảng khối lượng này hoặc chỉ giữ chúng ở các dòng tính giá bằng phân tích riêng (NP)."
+    }
+  },
+  "romania": {
+    "deviz_chapter_required": {
+      "fail": "Công tác {ordinal} chưa nêu chương deviz general",
+      "suggestion": "Xếp dòng vào chương và tiểu chương theo HG 907/2016, ví dụ 4.1 cho xây dựng và lắp đặt hoặc 5.1 cho tổ chức công trường"
+    },
+    "deviz_chapter_recognised": {
+      "fail": "Mã deviz '{code}' tại công tác {ordinal} không phải chương hay tiểu chương của deviz general",
+      "suggestion": "Sử dụng mã từ chương 1 đến 6 của deviz general theo HG 907/2016, như 1.2, 2, 3.5, 4.1, 5.1 hoặc 6.2"
+    }
+  },
+  "greece": {
+    "net_article_required": {
+      "fail": "Công tác {ordinal} chưa có mục trong bảng giá thống nhất (ΝΕΤ)",
+      "suggestion": "Nêu mục ΝΕΤ dùng để tính giá dòng này, ví dụ ΟΙΚ 32.01.06, hoặc ΝΑΟΙΚ cho mục mới"
+    },
+    "net_article_valid": {
+      "invalid": "Mục '{code}' tại công tác {ordinal} không có định dạng của mục ΝΕΤ",
+      "chapter": "Mục '{code}' tại công tác {ordinal} bắt đầu bằng chương {chapter}, không có trong bảng giá công trình xây dựng",
+      "suggestion": "Ghi tiền tố bảng giá và số mục, ví dụ ΟΙΚ 38.20.02, ΟΔΟ Α-2 hoặc ΑΤΗΕ 8151.1"
+    }
+  },
+  "ukraine": {
+    "zkr_chapter_required": {
+      "fail": "Công tác {ordinal} chưa nêu chương của tổng dự toán",
+      "suggestion": "Xếp dòng vào chương từ 1 đến 12 của зведений кошторисний розрахунок; công tác xây dựng hạng mục chính thuộc chương 2"
+    },
+    "zkr_chapter_recognised": {
+      "fail": "Chương {chapter} tại công tác {ordinal} không thuộc mười hai chương của tổng dự toán",
+      "suggestion": "Sử dụng số chương từ 1 đến 12"
+    }
+  },
+  "birimfiyat": {
+    "code_required": {
+      "fail": "Công tác {ordinal} thiếu số poz birim fiyat",
+      "suggestion": "Gán số poz Bayındırlık (ví dụ 04.013/1)"
+    },
+    "valid_poz": {
+      "fail": "Poz '{code}' không phải số trong sách đơn giá hiện hành (XX.XXX.XXXX) hoặc sách cũ (XX.XXX/X)",
+      "suggestion": "Sử dụng số trong sách, ví dụ 15.140.1002 hoặc 04.013/1 cho hợp đồng cũ; đánh số công tác tự phân tích là ÖZEL-1"
+    }
+  },
+  "sekisan": {
+    "code_required": {
+      "fail": "Công tác {ordinal} thiếu mã 積算",
+      "suggestion": "Gán mã công tác 積算基準"
+    },
+    "metric_units": {
+      "fail": "Đơn vị '{unit}' tại công tác {ordinal} không phải đơn vị tiêu chuẩn",
+      "suggestion": "Sử dụng đơn vị hệ mét tiêu chuẩn: m, m2, m3, kg, t, 式, v.v."
+    }
+  },
+  "bc3": {
+    "code_required": {
+      "fail": "Công tác {ordinal} thiếu mã khái niệm FIEBDC-3",
+      "suggestion": "Gán mã FIEBDC-3 (ví dụ E04CM040 hoặc 01.02.01)"
+    },
+    "valid_code": {
+      "fail": "Mã FIEBDC-3 '{code}' tại công tác {ordinal} không hợp lệ",
+      "suggestion": "Sử dụng định dạng chữ và số FIEBDC-3 (ví dụ E04CM040, 01.02.01, CAP01#)"
+    }
+  },
+  "mexico": {
+    "apu_completeness": {
+      "fail": "Công tác {ordinal} có phân tích APU chưa đầy đủ; thiếu thành phần chi phí: {missing}",
+      "suggestion": "Thêm các thành phần costo directo còn thiếu (mano de obra, materiales, maquinaria) vào phân tích đơn giá"
+    },
+    "iva_rate_valid": {
+      "fail": "Công tác {ordinal} có thuế suất IVA {rate} không hợp lệ; IVA tại Mexico là 16, 8 (vùng biên giới) hoặc 0 phần trăm",
+      "suggestion": "Đặt thuế suất IVA là 16 phần trăm (tiêu chuẩn), 8 phần trăm (vùng biên giới) hoặc 0 phần trăm"
+    },
+    "subcontract_retencion": {
+      "fail": "Công tác thầu phụ {ordinal} chưa ghi nhận có áp dụng khấu trừ IVA/ISR hay không",
+      "suggestion": "Ghi các khoản khấu trừ IVA và ISR cho dòng thầu phụ hoặc đánh dấu không áp dụng"
+    },
+    "cfdi_rfc_present": {
+      "missing": "Dữ liệu bên phát hành CFDI chưa đầy đủ để xuất hồ sơ dự thầu; còn thiếu: {missing}",
+      "invalid_rfc": "RFC '{rfc}' không phải RFC CFDI hợp lệ (12 ký tự cho công ty, 13 cho cá nhân)",
+      "suggestion": "Đặt RFC, regimen fiscal và uso CFDI của bên phát hành trong hồ sơ dự án để lập hóa đơn CFDI 4.0"
+    }
+  },
+  "pipeline": {
+    "side_effecting_requires_gate": {
+      "fail": "Các nút tạo tác động thay đổi dữ liệu không có cổng kiểm soát: {nodes}",
+      "suggestion": "Thêm cổng Kiểm tra hoặc Phê duyệt của con người trên mọi đường từ nút kích hoạt/AI đến từng nút ghi trước khi công bố."
+    }
+  },
+  "property_dev": {
+    "escrow_account_required": {
+      "fail": "Dự án phát triển cần tài khoản ký quỹ đang hoạt động cho cơ quan quản lý '{regulator}'",
+      "suggestion": "Mở tài khoản ký quỹ tại ngân hàng được cơ quan quản lý cấp phép trong Tuân thủ → Tài khoản ký quỹ"
+    },
+    "escrow_iban_valid": {
+      "fail": "Tài khoản ký quỹ {account}: IBAN '{iban}' không đạt kiểm tra cấu trúc ISO 13616",
+      "suggestion": "Sửa IBAN: mã quốc gia, độ dài và số kiểm tra phải khớp ISO 13616"
+    },
+    "escrow_balance_reconciled": {
+      "fail": "Tài khoản ký quỹ {account}: số dư sổ cái {ledger} lệch {drift} so với tổng giao dịch {transactions}",
+      "suggestion": "Đối chiếu tài khoản ký quỹ; kiểm tra khoản thu chưa ghi nhận hoặc khoản ghi nợ bị thiếu"
+    },
+    "sales_contract_party_ownership_sums_to_100": {
+      "fail": "Hợp đồng {contract}: tổng tỷ lệ sở hữu là {total}% (phải đúng 100%)",
+      "suggestion": "Điều chỉnh tỷ lệ các bên để tổng bằng 100.00%"
+    },
+    "payment_schedule_instalments_sum_to_contract_value": {
+      "fail": "Hợp đồng {contract}: tổng các đợt thanh toán {instalments} khác giá trị hợp đồng {contract_value} (chênh lệch {drift})",
+      "suggestion": "Cân đối lại lịch thanh toán để tổng các đợt bằng tổng giá trị hợp đồng"
+    },
+    "reservation_expiry_in_future": {
+      "fail": "Đặt chỗ {reservation}: thời điểm hết hạn {expires} không nằm trong tương lai",
+      "suggestion": "Gia hạn đặt chỗ hoặc chuyển sang trạng thái hết hạn/đã hủy"
+    },
+    "broker_commission_rate_within_bounds": {
+      "fail": "Thỏa thuận hoa hồng {agreement}: {issue}",
+      "suggestion": "Sử dụng tỷ lệ từ 0.1% đến 15%, số tiền cố định hoặc biểu mức bậc thang không rỗng"
+    },
+    "price_matrix_no_negative_modifier": {
+      "fail": "Ma trận giá {matrix}: hệ số {multiplier} của quy tắc '{factor}' nằm ngoài [-0.50, 2.00]",
+      "suggestion": "Giới hạn mức điều chỉnh từ -50% đến +200% để tránh giá lô đất không thực tế"
+    }
+  },
+  "schedule_quality": {
+    "open_ends": {
+      "fail": "Công việc '{activity}' thiếu liên kết logic với {ends} (đầu hở / công việc không được liên kết đầy đủ)",
+      "both": "công việc trước hoặc công việc sau",
+      "predecessor": "công việc trước",
+      "successor": "công việc sau",
+      "suggestion": "Liên kết công việc vào mạng bằng cả liên kết trước và sau hoặc đặt loại là mốc bắt đầu/kết thúc"
+    },
+    "negative_lag": {
+      "fail": "Quan hệ {predecessor} -> {successor} dùng độ trễ âm ({lag} ngày), tức thời gian dẫn trước, làm sai lệch đường găng",
+      "suggestion": "Thay thời gian dẫn trước bằng một công việc riêng hoặc quan hệ SS/FF để trình tự có cơ sở rõ ràng"
+    },
+    "excessive_lag": {
+      "fail": "Quan hệ {predecessor} -> {successor} có độ trễ {lag} ngày, vượt ngưỡng {threshold} ngày",
+      "suggestion": "Mô hình hóa thời gian chờ thành công việc riêng (mua sắm, dưỡng hộ, phê duyệt) để có thể theo dõi trạng thái và cân bằng nguồn lực"
+    },
+    "hard_constraints": {
+      "fail": "Công việc '{activity}' có ràng buộc ngày cứng ({constraint}) ghi đè logic mạng",
+      "suggestion": "Dùng ràng buộc mềm (bắt đầu không sớm hơn) hoặc xác định ngày theo logic để công việc có thể dịch chuyển khi công việc trước bị chậm"
+    },
+    "negative_float": {
+      "fail": "Công việc '{activity}' có tổng thời gian dự trữ âm ({float} ngày), nên tiến độ không khả thi với các liên kết hiện tại",
+      "suggestion": "Sắp xếp lại công việc, nới ràng buộc cứng hoặc thêm kế hoạch khôi phục có tài liệu để đưa thời gian dự trữ về không hoặc dương"
+    },
+    "high_float": {
+      "fail": "Công việc '{activity}' có tổng thời gian dự trữ rất lớn ({float} ngày), vượt ngưỡng {threshold} ngày",
+      "suggestion": "Kiểm tra liên kết công việc sau có bị thiếu không; thời gian dự trữ lớn thường cho thấy liên kết vào mạng chưa chặt chẽ"
+    },
+    "missing_duration": {
+      "fail": "Công việc '{activity}' có thời lượng không hợp lệ ({duration} ngày) đối với công việc không phải mốc",
+      "suggestion": "Đặt thời lượng dương theo ngày làm việc hoặc đặt dòng là mốc nếu thực sự là sự kiện không có thời lượng"
+    },
+    "duration_on_project_week": {
+      "fail": "Công việc '{activity}' được lưu là {stored} ngày làm việc, tính theo thứ Hai đến thứ Sáu từ {start} đến {end}; theo tuần làm việc của dự án, {calendar}, khoảng này có {expected} ngày",
+      "suggestion": "Lưu lại ngày của công việc để tính lại thời lượng theo tuần làm việc của dự án hoặc chủ động nhập thời lượng"
+    }
+  },
+  "sheet_completeness": {
+    "missing": {
+      "fail": "Tờ bản vẽ {sheet} có trong danh mục nhưng không có trong bộ đã tải lên",
+      "suggestion": "Tải lên tờ còn thiếu hoặc xác nhận đã rút tờ đó khỏi lần phát hành"
+    },
+    "extra": {
+      "fail": "Tờ bản vẽ {sheet} có trong bộ đã tải lên nhưng không có trong danh mục",
+      "suggestion": "Thêm vào danh mục hoặc sổ phát hành hoặc xóa tờ không liên quan"
+    },
+    "revision_mismatch": {
+      "fail": "Tờ bản vẽ {sheet} đang ở bản sửa đổi {actual_rev} nhưng danh mục yêu cầu {expected_rev}",
+      "suggestion": "Phát hành bản sửa đổi yêu cầu hoặc cập nhật danh mục theo bản hiện tại"
+    }
+  },
+  "procurement": {
+    "po_has_lines": {
+      "fail": "Đơn đặt hàng này không có dòng hàng nên giá trị cam kết chưa được ghi nhận",
+      "suggestion": "Thêm các mặt hàng đã đặt trước khi duyệt đơn đặt hàng"
+    },
+    "po_line_amount": {
+      "fail": "Dòng {line} có thành tiền {actual} nhưng khối lượng nhân đơn giá bằng {expected}",
+      "suggestion": "Sửa khối lượng, đơn giá hoặc thành tiền để ba giá trị khớp nhau"
+    },
+    "po_subtotal_matches_lines": {
+      "fail": "Tổng trước thuế là {actual} nhưng tổng các dòng bằng {expected}",
+      "suggestion": "Tính lại tổng trước thuế từ các dòng hiện tại"
+    },
+    "po_total_matches_subtotal": {
+      "fail": "Tổng cộng là {actual} nhưng tổng trước thuế cộng thuế bằng {expected}",
+      "suggestion": "Tính lại tổng cộng cho khớp tổng trước thuế cộng thuế"
+    },
+    "po_no_negative_line": {
+      "fail": "Dòng {line} có khối lượng không dương hoặc đơn giá âm",
+      "suggestion": "Lập chứng từ ghi giảm để đảo giao dịch thay vì dùng dòng âm"
+    },
+    "po_currency_set": {
+      "fail": "Đơn đặt hàng này không có tiền tệ nên không thể tổng hợp hoặc thanh toán giá trị",
+      "suggestion": "Đặt tiền tệ, thông thường là tiền tệ của dự án"
+    },
+    "po_vendor_assigned": {
+      "fail": "Đơn đặt hàng này chưa nêu nhà cung cấp",
+      "suggestion": "Chọn nhà cung cấp trước khi phê duyệt cam kết"
+    },
+    "po_retention_within_bounds": {
+      "fail": "Tỷ lệ giữ lại {percent}% nằm ngoài khoảng hợp lý từ 0 đến {max}%",
+      "suggestion": "Nhập tỷ lệ giữ lại dưới dạng phần trăm, ví dụ 5 cho năm phần trăm"
+    },
+    "po_delivery_after_issue": {
+      "fail": "Ngày giao hàng {delivery} trước ngày phát hành {issue}",
+      "suggestion": "Chuyển ngày giao hàng đến ngày phát hành hoặc sau đó"
+    },
+    "po_line_cost_coded": {
+      "fail": "Dòng {line} không có WBS, loại chi phí hoặc dòng chi phí nên sẽ không xuất hiện trong phân tích chi phí",
+      "suggestion": "Gán mã chi phí để cam kết được báo cáo đối chiếu với ngân sách"
+    },
+    "invoice_within_order": {
+      "fail": "Hóa đơn {invoice} vượt số tiền còn lại {remaining} của đơn {po} một khoản {excess}",
+      "suggestion": "Đối chiếu hóa đơn với đơn hàng; nếu phần vượt đã được thỏa thuận, ghi nhận thành thay đổi đơn hàng trước khi duyệt"
+    },
+    "invoice_quantity_received": {
+      "fail": "Dòng {line} sẽ được lập hóa đơn với tổng khối lượng {invoiced} nhưng chỉ mới nhận {received}",
+      "suggestion": "Chờ phiếu giao hàng hoặc xác nhận nhận hàng trước khi duyệt khối lượng này"
+    },
+    "invoice_value_received": {
+      "fail": "Các hóa đơn của đơn {po} sẽ có tổng {invoiced} nhưng hàng đã nhận chỉ có giá trị {received} theo đơn giá đặt hàng",
+      "suggestion": "Chờ phiếu giao hàng hoặc xác nhận nhận hàng trước khi duyệt số tiền này"
+    }
+  },
+  "subcontract": {
+    "agreement_has_scope": {
+      "fail": "Thỏa thuận này không có gói công việc nên đề nghị thanh toán không có phạm vi công việc làm căn cứ",
+      "suggestion": "Chia phạm vi hợp đồng thành các gói công việc trước khi kích hoạt thỏa thuận"
+    },
+    "package_scope_described": {
+      "fail": "Gói công việc {package} có tên nhưng chưa mô tả các công việc thuộc phạm vi",
+      "suggestion": "Ghi rõ nội dung của gói để làm căn cứ khi phát sinh tranh luận về thay đổi sau này"
+    },
+    "agreement_value_positive": {
+      "fail": "Giá trị hợp đồng là {value} nên khoản giữ lại và bảng phân bổ giá trị không có cơ sở để tính",
+      "suggestion": "Nhập giá trị hợp đồng đã thỏa thuận trước khi kích hoạt thỏa thuận"
+    },
+    "packages_within_value": {
+      "fail": "Các gói công việc có giá trị {planned} nhưng hợp đồng là {total}",
+      "suggestion": "Tính lại giá các gói hoặc tăng giá trị hợp đồng để thỏa thuận bao quát đủ phạm vi công việc"
+    },
+    "agreement_dates_ordered": {
+      "fail": "Thỏa thuận kết thúc ngày {end}, trước ngày bắt đầu {start}",
+      "suggestion": "Sửa ngày bắt đầu hoặc kết thúc để thời hạn hợp đồng đi đúng chiều thời gian"
+    },
+    "agreement_currency_set": {
+      "fail": "Thỏa thuận này không có tiền tệ nên các khoản thanh toán không thể được tổng hợp hoặc chi trả",
+      "suggestion": "Đặt tiền tệ, thông thường là tiền tệ của dự án"
+    },
+    "retention_within_bounds": {
+      "fail": "Tỷ lệ giữ lại {percent}% nằm ngoài khoảng hợp lý từ 0 đến {max}%",
+      "suggestion": "Nhập khoản giữ lại theo tỷ lệ phần trăm của mỗi lần thanh toán, không nhập dưới dạng số tiền"
+    },
+    "insurance_valid_at_start": {
+      "fail": "Bảo hiểm của nhà thầu phụ hết hạn ngày {expiry}, trước ngày bắt đầu công việc {reference}",
+      "suggestion": "Thu thập chứng nhận còn hiệu lực trước khi cho nhà thầu phụ vào công trường"
+    },
+    "unlinked_contract_twin": {
+      "fail": "Thỏa thuận thầu phụ {agreement} và hợp đồng {contract} có vẻ là cùng một hợp đồng thầu phụ nên dữ liệu tài chính có thể tính hai lần",
+      "suggestion": "Liên kết chúng nếu cùng một hợp đồng thầu phụ hoặc đánh dấu là khác nhau"
+    }
+  },
+  "submittal": {
+    "reviewer_assigned": {
+      "fail": "Hồ sơ trình duyệt này chưa nêu người xem xét nên không được giao cho ai xử lý",
+      "suggestion": "Chỉ định người xem xét có trách nhiệm phản hồi trước khi gửi"
+    },
+    "required_date_present": {
+      "fail": "Hồ sơ trình duyệt này chưa có ngày yêu cầu nên không bao giờ có thể được báo cáo là chậm",
+      "suggestion": "Đặt ngày cần hoàn tất xem xét theo công việc được phép triển khai sau hồ sơ này"
+    },
+    "required_date_after_submitted": {
+      "fail": "Hạn xem xét là {required}, trước ngày gửi hồ sơ {submitted}",
+      "suggestion": "Chuyển ngày yêu cầu sang ngày làm việc sau khi gửi hồ sơ"
+    },
+    "review_window_sufficient": {
+      "fail": "Người xem xét có {days} ngày, ít hơn {minimum} ngày thường cần để xem xét",
+      "suggestion": "Dành thời gian xem xét thông thường hoặc thỏa thuận trước với người xem xét về thời gian ngắn hơn"
+    },
+    "spec_section_present": {
+      "fail": "Hồ sơ trình duyệt này chưa nêu mục chỉ dẫn kỹ thuật nên không thể phân loại trong sổ theo dõi",
+      "suggestion": "Nhập mục chỉ dẫn kỹ thuật mà hồ sơ này đáp ứng"
+    },
+    "approver_distinct_from_reviewer": {
+      "fail": "Cùng một người ({person}) vừa xem xét vừa phê duyệt nên không có người thứ hai kiểm tra",
+      "suggestion": "Chỉ định người phê duyệt khác người xem xét"
+    },
+    "linked_scope_present": {
+      "fail": "Hồ sơ trình duyệt này không liên kết với công tác nào nên không được tổng hợp vào gói công việc",
+      "suggestion": "Liên kết các công tác trong bảng khối lượng mà hồ sơ này bao quát"
+    }
+  },
+  "rfq": {
+    "scope_described": {
+      "fail": "Yêu cầu này không có phạm vi công việc hoặc mô tả nên nhà cung cấp không có nội dung để báo giá",
+      "suggestion": "Mô tả phạm vi trước khi công bố để các báo giá nhận được có thể so sánh"
+    },
+    "deadline_present": {
+      "fail": "Yêu cầu này chưa nêu hạn nộp nên việc nhận báo giá không bao giờ kết thúc",
+      "suggestion": "Đặt ngày và giờ phải nhận được báo giá"
+    },
+    "deadline_parseable": {
+      "fail": "Hạn nộp {value} không phải ngày hệ thống đọc được và mọi báo giá sẽ bị từ chối",
+      "suggestion": "Nhập hạn dưới dạng ngày, ví dụ 2026-08-31"
+    },
+    "deadline_in_future": {
+      "fail": "Hạn nộp {deadline} đã qua vào hôm nay {today} nên yêu cầu được gửi trong trạng thái đã đóng",
+      "suggestion": "Chuyển hạn sang ngày tương lai trước khi công bố"
+    },
+    "has_recipients": {
+      "fail": "Yêu cầu này không gửi cho nhà cung cấp nào nên công bố sẽ không thông báo cho ai",
+      "suggestion": "Thêm các nhà cung cấp nhận yêu cầu này"
+    },
+    "currency_set": {
+      "fail": "Yêu cầu này chưa nêu tiền tệ nên không thể xếp hạng các báo giá với nhau",
+      "suggestion": "Đặt tiền tệ dùng để báo giá"
+    },
+    "bid_currency_matches": {
+      "fail": "Báo giá {bid} dùng {bid_currency} nhưng yêu cầu dùng {rfq_currency}",
+      "suggestion": "Yêu cầu bên dự thầu báo lại bằng tiền tệ của yêu cầu hoặc ghi nhận quy đổi đã thỏa thuận"
+    },
+    "bid_amounts_parseable": {
+      "fail": "Báo giá {bid} có số tiền {value}, không phải số có thể dùng để xếp hạng",
+      "suggestion": "Sửa số tiền báo giá trước khi trao thầu"
+    },
+    "bids_still_valid": {
+      "fail": "Báo giá {bid} hết hạn ngày {expired} và hôm nay là {today}, nên giá không còn ràng buộc",
+      "suggestion": "Yêu cầu bên dự thầu xác nhận giá trước khi trao thầu"
+    },
+    "award_has_competition": {
+      "fail": "Việc trao thầu này dựa trên {count} báo giá, ít hơn {minimum} báo giá cần để so sánh cạnh tranh",
+      "suggestion": "Ghi lý do chỉ định một nguồn là có cơ sở hoặc mời thêm bên dự thầu"
+    }
+  },
+  "errors": {
+    "resource_not_found": "Không tìm thấy nguồn lực",
+    "project_not_found": "Không tìm thấy dự án",
+    "vendor_not_found": "Không tìm thấy nhà cung cấp",
+    "template_not_found": "Không tìm thấy mẫu",
+    "position_not_found": "Không tìm thấy công tác",
+    "boq_not_found": "Không tìm thấy bảng khối lượng",
+    "session_not_found": "Không tìm thấy phiên",
+    "document_not_found": "Không tìm thấy tài liệu",
+    "documents_batch_delete_referenced": "Các bản ghi khác vẫn tham chiếu đến tài liệu trong lô này. Xem lại các liên kết sẽ bị cắt khi xóa và xác nhận bằng acknowledge_references.",
+    "invitation_not_found": "Không tìm thấy lời mời",
+    "agreement_not_found": "Không tìm thấy thỏa thuận",
+    "rejection_not_found": "Không tìm thấy bản ghi từ chối",
+    "claim_not_found": "Không tìm thấy đề nghị thanh toán khối lượng hoàn thành",
+    "gaeb_x89_final_account_unsupported": "Chưa thể xuất quyết toán cuối cùng hoặc quyết toán cuối cùng từng phần sang GAEB X89. Quyết toán phải tính công việc lũy kế trừ các khoản thanh toán trước, trong khi đề nghị thanh toán chỉ tạo hóa đơn tiến độ cho một kỳ. Hãy xuất đề nghị dưới dạng hóa đơn tiến độ.",
+    "xpwe_native_file_refused": "Đây là tệp dự án riêng của phần mềm dự toán, chỉ phần mềm đó mới mở được. Xuất dự toán sang XPWE từ phần mềm của bạn rồi tải lên tệp .xpwe.",
+    "plot_not_found": "Không tìm thấy lô đất",
+    "survey_not_found": "Không tìm thấy khảo sát bằng thiết bị bay",
+    "diary_video_not_found": "Không tìm thấy video nhật ký",
+    "diary_photo_not_found": "Không tìm thấy ảnh nhật ký",
+    "bidder_not_found": "Không tìm thấy bên dự thầu",
+    "webhook_not_found": "Không tìm thấy webhook",
+    "submission_not_found": "Không tìm thấy hồ sơ đã nộp",
+    "measurement_not_found": "Không tìm thấy phép đo công trường",
+    "salescontract_not_found": "Không tìm thấy hợp đồng bán hàng",
+    "prompt_not_found": "Không tìm thấy mẫu câu lệnh",
+    "prequalification_not_found": "Không tìm thấy hồ sơ sơ tuyển",
+    "purchase_requisition_not_found": "Không tìm thấy đề nghị mua hàng",
+    "purchase_order_not_found": "Không tìm thấy đơn đặt hàng",
+    "group_not_found": "Không tìm thấy nhóm",
+    "final_account_not_found": "Không tìm thấy quyết toán cuối cùng",
+    "estimate_job_not_found": "Không tìm thấy tác vụ lập dự toán",
+    "escrow_not_found": "Không tìm thấy giao dịch ký quỹ",
+    "commission_accrual_not_found": "Không tìm thấy khoản hoa hồng đã ghi nhận",
+    "baseline_not_found": "Không tìm thấy kế hoạch cơ sở",
+    "fx_rate_set_locked": "Tỷ giá ECB ngày {date} đã khóa nên lần làm mới này không ghi đè. Mở khóa bộ tỷ giá đó trước nếu cần nhận dữ liệu công bố mới.",
+    "boq_locked": "Bảng khối lượng đã khóa và không thể sửa. Tạo bản sửa đổi để thay đổi.",
+    "boq_link_owner_locked": "Mã '{code}' được định nghĩa bởi một dòng trong bảng đã khóa '{bill}'; liên kết tới mã này sẽ thay đổi bảng đó. Mở khóa bảng trước hoặc nhập dòng với mã mới."
+  },
+  "variations": {
+    "boq_lines_are_traced": {
+      "fail": "Dòng {line} trong bảng khối lượng của thay đổi này không truy được về dòng nào trong bảng phân bổ giá trị hoặc công tác dự toán",
+      "suggestion": "Nêu dòng hợp đồng bị ảnh hưởng hoặc công tác dự toán cung cấp phạm vi công việc để có thể bảo vệ cơ sở của số tiền"
+    },
+    "boq_total_matches_estimate": {
+      "fail": "Dự toán tổng trên yêu cầu này là {estimate} nhưng bảng khối lượng đã tính giá có tổng {priced}",
+      "suggestion": "Áp dụng tổng đã tính giá cho yêu cầu hoặc sửa bảng khối lượng để có một giá trị thống nhất"
+    },
+    "change_kind_matches_numbers": {
+      "removed_positive": "Dòng {line} được đánh dấu là công việc bị loại bỏ nhưng có khối lượng dương {quantity}; phần loại bỏ phải được trừ khỏi hợp đồng bằng khối lượng âm",
+      "added_negative": "Dòng {line} được đánh dấu là công việc bổ sung nhưng có khối lượng âm {quantity}; công việc trừ khỏi hợp đồng là loại bỏ, không phải bổ sung",
+      "removed_needs_contract_line": "Dòng {line} được đánh dấu là công việc bị loại bỏ nhưng không liên kết với dòng bảng phân bổ giá trị nào nên không có công tác hợp đồng để loại bỏ",
+      "modified_needs_contract_line": "Dòng {line} được đánh dấu là công việc sửa đổi nhưng không liên kết với dòng bảng phân bổ giá trị nào nên không có công tác hợp đồng để sửa đổi",
+      "suggestion": "Sửa loại thay đổi hoặc khối lượng trong liên kết nguồn của dòng hoặc nêu dòng hợp đồng bị ảnh hưởng"
+    }
+  },
+  "cases": {
+    "has_steps": {
+      "fail": "Tình huống này chưa có bước nào nên người đọc không có gì để làm theo.",
+      "suggestion": "Thêm ít nhất một bước nêu màn hình cần mở và thao tác tại đó."
+    },
+    "step_titled": {
+      "fail": "{count} bước thiếu tiêu đề hoặc màn hình cần mở.",
+      "suggestion": "Đặt tiêu đề ngắn cho từng bước và chọn màn hình sẽ mở."
+    },
+    "step_purpose": {
+      "fail": "{count} trong {total} bước không nêu lý do quan trọng nên tình huống giống danh sách thao tác bấm hơn là lời giải thích.",
+      "suggestion": "Thêm một dòng cho mỗi bước giải thích mục đích; đó là điều người mới cần."
+    },
+    "distinct_screens": {
+      "fail": "{count} bước mở cùng màn hình với bước ngay trước nên người đọc không thấy thay đổi và không phân biệt được các bước.",
+      "suggestion": "Gộp thành một bước hoặc chuyển bước thứ hai đến màn hình mà công việc thực sự tiếp diễn."
+    },
+    "duration_plausible": {
+      "fail": "Tình huống này dự kiến {minutes} phút cho {steps} bước. Người đọc không theo kịp sẽ không còn tin phần ước lượng còn lại.",
+      "suggestion": "Tăng thời gian dự kiến lên ít nhất {minimum} phút hoặc bớt một số bước."
+    },
+    "described": {
+      "fail": "Tình huống này không có tóm tắt nên danh sách chỉ hiển thị tiêu đề.",
+      "suggestion": "Thêm một câu về kết quả người đọc đạt được khi hoàn tất."
+    }
+  },
+  "uk": {
+    "contract_form_declared": {
+      "fail": "Dự toán chưa nêu mẫu hợp đồng dùng làm cơ sở tính giá",
+      "suggestion": "Ghi mẫu hợp đồng. Chi phí phục vụ thi công chung, rủi ro và điều khoản thanh toán được tính khác nhau theo từng mẫu nên con số ít ý nghĩa nếu thiếu thông tin này"
+    },
+    "payment_regime_declared": {
+      "fail": "Cơ chế thanh toán chưa đầy đủ: chưa ghi {missing}",
+      "suggestion": "Ghi cả hai ngày. Hợp đồng xây dựng không ấn định ngày nào không có nghĩa là được miễn; Scheme for Construction Contracts quy định cả hai và khi đó các bên phải tìm điều khoản thanh toán trong văn bản pháp quy thay vì hợp đồng đã ký"
+    },
+    "retention_declared": {
+      "fail": "Dự toán chưa nêu khoản giữ lại áp dụng",
+      "suggestion": "Ghi tỷ lệ giữ lại và điều kiện giải phóng hoặc ghi rõ không áp dụng. Tiền giữ lại là tiền nhà thầu đã kiếm được nhưng chưa thể nhận; dự toán không đề cập khoản này cũng bỏ qua vốn lưu động"
+    },
+    "cdm_duty_holders_declared": {
+      "fail": "Chưa ghi các chủ thể có trách nhiệm theo CDM 2015: thiếu {missing}",
+      "suggestion": "Ghi các quyết định bổ nhiệm. Khi có nhiều hơn một nhà thầu trong dự án, chủ đầu tư phải bổ nhiệm bằng văn bản đơn vị thiết kế chính và nhà thầu chính; nếu không, chính chủ đầu tư chịu những trách nhiệm đó"
+    },
+    "hrb_regime_declared": {
+      "fail": "Chưa xác định vấn đề công trình rủi ro cao: {reason}",
+      "unanswered": "dự toán chưa cho biết đây có phải công trình rủi ro cao hay không",
+      "disagrees": "dự toán khai báo rủi ro cao là {declared} nhưng kích thước của chính công trình cho kết quả {derived}",
+      "suggestion": "Công trình có rủi ro cao khi cao ít nhất 18 m hoặc có ít nhất 7 tầng VÀ có ít nhất hai căn ở. Phải xét cả hai phần: công trình cao không có nhà ở không thuộc rủi ro cao; phân loại như vậy sẽ tạo ra quy trình phê duyệt qua các cửa kiểm soát không cần thiết"
+    },
+    "vat_treatment_declared": {
+      "fail": "Dự toán chưa nêu cách xử lý thuế GTGT",
+      "suggestion": "Ghi cách xử lý: thuế suất tiêu chuẩn, thuế suất giảm hoặc bằng không nếu công việc đủ điều kiện, hoặc cơ chế tự kê khai thuế nội địa bởi bên mua nếu giao dịch thuộc phạm vi. Cơ chế này chuyển nghĩa vụ GTGT sang khách hàng và thay đổi số tiền nhà thầu được lập hóa đơn"
+    }
+  },
+  "project_completeness": {
+    "country_set": {
+      "fail": "Dự án chưa nêu quốc gia nên không thể xác định cơ sở giá, thuế suất hoặc lịch làm việc",
+      "suggestion": "Đặt quốc gia trong cài đặt dự án. Quốc gia quyết định gói vùng, thuế và lịch dùng để diễn giải từng giá trị"
+    },
+    "currency_set": {
+      "fail": "Dự án chưa nêu tiền tệ nên không thể cộng các bảng khối lượng, phụ phí và hợp đồng",
+      "suggestion": "Chọn tiền tệ trong cài đặt dự án. Mỗi bảng khối lượng và hợp đồng được tính giá, mọi tổng giá trị được đọc theo tiền tệ đó"
+    },
+    "currency_matches_bill": {
+      "fail": "Dự án được tính bằng {project_currency} nhưng các dòng của bảng khối lượng này dùng {bill_currencies}",
+      "suggestion": "Quy đổi các dòng sang tiền tệ dự án theo tỷ giá đã nêu hoặc ghi tỷ giá trên dự án để tổng bảng khối lượng là một con số"
+    },
+    "priced_bill_present": {
+      "fail": "Dự án chưa có bảng khối lượng chứa công tác nên không có cơ sở để lập dự toán",
+      "suggestion": "Tạo bảng khối lượng và thêm công tác hoặc nhập từ mô hình CAD, bảng tính hay tệp trao đổi"
+    },
+    "bill_base_date_set": {
+      "fail": "Bảng khối lượng \"{bill}\" chưa nêu ngày cơ sở mà đơn giá có hiệu lực",
+      "suggestion": "Ghi ngày cơ sở trên bảng khối lượng. Nếu thiếu, không thể điều chỉnh giá theo chỉ số, tính thuế theo ngày của giá hoặc so sánh với dự toán khác"
+    },
+    "classification_standard_set": {
+      "fail": "Dự án không có tiêu chuẩn phân loại nên mã của các công tác không thể được kiểm tra",
+      "suggestion": "Chọn tiêu chuẩn phân loại dùng để mã hóa dự án. Tiêu chuẩn này cũng quyết định bộ quy tắc quốc gia dùng để kiểm tra"
+    },
+    "planned_dates_set": {
+      "both_missing": "Dự án chưa có cả ngày bắt đầu và ngày kết thúc kế hoạch",
+      "start_missing": "Dự án có ngày kết thúc kế hoạch nhưng thiếu ngày bắt đầu",
+      "end_missing": "Dự án có ngày bắt đầu kế hoạch nhưng thiếu ngày kết thúc",
+      "unreadable": "Không thể đọc giá trị kế hoạch \"{value}\" dưới dạng ngày",
+      "suggestion": "Nhập ngày bắt đầu và kết thúc kế hoạch của dự án dưới dạng ngày. Chi phí theo thời gian, trượt giá và tiến độ được tính trong khoảng này"
+    },
+    "planned_dates_ordered": {
+      "fail": "Dự án dự kiến bắt đầu ngày {start} và kết thúc ngày {end}, nhưng ngày kết thúc lại trước ngày bắt đầu",
+      "suggestion": "Đổi chỗ hoặc sửa ngày kế hoạch để ngày bắt đầu trước ngày kết thúc"
+    },
+    "client_recorded": {
+      "fail": "Dự án chưa ghi khách hàng và không hợp đồng nào nêu bên giao thầu",
+      "suggestion": "Ghi khách hàng trên dự án hoặc thêm bên giao thầu vào các bên hợp đồng để dự toán có đối tượng nhận"
+    },
+    "procurement_started": {
+      "fail": "Dự án đang ở giai đoạn {phase} nhưng không có hợp đồng hoặc gói thầu",
+      "suggestion": "Tạo gói thầu từ bảng khối lượng hoặc ghi hợp đồng hoặc chuyển giai đoạn về giai đoạn lập dự toán mà dự án thực sự đang ở"
+    }
+  },
+  "boq_resources": {
+    "unit_rate_not_rederived": {
+      "fail": "Công tác {ordinal}: các dòng nguồn lực không đủ để tính giá dòng nên đơn giá không được tính lại từ chúng",
+      "fallback_allowance": "Công tác {ordinal}: các dòng nguồn lực là phân bổ chi phí ước tính chứa khối lượng công tác nên đơn giá không được tính lại từ chúng",
+      "assumed_norm": "Công tác {ordinal}: các dòng nguồn lực mang định mức chưa từng được danh mục nêu nên đơn giá không được tính lại từ chúng",
+      "norm_collapsed": "Công tác {ordinal}: các dòng nguồn lực mất định mức danh mục và thay bằng khối lượng công tác nên đơn giá không được tính lại từ chúng",
+      "whole_position_quantities": "Công tác {ordinal}: các dòng nguồn lực chứa lượng cho toàn bộ công tác thay vì định mức trên một đơn vị nên đơn giá không được tính lại từ chúng",
+      "suggestion": "Kiểm tra phân tích đơn giá; tính lại công tác từ mục danh mục qua bước xem xét định mức nguồn lực hoặc sửa các dòng thủ công"
+    }
+  },
+  "poland": {
+    "knr_reference_required": {
+      "fail": "Công tác {ordinal} chưa viện dẫn bảng danh mục KNR",
+      "suggestion": "Nêu bảng danh mục cung cấp định mức trong podstawa, ví dụ KNR 2-02 0201-01 hoặc ghi kalkulacja indywidualna cho dòng tính giá bằng tính toán riêng"
+    },
+    "knr_reference_recognised": {
+      "fail": "Tham chiếu '{code}' tại công tác {ordinal} chưa nêu họ danh mục KNR",
+      "suggestion": "Bắt đầu tham chiếu bằng họ danh mục như KNR, KNNR, KNR-W hoặc KSNR hoặc đánh dấu dòng là kalkulacja indywidualna"
+    }
+  }
+}
