@@ -31,7 +31,7 @@
     },
     "line_complete": {
       "fail": "A(z) {line}. sor hiányos: {reason}",
-      "labour_xor_plant": "vagy munkaerőt, vagy gépet kell rögzíteni; a két típus együttes megadása és mindkettő elhagyása is tilos",
+      "labour_xor_plant": "vagy munkaerőt, vagy gépet kell rögzíteni; a két típus együttes megadása és mindkettő elhagyása nem megengedett",
       "hours_positive": "az óraszámnak nullánál nagyobbnak kell lennie",
       "cost_code_required": "költségkód megadása kötelező",
       "suggestion": "A munkaidő-kimutatás beküldése előtt egészítse ki a sort"
