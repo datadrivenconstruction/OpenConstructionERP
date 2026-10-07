@@ -53,6 +53,20 @@ on:
   # Same reason as ci.yml: a release candidate branch can be gated by hand.
   workflow_dispatch:
 
+# Keep an active main verdict running; retain only the newest pending run.
+# GitHub replaces an older pending run even when cancel-in-progress is false,
+# so this deliberately does not promise a verdict for every intermediate commit.
+# Ordering is not guaranteed: read the verdict for the settled head explicitly.
+# The literal prefix keeps this queue separate from ci.yml and other workflows.
+# PR merge refs and manually selected branch/tag refs get separate groups;
+# non-main runs on the same ref supersede active runs. A manual main run shares
+# the main-push queue. The branches-only push trigger never starts a tag run.
+# Runs created from an older workflow without this group do not join it retroactively.
+# https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency
+concurrency:
+  group: ci-postgres-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   backend-postgres:
     runs-on: ubuntu-latest

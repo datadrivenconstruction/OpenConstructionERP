@@ -34,13 +34,18 @@ WORKFLOWS = Path(__file__).resolve().parents[3] / ".github" / "workflows"
 
 EXPRESSION = re.compile(r"\$\{\{(.*?)\}\}", re.S)
 # A context is the leading identifier of an expression term, e.g. the "runner"
-# of "runner.temp". Matching on a word boundary rather than a bare substring so
-# a string containing the word does not read as a context reference.
-CONTEXT = re.compile(r"\b([a-z_][a-z0-9_]*)\s*\.")
+# of "runner.temp". A name after a dot is a property, not another context:
+# github.event.workflow_run.head_branch names only the github context.
+CONTEXT = re.compile(r"\b([a-z_][a-z0-9_]*)(?:\s*\.\s*[a-z_][a-z0-9_-]*)+")
 
 # Available before a runner exists, i.e. everywhere a job-level key is
 # evaluated. Anything outside this set is a rejection, not a warning.
 JOB_LEVEL_CONTEXTS = frozenset({"github", "needs", "strategy", "matrix", "vars", "inputs", "secrets"})
+
+# Workflow concurrency is evaluated before any job exists. Unlike job-level
+# keys it cannot refer to needs, matrix or strategy (nor to secrets).
+# https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#context-availability
+WORKFLOW_CONCURRENCY_CONTEXTS = frozenset({"github", "inputs", "vars"})
 
 # The job-level keys evaluated at that same moment. `steps` is excluded on
 # purpose: a step body is evaluated on the runner, where `runner` is legal, and
@@ -55,26 +60,28 @@ def _workflow_files() -> list[Path]:
     return files
 
 
-def _illegal_contexts(value: object) -> list[str]:
-    """Return every context named inside `value` that a job-level key cannot use."""
+def _illegal_contexts(value: object, allowed: frozenset[str] = JOB_LEVEL_CONTEXTS) -> list[str]:
+    """Return contexts named inside `value` that this evaluation level cannot use."""
     found: list[str] = []
     if isinstance(value, dict):
         for key, item in value.items():
-            found.extend(_illegal_contexts(key))
-            found.extend(_illegal_contexts(item))
+            found.extend(_illegal_contexts(key, allowed))
+            found.extend(_illegal_contexts(item, allowed))
     elif isinstance(value, list):
         for item in value:
-            found.extend(_illegal_contexts(item))
+            found.extend(_illegal_contexts(item, allowed))
     elif isinstance(value, str):
         for expression in EXPRESSION.findall(value):
             for context in CONTEXT.findall(expression):
-                if context not in JOB_LEVEL_CONTEXTS:
+                if context not in allowed:
                     found.append(context)
     return found
 
 
 def _offences(document: dict) -> list[str]:
     offences: list[str] = []
+    for context in _illegal_contexts(document.get("concurrency"), WORKFLOW_CONCURRENCY_CONTEXTS):
+        offences.append(f"workflow concurrency names the unavailable '{context}' context")
     for job_name, job in (document.get("jobs") or {}).items():
         if not isinstance(job, dict):
             continue
@@ -128,3 +135,25 @@ def test_a_step_may_still_name_the_runner() -> None:
         "jobs:\n  upgrade:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo ${{ runner.temp }}\n"
     )
     assert _offences(stepwise) == []
+
+
+@pytest.mark.parametrize("context", ["runner", "needs", "matrix", "strategy", "secrets", "steps", "env"])
+@pytest.mark.parametrize("key", ["group", "cancel-in-progress"])
+def test_workflow_concurrency_rejects_job_and_runner_contexts(context: str, key: str) -> None:
+    broken = {"concurrency": {key: "${{ " + context + " . nested . value }}"}}
+    assert _offences(broken) == [f"workflow concurrency names the unavailable '{context}' context"]
+
+
+def test_workflow_concurrency_accepts_available_contexts_and_literal_groups() -> None:
+    for concurrency in (
+        "literal-group",
+        {"group": "pg-${{ github.ref }}", "cancel-in-progress": "${{ github.ref != 'refs/heads/main' }}"},
+        {"group": "${{ inputs.group || vars.group }}", "cancel-in-progress": False},
+        {"group": "${{ github.event.workflow_run.head_branch || github.event.release.tag_name }}"},
+        {"group": "${{ github . event . workflow_run . head_branch }}"},
+    ):
+        assert _offences({"concurrency": concurrency}) == []
+
+
+def test_concurrency_context_restriction_does_not_leak_into_job_keys() -> None:
+    assert _offences({"jobs": {"build": {"env": {"VALUE": "${{ needs.prepare.outputs.value }}"}}}}) == []
