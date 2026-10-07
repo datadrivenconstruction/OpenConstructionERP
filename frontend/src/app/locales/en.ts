@@ -40435,6 +40435,9 @@ const resource = {
     "boq.tax_date_placeholder": "Same as price base date",
     "boq.tax_date_hint": "VAT is charged at the rate in force on this date. Leave it empty to use the price base date.",
     "boq.date_shape_error": "Use a day, a month, a quarter or a year: 2026-03-15, 2026-03, 2026-Q1 or 2026",
+    "schedule.calendar.week_fallback": "The regional working week is unavailable. A standard planning week is used.",
+    "schedule.calendar.holidays_missing": "Public holidays are not available for {{years}}. Check the calendar before relying on these dates.",
+    "schedule.calendar.holidays_partial": "Public holiday coverage is incomplete for {{years}}. Check the calendar before relying on these dates.",
   }
 } as { translation: Record<string, string> };
 

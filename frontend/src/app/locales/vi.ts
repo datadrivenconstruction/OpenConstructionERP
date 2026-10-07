@@ -45494,6 +45494,9 @@ const resource = {
     "boq.tax_date_placeholder": "Giống ngày cơ sở giá",
     "boq.tax_date_hint": "Thuế GTGT được tính theo thuế suất có hiệu lực vào ngày này. Để trống để dùng ngày cơ sở giá.",
     "boq.date_shape_error": "Nhập ngày, tháng, quý hoặc năm: 2026-03-15, 2026-03, 2026-Q1 hoặc 2026",
+    "schedule.calendar.week_fallback": "Không có thông tin tuần làm việc theo khu vực. Hệ thống dùng tuần tiêu chuẩn để lập kế hoạch.",
+    "schedule.calendar.holidays_missing": "Không có dữ liệu ngày nghỉ lễ cho các năm {{years}}. Hãy kiểm tra lịch trước khi dựa vào những ngày này.",
+    "schedule.calendar.holidays_partial": "Dữ liệu ngày nghỉ lễ cho các năm {{years}} chưa đầy đủ. Hãy kiểm tra lịch trước khi dựa vào những ngày này.",
   }
 } as { translation: Record<string, string> };
 

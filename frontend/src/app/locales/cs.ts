@@ -46869,6 +46869,9 @@ const resource = {
     "boq.rs_unconverted": "Nezahrnuto do součtu: {{amount}} {{currency}}",
     "boq.rs_unconverted_hint": "Není k dispozici použitelný směnný kurz. Nastavte v nastavení projektu kladný kurz, aby se tyto částky zahrnuly.",
     // --- /Learn ---
+    "schedule.calendar.week_fallback": "Regionální pracovní týden není k dispozici. Pro plánování se používá standardní týden.",
+    "schedule.calendar.holidays_missing": "Údaje o státních svátcích pro roky {{years}} nejsou k dispozici. Než se na tato data spolehnete, zkontrolujte kalendář.",
+    "schedule.calendar.holidays_partial": "Údaje o státních svátcích pro roky {{years}} jsou neúplné. Než se na tato data spolehnete, zkontrolujte kalendář.",
   }
 } as { translation: Record<string, string> };
 

@@ -45961,6 +45961,9 @@ const resource = {
     "boq.tax_date_placeholder": "זהה לתאריך בסיס המחירים",
     "boq.tax_date_hint": "המע״מ מחושב לפי השיעור התקף בתאריך זה. השאירו ריק כדי להשתמש בתאריך בסיס המחירים.",
     "boq.date_shape_error": "הזינו יום, חודש, רבעון או שנה: 2026-03-15, 2026-03, 2026-Q1 או 2026",
+    "schedule.calendar.week_fallback": "שבוע העבודה האזורי אינו זמין. נעשה שימוש בשבוע תקני לתכנון.",
+    "schedule.calendar.holidays_missing": "נתוני החגים הרשמיים אינם זמינים עבור {{years}}. יש לבדוק את לוח השנה לפני שמסתמכים על תאריכים אלה.",
+    "schedule.calendar.holidays_partial": "נתוני החגים הרשמיים עבור {{years}} אינם מלאים. יש לבדוק את לוח השנה לפני שמסתמכים על תאריכים אלה.",
   }
 } as { translation: Record<string, string> };
 

@@ -46104,6 +46104,9 @@ const resource = {
     "boq.tax_date_placeholder": "가격 기준일과 동일",
     "boq.tax_date_hint": "부가가치세는 이 날짜에 적용되는 세율로 계산됩니다. 가격 기준일을 사용하려면 비워 두세요.",
     "boq.date_shape_error": "일, 월, 분기 또는 연도로 입력하세요: 2026-03-15, 2026-03, 2026-Q1 또는 2026",
+    "schedule.calendar.week_fallback": "지역별 주간 근무일 정보를 사용할 수 없어 표준 주간 일정으로 계획합니다.",
+    "schedule.calendar.holidays_missing": "{{years}}년의 공휴일 데이터를 사용할 수 없습니다. 이 날짜를 기준으로 계획하기 전에 달력을 확인하세요.",
+    "schedule.calendar.holidays_partial": "{{years}}년의 공휴일 데이터가 불완전합니다. 이 날짜를 기준으로 계획하기 전에 달력을 확인하세요.",
   }
 } as { translation: Record<string, string> };
 

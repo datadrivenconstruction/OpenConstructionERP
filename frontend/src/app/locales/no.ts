@@ -45712,6 +45712,9 @@ const resource = {
     "boq.tax_date_hint": "Merverdiavgift beregnes med satsen som gjelder på denne datoen. La feltet stå tomt for å bruke prisbasisdatoen.",
     "boq.date_shape_error": "Oppgi en dag, en måned, et kvartal eller et år: 2026-03-15, 2026-03, 2026-Q1 eller 2026",
     // --- /Learn ---
+    "schedule.calendar.week_fallback": "Den regionale arbeidsuken er ikke tilgjengelig. En standarduke brukes til planleggingen.",
+    "schedule.calendar.holidays_missing": "Opplysninger om offentlige fridager er ikke tilgjengelige for {{years}}. Kontroller kalenderen før du baserer deg på disse datoene.",
+    "schedule.calendar.holidays_partial": "Opplysningene om offentlige fridager for {{years}} er ufullstendige. Kontroller kalenderen før du baserer deg på disse datoene.",
   }
 } as { translation: Record<string, string> };
 

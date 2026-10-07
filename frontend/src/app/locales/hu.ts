@@ -48301,6 +48301,9 @@ const resource = {
     "boq.tax_date_hint": "Az áfát az ezen a napon hatályos kulccsal számítjuk. Hagyja üresen az árbázis dátumának használatához.",
     "boq.date_shape_error": "Adjon meg napot, hónapot, negyedévet vagy évet: 2026-03-15, 2026-03, 2026-Q1 vagy 2026",
     // --- /Learn ---
+    "schedule.calendar.week_fallback": "A regionális munkahét nem érhető el. A tervezés szabványos munkahéttel történik.",
+    "schedule.calendar.holidays_missing": "A munkaszüneti napok adatai nem érhetők el ezekre az évekre: {{years}}. Ellenőrizze a naptárt, mielőtt ezekre a dátumokra támaszkodik.",
+    "schedule.calendar.holidays_partial": "A munkaszüneti napok adatai hiányosak ezekre az évekre: {{years}}. Ellenőrizze a naptárt, mielőtt ezekre a dátumokra támaszkodik.",
   }
 } as { translation: Record<string, string> };
 

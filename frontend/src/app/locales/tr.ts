@@ -46560,6 +46560,9 @@ const resource = {
     "boq.tax_date_placeholder": "Fiyat esas tarihiyle aynı",
     "boq.tax_date_hint": "KDV bu tarihte geçerli olan oranla hesaplanır. Fiyat esas tarihini kullanmak için boş bırakın.",
     "boq.date_shape_error": "Gün, ay, çeyrek veya yıl girin: 2026-03-15, 2026-03, 2026-Q1 ya da 2026",
+    "schedule.calendar.week_fallback": "Bölgesel çalışma haftası kullanılamıyor. Planlamada standart bir hafta kullanılıyor.",
+    "schedule.calendar.holidays_missing": "{{years}} için resmî tatil verileri mevcut değil. Bu tarihleri esas almadan önce takvimi kontrol edin.",
+    "schedule.calendar.holidays_partial": "{{years}} için resmî tatil verileri eksik. Bu tarihleri esas almadan önce takvimi kontrol edin.",
   }
 } as { translation: Record<string, string> };
 

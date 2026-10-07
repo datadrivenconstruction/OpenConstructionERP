@@ -42651,6 +42651,9 @@ const resource = {
     "boq.rs_unconverted": "Excluído do total: {{amount}} {{currency}}",
     "boq.rs_unconverted_hint": "Não há uma taxa de câmbio válida. Defina uma taxa positiva nas configurações do projeto para incluir esses valores.",
     // --- /Learn ---
+    "schedule.calendar.week_fallback": "A semana de trabalho regional não está disponível. É utilizada uma semana de planejamento padrão.",
+    "schedule.calendar.holidays_missing": "Os feriados não estão disponíveis para {{years}}. Verifique o calendário antes de se basear nestas datas.",
+    "schedule.calendar.holidays_partial": "Os dados de feriados para {{years}} estão incompletos. Verifique o calendário antes de se basear nestas datas.",
   }
 } as { translation: Record<string, string> };
 

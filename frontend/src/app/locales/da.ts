@@ -45712,6 +45712,9 @@ const resource = {
     "boq.tax_date_hint": "Moms beregnes med den sats, der gælder på denne dato. Lad feltet stå tomt for at bruge prisbasisdatoen.",
     "boq.date_shape_error": "Angiv en dag, en måned, et kvartal eller et år: 2026-03-15, 2026-03, 2026-Q1 eller 2026",
     // --- /Learn ---
+    "schedule.calendar.week_fallback": "Den regionale arbejdsuge er ikke tilgængelig. Der bruges en standarduge til planlægningen.",
+    "schedule.calendar.holidays_missing": "Oplysninger om helligdage er ikke tilgængelige for {{years}}. Kontrollér kalenderen, før du baserer dig på disse datoer.",
+    "schedule.calendar.holidays_partial": "Oplysningerne om helligdage for {{years}} er ufuldstændige. Kontrollér kalenderen, før du baserer dig på disse datoer.",
   }
 } as { translation: Record<string, string> };
 

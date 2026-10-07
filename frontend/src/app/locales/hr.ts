@@ -45997,6 +45997,9 @@ const resource = {
     "boq.rs_unconverted": "Isključeno iz ukupnog iznosa: {{amount}} {{currency}}",
     "boq.rs_unconverted_hint": "Nema primjenjivog tečaja. Postavite pozitivan tečaj u postavkama projekta kako biste uključili ove iznose.",
     // --- /Learn ---
+    "schedule.calendar.week_fallback": "Regionalni radni tjedan nije dostupan. Za planiranje se koristi standardni tjedan.",
+    "schedule.calendar.holidays_missing": "Podaci o državnim blagdanima za {{years}} nisu dostupni. Provjerite kalendar prije nego što se oslonite na ove datume.",
+    "schedule.calendar.holidays_partial": "Podaci o državnim blagdanima za {{years}} nisu potpuni. Provjerite kalendar prije nego što se oslonite na ove datume.",
   }
 } as { translation: Record<string, string> };
 

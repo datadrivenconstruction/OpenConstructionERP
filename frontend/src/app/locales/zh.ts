@@ -47955,6 +47955,9 @@ const resource = {
     "boq.tax_date_placeholder": "与价格基准日相同",
     "boq.tax_date_hint": "增值税按该日期适用的税率计算。留空则使用价格基准日。",
     "boq.date_shape_error": "请输入日、月、季度或年：2026-03-15、2026-03、2026-Q1 或 2026",
+    "schedule.calendar.week_fallback": "地区工作周不可用，现使用标准规划工作周。",
+    "schedule.calendar.holidays_missing": "{{years}} 年的法定节假日数据不可用。请先核查日历，再依据这些日期安排计划。",
+    "schedule.calendar.holidays_partial": "{{years}} 年的法定节假日数据不完整。请先核查日历，再依据这些日期安排计划。",
   }
 } as { translation: Record<string, string> };
 

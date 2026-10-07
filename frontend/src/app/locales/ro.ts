@@ -45985,6 +45985,9 @@ const resource = {
     "boq.tax_date_hint": "TVA se calculează la cota în vigoare la această dată. Lăsați gol pentru a folosi data bazei de preț.",
     "boq.date_shape_error": "Introduceți o zi, o lună, un trimestru sau un an: 2026-03-15, 2026-03, 2026-Q1 sau 2026",
     // --- /Learn ---
+    "schedule.calendar.week_fallback": "Săptămâna de lucru regională nu este disponibilă. Pentru planificare se utilizează o săptămână standard.",
+    "schedule.calendar.holidays_missing": "Datele privind sărbătorile legale pentru {{years}} nu sunt disponibile. Verificați calendarul înainte de a vă baza pe aceste date.",
+    "schedule.calendar.holidays_partial": "Datele privind sărbătorile legale pentru {{years}} sunt incomplete. Verificați calendarul înainte de a vă baza pe aceste date.",
   }
 } as { translation: Record<string, string> };
 

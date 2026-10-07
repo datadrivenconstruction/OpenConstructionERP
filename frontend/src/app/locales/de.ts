@@ -48355,6 +48355,9 @@ const resource = {
     "boq.rs_unconverted": "Nicht in der Summe enthalten: {{amount}} {{currency}}",
     "boq.rs_unconverted_hint": "Kein verwendbarer Wechselkurs. Legen Sie in den Projekteinstellungen einen positiven Wechselkurs fest, um diese Beträge einzubeziehen.",
     // --- /Learn ---
+    "schedule.calendar.week_fallback": "Die regionale Arbeitswoche ist nicht verfügbar. Es wird eine Standardwoche für die Planung verwendet.",
+    "schedule.calendar.holidays_missing": "Für {{years}} sind keine gesetzlichen Feiertage verfügbar. Prüfen Sie den Kalender, bevor Sie sich auf diese Termine verlassen.",
+    "schedule.calendar.holidays_partial": "Die gesetzlichen Feiertage für {{years}} sind nicht vollständig erfasst. Prüfen Sie den Kalender, bevor Sie sich auf diese Termine verlassen.",
   }
 } as { translation: Record<string, string> };
 
