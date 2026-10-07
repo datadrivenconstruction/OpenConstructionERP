@@ -148,6 +148,56 @@ class WorkflowService:
 
         await verify_project_access(workflow.project_id, str(user_id), self.session)
 
+    async def _verify_request_target(
+        self,
+        workflow: ApprovalWorkflow,
+        data: ApprovalRequestCreate,
+        user_id: str,
+    ) -> None:
+        """Require the request's record to exist and belong to the route's project.
+
+        * The record type must match the route's type and be a registered,
+          approvable type (400 otherwise).
+        * The record must exist (404).
+        * A project route only accepts records of its own project; a template
+          route (no project) only accepts records of a project the caller can
+          access. Both refusals are 404 so a caller cannot probe foreign ids.
+        """
+        from app.modules.enterprise_workflows.entities import (
+            APPROVABLE_ENTITIES,
+            resolve_entity_project_id,
+        )
+
+        if data.entity_type != workflow.entity_type:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"Record type '{data.entity_type}' does not match the workflow's type '{workflow.entity_type}'"
+                ),
+            )
+        if data.entity_type not in APPROVABLE_ENTITIES:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"Record type '{data.entity_type}' cannot be submitted for approval. "
+                    f"Supported: {sorted(APPROVABLE_ENTITIES)}"
+                ),
+            )
+        entity_project = await resolve_entity_project_id(self.session, data.entity_type, data.entity_id)
+        not_found = HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Record not found")
+        if entity_project is None:
+            raise not_found
+        if workflow.project_id is not None:
+            if entity_project != workflow.project_id:
+                raise not_found
+            return
+        from app.dependencies import verify_project_access
+
+        try:
+            await verify_project_access(entity_project, str(user_id), self.session)
+        except HTTPException as exc:
+            raise not_found from exc
+
     # ── Workflows ───────────────────────────────────────────────────────────
 
     async def create_workflow(self, data: WorkflowCreate, user_id: str) -> ApprovalWorkflow:
@@ -288,6 +338,7 @@ class WorkflowService:
         """Submit an entity for approval against a workflow."""
         workflow = await self.get_workflow(data.workflow_id)  # 404 check
         await self._verify_workflow_project_access(workflow, user_id)
+        await self._verify_request_target(workflow, data, user_id)
 
         request = ApprovalRequest(
             workflow_id=data.workflow_id,
