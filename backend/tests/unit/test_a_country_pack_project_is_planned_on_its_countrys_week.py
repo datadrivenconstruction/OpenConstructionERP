@@ -67,7 +67,6 @@ COUNTRIES_WITHOUT_A_HOLIDAY_SOURCE: dict[str, str] = {
     "HU": "the Hungarian holidays plus the bridge-day swaps the ministry decrees each year",
     "ID": "the Indonesian national holidays and cuti bersama, set by joint ministerial decree each year",
     "IE": "the ten Irish public holidays, four of them first-Monday rules",
-    "PT": "the Portuguese national holidays",
     "RO": "the Romanian legal holidays under Labour Code art. 139, Orthodox Easter based",
     "SG": "the gazetted Singapore holidays, four of them lunar",
 }
