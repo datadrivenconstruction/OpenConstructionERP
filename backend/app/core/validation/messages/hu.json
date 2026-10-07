@@ -1,0 +1,868 @@
+{
+  "boq_markup": {
+    "contingency_not_on_profit": {
+      "fail": "A(z) „{markup}” kockázati tartalék alapja már tartalmazza a(z) „{profit}” nyereségtételt, így a kockázatra félretett összegre is árrés kerül",
+      "suggestion": "Ezt a tételt a közvetlen költségre alkalmazza, kivéve, ha a piacon szokásos módszer szándékosan az általános költségek és a nyereség után számolja a kockázatot"
+    },
+    "order_is_declared": {
+      "fail": "A(z) {order}. helyet több felártétel is használja: {markups}",
+      "suggestion": "Minden felártételhez rendeljen külön sorrendi helyet, hogy egyértelmű legyen, mely tételek növelik a következők számítási alapját"
+    },
+    "percentage_within_band": {
+      "fail": "A(z) „{markup}” {category} típusú tétel értéke {percentage}%, ami kívül esik a 0–{ceiling}% közötti észszerű tartományon",
+      "suggestion": "Ellenőrizze a tizedesjelet. A tétel ára minden esetben pontosan a megadott érték alapján számítódik"
+    },
+    "cumulative_base_is_settled": {
+      "fail": "A(z) „{markup}” alapja „{apply_to}”, de nem előzi meg más tétel, ezért csak a közvetlen költségre számítódik",
+      "suggestion": "Helyezze azok után a tételek után, amelyekkel növelt alapra kell számítani, vagy alkalmazza a közvetlen költségre"
+    }
+  },
+  "common": {
+    "ok": "Rendben"
+  },
+  "export": {
+    "generated": "Létrehozva",
+    "content_digest": "A tartalom lenyomata"
+  },
+  "field_time": {
+    "hours_per_day_max": {
+      "fail": "A(z) {worker} dolgozóhoz ezen a napon {hours} óra van rögzítve, ami meghaladja a(z) {max} órás korlátot",
+      "suggestion": "Beküldés előtt rendelje az órákat a megfelelő naphoz vagy dolgozóhoz"
+    },
+    "line_complete": {
+      "fail": "A(z) {line}. sor hiányos: {reason}",
+      "labour_xor_plant": "vagy munkaerőt, vagy gépet kell rögzíteni; a két típus együttes megadása és mindkettő elhagyása is tilos",
+      "hours_positive": "az óraszámnak nullánál nagyobbnak kell lennie",
+      "cost_code_required": "költségkód megadása kötelező",
+      "suggestion": "A munkaidő-kimutatás beküldése előtt egészítse ki a sort"
+    },
+    "cost_code_resolves": {
+      "fail": "A(z) {line}. sor „{code}” kódja nem egyezik a projekt egyetlen költségvetési tételével vagy WBS-elemével sem",
+      "suggestion": "Válasszon a projekt költségvetésében létező költségkódot vagy WBS-elemet"
+    },
+    "daywork_needs_variation": {
+      "fail": "A(z) {line}. óradíjas munkasor nincs nyitott módosításhoz kapcsolva",
+      "suggestion": "Kapcsolja az óradíjas munkát ahhoz a módosításhoz, amely alapján elrendelték"
+    },
+    "plant_needs_equipment": {
+      "fail": "A(z) {line}. géphasználati sorban nincs megadva gép",
+      "suggestion": "Rendeljen hozzá gépet, hogy a gépórák költsége kiszámítható legyen"
+    },
+    "approved_immutable": {
+      "fail": "Ez a munkaidő-kimutatás {status} állapotú, ezért nem szerkeszthető",
+      "suggestion": "A jóváhagyott órákat egy helyesbítő, visszafordító munkaidő-kimutatással javítsa"
+    },
+    "offline_clock_plausible": {
+      "fail": "Az ezt a napot rögzítő eszköz órája {minutes} perccel előrébb járt a szerver órájánál",
+      "suggestion": "Állítsa be az eszköz óráját, hogy a rögzített időpontok helyes sorrendben legyenek értelmezhetők"
+    },
+    "offline_sync_delay": {
+      "fail": "A munkavégzés napja {date}, de az adatok csak {days} nappal később érkeztek meg az irodába",
+      "suggestion": "Jóváhagyás előtt vesse össze az órákat a tényleges munkanappal; az elszámolási időszak már lezárulhatott"
+    }
+  },
+  "ai_takeoff": {
+    "unreviewed_proposals": {
+      "fail": "{count} mennyiségkimutatási javaslat még ellenőrzésre vár, ezért itt nem szerepel beárazva",
+      "suggestion": "Dolgozza fel az ellenőrzésre váró javaslatokat, hogy a jóváhagyott mennyiségek megfeleljenek a rajznak"
+    }
+  },
+  "boq_quality": {
+    "position_has_quantity": {
+      "fail": "A(z) {ordinal}. tétel mennyisége nem lehet nulla vagy hiányzó",
+      "suggestion": "Adjon meg 0-nál nagyobb mennyiséget"
+    },
+    "position_has_unit_rate": {
+      "fail": "A(z) {ordinal}. tételhez egységárat kell rendelni",
+      "suggestion": "Rendeljen hozzá egységárat a költségadatbázisból"
+    },
+    "position_has_description": {
+      "fail": "A(z) {ordinal}. tétel leírása nem lehet üres"
+    },
+    "no_duplicate_ordinals": {
+      "fail": "A(z) „{ordinal}” sorszám {count} tételnél ismétlődik"
+    },
+    "unit_rate_in_range": {
+      "fail": "A(z) {ordinal}. tétel ára {rate} > {threshold} (a medián ötszöröse)",
+      "suggestion": "Ellenőrizze ezt az egységárat: szokatlanul magas"
+    },
+    "negative_values": {
+      "fail": "A(z) {ordinal}. tételnél negatív érték szerepel: {details}",
+      "suggestion": "Javítsa a negatív értékeket; használjon pozitív számokat"
+    },
+    "unrealistic_rate": {
+      "fail": "A(z) {ordinal}. tétel: {details}",
+      "suggestion": "Ellenőrizze ezt az értéket: irreálisan magasnak tűnik",
+      "not_assessed_no_currency": "{count} tétel nincs értékelve: a költségvetésben nincs pénznem, így a(z) {reference} pénznemben megadott értékhatárok nem számíthatók át",
+      "not_assessed_no_currency_suggestion": "Adja meg a projekt pénznemét, vagy rögzítsen pénznemet a tételeknél",
+      "not_assessed_no_rate": "{count} darab, {currency} pénznemű tétel nincs értékelve: nincs rögzített {reference} → {currency} árfolyam, így az értékhatárok nem számíthatók át ehhez a költségvetéshez",
+      "not_assessed_no_rate_suggestion": "Rögzítsen {reference} alapú árfolyamot a(z) {currency} pénznemhez az árfolyamjegyzékben vagy a projekt árfolyamai között"
+    },
+    "total_mismatch": {
+      "fail": "A(z) {ordinal}. tétel: számított érték {computed} != tárolt érték {stored} (eltérés={diff})",
+      "suggestion": "Számítsa újra az összeget: mennyiség × egységár"
+    },
+    "resource_split_mismatch": {
+      "fail": "A(z) {ordinal}. tétel erőforrásainak részösszege ({subtotal}) {diff} értékkel eltér az egységártól ({rate})",
+      "suggestion": "Ellenőrizze az erőforrások mennyiségét és árait: az egységre vetített összegüknek egyeznie kell a tétel egységárával"
+    },
+    "empty_unit": {
+      "fail": "A(z) {ordinal}. tétel mértékegysége üres vagy hiányzik",
+      "suggestion": "Adjon meg mértékegységet (m, m2, m3, kg, pcs, lsum stb.)"
+    },
+    "section_without_items": {
+      "fail": "A(z) {ordinal}. fejezetben ({title}) nincsenek alárendelt tételek",
+      "suggestion": "Adjon tételeket ehhez a fejezethez, vagy távolítsa el az üres fejezetet"
+    },
+    "rate_vs_benchmark": {
+      "fail": "A(z) {ordinal}. tétel {rate}/{unit} egységára meghaladja a(z) {threshold}/{unit} referenciaértéket; lehetséges, hogy irreális",
+      "suggestion": "Ellenőrizze ezt az árat: {unit} egységre a szokásos árnak {threshold} alatt kell lennie. Keressen mértékegység- vagy tizedesjelhibát.",
+      "not_assessed_no_currency": "{count} tétel nincs értékelve: a költségvetésben nincs pénznem, így a(z) {reference} pénznemben megadott referenciaértékek nem számíthatók át",
+      "not_assessed_no_currency_suggestion": "Adja meg a projekt pénznemét, vagy rögzítsen pénznemet a tételeknél",
+      "not_assessed_no_rate": "{count} darab, {currency} pénznemű tétel nincs értékelve: nincs rögzített {reference} → {currency} árfolyam, így a referenciaértékek nem számíthatók át ehhez a költségvetéshez",
+      "not_assessed_no_rate_suggestion": "Rögzítsen {reference} alapú árfolyamot a(z) {currency} pénznemhez az árfolyamjegyzékben vagy a projekt árfolyamai között"
+    },
+    "lump_sum_ratio": {
+      "fail": "{total_count} tételből {lsum_count} ({percent}) átalánydíjas; ez meghaladja a(z) {threshold} határt",
+      "suggestion": "A pontosabb becsléshez bontsa az átalánydíjas tételeket mérhető mennyiségekre (m, m2, m3, kg, pcs)"
+    },
+    "cost_concentration": {
+      "fail": "A(z) {ordinal}. tétel a teljes költségvetési összeg {share} részét adja ({value} / {grand_total}), meghaladva a(z) {threshold} határt",
+      "suggestion": "Bontsa ezt a tételt kisebb tételekre, vagy ellenőrizze a költségét; egyetlen tétel nem uralhatja a költségvetést"
+    },
+    "currency_consistency": {
+      "fail": "Vegyes pénznemek találhatók: {currencies}",
+      "suggestion": "A teljes költségvetésben egyetlen pénznemet használjon"
+    },
+    "measurement_consistency": {
+      "fail": "A költségvetés metrikus és angolszász mértékegységeket vegyít; következetesen egy rendszert használjon",
+      "suggestion": "Minden mennyiséget váltson át metrikus vagy angolszász mértékegységekre"
+    },
+    "revision_cost_impact_review": {
+      "fail": "A revízió {amount} összegű költséghatása még nincs módosításként rögzítve",
+      "suggestion": "Hozzon létre módosítási kérelemtervezetet ebből a revízió-összehasonlításból a költségváltozás követésére"
+    },
+    "base_date_readable": {
+      "fail": "A(z) „{base_date}” bázisdátum nem érvényes dátum, ezért a költségvetés adója a mai, nem a saját időpontjának megfelelő kulccsal számítódik",
+      "suggestion": "Az árszint bázisát nap, hónap, negyedév vagy év formájában adja meg ({shapes})"
+    },
+    "tax_date_readable": {
+      "fail": "A(z) „{tax_date}” adózási dátum nem érvényes dátum, ezért a költségvetés adója a mai, nem a saját időpontjának megfelelő kulccsal számítódik",
+      "suggestion": "Az adózási dátumot nap, hónap, negyedév vagy év formájában adja meg ({shapes}), vagy törölje, hogy az adó a költségvetés bázisdátumához igazodjon"
+    }
+  },
+  "din276": {
+    "cost_group_required": {
+      "fail": "A(z) {ordinal}. tételből hiányzik a DIN 276 költségcsoport",
+      "suggestion": "Rendeljen hozzá háromjegyű DIN 276 Kostengruppe kódot (pl. 330 a falakhoz)"
+    },
+    "valid_cost_group": {
+      "fail": "Érvénytelen DIN 276 kód („{code}”) a(z) {ordinal}. tételben"
+    },
+    "hierarchy": {
+      "fail": "A(z) {ordinal}. tétel: a(z) {child} költségcsoport nem a(z) {parent} szülőcsoport alá tartozik (elvárt előtag: „{prefix}”)",
+      "suggestion": "Helyezze a tételt a megfelelő szülő alá, vagy módosítsa a költségcsoport kódját a szülő hierarchiájához ({prefix}xx)"
+    },
+    "completeness": {
+      "fail": "A(z) {group} költségcsoport – {group_name} hiányzik a költségvetésből",
+      "suggestion": "A teljes lefedettséghez adjon tételeket a(z) {group} költségcsoporthoz ({group_name})"
+    }
+  },
+  "gaeb": {
+    "ordinal_format": {
+      "fail": "A(z) „{ordinal}” sorszám nem felel meg a fájl GAEB OZ-Maske sorszámmintájának",
+      "suggestion": "Használja a fájl OZ-Maske mintáját, például 001.001.0010 vagy 01.02.0030"
+    },
+    "lv_structure": {
+      "fail": "A(z) {ordinal}. tételhez nem tartozik szülőfejezet; a GAEB LV hierarchiája Leistungsgruppe szülőt követel meg",
+      "suggestion": "Rendelje ezt a tételt egy szülőfejezethez (Leistungsgruppe / Titel)"
+    },
+    "einheitspreis_sanity": {
+      "negative": "A(z) {ordinal}. tétel Einheitspreis egységára ({rate}) negatív (mértékegység: „{unit}”); a GAEB nem enged negatív árat átadni",
+      "zero": "A(z) {ordinal}. tétel Einheitspreis egységára 0.00 (mértékegység: „{unit}”); erősítse meg, hogy ez ajánlott nulla ár, nem hiányzó egységár",
+      "suggestion": "Adjon meg pozitív Einheitspreis egységárat, vagy jelölje a tételt Bedarfspositionként (opcionális munka) vagy átalánydíjasként (unit='lsum')"
+    },
+    "trade_section_code": {
+      "fail": "A(z) „{ordinal}” felső szintű fejezetből hiányzik a GAEB Leistungsbereich szakági kód (háromjegyű kód szükséges, pl. „012”)",
+      "suggestion": "Adjon a fejezethez háromjegyű szakági kódot (Leistungsbereich), például „012” földmunkákhoz vagy „013” falazási munkákhoz"
+    },
+    "quantity_decimals": {
+      "fail": "A(z) {ordinal}. tétel {quantity} mennyisége {decimals} tizedesjegyet tartalmaz; a GAEB X83 szerinti határ 3",
+      "suggestion": "Kerekítse a mennyiséget legfeljebb 3 tizedesjegyre a GAEB X83 szerint"
+    }
+  },
+  "nrm": {
+    "classification_required": {
+      "fail": "A(z) {ordinal}. tételből hiányzik az NRM elemkód",
+      "suggestion": "Rendeljen hozzá NRM 1/2 elemkódot (pl. 2.6.1 a külső falakhoz)"
+    },
+    "valid_element": {
+      "fail": "Érvénytelen NRM kód („{code}”) a(z) {ordinal}. tételben"
+    },
+    "completeness": {
+      "fail": "A(z) {group} NRM csoport – {group_name} hiányzik a költségvetésből",
+      "suggestion": "Adjon tételeket a(z) {group} NRM csoporthoz ({group_name})"
+    },
+    "base_date_declared": {
+      "fail": "A költségterv nem jelöli meg az egységárak érvényességének bázisdátumát",
+      "suggestion": "Rögzítse a bázisdátumot a költségvetésben. Enélkül nem állapítható meg, hogy az ár elavult-e, illetve mekkora inflációs korrekció szükséges"
+    },
+    "cost_plan_stage_declared": {
+      "fail": "A költségterv nem jelöli meg, mely tervezési fázishoz készült",
+      "suggestion": "Rögzítse a tervezési fázist. Ez határozza meg az elvárható pontosságot; a fázis elhagyása téves elvárásokat kelthet"
+    },
+    "contractor_costs_present": {
+      "preliminaries": "A költségterv nem tartalmazza a fővállalkozó felvonulási és általános építéshelyi költségeit sem a(z) {group} csoportban, sem felártételként",
+      "overheads_and_profit": "A költségterv nem tartalmazza a fővállalkozó általános költségeit és nyereségét sem a(z) {group} csoportban, sem felártételként",
+      "suggestion": "Adja hozzá NRM csoportelemként vagy a felmért munkákra számított felártételként. Mindkettő helyes; elhagyásával a kimutatott összeg nem fedi a kivitelezés költségét"
+    },
+    "risk_allowance_present": {
+      "fail": "A költségterv nem tartalmaz kockázati tartalékot",
+      "suggestion": "Adjon hozzá kockázati tartalékot a 13. NRM csoportként vagy tartaléktételként. Tartalék nélkül a költségterv egyetlen becsült értéket biztos összegként tüntet fel"
+    }
+  },
+  "masterformat": {
+    "classification_required": {
+      "fail": "A(z) {ordinal}. tételből hiányzik a MasterFormat kód",
+      "suggestion": "Rendeljen hozzá MasterFormat kódot (pl. 03 30 00 a helyszínen öntött beton munkáihoz)"
+    },
+    "valid_division": {
+      "fail": "Érvénytelen MasterFormat kód („{code}”) a(z) {ordinal}. tételben",
+      "suggestion": "Használjon hatjegyű MasterFormat formátumot: XX XX XX (pl. 03 30 00)"
+    },
+    "completeness": {
+      "fail": "A(z) {division} szakág – {division_name} hiányzik a költségvetésből",
+      "suggestion": "Adjon tételeket a(z) {division} szakághoz ({division_name})"
+    }
+  },
+  "sinapi": {
+    "code_required": {
+      "fail": "A(z) {ordinal}. tételből hiányzik a SINAPI kód",
+      "suggestion": "Rendeljen hozzá SINAPI összetételkódot (pl. 87878 a C30 betonhoz)"
+    },
+    "valid_code": {
+      "fail": "Érvénytelen SINAPI kód („{code}”) a(z) {ordinal}. tételben"
+    }
+  },
+  "nbr": {
+    "classification_required": {
+      "fail": "A(z) {ordinal}. tételből hiányzik az NBR 12721 fejezet",
+      "suggestion": "Jelölje a tételt egy NBR 12721 fejezettel (S1 = előkészítés, S2 = alépítmény, …, S11 = kiegészítő munkák)"
+    },
+    "valid_section": {
+      "fail": "A(z) {ordinal}. tétel „{code}” NBR 12721 fejezete nem tartozik az S1–S11 tartományba",
+      "suggestion": "Használjon S1 és S11 közötti kódot (pl. S3 a felépítményhez)"
+    }
+  },
+  "gesn": {
+    "code_required": {
+      "fail": "A(z) {ordinal}. tételből hiányzik a ГЭСН/ФЕР kód",
+      "suggestion": "Rendeljen hozzá ГЭСН kódot (pl. 06-01-001-01 a betonhoz)"
+    },
+    "valid_code": {
+      "fail": "A(z) „{code}” ГЭСН kód nem felel meg az XX-XX-XXX-XX formátumnak",
+      "suggestion": "Használja az NN-NN-NNN-NN formátumot (pl. 06-01-001-01)"
+    },
+    "resource_breakdown": {
+      "fail": "A(z) {ordinal}. tétel a(z) {code} normára hivatkozik, de nem tartalmaz erőforrás-bontást",
+      "suggestion": "Importálja a norma munkaerő-, gép- és anyagmennyiségeit, vagy indokolja meg a tétel eltérését"
+    },
+    "labour_hours_present": {
+      "fail": "A(z) {ordinal}. tétel ({code}) erőforrás-bontásában nincsenek munkaórák",
+      "suggestion": "Adja meg a norma szerinti munkaórákat; az általános költség és a becsült nyereség a bérköltségre épül, ezek nélkül nem számítható ki"
+    },
+    "price_level_declared": {
+      "fail": "A költségvetés nem jelöli meg, milyen árszinten szerepelnek az összegek",
+      "suggestion": "Adja meg az árszint dátumát és az alkalmazott átszámítási indexet, hogy az ellenőr ugyanarra az összegre jusson"
+    }
+  },
+  "dpgf": {
+    "lot_required": {
+      "fail": "A(z) {ordinal}. tétel nincs Lot technique szakági munkacsomaghoz rendelve",
+      "suggestion": "Rendeljen hozzá Lot technique munkacsomagot (pl. Lot 01 Gros Œuvre)"
+    },
+    "pricing_complete": {
+      "fail": "Csak {priced}/{total} tétel ({percent}) van beárazva; ez elmarad a 80%-os küszöbtől",
+      "suggestion": "A DPGF benyújtása előtt árazza be az összes tételt"
+    }
+  },
+  "onorm": {
+    "position_format": {
+      "fail": "A(z) „{ordinal}” sorszám nem felel meg az ÖNORM XX.XX.XXXXA formátumának",
+      "suggestion": "Használja az ÖNORM B 2063 formátumot (pl. 01.02.01A)"
+    },
+    "description_length": {
+      "fail": "A(z) {ordinal}. tétel leírása túl rövid ({length} karakter; minimum 20)",
+      "suggestion": "Részletezze a tétel leírását az ÖNORM B 2063 szerint"
+    }
+  },
+  "gbt50500": {
+    "code_required": {
+      "fail": "A(z) {ordinal}. tételből hiányzik a GB/T 50500 kód",
+      "suggestion": "Rendeljen hozzá kilencjegyű GB/T 50500 kódot (pl. 010101001)"
+    },
+    "valid_code": {
+      "fail": "Érvénytelen GB/T 50500 kód („{code}”); 9 vagy 12 számjegy szükséges"
+    }
+  },
+  "cpwd": {
+    "code_required": {
+      "fail": "A(z) {ordinal}. tételből hiányzik a CPWD/DSR kód",
+      "suggestion": "Rendeljen hozzá CPWD DSR tételhivatkozást (pl. 4.1.1)"
+    },
+    "measurement_units": {
+      "fail": "A(z) {ordinal}. tétel „{unit}” mértékegysége nem felel meg az IS 1200 szabványnak",
+      "suggestion": "Használjon szabványos IS 1200 mértékegységeket: m, m2, m3, kg, nos, rm stb."
+    }
+  },
+  "hungary": {
+    "item_code_required": {
+      "fail": "A(z) {ordinal}. tételből hiányzik a magyar tételkód",
+      "invalid": "A(z) {ordinal}. tétel „{code}” kódja egyik tételrendnek sem felel meg",
+      "suggestion": "A magasépítési munkák MA-CC-SS-II kódot használnak (01–17. fejezet); az infrastruktúra-munkák a projekt kódjegyzékének hat- vagy hétjegyű tételszámát használják"
+    },
+    "chapter_recognised": {
+      "fail": "A(z) {ordinal}. tétel {chapter}. fejezete nem tartozik a tételrend tizenhét fejezetéhez"
+    },
+    "material_fee_split": {
+      "fail": "A(z) {ordinal}. tétel anyagára ({material}) és díja ({fee}) együtt nem egyezik az egységárral ({rate})",
+      "suggestion": "Javítsa az anyag- és díjegységárakat vagy a teljes egységárat, hogy a bontás összege egyezzen"
+    },
+    "item_number_unique": {
+      "fail": "A(z) {number} tételszám {count} tételnél szerepel, pedig egyetlen tételt kell azonosítania",
+      "suggestion": "Az ügyfélnek történő átadás előtt minden tételhez rendeljen saját projektbeli tételszámot"
+    }
+  },
+  "prezzario": {
+    "voce_code_format_valid": {
+      "fail": "A(z) {ordinal}. tétel „{code}” kódjából nem derül ki, melyik árjegyzékből származik",
+      "suggestion": "A hivatalos voce kód a régióval és az árjegyzék kiadási évével kezdődik, például TOS25_01.A03.001.001 (Toscana 2025). Másolja át pontosan a regionális árjegyzék kódját, importálja a tételt az árjegyzékből, vagy jelöljön új árat NP.01 kóddal"
+    },
+    "voce_reference_present": {
+      "fail": "A(z) {ordinal}. tétel nem hivatkozik prezzario voce árjegyzéki tételre",
+      "suggestion": "Válasszon tételt egy importált regionális árjegyzékből, vagy jelölje árelemzéssel alátámasztott nuovo prezzo (NP) tételként"
+    },
+    "costi_sicurezza_separated": {
+      "fail": "A költségvetés nem tartalmaz külön tételt az ajánlati árengedménnyel nem csökkenthető biztonsági költségekre",
+      "suggestion": "Az oneri della sicurezza biztonsági költségeket külön fejezetként vagy felártételként adja hozzá, az árjegyzék biztonsági fejezete vagy a biztonsági terv alapján árazva"
+    },
+    "incidenza_manodopera_documented": {
+      "fail": "A(z) {ordinal}. tétel ({code}) nem adja meg a munkadíj arányát",
+      "suggestion": "Vegye át az incidenza della manodopera értéket az árjegyzékből, vagy adjon hozzá munkaerő-erőforrást, hogy a munkadíj külön feltüntethető legyen az ajánlatban"
+    },
+    "overheads_not_applied_twice": {
+      "fail": "A regionális árjegyzék árai már tartalmazzák az általános költségeket (13–17%) és a nyereséget (10%). Újbóli felszámításuk körülbelül {percent}%-kal növeli a végösszeget.",
+      "suggestion": "Távolítsa el az általános költség és nyereség felárait ebből a költségvetésből, vagy csak a saját árelemzéssel árazott tételeken (NP) tartsa meg őket."
+    }
+  },
+  "romania": {
+    "deviz_chapter_required": {
+      "fail": "A(z) {ordinal}. tétel nem jelöl meg deviz general fejezetet",
+      "suggestion": "Sorolja a tételt a HG 907/2016 szerinti fejezetbe és alfejezetbe, például 4.1 az építési és szerelési munkákhoz vagy 5.1 az építési terület berendezéséhez"
+    },
+    "deviz_chapter_recognised": {
+      "fail": "A(z) {ordinal}. tétel „{code}” deviz kódja nem a deviz general fejezete vagy alfejezete",
+      "suggestion": "Használjon kódot a HG 907/2016 deviz general 1–6. fejezetéből, például 1.2, 2, 3.5, 4.1, 5.1 vagy 6.2"
+    }
+  },
+  "greece": {
+    "net_article_required": {
+      "fail": "A(z) {ordinal}. tételből hiányzik az egységes árjegyzék (ΝΕΤ) tételhivatkozása",
+      "suggestion": "Adja meg az árazás alapjául szolgáló ΝΕΤ tételt, például ΟΙΚ 32.01.06, vagy új tétel esetén ΝΑΟΙΚ"
+    },
+    "net_article_valid": {
+      "invalid": "A(z) {ordinal}. tétel „{code}” hivatkozása nem felel meg a ΝΕΤ tételformátumnak",
+      "chapter": "A(z) {ordinal}. tétel „{code}” hivatkozása a(z) {chapter}. fejezettel kezdődik, amely nem szerepel a magasépítési árjegyzékben",
+      "suggestion": "Adja meg az árjegyzék előtagját és a tételszámot, például ΟΙΚ 38.20.02, ΟΔΟ Α-2 vagy ΑΤΗΕ 8151.1"
+    }
+  },
+  "ukraine": {
+    "zkr_chapter_required": {
+      "fail": "A(z) {ordinal}. tétel nem jelöli meg az összesített költségvetés fejezetét",
+      "suggestion": "Sorolja a tételt a зведений кошторисний розрахунок 1–12. fejezetének valamelyikébe; a fő létesítmény építési munkái a 2. fejezetbe tartoznak"
+    },
+    "zkr_chapter_recognised": {
+      "fail": "A(z) {ordinal}. tétel {chapter}. fejezete nem tartozik az összesített költségvetés tizenkét fejezetéhez",
+      "suggestion": "Használjon 1 és 12 közötti fejezetszámot"
+    }
+  },
+  "birimfiyat": {
+    "code_required": {
+      "fail": "A(z) {ordinal}. tételből hiányzik a birim fiyat poz tételszám",
+      "suggestion": "Rendeljen hozzá Bayındırlık poz tételszámot (pl. 04.013/1)"
+    },
+    "valid_poz": {
+      "fail": "A(z) „{code}” poz kód sem a jelenlegi egységárjegyzék számozásának (XX.XXX.XXXX), sem a régebbinek (XX.XXX/X) nem felel meg",
+      "suggestion": "Használja az árjegyzék tételszámát, például 15.140.1002, vagy régebbi szerződésnél 04.013/1; saját árelemzésű tételeit ÖZEL-1 formában számozza"
+    }
+  },
+  "sekisan": {
+    "code_required": {
+      "fail": "A(z) {ordinal}. tételből hiányzik a 積算 kód",
+      "suggestion": "Rendeljen hozzá 積算基準 tételkódot"
+    },
+    "metric_units": {
+      "fail": "A(z) {ordinal}. tétel „{unit}” mértékegysége nem szabványos",
+      "suggestion": "Használjon szabványos metrikus mértékegységeket: m, m2, m3, kg, t, 式 stb."
+    }
+  },
+  "bc3": {
+    "code_required": {
+      "fail": "A(z) {ordinal}. tételből hiányzik a FIEBDC-3 fogalomkód",
+      "suggestion": "Rendeljen hozzá FIEBDC-3 kódot (pl. E04CM040 vagy 01.02.01)"
+    },
+    "valid_code": {
+      "fail": "Érvénytelen FIEBDC-3 kód („{code}”) a(z) {ordinal}. tételben",
+      "suggestion": "Használjon alfanumerikus FIEBDC-3 formátumot (pl. E04CM040, 01.02.01, CAP01#)"
+    }
+  },
+  "mexico": {
+    "apu_completeness": {
+      "fail": "A(z) {ordinal}. tétel APU egységárelemzése hiányos; hiányzó költségelemek: {missing}",
+      "suggestion": "Adja hozzá az egységárelemzéshez a hiányzó közvetlen költségelemeket (mano de obra, materiales, maquinaria)"
+    },
+    "iva_rate_valid": {
+      "fail": "A(z) {ordinal}. tétel IVA kulcsa ({rate}) érvénytelen; a mexikói IVA 16, 8 (határ menti régió) vagy 0 százalék",
+      "suggestion": "Állítsa az IVA kulcsot 16 százalékra (általános), 8 százalékra (határ menti régió) vagy 0 százalékra"
+    },
+    "subcontract_retencion": {
+      "fail": "A(z) {ordinal}. alvállalkozói tétel nem rögzíti, hogy vonatkozik-e rá IVA/ISR adólevonás",
+      "suggestion": "Rögzítse az alvállalkozói tétel IVA és ISR adólevonásait, vagy jelölje, hogy egyik sem alkalmazandó"
+    },
+    "cfdi_rfc_present": {
+      "missing": "A CFDI kibocsátói adatai hiányosak az ajánlati exporthoz; hiányzik: {missing}",
+      "invalid_rfc": "A(z) „{rfc}” RFC nem érvényes CFDI RFC (cégnél 12, magánszemélynél 13 karakter)",
+      "suggestion": "A CFDI 4.0 számlázáshoz adja meg a projektprofilban a kibocsátó RFC-jét, adózási rendszerét és az uso CFDI értéket"
+    }
+  },
+  "pipeline": {
+    "side_effecting_requires_gate": {
+      "fail": "Mellékhatással járó csomópontok ellenőrzési kapu nélkül: {nodes}",
+      "suggestion": "Közzététel előtt minden indító-/MI-csomóponttól az írási csomópontokig vezető útvonalra helyezzen ellenőrzési vagy emberi jóváhagyási kaput."
+    }
+  },
+  "property_dev": {
+    "escrow_account_required": {
+      "fail": "A fejlesztéshez aktív letéti számla szükséges a(z) „{regulator}” felügyelet előírásai szerint",
+      "suggestion": "Nyisson letéti számlát a felügyelet által engedélyezett banknál a Megfelelőség → Letéti számlák alatt"
+    },
+    "escrow_iban_valid": {
+      "fail": "A(z) {account} letéti számla „{iban}” IBAN-ja nem felel meg az ISO 13616 szerkezeti ellenőrzésének",
+      "suggestion": "Javítsa az IBAN-t: az országkódnak, a hossznak és az ellenőrző számnak meg kell felelnie az ISO 13616 szabványnak"
+    },
+    "escrow_balance_reconciled": {
+      "fail": "A(z) {account} letéti számla főkönyvi egyenlege ({ledger}) {drift} értékkel eltér a tranzakciók összegétől ({transactions})",
+      "suggestion": "Egyeztesse a letéti számlát; vizsgálja meg a nem rögzített jóváírásokat és a hiányzó terheléseket"
+    },
+    "sales_contract_party_ownership_sums_to_100": {
+      "fail": "A(z) {contract} szerződés tulajdoni hányadainak összege {total}% (pontosan 100%-nak kell lennie)",
+      "suggestion": "Módosítsa a felek százalékos részesedéseit úgy, hogy összegük 100.00% legyen"
+    },
+    "payment_schedule_instalments_sum_to_contract_value": {
+      "fail": "A(z) {contract} szerződés részleteinek összege ({instalments}) eltér a szerződés értékétől ({contract_value}); eltérés: {drift}",
+      "suggestion": "Igazítsa a fizetési ütemtervet úgy, hogy a részletek összege egyezzen a szerződés teljes értékével"
+    },
+    "reservation_expiry_in_future": {
+      "fail": "A(z) {reservation} foglalás lejárata ({expires}) nem jövőbeli időpont",
+      "suggestion": "Hosszabbítsa meg a foglalást, vagy állítsa lejárt/törölt állapotba"
+    },
+    "broker_commission_rate_within_bounds": {
+      "fail": "A(z) {agreement} jutalékmegállapodás: {issue}",
+      "suggestion": "Használjon 0.1% és 15% közötti százalékos mértéket, fix összeget vagy nem üres sávos díjtáblát"
+    },
+    "price_matrix_no_negative_modifier": {
+      "fail": "A(z) {matrix} ármátrix „{factor}” szabályának {multiplier} szorzója kívül esik a [-0.50, 2.00] tartományon",
+      "suggestion": "Az irreális telekárak elkerüléséhez korlátozza a módosítókat -50% és +200% közé"
+    }
+  },
+  "schedule_quality": {
+    "open_ends": {
+      "fail": "A(z) „{activity}” tevékenységhez hiányzik a következő logikai kapcsolat: {ends} (nyitott végű, be nem kötött tevékenység)",
+      "both": "megelőző vagy követő",
+      "predecessor": "megelőző",
+      "successor": "követő",
+      "suggestion": "Kösse a tevékenységet a hálózatba megelőző és követő kapcsolattal, vagy jelölje kezdő/záró mérföldkőként"
+    },
+    "negative_lag": {
+      "fail": "A(z) {predecessor} -> {successor} kapcsolat negatív késleltetést használ ({lag} nap), ami előrehozásnak számít és torzítja a kritikus utat",
+      "suggestion": "Cserélje az előrehozást külön tevékenységre vagy SS/FF kapcsolatra, hogy a sorrend indokolható maradjon"
+    },
+    "excessive_lag": {
+      "fail": "A(z) {predecessor} -> {successor} kapcsolat késleltetése {lag} nap, ami meghaladja a(z) {threshold} napos határt",
+      "suggestion": "A várakozási időt külön tevékenységként modellezze (beszerzés, szilárdulás, jóváhagyás), hogy állapotot lehessen rendelni hozzá és erőforrás-kiegyenlítéskor figyelembe lehessen venni"
+    },
+    "hard_constraints": {
+      "fail": "A(z) „{activity}” tevékenység szigorú dátumkorláttal rendelkezik ({constraint}), amely felülírja a hálózati logikát",
+      "suggestion": "Használjon rugalmas korlátot (kezdés legkorábban), vagy logikai kapcsolatokkal határozza meg a dátumot, hogy a tevékenység a megelőzők csúszásakor elmozdulhasson"
+    },
+    "negative_float": {
+      "fail": "A(z) „{activity}” tevékenység teljes tartalékideje negatív ({float} nap), így az ütemterv a megadott kapcsolatokkal nem teljesíthető",
+      "suggestion": "Módosítsa a munkasorrendet, enyhítsen egy szigorú korláton, vagy adjon dokumentált felzárkóztatási tervet, hogy a tartalékidő legalább nulla legyen"
+    },
+    "high_float": {
+      "fail": "A(z) „{activity}” tevékenység teljes tartalékideje nagyon magas ({float} nap), meghaladja a(z) {threshold} napos határt",
+      "suggestion": "Ellenőrizze, nem hiányzik-e követő kapcsolat; a nagy tartalékidő rendszerint laza hálózati bekötésre utal"
+    },
+    "missing_duration": {
+      "fail": "A(z) „{activity}” nem mérföldkő jellegű tevékenység időtartama érvénytelen ({duration} nap)",
+      "suggestion": "Adjon meg pozitív munkanap-időtartamot, vagy jelölje a sort mérföldkőként, ha valóban nulla időtartamú esemény"
+    },
+    "duration_on_project_week": {
+      "fail": "A(z) „{activity}” tevékenység tárolt időtartama {stored} munkanap, ami a(z) {start}–{end} közötti hétfő–péntek napok száma; a projekt {calendar} munkahét-rendje szerint ugyanezen dátumok {expected} munkanapot jelentenek",
+      "suggestion": "Mentse újra a tevékenység dátumait, hogy az időtartam a projekt munkahete szerint újraszámítódjon, vagy adja meg tudatosan az időtartamot"
+    }
+  },
+  "sheet_completeness": {
+    "missing": {
+      "fail": "A(z) {sheet} tervlap szerepel a rajzjegyzékben, de nincs a feltöltött készletben",
+      "suggestion": "Töltse fel a hiányzó tervlapot, vagy erősítse meg, hogy visszavonták a kiadásból"
+    },
+    "extra": {
+      "fail": "A(z) {sheet} tervlap szerepel a feltöltött készletben, de nincs a rajzjegyzékben",
+      "suggestion": "Adja hozzá a jegyzékhez vagy a kiadási nyilvántartáshoz, vagy távolítsa el a tévesen feltöltött lapot"
+    },
+    "revision_mismatch": {
+      "fail": "A(z) {sheet} tervlap revíziója {actual_rev}, de a jegyzék {expected_rev} revíziót vár",
+      "suggestion": "Adja ki az elvárt revíziót, vagy frissítse a jegyzéket az aktuálisra"
+    }
+  },
+  "procurement": {
+    "po_has_lines": {
+      "fail": "A beszerzési rendelés nem tartalmaz sorokat, így a kötelezettségvállalás összege nincs tételekkel alátámasztva",
+      "suggestion": "A beszerzési rendelés jóváhagyása előtt adja hozzá a megrendelt tételeket"
+    },
+    "po_line_amount": {
+      "fail": "A(z) {line}. sor összege {actual}, de a mennyiség és az egységár szorzata {expected}",
+      "suggestion": "Javítsa a mennyiséget, az egységárat vagy a sorösszeget, hogy összhangban legyenek"
+    },
+    "po_subtotal_matches_lines": {
+      "fail": "A részösszeg {actual}, de a sorok összege {expected}",
+      "suggestion": "Számítsa újra a részösszeget az aktuális sorokból"
+    },
+    "po_total_matches_subtotal": {
+      "fail": "A végösszeg {actual}, de a részösszeg és az adó összege {expected}",
+      "suggestion": "Számítsa újra a végösszeget, hogy egyezzen a részösszeg és az adó összegével"
+    },
+    "po_no_negative_line": {
+      "fail": "A(z) {line}. sor mennyisége nem pozitív, vagy egységára negatív",
+      "suggestion": "Negatív sor helyett állítson ki jóváíró bizonylatot a visszafordításhoz"
+    },
+    "po_currency_set": {
+      "fail": "A beszerzési rendelés pénzneme hiányzik, ezért az összege nem összesíthető és nem fizethető ki",
+      "suggestion": "Adja meg a pénznemet, rendszerint a projektben használtat"
+    },
+    "po_vendor_assigned": {
+      "fail": "A beszerzési rendelésben nincs szállító",
+      "suggestion": "A kötelezettségvállalás jóváhagyása előtt válassza ki a szállítót"
+    },
+    "po_retention_within_bounds": {
+      "fail": "A(z) {percent}% visszatartás kívül esik a 0–{max}% közötti észszerű tartományon",
+      "suggestion": "A visszatartást százalékként adja meg, például öt százalékhoz 5-öt"
+    },
+    "po_delivery_after_issue": {
+      "fail": "A szállítás dátuma ({delivery}) megelőzi a kiállítás dátumát ({issue})",
+      "suggestion": "Állítsa a szállítás dátumát a kiállítás napjára vagy későbbre"
+    },
+    "po_line_cost_coded": {
+      "fail": "A(z) {line}. sorhoz nincs WBS, költségkategória vagy költségtétel, ezért nem jelenik meg a költségbontásban",
+      "suggestion": "Rendeljen hozzá költségkódot, hogy a kötelezettségvállalás a költségkerethez kapcsolódjon"
+    },
+    "invoice_within_order": {
+      "fail": "A(z) {invoice} számla {excess} összeggel meghaladja a(z) {po} rendelés még nyitott {remaining} összegét",
+      "suggestion": "Vesse össze a számlát a rendeléssel; ha a többletet elfogadták, jóváhagyás előtt rögzítse a rendelés módosításaként"
+    },
+    "invoice_quantity_received": {
+      "fail": "A(z) {line}. sor számlázott mennyisége összesen {invoiced} lenne, de csak {received} érkezett be",
+      "suggestion": "A mennyiség jóváhagyása előtt várja meg a szállítólevelet, vagy igazolja az áruátvételt"
+    },
+    "invoice_value_received": {
+      "fail": "A(z) {po} rendelés számlái összesen {invoiced} értéket tennének ki, de az átvett áru értéke a rendelési árakon csak {received}",
+      "suggestion": "Az összeg jóváhagyása előtt várja meg a szállítólevelet, vagy igazolja az áruátvételt"
+    }
+  },
+  "subcontract": {
+    "agreement_has_scope": {
+      "fail": "A megállapodásban nincsenek munkacsomagok, így a kifizetési kérelemnek nincs mire hivatkoznia",
+      "suggestion": "A megállapodás aktiválása előtt bontsa a szerződéses munkatartalmat munkacsomagokra"
+    },
+    "package_scope_described": {
+      "fail": "A(z) {package} munkacsomagnak van neve, de a hozzá tartozó munkák leírása hiányzik",
+      "suggestion": "Írja le a munkacsomag tartalmát, hogy későbbi módosítási vita esetén legyen kiindulási alap"
+    },
+    "agreement_value_positive": {
+      "fail": "A szerződés értéke {value}, így a visszatartásnak és az értékütemezésnek nincs számítási alapja",
+      "suggestion": "A megállapodás aktiválása előtt adja meg az elfogadott szerződéses értéket"
+    },
+    "packages_within_value": {
+      "fail": "A munkacsomagok értéke {planned}, de a szerződésé {total}",
+      "suggestion": "Árazza újra a munkacsomagokat, vagy emelje a szerződés értékét, hogy fedezze a vállalt munkatartalmat"
+    },
+    "agreement_dates_ordered": {
+      "fail": "A megállapodás vége ({end}) megelőzi a kezdetét ({start})",
+      "suggestion": "Javítsa a kezdő- vagy végdátumot, hogy a szerződés időszaka előrefelé haladjon"
+    },
+    "agreement_currency_set": {
+      "fail": "A megállapodás pénzneme hiányzik, ezért a hozzá tartozó kifizetések nem összesíthetők és nem teljesíthetők",
+      "suggestion": "Adja meg a pénznemet, rendszerint a projektben használtat"
+    },
+    "retention_within_bounds": {
+      "fail": "A(z) {percent}% visszatartás kívül esik a 0–{max}% közötti észszerű tartományon",
+      "suggestion": "A visszatartást az egyes kifizetések százalékaként adja meg, ne összegként"
+    },
+    "insurance_valid_at_start": {
+      "fail": "Az alvállalkozó biztosítása {expiry} napján lejárt, a(z) {reference} napi munkakezdés előtt",
+      "suggestion": "Az alvállalkozó munkaterületre engedése előtt kérjen érvényes biztosítási igazolást"
+    },
+    "unlinked_contract_twin": {
+      "fail": "A(z) {agreement} alvállalkozói megállapodás és a(z) {contract} szerződés ugyanannak az alvállalkozásnak tűnik, így a pénzügyek kétszer számolhatják el",
+      "suggestion": "Kapcsolja össze őket, ha ugyanarra az alvállalkozásra vonatkoznak, vagy jelölje őket különbözőként"
+    }
+  },
+  "submittal": {
+    "reviewer_assigned": {
+      "fail": "A benyújtandó dokumentációhoz nincs kijelölt ellenőr, így beküldéskor senkihez sem kerül feldolgozásra",
+      "suggestion": "Beküldés előtt jelölje ki a választ adó ellenőrt"
+    },
+    "required_date_present": {
+      "fail": "A benyújtandó dokumentációnak nincs elvárt válaszdátuma, így késedelmesként sem jelenthető",
+      "suggestion": "Adja meg az ellenőrzés szükséges határidejét az általa lehetővé tett munkák alapján"
+    },
+    "required_date_after_submitted": {
+      "fail": "Az ellenőrzés határideje {required}, ami megelőzi a dokumentáció {submitted} napi benyújtását",
+      "suggestion": "Állítsa az elvárt dátumot a benyújtás utáni munkanapra"
+    },
+    "review_window_sufficient": {
+      "fail": "Az ellenőrnek {days} napja van, kevesebb, mint az ellenőrzéshez rendszerint szükséges {minimum} nap",
+      "suggestion": "Biztosítsa a szokásos ellenőrzési időt, vagy előzetesen egyeztesse a rövidebbet az ellenőrrel"
+    },
+    "spec_section_present": {
+      "fail": "A benyújtandó dokumentáció nem jelöl meg műszaki előírási fejezetet, így a nyilvántartás nem tudja besorolni",
+      "suggestion": "Adja meg azt a műszaki előírási fejezetet, amelyre a dokumentáció válaszol"
+    },
+    "approver_distinct_from_reviewer": {
+      "fail": "Ugyanaz a személy ({person}) az ellenőr és a jóváhagyó, így nincs független második ellenőrzés",
+      "suggestion": "Az ellenőrtől eltérő jóváhagyót jelöljön ki"
+    },
+    "linked_scope_present": {
+      "fail": "A benyújtandó dokumentáció nincs munkatartalmi tételhez kapcsolva, így nem összesíthető munkacsomaghoz",
+      "suggestion": "Kapcsolja hozzá az érintett költségvetési tételeket"
+    }
+  },
+  "rfq": {
+    "scope_described": {
+      "fail": "Az ajánlatkérés nem tartalmaz munkatartalmat vagy leírást, így a szállítónak nincs mit beáraznia",
+      "suggestion": "Közzététel előtt írja le a munkatartalmat, hogy a beérkező ajánlatok összehasonlíthatók legyenek"
+    },
+    "deadline_present": {
+      "fail": "Az ajánlatkérésben nincs beadási határidő, így az ajánlattétel sosem zárul le",
+      "suggestion": "Adja meg az ajánlatok beérkezésének dátumát és időpontját"
+    },
+    "deadline_parseable": {
+      "fail": "A(z) {value} beadási határidőt a rendszer nem tudja dátumként értelmezni, ezért minden ajánlatot elutasít",
+      "suggestion": "Dátumként adja meg a határidőt, például 2026-08-31"
+    },
+    "deadline_in_future": {
+      "fail": "A(z) {deadline} beadási határidő a mai napon ({today}) már elmúlt, így az ajánlatkérés lezártként érkezik",
+      "suggestion": "Közzététel előtt módosítsa a határidőt jövőbeli dátumra"
+    },
+    "has_recipients": {
+      "fail": "Az ajánlatkérésnek nincs szállítói címzettje, így a közzététel senkit sem értesít",
+      "suggestion": "Adja hozzá az ajánlatkérés címzett szállítóit"
+    },
+    "currency_set": {
+      "fail": "Az ajánlatkérésben nincs pénznem, így az ajánlatok nem rangsorolhatók egymáshoz képest",
+      "suggestion": "Adja meg az ajánlatok árazási pénznemét"
+    },
+    "bid_currency_matches": {
+      "fail": "A(z) {bid} ajánlat pénzneme {bid_currency}, az ajánlatkérésé viszont {rfq_currency}",
+      "suggestion": "Kérjen új ajánlatot az ajánlatkérés pénznemében, vagy rögzítse az elfogadott átszámítást"
+    },
+    "bid_amounts_parseable": {
+      "fail": "A(z) {bid} ajánlat összege {value}, ami nem rangsorolható számérték",
+      "suggestion": "Az odaítélés előtt javítsa az ajánlati összeget"
+    },
+    "bids_still_valid": {
+      "fail": "A(z) {bid} ajánlat {expired} napján lejárt, a mai nap pedig {today}, így az ára már nem kötelező érvényű",
+      "suggestion": "Odaítélés előtt kérje az ajánlattevőtől az ár megerősítését"
+    },
+    "award_has_competition": {
+      "fail": "Az odaítélés {count} ajánlaton alapul, ami kevesebb, mint a versenyeztetett összehasonlításhoz szükséges {minimum}",
+      "suggestion": "Rögzítse, mi indokolja az egyetlen forrásból történő odaítélést, vagy hívjon meg több ajánlattevőt"
+    }
+  },
+  "errors": {
+    "resource_not_found": "Az erőforrás nem található",
+    "project_not_found": "A projekt nem található",
+    "vendor_not_found": "A szállító nem található",
+    "template_not_found": "A sablon nem található",
+    "position_not_found": "A tétel nem található",
+    "boq_not_found": "A költségvetés nem található",
+    "session_not_found": "A munkamenet nem található",
+    "document_not_found": "A dokumentum nem található",
+    "documents_batch_delete_referenced": "Más nyilvántartások még hivatkoznak a köteg dokumentumaira. Ellenőrizze, mely kapcsolatokat szakítaná meg a törlés, és erősítse meg az acknowledge_references paraméterrel.",
+    "invitation_not_found": "A meghívó nem található",
+    "agreement_not_found": "A megállapodás nem található",
+    "rejection_not_found": "Az elutasítás nem található",
+    "claim_not_found": "A teljesítési elszámolás nem található",
+    "gaeb_x89_final_account_unsupported": "Végelszámolás vagy részleges végelszámolás még nem exportálható GAEB X89 formátumban. Ennek a halmozott teljesítést kell számláznia a korábbi kifizetések levonásával; egy teljesítési elszámolásból csak egy időszak részszámlája készül. Exportálja az elszámolást részszámlaként.",
+    "xpwe_native_file_refused": "Ez egy költségvetés-készítő program saját projektfájlja, amelyet csak az a program tud megnyitni. Exportálja a költségvetést XPWE formátumban a forrásprogramból, és töltse fel az .xpwe fájlt.",
+    "plot_not_found": "A telek nem található",
+    "survey_not_found": "A drónos felmérés nem található",
+    "diary_video_not_found": "Az építési napló videója nem található",
+    "diary_photo_not_found": "Az építési napló fényképe nem található",
+    "bidder_not_found": "Az ajánlattevő nem található",
+    "webhook_not_found": "A webhook nem található",
+    "submission_not_found": "A benyújtás nem található",
+    "measurement_not_found": "A helyszíni felmérés nem található",
+    "salescontract_not_found": "Az adásvételi szerződés nem található",
+    "prompt_not_found": "A prompt-sablon nem található",
+    "prequalification_not_found": "Az előminősítés nem található",
+    "purchase_requisition_not_found": "A beszerzési igény nem található",
+    "purchase_order_not_found": "A beszerzési rendelés nem található",
+    "group_not_found": "A csoport nem található",
+    "final_account_not_found": "A végelszámolás nem található",
+    "estimate_job_not_found": "A költségbecslési feladat nem található",
+    "escrow_not_found": "A letéti tranzakció nem található",
+    "commission_accrual_not_found": "Az elszámolt jutalék nem található",
+    "baseline_not_found": "A bázisterv nem található",
+    "fx_rate_set_locked": "A(z) {date} napi EKB-árfolyamok zároltak, ezért ez a frissítés nem írta felül őket. Először oldja fel az árfolyamkészlet zárolását, ha az új közzétételt kell átvennie.",
+    "boq_locked": "A költségvetés zárolt, ezért nem módosítható. A változtatáshoz hozzon létre revíziót.",
+    "boq_link_owner_locked": "A(z) „{code}” kódot a zárolt „{bill}” költségvetés egyik sora határozza meg, és a hozzákapcsolás módosítaná ezt a költségvetést. Először oldja fel a zárolást, vagy új kóddal rögzítse a sort."
+  },
+  "variations": {
+    "boq_lines_are_traced": {
+      "fail": "A módosítás költségvetésének {line}. sora sem értékütemezési sorra, sem költségvetési tételre nem vezethető vissza",
+      "suggestion": "Adja meg az érintett szerződéses sort vagy azt a költségvetési tételt, amelyből a munkatartalom származik, hogy az összeg alátámasztható legyen"
+    },
+    "boq_total_matches_estimate": {
+      "fail": "A kérelem főösszegként megadott becslése {estimate}, de a beárazott költségvetése összesen {priced}",
+      "suggestion": "Vegye át a kérelembe a beárazott végösszeget, vagy javítsa a költségvetést, hogy egyetlen egyértelmű összeg szerepeljen"
+    },
+    "change_kind_matches_numbers": {
+      "removed_positive": "A(z) {line}. sor elhagyott munkaként van jelölve, de pozitív {quantity} mennyiséget tartalmaz; az elhagyás negatív mennyiséggel csökkenti a szerződést",
+      "added_negative": "A(z) {line}. sor hozzáadott munkaként van jelölve, de negatív {quantity} mennyiséget tartalmaz; a szerződésből kivett munka elhagyás, nem hozzáadás",
+      "removed_needs_contract_line": "A(z) {line}. sor elhagyott munkaként van jelölve, de nem vezethető vissza értékütemezési sorra, így nincs elhagyható szerződéses tétel",
+      "modified_needs_contract_line": "A(z) {line}. sor módosított munkaként van jelölve, de nem vezethető vissza értékütemezési sorra, így nincs módosítható szerződéses tétel",
+      "suggestion": "Javítsa a sor visszakövetési adataiban a módosítás típusát vagy a mennyiséget, vagy nevezze meg az érintett szerződéses sort"
+    }
+  },
+  "cases": {
+    "has_steps": {
+      "fail": "Ez az eset még nem tartalmaz lépéseket, így az olvasónak nincs mit követnie.",
+      "suggestion": "Adjon hozzá legalább egy lépést a megnyitandó képernyő és az elvégzendő művelet megadásával."
+    },
+    "step_titled": {
+      "fail": "{count} lépésből hiányzik a cím vagy a megnyitandó képernyő.",
+      "suggestion": "Adjon minden lépésnek rövid címet, és válassza ki a megnyitandó képernyőt."
+    },
+    "step_purpose": {
+      "fail": "{total} lépésből {count} nem mondja el, miért fontos, így az eset magyarázat helyett kattintáslistának hat.",
+      "suggestion": "Minden lépéshez írjon egy sort a céljáról; erre van szüksége az új felhasználónak."
+    },
+    "distinct_screens": {
+      "fail": "{count} lépés ugyanazt a képernyőt nyitja meg, mint az előző, így az olvasó nem lát változást, és nem tudja megkülönböztetni őket.",
+      "suggestion": "Vonja össze őket egy lépésbe, vagy a másodikat irányítsa arra a képernyőre, ahol a munka ténylegesen folytatódik."
+    },
+    "duration_plausible": {
+      "fail": "Ez az eset {steps} lépésre {minutes} percet ígér. Aki nem tudja tartani a tempót, a becslés további részeiben sem bízik meg.",
+      "suggestion": "Emelje a becslést legalább {minimum} percre, vagy hagyjon el néhány lépést."
+    },
+    "described": {
+      "fail": "Az esetnek nincs összefoglalója, így a listában csak a címe jelenik meg.",
+      "suggestion": "Írjon egy mondatot arról, mit végez el az olvasó a végére."
+    }
+  },
+  "uk": {
+    "contract_form_declared": {
+      "fail": "A költségvetés nem jelöli meg az árazás alapjául szolgáló szerződésformát",
+      "suggestion": "Rögzítse a szerződésformát. A felvonulási költségek, a kockázat és a fizetési feltételek árazása ettől függ; nélküle az összeg kevéssé értelmezhető"
+    },
+    "payment_regime_declared": {
+      "fail": "A fizetési mechanizmus hiányos: nincs rögzítve {missing}",
+      "suggestion": "Rögzítse mindkét dátumot. Ha az építési szerződés egyiket sem határozza meg, attól még mindkettő kötelező: a Scheme for Construction Contracts pótolja őket, így a felek fizetési feltételeit nem az aláírt szerződés, hanem jogszabály adja"
+    },
+    "retention_declared": {
+      "fail": "A költségvetés nem adja meg az alkalmazandó visszatartást",
+      "suggestion": "Rögzítse a visszatartás százalékát és felszabadítását, vagy azt, hogy nincs visszatartás. Ez a vállalkozó által már megkeresett, de fel nem vehető pénz; ha a költségvetés nem szól róla, a forgótőkeigényről sem szól"
+    },
+    "cdm_duty_holders_declared": {
+      "fail": "A CDM 2015 szerinti kötelezettségviselők nincsenek rögzítve: hiányzik {missing}",
+      "suggestion": "Rögzítse a kijelöléseket. Ha több vállalkozó dolgozik a projekten, a megrendelőnek írásban főtervezőt és fővállalkozót kell kijelölnie; ennek hiányában a kötelezettségek a megrendelőt terhelik"
+    },
+    "hrb_regime_declared": {
+      "fail": "A magasabb kockázatú épület besorolása nincs tisztázva: {reason}",
+      "unanswered": "a költségvetés nem adja meg, hogy magasabb kockázatú épületről van-e szó",
+      "disagrees": "a költségvetés szerinti magasabb kockázatú besorolás {declared}, a saját méretei alapján viszont {derived}",
+      "suggestion": "Az épület akkor magasabb kockázatú, ha legalább 18 m magas VAGY legalább 7 szintes, ÉS legalább két lakóegységet tartalmaz. Mindkét feltételcsoport számít: a lakóegység nélküli magas épület nem magasabb kockázatú, és az ilyen besorolás szükségtelen engedélyezési kapueljárást eredményez"
+    },
+    "vat_treatment_declared": {
+      "fail": "A költségvetés nem adja meg az áfa kezelését",
+      "suggestion": "Rögzítse az adókezelést: általános kulcsot, jogosult munkáknál kedvezményes vagy nulla kulcsot, illetve a hatálya alá eső ügyleteknél belföldi fordított adózást. A fordított adózás az áfát a vevőre terheli, és megváltoztatja a vállalkozó által számlázható összeget"
+    }
+  },
+  "project_completeness": {
+    "country_set": {
+      "fail": "A projekt nem jelöl meg országot, így nem határozható meg az árbázisa, adókulcsa vagy munkanaptára",
+      "suggestion": "Adja meg az országot a projekt beállításaiban. Ez határozza meg az összegekhez alkalmazott regionális csomagot, adózást és naptárt"
+    },
+    "currency_set": {
+      "fail": "A projekt pénzneme hiányzik, így költségvetései, felárai és szerződései nem összesíthetők",
+      "suggestion": "Válassza ki a projekt pénznemét a beállításokban. Minden költségvetés és szerződés ebben árazódik, és minden végösszeg ebben értendő"
+    },
+    "currency_matches_bill": {
+      "fail": "A projekt pénzneme {project_currency}, de a költségvetés sorai {bill_currencies} pénznemben vannak árazva",
+      "suggestion": "Váltsa át a sorokat a projekt pénznemére megadott árfolyamon, vagy rögzítse az árfolyamot a projektnél, hogy a költségvetés végösszege egyetlen összeg legyen"
+    },
+    "priced_bill_present": {
+      "fail": "A projektnek nincs tételeket tartalmazó tételes költségvetése, így nincs miből becslést készíteni",
+      "suggestion": "Hozzon létre tételes költségvetést és adjon hozzá tételeket, vagy importáljon CAD-modellből, táblázatból vagy adatcserefájlból"
+    },
+    "bill_base_date_set": {
+      "fail": "A(z) „{bill}” költségvetés nem adja meg az egységárak érvényességének bázisdátumát",
+      "suggestion": "Rögzítse a bázisdátumot a költségvetésben. Enélkül az árak nem indexálhatók, nem adóztathatók a saját időpontjuk szerint, és nem hasonlíthatók össze más becsléssel"
+    },
+    "classification_standard_set": {
+      "fail": "A projektnek nincs osztályozási szabványa, így tételeinek kódjai nem ellenőrizhetők",
+      "suggestion": "Válassza ki a projekt kódolásához használt osztályozási szabványt. Ez az ellenőrzéskor alkalmazott országspecifikus szabálykészleteket is meghatározza"
+    },
+    "planned_dates_set": {
+      "both_missing": "A projektnek sem tervezett kezdő-, sem tervezett végdátuma nincs",
+      "start_missing": "A projektnek van tervezett végdátuma, de nincs tervezett kezdődátuma",
+      "end_missing": "A projektnek van tervezett kezdődátuma, de nincs tervezett végdátuma",
+      "unreadable": "A(z) „{value}” tervezett dátum nem értelmezhető dátumként",
+      "suggestion": "Adja meg a projekt tervezett kezdő- és végdátumát dátumként. Az időfüggő költségek, az áremelkedés és az ütemterv e két időpont közé számítódik"
+    },
+    "planned_dates_ordered": {
+      "fail": "A projekt tervezett kezdete {start}, vége {end}, ami megelőzi a kezdést",
+      "suggestion": "Cserélje fel vagy javítsa a tervezett dátumokat, hogy a kezdés megelőzze a befejezést"
+    },
+    "client_recorded": {
+      "fail": "A projektben nincs rögzített ügyfél, és egyik szerződés sem nevez meg megrendelőt",
+      "suggestion": "Rögzítse az ügyfelet a projektnél, vagy adja hozzá a megrendelőt szerződő félként, hogy a költségvetésnek legyen címzettje"
+    },
+    "procurement_started": {
+      "fail": "A projekt {phase} fázisban van, mégsem tartozik hozzá szerződés vagy ajánlati csomag",
+      "suggestion": "Hozzon létre ajánlati csomagot a költségvetésből, rögzítse a szerződést, vagy állítsa vissza a fázist arra a becslési szakaszra, ahol a projekt ténylegesen tart"
+    }
+  },
+  "boq_resources": {
+    "unit_rate_not_rederived": {
+      "fail": "A(z) {ordinal}. tétel erőforrássoraiból nem árazható a tétel, ezért az egységár nem számítódott újra belőlük",
+      "fallback_allowance": "A(z) {ordinal}. tétel erőforrássorai becsült költségfelosztást tartalmaznak a teljes tételmennyiséggel, ezért az egységár nem számítódott újra belőlük",
+      "assumed_norm": "A(z) {ordinal}. tétel erőforrássoraiban olyan normák szerepelnek, amelyeket a katalógus nem adott meg, ezért az egységár nem számítódott újra belőlük",
+      "norm_collapsed": "A(z) {ordinal}. tétel erőforrássorai elvesztették a katalógus szerinti normát, és helyette a teljes tételmennyiséget tartalmazzák, ezért az egységár nem számítódott újra belőlük",
+      "whole_position_quantities": "A(z) {ordinal}. tétel erőforrássoraiban egységre vetített normák helyett a teljes tétel mennyiségei szerepelnek, ezért az egységár nem számítódott újra belőlük",
+      "suggestion": "Ellenőrizze az erőforrás-bontást: az erőforrásnormák felülvizsgálatával származtassa újra a tételt a katalógustételből, vagy kézzel javítsa a sorokat"
+    }
+  },
+  "poland": {
+    "knr_reference_required": {
+      "fail": "A(z) {ordinal}. tétel nem hivatkozik KNR katalógustáblázatra",
+      "suggestion": "A podstawa mezőben adja meg a normák forrásául szolgáló katalógustáblázatot, például KNR 2-02 0201-01, vagy saját számítású tételnél írja be: kalkulacja indywidualna"
+    },
+    "knr_reference_recognised": {
+      "fail": "A(z) {ordinal}. tétel „{code}” hivatkozása nem nevez meg KNR katalóguscsaládot",
+      "suggestion": "A hivatkozást a katalóguscsaláddal kezdje, például KNR, KNNR, KNR-W vagy KSNR, vagy jelölje a tételt kalkulacja indywidualna megnevezéssel"
+    }
+  }
+}

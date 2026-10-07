@@ -5,6 +5,7 @@
       "en",
       "es",
       "fr",
+      "hu",
       "it",
       "ja",
       "ko",
@@ -12,6 +13,7 @@
       "pl",
       "pt",
       "ru",
+      "uk",
       "zh"
     ],
     "backend/app/modules/bcf/messages": [
