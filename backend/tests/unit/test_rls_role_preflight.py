@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import secrets
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -53,17 +54,95 @@ def test_private_cluster_uses_an_accessible_scratch_root(tmp_path, monkeypatch, 
 
 @pytest.fixture(scope="module")
 def private_cluster():
-    import pixeltable_pgserver
-
     data_dir = _private_cluster_path()
     assert not data_dir.exists(), "never reuse or clean up a pre-existing cluster"
-    # get_server defaults to stop-only. This uniquely owned cluster is outside
-    # pytest's temp tree, so explicitly remove its data after stopping it.
-    server = pixeltable_pgserver.get_server(str(data_dir), cleanup_mode="delete")
+    server = _start_private_cluster(data_dir)
     try:
         yield make_url(server.get_uri())
     finally:
         server.cleanup()
+
+
+def _start_private_cluster(data_dir):
+    import pixeltable_pgserver
+
+    if sys.platform == "win32":
+        from pixeltable_pgserver.pgexec import pgexec
+
+        from app.core.embedded_pg import _initdb_args
+
+        # get_server creates PGDATA before initdb. An elevated Windows runner's
+        # restricted initdb child cannot chmod that directory. Match boot():
+        # initdb creates its own directory, then pixeltable only attaches.
+        assert not data_dir.exists(), "initdb must own creation of the private cluster"
+        try:
+            pgexec("initdb", _initdb_args(data_dir))
+        except subprocess.CalledProcessError:
+            # initdb has exited, and this path did not exist before our call.
+            # Remove only its partial output, never any pre-existing cluster.
+            if data_dir.exists():
+                shutil.rmtree(data_dir)
+            raise
+        assert (data_dir / "PG_VERSION").is_file(), "private initdb did not finish"
+    # get_server defaults to stop-only. This uniquely owned cluster is outside
+    # pytest's temp tree, so explicitly remove its data after stopping it.
+    return pixeltable_pgserver.get_server(str(data_dir), cleanup_mode="delete")
+
+
+def test_windows_private_cluster_is_initialized_before_pixeltable_creates_its_directory(tmp_path, monkeypatch):
+    import importlib
+
+    import pixeltable_pgserver
+
+    pgexec_module = importlib.import_module("pixeltable_pgserver.pgexec")
+    data_dir = tmp_path / "private-pg"
+    server = object()
+    calls = []
+
+    def initialize(command, args):
+        assert command == "initdb"
+        assert args[-2:] == ("-D", str(data_dir))
+        assert "--locale=C" in args
+        assert not data_dir.exists()
+        calls.append("initdb")
+        data_dir.mkdir()
+        (data_dir / "PG_VERSION").write_text("16", encoding="ascii")
+
+    def attach(path, *, cleanup_mode):
+        assert Path(path) == data_dir
+        assert (data_dir / "PG_VERSION").is_file()
+        assert cleanup_mode == "delete"
+        calls.append("attach")
+        return server
+
+    monkeypatch.setattr(sys, "platform", "win32")
+    monkeypatch.setattr(pgexec_module, "pgexec", initialize)
+    monkeypatch.setattr(pixeltable_pgserver, "get_server", attach)
+    assert _start_private_cluster(data_dir) is server
+    assert calls == ["initdb", "attach"]
+
+
+def test_failed_private_initdb_cleans_partial_data_without_attaching(tmp_path, monkeypatch):
+    import importlib
+
+    import pixeltable_pgserver
+
+    pgexec_module = importlib.import_module("pixeltable_pgserver.pgexec")
+    data_dir = tmp_path / "failed-private-pg"
+    expected = subprocess.CalledProcessError(1, "initdb")
+
+    def fail_initialize(*args):
+        data_dir.mkdir()
+        (data_dir / "partial").write_text("incomplete", encoding="ascii")
+        raise expected
+
+    monkeypatch.setattr(sys, "platform", "win32")
+    monkeypatch.setattr(pgexec_module, "pgexec", fail_initialize)
+    monkeypatch.setattr(pixeltable_pgserver, "get_server", lambda *args, **kwargs: pytest.fail("must not attach"))
+    with pytest.raises(subprocess.CalledProcessError) as error:
+        _start_private_cluster(data_dir)
+    assert error.value is expected
+    assert not data_dir.exists()
 
 
 @pytest.fixture
