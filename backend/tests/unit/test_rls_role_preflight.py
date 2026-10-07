@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import os
+import secrets
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -14,11 +16,50 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.pool import NullPool
 
 
+def _private_cluster_path() -> Path:
+    # Match tests/conftest.py's cluster placement. Windows initdb cannot use
+    # the runneradmin profile's pytest temp tree reliably ("File exists").
+    # Keep a separate cluster: roles are cluster-wide, not database-local.
+    root = Path(tempfile.gettempdir())
+    for name in ("OE_TEST_PG_ROOT", "RUNNER_TEMP"):
+        candidate = os.environ.get(name, "").strip()
+        if candidate and Path(candidate).is_dir():
+            root = Path(candidate)
+            break
+    # Name, but do not pre-create, the data directory: let initdb own its
+    # permissions, exactly as the shared test-cluster launcher does.
+    return root.resolve() / f"oe-rls-private-{secrets.token_hex(8)}"
+
+
+@pytest.mark.parametrize("case", ["override", "runner", "missing_override", "system"])
+def test_private_cluster_uses_an_accessible_scratch_root(tmp_path, monkeypatch, case):
+    roots = {name: tmp_path / name for name in ("override", "runner", "system")}
+    for root in roots.values():
+        root.mkdir()
+    monkeypatch.delenv("OE_TEST_PG_ROOT", raising=False)
+    monkeypatch.delenv("RUNNER_TEMP", raising=False)
+    monkeypatch.setattr(tempfile, "gettempdir", lambda: str(roots["system"]))
+    if case != "system":
+        monkeypatch.setenv("RUNNER_TEMP", str(roots["runner"]))
+    if case == "override":
+        monkeypatch.setenv("OE_TEST_PG_ROOT", f" {roots['override']} ")
+    elif case == "missing_override":
+        monkeypatch.setenv("OE_TEST_PG_ROOT", str(tmp_path / "missing"))
+    path = _private_cluster_path()
+    assert path.parent == roots["runner" if case == "missing_override" else case]
+    assert not path.exists(), "initdb must create its own private data directory"
+    assert _private_cluster_path() != path, "parallel runs must not share cluster-wide roles"
+
+
 @pytest.fixture(scope="module")
-def private_cluster(tmp_path_factory):
+def private_cluster():
     import pixeltable_pgserver
 
-    server = pixeltable_pgserver.get_server(str(tmp_path_factory.mktemp("rls_roles_private")))
+    data_dir = _private_cluster_path()
+    assert not data_dir.exists(), "never reuse or clean up a pre-existing cluster"
+    # get_server defaults to stop-only. This uniquely owned cluster is outside
+    # pytest's temp tree, so explicitly remove its data after stopping it.
+    server = pixeltable_pgserver.get_server(str(data_dir), cleanup_mode="delete")
     try:
         yield make_url(server.get_uri())
     finally:
