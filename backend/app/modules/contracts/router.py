@@ -124,6 +124,7 @@ from app.modules.contracts.schemas import (
     LDClauseCreate,
     LDClauseResponse,
     LDClauseUpdate,
+    PaymentApplicationResponse,
     PaymentPlanResponse,
     ProgressClaimCommitRequest,
     ProgressClaimCreate,
@@ -1499,6 +1500,23 @@ async def delete_claim_line(
 # as if they do not exist (no information leak). They are an additive AIA
 # presentation layer over the existing progress-claim engine - no new claim
 # state, no duplicated retention/finance math.
+
+
+@router.get(
+    "/progress-claims/{claim_id}/payment-application",
+    response_model=PaymentApplicationResponse,
+    summary="Country-independent payment-application figures for a progress claim",
+)
+async def get_payment_application(
+    claim_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("contracts.read")),
+) -> PaymentApplicationResponse:
+    await _verify_claim_access(session, claim_id, user_id)
+    service = ContractsService(session)
+    payload = await service.build_payment_application(claim_id)
+    return PaymentApplicationResponse.model_validate(payload)
 
 
 @router.get(

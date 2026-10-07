@@ -329,3 +329,45 @@ async def test_aia_application_404_for_non_us_project(session) -> None:
     with pytest.raises(HTTPException) as exc:
         await svc.build_aia_application(claim.id)
     assert exc.value.status_code == 404
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("country", ["DE", "GB", "", "US", "CA", "AU"])
+async def test_canonical_payment_application_preserves_claim_figures(session, country) -> None:
+    claim = await _seed_claim(session, country_code=country)
+    service = ContractsService(session)
+    application = await service.build_payment_application(claim.id)
+    assert application["claim_id"] == claim.id
+    assert application["currency"] == "USD"
+    assert application["summary"]["total_earned_less_retainage"] == Decimal("4750.00")
+    assert application["lines"][0]["retainage"] == Decimal("250.00")
+    if country in {"US", "CA", "AU"}:
+        assert application == await service.build_aia_application(claim.id)
+    else:
+        with pytest.raises(HTTPException) as exc:
+            await service.build_aia_application(claim.id)
+        assert exc.value.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_canonical_payment_application_missing_claim(session) -> None:
+    with pytest.raises(HTTPException) as exc:
+        await ContractsService(session).build_payment_application(uuid.uuid4())
+    assert exc.value.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_canonical_route_enforces_project_ownership(session) -> None:
+    from app.modules.contracts.router import get_payment_application
+
+    claim = await _seed_claim(session, country_code="DE")
+    owner_view = await get_payment_application(claim.id, session, str(OWNER_ID), None)
+    assert owner_view.claim_id == claim.id
+    assert owner_view.summary.total_earned_less_retainage == Decimal("4750.00")
+
+    outsider_id = uuid.uuid4()
+    session.add(User(id=outsider_id, email="outsider@test.io", hashed_password="x", role="manager"))
+    await session.flush()
+    with pytest.raises(HTTPException) as exc:
+        await get_payment_application(claim.id, session, str(outsider_id), None)
+    assert exc.value.status_code == 404

@@ -6629,13 +6629,23 @@ class ContractsService:
         return project
 
     async def build_aia_application(self, claim_id: uuid.UUID, *, locale: str | None = None) -> dict[str, Any]:
-        """Assemble the AIA G702 summary + G703 continuation for one claim.
+        """Return the regional AIA view, retaining its US/CA/AU eligibility gate."""
+        return await self._build_payment_application(claim_id, locale=locale, require_aia=True)
+
+    async def build_payment_application(self, claim_id: uuid.UUID, *, locale: str | None = None) -> dict[str, Any]:
+        """Return shared claim figures for any country, without selecting a legal form."""
+        return await self._build_payment_application(claim_id, locale=locale, require_aia=False)
+
+    async def _build_payment_application(
+        self, claim_id: uuid.UUID, *, locale: str | None, require_aia: bool
+    ) -> dict[str, Any]:
+        """Assemble shared summary and continuation figures for one claim.
 
         Reuses the existing SoV lines (``ContractLine``) and the claim's lines
         (``ProgressClaimLine``); does not recompute the claim FSM or retention
-        accrual. Line 5 and column I are the claim's retention snapshot when
-        the engine has worked it out, else the contract's flat rate. Country-gated by the caller via
-        :meth:`assert_contract_aia_eligible`. Single-currency by construction
+        accrual. Retainage uses the claim's retention snapshot when
+        the engine has worked it out, else the contract's flat rate. The AIA
+        entry point additionally requires regional eligibility. Single-currency by construction
         (the claim inherits the contract currency); no currency is ever blended.
 
         ``locale`` is the language the application is read in, and the one
@@ -6663,7 +6673,8 @@ class ContractsService:
                 detail=translate("errors.claim_not_found", locale=get_locale()),
             )
         contract = await self.get_contract(claim.contract_id)
-        await self.assert_contract_aia_eligible(contract)
+        if require_aia:
+            await self.assert_contract_aia_eligible(contract)
 
         contract_lines = await self.line_repo.list_for_contract(contract.id)
         claim_lines = await self.claim_line_repo.list_for_claim(claim_id)

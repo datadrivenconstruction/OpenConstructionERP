@@ -1113,8 +1113,8 @@ class AIACertification(BaseModel):
     certified_amount: Decimal | None = None
 
 
-class AIAApplicationResponse(BaseModel):
-    """Full AIA G702 + G703 payment-application view for one progress claim."""
+class PaymentApplicationResponse(BaseModel):
+    """Country-independent claim figures; regional document rendering is separate."""
 
     claim_id: UUID
     contract_id: UUID
@@ -1129,6 +1129,10 @@ class AIAApplicationResponse(BaseModel):
     summary: AIAG702Summary
     lines: list[AIAG703Line]
     certification: AIACertification
+
+
+class AIAApplicationResponse(PaymentApplicationResponse):
+    """Full AIA G702 + G703 payment-application view for one progress claim."""
 
 
 # == ContractParty (structured parties / roles) ============================
