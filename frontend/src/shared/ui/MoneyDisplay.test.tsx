@@ -233,6 +233,18 @@ describe('MoneyDisplay - valid currency formatting', () => {
 });
 
 describe('MoneyDisplay exact fallback', () => {
+  it.each([
+    [1234.5, undefined, '1234.50 USD'],
+    [1234.5, 'always', '+1234.50 USD'],
+    [-1234.5, 'always', '-1234.50 USD'],
+  ] as const)('keeps numeric fallback compatibility for %s / %s', (amount, signDisplay, expected) => {
+    vi.spyOn(Intl, 'NumberFormat').mockImplementation(function () {
+      throw new RangeError('unavailable formatter');
+    });
+    const { container } = render(<MoneyDisplay amount={amount} currency="USD" signDisplay={signDisplay} />);
+    expect(container.textContent).toBe(expected);
+  });
+
   function emulateNumberOnlyEngine() {
     const Native = Intl.NumberFormat;
     return vi.spyOn(Intl, 'NumberFormat').mockImplementation(function (locales, options) {

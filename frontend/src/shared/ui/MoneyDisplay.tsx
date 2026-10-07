@@ -220,16 +220,14 @@ export function MoneyDisplay({
       formatted = formatDecimal(new Intl.NumberFormat(numberLocale, opts), formatValue);
     }
   } catch {
-    if (exactDecimal !== null) {
-      // Preserve all digits on old engines or failed formatting. This plain
-      // fallback deliberately does not claim localized/compact formatting.
-      formatted = `${rawDecimalWithSign(exactDecimal, signDisplay)} ${safeCurrency}`;
-    } else {
-      // Keep the existing numeric-input fallback independently of exact text.
-      const n = Number.isFinite(numericValue) ? numericValue : 0;
-      const plus = signDisplay === 'always' && n >= 0 ? '+' : '';
-      formatted = `${plus}${n.toFixed(minorUnits)} ${safeCurrency}`;
-    }
+    // Preserve the existing numeric fallback when Intl itself has failed.
+    const n = Number.isFinite(numericValue) ? numericValue : 0;
+    const plus = signDisplay === 'always' && n >= 0 ? '+' : '';
+    // Canonical strings retain every digit; neither fallback claims localized
+    // or compact formatting when the formatter could not provide it.
+    formatted = exactDecimal !== null
+      ? `${rawDecimalWithSign(exactDecimal, signDisplay)} ${safeCurrency}`
+      : `${plus}${n.toFixed(minorUnits)} ${safeCurrency}`;
   }
 
   const colorClass = colorize
