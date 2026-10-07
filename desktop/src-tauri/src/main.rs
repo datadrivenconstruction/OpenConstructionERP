@@ -911,6 +911,91 @@ line-height:1.55');\
     );
 }
 
+/// How many automatic restarts after an unexpected backend exit are allowed
+/// inside [`AUTO_RESTART_WINDOW_SECS`]. A crash that comes back at once is not
+/// cured by a third restart, and a loop of them would hide the message that
+/// tells the person to send us the log.
+const AUTO_RESTART_LIMIT: usize = 2;
+const AUTO_RESTART_WINDOW_SECS: u64 = 30 * 60;
+
+fn auto_restart_ledger() -> Option<PathBuf> {
+    workspace_data_dir().map(|d| d.join("logs").join("desktop-auto-restarts.txt"))
+}
+
+/// Decide from the earlier restart times whether one more is allowed, and
+/// return the times to keep. Pure, so the rule can be tested without a clock.
+fn auto_restart_decision(previous: &[u64], now: u64) -> (bool, Vec<u64>) {
+    let mut recent: Vec<u64> = previous
+        .iter()
+        .copied()
+        .filter(|t| *t <= now && now - *t < AUTO_RESTART_WINDOW_SECS)
+        .collect();
+    let allowed = recent.len() < AUTO_RESTART_LIMIT;
+    if allowed {
+        recent.push(now);
+    }
+    (allowed, recent)
+}
+
+/// Record and allow an automatic restart, unless the limit is reached. The
+/// ledger is a file because a restart replaces this process and its memory.
+fn claim_auto_restart() -> bool {
+    let Some(path) = auto_restart_ledger() else {
+        return false;
+    };
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(0);
+    let previous: Vec<u64> = std::fs::read_to_string(&path)
+        .unwrap_or_default()
+        .lines()
+        .filter_map(|l| l.trim().parse().ok())
+        .collect();
+    let (allowed, keep) = auto_restart_decision(&previous, now);
+    if let Some(dir) = path.parent() {
+        let _ = std::fs::create_dir_all(dir);
+    }
+    let body: Vec<String> = keep.iter().map(|t| t.to_string()).collect();
+    if std::fs::write(&path, body.join("
+")).is_err() {
+        // Without a ledger the limit cannot hold across restarts, and an
+        // unbounded restart loop is worse than the message.
+        return false;
+    }
+    if !allowed {
+        log_line("automatic restart limit reached; leaving the backend stopped");
+    }
+    allowed
+}
+
+/// The last `max_lines` lines of `text`, for copying a crash log tail.
+fn tail_lines(text: &str, max_lines: usize) -> String {
+    let lines: Vec<&str> = text.lines().collect();
+    let start = lines.len().saturating_sub(max_lines);
+    lines[start..].join("
+")
+}
+
+/// Copy the tail of the backend's crash log into the launcher log.
+fn log_backend_crash_tail() {
+    let Some(path) = workspace_data_dir().map(|d| d.join("logs").join("backend-crash.log")) else {
+        return;
+    };
+    match std::fs::read(&path) {
+        Ok(bytes) => {
+            let text = String::from_utf8_lossy(&bytes);
+            log_line(&format!(
+                "backend crash log ({}), last lines:
+{}",
+                path.display(),
+                tail_lines(&text, 80)
+            ));
+        }
+        Err(e) => log_line(&format!("backend crash log not readable at {}: {e}", path.display())),
+    }
+}
+
 /// Show or clear the notice that says the backend has gone quiet.
 ///
 /// Deliberately not the modal above. Silence is a symptom that can end: a long
@@ -3990,6 +4075,26 @@ this keeps happening send it to info@datadrivenconstruction.io."
                             // replace it with a vaguer one later.
                             fatal_flag.store(true, Ordering::SeqCst);
                         } else if !deliberate.load(Ordering::SeqCst) {
+                            // A native crash leaves no Python traceback on
+                            // stderr. The backend writes its faulthandler
+                            // dumps (and a stack dump of every thread when
+                            // its event loop stalls) to a crash log in the
+                            // data folder; copy the tail into this log so a
+                            // report sent to us carries the stack.
+                            log_backend_crash_tail();
+                            if claim_auto_restart() {
+                                log_line(
+                                    "the backend stopped unexpectedly; restarting it automatically",
+                                );
+                                report_backend_lost(
+                                    &handle_evt,
+                                    &lost_flag,
+                                    "The application backend stopped, restarting",
+                                    "OpenConstructionERP is starting the backend again. Your saved work is kept. This window will reload in a moment.",
+                                );
+                                std::thread::sleep(std::time::Duration::from_secs(3));
+                                handle_evt.restart();
+                            }
                             // The backend had already gone healthy, and
                             // nobody asked it to stop. This case was
                             // silent: readiness was the end of the
@@ -4813,6 +4918,31 @@ fn show_startup_failure_dialog(_message: &str) {}
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn auto_restart_allows_two_in_the_window_then_stops() {
+        let (ok1, l1) = super::auto_restart_decision(&[], 1_000);
+        assert!(ok1);
+        let (ok2, l2) = super::auto_restart_decision(&l1, 1_100);
+        assert!(ok2);
+        let (ok3, l3) = super::auto_restart_decision(&l2, 1_200);
+        assert!(!ok3);
+        assert_eq!(l3, vec![1_000, 1_100]);
+        // Outside the window the old restarts no longer count.
+        let later = 1_000 + super::AUTO_RESTART_WINDOW_SECS + 200;
+        let (ok4, l4) = super::auto_restart_decision(&l3, later);
+        assert!(ok4);
+        assert_eq!(l4, vec![later]);
+    }
+
+    #[test]
+    fn tail_lines_keeps_the_end() {
+        assert_eq!(super::tail_lines("a
+b
+c", 2), "b
+c");
+        assert_eq!(super::tail_lines("a", 5), "a");
+    }
+
     use super::*;
 
     /// The identity of the data directory the tests below speak from.
