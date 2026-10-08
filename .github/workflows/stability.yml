@@ -21,6 +21,10 @@ name: Stability (load, fresh install, long session)
 on:
   workflow_dispatch:
     inputs:
+      k6_scenarios:
+        description: "k6 scenarios: shared (every VU edits one seeded position), isolated (each VU edits its own BOQ)"
+        default: "shared,isolated"
+        required: false
       vus:
         description: "Comma-separated k6 VU counts, one run each"
         default: "20,50"
@@ -129,12 +133,21 @@ jobs:
         run: |
           # docker stats every 2s into a CSV; the PID file is what the stop
           # step kills, never a process name.
+          # CPU goes to its own file so the memory parser stays as it is. One
+          # uvicorn process held near 100% (one core) means the event loop is
+          # the ceiling, not the database pool.
           nohup bash -c 'while true; do
               docker stats --no-stream --format "{{.MemUsage}}" oe-app 2>/dev/null \
                 | awk -v t="$(date +%s)" "{print t\",\"\$1}"
               sleep 2
             done' > "$RUNNER_TEMP/mem.csv" 2>/dev/null &
           echo $! > "$RUNNER_TEMP/sampler.pid"
+          nohup bash -c 'while true; do
+              docker stats --no-stream --format "{{.CPUPerc}}" oe-app 2>/dev/null \
+                | awk -v t="$(date +%s)" "{print t\",\"\$1}"
+              sleep 2
+            done' > "$RUNNER_TEMP/cpu.csv" 2>/dev/null &
+          echo $! > "$RUNNER_TEMP/cpu-sampler.pid"
 
       - name: Wait for the demo seed to finish
         run: |
@@ -162,13 +175,19 @@ jobs:
           mkdir -p "$RUNNER_TEMP/k6"
           rc=0
           IFS=',' read -ra counts <<< "${{ inputs.vus }}"
-          for v in "${counts[@]}"; do
-            v="$(echo "$v" | tr -d ' ')"
-            echo "::group::k6 VUS=$v"
-            VUS="$v" DURATION="${{ inputs.duration }}" BASE_URL="http://127.0.0.1:${APP_PORT}" \
-              SUMMARY_OUT="$RUNNER_TEMP/k6/summary-vus-$v.json" \
-              k6 run scripts/stability/k6-load.js || rc=1
-            echo "::endgroup::"
+          IFS=',' read -ra scenarios <<< "${{ inputs.k6_scenarios }}"
+          for sc in "${scenarios[@]}"; do
+            sc="$(echo "$sc" | tr -d ' ')"
+            for v in "${counts[@]}"; do
+              v="$(echo "$v" | tr -d ' ')"
+              echo "::group::k6 SCENARIO=$sc VUS=$v"
+              echo "k6 $sc vus=$v start $(date +%s)" >> "$RUNNER_TEMP/k6/k6-phases.txt"
+              SCENARIO="$sc" VUS="$v" DURATION="${{ inputs.duration }}" BASE_URL="http://127.0.0.1:${APP_PORT}" \
+                SUMMARY_OUT="$RUNNER_TEMP/k6/summary-$sc-vus-$v.json" \
+                k6 run scripts/stability/k6-load.js || rc=1
+              echo "k6 $sc vus=$v end $(date +%s)" >> "$RUNNER_TEMP/k6/k6-phases.txt"
+              echo "::endgroup::"
+            done
           done
           exit $rc
 
@@ -176,6 +195,7 @@ jobs:
         if: ${{ always() && steps.cold.outcome != 'skipped' }}
         run: |
           [ -f "$RUNNER_TEMP/sampler.pid" ] && kill "$(cat "$RUNNER_TEMP/sampler.pid")" 2>/dev/null || true
+          [ -f "$RUNNER_TEMP/cpu-sampler.pid" ] && kill "$(cat "$RUNNER_TEMP/cpu-sampler.pid")" 2>/dev/null || true
           peak=$(python3 - "$RUNNER_TEMP/mem.csv" <<'PY'
           import re, sys
           units = {"b": 1, "kib": 1024, "mib": 1024**2, "gib": 1024**3, "kb": 1e3, "mb": 1e6, "gb": 1e9}
@@ -196,6 +216,33 @@ jobs:
             echo "peak ${peak} MiB, OOMKilled=$oom, restarts=$restarts, running=$running"
           } >> "$GITHUB_STEP_SUMMARY"
           cp "$RUNNER_TEMP/mem.csv" "$RUNNER_TEMP/k6/" 2>/dev/null || true
+          cp "$RUNNER_TEMP/cpu.csv" "$RUNNER_TEMP/k6/" 2>/dev/null || true
+          # CPU per k6 phase, so a saturated run can be told from an idle one.
+          python3 - "$RUNNER_TEMP/cpu.csv" "$RUNNER_TEMP/k6/k6-phases.txt" "$(nproc)" <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
+          import sys
+          samples = []
+          try:
+              for line in open(sys.argv[1]):
+                  t, _, v = line.strip().partition(",")
+                  try:
+                      samples.append((int(t), float(v.rstrip("%"))))
+                  except ValueError:
+                      pass
+          except OSError:
+              pass
+          phases = {}
+          try:
+              for line in open(sys.argv[2]):
+                  _, name, vus, edge, t = line.split()
+                  phases.setdefault(f"{name} {vus}", {})[edge] = int(t)
+          except (OSError, ValueError):
+              pass
+          print(f"\nrunner cores: {sys.argv[3]}; container CPU % where 100 = one full core")
+          for key, edges in phases.items():
+              vals = sorted(v for t, v in samples if edges.get("start", 0) + 30 <= t <= edges.get("end", 0))
+              if vals:
+                  print(f"- {key}: median {vals[len(vals) // 2]:.0f}%, p90 {vals[int(len(vals) * 0.9)]:.0f}%, max {vals[-1]:.0f}%")
+          PY
           if [ "$oom" != "false" ] || [ "$restarts" != "0" ] || [ "$running" != "true" ]; then
             echo "::error::app was OOM-killed, restarted or stopped under load"
             docker logs --tail 200 oe-app
