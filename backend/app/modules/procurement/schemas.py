@@ -27,6 +27,29 @@ def _validate_non_negative_decimal(v: str) -> str:
     return v
 
 
+def _validate_tolerance_pct(v: str | None) -> str | None:
+    """An invoice allowance as a percentage of the order: 0 to 100, or unset."""
+    if v is None or v == "":
+        return None
+    try:
+        d = Decimal(v)
+    except (InvalidOperation, ValueError, TypeError) as exc:
+        raise ValueError(f"Invalid percentage: {v!r}") from exc
+    if not d.is_finite() or d < 0 or d > 100:
+        raise ValueError(f"Percentage must be between 0 and 100, got {v!r}")
+    return v
+
+
+def _validate_tolerance_abs(v: str | None) -> str | None:
+    """An invoice allowance as an amount in the order's currency, or unset."""
+    if v is None or v == "":
+        return None
+    _validate_non_negative_decimal(v)
+    if not Decimal(v).is_finite():
+        raise ValueError(f"Invalid amount: {v!r}")
+    return v
+
+
 # ── Purchase Order ───────────────────────────────────────────────────────────
 
 
@@ -88,11 +111,26 @@ class POCreate(BaseModel):
     notes: str | None = Field(default=None, max_length=5000)
     items: list[POItemCreate] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
+    # How far a supplier invoice may run past this order before the match
+    # warns: a percentage, an amount in the order's currency, or both (the
+    # smaller band wins). Unset keeps the one-cent rounding band.
+    invoice_tolerance_pct: str | None = Field(default=None, max_length=20)
+    invoice_tolerance_abs: str | None = Field(default=None, max_length=50)
 
     @field_validator("amount_subtotal", "tax_amount", "amount_total")
     @classmethod
     def _check_non_negative_decimal(cls, v: str) -> str:
         return _validate_non_negative_decimal(v)
+
+    @field_validator("invoice_tolerance_pct")
+    @classmethod
+    def _check_tolerance_pct(cls, v: str | None) -> str | None:
+        return _validate_tolerance_pct(v)
+
+    @field_validator("invoice_tolerance_abs")
+    @classmethod
+    def _check_tolerance_abs(cls, v: str | None) -> str | None:
+        return _validate_tolerance_abs(v)
 
 
 class InvoiceCheckLine(BaseModel):
@@ -133,6 +171,11 @@ class POUpdate(BaseModel):
     notes: str | None = Field(default=None, max_length=5000)
     items: list[POItemCreate] | None = None
     metadata: dict[str, Any] | None = None
+    # How far a supplier invoice may run past this order before the match
+    # warns: a percentage, an amount in the order's currency, or both (the
+    # smaller band wins). Unset keeps the one-cent rounding band.
+    invoice_tolerance_pct: str | None = Field(default=None, max_length=20)
+    invoice_tolerance_abs: str | None = Field(default=None, max_length=50)
 
     @field_validator("amount_subtotal", "tax_amount", "amount_total")
     @classmethod
@@ -140,6 +183,16 @@ class POUpdate(BaseModel):
         if v is None:
             return v
         return _validate_non_negative_decimal(v)
+
+    @field_validator("invoice_tolerance_pct")
+    @classmethod
+    def _check_tolerance_pct(cls, v: str | None) -> str | None:
+        return _validate_tolerance_pct(v)
+
+    @field_validator("invoice_tolerance_abs")
+    @classmethod
+    def _check_tolerance_abs(cls, v: str | None) -> str | None:
+        return _validate_tolerance_abs(v)
 
     @field_validator("issue_date", "delivery_date")
     @classmethod
@@ -241,6 +294,8 @@ class POResponse(BaseModel):
     supplier_acknowledged_by: str | None = None
     supplier_reference: str | None = None
     supplier_confirmed_delivery_date: str | None = None
+    invoice_tolerance_pct: str | None = None
+    invoice_tolerance_abs: str | None = None
     payment_terms: str | None = None
     notes: str | None = None
     created_by: UUID | None = None

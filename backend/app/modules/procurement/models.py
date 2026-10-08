@@ -109,6 +109,11 @@ class PurchaseOrder(Base):
     supplier_acknowledged_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     supplier_reference: Mapped[str | None] = mapped_column(String(100), nullable=True)
     supplier_confirmed_delivery_date: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    # The overrun a supplier invoice may carry before the invoice match warns,
+    # as a percentage of the order and/or an amount in its currency. Decimal
+    # strings; null keeps the one-cent rounding band.
+    invoice_tolerance_pct: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    invoice_tolerance_abs: Mapped[str | None] = mapped_column(String(50), nullable=True)
     payment_terms: Mapped[str | None] = mapped_column(String(100), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)

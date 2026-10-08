@@ -879,6 +879,8 @@ class ProcurementService:
                 status=data.status,
                 payment_terms=data.payment_terms,
                 notes=data.notes,
+                invoice_tolerance_pct=data.invoice_tolerance_pct,
+                invoice_tolerance_abs=data.invoice_tolerance_abs,
                 created_by=uuid.UUID(user_id) if user_id else None,
                 metadata_=data.metadata,
             )
@@ -1761,6 +1763,8 @@ class ProcurementService:
             "invoiced_before_net": str(invoiced_before_net),
             "invoice_net": str(invoice_net or "0"),
             "invoice_ref": invoice_ref or "",
+            "invoice_tolerance_pct": po.invoice_tolerance_pct,
+            "invoice_tolerance_abs": po.invoice_tolerance_abs,
             "has_receipts": has_receipts,
             "received_net": str(
                 sum(

@@ -363,7 +363,9 @@ def check_line_cost_coded(po: dict[str, Any]) -> list[Finding]:
 # The person approving the invoice reads the warning and decides; nothing here
 # blocks the save. This is deliberately not an accounts-payable matching
 # engine: price variance per unit, tolerances per supplier and partial-line
-# splits are out of scope.
+# splits are out of scope. An order may carry its own allowance, a percentage,
+# an amount or both (``invoice_tolerance_pct`` / ``invoice_tolerance_abs``);
+# see ``_allowance`` for how the two combine.
 #
 # The payload is built by ``ProcurementService.invoice_match_payload``:
 #
@@ -378,13 +380,34 @@ def check_line_cost_coded(po: dict[str, Any]) -> list[Finding]:
 QUANTITY_TOLERANCE = Decimal("0.001")
 
 
+def _allowance(payload: dict[str, Any], base: Decimal) -> Decimal:
+    """The overrun the order allows its invoices, measured on *base*.
+
+    A percentage of the base, an amount, or both; with both the invoice must
+    stay inside both, so the smaller band wins. An unset or unreadable value is
+    ignored rather than read as a licence. Never below the rounding band, so an
+    order with no allowance behaves exactly as before.
+    """
+    bands: list[Decimal] = []
+    pct = parse_money(payload.get("invoice_tolerance_pct"))
+    if pct is not None and pct.is_finite() and pct >= 0:
+        bands.append(max(base, Decimal("0")) * pct / Decimal("100"))
+    absolute = parse_money(payload.get("invoice_tolerance_abs"))
+    if absolute is not None and absolute.is_finite() and absolute >= 0:
+        bands.append(absolute)
+    if not bands:
+        return MONEY_TOLERANCE
+    return max(min(bands), MONEY_TOLERANCE).quantize(Decimal("0.01"))
+
+
 def check_invoice_within_order(payload: dict[str, Any]) -> list[Finding]:
     """The invoice should not exceed what is still open on its order, net of VAT."""
     po_net = _money(payload.get("po_net"))
     before = _money(payload.get("invoiced_before_net"))
     invoice = _money(payload.get("invoice_net"))
     remaining = po_net - before
-    if invoice <= remaining + MONEY_TOLERANCE:
+    band = _allowance(payload, po_net)
+    if invoice <= remaining + band:
         return []
     return [
         Finding(
@@ -400,6 +423,7 @@ def check_invoice_within_order(payload: dict[str, Any]) -> list[Finding]:
                 "invoiced_before_net": str(before),
                 "invoice_net": str(invoice),
                 "remaining_net": str(remaining),
+                "tolerance_net": str(band),
             },
         )
     ]
@@ -462,7 +486,8 @@ def check_invoice_value_received(payload: dict[str, Any]) -> list[Finding]:
         return []
     total = _money(payload.get("invoiced_before_net")) + _money(payload.get("invoice_net"))
     received = _money(payload.get("received_net"))
-    if total <= received + MONEY_TOLERANCE:
+    band = _allowance(payload, received)
+    if total <= received + band:
         return []
     return [
         Finding(
@@ -472,6 +497,6 @@ def check_invoice_value_received(payload: dict[str, Any]) -> list[Finding]:
                 "invoiced": _amount(total, payload),
                 "received": _amount(received, payload),
             },
-            details={"invoiced_total_net": str(total), "received_net": str(received)},
+            details={"invoiced_total_net": str(total), "received_net": str(received), "tolerance_net": str(band)},
         )
     ]

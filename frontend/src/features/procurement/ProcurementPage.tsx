@@ -176,6 +176,8 @@ interface POResponse {
   status: string;
   payment_terms: string | null;
   notes: string | null;
+  invoice_tolerance_pct?: string | null;
+  invoice_tolerance_abs?: string | null;
   items: POItemResponse[];
 }
 
@@ -222,6 +224,10 @@ interface POFormState {
   currency: string;
   payment_terms: string;
   notes: string;
+  // How far a supplier invoice may run past the order before the match warns.
+  // Empty means no allowance beyond rounding.
+  invoice_tolerance_pct: string;
+  invoice_tolerance_abs: string;
   items: POLineItemForm[];
 }
 
@@ -249,6 +255,8 @@ function poFormFromResponse(po: POResponse, projectCurrency: string): POFormStat
     currency: po.currency_code || projectCurrency || '',
     payment_terms: payTermMatch?.[1] ?? '30',
     notes: po.notes ?? '',
+    invoice_tolerance_pct: po.invoice_tolerance_pct ?? '',
+    invoice_tolerance_abs: po.invoice_tolerance_abs ?? '',
     items:
       po.items && po.items.length > 0
         ? po.items.map((it) => ({
@@ -671,6 +679,8 @@ function PurchaseOrdersTab({
     currency: '',
     payment_terms: '30',
     notes: '',
+    invoice_tolerance_pct: '',
+    invoice_tolerance_abs: '',
     items: [{ ...emptyLine }] as POLineItemForm[],
   });
   // The state an edit prefill left the form in, so the save can send only what
@@ -684,7 +694,8 @@ function PurchaseOrdersTab({
   const emptyPoForm = {
     vendor_contact_id: '', vendor_display: '', po_type: 'standard' as 'standard' | 'blanket' | 'service',
     delivery_date: '', currency: '', payment_terms: '30',
-    notes: '', items: [{ ...emptyLine }] as POLineItemForm[],
+    notes: '', invoice_tolerance_pct: '', invoice_tolerance_abs: '',
+    items: [{ ...emptyLine }] as POLineItemForm[],
   };
 
   // Seed the currency from the resolved project currency when the create
@@ -821,6 +832,8 @@ function PurchaseOrdersTab({
         amount_total: String(poTotal.toFixed(2)),
         payment_terms: `Net ${data.payment_terms}`,
         notes: data.notes || undefined,
+        invoice_tolerance_pct: data.invoice_tolerance_pct.trim() || undefined,
+        invoice_tolerance_abs: data.invoice_tolerance_abs.trim() || undefined,
         status: 'draft',
         items: data.items
           .filter((li) => li.description.trim())
@@ -878,6 +891,13 @@ function PurchaseOrdersTab({
         body.payment_terms = `Net ${data.payment_terms}`;
       }
       if (data.notes !== base.notes) body.notes = data.notes || undefined;
+      // An emptied allowance is sent as '' so the server clears it.
+      if (data.invoice_tolerance_pct !== base.invoice_tolerance_pct) {
+        body.invoice_tolerance_pct = data.invoice_tolerance_pct.trim();
+      }
+      if (data.invoice_tolerance_abs !== base.invoice_tolerance_abs) {
+        body.invoice_tolerance_abs = data.invoice_tolerance_abs.trim();
+      }
       if (itemsChanged) {
         body.items = data.items
           .filter((li) => li.description.trim())
@@ -1429,6 +1449,41 @@ function PurchaseOrdersTab({
                       <option value="60">{t('procurement.net_days', { defaultValue: 'Net {{days}} days', days: 60 })}</option>
                       <option value="90">{t('procurement.net_days', { defaultValue: 'Net {{days}} days', days: 90 })}</option>
                     </select>
+                  </div>
+                  {/* Invoice allowance: how far a supplier invoice may run past
+                      this order before the invoice match warns. */}
+                  <div>
+                    <label htmlFor="po-tolerance-pct" className="block text-sm font-medium text-content-primary mb-1.5">
+                      {t('procurement.invoice_tolerance_pct', { defaultValue: 'Invoice allowance, %' })}
+                    </label>
+                    <input
+                      id="po-tolerance-pct"
+                      inputMode="decimal"
+                      value={poForm.invoice_tolerance_pct}
+                      onChange={(e) => setPoForm((f) => ({ ...f, invoice_tolerance_pct: e.target.value }))}
+                      placeholder={t('procurement.invoice_tolerance_none', { defaultValue: 'None' })}
+                      className={inputCls}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="po-tolerance-abs" className="block text-sm font-medium text-content-primary mb-1.5">
+                      {t('procurement.invoice_tolerance_abs', {
+                        defaultValue: 'Invoice allowance, {{currency}}',
+                        currency: poForm.currency || '',
+                      })}
+                    </label>
+                    <input
+                      id="po-tolerance-abs"
+                      inputMode="decimal"
+                      value={poForm.invoice_tolerance_abs}
+                      onChange={(e) => setPoForm((f) => ({ ...f, invoice_tolerance_abs: e.target.value }))}
+                      placeholder={t('procurement.invoice_tolerance_none', { defaultValue: 'None' })}
+                      title={t('procurement.invoice_tolerance_hint', {
+                        defaultValue:
+                          'A supplier invoice may exceed the order by this much before a warning. With both set, the smaller one applies.',
+                      })}
+                      className={inputCls}
+                    />
                   </div>
                 </div>
                 {/* Notes */}
