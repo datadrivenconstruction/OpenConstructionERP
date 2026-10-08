@@ -45,6 +45,7 @@ def _spec(pid: str = "p1", **kw: object) -> ProcessSpec:
 
 async def _registry(fresh: bool = False, **store_kw: object) -> ProcessRegistry:
     reg = ProcessRegistry(store=InMemoryProcessStore(**store_kw))  # type: ignore[arg-type]
+    reg.stagger_s = 0
     await reg.load(fresh_install=lambda: fresh)
     return reg
 
@@ -331,7 +332,7 @@ async def test_shared_switch_flips_whole_group_and_external_change_reconciles() 
     await reg.start_boot()
     assert reg.status("m1") is ProcessStatus.DISABLED
     await reg.enable("m1")
-    await asyncio.sleep(0.01)
+    await asyncio.sleep(0.2)
     assert switch["on"] is True
     assert reg.status("m2") is ProcessStatus.RUNNING
     assert sorted(started) == ["m1", "m2"]
@@ -376,8 +377,14 @@ def test_router_admin_endpoints(monkeypatch: pytest.MonkeyPatch) -> None:
     api = FastAPI()
     api.include_router(router_mod.router)
     api.dependency_overrides[get_current_user_payload] = lambda: {"sub": "u1", "role": "admin"}
-    for dep in router_mod.router.dependencies:
-        api.dependency_overrides[dep.dependency] = lambda: None  # type: ignore[index]
+    from app.dependencies import RequireRole
+
+    async def _no_check(
+        self: object, payload: object = None
+    ) -> None:  # admin gate is covered by test_router_requires_admin
+        return None
+
+    monkeypatch.setattr(RequireRole, "__call__", _no_check)
 
     with TestClient(api) as client:
         asyncio.run(reg.load(fresh_install=lambda: False))
@@ -394,10 +401,108 @@ def test_router_admin_endpoints(monkeypatch: pytest.MonkeyPatch) -> None:
         rec = client.get("/api/v1/processes/recommendations", params={"modules": "reporting"}).json()
         assert rec["process_ids"] == ["a", "core_req"]
         assert client.post("/api/v1/processes/preset", json={"preset": "nope"}).status_code == 422
+        ens = client.post("/api/v1/processes/ensure", params={"module": "reporting"}).json()
+        assert ens["module"] == "reporting"
+        assert ens["disabled"] == ["a"]
 
 
 def test_router_requires_admin() -> None:
     from app.core.processes.router import router as proc_router
 
-    names = [getattr(d.dependency, "__class__", type(None)).__name__ for d in proc_router.dependencies]
-    assert "RequireRole" in names
+    guarded = {
+        (route.path, tuple(sorted(route.methods)))  # type: ignore[attr-defined]
+        for route in proc_router.routes
+        if any(type(d.dependency).__name__ == "RequireRole" for d in route.dependencies)  # type: ignore[attr-defined]
+    }
+    paths = {p for p, _ in guarded}
+    assert "/api/v1/processes/{process_id}/{action}" in paths
+    assert "/api/v1/processes/{process_id}/logs" in paths
+    assert "/api/v1/processes/preset" in paths
+    assert "/api/v1/processes/first-run" in paths
+    assert "/api/v1/processes/" not in paths
+    assert "/api/v1/processes/ensure" not in paths
+
+
+def test_non_admin_listing_is_redacted(monkeypatch: pytest.MonkeyPatch) -> None:
+    import app.core.processes.router as router_mod
+
+    reg = ProcessRegistry(store=InMemoryProcessStore())
+    reg.register(_spec("a"))
+    monkeypatch.setattr(router_mod, "process_registry", reg)
+    entry = reg._entries["a"]
+    reg._record_error(entry, RuntimeError("secret path C:/x"))
+    body = router_mod._listing({"role": "viewer"})
+    item = body["processes"][0]
+    assert item["log_tail"] == []
+    assert item["last_error"]["message"] is None
+    assert router_mod._listing({"role": "admin"})["processes"][0]["last_error"]["message"]
+
+
+@pytest.mark.asyncio
+async def test_queue_starts_heavy_processes_one_at_a_time() -> None:
+    active: list[int] = []
+    peak: list[int] = []
+
+    def make(pid: str) -> ProcessSpec:
+        async def load() -> None:
+            active.append(1)
+            peak.append(len(active))
+            await asyncio.sleep(0.05)
+            active.pop()
+
+        return _spec(pid, modules=["costs"], start_mode="lazy", factory=lambda: ResidentProcess(load=load))
+
+    reg = await _registry()
+    for pid in ("h1", "h2", "h3"):
+        reg.register(make(pid))
+    reg.register(_spec("other", modules=["boq"], start_mode="lazy"))
+    first = reg.ensure_for_module("costs")
+    again = reg.ensure_for_module("costs")
+    assert first["queued"] == ["h1", "h2", "h3"]
+    assert again["queued"] == []
+    assert sorted(again["loading"]) == ["h1", "h2", "h3"]
+    assert reg.describe("h3")["queued"] is True
+    for _ in range(100):
+        await asyncio.sleep(0.02)
+        if all(reg.status(p) is ProcessStatus.RUNNING for p in ("h1", "h2", "h3")):
+            break
+    assert max(peak) == 1
+    assert reg.status("other") is ProcessStatus.IDLE
+    assert reg.ensure_for_module("costs")["running"] == ["h1", "h2", "h3"]
+    await reg.stop_all()
+    assert not _own_tasks()
+
+
+@pytest.mark.asyncio
+async def test_ensure_skips_disabled_and_manual() -> None:
+    reg = await _registry(rows={"off": False})
+    reg.register(_spec("off", modules=["m"], start_mode="lazy"))
+    reg.register(_spec("man", modules=["m"], start_mode="manual"))
+    out = reg.ensure_for_module("m")
+    assert out["queued"] == []
+    assert out["disabled"] == ["off"]
+
+
+@pytest.mark.asyncio
+async def test_schedule_boot_is_deferred_and_cancellable() -> None:
+    reg = await _registry()
+    reg.register(_spec("a"))
+    reg.schedule_boot(delay_s=0.05)
+    assert reg.status("a") is ProcessStatus.IDLE  # nothing on the startup path
+    await asyncio.sleep(0.2)
+    assert reg.status("a") is ProcessStatus.RUNNING
+    await reg.stop_all()
+    reg2 = await _registry()
+    reg2.register(_spec("b"))
+    reg2.schedule_boot(delay_s=10)
+    await reg2.stop_all()  # must not wait for the delay
+    assert reg2.status("b") is ProcessStatus.IDLE
+
+
+@pytest.mark.asyncio
+async def test_flags_persist() -> None:
+    reg = await _registry()
+    assert reg.get_flag("seeds/demo@1") is False
+    await reg.set_flag("seeds/demo@1")
+    assert reg.get_flag("seeds/demo@1") is True
+    assert reg.store.rows["flag:seeds/demo@1"] is True  # type: ignore[attr-defined]

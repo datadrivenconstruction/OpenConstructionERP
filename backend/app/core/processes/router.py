@@ -1,6 +1,11 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Admin API of the processes center, mounted at ``/api/v1/processes``."""
+"""API of the processes center, mounted at ``/api/v1/processes``.
+
+Any signed-in user may read the list (non-admins get it without logs and error
+details) and ask for a module's processes to warm up; every change is
+admin-only.
+"""
 
 from __future__ import annotations
 
@@ -15,8 +20,9 @@ from app.dependencies import RequireRole, get_current_user_payload
 router = APIRouter(
     prefix="/api/v1/processes",
     tags=["Processes"],
-    dependencies=[Depends(RequireRole("admin"))],
+    dependencies=[Depends(get_current_user_payload)],
 )
+_ADMIN = [Depends(RequireRole("admin"))]
 
 
 class PresetIn(BaseModel):
@@ -37,15 +43,49 @@ def _actor(payload: dict[str, Any]) -> str | None:
     return str(sub)[:100] if sub else None
 
 
+def _is_admin(payload: dict[str, Any]) -> bool:
+    from app.core.permissions import ROLE_HIERARCHY, _resolve_role
+
+    role = _resolve_role(payload.get("role", ""))
+    admin = _resolve_role("admin")
+    return role is not None and admin is not None and ROLE_HIERARCHY.get(role, -1) >= ROLE_HIERARCHY.get(admin, 999)
+
+
+def _redact(item: dict[str, Any]) -> dict[str, Any]:
+    item = dict(item)
+    item["log_tail"] = []
+    if item.get("last_error"):
+        item["last_error"] = {"message": None, "at": item["last_error"]["at"], "traceback_id": None}
+    return item
+
+
+def _listing(payload: dict[str, Any]) -> dict[str, Any]:
+    body = process_registry.describe_all()
+    if not _is_admin(payload):
+        body["processes"] = [_redact(p) for p in body["processes"]]
+        body["process_rss_mb"] = None
+    return body
+
+
 def _http(exc: ProcessError) -> HTTPException:
     return HTTPException(status_code=exc.status_code, detail=str(exc))
 
 
 @router.get("/")
-async def list_processes() -> dict[str, Any]:
+async def list_processes(payload: dict[str, Any] = Depends(get_current_user_payload)) -> dict[str, Any]:
     """Every registered process with live status, plus totals."""
     await process_registry.reconcile()
-    return process_registry.describe_all()
+    return _listing(payload)
+
+
+@router.post("/ensure")
+async def ensure_module(module: str = Query(..., min_length=1, max_length=100)) -> dict[str, Any]:
+    """Warm up the processes a module needs, in the background. Idempotent.
+
+    Returns at once; poll the list for progress. Disabled processes are not
+    started and come back under ``disabled``.
+    """
+    return process_registry.ensure_for_module(module)
 
 
 @router.get("/recommendations")
@@ -55,24 +95,24 @@ async def recommendations(modules: str = Query("", max_length=4000)) -> dict[str
     return process_registry.recommendations(module_ids)
 
 
-@router.post("/preset")
+@router.post("/preset", dependencies=_ADMIN)
 async def apply_preset(body: PresetIn, payload: dict[str, Any] = Depends(get_current_user_payload)) -> dict[str, Any]:
     """Switch to a preset: minimal, recommended or all."""
     try:
         await process_registry.apply_preset(body.preset, updated_by=_actor(payload))
     except ProcessError as exc:
         raise _http(exc) from exc
-    return process_registry.describe_all()
+    return _listing(payload)
 
 
-@router.post("/first-run")
+@router.post("/first-run", dependencies=_ADMIN)
 async def first_run(body: FirstRunIn, payload: dict[str, Any] = Depends(get_current_user_payload)) -> dict[str, Any]:
     """Answer the first-run wizard with the modules this installation will use."""
     await process_registry.first_run(body.module_ids, body.start_now, updated_by=_actor(payload))
-    return process_registry.describe_all()
+    return _listing(payload)
 
 
-@router.get("/{process_id}/logs")
+@router.get("/{process_id}/logs", dependencies=_ADMIN)
 async def process_logs(process_id: str, limit: int = Query(200, ge=1, le=200)) -> dict[str, Any]:
     """Last captured log lines of one process."""
     try:
@@ -81,7 +121,7 @@ async def process_logs(process_id: str, limit: int = Query(200, ge=1, le=200)) -
         raise _http(exc) from exc
 
 
-@router.post("/{process_id}/{action}")
+@router.post("/{process_id}/{action}", dependencies=_ADMIN)
 async def process_action(
     process_id: str,
     action: Literal["enable", "disable", "restart"],

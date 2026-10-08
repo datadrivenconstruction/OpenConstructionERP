@@ -5202,7 +5202,10 @@ def create_app() -> FastAPI:
         )
         try:
             await process_registry.load(fresh_install=lambda: bool(getattr(app.state, "database_was_empty", False)))
-            await process_registry.start_boot()
+            # Queued, not awaited: the server answers health checks and logins
+            # first, and boot processes then start one at a time in the
+            # background. Module-only processes wait for POST /processes/ensure.
+            process_registry.schedule_boot()
         except Exception:  # noqa: BLE001 - background processes never block boot
             logger.warning("Process registry start failed", exc_info=True)
         if _fast_startup:
