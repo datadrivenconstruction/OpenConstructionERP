@@ -873,6 +873,25 @@ class PayrollService:
             )
             budget_line_id = line.id
 
+            # The batch was built from the same field records that were costed
+            # as they were logged. Its posting replaces that estimate for the
+            # days it pays, otherwise each covered day reads as paid twice.
+            from app.modules.costmodel.service import LabourActualsService
+
+            entries = await self.entry_repo.list_for_batch(batch.id)
+            await LabourActualsService(self.session).supersede_with_payroll(
+                project_id=batch.project_id,
+                batch_id=str(batch.id),
+                entries=[
+                    {
+                        "resource_id": str(entry.resource_id) if entry.resource_id else "",
+                        "work_date": entry.work_date or "",
+                        "hours": entry.hours,
+                    }
+                    for entry in entries
+                ],
+            )
+
         # Flip status only after a successful post (post raises on failure, so a
         # failed posting leaves the batch unchanged for a safe retry).
         await self.batch_repo.update_fields(
