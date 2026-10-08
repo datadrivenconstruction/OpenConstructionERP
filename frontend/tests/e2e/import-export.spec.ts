@@ -11,11 +11,12 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import ExcelJS from 'exceljs';
 import type { APIRequestContext } from '@playwright/test';
 import { test, expect, API_URL } from './fixtures';
 
-const BACKEND_FIXTURES = path.resolve(__dirname, '../../../backend/tests/fixtures');
+const BACKEND_FIXTURES = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../backend/tests/fixtures');
 const XPWE = fs.readFileSync(path.join(BACKEND_FIXTURES, 'xpwe/computo_small.xpwe'));
 const X83 = fs.readFileSync(path.join(BACKEND_FIXTURES, 'gaeb/oce_conformance_x83.x83'));
 
