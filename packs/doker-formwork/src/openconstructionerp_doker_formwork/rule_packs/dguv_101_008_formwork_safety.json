@@ -7,20 +7,7 @@
   "severity_default": "error",
   "category": "hse",
   "locale_default": "de",
-  "enables_rule_ids": [
-    "hse.dguv_101_008.fall_protection_above_2m",
-    "hse.dguv_101_008.guardrail_height_1m_min",
-    "hse.dguv_101_008.toe_board_present",
-    "hse.dguv_101_008.intermediate_rail_present",
-    "hse.dguv_101_008.working_platform_load_class_specified",
-    "hse.dguv_101_008.access_ladder_or_stair_present",
-    "hse.dguv_101_008.props_stability_check_documented",
-    "hse.dguv_101_008.formwork_anchor_capacity_verified",
-    "hse.dguv_101_008.psa_helmet_harness_required",
-    "hse.dguv_101_008.toolbox_talk_logged",
-    "hse.dguv_101_008.weather_wind_speed_limit_documented",
-    "hse.dguv_101_008.crane_lift_plan_for_panel_above_500kg"
-  ],
+  "enables_rule_ids": [],
   "parameters": {
     "fall_protection_threshold_m": 2.0,
     "guardrail_height_min_m": 1.0,

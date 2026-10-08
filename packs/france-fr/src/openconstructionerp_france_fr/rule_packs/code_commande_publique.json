@@ -5,7 +5,8 @@
   "jurisdiction": "FR",
   "description": "Validates public tender documents against the Code de la commande publique (effective 2019-04-01). Checks AAPC publication requirements, CCAG-Travaux references, allotissement (lot splitting) obligations, selection criteria documentation, threshold compliance (European and national), avance forfaitaire, and sous-traitance (subcontracting) declaration requirements.",
   "applies_to": ["tender", "estimate", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "ccp.aapc_published",
     "ccp.procedure_type_defined",
     "ccp.threshold_european_check",
@@ -21,6 +22,7 @@
     "ccp.dce_complet",
     "ccp.acte_engagement_present"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "Direction des Affaires Juridiques (DAJ), Ministere de l'Economie",
   "publication_year": 2019
 }

@@ -22,7 +22,8 @@
     "bdi_source": "Acordao TCU 2622/2013",
     "regional_factor_required": true
   },
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "sinapi.reference_month_present",
     "sinapi.reference_month_within_freshness",
     "sinapi.state_index_applied",
@@ -36,5 +37,6 @@
     "boq_quality.no_zero_unit_rate",
     "boq_quality.no_missing_quantity",
     "boq_quality.no_duplicate_position"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

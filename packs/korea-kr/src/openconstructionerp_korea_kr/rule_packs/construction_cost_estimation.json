@@ -5,7 +5,8 @@
   "jurisdiction": "KR",
   "description": "Validates cost estimates against the Korean public construction cost estimation standards (Pyojun Pumsei). Checks that the cost structure follows the standard framework (direct material, direct labour, direct expenses, indirect expenses, overhead and profit), that unit rates reference the published standard unit costs or construction association price surveys, and that regional adjustment indices are applied.",
   "applies_to": ["estimate", "boq", "tender", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "kce.cost_structure_framework_valid",
     "kce.direct_material_cost_present",
     "kce.direct_labour_cost_present",
@@ -19,6 +20,7 @@
     "kce.regional_adjustment_applied",
     "kce.edition_year_current"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "MOLIT (Ministry of Land, Infrastructure and Transport)",
   "publication_year": 2024
 }

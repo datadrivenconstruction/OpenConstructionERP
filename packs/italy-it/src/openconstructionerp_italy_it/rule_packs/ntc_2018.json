@@ -5,7 +5,8 @@
   "jurisdiction": "IT",
   "description": "Validates structural project documentation against the Norme Tecniche per le Costruzioni (NTC 2018, D.M. 17 gennaio 2018) and its explanatory circular (Circolare 21/01/2019 n. 7). Checks seismic zone classification, soil category, structural material specifications, load combinations, and that the relazione di calcolo (structural report) covers the required chapters.",
   "applies_to": ["estimate", "validation", "submittals"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "ntc.zona_sismica_classified",
     "ntc.categoria_suolo_defined",
     "ntc.classe_uso_defined",
@@ -19,6 +20,7 @@
     "ntc.collaudo_statico_referenced",
     "ntc.denuncia_opere_strutturali_referenced"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "Ministero delle Infrastrutture e dei Trasporti",
   "publication_year": 2018
 }

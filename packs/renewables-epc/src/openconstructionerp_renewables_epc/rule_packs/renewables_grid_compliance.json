@@ -4,7 +4,8 @@
   "standard": "ENTSO-E Network Code RfG (EU 2016/631) + UK National Grid Electricity System Operator (NG ESO) Grid Code + IEEE 1547-2018 + IEEE 1547.1-2020 (Conformance test) + EN 50549-1/-2:2019 (LV/MV connection) + FERC Order 2222 (US — DER aggregation in wholesale markets) + NERC PRC-024-3 + IEC 61400-21 (wind grid quality)",
   "jurisdiction": "INTL",
   "description": "Grid-code compliance for renewables EPC connecting to TSO / DSO networks. Covers EU ENTSO-E Network Code Requirements for Generators (RfG, Regulation (EU) 2016/631) — generator types A (≥ 0.8 kW), B (≥ 1 MW typical national threshold), C (≥ 50 MW), D (≥ 75 MW or HV-connected) with progressively stricter capability requirements; UK NG ESO Grid Code (Connection Conditions CC.6); IEEE 1547-2018 (smart inverter functions cat A/B + ride-through performance cat I/II/III); EN 50549 (LV up to 1 kV / MV 1 – 35 kV); FERC Order 2222 (US — DER aggregations ≥ 100 kW in wholesale markets); NERC PRC-024-3 (frequency + voltage ride-through). Validates POI study (POC capacity assessment, short-circuit ratio SCR ≥ 3.0 weak-grid threshold), protection settings sign-off (51V time-overcurrent, 27/59 under-/over-voltage, 81 under-/over-frequency, ROCOF), LVRT / HVRT curve documented + tested per IEC 61400-21 (wind) or IEEE 1547.1, frequency response (UK NG ESO Mandatory Frequency Response MFR ±0.015 Hz dead-band + Dynamic Containment within 1 s; EU Frequency Containment Reserve FCR), reactive-power Q-V capability (cos φ 0.95 lead / 0.95 lag at POI minimum, often 0.90 / 0.90 for utility-scale), harmonics THD per IEC 61000-3-6 (LV) or IEC 61000-3-12 (MV) — THD ≤ 5 %, anti-islanding per IEEE 1547 §6.5 / EN 50438, commissioning witness test by TSO/DSO logged.",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "grid.poi_study_attached",
     "grid.poc_capacity_assessment_attached",
     "grid.short_circuit_ratio_scr_above_3",
@@ -36,5 +37,6 @@
     "grid.anti_islanding_ieee_1547_or_en_50438_compliant",
     "grid.commissioning_witness_logged",
     "grid.tso_dso_witness_test_signed"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

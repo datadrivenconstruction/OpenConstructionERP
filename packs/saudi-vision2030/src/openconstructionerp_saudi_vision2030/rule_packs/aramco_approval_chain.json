@@ -13,7 +13,8 @@
     "aramco.proponent_approval_present": "ERROR",
     "aramco.afc_stamp_present_for_construction_issue": "ERROR"
   },
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "aramco.proponent_approval_present",
     "aramco.engineering_discipline_lead_approval",
     "aramco.pmt_project_engineer_approval",
@@ -23,5 +24,6 @@
     "aramco.approval_stages_time_ordered",
     "aramco.deviation_request_format_compliant",
     "aramco.material_inspection_report_mir_workflow"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

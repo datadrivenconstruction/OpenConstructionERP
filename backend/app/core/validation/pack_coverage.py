@@ -72,6 +72,10 @@ RULE_PACKS_SUBDIR = "rule_packs"
 # one-line change here.
 ENABLES_KEY = "enables_rule_ids"
 
+# Ids a shipped pack intends to check but the engine does not define yet,
+# kept apart from ENABLES_KEY so switching a document on never claims them.
+PLANNED_KEY = "planned_not_built_rule_ids"
+
 
 # ── Result value objects ────────────────────────────────────────────────────
 
@@ -306,10 +310,16 @@ def _read_declared_rule_ids(payload: dict[str, Any]) -> list[str]:
     non-string entry) simply contributes the strings it does have. Non-string
     members are dropped rather than raising so one odd file never breaks the
     whole rollup.
+
+    Ids a shipped pack lists under ``planned_not_built_rule_ids`` are read too:
+    they are the pack's stated intent, so the coverage report keeps counting
+    them as declared and shows them as not run.
     """
-    raw = payload.get(ENABLES_KEY)
-    if not isinstance(raw, list):
-        return []
+    raw: list[Any] = []
+    for key in (ENABLES_KEY, PLANNED_KEY):
+        value = payload.get(key)
+        if isinstance(value, list):
+            raw.extend(value)
     seen: set[str] = set()
     out: list[str] = []
     for item in raw:

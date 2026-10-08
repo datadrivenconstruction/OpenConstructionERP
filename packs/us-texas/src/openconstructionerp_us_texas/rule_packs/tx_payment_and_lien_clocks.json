@@ -10,7 +10,8 @@
     "us_tx_public_2251",
     "us_tx_private_ch28"
   ],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "tx_clock.public_or_private_declared",
     "tx_clock.public_payment_due_within_thirty_days",
     "tx_clock.public_infrequent_governing_body_period_applied",
@@ -25,5 +26,6 @@
     "tx_clock.lien_suit_within_one_year_of_last_filing_day",
     "tx_clock.lien_extension_agreement_recorded_in_time",
     "tx_clock.original_contract_date_checked_against_2022_amendments"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

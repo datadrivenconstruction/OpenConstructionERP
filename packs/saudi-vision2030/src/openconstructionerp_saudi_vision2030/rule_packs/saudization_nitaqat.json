@@ -13,7 +13,8 @@
     "nitaqat.subcontractor_band_disclosed": "ERROR",
     "nitaqat.public_tender_requires_green_medium": "ERROR"
   },
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "nitaqat.subcontractor_band_disclosed",
     "nitaqat.saudi_workforce_pct_above_band_threshold",
     "nitaqat.headcount_above_threshold_must_have_band",
@@ -22,5 +23,6 @@
     "nitaqat.visa_sponsorship_blocked_if_yellow_or_red",
     "nitaqat.construction_activity_threshold_table_referenced",
     "nitaqat.band_validity_date_within_quarter"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

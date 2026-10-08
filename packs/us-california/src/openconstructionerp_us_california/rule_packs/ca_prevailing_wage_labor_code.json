@@ -7,7 +7,8 @@
   "description": "Enables the checks for California public works, where the state runs its own prevailing wage regime distinct from the federal one and the state labour department makes the determinations. The duty attaches above 1,000 dollars. An awarding body with an approved labour compliance programme may elect an exemption at 25,000 dollars or less for construction work, or 15,000 or less for alteration, demolition, repair or maintenance, but only with that approved programme in place. Contractors and subcontractors must register with the state labour department to bid or be listed on public works, which is separate from the contractor licence, and certified payroll records must be furnished. Where a job carries both the state and the federal regime the higher rate governs, so the rules check that a federal determination has not been treated as satisfying California.",
   "issuer": "California Department of Industrial Relations",
   "thresholds_referenced": "1,000 US dollars general threshold; 25,000 and 15,000 US dollar labour compliance programme exemptions",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "ca_wage.public_works_flagged",
     "ca_wage.project_value_above_threshold_checked",
     "ca_wage.state_determination_attached",
@@ -20,5 +21,6 @@
     "ca_wage.subcontractor_registration_recorded",
     "ca_wage.certified_payroll_furnished",
     "ca_wage.apprentice_ratio_recorded"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

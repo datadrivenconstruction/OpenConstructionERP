@@ -17,7 +17,8 @@
   ],
   "description": "Enables OCERP built-in validation rules that check concrete BOQ items and structural details against IS 456:2000 plus latest amendments — grade designation (M-series), minimum cement content per exposure class, durability requirements, nominal cover, max water/cement ratio, aggregate size, workability slump, curing period, and ductile-detailing prerequisites where IS 13920 applies.",
   "description_hi": "कंक्रीट बीओक्यू मदों एवं संरचनात्मक विवरण की आईएस 456:2000 + संशोधनों के अनुसार जाँच।",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "is456.concrete_grade_designation_valid",
     "is456.minimum_cement_content_met",
     "is456.exposure_class_specified",
@@ -30,5 +31,6 @@
     "is456.is_13920_ductile_detailing_when_seismic",
     "is456.is_1893_seismic_design_basis_present",
     "is456.is_875_loads_basis_present"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

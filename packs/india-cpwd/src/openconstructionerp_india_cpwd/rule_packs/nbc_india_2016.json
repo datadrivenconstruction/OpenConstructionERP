@@ -27,7 +27,8 @@
   ],
   "description": "Enables OCERP built-in validation rules that check building projects against the National Building Code of India 2016 + 2024 amendments. Validates fire & life safety (Part 4: travel distance, refuge area, sprinkler requirement), structural design basis (Part 6: IS-code reference present per material), building services (Part 8: lift requirement vs occupancy, fire-detection), plumbing (Part 9: water-supply demand, drainage slope), and landscape/sustainability (Parts 10-11).",
   "description_hi": "एनबीसी 2016 + 2024 संशोधनों के अनुसार भवन परियोजनाओं की जाँच — अग्नि एवं जीवन सुरक्षा, संरचनात्मक डिज़ाइन, भवन सेवाएँ एवं नल-व्यवस्था।",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "nbc.part4_fire_safety_occupancy_classified",
     "nbc.part4_travel_distance_within_limit",
     "nbc.part4_refuge_area_provided_high_rise",
@@ -47,5 +48,6 @@
     "nbc.part10_landscape_area_min_percent",
     "nbc.part11_sustainability_assessment_attached",
     "nbc.amendment_2024_referenced"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

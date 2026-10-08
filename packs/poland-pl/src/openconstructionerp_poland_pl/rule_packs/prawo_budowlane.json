@@ -5,7 +5,8 @@
   "jurisdiction": "PL",
   "description": "Validates project documentation against the Polish Construction Law (Prawo budowlane). Checks building category classification, pozwolenie na budowe (building permit) documentation, kierownik budowy (site manager) designation, nadzor inwestorski (investor supervision) requirements, dziennik budowy (construction diary) provisions, and odbiory (acceptance inspection) documentation.",
   "applies_to": ["estimate", "validation", "submittals"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "pb.building_category_classified",
     "pb.pozwolenie_na_budowe_referenced",
     "pb.zgloszenie_if_applicable",
@@ -19,6 +20,7 @@
     "pb.warunki_techniczne_referenced",
     "pb.energy_performance_certificate_if_applicable"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "GUNB (Glowny Urzad Nadzoru Budowlanego)",
   "publication_year": 2024
 }

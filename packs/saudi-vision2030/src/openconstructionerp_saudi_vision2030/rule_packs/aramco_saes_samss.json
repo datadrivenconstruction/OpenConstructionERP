@@ -14,7 +14,8 @@
     "aramco.samss_material_spec_referenced": "ERROR",
     "aramco.mir_required_for_critical_material": "ERROR"
   },
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "aramco.saes_citation_per_discipline",
     "aramco.saes_a_general_referenced",
     "aramco.saes_l_piping_referenced",
@@ -34,5 +35,6 @@
     "aramco.sap_ariba_pr_po_referenced",
     "aramco.deviation_request_format_compliant",
     "aramco.welding_procedure_specification_wps_attached"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

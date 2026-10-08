@@ -8,7 +8,8 @@
   "issuer": "International Code Council (ICC)",
   "occupancy_groups": "A (Assembly), B (Business), E (Educational), F (Factory), H (High-hazard), I (Institutional), M (Mercantile), R (Residential), S (Storage), U (Utility)",
   "construction_types": "I-A, I-B, II-A, II-B, III-A, III-B, IV-HT (Heavy Timber), IV-A/B/C (Mass Timber, new in 2021), V-A, V-B",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "ibc.2021.code_edition_jurisdiction_match",
     "ibc.2021.occupancy_classification_assigned",
     "ibc.2021.construction_type_assigned",
@@ -24,5 +25,6 @@
     "ibc.2021.mass_timber_iv_a_b_c_assemblies_when_used",
     "ibc.2021.energy_iecc_compliance_path_selected",
     "ibc.2021.state_amendment_addendum_present_when_applicable"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

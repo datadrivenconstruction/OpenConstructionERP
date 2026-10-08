@@ -14,18 +14,6 @@
     "boq_quality.position_has_quantity": "ERROR"
   },
   "enables_rule_ids": [
-    "nbc2020.part1_scope_and_objectives_documented",
-    "nbc2020.part3_fire_protection_present",
-    "nbc2020.part3_occupant_safety_present",
-    "nbc2020.part3_accessibility_barrier_free_present",
-    "nbc2020.part4_structural_design_loads_documented",
-    "nbc2020.part4_seismic_category_assigned",
-    "nbc2020.part5_environmental_separation_envelope_present",
-    "nbc2020.part6_hvac_design_present",
-    "nbc2020.part7_plumbing_design_present",
-    "nbc2020.part8_construction_site_safety_plan_present",
-    "nbc2020.part9_housing_small_buildings_classification",
-    "nbc2020.part10_energy_efficiency_necb_reference",
     "boq_quality.position_has_quantity",
     "boq_quality.position_has_unit_rate",
     "boq_quality.no_duplicate_ordinals",

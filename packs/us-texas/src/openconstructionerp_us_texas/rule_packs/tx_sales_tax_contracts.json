@@ -7,7 +7,8 @@
   "description": "Enables the checks that keep a Texas estimate honest about who owes sales tax on materials. The contract form decides it: under a lump sum contract the contractor is the consumer of the materials and no tax is charged to the customer, while under a separated contract the contractor sells the materials and collects tax on that charge but not on new-construction labor. Repair, remodeling and restoration of nonresidential real property reverses the rule and taxes the total charge including labor, whereas the same work on residential property leaves labor untaxed. The rules check that a project declares its contract form and its work character, that the tax treatment applied matches the pair, and that the combined rate priced does not exceed the 8.25 percent ceiling. No rate table ships with this pack; the rules run against the rate the user sets for the jobsite.",
   "issuer": "Texas Comptroller of Public Accounts",
   "rates_referenced": "State 6.25 percent, local up to 2 percent, combined ceiling 8.25 percent",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "tx_tax.contract_form_declared",
     "tx_tax.work_character_declared",
     "tx_tax.lump_sum_no_customer_tax_line",
@@ -20,5 +21,6 @@
     "tx_tax.combined_rate_within_ceiling",
     "tx_tax.resale_certificate_recorded_for_separated_contract",
     "tx_tax.use_tax_on_out_of_state_materials"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

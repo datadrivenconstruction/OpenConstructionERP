@@ -4,7 +4,8 @@
   "standard": "IEC 60502-1/-2:2014 (Power cables 1 – 30 kV) + IEC 60364-7-712:2017 (PV installations) + IEC 60287 series (current rating) + IEEE 525-2016 (Cable systems in substations) + IEEE 835-1994 (Power cable ampacity)",
   "jurisdiction": "INTL",
   "description": "MV cable schedule rule pack for utility-scale renewables EPC (PV array feeders to MV transformers + collector-circuit to POI substation, typical 33 kV / 34.5 kV EU/US, 22 kV common in Asia). Validates ampacity vs aggregated array / turbine current including future inverter clipping; voltage drop ≤ 3 % (often ≤ 2 % per IEC 60364 recommendation for PV feeders); short-circuit withstand sized for fault current × clearing time; derating factors applied (depth of burial per IEC 60287, soil thermal resistivity ρ_t in K·m/W, grouping factor, ambient temperature 20 °C reference, direct-buried vs duct vs cable tray); conduit fill ≤ 40 % per NEC 300.17 if US install; trench depth meets local code (typically 0.7 m unprotected / 0.5 m with protection per EN 50522 + national code); joint + termination kit specified per cable type (XLPE / EPR), termination class per IEC 60502 indoor / outdoor; thermomechanical bonding documented for long runs.",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "mvcable.ampacity_meets_load",
     "mvcable.ampacity_includes_future_clipping_margin",
     "mvcable.iec_60287_current_rating_method_used",
@@ -25,5 +26,6 @@
     "mvcable.insulation_xlpe_or_epr_specified",
     "mvcable.shield_grounding_strategy_documented",
     "mvcable.thermomechanical_bonding_documented_if_long_run"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

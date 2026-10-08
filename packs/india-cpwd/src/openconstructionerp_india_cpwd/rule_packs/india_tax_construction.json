@@ -17,7 +17,8 @@
     "tds_194c_company_firm": "2%",
     "labour_cess_bocw": "1% of construction cost above ₹10 lakh threshold"
   },
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "gst.sac_code_present_works_contract",
     "gst.hsn_code_present_material_supply",
     "gst.tax_rate_applicable_to_contract_type",
@@ -36,5 +37,6 @@
     "labour_cess.bocw_1pct_above_10_lakh",
     "labour_cess.deposit_to_welfare_board",
     "labour_cess.clause_in_tender_document"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

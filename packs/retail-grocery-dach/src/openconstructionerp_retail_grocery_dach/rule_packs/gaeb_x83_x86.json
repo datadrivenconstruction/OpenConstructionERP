@@ -15,7 +15,9 @@
     "gaeb.lv_structure",
     "gaeb.einheitspreis_sanity",
     "gaeb.trade_section_code",
-    "gaeb.quantity_decimals",
+    "gaeb.quantity_decimals"
+  ],
+  "planned_not_built_rule_ids": [
     "gaeb.xml_schema_valid",
     "gaeb.x83_award_phase_present",
     "gaeb.x84_alternate_offer_structure",
@@ -36,6 +38,7 @@
     "gaeb.stundenlohnarbeiten_marked",
     "gaeb.nachlass_within_legal_range"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "metadata": {
     "supported_phases": [
       "X81 — Leistungsverzeichnis-Übergabe",
