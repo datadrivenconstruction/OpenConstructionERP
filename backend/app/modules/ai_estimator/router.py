@@ -16,6 +16,7 @@ or absent vectors (the run degrades and ``progress.degraded_reason`` explains).
 
 from __future__ import annotations
 
+import logging
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -40,6 +41,8 @@ from app.modules.ai_estimator.repository import (
     AiEstimatorRunRepository,
 )
 from app.modules.ai_estimator.service import AiEstimatorService
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["ai_estimator"])
 
@@ -777,9 +780,20 @@ async def embedding_model_install(_current_user_id: CurrentUserId) -> dict[str, 
     # Asking for the model is asking for semantic search: one switch, not two.
     set_semantic_search_enabled(True)
     started = start_background_download(requested=True)
+    await _sync_process_registry()
     payload = download_status()
     payload["started"] = started
     return payload
+
+
+async def _sync_process_registry() -> None:
+    """Start or stop the semantic processes to match the switch just written."""
+    from app.core.processes import process_registry
+
+    try:
+        await process_registry.reconcile(force=True)
+    except Exception:
+        logger.warning("Could not apply the semantic switch to running processes", exc_info=True)
 
 
 @router.put(
@@ -803,6 +817,7 @@ async def embedding_model_set_enabled(
 
     enabled = set_semantic_search_enabled(body.enabled)
     started = start_background_download(requested=True) if enabled else False
+    await _sync_process_registry()
     payload = download_status()
     payload["started"] = started
     return payload
