@@ -2484,6 +2484,27 @@ class SheetService:
         logger.info("Sheet updated: %s (fields=%s, restacked=%s)", sheet_id, list(fields.keys()), moved)
         return sheet
 
+    async def bulk_update_sheets(
+        self,
+        project_id: uuid.UUID,
+        sheet_ids: list[uuid.UUID],
+        data: SheetUpdate,
+    ) -> list[Sheet]:
+        """Apply one correction to several sheets of a project.
+
+        Each sheet goes through :meth:`update_sheet`, so a bulk edit is recorded
+        as a hand edit and restacks exactly as the same edit made one sheet at a
+        time would. Every id is checked before anything is written: a sheet of
+        another project, or one that does not exist, fails the whole request
+        with 404 and leaves the rest untouched.
+        """
+        unique_ids = list(dict.fromkeys(sheet_ids))
+        for sheet_id in unique_ids:
+            sheet = await self.repo.get_by_id(sheet_id)
+            if sheet is None or sheet.project_id != project_id:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Sheet not found")
+        return [await self.update_sheet(sheet_id, data) for sheet_id in unique_ids]
+
     @staticmethod
     def _moved_in_stack(sheet: Sheet, old_key: str, old_revision: str | None, old_title: str) -> bool:
         """Whether a sheet's new fields can put it somewhere else in the revision stacks."""
