@@ -3,6 +3,12 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "Ukázkové projekty",
+    "processes.demo_data_seed.purpose": "Na pozadí nainstaluje ukázkové projekty, jakmile je server připraven.",
+    "processes.demo_data_seed.off_impact": "Nelze ji vypnout. Při čerstvé instalaci se ukázkové projekty objeví asi minutu po spuštění.",
+    "processes.demo_seeding": "Ukázkové projekty se ještě instalují. Objeví se zde asi za minutu.",
+    "processes.match_models_off": "Návrhy používají jednodušší řazení, protože {{names}} je vypnuto.",
+    "processes.match_models_open": "Zapněte to v části Služby na pozadí",
     "processes.wizard.heavy_hint": "{{module}} funguje i bez AI.",
     "processes.wizard.heavy_hint_search": "Vyhledávání podle klíčových slov funguje i bez AI.",
     "processes.wizard.heavy_label": "AI: {{module}}",

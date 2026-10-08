@@ -9,6 +9,12 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "Projetos de demonstração",
+    "processes.demo_data_seed.purpose": "Instala os projetos de demonstração em segundo plano assim que o servidor estiver pronto.",
+    "processes.demo_data_seed.off_impact": "Não pode ser desativado. Em uma instalação nova, os projetos de demonstração aparecem cerca de um minuto após a inicialização.",
+    "processes.demo_seeding": "Os projetos de demonstração ainda estão sendo instalados. Eles vão aparecer aqui em cerca de um minuto.",
+    "processes.match_models_off": "As sugestões usam uma classificação mais simples porque {{names}} está desativado.",
+    "processes.match_models_open": "Ative em Serviços em segundo plano",
     "processes.wizard.heavy_hint": "{{module}} funciona sem ela.",
     "processes.wizard.heavy_hint_search": "A busca por palavras-chave funciona sem ela.",
     "processes.wizard.heavy_label": "IA: {{module}}",

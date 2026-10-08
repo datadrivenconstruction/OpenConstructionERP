@@ -29,6 +29,7 @@ import { ProjectStatusBadge, CURATED_PROJECT_STATUSES, useProjectStatusLabel } f
 import { BIMConverterStatusBanner } from '../bim/BIMConverterStatusBanner';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { invalidateProjectLists } from './invalidateProjectLists';
+import { DemoSeedingHint } from '@/features/processes/DemoSeedingHint';
 
 const LIVE_DEFAULT_MIGRATED_KEY = 'oe_projects_filters_live_default';
 
@@ -992,6 +993,7 @@ export function ProjectsPage() {
               your first {entity}" template; the description retains the
               project-specific elaboration so users understand what a
               project is for. */}
+          <DemoSeedingHint />
           <EmptyState
             icon={<FolderOpen size={28} strokeWidth={1.5} />}
             title={t('projects.no_projects', { defaultValue: 'No projects yet' })}

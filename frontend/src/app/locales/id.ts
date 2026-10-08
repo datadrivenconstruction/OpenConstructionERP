@@ -3,6 +3,12 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "Proyek Demo",
+    "processes.demo_data_seed.purpose": "Memasang proyek demo di latar belakang setelah server siap.",
+    "processes.demo_data_seed.off_impact": "Tidak dapat dimatikan. Pada instalasi baru, proyek demo muncul sekitar satu menit setelah dimulai.",
+    "processes.demo_seeding": "Proyek demo masih dipasang. Proyek akan muncul di sini sekitar satu menit lagi.",
+    "processes.match_models_off": "Saran memakai peringkat yang lebih sederhana karena {{names}} nonaktif.",
+    "processes.match_models_open": "Aktifkan di Layanan latar belakang",
     "processes.wizard.heavy_hint": "{{module}} tetap berfungsi tanpa AI.",
     "processes.wizard.heavy_hint_search": "Pencarian kata kunci tetap berfungsi tanpa AI.",
     "processes.wizard.heavy_label": "AI: {{module}}",

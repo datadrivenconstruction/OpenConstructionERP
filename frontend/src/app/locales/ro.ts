@@ -3,6 +3,12 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "Proiecte demo",
+    "processes.demo_data_seed.purpose": "Instalează proiectele demo în fundal imediat ce serverul este gata.",
+    "processes.demo_data_seed.off_impact": "Nu poate fi dezactivat. La o instalare nouă, proiectele demo apar la aproximativ un minut după pornire.",
+    "processes.demo_seeding": "Proiectele demo încă se instalează. Vor apărea aici în aproximativ un minut.",
+    "processes.match_models_off": "Sugestiile folosesc un clasament mai simplu, deoarece {{names}} este dezactivat.",
+    "processes.match_models_open": "Activați-l în Servicii de fundal",
     "processes.wizard.heavy_hint": "{{module}} funcționează și fără el.",
     "processes.wizard.heavy_hint_search": "Căutarea după cuvinte cheie funcționează și fără el.",
     "processes.wizard.heavy_label": "AI: {{module}}",

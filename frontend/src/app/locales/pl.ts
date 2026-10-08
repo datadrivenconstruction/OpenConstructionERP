@@ -3,6 +3,12 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "Projekty demonstracyjne",
+    "processes.demo_data_seed.purpose": "Instaluje projekty demonstracyjne w tle, gdy tylko serwer jest gotowy.",
+    "processes.demo_data_seed.off_impact": "Nie można tego wyłączyć. Przy świeżej instalacji projekty demonstracyjne pojawiają się około minuty po starcie.",
+    "processes.demo_seeding": "Projekty demonstracyjne są jeszcze instalowane. Pojawią się tutaj za około minutę.",
+    "processes.match_models_off": "Podpowiedzi używają prostszego rankingu, ponieważ {{names}} jest wyłączone.",
+    "processes.match_models_open": "Włącz to w sekcji Usługi w tle",
     "processes.wizard.heavy_hint": "{{module}} działa także bez tego.",
     "processes.wizard.heavy_hint_search": "Wyszukiwanie po słowach kluczowych działa także bez tego.",
     "processes.wizard.heavy_label": "AI: {{module}}",

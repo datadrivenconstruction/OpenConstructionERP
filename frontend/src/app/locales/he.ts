@@ -3,6 +3,12 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "פרויקטי הדגמה",
+    "processes.demo_data_seed.purpose": "מתקין את פרויקטי ההדגמה ברקע ברגע שהשרת מוכן.",
+    "processes.demo_data_seed.off_impact": "אי אפשר לכבות אותו. בהתקנה חדשה פרויקטי ההדגמה מופיעים כדקה לאחר ההפעלה.",
+    "processes.demo_seeding": "פרויקטי ההדגמה עדיין בהתקנה. הם יופיעו כאן בעוד כדקה.",
+    "processes.match_models_off": "ההצעות משתמשות בדירוג פשוט יותר כי {{names}} כבוי.",
+    "processes.match_models_open": "הפעילו אותו בשירותי רקע",
     "processes.wizard.heavy_hint": "{{module}} פועל גם בלעדיה.",
     "processes.wizard.heavy_hint_search": "חיפוש לפי מילות מפתח פועל גם בלעדיה.",
     "processes.wizard.heavy_label": "בינה מלאכותית: {{module}}",

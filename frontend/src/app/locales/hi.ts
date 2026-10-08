@@ -3,6 +3,12 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "डेमो प्रोजेक्ट",
+    "processes.demo_data_seed.purpose": "सर्वर तैयार होते ही डेमो प्रोजेक्ट बैकग्राउंड में इंस्टॉल करता है।",
+    "processes.demo_data_seed.off_impact": "इसे बंद नहीं किया जा सकता। नई इंस्टॉलेशन में डेमो प्रोजेक्ट शुरू होने के लगभग एक मिनट बाद दिखते हैं।",
+    "processes.demo_seeding": "डेमो प्रोजेक्ट अभी इंस्टॉल हो रहे हैं। वे लगभग एक मिनट में यहाँ दिखेंगे।",
+    "processes.match_models_off": "{{names}} बंद होने के कारण सुझाव सरल रैंकिंग का उपयोग करते हैं।",
+    "processes.match_models_open": "इसे बैकग्राउंड सेवाएँ में चालू करें",
     "processes.wizard.heavy_hint": "{{module}} इसके बिना भी काम करता है।",
     "processes.wizard.heavy_hint_search": "कीवर्ड खोज इसके बिना भी काम करती है।",
     "processes.wizard.heavy_label": "AI: {{module}}",

@@ -3,6 +3,12 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "Демонстрационни проекти",
+    "processes.demo_data_seed.purpose": "Инсталира демонстрационните проекти на заден план, щом сървърът е готов.",
+    "processes.demo_data_seed.off_impact": "Не може да се изключи. При нова инсталация демонстрационните проекти се появяват около минута след стартирането.",
+    "processes.demo_seeding": "Демонстрационните проекти още се инсталират. Ще се появят тук след около минута.",
+    "processes.match_models_off": "Предложенията използват по-опростено класиране, защото {{names}} е изключено.",
+    "processes.match_models_open": "Включете го в Фонови услуги",
     "processes.wizard.heavy_hint": "{{module}} работи и без него.",
     "processes.wizard.heavy_hint_search": "Търсенето по ключови думи работи и без него.",
     "processes.wizard.heavy_label": "ИИ: {{module}}",

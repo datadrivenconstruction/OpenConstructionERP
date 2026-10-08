@@ -3,6 +3,12 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "Demo Projeler",
+    "processes.demo_data_seed.purpose": "Sunucu hazır olur olmaz demo projeleri arka planda kurar.",
+    "processes.demo_data_seed.off_impact": "Kapatılamaz. Yeni kurulumda demo projeler başlatmadan yaklaşık bir dakika sonra görünür.",
+    "processes.demo_seeding": "Demo projeler hâlâ kuruluyor. Yaklaşık bir dakika içinde burada görünecek.",
+    "processes.match_models_off": "{{names}} kapalı olduğu için öneriler daha basit bir sıralama kullanıyor.",
+    "processes.match_models_open": "Arka plan hizmetleri bölümünden açın",
     "processes.wizard.heavy_hint": "{{module}} bunsuz da çalışır.",
     "processes.wizard.heavy_hint_search": "Anahtar kelime araması bunsuz da çalışır.",
     "processes.wizard.heavy_label": "AI: {{module}}",
