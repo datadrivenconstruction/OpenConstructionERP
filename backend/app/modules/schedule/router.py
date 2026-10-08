@@ -51,7 +51,6 @@ from app.dependencies import (
     CurrentUserId,
     CurrentUserPayload,
     RequirePermission,
-    RequireRole,
     SessionDep,
     verify_project_access,
 )
@@ -388,7 +387,7 @@ async def restore_schedule(
 @router.delete(
     "/schedules/{schedule_id}/permanent/",
     status_code=204,
-    dependencies=[Depends(RequireRole("admin")), Depends(RequirePermission("schedule.purge"))],
+    dependencies=[Depends(RequirePermission("schedule.delete"))],
 )
 async def purge_schedule(
     schedule_id: uuid.UUID,
@@ -397,9 +396,9 @@ async def purge_schedule(
     session: SessionDep,
     service: ScheduleService = Depends(_get_service),
 ) -> None:
-    """Explicit admin-only destruction; the schedule must already be archived."""
+    """Explicit destruction by the project owner or an admin; the schedule must already be archived."""
     await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
-    await service.purge_schedule(schedule_id, actor_payload=payload)
+    await service.purge_schedule(schedule_id, actor_payload={**payload, "sub": payload.get("sub") or _user_id})
 
 
 @router.get(
@@ -422,14 +421,7 @@ async def schedule_delete_impact(
     """
     schedule = await _verify_schedule_owner(service, session, schedule_id, _user_id, payload)
     impact = await service.delete_impact(schedule_id)
-    blocked: str | None = None
-    try:
-        await RequireRole("admin")(payload)
-        await RequirePermission("schedule.purge")(payload)
-    except HTTPException:
-        blocked = "permission_denied"
-    if blocked is None and schedule.status != "archived":
-        blocked = "schedule_not_archived"
+    blocked = await service.purge_blocked_reason(schedule, {**payload, "sub": payload.get("sub") or _user_id})
     return ScheduleDeleteImpactResponse(**impact, can_delete=blocked is None, blocked_reason=blocked)
 
 

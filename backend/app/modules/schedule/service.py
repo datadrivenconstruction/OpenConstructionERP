@@ -1465,19 +1465,70 @@ class ScheduleService:
         """Restore the recorded status, or explicitly draft for legacy archives."""
         return await self.update_schedule(schedule_id, ScheduleUpdate(), actor_payload=actor_payload, restore=True)
 
-    async def purge_schedule(self, schedule_id: uuid.UUID, *, actor_payload: dict[str, Any]) -> None:
-        """Permanently delete an archived schedule; administrator only.
-
-        Raises HTTPException 404 if not found.
-        """
+    @staticmethod
+    async def is_purge_admin(actor_payload: dict[str, Any]) -> bool:
+        """Whether the caller is an administrator holding ``schedule.purge``."""
         from app.dependencies import RequirePermission, RequireRole
 
-        await RequireRole("admin")(actor_payload)
-        await RequirePermission("schedule.purge")(actor_payload)
+        try:
+            await RequireRole("admin")(actor_payload)
+            await RequirePermission("schedule.purge")(actor_payload)
+        except HTTPException:
+            return False
+        return True
+
+    async def is_project_owner(self, schedule: Schedule, user_id: str | None) -> bool:
+        """Whether ``user_id`` owns the project the schedule belongs to."""
+        from app.modules.projects.models import Project
+
+        if not user_id:
+            return False
+        owner_id = (
+            await self.session.execute(select(Project.owner_id).where(Project.id == schedule.project_id))
+        ).scalar_one_or_none()
+        return owner_id is not None and str(owner_id) == str(user_id)
+
+    async def purge_blocked_reason(self, schedule: Schedule, actor_payload: dict[str, Any]) -> str | None:
+        """Why this caller may not permanently delete the schedule, or None.
+
+        An administrator may delete any archived schedule. The owner of its
+        project may too, unless baselines hang off it: deleting those stays
+        an administrator's call, as on the baseline endpoint.
+        """
+        if not await self.is_purge_admin(actor_payload):
+            from app.dependencies import RequirePermission
+
+            try:
+                await RequirePermission("schedule.delete")(actor_payload)
+            except HTTPException:
+                return "permission_denied"
+            if not await self.is_project_owner(schedule, actor_payload.get("sub")):
+                return "permission_denied"
+            if await self.schedule_repo.count_baselines(schedule.id):
+                return "schedule_has_baselines"
+        if schedule.status != "archived":
+            return "schedule_not_archived"
+        return None
+
+    async def purge_schedule(self, schedule_id: uuid.UUID, *, actor_payload: dict[str, Any]) -> None:
+        """Permanently delete an archived schedule; administrator or project owner.
+
+        Raises HTTPException 404 if not found, 403 for anyone else, 409 when
+        the schedule is not archived or an owner meets baselines.
+        """
         schedule = await self.schedule_repo.get_for_update(schedule_id)
         if schedule is None:
             raise HTTPException(status_code=404, detail="Schedule not found")
-        if schedule.status != "archived":
+        blocked = await self.purge_blocked_reason(schedule, actor_payload)
+        if blocked == "permission_denied":
+            raise coded_http_error(
+                403, "permission_denied", "Only the project owner or an administrator can delete a schedule."
+            )
+        if blocked == "schedule_has_baselines":
+            raise coded_http_error(
+                409, "schedule_has_baselines", "Only an administrator can delete a schedule that has baselines."
+            )
+        if blocked == "schedule_not_archived":
             raise coded_http_error(409, "schedule_not_archived", "Archive the schedule before permanently deleting it.")
         project_id = str(schedule.project_id)
 

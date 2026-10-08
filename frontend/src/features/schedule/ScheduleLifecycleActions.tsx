@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Archive, RotateCcw, Trash2 } from 'lucide-react';
 import { useHasPermission } from '@/shared/lib/permissionGates';
 import { useConfirm } from '@/shared/hooks/useConfirm';
@@ -23,10 +23,20 @@ export function ScheduleLifecycleActions({ schedule, onChanged, compact = false 
   const queryClient = useQueryClient();
   const toast = useToastStore((s) => s.addToast);
   const canArchive = useHasPermission('schedule.delete');
-  const canPurge = useHasPermission('schedule.purge');
+  const isPurgeAdmin = useHasPermission('schedule.purge');
   const [busy, setBusy] = useState(false);
   const { confirm, ...confirmProps } = useConfirm();
   const archived = schedule.status === 'archived';
+  // The project owner may delete an archive too; the server knows who owns it,
+  // so ask it rather than offer a Delete it would refuse.
+  const impact = useQuery({
+    queryKey: ['schedules', schedule.id, 'delete-impact'],
+    queryFn: () => scheduleApi.getDeleteImpact(schedule.id),
+    enabled: archived && canArchive && !isPurgeAdmin,
+    staleTime: 60_000,
+  });
+  const canPurge = archived && (isPurgeAdmin || impact.data?.can_delete === true
+    || impact.data?.blocked_reason === 'schedule_has_baselines');
 
   const act = async (action: 'archive' | 'restore' | 'purge') => {
     if (busy) return;
@@ -73,7 +83,9 @@ export function ScheduleLifecycleActions({ schedule, onChanged, compact = false 
   return <div className="flex shrink-0 flex-wrap items-center gap-1" onClick={(event) => event.stopPropagation()}>
     {canArchive && <Button variant="ghost" size="sm" disabled={busy}
       aria-label={t(archived ? 'schedule.restore_named' : 'schedule.archive_named', { name: schedule.name })}
-      title={t(archived ? 'common.restore' : 'common.archive')}
+      title={archived ? t('common.restore') : t('schedule.archive_then_delete_hint', {
+        defaultValue: 'Archive this schedule. Once archived, the project owner can delete it permanently.',
+      })}
       icon={archived ? <RotateCcw size={14} /> : <Archive size={14} />}
       onClick={() => void act(archived ? 'restore' : 'archive')}>
       {!compact && t(archived ? 'common.restore' : 'common.archive')}
