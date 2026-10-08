@@ -7727,6 +7727,9 @@ class ContractsService:
         Retention: a deposit (``kind == "deposit"``) holds none, because it is
         paid before any work exists to secure; a progress or final instalment
         holds the contract's flat rate (see :meth:`roll_claim_retention`).
+        This is a confirmed product rule, not a provisional default, and there
+        is deliberately no per-contract switch for it. Both directions are
+        pinned in ``tests/integration/test_contracts_payment_plan_review.py``.
 
         The period ends on the claim date, the day it is raised, not on the
         day the milestone was reached: a claim raised a week after the
