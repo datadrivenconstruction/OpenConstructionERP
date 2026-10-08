@@ -135,6 +135,9 @@ may use different providers):
 
 ### AI providers
 
+How the software uses AI and what you as deployer decide is described in
+[AI_ACT.md](AI_ACT.md).
+
 **Only those you enable**, with API keys you supply. None is contacted
 until you save a key, and the Software ships with no key for any of them.
 Your prompts, and any document text, image or recording the feature sends,
