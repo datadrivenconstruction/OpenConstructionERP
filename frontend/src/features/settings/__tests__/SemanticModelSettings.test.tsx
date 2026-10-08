@@ -45,7 +45,11 @@ describe('SemanticModelSettings', () => {
     embeddingModelStatus.mockReset();
     setSemanticSearchEnabled.mockReset();
     embeddingModelStatus.mockResolvedValue(OFF);
-    setSemanticSearchEnabled.mockResolvedValue({ ...OFF, state: 'downloading', semantic_enabled: true });
+    setSemanticSearchEnabled.mockImplementation(async () => {
+      const on = { ...OFF, state: 'downloading', semantic_enabled: true };
+      embeddingModelStatus.mockResolvedValue(on);
+      return on;
+    });
   });
 
   it('is off by default, shows the memory it needs, and turns on with one request', async () => {
