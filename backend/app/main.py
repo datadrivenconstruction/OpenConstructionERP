@@ -5079,49 +5079,56 @@ def create_app() -> FastAPI:
         _section("Demo data")
         await _seed_demo_account()
 
-        # Seed ISO 3166-1 countries + tax configs + work calendars if empty.
-        # Required for the region-picker, tax-config lookups and work-calendar
-        # endpoints to return data on a fresh install.
-        try:
-            from app.database import async_session_factory as _i18n_session_factory
+        # Baseline seeds, once per app version: a completed seed leaves a
+        # marker (app.core.seed_once) and later boots of the same version skip
+        # it instead of re-querying its tables. A failed seed stamps nothing
+        # and runs again next boot.
+        from app.core.seed_once import SeedOnce
+        from app.database import async_session_factory as _seed_session_factory
+
+        _seeds = SeedOnce(settings.app_version)
+
+        # ISO 3166-1 countries + tax configs + work calendars. Required for the
+        # region-picker, tax-config lookups and work-calendar endpoints to
+        # return data on a fresh install.
+        async def _seed_i18n() -> None:
             from app.modules.i18n_foundation.seed import seed_i18n_data
 
-            async with _i18n_session_factory() as _seed_session:
+            async with _seed_session_factory() as _seed_session:
                 await seed_i18n_data(_seed_session)
                 await _seed_session.commit()
-        except Exception:
-            logger.exception("i18n seed failed - countries/taxes/calendars may be empty")
+
+        await _seeds.run("i18n", _seed_i18n, "i18n seed failed - countries/taxes/calendars may be empty")
 
         # Starter seed: small baseline of cost items + assemblies so a fresh
         # install never shows an empty /costs or /catalog before the user
         # imports a regional CWICR catalogue. Idempotent - only runs when
         # the tables are empty. Disable via OE_SKIP_STARTER_SEED=1.
-        try:
-            from app.database import async_session_factory as _starter_session_factory
+        async def _seed_starter() -> None:
             from app.scripts.seed_starter import seed_starter_data
 
-            async with _starter_session_factory() as _starter_session:
+            async with _seed_session_factory() as _starter_session:
                 counts = await seed_starter_data(_starter_session)
                 await _starter_session.commit()
-                if counts["cost_items"] or counts["assemblies"]:
-                    logger.info(
-                        "Starter seed: %d cost items, %d assemblies inserted",
-                        counts["cost_items"],
-                        counts["assemblies"],
-                    )
-                # The Cost Explorer module's own startup index build ran during
-                # module load, before this seed, so on a first boot it saw an
-                # empty cost table. Build the resource->work reverse index now
-                # that the starter cost items (with their resource recipes) are
-                # in place, otherwise the By-resources and Substitute tabs would
-                # stay empty until the next restart. Self-contained, idempotent
-                # and size-capped; it swallows its own errors.
-                if counts["cost_items"]:
-                    from app.modules.cost_explorer.service import build_index_if_empty
+            if counts["cost_items"] or counts["assemblies"]:
+                logger.info(
+                    "Starter seed: %d cost items, %d assemblies inserted",
+                    counts["cost_items"],
+                    counts["assemblies"],
+                )
+            # The Cost Explorer module's own startup index build ran during
+            # module load, before this seed, so on a first boot it saw an
+            # empty cost table. Build the resource->work reverse index now
+            # that the starter cost items (with their resource recipes) are
+            # in place, otherwise the By-resources and Substitute tabs would
+            # stay empty until the next restart. Self-contained, idempotent
+            # and size-capped; it swallows its own errors.
+            if counts["cost_items"]:
+                from app.modules.cost_explorer.service import build_index_if_empty
 
-                    await build_index_if_empty()
-        except Exception:
-            logger.exception("Starter seed failed - /costs and /catalog may be empty")
+                await build_index_if_empty()
+
+        await _seeds.run("starter", _seed_starter, "Starter seed failed - /costs and /catalog may be empty")
 
         # Regional indices seed (v3.12.0 - Stream B). Idempotent: the
         # script honours the UNIQUE(region, category, subcategory,
@@ -5129,20 +5136,19 @@ def create_app() -> FastAPI:
         # only inserts the OE_v3.12 baseline rows once. Failure is
         # non-fatal - the regional-adjust endpoint falls back to a 1:1
         # passthrough when no rows are on file.
-        try:
+        async def _seed_regional() -> None:
             from app.scripts.seed_regional_indices import main as _seed_regional_main
 
             inserted = await _seed_regional_main()
             if inserted:
-                logger.info(
-                    "Regional indices seed: %d factor rows inserted",
-                    inserted,
-                )
-        except Exception:
-            logger.exception(
-                "Regional indices seed failed - /v1/costs/regional-adjust will "
-                "passthrough until an operator imports a feed"
-            )
+                logger.info("Regional indices seed: %d factor rows inserted", inserted)
+
+        await _seeds.run(
+            "regional_indices",
+            _seed_regional,
+            "Regional indices seed failed - /v1/costs/regional-adjust will "
+            "passthrough until an operator imports a feed",
+        )
 
         # Property-dev house-type catalogue presets. Mirrors migration
         # v3114_propdev_house_type_catalogue's bulk_insert so fresh-blank-DB
@@ -5150,26 +5156,24 @@ def create_app() -> FastAPI:
         # never run the migration's upgrade()) still end up with the ~60
         # country presets populated. Idempotent - skips when any preset
         # row exists.
-        try:
-            from app.database import async_session_factory as _ht_session_factory
+        async def _seed_house_types() -> None:
             from app.modules.property_dev.seed_house_type_catalogue import (
                 seed_house_type_catalogue_presets,
             )
 
-            async with _ht_session_factory() as _ht_session:
+            async with _seed_session_factory() as _ht_session:
                 inserted = await seed_house_type_catalogue_presets(_ht_session)
                 await _ht_session.commit()
-                if inserted:
-                    logger.info(
-                        "Property-dev house-type catalogue seed: %d preset rows",
-                        inserted,
-                    )
-        except Exception:
-            logger.exception(
-                "Property-dev house-type catalogue preset seed failed - "
-                "/property-dev/house-type-catalogue will return an empty list "
-                "until an operator re-runs alembic or restarts the app"
-            )
+            if inserted:
+                logger.info("Property-dev house-type catalogue seed: %d preset rows", inserted)
+
+        await _seeds.run(
+            "house_type_catalogue",
+            _seed_house_types,
+            "Property-dev house-type catalogue preset seed failed - "
+            "/property-dev/house-type-catalogue will return an empty list "
+            "until an operator re-runs alembic or restarts the app",
+        )
 
         # Initialize vector database (LanceDB embedded, no Docker).
         #
