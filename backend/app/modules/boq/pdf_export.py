@@ -76,6 +76,7 @@ from app.core.pdf_branding import (
 # otherwise need three plural forms for.
 _PDF_LABELS: dict[str, dict[str, str]] = {
     "en": {
+        "ai_generated": "AI-generated",
         "cost_estimate": "COST ESTIMATE",
         "summary": "SUMMARY",
         "project": "Project:",
@@ -115,6 +116,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "tax_vat": "VAT",
     },
     "de": {
+        "ai_generated": "KI-generiert",
         "cost_estimate": "KOSTENSCHÄTZUNG",
         "summary": "ZUSAMMENFASSUNG",
         "project": "Projekt:",
@@ -154,6 +156,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "tax_vat": "MwSt.",
     },
     "fr": {
+        "ai_generated": "Généré par IA",
         "cost_estimate": "ESTIMATION DES COÛTS",
         "summary": "RÉSUMÉ",
         "project": "Projet :",
@@ -193,6 +196,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "tax_vat": "TVA",
     },
     "es": {
+        "ai_generated": "Generado por IA",
         "cost_estimate": "PRESUPUESTO",
         "summary": "RESUMEN",
         "project": "Proyecto:",
@@ -232,6 +236,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "tax_vat": "IVA",
     },
     "ru": {
+        "ai_generated": "Создано ИИ",
         "cost_estimate": "СМЕТНЫЙ РАСЧЁТ",
         "summary": "ИТОГИ",
         "project": "Проект:",
@@ -271,6 +276,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "tax_vat": "НДС",
     },
     "uk": {
+        "ai_generated": "Створено ШІ",
         "cost_estimate": "КОШТОРИСНИЙ РОЗРАХУНОК",
         "summary": "ПІДСУМКИ",
         "project": "Проєкт:",
@@ -310,6 +316,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "tax_vat": "ПДВ",
     },
     "hu": {
+        "ai_generated": "MI által generált",
         "cost_estimate": "KÖLTSÉGBECSLÉS",
         "summary": "ÖSSZESÍTÉS",
         "project": "Projekt:",
@@ -349,6 +356,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "tax_vat": "ÁFA",
     },
     "zh": {
+        "ai_generated": "AI 生成",
         "cost_estimate": "COST ESTIMATE",
         "summary": "SUMMARY",
         "project": "Project:",
@@ -372,6 +380,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "generated": "Generated:",
     },
     "pt": {
+        "ai_generated": "Gerado por IA",
         "cost_estimate": "ORÇAMENTO",
         "summary": "RESUMO",
         "project": "Projeto:",
@@ -411,6 +420,7 @@ _PDF_LABELS: dict[str, dict[str, str]] = {
         "tax_vat": "IVA",
     },
     "tr": {
+        "ai_generated": "Yapay zekâ ile üretildi",
         "cost_estimate": "MALİYET TAHMİNİ",
         "summary": "ÖZET",
         "project": "Proje:",
@@ -491,6 +501,7 @@ from app.core.pdf_fonts import (
 from app.core.regional_format import format_date, format_number, number_style
 from app.core.unit_conversion import convert as convert_units
 from app.core.unit_conversion import display_rate
+from app.modules.boq.ai_provenance import AI_MARK_TOKEN, ai_origin
 
 # Register the bundled Unicode (DejaVu) faces with reportlab. Idempotent and
 # safe at import time because reportlab is imported at module level here.
@@ -1447,10 +1458,19 @@ def _build_boq_table(
         """The position's row, its resource rows when asked for, and its total."""
         total, rate = _line_money(pos, base_currency, fx_rates)
         qty_text, unit_label = _qty_cell(pos.quantity, pos.unit)
+        desc_cell: Any = _safe_para(pos.description, styles["cell"])
+        ai_src = ai_origin(pos)
+        if ai_src:
+            # AI Act art. 50(2): visible per-row marker; the document
+            # metadata carries the machine-readable one.
+            desc_cell = [
+                desc_cell,
+                _safe_para(f"{lb.get('ai_generated', 'AI-generated')} ({ai_src})", styles["resource_cell"]),
+            ]
         rows: list[list[Any]] = [
             [
                 _safe_para(pos.ordinal, styles["cell"]),
-                _safe_para(pos.description, styles["cell"]),
+                desc_cell,
                 _safe_para(unit_label, styles["cell"]),
                 Paragraph(qty_text, styles["cell_right"]),
                 Paragraph(_rate_cell(rate, pos.unit), styles["cell_right"]),
@@ -2167,7 +2187,47 @@ def generate_boq_pdf(
 
     pdf_bytes = buffer.getvalue()
     buffer.close()
-    return pdf_bytes
+    return _stamp_ai_origin(pdf_bytes, _ai_sources(boq_data))
+
+
+def _ai_sources(boq_data: Any) -> list[str]:
+    """The AI ``source`` of every model-produced position in the bill."""
+    positions = [p for section in getattr(boq_data, "sections", []) or [] for p in section.positions]
+    positions += list(getattr(boq_data, "positions", []) or [])
+    return [src for src in (ai_origin(p) for p in positions) if src]
+
+
+def _stamp_ai_origin(pdf_bytes: bytes, sources: list[str]) -> bytes:
+    """Mark a PDF with AI-produced rows in its info dictionary and XMP (AI Act art. 50(2)).
+
+    Returns the input unchanged when no row is AI-produced, so ordinary
+    exports stay byte-identical.
+    """
+    if not sources:
+        return pdf_bytes
+    from pypdf import PdfReader, PdfWriter
+
+    writer = PdfWriter(clone_from=PdfReader(io.BytesIO(pdf_bytes)))
+    distinct = ",".join(sorted(set(sources)))
+    writer.add_metadata(
+        {
+            f"/{AI_MARK_TOKEN}": "true",
+            f"/{AI_MARK_TOKEN}-ROWS": str(len(sources)),
+            f"/{AI_MARK_TOKEN}-SOURCES": distinct,
+        }
+    )
+    xmp = (
+        '<?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>'
+        '<x:xmpmeta xmlns:x="adobe:ns:meta/"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">'
+        '<rdf:Description rdf:about="" xmlns:oce="https://openconstructionerp.com/ns/ai-origin/1.0/">'
+        f"<oce:aiGenerated>true</oce:aiGenerated><oce:aiRows>{len(sources)}</oce:aiRows>"
+        f"<oce:aiSources>{html.escape(distinct)}</oce:aiSources>"
+        '</rdf:Description></rdf:RDF></x:xmpmeta><?xpacket end="w"?>'
+    )
+    writer.xmp_metadata = xmp.encode("utf-8")
+    out = io.BytesIO()
+    writer.write(out)
+    return out.getvalue()
 
 
 def count_boq_positions(boq_data: Any) -> int:
@@ -2393,4 +2453,4 @@ def generate_boq_pdf_simple(
 
     pdf_bytes = buffer.getvalue()
     buffer.close()
-    return pdf_bytes
+    return _stamp_ai_origin(pdf_bytes, _ai_sources(boq_data))

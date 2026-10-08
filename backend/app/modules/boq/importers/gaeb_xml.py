@@ -46,6 +46,7 @@ import xml.etree.ElementTree as ET
 from decimal import Decimal, InvalidOperation
 from typing import Any, ClassVar
 
+from app.modules.boq.ai_provenance import AI_MARK_TEXT_PREFIX
 from app.modules.boq.importers._base import (
     ImportedBOQ,
     ImportedPosition,
@@ -247,6 +248,9 @@ def _extract_long_text(item: ET.Element) -> str:
             if not line:
                 continue
             if line.strip().lower() in _TEXT_NOISE_MARKERS:
+                continue
+            # Our own AI-origin marker line is provenance, not Langtext.
+            if line.strip().startswith(AI_MARK_TEXT_PREFIX):
                 continue
             paragraphs.append(line)
         if paragraphs:
