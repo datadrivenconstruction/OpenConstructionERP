@@ -2905,7 +2905,18 @@ fn extraction_is_in_use(scan: &ExtractionScan) -> bool {
 /// `timezonesets`. Removing the probed files first means the first thing we
 /// touch is the thing such a process is holding, so the removal stops there with
 /// everything else still on the disk.
-fn remove_extraction(dir: &std::path::Path, scan: &ExtractionScan) -> std::io::Result<()> {
+///
+/// The deadline is checked between files, not only between directories. One
+/// onefile extraction is 13 000 files and 1.4 GB, and on a loaded machine with
+/// antivirus a single `remove_dir_all` of it was measured at 12 minutes, all of
+/// it before the backend was spawned, against a sweep budget of 90 seconds.
+/// Returns Ok(false) when time ran out with files still on disk; what is left
+/// has no executables in it any more and is finished on the next start.
+fn remove_extraction(
+    dir: &std::path::Path,
+    scan: &ExtractionScan,
+    deadline: Instant,
+) -> std::io::Result<bool> {
     for image in &scan.images {
         match std::fs::remove_file(image) {
             Ok(()) => {}
@@ -2913,7 +2924,35 @@ fn remove_extraction(dir: &std::path::Path, scan: &ExtractionScan) -> std::io::R
             Err(e) => return Err(e),
         }
     }
-    std::fs::remove_dir_all(dir)
+    remove_tree_until(dir, deadline)
+}
+
+/// `remove_dir_all` that gives up at a deadline. Ok(true) when the tree is gone.
+fn remove_tree_until(dir: &std::path::Path, deadline: Instant) -> std::io::Result<bool> {
+    for entry in std::fs::read_dir(dir)? {
+        if Instant::now() >= deadline {
+            return Ok(false);
+        }
+        let entry = entry?;
+        let path = entry.path();
+        // Symlinks are removed as links and never followed, as in the scan.
+        if entry.file_type()?.is_dir() {
+            if !remove_tree_until(&path, deadline)? {
+                return Ok(false);
+            }
+        } else {
+            match std::fs::remove_file(&path) {
+                Ok(()) => {}
+                Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
+                Err(e) => return Err(e),
+            }
+        }
+    }
+    match std::fs::remove_dir(dir) {
+        Ok(()) => Ok(true),
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(true),
+        Err(e) => Err(e),
+    }
 }
 
 /// What the embedded cluster's pidfile says about a postmaster being alive.
@@ -3113,8 +3152,17 @@ fn sweep_extractions_in(
                 if report.removed == 0 {
                     on_first_removal();
                 }
-                match remove_extraction(&path, &scan) {
-                    Ok(()) => {
+                match remove_extraction(&path, &scan, deadline) {
+                    Ok(false) => {
+                        report.kept += 1;
+                        report.stopped_early = true;
+                        log_line(&format!(
+                            "extraction sweep: ran out of time partway through {}, the rest goes next start",
+                            observed.name
+                        ));
+                        break;
+                    }
+                    Ok(true) => {
                         report.removed += 1;
                         report.bytes_freed += scan.bytes;
                         log_line(&format!(
@@ -6275,6 +6323,27 @@ walking the directory rather than taking the held files first"
         assert_eq!(report.kept_in_use, 1, "the file held open was not noticed");
 
         drop(held);
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// The removal itself answers to the sweep budget, not only the gap between
+    /// directories: one extraction took 12 minutes to delete on a real machine.
+    #[test]
+    fn removing_one_extraction_stops_at_the_deadline_and_finishes_later() {
+        let root = fixture_dir("sweep-deadline");
+        let tree = root.join("_MEI700009");
+        std::fs::create_dir_all(tree.join("pkg")).expect("a fixture package directory");
+        for i in 0..5 {
+            std::fs::write(tree.join("pkg").join(format!("m{i}.py")), b"x").expect("a fixture file");
+        }
+
+        let past = Instant::now() - Duration::from_secs(1);
+        assert!(!remove_tree_until(&tree, past).expect("a removal out of time is not an error"));
+        assert!(tree.exists(), "a removal out of time still deleted the whole tree");
+
+        let later = Instant::now() + Duration::from_secs(30);
+        assert!(remove_tree_until(&tree, later).expect("the rest removes"));
+        assert!(!tree.exists(), "the tree was not removed when there was time");
         let _ = std::fs::remove_dir_all(&root);
     }
 
