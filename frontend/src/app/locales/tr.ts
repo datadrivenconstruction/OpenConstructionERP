@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "{{module}} bunsuz da çalışır.",
+    "processes.wizard.heavy_hint_search": "Anahtar kelime araması bunsuz da çalışır.",
+    "processes.wizard.heavy_label": "AI: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Arka plan hizmetleri: {{names}} hazırlanıyor",
     "processes.notice.preparing": "{{names}} hazırlanıyor. Çalışmaya devam edebilirsiniz, bu not kendiliğinden kaybolur.",

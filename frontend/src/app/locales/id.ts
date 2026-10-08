@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "{{module}} tetap berfungsi tanpa AI.",
+    "processes.wizard.heavy_hint_search": "Pencarian kata kunci tetap berfungsi tanpa AI.",
+    "processes.wizard.heavy_label": "AI: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Layanan latar belakang: menyiapkan {{names}}",
     "processes.notice.preparing": "Menyiapkan {{names}}. Anda bisa terus bekerja, catatan ini akan hilang sendiri.",

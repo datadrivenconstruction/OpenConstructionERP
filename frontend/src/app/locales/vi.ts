@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "{{module}} vẫn hoạt động khi không có AI.",
+    "processes.wizard.heavy_hint_search": "Tìm kiếm theo từ khóa vẫn hoạt động khi không có AI.",
+    "processes.wizard.heavy_label": "AI: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Dịch vụ nền: đang chuẩn bị {{names}}",
     "processes.notice.preparing": "Đang chuẩn bị {{names}}. Bạn cứ tiếp tục làm việc, ghi chú này sẽ tự biến mất.",

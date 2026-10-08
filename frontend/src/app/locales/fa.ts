@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "{{module}} بدون آن هم کار می‌کند.",
+    "processes.wizard.heavy_hint_search": "جستجوی کلیدواژه‌ای بدون آن هم کار می‌کند.",
+    "processes.wizard.heavy_label": "هوش مصنوعی: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "سرویس‌های پس‌زمینه: آماده‌سازی {{names}}",
     "processes.notice.preparing": "{{names}} در حال آماده‌سازی است. می‌توانید به کار ادامه دهید، این یادداشت خودش پاک می‌شود.",

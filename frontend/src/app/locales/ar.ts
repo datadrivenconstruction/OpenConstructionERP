@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "{{module}} يعمل بدونه.",
+    "processes.wizard.heavy_hint_search": "البحث بالكلمات المفتاحية يعمل بدونه.",
+    "processes.wizard.heavy_label": "الذكاء الاصطناعي: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "الخدمات الخلفية: جارٍ تحضير {{names}}",
     "processes.notice.preparing": "جارٍ تحضير {{names}}. يمكنك متابعة العمل، وستختفي هذه الملاحظة تلقائيًا.",

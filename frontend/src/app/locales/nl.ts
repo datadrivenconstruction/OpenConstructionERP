@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "{{module}} werkt ook zonder.",
+    "processes.wizard.heavy_hint_search": "Zoeken op trefwoord werkt ook zonder.",
+    "processes.wizard.heavy_label": "AI: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Achtergronddiensten: {{names}} wordt voorbereid",
     "processes.notice.preparing": "{{names}} wordt voorbereid. U kunt gewoon doorwerken, deze melding verdwijnt vanzelf.",
