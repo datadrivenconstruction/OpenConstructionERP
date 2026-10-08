@@ -3,6 +3,12 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "Demoprojecten",
+    "processes.demo_data_seed.purpose": "Installeert de demoprojecten op de achtergrond zodra de server klaar is.",
+    "processes.demo_data_seed.off_impact": "Kan niet worden uitgezet. Bij een verse installatie verschijnen de demoprojecten ongeveer een minuut na het starten.",
+    "processes.demo_seeding": "De demoprojecten worden nog geïnstalleerd. Ze verschijnen hier over ongeveer een minuut.",
+    "processes.match_models_off": "Suggesties gebruiken een eenvoudigere rangschikking omdat {{names}} uit staat.",
+    "processes.match_models_open": "Zet het aan bij Achtergronddiensten",
     "processes.wizard.heavy_hint": "{{module}} werkt ook zonder.",
     "processes.wizard.heavy_hint_search": "Zoeken op trefwoord werkt ook zonder.",
     "processes.wizard.heavy_label": "AI: {{module}}",

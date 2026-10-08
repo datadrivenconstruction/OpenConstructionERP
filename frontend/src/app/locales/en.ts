@@ -3,6 +3,12 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "Demo projects",
+    "processes.demo_data_seed.purpose": "Installs the demo projects in the background once the server is ready.",
+    "processes.demo_data_seed.off_impact": "It cannot be turned off. On a fresh install the demo projects appear about a minute after start.",
+    "processes.demo_seeding": "The demo projects are still being installed. They appear here in about a minute.",
+    "processes.match_models_off": "Suggestions use a simpler ranking because {{names}} is off.",
+    "processes.match_models_open": "Turn it on in Background services",
     "processes.wizard.heavy_hint": "{{module}} works without it.",
     "processes.wizard.heavy_hint_search": "Keyword search works without it.",
     "processes.wizard.heavy_label": "AI for {{module}}",

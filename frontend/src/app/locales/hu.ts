@@ -3,6 +3,12 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "Demó projektek",
+    "processes.demo_data_seed.purpose": "A háttérben telepíti a demó projekteket, amint a szerver készen áll.",
+    "processes.demo_data_seed.off_impact": "Nem kapcsolható ki. Friss telepítésnél a demó projektek nagyjából egy perccel az indítás után jelennek meg.",
+    "processes.demo_seeding": "A demó projektek telepítése még folyamatban van. Körülbelül egy perc múlva megjelennek itt.",
+    "processes.match_models_off": "A javaslatok egyszerűbb rangsorolást használnak, mert a(z) {{names}} ki van kapcsolva.",
+    "processes.match_models_open": "Kapcsolja be itt: Háttérszolgáltatások",
     "processes.wizard.heavy_hint": "A(z) {{module}} enélkül is működik.",
     "processes.wizard.heavy_hint_search": "A kulcsszavas keresés enélkül is működik.",
     "processes.wizard.heavy_label": "AI: {{module}}",

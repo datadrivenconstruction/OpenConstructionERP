@@ -3,6 +3,12 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "โครงการตัวอย่าง",
+    "processes.demo_data_seed.purpose": "ติดตั้งโครงการตัวอย่างในเบื้องหลังเมื่อเซิร์ฟเวอร์พร้อม",
+    "processes.demo_data_seed.off_impact": "ปิดไม่ได้ หากติดตั้งใหม่ โครงการตัวอย่างจะปรากฏหลังเริ่มระบบประมาณหนึ่งนาที",
+    "processes.demo_seeding": "โครงการตัวอย่างกำลังติดตั้งอยู่ จะปรากฏที่นี่ในอีกประมาณหนึ่งนาที",
+    "processes.match_models_off": "คำแนะนำใช้การจัดอันดับแบบง่ายกว่า เพราะ {{names}} ปิดอยู่",
+    "processes.match_models_open": "เปิดใช้งานได้ที่ บริการเบื้องหลัง",
     "processes.wizard.heavy_hint": "{{module}} ใช้งานได้โดยไม่ต้องมี AI",
     "processes.wizard.heavy_hint_search": "การค้นหาด้วยคำสำคัญใช้งานได้โดยไม่ต้องมี AI",
     "processes.wizard.heavy_label": "AI: {{module}}",

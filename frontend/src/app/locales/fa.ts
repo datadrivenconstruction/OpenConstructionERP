@@ -3,6 +3,12 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "پروژه‌های نمایشی",
+    "processes.demo_data_seed.purpose": "پس از آماده شدن سرور، پروژه‌های نمایشی را در پس‌زمینه نصب می‌کند.",
+    "processes.demo_data_seed.off_impact": "قابل خاموش کردن نیست. در نصب تازه، پروژه‌های نمایشی حدود یک دقیقه پس از راه‌اندازی ظاهر می‌شوند.",
+    "processes.demo_seeding": "پروژه‌های نمایشی هنوز در حال نصب هستند. حدود یک دقیقه دیگر اینجا نمایش داده می‌شوند.",
+    "processes.match_models_off": "پیشنهادها از رتبه‌بندی ساده‌تری استفاده می‌کنند، چون {{names}} خاموش است.",
+    "processes.match_models_open": "آن را در سرویس‌های پس‌زمینه روشن کنید",
     "processes.wizard.heavy_hint": "{{module}} بدون آن هم کار می‌کند.",
     "processes.wizard.heavy_hint_search": "جستجوی کلیدواژه‌ای بدون آن هم کار می‌کند.",
     "processes.wizard.heavy_label": "هوش مصنوعی: {{module}}",

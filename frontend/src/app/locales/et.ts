@@ -3,6 +3,12 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "Demoprojektid",
+    "processes.demo_data_seed.purpose": "Paigaldab demoprojektid taustal, kui server on valmis.",
+    "processes.demo_data_seed.off_impact": "Seda ei saa välja lülitada. Värskel paigaldusel ilmuvad demoprojektid umbes minut pärast käivitamist.",
+    "processes.demo_seeding": "Demoprojekte paigaldatakse veel. Need ilmuvad siia umbes minuti pärast.",
+    "processes.match_models_off": "Soovitused kasutavad lihtsamat järjestust, sest {{names}} on välja lülitatud.",
+    "processes.match_models_open": "Lülitage see sisse jaotises Taustateenused",
     "processes.wizard.heavy_hint": "{{module}} töötab ka ilma selleta.",
     "processes.wizard.heavy_hint_search": "Märksõnaotsing töötab ka ilma selleta.",
     "processes.wizard.heavy_label": "AI: {{module}}",
