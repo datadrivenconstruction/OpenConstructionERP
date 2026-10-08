@@ -476,6 +476,20 @@ async def test_create_session_invalid_source_rejected(http_client, two_tenants):
     assert resp.status_code == 422, f"expected pydantic schema error, got {resp.status_code}: {resp.text}"
 
 
+@pytest.mark.asyncio
+async def test_create_bim_session_without_a_model_is_rejected(http_client, two_tenants):
+    a = two_tenants["a"]
+    project_id, _ = await _seed_project_with_bim_model(owner_id=a["user_id"])
+
+    resp = await http_client.post(
+        "/api/v1/match_elements/sessions",
+        json={"project_id": str(project_id), "source": "bim"},
+        headers=a["headers"],
+    )
+    assert resp.status_code == 422, resp.text
+    assert "bim_model_id" in resp.json()["detail"]
+
+
 # ═════════════════════════════════════════════════════════════════════════
 #  3. GET /sessions?project_id=... — list scope + IDOR
 # ═════════════════════════════════════════════════════════════════════════

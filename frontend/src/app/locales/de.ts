@@ -37917,7 +37917,7 @@ const resource = {
     "sheets.bulk_apply_other": "Auf {{count}} Blätter anwenden",
     "sheets.select_all": "Alle angezeigten Blätter auswählen",
     "sheets.select_row": "Blatt {{number}} auswählen",
-    "sheets.row_edit_hint": "Klicken Sie auf ein Blatt, um Nummer, Titel, Revision, Fachgebiet oder Datum zu korrigieren und frühere Revisionen zu sehen. Mehrere ankreuzen, um sie gemeinsam zu ändern.",
+    "sheets.row_edit_hint": "Klicken Sie auf ein Blatt, um Nummer, Titel, Änderung, Fachgebiet oder Datum zu korrigieren und frühere Änderungsstände zu sehen. Mehrere ankreuzen, um sie gemeinsam zu ändern.",
     "sheets.reread_cta": "Schriftfelder erneut auslesen",
     "sheets.reread_hint": "Liest jedes Blatt erneut aus den gespeicherten PDFs. Felder, die Sie von Hand korrigiert haben, bleiben erhalten.",
     "sheets.reread_confirm_title": "Alle Schriftfelder erneut auslesen?",
