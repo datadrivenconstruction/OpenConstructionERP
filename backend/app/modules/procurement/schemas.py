@@ -693,6 +693,17 @@ class SupplierScorecardResponse(BaseModel):
     # GRs whose parent PO had no delivery_date - excluded from on-time
     # denominator so unscheduled POs do not inflate the score (P0-2).
     unscheduled_count: int = 0
+    # ── Is the supplier still qualified to buy from ─────────────────────
+    # From the contact (prequalification and its end date) and from the same
+    # vendor gate the order write path runs, so the card and the gate never
+    # disagree. ``qualification_state``: expired / expiring (30 days) /
+    # valid / not_stated. Empty when the caller sees none of its orders.
+    prequalification_status: str | None = None
+    qualified_until: str | None = None
+    qualification_state: str = "not_stated"
+    compliance_reasons: list[str] = Field(default_factory=list)
+    # Issued orders still waiting for the supplier's confirmation.
+    unconfirmed_po_count: int = 0
 
 
 # -- Supplier delivery performance / OTIF (project view) --------------------

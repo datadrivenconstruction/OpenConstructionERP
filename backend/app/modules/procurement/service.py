@@ -665,6 +665,76 @@ class ProcurementService:
         is_blocked = "subcontractor_blocked" in verdict.reasons
         return is_blocked, verdict.reasons
 
+    async def supplier_compliance(
+        self,
+        supplier_contact_id: str,
+        *,
+        project_id: uuid.UUID | None = None,
+        accessible_project_ids: set[uuid.UUID] | None = None,
+    ) -> dict[str, object]:
+        """Whether a supplier is still qualified to buy from, for its card.
+
+        The contact's prequalification and its end date, judged against
+        ``date.today()`` like the order gate; the gate's own compliance reasons
+        (blocked, prequal rejected, a lapsed certificate on the linked
+        subcontractor), so the card and the order write path never disagree;
+        and the issued orders still waiting for the supplier's confirmation.
+        An unknown or malformed contact id answers with an empty card.
+
+        ``qualification_state`` is ``expired``, ``expiring`` (within 30 days),
+        ``valid`` or ``not_stated``. A missing or unreadable date is
+        ``not_stated``, never ``valid``.
+        """
+        from sqlalchemy import func, select
+
+        from app.modules.contacts.models import Contact
+
+        card: dict[str, object] = {
+            "prequalification_status": None,
+            "qualified_until": None,
+            "qualification_state": "not_stated",
+            "compliance_reasons": [],
+            "unconfirmed_po_count": 0,
+        }
+        try:
+            contact_uuid = uuid.UUID(str(supplier_contact_id))
+        except (ValueError, TypeError):
+            return card
+
+        contact = (await self.session.execute(select(Contact).where(Contact.id == contact_uuid))).scalar_one_or_none()
+        if contact is not None:
+            card["prequalification_status"] = contact.prequalification_status
+            card["qualified_until"] = contact.qualified_until
+            try:
+                until = date.fromisoformat(str(contact.qualified_until or "")[:10])
+            except ValueError:
+                until = None
+            if until is not None:
+                today = date.today()
+                if until < today:
+                    card["qualification_state"] = "expired"
+                elif until <= today + timedelta(days=30):
+                    card["qualification_state"] = "expiring"
+                else:
+                    card["qualification_state"] = "valid"
+
+        _blocked, reasons = await self._vendor_block_status(str(contact_uuid))
+        card["compliance_reasons"] = list(reasons)
+
+        stmt = select(func.count(PurchaseOrder.id)).where(
+            PurchaseOrder.vendor_contact_id == str(contact_uuid),
+            PurchaseOrder.status.in_(("issued", "partially_received")),
+            PurchaseOrder.supplier_acknowledged_at.is_(None),
+        )
+        if project_id is not None:
+            stmt = stmt.where(PurchaseOrder.project_id == project_id)
+        elif accessible_project_ids is not None:
+            if not accessible_project_ids:
+                return card
+            stmt = stmt.where(PurchaseOrder.project_id.in_(accessible_project_ids))
+        card["unconfirmed_po_count"] = int((await self.session.execute(stmt)).scalar_one() or 0)
+        return card
+
     async def _enforce_vendor_gate(
         self,
         vendor_contact_id: str | None,

@@ -425,6 +425,15 @@ async def get_supplier_scorecard(
     if project_id is not None or data.get("total_po_count", 0) > 0:
         name_map = await _fetch_vendor_names(session, [contact_id])
         data["supplier_name"] = name_map.get(contact_id)
+        # Same reason as the name: the compliance block is only shown to a
+        # caller who can see this supplier's orders.
+        data.update(
+            await service.supplier_compliance(
+                contact_id,
+                project_id=project_id,
+                accessible_project_ids=scope_ids,
+            )
+        )
     return SupplierScorecardResponse.model_validate(data)
 
 
