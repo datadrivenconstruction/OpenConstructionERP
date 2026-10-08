@@ -53,6 +53,10 @@ on:
         description: "Boots for cold-start-probe: one fresh install, then warm restarts"
         default: "4"
         required: false
+      compare_refs:
+        description: "cold-start-probe: space-separated refs to boot alongside this one on the same runner"
+        default: ""
+        required: false
 
 permissions:
   contents: read
@@ -478,6 +482,8 @@ jobs:
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v7
         with:
@@ -492,18 +498,28 @@ jobs:
 
       # Bare `app.cli serve` on embedded PostgreSQL, no Docker, so psutil sees
       # the real process tree. Boot 1 is a fresh install, the rest are warm
-      # restarts of the same data directory.
+      # restarts of the same data directory. Runners differ by tens of percent,
+      # so a before/after belongs in one job: compare_refs are checked out next
+      # to this ref and booted in turn with it.
       - name: Probe
+        env:
+          COMPARE_REFS: ${{ inputs.compare_refs }}
         run: |
           set -o pipefail
           mkdir -p "$RUNNER_TEMP/probe"
+          targets=(--target "${{ github.ref_name }}=backend")
+          for ref in $COMPARE_REFS; do
+            dir="$RUNNER_TEMP/ref-$(echo "$ref" | tr -c 'A-Za-z0-9' '-')"
+            git worktree add --detach "$dir" "$ref"
+            targets+=(--target "$ref=$dir/backend")
+          done
           python scripts/stability/cold_start_probe.py \
-            --backend backend \
-            --data-dir "$RUNNER_TEMP/oe-probe-data" \
+            "${targets[@]}" \
+            --data-root "$RUNNER_TEMP/oe-probe-data" \
             --runs "${{ inputs.cold_start_runs }}" \
             --out "$RUNNER_TEMP/probe/cold-start.json" | tee -a "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "ref \`${{ github.ref_name }}\` at \`${{ github.sha }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "ref \`${{ github.ref_name }}\` at \`${{ github.sha }}\`, compared with: \`${COMPARE_REFS:-none}\`" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload probe results
         if: always()
