@@ -4,7 +4,8 @@
   "standard": "IEC 61215-1:2021 (PV module design qualification) + IEC 61730-1/-2:2023 (PV module safety) + IEC 62548:2023 (PV array design) + IEC 60364-7-712:2017 (Electrical installations — PV) + IEC 61853 series (PV energy rating) + NREL Atmospheric Soiling Loss Method",
   "jurisdiction": "INTL",
   "description": "Deep rule pack for PV array engineering. Validates module-level qualification (IEC 61215 design + IEC 61730 safety + fire-class C minimum for utility-scale, application class A — accessible mains-connected), array-level design per IEC 62548 (string voltage at lowest expected ambient < module Vmax_sys = 1500 V typical; overcurrent protection per IEC 60364-7-712; DC isolation; SPDs), system-level design (DC/AC ratio in 1.2 – 1.4 band for fixed-tilt utility-scale; inverter clipping loss budget < 1.5 % at chosen ratio; soiling-loss assumption documented with method — NREL/Kimber model or site-specific monitoring; degradation rate ≤ 0.5 %/yr crystalline LID+LeTID-corrected, ≤ 0.7 %/yr thin-film), shading analysis (PVsyst / Helioscope / SAM model, near + far shading, 3D obstruction model), bifacial gain factor (BGF) documented if bifacial modules (typical 5–15 % gain depending on albedo and structure), tracker design if single-axis (backtracking algorithm, max tilt ±60°, stow angle for high wind).",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "iec61215.module_design_qualification_certified",
     "iec61730.module_safety_class_a_certified",
     "iec61730.module_application_class_set",
@@ -32,5 +33,6 @@
     "pv.module_mismatch_loss_assumption_set",
     "pv.thermal_loss_coefficient_assumption_set",
     "pv.iec61853_energy_rating_data_used_if_available"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

@@ -4,7 +4,8 @@
   "standard": "ICC/MBI 1200-2021 (Off-site construction — Planning, design, fabrication and assembly) + ICC/MBI 1205-2021 (Inspection and regulatory compliance) + CSA A277:2016 (Procedure for factory certification of buildings) + NEN 9090 (Netherlands — prefab dimensional coordination) + Buildoffsite DfMA principles (UK)",
   "jurisdiction": "INTL",
   "description": "Enables OCERP built-in validation rules covering the procedural standards for off-site / modular construction in the major regulated markets. ICC/MBI 1200 sets fabrication and assembly requirements (US); ICC/MBI 1205 covers third-party inspection and AHJ regulatory compliance; CSA A277 is the Canadian factory-certification procedure (mandatory in most provinces for non-site-built buildings); NEN 9090 governs dimensional coordination for prefab in the Netherlands; Buildoffsite DfMA (Design for Manufacture and Assembly) principles cover the 7-step DfMA score (standardisation, modularisation, integration, simplification, repeatability, factory tolerance, lift/transport optimisation).",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "mbi1200.fabrication_process_documented",
     "mbi1200.assembly_sequence_documented",
     "mbi1200.module_identification_tag_applied",
@@ -24,5 +25,6 @@
     "dfma.standardisation_index_documented",
     "dfma.repeatability_metric_recorded",
     "dfma.iso_19650_information_delivery_plan_attached"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

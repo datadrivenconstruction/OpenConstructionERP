@@ -282,6 +282,11 @@ class GoodsReceiptItem(Base):
     quantity_received: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
     quantity_rejected: Mapped[str] = mapped_column(String(50), nullable=False, default="0")
     rejection_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Traceability carried over from the supplier catalogue receipt line when
+    # procurement became the one purchasing flow: the supplier's batch or lot
+    # and the serial numbers of the units received on this line.
+    batch_lot: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    serial_numbers: Mapped[list | None] = mapped_column(JSON, nullable=True)  # type: ignore[assignment]
 
     # Relationship
     goods_receipt: Mapped["GoodsReceipt"] = relationship(back_populates="items")

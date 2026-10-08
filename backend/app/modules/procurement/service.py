@@ -2189,6 +2189,8 @@ class ProcurementService:
                 quantity_received=item_data.quantity_received,
                 quantity_rejected=item_data.quantity_rejected,
                 rejection_reason=item_data.rejection_reason,
+                batch_lot=item_data.batch_lot,
+                serial_numbers=item_data.serial_numbers,
             )
             await self.gr_item_repo.create(item)
 

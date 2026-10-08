@@ -911,6 +911,91 @@ line-height:1.55');\
     );
 }
 
+/// How many automatic restarts after an unexpected backend exit are allowed
+/// inside [`AUTO_RESTART_WINDOW_SECS`]. A crash that comes back at once is not
+/// cured by a third restart, and a loop of them would hide the message that
+/// tells the person to send us the log.
+const AUTO_RESTART_LIMIT: usize = 2;
+const AUTO_RESTART_WINDOW_SECS: u64 = 30 * 60;
+
+fn auto_restart_ledger() -> Option<PathBuf> {
+    workspace_data_dir().map(|d| d.join("logs").join("desktop-auto-restarts.txt"))
+}
+
+/// Decide from the earlier restart times whether one more is allowed, and
+/// return the times to keep. Pure, so the rule can be tested without a clock.
+fn auto_restart_decision(previous: &[u64], now: u64) -> (bool, Vec<u64>) {
+    let mut recent: Vec<u64> = previous
+        .iter()
+        .copied()
+        .filter(|t| *t <= now && now - *t < AUTO_RESTART_WINDOW_SECS)
+        .collect();
+    let allowed = recent.len() < AUTO_RESTART_LIMIT;
+    if allowed {
+        recent.push(now);
+    }
+    (allowed, recent)
+}
+
+/// Record and allow an automatic restart, unless the limit is reached. The
+/// ledger is a file because a restart replaces this process and its memory.
+fn claim_auto_restart() -> bool {
+    let Some(path) = auto_restart_ledger() else {
+        return false;
+    };
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(0);
+    let previous: Vec<u64> = std::fs::read_to_string(&path)
+        .unwrap_or_default()
+        .lines()
+        .filter_map(|l| l.trim().parse().ok())
+        .collect();
+    let (allowed, keep) = auto_restart_decision(&previous, now);
+    if let Some(dir) = path.parent() {
+        let _ = std::fs::create_dir_all(dir);
+    }
+    let body: Vec<String> = keep.iter().map(|t| t.to_string()).collect();
+    if std::fs::write(&path, body.join("
+")).is_err() {
+        // Without a ledger the limit cannot hold across restarts, and an
+        // unbounded restart loop is worse than the message.
+        return false;
+    }
+    if !allowed {
+        log_line("automatic restart limit reached; leaving the backend stopped");
+    }
+    allowed
+}
+
+/// The last `max_lines` lines of `text`, for copying a crash log tail.
+fn tail_lines(text: &str, max_lines: usize) -> String {
+    let lines: Vec<&str> = text.lines().collect();
+    let start = lines.len().saturating_sub(max_lines);
+    lines[start..].join("
+")
+}
+
+/// Copy the tail of the backend's crash log into the launcher log.
+fn log_backend_crash_tail() {
+    let Some(path) = workspace_data_dir().map(|d| d.join("logs").join("backend-crash.log")) else {
+        return;
+    };
+    match std::fs::read(&path) {
+        Ok(bytes) => {
+            let text = String::from_utf8_lossy(&bytes);
+            log_line(&format!(
+                "backend crash log ({}), last lines:
+{}",
+                path.display(),
+                tail_lines(&text, 80)
+            ));
+        }
+        Err(e) => log_line(&format!("backend crash log not readable at {}: {e}", path.display())),
+    }
+}
+
 /// Show or clear the notice that says the backend has gone quiet.
 ///
 /// Deliberately not the modal above. Silence is a symptom that can end: a long
@@ -3590,6 +3675,44 @@ fn extraction_space_allows_a_sidecar(handle: &tauri::AppHandle) -> bool {
     }
 }
 
+/// The installed backend executable inside the resource directory (Windows).
+///
+/// Windows ships the backend as a PyInstaller onedir folder installed once as
+/// the Tauri resource `server/` (tauri.windows.conf.json), so nothing is
+/// unpacked at start. Tauri's externalBin ships exactly one file, which is why
+/// the exe is resolved here and started as a plain command instead.
+#[cfg(windows)]
+const ONEDIR_SERVER_EXE: &str = "openconstructionerp-server.exe";
+
+#[cfg(windows)]
+fn onedir_server_path(resource_dir: &std::path::Path) -> PathBuf {
+    resource_dir.join("server").join(ONEDIR_SERVER_EXE)
+}
+
+/// The command that starts the backend, before arguments and environment.
+#[cfg(windows)]
+fn backend_command(handle: &tauri::AppHandle) -> Result<tauri_plugin_shell::process::Command, String> {
+    let resource_dir = handle
+        .path()
+        .resource_dir()
+        .map_err(|e| format!("no resource directory: {e}"))?;
+    let exe = onedir_server_path(&resource_dir);
+    if !exe.is_file() {
+        return Err(format!("{} is missing", exe.display()));
+    }
+    log_line(&format!("backend executable: {}", exe.display()));
+    Ok(handle.shell().command(exe))
+}
+
+/// The command that starts the backend, before arguments and environment.
+#[cfg(not(windows))]
+fn backend_command(handle: &tauri::AppHandle) -> Result<tauri_plugin_shell::process::Command, String> {
+    handle
+        .shell()
+        .sidecar("openconstructionerp-server")
+        .map_err(|e| e.to_string())
+}
+
 /// Start a server locally, as a sidecar of this process, and open the app
 /// against it once it is healthy.
 ///
@@ -3619,8 +3742,7 @@ fn start_local_backend(
     // for. With --data-dir left unset the sidecar uses its default
     // (~/.openestimate), which stays writable even for a per-machine
     // install under Program Files.
-    let shell = handle.shell();
-    let sidecar_cmd = match shell.sidecar("openconstructionerp-server") {
+    let sidecar_cmd = match backend_command(&handle) {
         Ok(cmd) => {
             // OE_DESKTOP=1 marks this backend as one we spawned from the
             // desktop shell (so the backend can run desktop-only
@@ -3990,6 +4112,26 @@ this keeps happening send it to info@datadrivenconstruction.io."
                             // replace it with a vaguer one later.
                             fatal_flag.store(true, Ordering::SeqCst);
                         } else if !deliberate.load(Ordering::SeqCst) {
+                            // A native crash leaves no Python traceback on
+                            // stderr. The backend writes its faulthandler
+                            // dumps (and a stack dump of every thread when
+                            // its event loop stalls) to a crash log in the
+                            // data folder; copy the tail into this log so a
+                            // report sent to us carries the stack.
+                            log_backend_crash_tail();
+                            if claim_auto_restart() {
+                                log_line(
+                                    "the backend stopped unexpectedly; restarting it automatically",
+                                );
+                                report_backend_lost(
+                                    &handle_evt,
+                                    &lost_flag,
+                                    "The application backend stopped, restarting",
+                                    "OpenConstructionERP is starting the backend again. Your saved work is kept. This window will reload in a moment.",
+                                );
+                                std::thread::sleep(std::time::Duration::from_secs(3));
+                                handle_evt.restart();
+                            }
                             // The backend had already gone healthy, and
                             // nobody asked it to stop. This case was
                             // silent: readiness was the end of the
@@ -4403,8 +4545,13 @@ fn main() {
                     // written against.
                     let reporter = handle.clone();
                     let start = move || {
+                        // Still run on Windows, where the backend no longer
+                        // unpacks: it clears extractions left by the onefile
+                        // builds this version replaces.
                         sweep_orphaned_extractions(&handle);
-                        if !extraction_space_allows_a_sidecar(&handle) {
+                        // The space check is about room to unpack, and only
+                        // the onefile builds (macOS, Linux) unpack.
+                        if cfg!(not(windows)) && !extraction_space_allows_a_sidecar(&handle) {
                             return;
                         }
                         // Nothing between here and the spawn used to be able
@@ -4813,6 +4960,31 @@ fn show_startup_failure_dialog(_message: &str) {}
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn auto_restart_allows_two_in_the_window_then_stops() {
+        let (ok1, l1) = super::auto_restart_decision(&[], 1_000);
+        assert!(ok1);
+        let (ok2, l2) = super::auto_restart_decision(&l1, 1_100);
+        assert!(ok2);
+        let (ok3, l3) = super::auto_restart_decision(&l2, 1_200);
+        assert!(!ok3);
+        assert_eq!(l3, vec![1_000, 1_100]);
+        // Outside the window the old restarts no longer count.
+        let later = 1_000 + super::AUTO_RESTART_WINDOW_SECS + 200;
+        let (ok4, l4) = super::auto_restart_decision(&l3, later);
+        assert!(ok4);
+        assert_eq!(l4, vec![later]);
+    }
+
+    #[test]
+    fn tail_lines_keeps_the_end() {
+        assert_eq!(super::tail_lines("a
+b
+c", 2), "b
+c");
+        assert_eq!(super::tail_lines("a", 5), "a");
+    }
+
     use super::*;
 
     /// The identity of the data directory the tests below speak from.
@@ -6654,10 +6826,6 @@ nothing, and abandons a start that is working"
             text.contains(&assignment),
             "desktop/pyinstaller.spec no longer sets {assignment}, so the sidecar unpacks \
 somewhere this launcher does not sweep"
-        );
-        assert!(
-            text.contains("runtime_tmpdir=(_WINDOWS_RUNTIME_TMPDIR"),
-            "the spec still holds the path but no longer hands it to the bootloader"
         );
     }
 

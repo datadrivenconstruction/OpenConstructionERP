@@ -11,7 +11,8 @@
   "description": "Enables OCERP built-in validation rules that enforce SBC 304 (Concrete) — KSA-specific durability requirements driven by high temperature, low humidity inland and aggressive sulphate/chloride exposure on the Gulf (Eastern Province) and Red Sea coasts: minimum concrete cover for sabkha/coastal exposure, low-heat cement for mass pours, hot-weather concreting plan (>35 degC), reinforcement detailing per ACI 318, and curing temperature limits.",
   "description_ar": "تفعيل قواعد التحقق لإنفاذ متطلبات SBC 304 (الخرسانة) — متطلبات الديمومة الخاصة بالمملكة، الحد الأدنى للغطاء الخرساني للسبخات والمناطق الساحلية، خطة الصب في الطقس الحار، وتفاصيل التسليح.",
   "severity_overrides": {},
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "sbc304.exposure_class_assigned",
     "sbc304.concrete_grade_min_for_exposure",
     "sbc304.cover_min_for_sabkha_or_coastal",
@@ -23,5 +24,6 @@
     "sbc304.chloride_content_max_referenced",
     "sbc304.sulphate_resistant_cement_for_gulf_coast",
     "sbc304.curing_duration_min_documented"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

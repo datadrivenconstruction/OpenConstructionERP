@@ -85,7 +85,7 @@ class WindowsDiagnosticWorkflowTests(unittest.TestCase):
         self.assertIn('Get-FileHash', fingerprint['run'])
         self.assertIn('diagnostic-manifest.json', fingerprint['run'])
         self.assertIn('DIAGNOSTIC_SOURCE_SHA', fingerprint['run'])
-        self.assertIn('openconstructionerp-server-x86_64-pc-windows-msvc.exe', fingerprint['run'])
+        self.assertIn('binaries/server/openconstructionerp-server.exe', fingerprint['run'])
 
     def test_only_diagnostic_reuses_the_tested_frontend_without_rebuilding(self):
         sidecar = self.jobs['build-sidecar']['steps']

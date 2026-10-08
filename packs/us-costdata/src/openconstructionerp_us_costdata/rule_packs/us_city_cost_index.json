@@ -7,7 +7,8 @@
   "description": "Enables OCERP validation rules that apply a city cost index to localise national average unit prices, validate that the chosen city and ZIP3 are within the coverage of the index the user imported, confirm the index period currency (must be within 12 months for unit costs, 24 for installed costs), enforce material/labor/equipment factor application, and flag estimates that diverge from indexed benchmarks beyond a configurable band. No index data ships with this pack; the rules run against the figures the user imports.",
   "issuer": "The index publisher the user subscribes to",
   "metrics_referenced": "Total Index, Material Index, Labor Index, Equipment Index, Installed Index — all relative to the index base = 100.0",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "city_index.city_selected",
     "city_index.zip3_within_city_coverage",
     "city_index.index_period_within_12_months",
@@ -22,5 +23,6 @@
     "city_index.bare_costs_vs_o_and_p_costs_distinguished",
     "city_index.subscription_status_acknowledged",
     "city_index.multi_city_average_when_project_spans_metros"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

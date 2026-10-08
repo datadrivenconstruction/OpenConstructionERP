@@ -11,7 +11,8 @@
   "description": "Enables OCERP built-in validation rules that enforce SBC 301 (Loads) — Saudi-specific seismic micro-zonation (Zones 0-3, including the Red Sea coastal trough), basic wind speeds for the Arabian Peninsula (typically 33-44 m/s 3-sec gust depending on region), Hajj-period live-load surcharges for assembly occupancies in Makkah and Madinah, sandstorm dust load on roofs, and sabkha settlement allowance.",
   "description_ar": "تفعيل قواعد التحقق لإنفاذ متطلبات SBC 301 (الأحمال) — التصنيف الزلزالي السعودي، سرعات الرياح الأساسية لشبه الجزيرة العربية، أحمال الحشود في موسم الحج، أحمال الغبار والعواصف الرملية، وبدلات هبوط السبخة.",
   "severity_overrides": {},
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "sbc301.seismic_zone_assigned",
     "sbc301.seismic_design_category_assigned",
     "sbc301.basic_wind_speed_documented",
@@ -24,5 +25,6 @@
     "sbc301.coastal_corrosion_exposure_assigned",
     "sbc301.foundation_depth_below_active_zone",
     "sbc301.load_combinations_documented"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

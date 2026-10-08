@@ -11,6 +11,26 @@ import {
   type Page,
 } from '@/shared/lib/api';
 
+export interface HolidayCoverage {
+  year: number;
+  applied: boolean;
+  jurisdiction?: { source: string };
+  effective_year?: { source: string };
+  holiday_extent?: { source: string };
+  omitted?: string[];
+  placeholder_spans?: string[];
+}
+
+export interface WorkCalendarResponse {
+  region: string | null;
+  hours_per_day: number;
+  work_days_per_week: number;
+  label: string;
+  holiday_country?: string | null;
+  week_fallback?: boolean;
+  holiday_coverage?: HolidayCoverage;
+}
+
 export interface Schedule {
   id: string;
   project_id: string;

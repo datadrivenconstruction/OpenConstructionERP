@@ -77,6 +77,13 @@ on:
   push:
   pull_request:
 
+# Allow supersession within the same PR merge ref. Push runs (including
+# main, feature branches and release tags) keep a unique group and never cancel.
+# This does not deduplicate push/PR runs or change runner capacity.
+concurrency:
+  group: repo-hygiene-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions:
   contents: read
 

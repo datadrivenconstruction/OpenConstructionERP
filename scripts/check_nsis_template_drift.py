@@ -2,7 +2,7 @@
 """Check that the vendored NSIS installer template is upstream plus our edits.
 
 ``desktop/src-tauri/windows/installer.nsi`` is a copy of the template that ships
-inside the Tauri bundler, carrying seven deliberate changes. Four are on the
+inside the Tauri bundler, carrying eight deliberate changes. Four are on the
 reinstall page a user meets when a previous version is already installed: the
 second radio button, "Do not uninstall", starts selected on an upgrade; the WiX
 migration branch obeys whichever button was selected rather than uninstalling
@@ -381,8 +381,23 @@ REBOOTOK_UNINST_AFTER = r"""  ; Delete uninstaller
   Delete /REBOOTOK "$INSTDIR\uninstall.exe"
 """
 
+# ── Edit seven: no solid compression ───────────────────────────────────────
+
+NON_SOLID_BEFORE = r"""  ; Set the compression algorithm. We default to LZMA.
+  SetCompressor /SOLID "{{compression}}"
+"""
+
+NON_SOLID_AFTER = r"""  ; Set the compression algorithm. We default to LZMA.
+  ; Not /SOLID: a solid block holds the whole uncompressed payload, and the
+  ; Windows backend is a onedir folder of about 1.6 GB, which with the
+  ; converters and the offline WebView2 installer passes the 2 GB makensis
+  ; can map ("error mmapping datablock"). Per-file compression stays under it.
+  SetCompressor "{{compression}}"
+"""
+
 # Applied in this order, which is the order they appear in the file.
 PATCHES: tuple[tuple[str, str, str], ...] = (
+    ("non-solid compression", NON_SOLID_BEFORE, NON_SOLID_AFTER),
     ("the reinstall page default", REINSTALL_DEFAULT_BEFORE, REINSTALL_DEFAULT_AFTER),
     (
         "the WiX branch honouring the selection",

@@ -57,7 +57,13 @@ and is separate from the processors DDC uses to run its hosted instance.
 - **Geocoding.** When a project address is set, the address is sent to the
   public OpenStreetMap Nominatim service to resolve it to coordinates.
   Set `OE_GEOCODER_DISABLED=true` to switch this off, or
-  `OE_GEOCODER_BASE_URL` to use your own Nominatim mirror.
+  `OE_GEOCODER_BASE_URL` to use your own Nominatim mirror. Address
+  suggestions while typing also go to the Photon service by Komoot; set
+  `OE_GEOCODER_PHOTON_DISABLED=true` to keep suggestions on Nominatim only.
+- **OpenRouter attribution.** Requests sent to OpenRouter with your key
+  carry an `HTTP-Referer: https://openconstructionerp.com` header, so
+  OpenRouter attributes that usage to this application. Your key, your
+  account and OpenRouter's terms still apply.
 - **Weather.** Where weather-dependent features are used, coordinates are
   sent to Open-Meteo, or to OpenWeatherMap if you configure a key.
 - **Software and reference-data downloads.** Cost-base files, encoder
@@ -89,7 +95,13 @@ makes.*
 | Project content | Until you delete it; deleted content is purged from backups within 35 days |
 | Telemetry | 90 days |
 | Support correspondence | 24 months |
-| AI logs | 30 days unless you opt into a longer window |
+| AI results stored with a record (estimates, triage notes, suggestions) | Until you delete the record or its project; the Software applies no automatic expiry |
+| Call recordings (phone log) | 90 days, then the recording is deleted and the transcript kept; set `OE_PHONELOG_AUDIO_RETENTION_DAYS` (0 keeps recordings until the phone log is deleted) |
+| GPS location inside uploaded site photos | Removed from the stored file at upload; the coordinates are kept on the photo record for the map. Set `OE_PHOTO_KEEP_EXIF_GPS=true` to store files unchanged |
+
+*An earlier version of this table promised that AI logs were deleted after
+30 days. Nothing in the Software did that, so the row was replaced with what
+the Software actually does.*
 
 ## 4. Your rights
 
@@ -122,6 +134,9 @@ may use different providers):
 - Error reporting: Sentry (optional)
 
 ### AI providers
+
+How the software uses AI and what you as deployer decide is described in
+[AI_ACT.md](AI_ACT.md).
 
 **Only those you enable**, with API keys you supply. None is contacted
 until you save a key, and the Software ships with no key for any of them.

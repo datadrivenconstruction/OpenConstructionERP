@@ -15,6 +15,7 @@ import { WebhookLeads } from './WebhookLeads';
 import { DesktopServerCard } from './DesktopServerCard';
 import { TextSizeSetting } from './TextSizeSetting';
 import VectorStatusCard from './VectorStatusCard';
+import SemanticModelSettings from './SemanticModelSettings';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Eye,
@@ -2101,6 +2102,9 @@ export function SettingsPage() {
               <AIConfigurationCard />
               <div className="lg:col-span-2">
                 <VectorStatusCard />
+              </div>
+              <div className="lg:col-span-2">
+                <SemanticModelSettings />
               </div>
             </>
           )}

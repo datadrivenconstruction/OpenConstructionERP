@@ -7,19 +7,7 @@
   "severity_default": "warning",
   "category": "economics",
   "locale_default": "de",
-  "enables_rule_ids": [
-    "economics.formwork.reuse_factor_set",
-    "economics.formwork.reuse_within_system_cap",
-    "economics.formwork.takt_time_wall_within_bounds",
-    "economics.formwork.takt_time_column_within_bounds",
-    "economics.formwork.takt_time_slab_within_bounds",
-    "economics.formwork.takt_time_beam_within_bounds",
-    "economics.formwork.panel_module_efficiency_min_0_85",
-    "economics.formwork.no_orphan_offcuts_above_threshold",
-    "economics.formwork.abandonment_cost_estimated",
-    "economics.formwork.cycle_complete_before_invoice",
-    "economics.formwork.material_to_labor_ratio_within_range"
-  ],
+  "enables_rule_ids": [],
   "parameters": {
     "typical_takt_hours": {
       "wall_formwork": {"min": 6, "typical": 12, "max": 24},

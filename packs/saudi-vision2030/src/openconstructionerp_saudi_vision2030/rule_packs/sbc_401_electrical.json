@@ -11,7 +11,8 @@
   "description": "Enables OCERP built-in validation rules that enforce SBC 401 (Electrical Code) — KSA-specific 230 V single-phase / 400 V three-phase 60 Hz supply, SEC service-connection rules, fault-level coordination, earthing for high-ground-temperature soils, lightning protection for tall NEOM/Riyadh structures, EV charging provision (per Vision 2030 mobility targets), and SASO-certified equipment.",
   "description_ar": "تفعيل قواعد التحقق لإنفاذ الكود الكهربائي SBC 401 — متطلبات شركة الكهرباء السعودية، تنسيق مستويات العطل، التأريض، الحماية من الصواعق، وشحن المركبات الكهربائية.",
   "severity_overrides": {},
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "sbc401.supply_voltage_documented",
     "sbc401.sec_service_connection_approval",
     "sbc401.fault_level_coordination_present",
@@ -22,5 +23,6 @@
     "sbc401.saso_equipment_certification_referenced",
     "sbc401.standby_generator_capacity_documented",
     "sbc401.solar_pv_grid_tie_compliance"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

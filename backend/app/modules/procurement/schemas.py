@@ -387,11 +387,28 @@ class GRItemCreate(BaseModel):
     quantity_received: str = Field(default="0", max_length=50)
     quantity_rejected: str = Field(default="0", max_length=50)
     rejection_reason: str | None = None
+    batch_lot: str | None = Field(default=None, max_length=100)
+    serial_numbers: list[str] | None = Field(default=None, max_length=10000)
 
     @field_validator("quantity_ordered", "quantity_received", "quantity_rejected")
     @classmethod
     def _check_non_negative_decimal(cls, v: str) -> str:
         return _validate_non_negative_decimal(v)
+
+    @model_validator(mode="after")
+    def _serials_fit_the_received_quantity(self) -> "GRItemCreate":
+        """Serial numbers are unique, non-empty and no more than the units received."""
+        if not self.serial_numbers:
+            return self
+        cleaned = [s.strip() for s in self.serial_numbers]
+        if any(not s or len(s) > 100 for s in cleaned):
+            raise ValueError("serial numbers must be non-empty and at most 100 characters")
+        if len(set(cleaned)) != len(cleaned):
+            raise ValueError("serial numbers on one receipt line must be unique")
+        if Decimal(len(cleaned)) > Decimal(self.quantity_received):
+            raise ValueError("more serial numbers than units received on this line")
+        self.serial_numbers = cleaned
+        return self
 
 
 class GRCreate(BaseModel):
@@ -424,6 +441,8 @@ class GRItemResponse(BaseModel):
     quantity_received: str = "0"
     quantity_rejected: str = "0"
     rejection_reason: str | None = None
+    batch_lot: str | None = None
+    serial_numbers: list[str] | None = None
     created_at: datetime
     updated_at: datetime
 

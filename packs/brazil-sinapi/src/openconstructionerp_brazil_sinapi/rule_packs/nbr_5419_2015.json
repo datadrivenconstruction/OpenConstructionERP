@@ -19,12 +19,14 @@
     "protection_levels": ["NP I", "NP II", "NP III", "NP IV"],
     "risk_assessment_required": true
   },
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "nbr5419.risk_assessment_documented",
     "nbr5419.protection_level_assigned",
     "nbr5419.captadores_specified",
     "nbr5419.aterramento_specified",
     "nbr5419.equipotencializacao_specified",
     "nbr5419.dps_specified"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

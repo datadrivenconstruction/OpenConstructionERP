@@ -221,32 +221,55 @@ def semantic_library_available() -> bool:
 
 
 def download_enabled() -> bool:
-    """Whether this deployment should fetch the encoder in the background.
+    """Whether this deployment should fetch the encoder without being asked.
 
-    Precedence:
+    Only :data:`ENV_DOWNLOAD` can say yes. An operator who wants the weights
+    fetched on boot sets it to a truthy value; a falsy value is the lock that
+    even a click does not overrule (see :func:`download_locked_off`).
 
-    1. :data:`ENV_DOWNLOAD`, honoured in both directions, so an operator who
-       does want an encoder on a server can have one and an operator who does
-       not want one on a workstation can refuse it.
-    2. Otherwise :func:`app.config.desktop_mode` - on for the local
-       single-user workspace behind the native shell, off for a server deploy,
-       which does not need it.
-
-    A source checkout counts as a server here, because ``desktop_mode()`` is
-    the platform's one answer to desktop-versus-server and inventing a second
-    one for the same question is how the two drift apart. A developer who
-    wants the download sets the variable.
+    With the variable unset the answer is ``False`` everywhere, the desktop
+    included. The desktop used to answer ``desktop_mode()`` here and pulled
+    roughly 470 MB from the model hub on first boot with nobody having asked
+    for it. The Windows-trust rule is that the desktop makes no network fetch
+    without an explicit user action, so the download now starts only from a
+    click: the setup wizard's tick or the settings card, both of which reach
+    :func:`start_background_download` with ``requested=True``.
     """
     raw = os.environ.get(ENV_DOWNLOAD, "").strip().lower()
-    if raw in _TRUTHY:
-        return True
-    if raw in _FALSY:
-        return False
+    return raw in _TRUTHY
 
+
+def _install_in_flight() -> bool:
+    """Whether an install holds the lock or its background thread is still starting."""
+    if _lock.locked():
+        return True
+    thread = _thread
+    return thread is not None and thread.is_alive()
+
+
+def hub_fetch_allowed() -> bool:
+    """Whether the loader may resolve a bare hub id over the network.
+
+    ``SentenceTransformer`` downloads a hub id it does not find in its cache,
+    so offering it the id is itself a download. A falsy :data:`ENV_DOWNLOAD`
+    forbids that everywhere. On the desktop it is also forbidden until the
+    user asks, because a lazy first-embed fetch is the same unasked 470 MB the
+    background download was stopped from making. A server keeps its historic
+    lazy load, since its operator controls the variable.
+    """
+    if download_locked_off():
+        return False
+    if _install_in_flight():
+        # The installer is still writing the weights into the models dir. A
+        # bare hub id now starts a second download and load in parallel, which
+        # on Windows has exhausted the paging file (os error 1455).
+        return False
+    if download_enabled():
+        return True
     try:
         from app.config import desktop_mode
 
-        return desktop_mode()
+        return not desktop_mode()
     except Exception:  # noqa: BLE001 - never let a config import decide by crashing
         return False
 
@@ -894,7 +917,10 @@ def _message_for(state: str, repo: str, enabled: bool, locked: bool = False) -> 
             f"{ENV_DOWNLOAD}. Everything else works; an administrator can remove "
             "that setting to allow it."
         )
-    return f"The semantic search model is not downloaded on this deployment. Set {ENV_DOWNLOAD}=1 to fetch it."
+    return (
+        f"The semantic search model ({repo}, about 470 MB) is not downloaded. Search works without it; "
+        f"download it from the setup wizard or Settings, or set {ENV_DOWNLOAD}=1 to fetch it on start."
+    )
 
 
 def reset_state_for_tests() -> None:
@@ -921,6 +947,7 @@ __all__ = [
     "download_enabled",
     "download_locked_off",
     "download_status",
+    "hub_fetch_allowed",
     "find_installed_model",
     "install_embedding_model",
     "local_model_dir",

@@ -323,7 +323,7 @@ def test_classifier_hint_dict_includes_all_present_standards():
         ("QA", "masterformat"),
         ("GULF", "masterformat"),
         # ── Romance — native standards ──────────────────────────────
-        ("FR", "untec"),  # France — UNTEC
+        ("FR", "dpgf"),  # France — DPGF
         ("IT", "voci"),  # Italy — VOCI
         ("NL", "nlsfb"),  # Netherlands — native NL/SfB
         ("BE", "din276"),

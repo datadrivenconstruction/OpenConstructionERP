@@ -184,9 +184,11 @@ def _candidate_sources(name: str) -> list[str]:
         local = None
 
     try:
-        from app.core.embedding_installer import download_locked_off
+        from app.core.embedding_installer import hub_fetch_allowed
 
-        locked = download_locked_off()
+        # On the desktop the hub id is also withheld until the user asks for
+        # the model, because resolving it is an unasked download.
+        locked = not hub_fetch_allowed()
     except Exception:  # noqa: BLE001 - same reasoning as above
         locked = False
 
@@ -301,6 +303,16 @@ def _load_embedder():
         _embedder_tried = True
         return None
 
+    # A model load commits a few hundred MB at once. On a machine that has
+    # already run out of commit memory it fails inside native code, and a
+    # failure there is not always an exception: desktop reports show an access
+    # violation a minute later. Declining here leaves semantic search off and
+    # the rest of the application up.
+    low = _commit_too_low_for("model load", _MIN_COMMIT_MB_FOR_LOAD)
+    if low:
+        _embedder_tried = True
+        return None
+
     device = _resolve_device()
     primary, dim = _resolve_active_model()
     fallback_name = EMBEDDING_MODEL
@@ -332,6 +344,18 @@ def _load_embedder():
                 return _embedder_instance
             except Exception as exc:
                 logger.warning("Failed to load embedding model %s from %s: %s", candidate, source, exc)
+                if _is_out_of_memory(exc):
+                    # Trying the next candidate would load a second model into
+                    # the memory the first one could not get. That is what the
+                    # customer log shows: e5 failed with os error 1455, the
+                    # fallback was fetched and loaded anyway, and the process
+                    # died with an access violation shortly after.
+                    logger.warning(
+                        "Out of memory while loading the embedding model; semantic search stays off "
+                        "until the next start instead of loading a fallback model"
+                    )
+                    _embedder_tried = True
+                    return None
                 continue
 
     logger.warning("No embedding model could be loaded (tried %s, %s)", primary, fallback_name)
@@ -371,8 +395,68 @@ def active_model_name() -> str:
     return name
 
 
+# Commit memory (RAM plus page file) the OS must still be able to promise
+# before heavy native work starts. Below it, the work is declined with an
+# ordinary exception rather than risked as a native allocation failure.
+_MIN_COMMIT_MB_FOR_LOAD = 1024
+_MIN_COMMIT_MB_FOR_ENCODE = 384
+
+# Desktop: one inference at a time, in small batches. Concurrent forward
+# passes on the one model object multiply peak memory, and the attention
+# buffers of a 64-text batch at full sequence length run to hundreds of MB on
+# their own. The embedding pool docstring records the earlier frozen-build
+# SIGSEGV that only went away with the pool off.
+_DESKTOP_BATCH_SIZE = 16
+_SERVER_BATCH_SIZE = 64
+_desktop_encode_lock = threading.Lock()
+
+
+def _is_desktop() -> bool:
+    try:
+        from app.config import desktop_mode
+
+        return desktop_mode()
+    except Exception:  # noqa: BLE001 - config is not worth a failed encode
+        return False
+
+
+def _is_out_of_memory(exc: BaseException) -> bool:
+    from app.core.crash_diagnostics import is_out_of_memory_error
+
+    return is_out_of_memory_error(exc)
+
+
+def _commit_too_low_for(what: str, floor_mb: int) -> bool:
+    """True, with a warning, when available commit memory is under ``floor_mb``.
+
+    Unknown counts as enough: the probe exists to avoid a known wall, not to
+    refuse work on a platform that reports nothing.
+    """
+    from app.core.crash_diagnostics import available_commit_mb
+
+    avail = available_commit_mb()
+    if avail is None or avail >= floor_mb:
+        return False
+    logger.warning(
+        "Skipping embedding %s: only %.0f MB of memory left (RAM plus page file), need %d MB",
+        what,
+        avail,
+        floor_mb,
+    )
+    return True
+
+
 def encode_texts(texts: list[str]) -> list[list[float]]:
     """Encode texts to vectors. Works with both FastEmbed and sentence-transformers."""
+    if _is_desktop():
+        if _commit_too_low_for("inference", _MIN_COMMIT_MB_FOR_ENCODE):
+            raise RuntimeError("Not enough free memory for semantic indexing right now")
+        with _desktop_encode_lock:
+            return _encode_texts_unlocked(texts, _DESKTOP_BATCH_SIZE)
+    return _encode_texts_unlocked(texts, _SERVER_BATCH_SIZE)
+
+
+def _encode_texts_unlocked(texts: list[str], batch_size: int) -> list[list[float]]:
     embedder = get_embedder()
     if embedder is None:
         # Of the two named, sentence-transformers is in requirements-desktop.lock
@@ -390,7 +474,7 @@ def encode_texts(texts: list[str]) -> list[list[float]]:
         return [v.tolist() for v in embedder.embed(texts)]
 
     # sentence-transformers returns numpy array
-    return embedder.encode(texts, show_progress_bar=False, batch_size=64).tolist()
+    return embedder.encode(texts, show_progress_bar=False, batch_size=batch_size).tolist()
 
 
 async def encode_texts_async(texts: list[str]) -> list[list[float]]:

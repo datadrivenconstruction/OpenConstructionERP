@@ -53,6 +53,7 @@ from app.modules.boq.markup_templates import (
     DEFAULT_MARKUP_TEMPLATES,
     NON_SINGLE_TAX_REGIONS,
     REGION_BY_COUNTRY,
+    REGION_VARIANTS,
     region_lines_for_country,
     resolve_region_lines,
 )
@@ -207,10 +208,14 @@ def test_every_stack_is_reachable_from_some_country() -> None:
     only place the two disagree is a mapping nobody reads.
 
     ``DEFAULT`` is exempt because it is the fall-through by definition and no
-    country may map to it; see :func:`region_lines_for_country`.
+    country may map to it; see :func:`region_lines_for_country`. A stack in
+    ``REGION_VARIANTS`` is exempt only while the region it is a variant of is
+    itself reached, so a variant cannot become the back door for an orphan.
     """
     reachable = set(REGION_BY_COUNTRY.values())
-    orphaned = set(DEFAULT_MARKUP_TEMPLATES) - reachable - {"DEFAULT"}
+    stale = {variant: base for variant, base in REGION_VARIANTS.items() if base not in reachable}
+    assert not stale, f"variants of stacks no country reaches: {stale}"
+    orphaned = set(DEFAULT_MARKUP_TEMPLATES) - reachable - {"DEFAULT"} - set(REGION_VARIANTS)
     assert not orphaned, (
         f"regional stacks no country reaches: {sorted(orphaned)}. "
         f"Either map a country to each in REGION_BY_COUNTRY or delete the stack; "

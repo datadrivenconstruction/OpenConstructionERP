@@ -5,7 +5,8 @@
   "jurisdiction": "JP",
   "description": "Validates project documentation against the Japanese Building Standards Act (Kenchiku Kijun Ho). Checks building use classification, floor area ratio (yousekiritsu) and building coverage ratio (kenpeiritsu), fire resistance ratings for fireproof / quasi-fireproof structures, structural calculation method classification (Route 1/2/3 or time-history analysis), and confirmation application (kakunin shinsei) documentation requirements.",
   "applies_to": ["estimate", "validation", "submittals"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "bsl.building_use_classified",
     "bsl.yousekiritsu_floor_area_ratio_set",
     "bsl.kenpeiritsu_building_coverage_set",
@@ -19,6 +20,7 @@
     "bsl.building_officer_or_designated_body_named",
     "bsl.barrier_free_provisions_if_applicable"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "MLIT (Ministry of Land, Infrastructure, Transport and Tourism)",
   "publication_year": 2024
 }

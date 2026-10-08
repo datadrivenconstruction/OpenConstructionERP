@@ -17,7 +17,8 @@
   ],
   "description": "Enables OCERP built-in validation rules that check structural-steel BOQ items and design documents against IS 800:2007 (limit-state design basis) — section designation (ISMB/ISMC/ISA etc.), steel grade (E250/E350/E410), connection type, weld specification (IS 816), bolt grade (IS 1367), corrosion-protection, fire-protection rating, and consistency with IS 1893 seismic basis and IS 875 loads.",
   "description_hi": "इस्पात बीओक्यू मदों एवं डिज़ाइन दस्तावेज़ों की आईएस 800:2007 (सीमा-स्थिति) के अनुसार जाँच।",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "is800.steel_grade_specified",
     "is800.section_designation_valid",
     "is800.connection_type_specified",
@@ -29,5 +30,6 @@
     "is800.is_2062_grade_reference",
     "is800.is_1893_seismic_design_basis_present",
     "is800.is_875_loads_basis_present"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

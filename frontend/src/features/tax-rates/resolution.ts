@@ -49,7 +49,12 @@ export type Classification =
    * somebody flags one of the rows already on file; here, the row that would
    * answer does not exist yet and has to be added.
    */
-  | { kind: 'standard_rate_not_started' };
+  | { kind: 'standard_rate_not_started' }
+  /**
+   * A rate in force was marked as needing a local specialist's confirmation,
+   * usually the client's accountant, and nobody has confirmed it yet.
+   */
+  | { kind: 'awaiting_local_confirmation' };
 
 export type ResolutionKind = Classification['kind'];
 
@@ -62,6 +67,7 @@ export const UNANSWERED_KINDS: readonly ResolutionKind[] = [
   'no_country_data',
   'rates_conflict',
   'standard_rate_not_started',
+  'awaiting_local_confirmation',
 ];
 
 /**
@@ -97,6 +103,8 @@ export function classifyResolution(r: TaxResolution): Classification {
       return { kind: 'rates_conflict' };
     case 'default_rate_not_in_force':
       return { kind: 'standard_rate_not_started' };
+    case 'awaiting_confirmation':
+      return { kind: 'awaiting_local_confirmation' };
     case 'subdivision_unknown':
       // Three causes, three different people who can fix them, told apart by
       // which fields came back populated.

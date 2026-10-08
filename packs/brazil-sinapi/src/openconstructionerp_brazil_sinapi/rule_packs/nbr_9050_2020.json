@@ -18,7 +18,8 @@
     "reserved_parking_min_pct": 2.0,
     "reserved_parking_min_count": 1
   },
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "nbr9050.ramp_slope_within_limit",
     "nbr9050.door_min_clearance_080m",
     "nbr9050.accessible_route_from_sidewalk_present",
@@ -26,5 +27,6 @@
     "nbr9050.tactile_floor_signaling_present",
     "nbr9050.reserved_parking_count_ok",
     "nbr9050.elevator_clearance_compliant"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

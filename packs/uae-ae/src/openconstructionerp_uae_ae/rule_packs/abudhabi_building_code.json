@@ -5,7 +5,8 @@
   "jurisdiction": "AE",
   "description": "Validates project documentation against the Abu Dhabi International Building Code as adopted by Abu Dhabi Municipality (ADM). Based on the International Building Code (IBC) with local amendments, it covers structural requirements, fire protection, means of egress, accessibility, building envelope, and MEP provisions. Checks that the correct building occupancy classification, construction type, and applicable ADM circulars are referenced.",
   "applies_to": ["estimate", "validation", "submittals"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "adibc.occupancy_classification_set",
     "adibc.construction_type_classified",
     "adibc.fire_resistance_rating_set",
@@ -19,6 +20,7 @@
     "adibc.adm_circular_compliance_noted",
     "adibc.noc_requirements_referenced"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "Abu Dhabi Municipality (ADM)",
   "publication_year": 2023
 }

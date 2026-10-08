@@ -4,8 +4,11 @@
 // The semantic-search encoder, offered in the setup wizard as what it is: an
 // optional extra that downloads in the background and that nothing waits for.
 //
-// The card exists because the download is invisible otherwise. It starts on its
-// own on a local install, takes minutes, and until it finishes semantic search
+// The card exists because the download is invisible otherwise. It never starts
+// on its own, desktop included (no network fetch without an explicit user
+// action), so the card is also the consent: it states size and purpose before
+// the switch is flipped. Once asked for it takes minutes, and until it finishes
+// semantic search
 // declines out loud with a 503 while lexical search keeps answering. A user who
 // cannot see that state reads the decline as a broken product.
 //
@@ -98,6 +101,14 @@ export function SemanticModelCard({
                   'Optional - downloads in the background. Search works without it.',
               })}
             </p>
+            {state !== 'ready' && state !== 'library_missing' && !status?.locked && (
+              <p className="mt-1 text-xs text-content-tertiary">
+                {t('onboarding.semantic_model_consent', {
+                  defaultValue:
+                    'About 470 MB, downloaded only when you switch this on. It lets search find cost items by meaning, not only by exact words.',
+                })}
+              </p>
+            )}
           </div>
         </div>
 

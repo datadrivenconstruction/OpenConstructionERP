@@ -5231,8 +5231,8 @@ def create_app() -> FastAPI:
                     if find_installed_model() is None and not download_enabled():
                         logger.info(
                             "Embedder prime skipped: no encoder installed and the background "
-                            "download is off for this deployment (set OE_DOWNLOAD_EMBEDDING_MODEL=1 "
-                            "to fetch it). Semantic search reports its state honestly meanwhile."
+                            "download was not requested (download it from the setup wizard or Settings, or set "
+                            "OE_DOWNLOAD_EMBEDDING_MODEL=1). Semantic search reports its state honestly meanwhile."
                         )
                         return
 
@@ -5248,6 +5248,20 @@ def create_app() -> FastAPI:
                 _asyncio_emb_sched.create_task(_prime_embedder_background())
             except Exception:
                 logger.debug("Could not schedule embedder prime", exc_info=True)
+
+            # Desktop only: the hang that comes before a native crash is the one
+            # moment the culprit is still on a stack, so dump them all then.
+            try:
+                from app.config import desktop_mode as _desktop_mode_wd
+
+                if _desktop_mode_wd():
+                    import asyncio as _asyncio_wd
+
+                    from app.core.crash_diagnostics import start_loop_stall_watchdog
+
+                    start_loop_stall_watchdog(_asyncio_wd.get_running_loop())
+            except Exception:  # noqa: BLE001 - diagnostics are never fatal
+                logger.debug("Loop stall watchdog not started", exc_info=True)
 
             try:
                 app.state.embedding_warmup_task = _start_embedding_pool_warmup()
@@ -5548,6 +5562,16 @@ def create_app() -> FastAPI:
 
         if not _fast_startup:
             asyncio.create_task(_risk_escalation_sweeper())
+
+        # Call recordings expire after OE_PHONELOG_AUDIO_RETENTION_DAYS (default
+        # 90); the transcript stays. Daily sweep, fail-soft like the ones above.
+        try:
+            if not _fast_startup:
+                from app.modules.phonelog.retention import retention_loop
+
+                asyncio.create_task(retention_loop())
+        except Exception:  # noqa: BLE001 - never block startup on the sweeper
+            logger.exception("Phone log retention sweeper failed to start")
 
         _section("Ready")
         # Friendly multi-line ready banner. The CLI (`openestimate serve`)

@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- The schedule detail view warns when public-holiday coverage is missing or incomplete, using the saved calendar and years of generated plans. New generated calendars also retain whether their working week used a fallback, so that warning survives reopening the schedule. Regional calendar loading and failures are shown explicitly; manually configured calendars keep their own rules, and historical plans without a saved fallback flag are not reclassified.
 - New eligible outside-SOV progress claims use the retention ladder rate selected by prior SOV work, with existing caps and currency precision. Claims created before this change keep their flat-rate calculation, and issued certificates are not recalculated. Milestone, cost-plus and time-and-materials claims retain their existing rules.
 - Progress claims expose country-independent payment-application figures through `/progress-claims/{id}/payment-application`, using the same calculations and project access checks as the existing regional AIA view. The AIA JSON and PDF endpoints retain their country restrictions.
 - Bills can keep a tax date separately from the date their prices refer to. VAT uses the tax date when one is supplied, and otherwise keeps using the price reference date. Both dates survive copying a bill or creating a revision; impossible calendar dates are refused in the form.
@@ -47,6 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Claim invoice previews distinguish unavailable data from an invoice that has not been raised and offer retry on lookup errors. Net amounts use exact decimal subtraction, and money displays preserve large decimal-string values instead of first converting them to floating-point numbers.
 - Payment-application figures use the contract currency's minor unit, including zero- and three-decimal currencies, with displayed rows and totals kept consistent. Claims outside AIA countries now also show when prior certified amounts were reconstructed instead of read from stored certification totals.
 - Application startup no longer waits for the embedding worker pool to load or warm its model. A slow or unavailable encoder can prepare in the background while the server becomes available; shutting down does not let a delayed warm-up revive the executor.
 - Bill totals, resource summaries and ABC analysis exclude amounts without a usable positive exchange rate and show those amounts separately in their original currency. Resource summaries scale norms by the position quantity and retain legitimate negative credits. Tender packages require a currency before publishing, opening or awarding.

@@ -26,7 +26,9 @@
     "boq_quality.section_without_items",
     "boq_quality.rate_vs_benchmark",
     "boq_quality.lump_sum_ratio",
-    "boq_quality.cost_concentration",
+    "boq_quality.cost_concentration"
+  ],
+  "planned_not_built_rule_ids": [
     "lv.titel_present",
     "lv.titel_hierarchy_3_levels_max",
     "lv.position_under_titel",
@@ -45,6 +47,7 @@
     "lv.zulage_position_linked_to_main",
     "lv.mengenansatz_documented_per_position"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "metadata": {
     "structure": ["Titel (Level 1)", "Position (Level 2)", "Teilleistung / Unter­leistungsposition (Level 3)"],
     "ordinal_convention": "OZ — e.g. '01.02.0030.A' (Titel.SubTitel.Position.Teilleistung)",

@@ -94,6 +94,17 @@ def _resolve_pool_size() -> int:
                 "OE_VECTOR_POOL_WORKERS=%r is not an integer; using default",
                 raw,
             )
+    try:
+        from app.config import desktop_mode
+
+        if desktop_mode():
+            # One worker on the desktop. Inference there is serialised anyway
+            # (see ``app.core.vector.encode_texts``), so more workers only
+            # queue behind the same lock while each warm-up encode adds to
+            # peak memory on machines that are often short of it.
+            return 1
+    except Exception:  # noqa: BLE001 - fall through to the server default
+        pass
     cpu = os.cpu_count() or 1
     return min(4, max(1, cpu))
 

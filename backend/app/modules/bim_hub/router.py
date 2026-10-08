@@ -1729,6 +1729,10 @@ async def _process_cad_in_background(
                     "parquet_status": parquet_status,
                     "parquet_error": parquet_error,
                     "parquet_attempted_at": _dt.now(_UTC).isoformat(),
+                    # Header text as the converter wrote it ("Phase Created")
+                    # for the lowercased property keys. Kept here so a sidecar
+                    # rebuilt from the database still shows the original names.
+                    **({"column_labels": result["raw_element_labels"]} if result.get("raw_element_labels") else {}),
                 }
 
                 # BUG-V320-DDC-01 / D-TKC-NEW-01 - non-destructive honesty
@@ -2973,6 +2977,7 @@ async def retry_parquet_write(
             project_id=str(model.project_id),
             model_id=str(model_id),
             rows=rows,
+            labels=(model.metadata_ or {}).get("column_labels"),
             # The rows hold at most 30 properties per element: the sidecar says
             # so, and the rule test tells the user a re-import brings the rest.
             source=SOURCE_DATABASE,

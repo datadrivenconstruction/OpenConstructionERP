@@ -3244,6 +3244,31 @@ export function CreateContractModal({
             ))}
           </select>
           {defaultHint('retention_release_split')}
+          {knownDefaults?.release_period ? (
+            <p
+              className="mt-1 text-xs text-content-tertiary"
+              title={[
+                knownDefaults.release_period.reference,
+                knownDefaults.release_period.note_key
+                  ? t(knownDefaults.release_period.note_key, {
+                      defaultValue: knownDefaults.release_period.note,
+                    })
+                  : knownDefaults.release_period.note,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
+            >
+              {knownDefaults.release_period.value != null
+                ? t('contracts.payment_terms.release_period_days', {
+                    defaultValue: 'Released {{days}} days after the release event if no lien is filed ({{region}})',
+                    days: knownDefaults.release_period.value,
+                    region: knownDefaults.subdivision_code ?? '',
+                  })
+                : t(knownDefaults.release_period.note_key ?? '', {
+                    defaultValue: knownDefaults.release_period.note,
+                  })}
+            </p>
+          ) : null}
         </WideModalField>
         <WideModalField
           label={t('contracts.payment_terms.certificate_name', {

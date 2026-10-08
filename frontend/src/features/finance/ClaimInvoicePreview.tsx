@@ -18,7 +18,8 @@ import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Badge, Card, CardContent, CardHeader } from '@/shared/ui';
 import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
-import { apiGet, apiPost, getErrorMessage } from '@/shared/lib/api';
+import { ApiError, apiGet, apiPost, getErrorMessage } from '@/shared/lib/api';
+import { subtractDecimalStrings } from '@/shared/lib/exactDecimal';
 
 interface ClaimInvoiceLineItem {
   id: string;
@@ -74,19 +75,33 @@ export function ClaimInvoicePreview({
   // asked while the claim was still approved kept "Not raised" in the cache.
   // The status is part of the key, and a certified claim with no invoice yet
   // keeps asking until the invoice lands.
-  const { data: existing, isLoading } = useQuery<ClaimInvoice | null>({
+  const lookup = useQuery<ClaimInvoice | null>({
     queryKey: ['finance', 'claim-receivable', claimId, certified],
     queryFn: async () => {
       try {
         return await apiGet<ClaimInvoice>(
           `/api/v1/finance/claims/${encodeURIComponent(claimId)}/receivable-invoice/`,
         );
-      } catch {
-        return null;
+      } catch (cause) {
+        if (
+          cause instanceof ApiError &&
+          cause.status === 404 &&
+          typeof cause.body === 'object' &&
+          cause.body !== null &&
+          !Array.isArray(cause.body) &&
+          'detail' in cause.body &&
+          cause.body.detail === 'No receivable invoice exists for this claim'
+        ) {
+          return null;
+        }
+        throw cause;
       }
     },
     staleTime: 0,
-    refetchInterval: (query) => (certified && !query.state.data ? AWAIT_INVOICE_MS : false),
+    refetchInterval: (query) =>
+      certified && query.state.status === 'success' && query.state.data === null
+        ? AWAIT_INVOICE_MS
+        : false,
   });
 
   const raise = useMutation({
@@ -106,13 +121,13 @@ export function ClaimInvoicePreview({
     },
   });
 
-  const invoice = existing ?? null;
+  const invoice = lookup.isSuccess ? lookup.data : null;
   const currency = invoice?.currency_code || '';
   const payable = (invoice?.invoice_direction ?? direction) === 'payable';
   // The invoice stores the gross in its subtotal and holds retention beside
   // it, so what changes hands now is the total less the retention.
   const netNow = invoice
-    ? String(Math.round((Number(invoice.amount_total) - Number(invoice.retention_amount)) * 100) / 100)
+    ? subtractDecimalStrings(invoice.amount_total, invoice.retention_amount)
     : '0';
 
   return (
@@ -120,7 +135,7 @@ export function ClaimInvoicePreview({
       <CardHeader
         title={payable ? t('finance.claimInvoice.titlePayable') : t('finance.claimInvoice.title')}
         action={
-          invoice ? (
+          !lookup.isSuccess ? null : invoice ? (
             <Badge variant="success">{t('finance.claimInvoice.raised')}</Badge>
           ) : (
             <Badge variant="neutral">{t('finance.claimInvoice.notRaised')}</Badge>
@@ -128,8 +143,16 @@ export function ClaimInvoicePreview({
         }
       />
       <CardContent>
-        {isLoading ? (
+        {lookup.isPending ? (
           <p className="text-xs text-[var(--text-secondary)]">{t('common.loading')}</p>
+        ) : lookup.isError ? (
+          <div role="alert" className="space-y-3">
+            <p className="text-sm font-medium">{t('recovery.load_failed_title')}</p>
+            <p className="text-xs text-[var(--error)]">{getErrorMessage(lookup.error)}</p>
+            <Button size="sm" onClick={() => void lookup.refetch()} disabled={lookup.isFetching}>
+              {t('common.retry')}
+            </Button>
+          </div>
         ) : invoice ? (
           <dl className="space-y-2 text-sm">
             <div className="flex justify-between">

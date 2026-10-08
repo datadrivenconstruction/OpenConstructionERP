@@ -4,7 +4,8 @@
   "standard": "EN 1090",
   "jurisdiction": "EU",
   "description": "Enables OCERP built-in validation rules that enforce EN 1090-2 execution requirements for steel modules: execution class, welding procedure (ISO 3834), CE-marking, traceability and inspection.",
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "en1090.execution_class_set",
     "en1090.welding_procedure_iso_3834_documented",
     "en1090.ce_marking_evidence_attached",
@@ -12,5 +13,6 @@
     "en1090.inspection_class_set",
     "en1090.factory_production_control_logged",
     "en1090.welder_qualification_current"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

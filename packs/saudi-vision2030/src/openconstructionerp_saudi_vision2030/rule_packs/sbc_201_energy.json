@@ -14,7 +14,8 @@
     "boq_quality.position_has_quantity": "ERROR",
     "boq_quality.position_has_unit_rate": "ERROR"
   },
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "sbc201.climate_zone_assigned",
     "sbc201.wall_u_value_within_band",
     "sbc201.roof_u_value_within_band",
@@ -30,5 +31,6 @@
     "sbc201.seep_appliance_labelling_referenced",
     "sbc201.lighting_power_density_compliant",
     "sbc201.envelope_air_tightness_test_required"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

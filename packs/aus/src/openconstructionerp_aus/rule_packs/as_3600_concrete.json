@@ -10,7 +10,8 @@
   "exposure_classifications": ["A1", "A2", "B1", "B2", "C1", "C2", "U"],
   "characteristic_strengths_mpa": [20, 25, 32, 40, 50, 65, 80, 100],
   "applies_to": ["projects", "boq", "validation", "bim"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "as3600.exposure_classification_set",
     "as3600.characteristic_strength_specified",
     "as3600.cover_for_durability_minimum",
@@ -22,5 +23,6 @@
     "as3600.shrinkage_creep_factors_applied",
     "as3600.precast_interface_as_4910_compliant",
     "as3600.high_strength_concrete_special_provisions"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

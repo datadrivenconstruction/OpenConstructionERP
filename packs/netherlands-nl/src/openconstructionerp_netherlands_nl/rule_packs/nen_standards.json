@@ -5,7 +5,8 @@
   "jurisdiction": "NL",
   "description": "Validates specifications and BOQ items against key NEN (Nederlands Normalisatie-instituut) construction standards. Covers NEN 6700-series (structural safety, now superseded by Eurocode national annexes), NEN 2580 (floor area measurement, GBO/BVO), NEN 2767 (condition assessment), NEN-EN 1990-1999 (Eurocodes with Dutch National Annexes), and NEN 7120 / NTA 8800 (energy performance). Checks that specification clauses reference applicable NEN standards.",
   "applies_to": ["boq", "estimate", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "nen.standard_reference_present",
     "nen.standard_version_current",
     "nen.nen2580_floor_area_method_applied",
@@ -18,6 +19,7 @@
     "nen.nen3650_pipeline_if_applicable",
     "nen.material_test_standard_cited"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "NEN (Nederlands Normalisatie-instituut)",
   "publication_year": 2024
 }

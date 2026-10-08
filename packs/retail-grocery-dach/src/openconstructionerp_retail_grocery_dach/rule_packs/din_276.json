@@ -14,7 +14,9 @@
     "din276.cost_group_required",
     "din276.valid_cost_group",
     "din276.hierarchy",
-    "din276.completeness",
+    "din276.completeness"
+  ],
+  "planned_not_built_rule_ids": [
     "din276.cost_group_hierarchy_valid",
     "din276.kg_code_format",
     "din276.kg100_grundstueck_completeness",
@@ -34,6 +36,7 @@
     "din276.gross_external_area_present_bgf",
     "din276.gross_external_volume_present_bri"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "metadata": {
     "cost_group_count": 8,
     "max_hierarchy_depth": 3,

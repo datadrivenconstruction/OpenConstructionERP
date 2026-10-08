@@ -365,7 +365,11 @@ def test_rule_pack_files_are_valid_and_state_their_jurisdiction(slug: str) -> No
         )
         for field in ("name", "standard", "description", "issuer"):
             assert str(data.get(field, "")).strip(), f"{path.name} has an empty {field!r}"
-        assert data["enables_rule_ids"], f"{path.name} enables no rules"
+        # A document whose checks are not written yet lists them as planned
+        # (JUR-01) rather than switching on ids the engine does not define.
+        assert data["enables_rule_ids"] or data.get("planned_not_built_rule_ids"), (
+            f"{path.name} neither enables nor plans any rule"
+        )
         assert len(set(data["enables_rule_ids"])) == len(data["enables_rule_ids"]), f"{path.name} repeats a rule id"
 
 

@@ -11,13 +11,6 @@
   "description_fr-CA": "Active les règles OCERP pour les postes BOQ en charpente d'acier selon le calcul aux états limites CSA S16 : désignation de nuance (CSA G40.20/G40.21 — 300W, 350W, 350A, 350AT, HSS classe C/H, etc.), type de profilé (W/HSS/L/U), références de procédures de soudage (CSA W47.1 / W59), classe de boulonnage (A325 / A490 / ASTM F3125), résistance au feu et préparation de surface SSPC.",
   "severity_overrides": {},
   "enables_rule_ids": [
-    "csa_s16.steel_grade_g40_designation_required",
-    "csa_s16.member_section_type_specified",
-    "csa_s16.welding_csa_w47_1_w59_reference_present",
-    "csa_s16.bolting_class_specified",
-    "csa_s16.fire_protection_rating_specified",
-    "csa_s16.surface_preparation_sspc_specified",
-    "csa_s16.seismic_force_resisting_system_class_assigned",
     "boq_quality.position_has_unit_rate"
   ]
 }

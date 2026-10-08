@@ -5,7 +5,8 @@
   "jurisdiction": "IT",
   "description": "Validates public tender documents against the new Italian public procurement code (Codice dei contratti pubblici, D.Lgs. 36/2023, effective 2023-07-01). Checks that the progetto esecutivo is complete, that the quadro economico (cost breakdown) follows the prescribed structure, that RUP (Responsabile Unico del Procedimento) is designated, that subcontracting limits are documented, and that BIM obligations are met for contracts above the applicable threshold.",
   "applies_to": ["tender", "estimate", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "dlgs36.procedura_type_defined",
     "dlgs36.rup_designated",
     "dlgs36.quadro_economico_present",
@@ -22,6 +23,7 @@
     "dlgs36.garanzia_provvisoria_documented",
     "dlgs36.garanzia_definitiva_documented"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "ANAC (Autorita Nazionale Anticorruzione)",
   "publication_year": 2023
 }

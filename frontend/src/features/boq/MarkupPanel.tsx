@@ -28,7 +28,27 @@ const REGIONS: MarkupRegion[] = [
   { code: 'UK', flag: '\ud83c\uddec\ud83c\udde7', countries: ['GB'], standard: 'NRM/RICS' },
   { code: 'FR', flag: '\ud83c\uddeb\ud83c\uddf7', standard: 'BATIPRIX' },
   { code: 'ES', flag: '\ud83c\uddea\ud83c\uddf8', standard: 'CTE' },
-  { code: 'IT', flag: '\ud83c\uddee\ud83c\uddf9', standard: 'Prezzario' },
+  // Italy has two stacks. A regional price list rate already includes general
+  // expenses and profit, so the price-list stack adds only safety and VAT; the
+  // price-analysis stack (backend key IT) adds them on top.
+  {
+    code: 'IT_PREZZARIO',
+    flag: '\ud83c\uddee\ud83c\uddf9',
+    standard: 'Prezzario',
+    labelKey: 'boq.markup_region.it_price_list',
+    labelDefault: 'Italy, per price list',
+    hintKey: 'boq.markup_region.it_price_list_hint',
+    hintDefault: 'Price list rates already include general expenses and profit, so only safety costs and VAT are added.',
+  },
+  {
+    code: 'IT',
+    flag: '\ud83c\uddee\ud83c\uddf9',
+    standard: 'Analisi prezzi',
+    labelKey: 'boq.markup_region.it_price_analysis',
+    labelDefault: 'Italy, per price analysis',
+    hintKey: 'boq.markup_region.it_price_analysis_hint',
+    hintDefault: 'For rates built from a price analysis: adds general expenses 15%, profit 10%, safety costs and VAT.',
+  },
   { code: 'NL', flag: '\ud83c\uddf3\ud83c\uddf1', standard: 'STABU' },
   { code: 'PL', flag: '\ud83c\uddf5\ud83c\uddf1', standard: 'KNR' },
   { code: 'BE', flag: '\ud83c\udde7\ud83c\uddea', standard: 'BSAB' },
@@ -516,6 +536,11 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
                         {region.standard && (
                           <div className="text-2xs text-content-tertiary">{region.standard}</div>
                         )}
+                        {region.hintKey && (
+                          <div className="text-2xs text-content-tertiary whitespace-normal max-w-[260px]">
+                            {t(region.hintKey, { defaultValue: region.hintDefault ?? '' })}
+                          </div>
+                        )}
                       </div>
                     </button>
                   ))}
@@ -559,6 +584,21 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
               )}
             </div>
           </div>
+
+          {/* An imported bill with deductions (detrazioni): a percentage on
+              direct cost is taken on the works before deductions. The import
+              puts the deductions line first, so subtotal is the net base. */}
+          {markups.some((m) => !m.scope_position_id && m.metadata?.role === 'import_deductions') &&
+            markups.some(
+              (m) => m.is_active && m.markup_type === 'percentage' && m.apply_to === 'direct_cost',
+            ) && (
+              <div className="px-5 py-2 text-xs text-content-secondary bg-surface-secondary/30 border-t border-border-light">
+                {t('boq.markup_deductions_base_hint', {
+                  defaultValue:
+                    'This bill has deductions. A percentage on direct cost is taken on the works before deductions. To take it on the net amount, place it right after the deductions line with base subtotal.',
+                })}
+              </div>
+            )}
 
           {/* Markup table */}
           {markups.length > 0 ? (

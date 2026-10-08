@@ -13,7 +13,8 @@
     "neom.no_internal_combustion_vehicles_inside_zone": "ERROR",
     "neom.net_zero_carbon_target_set": "ERROR"
   },
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "neom.subzone_assigned",
     "neom.net_zero_carbon_target_set",
     "neom.embodied_carbon_within_budget",
@@ -31,5 +32,6 @@
     "neom.sindalah_island_marine_setback",
     "neom.neom_authority_approval_chain_configured",
     "neom.design_review_panel_drp_submission"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

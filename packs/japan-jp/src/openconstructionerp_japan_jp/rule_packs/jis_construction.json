@@ -5,7 +5,8 @@
   "jurisdiction": "JP",
   "description": "Validates BOQ items and specifications against key JIS (Japanese Industrial Standards) for construction materials and methods. Covers JIS A 5308 (ready-mixed concrete), JIS G 3112 (reinforcing steel bars), JIS A 6901 (gypsum boards), JIS A 5430 (fibre cement boards), and related material standards. Checks that specification clauses cite the applicable JIS number and that material grades match the JIS classification.",
   "applies_to": ["boq", "estimate", "validation"],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "jis.standard_reference_present",
     "jis.standard_version_current",
     "jis.a5308_concrete_grade_specified",
@@ -17,6 +18,7 @@
     "jis.material_grade_matches_jis",
     "jis.test_certificate_requirement_noted"
   ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
   "regulator": "JISC (Japanese Industrial Standards Committee)",
   "publication_year": 2024
 }

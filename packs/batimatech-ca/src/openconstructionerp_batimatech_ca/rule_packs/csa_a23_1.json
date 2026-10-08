@@ -13,15 +13,6 @@
     "csa_a23_1.exposure_class_required": "ERROR"
   },
   "enables_rule_ids": [
-    "csa_a23_1.exposure_class_required",
-    "csa_a23_1.compressive_strength_class_required",
-    "csa_a23_1.slump_range_specified",
-    "csa_a23_1.aggregate_nominal_size_specified",
-    "csa_a23_1.air_content_range_specified",
-    "csa_a23_1.cementitious_type_specified",
-    "csa_a23_1.curing_regime_specified",
-    "csa_a23_1.cold_weather_concreting_clause_documented",
-    "csa_a23_1.hot_weather_concreting_clause_documented",
     "boq_quality.position_has_unit_rate"
   ]
 }

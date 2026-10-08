@@ -54,6 +54,7 @@ from dateutil.easter import easter  # type: ignore[import]
 from hijridate import Gregorian, Hijri  # type: ignore[import]
 
 from app.core.provenance import Provenance, declared, fell_back, unavailable, weakest
+from app.core.seeded_holidays import seeded_holiday_dates
 
 logger = logging.getLogger(__name__)
 
@@ -1326,7 +1327,17 @@ def resolve_holidays(country_code: str, year: int) -> dict[str, Any]:
         return cached
 
     func = _HOLIDAY_FUNCS.get(cc)
-    if func is None:
+    try:
+        # Existing computed rules keep precedence. Only explicitly reviewed
+        # country/year seed bindings may fill an otherwise uncovered calendar.
+        dates = frozenset(func(year)) if func is not None else seeded_holiday_dates(cc, year)
+    except Exception as exc:
+        # Never cache a failed calculation or unreadable shipped roster as an
+        # empty answer: that would silently turn holidays into working days.
+        logger.exception("Holiday calculation failed for %s/%d", cc, year)
+        raise HolidayCalculationError(cc, year) from exc
+
+    if dates is None:
         result: dict[str, Any] = {
             "dates": frozenset(),
             "jurisdiction": fell_back(
@@ -1343,15 +1354,6 @@ def resolve_holidays(country_code: str, year: int) -> dict[str, Any]:
         }
         _holiday_cache[key] = result
         return result
-
-    try:
-        dates = frozenset(func(year))
-    except Exception as exc:
-        # Deliberately not cached. Memoising a failure would make the first call
-        # raise and every later one hand back a plausible empty set, so the
-        # defect would present as a holiday-free year to everything downstream.
-        logger.exception("Holiday calculation failed for %s/%d", cc, year)
-        raise HolidayCalculationError(cc, year) from exc
 
     resolved = _canonical_holiday_country(cc)
     table, omitted_names = _CURATED_TABLES.get(resolved, (None, ()))

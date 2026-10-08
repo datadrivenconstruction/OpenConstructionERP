@@ -10,12 +10,5 @@
   "description": "Validates the construction-management-for-fee structure per CCDC 5A-2025: Construction Manager fee basis defined, scope of advisory services documented, Trade Contractor procurement rules referenced, Owner-Trade Contractor agreements (CCDC 17-2025) tied back, and Ready-for-Takeover milestone defined.",
   "description_fr-CA": "Vérifie la structure de gérance pour honoraires selon CCDC 5A-2025 : base d'honoraires du Gérant définie, étendue des services-conseils documentée, règles d'approvisionnement des Entrepreneurs spécialisés référencées, contrats Maître-Entrepreneur spécialisé (CCDC 17-2025) rattachés, et jalon Prêt-pour-prise-en-charge défini.",
   "severity_overrides": {},
-  "enables_rule_ids": [
-    "ccdc5a.construction_manager_fee_basis_defined",
-    "ccdc5a.advisory_scope_documented",
-    "ccdc5a.trade_contractor_procurement_rules_referenced",
-    "ccdc5a.trade_contracts_ccdc17_linked",
-    "ccdc5a.ready_for_takeover_milestone_defined",
-    "ccdc5a.payment_schedule_prompt_payment_compliant"
-  ]
+  "enables_rule_ids": []
 }

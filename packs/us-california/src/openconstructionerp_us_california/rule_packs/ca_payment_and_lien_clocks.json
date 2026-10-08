@@ -10,7 +10,8 @@
     "us_ca_public_20104",
     "us_ca_private_8800"
   ],
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "ca_clock.public_or_private_declared",
     "ca_clock.public_progress_payment_within_thirty_days",
     "ca_clock.public_improper_request_returned_within_seven_days",
@@ -27,5 +28,6 @@
     "ca_clock.direct_contractor_sixty_day_window_applied",
     "ca_clock.other_claimant_thirty_day_window_applied",
     "ca_clock.lien_enforcement_suit_within_ninety_days"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

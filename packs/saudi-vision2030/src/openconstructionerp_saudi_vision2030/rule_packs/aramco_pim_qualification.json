@@ -13,7 +13,8 @@
     "aramco.avl_membership_for_category": "ERROR",
     "aramco.schedule_q_within_validity": "ERROR"
   },
-  "enables_rule_ids": [
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
     "aramco.avl_membership_for_category",
     "aramco.schedule_q_within_validity",
     "aramco.iktva_score_meets_package_minimum",
@@ -23,5 +24,6 @@
     "aramco.safety_trir_within_threshold",
     "aramco.iso_45001_certification_present_or_equivalent",
     "aramco.subcontractor_chain_avl_compliant"
-  ]
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before."
 }

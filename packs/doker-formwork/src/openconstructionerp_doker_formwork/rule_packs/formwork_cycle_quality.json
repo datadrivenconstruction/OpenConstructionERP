@@ -7,20 +7,7 @@
   "severity_default": "warning",
   "category": "quality",
   "locale_default": "de",
-  "enables_rule_ids": [
-    "formwork.cycle.shuttering_phase_present",
-    "formwork.cycle.reinforcement_phase_present",
-    "formwork.cycle.pour_phase_present",
-    "formwork.cycle.stripping_phase_present",
-    "formwork.cycle.curing_phase_present",
-    "formwork.cycle.stripping_time_min_24h",
-    "formwork.cycle.stripping_time_meets_strength_class",
-    "formwork.cycle.props_release_before_strip",
-    "formwork.cycle.props_reset_for_slab",
-    "formwork.cycle.no_zero_duration_phase",
-    "formwork.cycle.phase_order_canonical",
-    "formwork.cycle.area_matches_boq_quantity"
-  ],
+  "enables_rule_ids": [],
   "metadata": {
     "applies_to": ["wall_formwork", "column_formwork", "slab_formwork", "beam_formwork"],
     "canonical_phase_order": [

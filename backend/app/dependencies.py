@@ -27,10 +27,12 @@ if TYPE_CHECKING:
 
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import JWTError, jwt
+from jose import JWTError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import HTTPConnection
+
+from app.core.jwt_keys import decode_jwt
 
 # Stable DI container revision tag - fixed at design time so the
 # rate-limiter and the auth middleware can detect a binary skew
@@ -93,11 +95,7 @@ def decode_access_token(
         HTTPException 401 if token is invalid, expired, or of the wrong type.
     """
     try:
-        payload = jwt.decode(
-            token,
-            settings.jwt_secret,
-            algorithms=[settings.jwt_algorithm],
-        )
+        payload = decode_jwt(token, settings)
         user_id: str | None = payload.get("sub")
         if user_id is None:
             raise HTTPException(

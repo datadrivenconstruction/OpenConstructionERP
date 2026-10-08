@@ -7,19 +7,7 @@
   "severity_default": "error",
   "category": "compliance",
   "locale_default": "de",
-  "enables_rule_ids": [
-    "concrete.din_en_13670.execution_class_required",
-    "concrete.din_en_13670.execution_class_valid",
-    "concrete.din_en_13670.curing_class_required",
-    "concrete.din_en_13670.curing_class_meets_exposure",
-    "concrete.din_en_13670.formwork_tolerance_within_class",
-    "concrete.din_en_13670.reinforcement_cover_c_nom_set",
-    "concrete.din_en_13670.reinforcement_cover_meets_exposure",
-    "concrete.din_en_13670.cold_weather_concreting_plan",
-    "concrete.din_en_13670.hot_weather_concreting_plan",
-    "concrete.din_en_13670.compaction_method_documented",
-    "concrete.din_en_13670.construction_joint_documented"
-  ],
+  "enables_rule_ids": [],
   "parameters": {
     "execution_classes": ["EXC-1", "EXC-2", "EXC-3"],
     "curing_classes": ["NBK-1", "NBK-2", "NBK-3", "NBK-4"],

@@ -35,11 +35,16 @@ deliberately does not adjudicate, because fixing them changes date arithmetic
 for real users and that is a decision to take explicitly rather than as a side
 effect of writing a test.
 
-**The denominator is printed.** 37 countries are seeded, 19 are bound to an
-engine function, 18 are unbound. A gate whose population is invisible can be
+**The denominator is printed.** 37 countries are seeded, 20 have a runtime
+binding for the seed year, 17 are unbound. A gate whose population is invisible can be
 satisfied by narrowing it, so the unbound countries are named in the output
 rather than silently absent from it, and floors below stop the bound set from
 being trimmed to make a failure go away.
+
+PT/2026 is an explicit seed-backed runtime binding, not an independent holiday
+calculation. Its comparison proves that the resolver reaches the shipped data;
+the separate Portugal bridge tests pin the independently sourced date roster.
+The other bound countries continue to compare their computed rules with seeds.
 
 Scope note. The lunisolar half of this problem, India's seeded festivals
 measured against their own anchors, belongs to
@@ -59,6 +64,7 @@ from pathlib import Path
 import pytest
 
 from app.core.calendar import _HOLIDAY_FUNCS, _equinox_day, _get_holidays
+from app.core.seeded_holidays import SEEDED_HOLIDAY_COUNTS
 
 SEED_PATH = (
     Path(__file__).resolve().parents[3] / "app" / "modules" / "i18n_foundation" / "seed_data" / "work_calendars.json"
@@ -266,15 +272,15 @@ _DIVERGENCES: dict[str, Divergence] = {
 
 #: Floors. These stop a future failure from being resolved by trimming the
 #: population instead of the defect. Measured, not guessed: 37 seeded countries,
-#: of which 19 have an engine function.
+#: of which 20 have a runtime binding for the seed year.
 _MIN_SEEDED = 37
-_MIN_BOUND = 19
+_MIN_BOUND = 20
 
 #: The countries that ship a calendar nothing computes, named rather than
 #: counted. This has to be an explicit list: ``UNBOUND`` is derived from
-#: ``_HOLIDAY_FUNCS``, so a test that asks whether an unbound country is absent
-#: from ``_HOLIDAY_FUNCS`` is asking a tautology, and a country gaining an
-#: engine function would silently drop out of the derived list instead of
+#: the runtime binding registries, so a test that asks whether an unbound country
+#: is absent from those registries is asking a tautology. A country gaining a
+#: runtime binding would silently drop out of the derived list instead of
 #: failing anything. Pinned here, that migration is a failure that says so.
 _EXPECTED_UNBOUND: tuple[str, ...] = (
     "AU",
@@ -290,7 +296,6 @@ _EXPECTED_UNBOUND: tuple[str, ...] = (
     "NO",
     "NZ",
     "PL",
-    "PT",  # JUR-03: sourced 2026 seed only; the separate core engine remains future work.
     "SE",
     "TR",
     "UA",
@@ -319,8 +324,16 @@ def _seeded_countries() -> list[str]:
 
 
 SEEDED = _seeded_countries()
-BOUND = [c for c in SEEDED if c in _HOLIDAY_FUNCS]
-UNBOUND = [c for c in SEEDED if c not in _HOLIDAY_FUNCS]
+
+
+def _runtime_bound(country: str) -> bool:
+    # Preserve computed aliases such as AT -> DE, even though their jurisdiction
+    # provenance correctly reports a fallback. Their divergences still matter.
+    return country in _HOLIDAY_FUNCS or (country, SEED_YEAR) in SEEDED_HOLIDAY_COUNTS
+
+
+BOUND = [c for c in SEEDED if _runtime_bound(c)]
+UNBOUND = [c for c in SEEDED if not _runtime_bound(c)]
 
 
 def _measure(country_code: str) -> tuple[frozenset[str], frozenset[str]]:
@@ -384,17 +397,17 @@ def test_the_countries_that_agree_are_named() -> None:
     This asserts on ``_DIVERGENCES`` rather than on the data, deliberately. When
     the agreement check fails, the cheap way out is to add an entry here and
     move on, and that would be invisible: the suite goes green and one more
-    country stops being compared. Naming the four countries that carry no entry
+    country stops being compared. Naming the countries that carry no entry
     means growing the table is a change somebody has to make on purpose.
     """
     agreeing = sorted(c for c in BOUND if c not in _DIVERGENCES)
     print(f"seed equals engine exactly for {len(agreeing)} of {len(BOUND)} bound countries: {agreeing}")
-    assert agreeing == ["BG", "DE", "NG", "US"], (
+    assert agreeing == ["BG", "DE", "NG", "PT", "US"], (
         f"the set of countries whose two sources agree exactly has changed, now {agreeing}. "
         f"A country that LEFT this list started disagreeing with the engine, and belongs in "
         f"_DIVERGENCES only with a reason. A country that JOINED it either had its divergence "
-        f"fixed, in which case delete its _DIVERGENCES entry, or is newly bound to an engine "
-        f"function and agrees, in which case only this expectation needs updating. "
+        f"fixed, in which case delete its _DIVERGENCES entry, or has a new runtime binding "
+        f"that agrees, in which case only this expectation needs updating. "
     )
 
 
@@ -402,8 +415,8 @@ def test_no_recorded_divergence_is_stale() -> None:
     """An entry for a country we no longer ship, or no longer compute, is a lie."""
     orphans = sorted(set(_DIVERGENCES) - set(BOUND))
     assert not orphans, (
-        f"_DIVERGENCES has entries for {orphans}, which are not both seeded and bound to an "
-        f"engine function. A recorded divergence that nothing measures is worse than none, "
+        f"_DIVERGENCES has entries for {orphans}, which are not both seeded and bound to a "
+        f"runtime binding. A recorded divergence that nothing measures is worse than none, "
         f"because it reads as coverage."
     )
 
@@ -427,22 +440,22 @@ def test_every_divergence_names_a_side_and_a_reason() -> None:
 
 @pytest.mark.parametrize("code", _EXPECTED_UNBOUND)
 def test_an_unbound_country_ships_a_calendar_nothing_can_contradict(code: str) -> None:
-    """A seeded calendar with no engine function is unchecked, and says so.
+    """A seeded calendar with no runtime binding is unchecked, and says so.
 
     This is the honest half of the population: these countries ship holiday
     dates that nothing computes, so nothing can disagree with them.
 
     Parametrized over the pinned list rather than the derived one on purpose. A
-    country gaining an engine function disappears from ``UNBOUND`` the moment
-    ``_HOLIDAY_FUNCS`` grows, so parametrizing over ``UNBOUND`` and then
-    asserting the country is not in ``_HOLIDAY_FUNCS`` is a tautology that
+    country gaining a binding disappears from ``UNBOUND`` the moment a registry
+    grows, so parametrizing over ``UNBOUND`` and then asserting the country is
+    not bound is a tautology that
     cannot fail and, worse, drops the country out of the report instead of
     moving it into tier 1. Driven from ``_EXPECTED_UNBOUND``, the same event is
     a failure that names itself.
     """
     assert code in SEEDED, f"{code} is pinned as unbound but is no longer seeded at all"
-    assert code not in _HOLIDAY_FUNCS, (
-        f"{code} now has an engine function, so its seeded calendar CAN be compared and this "
+    assert not _runtime_bound(code), (
+        f"{code} now has a runtime binding, so its seeded calendar CAN be compared and this "
         f"gate must start comparing it. Remove {code} from _EXPECTED_UNBOUND; it will then "
         f"appear in BOUND and tier 1 will check it, which is where a divergence would show up."
     )
@@ -463,14 +476,14 @@ def test_the_pinned_unbound_list_matches_the_tree() -> None:
 def test_the_unbound_population_is_printed_and_bounded() -> None:
     """Name them in the output. A country absent from a report is not covered by it."""
     print(
-        f"seed vs engine population: {len(SEEDED)} countries seeded, {len(BOUND)} bound to an "
-        f"engine function and compared, {len(UNBOUND)} unbound and NOT compared."
+        f"seed vs runtime population: {len(SEEDED)} countries seeded, {len(BOUND)} bound "
+        f"for {SEED_YEAR} and compared, {len(UNBOUND)} unbound and NOT compared."
     )
     print(f"  bound   ({len(BOUND)}): {BOUND}")
     print(f"  unbound ({len(UNBOUND)}): {UNBOUND}")
     print(f"  of the bound, {len(BOUND) - len(_DIVERGENCES)} agree exactly and {len(_DIVERGENCES)} differ as recorded")
     for code in UNBOUND:
-        print(f"    {code}: {len(_seed_dates(code))} seeded dates, unbound because _HOLIDAY_FUNCS has no entry")
+        print(f"    {code}: {len(_seed_dates(code))} seeded dates, no runtime binding for {SEED_YEAR}")
 
     assert set(SEEDED) == set(BOUND) | set(UNBOUND), "a seeded country fell out of both halves of the population"
     assert not set(BOUND) & set(UNBOUND), "a country cannot be both bound and unbound"
