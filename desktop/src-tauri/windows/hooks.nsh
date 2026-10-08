@@ -176,3 +176,12 @@
 !macro NSIS_HOOK_PREUNINSTALL
   !insertmacro OE_STOP_THIS_INSTALL
 !macroend
+
+; Up to 18.4 the backend shipped as one onefile executable next to the
+; launcher. It is now the onedir folder $INSTDIR\server, so a copy of the old
+; file left by an upgrade is dead weight of about 650 MB. The uninstaller of
+; the previous version normally removes it; this covers the case where it did
+; not, for example a file held open at the time.
+!macro NSIS_HOOK_POSTINSTALL
+  Delete "$INSTDIR\openconstructionerp-server.exe"
+!macroend

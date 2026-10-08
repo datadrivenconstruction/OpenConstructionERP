@@ -131,6 +131,7 @@ def _spec_datas() -> list[tuple[str, str]]:
         "Analysis": _Analysis,
         "PYZ": lambda *_a, **_kw: None,
         "EXE": lambda *_a, **_kw: None,
+        "COLLECT": lambda *_a, **_kw: None,
     }
 
     fakes = {

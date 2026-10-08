@@ -3675,6 +3675,44 @@ fn extraction_space_allows_a_sidecar(handle: &tauri::AppHandle) -> bool {
     }
 }
 
+/// The installed backend executable inside the resource directory (Windows).
+///
+/// Windows ships the backend as a PyInstaller onedir folder installed once as
+/// the Tauri resource `server/` (tauri.windows.conf.json), so nothing is
+/// unpacked at start. Tauri's externalBin ships exactly one file, which is why
+/// the exe is resolved here and started as a plain command instead.
+#[cfg(windows)]
+const ONEDIR_SERVER_EXE: &str = "openconstructionerp-server.exe";
+
+#[cfg(windows)]
+fn onedir_server_path(resource_dir: &std::path::Path) -> PathBuf {
+    resource_dir.join("server").join(ONEDIR_SERVER_EXE)
+}
+
+/// The command that starts the backend, before arguments and environment.
+#[cfg(windows)]
+fn backend_command(handle: &tauri::AppHandle) -> Result<tauri_plugin_shell::process::Command, String> {
+    let resource_dir = handle
+        .path()
+        .resource_dir()
+        .map_err(|e| format!("no resource directory: {e}"))?;
+    let exe = onedir_server_path(&resource_dir);
+    if !exe.is_file() {
+        return Err(format!("{} is missing", exe.display()));
+    }
+    log_line(&format!("backend executable: {}", exe.display()));
+    Ok(handle.shell().command(exe))
+}
+
+/// The command that starts the backend, before arguments and environment.
+#[cfg(not(windows))]
+fn backend_command(handle: &tauri::AppHandle) -> Result<tauri_plugin_shell::process::Command, String> {
+    handle
+        .shell()
+        .sidecar("openconstructionerp-server")
+        .map_err(|e| e.to_string())
+}
+
 /// Start a server locally, as a sidecar of this process, and open the app
 /// against it once it is healthy.
 ///
@@ -3704,8 +3742,7 @@ fn start_local_backend(
     // for. With --data-dir left unset the sidecar uses its default
     // (~/.openestimate), which stays writable even for a per-machine
     // install under Program Files.
-    let shell = handle.shell();
-    let sidecar_cmd = match shell.sidecar("openconstructionerp-server") {
+    let sidecar_cmd = match backend_command(&handle) {
         Ok(cmd) => {
             // OE_DESKTOP=1 marks this backend as one we spawned from the
             // desktop shell (so the backend can run desktop-only
@@ -4508,8 +4545,13 @@ fn main() {
                     // written against.
                     let reporter = handle.clone();
                     let start = move || {
+                        // Still run on Windows, where the backend no longer
+                        // unpacks: it clears extractions left by the onefile
+                        // builds this version replaces.
                         sweep_orphaned_extractions(&handle);
-                        if !extraction_space_allows_a_sidecar(&handle) {
+                        // The space check is about room to unpack, and only
+                        // the onefile builds (macOS, Linux) unpack.
+                        if cfg!(not(windows)) && !extraction_space_allows_a_sidecar(&handle) {
                             return;
                         }
                         // Nothing between here and the spawn used to be able
@@ -6784,10 +6826,6 @@ nothing, and abandons a start that is working"
             text.contains(&assignment),
             "desktop/pyinstaller.spec no longer sets {assignment}, so the sidecar unpacks \
 somewhere this launcher does not sweep"
-        );
-        assert!(
-            text.contains("runtime_tmpdir=(_WINDOWS_RUNTIME_TMPDIR"),
-            "the spec still holds the path but no longer hands it to the bootloader"
         );
     }
 

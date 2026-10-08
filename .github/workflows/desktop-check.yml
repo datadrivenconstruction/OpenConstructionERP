@@ -164,6 +164,13 @@ jobs:
             mkdir -p desktop/src-tauri/binaries
             : > "$sidecar"
           fi
+          # Windows ships the sidecar as a onedir resource folder instead
+          # (tauri.windows.conf.json), and a resource path that does not exist
+          # fails the build script the same way.
+          if [ "$ext" = ".exe" ] && [ ! -e desktop/src-tauri/binaries/server ]; then
+            mkdir -p desktop/src-tauri/binaries/server
+            : > desktop/src-tauri/binaries/server/openconstructionerp-server.exe
+          fi
           echo "Target triple: ${triple}"
           echo "Sidecar stand-in: ${sidecar}"
 

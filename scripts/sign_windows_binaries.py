@@ -177,6 +177,8 @@ def check_archive(exe: Path) -> int:
     if signtool is None:
         print("error: signtool.exe was not found in the Windows SDK", file=sys.stderr)
         return 1
+    if exe.is_dir():
+        return check_folder(signtool, exe)
     reader, code = open_archive(exe)
     if reader is None:
         return code or 1
@@ -207,6 +209,19 @@ def check_archive(exe: Path) -> int:
     return 0 if names and not unsigned and not unreadable else 1
 
 
+def check_folder(signtool: str, folder: Path) -> int:
+    """Verify every PE file of a onedir build, the folder that actually ships.
+
+    Zero files is a failure for the same reason as an empty archive above.
+    """
+    files = find_candidates([folder])
+    unsigned = [f for f in files if not is_signed(signtool, f)]
+    print(f"{folder.name}: {len(files)} PE files, {len(files) - len(unsigned)} signed, {len(unsigned)} unsigned")
+    for f in unsigned:
+        print(f"::error title=Unsigned file in the sidecar folder::{f.relative_to(folder.resolve())}")
+    return 0 if files and not unsigned else 1
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("paths", nargs="+", type=Path, help="folders or files to sign")
@@ -215,7 +230,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--check-archive",
         action="store_true",
-        help="sign nothing; verify every PE member inside the given PyInstaller onefile executables",
+        help="sign nothing; verify every PE member inside the given PyInstaller onefile executables or onedir folders",
     )
     args = parser.parse_args(argv)
     if args.check_archive:

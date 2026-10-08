@@ -10,7 +10,11 @@ ManifestDPIAwareness PerMonitorV2
   SetCompress off
 !else
   ; Set the compression algorithm. We default to LZMA.
-  SetCompressor /SOLID "{{compression}}"
+  ; Not /SOLID: a solid block holds the whole uncompressed payload, and the
+  ; Windows backend is a onedir folder of about 1.6 GB, which with the
+  ; converters and the offline WebView2 installer passes the 2 GB makensis
+  ; can map ("error mmapping datablock"). Per-file compression stays under it.
+  SetCompressor "{{compression}}"
 !endif
 
 ; Keep above !include to stay ahead of any plugin command

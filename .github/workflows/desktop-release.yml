@@ -100,6 +100,11 @@ jobs:
     # job. Building it once and passing it to the three would take the whole
     # variance out of two of them.
     timeout-minutes: 120
+    # The built sidecar every check below runs. Windows is a PyInstaller onedir
+    # folder (exe plus _internal/), installed once as a Tauri resource; macOS
+    # and Linux are a single onefile executable shipped as an externalBin.
+    env:
+      SIDECAR_BIN: ${{ matrix.os == 'windows-latest' && 'desktop/dist/openconstructionerp-server/openconstructionerp-server.exe' || 'desktop/dist/openconstructionerp-server' }}
     strategy:
       # Build every OS even if one fails, so a single-platform break never
       # cancels the others and we still ship the installers that did build.
@@ -247,6 +252,15 @@ jobs:
           pip install "pyinstaller==6.21.0"
           pyinstaller desktop/pyinstaller.spec --distpath desktop/dist --workpath desktop/build --noconfirm
 
+      # The Windows onedir folder is packaged by makensis and installed under
+      # Program Files, and both stop at 260 characters. Deep licence trees in
+      # wheel metadata (torch's third_party notices) go past that, so they are
+      # packed into a zip beside themselves; any other over-long path fails here.
+      - name: Keep the onedir paths short enough to install (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: python scripts/shorten_onedir_paths.py desktop/dist/openconstructionerp-server
+
       # The onefile executable itself, signed before any check below runs it,
       # so those checks prove the bootloader still finds its archive behind
       # the appended signature.
@@ -259,11 +273,13 @@ jobs:
           AZURE_CLIENT_SECRET: ${{ secrets.ARTIFACT_SIGNING_CLIENT_SECRET }}
         run: |
           set -euo pipefail
-          python scripts/sign_windows_binaries.py desktop/dist/openconstructionerp-server.exe
+          # The whole onedir folder: the exe PyInstaller wrote and anything in
+          # _internal/ the pre-pack pass did not reach. Files that already
+          # carry a signature are left as they are.
+          python scripts/sign_windows_binaries.py desktop/dist/openconstructionerp-server
           # "Signed and verified" above was said about files in site-packages.
-          # This asks the archive itself whether its members kept those
-          # signatures through packing, member by member.
-          python scripts/sign_windows_binaries.py --check-archive desktop/dist/openconstructionerp-server.exe
+          # This walks the folder that ships and asks about every PE in it.
+          python scripts/sign_windows_binaries.py --check-archive desktop/dist/openconstructionerp-server
 
       # Ad-hoc sign the sidecar here, before anything runs it, rather than in
       # the bundling job. The signature is part of the file, so it survives the
@@ -298,7 +314,7 @@ jobs:
         # download.
         run: |
           python scripts/check_desktop_sidecar_bundle.py \
-            "desktop/dist/openconstructionerp-server${{ matrix.ext }}"
+            "${{ env.SIDECAR_BIN }}"
 
       # Run the thing we just built. Nothing in this workflow ever did, and that
       # is how the 14.4.0 macOS break shipped: the app reached "Starting the
@@ -342,7 +358,7 @@ jobs:
         timeout-minutes: 10
         run: |
           set -uo pipefail
-          bin="desktop/dist/openconstructionerp-server${{ matrix.ext }}"
+          bin="${{ env.SIDECAR_BIN }}"
           chmod +x "$bin" 2>/dev/null || true
           echo "Running: $bin version"
           # `|| code=$?` rather than a bare assignment followed by reading $?.
@@ -417,7 +433,7 @@ jobs:
         timeout-minutes: 10
         run: |
           set -uo pipefail
-          bin="desktop/dist/openconstructionerp-server${{ matrix.ext }}"
+          bin="${{ env.SIDECAR_BIN }}"
           chmod +x "$bin" 2>/dev/null || true
           echo "Running: $bin doctor"
           out=$("$bin" doctor 2>&1) || true
@@ -494,7 +510,7 @@ jobs:
         timeout-minutes: 20
         run: |
           set -uo pipefail
-          bin="desktop/dist/openconstructionerp-server${{ matrix.ext }}"
+          bin="${{ env.SIDECAR_BIN }}"
           chmod +x "$bin" 2>/dev/null || true
           # A relative directory, deliberately. RUNNER_TEMP on Windows is a
           # path with backslashes, and handing one to bash on one leg of a
@@ -581,7 +597,7 @@ jobs:
         shell: bash
         run: |
           set -uo pipefail
-          bin="desktop/dist/openconstructionerp-server${{ matrix.ext }}"
+          bin="${{ env.SIDECAR_BIN }}"
           chmod +x "$bin" 2>/dev/null || true
 
           code='import sys; sys.stdout.write("interpreter-answered\n")'
@@ -630,7 +646,7 @@ jobs:
         timeout-minutes: 35
         run: |
           set -uo pipefail
-          bin="desktop/dist/openconstructionerp-server${{ matrix.ext }}"
+          bin="${{ env.SIDECAR_BIN }}"
           chmod +x "$bin" 2>/dev/null || true
           # Relative for the same reason the step above uses one: RUNNER_TEMP on
           # Windows carries backslashes and handing one to bash fails a leg of
@@ -1014,10 +1030,17 @@ jobs:
         shell: bash
         run: |
           mkdir -p desktop/src-tauri/binaries
-          # onefile build: PyInstaller writes a single executable directly into
-          # distpath, not a onedir subfolder.
-          cp "desktop/dist/openconstructionerp-server${{ matrix.ext }}" \
-             "desktop/src-tauri/binaries/openconstructionerp-server-${{ matrix.target }}${{ matrix.ext }}"
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            # onedir build: the whole folder becomes the Tauri resource
+            # server/ (tauri.windows.conf.json).
+            cp -r desktop/dist/openconstructionerp-server desktop/src-tauri/binaries/server
+            echo "onedir sidecar: $(find desktop/src-tauri/binaries/server -type f | wc -l) files, $(du -sh desktop/src-tauri/binaries/server | cut -f1)"
+          else
+            # onefile build: PyInstaller writes a single executable directly
+            # into distpath.
+            cp "desktop/dist/openconstructionerp-server${{ matrix.ext }}" \
+               "desktop/src-tauri/binaries/openconstructionerp-server-${{ matrix.target }}${{ matrix.ext }}"
+          fi
 
       - name: Upload sidecar artifact
         uses: actions/upload-artifact@v4
@@ -1032,7 +1055,7 @@ jobs:
           SOURCE_SHA: ${{ github.sha }}
         run: |
           if ((git rev-parse HEAD).Trim() -ne $env:SOURCE_SHA) { throw 'Diagnostic checkout SHA mismatch' }
-          python desktop/frontend_artifact.py pack --dist frontend/dist --artifact desktop/frontend-artifact --source-sha "$env:SOURCE_SHA" --run-id "${{ github.run_id }}" --run-attempt "${{ github.run_attempt }}" --sidecar desktop/src-tauri/binaries/openconstructionerp-server-x86_64-pc-windows-msvc.exe
+          python desktop/frontend_artifact.py pack --dist frontend/dist --artifact desktop/frontend-artifact --source-sha "$env:SOURCE_SHA" --run-id "${{ github.run_id }}" --run-attempt "${{ github.run_attempt }}" --sidecar desktop/src-tauri/binaries/server/openconstructionerp-server.exe
 
       - name: Upload the tested diagnostic frontend
         if: inputs.build_only_windows
@@ -1239,7 +1262,7 @@ jobs:
           SOURCE_SHA: ${{ github.sha }}
         run: |
           if ((git rev-parse HEAD).Trim() -ne $env:SOURCE_SHA) { throw 'Diagnostic checkout SHA mismatch' }
-          python desktop/frontend_artifact.py restore --dist frontend/dist --artifact desktop/frontend-artifact --source-sha "$env:SOURCE_SHA" --run-id "${{ github.run_id }}" --run-attempt "${{ github.run_attempt }}" --sidecar desktop/src-tauri/binaries/openconstructionerp-server-x86_64-pc-windows-msvc.exe
+          python desktop/frontend_artifact.py restore --dist frontend/dist --artifact desktop/frontend-artifact --source-sha "$env:SOURCE_SHA" --run-id "${{ github.run_id }}" --run-attempt "${{ github.run_attempt }}" --sidecar desktop/src-tauri/binaries/server/openconstructionerp-server.exe
 
       # tauri.conf.json opens the window on "splash.html", and that one file is
       # the launcher's entire channel for saying anything to a user. Every
@@ -1566,7 +1589,7 @@ jobs:
           if ($actual -ne $env:DIAGNOSTIC_SOURCE_SHA) { throw 'Diagnostic checkout does not match workflow SHA' }
           $installers = @(Get-ChildItem -LiteralPath desktop/src-tauri/target/release/bundle/nsis -Filter '*.exe')
           if ($installers.Count -eq 0) { throw 'NSIS installer missing' }
-          $sidecar = Get-Item -LiteralPath desktop/src-tauri/binaries/openconstructionerp-server-x86_64-pc-windows-msvc.exe
+          $sidecar = Get-Item -LiteralPath desktop/src-tauri/binaries/server/openconstructionerp-server.exe
           $files = @($installers) + @($sidecar)
           $fingerprints = @($files | ForEach-Object { @{ name = $_.Name; bytes = $_.Length; sha256 = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant() } })
           $manifest = @{ purpose = 'diagnostic-only; not a published update'; source_sha = $actual; run_id = '${{ github.run_id }}'; run_attempt = '${{ github.run_attempt }}'; version = (Get-Content desktop/src-tauri/tauri.conf.json -Raw | ConvertFrom-Json).version; files = $fingerprints }
