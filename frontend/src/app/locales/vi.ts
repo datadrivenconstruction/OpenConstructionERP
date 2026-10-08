@@ -21995,7 +21995,7 @@ const resource = {
     "bim_rules.field_unit": "Đơn vị",
     "bim_rules.field_waste": "Hệ số hao hụt %",
     "bim_rules.flow_step_apply": "Xem trước để kiểm tra phần tử khớp, rồi Áp dụng. Sau khi có phiên bản mô hình mới, áp dụng lại và khối lượng sẽ được cập nhật.",
-    "bim_rules.flow_step_model": "Trong Revit, gán cho phần tử các tham số bạn dùng để định giá (ví dụ Phase Created hoặc mã BOQ), rồi tải mô hình lên.",
+    "bim_rules.flow_step_model": "Trong Revit®, gán cho phần tử các tham số bạn dùng để định giá (ví dụ Phase Created hoặc mã BOQ), rồi tải mô hình lên.",
     "bim_rules.flow_step_position": "Trỏ quy tắc tới một vị trí BOQ, hoặc để quy tắc tự tạo, rồi chọn khối lượng: diện tích, thể tích, chiều dài, trọng lượng hoặc số lượng.",
     "bim_rules.flow_step_rule": "Tạo một quy tắc: danh mục phần tử cùng bộ lọc thuộc tính. Tên thuộc tính và giá trị của chúng được gợi ý từ mô hình.",
     "bim_rules.flow_title": "Cách bóc tách khối lượng tự động hoạt động",

@@ -22083,7 +22083,7 @@ const resource = {
     "bim_rules.field_unit": "Yksikkö",
     "bim_rules.field_waste": "Hukkaprosentti %",
     "bim_rules.flow_step_apply": "Tarkista esikatselulla, mitä täsmää, ja valitse sitten Käytä. Mallin uuden version jälkeen käytä uudelleen, niin määrät päivittyvät.",
-    "bim_rules.flow_step_model": "Anna Revitissä elementeille parametrit, joiden mukaan hinnoittelet (esimerkiksi Phase Created tai määräluettelon koodi), ja lataa sitten malli.",
+    "bim_rules.flow_step_model": "Anna Revit®issä elementeille parametrit, joiden mukaan hinnoittelet (esimerkiksi Phase Created tai määräluettelon koodi), ja lataa sitten malli.",
     "bim_rules.flow_step_position": "Osoita sääntö määräluettelon nimikkeeseen tai anna sen luoda sellainen, ja valitse määrä: pinta-ala, tilavuus, pituus, paino tai lukumäärä.",
     "bim_rules.flow_step_rule": "Luo sääntö: elementin luokka ja ominaisuussuodattimet. Ominaisuuksien nimet ja arvot ehdotetaan mallista.",
     "bim_rules.flow_title": "Miten automaattinen määrälaskenta toimii",

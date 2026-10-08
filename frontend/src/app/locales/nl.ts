@@ -22375,7 +22375,7 @@ const resource = {
     "bim_rules.field_unit": "Eenheid",
     "bim_rules.field_waste": "Verliesfactor %",
     "bim_rules.flow_step_apply": "Controleer met het voorbeeld wat overeenkomt, en kies dan Toepassen. Pas na een nieuwe modelversie opnieuw toe, dan worden de hoeveelheden bijgewerkt.",
-    "bim_rules.flow_step_model": "Geef in Revit de elementen de parameters waarop u prijst (bijvoorbeeld Phase Created of een meetstaatcode) en upload daarna het model.",
+    "bim_rules.flow_step_model": "Geef in Revit® de elementen de parameters waarop u prijst (bijvoorbeeld Phase Created of een meetstaatcode) en upload daarna het model.",
     "bim_rules.flow_step_position": "Richt de regel op een meetstaatpost, of laat er een aanmaken, en kies de hoeveelheid: oppervlakte, volume, lengte, gewicht of aantal.",
     "bim_rules.flow_step_rule": "Maak een regel: elementcategorie plus eigenschapsfilters. Eigenschapsnamen en hun waarden worden vanuit het model voorgesteld.",
     "bim_rules.flow_title": "Hoe automatische takeoff werkt",

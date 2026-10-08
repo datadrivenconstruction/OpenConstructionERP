@@ -22433,7 +22433,7 @@ const resource = {
     "bim_rules.field_unit": "Unitate",
     "bim_rules.field_waste": "Factor de pierderi %",
     "bim_rules.flow_step_apply": "Folosiți previzualizarea pentru a vedea ce se potrivește, apoi Aplică. După o nouă versiune a modelului, aplicați din nou și cantitățile se actualizează.",
-    "bim_rules.flow_step_model": "În Revit, atribuiți elementelor parametrii după care evaluați costul (de exemplu Phase Created sau un cod din deviz), apoi încărcați modelul.",
+    "bim_rules.flow_step_model": "În Revit®, atribuiți elementelor parametrii după care evaluați costul (de exemplu Phase Created sau un cod din deviz), apoi încărcați modelul.",
     "bim_rules.flow_step_position": "Indicați regulii o poziție din deviz sau lăsați-o să creeze una și alegeți cantitatea: arie, volum, lungime, greutate sau număr.",
     "bim_rules.flow_step_rule": "Creați o regulă: categoria elementului plus filtre de proprietăți. Numele proprietăților și valorile lor sunt propuse din model.",
     "bim_rules.flow_title": "Cum funcționează extragerea automată a cantităților",

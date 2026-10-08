@@ -22402,7 +22402,7 @@ const resource = {
     "bim_rules.field_unit": "Enhed",
     "bim_rules.field_waste": "Spildfaktor %",
     "bim_rules.flow_step_apply": "Brug forhåndsvisning til at se, hvad der matcher, og derefter Anvend. Efter en ny modelversion anvender du igen, og mængderne opdateres.",
-    "bim_rules.flow_step_model": "I Revit giver du elementerne de parametre, du prissætter efter (for eksempel Phase Created eller en tilbudslistekode), og uploader derefter modellen.",
+    "bim_rules.flow_step_model": "I Revit® giver du elementerne de parametre, du prissætter efter (for eksempel Phase Created eller en tilbudslistekode), og uploader derefter modellen.",
     "bim_rules.flow_step_position": "Peg reglen på en post i tilbudslisten, eller lad den oprette en, og vælg mængden: areal, volumen, længde, vægt eller antal.",
     "bim_rules.flow_step_rule": "Opret en regel: elementkategori plus egenskabsfiltre. Egenskabsnavne og deres værdier foreslås fra modellen.",
     "bim_rules.flow_title": "Sådan fungerer automatisk mængdeudtræk",

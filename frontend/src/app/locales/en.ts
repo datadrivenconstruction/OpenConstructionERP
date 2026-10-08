@@ -20075,7 +20075,7 @@ const resource = {
     "bim_rules.field_unit": "Unit",
     "bim_rules.field_waste": "Waste factor %",
     "bim_rules.flow_step_apply": "Preview to check what matches, then Apply. After a new model version, Apply again and the quantities update.",
-    "bim_rules.flow_step_model": "In Revit, give the elements the parameters you price by (for example Phase Created or a BOQ code), then upload the model.",
+    "bim_rules.flow_step_model": "In Revit®, give the elements the parameters you price by (for example Phase Created or a BOQ code), then upload the model.",
     "bim_rules.flow_step_position": "Point the rule at a BOQ position, or let it create one, and pick the quantity: area, volume, length, weight or count.",
     "bim_rules.flow_step_rule": "Create a rule: element category plus property filters. Property names and their values are offered from the model.",
     "bim_rules.flow_title": "How automatic takeoff works",

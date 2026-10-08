@@ -22185,7 +22185,7 @@ const resource = {
     "bim_rules.field_unit": "Enhet",
     "bim_rules.field_waste": "Svinnfaktor %",
     "bim_rules.flow_step_apply": "Bruk forhåndsvisning for å se hva som samsvarer, og velg deretter Bruk. Etter en ny modellversjon bruker du på nytt, og mengdene oppdateres.",
-    "bim_rules.flow_step_model": "I Revit gir du elementene parameterne du prissetter etter (for eksempel Phase Created eller en mengdekode), og laster deretter opp modellen.",
+    "bim_rules.flow_step_model": "I Revit® gir du elementene parameterne du prissetter etter (for eksempel Phase Created eller en mengdekode), og laster deretter opp modellen.",
     "bim_rules.flow_step_position": "Pek regelen mot en post i mengdebeskrivelsen, eller la den opprette en, og velg mengden: areal, volum, lengde, vekt eller antall.",
     "bim_rules.flow_step_rule": "Opprett en regel: elementkategori pluss egenskapsfiltre. Egenskapsnavn og verdiene deres foreslås fra modellen.",
     "bim_rules.flow_title": "Slik fungerer automatisk mengdeuttak",

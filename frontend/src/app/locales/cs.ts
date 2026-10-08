@@ -22288,7 +22288,7 @@ const resource = {
     "bim_rules.field_unit": "Jednotka",
     "bim_rules.field_waste": "Faktor odpadu %",
     "bim_rules.flow_step_apply": "Náhledem zkontrolujte, co se shoduje, poté Použít. Po nové verzi modelu použijte znovu a množství se aktualizují.",
-    "bim_rules.flow_step_model": "V Revitu zadejte prvkům parametry, podle kterých oceňujete (například Phase Created nebo kód z výkazu výměr), a nahrajte model.",
+    "bim_rules.flow_step_model": "V Revit®u zadejte prvkům parametry, podle kterých oceňujete (například Phase Created nebo kód z výkazu výměr), a nahrajte model.",
     "bim_rules.flow_step_position": "Nasměrujte pravidlo na položku výkazu výměr, nebo nechte vytvořit novou, a vyberte množství: plocha, objem, délka, hmotnost nebo počet.",
     "bim_rules.flow_step_rule": "Vytvořte pravidlo: kategorie prvků plus filtry vlastností. Názvy vlastností a jejich hodnoty nabízí model.",
     "bim_rules.flow_title": "Jak funguje automatické měření výměr",

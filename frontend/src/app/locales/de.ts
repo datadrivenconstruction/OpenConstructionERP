@@ -22714,7 +22714,7 @@ const resource = {
     "bim_rules.field_unit": "Einheit",
     "bim_rules.field_waste": "Verschnittfaktor %",
     "bim_rules.flow_step_apply": "Mit der Vorschau prüfen, was zutrifft, dann Anwenden. Nach einer neuen Modellversion erneut anwenden, die Mengen werden aktualisiert.",
-    "bim_rules.flow_step_model": "Weisen Sie in Revit den Elementen die Parameter zu, nach denen Sie kalkulieren (zum Beispiel Phase Created oder einen LV-Code), und laden Sie dann das Modell hoch.",
+    "bim_rules.flow_step_model": "Weisen Sie in Revit® den Elementen die Parameter zu, nach denen Sie kalkulieren (zum Beispiel Phase Created oder einen LV-Code), und laden Sie dann das Modell hoch.",
     "bim_rules.flow_step_position": "Richten Sie die Regel auf eine LV-Position oder lassen Sie eine anlegen, und wählen Sie die Menge: Fläche, Volumen, Länge, Gewicht oder Anzahl.",
     "bim_rules.flow_step_rule": "Regel anlegen: Elementkategorie plus Eigenschaftsfilter. Eigenschaftsnamen und ihre Werte werden aus dem Modell vorgeschlagen.",
     "bim_rules.flow_title": "So funktioniert die automatische Mengenermittlung",

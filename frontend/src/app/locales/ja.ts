@@ -22149,7 +22149,7 @@ const resource = {
     "bim_rules.field_unit": "単位",
     "bim_rules.field_waste": "ロス率 %",
     "bim_rules.flow_step_apply": "プレビューで一致する要素を確認してから適用します。モデルの新しい版が出たら再度適用すると、数量が更新されます。",
-    "bim_rules.flow_step_model": "Revit で、単価を決める基準にするパラメータ (例: Phase Created や内訳書コード) を要素に設定し、モデルをアップロードします。",
+    "bim_rules.flow_step_model": "Revit® で、単価を決める基準にするパラメータ (例: Phase Created や内訳書コード) を要素に設定し、モデルをアップロードします。",
     "bim_rules.flow_step_position": "ルールを内訳書の項目に紐付けるか、新規作成させ、数量を選びます。面積、体積、長さ、重量、個数から選べます。",
     "bim_rules.flow_step_rule": "ルールを作成します。要素カテゴリとプロパティフィルタを指定します。プロパティ名と値はモデルから候補表示されます。",
     "bim_rules.flow_title": "自動拾い出しのしくみ",

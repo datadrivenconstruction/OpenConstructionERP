@@ -22334,7 +22334,7 @@ const resource = {
     "bim_rules.field_unit": "Ühik",
     "bim_rules.field_waste": "Jäätmetegur %",
     "bim_rules.flow_step_apply": "Eelvaatega kontrollige, mis sobib, seejärel Rakenda. Pärast mudeli uut versiooni rakendage uuesti ja kogused uuenevad.",
-    "bim_rules.flow_step_model": "Andke Revitis elementidele parameetrid, mille järgi hindate (näiteks Phase Created või mahutabeli kood), ja laadige seejärel mudel üles.",
+    "bim_rules.flow_step_model": "Andke Revit®is elementidele parameetrid, mille järgi hindate (näiteks Phase Created või mahutabeli kood), ja laadige seejärel mudel üles.",
     "bim_rules.flow_step_position": "Suunake reegel mahutabeli positsioonile või laske see luua, ja valige kogus: pindala, maht, pikkus, kaal või arv.",
     "bim_rules.flow_step_rule": "Looge reegel: elemendi kategooria ja omaduste filtrid. Omaduste nimed ja nende väärtused pakutakse mudelist.",
     "bim_rules.flow_title": "Kuidas automaatne koguste arvutus töötab",

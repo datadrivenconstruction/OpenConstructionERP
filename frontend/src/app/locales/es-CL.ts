@@ -21555,7 +21555,7 @@ const resource = {
     "bim_rules.field_unit": "Unidad",
     "bim_rules.field_waste": "Factor de merma %",
     "bim_rules.flow_step_apply": "Use la vista previa para comprobar qué coincide y luego Aplicar. Tras una nueva versión del modelo, aplique de nuevo y las cantidades se actualizan.",
-    "bim_rules.flow_step_model": "En Revit, asigne a los elementos los parámetros con los que valora (por ejemplo Phase Created o un código de presupuesto) y luego suba el modelo.",
+    "bim_rules.flow_step_model": "En Revit®, asigne a los elementos los parámetros con los que valora (por ejemplo Phase Created o un código de presupuesto) y luego suba el modelo.",
     "bim_rules.flow_step_position": "Apunte la regla a una partida del presupuesto, o deje que cree una, y elija la cantidad: área, volumen, longitud, peso o conteo.",
     "bim_rules.flow_step_rule": "Cree una regla: categoría de elemento más filtros de propiedades. Los nombres de propiedades y sus valores se sugieren desde el modelo.",
     "bim_rules.flow_title": "Cómo funciona la medición automática",

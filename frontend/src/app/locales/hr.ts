@@ -22096,7 +22096,7 @@ const resource = {
     "bim_rules.field_unit": "Jedinica",
     "bim_rules.field_waste": "Faktor otpada %",
     "bim_rules.flow_step_apply": "Pregledom provjerite što se podudara, zatim Primijeni. Nakon nove verzije modela primijenite ponovno i količine se ažuriraju.",
-    "bim_rules.flow_step_model": "U Revitu elementima dodijelite parametre prema kojima obračunavate cijenu (na primjer Phase Created ili šifru troškovnika), a zatim učitajte model.",
+    "bim_rules.flow_step_model": "U Revit®u elementima dodijelite parametre prema kojima obračunavate cijenu (na primjer Phase Created ili šifru troškovnika), a zatim učitajte model.",
     "bim_rules.flow_step_position": "Usmjerite pravilo na stavku troškovnika ili ga pustite da je izradi, i odaberite količinu: površina, volumen, duljina, težina ili broj.",
     "bim_rules.flow_step_rule": "Izradite pravilo: kategorija elementa plus filtri svojstava. Nazivi svojstava i njihove vrijednosti nude se iz modela.",
     "bim_rules.flow_title": "Kako radi automatski obračun količina",

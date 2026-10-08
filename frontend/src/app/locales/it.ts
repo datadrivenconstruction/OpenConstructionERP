@@ -22629,7 +22629,7 @@ const resource = {
     "bim_rules.field_unit": "Unità",
     "bim_rules.field_waste": "Fattore di sfrido %",
     "bim_rules.flow_step_apply": "Usa l'anteprima per verificare cosa corrisponde, poi Applica. Dopo una nuova versione del modello, applica di nuovo e le quantità si aggiornano.",
-    "bim_rules.flow_step_model": "In Revit assegna agli elementi i parametri con cui prezzi (per esempio Phase Created o un codice del computo), poi carica il modello.",
+    "bim_rules.flow_step_model": "In Revit® assegna agli elementi i parametri con cui prezzi (per esempio Phase Created o un codice del computo), poi carica il modello.",
     "bim_rules.flow_step_position": "Collega la regola a una voce del computo, o lascia che ne crei una, e scegli la quantità: area, volume, lunghezza, peso o numero.",
     "bim_rules.flow_step_rule": "Crea una regola: categoria dell'elemento più filtri sulle proprietà. I nomi delle proprietà e i loro valori sono proposti dal modello.",
     "bim_rules.flow_title": "Come funziona il takeoff automatico",

@@ -22149,7 +22149,7 @@ const resource = {
     "bim_rules.field_unit": "단위",
     "bim_rules.field_waste": "손실률 %",
     "bim_rules.flow_step_apply": "미리보기로 일치하는 항목을 확인한 뒤 적용하세요. 모델의 새 버전이 나오면 다시 적용하면 수량이 갱신됩니다.",
-    "bim_rules.flow_step_model": "Revit에서 단가를 매기는 기준이 되는 파라미터 (예: Phase Created 또는 내역서 코드)를 요소에 지정한 뒤 모델을 업로드하세요.",
+    "bim_rules.flow_step_model": "Revit®에서 단가를 매기는 기준이 되는 파라미터 (예: Phase Created 또는 내역서 코드)를 요소에 지정한 뒤 모델을 업로드하세요.",
     "bim_rules.flow_step_position": "규칙을 내역서 항목에 연결하거나 새로 만들게 한 다음 수량을 고르세요. 면적, 체적, 길이, 중량, 개수 중에서 선택합니다.",
     "bim_rules.flow_step_rule": "규칙을 만드세요. 요소 카테고리와 속성 필터를 지정합니다. 속성 이름과 값은 모델에서 제안됩니다.",
     "bim_rules.flow_title": "자동 물량 산출은 이렇게 작동합니다",

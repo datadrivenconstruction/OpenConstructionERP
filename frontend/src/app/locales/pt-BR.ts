@@ -21917,7 +21917,7 @@ const resource = {
     "bim_rules.field_unit": "Unidade",
     "bim_rules.field_waste": "Fator de perda %",
     "bim_rules.flow_step_apply": "Use a pré-visualização para conferir o que corresponde e depois Aplicar. Após uma nova versão do modelo, aplique de novo e os quantitativos são atualizados.",
-    "bim_rules.flow_step_model": "No Revit, atribua aos elementos os parâmetros pelos quais você orça (por exemplo Phase Created ou um código do orçamento) e depois envie o modelo.",
+    "bim_rules.flow_step_model": "No Revit®, atribua aos elementos os parâmetros pelos quais você orça (por exemplo Phase Created ou um código do orçamento) e depois envie o modelo.",
     "bim_rules.flow_step_position": "Aponte a regra para um item do orçamento, ou deixe que ela crie um, e escolha o quantitativo: área, volume, comprimento, peso ou contagem.",
     "bim_rules.flow_step_rule": "Crie uma regra: categoria do elemento mais filtros de propriedades. Os nomes das propriedades e seus valores são sugeridos a partir do modelo.",
     "bim_rules.flow_title": "Como funciona o levantamento automático de quantitativos",

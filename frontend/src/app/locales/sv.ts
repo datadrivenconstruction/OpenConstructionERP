@@ -22414,7 +22414,7 @@ const resource = {
     "bim_rules.field_unit": "Enhet",
     "bim_rules.field_waste": "Spillfaktor %",
     "bim_rules.flow_step_apply": "Använd förhandsvisning för att se vad som matchar och välj sedan Tillämpa. Efter en ny modellversion tillämpar du igen och mängderna uppdateras.",
-    "bim_rules.flow_step_model": "I Revit ger du elementen de parametrar du prissätter efter (till exempel Phase Created eller en mängdförteckningskod) och laddar sedan upp modellen.",
+    "bim_rules.flow_step_model": "I Revit® ger du elementen de parametrar du prissätter efter (till exempel Phase Created eller en mängdförteckningskod) och laddar sedan upp modellen.",
     "bim_rules.flow_step_position": "Rikta regeln mot en post i mängdförteckningen, eller låt den skapa en, och välj mängd: area, volym, längd, vikt eller antal.",
     "bim_rules.flow_step_rule": "Skapa en regel: elementkategori plus egenskapsfilter. Egenskapsnamn och deras värden föreslås från modellen.",
     "bim_rules.flow_title": "Så fungerar automatiskt mängduttag",

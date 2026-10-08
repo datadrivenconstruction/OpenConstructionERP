@@ -22598,7 +22598,7 @@ const resource = {
     "bim_rules.field_unit": "Jednostka",
     "bim_rules.field_waste": "Współczynnik strat %",
     "bim_rules.flow_step_apply": "Podglądem sprawdź, co pasuje, potem Zastosuj. Po nowej wersji modelu zastosuj ponownie, a ilości się zaktualizują.",
-    "bim_rules.flow_step_model": "W Revit nadaj elementom parametry, według których wyceniasz (na przykład Phase Created lub kod przedmiaru), a potem wgraj model.",
+    "bim_rules.flow_step_model": "W Revit® nadaj elementom parametry, według których wyceniasz (na przykład Phase Created lub kod przedmiaru), a potem wgraj model.",
     "bim_rules.flow_step_position": "Skieruj regułę na pozycję przedmiaru albo pozwól jej utworzyć nową i wybierz ilość: powierzchnia, objętość, długość, masa lub liczba sztuk.",
     "bim_rules.flow_step_rule": "Utwórz regułę: kategoria elementu plus filtry właściwości. Nazwy właściwości i ich wartości są podpowiadane z modelu.",
     "bim_rules.flow_title": "Jak działa automatyczny obmiar",
