@@ -82,7 +82,24 @@ export function useGanttLinking(scheduleId: string, canEdit: boolean): GanttLink
         return;
       }
       if (await afterChange()) {
-        addToast({ type: 'success', title: t('schedule.dep_added', { defaultValue: 'Dependency added' }) });
+        // A drag can land on the wrong bar; the toast takes the link back.
+        const undo = async () => {
+          try {
+            await scheduleApi.deleteRelationshipBetween(scheduleId, fromId, toId);
+          } catch (error) {
+            addToast({ type: 'error', title: scheduleErrorMessage(error, t) });
+            await refetch();
+            return;
+          }
+          if (await afterChange()) {
+            addToast({ type: 'info', title: t('schedule.dep_add_undone', { defaultValue: 'Link removed again' }) });
+          }
+        };
+        addToast({
+          type: 'success',
+          title: t('schedule.dep_added', { defaultValue: 'Dependency added' }),
+          action: { label: t('common.undo', { defaultValue: 'Undo' }), onClick: () => void undo() },
+        });
       }
     },
     [scheduleId, afterChange, refetch, addToast, t],
