@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "{{module}} 기능은 AI 없이도 작동합니다.",
+    "processes.wizard.heavy_hint_search": "키워드 검색은 AI 없이도 작동합니다.",
+    "processes.wizard.heavy_label": "AI: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "백그라운드 서비스: {{names}} 준비 중",
     "processes.notice.preparing": "{{names}} 준비 중입니다. 계속 작업하셔도 되며, 이 안내는 자동으로 사라집니다.",

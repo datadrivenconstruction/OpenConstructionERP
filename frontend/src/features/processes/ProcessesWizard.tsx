@@ -161,7 +161,27 @@ export function ProcessesWizard() {
                     >
                       {on && <Check size={12} />}
                     </span>
-                    <span className="min-w-0 flex-1 break-words">{m.label}</span>
+                    {m.heavyMb > 0 ? (
+                      // Unticked here means "no AI for this module", not "no
+                      // module": the label and the hint say which.
+                      <span className="min-w-0 flex-1">
+                        <span className="block break-words">
+                          {t('processes.wizard.heavy_label', { defaultValue: 'AI for {{module}}', module: m.label })}
+                        </span>
+                        <span className="block text-2xs text-content-tertiary">
+                          {m.id === 'search'
+                            ? t('processes.wizard.heavy_hint_search', {
+                                defaultValue: 'Keyword search works without it.',
+                              })
+                            : t('processes.wizard.heavy_hint', {
+                                defaultValue: '{{module}} works without it.',
+                                module: m.label,
+                              })}
+                        </span>
+                      </span>
+                    ) : (
+                      <span className="min-w-0 flex-1 break-words">{m.label}</span>
+                    )}
                     {m.heavyMb > 0 && (
                       <span className="shrink-0 text-xs tabular-nums text-content-tertiary">
                         {t('processes.wizard.adds', { defaultValue: '+{{value}}', value: formatMb(t, m.heavyMb) })}

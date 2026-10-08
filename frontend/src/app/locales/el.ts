@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "Το {{module}} λειτουργεί και χωρίς αυτό.",
+    "processes.wizard.heavy_hint_search": "Η αναζήτηση με λέξεις-κλειδιά λειτουργεί και χωρίς αυτό.",
+    "processes.wizard.heavy_label": "AI: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Υπηρεσίες παρασκηνίου: προετοιμασία {{names}}",
     "processes.notice.preparing": "Προετοιμασία: {{names}}. Μπορείτε να συνεχίσετε να εργάζεστε, η σημείωση θα εξαφανιστεί μόνη της.",

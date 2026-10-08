@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "{{module}} ใช้งานได้โดยไม่ต้องมี AI",
+    "processes.wizard.heavy_hint_search": "การค้นหาด้วยคำสำคัญใช้งานได้โดยไม่ต้องมี AI",
+    "processes.wizard.heavy_label": "AI: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "บริการเบื้องหลัง: กำลังเตรียม {{names}}",
     "processes.notice.preparing": "กำลังเตรียม {{names}} คุณทำงานต่อได้เลย ข้อความนี้จะหายไปเอง",

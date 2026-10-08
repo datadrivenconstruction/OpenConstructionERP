@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "{{module}} radi i bez toga.",
+    "processes.wizard.heavy_hint_search": "Pretraživanje po ključnim riječima radi i bez toga.",
+    "processes.wizard.heavy_label": "AI: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Pozadinske usluge: priprema se {{names}}",
     "processes.notice.preparing": "Priprema se: {{names}}. Možete nastaviti raditi, ova bilješka nestat će sama.",

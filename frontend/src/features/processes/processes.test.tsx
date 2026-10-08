@@ -198,6 +198,8 @@ describe('ProcessesWizard', () => {
     await waitFor(() => expect(screen.getByTestId('wizard-module-reporting').querySelector('input')).toBeChecked());
     expect(screen.getByTestId('wizard-module-costs').querySelector('input')).not.toBeChecked();
     expect(screen.getByTestId('wizard-module-costs')).toHaveTextContent('+400 MB');
+    // Unticked means no AI for the module, not no module.
+    expect(screen.getByTestId('wizard-module-costs')).toHaveTextContent('works without it');
     expect(screen.getByTestId('wizard-total')).toHaveTextContent('5 MB');
     fireEvent.click(screen.getByTestId('wizard-module-costs').querySelector('input'));
     await waitFor(() => expect(screen.getByTestId('wizard-total')).toHaveTextContent('405 MB'));
@@ -255,6 +257,14 @@ describe('ModuleProcessesNotice', () => {
     vi.mocked(apiGet).mockRejectedValue(new ApiError(403, 'Forbidden', null));
     const { container } = renderWith(<ModuleProcessesNotice moduleId="costs" />);
     await waitFor(() => expect(apiGet).toHaveBeenCalled());
+    expect(container.querySelector('[data-testid^="module-processes-notice"]')).toBeNull();
+  });
+
+  it('leaves out services another notice on the page speaks for', async () => {
+    vi.mocked(apiGet).mockResolvedValue(snapshot([proc()]));
+    const { container } = renderWith(<ModuleProcessesNotice moduleId="costs" exclude={['vector_db']} />);
+    await waitFor(() => expect(apiGet).toHaveBeenCalled());
+    await new Promise((r) => setTimeout(r, 50));
     expect(container.querySelector('[data-testid^="module-processes-notice"]')).toBeNull();
   });
 

@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "{{module}} اس کے بغیر بھی کام کرتا ہے۔",
+    "processes.wizard.heavy_hint_search": "کلیدی لفظ کی تلاش اس کے بغیر بھی کام کرتی ہے۔",
+    "processes.wizard.heavy_label": "AI: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "بیک گراؤنڈ سروسز: {{names}} تیار ہو رہا ہے",
     "processes.notice.preparing": "{{names}} تیار ہو رہا ہے۔ آپ کام جاری رکھ سکتے ہیں، یہ نوٹ خود ہٹ جائے گا۔",

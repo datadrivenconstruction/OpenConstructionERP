@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "{{module}} fungerar även utan.",
+    "processes.wizard.heavy_hint_search": "Nyckelordssökning fungerar även utan.",
+    "processes.wizard.heavy_label": "AI: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Bakgrundstjänster: förbereder {{names}}",
     "processes.notice.preparing": "Förbereder {{names}}. Du kan fortsätta arbeta, den här notisen försvinner av sig själv.",

@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "{{module}} ансыз да иштейт.",
+    "processes.wizard.heavy_hint_search": "Ачкыч сөз боюнча издөө ансыз да иштейт.",
+    "processes.wizard.heavy_label": "AI: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Фондук кызматтар: {{names}} даярдалууда",
     "processes.notice.preparing": "{{names}} даярдалууда. Иштей берсеңиз болот, бул эскертме өзү жок болот.",
