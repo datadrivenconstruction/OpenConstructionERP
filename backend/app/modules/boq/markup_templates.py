@@ -33,6 +33,7 @@ from pathlib import Path
 __all__ = [
     "DEFAULT_MARKUP_TEMPLATES",
     "REGION_BY_COUNTRY",
+    "REGION_VARIANTS",
     "NON_SINGLE_TAX_REGIONS",
     "CONSTRUCTION_TIER_COUNTRIES",
     "CONSTRUCTION_TIER_TAX_CODE",
@@ -765,6 +766,39 @@ DEFAULT_MARKUP_TEMPLATES: dict[str, list[dict[str, object]]] = {
     # subject to the tender discount: they are quoted and paid in full, and
     # folding them into an overhead percentage would lose the one property
     # that makes them a separate line on an Italian bill.
+    #
+    # Two Italian stacks, and which one is right depends on where the unit
+    # rates came from, not on the market. A rate from a regional price list
+    # (prezzario regionale) already includes spese generali (13-17 percent)
+    # and utile d'impresa (10 percent), so adding both again on top inflates
+    # the bill by about 26.5 percent (1.15 x 1.10). A rate built up from
+    # elementary prices (analisi prezzi) does not include them, and there the
+    # full stack is correct.
+    #
+    # ``IT_PREZZARIO`` is the "per price list" stack: safety and IVA only. It
+    # is what an Italian project is seeded with when nobody names a region,
+    # because pricing from the regional list is the typical Italian case.
+    # ``IT`` is the "per price analysis" stack and keeps its historical key so
+    # an explicit ``?region=IT`` call means what it always meant. It is an
+    # explicitly chosen variant (see ``REGION_VARIANTS``), so no country maps
+    # to it. The rule ``prezzario.overheads_not_applied_twice`` stays as the
+    # second layer for a bill that picks the analysis stack anyway.
+    "IT_PREZZARIO": [
+        {
+            "name": "Oneri della sicurezza non soggetti a ribasso",
+            "category": "other",
+            "percentage": "2.5",
+            "apply_to": "direct_cost",
+            "sort_order": 0,
+        },
+        {
+            "name": "IVA",
+            "category": "tax",
+            "percentage": "22.0",
+            "apply_to": "cumulative",
+            "sort_order": 1,
+        },
+    ],
     "IT": [
         {
             "name": "Spese generali",
@@ -2677,7 +2711,9 @@ REGION_BY_COUNTRY: dict[str, str] = {
     "KR": "KR",
     "RU": "RU",
     "HU": "HU",
-    "IT": "IT",
+    # Italy is seeded with the price-list stack; the price-analysis stack
+    # ``IT`` is offered alongside it, see ``REGION_VARIANTS``.
+    "IT": "IT_PREZZARIO",
     "ES": "ES",
     "NL": "NL",
     "PL": "PL",
@@ -2726,6 +2762,20 @@ REGION_BY_COUNTRY: dict[str, str] = {
     "CL": "CL",
     "CO": "CO",
     "PE": "PE",
+}
+
+# Stacks no country is seeded with, because each is an explicitly chosen
+# alternative to the stack the country IS seeded with. Key: the variant, value:
+# the region it is an alternative to. A stack listed here is reached through
+# the template picker and ``?region=``, never by derivation, and the
+# reachability test accepts it only when the region it names is itself reached
+# by some country.
+#
+# Italy is the one case: ``IT`` (per price analysis) is the alternative to
+# ``IT_PREZZARIO`` (per price list), and the two differ by exactly the spese
+# generali and utile d'impresa that a price-list rate already contains.
+REGION_VARIANTS: dict[str, str] = {
+    "IT": "IT_PREZZARIO",
 }
 
 # Regions whose tax lines a single country VAT rate cannot stand in for, and
