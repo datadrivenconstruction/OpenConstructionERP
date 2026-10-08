@@ -798,16 +798,22 @@ def _get_work_week(region: str | None = None) -> dict:
     return WORK_CALENDARS["DEFAULT"]
 
 
-def get_work_calendar(region: str | None = None) -> dict:
+def get_work_calendar(region: str | None = None, subdivision_code: str | None = None) -> dict:
     """Resolve the planning week and the holiday country independently.
 
     A macro-region never supplies a neighbouring country's public holidays.
     Holiday coverage remains explicit, including partial tables and years.
+    A project subdivision with a holiday list of its own (``CA-ON``) replaces
+    its country's list; the week stays the country's.
     """
+    from app.core.calendar import has_subdivision_holidays
     from app.core.classification_registry import is_macro_region, normalise_region
 
     week = _get_work_week(region)
     country = None if is_macro_region(region) else normalise_region(region)
+    sub = (subdivision_code or "").upper().strip()
+    if country and sub.startswith(f"{country}-") and has_subdivision_holidays(sub):
+        country = sub
     calendar = {**week, "holiday_country": country, "week_fallback": week is WORK_CALENDARS["DEFAULT"]}
     calendar.pop("holidays", None)
     if country:
@@ -1238,6 +1244,15 @@ class ScheduleService:
         if project is None:
             return None
         return calendar_region_for(project.region, getattr(project, "country_code", None))
+
+    async def resolve_project_subdivision(self, project_id: uuid.UUID | None) -> str | None:
+        """The project's ISO 3166-2 subdivision, which may carry its own holidays."""
+        if project_id is None:
+            return None
+        from app.modules.projects.repository import ProjectRepository
+
+        project = await ProjectRepository(self.session).get_by_id(project_id)
+        return getattr(project, "subdivision_code", None) if project is not None else None
 
     # ── Schedule operations ────────────────────────────────────────────────
 
@@ -3348,7 +3363,7 @@ class ScheduleService:
         # The same resolver compute_duration's callers use, so the week the
         # dates are drawn on here is the week they are recounted on later.
         project_region = await self.resolve_project_region(schedule_project_id)
-        cal = get_work_calendar(project_region)
+        cal = get_work_calendar(project_region, await self.resolve_project_subdivision(schedule_project_id))
         hours_per_day = cal["hours_per_day"]
         plan_calendar, calendar_to_record = await self._generation_calendar(
             schedule, set(cal["work_days"]), cal.get("holiday_country"), week_fallback=cal.get("week_fallback")

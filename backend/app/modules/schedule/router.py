@@ -2853,8 +2853,9 @@ async def schedule_work_calendar(
     """
     await verify_project_access(project_id, _user_id, session)
 
-    region = await ScheduleService(session).resolve_project_region(project_id)
-    cal = get_work_calendar(region)
+    service = ScheduleService(session)
+    region = await service.resolve_project_region(project_id)
+    cal = get_work_calendar(region, await service.resolve_project_subdivision(project_id))
     return WorkCalendarResponse(
         region=region,
         hours_per_day=cal["hours_per_day"],
