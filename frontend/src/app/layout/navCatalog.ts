@@ -488,6 +488,7 @@ export const navGroups: NavGroup[] = [
       { labelKey: 'nav.payment_clock', to: '/payment-clock', icon: Scale },
       { labelKey: 'nav.tax_withholding', to: '/tax-withholding', icon: Percent },
       { labelKey: 'nav.tax_rates', to: '/tax-rates', icon: Landmark },
+      { labelKey: 'nav.legal_entities', to: '/legal-entities', icon: Building2, advancedOnly: true },
       { labelKey: 'nav.einvoice_clearance', to: '/einvoice-clearance', icon: Stamp },
       { labelKey: 'nav.subcontractors', to: '/subcontractors', icon: HardHat, advancedOnly: true },
     ],
