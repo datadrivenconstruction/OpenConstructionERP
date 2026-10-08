@@ -62,3 +62,26 @@ Restart the server after changing these settings.
 You are responsible for the terms of the tile server you configure. Do not
 point this at `tile.openstreetmap.org` or any other service whose policy
 forbids proxying or use from an application.
+
+## Placing a project on the map from its address
+
+When a project gets an address, the platform can resolve it to coordinates
+and pin the project without anyone clicking the map. That means sending the
+address to a geocoder. Because a site address is often someone's home,
+nothing is sent until a manager answers a one-time question:
+
+- **Send to OpenStreetMap.** Addresses go to the public Nominatim service,
+  and address suggestions while typing go to the public Photon service.
+- **Do not send.** Projects are placed by clicking the map.
+- **Use our own server.** Addresses go to the Nominatim address you enter.
+  Suggestions stay off the public Photon service.
+
+The answer can be changed on the Geo Hub admin page (`/geo/admin`). A deployer can fix the choice in the
+environment instead, and then the question is not asked:
+
+| Variable | Effect |
+|---|---|
+| `OE_GEOCODER_DISABLED=true` | Nothing is sent, whatever was answered. |
+| `OE_GEOCODER_BASE_URL` | Your own Nominatim; addresses go there without asking. |
+| `OE_GEOCODER_PHOTON_URL` | Your own Photon for suggestions. |
+| `OE_GEOCODER_PHOTON_DISABLED=true` | Suggestions never use Photon. |

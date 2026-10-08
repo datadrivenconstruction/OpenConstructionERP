@@ -773,11 +773,37 @@ class GeocodeCache(Base):
         return f"<GeocodeCache {self.query_hash[:8]}… ({self.lat},{self.lon}) {self.precision}>"
 
 
+class GeocodingConsent(Base):
+    """The installation's answer to "may project addresses go to a geocoder".
+
+    One row per installation (``scope = "installation"``). Until a manager
+    answers, no address leaves the server, neither for the automatic map pin
+    nor for address suggestions. ``choice`` is ``allow`` (public
+    OpenStreetMap services), ``deny`` or ``mirror`` (the deployer's own
+    Nominatim at ``mirror_url``). Environment switches take precedence, see
+    ``geo_hub/consent.py``.
+    """
+
+    __tablename__ = "oe_geo_hub_geocoding_consent"
+    __table_args__ = (UniqueConstraint("scope", name="uq_oe_geo_hub_geocoding_consent_scope"),)
+
+    scope: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+        default="installation",
+        server_default="installation",
+    )
+    choice: Mapped[str] = mapped_column(String(16), nullable=False, default="deny", server_default="deny")
+    mirror_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    decided_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+
+
 __all__ = [
     "GeoAnchor",
     "GeoOverlay",
     "GeoRasterOverlay",
     "GeocodeCache",
+    "GeocodingConsent",
     "ImageryLayer",
     "TerrainSource",
     "TileGenerationJob",
