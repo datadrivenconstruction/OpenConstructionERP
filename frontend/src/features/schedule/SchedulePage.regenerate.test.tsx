@@ -794,7 +794,7 @@ describe('schedule list', () => {
     await waitFor(() => expect(useToastStore.getState().toasts).toHaveLength(1));
     const toast = useToastStore.getState().toasts[0];
     expect(toast.type).toBe('warning');
-    expect(toast.message).toMatch(/Only an administrator can permanently delete/);
+    expect(toast.message).toMatch(/Only the project owner or an administrator can permanently delete/);
     expect(screen.queryByRole('alertdialog')).toBeNull();
     expect(state.deletedSchedules).toEqual([]);
   });
