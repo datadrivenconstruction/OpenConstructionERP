@@ -22,6 +22,8 @@ import time
 from pathlib import Path
 from typing import Any
 
+from app.core.semantic_switch import SemanticSearchDisabled, semantic_search_enabled
+
 logger = logging.getLogger(__name__)
 
 COST_TABLE = "cost_items"
@@ -219,6 +221,10 @@ def get_embedder():
     """
     if _embedder_instance is not None:
         return _embedder_instance
+    # Switched off in Settings: answer like a missing model, but without
+    # setting ``_embedder_tried``, so turning it on works without a restart.
+    if not semantic_search_enabled():
+        return None
     # Short-circuit: a prior call exhausted both candidate models.
     # Without this guard every caller pays the multi-second retry cost.
     if _embedder_tried:
@@ -378,6 +384,8 @@ def embedder_status() -> dict[str, Any]:
         return {"available": True, "state": "ready", "model": active_model_name(), "dimension": dim}
     if not _has_module("sentence_transformers"):
         return {"available": False, "state": "library_missing", "model": name, "dimension": dim}
+    if not semantic_search_enabled():
+        return {"available": False, "state": "disabled", "model": name, "dimension": dim}
     if _embedder_tried:
         return {"available": False, "state": "load_failed", "model": name, "dimension": dim}
     return {"available": False, "state": "not_loaded", "model": name, "dimension": dim}
@@ -448,6 +456,8 @@ def _commit_too_low_for(what: str, floor_mb: int) -> bool:
 
 def encode_texts(texts: list[str]) -> list[list[float]]:
     """Encode texts to vectors. Works with both FastEmbed and sentence-transformers."""
+    if _embedder_instance is None and not semantic_search_enabled():
+        raise SemanticSearchDisabled()
     if _is_desktop():
         if _commit_too_low_for("inference", _MIN_COMMIT_MB_FOR_ENCODE):
             raise RuntimeError("Not enough free memory for semantic indexing right now")
@@ -554,6 +564,8 @@ def _get_lancedb():
     global _lancedb_instance, _lancedb_tried
     if _lancedb_instance is not None:
         return _lancedb_instance
+    if not semantic_search_enabled():
+        return None
     # Retry each time if not yet connected (e.g. package installed after startup)
     try:
         import lancedb

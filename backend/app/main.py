@@ -5165,8 +5165,17 @@ def create_app() -> FastAPI:
             "true",
             "yes",
         )
+        from app.core.semantic_switch import semantic_search_enabled as _semantic_on
+
         if _fast_startup:
             logger.info("Vector DB init + embedding warm-up skipped (OE_TEST_FAST_STARTUP)")
+        elif not _semantic_on():
+            # Off by default: the model and the vector store are what can push
+            # a low-memory machine over the edge, so nothing loads until
+            # someone turns semantic search on in Settings.
+            logger.info(
+                "Semantic search is switched off (Settings or OE_SEMANTIC_SEARCH); model and vector DB not loaded"
+            )
         else:
             # Run vector-DB init off the critical boot path. It opens every
             # collection (LanceDB count_rows per table, or a Qdrant round-trip),

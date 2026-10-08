@@ -403,6 +403,10 @@ os.environ.setdefault("REGISTRATION_MODE", "open")
 # test_demo_login_endpoint.py sets SEED_DEMO=true inside its own fixture and
 # is unaffected. All other suites work without the demo accounts.
 os.environ.setdefault("SEED_DEMO", "false")
+# Semantic search is off by default for users. The suite keeps the switch on so
+# the vector and matcher tests exercise the real path; the switch itself is
+# tested with this variable removed (test_semantic_search_is_opt_in.py).
+os.environ.setdefault("OE_SEMANTIC_SEARCH", "1")
 
 # ── Fast app startup for tests ─────────────────────────────────────────────
 # Each integration module stands up its own FastAPI app via create_app() and

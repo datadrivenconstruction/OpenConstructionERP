@@ -91,6 +91,7 @@ STATE_DOWNLOADING = "downloading"
 STATE_FAILED = "failed"
 STATE_READY = "ready"
 STATE_NOT_REQUESTED = "not_requested"
+STATE_DISABLED = "disabled"
 
 #: Written last, into the model directory, to mark the download complete.
 MARKER_FILENAME = ".oe_model_complete.json"
@@ -809,8 +810,13 @@ def download_status(*, repo_id: str | None = None) -> dict[str, Any]:
     that is a fifth. The precedence below is fixed here, once, so the two
     surfaces cannot drift:
 
-    ``library_missing`` > ``downloading`` > ``failed`` > ``ready`` >
-    ``not_requested``
+    ``library_missing`` > ``downloading`` > ``disabled`` > ``failed`` >
+    ``ready`` > ``not_requested``
+
+    ``disabled`` means semantic search is switched off for this installation
+    (see :mod:`app.core.semantic_switch`), whatever is on disk. The memory
+    fields beside it let the Settings card say what turning it on costs before
+    anyone flips the switch.
 
     The deliberate call in it: weights on disk report ``ready`` even when
     nothing has loaded them yet. ``embedder_status()`` says ``not_loaded``
@@ -835,10 +841,23 @@ def download_status(*, repo_id: str | None = None) -> dict[str, Any]:
     enabled = download_enabled()
     library = semantic_library_available()
 
+    from app.core.semantic_switch import locked_by_env, semantic_search_enabled
+
+    semantic_on = semantic_search_enabled()
+    try:
+        from app.core.crash_diagnostics import available_commit_mb
+
+        available_mb = available_commit_mb()
+    except Exception:  # noqa: BLE001 - an unknown reading is reported as unknown
+        available_mb = None
+    from app.core.vector import _MIN_COMMIT_MB_FOR_LOAD
+
     if not library:
         state = STATE_LIBRARY_MISSING
     elif snapshot["state"] == STATE_DOWNLOADING:
         state = STATE_DOWNLOADING
+    elif not semantic_on:
+        state = STATE_DISABLED
     elif installed is None and snapshot["state"] == STATE_FAILED:
         state = STATE_FAILED
     elif installed is not None or embedder.get("state") == "ready":
@@ -874,6 +893,11 @@ def download_status(*, repo_id: str | None = None) -> dict[str, Any]:
         "env_var": ENV_DOWNLOAD,
         "locked": download_locked_off(),
         "embedder": embedder,
+        "semantic_enabled": semantic_on,
+        "semantic_locked": locked_by_env(),
+        "available_memory_mb": None if available_mb is None else int(available_mb),
+        "required_memory_mb": _MIN_COMMIT_MB_FOR_LOAD,
+        "memory_low": available_mb is not None and available_mb < _MIN_COMMIT_MB_FOR_LOAD,
         "message": _message_for(state, repo, enabled, download_locked_off()),
     }
 
@@ -902,6 +926,11 @@ def _message_for(state: str, repo: str, enabled: bool, locked: bool = False) -> 
 
         return "Semantic search is not part of this installation. Everything else works without it. " + repair_hint(
             "Install the extra to enable it: pip install openconstructionerp[semantic]."
+        )
+    if state == STATE_DISABLED:
+        return (
+            "Semantic search is switched off. Everything else works without it. Turning it on in Settings "
+            "loads a language model that needs about 1 GB of free memory."
         )
     if state == STATE_DOWNLOADING:
         return f"Downloading the semantic search model ({repo}) in the background. You can keep working."

@@ -23,6 +23,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from app.dependencies import (
     CurrentUserId,
     RequirePermission,
+    RequireRole,
     SessionDep,
     verify_project_access,
 )
@@ -771,8 +772,37 @@ async def embedding_model_install(_current_user_id: CurrentUserId) -> dict[str, 
     is to render that state either way.
     """
     from app.core.embedding_installer import download_status, start_background_download
+    from app.core.semantic_switch import set_semantic_search_enabled
 
+    # Asking for the model is asking for semantic search: one switch, not two.
+    set_semantic_search_enabled(True)
     started = start_background_download(requested=True)
+    payload = download_status()
+    payload["started"] = started
+    return payload
+
+
+@router.put(
+    "/embedding-model/enabled",
+    dependencies=[Depends(RequireRole("admin"))],
+)
+async def embedding_model_set_enabled(
+    body: schemas.SemanticSearchSwitch,
+    _current_user_id: CurrentUserId,
+) -> dict[str, object]:
+    """Turn semantic search on or off for the whole installation.
+
+    Turning it on starts the encoder download when the weights are missing and
+    lets the next search load the model, no restart needed. Turning it off stops
+    new loads at once; memory already taken by a loaded model is returned on the
+    next restart. ``OE_SEMANTIC_SEARCH`` still wins, reported as
+    ``semantic_locked``.
+    """
+    from app.core.embedding_installer import download_status, start_background_download
+    from app.core.semantic_switch import set_semantic_search_enabled
+
+    enabled = set_semantic_search_enabled(body.enabled)
+    started = start_background_download(requested=True) if enabled else False
     payload = download_status()
     payload["started"] = started
     return payload
