@@ -784,6 +784,7 @@ class SubcontractorService:
             contact_id=data.contact_id,
             legal_name=data.legal_name,
             trade_name=data.trade_name,
+            party_kind=data.party_kind,
             tax_id=data.tax_id,
             trade_categories=data.trade_categories,
             prequalification_status=data.prequalification_status,

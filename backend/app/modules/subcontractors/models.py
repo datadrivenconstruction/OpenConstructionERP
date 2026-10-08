@@ -53,6 +53,10 @@ class Subcontractor(Base):
     )
     legal_name: Mapped[str] = mapped_column(String(255), nullable=False)
     trade_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    # ``natural_person`` (a sole trader) or ``legal_entity``. The rating below
+    # is personal data when the firm is one person, so the form is recorded,
+    # not guessed. NULL means not stated yet.
+    party_kind: Mapped[str | None] = mapped_column(String(20), nullable=True)
     tax_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     trade_categories: Mapped[list] = mapped_column(  # type: ignore[assignment]
         JSON,
