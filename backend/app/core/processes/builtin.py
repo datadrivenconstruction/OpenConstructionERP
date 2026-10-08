@@ -338,6 +338,27 @@ def register_builtin_processes(
         registry.register(spec)
 
 
+def register_demo_data_seed(registry: ProcessRegistry, seed: Callable[[], Awaitable[None]]) -> None:
+    """Declare this boot's deferred demo project seed.
+
+    Startup creates the demo accounts inline and hands the projects here, so
+    the first login does not wait for them. It is reported, not switchable:
+    stopping it halfway would leave a partial showcase until the next boot.
+    """
+    registry.register(
+        ProcessSpec(
+            id="demo_data_seed",
+            factory=lambda: OneShotProcess(run=seed),
+            category="maintenance",
+            start_mode="boot",
+            stoppable=False,
+            estimated_ram_mb=50,
+            restart_policy="never",
+            logger_names=["app.core.demo_projects", "app.core.demo_enrichment"],
+        )
+    )
+
+
 def register_notification_worker(registry: ProcessRegistry) -> None:
     """Declare the notification worker (called by its module)."""
     registry.register(
@@ -373,5 +394,6 @@ __all__ = [
     "NotificationWorkerProcess",
     "register_builtin_processes",
     "register_collab_lock_sweeper",
+    "register_demo_data_seed",
     "register_notification_worker",
 ]
