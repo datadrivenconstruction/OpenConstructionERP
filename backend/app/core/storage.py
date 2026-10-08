@@ -129,34 +129,36 @@ class PresignedUrl:
 # ── HMAC token helpers (used by LocalStorageBackend.presigned_put_url) ──
 
 
-def _local_upload_token_secret() -> bytes:
-    """Resolve the secret used to sign local upload tokens.
+def _local_upload_token_secrets() -> list[bytes]:
+    """Resolve the secrets for local upload tokens, signing secret first.
 
-    Pulled from ``Settings.jwt_secret`` so it rotates with the rest of
-    the auth surface; falls back to a process-local secret if settings
-    are unavailable (e.g. during tooling).  The fallback is *not* stable
-    across restarts, which is fine - local presigned URLs are intended
-    to live for at most an hour.
+    Pulled from the JWT key ring so it rotates with the rest of the auth
+    surface: tokens are signed with the current ``JWT_SECRET`` and accepted
+    under any secret still listed in ``JWT_PREVIOUS_SECRETS``. Falls back to
+    a process-local secret if settings are unavailable (e.g. during
+    tooling).  The fallback is *not* stable across restarts, which is fine -
+    local presigned URLs are intended to live for at most an hour.
     """
     try:
         from app.config import get_settings
+        from app.core.jwt_keys import ring_secrets
 
-        secret = getattr(get_settings(), "jwt_secret", None)
+        ring = ring_secrets(get_settings())
     except Exception:  # pragma: no cover - settings unavailable in tooling
-        secret = None
-    if secret:
-        return str(secret).encode("utf-8")
+        ring = []
+    if ring:
+        return [str(secret).encode("utf-8") for secret in ring]
     # Module-level fallback: cache one random secret for the life of the
     # process.  Distinct workers will reject each other's tokens, but a
     # single-process dev deployment is the only target for the local
     # backend anyway.
     global _LOCAL_FALLBACK_SECRET
     try:
-        return _LOCAL_FALLBACK_SECRET
+        return [_LOCAL_FALLBACK_SECRET]
     except NameError:
         pass
     _LOCAL_FALLBACK_SECRET = secrets.token_bytes(32)
-    return _LOCAL_FALLBACK_SECRET
+    return [_LOCAL_FALLBACK_SECRET]
 
 
 def _sign_local_upload_token(payload: dict[str, object]) -> str:
@@ -170,7 +172,7 @@ def _sign_local_upload_token(payload: dict[str, object]) -> str:
 
     body = json.dumps(payload, separators=(",", ":"), sort_keys=True).encode("utf-8")
     body_b64 = base64.urlsafe_b64encode(body).rstrip(b"=").decode("ascii")
-    sig = hmac.new(_local_upload_token_secret(), body_b64.encode("ascii"), hashlib.sha256)
+    sig = hmac.new(_local_upload_token_secrets()[0], body_b64.encode("ascii"), hashlib.sha256)
     return f"{body_b64}.{sig.hexdigest()}"
 
 
@@ -187,8 +189,10 @@ def _verify_local_upload_token(token: str) -> dict[str, object] | None:
         body_b64, sig_hex = token.split(".", 1)
     except ValueError:
         return None
-    expected = hmac.new(_local_upload_token_secret(), body_b64.encode("ascii"), hashlib.sha256).hexdigest()
-    if not hmac.compare_digest(sig_hex, expected):
+    if not any(
+        hmac.compare_digest(sig_hex, hmac.new(secret, body_b64.encode("ascii"), hashlib.sha256).hexdigest())
+        for secret in _local_upload_token_secrets()
+    ):
         return None
     try:
         padded = body_b64 + "=" * (-len(body_b64) % 4)

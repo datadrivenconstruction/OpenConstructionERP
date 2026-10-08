@@ -3099,14 +3099,24 @@ async def post_import_bundle(
 # ── Signed share URL (Issue #109) ─────────────────────────────────────────
 
 
-def _share_token_secret(settings) -> str:
-    secret = getattr(settings, "jwt_secret", None) or getattr(settings, "secret_key", "")
-    if not secret:
+def _share_token_secrets(settings) -> list[str]:
+    """Return the share-link secrets, signing secret first.
+
+    The JWT key ring: links are signed with the current ``JWT_SECRET`` and
+    still open under any secret listed in ``JWT_PREVIOUS_SECRETS``, so a
+    rotation does not break links that were already sent.
+    """
+    from app.core.jwt_keys import ring_secrets
+
+    secrets_ = ring_secrets(settings) if getattr(settings, "jwt_secret", None) else []
+    if not secrets_ and getattr(settings, "secret_key", ""):
+        secrets_ = [str(settings.secret_key)]
+    if not secrets_:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Server is missing a JWT secret; cannot mint share tokens.",
         )
-    return str(secret)
+    return secrets_
 
 
 @router.post(
@@ -3212,7 +3222,7 @@ async def post_email_link(
     payload_bytes = _json.dumps(payload_obj, separators=(",", ":")).encode("utf-8")
     payload_b64 = base64.urlsafe_b64encode(payload_bytes).rstrip(b"=").decode("ascii")
     sig = hmac.new(
-        _share_token_secret(settings).encode("utf-8"),
+        _share_token_secrets(settings)[0].encode("utf-8"),
         payload_b64.encode("ascii"),
         hashlib.sha256,
     ).digest()
@@ -3265,16 +3275,18 @@ async def get_share_file(
     if "." not in token:
         raise HTTPException(status_code=400, detail="Malformed share token")
     payload_b64, sig_b64 = token.split(".", 1)
-    expected = hmac.new(
-        _share_token_secret(settings).encode("utf-8"),
-        payload_b64.encode("ascii"),
-        hashlib.sha256,
-    ).digest()
+    secrets_ = _share_token_secrets(settings)
     try:
         provided = base64.urlsafe_b64decode(sig_b64 + "=" * (-len(sig_b64) % 4))
     except (ValueError, TypeError) as exc:
         raise HTTPException(status_code=400, detail="Malformed share token") from exc
-    if not hmac.compare_digest(expected, provided):
+    if not any(
+        hmac.compare_digest(
+            hmac.new(secret.encode("utf-8"), payload_b64.encode("ascii"), hashlib.sha256).digest(),
+            provided,
+        )
+        for secret in secrets_
+    ):
         raise HTTPException(status_code=401, detail="Invalid share token signature")
 
     try:

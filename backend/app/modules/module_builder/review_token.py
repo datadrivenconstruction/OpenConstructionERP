@@ -51,6 +51,7 @@ import time
 import uuid
 
 from app.config import get_settings
+from app.core.jwt_keys import ring_secrets
 from app.modules.module_builder.spec import ModuleSpec
 
 #: How long a preview stays installable. Long enough to read every generated
@@ -92,9 +93,14 @@ def _b64(raw: bytes) -> str:
     return base64.urlsafe_b64encode(raw).decode("ascii").rstrip("=")
 
 
-def _sign(body: str) -> str:
-    secret = get_settings().jwt_secret.encode("utf-8")
-    return _b64(hmac.new(secret, body.encode("utf-8"), hashlib.sha256).digest())
+def _sign(body: str, secret: str | None = None) -> str:
+    key = (secret if secret is not None else get_settings().jwt_secret).encode("utf-8")
+    return _b64(hmac.new(key, body.encode("utf-8"), hashlib.sha256).digest())
+
+
+def _signature_verifies(body: str, signature: str) -> bool:
+    """Accept a signature made by any secret in the JWT key ring."""
+    return any(hmac.compare_digest(signature, _sign(body, secret)) for secret in ring_secrets(get_settings()))
 
 
 def issue(spec: ModuleSpec, user_id: uuid.UUID | str, *, now: float | None = None, purpose: str = INSTALL) -> str:
@@ -127,7 +133,7 @@ def verify(
     cannot be discovered one byte at a time.
     """
     body, _, signature = token.partition(".")
-    if not body or not signature or not hmac.compare_digest(signature, _sign(body)):
+    if not body or not signature or not _signature_verifies(body, signature):
         raise ReviewTokenInvalid("review token signature does not verify")
 
     try:

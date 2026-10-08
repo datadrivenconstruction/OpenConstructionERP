@@ -54,6 +54,17 @@ def verification_keys(settings: Settings) -> list[tuple[str, str]]:
     return keys
 
 
+def ring_secrets(settings: Settings) -> list[str]:
+    """Return every secret in the ring, current first.
+
+    For HMAC signatures that carry no ``kid`` (share links, upload URLs,
+    review tokens): sign with the first entry, accept a match on any entry,
+    so rotating ``JWT_SECRET`` keeps already issued links working for as
+    long as the old secret stays in ``JWT_PREVIOUS_SECRETS``.
+    """
+    return [secret for _kid, secret in verification_keys(settings)]
+
+
 def encode_jwt(payload: dict[str, Any], settings: Settings) -> str:
     """Sign ``payload`` with the current secret and stamp its ``kid``."""
     return jwt.encode(

@@ -57,10 +57,11 @@ rotation are encrypted with the new secret, older values are not re-encrypted.
 Before you remove the old secret from the list, re-save stored provider keys in
 Settings, otherwise they become unreadable and have to be entered again.
 
-A few short-lived signatures use only the current secret and are invalidated by
-a rotation: local upload URLs (one hour), module builder review tokens, project
-share links and saved-view share links. Share links have to be re-issued after a
-rotation.
+Signatures without a `kid` use the same ring: local upload URLs (one hour),
+module builder review tokens, project file share links and saved-view share
+links are signed with the current secret and still verify under any secret in
+`JWT_PREVIOUS_SECRETS`. Links sent before a rotation keep working through the
+grace period and stop working once the old secret is removed from the list.
 
 Session revocation is not affected. Revoking a session or changing a password
 refuses tokens whichever key signed them.
