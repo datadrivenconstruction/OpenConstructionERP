@@ -3,15 +3,15 @@
 Nullable, added only when missing, so a database the boot-time column
 healer already touched upgrades cleanly. NULL means not stated yet.
 
-Revision ID: v62_contact_party_kind
-Revises: v61_geocoding_consent
+Revision ID: v63_contact_party_kind
+Revises: v62_geocoding_consent
 """
 
 import sqlalchemy as sa
 from alembic import op
 
-revision = "v62_contact_party_kind"
-down_revision = "v61_geocoding_consent"
+revision = "v63_contact_party_kind"
+down_revision = "v62_geocoding_consent"
 branch_labels = None
 depends_on = None
 

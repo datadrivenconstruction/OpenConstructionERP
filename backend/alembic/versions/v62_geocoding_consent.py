@@ -4,15 +4,15 @@ One row per installation. A new table, so ``create_all`` brings it to
 running installations as well; the revision only keeps an Alembic-built
 database in step. Created only when missing.
 
-Revision ID: v61_geocoding_consent
-Revises: v60_legal_entities
+Revision ID: v62_geocoding_consent
+Revises: v61_process_settings
 """
 
 import sqlalchemy as sa
 from alembic import op
 
-revision = "v61_geocoding_consent"
-down_revision = "v60_legal_entities"
+revision = "v62_geocoding_consent"
+down_revision = "v61_process_settings"
 branch_labels = None
 depends_on = None
 
