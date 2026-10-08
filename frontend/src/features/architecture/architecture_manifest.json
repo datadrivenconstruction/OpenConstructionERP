@@ -4276,6 +4276,12 @@
           "method": "POST",
           "path": "/embedding-model/install",
           "handler": "embedding_model_install"
+        },
+        {
+          "method": "PUT",
+          "path": "/embedding-model/enabled",
+          "handler": "embedding_model_set_enabled",
+          "request_schema": "schemas.SemanticSearchSwitch"
         }
       ],
       "schemas": [
@@ -6162,6 +6168,19 @@
               "name": "default_unit_system",
               "type": "str",
               "default": "'metric'"
+            }
+          ]
+        },
+        {
+          "class_name": "SemanticSearchSwitch",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Body of ``PUT /embedding-model/enabled``.",
+          "fields": [
+            {
+              "name": "enabled",
+              "type": "bool"
             }
           ]
         }
@@ -22815,6 +22834,7 @@
         "__init__.py",
         "activity_text.py",
         "ai_prompts.py",
+        "ai_provenance.py",
         "base_date.py",
         "cad_import.py",
         "change_review.py",
@@ -55686,6 +55706,11 @@
               "name": "release_period",
               "type": "dict[str, Any] | None",
               "default": "None"
+            },
+            {
+              "name": "subdivision_missing",
+              "type": "bool",
+              "default": "False"
             },
             {
               "name": "has_defaults",
@@ -192236,7 +192261,7 @@
             {
               "name": "blocked_reason",
               "type": "str | None",
-              "description": "Why not: permission_denied or schedule_not_archived. Permanent deletion is admin-only."
+              "description": "Why not: permission_denied, schedule_has_baselines or schedule_not_archived. The project owner or an admin may delete."
             }
           ]
         },
@@ -236435,10 +236460,10 @@
     },
     {
       "name": "settings",
-      "ts_files": 33,
+      "ts_files": 34,
       "css_files": 0,
       "test_files": 12,
-      "total_files": 33
+      "total_files": 34
     },
     {
       "name": "setup",
@@ -237972,11 +237997,11 @@
     "total_models": 625,
     "total_columns": 7171,
     "total_relationships": 236,
-    "total_routes": 3767,
-    "total_schemas": 3574,
-    "total_python_files": 2302,
+    "total_routes": 3768,
+    "total_schemas": 3575,
+    "total_python_files": 2303,
     "frontend_features": 192,
-    "frontend_ts_files": 2997,
+    "frontend_ts_files": 2998,
     "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {
