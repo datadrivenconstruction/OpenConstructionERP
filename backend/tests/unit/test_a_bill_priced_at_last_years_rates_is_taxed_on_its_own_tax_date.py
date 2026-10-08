@@ -74,7 +74,10 @@ class _MarkupSink:
     def __init__(self) -> None:
         self.created: list[Any] = []
 
-    async def delete_all_for_boq(self, _boq_id: uuid.UUID) -> None:
+    async def list_for_boq(self, _boq_id: uuid.UUID) -> list[Any]:
+        return list(self.created)
+
+    async def delete_all_for_boq(self, _boq_id: uuid.UUID, keep: list[Any] | None = None) -> None:
         return None
 
     async def bulk_create(self, markups: list[Any]) -> list[Any]:
