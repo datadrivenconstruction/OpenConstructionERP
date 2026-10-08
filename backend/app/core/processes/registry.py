@@ -90,9 +90,12 @@ class ProcessSpec:
         logger_names: Loggers whose records go to this process's log buffer.
         state_get: Reads the desired state from an existing switch instead of
             the registry's table (the semantic-search switch, for example).
-            Returning None hands the decision back to the table and defaults,
-            so a process can follow a switch on some installations only.
-        state_set: Writes that switch; required together with ``state_get``.
+            Returning None hands the decision back to the defaults, so a
+            process can follow a switch on some installations only. A choice
+            saved in the table for this process always wins over the switch.
+        state_set: Writes that switch when the process is turned on or off.
+            Leave it out to follow the switch for the default only and keep
+            individual choices in the table.
     """
 
     id: str
@@ -288,11 +291,13 @@ class ProcessRegistry:
             return env
         if spec.required:
             return True
+        # An explicit choice saved in the table beats a shared switch: an admin
+        # who turns one model off must not have that undone by Settings.
+        if spec.id in self._rows:
+            return self._rows[spec.id]
         switch = self._switch_value(entry)
         if switch is not None:
             return switch
-        if spec.id in self._rows:
-            return self._rows[spec.id]
         return spec.default_enabled if self._fresh else spec.legacy_enabled
 
     def _switch_value(self, entry: _Entry) -> bool | None:

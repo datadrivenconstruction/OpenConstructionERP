@@ -174,10 +174,45 @@ async def test_fresh_install_defaults_off_and_follows_semantic_switch(
     assert registry.status("cwicr_ranker") is ProcessStatus.IDLE
     assert matching_model_allowed("cwicr_ranker") is True
 
-    # Disabling one from the processes center writes the shared switch, not the table.
+    await registry.stop_all()
+
+
+@pytest.mark.asyncio
+async def test_disabling_the_reranker_keeps_semantic_search_and_the_ranker(
+    monkeypatch: pytest.MonkeyPatch, semantic_switch: dict[str, bool]
+) -> None:
+    monkeypatch.delenv("OE_TEST_FAST_STARTUP", raising=False)
+    store = InMemoryProcessStore()
+    registry = ProcessRegistry(store=store)
+    registry.stagger_s = 0
+    await registry.load(fresh_install=lambda: True)
+    register_matching_processes(registry)
+    monkeypatch.setattr(processes_pkg, "process_registry", registry)
+    monkeypatch.setattr(qdrant_adapter, "_client", None)
+    monkeypatch.setattr(qdrant_adapter, "_encoder", None)
+    monkeypatch.setattr(reranker_bge, "_RERANKER", None)
+    _fake_loaders(monkeypatch, _Client(), reranker="rr")
+    semantic_switch["on"] = True
+    await registry.reconcile(force=True)
+
     await registry.disable("bge_reranker")
-    assert semantic_switch["on"] is False
-    assert "bge_reranker" not in store.rows
+    assert semantic_switch["on"] is True  # search by meaning untouched
+    assert store.rows["bge_reranker"] is False  # the choice lives in the table
+    await registry.reconcile(force=True)
+    assert registry.status("bge_reranker") is ProcessStatus.DISABLED  # and survives a reconcile
+
+    out = registry.ensure_for_module("match")
+    assert out["queued"] == ["cwicr_ranker"]
+    await _until(lambda: registry.status("cwicr_ranker") is ProcessStatus.RUNNING)
+    assert matching_model_allowed("cwicr_ranker") is True
+    assert matching_model_allowed("bge_reranker") is False
+
+    # An explicit "on" also wins over the switch being off.
+    semantic_switch["on"] = False
+    await registry.enable("bge_reranker")
+    await registry.reconcile(force=True)
+    assert registry.is_enabled("bge_reranker") is True
+    assert registry.is_enabled("cwicr_ranker") is False
     await registry.stop_all()
 
 
