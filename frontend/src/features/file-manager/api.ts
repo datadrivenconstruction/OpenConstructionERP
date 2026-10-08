@@ -578,6 +578,27 @@ export async function updateSheet(sheetId: string, patch: SheetPatch): Promise<S
   return apiPatch<SheetRow, SheetPatch>(`${DOCUMENTS_BASE}/sheets/${sheetId}`, patch);
 }
 
+/** The fields a drawing set shares, set on several sheets at once. */
+export type SheetBulkPatch = Pick<SheetPatch, 'discipline' | 'revision' | 'revision_date' | 'scale'>;
+
+/**
+ * Apply one correction to several sheets of a project.
+ *
+ * Backed by ``POST /v1/documents/sheets/bulk-update/``. Each sheet is updated
+ * as a single edit would update it, restacking included, so the caller
+ * refetches the register.
+ */
+export async function bulkUpdateSheets(
+  projectId: string,
+  sheetIds: string[],
+  patch: SheetBulkPatch,
+): Promise<SheetRow[]> {
+  return apiPost<SheetRow[], SheetBulkPatch & { project_id: string; sheet_ids: string[] }>(
+    `${DOCUMENTS_BASE}/sheets/bulk-update/`,
+    { project_id: projectId, sheet_ids: sheetIds, ...patch },
+  );
+}
+
 /** What re-reading a project's title blocks changed. Mirrors `SheetRereadSummary`. */
 export interface SheetRereadSummary {
   sheets_checked: number;

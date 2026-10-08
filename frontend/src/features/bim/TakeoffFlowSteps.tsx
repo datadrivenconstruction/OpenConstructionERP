@@ -9,7 +9,7 @@ import { fmtNumber } from '@/shared/lib/formatters';
 const TAKEOFF_STEPS = [
   {
     key: 'model',
-    text: 'In Revit, give the elements the parameters you price by (for example Phase Created or a BOQ code), then upload the model.',
+    text: 'In Revit®, give the elements the parameters you price by (for example Phase Created or a BOQ code), then upload the model.',
   },
   {
     key: 'rule',

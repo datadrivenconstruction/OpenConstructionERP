@@ -1097,9 +1097,24 @@ def _ensure_persistent_jwt_secret() -> None:
                 os.environ["JWT_SECRET"] = existing
                 _logger.info("Loaded the persisted JWT secret from %s.", secret_path)
                 return
-    except OSError:
-        # Unreadable persisted secret - fall through and generate a fresh one.
-        pass
+    except OSError as exc:
+        # The file is there but could not be read (permissions, a volume that
+        # mounted read-protected). Overwriting it would destroy the secret every
+        # live session is signed with, turning a fixable permission problem into
+        # a sign-out of every user on every later boot. Keep the file, run on a
+        # per-process secret, and say so loudly.
+        generated = secrets.token_urlsafe(48)
+        _logger.warning(
+            "The persisted JWT secret at %s could not be read (%s) - using a "
+            "per-process secret and leaving the file untouched; every session "
+            "signed with the stored secret is rejected until this is fixed, and "
+            "sessions will be invalidated again on restart. Fix the file's "
+            "permissions or set JWT_SECRET / OE_JWT_SECRET.",
+            secret_path,
+            exc,
+        )
+        os.environ["JWT_SECRET"] = generated
+        return
 
     generated = secrets.token_urlsafe(48)
     try:
@@ -1184,6 +1199,21 @@ def load_or_create_dev_jwt_secret(
     existing = _read_persisted_secret(secret_path)
     if existing is not None:
         return existing, secret_path, "loaded"
+    try:
+        if secret_path.is_file():
+            secret_path.read_text(encoding="utf-8")
+    except OSError as exc:
+        # Present but unreadable: writing a fresh secret over it would destroy
+        # the key every live session is signed with. Run ephemeral, keep the file.
+        _logger.warning(
+            "The persisted JWT secret at %s could not be read (%s) - using a "
+            "per-process secret and leaving the file untouched. Sessions WILL be "
+            "invalidated on every restart until the file's permissions are fixed "
+            "or JWT_SECRET is set.",
+            secret_path,
+            exc,
+        )
+        return secrets.token_urlsafe(48), secret_path, "ephemeral"
 
     if legacy_paths is None:
         try:

@@ -937,3 +937,22 @@ async def test_generating_writes_the_plan_the_preview_showed_and_records_the_wor
         generation = (await service.get_schedule(schedule_id)).metadata_["boq_generation"]
         assert generation["workers_per_position"] == preview["workers_per_position"]
         assert generation["workers_assumed"] is True
+
+
+async def test_non_finite_quantities_are_skipped_not_a_crash() -> None:
+    """A quantity stored as "NaN" or "Infinity" parsed without error and then
+    overflowed ``math.ceil`` deep in the duration maths: a 500 for the whole
+    bill. Such a row is now no work, like an empty one, and the rest plans."""
+    async with transactional_session() as session:
+        service, schedule_id, bill, _ = await _setup(session)
+        cap = await bill.section(None, "01", "SCAVI E DEMOLIZIONI")
+        good = await bill.position(cap, "01.001", "Scavo a sezione obbligata", unit="m³", qty="120.5", rate="18.40")
+        await bill.position(cap, "01.002", "Voce senza quantita", unit="m²", qty="NaN", rate="10")
+        await bill.position(cap, "01.003", "Voce rotta", unit="mc", qty="Infinity", rate="10")
+        await bill.position(cap, "01.004", "Voce negativa", unit="q.li", qty="-5", rate="10")
+
+        preview = await service.preview_generation(schedule_id, bill.boq_id, 365)
+        assert preview["positions_scheduled"] == 1
+        await service.generate_from_boq(schedule_id, bill.boq_id, 365)
+        acts = await _activities(service, schedule_id)
+        assert _task_positions(acts) == [str(good)]

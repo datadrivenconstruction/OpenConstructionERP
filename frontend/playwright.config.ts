@@ -96,6 +96,8 @@ export default defineConfig({
     '**/tests/e2e/floating-chat.spec.ts',          // playwright-floating-chat.config.ts
     '**/tests/e2e/photos-tab.spec.ts',             // playwright.photos.config.ts
     '**/tests/e2e/smoke-all-modules.spec.ts',      // playwright.smoke-all.config.ts
+    '**/tests/e2e/session-longrun.spec.ts',        // playwright.stability.config.ts (hour-long soak)
+    '**/tests/e2e/import-export.spec.ts',          // playwright.stability.config.ts
   ],
 
   fullyParallel: true,

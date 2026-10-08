@@ -759,7 +759,7 @@ class ScheduleDeleteImpactResponse(BaseModel):
     )
     blocked_reason: str | None = Field(
         default=None,
-        description="Why not: permission_denied or schedule_not_archived. Permanent deletion is admin-only.",
+        description="Why not: permission_denied, schedule_has_baselines or schedule_not_archived. The project owner or an admin may delete.",
     )
 
 

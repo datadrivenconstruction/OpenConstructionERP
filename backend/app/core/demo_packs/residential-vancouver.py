@@ -44,6 +44,7 @@ TEMPLATE = DemoTemplate(
         "contingency; Vancouver 2026 price level, before GST + PST). "
     ),
     region="CA",
+    subdivision_code="CA-BC",
     classification_standard="masterformat",
     currency="CAD",
     locale="en-CA",

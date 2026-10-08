@@ -246,7 +246,7 @@ export function StageAdjustSheet({
                   {t('match_elements.pipeline.method', 'Method')}
                 </label>
                 <div className="mt-1 flex gap-1.5 flex-wrap">
-                  {(['vector', 'resources', 'lexical', 'llm'] as const).map(
+                  {(['vector', 'resources', 'llm'] as const).map(
                     (m) => (
                       <button
                         key={m}

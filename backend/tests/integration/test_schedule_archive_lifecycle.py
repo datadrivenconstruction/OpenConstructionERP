@@ -448,14 +448,23 @@ async def test_legacy_archive_restores_draft_with_explicit_fallback_marker(histo
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("role", ["editor", "viewer"])
-async def test_explicit_purge_permission_does_not_override_admin_role_guard(role):
-    async with api(role, ["schedule.purge"]) as (client, session, _service, schedule, _project, _payload):
+async def test_explicit_purge_permission_does_not_let_a_viewer_purge():
+    async with api("viewer", ["schedule.purge"]) as (client, session, _service, schedule, _project, _payload):
         schedule.status = "archived"
         await session.flush()
         assert (await client.delete(url(schedule, "/permanent/"))).status_code == 403
         assert (await client.get(url(schedule, "/delete-impact/"))).json()["can_delete"] is False
         assert await session.get(Schedule, schedule.id) is not None
+
+
+@pytest.mark.asyncio
+async def test_an_editor_who_owns_the_project_purges_the_archive():
+    async with api("editor") as (client, session, _service, schedule, _project, _payload):
+        schedule.status = "archived"
+        await session.flush()
+        assert (await client.get(url(schedule, "/delete-impact/"))).json()["can_delete"] is True
+        assert (await client.delete(url(schedule, "/permanent/"))).status_code == 204
+        assert (await client.get(url(schedule))).status_code == 404
 
 
 @pytest.mark.asyncio

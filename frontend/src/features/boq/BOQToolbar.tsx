@@ -727,6 +727,7 @@ export function BOQToolbar({
 
           {/* The number */}
           <span
+            data-testid="boq-grand-total"
             className="text-2xl font-bold leading-none text-content-primary"
             title={
               summary.displayRate != null && summary.displayCurrency

@@ -49,6 +49,7 @@ from app.modules.contracts.country_defaults import (
     PLATFORM_FALLBACK,
     apply_contract_defaults,
     forget_overridden,
+    has_subdivision_rows,
     normalise_country,
     resolve_contract_defaults,
     subcontract_retention_default,
@@ -1409,6 +1410,10 @@ class ContractsService:
             "country_code": country,
             "subdivision_code": (defaults or {}).get("subdivision_code"),
             "release_period": (defaults or {}).get("release_period"),
+            # The country's figures depend on the province and the project
+            # records none, so the form asks for it rather than quietly
+            # showing the national row.
+            "subdivision_missing": has_subdivision_rows(country) and not (defaults or {}).get("subdivision_code"),
             "has_defaults": defaults is not None,
             "standard_form": (defaults or {}).get("standard_form"),
             "values": (defaults or {}).get("values") or {},

@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Semantic search is now off by default on every installation, because loading its language model is what exhausted memory on low-headroom machines. Nothing loads the model, opens the vector store or runs the startup backfill until an administrator turns it on in Settings, AI, which shows the free memory it needs (about 1 GB) against what the machine has. **After upgrading, semantic matching against cost databases (including CWICR) and semantic search stop until semantic search is switched on again**; text search keeps working, and cost search, the match wizard and global search say so with a link to the switch. Server operators can set `OE_SEMANTIC_SEARCH=1` (or `0`) to fix the switch for the whole installation.
+- Project file share links, saved-view share links, local upload URLs and module builder review tokens are verified against the JWT key ring, so rotating `JWT_SECRET` no longer breaks links already sent while the old secret stays in `JWT_PREVIOUS_SECRETS`.
 - Schedule durations and newly generated BOQ plans now use the project's country holiday data wherever available. Regeneration can move dates that previously treated holidays as working days. Generated calendars retain the holiday dates and coverage for every year used by the plan, so the first CPM recalculation agrees with generation; regenerate when extending a plan into an uncovered year. Explicit site calendars remain authoritative. Unknown countries and partial holiday tables expose coverage, and macro-regions no longer supply a neighbouring country's holidays. New ORM-created projects no longer default to DACH.
 
 ### Added
