@@ -3,7 +3,7 @@
 """Procurement Pydantic schemas - request/response models."""
 
 import re
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 from typing import Any, Literal
 from uuid import UUID
@@ -210,6 +210,15 @@ class POCancelRequest(BaseModel):
     reason: str | None = Field(default=None, max_length=1000)
 
 
+class POAcknowledgeRequest(BaseModel):
+    """The supplier's confirmation of an issued order, as the buyer received it."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    supplier_reference: str | None = Field(default=None, max_length=100)
+    confirmed_delivery_date: date | None = None
+
+
 class POResponse(BaseModel):
     """Purchase order returned from the API."""
 
@@ -228,6 +237,10 @@ class POResponse(BaseModel):
     tax_amount: str = "0"
     amount_total: str = "0"
     status: str = "draft"
+    supplier_acknowledged_at: str | None = None
+    supplier_acknowledged_by: str | None = None
+    supplier_reference: str | None = None
+    supplier_confirmed_delivery_date: str | None = None
     payment_terms: str | None = None
     notes: str | None = None
     created_by: UUID | None = None

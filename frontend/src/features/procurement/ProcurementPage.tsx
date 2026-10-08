@@ -54,6 +54,7 @@ import { buildProcurementInsights } from './procurementInsights';
 import { VendorPrequalBadge } from './VendorPrequalBadge';
 import { BillPositionPicker } from './BillPositionPicker';
 import { RetainagePanel, RetainageBadge } from './RetainagePanel';
+import { SupplierConfirmationModal } from './SupplierConfirmationModal';
 import { POStatusPipeline } from './POStatusPipeline';
 import { DeliveryCountdownBadge } from './DeliveryCountdownBadge';
 import { RecordDeliveryModal } from './RecordDeliveryModal';
@@ -80,6 +81,10 @@ interface PurchaseOrder {
   vendor_contact_id?: string | null;
   issue_date: string;
   delivery_date: string | null;
+  // The supplier's order confirmation, null until the buyer records it.
+  supplier_acknowledged_at?: string | null;
+  supplier_reference?: string | null;
+  supplier_confirmed_delivery_date?: string | null;
   // Money bug fix: the list endpoint (POResponse in backend/.../schemas.py)
   // returns `amount_total` + `currency_code` (amount is a Decimal-serialized
   // STRING), NOT `total_amount`/`currency`. The old field names were always
@@ -618,6 +623,7 @@ function PurchaseOrdersTab({
   >(null);
   // Retainage panel (Gap F) - opened from a PO row's "Retainage" action.
   const [retainagePO, setRetainagePO] = useState<PurchaseOrder | null>(null);
+  const [confirmingPO, setConfirmingPO] = useState<PurchaseOrder | null>(null);
   // Removal confirm - opened from a PO row's delete / cancel action. Which of
   // the two verbs it offers is decided from the row's status by
   // `removalVerbFor`; the backend has the final say and refuses with a 409
@@ -1767,6 +1773,31 @@ function PurchaseOrdersTab({
                         {t('procurement.action_issue_short', { defaultValue: 'Issue' })}
                       </Button>
                     )}
+                    {['issued', 'partially_received'].includes(po.status) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setConfirmingPO(po)}
+                        title={
+                          po.supplier_acknowledged_at
+                            ? t('procurement.supplier_confirmed_title', {
+                                defaultValue: 'Confirmed by the supplier ({{ref}}). Click to revise.',
+                                ref: po.supplier_reference || '-',
+                              })
+                            : t('procurement.supplier_confirmation_record', {
+                                defaultValue: 'Record the supplier confirmation',
+                              })
+                        }
+                      >
+                        <CheckCircle2
+                          size={14}
+                          className={po.supplier_acknowledged_at ? 'mr-1 text-semantic-success' : 'mr-1'}
+                        />
+                        {po.supplier_acknowledged_at
+                          ? t('procurement.supplier_confirmed_short', { defaultValue: 'Confirmed' })
+                          : t('procurement.supplier_confirm_short', { defaultValue: 'Confirm' })}
+                      </Button>
+                    )}
                     {/* Invoicing is only valid once the PO has been issued -
                         a draft/cancelled PO must never become a payable
                         (mirrors the backend status guard). Keep the control
@@ -1870,6 +1901,8 @@ function PurchaseOrdersTab({
         projectId={projectId}
       />
     )}
+
+    <SupplierConfirmationModal po={confirmingPO} projectId={projectId} onClose={() => setConfirmingPO(null)} />
 
     {/* Retainage panel (Gap F) - release withheld retention + audit log */}
     {retainagePO && (

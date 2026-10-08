@@ -101,6 +101,14 @@ class PurchaseOrder(Base):
         doc="Cumulative retainage released (Decimal string)",
     )
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft", index=True)
+    # The supplier's order confirmation, recorded by the buyer once an issued
+    # order is answered. Null until then, which is how the register finds the
+    # orders nobody has confirmed. The confirmed date sits beside
+    # ``delivery_date`` instead of overwriting it: the gap is the point.
+    supplier_acknowledged_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    supplier_acknowledged_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    supplier_reference: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    supplier_confirmed_delivery_date: Mapped[str | None] = mapped_column(String(40), nullable=True)
     payment_terms: Mapped[str | None] = mapped_column(String(100), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)

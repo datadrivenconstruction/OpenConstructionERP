@@ -1466,6 +1466,67 @@ class ProcurementService:
         logger.info("PO cancelled: %s (from %s)", po_number, prior_status)
         return updated
 
+    async def acknowledge_po(
+        self,
+        po_id: uuid.UUID,
+        *,
+        supplier_reference: str | None = None,
+        confirmed_delivery_date: str | None = None,
+        actor_id: str | None = None,
+    ) -> PurchaseOrder:
+        """Record the supplier's confirmation of an order it was sent.
+
+        Only an order that is out with the supplier (``issued`` or
+        ``partially_received``) can be confirmed. A second call replaces the
+        first, because suppliers revise their confirmations; the audit trail
+        keeps both. The status does not change.
+
+        Raises:
+            HTTPException: 404 if the PO does not exist, 409 if it is not out
+                with the supplier.
+        """
+        po = await self.get_po(po_id)
+        prior_status = po.status
+        po_number = po.po_number
+        if prior_status not in ("issued", "partially_received"):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    f"Purchase order {po_number} is in status '{prior_status}'; "
+                    "only an issued order can be confirmed by the supplier"
+                ),
+            )
+        await self.po_repo.update(
+            po_id,
+            supplier_acknowledged_at=datetime.now(UTC).isoformat(),
+            supplier_acknowledged_by=actor_id,
+            supplier_reference=supplier_reference or None,
+            supplier_confirmed_delivery_date=confirmed_delivery_date or None,
+        )
+        try:
+            from app.core.audit_log import log_activity
+
+            await log_activity(
+                self.session,
+                actor_id=actor_id,
+                entity_type="purchase_order",
+                entity_id=str(po_id),
+                action="supplier_acknowledged",
+                reason="Supplier confirmation recorded",
+                metadata={
+                    "po_number": po_number,
+                    "supplier_reference": supplier_reference or "",
+                    "confirmed_delivery_date": confirmed_delivery_date or "",
+                },
+            )
+        except Exception:
+            logger.warning("Audit log FAILED for PO acknowledgement (po_id=%s)", po_id, exc_info=True)
+
+        updated = await self.po_repo.get(po_id)
+        if updated is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Purchase order not found")
+        return updated
+
     async def delete_po(self, po_id: uuid.UUID) -> None:
         """Delete a draft purchase order that never left draft.
 
