@@ -66,3 +66,48 @@ def test_exception_is_not_cached() -> None:
 
     assert asyncio.run(run()) == b"ok"
     assert attempts == 2
+
+
+def test_ensure_glb_goes_through_the_cache(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The cache only helps if the service calls it.
+
+    Two showcase models carry the same DAE bytes. Each gets its own GLB saved,
+    but trimesh converts once.
+    """
+    from pathlib import Path
+
+    from app.modules.bim_hub import file_storage, ifc_processor
+    from app.modules.bim_hub.service import BIMHubService
+
+    conversions: list[str] = []
+    saved: dict[str, bytes] = {}
+
+    async def find_geometry_key(project_id: str, model_id: str, prefer_ext: str = ".glb"):
+        if model_id in saved:
+            return (f"{model_id}.glb", ".glb")
+        return (f"{model_id}.dae", ".dae")
+
+    async def save_geometry(*, project_id: str, model_id: str, ext: str, content: bytes) -> None:
+        saved[model_id] = content
+
+    async def read_blob_bytes(self: BIMHubService, key: str) -> bytes:
+        return b"<COLLADA>same demo model</COLLADA>"
+
+    def convert_dae_to_glb(dae_path: Path, out_dir: Path) -> Path:
+        conversions.append(dae_path.read_text())
+        glb = out_dir / "geometry.glb"
+        glb.write_bytes(b"glTF-binary")
+        return glb
+
+    monkeypatch.setattr(file_storage, "find_geometry_key", find_geometry_key)
+    monkeypatch.setattr(file_storage, "save_geometry", save_geometry)
+    monkeypatch.setattr(BIMHubService, "_read_blob_bytes", read_blob_bytes)
+    monkeypatch.setattr(ifc_processor, "_convert_dae_to_glb", convert_dae_to_glb)
+
+    async def run() -> list[bool]:
+        service = BIMHubService(None)  # type: ignore[arg-type]
+        return [await service._ensure_glb("proj", mid) for mid in ("model-a", "model-b")]
+
+    assert asyncio.run(run()) == [True, True]
+    assert saved == {"model-a": b"glTF-binary", "model-b": b"glTF-binary"}
+    assert len(conversions) == 1

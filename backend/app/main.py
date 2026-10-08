@@ -2701,6 +2701,11 @@ def create_app() -> FastAPI:
 
     app.include_router(module_mgmt_router)
 
+    # Processes center API (admin-only): background processes on/off/restart
+    from app.core.processes.router import router as processes_router
+
+    app.include_router(processes_router)
+
     # Audit log API (admin-only)
     from app.core.audit_router import router as audit_router
 
@@ -4507,6 +4512,9 @@ def create_app() -> FastAPI:
             # written to stop having.
             from app.core import data_repairs as _data_repairs_core  # noqa: F401
 
+            # ``oe_process_settings`` lives in app.core as well.
+            from app.core.processes import store as _process_store_core  # noqa: F401
+
             # Register EVERY module's SQLAlchemy models before create_all so
             # a fresh PostgreSQL database gets all tables. This was
             # previously a hand-maintained import list that silently omitted
@@ -4587,6 +4595,18 @@ def create_app() -> FastAPI:
             # reads; ``app.state`` keeps its ``None``, because a question that
             # could not be put has no answer and must not borrow ``False``.
             _arrived_populated_unstamped = False
+            # The processes center starts heavy background processes off on a
+            # brand new installation only; one that already holds application
+            # tables keeps running what it ran before. Asked here, before any
+            # DDL, for the same reason as the question below.
+            try:
+                from sqlalchemy import inspect as _sa_inspect_fresh
+
+                async with engine.connect() as conn:
+                    _table_names = await conn.run_sync(lambda c: _sa_inspect_fresh(c).get_table_names())
+                app.state.database_was_empty = not any(t.startswith("oe_") for t in _table_names)
+            except Exception:
+                logger.debug("Could not tell whether the database arrived empty", exc_info=True)
             try:
                 from app.core.alembic_version_table import database_is_populated_but_unstamped
 
@@ -5059,49 +5079,56 @@ def create_app() -> FastAPI:
         _section("Demo data")
         await _seed_demo_account()
 
-        # Seed ISO 3166-1 countries + tax configs + work calendars if empty.
-        # Required for the region-picker, tax-config lookups and work-calendar
-        # endpoints to return data on a fresh install.
-        try:
-            from app.database import async_session_factory as _i18n_session_factory
+        # Baseline seeds, once per app version: a completed seed leaves a
+        # marker (app.core.seed_once) and later boots of the same version skip
+        # it instead of re-querying its tables. A failed seed stamps nothing
+        # and runs again next boot.
+        from app.core.seed_once import SeedOnce
+        from app.database import async_session_factory as _seed_session_factory
+
+        _seeds = SeedOnce(settings.app_version)
+
+        # ISO 3166-1 countries + tax configs + work calendars. Required for the
+        # region-picker, tax-config lookups and work-calendar endpoints to
+        # return data on a fresh install.
+        async def _seed_i18n() -> None:
             from app.modules.i18n_foundation.seed import seed_i18n_data
 
-            async with _i18n_session_factory() as _seed_session:
+            async with _seed_session_factory() as _seed_session:
                 await seed_i18n_data(_seed_session)
                 await _seed_session.commit()
-        except Exception:
-            logger.exception("i18n seed failed - countries/taxes/calendars may be empty")
+
+        await _seeds.run("i18n", _seed_i18n, "i18n seed failed - countries/taxes/calendars may be empty")
 
         # Starter seed: small baseline of cost items + assemblies so a fresh
         # install never shows an empty /costs or /catalog before the user
         # imports a regional CWICR catalogue. Idempotent - only runs when
         # the tables are empty. Disable via OE_SKIP_STARTER_SEED=1.
-        try:
-            from app.database import async_session_factory as _starter_session_factory
+        async def _seed_starter() -> None:
             from app.scripts.seed_starter import seed_starter_data
 
-            async with _starter_session_factory() as _starter_session:
+            async with _seed_session_factory() as _starter_session:
                 counts = await seed_starter_data(_starter_session)
                 await _starter_session.commit()
-                if counts["cost_items"] or counts["assemblies"]:
-                    logger.info(
-                        "Starter seed: %d cost items, %d assemblies inserted",
-                        counts["cost_items"],
-                        counts["assemblies"],
-                    )
-                # The Cost Explorer module's own startup index build ran during
-                # module load, before this seed, so on a first boot it saw an
-                # empty cost table. Build the resource->work reverse index now
-                # that the starter cost items (with their resource recipes) are
-                # in place, otherwise the By-resources and Substitute tabs would
-                # stay empty until the next restart. Self-contained, idempotent
-                # and size-capped; it swallows its own errors.
-                if counts["cost_items"]:
-                    from app.modules.cost_explorer.service import build_index_if_empty
+            if counts["cost_items"] or counts["assemblies"]:
+                logger.info(
+                    "Starter seed: %d cost items, %d assemblies inserted",
+                    counts["cost_items"],
+                    counts["assemblies"],
+                )
+            # The Cost Explorer module's own startup index build ran during
+            # module load, before this seed, so on a first boot it saw an
+            # empty cost table. Build the resource->work reverse index now
+            # that the starter cost items (with their resource recipes) are
+            # in place, otherwise the By-resources and Substitute tabs would
+            # stay empty until the next restart. Self-contained, idempotent
+            # and size-capped; it swallows its own errors.
+            if counts["cost_items"]:
+                from app.modules.cost_explorer.service import build_index_if_empty
 
-                    await build_index_if_empty()
-        except Exception:
-            logger.exception("Starter seed failed - /costs and /catalog may be empty")
+                await build_index_if_empty()
+
+        await _seeds.run("starter", _seed_starter, "Starter seed failed - /costs and /catalog may be empty")
 
         # Regional indices seed (v3.12.0 - Stream B). Idempotent: the
         # script honours the UNIQUE(region, category, subcategory,
@@ -5109,20 +5136,19 @@ def create_app() -> FastAPI:
         # only inserts the OE_v3.12 baseline rows once. Failure is
         # non-fatal - the regional-adjust endpoint falls back to a 1:1
         # passthrough when no rows are on file.
-        try:
+        async def _seed_regional() -> None:
             from app.scripts.seed_regional_indices import main as _seed_regional_main
 
             inserted = await _seed_regional_main()
             if inserted:
-                logger.info(
-                    "Regional indices seed: %d factor rows inserted",
-                    inserted,
-                )
-        except Exception:
-            logger.exception(
-                "Regional indices seed failed - /v1/costs/regional-adjust will "
-                "passthrough until an operator imports a feed"
-            )
+                logger.info("Regional indices seed: %d factor rows inserted", inserted)
+
+        await _seeds.run(
+            "regional_indices",
+            _seed_regional,
+            "Regional indices seed failed - /v1/costs/regional-adjust will "
+            "passthrough until an operator imports a feed",
+        )
 
         # Property-dev house-type catalogue presets. Mirrors migration
         # v3114_propdev_house_type_catalogue's bulk_insert so fresh-blank-DB
@@ -5130,26 +5156,24 @@ def create_app() -> FastAPI:
         # never run the migration's upgrade()) still end up with the ~60
         # country presets populated. Idempotent - skips when any preset
         # row exists.
-        try:
-            from app.database import async_session_factory as _ht_session_factory
+        async def _seed_house_types() -> None:
             from app.modules.property_dev.seed_house_type_catalogue import (
                 seed_house_type_catalogue_presets,
             )
 
-            async with _ht_session_factory() as _ht_session:
+            async with _seed_session_factory() as _ht_session:
                 inserted = await seed_house_type_catalogue_presets(_ht_session)
                 await _ht_session.commit()
-                if inserted:
-                    logger.info(
-                        "Property-dev house-type catalogue seed: %d preset rows",
-                        inserted,
-                    )
-        except Exception:
-            logger.exception(
-                "Property-dev house-type catalogue preset seed failed - "
-                "/property-dev/house-type-catalogue will return an empty list "
-                "until an operator re-runs alembic or restarts the app"
-            )
+            if inserted:
+                logger.info("Property-dev house-type catalogue seed: %d preset rows", inserted)
+
+        await _seeds.run(
+            "house_type_catalogue",
+            _seed_house_types,
+            "Property-dev house-type catalogue preset seed failed - "
+            "/property-dev/house-type-catalogue will return an empty list "
+            "until an operator re-runs alembic or restarts the app",
+        )
 
         # Initialize vector database (LanceDB embedded, no Docker).
         #
@@ -5165,99 +5189,64 @@ def create_app() -> FastAPI:
             "true",
             "yes",
         )
-        from app.core.semantic_switch import semantic_search_enabled as _semantic_on
+        # The semantic stack (vector store, encoder model and its download,
+        # embedding pool, backfill) runs as processes of the registry, so an
+        # admin can see, stop and restart each piece without a restart. They
+        # follow the semantic search switch, which is off by default: the model
+        # and the vector store are what can push a low-memory machine over the
+        # edge. OE_TEST_FAST_STARTUP keeps them all off, as before.
+        from app.core.processes import process_registry
+        from app.core.processes.semantic import register_semantic_processes
 
+        register_semantic_processes(
+            process_registry,
+            init_vector_db=_init_vector_db,
+            pool_warmup=_start_embedding_pool_warmup,
+            backfill=_auto_backfill_vector_collections,
+        )
+        # ── Schedulers, sweepers and warm-ups ────────────────────────────
+        # Each is a registry process (app.core.processes.builtin): the admin can
+        # see, stop and restart it, shutdown cancels it, and none runs on the
+        # boot path. Declared before the boot queue is scheduled below; periodic
+        # loops sleep before their first pass, and the cost-cache warm-up waits
+        # for the first visit to the cost database (POST /processes/ensure).
+        import asyncio
+
+        from app.core.processes.builtin import register_builtin_processes
+
+        async def _prime_openapi_schema() -> None:
+            started = time.perf_counter()
+            schema = await asyncio.to_thread(app.openapi)
+            logger.info(
+                "OpenAPI schema cached: %d paths in %.1fs",
+                len(schema.get("paths", {})),
+                time.perf_counter() - started,
+            )
+
+        def _openapi_env() -> bool | None:
+            if should_prime_openapi_schema(fast_startup=_fast_startup, openapi_url=app.openapi_url):
+                return True
+            # Without a docs URL nothing would ever read the document.
+            return False if _fast_startup or app.openapi_url is None else None
+
+        register_builtin_processes(process_registry, openapi_prime=_prime_openapi_schema, openapi_env=_openapi_env)
+
+        from app.core.processes.matching import register_matching_processes
+
+        register_matching_processes(process_registry)
+
+        try:
+            await process_registry.load(fresh_install=lambda: bool(getattr(app.state, "database_was_empty", False)))
+            # Queued, not awaited: the server answers health checks and logins
+            # first, and boot processes then start one at a time in the
+            # background. Module-only processes wait for POST /processes/ensure.
+            process_registry.schedule_boot()
+        except Exception:  # noqa: BLE001 - background processes never block boot
+            logger.warning("Process registry start failed", exc_info=True)
         if _fast_startup:
             logger.info("Vector DB init + embedding warm-up skipped (OE_TEST_FAST_STARTUP)")
-        elif not _semantic_on():
-            # Off by default: the model and the vector store are what can push
-            # a low-memory machine over the edge, so nothing loads until
-            # someone turns semantic search on in Settings.
-            logger.info(
-                "Semantic search is switched off (Settings or OE_SEMANTIC_SEARCH); model and vector DB not loaded"
-            )
-        else:
-            # Run vector-DB init off the critical boot path. It opens every
-            # collection (LanceDB count_rows per table, or a Qdrant round-trip),
-            # which delayed the server reporting ready on a fresh install.
-            # Nothing downstream awaits its result, and it is non-fatal, so
-            # detach it the same way as the embedder prime below.
-            async def _init_vector_db_background() -> None:
-                import asyncio as _asyncio_vdb
 
-                try:
-                    await _asyncio_vdb.to_thread(_init_vector_db)
-                except Exception:  # noqa: BLE001 - never fatal for startup
-                    logger.debug("Vector DB background init skipped", exc_info=True)
-
-            try:
-                import asyncio as _asyncio_vdb_sched
-
-                _asyncio_vdb_sched.create_task(_init_vector_db_background())
-            except Exception:
-                logger.debug("Could not schedule vector DB init", exc_info=True)
-
-            # The executor is enabled by default. Model loading and inference
-            # warm-up must stay off the critical startup path.
-            #
-            # Prime the embedder in a DETACHED background task. Loading the
-            # SentenceTransformer blocks for up to ~45s, and doing it inline
-            # here meant the server could not answer a single request until
-            # the model finished loading. ``get_embedder()`` is lazy + cached
-            # (see app/core/vector.py), so any caller that needs embeddings
-            # before the prime completes simply loads the model on demand and
-            # semantic search lights up the moment the model is ready. The
-            # load itself is CPU/IO-blocking, so the task hands it to a
-            # worker thread via ``asyncio.to_thread`` - same detached pattern
-            # as ``_auto_backfill_vector_collections`` below.
-            # Fetch the encoder weights, if this deployment wants them. Runs on
-            # its own daemon thread, is a no-op on a server deploy, and cannot
-            # raise here - see app/core/embedding_installer.py. Started before
-            # the prime below so a desktop first boot has the download already
-            # moving while the prime decides there is nothing to load yet.
-            try:
-                from app.core.embedding_installer import start_background_download
-
-                if start_background_download():
-                    logger.info("Encoder weights are downloading in the background - startup does not wait for them")
-            except Exception:  # noqa: BLE001 - an optional extra can never break startup
-                logger.debug("Could not start the encoder download", exc_info=True)
-
-            async def _prime_embedder_background() -> None:
-                import asyncio as _asyncio_emb
-
-                try:
-                    # Priming a model that is not on disk is itself a download,
-                    # and on a server deploy that is the download the platform
-                    # was told not to do. So the prime runs when the weights are
-                    # already installed (warm start, unchanged behaviour) or
-                    # when this deployment asked for them; otherwise it stands
-                    # down and the first caller that genuinely needs a vector
-                    # loads the model lazily, exactly as it does today.
-                    from app.core.embedding_installer import download_enabled, find_installed_model
-                    from app.core.vector import get_embedder as _ge
-
-                    if find_installed_model() is None and not download_enabled():
-                        logger.info(
-                            "Embedder prime skipped: no encoder installed and the background "
-                            "download was not requested (download it from the setup wizard or Settings, or set "
-                            "OE_DOWNLOAD_EMBEDDING_MODEL=1). Semantic search reports its state honestly meanwhile."
-                        )
-                        return
-
-                    embedder = await _asyncio_emb.to_thread(_ge)
-                    if embedder is not None:
-                        logger.info("Embedder background prime complete - semantic search ready")
-                except Exception as exc:  # noqa: BLE001 - never fatal for startup
-                    logger.info("Embedder background prime skipped: %s", exc)
-
-            try:
-                import asyncio as _asyncio_emb_sched
-
-                _asyncio_emb_sched.create_task(_prime_embedder_background())
-            except Exception:
-                logger.debug("Could not schedule embedder prime", exc_info=True)
-
+        if not _fast_startup and process_registry.is_enabled("embedding_model"):
             # Desktop only: the hang that comes before a native crash is the one
             # moment the culprit is still on a stack, so dump them all then.
             try:
@@ -5271,316 +5260,6 @@ def create_app() -> FastAPI:
                     start_loop_stall_watchdog(_asyncio_wd.get_running_loop())
             except Exception:  # noqa: BLE001 - diagnostics are never fatal
                 logger.debug("Loop stall watchdog not started", exc_info=True)
-
-            try:
-                app.state.embedding_warmup_task = _start_embedding_pool_warmup()
-            except Exception as exc:  # noqa: BLE001 - never fatal for startup
-                logger.warning("Embedding pool init skipped: %s", exc)
-
-            # Auto-backfill the multi-collection vector store from existing
-            # rows.  Detached as a background task so a slow embedding model
-            # download or a large dataset doesn't delay startup - semantic
-            # search remains available the moment the model finishes loading.
-            try:
-                import asyncio as _asyncio_bf
-
-                _asyncio_bf.create_task(_auto_backfill_vector_collections())
-            except Exception:
-                logger.debug("Could not schedule vector backfill", exc_info=True)
-
-        # ── KPI auto-recalculation scheduler (24-hour interval) ──────────
-        import asyncio
-
-        async def _kpi_scheduler() -> None:
-            """Run KPI recalculation for all active projects every 24 hours."""
-            while True:
-                await asyncio.sleep(86400)  # 24 hours
-                try:
-                    from app.database import async_session_factory as _kpi_sf
-                    from app.modules.reporting.service import ReportingService
-
-                    async with _kpi_sf() as kpi_session:
-                        svc = ReportingService(kpi_session)
-                        result = await svc.auto_recalculate_kpis()
-                        await kpi_session.commit()
-                        logger.info(
-                            "KPI scheduler: %d projects processed, %d failed",
-                            result["processed"],
-                            result["failed"],
-                        )
-                except Exception:
-                    logger.exception("KPI recalculation scheduler failed")
-
-        # Background schedulers are skipped under OE_TEST_FAST_STARTUP: the test
-        # suite stands up a fresh app (and thus a fresh set of these loops) per
-        # module on a single shared event loop. Left running, each module's
-        # detached loops accumulate and periodically open their own DB sessions,
-        # eventually exhausting the PostgreSQL connection cap (TooManyConnections)
-        # for later modules. Production (flag unset) starts them as before.
-        if not _fast_startup:
-            asyncio.create_task(_kpi_scheduler())
-
-        # ── File-trash retention purge (24-hour interval) ─────────────
-        # Walks ``oe_file_trash`` once a day and hard-deletes every row
-        # whose ``trashed_at + retention_days`` window has lapsed. The
-        # registration helper is idempotent so a hot-reload during dev
-        # doesn't end up running two parallel purge loops against the
-        # same database.
-        try:
-            if not _fast_startup:
-                from app.modules.file_trash.jobs import register_jobs as _ft_register_jobs
-
-                _ft_register_jobs()
-        except Exception:
-            logger.exception("file_trash scheduler registration failed")
-
-        # ── Demo upload retention (24-hour interval) ──────────────────
-        # Removes visitor uploads older than the configured window from the
-        # public hosted demo, seeded demo content excluded. The registration
-        # helper returns without starting anything unless this deployment is a
-        # read-only demo AND an operator set a positive retention window, so a
-        # self-hosted install has no loop and nothing that could call the
-        # sweep. See :mod:`app.core.demo_retention`.
-        try:
-            if not _fast_startup:
-                from app.core.demo_retention import register_jobs as _retention_register_jobs
-
-                _retention_register_jobs()
-        except Exception:
-            logger.exception("demo_retention scheduler registration failed")
-
-        # ── Cost-DB cache pre-warm (runs once, in background) ──────────
-        # The "Add from Database" modal in the BOQ editor calls three
-        # endpoints on open: /costs/regions/, /costs/category-tree/, and
-        # /costs/search/. The first two issue full-table aggregations
-        # (SELECT DISTINCT region, GROUP BY 4 JSON paths) that can be slow
-        # on a cold database when the active catalog holds 100 k+ rows. The
-        # user reported the modal
-        # "loading forever" - this prewarm pays the aggregation cost
-        # once at boot so every subsequent click is a cache hit.
-        async def _prewarm_cost_caches() -> None:
-            await asyncio.sleep(2)  # let other startup tasks settle
-            try:
-                import time as _ptime
-
-                from sqlalchemy import distinct, select
-                from sqlalchemy import func as _func
-
-                from app.database import async_session_factory as _cost_sf
-                from app.modules.costs.models import CostItem
-                from app.modules.costs.router import (
-                    _category_tree_cache,
-                    _region_cache,
-                )
-                from app.modules.costs.schemas import CategoryTreeNode
-                from app.modules.costs.service import CostItemService
-
-                async with _cost_sf() as cost_session:
-                    # 1) Distinct region list - drives the tab bar on /costs
-                    #    and the modal's region picker.
-                    r = await cost_session.execute(
-                        select(distinct(CostItem.region))
-                        .where(CostItem.is_active.is_(True))
-                        .where(CostItem.region.isnot(None))
-                        .where(CostItem.region != "")
-                    )
-                    regions = sorted(row[0] for row in r.all())
-                    _region_cache["regions"] = regions
-
-                    # 2) Per-region item-count stats - drives the count badge
-                    #    on each region tab.
-                    s = await cost_session.execute(
-                        select(
-                            CostItem.region,
-                            _func.count(CostItem.id).label("cnt"),
-                        )
-                        .where(CostItem.is_active.is_(True))
-                        .where(CostItem.region.isnot(None))
-                        .where(CostItem.region != "")
-                        .group_by(CostItem.region)
-                        .order_by(_func.count(CostItem.id).desc())
-                    )
-                    _region_cache["stats"] = [{"region": row[0], "count": row[1]} for row in s.all()]
-
-                    # 3) Distinct top-level categories - drives the category
-                    #    filter dropdown. Warm the all-regions list (the
-                    #    page's default before any region tab is clicked).
-                    coll_expr = CostItem.classification["collection"].as_string()
-                    c = await cost_session.execute(
-                        select(distinct(coll_expr))
-                        .where(CostItem.is_active.is_(True))
-                        .where(coll_expr.isnot(None))
-                        .where(coll_expr != "")
-                        .order_by(coll_expr)
-                    )
-                    _region_cache["categories_all"] = [row[0] for row in c.all() if row[0]]
-                    _region_cache["ts"] = _ptime.monotonic()
-
-                    svc = CostItemService(cost_session)
-                    for reg in regions:
-                        try:
-                            raw = await svc.category_tree(region=reg, depth=4)
-                            nodes = [CategoryTreeNode.model_validate(n) for n in raw]
-                            key = f"tree::{reg}::d=4::p="
-                            _category_tree_cache[key] = {
-                                "nodes": nodes,
-                                "ts": _ptime.monotonic(),
-                            }
-                        except Exception:
-                            logger.debug(
-                                "Pre-warm tree failed for region=%s",
-                                reg,
-                                exc_info=True,
-                            )
-                logger.info(
-                    "Cost-DB caches pre-warmed for %d regions",
-                    len(regions),
-                )
-            except Exception:
-                logger.debug("Cost-DB pre-warm failed (non-fatal)", exc_info=True)
-
-        if not _fast_startup:
-            asyncio.create_task(_prewarm_cost_caches())
-
-        # ── Scheduled reports worker (1-minute tick) ────────────────────
-        # Polls oe_reporting_template for rows whose ``next_run_at`` is
-        # due, renders each one via the existing generate_report path,
-        # then advances ``next_run_at`` using the stored cron expression.
-        # Deliberately uses the same asyncio-based loop as the KPI
-        # scheduler (not Celery) to keep the single-process footprint -
-        # the architecture guide "LIGHTWEIGHT & SIMPLE".
-        async def _reports_scheduler() -> None:
-            from datetime import UTC
-            from datetime import datetime as _dt
-
-            while True:
-                await asyncio.sleep(60)
-                try:
-                    from uuid import uuid4 as _uuid4
-
-                    from app.database import async_session_factory as _rep_sf
-                    from app.modules.reporting.schemas import (
-                        GenerateReportRequest as _GenReq,
-                    )
-                    from app.modules.reporting.service import (
-                        ReportingService as _RepSvc,
-                    )
-
-                    async with _rep_sf() as rep_session:
-                        svc = _RepSvc(rep_session)
-                        due = await svc.list_due_templates(_dt.now(UTC))
-                        for template in due:
-                            if template.project_id_scope is None:
-                                # Portfolio reports need cross-project
-                                # context we don't have yet - pause so
-                                # the worker doesn't busy-loop.
-                                template.is_scheduled = False
-                                template.next_run_at = None
-                                await svc.template_repo.update(template)
-                                continue
-                            try:
-                                gen = _GenReq(
-                                    project_id=template.project_id_scope,
-                                    template_id=template.id,
-                                    report_type=template.report_type,
-                                    title=f"{template.name} (scheduled {_dt.now(UTC):%Y-%m-%d %H:%M} UTC)",
-                                    format="pdf",
-                                    metadata={
-                                        "triggered_by": "scheduler",
-                                        "run_id": str(_uuid4()),
-                                    },
-                                )
-                                report = await svc.generate_report(gen)
-                                await svc.mark_template_ran(template)
-                                if template.recipients:
-                                    try:
-                                        await svc.dispatch_report_email(
-                                            report,
-                                            list(template.recipients),
-                                        )
-                                    except Exception:
-                                        logger.exception(
-                                            "Scheduled report %s email dispatch failed",
-                                            template.id,
-                                        )
-                            except Exception:
-                                logger.exception(
-                                    "Scheduled report %s failed",
-                                    template.id,
-                                )
-                        await rep_session.commit()
-                except Exception:
-                    logger.exception("Reports scheduler tick failed")
-
-        if not _fast_startup:
-            asyncio.create_task(_reports_scheduler())
-
-        # No-code agent builder: fire scheduled custom agents (item #29). The
-        # loop lives in the ai_agents module and self-schedules via asyncio;
-        # fail-soft so a scheduler hiccup never blocks startup.
-        try:
-            if not _fast_startup:
-                from app.modules.ai_agents.scheduler import start_scheduler
-
-                start_scheduler()
-        except Exception:  # noqa: BLE001 - never block startup on the scheduler
-            logger.exception("AI agent scheduler failed to start")
-
-        # Approval SLA monitor: background sweep that nudges the responsible
-        # approver when a step blows past its configured sla_hours and records
-        # the breach on the project timeline. Same lightweight asyncio loop;
-        # fail-soft so a hiccup never blocks startup.
-        try:
-            if not _fast_startup:
-                from app.modules.approval_routes.sla_monitor import start_sla_checker
-
-                start_sla_checker()
-        except Exception:  # noqa: BLE001 - never block startup on the monitor
-            logger.exception("Approval SLA monitor failed to start")
-
-        # Cross-module deadline sweeper (item #18): background sweep that nudges
-        # the owner when a tracked deadline (correspondence response, NCR
-        # corrective action, punch item) slips overdue and escalates it past the
-        # grace window. Same lightweight asyncio loop as the SLA monitor above;
-        # fail-soft so a hiccup never blocks startup.
-        try:
-            if not _fast_startup:
-                from app.modules.deadlines.sweeper import start_deadline_sweeper
-
-                start_deadline_sweeper()
-        except Exception:  # noqa: BLE001 - never block startup on the sweeper
-            logger.exception("Deadline sweeper failed to start")
-
-        # Risk auto-escalation (item #24): hourly sweep that escalates risks
-        # crossing their severity threshold or with a lapsed review date. The
-        # review-lapse trigger has no update event, so a periodic sweep is the
-        # only path that catches it. Same lightweight asyncio loop as above;
-        # the sweep is idempotent and commits nothing itself (caller commits).
-        async def _risk_escalation_sweeper() -> None:
-            while True:
-                await asyncio.sleep(3600)
-                try:
-                    from app.database import async_session_factory as _risk_sf
-                    from app.modules.risk.escalation import RiskEscalationService
-
-                    async with _risk_sf() as risk_session:
-                        await RiskEscalationService(risk_session).sweep()
-                        await risk_session.commit()
-                except Exception:
-                    logger.exception("Risk escalation sweep tick failed")
-
-        if not _fast_startup:
-            asyncio.create_task(_risk_escalation_sweeper())
-
-        # Call recordings expire after OE_PHONELOG_AUDIO_RETENTION_DAYS (default
-        # 90); the transcript stays. Daily sweep, fail-soft like the ones above.
-        try:
-            if not _fast_startup:
-                from app.modules.phonelog.retention import retention_loop
-
-                asyncio.create_task(retention_loop())
-        except Exception:  # noqa: BLE001 - never block startup on the sweeper
-            logger.exception("Phone log retention sweeper failed to start")
 
         _section("Ready")
         # Friendly multi-line ready banner. The CLI (`openestimate serve`)
@@ -5710,27 +5389,8 @@ def create_app() -> FastAPI:
         # this deployment did until the prime was added. An operator serving the
         # documentation to other people can pre-pay it with
         # OE_PRIME_OPENAPI_SCHEMA=1 and get the old behaviour back verbatim.
-        if should_prime_openapi_schema(fast_startup=_fast_startup, openapi_url=app.openapi_url):
-
-            async def _prime_openapi_schema() -> None:
-                try:
-                    started = time.perf_counter()
-                    schema = await asyncio.to_thread(app.openapi)
-                    logger.info(
-                        "OpenAPI schema cached: %d paths in %.1fs",
-                        len(schema.get("paths", {})),
-                        time.perf_counter() - started,
-                    )
-                except Exception:
-                    # Never fail a boot over the documentation. Without the
-                    # cache the first /api/docs visitor pays for the build,
-                    # which is exactly the old behaviour.
-                    logger.warning(
-                        "OpenAPI schema priming failed; the docs will build on first request",
-                        exc_info=True,
-                    )
-
-            app.state.openapi_prime_task = asyncio.create_task(_prime_openapi_schema())
+        # The prime itself is the ``openapi_prime`` registry process declared
+        # above: off unless OE_PRIME_OPENAPI_SCHEMA asks, or an admin starts it.
 
         # NOTE: frontend static mounting moved to create_app() (below, before
         # the startup event runs). Registering the SPA 404 exception handler
@@ -5746,6 +5406,15 @@ def create_app() -> FastAPI:
         logger.info("Shutting down %s", settings.app_name)
         from app.database import engine
 
+        # Stop every registry process (schedulers, models, the embedding pool)
+        # before the event bus drains and the engine goes away.
+        try:
+            from app.core.processes import process_registry
+
+            await process_registry.stop_all()
+        except Exception:
+            logger.debug("process registry stop failed", exc_info=True)
+
         # Let detached event subscribers finish before the pool goes away.
         # Bounded: whatever is still running at the deadline is cancelled and
         # logged, so a stuck handler cannot hold a restart hostage.
@@ -5755,15 +5424,6 @@ def create_app() -> FastAPI:
             await event_bus.drain()
         except Exception:
             logger.debug("event bus drain failed", exc_info=True)
-
-        # Stop the collaboration-lock sweeper before closing the DB
-        # engine so its last iteration cannot hit a disposed pool.
-        try:
-            from app.modules.collaboration_locks.sweeper import stop_sweeper
-
-            stop_sweeper()
-        except Exception:
-            logger.debug("collab lock sweeper stop failed", exc_info=True)
 
         # Tear down the embedding inference pool so Ctrl-C doesn't
         # leave orphan Python worker processes alive.

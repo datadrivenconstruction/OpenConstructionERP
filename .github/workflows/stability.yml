@@ -10,6 +10,10 @@ name: Stability (load, fresh install, long session)
 #                   desktop OSes?
 #   e2e-stability   does a real browser session survive token expiry, a backend
 #                   restart and import/export over a long soak?
+#   cold-start-probe how long until /api/health and the first login answer, and
+#                   how much memory the process tree holds after boot?
+#                   (only_cold_start=true runs this job alone; dispatch it on
+#                   two refs and compare the artifacts for a before/after)
 #
 # It is manual only. Nothing here runs on push, so nothing here can starve or be
 # cancelled by a later push the way the CI lane on main is.
@@ -37,6 +41,14 @@ on:
         description: "Fail load-3gb when cold start to healthy exceeds this"
         default: "60"
         required: false
+      only_cold_start:
+        description: "Run only cold-start-probe (skip load, compose, pip and e2e)"
+        type: boolean
+        default: false
+      cold_start_runs:
+        description: "Boots for cold-start-probe: one fresh install, then warm restarts"
+        default: "4"
+        required: false
 
 permissions:
   contents: read
@@ -48,6 +60,7 @@ concurrency:
 jobs:
   load-3gb:
     name: Load under a 3 GB memory cap
+    if: ${{ !inputs.only_cold_start }}
     runs-on: ubuntu-latest
     timeout-minutes: 120
     env:
@@ -210,6 +223,7 @@ jobs:
 
   compose-fresh:
     name: Quickstart compose on a clean runner
+    if: ${{ !inputs.only_cold_start }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -255,6 +269,7 @@ jobs:
 
   pip-clean-venv:
     name: Wheel in a clean venv (${{ matrix.os }})
+    if: ${{ !inputs.only_cold_start }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     strategy:
@@ -311,7 +326,7 @@ jobs:
 
   e2e-stability:
     name: Long browser session (soak, token expiry, restart)
-    if: ${{ inputs.run_e2e }}
+    if: ${{ inputs.run_e2e && !inputs.only_cold_start }}
     runs-on: ubuntu-latest
     # Soak plus install, build, seed and the import/export specs. The cap only
     # decides when a hung job is killed, so it is generous on purpose.
@@ -410,14 +425,44 @@ jobs:
         run: |
           [ -f "$OE_PID_FILE" ] && kill "$(cat "$OE_PID_FILE")" 2>/dev/null || true
 
-  # Placeholder, enable once the minimal-mode boot and process center land in main:
-  #
-  # minimal-cold-start-process-center:
-  #   name: Cold start in minimal mode + process center e2e
-  #   runs-on: ubuntu-latest
-  #   timeout-minutes: 60
-  #   steps:
-  #     - uses: actions/checkout@v7
-  #     # TODO: boot with the minimal-mode switch (name it after the feature
-  #     # ships), measure cold start to /api/health like load-3gb does, then run
-  #     # the process center Playwright spec against it.
+  cold-start-probe:
+    name: Cold start, first login and memory after boot
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
+
+      # The API is all the probe touches, so no frontend build.
+      - name: Install backend
+        working-directory: backend
+        run: pip install -e . psutil httpx
+
+      # Bare `app.cli serve` on embedded PostgreSQL, no Docker, so psutil sees
+      # the real process tree. Boot 1 is a fresh install, the rest are warm
+      # restarts of the same data directory.
+      - name: Probe
+        run: |
+          set -o pipefail
+          mkdir -p "$RUNNER_TEMP/probe"
+          python scripts/stability/cold_start_probe.py \
+            --backend backend \
+            --data-dir "$RUNNER_TEMP/oe-probe-data" \
+            --runs "${{ inputs.cold_start_runs }}" \
+            --out "$RUNNER_TEMP/probe/cold-start.json" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "ref \`${{ github.ref_name }}\` at \`${{ github.sha }}\`" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload probe results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cold-start-probe
+          path: ${{ runner.temp }}/probe/**
+          retention-days: 30
+          if-no-files-found: warn

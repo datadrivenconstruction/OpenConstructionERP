@@ -63,6 +63,10 @@ def _register_all_models() -> None:
     import app.core.data_repairs  # noqa: F401
     import app.core.pg_optimizations  # noqa: F401
 
+    # ``oe_process_settings``: declared in app.core.processes, imported by the
+    # app at startup, so the same explicit-import case as data_repairs.
+    import app.core.processes.store  # noqa: F401
+
     # The translation cache declares its table on Base.metadata at import time,
     # and nothing imports it until something asks for a translation. When that
     # import lands after create_all has run, the table exists in the metadata and
