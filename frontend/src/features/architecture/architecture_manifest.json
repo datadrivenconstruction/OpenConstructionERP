@@ -22875,6 +22875,7 @@
         "price_list_carry.py",
         "quantity_baseline.py",
         "quantity_formula.py",
+        "repairs.py",
         "repository.py",
         "resource_norms.py",
         "resource_review.py",
@@ -52128,6 +52129,12 @@
               "nullable": true
             },
             {
+              "name": "party_kind",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
               "name": "vat_number",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
@@ -52393,6 +52400,11 @@
               "description": "Registered legal entity name"
             },
             {
+              "name": "party_kind",
+              "type": "PartyKind | None",
+              "description": "natural_person (a human or sole trader) or legal_entity (a company); null when not stated"
+            },
+            {
               "name": "vat_number",
               "type": "str | None",
               "description": "VAT registration number"
@@ -52496,6 +52508,11 @@
             {
               "name": "legal_name",
               "type": "str | None"
+            },
+            {
+              "name": "party_kind",
+              "type": "PartyKind | None",
+              "default": "None"
             },
             {
               "name": "vat_number",
@@ -52606,6 +52623,11 @@
             },
             {
               "name": "legal_name",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "party_kind",
               "type": "str | None",
               "default": "None"
             },
@@ -89869,6 +89891,13 @@
         },
         {
           "method": "GET",
+          "path": "/entity-types/",
+          "handler": "list_entity_types",
+          "response_model": "list[str]",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
           "path": "/{workflow_id}",
           "handler": "get_workflow",
           "response_model": "WorkflowResponse",
@@ -115544,6 +115573,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "consent.py",
         "coord_transforms.py",
         "events.py",
         "geocoder.py",
@@ -116277,6 +116307,38 @@
             }
           ],
           "relationships": []
+        },
+        {
+          "class_name": "GeocodingConsent",
+          "tablename": "oe_geo_hub_geocoding_consent",
+          "docstring": "The installation's answer to \"may project addresses go to a geocoder\".\n\nOne row per installation (``scope = \"installation\"``). Until a manager\nanswers, no address leaves the server, neither for the automatic map pin\nnor for address suggestions. ``choice`` is ``allow`` (public\nOpenStreetMap services), ``deny`` or ``mirror`` (the deployer's own\nNominatim at ``mirror_url``). Environment switches take precedence, see\n``geo_hub/consent.py``.",
+          "columns": [
+            {
+              "name": "scope",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "choice",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "mirror_url",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "decided_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": []
         }
       ],
       "routes": [
@@ -116390,6 +116452,20 @@
           "handler": "geocode_cache_purge",
           "response_model": "GeocodeCachePurgeResponse",
           "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/geocoding-consent",
+          "handler": "get_geocoding_consent",
+          "response_model": "GeocodingConsentResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "PUT",
+          "path": "/geocoding-consent",
+          "handler": "put_geocoding_consent",
+          "response_model": "GeocodingConsentResponse",
+          "request_schema": "GeocodingConsentUpdate"
         },
         {
           "method": "DELETE",
@@ -118617,6 +118693,56 @@
               "name": "streets",
               "type": "GlobeStreetsSource | None",
               "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "GeocodingConsentResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Where project addresses may go for geocoding, and who decides it.\n\n``state`` is ``unanswered`` until a manager answers; ``env_disabled`` and\n``env_mirror`` mean the deployer fixed it in the environment and the\nanswer cannot be changed from the application.",
+          "fields": [
+            {
+              "name": "state",
+              "type": "str"
+            },
+            {
+              "name": "mirror_url",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "nominatim_url",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "photon_url",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "can_decide",
+              "type": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "GeocodingConsentUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A manager's answer to the one-time geocoding question.",
+          "fields": [
+            {
+              "name": "choice",
+              "type": "str"
+            },
+            {
+              "name": "mirror_url",
+              "type": "str | None"
             }
           ]
         }
@@ -207862,6 +207988,12 @@
               "nullable": true
             },
             {
+              "name": "party_kind",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
               "name": "tax_id",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
@@ -209170,6 +209302,11 @@
               "type": "str | None"
             },
             {
+              "name": "party_kind",
+              "type": "PartyKind | None",
+              "default": "None"
+            },
+            {
               "name": "tax_id",
               "type": "str | None"
             },
@@ -209229,6 +209366,11 @@
             {
               "name": "trade_name",
               "type": "str | None"
+            },
+            {
+              "name": "party_kind",
+              "type": "PartyKind | None",
+              "default": "None"
             },
             {
               "name": "tax_id",
@@ -209295,6 +209437,11 @@
             },
             {
               "name": "trade_name",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "party_kind",
               "type": "str | None",
               "default": "None"
             },
@@ -236011,10 +236158,10 @@
     },
     {
       "name": "geo-hub",
-      "ts_files": 45,
+      "ts_files": 46,
       "css_files": 0,
       "test_files": 11,
-      "total_files": 45
+      "total_files": 46
     },
     {
       "name": "global_presence",
@@ -236287,6 +236434,13 @@
       "ts_files": 9,
       "css_files": 0,
       "test_files": 4,
+      "total_files": 9
+    },
+    {
+      "name": "processes",
+      "ts_files": 9,
+      "css_files": 0,
+      "test_files": 1,
       "total_files": 9
     },
     {
@@ -238035,14 +238189,14 @@
   "statistics": {
     "backend_modules": 197,
     "modules_with_manifests": 195,
-    "total_models": 625,
-    "total_columns": 7171,
+    "total_models": 626,
+    "total_columns": 7177,
     "total_relationships": 236,
-    "total_routes": 3769,
-    "total_schemas": 3576,
-    "total_python_files": 2303,
-    "frontend_features": 192,
-    "frontend_ts_files": 2999,
+    "total_routes": 3772,
+    "total_schemas": 3578,
+    "total_python_files": 2305,
+    "frontend_features": 193,
+    "frontend_ts_files": 3009,
     "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {
@@ -238177,6 +238331,7 @@
     "prefab": "prefab",
     "preliminaries": "preliminaries",
     "price-index": "price_index",
+    "processes": null,
     "procurement": "procurement",
     "progress": "progress",
     "project-controls": "project_controls",
