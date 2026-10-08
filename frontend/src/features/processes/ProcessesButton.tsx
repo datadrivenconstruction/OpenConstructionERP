@@ -47,10 +47,12 @@ export function ProcessesButton() {
   const running = processes.filter(isOn).length;
   const errors = processes.filter((p) => p.status === 'error').length;
   const loading = processes.filter(isLoading);
-  const health = isError ? 'error' : overallHealth(processes);
+  // A failed refetch keeps the last good answer; only no answer at all reads as an error.
+  const unreachable = isError && !data;
+  const health = unreachable ? 'error' : overallHealth(processes);
 
   const title = t('processes.title', { defaultValue: 'Background services' });
-  const summary = isError
+  const summary = unreachable
     ? t('processes.header_unreachable', { defaultValue: 'Background services: status unavailable' })
     : loading.length > 0
       ? t('processes.header_summary_loading', {

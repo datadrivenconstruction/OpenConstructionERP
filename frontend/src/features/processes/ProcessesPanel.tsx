@@ -488,7 +488,7 @@ export function ProcessesPanel() {
             </div>
           )}
 
-          {isError && (
+          {isError && !data && (
             <div role="alert" className="rounded-xl bg-rose-500/10 p-3 text-sm text-rose-800 dark:text-rose-200">
               <p>{t('processes.load_failed', { defaultValue: 'Could not read the status of the services.' })}</p>
               <p className="mt-1 text-xs opacity-80">{getErrorMessage(error)}</p>
