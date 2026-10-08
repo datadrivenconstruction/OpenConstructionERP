@@ -19834,6 +19834,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "Iga kahe nädala järel",
     "contracts.payment_terms.interval.weekly": "Kord nädalas",
     "contracts.payment_terms.interval.milestone": "Vahe-eesmärkide järgi",
+    "contracts.payment_terms.subdivision_missing": "Holdbacki ja selle vabastamise tähtaja määrab provints. Salvestage provints projekti seadetes, et kasutada selle väärtusi; seni kuvatakse riigi vaikeväärtust.",
+    "contracts.payment_terms.subdivision_missing_action": "Ava projekti seaded",
     "contracts.payment_terms.release_period_days": "Vabastatakse {{days}} päeva pärast vabastamise sündmust, kui lien'i pole registreeritud ({{region}})",
     "contracts.payment_terms.source.statute": "Seadus",
     "contracts.payment_terms.source.standard_form": "Standardne lepinguvorm",

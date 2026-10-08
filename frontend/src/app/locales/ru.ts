@@ -20096,6 +20096,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "Каждые две недели",
     "contracts.payment_terms.interval.weekly": "Еженедельно",
     "contracts.payment_terms.interval.milestone": "По этапам",
+    "contracts.payment_terms.subdivision_missing": "Holdback и срок его освобождения устанавливает провинция. Укажите провинцию в настройках проекта, чтобы использовать её значения; до этого показывается общенациональное значение по умолчанию.",
+    "contracts.payment_terms.subdivision_missing_action": "Открыть настройки проекта",
     "contracts.payment_terms.release_period_days": "Освобождается через {{days}} дней после события освобождения, если lien не зарегистрирован ({{region}})",
     "contracts.payment_terms.source.statute": "Закон",
     "contracts.payment_terms.source.standard_form": "Типовая форма договора",

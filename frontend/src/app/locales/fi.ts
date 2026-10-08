@@ -19575,6 +19575,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "Kahden viikon välein",
     "contracts.payment_terms.interval.weekly": "Viikoittain",
     "contracts.payment_terms.interval.milestone": "Välitavoitteiden mukaan",
+    "contracts.payment_terms.subdivision_missing": "Holdbackin ja sen vapautusajan määrää provinssi. Kirjaa provinssi projektin asetuksiin, jotta sen luvut otetaan käyttöön; siihen asti näytetään maan oletusarvo.",
+    "contracts.payment_terms.subdivision_missing_action": "Avaa projektin asetukset",
     "contracts.payment_terms.release_period_days": "Vapautetaan {{days}} päivää vapautustapahtuman jälkeen, jos lien-oikeutta ei ole rekisteröity ({{region}})",
     "contracts.payment_terms.source.statute": "Laki",
     "contracts.payment_terms.source.standard_form": "Vakiosopimuslomake",

@@ -8108,6 +8108,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "Har ikki haftada",
     "contracts.payment_terms.interval.weekly": "Haftalik",
     "contracts.payment_terms.interval.milestone": "Muhim bosqichlarda",
+    "contracts.payment_terms.subdivision_missing": "Holdback va uni boʻshatish muddatini provinsiya belgilaydi. Uning qiymatlaridan foydalanish uchun loyiha sozlamalarida provinsiyani qayd eting; shunga qadar mamlakat boʻyicha standart qiymat koʻrsatiladi.",
+    "contracts.payment_terms.subdivision_missing_action": "Loyiha sozlamalarini ochish",
     "contracts.payment_terms.release_period_days": "lien roʻyxatdan oʻtkazilmagan boʻlsa, boʻshatish hodisasidan keyin {{days}} kun oʻtgach boʻshatiladi ({{region}})",
     "contracts.payment_terms.source.statute": "Qonun",
     "contracts.payment_terms.source.standard_form": "Standart shartnoma shakli",

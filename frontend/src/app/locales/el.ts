@@ -8217,6 +8217,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "Κάθε δύο εβδομάδες",
     "contracts.payment_terms.interval.weekly": "Εβδομαδιαίως",
     "contracts.payment_terms.interval.milestone": "Σε ορόσημα",
+    "contracts.payment_terms.subdivision_missing": "Το holdback και η προθεσμία απελευθέρωσής του ορίζονται από την επαρχία. Καταχωρίστε την επαρχία στις ρυθμίσεις του έργου για να χρησιμοποιηθούν οι τιμές της· μέχρι τότε εμφανίζεται η εθνική προεπιλογή.",
+    "contracts.payment_terms.subdivision_missing_action": "Άνοιγμα ρυθμίσεων έργου",
     "contracts.payment_terms.release_period_days": "Απελευθερώνεται {{days}} ημέρες μετά το γεγονός απελευθέρωσης, αν δεν έχει καταχωριστεί lien ({{region}})",
     "contracts.payment_terms.source.statute": "Νόμος",
     "contracts.payment_terms.source.standard_form": "Τυποποιημένη μορφή σύμβασης",

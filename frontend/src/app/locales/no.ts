@@ -19644,6 +19644,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "Hver andre uke",
     "contracts.payment_terms.interval.weekly": "Ukentlig",
     "contracts.payment_terms.interval.milestone": "Etter milepæler",
+    "contracts.payment_terms.subdivision_missing": "Holdback og frigivelsesfristen fastsettes av provinsen. Registrer provinsen i prosjektinnstillingene for å bruke tallene; inntil da vises den nasjonale standarden.",
+    "contracts.payment_terms.subdivision_missing_action": "Åpne prosjektinnstillinger",
     "contracts.payment_terms.release_period_days": "Frigis {{days}} dager etter frigivelseshendelsen hvis det ikke er registrert lien ({{region}})",
     "contracts.payment_terms.source.statute": "Lov",
     "contracts.payment_terms.source.standard_form": "Standard kontraktsformular",

@@ -19462,6 +19462,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "Setiap dua minggu",
     "contracts.payment_terms.interval.weekly": "Mingguan",
     "contracts.payment_terms.interval.milestone": "Per milestone",
+    "contracts.payment_terms.subdivision_missing": "Holdback dan jangka waktu pelepasannya ditetapkan oleh provinsi. Catat provinsi di pengaturan proyek untuk memakai angkanya; sampai saat itu, default nasional yang ditampilkan.",
+    "contracts.payment_terms.subdivision_missing_action": "Buka pengaturan proyek",
     "contracts.payment_terms.release_period_days": "Dilepaskan {{days}} hari setelah peristiwa pelepasan jika tidak ada lien yang didaftarkan ({{region}})",
     "contracts.payment_terms.source.statute": "Undang-undang",
     "contracts.payment_terms.source.standard_form": "Formulir kontrak standar",

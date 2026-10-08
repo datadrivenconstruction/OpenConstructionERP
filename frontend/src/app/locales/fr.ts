@@ -19303,6 +19303,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "Toutes les deux semaines",
     "contracts.payment_terms.interval.weekly": "Hebdomadaire",
     "contracts.payment_terms.interval.milestone": "Aux jalons",
+    "contracts.payment_terms.subdivision_missing": "Le holdback et son délai de libération sont fixés par la province. Indiquez la province dans les paramètres du projet pour utiliser ses chiffres ; d'ici là, la valeur nationale par défaut s'affiche.",
+    "contracts.payment_terms.subdivision_missing_action": "Ouvrir les paramètres du projet",
     "contracts.payment_terms.release_period_days": "Libérée {{days}} jours après l'événement de libération si aucun lien n'est inscrit ({{region}})",
     "contracts.payment_terms.source.statute": "Loi",
     "contracts.payment_terms.source.standard_form": "Formulaire de contrat type",

@@ -19131,6 +19131,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "Tuwing dalawang linggo",
     "contracts.payment_terms.interval.weekly": "Lingguhan",
     "contracts.payment_terms.interval.milestone": "Sa bawat milestone",
+    "contracts.payment_terms.subdivision_missing": "Ang probinsya ang nagtatakda ng holdback at ng palugit ng paglalabas nito. Itala ang probinsya sa mga setting ng proyekto para magamit ang mga numero nito; hanggang doon, ipinapakita ang pambansang default.",
+    "contracts.payment_terms.subdivision_missing_action": "Buksan ang mga setting ng proyekto",
     "contracts.payment_terms.release_period_days": "Inilalabas {{days}} araw pagkatapos ng release event kung walang nakarehistrong lien ({{region}})",
     "contracts.payment_terms.source.statute": "Batas",
     "contracts.payment_terms.source.standard_form": "Standard na contract form",

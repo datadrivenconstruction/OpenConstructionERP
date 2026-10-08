@@ -16498,6 +16498,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "Every two weeks",
     "contracts.payment_terms.interval.weekly": "Weekly",
     "contracts.payment_terms.interval.milestone": "At milestones",
+    "contracts.payment_terms.subdivision_missing": "Holdback and its release period are set by the province. Record the province in the project settings to use its figures; until then the national default is shown.",
+    "contracts.payment_terms.subdivision_missing_action": "Open project settings",
     "contracts.payment_terms.release_period_days": "Released {{days}} days after the release event if no lien is filed ({{region}})",
     "contracts.payment_terms.source.statute": "Statute",
     "contracts.payment_terms.source.standard_form": "Standard contract form",

@@ -19125,6 +19125,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "প্রতি দুই সপ্তাহে",
     "contracts.payment_terms.interval.weekly": "সাপ্তাহিক",
     "contracts.payment_terms.interval.milestone": "প্রতিটি মাইলস্টোনে",
+    "contracts.payment_terms.subdivision_missing": "Holdback এবং তা ছাড়ার সময়সীমা প্রদেশ ঠিক করে। প্রদেশের সংখ্যাগুলি ব্যবহার করতে প্রকল্প সেটিংসে প্রদেশটি লিখুন; তার আগে জাতীয় ডিফল্ট দেখানো হয়।",
+    "contracts.payment_terms.subdivision_missing_action": "প্রকল্প সেটিংস খুলুন",
     "contracts.payment_terms.release_period_days": "কোনো lien দাখিল না হলে রিলিজ ঘটনার {{days}} দিন পর ছাড়া হয় ({{region}})",
     "contracts.payment_terms.source.statute": "আইন",
     "contracts.payment_terms.source.standard_form": "স্ট্যান্ডার্ড কন্ট্রাক্ট ফর্ম",

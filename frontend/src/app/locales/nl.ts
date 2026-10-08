@@ -19464,6 +19464,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "Elke twee weken",
     "contracts.payment_terms.interval.weekly": "Wekelijks",
     "contracts.payment_terms.interval.milestone": "Bij mijlpalen",
+    "contracts.payment_terms.subdivision_missing": "De holdback en de vrijgavetermijn worden door de provincie bepaald. Leg de provincie vast in de projectinstellingen om haar cijfers te gebruiken; tot die tijd wordt de landelijke standaardwaarde getoond.",
+    "contracts.payment_terms.subdivision_missing_action": "Projectinstellingen openen",
     "contracts.payment_terms.release_period_days": "Wordt {{days}} dagen na de vrijgavegebeurtenis vrijgegeven als er geen lien is geregistreerd ({{region}})",
     "contracts.payment_terms.source.statute": "Wet",
     "contracts.payment_terms.source.standard_form": "Standaard contractformulier",

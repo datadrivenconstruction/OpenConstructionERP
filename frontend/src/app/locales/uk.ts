@@ -19950,6 +19950,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "Кожні два тижні",
     "contracts.payment_terms.interval.weekly": "Щотижня",
     "contracts.payment_terms.interval.milestone": "За етапами",
+    "contracts.payment_terms.subdivision_missing": "Holdback і строк його звільнення встановлює провінція. Вкажіть провінцію в налаштуваннях проєкту, щоб використовувати її значення; до цього показується загальнонаціональне значення за замовчуванням.",
+    "contracts.payment_terms.subdivision_missing_action": "Відкрити налаштування проєкту",
     "contracts.payment_terms.release_period_days": "Звільняється через {{days}} днів після події звільнення, якщо lien не зареєстровано ({{region}})",
     "contracts.payment_terms.source.statute": "Закон",
     "contracts.payment_terms.source.standard_form": "Типова форма договору",

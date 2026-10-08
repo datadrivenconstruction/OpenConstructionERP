@@ -19933,6 +19933,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "Alle zwei Wochen",
     "contracts.payment_terms.interval.weekly": "Wöchentlich",
     "contracts.payment_terms.interval.milestone": "Bei Meilensteinen",
+    "contracts.payment_terms.subdivision_missing": "Holdback und dessen Freigabefrist legt die Provinz fest. Tragen Sie die Provinz in den Projekteinstellungen ein, um deren Werte zu verwenden; bis dahin wird der landesweite Standardwert angezeigt.",
+    "contracts.payment_terms.subdivision_missing_action": "Projekteinstellungen öffnen",
     "contracts.payment_terms.release_period_days": "Wird {{days}} Tage nach dem Freigabeereignis freigegeben, wenn kein lien eingetragen ist ({{region}})",
     "contracts.payment_terms.source.statute": "Gesetz",
     "contracts.payment_terms.source.standard_form": "Vertragsmusterformular",

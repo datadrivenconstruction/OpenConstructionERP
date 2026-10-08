@@ -19679,6 +19679,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "ทุกสองสัปดาห์",
     "contracts.payment_terms.interval.weekly": "ทุกสัปดาห์",
     "contracts.payment_terms.interval.milestone": "ตามแต่ละหมุดหมาย",
+    "contracts.payment_terms.subdivision_missing": "Holdback และระยะเวลาปล่อยเงินกำหนดโดยจังหวัด (province) บันทึกจังหวัดในการตั้งค่าโครงการเพื่อใช้ตัวเลขของจังหวัดนั้น จนกว่าจะบันทึก ระบบจะแสดงค่าเริ่มต้นระดับประเทศ",
+    "contracts.payment_terms.subdivision_missing_action": "เปิดการตั้งค่าโครงการ",
     "contracts.payment_terms.release_period_days": "ปล่อยหลังเหตุการณ์ปล่อย {{days}} วัน หากไม่มี lien ที่จดทะเบียน ({{region}})",
     "contracts.payment_terms.source.statute": "กฎหมาย",
     "contracts.payment_terms.source.standard_form": "สัญญามาตรฐาน",

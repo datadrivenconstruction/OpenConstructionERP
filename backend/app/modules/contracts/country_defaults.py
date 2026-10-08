@@ -769,6 +769,12 @@ def note_key(country: str, field: str) -> str:
     return f"{NOTE_KEY_PREFIX}{country}.{field}.note"
 
 
+def has_subdivision_rows(country_code: str | None) -> bool:
+    """Whether the country's figures change with the province or state, so one should be recorded."""
+    prefix = f"{normalise_country(country_code)}-"
+    return prefix != "-" and any(code.startswith(prefix) for code in SUBDIVISION_CONTRACT_DEFAULTS)
+
+
 def normalise_subdivision(country: str, subdivision_code: str | None) -> str:
     """``"CA-MB"`` from ``"CA-MB"``, ``"ca-mb"`` or ``"MB"``; ``""`` when blank or in another country."""
     code = (subdivision_code or "").strip().upper()
@@ -964,6 +970,7 @@ __all__ = [
     "apply_contract_defaults",
     "forget_overridden",
     "normalise_country",
+    "has_subdivision_rows",
     "normalise_subdivision",
     "note_key",
     "resolve_contract_defaults",

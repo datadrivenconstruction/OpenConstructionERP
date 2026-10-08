@@ -9026,6 +9026,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "Her iki haftada bir",
     "contracts.payment_terms.interval.weekly": "Haftalık",
     "contracts.payment_terms.interval.milestone": "Kilometre taşlarında",
+    "contracts.payment_terms.subdivision_missing": "Holdback ve serbest bırakma süresi eyalet tarafından belirlenir. Eyaletin rakamlarını kullanmak için proje ayarlarında eyaleti kaydedin; o zamana kadar ulusal varsayılan gösterilir.",
+    "contracts.payment_terms.subdivision_missing_action": "Proje ayarlarını aç",
     "contracts.payment_terms.release_period_days": "Tescilli lien yoksa serbest bırakma olayından {{days}} gün sonra serbest bırakılır ({{region}})",
     "contracts.payment_terms.source.statute": "Yasa",
     "contracts.payment_terms.source.standard_form": "Standart sözleşme formu",

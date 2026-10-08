@@ -19670,6 +19670,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "Svaka dva tjedna",
     "contracts.payment_terms.interval.weekly": "Tjedno",
     "contracts.payment_terms.interval.milestone": "Po fazama",
+    "contracts.payment_terms.subdivision_missing": "Holdback i rok njegova oslobađanja određuje pokrajina. Upišite pokrajinu u postavkama projekta kako bi se koristile njezine vrijednosti; do tada se prikazuje državna zadana vrijednost.",
+    "contracts.payment_terms.subdivision_missing_action": "Otvori postavke projekta",
     "contracts.payment_terms.release_period_days": "Oslobađa se {{days}} dana nakon događaja oslobađanja, ako nije upisan lien ({{region}})",
     "contracts.payment_terms.source.statute": "Zakon",
     "contracts.payment_terms.source.standard_form": "Standardni obrazac ugovora",

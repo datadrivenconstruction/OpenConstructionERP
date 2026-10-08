@@ -19894,6 +19894,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "La fiecare două săptămâni",
     "contracts.payment_terms.interval.weekly": "Săptămânal",
     "contracts.payment_terms.interval.milestone": "La repere",
+    "contracts.payment_terms.subdivision_missing": "Holdback și termenul lui de eliberare sunt stabilite de provincie. Înregistrați provincia în setările proiectului pentru a folosi cifrele ei; până atunci se afișează valoarea națională implicită.",
+    "contracts.payment_terms.subdivision_missing_action": "Deschide setările proiectului",
     "contracts.payment_terms.release_period_days": "Se eliberează la {{days}} zile după evenimentul de eliberare, dacă nu a fost înregistrat niciun lien ({{region}})",
     "contracts.payment_terms.source.statute": "Lege",
     "contracts.payment_terms.source.standard_form": "Formular de contract standard",

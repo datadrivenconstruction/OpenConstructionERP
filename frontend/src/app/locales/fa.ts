@@ -8134,6 +8134,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "هر دو هفته",
     "contracts.payment_terms.interval.weekly": "هفتگی",
     "contracts.payment_terms.interval.milestone": "در نقاط عطف",
+    "contracts.payment_terms.subdivision_missing": "holdback و مهلت آزادسازی آن را استان تعیین می‌کند. برای استفاده از ارقام آن، استان را در تنظیمات پروژه ثبت کنید؛ تا آن زمان مقدار پیش‌فرض کشوری نمایش داده می‌شود.",
+    "contracts.payment_terms.subdivision_missing_action": "باز کردن تنظیمات پروژه",
     "contracts.payment_terms.release_period_days": "اگر lien ثبت نشده باشد، {{days}} روز پس از رویداد آزادسازی آزاد می‌شود ({{region}})",
     "contracts.payment_terms.source.statute": "قانون",
     "contracts.payment_terms.source.standard_form": "فرم استاندارد قرارداد",

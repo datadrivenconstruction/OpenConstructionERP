@@ -19842,6 +19842,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "हर दो सप्ताह",
     "contracts.payment_terms.interval.weekly": "साप्ताहिक",
     "contracts.payment_terms.interval.milestone": "हर माइलस्टोन पर",
+    "contracts.payment_terms.subdivision_missing": "Holdback और उसकी रिलीज़ अवधि प्रांत तय करता है। उसके आँकड़े इस्तेमाल करने के लिए परियोजना सेटिंग्स में प्रांत दर्ज करें; तब तक राष्ट्रीय डिफ़ॉल्ट दिखाया जाता है।",
+    "contracts.payment_terms.subdivision_missing_action": "परियोजना सेटिंग्स खोलें",
     "contracts.payment_terms.release_period_days": "कोई lien दर्ज न होने पर रिलीज़ घटना के {{days}} दिन बाद जारी किया जाता है ({{region}})",
     "contracts.payment_terms.source.statute": "कानून",
     "contracts.payment_terms.source.standard_form": "मानक अनुबंध प्रपत्र",

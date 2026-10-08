@@ -19512,6 +19512,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "Mỗi hai tuần",
     "contracts.payment_terms.interval.weekly": "Hàng tuần",
     "contracts.payment_terms.interval.milestone": "Theo từng mốc",
+    "contracts.payment_terms.subdivision_missing": "Holdback và thời hạn giải phóng do tỉnh bang quy định. Hãy ghi tỉnh bang trong phần cài đặt dự án để dùng số liệu của tỉnh; cho đến lúc đó, hiển thị mặc định cấp quốc gia.",
+    "contracts.payment_terms.subdivision_missing_action": "Mở cài đặt dự án",
     "contracts.payment_terms.release_period_days": "Được giải phóng sau {{days}} ngày kể từ sự kiện giải phóng nếu không có lien nào được đăng ký ({{region}})",
     "contracts.payment_terms.source.statute": "Luật định",
     "contracts.payment_terms.source.standard_form": "Mẫu hợp đồng chuẩn",

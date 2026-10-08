@@ -19821,6 +19821,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "Každé dva týdny",
     "contracts.payment_terms.interval.weekly": "Týdně",
     "contracts.payment_terms.interval.milestone": "Podle milníků",
+    "contracts.payment_terms.subdivision_missing": "Holdback a lhůtu jeho uvolnění stanoví provincie. Zapište provincii v nastavení projektu, aby se použily její hodnoty; do té doby se zobrazuje celostátní výchozí hodnota.",
+    "contracts.payment_terms.subdivision_missing_action": "Otevřít nastavení projektu",
     "contracts.payment_terms.release_period_days": "Uvolní se {{days}} dnů po události uvolnění, pokud není uplatněn lien ({{region}})",
     "contracts.payment_terms.source.statute": "Zákon",
     "contracts.payment_terms.source.standard_form": "Standardní vzor smlouvy",

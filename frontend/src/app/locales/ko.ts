@@ -19633,6 +19633,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "2주마다",
     "contracts.payment_terms.interval.weekly": "매주",
     "contracts.payment_terms.interval.milestone": "마일스톤마다",
+    "contracts.payment_terms.subdivision_missing": "holdback과 그 해제 기간은 주(province)에서 정합니다. 해당 주의 수치를 사용하려면 프로젝트 설정에 주를 기록하십시오. 그전까지는 전국 기본값이 표시됩니다.",
+    "contracts.payment_terms.subdivision_missing_action": "프로젝트 설정 열기",
     "contracts.payment_terms.release_period_days": "lien이 등록되지 않았다면 해제 사유 발생 후 {{days}}일이 지나 해제됩니다({{region}})",
     "contracts.payment_terms.source.statute": "법률",
     "contracts.payment_terms.source.standard_form": "표준 계약 양식",

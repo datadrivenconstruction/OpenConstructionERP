@@ -3122,6 +3122,19 @@ export function CreateContractModal({
             className={inputCls}
           />
           {defaultHint('retention_percent')}
+          {knownDefaults?.subdivision_missing ? (
+            <p className="mt-1 text-xs text-semantic-warning" data-testid="contract-subdivision-missing">
+              {t('contracts.payment_terms.subdivision_missing', {
+                defaultValue:
+                  'Holdback and its release period are set by the province. Record the province in the project settings to use its figures; until then the national default is shown.',
+              })}{' '}
+              <Link to={`/projects/${projectId}/settings`} className="underline">
+                {t('contracts.payment_terms.subdivision_missing_action', {
+                  defaultValue: 'Open project settings',
+                })}
+              </Link>
+            </p>
+          ) : null}
         </WideModalField>
       </WideModalSection>
 

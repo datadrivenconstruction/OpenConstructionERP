@@ -19651,6 +19651,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "Cada dos semanas",
     "contracts.payment_terms.interval.weekly": "Semanal",
     "contracts.payment_terms.interval.milestone": "En hitos",
+    "contracts.payment_terms.subdivision_missing": "El holdback y su plazo de liberación los fija la provincia. Registre la provincia en la configuración del proyecto para usar sus cifras; hasta entonces se muestra el valor nacional por defecto.",
+    "contracts.payment_terms.subdivision_missing_action": "Abrir la configuración del proyecto",
     "contracts.payment_terms.release_period_days": "Se libera {{days}} días después del hito de liberación si no se ha registrado ningún lien ({{region}})",
     "contracts.payment_terms.source.statute": "Ley",
     "contracts.payment_terms.source.standard_form": "Formulario de contrato tipo",

@@ -9119,6 +9119,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "كل أسبوعين",
     "contracts.payment_terms.interval.weekly": "أسبوعيًا",
     "contracts.payment_terms.interval.milestone": "عند المعالم",
+    "contracts.payment_terms.subdivision_missing": "يحدد الإقليم نسبة الـ holdback ومدة الإفراج عنه. سجّل الإقليم في إعدادات المشروع لاستخدام أرقامه؛ وإلى ذلك الحين تُعرض القيمة الافتراضية الوطنية.",
+    "contracts.payment_terms.subdivision_missing_action": "فتح إعدادات المشروع",
     "contracts.payment_terms.release_period_days": "يُفرج عنه بعد {{days}} يوما من حدث الإفراج إذا لم يُسجَّل أي lien ({{region}})",
     "contracts.payment_terms.source.statute": "القانون",
     "contracts.payment_terms.source.standard_form": "نموذج العقد القياسي",

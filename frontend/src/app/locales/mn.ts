@@ -8618,6 +8618,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "Хоёр долоо хоног тутам",
     "contracts.payment_terms.interval.weekly": "Долоо хоног бүр",
     "contracts.payment_terms.interval.milestone": "Чиглэлийн цэгүүдэд",
+    "contracts.payment_terms.subdivision_missing": "Holdback болон түүнийг чөлөөлөх хугацааг муж тогтооно. Мужийн тоог ашиглахын тулд төслийн тохиргоонд мужийг бүртгэнэ үү; тэр болтол улсын анхдагч утга харагдана.",
+    "contracts.payment_terms.subdivision_missing_action": "Төслийн тохиргоог нээх",
     "contracts.payment_terms.release_period_days": "lien бүртгэгдээгүй бол чөлөөлөх үйл явдлаас хойш {{days}} хоногийн дараа чөлөөлнө ({{region}})",
     "contracts.payment_terms.source.statute": "Хууль",
     "contracts.payment_terms.source.standard_form": "Стандарт гэрээний хэлбэр",

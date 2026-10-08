@@ -19836,6 +19836,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "Varannan vecka",
     "contracts.payment_terms.interval.weekly": "Veckovis",
     "contracts.payment_terms.interval.milestone": "Enligt delmål",
+    "contracts.payment_terms.subdivision_missing": "Holdback och dess frigörandetid fastställs av provinsen. Ange provinsen i projektinställningarna för att använda dess siffror; tills dess visas det nationella standardvärdet.",
+    "contracts.payment_terms.subdivision_missing_action": "Öppna projektinställningar",
     "contracts.payment_terms.release_period_days": "Frigörs {{days}} dagar efter frigörandehändelsen om inget lien registrerats ({{region}})",
     "contracts.payment_terms.source.statute": "Lag",
     "contracts.payment_terms.source.standard_form": "Standardavtalsformulär",

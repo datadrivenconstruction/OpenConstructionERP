@@ -19681,6 +19681,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "每两周",
     "contracts.payment_terms.interval.weekly": "每周",
     "contracts.payment_terms.interval.milestone": "按里程碑",
+    "contracts.payment_terms.subdivision_missing": "holdback 及其释放期限由省决定。请在项目设置中登记所在省份，以使用该省的数据；在此之前显示全国默认值。",
+    "contracts.payment_terms.subdivision_missing_action": "打开项目设置",
     "contracts.payment_terms.release_period_days": "如未登记 lien，则在释放事件发生后满 {{days}} 天释放（{{region}}）",
     "contracts.payment_terms.source.statute": "法定规定",
     "contracts.payment_terms.source.standard_form": "标准合同范本",

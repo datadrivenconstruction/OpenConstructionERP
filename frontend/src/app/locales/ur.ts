@@ -8170,6 +8170,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "ہر دو ہفتے",
     "contracts.payment_terms.interval.weekly": "ہفتہ وار",
     "contracts.payment_terms.interval.milestone": "سنگ میلوں پر",
+    "contracts.payment_terms.subdivision_missing": "Holdback اور اس کے اجرا کی مدت صوبہ طے کرتا ہے۔ صوبے کے اعداد و شمار استعمال کرنے کے لیے پروجیکٹ سیٹنگز میں صوبہ درج کریں؛ تب تک قومی ڈیفالٹ دکھایا جاتا ہے۔",
+    "contracts.payment_terms.subdivision_missing_action": "پروجیکٹ سیٹنگز کھولیں",
     "contracts.payment_terms.release_period_days": "اگر کوئی lien درج نہ ہو تو ریلیز واقعے کے {{days}} دن بعد جاری کیا جاتا ہے ({{region}})",
     "contracts.payment_terms.source.statute": "قانون",
     "contracts.payment_terms.source.standard_form": "معیاری کنٹریکٹ فارم",

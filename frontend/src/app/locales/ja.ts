@@ -19633,6 +19633,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "2週ごと",
     "contracts.payment_terms.interval.weekly": "毎週",
     "contracts.payment_terms.interval.milestone": "マイルストーンごと",
+    "contracts.payment_terms.subdivision_missing": "holdbackとその解放期間は州ごとに定められています。その州の数値を使うには、プロジェクト設定で州を登録してください。登録するまでは全国の既定値が表示されます。",
+    "contracts.payment_terms.subdivision_missing_action": "プロジェクト設定を開く",
     "contracts.payment_terms.release_period_days": "lienが登録されていなければ、解放イベントから{{days}}日後に解放されます（{{region}}）",
     "contracts.payment_terms.source.statute": "法律",
     "contracts.payment_terms.source.standard_form": "標準契約書式",

@@ -19909,6 +19909,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "На всеки две седмици",
     "contracts.payment_terms.interval.weekly": "Ежеседмично",
     "contracts.payment_terms.interval.milestone": "По етапи",
+    "contracts.payment_terms.subdivision_missing": "Holdback и срокът за освобождаването му се определят от провинцията. Запишете провинцията в настройките на проекта, за да се ползват нейните стойности; дотогава се показва националната стойност по подразбиране.",
+    "contracts.payment_terms.subdivision_missing_action": "Отвори настройките на проекта",
     "contracts.payment_terms.release_period_days": "Освобождава се {{days}} дни след събитието за освобождаване, ако не е вписан lien ({{region}})",
     "contracts.payment_terms.source.statute": "Закон",
     "contracts.payment_terms.source.standard_form": "Стандартна форма на договор",

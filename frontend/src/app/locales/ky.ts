@@ -4416,6 +4416,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "Ар эки жумада бир",
     "contracts.payment_terms.interval.weekly": "Жумалык",
     "contracts.payment_terms.interval.milestone": "Белестерде",
+    "contracts.payment_terms.subdivision_missing": "Holdback жана аны бошотуу мөөнөтүн провинция белгилейт. Анын маанилерин колдонуу үчүн долбоордун жөндөөлөрүндө провинцияны көрсөтүңүз; ага чейин өлкөнүн демейки мааниси көрсөтүлөт.",
+    "contracts.payment_terms.subdivision_missing_action": "Долбоордун жөндөөлөрүн ачуу",
     "contracts.payment_terms.release_period_days": "lien катталбаса, бошотуу окуясынан кийин {{days}} күн өткөндө бошотулат ({{region}})",
     "contracts.payment_terms.source.statute": "Мыйзам",
     "contracts.payment_terms.source.standard_form": "Стандарттык келишим формасы",

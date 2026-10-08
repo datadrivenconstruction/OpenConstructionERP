@@ -8168,6 +8168,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "Әрбір екі апта сайын",
     "contracts.payment_terms.interval.weekly": "Апталық",
     "contracts.payment_terms.interval.milestone": "Межелерде",
+    "contracts.payment_terms.subdivision_missing": "Holdback және оны босату мерзімін провинция белгілейді. Оның мәндерін қолдану үшін жоба баптауларында провинцияны көрсетіңіз; ол уақытқа дейін еліміздің әдепкі мәні көрсетіледі.",
+    "contracts.payment_terms.subdivision_missing_action": "Жоба баптауларын ашу",
     "contracts.payment_terms.release_period_days": "lien тіркелмесе, босату оқиғасынан кейін {{days}} күн өткенде босатылады ({{region}})",
     "contracts.payment_terms.source.statute": "Заң",
     "contracts.payment_terms.source.standard_form": "Стандартты келісімшарт үлгісі",

@@ -19686,6 +19686,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "A cada duas semanas",
     "contracts.payment_terms.interval.weekly": "Semanal",
     "contracts.payment_terms.interval.milestone": "Em marcos",
+    "contracts.payment_terms.subdivision_missing": "O holdback e o prazo de libertação são definidos pela província. Registe a província nas definições do projeto para usar os valores dela; até lá, é apresentado o valor nacional por omissão.",
+    "contracts.payment_terms.subdivision_missing_action": "Abrir as definições do projeto",
     "contracts.payment_terms.release_period_days": "Libertado {{days}} dias após o evento de libertação, se nenhum lien tiver sido registado ({{region}})",
     "contracts.payment_terms.source.statute": "Lei",
     "contracts.payment_terms.source.standard_form": "Modelo de contrato padrão",

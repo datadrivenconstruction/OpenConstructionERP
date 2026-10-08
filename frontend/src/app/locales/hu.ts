@@ -19361,6 +19361,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "Kéthetente",
     "contracts.payment_terms.interval.weekly": "Hetente",
     "contracts.payment_terms.interval.milestone": "Mérföldkövek szerint",
+    "contracts.payment_terms.subdivision_missing": "A holdbacket és annak felszabadítási idejét a tartomány határozza meg. Rögzítse a tartományt a projektbeállításokban, hogy annak értékeit használja a rendszer; addig az országos alapértelmezés látható.",
+    "contracts.payment_terms.subdivision_missing_action": "Projektbeállítások megnyitása",
     "contracts.payment_terms.release_period_days": "A felszabadítási esemény után {{days}} nappal szabadul fel, ha nem jegyeztek be lien-t ({{region}})",
     "contracts.payment_terms.source.statute": "Törvény",
     "contracts.payment_terms.source.standard_form": "Szabványos szerződésminta",

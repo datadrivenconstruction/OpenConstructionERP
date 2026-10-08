@@ -20132,6 +20132,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "Co dwa tygodnie",
     "contracts.payment_terms.interval.weekly": "Tygodniowo",
     "contracts.payment_terms.interval.milestone": "Zgodnie z etapami",
+    "contracts.payment_terms.subdivision_missing": "Holdback i termin jego zwolnienia ustala prowincja. Wpisz prowincję w ustawieniach projektu, aby użyć jej wartości; do tego czasu wyświetlana jest wartość domyślna dla kraju.",
+    "contracts.payment_terms.subdivision_missing_action": "Otwórz ustawienia projektu",
     "contracts.payment_terms.release_period_days": "Zwalniany po {{days}} dniach od zdarzenia zwolnienia, jeśli nie zgłoszono lien ({{region}})",
     "contracts.payment_terms.source.statute": "Ustawa",
     "contracts.payment_terms.source.standard_form": "Standardowy wzór umowy",

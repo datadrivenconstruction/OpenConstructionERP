@@ -8204,6 +8204,8 @@ const resource = {
     "contracts.payment_terms.interval.fortnightly": "כל שבועיים",
     "contracts.payment_terms.interval.weekly": "שבועי",
     "contracts.payment_terms.interval.milestone": "באבני דרך",
+    "contracts.payment_terms.subdivision_missing": "ה-holdback ותקופת השחרור שלו נקבעים על ידי המחוז. רשמו את המחוז בהגדרות הפרויקט כדי להשתמש בנתוניו; עד אז מוצג ברירת המחדל הארצית.",
+    "contracts.payment_terms.subdivision_missing_action": "פתיחת הגדרות הפרויקט",
     "contracts.payment_terms.release_period_days": "משוחרר {{days}} יום אחרי אירוע השחרור אם לא נרשם lien ({{region}})",
     "contracts.payment_terms.source.statute": "חוק",
     "contracts.payment_terms.source.standard_form": "נוסח חוזה סטנדרטי",
