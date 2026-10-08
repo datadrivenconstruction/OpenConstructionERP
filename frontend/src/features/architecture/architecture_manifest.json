@@ -18326,6 +18326,7 @@
         "exporters/boq_xlsx.py",
         "exporters/cobie.py",
         "file_storage.py",
+        "glb_cache.py",
         "ifc_processor.py",
         "manifest.py",
         "mesh_formats.py",
@@ -89573,6 +89574,7 @@
       "module_category": "enterprise",
       "files": [
         "__init__.py",
+        "entities.py",
         "intl.py",
         "manifest.py",
         "models.py",
@@ -140948,6 +140950,7 @@
         "manifest.py",
         "models.py",
         "normalize.py",
+        "retention.py",
         "router.py",
         "schemas.py",
         "service.py",
@@ -148413,6 +148416,18 @@
               "annotation": "Mapped[str | None]",
               "sql_type": "Text",
               "nullable": true
+            },
+            {
+              "name": "batch_lot",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "serial_numbers",
+              "annotation": "Mapped[list | None]",
+              "sql_type": "JSON",
+              "nullable": true
             }
           ],
           "relationships": [
@@ -149365,6 +149380,14 @@
               "name": "rejection_reason",
               "type": "str | None",
               "default": "None"
+            },
+            {
+              "name": "batch_lot",
+              "type": "str | None"
+            },
+            {
+              "name": "serial_numbers",
+              "type": "list[str] | None"
             }
           ]
         },
@@ -149448,6 +149471,16 @@
             {
               "name": "rejection_reason",
               "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "batch_lot",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "serial_numbers",
+              "type": "list[str] | None",
               "default": "None"
             },
             {
@@ -235822,10 +235855,10 @@
     },
     {
       "name": "settings",
-      "ts_files": 31,
+      "ts_files": 33,
       "css_files": 0,
-      "test_files": 11,
-      "total_files": 31
+      "test_files": 12,
+      "total_files": 33
     },
     {
       "name": "setup",
@@ -237356,13 +237389,13 @@
     "backend_modules": 196,
     "modules_with_manifests": 194,
     "total_models": 623,
-    "total_columns": 7153,
+    "total_columns": 7155,
     "total_relationships": 234,
     "total_routes": 3757,
     "total_schemas": 3564,
-    "total_python_files": 2290,
+    "total_python_files": 2293,
     "frontend_features": 192,
-    "frontend_ts_files": 2992,
+    "frontend_ts_files": 2994,
     "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {
