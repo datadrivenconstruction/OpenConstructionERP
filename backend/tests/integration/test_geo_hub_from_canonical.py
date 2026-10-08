@@ -312,6 +312,9 @@ class TestFromCanonical:
     @pytest.mark.asyncio
     async def test_heading_rotates_without_error(self, http_client, tenant_a):
         # Heading rotation path is exercised — output must still pack.
+        # Create the anchor here: a sharded run can pick this test without
+        # the earlier ones that would otherwise have left an anchor behind.
+        await _create_anchor(http_client, tenant_a)
         model_id = await _create_bim_model_with_elements(
             tenant_a["project_id"],
         )
