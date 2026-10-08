@@ -377,6 +377,42 @@ class TestBimParquetObservability:
         assert post_meta.get("parquet_status") == "ok", post_meta
         assert post_meta.get("parquet_error") in (None, "")
 
+    async def test_revit_property_names_survive_import_and_retry(
+        self,
+        pq_client: AsyncClient,
+        pq_auth: dict[str, str],
+        pq_project: str,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """The original header text reaches the model and the rebuilt sidecar.
+
+        The import lowercases property keys; "Phase Created" survives only as a
+        label. A sidecar rebuilt from the database rows used to lose it, and
+        property search listed "phase created" again.
+        """
+        labels = {"phase created": "Phase Created", "area": "Area"}
+
+        def _with_labels(cad_path, tmp_dir, depth) -> dict[str, Any]:
+            result = _fake_conversion_with_raw_elements(cad_path, tmp_dir, depth)
+            result["raw_element_labels"] = dict(labels)
+            return result
+
+        monkeypatch.setattr("app.modules.bim_hub.ifc_processor.process_ifc_file", _with_labels)
+
+        def _boom(**_kwargs: Any) -> None:
+            raise OSError("first attempt fails")
+
+        monkeypatch.setattr("app.modules.bim_hub.dataframe_store.write_dataframe", _boom)
+        model_id = await _upload_ifc(pq_client, pq_auth, pq_project, "pq-labels")
+        body = await _wait_for_status(pq_client, pq_auth, model_id)
+        assert (body.get("metadata") or {}).get("column_labels") == labels, body.get("metadata")
+
+        written: dict[str, Any] = {}
+        monkeypatch.setattr("app.modules.bim_hub.dataframe_store.write_dataframe", lambda **kw: written.update(kw))
+        retry = await pq_client.post(f"/api/v1/bim_hub/models/{model_id}/parquet/retry/", headers=pq_auth)
+        assert retry.status_code == 202, retry.text
+        assert written.get("labels") == labels, written.get("labels")
+
     async def test_parquet_status_endpoint_returns_current_state(
         self,
         pq_client: AsyncClient,
