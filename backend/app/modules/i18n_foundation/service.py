@@ -11,7 +11,7 @@ Wraps repository classes and adds business logic for:
 
 import logging
 import uuid
-from datetime import date, timedelta
+from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
 
 from fastapi import HTTPException, status
@@ -32,8 +32,10 @@ from app.modules.i18n_foundation.repository import (
 from app.modules.i18n_foundation.schemas import ConvertResponse, WorkingDaysResponse, WorkingDaysYear
 from app.modules.i18n_foundation.subdivisions import KNOWN_SUBDIVISIONS, normalize_subdivision
 from app.modules.i18n_foundation.tax_rules import (
+    LOCAL_CONFIRMATION_KEY,
     TaxResolution,
     TaxRuleError,
+    is_awaiting_confirmation,
     row_from_orm,
     validate_tax_row,
 )
@@ -94,6 +96,32 @@ def _parse_stored_rate(raw: str, from_code: str, to_code: str) -> Decimal:
             detail=(f"Stored exchange rate for {from_code}/{to_code} must be a positive finite number, got '{raw}'"),
         )
     return rate
+
+
+#: The fields a local confirmation vouches for. Changing any of them on a
+#: confirmed row sends it back to pending.
+_CONFIRMED_FIELDS: tuple[str, ...] = (
+    "rate_pct",
+    "combination",
+    "subdivision_code",
+    "effective_from",
+    "effective_to",
+    "country_code",
+)
+
+
+def _with_fresh_confirmation(metadata: dict | None) -> dict:
+    """Metadata for a new row: a requested confirmation always starts pending.
+
+    A create may ask for confirmation with ``{"local_confirmation":
+    {"required": true}}``. Whatever else it sends under that key is dropped,
+    so no row can be created already confirmed.
+    """
+    out = dict(metadata or {})
+    block = out.pop(LOCAL_CONFIRMATION_KEY, None)
+    if isinstance(block, dict) and block.get("required"):
+        out[LOCAL_CONFIRMATION_KEY] = {"required": True, "status": "pending"}
+    return out
 
 
 class I18nFoundationService:
@@ -636,8 +664,13 @@ class I18nFoundationService:
         self,
         country_code: str,
     ) -> list[TaxConfiguration]:
-        """Get all currently active tax configurations for a country."""
-        return await self.tax_config_repo.get_active_for_country(country_code)
+        """Get all currently active tax configurations for a country.
+
+        A row still waiting for its local confirmation is left out, so a form
+        that offers these rates cannot put an unconfirmed one on a document.
+        """
+        rows = await self.tax_config_repo.get_active_for_country(country_code)
+        return [row for row in rows if not is_awaiting_confirmation(row.metadata_)]
 
     async def _country_has_federal_layer(self, country_code: str) -> bool:
         """Whether this country already carries a country-wide federal rate.
@@ -690,6 +723,7 @@ class I18nFoundationService:
         """
         data = dict(data)
         data["subdivision_code"] = normalize_subdivision(data.get("subdivision_code"))
+        data["metadata"] = _with_fresh_confirmation(data.get("metadata"))
         await self._validate_tax_row(
             data.get("country_code", ""),
             data.get("combination", "national"),
@@ -750,12 +784,87 @@ class I18nFoundationService:
             )
         await self._validate_tax_row(merged_country, merged_combination, merged_subdivision, merged_rate)
 
+        # The confirmation is written only by confirm_tax_config. A patch that
+        # sends metadata keeps the stored confirmation, and a patch that moves
+        # what the confirmation vouched for sends the row back to pending.
+        stored = dict(existing.metadata_ or {})
+        if "metadata" in data:
+            incoming = dict(data["metadata"] or {})
+            incoming.pop(LOCAL_CONFIRMATION_KEY, None)
+            if LOCAL_CONFIRMATION_KEY in stored:
+                incoming[LOCAL_CONFIRMATION_KEY] = stored[LOCAL_CONFIRMATION_KEY]
+            stored = incoming
+            data["metadata"] = stored
+        block = stored.get(LOCAL_CONFIRMATION_KEY)
+        if isinstance(block, dict) and block.get("required"):
+            moved = any(field in data and data[field] != getattr(existing, field) for field in _CONFIRMED_FIELDS)
+            if moved and block.get("status") == "confirmed":
+                data["metadata"] = {**stored, LOCAL_CONFIRMATION_KEY: {"required": True, "status": "pending"}}
+
         result = await self.tax_config_repo.update(config_id, data)
         if result is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Tax configuration not found",
             )
+        return result
+
+    async def confirm_tax_config(
+        self,
+        config_id: uuid.UUID,
+        *,
+        user_id: str,
+        accountant_name: str,
+        source_reference: str,
+    ) -> TaxConfiguration:
+        """Record that a local specialist confirmed a tax row, and audit it.
+
+        Raises:
+            HTTPException: 404 if the row does not exist, 409 if it was never
+                marked as needing confirmation.
+        """
+        from app.core.audit import audit_log  # noqa: PLC0415
+
+        existing = await self.get_tax_config(config_id)
+        stored = dict(existing.metadata_ or {})
+        block = stored.get(LOCAL_CONFIRMATION_KEY)
+        if not isinstance(block, dict) or not block.get("required"):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "code": "confirmation_not_required",
+                    "message": "This tax rate is not marked as needing local confirmation.",
+                },
+            )
+        confirmation = {
+            "required": True,
+            "status": "confirmed",
+            "accountant_name": accountant_name.strip(),
+            "source_reference": source_reference.strip(),
+            "confirmed_by": user_id,
+            "confirmed_at": datetime.now(UTC).isoformat(),
+        }
+        result = await self.tax_config_repo.update(
+            config_id, {"metadata": {**stored, LOCAL_CONFIRMATION_KEY: confirmation}}
+        )
+        await audit_log(
+            self.session,
+            action="confirm",
+            entity_type="tax_config",
+            entity_id=str(config_id),
+            user_id=user_id,
+            details={
+                "country_code": existing.country_code,
+                "subdivision_code": existing.subdivision_code,
+                "tax_code": existing.tax_code,
+                "rate_pct": existing.rate_pct,
+                "effective_from": existing.effective_from,
+                "accountant_name": confirmation["accountant_name"],
+                "source_reference": confirmation["source_reference"],
+            },
+        )
+        if result is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tax configuration not found")
         return result
 
     # ── Tax resolution ─────────────────────────────────────────────────────
