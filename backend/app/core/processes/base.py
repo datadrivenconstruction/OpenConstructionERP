@@ -38,6 +38,9 @@ class ProcessReporter(Protocol):
     def crashed(self, exc: BaseException) -> None:
         """Report that the process died; the restart policy decides what next."""
 
+    def ready(self) -> None:
+        """Report that a process with ``reports_ready`` finished loading."""
+
 
 class _NullReporter:
     def tick_ok(self) -> None:
@@ -50,6 +53,9 @@ class _NullReporter:
         return None
 
     def crashed(self, exc: BaseException) -> None:
+        return None
+
+    def ready(self) -> None:
         return None
 
 
@@ -71,6 +77,10 @@ class ManagedProcess(ABC):
 
     process_id: str = ""
     reporter: ProcessReporter = _NullReporter()
+    #: True when ``start`` returns before the process is usable and the
+    #: process calls ``reporter.ready()`` later; the status stays ``starting``
+    #: until then, and the start queue waits for it.
+    reports_ready: bool = False
 
     def bind(self, process_id: str, reporter: ProcessReporter) -> None:
         """Attach the registry's id and reporter before ``start`` is called."""
@@ -185,7 +195,8 @@ class OneShotProcess(_TaskProcess):
 class ResidentProcess(_TaskProcess):
     """Load something that then stays resident (a model, an open store).
 
-    The status stays ``running`` after ``load`` returns, because the thing is
+    The status is ``starting`` while ``load`` runs and stays ``running`` after
+    it returns, because the thing is
     still in memory. ``unload`` runs on stop and should drop every reference
     so the garbage collector can reclaim it; the OS may not see the memory
     back at once.
@@ -194,6 +205,8 @@ class ResidentProcess(_TaskProcess):
         load: Coroutine function that loads the resource.
         unload: Optional callable (sync or async) that releases it.
     """
+
+    reports_ready = True
 
     def __init__(
         self,
@@ -216,6 +229,8 @@ class ResidentProcess(_TaskProcess):
             raise
         except Exception as exc:
             self.reporter.crashed(exc)
+        else:
+            self.reporter.ready()
 
     async def stop(self) -> None:
         await super().stop()

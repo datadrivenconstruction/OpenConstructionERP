@@ -22,6 +22,10 @@ async def test_processes_list_and_semantic_stack(client, auth_headers) -> None: 
     rec = await client.get("/api/v1/processes/recommendations?modules=search", headers=auth_headers)
     assert "embedding_model" in rec.json()["process_ids"]
     assert (await client.post("/api/v1/processes/nope/restart", headers=auth_headers)).status_code == 404
+    ens = await client.post("/api/v1/processes/ensure?module=search", headers=auth_headers)
+    assert ens.status_code == 200, ens.text
+    # OE_TEST_FAST_STARTUP locks the semantic stack off in tests.
+    assert "embedding_model" in ens.json()["disabled"]
 
 
 @pytest.mark.asyncio

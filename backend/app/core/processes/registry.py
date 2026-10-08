@@ -146,6 +146,7 @@ class _Entry:
         self.attached: list[str] = []
         self.generation = 0
         self.booted = False
+        self.queued = False
 
 
 class _Reporter:
@@ -183,6 +184,11 @@ class _Reporter:
         self.entry.last_run_ok = False
         self.registry._fail(self.entry, exc)
 
+    def ready(self) -> None:
+        if self._current() and self.entry.status is ProcessStatus.STARTING:
+            self.entry.started_at = datetime.now(UTC)
+            self.registry._set(self.entry, ProcessStatus.RUNNING)
+
 
 class ProcessRegistry:
     """Registry of background processes for this OS process.
@@ -205,6 +211,14 @@ class ProcessRegistry:
         self._loaded = False
         self._last_reconcile = 0.0
         self._bg: set[asyncio.Task[Any]] = set()
+        self._queue: list[str] = []
+        self._queue_wakeup: asyncio.Event | None = None
+        self._worker: asyncio.Task[None] | None = None
+        self._boot_task: asyncio.Task[None] | None = None
+        #: Pause between two queued starts, so heavy loads never overlap.
+        self.stagger_s = 1.0
+        #: Longest a queued start may stay ``starting`` before the queue moves on.
+        self.settle_timeout_s = 600.0
 
     # -- declaration -------------------------------------------------------
 
@@ -393,6 +407,8 @@ class ProcessRegistry:
             entry.last_run_ok = False
             self._fail(entry, exc)
             return
+        if process.reports_ready:
+            return
         entry.started_at = datetime.now(UTC)
         if entry.status is ProcessStatus.STARTING:
             self._set(entry, ProcessStatus.RUNNING)
@@ -454,8 +470,123 @@ class ProcessRegistry:
             except Exception as exc:  # pragma: no cover - _start_locked already contains failures
                 self._fail(entry, exc)
 
+    # -- start queue -------------------------------------------------------
+
+    def enqueue(self, process_ids: list[str]) -> list[str]:
+        """Queue processes to start one after another in the background.
+
+        Starts are serial: the next one begins only when the previous one has
+        finished loading (or failed), so two models never load at once. Safe
+        to call repeatedly; a process already running or queued is skipped.
+
+        Returns:
+            The ids actually added to the queue.
+        """
+        added: list[str] = []
+        for pid in process_ids:
+            entry = self._get(pid)
+            if entry.queued or entry.status in _ACTIVE or not self._desired(entry):
+                continue
+            entry.queued = True
+            self._queue.append(pid)
+            added.append(pid)
+        if added:
+            self._ensure_worker()
+        return added
+
+    def _ensure_worker(self) -> None:
+        if self._queue_wakeup is None:
+            self._queue_wakeup = asyncio.Event()
+        self._queue_wakeup.set()
+        if self._worker is None or self._worker.done():
+            self._worker = asyncio.get_running_loop().create_task(self._drain(), name="process-queue")
+
+    async def _drain(self) -> None:
+        while self._queue:
+            pid = self._queue.pop(0)
+            entry = self._entries[pid]
+            try:
+                await self.ensure_started(pid)
+                waited = 0.0
+                while entry.status is ProcessStatus.STARTING and waited < self.settle_timeout_s:
+                    await asyncio.sleep(0.05)
+                    waited += 0.05
+            except Exception as exc:  # pragma: no cover - ensure_started contains failures
+                self._fail(entry, exc)
+            finally:
+                entry.queued = False
+            if self._queue:
+                await asyncio.sleep(self.stagger_s)
+
+    def schedule_boot(self, delay_s: float = 2.0) -> asyncio.Task[None]:
+        """Queue every enabled ``boot`` process after ``delay_s`` seconds.
+
+        Called from startup instead of awaiting :meth:`start_boot`, so the
+        server answers health checks and logins before any background
+        process loads.
+        """
+
+        async def later() -> None:
+            await asyncio.sleep(delay_s)
+            pending = []
+            for entry in self._entries.values():
+                if entry.booted or entry.spec.start_mode != "boot" or not self._desired(entry):
+                    continue
+                entry.booted = True
+                pending.append(entry.spec.id)
+            self.enqueue(pending)
+
+        self._boot_task = asyncio.get_running_loop().create_task(later(), name="process-boot")
+        return self._boot_task
+
+    def processes_for_module(self, module_id: str) -> list[str]:
+        """Ids of the processes that declare ``module_id`` among their modules."""
+        return [e.spec.id for e in self._entries.values() if module_id in e.spec.modules]
+
+    def ensure_for_module(self, module_id: str) -> dict[str, Any]:
+        """Warm up what a module needs, in the background. Idempotent.
+
+        The frontend calls this when the user opens a module, so its processes
+        load while the first screen renders instead of at platform start.
+
+        Returns:
+            ``queued`` (just added), ``running``, ``loading`` and ``disabled`` ids.
+        """
+        ids = self.processes_for_module(module_id)
+        startable = [pid for pid in ids if self._entries[pid].spec.start_mode in ("boot", "lazy")]
+        queued = self.enqueue(startable)
+        out: dict[str, list[str]] = {"queued": queued, "running": [], "loading": [], "disabled": []}
+        for pid in ids:
+            entry = self._entries[pid]
+            if not self._desired(entry):
+                out["disabled"].append(pid)
+            elif entry.status in {ProcessStatus.RUNNING, ProcessStatus.DEGRADED}:
+                out["running"].append(pid)
+            elif entry.queued or entry.status is ProcessStatus.STARTING:
+                out["loading"].append(pid)
+        return {"module": module_id, **out}
+
+    # -- flags -------------------------------------------------------------
+
+    def get_flag(self, key: str) -> bool:
+        """Read a persisted installation flag (seed markers and the like)."""
+        return self._rows.get(f"flag:{key}", False)
+
+    async def set_flag(self, key: str, value: bool = True) -> None:
+        """Persist an installation flag under ``flag:<key>``."""
+        await self._save(f"flag:{key}", value)
+
     async def stop_all(self) -> None:
         """Stop everything (shutdown). Idempotent."""
+        self._queue.clear()
+        for task in (self._boot_task, self._worker):
+            if task is not None and not task.done():
+                task.cancel()
+                with contextlib.suppress(asyncio.CancelledError, Exception):
+                    await task
+        self._boot_task = self._worker = None
+        for entry in self._entries.values():
+            entry.queued = False
         for entry in reversed(list(self._entries.values())):
             async with entry.lock:
                 await self._stop_locked(entry, final=self._resting_status(entry))
@@ -523,11 +654,10 @@ class ProcessRegistry:
                 async with entry.lock:
                     await self._stop_locked(entry, final=ProcessStatus.DISABLED)
             elif desired and entry.status is ProcessStatus.DISABLED:
+                self._set(entry, ProcessStatus.IDLE)
                 if entry.spec.start_mode == "boot":
                     entry.booted = True
-                    await self.start(entry.spec.id)
-                else:
-                    self._set(entry, ProcessStatus.IDLE)
+                    self.enqueue([entry.spec.id])
 
     # -- first run and presets ---------------------------------------------
 
@@ -550,6 +680,7 @@ class ProcessRegistry:
         }
 
     async def _apply_set(self, wanted: set[str], start_now: bool, updated_by: str | None) -> None:
+        to_start: list[str] = []
         for entry in list(self._entries.values()):
             spec = entry.spec
             if self._env(entry) is not None or spec.required or not spec.stoppable:
@@ -559,12 +690,15 @@ class ProcessRegistry:
                 continue
             if on:
                 await self._persist(entry, True, updated_by)
-                if start_now and spec.start_mode == "boot":
-                    await self.start(spec.id)
-                elif entry.status is ProcessStatus.DISABLED:
+                if entry.status is ProcessStatus.DISABLED:
                     self._set(entry, ProcessStatus.IDLE)
+                if start_now and spec.start_mode == "boot":
+                    entry.booted = True
+                    to_start.append(spec.id)
             else:
                 await self.disable(spec.id, updated_by)
+        if to_start:
+            self.enqueue(to_start)
 
     async def first_run(self, module_ids: list[str], start_now: bool, updated_by: str | None = None) -> None:
         """Answer the first-run wizard: run exactly what the chosen modules need."""
@@ -609,6 +743,7 @@ class ProcessRegistry:
             "stoppable": spec.stoppable,
             "env_locked": self._env(entry) is not None,
             "status": entry.status.value,
+            "queued": entry.queued,
             "ram_mb_estimate": spec.estimated_ram_mb,
             "ram_mb_actual": None,
             "dependencies": list(spec.dependencies),
