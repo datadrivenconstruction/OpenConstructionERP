@@ -235441,10 +235441,10 @@
     },
     {
       "name": "bim",
-      "ts_files": 113,
+      "ts_files": 115,
       "css_files": 0,
-      "test_files": 38,
-      "total_files": 114
+      "test_files": 39,
+      "total_files": 116
     },
     {
       "name": "bim_requirements",
@@ -237976,7 +237976,7 @@
     "total_schemas": 3574,
     "total_python_files": 2302,
     "frontend_features": 192,
-    "frontend_ts_files": 2995,
+    "frontend_ts_files": 2997,
     "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {
