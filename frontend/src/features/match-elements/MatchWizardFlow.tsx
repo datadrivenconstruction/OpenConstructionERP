@@ -101,6 +101,7 @@ import {
 } from './matchReasons';
 import { fmtFixed } from '@/shared/lib/formatters';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { SemanticSearchOffHint } from '@/features/settings/SemanticSearchOffHint';
 
 // ─────────────────────────────────────────────────────────────────────────
 //  Stage model — the single source of truth for the one-and-only rail
@@ -1248,6 +1249,7 @@ export function MatchWizardFlow() {
           page's only card about the search service: a second one probed a
           different vector database and could say "running" while this one
           said "blocked". */}
+      <SemanticSearchOffHint />
       <MatchReadinessCard projectId={projectId} onOpenSetup={openSetup} />
 
       {/* Setup & tools — dead_button fix. These panels were built and

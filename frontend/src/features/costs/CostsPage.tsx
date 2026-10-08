@@ -67,6 +67,7 @@ import { fetchCategoryTree, type CategoryTreeNode } from '@/features/boq/api';
 import { getUnitsForLocale } from '@/features/boq/boqHelpers';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { compareNames } from '@/shared/lib/collator';
+import { SemanticSearchOffHint, useSemanticSearchOff } from '@/features/settings/SemanticSearchOffHint';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -604,6 +605,7 @@ export function CostsPage() {
   const [showEscalation, setShowEscalation] = useState(false);
   const [showRegionalAdjust, setShowRegionalAdjust] = useState(false);
   const [semanticSearch, setSemanticSearch] = useState(false);
+  const semanticOff = useSemanticSearchOff();
 
   // Column sorting
   type SortField = 'code' | 'rate' | 'description' | '';
@@ -1482,7 +1484,8 @@ export function CostsPage() {
           {/* The semantic toggle is on but this deployment has no embedding
               model, so these rows came from the text search. Saying so is the
               difference between a fallback and a wrong answer. */}
-          {semanticSearch && data?.semanticUnavailable && (
+          {semanticSearch && <SemanticSearchOffHint />}
+          {semanticSearch && data?.semanticUnavailable && !semanticOff && (
             <div
               role="status"
               className="flex items-start gap-2 rounded-lg border border-amber-400/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-600 dark:text-amber-400"
