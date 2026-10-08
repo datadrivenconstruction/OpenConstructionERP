@@ -8,6 +8,7 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Servicios en segundo plano: preparando {{names}}",
     "processes.notice.preparing": "Preparando {{names}}. Puede seguir trabajando, este aviso desaparecerá solo.",
     "processes.status.queued": "Esperando para cargar",

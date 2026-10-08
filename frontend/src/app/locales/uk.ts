@@ -3,6 +3,7 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Фонові служби: готуємо {{names}}",
     "processes.notice.preparing": "Готуємо: {{names}}. Можна продовжувати роботу, це повідомлення зникне саме.",
     "processes.status.queued": "Чекає на завантаження",
@@ -10780,7 +10781,8 @@ const resource = {
     "schedule.select_project": "Виберіть проєкт, щоб переглянути й керувати його графіком будівництва",
     "schedule.start": "Початок",
     "schedule.start_date": "Дата початку",
-    "schedule.status_active": "активний",    "schedule.confirm_delete_activity_title": "Видалити роботу?",
+    "schedule.status_active": "активний",
+    "schedule.confirm_delete_activity_title": "Видалити роботу?",
     "schedule.confirm_delete_activity": "Видалити «{{name}}» та її зв’язки з іншими роботами? Цю дію неможливо скасувати.",
     "schedule.confirm_delete_section_one": "У розділі «{{name}}» робіт: {{count}}. Видалити їх разом із розділом чи зберегти, перемістивши на рівень вище? Цю дію неможливо скасувати.",
     "schedule.confirm_delete_section_few": "У розділі «{{name}}» робіт: {{count}}. Видалити їх разом із розділом чи зберегти, перемістивши на рівень вище? Цю дію неможливо скасувати.",

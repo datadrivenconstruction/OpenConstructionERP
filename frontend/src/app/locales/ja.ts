@@ -3,6 +3,7 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "バックグラウンドサービス: {{names}}を準備中",
     "processes.notice.preparing": "{{names}}を準備中です。作業を続けられます。この表示は自動的に消えます。",
     "processes.status.queued": "読み込み待ち",

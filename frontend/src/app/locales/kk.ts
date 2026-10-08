@@ -3,6 +3,7 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Фондық қызметтер: {{names}} дайындалуда",
     "processes.notice.preparing": "{{names}} дайындалуда. Жұмысты жалғастыра беруге болады, бұл ескерту өздігінен жоғалады.",
     "processes.status.queued": "Жүктелуді күтуде",
@@ -14390,7 +14391,8 @@ const resource = {
     "schedule.select_project": "Оның құрылыс кестесін көру және басқару үшін жобаны таңдаңыз",
     "schedule.start": "Басталуы",
     "schedule.start_date": "Басталу Күні",
-    "schedule.status_active": "белсенді",    "schedule.confirm_delete_activity_title": "Жұмыс жойылсын ба?",
+    "schedule.status_active": "белсенді",
+    "schedule.confirm_delete_activity_title": "Жұмыс жойылсын ба?",
     "schedule.confirm_delete_activity": "«{{name}}» және оның басқа жұмыстармен байланыстары жойылсын ба? Бұл әрекетті қайтару мүмкін емес.",
     "schedule.confirm_delete_section_one": "«{{name}}» бөліміндегі жұмыстар саны: {{count}}. Оларды бөліммен бірге жойыңыз немесе бір деңгей жоғары жылжытып сақтаңыз. Әрекетті қайтару мүмкін емес.",
     "schedule.confirm_delete_section_other": "«{{name}}» бөліміндегі жұмыстар саны: {{count}}. Оларды бөліммен бірге жойыңыз немесе бір деңгей жоғары жылжытып сақтаңыз. Әрекетті қайтару мүмкін емес.",

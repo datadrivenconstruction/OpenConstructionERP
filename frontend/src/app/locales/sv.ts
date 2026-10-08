@@ -3,6 +3,7 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Bakgrundstjänster: förbereder {{names}}",
     "processes.notice.preparing": "Förbereder {{names}}. Du kan fortsätta arbeta, den här notisen försvinner av sig själv.",
     "processes.status.queued": "Väntar på att laddas",
@@ -13344,7 +13345,8 @@ const resource = {
     "schedule.select_project": "Välj ett projekt för att visa och hantera dess byggtidplan",
     "schedule.start": "Start",
     "schedule.start_date": "Startdatum",
-    "schedule.status_active": "aktiv",    "schedule.confirm_delete_activity_title": "Ta bort aktiviteten?",
+    "schedule.status_active": "aktiv",
+    "schedule.confirm_delete_activity_title": "Ta bort aktiviteten?",
     "schedule.confirm_delete_activity": "Ta bort ”{{name}}” och dess länkar till andra aktiviteter? Detta kan inte ångras.",
     "schedule.confirm_delete_section_one": "Antal aktiviteter i ”{{name}}”: {{count}}. Ta bort dem med avsnittet eller behåll dem en nivå upp. Detta kan inte ångras.",
     "schedule.confirm_delete_section_other": "Antal aktiviteter i ”{{name}}”: {{count}}. Ta bort dem med avsnittet eller behåll dem en nivå upp. Detta kan inte ångras.",

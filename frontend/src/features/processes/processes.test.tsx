@@ -182,7 +182,11 @@ describe('ProcessesWizard', () => {
   it('opens on first run, sums memory for the picked modules and starts them', async () => {
     vi.mocked(apiGet).mockResolvedValue(
       snapshot(
-        [proc(), proc({ id: 'bim_conv', modules: ['bim'], ram_mb_estimate: 300 })],
+        [
+          proc(),
+          proc({ id: 'bim_conv', modules: ['bim'], ram_mb_estimate: 300 }),
+          proc({ id: 'kpi', category: 'scheduler', modules: ['reporting'], ram_mb_estimate: 5 }),
+        ],
         { first_run_done: false },
       ),
     );
@@ -190,11 +194,19 @@ describe('ProcessesWizard', () => {
     // The header button offers the choice and lazy-loads the wizard.
     renderWith(<ProcessesButton />);
     await screen.findByTestId('processes-wizard', {}, { timeout: 5000 });
+    // Light loops start ticked, anything with a model or an index does not.
+    await waitFor(() => expect(screen.getByTestId('wizard-module-reporting').querySelector('input')).toBeChecked());
+    expect(screen.getByTestId('wizard-module-costs').querySelector('input')).not.toBeChecked();
+    expect(screen.getByTestId('wizard-module-costs')).toHaveTextContent('+400 MB');
+    expect(screen.getByTestId('wizard-total')).toHaveTextContent('5 MB');
     fireEvent.click(screen.getByTestId('wizard-module-costs').querySelector('input'));
-    await waitFor(() => expect(screen.getByTestId('wizard-total')).toHaveTextContent('400 MB'));
+    await waitFor(() => expect(screen.getByTestId('wizard-total')).toHaveTextContent('405 MB'));
     fireEvent.click(screen.getByTestId('wizard-start'));
     await waitFor(() =>
-      expect(apiPost).toHaveBeenCalledWith('/v1/processes/first-run', { module_ids: ['costs'], start_now: true }),
+      expect(apiPost).toHaveBeenCalledWith('/v1/processes/first-run', {
+        module_ids: expect.arrayContaining(['costs', 'reporting']),
+        start_now: true,
+      }),
     );
   });
 

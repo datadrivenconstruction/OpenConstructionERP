@@ -3,6 +3,7 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Дэвсгэр үйлчилгээ: {{names}} бэлдэж байна",
     "processes.notice.preparing": "{{names}} бэлдэж байна. Ажлаа үргэлжлүүлж болно, энэ тэмдэглэл өөрөө алга болно.",
     "processes.status.queued": "Ачаалахыг хүлээж байна",

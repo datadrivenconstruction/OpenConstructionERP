@@ -3,6 +3,7 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Servicii de fundal: se pregătește {{names}}",
     "processes.notice.preparing": "Se pregătește: {{names}}. Puteți continua să lucrați, această notă dispare singură.",
     "processes.status.queued": "Așteaptă încărcarea",
@@ -11546,7 +11547,8 @@ const resource = {
     "schedule.select_project": "Selectați un proiect pentru a vizualiza și gestiona planificarea de construcție",
     "schedule.start": "Pornește",
     "schedule.start_date": "Data de început",
-    "schedule.status_active": "Activ",    "schedule.confirm_delete_activity_title": "Ștergeți activitatea?",
+    "schedule.status_active": "Activ",
+    "schedule.confirm_delete_activity_title": "Ștergeți activitatea?",
     "schedule.confirm_delete_activity": "Ștergeți „{{name}}” și legăturile sale cu alte activități? Acțiunea este ireversibilă.",
     "schedule.confirm_delete_section_one": "„{{name}}” conține activități: {{count}}. Le puteți șterge odată cu secțiunea sau păstra, mutându-le cu un nivel mai sus. Acțiunea este ireversibilă.",
     "schedule.confirm_delete_section_few": "„{{name}}” conține activități: {{count}}. Le puteți șterge odată cu secțiunea sau păstra, mutându-le cu un nivel mai sus. Acțiunea este ireversibilă.",

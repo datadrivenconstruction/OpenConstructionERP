@@ -3,6 +3,7 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Mga background service: inihahanda ang {{names}}",
     "processes.notice.preparing": "Inihahanda ang {{names}}. Maaari kang magpatuloy sa trabaho, kusang mawawala ang paalalang ito.",
     "processes.status.queued": "Naghihintay ma-load",

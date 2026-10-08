@@ -3,6 +3,7 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Υπηρεσίες παρασκηνίου: προετοιμασία {{names}}",
     "processes.notice.preparing": "Προετοιμασία: {{names}}. Μπορείτε να συνεχίσετε να εργάζεστε, η σημείωση θα εξαφανιστεί μόνη της.",
     "processes.status.queued": "Αναμονή φόρτωσης",
@@ -14439,7 +14440,8 @@ const resource = {
     "schedule.select_project": "Επιλέξτε ένα έργο για να δείτε και να διαχειριστείτε το χρονοδιάγραμμα κατασκευής του",
     "schedule.start": "Έναρξη",
     "schedule.start_date": "Ημερομηνία Έναρξης",
-    "schedule.status_active": "ενεργό",    "schedule.confirm_delete_activity_title": "Διαγραφή δραστηριότητας;",
+    "schedule.status_active": "ενεργό",
+    "schedule.confirm_delete_activity_title": "Διαγραφή δραστηριότητας;",
     "schedule.confirm_delete_activity": "Να διαγραφεί η «{{name}}» και οι συνδέσεις της με άλλες δραστηριότητες; Η ενέργεια δεν αναιρείται.",
     "schedule.confirm_delete_section_one": "Δραστηριότητες στην ενότητα «{{name}}»: {{count}}. Διαγράψτε τις μαζί με την ενότητα ή διατηρήστε τις ένα επίπεδο ψηλότερα. Η ενέργεια δεν αναιρείται.",
     "schedule.confirm_delete_section_other": "Δραστηριότητες στην ενότητα «{{name}}»: {{count}}. Διαγράψτε τις μαζί με την ενότητα ή διατηρήστε τις ένα επίπεδο ψηλότερα. Η ενέργεια δεν αναιρείται.",

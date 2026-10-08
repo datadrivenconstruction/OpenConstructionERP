@@ -3,6 +3,7 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Arka plan hizmetleri: {{names}} hazırlanıyor",
     "processes.notice.preparing": "{{names}} hazırlanıyor. Çalışmaya devam edebilirsiniz, bu not kendiliğinden kaybolur.",
     "processes.status.queued": "Yüklenmeyi bekliyor",
@@ -11607,7 +11608,8 @@ const resource = {
     "schedule.select_project": "İnşaat iş programını görüntülemek ve yönetmek için bir proje seçin",
     "schedule.start": "Başlangıç",
     "schedule.start_date": "Başlangıç Tarihi",
-    "schedule.status_active": "aktif",    "schedule.confirm_delete_activity_title": "Faaliyet silinsin mi?",
+    "schedule.status_active": "aktif",
+    "schedule.confirm_delete_activity_title": "Faaliyet silinsin mi?",
     "schedule.confirm_delete_activity": "“{{name}}” ve diğer faaliyetlerle bağlantıları silinsin mi? Bu işlem geri alınamaz.",
     "schedule.confirm_delete_section_one": "“{{name}}” bölümünde {{count}} faaliyet var. Bölümle birlikte silin veya bir üst düzeye taşıyarak koruyun. Bu işlem geri alınamaz.",
     "schedule.confirm_delete_section_other": "“{{name}}” bölümünde {{count}} faaliyet var. Bölümle birlikte silin veya bir üst düzeye taşıyarak koruyun. Bu işlem geri alınamaz.",

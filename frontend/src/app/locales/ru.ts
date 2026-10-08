@@ -3,6 +3,7 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Фоновые службы: готовим {{names}}",
     "processes.notice.preparing": "Готовим: {{names}}. Можно продолжать работу, это сообщение исчезнет само.",
     "processes.status.queued": "Ждёт загрузки",
@@ -11215,7 +11216,8 @@ const resource = {
     "schedule.select_project": "Выберите проект для просмотра и управления графиком строительства",
     "schedule.start": "Начало",
     "schedule.start_date": "Дата начала",
-    "schedule.status_active": "активный",    "schedule.confirm_delete_activity_title": "Удалить работу?",
+    "schedule.status_active": "активный",
+    "schedule.confirm_delete_activity_title": "Удалить работу?",
     "schedule.confirm_delete_activity": "Удалить «{{name}}» и её связи с другими работами? Это действие нельзя отменить.",
     "schedule.confirm_delete_section_one": "В разделе «{{name}}» работ: {{count}}. Удалить их вместе с разделом или сохранить, переместив на уровень выше? Это действие нельзя отменить.",
     "schedule.confirm_delete_section_few": "В разделе «{{name}}» работ: {{count}}. Удалить их вместе с разделом или сохранить, переместив на уровень выше? Это действие нельзя отменить.",

@@ -3,6 +3,7 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Pozadinske usluge: priprema se {{names}}",
     "processes.notice.preparing": "Priprema se: {{names}}. Možete nastaviti raditi, ova bilješka nestat će sama.",
     "processes.status.queued": "Čeka učitavanje",

@@ -3,6 +3,7 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Taustapalvelut: valmistellaan {{names}}",
     "processes.notice.preparing": "Valmistellaan: {{names}}. Voit jatkaa työskentelyä, tämä ilmoitus poistuu itsestään.",
     "processes.status.queued": "Odottaa latausta",
@@ -10770,7 +10771,8 @@ const resource = {
     "schedule.select_project": "Valitse projekti nähdäksesi ja hallitaksesi sen rakentamisaikataulua",
     "schedule.start": "Alku",
     "schedule.start_date": "Aloituspäivä",
-    "schedule.status_active": "aktiivinen",    "schedule.confirm_delete_activity_title": "Poistetaanko tehtävä?",
+    "schedule.status_active": "aktiivinen",
+    "schedule.confirm_delete_activity_title": "Poistetaanko tehtävä?",
     "schedule.confirm_delete_activity": "Poistetaanko ”{{name}}” ja sen yhteydet muihin tehtäviin? Tätä ei voi kumota.",
     "schedule.confirm_delete_section_one": "Osion ”{{name}}” tehtävien määrä: {{count}}. Poista ne osion mukana tai säilytä ne siirtämällä tasoa ylemmäs. Tätä ei voi kumota.",
     "schedule.confirm_delete_section_other": "Osion ”{{name}}” tehtävien määrä: {{count}}. Poista ne osion mukana tai säilytä ne siirtämällä tasoa ylemmäs. Tätä ei voi kumota.",

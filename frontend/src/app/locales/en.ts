@@ -3,6 +3,7 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Background services: preparing {{names}}",
     "processes.notice.preparing": "Preparing {{names}}. You can keep working, this note clears by itself.",
     "processes.status.queued": "Waiting to load",

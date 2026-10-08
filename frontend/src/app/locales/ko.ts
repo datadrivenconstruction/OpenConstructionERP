@@ -3,6 +3,7 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "백그라운드 서비스: {{names}} 준비 중",
     "processes.notice.preparing": "{{names}} 준비 중입니다. 계속 작업하셔도 되며, 이 안내는 자동으로 사라집니다.",
     "processes.status.queued": "로드 대기 중",

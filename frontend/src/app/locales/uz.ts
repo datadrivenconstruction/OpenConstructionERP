@@ -3,6 +3,7 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Fon xizmatlari: {{names}} tayyorlanmoqda",
     "processes.notice.preparing": "{{names}} tayyorlanmoqda. Ishni davom ettirishingiz mumkin, bu eslatma oʻzi yoʻqoladi.",
     "processes.status.queued": "Yuklanishni kutmoqda",
@@ -11340,7 +11341,8 @@ const resource = {
     "schedule.select_project": "Uning qurilish jadvalini koʻrish va boshqarish uchun loyihani tanlang",
     "schedule.start": "Boshlanish",
     "schedule.start_date": "Boshlanish sanasi",
-    "schedule.status_active": "faol",    "schedule.confirm_delete_activity_title": "Ish o‘chirilsinmi?",
+    "schedule.status_active": "faol",
+    "schedule.confirm_delete_activity_title": "Ish o‘chirilsinmi?",
     "schedule.confirm_delete_activity": "“{{name}}” va uning boshqa ishlar bilan bog‘lanishlari o‘chirilsinmi? Buni bekor qilib bo‘lmaydi.",
     "schedule.confirm_delete_section_one": "“{{name}}” bo‘limidagi ishlar soni: {{count}}. Ularni bo‘lim bilan o‘chiring yoki bir pog‘ona yuqoriga ko‘chirib saqlang. Buni bekor qilib bo‘lmaydi.",
     "schedule.confirm_delete_section_other": "“{{name}}” bo‘limidagi ishlar soni: {{count}}. Ularni bo‘lim bilan o‘chiring yoki bir pog‘ona yuqoriga ko‘chirib saqlang. Buni bekor qilib bo‘lmaydi.",

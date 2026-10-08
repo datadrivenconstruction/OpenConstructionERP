@@ -3,6 +3,7 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Baggrundstjenester: klargør {{names}}",
     "processes.notice.preparing": "Klargør {{names}}. Du kan arbejde videre, denne note forsvinder af sig selv.",
     "processes.status.queued": "Venter på at blive indlæst",
@@ -13380,7 +13381,8 @@ const resource = {
     "schedule.select_project": "Vælg et projekt for at se og administrere dets byggetidsplan",
     "schedule.start": "Start",
     "schedule.start_date": "Startdato",
-    "schedule.status_active": "aktiv",    "schedule.confirm_delete_activity_title": "Slet aktiviteten?",
+    "schedule.status_active": "aktiv",
+    "schedule.confirm_delete_activity_title": "Slet aktiviteten?",
     "schedule.confirm_delete_activity": "Slet »{{name}}« og dens forbindelser til andre aktiviteter? Dette kan ikke fortrydes.",
     "schedule.confirm_delete_section_one": "Antal aktiviteter i »{{name}}«: {{count}}. Slet dem med afsnittet, eller behold dem ét niveau oppe. Dette kan ikke fortrydes.",
     "schedule.confirm_delete_section_other": "Antal aktiviteter i »{{name}}«: {{count}}. Slet dem med afsnittet, eller behold dem ét niveau oppe. Dette kan ikke fortrydes.",

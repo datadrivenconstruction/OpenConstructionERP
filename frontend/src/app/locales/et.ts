@@ -3,6 +3,7 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Taustateenused: valmistatakse ette {{names}}",
     "processes.notice.preparing": "Valmistatakse ette: {{names}}. Võite tööd jätkata, see märge kaob ise.",
     "processes.status.queued": "Ootab laadimist",
@@ -14815,7 +14816,8 @@ const resource = {
     "schedule.select_project": "Valige projekt selle ehitusajakava vaatamiseks ja haldamiseks",
     "schedule.start": "Algus",
     "schedule.start_date": "Alguskuupäev",
-    "schedule.status_active": "aktiivne",    "schedule.confirm_delete_activity_title": "Kas kustutada tegevus?",
+    "schedule.status_active": "aktiivne",
+    "schedule.confirm_delete_activity_title": "Kas kustutada tegevus?",
     "schedule.confirm_delete_activity": "Kas kustutada „{{name}}” ja selle seosed teiste tegevustega? Seda ei saa tagasi võtta.",
     "schedule.confirm_delete_section_one": "Jaotise „{{name}}” tegevuste arv: {{count}}. Kustutage need koos jaotisega või säilitage üks tase kõrgemal. Seda ei saa tagasi võtta.",
     "schedule.confirm_delete_section_other": "Jaotise „{{name}}” tegevuste arv: {{count}}. Kustutage need koos jaotisega või säilitage üks tase kõrgemal. Seda ei saa tagasi võtta.",

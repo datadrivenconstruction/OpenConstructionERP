@@ -3,6 +3,7 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Achtergronddiensten: {{names}} wordt voorbereid",
     "processes.notice.preparing": "{{names}} wordt voorbereid. U kunt gewoon doorwerken, deze melding verdwijnt vanzelf.",
     "processes.status.queued": "Wacht op laden",

@@ -3,6 +3,7 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Háttérszolgáltatások: előkészítés: {{names}}",
     "processes.notice.preparing": "Előkészítés: {{names}}. Dolgozhat tovább, ez a megjegyzés magától eltűnik.",
     "processes.status.queued": "Betöltésre vár",
@@ -9669,7 +9670,8 @@ const resource = {
     "schedule.select_project": "Válasszon egy projektet az építési ütemtervének megtekintéséhez és kezeléséhez",
     "schedule.start": "Kezdés",
     "schedule.start_date": "Kezdés dátuma",
-    "schedule.status_active": "aktív",    "schedule.confirm_delete_activity_title": "Törli a tevékenységet?",
+    "schedule.status_active": "aktív",
+    "schedule.confirm_delete_activity_title": "Törli a tevékenységet?",
     "schedule.confirm_delete_activity": "Törli a(z) „{{name}}” tevékenységet és kapcsolatait? A művelet nem vonható vissza.",
     "schedule.confirm_delete_section_one": "A(z) „{{name}}” szakasz tevékenységeinek száma: {{count}}. Törölheti őket a szakasszal együtt, vagy megtarthatja őket egy szinttel feljebb helyezve. A művelet nem vonható vissza.",
     "schedule.confirm_delete_section_other": "A(z) „{{name}}” szakasz tevékenységeinek száma: {{count}}. Törölheti őket a szakasszal együtt, vagy megtarthatja őket egy szinttel feljebb helyezve. A művelet nem vonható vissza.",

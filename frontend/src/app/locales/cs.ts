@@ -3,6 +3,7 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Služby na pozadí: připravuje se {{names}}",
     "processes.notice.preparing": "Připravuje se: {{names}}. Můžete pracovat dál, toto upozornění zmizí samo.",
     "processes.status.queued": "Čeká na načtení",

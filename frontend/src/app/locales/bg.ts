@@ -3,6 +3,7 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Фонови услуги: подготвят се {{names}}",
     "processes.notice.preparing": "Подготвя се: {{names}}. Можете да продължите работа, бележката ще изчезне сама.",
     "processes.status.queued": "Чака зареждане",

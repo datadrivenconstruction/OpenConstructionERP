@@ -17,7 +17,10 @@ import { Check, Loader2, X } from 'lucide-react';
 import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
-import { processesForModules, ramOf, useFirstRun, useProcesses } from './api';
+import { processesForModules, ramOf, useFirstRun, useProcesses, type ProcessCategory } from './api';
+
+/** Kinds of service that load a model or an index into memory. */
+const HEAVY = new Set<ProcessCategory>(['ai_model', 'vector_index']);
 import { formatMb, moduleLink, processName, useIsProcessAdmin } from './labels';
 import { useProcessesUi } from './useProcessesUi';
 
@@ -34,20 +37,42 @@ export function ProcessesWizard() {
 
   useFocusTrap(ref, wizardOpen);
 
-  // Start from what is already on, so reopening shows the current state.
-  useEffect(() => {
-    if (!wizardOpen || !data) return;
-    const on = new Set<string>();
-    for (const p of data.processes) if (p.enabled && !p.required && p.stoppable) p.modules.forEach((m) => on.add(m));
-    setPicked(on);
-  }, [wizardOpen, data]);
-
   const processes = data?.processes ?? [];
   const modules = useMemo(() => {
     const ids = new Set<string>();
     for (const p of processes) if (!p.required && p.stoppable) p.modules.forEach((m) => ids.add(m));
-    return [...ids].map((id) => moduleLink(t, id)).sort((a, b) => a.label.localeCompare(b.label));
+    return [...ids]
+      .map((id) => {
+        // What this module would add on its own: the AI models and search
+        // indexes it pulls in. Light loops are not worth a number.
+        const heavyMb = processes
+          .filter((p) => p.modules.includes(id) && HEAVY.has(p.category))
+          .reduce((sum, p) => sum + ramOf(p), 0);
+        return { ...moduleLink(t, id), heavyMb };
+      })
+      .sort((a, b) => a.heavyMb - b.heavyMb || a.label.localeCompare(b.label));
   }, [processes, t]);
+
+  // Seed the ticks once per opening, not on every poll, or a refresh would
+  // undo what the user just clicked. First run: light modules on, anything
+  // that loads a model or a search index off (the platform starts light).
+  // Reopened later: what is on now.
+  const seeded = useRef(false);
+  useEffect(() => {
+    if (!wizardOpen) {
+      seeded.current = false;
+      return;
+    }
+    if (seeded.current || !data) return;
+    seeded.current = true;
+    const on = new Set<string>();
+    if (data.first_run_done) {
+      for (const p of data.processes) if (p.enabled && !p.required && p.stoppable) p.modules.forEach((m) => on.add(m));
+    } else {
+      for (const m of modules) if (m.heavyMb === 0) on.add(m.id);
+    }
+    setPicked(on);
+  }, [wizardOpen, data, modules]);
   const needed = processesForModules(processes, [...picked]);
   const totalMb = needed.reduce((s, p) => s + ramOf(p), 0);
 
@@ -136,7 +161,12 @@ export function ProcessesWizard() {
                     >
                       {on && <Check size={12} />}
                     </span>
-                    <span className="min-w-0 break-words">{m.label}</span>
+                    <span className="min-w-0 flex-1 break-words">{m.label}</span>
+                    {m.heavyMb > 0 && (
+                      <span className="shrink-0 text-xs tabular-nums text-content-tertiary">
+                        {t('processes.wizard.adds', { defaultValue: '+{{value}}', value: formatMb(t, m.heavyMb) })}
+                      </span>
+                    )}
                   </label>
                 );
               })}

@@ -3,6 +3,7 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Bakgrunnstjenester: klargjør {{names}}",
     "processes.notice.preparing": "Klargjør {{names}}. Du kan jobbe videre, dette varselet forsvinner av seg selv.",
     "processes.status.queued": "Venter på å bli lastet",
@@ -13210,7 +13211,8 @@ const resource = {
     "schedule.select_project": "Velg et prosjekt for a vise og administrere dets fremdriftsplan",
     "schedule.start": "Start",
     "schedule.start_date": "Startdato",
-    "schedule.status_active": "aktiv",    "schedule.confirm_delete_activity_title": "Slette aktiviteten?",
+    "schedule.status_active": "aktiv",
+    "schedule.confirm_delete_activity_title": "Slette aktiviteten?",
     "schedule.confirm_delete_activity": "Slette «{{name}}» og koblingene til andre aktiviteter? Dette kan ikke angres.",
     "schedule.confirm_delete_section_one": "Antall aktiviteter i «{{name}}»: {{count}}. Slett dem med avsnittet eller behold dem ett nivå opp. Dette kan ikke angres.",
     "schedule.confirm_delete_section_other": "Antall aktiviteter i «{{name}}»: {{count}}. Slett dem med avsnittet eller behold dem ett nivå opp. Dette kan ikke angres.",
