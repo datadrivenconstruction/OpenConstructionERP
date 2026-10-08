@@ -46301,6 +46301,7 @@ const resource = {
     "boq.import_toast.deleted": "Voci rimosse: {{count}}",
     "boq.markup_region.gulf": "Stati del Golfo",
     "boq.markup_region.generic": "Internazionale generico",
+    "boq.markup_deductions_base_hint": "Questo computo contiene detrazioni. Una percentuale sul costo diretto si calcola sui lavori prima delle detrazioni. Per calcolarla sull'importo netto, posizionala subito dopo la riga delle detrazioni con base subtotale.",
     "boq.markup_region.it_price_list": "Italia, da prezzario",
     "boq.markup_region.it_price_analysis": "Italia, da analisi prezzi",
     "boq.markup_region.it_price_list_hint": "I prezzi del prezzario includono già spese generali e utile d'impresa: si aggiungono solo oneri della sicurezza e IVA.",

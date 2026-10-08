@@ -45422,6 +45422,7 @@ const resource = {
     "boq.import_toast.deleted": "Poziții eliminate: {{count}}",
     "boq.markup_region.gulf": "Statele din Golf",
     "boq.markup_region.generic": "Internațional generic",
+    "boq.markup_deductions_base_hint": "Acest deviz are deduceri. Un procent din costul direct se calculează pe lucrări înainte de deduceri. Pentru a-l calcula pe suma netă, plasați-l imediat după linia de deduceri, cu baza subtotal.",
     "boq.markup_region.it_price_list": "Italia, după lista de prețuri",
     "boq.markup_region.it_price_analysis": "Italia, după analiza de prețuri",
     "boq.markup_region.it_price_list_hint": "Prețurile din listă includ deja cheltuielile generale și profitul, deci se adaugă doar costurile de siguranță și TVA.",

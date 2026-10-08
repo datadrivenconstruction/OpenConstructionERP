@@ -45423,6 +45423,7 @@ const resource = {
     "boq.import_toast.deleted": "Uklonjene stavke: {{count}}",
     "boq.markup_region.gulf": "Zaljevske države",
     "boq.markup_region.generic": "Opće međunarodno",
+    "boq.markup_deductions_base_hint": "Ovaj troškovnik sadrži odbitke. Postotak na izravne troškove računa se na radove prije odbitaka. Da biste ga računali na neto iznos, postavite ga odmah iza retka odbitaka s osnovicom međuzbroj.",
     "boq.markup_region.it_price_list": "Italija, prema cjeniku",
     "boq.markup_region.it_price_analysis": "Italija, prema analizi cijena",
     "boq.markup_region.it_price_list_hint": "Cijene iz cjenika već uključuju opće troškove i dobit, pa se dodaju samo troškovi sigurnosti i PDV.",

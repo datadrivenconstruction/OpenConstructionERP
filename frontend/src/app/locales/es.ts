@@ -47999,6 +47999,7 @@ const resource = {
     "boq.import_toast.deleted": "Partidas eliminadas: {{count}}",
     "boq.markup_region.gulf": "Estados del Golfo",
     "boq.markup_region.generic": "Internacional genérico",
+    "boq.markup_deductions_base_hint": "Este presupuesto tiene deducciones. Un porcentaje sobre el coste directo se calcula sobre las obras antes de las deducciones. Para calcularlo sobre el importe neto, colóquelo justo después de la línea de deducciones con base subtotal.",
     "boq.markup_region.it_price_list": "Italia, según lista de precios",
     "boq.markup_region.it_price_analysis": "Italia, según análisis de precios",
     "boq.markup_region.it_price_list_hint": "Los precios de la lista ya incluyen gastos generales y beneficio, así que solo se añaden costes de seguridad e IVA.",

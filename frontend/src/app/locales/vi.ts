@@ -44864,6 +44864,7 @@ const resource = {
     "boq.import_toast.deleted": "Hạng mục đã xóa: {{count}}",
     "boq.markup_region.gulf": "Các nước vùng Vịnh",
     "boq.markup_region.generic": "Quốc tế chung",
+    "boq.markup_deductions_base_hint": "Dự toán này có các khoản giảm trừ. Tỷ lệ trên chi phí trực tiếp được tính trên khối lượng trước giảm trừ. Để tính trên số tiền thuần, hãy đặt nó ngay sau dòng giảm trừ với cơ sở tính là tổng phụ.",
     "boq.markup_region.it_price_list": "Ý, theo bảng giá",
     "boq.markup_region.it_price_analysis": "Ý, theo phân tích đơn giá",
     "boq.markup_region.it_price_list_hint": "Giá trong bảng giá đã gồm chi phí chung và lợi nhuận, nên chỉ cộng thêm chi phí an toàn và VAT.",

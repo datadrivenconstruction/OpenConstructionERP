@@ -45147,6 +45147,7 @@ const resource = {
     "boq.import_toast.deleted": "ردیف‌های حذف‌شده: {{count}}",
     "boq.markup_region.gulf": "کشورهای حوزهٔ خلیج فارس",
     "boq.markup_region.generic": "بین‌المللی عمومی",
+    "boq.markup_deductions_base_hint": "این برآورد کسورات دارد. درصد بر هزینه مستقیم روی کارها پیش از کسورات محاسبه می‌شود. برای محاسبه روی مبلغ خالص، آن را بلافاصله پس از ردیف کسورات با مبنای جمع جزء قرار دهید.",
     "boq.markup_region.it_price_list": "ایتالیا، بر اساس فهرست‌بها",
     "boq.markup_region.it_price_analysis": "ایتالیا، بر اساس تجزیه‌بها",
     "boq.markup_region.it_price_list_hint": "قیمت‌های فهرست‌بها از قبل شامل هزینه‌های بالاسری و سود است، پس فقط هزینه‌های ایمنی و مالیات بر ارزش افزوده اضافه می‌شود.",

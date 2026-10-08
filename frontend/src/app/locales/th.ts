@@ -44856,6 +44856,7 @@ const resource = {
     "boq.import_toast.deleted": "ลบรายการ: {{count}}",
     "boq.markup_region.gulf": "ประเทศอ่าวเปอร์เซีย",
     "boq.markup_region.generic": "สากลทั่วไป",
+    "boq.markup_deductions_base_hint": "ประมาณราคานี้มีรายการหักลด เปอร์เซ็นต์ของต้นทุนทางตรงคิดจากงานก่อนหักลด หากต้องการคิดจากยอดสุทธิ ให้วางไว้ถัดจากบรรทัดหักลดทันทีโดยใช้ฐานยอดรวมย่อย",
     "boq.markup_region.it_price_list": "อิตาลี ตามบัญชีราคา",
     "boq.markup_region.it_price_analysis": "อิตาลี ตามการวิเคราะห์ราคา",
     "boq.markup_region.it_price_list_hint": "ราคาในบัญชีราคารวมค่าใช้จ่ายทั่วไปและกำไรไว้แล้ว จึงเพิ่มเฉพาะค่าความปลอดภัยและ VAT",

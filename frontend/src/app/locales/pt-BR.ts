@@ -42106,6 +42106,7 @@ const resource = {
     "boq.import_toast.deleted": "Itens removidos: {{count}}",
     "boq.markup_region.gulf": "Estados do Golfo",
     "boq.markup_region.generic": "Internacional genérico",
+    "boq.markup_deductions_base_hint": "Este orçamento tem deduções. Um percentual sobre o custo direto é calculado sobre os serviços antes das deduções. Para calculá-lo sobre o valor líquido, coloque-o logo após a linha de deduções com base subtotal.",
     "boq.markup_region.it_price_list": "Itália, por tabela de preços",
     "boq.markup_region.it_price_analysis": "Itália, por composição de preços",
     "boq.markup_region.it_price_list_hint": "Os preços da tabela já incluem despesas gerais e lucro, então só são acrescentados custos de segurança e IVA.",

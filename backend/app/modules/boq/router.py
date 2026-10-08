@@ -222,6 +222,7 @@ from app.modules.boq.schemas import (
     TemplateInfo,
 )
 from app.modules.boq.service import (
+    IMPORT_DEDUCTIONS_ROLE,
     MAX_NESTING_DEPTH,
     SECTION_UNITS,
     BOQService,
@@ -7325,7 +7326,7 @@ async def _persist_imported_boq(
 
 
 # The bill's one deductions line, found again by this role on every import.
-_DEDUCTIONS_ROLE = "import_deductions"
+_DEDUCTIONS_ROLE = IMPORT_DEDUCTIONS_ROLE
 _DEDUCTIONS_NAME = "Detrazioni / minori lavori"
 
 
@@ -7385,6 +7386,9 @@ async def _persist_import_deductions(
                     metadata=line_meta,
                 ),
             )
+        # First in the stack, so the percentage lines after it are taken on
+        # the net amount (works less deductions), not on the works alone.
+        await service.seat_import_deductions_first(boq_id)
     except Exception as exc:  # noqa: BLE001 - never abort an import on a markup
         errors.append({"ordinal": "", "code": "import_deductions_failed", "error": f"Deductions line failed: {exc}"})
         logger.warning("Deductions line for BOQ %s failed: %s", boq_id, exc)

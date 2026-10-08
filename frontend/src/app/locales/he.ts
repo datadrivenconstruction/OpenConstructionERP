@@ -45400,6 +45400,7 @@ const resource = {
     "boq.import_toast.deleted": "סעיפים שהוסרו: {{count}}",
     "boq.markup_region.gulf": "מדינות המפרץ",
     "boq.markup_region.generic": "בין-לאומי כללי",
+    "boq.markup_deductions_base_hint": "בכתב כמויות זה יש הפחתות. אחוז מעלות ישירה מחושב על העבודות לפני ההפחתות. כדי לחשב אותו על הסכום הנקי, מקמו אותו מיד אחרי שורת ההפחתות עם בסיס סכום ביניים.",
     "boq.markup_region.it_price_list": "איטליה, לפי מחירון",
     "boq.markup_region.it_price_analysis": "איטליה, לפי ניתוח מחירים",
     "boq.markup_region.it_price_list_hint": "מחירי המחירון כוללים כבר הוצאות כלליות ורווח, ולכן מתווספים רק עלויות בטיחות ומע\"מ.",

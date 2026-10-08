@@ -585,6 +585,21 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
             </div>
           </div>
 
+          {/* An imported bill with deductions (detrazioni): a percentage on
+              direct cost is taken on the works before deductions. The import
+              puts the deductions line first, so subtotal is the net base. */}
+          {markups.some((m) => !m.scope_position_id && m.metadata?.role === 'import_deductions') &&
+            markups.some(
+              (m) => m.is_active && m.markup_type === 'percentage' && m.apply_to === 'direct_cost',
+            ) && (
+              <div className="px-5 py-2 text-xs text-content-secondary bg-surface-secondary/30 border-t border-border-light">
+                {t('boq.markup_deductions_base_hint', {
+                  defaultValue:
+                    'This bill has deductions. A percentage on direct cost is taken on the works before deductions. To take it on the net amount, place it right after the deductions line with base subtotal.',
+                })}
+              </div>
+            )}
+
           {/* Markup table */}
           {markups.length > 0 ? (
             <div className="overflow-x-auto">

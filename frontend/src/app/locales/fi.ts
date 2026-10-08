@@ -45156,6 +45156,7 @@ const resource = {
     "boq.import_toast.deleted": "Poistetut nimikkeet: {{count}}",
     "boq.markup_region.gulf": "Persianlahden valtiot",
     "boq.markup_region.generic": "Yleinen kansainvälinen",
+    "boq.markup_deductions_base_hint": "Tässä laskelmassa on vähennyksiä. Prosentti välittömistä kustannuksista lasketaan töistä ennen vähennyksiä. Laske se nettosummasta sijoittamalla se heti vähennysrivin jälkeen perusteella välisumma.",
     "boq.markup_region.it_price_list": "Italia, hinnaston mukaan",
     "boq.markup_region.it_price_analysis": "Italia, hinta-analyysin mukaan",
     "boq.markup_region.it_price_list_hint": "Hinnaston hinnat sisältävät jo yleiskulut ja katteen, joten vain turvallisuuskulut ja ALV lisätään.",

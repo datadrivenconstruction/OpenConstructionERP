@@ -45163,6 +45163,7 @@ const resource = {
     "boq.import_toast.deleted": "Fjernede poster: {{count}}",
     "boq.markup_region.gulf": "Golfstaterne",
     "boq.markup_region.generic": "Generel international",
+    "boq.markup_deductions_base_hint": "Dette overslag har fradrag. En procentsats af de direkte omkostninger beregnes af arbejdet før fradrag. For at beregne den af nettobeløbet skal den placeres lige efter fradragslinjen med grundlag subtotal.",
     "boq.markup_region.it_price_list": "Italien, efter prisliste",
     "boq.markup_region.it_price_analysis": "Italien, efter prisanalyse",
     "boq.markup_region.it_price_list_hint": "Prislistens priser indeholder allerede fællesomkostninger og avance, så kun sikkerhedsomkostninger og moms lægges til.",

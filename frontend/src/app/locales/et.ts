@@ -45094,6 +45094,7 @@ const resource = {
     "boq.import_toast.deleted": "Eemaldatud positsioone: {{count}}",
     "boq.markup_region.gulf": "Pärsia lahe riigid",
     "boq.markup_region.generic": "Üldine rahvusvaheline",
+    "boq.markup_deductions_base_hint": "Selles eelarves on mahaarvamisi. Protsent otsestest kuludest arvutatakse töödest enne mahaarvamisi. Netosummast arvutamiseks pange see kohe mahaarvamiste rea järele baasiga vahesumma.",
     "boq.markup_region.it_price_list": "Itaalia, hinnakirja järgi",
     "boq.markup_region.it_price_analysis": "Itaalia, hinnaanalüüsi järgi",
     "boq.markup_region.it_price_list_hint": "Hinnakirja hinnad sisaldavad juba üldkulusid ja kasumit, seega lisatakse ainult ohutuskulud ja käibemaks.",

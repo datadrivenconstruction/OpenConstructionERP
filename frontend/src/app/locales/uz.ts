@@ -46068,6 +46068,7 @@ const resource = {
     "boq.import_toast.deleted": "O‘chirilgan pozitsiyalar: {{count}}",
     "boq.markup_region.gulf": "Fors ko‘rfazi davlatlari",
     "boq.markup_region.generic": "Umumiy xalqaro",
+    "boq.markup_deductions_base_hint": "Bu smetada chegirmalar bor. To'g'ridan-to'g'ri xarajatlardan foiz chegirmalardan oldingi ishlardan hisoblanadi. Uni sof summadan hisoblash uchun chegirmalar qatoridan keyin darhol oraliq jami asosida joylashtiring.",
     "boq.markup_region.it_price_list": "Italiya, narxlar ro'yxati bo'yicha",
     "boq.markup_region.it_price_analysis": "Italiya, narx tahlili bo'yicha",
     "boq.markup_region.it_price_list_hint": "Narxlar ro'yxatidagi narxlarga umumiy xarajatlar va foyda allaqachon kiritilgan, shuning uchun faqat xavfsizlik xarajatlari va QQS qo'shiladi.",

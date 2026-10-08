@@ -45147,6 +45147,7 @@ const resource = {
     "boq.import_toast.deleted": "حذف شدہ آئٹمز: {{count}}",
     "boq.markup_region.gulf": "خلیجی ممالک",
     "boq.markup_region.generic": "عمومی بین الاقوامی",
+    "boq.markup_deductions_base_hint": "اس تخمینے میں کٹوتیاں ہیں۔ براہِ راست لاگت پر فیصد کٹوتیوں سے پہلے کے کاموں پر لگتا ہے۔ اسے خالص رقم پر لگانے کے لیے، اسے کٹوتیوں کی سطر کے فوراً بعد ذیلی میزان کی بنیاد کے ساتھ رکھیں۔",
     "boq.markup_region.it_price_list": "اٹلی، قیمتوں کی فہرست کے مطابق",
     "boq.markup_region.it_price_analysis": "اٹلی، قیمتوں کے تجزیے کے مطابق",
     "boq.markup_region.it_price_list_hint": "فہرست کی قیمتوں میں عمومی اخراجات اور منافع پہلے سے شامل ہیں، اس لیے صرف حفاظتی اخراجات اور VAT شامل کیے جاتے ہیں۔",

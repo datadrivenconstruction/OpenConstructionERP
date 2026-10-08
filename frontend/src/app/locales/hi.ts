@@ -45169,6 +45169,7 @@ const resource = {
     "boq.import_toast.deleted": "हटाई गई मदें: {{count}}",
     "boq.markup_region.gulf": "खाड़ी देश",
     "boq.markup_region.generic": "सामान्य अंतरराष्ट्रीय",
+    "boq.markup_deductions_base_hint": "इस अनुमान में कटौतियाँ हैं। प्रत्यक्ष लागत पर प्रतिशत कटौतियों से पहले के कार्यों पर लगता है। इसे शुद्ध राशि पर लगाने के लिए, इसे कटौती पंक्ति के ठीक बाद उप-योग आधार के साथ रखें।",
     "boq.markup_region.it_price_list": "इटली, मूल्य सूची के अनुसार",
     "boq.markup_region.it_price_analysis": "इटली, मूल्य विश्लेषण के अनुसार",
     "boq.markup_region.it_price_list_hint": "मूल्य सूची की दरों में सामान्य व्यय और लाभ पहले से शामिल हैं, इसलिए केवल सुरक्षा लागत और VAT जोड़े जाते हैं।",

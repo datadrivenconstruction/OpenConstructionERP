@@ -45778,6 +45778,7 @@ const resource = {
     "boq.import_toast.deleted": "Poster borttagna: {{count}}",
     "boq.markup_region.gulf": "Gulfstaterna",
     "boq.markup_region.generic": "Allmän internationell",
+    "boq.markup_deductions_base_hint": "Den här kalkylen har avdrag. En procentsats på direkta kostnader beräknas på arbetena före avdrag. För att beräkna den på nettobeloppet, placera den direkt efter avdragsraden med bas delsumma.",
     "boq.markup_region.it_price_list": "Italien, enligt prislista",
     "boq.markup_region.it_price_analysis": "Italien, enligt prisanalys",
     "boq.markup_region.it_price_list_hint": "Prislistans priser innehåller redan omkostnader och vinst, så bara säkerhetskostnader och moms läggs till.",

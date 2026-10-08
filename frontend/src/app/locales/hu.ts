@@ -47752,6 +47752,7 @@ const resource = {
     "boq.import_toast.deleted": "Eltávolított tételek: {{count}}",
     "boq.markup_region.gulf": "Öböl menti államok",
     "boq.markup_region.generic": "Általános nemzetközi",
+    "boq.markup_deductions_base_hint": "Ebben a költségvetésben levonások vannak. A közvetlen költségre vetített százalék a levonások előtti munkákra számítódik. A nettó összegre számításhoz tegye közvetlenül a levonások sora után, részösszeg alappal.",
     "boq.markup_region.it_price_list": "Olaszország, árjegyzék szerint",
     "boq.markup_region.it_price_analysis": "Olaszország, árelemzés szerint",
     "boq.markup_region.it_price_list_hint": "Az árjegyzék árai már tartalmazzák az általános költséget és a nyereséget, ezért csak a biztonsági költség és az áfa kerül rá.",

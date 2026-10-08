@@ -549,6 +549,75 @@ async def test_importing_the_bill_again_keeps_one_deductions_line_that_matches_t
     assert Decimal(str(markups[0]["fixed_amount"])) == Decimal("-236.30")
 
 
+_WORKS = Decimal("2654.57")  # the positive items of the deductions bill
+_NET = Decimal("2418.27")  # works less the 236.30 of deductions, the file's own total
+
+
+def _cents(value: Decimal) -> Decimal:
+    from decimal import ROUND_HALF_UP
+
+    return value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+
+async def _apply(http_client, auth_headers, boq: str, region: str) -> None:
+    resp = await http_client.post(
+        f"/api/v1/boq/boqs/{boq}/markups/apply-defaults/?region={region}", headers=auth_headers
+    )
+    assert resp.status_code in (200, 201), resp.text[:300]
+
+
+@pytest.mark.asyncio
+async def test_a_template_applied_after_the_import_keeps_the_deductions_first(http_client, auth_headers) -> None:
+    """Applying the price-list template must not drop the deductions, and its percentages run on the net amount."""
+    boq = await _new_boq(http_client, auth_headers)
+    await _import(http_client, auth_headers, boq, fx.deductions_bill())
+    await _apply(http_client, auth_headers, boq, "IT_PREZZARIO")
+
+    shown, listed, markups = await _totals(http_client, auth_headers, boq)
+    names = [m["name"] for m in sorted(markups, key=lambda m: m["sort_order"])]
+    assert names == ["Detrazioni / minori lavori", "Oneri della sicurezza non soggetti a ribasso", "IVA"]
+    safety = _NET * Decimal("0.025")
+    iva = (_NET + safety) * Decimal("0.22")
+    assert shown == listed == _cents(_NET + safety + iva)
+
+
+@pytest.mark.asyncio
+async def test_general_expenses_after_the_deductions_are_taken_on_the_net_amount(http_client, auth_headers) -> None:
+    """The analysis template on a bill with deductions: spese generali and IVA see works less deductions."""
+    boq = await _new_boq(http_client, auth_headers)
+    await _import(http_client, auth_headers, boq, fx.deductions_bill())
+    await _apply(http_client, auth_headers, boq, "IT")
+
+    shown, listed, markups = await _totals(http_client, auth_headers, boq)
+    by_name = {m["name"]: m for m in markups}
+    ordered = [m["name"] for m in sorted(markups, key=lambda m: m["sort_order"])]
+    assert ordered[0] == "Detrazioni / minori lavori"
+    assert by_name["Spese generali"]["apply_to"] == "subtotal"
+    sg = _NET * Decimal("0.15")
+    utile = (_NET + sg) * Decimal("0.10")
+    # A direct_cost line further down keeps its base; the markup panel points it out.
+    assert by_name["Oneri della sicurezza non soggetti a ribasso"]["apply_to"] == "direct_cost"
+    safety = _WORKS * Decimal("0.025")
+    iva = (_NET + sg + utile + safety) * Decimal("0.22")
+    assert shown == listed == _cents(_NET + sg + utile + safety + iva)
+
+
+@pytest.mark.asyncio
+async def test_an_import_puts_its_deductions_before_markups_already_on_the_bill(http_client, auth_headers) -> None:
+    """A template chosen before the file is imported: the deductions still go first and IVA sees the net amount."""
+    boq = await _new_boq(http_client, auth_headers)
+    await _apply(http_client, auth_headers, boq, "IT_PREZZARIO")
+    await _import(http_client, auth_headers, boq, fx.deductions_bill())
+
+    shown, listed, markups = await _totals(http_client, auth_headers, boq)
+    ordered = sorted(markups, key=lambda m: m["sort_order"])
+    assert ordered[0]["name"] == "Detrazioni / minori lavori"
+    assert ordered[1]["apply_to"] == "subtotal"
+    safety = _NET * Decimal("0.025")
+    iva = (_NET + safety) * Decimal("0.22")
+    assert shown == listed == _cents(_NET + safety + iva)
+
+
 @pytest.mark.asyncio
 async def test_import_without_deductions_clears_the_old_import_deduction_amount(http_client, auth_headers) -> None:
     """Replacing all rows with a positive bill must not retain the previous credit."""

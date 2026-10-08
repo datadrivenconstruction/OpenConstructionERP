@@ -46388,6 +46388,7 @@ const resource = {
     "boq.import_toast.deleted": "削除した明細: {{count}}件",
     "boq.markup_region.gulf": "湾岸諸国",
     "boq.markup_region.generic": "汎用（国際）",
+    "boq.markup_deductions_base_hint": "この内訳書には控除があります。直接工事費に対する率は控除前の工事に掛かります。正味額に掛けるには、控除行の直後に置き、基準を小計にしてください。",
     "boq.markup_region.it_price_list": "イタリア(単価表による)",
     "boq.markup_region.it_price_analysis": "イタリア(単価分析による)",
     "boq.markup_region.it_price_list_hint": "単価表の単価には一般管理費と利益がすでに含まれているため、安全費と付加価値税のみを加算します。",

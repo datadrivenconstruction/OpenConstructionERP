@@ -46000,6 +46000,7 @@ const resource = {
     "boq.import_toast.deleted": "Silinen kalemler: {{count}}",
     "boq.markup_region.gulf": "Körfez ülkeleri",
     "boq.markup_region.generic": "Genel uluslararası",
+    "boq.markup_deductions_base_hint": "Bu keşifte kesintiler var. Doğrudan maliyet üzerinden yüzde, kesintilerden önceki işler üzerinden hesaplanır. Net tutar üzerinden hesaplamak için, ara toplam tabanıyla kesinti satırının hemen ardına yerleştirin.",
     "boq.markup_region.it_price_list": "İtalya, fiyat listesine göre",
     "boq.markup_region.it_price_analysis": "İtalya, fiyat analizine göre",
     "boq.markup_region.it_price_list_hint": "Fiyat listesi fiyatları genel giderleri ve kârı zaten içerir, bu yüzden yalnızca güvenlik maliyetleri ve KDV eklenir.",

@@ -3978,6 +3978,7 @@ const resource = {
     "boq.import_toast.deleted": "Items removed: {{count}}",
     "boq.markup_region.gulf": "Gulf states",
     "boq.markup_region.generic": "Generic international",
+    "boq.markup_deductions_base_hint": "This bill has deductions. A percentage on direct cost is taken on the works before deductions. To take it on the net amount, place it right after the deductions line with base subtotal.",
     "boq.markup_region.it_price_list": "Italy, per price list",
     "boq.markup_region.it_price_analysis": "Italy, per price analysis",
     "boq.markup_region.it_price_list_hint": "Price list rates already include general expenses and profit, so only safety costs and VAT are added.",

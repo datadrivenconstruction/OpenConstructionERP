@@ -48000,6 +48000,7 @@ const resource = {
     "boq.import_toast.deleted": "Postes supprimés : {{count}}",
     "boq.markup_region.gulf": "États du Golfe",
     "boq.markup_region.generic": "International générique",
+    "boq.markup_deductions_base_hint": "Ce devis contient des déductions. Un pourcentage sur le coût direct est calculé sur les travaux avant déductions. Pour le calculer sur le montant net, placez-le juste après la ligne des déductions avec la base sous-total.",
     "boq.markup_region.it_price_list": "Italie, selon bordereau de prix",
     "boq.markup_region.it_price_analysis": "Italie, selon analyse de prix",
     "boq.markup_region.it_price_list_hint": "Les prix du bordereau incluent déjà frais généraux et bénéfice : seuls les coûts de sécurité et la TVA sont ajoutés.",

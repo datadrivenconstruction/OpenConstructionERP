@@ -45163,6 +45163,7 @@ const resource = {
     "boq.import_toast.deleted": "Poster fjernet: {{count}}",
     "boq.markup_region.gulf": "Gulfstatene",
     "boq.markup_region.generic": "Generell internasjonal",
+    "boq.markup_deductions_base_hint": "Dette overslaget har fradrag. En prosentsats av direkte kostnader beregnes av arbeidene før fradrag. For å beregne den av nettobeløpet, plasser den rett etter fradragslinjen med grunnlag delsum.",
     "boq.markup_region.it_price_list": "Italia, etter prisliste",
     "boq.markup_region.it_price_analysis": "Italia, etter prisanalyse",
     "boq.markup_region.it_price_list_hint": "Prislisteprisene inkluderer allerede felleskostnader og fortjeneste, så bare sikkerhetskostnader og mva. legges til.",

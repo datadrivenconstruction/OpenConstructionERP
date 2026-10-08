@@ -46045,6 +46045,7 @@ const resource = {
     "boq.import_toast.deleted": "Posten verwijderd: {{count}}",
     "boq.markup_region.gulf": "Golfstaten",
     "boq.markup_region.generic": "Algemeen internationaal",
+    "boq.markup_deductions_base_hint": "Deze begroting bevat aftrekposten. Een percentage op directe kosten wordt berekend op het werk vóór aftrek. Om het op het nettobedrag te berekenen, plaats het direct na de aftrekregel met basis subtotaal.",
     "boq.markup_region.it_price_list": "Italië, volgens prijslijst",
     "boq.markup_region.it_price_analysis": "Italië, volgens prijsanalyse",
     "boq.markup_region.it_price_list_hint": "Prijslijstprijzen bevatten al algemene kosten en winst, dus alleen veiligheidskosten en btw worden toegevoegd.",

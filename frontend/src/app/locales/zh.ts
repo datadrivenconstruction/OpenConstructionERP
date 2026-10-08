@@ -47325,6 +47325,7 @@ const resource = {
     "boq.import_toast.deleted": "已删除清单项：{{count}}",
     "boq.markup_region.gulf": "海湾国家",
     "boq.markup_region.generic": "通用国际",
+    "boq.markup_deductions_base_hint": "此清单含有扣减项。按直接费计取的百分比以扣减前的工程计算。若要按净额计取，请将其放在扣减行之后，并以小计为基数。",
     "boq.markup_region.it_price_list": "意大利，按价目表",
     "boq.markup_region.it_price_analysis": "意大利，按单价分析",
     "boq.markup_region.it_price_list_hint": "价目表单价已包含管理费和利润，因此只加安全费和增值税。",

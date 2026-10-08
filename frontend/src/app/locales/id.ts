@@ -44844,6 +44844,7 @@ const resource = {
     "boq.import_toast.deleted": "Item dihapus: {{count}}",
     "boq.markup_region.gulf": "Negara-negara Teluk",
     "boq.markup_region.generic": "Internasional umum",
+    "boq.markup_deductions_base_hint": "RAB ini memiliki pengurangan. Persentase atas biaya langsung dihitung dari pekerjaan sebelum pengurangan. Untuk menghitungnya dari jumlah bersih, letakkan tepat setelah baris pengurangan dengan dasar subtotal.",
     "boq.markup_region.it_price_list": "Italia, menurut daftar harga",
     "boq.markup_region.it_price_analysis": "Italia, menurut analisa harga",
     "boq.markup_region.it_price_list_hint": "Harga daftar harga sudah mencakup biaya umum dan keuntungan, jadi hanya biaya keselamatan dan PPN yang ditambahkan.",

@@ -46292,6 +46292,7 @@ const resource = {
     "boq.import_toast.deleted": "Odstraněné položky: {{count}}",
     "boq.markup_region.gulf": "Státy Perského zálivu",
     "boq.markup_region.generic": "Obecný mezinárodní",
+    "boq.markup_deductions_base_hint": "Tento rozpočet obsahuje odpočty. Procento z přímých nákladů se počítá z prací před odpočty. Chcete-li ho počítat z čisté částky, umístěte ho hned za řádek odpočtů se základem mezisoučet.",
     "boq.markup_region.it_price_list": "Itálie, podle ceníku",
     "boq.markup_region.it_price_analysis": "Itálie, podle analýzy cen",
     "boq.markup_region.it_price_list_hint": "Ceny z ceníku už zahrnují režijní náklady a zisk, proto se přičítají jen náklady na bezpečnost a DPH.",

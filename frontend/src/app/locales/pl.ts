@@ -46523,6 +46523,7 @@ const resource = {
     "boq.import_toast.deleted": "Usunięte pozycje: {{count}}",
     "boq.markup_region.gulf": "Państwa Zatoki Perskiej",
     "boq.markup_region.generic": "Ogólny międzynarodowy",
+    "boq.markup_deductions_base_hint": "Ten kosztorys zawiera potrącenia. Procent od kosztów bezpośrednich liczony jest od robót przed potrąceniami. Aby liczyć go od kwoty netto, umieść go zaraz po wierszu potrąceń z podstawą suma częściowa.",
     "boq.markup_region.it_price_list": "Włochy, według cennika",
     "boq.markup_region.it_price_analysis": "Włochy, według analizy cen",
     "boq.markup_region.it_price_list_hint": "Ceny z cennika zawierają już koszty ogólne i zysk, więc dodawane są tylko koszty bezpieczeństwa i VAT.",

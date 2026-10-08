@@ -47772,6 +47772,7 @@ const resource = {
     "boq.import_toast.deleted": "البنود المحذوفة: {{count}}",
     "boq.markup_region.gulf": "دول الخليج",
     "boq.markup_region.generic": "دولي عام",
+    "boq.markup_deductions_base_hint": "تحتوي هذه المقايسة على خصومات. تُحسب النسبة على التكلفة المباشرة على الأعمال قبل الخصومات. لحسابها على المبلغ الصافي، ضعها مباشرة بعد سطر الخصومات بأساس المجموع الفرعي.",
     "boq.markup_region.it_price_list": "إيطاليا، حسب قائمة الأسعار",
     "boq.markup_region.it_price_analysis": "إيطاليا، حسب تحليل الأسعار",
     "boq.markup_region.it_price_list_hint": "أسعار القائمة تشمل مسبقًا المصاريف العامة والربح، لذا تُضاف تكاليف السلامة وضريبة القيمة المضافة فقط.",

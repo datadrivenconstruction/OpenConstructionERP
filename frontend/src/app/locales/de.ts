@@ -47806,6 +47806,7 @@ const resource = {
     "boq.import_toast.deleted": "Positionen entfernt: {{count}}",
     "boq.markup_region.gulf": "Golfstaaten",
     "boq.markup_region.generic": "Allgemein international",
+    "boq.markup_deductions_base_hint": "Dieses LV enthält Abzüge. Ein Prozentsatz auf die Direktkosten wird auf die Leistungen vor Abzügen berechnet. Um ihn auf den Nettobetrag zu berechnen, setzen Sie ihn direkt hinter die Abzugszeile mit Basis Zwischensumme.",
     "boq.markup_region.it_price_list": "Italien, nach Preisliste",
     "boq.markup_region.it_price_analysis": "Italien, nach Preisanalyse",
     "boq.markup_region.it_price_list_hint": "Preislistenpreise enthalten bereits Gemeinkosten und Gewinn, daher werden nur Sicherheitskosten und MwSt. aufgeschlagen.",

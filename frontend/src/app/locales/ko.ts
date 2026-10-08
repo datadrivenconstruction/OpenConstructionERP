@@ -45474,6 +45474,7 @@ const resource = {
     "boq.import_toast.deleted": "삭제된 항목: {{count}}",
     "boq.markup_region.gulf": "걸프 국가",
     "boq.markup_region.generic": "일반 국제",
+    "boq.markup_deductions_base_hint": "이 내역서에는 공제가 있습니다. 직접공사비에 대한 비율은 공제 전 공사에 적용됩니다. 순액에 적용하려면 공제 행 바로 다음에 소계 기준으로 배치하세요.",
     "boq.markup_region.it_price_list": "이탈리아, 단가표 기준",
     "boq.markup_region.it_price_analysis": "이탈리아, 단가 분석 기준",
     "boq.markup_region.it_price_list_hint": "단가표 단가에는 일반관리비와 이윤이 이미 포함되어 있으므로 안전관리비와 부가가치세만 더합니다.",

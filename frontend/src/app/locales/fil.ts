@@ -45048,6 +45048,7 @@ const resource = {
     "boq.import_toast.deleted": "Mga tinanggal na item: {{count}}",
     "boq.markup_region.gulf": "Mga bansa sa Gulpo",
     "boq.markup_region.generic": "Pangkalahatang internasyonal",
+    "boq.markup_deductions_base_hint": "May mga bawas ang tantiyang ito. Ang porsiyento sa direktang gastos ay kinukuha sa mga gawa bago ang mga bawas. Para makuha ito sa netong halaga, ilagay ito kasunod mismo ng linya ng mga bawas na may basehang subtotal.",
     "boq.markup_region.it_price_list": "Italya, ayon sa listahan ng presyo",
     "boq.markup_region.it_price_analysis": "Italya, ayon sa pagsusuri ng presyo",
     "boq.markup_region.it_price_list_hint": "Kasama na sa mga presyo ng listahan ang pangkalahatang gastos at tubo, kaya gastos sa kaligtasan at VAT lang ang idinadagdag.",

@@ -44743,6 +44743,7 @@ const resource = {
     "boq.import_toast.deleted": "Устгагдсан ажлын зүйл: {{count}}",
     "boq.markup_region.gulf": "Персийн булангийн орнууд",
     "boq.markup_region.generic": "Ерөнхий олон улсын",
+    "boq.markup_deductions_base_hint": "Энэ төсөвт хасалт байна. Шууд зардлаас тооцох хувь хасалтаас өмнөх ажлаас бодогдоно. Цэвэр дүнгээс бодохын тулд хасалтын мөрийн дараа шууд дэд дүн суурьтайгаар байрлуулна уу.",
     "boq.markup_region.it_price_list": "Итали, үнийн жагсаалтаар",
     "boq.markup_region.it_price_analysis": "Итали, үнийн шинжилгээгээр",
     "boq.markup_region.it_price_list_hint": "Үнийн жагсаалтын үнэд ерөнхий зардал ба ашиг аль хэдийн орсон тул зөвхөн аюулгүй байдлын зардал ба НӨАТ нэмэгдэнэ.",

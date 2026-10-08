@@ -45360,6 +45360,7 @@ const resource = {
     "boq.import_toast.deleted": "মুছে ফেলা আইটেম: {{count}}",
     "boq.markup_region.gulf": "উপসাগরীয় দেশসমূহ",
     "boq.markup_region.generic": "সাধারণ আন্তর্জাতিক",
+    "boq.markup_deductions_base_hint": "এই প্রাক্কলনে কর্তন আছে। প্রত্যক্ষ ব্যয়ের উপর শতাংশ কর্তনের আগের কাজের উপর হিসাব হয়। নিট অঙ্কের উপর হিসাব করতে, এটিকে কর্তনের সারির ঠিক পরে উপমোট ভিত্তিতে রাখুন।",
     "boq.markup_region.it_price_list": "ইতালি, মূল্য তালিকা অনুযায়ী",
     "boq.markup_region.it_price_analysis": "ইতালি, মূল্য বিশ্লেষণ অনুযায়ী",
     "boq.markup_region.it_price_list_hint": "মূল্য তালিকার দরে সাধারণ ব্যয় ও মুনাফা আগে থেকেই ধরা আছে, তাই শুধু নিরাপত্তা ব্যয় ও ভ্যাট যোগ হয়।",
