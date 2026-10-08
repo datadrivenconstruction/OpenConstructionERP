@@ -239,6 +239,14 @@ def download_enabled() -> bool:
     return raw in _TRUTHY
 
 
+def _install_in_flight() -> bool:
+    """Whether an install holds the lock or its background thread is still starting."""
+    if _lock.locked():
+        return True
+    thread = _thread
+    return thread is not None and thread.is_alive()
+
+
 def hub_fetch_allowed() -> bool:
     """Whether the loader may resolve a bare hub id over the network.
 
@@ -250,6 +258,11 @@ def hub_fetch_allowed() -> bool:
     lazy load, since its operator controls the variable.
     """
     if download_locked_off():
+        return False
+    if _install_in_flight():
+        # The installer is still writing the weights into the models dir. A
+        # bare hub id now starts a second download and load in parallel, which
+        # on Windows has exhausted the paging file (os error 1455).
         return False
     if download_enabled():
         return True

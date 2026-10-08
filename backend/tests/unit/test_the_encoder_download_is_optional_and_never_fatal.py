@@ -741,3 +741,35 @@ def test_the_lock_keeps_the_loader_off_the_hub_as_well(monkeypatch: pytest.Monke
     # Unlocked with a local copy: the copy first, the hub still available.
     monkeypatch.delenv(installer.ENV_DOWNLOAD, raising=False)
     assert vector._candidate_sources(REPO) == [str(local), REPO]
+
+
+def test_the_hub_id_is_withheld_while_the_install_is_in_flight(hub, monkeypatch: pytest.MonkeyPatch) -> None:
+    """A second loader fetching the bare hub id races the installer for memory and disk."""
+    monkeypatch.setenv(installer.ENV_DOWNLOAD, "1")
+    gate = threading.Event()
+    _FakeHub.stall_on = "model.safetensors"
+    _FakeHub.stall_gate = gate
+
+    first = threading.Thread(target=lambda: installer.install_embedding_model(repo_id=REPO), daemon=True)
+    first.start()
+    _await_state(installer.STATE_DOWNLOADING)
+    assert installer.hub_fetch_allowed() is False
+
+    gate.set()
+    first.join(timeout=30)
+    assert installer.hub_fetch_allowed() is True
+
+
+def test_the_hub_id_comes_back_after_a_failed_install(hub, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv(installer.ENV_DOWNLOAD, "1")
+
+    def _boom(*_a: object, **_k: object) -> None:
+        raise OSError("disk full")
+
+    monkeypatch.setattr(installer, "_download_one", _boom)
+    try:
+        installer.install_embedding_model(repo_id=REPO, force=True)
+    except Exception:  # noqa: BLE001, S110 - the outcome under test is the flag, not the error
+        pass
+    assert installer.is_downloading() is False
+    assert installer.hub_fetch_allowed() is True
