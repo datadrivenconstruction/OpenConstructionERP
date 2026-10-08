@@ -4,6 +4,8 @@
 
 from __future__ import annotations
 
+import uuid
+
 import pytest
 from fastapi import HTTPException
 
@@ -75,3 +77,51 @@ async def test_branches_belong_to_their_entity_and_go_with_it(pg_session) -> Non
 
     await service.delete_entity(entity.id)
     assert await service.branches.get(abroad.id) is None
+
+
+async def _project(pg_session):
+    from app.modules.projects.models import Project
+    from app.modules.users.models import User
+
+    owner = User(email=f"le-{uuid.uuid4().hex[:8]}@example.com", hashed_password="x", full_name="LE Owner")
+    pg_session.add(owner)
+    await pg_session.flush()
+    project = Project(name="LE project", owner_id=owner.id)
+    pg_session.add(project)
+    await pg_session.flush()
+    return project
+
+
+async def test_a_project_names_its_entity_or_falls_back_to_the_default(pg_session) -> None:
+    service = LegalEntityService(pg_session)
+    project = await _project(pg_session)
+    assert await service.project_entity(project.id) == (None, "none")
+
+    default = await service.create_entity(_entity("LE-HOME", is_default=True))
+    assert await service.project_entity(project.id) == (default, "default")
+
+    sub = await service.create_entity(_entity("LE-SUB", country_code="PL", functional_currency="PLN"))
+    assert await service.assign_project(project.id, sub.id) == (sub, "assigned")
+    assert project.legal_entity_id == sub.id
+
+    with pytest.raises(HTTPException) as exc:
+        await service.delete_entity(sub.id)
+    assert exc.value.status_code == 409
+
+    assert await service.assign_project(project.id, None) == (default, "default")
+    await service.delete_entity(sub.id)
+
+
+async def test_an_inactive_or_unknown_entity_cannot_take_a_project(pg_session) -> None:
+    service = LegalEntityService(pg_session)
+    project = await _project(pg_session)
+    dormant = await service.create_entity(_entity("LE-DORM", is_active=False))
+    with pytest.raises(HTTPException) as exc:
+        await service.assign_project(project.id, dormant.id)
+    assert exc.value.status_code == 422
+    with pytest.raises(HTTPException) as exc:
+        await service.assign_project(project.id, uuid.uuid4())
+    assert exc.value.status_code == 404
+    with pytest.raises(HTTPException) as exc:
+        await service.project_entity(uuid.uuid4())
+    assert exc.value.status_code == 404

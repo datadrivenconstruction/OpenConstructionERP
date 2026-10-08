@@ -13,6 +13,8 @@ Mounted at ``/api/v1/legal_entities/`` by the module loader.
     POST   /entities/{entity_id}/branches/          add a branch (admin)
     PATCH  /entities/{entity_id}/branches/{id}      update a branch (admin)
     DELETE /entities/{entity_id}/branches/{id}      delete a branch (admin)
+    GET    /projects/{project_id}/entity            the entity owning a project (project access)
+    PUT    /projects/{project_id}/entity            name or clear it (admin + project access)
 """
 
 from __future__ import annotations
@@ -21,8 +23,8 @@ import uuid
 
 from fastapi import APIRouter, Depends, Query, Response, status
 
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep
-from app.modules.legal_entities.models import Branch
+from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.modules.legal_entities.models import Branch, LegalEntity
 from app.modules.legal_entities.schemas import (
     BranchCreate,
     BranchResponse,
@@ -32,6 +34,8 @@ from app.modules.legal_entities.schemas import (
     LegalEntityListResponse,
     LegalEntityResponse,
     LegalEntityUpdate,
+    ProjectEntityAssign,
+    ProjectEntityResponse,
 )
 from app.modules.legal_entities.service import LegalEntityService
 from app.modules.legal_entities.validators import Issue
@@ -134,3 +138,29 @@ async def delete_branch(
 ) -> Response:
     await LegalEntityService(session).delete_branch(entity_id, branch_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+def _project_entity_response(project_id: uuid.UUID, entity: LegalEntity | None, source: str) -> ProjectEntityResponse:
+    return ProjectEntityResponse(
+        project_id=project_id,
+        legal_entity=LegalEntityResponse.model_validate(entity) if entity is not None else None,
+        source=source,
+    )
+
+
+@router.get("/projects/{project_id}/entity", response_model=ProjectEntityResponse)
+async def get_project_entity(
+    project_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId
+) -> ProjectEntityResponse:
+    await verify_project_access(project_id, user_id, session)
+    entity, source = await LegalEntityService(session).project_entity(project_id)
+    return _project_entity_response(project_id, entity, source)
+
+
+@router.put("/projects/{project_id}/entity", response_model=ProjectEntityResponse, dependencies=[_MANAGE])
+async def assign_project_entity(
+    project_id: uuid.UUID, data: ProjectEntityAssign, session: SessionDep, user_id: CurrentUserId
+) -> ProjectEntityResponse:
+    await verify_project_access(project_id, user_id, session)
+    entity, source = await LegalEntityService(session).assign_project(project_id, data.legal_entity_id)
+    return _project_entity_response(project_id, entity, source)
