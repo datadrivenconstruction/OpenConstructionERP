@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "{{module}} töötab ka ilma selleta.",
+    "processes.wizard.heavy_hint_search": "Märksõnaotsing töötab ka ilma selleta.",
+    "processes.wizard.heavy_label": "AI: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Taustateenused: valmistatakse ette {{names}}",
     "processes.notice.preparing": "Valmistatakse ette: {{names}}. Võite tööd jätkata, see märge kaob ise.",

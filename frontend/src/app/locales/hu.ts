@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "A(z) {{module}} enélkül is működik.",
+    "processes.wizard.heavy_hint_search": "A kulcsszavas keresés enélkül is működik.",
+    "processes.wizard.heavy_label": "AI: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Háttérszolgáltatások: előkészítés: {{names}}",
     "processes.notice.preparing": "Előkészítés: {{names}}. Dolgozhat tovább, ez a megjegyzés magától eltűnik.",

@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "{{module}} fungerer også uten.",
+    "processes.wizard.heavy_hint_search": "Nøkkelordsøk fungerer også uten.",
+    "processes.wizard.heavy_label": "KI: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Bakgrunnstjenester: klargjør {{names}}",
     "processes.notice.preparing": "Klargjør {{names}}. Du kan jobbe videre, dette varselet forsvinner av seg selv.",

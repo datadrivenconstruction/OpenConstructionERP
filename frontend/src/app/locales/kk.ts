@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "{{module}} онсыз да жұмыс істейді.",
+    "processes.wizard.heavy_hint_search": "Кілт сөз бойынша іздеу онсыз да жұмыс істейді.",
+    "processes.wizard.heavy_label": "ИИ: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Фондық қызметтер: {{names}} дайындалуда",
     "processes.notice.preparing": "{{names}} дайындалуда. Жұмысты жалғастыра беруге болады, бұл ескерту өздігінен жоғалады.",

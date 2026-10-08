@@ -16,7 +16,16 @@ import { isControllable, isLoading, isUnsupported, ramOf, useEnsureModule, usePr
 import { formatMb, processName, processOffImpact, useIsProcessAdmin } from './labels';
 import { useProcessesUi } from './useProcessesUi';
 
-export function ModuleProcessesNotice({ moduleId, className }: { moduleId: string; className?: string }) {
+export function ModuleProcessesNotice({
+  moduleId,
+  className,
+  exclude = [],
+}: {
+  moduleId: string;
+  className?: string;
+  /** Process ids another notice on the page already speaks for. */
+  exclude?: string[];
+}) {
   const { t } = useTranslation();
   const isAdmin = useIsProcessAdmin();
   useEnsureModule(moduleId);
@@ -26,7 +35,7 @@ export function ModuleProcessesNotice({ moduleId, className }: { moduleId: strin
   const addToast = useToastStore((s) => s.addToast);
 
   const off = (data?.processes ?? []).filter(
-    (p) => p.modules.includes(moduleId) && (!p.enabled || p.status === 'error' || isLoading(p)),
+    (p) => p.modules.includes(moduleId) && !exclude.includes(p.id) && (!p.enabled || p.status === 'error' || isLoading(p)),
   );
   if (off.length === 0 || isUnsupported(error)) return null;
 

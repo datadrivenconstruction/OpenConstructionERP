@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "{{module}} үүнгүйгээр ч ажиллана.",
+    "processes.wizard.heavy_hint_search": "Түлхүүр үгээр хайх нь үүнгүйгээр ч ажиллана.",
+    "processes.wizard.heavy_label": "AI: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Дэвсгэр үйлчилгээ: {{names}} бэлдэж байна",
     "processes.notice.preparing": "{{names}} бэлдэж байна. Ажлаа үргэлжлүүлж болно, энэ тэмдэглэл өөрөө алга болно.",

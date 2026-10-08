@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "{{module}} funcționează și fără el.",
+    "processes.wizard.heavy_hint_search": "Căutarea după cuvinte cheie funcționează și fără el.",
+    "processes.wizard.heavy_label": "AI: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Servicii de fundal: se pregătește {{names}}",
     "processes.notice.preparing": "Se pregătește: {{names}}. Puteți continua să lucrați, această notă dispare singură.",

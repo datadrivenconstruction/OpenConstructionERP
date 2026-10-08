@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "{{module}} usiz ham ishlaydi.",
+    "processes.wizard.heavy_hint_search": "Kalit so'z bo'yicha qidiruv usiz ham ishlaydi.",
+    "processes.wizard.heavy_label": "AI: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Fon xizmatlari: {{names}} tayyorlanmoqda",
     "processes.notice.preparing": "{{names}} tayyorlanmoqda. Ishni davom ettirishingiz mumkin, bu eslatma oʻzi yoʻqoladi.",

@@ -12,6 +12,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "{{module}} funciona sin ella.",
+    "processes.wizard.heavy_hint_search": "La búsqueda por palabras clave funciona sin ella.",
+    "processes.wizard.heavy_label": "IA: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Servicios en segundo plano: preparando {{names}}",
     "processes.notice.preparing": "Preparando {{names}}. Puede seguir trabajando, este aviso desaparecerá solo.",

@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "{{module}} funktioniert auch ohne.",
+    "processes.wizard.heavy_hint_search": "Die Stichwortsuche funktioniert auch ohne.",
+    "processes.wizard.heavy_label": "KI: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Hintergrunddienste: {{names}} wird vorbereitet",
     "processes.notice.preparing": "{{names}} wird vorbereitet. Sie können weiterarbeiten, dieser Hinweis verschwindet von selbst.",

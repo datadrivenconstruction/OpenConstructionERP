@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "{{module}} funguje i bez AI.",
+    "processes.wizard.heavy_hint_search": "Vyhledávání podle klíčových slov funguje i bez AI.",
+    "processes.wizard.heavy_label": "AI: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Služby na pozadí: připravuje se {{names}}",
     "processes.notice.preparing": "Připravuje se: {{names}}. Můžete pracovat dál, toto upozornění zmizí samo.",

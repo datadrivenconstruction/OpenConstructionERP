@@ -62,6 +62,21 @@ export interface ProcessesSnapshot {
 
 export type ProcessAction = 'enable' | 'disable' | 'restart';
 
+/**
+ * The meaning search stack and the matching models. On a fresh install they
+ * follow the semantic search switch in Settings, so a page that already shows
+ * that switch can leave them out of its process banner.
+ */
+export const SEMANTIC_PROCESS_IDS = [
+  'vector_db',
+  'embedding_model',
+  'embedding_model_download',
+  'embedding_pool',
+  'vector_backfill',
+  'cwicr_ranker',
+  'bge_reranker',
+];
+
 export const CATEGORY_ORDER: ProcessCategory[] = ['ai_model', 'vector_index', 'scheduler', 'cache_warmup', 'sync', 'maintenance'];
 
 export const processesKey = ['processes'] as const;

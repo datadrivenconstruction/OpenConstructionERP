@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "没有 AI，{{module}} 也能正常使用。",
+    "processes.wizard.heavy_hint_search": "没有 AI，关键词搜索也能正常使用。",
+    "processes.wizard.heavy_label": "AI：{{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "后台服务:正在准备{{names}}",
     "processes.notice.preparing": "正在准备{{names}}。您可以继续工作,此提示会自动消失。",

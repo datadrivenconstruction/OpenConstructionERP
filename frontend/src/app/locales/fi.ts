@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "{{module}} toimii myös ilman sitä.",
+    "processes.wizard.heavy_hint_search": "Avainsanahaku toimii myös ilman sitä.",
+    "processes.wizard.heavy_label": "Tekoäly: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Taustapalvelut: valmistellaan {{names}}",
     "processes.notice.preparing": "Valmistellaan: {{names}}. Voit jatkaa työskentelyä, tämä ilmoitus poistuu itsestään.",

@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "{{module}} працює і без нього.",
+    "processes.wizard.heavy_hint_search": "Пошук за ключовими словами працює і без нього.",
+    "processes.wizard.heavy_label": "ШІ: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Фонові служби: готуємо {{names}}",
     "processes.notice.preparing": "Готуємо: {{names}}. Можна продовжувати роботу, це повідомлення зникне саме.",

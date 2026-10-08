@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "{{module}} এটি ছাড়াই কাজ করে।",
+    "processes.wizard.heavy_hint_search": "কীওয়ার্ড সার্চ এটি ছাড়াই কাজ করে।",
+    "processes.wizard.heavy_label": "AI: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "ব্যাকগ্রাউন্ড সার্ভিস: {{names}} প্রস্তুত হচ্ছে",
     "processes.notice.preparing": "{{names}} প্রস্তুত হচ্ছে। আপনি কাজ চালিয়ে যেতে পারেন, এই নোট নিজে থেকে মুছে যাবে।",

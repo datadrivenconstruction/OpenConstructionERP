@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "{{module}} פועל גם בלעדיה.",
+    "processes.wizard.heavy_hint_search": "חיפוש לפי מילות מפתח פועל גם בלעדיה.",
+    "processes.wizard.heavy_label": "בינה מלאכותית: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "שירותי רקע: מכינים את {{names}}",
     "processes.notice.preparing": "מכינים את {{names}}. אפשר להמשיך לעבוד, ההודעה תיעלם מעצמה.",

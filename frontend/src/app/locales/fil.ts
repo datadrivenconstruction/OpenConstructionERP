@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "Gumagana ang {{module}} kahit wala ito.",
+    "processes.wizard.heavy_hint_search": "Gumagana ang paghahanap gamit ang keyword kahit wala ito.",
+    "processes.wizard.heavy_label": "AI: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Mga background service: inihahanda ang {{names}}",
     "processes.notice.preparing": "Inihahanda ang {{names}}. Maaari kang magpatuloy sa trabaho, kusang mawawala ang paalalang ito.",

@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.wizard.heavy_hint": "{{module}} работи и без него.",
+    "processes.wizard.heavy_hint_search": "Търсенето по ключови думи работи и без него.",
+    "processes.wizard.heavy_label": "ИИ: {{module}}",
     "processes.wizard.adds": "+{{value}}",
     "processes.header_summary_loading": "Фонови услуги: подготвят се {{names}}",
     "processes.notice.preparing": "Подготвя се: {{names}}. Можете да продължите работа, бележката ще изчезне сама.",
