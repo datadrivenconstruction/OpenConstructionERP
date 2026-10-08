@@ -15,6 +15,7 @@ import { ActivePackChip, CountryFlag, ModuleInfoButton, PartnerLogoBadge } from 
 import { usePartnerPack } from '@/shared/hooks/usePartnerPack';
 import { NotificationBell } from '@/shared/ui/NotificationBell';
 import { LearnTopBarButton } from './LearnTopBarButton';
+import { ProcessesButton, ProcessesPanel, ProcessesWizard } from '@/features/processes';
 import { HeaderNewsButton } from '@/shared/ui/HeaderNewsButton';
 import { ModuleBuilderButton } from '@/features/module-builder';
 import { fetchProjectList } from '@/shared/lib/projectList';
@@ -536,6 +537,11 @@ export function Header({ title, onMenuClick }: HeaderProps) {
         {/* Only while the Learn card is hidden from the menu: its way back,
             at every width. */}
         <LearnTopBarButton />
+        {/* Background services: what the platform keeps loaded, at every
+            width, because it is the way back to a feature that stopped. */}
+        <ProcessesButton />
+        <ProcessesPanel />
+        <ProcessesWizard />
         <NotificationBell />
         <HeaderNewsButton />
         {/* Building a module is something you do from wherever you noticed the

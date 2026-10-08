@@ -68,6 +68,7 @@ import { getUnitsForLocale } from '@/features/boq/boqHelpers';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { compareNames } from '@/shared/lib/collator';
 import { SemanticSearchOffHint, useSemanticSearchOff } from '@/features/settings/SemanticSearchOffHint';
+import { ModuleProcessesNotice } from '@/features/processes';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -1140,6 +1141,8 @@ export function CostsPage() {
 
   return (
     <div className="relative space-y-5 animate-fade-in">
+      {/* Says so when a background service this page leans on is off. */}
+      <ModuleProcessesNotice moduleId="costs" />
       {/* Faint watermark of the active cost-database country (founder ask):
           pick the German base and the page carries the German flag at ~5%. */}
       <CountryFlagBackdrop code={activeRegion} />
