@@ -4,11 +4,15 @@
 
 ``cwicr_ranker`` is the CWICR vector store client plus the BGE-M3 encoder the
 CWICR collections were embedded with; ``bge_reranker`` is the cross-encoder
-that reorders match candidates. Both are lazy: enabled, but loaded only when
-someone opens the costs or match module (``POST /processes/ensure``) or the
-first match request needs them. An admin who disables one stops request paths
-from loading it too, see :func:`matching_model_allowed`. Being lazy they load
-nothing at boot, so ``OE_TEST_FAST_STARTUP`` does not need to lock them off.
+that reorders match candidates. Together they hold about 1.4 GB, so they follow
+the same rule as the semantic stack: on a fresh installation they are off and
+follow the semantic search switch in Settings; an installation that predates
+the processes center keeps them on, as before, with the choice kept in the
+registry's table. Both are lazy, loaded only when someone opens the costs or
+match module (``POST /processes/ensure``) or a match request needs them. When
+one is off, request paths do not load it either, see
+:func:`matching_model_allowed`. Being lazy they load nothing at boot, so
+``OE_TEST_FAST_STARTUP`` does not need to lock them off.
 """
 
 from __future__ import annotations
@@ -37,6 +41,15 @@ def matching_model_allowed(process_id: str) -> bool:
     if process_id not in process_registry.ids():
         return True
     return process_registry.is_enabled(process_id)
+
+
+def disabled_matching_models() -> list[str]:
+    """Ids of the matching models a request may not load right now."""
+    try:
+        return [pid for pid in MATCHING_PROCESS_IDS if not matching_model_allowed(pid)]
+    except Exception:  # a status probe must never break a match
+        logger.debug("Could not read matching model state", exc_info=True)
+        return []
 
 
 async def _load_cwicr() -> None:
@@ -70,15 +83,36 @@ def _unload_reranker() -> None:
     reranker_bge._RERANKER = None
 
 
+DISABLED_MESSAGE = (
+    "The cost-matching model is switched off. Turn on semantic search in Settings, "
+    "or ask an administrator to enable it in the processes center."
+)
+
+
 def register_matching_processes(registry: ProcessRegistry) -> None:
     """Register ``cwicr_ranker`` and ``bge_reranker`` on ``registry``."""
+
+    def state_get() -> bool | None:
+        if not registry.fresh_install:
+            return None
+        from app.core.semantic_switch import semantic_search_enabled
+
+        return semantic_search_enabled()
+
+    def state_set(enabled: bool) -> None:
+        from app.core.semantic_switch import set_semantic_search_enabled
+
+        set_semantic_search_enabled(enabled)
+
     common = {
         "modules": _MODULES,
         "category": "ai_model",
         "start_mode": "lazy",
-        "default_enabled": True,
+        "default_enabled": False,
         "legacy_enabled": True,
         "restart_policy": "never",
+        "state_get": state_get,
+        "state_set": state_set,
     }
     registry.register(
         ProcessSpec(

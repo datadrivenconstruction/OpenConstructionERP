@@ -90,6 +90,8 @@ class ProcessSpec:
         logger_names: Loggers whose records go to this process's log buffer.
         state_get: Reads the desired state from an existing switch instead of
             the registry's table (the semantic-search switch, for example).
+            Returning None hands the decision back to the table and defaults,
+            so a process can follow a switch on some installations only.
         state_set: Writes that switch; required together with ``state_get``.
     """
 
@@ -110,7 +112,7 @@ class ProcessSpec:
     backoff_max_s: float = 300.0
     env_override: Callable[[], bool | None] | None = None
     logger_names: list[str] = field(default_factory=list)
-    state_get: Callable[[], bool] | None = None
+    state_get: Callable[[], bool | None] | None = None
     state_set: Callable[[bool], object] | None = None
 
 
@@ -286,15 +288,23 @@ class ProcessRegistry:
             return env
         if spec.required:
             return True
-        if spec.state_get is not None:
-            try:
-                return bool(spec.state_get())
-            except Exception:
-                logger.warning("state_get of %s failed", spec.id, exc_info=True)
-                return False
+        switch = self._switch_value(entry)
+        if switch is not None:
+            return switch
         if spec.id in self._rows:
             return self._rows[spec.id]
         return spec.default_enabled if self._fresh else spec.legacy_enabled
+
+    def _switch_value(self, entry: _Entry) -> bool | None:
+        """The external switch's answer, or None when the table decides."""
+        if entry.spec.state_get is None:
+            return None
+        try:
+            value = entry.spec.state_get()
+        except Exception:
+            logger.warning("state_get of %s failed", entry.spec.id, exc_info=True)
+            return False
+        return None if value is None else bool(value)
 
     def _resting_status(self, entry: _Entry) -> ProcessStatus:
         return ProcessStatus.IDLE if self._desired(entry) else ProcessStatus.DISABLED
@@ -313,8 +323,13 @@ class ProcessRegistry:
         """Return the current status."""
         return self._get(process_id).status
 
+    @property
+    def fresh_install(self) -> bool:
+        """Whether this installation started with the processes center."""
+        return self._fresh
+
     async def _persist(self, entry: _Entry, enabled: bool, updated_by: str | None) -> None:
-        if entry.spec.state_set is not None:
+        if entry.spec.state_set is not None and self._switch_value(entry) is not None:
             await asyncio.to_thread(entry.spec.state_set, enabled)
         else:
             await self._save(entry.spec.id, enabled, updated_by)
@@ -698,7 +713,7 @@ class ProcessRegistry:
             if self._env(entry) is not None or spec.required or not spec.stoppable:
                 continue
             on = spec.id in wanted
-            if on == self._desired(entry) and (spec.id in self._rows or spec.state_get is not None):
+            if on == self._desired(entry) and (spec.id in self._rows or self._switch_value(entry) is not None):
                 continue
             if on:
                 await self._persist(entry, True, updated_by)

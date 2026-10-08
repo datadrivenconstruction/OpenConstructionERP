@@ -30,10 +30,11 @@ class _Client:
 
 @pytest.fixture
 async def reg(monkeypatch: pytest.MonkeyPatch) -> ProcessRegistry:
+    """An upgraded installation: both models on, choice kept in the table."""
     monkeypatch.delenv("OE_TEST_FAST_STARTUP", raising=False)
     registry = ProcessRegistry(store=InMemoryProcessStore())
     registry.stagger_s = 0
-    await registry.load(fresh_install=lambda: True)
+    await registry.load(fresh_install=lambda: False)
     register_matching_processes(registry)
     monkeypatch.setattr(processes_pkg, "process_registry", registry)
     monkeypatch.setattr(qdrant_adapter, "_client", None)
@@ -70,7 +71,7 @@ async def test_lazy_enabled_and_loaded_on_module_entry(reg: ProcessRegistry, mon
         assert item["start_mode"] == "lazy"
         assert item["modules"] == ["costs", "match"]
         assert item["ram_mb_estimate"] > 0
-        assert reg.status(pid) is ProcessStatus.IDLE  # fresh install: on, not loaded
+        assert reg.status(pid) is ProcessStatus.IDLE  # upgrade: on as before, not loaded
     out = reg.ensure_for_module("match")
     assert sorted(out["queued"]) == ["bge_reranker", "cwicr_ranker"]
     await _until(lambda: all(reg.status(p) is ProcessStatus.RUNNING for p in ("cwicr_ranker", "bge_reranker")))
@@ -133,3 +134,57 @@ async def test_fast_startup_leaves_lazy_models_usable(monkeypatch: pytest.Monkey
     await registry.start_boot()
     assert registry.describe("cwicr_ranker")["env_locked"] is False
     assert registry.status("bge_reranker") is ProcessStatus.IDLE
+
+
+@pytest.fixture
+def semantic_switch(monkeypatch: pytest.MonkeyPatch) -> dict[str, bool]:
+    from app.core import semantic_switch as sw
+
+    state = {"on": False}
+    monkeypatch.setattr(sw, "semantic_search_enabled", lambda: state["on"])
+    monkeypatch.setattr(sw, "set_semantic_search_enabled", lambda v: state.__setitem__("on", bool(v)) or state["on"])
+    return state
+
+
+@pytest.mark.asyncio
+async def test_fresh_install_defaults_off_and_follows_semantic_switch(
+    monkeypatch: pytest.MonkeyPatch, semantic_switch: dict[str, bool]
+) -> None:
+    monkeypatch.delenv("OE_TEST_FAST_STARTUP", raising=False)
+    store = InMemoryProcessStore()
+    registry = ProcessRegistry(store=store)
+    registry.stagger_s = 0
+    await registry.load(fresh_install=lambda: True)
+    register_matching_processes(registry)
+    monkeypatch.setattr(processes_pkg, "process_registry", registry)
+
+    # Fresh install: off, nothing loads on module entry, request paths refuse.
+    for pid in ("cwicr_ranker", "bge_reranker"):
+        assert registry.status(pid) is ProcessStatus.DISABLED
+    out = registry.ensure_for_module("costs")
+    assert out["queued"] == []
+    assert sorted(out["disabled"]) == ["bge_reranker", "cwicr_ranker"]
+    from app.core.processes.matching import disabled_matching_models
+
+    assert disabled_matching_models() == ["cwicr_ranker", "bge_reranker"]
+
+    # Turning semantic search on in Settings turns them on (lazy, not loaded).
+    semantic_switch["on"] = True
+    await registry.reconcile(force=True)
+    assert registry.status("cwicr_ranker") is ProcessStatus.IDLE
+    assert matching_model_allowed("cwicr_ranker") is True
+
+    # Disabling one from the processes center writes the shared switch, not the table.
+    await registry.disable("bge_reranker")
+    assert semantic_switch["on"] is False
+    assert "bge_reranker" not in store.rows
+    await registry.stop_all()
+
+
+@pytest.mark.asyncio
+async def test_upgrade_ignores_semantic_switch(reg: ProcessRegistry, semantic_switch: dict[str, bool]) -> None:
+    assert semantic_switch["on"] is False
+    assert reg.is_enabled("cwicr_ranker") is True
+    await reg.disable("cwicr_ranker")
+    assert reg.store.rows["cwicr_ranker"] is False  # type: ignore[attr-defined]
+    assert semantic_switch["on"] is False
