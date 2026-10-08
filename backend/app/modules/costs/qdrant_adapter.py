@@ -679,6 +679,10 @@ def _get_encoder() -> Any:
         raise RuntimeError(_encoder_missing_message())
     if _encoder is not None:
         return _encoder
+    from app.core.processes.matching import matching_model_allowed
+
+    if not matching_model_allowed("cwicr_ranker"):
+        raise RuntimeError("The CWICR matching model is switched off in Processes. An administrator can turn it on.")
 
     # Serialise concurrent first-load attempts. Under the async server
     # the first /match request fans out across the threadpool; two

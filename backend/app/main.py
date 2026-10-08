@@ -5231,6 +5231,10 @@ def create_app() -> FastAPI:
 
         register_builtin_processes(process_registry, openapi_prime=_prime_openapi_schema, openapi_env=_openapi_env)
 
+        from app.core.processes.matching import register_matching_processes
+
+        register_matching_processes(process_registry)
+
         try:
             await process_registry.load(fresh_install=lambda: bool(getattr(app.state, "database_was_empty", False)))
             # Queued, not awaited: the server answers health checks and logins
