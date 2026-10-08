@@ -125,3 +125,23 @@ async def test_an_inactive_or_unknown_entity_cannot_take_a_project(pg_session) -
     with pytest.raises(HTTPException) as exc:
         await service.project_entity(uuid.uuid4())
     assert exc.value.status_code == 404
+
+
+async def test_an_invoice_is_numbered_under_the_entity_the_project_names(pg_session) -> None:
+    from app.modules.finance.repository import InvoiceRepository
+    from app.modules.legal_entities.lookup import entity_country
+
+    service = LegalEntityService(pg_session)
+    project = await _project(pg_session)
+    numbers = InvoiceRepository(pg_session)
+
+    # The default entity does not stamp a number: a project naming none keeps the plain prefix.
+    await service.create_entity(_entity("LE-DFLT", is_default=True, country_code="AT"))
+    assert await numbers.next_invoice_number(project.id, "receivable") == "INV-R-001"
+    assert await entity_country(pg_session, project.id) == "AT"
+
+    sub = await service.create_entity(_entity("PL01", country_code="PL", functional_currency="PLN"))
+    await service.assign_project(project.id, sub.id)
+    assert await numbers.next_invoice_number(project.id, "receivable") == "PL01-INV-R-001"
+    assert await numbers.next_invoice_number(project.id, "payable") == "PL01-INV-P-001"
+    assert await entity_country(pg_session, project.id) == "PL"
