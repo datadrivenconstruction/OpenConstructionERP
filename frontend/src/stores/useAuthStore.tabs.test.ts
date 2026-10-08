@@ -411,6 +411,32 @@ describe('auth shared by the tabs of one browser', () => {
     // Neither failure touches the session: the caller decides.
     expect(tab.state().isAuthenticated).toBe(true);
   });
+
+  it('treats every shape of a restarting backend as transient, never as a refused token', async () => {
+    const browser = openBrowser();
+    const tab = openTab(browser);
+    tab.state().setTokens(ACCESS_1, REFRESH_1, true, 'a@example.com');
+
+    for (const status of [500, 502, 503, 504]) {
+      fetchMock.mockResolvedValueOnce({ ok: false, status, json: async () => ({}) } as Response);
+      expect(await tab.state().refreshSession()).toEqual({ token: null, reason: 'transient' });
+    }
+    // Connection refused while the process is down.
+    fetchMock.mockRejectedValueOnce(new TypeError('Failed to fetch'));
+    expect(await tab.state().refreshSession()).toEqual({ token: null, reason: 'transient' });
+    // A proxy's HTML page served with 200 while the upstream boots.
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => {
+        throw new SyntaxError('Unexpected token <');
+      },
+    } as unknown as Response);
+    expect(await tab.state().refreshSession()).toEqual({ token: null, reason: 'transient' });
+
+    expect(tab.state().isAuthenticated).toBe(true);
+    expect(browser.local.getItem('oe_refresh_token')).toBe(REFRESH_1);
+  });
 });
 
 describe('remember me choice', () => {
