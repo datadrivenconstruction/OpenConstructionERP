@@ -120,6 +120,7 @@ const resource = {
     "modules.catalog.jobs": "Tâches en arrière-plan",
     "modules.catalog.labor_rates": "Taux de main-d'œuvre et d'équipes",
     "modules.catalog.latam_pack": "Pack régional - Amérique latine",
+    "modules.catalog.legal_entities": "Entités juridiques",
     "modules.catalog.markups": "Annotations & Marquages",
     "modules.catalog.match": "Appariement des éléments",
     "modules.catalog.match_elements": "Correspondance éléments",

@@ -79,6 +79,7 @@ const resource = {
     "modules.catalog.jobs": "Tarefas em background",
     "modules.catalog.labor_rates": "Taxas de Mão de Obra e Equipe",
     "modules.catalog.latam_pack": "Pacote regional - América Latina",
+    "modules.catalog.legal_entities": "Entidades jurídicas",
     "modules.catalog.markups": "Marcações e Anotações",
     "modules.catalog.match": "Correspondência de elementos",
     "modules.catalog.match_elements": "Corresponder Elementos",

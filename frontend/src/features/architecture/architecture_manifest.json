@@ -55678,6 +55678,16 @@
               "default": "None"
             },
             {
+              "name": "subdivision_code",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "release_period",
+              "type": "dict[str, Any] | None",
+              "default": "None"
+            },
+            {
               "name": "has_defaults",
               "type": "bool"
             },
@@ -122874,6 +122884,13 @@
           "request_schema": "I18nFoundationService"
         },
         {
+          "method": "POST",
+          "path": "/tax-configs/{config_id}/confirm",
+          "handler": "confirm_tax_config",
+          "response_model": "TaxConfigResponse",
+          "request_schema": "TaxConfigConfirm"
+        },
+        {
           "method": "PATCH",
           "path": "/tax-configs/{config_id}",
           "handler": "update_tax_config",
@@ -123270,6 +123287,23 @@
             {
               "name": "total",
               "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "TaxConfigConfirm",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A local specialist's confirmation of one tax row, recorded by an admin.\n\n``accountant_name`` is who confirmed it, usually the client's accountant,\nand ``source_reference`` the official publication they checked it against.\nBoth are required: a confirmation that cannot say who or against what is\nnot one.",
+          "fields": [
+            {
+              "name": "accountant_name",
+              "type": "str"
+            },
+            {
+              "name": "source_reference",
+              "type": "str"
             }
           ]
         },
@@ -127347,6 +127381,552 @@
         }
       ],
       "schemas": [],
+      "import_dependencies": []
+    },
+    {
+      "module_id": "legal_entities",
+      "module_label": "Legal Entities",
+      "module_category": "core",
+      "files": [
+        "__init__.py",
+        "manifest.py",
+        "models.py",
+        "permissions.py",
+        "repository.py",
+        "router.py",
+        "schemas.py",
+        "service.py",
+        "validators.py"
+      ],
+      "manifest": {
+        "name": "oe_legal_entities",
+        "version": "0.1.0",
+        "display_name": "Legal Entities",
+        "description": "Companies of the group and their branches, each with its country and functional currency",
+        "author": "OpenConstructionERP Core Team",
+        "category": "core",
+        "depends": [],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [
+        {
+          "class_name": "LegalEntity",
+          "tablename": "oe_legal_entities_entity",
+          "docstring": "A company of the group, with the country and currency its books follow.",
+          "columns": [
+            {
+              "name": "code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "country_code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "subdivision_code",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "functional_currency",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "registration_number",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "tax_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "is_default",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "is_active",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "metadata_",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": [
+            {
+              "name": "branches",
+              "type": "one-to-many",
+              "annotation": "Mapped[list[Branch]]",
+              "back_populates": "legal_entity"
+            }
+          ]
+        },
+        {
+          "class_name": "Branch",
+          "tablename": "oe_legal_entities_branch",
+          "docstring": "An establishment of one legal entity: a regional office, a site office, a foreign branch.",
+          "columns": [
+            {
+              "name": "legal_entity_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_legal_entities_entity.id"
+            },
+            {
+              "name": "code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "country_code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "subdivision_code",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "is_active",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            }
+          ],
+          "relationships": [
+            {
+              "name": "legal_entity",
+              "type": "many-to-one",
+              "annotation": "Mapped[LegalEntity]",
+              "target_model": "LegalEntity",
+              "back_populates": "branches"
+            }
+          ]
+        }
+      ],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/entities/",
+          "handler": "list_entities",
+          "response_model": "LegalEntityListResponse"
+        },
+        {
+          "method": "GET",
+          "path": "/entities/default",
+          "handler": "get_default_entity",
+          "response_model": "LegalEntityResponse | None"
+        },
+        {
+          "method": "POST",
+          "path": "/entities/",
+          "handler": "create_entity",
+          "response_model": "LegalEntityResponse",
+          "request_schema": "LegalEntityCreate"
+        },
+        {
+          "method": "GET",
+          "path": "/entities/{entity_id}",
+          "handler": "get_entity",
+          "response_model": "LegalEntityResponse"
+        },
+        {
+          "method": "PATCH",
+          "path": "/entities/{entity_id}",
+          "handler": "update_entity",
+          "response_model": "LegalEntityResponse",
+          "request_schema": "LegalEntityUpdate"
+        },
+        {
+          "method": "DELETE",
+          "path": "/entities/{entity_id}",
+          "handler": "delete_entity"
+        },
+        {
+          "method": "POST",
+          "path": "/entities/{entity_id}/branches/",
+          "handler": "create_branch",
+          "response_model": "BranchResponse",
+          "request_schema": "BranchCreate"
+        },
+        {
+          "method": "PATCH",
+          "path": "/entities/{entity_id}/branches/{branch_id}",
+          "handler": "update_branch",
+          "response_model": "BranchResponse",
+          "request_schema": "BranchUpdate"
+        },
+        {
+          "method": "DELETE",
+          "path": "/entities/{entity_id}/branches/{branch_id}",
+          "handler": "delete_branch"
+        }
+      ],
+      "schemas": [
+        {
+          "class_name": "_CodesMixin",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": []
+        },
+        {
+          "class_name": "LegalEntityCreate",
+          "bases": [
+            "_CodesMixin"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "country_code",
+              "type": "str"
+            },
+            {
+              "name": "subdivision_code",
+              "type": "str | None"
+            },
+            {
+              "name": "functional_currency",
+              "type": "str"
+            },
+            {
+              "name": "registration_number",
+              "type": "str | None"
+            },
+            {
+              "name": "tax_id",
+              "type": "str | None"
+            },
+            {
+              "name": "is_default",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "is_active",
+              "type": "bool",
+              "default": "True"
+            },
+            {
+              "name": "metadata",
+              "type": "dict[str, Any]"
+            }
+          ]
+        },
+        {
+          "class_name": "LegalEntityUpdate",
+          "bases": [
+            "_CodesMixin"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str | None"
+            },
+            {
+              "name": "name",
+              "type": "str | None"
+            },
+            {
+              "name": "country_code",
+              "type": "str | None"
+            },
+            {
+              "name": "subdivision_code",
+              "type": "str | None"
+            },
+            {
+              "name": "functional_currency",
+              "type": "str | None"
+            },
+            {
+              "name": "registration_number",
+              "type": "str | None"
+            },
+            {
+              "name": "tax_id",
+              "type": "str | None"
+            },
+            {
+              "name": "is_default",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "is_active",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "metadata",
+              "type": "dict[str, Any] | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "BranchCreate",
+          "bases": [
+            "_CodesMixin"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "country_code",
+              "type": "str | None"
+            },
+            {
+              "name": "subdivision_code",
+              "type": "str | None"
+            },
+            {
+              "name": "is_active",
+              "type": "bool",
+              "default": "True"
+            }
+          ]
+        },
+        {
+          "class_name": "BranchUpdate",
+          "bases": [
+            "_CodesMixin"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str | None"
+            },
+            {
+              "name": "name",
+              "type": "str | None"
+            },
+            {
+              "name": "country_code",
+              "type": "str | None"
+            },
+            {
+              "name": "subdivision_code",
+              "type": "str | None"
+            },
+            {
+              "name": "is_active",
+              "type": "bool | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "IssueResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "rule_id",
+              "type": "str"
+            },
+            {
+              "name": "severity",
+              "type": "str"
+            },
+            {
+              "name": "field",
+              "type": "str"
+            },
+            {
+              "name": "message",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "BranchResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "legal_entity_id",
+              "type": "UUID"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "country_code",
+              "type": "str"
+            },
+            {
+              "name": "subdivision_code",
+              "type": "str | None"
+            },
+            {
+              "name": "is_active",
+              "type": "bool"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime"
+            },
+            {
+              "name": "updated_at",
+              "type": "datetime"
+            },
+            {
+              "name": "warnings",
+              "type": "list[IssueResponse]"
+            }
+          ]
+        },
+        {
+          "class_name": "LegalEntityResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "country_code",
+              "type": "str"
+            },
+            {
+              "name": "subdivision_code",
+              "type": "str | None"
+            },
+            {
+              "name": "functional_currency",
+              "type": "str"
+            },
+            {
+              "name": "registration_number",
+              "type": "str | None"
+            },
+            {
+              "name": "tax_id",
+              "type": "str | None"
+            },
+            {
+              "name": "is_default",
+              "type": "bool"
+            },
+            {
+              "name": "is_active",
+              "type": "bool"
+            },
+            {
+              "name": "metadata",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "branches",
+              "type": "list[BranchResponse]"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime"
+            },
+            {
+              "name": "updated_at",
+              "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "LegalEntityListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[LegalEntityResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            }
+          ]
+        }
+      ],
       "import_dependencies": []
     },
     {
@@ -235967,10 +236547,10 @@
     },
     {
       "name": "tax-rates",
-      "ts_files": 7,
+      "ts_files": 8,
       "css_files": 0,
       "test_files": 2,
-      "total_files": 7
+      "total_files": 8
     },
     {
       "name": "tax-withholding",
@@ -236812,6 +237392,7 @@
       "users"
     ],
     "latam_pack": [],
+    "legal_entities": [],
     "markups": [
       "documents",
       "file_versions",
@@ -237386,16 +237967,16 @@
     ]
   },
   "statistics": {
-    "backend_modules": 196,
-    "modules_with_manifests": 194,
-    "total_models": 623,
-    "total_columns": 7155,
-    "total_relationships": 234,
-    "total_routes": 3757,
-    "total_schemas": 3564,
-    "total_python_files": 2293,
+    "backend_modules": 197,
+    "modules_with_manifests": 195,
+    "total_models": 625,
+    "total_columns": 7171,
+    "total_relationships": 236,
+    "total_routes": 3767,
+    "total_schemas": 3574,
+    "total_python_files": 2302,
     "frontend_features": 192,
-    "frontend_ts_files": 2994,
+    "frontend_ts_files": 2995,
     "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {

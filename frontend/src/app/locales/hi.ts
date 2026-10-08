@@ -122,6 +122,7 @@ const resource = {
     "modules.catalog.jobs": "बैकग्राउंड जॉब्स",
     "modules.catalog.labor_rates": "श्रम और दल दरें",
     "modules.catalog.latam_pack": "क्षेत्रीय पैक - लैटिन अमेरिका",
+    "modules.catalog.legal_entities": "विधिक संस्थाएँ",
     "modules.catalog.markups": "मार्कअप और एनोटेशन",
     "modules.catalog.match": "एलिमेंट मिलान",
     "modules.catalog.match_elements": "तत्व मिलाएं",

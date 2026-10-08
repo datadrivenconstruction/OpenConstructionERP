@@ -120,6 +120,7 @@ const resource = {
     "modules.catalog.jobs": "Job in background",
     "modules.catalog.labor_rates": "Tariffe Manodopera e Squadre",
     "modules.catalog.latam_pack": "Pacchetto regionale - America Latina",
+    "modules.catalog.legal_entities": "Entità giuridiche",
     "modules.catalog.markups": "Annotazioni e Marcature",
     "modules.catalog.match": "Abbinamento elementi",
     "modules.catalog.match_elements": "Abbina elementi",

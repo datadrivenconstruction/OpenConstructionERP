@@ -122,6 +122,7 @@ const resource = {
     "modules.catalog.jobs": "وظایف پس‌زمینه",
     "modules.catalog.labor_rates": "نرخ نیروی کار و گروه کاری",
     "modules.catalog.latam_pack": "بسته منطقه‌ای - آمریکای لاتین",
+    "modules.catalog.legal_entities": "اشخاص حقوقی",
     "modules.catalog.markups": "علامت‌گذاری‌ها و حاشیه‌نویسی‌ها",
     "modules.catalog.match": "تطبیق اجزا",
     "modules.catalog.match_elements": "تطبیق CAD-BIM ← هزینه",

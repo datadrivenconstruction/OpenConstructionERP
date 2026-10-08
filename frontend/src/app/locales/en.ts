@@ -123,6 +123,7 @@ const resource = {
     "modules.catalog.jobs": "Background Jobs",
     "modules.catalog.labor_rates": "Labor & Crew Rates",
     "modules.catalog.latam_pack": "Regional Pack - Latin America",
+    "modules.catalog.legal_entities": "Legal Entities",
     "modules.catalog.markups": "Markups & Annotations",
     "modules.catalog.match": "Element Match",
     "modules.catalog.match_elements": "CAD-BIM Match → Cost",

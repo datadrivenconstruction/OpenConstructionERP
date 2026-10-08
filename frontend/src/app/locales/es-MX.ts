@@ -79,6 +79,7 @@ const resource = {
     "modules.catalog.jobs": "Tareas en segundo plano",
     "modules.catalog.labor_rates": "Tarifas de Mano de Obra y Equipo",
     "modules.catalog.latam_pack": "Paquete regional - América Latina",
+    "modules.catalog.legal_entities": "Entidades legales",
     "modules.catalog.markups": "Marcas y Anotaciones",
     "modules.catalog.match": "Coincidencia de elementos",
     "modules.catalog.match_elements": "Cotejar elementos",

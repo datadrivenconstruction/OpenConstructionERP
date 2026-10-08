@@ -122,6 +122,7 @@ const resource = {
     "modules.catalog.jobs": "Арын ажил",
     "modules.catalog.labor_rates": "Хөдөлмөр ба багийн үнэ",
     "modules.catalog.latam_pack": "Бүсийн багц - Латин Америк",
+    "modules.catalog.legal_entities": "Хуулийн этгээдүүд",
     "modules.catalog.markups": "Тэмдэглэгээ ба тайлбар",
     "modules.catalog.match": "Элемент тааруулах",
     "modules.catalog.match_elements": "Элементүүдийг тааруулах",

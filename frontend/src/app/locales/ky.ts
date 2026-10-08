@@ -120,6 +120,7 @@ const resource = {
     "modules.catalog.jobs": "Фондук тапшырмалар",
     "modules.catalog.labor_rates": "Жумушчу күч жана бригаданын тарифтери",
     "modules.catalog.latam_pack": "Аймактык пакет - Латын Америкасы",
+    "modules.catalog.legal_entities": "Юридикалык жактар",
     "modules.catalog.markups": "Белгилер жана аннотациялар",
     "modules.catalog.match": "Элемент дал келтирүү",
     "modules.catalog.match_elements": "CAD-BIM Дал келтирүү → Баа",

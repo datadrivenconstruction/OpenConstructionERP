@@ -122,6 +122,7 @@ const resource = {
     "modules.catalog.jobs": "Công việc nền",
     "modules.catalog.labor_rates": "Tỷ lệ Lao động & Đội",
     "modules.catalog.latam_pack": "Gói khu vực - Mỹ Latinh",
+    "modules.catalog.legal_entities": "Pháp nhân",
     "modules.catalog.markups": "Chú thích & Ghi chú",
     "modules.catalog.match": "Khớp phần tử",
     "modules.catalog.match_elements": "Khớp phần tử",

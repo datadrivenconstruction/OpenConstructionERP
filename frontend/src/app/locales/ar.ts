@@ -122,6 +122,7 @@ const resource = {
     "modules.catalog.jobs": "المهام الخلفية",
     "modules.catalog.labor_rates": "أسعار العمالة والطواقم",
     "modules.catalog.latam_pack": "حزمة إقليمية - أمريكا اللاتينية",
+    "modules.catalog.legal_entities": "الكيانات القانونية",
     "modules.catalog.markups": "العلامات والتعليقات التوضيحية",
     "modules.catalog.match": "مطابقة العناصر",
     "modules.catalog.match_elements": "مطابقة العناصر",

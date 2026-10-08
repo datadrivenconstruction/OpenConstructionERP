@@ -120,6 +120,7 @@ const resource = {
     "modules.catalog.jobs": "Arka Plan İşleri",
     "modules.catalog.labor_rates": "İşçilik ve Ekip Maliyetleri",
     "modules.catalog.latam_pack": "Bölgesel paket - Latin Amerika",
+    "modules.catalog.legal_entities": "Tüzel Kişiler",
     "modules.catalog.markups": "İşaretlemeler ve Açıklamalar",
     "modules.catalog.match": "Eleman Eşleştirme",
     "modules.catalog.match_elements": "Eleman Eşleştir",

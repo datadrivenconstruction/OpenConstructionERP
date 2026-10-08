@@ -122,6 +122,7 @@ const resource = {
     "modules.catalog.jobs": "백그라운드 작업",
     "modules.catalog.labor_rates": "노동 및 팀 요율",
     "modules.catalog.latam_pack": "지역 팩 - 라틴아메리카",
+    "modules.catalog.legal_entities": "법인",
     "modules.catalog.markups": "마크업 및 주석",
     "modules.catalog.match": "요소 매칭",
     "modules.catalog.match_elements": "요소 매칭",

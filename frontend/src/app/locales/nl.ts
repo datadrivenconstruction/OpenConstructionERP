@@ -120,6 +120,7 @@ const resource = {
     "modules.catalog.jobs": "Achtergrondtaken",
     "modules.catalog.labor_rates": "Arbeids- & Ploegtarieven",
     "modules.catalog.latam_pack": "Regionaal pakket - Latijns-Amerika",
+    "modules.catalog.legal_entities": "Rechtspersonen",
     "modules.catalog.markups": "Markeringen & Annotaties",
     "modules.catalog.match": "Element-matching",
     "modules.catalog.match_elements": "Elementen koppelen",

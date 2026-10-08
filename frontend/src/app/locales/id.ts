@@ -122,6 +122,7 @@ const resource = {
     "modules.catalog.jobs": "Tugas latar belakang",
     "modules.catalog.labor_rates": "Tarif Tenaga Kerja & Kru",
     "modules.catalog.latam_pack": "Paket regional - Amerika Latin",
+    "modules.catalog.legal_entities": "Badan Hukum",
     "modules.catalog.markups": "Markup & Anotasi",
     "modules.catalog.match": "Pencocokan elemen",
     "modules.catalog.match_elements": "Cocokkan Elemen",

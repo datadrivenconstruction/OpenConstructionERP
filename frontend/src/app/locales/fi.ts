@@ -120,6 +120,7 @@ const resource = {
     "modules.catalog.jobs": "Taustatyöt",
     "modules.catalog.labor_rates": "Työ- ja miehistöhinnat",
     "modules.catalog.latam_pack": "Alueellinen paketti - Latinalainen Amerikka",
+    "modules.catalog.legal_entities": "Oikeushenkilöt",
     "modules.catalog.markups": "Merkinnät ja huomautukset",
     "modules.catalog.match": "Elementtisovitus",
     "modules.catalog.match_elements": "Yhdistä elementit",

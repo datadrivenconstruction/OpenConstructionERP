@@ -122,6 +122,7 @@ const resource = {
     "modules.catalog.jobs": "پس منظر ٹاسکس",
     "modules.catalog.labor_rates": "لیبر اور کریو ریٹس",
     "modules.catalog.latam_pack": "علاقائی پیک - لاطینی امریکہ",
+    "modules.catalog.legal_entities": "قانونی ادارے",
     "modules.catalog.markups": "Markups اور Annotations",
     "modules.catalog.match": "ایلیمنٹ میل",
     "modules.catalog.match_elements": "CAD-BIM میچ → لاگت",

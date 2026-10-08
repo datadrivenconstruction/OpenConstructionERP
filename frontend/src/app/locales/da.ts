@@ -120,6 +120,7 @@ const resource = {
     "modules.catalog.jobs": "Baggrundsjob",
     "modules.catalog.labor_rates": "Arbejds- & Mandskabstal",
     "modules.catalog.latam_pack": "Regional pakke - Latinamerika",
+    "modules.catalog.legal_entities": "Juridiske enheder",
     "modules.catalog.markups": "Markeringer & Annotering",
     "modules.catalog.match": "Elementmatching",
     "modules.catalog.match_elements": "Match elementer",

@@ -120,6 +120,7 @@ const resource = {
     "modules.catalog.jobs": "Pozadinski poslovi",
     "modules.catalog.labor_rates": "Cijene rada i posade",
     "modules.catalog.latam_pack": "Regionalni paket - Latinska Amerika",
+    "modules.catalog.legal_entities": "Pravne osobe",
     "modules.catalog.markups": "Oznake i napomene",
     "modules.catalog.match": "Sparivanje elemenata",
     "modules.catalog.match_elements": "Uskladi elemente",

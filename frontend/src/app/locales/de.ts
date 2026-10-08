@@ -120,6 +120,7 @@ const resource = {
     "modules.catalog.jobs": "Hintergrundaufgaben",
     "modules.catalog.labor_rates": "Lohn- und Teamraten",
     "modules.catalog.latam_pack": "Regionalpaket - Lateinamerika",
+    "modules.catalog.legal_entities": "Rechtseinheiten",
     "modules.catalog.markups": "Markierungen & Anmerkungen",
     "modules.catalog.match": "Element-Zuordnung",
     "modules.catalog.match_elements": "Elemente abgleichen",

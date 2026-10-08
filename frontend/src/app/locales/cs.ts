@@ -120,6 +120,7 @@ const resource = {
     "modules.catalog.jobs": "Úlohy na pozadí",
     "modules.catalog.labor_rates": "Sazby práce a posádek",
     "modules.catalog.latam_pack": "Regionální balíček - Latinská Amerika",
+    "modules.catalog.legal_entities": "Právnické osoby",
     "modules.catalog.markups": "Poznámky a anotace",
     "modules.catalog.match": "Párování prvků",
     "modules.catalog.match_elements": "Párování prvků",

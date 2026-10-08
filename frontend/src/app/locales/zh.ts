@@ -122,6 +122,7 @@ const resource = {
     "modules.catalog.jobs": "后台任务",
     "modules.catalog.labor_rates": "人工与团队费率",
     "modules.catalog.latam_pack": "区域包 - 拉丁美洲",
+    "modules.catalog.legal_entities": "法人实体",
     "modules.catalog.markups": "标注与批注",
     "modules.catalog.match": "构件匹配",
     "modules.catalog.match_elements": "匹配构件",

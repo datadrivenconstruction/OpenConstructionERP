@@ -120,6 +120,7 @@ const resource = {
     "modules.catalog.jobs": "Taustülesanded",
     "modules.catalog.labor_rates": "Tööjõu- ja brigaadihinnad",
     "modules.catalog.latam_pack": "Piirkondlik pakett - Ladina-Ameerika",
+    "modules.catalog.legal_entities": "Juriidilised isikud",
     "modules.catalog.markups": "Märgistused ja annotatsioonid",
     "modules.catalog.match": "Elementide sobitamine",
     "modules.catalog.match_elements": "CAD-BIM sobitus → kulu",

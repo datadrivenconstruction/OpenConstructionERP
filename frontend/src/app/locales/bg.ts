@@ -120,6 +120,7 @@ const resource = {
     "modules.catalog.jobs": "Фонови задачи",
     "modules.catalog.labor_rates": "Ставки за труд и екипи",
     "modules.catalog.latam_pack": "Регионален пакет - Латинска Америка",
+    "modules.catalog.legal_entities": "Юридически лица",
     "modules.catalog.markups": "Маркировки и анотации",
     "modules.catalog.match": "Съпоставка на елементи",
     "modules.catalog.match_elements": "Съпоставяне на елементи",

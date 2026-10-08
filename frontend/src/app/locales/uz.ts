@@ -43143,6 +43143,7 @@ const resource = {
     "modules.catalog.india_pack": "Mintaqaviy paket - Hindiston",
     "modules.catalog.inspections": "Sifat tekshiruvlari",
     "modules.catalog.latam_pack": "Mintaqaviy paket - Lotin Amerikasi",
+    "modules.catalog.legal_entities": "Yuridik shaxslar",
     "modules.catalog.mexico_pack": "Mintaqaviy paket - Meksika",
     "modules.catalog.middle_east_pack": "Mintaqaviy paket - Yaqin Sharq va GCC",
     "modules.catalog.onboarding": "Boshlangʻich sozlash",

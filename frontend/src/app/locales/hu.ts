@@ -120,6 +120,7 @@ const resource = {
     "modules.catalog.jobs": "Háttérfolyamatok",
     "modules.catalog.labor_rates": "Munkaerő- és brigáddíjak",
     "modules.catalog.latam_pack": "Regionális csomag - Latin-Amerika",
+    "modules.catalog.legal_entities": "Jogi személyek",
     "modules.catalog.markups": "Jelölések és megjegyzések",
     "modules.catalog.match": "Elempárosítás",
     "modules.catalog.match_elements": "CAD-BIM párosítás → költség",

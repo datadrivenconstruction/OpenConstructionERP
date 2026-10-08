@@ -122,6 +122,7 @@ const resource = {
     "modules.catalog.jobs": "バックグラウンドジョブ",
     "modules.catalog.labor_rates": "労務費とクルー単価",
     "modules.catalog.latam_pack": "地域パック - ラテンアメリカ",
+    "modules.catalog.legal_entities": "法人",
     "modules.catalog.markups": "マークアップと注釈",
     "modules.catalog.match": "要素マッチング",
     "modules.catalog.match_elements": "要素照合",

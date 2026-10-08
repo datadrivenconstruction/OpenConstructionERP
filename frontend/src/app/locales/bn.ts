@@ -122,6 +122,7 @@ const resource = {
     "modules.catalog.jobs": "ব্যাকগ্রাউন্ড জব",
     "modules.catalog.labor_rates": "শ্রম ও ক্রু রেট",
     "modules.catalog.latam_pack": "আঞ্চলিক প্যাক - লাতিন আমেরিকা",
+    "modules.catalog.legal_entities": "আইনি সত্তা",
     "modules.catalog.markups": "মার্কআপ ও অ্যানোটেশন",
     "modules.catalog.match": "উপাদান মিল",
     "modules.catalog.match_elements": "CAD-BIM ম্যাচ → কস্ট",

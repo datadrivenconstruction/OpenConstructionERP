@@ -120,6 +120,7 @@ const resource = {
     "modules.catalog.jobs": "Фондық Тапсырмалар",
     "modules.catalog.labor_rates": "Еңбек пен бригада мөлшерлемелері",
     "modules.catalog.latam_pack": "Аймақтық пакет - Латын Америкасы",
+    "modules.catalog.legal_entities": "Заңды тұлғалар",
     "modules.catalog.markups": "Белгілер мен Түсіндірмелер",
     "modules.catalog.match": "Элементтерді Сәйкестендіру",
     "modules.catalog.match_elements": "CAD-BIM Сәйкестендіру → Шығын",

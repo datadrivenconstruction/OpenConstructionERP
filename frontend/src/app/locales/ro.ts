@@ -120,6 +120,7 @@ const resource = {
     "modules.catalog.jobs": "Sarcini de fundal",
     "modules.catalog.labor_rates": "Tarife Muncă și Echipă",
     "modules.catalog.latam_pack": "Pachet regional - America Latină",
+    "modules.catalog.legal_entities": "Entități juridice",
     "modules.catalog.markups": "Marcaje și Adnotări",
     "modules.catalog.match": "Corespondență elemente",
     "modules.catalog.match_elements": "Potrivire elemente",

@@ -122,6 +122,7 @@ const resource = {
     "modules.catalog.jobs": "งานเบื้องหลัง",
     "modules.catalog.labor_rates": "อัตราค่าแรงและค่าแรงทีม",
     "modules.catalog.latam_pack": "แพ็กภูมิภาค - ลาตินอเมริกา",
+    "modules.catalog.legal_entities": "นิติบุคคล",
     "modules.catalog.markups": "เครื่องหมายและคำอธิบายประกอบ",
     "modules.catalog.match": "จับคู่องค์ประกอบ",
     "modules.catalog.match_elements": "จับคู่องค์ประกอบ",

@@ -122,6 +122,7 @@ const resource = {
     "modules.catalog.jobs": "משימות רקע",
     "modules.catalog.labor_rates": "תעריפי עבודה וצוותים",
     "modules.catalog.latam_pack": "חבילה אזורית - אמריקה הלטינית",
+    "modules.catalog.legal_entities": "ישויות משפטיות",
     "modules.catalog.markups": "סימונים והערות",
     "modules.catalog.match": "התאמת אלמנטים",
     "modules.catalog.match_elements": "התאמת CAD-BIM → עלות",

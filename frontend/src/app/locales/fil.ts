@@ -122,6 +122,7 @@ const resource = {
     "modules.catalog.jobs": "Mga Gawain sa Likod",
     "modules.catalog.labor_rates": "Rate ng Paggawa at Crew",
     "modules.catalog.latam_pack": "Rehiyonal na pack - Latin Amerika",
+    "modules.catalog.legal_entities": "Mga Legal na Entidad",
     "modules.catalog.markups": "Mga Markup at Annotation",
     "modules.catalog.match": "Tugma ng Elemento",
     "modules.catalog.match_elements": "CAD-BIM Tugma → Gastos",

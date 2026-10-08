@@ -44044,6 +44044,7 @@ const resource = {
     "modules.catalog.india_pack": "Регіональний пакет - Індія",
     "modules.catalog.inspections": "Інспекції якості",
     "modules.catalog.latam_pack": "Регіональний пакет - Латинська Америка",
+    "modules.catalog.legal_entities": "Юридичні особи",
     "modules.catalog.mexico_pack": "Регіональний пакет - Мексика",
     "modules.catalog.middle_east_pack": "Регіональний пакет - Близький Схід і країни Перської затоки (GCC)",
     "modules.catalog.onboarding": "Введення в роботу",

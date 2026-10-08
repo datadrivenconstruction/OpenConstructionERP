@@ -120,6 +120,7 @@ const resource = {
     "modules.catalog.jobs": "Zadania w tle",
     "modules.catalog.labor_rates": "Stawki robocizny i ekip",
     "modules.catalog.latam_pack": "Pakiet regionalny - Ameryka Łacińska",
+    "modules.catalog.legal_entities": "Podmioty prawne",
     "modules.catalog.markups": "Adnotacje i oznaczenia",
     "modules.catalog.match": "Dopasowanie elementów",
     "modules.catalog.match_elements": "Dopasuj elementy",

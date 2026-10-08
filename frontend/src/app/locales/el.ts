@@ -120,6 +120,7 @@ const resource = {
     "modules.catalog.jobs": "Εργασίες Παρασκηνίου",
     "modules.catalog.labor_rates": "Τιμές Εργατικού Δυναμικού & Συνεργείων",
     "modules.catalog.latam_pack": "Περιφερειακό πακέτο - Λατινική Αμερική",
+    "modules.catalog.legal_entities": "Νομικές οντότητες",
     "modules.catalog.markups": "Σχολιασμοί & Επισημάνσεις",
     "modules.catalog.match": "Αντιστοίχιση Στοιχείων",
     "modules.catalog.match_elements": "CAD-BIM Match → Κόστος",
