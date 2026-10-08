@@ -30,7 +30,7 @@ import {
   type PriceListProgress,
 } from './regionalPriceListApi';
 
-const ACCEPT = '.xml,.xpwe,.csv,.xlsx,.json,.zip,.txt';
+const ACCEPT = '.xml,.xpwe,.pwe,.csv,.xlsx,.json,.zip,.txt';
 
 function useErrorText() {
   const { t } = useTranslation();
