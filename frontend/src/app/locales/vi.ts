@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "Dịch vụ nền: đang chuẩn bị {{names}}",
+    "processes.notice.preparing": "Đang chuẩn bị {{names}}. Bạn cứ tiếp tục làm việc, ghi chú này sẽ tự biến mất.",
+    "processes.status.queued": "Đang chờ tải",
     "processes.action_failed": "Không thể thay đổi {{name}}",
     "processes.ai_agent_scheduler.name": "Bộ lập lịch tác nhân AI",
     "processes.ai_agent_scheduler.off_impact": "Các tác nhân theo lịch sẽ không chạy. Bạn vẫn có thể khởi động chúng thủ công.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "Hãy nhờ quản trị viên bật lên.",
     "processes.notice.more": "Đây là gì?",
     "processes.notice.needs": "Tính năng này cần {{names}}. Hiện đang tắt.",
-    "processes.notice.starting": "{{names}} đang khởi động. Trang này sẽ tự cập nhật.",
     "processes.notice.turn_on": "Bật (dùng khoảng {{value}})",
     "processes.notification_worker.name": "Gửi thông báo",
     "processes.notification_worker.off_impact": "Bản tóm tắt và email thông báo không được gửi.",

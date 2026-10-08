@@ -12,24 +12,25 @@ import { AlertTriangle, Loader2, Power } from 'lucide-react';
 
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
-import { isControllable, isUnsupported, ramOf, useProcessAction, useProcesses } from './api';
+import { isControllable, isLoading, isUnsupported, ramOf, useEnsureModule, useProcessAction, useProcesses } from './api';
 import { formatMb, processName, processOffImpact, useIsProcessAdmin } from './labels';
 import { useProcessesUi } from './useProcessesUi';
 
 export function ModuleProcessesNotice({ moduleId, className }: { moduleId: string; className?: string }) {
   const { t } = useTranslation();
   const isAdmin = useIsProcessAdmin();
+  useEnsureModule(moduleId);
   const { data, error } = useProcesses();
   const action = useProcessAction();
   const openPanel = useProcessesUi((s) => s.openPanel);
   const addToast = useToastStore((s) => s.addToast);
 
   const off = (data?.processes ?? []).filter(
-    (p) => p.modules.includes(moduleId) && (!p.enabled || p.status === 'error' || p.status === 'starting'),
+    (p) => p.modules.includes(moduleId) && (!p.enabled || p.status === 'error' || isLoading(p)),
   );
   if (off.length === 0 || isUnsupported(error)) return null;
 
-  const starting = off.every((p) => p.enabled && p.status === 'starting');
+  const starting = off.every((p) => p.enabled && isLoading(p));
   const names = off.map((p) => processName(t, p)).join(', ');
   const mb = off.reduce((s, p) => s + ramOf(p), 0);
 
@@ -54,21 +55,27 @@ export function ModuleProcessesNotice({ moduleId, className }: { moduleId: strin
     <div
       role="status"
       data-testid={`module-processes-notice-${moduleId}`}
+      data-state={starting ? 'preparing' : 'off'}
       className={
-        'flex flex-col gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm sm:flex-row sm:items-center ' +
+        (starting
+          ? 'flex items-center gap-2 rounded-xl border border-sky-500/25 bg-sky-500/5 px-3 py-2 text-xs '
+          : 'flex flex-col gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm sm:flex-row sm:items-center ') +
         (className ?? '')
       }
     >
       <div className="flex min-w-0 flex-1 items-start gap-2">
         {starting ? (
-          <Loader2 size={16} className="mt-0.5 shrink-0 animate-spin text-amber-600" aria-hidden />
+          <Loader2 size={14} className="mt-0.5 shrink-0 animate-spin text-sky-600" aria-hidden />
         ) : (
           <AlertTriangle size={16} className="mt-0.5 shrink-0 text-amber-600" aria-hidden />
         )}
         <div className="min-w-0">
           <p className="font-medium text-content-primary">
             {starting
-              ? t('processes.notice.starting', { defaultValue: '{{names}} is starting. This page will update by itself.', names })
+              ? t('processes.notice.preparing', {
+                  defaultValue: 'Preparing {{names}}. You can keep working, this note clears by itself.',
+                  names,
+                })
               : t('processes.notice.needs', { defaultValue: 'This feature needs {{names}}. It is off.', names })}
           </p>
           {!starting && off.length === 1 && (

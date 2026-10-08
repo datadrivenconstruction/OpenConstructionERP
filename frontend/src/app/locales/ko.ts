@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "백그라운드 서비스: {{names}} 준비 중",
+    "processes.notice.preparing": "{{names}} 준비 중입니다. 계속 작업하셔도 되며, 이 안내는 자동으로 사라집니다.",
+    "processes.status.queued": "로드 대기 중",
     "processes.action_failed": "{{name}}을(를) 변경하지 못했습니다",
     "processes.ai_agent_scheduler.name": "AI 에이전트 스케줄러",
     "processes.ai_agent_scheduler.off_impact": "예약된 에이전트가 실행되지 않습니다. 직접 시작할 수는 있습니다.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "관리자에게 켜 달라고 요청하세요.",
     "processes.notice.more": "이게 무엇인가요?",
     "processes.notice.needs": "이 기능에는 {{names}}이(가) 필요합니다. 현재 꺼져 있습니다.",
-    "processes.notice.starting": "{{names}}을(를) 시작하는 중입니다. 이 페이지는 자동으로 업데이트됩니다.",
     "processes.notice.turn_on": "켜기(약 {{value}} 사용)",
     "processes.notification_worker.name": "알림 발송",
     "processes.notification_worker.off_impact": "요약과 알림 이메일이 발송되지 않습니다.",

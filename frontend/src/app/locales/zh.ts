@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "后台服务:正在准备{{names}}",
+    "processes.notice.preparing": "正在准备{{names}}。您可以继续工作,此提示会自动消失。",
+    "processes.status.queued": "等待加载",
     "processes.action_failed": "无法更改:{{name}}",
     "processes.ai_agent_scheduler.name": "AI 智能体调度器",
     "processes.ai_agent_scheduler.off_impact": "计划中的智能体不会运行。您仍可以手动启动它们。",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "请联系管理员开启。",
     "processes.notice.more": "这是什么?",
     "processes.notice.needs": "此功能需要{{names}}。目前已关闭。",
-    "processes.notice.starting": "正在启动{{names}}。本页面会自动更新。",
     "processes.notice.turn_on": "开启(约占用 {{value}})",
     "processes.notification_worker.name": "通知发送",
     "processes.notification_worker.off_impact": "不会发送汇总和通知邮件。",

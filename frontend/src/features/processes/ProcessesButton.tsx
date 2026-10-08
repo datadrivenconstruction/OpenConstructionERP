@@ -7,9 +7,11 @@
  */
 
 import { useTranslation } from 'react-i18next';
-import { Cpu } from 'lucide-react';
+import { Suspense, lazy, useEffect, useRef } from 'react';
+import { Cpu, Loader2 } from 'lucide-react';
 import clsx from 'clsx';
-import { isOn, isUnsupported, overallHealth, useProcesses } from './api';
+import { isLoading, isOn, isUnsupported, overallHealth, useProcesses } from './api';
+import { processName, useIsProcessAdmin } from './labels';
 import { useProcessesUi } from './useProcessesUi';
 
 const DOT: Record<string, string> = {
@@ -19,21 +21,43 @@ const DOT: Record<string, string> = {
   idle: 'bg-slate-400',
 };
 
+// The panel and the wizard are code nobody needs on the first screen: they load
+// when opened, so signing in never waits on them.
+const ProcessesPanel = lazy(() => import('./ProcessesPanel').then((m) => ({ default: m.ProcessesPanel })));
+const ProcessesWizard = lazy(() => import('./ProcessesWizard').then((m) => ({ default: m.ProcessesWizard })));
+
 export function ProcessesButton() {
   const { t } = useTranslation();
   const panelOpen = useProcessesUi((s) => s.panelOpen);
+  const wizardOpen = useProcessesUi((s) => s.wizardOpen);
   const openPanel = useProcessesUi((s) => s.openPanel);
+  const openWizard = useProcessesUi((s) => s.openWizard);
+  const isAdmin = useIsProcessAdmin();
   const { data, isError, error } = useProcesses(panelOpen);
+  const offered = useRef(false);
+
+  // Offer the first-run choice once per session while the server has none on record.
+  useEffect(() => {
+    if (offered.current || !isAdmin || !data || data.first_run_done) return;
+    offered.current = true;
+    openWizard();
+  }, [isAdmin, data, openWizard]);
 
   const processes = data?.processes ?? [];
   const running = processes.filter(isOn).length;
   const errors = processes.filter((p) => p.status === 'error').length;
+  const loading = processes.filter(isLoading);
   const health = isError ? 'error' : overallHealth(processes);
 
   const title = t('processes.title', { defaultValue: 'Background services' });
   const summary = isError
     ? t('processes.header_unreachable', { defaultValue: 'Background services: status unavailable' })
-    : errors > 0
+    : loading.length > 0
+      ? t('processes.header_summary_loading', {
+          defaultValue: 'Background services: preparing {{names}}',
+          names: loading.map((p) => processName(t, p)).join(', '),
+        })
+      : errors > 0
       ? t('processes.header_summary_errors', {
           defaultValue: 'Background services: {{running}} on, {{errors}} with errors',
           running,
@@ -44,13 +68,14 @@ export function ProcessesButton() {
   if (isUnsupported(error)) return null;
 
   return (
+    <>
     <button
       type="button"
       onClick={() => openPanel()}
       aria-label={summary}
       aria-haspopup="dialog"
       aria-expanded={panelOpen}
-      title={title}
+      title={loading.length > 0 ? summary : title}
       data-testid="header-processes"
       data-health={health}
       className={clsx(
@@ -59,7 +84,11 @@ export function ProcessesButton() {
         'transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40',
       )}
     >
-      <Cpu size={16} strokeWidth={1.9} aria-hidden />
+      {loading.length > 0 ? (
+        <Loader2 size={16} strokeWidth={1.9} className="animate-spin" aria-hidden />
+      ) : (
+        <Cpu size={16} strokeWidth={1.9} aria-hidden />
+      )}
       {data && (
         <span className="min-w-[1ch] text-xs font-semibold tabular-nums" aria-hidden>
           {running}
@@ -70,5 +99,12 @@ export function ProcessesButton() {
         className={clsx('absolute right-0.5 top-0.5 h-2 w-2 rounded-full ring-2 ring-surface-primary', DOT[health])}
       />
     </button>
+    {(panelOpen || wizardOpen) && (
+      <Suspense fallback={null}>
+        {panelOpen && <ProcessesPanel />}
+        {wizardOpen && <ProcessesWizard />}
+      </Suspense>
+    )}
+    </>
   );
 }

@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "Taustateenused: valmistatakse ette {{names}}",
+    "processes.notice.preparing": "Valmistatakse ette: {{names}}. Võite tööd jätkata, see märge kaob ise.",
+    "processes.status.queued": "Ootab laadimist",
     "processes.action_failed": "Muutmine ebaõnnestus: {{name}}",
     "processes.ai_agent_scheduler.name": "AI-agentide ajastaja",
     "processes.ai_agent_scheduler.off_impact": "Ajastatud agendid ei tööta. Käsitsi saate neid endiselt käivitada.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "Paluge administraatoril see sisse lülitada.",
     "processes.notice.more": "Mis see on?",
     "processes.notice.needs": "See funktsioon vajab: {{names}}. See on välja lülitatud.",
-    "processes.notice.starting": "Käivitatakse: {{names}}. Leht uueneb ise.",
     "processes.notice.turn_on": "Lülita sisse (kasutab ~{{value}})",
     "processes.notification_worker.name": "Teavituste kohaletoimetamine",
     "processes.notification_worker.off_impact": "Kokkuvõtteid ja teavitusmeile ei saadeta.",

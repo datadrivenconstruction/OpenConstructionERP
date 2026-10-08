@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "Fon xizmatlari: {{names}} tayyorlanmoqda",
+    "processes.notice.preparing": "{{names}} tayyorlanmoqda. Ishni davom ettirishingiz mumkin, bu eslatma oʻzi yoʻqoladi.",
+    "processes.status.queued": "Yuklanishni kutmoqda",
     "processes.action_failed": "{{name}} oʻzgartirilmadi",
     "processes.ai_agent_scheduler.name": "AI agentlar rejalashtirgichi",
     "processes.ai_agent_scheduler.off_impact": "Rejalashtirilgan agentlar ishlamaydi. Ularni hamon qoʻlda ishga tushirishingiz mumkin.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "Administratordan buni yoqishni soʻrang.",
     "processes.notice.more": "Bu nima?",
     "processes.notice.needs": "Bu imkoniyat uchun {{names}} kerak. U oʻchirilgan.",
-    "processes.notice.starting": "{{names}} ishga tushmoqda. Bu sahifa oʻzi yangilanadi.",
     "processes.notice.turn_on": "Yoqish (taxminan {{value}} ishlatadi)",
     "processes.notification_worker.name": "Bildirishnomalarni yetkazish",
     "processes.notification_worker.off_impact": "Xulosalar va bildirishnoma xatlari yuborilmaydi.",

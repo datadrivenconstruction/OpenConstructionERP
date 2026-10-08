@@ -15,7 +15,7 @@ import { ActivePackChip, CountryFlag, ModuleInfoButton, PartnerLogoBadge } from 
 import { usePartnerPack } from '@/shared/hooks/usePartnerPack';
 import { NotificationBell } from '@/shared/ui/NotificationBell';
 import { LearnTopBarButton } from './LearnTopBarButton';
-import { ProcessesButton, ProcessesPanel, ProcessesWizard } from '@/features/processes';
+import { ProcessesButton } from '@/features/processes/ProcessesButton';
 import { HeaderNewsButton } from '@/shared/ui/HeaderNewsButton';
 import { ModuleBuilderButton } from '@/features/module-builder';
 import { fetchProjectList } from '@/shared/lib/projectList';
@@ -540,8 +540,6 @@ export function Header({ title, onMenuClick }: HeaderProps) {
         {/* Background services: what the platform keeps loaded, at every
             width, because it is the way back to a feature that stopped. */}
         <ProcessesButton />
-        <ProcessesPanel />
-        <ProcessesWizard />
         <NotificationBell />
         <HeaderNewsButton />
         {/* Building a module is something you do from wherever you noticed the

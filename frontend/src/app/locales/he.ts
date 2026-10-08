@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "שירותי רקע: מכינים את {{names}}",
+    "processes.notice.preparing": "מכינים את {{names}}. אפשר להמשיך לעבוד, ההודעה תיעלם מעצמה.",
+    "processes.status.queued": "ממתין לטעינה",
     "processes.action_failed": "לא ניתן היה לשנות את {{name}}",
     "processes.ai_agent_scheduler.name": "מתזמן סוכני AI",
     "processes.ai_agent_scheduler.off_impact": "סוכנים מתוזמנים לא רצים. עדיין אפשר להפעיל אותם ידנית.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "בקשו ממנהל מערכת להפעיל זאת.",
     "processes.notice.more": "מה זה?",
     "processes.notice.needs": "תכונה זו זקוקה ל-{{names}}. כרגע כבוי.",
-    "processes.notice.starting": "{{names}} מופעל. הדף יתעדכן מעצמו.",
     "processes.notice.turn_on": "הפעלה (משתמש בכ-{{value}})",
     "processes.notification_worker.name": "שליחת התראות",
     "processes.notification_worker.off_impact": "סיכומים ואימיילים של התראות אינם נשלחים.",

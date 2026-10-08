@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "Background services: preparing {{names}}",
+    "processes.notice.preparing": "Preparing {{names}}. You can keep working, this note clears by itself.",
+    "processes.status.queued": "Waiting to load",
     "processes.action_failed": "Could not change {{name}}",
     "processes.ai_agent_scheduler.name": "AI agent scheduler",
     "processes.ai_agent_scheduler.off_impact": "Scheduled agents do not run. You can still start them by hand.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "Ask an administrator to turn it on.",
     "processes.notice.more": "What is this?",
     "processes.notice.needs": "This feature needs {{names}}. It is off.",
-    "processes.notice.starting": "{{names}} is starting. This page will update by itself.",
     "processes.notice.turn_on": "Turn on (uses ~{{value}})",
     "processes.notification_worker.name": "Notification delivery",
     "processes.notification_worker.off_impact": "Digests and notification emails are not sent.",

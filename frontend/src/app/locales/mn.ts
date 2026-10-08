@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "Дэвсгэр үйлчилгээ: {{names}} бэлдэж байна",
+    "processes.notice.preparing": "{{names}} бэлдэж байна. Ажлаа үргэлжлүүлж болно, энэ тэмдэглэл өөрөө алга болно.",
+    "processes.status.queued": "Ачаалахыг хүлээж байна",
     "processes.action_failed": "{{name}}-г өөрчилж чадсангүй",
     "processes.ai_agent_scheduler.name": "AI агентуудын хуваарьлагч",
     "processes.ai_agent_scheduler.off_impact": "Хуваарьтай агентууд ажиллахгүй. Тэдгээрийг гараар эхлүүлж болно.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "Администратораас үүнийг асаахыг хүснэ үү.",
     "processes.notice.more": "Энэ юу вэ?",
     "processes.notice.needs": "Энэ боломжид {{names}} хэрэгтэй. Одоо унтарсан байна.",
-    "processes.notice.starting": "{{names}} эхэлж байна. Энэ хуудас өөрөө шинэчлэгдэнэ.",
     "processes.notice.turn_on": "Асаах (ойролцоогоор {{value}} ашиглана)",
     "processes.notification_worker.name": "Мэдэгдэл хүргэх",
     "processes.notification_worker.off_impact": "Хураангуй болон мэдэгдлийн имэйл илгээгдэхгүй.",

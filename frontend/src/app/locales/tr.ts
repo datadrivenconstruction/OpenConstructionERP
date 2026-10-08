@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "Arka plan hizmetleri: {{names}} hazırlanıyor",
+    "processes.notice.preparing": "{{names}} hazırlanıyor. Çalışmaya devam edebilirsiniz, bu not kendiliğinden kaybolur.",
+    "processes.status.queued": "Yüklenmeyi bekliyor",
     "processes.action_failed": "{{name}} değiştirilemedi",
     "processes.ai_agent_scheduler.name": "Yapay zeka ajanı zamanlayıcısı",
     "processes.ai_agent_scheduler.off_impact": "Zamanlanmış ajanlar çalışmaz. Yine de elle başlatabilirsiniz.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "Bir yöneticiden açmasını isteyin.",
     "processes.notice.more": "Bu nedir?",
     "processes.notice.needs": "Bu özellik şunlara ihtiyaç duyar: {{names}}. Kapalı.",
-    "processes.notice.starting": "{{names}} başlatılıyor. Bu sayfa kendiliğinden güncellenir.",
     "processes.notice.turn_on": "Aç (~{{value}} kullanır)",
     "processes.notification_worker.name": "Bildirim gönderimi",
     "processes.notification_worker.off_impact": "Özetler ve bildirim e-postaları gönderilmez.",

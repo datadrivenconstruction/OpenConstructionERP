@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "Фоновые службы: готовим {{names}}",
+    "processes.notice.preparing": "Готовим: {{names}}. Можно продолжать работу, это сообщение исчезнет само.",
+    "processes.status.queued": "Ждёт загрузки",
     "processes.action_failed": "Не удалось изменить: {{name}}",
     "processes.ai_agent_scheduler.name": "Планировщик ИИ-агентов",
     "processes.ai_agent_scheduler.off_impact": "Агенты по расписанию не запускаются. Запустить их можно вручную.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "Попросите администратора включить это.",
     "processes.notice.more": "Что это?",
     "processes.notice.needs": "Для этой функции нужно: {{names}}. Сейчас выключено.",
-    "processes.notice.starting": "Запускается: {{names}}. Страница обновится сама.",
     "processes.notice.turn_on": "Включить (займёт ~{{value}})",
     "processes.notification_worker.name": "Доставка уведомлений",
     "processes.notification_worker.off_impact": "Сводки и письма с уведомлениями не отправляются.",

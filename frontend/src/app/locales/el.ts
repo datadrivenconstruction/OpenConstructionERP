@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "Υπηρεσίες παρασκηνίου: προετοιμασία {{names}}",
+    "processes.notice.preparing": "Προετοιμασία: {{names}}. Μπορείτε να συνεχίσετε να εργάζεστε, η σημείωση θα εξαφανιστεί μόνη της.",
+    "processes.status.queued": "Αναμονή φόρτωσης",
     "processes.action_failed": "Δεν ήταν δυνατή η αλλαγή: {{name}}",
     "processes.ai_agent_scheduler.name": "Προγραμματιστής πρακτόρων AI",
     "processes.ai_agent_scheduler.off_impact": "Οι προγραμματισμένοι πράκτορες δεν εκτελούνται. Μπορείτε ακόμη να τους ξεκινήσετε χειροκίνητα.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "Ζητήστε από έναν διαχειριστή να το ενεργοποιήσει.",
     "processes.notice.more": "Τι είναι αυτό;",
     "processes.notice.needs": "Αυτή η λειτουργία χρειάζεται: {{names}}. Είναι απενεργοποιημένο.",
-    "processes.notice.starting": "Εκκίνηση: {{names}}. Η σελίδα θα ενημερωθεί μόνη της.",
     "processes.notice.turn_on": "Ενεργοποίηση (χρησιμοποιεί ~{{value}})",
     "processes.notification_worker.name": "Παράδοση ειδοποιήσεων",
     "processes.notification_worker.off_impact": "Οι συνοπτικές αναφορές και τα email ειδοποιήσεων δεν αποστέλλονται.",

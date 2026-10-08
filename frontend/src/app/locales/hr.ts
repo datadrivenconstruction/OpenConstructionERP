@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "Pozadinske usluge: priprema se {{names}}",
+    "processes.notice.preparing": "Priprema se: {{names}}. Možete nastaviti raditi, ova bilješka nestat će sama.",
+    "processes.status.queued": "Čeka učitavanje",
     "processes.action_failed": "Nije moguće promijeniti: {{name}}",
     "processes.ai_agent_scheduler.name": "Planer AI agenata",
     "processes.ai_agent_scheduler.off_impact": "Planirani agenti se ne pokreću. I dalje ih možete pokrenuti ručno.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "Zamolite administratora da to uključi.",
     "processes.notice.more": "Što je ovo?",
     "processes.notice.needs": "Ova funkcija treba: {{names}}. Isključeno je.",
-    "processes.notice.starting": "Pokreće se: {{names}}. Ova stranica će se sama osvježiti.",
     "processes.notice.turn_on": "Uključi (koristi ~{{value}})",
     "processes.notification_worker.name": "Isporuka obavijesti",
     "processes.notification_worker.off_impact": "Sažeci i e-poruke s obavijestima ne šalju se.",

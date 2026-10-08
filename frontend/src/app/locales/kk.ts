@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "Фондық қызметтер: {{names}} дайындалуда",
+    "processes.notice.preparing": "{{names}} дайындалуда. Жұмысты жалғастыра беруге болады, бұл ескерту өздігінен жоғалады.",
+    "processes.status.queued": "Жүктелуді күтуде",
     "processes.action_failed": "{{name}} өзгертілмеді",
     "processes.ai_agent_scheduler.name": "ЖИ агенттерінің жоспарлағышы",
     "processes.ai_agent_scheduler.off_impact": "Жоспарланған агенттер жұмыс істемейді. Оларды қолмен іске қосуға әлі де болады.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "Әкімшіден мұны қосуды сұраңыз.",
     "processes.notice.more": "Бұл не?",
     "processes.notice.needs": "Бұл мүмкіндікке {{names}} қажет. Ол өшірулі.",
-    "processes.notice.starting": "{{names}} іске қосылуда. Бұл бет өздігінен жаңарады.",
     "processes.notice.turn_on": "Қосу (шамамен {{value}} пайдаланады)",
     "processes.notification_worker.name": "Хабарландыруларды жеткізу",
     "processes.notification_worker.off_impact": "Жиынтықтар мен хабарландыру хаттары жіберілмейді.",

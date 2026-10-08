@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "Serviços em segundo plano: preparando {{names}}",
+    "processes.notice.preparing": "Preparando {{names}}. Você pode continuar trabalhando, este aviso some sozinho.",
+    "processes.status.queued": "Aguardando carregamento",
     "processes.action_failed": "Não foi possível alterar {{name}}",
     "processes.ai_agent_scheduler.name": "Agendador de agentes de IA",
     "processes.ai_agent_scheduler.off_impact": "Os agentes agendados não são executados. Você ainda pode iniciá-los manualmente.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "Peça a um administrador para ligar.",
     "processes.notice.more": "O que é isto?",
     "processes.notice.needs": "Este recurso precisa de {{names}}. Está desligado.",
-    "processes.notice.starting": "{{names}} está iniciando. Esta página será atualizada sozinha.",
     "processes.notice.turn_on": "Ligar (usa ~{{value}})",
     "processes.notification_worker.name": "Envio de notificações",
     "processes.notification_worker.off_impact": "Resumos e e-mails de notificação não são enviados.",

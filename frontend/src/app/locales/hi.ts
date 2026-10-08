@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "बैकग्राउंड सेवाएँ: {{names}} तैयार हो रहा है",
+    "processes.notice.preparing": "{{names}} तैयार हो रहा है। आप काम जारी रख सकते हैं, यह नोट अपने आप हट जाएगा।",
+    "processes.status.queued": "लोड होने की प्रतीक्षा में",
     "processes.action_failed": "{{name}} बदला नहीं जा सका",
     "processes.ai_agent_scheduler.name": "AI एजेंट शेड्यूलर",
     "processes.ai_agent_scheduler.off_impact": "शेड्यूल किए गए एजेंट नहीं चलते। आप उन्हें अब भी हाथ से शुरू कर सकते हैं।",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "किसी एडमिनिस्ट्रेटर से इसे चालू करने को कहें।",
     "processes.notice.more": "यह क्या है?",
     "processes.notice.needs": "इस सुविधा के लिए {{names}} चाहिए। यह बंद है।",
-    "processes.notice.starting": "{{names}} शुरू हो रहा है। यह पेज अपने आप अपडेट हो जाएगा।",
     "processes.notice.turn_on": "चालू करें (लगभग {{value}} उपयोग करता है)",
     "processes.notification_worker.name": "सूचनाओं की डिलीवरी",
     "processes.notification_worker.off_impact": "सारांश और सूचना ईमेल नहीं भेजे जाते।",

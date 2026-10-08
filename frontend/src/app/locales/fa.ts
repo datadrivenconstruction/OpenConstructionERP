@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "سرویس‌های پس‌زمینه: آماده‌سازی {{names}}",
+    "processes.notice.preparing": "{{names}} در حال آماده‌سازی است. می‌توانید به کار ادامه دهید، این یادداشت خودش پاک می‌شود.",
+    "processes.status.queued": "در انتظار بارگذاری",
     "processes.action_failed": "تغییر {{name}} ممکن نشد",
     "processes.ai_agent_scheduler.name": "زمان‌بند عامل‌های هوش مصنوعی",
     "processes.ai_agent_scheduler.off_impact": "عامل‌های زمان‌بندی‌شده اجرا نمی‌شوند. همچنان می‌توانید آن‌ها را دستی شروع کنید.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "از یک مدیر بخواهید آن را روشن کند.",
     "processes.notice.more": "این چیست؟",
     "processes.notice.needs": "این قابلیت به {{names}} نیاز دارد. خاموش است.",
-    "processes.notice.starting": "{{names}} در حال شروع است. این صفحه خودش به‌روز می‌شود.",
     "processes.notice.turn_on": "روشن‌کردن (حدود {{value}} مصرف می‌کند)",
     "processes.notification_worker.name": "ارسال اعلان‌ها",
     "processes.notification_worker.off_impact": "خلاصه‌ها و ایمیل‌های اعلان ارسال نمی‌شوند.",

@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "Achtergronddiensten: {{names}} wordt voorbereid",
+    "processes.notice.preparing": "{{names}} wordt voorbereid. U kunt gewoon doorwerken, deze melding verdwijnt vanzelf.",
+    "processes.status.queued": "Wacht op laden",
     "processes.action_failed": "{{name}} kon niet worden gewijzigd",
     "processes.ai_agent_scheduler.name": "Planner voor AI-agenten",
     "processes.ai_agent_scheduler.off_impact": "Geplande agenten draaien niet. U kunt ze nog wel met de hand starten.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "Vraag een beheerder om dit aan te zetten.",
     "processes.notice.more": "Wat is dit?",
     "processes.notice.needs": "Deze functie heeft {{names}} nodig. Het staat uit.",
-    "processes.notice.starting": "{{names}} wordt gestart. Deze pagina ververst vanzelf.",
     "processes.notice.turn_on": "Aanzetten (gebruikt ~{{value}})",
     "processes.notification_worker.name": "Bezorging van meldingen",
     "processes.notification_worker.off_impact": "Samenvattingen en meldingsmails worden niet verzonden.",

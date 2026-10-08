@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "ব্যাকগ্রাউন্ড সার্ভিস: {{names}} প্রস্তুত হচ্ছে",
+    "processes.notice.preparing": "{{names}} প্রস্তুত হচ্ছে। আপনি কাজ চালিয়ে যেতে পারেন, এই নোট নিজে থেকে মুছে যাবে।",
+    "processes.status.queued": "লোডের অপেক্ষায়",
     "processes.action_failed": "{{name}} পরিবর্তন করা যায়নি",
     "processes.ai_agent_scheduler.name": "AI এজেন্ট শিডিউলার",
     "processes.ai_agent_scheduler.off_impact": "শিডিউল করা এজেন্ট চলে না। আপনি এখনও হাতে শুরু করতে পারেন।",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "একজন অ্যাডমিনিস্ট্রেটরকে এটি চালু করতে বলুন।",
     "processes.notice.more": "এটি কী?",
     "processes.notice.needs": "এই ফিচারের জন্য {{names}} দরকার। এটি বন্ধ আছে।",
-    "processes.notice.starting": "{{names}} শুরু হচ্ছে। এই পেজ নিজে থেকে আপডেট হবে।",
     "processes.notice.turn_on": "চালু করুন (প্রায় {{value}} ব্যবহার করে)",
     "processes.notification_worker.name": "নোটিফিকেশন পাঠানো",
     "processes.notification_worker.off_impact": "সারসংক্ষেপ ও নোটিফিকেশন ইমেল পাঠানো হয় না।",

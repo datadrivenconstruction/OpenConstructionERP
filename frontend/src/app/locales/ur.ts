@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "بیک گراؤنڈ سروسز: {{names}} تیار ہو رہا ہے",
+    "processes.notice.preparing": "{{names}} تیار ہو رہا ہے۔ آپ کام جاری رکھ سکتے ہیں، یہ نوٹ خود ہٹ جائے گا۔",
+    "processes.status.queued": "لوڈ ہونے کا انتظار",
     "processes.action_failed": "{{name}} کو تبدیل نہیں کیا جا سکا",
     "processes.ai_agent_scheduler.name": "AI ایجنٹ شیڈیولر",
     "processes.ai_agent_scheduler.off_impact": "شیڈیول کیے گئے ایجنٹ نہیں چلتے۔ آپ انہیں اب بھی ہاتھ سے شروع کر سکتے ہیں۔",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "کسی ایڈمنسٹریٹر سے اسے آن کرنے کو کہیں۔",
     "processes.notice.more": "یہ کیا ہے؟",
     "processes.notice.needs": "اس فیچر کو {{names}} درکار ہے۔ یہ بند ہے۔",
-    "processes.notice.starting": "{{names}} شروع ہو رہا ہے۔ یہ صفحہ خود اپ ڈیٹ ہو جائے گا۔",
     "processes.notice.turn_on": "آن کریں (تقریباً {{value}} استعمال کرتا ہے)",
     "processes.notification_worker.name": "اطلاعات کی ترسیل",
     "processes.notification_worker.off_impact": "خلاصے اور اطلاعی ای میلز نہیں بھیجی جاتیں۔",

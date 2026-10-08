@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "Usługi w tle: przygotowywanie: {{names}}",
+    "processes.notice.preparing": "Przygotowywanie: {{names}}. Możesz pracować dalej, ta informacja zniknie sama.",
+    "processes.status.queued": "Czeka na załadowanie",
     "processes.action_failed": "Nie udało się zmienić: {{name}}",
     "processes.ai_agent_scheduler.name": "Harmonogram agentów AI",
     "processes.ai_agent_scheduler.off_impact": "Agenci według harmonogramu nie działają. Nadal możesz uruchomić ich ręcznie.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "Poproś administratora o włączenie.",
     "processes.notice.more": "Co to jest?",
     "processes.notice.needs": "Ta funkcja wymaga: {{names}}. Jest wyłączone.",
-    "processes.notice.starting": "Uruchamianie: {{names}}. Ta strona odświeży się sama.",
     "processes.notice.turn_on": "Włącz (zużywa ok. {{value}})",
     "processes.notification_worker.name": "Dostarczanie powiadomień",
     "processes.notification_worker.off_impact": "Zestawienia i e-maile z powiadomieniami nie są wysyłane.",

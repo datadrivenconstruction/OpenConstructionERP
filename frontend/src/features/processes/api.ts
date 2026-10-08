@@ -10,6 +10,7 @@
  * the English text the API sends as the fallback.
  */
 
+import { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ApiError, apiGet, apiPost } from '@/shared/lib/api';
 
@@ -47,6 +48,8 @@ export interface ProcessInfo {
   next_retry_at: string | null;
   started_at: string | null;
   log_tail: string[];
+  /** Waiting its turn in the serial start queue: shown as loading. */
+  queued?: boolean;
 }
 
 export interface ProcessesSnapshot {
@@ -71,11 +74,19 @@ export function fetchProcesses(): Promise<ProcessesSnapshot> {
   return apiGet<ProcessesSnapshot>('/v1/processes/');
 }
 
+/** Loading in the background: starting now, or queued to start. */
+export function isLoading(p: ProcessInfo): boolean {
+  return p.status === 'starting' || (p.queued === true && p.status !== 'running' && p.status !== 'disabled');
+}
+
 export function useProcesses(live = false) {
   return useQuery({
     queryKey: processesKey,
     queryFn: fetchProcesses,
-    refetchInterval: live ? POLL_OPEN_MS : POLL_IDLE_MS,
+    // Fast while someone watches the panel or something is still loading,
+    // so the "preparing" note clears as soon as the service is up.
+    refetchInterval: (q) =>
+      live || (q.state.data?.processes.some(isLoading) ?? false) ? POLL_OPEN_MS : POLL_IDLE_MS,
     staleTime: 2000,
     retry: false,
   });
@@ -133,7 +144,7 @@ export type OverallHealth = 'ok' | 'busy' | 'error' | 'idle';
 /** One colour for the header dot: red beats amber beats green; nothing on is grey. */
 export function overallHealth(processes: ProcessInfo[]): OverallHealth {
   if (processes.some((p) => p.status === 'error')) return 'error';
-  if (processes.some((p) => p.status === 'starting' || p.status === 'stopping' || p.status === 'degraded')) {
+  if (processes.some((p) => isLoading(p) || p.status === 'stopping' || p.status === 'degraded')) {
     return 'busy';
   }
   return processes.some(isOn) ? 'ok' : 'idle';
@@ -165,4 +176,29 @@ export function isControllable(p: ProcessInfo): boolean {
 /** On means doing its job or ready to: running, or enabled and loading on first use. */
 export function isOn(p: ProcessInfo): boolean {
   return p.status === 'running' || p.status === 'idle';
+}
+
+const ensured = new Set<string>();
+
+/** Test hook: forget which modules were already asked for this session. */
+export function resetEnsured(): void {
+  ensured.clear();
+}
+
+/**
+ * Entering a module asks the server to start what it needs, in the background
+ * and in turn. Fire and forget: the page never waits for it, and a server
+ * without the endpoint is simply not asked again this session.
+ */
+export function useEnsureModule(moduleId: string): void {
+  const qc = useQueryClient();
+  useEffect(() => {
+    if (ensured.has(moduleId)) return;
+    ensured.add(moduleId);
+    apiPost(`/v1/processes/ensure?module=${encodeURIComponent(moduleId)}`)
+      .then(() => qc.invalidateQueries({ queryKey: processesKey }))
+      .catch(() => {
+        /* older server or no session: the banner still reads the list */
+      });
+  }, [moduleId, qc]);
 }

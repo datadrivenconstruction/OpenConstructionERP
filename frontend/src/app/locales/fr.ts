@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "Services d'arrière-plan : préparation de {{names}}",
+    "processes.notice.preparing": "Préparation de {{names}}. Vous pouvez continuer à travailler, cette note disparaîtra toute seule.",
+    "processes.status.queued": "En attente de chargement",
     "processes.action_failed": "Impossible de modifier {{name}}",
     "processes.ai_agent_scheduler.name": "Planificateur d'agents IA",
     "processes.ai_agent_scheduler.off_impact": "Les agents planifiés ne s'exécutent pas. Vous pouvez toujours les lancer à la main.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "Demandez à un administrateur de l'activer.",
     "processes.notice.more": "De quoi s'agit-il ?",
     "processes.notice.needs": "Cette fonction a besoin de {{names}}. Il est désactivé.",
-    "processes.notice.starting": "{{names}} démarre. Cette page se mettra à jour toute seule.",
     "processes.notice.turn_on": "Activer (utilise ~{{value}})",
     "processes.notification_worker.name": "Envoi des notifications",
     "processes.notification_worker.off_impact": "Les résumés et les e-mails de notification ne sont pas envoyés.",

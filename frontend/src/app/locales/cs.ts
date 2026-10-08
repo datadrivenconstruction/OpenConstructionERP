@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "Služby na pozadí: připravuje se {{names}}",
+    "processes.notice.preparing": "Připravuje se: {{names}}. Můžete pracovat dál, toto upozornění zmizí samo.",
+    "processes.status.queued": "Čeká na načtení",
     "processes.action_failed": "Nepodařilo se změnit: {{name}}",
     "processes.ai_agent_scheduler.name": "Plánovač AI agentů",
     "processes.ai_agent_scheduler.off_impact": "Naplánovaní agenti se nespouštějí. Stále je můžete spustit ručně.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "Požádejte správce o zapnutí.",
     "processes.notice.more": "Co to je?",
     "processes.notice.needs": "Tato funkce potřebuje: {{names}}. Je vypnuto.",
-    "processes.notice.starting": "Spouští se: {{names}}. Stránka se aktualizuje sama.",
     "processes.notice.turn_on": "Zapnout (zabere ~{{value}})",
     "processes.notification_worker.name": "Doručování oznámení",
     "processes.notification_worker.off_impact": "Souhrny a e-maily s oznámeními se neodesílají.",

@@ -21,10 +21,9 @@ vi.mock('@/stores/useAuthStore', () => ({
 }));
 
 import { ApiError, apiGet, apiPost } from '@/shared/lib/api';
-import { overallHealth, processesForModules } from './api';
+import { overallHealth, processesForModules, resetEnsured } from './api';
 import { ProcessesButton } from './ProcessesButton';
 import { ProcessesPanel } from './ProcessesPanel';
-import { ProcessesWizard } from './ProcessesWizard';
 import { ModuleProcessesNotice } from './ModuleProcessesNotice';
 import { useProcessesUi } from './useProcessesUi';
 
@@ -71,6 +70,8 @@ beforeEach(() => {
   role = 'admin';
   vi.mocked(apiGet).mockReset();
   vi.mocked(apiPost).mockReset();
+  vi.mocked(apiPost).mockResolvedValue({});
+  resetEnsured();
   useProcessesUi.setState({ panelOpen: false, wizardOpen: false, focusId: null });
 });
 
@@ -186,8 +187,9 @@ describe('ProcessesWizard', () => {
       ),
     );
     vi.mocked(apiPost).mockResolvedValue(snapshot([]));
-    renderWith(<ProcessesWizard />);
-    await screen.findByTestId('processes-wizard');
+    // The header button offers the choice and lazy-loads the wizard.
+    renderWith(<ProcessesButton />);
+    await screen.findByTestId('processes-wizard', {}, { timeout: 5000 });
     fireEvent.click(screen.getByTestId('wizard-module-costs').querySelector('input'));
     await waitFor(() => expect(screen.getByTestId('wizard-total')).toHaveTextContent('400 MB'));
     fireEvent.click(screen.getByTestId('wizard-start'));
@@ -199,8 +201,9 @@ describe('ProcessesWizard', () => {
   it('is not offered to a non-admin', async () => {
     role = 'viewer';
     vi.mocked(apiGet).mockResolvedValue(snapshot([proc()], { first_run_done: false }));
-    renderWith(<ProcessesWizard />);
-    await waitFor(() => expect(apiGet).toHaveBeenCalled());
+    renderWith(<ProcessesButton />);
+    await screen.findByTestId('header-processes');
+    expect(useProcessesUi.getState().wizardOpen).toBe(false);
     expect(screen.queryByTestId('processes-wizard')).toBeNull();
   });
 });
@@ -211,6 +214,19 @@ describe('ModuleProcessesNotice', () => {
     const { container } = renderWith(<ModuleProcessesNotice moduleId="costs" />);
     await waitFor(() => expect(apiGet).toHaveBeenCalled());
     expect(container.querySelector('[data-testid^="module-processes-notice"]')).toBeNull();
+  });
+
+  it('asks the server once to prepare the module, without waiting on it', async () => {
+    vi.mocked(apiGet).mockResolvedValue(snapshot([proc({ enabled: true, status: 'idle', queued: true })]));
+    const first = renderWith(<ModuleProcessesNotice moduleId="costs" />);
+    const note = await screen.findByTestId('module-processes-notice-costs');
+    expect(note).toHaveAttribute('data-state', 'preparing');
+    expect(screen.queryByTestId('module-processes-turn-on')).toBeNull();
+    first.unmount();
+    renderWith(<ModuleProcessesNotice moduleId="costs" />);
+    await screen.findByTestId('module-processes-notice-costs');
+    const ensures = vi.mocked(apiPost).mock.calls.filter(([u]) => String(u).startsWith('/v1/processes/ensure'));
+    expect(ensures).toEqual([['/v1/processes/ensure?module=costs']]);
   });
 
   it('turns an off service on in one click', async () => {

@@ -40,6 +40,7 @@ import { useToastStore } from '@/stores/useToastStore';
 import {
   CATEGORY_ORDER,
   isControllable,
+  isLoading,
   isOn,
   ramOf,
   useMinimalPreset,
@@ -111,20 +112,20 @@ function categoryLabel(t: TFunction, c: ProcessCategory): string {
   }
 }
 
-export function StatusPill({ status }: { status: ProcessStatus }) {
+export function StatusPill({ status, queued = false }: { status: ProcessStatus; queued?: boolean }) {
   const { t } = useTranslation();
-  const busy = status === 'starting' || status === 'stopping';
+  const busy = queued || status === 'starting' || status === 'stopping';
   return (
     <span
       data-testid="process-status"
-      data-status={status}
+      data-status={queued ? 'queued' : status}
       className={clsx(
         'inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-2xs font-semibold ring-1 ring-inset',
-        STATUS_STYLE[status],
+        queued ? STATUS_STYLE.starting : STATUS_STYLE[status],
       )}
     >
       {busy && <Loader2 size={10} className="animate-spin" aria-hidden />}
-      {statusLabel(t, status)}
+      {queued ? t('processes.status.queued', { defaultValue: 'Waiting to load' }) : statusLabel(t, status)}
     </span>
   );
 }
@@ -200,7 +201,7 @@ function ProcessRow({
   const purpose = processPurpose(t, p);
   const offImpact = processOffImpact(t, p);
   const detailsId = `process-details-${p.id}`;
-  const busy = pending || p.status === 'starting' || p.status === 'stopping';
+  const busy = pending || isLoading(p) || p.status === 'stopping';
   const controllable = isControllable(p);
   const canRestart =
     controllable && p.enabled && (p.status === 'running' || p.status === 'error' || p.status === 'degraded');
@@ -230,7 +231,7 @@ function ProcessRow({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <h4 className="min-w-0 break-words text-sm font-semibold text-content-primary">{name}</h4>
-            <StatusPill status={p.status} />
+            <StatusPill status={p.status} queued={p.queued === true && p.status === 'idle'} />
             {(p.required || !p.stoppable) && (
               <span className="text-2xs font-medium text-content-tertiary">
                 {t('processes.required', { defaultValue: 'Always on' })}

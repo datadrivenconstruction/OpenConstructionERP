@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "Taustapalvelut: valmistellaan {{names}}",
+    "processes.notice.preparing": "Valmistellaan: {{names}}. Voit jatkaa työskentelyä, tämä ilmoitus poistuu itsestään.",
+    "processes.status.queued": "Odottaa latausta",
     "processes.action_failed": "Kohdetta {{name}} ei voitu muuttaa",
     "processes.ai_agent_scheduler.name": "AI-agenttien ajastin",
     "processes.ai_agent_scheduler.off_impact": "Ajastetut agentit eivät käynnisty. Voit silti käynnistää ne käsin.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "Pyydä ylläpitäjää ottamaan se käyttöön.",
     "processes.notice.more": "Mikä tämä on?",
     "processes.notice.needs": "Tämä toiminto tarvitsee: {{names}}. Se on pois päältä.",
-    "processes.notice.starting": "Käynnistetään: {{names}}. Sivu päivittyy itsestään.",
     "processes.notice.turn_on": "Ota käyttöön (käyttää ~{{value}})",
     "processes.notification_worker.name": "Ilmoitusten toimitus",
     "processes.notification_worker.off_impact": "Yhteenvetoja ja ilmoitussähköposteja ei lähetetä.",

@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "บริการเบื้องหลัง: กำลังเตรียม {{names}}",
+    "processes.notice.preparing": "กำลังเตรียม {{names}} คุณทำงานต่อได้เลย ข้อความนี้จะหายไปเอง",
+    "processes.status.queued": "รอการโหลด",
     "processes.action_failed": "ไม่สามารถเปลี่ยน {{name}} ได้",
     "processes.ai_agent_scheduler.name": "ตัวตั้งเวลาเอเจนต์ AI",
     "processes.ai_agent_scheduler.off_impact": "เอเจนต์ที่ตั้งเวลาไว้จะไม่ทำงาน แต่คุณยังสั่งเริ่มด้วยตนเองได้",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "ขอให้ผู้ดูแลระบบเปิดให้",
     "processes.notice.more": "นี่คืออะไร",
     "processes.notice.needs": "ฟีเจอร์นี้ต้องใช้ {{names}} ขณะนี้ปิดอยู่",
-    "processes.notice.starting": "กำลังเริ่ม {{names}} หน้านี้จะอัปเดตเอง",
     "processes.notice.turn_on": "เปิด (ใช้ประมาณ {{value}})",
     "processes.notification_worker.name": "การส่งการแจ้งเตือน",
     "processes.notification_worker.off_impact": "จะไม่มีการส่งสรุปและอีเมลแจ้งเตือน",

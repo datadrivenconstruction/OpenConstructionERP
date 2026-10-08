@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "Layanan latar belakang: menyiapkan {{names}}",
+    "processes.notice.preparing": "Menyiapkan {{names}}. Anda bisa terus bekerja, catatan ini akan hilang sendiri.",
+    "processes.status.queued": "Menunggu dimuat",
     "processes.action_failed": "Tidak dapat mengubah {{name}}",
     "processes.ai_agent_scheduler.name": "Penjadwal agen AI",
     "processes.ai_agent_scheduler.off_impact": "Agen terjadwal tidak berjalan. Anda masih bisa memulainya secara manual.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "Minta administrator untuk menyalakannya.",
     "processes.notice.more": "Apa ini?",
     "processes.notice.needs": "Fitur ini membutuhkan {{names}}. Sedang mati.",
-    "processes.notice.starting": "{{names}} sedang dimulai. Halaman ini akan diperbarui sendiri.",
     "processes.notice.turn_on": "Nyalakan (memakai ~{{value}})",
     "processes.notification_worker.name": "Pengiriman notifikasi",
     "processes.notification_worker.off_impact": "Ringkasan dan email notifikasi tidak dikirim.",

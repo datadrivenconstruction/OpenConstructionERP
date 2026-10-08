@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "Фондук кызматтар: {{names}} даярдалууда",
+    "processes.notice.preparing": "{{names}} даярдалууда. Иштей берсеңиз болот, бул эскертме өзү жок болот.",
+    "processes.status.queued": "Жүктөлүүнү күтүүдө",
     "processes.action_failed": "{{name}} өзгөртүлгөн жок",
     "processes.ai_agent_scheduler.name": "ЖИ агенттеринин пландаштыргычы",
     "processes.ai_agent_scheduler.off_impact": "Пландалган агенттер иштебейт. Аларды кол менен баштоого болот.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "Администратордон муну күйгүзүүнү сураныңыз.",
     "processes.notice.more": "Бул эмне?",
     "processes.notice.needs": "Бул мүмкүнчүлүккө {{names}} керек. Ал өчүрүлгөн.",
-    "processes.notice.starting": "{{names}} ишке киргизилүүдө. Бул бет өзү жаңырат.",
     "processes.notice.turn_on": "Күйгүзүү (болжол менен {{value}} колдонот)",
     "processes.notification_worker.name": "Эскертмелерди жеткирүү",
     "processes.notification_worker.off_impact": "Жыйынтыктар жана эскертме каттары жөнөтүлбөйт.",

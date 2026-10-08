@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "Фонові служби: готуємо {{names}}",
+    "processes.notice.preparing": "Готуємо: {{names}}. Можна продовжувати роботу, це повідомлення зникне саме.",
+    "processes.status.queued": "Чекає на завантаження",
     "processes.action_failed": "Не вдалося змінити: {{name}}",
     "processes.ai_agent_scheduler.name": "Планувальник ШІ-агентів",
     "processes.ai_agent_scheduler.off_impact": "Агенти за розкладом не запускаються. Запустити їх можна вручну.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "Попросіть адміністратора це увімкнути.",
     "processes.notice.more": "Що це?",
     "processes.notice.needs": "Для цієї функції потрібно: {{names}}. Зараз вимкнено.",
-    "processes.notice.starting": "Запускається: {{names}}. Сторінка оновиться сама.",
     "processes.notice.turn_on": "Увімкнути (займе ~{{value}})",
     "processes.notification_worker.name": "Доставлення сповіщень",
     "processes.notification_worker.off_impact": "Зведення та листи зі сповіщеннями не надсилаються.",

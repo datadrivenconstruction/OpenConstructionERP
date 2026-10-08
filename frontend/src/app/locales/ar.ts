@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "الخدمات الخلفية: جارٍ تحضير {{names}}",
+    "processes.notice.preparing": "جارٍ تحضير {{names}}. يمكنك متابعة العمل، وستختفي هذه الملاحظة تلقائيًا.",
+    "processes.status.queued": "في انتظار التحميل",
     "processes.action_failed": "تعذّر تغيير {{name}}",
     "processes.ai_agent_scheduler.name": "جدولة وكلاء الذكاء الاصطناعي",
     "processes.ai_agent_scheduler.off_impact": "لا يعمل الوكلاء المجدولون. ما زال بإمكانك تشغيلهم يدويًا.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "اطلب من مسؤول النظام تشغيله.",
     "processes.notice.more": "ما هذا؟",
     "processes.notice.needs": "تحتاج هذه الميزة إلى {{names}}. وهو متوقف.",
-    "processes.notice.starting": "جارٍ تشغيل {{names}}. ستتحدث هذه الصفحة تلقائيًا.",
     "processes.notice.turn_on": "تشغيل (يستخدم نحو {{value}})",
     "processes.notification_worker.name": "إرسال الإشعارات",
     "processes.notification_worker.off_impact": "لا يتم إرسال الملخصات ولا رسائل الإشعارات البريدية.",

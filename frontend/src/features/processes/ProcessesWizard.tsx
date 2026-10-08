@@ -25,23 +25,14 @@ export function ProcessesWizard() {
   const { t } = useTranslation();
   const isAdmin = useIsProcessAdmin();
   const wizardOpen = useProcessesUi((s) => s.wizardOpen);
-  const openWizard = useProcessesUi((s) => s.openWizard);
   const closeWizard = useProcessesUi((s) => s.closeWizard);
   const { data } = useProcesses(wizardOpen);
   const firstRun = useFirstRun();
   const addToast = useToastStore((s) => s.addToast);
   const ref = useRef<HTMLDivElement>(null);
   const [picked, setPicked] = useState<Set<string>>(new Set());
-  const [autoShown, setAutoShown] = useState(false);
 
   useFocusTrap(ref, wizardOpen);
-
-  // Offer the choice once per session while the server has none on record.
-  useEffect(() => {
-    if (autoShown || !isAdmin || !data || data.first_run_done) return;
-    setAutoShown(true);
-    openWizard();
-  }, [autoShown, isAdmin, data, openWizard]);
 
   // Start from what is already on, so reopening shows the current state.
   useEffect(() => {

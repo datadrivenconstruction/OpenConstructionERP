@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "Háttérszolgáltatások: előkészítés: {{names}}",
+    "processes.notice.preparing": "Előkészítés: {{names}}. Dolgozhat tovább, ez a megjegyzés magától eltűnik.",
+    "processes.status.queued": "Betöltésre vár",
     "processes.action_failed": "Nem sikerült módosítani: {{name}}",
     "processes.ai_agent_scheduler.name": "AI-ügynökök ütemezője",
     "processes.ai_agent_scheduler.off_impact": "Az ütemezett ügynökök nem futnak. Kézzel még elindíthatja őket.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "Kérje meg egy rendszergazdát, hogy kapcsolja be.",
     "processes.notice.more": "Mi ez?",
     "processes.notice.needs": "Ehhez a funkcióhoz szükséges: {{names}}. Ki van kapcsolva.",
-    "processes.notice.starting": "Indul: {{names}}. Az oldal magától frissül.",
     "processes.notice.turn_on": "Bekapcsolás (~{{value}} memóriát használ)",
     "processes.notification_worker.name": "Értesítések kézbesítése",
     "processes.notification_worker.off_impact": "Az összesítők és az értesítő e-mailek nem kerülnek elküldésre.",

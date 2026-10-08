@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "Bakgrundstjänster: förbereder {{names}}",
+    "processes.notice.preparing": "Förbereder {{names}}. Du kan fortsätta arbeta, den här notisen försvinner av sig själv.",
+    "processes.status.queued": "Väntar på att laddas",
     "processes.action_failed": "Det gick inte att ändra {{name}}",
     "processes.ai_agent_scheduler.name": "Schemaläggare för AI-agenter",
     "processes.ai_agent_scheduler.off_impact": "Schemalagda agenter körs inte. Du kan fortfarande starta dem för hand.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "Be en administratör slå på det.",
     "processes.notice.more": "Vad är det här?",
     "processes.notice.needs": "Den här funktionen behöver {{names}}. Det är avstängt.",
-    "processes.notice.starting": "{{names}} startar. Sidan uppdateras av sig själv.",
     "processes.notice.turn_on": "Slå på (använder ~{{value}})",
     "processes.notification_worker.name": "Leverans av aviseringar",
     "processes.notification_worker.off_impact": "Sammanställningar och aviseringsmejl skickas inte.",

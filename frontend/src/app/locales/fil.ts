@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "Mga background service: inihahanda ang {{names}}",
+    "processes.notice.preparing": "Inihahanda ang {{names}}. Maaari kang magpatuloy sa trabaho, kusang mawawala ang paalalang ito.",
+    "processes.status.queued": "Naghihintay ma-load",
     "processes.action_failed": "Hindi mabago ang {{name}}",
     "processes.ai_agent_scheduler.name": "Scheduler ng mga AI agent",
     "processes.ai_agent_scheduler.off_impact": "Hindi tumatakbo ang mga naka-iskedyul na agent. Maaari mo pa rin silang simulan nang mano-mano.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "Hilingin sa isang administrator na i-on ito.",
     "processes.notice.more": "Ano ito?",
     "processes.notice.needs": "Kailangan ng feature na ito ang {{names}}. Naka-off ito.",
-    "processes.notice.starting": "Sinisimulan ang {{names}}. Kusang mag-a-update ang pahinang ito.",
     "processes.notice.turn_on": "I-on (gumagamit ng ~{{value}})",
     "processes.notification_worker.name": "Paghahatid ng mga notification",
     "processes.notification_worker.off_impact": "Hindi ipinapadala ang mga buod at email ng notification.",

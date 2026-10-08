@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "Hintergrunddienste: {{names}} wird vorbereitet",
+    "processes.notice.preparing": "{{names}} wird vorbereitet. Sie können weiterarbeiten, dieser Hinweis verschwindet von selbst.",
+    "processes.status.queued": "Wartet auf das Laden",
     "processes.action_failed": "{{name}} konnte nicht geändert werden",
     "processes.ai_agent_scheduler.name": "Planer für KI-Agenten",
     "processes.ai_agent_scheduler.off_impact": "Geplante Agenten laufen nicht. Sie lassen sich weiterhin von Hand starten.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "Bitten Sie eine Administratorin oder einen Administrator, es einzuschalten.",
     "processes.notice.more": "Was ist das?",
     "processes.notice.needs": "Diese Funktion braucht {{names}}. Sie ist ausgeschaltet.",
-    "processes.notice.starting": "{{names}} wird gestartet. Diese Seite aktualisiert sich von selbst.",
     "processes.notice.turn_on": "Einschalten (benötigt ca. {{value}})",
     "processes.notification_worker.name": "Zustellung von Benachrichtigungen",
     "processes.notification_worker.off_impact": "Zusammenfassungen und Benachrichtigungs-E-Mails werden nicht gesendet.",

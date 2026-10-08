@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "Baggrundstjenester: klargør {{names}}",
+    "processes.notice.preparing": "Klargør {{names}}. Du kan arbejde videre, denne note forsvinder af sig selv.",
+    "processes.status.queued": "Venter på at blive indlæst",
     "processes.action_failed": "Kunne ikke ændre {{name}}",
     "processes.ai_agent_scheduler.name": "Planlægger for AI-agenter",
     "processes.ai_agent_scheduler.off_impact": "Planlagte agenter kører ikke. Du kan stadig starte dem manuelt.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "Bed en administrator om at slå det til.",
     "processes.notice.more": "Hvad er det her?",
     "processes.notice.needs": "Denne funktion kræver {{names}}. Det er slået fra.",
-    "processes.notice.starting": "{{names}} starter. Siden opdaterer sig selv.",
     "processes.notice.turn_on": "Slå til (bruger ~{{value}})",
     "processes.notification_worker.name": "Levering af notifikationer",
     "processes.notification_worker.off_impact": "Opsummeringer og notifikationsmails bliver ikke sendt.",

@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "Servicii de fundal: se pregătește {{names}}",
+    "processes.notice.preparing": "Se pregătește: {{names}}. Puteți continua să lucrați, această notă dispare singură.",
+    "processes.status.queued": "Așteaptă încărcarea",
     "processes.action_failed": "Nu s-a putut modifica: {{name}}",
     "processes.ai_agent_scheduler.name": "Planificator pentru agenți AI",
     "processes.ai_agent_scheduler.off_impact": "Agenții programați nu rulează. Îi puteți porni în continuare manual.",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "Rugați un administrator să îl pornească.",
     "processes.notice.more": "Ce este aceasta?",
     "processes.notice.needs": "Această funcție are nevoie de: {{names}}. Este oprit.",
-    "processes.notice.starting": "Se pornește: {{names}}. Pagina se va actualiza singură.",
     "processes.notice.turn_on": "Pornește (folosește ~{{value}})",
     "processes.notification_worker.name": "Livrarea notificărilor",
     "processes.notification_worker.off_impact": "Rezumatele și e-mailurile de notificare nu sunt trimise.",

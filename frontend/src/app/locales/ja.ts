@@ -3,6 +3,9 @@
 
 const resource = {
   "translation": {
+    "processes.header_summary_loading": "バックグラウンドサービス: {{names}}を準備中",
+    "processes.notice.preparing": "{{names}}を準備中です。作業を続けられます。この表示は自動的に消えます。",
+    "processes.status.queued": "読み込み待ち",
     "processes.action_failed": "{{name}}を変更できませんでした",
     "processes.ai_agent_scheduler.name": "AIエージェントのスケジューラー",
     "processes.ai_agent_scheduler.off_impact": "スケジュールされたエージェントは実行されません。手動で開始することはできます。",
@@ -79,7 +82,6 @@ const resource = {
     "processes.notice.ask_admin": "管理者にオンにするよう依頼してください。",
     "processes.notice.more": "これは何ですか?",
     "processes.notice.needs": "この機能には{{names}}が必要です。現在オフです。",
-    "processes.notice.starting": "{{names}}を起動中です。このページは自動的に更新されます。",
     "processes.notice.turn_on": "オンにする(約{{value}}使用)",
     "processes.notification_worker.name": "通知の配信",
     "processes.notification_worker.off_impact": "ダイジェストと通知メールは送信されません。",
