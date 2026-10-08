@@ -74,6 +74,10 @@ ENABLES_KEY = "enables_rule_ids"
 
 # Ids a shipped pack intends to check but the engine does not define yet,
 # kept apart from ENABLES_KEY so switching a document on never claims them.
+# A pack is live, and may keep such a plan, exactly when the wheel ships it
+# (the force-include map in pyproject.toml); a pack that does not ship drops
+# the ids instead. The rule is mechanical on purpose, so nobody keeps a list:
+# tests/unit/test_uk_pack.py reads the shipped set and holds every pack to it.
 PLANNED_KEY = "planned_not_built_rule_ids"
 
 
