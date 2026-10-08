@@ -2927,6 +2927,21 @@ fn remove_extraction(
     remove_tree_until(dir, deadline)
 }
 
+/// Put the calling thread, CPU and disk I/O both, into background mode.
+#[cfg(windows)]
+fn lower_this_thread_priority() {
+    use windows_sys::Win32::System::Threading::{
+        GetCurrentThread, SetThreadPriority, THREAD_MODE_BACKGROUND_BEGIN,
+    };
+    // SAFETY: the pseudo-handle of the current thread needs no closing.
+    unsafe {
+        SetThreadPriority(GetCurrentThread(), THREAD_MODE_BACKGROUND_BEGIN);
+    }
+}
+
+#[cfg(not(windows))]
+fn lower_this_thread_priority() {}
+
 /// `remove_dir_all` that gives up at a deadline. Ok(true) when the tree is gone.
 fn remove_tree_until(dir: &std::path::Path, deadline: Instant) -> std::io::Result<bool> {
     for entry in std::fs::read_dir(dir)? {
@@ -3203,7 +3218,7 @@ fn sweep_extractions_in(
 ///
 /// Only ever inside the root this application unpacks into. A directory we did
 /// not create is not ours to judge, however confident the guards below are.
-fn sweep_orphaned_extractions(handle: &tauri::AppHandle) {
+fn sweep_orphaned_extractions(handle: &tauri::AppHandle, cluster: ClusterState, announce: bool) {
     let root = match extraction_root() {
         Some(root) => root,
         None => {
@@ -3216,10 +3231,13 @@ fn sweep_orphaned_extractions(handle: &tauri::AppHandle) {
     let mut announced = false;
     let report = sweep_extractions_in(
         &root,
-        embedded_cluster_state(),
+        cluster,
         EXTRACTION_MINIMUM_AGE,
         EXTRACTION_SWEEP_BUDGET,
         &mut || {
+            if !announce {
+                return;
+            }
             announced = true;
             boot_stage(
                 handle,
@@ -4593,10 +4611,30 @@ fn main() {
                     // written against.
                     let reporter = handle.clone();
                     let start = move || {
-                        // Still run on Windows, where the backend no longer
-                        // unpacks: it clears extractions left by the onefile
-                        // builds this version replaces.
-                        sweep_orphaned_extractions(&handle);
+                        // On Windows the backend no longer unpacks, so the
+                        // sweep only clears extractions left by the onefile
+                        // builds this version replaces, and nothing the
+                        // backend needs waits on it. It used to run here,
+                        // ahead of the spawn, and one 1.4 GB extraction took
+                        // 5 to 12 minutes of splash on a loaded machine. Now
+                        // it runs beside the backend on a background-priority
+                        // thread. The cluster state is read BEFORE the spawn:
+                        // our own postmaster runs from the install folder,
+                        // never from the extraction root, and an old one still
+                        // running out of an extraction is caught by the
+                        // per-file in-use probe either way.
+                        if cfg!(windows) {
+                            let cluster = embedded_cluster_state();
+                            let sweeper = handle.clone();
+                            let _ = std::thread::Builder::new()
+                                .name("oe-extraction-sweep".to_string())
+                                .spawn(move || {
+                                    lower_this_thread_priority();
+                                    sweep_orphaned_extractions(&sweeper, cluster, false);
+                                });
+                        } else {
+                            sweep_orphaned_extractions(&handle, embedded_cluster_state(), true);
+                        }
                         // The space check is about room to unpack, and only
                         // the onefile builds (macOS, Linux) unpack.
                         if cfg!(not(windows)) && !extraction_space_allows_a_sidecar(&handle) {
