@@ -10,7 +10,7 @@ one set of rules.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -133,3 +133,22 @@ class LegalEntityResponse(BaseModel):
 class LegalEntityListResponse(BaseModel):
     items: list[LegalEntityResponse]
     total: int
+
+
+class ProjectEntityAssign(BaseModel):
+    """Name the entity that owns a project; null clears it back to the default."""
+
+    legal_entity_id: UUID | None = None
+
+
+class ProjectEntityResponse(BaseModel):
+    """The entity a project's documents belong to, and why.
+
+    ``source`` is ``assigned`` when the project names the entity, ``default``
+    when it names none and the default entity answers, and ``none`` when there
+    is neither, so a caller never mistakes the fallback for a choice.
+    """
+
+    project_id: UUID
+    legal_entity: LegalEntityResponse | None
+    source: Literal["assigned", "default", "none"]

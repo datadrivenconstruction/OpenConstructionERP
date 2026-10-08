@@ -140,6 +140,12 @@ class Project(Base):
     # Victoria a domestic-building one. NULL means not recorded, and a rule
     # scoped to a subdivision then says it could not run rather than guess.
     subdivision_code: Mapped[str | None] = mapped_column(String(6), nullable=True, default=None)
+    # The company in the group that owns the project, a row of the legal
+    # entities module. NULL means none was named and the default entity
+    # answers. No database foreign key: legal entities is a module that can be
+    # left out, and the core project table must build without its table. The
+    # module checks the id on write and refuses to delete an entity in use.
+    legal_entity_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, default=None, index=True)
 
     # ── Phase 12 expansion fields (all nullable for backward compat) ─────
     project_code: Mapped[str | None] = mapped_column(String(50), nullable=True)
