@@ -195,7 +195,10 @@ export function useEnsureModule(moduleId: string): void {
   useEffect(() => {
     if (ensured.has(moduleId)) return;
     ensured.add(moduleId);
-    apiPost(`/v1/processes/ensure?module=${encodeURIComponent(moduleId)}`)
+    // Wrapped so a synchronous throw (or a stubbed client in a test) cannot
+    // escape the effect: this call must never break the page that makes it.
+    Promise.resolve()
+      .then(() => apiPost(`/v1/processes/ensure?module=${encodeURIComponent(moduleId)}`))
       .then(() => qc.invalidateQueries({ queryKey: processesKey }))
       .catch(() => {
         /* older server or no session: the banner still reads the list */

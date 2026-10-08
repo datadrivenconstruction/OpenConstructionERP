@@ -41,6 +41,7 @@ export interface ModuleLink {
  */
 const MODULE_ROUTES: Record<string, string> = {
   costs: '/costs',
+  match: '/match-elements',
   search: '/costs',
   ai: '/ai-estimate',
   ai_agents: '/ai-agents',
