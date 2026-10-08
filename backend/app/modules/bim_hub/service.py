@@ -1155,6 +1155,12 @@ class BIMHubService:
         elements = list(result.scalars().all())
         if not elements:
             return False
+        # The import keeps the original header text beside the lowercased keys;
+        # without it the rebuilt sidecar would list "phase created".
+        model = await self.session.get(BIMModel, model_uuid)
+        labels = (model.metadata_ or {}).get("column_labels") if model is not None else None
+        if not isinstance(labels, dict):
+            labels = None
 
         rows: list[dict[str, Any]] = []
         for el in elements:
@@ -1183,6 +1189,7 @@ class BIMHubService:
                 project_id=project_id,
                 model_id=model_id,
                 rows=rows,
+                labels=labels,
                 source=dataframe_store.SOURCE_DATABASE,
             )
         except Exception:  # noqa: BLE001 - the property panel is best-effort

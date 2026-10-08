@@ -605,3 +605,20 @@ async def test_the_parquet_status_tells_the_search_panel_the_sidecar_state(
     body = await bim_router.get_parquet_status(model_id, user_id="u1", service=None)  # type: ignore[arg-type]
     assert body["sidecar"] == "rebuilt"
     assert body["status"] == "ok"
+
+
+@pytest.mark.asyncio
+async def test_a_rebuilt_sidecar_keeps_the_revit_property_names(session, data_dir: Path) -> None:
+    """The import lowercases every header; the rebuild must still show "Phase Created"."""
+    project, _boq, model, _by_ref = await _capped_model(session, data_dir)
+    model.metadata_ = {"column_labels": {"phase created": "Phase Created", "category": "Category"}}
+    await session.flush()
+    sidecar = data_dir / "bim" / str(project.id) / str(model.id) / "elements.parquet"
+    sidecar.unlink()
+
+    assert await BIMHubService(session).ensure_parquet(str(project.id), str(model.id))
+
+    labels = {c["name"]: c.get("label") for c in ds.read_schema(str(project.id), str(model.id))}
+    assert labels["phase created"] == "Phase Created"
+    assert labels["category"] == "Category"
+    assert ds.sidecar_state(str(project.id), str(model.id)) == "rebuilt"

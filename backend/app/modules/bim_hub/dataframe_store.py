@@ -250,7 +250,7 @@ def write_dataframe(
     # but the literal string "None" for materials).
     schema = pa.schema([(k, pa.string()) for k in all_keys])
     metadata: dict[bytes, bytes] = {}
-    if labels:
+    if isinstance(labels, dict) and labels:
         kept = {k: str(labels[k]) for k in all_keys if labels.get(k)}
         if kept:
             metadata[_LABELS_METADATA_KEY] = json.dumps(kept, ensure_ascii=False).encode("utf-8")
