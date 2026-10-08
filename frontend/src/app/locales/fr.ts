@@ -19309,7 +19309,7 @@ const resource = {
     "contracts.country_defaults.CA.retention_release_split.note": "Versée lorsque la lien period suivant le certificate of substantial performance publié est écoulée sans qu'aucun lien n'ait été inscrit ; le holdback sur les travaux exécutés ensuite est versé à l'achèvement du contrat. L'Ontario libère aussi le holdback chaque année de contrat à partir de 2026.",
     "contracts.country_defaults.CA.payment_period_days.note": "Le maître d'ouvrage paie une facture conforme (proper invoice) dans les 28 jours suivant sa réception, sauf s'il émet une notice of non-payment.",
     "contracts.country_defaults.CA.valuation_interval.note": "L'entrepreneur remet une facture conforme chaque mois, sauf si le contrat fixe un autre intervalle.",
-    "contracts.country_defaults.CA.certificate_name.note": "Le Consultant certifie la demande de paiement mensuelle (application for payment) de l'entrepreneur.",
+    "contracts.country_defaults.CA.certificate_name.note": "Le Consultant certifie la demande de paiement mensuelle de l'entrepreneur.",
     "contracts.country_defaults.CN.retention_percent.note": "Le dépôt de garantie de qualité ne peut pas dépasser trois pour cent du prix de contrat arrêté.",
     "contracts.country_defaults.CN.retention_cap_percent.note": "Trois pour cent du prix arrêté constitue un plafond légal pour le dépôt.",
     "contracts.country_defaults.CN.retention_release_split.note": "Remboursé à la fin de la période de garantie des défauts, généralement 12 mois et au plus 24.",
