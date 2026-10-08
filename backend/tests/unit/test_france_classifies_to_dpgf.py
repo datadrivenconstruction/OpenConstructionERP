@@ -46,9 +46,10 @@ def test_a_project_already_stored_under_untec_keeps_it() -> None:
     assert resolved.source == "explicit"
 
 
-def test_francophone_africa_still_reads_untec() -> None:
+def test_francophone_africa_reads_dpgf() -> None:
+    """Senegal, Ivory Coast and Cameroon moved off UNTEC in 2026-10."""
     for region in ("SN", "CI", "CM"):
-        assert resolve_standard(None, region).standard == "untec", region
+        assert resolve_standard(None, region).standard == "dpgf", region
 
 
 def test_a_french_project_runs_the_dpgf_rules_the_engine_registers() -> None:
