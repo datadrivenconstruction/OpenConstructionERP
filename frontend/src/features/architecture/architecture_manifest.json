@@ -82744,6 +82744,13 @@
           "request_schema": "SheetUpdate"
         },
         {
+          "method": "POST",
+          "path": "/sheets/bulk-update/",
+          "handler": "bulk_update_sheets",
+          "response_model": "list[SheetResponse]",
+          "request_schema": "SheetBulkUpdate"
+        },
+        {
           "method": "DELETE",
           "path": "/sheets/{sheet_id}",
           "handler": "delete_sheet",
@@ -83361,6 +83368,40 @@
               "name": "metadata",
               "type": "dict[str, Any] | None",
               "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "SheetBulkUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The same correction applied to several sheets of one project at once.\n\nOnly the fields a drawing set shares are offered: a discipline, a revision\nand its date, a scale. Number and title name one drawing each and are\ncorrected one sheet at a time.",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "sheet_ids",
+              "type": "list[UUID]"
+            },
+            {
+              "name": "discipline",
+              "type": "str | None"
+            },
+            {
+              "name": "revision",
+              "type": "str | None"
+            },
+            {
+              "name": "revision_date",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "scale",
+              "type": "str | None"
             }
           ]
         },
@@ -235872,10 +235913,10 @@
     },
     {
       "name": "file-manager",
-      "ts_files": 51,
+      "ts_files": 52,
       "css_files": 0,
       "test_files": 12,
-      "total_files": 51
+      "total_files": 52
     },
     {
       "name": "file-references",
@@ -237997,11 +238038,11 @@
     "total_models": 625,
     "total_columns": 7171,
     "total_relationships": 236,
-    "total_routes": 3768,
-    "total_schemas": 3575,
+    "total_routes": 3769,
+    "total_schemas": 3576,
     "total_python_files": 2303,
     "frontend_features": 192,
-    "frontend_ts_files": 2998,
+    "frontend_ts_files": 2999,
     "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {
