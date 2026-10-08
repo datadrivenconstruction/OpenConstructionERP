@@ -393,7 +393,15 @@ class ProcessRegistry:
             if dep_entry is None or not self._desired(dep_entry):
                 self._fail(entry, RuntimeError(f"dependency '{dep}' is disabled"), retry=False)
                 return
-            if not await self.ensure_started(dep):
+            await self.ensure_started(dep)
+            # A resident dependency (a model, a store) is still ``starting``
+            # while it loads; judging it then would fail a process whose
+            # dependency is healthy, just not ready yet.
+            waited = 0.0
+            while dep_entry.status is ProcessStatus.STARTING and waited < self.settle_timeout_s:
+                await asyncio.sleep(0.05)
+                waited += 0.05
+            if dep_entry.status not in {ProcessStatus.RUNNING, ProcessStatus.DEGRADED}:
                 self._fail(entry, RuntimeError(f"dependency '{dep}' failed to start"))
                 return
         entry.generation += 1

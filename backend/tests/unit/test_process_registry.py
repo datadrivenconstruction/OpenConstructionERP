@@ -529,3 +529,40 @@ async def test_ensure_does_not_rerun_finished_oneshot() -> None:
     await reg.restart("warm")
     await _until(lambda: len(runs) == 2)
     await reg.stop_all()
+
+
+@pytest.mark.asyncio
+async def test_dependency_still_loading_is_awaited_not_failed() -> None:
+    gate = asyncio.Event()
+
+    async def load() -> None:
+        await gate.wait()
+
+    reg = await _registry()
+    reg.register(_spec("store", start_mode="lazy", factory=lambda: ResidentProcess(load=load)))
+    reg.register(_spec("backfill", dependencies=["store"], restart_policy="never"))
+    starting = asyncio.create_task(reg.start("backfill"))
+    await _until(lambda: reg.status("store") is ProcessStatus.STARTING)
+    assert reg.status("backfill") is not ProcessStatus.ERROR
+    gate.set()
+    await starting
+    assert reg.status("store") is ProcessStatus.RUNNING
+    assert reg.status("backfill") is ProcessStatus.RUNNING
+    assert reg.describe("backfill")["last_error"] is None
+    await reg.stop_all()
+
+
+@pytest.mark.asyncio
+async def test_dependency_that_fails_while_loading_fails_the_dependent() -> None:
+    async def load() -> None:
+        await asyncio.sleep(0.02)
+        raise RuntimeError("store broke")
+
+    reg = await _registry()
+    reg.register(_spec("store", start_mode="lazy", restart_policy="never", factory=lambda: ResidentProcess(load=load)))
+    reg.register(_spec("backfill", dependencies=["store"], restart_policy="never"))
+    await reg.start("backfill")
+    assert reg.status("store") is ProcessStatus.ERROR
+    assert reg.status("backfill") is ProcessStatus.ERROR
+    assert "store" in reg.describe("backfill")["last_error"]["message"]
+    await reg.stop_all()
