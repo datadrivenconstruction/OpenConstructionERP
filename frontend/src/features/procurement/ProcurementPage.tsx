@@ -1,12 +1,14 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { lazy, Suspense, useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   Package,
+  Truck,
+  Boxes,
   ClipboardCheck,
   Search,
   FileText,
@@ -348,7 +350,15 @@ function currencyOptions(active: string): string[] {
   return [...COMMON_CURRENCIES];
 }
 
-type ProcurementTab = 'purchase-orders' | 'goods-receipts';
+type ProcurementTab = 'purchase-orders' | 'goods-receipts' | 'vendors' | 'catalog';
+
+// The vendor and catalog reference library, shown here as two tabs so a buyer
+// does not leave Procurement to find a supplier or a catalog price. It is the
+// same component the standalone /supplier-catalogs page renders, loaded on
+// first open; that page keeps all of its tabs.
+const SupplierCatalogsPage = lazy(() =>
+  import('@/features/supplier-catalogs').then((m) => ({ default: m.SupplierCatalogsPage })),
+);
 
 const PO_STATUS_COLORS: Record<
   string,
@@ -461,6 +471,16 @@ export function ProcurementPage() {
       label: t('procurement.goods_receipts', { defaultValue: 'Goods Receipts' }),
       icon: <ClipboardCheck size={15} />,
     },
+    {
+      key: 'vendors',
+      label: t('supplier_catalogs.tab_vendors', { defaultValue: 'Vendors' }),
+      icon: <Truck size={15} />,
+    },
+    {
+      key: 'catalog',
+      label: t('supplier_catalogs.tab_catalog', { defaultValue: 'Catalog' }),
+      icon: <Boxes size={15} />,
+    },
   ];
 
   return (
@@ -572,8 +592,13 @@ export function ProcurementPage() {
         ))}
       </div>
 
-      {/* Tab Content */}
-      {!projectId ? (
+      {/* Tab Content. Vendors and the catalog belong to the company, not a
+          project, so they open without one. */}
+      {activeTab === 'vendors' || activeTab === 'catalog' ? (
+        <Suspense fallback={<Loader2 size={18} className="animate-spin text-content-tertiary" />}>
+          <SupplierCatalogsPage embeddedTab={activeTab} />
+        </Suspense>
+      ) : !projectId ? (
         <RequiresProject
           emptyHint={t('procurement.select_project', {
             defaultValue:
