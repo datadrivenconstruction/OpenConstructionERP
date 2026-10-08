@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "Förslag använder en enklare rangordning eftersom {{names}} är avstängd.",
+    "processes.match_models_open": "Slå på det under Bakgrundstjänster",
     "processes.wizard.heavy_hint": "{{module}} fungerar även utan.",
     "processes.wizard.heavy_hint_search": "Nyckelordssökning fungerar även utan.",
     "processes.wizard.heavy_label": "AI: {{module}}",

@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "{{names}} 已关闭，因此建议使用较简单的排序。",
+    "processes.match_models_open": "请在“后台服务”中开启",
     "processes.wizard.heavy_hint": "没有 AI，{{module}} 也能正常使用。",
     "processes.wizard.heavy_hint_search": "没有 AI，关键词搜索也能正常使用。",
     "processes.wizard.heavy_label": "AI：{{module}}",

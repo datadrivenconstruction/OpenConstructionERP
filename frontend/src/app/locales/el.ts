@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "Οι προτάσεις χρησιμοποιούν απλούστερη κατάταξη, επειδή το {{names}} είναι απενεργοποιημένο.",
+    "processes.match_models_open": "Ενεργοποιήστε το στις Υπηρεσίες παρασκηνίου",
     "processes.wizard.heavy_hint": "Το {{module}} λειτουργεί και χωρίς αυτό.",
     "processes.wizard.heavy_hint_search": "Η αναζήτηση με λέξεις-κλειδιά λειτουργεί και χωρίς αυτό.",
     "processes.wizard.heavy_label": "AI: {{module}}",

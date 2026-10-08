@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "Vorschläge nutzen eine einfachere Rangfolge, weil {{names}} ausgeschaltet ist.",
+    "processes.match_models_open": "Unter Hintergrunddienste einschalten",
     "processes.wizard.heavy_hint": "{{module}} funktioniert auch ohne.",
     "processes.wizard.heavy_hint_search": "Die Stichwortsuche funktioniert auch ohne.",
     "processes.wizard.heavy_label": "KI: {{module}}",

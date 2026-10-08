@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "A javaslatok egyszerűbb rangsorolást használnak, mert a(z) {{names}} ki van kapcsolva.",
+    "processes.match_models_open": "Kapcsolja be itt: Háttérszolgáltatások",
     "processes.wizard.heavy_hint": "A(z) {{module}} enélkül is működik.",
     "processes.wizard.heavy_hint_search": "A kulcsszavas keresés enélkül is működik.",
     "processes.wizard.heavy_label": "AI: {{module}}",

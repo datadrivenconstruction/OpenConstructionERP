@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "{{names}} がオフのため、候補はよりシンプルな順位付けを使用しています。",
+    "processes.match_models_open": "バックグラウンドサービス でオンにしてください",
     "processes.wizard.heavy_hint": "AIなしでも{{module}}は使えます。",
     "processes.wizard.heavy_hint_search": "AIなしでもキーワード検索は使えます。",
     "processes.wizard.heavy_label": "AI: {{module}}",

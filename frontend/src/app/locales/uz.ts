@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "{{names}} o'chirilgani uchun takliflar soddaroq saralashdan foydalanmoqda.",
+    "processes.match_models_open": "Uni Fon xizmatlari bo'limida yoqing",
     "processes.wizard.heavy_hint": "{{module}} usiz ham ishlaydi.",
     "processes.wizard.heavy_hint_search": "Kalit so'z bo'yicha qidiruv usiz ham ishlaydi.",
     "processes.wizard.heavy_label": "AI: {{module}}",

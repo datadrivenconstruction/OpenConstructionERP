@@ -12,6 +12,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "Las sugerencias usan un ranking más simple porque {{names}} está desactivado.",
+    "processes.match_models_open": "Actívalo en Servicios en segundo plano",
     "processes.wizard.heavy_hint": "{{module}} funciona sin ella.",
     "processes.wizard.heavy_hint_search": "La búsqueda por palabras clave funciona sin ella.",
     "processes.wizard.heavy_label": "IA: {{module}}",

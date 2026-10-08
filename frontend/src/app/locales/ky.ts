@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "{{names}} өчүрүлгөндүктөн, сунуштар жөнөкөй иреттөөнү колдонот.",
+    "processes.match_models_open": "Аны Фондук кызматтар бөлүмүндө күйгүзүңүз",
     "processes.wizard.heavy_hint": "{{module}} ансыз да иштейт.",
     "processes.wizard.heavy_hint_search": "Ачкыч сөз боюнча издөө ансыз да иштейт.",
     "processes.wizard.heavy_label": "AI: {{module}}",

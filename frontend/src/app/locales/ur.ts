@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "{{names}} بند ہونے کی وجہ سے تجاویز سادہ درجہ بندی استعمال کر رہی ہیں۔",
+    "processes.match_models_open": "اسے بیک گراؤنڈ سروسز میں آن کریں",
     "processes.wizard.heavy_hint": "{{module}} اس کے بغیر بھی کام کرتا ہے۔",
     "processes.wizard.heavy_hint_search": "کلیدی لفظ کی تلاش اس کے بغیر بھی کام کرتی ہے۔",
     "processes.wizard.heavy_label": "AI: {{module}}",

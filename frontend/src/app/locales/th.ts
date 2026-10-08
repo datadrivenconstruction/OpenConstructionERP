@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "คำแนะนำใช้การจัดอันดับแบบง่ายกว่า เพราะ {{names}} ปิดอยู่",
+    "processes.match_models_open": "เปิดใช้งานได้ที่ บริการเบื้องหลัง",
     "processes.wizard.heavy_hint": "{{module}} ใช้งานได้โดยไม่ต้องมี AI",
     "processes.wizard.heavy_hint_search": "การค้นหาด้วยคำสำคัญใช้งานได้โดยไม่ต้องมี AI",
     "processes.wizard.heavy_label": "AI: {{module}}",

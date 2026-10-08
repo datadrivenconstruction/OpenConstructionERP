@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "Suggesties gebruiken een eenvoudigere rangschikking omdat {{names}} uit staat.",
+    "processes.match_models_open": "Zet het aan bij Achtergronddiensten",
     "processes.wizard.heavy_hint": "{{module}} werkt ook zonder.",
     "processes.wizard.heavy_hint_search": "Zoeken op trefwoord werkt ook zonder.",
     "processes.wizard.heavy_label": "AI: {{module}}",

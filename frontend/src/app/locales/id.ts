@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "Saran memakai peringkat yang lebih sederhana karena {{names}} nonaktif.",
+    "processes.match_models_open": "Aktifkan di Layanan latar belakang",
     "processes.wizard.heavy_hint": "{{module}} tetap berfungsi tanpa AI.",
     "processes.wizard.heavy_hint_search": "Pencarian kata kunci tetap berfungsi tanpa AI.",
     "processes.wizard.heavy_label": "AI: {{module}}",

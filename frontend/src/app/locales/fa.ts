@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "پیشنهادها از رتبه‌بندی ساده‌تری استفاده می‌کنند، چون {{names}} خاموش است.",
+    "processes.match_models_open": "آن را در سرویس‌های پس‌زمینه روشن کنید",
     "processes.wizard.heavy_hint": "{{module}} بدون آن هم کار می‌کند.",
     "processes.wizard.heavy_hint_search": "جستجوی کلیدواژه‌ای بدون آن هم کار می‌کند.",
     "processes.wizard.heavy_label": "هوش مصنوعی: {{module}}",

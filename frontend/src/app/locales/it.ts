@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "I suggerimenti usano una classificazione più semplice perché {{names}} è disattivato.",
+    "processes.match_models_open": "Attivalo in Servizi in background",
     "processes.wizard.heavy_hint": "{{module}} funziona anche senza.",
     "processes.wizard.heavy_hint_search": "La ricerca per parole chiave funziona anche senza.",
     "processes.wizard.heavy_label": "IA: {{module}}",

@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "{{names}} বন্ধ থাকায় পরামর্শগুলো সহজ র‍্যাংকিং ব্যবহার করছে।",
+    "processes.match_models_open": "ব্যাকগ্রাউন্ড সার্ভিস-এ এটি চালু করুন",
     "processes.wizard.heavy_hint": "{{module}} এটি ছাড়াই কাজ করে।",
     "processes.wizard.heavy_hint_search": "কীওয়ার্ড সার্চ এটি ছাড়াই কাজ করে।",
     "processes.wizard.heavy_label": "AI: {{module}}",

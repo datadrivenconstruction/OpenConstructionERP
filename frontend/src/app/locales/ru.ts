@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "Подсказки используют упрощённое ранжирование, потому что {{names}} отключено.",
+    "processes.match_models_open": "Включите это в разделе Фоновые службы",
     "processes.wizard.heavy_hint": "{{module}} работает и без него.",
     "processes.wizard.heavy_hint_search": "Поиск по ключевым словам работает и без него.",
     "processes.wizard.heavy_label": "ИИ: {{module}}",

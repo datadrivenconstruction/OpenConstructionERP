@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "{{names}} kapalı olduğu için öneriler daha basit bir sıralama kullanıyor.",
+    "processes.match_models_open": "Arka plan hizmetleri bölümünden açın",
     "processes.wizard.heavy_hint": "{{module}} bunsuz da çalışır.",
     "processes.wizard.heavy_hint_search": "Anahtar kelime araması bunsuz da çalışır.",
     "processes.wizard.heavy_label": "AI: {{module}}",

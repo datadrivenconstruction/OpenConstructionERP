@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "Prijedlozi koriste jednostavnije rangiranje jer je {{names}} isključeno.",
+    "processes.match_models_open": "Uključite to u odjeljku Pozadinske usluge",
     "processes.wizard.heavy_hint": "{{module}} radi i bez toga.",
     "processes.wizard.heavy_hint_search": "Pretraživanje po ključnim riječima radi i bez toga.",
     "processes.wizard.heavy_label": "AI: {{module}}",

@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "Soovitused kasutavad lihtsamat järjestust, sest {{names}} on välja lülitatud.",
+    "processes.match_models_open": "Lülitage see sisse jaotises Taustateenused",
     "processes.wizard.heavy_hint": "{{module}} töötab ka ilma selleta.",
     "processes.wizard.heavy_hint_search": "Märksõnaotsing töötab ka ilma selleta.",
     "processes.wizard.heavy_label": "AI: {{module}}",

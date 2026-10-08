@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "Podpowiedzi używają prostszego rankingu, ponieważ {{names}} jest wyłączone.",
+    "processes.match_models_open": "Włącz to w sekcji Usługi w tle",
     "processes.wizard.heavy_hint": "{{module}} działa także bez tego.",
     "processes.wizard.heavy_hint_search": "Wyszukiwanie po słowach kluczowych działa także bez tego.",
     "processes.wizard.heavy_label": "AI: {{module}}",

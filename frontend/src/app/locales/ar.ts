@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "تستخدم الاقتراحات ترتيبًا أبسط لأن {{names}} متوقف.",
+    "processes.match_models_open": "فعّله في الخدمات الخلفية",
     "processes.wizard.heavy_hint": "{{module}} يعمل بدونه.",
     "processes.wizard.heavy_hint_search": "البحث بالكلمات المفتاحية يعمل بدونه.",
     "processes.wizard.heavy_label": "الذكاء الاصطناعي: {{module}}",

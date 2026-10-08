@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "Forslag bruger en enklere rangering, fordi {{names}} er slået fra.",
+    "processes.match_models_open": "Slå det til under Baggrundstjenester",
     "processes.wizard.heavy_hint": "{{module}} fungerer uden.",
     "processes.wizard.heavy_hint_search": "Søgning på nøgleord fungerer uden.",
     "processes.wizard.heavy_label": "AI: {{module}}",

@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "Sugestiile folosesc un clasament mai simplu, deoarece {{names}} este dezactivat.",
+    "processes.match_models_open": "Activați-l în Servicii de fundal",
     "processes.wizard.heavy_hint": "{{module}} funcționează și fără el.",
     "processes.wizard.heavy_hint_search": "Căutarea după cuvinte cheie funcționează și fără el.",
     "processes.wizard.heavy_label": "AI: {{module}}",

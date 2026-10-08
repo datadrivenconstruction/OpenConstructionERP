@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "{{names}}이(가) 꺼져 있어 추천은 더 단순한 순위 방식을 사용합니다.",
+    "processes.match_models_open": "백그라운드 서비스에서 켜세요",
     "processes.wizard.heavy_hint": "{{module}} 기능은 AI 없이도 작동합니다.",
     "processes.wizard.heavy_hint_search": "키워드 검색은 AI 없이도 작동합니다.",
     "processes.wizard.heavy_label": "AI: {{module}}",

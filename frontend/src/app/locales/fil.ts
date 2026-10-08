@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "Mas simpleng ranking ang gamit ng mga suhestiyon dahil naka-off ang {{names}}.",
+    "processes.match_models_open": "I-on ito sa Mga background service",
     "processes.wizard.heavy_hint": "Gumagana ang {{module}} kahit wala ito.",
     "processes.wizard.heavy_hint_search": "Gumagana ang paghahanap gamit ang keyword kahit wala ito.",
     "processes.wizard.heavy_label": "AI: {{module}}",

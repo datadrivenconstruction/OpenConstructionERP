@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "Ehdotukset käyttävät yksinkertaisempaa järjestystä, koska {{names}} on pois päältä.",
+    "processes.match_models_open": "Ota se käyttöön kohdassa Taustapalvelut",
     "processes.wizard.heavy_hint": "{{module}} toimii myös ilman sitä.",
     "processes.wizard.heavy_hint_search": "Avainsanahaku toimii myös ilman sitä.",
     "processes.wizard.heavy_label": "Tekoäly: {{module}}",

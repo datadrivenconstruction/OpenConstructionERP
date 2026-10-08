@@ -3,6 +3,8 @@
 
 const resource = {
   "translation": {
+    "processes.match_models_off": "{{names}} унтарсан тул санал болгох зүйлс энгийн эрэмбэлэлт ашиглаж байна.",
+    "processes.match_models_open": "Дэвсгэр үйлчилгээ хэсэгт асаана уу",
     "processes.wizard.heavy_hint": "{{module}} үүнгүйгээр ч ажиллана.",
     "processes.wizard.heavy_hint_search": "Түлхүүр үгээр хайх нь үүнгүйгээр ч ажиллана.",
     "processes.wizard.heavy_label": "AI: {{module}}",

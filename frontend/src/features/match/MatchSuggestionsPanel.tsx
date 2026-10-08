@@ -54,6 +54,8 @@ import type {
 } from './types';
 import { fmtFixed } from '@/shared/lib/formatters';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { useProcessesUi } from '@/features/processes/useProcessesUi';
+import { useIsProcessAdmin } from '@/features/processes/labels';
 
 /* ── Props ─────────────────────────────────────────────────────────────── */
 
@@ -338,6 +340,10 @@ export function MatchSuggestionsPanel({
         hasAutoLink={Boolean(response?.auto_linked)}
         compact={compact}
       />
+
+      {(response?.models_disabled?.length ?? 0) > 0 && !compact && (
+        <MatchModelsOffHint ids={response!.models_disabled!} />
+      )}
 
       {/* Fallback hint: when the cascade fell through to monolingual
           matching (no MUSE/IATE pair, no cache hit, LLM tier missing
@@ -1197,3 +1203,37 @@ function ScoreBadge({
 }
 
 export default MatchSuggestionsPanel;
+
+/**
+ * Says when the matching models are switched off, so a thinner list of
+ * suggestions is read as a setting rather than as the data. Links to the
+ * Background services panel at the first switched-off model.
+ */
+function MatchModelsOffHint({ ids }: { ids: ReadonlyArray<string> }) {
+  const { t } = useTranslation();
+  const isAdmin = useIsProcessAdmin();
+  const openPanel = useProcessesUi((s) => s.openPanel);
+  const names = ids.map((id) => t(`processes.${id}.name`, { defaultValue: id.replace(/_/g, ' ') })).join(', ');
+  return (
+    <div
+      className="flex flex-wrap items-start gap-x-2 gap-y-1 px-3 py-2 border-b border-border-light bg-sky-50 text-sky-900 text-[11px] dark:bg-sky-900/20 dark:text-sky-200"
+      role="status"
+      data-testid="match-models-off-hint"
+    >
+      <Info size={11} className="mt-0.5 shrink-0" aria-hidden="true" />
+      <span className="flex-1 min-w-0">
+        {t('processes.match_models_off', {
+          defaultValue: 'Suggestions use a simpler ranking because {{names}} is off.',
+          names,
+        })}{' '}
+        {isAdmin ? (
+          <button type="button" onClick={() => openPanel(ids[0])} className="font-medium text-oe-blue hover:underline">
+            {t('processes.match_models_open', { defaultValue: 'Turn it on in Background services' })}
+          </button>
+        ) : (
+          t('processes.notice.ask_admin', { defaultValue: 'Ask an administrator to turn it on.' })
+        )}
+      </span>
+    </div>
+  );
+}
