@@ -38324,7 +38324,7 @@ const resource = {
     "validation.status_info": "Información",
     "validation_rules.cta_add_custom": "Cómo agregar una regla personalizada",
     "validation_rules.cta_open_runs": "Abrir ejecuciones de validación",
-    "validation_rules.intro_1": "Todas las reglas de validación integradas en OpenConstructionERP. Utilice este catálogo para ver qué se verifica en cada importación (BOQs, modelos CAD, datos de licitación, resultados de despegue).",
+    "validation_rules.intro_1": "Todas las reglas de validación integradas en OpenConstructionERP. Utilice este catálogo para ver qué se verifica en cada importación (BOQs, modelos CAD, datos de licitación, resultados de medición).",
     "validation_rules.intro_2": "Busque por severidad (los errores bloquean, las advertencias señalan, la información sugiere), por estándar (DIN 276 / GAEB / NRM / MasterFormat) o busque por nombre.",
     "validation_rules.intro_3": "La selección de reglas por proyecto se configura durante el flujo de trabajo de importación: abra un proyecto, vaya a su pestaña Validación y elija qué conjuntos de reglas se aplican.",
     "validation_rules.title": "Reglas de validación",
