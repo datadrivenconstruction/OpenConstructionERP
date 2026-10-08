@@ -1389,10 +1389,17 @@ class ContractsService:
             return None
         return normalise_country(getattr(project, "country_code", None)) or None
 
+    async def project_subdivision(self, project_id: uuid.UUID) -> str | None:
+        """The project's ISO 3166-2 subdivision as recorded, or None."""
+        from app.modules.projects.models import Project  # noqa: PLC0415
+
+        project = await self.session.get(Project, project_id)
+        return (getattr(project, "subdivision_code", None) or None) if project is not None else None
+
     async def country_defaults_for_project(self, project_id: uuid.UUID) -> dict[str, Any]:
         """What a new contract on ``project_id`` starts from, for the form to pre-fill."""
         country = await self.project_country(project_id)
-        defaults = resolve_contract_defaults(country)
+        defaults = resolve_contract_defaults(country, await self.project_subdivision(project_id))
         # A subcontract agreement has no ceiling, so where the country's rate
         # runs above its cap the agreement form starts from the cap. Answered
         # here so the form shows the figure the server will apply.
@@ -1400,6 +1407,8 @@ class ContractsService:
         return {
             "project_id": project_id,
             "country_code": country,
+            "subdivision_code": (defaults or {}).get("subdivision_code"),
+            "release_period": (defaults or {}).get("release_period"),
             "has_defaults": defaults is not None,
             "standard_form": (defaults or {}).get("standard_form"),
             "values": (defaults or {}).get("values") or {},
@@ -1425,7 +1434,8 @@ class ContractsService:
             # left unwritten, and the event decides as it did before country
             # defaults existed.
             explicit.setdefault("retention_release_split", None)
-        values, stamp = apply_contract_defaults(explicit, resolve_contract_defaults(country), country_code=country)
+        defaults = resolve_contract_defaults(country, await self.project_subdivision(data.project_id))
+        values, stamp = apply_contract_defaults(explicit, defaults, country_code=country)
         fallback: list[str] = []
 
         retention = values.get("retention_percent")

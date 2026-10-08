@@ -225,6 +225,10 @@ class ContractCountryDefaultsResponse(BaseModel):
 
     project_id: UUID
     country_code: str | None = None
+    # The ISO 3166-2 row read over the country's, e.g. "CA-MB", and how long
+    # its holdback is kept after the release event. None when not recorded.
+    subdivision_code: str | None = None
+    release_period: dict[str, Any] | None = None
     has_defaults: bool
     standard_form: str | None = None
     values: dict[str, Any] = Field(default_factory=dict)

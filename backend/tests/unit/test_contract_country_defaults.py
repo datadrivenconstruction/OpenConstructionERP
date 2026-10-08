@@ -554,3 +554,52 @@ def test_a_country_with_no_row_gives_a_subcontract_no_rate() -> None:
 def test_the_contract_cap_is_read_from_its_payment_terms(raw, expected) -> None:
     contract = SimpleNamespace(terms={"payment_terms": {"retention_cap_percent": raw}})
     assert contract_retention_cap(contract) == expected
+
+
+# ── Canadian provinces ────────────────────────────────────────────────
+
+
+def test_a_manitoba_project_starts_from_seven_and_a_half_percent() -> None:
+    resolved = resolve_contract_defaults("CA", "CA-MB")
+    assert resolved is not None
+    assert resolved["subdivision_code"] == "CA-MB"
+    assert resolved["values"]["retention_percent"] == "7.5"
+    assert (
+        resolved["sources"]["retention_percent"]["note_key"]
+        == "contracts.country_defaults.CA-MB.retention_percent.note"
+    )
+    # Fields the province does not name come from the country row.
+    assert resolved["values"]["payment_period_days"] == 28
+    assert (
+        resolved["sources"]["payment_period_days"]["note_key"]
+        == "contracts.country_defaults.CA.payment_period_days.note"
+    )
+    assert resolved["release_period"]["value"] == 60
+
+
+def test_each_province_states_its_own_release_period() -> None:
+    periods = {
+        code: resolve_contract_defaults("CA", code)["release_period"]["value"]
+        for code in ("CA-ON", "CA-BC", "CA-AB", "CA-MB", "CA-QC")
+    }
+    assert periods == {"CA-ON": 60, "CA-BC": 55, "CA-AB": 60, "CA-MB": 60, "CA-QC": None}
+
+
+def test_quebec_has_no_statutory_holdback() -> None:
+    resolved = resolve_contract_defaults("CA", "QC")
+    assert resolved["subdivision_code"] == "CA-QC"
+    assert resolved["sources"]["retention_percent"]["source"] == "industry_practice"
+    assert resolved["values"]["payment_period_days"] is None
+
+
+def test_an_unknown_or_foreign_subdivision_reads_the_country_row() -> None:
+    national = resolve_contract_defaults("CA")
+    for sub in (None, "", "CA-NS", "US-CA", "MB-X"):
+        resolved = resolve_contract_defaults("CA", sub)
+        assert resolved["subdivision_code"] is None, sub
+        assert resolved["release_period"] is None, sub
+        assert resolved["values"] == national["values"], sub
+
+
+def test_a_subdivision_never_lends_its_row_to_another_country() -> None:
+    assert resolve_contract_defaults("US", "CA-MB")["subdivision_code"] is None
