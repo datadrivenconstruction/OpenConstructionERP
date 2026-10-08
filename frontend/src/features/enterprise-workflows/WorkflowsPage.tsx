@@ -25,6 +25,7 @@ import { PageHeader } from '@/shared/ui/PageHeader';
 import { useToastStore } from '@/stores/useToastStore';
 import {
   fetchWorkflows,
+  fetchEntityTypes,
   createWorkflow,
   updateWorkflow,
   deleteWorkflow,
@@ -80,6 +81,10 @@ function roleLabel(role: string, t: TFn): string {
   return t(`users.roles.${role}`, { defaultValue: role.charAt(0).toUpperCase() + role.slice(1) });
 }
 
+function entityTypeLabel(entityType: string, t: TFn): string {
+  return t(`enterprise_workflows.entity_${entityType}`, { defaultValue: entityType.replace(/_/g, ' ') });
+}
+
 function actionLabel(action: WorkflowActionType, t: TFn): string {
   switch (action) {
     case 'approve':
@@ -129,6 +134,12 @@ function CreateWorkflowDialog({
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [entityType, setEntityType] = useState('');
+  const { data: entityTypes = [] } = useQuery({
+    queryKey: ['enterprise-workflows', 'entity-types'],
+    queryFn: fetchEntityTypes,
+    enabled: open,
+    staleTime: Infinity,
+  });
   const [steps, setSteps] = useState<StepDraft[]>([EMPTY_STEP]);
 
   const updateStep = useCallback((index: number, patch: Partial<StepDraft>) => {
@@ -191,18 +202,22 @@ function CreateWorkflowDialog({
             <label htmlFor="ew-create-entity" className="mb-1 block text-xs font-medium text-content-secondary">
               {t('enterprise_workflows.entity_type', { defaultValue: 'Entity Type' })}
             </label>
-            <input
+            <select
               id="ew-create-entity"
-              type="text"
               value={entityType}
               onChange={(e) => setEntityType(e.target.value)}
-              placeholder={t('enterprise_workflows.entity_type_placeholder', {
-                defaultValue: 'e.g. change_order, variation, invoice',
-              })}
               className="w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm
-                text-content-primary placeholder:text-content-tertiary
-                focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
-            />
+                text-content-primary focus:border-oe-blue focus:outline-none focus:ring-1 focus:ring-oe-blue"
+            >
+              <option value="">
+                {t('enterprise_workflows.entity_type_choose', { defaultValue: 'Choose a record type' })}
+              </option>
+              {entityTypes.map((et) => (
+                <option key={et} value={et}>
+                  {entityTypeLabel(et, t)}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
@@ -344,7 +359,7 @@ function WorkflowRow({
           </Badge>
         </div>
         <div className="mt-0.5 flex items-center gap-3 text-xs text-content-tertiary">
-          <span>{workflow.entity_type}</span>
+          <span>{entityTypeLabel(workflow.entity_type, t)}</span>
           {workflow.description && (
             <>
               <span aria-hidden>·</span>
@@ -427,7 +442,7 @@ function ApprovalRequestRow({
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-content-primary">
-            {request.entity_type}
+            {entityTypeLabel(request.entity_type, t)}
           </span>
           <span className="font-mono text-xs text-content-tertiary">
             {request.entity_id.slice(0, 8)}
