@@ -9,6 +9,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router-dom';
 
 const addToast = vi.fn();
 vi.mock('@/stores/useToastStore', () => {
@@ -65,9 +66,11 @@ function renderCard(data: MatchReadiness | Error, onOpenSetup = vi.fn()) {
   else fetchSpy.mockResolvedValue(data);
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
-    <QueryClientProvider client={qc}>
-      <MatchReadinessCard projectId="p-1" onOpenSetup={onOpenSetup} />
-    </QueryClientProvider>,
+    <MemoryRouter>
+      <QueryClientProvider client={qc}>
+        <MatchReadinessCard projectId="p-1" onOpenSetup={onOpenSetup} />
+      </QueryClientProvider>
+    </MemoryRouter>,
   );
   return { onOpenSetup };
 }
@@ -286,5 +289,18 @@ describe('MatchReadinessCard', () => {
         message: expect.stringContaining('administrator'),
       });
     });
+  });
+});
+
+describe('MatchReadinessCard - why it is blocked', () => {
+  it('says what matching needs and links to the search settings when it cannot install search itself', async () => {
+    renderCard(
+      readiness({
+        can_match: false,
+        blockers: [{ code: 'search_unreachable', params: {} }],
+      }),
+    );
+    expect(await screen.findByText(/meaning search service and a rate catalogue/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Set up search/ })).toHaveAttribute('href', '/settings?tab=ai');
   });
 });

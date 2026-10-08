@@ -663,6 +663,10 @@ export function MatchWizardFlow() {
   // uses, so the picker and the run agree.
   const readinessQ = useMatchReadiness(projectId);
   const recommendedRegion = readinessQ.data?.recommended_catalogue?.region ?? null;
+  // A run while the readiness card names a blocker (no search service, no
+  // catalogue installed) comes back as an empty result with no reason, which
+  // reads as "nothing in the model matched". So the run waits for the card.
+  const matchBlocked = (readinessQ.data?.blockers.length ?? 0) > 0;
 
   // Pre-select the installed catalogue that fits the project, once, and
   // never over the project's own binding or over the user's choice of Auto
@@ -1085,7 +1089,7 @@ export function MatchWizardFlow() {
       case 'scope':
         return true;
       case 'grouping':
-        return !!sessionId && groups.length > 0;
+        return !!sessionId && groups.length > 0 && !matchBlocked;
       case 'run':
         return matchStatus === 'done';
       case 'review':
@@ -1093,7 +1097,7 @@ export function MatchWizardFlow() {
       default:
         return false;
     }
-  }, [stage, projectId, modelId, sessionId, groups.length, matchStatus, autoBlocked, catalogueId]);
+  }, [stage, projectId, modelId, sessionId, groups.length, matchStatus, autoBlocked, catalogueId, matchBlocked]);
 
   const goNext = useCallback(async () => {
     switch (stage) {
@@ -2156,6 +2160,13 @@ export function MatchWizardFlow() {
               </Button>
 
               <div className="text-xs text-content-tertiary">
+                {stage === 'grouping' && matchBlocked && (
+                  <span role="status" className="me-2 text-semantic-warning">
+                    {t('match.wizard.runBlocked', {
+                      defaultValue: 'Matching cannot run yet. The card at the top of the page says what is missing.',
+                    })}
+                  </span>
+                )}
                 {t('match.wizard.stepCounter', {
                   defaultValue: 'Step {{n}} / {{total}}',
                   n: STAGE_INDEX[stage],

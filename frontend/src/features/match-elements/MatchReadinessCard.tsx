@@ -19,6 +19,7 @@
 // the catalogue store the ranker reads was down or empty; its install and
 // refresh actions live here now, shown only where they change the answer.
 
+import { Link } from 'react-router-dom';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -328,6 +329,14 @@ export function MatchReadinessCard({ projectId, onOpenSetup }: Props) {
             defaultValue: 'Matching cannot run here yet',
           })}
         </div>
+        {/* Why at all: without this a blocked card names what is missing but
+            not what it is for, and a first-time user reads it as a fault. */}
+        <p className="mt-1 pl-6 text-xs text-rose-900/90 dark:text-rose-100/90">
+          {t('match_readiness.blocked_why', {
+            defaultValue:
+              'Matching compares every model element with a rate catalogue by meaning, so it needs two things on this server: the meaning search service and a rate catalogue for your country.',
+          })}
+        </p>
         <ul className="mt-1.5 space-y-1 pl-6 text-xs text-rose-800 dark:text-rose-200">
           {data.blockers.map((b) => (
             <li key={b.code} data-code={b.code}>
@@ -363,6 +372,15 @@ export function MatchReadinessCard({ projectId, onOpenSetup }: Props) {
               <RefreshCw className={readinessQ.isFetching ? 'h-3.5 w-3.5 animate-spin' : 'h-3.5 w-3.5'} />
               {t('qdrant_health.refresh_button', { defaultValue: 'Refresh status' })}
             </button>
+          )}
+          {unreachable && unreachable.params.local_install !== 'available' && (
+            <Link
+              to="/settings?tab=ai"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-rose-900 underline-offset-2 hover:underline dark:text-rose-100"
+            >
+              {t('match_readiness.open_search_settings', { defaultValue: 'Set up search' })}
+              <ArrowRight className="h-3 w-3" />
+            </Link>
           )}
           {onOpenSetup && data.blockers.some((b) => b.code === 'no_catalogue_installed') && (
             <button
