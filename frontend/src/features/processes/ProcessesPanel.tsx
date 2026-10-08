@@ -20,7 +20,6 @@ import {
   Check,
   ChevronDown,
   Copy,
-  Database,
   Feather,
   Flame,
   Lock,
