@@ -121,13 +121,18 @@ _INT32_LAST = 2**31 - 1
 
 
 def _str_to_float(value: str | None) -> float:
-    """Convert a string-stored numeric value to float, defaulting to 0.0."""
+    """Convert a string-stored numeric value to float, defaulting to 0.0.
+
+    "NaN" and "Infinity" parse without error and then overflow the duration
+    maths, so a non-finite value counts as no value at all.
+    """
     if value is None:
         return 0.0
     try:
-        return float(value)
+        number = float(value)
     except (ValueError, TypeError):
         return 0.0
+    return number if math.isfinite(number) else 0.0
 
 
 # ── Fallback production rates for generate-from-BOQ durations ─────────────

@@ -955,3 +955,42 @@ async def test_all_rejected_rows_fail_background_job(http_client, auth_headers):
     assert job["status"] == "failed"
     assert "import_persistence_failed" in str(job)
     assert await _row_count(http_client, auth_headers, boq) == _SECTIONS + 5
+
+
+@pytest.mark.asyncio
+async def test_an_imported_computo_generates_a_schedule(http_client, auth_headers) -> None:
+    """The Italian tester's path: import an XPWE computo, then Generate from BoQ.
+
+    Their report was that generation "always errors". The bill here has the
+    capitolo > categoria > sub-categoria depth, measurement sheets and an item
+    filed under no category, as a real computo does.
+    """
+    boq = await _new_boq(http_client, auth_headers)
+    await _import(http_client, auth_headers, boq, _CONTENT)
+    stored = await http_client.get(f"/api/v1/boq/boqs/{boq}", headers=auth_headers)
+    project_id = stored.json()["project_id"]
+    schedule = await http_client.post(
+        "/api/v1/schedule/schedules/",
+        json={"project_id": project_id, "name": "Cronoprogramma", "start_date": "2026-05-04"},
+        headers=auth_headers,
+    )
+    assert schedule.status_code == 201, schedule.text[:300]
+    sid = schedule.json()["id"]
+
+    preview = await http_client.post(
+        f"/api/v1/schedule/schedules/{sid}/generate-from-boq/preview/", json={"boq_id": boq}, headers=auth_headers
+    )
+    assert preview.status_code == 200, preview.text[:500]
+    assert preview.json()["positions_scheduled"] == 5
+
+    generated = await http_client.post(
+        f"/api/v1/schedule/schedules/{sid}/generate-from-boq/", json={"boq_id": boq}, headers=auth_headers
+    )
+    assert generated.status_code in (200, 201), generated.text[:500]
+    # Run again with replace, as a person fixing the bill and regenerating does.
+    again = await http_client.post(
+        f"/api/v1/schedule/schedules/{sid}/generate-from-boq/",
+        json={"boq_id": boq, "replace": True},
+        headers=auth_headers,
+    )
+    assert again.status_code in (200, 201), again.text[:500]
