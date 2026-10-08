@@ -2701,6 +2701,11 @@ def create_app() -> FastAPI:
 
     app.include_router(module_mgmt_router)
 
+    # Processes center API (admin-only): background processes on/off/restart
+    from app.core.processes.router import router as processes_router
+
+    app.include_router(processes_router)
+
     # Audit log API (admin-only)
     from app.core.audit_router import router as audit_router
 
@@ -4507,6 +4512,9 @@ def create_app() -> FastAPI:
             # written to stop having.
             from app.core import data_repairs as _data_repairs_core  # noqa: F401
 
+            # ``oe_process_settings`` lives in app.core as well.
+            from app.core.processes import store as _process_store_core  # noqa: F401
+
             # Register EVERY module's SQLAlchemy models before create_all so
             # a fresh PostgreSQL database gets all tables. This was
             # previously a hand-maintained import list that silently omitted
@@ -4587,6 +4595,18 @@ def create_app() -> FastAPI:
             # reads; ``app.state`` keeps its ``None``, because a question that
             # could not be put has no answer and must not borrow ``False``.
             _arrived_populated_unstamped = False
+            # The processes center starts heavy background processes off on a
+            # brand new installation only; one that already holds application
+            # tables keeps running what it ran before. Asked here, before any
+            # DDL, for the same reason as the question below.
+            try:
+                from sqlalchemy import inspect as _sa_inspect_fresh
+
+                async with engine.connect() as conn:
+                    _table_names = await conn.run_sync(lambda c: _sa_inspect_fresh(c).get_table_names())
+                app.state.database_was_empty = not any(t.startswith("oe_") for t in _table_names)
+            except Exception:
+                logger.debug("Could not tell whether the database arrived empty", exc_info=True)
             try:
                 from app.core.alembic_version_table import database_is_populated_but_unstamped
 
@@ -5165,99 +5185,30 @@ def create_app() -> FastAPI:
             "true",
             "yes",
         )
-        from app.core.semantic_switch import semantic_search_enabled as _semantic_on
+        # The semantic stack (vector store, encoder model and its download,
+        # embedding pool, backfill) runs as processes of the registry, so an
+        # admin can see, stop and restart each piece without a restart. They
+        # follow the semantic search switch, which is off by default: the model
+        # and the vector store are what can push a low-memory machine over the
+        # edge. OE_TEST_FAST_STARTUP keeps them all off, as before.
+        from app.core.processes import process_registry
+        from app.core.processes.semantic import register_semantic_processes
 
+        register_semantic_processes(
+            process_registry,
+            init_vector_db=_init_vector_db,
+            pool_warmup=_start_embedding_pool_warmup,
+            backfill=_auto_backfill_vector_collections,
+        )
+        try:
+            await process_registry.load(fresh_install=lambda: bool(getattr(app.state, "database_was_empty", False)))
+            await process_registry.start_boot()
+        except Exception:  # noqa: BLE001 - background processes never block boot
+            logger.warning("Process registry start failed", exc_info=True)
         if _fast_startup:
             logger.info("Vector DB init + embedding warm-up skipped (OE_TEST_FAST_STARTUP)")
-        elif not _semantic_on():
-            # Off by default: the model and the vector store are what can push
-            # a low-memory machine over the edge, so nothing loads until
-            # someone turns semantic search on in Settings.
-            logger.info(
-                "Semantic search is switched off (Settings or OE_SEMANTIC_SEARCH); model and vector DB not loaded"
-            )
-        else:
-            # Run vector-DB init off the critical boot path. It opens every
-            # collection (LanceDB count_rows per table, or a Qdrant round-trip),
-            # which delayed the server reporting ready on a fresh install.
-            # Nothing downstream awaits its result, and it is non-fatal, so
-            # detach it the same way as the embedder prime below.
-            async def _init_vector_db_background() -> None:
-                import asyncio as _asyncio_vdb
 
-                try:
-                    await _asyncio_vdb.to_thread(_init_vector_db)
-                except Exception:  # noqa: BLE001 - never fatal for startup
-                    logger.debug("Vector DB background init skipped", exc_info=True)
-
-            try:
-                import asyncio as _asyncio_vdb_sched
-
-                _asyncio_vdb_sched.create_task(_init_vector_db_background())
-            except Exception:
-                logger.debug("Could not schedule vector DB init", exc_info=True)
-
-            # The executor is enabled by default. Model loading and inference
-            # warm-up must stay off the critical startup path.
-            #
-            # Prime the embedder in a DETACHED background task. Loading the
-            # SentenceTransformer blocks for up to ~45s, and doing it inline
-            # here meant the server could not answer a single request until
-            # the model finished loading. ``get_embedder()`` is lazy + cached
-            # (see app/core/vector.py), so any caller that needs embeddings
-            # before the prime completes simply loads the model on demand and
-            # semantic search lights up the moment the model is ready. The
-            # load itself is CPU/IO-blocking, so the task hands it to a
-            # worker thread via ``asyncio.to_thread`` - same detached pattern
-            # as ``_auto_backfill_vector_collections`` below.
-            # Fetch the encoder weights, if this deployment wants them. Runs on
-            # its own daemon thread, is a no-op on a server deploy, and cannot
-            # raise here - see app/core/embedding_installer.py. Started before
-            # the prime below so a desktop first boot has the download already
-            # moving while the prime decides there is nothing to load yet.
-            try:
-                from app.core.embedding_installer import start_background_download
-
-                if start_background_download():
-                    logger.info("Encoder weights are downloading in the background - startup does not wait for them")
-            except Exception:  # noqa: BLE001 - an optional extra can never break startup
-                logger.debug("Could not start the encoder download", exc_info=True)
-
-            async def _prime_embedder_background() -> None:
-                import asyncio as _asyncio_emb
-
-                try:
-                    # Priming a model that is not on disk is itself a download,
-                    # and on a server deploy that is the download the platform
-                    # was told not to do. So the prime runs when the weights are
-                    # already installed (warm start, unchanged behaviour) or
-                    # when this deployment asked for them; otherwise it stands
-                    # down and the first caller that genuinely needs a vector
-                    # loads the model lazily, exactly as it does today.
-                    from app.core.embedding_installer import download_enabled, find_installed_model
-                    from app.core.vector import get_embedder as _ge
-
-                    if find_installed_model() is None and not download_enabled():
-                        logger.info(
-                            "Embedder prime skipped: no encoder installed and the background "
-                            "download was not requested (download it from the setup wizard or Settings, or set "
-                            "OE_DOWNLOAD_EMBEDDING_MODEL=1). Semantic search reports its state honestly meanwhile."
-                        )
-                        return
-
-                    embedder = await _asyncio_emb.to_thread(_ge)
-                    if embedder is not None:
-                        logger.info("Embedder background prime complete - semantic search ready")
-                except Exception as exc:  # noqa: BLE001 - never fatal for startup
-                    logger.info("Embedder background prime skipped: %s", exc)
-
-            try:
-                import asyncio as _asyncio_emb_sched
-
-                _asyncio_emb_sched.create_task(_prime_embedder_background())
-            except Exception:
-                logger.debug("Could not schedule embedder prime", exc_info=True)
-
+        if not _fast_startup and process_registry.is_enabled("embedding_model"):
             # Desktop only: the hang that comes before a native crash is the one
             # moment the culprit is still on a stack, so dump them all then.
             try:
@@ -5271,22 +5222,6 @@ def create_app() -> FastAPI:
                     start_loop_stall_watchdog(_asyncio_wd.get_running_loop())
             except Exception:  # noqa: BLE001 - diagnostics are never fatal
                 logger.debug("Loop stall watchdog not started", exc_info=True)
-
-            try:
-                app.state.embedding_warmup_task = _start_embedding_pool_warmup()
-            except Exception as exc:  # noqa: BLE001 - never fatal for startup
-                logger.warning("Embedding pool init skipped: %s", exc)
-
-            # Auto-backfill the multi-collection vector store from existing
-            # rows.  Detached as a background task so a slow embedding model
-            # download or a large dataset doesn't delay startup - semantic
-            # search remains available the moment the model finishes loading.
-            try:
-                import asyncio as _asyncio_bf
-
-                _asyncio_bf.create_task(_auto_backfill_vector_collections())
-            except Exception:
-                logger.debug("Could not schedule vector backfill", exc_info=True)
 
         # ── KPI auto-recalculation scheduler (24-hour interval) ──────────
         import asyncio
@@ -5745,6 +5680,15 @@ def create_app() -> FastAPI:
     async def shutdown() -> None:
         logger.info("Shutting down %s", settings.app_name)
         from app.database import engine
+
+        # Stop every registry process (schedulers, models, the embedding pool)
+        # before the event bus drains and the engine goes away.
+        try:
+            from app.core.processes import process_registry
+
+            await process_registry.stop_all()
+        except Exception:
+            logger.debug("process registry stop failed", exc_info=True)
 
         # Let detached event subscribers finish before the pool goes away.
         # Bounded: whatever is still running at the deadline is cancelled and
