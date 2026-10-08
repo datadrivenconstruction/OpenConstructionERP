@@ -487,6 +487,10 @@ class ProcessRegistry:
             entry = self._get(pid)
             if entry.queued or entry.status in _ACTIVE or not self._desired(entry):
                 continue
+            # A one-shot job that already finished this run stays done; an
+            # explicit restart is the way to run it again.
+            if entry.last_run_ok:
+                continue
             entry.queued = True
             self._queue.append(pid)
             added.append(pid)

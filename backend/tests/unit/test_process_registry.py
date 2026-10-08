@@ -506,3 +506,23 @@ async def test_flags_persist() -> None:
     await reg.set_flag("seeds/demo@1")
     assert reg.get_flag("seeds/demo@1") is True
     assert reg.store.rows["flag:seeds/demo@1"] is True  # type: ignore[attr-defined]
+
+
+@pytest.mark.asyncio
+async def test_ensure_does_not_rerun_finished_oneshot() -> None:
+    runs: list[int] = []
+
+    async def run() -> None:
+        runs.append(1)
+
+    reg = await _registry()
+    reg.register(_spec("warm", modules=["costs"], start_mode="lazy", factory=lambda: OneShotProcess(run=run)))
+    assert reg.ensure_for_module("costs")["queued"] == ["warm"]
+    await asyncio.sleep(0.1)
+    assert reg.ensure_for_module("costs")["queued"] == []
+    await asyncio.sleep(0.05)
+    assert runs == [1]
+    await reg.restart("warm")
+    await asyncio.sleep(0.05)
+    assert runs == [1, 1]
+    await reg.stop_all()
