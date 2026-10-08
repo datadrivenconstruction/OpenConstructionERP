@@ -237,34 +237,37 @@ def start_loop_stall_watchdog(
     """Dump all thread stacks when ``loop`` stops turning for ``threshold_s``.
 
     A heartbeat task on the loop records the time each second; a daemon thread
-    compares it against the clock. One dump per stall: the watchdog re-arms
-    only after the loop has beaten again. Returns ``False`` if already running.
+    compares it against the clock. One dump per stall, whatever the timing:
+    a stall is identified by the heartbeat it is stuck after, so a slow runner
+    polling the same stall twice, or a gap between two healthy beats, cannot
+    produce a second dump. Returns ``False`` if already running.
     """
     global _watchdog_thread, _last_beat
     if _watchdog_thread is not None and _watchdog_thread.is_alive():
         return False
 
     _last_beat = time.monotonic()
+    # A healthy loop must beat well inside the threshold, or the ordinary gap
+    # between two beats reads as a stall.
+    beat_s = min(1.0, threshold_s / 4)
 
     async def _heartbeat() -> None:
         global _last_beat
         while True:
             _last_beat = time.monotonic()
-            await asyncio.sleep(1.0)
+            await asyncio.sleep(beat_s)
 
     loop.call_soon_threadsafe(lambda: loop.create_task(_heartbeat()))
 
     def _watch() -> None:
-        dumped = False
+        dumped_after_beat: float | None = None
         while not loop.is_closed():
             time.sleep(poll_s)
-            stalled_for = time.monotonic() - _last_beat
-            if stalled_for < threshold_s:
-                dumped = False
+            beat = _last_beat
+            stalled_for = time.monotonic() - beat
+            if stalled_for < threshold_s or beat == dumped_after_beat:
                 continue
-            if dumped:
-                continue
-            dumped = True
+            dumped_after_beat = beat
             snap = format_snapshot(memory_snapshot())
             logger.warning("Event loop stalled for %.0fs; memory: %s", stalled_for, snap)
             write_crash_note(f"event loop stalled for {stalled_for:.0f}s; memory: {snap}; all thread stacks follow")
