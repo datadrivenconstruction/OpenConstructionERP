@@ -50,6 +50,15 @@ async def _registry(fresh: bool = False, **store_kw: object) -> ProcessRegistry:
     return reg
 
 
+async def _until(cond: object, timeout: float = 10.0) -> None:
+    """Poll ``cond`` until true; generous so a loaded CI box does not flake."""
+    deadline = asyncio.get_running_loop().time() + timeout
+    while not cond():  # type: ignore[operator]
+        if asyncio.get_running_loop().time() > deadline:
+            raise AssertionError("condition not reached in time")
+        await asyncio.sleep(0.01)
+
+
 def _own_tasks() -> set[asyncio.Task[object]]:
     return {t for t in asyncio.all_tasks() if (t.get_name() or "").startswith("process:")}
 
@@ -61,10 +70,9 @@ async def test_boot_starts_enabled_and_skips_lazy() -> None:
     reg.register(_spec("a", counter=calls))
     reg.register(_spec("b", start_mode="lazy"))
     await reg.start_boot()
-    await asyncio.sleep(0.05)
+    await _until(lambda: calls)
     assert reg.status("a") is ProcessStatus.RUNNING
     assert reg.status("b") is ProcessStatus.IDLE
-    assert calls
     await reg.stop_all()
     assert not _own_tasks()
 
@@ -154,10 +162,11 @@ async def test_oneshot_crash_retries_with_backoff_then_gives_up() -> None:
         )
     )
     await reg.start_boot()
-    for _ in range(100):
-        await asyncio.sleep(0.02)
-        if len(attempts) >= 3 and reg.status("o") is ProcessStatus.ERROR and reg.describe("o")["next_retry_at"] is None:
-            break
+    await _until(
+        lambda: (
+            len(attempts) >= 3 and reg.status("o") is ProcessStatus.ERROR and reg.describe("o")["next_retry_at"] is None
+        )
+    )
     assert len(attempts) == 3
     assert reg.describe("o")["restart_count"] == 2
     assert reg.status("o") is ProcessStatus.ERROR
@@ -173,7 +182,7 @@ async def test_oneshot_success_becomes_idle_done() -> None:
     reg = await _registry()
     reg.register(_spec("o", factory=lambda: OneShotProcess(run=run)))
     await reg.start_boot()
-    await asyncio.sleep(0.05)
+    await _until(lambda: reg.describe("o")["last_run_ok"] is True)
     assert reg.status("o") is ProcessStatus.IDLE
     assert reg.describe("o")["last_run_ok"] is True
 
@@ -189,8 +198,7 @@ async def test_loop_tick_exception_degrades_but_keeps_running() -> None:
     reg = await _registry()
     reg.register(_spec("l", factory=lambda: LoopProcess(interval_s=0.01, tick=tick)))
     await reg.start_boot()
-    await asyncio.sleep(0.08)
-    assert len(n) >= 2
+    await _until(lambda: len(n) >= 2 and reg.status("l") is ProcessStatus.DEGRADED)
     assert reg.status("l") is ProcessStatus.DEGRADED
     assert "tick failed" in reg.describe("l")["last_error"]["message"]
     await reg.stop_all()
@@ -257,7 +265,7 @@ async def test_state_change_events_published() -> None:
     reg.register(_spec("a"))
     await reg.start_boot()
     await reg.disable("a")
-    await asyncio.sleep(0.01)
+    await _until(lambda: bool(seen) and seen[-1][1] == "disabled")
     assert ("idle", "starting") in seen
     assert ("running", "stopping") in seen
     assert seen[-1][1] == "disabled"
@@ -291,7 +299,7 @@ async def test_thread_loop_process_joins_thread_on_stop() -> None:
     reg = await _registry()
     reg.register(_spec("t", factory=lambda: ThreadLoopProcess(interval_s=0.01, work=work)))
     await reg.start_boot()
-    await asyncio.sleep(0.05)
+    await _until(lambda: hits)
     await reg.restart("t")
     assert [t.name for t in threading.enumerate()].count("process:t") == 1
     await reg.stop_all()
@@ -332,7 +340,7 @@ async def test_shared_switch_flips_whole_group_and_external_change_reconciles() 
     await reg.start_boot()
     assert reg.status("m1") is ProcessStatus.DISABLED
     await reg.enable("m1")
-    await asyncio.sleep(0.2)
+    await _until(lambda: reg.status("m1") is ProcessStatus.RUNNING and reg.status("m2") is ProcessStatus.RUNNING)
     assert switch["on"] is True
     assert reg.status("m2") is ProcessStatus.RUNNING
     assert sorted(started) == ["m1", "m2"]
@@ -353,10 +361,10 @@ async def test_start_boot_twice_does_not_rerun_finished_oneshot() -> None:
     reg = await _registry()
     reg.register(_spec("o", factory=lambda: OneShotProcess(run=run)))
     await reg.start_boot()
-    await asyncio.sleep(0.02)
+    await _until(lambda: runs)
     reg.register(_spec("late"))
     await reg.start_boot()
-    await asyncio.sleep(0.02)
+    await asyncio.sleep(0.05)
     assert runs == [1]
     assert reg.status("late") is ProcessStatus.RUNNING
     await reg.stop_all()
@@ -462,10 +470,7 @@ async def test_queue_starts_heavy_processes_one_at_a_time() -> None:
     assert again["queued"] == []
     assert sorted(again["loading"]) == ["h1", "h2", "h3"]
     assert reg.describe("h3")["queued"] is True
-    for _ in range(100):
-        await asyncio.sleep(0.02)
-        if all(reg.status(p) is ProcessStatus.RUNNING for p in ("h1", "h2", "h3")):
-            break
+    await _until(lambda: all(reg.status(p) is ProcessStatus.RUNNING for p in ("h1", "h2", "h3")))
     assert max(peak) == 1
     assert reg.status("other") is ProcessStatus.IDLE
     assert reg.ensure_for_module("costs")["running"] == ["h1", "h2", "h3"]
@@ -489,8 +494,7 @@ async def test_schedule_boot_is_deferred_and_cancellable() -> None:
     reg.register(_spec("a"))
     reg.schedule_boot(delay_s=0.05)
     assert reg.status("a") is ProcessStatus.IDLE  # nothing on the startup path
-    await asyncio.sleep(0.2)
-    assert reg.status("a") is ProcessStatus.RUNNING
+    await _until(lambda: reg.status("a") is ProcessStatus.RUNNING)
     await reg.stop_all()
     reg2 = await _registry()
     reg2.register(_spec("b"))
@@ -518,11 +522,10 @@ async def test_ensure_does_not_rerun_finished_oneshot() -> None:
     reg = await _registry()
     reg.register(_spec("warm", modules=["costs"], start_mode="lazy", factory=lambda: OneShotProcess(run=run)))
     assert reg.ensure_for_module("costs")["queued"] == ["warm"]
-    await asyncio.sleep(0.1)
+    await _until(lambda: reg.describe("warm")["last_run_ok"] is True and not reg.describe("warm")["queued"])
     assert reg.ensure_for_module("costs")["queued"] == []
     await asyncio.sleep(0.05)
     assert runs == [1]
     await reg.restart("warm")
-    await asyncio.sleep(0.05)
-    assert runs == [1, 1]
+    await _until(lambda: len(runs) == 2)
     await reg.stop_all()

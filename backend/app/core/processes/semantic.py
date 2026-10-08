@@ -28,7 +28,7 @@ SEMANTIC_PROCESS_IDS = (
     "embedding_pool",
     "vector_backfill",
 )
-_MODULES = ["search", "costs", "ai"]
+_MODULES = ["search", "costs", "ai", "match"]
 
 
 def fast_startup() -> bool:
