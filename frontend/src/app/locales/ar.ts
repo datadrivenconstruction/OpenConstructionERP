@@ -3,6 +3,10 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "مشاريع تجريبية",
+    "processes.demo_data_seed.purpose": "تثبّت المشاريع التجريبية في الخلفية بمجرد أن يصبح الخادم جاهزًا.",
+    "processes.demo_data_seed.off_impact": "لا يمكن إيقافها. في التثبيت الجديد تظهر المشاريع التجريبية بعد دقيقة تقريبًا من التشغيل.",
+    "processes.demo_seeding": "لا يزال تثبيت المشاريع التجريبية جاريًا. ستظهر هنا خلال دقيقة تقريبًا.",
     "processes.match_models_off": "تستخدم الاقتراحات ترتيبًا أبسط لأن {{names}} متوقف.",
     "processes.match_models_open": "فعّله في الخدمات الخلفية",
     "processes.wizard.heavy_hint": "{{module}} يعمل بدونه.",

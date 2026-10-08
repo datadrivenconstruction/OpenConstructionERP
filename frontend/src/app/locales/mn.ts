@@ -3,6 +3,10 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "Жишээ төслүүд",
+    "processes.demo_data_seed.purpose": "Сервер бэлэн болмогц жишээ төслүүдийг дэвсгэрт суулгана.",
+    "processes.demo_data_seed.off_impact": "Үүнийг унтрааж болохгүй. Шинэ суулгалтад жишээ төслүүд эхэлснээс хойш ойролцоогоор нэг минутын дараа харагдана.",
+    "processes.demo_seeding": "Жишээ төслүүд одоо суулгагдаж байна. Тэд ойролцоогоор нэг минутын дараа энд гарна.",
     "processes.match_models_off": "{{names}} унтарсан тул санал болгох зүйлс энгийн эрэмбэлэлт ашиглаж байна.",
     "processes.match_models_open": "Дэвсгэр үйлчилгээ хэсэгт асаана уу",
     "processes.wizard.heavy_hint": "{{module}} үүнгүйгээр ч ажиллана.",

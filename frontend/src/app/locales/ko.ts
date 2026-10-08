@@ -3,6 +3,10 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "데모 프로젝트",
+    "processes.demo_data_seed.purpose": "서버가 준비되면 백그라운드에서 데모 프로젝트를 설치합니다.",
+    "processes.demo_data_seed.off_impact": "끌 수 없습니다. 새로 설치한 경우 시작 후 약 1분 뒤에 데모 프로젝트가 나타납니다.",
+    "processes.demo_seeding": "데모 프로젝트를 아직 설치하는 중입니다. 약 1분 뒤에 여기에 표시됩니다.",
     "processes.match_models_off": "{{names}}이(가) 꺼져 있어 추천은 더 단순한 순위 방식을 사용합니다.",
     "processes.match_models_open": "백그라운드 서비스에서 켜세요",
     "processes.wizard.heavy_hint": "{{module}} 기능은 AI 없이도 작동합니다.",

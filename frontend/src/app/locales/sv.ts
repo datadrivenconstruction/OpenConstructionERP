@@ -3,6 +3,10 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "Demoprojekt",
+    "processes.demo_data_seed.purpose": "Installerar demoprojekten i bakgrunden så fort servern är klar.",
+    "processes.demo_data_seed.off_impact": "Går inte att stänga av. Vid en ny installation dyker demoprojekten upp ungefär en minut efter start.",
+    "processes.demo_seeding": "Demoprojekten installeras fortfarande. De visas här om ungefär en minut.",
     "processes.match_models_off": "Förslag använder en enklare rangordning eftersom {{names}} är avstängd.",
     "processes.match_models_open": "Slå på det under Bakgrundstjänster",
     "processes.wizard.heavy_hint": "{{module}} fungerar även utan.",

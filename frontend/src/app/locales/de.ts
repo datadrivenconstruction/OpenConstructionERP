@@ -3,6 +3,10 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "Demoprojekte",
+    "processes.demo_data_seed.purpose": "Installiert die Demoprojekte im Hintergrund, sobald der Server bereit ist.",
+    "processes.demo_data_seed.off_impact": "Lässt sich nicht abschalten. Bei einer frischen Installation erscheinen die Demoprojekte etwa eine Minute nach dem Start.",
+    "processes.demo_seeding": "Die Demoprojekte werden noch installiert. Sie erscheinen hier in etwa einer Minute.",
     "processes.match_models_off": "Vorschläge nutzen eine einfachere Rangfolge, weil {{names}} ausgeschaltet ist.",
     "processes.match_models_open": "Unter Hintergrunddienste einschalten",
     "processes.wizard.heavy_hint": "{{module}} funktioniert auch ohne.",

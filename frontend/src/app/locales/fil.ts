@@ -3,6 +3,10 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "Mga Demo Project",
+    "processes.demo_data_seed.purpose": "Ini-install ang mga demo project sa background kapag handa na ang server.",
+    "processes.demo_data_seed.off_impact": "Hindi ito maaaring patayin. Sa bagong install, lalabas ang mga demo project mga isang minuto pagkatapos mag-start.",
+    "processes.demo_seeding": "Ini-install pa ang mga demo project. Lalabas ang mga ito rito sa loob ng mga isang minuto.",
     "processes.match_models_off": "Mas simpleng ranking ang gamit ng mga suhestiyon dahil naka-off ang {{names}}.",
     "processes.match_models_open": "I-on ito sa Mga background service",
     "processes.wizard.heavy_hint": "Gumagana ang {{module}} kahit wala ito.",

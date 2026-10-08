@@ -3,6 +3,10 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "Demo loyihalar",
+    "processes.demo_data_seed.purpose": "Server tayyor bo'lgach, demo loyihalarni fonda o'rnatadi.",
+    "processes.demo_data_seed.off_impact": "Uni o'chirib bo'lmaydi. Yangi o'rnatishda demo loyihalar ishga tushgandan taxminan bir daqiqa o'tib paydo bo'ladi.",
+    "processes.demo_seeding": "Demo loyihalar hali o'rnatilmoqda. Ular bu yerda taxminan bir daqiqadan so'ng paydo bo'ladi.",
     "processes.match_models_off": "{{names}} o'chirilgani uchun takliflar soddaroq saralashdan foydalanmoqda.",
     "processes.match_models_open": "Uni Fon xizmatlari bo'limida yoqing",
     "processes.wizard.heavy_hint": "{{module}} usiz ham ishlaydi.",

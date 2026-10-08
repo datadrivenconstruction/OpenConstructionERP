@@ -3,6 +3,10 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "ڈیمو پروجیکٹس",
+    "processes.demo_data_seed.purpose": "سرور تیار ہوتے ہی ڈیمو پروجیکٹس کو پس منظر میں انسٹال کرتا ہے۔",
+    "processes.demo_data_seed.off_impact": "اسے بند نہیں کیا جا سکتا۔ نئی انسٹالیشن پر ڈیمو پروجیکٹس شروع ہونے کے تقریباً ایک منٹ بعد نظر آتے ہیں۔",
+    "processes.demo_seeding": "ڈیمو پروجیکٹس ابھی انسٹال ہو رہے ہیں۔ وہ تقریباً ایک منٹ میں یہاں نظر آئیں گے۔",
     "processes.match_models_off": "{{names}} بند ہونے کی وجہ سے تجاویز سادہ درجہ بندی استعمال کر رہی ہیں۔",
     "processes.match_models_open": "اسے بیک گراؤنڈ سروسز میں آن کریں",
     "processes.wizard.heavy_hint": "{{module}} اس کے بغیر بھی کام کرتا ہے۔",

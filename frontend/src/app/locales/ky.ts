@@ -3,6 +3,10 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "Демо долбоорлор",
+    "processes.demo_data_seed.purpose": "Сервер даяр болгондо демо долбоорлорду фондо орнотот.",
+    "processes.demo_data_seed.off_impact": "Аны өчүрүү мүмкүн эмес. Жаңы орнотууда демо долбоорлор иштеткенден кийин болжол менен бир мүнөттөн соң пайда болот.",
+    "processes.demo_seeding": "Демо долбоорлор дагы эле орнотулууда. Алар бул жерде болжол менен бир мүнөттөн кийин пайда болот.",
     "processes.match_models_off": "{{names}} өчүрүлгөндүктөн, сунуштар жөнөкөй иреттөөнү колдонот.",
     "processes.match_models_open": "Аны Фондук кызматтар бөлүмүндө күйгүзүңүз",
     "processes.wizard.heavy_hint": "{{module}} ансыз да иштейт.",

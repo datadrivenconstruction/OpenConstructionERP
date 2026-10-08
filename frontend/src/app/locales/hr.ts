@@ -3,6 +3,10 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "Demo projekti",
+    "processes.demo_data_seed.purpose": "Instalira demo projekte u pozadini čim je poslužitelj spreman.",
+    "processes.demo_data_seed.off_impact": "Ne može se isključiti. Na svježoj instalaciji demo projekti se pojavljuju oko minutu nakon pokretanja.",
+    "processes.demo_seeding": "Demo projekti se još instaliraju. Pojavit će se ovdje za otprilike minutu.",
     "processes.match_models_off": "Prijedlozi koriste jednostavnije rangiranje jer je {{names}} isključeno.",
     "processes.match_models_open": "Uključite to u odjeljku Pozadinske usluge",
     "processes.wizard.heavy_hint": "{{module}} radi i bez toga.",

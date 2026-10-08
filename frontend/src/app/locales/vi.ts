@@ -3,6 +3,10 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "Dự án mẫu",
+    "processes.demo_data_seed.purpose": "Cài đặt các dự án mẫu ở chế độ nền ngay khi máy chủ sẵn sàng.",
+    "processes.demo_data_seed.off_impact": "Không thể tắt. Với bản cài mới, các dự án mẫu xuất hiện sau khoảng một phút kể từ khi khởi động.",
+    "processes.demo_seeding": "Các dự án mẫu vẫn đang được cài đặt. Chúng sẽ xuất hiện ở đây sau khoảng một phút.",
     "processes.match_models_off": "Gợi ý dùng cách xếp hạng đơn giản hơn vì {{names}} đang tắt.",
     "processes.match_models_open": "Bật tính năng này trong Dịch vụ nền",
     "processes.wizard.heavy_hint": "{{module}} vẫn hoạt động khi không có AI.",

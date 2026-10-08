@@ -3,6 +3,10 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "デモプロジェクト",
+    "processes.demo_data_seed.purpose": "サーバーの準備ができたら、バックグラウンドでデモプロジェクトをインストールします。",
+    "processes.demo_data_seed.off_impact": "オフにはできません。新規インストールでは、起動の約1分後にデモプロジェクトが表示されます。",
+    "processes.demo_seeding": "デモプロジェクトはまだインストール中です。約1分後にここに表示されます。",
     "processes.match_models_off": "{{names}} がオフのため、候補はよりシンプルな順位付けを使用しています。",
     "processes.match_models_open": "バックグラウンドサービス でオンにしてください",
     "processes.wizard.heavy_hint": "AIなしでも{{module}}は使えます。",

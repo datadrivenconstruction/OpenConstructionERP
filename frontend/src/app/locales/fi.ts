@@ -3,6 +3,10 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "Demoprojektit",
+    "processes.demo_data_seed.purpose": "Asentaa demoprojektit taustalla, kun palvelin on valmis.",
+    "processes.demo_data_seed.off_impact": "Sitä ei voi poistaa käytöstä. Uudessa asennuksessa demoprojektit ilmestyvät noin minuutin kuluttua käynnistyksestä.",
+    "processes.demo_seeding": "Demoprojekteja asennetaan vielä. Ne ilmestyvät tähän noin minuutin kuluttua.",
     "processes.match_models_off": "Ehdotukset käyttävät yksinkertaisempaa järjestystä, koska {{names}} on pois päältä.",
     "processes.match_models_open": "Ota se käyttöön kohdassa Taustapalvelut",
     "processes.wizard.heavy_hint": "{{module}} toimii myös ilman sitä.",

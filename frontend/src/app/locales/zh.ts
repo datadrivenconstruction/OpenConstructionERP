@@ -3,6 +3,10 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "示例项目",
+    "processes.demo_data_seed.purpose": "服务器就绪后,在后台安装示例项目。",
+    "processes.demo_data_seed.off_impact": "无法关闭。全新安装时,示例项目会在启动约一分钟后出现。",
+    "processes.demo_seeding": "示例项目仍在安装中,大约一分钟后会显示在这里。",
     "processes.match_models_off": "{{names}} 已关闭，因此建议使用较简单的排序。",
     "processes.match_models_open": "请在“后台服务”中开启",
     "processes.wizard.heavy_hint": "没有 AI，{{module}} 也能正常使用。",

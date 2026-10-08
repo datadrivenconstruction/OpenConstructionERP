@@ -3,6 +3,10 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "Progetti dimostrativi",
+    "processes.demo_data_seed.purpose": "Installa i progetti dimostrativi in background quando il server è pronto.",
+    "processes.demo_data_seed.off_impact": "Non si può disattivare. Su un'installazione nuova i progetti dimostrativi compaiono circa un minuto dopo l'avvio.",
+    "processes.demo_seeding": "I progetti dimostrativi sono ancora in installazione. Compariranno qui tra circa un minuto.",
     "processes.match_models_off": "I suggerimenti usano una classificazione più semplice perché {{names}} è disattivato.",
     "processes.match_models_open": "Attivalo in Servizi in background",
     "processes.wizard.heavy_hint": "{{module}} funziona anche senza.",

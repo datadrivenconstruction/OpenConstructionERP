@@ -3,6 +3,10 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "Демонстраційні проєкти",
+    "processes.demo_data_seed.purpose": "Встановлює демонстраційні проєкти у фоні, щойно сервер буде готовий.",
+    "processes.demo_data_seed.off_impact": "Вимкнути не можна. Під час свіжого встановлення демонстраційні проєкти з'являються приблизно через хвилину після запуску.",
+    "processes.demo_seeding": "Демонстраційні проєкти ще встановлюються. Вони з'являться тут приблизно за хвилину.",
     "processes.match_models_off": "Підказки використовують спрощене ранжування, бо {{names}} вимкнено.",
     "processes.match_models_open": "Увімкніть це в розділі Фонові служби",
     "processes.wizard.heavy_hint": "{{module}} працює і без нього.",

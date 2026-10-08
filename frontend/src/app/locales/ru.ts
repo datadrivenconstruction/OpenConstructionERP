@@ -3,6 +3,10 @@
 
 const resource = {
   "translation": {
+    "processes.demo_data_seed.name": "Демо-проекты",
+    "processes.demo_data_seed.purpose": "Устанавливает демо-проекты в фоне, как только сервер готов.",
+    "processes.demo_data_seed.off_impact": "Отключить нельзя. При свежей установке демо-проекты появляются примерно через минуту после запуска.",
+    "processes.demo_seeding": "Демо-проекты ещё устанавливаются. Они появятся здесь примерно через минуту.",
     "processes.match_models_off": "Подсказки используют упрощённое ранжирование, потому что {{names}} отключено.",
     "processes.match_models_open": "Включите это в разделе Фоновые службы",
     "processes.wizard.heavy_hint": "{{module}} работает и без него.",
