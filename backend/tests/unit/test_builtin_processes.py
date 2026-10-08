@@ -35,6 +35,15 @@ async def _registry(fresh: bool) -> ProcessRegistry:
     return reg
 
 
+async def _until(cond: object, timeout: float = 10.0) -> None:
+    """Poll ``cond`` until true; generous so a loaded CI box does not flake."""
+    deadline = asyncio.get_running_loop().time() + timeout
+    while not cond():  # type: ignore[operator]
+        if asyncio.get_running_loop().time() > deadline:
+            raise AssertionError("condition not reached in time")
+        await asyncio.sleep(0.01)
+
+
 def _own_tasks() -> set[asyncio.Task[object]]:
     return {t for t in asyncio.all_tasks() if (t.get_name() or "").startswith("process:")}
 
@@ -100,7 +109,7 @@ async def test_cost_prewarm_is_lazy_and_runs_once_on_module_entry(monkeypatch: p
         assert runs == []
         # Opening the cost module twice runs the warm-up once.
         reg.ensure_for_module("costs")
-        await asyncio.sleep(0.1)
+        await _until(lambda: runs == [1] and reg.status("cost_cache_prewarm") is ProcessStatus.IDLE)
         reg.ensure_for_module("costs")
         await asyncio.sleep(0.1)
         assert runs == [1]
@@ -135,7 +144,7 @@ async def test_a_failing_prewarm_sets_error_and_does_not_raise(monkeypatch: pyte
     reg = await _registry(fresh=False)
     try:
         await reg.ensure_started("cost_cache_prewarm")
-        await asyncio.sleep(0.05)
+        await _until(lambda: reg.status("cost_cache_prewarm") is ProcessStatus.ERROR)
         info = reg.describe("cost_cache_prewarm")
         assert info["status"] == ProcessStatus.ERROR
         assert "catalog unreachable" in info["last_error"]["message"]
@@ -156,8 +165,7 @@ async def test_a_failing_tick_keeps_the_loop_alive(monkeypatch: pytest.MonkeyPat
     reg = await _registry(fresh=False)
     try:
         await reg.start("risk_escalation")
-        await asyncio.sleep(0.1)
-        assert len(calls) >= 2
+        await _until(lambda: len(calls) >= 2)
         assert reg.status("risk_escalation") in {ProcessStatus.RUNNING, ProcessStatus.DEGRADED}
     finally:
         await reg.stop_all()
