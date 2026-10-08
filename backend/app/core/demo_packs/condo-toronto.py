@@ -46,6 +46,7 @@ TEMPLATE = DemoTemplate(
         "HST). Cost region: CA_TORONTO."
     ),
     region="CA",
+    subdivision_code="CA-ON",
     classification_standard="masterformat",
     currency="CAD",
     locale="en-CA",

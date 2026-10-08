@@ -452,6 +452,9 @@ class DemoTemplate:
     # Optional: human-readable project code shown on documents and the
     # project header (e.g. "LM-HN-2026-01"). Stored on Project.project_code.
     project_code: str = ""
+    # Optional: ISO 3166-2 province or state where the work is ("CA-ON"). Rules
+    # set below the country read it: Canadian holdback and holidays, US state caps.
+    subdivision_code: str = ""
     # Optional: multiple tender packages. When set, overrides tender_name/tender_companies.
     tender_packages: list[TenderPackageDef] = field(default_factory=list)
     # Optional: explicit schedule activities. When set, overrides auto-generation from sections.
@@ -12191,6 +12194,7 @@ async def install_demo_project(
         # look German to the country rules (falls back to the default when the
         # country name is not mapped).
         country_code=(_country_code_for(template) or "DE"),
+        subdivision_code=template.subdivision_code or None,
         classification_standard=template.classification_standard,
         currency=template.currency,
         locale=template.locale,
