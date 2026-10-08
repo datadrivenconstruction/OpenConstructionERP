@@ -318,8 +318,8 @@ jobs:
     timeout-minutes: 240
     env:
       OE_PID_FILE: ${{ github.workspace }}/backend.pid
-      OE_DATA_DIR: ${{ runner.temp }}/oe-stability-data
-      OE_LOG_FILE: ${{ runner.temp }}/backend.log
+      OE_DATA_DIR: ${{ github.workspace }}/.oe-stability/data
+      OE_LOG_FILE: ${{ github.workspace }}/.oe-stability/backend.log
       OE_BACKEND_DIR: ${{ github.workspace }}/backend
       OE_PORT: "8000"
     steps:
@@ -367,6 +367,8 @@ jobs:
           echo "JWT_EXPIRE_MINUTES=2" >> "$GITHUB_ENV"
           echo "SEED_DEMO=true" >> "$GITHUB_ENV"
           echo "APP_ENV=development" >> "$GITHUB_ENV"
+          export JWT_EXPIRE_MINUTES=2 SEED_DEMO=true APP_ENV=development
+          mkdir -p "$(dirname "$OE_LOG_FILE")" "$OE_DATA_DIR"
           nohup python -m app.cli serve --port "$OE_PORT" --data-dir "$OE_DATA_DIR" > "$OE_LOG_FILE" 2>&1 &
           echo $! > "$OE_PID_FILE"
           echo "backend launched (pid $(cat "$OE_PID_FILE"))"
@@ -399,7 +401,7 @@ jobs:
           path: |
             frontend/playwright-report/**
             frontend/test-results/**
-            ${{ runner.temp }}/backend.log
+            ${{ github.workspace }}/.oe-stability/backend.log
           retention-days: 14
           if-no-files-found: warn
 
