@@ -1854,6 +1854,9 @@ enum StartupOutcome {
     Broken(String),
     /// The wait gave up; carries which of the two limits ran out.
     TimedOut(TimeoutKind),
+    /// The sidecar process has already terminated. Its termination handler has
+    /// reported why, so the wait has nothing to add and must not add anything.
+    Exited,
 }
 
 /// Why the startup wait gave up.
@@ -2067,6 +2070,7 @@ async fn wait_for_backend(
     port: u16,
     timeout_secs: u64,
     progress: &BootProgress,
+    exited: &AtomicBool,
 ) -> StartupOutcome {
     let client = reqwest::Client::new();
     let url = format!("http://127.0.0.1:{port}/api/health");
@@ -2077,6 +2081,12 @@ async fn wait_for_backend(
     let mut broken_logged = false;
 
     loop {
+        // A dead process is not a quiet one. Without this the wait kept polling
+        // a backend that had exited with a FATAL, and 240s later logged it as
+        // having gone quiet, as if it might still have been working.
+        if exited.load(Ordering::SeqCst) {
+            return StartupOutcome::Exited;
+        }
         // Checked before the probe, so a backend that has gone quiet is given
         // up on at the quiet limit rather than one poll later.
         if let Some(kind) = startup_give_up(progress.quiet_for(), start.elapsed(), ceiling) {
@@ -3011,10 +3021,23 @@ fn cluster_state_of(pidfile: &std::path::Path) -> ClusterState {
     }
 }
 
+/// Where the backend keeps the cluster for this data directory.
+///
+/// `<data dir>/pgdata`, unless the backend had to move it: on Windows a data
+/// directory whose path is not ASCII cannot hold a PostgreSQL cluster, so the
+/// backend places it under ProgramData and writes the path it chose into
+/// `pgdata.location` (see `resolve_pgdata` in `backend/app/core/embedded_pg.py`).
+fn cluster_dir_of(data_dir: &std::path::Path) -> std::path::PathBuf {
+    match std::fs::read_to_string(data_dir.join("pgdata.location")) {
+        Ok(text) if !text.trim().is_empty() => std::path::PathBuf::from(text.trim()),
+        _ => data_dir.join("pgdata"),
+    }
+}
+
 /// The state of this installation's own embedded cluster.
 fn embedded_cluster_state() -> ClusterState {
     match workspace_data_dir() {
-        Some(dir) => cluster_state_of(&dir.join("pgdata").join("postmaster.pid")),
+        Some(dir) => cluster_state_of(&cluster_dir_of(&dir).join("postmaster.pid")),
         None => ClusterState::Unknown,
     }
 }
@@ -4258,6 +4281,7 @@ happening, send the log file to info@datadrivenconstruction.io.",
     let shutting_down_wait = shutting_down.clone();
     let backend_lost_wait = backend_lost.clone();
     let progress_wait = boot_progress.clone();
+    let exited_wait = backend_exited.clone();
     let base_url_wait = base_url;
     tauri::async_runtime::spawn(async move {
         // A first run that has to recover a large local database (WAL
@@ -4284,7 +4308,7 @@ happening, send the log file to info@datadrivenconstruction.io.",
         // that goes quiet is given up on after STARTUP_QUIET_TIMEOUT,
         // so the full window is only ever spent on a backend that is
         // demonstrably still working.
-        match wait_for_backend(&handle_clone, port, 1200, &progress_wait).await {
+        match wait_for_backend(&handle_clone, port, 1200, &progress_wait, &exited_wait).await {
             StartupOutcome::Ready => {
                 ready_flag.store(true, Ordering::SeqCst);
                 log_line("backend healthy; navigating to app");
@@ -4336,6 +4360,9 @@ info@datadrivenconstruction.io."
                         ),
                     );
                 }
+            }
+            StartupOutcome::Exited => {
+                log_line("startup wait ended: the backend process had already exited");
             }
             StartupOutcome::TimedOut(kind) => {
                 let stage = progress_wait.stage();
@@ -4911,6 +4938,11 @@ fn force_backend_stop(pid: u32) {
         .creation_flags(CREATE_NO_WINDOW)
         .status()
     {
+        // 128 is taskkill's "no such process": the tree went away between the
+        // last check and this one, which is the outcome this step wanted.
+        Ok(status) if status.code() == Some(128) => log_line(&format!(
+            "backend stop: pid {pid} was already gone"
+        )),
         Ok(status) => log_line(&format!(
             "backend stop: taskkill on pid {pid} exited {status}"
         )),
@@ -4973,6 +5005,15 @@ fn stop_backend(app_handle: &tauri::AppHandle) {
 
     // Read the pid BEFORE kill(), which consumes the handle.
     let pid = child.pid();
+    if exited.load(Ordering::SeqCst) {
+        // Nothing to stop, and stopping it anyway is not harmless: Windows
+        // reuses process ids, so a taskkill /T on a dead sidecar's id can land
+        // on whatever process holds that number now.
+        log_line(&format!(
+            "backend sidecar (pid {pid}) had already exited; nothing to stop"
+        ));
+        return;
+    }
     log_line(&format!("stopping the backend sidecar (pid {pid})"));
 
     // Step one. `port` is Some only for a sidecar we started ourselves, so a

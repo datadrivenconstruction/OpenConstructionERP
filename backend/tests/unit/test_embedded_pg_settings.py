@@ -13,7 +13,6 @@ no cluster and cannot disturb the session's own.
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 import pytest
@@ -106,11 +105,7 @@ def test_the_cluster_is_pre_initialised_on_every_platform(tmp_path: Path, monkey
         (tmp_path / "PG_VERSION").write_text("16\n", encoding="utf-8")
         (tmp_path / "postgresql.conf").write_text(BASE_CONF, encoding="utf-8")
 
-    monkeypatch.setitem(
-        sys.modules,
-        "pixeltable_pgserver.pgexec",
-        type("_FakeModule", (), {"pgexec": staticmethod(fake_pgexec)}),
-    )
+    monkeypatch.setattr(embedded_pg, "_safe_pgexec", fake_pgexec)
 
     assert embedded_pg._pre_initialize_cluster(tmp_path) is True
 
