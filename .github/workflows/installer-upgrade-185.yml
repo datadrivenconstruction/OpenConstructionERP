@@ -17,6 +17,14 @@ on:
         description: Version the new build must report on /api/health
         required: false
         default: ""
+      race_loops:
+        description: Create-then-write sequences per job on the new build, no retry, any 404 fails (0 = off)
+        required: false
+        default: "0"
+      expect_healthy:
+        description: Fail unless the upgraded build answers healthy with arrived_populated_unstamped null on its 2nd and 3rd start
+        required: false
+        default: "false"
 
 permissions:
   contents: read
@@ -28,6 +36,8 @@ env:
   OLD_TAG: v18.4.0
   NEW_TAG: ${{ inputs.new_tag }}
   EXPECT_VERSION: ${{ inputs.expect_version }}
+  RACE_LOOPS: ${{ inputs.race_loops || '0' }}
+  EXPECT_HEALTHY: ${{ inputs.expect_healthy || 'false' }}
   GH_TOKEN: ${{ github.token }}
   GH_REPO: ${{ github.repository }}
 
@@ -93,6 +103,8 @@ jobs:
           $probe = Get-Content (Join-Path $env:RUNNER_TEMP 'probe.json') -Raw | ConvertFrom-Json
           Test-ProbeData $run.Port $tok $probe
           $null = New-ProbeData $run.Port $tok 'after-upgrade'
+          Assert-Healthy $run.Health 'first'
+          Test-RaceLoop $run.Port $tok 'after-upgrade'
           $errs = Get-StartupErrors $data $run.LogStart
           Say "startup log error lines since this start: $($errs.Count)"
           $errs | Select-Object -First 40 | ForEach-Object { Say "  ERR: $_" }
@@ -104,8 +116,17 @@ jobs:
           Say "second start error lines: $($errs2.Count)"
           $errs2 | Select-Object -First 40 | ForEach-Object { Say "  ERR: $_" }
           Stop-App $run2 $app
+          # Third start: the health answer must hold once the database is settled.
+          $run3 = Start-App $app $data 900
+          Test-ProbeData $run3.Port (Get-Token $run3.Port $data) $probe
+          $errs3 = Get-StartupErrors $data $run3.LogStart
+          Say "third start error lines: $($errs3.Count)"
+          $errs3 | Select-Object -First 40 | ForEach-Object { Say "  ERR: $_" }
+          Stop-App $run3 $app
           Save-Logs $data 'c-new'
-          if ($errs.Count -or $errs2.Count) { Fail 'error lines in the startup log after the upgrade' }
+          if ($errs.Count -or $errs2.Count -or $errs3.Count) { Fail 'error lines in the startup log after the upgrade' }
+          Assert-Healthy $run2.Health 'second'
+          Assert-Healthy $run3.Health 'third'
 
       - name: (d) Uninstall and check leftovers
         if: ${{ !cancelled() }}
@@ -211,6 +232,8 @@ jobs:
           $tok = Get-Token $run.Port $data
           $probe = New-ProbeData $run.Port $tok 'кириллица'
           Test-ProbeData $run.Port $tok $probe
+          Say "fresh start: status=$($run.Health.status) arrived_populated_unstamped=$($run.Health.arrived_populated_unstamped)"
+          Test-RaceLoop $run.Port $tok 'fresh'
           $errs = Get-StartupErrors $data $run.LogStart
           Say "startup log error lines: $($errs.Count)"
           $errs | Select-Object -First 40 | ForEach-Object { Say "  ERR: $_" }

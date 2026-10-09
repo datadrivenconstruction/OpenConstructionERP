@@ -150,19 +150,60 @@ function Invoke-Api([int]$port, [string]$token, [string]$method, [string]$path, 
 }
 
 # A 404 on a row created by the previous call is the read-after-create race of
-# get_session (commit runs after the response is sent). Counted, retried, and
-# reported, so it is told apart from an installer fault.
+# get_session (commit runs after the response is sent). By default it is
+# counted, retried and reported, so it is told apart from an installer fault.
+# With RACE_LOOPS set the build under test must be free of it: no retry, and
+# Test-RaceLoop runs that many create-then-write sequences, failing on any 404.
 $script:Race404 = 0
+$script:Strict = [int]("0$env:RACE_LOOPS") -gt 0
 function Invoke-Retry404([scriptblock]$call, [string]$what) {
   for ($i = 1; $i -le 5; $i++) {
     try { return & $call } catch {
       $code = $_.Exception.Response.StatusCode.value__
-      if ($code -ne 404 -or $i -eq 5) { throw }
+      if ($code -ne 404) { throw }
       $script:Race404++
       Say "RACE: $what answered 404 right after the row it needs was created (try $i): $($_.ErrorDetails.Message)"
+      if ($script:Strict -or $i -eq 5) { throw }
       Start-Sleep -Milliseconds 500
     }
   }
+}
+
+# Every call follows the one that created its row, with no pause and no retry.
+function Test-RaceLoop([int]$port, [string]$token, [string]$tag) {
+  $n = [int]("0$env:RACE_LOOPS")
+  if ($n -le 0) { return }
+  $hits = 0; $other = 0
+  for ($i = 1; $i -le $n; $i++) {
+    $step = 'project create'
+    try {
+      $proj = Invoke-Api $port $token Post '/api/v1/projects/' @{ name = "Race $tag $i" }
+      $step = 'project read'
+      $null = Invoke-Api $port $token Get "/api/v1/projects/$($proj.id)"
+      $step = 'BOQ create'
+      $boq = Invoke-Api $port $token Post '/api/v1/boq/boqs/' @{ project_id = $proj.id; name = "Race BOQ $i" }
+      $step = 'position create'
+      $pos = Invoke-Api $port $token Post "/api/v1/boq/boqs/$($boq.id)/positions/" @{ boq_id = $boq.id; ordinal = '01.001'; description = "Race position $i"; unit = 'm3'; quantity = 1; unit_rate = '10.00' }
+      $step = 'position update'
+      $null = Invoke-Api $port $token Patch "/api/v1/boq/positions/$($pos.id)" @{ quantity = 2 }
+    } catch {
+      $code = $_.Exception.Response.StatusCode.value__
+      if ($code -eq 404) { $hits++; Say "RACE: sequence $i, $step answered 404: $($_.ErrorDetails.Message)" }
+      else { $other++; Say "race loop sequence $i, $step failed with $code : $($_.ErrorDetails.Message) $($_.Exception.Message)" }
+    }
+  }
+  Say "race loop ($tag): $n create-then-write sequences, 404 answers: $hits, other failures: $other"
+  if ($hits) { Fail "read-after-create race: $hits of $n sequences answered 404" }
+  if ($other) { Fail "race loop: $other of $n sequences failed for another reason" }
+}
+
+# The desktop ships no migration tree, so from 1e9934e98 on it must answer
+# healthy with the unstamped question unasked (null) on every start.
+function Assert-Healthy($health, [string]$which) {
+  Say "$which start: status=$($health.status) arrived_populated_unstamped=$(if ($null -eq $health.arrived_populated_unstamped) { 'null' } else { $health.arrived_populated_unstamped })"
+  if ($env:EXPECT_HEALTHY -ne 'true') { return }
+  if ($health.status -ne 'healthy') { Fail "$which start reports status $($health.status)" }
+  if ($null -ne $health.arrived_populated_unstamped) { Fail "$which start reports arrived_populated_unstamped=$($health.arrived_populated_unstamped)" }
 }
 
 function New-ProbeData([int]$port, [string]$token, [string]$tag) {
