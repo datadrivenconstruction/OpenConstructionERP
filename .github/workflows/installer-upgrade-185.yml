@@ -1,0 +1,176 @@
+# Temporary: installer upgrade and fresh-install check before 18.5.0.
+# Lives only on wip/installer-upgrade-185, never merged to main.
+name: Installer upgrade check (temporary)
+
+on:
+  push:
+    branches: [wip/installer-upgrade-185]
+  workflow_dispatch:
+    inputs:
+      new_run_id:
+        description: Desktop Release run whose windows-diagnostic artifact is the new installer
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  # The Desktop Release run (build_only_windows) that built the installer under test.
+  NEW_RUN_ID: ${{ inputs.new_run_id || '37950751566' }}
+  OLD_TAG: v18.4.0
+  GH_TOKEN: ${{ github.token }}
+  GH_REPO: ${{ github.repository }}
+
+jobs:
+  upgrade:
+    name: Upgrade 18.4.0 to new build
+    runs-on: windows-latest
+    timeout-minutes: 180
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/installer-check
+
+      - name: Download both installers
+        run: |
+          . .github/installer-check/oe-check.ps1
+          New-Item -ItemType Directory -Force old, new | Out-Null
+          gh release download $env:OLD_TAG -p '*_x64-setup.exe' -D old
+          $name = gh api "repos/$env:GH_REPO/actions/runs/$env:NEW_RUN_ID/artifacts" -q '.artifacts[] | select(.name | startswith("windows-diagnostic")) | .name'
+          Say "new installer artifact: $name (run $env:NEW_RUN_ID)"
+          gh run download $env:NEW_RUN_ID -n $name -D new
+          Get-Content new\diagnostic-manifest.json | Write-Host
+          Show-Installer (Get-ChildItem old\*.exe)[0].FullName
+          Show-Installer (Get-ChildItem new\*.exe)[0].FullName
+
+      - name: (a) Install 18.4.0, start, create project with a BOQ position, stop
+        run: |
+          . .github/installer-check/oe-check.ps1
+          $app = 'C:\Program Files\OpenConstructionERP'
+          $data = Join-Path $env:USERPROFILE '.openestimate'
+          Install-Silent (Get-ChildItem old\*.exe)[0].FullName $null
+          $l = Show-Layout $app
+          $run = Start-App $app $data
+          Say "old version reports $($run.Health.version)"
+          $tok = Get-Token $run.Port $data
+          $probe = New-ProbeData $run.Port $tok 'from-18.4.0'
+          $probe | ConvertTo-Json | Set-Content (Join-Path $env:RUNNER_TEMP 'probe.json')
+          Stop-App $run $app
+          Save-Logs $data 'a-old'
+
+      - name: (b) Install the new build over 18.4.0
+        run: |
+          . .github/installer-check/oe-check.ps1
+          $app = 'C:\Program Files\OpenConstructionERP'
+          Install-Silent (Get-ChildItem new\*.exe)[0].FullName $null
+          $l = Show-Layout $app
+          if (-not $l.Onedir) { Fail 'the upgraded install has no onedir server folder' }
+          if ($l.Onefile) { Fail 'the old onefile server exe is still in the install dir' }
+
+      - name: (c) Start the new build, health, version, data survived, no startup errors
+        run: |
+          . .github/installer-check/oe-check.ps1
+          $app = 'C:\Program Files\OpenConstructionERP'
+          $data = Join-Path $env:USERPROFILE '.openestimate'
+          $run = Start-App $app $data
+          Say "new version reports $($run.Health.version) build $($run.Health.build)"
+          $tok = Get-Token $run.Port $data
+          $probe = Get-Content (Join-Path $env:RUNNER_TEMP 'probe.json') -Raw | ConvertFrom-Json
+          Test-ProbeData $run.Port $tok $probe
+          $null = New-ProbeData $run.Port $tok 'after-upgrade'
+          $errs = Get-StartupErrors $data $run.LogStart
+          Say "startup log error lines since this start: $($errs.Count)"
+          $errs | Select-Object -First 40 | ForEach-Object { Say "  ERR: $_" }
+          Stop-App $run $app
+          # Second start of the upgraded build: the old extraction sweep and a clean restart.
+          $run2 = Start-App $app $data
+          Test-ProbeData $run2.Port (Get-Token $run2.Port $data) $probe
+          $errs2 = Get-StartupErrors $data $run2.LogStart
+          Say "second start error lines: $($errs2.Count)"
+          $errs2 | Select-Object -First 40 | ForEach-Object { Say "  ERR: $_" }
+          Stop-App $run2 $app
+          Save-Logs $data 'c-new'
+          if ($errs.Count -or $errs2.Count) { Fail 'error lines in the startup log after the upgrade' }
+
+      - name: (d) Uninstall and check leftovers
+        if: ${{ !cancelled() }}
+        run: |
+          . .github/installer-check/oe-check.ps1
+          $app = 'C:\Program Files\OpenConstructionERP'
+          $u = Uninstall-App $app
+          $data = Join-Path $env:USERPROFILE '.openestimate'
+          Say "user data kept after uninstall (by design): $(Test-Path -LiteralPath $data)"
+          if ($u.Exit -ne 0) { Fail "uninstaller exit $($u.Exit)" }
+          if ($u.Procs) { Fail 'processes from the install dir survived the uninstall' }
+          if ($u.Key) { Fail 'the uninstall registry key survived' }
+          if (Test-Path -LiteralPath (Join-Path $app 'OpenConstructionERP.exe')) { Fail 'the main exe survived the uninstall' }
+
+      - name: Upload logs
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: upgrade-logs
+          path: |
+            ${{ runner.temp }}/oe-report.txt
+            ${{ runner.temp }}/oe-logs
+          if-no-files-found: warn
+
+  cyrillic:
+    name: Fresh install into a Cyrillic path
+    runs-on: windows-latest
+    timeout-minutes: 120
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/installer-check
+
+      - name: Download the new installer
+        run: |
+          . .github/installer-check/oe-check.ps1
+          New-Item -ItemType Directory -Force new | Out-Null
+          $name = gh api "repos/$env:GH_REPO/actions/runs/$env:NEW_RUN_ID/artifacts" -q '.artifacts[] | select(.name | startswith("windows-diagnostic")) | .name'
+          gh run download $env:NEW_RUN_ID -n $name -D new
+          Show-Installer (Get-ChildItem new\*.exe)[0].FullName
+
+      - name: Install, start with a Cyrillic home, health, data, stop, uninstall
+        run: |
+          . .github/installer-check/oe-check.ps1
+          $app = 'C:\Тест Установка\OpenConstructionERP'
+          $home_ = 'C:\Пользователи\Тестовый Сметчик'
+          New-Item -ItemType Directory -Force -Path $home_ | Out-Null
+          $env:USERPROFILE = $home_; $env:HOME = $home_
+          $data = Join-Path $home_ '.openestimate'
+          Install-Silent (Get-ChildItem new\*.exe)[0].FullName $app
+          $l = Show-Layout $app
+          if (-not $l.Onedir) { Fail 'no onedir server folder in the Cyrillic install' }
+          $run = Start-App $app $data
+          $tok = Get-Token $run.Port $data
+          $probe = New-ProbeData $run.Port $tok 'кириллица'
+          Test-ProbeData $run.Port $tok $probe
+          $errs = Get-StartupErrors $data $run.LogStart
+          Say "startup log error lines: $($errs.Count)"
+          $errs | Select-Object -First 40 | ForEach-Object { Say "  ERR: $_" }
+          Stop-App $run $app
+          Save-Logs $data 'cyrillic'
+          $u = Uninstall-App $app
+          if ($u.Exit -ne 0) { Fail "uninstaller exit $($u.Exit)" }
+          if ($u.Procs) { Fail 'processes from the install dir survived the uninstall' }
+          if ($errs.Count) { Fail 'error lines in the startup log' }
+
+      - name: Upload logs
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyrillic-logs
+          path: |
+            ${{ runner.temp }}/oe-report.txt
+            ${{ runner.temp }}/oe-logs
+          if-no-files-found: warn
