@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Search, ChevronDown, ChevronRight, LogOut, User, Settings, Menu, MessageSquarePlus, FolderOpen, CheckCircle2, XCircle, Bug, BookOpen, Loader2, Upload, HelpCircle, GraduationCap, Mail, ExternalLink, Github, Sun, Moon, Monitor, Globe } from 'lucide-react';
 import clsx from 'clsx';
 import { SUPPORTED_LANGUAGES, getLanguageByCode, changeLanguage } from '../i18n';
+import { sortLanguagesByName } from '@/shared/lib/languageOrder';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useUploadQueueStore } from '@/stores/useUploadQueueStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -1244,7 +1245,7 @@ function LanguageSwitcher({
 
       {open && (
         <div role="menu" className="absolute right-0 top-full mt-1.5 w-48 max-h-72 overflow-y-auto rounded-xl border border-border-light bg-surface-elevated shadow-lg animate-scale-in py-1">
-          {SUPPORTED_LANGUAGES.map((lang) => (
+          {sortLanguagesByName(SUPPORTED_LANGUAGES).map((lang) => (
             <button
               key={lang.code}
               role="menuitem"

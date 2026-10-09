@@ -59,6 +59,7 @@ import { DashboardLayoutManager } from '@/features/dashboard/DashboardLayoutMana
 import { UpdateInlineNotice } from '@/shared/ui/UpdateChecker';
 import { apiGet, apiPatch, apiPost, apiPut, apiDelete } from '@/shared/lib/api';
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
+import { sortLanguagesByName } from '@/shared/lib/languageOrder';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useThemeStore } from '@/stores/useThemeStore';
 import { useToastStore } from '@/stores/useToastStore';
@@ -2043,7 +2044,7 @@ export function SettingsPage() {
                 />
                 <CardContent>
                   <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
-                    {SUPPORTED_LANGUAGES.map((lang) => {
+                    {sortLanguagesByName(SUPPORTED_LANGUAGES).map((lang) => {
                       const isActive = i18n.language === lang.code;
                       return (
                         <button
