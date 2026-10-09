@@ -141,6 +141,15 @@ jobs:
           - case: default install dir, Chinese home
             app: 'C:\Program Files\OpenConstructionERP'
             home: 'C:\Users\测试用户'
+          # Control: the same USERPROFILE override with a plain ASCII name.
+          - case: default install dir, ASCII home override
+            app: 'C:\Program Files\OpenConstructionERP'
+            home: 'C:\Users\plainuser'
+          # A real profile has AppData, and LOCALAPPDATA follows the home.
+          - case: default install dir, Cyrillic home with AppData
+            app: 'C:\Program Files\OpenConstructionERP'
+            home: 'C:\Users\Сметчик Профиль'
+            appdata: true
     defaults:
       run:
         shell: pwsh
@@ -164,6 +173,11 @@ jobs:
           $home_ = '${{ matrix.home }}'
           New-Item -ItemType Directory -Force -Path $home_ | Out-Null
           $env:USERPROFILE = $home_; $env:HOME = $home_
+          if ('${{ matrix.appdata }}' -eq 'true') {
+            $env:LOCALAPPDATA = Join-Path $home_ 'AppData\Local'; $env:APPDATA = Join-Path $home_ 'AppData\Roaming'
+            New-Item -ItemType Directory -Force -Path $env:LOCALAPPDATA, $env:APPDATA | Out-Null
+          }
+          Say "profile: USERPROFILE=$env:USERPROFILE LOCALAPPDATA=$env:LOCALAPPDATA home AppData\Local exists=$(Test-Path -LiteralPath (Join-Path $home_ 'AppData\Local'))"
           $data = Join-Path $home_ '.openestimate'
           $dir = if ($app -like 'C:\Program Files\*') { $null } else { $app }
           if ($dir -and ($dir -match '[^\x00-\x7F]')) {
@@ -190,6 +204,9 @@ jobs:
           Say "startup log error lines: $($errs.Count)"
           $errs | Select-Object -First 40 | ForEach-Object { Say "  ERR: $_" }
           Stop-App $run $app
+          foreach ($root in @($app, $home_, 'C:\Users\runneradmin\AppData\Local')) {
+            Get-ChildItem -LiteralPath $root -Recurse -Directory -Filter EBWebView -ErrorAction SilentlyContinue | ForEach-Object { Say "webview data: $($_.FullName)" }
+          }
           Save-Logs $data 'cyrillic'
           $u = Uninstall-App $app
           if ($u.Exit -ne 0) { Fail "uninstaller exit $($u.Exit)" }
