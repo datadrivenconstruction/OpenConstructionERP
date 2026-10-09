@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [18.5.0] - 2026-10-09
+## [18.5.0] - 2026-10-10
 
 This release makes the platform lighter to run and easier to understand. A Background services button in the top bar lists every service the platform keeps loaded, what it is for, which modules need it and roughly how much memory it takes, and an administrator can switch each one on or off without a restart. On a fresh server the administrator is asked once which modules they will use before anything heavy starts, semantic search stays off until someone turns it on, and the demo projects are set up in the background. The Windows desktop app installs its backend once instead of unpacking it on every start and now starts for users whose account name has non-ASCII letters. Procurement, the client portal, payment plans, schedules and the Italian workflow all grow, as listed below.
 
@@ -76,6 +76,9 @@ This release makes the platform lighter to run and easier to understand. A Backg
 
 ### Fixed
 
+- A record you have just created, such as a project, a bill or a position, is saved before the app confirms it, so opening it or adding to it right away no longer answers "not found", and a save that fails is no longer reported as a success. FastAPI 0.121.1 is now the minimum version.
+- Adding a top-level section to a bill after deleting one no longer fails with "already exists". A new section takes the next free number instead of one already in use.
+- The desktop app no longer reports its health as degraded on every start after the first.
 - The desktop app now starts on Windows accounts whose user name contains non-ASCII characters, such as Cyrillic, Chinese or accented letters. When the data folder path is not ASCII, the database cluster lives under %ProgramData%\OpenConstructionERP\clusters\ with access for the owner only. The installer and uninstaller follow that location too, so they stop the database before replacing files.
 - The Windows installer refuses an install folder whose path has non-ASCII characters, such as Cyrillic or accented letters, with a clear message instead of installing an app whose database cannot start. A silent install stops with exit code 3 and writes the reason to %TEMP%\OpenConstructionERP-install-error.log. The default folder under Program Files and non-ASCII user names are not affected.
 - The Windows installer and uninstaller no longer close every program on the machine named openconstructionerp.exe, such as a backend served from a pip install; they close only what runs from the install folder. An upgrade from 18.4.0 or earlier still runs the previous uninstaller first, which does close them, so stop such a backend before you upgrade.
