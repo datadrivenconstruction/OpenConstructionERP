@@ -148917,6 +148917,42 @@
               "nullable": false
             },
             {
+              "name": "supplier_acknowledged_at",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "supplier_acknowledged_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "supplier_reference",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "supplier_confirmed_delivery_date",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "invoice_tolerance_pct",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "invoice_tolerance_abs",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
               "name": "payment_terms",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
@@ -149503,6 +149539,13 @@
         },
         {
           "method": "POST",
+          "path": "/{po_id}/acknowledge/",
+          "handler": "acknowledge_purchase_order",
+          "response_model": "POResponse",
+          "request_schema": "POAcknowledgeRequest"
+        },
+        {
+          "method": "POST",
           "path": "/{po_id}/cancel/",
           "handler": "cancel_purchase_order",
           "response_model": "POResponse",
@@ -149654,6 +149697,14 @@
             {
               "name": "metadata",
               "type": "dict[str, Any]"
+            },
+            {
+              "name": "invoice_tolerance_pct",
+              "type": "str | None"
+            },
+            {
+              "name": "invoice_tolerance_abs",
+              "type": "str | None"
             }
           ]
         },
@@ -149760,6 +149811,14 @@
               "name": "metadata",
               "type": "dict[str, Any] | None",
               "default": "None"
+            },
+            {
+              "name": "invoice_tolerance_pct",
+              "type": "str | None"
+            },
+            {
+              "name": "invoice_tolerance_abs",
+              "type": "str | None"
             }
           ]
         },
@@ -149851,6 +149910,24 @@
           ]
         },
         {
+          "class_name": "POAcknowledgeRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The supplier's confirmation of an issued order, as the buyer received it.",
+          "fields": [
+            {
+              "name": "supplier_reference",
+              "type": "str | None"
+            },
+            {
+              "name": "confirmed_delivery_date",
+              "type": "date | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
           "class_name": "POResponse",
           "bases": [
             "BaseModel"
@@ -149918,6 +149995,36 @@
               "name": "status",
               "type": "str",
               "default": "'draft'"
+            },
+            {
+              "name": "supplier_acknowledged_at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "supplier_acknowledged_by",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "supplier_reference",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "supplier_confirmed_delivery_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "invoice_tolerance_pct",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "invoice_tolerance_abs",
+              "type": "str | None",
+              "default": "None"
             },
             {
               "name": "payment_terms",
@@ -150541,6 +150648,30 @@
             },
             {
               "name": "unscheduled_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "prequalification_status",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "qualified_until",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "qualification_state",
+              "type": "str",
+              "default": "'not_stated'"
+            },
+            {
+              "name": "compliance_reasons",
+              "type": "list[str]"
+            },
+            {
+              "name": "unconfirmed_po_count",
               "type": "int",
               "default": "0"
             }
@@ -236445,10 +236576,10 @@
     },
     {
       "name": "procurement",
-      "ts_files": 26,
+      "ts_files": 27,
       "css_files": 0,
       "test_files": 11,
-      "total_files": 26
+      "total_files": 27
     },
     {
       "name": "progress",
@@ -238190,13 +238321,13 @@
     "backend_modules": 197,
     "modules_with_manifests": 195,
     "total_models": 626,
-    "total_columns": 7177,
+    "total_columns": 7183,
     "total_relationships": 236,
-    "total_routes": 3772,
-    "total_schemas": 3578,
+    "total_routes": 3773,
+    "total_schemas": 3579,
     "total_python_files": 2305,
     "frontend_features": 193,
-    "frontend_ts_files": 3009,
+    "frontend_ts_files": 3010,
     "frontend_backend_mapped": 171
   },
   "frontend_backend_mapping": {
