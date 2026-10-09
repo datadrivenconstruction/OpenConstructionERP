@@ -40,3 +40,27 @@ embedded_db_state() {  # print alembic_version of every database in the embedded
 }
 
 site_packages() { "$VENV/bin/python" -c "import sysconfig; print(sysconfig.get_paths()['purelib'])"; }
+
+embedded_schema() {  # $1 = outdir; dump the schema of the app database in the running embedded cluster
+  local pidf="$DATA/pgdata/postmaster.pid" bin port sock db
+  port=$(sed -n 4p "$pidf"); sock=$(sed -n 5p "$pidf")
+  bin=$("$VENV/bin/python" -c "from pixeltable_pgserver.utils import POSTGRES_BIN_PATH as p; print(p)")
+  for d in $("$bin/psql" -h "$sock" -p "$port" -U postgres -d postgres -Atc "select datname from pg_database where not datistemplate"); do
+    if [ "$("$bin/psql" -h "$sock" -p "$port" -U postgres -d "$d" -Atc "select to_regclass('public.oe_projects_project') is not null")" = t ]; then db=$d; fi
+  done
+  echo "embedded app database: ${db:-NOT FOUND}"
+  PSQL="$bin/psql -h $sock -p $port -U postgres" bash "$PROBE/schema.sh" "$db" "$1"
+}
+
+compare_schema() {  # $1 = upgraded dir, $2 = fresh dir, $3 = label; fails on table/column/index/constraint gaps
+  local rc=0 k a b only_up only_fresh
+  for k in tables columns indexes constraints; do
+    a="$1/$k.txt"; b="$2/$k.txt"
+    only_up=$(comm -23 "$a" "$b" | wc -l | tr -d ' '); only_fresh=$(comm -13 "$a" "$b" | wc -l | tr -d ' ')
+    echo "== $3 $k: only in upgraded=$only_up, only in fresh=$only_fresh"
+    comm -3 "$a" "$b" | head -60
+    [ "$only_fresh" -gt 0 ] && rc=1
+    { [ "$k" = columns ] || [ "$k" = tables ]; } && [ "$only_up" -gt 0 ] && rc=1
+  done
+  return $rc
+}

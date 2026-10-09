@@ -145,11 +145,25 @@ jobs:
           rc=0
           python .github/upgrade-probe/probe.py verify --snap "$LOGS/snapshot.json" --expect-version "$NEW_VERSION" || rc=1
           python .github/upgrade-probe/probe.py frontend || rc=1
+          python .github/upgrade-probe/probe.py newrev || rc=1
           embedded_db_state
+          embedded_schema "$LOGS/schema-upg"
           python .github/upgrade-probe/probe.py logscan "$LOGS/serve-new.log" || rc=1
           stop_serve || rc=1
           cat "$LOGS/timings.jsonl"
           exit $rc
+      - name: Fresh embedded install of head (schema reference) and compare with the upgraded one
+        if: ${{ !cancelled() }}
+        run: |
+          . .github/upgrade-probe/lib.sh
+          export DATA=$RUNNER_TEMP/oe-fresh
+          start_serve fresh
+          python .github/upgrade-probe/probe.py wait --timeout 1500 --label fresh-embedded --timing-file "$LOGS/timings.jsonl" || { tail -120 "$LOGS/serve-fresh.log"; exit 1; }
+          python .github/upgrade-probe/probe.py newrev --lenient || true
+          embedded_db_state
+          embedded_schema "$LOGS/schema-fresh"
+          stop_serve
+          compare_schema "$LOGS/schema-upg" "$LOGS/schema-fresh" "embedded upgraded-vs-fresh"
       - if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -228,6 +242,7 @@ jobs:
           rc=0
           python .github/upgrade-probe/probe.py verify --snap "$LOGS/snapshot.json" --expect-version "$NEW_VERSION" || rc=1
           python .github/upgrade-probe/probe.py frontend || rc=1
+          python .github/upgrade-probe/probe.py newrev || rc=1
           python .github/upgrade-probe/probe.py logscan "$LOGS/serve-new.log" || rc=1
           stop_serve || rc=1
           echo "stamp after product upgrade: $(psql -h localhost -U oe -d upg -Atc 'select version_num from alembic_version')"
@@ -263,18 +278,12 @@ jobs:
           echo "stamp fresh: $(psql -h localhost -U oe -d fresh -Atc 'select version_num from alembic_version')"
           bash .github/upgrade-probe/schema.sh fresh "$LOGS/schema-fresh"
       - name: Compare upgraded schema with fresh (both directions)
+        if: ${{ !cancelled() }}
         run: |
+          . .github/upgrade-probe/lib.sh
           rc=0
-          for which in upg ops; do
-            for k in tables columns indexes constraints; do
-              a="$LOGS/schema-$which/$k.txt"; b="$LOGS/schema-fresh/$k.txt"
-              [ -f "$a" ] || continue
-              only_up=$(comm -23 "$a" "$b" | wc -l); only_fresh=$(comm -13 "$a" "$b" | wc -l)
-              echo "== $which vs fresh, $k: only in $which=$only_up, only in fresh=$only_fresh"
-              comm -3 "$a" "$b" | head -40
-              if [ "$which" = upg ] && { [ "$k" = columns ] || [ "$k" = tables ]; } && [ $((only_up+only_fresh)) -gt 0 ]; then rc=1; fi
-            done
-          done
+          compare_schema "$LOGS/schema-upg" "$LOGS/schema-fresh" "external-pg product-path upgraded-vs-fresh" || rc=1
+          [ -d "$LOGS/schema-ops" ] && { compare_schema "$LOGS/schema-ops" "$LOGS/schema-fresh" "external-pg OPS-path (report only)" || true; }
           cat "$LOGS/timings.jsonl"
           exit $rc
       - if: always()
@@ -316,6 +325,7 @@ jobs:
           start_serve first
           python .github/upgrade-probe/probe.py wait --timeout 1500 --label fresh-first --timing-file "$LOGS/timings.jsonl" || { tail -120 "$LOGS/serve-first.log"; exit 1; }
           python .github/upgrade-probe/probe.py frontend || rc=1
+          python .github/upgrade-probe/probe.py newrev || rc=1
           curl -s http://127.0.0.1:8080/api/health | python -c "import sys,json;h=json.load(sys.stdin);print({k:h.get(k) for k in ('status','version','alembic_head_matches','modules_loaded')})"
           embedded_db_state
           python .github/upgrade-probe/probe.py logscan "$LOGS/serve-first.log" || rc=1
@@ -396,10 +406,23 @@ jobs:
           rc=0
           python .github/upgrade-probe/probe.py verify --snap "$LOGS/snapshot.json" --expect-version "$NEW_VERSION" || rc=1
           python .github/upgrade-probe/probe.py frontend || rc=1
+          python .github/upgrade-probe/probe.py newrev || rc=1
           docker exec app sh -c 'ls -la /data | head -20; touch /data/.write_probe && echo data dir writable'  || rc=1
           docker stop -t 60 app; docker logs app >"$LOGS/docker-new.log" 2>&1
           python .github/upgrade-probe/probe.py logscan "$LOGS/docker-new.log" || rc=1
           echo "stamp after upgrade: $(docker exec pg psql -U oe -d openestimate -Atc 'select version_num from alembic_version')"
+          docker rm app
+          PSQL="docker exec -i pg psql -U oe" bash .github/upgrade-probe/schema.sh openestimate "$LOGS/schema-upg"
+          docker exec pg createdb -U oe fresh
+          sed 's/^OE_DB_NAME=.*/OE_DB_NAME=fresh/' "$RUNNER_TEMP/app.env" > "$RUNNER_TEMP/fresh.env"
+          docker volume create freshvol
+          docker run -d --name appfresh --network oe -p 8080:8080 -v freshvol:/data --env-file "$RUNNER_TEMP/fresh.env" oe:head
+          python .github/upgrade-probe/probe.py wait --timeout 1500 --label docker-fresh --timing-file "$LOGS/timings.jsonl" || { docker logs appfresh 2>&1 | tail -100; exit 1; }
+          docker stop -t 60 appfresh; docker logs appfresh >"$LOGS/docker-fresh.log" 2>&1
+          PSQL="docker exec -i pg psql -U oe" bash .github/upgrade-probe/schema.sh fresh "$LOGS/schema-fresh"
+          export DATA=/nonexistent VENV=/nonexistent
+          . .github/upgrade-probe/lib.sh
+          compare_schema "$LOGS/schema-upg" "$LOGS/schema-fresh" "docker upgraded-vs-fresh" || rc=1
           cat "$LOGS/timings.jsonl"
           exit $rc
       - if: always()

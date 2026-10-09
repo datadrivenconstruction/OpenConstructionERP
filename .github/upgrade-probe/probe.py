@@ -275,6 +275,67 @@ def cmd_logscan(a):
         sys.exit(1)
 
 
+def _items(js):
+    if isinstance(js, list):
+        return js
+    if isinstance(js, dict):
+        for k in ("items", "results", "data"):
+            if isinstance(js.get(k), list):
+                return js[k]
+    return []
+
+
+def cmd_newrev(a):
+    """One read per revision v52..v65 over every visible project; any 5xx fails."""
+    tok = login(a.base)
+    assert tok, "demo login failed"
+    st, pj = call(a.base, "GET", "/api/v1/projects/?limit=500&status=all", token=tok)
+    pids = [p["id"] for p in _items(pj)]
+    print(f"{len(pids)} project(s)")
+    fails, rows = [], {}
+
+    def hit(rev, method, path, body=None):
+        st, js = call(a.base, method, path, body, tok)
+        n = len(_items(js)) if st == 200 else 0
+        key = f"{rev} {method} {path.split('?')[0]}"
+        prev = rows.get(key, (0, set()))
+        rows[key] = (prev[0] + n, prev[1] | {st})
+        if st >= 500 or st in (404, 405) and not a.lenient:
+            fails.append(f"{key}: HTTP {st} {json.dumps(js)[:400] if not isinstance(js, bytes) else js[:400]!r}")
+        return st, js
+
+    for pid in pids:
+        hit("v52", "GET", f"/api/v1/reporting/reports/?project_id={pid}")
+        st, sch = hit("v53", "GET", f"/api/v1/schedule/schedules/?project_id={pid}")
+        for s in _items(sch)[:2]:
+            hit("v53", "GET", f"/api/v1/schedule/schedules/{s['id']}/activities/")
+        st, cons = hit("v54", "GET", f"/api/v1/contracts/contracts/?project_id={pid}")
+        for c in _items(cons)[:2]:
+            hit("v54", "GET", f"/api/v1/contracts/contracts/{c['id']}/milestones")
+            hit("v54", "GET", f"/api/v1/contracts/contracts/{c['id']}/payment-plan")
+        hit("v55", "GET", f"/api/v1/boq/boqs/?project_id={pid}")
+        hit("v56", "GET", f"/api/v1/punchlist/items/?project_id={pid}")
+        hit("v59", "GET", f"/api/v1/procurement/goods-receipts/?project_id={pid}")
+        hit("v64/v65", "GET", f"/api/v1/procurement/?project_id={pid}")
+    hit("v54", "GET", "/api/v1/projects/?limit=500&status=all")
+    hit("v57", "POST", "/api/v1/costs/usage-counts/", {"ids": ["00000000-0000-0000-0000-000000000001"]})
+    hit("v58", "GET", "/api/v1/assemblies/")
+    hit("v58", "GET", "/api/v1/pipelines/")
+    hit("v58", "GET", "/api/v1/webhook-leads/sources/")
+    hit("v60", "GET", "/api/v1/legal-entities/entities/")
+    hit("v61", "GET", "/api/v1/processes/")
+    hit("v62", "GET", "/api/v1/geo-hub/geocoding-consent")
+    hit("v63", "GET", "/api/v1/contacts/")
+    hit("v63", "GET", "/api/v1/subcontractors/subcontractors/")
+    for k, (n, sts) in sorted(rows.items()):
+        print(f"  {k:70s} status={sorted(sts)} rows={n}")
+    for f in fails[:40]:
+        print("FAIL", f)
+    if fails:
+        sys.exit(1)
+    print("newrev OK")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--base", default="http://127.0.0.1:8080")
@@ -289,11 +350,13 @@ def main():
     v.add_argument("--snap", required=True)
     v.add_argument("--expect-version", default="")
     sub.add_parser("frontend")
+    nr = sub.add_parser("newrev")
+    nr.add_argument("--lenient", action="store_true")
     lg = sub.add_parser("logscan")
     lg.add_argument("log")
     lg.add_argument("--report-only", action="store_true")
     a = ap.parse_args()
-    {"wait": cmd_wait, "seed": cmd_seed, "verify": cmd_verify, "frontend": cmd_frontend, "logscan": cmd_logscan}[
+    {"wait": cmd_wait, "seed": cmd_seed, "verify": cmd_verify, "frontend": cmd_frontend, "logscan": cmd_logscan, "newrev": cmd_newrev}[
         a.cmd
     ](a)
 
