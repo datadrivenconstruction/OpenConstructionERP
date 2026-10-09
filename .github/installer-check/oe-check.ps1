@@ -52,6 +52,22 @@ function Show-Layout([string]$app) {
   return [pscustomobject]@{ Onedir = $onedir; Onefile = $onefile }
 }
 
+# The installer under test: a published release asset when NEW_TAG is set,
+# otherwise the windows-diagnostic artifact of the NEW_RUN_ID build.
+function Get-NewInstaller([string]$dir) {
+  if ($env:NEW_TAG) {
+    Say "new installer: release $env:NEW_TAG"
+    gh release download $env:NEW_TAG -p '*_x64-setup.exe' -D $dir
+  } else {
+    $name = gh api "repos/$env:GH_REPO/actions/runs/$env:NEW_RUN_ID/artifacts" -q '.artifacts[] | select(.name | startswith("windows-diagnostic")) | .name'
+    Say "new installer artifact: $name (run $env:NEW_RUN_ID)"
+    gh run download $env:NEW_RUN_ID -n $name -D $dir
+    $m = Join-Path $dir 'diagnostic-manifest.json'
+    if (Test-Path -LiteralPath $m) { Get-Content -LiteralPath $m | Write-Host }
+  }
+  if (-not (Get-ChildItem (Join-Path $dir '*.exe'))) { Fail "no new installer in $dir" }
+}
+
 function Start-App([string]$app, [string]$data, [int]$budget = 1500) {
   $ll = Join-Path $data 'desktop-launcher.log'
   $before = if (Test-Path -LiteralPath $ll) { @(Get-Content -LiteralPath $ll).Count } else { 0 }

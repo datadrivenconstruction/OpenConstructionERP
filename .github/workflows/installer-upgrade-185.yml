@@ -3,12 +3,18 @@
 name: Installer upgrade check (temporary)
 
 on:
-  push:
-    branches: [wip/installer-upgrade-185]
   workflow_dispatch:
     inputs:
       new_run_id:
         description: Desktop Release run whose windows-diagnostic artifact is the new installer
+        required: false
+        default: ""
+      new_tag:
+        description: Published release tag whose x64 setup asset is the new installer (wins over new_run_id)
+        required: false
+        default: ""
+      expect_version:
+        description: Version the new build must report on /api/health
         required: false
         default: ""
 
@@ -20,6 +26,8 @@ env:
   # The Desktop Release run (build_only_windows) that built the installer under test.
   NEW_RUN_ID: ${{ inputs.new_run_id || '37972495279' }}
   OLD_TAG: v18.4.0
+  NEW_TAG: ${{ inputs.new_tag }}
+  EXPECT_VERSION: ${{ inputs.expect_version }}
   GH_TOKEN: ${{ github.token }}
   GH_REPO: ${{ github.repository }}
 
@@ -41,10 +49,7 @@ jobs:
           . .github/installer-check/oe-check.ps1
           New-Item -ItemType Directory -Force old, new | Out-Null
           gh release download $env:OLD_TAG -p '*_x64-setup.exe' -D old
-          $name = gh api "repos/$env:GH_REPO/actions/runs/$env:NEW_RUN_ID/artifacts" -q '.artifacts[] | select(.name | startswith("windows-diagnostic")) | .name'
-          Say "new installer artifact: $name (run $env:NEW_RUN_ID)"
-          gh run download $env:NEW_RUN_ID -n $name -D new
-          Get-Content new\diagnostic-manifest.json | Write-Host
+          Get-NewInstaller new
           Show-Installer (Get-ChildItem old\*.exe)[0].FullName
           Show-Installer (Get-ChildItem new\*.exe)[0].FullName
 
@@ -83,6 +88,7 @@ jobs:
           $data = Join-Path $env:USERPROFILE '.openestimate'
           $run = Start-App $app $data 900
           Say "new version reports $($run.Health.version) build $($run.Health.build)"
+          if ($env:EXPECT_VERSION -and $run.Health.version -ne $env:EXPECT_VERSION) { Fail "new build reports $($run.Health.version), expected $env:EXPECT_VERSION" }
           $tok = Get-Token $run.Port $data
           $probe = Get-Content (Join-Path $env:RUNNER_TEMP 'probe.json') -Raw | ConvertFrom-Json
           Test-ProbeData $run.Port $tok $probe
@@ -162,8 +168,7 @@ jobs:
         run: |
           . .github/installer-check/oe-check.ps1
           New-Item -ItemType Directory -Force new | Out-Null
-          $name = gh api "repos/$env:GH_REPO/actions/runs/$env:NEW_RUN_ID/artifacts" -q '.artifacts[] | select(.name | startswith("windows-diagnostic")) | .name'
-          gh run download $env:NEW_RUN_ID -n $name -D new
+          Get-NewInstaller new
           Show-Installer (Get-ChildItem new\*.exe)[0].FullName
 
       - name: Install, start with a non-ASCII home, health, data, stop, uninstall
@@ -201,6 +206,8 @@ jobs:
           $l = Show-Layout $app
           if (-not $l.Onedir) { Fail 'no onedir server folder in the Cyrillic install' }
           $run = Start-App $app $data 900
+          Say "fresh install reports $($run.Health.version)"
+          if ($env:EXPECT_VERSION -and $run.Health.version -ne $env:EXPECT_VERSION) { Fail "fresh install reports $($run.Health.version), expected $env:EXPECT_VERSION" }
           $tok = Get-Token $run.Port $data
           $probe = New-ProbeData $run.Port $tok 'кириллица'
           Test-ProbeData $run.Port $tok $probe
