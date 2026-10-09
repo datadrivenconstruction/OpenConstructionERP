@@ -30,7 +30,7 @@ vi.mock('@/shared/lib/api', async (importOriginal) => ({
 const INVOICE_ID = 'b7e53ca8-1ad2-4cc3-8598-b91873d61920';
 
 function postedKey(index: number) {
-  const body = vi.mocked(apiPost).mock.calls[index][1];
+  const body = vi.mocked(apiPost).mock.calls[index]?.[1];
   return typeof body === 'object' && body !== null && 'idempotency_key' in body ? body.idempotency_key : undefined;
 }
 
