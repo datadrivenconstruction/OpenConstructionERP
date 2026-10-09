@@ -172,6 +172,10 @@ jobs:
           $app = '${{ matrix.app }}'
           $home_ = '${{ matrix.home }}'
           New-Item -ItemType Directory -Force -Path $home_ | Out-Null
+          # A real profile belongs to its user. Created elevated, the folder only
+          # inherits read access for Users from C:\Users, and initdb, which drops
+          # the Administrators group, could not write into it.
+          icacls $home_ /grant "${env:USERNAME}:(OI)(CI)F" | Out-Null
           $env:USERPROFILE = $home_; $env:HOME = $home_
           if ('${{ matrix.appdata }}' -eq 'true') {
             $env:LOCALAPPDATA = Join-Path $home_ 'AppData\Local'; $env:APPDATA = Join-Path $home_ 'AppData\Roaming'
