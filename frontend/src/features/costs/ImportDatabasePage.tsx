@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { useState, useCallback, useRef, useEffect, type DragEvent, type ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { loadColumnProfile, saveColumnProfile } from './columnMappingProfiles';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -2708,6 +2709,8 @@ export function ImportDatabasePage() {
   // `catalogName` groups the imported rows.
   const [previewData, setPreviewData] = useState<PreviewResult | null>(null);
   const [columnMap, setColumnMap] = useState<Record<string, string>>({});
+  // Whether the mapping on screen came from one remembered for these headers.
+  const [profileApplied, setProfileApplied] = useState(false);
   const [catalogName, setCatalogName] = useState('');
   // Target catalog step: create a new catalog inline (name + currency) or
   // import into an existing one. New is the default - the name is seeded
@@ -2753,7 +2756,11 @@ export function ImportDatabasePage() {
         const suggested = data.suggested_map[field];
         seeded[field] = suggested && data.headers.includes(suggested) ? suggested : NOT_MAPPED;
       }
-      setColumnMap(seeded);
+      // A mapping saved for the same header row (last year's edition of the
+      // same list) wins over the guess.
+      const remembered = loadColumnProfile(data.headers);
+      setProfileApplied(remembered !== null);
+      setColumnMap(remembered ? { ...seeded, ...remembered } : seeded);
       setCatalogName(baseName(file.name));
     },
     onError: (err: Error, file) => {
@@ -2901,6 +2908,7 @@ export function ImportDatabasePage() {
       for (const [field, header] of Object.entries(columnMap)) {
         if (header) cleanMap[field] = header;
       }
+      if (previewData) saveColumnProfile(previewData.headers, cleanMap);
       return uploadCostFile(selectedFile, {
         columnMap: cleanMap,
         ...(catalogMode === 'existing'
@@ -2927,6 +2935,7 @@ export function ImportDatabasePage() {
     setResult(null);
     setPreviewData(null);
     setColumnMap({});
+    setProfileApplied(false);
     setCatalogName('');
     setCatalogMode('new');
     setCatalogCurrency('');
@@ -3305,6 +3314,14 @@ export function ImportDatabasePage() {
           )}
 
           {/* Column mapping panel - shown once preview resolves */}
+          {selectedFile && previewData && profileApplied && (
+            <p className="flex items-center gap-2 text-xs text-content-secondary" role="status">
+              <CheckCircle2 size={14} className="text-semantic-success" />
+              {t('costs_import.profile_applied', {
+                defaultValue: 'Columns mapped the way you mapped a file with the same headers last time. Check them before importing.',
+              })}
+            </p>
+          )}
           {selectedFile && previewData && (
             <ColumnMappingPanel
               data={previewData}
