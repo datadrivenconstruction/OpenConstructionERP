@@ -37,7 +37,7 @@ MAX_MEMBER_RATIO: Final[int] = 200
 
 # Extensions a member can be read as; anything else in an archive (a PDF of
 # the decree, a DOCX of metadata) is listed as skipped.
-READABLE_EXTENSIONS: Final[tuple[str, ...]] = (".xml", ".xpwe", ".csv", ".xlsx", ".json", ".txt")
+READABLE_EXTENSIONS: Final[tuple[str, ...]] = (".xml", ".xpwe", ".pwe", ".csv", ".xlsx", ".json", ".txt")
 
 
 class ContainerRefused(ValueError):
