@@ -79,7 +79,10 @@ classifiers = [
 # the way pandas 3 was let in. The dev extra stays open: it is test and build
 # tooling that CI installs, not something a user's install runs.
 dependencies = [
-    "fastapi>=0.116.0,<1",
+    # 0.121.0 added Depends(scope=...) and 0.121.1 fixed it for parameterless
+    # dependencies like get_session; SessionDep needs function scope so the
+    # request commits before its response is sent.
+    "fastapi>=0.121.1,<1",
     # Starlette arrives with FastAPI, but no FastAPI release floors it high
     # enough for us: 0.116.0 accepts starlette 0.40. The 422 status constant
     # is HTTP_422_UNPROCESSABLE_CONTENT, which starlette only has from 0.48.0,
