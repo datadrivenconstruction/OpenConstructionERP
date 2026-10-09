@@ -961,8 +961,8 @@ async def test_non_finite_quantities_are_skipped_not_a_crash() -> None:
 async def test_a_huge_quantity_in_an_unknown_unit_still_fits_the_window() -> None:
     """An XPWE computo may carry quantities up to 1e10 in a unit the duration
     table does not know ("a misura", "corpo"). At one hour per unit that is
-    millions of days; the plan must still fit the window instead of walking
-    a calendar for ever or overflowing a date."""
+    millions of days; the plan must still come out instead of walking a
+    calendar for ever or overflowing a date."""
     async with transactional_session() as session:
         service, schedule_id, bill, _ = await _setup(session)
         cap = await bill.section(None, "01", "OPERE PROVVISIONALI")
