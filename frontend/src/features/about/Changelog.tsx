@@ -73,6 +73,13 @@ const UNRELEASED: ChangelogEntry | null = {
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '18.5.0',
+    date: '2026-10-09',
+    tag: 'NEW',
+    summary:
+      'A new Background services panel in the top bar shows what the platform keeps loaded, how much memory each service takes and what stops without it, and a first-run step asks which modules you will use before anything heavy starts; semantic search is off until you turn it on. The Windows desktop app installs its backend once instead of unpacking it on every start, restarts a crashed backend on its own, and now starts for users whose Windows name has non-ASCII letters. Procurement records the supplier\'s order confirmation, lets an order allow its invoices a stated overrun, shows whether a supplier is still prequalified and opens vendors and the catalogue in place. The client portal emails sign-in links and shows milestones, overdue invoices and payment plan instalments, and a payment plan can follow the schedule. Group companies and branches join the core, schedules import from Excel and keep holidays per country, and Italian users get the BIM property search, XPWE and PWE imports, undoable section delete and bulk drawing sheet edits they asked for.',
+  },
+  {
     version: '18.4.0',
     date: '2026-10-04',
     tag: 'NEW',
