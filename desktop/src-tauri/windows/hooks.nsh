@@ -185,3 +185,70 @@
 !macro NSIS_HOOK_POSTINSTALL
   Delete "$INSTDIR\openconstructionerp-server.exe"
 !macroend
+
+; The install directory has to be an ASCII path. Since the backend became a
+; onedir folder, the bundled PostgreSQL runs from $INSTDIR\server itself, and
+; its initdb cannot find its own postgres.exe when that path holds characters
+; outside the ANSI code page: "could not re-execute with restricted token" and
+; "program postgres is needed by initdb but was not found". The app then never
+; starts. Up to 18.4 the binaries ran from an unpacked copy under the user's
+; profile, so this is new with onedir. The data directory has its own ASCII
+; fallback in the backend; the binaries cannot be moved from here, so the
+; installer refuses the folder instead.
+;
+; The test is a round trip through the US-ASCII code page (20127): every
+; character outside it comes back as "?", which a Windows path cannot contain,
+; so a difference means the path is not ASCII. StrCmpS, because StrCmp ignores
+; case and would call two different strings equal.
+!define OE_NON_ASCII_INSTDIR_TEXT "Please choose an installation folder whose path uses only Latin letters, digits and spaces. The built-in database cannot start from a folder with other characters in its path:$\n$\n$INSTDIR"
+
+; Leaves "1" on the stack when $INSTDIR is ASCII, "0" otherwise.
+Function OE_InstDirIsAscii
+  Push $0
+  Push $1
+  StrCpy $1 ""
+  System::Call 'kernel32::WideCharToMultiByte(i 20127, i 0, w "$INSTDIR", i -1, m .r1, i ${NSIS_MAX_STRLEN}, p 0, p 0) i .r0'
+  ${If} $0 = 0
+    StrCpy $0 "0"
+  ${Else}
+    StrCmpS $1 $INSTDIR 0 +3
+      StrCpy $0 "1"
+      Goto +2
+    StrCpy $0 "0"
+  ${EndIf}
+  Pop $1
+  Exch $0
+FunctionEnd
+
+; Leave callback of the directory page: say why and stay on the page.
+Function OE_CheckInstallDirectory
+  Call OE_InstDirIsAscii
+  Pop $0
+  ${If} $0 != "1"
+    MessageBox MB_OK|MB_ICONEXCLAMATION "${OE_NON_ASCII_INSTDIR_TEXT}"
+    Abort
+  ${EndIf}
+FunctionEnd
+
+; Before any file is written, for every mode: a silent install with /D= never
+; sees the directory page. Exits non-zero, writes the reason to the console it
+; was started from and to %TEMP%\OpenConstructionERP-install-error.log.
+!macro OE_REFUSE_NON_ASCII_INSTDIR
+  Call OE_InstDirIsAscii
+  Pop $0
+  ${If} $0 != "1"
+    FileOpen $1 "$TEMP\OpenConstructionERP-install-error.log" w
+    ${If} $1 != ""
+      FileWriteUTF16LE /BOM $1 "${OE_NON_ASCII_INSTDIR_TEXT}$\r$\n"
+      FileClose $1
+    ${EndIf}
+    System::Call 'kernel32::AttachConsole(i -1)i.r0'
+    ${If} $0 <> 0
+      System::Call 'kernel32::GetStdHandle(i -11)i.r0'
+      FileWrite $0 "The install folder must be an ASCII path: $INSTDIR$\r$\n"
+    ${EndIf}
+    MessageBox MB_OK|MB_ICONEXCLAMATION "${OE_NON_ASCII_INSTDIR_TEXT}" /SD IDOK
+    SetErrorLevel 3
+    Quit
+  ${EndIf}
+!macroend

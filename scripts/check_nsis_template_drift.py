@@ -16,7 +16,9 @@ silently surviving. Two drop the template's name-based CheckIfAppIsRunning from
 the Install and Uninstall sections: in perMachine mode it kills every process on
 the machine named like our main binary, which includes the pip package's own
 openconstructionerp.exe, while our hooks already close what runs from the
-install directory by path. The reasons are written at length in that file.
+install directory by path. Two wire the non-ASCII install directory check from
+windows/hooks.nsh to the directory page and to the first section. The reasons
+are written at length in that file.
 
 Vendoring it costs something, and this script is the payment. The template is a
 Handlebars template, not plain NSI: blocks like each-resources and each-binaries
@@ -399,6 +401,36 @@ NO_NAME_KILL_UNINSTALL_AFTER = r"""    !insertmacro NSIS_HOOK_PREUNINSTALL
   ; No CheckIfAppIsRunning, see the note in the Install section.
 """
 
+# ── Edits ten and eleven: refuse a non-ASCII install directory ─────────────
+# The onedir backend runs the bundled PostgreSQL from $INSTDIR, and its initdb
+# cannot start from a path outside the ANSI code page. The check lives in
+# windows/hooks.nsh; the template only wires it to the directory page and to
+# the first section, which a silent install reaches without that page.
+
+ASCII_PAGE_BEFORE = r"""; 5. Choose install directory page
+!define MUI_PAGE_CUSTOMFUNCTION_PRE SkipIfPassive
+!insertmacro MUI_PAGE_DIRECTORY
+"""
+
+ASCII_PAGE_AFTER = r"""; 5. Choose install directory page
+!define MUI_PAGE_CUSTOMFUNCTION_PRE SkipIfPassive
+; OpenConstructionERP fork: refuse a non-ASCII folder on the page itself, see
+; OE_CheckInstallDirectory in windows/hooks.nsh.
+!define MUI_PAGE_CUSTOMFUNCTION_LEAVE OE_CheckInstallDirectory
+!insertmacro MUI_PAGE_DIRECTORY
+"""
+
+ASCII_SILENT_BEFORE = r"""Section EarlyChecks
+"""
+
+ASCII_SILENT_AFTER = r"""Section EarlyChecks
+  ; OpenConstructionERP fork: a silent or passive install never shows the
+  ; directory page, so the ASCII check from windows/hooks.nsh runs here too,
+  ; before any section writes a file.
+  !insertmacro OE_REFUSE_NON_ASCII_INSTDIR
+
+"""
+
 # ── Edit five: /REBOOTOK on main exe delete ──────────────────────────────────
 # If the executable is still locked (antivirus, indexer) after hooks have run,
 # NSIS schedules it for deletion on the next reboot instead of silently
@@ -451,6 +483,8 @@ PATCHES: tuple[tuple[str, str, str], ...] = (
     ),
     ("the old uninstaller timeout", UNINSTALL_TIMEOUT_BEFORE, UNINSTALL_TIMEOUT_AFTER),
     ("a leftover file not being fatal", LEFTOVER_FILE_BEFORE, LEFTOVER_FILE_AFTER),
+    ("the ASCII check on the directory page", ASCII_PAGE_BEFORE, ASCII_PAGE_AFTER),
+    ("the ASCII check before any file is written", ASCII_SILENT_BEFORE, ASCII_SILENT_AFTER),
     (
         "no kill by image name on install",
         NO_NAME_KILL_INSTALL_BEFORE,

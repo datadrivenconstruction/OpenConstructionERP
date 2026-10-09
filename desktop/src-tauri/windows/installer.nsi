@@ -560,6 +560,9 @@ FunctionEnd
 
 ; 5. Choose install directory page
 !define MUI_PAGE_CUSTOMFUNCTION_PRE SkipIfPassive
+; OpenConstructionERP fork: refuse a non-ASCII folder on the page itself, see
+; OE_CheckInstallDirectory in windows/hooks.nsh.
+!define MUI_PAGE_CUSTOMFUNCTION_LEAVE OE_CheckInstallDirectory
 !insertmacro MUI_PAGE_DIRECTORY
 
 ; 6. Start menu shortcut page
@@ -699,6 +702,11 @@ FunctionEnd
 
 
 Section EarlyChecks
+  ; OpenConstructionERP fork: a silent or passive install never shows the
+  ; directory page, so the ASCII check from windows/hooks.nsh runs here too,
+  ; before any section writes a file.
+  !insertmacro OE_REFUSE_NON_ASCII_INSTDIR
+
   ; Abort silent installer if downgrades is disabled
   !if "${ALLOWDOWNGRADES}" == "false"
   ${If} ${Silent}

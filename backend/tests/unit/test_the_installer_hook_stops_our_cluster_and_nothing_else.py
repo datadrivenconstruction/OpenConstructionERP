@@ -217,6 +217,42 @@ def test_the_installer_template_kills_nothing_by_image_name() -> None:
     assert not offenders, f"the installer kills processes by image name again: {offenders}"
 
 
+def test_the_installer_refuses_a_non_ascii_install_directory(hook_text: str) -> None:
+    """A non-ASCII ``$INSTDIR`` must be refused on the page and in silent mode.
+
+    The onedir backend runs the bundled PostgreSQL from the install directory,
+    and its initdb cannot start from a path outside the ANSI code page, so an
+    install into such a folder never starts. Measured on a hosted runner: a
+    Cyrillic install folder gave "program postgres is needed by initdb but was
+    not found" and no healthy backend in 25 minutes. The page check covers the
+    wizard, the section check covers ``/S /D=...`` and passive mode, which never
+    show the page.
+    """
+    check = re.search(r"Function OE_InstDirIsAscii(.*?)FunctionEnd", hook_text, re.S)
+    assert check is not None, "the hook no longer defines the ASCII check"
+    assert "WideCharToMultiByte(i 20127" in check.group(1), "the check no longer round-trips through US-ASCII"
+    assert "StrCmpS" in check.group(1), "StrCmp ignores case, the comparison must be StrCmpS"
+
+    refuse = re.search(r"!macro OE_REFUSE_NON_ASCII_INSTDIR(.*?)!macroend", hook_text, re.S)
+    assert refuse is not None, "the hook no longer defines the silent-mode refusal"
+    level = re.search(r"SetErrorLevel\s+(\d+)", refuse.group(1))
+    assert level is not None and int(level.group(1)) != 0, "a refused silent install must exit non-zero"
+    assert re.search(r"^\s*(Quit|Abort)\b", refuse.group(1), re.M), "the refusal does not stop the install"
+
+    template = (HOOK.parent / "installer.nsi").read_text(encoding="utf-8")
+    executed = "\n".join(
+        line.strip() for line in template.splitlines() if line.strip() and not line.strip().startswith(";")
+    )
+    assert re.search(
+        r"!define MUI_PAGE_CUSTOMFUNCTION_LEAVE OE_CheckInstallDirectory\n!insertmacro MUI_PAGE_DIRECTORY\b", executed
+    ), "the directory page no longer runs the ASCII check when the user leaves it"
+    early = re.search(r"Section EarlyChecks\n(.*?)\nSectionEnd", executed, re.S)
+    assert early is not None, "the template no longer has an EarlyChecks section"
+    assert early.group(1).splitlines()[0] == "!insertmacro OE_REFUSE_NON_ASCII_INSTDIR", (
+        "a silent install no longer checks the install directory before anything else runs"
+    )
+
+
 def test_every_command_line_survives_nsis_string_truncation(hook_text: str) -> None:
     """A command longer than NSIS can hold is truncated, not rejected.
 
