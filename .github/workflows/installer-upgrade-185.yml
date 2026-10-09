@@ -18,7 +18,7 @@ permissions:
 
 env:
   # The Desktop Release run (build_only_windows) that built the installer under test.
-  NEW_RUN_ID: ${{ inputs.new_run_id || '37967335552' }}
+  NEW_RUN_ID: ${{ inputs.new_run_id || '37972495279' }}
   OLD_TAG: v18.4.0
   GH_TOKEN: ${{ github.token }}
   GH_REPO: ${{ github.repository }}
