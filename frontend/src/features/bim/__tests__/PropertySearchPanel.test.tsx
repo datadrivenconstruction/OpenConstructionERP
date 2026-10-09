@@ -116,6 +116,31 @@ describe('PropertySearchPanel', () => {
     expect(within(screen.getByTestId('property-search-column-listbox')).getAllByRole('option')).toHaveLength(1);
   });
 
+  it('turns an equality search into a quantity rule with the same key and value', async () => {
+    queryMock.mockResolvedValue([{ id: '312002' }]);
+    const onCreateRule = vi.fn();
+    renderPanel({ onCreateRule });
+    await pickColumn('phase cr', 'Phase Created');
+    fireEvent.change(screen.getByTestId('property-search-op'), { target: { value: '=' } });
+    fireEvent.change(screen.getByTestId('property-search-value'), { target: { value: ' Progetto ' } });
+    expect(screen.queryByTestId('property-search-create-rule')).toBeNull();
+    fireEvent.click(screen.getByTestId('property-search-submit'));
+
+    fireEvent.click(await screen.findByTestId('property-search-create-rule'));
+    expect(onCreateRule).toHaveBeenCalledWith('phase created', 'Progetto');
+  });
+
+  it('offers no rule for a search a rule cannot express', async () => {
+    queryMock.mockResolvedValue([{ id: '312002' }]);
+    renderPanel({ onCreateRule: vi.fn() });
+    await pickColumn('phase cr', 'Phase Created');
+    fireEvent.change(screen.getByTestId('property-search-value'), { target: { value: 'Prog' } });
+    fireEvent.click(screen.getByTestId('property-search-submit'));
+
+    await screen.findByTestId('property-search-result-count');
+    expect(screen.queryByTestId('property-search-create-rule')).toBeNull();
+  });
+
   it('queries by the column key and isolates the matching elements by their viewer id', async () => {
     queryMock.mockResolvedValue([{ id: '312002' }, { id: '312004' }]);
     const { onIsolate } = renderPanel();
