@@ -1598,7 +1598,7 @@ export default function App() {
         <Route path="/payment-clock" element={<P title="Payment Clock"><PaymentClockPage /></P>} />
         <Route path="/tax-withholding" element={<P title="Withholding Tax"><TaxWithholdingPage /></P>} />
         <Route path="/tax-rates" element={<P title="Tax Rates"><TaxRatesPage /></P>} />
-        <Route path="/legal-entities" element={<P title="Legal Entities"><LegalEntitiesPage /></P>} />
+        <Route path="/admin/legal-entities" element={<P title="Legal Entities"><LegalEntitiesPage /></P>} />
         <Route path="/einvoice-clearance" element={<P title="E-invoice Clearance"><EInvoiceClearancePage /></P>} />
         <Route path="/cost-match" element={<P title="Cost Match"><CostMatchPage /></P>} />
         <Route path="/full-evm" element={<P title="Earned Value"><FullEvmPage /></P>} />

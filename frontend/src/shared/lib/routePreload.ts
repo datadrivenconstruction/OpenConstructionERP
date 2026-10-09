@@ -82,7 +82,7 @@ const preloaders: Record<string, () => void> = {
   '/payment-clock': () => void import('@/features/payment-clock'),
   '/tax-withholding': () => void import('@/features/tax-withholding'),
   '/tax-rates': () => void import('@/features/tax-rates'),
-  '/legal-entities': () => void import('@/features/legal-entities'),
+  '/admin/legal-entities': () => void import('@/features/legal-entities'),
   '/full-evm': () => void import('@/features/full-evm'),
   '/fx': () => void import('@/features/fx'),
   '/change-intelligence': () => void import('@/features/change-intelligence'),
