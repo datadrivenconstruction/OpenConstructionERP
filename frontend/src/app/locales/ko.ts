@@ -22852,7 +22852,7 @@ const resource = {
     "bim.property_search_results": "일치하는 요소 {{count}}개",
     "bim.property_search_run": "검색 및 격리",
     "bim.property_search_create_rule": "이 검색으로 수량 규칙 만들기",
-    "bim.property_search_create_rule_hint": "이 속성과 값을 필터로 하는 수량 규칙을 엽니다. 그런 다음 BOQ 항목에 연결합니다.",
+    "bim.property_search_create_rule_hint": "이 속성과 값을 필터로 하는 수량 규칙을 엽니다. 그런 다음 내역서 항목에 연결합니다.",
     "bim.property_search_target": "대상 모델",
     "bim.property_search_title": "속성 검색",
     "bim.property_search_toggle": "요소 속성 검색",

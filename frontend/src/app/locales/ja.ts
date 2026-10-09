@@ -22852,7 +22852,7 @@ const resource = {
     "bim.property_search_results": "一致する要素{{count}}件",
     "bim.property_search_run": "検索して分離",
     "bim.property_search_create_rule": "この検索から数量ルールを作成",
-    "bim.property_search_create_rule_hint": "このプロパティと値をフィルターにした数量ルールを開きます。その後、BOQ の項目に紐付けます。",
+    "bim.property_search_create_rule_hint": "このプロパティと値をフィルターにした数量ルールを開きます。その後、内訳書の項目に紐付けます。",
     "bim.property_search_target": "対象モデル",
     "bim.property_search_title": "プロパティ検索",
     "bim.property_search_toggle": "要素プロパティを検索",
