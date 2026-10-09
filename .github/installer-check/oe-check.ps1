@@ -104,7 +104,10 @@ function Get-Token([int]$port, [string]$data) {
     $f = Join-Path $dir '.demo_credentials.json'
     if (Test-Path -LiteralPath $f) {
       $cred = Get-Content -LiteralPath $f -Raw | ConvertFrom-Json
-      foreach ($pr in $cred.PSObject.Properties) {
+      # The estimator owns ordinary project work; the demo admin is tried last.
+      $props = @($cred.PSObject.Properties | Sort-Object { if ($_.Name -like 'estimator@*') { 0 } elseif ($_.Name -like 'demo@*') { 2 } else { 1 } })
+      Say "demo accounts in ${f}: $(@($props | ForEach-Object Name) -join ', ')"
+      foreach ($pr in $props) {
         try {
           $tok = Invoke-RestMethod "$base/auth/login/" -Method Post -ContentType 'application/json' -Body (@{ email = $pr.Name; password = $pr.Value } | ConvertTo-Json) -TimeoutSec 60
           Say "login as $($pr.Name) from $f"
@@ -132,6 +135,8 @@ function Invoke-Api([int]$port, [string]$token, [string]$method, [string]$path, 
 
 function New-ProbeData([int]$port, [string]$token, [string]$tag) {
   $proj = Invoke-Api $port $token Post '/api/v1/projects/' @{ name = "Upgrade probe $tag" }
+  Say ("project create answered: " + ($proj | ConvertTo-Json -Compress -Depth 3).Substring(0, [Math]::Min(600, ($proj | ConvertTo-Json -Compress -Depth 3).Length)))
+  try { $back = Invoke-Api $port $token Get "/api/v1/projects/$($proj.id)"; Say "project read back: $($back.name)" } catch { Say "project read back failed: $($_.ErrorDetails.Message) $($_.Exception.Message)" }
   $boq = Invoke-Api $port $token Post '/api/v1/boq/boqs/' @{ project_id = $proj.id; name = "Probe BOQ $tag"; description = 'installer upgrade check' }
   $pos = Invoke-Api $port $token Post "/api/v1/boq/boqs/$($boq.id)/positions/" @{ boq_id = $boq.id; ordinal = '01.001'; description = "Probe concrete C30/37 $tag"; unit = 'm3'; quantity = 12.5; unit_rate = '145.20' }
   Say "created project=$($proj.id) boq=$($boq.id) position=$($pos.id)"
