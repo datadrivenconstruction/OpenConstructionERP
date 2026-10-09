@@ -111,7 +111,7 @@ class TestWhereTheClusterLives:
     def test_an_ascii_data_dir_keeps_its_cluster_in_place(
         self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
     ) -> None:
-        monkeypatch.setattr(embedded_pg.os, "name", "nt")
+        monkeypatch.setattr(embedded_pg, "cluster_path_must_be_ascii", lambda: True)
         data_dir = tmp_path / "plain"
 
         assert embedded_pg.resolve_pgdata(data_dir) == data_dir / "pgdata"
@@ -119,7 +119,7 @@ class TestWhereTheClusterLives:
     def test_a_non_ascii_home_moves_the_cluster_to_an_ascii_path(
         self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
     ) -> None:
-        monkeypatch.setattr(embedded_pg.os, "name", "nt")
+        monkeypatch.setattr(embedded_pg, "cluster_path_must_be_ascii", lambda: True)
         monkeypatch.setenv("PROGRAMDATA", str(tmp_path / "ProgramData"))
         data_dir = tmp_path / "Users" / "田田" / ".openestimate"
 
@@ -135,7 +135,7 @@ class TestWhereTheClusterLives:
     def test_initdb_debris_on_the_non_ascii_path_does_not_pin_the_cluster_there(
         self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
     ) -> None:
-        monkeypatch.setattr(embedded_pg.os, "name", "nt")
+        monkeypatch.setattr(embedded_pg, "cluster_path_must_be_ascii", lambda: True)
         monkeypatch.setenv("PROGRAMDATA", str(tmp_path / "ProgramData"))
         data_dir = tmp_path / "田田"
         debris = data_dir / "pgdata"
@@ -149,7 +149,7 @@ class TestWhereTheClusterLives:
     def test_a_cluster_that_has_run_on_the_non_ascii_path_stays_there(
         self, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
     ) -> None:
-        monkeypatch.setattr(embedded_pg.os, "name", "nt")
+        monkeypatch.setattr(embedded_pg, "cluster_path_must_be_ascii", lambda: True)
         data_dir = tmp_path / "田田"
         existing = data_dir / "pgdata"
         existing.mkdir(parents=True)

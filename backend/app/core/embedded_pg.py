@@ -1453,6 +1453,16 @@ def _cluster_has_run(pgdata: Path) -> bool:
     return (pgdata / "postmaster.opts").is_file()
 
 
+def cluster_path_must_be_ascii() -> bool:
+    """Whether the bundled PostgreSQL needs its cluster on an ASCII path here.
+
+    True on Windows only. A function for the reason :func:`path_limit_applies`
+    gives: it is the seam the tests patch, because patching ``os.name`` makes
+    ``pathlib`` build a ``WindowsPath`` on Linux and macOS, which raises.
+    """
+    return os.name == "nt"
+
+
 def resolve_pgdata(data_dir: Path | str) -> Path:
     """The cluster directory for ``data_dir``: ``<data_dir>/pgdata`` unless Windows cannot use it.
 
@@ -1469,7 +1479,7 @@ def resolve_pgdata(data_dir: Path | str) -> Path:
     directory or initdb debris, is left alone and simply no longer used.
     """
     default = Path(data_dir).expanduser() / "pgdata"
-    if os.name != "nt" or str(default.absolute()).isascii():
+    if not cluster_path_must_be_ascii() or str(default.absolute()).isascii():
         return default
     if _cluster_has_run(default):
         return default
