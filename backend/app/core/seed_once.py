@@ -78,3 +78,24 @@ class SeedOnce:
                 # No marker only means the idempotent seed runs again next boot.
                 logger.debug("Could not record seed marker %s", key, exc_info=True)
         return True
+
+
+#: Set while a demo project seed is in flight, cleared when it completes.
+DEMO_PROJECTS_PENDING = f"{_PREFIX}demo_projects_pending"
+
+
+async def demo_projects_pending(store: ProcessStore | None = None) -> bool:
+    """Whether an earlier demo project seed started and never completed."""
+    try:
+        return bool((await (store or DbProcessStore()).load()).get(DEMO_PROJECTS_PENDING))
+    except Exception:
+        logger.debug("Could not read the demo seed flag", exc_info=True)
+        return False
+
+
+async def set_demo_projects_pending(pending: bool, store: ProcessStore | None = None) -> None:
+    """Record that a demo project seed started (True) or completed (False). Never raises."""
+    try:
+        await (store or DbProcessStore()).save(DEMO_PROJECTS_PENDING, pending, updated_by="seed")
+    except Exception:
+        logger.debug("Could not record the demo seed flag", exc_info=True)

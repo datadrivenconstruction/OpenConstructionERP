@@ -474,8 +474,9 @@ jobs:
           # a restart through restart-backend.sh keeps the short token.
           echo "JWT_EXPIRE_MINUTES=2" >> "$GITHUB_ENV"
           echo "SEED_DEMO=true" >> "$GITHUB_ENV"
+          echo "OE_DEMO_SEED_INLINE=true" >> "$GITHUB_ENV"
           echo "APP_ENV=development" >> "$GITHUB_ENV"
-          export JWT_EXPIRE_MINUTES=2 SEED_DEMO=true APP_ENV=development
+          export JWT_EXPIRE_MINUTES=2 SEED_DEMO=true APP_ENV=development OE_DEMO_SEED_INLINE=true
           mkdir -p "$(dirname "$OE_LOG_FILE")" "$OE_DATA_DIR"
           nohup python -m app.cli serve --port "$OE_PORT" --data-dir "$OE_DATA_DIR" > "$OE_LOG_FILE" 2>&1 &
           echo $! > "$OE_PID_FILE"
@@ -549,11 +550,14 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p "$RUNNER_TEMP/probe"
-          targets=(--target "${{ github.ref_name }}=backend")
+          slug() { printf '%s' "$1" | tr -c 'A-Za-z0-9.' '-'; }
+          targets=(--target "$(slug "${{ github.ref_name }}")=backend")
           for ref in $COMPARE_REFS; do
-            dir="$RUNNER_TEMP/ref-$(echo "$ref" | tr -c 'A-Za-z0-9' '-')"
-            git worktree add --detach "$dir" "$ref"
-            targets+=(--target "$ref=$dir/backend")
+            # A branch other than the dispatched one exists only as origin/<ref>.
+            sha=$(git rev-parse --verify -q "$ref^{commit}" || git rev-parse --verify "origin/$ref^{commit}")
+            dir="$RUNNER_TEMP/ref-$(slug "$ref")"
+            git worktree add --detach "$dir" "$sha"
+            targets+=(--target "$(slug "$ref")=$dir/backend")
           done
           python scripts/stability/cold_start_probe.py \
             "${targets[@]}" \
