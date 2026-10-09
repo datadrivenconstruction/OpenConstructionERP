@@ -35,8 +35,9 @@ def _routes() -> list[APIRoute]:
 
 def test_every_write_route_requires_manage() -> None:
     writes = [r for r in _routes() if r.methods & {"POST", "PATCH", "PUT", "DELETE"}]
-    # Entities and branches, each created, updated and deleted.
-    assert len(writes) == 6
+    # Entities and branches, each created, updated and deleted, plus naming
+    # the entity that owns a project.
+    assert len(writes) == 7
     missing = [f"{sorted(r.methods)} {r.path}" for r in writes if "legal_entities.manage" not in _permissions(r)]
     assert missing == []
 
