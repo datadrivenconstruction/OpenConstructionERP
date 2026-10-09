@@ -113,6 +113,7 @@ import {
   convertToBase,
   computeQualityScore,
   isResourceDrivenRate,
+  nextTopLevelSectionOrdinal,
   type QualityBreakdown,
   type Tip,
 } from './boqHelpers';
@@ -2701,7 +2702,7 @@ export function BOQEditorPage() {
       const ordinal = computeNextSubOrdinal(all, parentOrdinal);
       sectionMutation.mutate({ ordinal, description: sectionNameInput || '', parent_id: pid });
     } else {
-      const ordinal = String(grouped.sections.length + 1).padStart(2, '0');
+      const ordinal = nextTopLevelSectionOrdinal((boq?.positions ?? []).map((p) => p.ordinal));
       sectionMutation.mutate({ ordinal, description: sectionNameInput || '' });
     }
     setShowSectionModal(false);
@@ -2710,7 +2711,6 @@ export function BOQEditorPage() {
   }, [
     boqId,
     boq?.positions,
-    grouped.sections.length,
     sectionMutation,
     sectionNameInput,
     sectionParentInput,
