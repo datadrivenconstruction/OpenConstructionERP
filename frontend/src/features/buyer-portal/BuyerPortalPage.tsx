@@ -72,6 +72,7 @@ import {
 
 import { BetaBanner, ModuleGuideButton } from '@/shared/ui';
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
+import { sortLanguagesByName } from '@/shared/lib/languageOrder';
 
 import { buyerPortalGuide } from './buyerPortalGuide';
 
@@ -1888,7 +1889,7 @@ function ShellWrapper({
               className="min-h-11 text-xs font-medium px-2 py-1 rounded border border-border-light bg-surface-primary text-content-secondary hover:bg-surface-secondary focus:outline-none focus:ring-2 focus:ring-oe-blue"
               data-testid="locale-select"
             >
-              {SUPPORTED_LANGUAGES.map((loc) => (
+              {sortLanguagesByName(SUPPORTED_LANGUAGES).map((loc) => (
                 <option key={loc.code} value={loc.code}>
                   {loc.name}
                 </option>
