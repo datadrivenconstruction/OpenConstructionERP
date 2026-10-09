@@ -1,0 +1,122 @@
+# TEMPORARY. Lives only on a wip/ branch and must never reach main.
+# After the tag: install the PUBLISHED wheel from PyPI, fresh and as an upgrade
+# from 18.4.0, on Linux, macOS and Windows.
+name: Verify published 18.5
+
+on:
+  push:
+    branches: [wip/verify-published-185]
+  workflow_dispatch:
+
+concurrency:
+  group: verify-published-185
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # REHEARSAL: 18.3.0 -> 18.4.0 to prove the harness on all three OSes before the tag.
+  # For the real check set OLD 18.4.0, NEW 18.5.0 and REHEARSAL to ''.
+  OLD_VERSION: '18.3.0'
+  NEW_VERSION: '18.4.0'
+  REHEARSAL: '1'
+  PYTHONUTF8: '1'
+
+jobs:
+  published:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        mode: [fresh, upgrade]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 75
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Prepare
+        run: |
+          T=$(python -c "import os;print(os.environ['RUNNER_TEMP'].replace(chr(92),'/'))")
+          echo "VENV=$T/venv" >> "$GITHUB_ENV"
+          echo "DATA=$T/oe-data" >> "$GITHUB_ENV"
+          echo "LOGS=$T/logs" >> "$GITHUB_ENV"
+          mkdir -p "$T/logs"
+          python -m venv "$T/venv"
+          if [ -x "$T/venv/Scripts/python.exe" ]; then echo "VPY=$T/venv/Scripts/python.exe" >> "$GITHUB_ENV"; else echo "VPY=$T/venv/bin/python" >> "$GITHUB_ENV"; fi
+      - name: Wait until PyPI serves the new version
+        run: |
+          for i in $(seq 1 30); do
+            python -m pip download -q --no-deps -d "$RUNNER_TEMP/dl" "openconstructionerp==$NEW_VERSION" && break
+            echo "not on PyPI yet ($i)"; sleep 30
+          done
+          ls -l "$RUNNER_TEMP/dl"
+          python - <<'PY'
+          import glob, hashlib, json, os, urllib.request
+          f = glob.glob(os.path.join(os.environ["RUNNER_TEMP"], "dl", "*.whl"))[0]
+          meta = json.load(urllib.request.urlopen(f"https://pypi.org/pypi/openconstructionerp/{os.environ['NEW_VERSION']}/json"))
+          files = {u["filename"]: u for u in meta["urls"]}
+          name = os.path.basename(f)
+          digest = hashlib.sha256(open(f, "rb").read()).hexdigest()
+          print(f"{name}: {os.path.getsize(f):,} bytes = {os.path.getsize(f)/1048576:.2f} MiB, sha256 {digest}")
+          assert files[name]["digests"]["sha256"] == digest, "downloaded wheel does not match the PyPI digest"
+          print("PyPI files for this version:", sorted(files))
+          PY
+      - name: Install (fresh = new version; upgrade = old version first)
+        run: |
+          "$VPY" -m pip install -q --upgrade pip
+          v=$([ "${{ matrix.mode }}" = upgrade ] && echo "$OLD_VERSION" || echo "$NEW_VERSION")
+          s=$(date +%s)
+          "$VPY" -m pip install "openconstructionerp==$v" >"$LOGS/pip-install.log" 2>&1 || { tail -60 "$LOGS/pip-install.log"; exit 1; }
+          echo "pip install $v took $(( $(date +%s) - s ))s"
+      - name: Upgrade path - boot old, seed, stop, pip install --upgrade, boot new
+        if: matrix.mode == 'upgrade'
+        run: |
+          L=.github/upgrade-probe/life.py; P=.github/upgrade-probe/probe.py
+          python $L start "$VENV" "$DATA" "$LOGS/serve-old.log"
+          python $P wait --timeout 1800 --label old-first --timing-file "$LOGS/timings.jsonl" || { tail -100 "$LOGS/serve-old.log"; python $L stop "$VENV" "$DATA"; exit 1; }
+          python $P seed --out "$LOGS/snapshot.json" || { python $L stop "$VENV" "$DATA"; exit 1; }
+          python $L stop "$VENV" "$DATA"
+          "$VPY" -m pip install --upgrade "openconstructionerp==$NEW_VERSION" >"$LOGS/pip-upgrade.log" 2>&1 || { tail -60 "$LOGS/pip-upgrade.log"; exit 1; }
+          grep -E "Successfully installed" "$LOGS/pip-upgrade.log" | cut -c1-300
+          "$VPY" -m pip show openconstructionerp | head -2
+          rc=0
+          python $L start "$VENV" "$DATA" "$LOGS/serve-new.log"
+          python $P wait --timeout 1800 --label upgraded --timing-file "$LOGS/timings.jsonl" || { tail -120 "$LOGS/serve-new.log"; python $L stop "$VENV" "$DATA"; exit 1; }
+          python $P verify --snap "$LOGS/snapshot.json" --expect-version "$NEW_VERSION" || rc=1
+          python $P frontend || rc=1
+          python $P newrev ${REHEARSAL:+--lenient} || rc=1
+          python $P race -n 20 || { [ -n "$REHEARSAL" ] && echo 'REHEARSAL: race failure tolerated' || rc=1; }
+          python $L stop "$VENV" "$DATA" || rc=1
+          python $P logscan "$LOGS/serve-new.log" || rc=1
+          cat "$LOGS/timings.jsonl"
+          exit $rc
+      - name: Fresh path - first start (cold) and second start (warm)
+        if: matrix.mode == 'fresh'
+        run: |
+          L=.github/upgrade-probe/life.py; P=.github/upgrade-probe/probe.py
+          rc=0
+          python $L start "$VENV" "$DATA" "$LOGS/serve-first.log"
+          python $P wait --timeout 1800 --label fresh-first --timing-file "$LOGS/timings.jsonl" || { tail -120 "$LOGS/serve-first.log"; python $L stop "$VENV" "$DATA"; exit 1; }
+          curl -s http://127.0.0.1:8080/api/health | python -c "import sys,json;h=json.load(sys.stdin);print({k:h.get(k) for k in ('status','version','alembic_head_matches','modules_loaded')}); sys.exit(0 if h.get('version')=='$NEW_VERSION' and h.get('status')=='healthy' else 1)" || rc=1
+          python $P frontend || rc=1
+          python $P newrev ${REHEARSAL:+--lenient} || rc=1
+          python $P race -n 20 || { [ -n "$REHEARSAL" ] && echo 'REHEARSAL: race failure tolerated' || rc=1; }
+          python $L stop "$VENV" "$DATA" || rc=1
+          python $P logscan "$LOGS/serve-first.log" || rc=1
+          python $L start "$VENV" "$DATA" "$LOGS/serve-second.log"
+          python $P wait --timeout 900 --label fresh-second --timing-file "$LOGS/timings.jsonl" || { tail -120 "$LOGS/serve-second.log"; python $L stop "$VENV" "$DATA"; exit 1; }
+          python $L stop "$VENV" "$DATA" || rc=1
+          python $P logscan "$LOGS/serve-second.log" || rc=1
+          cat "$LOGS/timings.jsonl"
+          exit $rc
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-${{ matrix.os }}-${{ matrix.mode }}
+          path: ${{ runner.temp }}/logs

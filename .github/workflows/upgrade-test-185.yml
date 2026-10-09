@@ -146,6 +146,7 @@ jobs:
           python .github/upgrade-probe/probe.py verify --snap "$LOGS/snapshot.json" --expect-version "$NEW_VERSION" || rc=1
           python .github/upgrade-probe/probe.py frontend || rc=1
           python .github/upgrade-probe/probe.py newrev || rc=1
+          python .github/upgrade-probe/probe.py race -n 20 || rc=1
           embedded_db_state
           embedded_schema "$LOGS/schema-upg"
           python .github/upgrade-probe/probe.py logscan "$LOGS/serve-new.log" || rc=1
@@ -243,6 +244,7 @@ jobs:
           python .github/upgrade-probe/probe.py verify --snap "$LOGS/snapshot.json" --expect-version "$NEW_VERSION" || rc=1
           python .github/upgrade-probe/probe.py frontend || rc=1
           python .github/upgrade-probe/probe.py newrev || rc=1
+          python .github/upgrade-probe/probe.py race -n 20 || rc=1
           python .github/upgrade-probe/probe.py logscan "$LOGS/serve-new.log" || rc=1
           stop_serve || rc=1
           echo "stamp after product upgrade: $(psql -h localhost -U oe -d upg -Atc 'select version_num from alembic_version')"
@@ -328,6 +330,7 @@ jobs:
           python .github/upgrade-probe/probe.py wait --timeout 1500 --label fresh-first --timing-file "$LOGS/timings.jsonl" || { tail -120 "$LOGS/serve-first.log"; exit 1; }
           python .github/upgrade-probe/probe.py frontend || rc=1
           python .github/upgrade-probe/probe.py newrev || rc=1
+          python .github/upgrade-probe/probe.py race -n 20 || rc=1
           curl -s http://127.0.0.1:8080/api/health | python -c "import sys,json;h=json.load(sys.stdin);print({k:h.get(k) for k in ('status','version','alembic_head_matches','modules_loaded')})"
           embedded_db_state
           python .github/upgrade-probe/probe.py logscan "$LOGS/serve-first.log" || rc=1
@@ -411,6 +414,7 @@ jobs:
           python .github/upgrade-probe/probe.py verify --snap "$LOGS/snapshot.json" --expect-version "$NEW_VERSION" || rc=1
           python .github/upgrade-probe/probe.py frontend || rc=1
           python .github/upgrade-probe/probe.py newrev || rc=1
+          python .github/upgrade-probe/probe.py race -n 20 || rc=1
           docker exec app sh -c 'ls -la /data | head -20; touch /data/.write_probe && echo data dir writable'  || rc=1
           docker stop -t 60 app; docker logs app >"$LOGS/docker-new.log" 2>&1
           python .github/upgrade-probe/probe.py logscan "$LOGS/docker-new.log" || rc=1

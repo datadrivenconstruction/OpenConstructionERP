@@ -336,6 +336,47 @@ def cmd_newrev(a):
     print("newrev OK")
 
 
+def cmd_race(a):
+    """Create then immediately use, each request on a fresh connection; any 404/5xx fails.
+
+    A row committed after the response is sent reads as 404 to a client that uses
+    it straight away. urllib opens a new connection per request, so nothing here
+    can ride the creating request's session.
+    """
+    tok = login(a.base)
+    assert tok, "demo login failed"
+    bad, ok = [], 0
+    p = must(*call(a.base, "POST", "/api/v1/projects/", {"name": "Race probe", "currency": "EUR"}, tok), "create project")
+    st, js = call(a.base, "GET", f"/api/v1/projects/{p['id']}", token=tok)
+    if st != 200:
+        bad.append(f"project read-after-create: HTTP {st}")
+    for i in range(a.n):
+        st, b = call(a.base, "POST", "/api/v1/boq/boqs/", {"project_id": p["id"], "name": f"Race BOQ {i}"}, tok)
+        if st not in (200, 201):
+            bad.append(f"#{i} create boq: HTTP {st} {str(b)[:300]}")
+            continue
+        st, pos = call(
+            a.base,
+            "POST",
+            f"/api/v1/boq/boqs/{b['id']}/positions/",
+            {"boq_id": b["id"], "ordinal": "01.001", "description": "race", "unit": "m2", "quantity": "1", "unit_rate": "2.50"},
+            tok,
+        )
+        if st not in (200, 201):
+            bad.append(f"#{i} add position right after create: HTTP {st} {str(pos)[:300]}")
+            continue
+        st, got = call(a.base, "GET", f"/api/v1/boq/boqs/{b['id']}", token=tok)
+        if st != 200:
+            bad.append(f"#{i} read boq right after position: HTTP {st}")
+            continue
+        ok += 1
+    print(f"race: {ok}/{a.n} create->use->read cycles clean, {len(bad)} failure(s)")
+    for line in bad[:40]:
+        print("FAIL", line)
+    if bad:
+        sys.exit(1)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--base", default="http://127.0.0.1:8080")
@@ -350,13 +391,15 @@ def main():
     v.add_argument("--snap", required=True)
     v.add_argument("--expect-version", default="")
     sub.add_parser("frontend")
+    rc = sub.add_parser("race")
+    rc.add_argument("-n", type=int, default=20)
     nr = sub.add_parser("newrev")
     nr.add_argument("--lenient", action="store_true")
     lg = sub.add_parser("logscan")
     lg.add_argument("log")
     lg.add_argument("--report-only", action="store_true")
     a = ap.parse_args()
-    {"wait": cmd_wait, "seed": cmd_seed, "verify": cmd_verify, "frontend": cmd_frontend, "logscan": cmd_logscan, "newrev": cmd_newrev}[
+    {"wait": cmd_wait, "seed": cmd_seed, "verify": cmd_verify, "frontend": cmd_frontend, "logscan": cmd_logscan, "newrev": cmd_newrev, "race": cmd_race}[
         a.cmd
     ](a)
 
