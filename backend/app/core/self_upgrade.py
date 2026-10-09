@@ -341,6 +341,8 @@ def run_upgrade(job: UpgradeJob) -> UpgradeJob:
             job.command,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=UPGRADE_TIMEOUT_SECONDS,
         )
         job.exit_code = proc.returncode
