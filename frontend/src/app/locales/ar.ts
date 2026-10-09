@@ -112,6 +112,7 @@ const resource = {
     "processes.reports_scheduler.purpose": "يُنشئ ويرسل بالبريد التقارير التي ضبطتها لتصدر وفق جدول.",
     "processes.required": "يعمل دائمًا",
     "processes.restart": "إعادة تشغيل {{name}}",
+    "processes.restarts_zero": "لم يُعَد تشغيله تلقائيًا منذ بدء الخادم.",
     "processes.restarts_one": "أُعيد تشغيله تلقائيًا مرة واحدة منذ بدء الخادم.",
     "processes.restarts_two": "أُعيد تشغيله تلقائيًا مرتين منذ بدء الخادم.",
     "processes.restarts_few": "أُعيد تشغيله تلقائيًا {{count}} مرات منذ بدء الخادم.",
