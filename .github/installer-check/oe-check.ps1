@@ -133,12 +133,28 @@ function Invoke-Api([int]$port, [string]$token, [string]$method, [string]$path, 
   Invoke-RestMethod @p
 }
 
+# A 404 on a row created by the previous call is the read-after-create race of
+# get_session (commit runs after the response is sent). Counted, retried, and
+# reported, so it is told apart from an installer fault.
+$script:Race404 = 0
+function Invoke-Retry404([scriptblock]$call, [string]$what) {
+  for ($i = 1; $i -le 5; $i++) {
+    try { return & $call } catch {
+      $code = $_.Exception.Response.StatusCode.value__
+      if ($code -ne 404 -or $i -eq 5) { throw }
+      $script:Race404++
+      Say "RACE: $what answered 404 right after the row it needs was created (try $i): $($_.ErrorDetails.Message)"
+      Start-Sleep -Milliseconds 500
+    }
+  }
+}
+
 function New-ProbeData([int]$port, [string]$token, [string]$tag) {
   $proj = Invoke-Api $port $token Post '/api/v1/projects/' @{ name = "Upgrade probe $tag" }
   Say ("project create answered: " + ($proj | ConvertTo-Json -Compress -Depth 3).Substring(0, [Math]::Min(600, ($proj | ConvertTo-Json -Compress -Depth 3).Length)))
   try { $back = Invoke-Api $port $token Get "/api/v1/projects/$($proj.id)"; Say "project read back: $($back.name)" } catch { Say "project read back failed: $($_.ErrorDetails.Message) $($_.Exception.Message)" }
-  $boq = Invoke-Api $port $token Post '/api/v1/boq/boqs/' @{ project_id = $proj.id; name = "Probe BOQ $tag"; description = 'installer upgrade check' }
-  $pos = Invoke-Api $port $token Post "/api/v1/boq/boqs/$($boq.id)/positions/" @{ boq_id = $boq.id; ordinal = '01.001'; description = "Probe concrete C30/37 $tag"; unit = 'm3'; quantity = 12.5; unit_rate = '145.20' }
+  $boq = Invoke-Retry404 { Invoke-Api $port $token Post '/api/v1/boq/boqs/' @{ project_id = $proj.id; name = "Probe BOQ $tag"; description = 'installer upgrade check' } } 'BOQ create'
+  $pos = Invoke-Retry404 { Invoke-Api $port $token Post "/api/v1/boq/boqs/$($boq.id)/positions/" @{ boq_id = $boq.id; ordinal = '01.001'; description = "Probe concrete C30/37 $tag"; unit = 'm3'; quantity = 12.5; unit_rate = '145.20' } } 'position create'
   Say "created project=$($proj.id) boq=$($boq.id) position=$($pos.id)"
   [pscustomobject]@{ project = "$($proj.id)"; boq = "$($boq.id)"; position = "$($pos.id)"; tag = $tag }
 }
