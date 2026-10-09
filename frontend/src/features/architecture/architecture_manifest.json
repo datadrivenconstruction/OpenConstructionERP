@@ -137958,6 +137958,7 @@
         "_wave4_subscribers.py",
         "_wave5_cross_module_subscribers.py",
         "dispatcher.py",
+        "email_render.py",
         "events.py",
         "intl.py",
         "manifest.py",
@@ -238325,7 +238326,7 @@
     "total_relationships": 236,
     "total_routes": 3773,
     "total_schemas": 3579,
-    "total_python_files": 2305,
+    "total_python_files": 2306,
     "frontend_features": 193,
     "frontend_ts_files": 3018,
     "frontend_backend_mapped": 171
