@@ -237,6 +237,7 @@ export const TITLE_I18N_MAP: Record<string, string> = {
   'Progress Claim': 'contracts.claim',
   'Withholding Tax': 'nav.tax_withholding',
   'Tax Rates': 'nav.tax_rates',
+  'Legal Entities': 'nav.legal_entities',
   'Authority Submissions': 'authority_submission.title',
   'Review Authority': 'review_authority.title',
   'Interface Register': 'interface_management.title',
