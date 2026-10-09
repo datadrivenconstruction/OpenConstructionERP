@@ -956,21 +956,3 @@ async def test_non_finite_quantities_are_skipped_not_a_crash() -> None:
         await service.generate_from_boq(schedule_id, bill.boq_id, 365)
         acts = await _activities(service, schedule_id)
         assert _task_positions(acts) == [str(good)]
-
-
-async def test_a_huge_quantity_in_an_unknown_unit_still_fits_the_window() -> None:
-    """An XPWE computo may carry quantities up to 1e10 in a unit the duration
-    table does not know ("a misura", "corpo"). At one hour per unit that is
-    millions of days; the plan must still come out instead of walking a
-    calendar for ever or overflowing a date."""
-    async with transactional_session() as session:
-        service, schedule_id, bill, _ = await _setup(session)
-        cap = await bill.section(None, "01", "OPERE PROVVISIONALI")
-        await bill.position(cap, "01.001", "Nolo ponteggio", unit="a misura", qty="9999999999", rate="0.01")
-        await bill.position(cap, "01.002", "Scavo", unit="mc", qty="120", rate="18.40")
-
-        preview = await service.preview_generation(schedule_id, bill.boq_id, 365)
-        assert preview["positions_scheduled"] == 2
-        await service.generate_from_boq(schedule_id, bill.boq_id, 365)
-        acts = await _activities(service, schedule_id)
-        assert len(_task_positions(acts)) == 2

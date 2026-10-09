@@ -54,7 +54,6 @@ import { buildLinkFromModelUrl, buildQuantityRulesUrl } from '@/features/bim/qua
 // import { AutocompleteInput } from './AutocompleteInput';
 import { AIChatPanel } from './AIChatPanel';
 import { importLanded, importToastText, type ImportToastResult } from './importToastText';
-import { carriesPriceList, saveImportedPriceList } from './saveImportedPriceList';
 import { importProgressText, isImportJob, waitForImportJob, type ImportProgress } from './importJob';
 import { alreadyImported, importFailureFromBody, importFailureText } from './importFailureText';
 import { toolbarImportRoute } from './importRoute';
@@ -4524,49 +4523,6 @@ export function BOQEditorPage() {
           title: toast.title,
           message: toast.message,
         });
-        if (importLanded(result) && carriesPriceList(result.source_format)) {
-          // The same file holds the price list the bill is priced from;
-          // offer to keep it as a cost database without a second upload.
-          addToast(
-            {
-              type: 'info',
-              title: t('boq.import_save_price_list_title', {
-                defaultValue: 'This file also contains a price list',
-              }),
-              message: t('boq.import_save_price_list_hint', {
-                defaultValue: 'Save it as a cost database to price new positions from it.',
-              }),
-              action: {
-                label: t('boq.import_save_price_list', { defaultValue: 'Save as cost database' }),
-                onClick: () => {
-                  void saveImportedPriceList(file).then(
-                    (saved) => {
-                      queryClient.invalidateQueries({ queryKey: ['costs'] });
-                      addToast({
-                        type: 'success',
-                        title: t('boq.import_price_list_saved', {
-                          defaultValue: 'Cost database "{{name}}" saved with {{count}} items',
-                          name: saved.catalog,
-                          count: saved.imported,
-                        }),
-                      });
-                    },
-                    (err: unknown) => {
-                      addToast({
-                        type: 'error',
-                        title: t('boq.import_price_list_failed', {
-                          defaultValue: 'Could not save the price list',
-                        }),
-                        message: err instanceof Error ? err.message : undefined,
-                      });
-                    },
-                  );
-                },
-              },
-            },
-            { duration: 20000 },
-          );
-        }
 
         invalidateAll();
       } catch (err) {

@@ -181,10 +181,6 @@ _FALLBACK_PRICE_SHARE_CAP = 3.0
 # gives hours but no crew. A person may ask for any number in the same range.
 MAX_ASSUMED_WORKERS = 20
 
-# The longest one generated position may run, in working days: about a
-# century, far past any real window and far short of the last calendar date.
-_MAX_TASK_WORKING_DAYS = 26_000
-
 # Lump-sum positions get a flat labor-hour allowance regardless of quantity.
 _FALLBACK_LUMP_SUM_HOURS = 8.0
 
@@ -3520,12 +3516,7 @@ class ScheduleService:
                     duration_cal, _ = _from_resources(task.row.data, workers)
                     # Calendar days to working days on the project's own week.
                     out[task.row.id] = max(1, math.ceil(duration_cal * work_days_per_week / 7))
-            # A quantity the unit table cannot size (an XPWE "a misura" line
-            # may carry 1e10) asks for millions of working days; laying those
-            # out walks the calendar past the last date there is. A position
-            # longer than the cap is no plan either, so it stops there and the
-            # preview says the plan overruns the window.
-            return {key: min(days, _MAX_TASK_WORKING_DAYS) for key, days in out.items()}
+            return out
 
         schedule_start = (
             start_date

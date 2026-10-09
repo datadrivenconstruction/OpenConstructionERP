@@ -341,15 +341,6 @@ export function RegionalPriceListImport() {
               {errorText(previewMutation.error)}
             </p>
           )}
-          {previewMutation.error instanceof PriceListError &&
-            previewMutation.error.code === 'no_price_list_found' && (
-              <p className="mt-1 text-sm text-content-secondary">
-                {t('costs_pricelist.hint_map_columns', {
-                  defaultValue:
-                    'A table in another layout (Excel or CSV) can still be imported: upload it under "or upload your own file" below and match its columns to code, description, unit and price.',
-                })}
-              </p>
-            )}
 
           {result && (
             <p className="mt-3 flex items-center gap-2 text-sm text-semantic-success">

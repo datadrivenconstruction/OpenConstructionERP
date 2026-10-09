@@ -125,10 +125,8 @@ def _glob_match(text: str, pattern: str) -> bool:
     nothing here: ``fnmatch`` took ``[30 cm]`` in a value picked from the model
     ("Muro [30 cm]") as a character class, and the value stopped matching
     itself. ``*`` runs across line breaks, so "riga*" finds a multi-line comment.
-    Surrounding whitespace is ignored on both sides, as property search does,
-    so a value exported with a trailing space still matches what was picked.
     """
-    return _glob_regex(pattern.strip()).fullmatch(text.strip().lower()) is not None
+    return _glob_regex(pattern).fullmatch(text.lower()) is not None
 
 
 # Free disk required before baking a tileset, as a multiple of the source GLB.
@@ -4311,7 +4309,6 @@ class BIMHubService:
         catalog = build_property_catalog(
             list(elements),
             model_format=getattr(model, "model_format", None),
-            labels=(model.metadata_ or {}).get("column_labels"),
         )
         return {
             "model_id": model_id,
