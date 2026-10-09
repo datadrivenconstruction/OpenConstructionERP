@@ -52,7 +52,7 @@ import type {
   MatchSource,
   MatchStatus,
 } from './types';
-import { fmtFixed } from '@/shared/lib/formatters';
+import { fmtFixed, fmtList } from '@/shared/lib/formatters';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { useProcessesUi } from '@/features/processes/useProcessesUi';
 import { useIsProcessAdmin } from '@/features/processes/labels';
@@ -1213,7 +1213,7 @@ function MatchModelsOffHint({ ids }: { ids: ReadonlyArray<string> }) {
   const { t } = useTranslation();
   const isAdmin = useIsProcessAdmin();
   const openPanel = useProcessesUi((s) => s.openPanel);
-  const names = ids.map((id) => t(`processes.${id}.name`, { defaultValue: id.replace(/_/g, ' ') })).join(', ');
+  const names = fmtList(ids.map((id) => t(`processes.${id}.name`, { defaultValue: id.replace(/_/g, ' ') })));
   return (
     <div
       className="flex flex-wrap items-start gap-x-2 gap-y-1 px-3 py-2 border-b border-border-light bg-sky-50 text-sky-900 text-[11px] dark:bg-sky-900/20 dark:text-sky-200"

@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { AlertTriangle, Loader2, Power } from 'lucide-react';
 
 import { getErrorMessage } from '@/shared/lib/api';
+import { fmtList } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import { isControllable, isLoading, isUnsupported, ramOf, useEnsureModule, useProcessAction, useProcesses } from './api';
 import { formatMb, processName, processOffImpact, useIsProcessAdmin } from './labels';
@@ -40,7 +41,7 @@ export function ModuleProcessesNotice({
   if (off.length === 0 || isUnsupported(error)) return null;
 
   const starting = off.every((p) => p.enabled && isLoading(p));
-  const names = off.map((p) => processName(t, p)).join(', ');
+  const names = fmtList(off.map((p) => processName(t, p)));
   const mb = off.reduce((s, p) => s + ramOf(p), 0);
 
   const turnOn = () =>
