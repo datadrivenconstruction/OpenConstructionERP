@@ -374,3 +374,11 @@ describe('draftConfidence', () => {
     expect(draftConfidence(mk(0, 0)).confidence).toBe('low');
   });
 });
+
+describe('fnmatchCI whitespace', () => {
+  it('ignores whitespace around the value and the pattern, as the server does', () => {
+    expect(fnmatchCI('Fase 1 ', 'fase 1')).toBe(true);
+    expect(fnmatchCI('Muro [30 cm]', '  Muro [30 cm] ')).toBe(true);
+    expect(fnmatchCI('Fase  1', 'Fase 1')).toBe(false);
+  });
+});

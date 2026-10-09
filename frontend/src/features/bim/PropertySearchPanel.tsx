@@ -72,6 +72,10 @@ interface PropertySearchPanelProps {
    *  hidden. Forward-compatible for FederationsPage / FederatedViewer; the
    *  single-model BIMPage mount leaves it unset. */
   childModelIds?: string[];
+  /** Opens the quantity rule editor pre-filled with this equality search, so
+   *  the filter that found the elements becomes a rule priced into the BOQ.
+   *  The button is hidden when the parent does not supply it. */
+  onCreateRule?: (propKey: string, propValue: string) => void;
 }
 
 type SearchOp = BIMDataframeFilter['op'];
@@ -94,6 +98,7 @@ export default function PropertySearchPanel({
   onIsolate,
   onClear,
   childModelIds,
+  onCreateRule,
 }: PropertySearchPanelProps) {
   const { t } = useTranslation();
   const numberLocale = useNumberLocale();
@@ -542,6 +547,20 @@ export default function PropertySearchPanel({
           </button>
         )}
       </div>
+
+      {outcome?.kind === 'hits' && !error && onCreateRule && op === '=' && column && value.trim() !== '' && (
+        <button
+          type="button"
+          onClick={() => onCreateRule(column, value.trim())}
+          className="inline-flex items-center justify-center gap-1 rounded-md border border-oe-blue/40 px-2 py-1 text-[11px] font-medium text-oe-blue hover:bg-oe-blue/5"
+          data-testid="property-search-create-rule"
+          title={t('bim.property_search_create_rule_hint', {
+            defaultValue: 'Open a quantity rule with this property and value as its filter, then link it to a BOQ position.',
+          })}
+        >
+          {t('bim.property_search_create_rule', { defaultValue: 'Make a quantity rule from this search' })}
+        </button>
+      )}
 
       {outcome?.kind === 'hits' && !error && (
         <div role="status" className="flex flex-col gap-0.5">
