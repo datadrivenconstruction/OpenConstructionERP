@@ -51,7 +51,7 @@ _INSTANCE_ID = str(_instance_uuid.uuid4())
 _BUILD_PEPPER = bytes(b ^ 0x55 for b in (b"\x11\x11\x16\x78\x16\x02\x1c\x16\x07\x78\x1a\x10\x78\x67\x65\x67\x63"))
 _BUILD_HASH = _hashlib.sha256(_BUILD_PEPPER + f"DDC-CWICR-OE-{_INSTANCE_ID}".encode()).hexdigest()[:16]
 
-from collections.abc import Iterator
+from collections.abc import Awaitable, Callable, Iterator
 from contextlib import contextmanager
 from datetime import UTC
 from pathlib import Path
@@ -1476,7 +1476,7 @@ def _boot_demo_ids(active: Any) -> list[str]:
 _HEILBRONN_DEMO_ID = "retail-market-heilbronn"
 
 
-async def _seed_demo_account() -> None:
+async def _seed_demo_account(*, defer_projects: bool = False) -> Callable[[], Awaitable[None]] | None:
     """Create demo user + showcase projects if they don't exist yet.
 
     Idempotent - safe to call on every startup. Creates:
@@ -1495,6 +1495,12 @@ async def _seed_demo_account() -> None:
     their team can set the env vars; everyone else gets a unique secret
     they can recover from the credentials file.
 
+    With ``defer_projects`` the accounts are created now and the project
+    seed (sections 3 onward, the bulk of a first boot) is returned as a
+    coroutine function instead of run, so startup can hand it to a background
+    process and answer health checks and logins first. None is returned when
+    there is nothing left to run.
+
     Disable demo creation entirely with ``SEED_DEMO=false`` in production.
     When ``SEED_DEMO`` is unset, the persisted first-run choice (the CLI's
     "Load demo projects?" prompt / ``serve --no-demo`` / the demo-data
@@ -1504,7 +1510,7 @@ async def _seed_demo_account() -> None:
     from app.core.demo_seed import seed_demo_enabled
 
     if not seed_demo_enabled():
-        return
+        return None
 
     from sqlalchemy import func, select
 
@@ -1705,218 +1711,229 @@ async def _seed_demo_account() -> None:
         except Exception:
             logger.warning("Backfill of earlier demo removals skipped (non-fatal)", exc_info=True)
 
-        # ── 3. Project seed (outside the user session) ────────────────
-        # Two distinct seeding paths run on PostgreSQL, picked by whether a
-        # partner pack is active:
-        #
-        #   PACK MODE  (a pack is active): seed ONLY that pack's own country
-        #     project(s) so the workspace reflects the partner's region,
-        #     currency and classification - nothing else.
-        #
-        #   GENERIC MODE (no pack): seed the rich showcase - the country
-        #     projects in SHOWCASE_DEMO_IDS plus the flagship reference
-        #     project installed further below - so a fresh, vanilla install
-        #     lands a fully worked-out, globe-spanning portfolio.
-        #
-        # Both paths install each project in its own try/except so one failure
-        # never aborts the rest of the seed.
-        if project_count == 0:
-            if active is not None:
-                # PACK MODE - seed only the active pack's project(s). Prefer the
-                # manifest's explicit demo_template_ids (filtered to ids that
-                # resolve in DEMO_TEMPLATES), then fall back to the single
-                # PACK_DEMO_PROJECT flagship mapping. Tag every row with the
-                # pack slug so scope_project_query keeps the workspace clean.
-                from app.core.demo_projects import install_demo_projects_at_boot
+        async def _seed_projects() -> None:
+            try:
+                # ── 3. Project seed (outside the user session) ────────────────
+                # Two distinct seeding paths run on PostgreSQL, picked by whether a
+                # partner pack is active:
+                #
+                #   PACK MODE  (a pack is active): seed ONLY that pack's own country
+                #     project(s) so the workspace reflects the partner's region,
+                #     currency and classification - nothing else.
+                #
+                #   GENERIC MODE (no pack): seed the rich showcase - the country
+                #     projects in SHOWCASE_DEMO_IDS plus the flagship reference
+                #     project installed further below - so a fresh, vanilla install
+                #     lands a fully worked-out, globe-spanning portfolio.
+                #
+                # Both paths install each project in its own try/except so one failure
+                # never aborts the rest of the seed.
+                if project_count == 0:
+                    if active is not None:
+                        # PACK MODE - seed only the active pack's project(s). Prefer the
+                        # manifest's explicit demo_template_ids (filtered to ids that
+                        # resolve in DEMO_TEMPLATES), then fall back to the single
+                        # PACK_DEMO_PROJECT flagship mapping. Tag every row with the
+                        # pack slug so scope_project_query keeps the workspace clean.
+                        from app.core.demo_projects import install_demo_projects_at_boot
 
-                pack_ids = _pack_demo_ids(active)
+                        pack_ids = _pack_demo_ids(active)
 
-                # Skips any demo the user deleted or purged; see the helper.
-                await install_demo_projects_at_boot(pack_ids, partner_pack=active.slug)
-                if not pack_ids:
+                        # Skips any demo the user deleted or purged; see the helper.
+                        await install_demo_projects_at_boot(pack_ids, partner_pack=active.slug)
+                        if not pack_ids:
+                            logger.info(
+                                "Partner pack %s is active but maps to no demo project; skipping demo seed.",
+                                active.slug,
+                            )
+                    else:
+                        # GENERIC MODE - seed the rich showcase by default. Tests ask for
+                        # a fast startup (OE_TEST_FAST_STARTUP), and operators can opt out
+                        # with OE_SKIP_SHOWCASE=1; both skip the showcase loop. The
+                        # flagship below still installs alongside it.
+                        _fast_startup = os.environ.get("OE_TEST_FAST_STARTUP", "").lower() in (
+                            "1",
+                            "true",
+                            "yes",
+                        )
+                        _skip_showcase = os.environ.get("OE_SKIP_SHOWCASE", "").lower() in (
+                            "1",
+                            "true",
+                            "yes",
+                        )
+                        if _fast_startup or _skip_showcase:
+                            logger.debug(
+                                "Showcase seed skipped (%s)",
+                                "OE_TEST_FAST_STARTUP" if _fast_startup else "OE_SKIP_SHOWCASE",
+                            )
+                        else:
+                            from app.core.demo_projects import SHOWCASE_DEMO_IDS, install_demo_projects_at_boot
+
+                            # This branch runs whenever the showcase owner has no
+                            # projects, which is also the state a purge of demo data
+                            # leaves behind. The helper skips every demo the user
+                            # removed, so a purge is not undone by the next restart.
+                            await install_demo_projects_at_boot(list(SHOWCASE_DEMO_IDS))
+
+                # Flagship "Residential House" reference project - an ORM installer
+                # running on PostgreSQL so the full CAD-to-BOQ showcase (real
+                # DDC-converted IFC/RVT geometry + a CWICR-priced, BIM-linked Bill of
+                # Quantities) is present out of the box. Idempotent, so it also
+                # backfills existing databases on the next startup. Runs regardless of
+                # project_count so an upgrade picks it up.
+                #
+                # Version sentinel: the whole backfill block below (flagship 6640-
+                # element model + ~16MB geometry, Heilbronn showcase, equipment +
+                # subcontractor demos, enrich_all) is idempotent but costs real time
+                # on EVERY boot just to conclude "nothing to do". After a completed
+                # run we stamp the app version into a small marker file in the data
+                # dir; while the marker matches the running version the block is
+                # skipped entirely. An upgrade changes app_version, so the backfills
+                # still run once per version to pick up new demo content. Crash-safe:
+                # an unreadable/missing marker (or a fresh DB - project_count == 0)
+                # runs the seeds exactly as before.
+                _seed_fast_startup = os.environ.get("OE_TEST_FAST_STARTUP", "").lower() in ("1", "true", "yes")
+                _running_version = get_settings().app_version
+                _backfill_current = (
+                    not _seed_fast_startup and project_count > 0 and _read_demo_backfill_version() == _running_version
+                )
+                if _seed_fast_startup:
+                    # The flagship installer writes a 6640-element model and ~16MB of
+                    # geometry; no test needs it, and it adds several seconds to every
+                    # per-module app startup. Skip it when the test suite asks for a
+                    # fast startup.
+                    logger.debug("Flagship seed skipped (OE_TEST_FAST_STARTUP)")
+                elif _backfill_current:
                     logger.info(
-                        "Partner pack %s is active but maps to no demo project; skipping demo seed.",
-                        active.slug,
-                    )
-            else:
-                # GENERIC MODE - seed the rich showcase by default. Tests ask for
-                # a fast startup (OE_TEST_FAST_STARTUP), and operators can opt out
-                # with OE_SKIP_SHOWCASE=1; both skip the showcase loop. The
-                # flagship below still installs alongside it.
-                _fast_startup = os.environ.get("OE_TEST_FAST_STARTUP", "").lower() in (
-                    "1",
-                    "true",
-                    "yes",
-                )
-                _skip_showcase = os.environ.get("OE_SKIP_SHOWCASE", "").lower() in (
-                    "1",
-                    "true",
-                    "yes",
-                )
-                if _fast_startup or _skip_showcase:
-                    logger.debug(
-                        "Showcase seed skipped (%s)",
-                        "OE_TEST_FAST_STARTUP" if _fast_startup else "OE_SKIP_SHOWCASE",
+                        "Demo backfill seeds skipped - already completed for version %s",
+                        _running_version,
                     )
                 else:
-                    from app.core.demo_projects import SHOWCASE_DEMO_IDS, install_demo_projects_at_boot
+                    # Tracks whether every named seeder below completed. A failed
+                    # seeder must NOT stamp the version marker - otherwise a
+                    # transient failure (DB hiccup mid-seed) would be skipped on
+                    # every subsequent boot until the next app upgrade instead of
+                    # self-healing on the next start.
+                    _backfill_ok = True
+                    try:
+                        from app.core.demo_projects import install_flagship_at_boot
 
-                    # This branch runs whenever the showcase owner has no
-                    # projects, which is also the state a purge of demo data
-                    # leaves behind. The helper skips every demo the user
-                    # removed, so a purge is not undone by the next restart.
-                    await install_demo_projects_at_boot(list(SHOWCASE_DEMO_IDS))
+                        fl_result = await install_flagship_at_boot(demo_user_id)
+                        logger.info("Flagship seed: %s", fl_result)
+                    except Exception:
+                        _backfill_ok = False
+                        logger.warning("Flagship seed skipped (non-fatal)", exc_info=True)
 
-        # Flagship "Residential House" reference project - an ORM installer
-        # running on PostgreSQL so the full CAD-to-BOQ showcase (real
-        # DDC-converted IFC/RVT geometry + a CWICR-priced, BIM-linked Bill of
-        # Quantities) is present out of the box. Idempotent, so it also
-        # backfills existing databases on the next startup. Runs regardless of
-        # project_count so an upgrade picks it up.
-        #
-        # Version sentinel: the whole backfill block below (flagship 6640-
-        # element model + ~16MB geometry, Heilbronn showcase, equipment +
-        # subcontractor demos, enrich_all) is idempotent but costs real time
-        # on EVERY boot just to conclude "nothing to do". After a completed
-        # run we stamp the app version into a small marker file in the data
-        # dir; while the marker matches the running version the block is
-        # skipped entirely. An upgrade changes app_version, so the backfills
-        # still run once per version to pick up new demo content. Crash-safe:
-        # an unreadable/missing marker (or a fresh DB - project_count == 0)
-        # runs the seeds exactly as before.
-        _seed_fast_startup = os.environ.get("OE_TEST_FAST_STARTUP", "").lower() in ("1", "true", "yes")
-        _running_version = get_settings().app_version
-        _backfill_current = (
-            not _seed_fast_startup and project_count > 0 and _read_demo_backfill_version() == _running_version
-        )
-        if _seed_fast_startup:
-            # The flagship installer writes a 6640-element model and ~16MB of
-            # geometry; no test needs it, and it adds several seconds to every
-            # per-module app startup. Skip it when the test suite asks for a
-            # fast startup.
-            logger.debug("Flagship seed skipped (OE_TEST_FAST_STARTUP)")
-        elif _backfill_current:
-            logger.info(
-                "Demo backfill seeds skipped - already completed for version %s",
-                _running_version,
-            )
-        else:
-            # Tracks whether every named seeder below completed. A failed
-            # seeder must NOT stamp the version marker - otherwise a
-            # transient failure (DB hiccup mid-seed) would be skipped on
-            # every subsequent boot until the next app upgrade instead of
-            # self-healing on the next start.
-            _backfill_ok = True
-            try:
-                from app.core.demo_projects import install_flagship_at_boot
+                    # Retail Market Heilbronn - the ninth showcase project. Backfilled
+                    # flagship-style on EVERY boot (not just project_count == 0) so
+                    # existing installs pick it up on upgrade. install_demo_project
+                    # dedupes on metadata_["demo_id"], so once the project exists the
+                    # re-run is a cheap no-op. Operators who opted out of the showcase
+                    # keep their workspace clean.
+                    if os.environ.get("OE_SKIP_SHOWCASE", "").lower() in ("1", "true", "yes"):
+                        logger.debug("Retail Market Heilbronn backfill skipped (OE_SKIP_SHOWCASE)")
+                    else:
+                        try:
+                            from app.core.demo_projects import install_demo_project as _install_demo
 
-                fl_result = await install_flagship_at_boot(demo_user_id)
-                logger.info("Flagship seed: %s", fl_result)
-            except Exception:
-                _backfill_ok = False
-                logger.warning("Flagship seed skipped (non-fatal)", exc_info=True)
-
-            # Retail Market Heilbronn - the ninth showcase project. Backfilled
-            # flagship-style on EVERY boot (not just project_count == 0) so
-            # existing installs pick it up on upgrade. install_demo_project
-            # dedupes on metadata_["demo_id"], so once the project exists the
-            # re-run is a cheap no-op. Operators who opted out of the showcase
-            # keep their workspace clean.
-            if os.environ.get("OE_SKIP_SHOWCASE", "").lower() in ("1", "true", "yes"):
-                logger.debug("Retail Market Heilbronn backfill skipped (OE_SKIP_SHOWCASE)")
-            else:
-                try:
-                    from app.core.demo_projects import install_demo_project as _install_demo
-
-                    async with async_session_factory() as rh_session:
-                        rh_result = await _install_demo(rh_session, _HEILBRONN_DEMO_ID, respect_retirement=True)
-                        await rh_session.commit()
-                        if not rh_result.get("already_installed") and not rh_result.get("retired"):
-                            logger.info(
-                                "Retail Market Heilbronn showcase seeded: %s (%s positions)",
-                                rh_result.get("project_id"),
-                                rh_result.get("positions"),
+                            async with async_session_factory() as rh_session:
+                                rh_result = await _install_demo(rh_session, _HEILBRONN_DEMO_ID, respect_retirement=True)
+                                await rh_session.commit()
+                                if not rh_result.get("already_installed") and not rh_result.get("retired"):
+                                    logger.info(
+                                        "Retail Market Heilbronn showcase seeded: %s (%s positions)",
+                                        rh_result.get("project_id"),
+                                        rh_result.get("positions"),
+                                    )
+                        except Exception:
+                            _backfill_ok = False
+                            logger.warning(
+                                "Retail Market Heilbronn showcase backfill skipped (non-fatal)",
+                                exc_info=True,
                             )
-                except Exception:
-                    _backfill_ok = False
-                    logger.warning(
-                        "Retail Market Heilbronn showcase backfill skipped (non-fatal)",
-                        exc_info=True,
-                    )
 
-            # The fleet and the vendor register are company-wide demo content
-            # that only makes sense next to a demo project. An install whose
-            # demos were all removed gets neither back.
-            from app.core.demo_marker import first_live_demo_project_id
+                    # The fleet and the vendor register are company-wide demo content
+                    # that only makes sense next to a demo project. An install whose
+                    # demos were all removed gets neither back.
+                    from app.core.demo_marker import first_live_demo_project_id
 
-            async with async_session_factory() as probe_session:
-                _any_live_demo = await first_live_demo_project_id(probe_session) is not None
-            if not _any_live_demo:
-                logger.info("Equipment and subcontractor demo seeds skipped: no demo project is installed")
-            else:
-                # Equipment & fleet demo - a representative fleet with 90 days of
-                # telemetry so the predictive Health & Analytics tab and Fleet
-                # Intelligence panel arrive populated (gauge, anomalies, forecast,
-                # underutilised units, savings) rather than empty. Idempotent: the
-                # seed skips when EQ-0001 already exists.
-                try:
-                    from app.modules.equipment.seed import seed_equipment_demo
+                    async with async_session_factory() as probe_session:
+                        _any_live_demo = await first_live_demo_project_id(probe_session) is not None
+                    if not _any_live_demo:
+                        logger.info("Equipment and subcontractor demo seeds skipped: no demo project is installed")
+                    else:
+                        # Equipment & fleet demo - a representative fleet with 90 days of
+                        # telemetry so the predictive Health & Analytics tab and Fleet
+                        # Intelligence panel arrive populated (gauge, anomalies, forecast,
+                        # underutilised units, savings) rather than empty. Idempotent: the
+                        # seed skips when EQ-0001 already exists.
+                        try:
+                            from app.modules.equipment.seed import seed_equipment_demo
 
-                    async with async_session_factory() as eq_session:
-                        eq_counts = await seed_equipment_demo(eq_session)
-                        await eq_session.commit()
-                        if any(eq_counts.values()):
-                            logger.info("Equipment demo seed: %s", eq_counts)
-                except Exception:
-                    _backfill_ok = False
-                    logger.warning("Equipment demo seed skipped (non-fatal)", exc_info=True)
+                            async with async_session_factory() as eq_session:
+                                eq_counts = await seed_equipment_demo(eq_session)
+                                await eq_session.commit()
+                                if any(eq_counts.values()):
+                                    logger.info("Equipment demo seed: %s", eq_counts)
+                        except Exception:
+                            _backfill_ok = False
+                            logger.warning("Equipment demo seed skipped (non-fatal)", exc_info=True)
 
-                # Subcontractor demo - 50 firms with varied prequalification states
-                # and 24 months of rating rollups for the top 10, plus agreements on
-                # the flagship project. Feeds the vendor scorecard (rating dials +
-                # period history) and the procurement prequalification badges /
-                # award gate. Idempotent: skips when any subcontractor exists.
-                try:
-                    from app.modules.subcontractors.seed import seed_subcontractors_demo
+                        # Subcontractor demo - 50 firms with varied prequalification states
+                        # and 24 months of rating rollups for the top 10, plus agreements on
+                        # the flagship project. Feeds the vendor scorecard (rating dials +
+                        # period history) and the procurement prequalification badges /
+                        # award gate. Idempotent: skips when any subcontractor exists.
+                        try:
+                            from app.modules.subcontractors.seed import seed_subcontractors_demo
 
-                    async with async_session_factory() as sub_session:
-                        # Attach agreements to a demo project, never to whichever
-                        # project the table returns first, which on a working
-                        # install is somebody's real one. None just skips the
-                        # agreements, leaving the subs + ratings the scorecard needs.
-                        _proj_id = await first_live_demo_project_id(sub_session)
-                        sub_counts = await seed_subcontractors_demo(sub_session, project_id=_proj_id)
-                        await sub_session.commit()
-                        if any(sub_counts.values()):
-                            logger.info("Subcontractor demo seed: %s", sub_counts)
-                except Exception:
-                    _backfill_ok = False
-                    logger.warning("Subcontractor demo seed skipped (non-fatal)", exc_info=True)
+                            async with async_session_factory() as sub_session:
+                                # Attach agreements to a demo project, never to whichever
+                                # project the table returns first, which on a working
+                                # install is somebody's real one. None just skips the
+                                # agreements, leaving the subs + ratings the scorecard needs.
+                                _proj_id = await first_live_demo_project_id(sub_session)
+                                sub_counts = await seed_subcontractors_demo(sub_session, project_id=_proj_id)
+                                await sub_session.commit()
+                                if any(sub_counts.values()):
+                                    logger.info("Subcontractor demo seed: %s", sub_counts)
+                        except Exception:
+                            _backfill_ok = False
+                            logger.warning("Subcontractor demo seed skipped (non-fatal)", exc_info=True)
 
-            # ── Remaining feature-module demos ──────────────────────────────
-            # bid management, carbon, CRM, HSE-Advanced, portal, QMS, advanced
-            # scheduling (Last Planner), service management, supplier catalogs,
-            # variations, photos, takeoff, clash, costmodel, moc, markups,
-            # catalog and BIM grouping each ship a demo seeder. They used to be
-            # inlined here; the same list now lives in a reusable, fail-soft
-            # coroutine so the in-app partner-pack apply paths run the exact same
-            # enrichment instead of opening with empty modules. ``enrich_all``
-            # enriches every project that exists at boot, each seeder in its own
-            # session so one failure cannot poison the rest.
-            from app.core.demo_enrichment import enrich_all
+                    # ── Remaining feature-module demos ──────────────────────────────
+                    # bid management, carbon, CRM, HSE-Advanced, portal, QMS, advanced
+                    # scheduling (Last Planner), service management, supplier catalogs,
+                    # variations, photos, takeoff, clash, costmodel, moc, markups,
+                    # catalog and BIM grouping each ship a demo seeder. They used to be
+                    # inlined here; the same list now lives in a reusable, fail-soft
+                    # coroutine so the in-app partner-pack apply paths run the exact same
+                    # enrichment instead of opening with empty modules. ``enrich_all``
+                    # enriches every project that exists at boot, each seeder in its own
+                    # session so one failure cannot poison the rest.
+                    from app.core.demo_enrichment import enrich_all
 
-            await enrich_all()
+                    await enrich_all()
 
-            # Stamp the sentinel only when every named seeder completed.
-            # On a failed pass the marker stays absent/stale, so the next
-            # boot retries the (idempotent) seeds instead of skipping them
-            # until the next app upgrade.
-            if _backfill_ok:
-                _write_demo_backfill_version(_running_version)
-            else:
-                logger.info("Demo backfill marker not stamped - at least one seeder failed; will retry next boot")
+                    # Stamp the sentinel only when every named seeder completed.
+                    # On a failed pass the marker stays absent/stale, so the next
+                    # boot retries the (idempotent) seeds instead of skipping them
+                    # until the next app upgrade.
+                    if _backfill_ok:
+                        _write_demo_backfill_version(_running_version)
+                    else:
+                        logger.info(
+                            "Demo backfill marker not stamped - at least one seeder failed; will retry next boot"
+                        )
+            except Exception:
+                logger.exception("Failed to seed demo projects (non-fatal)")
+
+        if defer_projects:
+            return _seed_projects
+        await _seed_projects()
     except Exception:
         logger.exception("Failed to seed demo account (non-fatal)")
+    return None
 
 
 def create_app() -> FastAPI:
@@ -5075,9 +5092,16 @@ def create_app() -> FastAPI:
 
         register_builtin_rules()
 
-        # Seed demo account + 3 demo projects (idempotent)
+        # Seed the demo accounts now: the first login needs them. The demo
+        # projects are the bulk of a first boot (about a minute on a clean
+        # runner), and nothing before the first answer needs them, so they
+        # seed in the background as the ``demo_data_seed`` registry process
+        # and appear while the user is signing in. The test suite expects a
+        # seeded database when startup returns, so OE_TEST_FAST_STARTUP keeps
+        # them inline.
         _section("Demo data")
-        await _seed_demo_account()
+        _defer_demo = os.environ.get("OE_TEST_FAST_STARTUP", "").lower() not in ("1", "true", "yes")
+        _demo_projects_seed = await _seed_demo_account(defer_projects=_defer_demo)
 
         # Baseline seeds, once per app version: a completed seed leaves a
         # marker (app.core.seed_once) and later boots of the same version skip
@@ -5230,6 +5254,10 @@ def create_app() -> FastAPI:
             return False if _fast_startup or app.openapi_url is None else None
 
         register_builtin_processes(process_registry, openapi_prime=_prime_openapi_schema, openapi_env=_openapi_env)
+        if _demo_projects_seed is not None:
+            from app.core.processes.builtin import register_demo_data_seed
+
+            register_demo_data_seed(process_registry, _demo_projects_seed)
 
         from app.core.processes.matching import register_matching_processes
 
