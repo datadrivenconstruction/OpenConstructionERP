@@ -15,6 +15,7 @@ import clsx from 'clsx';
 import { Check, Loader2, X } from 'lucide-react';
 
 import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
+import { compareNames } from '@/shared/lib/collator';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { processesForModules, ramOf, useFirstRun, useProcesses, type ProcessCategory } from './api';
@@ -50,7 +51,7 @@ export function ProcessesWizard() {
           .reduce((sum, p) => sum + ramOf(p), 0);
         return { ...moduleLink(t, id), heavyMb };
       })
-      .sort((a, b) => a.heavyMb - b.heavyMb || a.label.localeCompare(b.label));
+      .sort((a, b) => a.heavyMb - b.heavyMb || compareNames(a.label, b.label));
   }, [processes, t]);
 
   // Seed the ticks once per opening, not on every poll, or a refresh would

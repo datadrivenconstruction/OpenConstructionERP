@@ -9,6 +9,7 @@
 
 import type { TFunction } from 'i18next';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { fmtFixed, fmtNumber } from '@/shared/lib/formatters';
 import type { ProcessInfo } from './api';
 
 function humanise(id: string): string {
@@ -62,8 +63,8 @@ export function moduleLink(t: TFunction, id: string): ModuleLink {
 
 export function formatMb(t: TFunction, mb: number): string {
   return mb >= 1024
-    ? t('processes.ram_gb', { defaultValue: '{{value}} GB', value: (mb / 1024).toFixed(1) })
-    : t('processes.ram_mb', { defaultValue: '{{value}} MB', value: Math.round(mb) });
+    ? t('processes.ram_gb', { defaultValue: '{{value}} GB', value: fmtFixed(mb / 1024, 1) })
+    : t('processes.ram_mb', { defaultValue: '{{value}} MB', value: fmtNumber(Math.round(mb), 0) });
 }
 
 const ADMIN_ROLES = new Set(['admin', 'owner', 'superuser']);
