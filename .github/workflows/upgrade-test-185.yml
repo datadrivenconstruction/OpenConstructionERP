@@ -249,6 +249,7 @@ jobs:
           bash .github/upgrade-probe/schema.sh upg "$LOGS/schema-upg"
           exit $rc
       - name: Ops path - alembic upgrade head on a clone of the 18.4.0 database (report)
+        if: ${{ !cancelled() }}
         id: ops
         continue-on-error: true
         env:
@@ -265,6 +266,7 @@ jobs:
           bash "$GITHUB_WORKSPACE/.github/upgrade-probe/schema.sh" upg_ops "$LOGS/schema-ops"
           exit $rc
       - name: Fresh install of head on an empty database (schema reference)
+        if: ${{ !cancelled() }}
         env:
           DATABASE_URL: postgresql+asyncpg://oe:oe@localhost:5432/fresh
           DATABASE_SYNC_URL: postgresql://oe:oe@localhost:5432/fresh
@@ -392,6 +394,7 @@ jobs:
           SEED_DEMO=true
           EOF
           sed -i 's/^ *//' "$RUNNER_TEMP/app.env"
+          trap 'docker rm -f app appfresh >/dev/null 2>&1 || true' EXIT
           docker run -d --name app --network oe -p 8080:8080 -v appvol:/data --env-file "$RUNNER_TEMP/app.env" \
             ghcr.io/datadrivenconstruction/openconstructionerp:$OLD_VERSION
           python .github/upgrade-probe/probe.py wait --timeout 1500 --label docker-old --timing-file "$LOGS/timings.jsonl" || { docker logs app 2>&1 | tail -100; exit 1; }
@@ -401,6 +404,7 @@ jobs:
           echo "stamp after 18.4.0: $(docker exec pg psql -U oe -d openestimate -Atc 'select version_num from alembic_version')"
       - name: Run head image on the same volumes and verify
         run: |
+          trap 'docker rm -f app appfresh >/dev/null 2>&1 || true' EXIT
           docker run -d --name app --network oe -p 8080:8080 -v appvol:/data --env-file "$RUNNER_TEMP/app.env" oe:head
           python .github/upgrade-probe/probe.py wait --timeout 1500 --label docker-upgraded --timing-file "$LOGS/timings.jsonl" || { docker logs app 2>&1 | tail -150; exit 1; }
           rc=0

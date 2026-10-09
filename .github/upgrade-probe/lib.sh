@@ -9,6 +9,8 @@ start_serve() {  # $1 = log label. Own session so stop can signal the whole grou
   echo $! >"$RUNNER_TEMP/serve.pid"
   cd "$GITHUB_WORKSPACE"
   echo "started serve pid $(cat "$RUNNER_TEMP/serve.pid") -> $log"
+  # A failing step must not leave the server holding 8080 for the next step.
+  trap 'stop_serve >/dev/null 2>&1 || true' EXIT
 }
 
 port_free() { ! (lsof -nP -iTCP:8080 -sTCP:LISTEN >/dev/null 2>&1); }
