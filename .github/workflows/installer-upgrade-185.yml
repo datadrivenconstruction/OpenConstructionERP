@@ -61,6 +61,10 @@ jobs:
           $probe = New-ProbeData $run.Port $tok 'from-18.4.0'
           $probe | ConvertTo-Json | Set-Content (Join-Path $env:RUNNER_TEMP 'probe.json')
           Stop-App $run $app
+          # A restart of 18.4.0 over its own populated database: is it "degraded" too?
+          $again = Start-App $app $data 900
+          Say "18.4.0 restart status=$($again.Health.status) arrived_populated_unstamped=$($again.Health.arrived_populated_unstamped)"
+          Stop-App $again $app
           Save-Logs $data 'a-old'
 
       - name: (b) Install the new build over 18.4.0
