@@ -43325,6 +43325,7 @@ const resource = {
     "modules.catalog.dashboard": "Boshqaruv paneli yigʻmasi",
     "modules.catalog.dashboards": "Boshqaruv panellari",
     "modules.catalog.eac": "EAC v2 mexanizmi",
+    "modules.catalog.einvoice": "Elektron hisob-faktura",
     "modules.catalog.einvoice_clearance": "Elektron hisob-fakturani rasmiylashtirish",
     "modules.catalog.equipment": "Uskuna va texnika parkini boshqarish",
     "modules.catalog.field_diary": "Obyekt kundaligi",

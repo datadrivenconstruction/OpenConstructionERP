@@ -218,6 +218,7 @@ const resource = {
     "modules.catalog.documents": "নথি",
     "modules.catalog.dwg_takeoff": "DWG টেকঅফ",
     "modules.catalog.eac": "EAC v2 ইঞ্জিন",
+    "modules.catalog.einvoice": "ই-ইনভয়েস",
     "modules.catalog.einvoice_clearance": "ই-ইনভয়েস ক্লিয়ারেন্স",
     "modules.catalog.enterprise_workflows": "এন্টারপ্রাইজ ওয়ার্কফ্লো",
     "modules.catalog.equipment": "সরঞ্জাম ও বহর ব্যবস্থাপনা",

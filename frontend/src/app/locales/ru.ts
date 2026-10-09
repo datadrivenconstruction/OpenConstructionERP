@@ -218,6 +218,7 @@ const resource = {
     "modules.catalog.documents": "Документы",
     "modules.catalog.dwg_takeoff": "Обмер по DWG",
     "modules.catalog.eac": "Движок EAC v2",
+    "modules.catalog.einvoice": "Электронный счёт",
     "modules.catalog.einvoice_clearance": "Клиринг электронных счетов-фактур",
     "modules.catalog.enterprise_workflows": "Корпоративные процессы",
     "modules.catalog.equipment": "Управление техникой и автопарком",

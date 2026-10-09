@@ -217,6 +217,7 @@ const resource = {
     "modules.catalog.documents": "문서",
     "modules.catalog.dwg_takeoff": "DWG 물량 산출",
     "modules.catalog.eac": "EAC v2 엔진",
+    "modules.catalog.einvoice": "전자 세금계산서",
     "modules.catalog.einvoice_clearance": "전자세금계산서 검증",
     "modules.catalog.enterprise_workflows": "엔터프라이즈 워크플로",
     "modules.catalog.equipment": "장비 및 차량 관리",

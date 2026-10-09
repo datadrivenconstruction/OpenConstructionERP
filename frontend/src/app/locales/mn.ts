@@ -218,6 +218,7 @@ const resource = {
     "modules.catalog.documents": "Баримт бичгүүд",
     "modules.catalog.dwg_takeoff": "DWG хэмжилт",
     "modules.catalog.eac": "EAC v2 систем",
+    "modules.catalog.einvoice": "Цахим нэхэмжлэх",
     "modules.catalog.einvoice_clearance": "Цахим нэхэмжлэхийн зөвшөөрөл",
     "modules.catalog.enterprise_workflows": "Байгууллагын ажлын урсгалууд",
     "modules.catalog.equipment": "Тоног төхөөрөмж ба автопаркийн удирдлага",

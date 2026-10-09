@@ -216,6 +216,7 @@ const resource = {
     "modules.catalog.documents": "Dokumenter",
     "modules.catalog.dwg_takeoff": "DWG-oppmåling",
     "modules.catalog.eac": "EAC v2-motor",
+    "modules.catalog.einvoice": "E-faktura",
     "modules.catalog.einvoice_clearance": "E-fakturavalidering",
     "modules.catalog.enterprise_workflows": "Bedriftsarbeidsflyter",
     "modules.catalog.equipment": "Utstyrs- & flåtestyring",

@@ -217,6 +217,7 @@ const resource = {
     "modules.catalog.documents": "Documents",
     "modules.catalog.dwg_takeoff": "Métré DWG",
     "modules.catalog.eac": "Moteur EAC v2",
+    "modules.catalog.einvoice": "Facture électronique",
     "modules.catalog.einvoice_clearance": "Validation de facture électronique",
     "modules.catalog.enterprise_workflows": "Flux de travail d'entreprise",
     "modules.catalog.equipment": "Gestion du matériel & du parc",

@@ -216,6 +216,7 @@ const resource = {
     "modules.catalog.documents": "Документтер",
     "modules.catalog.dwg_takeoff": "DWG Такеофф",
     "modules.catalog.eac": "EAC v2 кыймылдаткычы",
+    "modules.catalog.einvoice": "Электрондук эсеп-фактура",
     "modules.catalog.einvoice_clearance": "Электрондук эсеп-фактураны текшерүү",
     "modules.catalog.enterprise_workflows": "Корпоративдик иш процесстери",
     "modules.catalog.equipment": "Жабдуулар жана автопаркты башкаруу",

@@ -218,6 +218,7 @@ const resource = {
     "modules.catalog.documents": "اسناد",
     "modules.catalog.dwg_takeoff": "متره DWG",
     "modules.catalog.eac": "موتور EAC v2",
+    "modules.catalog.einvoice": "صورت‌حساب الکترونیکی",
     "modules.catalog.einvoice_clearance": "تأیید فاکتور الکترونیکی",
     "modules.catalog.enterprise_workflows": "جریان‌های کاری سازمانی",
     "modules.catalog.equipment": "مدیریت تجهیزات و ناوگان",
