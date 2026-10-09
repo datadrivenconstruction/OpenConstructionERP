@@ -371,3 +371,32 @@ def test_it_leaves_a_recycled_pid_alone(postmaster_command: str, impostor_postgr
         finally:
             if proc.poll() is None:
                 proc.kill()
+
+
+@pytestmark_windows
+def test_it_follows_the_pointer_to_a_relocated_cluster(postmaster_command: str, impostor_postgres: Path) -> None:
+    """A data directory PostgreSQL cannot use keeps its cluster elsewhere.
+
+    The backend then writes the cluster's path into ``pgdata.location`` and
+    leaves ``<data dir>/pgdata`` absent. A hook that only looks in the default
+    place finds no pid file and stops nothing, which is the same quiet no-op
+    the positive control above exists to rule out, so the relocated layout gets
+    its own positive control, under a data directory named the way the
+    affected accounts are.
+    """
+    with tempfile.TemporaryDirectory() as directory:
+        data_dir = Path(directory) / "田田" / ".openestimate"
+        data_dir.mkdir(parents=True)
+        cluster_home = Path(directory) / "clusters" / "0123456789abcdef"
+        proc = _spawn(impostor_postgres)
+        try:
+            _write_pid_file(cluster_home, proc.pid, int(time.time()))
+            (data_dir / "pgdata.location").write_text(str(cluster_home / "pgdata"), encoding="utf-8")
+            assert not (data_dir / "pgdata").exists()
+            _run(postmaster_command, data_dir)
+            stopped = _stopped_within(proc)
+            print(f"relocated postmaster pid {proc.pid}: stopped={stopped}")
+            assert stopped, "the hook did not follow pgdata.location to the cluster the backend placed elsewhere"
+        finally:
+            if proc.poll() is None:
+                proc.kill()
