@@ -135,7 +135,8 @@ class TestTranslatedMessages:
                     field: f"VALUE_{field}" for _, field, _, _ in Formatter().parse(template) if field is not None
                 }
                 assert translate(f"bcf.{key}", locale=locale, **params) == template.format(**params), key
-        assert not caplog.records
+        # Reloading the bundle logs an INFO line; only warnings signal a fallback.
+        assert not [record for record in caplog.records if record.levelno >= logging.WARNING]
 
     @pytest.mark.parametrize(
         ("locale", "expected"),

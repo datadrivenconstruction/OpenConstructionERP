@@ -287,11 +287,13 @@ def test_gate_stays_green_when_a_catalogue_gains_a_locale(tmp_path: Path) -> Non
     """Growing an answered set must pass (a hard 28-of-28 requirement would block today's tree)."""
     name = _NEWLY_WATCHED[0]
     scratch = _copy_catalogue(name, tmp_path / "messages")
-    (scratch / "fr.json").write_text(json.dumps({"common": {"ok": "OK"}}), encoding="utf-8")
+    # Pick a locale the catalogue does not answer yet, so the set really grows.
+    gained = next(code for code in ("fr", "pl", "nl", "sv") if not (scratch / f"{code}.json").exists())
+    (scratch / f"{gained}.json").write_text(json.dumps({"common": {"ok": "OK"}}), encoding="utf-8")
 
     exit_code, lines = gate.check(catalogues={**_CATALOGUES, name: scratch}, cross_check=False)
     assert exit_code == 0, "\n".join(lines)
-    assert any("fr" in line and name in line and "regenerate the baseline" in line for line in lines)
+    assert any(gained in line and name in line and "regenerate the baseline" in line for line in lines)
 
 
 def test_gate_refuses_a_baseline_it_cannot_read(tmp_path: Path) -> None:
