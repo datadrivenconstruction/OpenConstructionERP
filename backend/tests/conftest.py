@@ -776,6 +776,22 @@ _LOCAL_HTTP_HOSTS = frozenset({"", "localhost", "127.0.0.1", "::1", "test", "tes
 
 
 @pytest.fixture(autouse=True)
+def _semantic_switch_state_in_tmp(tmp_path, monkeypatch):
+    """Keep the semantic search switch file out of the real data directory.
+
+    Turning semantic search on (the install and enable endpoints) writes
+    ``semantic_search.json`` into the data dir, which for a test run is the
+    checkout itself; a test that flips it would leave the file behind and
+    change the next local start.
+    """
+    from app.core import semantic_switch
+
+    state_dir = tmp_path / "_semantic_switch"
+    monkeypatch.setattr(semantic_switch, "_state_path", lambda: state_dir / semantic_switch.STATE_FILENAME)
+    monkeypatch.setattr(semantic_switch, "_cache", None)
+
+
+@pytest.fixture(autouse=True)
 def _no_outbound_http(request, monkeypatch):
     """Turn a real call to a third-party host into a named test failure.
 
