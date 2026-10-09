@@ -216,6 +216,7 @@ const resource = {
     "modules.catalog.documents": "Құжаттар",
     "modules.catalog.dwg_takeoff": "DWG Өлшеу",
     "modules.catalog.eac": "EAC v2 қозғалтқышы",
+    "modules.catalog.einvoice": "Электрондық шот-фактура",
     "modules.catalog.einvoice_clearance": "Электрондық шот-фактура клиренсі",
     "modules.catalog.enterprise_workflows": "Кәсіпорын Жұмыс Ағындары",
     "modules.catalog.equipment": "Жабдық пен автопарк басқару",

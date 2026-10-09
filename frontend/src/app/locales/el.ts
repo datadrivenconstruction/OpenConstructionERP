@@ -216,6 +216,7 @@ const resource = {
     "modules.catalog.documents": "Έγγραφα",
     "modules.catalog.dwg_takeoff": "Επιμέτρηση DWG",
     "modules.catalog.eac": "Μηχανή EAC v2",
+    "modules.catalog.einvoice": "Ηλεκτρονικό τιμολόγιο",
     "modules.catalog.einvoice_clearance": "Εκκαθάριση ηλ. τιμολογίων",
     "modules.catalog.enterprise_workflows": "Επιχειρησιακές Ροές Εργασίας",
     "modules.catalog.equipment": "Διαχείριση Εξοπλισμού & Στόλου",

@@ -216,6 +216,7 @@ const resource = {
     "modules.catalog.documents": "Dokumendid",
     "modules.catalog.dwg_takeoff": "DWG-mõõdistus",
     "modules.catalog.eac": "EAC v2 mootor",
+    "modules.catalog.einvoice": "E-arve",
     "modules.catalog.einvoice_clearance": "E-arve valideerimine",
     "modules.catalog.enterprise_workflows": "Ettevõtte töövood",
     "modules.catalog.equipment": "Seadmete ja sõidukipargi haldus",

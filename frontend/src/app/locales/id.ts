@@ -217,6 +217,7 @@ const resource = {
     "modules.catalog.documents": "Dokumen",
     "modules.catalog.dwg_takeoff": "Takeoff DWG",
     "modules.catalog.eac": "Mesin EAC v2",
+    "modules.catalog.einvoice": "Faktur elektronik",
     "modules.catalog.einvoice_clearance": "Validasi Faktur Elektronik",
     "modules.catalog.enterprise_workflows": "Alur Kerja Perusahaan",
     "modules.catalog.equipment": "Manajemen Peralatan & Armada",

@@ -194,6 +194,7 @@ const resource = {
     "modules.catalog.design_options": "Opções de Design",
     "modules.catalog.documents": "Documentos",
     "modules.catalog.dwg_takeoff": "Medição DWG",
+    "modules.catalog.einvoice": "Nota fiscal eletrônica",
     "modules.catalog.enterprise_workflows": "Fluxos de Trabalho Corporativos",
     "modules.catalog.erp_chat": "Chat ERP",
     "modules.catalog.esg": "Desempenho ESG em obra",

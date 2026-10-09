@@ -216,6 +216,7 @@ const resource = {
     "modules.catalog.documents": "Belgeler",
     "modules.catalog.dwg_takeoff": "DWG Metraj",
     "modules.catalog.eac": "EAC v2 Motoru",
+    "modules.catalog.einvoice": "E-fatura",
     "modules.catalog.einvoice_clearance": "E-fatura Doğrulama",
     "modules.catalog.enterprise_workflows": "Kurumsal İş Akışları",
     "modules.catalog.equipment": "Ekipman ve Filo Yönetimi",

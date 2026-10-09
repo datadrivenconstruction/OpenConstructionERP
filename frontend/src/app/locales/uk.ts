@@ -44254,6 +44254,7 @@ const resource = {
     "modules.catalog.dashboard": "Зведена панель приладів",
     "modules.catalog.dashboards": "Панелі приладів",
     "modules.catalog.eac": "Рушій EAC v2",
+    "modules.catalog.einvoice": "Електронний рахунок",
     "modules.catalog.einvoice_clearance": "Кліренс е-рахунків",
     "modules.catalog.equipment": "Управління технікою та парком машин",
     "modules.catalog.field_diary": "Щоденник об'єкта",

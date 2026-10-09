@@ -218,6 +218,7 @@ const resource = {
     "modules.catalog.documents": "Dokumenty",
     "modules.catalog.dwg_takeoff": "Výkaz výměr z DWG",
     "modules.catalog.eac": "Engine EAC v2",
+    "modules.catalog.einvoice": "E-faktura",
     "modules.catalog.einvoice_clearance": "Validace e-faktury",
     "modules.catalog.enterprise_workflows": "Podnikové workflow",
     "modules.catalog.equipment": "Správa vybavení a vozového parku",

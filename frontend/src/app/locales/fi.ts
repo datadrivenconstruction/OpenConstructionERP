@@ -216,6 +216,7 @@ const resource = {
     "modules.catalog.documents": "Dokumentit",
     "modules.catalog.dwg_takeoff": "DWG-määrälaskenta",
     "modules.catalog.eac": "EAC v2 -moottori",
+    "modules.catalog.einvoice": "Verkkolasku",
     "modules.catalog.einvoice_clearance": "Verkkolaskun validointi",
     "modules.catalog.enterprise_workflows": "Yritystason työnkulut",
     "modules.catalog.equipment": "Kaluston ja ajoneuvojen hallinta",

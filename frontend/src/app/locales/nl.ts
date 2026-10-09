@@ -216,6 +216,7 @@ const resource = {
     "modules.catalog.documents": "Documenten",
     "modules.catalog.dwg_takeoff": "DWG-uitname",
     "modules.catalog.eac": "EAC v2-engine",
+    "modules.catalog.einvoice": "E-factuur",
     "modules.catalog.einvoice_clearance": "E-factuurvalidatie",
     "modules.catalog.enterprise_workflows": "Enterprise-workflows",
     "modules.catalog.equipment": "Materieel- & wagenparkbeheer",

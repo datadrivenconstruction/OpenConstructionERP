@@ -217,6 +217,7 @@ const resource = {
     "modules.catalog.documents": "文档",
     "modules.catalog.dwg_takeoff": "DWG 工程量提取",
     "modules.catalog.eac": "EAC v2 引擎",
+    "modules.catalog.einvoice": "电子发票",
     "modules.catalog.einvoice_clearance": "电子发票验证",
     "modules.catalog.enterprise_workflows": "企业工作流",
     "modules.catalog.equipment": "设备与车队管理",

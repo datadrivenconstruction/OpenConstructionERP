@@ -218,6 +218,7 @@ const resource = {
     "modules.catalog.documents": "Dokumenty",
     "modules.catalog.dwg_takeoff": "Przedmiar z DWG",
     "modules.catalog.eac": "Silnik EAC v2",
+    "modules.catalog.einvoice": "E-faktura",
     "modules.catalog.einvoice_clearance": "Walidacja e-faktury",
     "modules.catalog.enterprise_workflows": "Przepływy pracy enterprise",
     "modules.catalog.equipment": "Zarządzanie sprzętem i flotą",

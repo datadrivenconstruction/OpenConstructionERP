@@ -217,6 +217,7 @@ const resource = {
     "modules.catalog.documents": "Dokumenti",
     "modules.catalog.dwg_takeoff": "Iskaz iz DWG-a",
     "modules.catalog.eac": "EAC v2 mehanizam",
+    "modules.catalog.einvoice": "E-račun",
     "modules.catalog.einvoice_clearance": "Validacija e-računa",
     "modules.catalog.enterprise_workflows": "Korporativni tijekovi rada",
     "modules.catalog.equipment": "Upravljanje opremom i voznim parkom",
