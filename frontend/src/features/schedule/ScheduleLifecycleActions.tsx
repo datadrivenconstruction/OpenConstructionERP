@@ -30,7 +30,7 @@ export function ScheduleLifecycleActions({ schedule, onChanged, compact = false 
   // The project owner may delete an archive too; the server knows who owns it,
   // so ask it rather than offer a Delete it would refuse.
   const impact = useQuery({
-    queryKey: ['schedule-delete-impact', schedule.id],
+    queryKey: ['schedules', schedule.id, 'delete-impact'],
     queryFn: () => scheduleApi.getDeleteImpact(schedule.id),
     enabled: archived && canArchive && !isPurgeAdmin,
     staleTime: 60_000,
@@ -72,7 +72,6 @@ export function ScheduleLifecycleActions({ schedule, onChanged, compact = false 
         toast({ type: 'success', title: t('schedule.deleted') });
       }
       await queryClient.invalidateQueries({ queryKey: ['schedules'] });
-      await queryClient.invalidateQueries({ queryKey: ['schedule-delete-impact', schedule.id] });
       onChanged?.();
     } catch (error) {
       toast({ type: 'error', title: t('toasts.error'), message: scheduleErrorMessage(error, t) });

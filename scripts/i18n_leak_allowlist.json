@@ -1528,25 +1528,5 @@
     "en_value": "Subtotal",
     "note": "Subtotal is the ordinary word for this column in da, es (all variants), id, no, pt (both) and ro, so the translation equals English by design",
     "reason_category": "cognate_loanword"
-  },
-  "processes.ram_estimate": {
-    "en_value": "~{{value}}",
-    "note": "a tilde marking an estimate before a placeholder, no literal text to translate (background services panel)",
-    "reason_category": "template_placeholder"
-  },
-  "processes.ram_gb": {
-    "en_value": "{{value}} GB",
-    "note": "unit symbol beside a placeholder, the same shape as the settled sibling bim.converter_panel_size ({size} MB); GB is written the same way in every locale we ship, so there is nothing to translate (background services panel)",
-    "reason_category": "abbreviation"
-  },
-  "processes.ram_mb": {
-    "en_value": "{{value}} MB",
-    "note": "unit symbol beside a placeholder, the same shape as the settled sibling bim.converter_panel_size ({size} MB); MB is written the same way in every locale we ship, so there is nothing to translate (background services panel)",
-    "reason_category": "abbreviation"
-  },
-  "processes.wizard.adds": {
-    "en_value": "+{{value}}",
-    "note": "a plus sign before a placeholder, showing how much memory a ticked service adds; no literal text to translate (background services wizard)",
-    "reason_category": "template_placeholder"
   }
 }

@@ -11,6 +11,7 @@ Endpoints:
     GET    /{id}                       - Get single PO
     PATCH  /{id}                       - Update PO (auth required)
     POST   /{id}/issue                 - Issue PO (auth required)
+    POST   /{id}/acknowledge           - Record the supplier confirmation
 
 NOTE: Fixed-path routes (/goods-receipts) are registered BEFORE the parametric
 /{po_id} route so that FastAPI does not try to parse "goods-receipts" as a UUID.
@@ -43,6 +44,7 @@ from app.modules.procurement.schemas import (
     GRListResponse,
     GRResponse,
     InvoiceCheckRequest,
+    POAcknowledgeRequest,
     POCancelRequest,
     POCreate,
     POInvoiceCreatedResponse,
@@ -423,6 +425,15 @@ async def get_supplier_scorecard(
     if project_id is not None or data.get("total_po_count", 0) > 0:
         name_map = await _fetch_vendor_names(session, [contact_id])
         data["supplier_name"] = name_map.get(contact_id)
+        # Same reason as the name: the compliance block is only shown to a
+        # caller who can see this supplier's orders.
+        data.update(
+            await service.supplier_compliance(
+                contact_id,
+                project_id=project_id,
+                accessible_project_ids=scope_ids,
+            )
+        )
     return SupplierScorecardResponse.model_validate(data)
 
 
@@ -835,6 +846,30 @@ async def issue_purchase_order(
     existing = await service.get_po(po_id)
     await verify_project_access(existing.project_id, str(user_id), session)
     po = await service.issue_po(po_id)
+    return await _po_response(service.session, po)
+
+
+@router.post(
+    "/{po_id}/acknowledge/",
+    response_model=POResponse,
+    dependencies=[Depends(RequirePermission("procurement.acknowledge"))],
+)
+async def acknowledge_purchase_order(
+    po_id: uuid.UUID,
+    data: POAcknowledgeRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: ProcurementService = Depends(_get_service),
+) -> POResponse:
+    """Record the supplier's confirmation of an issued order."""
+    existing = await service.get_po(po_id)
+    await verify_project_access(existing.project_id, str(user_id), session)
+    po = await service.acknowledge_po(
+        po_id,
+        supplier_reference=data.supplier_reference,
+        confirmed_delivery_date=data.confirmed_delivery_date.isoformat() if data.confirmed_delivery_date else None,
+        actor_id=str(user_id),
+    )
     return await _po_response(service.session, po)
 
 

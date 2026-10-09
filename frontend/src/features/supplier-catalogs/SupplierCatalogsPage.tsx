@@ -1,6 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-import { useState, useMemo, Fragment, type ReactNode } from 'react';
+import { useEffect, useState, useMemo, Fragment, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
@@ -207,10 +207,22 @@ function HowSupplierCatalogsWork() {
   );
 }
 
-export function SupplierCatalogsPage() {
+interface SupplierCatalogsPageProps {
+  /**
+   * Render one tab inside another page (Procurement shows Vendors and Catalog
+   * this way). The page's own header, guide and tab bar are left out; the
+   * standalone /supplier-catalogs page keeps all four tabs.
+   */
+  embeddedTab?: 'vendors' | 'catalog';
+}
+
+export function SupplierCatalogsPage({ embeddedTab }: SupplierCatalogsPageProps = {}) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<Tab>('vendors');
+  const [tab, setTab] = useState<Tab>(embeddedTab ?? 'vendors');
+  useEffect(() => {
+    if (embeddedTab) setTab(embeddedTab);
+  }, [embeddedTab]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
@@ -362,6 +374,16 @@ export function SupplierCatalogsPage() {
 
   return (
     <div className="space-y-5 animate-fade-in">
+      {embeddedTab ? (
+        canCreateHere && (
+          <div className="flex justify-end">
+            <Button variant="primary" icon={<Plus size={14} />} onClick={() => setCreateOpen(true)}>
+              {createLabel(tab, t)}
+            </Button>
+          </div>
+        )
+      ) : (
+      <>
       <Breadcrumb items={[{ label: t('nav.supplier_catalogs', { defaultValue: 'Supplier Catalogs' }) }]} />
 
       {/* Header — the module name + icon live in the global top bar; the
@@ -439,6 +461,8 @@ export function SupplierCatalogsPage() {
           })}
         </nav>
       </div>
+      </>
+      )}
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative flex-1 min-w-[200px] max-w-md">

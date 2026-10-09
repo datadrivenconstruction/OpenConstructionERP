@@ -108,13 +108,6 @@ CANNOT_TRUNCATE: frozenset[str] = frozenset(
         # returns the whole PROFILES dict, so there is no query, no LIMIT and no
         # state in which it answers with part of the set.
         "einvoice/router.py::list_profiles",
-        # A fixed registry of record types an approval route may target. The
-        # route returns sorted(APPROVABLE_ENTITIES), a set compiled into the
-        # source that gains an entry only when a developer registers a new
-        # approvable record type. There is no query and no LIMIT. A short answer
-        # would hide a record type from the route form, so an admin could not
-        # put that record under approval at all: a correctness bug, not a page.
-        "enterprise_workflows/router.py::list_entity_types",
     }
 )
 

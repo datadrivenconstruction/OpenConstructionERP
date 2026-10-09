@@ -3,7 +3,7 @@
 """Procurement Pydantic schemas - request/response models."""
 
 import re
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 from typing import Any, Literal
 from uuid import UUID
@@ -24,6 +24,29 @@ def _validate_non_negative_decimal(v: str) -> str:
         raise ValueError(f"Invalid decimal value: {v!r}") from exc
     if d < 0:
         raise ValueError(f"Value must be non-negative, got {v!r}")
+    return v
+
+
+def _validate_tolerance_pct(v: str | None) -> str | None:
+    """An invoice allowance as a percentage of the order: 0 to 100, or unset."""
+    if v is None or v == "":
+        return None
+    try:
+        d = Decimal(v)
+    except (InvalidOperation, ValueError, TypeError) as exc:
+        raise ValueError(f"Invalid percentage: {v!r}") from exc
+    if not d.is_finite() or d < 0 or d > 100:
+        raise ValueError(f"Percentage must be between 0 and 100, got {v!r}")
+    return v
+
+
+def _validate_tolerance_abs(v: str | None) -> str | None:
+    """An invoice allowance as an amount in the order's currency, or unset."""
+    if v is None or v == "":
+        return None
+    _validate_non_negative_decimal(v)
+    if not Decimal(v).is_finite():
+        raise ValueError(f"Invalid amount: {v!r}")
     return v
 
 
@@ -88,11 +111,26 @@ class POCreate(BaseModel):
     notes: str | None = Field(default=None, max_length=5000)
     items: list[POItemCreate] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
+    # How far a supplier invoice may run past this order before the match
+    # warns: a percentage, an amount in the order's currency, or both (the
+    # smaller band wins). Unset keeps the one-cent rounding band.
+    invoice_tolerance_pct: str | None = Field(default=None, max_length=20)
+    invoice_tolerance_abs: str | None = Field(default=None, max_length=50)
 
     @field_validator("amount_subtotal", "tax_amount", "amount_total")
     @classmethod
     def _check_non_negative_decimal(cls, v: str) -> str:
         return _validate_non_negative_decimal(v)
+
+    @field_validator("invoice_tolerance_pct")
+    @classmethod
+    def _check_tolerance_pct(cls, v: str | None) -> str | None:
+        return _validate_tolerance_pct(v)
+
+    @field_validator("invoice_tolerance_abs")
+    @classmethod
+    def _check_tolerance_abs(cls, v: str | None) -> str | None:
+        return _validate_tolerance_abs(v)
 
 
 class InvoiceCheckLine(BaseModel):
@@ -133,6 +171,11 @@ class POUpdate(BaseModel):
     notes: str | None = Field(default=None, max_length=5000)
     items: list[POItemCreate] | None = None
     metadata: dict[str, Any] | None = None
+    # How far a supplier invoice may run past this order before the match
+    # warns: a percentage, an amount in the order's currency, or both (the
+    # smaller band wins). Unset keeps the one-cent rounding band.
+    invoice_tolerance_pct: str | None = Field(default=None, max_length=20)
+    invoice_tolerance_abs: str | None = Field(default=None, max_length=50)
 
     @field_validator("amount_subtotal", "tax_amount", "amount_total")
     @classmethod
@@ -140,6 +183,16 @@ class POUpdate(BaseModel):
         if v is None:
             return v
         return _validate_non_negative_decimal(v)
+
+    @field_validator("invoice_tolerance_pct")
+    @classmethod
+    def _check_tolerance_pct(cls, v: str | None) -> str | None:
+        return _validate_tolerance_pct(v)
+
+    @field_validator("invoice_tolerance_abs")
+    @classmethod
+    def _check_tolerance_abs(cls, v: str | None) -> str | None:
+        return _validate_tolerance_abs(v)
 
     @field_validator("issue_date", "delivery_date")
     @classmethod
@@ -210,6 +263,15 @@ class POCancelRequest(BaseModel):
     reason: str | None = Field(default=None, max_length=1000)
 
 
+class POAcknowledgeRequest(BaseModel):
+    """The supplier's confirmation of an issued order, as the buyer received it."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    supplier_reference: str | None = Field(default=None, max_length=100)
+    confirmed_delivery_date: date | None = None
+
+
 class POResponse(BaseModel):
     """Purchase order returned from the API."""
 
@@ -228,6 +290,12 @@ class POResponse(BaseModel):
     tax_amount: str = "0"
     amount_total: str = "0"
     status: str = "draft"
+    supplier_acknowledged_at: str | None = None
+    supplier_acknowledged_by: str | None = None
+    supplier_reference: str | None = None
+    supplier_confirmed_delivery_date: str | None = None
+    invoice_tolerance_pct: str | None = None
+    invoice_tolerance_abs: str | None = None
     payment_terms: str | None = None
     notes: str | None = None
     created_by: UUID | None = None
@@ -625,6 +693,17 @@ class SupplierScorecardResponse(BaseModel):
     # GRs whose parent PO had no delivery_date - excluded from on-time
     # denominator so unscheduled POs do not inflate the score (P0-2).
     unscheduled_count: int = 0
+    # ── Is the supplier still qualified to buy from ─────────────────────
+    # From the contact (prequalification and its end date) and from the same
+    # vendor gate the order write path runs, so the card and the gate never
+    # disagree. ``qualification_state``: expired / expiring (30 days) /
+    # valid / not_stated. Empty when the caller sees none of its orders.
+    prequalification_status: str | None = None
+    qualified_until: str | None = None
+    qualification_state: str = "not_stated"
+    compliance_reasons: list[str] = Field(default_factory=list)
+    # Issued orders still waiting for the supplier's confirmation.
+    unconfirmed_po_count: int = 0
 
 
 # -- Supplier delivery performance / OTIF (project view) --------------------

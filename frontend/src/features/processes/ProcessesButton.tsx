@@ -10,7 +10,6 @@ import { useTranslation } from 'react-i18next';
 import { Suspense, lazy, useEffect, useRef } from 'react';
 import { Cpu, Loader2 } from 'lucide-react';
 import clsx from 'clsx';
-import { fmtList } from '@/shared/lib/formatters';
 import { isLoading, isOn, isUnsupported, overallHealth, useProcesses } from './api';
 import { processName, useIsProcessAdmin } from './labels';
 import { useProcessesUi } from './useProcessesUi';
@@ -58,7 +57,7 @@ export function ProcessesButton() {
     : loading.length > 0
       ? t('processes.header_summary_loading', {
           defaultValue: 'Background services: preparing {{names}}',
-          names: fmtList(loading.map((p) => processName(t, p))),
+          names: loading.map((p) => processName(t, p)).join(', '),
         })
       : errors > 0
       ? t('processes.header_summary_errors', {
