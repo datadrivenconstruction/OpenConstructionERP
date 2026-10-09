@@ -95,7 +95,7 @@ function Show-LauncherLog([string]$data, [int]$skip = 0) {
 function Get-StartupErrors([string]$data, [int]$skip) {
   $ll = Join-Path $data 'desktop-launcher.log'
   if (-not (Test-Path -LiteralPath $ll)) { return @() }
-  @(Get-Content -LiteralPath $ll | Select-Object -Skip $skip | Select-String -Pattern 'Traceback|FATAL|panic|ERROR|CRITICAL|0xC0000005|-1073741819' | ForEach-Object { $_.Line })
+  @(Get-Content -LiteralPath $ll | Select-Object -Skip $skip | Select-String -CaseSensitive -Pattern ' ERROR | CRITICAL |Traceback|FATAL|panicked|0xC0000005|-1073741819' | ForEach-Object { $_.Line })
 }
 
 function Get-Token([int]$port, [string]$data) {

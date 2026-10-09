@@ -55,7 +55,7 @@ jobs:
           $data = Join-Path $env:USERPROFILE '.openestimate'
           Install-Silent (Get-ChildItem old\*.exe)[0].FullName $null
           $l = Show-Layout $app
-          $run = Start-App $app $data
+          $run = Start-App $app $data 900
           Say "old version reports $($run.Health.version)"
           $tok = Get-Token $run.Port $data
           $probe = New-ProbeData $run.Port $tok 'from-18.4.0'
@@ -77,7 +77,7 @@ jobs:
           . .github/installer-check/oe-check.ps1
           $app = 'C:\Program Files\OpenConstructionERP'
           $data = Join-Path $env:USERPROFILE '.openestimate'
-          $run = Start-App $app $data
+          $run = Start-App $app $data 900
           Say "new version reports $($run.Health.version) build $($run.Health.build)"
           $tok = Get-Token $run.Port $data
           $probe = Get-Content (Join-Path $env:RUNNER_TEMP 'probe.json') -Raw | ConvertFrom-Json
@@ -88,7 +88,7 @@ jobs:
           $errs | Select-Object -First 40 | ForEach-Object { Say "  ERR: $_" }
           Stop-App $run $app
           # Second start of the upgraded build: the old extraction sweep and a clean restart.
-          $run2 = Start-App $app $data
+          $run2 = Start-App $app $data 900
           Test-ProbeData $run2.Port (Get-Token $run2.Port $data) $probe
           $errs2 = Get-StartupErrors $data $run2.LogStart
           Say "second start error lines: $($errs2.Count)"
@@ -121,9 +121,22 @@ jobs:
           if-no-files-found: warn
 
   cyrillic:
-    name: Fresh install into a Cyrillic path
+    name: Fresh install, ${{ matrix.case }}
     runs-on: windows-latest
-    timeout-minutes: 120
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - case: Cyrillic install dir and home
+            app: 'C:\Тест Установка\OpenConstructionERP'
+            home: 'C:\Пользователи\Тестовый Сметчик'
+          - case: default install dir, Cyrillic home
+            app: 'C:\Program Files\OpenConstructionERP'
+            home: 'C:\Users\Тестовый Сметчик'
+          - case: default install dir, Chinese home
+            app: 'C:\Program Files\OpenConstructionERP'
+            home: 'C:\Users\测试用户'
     defaults:
       run:
         shell: pwsh
@@ -140,18 +153,19 @@ jobs:
           gh run download $env:NEW_RUN_ID -n $name -D new
           Show-Installer (Get-ChildItem new\*.exe)[0].FullName
 
-      - name: Install, start with a Cyrillic home, health, data, stop, uninstall
+      - name: Install, start with a non-ASCII home, health, data, stop, uninstall
         run: |
           . .github/installer-check/oe-check.ps1
-          $app = 'C:\Тест Установка\OpenConstructionERP'
-          $home_ = 'C:\Пользователи\Тестовый Сметчик'
+          $app = '${{ matrix.app }}'
+          $home_ = '${{ matrix.home }}'
           New-Item -ItemType Directory -Force -Path $home_ | Out-Null
           $env:USERPROFILE = $home_; $env:HOME = $home_
           $data = Join-Path $home_ '.openestimate'
-          Install-Silent (Get-ChildItem new\*.exe)[0].FullName $app
+          $dir = if ($app -like 'C:\Program Files\*') { $null } else { $app }
+          Install-Silent (Get-ChildItem new\*.exe)[0].FullName $dir
           $l = Show-Layout $app
           if (-not $l.Onedir) { Fail 'no onedir server folder in the Cyrillic install' }
-          $run = Start-App $app $data
+          $run = Start-App $app $data 900
           $tok = Get-Token $run.Port $data
           $probe = New-ProbeData $run.Port $tok 'кириллица'
           Test-ProbeData $run.Port $tok $probe
@@ -169,7 +183,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: cyrillic-logs
+          name: fresh-logs-${{ strategy.job-index }}
           path: |
             ${{ runner.temp }}/oe-report.txt
             ${{ runner.temp }}/oe-logs
