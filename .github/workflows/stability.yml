@@ -173,6 +173,9 @@ jobs:
 
       - uses: grafana/setup-k6-action@v1
 
+      - name: Install py-spy
+        run: pipx install py-spy || python3 -m pip install --user py-spy
+
       - name: Run k6 for each VU count
         id: k6
         run: |
@@ -186,6 +189,18 @@ jobs:
               v="$(echo "$v" | tr -d ' ')"
               echo "::group::k6 SCENARIO=$sc VUS=$v"
               echo "k6 $sc vus=$v start $(date +%s)" >> "$RUNNER_TEMP/k6/k6-phases.txt"
+              if [ "$v" = "${counts[-1]// /}" ] && [ "$sc" = "${scenarios[-1]// /}" ]; then
+                # Sample the one uvicorn process for 2 minutes of the heaviest
+                # phase. The host sees the container's processes, so py-spy
+                # attaches by the host PID that docker top reports.
+                pid=$(docker top oe-app -eo pid,args | awk '/uvicorn/ && !/awk/ {print $1; exit}')
+                if [ -n "$pid" ]; then
+                  (sleep 60 && sudo "$(command -v py-spy)" record --pid "$pid" --duration 120 --rate 50 \
+                    --nonblocking --format raw --output "$RUNNER_TEMP/k6/pyspy-raw.txt" \
+                    > "$RUNNER_TEMP/k6/pyspy.log" 2>&1) &
+                  echo $! > "$RUNNER_TEMP/pyspy.pid"
+                fi
+              fi
               SCENARIO="$sc" VUS="$v" DURATION="${{ inputs.duration }}" BASE_URL="http://127.0.0.1:${APP_PORT}" \
                 SUMMARY_OUT="$RUNNER_TEMP/k6/summary-$sc-vus-$v.json" \
                 k6 run scripts/stability/k6-load.js || rc=1
@@ -221,6 +236,33 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
           cp "$RUNNER_TEMP/mem.csv" "$RUNNER_TEMP/k6/" 2>/dev/null || true
           cp "$RUNNER_TEMP/cpu.csv" "$RUNNER_TEMP/k6/" 2>/dev/null || true
+          # Hottest code under load, from the py-spy samples taken in the k6 step.
+          python3 - "$RUNNER_TEMP/k6/pyspy-raw.txt" <<'PY' | tee -a "$GITHUB_STEP_SUMMARY" || true
+          import collections, sys
+          own, incl, total = collections.Counter(), collections.Counter(), 0
+          try:
+              lines = open(sys.argv[1]).read().splitlines()
+          except OSError:
+              print("\nno py-spy profile (see pyspy.log in the artifact)")
+              sys.exit(0)
+          for line in lines:
+              stack, _, n = line.rpartition(" ")
+              if not stack or not n.isdigit():
+                  continue
+              n = int(n)
+              total += n
+              frames = stack.split(";")
+              own[frames[-1]] += n
+              for f in set(frames):
+                  if "/app/" in f and "site-packages" not in f:
+                      incl[f] += n
+          print(f"\n### py-spy, {total} samples\n\nTop self time:\n")
+          for f, n in own.most_common(25):
+              print(f"- {100 * n / total:5.1f}% {f}")
+          print("\nTop inclusive time in app code:\n")
+          for f, n in incl.most_common(25):
+              print(f"- {100 * n / total:5.1f}% {f}")
+          PY
           # CPU per k6 phase, so a saturated run can be told from an idle one.
           python3 - "$RUNNER_TEMP/cpu.csv" "$RUNNER_TEMP/k6/k6-phases.txt" "$(nproc)" <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
           import sys
