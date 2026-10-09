@@ -816,7 +816,17 @@ Section Install
     !insertmacro NSIS_HOOK_PREINSTALL
   !endif
 
-  !insertmacro CheckIfAppIsRunning "${MAINBINARYNAME}.exe" "${PRODUCTNAME}"
+  ; OpenConstructionERP fork: no CheckIfAppIsRunning here or in the Uninstall
+  ; section. Upstream calls it with the main binary name, and in perMachine mode
+  ; that is nsis_tauri_utils::FindProcess plus KillProcess: every process on the
+  ; machine with that image name, compared case-insensitively, in every session,
+  ; and without asking when the installer runs silently. The pip package's own
+  ; console script is openconstructionerp.exe, so an upgrade of the desktop app
+  ; killed any backend a user was serving from a Python install, which is not
+  ; ours to stop. NSIS_HOOK_PREINSTALL above (windows/hooks.nsh) already closes
+  ; whatever runs from $INSTDIR, matched by path, and NSIS_HOOK_PREUNINSTALL
+  ; does the same before the uninstall, so nothing that holds our files is left
+  ; running by the time they are written or removed.
 
   ; Copy main executable
   File "${MAINBINARYSRCPATH}"
@@ -953,7 +963,7 @@ Section Uninstall
     !insertmacro NSIS_HOOK_PREUNINSTALL
   !endif
 
-  !insertmacro CheckIfAppIsRunning "${MAINBINARYNAME}.exe" "${PRODUCTNAME}"
+  ; No CheckIfAppIsRunning, see the note in the Install section.
 
   ; Delete the app directory and its content from disk.
   ; /REBOOTOK: if the executable is still locked (antivirus, indexer), Windows

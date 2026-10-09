@@ -191,6 +191,32 @@ def test_both_install_and_uninstall_stop_the_cluster(hook_text: str) -> None:
     )
 
 
+def test_the_installer_template_kills_nothing_by_image_name() -> None:
+    """The vendored template may not call the bundler's name-based process kill.
+
+    Upstream's ``CheckIfAppIsRunning`` on the main binary is ``FindProcess`` plus
+    ``KillProcess``: in perMachine mode every process on the machine with that
+    image name, compared case-insensitively, and no prompt in silent mode. The
+    pip package's console script is ``openconstructionerp.exe``, so an upgrade
+    of the desktop app killed a backend served from a Python install. Our hooks
+    close what runs from ``$INSTDIR`` by path, which is all the files need.
+    """
+    template = HOOK.parent / "installer.nsi"
+    assert template.is_file(), f"the vendored installer template is not at {template}"
+    executed = [
+        line.strip()
+        for line in template.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.strip().startswith(";")
+    ]
+    print(f"\nread {template.name}: {len(executed)} executed lines")
+    assert any("NSIS_HOOK_PREINSTALL" in line for line in executed), "the template no longer runs the install hook"
+    assert any("NSIS_HOOK_PREUNINSTALL" in line for line in executed), "the template no longer runs the uninstall hook"
+    offenders = [
+        line for line in executed if re.search(r"CheckIfAppIsRunning|nsis_tauri_utils::(FindProcess|KillProcess)", line)
+    ]
+    assert not offenders, f"the installer kills processes by image name again: {offenders}"
+
+
 def test_every_command_line_survives_nsis_string_truncation(hook_text: str) -> None:
     """A command longer than NSIS can hold is truncated, not rejected.
 
