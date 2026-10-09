@@ -4639,11 +4639,14 @@ def create_app() -> FastAPI:
             except Exception:
                 logger.debug("Could not tell whether the database arrived empty", exc_info=True)
             try:
-                from app.core.alembic_version_table import database_is_populated_but_unstamped
+                from app.core.alembic_version_table import arrived_populated_unstamped_answer
 
+                # None where no migration tree ships (the desktop bundle): every
+                # database there is unstamped, so the answer would say nothing.
                 async with engine.connect() as conn:
-                    _arrived_populated_unstamped = await conn.run_sync(database_is_populated_but_unstamped)
-                app.state.arrived_populated_unstamped = _arrived_populated_unstamped
+                    _answer = await conn.run_sync(arrived_populated_unstamped_answer)
+                app.state.arrived_populated_unstamped = _answer
+                _arrived_populated_unstamped = _answer is True
                 if _arrived_populated_unstamped:
                     logger.warning(
                         "This database holds application tables but records no migration revision, so it "
