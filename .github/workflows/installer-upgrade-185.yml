@@ -166,6 +166,19 @@ jobs:
           $env:USERPROFILE = $home_; $env:HOME = $home_
           $data = Join-Path $home_ '.openestimate'
           $dir = if ($app -like 'C:\Program Files\*') { $null } else { $app }
+          if ($dir -and ($dir -match '[^\x00-\x7F]')) {
+            # A non-ASCII install folder must be refused cleanly, not installed.
+            $p = Start-Process -FilePath (Get-ChildItem new\*.exe)[0].FullName -ArgumentList "/S /D=$dir" -PassThru -Wait
+            Wait-Uninstallers
+            $elog = Join-Path $env:TEMP 'OpenConstructionERP-install-error.log'
+            Say "non-ASCII folder: installer exit=$($p.ExitCode) main exe present=$(Test-Path -LiteralPath (Join-Path $app 'OpenConstructionERP.exe')) error log=$(Test-Path -LiteralPath $elog) key=$([bool](Get-UninstallKey))"
+            if (Test-Path -LiteralPath $elog) { Say ("error log: " + (Get-Content -LiteralPath $elog -Raw)) }
+            if ($p.ExitCode -eq 0) { Fail 'the installer accepted a non-ASCII install folder' }
+            if (Test-Path -LiteralPath (Join-Path $app 'OpenConstructionERP.exe')) { Fail 'files were installed into the refused folder' }
+            if (Get-UninstallKey) { Fail 'a refused install left an uninstall key' }
+            Say 'refused as intended'
+            return
+          }
           Install-Silent (Get-ChildItem new\*.exe)[0].FullName $dir
           $l = Show-Layout $app
           if (-not $l.Onedir) { Fail 'no onedir server folder in the Cyrillic install' }
