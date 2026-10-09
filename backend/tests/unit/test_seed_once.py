@@ -75,3 +75,16 @@ async def test_an_unwritable_marker_does_not_fail_the_seed() -> None:
     runs, seed = _counting()
     assert await SeedOnce("1.0.0", ReadOnly()).run("i18n", seed, "failed") is True
     assert runs == [1]
+
+
+@pytest.mark.asyncio
+async def test_the_demo_pending_flag_survives_until_cleared() -> None:
+    from app.core.seed_once import demo_projects_pending, set_demo_projects_pending
+
+    store = InMemoryProcessStore()
+    assert await demo_projects_pending(store) is False
+    await set_demo_projects_pending(True, store)
+    # A boot that died here finds the flag and installs the showcase again.
+    assert await demo_projects_pending(store) is True
+    await set_demo_projects_pending(False, store)
+    assert await demo_projects_pending(store) is False

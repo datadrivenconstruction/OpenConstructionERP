@@ -108,6 +108,8 @@ jobs:
         env:
           OE_DATA_DIR: ${{ runner.temp }}/oe-e2e-data
           SEED_DEMO: "true"
+          # Demo projects seed before the first 200 on /api/health, not after.
+          OE_DEMO_SEED_INLINE: "true"
           APP_ENV: development
         run: |
           nohup python -m app.cli serve --port 8000 --data-dir "${{ runner.temp }}/oe-e2e-data" \

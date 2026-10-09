@@ -1711,6 +1711,18 @@ async def _seed_demo_account(*, defer_projects: bool = False) -> Callable[[], Aw
         except Exception:
             logger.warning("Backfill of earlier demo removals skipped (non-fatal)", exc_info=True)
 
+        # A deferred seed cut short (the app closed within its first minute)
+        # leaves some projects behind, and ``project_count > 0`` would then skip
+        # the showcase for good. A pending flag set before the seed and cleared
+        # after it brings the install back on the next boot; the install skips
+        # every demo already in place. Installs older than the flag carry none
+        # and keep the plain project_count rule.
+        from app.core.seed_once import demo_projects_pending, set_demo_projects_pending
+
+        install_showcase = project_count == 0 or await demo_projects_pending()
+        if install_showcase:
+            await set_demo_projects_pending(True)
+
         async def _seed_projects() -> None:
             try:
                 # ── 3. Project seed (outside the user session) ────────────────
@@ -1728,7 +1740,7 @@ async def _seed_demo_account(*, defer_projects: bool = False) -> Callable[[], Aw
                 #
                 # Both paths install each project in its own try/except so one failure
                 # never aborts the rest of the seed.
-                if project_count == 0:
+                if install_showcase:
                     if active is not None:
                         # PACK MODE - seed only the active pack's project(s). Prefer the
                         # manifest's explicit demo_template_ids (filtered to ids that
@@ -1925,6 +1937,8 @@ async def _seed_demo_account(*, defer_projects: bool = False) -> Callable[[], Aw
                         logger.info(
                             "Demo backfill marker not stamped - at least one seeder failed; will retry next boot"
                         )
+                if install_showcase:
+                    await set_demo_projects_pending(False)
             except Exception:
                 logger.exception("Failed to seed demo projects (non-fatal)")
 
@@ -5098,9 +5112,14 @@ def create_app() -> FastAPI:
         # seed in the background as the ``demo_data_seed`` registry process
         # and appear while the user is signing in. The test suite expects a
         # seeded database when startup returns, so OE_TEST_FAST_STARTUP keeps
-        # them inline.
+        # them inline, and so does OE_DEMO_SEED_INLINE: set it where whatever
+        # runs after the first 200 on /api/health needs the projects already
+        # in place (the browser lanes that seed and then click through).
         _section("Demo data")
-        _defer_demo = os.environ.get("OE_TEST_FAST_STARTUP", "").lower() not in ("1", "true", "yes")
+        _defer_demo = not any(
+            os.environ.get(var, "").lower() in ("1", "true", "yes")
+            for var in ("OE_TEST_FAST_STARTUP", "OE_DEMO_SEED_INLINE")
+        )
         _demo_projects_seed = await _seed_demo_account(defer_projects=_defer_demo)
 
         # Baseline seeds, once per app version: a completed seed leaves a
