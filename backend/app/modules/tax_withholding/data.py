@@ -214,6 +214,50 @@ WITHHOLDING_REGIMES: tuple[dict[str, Any], ...] = (
             "signed request-for-taxpayer-identification form on file."
         ),
     },
+    {
+        # Gelir Vergisi Kanunu 193 art. 94 first paragraph item 3 and Kurumlar
+        # Vergisi Kanunu 5520 art. 15(1)(a), read on mevzuat.gov.tr 2026-10-10:
+        # "42 nci madde kapsamına giren işler dolayısıyla bu işleri yapanlara
+        # (kurumlar dahil) ödenen istihkak bedellerinden". The rates are set by
+        # Bakanlar Kurulu Kararı 2009/14592 as amended by Cumhurbaşkanı Kararı
+        # 9707 (Resmî Gazete 30.3.2025 no. 32857, from 1.4.2025). That
+        # decision's title is confirmed on the Resmî Gazete index but its body is
+        # a scanned image, so the two figures and the net-of-KDV base were read
+        # from secondary summaries. Pending review by a Turkish quantity surveyor.
+        "country_code": "TR",
+        "scheme_code": "TR_YILLARA_YAYGIN_INSAAT_STOPAJ",
+        "scheme_name": "Yıllara yaygın inşaat ve onarım işleri hakediş stopajı",
+        "legal_reference": "GVK 193 art. 94/3, KVK 5520 art. 15(1)(a), BKK 2009/14592 as amended by CBK 9707",
+        "authority": "Gelir İdaresi Başkanlığı",
+        "currency_code": "TRY",
+        "default_band_code": "STANDARD",
+        "materials_excluded": False,
+        "vat_excluded": True,
+        "verification_validity_months": 0,
+        "threshold_amount": None,
+        "bands": [
+            {
+                "code": "RAIL_AND_SHIP",
+                "label": "Railway, tram, metro, funicular, monorail and ship construction or repair",
+                "rate_pct": "1",
+                "requires_verification": False,
+            },
+            {
+                "code": "STANDARD",
+                "label": "Other construction and repair works spanning more than one calendar year",
+                "rate_pct": "5",
+                "requires_verification": False,
+            },
+        ],
+        "notes": (
+            "Withheld by the payer from each progress payment (hakediş) on construction or repair "
+            "works that run over more than one calendar year, and declared on the payer's monthly "
+            "withholding return. The base is the hakediş amount before KDV. Works finished within one "
+            "calendar year are outside the scheme. The band follows the kind of work, not a check on "
+            "the contractor: the one percent band covers railway, tram, metro, funicular, monorail "
+            "and ship construction and repair from 1 April 2025, and everything else is five percent."
+        ),
+    },
 )
 
 

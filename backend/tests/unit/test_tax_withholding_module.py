@@ -29,7 +29,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.projects.models import Project
 from app.modules.tax_withholding import repository, schemas, service
-from app.modules.tax_withholding.data import REVERSE_CHARGE_RULES, WITHHOLDING_REGIMES
+from app.modules.tax_withholding.data import REVERSE_CHARGE_RULES, WITHHOLDING_REGIMES, regime_by_scheme
 from app.modules.tax_withholding.models import (
     PartyTaxStatus,
     ReverseChargeDetermination,
@@ -361,6 +361,27 @@ class TestShippedData:
         for regime in WITHHOLDING_REGIMES:
             assert len(regime["currency_code"]) == 3, regime["scheme_code"]
             assert regime["legal_reference"], regime["scheme_code"]
+
+    def test_turkish_stopaj_is_taken_on_the_hakedis_net_of_kdv(self):
+        # GVK art. 94/3 and KVK art. 15(1)(a): withholding on progress
+        # payments for construction spanning more than one calendar year.
+        regime = regime_by_scheme("TR_YILLARA_YAYGIN_INSAAT_STOPAJ")
+        assert regime is not None
+        assert regime["country_code"] == "TR"
+        assert regime["currency_code"] == "TRY"
+        assert regime["vat_excluded"] is True
+        assert regime["materials_excluded"] is False
+        rates = {band["code"]: Decimal(band["rate_pct"]) for band in regime["bands"]}
+        assert rates == {"RAIL_AND_SHIP": Decimal("1"), "STANDARD": Decimal("5")}
+        assert regime["default_band_code"] == "STANDARD"
+        # The band follows the kind of work, not a verification of the party.
+        assert not any(band["requires_verification"] for band in regime["bands"])
+
+    def test_turkish_vat_withholding_is_not_shipped_as_a_reverse_charge(self):
+        # KDV tevkifat withholds four tenths of the VAT and the invoice still
+        # shows VAT, which is the opposite of what a reverse-charge rule
+        # promises. It has no row until the module can express it.
+        assert not any(rule["country_code"] == "TR" for rule in REVERSE_CHARGE_RULES)
 
     def test_every_reverse_charge_rule_carries_wording_to_print(self):
         # A rule with no wording is a rule that cannot be complied with: the
