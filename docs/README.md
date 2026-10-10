@@ -72,6 +72,7 @@ For developers extending or building on OpenConstructionERP.
 
 - [Linux install guide](./INSTALL_LINUX.md) - set up on a server.
 - [Desktop install guide](./desktop/INSTALL.md) - set up on a workstation.
+- [Installation help and troubleshooting](./INSTALL_TROUBLESHOOTING.md) - what a warning or error during install or start means and what to do about it (also in German and Russian).
 - [Desktop remote server](./desktop/REMOTE_SERVER.md) - point desktop installations at one server your organisation already runs, instead of a separate database per desk.
 - [Email and SMTP setup](./email-setup.md) - configure outbound mail for password resets, tender invitations and notifications, pick the right port, and check whether it is working.
 - [Maps and basemaps](./maps.md) - where the street maps come from, how to self-host them, and how to give the 3D globe raster street tiles of your own.

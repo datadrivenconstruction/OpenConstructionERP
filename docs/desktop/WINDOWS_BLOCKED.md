@@ -2,6 +2,8 @@
 
 Also available in [Deutsch](WINDOWS_BLOCKED.de.md) and [Русский](WINDOWS_BLOCKED.ru.md).
 
+For any other warning or error while installing or starting, see [Installation help](../INSTALL_TROUBLESHOOTING.md) (also [online](https://openconstructionerp.com/install-help)).
+
 This page is for you if Windows refuses to start OpenConstructionERP, calls it an app from an unknown or unverified publisher, or let it run once and blocks it on every start since.
 
 ## Why this happens

@@ -15,6 +15,7 @@ import io
 import pytest
 
 from app.modules.costs.pricelist_import import PriceListRefused, preview
+from app.modules.costs.pricelists.containers import ContainerRefused
 from app.modules.costs.pricelists.service import plan_upload
 from tests.fixtures import xpwe_builder as fx
 
@@ -45,3 +46,15 @@ def test_the_refusal_reaches_the_screen_with_its_values() -> None:
     detail = _refusal(whole[: len(whole) // 2]).as_http().detail
     assert detail["code"] == "xpwe_not_well_formed"
     assert {"line", "column"} <= set(detail)
+
+
+def test_an_xpwe_saved_as_pwe_is_read_as_a_price_list() -> None:
+    plan = plan_upload(io.BytesIO(fx.small_computo()), "elenco.pwe")
+    assert plan.format.format_id == "xpwe"
+    assert any(True for _row in plan.rows())
+
+
+def test_a_binary_pwe_project_file_says_export_xpwe() -> None:
+    with pytest.raises(ContainerRefused) as caught:
+        plan_upload(io.BytesIO(b"\x00\x01PWE-BINARY\x00" * 64), "computo.pwe")
+    assert caught.value.code == "xpwe_not_xml"
