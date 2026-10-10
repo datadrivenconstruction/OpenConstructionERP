@@ -570,7 +570,13 @@ class ProjectService:
                 # because a country the product filled in is not the same fact
                 # as a country the user typed, and v3319 exists precisely so
                 # those two stop being the same row.
-                if not (data.country_code or "").strip():
+                #
+                # Two blanks have to hold: the request field and the settled
+                # value. A country read from the address a few lines up is a
+                # country the creator named, and testing ``data.country_code``
+                # alone let the pack overwrite it, so a site address in Hungary
+                # under the Turkish pack was stored as Turkey.
+                if not (data.country_code or "").strip() and not country_code:
                     _pack_country = getattr(active_pack, "market_country_code", None)
                     if _pack_country:
                         country_code = _pack_country
@@ -626,11 +632,55 @@ class ProjectService:
         # fail masterformat on every line. A set the caller asked for is not
         # in the record and is never dropped, because a dual-coded bill asks
         # for a second code set on purpose.
+        #
+        # The sets and the methodology are a statement about one market, so
+        # they come from the pack of the project's own country and not always
+        # from the active one. A contractor with the Turkish pack active who
+        # opens a Hungarian project used to get birimfiyat on it, which failed
+        # the poz-number rule on every correctly coded Hungarian line, and the
+        # Turkish cascade. ``configuration_pack`` keeps the active pack for a
+        # project in its own country, reads the other country's manifest
+        # without activating it, and answers ``None`` for a country no pack is
+        # written for, which leaves the project as an installation with no
+        # pack would: the caller's sets and the international methodology.
+        # What the active pack says about the installation (its tag on the
+        # project, branding, company profile, modules) is untouched.
+        _config_pack = active_pack
+        try:
+            from app.core.partner_pack.discovery import discover_packs
+            from app.modules.projects.country_configuration import (
+                CONFIGURATION_PACK_METADATA_KEY,
+                CONFIGURATION_SOURCE_METADATA_KEY,
+                SOURCE_ACTIVE_PACK,
+                configuration_pack,
+            )
+
+            _config_pack, _config_source = configuration_pack(
+                region=data.region,
+                country_code=country_code,
+                active_pack=active_pack,
+                shipped=discover_packs,
+            )
+            if _config_source != SOURCE_ACTIVE_PACK:
+                pack_meta[CONFIGURATION_SOURCE_METADATA_KEY] = _config_source
+                if _config_pack is not None:
+                    pack_meta[CONFIGURATION_PACK_METADATA_KEY] = _config_pack.slug
+        except Exception as exc:  # noqa: BLE001 - creation must never break on pack lookup
+            # Falls back to the active pack, which is what every project got
+            # before. Said out loud, because the result is a project in one
+            # country carrying another country's rules.
+            logger.warning(
+                "Project create: could not resolve the pack of country %s, using the active pack: %s",
+                country_code,
+                exc,
+            )
+            _config_pack = active_pack
+
         _pack_added: list[str] = []
         try:
             from app.core.partner_pack.apply import PACK_RULE_SETS_METADATA_KEY, split_inherited_rule_sets
 
-            _rule_sets, _pack_added = split_inherited_rule_sets(data.validation_rule_sets, active_pack)
+            _rule_sets, _pack_added = split_inherited_rule_sets(data.validation_rule_sets, _config_pack)
             if _pack_added:
                 pack_meta[PACK_RULE_SETS_METADATA_KEY] = _pack_added
         except Exception:  # noqa: BLE001 - creation must never break on pack lookup
@@ -682,7 +732,9 @@ class ProjectService:
                 # while a pack is active opens with the partner's cascade, not
                 # the flat international default. Builtin template slug only,
                 # validated against the pure templates catalogue (no DB import).
-                _meth = getattr(active_pack, "default_methodology", None)
+                # Read from the pack of the project's own country, like the
+                # rule sets above; a country with no pack keeps the default.
+                _meth = getattr(_config_pack, "default_methodology", None)
                 if _meth:
                     from app.modules.methodology.templates import TEMPLATES_BY_SLUG
 
