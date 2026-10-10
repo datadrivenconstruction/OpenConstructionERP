@@ -419,6 +419,36 @@
     "note": "named open data / interchange standard or format code (CLAUDE.md: not translated); identical in every locale including ru (bn locale addition)",
     "reason_category": "standard_code"
   },
+  "notifications.submittal.approved_as_noted.body": {
+    "en_value": "{{code}} - {{title}}",
+    "note": "entirely template variables and a separator, no literal word to translate",
+    "reason_category": "template_placeholder"
+  },
+  "hakedis.rate.fraction": {
+    "en_value": "{{numerator}}/{{denominator}}",
+    "note": "a fraction such as 5/10: digits and a slash, no literal word to translate",
+    "reason_category": "template_placeholder"
+  },
+  "hakedis.attention.line": {
+    "en_value": "{{line}}: {{reason}}",
+    "note": "entirely template variables and punctuation, no literal word to translate",
+    "reason_category": "template_placeholder"
+  },
+  "einvoice.tr.currency_tl": {
+    "en_value": "TL",
+    "note": "TL is the abbreviation of the Turkish lira as printed on Turkish invoices; shown the same way in every locale",
+    "reason_category": "abbreviation"
+  },
+  "einvoice.profile.ubl_tr": {
+    "en_value": "UBL-TR 1.2 (e-Fatura)",
+    "note": "name and version of the Turkish UBL profile (UBL-TR 1.2) and the e-Fatura system; official identifiers, kept in every locale including ru",
+    "reason_category": "standard_code"
+  },
+  "doc_export.primary_hint": {
+    "en_value": "{{document}}: {{format}}, {{language}}",
+    "note": "entirely template variables and punctuation, no literal word to translate",
+    "reason_category": "template_placeholder"
+  },
   "cost_match.confidence_percent": {
     "en_value": "{{percent}}%",
     "note": "pure interpolation shell with a bare percent sign, no literal text to translate (bn locale addition)",

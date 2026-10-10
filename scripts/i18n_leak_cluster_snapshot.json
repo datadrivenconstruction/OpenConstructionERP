@@ -1618,5 +1618,37 @@
     ],
     "key_count_at_seed": 3,
     "note": "Error, spelled the same in all four Spanish locales and borrowed as-is into Filipino: the bare noun (jobs.error = 'Error'), and the singular of a counted label, '{{count}} error', in dashboard.validation_portfolio.errors_count_one and schedule.tabular_import.count_errors_one. Their plural forms (errores, and the unchanged Filipino) are translated."
+  },
+  {
+    "locale_set": [
+      "es",
+      "es-CL",
+      "es-CO",
+      "es-MX",
+      "fr",
+      "it",
+      "pt",
+      "pt-BR"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Base, the ordinary word for a cost base or basis in Spanish, French, Italian and Portuguese, spelled the same as English: boq.display_base, hakedis.basis.base, propdev.pricing.base_price. Checked each value rather than the count; the three Spanish regional locales copy es."
+  },
+  {
+    "locale_set": [
+      "da",
+      "de",
+      "es",
+      "es-CL",
+      "es-CO",
+      "es-MX",
+      "id",
+      "no",
+      "pt",
+      "pt-BR",
+      "sv",
+      "tr"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Normal, the ordinary word for a priority level in Danish, German, Spanish, Indonesian, Norwegian, Portuguese, Swedish and Turkish, spelled the same as English: rfi.priority_normal, takeoff_crosslink.priority_normal, tasks.priority_normal. Checked each value rather than the count."
   }
 ]

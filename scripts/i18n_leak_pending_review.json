@@ -3165,5 +3165,42 @@
     "en_value": "SP %",
     "n": 30,
     "reason": "Column label SP % of the Russian resource-index method (estimated profit as a percent of the payroll fund). Kept as the method code in most locales, native abbreviation where the script allows. Filed for native review."
+  },
+  "hakedis.rate.percent": {
+    "added_by": "Turkey pack i18n parity (2026-10-10)",
+    "differs_in": [
+      "cs",
+      "da",
+      "fi",
+      "fr",
+      "hr",
+      "no",
+      "sv",
+      "tr"
+    ],
+    "en_value": "{{rate}}%",
+    "n": 34,
+    "reason": "Percent template. Identical to en where the locale writes the sign directly after the number; cs, da, fi, fr, hr, no and sv put a space before it by their typographic rule, and tr puts the sign first. Differences are deliberate, so it cannot be allowlisted, which requires identity in every locale."
+  },
+  "rfi.discipline_mep": {
+    "added_by": "Turkey pack i18n parity (2026-10-10)",
+    "differs_in": [
+      "de",
+      "el",
+      "fa",
+      "fi",
+      "fil",
+      "he",
+      "ja",
+      "kk",
+      "ru",
+      "sv",
+      "tr",
+      "uk",
+      "ur"
+    ],
+    "en_value": "MEP",
+    "n": 29,
+    "reason": "MEP is the discipline code (mechanical, electrical, plumbing) and stays as is in most locales; 13 locales use their own trade term (for example TGA in de, VVS/El in sv), taken from each file's own category_mep. Filed for native review."
   }
 }
