@@ -32,6 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Your interface language is now kept with your account. A language you pick while signed in is saved to it, and after you sign in on a new browser or a new desktop port that has no language of its own, your language comes back instead of the browser's.
 - Every channel in the Report a bug menu opens again. In the desktop app the email channel did nothing, and after a start with a few network errors the whole list was locked until you found "report anyway"; the network notice now only advises.
 - Dark mode no longer draws white outlines round buttons, cards and menu items such as the sidebar footer, and focused buttons lose the white band between their edge and their focus ring. Light mode looks exactly as before.
+- Turkish schedules now skip Turkish public holidays, including Ramazan Bayramı and Kurban Bayramı for 2026 and 2027 as Diyanet published them. Before, a project in Turkey counted every weekday as a working day. A Turkish schedule made earlier keeps the calendar it was generated with, so its dates move when it is generated again from the bill. 2028 holds only the fixed holidays until Diyanet publishes that year.
+- The Turkey and China country packs now offer their national cost bases (Birim Fiyat and Dinge) next to the Istanbul and Shanghai catalogues they already installed, and the semantic search catalogue cards for Turkey and China are named for the Istanbul and Shanghai catalogues they actually install instead of the national bases.
 
 ## [18.5.0] - 2026-10-10
 
