@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Every channel in the Report a bug menu opens again. In the desktop app the email channel did nothing, and after a start with a few network errors the whole list was locked until you found "report anyway"; the network notice now only advises.
 - Dark mode no longer draws white outlines round buttons, cards and menu items such as the sidebar footer, and focused buttons lose the white band between their edge and their focus ring. Light mode looks exactly as before.
 - The Chinese interface no longer shows a garbled "What's new" card on the dashboard, names the sale and purchase agreement in property development as a sales contract instead of a spa, and translates Cost Explorer, as do Danish, Finnish, Hindi, Indonesian, Japanese, Korean, Mongolian, Norwegian, Swedish, Thai, Turkish and Vietnamese.
+- The totals card in the BOQ editor counts sections and positions in each language's own plural forms, so a bill with one section no longer reads "1 sections · 1 positions", and Arabic gets its dual and the forms for three to ten and eleven up.
 
 ## [18.5.0] - 2026-10-10
 

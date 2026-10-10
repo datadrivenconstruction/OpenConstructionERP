@@ -772,10 +772,16 @@ export function BOQToolbar({
           {/* Meta line: counts + quality status badges */}
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="text-2xs text-content-tertiary">
-              {t('boq.toolbar_summary_aria', {
-                defaultValue: '{{sections}} sections · {{positions}} positions',
-                sections: summary.sectionCount,
-                positions: summary.positionCount,
+              {t('boq.sections_count', {
+                count: summary.sectionCount,
+                defaultValue_one: '{{count}} section',
+                defaultValue: '{{count}} sections',
+              })}
+              {' · '}
+              {t('boq.positions_count', {
+                count: summary.positionCount,
+                defaultValue_one: '{{count}} position',
+                defaultValue: '{{count}} positions',
               })}
             </span>
             {summary.errorCount > 0 && (

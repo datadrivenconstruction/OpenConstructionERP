@@ -14087,7 +14087,6 @@ const resource = {
     "boq.suggest_rate": "Sugerir tarifa",
     "boq.suggested": "Sugerida",
     "boq.toolbar_quality": "Calidad",
-    "boq.toolbar_summary_aria": "{{sections}} secciones · {{positions}} partidas",
     "boq.try_different_search": "Pruebe un término de búsqueda o filtro diferente",
     "boq.unit_options": "Opciones de unidad",
     "boq.unit_rate_variant_pill": "▾ {{count}} opciones",
