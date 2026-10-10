@@ -847,6 +847,7 @@ const resource = {
     "einvoice.profile.ehf": "EHF Billing 3.0 (挪威)",
     "einvoice.profile.peppol_aunz": "Peppol A-NZ Billing 3.0 (澳大利亚 / 新西兰)",
     "einvoice.profile.peppol_sg": "Peppol SG Billing 3.0 (新加坡)",
+    "einvoice.profile.ubl_tr": "UBL-TR 1.2 (e-Fatura)",
     "einvoice.party.seller": "卖方",
     "einvoice.party.buyer": "买方",
     "einvoice.rule.BR-1": "未知的电子发票格式 {{profile}}。",

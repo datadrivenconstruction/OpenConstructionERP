@@ -17,6 +17,7 @@ from app.modules.einvoice.profiles import (
     PEPPOL_PROFILE,
     PEPPOL_SG,
     PROFILES,
+    SYNTAXES,
 )
 from app.modules.einvoice.ubl import CAC, CBC, INV
 
@@ -110,7 +111,10 @@ def test_new_profile_requires_a_buyer_or_order_reference(profile):
 def test_registry_profiles_are_self_consistent():
     for name, prof in PROFILES.items():
         assert prof.name == name
-        assert prof.syntax in {"cii", "ubl"}
+        # The registry's own vocabulary, which since UBL-TR holds one syntax
+        # outside EN 16931. That the EN 16931 engine refuses it is pinned in
+        # test_einvoice_tr_mapper.py.
+        assert prof.syntax in SYNTAXES
         assert prof.guideline
         assert prof.label, f"{name} needs a human label"
         assert prof.region, f"{name} needs a region"

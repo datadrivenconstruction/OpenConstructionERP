@@ -590,6 +590,7 @@ const resource = {
     "einvoice.profile.ehf": "EHF Billing 3.0 (Norja)",
     "einvoice.profile.peppol_aunz": "Peppol A-NZ Billing 3.0 (Australia / Uusi-Seelanti)",
     "einvoice.profile.peppol_sg": "Peppol SG Billing 3.0 (Singapore)",
+    "einvoice.profile.ubl_tr": "UBL-TR 1.2 (e-Fatura)",
     "einvoice.party.seller": "myyjä",
     "einvoice.party.buyer": "ostaja",
     "einvoice.rule.BR-1": "Laskumuoto {{profile}} on tuntematon.",

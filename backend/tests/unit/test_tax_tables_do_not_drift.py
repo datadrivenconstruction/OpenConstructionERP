@@ -167,6 +167,8 @@ _NOT_COMPARABLE: dict[str, str] = {
     "VAT_RED_9": "Ireland's second reduced 9 % tier; VAT_RED (13.5 %) is the reduced rate compared",
     "AFA_18": "one of Hungary's two reduced bands; no single-rate counterpart",
     "AFA_5": "one of Hungary's two reduced bands; no single-rate counterpart",
+    "KDV_1": "Türkiye's list (I) tier; KDV_RED (list II) is the reduced rate compared",
+    "IVA_SRED": "Spain's super-reduced tier; IVA_RED is the reduced rate compared",
     "TVA_INT": "France's intermediate 10 % tier; neither standard nor reduced",
     "FPA_SRED": "Greece's super-reduced 6 % tier; FPA_RED is the reduced rate compared",
     "VAT_SPECIAL": "Swiss accommodation rate; no counterpart class",

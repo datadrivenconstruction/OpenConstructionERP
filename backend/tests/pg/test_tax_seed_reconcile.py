@@ -109,6 +109,14 @@ _SWISS_HISTORY_ADDED_IN_18_4 = {
 #: The same four as delivery keys.
 _IRISH_AND_HUNGARIAN_TIERS = {"IE/VAT_RED_9", "IE/VAT_ZERO", "HU/AFA_18", "HU/AFA_5"}
 
+#: The list (I) tier of Turkish KDV, first shipped on 2026-10-10. Both old
+#: cohorts hold the Turkish general rate, so it joins a filled country-wide
+#: slot as a tier and is owed to both.
+#: Spain's super-reduced tier, first shipped the same day, joins them on the
+#: same argument: both old cohorts hold the Spanish general rate.
+_TURKISH_TIER_ADDED_2026_10 = {("TR", "KDV_1", "2023-07-10"), ("ES", "IVA_SRED", "2012-09-01")}
+_TURKISH_TIER = {"TR/KDV_1", "ES/IVA_SRED"}
+
 #: Rows the seed file gained after the v15.4.0-era file, by
 #: ``(country, tax_code, effective_from)``. Written out rather than derived from
 #: the reconciler's own tables on purpose: deriving the fixture from the code
@@ -149,6 +157,7 @@ _ADDED_AFTER_V15_4_0 = {
     *_TIERS_ADDED_IN_18_4,
     *_IRISH_WINDOWS_ADDED_IN_18_4,
     *_SWISS_HISTORY_ADDED_IN_18_4,
+    *_TURKISH_TIER_ADDED_2026_10,
 }
 
 #: Rows the current file has since EDITED, restored to what the old file said.
@@ -188,6 +197,7 @@ _ADDED_AFTER_V15_9_1 = {
     *_TIERS_ADDED_IN_18_4,
     *_IRISH_WINDOWS_ADDED_IN_18_4,
     *_SWISS_HISTORY_ADDED_IN_18_4,
+    *_TURKISH_TIER_ADDED_2026_10,
 }
 
 #: The v15.9.1 cohort needed no restorations until Israel's 18 % rate was
@@ -247,10 +257,19 @@ _EXPECTED_DELIVERY = {
     # standard rate is on file and the tier does not change what either
     # country resolves to on any date.
     *_IRISH_AND_HUNGARIAN_TIERS,
+    # Türkiye's list (I) tier, on the same argument again.
+    *_TURKISH_TIER,
 }
 
 #: What a v15.9.1 install is owed: the lines that shipped after it.
-_EXPECTED_AFTER_V15_9_1 = {"KW/NONE", "QA/NONE", *_GREECE_LINES, *_CROATIA_TIERS, *_IRISH_AND_HUNGARIAN_TIERS}
+_EXPECTED_AFTER_V15_9_1 = {
+    "KW/NONE",
+    "QA/NONE",
+    *_GREECE_LINES,
+    *_CROATIA_TIERS,
+    *_IRISH_AND_HUNGARIAN_TIERS,
+    *_TURKISH_TIER,
+}
 
 
 def _key(row: dict) -> tuple:

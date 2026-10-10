@@ -232,6 +232,26 @@ LINE_FIRST_SHIPPED: Final[dict[RateLine, str]] = {
     ("IE", "VAT_ZERO"): "2026-10-04",
     ("HU", "AFA_18"): "2026-10-04",
     ("HU", "AFA_5"): "2026-10-04",
+    # Türkiye's list (I) tier beside the 20 % general and the 10 % list (II)
+    # rates the seed already held, so a line taxed at the lowest tier has a
+    # rate to pick. Delivered as a tier, beside the standard rate and never
+    # instead of it.
+    #
+    # Cumhurbaşkanı Kararı 7346 (Resmî Gazete 2023-07-07, no. 32241) raised the
+    # general and the list (II) rate from 2023-07-10 and left list (I) where it
+    # was. The row therefore opens on the window the other two Turkish rows
+    # share, not on the older date the tier itself goes back to: the seed
+    # carries no Turkish row before that window, and one tier reaching further
+    # back than the standard rate would answer a date the country has no
+    # standard rate on file for. The decree's body is published as a scanned
+    # image, so the values rest on two professional summaries of it rather
+    # than on the text itself.
+    ("TR", "KDV_1"): "2026-10-10",
+    # Spain's super-reduced tier (Ley 37/1992, art. 91.Dos,
+    # https://www.boe.es/buscar/act.php?id=BOE-A-1992-28740). It opens on the
+    # window the other two Spanish rows share, for the reason given above for
+    # the Turkish tier.
+    ("ES", "IVA_SRED"): "2026-10-10",
 }
 
 #: Rate lines another repair owns. Two repairs writing one line would each see

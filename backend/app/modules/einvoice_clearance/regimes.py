@@ -795,6 +795,79 @@ COUNTRY_REGIMES: dict[str, CountryRegime] = {
         profile_fields=("network_participant_id",),
         correction_mechanism="credit note",
     ),
+    "TR": CountryRegime(
+        country="TR",
+        # Filed under clearance by this registry's own reading, not as a quotation
+        # of the law: an e-Fatura reaches its buyer through the revenue
+        # administration's system, which checks it on the way. Unlike the other
+        # clearance entries, the identifier is not handed back by the authority.
+        # The issuer writes the UUID (ETTN) into the document before it is sent.
+        regime=REGIME_CLEARANCE,
+        platform="GİB e-Fatura / e-Arşiv Fatura",
+        label="Türkiye - e-Fatura and e-Arşiv Fatura in UBL-TR",
+        identifier_label="ETTN (the invoice UUID, written by the issuer)",
+        # The key of the einvoice profile that writes it. Not EN 16931, so
+        # ``en16931_profile`` stays empty: no EN 16931 writer produces this.
+        document_format="ubl_tr",
+        en16931_profile="",
+        profile_fields=("tax_registration_id",),
+        document_fields=("profile_id", "invoice_type_code", "uuid"),
+        # No cancellation or objection period is recorded: none was read from a
+        # primary source, and a remembered number of days is worse than none.
+        cancellation_window_days=None,
+        correction_mechanism=(
+            "iade faturası (a return invoice, type IADE) referring to the original by number and date; "
+            "a TICARIFATURA can also be rejected by its recipient through the system"
+        ),
+        commencement=(
+            CommencementPhase(
+                obligation=OBLIGATION_ISSUE,
+                # No calendar date: the duty starts at the beginning of the seventh
+                # month of the year after the accounting period that met the threshold.
+                effective_date="",
+                scope="e-Fatura, taxpayers whose gross sales revenue reached the threshold in a 2022 or later period",
+                legal_status=LEGAL_STATUS_IN_FORCE,
+                source_url=(
+                    "https://ebelge.gib.gov.tr/dosyalar/tebligler/"
+                    "Dipnotlu_Guncel_Sekli_ile_509_Sira_No'lu_VUK_Genel_Tebligi.pdf"
+                ),
+                read_date="2026-10-10",
+                threshold="TRY 3000000 gross sales revenue in the accounting period",
+                notes=(
+                    "VUK Genel Tebliği 509, section IV.1.4, consolidated through no. 589. Lower thresholds and "
+                    "sector-based duties exist beside this one, and voluntary registration is allowed. Between "
+                    "two registered users an invoice must be an e-Fatura."
+                ),
+            ),
+            CommencementPhase(
+                obligation=OBLIGATION_ISSUE,
+                effective_date="2026-01-01",
+                scope=(
+                    "e-Arşiv Fatura through the GİB portal, every invoice of a taxpayer not registered "
+                    "for e-Arşiv, whatever its amount"
+                ),
+                legal_status=LEGAL_STATUS_IN_FORCE,
+                source_url=(
+                    "https://ebelge.gib.gov.tr/dosyalar/tebligler/"
+                    "Dipnotlu_Guncel_Sekli_ile_509_Sira_No'lu_VUK_Genel_Tebligi.pdf"
+                ),
+                read_date="2026-10-10",
+                notes=(
+                    "VUK Genel Tebliği 509, section IV.2.4.3 as amended by no. 589. For taxpayers on the "
+                    "simplified and the operating-account basis the same rule starts on 2027-01-01."
+                ),
+            ),
+        ),
+        notes=(
+            "The platform writes the UBL-TR document unsigned and does not transmit it: no adapter is "
+            "registered for this country. The document is signed with the taxpayer's financial seal "
+            "(mali mühür), or with the integrator's own when the taxpayer asks for that, and is submitted "
+            "through the GİB portal, the taxpayer's own direct integration or a licensed integrator "
+            "(özel entegratör). A registered e-Fatura user issues an e-Fatura to a registered recipient "
+            "and an e-Arşiv Fatura to everyone else; which of the two applies to a given buyer is looked "
+            "up by the integrator, so the scenario is never defaulted here."
+        ),
+    ),
 }
 
 SUPPORTED_COUNTRIES: tuple[str, ...] = tuple(sorted(COUNTRY_REGIMES))

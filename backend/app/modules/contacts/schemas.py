@@ -63,6 +63,11 @@ class ContactCreate(BaseModel):
     vat_number: str | None = Field(
         default=None, max_length=50, description="VAT registration number", examples=["DE123456789"]
     )
+    tax_office: str | None = Field(
+        default=None,
+        max_length=100,
+        description="Tax office the party is registered with, where invoices name it (e.g. the Turkish vergi dairesi)",
+    )
 
     country_code: str | None = Field(
         default=None,
@@ -131,6 +136,7 @@ class ContactUpdate(BaseModel):
     legal_name: str | None = Field(default=None, max_length=255)
     party_kind: PartyKind | None = None
     vat_number: str | None = Field(default=None, max_length=50)
+    tax_office: str | None = Field(default=None, max_length=100)
 
     country_code: str | None = Field(default=None, max_length=2)
     address: dict[str, Any] | None = None
@@ -185,6 +191,7 @@ class ContactResponse(BaseModel):
     legal_name: str | None = None
     party_kind: str | None = None
     vat_number: str | None = None
+    tax_office: str | None = None
 
     country_code: str | None = None
     address: dict[str, Any] | None = None

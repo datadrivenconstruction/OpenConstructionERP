@@ -47,6 +47,7 @@ class _StoredFields(BaseModel):
     seller_vat_id: str = Field(default="", max_length=50, examples=["DE123456789"])
     seller_tax_number: str = Field(default="", max_length=50)
     seller_legal_id: str = Field(default="", max_length=50)
+    seller_tax_office: str = Field(default="", max_length=100)
     seller_country_code: str = Field(default="", max_length=2, examples=["DE"])
     seller_line1: str = Field(default="", max_length=200)
     seller_postcode: str = Field(default="", max_length=20)

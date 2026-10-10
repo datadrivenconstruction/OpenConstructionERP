@@ -259,11 +259,40 @@ def test_no_country_answers_a_date_with_a_standard_rate_that_was_not_in_force_on
     assert checked > 500, checked
 
 
+# ── Türkiye ──────────────────────────────────────────────────────────────────
+
+
+def _turkish_seed_rows() -> dict[str, dict]:
+    return {row["tax_code"]: row for row in load_tax_seed_rows() if row["country_code"] == "TR"}
+
+
+def test_turkiye_offers_its_general_rate_and_both_reduced_lists() -> None:
+    """The rates are read from the seed, not restated: this pins the set of lines."""
+    seeded = _turkish_seed_rows()
+    assert set(seeded) == {"KDV", "KDV_RED", "KDV_1"}
+    assert _rates_in_force("TR", "2026-10-10") == {code: Decimal(row["rate_pct"]) for code, row in seeded.items()}
+
+
+def test_turkiye_still_resolves_to_its_general_rate_with_the_list_one_tier_beside_it() -> None:
+    general = _turkish_seed_rows()["KDV"]
+    assert general["is_default"] is True
+    assert Decimal(_standard("TR", "2026-10-10")) == Decimal(general["rate_pct"])
+
+
+def test_the_turkish_tier_opens_with_the_general_rate_and_not_before_it() -> None:
+    """A tier in force on a date the general rate is not would be all the resolver had."""
+    seeded = _turkish_seed_rows()
+    assert seeded["KDV_1"]["effective_from"] == seeded["KDV"]["effective_from"]
+    assert "KDV_1" not in _rates_in_force("TR", "2023-07-09")
+    assert _standard("TR", "2023-07-09") is None
+
+
 # ── Every shipped tier ───────────────────────────────────────────────────────
 
 
 def test_no_new_tier_is_flagged_as_a_standard_rate() -> None:
-    tiers = {("IE", "VAT_RED_9"), ("IE", "VAT_ZERO"), ("HU", "AFA_18"), ("HU", "AFA_5")}
+    tiers = {("IE", "VAT_RED_9"), ("IE", "VAT_ZERO"), ("HU", "AFA_18"), ("HU", "AFA_5"), ("TR", "KDV_1")}
+    tiers.add(("ES", "IVA_SRED"))
     found = {(row["country_code"], row["tax_code"]): row for row in load_tax_seed_rows()}
     for line in tiers:
         assert line in found, f"{line} is missing from the seed file"

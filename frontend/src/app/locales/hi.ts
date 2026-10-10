@@ -865,6 +865,7 @@ const resource = {
     "einvoice.profile.ehf": "EHF Billing 3.0 (नॉर्वे)",
     "einvoice.profile.peppol_aunz": "Peppol A-NZ Billing 3.0 (ऑस्ट्रेलिया / न्यूज़ीलैंड)",
     "einvoice.profile.peppol_sg": "Peppol SG Billing 3.0 (सिंगापुर)",
+    "einvoice.profile.ubl_tr": "UBL-TR 1.2 (e-Fatura)",
     "einvoice.party.seller": "विक्रेता",
     "einvoice.party.buyer": "क्रेता",
     "einvoice.rule.BR-1": "अज्ञात ई-इनवॉइस फ़ॉर्मैट {{profile}}।",

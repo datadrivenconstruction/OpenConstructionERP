@@ -41,6 +41,10 @@ class Contact(Base):
     # NULL means not stated yet.
     party_kind: Mapped[str | None] = mapped_column(String(20), nullable=True)
     vat_number: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    # The tax office the party is registered with, where an invoice has to
+    # name it beside the tax number (the Turkish vergi dairesi). NULL means
+    # not stated.
+    tax_office: Mapped[str | None] = mapped_column(String(100), nullable=True)
 
     # Location
     country_code: Mapped[str | None] = mapped_column(String(2), nullable=True)

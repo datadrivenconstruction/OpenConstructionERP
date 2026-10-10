@@ -43,8 +43,10 @@ from tests.modules.i18n_foundation.conftest import API_PREFIX, build_app, http_c
 
 pytestmark = pytest.mark.asyncio
 
-#: The four rate lines the 2026-10-04 seed file added.
-NEW_LINES = {("IE", "VAT_RED_9"), ("IE", "VAT_ZERO"), ("HU", "AFA_18"), ("HU", "AFA_5")}
+#: The four rate lines the 2026-10-04 seed file added, and the Turkish list (I)
+#: tier the 2026-10-10 one added.
+NEW_LINES = {("IE", "VAT_RED_9"), ("IE", "VAT_ZERO"), ("HU", "AFA_18"), ("HU", "AFA_5"), ("TR", "KDV_1")}
+NEW_LINES.add(("ES", "IVA_SRED"))
 NEW_KEYS = {f"tax:{cc}/{code}" for cc, code in NEW_LINES}
 
 #: When the old install was seeded: before any of the four shipped.
@@ -63,9 +65,10 @@ def _stamp(row, at: datetime = SEEDED_AT):
 def _old_tax_rows() -> list[dict]:
     rows = [r for r in load_tax_seed_rows() if (r["country_code"], r["tax_code"]) not in NEW_LINES]
     # The cohort must really be the broken one, or every assertion below is vacuous.
-    assert len(rows) == len(load_tax_seed_rows()) - 4
+    assert len(rows) == len(load_tax_seed_rows()) - len(NEW_LINES)
     held = {(r["country_code"], r["tax_code"]) for r in rows}
     assert ("IE", "VAT") in held and ("IE", "VAT_RED") in held and ("HU", "AFA") in held
+    assert ("TR", "KDV") in held and ("TR", "KDV_RED") in held
     assert not (held & NEW_LINES)
     return rows
 
@@ -139,7 +142,7 @@ async def test_apply_adds_the_new_rows_and_a_second_apply_is_a_no_op(session: As
     result = await apply_reference_update(session, None)
 
     assert set(result.applied) == NEW_KEYS
-    assert result.rows_added == 4
+    assert result.rows_added == len(NEW_LINES)
     assert result.rows_updated == 0
     nine = await _tax(session, "IE", "VAT_RED_9")
     assert [r.rate_pct for r in nine] == ["9.0"]
@@ -464,7 +467,7 @@ async def test_the_cli_apply_writes_and_a_second_run_has_nothing_left(
 
     applied: list[str] = []
     await run_reference_data_update(True, write=applied.append)
-    assert any("4 row(s) added" in line for line in applied)
+    assert any(f"{len(NEW_LINES)} row(s) added" in line for line in applied)
     assert [r.rate_pct for r in await _tax(session, "HU", "AFA_18")] == ["18.0"]
 
     again: list[str] = []
@@ -502,10 +505,10 @@ async def test_an_admin_previews_and_applies_over_http(session: AsyncSession) ->
         body = preview.json()
         ready = {c["key"] for c in body["changes"] if c["status"] == "ready"}
         assert ready == NEW_KEYS
-        assert body["ready"] == 4
+        assert body["ready"] == len(NEW_LINES)
 
         applied = await client.post(APPLY_URL, json={"keys": sorted(ready)})
         assert applied.status_code == 200
-        assert applied.json()["rows_added"] == 4
+        assert applied.json()["rows_added"] == len(NEW_LINES)
         assert applied.json()["preview"]["ready"] == 0
     assert [r.rate_pct for r in await _tax(session, "IE", "VAT_RED_9")] == ["9.0"]

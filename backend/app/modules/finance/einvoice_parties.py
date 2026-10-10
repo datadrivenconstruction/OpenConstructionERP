@@ -99,6 +99,21 @@ def _first_present(address: dict[str, Any], keys: tuple[str, ...]) -> str:
     return ""
 
 
+def _person_names(contact: Contact) -> dict[str, str]:
+    """First and family name, only for a contact recorded as a natural person.
+
+    A company's contact person also has a first and a last name on the record;
+    printing those as the party's own name would address a company's invoice
+    to its employee.
+    """
+    if str(contact.party_kind or "") != "natural_person":
+        return {}
+    return {
+        "first_name": str(contact.first_name or "").strip(),
+        "family_name": str(contact.last_name or "").strip(),
+    }
+
+
 def buyer_party_from_contact(contact: Contact) -> dict[str, str]:
     """Return the buyer-party fields a contact can answer.
 
@@ -121,6 +136,13 @@ def buyer_party_from_contact(contact: Contact) -> dict[str, str]:
         "line1": _first_present(address, _ADDRESS_LINE_KEYS),
         "postcode": _first_present(address, _POSTCODE_KEYS),
         "city": _first_present(address, ("city",)),
+        # Read by formats that print them (UBL-TR: the tax office beside the
+        # tax number, the district as CitySubdivisionName, a natural person
+        # by first and family name). The EN 16931 party ignores them.
+        "tax_office": str(contact.tax_office or "").strip(),
+        "district": _first_present(address, ("district",)),
+        "building_number": _first_present(address, ("building_number",)),
+        **_person_names(contact),
     }
     return {key: value for key, value in fields.items() if value}
 

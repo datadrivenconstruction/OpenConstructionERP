@@ -16,6 +16,8 @@ caller passes explicitly (``seller`` / ``buyer``) wins over metadata.
 
 from __future__ import annotations
 
+import datetime as dt
+from collections.abc import Mapping, Sequence
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
@@ -28,8 +30,9 @@ from app.modules.einvoice.cii import (
     build_cii_xml,
     validate_rules,
 )
-from app.modules.einvoice.profiles import get_profile
+from app.modules.einvoice.profiles import EN16931_SYNTAXES, SYNTAX_CII, SYNTAX_UBL, SYNTAX_UBL_TR, Profile, get_profile
 from app.modules.einvoice.rules import DE_INVOICE_TYPE_CODES, FATAL, RuleViolation, money_decimals
+from app.modules.einvoice.tr_mapper import TrGroupTaxes, TrMapping, build_tr_invoice
 from app.modules.einvoice.ubl import build_ubl_xml
 
 _2P = Decimal("0.01")
@@ -208,6 +211,16 @@ def _merge_defaults(ei: dict[str, Any], defaults: dict[str, Any] | None) -> dict
         elif _is_empty(current):
             merged[key] = value
     return merged
+
+
+def merge_einvoice_defaults(ei: dict[str, Any], defaults: dict[str, Any] | None) -> dict[str, Any]:
+    """One invoice's e-invoice metadata with the standing settings filled in beneath it.
+
+    The same merge ``build_einvoice`` applies, exposed for a caller that reads
+    the parties without building the EN 16931 model (the UBL-TR export), so
+    both formats resolve seller and buyer identically.
+    """
+    return _merge_defaults(ei, defaults)
 
 
 def build_einvoice(
@@ -401,6 +414,30 @@ def build_einvoice(
     )
 
 
+def _en16931_profile(profile: str) -> Profile:
+    """Look a profile up and refuse one the EN 16931 engine does not write.
+
+    Every function below builds the EN 16931 model first. A profile outside
+    that model handed to them would be validated against the wrong rules and
+    written by the wrong writer, so it is refused here, by name, before any of
+    that happens.
+
+    Raises:
+        EInvoiceError: the profile is unknown, or it is not EN 16931.
+    """
+    prof = get_profile(profile)
+    if prof is None:
+        raise EInvoiceError(f"unknown e-invoice profile {profile!r}")
+    if prof.syntax == SYNTAX_UBL_TR:
+        raise EInvoiceError(
+            f"profile {profile!r} is UBL-TR, which is not an EN 16931 document; "
+            "use render_tr_einvoice / tr_violations_for with the invoice's payment taxes"
+        )
+    if prof.syntax not in EN16931_SYNTAXES:
+        raise EInvoiceError(f"profile {profile!r} has the syntax {prof.syntax!r}, which no writer here produces")
+    return prof
+
+
 def render_einvoice(
     *,
     invoice: dict[str, Any],
@@ -418,9 +455,7 @@ def render_einvoice(
     ``direction`` unused for now; both payable and receivable render the same
     CII (party roles are already set by seller/buyer).
     """
-    prof = get_profile(profile)
-    if prof is None:
-        raise EInvoiceError(f"unknown e-invoice profile {profile!r}")
+    prof = _en16931_profile(profile)
     ei = build_einvoice(
         invoice=invoice,
         line_items=line_items,
@@ -431,7 +466,7 @@ def render_einvoice(
         buyer_fallback_name=buyer_fallback_name,
         defaults=defaults,
     )
-    xml = build_ubl_xml(ei, strict=strict) if prof.syntax == "ubl" else build_cii_xml(ei, strict=strict)
+    xml = _write_en16931(ei, prof, strict=strict)
     safe_num = _safe_token(ei.invoice_number)
     filename = f"einvoice_{safe_num}_{profile}.xml"
     return filename, "application/xml", xml
@@ -459,10 +494,8 @@ def render_einvoice_pdf(
     """
     from app.modules.einvoice.pdf_embed import build_facturx_pdf
 
-    prof = get_profile(profile)
-    if prof is None:
-        raise EInvoiceError(f"unknown e-invoice profile {profile!r}")
-    if prof.syntax != "cii":
+    prof = _en16931_profile(profile)
+    if prof.syntax != SYNTAX_CII:
         raise EInvoiceError(
             f"profile {profile!r} is UBL/XML-only; a hybrid PDF needs a CII profile "
             "(zugferd, facturx, xrechnung or en16931)"
@@ -499,7 +532,15 @@ def violations_for(
     This is what a screen should call. ``problems_for`` flattens the same
     result to the fatal messages only, which cannot tell a reader that an
     invoice exports fine but ought to name a bank account.
+
+    Raises:
+        EInvoiceError: the profile is registered and is not an EN 16931
+            profile. A UBL-TR invoice is checked by :func:`tr_violations_for`.
+            A profile nobody registered is still reported as a finding by the
+            rules, as it always was.
     """
+    if get_profile(profile) is not None:
+        _en16931_profile(profile)
     ei = build_einvoice(
         invoice=invoice,
         line_items=line_items,
@@ -536,6 +577,116 @@ def problems_for(
         defaults=defaults,
     )
     return [v.message for v in found if v.severity == FATAL]
+
+
+def _write_en16931(ei: EInvoice, prof: Profile, *, strict: bool) -> bytes:
+    """Write the EN 16931 model in the syntax its profile names.
+
+    Each syntax is named. A final ``else`` that fell through to one of the
+    writers would hand it every syntax added later, and the file would come
+    out well formed in the wrong format.
+
+    Raises:
+        EInvoiceError: the profile's syntax has no EN 16931 writer.
+    """
+    if prof.syntax == SYNTAX_UBL:
+        return build_ubl_xml(ei, strict=strict)
+    if prof.syntax == SYNTAX_CII:
+        return build_cii_xml(ei, strict=strict)
+    raise EInvoiceError(f"profile {prof.name!r} has the syntax {prof.syntax!r}, which no writer here produces")
+
+
+# ── UBL-TR (e-Fatura / e-Arşiv Fatura) ───────────────────────────────────────
+#
+# A separate path on purpose. The Turkish document has its own model and its
+# own rules, and it never passes through ``build_einvoice`` or the EN 16931
+# rules above: BR-CO-14, BR-CO-15 and BR-CO-16 would refuse a correct
+# withholding invoice. The caller supplies the taxes, one result of the shared
+# payment tax calculation per group of lines; nothing here computes any.
+
+
+def map_tr_einvoice(
+    *,
+    invoice_id: Any,
+    invoice: Mapping[str, Any],
+    line_items: Sequence[Mapping[str, Any]],
+    seller: Mapping[str, Any],
+    buyer: Mapping[str, Any],
+    tr: Mapping[str, Any] | None,
+    group_taxes: Sequence[TrGroupTaxes],
+    payment: Mapping[str, Any] | None = None,
+    extra_findings: Sequence[RuleViolation] = (),
+    today: dt.date | None = None,
+) -> tuple[TrMapping, list[RuleViolation]]:
+    """Map an invoice onto UBL-TR and collect every finding about it.
+
+    Args:
+        invoice_id: the platform id of the invoice.
+        invoice: the invoice header dict.
+        line_items: the invoice lines, each with its VAT rate and withholding code.
+        seller: the supplier party dict.
+        buyer: the customer party dict.
+        tr: the Turkish e-invoice fields of the invoice.
+        group_taxes: the computed taxes of every line group.
+        payment: optional settlement fields.
+        extra_findings: findings the caller established before mapping, for
+            example that the taxes are not confirmed. They are reported first.
+        today: the day the issue date is judged against; defaults to the
+            calendar day in Türkiye.
+
+    Returns:
+        The mapping and the full list of findings: the caller's, the
+        mapper's, then those of :func:`~app.modules.einvoice.rules_tr.check_tr`.
+    """
+    from app.modules.einvoice.rules_tr import check_tr
+
+    mapping = build_tr_invoice(
+        invoice_id=invoice_id,
+        invoice=invoice,
+        line_items=line_items,
+        seller=seller,
+        buyer=buyer,
+        tr=tr,
+        group_taxes=group_taxes,
+        payment=payment,
+    )
+    found = [*extra_findings, *mapping.findings]
+    if mapping.invoice is not None:
+        found += check_tr(mapping.invoice, today=today)
+    return mapping, found
+
+
+def tr_violations_for(**kwargs: Any) -> list[RuleViolation]:
+    """Validate a UBL-TR invoice without rendering it. See :func:`map_tr_einvoice`."""
+    return map_tr_einvoice(**kwargs)[1]
+
+
+def render_tr_einvoice(**kwargs: Any) -> tuple[str, str, bytes, list[RuleViolation]]:
+    """Return ``(filename, media_type, xml, findings)`` for an unsigned UBL-TR invoice.
+
+    The file is what the customer's licensed integrator signs and submits.
+    ``findings`` are the warnings and information findings that did not block
+    it, for the caller to hand over with the file.
+
+    Args:
+        **kwargs: the arguments of :func:`map_tr_einvoice`.
+
+    Raises:
+        EInvoiceError: a fatal finding blocks the document. The message lists
+            every one of them.
+    """
+    from app.modules.einvoice.ubl_tr import build_ubl_tr_xml
+
+    mapping, found = map_tr_einvoice(**kwargs)
+    fatal = [violation for violation in found if violation.severity == FATAL]
+    if fatal or mapping.invoice is None:
+        raise EInvoiceError("; ".join(str(violation) for violation in fatal) or "the invoice could not be mapped")
+    # Checked above against the same day, so the writer is not asked to check
+    # again against a day of its own.
+    xml = build_ubl_tr_xml(mapping.invoice, strict=False)
+    number = mapping.invoice.document_id or str(kwargs["invoice"].get("invoice_number") or "")
+    filename = f"einvoice_{_safe_token(number)}_ubl_tr.xml"
+    return filename, "application/xml", xml, found
 
 
 def _safe_token(raw: str) -> str:

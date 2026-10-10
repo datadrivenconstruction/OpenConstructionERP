@@ -67,7 +67,17 @@ BIRIMFIYAT_RULES = (
     rules.BirimFiyatPozRateConsistent,
     rules.BirimFiyatOwnItemAnalysed,
     rules.BirimFiyatProfitOverheadOnce,
+    rules.BirimFiyatUnitMatchesPoz,
+    rules.BirimFiyatRateAgainstPublished,
 )
+
+#: What the unit-price document still lists as planned. Pinned by name, so an
+#: id cannot leave or join the list without this file being read.
+STILL_PLANNED = {
+    "birimfiyat.profit_included_in_book_rate",
+    "birimfiyat.edition_year_current",
+    "birimfiyat.price_difference_documented",
+}
 
 
 @pytest.fixture(scope="module")
@@ -286,6 +296,51 @@ def test_no_planned_rule_id_is_one_the_engine_already_has() -> None:
             assert "planned, not built" in document.get("planned_not_built_note", "").lower(), stem
 
 
+def test_the_unit_price_document_plans_exactly_the_three_checks_nothing_can_make_yet() -> None:
+    document = _documents()["bayindirlik_unit_prices"]
+    assert set(document["planned_not_built_rule_ids"]) == STILL_PLANNED
+    assert len(document["planned_not_built_rule_ids"]) == len(STILL_PLANNED)
+
+
+def test_the_two_price_book_checks_are_promised_because_they_are_built() -> None:
+    from app.core.validation.poz_catalogue import POZ_CATALOGUE_RULE_IDS
+
+    document = _documents()["bayindirlik_unit_prices"]
+    assert set(document["enables_rule_ids"]) >= POZ_CATALOGUE_RULE_IDS
+    assert set(_registry()["ids"]) >= POZ_CATALOGUE_RULE_IDS
+    assert {rules.BirimFiyatUnitMatchesPoz.rule_id, rules.BirimFiyatRateAgainstPublished.rule_id} == set(
+        POZ_CATALOGUE_RULE_IDS
+    )
+
+
+def test_the_published_price_thresholds_ship_unset_and_unconfirmed() -> None:
+    """No tolerance is known, so none is shipped: the document states null, not a number."""
+    from app.core.validation.poz_catalogue import PRICE_COMPARISON_BLOCK, tolerance_from_document
+
+    document = _documents()["bayindirlik_unit_prices"]
+    block = document[PRICE_COMPARISON_BLOCK]
+    assert block["applies_to_rule_id"] == rules.BirimFiyatRateAgainstPublished.rule_id
+    assert block["review_status"] == "unconfirmed"
+    assert "warn_above_percent" in block
+    assert "warn_below_percent" in block
+    assert block["warn_above_percent"] is None
+    assert block["warn_below_percent"] is None
+    tolerance = tolerance_from_document(document)
+    assert tolerance.warn_above_percent is None
+    assert tolerance.warn_below_percent is None
+    assert tolerance.review_status == "unconfirmed"
+
+
+def test_the_engine_reads_the_thresholds_from_the_document_the_pack_ships() -> None:
+    """The path the product takes to the file, not a second copy of its contents."""
+    from app.core.validation.pack_coverage import _discover_pack_files
+    from app.core.validation.poz_catalogue import TR_POZ_RULE_PACK
+
+    found = [file.path for file in _discover_pack_files() if file.path.stem == TR_POZ_RULE_PACK]
+    assert found, "the pack's unit-price document is not discoverable, so a threshold set in it would be ignored"
+    assert found[0].resolve() == (RULE_PACKS / f"{TR_POZ_RULE_PACK}.json").resolve()
+
+
 def test_only_the_unit_price_document_runs_rules() -> None:
     """The other four are reference documents and say so by enabling nothing."""
     enabling = {stem for stem, document in _documents().items() if document.get("enables_rule_ids")}
@@ -343,12 +398,10 @@ def test_every_message_exists_in_english_and_in_turkish(rule, locale: str) -> No
 
 # ── KDV ──────────────────────────────────────────────────────────────────────
 
-#: The 1 percent tier of list (I) is law (Karar 2007/13033 as amended by Karar
-#: 7346) and the tax seed does not carry it yet: adding a rate line to the
-#: seed is a delivery to every existing install with a ship date and gates of
-#: its own. Pinned so that the day the seed gains the row this fails and the
-#: pin is removed, instead of the gap being forgotten.
-_KDV_TIERS_NOT_YET_SEEDED = {Decimal("1")}
+#: Every tier the pack offers is in the tax seed since the list (I) row
+#: shipped on 2026-10-10. Kept as an empty set rather than deleted, so a tier
+#: offered without a seeded row has to be written down here to pass.
+_KDV_TIERS_NOT_YET_SEEDED: set[Decimal] = set()
 
 
 def _seeded_kdv_rates() -> set[Decimal]:

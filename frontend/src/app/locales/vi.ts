@@ -847,6 +847,7 @@ const resource = {
     "einvoice.profile.ehf": "EHF Billing 3.0 (Na Uy)",
     "einvoice.profile.peppol_aunz": "Peppol A-NZ Billing 3.0 (Úc / New Zealand)",
     "einvoice.profile.peppol_sg": "Peppol SG Billing 3.0 (Singapore)",
+    "einvoice.profile.ubl_tr": "UBL-TR 1.2 (e-Fatura)",
     "einvoice.party.seller": "người bán",
     "einvoice.party.buyer": "người mua",
     "einvoice.rule.BR-1": "Định dạng hóa đơn điện tử không xác định {{profile}}.",

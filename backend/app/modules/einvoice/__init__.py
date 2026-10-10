@@ -17,6 +17,12 @@ Two API surfaces expose it:
       generation at ``/api/v1/einvoice/``, accepting raw dicts for
       integrations, pre-flight checks and testing.
 
+One format is outside EN 16931: UBL-TR, the Turkish e-Fatura / e-Arşiv Fatura
+document (``ubl_tr``, ``rules_tr``, ``tr_mapper``). It is registered as a
+profile so a picker lists it, and it has its own entry points below
+(``render_tr_einvoice``, ``tr_violations_for``) because its taxes come from
+the shared payment tax calculation rather than from this module.
+
 The inbound counterpart is ``supplier_catalogs.peppol`` (UBL parser).
 """
 
@@ -35,7 +41,9 @@ from app.modules.einvoice.profiles import (
     PROFILES,
     SUPPORTED_PROFILES,
     Profile,
+    default_profile_for_country,
     get_profile,
+    is_en16931_profile,
 )
 from app.modules.einvoice.rules import (
     DE_INVOICE_TYPE_CODES,
@@ -48,11 +56,15 @@ from app.modules.einvoice.rules import (
 )
 from app.modules.einvoice.service import (
     build_einvoice,
+    map_tr_einvoice,
     problems_for,
     render_einvoice,
     render_einvoice_pdf,
+    render_tr_einvoice,
+    tr_violations_for,
     violations_for,
 )
+from app.modules.einvoice.tr_mapper import TrGroupTaxes, TrLineGroup, group_lines, tr_invoice_uuid
 from app.modules.einvoice.ubl import build_ubl_xml, is_credit_note
 
 __all__ = [
@@ -71,15 +83,24 @@ __all__ = [
     "Profile",
     "RuleViolation",
     "TaxSubtotal",
+    "TrGroupTaxes",
+    "TrLineGroup",
     "build_cii_xml",
     "build_einvoice",
     "build_ubl_xml",
+    "default_profile_for_country",
     "get_profile",
+    "group_lines",
     "is_credit_note",
+    "is_en16931_profile",
+    "map_tr_einvoice",
     "problems_for",
     "profile_problems",
     "render_einvoice",
     "render_einvoice_pdf",
+    "render_tr_einvoice",
+    "tr_invoice_uuid",
+    "tr_violations_for",
     "validate",
     "validate_semantics",
     "violations_for",

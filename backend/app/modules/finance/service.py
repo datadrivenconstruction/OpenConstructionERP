@@ -274,6 +274,19 @@ def _issued_invoice_changes(invoice: Any, fields: dict[str, Any], new_lines: Seq
     return changed
 
 
+def _claim_has_certificate(project: Any, contract: Any) -> bool:
+    """Whether a claim of this contract is certified on a payment certificate layout.
+
+    Asked of the contracts module, which owns the layouts. An install without
+    that helper has no such certificate, and every claim is invoiced as before.
+    """
+    try:
+        from app.modules.contracts.hakedis_layout import has_layout
+    except ImportError:
+        return False
+    return bool(has_layout(getattr(project, "country_code", None), getattr(contract, "terms", None)))
+
+
 def _parse_decimal(value: str, field_name: str = "value") -> Decimal:
     """Parse a string to Decimal, raising a clear error on failure."""
     try:
@@ -1672,6 +1685,95 @@ class FinanceService:
             return None
         return (issued + timedelta(days=days)).isoformat()
 
+    async def _certificate_vat(
+        self, claim: Any, invoice_currency: str, invoice_net: Decimal
+    ) -> tuple[Decimal, Decimal | None]:
+        """The VAT of a claim invoice, read from the claim's confirmed statutory taxes.
+
+        Args:
+            claim: the certified progress claim.
+            invoice_currency: the currency the invoice will be raised in.
+            invoice_net: the amount before VAT the invoice will carry.
+
+        Returns:
+            The computed VAT and the rate it was computed with.
+
+        Raises:
+            HTTPException 409: the taxes are not stored, not confirmed, held,
+                in another currency, or computed on another amount than the
+                invoice would carry. The message says what to do; the invoice
+                is not raised on a figure nobody confirmed.
+        """
+        number = getattr(claim, "claim_number", "") or str(claim.id)
+
+        def refuse(why: str, then: str) -> HTTPException:
+            return HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"The invoice for payment certificate {number} cannot be raised yet: {why}. {then}",
+            )
+
+        try:
+            from app.modules.tax_withholding import service as tax_service
+        except ImportError as exc:
+            raise refuse(
+                "the payment taxes module is not installed, so the certificate has no confirmed VAT",
+                "Enable the tax withholding module.",
+            ) from exc
+        stored = await tax_service.get_statutory(self.session, source_kind="progress_claim", source_id=claim.id)
+        if stored is None:
+            raise refuse(
+                "its taxes have not been computed",
+                "Open the certificate, choose its taxes and confirm them, then raise the invoice again.",
+            )
+        calc, lines = stored
+        if calc.status != "confirmed":
+            raise refuse(
+                f"its taxes are {calc.status}, not confirmed",
+                "Confirm the taxes on the certificate, then raise the invoice again.",
+            )
+        try:
+            result = tax_service.result_from_lines(lines)
+        except tax_service.StatutoryDataError as exc:
+            raise refuse(
+                f"its stored taxes cannot be read ({exc})", "Reopen the taxes and confirm them again."
+            ) from exc
+        stored_currency = (calc.currency_code or "").strip().upper()
+        if stored_currency != (invoice_currency or "").strip().upper():
+            raise refuse(
+                f"its taxes are in {stored_currency} and the invoice would be in {invoice_currency or 'no currency'}",
+                "Compute the taxes in the currency of the certificate.",
+            )
+        # The certificate taxes the amount of this certificate, which is the
+        # work of the period plus whatever the layout adds above its VAT line
+        # (a price adjustment, for one). The invoice is built from the claim's
+        # gross and its lines. Where the two differ, an invoice raised anyway
+        # would carry VAT on a base it does not show.
+        # Compared as numbers: the claim keeps four decimals and the
+        # certificate the currency's own, so 1000.0000 and 1000.00 agree.
+        try:
+            taxed_net = tax_service.money_as_stored(calc.net_amount, stored_currency)
+        except tax_service.StatutoryDataError as exc:
+            raise refuse(
+                f"its stored taxes cannot be read ({exc})", "Reopen the taxes and confirm them again."
+            ) from exc
+        if taxed_net is not None and taxed_net != invoice_net:
+            raise refuse(
+                f"its taxes were computed on {taxed_net} {stored_currency} and the claim's gross amount is "
+                f"{invoice_net} {stored_currency}",
+                "The certificate carries an amount above its VAT line that the claim's lines do not (a price "
+                "adjustment, for one), or the claim changed after its taxes were confirmed. Where the claim "
+                "changed, confirm the certificate's taxes again. Where the certificate carries the extra amount, "
+                "enter this invoice by hand for the certificate amount and confirm its own taxes.",
+            )
+        vat = result.vat_computed
+        if vat.status == "held" or (vat.status == "value" and vat.amount is None):
+            raise refuse(
+                f"its VAT is held ({vat.reason_key or 'no reason recorded'})",
+                "Resolve what holds it on the certificate's taxes and confirm them again.",
+            )
+        rate = Decimal(str(calc.vat_rate_pct)) if calc.vat_rate_pct is not None else None
+        return (vat.amount if vat.status == "value" and vat.amount is not None else Decimal("0")), rate
+
     async def create_receivable_from_claim(
         self,
         claim_id: uuid.UUID,
@@ -1758,6 +1860,15 @@ class FinanceService:
         base_currency = (getattr(project, "currency", "") or "").strip().upper() if project else ""
         fx_map = _project_fx_map(project)
 
+        # Where the project's country has a payment certificate layout, the
+        # certificate is the document both parties signed and its statutory
+        # taxes are computed and confirmed in its own currency. The invoice
+        # then states the same amounts in that currency: converting them would
+        # produce a VAT figure no certificate shows.
+        on_certificate = _claim_has_certificate(project, contract)
+        if on_certificate and claim_currency:
+            base_currency = claim_currency
+
         def _to_base(raw: object) -> Decimal:
             converted, _missing = _convert_to_base(
                 # Decimal end to end (no lossy float round-trip); the stored
@@ -1819,6 +1930,12 @@ class FinanceService:
             if vat_rate > 0
             else Decimal("0")
         )
+        line_vat_rate: Decimal | None = None
+        if on_certificate:
+            # The second VAT calculation ends here: on a certificate the VAT is
+            # read from the claim's confirmed statutory taxes, never recomputed
+            # from a contract-level rate.
+            tax_base, line_vat_rate = await self._certificate_vat(claim, invoice_currency, gross_base)
 
         invoice_date = (claim.claim_date or "")[:10]
         invoice_number = await self.invoices.next_invoice_number(project_id, direction)
@@ -1886,6 +2003,9 @@ class FinanceService:
                     wbs_id=None,
                     cost_category=None,
                     sort_order=idx,
+                    # Only a certificate invoice states the rate per line: it is
+                    # the rate its confirmed taxes were computed with.
+                    **({"vat_rate": line_vat_rate} if line_vat_rate is not None else {}),
                 )
             )
 

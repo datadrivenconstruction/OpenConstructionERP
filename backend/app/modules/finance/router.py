@@ -75,6 +75,7 @@ from app.modules.finance.einvoice_settings_schemas import (
     EInvoiceSettingsRead,
     EInvoiceSettingsUpdate,
 )
+from app.modules.finance.einvoice_tr_schemas import TrEInvoiceFields
 from app.modules.finance.models import EVMSnapshot, Invoice, InvoiceLineItem, Payment, ProjectBudget
 from app.modules.finance.retention_ledger import RetentionRollup
 from app.modules.finance.schemas import (
@@ -722,12 +723,19 @@ async def export_invoice_br_pdf(
     ),
 )
 async def list_einvoice_profiles(
+    session: SessionDep,
     _perm: None = Depends(RequirePermission("finance.read")),
 ) -> dict[str, Any]:
     """Return the supported e-invoice profiles with their syntax and region."""
-    from app.modules.einvoice import PROFILES
+    from app.modules.einvoice import PROFILES, default_profile_for_country
+    from app.modules.finance.einvoice_settings_service import einvoice_defaults
 
+    seller = (await einvoice_defaults(session)).get("seller") or {}
     return {
+        # The profile to offer first, for a seller whose country has a national
+        # format outside EN 16931 (a Turkish seller is offered UBL-TR). ``None``
+        # everywhere else, where the picker keeps its own default.
+        "default": default_profile_for_country(seller.get("country_code")),
         "profiles": [
             {
                 "key": key,
@@ -738,7 +746,7 @@ async def list_einvoice_profiles(
                 "region": profile.region,
             }
             for key, profile in PROFILES.items()
-        ]
+        ],
     }
 
 
@@ -789,6 +797,170 @@ async def write_einvoice_settings(
     return EInvoiceSettingsRead.from_row(row)
 
 
+def _violation_dicts(found: Iterable[Any]) -> list[dict[str, Any]]:
+    return [
+        {
+            "rule_id": v.rule_id,
+            "severity": v.severity,
+            "message": v.message,
+            "term": v.term,
+            "params": v.params,
+        }
+        for v in found
+    ]
+
+
+async def _export_tr_einvoice(
+    session: AsyncSession,
+    invoice: Invoice,
+    defaults: dict[str, Any],
+    *,
+    dry_run: bool,
+    embed: bool,
+) -> StreamingResponse | dict[str, Any]:
+    """The UBL-TR (e-Fatura / e-Arşiv Fatura) branch of the e-invoice export.
+
+    A dry run answers the same shape as the EN 16931 one, with three keys
+    added: ``document`` (what would be written), ``tax_source`` (where the
+    taxes were read from and in what state) and ``fields`` (the Turkish
+    e-invoice fields as stored). Without ``dry_run`` the unsigned XML is
+    streamed, and refused with 422 while any fatal finding stands. The file
+    carries the count and ids of its remaining warnings in two response
+    headers; their text is what the dry run returns.
+    """
+    from app.modules.einvoice import FATAL, map_tr_einvoice, render_tr_einvoice
+    from app.modules.einvoice.cii import EInvoiceError
+    from app.modules.finance.einvoice_tr import assemble_tr_export
+
+    if embed:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail="ubl_tr is an XML document for an integrator to sign; it has no hybrid PDF (embed=true)",
+        )
+    inputs = await assemble_tr_export(session, invoice, defaults=defaults)
+
+    if dry_run:
+        mapping, found = await asyncio.to_thread(lambda: map_tr_einvoice(**inputs.mapper_kwargs))
+        problems = [v.message for v in found if v.severity == FATAL]
+        document = mapping.invoice
+        return {
+            "format": "ubl_tr",
+            "valid": not problems,
+            "problems": problems,
+            "violations": _violation_dicts(found),
+            "document": None
+            if document is None
+            else {
+                "uuid": document.uuid,
+                "document_id": document.document_id,
+                "profile_id": document.profile_id,
+                "invoice_type": document.invoice_type,
+                "currency": document.currency,
+                "line_extension": str(document.totals.line_extension),
+                "tax_inclusive": str(document.totals.tax_inclusive),
+                "payable": str(document.totals.payable),
+                "inferred": mapping.inferred,
+                "signed": False,
+            },
+            "tax_source": inputs.tax_source,
+            "fields": inputs.fields,
+        }
+
+    try:
+        filename, media_type, body, found = await asyncio.to_thread(lambda: render_tr_einvoice(**inputs.mapper_kwargs))
+    except EInvoiceError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=(
+                f"invoice cannot be written as an e-Fatura yet: {exc}. "
+                "Call with ?format=ubl_tr&dry_run=true for the full report, each finding with where to fix it."
+            ),
+        ) from exc
+    return StreamingResponse(
+        io.BytesIO(body),
+        media_type=media_type,
+        headers={
+            "Content-Disposition": attachment_disposition(filename),
+            # The document is Turkish whatever language the reader asked for.
+            "Content-Language": "tr",
+            "X-EInvoice-Signed": "false",
+            "X-EInvoice-Findings": str(len(found)),
+            # Rule ids are ASCII, so they travel in a header; the sentences do not.
+            "X-EInvoice-Finding-Ids": ",".join(sorted({v.rule_id for v in found})),
+        },
+    )
+
+
+@router.get(
+    "/invoices/{invoice_id}/einvoice/tr",
+    summary="Read the Turkish e-invoice fields of an invoice",
+    description=(
+        "The e-Fatura / e-Arşiv Fatura fields stored on the invoice under "
+        "metadata.einvoice.tr (scenario, invoice type, document number, exchange "
+        "rate, exemption, the invoice a return answers), with defaults for the "
+        "ones not set, the UUID (ETTN) the export will write, and where the "
+        "taxes of the invoice are read from."
+    ),
+)
+async def read_invoice_tr_einvoice_fields(
+    invoice_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("finance.read")),
+    service: FinanceService = Depends(_get_service),
+) -> dict[str, Any]:
+    """Return the stored Turkish e-invoice fields of one invoice."""
+    from app.modules.einvoice import tr_invoice_uuid
+    from app.modules.finance.einvoice_tr import invoice_source, read_tr_fields
+
+    await _require_invoice_access(session, invoice_id, user_id)
+    invoice = await service.get_invoice(invoice_id)
+    fields, unreadable = read_tr_fields(invoice.metadata_)
+    source_kind, source_id = invoice_source(invoice)
+    return {
+        "invoice_id": str(invoice.id),
+        "uuid": tr_invoice_uuid(invoice.id),
+        "fields": fields,
+        "unreadable": unreadable,
+        "tax_source": {"source_kind": source_kind, "source_id": str(source_id), "project_id": str(invoice.project_id)},
+        "line_ids": [str(item.id) for item in invoice.line_items or []],
+    }
+
+
+@router.put(
+    "/invoices/{invoice_id}/einvoice/tr",
+    summary="Write the Turkish e-invoice fields of an invoice",
+    description=(
+        "Replaces the whole metadata.einvoice.tr block, so a field left out is a "
+        "field cleared. A field the format does not have is refused with 422 "
+        "rather than stored and ignored. Nothing else on the invoice changes, so "
+        "this is allowed on an issued invoice too: the document number is only "
+        "known once the integrator has assigned it."
+    ),
+)
+async def write_invoice_tr_einvoice_fields(
+    invoice_id: uuid.UUID,
+    payload: TrEInvoiceFields,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("finance.update")),
+) -> dict[str, Any]:
+    """Store the Turkish e-invoice fields of one invoice."""
+    from app.modules.einvoice import tr_invoice_uuid
+    from app.modules.finance.einvoice_tr_schemas import TR_BLOCK_KEY
+
+    invoice = await _require_invoice_access(session, invoice_id, user_id)
+    metadata = dict(invoice.metadata_ or {})
+    einvoice = dict(metadata.get("einvoice") or {})
+    einvoice[TR_BLOCK_KEY] = payload.model_dump()
+    metadata["einvoice"] = einvoice
+    # A new dict, so the JSON column sees a change.
+    invoice.metadata_ = metadata
+    await session.flush()
+    await session.commit()
+    return {"invoice_id": str(invoice.id), "uuid": tr_invoice_uuid(invoice.id), "fields": einvoice[TR_BLOCK_KEY]}
+
+
 @router.get(
     "/invoices/{invoice_id}/einvoice",
     summary="Export invoice as an EN 16931 e-invoice (international: CII and UBL/Peppol)",
@@ -829,6 +1001,7 @@ async def export_invoice_einvoice(
     from app.modules.einvoice import (
         FATAL,
         SUPPORTED_PROFILES,
+        is_en16931_profile,
         render_einvoice,
         render_einvoice_pdf,
         violations_for,
@@ -871,6 +1044,11 @@ async def export_invoice_einvoice(
         contact_id=fresh.contact_id,
         invoice_direction=fresh.invoice_direction,
     )
+
+    if not is_en16931_profile(profile):
+        # UBL-TR: its own model, its own rules, and taxes read from the shared
+        # payment tax calculation. Branched before anything EN 16931 runs.
+        return await _export_tr_einvoice(session, fresh, defaults, dry_run=dry_run, embed=embed)
 
     if dry_run:
         found = violations_for(

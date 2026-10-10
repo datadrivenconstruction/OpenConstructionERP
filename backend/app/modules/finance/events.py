@@ -61,6 +61,7 @@ import logging
 import uuid
 from decimal import Decimal, InvalidOperation
 
+from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -464,6 +465,13 @@ async def _on_claim_certified(event: Event) -> None:
                 getattr(invoice, "invoice_number", "?"),
                 claim_id,
             )
+    except HTTPException as exc:
+        if exc.status_code != status.HTTP_409_CONFLICT:
+            logger.exception("finance: _on_claim_certified failed for claim %s", claim_id)
+            return
+        # A payment certificate whose taxes are not confirmed yet. Not a
+        # failure: the invoice is raised from the claim once they are.
+        logger.info("finance: no invoice for claim %s yet: %s", claim_id, exc.detail)
     except Exception:
         logger.exception("finance: _on_claim_certified failed for claim %s", claim_id)
 

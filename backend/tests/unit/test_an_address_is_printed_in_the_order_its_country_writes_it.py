@@ -122,7 +122,14 @@ CASES: dict[str, tuple[dict[str, str], list[str]]] = {
 #: what the fallback does. Named rather than left implicit: a profile added for
 #: a country that is in neither this set nor the rules table is a country whose
 #: address nobody looked at, and the test below is red until somebody does.
-SERVED_BY_THE_CONTINENTAL_FALLBACK = {"FR", "NL", "NO"}
+#:
+#: Türkiye is here on the same ground: a Turkish address closes with the post
+#: code followed by the district and the province ("34710 Kadıköy/İstanbul"),
+#: post code first. Its own profile never reaches the printed address at all,
+#: because UBL-TR is written as structured XML with one element per part and
+#: has no readable PDF; the entry covers any other document printed for a
+#: Turkish party.
+SERVED_BY_THE_CONTINENTAL_FALLBACK = {"FR", "NL", "NO", "TR"}
 
 
 def profile_region_codes() -> set[str]:

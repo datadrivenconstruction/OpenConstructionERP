@@ -135,6 +135,7 @@ class ContactService:
             legal_name=data.legal_name,
             party_kind=data.party_kind,
             vat_number=data.vat_number,
+            tax_office=data.tax_office,
             country_code=data.country_code,
             address=data.address,
             primary_email=normalised_email,

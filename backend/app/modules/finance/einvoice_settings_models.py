@@ -35,6 +35,7 @@ _SELLER_FIELDS = (
     "vat_id",
     "tax_number",
     "legal_id",
+    "tax_office",
     "country_code",
     "line1",
     "postcode",
@@ -90,6 +91,11 @@ class EInvoiceSettings(Base):
     seller_vat_id: Mapped[str] = mapped_column(String(50), nullable=False, default="", server_default="")
     seller_tax_number: Mapped[str] = mapped_column(String(50), nullable=False, default="", server_default="")
     seller_legal_id: Mapped[str] = mapped_column(String(50), nullable=False, default="", server_default="")
+    # The tax office the seller is registered with. A first-class part of a
+    # party's tax identity where an invoice names it beside the tax number
+    # (the Turkish vergi dairesi, written as PartyTaxScheme/TaxScheme/Name).
+    # The EN 16931 party has no such term and ignores it.
+    seller_tax_office: Mapped[str] = mapped_column(String(100), nullable=False, default="", server_default="")
     seller_country_code: Mapped[str] = mapped_column(String(2), nullable=False, default="", server_default="")
     seller_line1: Mapped[str] = mapped_column(String(200), nullable=False, default="", server_default="")
     seller_postcode: Mapped[str] = mapped_column(String(20), nullable=False, default="", server_default="")

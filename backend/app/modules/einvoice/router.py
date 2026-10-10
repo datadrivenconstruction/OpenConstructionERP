@@ -46,6 +46,27 @@ def _line_dicts(items: list[Any]) -> list[dict[str, Any]]:
     return [item.model_dump(mode="python") for item in items]
 
 
+def _refuse_non_en16931(profile: str | None) -> None:
+    """Answer 422 for a registered profile these raw-data routes cannot serve.
+
+    UBL-TR is in the registry and is not EN 16931. Its tax block comes from
+    the payment taxes stored for a persisted invoice, which a raw payload does
+    not carry, so it is issued from the finance invoice route only. Without
+    this the request would reach the EN 16931 builder and be judged by rules
+    that refuse a correct Turkish withholding invoice.
+    """
+    from app.modules.einvoice.profiles import get_profile, is_en16931_profile
+
+    if get_profile(profile or "") is not None and not is_en16931_profile(profile or ""):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=(
+                f"profile {profile!r} is not an EN 16931 profile and cannot be built from raw data; "
+                "issue it from the invoice itself: GET /api/v1/finance/invoices/{id}/einvoice?format=" + str(profile)
+            ),
+        )
+
+
 @router.get(
     "/profiles",
     response_model=list[ProfileResponse],
@@ -92,6 +113,7 @@ async def validate_invoice(
     from app.modules.einvoice.rules import FATAL
     from app.modules.einvoice.service import violations_for
 
+    _refuse_non_en16931(body.profile)
     invoice_dict = _invoice_dict(body.invoice)
     line_items = _line_dicts(body.line_items)
     seller = body.seller.model_dump(mode="python") if body.seller else None
@@ -150,6 +172,7 @@ async def generate_invoice(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=f"unknown e-invoice profile {body.profile!r}; use one of {', '.join(SUPPORTED_PROFILES)}",
         )
+    _refuse_non_en16931(profile)
 
     invoice_dict = _invoice_dict(body.invoice)
     line_items = _line_dicts(body.line_items)

@@ -486,6 +486,22 @@
     "is_default": false
   },
   {
+    "country_code": "ES",
+    "tax_name": "VAT Super-reduced (IVA)",
+    "tax_name_translations": {
+      "en": "VAT Super-reduced",
+      "es": "IVA superreducido"
+    },
+    "tax_code": "IVA_SRED",
+    "rate_pct": "4.0",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": "2012-09-01",
+    "effective_to": null,
+    "is_default": false
+  },
+  {
     "country_code": "IT",
     "tax_name": "VAT Standard (IVA)",
     "tax_name_translations": {
@@ -638,6 +654,22 @@
     },
     "tax_code": "KDV_RED",
     "rate_pct": "10.0",
+    "tax_type": "vat",
+    "combination": "national",
+    "subdivision_code": null,
+    "effective_from": "2023-07-10",
+    "effective_to": null,
+    "is_default": false
+  },
+  {
+    "country_code": "TR",
+    "tax_name": "VAT Reduced, list I (KDV)",
+    "tax_name_translations": {
+      "en": "VAT Reduced, list I",
+      "tr": "KDV indirimli oran, (I) sayılı liste"
+    },
+    "tax_code": "KDV_1",
+    "rate_pct": "1.0",
     "tax_type": "vat",
     "combination": "national",
     "subdivision_code": null,

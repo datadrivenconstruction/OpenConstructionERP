@@ -10,6 +10,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator, model_validator
 
 from app.modules.einvoice.rules import VAT_CATEGORY_CODES
+from app.modules.finance.einvoice_tr_schemas import validate_tr_block
 from app.modules.finance.variance import expected_outturn
 
 
@@ -179,6 +180,13 @@ class InvoiceCreate(BaseModel):
     def _check_non_negative_decimal(cls, v: str) -> str:
         return _validate_non_negative_decimal(v)
 
+    @field_validator("metadata")
+    @classmethod
+    def _check_tr_einvoice_block(cls, v: dict[str, Any]) -> dict[str, Any]:
+        """Refuse a malformed ``einvoice.tr`` block; every other key stays free-form."""
+        validate_tr_block(v)
+        return v
+
 
 class InvoiceUpdate(BaseModel):
     """Partial update for an invoice."""
@@ -219,6 +227,13 @@ class InvoiceUpdate(BaseModel):
         if v is None:
             return v
         return _validate_non_negative_decimal(v)
+
+    @field_validator("metadata")
+    @classmethod
+    def _check_tr_einvoice_block(cls, v: dict[str, Any] | None) -> dict[str, Any] | None:
+        """Refuse a malformed ``einvoice.tr`` block; every other key stays free-form."""
+        validate_tr_block(v)
+        return v
 
 
 # ── Invoice responses ────────────────────────────────────────────────────────
