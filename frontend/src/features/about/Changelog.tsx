@@ -55,10 +55,10 @@ interface ChangelogEntry {
  */
 const UNRELEASED: ChangelogEntry | null = {
   version: 'Unreleased',
-  date: '2026-09-30',
+  date: '2026-10-10',
   tag: 'FIX',
   summary:
-    'Demo data stays in demo projects, and a deleted demo stays deleted through restarts and upgrades, including on installs that removed their demos before this version. Settings can now find the demo records an older version left in your own projects and remove them after you confirm; on a server, demo-cleanup does the same.',
+    'Payments and purchase order links keep every amount exactly as entered, and a withholding the browser cannot read no longer posts as zero. Notification links open a page that exists, notification email buttons open the app and speak the reader\'s language, and every email carries the OpenConstructionERP name.',
 };
 
 // Sorted newest to oldest. Sort is enforced at runtime below (semver-aware) so

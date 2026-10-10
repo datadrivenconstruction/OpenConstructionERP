@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Recording a payment and linking an invoice to a purchase order keep every amount exactly as entered. The withheld amount, the cash paid and the amount still open on the order are no longer rounded through floating point, and a withholding the browser cannot read disables Record payment instead of quietly posting zero.
+- Every link in a notification now opens a page that exists. The button in a notification email opens the app instead of leading nowhere, and the email's greeting, button and footer are written in the reader's language.
+- Every email the platform sends carries the OpenConstructionERP name at the top, in the sender and in the closing line.
+
 ## [18.5.0] - 2026-10-10
 
 This release makes the platform lighter to run and easier to understand. A Background services button in the top bar lists every service the platform keeps loaded, what it is for, which modules need it and roughly how much memory it takes, and an administrator can switch each one on or off without a restart. On a fresh server the administrator is asked once which modules they will use before anything heavy starts, semantic search stays off until someone turns it on, and the demo projects are set up in the background. The Windows desktop app installs its backend once instead of unpacking it on every start and now starts for users whose account name has non-ASCII letters. Procurement, the client portal, payment plans, schedules and the Italian workflow all grow, as listed below.
