@@ -112,7 +112,7 @@ const resource = {
     "processes.reports_scheduler.purpose": "Izrađuje i šalje e-poštom izvješća koja ste postavili da idu prema rasporedu.",
     "processes.required": "Uvijek uključeno",
     "processes.restart": "Ponovno pokreni: {{name}}",
-    "processes.restarts_one": "Automatski ponovno pokrenuto jednom od pokretanja poslužitelja.",
+    "processes.restarts_one": "Automatski ponovno pokrenuto {{count}} put od pokretanja poslužitelja.",
     "processes.restarts_few": "Automatski ponovno pokrenuto {{count}} puta od pokretanja poslužitelja.",
     "processes.restarts_other": "Automatski ponovno pokrenuto {{count}} puta od pokretanja poslužitelja.",
     "processes.risk_escalation.name": "Eskalacija rizika",

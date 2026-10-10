@@ -112,7 +112,7 @@ const resource = {
     "processes.reports_scheduler.purpose": "Формує й надсилає поштою звіти, які ви налаштували на відправлення за розкладом.",
     "processes.required": "Завжди увімкнено",
     "processes.restart": "Перезапустити: {{name}}",
-    "processes.restarts_one": "Автоматично перезапущено один раз від запуску сервера.",
+    "processes.restarts_one": "Автоматично перезапускалося {{count}} раз від запуску сервера.",
     "processes.restarts_few": "Автоматично перезапускалося {{count}} рази від запуску сервера.",
     "processes.restarts_many": "Автоматично перезапускалося {{count}} разів від запуску сервера.",
     "processes.restarts_other": "Автоматично перезапускалося {{count}} разу від запуску сервера.",

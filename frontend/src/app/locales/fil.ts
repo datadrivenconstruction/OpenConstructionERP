@@ -112,7 +112,7 @@ const resource = {
     "processes.reports_scheduler.purpose": "Binubuo at ine-email ang mga ulat na itinakda mong lumabas ayon sa iskedyul.",
     "processes.required": "Palaging naka-on",
     "processes.restart": "I-restart ang {{name}}",
-    "processes.restarts_one": "Awtomatikong na-restart nang isang beses mula nang magsimula ang server.",
+    "processes.restarts_one": "Awtomatikong na-restart nang {{count}} beses mula nang magsimula ang server.",
     "processes.restarts_other": "Awtomatikong na-restart nang {{count}} beses mula nang magsimula ang server.",
     "processes.risk_escalation.name": "Pag-akyat ng mga panganib",
     "processes.risk_escalation.off_impact": "Hindi awtomatikong ina-akyat ang mga panganib.",

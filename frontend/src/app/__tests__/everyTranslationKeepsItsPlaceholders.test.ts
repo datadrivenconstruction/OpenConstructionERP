@@ -202,7 +202,11 @@ describe('every translation keeps the placeholders its sentence needs', () => {
   it('never invents a placeholder nothing supplies', () => {
     const invented: string[] = [];
     for (const { code, key, want, got } of comparisons) {
-      const extra = [...got].filter((p) => !want.has(p));
+      // i18next reaches a plural form only when the caller passed `count`, so
+      // a form may always print it. English "once" has no number, but the
+      // Russian singular also covers 21 and has to.
+      const plural = /_(zero|one|two|few|many|other)$/.test(key);
+      const extra = [...got].filter((p) => !want.has(p) && !(plural && p === 'count'));
       if (extra.length > 0) invented.push(`${code} ${key}: unknown ${extra.join(', ')}`);
     }
     expect(invented, `placeholders no caller supplies:\n  ${invented.join('\n  ')}`).toEqual([]);
