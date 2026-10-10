@@ -211,6 +211,8 @@ describe('counted phrases follow each language, not the English branch', () => {
     });
   }
 
+  // Evaluates every locale file, regional variants included: about 13 s on
+  // an idle Windows machine and past the default 15 s next to a parallel run.
   it('no locale file still carries a retired two-form key', () => {
     const leftovers: string[] = [];
     for (const code of LOCALE_CODES) {
@@ -218,7 +220,7 @@ describe('counted phrases follow each language, not the English branch', () => {
       for (const key of RETIRED) if (key in table) leftovers.push(`${code}: ${key}`);
     }
     expect(leftovers).toEqual([]);
-  });
+  }, 60_000);
 });
 
 /**
