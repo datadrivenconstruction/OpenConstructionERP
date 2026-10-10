@@ -167,6 +167,34 @@ describe('ClaimInvoicePreview', () => {
     expect(await screen.findByText('INV-P-001')).toBeInTheDocument();
   });
 
+  // A payment certificate is invoiced on its confirmed taxes or not at all, and
+  // the server answers 409 with the step that is missing. That sentence is the
+  // only instruction the user gets, so it has to reach the screen whole.
+  it.each([
+    [
+      'taxes not confirmed',
+      'The invoice for payment certificate HK-003 cannot be raised yet: its taxes are draft, not confirmed. ' +
+        'Confirm the taxes on the certificate, then raise the invoice again.',
+    ],
+    [
+      'taxed on another amount',
+      'The invoice for payment certificate HK-003 cannot be raised yet: its taxes were computed on ' +
+        "1050.00 TRY and the claim's gross amount is 1000.00 TRY.",
+    ],
+  ])('shows the refusal of a certificate with %s in the server words', async (_name, detail) => {
+    getMock.mockRejectedValue(absent());
+    vi.mocked(api.apiPost).mockRejectedValue(new api.ApiError(409, 'Conflict', { detail }));
+    renderPreview({ direction: 'receivable' });
+
+    fireEvent.click(await screen.findByText('finance.claimInvoice.raiseAction'));
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toHaveTextContent(detail);
+    // Still not raised, and still offered: the refusal is not a dead end.
+    expect(screen.getByText('finance.claimInvoice.notRaised')).toBeInTheDocument();
+    expect(screen.getByText('finance.claimInvoice.raiseAction').closest('button')).not.toBeDisabled();
+  });
+
   it('does not poll failed lookups as though an invoice were absent', async () => {
     getMock.mockRejectedValue(new Error('Offline'));
     renderPreview();

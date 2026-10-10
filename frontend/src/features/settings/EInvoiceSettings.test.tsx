@@ -40,6 +40,7 @@ const BLANK = {
   seller_name: '',
   seller_vat_id: '',
   seller_tax_number: '',
+  seller_tax_office: '',
   seller_legal_id: '',
   seller_country_code: '',
   seller_line1: '',
@@ -180,6 +181,47 @@ describe('EInvoiceSettings', () => {
     // Present and empty, not absent: a patch could not express a removal.
     expect(body).toHaveProperty('payee_iban', '');
     expect(body).toHaveProperty('seller_name', 'Hochbau Nord GmbH');
+  });
+
+  it('keeps the tax office beside the tax number and saves it with the rest', async () => {
+    // A Turkish e-Fatura names the seller's tax office next to its tax
+    // number, and this screen is the one place it is set for every invoice.
+    apiGetMock.mockResolvedValue({ ...CONFIGURED, seller_tax_office: 'Central tax office' });
+    renderPanel();
+
+    const office = (await screen.findByLabelText(
+      'settings.einvoice.field.seller_tax_office',
+    )) as HTMLInputElement;
+    expect(office.value).toBe('Central tax office');
+    const number = screen.getByLabelText('settings.einvoice.field.seller_tax_number');
+    // Directly after the tax number in the form, not at the end of it.
+    expect(number.compareDocumentPosition(office) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(
+      office.compareDocumentPosition(screen.getByLabelText('settings.einvoice.field.seller_legal_id')) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+
+    fireEvent.change(office, { target: { value: 'Harbour tax office' } });
+    fireEvent.click(screen.getByRole('button', { name: 'settings.einvoice.save' }));
+
+    await waitFor(() => expect(apiPutMock).toHaveBeenCalledTimes(1));
+    expect(apiPutMock.mock.calls[0]![1]).toHaveProperty('seller_tax_office', 'Harbour tax office');
+  });
+
+  it('sends an empty tax office for a server answer that predates the field', async () => {
+    // The save writes the whole row. An undefined here would be dropped from
+    // the JSON body, and a schema that requires the key would refuse the save.
+    const { seller_tax_office: _absent, ...older } = CONFIGURED;
+    apiGetMock.mockResolvedValue(older);
+    renderPanel();
+
+    fireEvent.change(await screen.findByLabelText('settings.einvoice.field.seller_city'), {
+      target: { value: 'Kiel' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'settings.einvoice.save' }));
+
+    await waitFor(() => expect(apiPutMock).toHaveBeenCalledTimes(1));
+    expect(apiPutMock.mock.calls[0]![1]).toHaveProperty('seller_tax_office', '');
   });
 
   it("labels the account the way the seller's country is paid", async () => {

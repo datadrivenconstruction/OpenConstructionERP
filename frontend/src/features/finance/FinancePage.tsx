@@ -2951,6 +2951,12 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
           onClose={() => setEinvoiceFor(null)}
           invoiceId={einvoiceFor.id}
           invoiceNumber={einvoiceFor.invoice_number}
+          // A return (IADE) names the invoice it answers. The register is
+          // already loaded, so the other invoices of the project are offered
+          // from it instead of being typed in by id.
+          returnCandidates={(invoices ?? [])
+            .filter((inv) => inv.id !== einvoiceFor.id)
+            .map((inv) => ({ id: inv.id, invoice_number: inv.invoice_number }))}
         />
       )}
 

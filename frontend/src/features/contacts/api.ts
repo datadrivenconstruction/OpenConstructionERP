@@ -38,6 +38,8 @@ export interface Contact {
   /** natural_person or legal_entity; null when not stated. */
   party_kind?: PartyKind | null;
   vat_number: string | null;
+  /** The tax office (vergi dairesi) a Turkish e-Fatura names beside the tax number. */
+  tax_office?: string | null;
   primary_email: string | null;
   primary_phone: string | null;
   website: string | null;
@@ -138,6 +140,7 @@ export interface CreateContactPayload {
   legal_name?: string;
   party_kind?: PartyKind;
   vat_number?: string;
+  tax_office?: string;
   primary_email?: string;
   primary_phone?: string;
   website?: string;
@@ -170,6 +173,7 @@ export interface UpdateContactPayload {
   legal_name?: string | null;
   party_kind?: PartyKind | null;
   vat_number?: string | null;
+  tax_office?: string | null;
   primary_email?: string | null;
   primary_phone?: string | null;
   website?: string | null;

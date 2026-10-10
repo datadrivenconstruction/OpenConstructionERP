@@ -113,3 +113,26 @@ describe('party kind', () => {
     expect('party_kind' in buildContactPatch({ ...base }, base)).toBe(false);
   });
 });
+
+describe('tax office', () => {
+  // A Turkish e-Fatura names the buyer's tax office beside its tax number and
+  // is refused without it. The export reads it off the contact, so the form
+  // has to carry it in both directions like the tax number it sits beside.
+  const stored = contactFormData({ ...contact(null), tax_office: 'Central tax office' });
+
+  it('reads the stored office and treats a contact without the field as blank', () => {
+    expect(stored.tax_office).toBe('Central tax office');
+    expect(contactFormData(contact(null)).tax_office).toBe('');
+  });
+
+  it('sends a changed office and clears an emptied one to null', () => {
+    expect(buildContactPatch({ ...stored, tax_office: 'Harbour tax office' }, stored).tax_office).toBe(
+      'Harbour tax office',
+    );
+    expect(buildContactPatch({ ...stored, tax_office: '' }, stored).tax_office).toBeNull();
+  });
+
+  it('leaves the office out of a save that did not touch it', () => {
+    expect('tax_office' in buildContactPatch({ ...stored, city: 'Kiel' }, stored)).toBe(false);
+  });
+});

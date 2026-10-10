@@ -210,7 +210,15 @@ export function ClaimInvoicePreview({
             </Button>
           </div>
         )}
-        {error && <p className="mt-2 text-xs text-[var(--error)]">{error}</p>}
+        {/* The refusal is the server's own sentence. For a payment certificate
+            it names the step that is missing (taxes not confirmed, or taxed on
+            another amount than the claim's gross), which no fixed text here
+            could say. */}
+        {error && (
+          <p role="alert" className="mt-2 text-xs text-[var(--error)]">
+            {error}
+          </p>
+        )}
       </CardContent>
     </Card>
   );

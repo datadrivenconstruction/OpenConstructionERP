@@ -29,6 +29,9 @@ const SELLER_FIELDS = [
   'seller_name',
   'seller_vat_id',
   'seller_tax_number',
+  // The tax office (vergi dairesi) a Turkish e-Fatura names beside the
+  // seller's tax number. Blank everywhere it is not asked for.
+  'seller_tax_office',
   'seller_legal_id',
   'seller_country_code',
   'seller_line1',
