@@ -6,6 +6,7 @@ import App from './app/App';
 import { useToastStore } from '@/stores/useToastStore';
 import { notifyQueryError } from '@/shared/lib/queryErrorToast';
 import { initialLocaleReady } from './app/i18n';
+import { startAccountLanguageSync } from './app/accountLanguage';
 import { applyStoredUiScale } from '@/shared/lib/uiScale';
 import { retireStaleCaches } from './pwa/retireStaleCaches';
 import './index.css';
@@ -115,6 +116,7 @@ window.addEventListener('vite:preloadError', () => {
 // name; dropping the old cache lets those visitors see the real images
 // without a hard reload. Fire and forget, it never throws.
 void retireStaleCaches();
+startAccountLanguageSync();
 
 // The public demo is served under /demo (Caddy strips the prefix before it
 // reaches the backend, but the browser URL keeps it), so react-router needs a

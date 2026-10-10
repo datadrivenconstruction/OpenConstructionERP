@@ -27751,6 +27751,7 @@ const resource = {
     "common.not_set": "Nesetat",
     "common.offline_banner": "Sunteți offline - modificările nu se vor sincroniza.",
     "common.offline_banner_desktop": "Sunteți offline. Munca dvs. este salvată pe acest computer - doar colaborarea în timp real între mai mulți utilizatori este întreruptă până când vă reconectați.",
+    "common.desktop_port_moved": "Un alt program folosește portul {{defaultPort}}, așa că aplicația s-a deschis pe portul {{port}}. Autentificarea și limba sunt păstrate pentru fiecare port, deci s-ar putea să trebuiască să vă autentificați sau să alegeți limba din nou o dată. Proiectele și datele dvs. nu sunt afectate.",
     "common.optional": "opțional",
     "common.prev": "Pagina anterioară",
     "common.rename": "Redenumire",

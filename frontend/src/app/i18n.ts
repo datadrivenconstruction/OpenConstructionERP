@@ -528,6 +528,25 @@ export function applyDocumentDirection(code: string): void {
   document.documentElement.lang = code;
 }
 
+/**
+ * Whether this origin already held a language choice when the app loaded: one
+ * stored by an earlier visit, or one named in the address. False on a fresh
+ * origin, such as the desktop window after it had to move to another port,
+ * where the language comes from the browser and the account's own language
+ * may be restored after sign-in (see ``accountLanguage.ts``). Read before
+ * ``resolveInitialLanguage`` runs, because initialising i18next writes the
+ * language it settles on into the same key.
+ */
+export const languageChosenHere: boolean = (() => {
+  if (typeof window === 'undefined') return false;
+  try {
+    if (new URLSearchParams(window.location.search).get('lang')) return true;
+    return window.localStorage.getItem('i18nextLng') !== null;
+  } catch {
+    return false;
+  }
+})();
+
 const initialLanguage = resolveInitialLanguage();
 
 // Direction has to be on <html> BEFORE the first paint, and until now nothing

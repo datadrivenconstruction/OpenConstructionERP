@@ -27817,6 +27817,7 @@ const resource = {
     "common.not_set": "Non défini",
     "common.offline_banner": "Vous êtes hors ligne - les modifications ne se synchroniseront pas.",
     "common.offline_banner_desktop": "Vous êtes hors ligne. Votre travail est enregistré sur cet ordinateur - seule la collaboration multi-utilisateurs en temps réel est suspendue jusqu'à votre reconnexion.",
+    "common.desktop_port_moved": "Un autre programme utilise le port {{defaultPort}}, l'application s'est donc ouverte sur le port {{port}}. La connexion et la langue sont conservées par port : vous devrez peut-être vous reconnecter ou choisir à nouveau votre langue une fois. Vos projets et vos données ne sont pas concernés.",
     "common.optional": "facultatif",
     "common.prev": "Page précédente",
     "common.rename": "Renommer",

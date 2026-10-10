@@ -28379,6 +28379,7 @@ const resource = {
     "common.not_set": "Nicht eingestellt",
     "common.offline_banner": "Sie sind offline - Änderungen werden nicht synchronisiert.",
     "common.offline_banner_desktop": "Sie sind offline. Ihre Arbeit wird auf diesem Computer gespeichert - nur die Echtzeit-Zusammenarbeit mehrerer Benutzer pausiert, bis Sie wieder verbunden sind.",
+    "common.desktop_port_moved": "Ein anderes Programm belegt Port {{defaultPort}}, daher wurde die App auf Port {{port}} geöffnet. Anmeldung und Sprache werden pro Port gespeichert, daher müssen Sie sich eventuell einmal neu anmelden oder die Sprache erneut wählen. Ihre Projekte und Daten sind nicht betroffen.",
     "common.optional": "optional",
     "common.prev": "Vorherige Seite",
     "common.rename": "Umbenennen",

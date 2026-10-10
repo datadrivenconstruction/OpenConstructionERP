@@ -27965,6 +27965,7 @@ const resource = {
     "common.not_set": "Ayarlanmamış",
     "common.offline_banner": "Çevrimdışısınız - değişiklikler senkronize olmayacaktır.",
     "common.offline_banner_desktop": "Çevrimdışısınız. Çalışmanız bu bilgisayara kaydedilir - yalnızca birden fazla kullanıcının gerçek zamanlı iş birliği, yeniden bağlanana kadar duraklatılır.",
+    "common.desktop_port_moved": "{{defaultPort}} numaralı bağlantı noktasını başka bir program kullanıyor, bu yüzden uygulama {{port}} numaralı bağlantı noktasında açıldı. Oturum ve dil her bağlantı noktası için ayrı saklanır, bu nedenle bir kez yeniden oturum açmanız veya dilinizi yeniden seçmeniz gerekebilir. Projeleriniz ve verileriniz etkilenmez.",
     "common.optional": "isteğe bağlı",
     "common.prev": "Önceki sayfa",
     "common.rename": "Yeniden adlandır",

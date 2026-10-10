@@ -27827,6 +27827,7 @@ const resource = {
     "common.not_set": "Non impostato",
     "common.offline_banner": "Sei offline - le modifiche non verranno sincronizzate.",
     "common.offline_banner_desktop": "Sei offline. Il tuo lavoro è salvato su questo computer - solo la collaborazione multiutente in tempo reale è in pausa finché non ti riconnetti.",
+    "common.desktop_port_moved": "Un altro programma sta usando la porta {{defaultPort}}, quindi l'app si è aperta sulla porta {{port}}. Accesso e lingua vengono salvati per porta, quindi potrebbe essere necessario accedere o scegliere la lingua di nuovo una volta. I tuoi progetti e i tuoi dati non sono interessati.",
     "common.optional": "facoltativo",
     "common.prev": "Pagina precedente",
     "common.rename": "Rinomina",

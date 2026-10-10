@@ -28490,6 +28490,7 @@ const resource = {
     "common.not_set": "Belgilanmagan",
     "common.offline_banner": "Siz oflaynsiz - oʻzgarishlar sinxronlanmaydi.",
     "common.offline_banner_desktop": "Siz oflaynsiz. Ishingiz bu kompyuterda saqlanmoqda - faqat jonli koʻp foydalanuvchili hamkorlik qayta ulanguningizcha toʻxtab turadi.",
+    "common.desktop_port_moved": "{{defaultPort}} portini boshqa dastur ishlatmoqda, shuning uchun ilova {{port}} portida ochildi. Kirish va til har bir port uchun alohida saqlanadi, shu sababli bir marta qayta kirish yoki tilni qayta tanlash kerak boʻlishi mumkin. Loyihalaringiz va maʼlumotlaringizga taʼsir qilmaydi.",
     "common.optional": "ixtiyoriy",
     "common.prev": "Oldingi sahifa",
     "common.rename": "Nomini oʻzgartirish",

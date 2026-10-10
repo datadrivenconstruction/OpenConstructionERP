@@ -27426,6 +27426,7 @@ const resource = {
     "common.not_set": "Chưa được đặt",
     "common.offline_banner": "Bạn đang ngoại tuyến - các thay đổi sẽ không đồng bộ.",
     "common.offline_banner_desktop": "Bạn đang ngoại tuyến. Công việc của bạn được lưu trên máy tính này - chỉ có sự cộng tác thời gian thực của nhiều người dùng tạm dừng cho đến khi bạn kết nối lại.",
+    "common.desktop_port_moved": "Một chương trình khác đang dùng cổng {{defaultPort}}, nên ứng dụng đã mở trên cổng {{port}}. Đăng nhập và ngôn ngữ được lưu riêng theo từng cổng, vì vậy bạn có thể cần đăng nhập hoặc chọn lại ngôn ngữ một lần. Dự án và dữ liệu của bạn không bị ảnh hưởng.",
     "common.optional": "tùy chọn",
     "common.prev": "Trang trước",
     "common.rename": "Đổi tên",

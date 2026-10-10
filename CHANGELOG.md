@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Every link in a notification now opens a page that exists. The button in a notification email opens the app instead of leading nowhere, and the email's greeting, button and footer are written in the reader's language.
 - Every email the platform sends carries the OpenConstructionERP name at the top, in the sender and in the closing line.
 - When `openconstructionerp` cannot start, because the port is busy, the embedded database will not come up or a check fails, it now points to the installation help page at https://openconstructionerp.com/install-help. The old troubleshooting link led to a section that no longer exists.
+- The desktop app no longer signs you out and resets your language on every start when another program holds port 8732. It falls back to the port it used last time, then to 8733 to 8741, and only then to a random one, so a busy default costs one move instead of one per start. The first time the window opens on another port it says so in plain words.
+- Your interface language is now kept with your account. A language you pick while signed in is saved to it, and after you sign in on a new browser or a new desktop port that has no language of its own, your language comes back instead of the browser's.
 
 ## [18.5.0] - 2026-10-10
 

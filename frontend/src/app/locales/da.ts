@@ -27571,6 +27571,7 @@ const resource = {
     "common.not_set": "Ikke indstillet",
     "common.offline_banner": "Du er offline - ændringer synkroniseres ikke.",
     "common.offline_banner_desktop": "Du er offline. Dit arbejde gemmes på denne computer - kun realtidssamarbejde mellem flere brugere sættes på pause, indtil du opretter forbindelse igen.",
+    "common.desktop_port_moved": "Et andet program bruger port {{defaultPort}}, så appen åbnede på port {{port}}. Login og sprog gemmes pr. port, så du skal måske logge ind eller vælge sprog igen én gang. Dine projekter og data påvirkes ikke.",
     "common.optional": "valgfri",
     "common.prev": "Forrige side",
     "common.rename": "Omdøb",

@@ -27765,6 +27765,7 @@ const resource = {
     "common.not_set": "Não definido",
     "common.offline_banner": "Está offline - as alterações não sincronizarão.",
     "common.offline_banner_desktop": "Está offline. Seu trabalho está guardado neste computador - apenas a colaboração multiusuário em tempo real fica pausada até si se reconectar.",
+    "common.desktop_port_moved": "Outro programa está a usar a porta {{defaultPort}}, por isso a aplicação abriu na porta {{port}}. A sessão e o idioma são guardados por porta, por isso poderá ter de iniciar sessão ou escolher o idioma novamente uma vez. Os seus projetos e dados não são afetados.",
     "common.optional": "opcional",
     "common.prev": "Página anterior",
     "common.rename": "Renomear",

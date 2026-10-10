@@ -27764,6 +27764,7 @@ const resource = {
     "common.not_set": "No establecido",
     "common.offline_banner": "Estás sin conexión - los cambios no se sincronizarán.",
     "common.offline_banner_desktop": "Estás sin conexión. Tu trabajo se guarda en este equipo - solo se pausa la colaboración multiusuario en tiempo real hasta que vuelvas a conectarte.",
+    "common.desktop_port_moved": "Otro programa está usando el puerto {{defaultPort}}, por eso la aplicación se abrió en el puerto {{port}}. El inicio de sesión y el idioma se guardan por puerto, así que puede que tenga que iniciar sesión o elegir el idioma de nuevo una vez. Sus proyectos y datos no se ven afectados.",
     "common.optional": "opcional",
     "common.prev": "Página anterior",
     "common.rename": "Renombrar",

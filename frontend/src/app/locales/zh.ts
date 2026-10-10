@@ -27410,6 +27410,7 @@ const resource = {
     "common.not_set": "未设置",
     "common.offline_banner": "您已离线 - 更改不会同步。",
     "common.offline_banner_desktop": "您已离线。您的工作已保存在这台计算机上 - 仅多用户实时协作会暂停，直到您重新连接。",
+    "common.desktop_port_moved": "端口 {{defaultPort}} 已被其他程序占用，因此应用在端口 {{port}} 上打开。登录状态和语言按端口分别保存，您可能需要重新登录或重新选择一次语言。您的项目和数据不受影响。",
     "common.optional": "可选",
     "common.prev": "上一页",
     "common.rename": "重命名",

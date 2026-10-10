@@ -27434,6 +27434,7 @@ const resource = {
     "common.not_set": "Ei asetettu",
     "common.offline_banner": "Olet offline - muutokset eivät synkronoidu.",
     "common.offline_banner_desktop": "Olet offline-tilassa. Työsi tallennetaan tähän tietokoneeseen - vain usean käyttäjän reaaliaikainen yhteistyö keskeytyy, kunnes muodostat yhteyden uudelleen.",
+    "common.desktop_port_moved": "Toinen ohjelma käyttää porttia {{defaultPort}}, joten sovellus avautui porttiin {{port}}. Kirjautuminen ja kieli tallennetaan porttikohtaisesti, joten voit joutua kirjautumaan tai valitsemaan kielen uudelleen kerran. Projektisi ja tietosi eivät muutu.",
     "common.optional": "valinnainen",
     "common.prev": "Edellinen sivu",
     "common.rename": "Nimeä uudelleen",

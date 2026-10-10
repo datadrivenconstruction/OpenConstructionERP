@@ -11549,6 +11549,7 @@ const resource = {
     "common.no_results": "No results found",
     "common.none": "None",
     "common.offline_banner_desktop": "You're offline. Your work is saved on this computer - only live multi-user collaboration pauses until you reconnect.",
+    "common.desktop_port_moved": "Another program is using port {{defaultPort}}, so the app opened on port {{port}}. Sign-in and language are kept per port, so you may need to sign in or pick your language again once. Your projects and data are not affected.",
     "common.open_menu": "Open menu",
     "common.pin": "Pin",
     "common.previous": "Previous",
