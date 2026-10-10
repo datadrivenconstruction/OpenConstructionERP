@@ -139,7 +139,9 @@ _REGION_BY_COUNTRY: dict[str, tuple[str, str]] = {
         ("DE", "FR", "GB", "IE", "NL", "BE", "ES", "IT", "PT", "PL", "CZ", "AT", "CH", "SE", "NO", "DK", "FI", "ZA"),
         ("EMEA", "Europe, Middle East and Africa"),
     ),
-    **dict.fromkeys(("AE", "SA", "QA", "KW", "OM", "BH", "TR"), ("GULF", "Gulf states")),
+    # Turkey is not a Gulf state; it sits with the rest of the region.
+    "TR": ("EMEA", "Europe, Middle East and Africa"),
+    **dict.fromkeys(("AE", "SA", "QA", "KW", "OM", "BH"), ("GULF", "Gulf states")),
     **dict.fromkeys(("US", "CA", "BR", "MX", "AR", "CL", "CO"), ("AMER", "Americas")),
     **dict.fromkeys(("CN", "IN", "JP", "KR", "SG", "AU", "NZ", "MY", "TH", "VN", "ID", "PH"), ("APAC", "Asia Pacific")),
 }
