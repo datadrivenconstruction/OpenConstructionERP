@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openconstructionerp-turkey-tr-mep"
+version = "0.1.0"
+description = "Industry pack for a mechanical, electrical and plumbing contractor in Türkiye: the Türkiye country configuration plus a short menu built around site records, approvals, procurement, progress claims, quality, commissioning and handover."
+readme = "README.md"
+license = { text = "AGPL-3.0-or-later" }
+requires-python = ">=3.11"
+authors = [
+    { name = "OpenConstructionERP", email = "info@datadrivenconstruction.io" },
+]
+keywords = [
+    "openconstructionerp",
+    "ocerp",
+    "industry-pack",
+    "turkey",
+    "mep",
+    "mekanik-tesisat",
+    "elektrik-tesisati",
+    "hakedis",
+    "taahhut",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Other Audience",
+    "Topic :: Office/Business",
+    "Natural Language :: Turkish",
+    "Natural Language :: English",
+]
+# The country pack is a hard dependency: this pack's manifest is built from
+# the country pack's at import time and carries no copy of it.
+dependencies = [
+    "openconstructionerp>=5.5.0",
+    "openconstructionerp-turkey-tr>=0.2.0",
+]
+
+[project.urls]
+Source = "https://github.com/DataDrivenConstruction/openconstructionerp"
+
+[project.entry-points."openconstructionerp.partner_packs"]
+turkey-tr-mep = "openconstructionerp_turkey_tr_mep:MANIFEST"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]

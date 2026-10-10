@@ -260,3 +260,77 @@ describe('finishing the wizard after picking a mode', () => {
     expect(screen.queryByTestId('sidebar-workspace')).toBeNull();
   });
 });
+
+describe('finishing the wizard after installing a ready-made pack', () => {
+  const MEP_PRESETS: Presets = [
+    ...PRESETS,
+    {
+      key: 'mep_contractor',
+      label: 'MEP / Building Services Contractor',
+      description: 'We install building services.',
+      icon: 'Wrench',
+      tags: [],
+      enabled_modules: ['submittals', 'rfi', 'schedule'],
+      module_count: 3,
+    },
+  ];
+
+  /** The pack `GET /v1/partner-pack/current` reports, over the small server. */
+  function packNames(profile: string | null): void {
+    const base = api.apiGet.getMockImplementation()!;
+    api.apiGet.mockImplementation((path: string) =>
+      path === '/v1/partner-pack/current'
+        ? Promise.resolve({ active: true, manifest: { default_company_profile: profile } })
+        : base(path),
+    );
+  }
+
+  function renderPackFinish() {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={client}>
+        <MemoryRouter initialEntries={['/onboarding']}>
+          <StepFinish
+            onBack={() => undefined}
+            companyType={null}
+            enabledModules={new Set()}
+            presets={MEP_PRESETS}
+            packInstalled
+          />
+          <Location />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    return client;
+  }
+
+  it('saves the profile the pack names for the person who installed it', async () => {
+    packNames('mep_contractor');
+    const client = renderPackFinish();
+
+    fireEvent.click(screen.getByRole('button', { name: /Start Working/ }));
+
+    await waitFor(() => expect(screen.getByTestId('location').textContent).toBe('/projects'));
+    expect(onboardingPost()).toEqual({
+      company_type: 'mep_contractor',
+      enabled_modules: ['submittals', 'rfi', 'schedule'],
+      completed: true,
+    });
+    expect(localStorage.getItem('oe_company_type')).toBe('mep_contractor');
+    expect(client.getQueryData(meOnboardingQueryKey(USER_ID))).toMatchObject({
+      completed: true,
+      company_type: 'mep_contractor',
+    });
+  });
+
+  it('saves nothing when the pack names no profile, as before', async () => {
+    packNames(null);
+    renderPackFinish();
+
+    fireEvent.click(screen.getByRole('button', { name: /Start Working/ }));
+
+    await waitFor(() => expect(screen.getByTestId('location').textContent).toBe('/projects'));
+    expect(api.apiPost.mock.calls.filter(([path]) => path === '/v1/users/me/onboarding/')).toEqual([]);
+    expect(localStorage.getItem('oe_company_type')).toBeNull();
+  });
+});

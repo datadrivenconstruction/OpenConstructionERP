@@ -17,6 +17,7 @@ import {
   ROLE_PROFILE_KEYS,
   activeModuleCount,
   companyTypeToSave,
+  packProfileToSave,
   groupProfilePresets,
 } from '../profileGroups';
 import { ALL_MODULES, CORE_MODULE_KEYS } from '../modules';
@@ -128,5 +129,30 @@ describe('activeModuleCount', () => {
     const core = [...CORE_MODULE_KEYS][0]!;
     expect(activeModuleCount(['boq', core])).toBe(CORE_MODULE_KEYS.size + 1);
     expect(activeModuleCount([])).toBe(CORE_MODULE_KEYS.size);
+  });
+});
+
+describe('packProfileToSave', () => {
+  const presets = [
+    { key: 'mep_contractor', enabled_modules: ['submittals', 'rfi'] },
+    { key: 'full_enterprise', enabled_modules: ['everything'] },
+  ];
+
+  it('saves the profile the pack names, with that profile\'s own modules', () => {
+    expect(packProfileToSave('mep_contractor', presets)).toEqual({
+      company_type: 'mep_contractor',
+      enabled_modules: ['submittals', 'rfi'],
+    });
+  });
+
+  it('saves nothing for a pack that names no profile', () => {
+    expect(packProfileToSave(null, presets)).toBeNull();
+    expect(packProfileToSave(undefined, presets)).toBeNull();
+    expect(packProfileToSave('', presets)).toBeNull();
+  });
+
+  it('saves nothing for a profile this server does not serve, or for the catch-all', () => {
+    expect(packProfileToSave('no_such_profile', presets)).toBeNull();
+    expect(packProfileToSave('full_enterprise', presets)).toBeNull();
   });
 });

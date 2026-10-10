@@ -627,3 +627,58 @@ describe('installing a country pack on the data step', () => {
     expect(packDbStateFor('completed')).toBe('done');
   });
 });
+
+describe('on an installation whose pack names a company profile', () => {
+  /** The pack `GET /v1/partner-pack/current` reports, over the small server. */
+  function packNames(profile: string | null): void {
+    const base = api.apiGet.getMockImplementation()!;
+    api.apiGet.mockImplementation((path: string) =>
+      path === '/v1/partner-pack/current'
+        ? Promise.resolve({ active: true, manifest: { default_company_profile: profile } })
+        : base(path),
+    );
+  }
+
+  it('sends a user who is not an admin straight on, with the server record completed and no profile saved', async () => {
+    packNames('mep_contractor');
+    const client = renderWizard();
+
+    await waitFor(() => expect(screen.getByTestId('location').textContent).toBe('/'));
+    expect(posts('/v1/users/me/onboarding/')).toHaveLength(0);
+    expect(posts('/v1/users/me/onboarding/complete/').length).toBeGreaterThan(0);
+    // What the dashboard reads before it would send the user back here.
+    expect(client.getQueryData(meOnboardingQueryKey(USER_ID))).toMatchObject({
+      completed: true,
+      company_type: null,
+    });
+    expect(localStorage.getItem('oe_onboarding_completed')).toBe('true');
+    expect(localStorage.getItem('oe_company_type')).toBeNull();
+  });
+
+  it('keeps the wizard for the admin, who is the one setting the company up', async () => {
+    packNames('mep_contractor');
+    useAuthStore.setState({ userRole: 'admin' });
+    renderWizard();
+
+    await heading('Welcome to OpenConstructionERP');
+    await waitFor(() =>
+      expect(api.apiGet.mock.calls.some(([path]) => path === '/v1/partner-pack/current')).toBe(true),
+    );
+    await Promise.resolve();
+    expect(screen.queryByTestId('location')).toBeNull();
+    expect(posts('/v1/users/me/onboarding/complete/')).toHaveLength(0);
+  });
+
+  it('keeps the wizard for everybody when the pack names no profile', async () => {
+    packNames(null);
+    renderWizard();
+
+    await heading('Welcome to OpenConstructionERP');
+    await waitFor(() =>
+      expect(api.apiGet.mock.calls.some(([path]) => path === '/v1/partner-pack/current')).toBe(true),
+    );
+    await Promise.resolve();
+    expect(screen.queryByTestId('location')).toBeNull();
+    expect(posts('/v1/users/me/onboarding/complete/')).toHaveLength(0);
+  });
+});

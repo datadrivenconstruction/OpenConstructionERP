@@ -431,3 +431,105 @@ describe('without a workspace, or in Advanced mode', () => {
     expect(hrefs).not.toContain('/finance?tab=budgets');
   });
 });
+
+/** As `serverSays`, on an installation whose active pack names a profile. */
+function serverSaysWithPack(companyType: string | null, packProfile: string | null): void {
+  api.apiGet.mockImplementation((path: string) => {
+    if (path === '/v1/users/me/onboarding/') {
+      return Promise.resolve({ completed: true, company_type: companyType });
+    }
+    if (path === '/v1/partner-pack/current') {
+      return Promise.resolve({ active: true, manifest: { default_company_profile: packProfile } });
+    }
+    return Promise.resolve([]);
+  });
+}
+
+const MEP_HEADINGS = [
+  'site_records',
+  'engineering',
+  'procurement',
+  'commercial',
+  'estimating',
+  'quality',
+  'hse',
+  'handover',
+];
+
+describe('on an installation whose pack names a company profile', () => {
+  it('opens a user who has chosen no profile on the pack profile workspace, under its headings', async () => {
+    serverSaysWithPack(null, 'mep_contractor');
+    renderAt('/');
+
+    const workspace = await screen.findByTestId('sidebar-workspace');
+    const hrefs = menuHrefs(workspace);
+    expect(hrefs.slice(0, 5)).toEqual(['/', '/inbox', '/projects', '/daily-diary', '/correspondence']);
+    expect(hrefs).toHaveLength(35);
+    expect(hrefs).toContain('/contracts?tab=claims');
+    expect(hrefs[hrefs.length - 1]).toBe('/defects-liability');
+
+    const headings = [...workspace.querySelectorAll('[data-testid^="sidebar-workspace-section-"]')].map((el) =>
+      el.getAttribute('data-testid')!.replace('sidebar-workspace-section-', ''),
+    );
+    expect(headings).toEqual(MEP_HEADINGS);
+    expect(moreExpanded()).toBe('false');
+    // Nothing was stored as this user's own choice.
+    expect(localStorage.getItem('oe_company_type')).toBeNull();
+  });
+
+  it('lets the profile a user chose win over the pack profile', async () => {
+    serverSaysWithPack('site_records', 'mep_contractor');
+    renderAt('/');
+
+    const workspace = await screen.findByTestId('sidebar-workspace');
+    await waitFor(() =>
+      expect(menuHrefs(workspace)).toEqual([
+        '/',
+        '/inbox',
+        '/projects',
+        '/daily-diary',
+        '/correspondence',
+        '/rfi',
+        '/submittals',
+        '/variations',
+        '/files',
+        '/contacts',
+      ]),
+    );
+    expect(workspace.querySelector('[data-testid^="sidebar-workspace-section-"]')).toBeNull();
+  });
+
+  it('keeps the screens of other trades out from under More modules, and only for that profile', async () => {
+    serverSaysWithPack(null, 'mep_contractor');
+    renderAt('/');
+    fireEvent.click(await screen.findByTestId('sidebar-more-modules'));
+
+    const hrefs = menuHrefs();
+    for (const route of ['/formwork', '/rebar-schedule', '/property-dev', '/geo', '/funding', '/rom-estimate']) {
+      expect(hrefs, route).not.toContain(route);
+    }
+    // The rest of the catalogue is still one click away.
+    for (const route of ['/changeorders', '/field-reports', '/costs', '/crm', '/fx']) {
+      expect(hrefs, route).toContain(route);
+    }
+    cleanup();
+    // "More modules" remembers it was opened, so a second click would shut it.
+    localStorage.clear();
+
+    // The different case: a general contractor, same installation, keeps them.
+    serverSaysWithPack('general_contractor', 'mep_contractor');
+    renderAt('/');
+    fireEvent.click(await screen.findByTestId('sidebar-more-modules'));
+    await waitFor(() => expect(menuHrefs()).toContain('/formwork'));
+    expect(menuHrefs()).toContain('/geo');
+  });
+
+  it('changes nothing when the pack names no profile', async () => {
+    serverSaysWithPack(null, null);
+    renderAt('/');
+
+    await waitFor(() => expect(api.apiGet).toHaveBeenCalledWith('/v1/partner-pack/current'));
+    expect(screen.queryByTestId('sidebar-workspace')).toBeNull();
+    expect(menuHrefs()).toEqual(TODAYS_SIMPLE);
+  });
+});

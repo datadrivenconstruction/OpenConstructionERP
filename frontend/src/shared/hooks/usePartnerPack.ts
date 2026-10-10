@@ -49,6 +49,10 @@ export interface PartnerPackManifest {
   validation_rule_sets: string[];
   default_modules: string[];
   hidden_modules: string[];
+  /** The company profile this pack's users start in, or null. Absent on older
+   *  backends. Read by the sidebar as the profile of a user who has chosen
+   *  none (`effectiveCompanyPresetKey`). */
+  default_company_profile?: string | null;
   branding: PartnerPackBranding;
   has_onboarding_script: boolean;
   metadata: Record<string, unknown>;

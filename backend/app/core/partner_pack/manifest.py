@@ -200,14 +200,53 @@ class PartnerPackManifest(BaseModel):
     default_modules: list[str] = Field(
         default_factory=list,
         description=(
-            "Module slugs to keep enabled in the sidebar by default. "
-            "Empty list means 'all modules visible'. Users can still "
-            "show/hide modules via the sidebar menu editor."
+            "Backend module names (the manifest name, e.g. 'oe_contracts') that "
+            "applying the pack switches ON for the whole installation. Additive "
+            "and always applied; enabling a module that is already on does "
+            "nothing, so an empty list changes nothing. This is the server-side "
+            "module state an admin sees under Modules > System Modules. It is "
+            "not a menu: no sidebar code reads this list, and it neither adds "
+            "nor orders a row. A name that is not an installed module is "
+            "reported as a warning at apply time."
         ),
     )
     hidden_modules: list[str] = Field(
         default_factory=list,
-        description=("Module slugs to hide by default for this pack. Users can re-enable via the sidebar editor."),
+        description=(
+            "Backend module names that applying the pack switches OFF for the "
+            "whole installation, and only when the admin applying it confirms "
+            "the disables; without that confirmation the list is reported back "
+            "as skipped. Switching a module off removes its API for every user, "
+            "which is a much larger thing than hiding a menu row, and the row "
+            "itself leaves the sidebar only when the sidebar knows which module "
+            "backs its route. A module of category 'core' cannot be switched "
+            "off, nor one that a module still on depends on: each such entry "
+            "is recorded as failed and the rest are applied, so list dependents "
+            "before what they depend on. An admin switches a module back on "
+            "under Modules > System Modules, and un-applying the pack restores "
+            "what it switched off. A user cannot, and the sidebar menu editor "
+            "has nothing to do with this list. For a short menu use "
+            "``default_company_profile``."
+        ),
+    )
+    default_company_profile: str | None = Field(
+        default=None,
+        description=(
+            "Key of the company profile (app.core.onboarding_presets."
+            "COMPANY_PRESETS, e.g. 'mep_contractor') the users of this "
+            "installation start in. A profile that has a workspace gives its "
+            "users a short ordered menu with every other screen folded under "
+            "'More modules', which is the one mechanism that shortens the "
+            "sidebar. The field is a default and never a setting written on a "
+            "user's behalf: it travels in the public manifest the way "
+            "``default_locale`` does, the setup wizard saves it for the admin "
+            "who installs the pack, and a user who has chosen no profile sees "
+            "the menu of this one until they choose. Anyone can pick another "
+            "profile on Modules > Company Profiles. None keeps the behaviour "
+            "of a pack that says nothing. Unlike a rule set, the profile "
+            "catalogue is plain data available at import time, so an unknown "
+            "key is refused here, when the manifest is built."
+        ),
     )
 
     # Branding (logo, colours, favicon)
@@ -343,6 +382,39 @@ class PartnerPackManifest(BaseModel):
             seen.add(name)
         return value
 
+    @field_validator("default_company_profile")
+    @classmethod
+    def _check_company_profile(cls, value: str | None) -> str | None:
+        """Refuse a profile key the onboarding catalogue does not carry.
+
+        The catalogue is a module of literals with no imports of its own, so
+        reading it here is safe at import time. That is the difference from
+        ``validation_rule_sets``, whose registry is filled at start-up and can
+        only be checked when the pack is applied. The size tiers
+        (``size_small`` and the like) are a different catalogue and are
+        refused: a tier names how many people a company has, not what its menu
+        should hold.
+
+        Args:
+            value: The declared profile key, or None.
+
+        Returns:
+            The same value, unchanged.
+
+        Raises:
+            ValueError: If the key is not a company profile.
+        """
+        if value is None:
+            return None
+        from app.core.onboarding_presets import COMPANY_PRESETS
+
+        if value not in COMPANY_PRESETS:
+            raise ValueError(
+                f"default_company_profile {value!r} is not a company profile. "
+                f"Known profiles: {', '.join(sorted(COMPANY_PRESETS))}."
+            )
+        return value
+
     @model_validator(mode="after")
     def _resolve_pack_type(self) -> PartnerPackManifest:
         """Fill ``pack_type`` from inference when a manifest omits it."""
@@ -431,6 +503,7 @@ class PartnerPackManifest(BaseModel):
             "demo_template_ids": self.demo_template_ids,
             "default_modules": self.default_modules,
             "hidden_modules": self.hidden_modules,
+            "default_company_profile": self.default_company_profile,
             "branding": {
                 "primary_color": self.branding.primary_color,
                 "accent_color": self.branding.accent_color,

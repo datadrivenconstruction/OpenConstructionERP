@@ -110,7 +110,13 @@ import {
   type CountryPack,
 } from './countryPacks';
 import { packToPreselect, resolveCountryOffer } from './countryOffer';
-import { activeModuleCount, companyTypeToSave, groupProfilePresets } from './profileGroups';
+import {
+  activeModuleCount,
+  companyTypeToSave,
+  groupProfilePresets,
+  packProfileToSave,
+} from './profileGroups';
+import { usePartnerPack, type PartnerPackResponse } from '@/shared/hooks/usePartnerPack';
 import { profileShapes } from '@/features/modules/profileDifference';
 import { packNameSlug } from '@/shared/lib/regionalPack';
 import { PackEmblem } from '@/shared/ui/PackEmblem';
@@ -4451,6 +4457,36 @@ export function StepFinish({
       // and sample data on the server. Don't clobber that here -- just mark
       // onboarding complete (which fires the tour-gating event) and open the
       // seeded projects.
+      //
+      // One thing the install does not do is choose a company profile, because
+      // the pack jumps past that step. When the pack names the profile its
+      // users start in, save it for the person who installed it, the way the
+      // profile step would have. This writes that user's own preferences, not
+      // the installation's module state the pack just set. A pack that names
+      // no profile saves nothing, as before.
+      try {
+        const current = await apiGet<PartnerPackResponse>('/v1/partner-pack/current');
+        const toSave = packProfileToSave(
+          current.active ? current.manifest?.default_company_profile : null,
+          presets,
+        );
+        if (toSave) {
+          const saved = await apiPost<MeOnboarding>('/v1/users/me/onboarding/', {
+            ...toSave,
+            completed: true,
+          });
+          queryClient.setQueryData(onboardingQueryKey, saved);
+          await syncFromServer();
+          try {
+            localStorage.setItem(COMPANY_TYPE_STORAGE_KEY, toSave.company_type);
+          } catch {
+            // Storage unavailable -- the server copy above is the one that counts.
+          }
+        }
+      } catch {
+        // Non-critical -- the pack's profile still reaches this user as the
+        // default of anybody who has chosen none.
+      }
       markOnboardingCompleted();
       setSaving(false);
       navigate('/projects');
@@ -4501,6 +4537,7 @@ export function StepFinish({
     enabledModules,
     navigate,
     packInstalled,
+    presets,
     queryClient,
     onboardingQueryKey,
     syncFromServer,
@@ -4671,6 +4708,44 @@ export function OnboardingWizard() {
       navigate('/', { replace: true });
     }
   }, [alreadyCompleted, navigate]);
+
+  /* A company that installed a pack naming its profile has already answered
+     everything this wizard asks: the language, the market and the menu. The
+     people who join that installation afterwards (site staff, mostly) have
+     nothing to set up and cannot install anything, and the card the wizard
+     recommends to them, Quick Start, would save the catch-all profile and
+     hand them the whole catalogue instead of the company's menu. So anyone
+     who is not an admin is marked as set up and sent on; the menu then
+     follows the pack's profile (`effectiveCompanyPresetKey`), and they can
+     still pick their own on Modules > Company Profiles. An admin, and any
+     installation whose pack names no profile, gets the wizard as before. */
+  const canInstallPacks = useCanInstallPartnerPacks();
+  const { data: activePack } = usePartnerPack();
+  const packProfile = activePack?.active ? (activePack.manifest?.default_company_profile ?? null) : null;
+  const passQueryClient = useQueryClient();
+  const passOnboardingKey = useMeOnboardingQueryKey();
+  useEffect(() => {
+    if (alreadyCompleted || canInstallPacks || !packProfile) return;
+    let cancelled = false;
+    // The dashboard sends back here anyone whose server record is not
+    // completed, and it reads that record from the shared cache entry. So the
+    // flag is written on the server first and its answer put into that entry
+    // before leaving; leaving on the local flag alone would bounce between the
+    // two screens. If the write fails the wizard simply stays.
+    void apiPost<MeOnboarding>('/v1/users/me/onboarding/complete/', undefined)
+      .then((saved) => {
+        if (cancelled) return;
+        passQueryClient.setQueryData(passOnboardingKey, saved);
+        markOnboardingCompleted();
+        navigate('/', { replace: true });
+      })
+      .catch(() => {
+        /* stay on the wizard */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [alreadyCompleted, canInstallPacks, packProfile, navigate, passQueryClient, passOnboardingKey]);
 
   // Track whether user chose "Quick Start" (skip profile + modules, go to data)
   const [quickStart, setQuickStart] = useState(false);

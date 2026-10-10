@@ -460,6 +460,12 @@ def _plan(m: PartnerPackManifest, *, strict_rule_sets: bool = True) -> dict[str,
             f"Estimating methodology '{m.default_methodology}' will be activated on the pack's demo "
             "project and seeded on new projects created while the pack is active."
         )
+    if m.default_company_profile:
+        warnings.append(
+            f"Company profile '{m.default_company_profile}' becomes the starting menu of every user who "
+            "has not chosen a profile. Nothing is written to any account: a user who has chosen one keeps "
+            "it, and anyone can switch on Modules > Company Profiles."
+        )
     # What each declared cost region would load. This replaced a warning that
     # said "cost data is not downloaded automatically", which was true of the
     # bare ``/apply`` and false in the one screen that showed it: the Modules
@@ -491,6 +497,7 @@ def _plan(m: PartnerPackManifest, *, strict_rule_sets: bool = True) -> dict[str,
         "cost_bases": cost_bases,
         "default_tax_template": m.default_tax_template,
         "default_methodology": m.default_methodology,
+        "default_company_profile": m.default_company_profile,
         "demo_project": _pack_demo_info(m.slug),
         "warnings": warnings,
     }

@@ -37,7 +37,7 @@ import {
 } from 'lucide-react';
 import { LEARN_GROUP_ID, navGroups, type NavGroup, type NavItem } from './navCatalog';
 import { LEARN_ANCHOR_ATTR, anchorRect, flyLearn } from './learnFlight';
-import { PRESET_WORKSPACES, resolveWorkspace, shownTab } from './workspaces';
+import { PRESET_WORKSPACES, resolveWorkspace, shownTab, workspaceSectionByRoute } from './workspaces';
 import { useCompanyWorkspace } from './useCompanyWorkspace';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useModuleStore } from '@/stores/useModuleStore';
@@ -304,6 +304,12 @@ const ROUTE_BACKEND_MODULE: Record<string, string | readonly string[]> = {
   '/source-data': 'oe_source_data',
   '/project-route': 'oe_project_route',
   '/site-supervision': 'oe_site_supervision',
+  // Rows of optional modules a pack may switch off for a trade that has no
+  // use for them (the Turkey MEP contractor pack does). Without an entry
+  // here the row stayed in the menu and opened a screen whose API was gone.
+  '/funding': 'oe_funding',
+  '/rebar-schedule': 'oe_rebar_schedule',
+  '/value': 'oe_value',
 };
 
 // localStorage key for collapsed state
@@ -509,6 +515,16 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   const workspaceRoutes = useMemo(
     () => new Set(workspaceItems.map((item) => item.to)),
     [workspaceItems],
+  );
+  // The headings a long workspace is read by, and the rows its kind of
+  // company has no use for, which stay out from under "More modules".
+  const workspaceSections = useMemo(
+    () => (workspaceActive && workspace ? workspaceSectionByRoute(workspace) : null),
+    [workspaceActive, workspace],
+  );
+  const notForProfile = useMemo(
+    () => new Set(workspaceActive && workspace ? (workspace.notForProfile ?? []) : []),
+    [workspaceActive, workspace],
   );
   // Under "More modules" the groups show what Advanced mode shows: the point
   // of the workspace is that the rest is one click away, not behind a switch.
@@ -1040,7 +1056,9 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
       (item) =>
         passesRowGates(item) &&
         (!item.advancedOnly || showAdvancedRows) &&
-        !workspaceRoutes.has(item.to),
+        !workspaceRoutes.has(item.to) &&
+        // Edit menu lists every row, so one left out here can still be found.
+        (editMode || !notForProfile.has(item.to)),
     );
   };
 
@@ -1382,7 +1400,30 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
               onToggle={() => toggleGroup(`workspace:${workspace.presetKey}`)}
               iconified={iconified}
             >
-              <ul className="space-y-0.5">{visibleWorkspaceItems.map(renderRow)}</ul>
+              <ul className="space-y-0.5">
+                {visibleWorkspaceItems.flatMap((item, i) => {
+                  // A heading above the first row of each section that is on
+                  // screen. A section whose rows are all gated out gets none.
+                  const section = workspaceSections?.get(item.to);
+                  const previous = i > 0 ? workspaceSections?.get(visibleWorkspaceItems[i - 1]!.to) : undefined;
+                  const row = renderRow(item, i);
+                  if (!section || section === previous || iconified) return [row];
+                  return [
+                    <li
+                      key={`section:${section.id}`}
+                      role="presentation"
+                      data-testid={`sidebar-workspace-section-${section.id}`}
+                      // Sentence case as written, not CSS uppercase: that maps
+                      // the Turkish dotless and dotted i wrongly unless the
+                      // document language is set to match.
+                      className="px-2.5 pb-0.5 pt-2.5 text-[11px] font-semibold text-content-quaternary"
+                    >
+                      {t(section.labelKey, { defaultValue: section.defaultLabel })}
+                    </li>,
+                    row,
+                  ];
+                })}
+              </ul>
             </NavGroupSection>
           </div>
         )}

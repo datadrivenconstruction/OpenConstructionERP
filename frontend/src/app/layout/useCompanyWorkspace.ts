@@ -22,7 +22,8 @@ import { useQuery } from '@tanstack/react-query';
 import { apiGet } from '@/shared/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useMeOnboardingQueryKey } from './meOnboardingQuery';
-import { workspaceFor, type Workspace } from './workspaces';
+import { usePartnerPack } from '@/shared/hooks/usePartnerPack';
+import { effectiveCompanyPresetKey, workspaceFor, type Workspace } from './workspaces';
 
 /** localStorage cache of the chosen profile key. Written by the wizard and the
  *  Modules page profile switch, read by the Modules page. */
@@ -43,7 +44,8 @@ function readCachedCompanyType(): string | null {
   }
 }
 
-/** The signed-in user's company preset key, or null when none was chosen. */
+/** The company preset key the signed-in user's menu follows: their own
+ *  choice, else the active pack's default profile, else null. */
 export function useCompanyPresetKey(): string | null {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const queryKey = useMeOnboardingQueryKey();
@@ -80,7 +82,16 @@ export function useCompanyPresetKey(): string | null {
     }
   }, [serverKey]);
 
-  return serverKey !== undefined ? serverKey : readCachedCompanyType();
+  // A user who has chosen no profile gets the one the installation's pack
+  // names, if it names one. Nothing is stored for them, here or on the server,
+  // so the cache above stays this user's own answer and their first real
+  // choice wins from then on. This is how one pack install reaches the people
+  // who never open the setup wizard.
+  const { data: pack } = usePartnerPack();
+  const packDefault = pack?.active ? (pack.manifest?.default_company_profile ?? null) : null;
+
+  const ownKey = serverKey !== undefined ? serverKey : readCachedCompanyType();
+  return effectiveCompanyPresetKey(ownKey, packDefault);
 }
 
 /** The workspace the user's company profile brings, or null when it has none. */

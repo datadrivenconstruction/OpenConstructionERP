@@ -392,7 +392,12 @@ _PROFILE_MUST_INCLUDE: dict[str, list[str]] = {
     # The owner signs the contract and approves every change to it.
     "owner_client": ["contracts", "changeorders"],
     # Building services work is live electrical, hot work and working at height.
-    "mep_contractor": ["safety"],
+    # The installer also writes to the main contractor every week
+    # (correspondence), is paid through progress claims (contracts) and
+    # invoices (finance), and runs subcontractors of its own.
+    "mep_contractor": ["safety", "correspondence", "contracts", "finance", "subcontractors"],
+    # The five registers a document controller keeps on any contractor's site.
+    "site_records": ["daily_diary", "correspondence", "rfi", "submittals", "variations"],
     # Roads and bridges run on the same RFI, submittal and meeting cycle as a
     # building site.
     "civil_infrastructure": ["rfi", "submittals", "meetings"],
@@ -406,3 +411,22 @@ _PROFILE_MUST_INCLUDE: dict[str, list[str]] = {
 def test_a_profile_carries_the_modules_its_work_needs(key: str) -> None:
     missing = sorted(set(_PROFILE_MUST_INCLUDE[key]) - set(COMPANY_PRESETS[key].enabled_modules))
     assert missing == [], f"preset {key} leaves out {missing}"
+
+
+#: What a profile must leave out, because the screen answers a question this
+#: kind of company never asks and the profile is the only thing that hides it.
+_PROFILE_MUST_NOT_INCLUDE: dict[str, list[str]] = {
+    # An installer works for private owners and main contractors: no public
+    # grant lifecycle, and it sells no plots or units.
+    "mep_contractor": ["funding", "property_dev"],
+    # A register keeper prices nothing and buys nothing.
+    "site_records": ["funding", "property_dev", "procurement", "finance", "tendering"],
+}
+
+
+@pytest.mark.parametrize("key", sorted(_PROFILE_MUST_NOT_INCLUDE))
+def test_a_profile_leaves_out_what_its_company_never_opens(key: str) -> None:
+    extra = sorted(set(_PROFILE_MUST_NOT_INCLUDE[key]) & set(COMPANY_PRESETS[key].enabled_modules))
+    assert extra == [], f"preset {key} switches on {extra}"
+    prefs = modules_for(COMPANY_PRESETS[key].enabled_modules)
+    assert all(prefs[m] is False for m in _PROFILE_MUST_NOT_INCLUDE[key])

@@ -47,6 +47,7 @@ export const ROLE_PROFILE_KEYS: ReadonlySet<string> = new Set([
   'procurement_manager',
   'scheduler_planner',
   'site_supervisor',
+  'site_records',
   'quality_manager',
   'hse_manager',
   'bim_vdc',
@@ -111,6 +112,29 @@ export function companyTypeToSave(
   return EVERYTHING_MODULE_KEYS.every((key) => enabledModules.has(key))
     ? EVERYTHING_PROFILE_KEY
     : null;
+}
+
+/**
+ * What the wizard saves for the admin who installed a ready-made pack, or
+ * `null` when the pack names no profile (or one this server does not serve).
+ *
+ * A pack can name the company profile its users start in
+ * (`default_company_profile` in its manifest). Installing a pack jumps
+ * straight to Finish, past the profile step, and Finish used to save nothing
+ * at all in that case, so the person who had just set the company up landed
+ * on the full menu with no profile. Saving the pack's profile for them is the
+ * same save the profile step makes: `company_type` plus that profile's own
+ * module list, which the server turns into `module_preferences`. It touches
+ * the user's preferences only. The modules the pack switched on or off for the
+ * installation are a different layer and are not written here.
+ */
+export function packProfileToSave<T extends { key: string; enabled_modules: readonly string[] }>(
+  packDefault: string | null | undefined,
+  presets: readonly T[],
+): { company_type: string; enabled_modules: string[] } | null {
+  if (!packDefault || packDefault === EVERYTHING_PROFILE_KEY) return null;
+  const preset = presets.find((p) => p.key === packDefault);
+  return preset ? { company_type: preset.key, enabled_modules: [...preset.enabled_modules] } : null;
 }
 
 /** How many modules are on for a set of picked ones: those plus the core

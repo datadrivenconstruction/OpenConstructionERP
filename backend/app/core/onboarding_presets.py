@@ -517,26 +517,36 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
         label="MEP / Building Services Contractor",
         description="We install mechanical, electrical and plumbing systems - coordinated models, submittals and commissioning.",
         icon="Wrench",
-        tags=["MEP", "Submittals", "Coordination", "Service"],
+        tags=["MEP", "Submittals", "Progress claims", "Commissioning"],
+        # Three modules the profile used to switch on are off now. ``funding``
+        # is the public-grant lifecycle, and an installer is paid by a main
+        # contractor or a private owner. ``service`` (maintenance contracts) and
+        # ``match_elements`` (model element to cost) are real for some
+        # installers and not a starting point: both come back from the Modules
+        # page. What was missing is what the installer does every week: letters
+        # to the main contractor, coordination meetings, the subcontractors it
+        # runs itself, invoices and payments, requests for quotation.
         enabled_modules=[
             "boq",
             "validation",
             "takeoff",
             "dwg_takeoff",
             "bim_hub",
-            "match_elements",
             "schedule",
+            "schedule_advanced",  # look-ahead and weekly work plans
             "tasks",
             "procurement",
-            "funding",
+            "rfq_bidding",  # request for quotation to equipment suppliers
             "supplier_catalogs",
             "submittals",
             "rfi",
             "transmittals",
+            "correspondence",
+            "meetings",
             "inspections",
             "ncr",
             "punchlist",
-            "service",
+            "risk",
             "equipment",
             "resources",
             "daily_diary",
@@ -546,8 +556,11 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "changeorders",
             "variations",
             "contracts",
+            "subcontractors",
+            "finance",
             "reporting",
             "safety",  # live electrical, hot work, work at height
+            "hse_advanced",  # permits to work, toolbox talks
             "cad",  # takeoff depends on it
         ],
     ),
@@ -729,6 +742,27 @@ COMPANY_PRESETS: dict[str, CompanyPreset] = {
             "collaboration",
             "boq",  # schedule depends on it
             "contracts",  # subcontractors depends on it
+        ],
+    ),
+    "site_records": CompanyPreset(
+        key="site_records",
+        label="Site Records / Document Control",
+        description="We keep the site's records - the daily diary, letters, RFIs, submittals, variations and claims.",
+        icon="ClipboardList",
+        tags=["Site diary", "Correspondence", "RFIs", "Submittals"],
+        # The registers one person keeps on any contractor's site, and nothing
+        # that prices or buys. It is the profile a pilot starts on: five
+        # registers on one project, before the company turns on the rest.
+        enabled_modules=[
+            "daily_diary",
+            "correspondence",
+            "rfi",
+            "submittals",
+            "variations",
+            "transmittals",
+            "meetings",
+            "documents",
+            "boq",  # variations depends on it
         ],
     ),
     "quality_manager": CompanyPreset(
