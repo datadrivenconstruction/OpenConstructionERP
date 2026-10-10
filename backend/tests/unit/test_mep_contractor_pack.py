@@ -119,13 +119,21 @@ def test_the_pack_loads_and_is_filed_as_an_industry_pack_for_one_market() -> Non
     assert pack.market_country_code == "TR"
 
 
-def test_the_pack_sorts_after_the_country_pack() -> None:
-    """The first-run offer takes the first pack of the reader's country.
+def test_the_pack_says_it_is_a_variant_of_the_country_pack() -> None:
+    """What keeps this pack from being offered as the country's own pack.
 
-    Packs are listed by slug, so a slug that sorted ahead of ``turkey-tr``
-    would be offered to every Turkish first run in place of the country pack.
+    The first-run picker used to take the first pack of the reader's country
+    in slug order, and this pack's slug was chosen to sort after ``turkey-tr``
+    for that reason. The picker no longer reads the order: it leaves out any
+    pack that names a parent (``frontend/src/features/onboarding/countryOffer.ts``),
+    and project creation does the same when it looks for a country's own pack
+    (``app/modules/projects/country_configuration.py``). Both read this one
+    metadata key from the public manifest, so it is pinned here.
     """
-    assert sorted([_pack().slug, _country().slug]) == [_country().slug, _pack().slug]
+    pack = _pack()
+    assert pack.metadata["derived_from"] == _country().slug
+    assert pack.to_public_dict()["metadata"]["derived_from"] == _country().slug
+    assert "derived_from" not in _country().metadata
 
 
 #: The fields this pack states for itself. Everything else is the country's.
@@ -137,6 +145,7 @@ _OWN_FIELDS = frozenset(
         "pack_type",
         "description",
         "default_company_profile",
+        "validation_rule_packs",
         "default_modules",
         "hidden_modules",
         "branding",
@@ -160,7 +169,6 @@ def test_the_country_fields_that_matter_are_actually_set() -> None:
     assert pack.default_currency == "TRY"
     assert pack.default_methodology
     assert pack.validation_rule_sets
-    assert pack.validation_rule_packs
     assert pack.cwicr_regions
     assert pack.demo_template_ids
 
@@ -193,10 +201,22 @@ def test_the_manifest_file_states_no_country_value_of_its_own() -> None:
     assert copied == []
 
 
-def test_the_reference_documents_exist_in_the_country_pack() -> None:
-    """The ids are inherited; the files stay where they are and must be there."""
-    rule_packs = COUNTRY_MANIFEST.parent / "rule_packs"
-    missing = [name for name in _pack().validation_rule_packs if not (rule_packs / f"{name}.json").is_file()]
+def test_the_reference_documents_stay_the_country_packs() -> None:
+    """The pack names no document, because it carries none.
+
+    ``validation_rule_packs`` names files under a pack's own ``rule_packs/``
+    directory, and the installed-wheel gate
+    (``scripts/check_wheel_ships_every_pack.py``) reads every name a manifest
+    carries through that pack's own files. Inheriting the country pack's five
+    names would have promised five files this package cannot serve. The
+    documents are still on every installation that has this pack, in the
+    country pack it cannot be loaded without.
+    """
+    assert _pack().validation_rule_packs == []
+    assert not (PACK_MANIFEST.parent / "rule_packs").exists()
+    country_documents = COUNTRY_MANIFEST.parent / "rule_packs"
+    assert _country().validation_rule_packs
+    missing = [name for name in _country().validation_rule_packs if not (country_documents / f"{name}.json").is_file()]
     assert missing == []
 
 

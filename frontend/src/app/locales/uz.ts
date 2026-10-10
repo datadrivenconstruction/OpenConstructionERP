@@ -46164,6 +46164,7 @@ const resource = {
     "modules.pp_name_poland_pl": "Polsha qurilish paketi",
     "modules.pp_name_portugal_pt": "Portugaliya qurilish paketi",
     "modules.pp_name_turkey_tr": "Turkiya qurilish paketi",
+    "modules.pp_name_turkey_tr_mep": "Turkiya muhandislik tizimlari pudratchisi paketi",
     "modules.pack_chip_none": "Mintaqaviy paket yoʻq",
     "modules.pack_chip_none_hint": "Hech qanday mintaqaviy paket qoʻllanilmagan. Paket ushbu ish maydoni uchun valyuta, soliq shabloni va tekshiruv standartlarini belgilaydi.",
     "modules.pack_chip_applied_hint": "Mintaqaviy paket ishlatilmoqda. Paketlar roʻyxatini ochadi.",

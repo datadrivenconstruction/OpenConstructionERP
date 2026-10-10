@@ -45230,6 +45230,7 @@ const resource = {
     "modules.pp_name_poland_pl": "Pachet de construcții Polonia",
     "modules.pp_name_portugal_pt": "Pachet de construcții Portugalia",
     "modules.pp_name_turkey_tr": "Pachet de construcții Turcia",
+    "modules.pp_name_turkey_tr_mep": "Pachet pentru antreprenori de instalații Turcia",
     "modules.pack_chip_none": "Niciun pachet regional",
     "modules.pack_chip_none_hint": "Nu este aplicat niciun pachet regional. Un pachet stabilește moneda, șablonul fiscal și standardele de validare pentru acest spațiu de lucru.",
     "modules.pack_chip_applied_hint": "Pachet regional în uz. Deschide lista de pachete.",

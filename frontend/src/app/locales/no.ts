@@ -44968,6 +44968,7 @@ const resource = {
     "modules.pp_name_poland_pl": "Byggepakke Polen",
     "modules.pp_name_portugal_pt": "Byggepakke Portugal",
     "modules.pp_name_turkey_tr": "Byggepakke Tyrkia",
+    "modules.pp_name_turkey_tr_mep": "Pakke for tekniske entreprenører Tyrkia",
     "modules.pack_chip_none": "Ingen regionpakke",
     "modules.pack_chip_none_hint": "Ingen regionpakke er brukt. En pakke setter valuta, skattemal og valideringsstandarder for dette arbeidsområdet.",
     "modules.pack_chip_applied_hint": "Regionpakke i bruk. Åpner pakkelisten.",

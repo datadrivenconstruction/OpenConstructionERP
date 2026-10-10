@@ -44822,6 +44822,7 @@ const resource = {
     "modules.pp_name_poland_pl": "بسته ساخت‌وساز لهستان",
     "modules.pp_name_portugal_pt": "بسته ساخت‌وساز پرتغال",
     "modules.pp_name_turkey_tr": "بسته ساخت‌وساز ترکیه",
+    "modules.pp_name_turkey_tr_mep": "بسته پیمانکاران تأسیسات مکانیکی و برقی ترکیه",
     "modules.pack_chip_none": "بدون بسته منطقه‌ای",
     "modules.pack_chip_none_hint": "هیچ بسته منطقه‌ای اعمال نشده است. یک بسته واحد پول، الگوی مالیات و استانداردهای اعتبارسنجی این فضای کاری را تعیین می‌کند.",
     "modules.pack_chip_applied_hint": "بسته منطقه‌ای در حال استفاده است. فهرست بسته‌ها را باز می‌کند.",

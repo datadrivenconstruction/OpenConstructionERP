@@ -46822,6 +46822,7 @@ const resource = {
     "modules.pp_name_poland_pl": "Építőipari csomag: Lengyelország",
     "modules.pp_name_portugal_pt": "Építőipari csomag: Portugália",
     "modules.pp_name_turkey_tr": "Építőipari csomag: Törökország",
+    "modules.pp_name_turkey_tr_mep": "Épületgépészeti és villamos kivitelezői csomag: Törökország",
     "modules.pack_chip_none": "Nincs regionális csomag",
     "modules.pack_chip_none_hint": "Nincs alkalmazott regionális csomag. Egy csomag beállítja ennek a munkaterületnek a pénznemét, adósablonját és validációs szabványait.",
     "modules.pack_chip_applied_hint": "Használt regionális csomag. Megnyitja a csomaglistát.",

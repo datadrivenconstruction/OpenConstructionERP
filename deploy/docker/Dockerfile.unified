@@ -161,6 +161,7 @@ COPY packs/south-africa/src/ packs/south-africa/src/
 COPY packs/sweden-se/src/ packs/sweden-se/src/
 COPY packs/switzerland-ch/src/ packs/switzerland-ch/src/
 COPY packs/turkey-tr/src/ packs/turkey-tr/src/
+COPY packs/turkey-tr-mep/src/ packs/turkey-tr-mep/src/
 COPY packs/uae-ae/src/ packs/uae-ae/src/
 COPY packs/uk-jct/src/ packs/uk-jct/src/
 COPY packs/ukraine-ua/src/ packs/ukraine-ua/src/

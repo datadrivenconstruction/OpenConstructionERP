@@ -44793,6 +44793,7 @@ const resource = {
     "modules.pp_name_poland_pl": "Rakennuspaketti: Puola",
     "modules.pp_name_portugal_pt": "Rakennuspaketti: Portugali",
     "modules.pp_name_turkey_tr": "Rakennuspaketti: Turkki",
+    "modules.pp_name_turkey_tr_mep": "Talotekniikkaurakoitsijan paketti: Turkki",
     "modules.pack_chip_none": "Ei alueellista pakettia",
     "modules.pack_chip_none_hint": "Alueellista pakettia ei ole otettu käyttöön. Paketti määrittää tämän työtilan valuutan, veromallin ja validointistandardit.",
     "modules.pack_chip_applied_hint": "Alueellinen paketti käytössä. Avaa pakettiluettelon.",

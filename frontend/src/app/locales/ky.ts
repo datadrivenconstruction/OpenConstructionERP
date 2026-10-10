@@ -44990,6 +44990,7 @@ const resource = {
     "modules.pp_name_poland_pl": "Польша курулуш пакети",
     "modules.pp_name_portugal_pt": "Португалия курулуш пакети",
     "modules.pp_name_turkey_tr": "Түркия курулуш пакети",
+    "modules.pp_name_turkey_tr_mep": "Түркия инженердик тутумдар подрядчысынын пакети",
     "modules.pack_chip_none": "Аймактык пакет жок",
     "modules.pack_chip_none_hint": "Аймактык пакет колдонулган эмес. Пакет бул жумуш мейкиндиги үчүн валютаны, салык шаблонун жана валидация стандарттарын белгилейт.",
     "modules.pack_chip_applied_hint": "Аймактык пакет колдонулууда. Пакеттер тизмесин ачат.",

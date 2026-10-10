@@ -44856,6 +44856,7 @@ const resource = {
     "modules.pp_name_poland_pl": "Польша құрылыс пакеті",
     "modules.pp_name_portugal_pt": "Португалия құрылыс пакеті",
     "modules.pp_name_turkey_tr": "Түркия құрылыс пакеті",
+    "modules.pp_name_turkey_tr_mep": "Түркия инженерлік жүйелер мердігерінің пакеті",
     "modules.pack_chip_none": "Аймақтық пакет жоқ",
     "modules.pack_chip_none_hint": "Аймақтық пакет қолданылмаған. Пакет осы жұмыс кеңістігі үшін валютаны, салық үлгісін және тексеру стандарттарын белгілейді.",
     "modules.pack_chip_applied_hint": "Аймақтық пакет қолданылуда. Пакеттер тізімін ашады.",

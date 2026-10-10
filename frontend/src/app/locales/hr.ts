@@ -45158,6 +45158,7 @@ const resource = {
     "modules.pp_name_poland_pl": "Građevinski paket Poljska",
     "modules.pp_name_portugal_pt": "Građevinski paket Portugal",
     "modules.pp_name_turkey_tr": "Građevinski paket Turska",
+    "modules.pp_name_turkey_tr_mep": "Paket za izvođače strojarskih i elektroinstalacija Turska",
     "modules.pack_chip_none": "Nema regionalnog paketa",
     "modules.pack_chip_none_hint": "Nije primijenjen nijedan regionalni paket. Paket postavlja valutu, predložak poreza i standarde validacije za ovaj radni prostor.",
     "modules.pack_chip_applied_hint": "Regionalni paket u upotrebi. Otvara popis paketa.",

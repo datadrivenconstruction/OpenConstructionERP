@@ -46020,6 +46020,7 @@ const resource = {
     "modules.pp_name_poland_pl": "Pacchetto Costruzioni Polonia",
     "modules.pp_name_portugal_pt": "Pacchetto Costruzioni Portogallo",
     "modules.pp_name_turkey_tr": "Pacchetto Costruzioni Turchia",
+    "modules.pp_name_turkey_tr_mep": "Pacchetto Impiantisti Turchia",
     "modules.pack_chip_none": "Nessun pacchetto regionale",
     "modules.pack_chip_none_hint": "Nessun pacchetto regionale applicato. Un pacchetto imposta la valuta, il modello fiscale e gli standard di validazione per questo spazio di lavoro.",
     "modules.pack_chip_applied_hint": "Pacchetto regionale in uso. Apre l'elenco dei pacchetti.",

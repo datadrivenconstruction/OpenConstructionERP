@@ -44966,6 +44966,7 @@ const resource = {
     "modules.pp_name_poland_pl": "Строителен пакет Полша",
     "modules.pp_name_portugal_pt": "Строителен пакет Португалия",
     "modules.pp_name_turkey_tr": "Строителен пакет Турция",
+    "modules.pp_name_turkey_tr_mep": "Пакет за изпълнители на сградни инсталации Турция",
     "modules.pack_chip_none": "Няма регионален пакет",
     "modules.pack_chip_none_hint": "Не е приложен регионален пакет. Пакетът задава валутата, данъчния шаблон и стандартите за валидация за това работно пространство.",
     "modules.pack_chip_applied_hint": "Използва се регионален пакет. Отваря списъка с пакети.",

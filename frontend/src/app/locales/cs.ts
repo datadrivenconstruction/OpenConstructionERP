@@ -46102,6 +46102,7 @@ const resource = {
     "modules.pp_name_poland_pl": "Stavební balíček Polsko",
     "modules.pp_name_portugal_pt": "Stavební balíček Portugalsko",
     "modules.pp_name_turkey_tr": "Stavební balíček Turecko",
+    "modules.pp_name_turkey_tr_mep": "Balíček pro dodavatele TZB Turecko",
     "modules.pack_chip_none": "Žádný regionální balíček",
     "modules.pack_chip_none_hint": "Není použit žádný regionální balíček. Balíček nastavuje měnu, šablonu daně a standardy ověřování pro tento pracovní prostor.",
     "modules.pack_chip_applied_hint": "Používá se regionální balíček. Otevře seznam balíčků.",

@@ -45261,6 +45261,7 @@ const resource = {
     "modules.pp_name_poland_pl": "폴란드 건설 팩",
     "modules.pp_name_portugal_pt": "포르투갈 건설 팩",
     "modules.pp_name_turkey_tr": "튀르키예 건설 팩",
+    "modules.pp_name_turkey_tr_mep": "튀르키예 기계·전기 설비 시공사 팩",
     "modules.pack_chip_none": "지역 팩 없음",
     "modules.pack_chip_none_hint": "적용된 지역 팩이 없습니다. 팩은 이 워크스페이스의 통화, 세금 서식, 검증 표준을 설정합니다.",
     "modules.pack_chip_applied_hint": "지역 팩 사용 중. 팩 목록을 엽니다.",

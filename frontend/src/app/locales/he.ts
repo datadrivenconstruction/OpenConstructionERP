@@ -45168,6 +45168,7 @@ const resource = {
     "modules.pp_name_poland_pl": "חבילת בנייה לפולין",
     "modules.pp_name_portugal_pt": "חבילת בנייה לפורטוגל",
     "modules.pp_name_turkey_tr": "חבילת בנייה לטורקיה",
+    "modules.pp_name_turkey_tr_mep": "חבילת קבלני מערכות אלקטרומכניות לטורקיה",
     "modules.pack_chip_none": "אין חבילת אזור",
     "modules.pack_chip_none_hint": "לא הוחלה חבילת אזור. חבילה קובעת את המטבע, תבנית המס ותקני האימות עבור סביבת עבודה זו.",
     "modules.pack_chip_applied_hint": "חבילת אזור בשימוש. פותח את רשימת החבילות.",

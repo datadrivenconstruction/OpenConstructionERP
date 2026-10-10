@@ -181,8 +181,29 @@ def test_mapped_demo_ids_resolve_to_templates() -> None:
 #: Korean pack, a Budapest block in the Polish one, a Rome block in the Spanish
 #: one, a Jeddah hospital in the Turkish one), in another currency and
 #: validated as another country, which is the opposite of the in-market
-#: guarantee this test exists for.
-PACKS_WITH_ONE_IN_MARKET_DEMO = frozenset({"japan-jp", "korea-kr", "poland-pl", "spain-es", "turkey-tr"})
+#: guarantee this test exists for. turkey-tr-mep is derived from turkey-tr and
+#: is in the same market, so it has the same one demo.
+PACKS_WITH_ONE_IN_MARKET_DEMO = frozenset(
+    {"japan-jp", "korea-kr", "poland-pl", "spain-es", "turkey-tr", "turkey-tr-mep"}
+)
+
+
+def test_a_derived_pack_installs_the_demos_of_its_parent() -> None:
+    """A pack built on another pack seeds what that pack seeds, on every path.
+
+    The full install reads the inherited ``demo_template_ids`` and the bare
+    apply reads ``PACK_DEMO_PROJECT``. With no entry for the derived slug the
+    two disagreed: one seeded the country's demo and the other seeded nothing.
+    """
+    from app.core.partner_pack.discovery import discover_packs
+    from app.core.partner_pack.full_install import _demo_install_list
+
+    derived = [p for p in discover_packs() if (p.metadata or {}).get("derived_from")]
+    assert derived, "no derived pack was discovered, so this test compared nothing"
+    for pack in derived:
+        parent = pack.metadata["derived_from"]
+        assert PACK_DEMO_PROJECT.get(pack.slug) == PACK_DEMO_PROJECT[parent], pack.slug
+        assert _demo_install_list(pack.slug, 2) == _demo_install_list(parent, 2), pack.slug
 
 
 def test_every_pack_resolves_to_exactly_two_demos() -> None:

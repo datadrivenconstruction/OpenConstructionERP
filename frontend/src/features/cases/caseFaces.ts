@@ -167,6 +167,10 @@ const COMPANY_THUMB_ALIASES: Record<string, string> = {
   'project-manager': 'construction-manager',
   'bim-consultant': 'bim-vdc',
   'owner-operator': 'facility-manager',
+  // A job profile, not a company type: the person who keeps the site
+  // registers. No photo was shot for it, and the site office is where that
+  // person sits, so it shares the site supervisor's.
+  'site-records': 'site-supervisor',
 };
 
 /** Positive modulo, so a caller passing a negative index still lands inside

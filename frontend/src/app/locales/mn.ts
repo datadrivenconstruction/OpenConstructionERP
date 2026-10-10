@@ -44597,6 +44597,7 @@ const resource = {
     "modules.pp_name_poland_pl": "Барилгын багц: Польш",
     "modules.pp_name_portugal_pt": "Барилгын багц: Португал",
     "modules.pp_name_turkey_tr": "Барилгын багц: Турк",
+    "modules.pp_name_turkey_tr_mep": "Инженерийн шугам сүлжээний гүйцэтгэгчийн багц: Турк",
     "modules.pack_chip_none": "Бүсийн багц алга",
     "modules.pack_chip_none_hint": "Бүсийн багц ашиглагдаагүй байна. Багц энэ ажлын орчны валют, татварын загвар, баталгаажуулалтын стандартыг тодорхойлдог.",
     "modules.pack_chip_applied_hint": "Бүсийн багц ашиглагдаж байна. Багцын жагсаалтыг нээнэ.",

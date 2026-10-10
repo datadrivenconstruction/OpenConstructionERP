@@ -34,7 +34,6 @@ guard, so each helper starts a clean interpreter and loads a stated set.
 
 from __future__ import annotations
 
-import ast
 import json
 import re
 import subprocess
@@ -44,6 +43,7 @@ from pathlib import Path
 import pytest
 
 from app.core.partner_pack.apply import _known_rule_sets, _near_miss_rule_set, _squash
+from tests._pack_manifest_source import declared_lists
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 BACKEND = REPO_ROOT / "backend"
@@ -107,14 +107,13 @@ def shipped_rule_sets() -> set[str]:
 
 
 def declared_rule_packs() -> dict[str, list[str]]:
-    """Pack slug -> the rule pack names its manifest declares."""
-    out: dict[str, list[str]] = {}
-    for manifest in sorted(PACKS_DIR.glob("*/src/*/manifest.py")):
-        source = manifest.read_text(encoding="utf-8")
-        match = re.search(r"validation_rule_packs\s*=\s*(\[[^\]]*\])", source, re.S)
-        if match:
-            out[manifest.parts[-4]] = list(ast.literal_eval(match.group(1)))
-    return out
+    """Pack slug -> the rule pack names its manifest declares.
+
+    Read from the source by the reader ``test_partner_pack_rule_sets.py`` uses,
+    which follows a derived pack to the parent it names instead of reporting
+    it as declaring nothing. A pack that declares none is left out, as before.
+    """
+    return {slug: names for slug, names in declared_lists(PACKS_DIR, "validation_rule_packs").items() if names}
 
 
 def test_the_detector_answers_without_any_manifest_in_front_of_it(shipped_rule_sets: set[str]) -> None:

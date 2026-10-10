@@ -47200,6 +47200,7 @@ const resource = {
     "modules.pp_name_poland_pl": "波兰建筑数据包",
     "modules.pp_name_portugal_pt": "葡萄牙建筑数据包",
     "modules.pp_name_turkey_tr": "土耳其建筑数据包",
+    "modules.pp_name_turkey_tr_mep": "土耳其机电承包商数据包",
     "modules.pack_chip_none": "无区域数据包",
     "modules.pack_chip_none_hint": "未应用区域数据包。数据包会为此工作区设置货币、税务模板和验证标准。",
     "modules.pack_chip_applied_hint": "正在使用区域数据包。打开数据包列表。",

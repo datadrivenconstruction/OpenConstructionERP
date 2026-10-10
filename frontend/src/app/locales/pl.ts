@@ -46333,6 +46333,7 @@ const resource = {
     "modules.pp_name_poland_pl": "Pakiet budowlany Polska",
     "modules.pp_name_portugal_pt": "Pakiet budowlany Portugalia",
     "modules.pp_name_turkey_tr": "Pakiet budowlany Turcja",
+    "modules.pp_name_turkey_tr_mep": "Pakiet dla wykonawców instalacji Turcja",
     "modules.pack_chip_none": "Brak pakietu regionalnego",
     "modules.pack_chip_none_hint": "Nie zastosowano żadnego pakietu regionalnego. Pakiet ustala walutę, szablon podatku i standardy walidacji dla tej przestrzeni roboczej.",
     "modules.pack_chip_applied_hint": "Używany pakiet regionalny. Otwiera listę pakietów.",

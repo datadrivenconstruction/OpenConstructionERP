@@ -44636,6 +44636,7 @@ const resource = {
     "modules.pp_name_poland_pl": "Paket Konstruksi Polandia",
     "modules.pp_name_portugal_pt": "Paket Konstruksi Portugal",
     "modules.pp_name_turkey_tr": "Paket Konstruksi Turki",
+    "modules.pp_name_turkey_tr_mep": "Paket Kontraktor MEP Turki",
     "modules.pack_chip_none": "Tidak ada paket regional",
     "modules.pack_chip_none_hint": "Tidak ada paket regional yang diterapkan. Paket menentukan mata uang, templat pajak, dan standar validasi untuk workspace ini.",
     "modules.pack_chip_applied_hint": "Paket regional sedang digunakan. Membuka daftar paket.",

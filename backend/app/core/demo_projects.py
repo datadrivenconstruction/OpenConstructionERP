@@ -2401,6 +2401,10 @@ PACK_DEMO_PROJECT: dict[str, str] = {
     "japan-jp": "office-tokyo",
     "korea-kr": "residential-seoul",
     "turkey-tr": "mixed-use-istanbul",
+    # Derived from turkey-tr and carrying its whole configuration, so it leads
+    # with the same demo. It is a main contractor's estimate, not an MEP
+    # subcontract: point this at an MEP demo when one is written.
+    "turkey-tr-mep": "mixed-use-istanbul",
     "italy-it": "residential-rome",
     "spain-es": "mixed-use-barcelona",
     "uae-ae": "warehouse-dubai",

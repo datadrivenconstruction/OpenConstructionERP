@@ -44739,6 +44739,7 @@ const resource = {
     "modules.pp_name_poland_pl": "Gói Xây dựng Ba Lan",
     "modules.pp_name_portugal_pt": "Gói Xây dựng Bồ Đào Nha",
     "modules.pp_name_turkey_tr": "Gói Xây dựng Thổ Nhĩ Kỳ",
+    "modules.pp_name_turkey_tr_mep": "Gói Nhà thầu Cơ điện Thổ Nhĩ Kỳ",
     "modules.pack_chip_none": "Không có gói khu vực",
     "modules.pack_chip_none_hint": "Chưa áp dụng gói khu vực nào. Gói sẽ thiết lập tiền tệ, mẫu thuế và tiêu chuẩn xác thực cho không gian làm việc này.",
     "modules.pack_chip_applied_hint": "Đang dùng gói khu vực. Mở danh sách gói.",

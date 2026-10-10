@@ -24,10 +24,8 @@ whatever the pytest session happens to have loaded rather than the software.
 
 from __future__ import annotations
 
-import ast
 import importlib.util
 import json
-import re
 import subprocess
 import sys
 import tempfile
@@ -43,6 +41,13 @@ from app.core.partner_pack.apply import (
     resolve_declared_rule_sets,
 )
 from app.core.partner_pack.manifest import PartnerPackManifest
+from tests._pack_manifest_source import (
+    PARENT_LITERAL,
+    UnreadableParentError,
+    declared_lists,
+    declared_parent,
+    manifest_sources,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 BACKEND = REPO_ROOT / "backend"
@@ -136,23 +141,18 @@ def shipped_rule_ids() -> set[str]:
 
 
 def declared_rule_sets() -> dict[str, list[str]]:
-    """Pack slug -> the engine rule-set identifiers its manifest declares."""
-    out: dict[str, list[str]] = {}
-    for manifest in sorted(PACKS_DIR.glob("*/src/*/manifest.py")):
-        source = manifest.read_text(encoding="utf-8")
-        match = re.search(r"validation_rule_sets\s*=\s*(\[[^\]]*\])", source, re.S)
-        out[manifest.parts[-4]] = list(ast.literal_eval(match.group(1))) if match else []
-    return out
+    """Pack slug -> the engine rule-set identifiers its manifest declares.
+
+    Read from the source, never by importing. A pack derived from another one
+    states only its own fields, so the reader follows the parent it names; see
+    ``tests/_pack_manifest_source.py`` for the rule and for what it refuses.
+    """
+    return declared_lists(PACKS_DIR, "validation_rule_sets")
 
 
 def declared_rule_packs() -> dict[str, list[str]]:
-    """Pack slug -> the document ids its manifest declares."""
-    out: dict[str, list[str]] = {}
-    for manifest in sorted(PACKS_DIR.glob("*/src/*/manifest.py")):
-        source = manifest.read_text(encoding="utf-8")
-        match = re.search(r"validation_rule_packs\s*=\s*(\[[^\]]*\])", source, re.S)
-        out[manifest.parts[-4]] = list(ast.literal_eval(match.group(1))) if match else []
-    return out
+    """Pack slug -> the document ids its manifest declares, read the same way."""
+    return declared_lists(PACKS_DIR, "validation_rule_packs")
 
 
 @lru_cache(maxsize=1)
@@ -317,8 +317,99 @@ def test_both_readers_see_the_same_declarations() -> None:
         f"a pack declares something the source reader in this file cannot see: {disagreements}. "
         "Every check here that iterates the packs reads the source, so a pack it cannot parse "
         "is a pack it silently exempts. Write the declaration as a plain list literal in the "
-        "constructor call, or teach the reader the new shape."
+        f"constructor call, name the pack it is inherited from in a module-level {PARENT_LITERAL} "
+        "literal, or teach the reader the new shape."
     )
+
+
+# ── A pack derived from another pack ────────────────────────────────────────
+#
+# A derived manifest is built from its parent's when it is imported, so the
+# fields it inherits are written nowhere in its source. The text reader follows
+# it to the parent, and that would be a way to satisfy the agreement test above
+# with a lie if the parent it follows were not the parent the manifest is
+# really built from. These tests close that: the link is stated in two places
+# that have to agree, and a link the reader cannot follow raises.
+
+
+def test_a_derived_pack_names_its_parent_in_both_places() -> None:
+    """The literal the text reader follows is the parent the manifest carries.
+
+    ``metadata["derived_from"]`` is what the running product reads (the
+    first-run picker, and project creation when it looks for a country's own
+    pack). ``DERIVED_FROM`` is what the source gates read. A pack that states
+    one and not the other, or two different slugs, is refused here, in both
+    directions, so neither can drift from the other unnoticed.
+    """
+    objects = _manifest_objects()
+    sources = manifest_sources(PACKS_DIR)
+    from_object = {
+        slug: str(manifest.metadata.get("derived_from"))
+        for slug, manifest in objects.items()
+        if manifest.metadata.get("derived_from")
+    }
+    from_source = {slug: parent for slug, path in sources.items() if (parent := declared_parent(path))}
+
+    assert from_object, (
+        "no pack in the tree carries metadata['derived_from'], so nothing below measures a derived "
+        "pack. turkey-tr-mep is one; if it stopped being one, delete this guard with it."
+    )
+    assert from_source == from_object, (
+        f"the parent a manifest object carries and the parent its source names disagree. From the "
+        f"objects: {from_object}. From the {PARENT_LITERAL} literals: {from_source}."
+    )
+    for slug, parent in from_object.items():
+        assert parent in objects, f"packs/{slug} is derived from {parent!r}, which is not a pack in the tree"
+        assert objects[parent].slug == parent
+        assert not objects[parent].metadata.get("derived_from"), (
+            f"packs/{slug} is derived from packs/{parent}, which is itself derived"
+        )
+
+
+def test_a_derived_pack_runs_the_rule_sets_of_its_parent() -> None:
+    """Not vacuous: the inherited names are really there, on both readers."""
+    objects = _manifest_objects()
+    text_sets = declared_rule_sets()
+    derived = {slug: str(m.metadata["derived_from"]) for slug, m in objects.items() if m.metadata.get("derived_from")}
+    assert derived
+    for slug, parent in derived.items():
+        assert objects[parent].validation_rule_sets, f"packs/{parent} declares no rule set to inherit"
+        assert list(objects[slug].validation_rule_sets) == list(objects[parent].validation_rule_sets)
+        assert text_sets[slug] == text_sets[parent] == list(objects[parent].validation_rule_sets)
+
+
+def _plant_manifest(packs_dir: Path, slug: str, body: str) -> None:
+    package = packs_dir / slug / "src" / f"openconstructionerp_{slug.replace('-', '_')}"
+    package.mkdir(parents=True)
+    (package / "manifest.py").write_text(body, encoding="utf-8")
+
+
+def test_the_source_reader_follows_one_parent_and_lets_an_own_literal_win(tmp_path: Path) -> None:
+    _plant_manifest(tmp_path, "base", 'MANIFEST = M(validation_rule_sets=["alpha"], validation_rule_packs=["doc"])\n')
+    _plant_manifest(tmp_path, "child", 'DERIVED_FROM = "base"\nMANIFEST = derive(validation_rule_packs=[])\n')
+    _plant_manifest(tmp_path, "plain", "MANIFEST = M()\n")
+
+    assert declared_lists(tmp_path, "validation_rule_sets") == {"base": ["alpha"], "child": ["alpha"], "plain": []}
+    assert declared_lists(tmp_path, "validation_rule_packs") == {"base": ["doc"], "child": [], "plain": []}
+
+
+@pytest.mark.parametrize(
+    ("child", "why"),
+    [
+        ('DERIVED_FROM = "absent"\n', "no packs/absent"),
+        ('DERIVED_FROM = "middle"\n', "itself derived"),
+        ('PARENT = "base"\nDERIVED_FROM = PARENT\n', "plain string literal"),
+        ('DERIVED_FROM = ""\n', "plain string literal"),
+    ],
+)
+def test_the_source_reader_refuses_a_parent_it_cannot_follow(tmp_path: Path, child: str, why: str) -> None:
+    """Silence is the failure being guarded: each of these used to read as "declares nothing"."""
+    _plant_manifest(tmp_path, "base", 'MANIFEST = M(validation_rule_sets=["alpha"])\n')
+    _plant_manifest(tmp_path, "middle", 'DERIVED_FROM = "base"\n')
+    _plant_manifest(tmp_path, "child", child)
+
+    with pytest.raises(UnreadableParentError, match=why):
+        declared_lists(tmp_path, "validation_rule_sets")
 
 
 def test_every_declared_rule_set_is_one_the_engine_registers(shipped_rule_sets: set[str]) -> None:

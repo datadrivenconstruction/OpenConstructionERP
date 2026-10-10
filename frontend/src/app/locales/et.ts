@@ -44904,6 +44904,7 @@ const resource = {
     "modules.pp_name_poland_pl": "Ehituspakett: Poola",
     "modules.pp_name_portugal_pt": "Ehituspakett: Portugal",
     "modules.pp_name_turkey_tr": "Ehituspakett: Türgi",
+    "modules.pp_name_turkey_tr_mep": "Tehnosüsteemide töövõtja pakett: Türgi",
     "modules.pack_chip_none": "Regionaalpaketti ei ole",
     "modules.pack_chip_none_hint": "Regionaalpaketti ei ole rakendatud. Pakett määrab selle tööruumi valuuta, maksumalli ja valideerimisstandardid.",
     "modules.pack_chip_applied_hint": "Regionaalpakett kasutusel. Avab paketiloendi.",

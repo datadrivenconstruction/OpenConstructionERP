@@ -109,7 +109,13 @@ import {
   getCountryPack,
   type CountryPack,
 } from './countryPacks';
-import { packToPreselect, resolveCountryOffer } from './countryOffer';
+import {
+  modulesLeftOnByOneClick,
+  packSetupHref,
+  packToPreselect,
+  packVariantOf,
+  resolveCountryOffer,
+} from './countryOffer';
 import {
   activeModuleCount,
   companyTypeToSave,
@@ -188,6 +194,115 @@ function packDisplayName(t: TFunction, pack: InstalledPartnerPack): string {
   return t(`modules.pp_name_${packNameSlug(pack.slug)}`, {
     defaultValue: pack.partner_name,
   });
+}
+
+/**
+ * Marks a pack tile as a specialised variant of another pack.
+ *
+ * Two tiles for one country read as a duplicate unless one of them says what
+ * it is. The variant is never preselected (see `packToPreselect`), so this
+ * badge is what tells a reader the second tile is a deliberate choice.
+ */
+function PackVariantBadge({ pack }: { pack: InstalledPartnerPack }) {
+  const { t } = useTranslation();
+  if (!packVariantOf(pack)) return null;
+  return (
+    <span
+      data-testid={`pack-variant-${pack.slug}`}
+      className="rounded-full bg-surface-tertiary px-2 py-0.5 text-2xs font-medium text-content-secondary"
+    >
+      {t('onboarding.pp_variant_badge', { defaultValue: 'Specialised variant' })}
+    </span>
+  );
+}
+
+/**
+ * What a reader should know about the selected pack before a one-click setup.
+ *
+ * Two sentences, each shown only when it is true of the pack: that it is a
+ * variant of another pack, with the plain one named as the safe choice, and
+ * that it can switch modules off which this setup will leave on. The second
+ * used to be silent: the one-click install never sends the confirmation, the
+ * server reports the list as skipped, and nothing on this screen said so.
+ */
+function PackOneClickNotes({
+  pack,
+  packs,
+}: {
+  pack: InstalledPartnerPack;
+  packs: InstalledPartnerPack[];
+}) {
+  const { t } = useTranslation();
+  const parentSlug = packVariantOf(pack);
+  const parent = parentSlug ? packs.find((p) => p.slug === parentSlug) : undefined;
+  const leftOn = modulesLeftOnByOneClick(pack);
+  if (!parent && leftOn === 0) return null;
+  return (
+    <div
+      data-testid="pack-one-click-notes"
+      className="mt-2 space-y-1 text-center text-2xs text-content-tertiary"
+    >
+      {parent && (
+        <p>
+          {t('onboarding.pp_variant_hint', {
+            defaultValue:
+              '{{pack}} is built on {{base}} for one trade: the same country configuration with a shorter menu. If you are not sure, choose {{base}}.',
+            pack: packDisplayName(t, pack),
+            base: packDisplayName(t, parent),
+          })}
+        </p>
+      )}
+      {leftOn > 0 && (
+        <p>
+          {t('onboarding.pp_optional_disables', {
+            defaultValue:
+              'This pack can also switch off modules its users do not need ({{n}} in total). One-click setup leaves all of them on. To switch them off, open this pack on the Modules page, Packs tab, and tick the box in its setup dialog.',
+            n: leftOn,
+          })}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/**
+ * On Finish: says a one-click install left a pack's optional switch-offs on,
+ * and links to the dialog that can apply them.
+ *
+ * The same packs query the pickers use, so this reads the cache they filled
+ * and fetches nothing new on the usual path.
+ */
+function PackModulesLeftOnNote({ slug, onLeave }: { slug: string; onLeave: () => void }) {
+  const { t } = useTranslation();
+  const { data } = useQuery({
+    queryKey: ['partner-pack', 'installed'],
+    queryFn: fetchInstalledPacks,
+    staleTime: 60_000,
+  });
+  const pack = data?.installed?.find((p) => p.slug === slug);
+  const leftOn = pack ? modulesLeftOnByOneClick(pack) : 0;
+  if (leftOn === 0) return null;
+  return (
+    <p
+      data-testid="pack-modules-left-on"
+      className="mt-4 max-w-md text-center text-xs text-content-tertiary"
+    >
+      {t('onboarding.pp_modules_left_on', {
+        defaultValue:
+          'Modules this pack can switch off, all left on by the one-click setup: {{n}}. Nothing was switched off.',
+        n: leftOn,
+      })}{' '}
+      <Link
+        to={packSetupHref(slug)}
+        onClick={onLeave}
+        className="font-medium text-oe-blue hover:underline"
+      >
+        {t('onboarding.pp_modules_left_on_link', {
+          defaultValue: 'Open the pack in Modules to switch them off',
+        })}
+      </Link>
+    </p>
+  );
 }
 
 // Every value here is a global-market catalogue, never a national norm base. A
@@ -1672,6 +1787,7 @@ export function ReadyPackPicker({
                     {name}
                   </span>
                 </div>
+                <PackVariantBadge pack={pack} />
                 <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-2xs text-content-quaternary">
                   <span className="inline-flex items-center gap-1">
                     <Languages size={11} />
@@ -1848,6 +1964,8 @@ export function ReadyPackPicker({
               })}
             </p>
           )}
+
+          {!installing && <PackOneClickNotes pack={selectedPack} packs={packs} />}
         </div>
       )}
 
@@ -3079,6 +3197,7 @@ function PartnerPackInstaller({
                   <div className="truncate text-2xs text-content-tertiary">
                     {pack.partner_name}
                   </div>
+                  <PackVariantBadge pack={pack} />
                   <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-2xs text-content-quaternary">
                     <span className="inline-flex items-center gap-1">
                       <Languages size={11} />
@@ -3099,6 +3218,9 @@ function PartnerPackInstaller({
       {/* Selected pack description — frosted-glass, expandable */}
       {!isLoading && selectedPack && (
         <PackDescriptionCard description={selectedPack.description} />
+      )}
+      {!isLoading && selectedPack && !installing && (
+        <PackOneClickNotes pack={selectedPack} packs={packs} />
       )}
 
       {/* Progress checklist — the five orchestrated steps */}
@@ -4405,11 +4527,15 @@ export function StepFinish({
   enabledModules,
   presets,
   packInstalled = false,
+  installedPackSlug = null,
 }: {
   onBack: () => void;
   companyType: string | null;
   enabledModules: Set<string>;
   presets: ApiCompanyPreset[];
+  /** Slug of the partner pack the one-click path installed, when it was one
+   *  (a curated market preset records ``country:<id>`` and is not a pack). */
+  installedPackSlug?: string | null;
   /** A ready-made pack already provisioned modules + regional config + sample
    *  data server-side. When true, Finish must NOT overwrite those module
    *  preferences or re-POST a generic onboarding payload, and it lands on the
@@ -4644,6 +4770,10 @@ export function StepFinish({
           {t('onboarding.start_working', { defaultValue: 'Start Working' })}
         </Button>
       </div>
+
+      {installedPackSlug && !installedPackSlug.startsWith('country:') && (
+        <PackModulesLeftOnNote slug={installedPackSlug} onLeave={markOnboardingCompleted} />
+      )}
 
       {/* Explore-all CTA — links to /modules so users can see the full
           88-module marketplace post-onboarding. Persists onboarding-complete
@@ -5044,6 +5174,7 @@ export function OnboardingWizard() {
                   enabledModules={enabledModules}
                   presets={presets}
                   packInstalled={packInstalledSlug !== null}
+                  installedPackSlug={packInstalledSlug}
                 />
               )}
             </StepTransition>

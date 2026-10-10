@@ -47796,6 +47796,7 @@ const resource = {
     "modules.pp_name_poland_pl": "Pacote de Construção: Polônia",
     "modules.pp_name_portugal_pt": "Pacote de Construção: Portugal",
     "modules.pp_name_turkey_tr": "Pacote de Construção: Turquia",
+    "modules.pp_name_turkey_tr_mep": "Pacote para Empreiteiros de Instalações: Turquia",
     "modules.pack_chip_none": "Sem pacote regional",
     "modules.pack_chip_none_hint": "Nenhum pacote regional está aplicado. Um pacote define a moeda, o modelo de imposto e os padrões de validação deste espaço de trabalho.",
     "modules.pack_chip_applied_hint": "Pacote regional em uso. Abre a lista de pacotes.",

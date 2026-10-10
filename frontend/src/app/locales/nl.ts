@@ -45761,6 +45761,7 @@ const resource = {
     "modules.pp_name_poland_pl": "Bouwpakket Polen",
     "modules.pp_name_portugal_pt": "Bouwpakket Portugal",
     "modules.pp_name_turkey_tr": "Bouwpakket Turkije",
+    "modules.pp_name_turkey_tr_mep": "Pakket voor installatiebedrijven Turkije",
     "modules.pack_chip_none": "Geen regiopakket",
     "modules.pack_chip_none_hint": "Er is geen regiopakket toegepast. Een pakket bepaalt de valuta, het belastingsjabloon en de validatienormen voor deze werkruimte.",
     "modules.pack_chip_applied_hint": "Regiopakket in gebruik. Opent de pakkettenlijst.",

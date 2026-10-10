@@ -82,7 +82,12 @@ export function resolveCountryOffer(
   // hand a vertical pack to a reader as though it were their country's.
   if (code === 'xx') return null;
 
-  const pack = packs.find((p) => packCountryCode(p) === code);
+  // The country's own pack, never a variant of it. `find` on the bare country
+  // would take whichever pack the list happens to hold first, and the list is
+  // ordered by slug: turkey-tr-mep was given a slug that sorts after turkey-tr
+  // for exactly that reason, which is a naming convention standing in for a
+  // rule. See `isCountrysOwnPack`.
+  const pack = packs.find((p) => packCountryCode(p) === code && isCountrysOwnPack(p));
   if (pack) return { kind: 'pack', pack };
 
   // Never fall through to DEFAULT_COUNTRY_PACK here. It is the first entry of
@@ -108,6 +113,13 @@ export function resolveCountryOffer(
  * two for single states) is the reader's choice to make, not the slug
  * order's: preselecting the first made every American a Californian.
  * ``null`` leaves the grid unselected and the curated offer, if any, leads.
+ *
+ * A specialised variant of the country pack does not count as a second pack
+ * for the country. Türkiye has the country pack and an industry pack built on
+ * it for one trade; counting both left a Turkish first run with nothing
+ * selected, and counting only the first by slug would have been the slug
+ * order deciding again. The plain pack is preselected and the variant stays a
+ * tile the reader picks on purpose.
  */
 export function packToPreselect(
   country: string | null | undefined,
@@ -115,6 +127,47 @@ export function packToPreselect(
 ): string | null {
   const code = country?.toLowerCase();
   if (!code || code === 'xx') return null;
-  const own = packs.filter((p) => packCountryCode(p) === code);
+  const own = packs.filter((p) => packCountryCode(p) === code && isCountrysOwnPack(p));
   return own.length === 1 ? (own[0]?.slug ?? null) : null;
+}
+
+/**
+ * The slug of the pack ``pack`` is a specialised variant of, or ``null``.
+ *
+ * A derived pack names its parent in ``metadata.derived_from``: it carries
+ * the parent's whole configuration and adds one company shape to it. The
+ * backend reads the same key when it looks for a country's own pack
+ * (``app/modules/projects/country_configuration.py``).
+ */
+export function packVariantOf(pack: InstalledPartnerPack): string | null {
+  const parent = pack.metadata?.derived_from;
+  return typeof parent === 'string' && parent.trim() ? parent.trim() : null;
+}
+
+/**
+ * Whether ``pack`` may stand for its country in an offer or a preselection.
+ *
+ * Not a variant of another pack, and not an industry pack that happens to
+ * name a market. Deliberately not "is of type country": ``type`` is absent on
+ * an older backend, and requiring it would end every preselection there.
+ */
+export function isCountrysOwnPack(pack: InstalledPartnerPack): boolean {
+  return packVariantOf(pack) === null && pack.type !== 'industry';
+}
+
+/** Where the Modules page opens one named pack's setup dialog. */
+export function packSetupHref(slug: string): string {
+  return `/modules?tab=packs&pack=${encodeURIComponent(slug)}`;
+}
+
+/**
+ * How many modules ``pack`` can switch off that a one-click install leaves on.
+ *
+ * The one-click install never sends the confirmation that switches a pack's
+ * ``hidden_modules`` off, on purpose: nothing is turned off without an
+ * administrator ticking a box. This is the number to tell them about, so the
+ * skip is said rather than silent. Zero for almost every pack.
+ */
+export function modulesLeftOnByOneClick(pack: InstalledPartnerPack): number {
+  return Array.isArray(pack.hidden_modules) ? pack.hidden_modules.length : 0;
 }

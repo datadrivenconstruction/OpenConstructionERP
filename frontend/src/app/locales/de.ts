@@ -47610,6 +47610,7 @@ const resource = {
     "modules.pp_name_poland_pl": "Polen-Baupaket",
     "modules.pp_name_portugal_pt": "Portugal-Baupaket",
     "modules.pp_name_turkey_tr": "Türkei-Baupaket",
+    "modules.pp_name_turkey_tr_mep": "Türkei-Paket für TGA-Firmen",
     "modules.pack_chip_none": "Kein regionales Paket",
     "modules.pack_chip_none_hint": "Es ist kein regionales Paket angewendet. Ein Paket legt Währung, Steuermuster und Validierungsnormen für diesen Arbeitsbereich fest.",
     "modules.pack_chip_applied_hint": "Regionales Paket im Einsatz. Öffnet die Paketliste.",

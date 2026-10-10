@@ -44798,6 +44798,7 @@ const resource = {
     "modules.pp_name_poland_pl": "Construction Pack ng Poland",
     "modules.pp_name_portugal_pt": "Construction Pack ng Portugal",
     "modules.pp_name_turkey_tr": "Construction Pack ng Türkiye",
+    "modules.pp_name_turkey_tr_mep": "MEP Contractor Pack ng Türkiye",
     "modules.pack_chip_none": "Walang regional pack",
     "modules.pack_chip_none_hint": "Walang na-apply na regional pack. Itinatakda ng pack ang currency, tax template, at validation standards para sa workspace na ito.",
     "modules.pack_chip_applied_hint": "Ginagamit ang regional pack. Binubuksan ang listahan ng pack.",

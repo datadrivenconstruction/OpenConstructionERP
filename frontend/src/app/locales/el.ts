@@ -44943,6 +44943,7 @@ const resource = {
     "modules.pp_name_poland_pl": "Πακέτο Κατασκευών: Πολωνία",
     "modules.pp_name_portugal_pt": "Πακέτο Κατασκευών: Πορτογαλία",
     "modules.pp_name_turkey_tr": "Πακέτο Κατασκευών: Τουρκία",
+    "modules.pp_name_turkey_tr_mep": "Πακέτο Εργολάβων Η/Μ: Τουρκία",
     "modules.pack_chip_none": "Κανένα περιφερειακό πακέτο",
     "modules.pack_chip_none_hint": "Δεν έχει εφαρμοστεί περιφερειακό πακέτο. Ένα πακέτο ορίζει το νόμισμα, το πρότυπο φόρου και τα πρότυπα επικύρωσης για αυτόν τον χώρο εργασίας.",
     "modules.pack_chip_applied_hint": "Περιφερειακό πακέτο σε χρήση. Ανοίγει τη λίστα πακέτων.",

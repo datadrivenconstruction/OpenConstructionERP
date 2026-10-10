@@ -44951,6 +44951,7 @@ const resource = {
     "modules.pp_name_poland_pl": "پولینڈ تعمیراتی پیکج",
     "modules.pp_name_portugal_pt": "پرتگال تعمیراتی پیکج",
     "modules.pp_name_turkey_tr": "ترکیہ تعمیراتی پیکج",
+    "modules.pp_name_turkey_tr_mep": "ترکیہ ایم ای پی ٹھیکیدار پیکج",
     "modules.pack_chip_none": "کوئی علاقائی پیکج نہیں",
     "modules.pack_chip_none_hint": "کوئی علاقائی پیکج لاگو نہیں ہے۔ پیکج اس ورک اسپیس کے لیے کرنسی، ٹیکس ٹیمپلیٹ اور تصدیق معیارات طے کرتا ہے۔",
     "modules.pack_chip_applied_hint": "علاقائی پیکج زیرِ استعمال ہے۔ پیکج کی فہرست کھولتا ہے۔",

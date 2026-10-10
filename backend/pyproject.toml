@@ -631,6 +631,15 @@ artifacts = ["app/scripts/flagship_assets/site_photos/*.jpg"]
 # licence signals in the tree, in both directions, and reads the slugs back out
 # of it to check that every file those packs' manifests name is a file they
 # actually carry and commit. Add a pack here and it comes under both.
+#
+# A pack derived from another one (``turkey-tr-mep`` from ``turkey-tr``) builds
+# its manifest from its parent's when it is loaded, and finds the parent in the
+# directory next to its own. It ships only together with that parent, at the
+# same ``packs/<slug>/src`` layout, or discovery skips it. No ordering is
+# involved: each manifest is loaded by file and the derived one loads its
+# parent itself. backend/tests/unit/test_a_derived_pack_ships_with_its_parent.py
+# holds this map, the Dockerfile and the desktop spec to that, and loads the
+# derived manifest from a copy of the shipped layout in a clean interpreter.
 "../packs/aus/src" = "packs/aus/src"
 "../packs/austria-at/src" = "packs/austria-at/src"
 "../packs/belgium-be/src" = "packs/belgium-be/src"
@@ -669,6 +678,7 @@ artifacts = ["app/scripts/flagship_assets/site_photos/*.jpg"]
 "../packs/sweden-se/src" = "packs/sweden-se/src"
 "../packs/switzerland-ch/src" = "packs/switzerland-ch/src"
 "../packs/turkey-tr/src" = "packs/turkey-tr/src"
+"../packs/turkey-tr-mep/src" = "packs/turkey-tr-mep/src"
 "../packs/uae-ae/src" = "packs/uae-ae/src"
 "../packs/uk-jct/src" = "packs/uk-jct/src"
 "../packs/ukraine-ua/src" = "packs/ukraine-ua/src"

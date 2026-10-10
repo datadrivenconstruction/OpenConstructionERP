@@ -46154,6 +46154,7 @@ const resource = {
     "modules.pp_name_poland_pl": "ポーランド建設パック",
     "modules.pp_name_portugal_pt": "ポルトガル建設パック",
     "modules.pp_name_turkey_tr": "トルコ建設パック",
+    "modules.pp_name_turkey_tr_mep": "トルコ設備工事業者パック",
     "modules.pack_chip_none": "地域パックなし",
     "modules.pack_chip_none_hint": "地域パックは適用されていません。パックはこのワークスペースの通貨、税務テンプレート、検証基準を設定します。",
     "modules.pack_chip_applied_hint": "地域パック使用中。パック一覧を開きます。",

@@ -45239,6 +45239,7 @@ const resource = {
     "modules.pp_name_poland_pl": "পোল্যান্ড নির্মাণ প্যাক",
     "modules.pp_name_portugal_pt": "পর্তুগাল নির্মাণ প্যাক",
     "modules.pp_name_turkey_tr": "তুরস্ক নির্মাণ প্যাক",
+    "modules.pp_name_turkey_tr_mep": "তুরস্ক এমইপি ঠিকাদার প্যাক",
     "modules.pack_chip_none": "কোনো আঞ্চলিক প্যাক নেই",
     "modules.pack_chip_none_hint": "কোনো আঞ্চলিক প্যাক প্রয়োগ করা হয়নি। একটি প্যাক এই ওয়ার্কস্পেসের মুদ্রা, কর টেমপ্লেট ও ভ্যালিডেশন স্ট্যান্ডার্ড নির্ধারণ করে।",
     "modules.pack_chip_applied_hint": "আঞ্চলিক প্যাক ব্যবহৃত হচ্ছে। প্যাক তালিকা খোলে।",

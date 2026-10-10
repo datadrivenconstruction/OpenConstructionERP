@@ -45583,6 +45583,7 @@ const resource = {
     "modules.pp_name_poland_pl": "Byggpaket Polen",
     "modules.pp_name_portugal_pt": "Byggpaket Portugal",
     "modules.pp_name_turkey_tr": "Byggpaket Turkiet",
+    "modules.pp_name_turkey_tr_mep": "Paket för installationsentreprenörer Turkiet",
     "modules.pack_chip_none": "Inget regionpaket",
     "modules.pack_chip_none_hint": "Inget regionpaket är tillämpat. Ett paket anger valuta, skattmall och valideringsstandarder för detta arbetsområde.",
     "modules.pack_chip_applied_hint": "Regionpaket används. Öppnar paketlistan.",

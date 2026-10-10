@@ -44731,6 +44731,7 @@ const resource = {
     "modules.pp_name_poland_pl": "แพ็กก่อสร้างโปแลนด์",
     "modules.pp_name_portugal_pt": "แพ็กก่อสร้างโปรตุเกส",
     "modules.pp_name_turkey_tr": "แพ็กก่อสร้างตุรกี",
+    "modules.pp_name_turkey_tr_mep": "แพ็กผู้รับเหมางานระบบ ตุรกี",
     "modules.pack_chip_none": "ไม่มีแพ็กภูมิภาค",
     "modules.pack_chip_none_hint": "ไม่มีการใช้งานแพ็กภูมิภาค แพ็กจะกำหนดสกุลเงิน แม่แบบภาษี และมาตรฐานการตรวจสอบสำหรับพื้นที่ทำงานนี้",
     "modules.pack_chip_applied_hint": "กำลังใช้งานแพ็กภูมิภาค เปิดรายการแพ็ก",

@@ -44896,6 +44896,7 @@ const resource = {
     "modules.pp_name_poland_pl": "पोलैंड निर्माण पैक",
     "modules.pp_name_portugal_pt": "पुर्तगाल निर्माण पैक",
     "modules.pp_name_turkey_tr": "तुर्किये निर्माण पैक",
+    "modules.pp_name_turkey_tr_mep": "तुर्किये MEP ठेकेदार पैक",
     "modules.pack_chip_none": "कोई क्षेत्रीय पैक नहीं",
     "modules.pack_chip_none_hint": "कोई क्षेत्रीय पैक लागू नहीं है। एक पैक इस वर्कस्पेस के लिए मुद्रा, कर टेम्पलेट और सत्यापन मानक तय करता है।",
     "modules.pack_chip_applied_hint": "क्षेत्रीय पैक उपयोग में है। पैक सूची खोलता है।",

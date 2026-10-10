@@ -7,9 +7,9 @@ This pack is the Türkiye country pack with one company shape laid over it: a
 mechanical, electrical and plumbing contractor. One installation runs one pack
 at a time, so the two cannot be installed side by side and this pack has to
 carry the country configuration as well as the shape. It does not copy it. The
-locale, currency, methodology, rule set, reference documents, cost region and
-market metadata are read from the country pack's own manifest when this module
-is imported, and only the fields named in ``_derive`` below are this pack's.
+locale, currency, methodology, rule set, cost region and market metadata are
+read from the country pack's own manifest when this module is imported, and
+only the fields named in ``_derive`` below are this pack's.
 A correction made to the country pack reaches this one on the next start.
 """
 
@@ -22,42 +22,56 @@ from typing import Any
 
 from app.core.partner_pack.manifest import PartnerBranding, PartnerPackManifest
 
-#: Slug and package of the pack this one is derived from.
-COUNTRY_PACK_SLUG = "turkey-tr"
+#: Slug of the pack this one is derived from. A plain string literal on
+#: purpose: the gates that read pack manifests as text, without importing
+#: them, find the parent through this name and read from the parent's source
+#: every field this file does not state. Keep the name and keep it a literal.
+DERIVED_FROM = "turkey-tr"
 _COUNTRY_PACKAGE = "openconstructionerp_turkey_tr"
 
 
 def _country_manifest() -> PartnerPackManifest:
     """Return the Türkiye country pack's manifest.
 
-    Two layouts have to work. Installed from its own wheel, this pack depends
+    Two layouts have to work, and they are tried in this order.
+
+    In a source checkout, in the community wheel, in the Docker image and in
+    the desktop bundle the pack tree sits beside the ``app`` package and no
+    pack is on the import path: the core loads each ``manifest.py`` by file.
+    The country pack is then the directory next to this one, and its manifest
+    is loaded the same way. The neighbour is preferred over an installed
+    package of the same name because it is the copy that shipped with this
+    file, so the two cannot be of different releases.
+
+    Installed from its own wheel there is no neighbour. This pack then depends
     on the country pack's distribution (see ``pyproject.toml``) and the
-    package imports by name. In a source checkout, and in the community wheel
-    where the pack tree sits beside the ``app`` package, no pack is on the
-    import path: the core loads each ``manifest.py`` by file, so the country
-    pack's is loaded the same way from its place two directories over.
+    package imports by name.
 
     Raises:
         ImportError: If the country pack is in neither place. The core logs
             that and skips this pack, which is the correct outcome: a derived
             pack without its base has no configuration to offer.
     """
-    try:
-        module = importlib.import_module(f"{_COUNTRY_PACKAGE}.manifest")
-    except ImportError:
-        path = Path(__file__).resolve().parents[3] / COUNTRY_PACK_SLUG / "src" / _COUNTRY_PACKAGE / "manifest.py"
-        spec = (
-            importlib.util.spec_from_file_location("_oe_turkey_tr_mep_country_manifest", path)
-            if path.is_file()
-            else None
-        )
+    resolved = Path(__file__).resolve()
+    neighbour = (
+        resolved.parents[3] / DERIVED_FROM / "src" / _COUNTRY_PACKAGE / "manifest.py"
+        if len(resolved.parents) > 3
+        else None
+    )
+    if neighbour is not None and neighbour.is_file():
+        spec = importlib.util.spec_from_file_location("_oe_turkey_tr_mep_country_manifest", neighbour)
         if spec is None or spec.loader is None:
-            raise ImportError(
-                f"The {COUNTRY_PACK_SLUG} pack is required by turkey-tr-mep and was not found "
-                f"as an installed package or at {path}."
-            ) from None
+            raise ImportError(f"The {DERIVED_FROM} pack at {neighbour} could not be loaded for turkey-tr-mep.")
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
+    else:
+        try:
+            module = importlib.import_module(f"{_COUNTRY_PACKAGE}.manifest")
+        except ImportError:
+            raise ImportError(
+                f"The {DERIVED_FROM} pack is required by turkey-tr-mep and was not found "
+                f"next to it ({neighbour}) or as an installed package."
+            ) from None
     manifest = module.MANIFEST
     return manifest if isinstance(manifest, PartnerPackManifest) else PartnerPackManifest(**manifest)
 
@@ -100,6 +114,15 @@ MANIFEST = _derive(
     # other screen folded under "More modules". The person who keeps the site
     # registers can pick the shorter "Site Records" profile for themselves.
     default_company_profile="mep_contractor",
+    # Empty, and stated rather than inherited. This field names the reference
+    # documents a pack carries under its own ``rule_packs/`` directory, and
+    # this pack carries none: the five Turkish documents are files of the
+    # country pack. They are found from that pack's directory whichever pack
+    # is active, so nothing is lost by not repeating their names here, and
+    # repeating them would name five files this package cannot serve. The
+    # rule set that actually runs rules is ``validation_rule_sets``, and that
+    # one is inherited.
+    validation_rule_packs=[],
     # Switched ON for the installation when the pack is applied. Every entry
     # is a non-core module the installer's menu opens, so a module an admin
     # switched off earlier comes back with the pack. Core modules cannot be
@@ -194,6 +217,6 @@ MANIFEST = _derive(
         "industry": "mep-contracting",
         "industry_name_en": "Mechanical, electrical and plumbing contracting",
         "industry_name_tr": "Mekanik ve elektrik tesisat taahhüdü",
-        "derived_from": COUNTRY_PACK_SLUG,
+        "derived_from": DERIVED_FROM,
     },
 )

@@ -47435,6 +47435,7 @@ const resource = {
     "modules.pp_name_poland_pl": "Pack Construction Pologne",
     "modules.pp_name_portugal_pt": "Pack Construction Portugal",
     "modules.pp_name_turkey_tr": "Pack Construction Turquie",
+    "modules.pp_name_turkey_tr_mep": "Pack Entreprises de lots techniques Turquie",
     "modules.pack_chip_none": "Aucun pack régional",
     "modules.pack_chip_none_hint": "Aucun pack régional n'est appliqué. Un pack définit la devise, le modèle fiscal et les normes de validation de cet espace de travail.",
     "modules.pack_chip_applied_hint": "Pack régional en cours d'utilisation. Ouvre la liste des packs.",

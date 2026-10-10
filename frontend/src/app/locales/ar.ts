@@ -47588,6 +47588,7 @@ const resource = {
     "modules.pp_name_poland_pl": "حزمة إنشاءات بولندا",
     "modules.pp_name_portugal_pt": "حزمة إنشاءات البرتغال",
     "modules.pp_name_turkey_tr": "حزمة إنشاءات تركيا",
+    "modules.pp_name_turkey_tr_mep": "حزمة مقاولي الأعمال الميكانيكية والكهربائية في تركيا",
     "modules.pack_chip_none": "لا توجد حزمة إقليمية",
     "modules.pack_chip_none_hint": "لا توجد حزمة إقليمية مطبَّقة. تحدد الحزمة العملة وقالب الضريبة ومعايير التحقق لمساحة العمل هذه.",
     "modules.pack_chip_applied_hint": "الحزمة الإقليمية قيد الاستخدام. يفتح قائمة الحزم.",
