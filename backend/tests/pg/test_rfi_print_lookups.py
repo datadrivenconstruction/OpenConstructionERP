@@ -96,7 +96,8 @@ async def test_the_rfi_pdf_resolves_people_documents_and_the_variation(pg_sessio
     assert "Linked documents no longer available: 2" in text
     assert "CO-003 - Lintel change" in text
     # The stored currency is lower case; the document prints the ISO code.
-    assert "Yes, 12000 EUR" in text
+    # ... and the amount in the separators a euro project writes it with.
+    assert "Yes, 12.000,00 EUR" in text.replace("\u00a0", " ")
 
 
 async def test_the_rfi_log_prints_names_words_and_a_page_setup(pg_session) -> None:

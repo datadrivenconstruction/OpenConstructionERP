@@ -63,6 +63,12 @@ from app.modules.submittals.schemas import (
 from app.modules.submittals.service import SubmittalService
 
 router = APIRouter(tags=["submittals"])
+
+# Register and record exports (workbook and PDF). Included first, so the
+# static "export" paths are matched before the "/{id}" routes below.
+from app.modules.submittals.export_routes import export_router  # noqa: E402
+
+router.include_router(export_router)
 logger = logging.getLogger(__name__)
 
 # Magic-byte allow-list for direct submittal-attachment uploads.

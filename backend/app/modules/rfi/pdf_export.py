@@ -80,6 +80,8 @@ from app.core.pdf_fonts import (
     pdf_table_paragraph_rows,
     register_pdf_fonts,
 )
+from app.core.regional_format import number_style
+from app.core.register_export import format_amount
 from app.modules.rfi.intl import localize_discipline, localize_status
 from app.modules.rfi.pdf_translations import (
     DEFAULT_PDF_LOCALE,
@@ -342,6 +344,7 @@ def build_rfi_pdf(
     project_name: str,
     project_code: str | None = None,
     currency: str = "",
+    country: str | None = None,
     people: Mapping[str, str] | None = None,
     documents: Sequence[str] = (),
     unavailable_documents: int = 0,
@@ -357,6 +360,9 @@ def build_rfi_pdf(
         project_code: Project code, appended to the name when set.
         currency: ISO code of the project's currency. The cost impact amount
             is stored in that currency, so it is printed next to it.
+        country: ISO 3166-1 alpha-2 of the project's country, when known. It
+            decides the separators the amount is written with; without it the
+            currency does.
         people: Display names keyed by ``str(user_id)`` for everyone the RFI
             names (raised by, assigned to, ball in court, answered by).
         documents: Names of the linked documents that still exist.
@@ -467,7 +473,14 @@ def build_rfi_pdf(
 
     # Impact.
     cost_value = str(getattr(rfi, "cost_impact_value", None) or "").strip()
-    cost_detail = f"{cost_value} {currency}".strip() if cost_value else None
+    cost_detail = None
+    if cost_value:
+        # Written the way the project's market writes an amount (1.234,56 for
+        # a lira or a euro). The column is free text, so a value that is not a
+        # number is printed as it was typed.
+        cost_detail = format_amount(cost_value, number_style(country, currency), currency)
+        if cost_detail == "-":
+            cost_detail = f"{cost_value} {currency}".strip()
     schedule_days = getattr(rfi, "schedule_impact_days", None)
     schedule_detail = days_text(int(schedule_days), locale) if isinstance(schedule_days, int) else None
     impact_rows = [

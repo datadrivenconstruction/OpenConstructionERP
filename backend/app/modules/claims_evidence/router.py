@@ -35,6 +35,12 @@ from app.modules.claims_evidence.service import assemble_evidence, reconstruct_s
 
 router = APIRouter(tags=["Claims Evidence"])
 
+# Printable evidence packs (PDF and workbook). Included first, so the
+# static export paths are matched before the routes below.
+from app.modules.claims_evidence.export_routes import export_router  # noqa: E402
+
+router.include_router(export_router)
+
 #: Subject kinds the provability endpoint accepts, surfaced in its 422 message.
 _SUBJECT_KINDS = (
     "change_order",

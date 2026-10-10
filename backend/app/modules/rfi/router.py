@@ -69,6 +69,12 @@ from app.modules.rfi.schemas import (
 from app.modules.rfi.service import RFIService
 
 router = APIRouter(tags=["rfi"])
+
+# Register and record exports (workbook and PDF). Included first, so the
+# static "export" paths are matched before the "/{id}" routes below.
+from app.modules.rfi.export_routes import export_router  # noqa: E402
+
+router.include_router(export_router)
 logger = logging.getLogger(__name__)
 
 # R5 / BUG-RFI-ATT: allow-list of magic-byte tokens accepted for RFI reply

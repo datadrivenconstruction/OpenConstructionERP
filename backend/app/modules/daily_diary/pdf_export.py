@@ -79,6 +79,7 @@ from app.modules.daily_diary.pdf_translations import (
     entry_type_label,
     format_iso_date,
     normalize_pdf_locale,
+    status_caps,
     status_label,
     tr,
     weather_summary_text,
@@ -328,7 +329,7 @@ def _build_header(
 ) -> list[Any]:
     """Build the dark header band with project, date and status."""
     doc_title = tr(locale, "doc_title")
-    status_text = status_label(status, locale).upper()
+    status_text = status_caps(status_label(status, locale), locale)
     header = Table(
         [
             [
@@ -372,7 +373,7 @@ def _build_overview(
     completeness_text = "-"
     if completeness is not None:
         try:
-            completeness_text = f"{float(completeness) * 100:.0f}%"
+            completeness_text = tr(locale, "percent", value=f"{float(completeness) * 100:.0f}")
         except (TypeError, ValueError):
             completeness_text = "-"
 
@@ -441,9 +442,9 @@ def _build_weather(
                 [
                     Paragraph(time_text, styles["cell"]),
                     _safe_para(getattr(rec, "source", "") or "-", styles["cell"]),
-                    Paragraph(_fmt_number(getattr(rec, "temperature_c", None)), styles["cell"]),
-                    Paragraph(_fmt_number(getattr(rec, "wind_speed_kmh", None)), styles["cell"]),
-                    Paragraph(_fmt_number(getattr(rec, "precipitation_mm", None)), styles["cell"]),
+                    Paragraph(_fmt_number(getattr(rec, "temperature_c", None), locale=locale), styles["cell"]),
+                    Paragraph(_fmt_number(getattr(rec, "wind_speed_kmh", None), locale=locale), styles["cell"]),
+                    Paragraph(_fmt_number(getattr(rec, "precipitation_mm", None), locale=locale), styles["cell"]),
                     _safe_para(getattr(rec, "conditions_text", None) or "-", styles["cell"]),
                 ]
             )

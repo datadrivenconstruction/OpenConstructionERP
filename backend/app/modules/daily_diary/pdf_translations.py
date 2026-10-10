@@ -5,8 +5,15 @@
 The diary PDF used to be hardcoded English and printed the raw
 ``weather_summary`` dictionary keys (``temp_c: 20 · conditions: clear``).
 This module gives the renderer a self-contained translations table -
-English (source of truth) plus German - and the small helpers the router
-and the renderer need to pick and apply a locale.
+English (source of truth), German and Turkish - and the small helpers the
+router and the renderer need to pick and apply a locale.
+
+The Turkish document is titled "Şantiye Günlük Raporu", the name Turkish
+contractors print on this form. It is deliberately not "Şantiye Defteri":
+that is the statutory site book a site chief keeps under the Turkish
+regulation on site chiefs, and a report printed from here is not that book.
+The other Turkish labels follow the diary screen (``daily_diary.*`` in the
+Turkish interface locale) so the page says what the screen says.
 
 * **Self-contained per-package bundle**, like
   :mod:`app.core.validation.messages`: strings live next to the code that
@@ -32,6 +39,7 @@ from __future__ import annotations
 from datetime import date
 from typing import Any
 
+from app.core import register_export
 from app.core.document_locale import (
     normalize_document_locale,
     resolve_document_locale,
@@ -47,6 +55,7 @@ __all__ = [
     "format_iso_date",
     "normalize_pdf_locale",
     "resolve_pdf_locale",
+    "status_caps",
     "status_label",
     "tr",
     "weather_summary_text",
@@ -56,7 +65,7 @@ DEFAULT_PDF_LOCALE = "en"
 
 #: Languages the diary PDF can actually render. Extend the tables below
 #: when adding a language; anything else falls back to English.
-SUPPORTED_PDF_LOCALES: tuple[str, ...] = ("en", "de")
+SUPPORTED_PDF_LOCALES: tuple[str, ...] = ("en", "de", "tr")
 
 # ── Catalog ──────────────────────────────────────────────────────────────
 # The English values are byte-for-byte the literals the renderer shipped
@@ -93,6 +102,8 @@ _STRINGS: dict[str, dict[str, str]] = {
         "summary_wind": "wind {value} km/h",
         "summary_precipitation": "precipitation {value} mm",
         "summary_humidity": "humidity {value} %",
+        "percent": "{value}%",
+        "decimal_mark": ".",
     },
     "de": {
         "doc_title": "Bautagebuch",
@@ -124,6 +135,41 @@ _STRINGS: dict[str, dict[str, str]] = {
         "summary_wind": "Wind {value} km/h",
         "summary_precipitation": "Niederschlag {value} mm",
         "summary_humidity": "Luftfeuchte {value} %",
+        "percent": "{value} %",
+        "decimal_mark": ",",
+    },
+    "tr": {
+        "doc_title": "Şantiye Günlük Raporu",
+        "overview": "Genel bilgiler",
+        "site_supervisor": "Saha amiri",
+        "not_recorded": "Kaydedilmedi",
+        "labour_on_site": "Sahadaki iş gücü",
+        "equipment_on_site": "Sahadaki ekipman",
+        "completeness": "Tamlık oranı",
+        "weather": "Hava durumu",
+        "weather_time": "Saat",
+        "weather_source": "Kaynak",
+        "weather_temp": "Sıcaklık (°C)",
+        "weather_wind": "Rüzgar (km/sa)",
+        "weather_precip": "Yağış (mm)",
+        "weather_conditions": "Koşullar",
+        "weather_empty": "Bu gün için hava durumu kaydedilmedi.",
+        "site_record": "Şantiye kayıtları",
+        "entries_empty": "Bu rapor için kayıt girilmedi.",
+        "notes": "Notlar",
+        "notes_empty": "Ek not yok.",
+        "footer_supervisor": "Saha amiri: {name}",
+        "footer_supervisor_missing": "Saha amiri: kaydedilmedi",
+        "footer_generated": "Oluşturulma: {timestamp}",
+        "footer_page": "Sayfa {page}",
+        "filename_prefix": "santiye-gunluk-raporu",
+        "date_format": "%d.%m.%Y",
+        "datetime_format": "%d.%m.%Y %H:%M UTC",
+        "summary_wind": "rüzgar {value} km/sa",
+        "summary_precipitation": "yağış {value} mm",
+        "summary_humidity": "nem %{value}",
+        "percent": "%{value}",
+        "decimal_mark": ",",
     },
 }
 
@@ -151,6 +197,16 @@ _ENTRY_TYPE_LABELS: dict[str, dict[str, str]] = {
         "photo_note": "Fotonotizen",
         "general": "Allgemeine Notizen",
     },
+    "tr": {
+        "visitor": "Ziyaretçiler",
+        "event": "Olaylar",
+        "delivery": "Malzeme teslimatları",
+        "completion": "Yapılan işler",
+        "incident_summary": "İş güvenliği ve olaylar",
+        "inspection_summary": "Denetimler",
+        "photo_note": "Fotoğraf notları",
+        "general": "Genel notlar",
+    },
 }
 
 # Status chip labels for the DIARY_STATUSES lifecycle (open -> closed ->
@@ -169,6 +225,12 @@ _STATUS_LABELS: dict[str, dict[str, str]] = {
         "closed": "Geschlossen",
         "signed": "Unterzeichnet",
         "archived": "Archiviert",
+    },
+    "tr": {
+        "open": "Açık",
+        "closed": "Kapatıldı",
+        "signed": "İmzalandı",
+        "archived": "Arşivlendi",
     },
 }
 
@@ -238,6 +300,36 @@ _CONDITION_LABELS: dict[str, dict[str, str]] = {
         "thunderstorm": "Gewitter",
         "thunderstorm_hail_light": "Gewitter mit leichtem Hagel",
         "thunderstorm_hail_heavy": "Gewitter mit starkem Hagel",
+    },
+    "tr": {
+        "clear": "açık",
+        "mainly_clear": "çoğunlukla açık",
+        "partly_cloudy": "parçalı bulutlu",
+        "cloudy": "bulutlu",
+        "overcast": "kapalı",
+        "fog": "sis",
+        "fog_rime": "kırağılı sis",
+        "drizzle_light": "hafif çisenti",
+        "drizzle_moderate": "orta şiddette çisenti",
+        "drizzle_dense": "yoğun çisenti",
+        "rain": "yağmur",
+        "rain_light": "hafif yağmur",
+        "rain_moderate": "orta şiddette yağmur",
+        "rain_heavy": "kuvvetli yağmur",
+        "freezing_rain_light": "hafif dondurucu yağmur",
+        "freezing_rain_heavy": "kuvvetli dondurucu yağmur",
+        "snow": "kar",
+        "snow_light": "hafif kar yağışı",
+        "snow_moderate": "orta şiddette kar yağışı",
+        "snow_heavy": "yoğun kar yağışı",
+        "rain_showers_light": "hafif sağanak yağış",
+        "rain_showers_moderate": "orta şiddette sağanak yağış",
+        "rain_showers_violent": "şiddetli sağanak yağış",
+        "snow_showers_light": "hafif kar sağanağı",
+        "snow_showers_heavy": "kuvvetli kar sağanağı",
+        "thunderstorm": "gök gürültülü sağanak yağış",
+        "thunderstorm_hail_light": "hafif dolu ile gök gürültülü sağanak yağış",
+        "thunderstorm_hail_heavy": "kuvvetli dolu ile gök gürültülü sağanak yağış",
     },
 }
 
@@ -310,6 +402,16 @@ def status_label(status: str | None, locale: str) -> str:
     return label or (status or "open")
 
 
+def status_caps(label: str, locale: str) -> str:
+    """Upper-case the status chip the way the language writes capitals.
+
+    ``str.upper`` printed the Turkish "İmzalandı" correctly only by luck and
+    would print "Arşivlendi" as "ARŞIVLENDI", without the dot Turkish keeps
+    on a capital i.
+    """
+    return register_export.caps(label, locale)
+
+
 def diary_pdf_filename(stem: str, locale: str) -> str:
     """Download filename for a diary export, e.g. ``bautagebuch-2026-04-10.pdf``."""
     return f"{tr(normalize_pdf_locale(locale), 'filename_prefix')}-{stem}.pdf"
@@ -318,12 +420,14 @@ def diary_pdf_filename(stem: str, locale: str) -> str:
 # ── Value formatting ─────────────────────────────────────────────────────
 
 
-def fmt_number(value: Any, decimals: int = 1) -> str:
+def fmt_number(value: Any, decimals: int = 1, locale: str | None = None) -> str:
     """Format a numeric value (int / float / Decimal) for display.
 
     Args:
         value: The value to format. ``None`` renders as a dash.
         decimals: Number of decimal places to keep.
+        locale: Document language, for the decimal mark (German and Turkish
+            write ``12,5``). ``None`` keeps the full stop.
 
     Returns:
         A formatted string, or ``"-"`` when the value is missing or not
@@ -337,7 +441,8 @@ def fmt_number(value: Any, decimals: int = 1) -> str:
         return "-"
     if number == int(number):
         return str(int(number))
-    return f"{number:.{decimals}f}"
+    text = f"{number:.{decimals}f}"
+    return text.replace(".", tr(locale, "decimal_mark")) if locale else text
 
 
 def format_iso_date(value: str, locale: str) -> str:
@@ -399,7 +504,7 @@ def weather_summary_text(summary: dict[str, Any], locale: str) -> str:
 
     temp = _first_present(summary, _TEMP_KEYS)
     if temp is not None:
-        text = fmt_number(temp)
+        text = fmt_number(temp, locale=locale)
         if text != "-":
             parts.append(f"{text} °C")
             consumed.update(_TEMP_KEYS)
@@ -421,7 +526,7 @@ def weather_summary_text(summary: dict[str, Any], locale: str) -> str:
     ):
         value = _first_present(summary, keys)
         if value is not None:
-            text = fmt_number(value)
+            text = fmt_number(value, locale=locale)
             if text != "-":
                 parts.append(tr(locale, template_key, value=text))
                 consumed.update(keys)

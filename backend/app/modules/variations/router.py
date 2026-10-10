@@ -78,6 +78,12 @@ from app.modules.variations.service import (
 )
 
 router = APIRouter(tags=["variations"])
+
+# Register and record exports (workbook and PDF). Included first, so the
+# static "export" paths are matched before the "/{id}" routes below.
+from app.modules.variations.export_routes import export_router  # noqa: E402
+
+router.include_router(export_router)
 logger = logging.getLogger(__name__)
 
 

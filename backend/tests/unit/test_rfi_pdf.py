@@ -126,7 +126,8 @@ def _pages(pdf: bytes) -> list[str]:
 
 
 def _text(pdf: bytes) -> str:
-    return "\n".join(_pages(pdf))
+    # An amount and its currency code are joined by a no-break space.
+    return "\n".join(_pages(pdf)).replace("\u00a0", " ")
 
 
 # ── Renderer ──────────────────────────────────────────────────────────────
@@ -150,7 +151,7 @@ def test_english_form_carries_every_field() -> None:
         "High",
         "Structural",
         "A-201 Elevations rev C.pdf",
-        "Yes, 12000 USD",
+        "Yes, 12,000.00 USD",
         "Yes, 3 days",
         "Use the in-situ beam per S-110 rev B.",
         "2026-09-14",

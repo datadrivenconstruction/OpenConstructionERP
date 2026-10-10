@@ -35,6 +35,12 @@ from app.modules.transmittals.service import TransmittalService
 
 router = APIRouter(tags=["transmittals"])
 
+# Register and record exports (workbook and PDF). Included first, so the
+# static "export" paths are matched before the "/{id}" routes below.
+from app.modules.transmittals.export_routes import export_router  # noqa: E402
+
+router.include_router(export_router)
+
 
 def _get_service(session: SessionDep) -> TransmittalService:
     return TransmittalService(session)

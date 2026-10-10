@@ -47,6 +47,12 @@ from app.modules.changeorders.schemas import (
 from app.modules.changeorders.service import ChangeOrderService
 
 router = APIRouter(tags=["changeorders"])
+
+# Register and record exports (workbook and PDF). Included first, so the
+# static "export" paths are matched before the "/{id}" routes below.
+from app.modules.changeorders.export_routes import export_router  # noqa: E402
+
+router.include_router(export_router)
 logger = logging.getLogger(__name__)
 
 
