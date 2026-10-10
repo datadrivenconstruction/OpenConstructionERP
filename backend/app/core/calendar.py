@@ -1140,6 +1140,11 @@ _WORKING_WEEK: dict[str, frozenset[int]] = {
     # Monday-Friday here is the near-universal practical convention, not a
     # statute naming these five days the way Bulgaria's does.
     "NG": frozenset({0, 1, 2, 3, 4}),
+    # Turkey: Labour Law 4857 Art. 63 caps the week at 45 hours without fixing
+    # the days, and Law 2429 Art. 3 makes Sunday the weekly rest day. Monday-
+    # Friday is the common office and public-sector week, a convention like
+    # Nigeria's; sites often also work Saturday, which a project calendar sets.
+    "TR": frozenset({0, 1, 2, 3, 4}),
 }
 
 _DEFAULT_WORKING_WEEK: frozenset[int] = frozenset({0, 1, 2, 3, 4})
