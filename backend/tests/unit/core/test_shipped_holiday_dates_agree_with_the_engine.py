@@ -35,8 +35,8 @@ deliberately does not adjudicate, because fixing them changes date arithmetic
 for real users and that is a decision to take explicitly rather than as a side
 effect of writing a test.
 
-**The denominator is printed.** 37 countries are seeded, 20 have a runtime
-binding for the seed year, 17 are unbound. A gate whose population is invisible can be
+**The denominator is printed.** 37 countries are seeded, 21 have a runtime
+binding for the seed year, 16 are unbound. A gate whose population is invisible can be
 satisfied by narrowing it, so the unbound countries are named in the output
 rather than silently absent from it, and floors below stop the bound set from
 being trimmed to make a failure go away.
@@ -272,9 +272,9 @@ _DIVERGENCES: dict[str, Divergence] = {
 
 #: Floors. These stop a future failure from being resolved by trimming the
 #: population instead of the defect. Measured, not guessed: 37 seeded countries,
-#: of which 20 have a runtime binding for the seed year.
+#: of which 21 have a runtime binding for the seed year.
 _MIN_SEEDED = 37
-_MIN_BOUND = 20
+_MIN_BOUND = 21
 
 #: The countries that ship a calendar nothing computes, named rather than
 #: counted. This has to be an explicit list: ``UNBOUND`` is derived from
@@ -297,7 +297,6 @@ _EXPECTED_UNBOUND: tuple[str, ...] = (
     "NZ",
     "PL",
     "SE",
-    "TR",
     "UA",
     "ZA",
 )
@@ -392,7 +391,7 @@ def test_the_seed_and_the_engine_agree(code: str) -> None:
 
 
 def test_the_countries_that_agree_are_named() -> None:
-    """The four clean countries, pinned against the easy escape from the test above.
+    """The six clean countries, pinned against the easy escape from the test above.
 
     This asserts on ``_DIVERGENCES`` rather than on the data, deliberately. When
     the agreement check fails, the cheap way out is to add an entry here and
@@ -402,7 +401,7 @@ def test_the_countries_that_agree_are_named() -> None:
     """
     agreeing = sorted(c for c in BOUND if c not in _DIVERGENCES)
     print(f"seed equals engine exactly for {len(agreeing)} of {len(BOUND)} bound countries: {agreeing}")
-    assert agreeing == ["BG", "DE", "NG", "PT", "US"], (
+    assert agreeing == ["BG", "DE", "NG", "PT", "TR", "US"], (
         f"the set of countries whose two sources agree exactly has changed, now {agreeing}. "
         f"A country that LEFT this list started disagreeing with the engine, and belongs in "
         f"_DIVERGENCES only with a reason. A country that JOINED it either had its divergence "

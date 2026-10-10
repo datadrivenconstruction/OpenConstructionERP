@@ -1028,6 +1028,71 @@ def _holidays_bg(year: int) -> set[date]:
     return days
 
 
+# First day of each Turkish religious feast, as published by the Presidency of
+# Religious Affairs (Diyanet Isleri Baskanligi) in its "Dini Gunler" calendar.
+# Turkey fixes these from Diyanet's own computed calendar rather than from the
+# Umm al-Qura tables ``hijridate`` implements, and the two can differ by a day,
+# so the dates are curated per year instead of converted. 2026 and 2027 match
+# Umm al-Qura; that agreement is a cross-check, not the source.
+#
+# Sources: Diyanet's 2026 calendar (as shipped in the 2026 work-calendar seed)
+# and Diyanet's 2027 calendar as reported by CNN Turk, "2027 resmi tatiller
+# takvimi" (28 July 2026), and Evrensel, "Diyanet 2027 takvimini duyurdu"
+# (24 August 2026): Ramazan Bayrami 9-11 March 2027, Kurban Bayrami 16-19 May
+# 2027. Diyanet publishes one year at a time, so 2028 is left out until it does;
+# a year outside the table returns only the fixed days and says so.
+_TR_FEASTS: dict[int, dict[str, tuple[int, int]]] = {
+    2026: {"ramazan_bayrami": (3, 20), "kurban_bayrami": (5, 27)},
+    2027: {"ramazan_bayrami": (3, 9), "kurban_bayrami": (5, 16)},
+}
+
+_TR_FIRST_YEAR = min(_TR_FEASTS)
+_TR_LAST_YEAR = max(_TR_FEASTS)
+
+
+def _holidays_tr(year: int) -> set[date]:
+    """Turkish public holidays (Law No. 2429 on National Holidays and General Days Off).
+
+    Seven fixed days plus the two religious feasts: Ramazan Bayrami for three
+    days and Kurban Bayrami for four, both counted from ``_TR_FEASTS``.
+
+    A holiday on a Saturday or Sunday is not moved; Law 2429 has no substitute
+    day. The half days are not modelled, because this function returns whole
+    days: the afternoon of 28 October and the afternoon of each feast's eve
+    (arife) are off for public employees, so a span across one counts half a
+    day more working time than the public sector has. Bridge days the
+    government grants by circular for the public sector are announced each year
+    and are not modelled either.
+    """
+    holidays: set[date] = {
+        date(year, 1, 1),  # New Year's Day
+        date(year, 4, 23),  # National Sovereignty and Children's Day
+        date(year, 5, 1),  # Labour and Solidarity Day
+        date(year, 5, 19),  # Commemoration of Ataturk, Youth and Sports Day
+        date(year, 7, 15),  # Democracy and National Unity Day
+        date(year, 8, 30),  # Victory Day
+        date(year, 10, 29),  # Republic Day
+    }
+
+    feasts = _TR_FEASTS.get(year)
+    if feasts is None:
+        logger.warning(
+            "No curated Turkish feast dates for %d (table covers %d-%d); Ramazan Bayrami and "
+            "Kurban Bayrami are omitted and only the %d fixed days are returned",
+            year,
+            _TR_FIRST_YEAR,
+            _TR_LAST_YEAR,
+            len(holidays),
+        )
+        return holidays
+
+    ramazan = date(year, *feasts["ramazan_bayrami"])
+    holidays.update(ramazan + timedelta(days=offset) for offset in range(3))
+    kurban = date(year, *feasts["kurban_bayrami"])
+    holidays.update(kurban + timedelta(days=offset) for offset in range(4))
+    return holidays
+
+
 # ── Working-week definitions (date.weekday(): 0=Mon, 6=Sun) ──────────────────
 #
 # Standard Mon–Fri work week: {0, 1, 2, 3, 4}
@@ -1100,6 +1165,7 @@ _HOLIDAY_FUNCS: dict[str, Any] = {
     "RU": _holidays_ru,
     "NG": _holidays_ng,
     "BG": _holidays_bg,
+    "TR": _holidays_tr,
 }
 
 
@@ -1205,6 +1271,7 @@ class HolidayCalculationError(RuntimeError):
 _CURATED_TABLES: dict[str, tuple[dict[int, Any], tuple[str, ...]]] = {
     "CN": (_CN_FESTIVALS, ("Spring Festival", "Qingming", "Dragon Boat", "Mid-Autumn")),
     "IN": (_HINDU_HOLIDAYS, ("Holi", "Diwali")),
+    "TR": (_TR_FEASTS, ("Ramazan Bayrami", "Kurban Bayrami")),
 }
 
 #: Holidays whose dates are computed but whose length is not. ``_gcc_eids``
