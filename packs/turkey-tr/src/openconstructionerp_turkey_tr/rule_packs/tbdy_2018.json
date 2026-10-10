@@ -1,10 +1,11 @@
 {
   "rule_pack_id": "tbdy_2018",
-  "name": "TBDY 2018 — Turkish Building Seismic Code",
+  "name": "TBDY 2018, Turkish Building Seismic Code",
   "standard": "TBDY 2018 (Turkiye Bina Deprem Yonetmeligi)",
   "jurisdiction": "TR",
   "description": "Validates structural project documentation against the Turkish Building Seismic Code (TBDY 2018, Deprem Yonetmeligi). Checks seismic hazard zone designation using the Turkey Earthquake Hazard Map (AFAD), site class classification (ZA through ZF), building importance class, structural system type, and that the deprem performans raporu (seismic performance report) covers the required analysis methods for the building height and importance category.",
   "applies_to": ["estimate", "validation", "submittals"],
+  "review_status": "Written from the Turkish Building Earthquake Code 2018 (TBDY, Resmi Gazete 30364 of 18 March 2018, in force 1 January 2019), which replaced the four numbered seismic zones with site-specific hazard from the AFAD map. Nothing in it runs yet. Not reviewed by a Turkish quantity surveyor or structural engineer.",
   "enables_rule_ids": [],
   "planned_not_built_rule_ids": [
     "tbdy.deprem_tehlike_haritasi_referenced",

@@ -1,10 +1,11 @@
 {
   "rule_pack_id": "kamu_ihale",
-  "name": "Kamu Ihale Kanunu — Public Procurement Law",
+  "name": "Kamu Ihale Kanunu, Public Procurement Law",
   "standard": "Kamu Ihale Kanunu (Kanun No. 4734) / Kamu Ihale Sozlesmeleri Kanunu (No. 4735)",
   "jurisdiction": "TR",
   "description": "Validates public tender documents against the Turkish Public Procurement Law (Kamu Ihale Kanunu, No. 4734) and the Public Procurement Contracts Law (No. 4735). Checks ihale usulu (procurement method) classification, yaklasilk maliyet (estimated cost) documentation, idari sartname (administrative specification) completeness, teklif mektubu (bid letter) requirements, gecici teminat (bid bond) rate, kesin teminat (performance bond) rate, and fiyat farki (price adjustment) clause.",
   "applies_to": ["tender", "estimate", "validation"],
+  "review_status": "Written from Public Procurement Law 4734, Public Procurement Contracts Law 4735 and the public works general conditions as amended in Resmi Gazete 32971 of 30 July 2025. Nothing in it runs yet. Not reviewed by a Turkish quantity surveyor or procurement specialist.",
   "enables_rule_ids": [],
   "planned_not_built_rule_ids": [
     "kik.ihale_usulu_defined",

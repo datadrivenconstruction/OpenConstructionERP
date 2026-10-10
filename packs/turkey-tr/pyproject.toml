@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "openconstructionerp-turkey-tr"
 version = "0.1.0"
-description = "Country pack for the Turkish market: Bayindirlik Bakanligi Birim Fiyat unit-price methodology, Deprem Yonetmeligi 2018 (TBDY) seismic code, Imar Kanunu zoning compliance, TSE standards, KDV at 20 percent, Turkish lira."
+description = "Country pack for the Turkish market: the unit prices of the Ministry of Environment, Urbanisation and Climate Change (formerly Bayindirlik), Deprem Yonetmeligi 2018 (TBDY) seismic code, Imar Kanunu zoning compliance, TSE standards, KDV at 20 percent, Turkish lira."
 readme = "README.md"
 license = { text = "AGPL-3.0-or-later" }
 requires-python = ">=3.11"

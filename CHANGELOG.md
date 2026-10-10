@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Your interface language is now kept with your account. A language you pick while signed in is saved to it, and after you sign in on a new browser or a new desktop port that has no language of its own, your language comes back instead of the browser's.
 - The fallback VAT table that the GAEB X89 invoice export falls back on when no dated rate is stored now knows Turkey, at KDV 20 percent and the reduced 10 percent, instead of exporting a Turkish claim at 0 percent.
 - The demo portfolio files the Istanbul project under Europe, Middle East and Africa instead of a subprogramme named Gulf states.
+- The Turkish pack switches on the two poz number checks the engine already had, where its unit-price document used to enable nothing, and its setup wizard asks for the earthquake design class of TBDY 2018 instead of the four seismic zones the 2018 code abolished. Each of its four rule documents says it has not been reviewed by a Turkish quantity surveyor.
 
 ## [18.5.0] - 2026-10-10
 

@@ -18,7 +18,7 @@ steps:
       - { key: ticaret_sicil_no, label: "Ticaret Sicil Numarasi (Trade Registry No.)", type: text, required: false }
       - { key: yapi_denetim_class, label: "Yapi Denetim class (Building Inspection) / Yapi denetim sinifi", type: select, options: ["Not applicable", "A Grubu", "B Grubu", "C Grubu"], required: false, default: "Not applicable", help: "Building inspection classification under Law 4708." }
       - { key: head_office_city, label: "Head-office city / Merkez ofis sehri", type: select, options: ["Istanbul", "Ankara", "Izmir", "Antalya", "Bursa", "Adana", "Konya", "Gaziantep", "Kayseri", "Trabzon", "Other"], required: true }
-      - { key: deprem_bolgesi, label: "Primary seismic zone / Deprem bolgesi", type: select, options: ["Zone 1 (highest risk)", "Zone 2", "Zone 3", "Zone 4 (lowest risk)"], required: false, default: "Zone 1 (highest risk)", help: "Determines which TBDY 2018 parameters apply by default." }
+      - { key: deprem_tasarim_sinifi, label: "Typical earthquake design class / Deprem tasarim sinifi (DTS)", type: select, options: ["Not set", "DTS 1", "DTS 1a", "DTS 2", "DTS 2a", "DTS 3", "DTS 3a", "DTS 4", "DTS 4a"], required: false, default: "Not set", help: "TBDY 2018 sets the class for each building from the AFAD hazard map (SDS) and the building use class. The four numbered seismic zones of the 2007 code no longer apply." }
 
   - id: standards_birimfiyat
     title: "Standards and unit prices / Standartlar ve birim fiyat"
