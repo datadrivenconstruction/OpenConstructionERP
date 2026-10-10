@@ -38719,9 +38719,12 @@
         "__init__.py",
         "budget_delta_repair.py",
         "events.py",
+        "export_routes.py",
         "intl.py",
         "manifest.py",
         "models.py",
+        "pdf_export.py",
+        "pdf_translations.py",
         "permissions.py",
         "repairs.py",
         "repository.py",
@@ -40215,7 +40218,10 @@
       "files": [
         "__init__.py",
         "evidence_pack.py",
+        "export_routes.py",
         "manifest.py",
+        "pdf_export.py",
+        "pdf_translations.py",
         "permissions.py",
         "provability.py",
         "provability_service.py",
@@ -52141,6 +52147,12 @@
               "nullable": true
             },
             {
+              "name": "tax_office",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
               "name": "country_code",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
@@ -52410,6 +52422,11 @@
               "description": "VAT registration number"
             },
             {
+              "name": "tax_office",
+              "type": "str | None",
+              "description": "Tax office the party is registered with, where invoices name it (e.g. the Turkish vergi dairesi)"
+            },
+            {
               "name": "country_code",
               "type": "str | None",
               "description": "ISO 3166-1 alpha-2 country code (e.g. DE, GB, US)"
@@ -52516,6 +52533,10 @@
             },
             {
               "name": "vat_number",
+              "type": "str | None"
+            },
+            {
+              "name": "tax_office",
               "type": "str | None"
             },
             {
@@ -52633,6 +52654,11 @@
             },
             {
               "name": "vat_number",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "tax_office",
               "type": "str | None",
               "default": "None"
             },
@@ -52797,11 +52823,18 @@
         "__init__.py",
         "aia.py",
         "aia_pdf.py",
+        "certificate_taxes.py",
         "claim_context.py",
         "compliance_packs.py",
         "country_defaults.py",
         "events.py",
         "final_account.py",
+        "hakedis.py",
+        "hakedis_document.py",
+        "hakedis_layout.py",
+        "hakedis_pdf.py",
+        "hakedis_rules.py",
+        "hakedis_xlsx.py",
         "intl.py",
         "manifest.py",
         "messages/__init__.py",
@@ -54512,6 +54545,74 @@
               "back_populates": "movements"
             }
           ]
+        },
+        {
+          "class_name": "CertificateLine",
+          "tablename": "oe_contracts_certificate_line",
+          "docstring": "One line of a payment certificate (hakediş): entered by a person, or frozen.\n\nTwo kinds of row live here, told apart by ``frozen``.\n\nA row with ``frozen`` false is what a person entered for one manual line\nof a certificate that is still being prepared: an amount, a percent of the\nline's base, or the statement that the line does not apply, with a note.\n\nA row with ``frozen`` true is written once, when the document is\ncertified: one per summary line with the status, amount and basis the\nline had at that moment, plus one row keyed ``@document`` whose ``basis``\nholds everything the document is printed from. A certified certificate is\nread back from these rows and never computed again, so a rate table, a\nlabel or a layout changed afterwards cannot change what was signed.\n\n``source_kind`` and ``source_id`` name the document the same way the\nstatutory tax lines do: ``progress_claim`` for a claim of this module,\n``sub_payment_application`` for a subcontractor's payment application.\n``source_id`` is a plain id for that reason, since the second kind lives\nin a module this one must load without.",
+          "columns": [
+            {
+              "name": "source_kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "source_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "line_key",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "calc_status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "amount",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "pct",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "basis",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "note",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "frozen",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "entered_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            }
+          ],
+          "relationships": []
         }
       ],
       "routes": [
@@ -54914,6 +55015,46 @@
           "path": "/progress-claims/{claim_id}/aia-application/pdf",
           "handler": "export_aia_application_pdf",
           "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/progress-claims/{claim_id}/hakedis",
+          "handler": "get_claim_hakedis",
+          "response_model": "HakedisResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/progress-claims/{claim_id}/hakedis/pdf",
+          "handler": "export_claim_hakedis_pdf",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/progress-claims/{claim_id}/hakedis/xlsx",
+          "handler": "export_claim_hakedis_xlsx",
+          "request_schema": "None"
+        },
+        {
+          "method": "PUT",
+          "path": "/progress-claims/{claim_id}/hakedis/lines/{line_key}",
+          "handler": "put_claim_hakedis_line",
+          "response_model": "HakedisResponse",
+          "request_schema": "HakedisLineInput"
+        },
+        {
+          "method": "PUT",
+          "path": "/progress-claims/{claim_id}/hakedis/options",
+          "handler": "put_claim_hakedis_options",
+          "response_model": "HakedisResponse",
+          "request_schema": "HakedisOptionsInput"
+        },
+        {
+          "method": "PUT",
+          "path": "/progress-claims/{claim_id}/hakedis/taxes",
+          "handler": "put_claim_hakedis_taxes",
+          "response_model": "HakedisResponse",
+          "request_schema": "HakedisTaxesInput"
         },
         {
           "method": "POST",
@@ -59615,6 +59756,213 @@
               "type": "str"
             }
           ]
+        },
+        {
+          "class_name": "HakedisLineInput",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What a person enters for one manual line of a payment certificate.\n\n``state`` is ``value`` with an ``amount`` or a ``pct`` of the line's base,\n``not_applicable`` with the reason as ``note``, or ``unset`` to remove the\nentry so the line is held again.",
+          "fields": [
+            {
+              "name": "state",
+              "type": "str"
+            },
+            {
+              "name": "amount",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "pct",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "note",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "HakedisOptionsInput",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Whether this certificate is the final one. Stated by a person, never inferred.",
+          "fields": [
+            {
+              "name": "is_final",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "class_name": "HakedisTaxChoice",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A person's decision on one tax: a category, not applicable with a reason, or undecided.",
+          "fields": [
+            {
+              "name": "state",
+              "type": "str"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "reason",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "HakedisTaxesInput",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The tax choices of one certificate and the two facts about the buyer.\n\nNo amount is sent: the base of every tax is the certificate's own. A field\nleft out keeps its stored value, so an empty body recalculates the taxes\non the certificate's current amounts.",
+          "fields": [
+            {
+              "name": "vat_withholding",
+              "type": "HakedisTaxChoice | None",
+              "default": "None"
+            },
+            {
+              "name": "income_withholding",
+              "type": "HakedisTaxChoice | None",
+              "default": "None"
+            },
+            {
+              "name": "stamp_duty",
+              "type": "HakedisTaxChoice | None",
+              "default": "None"
+            },
+            {
+              "name": "buyer_is_designated",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "work_value_incl_vat",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "work_value_note",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "HakedisResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A payment certificate as the screen reads it. Every amount is a string.\n\nThe nested objects are documented with the endpoint; they are passed\nthrough as built so the screen and the printed document read one model.",
+          "fields": [
+            {
+              "name": "source_kind",
+              "type": "str"
+            },
+            {
+              "name": "source_id",
+              "type": "UUID"
+            },
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "reference",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "locale",
+              "type": "str"
+            },
+            {
+              "name": "locales",
+              "type": "list[str]"
+            },
+            {
+              "name": "layout_available",
+              "type": "bool"
+            },
+            {
+              "name": "editable",
+              "type": "bool"
+            },
+            {
+              "name": "frozen",
+              "type": "bool"
+            },
+            {
+              "name": "frozen_at",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "is_draft",
+              "type": "bool"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "country_code",
+              "type": "str"
+            },
+            {
+              "name": "flavour",
+              "type": "str"
+            },
+            {
+              "name": "header",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "works",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "summary",
+              "type": "list[dict[str, Any]]"
+            },
+            {
+              "name": "notes",
+              "type": "list[dict[str, Any]]"
+            },
+            {
+              "name": "taxes",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "options",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "signature_roles",
+              "type": "list[dict[str, Any]]"
+            },
+            {
+              "name": "carried_total",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "findings",
+              "type": "list[dict[str, Any]]"
+            },
+            {
+              "name": "can_certify",
+              "type": "bool"
+            }
+          ]
         }
       ],
       "import_dependencies": [
@@ -59622,12 +59970,14 @@
         "changeorders",
         "contacts",
         "finance",
+        "i18n_foundation",
         "progress",
         "projects",
         "punchlist",
         "schedule",
         "signing",
         "subcontractors",
+        "tax_withholding",
         "users",
         "variations"
       ]
@@ -60189,9 +60539,12 @@
       "files": [
         "__init__.py",
         "events.py",
+        "export_routes.py",
         "intl.py",
         "manifest.py",
         "models.py",
+        "pdf_export.py",
+        "pdf_translations.py",
         "permissions.py",
         "repository.py",
         "router.py",
@@ -79741,6 +80094,11 @@
               "type": "str"
             },
             {
+              "name": "reference",
+              "type": "str | None",
+              "description": "The record's own register number (RFI-007, VR-012), when the source has one."
+            },
+            {
               "name": "due_date",
               "type": "str | None",
               "description": "Normalized ISO date (yyyy-mm-dd) or full ISO."
@@ -88090,9 +88448,14 @@
         "profiles.py",
         "router.py",
         "rules.py",
+        "rules_tr.py",
         "schemas.py",
         "service.py",
-        "ubl.py"
+        "tr_ids.py",
+        "tr_mapper.py",
+        "tr_words.py",
+        "ubl.py",
+        "ubl_tr.py"
       ],
       "manifest": {
         "name": "oe_einvoice",
@@ -104978,6 +105341,8 @@
         "einvoice_settings_schemas.py",
         "einvoice_settings_seed.py",
         "einvoice_settings_service.py",
+        "einvoice_tr.py",
+        "einvoice_tr_schemas.py",
         "events.py",
         "gaap.py",
         "invoice_capture_logic.py",
@@ -104995,6 +105360,7 @@
         "router.py",
         "schemas.py",
         "service.py",
+        "validators.py",
         "variance.py"
       ],
       "manifest": {
@@ -105716,6 +106082,18 @@
           "handler": "write_einvoice_settings",
           "response_model": "EInvoiceSettingsRead",
           "request_schema": "EInvoiceSettingsUpdate"
+        },
+        {
+          "method": "GET",
+          "path": "/invoices/{invoice_id}/einvoice/tr",
+          "handler": "read_invoice_tr_einvoice_fields",
+          "request_schema": "None"
+        },
+        {
+          "method": "PUT",
+          "path": "/invoices/{invoice_id}/einvoice/tr",
+          "handler": "write_invoice_tr_einvoice_fields",
+          "request_schema": "TrEInvoiceFields"
         },
         {
           "method": "GET",
@@ -107950,6 +108328,7 @@
         "procurement",
         "projects",
         "subcontractors",
+        "tax_withholding",
         "teams",
         "users"
       ]
@@ -138005,6 +138384,7 @@
         "__init__.py",
         "_collaboration_subscribers.py",
         "_file_approvals_subscribers.py",
+        "_site_register_subscribers.py",
         "_wave1_subscribers.py",
         "_wave23_subscribers.py",
         "_wave4_subscribers.py",
@@ -138013,6 +138393,7 @@
         "email_render.py",
         "events.py",
         "intl.py",
+        "localized.py",
         "manifest.py",
         "models.py",
         "notification_worker.py",
@@ -138022,6 +138403,7 @@
         "schemas.py",
         "service.py",
         "templates.py",
+        "templates_tr.py",
         "ws_hub.py"
       ],
       "manifest": {
@@ -138675,17 +139057,21 @@
       "import_dependencies": [
         "bid_management",
         "carbon",
+        "changeorders",
         "collaboration",
         "contracts",
         "crm",
+        "deadlines",
         "projects",
         "qms",
         "resources",
         "safety",
         "schedule",
+        "submittals",
         "supplier_catalogs",
         "users",
-        "validation"
+        "validation",
+        "variations"
       ]
     },
     {
@@ -153420,6 +153806,7 @@
         "access.py",
         "bundle_export.py",
         "bundle_import.py",
+        "country_configuration.py",
         "file_manager_schemas.py",
         "file_manager_service.py",
         "manifest.py",
@@ -183091,12 +183478,14 @@
         "__init__.py",
         "approval_subscribers.py",
         "events.py",
+        "export_routes.py",
         "intl.py",
         "manifest.py",
         "models.py",
         "pdf_export.py",
         "pdf_translations.py",
         "permissions.py",
+        "register_export.py",
         "repository.py",
         "router.py",
         "schemas.py",
@@ -209377,6 +209766,46 @@
         },
         {
           "method": "GET",
+          "path": "/payment-applications/{payment_id}/hakedis",
+          "handler": "get_payment_hakedis",
+          "response_model": "HakedisResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/payment-applications/{payment_id}/hakedis/pdf",
+          "handler": "export_payment_hakedis_pdf",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/payment-applications/{payment_id}/hakedis/xlsx",
+          "handler": "export_payment_hakedis_xlsx",
+          "request_schema": "None"
+        },
+        {
+          "method": "PUT",
+          "path": "/payment-applications/{payment_id}/hakedis/lines/{line_key}",
+          "handler": "put_payment_hakedis_line",
+          "response_model": "HakedisResponse",
+          "request_schema": "HakedisLineInput"
+        },
+        {
+          "method": "PUT",
+          "path": "/payment-applications/{payment_id}/hakedis/options",
+          "handler": "put_payment_hakedis_options",
+          "response_model": "HakedisResponse",
+          "request_schema": "HakedisOptionsInput"
+        },
+        {
+          "method": "PUT",
+          "path": "/payment-applications/{payment_id}/hakedis/taxes",
+          "handler": "put_payment_hakedis_taxes",
+          "response_model": "HakedisResponse",
+          "request_schema": "HakedisTaxesInput"
+        },
+        {
+          "method": "GET",
           "path": "/progress-claims/{claim_id}/rollup/suggested-lines",
           "handler": "get_suggested_claim_lines",
           "response_model": "SuggestedClaimLinesResponse",
@@ -212471,14 +212900,21 @@
         "__init__.py",
         "approval_subscribers.py",
         "events.py",
+        "export_routes.py",
         "intl.py",
         "manifest.py",
+        "messages/__init__.py",
         "models.py",
+        "pdf_export.py",
+        "pdf_translations.py",
         "permissions.py",
+        "register_routes.py",
         "repository.py",
         "router.py",
+        "rules.py",
         "schemas.py",
         "service.py",
+        "tracking.py",
         "validators.py",
         "vector_adapter.py"
       ],
@@ -212590,6 +213026,84 @@
             },
             {
               "name": "linked_boq_item_ids",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "discipline",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "manufacturer",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "model_reference",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "country_of_origin",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "supplier",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "review_outcome",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "review_code",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "review_period_days",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "review_history",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "required_on_site_date",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "long_lead",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "lead_time_weeks",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "linked_drawing_ids",
               "annotation": "Mapped[list]",
               "sql_type": "JSON",
               "nullable": false
@@ -212716,9 +213230,46 @@
       ],
       "schemas": [
         {
-          "class_name": "SubmittalCreate",
+          "class_name": "_RegisterFields",
           "bases": [
             "BaseModel"
+          ],
+          "docstring": "The register columns a create and an update share, all optional.",
+          "fields": [
+            {
+              "name": "discipline",
+              "type": "str | None"
+            },
+            {
+              "name": "manufacturer",
+              "type": "str | None"
+            },
+            {
+              "name": "country_of_origin",
+              "type": "str | None"
+            },
+            {
+              "name": "supplier",
+              "type": "str | None"
+            },
+            {
+              "name": "review_period_days",
+              "type": "int | None"
+            },
+            {
+              "name": "required_on_site_date",
+              "type": "str | None"
+            },
+            {
+              "name": "lead_time_weeks",
+              "type": "int | None"
+            }
+          ]
+        },
+        {
+          "class_name": "SubmittalCreate",
+          "bases": [
+            "_RegisterFields"
           ],
           "docstring": "Create a new submittal.",
           "fields": [
@@ -212783,6 +213334,15 @@
               "type": "list[str]"
             },
             {
+              "name": "long_lead",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "linked_drawing_ids",
+              "type": "list[str]"
+            },
+            {
               "name": "metadata",
               "type": "dict[str, Any]"
             }
@@ -212791,9 +213351,9 @@
         {
           "class_name": "SubmittalUpdate",
           "bases": [
-            "BaseModel"
+            "_RegisterFields"
           ],
-          "docstring": "Partial update for a submittal.",
+          "docstring": "Partial update for a submittal.\n\nThe reviewer's stamp (``review_outcome``, ``review_code``) is not here on\npurpose: it is written by the review and approve actions, which are\nrole-gated and audited, and never by a plain edit.",
           "fields": [
             {
               "name": "title",
@@ -212853,6 +213413,15 @@
               "default": "None"
             },
             {
+              "name": "long_lead",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "linked_drawing_ids",
+              "type": "list[str] | None"
+            },
+            {
               "name": "metadata",
               "type": "dict[str, Any] | None",
               "default": "None"
@@ -212873,6 +213442,15 @@
             {
               "name": "notes",
               "type": "str | None"
+            },
+            {
+              "name": "code",
+              "type": "str | None"
+            },
+            {
+              "name": "resubmit_for_record",
+              "type": "bool",
+              "default": "False"
             }
           ]
         },
@@ -212885,6 +213463,10 @@
           "fields": [
             {
               "name": "notes",
+              "type": "str | None"
+            },
+            {
+              "name": "code",
               "type": "str | None"
             }
           ]
@@ -213008,12 +213590,270 @@
               "default": "None"
             },
             {
+              "name": "discipline",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "manufacturer",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "country_of_origin",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "supplier",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "supplier_name",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "review_period_days",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "required_on_site_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "long_lead",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "lead_time_weeks",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "linked_drawing_ids",
+              "type": "list[str]"
+            },
+            {
+              "name": "review_history",
+              "type": "list[dict[str, Any]]"
+            },
+            {
+              "name": "review_outcome",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "review_code",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "may_proceed",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "resubmit_for_record",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "days_in_review",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "review_due_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "review_overdue_days",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "approval_needed_by",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "approval_late_days",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "submit_by_date",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
               "name": "created_at",
               "type": "datetime"
             },
             {
               "name": "updated_at",
               "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "SubmittalCodeCount",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "How many submittals carry one code of a vocabulary.",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "count",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "SubmittalOutcomeCount",
+          "bases": [
+            "SubmittalCodeCount"
+          ],
+          "docstring": "An outcome count with the default stamp letter for that outcome.",
+          "fields": [
+            {
+              "name": "review_code",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "SubmittalRegisterSummary",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The figures printed above the register, for one project as of today.",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "as_of",
+              "type": "str"
+            },
+            {
+              "name": "total",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "by_status",
+              "type": "list[SubmittalCodeCount]"
+            },
+            {
+              "name": "by_type",
+              "type": "list[SubmittalCodeCount]"
+            },
+            {
+              "name": "by_discipline",
+              "type": "list[SubmittalCodeCount]"
+            },
+            {
+              "name": "by_outcome",
+              "type": "list[SubmittalOutcomeCount]"
+            },
+            {
+              "name": "awaiting_review",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "review_overdue",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "review_period_unknown",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "long_lead",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "long_lead_awaiting_approval",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "approval_late",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "long_lead_without_lead_time",
+              "type": "int",
+              "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "SubmittalVocabularyEntry",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One code of a vocabulary with its label in the request language.",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "short_code",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "SubmittalVocabulary",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The codes the pickers offer, labelled in one language.",
+          "fields": [
+            {
+              "name": "locale",
+              "type": "str"
+            },
+            {
+              "name": "types",
+              "type": "list[SubmittalVocabularyEntry]"
+            },
+            {
+              "name": "disciplines",
+              "type": "list[SubmittalVocabularyEntry]"
+            },
+            {
+              "name": "outcomes",
+              "type": "list[SubmittalVocabularyEntry]"
+            },
+            {
+              "name": "sort_fields",
+              "type": "list[str]"
             }
           ]
         }
@@ -220307,6 +221147,7 @@
         "router.py",
         "schemas.py",
         "service.py",
+        "source_owners.py",
         "validators.py"
       ],
       "manifest": {
@@ -220725,6 +221566,352 @@
             }
           ],
           "relationships": []
+        },
+        {
+          "class_name": "StatutoryTaxCalc",
+          "tablename": "oe_tax_withholding_statutory_calc",
+          "docstring": "The inputs and the sign-off behind one document's statutory tax lines.\n\nOne row per source document. It holds what the five figures were computed\nfrom, so the calculation can be reproduced, and it holds the whole\nlifecycle, so there is exactly one place that says whether the figures are\na draft, confirmed or void. The lines carry no status of their own: two\nwritable copies of one status disagree sooner or later.\n\n``vat_rate_pct`` is an input here, not something this module resolves. The\nplatform has one source for a VAT rate and the caller reads it there. NULL\nmeans the rate was not known when the figures were computed, and it is\nnever read as zero.\n\n``buyer_is_designated`` and ``work_value_incl_vat`` are nullable for the\nsame reason: \"not stated\" has to stay distinguishable from \"no\" and from\n\"nothing\", because a withholding that depends on who the buyer is, or on\nthe value of the whole work, is held until somebody answers.\n\nAmounts are stored at four decimal places so a three-decimal currency\nkeeps its last digit. They are read back at the currency's own precision.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "source_kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "source_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "source_reference",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "direction",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "country_code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "currency_code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "document_date",
+              "annotation": "Mapped[date]",
+              "sql_type": "Date",
+              "nullable": false
+            },
+            {
+              "name": "net_amount",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "MoneyType",
+              "nullable": false
+            },
+            {
+              "name": "vat_rate_pct",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "MoneyType",
+              "nullable": true
+            },
+            {
+              "name": "buyer_is_designated",
+              "annotation": "Mapped[bool | None]",
+              "sql_type": "Boolean",
+              "nullable": true
+            },
+            {
+              "name": "work_value_incl_vat",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "MoneyType",
+              "nullable": true
+            },
+            {
+              "name": "work_value_note",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "stamp_duty_base",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "MoneyType",
+              "nullable": true
+            },
+            {
+              "name": "stamp_duty_base_same_as_net",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "confirmed_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "confirmed_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "unconfirmed_rates_acknowledged_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "unconfirmed_rates_acknowledged_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "reopened_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "reopened_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "reopen_reason",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "voided_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "voided_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "void_reason",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "StatutoryTaxLine",
+          "tablename": "oe_tax_withholding_statutory_line",
+          "docstring": "One statutory tax figure on one payment document.\n\nA row is a stored :class:`app.core.payment_taxes.Figure`: every field of\nthe figure has a column, so the result of a calculation can be rebuilt\nfrom the rows exactly, without running the calculation again. That is what\nfreezing means here. A confirmed document answers from these rows whatever\nthe rate tables say afterwards.\n\n``tax_amount`` and ``base_amount`` are NULL for a figure that is held or\nnot applicable. NULL is not zero: a real zero is a ``value`` row holding\n``0``, and it is the only way a zero gets into this table.\n\nThe three lines that belong to a tax a person decides on (``vat_withheld``,\n``income_withheld``, ``stamp_duty``) also carry that decision in the\n``choice_*`` columns. ``code`` is the rate row the figure was computed\nfrom; ``choice_code`` is what the person picked. They are kept apart so a\npicked code that had no row on the document date still shows what was\nasked for.\n\n``project_id``, ``source_kind`` and ``source_id`` repeat the parent's so\nthe unique key can be stated on this table and a line can be found without\nthe parent.",
+          "columns": [
+            {
+              "name": "calc_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_tax_withholding_statutory_calc.id"
+            },
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "source_kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "source_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "calc_status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "tax_amount",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "MoneyType",
+              "nullable": true
+            },
+            {
+              "name": "base_amount",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "MoneyType",
+              "nullable": true
+            },
+            {
+              "name": "rate_pct",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "MoneyType",
+              "nullable": true
+            },
+            {
+              "name": "numerator",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "denominator",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "currency_code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "legal_reference",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "source_url",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "rate_effective_from",
+              "annotation": "Mapped[date | None]",
+              "sql_type": "Date",
+              "nullable": true
+            },
+            {
+              "name": "rate_effective_to",
+              "annotation": "Mapped[date | None]",
+              "sql_type": "Date",
+              "nullable": true
+            },
+            {
+              "name": "review_status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "reason_key",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "reason_params",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "choice_state",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "choice_code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "choice_reason",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "overridden",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "override_amount",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "MoneyType",
+              "nullable": true
+            },
+            {
+              "name": "override_reason",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "overridden_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "overridden_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            }
+          ],
+          "relationships": []
         }
       ],
       "routes": [
@@ -220877,6 +222064,69 @@
           "method": "DELETE",
           "path": "/reverse-charge/{determination_id}",
           "handler": "remove_determination"
+        },
+        {
+          "method": "POST",
+          "path": "/statutory/preview",
+          "handler": "preview_statutory_taxes",
+          "response_model": "StatutoryPreviewResponse",
+          "request_schema": "StatutoryPreviewRequest"
+        },
+        {
+          "method": "GET",
+          "path": "/statutory/categories",
+          "handler": "list_statutory_categories",
+          "response_model": "StatutoryCategoryListResponse",
+          "request_schema": "RowSourceDep"
+        },
+        {
+          "method": "GET",
+          "path": "/statutory/{source_kind}/{source_id}",
+          "handler": "read_statutory_taxes",
+          "response_model": "StatutoryCalcResponse",
+          "request_schema": "StatutorySourceKindLiteral"
+        },
+        {
+          "method": "PUT",
+          "path": "/statutory/{source_kind}/{source_id}",
+          "handler": "save_statutory_taxes",
+          "response_model": "StatutoryCalcResponse",
+          "request_schema": "StatutorySourceKindLiteral"
+        },
+        {
+          "method": "POST",
+          "path": "/statutory/{source_kind}/{source_id}/override",
+          "handler": "override_statutory_tax",
+          "response_model": "StatutoryCalcResponse",
+          "request_schema": "StatutorySourceKindLiteral"
+        },
+        {
+          "method": "DELETE",
+          "path": "/statutory/{source_kind}/{source_id}/override/{kind}",
+          "handler": "clear_statutory_tax_override",
+          "response_model": "StatutoryCalcResponse",
+          "request_schema": "StatutorySourceKindLiteral"
+        },
+        {
+          "method": "POST",
+          "path": "/statutory/{source_kind}/{source_id}/confirm",
+          "handler": "confirm_statutory_taxes",
+          "response_model": "StatutoryCalcResponse",
+          "request_schema": "StatutorySourceKindLiteral"
+        },
+        {
+          "method": "POST",
+          "path": "/statutory/{source_kind}/{source_id}/reopen",
+          "handler": "reopen_statutory_taxes",
+          "response_model": "StatutoryCalcResponse",
+          "request_schema": "StatutorySourceKindLiteral"
+        },
+        {
+          "method": "POST",
+          "path": "/statutory/{source_kind}/{source_id}/void",
+          "handler": "void_statutory_taxes",
+          "response_model": "StatutoryCalcResponse",
+          "request_schema": "StatutorySourceKindLiteral"
         }
       ],
       "schemas": [
@@ -221829,6 +223079,553 @@
             {
               "name": "findings",
               "type": "list[WithholdingFinding]"
+            }
+          ]
+        },
+        {
+          "class_name": "StatutoryChoice",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What a person decided about one tax on one document.\n\n``unset`` is a real answer: nobody has decided, and the figure is held.",
+          "fields": [
+            {
+              "name": "state",
+              "type": "StatutoryChoiceStateLiteral",
+              "default": "'unset'"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "reason",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "StatutoryInputsBody",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The document and the person's choices: everything a calculation reads.\n\n``vat_rate_pct`` has no default on purpose. The caller resolves the rate\nfrom the platform's single source of VAT rates and states it, or states\n``null`` because it could not be resolved. Leaving the key out is a 422,\nso \"unknown\" is always something the caller said and never something this\nschema assumed.",
+          "fields": [
+            {
+              "name": "country_code",
+              "type": "str"
+            },
+            {
+              "name": "currency_code",
+              "type": "str"
+            },
+            {
+              "name": "document_date",
+              "type": "date"
+            },
+            {
+              "name": "net_amount",
+              "type": "Decimal"
+            },
+            {
+              "name": "vat_rate_pct",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "buyer_is_designated",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "work_value_incl_vat",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "work_value_note",
+              "type": "str"
+            },
+            {
+              "name": "stamp_duty_base",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "stamp_duty_base_same_as_net",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "vat_withholding",
+              "type": "StatutoryChoice"
+            },
+            {
+              "name": "income_withholding",
+              "type": "StatutoryChoice"
+            },
+            {
+              "name": "stamp_duty",
+              "type": "StatutoryChoice"
+            }
+          ]
+        },
+        {
+          "class_name": "StatutoryPreviewRequest",
+          "bases": [
+            "StatutoryInputsBody"
+          ],
+          "docstring": "Compute the five figures without storing anything.",
+          "fields": []
+        },
+        {
+          "class_name": "StatutoryUpsertRequest",
+          "bases": [
+            "StatutoryInputsBody"
+          ],
+          "docstring": "Compute the five figures of one source document and store them as a draft.",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "direction",
+              "type": "StatutoryDirectionLiteral"
+            },
+            {
+              "name": "source_reference",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "StatutoryOverrideRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Replace the computed amount of one figure with a person's own.",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "kind",
+              "type": "StatutoryOverridableLiteral"
+            },
+            {
+              "name": "amount",
+              "type": "Decimal"
+            },
+            {
+              "name": "reason",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "StatutoryConfirmRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Confirm the stored figures.\n\n``acknowledge_unconfirmed_rates`` is the statement \"I have checked by hand\nthe rates this platform has not confirmed against their source\". It is\nstored with the user and the time, and it defaults to false.",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "acknowledge_unconfirmed_rates",
+              "type": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "StatutoryReasonRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Reopen or void a set of figures, with the reason.",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "reason",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "StatutoryFigureResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One tax figure with everything needed to check it.\n\n``amount`` is ``null`` unless ``status`` is ``value``. ``reason_key`` and\n``reason_params`` are what the screen translates; this API sends no\nsentence about a figure.",
+          "fields": [
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "amount",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "base",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "rate_pct",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "numerator",
+              "type": "int | None"
+            },
+            {
+              "name": "denominator",
+              "type": "int | None"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "currency_code",
+              "type": "str"
+            },
+            {
+              "name": "legal_reference",
+              "type": "str"
+            },
+            {
+              "name": "source_url",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "effective_from",
+              "type": "date | None"
+            },
+            {
+              "name": "effective_to",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "review_status",
+              "type": "str"
+            },
+            {
+              "name": "overridden",
+              "type": "bool"
+            },
+            {
+              "name": "reason_key",
+              "type": "str"
+            },
+            {
+              "name": "reason_params",
+              "type": "dict[str, str]"
+            },
+            {
+              "name": "choice_state",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "choice_code",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "choice_reason",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "override_amount",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "override_reason",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "overridden_by",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "overridden_at",
+              "type": "datetime | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "StatutoryPreviewResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The five figures of a preview, in printed order.",
+          "fields": [
+            {
+              "name": "inputs",
+              "type": "StatutoryInputsBody"
+            },
+            {
+              "name": "figures",
+              "type": "list[StatutoryFigureResponse]"
+            },
+            {
+              "name": "complete",
+              "type": "bool"
+            },
+            {
+              "name": "uses_unconfirmed_rates",
+              "type": "bool"
+            },
+            {
+              "name": "findings",
+              "type": "list[WithholdingFinding]"
+            }
+          ]
+        },
+        {
+          "class_name": "StatutoryCalcResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The stored statutory taxes of one source document.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "source_kind",
+              "type": "str"
+            },
+            {
+              "name": "source_id",
+              "type": "UUID"
+            },
+            {
+              "name": "source_reference",
+              "type": "str"
+            },
+            {
+              "name": "direction",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "inputs",
+              "type": "StatutoryInputsBody"
+            },
+            {
+              "name": "figures",
+              "type": "list[StatutoryFigureResponse]"
+            },
+            {
+              "name": "complete",
+              "type": "bool"
+            },
+            {
+              "name": "uses_unconfirmed_rates",
+              "type": "bool"
+            },
+            {
+              "name": "confirmed_by",
+              "type": "UUID | None"
+            },
+            {
+              "name": "confirmed_at",
+              "type": "datetime | None"
+            },
+            {
+              "name": "unconfirmed_rates_acknowledged_by",
+              "type": "UUID | None"
+            },
+            {
+              "name": "unconfirmed_rates_acknowledged_at",
+              "type": "datetime | None"
+            },
+            {
+              "name": "reopened_by",
+              "type": "UUID | None"
+            },
+            {
+              "name": "reopened_at",
+              "type": "datetime | None"
+            },
+            {
+              "name": "reopen_reason",
+              "type": "str"
+            },
+            {
+              "name": "voided_by",
+              "type": "UUID | None"
+            },
+            {
+              "name": "voided_at",
+              "type": "datetime | None"
+            },
+            {
+              "name": "void_reason",
+              "type": "str"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime"
+            },
+            {
+              "name": "updated_at",
+              "type": "datetime"
+            },
+            {
+              "name": "findings",
+              "type": "list[WithholdingFinding]"
+            }
+          ]
+        },
+        {
+          "class_name": "StatutoryCategoryResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One category a person can choose for a tax, with its legal basis.\n\n``review_status`` is shown beside the category: an ``unconfirmed`` row\ncomputes, and the person choosing it should know it has not been checked\nagainst the primary source.",
+          "fields": [
+            {
+              "name": "country_code",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "labels",
+              "type": "dict[str, str]"
+            },
+            {
+              "name": "base",
+              "type": "str"
+            },
+            {
+              "name": "rate_pct",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "numerator",
+              "type": "int | None"
+            },
+            {
+              "name": "denominator",
+              "type": "int | None"
+            },
+            {
+              "name": "threshold_amount",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "threshold_currency",
+              "type": "str"
+            },
+            {
+              "name": "threshold_scope",
+              "type": "str"
+            },
+            {
+              "name": "threshold_measure",
+              "type": "str"
+            },
+            {
+              "name": "cap_amount",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "buyer_scope",
+              "type": "str"
+            },
+            {
+              "name": "work_value_threshold",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "conditions",
+              "type": "dict[str, str]"
+            },
+            {
+              "name": "effective_from",
+              "type": "date"
+            },
+            {
+              "name": "effective_to",
+              "type": "date | None"
+            },
+            {
+              "name": "legal_reference",
+              "type": "str"
+            },
+            {
+              "name": "source_url",
+              "type": "str"
+            },
+            {
+              "name": "read_date",
+              "type": "str"
+            },
+            {
+              "name": "review_status",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "StatutoryCategoryListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One page of the categories on offer, with how many there are in all.\n\n``total`` counts every category the country, date and kind matched, so a\npicker that received fewer ``items`` than that knows it is not showing\nthem all.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[StatutoryCategoryResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "200"
             }
           ]
         }
@@ -226265,10 +228062,13 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "export_routes.py",
         "intl.py",
         "logic.py",
         "manifest.py",
         "models.py",
+        "pdf_export.py",
+        "pdf_translations.py",
         "permissions.py",
         "repository.py",
         "router.py",
@@ -229762,8 +231562,11 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "export_routes.py",
         "manifest.py",
         "models.py",
+        "pdf_export.py",
+        "pdf_translations.py",
         "permissions.py",
         "repository.py",
         "router.py",
@@ -235926,17 +237729,17 @@
     },
     {
       "name": "changeorders",
-      "ts_files": 14,
+      "ts_files": 15,
       "css_files": 0,
-      "test_files": 6,
-      "total_files": 14
+      "test_files": 7,
+      "total_files": 15
     },
     {
       "name": "claims-evidence",
-      "ts_files": 8,
+      "ts_files": 9,
       "css_files": 0,
-      "test_files": 2,
-      "total_files": 8
+      "test_files": 3,
+      "total_files": 9
     },
     {
       "name": "clash",
@@ -236003,10 +237806,10 @@
     },
     {
       "name": "contracts",
-      "ts_files": 66,
+      "ts_files": 82,
       "css_files": 0,
-      "test_files": 31,
-      "total_files": 66
+      "test_files": 35,
+      "total_files": 82
     },
     {
       "name": "coordination",
@@ -236017,10 +237820,10 @@
     },
     {
       "name": "correspondence",
-      "ts_files": 5,
+      "ts_files": 7,
       "css_files": 0,
-      "test_files": 0,
-      "total_files": 5
+      "test_files": 2,
+      "total_files": 7
     },
     {
       "name": "cost-explorer",
@@ -236087,10 +237890,10 @@
     },
     {
       "name": "daily-diary",
-      "ts_files": 8,
+      "ts_files": 9,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 8
+      "test_files": 2,
+      "total_files": 9
     },
     {
       "name": "dashboard",
@@ -236311,10 +238114,10 @@
     },
     {
       "name": "finance",
-      "ts_files": 34,
+      "ts_files": 38,
       "css_files": 0,
-      "test_files": 14,
-      "total_files": 34
+      "test_files": 16,
+      "total_files": 38
     },
     {
       "name": "forms",
@@ -236549,10 +238352,10 @@
     },
     {
       "name": "onboarding",
-      "ts_files": 24,
+      "ts_files": 25,
       "css_files": 0,
-      "test_files": 13,
-      "total_files": 24
+      "test_files": 14,
+      "total_files": 25
     },
     {
       "name": "payment-clock",
@@ -236787,10 +238590,10 @@
     },
     {
       "name": "rfi",
-      "ts_files": 9,
+      "ts_files": 11,
       "css_files": 0,
-      "test_files": 3,
-      "total_files": 9
+      "test_files": 5,
+      "total_files": 11
     },
     {
       "name": "rfq-bidding",
@@ -236934,10 +238737,10 @@
     },
     {
       "name": "submittals",
-      "ts_files": 12,
+      "ts_files": 22,
       "css_files": 0,
-      "test_files": 4,
-      "total_files": 12
+      "test_files": 7,
+      "total_files": 22
     },
     {
       "name": "supplier-catalogs",
@@ -237018,10 +238821,10 @@
     },
     {
       "name": "transmittals",
-      "ts_files": 6,
+      "ts_files": 7,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 6
+      "test_files": 2,
+      "total_files": 7
     },
     {
       "name": "users",
@@ -237046,10 +238849,10 @@
     },
     {
       "name": "variations",
-      "ts_files": 14,
+      "ts_files": 16,
       "css_files": 0,
-      "test_files": 6,
-      "total_files": 14
+      "test_files": 7,
+      "total_files": 16
     },
     {
       "name": "videos",
@@ -237412,12 +239215,14 @@
       "changeorders",
       "contacts",
       "finance",
+      "i18n_foundation",
       "progress",
       "projects",
       "punchlist",
       "schedule",
       "signing",
       "subcontractors",
+      "tax_withholding",
       "users",
       "variations"
     ],
@@ -237727,6 +239532,7 @@
       "procurement",
       "projects",
       "subcontractors",
+      "tax_withholding",
       "teams",
       "users"
     ],
@@ -237890,17 +239696,21 @@
     "notifications": [
       "bid_management",
       "carbon",
+      "changeorders",
       "collaboration",
       "contracts",
       "crm",
+      "deadlines",
       "projects",
       "qms",
       "resources",
       "safety",
       "schedule",
+      "submittals",
       "supplier_catalogs",
       "users",
-      "validation"
+      "validation",
+      "variations"
     ],
     "onboarding": [
       "costs",
@@ -238394,14 +240204,14 @@
   "statistics": {
     "backend_modules": 197,
     "modules_with_manifests": 195,
-    "total_models": 626,
-    "total_columns": 7184,
+    "total_models": 629,
+    "total_columns": 7262,
     "total_relationships": 236,
-    "total_routes": 3775,
-    "total_schemas": 3581,
-    "total_python_files": 2307,
+    "total_routes": 3798,
+    "total_schemas": 3604,
+    "total_python_files": 2351,
     "frontend_features": 194,
-    "frontend_ts_files": 3025,
+    "frontend_ts_files": 3066,
     "frontend_backend_mapped": 172
   },
   "frontend_backend_mapping": {
