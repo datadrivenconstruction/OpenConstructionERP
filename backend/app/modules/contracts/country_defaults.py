@@ -531,6 +531,56 @@ COUNTRY_CONTRACT_DEFAULTS: dict[str, dict[str, Any]] = {
             "The progress payment certificate.",
         ),
     },
+    # Public works let under Kamu İhale Kanunu 4734. The figures are the
+    # standard contract (Yapım İşlerine Ait Tip Sözleşme, Ek-7 of the Yapım
+    # İşleri İhaleleri Uygulama Yönetmeliği) and the general conditions (Ek-8),
+    # both as amended by Resmî Gazete 30.7.2025 no. 32971, in force 1.9.2025.
+    # Tip Sözleşme art. 30.2 for a unit-price contract: "Düzenlenen
+    # hakedişlerde; yapılan iş tutarının % 3'ü karşılığında teminat mektubu
+    # alınır ... Yüklenicinin teminat mektubu vermemesi durumunda ise yapılan
+    # iş tutarının % 3'ü tutulur ve kesin hesaplar İdare tarafından
+    # onaylanmadıkça bu tutarlar ödenmez." Private works agree their own terms.
+    "TR": {
+        "standard_form": "Yapım İşlerine Ait Tip Sözleşme",
+        "retention_percent": _figure(
+            "3",
+            "statute",
+            "Yapım İşlerine Ait Tip Sözleşme, art. 30.2, as amended by Resmî Gazete 32971 of 30.7.2025",
+            "On public works, three percent of the work in each progress payment is held, or covered by a "
+            "letter of guarantee, until the final account is approved.",
+        ),
+        "retention_cap_percent": _figure(
+            None,
+            "statute",
+            "Yapım İşlerine Ait Tip Sözleşme, art. 30.2",
+            "No ceiling: the three percent is taken on every progress payment for the whole job.",
+        ),
+        "retention_release_split": _figure(
+            _split(("final_completion", "100")),
+            "statute",
+            "Yapım İşlerine Ait Tip Sözleşme, art. 30.2",
+            "Paid back once the administration approves the final account (kesin hesap).",
+        ),
+        "payment_period_days": _figure(
+            75,
+            "statute",
+            "Yapım İşleri Genel Şartnamesi, art. 39(4)(f)",
+            "Up to 30 days to approve the progress payment report, 30 more to accrue it and 15 to pay, so at "
+            "most 75 days from submission unless the contract sets a shorter payment period.",
+        ),
+        "valuation_interval": _figure(
+            "monthly",
+            "statute",
+            "Yapım İşleri Genel Şartnamesi, art. 39(4)(a)",
+            "A progress payment report is drawn up in the first five working days of each month.",
+        ),
+        "certificate_name": _figure(
+            "Hakediş Raporu",
+            "statute",
+            "Yapım İşleri Genel Şartnamesi, art. 39",
+            "The progress payment report the site supervisor and the contractor sign.",
+        ),
+    },
 }
 
 

@@ -113,6 +113,24 @@ def test_the_canadian_holdback_is_statute_and_names_the_province_that_differs() 
     ]
 
 
+def test_turkish_public_works_hold_three_percent_until_the_final_account() -> None:
+    """Tip Sözleşme art. 30.2 as amended in 2025: three percent of each hakediş
+    is held, or covered by a letter of guarantee, until the administration
+    approves the final account. It accrues on every hakediş with no ceiling."""
+    resolved = resolve_contract_defaults("tr")
+    assert resolved is not None
+    values, sources = resolved["values"], resolved["sources"]
+    assert values["retention_percent"] == "3"
+    assert sources["retention_percent"]["source"] == "statute"
+    assert "30.2" in sources["retention_percent"]["reference"]
+    assert values["retention_cap_percent"] is None
+    assert values["retention_release_split"] == [{"event": "final_completion", "release_percent_of_held": "100"}]
+    # 30 days to approve, 30 to accrue, 15 to pay: the latest the conditions allow.
+    assert values["payment_period_days"] == 75
+    assert values["valuation_interval"] == "monthly"
+    assert values["certificate_name"] == "Hakediş Raporu"
+
+
 def test_uk_is_read_as_great_britain() -> None:
     assert resolve_contract_defaults("uk") == resolve_contract_defaults("GB")
 
