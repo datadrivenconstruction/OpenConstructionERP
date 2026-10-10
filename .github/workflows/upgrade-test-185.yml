@@ -1,0 +1,440 @@
+# TEMPORARY. Lives only on wip/upgrade-test-185 and must never reach main.
+# Upgrade paths 18.4.0 -> branch head: pip + embedded PG, pip + external PG 16,
+# fresh install, Docker image over an 18.4.0 volume.
+name: Upgrade test 18.5
+
+on:
+  push:
+    branches: [wip/upgrade-test-185]
+  workflow_dispatch:
+
+concurrency:
+  group: upgrade-test-185
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  OLD_VERSION: '18.4.0'
+
+jobs:
+  build-wheel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    outputs:
+      new_version: ${{ steps.ver.outputs.new_version }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: ver
+        name: Pick the version under test (bump in this checkout only when head is still the old one)
+        run: |
+          cur=$(sed -n 's/^version = "\(.*\)"/\1/p' backend/pyproject.toml | head -1)
+          if [ "$cur" = "$OLD_VERSION" ]; then
+            new=18.5.0
+            sed -i "s/^version = \"$cur\"/version = \"$new\"/" backend/pyproject.toml
+            sed -i "0,/\"version\": \"$cur\"/s//\"version\": \"$new\"/" frontend/package.json
+            sed -i "s/$cur/$new/g" frontend/index.html
+            echo "head carries $cur; simulating the bump to $new in this checkout only"
+          else
+            new=$cur
+            echo "head already carries $cur"
+          fi
+          echo "new_version=$new" >> "$GITHUB_OUTPUT"
+          git diff --stat
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      - name: Build frontend bundle into wheel layout (as pypi-publish.yml)
+        env:
+          NODE_OPTIONS: --max-old-space-size=12288
+        run: |
+          cd frontend
+          npm ci
+          npm run build
+      - name: Build wheel (as pypi-publish.yml)
+        run: |
+          python -m pip install --upgrade build pyyaml
+          cd backend
+          python -m build --wheel --outdir ../dist/
+      - name: Run the publish workflow's own wheel checks verbatim
+        shell: bash
+        run: |
+          python - <<'PY'
+          import subprocess, sys, yaml
+          wf = yaml.safe_load(open('.github/workflows/pypi-publish.yml', encoding='utf-8'))
+          steps = wf['jobs']['publish']['steps']
+          want = ('Check the wheel fits', 'Sanity check wheel')
+          ran = 0
+          for s in steps:
+              if s.get('name', '').startswith(want):
+                  print(f'::group::{s["name"]}', flush=True)
+                  r = subprocess.run(['bash', '-e', '-c', s['run']])
+                  print('::endgroup::', flush=True)
+                  ran += 1
+                  if r.returncode:
+                      sys.exit(f'{s["name"]} failed with {r.returncode}')
+          assert ran == 2, f'found {ran} of the 2 publish checks'
+          PY
+      - name: Wheel size vs budget
+        run: |
+          f=$(ls dist/*.whl); b=$(stat -c %s "$f")
+          python -c "b=$b; print(f'WHEEL $(basename $f): {b:,} bytes = {b/1048576:.2f} MiB; budget 95 MiB, headroom {95-b/1048576:.2f} MiB; PyPI hard cap 100 MiB')"
+          python -c "import zipfile,collections;z=zipfile.ZipFile('$f');c=collections.Counter();[c.update({'/'.join(i.filename.split('/')[:2]):i.compress_size}) for i in z.infolist()];[print(f'{v/1048576:8.2f} MiB  {k}') for k,v in c.most_common(12)]"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheel
+          path: dist/*.whl
+
+  pip-embedded:
+    needs: build-wheel
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 75
+    env:
+      NEW_VERSION: ${{ needs.build-wheel.outputs.new_version }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install 18.4.0 from PyPI into a venv
+        run: |
+          echo "VENV=$RUNNER_TEMP/venv" >> "$GITHUB_ENV"
+          echo "DATA=$RUNNER_TEMP/oe-data" >> "$GITHUB_ENV"
+          echo "LOGS=$RUNNER_TEMP/logs" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/logs"
+          python -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/python" -m pip install -q --upgrade pip
+          /usr/bin/time -p "$RUNNER_TEMP/venv/bin/pip" install "openconstructionerp==$OLD_VERSION" >"$RUNNER_TEMP/logs/pip-old.log" 2>&1 || { tail -50 "$RUNNER_TEMP/logs/pip-old.log"; exit 1; }
+          tail -3 "$RUNNER_TEMP/logs/pip-old.log"
+      - name: Boot 18.4.0, seed probe data, stop
+        run: |
+          . .github/upgrade-probe/lib.sh
+          start_serve old
+          python .github/upgrade-probe/probe.py wait --timeout 1500 --label old-first --timing-file "$LOGS/timings.jsonl" || { tail -80 "$LOGS/serve-old.log"; exit 1; }
+          python .github/upgrade-probe/probe.py seed --out "$LOGS/snapshot.json"
+          embedded_db_state
+          python .github/upgrade-probe/probe.py logscan "$LOGS/serve-old.log" --report-only
+          stop_serve
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheel
+          path: wheel
+      - name: pip install --upgrade the head wheel into the same venv
+        run: |
+          . .github/upgrade-probe/lib.sh
+          "$VENV/bin/pip" install --upgrade wheel/*.whl >"$LOGS/pip-upgrade.log" 2>&1 || { tail -60 "$LOGS/pip-upgrade.log"; exit 1; }
+          grep -E "Successfully installed|already satisfied.*openconstructionerp" "$LOGS/pip-upgrade.log" | head -5
+          "$VENV/bin/pip" show openconstructionerp | head -2
+          "$VENV/bin/pip" check || true
+          echo "heads in installed tree:"; python .github/upgrade-probe/heads.py "$(site_packages)"
+      - name: Boot head on the same data dir and verify
+        run: |
+          . .github/upgrade-probe/lib.sh
+          start_serve new
+          python .github/upgrade-probe/probe.py wait --timeout 1500 --label upgraded --timing-file "$LOGS/timings.jsonl" || { tail -120 "$LOGS/serve-new.log"; exit 1; }
+          rc=0
+          python .github/upgrade-probe/probe.py verify --snap "$LOGS/snapshot.json" --expect-version "$NEW_VERSION" || rc=1
+          python .github/upgrade-probe/probe.py frontend || rc=1
+          python .github/upgrade-probe/probe.py newrev || rc=1
+          python .github/upgrade-probe/probe.py race -n 20 || rc=1
+          embedded_db_state
+          embedded_schema "$LOGS/schema-upg"
+          python .github/upgrade-probe/probe.py logscan "$LOGS/serve-new.log" || rc=1
+          stop_serve || rc=1
+          cat "$LOGS/timings.jsonl"
+          exit $rc
+      - name: Fresh embedded install of head (schema reference) and compare with the upgraded one
+        if: ${{ !cancelled() }}
+        run: |
+          . .github/upgrade-probe/lib.sh
+          export DATA=$RUNNER_TEMP/oe-fresh
+          start_serve fresh
+          python .github/upgrade-probe/probe.py wait --timeout 1500 --label fresh-embedded --timing-file "$LOGS/timings.jsonl" || { tail -120 "$LOGS/serve-fresh.log"; exit 1; }
+          python .github/upgrade-probe/probe.py newrev --lenient || true
+          embedded_db_state
+          embedded_schema "$LOGS/schema-fresh"
+          stop_serve
+          compare_schema "$LOGS/schema-upg" "$LOGS/schema-fresh" "embedded upgraded-vs-fresh"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-pip-embedded-${{ matrix.os }}
+          path: ${{ runner.temp }}/logs
+
+  pip-external-pg:
+    needs: build-wheel
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: oe
+          POSTGRES_PASSWORD: oe
+          POSTGRES_DB: upg
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U oe -d upg"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      NEW_VERSION: ${{ needs.build-wheel.outputs.new_version }}
+      PGPASSWORD: oe
+      JWT_SECRET: upgrade-test-secret-0123456789abcdef0123456789abcdef
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install 18.4.0 from PyPI into a venv
+        run: |
+          echo "VENV=$RUNNER_TEMP/venv" >> "$GITHUB_ENV"
+          echo "LOGS=$RUNNER_TEMP/logs" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/logs"
+          psql -h localhost -U oe -d upg -c "create database fresh"
+          python -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/python" -m pip install -q --upgrade pip
+          "$RUNNER_TEMP/venv/bin/pip" install "openconstructionerp==$OLD_VERSION" >"$RUNNER_TEMP/logs/pip-old.log" 2>&1 || { tail -50 "$RUNNER_TEMP/logs/pip-old.log"; exit 1; }
+      - name: Boot 18.4.0 on external PG, seed, stop
+        env:
+          DATABASE_URL: postgresql+asyncpg://oe:oe@localhost:5432/upg
+          DATABASE_SYNC_URL: postgresql://oe:oe@localhost:5432/upg
+        run: |
+          export DATA=$RUNNER_TEMP/data-upg
+          . .github/upgrade-probe/lib.sh
+          start_serve old
+          python .github/upgrade-probe/probe.py wait --timeout 1500 --label pg-old-first --timing-file "$LOGS/timings.jsonl" || { tail -80 "$LOGS/serve-old.log"; exit 1; }
+          python .github/upgrade-probe/probe.py seed --out "$LOGS/snapshot.json"
+          python .github/upgrade-probe/probe.py logscan "$LOGS/serve-old.log" --report-only
+          stop_serve
+          echo "stamp after 18.4.0: $(psql -h localhost -U oe -d upg -Atc 'select version_num from alembic_version')"
+          psql -h localhost -U oe -d upg -c "create database upg_ops template upg"
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheel
+          path: wheel
+      - name: pip install --upgrade the head wheel
+        run: |
+          . .github/upgrade-probe/lib.sh
+          "$VENV/bin/pip" install --upgrade wheel/*.whl >"$LOGS/pip-upgrade.log" 2>&1 || { tail -60 "$LOGS/pip-upgrade.log"; exit 1; }
+          "$VENV/bin/pip" show openconstructionerp | head -2
+          echo "heads in installed tree:"; python .github/upgrade-probe/heads.py "$(site_packages)"
+      - name: Product path - boot head on the upgraded database and verify
+        env:
+          DATABASE_URL: postgresql+asyncpg://oe:oe@localhost:5432/upg
+          DATABASE_SYNC_URL: postgresql://oe:oe@localhost:5432/upg
+        run: |
+          export DATA=$RUNNER_TEMP/data-upg
+          . .github/upgrade-probe/lib.sh
+          start_serve new
+          python .github/upgrade-probe/probe.py wait --timeout 1500 --label pg-upgraded --timing-file "$LOGS/timings.jsonl" || { tail -120 "$LOGS/serve-new.log"; exit 1; }
+          rc=0
+          python .github/upgrade-probe/probe.py verify --snap "$LOGS/snapshot.json" --expect-version "$NEW_VERSION" || rc=1
+          python .github/upgrade-probe/probe.py frontend || rc=1
+          python .github/upgrade-probe/probe.py newrev || rc=1
+          python .github/upgrade-probe/probe.py race -n 20 || rc=1
+          python .github/upgrade-probe/probe.py logscan "$LOGS/serve-new.log" || rc=1
+          stop_serve || rc=1
+          echo "stamp after product upgrade: $(psql -h localhost -U oe -d upg -Atc 'select version_num from alembic_version')"
+          bash .github/upgrade-probe/schema.sh upg "$LOGS/schema-upg"
+          exit $rc
+      - name: Ops path - alembic upgrade head on a clone of the 18.4.0 database (report)
+        if: ${{ !cancelled() }}
+        id: ops
+        continue-on-error: true
+        env:
+          DATABASE_URL: postgresql+asyncpg://oe:oe@localhost:5432/upg_ops
+          DATABASE_SYNC_URL: postgresql://oe:oe@localhost:5432/upg_ops
+        run: |
+          set +e
+          . .github/upgrade-probe/lib.sh
+          cd "$(site_packages)"
+          echo "before: $(psql -h localhost -U oe -d upg_ops -Atc 'select version_num from alembic_version')"
+          "$VENV/bin/alembic" -c alembic.ini upgrade head 2>&1 | tee "$LOGS/alembic-ops.log" | tail -40
+          rc=${PIPESTATUS[0]}
+          echo "after: $(psql -h localhost -U oe -d upg_ops -Atc 'select version_num from alembic_version')"
+          bash "$GITHUB_WORKSPACE/.github/upgrade-probe/schema.sh" upg_ops "$LOGS/schema-ops"
+          exit $rc
+      - name: Fresh install of head on an empty database (schema reference)
+        if: ${{ !cancelled() }}
+        env:
+          DATABASE_URL: postgresql+asyncpg://oe:oe@localhost:5432/fresh
+          DATABASE_SYNC_URL: postgresql://oe:oe@localhost:5432/fresh
+        run: |
+          export DATA=$RUNNER_TEMP/data-fresh
+          . .github/upgrade-probe/lib.sh
+          start_serve fresh
+          python .github/upgrade-probe/probe.py wait --timeout 1500 --label pg-fresh --timing-file "$LOGS/timings.jsonl" || { tail -120 "$LOGS/serve-fresh.log"; exit 1; }
+          python .github/upgrade-probe/probe.py logscan "$LOGS/serve-fresh.log" --report-only
+          stop_serve
+          echo "stamp fresh: $(psql -h localhost -U oe -d fresh -Atc 'select version_num from alembic_version')"
+          bash .github/upgrade-probe/schema.sh fresh "$LOGS/schema-fresh"
+      - name: Compare upgraded schema with fresh (both directions)
+        if: ${{ !cancelled() }}
+        run: |
+          . .github/upgrade-probe/lib.sh
+          rc=0
+          compare_schema "$LOGS/schema-upg" "$LOGS/schema-fresh" "external-pg product-path upgraded-vs-fresh" || rc=1
+          [ -d "$LOGS/schema-ops" ] && { compare_schema "$LOGS/schema-ops" "$LOGS/schema-fresh" "external-pg OPS-path (report only)" || true; }
+          cat "$LOGS/timings.jsonl"
+          exit $rc
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-pip-external-pg
+          path: ${{ runner.temp }}/logs
+
+  fresh-install:
+    needs: build-wheel
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      NEW_VERSION: ${{ needs.build-wheel.outputs.new_version }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheel
+          path: wheel
+      - name: Install head wheel into an empty venv
+        run: |
+          echo "VENV=$RUNNER_TEMP/venv" >> "$GITHUB_ENV"
+          echo "DATA=$RUNNER_TEMP/oe-data" >> "$GITHUB_ENV"
+          echo "LOGS=$RUNNER_TEMP/logs" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/logs"
+          python -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/python" -m pip install -q --upgrade pip
+          s=$(date +%s)
+          "$RUNNER_TEMP/venv/bin/pip" install wheel/*.whl >"$RUNNER_TEMP/logs/pip-fresh.log" 2>&1 || { tail -60 "$RUNNER_TEMP/logs/pip-fresh.log"; exit 1; }
+          echo "pip install took $(( $(date +%s) - s ))s"
+      - name: First start (cold) and second start (warm)
+        run: |
+          . .github/upgrade-probe/lib.sh
+          rc=0
+          start_serve first
+          python .github/upgrade-probe/probe.py wait --timeout 1500 --label fresh-first --timing-file "$LOGS/timings.jsonl" || { tail -120 "$LOGS/serve-first.log"; exit 1; }
+          python .github/upgrade-probe/probe.py frontend || rc=1
+          python .github/upgrade-probe/probe.py newrev || rc=1
+          python .github/upgrade-probe/probe.py race -n 20 || rc=1
+          curl -s http://127.0.0.1:8080/api/health | python -c "import sys,json;h=json.load(sys.stdin);print({k:h.get(k) for k in ('status','version','alembic_head_matches','modules_loaded')})"
+          embedded_db_state
+          python .github/upgrade-probe/probe.py logscan "$LOGS/serve-first.log" || rc=1
+          stop_serve || rc=1
+          start_serve second
+          python .github/upgrade-probe/probe.py wait --timeout 900 --label fresh-second --timing-file "$LOGS/timings.jsonl" || { tail -120 "$LOGS/serve-second.log"; exit 1; }
+          python .github/upgrade-probe/probe.py logscan "$LOGS/serve-second.log" || rc=1
+          stop_serve || rc=1
+          cat "$LOGS/timings.jsonl"
+          exit $rc
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-fresh-install
+          path: ${{ runner.temp }}/logs
+
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v7
+      - name: Bump version in this checkout only when head is still the old one
+        run: |
+          cur=$(sed -n 's/^version = "\(.*\)"/\1/p' backend/pyproject.toml | head -1)
+          if [ "$cur" = "$OLD_VERSION" ]; then
+            sed -i "s/^version = \"$cur\"/version = \"18.5.0\"/" backend/pyproject.toml
+            sed -i "0,/\"version\": \"$cur\"/s//\"version\": \"18.5.0\"/" frontend/package.json
+            sed -i "s/$cur/18.5.0/g" frontend/index.html
+            echo "NEW_VERSION=18.5.0" >> "$GITHUB_ENV"
+          else
+            echo "NEW_VERSION=$cur" >> "$GITHUB_ENV"
+          fi
+          mkdir -p "$RUNNER_TEMP/logs"; echo "LOGS=$RUNNER_TEMP/logs" >> "$GITHUB_ENV"
+      - name: Build the head image (Dockerfile.unified) and pull 18.4.0
+        run: |
+          s=$(date +%s)
+          docker build -f deploy/docker/Dockerfile.unified -t oe:head . >"$LOGS/docker-build.log" 2>&1 || { tail -80 "$LOGS/docker-build.log"; exit 1; }
+          echo "build took $(( $(date +%s) - s ))s"
+          docker pull -q ghcr.io/datadrivenconstruction/openconstructionerp:$OLD_VERSION
+          docker images | head -5
+          for i in oe:head ghcr.io/datadrivenconstruction/openconstructionerp:$OLD_VERSION; do
+            echo "$i runs as: $(docker run --rm --entrypoint id $i)"
+          done
+      - name: Run 18.4.0 image with fresh volumes, seed, stop
+        run: |
+          docker network create oe
+          docker volume create pgvol; docker volume create appvol
+          docker run -d --name pg --network oe -e POSTGRES_USER=oe -e POSTGRES_PASSWORD=oe -e POSTGRES_DB=openestimate \
+            -v pgvol:/var/lib/postgresql/data postgres:16-alpine
+          for _ in $(seq 1 30); do docker exec pg pg_isready -U oe -d openestimate && break; sleep 2; done
+          cat > "$RUNNER_TEMP/app.env" <<'EOF'
+          OE_DB_HOST=pg
+          OE_DB_PORT=5432
+          OE_DB_USER=oe
+          OE_DB_NAME=openestimate
+          OE_DB_PASSWORD=oe
+          JWT_SECRET=upgrade-test-secret-0123456789abcdef0123456789abcdef
+          SERVE_FRONTEND=true
+          ALLOWED_ORIGINS=http://localhost:8080
+          OE_DATA_DIR=/data
+          APP_ENV=development
+          APP_DEBUG=false
+          VECTOR_BACKEND=lancedb
+          SEED_DEMO=true
+          EOF
+          sed -i 's/^ *//' "$RUNNER_TEMP/app.env"
+          trap 'docker rm -f app appfresh >/dev/null 2>&1 || true' EXIT
+          docker run -d --name app --network oe -p 8080:8080 -v appvol:/data --env-file "$RUNNER_TEMP/app.env" \
+            ghcr.io/datadrivenconstruction/openconstructionerp:$OLD_VERSION
+          python .github/upgrade-probe/probe.py wait --timeout 1500 --label docker-old --timing-file "$LOGS/timings.jsonl" || { docker logs app 2>&1 | tail -100; exit 1; }
+          python .github/upgrade-probe/probe.py seed --out "$LOGS/snapshot.json"
+          docker stop -t 60 app; docker logs app >"$LOGS/docker-old.log" 2>&1; docker rm app
+          python .github/upgrade-probe/probe.py logscan "$LOGS/docker-old.log" --report-only
+          echo "stamp after 18.4.0: $(docker exec pg psql -U oe -d openestimate -Atc 'select version_num from alembic_version')"
+      - name: Run head image on the same volumes and verify
+        run: |
+          trap 'docker rm -f app appfresh >/dev/null 2>&1 || true' EXIT
+          docker run -d --name app --network oe -p 8080:8080 -v appvol:/data --env-file "$RUNNER_TEMP/app.env" oe:head
+          python .github/upgrade-probe/probe.py wait --timeout 1500 --label docker-upgraded --timing-file "$LOGS/timings.jsonl" || { docker logs app 2>&1 | tail -150; exit 1; }
+          rc=0
+          python .github/upgrade-probe/probe.py verify --snap "$LOGS/snapshot.json" --expect-version "$NEW_VERSION" || rc=1
+          python .github/upgrade-probe/probe.py frontend || rc=1
+          python .github/upgrade-probe/probe.py newrev || rc=1
+          python .github/upgrade-probe/probe.py race -n 20 || rc=1
+          docker exec app sh -c 'ls -la /data | head -20; touch /data/.write_probe && echo data dir writable'  || rc=1
+          docker stop -t 60 app; docker logs app >"$LOGS/docker-new.log" 2>&1
+          python .github/upgrade-probe/probe.py logscan "$LOGS/docker-new.log" || rc=1
+          echo "stamp after upgrade: $(docker exec pg psql -U oe -d openestimate -Atc 'select version_num from alembic_version')"
+          docker rm app
+          PSQL="docker exec -i pg psql -U oe" bash .github/upgrade-probe/schema.sh openestimate "$LOGS/schema-upg"
+          docker exec pg createdb -U oe fresh
+          sed 's/^OE_DB_NAME=.*/OE_DB_NAME=fresh/' "$RUNNER_TEMP/app.env" > "$RUNNER_TEMP/fresh.env"
+          docker volume create freshvol
+          docker run -d --name appfresh --network oe -p 8080:8080 -v freshvol:/data --env-file "$RUNNER_TEMP/fresh.env" oe:head
+          python .github/upgrade-probe/probe.py wait --timeout 1500 --label docker-fresh --timing-file "$LOGS/timings.jsonl" || { docker logs appfresh 2>&1 | tail -100; exit 1; }
+          docker stop -t 60 appfresh; docker logs appfresh >"$LOGS/docker-fresh.log" 2>&1
+          PSQL="docker exec -i pg psql -U oe" bash .github/upgrade-probe/schema.sh fresh "$LOGS/schema-fresh"
+          export DATA=/nonexistent VENV=/nonexistent
+          . .github/upgrade-probe/lib.sh
+          compare_schema "$LOGS/schema-upg" "$LOGS/schema-fresh" "docker upgraded-vs-fresh" || rc=1
+          cat "$LOGS/timings.jsonl"
+          exit $rc
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-docker
+          path: ${{ runner.temp }}/logs
