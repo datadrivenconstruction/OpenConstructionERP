@@ -8,6 +8,8 @@ body:
       value: |
         Thanks for reporting a bug! Please fill out the details below so we can investigate.
 
+        **Installation problem?** Before filing, check [Installation help](https://openconstructionerp.com/install-help). It lists the common install and startup messages with what to do about each.
+
   - type: input
     id: version
     attributes:

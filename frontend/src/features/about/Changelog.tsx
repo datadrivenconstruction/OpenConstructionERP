@@ -55,10 +55,10 @@ interface ChangelogEntry {
  */
 const UNRELEASED: ChangelogEntry | null = {
   version: 'Unreleased',
-  date: '2026-09-30',
+  date: '2026-10-10',
   tag: 'FIX',
   summary:
-    'Demo data stays in demo projects, and a deleted demo stays deleted through restarts and upgrades, including on installs that removed their demos before this version. Settings can now find the demo records an older version left in your own projects and remove them after you confirm; on a server, demo-cleanup does the same.',
+    'Generate from BoQ no longer fails on a huge quantity in a unit it cannot size, and a price list saved as .pwe is read like any XPWE file. Italian price lists in Excel map their usual columns on their own, an XPWE bill import offers to keep its price list as a cost database, and property search in the BIM viewer can open a quantity rule filled in from the search.',
 };
 
 // Sorted newest to oldest. Sort is enforced at runtime below (semver-aware) so
