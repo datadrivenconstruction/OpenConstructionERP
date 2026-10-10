@@ -945,6 +945,22 @@ DEFAULT_MARKUP_TEMPLATES: dict[str, list[dict[str, object]]] = {
     # splitting it here would invent a division the market does not make. It
     # is filed as overhead because that is the wider half of what it covers,
     # so this region has no line categorised as profit, on purpose.
+    #
+    # The 25 is the figure of Yapım İşleri İhaleleri Uygulama Yönetmeliği,
+    # Madde 11(1): it is added to prices that carry no contractor profit and
+    # general expenses.
+    # https://www.mevzuat.gov.tr/MevzuatMetin/yonetmelik/7.5.12916.pdf
+    # That condition matters. The published unit prices already contain the
+    # 25 (measured on the national cost base: the published price is 1.25
+    # times the sum of the analysis for the large majority of items in
+    # chapters 15, 25 and 35, and never 1.00), so this stack is right for a
+    # bill priced at analysis cost and counts the 25 twice on a bill priced
+    # from the published prices. Nothing here can tell the two apart; the line
+    # has to be removed from the second kind of bill by its author.
+    #
+    # KDV: general rate 20 since 10 July 2023, Karar 7346, Resmî Gazete
+    # 7 July 2023 no. 32241.
+    # https://www.resmigazete.gov.tr/eskiler/2023/07/20230707-11.pdf
     "TR": [
         {
             "name": "Müteahhit kârı ve genel giderler",

@@ -1,0 +1,70 @@
+{
+  "rule_pack_id": "tesisat_teknik_sartnameleri",
+  "name": "Mechanical and electrical installation: general technical specifications and fire regulation",
+  "name_tr": "Makina ve Elektrik Tesisatı Genel Teknik Şartnameleri, Yangın Yönetmeliği",
+  "standard": "Makina Tesisatı Genel Teknik Şartnamesi / Elektrik Tesisatı Genel Teknik Şartnamesi",
+  "jurisdiction": "TR",
+  "applies_to": [
+    "boq",
+    "submittals",
+    "validation"
+  ],
+  "review_status": "Titles, gazette dates and numbers copied from the publishing bodies' own pages on 2026-10-10. Reference only. Pending review by a Turkish mechanical and a Turkish electrical engineer.",
+  "description": "The documents a mechanical and electrical installation contractor in Türkiye is asked to work to. The general technical specifications are published by the Yüksek Fen Kurulu Başkanlığı of the Çevre, Şehircilik ve İklim Değişikliği Bakanlığı, part by part, in the Resmî Gazete; public contracts make them binding and private contracts usually cite them. This document lists the parts with their gazette dates so that a submittal or a specification clause can name the right one. Nothing here is executed by the validation engine.",
+  "source": "https://yfk.csb.gov.tr/sartnameler-i-330",
+  "references": [
+    {
+      "title_tr": "Makina Tesisatı Genel Teknik Şartnamesi",
+      "title_en": "General technical specification for mechanical installation",
+      "parts": [
+        {"name_tr": "Genel Esaslar", "gazette_date": "2019-12-01", "gazette_number": "30965"},
+        {"name_tr": "Sıhhi Tesisat", "gazette_date": "2019-12-01", "gazette_number": "30965"},
+        {"name_tr": "Isıtma Tesisatı", "gazette_date": "2019-12-01", "gazette_number": "30965"},
+        {"name_tr": "Brülör ve Yakma Yönetim Sistemleri", "gazette_date": "2019-12-01", "gazette_number": "30965"},
+        {"name_tr": "Otomatik Kontrol ve Bina Otomasyon Sistemleri", "gazette_date": "2019-12-01", "gazette_number": "30965"},
+        {"name_tr": "Soğutma Tesisatı Sistemleri", "gazette_date": "2019-12-01", "gazette_number": "30965"},
+        {"name_tr": "Yangınla Mücadele ve Korunma Sistemleri", "gazette_date": "2019-12-01", "gazette_number": "30965"},
+        {"name_tr": "Isı Pompaları", "gazette_date": "2019-12-01", "gazette_number": "30965"},
+        {"name_tr": "Havalandırma ve Klima Tesisatı", "gazette_date": "2024-08-05", "gazette_number": "32623 (1. Mükerrer)"},
+        {"name_tr": "Merkezi Tıbbi Gaz Sistemi", "gazette_date": "2007-06-30", "gazette_number": "26568 (1. Mükerrer)"},
+        {"name_tr": "Bina ve Mekanik Tesisat Yalıtım Sistemleri", "gazette_date": "2007-06-30", "gazette_number": "26568 (1. Mükerrer)"},
+        {"name_tr": "Müşterek Tesisat Elemanları, Borular, Vanalar vb. İşleri", "gazette_date": "2007-06-30", "gazette_number": "26568 (1. Mükerrer)"}
+      ]
+    },
+    {
+      "title_tr": "Elektrik Tesisatı Genel Teknik Şartnamesi",
+      "title_en": "General technical specification for electrical installation",
+      "parts": [
+        {"name_tr": "Elektrik Tesisatlarında Sismik Önlemler", "gazette_date": "2024-08-18", "gazette_number": "32636"},
+        {"name_tr": "Elektrikli Taşıt Şarj Sistemi Tesisatı Genel Teknik Şartnamesi", "gazette_date": "2022-06-15", "gazette_number": "31867"},
+        {"name_tr": "Yangın Algılama ve Alarm Sistemleri", "gazette_date": "2021-12-16", "gazette_number": "31691"},
+        {"name_tr": "Elektrik Panoları", "gazette_date": "2021-09-11", "gazette_number": "31595"},
+        {"name_tr": "Dizel Elektrojen Grubu", "gazette_date": "2020-12-23", "gazette_number": "31343"},
+        {"name_tr": "Kablolar", "gazette_date": "2020-12-23", "gazette_number": "31343"},
+        {"name_tr": "Acil Durum Aydınlatma ve Yönlendirme Sistemleri", "gazette_date": "2020-12-23", "gazette_number": "31343"}
+      ],
+      "note": "The ministry's page lists further parts of this specification. Only the parts read on the page are listed here."
+    },
+    {
+      "title_tr": "Binaların Yangından Korunması Hakkında Yönetmelik",
+      "title_en": "Regulation on the protection of buildings from fire",
+      "instrument": "Bakanlar Kurulu Kararı 2007/12937 of 27 November 2007",
+      "gazette_date": "2007-12-19",
+      "gazette_number": "26735",
+      "source": "https://www.mevzuat.gov.tr/MevzuatMetin/21.5.200712937.pdf"
+    },
+    {
+      "title_tr": "Elektrik Tesislerinde Topraklamalar Yönetmeliği",
+      "title_en": "Regulation on earthing in electrical installations",
+      "source": "https://www.mevzuat.gov.tr/MevzuatMetin/yonetmelik/7.5.10392.pdf"
+    }
+  ],
+  "enables_rule_ids": [],
+  "planned_not_built_rule_ids": [
+    "tesisat.specification_part_cited",
+    "tesisat.fire_regulation_cited_for_fire_systems",
+    "tesisat.seismic_restraint_item_present",
+    "tesisat.earthing_item_present"
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. Each would have to read which system a line belongs to and which specification its clause cites, and a bill line carries neither as data today. Move an id to enables_rule_ids on the day its rule lands, not before."
+}

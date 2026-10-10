@@ -1,10 +1,21 @@
 {
   "rule_pack_id": "kamu_ihale",
-  "name": "Kamu Ihale Kanunu — Public Procurement Law",
-  "standard": "Kamu Ihale Kanunu (Kanun No. 4734) / Kamu Ihale Sozlesmeleri Kanunu (No. 4735)",
+  "name": "Public procurement law (Kamu İhale Kanunu)",
+  "name_tr": "Kamu İhale Kanunu ve Kamu İhale Sözleşmeleri Kanunu",
+  "standard": "4734 sayılı Kamu İhale Kanunu / 4735 sayılı Kamu İhale Sözleşmeleri Kanunu",
   "jurisdiction": "TR",
-  "description": "Validates public tender documents against the Turkish Public Procurement Law (Kamu Ihale Kanunu, No. 4734) and the Public Procurement Contracts Law (No. 4735). Checks ihale usulu (procurement method) classification, yaklasilk maliyet (estimated cost) documentation, idari sartname (administrative specification) completeness, teklif mektubu (bid letter) requirements, gecici teminat (bid bond) rate, kesin teminat (performance bond) rate, and fiyat farki (price adjustment) clause.",
-  "applies_to": ["tender", "estimate", "validation"],
+  "applies_to": [
+    "tender",
+    "estimate",
+    "validation"
+  ],
+  "review_status": "Drawn from the consolidated texts of the two laws. Reference only. Pending review by a Turkish quantity surveyor.",
+  "scope_note": "Applies to tenders let by public bodies. A contractor working only for private and international owners is outside it, and none of the ids below would apply to such a contract.",
+  "description": "The documents and figures a public works tender in Türkiye is checked for under the Public Procurement Law (4734 sayılı Kamu İhale Kanunu) and the Public Procurement Contracts Law (4735 sayılı Kamu İhale Sözleşmeleri Kanunu): the procurement method (ihale usulü), the estimated cost (yaklaşık maliyet), the administrative and technical specifications (idari şartname, teknik şartname), the bid letter (teklif mektubu), the bid bond (geçici teminat, not less than 3 percent of the bid, Law 4734 Article 33), the performance bond (kesin teminat, 6 percent of the contract price, Law 4734 Article 43) and the price adjustment clause (fiyat farkı).",
+  "sources": [
+    "https://www.mevzuat.gov.tr/MevzuatMetin/1.5.4734.pdf",
+    "https://www.mevzuat.gov.tr/MevzuatMetin/1.5.4735.pdf"
+  ],
   "enables_rule_ids": [],
   "planned_not_built_rule_ids": [
     "kik.ihale_usulu_defined",
@@ -21,6 +32,5 @@
     "kik.ihalelere_katilma_yasaklari_check"
   ],
   "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
-  "regulator": "KIK (Kamu Ihale Kurumu)",
-  "publication_year": 2024
+  "regulator": "Kamu İhale Kurumu (KİK)"
 }

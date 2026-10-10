@@ -1,10 +1,17 @@
 {
   "rule_pack_id": "tbdy_2018",
-  "name": "TBDY 2018 — Turkish Building Seismic Code",
-  "standard": "TBDY 2018 (Turkiye Bina Deprem Yonetmeligi)",
+  "name": "TBDY 2018, the building earthquake code",
+  "name_tr": "Türkiye Bina Deprem Yönetmeliği 2018",
+  "standard": "TBDY 2018 (Türkiye Bina Deprem Yönetmeliği)",
   "jurisdiction": "TR",
-  "description": "Validates structural project documentation against the Turkish Building Seismic Code (TBDY 2018, Deprem Yonetmeligi). Checks seismic hazard zone designation using the Turkey Earthquake Hazard Map (AFAD), site class classification (ZA through ZF), building importance class, structural system type, and that the deprem performans raporu (seismic performance report) covers the required analysis methods for the building height and importance category.",
-  "applies_to": ["estimate", "validation", "submittals"],
+  "applies_to": [
+    "estimate",
+    "validation",
+    "submittals"
+  ],
+  "review_status": "Drawn from public sources and not read against the text of the regulation. Reference only. Pending review by a Turkish structural engineer.",
+  "scope_note": "A structural design code. Of its content, an installation contractor meets the requirements for non-structural elements, which is where the seismic restraint of mechanical and electrical services sits; the rest is the structural engineer's.",
+  "description": "What a structural submission in Türkiye is checked for under the building earthquake code: the reference to the earthquake hazard map (deprem tehlike haritası), the local site class (yerel zemin sınıfı), the building use class and importance factor (bina kullanım sınıfı, bina önem katsayısı), the structural system (taşıyıcı sistem), the analysis method (deprem hesap yöntemi), the building height class, the irregularity check (düzensizlik kontrolü), the performance target (performans hedefi) and, for an existing building, the assessment report.",
   "enables_rule_ids": [],
   "planned_not_built_rule_ids": [
     "tbdy.deprem_tehlike_haritasi_referenced",
@@ -21,6 +28,6 @@
     "tbdy.deprem_performans_raporu_present"
   ],
   "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
-  "regulator": "AFAD (Afet ve Acil Durum Yonetimi Baskanligi)",
+  "regulator": "Afet ve Acil Durum Yönetimi Başkanlığı (AFAD)",
   "publication_year": 2018
 }

@@ -72,7 +72,15 @@ UNMEASURED = "unmeasured"
 #: on purpose, because deriving the expectation from the same code under test would
 #: assert nothing. The population it is checked against *is* derived, so a country
 #: added to either registry is covered without touching this set.
-_KNOWN_UNMEASURED: frozenset[str] = frozenset({"BG", "ES", "FR", "JP", "NG"})
+#:
+#: TR joined with the Turkish holiday table: core.calendar now states a Monday to
+#: Friday week for it, and the planning table has no Turkish calendar, so a Turkish
+#: programme is still planned on DEFAULT. The two happen to name the same days.
+#: Giving the planning table a TR entry is refused by two other gates that pin TR
+#: to DEFAULT (test_work_calendar_country_codes_are_iso and
+#: test_a_country_pack_project_is_planned_on_its_countrys_week), so the three move
+#: together or not at all.
+_KNOWN_UNMEASURED: frozenset[str] = frozenset({"BG", "ES", "FR", "JP", "NG", "TR"})
 
 
 def _population(core_weeks: Mapping[str, Any], country_map: Mapping[str, Any]) -> list[str]:

@@ -389,11 +389,35 @@
   "birimfiyat": {
     "code_required": {
       "fail": "Position {ordinal} missing birim fiyat poz number",
-      "suggestion": "Assign a Bayındırlık poz number (e.g., 04.013/1)"
+      "suggestion": "Assign the poz number from the unit-price list (e.g. 15.150.1005), or number your own analysed item ÖZEL-1"
     },
     "valid_poz": {
       "fail": "Poz '{code}' is neither a current unit-price book number (XX.XXX.XXXX) nor an older one (XX.XXX/X)",
-      "suggestion": "Use the book's number, e.g. 15.140.1002, or 04.013/1 on an older contract; number your own analysed items as ÖZEL-1"
+      "suggestion": "Use the book's number, e.g. 15.150.1005, or 04.013/1 on an older contract; number your own analysed items as ÖZEL-1"
+    },
+    "chapter_recognised": {
+      "fail": "Poz '{code}' on position {ordinal} starts with {chapter}, which is not a chapter of a unit-price list this check knows",
+      "suggestion": "The Ministry book numbers building works 15, mechanical installation 25 and electrical installation 35, with resource prices under 10 and plant analyses under 19. Check the number against the list it was taken from, or number your own item ÖZEL-1"
+    },
+    "unit_recognised": {
+      "fail": "Unit '{unit}' on position {ordinal} is not one the unit-price lists measure in",
+      "suggestion": "Use the unit the list gives for the item, for example m, m², m³, Ad, Tk, Kg, Ton, Sa"
+    },
+    "poz_unit_consistent": {
+      "fail": "Poz '{code}' is measured in {count} different units in this bill ({units})",
+      "suggestion": "A poz number is defined in one unit. Bring the lines to the unit the list gives, or give the differing work its own number"
+    },
+    "poz_rate_consistent": {
+      "fail": "Poz '{code}' is priced at {count} different unit rates in this bill ({rates})",
+      "suggestion": "One poz number has one unit price in a bill. Use one rate, or number the differing item separately as an own item"
+    },
+    "own_item_analysed": {
+      "fail": "Own item '{code}' on position {ordinal} carries no price analysis",
+      "suggestion": "An item the list does not have is priced by its own analysis. Add the labour, material and plant resources under the line, or write the analysis into its note"
+    },
+    "profit_overhead_once": {
+      "fail": "Contractor profit and general expenses are applied on {count} lines, {total} percent together, above the single {limit} percent",
+      "suggestion": "The 25 percent is added once. Keep one line, and remove it altogether when the rates are published unit prices, which already contain it"
     }
   },
   "sekisan": {

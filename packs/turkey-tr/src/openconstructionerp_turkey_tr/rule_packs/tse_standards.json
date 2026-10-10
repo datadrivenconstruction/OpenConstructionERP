@@ -1,10 +1,17 @@
 {
   "rule_pack_id": "tse_standards",
-  "name": "TSE — Turkish Standards Institution Construction Standards",
-  "standard": "TS EN / TS standards series",
+  "name": "Turkish standards cited in specifications (TSE)",
+  "name_tr": "Türk Standardları Enstitüsü standartları",
+  "standard": "TS / TS EN standards",
   "jurisdiction": "TR",
-  "description": "Validates BOQ items and specifications against key TSE (Turk Standartlari Enstitusu) construction standards. Covers TS EN 206 (concrete), TS 500 (reinforced concrete design), TS 648 (steel structures), TS 825 (thermal insulation), TS EN 1990-1999 (Eurocodes with Turkish National Annexes), and material testing standards. Checks that specification clauses cite the applicable TS standard and that material grades match TSE classifications.",
-  "applies_to": ["boq", "estimate", "validation"],
+  "applies_to": [
+    "boq",
+    "estimate",
+    "validation"
+  ],
+  "review_status": "Drawn from public sources and not read against the standards themselves, which are sold documents. Reference only. Pending review by a Turkish engineer of each discipline.",
+  "scope_note": "The standards named here are structural and building-fabric ones. The standards an installation contractor is held to are cited item by item in the Ministry unit-price book and in the general technical specifications, see tesisat_teknik_sartnameleri.",
+  "description": "What a specification clause or a bill line in Türkiye is checked for against the standards of the Türk Standardları Enstitüsü (TSE): that the clause cites the applicable TS or TS EN standard, that the cited edition is current, and that a material grade is one the standard defines. The ids below name the standards the checks were planned around: TS EN 206 for concrete, TS 500 for reinforced concrete design, TS 648 for steel structures, TS 825 for thermal insulation and the Eurocodes with their national annexes.",
   "enables_rule_ids": [],
   "planned_not_built_rule_ids": [
     "tse.standard_reference_present",
@@ -19,6 +26,5 @@
     "tse.test_certificate_requirement_noted"
   ],
   "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
-  "regulator": "TSE (Turk Standartlari Enstitusu)",
-  "publication_year": 2024
+  "regulator": "Türk Standardları Enstitüsü (TSE)"
 }

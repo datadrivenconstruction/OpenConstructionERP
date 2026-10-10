@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "openconstructionerp-turkey-tr"
-version = "0.1.0"
-description = "Country pack for the Turkish market: Bayindirlik Bakanligi Birim Fiyat unit-price methodology, Deprem Yonetmeligi 2018 (TBDY) seismic code, Imar Kanunu zoning compliance, TSE standards, KDV at 20 percent, Turkish lira."
+version = "0.2.0"
+description = "Country pack for Türkiye: the poz numbering of the Ministry unit-price book for building, mechanical and electrical works, the 25 percent contractor profit and general expenses, KDV at 20 percent with two reduced rates, Turkish lira."
 readme = "README.md"
 license = { text = "AGPL-3.0-or-later" }
 requires-python = ">=3.11"
@@ -18,10 +18,11 @@ keywords = [
     "country-pack",
     "turkey",
     "birimfiyat",
-    "bayindirlik",
+    "poz",
+    "mekanik-tesisat",
+    "elektrik-tesisati",
     "tbdy",
     "deprem",
-    "imar",
     "tse",
     "kdv",
     "lira",

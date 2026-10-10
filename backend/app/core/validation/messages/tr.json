@@ -389,11 +389,35 @@
   "birimfiyat": {
     "code_required": {
       "fail": "{ordinal} pozunda birim fiyat poz numarası eksik",
-      "suggestion": "Bayındırlık poz numarası atayın (ör. 04.013/1)"
+      "suggestion": "Birim fiyat listesindeki poz numarasını atayın (ör. 15.150.1005) veya kendi analiz kaleminizi ÖZEL-1 olarak numaralandırın"
     },
     "valid_poz": {
       "fail": "'{code}' pozu ne güncel birim fiyat kitabı numarası (XX.XXX.XXXX) ne de eski biçimdeki numara (XX.XXX/X)",
-      "suggestion": "Kitaptaki numarayı kullanın; ör. 15.140.1002 veya eski sözleşmelerde 04.013/1; kendi analiz pozlarınızı ÖZEL-1 olarak numaralandırın"
+      "suggestion": "Kitaptaki numarayı kullanın; ör. 15.150.1005 veya eski sözleşmelerde 04.013/1; kendi analiz pozlarınızı ÖZEL-1 olarak numaralandırın"
+    },
+    "chapter_recognised": {
+      "fail": "{ordinal} pozundaki '{code}' numarası {chapter} ile başlıyor; bu, denetimin tanıdığı bir birim fiyat listesi bölümü değil",
+      "suggestion": "Bakanlık kitabında inşaat 15, mekanik tesisat 25, elektrik tesisatı 35 ile numaralanır; rayiçler 10, makine analizleri 19 altındadır. Numarayı alındığı listeyle karşılaştırın veya kendi kaleminizi ÖZEL-1 olarak numaralandırın"
+    },
+    "unit_recognised": {
+      "fail": "{ordinal} pozundaki '{unit}' birimi, birim fiyat listelerinin kullandığı ölçü birimlerinden değil",
+      "suggestion": "Listenin o kalem için verdiği birimi kullanın; ör. m, m², m³, Ad, Tk, Kg, Ton, Sa"
+    },
+    "poz_unit_consistent": {
+      "fail": "'{code}' pozu bu keşifte {count} farklı birimle ölçülmüş ({units})",
+      "suggestion": "Bir poz numarası tek bir birimle tanımlanır. Kalemleri listedeki birime getirin veya farklı işe ayrı bir numara verin"
+    },
+    "poz_rate_consistent": {
+      "fail": "'{code}' pozu bu keşifte {count} farklı birim fiyatla fiyatlandırılmış ({rates})",
+      "suggestion": "Bir keşifte bir poz numarasının tek birim fiyatı olur. Tek fiyat kullanın veya farklı kalemi özel poz olarak ayrı numaralandırın"
+    },
+    "own_item_analysed": {
+      "fail": "{ordinal} pozundaki '{code}' özel pozunun fiyat analizi yok",
+      "suggestion": "Listede bulunmayan kalem kendi analiziyle fiyatlandırılır. Kalemin altına işçilik, malzeme ve makine kaynaklarını ekleyin veya analizi kalemin notuna yazın"
+    },
+    "profit_overhead_once": {
+      "fail": "Yüklenici kârı ve genel giderler {count} satırda uygulanmış; toplam yüzde {total}, tek seferlik yüzde {limit} oranının üzerinde",
+      "suggestion": "Yüzde 25 bir kez eklenir. Tek satır bırakın; fiyatlar yayımlanmış kârlı birim fiyatlarsa bu satırı tümüyle kaldırın, çünkü o fiyatlar bu payı zaten içerir"
     }
   },
   "sekisan": {

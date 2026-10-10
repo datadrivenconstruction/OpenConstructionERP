@@ -1662,6 +1662,59 @@ PAYMENT_REGIMES: tuple[dict[str, Any], ...] = (
         ),
     },
     {
+        "code": "tr_ttk_1530",
+        "jurisdiction": "Türkiye",
+        "country_code": "TR",
+        "statute": "Türk Ticaret Kanunu (Law 6102)",
+        "statute_reference": "Article 1530(2)-(7), https://www.mevzuat.gov.tr/MevzuatMetin/1.5.6102.pdf",
+        "due_date_basis": "application_date",
+        "due_date_days": 0,
+        "due_date_day_basis": "calendar",
+        "payment_notice_basis": "application_date",
+        "payment_notice_days": None,
+        "payment_notice_day_basis": "calendar",
+        "final_date_basis": "application_date",
+        "final_date_days": 30,
+        "final_date_day_basis": "calendar",
+        "pay_less_days": None,
+        "pay_less_day_basis": "calendar",
+        "no_notice_effect": "none",
+        "interest_basis": "prescribed_rate",
+        "interest_reference_rate": (
+            "the communique the Central Bank of the Republic of Türkiye issues each January under Article 1530(7)"
+        ),
+        "interest_margin_percent": None,
+        "interest_fixed_percent": None,
+        "interest_statute": "Article 1530(7); Law 3095 sets the commercial default rate the announced rate must exceed",
+        "notes": (
+            "An interest basis rather than a notice regime, the same shape as the EU Late Payment "
+            "Directive: Article 1530 sets a payment term between commercial enterprises for the supply "
+            "of goods and services and the interest that runs when it is missed, with no payment or "
+            "pay-less notice, so no_notice_effect is none. Where the contract names a payment date or "
+            "term, the debtor is in default on it without any notice (paragraph 2). Where it names none, "
+            "or names one that breaches paragraph 5, default begins thirty days after the invoice or an "
+            "equivalent request for payment is received, or thirty days after the goods or services are "
+            "received where that is later or the date of the invoice is uncertain, or thirty days after "
+            "acceptance where the law or the contract provides an acceptance procedure (paragraph 4). "
+            "That thirty days from the application is written here as the final date for payment. An "
+            "agreed term may run to sixty days at most; a longer one needs express agreement and must not "
+            "be grossly unfair to the creditor, and it may not exceed sixty days at all where the "
+            "creditor is a small or medium-sized enterprise or an agricultural producer, or the debtor "
+            "is a large enterprise (paragraph 5), so state the agreed final date on the application "
+            "where a contract sets one. A clause excluding default interest is void (paragraph 6). "
+            "Where no rate is agreed, the rate is the one the Central Bank announces each January "
+            "together with a minimum amount for recovery costs; the law requires it to be at least "
+            "eight points above the commercial default rate of Law 3095 and does not itself state a "
+            "number, so none is encoded: read the communique of the year (for 2026, Resmî Gazete "
+            "2 January 2026, no. 33125). Where the price is paid in instalments the terms above apply "
+            "to the first instalment and each unpaid part bears the same interest (paragraph 8); that "
+            "second clock is not computed. The article was read in full in the consolidated text on "
+            "mevzuat.gov.tr on 2026-10-10. It speaks of dealings between commercial enterprises, and "
+            "whether a contract with a public body falls under it was not established, so this row is "
+            "not confirmed for a public Turkish contract. Pending review by a Turkish lawyer."
+        ),
+    },
+    {
         "code": "ng_ppa_2007",
         "jurisdiction": "Nigeria (public)",
         "country_code": "NG",

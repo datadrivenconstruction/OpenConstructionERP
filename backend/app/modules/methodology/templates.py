@@ -1069,6 +1069,13 @@ _COUNTRY_TEMPLATES: list[dict[str, Any]] = [
 # the Indonesian rupiah and Chilean peso, 3 for the Kuwaiti dinar).
 _MORE_COUNTRY_TEMPLATES: list[dict[str, Any]] = [
     # Europe (and the European-facing part of the Turkish market).
+    #
+    # Türkiye. The overhead and profit written here are the fallback and are
+    # not what ships: the regional table states the national stack, one
+    # combined 25 percent line for contractor profit and general expenses and
+    # then KDV, and :func:`_reconcile_with_region_table` replaces these steps
+    # with it. What this literal carries that the table has no opinion about
+    # is the currency and the tax rate.
     _flat_country_template(
         slug="turkey",
         name="Turkey",

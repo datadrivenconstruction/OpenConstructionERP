@@ -1,25 +1,113 @@
 {
   "rule_pack_id": "bayindirlik_unit_prices",
-  "name": "Bayindirlik Birim Fiyat — Ministry Unit Prices",
-  "standard": "Bayindirlik Bakanligi Birim Fiyat (annual edition)",
+  "name": "Ministry unit-price book (birim fiyat)",
+  "name_tr": "İnşaat ve Tesisat Birim Fiyatları",
+  "standard": "birimfiyat",
   "jurisdiction": "TR",
-  "description": "Validates cost estimates against the Bayindirlik Bakanligi (now Cevre, Sehircilik ve Iklim Degisikligi Bakanligi) unit price framework. Checks that BOQ items reference valid poz (unit price item) numbers, that unit rates do not exceed the published birim fiyat without justification (yeni fiyat analizi), that measurement units match the poz definition, and that the correct fiscal year edition is referenced.",
-  "applies_to": ["estimate", "boq", "tender", "validation"],
-  "enables_rule_ids": [],
-  "planned_not_built_rule_ids": [
-    "birimfiyat.poz_number_format_valid",
-    "birimfiyat.poz_reference_present",
-    "birimfiyat.unit_matches_poz_definition",
-    "birimfiyat.unit_rate_within_published_range",
-    "birimfiyat.yeni_fiyat_analizi_for_non_catalogue",
-    "birimfiyat.yeni_fiyat_analizi_for_rate_deviation",
-    "birimfiyat.iscilik_labour_rate_referenced",
-    "birimfiyat.malzeme_material_rate_referenced",
-    "birimfiyat.makine_equipment_rate_referenced",
-    "birimfiyat.yil_edition_year_current",
-    "birimfiyat.fiyat_farki_escalation_documented"
+  "applies_to": [
+    "estimate",
+    "boq",
+    "tender",
+    "validation"
   ],
-  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. They record what this document is meant to check once the rules are written; move an id back to enables_rule_ids on the day its rule lands, not before.",
-  "regulator": "Cevre, Sehircilik ve Iklim Degisikligi Bakanligi",
-  "publication_year": 2024
+  "review_status": "Structure read from the published unit-price book and the legislation cited below. Pending review by a Turkish quantity surveyor.",
+  "description": "The unit-price book Turkish bills are written against. It is published each year, with analyses, by the Yüksek Fen Kurulu Başkanlığı of the Çevre, Şehircilik ve İklim Değişikliği Bakanlığı, the ministry that took over the work of the former Bayındırlık ve İskân Bakanlığı. Every line of a bill cites a poz number from the book, or is marked as the contractor's own analysed item (özel poz). The published unit prices already contain the 25 percent contractor profit and general expenses; the analysis cost underneath them does not. This document describes the structure of the numbering and carries no price; prices come from the cost base the pack loads.",
+  "publisher": {
+    "ministry": "Çevre, Şehircilik ve İklim Değişikliği Bakanlığı",
+    "body": "Yüksek Fen Kurulu Başkanlığı",
+    "edition": "annual, effective 1 January; monthly updated lists since 2025",
+    "source": "https://yfk.csb.gov.tr/birim-fiyatlar-i-100468"
+  },
+  "code_format": {
+    "shape": "NN.NNN.NNNN",
+    "segments": 3,
+    "separator": ".",
+    "segment_1": "chapter of the book, two digits",
+    "segment_2": "group within the chapter, three digits",
+    "segment_3": "item, four digits",
+    "examples": [
+      "15.150.1005",
+      "25.305.1104",
+      "35.150.3101",
+      "19.100.1101",
+      "10.100.1062"
+    ],
+    "regex": "^\\d{2}\\.\\d{3}\\.\\d{4}(?:/[A-Z0-9]{1,2})?$",
+    "older_shape": "NN.NNN/N with an optional Y. prefix for building works, still found on older contracts",
+    "own_item": "ÖZEL-1, ÖZEL POZ 3: an item the bill numbers itself because the book has none"
+  },
+  "chapters": [
+    {
+      "code": "10",
+      "name_tr": "Rayiçler",
+      "name_en": "Resource prices: labour, materials, transport"
+    },
+    {
+      "code": "15",
+      "name_tr": "İnşaat",
+      "name_en": "Building works"
+    },
+    {
+      "code": "19",
+      "name_tr": "Makine saatlik ücret analizleri",
+      "name_en": "Hourly plant cost analyses"
+    },
+    {
+      "code": "25",
+      "name_tr": "Mekanik tesisat",
+      "name_en": "Mechanical installation"
+    },
+    {
+      "code": "35",
+      "name_tr": "Elektrik tesisatı",
+      "name_en": "Electrical installation"
+    }
+  ],
+  "other_publishers": "Other public bodies number their own lists in the same three-group shape under other first groups, for example İLBANK, DSİ, the defence ministry and the port and airport authority. The chapter rule accepts them without naming them: it only speaks when a number is in the Ministry shape and its first group is one no publisher this document knows of uses.",
+  "units": {
+    "note": "The units the book measures in. A bill may write any of the spellings; the engine folds case, the superscript and the closing dot.",
+    "accepted": [
+      "m",
+      "m²",
+      "m³",
+      "km",
+      "Ad",
+      "Tk",
+      "Kg",
+      "Ton",
+      "Sa",
+      "Gün",
+      "Ay",
+      "Lt",
+      "kWh",
+      "Ha",
+      "Dekar"
+    ],
+    "multiples": "A count in front of the unit is how the book writes a bulk unit: 100 m², 1000 Ad"
+  },
+  "profit_and_general_expenses": {
+    "percent": 25,
+    "name_tr": "Yüklenici kârı ve genel giderler",
+    "legal_reference": "Yapım İşleri İhaleleri Uygulama Yönetmeliği, Madde 11(1)",
+    "source": "https://www.mevzuat.gov.tr/MevzuatMetin/yonetmelik/7.5.12916.pdf",
+    "note": "Added once, to prices that carry no profit and general expenses. A published unit price already contains it, so a bill priced from the book must not add it again as a markup line."
+  },
+  "enables_rule_ids": [
+    "birimfiyat.code_required",
+    "birimfiyat.valid_poz",
+    "birimfiyat.chapter_recognised",
+    "birimfiyat.unit_recognised",
+    "birimfiyat.poz_unit_consistent",
+    "birimfiyat.poz_rate_consistent",
+    "birimfiyat.own_item_analysed",
+    "birimfiyat.profit_overhead_once"
+  ],
+  "planned_not_built_rule_ids": [
+    "birimfiyat.unit_matches_poz_definition",
+    "birimfiyat.unit_rate_within_published_price",
+    "birimfiyat.profit_included_in_book_rate",
+    "birimfiyat.edition_year_current",
+    "birimfiyat.price_difference_documented"
+  ],
+  "planned_not_built_note": "Planned, not built. The engine defines none of the ids in planned_not_built_rule_ids, so switching this document on does not run them. The first four need a lookup into the loaded price base, which no rule can make today: the unit a poz is defined in, its published price, whether a line's rate is the published price (profit included) or the analysis cost (profit excluded), and the edition a number belongs to cannot be read from a bill line alone. A line priced from the base carries the id of its cost item and nothing about the base it came from, so the third check is one carried flag away: the day a line keeps which list its rate is from and whether that rate includes profit, the double count can be reported without a lookup. The fifth, the fiyat farkı record, needs the contract's price-adjustment clause, which a bill does not carry. Move an id to enables_rule_ids on the day its rule lands, not before."
 }

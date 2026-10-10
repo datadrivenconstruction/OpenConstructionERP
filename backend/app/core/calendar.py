@@ -42,6 +42,10 @@ Sources:
   corroboration rather than a primary text read in full; see _holidays_ng.
 - BG: Labour Code (Kodeks na truda), Art. 154. Art. 154(2) moves a holiday
   landing on a Saturday or Sunday, with the Easter block exempted.
+- TR: Law 2429 (Ulusal Bayram ve Genel Tatiller Hakkında Kanun), Art. 1-2, for
+  the days; the Diyanet İşleri Başkanlığı yearly "Resmi Tatiller" pages for the
+  dates of Ramazan Bayramı and Kurban Bayramı. Half days are not modelled (see
+  _holidays_tr).
 """
 
 from __future__ import annotations
@@ -298,6 +302,36 @@ _CN_LAST_YEAR = max(_CN_FESTIVALS)
 # from 1 January 2025: Spring Festival went from three days to four by making New
 # Year's Eve statutory, and Labour Day from one day to two.
 _CN_HOLIDAY_REFORM_YEAR = 2025
+
+# Türkiye: the first day of Ramazan Bayramı and of Kurban Bayramı, as (month,
+# day) in the Gregorian year. Law 2429 Art. 2 fixes the lengths, three days and
+# four days after the half day of the eve, and leaves the dates to the calendar
+# the Diyanet İşleri Başkanlığı computes and publishes. Those published dates
+# are the ones offices close on, so they are copied here rather than derived
+# from a Hijri converter, which follows a different sighting rule and can land
+# a day away.
+#
+# Source, one page per year, read 2026-10-10:
+# https://vakithesaplama.diyanet.gov.tr/icerik.php?icerik=157 (2025), 158
+# (2026), 159 (2027), 193 (2028), 194 (2029), 195 (2030), 196 (2031), 197
+# (2032), 198 (2033).
+#
+# Each feast is a tuple because the lunar year is shorter than the solar one:
+# in 2033 Ramazan Bayramı falls twice, in January and again in December.
+_TR_BAYRAMS: dict[int, dict[str, tuple[tuple[int, int], ...]]] = {
+    2025: {"ramazan": ((3, 30),), "kurban": ((6, 6),)},
+    2026: {"ramazan": ((3, 20),), "kurban": ((5, 27),)},
+    2027: {"ramazan": ((3, 9),), "kurban": ((5, 16),)},
+    2028: {"ramazan": ((2, 26),), "kurban": ((5, 5),)},
+    2029: {"ramazan": ((2, 14),), "kurban": ((4, 24),)},
+    2030: {"ramazan": ((2, 4),), "kurban": ((4, 13),)},
+    2031: {"ramazan": ((1, 24),), "kurban": ((4, 2),)},
+    2032: {"ramazan": ((1, 14),), "kurban": ((3, 22),)},
+    2033: {"ramazan": ((1, 2), (12, 23)), "kurban": ((3, 11),)},
+}
+
+_TR_RAMAZAN_DAYS = 3
+_TR_KURBAN_DAYS = 4
 
 
 # ── Per-country holiday calculators ──────────────────────────────────────────
@@ -904,6 +938,63 @@ def _holidays_ru(year: int) -> set[date]:
     }
 
 
+def _holidays_tr(year: int) -> set[date]:
+    """Türkiye public holidays (Law 2429, Art. 1 and 2), whole days only.
+
+    Seven fixed days: 1 January, 23 April, 1 May, 19 May, 15 July (added by
+    Law 6752 in 2016), 30 August and 29 October. Ramazan Bayramı adds three
+    days and Kurban Bayramı four, on the dates in ``_TR_BAYRAMS``. A year
+    outside that table logs a warning and returns the fixed days alone, which
+    :func:`resolve_holidays` reports as a fallback on the year axis.
+
+    Three things the law provides are not in the set, and all three err the
+    same way: a day that is partly or wholly off is counted as a working day,
+    so a derived deadline can land earlier than the real one, never later.
+
+    * The half days. The eve (arife) of each feast and 28 October are
+      holidays from 13:00. A set of whole days cannot hold half a day, and
+      counting them as full holidays would err the other way on a site that
+      works the morning.
+    * The Saturday rule of Art. 2: where a holiday ends on a Friday evening,
+      the following Saturday is a full holiday for public offices. It does
+      not move a Monday to Friday calendar and does not bind private sites.
+    * Administrative leave. The government regularly bridges a feast to the
+      nearest weekend by circular, for public staff, announced weeks ahead.
+      It is not derivable.
+
+    Source: https://www.mevzuat.gov.tr/MevzuatMetin/1.5.2429.pdf
+    """
+    holidays: set[date] = {
+        date(year, 1, 1),  # Yılbaşı
+        date(year, 4, 23),  # Ulusal Egemenlik ve Çocuk Bayramı
+        date(year, 5, 1),  # Emek ve Dayanışma Günü
+        date(year, 5, 19),  # Atatürk'ü Anma, Gençlik ve Spor Bayramı
+        date(year, 7, 15),  # Demokrasi ve Millî Birlik Günü
+        date(year, 8, 30),  # Zafer Bayramı
+        date(year, 10, 29),  # Cumhuriyet Bayramı
+    }
+    bayrams = _TR_BAYRAMS.get(year)
+    if bayrams is None:
+        logger.warning(
+            "No curated Turkish feast dates for %d (table covers %d-%d); Ramazan Bayramı and "
+            "Kurban Bayramı are omitted and only the %d fixed days are returned",
+            year,
+            min(_TR_BAYRAMS),
+            max(_TR_BAYRAMS),
+            len(holidays),
+        )
+        return holidays
+
+    for name, length in (("ramazan", _TR_RAMAZAN_DAYS), ("kurban", _TR_KURBAN_DAYS)):
+        for month, day in bayrams[name]:
+            first = date(year, month, day)
+            holidays.update(first + timedelta(days=offset) for offset in range(length))
+    # A feast that starts in the last days of December runs into January. No
+    # year of the table does, and this keeps the answer to the year asked for
+    # if a later row ever does.
+    return {d for d in holidays if d.year == year}
+
+
 def _holidays_ng(year: int) -> set[date]:
     """Nigerian federal public holidays (Public Holidays Act, Cap. P40, LFN 2004).
 
@@ -1075,6 +1166,13 @@ _WORKING_WEEK: dict[str, frozenset[int]] = {
     # Monday-Friday here is the near-universal practical convention, not a
     # statute naming these five days the way Bulgaria's does.
     "NG": frozenset({0, 1, 2, 3, 4}),
+    # Türkiye: İş Kanunu 4857 Art. 63 caps the week at 45 hours and leaves the
+    # days to the contract; Art. 46 gives one rest day in seven and Law 2429
+    # Art. 3 names Sunday. So no statute makes Saturday a day off. Monday to
+    # Friday is the office convention and the one the shipped Turkish calendar
+    # uses; a site that works Saturdays sets its own calendar.
+    # https://www.mevzuat.gov.tr/MevzuatMetin/1.5.4857.pdf
+    "TR": frozenset({0, 1, 2, 3, 4}),
 }
 
 _DEFAULT_WORKING_WEEK: frozenset[int] = frozenset({0, 1, 2, 3, 4})
@@ -1100,6 +1198,7 @@ _HOLIDAY_FUNCS: dict[str, Any] = {
     "RU": _holidays_ru,
     "NG": _holidays_ng,
     "BG": _holidays_bg,
+    "TR": _holidays_tr,
 }
 
 
@@ -1205,6 +1304,7 @@ class HolidayCalculationError(RuntimeError):
 _CURATED_TABLES: dict[str, tuple[dict[int, Any], tuple[str, ...]]] = {
     "CN": (_CN_FESTIVALS, ("Spring Festival", "Qingming", "Dragon Boat", "Mid-Autumn")),
     "IN": (_HINDU_HOLIDAYS, ("Holi", "Diwali")),
+    "TR": (_TR_BAYRAMS, ("Ramazan Bayramı", "Kurban Bayramı")),
 }
 
 #: Holidays whose dates are computed but whose length is not. ``_gcc_eids``

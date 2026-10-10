@@ -1,43 +1,73 @@
 # Turkey Construction Pack - first-login onboarding wizard.
-# Streamed by /api/v1/partner-pack/onboarding-script and rendered by
-# the OnboardingWizard React component in place of the default steps.
+# Streamed by /api/v1/partner-pack/onboarding-script and rendered by the
+# OnboardingWizard React component in place of the default steps.
+#
+# Labels are bilingual: every label that names a domain term carries the
+# Turkish word next to the English one rather than a translation of the
+# English sentence. The script declares Turkish, the language the pack
+# opens the interface in.
 
 version: 2
 locale: tr
-title: "Welcome to OpenConstructionERP - Turkey Edition"
-title_tr: "OpenConstructionERP'ye Hosgeldiniz - Turkiye"
-subtitle: "Three steps to align your workspace with Turkish construction practice (Birim Fiyat, TBDY, KDV). Calisma alaninizi Turk insaat uygulamalarina uygun hale getirin."
+title: "Welcome to OpenConstructionERP - Türkiye"
+title_tr: "OpenConstructionERP'ye hoş geldiniz - Türkiye"
+subtitle: "Four steps to line the workspace up with Turkish practice: poz numbers, the unit-price book, the 25 percent, KDV. Dört adımda çalışma alanınız Türkiye uygulamasına göre ayarlanır."
 
 steps:
   - id: company_profile
-    title: "Company profile / Firma bilgileri"
-    body: "Tell us about your firm so reports and tender documents are correctly attributed. Firma bilgilerinizi girin, boylece raporlar ve ihale belgeleri dogru sekilde duzenlenir."
+    title: "Company details / Firma bilgileri"
+    body: "Used on bills, tender documents and reports. Keşiflerde, teklif belgelerinde ve raporlarda görünür."
     fields:
-      - { key: company_name, label: "Company name / Firma adi", type: text, required: true }
-      - { key: vergi_no, label: "Vergi Kimlik Numarasi (Tax ID) / VKN", type: text, required: false, placeholder: "1234567890", help: "10-digit tax identification number issued by the Revenue Administration." }
-      - { key: ticaret_sicil_no, label: "Ticaret Sicil Numarasi (Trade Registry No.)", type: text, required: false }
-      - { key: yapi_denetim_class, label: "Yapi Denetim class (Building Inspection) / Yapi denetim sinifi", type: select, options: ["Not applicable", "A Grubu", "B Grubu", "C Grubu"], required: false, default: "Not applicable", help: "Building inspection classification under Law 4708." }
-      - { key: head_office_city, label: "Head-office city / Merkez ofis sehri", type: select, options: ["Istanbul", "Ankara", "Izmir", "Antalya", "Bursa", "Adana", "Konya", "Gaziantep", "Kayseri", "Trabzon", "Other"], required: true }
-      - { key: deprem_bolgesi, label: "Primary seismic zone / Deprem bolgesi", type: select, options: ["Zone 1 (highest risk)", "Zone 2", "Zone 3", "Zone 4 (lowest risk)"], required: false, default: "Zone 1 (highest risk)", help: "Determines which TBDY 2018 parameters apply by default." }
+      - { key: company_name, label: "Company name / Firma adı", type: text, required: true }
+      - { key: vergi_no, label: "Tax identification number / Vergi kimlik numarası (VKN)", type: text, required: false, placeholder: "1234567890" }
+      - { key: vergi_dairesi, label: "Tax office / Vergi dairesi", type: text, required: false }
+      - { key: ticaret_sicil_no, label: "Trade registry number / Ticaret sicil numarası", type: text, required: false }
+      - { key: head_office_city, label: "Head office, province / Merkez, il", type: select, required: true, default: "İstanbul", options: ["İstanbul", "Ankara", "İzmir", "Antalya", "Bursa", "Adana", "Konya", "Gaziantep", "Kayseri", "Kocaeli", "Mersin", "Trabzon", "Other / Diğer"] }
 
-  - id: standards_birimfiyat
-    title: "Standards and unit prices / Standartlar ve birim fiyat"
-    body: "Choose the specification and price base you work to. The BOQ editor and validation engine will check against this. Calistiginiz sartname ve fiyat tabanini secin."
+  - id: work_type
+    title: "Type of work / İşin türü"
+    body: "The unit-price book keeps building, mechanical and electrical works in separate chapters. Pick where most of your turnover sits; every chapter stays available on every project. Birim fiyat kitabında inşaat, mekanik tesisat ve elektrik tesisatı ayrı bölümlerdedir."
     fields:
-      - { key: price_base, label: "Default price base / Varsayilan fiyat tabani", type: radio, options: ["Bayindirlik Bakanligi Birim Fiyat (Ministry unit prices)", "Iller Bankasi (Provincial Bank unit prices)", "Private in-house rate library"], required: true, default: "Bayindirlik Bakanligi Birim Fiyat (Ministry unit prices)" }
-      - { key: birim_fiyat_year, label: "Birim Fiyat reference year", type: select, options: ["2026", "2025", "2024", "2023"], required: true, default: "2026" }
-      - { key: enable_tbdy_2018, label: "Enable TBDY 2018 seismic code checks / TBDY 2018 deprem yonetmeligi kontrollerini etkinlestir", type: checkbox, default: true, help: "Mandatory for all new buildings in Turkey since 2019." }
-      - { key: enable_tse_standards, label: "Enable TSE construction standards / TSE insaat standartlarini etkinlestir", type: checkbox, default: true }
-      - { key: enable_imar_kanunu, label: "Enable Imar Kanunu zoning compliance / Imar Kanunu uyumluluklarini etkinlestir", type: checkbox, default: true }
-      - { key: default_kdv_rate, label: "Default KDV (VAT) rate", type: select, options: ["20% (standard rate)", "10% (reduced, certain construction services)", "1% (social housing, specific categories)"], required: true, default: "20% (standard rate)" }
+      - { key: primary_work_type, label: "Predominant work type / Ağırlıklı iş türü", type: radio, required: true, default: "Building works (inşaat, 15)", options: ["Building works (inşaat, 15)", "Mechanical installation (mekanik tesisat, 25)", "Electrical installation (elektrik tesisatı, 35)", "Mechanical and electrical together (mekanik ve elektrik tesisatı)", "All of them in roughly equal measure"] }
+      - { key: role, label: "Your role on projects / Projelerdeki rolünüz", type: radio, required: true, default: "Main contractor (yüklenici)", options: ["Main contractor (yüklenici)", "Subcontractor (alt yüklenici)", "Designer or cost consultant (proje müellifi, keşif ve metraj)", "Client or investor (işveren, yatırımcı)"] }
+      - { key: works_in_public_procurement, label: "We tender for public works under the procurement law / Kamu ihalelerine katılıyoruz (4734)", type: checkbox, default: false, help: "Leave clear when you work for private and international owners only. The procurement references stay off." }
+      - { key: structural_scope, label: "Our scope includes the structure / Kapsamımızda taşıyıcı sistem var", type: checkbox, default: false, help: "Switches on the earthquake code reference document. An installation contractor meets that code only through the restraint of services." }
+
+  - id: unit_prices
+    title: "Poz numbers and unit prices / Poz numaraları ve birim fiyatlar"
+    body: "Every line of a Turkish bill cites a poz number, or is the contractor's own analysed item. The validation engine checks the number, its chapter and the unit. Her kalem bir poz numarası taşır ya da özel poz olarak analiziyle verilir."
+    fields:
+      - { key: price_base, label: "Default price base / Varsayılan fiyat tabanı", type: radio, required: true, default: "Ministry unit prices (Çevre, Şehircilik ve İklim Değişikliği Bakanlığı birim fiyatları)", options: ["Ministry unit prices (Çevre, Şehircilik ve İklim Değişikliği Bakanlığı birim fiyatları)", "Another public body's list (diğer kurum birim fiyatları)", "Own rate library (firma birim fiyatları)"] }
+      - { key: priced_from_published_rates, label: "My rates are the published unit prices, profit included / Fiyatlarım kârlı birim fiyatlardır", type: checkbox, default: false, help: "A published unit price already contains the 25 percent contractor profit and general expenses. Tick this and remove the 25 percent markup line from such a bill, otherwise it is counted twice. Leave it clear when you price at analysis cost and add the 25 percent once on the summary." }
+      - { key: check_poz_chapter, label: "Warn when a poz chapter is not one the book has / Tanınmayan poz bölümünde uyar", type: checkbox, default: true }
+      - { key: check_poz_units, label: "Warn when a line's unit is not one the book measures in / Kitapta olmayan ölçü biriminde uyar", type: checkbox, default: true }
+      - { key: own_items_need_analysis, label: "Ask for an analysis under every own item / Özel pozlarda analiz iste", type: checkbox, default: true, help: "An item the book does not have (özel poz, yeni fiyat) is priced by its own analysis: labour, material and plant." }
+
+  - id: money
+    title: "Money / Para ve vergi"
+    body: "Lira at two decimals. KDV has a general rate and two reduced rates; which supplies fall under the reduced lists is decided per invoice with your accountant. Türk lirası, iki ondalık. KDV oranı fatura bazında belirlenir."
+    fields:
+      - { key: currency, label: "Currency / Para birimi", type: select, required: true, default: "TRY (₺)", options: ["TRY (₺)", "EUR (€) - for contracts priced in foreign currency", "USD ($) - for contracts priced in foreign currency"] }
+      - { key: default_kdv_rate, label: "Default KDV rate / Varsayılan KDV oranı", type: radio, required: true, default: "20% (genel oran)", options: ["20% (genel oran)", "10% (indirimli oran, II sayılı liste)", "1% (indirimli oran, I sayılı liste)"] }
+      - { key: profit_overhead_percent, label: "Contractor profit and general expenses / Yüklenici kârı ve genel giderler", type: select, required: true, default: "25%", options: ["25%", "0% (rates already include it)", "Set per project"] }
 
   - id: review
-    title: "Review and finish / Gozden gecir ve tamamla"
-    body: "We will create your first Turkish project workspace with the standards and tax settings you selected. You can change everything later in Settings. Sectiklerinize gore ilk Turkiye proje alaninizi olusturacagiz."
+    title: "Review and finish / Gözden geçir ve tamamla"
+    body: "We will set the workspace to lira at two decimals, switch on the Turkish poz rules, and apply the Turkish estimating method with the 25 percent and KDV. Everything here can be changed later in Settings. Tüm ayarlar daha sonra değiştirilebilir."
     action:
-      label: "Create my Turkey workspace / Turkiye calisma alanimi olustur"
+      label: "Create my Türkiye workspace / Çalışma alanımı oluştur"
       apply:
         - set_default_currency: TRY
         - set_tax_template: tr_kdv_20
         - preload_cwicr_regions:
-            - cwicr-tr-istanbul
+            - cwicr-tr-national
+        - enable_rule_packs:
+            - bayindirlik_unit_prices
+            - tesisat_teknik_sartnameleri
+            - tse_standards
+        - conditionally_enable_rule_pack:
+            rule_pack: kamu_ihale
+            when: "works_in_public_procurement == true"
+        - conditionally_enable_rule_pack:
+            rule_pack: tbdy_2018
+            when: "structural_scope == true"

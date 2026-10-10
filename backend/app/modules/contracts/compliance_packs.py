@@ -251,7 +251,9 @@ RULE_PACKS: dict[str, dict[str, Any]] = {
         "id": "tr_compliance",
         "name": "Turkey Compliance",
         "description": "Birim fiyat poz numbers on every priced line, in the published "
-        "unit-price format, plus the universal quality baseline.",
+        "unit-price format and under a chapter a published list has, the units those lists "
+        "measure in, one unit and one rate per poz, an analysis under every own item and the "
+        "25 percent applied once, plus the universal quality baseline.",
         "jurisdiction": "TR",
         "enforced_workflows": [WORKFLOW_CONTRACT_SIGNATURE],
         "rule_sets": ["boq_quality", "birimfiyat"],

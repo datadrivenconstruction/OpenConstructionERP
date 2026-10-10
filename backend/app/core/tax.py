@@ -173,6 +173,16 @@ _RAW: dict[str, dict[str, str]] = {
     # something prices from them. Do not read the entry's presence as evidence
     # that a Romanian pack exists or that Romanian VAT flows through here.
     "RO": {"standard": "0.21", "reduced": "0.11", "zero": "0.00"},
+    # ── Türkiye ───────────────────────────────────────────────────────────
+    # KDV, Law 3065 art. 28 and Karar 2007/13033 as amended by Karar 7346
+    # (Resmî Gazete 7 July 2023, no. 32241): general rate 20 and list (II)
+    # rate 10, both in force since 10 July 2023.
+    # https://www.resmigazete.gov.tr/eskiler/2023/07/20230707-11.pdf
+    # Türkiye has a second reduced rate, 1 percent on list (I), and this
+    # table has one "reduced" slot per country, so the 1 percent is not here.
+    # Like RO above, the entry has no consumer today; the dated rates live in
+    # the tax seed and the rate a bill charges comes from the TR markup stack.
+    "TR": {"standard": "0.20", "reduced": "0.10"},
     # ── Russia / CIS ──────────────────────────────────────────────────────
     # Standard rate 22 % since 2026-01-01, up from 20 %. This table carries no
     # effective dates, so it states only what is in force now; the dated
