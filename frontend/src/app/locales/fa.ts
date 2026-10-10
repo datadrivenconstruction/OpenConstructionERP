@@ -45992,6 +45992,21 @@ const resource = {
     "schedule.calendar.week_fallback": "هفتهٔ کاری منطقه‌ای در دسترس نیست. برای برنامه‌ریزی از هفتهٔ استاندارد استفاده می‌شود.",
     "schedule.calendar.holidays_missing": "اطلاعات تعطیلات رسمی برای {{years}} در دسترس نیست. پیش از اتکا به این تاریخ‌ها، تقویم را بررسی کنید.",
     "schedule.calendar.holidays_partial": "اطلاعات تعطیلات رسمی برای {{years}} کامل نیست. پیش از اتکا به این تاریخ‌ها، تقویم را بررسی کنید.",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "پیش‌نویس آماده‌سازی برای وام‌دهنده",
+    "contracts.lender_preparation.notice": "نسخهٔ کاری فقط‌خواندنی. این نسخه به معنای ارائه به وام‌دهنده، گواهی یا پرداخت تسهیلات نیست. سوابق مبدأ جداگانه خوانده می‌شوند و ممکن است تغییر کنند.",
+    "contracts.lender_preparation.missing": "شامل نمی‌شود: تسهیلات اعتباری، تأیید وام‌دهنده، مدارک مصالح انبارشده و دفتر دستورهای تغییر مختص قرارداد.",
+    "contracts.lender_preparation.error": "درخواست پرداخت بارگیری نشد. برای تلاش دوباره، تازه‌سازی کنید.",
+    "contracts.lender_preparation.subcontractors": "درخواست‌های پرداخت پیمانکاران جزء",
+    "contracts.lender_preparation.documents": "ارجاع‌های اسناد قرارداد",
+    "contracts.lender_preparation.waivers": "ارجاع‌های اسقاط حقوق تضمینی مرتبط با درخواست",
+    "contracts.lender_preparation.loaded": "{{count}} ثبت‌شده؛ بدون راستی‌آزمایی مستقل",
+    "contracts.lender_preparation.unavailable": "در دسترس نیست؛ از این پیش‌نویس حذف شده است",
+    "contracts.lender_preparation.download": "دریافت پیش‌نویس JSON",
+    "contracts.lender_preparation.certified": "مبلغ گواهی‌شدهٔ ثبت‌شده",
+    "contracts.lender_preparation.findings": "یافته‌های ثبت‌شده دربارهٔ گواهی‌ها",
+    "contracts.lender_preparation.no_period": "این درخواست تاریخ‌های دوره ندارد. درخواست‌های پرداخت پیمانکاران جزء بر اساس تاریخ تطبیق داده نمی‌شوند.",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

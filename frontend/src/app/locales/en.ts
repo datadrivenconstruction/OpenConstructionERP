@@ -40732,6 +40732,21 @@ const resource = {
     "schedule.calendar.week_fallback": "The regional working week is unavailable. A standard planning week is used.",
     "schedule.calendar.holidays_missing": "Public holidays are not available for {{years}}. Check the calendar before relying on these dates.",
     "schedule.calendar.holidays_partial": "Public holiday coverage is incomplete for {{years}}. Check the calendar before relying on these dates.",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "Draft lender preparation",
+    "contracts.lender_preparation.notice": "Read-only working copy. This is not a lender submission, certification or disbursement. Source records are read separately and may change.",
+    "contracts.lender_preparation.missing": "Not included: loan facility, lender approval, stored-material evidence and the contract-specific change-order log.",
+    "contracts.lender_preparation.error": "The payment application could not be loaded. Refresh to try again.",
+    "contracts.lender_preparation.subcontractors": "Subcontractor payment applications",
+    "contracts.lender_preparation.documents": "Contract document references",
+    "contracts.lender_preparation.waivers": "Claim waiver references",
+    "contracts.lender_preparation.loaded": "{{count}} recorded; not independently verified",
+    "contracts.lender_preparation.unavailable": "Unavailable; omitted from this draft",
+    "contracts.lender_preparation.download": "Download draft JSON",
+    "contracts.lender_preparation.certified": "Recorded certified amount",
+    "contracts.lender_preparation.findings": "Recorded certificate findings",
+    "contracts.lender_preparation.no_period": "This claim has no period dates. Subcontractor payment applications are not matched by date.",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

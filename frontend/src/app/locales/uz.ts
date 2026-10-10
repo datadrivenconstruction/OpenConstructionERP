@@ -46927,6 +46927,21 @@ const resource = {
     "schedule.calendar.week_fallback": "Mintaqaviy ish haftasi mavjud emas. Rejalashtirish uchun standart hafta ishlatiladi.",
     "schedule.calendar.holidays_missing": "{{years}} yillari uchun rasmiy bayram kunlari maʼlumotlari mavjud emas. Ushbu sanalarga tayanishdan oldin taqvimni tekshiring.",
     "schedule.calendar.holidays_partial": "{{years}} yillari uchun rasmiy bayram kunlari maʼlumotlari toʻliq emas. Ushbu sanalarga tayanishdan oldin taqvimni tekshiring.",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "Kredit beruvchi uchun tayyorgarlik qoralamasi",
+    "contracts.lender_preparation.notice": "Faqat oʻqish uchun ishchi nusxa. Bu kredit beruvchiga ariza topshirish, tasdiqlash yoki mablagʻ ajratish emas. Manba yozuvlari alohida oʻqiladi va oʻzgarishi mumkin.",
+    "contracts.lender_preparation.missing": "Kiritilmagan: kredit liniyasi, kredit beruvchining roziligi, ombordagi materiallar dalillari va aynan shu shartnomaga tegishli oʻzgartirish buyruqlari jurnali.",
+    "contracts.lender_preparation.error": "Toʻlov arizasini yuklab boʻlmadi. Qayta urinish uchun yangilang.",
+    "contracts.lender_preparation.subcontractors": "Subpudratchilarning toʻlov arizalari",
+    "contracts.lender_preparation.documents": "Shartnoma hujjatlariga havolalar",
+    "contracts.lender_preparation.waivers": "Arizaga oid taʼminot huquqlaridan voz kechish hujjatlariga havolalar",
+    "contracts.lender_preparation.loaded": "{{count}} ta qayd etilgan; mustaqil tekshirilmagan",
+    "contracts.lender_preparation.unavailable": "Mavjud emas; bu qoralamaga kiritilmagan",
+    "contracts.lender_preparation.download": "JSON qoralamasini yuklab olish",
+    "contracts.lender_preparation.certified": "Qayd etilgan tasdiqlangan summa",
+    "contracts.lender_preparation.findings": "Sertifikatlar boʻyicha qayd etilgan aniqlanmalar",
+    "contracts.lender_preparation.no_period": "Bu talabnomada davr sanalari yo‘q. Subpudratchilarning to‘lov arizalari sana bo‘yicha moslashtirilmaydi.",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

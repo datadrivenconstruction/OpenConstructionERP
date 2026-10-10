@@ -45780,6 +45780,21 @@ const resource = {
     "schedule.calendar.week_fallback": "Pekan kerja regional tidak tersedia. Pekan standar digunakan untuk perencanaan.",
     "schedule.calendar.holidays_missing": "Data hari libur nasional untuk {{years}} tidak tersedia. Periksa kalender sebelum mengandalkan tanggal-tanggal ini.",
     "schedule.calendar.holidays_partial": "Data hari libur nasional untuk {{years}} belum lengkap. Periksa kalender sebelum mengandalkan tanggal-tanggal ini.",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "Draf persiapan untuk pemberi pinjaman",
+    "contracts.lender_preparation.notice": "Salinan kerja hanya baca. Ini bukan pengajuan kepada pemberi pinjaman, sertifikasi, atau pencairan. Catatan sumber dibaca secara terpisah dan dapat berubah.",
+    "contracts.lender_preparation.missing": "Tidak termasuk: fasilitas kredit, persetujuan pemberi pinjaman, bukti material tersimpan, dan daftar perintah perubahan khusus kontrak.",
+    "contracts.lender_preparation.error": "Permohonan pembayaran tidak dapat dimuat. Muat ulang untuk mencoba lagi.",
+    "contracts.lender_preparation.subcontractors": "Permohonan pembayaran subkontraktor",
+    "contracts.lender_preparation.documents": "Referensi dokumen kontrak",
+    "contracts.lender_preparation.waivers": "Referensi pelepasan hak jaminan terkait permohonan",
+    "contracts.lender_preparation.loaded": "{{count}} tercatat; belum diverifikasi secara independen",
+    "contracts.lender_preparation.unavailable": "Tidak tersedia; tidak disertakan dalam draf ini",
+    "contracts.lender_preparation.download": "Unduh draf JSON",
+    "contracts.lender_preparation.certified": "Jumlah tersertifikasi yang tercatat",
+    "contracts.lender_preparation.findings": "Temuan sertifikat yang tercatat",
+    "contracts.lender_preparation.no_period": "Klaim ini tidak memiliki tanggal periode. Permohonan pembayaran subkontraktor tidak dicocokkan berdasarkan tanggal.",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

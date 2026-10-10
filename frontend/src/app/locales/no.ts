@@ -46011,6 +46011,21 @@ const resource = {
     "schedule.calendar.week_fallback": "Den regionale arbeidsuken er ikke tilgjengelig. En standarduke brukes til planleggingen.",
     "schedule.calendar.holidays_missing": "Opplysninger om offentlige fridager er ikke tilgjengelige for {{years}}. Kontroller kalenderen før du baserer deg på disse datoene.",
     "schedule.calendar.holidays_partial": "Opplysningene om offentlige fridager for {{years}} er ufullstendige. Kontroller kalenderen før du baserer deg på disse datoene.",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "Utkast til underlag for långiveren",
+    "contracts.lender_preparation.notice": "Skrivebeskyttet arbeidskopi. Dette er ingen innsending til långiveren, attestering eller utbetaling. Kildepostene leses separat og kan endres.",
+    "contracts.lender_preparation.missing": "Omfatter ikke: kredittramme, långiverens godkjenning, dokumentasjon for lagrede materialer eller kontraktens særskilte register over endringsordrer.",
+    "contracts.lender_preparation.error": "Betalingssøknaden kunne ikke lastes inn. Oppdater for å prøve igjen.",
+    "contracts.lender_preparation.subcontractors": "Underentreprenørenes betalingssøknader",
+    "contracts.lender_preparation.documents": "Henvisninger til kontraktsdokumenter",
+    "contracts.lender_preparation.waivers": "Henvisninger til rettighetsavkall knyttet til søknaden",
+    "contracts.lender_preparation.loaded": "{{count}} registrert; ikke uavhengig verifisert",
+    "contracts.lender_preparation.unavailable": "Utilgjengelig; utelatt fra dette utkastet",
+    "contracts.lender_preparation.download": "Last ned utkast som JSON",
+    "contracts.lender_preparation.certified": "Registrert attestert beløp",
+    "contracts.lender_preparation.findings": "Registrerte merknader om attester",
+    "contracts.lender_preparation.no_period": "Dette betalingskravet mangler periodedatoer. Underentreprenørenes betalingssøknader kobles ikke etter dato.",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

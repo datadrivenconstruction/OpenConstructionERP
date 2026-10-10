@@ -46626,6 +46626,21 @@ const resource = {
     "schedule.calendar.week_fallback": "Den regionala arbetsveckan är inte tillgänglig. En standardvecka används för planeringen.",
     "schedule.calendar.holidays_missing": "Uppgifter om helgdagar saknas för {{years}}. Kontrollera kalendern innan du förlitar dig på dessa datum.",
     "schedule.calendar.holidays_partial": "Uppgifterna om helgdagar för {{years}} är ofullständiga. Kontrollera kalendern innan du förlitar dig på dessa datum.",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "Utkast till underlag för långivaren",
+    "contracts.lender_preparation.notice": "Skrivskyddad arbetskopia. Detta är ingen inlämning till långivaren, attestering eller utbetalning. Källposterna läses separat och kan ändras.",
+    "contracts.lender_preparation.missing": "Ingår inte: kreditfacilitet, långivarens godkännande, underlag för lagrat material eller avtalets särskilda register över ändringsorder.",
+    "contracts.lender_preparation.error": "Betalningsansökan kunde inte läsas in. Uppdatera för att försöka igen.",
+    "contracts.lender_preparation.subcontractors": "Underentreprenörernas betalningsansökningar",
+    "contracts.lender_preparation.documents": "Hänvisningar till avtalsdokument",
+    "contracts.lender_preparation.waivers": "Hänvisningar till rättighetsavståenden för ansökan",
+    "contracts.lender_preparation.loaded": "{{count}} registrerade; inte oberoende verifierade",
+    "contracts.lender_preparation.unavailable": "Ej tillgängligt; utelämnat ur detta utkast",
+    "contracts.lender_preparation.download": "Ladda ned utkast som JSON",
+    "contracts.lender_preparation.certified": "Registrerat attesterat belopp",
+    "contracts.lender_preparation.findings": "Registrerade anmärkningar om intyg",
+    "contracts.lender_preparation.no_period": "Detta betalningsanspråk saknar perioddatum. Underentreprenörernas betalningsansökningar matchas inte efter datum.",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

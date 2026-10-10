@@ -46287,6 +46287,21 @@ const resource = {
     "schedule.calendar.week_fallback": "Săptămâna de lucru regională nu este disponibilă. Pentru planificare se utilizează o săptămână standard.",
     "schedule.calendar.holidays_missing": "Datele privind sărbătorile legale pentru {{years}} nu sunt disponibile. Verificați calendarul înainte de a vă baza pe aceste date.",
     "schedule.calendar.holidays_partial": "Datele privind sărbătorile legale pentru {{years}} sunt incomplete. Verificați calendarul înainte de a vă baza pe aceste date.",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "Ciornă de pregătire pentru creditor",
+    "contracts.lender_preparation.notice": "Copie de lucru doar pentru citire. Nu reprezintă o depunere la creditor, o certificare sau o debursare. Înregistrările sursă sunt citite separat și se pot modifica.",
+    "contracts.lender_preparation.missing": "Nu include: facilitatea de credit, aprobarea creditorului, dovezile privind materialele depozitate și registrul ordinelor de modificare specific contractului.",
+    "contracts.lender_preparation.error": "Cererea de plată nu a putut fi încărcată. Reîmprospătați pentru a încerca din nou.",
+    "contracts.lender_preparation.subcontractors": "Cereri de plată ale subcontractanților",
+    "contracts.lender_preparation.documents": "Referințe la documentele contractului",
+    "contracts.lender_preparation.waivers": "Referințe la renunțările la drepturile de garanție aferente cererii",
+    "contracts.lender_preparation.loaded": "{{count}} înregistrate; fără verificare independentă",
+    "contracts.lender_preparation.unavailable": "Indisponibil; omis din această ciornă",
+    "contracts.lender_preparation.download": "Descărcați ciorna JSON",
+    "contracts.lender_preparation.certified": "Sumă certificată înregistrată",
+    "contracts.lender_preparation.findings": "Constatări înregistrate privind certificatele",
+    "contracts.lender_preparation.no_period": "Această cerere nu are datele perioadei. Cererile de plată ale subcontractanților nu sunt corelate după dată.",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

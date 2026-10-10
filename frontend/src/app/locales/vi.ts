@@ -45789,6 +45789,21 @@ const resource = {
     "schedule.calendar.week_fallback": "Không có thông tin tuần làm việc theo khu vực. Hệ thống dùng tuần tiêu chuẩn để lập kế hoạch.",
     "schedule.calendar.holidays_missing": "Không có dữ liệu ngày nghỉ lễ cho các năm {{years}}. Hãy kiểm tra lịch trước khi dựa vào những ngày này.",
     "schedule.calendar.holidays_partial": "Dữ liệu ngày nghỉ lễ cho các năm {{years}} chưa đầy đủ. Hãy kiểm tra lịch trước khi dựa vào những ngày này.",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "Bản nháp chuẩn bị cho bên cho vay",
+    "contracts.lender_preparation.notice": "Bản làm việc chỉ đọc. Đây không phải hồ sơ nộp cho bên cho vay, chứng nhận hay giải ngân. Các bản ghi nguồn được đọc riêng và có thể thay đổi.",
+    "contracts.lender_preparation.missing": "Không bao gồm: hạn mức tín dụng, phê duyệt của bên cho vay, chứng từ vật liệu lưu kho và sổ lệnh thay đổi riêng của hợp đồng.",
+    "contracts.lender_preparation.error": "Không thể tải đề nghị thanh toán. Hãy làm mới để thử lại.",
+    "contracts.lender_preparation.subcontractors": "Đề nghị thanh toán của nhà thầu phụ",
+    "contracts.lender_preparation.documents": "Tham chiếu tài liệu hợp đồng",
+    "contracts.lender_preparation.waivers": "Tham chiếu văn bản từ bỏ quyền bảo đảm liên quan đến đề nghị",
+    "contracts.lender_preparation.loaded": "Đã ghi nhận {{count}}; chưa được kiểm tra độc lập",
+    "contracts.lender_preparation.unavailable": "Không khả dụng; không đưa vào bản nháp này",
+    "contracts.lender_preparation.download": "Tải bản nháp JSON",
+    "contracts.lender_preparation.certified": "Số tiền đã chứng nhận được ghi nhận",
+    "contracts.lender_preparation.findings": "Các phát hiện về chứng chỉ đã ghi nhận",
+    "contracts.lender_preparation.no_period": "Yêu cầu này không có ngày của kỳ. Các đề nghị thanh toán của nhà thầu phụ không được đối chiếu theo ngày.",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

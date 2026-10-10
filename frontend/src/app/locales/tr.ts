@@ -46859,6 +46859,21 @@ const resource = {
     "schedule.calendar.week_fallback": "Bölgesel çalışma haftası kullanılamıyor. Planlamada standart bir hafta kullanılıyor.",
     "schedule.calendar.holidays_missing": "{{years}} için resmî tatil verileri mevcut değil. Bu tarihleri esas almadan önce takvimi kontrol edin.",
     "schedule.calendar.holidays_partial": "{{years}} için resmî tatil verileri eksik. Bu tarihleri esas almadan önce takvimi kontrol edin.",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "Kredi veren için hazırlık taslağı",
+    "contracts.lender_preparation.notice": "Salt okunur çalışma kopyasıdır. Kredi verene başvuru, tutar onayı veya kredi kullandırımı değildir. Kaynak kayıtlar ayrı ayrı okunur ve değişebilir.",
+    "contracts.lender_preparation.missing": "Kapsam dışı: kredi limiti, kredi verenin onayı, depolanan malzeme belgeleri ve sözleşmeye özgü değişiklik emri kaydı.",
+    "contracts.lender_preparation.error": "Ödeme başvurusu yüklenemedi. Yeniden denemek için yenileyin.",
+    "contracts.lender_preparation.subcontractors": "Alt yüklenici ödeme başvuruları",
+    "contracts.lender_preparation.documents": "Sözleşme belgesi referansları",
+    "contracts.lender_preparation.waivers": "Başvuruya bağlı teminat hakkından feragat referansları",
+    "contracts.lender_preparation.loaded": "{{count}} kayıt; bağımsız olarak doğrulanmadı",
+    "contracts.lender_preparation.unavailable": "Kullanılamıyor; bu taslağa dahil edilmedi",
+    "contracts.lender_preparation.download": "JSON taslağını indir",
+    "contracts.lender_preparation.certified": "Kayıtlı onaylanmış tutar",
+    "contracts.lender_preparation.findings": "Kayıtlı belge bulguları",
+    "contracts.lender_preparation.no_period": "Bu hakedişin dönem tarihleri yok. Alt yüklenici ödeme başvuruları tarihe göre eşleştirilmez.",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

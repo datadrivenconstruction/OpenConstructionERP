@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - An Italian price list in Excel or CSV maps its usual columns (Tariffa, Descrizione estesa, U.M., Unità di misura, Prezzo €) to code, description, unit and price without a manual step. A column mapping you set is remembered in this browser for files with the same headers, so next year's edition of the same list opens already mapped.
 - After an XPWE bill import, a message offers to save the price list inside the same file as a cost database, so it no longer has to be uploaded a second time.
 - The schedule page says how to link two bars by dragging, and the archive filter says that a schedule is deleted from its archived list.
+- Progress claims offer a read-only draft lender-preparation preview and JSON download, preserving canonical payment figures and marking unavailable evidence; it does not submit to a lender, approve funding or disburse money, and excludes loan facilities, stored-material evidence and the contract-specific change-order log.
 
 ### Fixed
 

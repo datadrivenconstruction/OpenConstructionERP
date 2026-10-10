@@ -48653,6 +48653,21 @@ const resource = {
     "schedule.calendar.week_fallback": "Die regionale Arbeitswoche ist nicht verfügbar. Es wird eine Standardwoche für die Planung verwendet.",
     "schedule.calendar.holidays_missing": "Für {{years}} sind keine gesetzlichen Feiertage verfügbar. Prüfen Sie den Kalender, bevor Sie sich auf diese Termine verlassen.",
     "schedule.calendar.holidays_partial": "Die gesetzlichen Feiertage für {{years}} sind nicht vollständig erfasst. Prüfen Sie den Kalender, bevor Sie sich auf diese Termine verlassen.",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "Entwurf zur Vorbereitung für den Kreditgeber",
+    "contracts.lender_preparation.notice": "Schreibgeschützte Arbeitskopie. Dies ist weder eine Einreichung beim Kreditgeber noch eine Bescheinigung oder Auszahlung. Die Quelldatensätze werden getrennt gelesen und können sich ändern.",
+    "contracts.lender_preparation.missing": "Nicht enthalten: Kreditfazilität, Genehmigung des Kreditgebers, Nachweise zu gelagerten Materialien und das vertragsbezogene Nachtragsregister.",
+    "contracts.lender_preparation.error": "Der Zahlungsantrag konnte nicht geladen werden. Aktualisieren Sie die Ansicht, um es erneut zu versuchen.",
+    "contracts.lender_preparation.subcontractors": "Zahlungsanträge der Nachunternehmer",
+    "contracts.lender_preparation.documents": "Verweise auf Vertragsdokumente",
+    "contracts.lender_preparation.waivers": "Verweise auf Freigabeerklärungen zum Zahlungsantrag",
+    "contracts.lender_preparation.loaded": "{{count}} erfasst; nicht unabhängig geprüft",
+    "contracts.lender_preparation.unavailable": "Nicht verfügbar; in diesem Entwurf ausgelassen",
+    "contracts.lender_preparation.download": "Entwurf als JSON herunterladen",
+    "contracts.lender_preparation.certified": "Erfasster bescheinigter Betrag",
+    "contracts.lender_preparation.findings": "Erfasste Feststellungen zu Bescheinigungen",
+    "contracts.lender_preparation.no_period": "Dieser Zahlungsantrag hat keine Zeitraumdaten. Zahlungsanträge der Nachunternehmer werden nicht nach Datum zugeordnet.",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

@@ -47404,6 +47404,21 @@ const resource = {
     "schedule.calendar.week_fallback": "Regionalny tydzień pracy jest niedostępny. Do planowania używany jest standardowy tydzień pracy.",
     "schedule.calendar.holidays_missing": "Dane o dniach ustawowo wolnych od pracy dla lat {{years}} są niedostępne. Sprawdź kalendarz, zanim oprzesz się na tych datach.",
     "schedule.calendar.holidays_partial": "Dane o dniach ustawowo wolnych od pracy dla lat {{years}} są niekompletne. Sprawdź kalendarz, zanim oprzesz się na tych datach.",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "Robocze przygotowanie dla kredytodawcy",
+    "contracts.lender_preparation.notice": "Kopia robocza tylko do odczytu. Nie stanowi złożenia wniosku kredytodawcy, poświadczenia ani wypłaty środków. Rekordy źródłowe są odczytywane osobno i mogą się zmieniać.",
+    "contracts.lender_preparation.missing": "Nie obejmuje: linii kredytowej, zgody kredytodawcy, dowodów dotyczących składowanych materiałów ani rejestru poleceń zmian dla danego kontraktu.",
+    "contracts.lender_preparation.error": "Nie udało się wczytać wniosku o płatność. Odśwież, aby spróbować ponownie.",
+    "contracts.lender_preparation.subcontractors": "Wnioski o płatność podwykonawców",
+    "contracts.lender_preparation.documents": "Odwołania do dokumentów kontraktu",
+    "contracts.lender_preparation.waivers": "Odwołania do zrzeczeń praw związanych z wnioskiem",
+    "contracts.lender_preparation.loaded": "Zarejestrowano: {{count}}; bez niezależnej weryfikacji",
+    "contracts.lender_preparation.unavailable": "Niedostępne; pominięte w tej wersji roboczej",
+    "contracts.lender_preparation.download": "Pobierz wersję roboczą JSON",
+    "contracts.lender_preparation.certified": "Zarejestrowana poświadczona kwota",
+    "contracts.lender_preparation.findings": "Zarejestrowane ustalenia dotyczące certyfikatów",
+    "contracts.lender_preparation.no_period": "Ten wniosek nie ma dat okresu. Wnioski o płatność podwykonawców nie są dopasowywane według daty.",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 

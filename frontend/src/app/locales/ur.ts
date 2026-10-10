@@ -45992,6 +45992,21 @@ const resource = {
     "schedule.calendar.week_fallback": "علاقائی کام کے ہفتے کی معلومات دستیاب نہیں ہیں۔ منصوبہ بندی کے لیے معیاری ہفتہ استعمال کیا جا رہا ہے۔",
     "schedule.calendar.holidays_missing": "{{years}} کے لیے سرکاری تعطیلات کا ڈیٹا دستیاب نہیں ہے۔ ان تاریخوں پر انحصار کرنے سے پہلے کیلنڈر کی جانچ کریں۔",
     "schedule.calendar.holidays_partial": "{{years}} کے لیے سرکاری تعطیلات کا ڈیٹا نامکمل ہے۔ ان تاریخوں پر انحصار کرنے سے پہلے کیلنڈر کی جانچ کریں۔",
+    // --- Draft lender preparation ---
+    "contracts.lender_preparation.title": "قرض دہندہ کے لیے تیاری کا مسودہ",
+    "contracts.lender_preparation.notice": "صرف پڑھنے کے لیے عملی نقل۔ یہ قرض دہندہ کو جمع کرائی گئی درخواست، تصدیق یا رقم کا اجرا نہیں ہے۔ ماخذ ریکارڈ الگ الگ پڑھے جاتے ہیں اور بدل سکتے ہیں۔",
+    "contracts.lender_preparation.missing": "شامل نہیں: قرض کی سہولت، قرض دہندہ کی منظوری، ذخیرہ شدہ مواد کے شواہد اور اسی معاہدے کے تبدیلی احکامات کا رجسٹر۔",
+    "contracts.lender_preparation.error": "ادائیگی کی درخواست لوڈ نہیں ہو سکی۔ دوبارہ کوشش کے لیے تازہ کریں۔",
+    "contracts.lender_preparation.subcontractors": "ذیلی ٹھیکیداروں کی ادائیگی کی درخواستیں",
+    "contracts.lender_preparation.documents": "معاہدے کی دستاویزات کے حوالے",
+    "contracts.lender_preparation.waivers": "درخواست سے متعلق ضمانتی حقوق سے دستبرداری کے حوالے",
+    "contracts.lender_preparation.loaded": "{{count}} درج؛ آزادانہ تصدیق نہیں کی گئی",
+    "contracts.lender_preparation.unavailable": "دستیاب نہیں؛ اس مسودے میں شامل نہیں",
+    "contracts.lender_preparation.download": "JSON مسودہ ڈاؤن لوڈ کریں",
+    "contracts.lender_preparation.certified": "درج شدہ تصدیق شدہ رقم",
+    "contracts.lender_preparation.findings": "اسناد سے متعلق درج شدہ نتائج",
+    "contracts.lender_preparation.no_period": "اس دعوے میں مدت کی تاریخیں نہیں ہیں۔ ذیلی ٹھیکیداروں کی ادائیگی کی درخواستوں کو تاریخ کے مطابق نہیں ملایا جاتا۔",
+    // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };
 
