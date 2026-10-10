@@ -210987,6 +210987,11 @@
               "type": "dict[str, Any]"
             },
             {
+              "name": "hakedis_available",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
               "name": "created_at",
               "type": "datetime"
             },
@@ -212905,6 +212910,7 @@
         "manifest.py",
         "messages/__init__.py",
         "models.py",
+        "org_width_repair.py",
         "pdf_export.py",
         "pdf_translations.py",
         "permissions.py",
@@ -237806,10 +237812,10 @@
     },
     {
       "name": "contracts",
-      "ts_files": 82,
+      "ts_files": 83,
       "css_files": 0,
-      "test_files": 35,
-      "total_files": 82
+      "test_files": 36,
+      "total_files": 83
     },
     {
       "name": "coordination",
@@ -240209,9 +240215,9 @@
     "total_relationships": 236,
     "total_routes": 3798,
     "total_schemas": 3604,
-    "total_python_files": 2351,
+    "total_python_files": 2352,
     "frontend_features": 194,
-    "frontend_ts_files": 3066,
+    "frontend_ts_files": 3067,
     "frontend_backend_mapped": 172
   },
   "frontend_backend_mapping": {

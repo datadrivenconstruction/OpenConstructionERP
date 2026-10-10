@@ -11,7 +11,7 @@ on every other one a real estimate uses:
   filed under its local estimate "02-01-001" or written "Глава 2" warned, and
   a superscript digit passed ``str.isdigit`` and then broke ``int``.
 * Turkey accepted only the older XX.XXX/X poz numbering, so every line of a
-  current bill (XX.XXX.XXXX, the Istanbul demo included) warned.
+  current bill (XX.XXX.XXXX) warned.
 * India (CPWD) and Japan (Sekisan) compared units against a short list with no
   folding, so "m²", the unit the India pack declares as its own default, the
   quintal, the tonne written "MT", 基 and 面 on the Tokyo demo, and every
@@ -440,3 +440,31 @@ def test_the_shipped_demo_of_the_country_passes_its_national_rule(demo_id: str, 
     assert len(results) >= 20, f"{rule.rule_id} judged only {len(results)} rows of {demo_id}"
     failed = sorted({str((r.details or {}).get("given_code") or r.message) for r in results if not r.passed})
     assert failed == [], f"{demo_id} fails {rule.rule_id} on {failed}"
+
+
+def test_the_istanbul_demo_numbers_its_lines_itself_and_claims_no_book_number() -> None:
+    """No work-item list ships in the repository, so the demo has no book number to cite.
+
+    Its lines once carried codes in the Ministry shape that were never read
+    from a published list. A number in that shape is looked up in the installed
+    price book and judged against the unit and price found there, so the demo
+    carries own item numbers instead, each used once, and its sections none.
+    """
+    from app.core.validation.rules import ministry_poz_of
+
+    positions = _demo_positions("mixed-use-istanbul")
+    sections = [pos for pos in positions if pos.get("type") == "section"]
+    lines = [pos for pos in positions if pos.get("type") != "section"]
+    assert len(lines) >= 20
+    assert [pos["classification"] for pos in sections] == [{}] * len(sections)
+
+    codes = [str(pos["classification"].get("birimfiyat") or "") for pos in lines]
+    in_book_shape = sorted(code for code in codes if BirimFiyatValidPoz._CURRENT_PATTERN.match(code))
+    assert in_book_shape == [], f"lines cite numbers in the unit-price book's shape: {in_book_shape}"
+    assert [pos["ordinal"] for pos in lines if ministry_poz_of(pos)] == []
+    not_own = sorted(code for code in codes if not BirimFiyatValidPoz._SPECIAL_PATTERN.match(code.upper()))
+    assert not_own == [], f"lines are not numbered as own items: {not_own}"
+    assert len(set(codes)) == len(codes), "an own item number is used on two lines"
+    # The control: the pattern the assertions lean on does tell the two apart.
+    assert BirimFiyatValidPoz._CURRENT_PATTERN.match("15.150.1005")
+    assert not BirimFiyatValidPoz._SPECIAL_PATTERN.match("15.150.1005")

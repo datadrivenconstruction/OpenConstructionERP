@@ -593,6 +593,12 @@ class AgreementResponse(BaseModel):
     notes: str | None = None
     created_by: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
+    # Whether pay applications under this agreement have a payment certificate
+    # (hakediş): the same answer its certificate routes give, so the client
+    # need not ask one of them to find out. Set by the service, not a column;
+    # None where a response was built without asking, which the client reads
+    # as unknown and asks.
+    hakedis_available: bool | None = None
     created_at: datetime
     updated_at: datetime
 

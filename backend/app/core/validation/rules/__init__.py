@@ -5509,7 +5509,7 @@ class BirimFiyatValidPoz(ValidationRule):
 
     # The two shapes a Turkish poz number has had. The ministry's unit-price
     # book numbers its items XX.XXX.XXXX ("15.150.1005"), and that is what
-    # every current bill and the Istanbul demo carry. The older Bayındırlık numbering, XX.XXX/X with an optional "Y."
+    # every current bill carries. The older Bayındırlık numbering, XX.XXX/X with an optional "Y."
     # for building works and an optional letter variant ("Y.16.050/04",
     # "04.613/1A"), is still found on revised older contracts. Only the older
     # shape was accepted, so a correctly numbered current bill warned on every

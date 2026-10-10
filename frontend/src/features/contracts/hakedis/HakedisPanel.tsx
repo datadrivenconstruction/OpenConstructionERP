@@ -87,10 +87,16 @@ interface AttentionItem {
 export interface HakedisPanelProps {
   /** Which document the certificate belongs to. */
   source: HakedisSource;
+  /**
+   * False where the caller already knows the contract has no certificate
+   * layout, or does not know yet: the certificate is then not asked for and
+   * nothing is shown.
+   */
+  enabled?: boolean;
   className?: string;
 }
 
-export function HakedisPanel({ source, className }: HakedisPanelProps) {
+export function HakedisPanel({ source, enabled = true, className }: HakedisPanelProps) {
   const { t, i18n } = useTranslation();
   const qc = useQueryClient();
   const numberLocale = useNumberLocale();
@@ -100,7 +106,7 @@ export function HakedisPanel({ source, className }: HakedisPanelProps) {
   const docQ = useQuery({
     queryKey: hakedisKey(source, locale),
     queryFn: () => getHakedis(source, locale),
-    enabled: source.id !== '',
+    enabled: enabled && source.id !== '',
     // "No layout for this contract" is an answer, not a failure to retry.
     retry: false,
   });

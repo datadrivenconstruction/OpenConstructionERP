@@ -8,6 +8,8 @@ export { HakedisDialog, type HakedisDialogProps } from './HakedisDialog';
 export { HakedisTermsCard } from './HakedisTermsEditor';
 export { getHakedis, type HakedisDocument, type HakedisSource, type HakedisSourceKind } from './api';
 export {
+  agreementMayHaveHakedis,
+  claimMayHaveHakedis,
   hakedisBaseKey,
   hakedisKey,
   isHakedisNotAvailable,

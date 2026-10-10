@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- A Turkiye pack for MEP contractors. It keeps the menu to what a mechanical, electrical and plumbing contractor uses, adds a site records profile for a pilot on one project, and derives its taxes, classification and rules from the Turkiye pack.
+- Hakedis, the Turkish progress payment certificate. A progress claim or a subcontractor payment application in a Turkish project shows the works table and the lettered summary, computes KDV, KDV tevkifat, stopaj, damga vergisi and retention from dated statutory rates with their legal reference, and waits for a person wherever a category or an amount has to be chosen. It prints as PDF and Excel in Turkish or English, and a certified hakedis is frozen.
+- e-Fatura output for Turkiye. An invoice can be checked against the UBL-TR rules and downloaded as an unsigned UBL-TR file for a licensed integrator. Contacts and the seller settings carry the tax office.
+- The submittal register tracks discipline, manufacturer, model, origin and supplier, the outcome as stamped, the review period, and for long lead items the date needed on site, from which the latest approval date follows. A summary on top says what waits for review and what was approved too late.
+- Site diary, RFI, submittal, correspondence, transmittal, variation, change order and claim registers export to PDF and Excel in the document language of your choice, with figures written the way the project's country writes them.
+- A bill in a Turkish project is checked against the installed Ministry unit price book: the unit of a line against the unit of its poz, and its rate against the published price.
+- Notifications are written in the language of the person who receives them, and variations, change orders and correspondence now notify the people involved.
+- Search on the register pages finds a Turkish name however it is typed, with or without the dotted and dotless i.
 - Property search in the BIM viewer can open a quantity rule already filled in with the property and value you searched for, so the filter that found the elements is the one that prices them into the bill.
 - An Italian price list in Excel or CSV maps its usual columns (Tariffa, Descrizione estesa, U.M., Unità di misura, Prezzo €) to code, description, unit and price without a manual step. A column mapping you set is remembered in this browser for files with the same headers, so next year's edition of the same list opens already mapped.
 - After an XPWE bill import, a message offers to save the price list inside the same file as a cost database, so it no longer has to be uploaded a second time.
@@ -20,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The submitting organisation on a submittal accepts a company name of up to 255 characters. The column was 36 characters wide on PostgreSQL and refused a longer name; it is widened at startup, also on an installation that stamps revisions instead of running them.
+- A project now gets the validation rules of its own country when it is created, and printed registers no longer cut a number, a date or an amount in the middle.
 - Generate from BoQ no longer fails on a bill with a huge quantity in a unit it cannot size, such as an XPWE line "a misura" with 10 billion units. Such a position now runs at most about four centuries and the preview says the plan overruns the window.
 - A regional price list saved as .pwe is read like any XPWE file instead of being refused as an unknown format, and the estimating program's own binary project file gets the advice to export it as XPWE.
 - Quantity rules ignore spaces around a value, as property search already did, and the Smart View builder shows the property names Revit wrote instead of lower-cased keys.

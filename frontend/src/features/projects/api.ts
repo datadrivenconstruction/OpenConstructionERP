@@ -51,6 +51,12 @@ export interface Project {
    * front end keys the AIA UI off this so it never renders elsewhere.
    */
   is_aia_eligible?: boolean;
+  /**
+   * True when the project's country has a standard payment certificate
+   * (hakediş) layout. Computed server-side; a contract may still configure a
+   * layout of its own in any country.
+   */
+  is_hakedis_eligible?: boolean;
   metadata: Record<string, unknown>;
   /** Building type, e.g. "office" / "hospital" - maps to a benchmark cell. */
   project_type?: string | null;

@@ -714,6 +714,21 @@ class ProjectResponse(BaseModel):
 
         return is_aia_eligible(self.country_code, self.address)
 
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def is_hakedis_eligible(self) -> bool:
+        """True when the project's country has a standard payment certificate (hakediş) layout.
+
+        The country half of the gate the certificate endpoints apply, so the
+        front end does not ask for a certificate where the answer is known to
+        be 404. A contract may still configure a layout of its own in any
+        country; that half is read from the contract's terms.
+        """
+        from app.modules.contracts.country_defaults import normalise_country
+        from app.modules.contracts.hakedis_layout import has_layout
+
+        return has_layout(normalise_country(self.country_code))
+
 
 # ── Status-history schemas ───────────────────────────────────────────────
 

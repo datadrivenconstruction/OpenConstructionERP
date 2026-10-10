@@ -131,6 +131,9 @@ export interface Agreement {
   notes?: string | null;
   created_by?: string | null;
   metadata: Record<string, unknown>;
+  // Whether pay applications under this agreement have a payment certificate
+  // (hakediş). The server's own answer, the one its certificate routes give.
+  hakedis_available?: boolean | null;
   created_at: string;
   updated_at: string;
 }

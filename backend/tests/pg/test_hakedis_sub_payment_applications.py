@@ -356,3 +356,23 @@ async def test_a_subcontract_outside_the_certificate_countries_is_approved_as_be
         select(func.count()).select_from(CertificateLine).where(CertificateLine.source_id == application.id)
     )
     assert stored == 0
+
+
+async def test_an_agreement_says_whether_it_has_a_certificate_as_its_routes_would(world) -> None:
+    """The flag on the agreement and the 404 of the certificate route are one answer."""
+    session, _payable = world
+    cases = (
+        ({"country": "TR"}, True),
+        ({"country": "DE"}, False),
+        ({"country": "DE", "metadata": {"hakedis": {"preset": "TR_PRIVATE"}}}, True),
+    )
+    for arguments, expected in cases:
+        svc, agreement, packages = await _agreement(session, **arguments)
+        assert (await svc.agreement_response(agreement)).hakedis_available is expected, arguments
+        application = await _application(svc, agreement, packages, 1)
+        if expected:
+            assert (await svc.hakedis_view(application.id, locale="tr"))["summary"]
+        else:
+            with pytest.raises(HTTPException) as absent:
+                await svc.hakedis_view(application.id, locale="tr")
+            assert absent.value.detail["error"] == "hakedis_not_available"

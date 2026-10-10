@@ -531,14 +531,14 @@ class _StubRepo:
         return self.row if rfi_id == self.row.id else None
 
 
-def _service(row: SimpleNamespace) -> RFIService:
+def _service(row: SimpleNamespace, *, country: str | None = None) -> RFIService:
     """An RFIService whose lookups answer from memory instead of the database."""
     service = RFIService.__new__(RFIService)
     service.session = None  # type: ignore[assignment]
     service.repo = _StubRepo(row)  # type: ignore[assignment]
 
-    async def _project_header(_project_id: uuid.UUID) -> tuple[str, str | None, str]:
-        return "Residential House", "RH-01", "USD"
+    async def _project_header(_project_id: uuid.UUID) -> tuple[str, str | None, str, str | None]:
+        return "Residential House", "RH-01", "USD", country
 
     async def _names(_ids: Any) -> dict[str, str]:
         return dict(PEOPLE)
@@ -635,6 +635,18 @@ async def test_route_404s_an_unknown_rfi() -> None:
             service=_service(row),
         )
     assert missing.value.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_the_service_hands_the_projects_country_to_the_form() -> None:
+    """The form of a Turkish project printed in English dates the Turkish way, as the registers do."""
+    row = _rfi()
+    turkish, _number = await _service(row, country="TR").generate_rfi_pdf(row.id, locale="en")
+    assert "20.09.2026" in _text(turkish)
+    # The control: with no country on file the language decides, as before.
+    plain, _number = await _service(row).generate_rfi_pdf(row.id, locale="en")
+    assert "2026-09-20" in _text(plain)
+    assert "20.09.2026" not in _text(plain)
 
 
 # ── Page total, continuation header, the set's conventions ────────────────

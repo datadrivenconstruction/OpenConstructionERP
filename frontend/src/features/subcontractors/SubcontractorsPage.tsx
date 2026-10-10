@@ -94,7 +94,12 @@ import { certTypeLabel, describeComplianceReasons } from './complianceReasons';
 import { AgreementFormModal, PaymentApplicationFormModal, SignAgreementButton } from './AgreementForms';
 import { UnlinkedTwinBanner } from './UnlinkedTwinBanner';
 import { PayAppAmount, PaymentApprovalActions } from './PaymentApprovalActions';
-import { getHakedis, hakedisKey, screenLocale } from '@/features/contracts/hakedis';
+import {
+  agreementMayHaveHakedis,
+  getHakedis,
+  hakedisKey,
+  screenLocale,
+} from '@/features/contracts/hakedis';
 import { fmtPercent, fmtFixed } from '@/shared/lib/formatters';
 
 type DrawerTab = 'scope' | 'payments' | 'ratings' | 'retention';
@@ -1572,6 +1577,7 @@ function PaymentsTab({
             agreements.find((a) => a.id === effectiveId)?.requires_lien_waiver ?? false
           }
           retentionPercent={agreements.find((a) => a.id === effectiveId)?.retention_percent}
+          hakedisMayApply={agreementMayHaveHakedis(agreements.find((a) => a.id === effectiveId))}
         />
       )}
     </div>
@@ -1582,20 +1588,24 @@ function PaymentList({
   rows,
   requiresWaiver,
   retentionPercent,
+  hakedisMayApply,
 }: {
   rows: PaymentApplication[];
   requiresWaiver: boolean;
   retentionPercent?: number | string;
+  /** False where the agreement is known to have no payment certificate. */
+  hakedisMayApply: boolean;
 }) {
   const { t, i18n } = useTranslation();
   // Whether the agreement's contract has a payment certificate layout is the
   // same answer for every row, so it is asked once, for the first one. The
-  // read is the certificate itself, shared with the dialog that shows it.
+  // read is the certificate itself, shared with the dialog that shows it. It
+  // is not asked at all where the agreement already says there is none.
   const firstId = rows[0]?.id ?? '';
   const hakedisProbe = useQuery({
     queryKey: hakedisKey({ kind: 'sub_payment_application', id: firstId }, screenLocale(i18n.language)),
     queryFn: () => getHakedis({ kind: 'sub_payment_application', id: firstId }, screenLocale(i18n.language)),
-    enabled: firstId !== '',
+    enabled: hakedisMayApply && firstId !== '',
     retry: false,
   });
   const hakedisAvailable = hakedisProbe.isSuccess;

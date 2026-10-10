@@ -106,3 +106,28 @@ async def test_the_first_boot_repairs_nothing_on_a_database_create_all_just_buil
     repairs = [record.getMessage() for record in caplog.records if record.getMessage().startswith("Schema repair:")]
     assert rewritten == 0, "a fresh database holds no rows, so nothing can have been backfilled"
     assert repairs == [], "a database create_all just built was reported as repaired:\n" + "\n".join(repairs)
+
+
+async def test_the_first_boot_widens_no_column_on_a_database_create_all_just_built(fresh_database, caplog) -> None:
+    """The retyping repairs of the boot path find a fresh column already at the model's type."""
+    from app.modules.submittals.org_width_repair import widen_submitted_by_org
+
+    with caplog.at_level(logging.INFO, logger="app.modules.submittals.org_width_repair"):
+        async with fresh_database.begin() as conn:
+            assert await widen_submitted_by_org(conn) == 0
+
+    live = await fresh_database.connect()
+    try:
+        length = (
+            await live.execute(
+                text(
+                    "SELECT character_maximum_length FROM information_schema.columns "
+                    "WHERE table_schema = current_schema() AND table_name = 'oe_submittals_submittal' "
+                    "AND column_name = 'submitted_by_org'"
+                )
+            )
+        ).scalar_one()
+    finally:
+        await live.close()
+    assert length == 255
+    assert [record.getMessage() for record in caplog.records if record.getMessage().startswith("Widened")] == []

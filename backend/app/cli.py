@@ -1621,6 +1621,15 @@ def cmd_init_db(args: argparse.Namespace) -> None:
                 await widen_classified_at(conn)
         except Exception as exc:  # noqa: BLE001
             logger.warning("init-db: classified_at widening skipped: %s", exc)
+        # The same for the submitting company of a submittal, which an upgraded
+        # database keeps at 36 characters while the model declares 255.
+        try:
+            from app.modules.submittals.org_width_repair import widen_submitted_by_org
+
+            async with engine.begin() as conn:
+                await widen_submitted_by_org(conn)
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("init-db: submitted_by_org widening skipped: %s", exc)
         # The data half of an upgrade. The heal above moves the schema and
         # rewrites no rows, so a migration that backfills or renames never runs
         # on any install brought up this way. Same registry the first serve

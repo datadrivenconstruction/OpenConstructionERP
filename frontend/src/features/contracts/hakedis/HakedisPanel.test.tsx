@@ -59,11 +59,11 @@ const calcMock = vi.mocked(api.getStatutoryTaxes);
 
 const CLAIM: HakedisSource = { kind: 'progress_claim', id: 'claim-1' };
 
-function renderPanel(source: HakedisSource = CLAIM) {
+function renderPanel(source: HakedisSource = CLAIM, enabled?: boolean) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   const view = render(
     <QueryClientProvider client={qc}>
-      <HakedisPanel source={source} />
+      <HakedisPanel source={source} enabled={enabled} />
     </QueryClientProvider>,
   );
   return { qc, ...view };
@@ -86,6 +86,23 @@ describe('HakedisPanel', () => {
     await waitFor(() => expect(container).toBeEmptyDOMElement());
     expect(screen.queryByTestId('hakedis-panel')).toBeNull();
     expect(screen.queryByTestId('hakedis-panel-error')).toBeNull();
+  });
+
+  it('does not ask for the certificate where the caller knows there is none', async () => {
+    getMock.mockResolvedValue(certificate());
+    const { container, qc } = renderPanel(CLAIM, false);
+    // Long enough for a query that was going to run to have run.
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(getMock).not.toHaveBeenCalled();
+    expect(qc.isFetching()).toBe(0);
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('asks as before when the caller says nothing about availability', async () => {
+    getMock.mockResolvedValue(certificate());
+    renderPanel();
+    await screen.findByTestId('hakedis-panel');
+    expect(getMock).toHaveBeenCalledWith(CLAIM, 'en');
   });
 
   it('says so when the certificate cannot be read for another reason', async () => {

@@ -457,3 +457,35 @@ def test_a_foreign_currency_certificate_is_told_where_its_lira_equivalent_belong
     assert text.startswith("Bu hakediş EUR cinsinden düzenlenmiştir")
     assert "VUK md. 215" in text and "KDV Kanunu md. 26" in text
     assert label("fx.rate_missing", "en") == "TL equivalent: exchange rate not entered."
+
+
+@pytest.mark.parametrize(
+    ("country_code", "expected"),
+    [("TR", True), ("tr", True), (" TR ", True), ("DE", False), ("", False), (None, False)],
+)
+def test_a_project_says_whether_its_country_has_a_certificate_layout(country_code: str | None, expected: bool) -> None:
+    """The flag the client reads before it asks for a certificate is the server's own gate."""
+    import uuid
+    from datetime import UTC, datetime
+
+    from app.modules.projects.schemas import ProjectResponse
+
+    project = ProjectResponse(
+        id=uuid.uuid4(),
+        name="Kule Projesi",
+        description="",
+        region="TR",
+        classification_standard="birimfiyat",
+        currency="TRY",
+        locale="tr",
+        validation_rule_sets=["boq_quality"],
+        status="active",
+        owner_id=uuid.uuid4(),
+        country_code=country_code,
+        metadata={},
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+    assert project.is_hakedis_eligible is expected
+    assert project.is_hakedis_eligible is has_layout((country_code or "").strip().upper())
+    assert project.model_dump()["is_hakedis_eligible"] is expected

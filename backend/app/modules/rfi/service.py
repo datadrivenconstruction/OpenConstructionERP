@@ -949,7 +949,7 @@ class RFIService:
         from app.modules.rfi.pdf_export import build_rfi_pdf
 
         rfi = await self.get_rfi(rfi_id)
-        project_name, project_code, currency = await self._project_header(rfi.project_id)
+        project_name, project_code, currency, country = await self._project_header(rfi.project_id)
         people = await self.user_display_names([rfi.raised_by, rfi.assigned_to, rfi.ball_in_court, rfi.responded_by])
         documents, unavailable = await self._linked_document_names(rfi.project_id, rfi.linked_drawing_ids or [])
         variation = await self._variation_label(rfi.project_id, rfi.change_order_id)
@@ -964,6 +964,7 @@ class RFIService:
             project_name=project_name,
             project_code=project_code,
             currency=currency,
+            country=country,
             people=people,
             documents=documents,
             unavailable_documents=unavailable,
@@ -972,20 +973,27 @@ class RFIService:
         )
         return pdf_bytes, rfi.rfi_number
 
-    async def _project_header(self, project_id: uuid.UUID) -> tuple[str, str | None, str]:
-        """``(name, project_code, currency)`` of the RFI's project, currency upper-cased."""
+    async def _project_header(self, project_id: uuid.UUID) -> tuple[str, str | None, str, str | None]:
+        """``(name, project_code, currency, country)`` of the RFI's project, the two codes upper-cased."""
         from sqlalchemy import select
 
         from app.modules.projects.models import Project
 
         row = (
             await self.session.execute(
-                select(Project.name, Project.project_code, Project.currency).where(Project.id == project_id)
+                select(Project.name, Project.project_code, Project.currency, Project.country_code).where(
+                    Project.id == project_id
+                )
             )
         ).first()
         if row is None:
-            return "", None, ""
-        return row.name or "", row.project_code or None, (row.currency or "").strip().upper()
+            return "", None, "", None
+        return (
+            row.name or "",
+            row.project_code or None,
+            (row.currency or "").strip().upper(),
+            (row.country_code or "").strip().upper() or None,
+        )
 
     async def user_display_names(self, user_ids: Iterable[Any]) -> dict[str, str]:
         """Map user ids to a display name (full name, else email).

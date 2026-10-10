@@ -4761,6 +4761,19 @@ def create_app() -> FastAPI:
             except Exception:
                 logger.warning("classified_at widening skipped (non-fatal)", exc_info=True)
 
+            # And a third column the heal leaves as it found it. A submittal's
+            # submitting company was 36 characters wide while the API accepted
+            # 255, and the revision that lengthens it is stamped, not run, on an
+            # installation upgraded in place. Idempotent, and a no-op once the
+            # reflected length reads 255.
+            try:
+                from app.modules.submittals.org_width_repair import widen_submitted_by_org
+
+                async with engine.begin() as conn:
+                    await widen_submitted_by_org(conn)
+            except Exception:
+                logger.warning("submitted_by_org widening skipped (non-fatal)", exc_info=True)
+
             async with engine.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)
             logger.info("PostgreSQL tables created/verified")

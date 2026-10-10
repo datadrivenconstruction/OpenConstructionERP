@@ -61,6 +61,7 @@ from app.modules.subcontractors.repository import (
 )
 from app.modules.subcontractors.schemas import (
     AgreementCreate,
+    AgreementResponse,
     AgreementUpdate,
     ApprovedLineAmount,
     CertificateCreate,
@@ -2851,6 +2852,12 @@ class SubcontractorService:
         project = await self._hakedis_project(agreement)
         country = str(getattr(project, "country_code", "") or "").strip().upper()
         return hakedis_document.hakedis_available(country, await self._hakedis_terms(agreement))
+
+    async def agreement_response(self, agreement: SubcontractAgreement) -> AgreementResponse:
+        """The agreement as the API returns it, saying whether it has a payment certificate."""
+        response = AgreementResponse.model_validate(agreement)
+        response.hakedis_available = await self._hakedis_applies(agreement)
+        return response
 
     async def hakedis_source(
         self, payment: PaymentApplication, agreement: SubcontractAgreement, *, language: str = "tr"

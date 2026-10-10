@@ -645,7 +645,7 @@ async def list_agreements(
         rows = await svc.agreements.list_for_project(project_id, status=status_filter)
     else:
         rows = []
-    return [AgreementResponse.model_validate(r) for r in rows]
+    return [await svc.agreement_response(r) for r in rows]
 
 
 @router.post("/agreements/", response_model=AgreementResponse, status_code=201)
@@ -659,7 +659,7 @@ async def create_agreement(
     await verify_project_access(data.project_id, user_id, session)
     svc = SubcontractorService(session)
     entity = await svc.create_agreement(data, user_id=user_id)
-    return AgreementResponse.model_validate(entity)
+    return await svc.agreement_response(entity)
 
 
 @router.patch("/agreements/{agreement_id}", response_model=AgreementResponse)
@@ -674,7 +674,7 @@ async def update_agreement(
     svc = SubcontractorService(session)
     await _verify_agreement_project(agreement_id, user_id, session, svc)
     entity = await svc.update_agreement(agreement_id, data)
-    return AgreementResponse.model_validate(entity)
+    return await svc.agreement_response(entity)
 
 
 @router.get("/unlinked-twins/", response_model=UnlinkedTwinListResponse)
@@ -707,7 +707,7 @@ async def dismiss_unlinked_twin(
     svc = SubcontractorService(session)
     await _verify_agreement_project(agreement_id, user_id, session, svc)
     entity = await svc.dismiss_unlinked_twin(agreement_id, data.contract_id)
-    return AgreementResponse.model_validate(entity)
+    return await svc.agreement_response(entity)
 
 
 @router.get("/agreements/{agreement_id}/validate/")

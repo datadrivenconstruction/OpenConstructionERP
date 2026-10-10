@@ -15,7 +15,10 @@ One step is different. ``oe_submittals_submittal.submitted_by_org`` goes from
 name, the API has always accepted 255 characters, and PostgreSQL refused a
 name longer than 36. Neither ``create_all`` nor the healer changes the type of
 an existing column, so this migration MUST be RUN (``alembic upgrade``), not
-merely stamped, for an installed database to accept a long name.
+merely stamped, to change it. An installation that is stamped gets the same
+widening at boot from ``app.modules.submittals.org_width_repair``, which is
+guarded on the same reflected length, so whichever runs first leaves the
+other nothing to do.
 
 No row is rewritten. The downgrade narrows the column back only when every
 stored value still fits 36 characters, and otherwise leaves it wide.

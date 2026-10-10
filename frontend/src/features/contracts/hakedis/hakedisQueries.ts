@@ -53,6 +53,41 @@ export function screenLocale(language: string | null | undefined): HakedisLocale
   return (language ?? '').toLowerCase().split('-')[0] === 'tr' ? 'tr' : 'en';
 }
 
+/** Whether a contract's terms configure a certificate layout of their own (a preset or its own lines). */
+function termsConfigureHakedis(terms: unknown): boolean {
+  const hakedis = isRecord(terms) ? terms.hakedis : undefined;
+  return isRecord(hakedis) && (hakedis.preset != null || hakedis.lines != null);
+}
+
+/**
+ * Whether a progress claim's certificate is worth asking for.
+ *
+ * The server answers 404 for a contract without a certificate layout, which is
+ * every contract outside the countries that have one unless its terms bring a
+ * layout. Both halves are already on the claim page, so the question is not
+ * sent where the answer is known. It leans towards asking: false only while
+ * the project and contract are still loading, or when both say there is none.
+ * A lookup that failed, or a server that does not send the flag, asks as before.
+ */
+export function claimMayHaveHakedis(
+  project: { is_hakedis_eligible?: boolean } | undefined,
+  contract: { terms?: unknown } | undefined,
+  lookupFailed: boolean,
+): boolean {
+  if (lookupFailed) return true;
+  if (!project || !contract) return false;
+  return project.is_hakedis_eligible !== false || termsConfigureHakedis(contract.terms);
+}
+
+/**
+ * Whether the pay applications of a subcontract agreement may have a
+ * certificate. The agreement carries the server's own answer; without it (no
+ * agreement in hand, or a server that does not send it) the question is asked.
+ */
+export function agreementMayHaveHakedis(agreement: { hakedis_available?: boolean | null } | undefined): boolean {
+  return agreement?.hakedis_available !== false;
+}
+
 /** A refusal as the screen needs it, whichever module wrote it. */
 export interface HakedisRefusal {
   status: number | null;
