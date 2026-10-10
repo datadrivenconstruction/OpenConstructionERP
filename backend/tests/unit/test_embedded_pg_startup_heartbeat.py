@@ -238,7 +238,11 @@ def test_a_bring_up_that_never_returns_stops_being_fed_at_the_deadline(
     monkeypatch.setattr(embedded_pg, "_postmaster_recovering", lambda _pgdata: True)
     monkeypatch.setattr(embedded_pg, "_accepts_a_connection", lambda _pgdata: True)
 
-    deadline = time.monotonic() + 0.4
+    # The budget starts before the worker thread does, so it has to cover the
+    # thread start and the run up to the first heartbeat on a slow runner too.
+    # At 0.4 s a macOS runner spent it all before the first beat and the test
+    # read the correct stop as "never fed". Two seconds is 40 beats of room.
+    deadline = time.monotonic() + 2.0
     pgserver = _BlockingPgserver()
     thread, _result = _run_boot_once(embedded_pg, pgserver, tmp_path, deadline)
 
