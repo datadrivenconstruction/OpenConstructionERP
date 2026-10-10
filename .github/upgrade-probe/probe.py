@@ -370,6 +370,29 @@ def cmd_race(a):
             bad.append(f"#{i} read boq right after position: HTTP {st}")
             continue
         ok += 1
+    if a.threads > 1:
+        import concurrent.futures as cf
+
+        def chain(i):
+            errs = []
+            st, b = call(a.base, "POST", "/api/v1/boq/boqs/", {"project_id": p["id"], "name": f"Par BOQ {i}"}, tok)
+            if st not in (200, 201):
+                return [f"par#{i} create boq: HTTP {st}"]
+            st, _ = call(
+                a.base,
+                "POST",
+                f"/api/v1/boq/boqs/{b['id']}/positions/",
+                {"boq_id": b["id"], "ordinal": "01.001", "description": "par", "unit": "m2", "quantity": "1", "unit_rate": "1"},
+                tok,
+            )
+            if st not in (200, 201):
+                errs.append(f"par#{i} add position right after create: HTTP {st}")
+            return errs
+
+        with cf.ThreadPoolExecutor(a.threads) as ex:
+            par = [e for r in ex.map(chain, range(a.n * 2)) for e in r]
+        print(f"race parallel: {a.n * 2} chains on {a.threads} threads, {len(par)} failure(s)")
+        bad += par
     print(f"race: {ok}/{a.n} create->use->read cycles clean, {len(bad)} failure(s)")
     for line in bad[:40]:
         print("FAIL", line)
@@ -393,6 +416,7 @@ def main():
     sub.add_parser("frontend")
     rc = sub.add_parser("race")
     rc.add_argument("-n", type=int, default=20)
+    rc.add_argument("--threads", type=int, default=1)
     nr = sub.add_parser("newrev")
     nr.add_argument("--lenient", action="store_true")
     lg = sub.add_parser("logscan")

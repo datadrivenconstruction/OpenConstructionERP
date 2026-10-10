@@ -22,12 +22,11 @@ def exe(venv, name):
 
 
 def port_free():
+    # Ask whether anything accepts on the port. A bind test reads a socket in
+    # TIME_WAIT as busy on Linux and macOS, which is not a live server.
     with socket.socket() as s:
-        try:
-            s.bind(("127.0.0.1", PORT))
-            return True
-        except OSError:
-            return False
+        s.settimeout(2)
+        return s.connect_ex(("127.0.0.1", PORT)) != 0
 
 
 def alive(pid):

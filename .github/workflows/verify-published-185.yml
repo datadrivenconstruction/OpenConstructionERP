@@ -91,7 +91,7 @@ jobs:
           python $P verify --snap "$LOGS/snapshot.json" --expect-version "$NEW_VERSION" || rc=1
           python $P frontend || rc=1
           python $P newrev ${REHEARSAL:+--lenient} || rc=1
-          python $P race -n 20 || { [ -n "$REHEARSAL" ] && echo 'REHEARSAL: race failure tolerated' || rc=1; }
+          python $P race -n 20 --threads 8 || { [ -n "$REHEARSAL" ] && echo 'REHEARSAL: race failure tolerated' || rc=1; }
           python $L stop "$VENV" "$DATA" || rc=1
           python $P logscan "$LOGS/serve-new.log" || rc=1
           cat "$LOGS/timings.jsonl"
@@ -106,7 +106,7 @@ jobs:
           curl -s http://127.0.0.1:8080/api/health | python -c "import sys,json;h=json.load(sys.stdin);print({k:h.get(k) for k in ('status','version','alembic_head_matches','modules_loaded')}); sys.exit(0 if h.get('version')=='$NEW_VERSION' and h.get('status')=='healthy' else 1)" || rc=1
           python $P frontend || rc=1
           python $P newrev ${REHEARSAL:+--lenient} || rc=1
-          python $P race -n 20 || { [ -n "$REHEARSAL" ] && echo 'REHEARSAL: race failure tolerated' || rc=1; }
+          python $P race -n 20 --threads 8 || { [ -n "$REHEARSAL" ] && echo 'REHEARSAL: race failure tolerated' || rc=1; }
           python $L stop "$VENV" "$DATA" || rc=1
           python $P logscan "$LOGS/serve-first.log" || rc=1
           python $L start "$VENV" "$DATA" "$LOGS/serve-second.log"
