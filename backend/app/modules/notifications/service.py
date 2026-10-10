@@ -358,13 +358,17 @@ class NotificationService:
             title_key = payload.get("title_key") or f"notifications.{event_type}.title"
             await self.create(
                 user_id=user_id,
-                notification_type=event_type,
+                # A caller may name the row's type (it picks the bell icon)
+                # and attach metadata; without either the event type stands
+                # in, as it always did.
+                notification_type=payload.get("notification_type") or event_type,
                 title_key=title_key,
                 body_key=payload.get("body_key"),
                 body_context=payload.get("body_context") or {},
                 action_url=payload.get("action_url"),
                 entity_type=payload.get("entity_type"),
                 entity_id=payload.get("entity_id"),
+                metadata=payload.get("metadata"),
             )
             return
 
@@ -520,6 +524,40 @@ KNOWN_EVENT_TYPES: list[dict[str, str]] = [
     },
     {"event_type": "changeorders.approval.approved", "module": "changeorders", "description": "Change-order approved"},
     {"event_type": "changeorders.approval.rejected", "module": "changeorders", "description": "Change-order rejected"},
+    # The three below are the ones a change order really notifies on. The two
+    # above name events nothing publishes; they stay listed because stored
+    # preferences may reference them.
+    {
+        "event_type": "changeorders.notify.awaiting_approval",
+        "module": "changeorders",
+        "description": "Change order waiting for your approval",
+    },
+    {
+        "event_type": "changeorders.notify.approved",
+        "module": "changeorders",
+        "description": "Change order you submitted was approved",
+    },
+    {
+        "event_type": "changeorders.notify.rejected",
+        "module": "changeorders",
+        "description": "Change order you submitted was rejected",
+    },
+    # Variation requests
+    {
+        "event_type": "variations.notify.submitted",
+        "module": "variations",
+        "description": "Variation request waiting for a decision",
+    },
+    {
+        "event_type": "variations.notify.approved",
+        "module": "variations",
+        "description": "Variation request you raised was approved",
+    },
+    {
+        "event_type": "variations.notify.rejected",
+        "module": "variations",
+        "description": "Variation request you raised was rejected",
+    },
     # Risk
     {"event_type": "risk.assigned", "module": "risk", "description": "Risk assigned"},
     {"event_type": "risk.simulated", "module": "risk", "description": "Risk simulation completed"},
@@ -567,6 +605,11 @@ KNOWN_EVENT_TYPES: list[dict[str, str]] = [
         "event_type": "deadlines.correspondence.overdue",
         "module": "deadlines",
         "description": "Correspondence past its response deadline",
+    },
+    {
+        "event_type": "deadlines.correspondence.approaching",
+        "module": "deadlines",
+        "description": "Correspondence whose response deadline is close",
     },
     {
         "event_type": "deadlines.qms_ncr_action.overdue",

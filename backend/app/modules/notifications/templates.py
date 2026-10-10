@@ -142,6 +142,94 @@ _TEMPLATES: dict[str, str] = {
     "notifications.deadline.approaching.body": '{module} item "{title}" is due on {due_date}.',
     "notifications.deadline.built.approaching.title": "Due soon: {title}",
     "notifications.deadline.built.approaching.body": '{module}: "{title}" is due on {due_date}.',
+    # ── Site registers: deadline reminders that name the record ───────
+    # One set per register instead of a ``{module}`` word, because a word put
+    # into the params is stored in one language and read back in another.
+    # ``{reference}`` is the register number, ``{due_date_display}`` the date
+    # in the recipient's own format. The plain keys above stay for every
+    # source that has no set here.
+    "notifications.deadline.rfi.overdue.title": "Overdue: RFI {reference}",
+    "notifications.deadline.rfi.overdue.body": (
+        'RFI {reference} "{title}" on {project} was due on {due_date_display} '
+        "and is {days_overdue} day(s) overdue. Response required."
+    ),
+    "notifications.deadline.rfi.escalated.title": "Escalated: RFI {reference}",
+    "notifications.deadline.rfi.escalated.body": (
+        'RFI {reference} "{title}" on {project} is still open, {days_overdue} day(s) past its '
+        "due date of {due_date_display}, and has been escalated to you."
+    ),
+    "notifications.deadline.rfi.approaching.title": "Due soon: RFI {reference}",
+    "notifications.deadline.rfi.approaching.body": (
+        'RFI {reference} "{title}" on {project} is due on {due_date_display}. Response required.'
+    ),
+    "notifications.deadline.submittals.overdue.title": "Overdue: submittal {reference}",
+    "notifications.deadline.submittals.overdue.body": (
+        'Submittal {reference} "{title}" on {project} was due on {due_date_display} '
+        "and is {days_overdue} day(s) overdue. Review required."
+    ),
+    "notifications.deadline.submittals.escalated.title": "Escalated: submittal {reference}",
+    "notifications.deadline.submittals.escalated.body": (
+        'Submittal {reference} "{title}" on {project} is still open, {days_overdue} day(s) past its '
+        "due date of {due_date_display}, and has been escalated to you."
+    ),
+    "notifications.deadline.submittals.approaching.title": "Due soon: submittal {reference}",
+    "notifications.deadline.submittals.approaching.body": (
+        'Submittal {reference} "{title}" on {project} is due on {due_date_display}. Review required.'
+    ),
+    "notifications.deadline.correspondence.overdue.title": "Overdue: correspondence {reference}",
+    "notifications.deadline.correspondence.overdue.body": (
+        'Correspondence {reference} "{title}" on {project} needed a response by {due_date_display} '
+        "and is {days_overdue} day(s) overdue. Response required."
+    ),
+    "notifications.deadline.correspondence.escalated.title": "Escalated: correspondence {reference}",
+    "notifications.deadline.correspondence.escalated.body": (
+        'Correspondence {reference} "{title}" on {project} is still unanswered, {days_overdue} day(s) past its '
+        "due date of {due_date_display}, and has been escalated to you."
+    ),
+    "notifications.deadline.correspondence.approaching.title": "Due soon: correspondence {reference}",
+    "notifications.deadline.correspondence.approaching.body": (
+        'Correspondence {reference} "{title}" on {project} needs a response by {due_date_display}. Response required.'
+    ),
+    "notifications.deadline.variations.overdue.title": "Overdue: variation {reference}",
+    "notifications.deadline.variations.overdue.body": (
+        'Variation {reference} "{title}" on {project} was due on {due_date_display} '
+        "and is {days_overdue} day(s) overdue. Decision required."
+    ),
+    "notifications.deadline.variations.escalated.title": "Escalated: variation {reference}",
+    "notifications.deadline.variations.escalated.body": (
+        'Variation {reference} "{title}" on {project} is still open, {days_overdue} day(s) past its '
+        "due date of {due_date_display}, and has been escalated to you."
+    ),
+    "notifications.deadline.variations.approaching.title": "Due soon: variation {reference}",
+    "notifications.deadline.variations.approaching.body": (
+        'Variation {reference} "{title}" on {project} is due on {due_date_display}. Decision required.'
+    ),
+    # ── Variation requests (lifecycle) ───────────────────────────────
+    "notifications.variation.submitted.title": "Variation awaiting decision: {code}",
+    "notifications.variation.submitted.body": (
+        'Variation {code} "{title}" on {project} was submitted and is waiting for a decision.'
+    ),
+    "notifications.variation.approved.title": "Variation approved: {code}",
+    "notifications.variation.approved.body": 'Variation {code} "{title}" on {project} was approved.',
+    "notifications.variation.rejected.title": "Variation rejected: {code}",
+    "notifications.variation.rejected.body": (
+        'Variation {code} "{title}" on {project} was rejected and returned to you.'
+    ),
+    "notifications.variation.rejected_reason.body": (
+        'Variation {code} "{title}" on {project} was rejected and returned to you. Reason: {reason}'
+    ),
+    # ── Change orders (lifecycle) ────────────────────────────────────
+    "notifications.changeorder.awaiting_approval.title": "Change order awaiting approval: {code}",
+    "notifications.changeorder.awaiting_approval.body": (
+        'Change order {code} "{title}" on {project} was submitted and is waiting for approval.'
+    ),
+    "notifications.changeorder.approved.title": "Change order approved: {code}",
+    "notifications.changeorder.approved.body": 'Change order {code} "{title}" on {project} was approved.',
+    "notifications.changeorder.rejected.title": "Change order rejected: {code}",
+    "notifications.changeorder.rejected.body": 'Change order {code} "{title}" on {project} was rejected.',
+    # ── Submittal returned with the "approved as noted" review code ───
+    "notifications.submittal.approved_as_noted.title": "Submittal approved as noted",
+    "notifications.submittal.approved_as_noted.body": "{code} - {title}",
     # ── Document approvals (file_approvals engine) ───────────────────
     "notifications.file_approval.needs_approver.title": "A document needs your approval",
     "notifications.file_approval.needs_approver.body": "A {file_kind} is waiting for your approval.",
@@ -209,6 +297,14 @@ _TYPE_TO_ICON: dict[str, str] = {
     "approval_needed": "warning",
     "approval_decided": "success",
     "approval_rejected": "error",
+    # Site registers (variation requests, change orders, submittal review code)
+    "variation_submitted": "warning",
+    "variation_approved": "success",
+    "variation_rejected": "error",
+    "changeorder_awaiting_approval": "warning",
+    "changeorder_approved": "success",
+    "changeorder_rejected": "error",
+    "submittal_approved_as_noted": "success",
 }
 
 
@@ -279,6 +375,11 @@ def icon_category_for(notification_type: str | None) -> str:
     if not notification_type:
         return "info"
     return _TYPE_TO_ICON.get(notification_type, "info")
+
+
+def english_template(key: str) -> str | None:
+    """The raw English template for ``key``, placeholders unfilled, or None."""
+    return _TEMPLATES.get(key)
 
 
 def all_template_keys() -> list[str]:

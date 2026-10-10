@@ -19,7 +19,7 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.events import event_bus
+from app.core.events import event_bus, publish_after_commit
 from app.core.json_merge import merge_metadata
 from app.modules.changeorders.intl import REASON_CATEGORIES
 from app.modules.changeorders.models import (
@@ -1346,6 +1346,13 @@ class ChangeOrderService:
             metadata=audit_metadata,
         )
         await self.session.refresh(order)
+        # Tell whoever has to approve, once the submission is committed.
+        publish_after_commit(
+            self.session,
+            "changeorders.notify.awaiting_approval",
+            {"change_order_id": str(order_id), "actor_id": user_id},
+            source_module="oe_changeorders",
+        )
 
         logger.info("Change order submitted: %s by %s", code_snapshot, user_id)
         return order
@@ -1596,6 +1603,13 @@ class ChangeOrderService:
                 "budget_row_action": budget_writeback.get("action"),
                 "schedule_impact_days": getattr(order, "schedule_impact_days", 0) or 0,
             },
+            source_module="oe_changeorders",
+        )
+        # Tell the submitter, once the approval is committed.
+        publish_after_commit(
+            self.session,
+            "changeorders.notify.decided",
+            {"change_order_id": str(order_id), "decision": "approved", "actor_id": user_id},
             source_module="oe_changeorders",
         )
 
@@ -2224,6 +2238,13 @@ class ChangeOrderService:
             to_status="rejected",
             metadata={"code": code_snapshot},
         )
+        # Tell the submitter, once the rejection is committed.
+        publish_after_commit(
+            self.session,
+            "changeorders.notify.decided",
+            {"change_order_id": str(order_id), "decision": "rejected", "actor_id": user_id},
+            source_module="oe_changeorders",
+        )
         fresh = await self.repo.get_by_id(order_id)
 
         logger.info(
@@ -2604,6 +2625,13 @@ class ChangeOrderService:
             },
             source_module="oe_changeorders",
         )
+        # Tell the first approver, once the chain is committed.
+        publish_after_commit(
+            self.session,
+            "changeorders.notify.awaiting_approval",
+            {"change_order_id": str(order_id), "actor_id": None},
+            source_module="oe_changeorders",
+        )
         logger.info(
             "Approval chain started for CO %s: %d steps",
             order_id,
@@ -2806,6 +2834,13 @@ class ChangeOrderService:
                 },
                 source_module="oe_changeorders",
             )
+            # Tell the submitter, once the rejection is committed.
+            publish_after_commit(
+                self.session,
+                "changeorders.notify.decided",
+                {"change_order_id": str(order_id), "decision": "rejected", "actor_id": str(user_id)},
+                source_module="oe_changeorders",
+            )
             logger.info(
                 "Approval chain rejected at step %d for CO %s by %s",
                 cursor,
@@ -2858,6 +2893,13 @@ class ChangeOrderService:
                 "by_user_id": str(user_id),
                 "chain_complete": False,
             },
+            source_module="oe_changeorders",
+        )
+        # Tell the approver of the next step, once this step is committed.
+        publish_after_commit(
+            self.session,
+            "changeorders.notify.awaiting_approval",
+            {"change_order_id": str(order_id), "actor_id": str(user_id)},
             source_module="oe_changeorders",
         )
         logger.info(

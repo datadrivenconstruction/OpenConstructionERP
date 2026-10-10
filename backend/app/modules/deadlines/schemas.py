@@ -23,6 +23,10 @@ class DeadlineItem(BaseModel):
     project_id: str
     project_name: str | None = None
     title: str
+    reference: str | None = Field(
+        default=None,
+        description="The record's own register number (RFI-007, VR-012), when the source has one.",
+    )
     due_date: str | None = Field(default=None, description="Normalized ISO date (yyyy-mm-dd) or full ISO.")
     owner_user_id: str | None = None
     owner_name: str | None = Field(default=None, description="Resolved owner display name (best-effort).")

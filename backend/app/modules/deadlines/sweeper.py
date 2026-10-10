@@ -44,6 +44,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import uuid
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import select
@@ -53,6 +54,7 @@ from app.core.events import event_bus
 from app.database import async_session_factory
 from app.modules.deadlines import service as deadlines_service
 from app.modules.deadlines.schemas import DeadlineItem
+from app.modules.notifications.localized import format_day
 from app.modules.notifications.models import Notification
 from app.modules.notifications.service import NotificationService
 from app.modules.projects.models import Project
@@ -92,7 +94,23 @@ ESCALATE_GRACE_DAYS = 3
 # (``DueFeature.remind_days_before`` is at most 30). Each record then carries
 # its own module's window in ``remind_days`` and is reminded only inside it,
 # see :func:`_inside_own_window`.
-APPROACHING_NOTIFY: dict[str, int] = {"contracts_payment_plan": 7, deadlines_service.BUILT_MODULES: 30}
+#
+# Correspondence is reminded three days ahead, the same "approaching" window
+# the deadline register shows by default (``service.compute_deadlines``), so
+# the reminder arrives when the row turns amber on screen and not on a
+# different day. A letter with a contractual reply date is the one record
+# here whose lateness has a legal cost, which is why it is told in advance.
+APPROACHING_NOTIFY: dict[str, int] = {
+    "contracts_payment_plan": 7,
+    deadlines_service.BUILT_MODULES: 30,
+    "correspondence": 3,
+}
+
+# Sources whose reminder names the record itself (register number, project,
+# due date) with wording of its own per register, instead of the plain
+# sentence with a ``{module}`` word in it. A word in the params is stored in
+# one language; a key per register is translated like any other.
+RECORD_NAMING_MODULES: frozenset[str] = frozenset({"rfi", "submittals", "correspondence", "variations"})
 
 # A built module's reminder names the module the person built rather than a
 # platform source, so it has its own wording.
@@ -276,10 +294,58 @@ async def _already_escalated(session: AsyncSession, item: DeadlineItem) -> bool:
     return False
 
 
-def _overdue_context(item: DeadlineItem) -> dict[str, object]:
+@dataclass(frozen=True)
+class Reader:
+    """How one recipient reads: interface language and date format."""
+
+    locale: str = "en"
+    date_format: str | None = None
+
+
+async def _readers(session: AsyncSession, user_ids: list[uuid.UUID]) -> dict[uuid.UUID, Reader]:
+    """Language and date format of each recipient, from their own settings."""
+    if not user_ids:
+        return {}
+    rows = await session.execute(select(User.id, User.locale, User.date_format).where(User.id.in_(user_ids)))
+    return {uid: Reader(locale=locale or "en", date_format=date_format) for uid, locale, date_format in rows.all()}
+
+
+def _names_its_record(item: DeadlineItem) -> bool:
+    """Whether this item gets its register's own wording.
+
+    Needs the register number and the project name, because the sentence is
+    built around both. An item missing either keeps the plain wording.
+    """
+    return item.module in RECORD_NAMING_MODULES and bool(item.reference) and bool(item.project_name)
+
+
+def _record_context(item: DeadlineItem, reader: Reader | None) -> dict[str, object]:
+    """The params a register's own wording needs, written for one reader.
+
+    The date travels twice: ``due_date_iso`` is the canonical value any later
+    reader is re-rendered from, ``due_date_display`` is the same day in the
+    recipient's format for a client that interpolates params as they are.
+    """
+    if not _names_its_record(item):
+        return {}
+    reader = reader or Reader()
+    return {
+        "reference": item.reference,
+        "project": item.project_name,
+        "due_date_iso": item.due_date,
+        "due_date_display": format_day(item.due_date, reader.locale, reader.date_format),
+    }
+
+
+def _overdue_context(item: DeadlineItem, reader: Reader | None = None) -> dict[str, object]:
     # ``source_label`` when there is one: "built_modules" would mean nothing to
     # the reader, the module's own name does.
-    return {"module": item.source_label or item.module, "title": item.title, "days_overdue": item.days_overdue}
+    return {
+        "module": item.source_label or item.module,
+        "title": item.title,
+        "days_overdue": item.days_overdue,
+        **_record_context(item, reader),
+    }
 
 
 def _inside_own_window(item: DeadlineItem) -> bool:
@@ -287,10 +353,19 @@ def _inside_own_window(item: DeadlineItem) -> bool:
     return item.remind_days is None or -item.days_overdue <= item.remind_days
 
 
+def _keys(item: DeadlineItem, kind: str) -> tuple[str, str]:
+    """Title and body key for ``kind`` (overdue | escalated | approaching)."""
+    if _names_its_record(item):
+        stem = f"notifications.deadline.{item.module}.{kind}"
+    else:
+        stem = f"notifications.deadline.{kind}"
+    return f"{stem}.title", f"{stem}.body"
+
+
 def _approaching_keys(item: DeadlineItem) -> tuple[str, str]:
     if item.module == deadlines_service.BUILT_MODULES:
         return BUILT_APPROACHING_TITLE_KEY, BUILT_APPROACHING_BODY_KEY
-    return "notifications.deadline.approaching.title", "notifications.deadline.approaching.body"
+    return _keys(item, "approaching")
 
 
 async def _notify_overdue(
@@ -310,15 +385,18 @@ async def _notify_overdue(
     on the next tick, because the record of it is gone.
     """
     svc = NotificationService(session)
-    context = _overdue_context(item)
+    title_key, body_key = _keys(item, "overdue")
+    readers = await _readers(session, recipients)
     for recipient in recipients:
+        # Per recipient, because the display date is written in their format.
+        context = _overdue_context(item, readers.get(recipient))
         await svc.create(
             user_id=recipient,
             notification_type=OVERDUE_TYPE,
-            title_key="notifications.deadline.overdue.title",
+            title_key=title_key,
             entity_type=item.entity_type,
             entity_id=item.entity_id,
-            body_key="notifications.deadline.overdue.body",
+            body_key=body_key,
             body_context=context,
             action_url=item.action_url,
             metadata={"module": item.module, "due_date": item.due_date, "level": 0},
@@ -330,8 +408,8 @@ async def _notify_overdue(
             event_type=f"deadlines.{item.module}.overdue",
             user_id=recipient,
             payload={
-                "title_key": "notifications.deadline.overdue.title",
-                "body_key": "notifications.deadline.overdue.body",
+                "title_key": title_key,
+                "body_key": body_key,
                 "body_context": context,
                 "action_url": item.action_url,
                 "entity_type": item.entity_type,
@@ -364,15 +442,17 @@ async def _maybe_escalate(session: AsyncSession, item: DeadlineItem, now: dateti
         return False
 
     svc = NotificationService(session)
+    title_key, body_key = _keys(item, "escalated")
+    readers = await _readers(session, targets)
     for recipient in targets:
         await svc.create(
             user_id=recipient,
             notification_type=ESCALATED_TYPE,
-            title_key="notifications.deadline.escalated.title",
+            title_key=title_key,
             entity_type=item.entity_type,
             entity_id=item.entity_id,
-            body_key="notifications.deadline.escalated.body",
-            body_context=_overdue_context(item),
+            body_key=body_key,
+            body_context=_overdue_context(item, readers.get(recipient)),
             action_url=item.action_url,
             metadata={"module": item.module, "due_date": item.due_date, "level": 1},
         )
@@ -415,12 +495,13 @@ async def _already_reminded(session: AsyncSession, item: DeadlineItem) -> bool:
     return item.due_date in dates or len(dates) >= MAX_APPROACHING_REMINDERS
 
 
-def _approaching_context(item: DeadlineItem) -> dict[str, object]:
+def _approaching_context(item: DeadlineItem, reader: Reader | None = None) -> dict[str, object]:
     return {
         "module": item.source_label or item.module,
         "title": item.title,
         "due_date": item.due_date,
         "days_until": -item.days_overdue,
+        **_record_context(item, reader),
     }
 
 
@@ -432,9 +513,10 @@ async def _notify_approaching(
 ) -> None:
     """The approaching twin of :func:`_notify_overdue`, with the same outbox rule."""
     svc = NotificationService(session)
-    context = _approaching_context(item)
     title_key, body_key = _approaching_keys(item)
+    readers = await _readers(session, recipients)
     for recipient in recipients:
+        context = _approaching_context(item, readers.get(recipient))
         await svc.create(
             user_id=recipient,
             notification_type=APPROACHING_TYPE,

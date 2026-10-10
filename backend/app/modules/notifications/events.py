@@ -201,6 +201,10 @@ async def _on_rfi_assigned(event: Event) -> None:
     rfi_id = data.get("rfi_id") or data.get("id")
     if not assignee_id or not rfi_id:
         return
+    # Assigning an RFI to yourself is not news to you. ``assigned_by`` is on
+    # the payload of the create path only; a reassignment carries no actor.
+    if _same_user(assignee_id, data.get("assigned_by")):
+        return
     try:
         async with async_session_factory() as session:
             svc = NotificationService(session)
@@ -261,6 +265,9 @@ async def _on_rfi_responded(event: Event) -> None:
     rfi_id = data.get("rfi_id") or data.get("id")
     if not requester_id or not rfi_id:
         return
+    # The person who wrote the answer does not need telling it was answered.
+    if _same_user(requester_id, data.get("responded_by")):
+        return
     try:
         async with async_session_factory() as session:
             svc = NotificationService(session)
@@ -304,6 +311,37 @@ def uuid_from_str(value: str):
         return value
 
 
+def _same_user(left: object, right: object) -> bool:
+    """Whether two payload values name the same user.
+
+    Payloads carry ids as ``UUID`` on some paths and as strings on others, so
+    the comparison is on the canonical form. Two empty values are not a match.
+    """
+    if not left or not right:
+        return False
+    return str(uuid_from_str(str(left))) == str(uuid_from_str(str(right)))
+
+
+async def _submittal_number(session, data: dict) -> str:
+    """The submittal's register number, from the payload or from the row.
+
+    ``submittal.approved`` and ``submittal.reviewed`` are published without
+    it, which left ``{code}`` empty in the bell. The number is written when
+    the submittal is created and never changes, so reading it here is safe
+    even while the publisher's transaction is still open.
+    """
+    number = data.get("submittal_number")
+    if number:
+        return str(number)
+    try:
+        from app.modules.submittals.models import Submittal
+
+        row = await session.get(Submittal, uuid_from_str(str(data.get("submittal_id") or data.get("id"))))
+        return str(row.submittal_number) if row is not None and row.submittal_number else ""
+    except Exception:
+        return ""
+
+
 async def _on_submittal_submitted(event: Event) -> None:
     """``submittal.submitted`` → notify the reviewer + project owner."""
     if not await _can_open_isolated_session():
@@ -323,6 +361,12 @@ async def _on_submittal_submitted(event: Event) -> None:
                 owner_id = await _resolve_project_owner(session, project_id)
                 if owner_id:
                     targets.add(owner_id)
+            # ``submitted_by`` is the submittal's author. An author who is
+            # also the project owner, or who named themselves reviewer, would
+            # otherwise be told that their own submittal awaits review. The
+            # set already folds a reviewer who is the owner into one row.
+            submitter = data.get("submitted_by")
+            targets = {uid for uid in targets if not _same_user(uid, submitter)}
             if not targets:
                 return
             svc = NotificationService(session)
@@ -354,6 +398,8 @@ async def _on_submittal_approved(event: Event) -> None:
     submittal_id = data.get("submittal_id") or data.get("id")
     if not submitter_id or not submittal_id:
         return
+    if _same_user(submitter_id, data.get("approver_id")):
+        return
     try:
         async with async_session_factory() as session:
             svc = NotificationService(session)
@@ -363,7 +409,7 @@ async def _on_submittal_approved(event: Event) -> None:
                 title_key="notifications.submittal.approved.title",
                 body_key="notifications.submittal.approved.body",
                 body_context={
-                    "code": data.get("submittal_number") or "",
+                    "code": await _submittal_number(session, data),
                     "title": data.get("title") or "",
                 },
                 entity_type="submittal",
@@ -375,6 +421,51 @@ async def _on_submittal_approved(event: Event) -> None:
         logger.warning("notifications: _on_submittal_approved failed", exc_info=True)
 
 
+async def _on_submittal_reviewed(event: Event) -> None:
+    """``submittal.reviewed`` -> tell the submitter about an approving review code.
+
+    A review can return four codes. ``rejected`` and ``revise_and_resubmit``
+    publish events of their own and are handled below. ``approved`` and
+    ``approved_as_noted`` published only this one, which had no subscriber
+    that notified anyone, so a submitter whose submittal came back approved
+    through the review step was never told.
+    """
+    data = event.data or {}
+    decision = data.get("decision")
+    if decision not in ("approved", "approved_as_noted"):
+        return
+    submitter_id = data.get("submitted_by") or data.get("created_by")
+    submittal_id = data.get("submittal_id") or data.get("id")
+    if not submitter_id or not submittal_id:
+        return
+    if _same_user(submitter_id, data.get("reviewer_id")):
+        return
+    title_key = "notifications.submittal.approved.title"
+    body_key = "notifications.submittal.approved.body"
+    if decision == "approved_as_noted":
+        title_key = "notifications.submittal.approved_as_noted.title"
+        body_key = "notifications.submittal.approved_as_noted.body"
+    try:
+        async with async_session_factory() as session:
+            svc = NotificationService(session)
+            await svc.create(
+                user_id=submitter_id,
+                notification_type=f"submittal_{decision}",
+                title_key=title_key,
+                body_key=body_key,
+                body_context={
+                    "code": await _submittal_number(session, data),
+                    "title": data.get("title") or "",
+                },
+                entity_type="submittal",
+                entity_id=str(submittal_id),
+                action_url=f"/submittals?id={submittal_id}",
+            )
+            await session.commit()
+    except Exception:
+        logger.warning("notifications: _on_submittal_reviewed failed", exc_info=True)
+
+
 async def _on_submittal_rejected(event: Event) -> None:
     """``submittal.rejected`` → notify the submitter with rejection reason."""
     if not await _can_open_isolated_session():
@@ -383,6 +474,8 @@ async def _on_submittal_rejected(event: Event) -> None:
     submitter_id = data.get("submitted_by") or data.get("created_by")
     submittal_id = data.get("submittal_id") or data.get("id")
     if not submitter_id or not submittal_id:
+        return
+    if _same_user(submitter_id, data.get("reviewer_id")):
         return
     try:
         async with async_session_factory() as session:
@@ -414,6 +507,8 @@ async def _on_submittal_revise_resubmit(event: Event) -> None:
     submitter_id = data.get("submitted_by") or data.get("created_by")
     submittal_id = data.get("submittal_id") or data.get("id")
     if not submitter_id or not submittal_id:
+        return
+    if _same_user(submitter_id, data.get("reviewer_id")):
         return
     try:
         async with async_session_factory() as session:
@@ -737,6 +832,7 @@ _SUBSCRIPTIONS: list[tuple[str, callable]] = [  # type: ignore[type-arg]
     ("risk.assigned", _on_risk_assigned),
     ("submittal.submitted", _on_submittal_submitted),
     ("submittal.approved", _on_submittal_approved),
+    ("submittal.reviewed", _on_submittal_reviewed),
     ("submittal.rejected", _on_submittal_rejected),
     ("submittal.revise_resubmit", _on_submittal_revise_resubmit),
     ("transmittal.issued", _on_transmittal_issued),
@@ -778,6 +874,9 @@ def register_notification_subscribers() -> None:
     from app.modules.notifications._file_approvals_subscribers import (
         register_file_approvals_notification_subscribers,
     )
+    from app.modules.notifications._site_register_subscribers import (
+        register_site_register_notification_subscribers,
+    )
     from app.modules.notifications._wave1_subscribers import (
         register_wave1_notification_subscribers,
     )
@@ -797,3 +896,4 @@ def register_notification_subscribers() -> None:
     register_wave5_notification_subscribers()
     register_collaboration_notification_subscribers()
     register_file_approvals_notification_subscribers()
+    register_site_register_notification_subscribers()

@@ -115,6 +115,16 @@ _TABLES: dict[str, dict[str, str]] = {
         "digest_subject": "OpenConstructionERP: Сводка уведомлений ({count})",
         "digest_heading": "Последние уведомления:",
     },
+    "tr": {
+        "greeting": "Merhaba {name},",
+        "greeting_generic": "Merhaba,",
+        "cta": "OpenConstructionERP üzerinde aç",
+        "footer": (
+            "Bu e-postayı bildirim ayarlarınız nedeniyle alıyorsunuz. Ayarlarınızı profilinizden değiştirebilirsiniz."
+        ),
+        "digest_subject": "OpenConstructionERP: Bildirim özeti ({count})",
+        "digest_heading": "Son bildirimler:",
+    },
 }
 
 #: Languages the notification email can be written in.

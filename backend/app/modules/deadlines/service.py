@@ -219,6 +219,7 @@ async def _collect_correspondence(
                 entity_id=str(r.id),
                 project_id=str(r.project_id),
                 title=r.subject,
+                reference=r.reference_number,
                 due_date=_iso_date(due),
                 # Correspondence has no true assignee - the creator is the
                 # best-effort owner. The sweep falls back to project managers
@@ -366,6 +367,7 @@ async def _collect_rfis(
                 entity_id=str(r.id),
                 project_id=str(r.project_id),
                 title=r.subject,
+                reference=r.rfi_number,
                 due_date=_iso_date(due),
                 # ``assigned_to`` is the answerer; ``ball_in_court`` is who owes
                 # the next move and wins when both are set.
@@ -413,6 +415,7 @@ async def _collect_submittals(
                 entity_id=str(r.id),
                 project_id=str(r.project_id),
                 title=r.title,
+                reference=r.submittal_number,
                 due_date=_iso_date(due),
                 owner_user_id=_owner_id(r.reviewer_id, r.ball_in_court),
                 status=r.status,
@@ -459,6 +462,7 @@ async def _collect_variation_requests(
                 entity_id=str(r.id),
                 project_id=str(r.project_id),
                 title=r.title or r.code,
+                reference=r.code,
                 due_date=_iso_date(due),
                 owner_user_id=_owner_id(r.ball_in_court),
                 status=r.status,

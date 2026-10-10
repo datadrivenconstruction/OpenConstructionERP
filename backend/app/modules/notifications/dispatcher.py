@@ -49,8 +49,9 @@ from sqlalchemy import select
 from app.core.events import Event, event_bus
 from app.database import async_session_factory
 from app.modules.notifications.email_render import digest_heading, digest_subject, render_notification_email
+from app.modules.notifications.localized import localize_context
+from app.modules.notifications.localized import render as render_template
 from app.modules.notifications.models import WebhookTarget
-from app.modules.notifications.templates import render as render_template
 
 logger = logging.getLogger(__name__)
 
@@ -125,6 +126,86 @@ async def _resolve_user_email(user_id: str) -> tuple[str | None, str | None, str
         return None, None, None
 
 
+async def _reader_date_format(user_id: str) -> str | None:
+    """The recipient's own date order (``User.date_format``), or ``None``.
+
+    Best effort: an id that is not a user, or a failed lookup, leaves the
+    date to the recipient's language.
+    """
+    try:
+        uid = uuid.UUID(str(user_id))
+    except (ValueError, TypeError):
+        return None
+    try:
+        async with async_session_factory() as session:
+            from app.modules.users.models import User
+
+            user = await session.get(User, uid)
+            return user.date_format if user is not None else None
+    except Exception:  # noqa: BLE001
+        logger.debug("dispatcher: date format lookup failed", exc_info=True)
+        return None
+
+
+def _with_project(title: str, ctx: dict) -> str:
+    """Lead a subject with the project, when the params name one.
+
+    A mailbox search for the project, or for the record reference the title
+    carries, then finds the message.
+    """
+    project = str(ctx.get("project") or "").strip()
+    return f"[{project}] {title}" if project else title
+
+
+def render_email_parts(
+    event_type: str,
+    payload: dict,
+    locale: str | None,
+    date_format: str | None = None,
+) -> tuple[str, str]:
+    """Subject and plain body of one notification email, for one recipient.
+
+    Pure: no database, no clock. The notification text comes from the
+    catalogue of the recipient's language and the dates in the params are
+    written in the recipient's order; the frame around it is
+    :mod:`app.modules.notifications.email_render`'s.
+
+    Args:
+        event_type: The dispatched event type.
+        payload: The dispatch payload (keys, params, or a digest's ``events``).
+        locale: The recipient's ``User.locale``.
+        date_format: The recipient's ``User.date_format``.
+
+    Returns:
+        ``(subject, body_text)``.
+    """
+    title_key = payload.get("title_key") or f"notifications.{event_type}.title"
+    body_key = payload.get("body_key") or f"notifications.{event_type}.body"
+    ctx = localize_context(payload.get("body_context"), locale, date_format)
+    if event_type == "notifications.digest" and "events" in payload:
+        # The digest flusher sends its count and channel beside the events,
+        # not as params, and the digest sentence needs both.
+        ctx.setdefault("count", payload.get("count", len(payload.get("events") or [])))
+        ctx.setdefault("channel", payload.get("channel", "email"))
+    subject = _with_project(render_template(title_key, ctx, locale) or event_type, ctx)
+    body_text = render_template(body_key, ctx, locale) or ""
+
+    # Digest payloads carry an "events" list - render a small bulleted
+    # summary so the recipient gets something readable in one glance.
+    if event_type == "notifications.digest" and "events" in payload:
+        lines = ["", digest_heading(locale), ""]
+        for entry in payload.get("events", []):
+            etype = entry.get("event_type", "")
+            epayload = entry.get("payload") or {}
+            ectx = localize_context(epayload.get("body_context"), locale, date_format)
+            etitle_key = epayload.get("title_key") or f"notifications.{etype}.title"
+            etitle = _with_project(render_template(etitle_key, ectx, locale) or etype, ectx)
+            lines.append(f"  • {etitle}")
+        body_text = (body_text + "\n" + "\n".join(lines)).strip()
+        subject = digest_subject(locale, len(payload.get("events") or []))
+    return subject, body_text
+
+
 async def _on_dispatch_email(event: Event) -> None:
     """``notifications.dispatch.email`` → real SMTP send."""
     data = event.data or {}
@@ -143,24 +224,7 @@ async def _on_dispatch_email(event: Event) -> None:
         )
         return
 
-    title_key = payload.get("title_key") or f"notifications.{event_type}.title"
-    body_key = payload.get("body_key") or f"notifications.{event_type}.body"
-    ctx = payload.get("body_context") or {}
-    subject = render_template(title_key, ctx) or event_type
-    body_text = render_template(body_key, ctx) or ""
-
-    # Digest payloads carry an "events" list - render a small bulleted
-    # summary so the recipient gets something readable in one glance.
-    if event_type == "notifications.digest" and "events" in payload:
-        lines = ["", digest_heading(locale), ""]
-        for entry in payload.get("events", []):
-            etype = entry.get("event_type", "")
-            ectx = (entry.get("payload") or {}).get("body_context", {}) or {}
-            etitle_key = (entry.get("payload") or {}).get("title_key") or f"notifications.{etype}.title"
-            etitle = render_template(etitle_key, ectx) or etype
-            lines.append(f"  • {etitle}")
-        body_text = (body_text + "\n" + "\n".join(lines)).strip()
-        subject = digest_subject(locale, len(payload.get("events") or []))
+    subject, body_text = render_email_parts(event_type, payload, locale, await _reader_date_format(user_id))
 
     from app.config import get_settings
 
@@ -370,6 +434,7 @@ def register_dispatchers() -> None:
 
 
 __all__ = [
+    "render_email_parts",
     "_on_dispatch_email",
     "_on_dispatch_webhook",
     "_on_notification_created",

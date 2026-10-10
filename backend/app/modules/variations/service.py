@@ -21,7 +21,7 @@ from fastapi import status as http_status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.day_basis import CALENDAR, add_days
-from app.core.events import event_bus
+from app.core.events import event_bus, publish_after_commit
 from app.core.i18n import get_locale
 from app.core.money import money_quantum
 from app.core.validation.messages import translate
@@ -1707,6 +1707,14 @@ class VariationsService:
                 "code": vr.code,
                 "to_status": to_status,
             },
+        )
+        # The notification subscriber reads this request back from a session
+        # of its own, so it is told only once the transition is committed.
+        publish_after_commit(
+            self.session,
+            "variations.notify.request",
+            {"request_id": str(vr_id), "to_status": to_status, "actor_id": user_id},
+            source_module="variations",
         )
         # R5 audit: structured log on decision-grade transitions so the
         # audit trail survives a missing event subscriber.

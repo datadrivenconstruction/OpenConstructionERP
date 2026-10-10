@@ -349,7 +349,18 @@ def _registered_notification_handlers() -> list[tuple[str, Any, str]]:
     return sorted(out, key=lambda r: (r[2], r[0]))
 
 
+# Payload keys whose VALUE selects whether a handler notifies at all. A probe
+# string under such a key sends the handler down its "not mine" branch in both
+# runs, and it then reads as a handler that notifies nobody. The value here is
+# one the real publisher sends: ``submittal.reviewed`` carries the review code
+# in ``decision`` and ``_on_submittal_reviewed`` acts on the approving codes
+# only (submittals/service.py, review_submittal).
+_BRANCH_VALUES: dict[str, str] = {"decision": "approved_as_noted"}
+
+
 def _sample_value(key: str) -> Any:
+    if key in _BRANCH_VALUES:
+        return _BRANCH_VALUES[key]
     if key.endswith(("_id", "_by")) or key == "id":
         return str(uuid.uuid4())
     if key in {"count", "quantity", "days"}:

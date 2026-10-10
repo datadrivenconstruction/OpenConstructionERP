@@ -78,6 +78,42 @@ def _resolve_body_key(stored: str | None) -> str | None:
     return _LEGACY_BODY_ALIASES.get(stored, stored)
 
 
+def reader_text(
+    title_key: str,
+    body_key: str | None,
+    body_context: dict[str, Any] | None,
+    locale: str | None,
+    date_format: str | None = None,
+) -> tuple[str, str, dict[str, Any]]:
+    """Fallback title and body, and the params, written for the reader.
+
+    The row stores a key and params; this is the read-time half of that
+    design. ``title_default`` / ``body_default`` are what the bell shows when
+    its locale file lacks the key, so they are rendered in the language of the
+    person opening the bell, not in English and not in whatever language the
+    recipient used on the day the row was written.
+
+    Args:
+        title_key: Stored title key (legacy aliases are resolved).
+        body_key: Stored body key, if any.
+        body_context: Stored params.
+        locale: The reader's interface language.
+        date_format: The reader's date format setting.
+
+    Returns:
+        ``(title_default, body_default, params)`` where ``params`` carries the
+        display date in the reader's format.
+    """
+    from app.modules.notifications.localized import localize_context
+    from app.modules.notifications.localized import render as render_localized
+
+    params = localize_context(body_context, locale, date_format)
+    title = render_localized(_resolve_title_key(title_key), params, locale)
+    resolved_body_key = _resolve_body_key(body_key)
+    body = render_localized(resolved_body_key, params, locale) if resolved_body_key else ""
+    return title, body, params
+
+
 class NotificationResponse(BaseModel):
     """Single notification returned from the API.
 

@@ -60,6 +60,7 @@ from app.modules.notifications.schemas import (
     WebhookTargetCreate,
     WebhookTargetResponse,
     WebhookTargetUpdate,
+    reader_text,
 )
 from app.modules.notifications.service import (
     _DIGEST_FLUSHER,
@@ -76,8 +77,40 @@ def _get_service(session: SessionDep) -> NotificationService:
     return NotificationService(session)
 
 
-def _to_response(n: object) -> NotificationResponse:
-    """Build a NotificationResponse from a Notification ORM object."""
+async def _reader_settings(session: Any, user_id: Any) -> tuple[str, str | None]:
+    """The reader's interface language and date format, English when unknown."""
+    try:
+        from app.modules.users.models import User
+
+        row = (
+            await session.execute(select(User.locale, User.date_format).where(User.id == uuid.UUID(str(user_id))))
+        ).first()
+    except Exception:  # noqa: BLE001 - the list must still render
+        logger.debug("notifications: reader settings lookup failed", exc_info=True)
+        return "en", None
+    if row is None:
+        return "en", None
+    return row[0] or "en", row[1]
+
+
+def _to_response(
+    n: object,
+    locale: str | None = None,
+    date_format: str | None = None,
+) -> NotificationResponse:
+    """Build a NotificationResponse from a Notification ORM object.
+
+    ``locale`` / ``date_format`` are the reader's. The fallback strings and
+    the display date in the params are written for that reader; the stored
+    key and params are returned unchanged otherwise.
+    """
+    title_default, body_default, params = reader_text(
+        n.title_key,  # type: ignore[attr-defined]
+        n.body_key,  # type: ignore[attr-defined]
+        n.body_context or {},  # type: ignore[attr-defined]
+        locale,
+        date_format,
+    )
     return NotificationResponse(
         id=n.id,  # type: ignore[attr-defined]
         user_id=n.user_id,  # type: ignore[attr-defined]
@@ -85,8 +118,10 @@ def _to_response(n: object) -> NotificationResponse:
         entity_type=n.entity_type,  # type: ignore[attr-defined]
         entity_id=n.entity_id,  # type: ignore[attr-defined]
         title_key=n.title_key,  # type: ignore[attr-defined]
+        title_default=title_default,
         body_key=n.body_key,  # type: ignore[attr-defined]
-        body_context=n.body_context or {},  # type: ignore[attr-defined]
+        body_default=body_default,
+        body_context=params,
         action_url=n.action_url,  # type: ignore[attr-defined]
         is_read=n.is_read,  # type: ignore[attr-defined]
         read_at=n.read_at,  # type: ignore[attr-defined]
@@ -111,8 +146,9 @@ async def list_notifications(
     """List current user's notifications (paginated)."""
     items, total = await service.list_for_user(user_id, is_read=is_read, limit=limit, offset=offset)
     unread = await service.count_unread(user_id)
+    locale, date_format = await _reader_settings(service.session, user_id)
     return NotificationListResponse(
-        items=[_to_response(i) for i in items],
+        items=[_to_response(i, locale, date_format) for i in items],
         total=total,
         unread_count=unread,
     )
