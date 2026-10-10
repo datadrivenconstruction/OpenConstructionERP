@@ -20,6 +20,7 @@ import pytest
 from fastapi import HTTPException
 
 from app.modules.finance import gaap
+from app.modules.finance.models import LedgerEntry
 from app.modules.finance.schemas import JournalEntryCreate, JournalLineInput
 from app.modules.finance.service import FinanceService
 
@@ -162,6 +163,231 @@ async def test_post_unbalanced_journal_rejected() -> None:
         await svc.post_journal_entry(data)
     assert exc.value.status_code == 400
     assert "Unbalanced" in exc.value.detail
+
+
+class _RecordingJournalSession(_StubSession):
+    """Observe write boundaries; optionally replay already-persisted rows."""
+
+    def __init__(self, existing: list[Any] | None = None) -> None:
+        self.existing = existing or []
+        self.added: list[Any] = []
+        self.savepoints = 0
+        self.flushes = 0
+
+    def begin_nested(self) -> _NestedCtx:
+        self.savepoints += 1
+        return super().begin_nested()
+
+    def add(self, obj: Any) -> None:
+        self.added.append(obj)
+
+    async def flush(self) -> None:
+        self.flushes += 1
+
+    async def execute(self, _stmt: Any) -> Any:
+        return SimpleNamespace(scalars=lambda: SimpleNamespace(all=lambda: self.existing))
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("currency", ["KWD", "USD", "JPY"])
+async def test_journal_rejects_subcent_imbalance_before_writing(currency: str) -> None:
+    svc = _make_service()
+    recorder = _RecordingJournalSession()
+    svc.session = recorder
+    data = JournalEntryCreate(
+        project_id=PROJECT_ID,
+        transaction_ref="JE-SUBCENT",
+        currency_code=currency,
+        lines=[_line("1000", debit="1.001"), _line("4000", credit="1.002")],
+    )
+    with pytest.raises(HTTPException) as exc:
+        await svc.post_journal_entry(data)
+    assert exc.value.status_code == 400
+    assert "Unbalanced" in exc.value.detail
+    assert "sum(debit)=1.001" in exc.value.detail
+    assert "sum(credit)=1.002" in exc.value.detail
+    assert recorder.added == []
+    assert recorder.savepoints == recorder.flushes == 0
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("debit,credit", [("Infinity", "1"), ("1", "Infinity"), ("Infinity", "Infinity")])
+async def test_journal_rejects_nonfinite_amounts_before_writing(debit: str, credit: str) -> None:
+    svc = _make_service()
+    recorder = _RecordingJournalSession()
+    svc.session = recorder
+    # Internal callers still need the service guard after request validation.
+    data = JournalEntryCreate.model_construct(
+        project_id=PROJECT_ID,
+        transaction_ref="JE-NONFINITE",
+        currency_code="USD",
+        lines=[
+            JournalLineInput.model_construct(account_code="1000", debit=debit, credit="0"),
+            JournalLineInput.model_construct(account_code="4000", debit="0", credit=credit),
+        ],
+    )
+    with pytest.raises(HTTPException) as exc:
+        await svc.post_journal_entry(data)
+    assert exc.value.status_code == 400
+    assert "finite" in exc.value.detail.lower()
+    assert recorder.added == []
+    assert recorder.savepoints == recorder.flushes == 0
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("debits", "credit"),
+    [(["1.002"], "1.001"), (["0.501", "0.500"], "1.002")],
+)
+async def test_journal_checks_unrounded_totals_across_all_lines(debits: list[str], credit: str) -> None:
+    svc = _make_service()
+    recorder = _RecordingJournalSession()
+    svc.session = recorder
+    data = JournalEntryCreate(
+        project_id=PROJECT_ID,
+        transaction_ref="JE-SUBCENT-LINES",
+        currency_code="KWD",
+        lines=[_line("1000", debit=value) for value in debits] + [_line("4000", credit=credit)],
+    )
+    with pytest.raises(HTTPException) as exc:
+        await svc.post_journal_entry(data)
+    assert exc.value.status_code == 400
+    assert "Unbalanced" in exc.value.detail
+    assert recorder.added == []
+    assert recorder.savepoints == recorder.flushes == 0
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("amount", ["1.001", "0.001", "1E-3"])
+async def test_balanced_nonrepresentable_journal_is_rejected_without_rounding(amount: str) -> None:
+    svc = _make_service()
+    recorder = _RecordingJournalSession()
+    svc.session = recorder
+    data = JournalEntryCreate(
+        project_id=PROJECT_ID,
+        transaction_ref="JE-EQUAL-SUBCENT",
+        currency_code="KWD",
+        lines=[_line("1000", debit=amount), _line("4000", credit=amount)],
+    )
+    with pytest.raises(HTTPException) as exc:
+        await svc.post_journal_entry(data)
+    assert exc.value.status_code == 400
+    assert "precision" in exc.value.detail.lower()
+    assert str(Decimal(amount)) in exc.value.detail
+    assert recorder.added == []
+    assert recorder.savepoints == recorder.flushes == 0
+
+
+@pytest.mark.asyncio
+async def test_balanced_split_legs_cannot_become_unbalanced_when_stored() -> None:
+    svc = _make_service()
+    recorder = _RecordingJournalSession()
+    svc.session = recorder
+    data = JournalEntryCreate(
+        project_id=PROJECT_ID,
+        transaction_ref="JE-SPLIT-ROUNDING",
+        currency_code="KWD",
+        lines=[_line("1000", debit="0.005"), _line("1100", debit="0.005"), _line("4000", credit="0.010")],
+    )
+    with pytest.raises(HTTPException) as exc:
+        await svc.post_journal_entry(data)
+    assert exc.value.status_code == 400
+    assert "precision" in exc.value.detail.lower()
+    assert recorder.added == []
+    assert recorder.savepoints == recorder.flushes == 0
+
+
+@pytest.mark.asyncio
+async def test_balanced_representable_trailing_zeros_keep_existing_response_rounding() -> None:
+    svc = _make_service()
+    recorder = _RecordingJournalSession()
+    svc.session = recorder
+    data = JournalEntryCreate(
+        project_id=PROJECT_ID,
+        transaction_ref="JE-EQUAL-TRAILING-ZEROS",
+        currency_code="KWD",
+        lines=[_line("1000", debit="1.000"), _line("4000", credit="1.0")],
+    )
+    rows, total_debits, total_credits = await svc.post_journal_entry(data)
+    assert rows == recorder.added
+    assert len(rows) == 2
+    assert rows[0].debit_amount == rows[1].credit_amount == Decimal("1")
+    assert total_debits == total_credits == Decimal("1.00")
+    assert recorder.savepoints == recorder.flushes == 1
+
+
+@pytest.mark.asyncio
+async def test_journal_accepts_positive_exponent_and_zero_with_large_negative_exponent() -> None:
+    svc = _make_service()
+    recorder = _RecordingJournalSession()
+    svc.session = recorder
+    data = JournalEntryCreate(
+        project_id=PROJECT_ID,
+        transaction_ref="JE-EXPONENT-CONTROL",
+        currency_code="KWD",
+        lines=[_line("1000", debit="1E+1", credit="0E-100000"), _line("4000", debit="0E-100000", credit="10.000")],
+    )
+    rows, total_debits, total_credits = await svc.post_journal_entry(data)
+    assert len(rows) == 2
+    assert rows[0].debit_amount == rows[1].credit_amount == Decimal("10")
+    assert rows[0].credit_amount.as_tuple().exponent == -100000
+    assert rows[1].debit_amount.as_tuple().exponent == -100000
+    assert total_debits == total_credits == Decimal("10.00")
+    assert recorder.savepoints == recorder.flushes == 1
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("debit_scale,credit_scale,allowed", [(3, 2, False), (2, 3, False), (3, 3, True)])
+async def test_journal_uses_each_declared_column_scale(
+    monkeypatch: pytest.MonkeyPatch, debit_scale: int, credit_scale: int, allowed: bool
+) -> None:
+    # Isolate the metadata contract, not a database upgrade: both physical
+    # columns still use their existing scale outside this stub-only test.
+    monkeypatch.setattr(LedgerEntry.__table__.c.debit_amount.type, "scale", debit_scale)
+    monkeypatch.setattr(LedgerEntry.__table__.c.credit_amount.type, "scale", credit_scale)
+    svc = _make_service()
+    recorder = _RecordingJournalSession()
+    svc.session = recorder
+    data = JournalEntryCreate(
+        project_id=PROJECT_ID,
+        transaction_ref="JE-DECLARED-SCALES",
+        currency_code="KWD",
+        lines=[_line("1000", debit="1.001"), _line("4000", credit="1.001")],
+    )
+    if allowed:
+        rows, _, _ = await svc.post_journal_entry(data)
+        assert len(rows) == 2
+        assert rows[0].debit_amount == rows[1].credit_amount == Decimal("1.001")
+    else:
+        with pytest.raises(HTTPException) as exc:
+            await svc.post_journal_entry(data)
+        assert exc.value.status_code == 400
+        assert "precision" in exc.value.detail.lower()
+        assert recorder.added == []
+        assert recorder.savepoints == recorder.flushes == 0
+
+
+@pytest.mark.asyncio
+async def test_balanced_cent_journal_replay_returns_existing_rows_without_writing() -> None:
+    existing = [
+        SimpleNamespace(id=uuid.uuid4(), debit_amount=Decimal("1.25"), credit_amount=Decimal("0")),
+        SimpleNamespace(id=uuid.uuid4(), debit_amount=Decimal("0"), credit_amount=Decimal("1.25")),
+    ]
+    svc = _make_service()
+    recorder = _RecordingJournalSession(existing)
+    svc.session = recorder
+    data = JournalEntryCreate(
+        project_id=PROJECT_ID,
+        transaction_ref="JE-REPLAY",
+        currency_code="USD",
+        lines=[_line("1000", debit="1.2500"), _line("4000", credit="1.25")],
+    )
+    rows, total_debits, total_credits = await svc.post_journal_entry(data)
+    assert rows == existing
+    assert [row.id for row in rows] == [row.id for row in existing]
+    assert total_debits == total_credits == Decimal("1.25")
+    assert recorder.added == []
+    assert recorder.savepoints == recorder.flushes == 0
 
 
 @pytest.mark.asyncio

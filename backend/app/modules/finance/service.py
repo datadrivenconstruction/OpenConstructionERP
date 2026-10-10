@@ -232,18 +232,19 @@ _VALID_INVOICE_STATUSES = set(_INVOICE_STATUS_TRANSITIONS.keys())
 #: to whom and in which currency is the record.
 _INVOICE_EDITABLE_STATUSES: frozenset[str] = frozenset({"draft", "pending"})
 
-#: The amounts an issued invoice keeps, compared to the cent so that a form
-#: sending the stored figures back is not read as a change.
+#: The amounts an issued invoice keeps. Exact Decimal equality permits a form
+#: to resend equivalent spellings without hiding changes below one cent.
 _INVOICE_KEPT_AMOUNTS: tuple[str, ...] = ("amount_subtotal", "tax_amount", "retention_amount", "amount_total")
 
 #: The parties and terms an issued invoice keeps, compared as text.
 _INVOICE_KEPT_TERMS: tuple[str, ...] = ("currency_code", "tax_config_id", "contact_id", "invoice_direction")
 
 
-def _cents(value: Any) -> Decimal | None:
-    """An amount rounded to the cent for comparison, ``None`` when unreadable."""
+def _invoice_amount(value: Any) -> Decimal | None:
+    """An exact finite amount for comparison, ``None`` when unreadable."""
     try:
-        return Decimal(str(value if value not in (None, "") else "0")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        amount = Decimal(str(value if value not in (None, "") else "0"))
+        return amount if amount.is_finite() else None
     except (InvalidOperation, TypeError, ValueError):
         return None
 
@@ -255,11 +256,14 @@ def _issued_invoice_changes(invoice: Any, fields: dict[str, Any], new_lines: Seq
     not one. Replacement lines count when their number or their amounts differ
     from the stored ones; a reworded description does not move money.
     """
-    changed = [
-        name
-        for name in _INVOICE_KEPT_AMOUNTS
-        if name in fields and _cents(fields[name]) != _cents(getattr(invoice, name, None))
-    ]
+    changed = []
+    for name in _INVOICE_KEPT_AMOUNTS:
+        if name not in fields:
+            continue
+        new_amount = _invoice_amount(fields[name])
+        old_amount = _invoice_amount(getattr(invoice, name, None))
+        if new_amount is None or old_amount is None or new_amount != old_amount:
+            changed.append(name)
     for name in _INVOICE_KEPT_TERMS:
         if name not in fields:
             continue
@@ -267,9 +271,11 @@ def _issued_invoice_changes(invoice: Any, fields: dict[str, Any], new_lines: Seq
         if str(new).strip().upper() != str(old).strip().upper():
             changed.append(name)
     if new_lines is not None:
-        old_amounts = sorted(_cents(getattr(item, "amount", None)) or Decimal("0") for item in invoice.line_items or [])
-        new_amounts = sorted(_cents(getattr(item, "amount", None)) or Decimal("0") for item in new_lines)
-        if old_amounts != new_amounts:
+        old_amounts = [_invoice_amount(getattr(item, "amount", None)) for item in invoice.line_items or []]
+        new_amounts = [_invoice_amount(getattr(item, "amount", None)) for item in new_lines]
+        if any(amount is None for amount in old_amounts + new_amounts) or sorted(
+            amount for amount in old_amounts if amount is not None
+        ) != sorted(amount for amount in new_amounts if amount is not None):
             changed.append("line_items")
     return changed
 
@@ -3378,6 +3384,11 @@ class FinanceService:
         for idx, line in enumerate(data.lines):
             debit = _safe_decimal(line.debit)
             credit = _safe_decimal(line.credit)
+            if not debit.is_finite() or not credit.is_finite():
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Line {idx}: journal amounts must be finite.",
+                )
             if debit < 0 or credit < 0:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -3411,14 +3422,29 @@ class FinanceService:
             total_credits += credit
             prepared.append((line.account_code, debit, credit, line.description))
 
-        if gaap.q2(total_debits) != gaap.q2(total_credits):
+        if total_debits != total_credits:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=(
-                    f"Unbalanced journal entry: sum(debit)={gaap.q2(total_debits)} "
-                    f"!= sum(credit)={gaap.q2(total_credits)}. Rejected."
+                    f"Unbalanced journal entry: sum(debit)={total_debits} != sum(credit)={total_credits}. Rejected."
                 ),
             )
+        # Check representability, never round: individually rounded legs can
+        # turn an exactly balanced input into an unbalanced stored journal.
+        debit_scale = LedgerEntry.__table__.c.debit_amount.type.scale
+        credit_scale = LedgerEntry.__table__.c.credit_amount.type.scale
+        for idx, (_account, debit, credit, _description) in enumerate(prepared):
+            for side, amount, scale in (("debit", debit, debit_scale), ("credit", credit, credit_scale)):
+                parts = amount.as_tuple()
+                excess_places = max(0, -scale - int(parts.exponent))
+                if excess_places and any(parts.digits[-excess_places:]):
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=(
+                            f"Line {idx}: {side} amount {amount} has unsupported fractional "
+                            f"precision for the ledger ({scale} decimal places)."
+                        ),
+                    )
         if total_debits <= 0:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
