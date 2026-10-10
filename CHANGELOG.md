@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Splitting a payment into cash and retention no longer adds a cent when both parts fall halfway between cents. Retention keeps its existing rounding, and cash is the remainder of the rounded total.
+
 ## [18.5.0] - 2026-10-10
 
 This release makes the platform lighter to run and easier to understand. A Background services button in the top bar lists every service the platform keeps loaded, what it is for, which modules need it and roughly how much memory it takes, and an administrator can switch each one on or off without a restart. On a fresh server the administrator is asked once which modules they will use before anything heavy starts, semantic search stays off until someone turns it on, and the demo projects are set up in the background. The Windows desktop app installs its backend once instead of unpacking it on every start and now starts for users whose account name has non-ASCII letters. Procurement, the client portal, payment plans, schedules and the Italian workflow all grow, as listed below.
@@ -106,7 +109,6 @@ This release makes the platform lighter to run and easier to understand. A Backg
 - Installing a register again over the records an earlier version kept no longer breaks it. New optional fields, links and the status function are added to the existing records, and a change that would lose or hide records, such as removing a field or changing what kind of value it holds, is refused with an explanation before anything is changed.
 - Recalculating the critical path no longer wipes the other information stored on each activity, such as where an imported activity came from or that a milestone was already announced as reached.
 - An invoice raised from a certified claim now falls due after the agreed payment period instead of carrying no due date.
-- Splitting a payment into cash and retention no longer adds a cent when both parts fall halfway between cents. Retention keeps its existing rounding, and cash is the remainder of the rounded total.
 - BIM quantity rules treat only * and ? as wildcards, the same as the rule tester. A value picked from the model with square brackets in it, such as a wall type "Muro [30 cm]", used to be read as a pattern and stopped matching itself.
 - The client portal no longer shows a progress report the moment it is generated. A report now stays internal until a manager chooses Show to client on the Progress reports tab, and Hide from client takes it back. Reports generated before this release start as internal, so publish the ones your clients should keep seeing. A draft the client cannot see answers exactly like a report that does not exist.
 - The title block reader no longer takes ordinary words on a drawing for a revision. An Italian plan mentioning a "porta scorrevole" above its title block was registered at revision "ole"; a revision label now has to stand as a word and its value has to look like a revision.
