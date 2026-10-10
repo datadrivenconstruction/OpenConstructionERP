@@ -68,7 +68,7 @@ class _Format:
 _FORMATS: tuple[_Format, ...] = (
     # First: its sniff matches only the XPWE root element, so it can never
     # claim a regional XML.
-    _Format(xpwe.FORMAT_ID, 0, xpwe.sniff, _read_xpwe, (".xpwe", ".xml")),
+    _Format(xpwe.FORMAT_ID, 0, xpwe.sniff, _read_xpwe, (".xpwe", ".pwe", ".xml")),
     _Format(toscana.FORMAT_ID, 1, toscana.sniff, _xml(toscana.read), (".xml",)),
     _Format(lombardia.FORMAT_ID, 2, lombardia.sniff, _xml(lombardia.read), (".xml",)),
     _Format(veneto.FORMAT_ID, 3, veneto.sniff, _xml(veneto.read), (".xml",)),
@@ -122,9 +122,14 @@ def plan_upload(stream: IO[bytes], filename: str) -> UploadPlan:
             continue
         fmt = _detect(member)
         if fmt is None:
-            skipped.append({"name": member.name, "reason": "format_not_recognised"})
+            # A .pwe that is not XPWE inside is the estimating program's own
+            # binary project file, which only that program can open.
+            reason = "native_project_file" if member.extension == ".pwe" else "format_not_recognised"
+            skipped.append({"name": member.name, "reason": reason})
             continue
         detected.append((fmt, member))
+    if not detected and any(s["reason"] == "native_project_file" for s in skipped):
+        raise ContainerRefused("xpwe_not_xml")
     if not detected:
         raise ContainerRefused("no_price_list_found", skipped=skipped)
     best = min(fmt.priority for fmt, _m in detected)

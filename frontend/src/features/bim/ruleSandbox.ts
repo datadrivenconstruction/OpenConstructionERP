@@ -62,9 +62,10 @@ export function wildcardToRegExp(pattern: string): RegExp {
   return new RegExp(`^${out}$`, 'is');
 }
 
-/** Case-insensitive fnmatch for a single value against a single pattern. */
+/** Case-insensitive fnmatch for a single value against a single pattern;
+ *  surrounding whitespace is ignored on both sides, as on the server. */
 export function fnmatchCI(value: string, pattern: string): boolean {
-  return wildcardToRegExp(pattern).test(value);
+  return wildcardToRegExp(pattern.trim()).test(value.trim());
 }
 
 /* ── Property matching (mirror of _property_value_matches) ─────────────────── */

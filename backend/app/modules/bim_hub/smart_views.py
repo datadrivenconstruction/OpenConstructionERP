@@ -530,6 +530,7 @@ def build_property_catalog(
     elements: list[Any],
     model_format: str | None = None,
     sample_cap: int = 25,
+    labels: dict[str, str] | None = None,
 ) -> list[PropertyEntry]:
     """Build the canonical-format property catalog for a model.
 
@@ -538,7 +539,8 @@ def build_property_catalog(
     Properties / Quantities, with sample distinct values.  Source-format
     badge is supplied by the caller (``model_format``) and stamped onto
     every row; mixed-format federations should call this once per model
-    and merge.
+    and merge. ``labels`` maps a lowercased property key to the header text
+    the converter wrote ("Phase Created"), so the catalog shows Revit's names.
     """
     src = _source_format_of(model_format)
     entries: dict[str, dict[str, Any]] = {}
@@ -632,7 +634,8 @@ def build_property_catalog(
         else:
             data_type = "string"
 
-        label = field.split(".")[-1].replace("_", " ")
+        leaf = field.split(".")[-1]
+        label = (labels or {}).get(leaf) or leaf.replace("_", " ")
         catalog.append(
             PropertyEntry(
                 field=field,
