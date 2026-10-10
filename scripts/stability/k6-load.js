@@ -41,6 +41,13 @@ export const options = {
     // Writes are reported but only guarded against pathological latency.
     'http_req_duration{kind:write}': ['p(95)<3000'],
     checks: ['rate>0.99'],
+    // Per-endpoint trends: k6 only reports a tagged sub-metric that has a
+    // threshold, so these are deliberately loose and exist to be read.
+    'http_req_duration{name:projects-list}': ['p(95)<60000'],
+    'http_req_duration{name:boq-list}': ['p(95)<60000'],
+    'http_req_duration{name:boq-get}': ['p(95)<60000'],
+    'http_req_duration{name:position-patch}': ['p(95)<60000'],
+    'http_req_duration{name:costs-search}': ['p(95)<60000'],
   },
   summaryTrendStats: ['avg', 'min', 'med', 'p(90)', 'p(95)', 'p(99)', 'max'],
 };
@@ -83,6 +90,43 @@ export function setup() {
 }
 
 let vuToken = null;
+let own = null;
+
+// SCENARIO=isolated: each VU builds its own project, BOQ and position on its
+// first iteration and edits only that, so row locks and BOQ total recalculation
+// never queue one VU behind another. Comparing it with the shared run separates
+// contention on one BOQ (a property of the test) from a server-wide ceiling.
+function ownTarget(p) {
+  const tag = (name) => Object.assign({ tags: { kind: 'setup', name } }, p);
+  const project = http.post(
+    `${API}/projects/`,
+    JSON.stringify({ name: `k6 load VU ${__VU} ${Date.now()}`, currency: 'EUR' }),
+    tag('project-create'),
+  );
+  if (!check(project, { 'project create 201': (r) => r.status === 201 })) return null;
+  const projectId = project.json('id');
+  const boq = http.post(
+    `${API}/boq/boqs/`,
+    JSON.stringify({ project_id: projectId, name: `k6 BOQ ${__VU}` }),
+    tag('boq-create'),
+  );
+  if (!check(boq, { 'boq create 201': (r) => r.status === 201 })) return null;
+  const boqId = boq.json('id');
+  const position = http.post(
+    `${API}/boq/boqs/${boqId}/positions/`,
+    JSON.stringify({
+      boq_id: boqId,
+      ordinal: '01.001',
+      description: 'k6 load position',
+      unit: 'm3',
+      quantity: 10,
+      unit_rate: '100.00',
+    }),
+    tag('position-create'),
+  );
+  if (!check(position, { 'position create 201': (r) => r.status === 201 })) return null;
+  return { projectId, boqId, positionId: position.json('id'), quantity: 10 };
+}
 
 export default function (data) {
   if (!vuToken) {
@@ -93,6 +137,14 @@ export default function (data) {
     }
   }
   const p = auth(vuToken);
+  if (__ENV.SCENARIO === 'isolated') {
+    if (!own) own = ownTarget(p);
+    if (!own) {
+      sleep(1);
+      return;
+    }
+    data = own;
+  }
   const read = (url, name) => http.get(url, Object.assign({ tags: { kind: 'read', name } }, p));
 
   check(read(`${API}/projects/?limit=50`, 'projects-list'), { 'projects 200': (r) => r.status === 200 });

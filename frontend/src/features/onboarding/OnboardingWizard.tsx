@@ -64,6 +64,7 @@ import {
   changeLanguage,
   SUPPORTED_LANGUAGES,
 } from '@/app/i18n';
+import { sortLanguagesByName } from '@/shared/lib/languageOrder';
 import { useToastStore } from '@/stores/useToastStore';
 import {
   useBackgroundInstallStore,
@@ -1154,7 +1155,7 @@ function StepWelcome({
           <span className="h-px w-8 bg-border-light" aria-hidden />
         </div>
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
-          {SUPPORTED_LANGUAGES.map((lang) => {
+          {sortLanguagesByName(SUPPORTED_LANGUAGES).map((lang) => {
             const isSelected = selected === lang.code;
             return (
               <button

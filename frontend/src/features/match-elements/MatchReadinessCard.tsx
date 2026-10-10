@@ -48,6 +48,8 @@ import {
   type MatchReadinessItem,
 } from './api';
 import { describeMatchError } from './matchErrors';
+import { ModuleProcessesNotice } from '@/features/processes';
+import { useEnsureModule } from '@/features/processes/api';
 
 export function useMatchReadiness(projectId: string | null) {
   return useQuery<MatchReadiness>({
@@ -200,6 +202,8 @@ export function MatchReadinessCard({ projectId, onOpenSetup }: Props) {
   const qc = useQueryClient();
   const readinessQ = useMatchReadiness(projectId);
   const locale = i18n.language || 'en';
+  // Opening Match asks the server to start the meaning search in the background.
+  useEnsureModule('match');
 
   const switchM = useMutation({
     mutationFn: (catalogue: string) => setProjectCatalog(projectId!, catalogue),
@@ -344,6 +348,9 @@ export function MatchReadinessCard({ projectId, onOpenSetup }: Props) {
             </li>
           ))}
         </ul>
+        {/* When the search service is simply switched off, this offers the
+            one-click way to turn it on (or says whom to ask). */}
+        {unreachable && <ModuleProcessesNotice moduleId="match" className="mt-2 ml-6" />}
         <div className="mt-2 ml-6 flex flex-wrap items-center gap-3">
           {unreachable?.params.local_install === 'available' && (
             <button

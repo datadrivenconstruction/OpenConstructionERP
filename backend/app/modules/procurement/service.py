@@ -665,6 +665,76 @@ class ProcurementService:
         is_blocked = "subcontractor_blocked" in verdict.reasons
         return is_blocked, verdict.reasons
 
+    async def supplier_compliance(
+        self,
+        supplier_contact_id: str,
+        *,
+        project_id: uuid.UUID | None = None,
+        accessible_project_ids: set[uuid.UUID] | None = None,
+    ) -> dict[str, object]:
+        """Whether a supplier is still qualified to buy from, for its card.
+
+        The contact's prequalification and its end date, judged against
+        ``date.today()`` like the order gate; the gate's own compliance reasons
+        (blocked, prequal rejected, a lapsed certificate on the linked
+        subcontractor), so the card and the order write path never disagree;
+        and the issued orders still waiting for the supplier's confirmation.
+        An unknown or malformed contact id answers with an empty card.
+
+        ``qualification_state`` is ``expired``, ``expiring`` (within 30 days),
+        ``valid`` or ``not_stated``. A missing or unreadable date is
+        ``not_stated``, never ``valid``.
+        """
+        from sqlalchemy import func, select
+
+        from app.modules.contacts.models import Contact
+
+        card: dict[str, object] = {
+            "prequalification_status": None,
+            "qualified_until": None,
+            "qualification_state": "not_stated",
+            "compliance_reasons": [],
+            "unconfirmed_po_count": 0,
+        }
+        try:
+            contact_uuid = uuid.UUID(str(supplier_contact_id))
+        except (ValueError, TypeError):
+            return card
+
+        contact = (await self.session.execute(select(Contact).where(Contact.id == contact_uuid))).scalar_one_or_none()
+        if contact is not None:
+            card["prequalification_status"] = contact.prequalification_status
+            card["qualified_until"] = contact.qualified_until
+            try:
+                until = date.fromisoformat(str(contact.qualified_until or "")[:10])
+            except ValueError:
+                until = None
+            if until is not None:
+                today = date.today()
+                if until < today:
+                    card["qualification_state"] = "expired"
+                elif until <= today + timedelta(days=30):
+                    card["qualification_state"] = "expiring"
+                else:
+                    card["qualification_state"] = "valid"
+
+        _blocked, reasons = await self._vendor_block_status(str(contact_uuid))
+        card["compliance_reasons"] = list(reasons)
+
+        stmt = select(func.count(PurchaseOrder.id)).where(
+            PurchaseOrder.vendor_contact_id == str(contact_uuid),
+            PurchaseOrder.status.in_(("issued", "partially_received")),
+            PurchaseOrder.supplier_acknowledged_at.is_(None),
+        )
+        if project_id is not None:
+            stmt = stmt.where(PurchaseOrder.project_id == project_id)
+        elif accessible_project_ids is not None:
+            if not accessible_project_ids:
+                return card
+            stmt = stmt.where(PurchaseOrder.project_id.in_(accessible_project_ids))
+        card["unconfirmed_po_count"] = int((await self.session.execute(stmt)).scalar_one() or 0)
+        return card
+
     async def _enforce_vendor_gate(
         self,
         vendor_contact_id: str | None,
@@ -879,6 +949,8 @@ class ProcurementService:
                 status=data.status,
                 payment_terms=data.payment_terms,
                 notes=data.notes,
+                invoice_tolerance_pct=data.invoice_tolerance_pct,
+                invoice_tolerance_abs=data.invoice_tolerance_abs,
                 created_by=uuid.UUID(user_id) if user_id else None,
                 metadata_=data.metadata,
             )
@@ -1466,6 +1538,67 @@ class ProcurementService:
         logger.info("PO cancelled: %s (from %s)", po_number, prior_status)
         return updated
 
+    async def acknowledge_po(
+        self,
+        po_id: uuid.UUID,
+        *,
+        supplier_reference: str | None = None,
+        confirmed_delivery_date: str | None = None,
+        actor_id: str | None = None,
+    ) -> PurchaseOrder:
+        """Record the supplier's confirmation of an order it was sent.
+
+        Only an order that is out with the supplier (``issued`` or
+        ``partially_received``) can be confirmed. A second call replaces the
+        first, because suppliers revise their confirmations; the audit trail
+        keeps both. The status does not change.
+
+        Raises:
+            HTTPException: 404 if the PO does not exist, 409 if it is not out
+                with the supplier.
+        """
+        po = await self.get_po(po_id)
+        prior_status = po.status
+        po_number = po.po_number
+        if prior_status not in ("issued", "partially_received"):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    f"Purchase order {po_number} is in status '{prior_status}'; "
+                    "only an issued order can be confirmed by the supplier"
+                ),
+            )
+        await self.po_repo.update(
+            po_id,
+            supplier_acknowledged_at=datetime.now(UTC).isoformat(),
+            supplier_acknowledged_by=actor_id,
+            supplier_reference=supplier_reference or None,
+            supplier_confirmed_delivery_date=confirmed_delivery_date or None,
+        )
+        try:
+            from app.core.audit_log import log_activity
+
+            await log_activity(
+                self.session,
+                actor_id=actor_id,
+                entity_type="purchase_order",
+                entity_id=str(po_id),
+                action="supplier_acknowledged",
+                reason="Supplier confirmation recorded",
+                metadata={
+                    "po_number": po_number,
+                    "supplier_reference": supplier_reference or "",
+                    "confirmed_delivery_date": confirmed_delivery_date or "",
+                },
+            )
+        except Exception:
+            logger.warning("Audit log FAILED for PO acknowledgement (po_id=%s)", po_id, exc_info=True)
+
+        updated = await self.po_repo.get(po_id)
+        if updated is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Purchase order not found")
+        return updated
+
     async def delete_po(self, po_id: uuid.UUID) -> None:
         """Delete a draft purchase order that never left draft.
 
@@ -1700,6 +1833,8 @@ class ProcurementService:
             "invoiced_before_net": str(invoiced_before_net),
             "invoice_net": str(invoice_net or "0"),
             "invoice_ref": invoice_ref or "",
+            "invoice_tolerance_pct": po.invoice_tolerance_pct,
+            "invoice_tolerance_abs": po.invoice_tolerance_abs,
             "has_receipts": has_receipts,
             "received_net": str(
                 sum(

@@ -33,6 +33,9 @@ def register_procurement_permissions() -> None:
             # that commitment in the first place. An EDITOR who may raise and
             # amend a PO may not take one back out of circulation.
             "procurement.cancel": Role.MANAGER,
+            # Recording the supplier's order confirmation is entering a fact
+            # someone received, the same tier as booking a delivery.
+            "procurement.acknowledge": Role.EDITOR,
             "procurement.confirm_receipt": Role.EDITOR,
             # R7 (2026-05-24): PO → Invoice conversion is a financial
             # commitment, MANAGER-only.

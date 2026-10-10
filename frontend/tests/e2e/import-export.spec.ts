@@ -11,11 +11,12 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import ExcelJS from 'exceljs';
 import type { APIRequestContext } from '@playwright/test';
 import { test, expect, API_URL } from './fixtures';
 
-const BACKEND_FIXTURES = path.resolve(__dirname, '../../../backend/tests/fixtures');
+const BACKEND_FIXTURES = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../backend/tests/fixtures');
 const XPWE = fs.readFileSync(path.join(BACKEND_FIXTURES, 'xpwe/computo_small.xpwe'));
 const X83 = fs.readFileSync(path.join(BACKEND_FIXTURES, 'gaeb/oce_conformance_x83.x83'));
 
@@ -111,7 +112,7 @@ test.describe('BOQ import / export', () => {
     { label: 'XPWE', file: 'computo.xpwe', buffer: XPWE },
     { label: 'GAEB X83', file: 'lv.x83', buffer: X83 },
   ]) {
-    test(`${fx.label}: import, screen total, exports, round trip`, async ({ page }) => {
+    test(`${fx.label}: import, screen total, exports, round trip`, async ({ authedPage: page }) => {
       const boqId = await newBoq(`E2E ${fx.label}`);
       const imp = await upload(boqId, 'import/auto/', fx.file, fx.buffer);
       expect(imp.status(), await imp.text()).toBe(200);
@@ -151,7 +152,7 @@ test.describe('BOQ import / export', () => {
     });
   }
 
-  test('truncated GAEB upload is refused and leaves the bill unchanged', async ({ page }) => {
+  test('truncated GAEB upload is refused and leaves the bill unchanged', async ({ authedPage: page }) => {
     const boqId = await newBoq('E2E truncated');
     expect((await upload(boqId, 'import/auto/', 'lv.x83', X83)).status()).toBe(200);
     const before = await positionCount(boqId);

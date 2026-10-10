@@ -3,7 +3,7 @@
 """Contacts Pydantic schemas - request/response models."""
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -24,6 +24,9 @@ CONTACT_TYPES: tuple[str, ...] = (
     "customer",
 )
 _CONTACT_TYPE_PATTERN = f"^({'|'.join(CONTACT_TYPES)})$"
+
+# Whether the contact is a human (including a sole trader) or a company.
+PartyKind = Literal["natural_person", "legal_entity"]
 
 # ── Create / Update ──────────────────────────────────────────────────────
 
@@ -53,6 +56,10 @@ class ContactCreate(BaseModel):
         examples=["Acme Construction GmbH"],
     )
     legal_name: str | None = Field(default=None, max_length=255, description="Registered legal entity name")
+    party_kind: PartyKind | None = Field(
+        default=None,
+        description="natural_person (a human or sole trader) or legal_entity (a company); null when not stated",
+    )
     vat_number: str | None = Field(
         default=None, max_length=50, description="VAT registration number", examples=["DE123456789"]
     )
@@ -122,6 +129,7 @@ class ContactUpdate(BaseModel):
     last_name: str | None = Field(default=None, max_length=255)
     company_name: str | None = Field(default=None, max_length=255)
     legal_name: str | None = Field(default=None, max_length=255)
+    party_kind: PartyKind | None = None
     vat_number: str | None = Field(default=None, max_length=50)
 
     country_code: str | None = Field(default=None, max_length=2)
@@ -175,6 +183,7 @@ class ContactResponse(BaseModel):
     last_name: str | None = None
     company_name: str | None = None
     legal_name: str | None = None
+    party_kind: str | None = None
     vat_number: str | None = None
 
     country_code: str | None = None

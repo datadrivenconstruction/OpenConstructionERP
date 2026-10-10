@@ -1056,7 +1056,13 @@ LangDep = Annotated[str, Depends(get_lang)]
 
 # ── Convenience type aliases ───────────────────────────────────────────────
 
-SessionDep = Annotated[AsyncSession, Depends(get_session)]
+# ``scope="function"`` commits the session when the path operation returns and
+# before the response goes out. The default request scope (FastAPI >= 0.118)
+# commits only after the response is sent, so a client could get its 201 and
+# send a follow-up request that reads the row before it was committed, and a
+# failed commit still reached the client as a success. A streaming body or a
+# background task therefore cannot use this session; open its own instead.
+SessionDep = Annotated[AsyncSession, Depends(get_session, scope="function")]
 CurrentUserPayload = Annotated[dict[str, Any], Depends(get_current_user_payload)]
 CurrentUserId = Annotated[str, Depends(get_current_user_id)]
 OptionalUserPayload = Annotated[dict[str, Any] | None, Depends(get_optional_user_payload)]

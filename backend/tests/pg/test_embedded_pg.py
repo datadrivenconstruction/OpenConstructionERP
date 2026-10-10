@@ -139,9 +139,6 @@ def test_pre_initialize_cluster_skips_when_already_inited(tmp_path, monkeypatch)
 
 def test_pre_initialize_cluster_passes_c_locale_on_windows(tmp_path, monkeypatch) -> None:
     """On Windows, a fresh cluster is pre-created via initdb --locale=C."""
-    import sys
-    import types
-
     pgdata = tmp_path / "pgdata"
     pgdata.mkdir()
     monkeypatch.setattr(embedded_pg.os, "name", "nt")
@@ -154,11 +151,9 @@ def test_pre_initialize_cluster_passes_c_locale_on_windows(tmp_path, monkeypatch
         (pgdata / "PG_VERSION").write_text("16\n")  # simulate a real initdb
         return ""
 
-    fake_mod = types.ModuleType("pixeltable_pgserver.pgexec")
-    fake_mod.pgexec = fake_pgexec
-    if "pixeltable_pgserver" not in sys.modules:
-        monkeypatch.setitem(sys.modules, "pixeltable_pgserver", types.ModuleType("pixeltable_pgserver"))
-    monkeypatch.setitem(sys.modules, "pixeltable_pgserver.pgexec", fake_mod)
+    # The pre-init runs bundled programs through our own decoding runner, not
+    # through pixeltable's pgexec, so the runner is what stands in for initdb.
+    monkeypatch.setattr(embedded_pg, "_safe_pgexec", fake_pgexec)
 
     assert embedded_pg._pre_initialize_cluster(pgdata) is True
     assert calls["command"] == "initdb"
@@ -199,9 +194,6 @@ def test_clear_incomplete_cluster_keeps_a_real_cluster(tmp_path) -> None:
 
 def test_pre_initialize_cluster_clears_debris_then_inits(tmp_path, monkeypatch) -> None:
     """On Windows, a non-empty pgdata without PG_VERSION is cleared, then inited."""
-    import sys
-    import types
-
     pgdata = tmp_path / "pgdata"
     pgdata.mkdir()
     # Debris from a previous failed init: present, no PG_VERSION.
@@ -220,11 +212,9 @@ def test_pre_initialize_cluster_clears_debris_then_inits(tmp_path, monkeypatch) 
         (pgdata / "PG_VERSION").write_text("16\n")
         return ""
 
-    fake_mod = types.ModuleType("pixeltable_pgserver.pgexec")
-    fake_mod.pgexec = fake_pgexec
-    if "pixeltable_pgserver" not in sys.modules:
-        monkeypatch.setitem(sys.modules, "pixeltable_pgserver", types.ModuleType("pixeltable_pgserver"))
-    monkeypatch.setitem(sys.modules, "pixeltable_pgserver.pgexec", fake_mod)
+    # The pre-init runs bundled programs through our own decoding runner, not
+    # through pixeltable's pgexec, so the runner is what stands in for initdb.
+    monkeypatch.setattr(embedded_pg, "_safe_pgexec", fake_pgexec)
 
     assert embedded_pg._pre_initialize_cluster(pgdata) is True
     assert seen["command"] == "initdb"

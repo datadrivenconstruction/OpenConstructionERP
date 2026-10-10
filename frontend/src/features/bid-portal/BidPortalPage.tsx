@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronRight, CheckCircle2, Clock, Lock, AlertTriangle } from 'lucide-react';
 
 import { SUPPORTED_LANGUAGES } from '@/app/i18n';
+import { sortLanguagesByName } from '@/shared/lib/languageOrder';
 import { Button, ConfirmDialog } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { formatCurrency } from '@/shared/lib/money';
@@ -569,7 +570,7 @@ function Shell({ children }: { children: React.ReactNode }) {
               className="min-h-11 rounded border border-border-light bg-surface-primary px-2 py-1 text-xs font-medium text-content-secondary focus:outline-none focus:ring-2 focus:ring-oe-blue"
               data-testid="bid-portal-locale"
             >
-              {SUPPORTED_LANGUAGES.map((loc) => (
+              {sortLanguagesByName(SUPPORTED_LANGUAGES).map((loc) => (
                 <option key={loc.code} value={loc.code}>
                   {loc.name}
                 </option>

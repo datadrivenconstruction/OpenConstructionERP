@@ -1983,6 +1983,7 @@ function KV({ label, value }: { label: React.ReactNode; value: React.ReactNode }
 interface SubcontractorFormState {
   legal_name: string;
   trade_name: string;
+  party_kind: 'natural_person' | 'legal_entity' | '';
   tax_id: string;
   trade_categories: string;
   country: string;
@@ -1995,6 +1996,7 @@ function _toFormState(existing?: Subcontractor): SubcontractorFormState {
   return {
     legal_name: existing?.legal_name ?? '',
     trade_name: existing?.trade_name ?? '',
+    party_kind: existing?.party_kind ?? '',
     tax_id: existing?.tax_id ?? '',
     trade_categories: existing?.trade_categories.join(', ') ?? '',
     country: existing?.country ?? '',
@@ -2008,6 +2010,7 @@ function _toPayload(form: SubcontractorFormState): CreateSubcontractorPayload {
   return {
     legal_name: form.legal_name.trim(),
     trade_name: form.trade_name.trim() || undefined,
+    party_kind: form.party_kind || null,
     tax_id: form.tax_id.trim() || undefined,
     country: form.country.trim() || undefined,
     website: form.website.trim() || undefined,
@@ -2178,6 +2181,23 @@ function SubcontractorFormModal({
             onChange={(e) => set('trade_name', e.target.value)}
             className={inputCls}
           />
+        </WideModalField>
+        <WideModalField
+          label={t('contacts.field_party_kind', { defaultValue: 'Person or company' })}
+        >
+          <select
+            value={form.party_kind}
+            onChange={(e) => set('party_kind', e.target.value as SubcontractorFormState['party_kind'])}
+            className={inputCls}
+          >
+            <option value="">{t('contacts.party_kind_unset', { defaultValue: 'Not stated' })}</option>
+            <option value="natural_person">
+              {t('contacts.party_kind_natural_person', { defaultValue: 'Natural person or sole trader' })}
+            </option>
+            <option value="legal_entity">
+              {t('contacts.party_kind_legal_entity', { defaultValue: 'Company or other legal entity' })}
+            </option>
+          </select>
         </WideModalField>
         <WideModalField
           label={t('subcontractors.tax_id', { defaultValue: 'Tax ID' })}

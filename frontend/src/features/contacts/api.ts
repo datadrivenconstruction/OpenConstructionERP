@@ -25,6 +25,9 @@ export type ContactType =
 
 export type PrequalificationStatus = 'pending' | 'approved' | 'expired' | 'rejected';
 
+/** Whether a contact is a human (including a sole trader) or a company. */
+export type PartyKind = 'natural_person' | 'legal_entity';
+
 export interface Contact {
   id: string;
   contact_type: ContactType;
@@ -32,6 +35,8 @@ export interface Contact {
   last_name: string | null;
   company_name: string | null;
   legal_name: string | null;
+  /** natural_person or legal_entity; null when not stated. */
+  party_kind?: PartyKind | null;
   vat_number: string | null;
   primary_email: string | null;
   primary_phone: string | null;
@@ -131,6 +136,7 @@ export interface CreateContactPayload {
   last_name?: string;
   company_name?: string;
   legal_name?: string;
+  party_kind?: PartyKind;
   vat_number?: string;
   primary_email?: string;
   primary_phone?: string;
@@ -162,6 +168,7 @@ export interface UpdateContactPayload {
   last_name?: string | null;
   company_name?: string | null;
   legal_name?: string | null;
+  party_kind?: PartyKind | null;
   vat_number?: string | null;
   primary_email?: string | null;
   primary_phone?: string | null;

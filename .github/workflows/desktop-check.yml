@@ -26,6 +26,7 @@ on:
     branches: [main]
     paths:
       - "desktop/**"
+      - "backend/app/core/embedded_pg.py"
       - ".github/workflows/desktop-check.yml"
       - ".github/workflows/desktop-release.yml"
   # So the lane can be pointed at a branch. That is how it gets tested: put a
@@ -207,3 +208,55 @@ jobs:
           cargo test --locked
           git diff --stat -- gen/ || true
           git diff -- gen/ | head -n 80 || true
+
+  embedded-pg-non-ascii-user:
+    name: Embedded PG bring-up (windows, non-ASCII user folder)
+    # A Windows account named with CJK characters could not start the desktop
+    # app: initdb printed the user name in the ANSI code page and the bring-up
+    # died decoding it. This boots the real bundled cluster with the data
+    # directory under such a name, which is the only check that exercises the
+    # relocation and the decoding against real PostgreSQL binaries.
+    runs-on: windows-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
+
+      - name: Create empty frontend dist (hatchling force-include)
+        shell: bash
+        run: |
+          mkdir -p ../frontend/dist
+          touch ../frontend/dist/.gitkeep
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      - name: Boot embedded PostgreSQL under a CJK-named data directory
+        shell: bash
+        env:
+          PYTHONUTF8: "1"
+          PYTHONUNBUFFERED: "1"
+        run: |
+          python - <<'PY'
+          import os, sys
+          from pathlib import Path
+          from app.core import embedded_pg
+
+          data_dir = Path(os.environ["RUNNER_TEMP"]) / "田田" / ".openestimate"
+          data_dir.mkdir(parents=True, exist_ok=True)
+          ok = embedded_pg.boot(data_dir)
+          pgdata = embedded_pg.resolve_pgdata(data_dir)
+          print("boot:", ok, "pgdata:", pgdata, "detail:", embedded_pg.last_fatal_detail())
+          embedded_pg.shutdown(force=True)
+          sys.exit(0 if ok and str(pgdata).isascii() and (pgdata / "PG_VERSION").exists() else 1)
+          PY

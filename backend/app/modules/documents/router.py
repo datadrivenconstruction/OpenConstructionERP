@@ -1174,7 +1174,7 @@ async def bulk_update_sheets(
     await verify_project_access(data.project_id, user_id, session)
     changes = data.changes()
     if not changes.model_fields_set:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No field to change")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="No field to change")
     sheets = await service.bulk_update_sheets(data.project_id, data.sheet_ids, changes)
     return [_sheet_to_response(sheet) for sheet in sheets]
 

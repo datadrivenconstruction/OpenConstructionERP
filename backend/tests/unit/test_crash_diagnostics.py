@@ -68,6 +68,23 @@ def test_watchdog_dumps_once_per_stall(monkeypatch) -> None:
         loop.close()
 
 
+def test_watchdog_never_dumps_one_stall_twice(monkeypatch) -> None:
+    """The stall is keyed on the beat it is stuck after, not on poll timing."""
+    dumps: list[int] = []
+    monkeypatch.setattr(cd, "_watchdog_thread", None)
+    monkeypatch.setattr(cd.faulthandler, "dump_traceback", lambda **kw: dumps.append(1))
+    # No running loop: the heartbeat never fires, so one stall lasts the whole
+    # test and is polled dozens of times past the threshold.
+    loop = asyncio.new_event_loop()
+    try:
+        assert cd.start_loop_stall_watchdog(loop, threshold_s=0.1, poll_s=0.02)
+        time.sleep(1.0)
+        assert dumps == [1]
+    finally:
+        loop.close()
+        cd._watchdog_thread.join(timeout=2)
+
+
 def test_load_embedder_skips_fallback_after_out_of_memory(monkeypatch) -> None:
     from app.core import vector
 

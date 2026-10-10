@@ -54,8 +54,11 @@ and is separate from the processors DDC uses to run its hosted instance.
   you and them; DDC is not a party to that agreement. On a self-hosted
   install DDC operates no part of it. Section 5 lists every provider and
   its endpoint, and what the features transmit.
-- **Geocoding.** When a project address is set, the address is sent to the
-  public OpenStreetMap Nominatim service to resolve it to coordinates.
+- **Geocoding.** Nothing is sent until a manager of your installation
+  answers a one-time question: send addresses to the public OpenStreetMap
+  services, do not send them, or use your own mirror. With the first
+  answer, a project address is sent to the public OpenStreetMap Nominatim
+  service to resolve it to coordinates.
   Set `OE_GEOCODER_DISABLED=true` to switch this off, or
   `OE_GEOCODER_BASE_URL` to use your own Nominatim mirror. Address
   suggestions while typing also go to the Photon service by Komoot; set

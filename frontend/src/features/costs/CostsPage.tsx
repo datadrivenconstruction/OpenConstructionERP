@@ -68,6 +68,8 @@ import { getUnitsForLocale } from '@/features/boq/boqHelpers';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { compareNames } from '@/shared/lib/collator';
 import { SemanticSearchOffHint, useSemanticSearchOff } from '@/features/settings/SemanticSearchOffHint';
+import { ModuleProcessesNotice } from '@/features/processes';
+import { SEMANTIC_PROCESS_IDS } from '@/features/processes/api';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -1140,6 +1142,10 @@ export function CostsPage() {
 
   return (
     <div className="relative space-y-5 animate-fade-in">
+      {/* Says so when a background service this page leans on is off. */}
+      {/* While semantic search is switched off in Settings, the search box
+          says so itself (SemanticSearchOffHint); one notice per cause. */}
+      <ModuleProcessesNotice moduleId="costs" exclude={semanticOff ? SEMANTIC_PROCESS_IDS : []} />
       {/* Faint watermark of the active cost-database country (founder ask):
           pick the German base and the page carries the German flag at ~5%. */}
       <CountryFlagBackdrop code={activeRegion} />

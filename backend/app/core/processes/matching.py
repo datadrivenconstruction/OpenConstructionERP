@@ -6,9 +6,11 @@
 CWICR collections were embedded with; ``bge_reranker`` is the cross-encoder
 that reorders match candidates. Together they hold about 1.4 GB, so they follow
 the same rule as the semantic stack: on a fresh installation they are off and
-follow the semantic search switch in Settings; an installation that predates
-the processes center keeps them on, as before, with the choice kept in the
-registry's table. Both are lazy, loaded only when someone opens the costs or
+turning semantic search on in Settings turns them on by default; an
+installation that predates the processes center keeps them on, as before.
+Switching one of them on or off in the processes center is saved in the
+registry's table, wins over that default and leaves semantic search alone, so
+an admin can drop the reranker for memory and keep search by meaning. Both are lazy, loaded only when someone opens the costs or
 match module (``POST /processes/ensure``) or a match request needs them. When
 one is off, request paths do not load it either, see
 :func:`matching_model_allowed`. Being lazy they load nothing at boot, so
@@ -99,11 +101,6 @@ def register_matching_processes(registry: ProcessRegistry) -> None:
 
         return semantic_search_enabled()
 
-    def state_set(enabled: bool) -> None:
-        from app.core.semantic_switch import set_semantic_search_enabled
-
-        set_semantic_search_enabled(enabled)
-
     common = {
         "modules": _MODULES,
         "category": "ai_model",
@@ -112,7 +109,6 @@ def register_matching_processes(registry: ProcessRegistry) -> None:
         "legacy_enabled": True,
         "restart_policy": "never",
         "state_get": state_get,
-        "state_set": state_set,
     }
     registry.register(
         ProcessSpec(

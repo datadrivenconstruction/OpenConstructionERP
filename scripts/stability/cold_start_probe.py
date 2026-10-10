@@ -1,7 +1,7 @@
 """Measure how fast the app comes up and how much memory it holds after boot.
 
-Boots ``python -m app.cli serve`` against one data directory ``--runs`` times in
-a row. The first boot is a fresh install (database created, seeds run); the
+Boots ``python -m app.cli serve`` ``--runs`` times per target, each target on
+its own data directory, interleaving the targets. The first boot is a fresh install (database created, seeds run); the
 later ones are warm restarts. For each boot it records the seconds from launch
 to the first 200 on /api/health, to the first successful demo login, and the
 resident memory of the whole process tree at health, +60 s and +120 s.
@@ -9,7 +9,7 @@ resident memory of the whole process tree at health, +60 s and +120 s.
 Writes one JSON object per boot to ``--out`` and a Markdown table to stdout.
 
 Usage:
-    python scripts/stability/cold_start_probe.py --backend backend --data-dir /tmp/oe --runs 4 --out probe.json
+    python scripts/stability/cold_start_probe.py --target new=backend --target old=../old/backend --data-root /tmp/oe --out probe.json
 """
 
 from __future__ import annotations
@@ -67,6 +67,8 @@ def boot_once(
 ) -> dict[str, object]:
     env = dict(os.environ)
     env.update({"DEMO_USER_PASSWORD": DEMO_PASSWORD, "SEED_DEMO": "true", "PYTHONUNBUFFERED": "1"})
+    # The tree under test, not whatever ``pip install -e`` pointed at.
+    env["PYTHONPATH"] = str(backend)
     base = f"http://127.0.0.1:{port}"
     result: dict[str, object] = {"label": label}
     with (log_dir / f"serve-{label}.log").open("w", encoding="utf8") as log:
@@ -117,40 +119,60 @@ def boot_once(
     return result
 
 
+KEYS = ["health_s", "login_s", "rss_health_mb", "rss_plus_60s_mb", "rss_plus_120s_mb"]
+
+
+def table(name: str, rows: list[dict[str, object]]) -> None:
+    print()
+    print(f"**{name}**")
+    print()
+    print("| boot | " + " | ".join(KEYS) + " | error |")
+    print("|---" * (len(KEYS) + 2) + "|")
+    for row in rows:
+        print(f"| {row['label']} | " + " | ".join(str(row.get(k, "")) for k in KEYS) + f" | {row.get('error', '')} |")
+    warm = [r for r in rows[1:] if "error" not in r]
+    if warm:
+        med = {
+            k: statistics.median(r[k] for r in warm if r.get(k) is not None)
+            for k in KEYS
+            if any(r.get(k) is not None for r in warm)
+        }
+        print("| warm median | " + " | ".join(str(med.get(k, "")) for k in KEYS) + " | |")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--backend", type=Path, required=True)
-    parser.add_argument("--data-dir", type=Path, required=True)
+    parser.add_argument(
+        "--target",
+        action="append",
+        required=True,
+        help="name=backend_dir; several targets are booted in turn, so they share the runner's conditions",
+    )
+    parser.add_argument("--data-root", type=Path, required=True)
     parser.add_argument("--runs", type=int, default=4)
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--timeout", type=float, default=1200)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
 
-    args.data_dir.mkdir(parents=True, exist_ok=True)
+    targets = [(name, Path(path).resolve()) for name, _, path in (t.partition("=") for t in args.target)]
     log_dir = args.out.parent
-    rows = []
+    results: dict[str, list[dict[str, object]]] = {name: [] for name, _ in targets}
+    # Interleaved: boot i of every target runs back to back, so a slow patch
+    # of the runner hits all of them alike instead of skewing one.
     for i in range(args.runs):
-        label = "fresh" if i == 0 else f"warm{i}"
-        row = boot_once(args.backend.resolve(), args.data_dir.resolve(), args.port, label, args.timeout, log_dir)
-        print(json.dumps(row), file=sys.stderr, flush=True)
-        rows.append(row)
-    args.out.write_text(json.dumps(rows, indent=2), encoding="utf8")
-
-    keys = ["health_s", "login_s", "rss_health_mb", "rss_plus_60s_mb", "rss_plus_120s_mb"]
-    print("| boot | " + " | ".join(keys) + " | error |")
-    print("|---" * (len(keys) + 2) + "|")
-    for row in rows:
-        print(f"| {row['label']} | " + " | ".join(str(row.get(k, "")) for k in keys) + f" | {row.get('error', '')} |")
-    warm = [r for r in rows[1:] if "error" not in r]
-    if warm:
-        med = {
-            k: statistics.median(r[k] for r in warm if r.get(k) is not None)
-            for k in keys
-            if any(r.get(k) is not None for r in warm)
-        }
-        print("| warm median | " + " | ".join(str(med.get(k, "")) for k in keys) + " | |")
-    return 0 if all("error" not in r for r in rows) else 1
+        for name, backend in targets:
+            data_dir = (args.data_root / name).resolve()
+            data_dir.mkdir(parents=True, exist_ok=True)
+            label = "fresh" if i == 0 else f"warm{i}"
+            row = boot_once(backend, data_dir, args.port, f"{name}-{label}", args.timeout, log_dir)
+            row["label"] = label
+            print(json.dumps({"target": name, **row}), file=sys.stderr, flush=True)
+            results[name].append(row)
+    args.out.write_text(json.dumps(results, indent=2), encoding="utf8")
+    for name, rows in results.items():
+        table(name, rows)
+    return 0 if all("error" not in r for rows in results.values() for r in rows) else 1
 
 
 if __name__ == "__main__":

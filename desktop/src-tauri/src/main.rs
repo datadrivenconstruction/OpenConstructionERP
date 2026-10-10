@@ -1854,6 +1854,9 @@ enum StartupOutcome {
     Broken(String),
     /// The wait gave up; carries which of the two limits ran out.
     TimedOut(TimeoutKind),
+    /// The sidecar process has already terminated. Its termination handler has
+    /// reported why, so the wait has nothing to add and must not add anything.
+    Exited,
 }
 
 /// Why the startup wait gave up.
@@ -2067,6 +2070,7 @@ async fn wait_for_backend(
     port: u16,
     timeout_secs: u64,
     progress: &BootProgress,
+    exited: &AtomicBool,
 ) -> StartupOutcome {
     let client = reqwest::Client::new();
     let url = format!("http://127.0.0.1:{port}/api/health");
@@ -2077,6 +2081,12 @@ async fn wait_for_backend(
     let mut broken_logged = false;
 
     loop {
+        // A dead process is not a quiet one. Without this the wait kept polling
+        // a backend that had exited with a FATAL, and 240s later logged it as
+        // having gone quiet, as if it might still have been working.
+        if exited.load(Ordering::SeqCst) {
+            return StartupOutcome::Exited;
+        }
         // Checked before the probe, so a backend that has gone quiet is given
         // up on at the quiet limit rather than one poll later.
         if let Some(kind) = startup_give_up(progress.quiet_for(), start.elapsed(), ceiling) {
@@ -2905,7 +2915,18 @@ fn extraction_is_in_use(scan: &ExtractionScan) -> bool {
 /// `timezonesets`. Removing the probed files first means the first thing we
 /// touch is the thing such a process is holding, so the removal stops there with
 /// everything else still on the disk.
-fn remove_extraction(dir: &std::path::Path, scan: &ExtractionScan) -> std::io::Result<()> {
+///
+/// The deadline is checked between files, not only between directories. One
+/// onefile extraction is 13 000 files and 1.4 GB, and on a loaded machine with
+/// antivirus a single `remove_dir_all` of it was measured at 12 minutes, all of
+/// it before the backend was spawned, against a sweep budget of 90 seconds.
+/// Returns Ok(false) when time ran out with files still on disk; what is left
+/// has no executables in it any more and is finished on the next start.
+fn remove_extraction(
+    dir: &std::path::Path,
+    scan: &ExtractionScan,
+    deadline: Instant,
+) -> std::io::Result<bool> {
     for image in &scan.images {
         match std::fs::remove_file(image) {
             Ok(()) => {}
@@ -2913,7 +2934,50 @@ fn remove_extraction(dir: &std::path::Path, scan: &ExtractionScan) -> std::io::R
             Err(e) => return Err(e),
         }
     }
-    std::fs::remove_dir_all(dir)
+    remove_tree_until(dir, deadline)
+}
+
+/// Put the calling thread, CPU and disk I/O both, into background mode.
+#[cfg(windows)]
+fn lower_this_thread_priority() {
+    use windows_sys::Win32::System::Threading::{
+        GetCurrentThread, SetThreadPriority, THREAD_MODE_BACKGROUND_BEGIN,
+    };
+    // SAFETY: the pseudo-handle of the current thread needs no closing.
+    unsafe {
+        SetThreadPriority(GetCurrentThread(), THREAD_MODE_BACKGROUND_BEGIN);
+    }
+}
+
+#[cfg(not(windows))]
+fn lower_this_thread_priority() {}
+
+/// `remove_dir_all` that gives up at a deadline. Ok(true) when the tree is gone.
+fn remove_tree_until(dir: &std::path::Path, deadline: Instant) -> std::io::Result<bool> {
+    for entry in std::fs::read_dir(dir)? {
+        if Instant::now() >= deadline {
+            return Ok(false);
+        }
+        let entry = entry?;
+        let path = entry.path();
+        // Symlinks are removed as links and never followed, as in the scan.
+        if entry.file_type()?.is_dir() {
+            if !remove_tree_until(&path, deadline)? {
+                return Ok(false);
+            }
+        } else {
+            match std::fs::remove_file(&path) {
+                Ok(()) => {}
+                Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
+                Err(e) => return Err(e),
+            }
+        }
+    }
+    match std::fs::remove_dir(dir) {
+        Ok(()) => Ok(true),
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(true),
+        Err(e) => Err(e),
+    }
 }
 
 /// What the embedded cluster's pidfile says about a postmaster being alive.
@@ -2957,10 +3021,23 @@ fn cluster_state_of(pidfile: &std::path::Path) -> ClusterState {
     }
 }
 
+/// Where the backend keeps the cluster for this data directory.
+///
+/// `<data dir>/pgdata`, unless the backend had to move it: on Windows a data
+/// directory whose path is not ASCII cannot hold a PostgreSQL cluster, so the
+/// backend places it under ProgramData and writes the path it chose into
+/// `pgdata.location` (see `resolve_pgdata` in `backend/app/core/embedded_pg.py`).
+fn cluster_dir_of(data_dir: &std::path::Path) -> std::path::PathBuf {
+    match std::fs::read_to_string(data_dir.join("pgdata.location")) {
+        Ok(text) if !text.trim().is_empty() => std::path::PathBuf::from(text.trim()),
+        _ => data_dir.join("pgdata"),
+    }
+}
+
 /// The state of this installation's own embedded cluster.
 fn embedded_cluster_state() -> ClusterState {
     match workspace_data_dir() {
-        Some(dir) => cluster_state_of(&dir.join("pgdata").join("postmaster.pid")),
+        Some(dir) => cluster_state_of(&cluster_dir_of(&dir).join("postmaster.pid")),
         None => ClusterState::Unknown,
     }
 }
@@ -3113,8 +3190,17 @@ fn sweep_extractions_in(
                 if report.removed == 0 {
                     on_first_removal();
                 }
-                match remove_extraction(&path, &scan) {
-                    Ok(()) => {
+                match remove_extraction(&path, &scan, deadline) {
+                    Ok(false) => {
+                        report.kept += 1;
+                        report.stopped_early = true;
+                        log_line(&format!(
+                            "extraction sweep: ran out of time partway through {}, the rest goes next start",
+                            observed.name
+                        ));
+                        break;
+                    }
+                    Ok(true) => {
                         report.removed += 1;
                         report.bytes_freed += scan.bytes;
                         log_line(&format!(
@@ -3155,7 +3241,7 @@ fn sweep_extractions_in(
 ///
 /// Only ever inside the root this application unpacks into. A directory we did
 /// not create is not ours to judge, however confident the guards below are.
-fn sweep_orphaned_extractions(handle: &tauri::AppHandle) {
+fn sweep_orphaned_extractions(handle: &tauri::AppHandle, cluster: ClusterState, announce: bool) {
     let root = match extraction_root() {
         Some(root) => root,
         None => {
@@ -3168,10 +3254,13 @@ fn sweep_orphaned_extractions(handle: &tauri::AppHandle) {
     let mut announced = false;
     let report = sweep_extractions_in(
         &root,
-        embedded_cluster_state(),
+        cluster,
         EXTRACTION_MINIMUM_AGE,
         EXTRACTION_SWEEP_BUDGET,
         &mut || {
+            if !announce {
+                return;
+            }
             announced = true;
             boot_stage(
                 handle,
@@ -4192,6 +4281,7 @@ happening, send the log file to info@datadrivenconstruction.io.",
     let shutting_down_wait = shutting_down.clone();
     let backend_lost_wait = backend_lost.clone();
     let progress_wait = boot_progress.clone();
+    let exited_wait = backend_exited.clone();
     let base_url_wait = base_url;
     tauri::async_runtime::spawn(async move {
         // A first run that has to recover a large local database (WAL
@@ -4218,7 +4308,7 @@ happening, send the log file to info@datadrivenconstruction.io.",
         // that goes quiet is given up on after STARTUP_QUIET_TIMEOUT,
         // so the full window is only ever spent on a backend that is
         // demonstrably still working.
-        match wait_for_backend(&handle_clone, port, 1200, &progress_wait).await {
+        match wait_for_backend(&handle_clone, port, 1200, &progress_wait, &exited_wait).await {
             StartupOutcome::Ready => {
                 ready_flag.store(true, Ordering::SeqCst);
                 log_line("backend healthy; navigating to app");
@@ -4270,6 +4360,9 @@ info@datadrivenconstruction.io."
                         ),
                     );
                 }
+            }
+            StartupOutcome::Exited => {
+                log_line("startup wait ended: the backend process had already exited");
             }
             StartupOutcome::TimedOut(kind) => {
                 let stage = progress_wait.stage();
@@ -4545,10 +4638,30 @@ fn main() {
                     // written against.
                     let reporter = handle.clone();
                     let start = move || {
-                        // Still run on Windows, where the backend no longer
-                        // unpacks: it clears extractions left by the onefile
-                        // builds this version replaces.
-                        sweep_orphaned_extractions(&handle);
+                        // On Windows the backend no longer unpacks, so the
+                        // sweep only clears extractions left by the onefile
+                        // builds this version replaces, and nothing the
+                        // backend needs waits on it. It used to run here,
+                        // ahead of the spawn, and one 1.4 GB extraction took
+                        // 5 to 12 minutes of splash on a loaded machine. Now
+                        // it runs beside the backend on a background-priority
+                        // thread. The cluster state is read BEFORE the spawn:
+                        // our own postmaster runs from the install folder,
+                        // never from the extraction root, and an old one still
+                        // running out of an extraction is caught by the
+                        // per-file in-use probe either way.
+                        if cfg!(windows) {
+                            let cluster = embedded_cluster_state();
+                            let sweeper = handle.clone();
+                            let _ = std::thread::Builder::new()
+                                .name("oe-extraction-sweep".to_string())
+                                .spawn(move || {
+                                    lower_this_thread_priority();
+                                    sweep_orphaned_extractions(&sweeper, cluster, false);
+                                });
+                        } else {
+                            sweep_orphaned_extractions(&handle, embedded_cluster_state(), true);
+                        }
                         // The space check is about room to unpack, and only
                         // the onefile builds (macOS, Linux) unpack.
                         if cfg!(not(windows)) && !extraction_space_allows_a_sidecar(&handle) {
@@ -4825,6 +4938,11 @@ fn force_backend_stop(pid: u32) {
         .creation_flags(CREATE_NO_WINDOW)
         .status()
     {
+        // 128 is taskkill's "no such process": the tree went away between the
+        // last check and this one, which is the outcome this step wanted.
+        Ok(status) if status.code() == Some(128) => log_line(&format!(
+            "backend stop: pid {pid} was already gone"
+        )),
         Ok(status) => log_line(&format!(
             "backend stop: taskkill on pid {pid} exited {status}"
         )),
@@ -4887,6 +5005,15 @@ fn stop_backend(app_handle: &tauri::AppHandle) {
 
     // Read the pid BEFORE kill(), which consumes the handle.
     let pid = child.pid();
+    if exited.load(Ordering::SeqCst) {
+        // Nothing to stop, and stopping it anyway is not harmless: Windows
+        // reuses process ids, so a taskkill /T on a dead sidecar's id can land
+        // on whatever process holds that number now.
+        log_line(&format!(
+            "backend sidecar (pid {pid}) had already exited; nothing to stop"
+        ));
+        return;
+    }
     log_line(&format!("stopping the backend sidecar (pid {pid})"));
 
     // Step one. `port` is Some only for a sidecar we started ourselves, so a
@@ -6275,6 +6402,27 @@ walking the directory rather than taking the held files first"
         assert_eq!(report.kept_in_use, 1, "the file held open was not noticed");
 
         drop(held);
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// The removal itself answers to the sweep budget, not only the gap between
+    /// directories: one extraction took 12 minutes to delete on a real machine.
+    #[test]
+    fn removing_one_extraction_stops_at_the_deadline_and_finishes_later() {
+        let root = fixture_dir("sweep-deadline");
+        let tree = root.join("_MEI700009");
+        std::fs::create_dir_all(tree.join("pkg")).expect("a fixture package directory");
+        for i in 0..5 {
+            std::fs::write(tree.join("pkg").join(format!("m{i}.py")), b"x").expect("a fixture file");
+        }
+
+        let past = Instant::now() - Duration::from_secs(1);
+        assert!(!remove_tree_until(&tree, past).expect("a removal out of time is not an error"));
+        assert!(tree.exists(), "a removal out of time still deleted the whole tree");
+
+        let later = Instant::now() + Duration::from_secs(30);
+        assert!(remove_tree_until(&tree, later).expect("the rest removes"));
+        assert!(!tree.exists(), "the tree was not removed when there was time");
         let _ = std::fs::remove_dir_all(&root);
     }
 

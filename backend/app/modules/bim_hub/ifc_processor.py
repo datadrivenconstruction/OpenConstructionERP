@@ -921,6 +921,8 @@ def _try_cad2data(ifc_path: Path, output_dir: Path, *, conversion_depth: str = "
             [cad2data_bin, str(ifc_path), "--output-dir", str(output_dir), "--format", "csv,dae"],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=300,
         )
         if result.returncode != 0:

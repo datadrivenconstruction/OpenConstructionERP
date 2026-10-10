@@ -899,3 +899,29 @@ export function classificationCode(classification: unknown, preferred?: string |
   }
   return '';
 }
+
+/**
+ * Next free ordinal for a new top-level section.
+ *
+ * The editor used to number a new section by counting the sections it had,
+ * so after deleting ``01`` out of ``01`` and ``02`` the next one came out as
+ * ``02`` again, the backend answered 409 and every retry asked for the same
+ * taken number. Start one past the highest plain numeric ordinal instead and
+ * step past anything already used, keeping the two-digit padding.
+ */
+export function nextTopLevelSectionOrdinal(ordinals: Iterable<string | null | undefined>): string {
+  const used = new Set<string>();
+  let max = 0;
+  for (const ordinal of ordinals) {
+    if (!ordinal) continue;
+    used.add(ordinal);
+    if (/^\d+$/.test(ordinal)) max = Math.max(max, parseInt(ordinal, 10));
+  }
+  let next = max + 1;
+  let candidate = String(next).padStart(2, '0');
+  while (used.has(candidate)) {
+    next += 1;
+    candidate = String(next).padStart(2, '0');
+  }
+  return candidate;
+}

@@ -50,6 +50,7 @@ import {
   agentTagline,
   resolveAgentIcon,
 } from './components/agentMeta';
+import { ModuleProcessesNotice } from '@/features/processes';
 
 // ── AI tools cross-link strip (CONN-82) ─────────────────────────────────────
 // The four AI surfaces - Agents, Cost Advisor, Chat, Quick Estimate - are
@@ -459,6 +460,8 @@ export function AgentsPage(): JSX.Element {
 
   return (
     <div className="space-y-5 animate-fade-in">
+      {/* Says so when a background service this page leans on is off. */}
+      <ModuleProcessesNotice moduleId="ai_agents" />
       {/* Canonical top block - module name + icon live in the global top app
           bar. The page renders only its (contextual) subtitle on the left and
           the page actions on the right. */}
