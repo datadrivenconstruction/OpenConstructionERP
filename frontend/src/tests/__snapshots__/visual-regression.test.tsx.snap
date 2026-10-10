@@ -59,7 +59,7 @@ exports[`Visual Regression - Breadcrumb > renders multi-level breadcrumb with li
 <div>
   <nav
     aria-label="Breadcrumb"
-    class="flex items-center gap-1 text-xs"
+    class="flex flex-wrap items-center gap-1 text-xs min-w-0"
   >
     <a
       aria-label="Dashboard"
@@ -88,7 +88,7 @@ exports[`Visual Regression - Breadcrumb > renders multi-level breadcrumb with li
       </svg>
     </a>
     <span
-      class="flex items-center gap-1"
+      class="flex items-center gap-1 min-w-0"
     >
       <svg
         class="lucide lucide-chevron-right text-content-quaternary"
@@ -115,7 +115,7 @@ exports[`Visual Regression - Breadcrumb > renders multi-level breadcrumb with li
       </a>
     </span>
     <span
-      class="flex items-center gap-1"
+      class="flex items-center gap-1 min-w-0"
     >
       <svg
         class="lucide lucide-chevron-right text-content-quaternary"
@@ -142,7 +142,7 @@ exports[`Visual Regression - Breadcrumb > renders multi-level breadcrumb with li
       </a>
     </span>
     <span
-      class="flex items-center gap-1"
+      class="flex items-center gap-1 min-w-0"
     >
       <svg
         class="lucide lucide-chevron-right text-content-quaternary"

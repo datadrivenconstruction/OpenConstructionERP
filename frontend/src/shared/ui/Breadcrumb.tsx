@@ -25,7 +25,7 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
   if (items.length <= 1) return null;
 
   return (
-    <nav aria-label={t('common.breadcrumb', { defaultValue: 'Breadcrumb' })} className={clsx('flex items-center gap-1 text-xs', className)}>
+    <nav aria-label={t('common.breadcrumb', { defaultValue: 'Breadcrumb' })} className={clsx('flex flex-wrap items-center gap-1 text-xs min-w-0', className)}>
       <Link
         to="/"
         className="flex items-center text-content-tertiary hover:text-content-secondary transition-colors"
@@ -36,7 +36,7 @@ export function Breadcrumb({ items, className }: BreadcrumbProps) {
       {items.map((item, idx) => {
         const isLast = idx === items.length - 1;
         return (
-          <span key={item.label} className="flex items-center gap-1">
+          <span key={item.label} className="flex items-center gap-1 min-w-0">
             <ChevronRight size={12} className="text-content-quaternary" />
             {isLast || !item.to ? (
               <span className="text-content-primary font-medium truncate max-w-[200px]">

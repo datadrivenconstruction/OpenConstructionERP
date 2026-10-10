@@ -329,7 +329,7 @@ export function BOQToolbar({
         {/* ── Row 1: the primary "build the BOQ" actions ──────────────────── */}
         <div className="flex flex-wrap items-center gap-x-1.5 gap-y-2">
           {/* Quality ring + Add group */}
-          <div className="flex items-center gap-1.5" data-testid="boq-quality-ring">
+          <div className="flex flex-wrap items-center gap-1.5" data-testid="boq-quality-ring">
             {hasPositions && qualityScoreRing}
             {!readOnly && <>
             <Button
@@ -368,7 +368,7 @@ export function BOQToolbar({
           <div className="w-px h-6 bg-border-light hidden sm:block" />
 
           {/* Hot quality/AI actions surfaced as buttons + overflow menu */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
             <Button
               variant="secondary"
               size="sm"

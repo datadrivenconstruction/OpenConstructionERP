@@ -35,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The Chinese interface no longer shows a garbled "What's new" card on the dashboard, names the sale and purchase agreement in property development as a sales contract instead of a spa, and translates Cost Explorer, as do Danish, Finnish, Hindi, Indonesian, Japanese, Korean, Mongolian, Norwegian, Swedish, Thai, Turkish and Vietnamese.
 - The totals card in the BOQ editor counts sections and positions in each language's own plural forms, so a bill with one section no longer reads "1 sections · 1 positions", and Arabic gets its dual and the forms for three to ten and eleven up.
 - The Background services panel no longer says a service restarted "once" in Russian, Ukrainian, Croatian and Filipino when it restarted 21 or 31 times; those languages use the same singular form for such numbers, so the sentence now carries the number.
-- The row of actions above the BOQ grid wraps onto a second line when it does not fit, so in German, Russian or Chinese at 1440 pixels, and on a phone, the page no longer scrolls sideways.
+- The row of actions above the BOQ grid wraps onto a second line when it does not fit, so in German, Russian or Chinese at 1440 pixels, and on a phone, the page no longer scrolls sideways. On a phone the breadcrumb and the quality and add button groups of the BOQ toolbar wrap as well.
 - A failed save that the screen already explains, such as a section that could not be added, no longer shows a second generic "Operation failed" message next to it.
 
 ## [18.5.0] - 2026-10-10
