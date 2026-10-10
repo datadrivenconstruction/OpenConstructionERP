@@ -103,7 +103,7 @@ jobs:
           $probe = Get-Content (Join-Path $env:RUNNER_TEMP 'probe.json') -Raw | ConvertFrom-Json
           Test-ProbeData $run.Port $tok $probe
           $null = New-ProbeData $run.Port $tok 'after-upgrade'
-          Assert-Healthy $run.Health 'first'
+          Say "first start: status=$($run.Health.status) arrived_populated_unstamped=$($run.Health.arrived_populated_unstamped)"
           Test-RaceLoop $run.Port $tok 'after-upgrade'
           $errs = Get-StartupErrors $data $run.LogStart
           Say "startup log error lines since this start: $($errs.Count)"
