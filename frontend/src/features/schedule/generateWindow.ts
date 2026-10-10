@@ -100,7 +100,20 @@ export function parseWorkers(value: string): number | null {
 /** Something the last generation from a BOQ could not do as asked. */
 export type GenerationWarning =
   | { code: 'plan_exceeds_window'; planned_end: string; requested_end: string }
-  | { code: 'durations_shortened'; percent: number };
+  | { code: 'durations_shortened'; percent: number }
+  | { code: 'parallel_crews'; positions: number; workers: number; most_crews: number };
+
+/** Whether one raw warning is the parallel-crews note, with the numbers it needs. */
+export function isParallelCrewsWarning(
+  item: Record<string, unknown>,
+): item is { code: 'parallel_crews'; positions: number; workers: number; most_crews: number } {
+  return (
+    item.code === 'parallel_crews' &&
+    typeof item.positions === 'number' &&
+    typeof item.workers === 'number' &&
+    typeof item.most_crews === 'number'
+  );
+}
 
 type ScheduleMetadataHolder = { metadata_?: Record<string, unknown>; metadata?: Record<string, unknown> };
 
@@ -127,6 +140,7 @@ export function generationWarnings(schedule: ScheduleMetadataHolder | null | und
     if (item.code === 'plan_exceeds_window') {
       return typeof item.planned_end === 'string' && typeof item.requested_end === 'string';
     }
+    if (item.code === 'parallel_crews') return isParallelCrewsWarning(item);
     return item.code === 'durations_shortened' && typeof item.percent === 'number';
   });
 }

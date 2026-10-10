@@ -11531,6 +11531,7 @@ const resource = {
     "schedule.replace_instalments_relinked_other": "{{count}} đợt thanh toán hợp đồng chuyển sang cùng mốc trong kế hoạch mới.",
     "schedule.replace_instalments_unlinked_other": "{{count}} đợt thanh toán hợp đồng mất liên kết mốc và trở về ngày theo hợp đồng.",
     "schedule.warning_durations_shortened": "Để đáp ứng ngày yêu cầu, mọi thời lượng rút còn {{percent}}% ước tính. Kiểm tra các tổ có duy trì được nhịp độ này không.",
+    "schedule.warning_parallel_crews": "Hạng mục được giao nhiều tổ song song: {{positions}}. Một tổ {{workers}} người không thể hoàn thành chúng trong khoảng thời gian, nên mỗi hạng mục có tối đa {{crews}} tổ làm song song. Số giờ công không đổi, chỉ thời lượng ngắn lại.",
     "schedule.warning_plan_exceeds_window": "Kế hoạch không vừa thời gian yêu cầu: kết thúc {{planned}}, yêu cầu {{requested}}. Bốn tổ làm song song và mọi thời lượng đã rút còn nửa ước tính, mức tối thiểu. Lùi ngày kết thúc hoặc rút ngắn kế hoạch thủ công.",
     "schedule.status_archived": "đã lưu trữ",
     "schedule.status_completed": "đã hoàn thành",

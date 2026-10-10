@@ -45,7 +45,7 @@ import { useGanttLinking } from './useGanttLinking';
 import { replaceInstalmentSentences } from './confirmations';
 import { ScheduleLifecycleActions } from './ScheduleLifecycleActions';
 import { ActivityDeleteDialog, activityDeleteTarget, type ActivityDeleteTarget } from './ActivityDeleteDialog';
-import { GenerationPreviewPanel, isBudgetEstimate } from './GenerationPreviewPanel';
+import { GenerationPreviewPanel, isBudgetEstimate, parallelCrewsText } from './GenerationPreviewPanel';
 import { ApiError, apiGet } from '@/shared/lib/api';
 import { fetchProjectList } from '@/shared/lib/projectList';
 import { fmtDate, getIntlLocale } from '@/shared/lib/formatters';
@@ -1955,6 +1955,8 @@ export function ScheduleDetail({
                     requested: formatDate(w.requested_end),
                   })}
                 </p>
+              ) : w.code === 'parallel_crews' ? (
+                <p key={w.code}>{parallelCrewsText(t, w)}</p>
               ) : (
                 <p key={w.code}>
                   {t('schedule.warning_durations_shortened', {

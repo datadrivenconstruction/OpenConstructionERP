@@ -9911,6 +9911,7 @@ const resource = {
     "schedule.replace_instalments_unlinked_one": "Contractuele betalingstermijnen die hun mijlpaal verliezen en terugvallen op hun contractdatums: {{count}}.",
     "schedule.replace_instalments_unlinked_other": "Contractuele betalingstermijnen die hun mijlpaal verliezen en terugvallen op hun contractdatums: {{count}}.",
     "schedule.warning_durations_shortened": "Om uw datums te halen, is elke doorlooptijd verkort tot {{percent}}% van de raming. Controleer of de ploegen dit tempo kunnen volhouden.",
+    "schedule.warning_parallel_crews": "Posten met parallelle ploegen: {{positions}}. Eén ploeg van {{workers}} zou ze niet binnen de periode afronden, dus werken er per post tot {{crews}} ploegen naast elkaar. De arbeidsuren blijven gelijk, alleen de duur wordt korter.",
     "schedule.warning_plan_exceeds_window": "Het plan past niet binnen uw datums: het eindigt op {{planned}}, terwijl u {{requested}} vroeg. Vier ploegen werken parallel en alle doorlooptijden zijn al gehalveerd, de maximaal toegestane verkorting. Verschuif de einddatum of verkort het plan handmatig.",
     "schedule.status_archived": "gearchiveerd",
     "schedule.status_completed": "voltooid",

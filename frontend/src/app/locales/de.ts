@@ -10985,6 +10985,7 @@ const resource = {
     "schedule.replace_instalments_unlinked_one": "Vertragliche Zahlungsraten, die ihren Meilenstein verlieren und zu ihren Vertragsterminen zurückkehren: {{count}}.",
     "schedule.replace_instalments_unlinked_other": "Vertragliche Zahlungsraten, die ihren Meilenstein verlieren und zu ihren Vertragsterminen zurückkehren: {{count}}.",
     "schedule.warning_durations_shortened": "Um Ihre Termine einzuhalten, wurde jede Dauer auf {{percent}} % ihrer Schätzung verkürzt. Prüfen Sie, ob die Kolonnen dieses Tempo halten können.",
+    "schedule.warning_parallel_crews": "Positionen mit parallelen Kolonnen: {{positions}}. Eine Kolonne mit {{workers}} Arbeitskräften hätte sie im Zeitfenster nicht geschafft, daher arbeiten an jeder bis zu {{crews}} Kolonnen nebeneinander. Die Arbeitsstunden bleiben gleich, nur die Dauern werden kürzer.",
     "schedule.warning_plan_exceeds_window": "Der Plan passt nicht in Ihren Zeitraum: Er endet am {{planned}}, gewünscht war {{requested}}. Vier Kolonnen arbeiten parallel und jede Dauer ist bereits auf die Hälfte der Schätzung gekürzt, die kürzeste zulässige Verdichtung. Verschieben Sie das Enddatum oder verkürzen Sie den Plan manuell.",
     "schedule.status_archived": "archiviert",
     "schedule.status_completed": "abgeschlossen",

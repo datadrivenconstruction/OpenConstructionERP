@@ -11049,6 +11049,7 @@ const resource = {
     "schedule.replace_instalments_relinked_other": "{{count}} 笔合同付款将关联到新计划中相同的里程碑。",
     "schedule.replace_instalments_unlinked_other": "{{count}} 笔合同付款将失去里程碑关联，恢复至合同约定日期。",
     "schedule.warning_durations_shortened": "为满足指定日期，各工期缩短至估算值的 {{percent}}%。请确认班组能保持此施工速度。",
+    "schedule.warning_parallel_crews": "安排了并行班组的分项：{{positions}}。一个 {{workers}} 人的班组无法在期限内完成，因此每个分项最多有 {{crews}} 个班组并行施工。人工工时不变，只是工期缩短。",
     "schedule.warning_plan_exceeds_window": "计划无法满足指定日期：预计结束为 {{planned}}，要求为 {{requested}}。四个班组并行施工，所有工期已压缩至估算值的一半，达到最短限度。请推迟结束日期或手动缩短计划。",
     "schedule.status_archived": "已归档",
     "schedule.status_completed": "已完成",

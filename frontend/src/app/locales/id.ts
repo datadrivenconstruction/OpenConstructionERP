@@ -11531,6 +11531,7 @@ const resource = {
     "schedule.replace_instalments_relinked_other": "Sebanyak {{count}} angsuran kontrak dipindahkan ke tonggak yang sama dalam rencana baru.",
     "schedule.replace_instalments_unlinked_other": "Sebanyak {{count}} angsuran kontrak kehilangan tonggaknya dan kembali ke tanggal kontrak.",
     "schedule.warning_durations_shortened": "Agar memenuhi tanggal, setiap durasi dipangkas menjadi {{percent}}% dari perkiraan. Pastikan regu mampu mempertahankan kecepatan ini.",
+    "schedule.warning_parallel_crews": "Item yang diberi regu paralel: {{positions}}. Satu regu berisi {{workers}} orang tidak akan menyelesaikannya dalam jangka waktu, jadi hingga {{crews}} regu bekerja berdampingan pada masing-masing item. Jam kerja tidak berubah, hanya durasinya yang lebih singkat.",
     "schedule.warning_plan_exceeds_window": "Rencana tidak memenuhi tanggal: selesai {{planned}}, diminta {{requested}}. Empat regu bekerja paralel dan semua durasi sudah dipangkas hingga setengah perkiraan, batas minimum. Mundurkan tanggal akhir atau pendekkan rencana secara manual.",
     "schedule.status_archived": "diarsipkan",
     "schedule.status_completed": "selesai",

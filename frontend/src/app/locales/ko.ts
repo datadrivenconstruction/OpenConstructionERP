@@ -11030,6 +11030,7 @@ const resource = {
     "schedule.replace_instalments_relinked_other": "계약 분할 지급 {{count}}건을 새 계획의 동일한 마일스톤에 연결합니다.",
     "schedule.replace_instalments_unlinked_other": "계약 분할 지급 {{count}}건의 마일스톤 연결이 해제되고 계약상 날짜로 돌아갑니다.",
     "schedule.warning_durations_shortened": "요청 날짜에 맞추려고 각 기간을 추정치의 {{percent}}%로 단축했습니다. 작업반이 이 속도를 유지할 수 있는지 확인하세요.",
+    "schedule.warning_parallel_crews": "병행 작업조가 배정된 항목: {{positions}}. {{workers}}명으로 구성된 작업조 하나로는 기간 내에 끝낼 수 없어 항목마다 최대 {{crews}}개 작업조가 나란히 작업합니다. 노무 시간은 그대로이고 기간만 짧아집니다.",
     "schedule.warning_plan_exceeds_window": "계획이 요청 날짜에 맞지 않습니다. 예정 종료일은 {{planned}}, 요청은 {{requested}}입니다. 작업반 4개가 병행하며 모든 기간은 이미 한계인 추정치의 절반입니다. 종료일을 늦추거나 계획을 수동으로 단축하세요.",
     "schedule.status_archived": "보관됨",
     "schedule.status_completed": "완료됨",

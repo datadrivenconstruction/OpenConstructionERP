@@ -11249,6 +11249,7 @@ const resource = {
     "schedule.replace_instalments_unlinked_many": "Smluvní splátky, které ztratí vazbu na milník a vrátí se ke smluvním termínům: {{count}}.",
     "schedule.replace_instalments_unlinked_other": "Smluvní splátky, které ztratí vazbu na milník a vrátí se ke smluvním termínům: {{count}}.",
     "schedule.warning_durations_shortened": "Pro dodržení požadovaných dat byla každá doba zkrácena na {{percent}} % odhadu. Ověřte, že čety toto tempo zvládnou.",
+    "schedule.warning_parallel_crews": "Položky s paralelními četami: {{positions}}. Jedna četa o {{workers}} lidech by je v časovém okně nestihla, proto na každé pracuje souběžně až {{crews}} čet. Pracovní hodiny se nemění, zkracují se jen doby trvání.",
     "schedule.warning_plan_exceeds_window": "Plán se nevejde do požadovaných termínů: končí {{planned}}, místo {{requested}}. Čtyři čety pracují souběžně a všechny doby jsou již zkráceny na polovinu, tedy na povolené minimum. Posuňte datum dokončení nebo plán zkraťte ručně.",
     "schedule.status_archived": "archivováno",
     "schedule.status_completed": "dokončeno",

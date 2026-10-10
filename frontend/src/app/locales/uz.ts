@@ -11420,6 +11420,7 @@ const resource = {
     "schedule.preview_workers_set_other": "Siz belgilaganidek, brigadasi yo‘q {{positions}} pozitsiyaning har biriga kamida {{count}} ishchi.",
     "schedule.preview_shortened_to_floor": "Barcha davomiyliklar allaqachon bahoning yarmiga, reja qisqarishining quyi chegarasiga tushirilgan.",
     "schedule.warning_durations_shortened": "Muddatga moslash uchun davomiyliklar bahoning {{percent}} foizigacha qisqartirildi. Brigadalar shu sur’atni ushlay olishini tekshiring.",
+    "schedule.warning_parallel_crews": "Parallel brigadalar berilgan pozitsiyalar: {{positions}}. {{workers}} kishilik bitta brigada ularni muddat ichida tugata olmas edi, shu sababli har birida yonma-yon {{crews}} tagacha brigada ishlaydi. Mehnat soatlari oʻzgarmaydi, faqat davomiyligi qisqaradi.",
     "schedule.preview_budget_bill": "Smeta byudjet bahosi sifatida saqlangan. Har bir qat’iy summa bitta chiziqqa aylanadi, shuning uchun reja tafsiloti byudjet bilan cheklanadi. Batafsil smeta qurilish uchun ish rejasini beradi.",
     "schedule.preview_lump_sum_bill": "{{total}} pozitsiyadan {{count}} tasi qat’iy summa. Har biri bitta chiziq bo‘lib, tafsilotni byudjetdagidek cheklaydi. Hajmlari bor smeta qurilish uchun ish rejasini beradi.",
     "schedule.preview_notes_title": "Baholangan yoki o‘tkazib yuborilgan",

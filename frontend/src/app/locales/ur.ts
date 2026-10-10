@@ -14511,6 +14511,7 @@ const resource = {
     "schedule.replace_instalments_unlinked_one": "معاہدے کی {{count}} اقساط کا سنگ میل سے ربط ختم ہوگا اور وہ معاہدے کی تاریخوں پر لوٹیں گی۔",
     "schedule.replace_instalments_unlinked_other": "معاہدے کی {{count}} اقساط کا سنگ میل سے ربط ختم ہوگا اور وہ معاہدے کی تاریخوں پر لوٹیں گی۔",
     "schedule.warning_durations_shortened": "مطلوبہ تاریخوں کے لیے ہر مدت تخمینے کے {{percent}}% تک کم کی گئی۔ جانچیں کہ ٹیمیں یہ رفتار برقرار رکھ سکتی ہیں۔",
+    "schedule.warning_parallel_crews": "متوازی عملے والی آئٹمز: {{positions}}۔ {{workers}} افراد کا ایک عملہ انہیں مقررہ مدت میں مکمل نہ کر پاتا، اس لیے ہر ایک پر زیادہ سے زیادہ {{crews}} عملے ساتھ ساتھ کام کرتے ہیں۔ مزدوری کے گھنٹے نہیں بدلتے، صرف دورانیے کم ہوتے ہیں۔",
     "schedule.warning_plan_exceeds_window": "منصوبہ تاریخوں میں نہیں سماتا: اختتام {{planned}}، مطلوبہ {{requested}}۔ چار ٹیمیں ساتھ کام کرتی ہیں اور تمام مدتیں تخمینے کے نصف، کم سے کم حد، تک پہنچ چکی ہیں۔ اختتامی تاریخ آگے کریں یا منصوبہ دستی طور پر چھوٹا کریں۔",
     "schedule.status_archived": "محفوظ شدہ",
     "schedule.status_completed": "مکمل",

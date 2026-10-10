@@ -9553,6 +9553,7 @@ const resource = {
     "schedule.replace_instalments_unlinked_many": "Prestações de pagamento contratuais que perdem o marco e voltam às datas contratuais: {{count}}.",
     "schedule.replace_instalments_unlinked_other": "Prestações de pagamento contratuais que perdem o marco e voltam às datas contratuais: {{count}}.",
     "schedule.warning_durations_shortened": "Para cumprir as datas pedidas, cada duração foi reduzida a {{percent}}% da estimativa. Verifique se as equipes conseguem manter esse ritmo.",
+    "schedule.warning_parallel_crews": "Itens com equipes em paralelo: {{positions}}. Uma equipe de {{workers}} não conseguiria concluí-los no prazo, por isso até {{crews}} equipes trabalham lado a lado em cada um. As horas de mão de obra não mudam, apenas as durações ficam mais curtas.",
     "schedule.warning_plan_exceeds_window": "O plano não cabe nas datas pedidas: termina em {{planned}}, em vez de {{requested}}. Quatro equipes trabalham em paralelo e todas as durações já estão reduzidas a metade, a compressão máxima do plano. Adie a data final ou reduza o plano manualmente.",
     "schedule.status_archived": "arquivado",
     "schedule.status_completed": "concluído",

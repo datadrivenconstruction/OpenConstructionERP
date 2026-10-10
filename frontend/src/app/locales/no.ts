@@ -13296,6 +13296,7 @@ const resource = {
     "schedule.preview_workers_set_other": "Din angitte minste bemanning per post uten arbeidslag: {{count}}; poster: {{positions}}.",
     "schedule.preview_shortened_to_floor": "Alle varigheter er allerede halvert fra anslaget, planens nedre komprimeringsgrense.",
     "schedule.warning_durations_shortened": "For å holde datoene er alle varigheter redusert til {{percent}}% av anslaget. Kontroller at arbeidslagene klarer tempoet.",
+    "schedule.warning_parallel_crews": "Poster med parallelle arbeidslag: {{positions}}. Ett lag på {{workers}} ville ikke rekke dem innenfor perioden, så opptil {{crews}} lag jobber side om side på hver. Arbeidstimene er uendret, bare varighetene blir kortere.",
     "schedule.preview_budget_bill": "Kalkylen er lagret som budsjettanslag. Hver rundsum blir én stolpe, så planen er bare så detaljert som budsjettet. En detaljert mengdebeskrivelse gir en plan for utførelsen.",
     "schedule.preview_lump_sum_bill": "Rundsumsposter: {{count}} av {{total}}. Hver blir én stolpe og begrenser detaljnivået som i et budsjett. En beskrivelse med mengder gir en plan for utførelsen.",
     "schedule.preview_notes_title": "Anslått eller utelatt",

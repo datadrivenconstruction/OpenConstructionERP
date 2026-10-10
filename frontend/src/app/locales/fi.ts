@@ -10851,6 +10851,7 @@ const resource = {
     "schedule.preview_workers_set_other": "Asettamasi vähimmäishenkilömäärä nimikkeellä ilman ryhmää: {{count}}; nimikkeitä: {{positions}}.",
     "schedule.preview_shortened_to_floor": "Kaikki kestot on jo puolitettu arviosta, mikä on suunnitelman tiivistämisen alaraja.",
     "schedule.warning_durations_shortened": "Määräajan saavuttamiseksi kestot lyhennettiin {{percent}} prosenttiin arviosta. Tarkista, että työryhmät pystyvät tähän tahtiin.",
+    "schedule.warning_parallel_crews": "Nimikkeet, joilla on rinnakkaisia ryhmiä: {{positions}}. Yksi {{workers}} hengen ryhmä ei ehtisi tehdä niitä aikaikkunassa, joten kullakin työskentelee rinnakkain enintään {{crews}} ryhmää. Työtunnit pysyvät samoina, vain kestot lyhenevät.",
     "schedule.preview_budget_bill": "Laskelma on tallennettu budjettiarviona. Kukin kokonaissumma muuttuu yhdeksi palkiksi, joten suunnitelma on vain budjetin tarkkuinen. Yksityiskohtainen määräluettelo antaa toteutukseen sopivan suunnitelman.",
     "schedule.preview_lump_sum_bill": "Kokonaissummaeriä: {{count}} kaikkiaan {{total}} nimikkeestä. Kukin muuttuu yhdeksi palkiksi, mikä rajaa tarkkuutta budjetin tavoin. Määrät sisältävä luettelo antaa toteutukseen sopivan suunnitelman.",
     "schedule.preview_notes_title": "Arvioitu tai ohitettu",

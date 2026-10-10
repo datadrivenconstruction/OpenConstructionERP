@@ -9750,6 +9750,7 @@ const resource = {
     "schedule.preview_workers_set_other": "Az Ön beállítása: legalább {{count}} fő tételenként, ahol nincs brigád ({{positions}} tétel).",
     "schedule.preview_shortened_to_floor": "Minden időtartam már a becslés felére csökkent, ami a tömörítés alsó határa.",
     "schedule.warning_durations_shortened": "A határidőhöz minden időtartamot a becslés {{percent}}%-ára csökkentettünk. Ellenőrizze, hogy a brigádok tartani tudják-e ezt az ütemet.",
+    "schedule.warning_parallel_crews": "Párhuzamos brigádokat kapott tételek: {{positions}}. Egy {{workers}} fős brigád nem végezne velük az időkereten belül, ezért mindegyiken legfeljebb {{crews}} brigád dolgozik egymás mellett. A munkaórák nem változnak, csak az időtartamok rövidülnek.",
     "schedule.preview_budget_bill": "Ez előirányzati költségvetés. Minden átalányösszeg egy sáv lesz, így a terv részletessége a költségvetésére korlátozódik. A tételes költségvetés kivitelezésre alkalmas ütemtervet ad.",
     "schedule.preview_lump_sum_bill": "Átalánytételek: {{count}} a(z) {{total}} tételből. Mindegyik egy sáv lesz, ami korlátozza a részletességet, mint az előirányzatnál. A mennyiségeket tartalmazó költségvetés kivitelezésre alkalmas tervet ad.",
     "schedule.preview_notes_title": "Becsült vagy kihagyott",

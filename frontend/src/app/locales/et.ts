@@ -14902,6 +14902,7 @@ const resource = {
     "schedule.preview_workers_set_other": "Teie määratud töötajate miinimum brigaadita kirje kohta: {{count}}; kirjeid: {{positions}}.",
     "schedule.preview_shortened_to_floor": "Kõik kestused on juba poole võrra lühendatud, mis on plaani tihendamise alampiir.",
     "schedule.warning_durations_shortened": "Tähtajast kinnipidamiseks lühendati kestused {{percent}}%-ni hinnangust. Kontrollige, kas brigaadid suudavad seda tempot hoida.",
+    "schedule.warning_parallel_crews": "Paralleelsete brigaadidega positsioonid: {{positions}}. Üks {{workers}}-liikmeline brigaad ei jõuaks neid ajaaknas valmis, seega töötab igaühel kõrvuti kuni {{crews}} brigaadi. Töötunnid ei muutu, lüheneb ainult kestus.",
     "schedule.preview_budget_bill": "Eelarve on salvestatud esialgse maksumushinnanguna. Iga koondsumma muutub üheks ribaks, seega on plaan sama üldine kui eelarve. Üksikasjalik mahuloend annab teostatava tööplaani.",
     "schedule.preview_lump_sum_bill": "Koondsummaga kirjeid: {{count}} kokku {{total}} kirjest. Igaüks muutub üheks ribaks, piirates detailsust nagu eelarves. Kogustega mahuloend annab teostatava tööplaani.",
     "schedule.preview_notes_title": "Hinnatud või välja jäetud",

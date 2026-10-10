@@ -8841,6 +8841,7 @@ const resource = {
     "schedule.preview_workers_set_other": "At least {{count}} workers per position where the bill gives no crew ({{positions}} positions), as you set it.",
     "schedule.preview_shortened_to_floor": "Every duration is already cut to half of its estimate, the shortest a plan is squeezed to.",
     "schedule.warning_durations_shortened": "To fit the dates you asked for, every duration was shortened to {{percent}}% of its estimate. Check that the crews can keep that pace.",
+    "schedule.warning_parallel_crews": "Positions given parallel crews: {{positions}}. One crew of {{workers}} could not finish them in the window, so up to {{crews}} crews work each of them side by side. Their labour hours are unchanged, only their durations are shorter.",
     "schedule.generate_target_title": "Which schedule should the BOQ go into?",
     "schedule.generate_target_hint": "Pick a schedule to generate into, or start a new one. A schedule that already has activities asks before anything is replaced.",
     "schedule.new_schedule": "New schedule",

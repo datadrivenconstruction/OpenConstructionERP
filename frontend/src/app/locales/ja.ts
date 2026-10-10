@@ -11012,6 +11012,7 @@ const resource = {
     "schedule.replace_instalments_relinked_other": "契約の分割支払{{count}}件を新計画の同じマイルストーンに移します。",
     "schedule.replace_instalments_unlinked_other": "契約の分割支払{{count}}件はマイルストーンとの関連を失い、契約上の日付に戻ります。",
     "schedule.warning_durations_shortened": "指定日付に収めるため、全期間を推定値の{{percent}}%に短縮しました。各班がこのペースで作業できるか確認してください。",
+    "schedule.warning_parallel_crews": "並行して複数の班を割り当てた項目: {{positions}}。{{workers}} 人の 1 班では期間内に終わらないため、各項目で最大 {{crews}} 班が並行して作業します。労務時間は変わらず、期間だけが短くなります。",
     "schedule.warning_plan_exceeds_window": "計画は指定日付に収まりません。終了予定{{planned}}、指定{{requested}}です。4班が並行作業し、全期間は下限である推定値の半分まで短縮済みです。終了日を延ばすか手動で計画を短縮してください。",
     "schedule.status_archived": "アーカイブ済み",
     "schedule.status_completed": "完了",

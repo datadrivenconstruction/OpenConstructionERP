@@ -10087,6 +10087,7 @@ const resource = {
     "schedule.replace_instalments_unlinked_many": "Rate di pagamento contrattuali che perdono il traguardo e tornano alle date contrattuali: {{count}}.",
     "schedule.replace_instalments_unlinked_other": "Rate di pagamento contrattuali che perdono il traguardo e tornano alle date contrattuali: {{count}}.",
     "schedule.warning_durations_shortened": "Per rispettare le date richieste, ogni durata è stata ridotta al {{percent}}% della stima. Verifica che le squadre possano mantenere questo ritmo.",
+    "schedule.warning_parallel_crews": "Voci affidate a squadre in parallelo: {{positions}}. Una squadra di {{workers}} non riuscirebbe a completarle nella finestra, quindi fino a {{crews}} squadre lavorano affiancate su ciascuna. Le ore di manodopera non cambiano, si accorciano solo le durate.",
     "schedule.warning_plan_exceeds_window": "Il piano non rispetta le date richieste: termina il {{planned}}, anziché il {{requested}}. Quattro squadre lavorano in parallelo e ogni durata è già dimezzata, la massima compressione prevista. Sposta la data finale o abbrevia il piano manualmente.",
     "schedule.status_archived": "archiviato",
     "schedule.status_completed": "completato",

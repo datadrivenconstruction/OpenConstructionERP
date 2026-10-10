@@ -11523,6 +11523,7 @@ const resource = {
     "schedule.replace_instalments_unlinked_many": "Raty płatności umownych tracące kamień milowy i wracające do terminów umownych: {{count}}.",
     "schedule.replace_instalments_unlinked_other": "Raty płatności umownych tracące kamień milowy i wracające do terminów umownych: {{count}}.",
     "schedule.warning_durations_shortened": "Aby dotrzymać wskazanych dat, każdy czas skrócono do {{percent}}% szacunku. Sprawdź, czy brygady mogą utrzymać takie tempo.",
+    "schedule.warning_parallel_crews": "Pozycje z równoległymi brygadami: {{positions}}. Jedna brygada licząca {{workers}} osób nie zdążyłaby ich wykonać w wyznaczonym czasie, więc przy każdej pracuje równolegle do {{crews}} brygad. Roboczogodziny się nie zmieniają, skraca się tylko czas trwania.",
     "schedule.warning_plan_exceeds_window": "Plan nie mieści się w terminie: kończy się {{planned}}, zamiast {{requested}}. Cztery brygady pracują równolegle, a wszystkie czasy są już skrócone o połowę, do dopuszczalnego minimum. Przesuń datę końcową lub skróć plan ręcznie.",
     "schedule.status_archived": "zarchiwizowany",
     "schedule.status_completed": "ukończony",

@@ -11553,6 +11553,7 @@ const resource = {
     "schedule.replace_instalments_unlinked_few": "Ugovorne rate plaćanja koje gube prekretnicu i vraćaju se na ugovorne datume: {{count}}.",
     "schedule.replace_instalments_unlinked_other": "Ugovorne rate plaćanja koje gube prekretnicu i vraćaju se na ugovorne datume: {{count}}.",
     "schedule.warning_durations_shortened": "Radi ispunjavanja zadanih datuma svako trajanje skraćeno je na {{percent}}% procjene. Provjerite mogu li ekipe održati taj tempo.",
+    "schedule.warning_parallel_crews": "Stavke s paralelnim ekipama: {{positions}}. Jedna ekipa od {{workers}} radnika ne bi ih završila u zadanom roku, pa na svakoj usporedno radi do {{crews}} ekipa. Radni sati ostaju isti, kraća su samo trajanja.",
     "schedule.warning_plan_exceeds_window": "Plan ne stane u zadane datume: završava {{planned}}, umjesto {{requested}}. Četiri ekipe rade usporedno, a sva su trajanja već prepolovljena, na dopušteni minimum. Pomaknite završni datum ili ručno skratite plan.",
     "schedule.status_archived": "arhiviran",
     "schedule.status_completed": "dovršen",

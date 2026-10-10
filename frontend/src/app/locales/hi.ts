@@ -11145,6 +11145,7 @@ const resource = {
     "schedule.replace_instalments_unlinked_one": "अनुबंध की {{count}} भुगतान किस्तों का मील के पत्थर से संबंध हटेगा और वे अनुबंध की तारीखों पर लौटेंगी।",
     "schedule.replace_instalments_unlinked_other": "अनुबंध की {{count}} भुगतान किस्तों का मील के पत्थर से संबंध हटेगा और वे अनुबंध की तारीखों पर लौटेंगी।",
     "schedule.warning_durations_shortened": "माँगी गई तारीखों के लिए हर अवधि अनुमान के {{percent}}% तक घटाई गई। जाँचें कि टोलियाँ इस गति से काम कर सकती हैं।",
+    "schedule.warning_parallel_crews": "समानांतर दल वाली मदें: {{positions}}। {{workers}} लोगों का एक दल इन्हें समय-सीमा में पूरा नहीं कर पाता, इसलिए हर मद पर अधिकतम {{crews}} दल साथ-साथ काम करते हैं। श्रम-घंटे नहीं बदलते, केवल अवधि छोटी होती है।",
     "schedule.warning_plan_exceeds_window": "योजना तारीखों में नहीं समाती: समाप्ति {{planned}}, माँगी गई {{requested}}। चार टोलियाँ साथ काम करती हैं और सभी अवधियाँ अनुमान के आधे, न्यूनतम सीमा, तक घट चुकी हैं। अंतिम तिथि आगे बढ़ाएँ या योजना हाथ से छोटी करें।",
     "schedule.status_archived": "संग्रहीत",
     "schedule.status_completed": "पूर्ण",

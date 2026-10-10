@@ -11642,6 +11642,7 @@ const resource = {
     "schedule.preview_workers_set_other": "Personal minim pe poziție fără echipă: {{count}}; poziții: {{positions}}, conform setării dvs.",
     "schedule.preview_shortened_to_floor": "Toate duratele sunt deja reduse la jumătatea estimării, limita minimă de comprimare.",
     "schedule.warning_durations_shortened": "Pentru respectarea termenului, toate duratele au fost reduse la {{percent}}% din estimare. Verificați dacă echipele pot susține ritmul.",
+    "schedule.warning_parallel_crews": "Poziții cu echipe în paralel: {{positions}}. O echipă de {{workers}} nu le-ar putea termina în intervalul dat, așa că la fiecare lucrează în paralel până la {{crews}} echipe. Orele de manoperă nu se schimbă, doar duratele sunt mai scurte.",
     "schedule.preview_budget_bill": "Deviz salvat ca estimare bugetară. Fiecare sumă forfetară devine o bară, deci planul are doar detalierea bugetului. Un deviz detaliat permite un grafic de execuție.",
     "schedule.preview_lump_sum_bill": "Poziții forfetare: {{count}} din {{total}}. Fiecare devine o bară, limitând detalierea ca într-un buget. Un deviz cu cantități permite un grafic de execuție.",
     "schedule.preview_notes_title": "Estimat sau omis",

@@ -14603,6 +14603,7 @@ const resource = {
     "schedule.replace_instalments_unlinked_two": "תשלומי חוזה יאבדו את הקישור לאבן הדרך ויחזרו לתאריכי החוזה: {{count}}.",
     "schedule.replace_instalments_unlinked_other": "תשלומי חוזה יאבדו את הקישור לאבן הדרך ויחזרו לתאריכי החוזה: {{count}}.",
     "schedule.warning_durations_shortened": "כדי להתאים לתאריכים, כל משך קוצר ל־{{percent}}% מהאומדן. בדקו שהצוותים מסוגלים לעמוד בקצב.",
+    "schedule.warning_parallel_crews": "סעיפים שקיבלו צוותים מקבילים: {{positions}}. צוות אחד של {{workers}} לא היה מסיים אותם בחלון הזמן, ולכן על כל אחד עובדים זה לצד זה עד {{crews}} צוותים. שעות העבודה לא משתנות, רק משכי הזמן מתקצרים.",
     "schedule.warning_plan_exceeds_window": "התוכנית אינה מתאימה לתאריכים: סיום {{planned}}, מבוקש {{requested}}. ארבעה צוותים עובדים במקביל והמשכים כבר קוצרו למחצית האומדן, הגבול המזערי. דחו את הסיום או קצרו ידנית.",
     "schedule.status_archived": "בארכיון",
     "schedule.status_completed": "הושלם",

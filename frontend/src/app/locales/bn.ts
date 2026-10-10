@@ -14223,6 +14223,7 @@ const resource = {
     "schedule.replace_instalments_unlinked_one": "চুক্তির {{count}}টি কিস্তির মাইলফলক সংযোগ উঠে যাবে এবং চুক্তির তারিখে ফিরবে।",
     "schedule.replace_instalments_unlinked_other": "চুক্তির {{count}}টি কিস্তির মাইলফলক সংযোগ উঠে যাবে এবং চুক্তির তারিখে ফিরবে।",
     "schedule.warning_durations_shortened": "চাওয়া তারিখ মেলাতে প্রতিটি সময়কাল অনুমানের {{percent}}% করা হয়েছে। দলগুলি এই গতিতে কাজ করতে পারবে কিনা যাচাই করুন।",
+    "schedule.warning_parallel_crews": "সমান্তরাল দল পাওয়া আইটেম: {{positions}}। {{workers}} জনের একটি দল এগুলো সময়সীমার মধ্যে শেষ করতে পারত না, তাই প্রতিটিতে পাশাপাশি সর্বোচ্চ {{crews}}টি দল কাজ করে। শ্রমঘণ্টা বদলায় না, শুধু সময়কাল কমে।",
     "schedule.warning_plan_exceeds_window": "পরিকল্পনা তারিখে মেলেনি: শেষ {{planned}}, চাওয়া {{requested}}। চারটি দল একসঙ্গে কাজ করছে এবং সব সময়কাল অনুমানের অর্ধেক, সর্বনিম্ন সীমায়। শেষের তারিখ পিছিয়ে দিন বা হাতে পরিকল্পনা ছোট করুন।",
     "schedule.status_archived": "আর্কাইভ করা",
     "schedule.status_completed": "সম্পন্ন",

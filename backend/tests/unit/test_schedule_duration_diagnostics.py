@@ -155,7 +155,7 @@ async def test_current_demo_projection_exposes_duration_bottlenecks(demo_id, rec
                 plan.fitted_window["days"],
                 hours_per_day=hpd,
                 work_days_per_week=week,
-                assumed_workers=plan.workers_per_position,
+                assumed_workers=plan.workers_per_position * activity.metadata_.get("parallel_gangs", 1),
             )
             if source in ("labor_hours", "resource_sum"):
                 assert activity.duration_days == max(1, math.ceil(calendar_days * week / 7))
@@ -169,7 +169,7 @@ async def test_current_demo_projection_exposes_duration_bottlenecks(demo_id, rec
                     "source": source,
                     "hours_per_unit_read": per_unit,
                     "total_hours_read": round(quantity * per_unit, 4),
-                    "workers": plan.workers_per_position,
+                    "workers": plan.workers_per_position * activity.metadata_.get("parallel_gangs", 1),
                     "hours_per_day": hpd,
                     "working_days_per_week": week,
                     "calendar_days_intermediate": calendar_days,

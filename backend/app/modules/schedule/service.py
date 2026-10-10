@@ -181,6 +181,12 @@ _FALLBACK_PRICE_SHARE_CAP = 3.0
 # gives hours but no crew. A person may ask for any number in the same range.
 MAX_ASSUMED_WORKERS = 20
 
+# When even that many do not fit the window, a position that alone runs longer
+# than the window gets gangs of that size side by side, at most this many, so
+# that it takes about this share of the window.
+_PARALLEL_GANG_TARGET_SHARE = 0.25
+_MAX_PARALLEL_GANGS = 10
+
 # The longest one generated position may run, in working days: about four
 # centuries, far short of the last calendar date. It only stops a date overflow
 # and must not trim a merely absurd duration: several demo bills ask for more
@@ -3513,14 +3519,19 @@ class ScheduleService:
             )
         }
 
+        # Gangs working one position side by side, for a position too big for
+        # one gang in the window (see ``_choose_workers``). One unless set.
+        gangs: dict[str, int] = {}
+
         def _durations_for(workers: int) -> dict[str, int]:
             out: dict[str, int] = {}
             for task in tasks:
                 b = basis.get(task.row.id)
+                crew = workers * gangs.get(task.row.id, 1)
                 if b is not None:
-                    out[task.row.id] = max(1, math.ceil(b["hours"] / (max(b["gang"], workers) * hours_per_day)))
+                    out[task.row.id] = max(1, math.ceil(b["hours"] / (max(b["gang"], crew) * hours_per_day)))
                 else:
-                    duration_cal, _ = _from_resources(task.row.data, workers)
+                    duration_cal, _ = _from_resources(task.row.data, crew)
                     # Calendar days to working days on the project's own week.
                     out[task.row.id] = max(1, math.ceil(duration_cal * work_days_per_week / 7))
             # A quantity the unit table cannot size (an XPWE "a misura" line
@@ -3572,14 +3583,34 @@ class ScheduleService:
                 workers = MAX_ASSUMED_WORKERS
                 if _fits(MAX_ASSUMED_WORKERS):
                     workers = next(n for n in range(1, MAX_ASSUMED_WORKERS + 1) if _fits(n))
+                else:
+                    # Even the most workers per position do not fit. On a big
+                    # job that is a few positions far larger than the rest,
+                    # 9,650 t of rebar or 36,500 m2 of glazing, which a site
+                    # works with several gangs at once rather than one gang
+                    # for a decade. Such a position gets gangs side by side,
+                    # sized from its own length; the hours stay what they are.
+                    # Against an end date the person gave, only a position that
+                    # alone outlasts it: one that fits on its own keeps one
+                    # crew, and the plan is shortened toward that date as it
+                    # always was. Without an end date nothing is shortened, so
+                    # a position longer than a share of the default window
+                    # gets the crews instead; else a bill of many large trades
+                    # reads as a decade of work.
+                    longest = max(1, int(budget * _PARALLEL_GANG_TARGET_SHARE))
+                    trigger = budget if window_is_explicit else longest
+                    single = _durations_for(MAX_ASSUMED_WORKERS)
+                    for key in without_workers:
+                        if single[key] > trigger:
+                            gangs[key] = min(_MAX_PARALLEL_GANGS, math.ceil(single[key] / longest))
             return workers, fit_plan(tree.roots, _durations_for(workers), budget, allow_compress=window_is_explicit)
 
         # Pure and CPU-bound: off the event loop, so a big bill does not stall
         # every other request while it is laid out.
         workers, fit = await asyncio.to_thread(_choose_workers)
         durations = _durations_for(workers)
-        for b in basis.values():
-            b["gang"] = max(b["gang"], workers)
+        for key, b in basis.items():
+            b["gang"] = max(b["gang"], workers * gangs.get(key, 1))
         layout = fit.layout
         # A loose lump sum runs for the whole works; whatever its own estimate
         # said is not what the chart shows, so neither is the note.
@@ -3669,6 +3700,8 @@ class ScheduleService:
                 }
                 if item.row.id in basis:
                     task_meta["duration_basis"] = basis[item.row.id]
+                if gangs.get(item.row.id, 1) > 1:
+                    task_meta["parallel_gangs"] = gangs[item.row.id]
                 activities.append(
                     Activity(
                         id=activity_id,
@@ -3836,6 +3869,17 @@ class ScheduleService:
             warnings.append(exceeds)
         elif window_is_explicit and fit.compressed_pct is not None:
             warnings.append({"code": "durations_shortened", "percent": fit.compressed_pct})
+        if gangs:
+            # Said every time, so a duration that is shorter than one crew of
+            # the assumed size could manage is never a mystery.
+            warnings.append(
+                {
+                    "code": "parallel_crews",
+                    "positions": len(gangs),
+                    "workers": workers,
+                    "most_crews": max(gangs.values()),
+                }
+            )
 
         return _BoqGenerationPlan(
             schedule_meta=(

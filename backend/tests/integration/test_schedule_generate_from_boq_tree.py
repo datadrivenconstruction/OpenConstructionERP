@@ -835,7 +835,9 @@ async def test_when_even_twenty_workers_do_not_fit_the_preview_says_so() -> None
             assert explicit["fitted_window"]["fits"] is False
             # Halving every duration does not save it either, and the plan says so.
             assert explicit["fits"] is False and explicit["compressed_pct"] == 50
-            assert [w["code"] for w in explicit["warnings"]] == ["plan_exceeds_window"]
+            # Each position alone outlasts the window, so it is also given
+            # parallel crews, and the plan says that too.
+            assert [w["code"] for w in explicit["warnings"]] == ["plan_exceeds_window", "parallel_crews"]
 
 
 @pytest.mark.asyncio
@@ -855,6 +857,47 @@ async def test_twenty_workers_that_fit_only_shortened_are_not_called_a_fit() -> 
         assert preview["compressed_pct"] is not None
         assert preview["fitted_window"]["fits"] is False
         assert preview["warnings"] == [{"code": "durations_shortened", "percent": preview["compressed_pct"]}]
+
+
+async def _bill_with_one_giant(bill: _Bill) -> uuid.UUID:
+    # 200,000 man-hours on one position: 1,250 working days for one crew of
+    # 20, years past the default window, next to two ordinary positions.
+    section = await bill.section(None, "01", "Strutture")
+    giant = await bill.position(section, "01.1", "Armatura", "m2", "400000", "10", meta=_labour_row(0.5))
+    await bill.position(section, "01.2", "Casseri", "m2", "2000", "10", meta=_labour_row(0.5))
+    await bill.position(section, "01.3", "Getto", "m2", "2000", "10", meta=_labour_row(0.5))
+    return giant
+
+
+@pytest.mark.asyncio
+async def test_a_position_too_big_for_one_crew_gets_parallel_crews_and_says_so() -> None:
+    async with transactional_session() as session:
+        service, schedule_id, bill, _ = await _setup(session)
+        giant = await _bill_with_one_giant(bill)
+        preview = await service.preview_generation(schedule_id, bill.boq_id, None)
+        assert preview["workers_per_position"] == 20
+        assert preview["compressed_pct"] is None  # crews are added, no hour is taken away
+        crews = [w for w in preview["warnings"] if w["code"] == "parallel_crews"]
+        assert crews == [{"code": "parallel_crews", "positions": 1, "workers": 20, "most_crews": 10}]
+
+        await service.generate_from_boq(schedule_id, bill.boq_id, None)
+        tasks = {a.boq_position_ids[0]: a for a in await _activities(service, schedule_id) if a.activity_type == "task"}
+        big = tasks[str(giant)]
+        assert big.metadata_["parallel_gangs"] == 10
+        # One crew of 20 would need ten times as long; the small ones keep one crew.
+        assert big.duration_days < 200
+        assert all("parallel_gangs" not in a.metadata_ for key, a in tasks.items() if key != str(giant))
+        warnings = (await service.get_schedule(schedule_id)).metadata_["boq_generation"]["warnings"]
+        assert {"code": "parallel_crews", "positions": 1, "workers": 20, "most_crews": 10} in warnings
+
+
+@pytest.mark.asyncio
+async def test_workers_asked_for_are_never_given_parallel_crews() -> None:
+    async with transactional_session() as session:
+        service, schedule_id, bill, _ = await _setup(session)
+        await _bill_with_one_giant(bill)
+        preview = await service.preview_generation(schedule_id, bill.boq_id, None, workers_per_position=20)
+        assert not [w for w in preview["warnings"] if w["code"] == "parallel_crews"]
 
 
 @pytest.mark.asyncio

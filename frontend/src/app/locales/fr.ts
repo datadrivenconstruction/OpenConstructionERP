@@ -9967,6 +9967,7 @@ const resource = {
     "schedule.replace_instalments_unlinked_many": "Échéances de paiement contractuelles perdant leur jalon et reprenant leurs dates contractuelles : {{count}}.",
     "schedule.replace_instalments_unlinked_other": "Échéances de paiement contractuelles perdant leur jalon et reprenant leurs dates contractuelles : {{count}}.",
     "schedule.warning_durations_shortened": "Pour respecter vos dates, chaque durée a été réduite à {{percent}} % de son estimation. Vérifiez que les équipes peuvent tenir ce rythme.",
+    "schedule.warning_parallel_crews": "Postes confiés à des équipes en parallèle : {{positions}}. Une équipe de {{workers}} ne pourrait pas les terminer dans le délai, donc jusqu'à {{crews}} équipes travaillent côte à côte sur chacun. Les heures de main-d'œuvre ne changent pas, seules les durées sont plus courtes.",
     "schedule.warning_plan_exceeds_window": "Le plan dépasse vos dates : il se termine le {{planned}}, au lieu du {{requested}}. Quatre équipes travaillent en parallèle et chaque durée est déjà réduite de moitié, la compression maximale autorisée. Repoussez la date de fin ou raccourcissez le plan manuellement.",
     "schedule.status_archived": "archivé",
     "schedule.status_completed": "terminé",

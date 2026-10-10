@@ -11701,6 +11701,7 @@ const resource = {
     "schedule.preview_workers_set_other": "Ayarınıza göre, ekibi belirtilmeyen {{positions}} poz için poz başına en az {{count}} çalışan.",
     "schedule.preview_shortened_to_floor": "Tüm süreler zaten tahminin yarısına, planın sıkıştırma alt sınırına indirildi.",
     "schedule.warning_durations_shortened": "İstenen tarihlere uymak için tüm süreler tahminin %{{percent}} düzeyine indirildi. Ekiplerin bu tempoyu koruyabildiğini kontrol edin.",
+    "schedule.warning_parallel_crews": "Paralel ekip verilen kalemler: {{positions}}. {{workers}} kişilik tek bir ekip bunları süre içinde bitiremezdi, bu yüzden her birinde yan yana en fazla {{crews}} ekip çalışır. İşçilik saatleri değişmez, yalnızca süreler kısalır.",
     "schedule.preview_budget_bill": "Bu keşif bütçe tahmini olarak kayıtlı. Her götürü bedel tek çubuğa dönüşür; planın ayrıntısı bütçeyle sınırlıdır. Ayrıntılı keşif, uygulamaya uygun plan sağlar.",
     "schedule.preview_lump_sum_bill": "{{total}} pozun {{count}} adedi götürü bedeldir. Her biri tek çubuğa dönüşerek ayrıntıyı bütçedeki gibi sınırlar. Miktar içeren keşif, uygulamaya uygun plan sağlar.",
     "schedule.preview_notes_title": "Tahmin edilen veya atlanan",

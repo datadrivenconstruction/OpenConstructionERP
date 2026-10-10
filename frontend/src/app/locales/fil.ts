@@ -14181,6 +14181,7 @@ const resource = {
     "schedule.replace_instalments_unlinked_one": "Mawawalan ng milyahe ang {{count}} hulog sa kontrata at babalik sa mga petsa ng kontrata.",
     "schedule.replace_instalments_unlinked_other": "Mawawalan ng milyahe ang {{count}} hulog sa kontrata at babalik sa mga petsa ng kontrata.",
     "schedule.warning_durations_shortened": "Para magkasya sa mga petsa, pinaikli ang bawat tagal sa {{percent}}% ng tantiya. Tiyaking kaya ng mga pangkat ang bilis na ito.",
+    "schedule.warning_parallel_crews": "Mga item na binigyan ng magkakasabay na grupo: {{positions}}. Hindi ito matatapos ng isang grupo na may {{workers}} katao sa loob ng takdang panahon, kaya hanggang {{crews}} grupo ang sabay-sabay na gumagawa sa bawat isa. Hindi nagbabago ang oras ng paggawa, ang tagal lang ang umiikli.",
     "schedule.warning_plan_exceeds_window": "Hindi kasya ang plano: magtatapos sa {{planned}}, ang hiningi ay {{requested}}. Apat na pangkat ang sabay at lahat ng tagal ay nasa kalahati na ng tantiya, ang pinakamababang hangganan. Ilipat ang petsa ng pagtatapos o paikliin nang manu-mano.",
     "schedule.status_archived": "naka-archive",
     "schedule.status_completed": "natapos",

@@ -6,6 +6,7 @@ import { AlertTriangle, Info } from 'lucide-react';
 import type { TFunction } from 'i18next';
 import { fmtDate } from '@/shared/lib/formatters';
 import type { GenerationNote, GenerationPreview } from './api';
+import { isParallelCrewsWarning } from './generateWindow';
 
 /** Estimate types that describe a budget rather than a bill to build from. */
 const BUDGET_ESTIMATE_TYPES = new Set(['budget', 'conceptual', 'order_of_magnitude', 'rom', 'preliminary']);
@@ -18,6 +19,25 @@ export function isMostlyLumpSums(preview: Pick<GenerationPreview, 'lump_sum_posi
 /** Whether a BOQ was saved as a budget-level estimate (a control budget, a cost plan). */
 export function isBudgetEstimate(estimateType: string | null | undefined): boolean {
   return !!estimateType && BUDGET_ESTIMATE_TYPES.has(estimateType.toLowerCase());
+}
+
+/**
+ * The sentence for positions given several crews side by side, because one
+ * crew of the assumed size could not finish them in the window. Shown in the
+ * preview and after generating, so a duration shorter than one crew could
+ * manage always comes with its reason.
+ */
+export function parallelCrewsText(
+  t: TFunction,
+  w: { positions: number; workers: number; most_crews: number },
+): string {
+  return t('schedule.warning_parallel_crews', {
+    defaultValue:
+      'Positions given parallel crews: {{positions}}. One crew of {{workers}} could not finish them in the window, so up to {{crews}} crews work each of them side by side. Their labour hours are unchanged, only their durations are shorter.',
+    positions: w.positions,
+    workers: w.workers,
+    crews: w.most_crews,
+  });
 }
 
 // How many notes are listed before "Show all".
@@ -192,6 +212,10 @@ export function GenerationPreviewPanel({ preview }: { preview: GenerationPreview
               'To fit the dates you asked for, every duration was shortened to {{percent}}% of its estimate. Check that the crews can keep that pace.',
             percent: preview.compressed_pct,
           })}`}
+        {preview.warnings
+          .filter(isParallelCrewsWarning)
+          .map((w) => ` ${parallelCrewsText(t, w)}`)
+          .join('')}
       </p>
       {isBudgetEstimate(preview.boq_estimate_type) ? (
         <p className="flex items-start gap-2 text-xs text-semantic-warning">

@@ -9586,6 +9586,7 @@ const resource = {
     "schedule.replace_instalments_unlinked_many": "Cuotas de pago contractuales que pierden su hito y vuelven a sus fechas contractuales: {{count}}.",
     "schedule.replace_instalments_unlinked_other": "Cuotas de pago contractuales que pierden su hito y vuelven a sus fechas contractuales: {{count}}.",
     "schedule.warning_durations_shortened": "Para cumplir las fechas solicitadas, cada duración se redujo al {{percent}}% de su estimación. Comprueba que las cuadrillas puedan mantener ese ritmo.",
+    "schedule.warning_parallel_crews": "Partidas con cuadrillas en paralelo: {{positions}}. Una cuadrilla de {{workers}} no podría terminarlas dentro del plazo, así que hasta {{crews}} cuadrillas trabajan a la vez en cada una. Las horas de mano de obra no cambian, solo las duraciones son más cortas.",
     "schedule.warning_plan_exceeds_window": "El plan no cabe en las fechas solicitadas: termina el {{planned}}, en vez del {{requested}}. Cuatro cuadrillas trabajan en paralelo y todas las duraciones ya están reducidas a la mitad, la compresión máxima del plan. Retrasa la fecha final o acorta el plan manualmente.",
     "schedule.status_archived": "archivado",
     "schedule.status_completed": "completado",

@@ -15727,6 +15727,7 @@ const resource = {
     "schedule.replace_instalments_unlinked_many": "تفقد دفعات العقد البالغ عددها {{count}} ارتباطها بالمعلم وتعود إلى تواريخ العقد.",
     "schedule.replace_instalments_unlinked_other": "تفقد دفعات العقد البالغ عددها {{count}} ارتباطها بالمعلم وتعود إلى تواريخ العقد.",
     "schedule.warning_durations_shortened": "لملاءمة التواريخ، خُفّضت كل مدة إلى {{percent}}% من تقديرها. تحقق من قدرة الفرق على هذا الإيقاع.",
+    "schedule.warning_parallel_crews": "البنود التي خُصصت لها فرق متوازية: {{positions}}. لم يكن بإمكان فريق واحد من {{workers}} عامل إنجازها ضمن المدة، لذا يعمل على كل بند حتى {{crews}} فرق جنبًا إلى جنب. ساعات العمل لا تتغير، وتقصر المدد فقط.",
     "schedule.warning_plan_exceeds_window": "المخطط لا يلائم التواريخ: ينتهي {{planned}} بينما المطلوب {{requested}}. أربعة فرق تعمل بالتوازي وجميع المدد خُفّضت إلى نصف تقديرها، وهو الحد الأدنى. أجّل النهاية أو قصّر المخطط يدوياً.",
     "schedule.status_archived": "مؤرشف",
     "schedule.status_completed": "مكتمل",

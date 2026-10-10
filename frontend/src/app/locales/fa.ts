@@ -14475,6 +14475,7 @@ const resource = {
     "schedule.replace_instalments_unlinked_one": "{{count}} قسط قرارداد پیوند نقطه عطف را از دست داده و به تاریخ قرارداد بازمی‌گردد.",
     "schedule.replace_instalments_unlinked_other": "{{count}} قسط قرارداد پیوند نقطه عطف را از دست داده و به تاریخ قرارداد بازمی‌گردد.",
     "schedule.warning_durations_shortened": "برای رعایت تاریخ‌ها، همه مدت‌ها به {{percent}}% برآورد کاهش یافتند. توان گروه‌ها برای این سرعت را بررسی کنید.",
+    "schedule.warning_parallel_crews": "ردیف‌هایی که چند گروه کاری موازی گرفتند: {{positions}}. یک گروه {{workers}} نفره نمی‌توانست آن‌ها را در بازه زمانی تمام کند، پس روی هر کدام حداکثر {{crews}} گروه کنار هم کار می‌کنند. ساعت‌های کار تغییر نمی‌کند، فقط مدت‌ها کوتاه‌تر می‌شوند.",
     "schedule.warning_plan_exceeds_window": "برنامه با تاریخ‌ها سازگار نیست: پایان {{planned}} است، درخواستی {{requested}}. چهار گروه موازی کار می‌کنند و مدت‌ها به نصف برآورد، حداقل ممکن، رسیده‌اند. پایان را عقب ببرید یا برنامه را دستی کوتاه کنید.",
     "schedule.status_archived": "بایگانی شده",
     "schedule.status_completed": "تکمیل شده",

@@ -13430,6 +13430,7 @@ const resource = {
     "schedule.preview_workers_set_other": "Din angivna minsta bemanning per post utan arbetslag: {{count}}; poster: {{positions}}.",
     "schedule.preview_shortened_to_floor": "Alla varaktigheter är redan halverade jämfört med uppskattningen, planens nedre komprimeringsgräns.",
     "schedule.warning_durations_shortened": "För att hålla datumen har alla varaktigheter kortats till {{percent}}% av uppskattningen. Kontrollera att arbetslagen klarar takten.",
+    "schedule.warning_parallel_crews": "Poster med parallella lag: {{positions}}. Ett lag på {{workers}} skulle inte hinna klart med dem inom tidsramen, så upp till {{crews}} lag arbetar sida vid sida på varje. Arbetstimmarna är oförändrade, bara varaktigheterna blir kortare.",
     "schedule.preview_budget_bill": "Kalkylen är sparad som budgetkalkyl. Varje klumpsumma blir en stapel, så planen är inte mer detaljerad än budgeten. En detaljerad mängdförteckning ger en plan för genomförandet.",
     "schedule.preview_lump_sum_bill": "Klumpsummeposter: {{count}} av {{total}}. Varje post blir en stapel, vilket begränsar detaljeringsgraden som i en budget. En förteckning med mängder ger en genomförbar arbetsplan.",
     "schedule.preview_notes_title": "Uppskattat eller utelämnat",

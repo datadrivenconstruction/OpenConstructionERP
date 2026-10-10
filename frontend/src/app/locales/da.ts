@@ -13466,6 +13466,7 @@ const resource = {
     "schedule.preview_workers_set_other": "Dit angivne minimum pr. post uden hold: {{count}}; poster: {{positions}}.",
     "schedule.preview_shortened_to_floor": "Alle varigheder er allerede halveret i forhold til skønnet, planens nedre komprimeringsgrænse.",
     "schedule.warning_durations_shortened": "For at holde datoerne er alle varigheder forkortet til {{percent}}% af skønnet. Kontrollér, at holdene kan følge tempoet.",
+    "schedule.warning_parallel_crews": "Poster med parallelle sjak: {{positions}}. Ét sjak på {{workers}} ville ikke nå dem inden for perioden, så op til {{crews}} sjak arbejder side om side på hver. Arbejdstimerne er uændrede, kun varighederne bliver kortere.",
     "schedule.preview_budget_bill": "Kalkulationen er gemt som budgetoverslag. Hver fast sum bliver én bjælke, så planen har budgettets detaljeringsgrad. En detaljeret mængdefortegnelse giver en plan til udførelsen.",
     "schedule.preview_lump_sum_bill": "Poster med fast sum: {{count}} af {{total}}. Hver bliver én bjælke og begrænser detaljeringsgraden som i et budget. En fortegnelse med mængder giver en plan til udførelsen.",
     "schedule.preview_notes_title": "Anslået eller udeladt",
