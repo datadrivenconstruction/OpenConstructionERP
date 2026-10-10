@@ -23,7 +23,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Check, CheckCheck, Banknote, X, ListTree } from 'lucide-react';
+import { Check, CheckCheck, Banknote, X, ListTree, FileText } from 'lucide-react';
 import type { TFunction } from 'i18next';
 
 import { Button } from '@/shared/ui';
@@ -42,6 +42,12 @@ import {
   type PaymentApplication,
 } from './api';
 import { PayAppLinesDialog } from './PayAppLinesDialog';
+import {
+  HakedisDialog,
+  hakedisBaseKey,
+  recordHakedisRefusal,
+  type HakedisSource,
+} from '@/features/contracts/hakedis';
 
 type Step = 'approve_foreman' | 'approve_finance' | 'mark_paid' | 'reject';
 
@@ -75,6 +81,12 @@ function refusalMessage(err: unknown, t: TFunction): string {
   if (detail?.code === 'approved_above_claimed') {
     return t('subcontractors.pay_app_above_claimed', { defaultValue: 'Cannot exceed the amount claimed.' });
   }
+  if (detail?.code === 'hakedis_amounts_differ') {
+    return t('hakedis.error.hakedis_amounts_differ', {
+      defaultValue:
+        'The certificate was prepared on the claimed amounts. Approve it as claimed, or reject it and have it submitted again.',
+    });
+  }
   return getErrorMessage(err);
 }
 
@@ -84,9 +96,16 @@ export interface PaymentApprovalActionsProps {
   requiresWaiver: boolean;
   /** The agreement's retention percent, for the payable the dialog shows. */
   retentionPercent?: number | string;
+  /** The agreement's contract has a payment certificate layout, so the row offers the certificate. */
+  hakedisAvailable?: boolean;
 }
 
-export function PaymentApprovalActions({ payment, requiresWaiver, retentionPercent }: PaymentApprovalActionsProps) {
+export function PaymentApprovalActions({
+  payment,
+  requiresWaiver,
+  retentionPercent,
+  hakedisAvailable = false,
+}: PaymentApprovalActionsProps) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
@@ -94,6 +113,8 @@ export function PaymentApprovalActions({ payment, requiresWaiver, retentionPerce
   const [rejecting, setRejecting] = useState(false);
   const [reason, setReason] = useState('');
   const [dialog, setDialog] = useState<'view' | 'approve' | null>(null);
+  const [certificateOpen, setCertificateOpen] = useState(false);
+  const hakedisSource: HakedisSource = { kind: 'sub_payment_application', id: payment.id };
 
   const may = (step: Step) => rank >= REQUIRED_RANK[step];
   const waiverGated = payment.status === 'foreman_approved' || payment.status === 'finance_approved';
@@ -127,12 +148,29 @@ export function PaymentApprovalActions({ payment, requiresWaiver, retentionPerce
       qc.invalidateQueries({ queryKey: ['subcontractors', 'pay-app-lines', payment.id] });
       // Every GC claim rollup shows its pay applications' status.
       qc.invalidateQueries({ queryKey: ['subcontractors', 'claim-rollup'] });
+      // An approval certifies the payment certificate, which freezes it.
+      qc.invalidateQueries({ queryKey: hakedisBaseKey(hakedisSource) });
       addToast({
         type: 'success',
         title: t('subcontractors.pay_app_updated', { defaultValue: 'Payment application updated' }),
       });
     },
-    onError: (err) => addToast({ type: 'error', title: refusalMessage(err, t) }),
+    onError: (err) => {
+      // An approval refused over the payment certificate is shown on the
+      // certificate itself, against the lines it names.
+      if (recordHakedisRefusal(qc, hakedisSource, err)) {
+        setDialog(null);
+        setCertificateOpen(true);
+        addToast({
+          type: 'error',
+          title: t('hakedis.certify.refused', {
+            defaultValue: 'The payment certificate is not ready to certify. See what is missing on the certificate.',
+          }),
+        });
+        return;
+      }
+      addToast({ type: 'error', title: refusalMessage(err, t) });
+    },
   });
 
   const open = payment.status === 'submitted' || waiverGated;
@@ -150,15 +188,35 @@ export function PaymentApprovalActions({ payment, requiresWaiver, retentionPerce
     />
   );
   const linesButton = (
-    <Button
-      variant="ghost"
-      size="sm"
-      icon={<ListTree size={12} />}
-      onClick={() => setDialog('view')}
-      data-testid="pay-app-lines-open"
-    >
-      {t('subcontractors.pay_app_lines', { defaultValue: 'Lines' })}
-    </Button>
+    <>
+      <Button
+        variant="ghost"
+        size="sm"
+        icon={<ListTree size={12} />}
+        onClick={() => setDialog('view')}
+        data-testid="pay-app-lines-open"
+      >
+        {t('subcontractors.pay_app_lines', { defaultValue: 'Lines' })}
+      </Button>
+      {hakedisAvailable && (
+        <Button
+          variant="ghost"
+          size="sm"
+          icon={<FileText size={12} />}
+          onClick={() => setCertificateOpen(true)}
+          data-testid="pay-app-hakedis-open"
+        >
+          {t('hakedis.open', { defaultValue: 'Certificate' })}
+        </Button>
+      )}
+      {certificateOpen && (
+        <HakedisDialog
+          source={hakedisSource}
+          reference={payment.application_number}
+          onClose={() => setCertificateOpen(false)}
+        />
+      )}
+    </>
   );
 
   // Past approval, or for a role that may not act, the lines are still worth

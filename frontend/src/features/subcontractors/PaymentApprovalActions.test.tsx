@@ -115,6 +115,24 @@ async function openApproval() {
 }
 
 describe('PaymentApprovalActions', () => {
+  it('offers the payment certificate only where the agreement has a certificate layout', () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const { rerender } = render(
+      <QueryClientProvider client={qc}>
+        <PaymentApprovalActions payment={payment('paid')} requiresWaiver={false} />
+      </QueryClientProvider>,
+    );
+    expect(screen.queryByTestId('pay-app-hakedis-open')).toBeNull();
+    rerender(
+      <QueryClientProvider client={qc}>
+        <PaymentApprovalActions payment={payment('paid')} requiresWaiver={false} hakedisAvailable />
+      </QueryClientProvider>,
+    );
+    expect(screen.getByTestId('pay-app-hakedis-open')).toHaveTextContent('Certificate');
+    // The lines stay on offer beside it.
+    expect(screen.getByTestId('pay-app-lines-open')).toBeInTheDocument();
+  });
+
   it('offers the foreman step on a submitted pay application and calls its route', async () => {
     foremanMock.mockResolvedValue(payment('foreman_approved'));
     renderActions('submitted');
