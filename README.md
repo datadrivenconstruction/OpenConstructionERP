@@ -414,6 +414,8 @@ Download the installer for your operating system, run it, and OpenConstructionER
 
 There is no Intel macOS build at the moment. On an Intel Mac, use the pip or Docker route below.
 
+Seeing a warning or an error while installing or starting? **[Installation help](docs/INSTALL_TROUBLESHOOTING.md)** lists each message with what it means and what to do ([Deutsch](docs/INSTALL_TROUBLESHOOTING.de.md), [Русский](docs/INSTALL_TROUBLESHOOTING.ru.md)).
+
 The first launch takes about a minute while it sets up your local database, then every launch after that is fast. Open source under AGPL-3.0.
 
 > **Prefer the command line?** The options below (pip, Docker, source) need Python 3.12+. Check with `python --version`.

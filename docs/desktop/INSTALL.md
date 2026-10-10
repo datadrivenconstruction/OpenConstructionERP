@@ -14,7 +14,7 @@ The installers live on the project's GitHub Releases page. Open the latest relea
 
 Each release attaches one Windows installer, an `.exe`. It installs for all users of the machine, into `C:\Program Files\OpenConstructionERP`, so Windows asks for administrator permission before it continues. Releases up to 15.1.0 also carried an `.msi`. It installed the same application to the same place but kept its own record of having done so, which is why two installers for one program was a trap rather than a choice, and from 15.2.0 it is gone. If the copy you have came from the `.msi`, uninstall that entry before you run the `.exe`, otherwise the machine lists the app twice. Your data is not in the installed folder and an uninstall does not touch it.
 
-The app needs Microsoft's WebView2 runtime. If your machine does not already have it the installer fetches it during installation, so there is nothing extra to install by hand, but it does mean that a first install on a machine without WebView2 needs a working internet connection. Without one the installer stops and reports that WebView2 could not be installed. Once WebView2 is present, installing and running the app work offline.
+The app needs Microsoft's WebView2 runtime, which draws its window. The installer carries a full offline copy of it and installs it when your machine does not already have it, so neither the installation nor the app needs an internet connection. If Windows refuses to install WebView2, the installer stops with an error about it; [Installation help](../INSTALL_TROUBLESHOOTING.md) says what to do.
 
 When it finishes you will find OpenConstructionERP in the Start Menu and as a shortcut, both named "OpenConstructionERP". Click either one to launch it.
 
@@ -83,5 +83,7 @@ Uninstalling removes the program and leaves your data where it is. The `.openest
 To start genuinely from scratch, uninstall the app and then delete the `.openestimate` folder in your home directory yourself. That removes your projects, your users and every file you ever uploaded, with no undo, so copy it somewhere safe first unless you are certain. The next launch then behaves exactly like a first launch, database setup and demo account included.
 
 ## Need help
+
+If you see a warning or an error, look it up in [Installation help and troubleshooting](../INSTALL_TROUBLESHOOTING.md) first. It lists the messages the installer, the app and your system show, and what to do about each.
 
 If something does not work or you have a question, email us at info@datadrivenconstruction.io, or open an issue on the project's GitHub issues page. We are happy to help.
