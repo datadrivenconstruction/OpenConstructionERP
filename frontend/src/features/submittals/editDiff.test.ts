@@ -20,9 +20,10 @@
 import { describe, it, expect } from 'vitest';
 
 import { submittalFormData, buildSubmittalPatch } from './SubmittalsPage';
-import type { Submittal } from './api';
+import { LEGACY_REGISTER_FIELDS, type Submittal } from './api';
 
 const SUBMITTAL: Submittal = {
+  ...LEGACY_REGISTER_FIELDS,
   id: 's1',
   project_id: 'p1',
   submittal_number: 'SUB-001',

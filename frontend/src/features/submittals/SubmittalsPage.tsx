@@ -39,9 +39,10 @@ import {
 } from '@/shared/ui';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { PageHeader } from '@/shared/ui/PageHeader';
-import { RegisterExportButton, RecordPdfButton } from '@/shared/ui/RegisterExport';
+import { RecordPdfButton } from '@/shared/ui/RegisterExport';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { fetchProjectList } from '@/shared/lib/projectList';
+import { matchesSearch } from '@/shared/lib/highlightMatch';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import {
@@ -50,19 +51,53 @@ import {
   updateSubmittal,
   submitSubmittal,
   submitReviewDecision,
-  downloadSubmittalRegister,
+  fetchSubmittalSummary,
   downloadSubmittalPdf,
   type Submittal,
   type SubmittalStatus,
   SUBMITTAL_TYPES,
   type SubmittalType,
+  type SubmittalVocabulary,
   type CreateSubmittalPayload,
   type UpdateSubmittalPayload,
   type ApproveSubmittalPayload,
 } from './api';
 import { SubmittalStatusPipeline } from './SubmittalStatusPipeline';
 import { DueDateBadge } from './DueDateBadge';
-import { DaysInCourtBadge } from './DaysInCourtBadge';
+import {
+  ApprovalNeededBy,
+  DisciplineBadge,
+  LongLeadMark,
+  ReviewClock,
+  ReviewCodeChip,
+  SortableHeader,
+  outcomeHint,
+} from './registerCells';
+import {
+  NO_FILTERS,
+  applyClientCut,
+  hasActiveFilter,
+  hasServerFilter,
+  isServerSortable,
+  toListFilters,
+  useSubmittalVocabulary,
+  vocabularyEntry,
+  type RegisterFilters,
+  type RegisterSort,
+} from './registerView';
+import {
+  EMPTY_PROCUREMENT_FORM,
+  SubmittalProcurementFields,
+  buildProcurementCreate,
+  buildProcurementPatch,
+  hasProcurementErrors,
+  procurementFormData,
+  type ProcurementFormData,
+} from './SubmittalProcurementFields';
+import { SubmittalRegisterDetail } from './SubmittalRegisterDetail';
+import { SubmittalRegisterExport } from './SubmittalRegisterExport';
+import { SubmittalRegisterFilters, SubmittalTypeTabs } from './SubmittalRegisterFilters';
+import { SubmittalRegisterSummary } from './SubmittalRegisterSummary';
 import {
   ApprovalInstanceCard,
   ApprovalTargetBadge,
@@ -139,7 +174,7 @@ const textareaCls =
 
 /* ── Create Modal ─────────────────────────────────────────────────────── */
 
-interface SubmittalFormData {
+interface SubmittalFormData extends ProcurementFormData {
   title: string;
   spec_section: string;
   type: SubmittalType;
@@ -147,12 +182,16 @@ interface SubmittalFormData {
   description: string;
 }
 
+/** The fields whose errors wait until the user has left them. */
+type TouchedField = 'title' | 'spec_section' | 'type' | 'date_required' | 'description';
+
 const EMPTY_FORM: SubmittalFormData = {
   title: '',
   spec_section: '',
   type: 'shop_drawing',
   date_required: '',
   description: '',
+  ...EMPTY_PROCUREMENT_FORM,
 };
 
 /**
@@ -175,6 +214,7 @@ export function submittalFormData(existing?: Submittal): SubmittalFormData {
     type: existing.type,
     date_required: existing.date_required ?? '',
     description: existing.description ?? '',
+    ...procurementFormData(existing),
   };
 }
 
@@ -205,7 +245,8 @@ export function buildSubmittalPatch(
   if (form.date_required !== base.date_required) {
     data.date_required = form.date_required || null;
   }
-  return data;
+  // The register columns follow the same rule: only what was changed.
+  return { ...data, ...buildProcurementPatch(form, base) };
 }
 
 /**
@@ -224,12 +265,15 @@ function SubmittalFormModal({
   onClose,
   onSubmit,
   isPending,
+  vocabulary,
 }: {
   mode: 'create' | 'edit';
   existing?: Submittal;
   onClose: () => void;
   onSubmit: (data: SubmittalFormData) => void;
   isPending: boolean;
+  /** The codes the pickers offer; `null` until the vocabulary route answers. */
+  vocabulary: SubmittalVocabulary | null;
 }) {
   const { t } = useTranslation();
   const isEdit = mode === 'edit';
@@ -241,7 +285,7 @@ function SubmittalFormModal({
   // Per-field touched tracking so validation surfaces as the user leaves each
   // field (onBlur) instead of only after a submit attempt. Submitting marks
   // every field touched so any still-empty required field lights up.
-  const [touched, setTouched] = useState<Record<keyof SubmittalFormData, boolean>>({
+  const [touched, setTouched] = useState<Record<TouchedField, boolean>>({
     title: false,
     spec_section: false,
     type: false,
@@ -252,12 +296,17 @@ function SubmittalFormModal({
   const set = <K extends keyof SubmittalFormData>(key: K, value: SubmittalFormData[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
-  const markTouched = (key: keyof SubmittalFormData) =>
+  // The same setter, typed to the register group's own keys for its component.
+  const setProcurement = <K extends keyof ProcurementFormData>(key: K, value: ProcurementFormData[K]) =>
+    setForm((prev) => ({ ...prev, [key]: value }));
+
+  const markTouched = (key: TouchedField) =>
     setTouched((prev) => (prev[key] ? prev : { ...prev, [key]: true }));
 
   const titleError = touched.title && form.title.trim().length === 0;
   const specError = touched.spec_section && form.spec_section.trim().length === 0;
-  const canSubmit = form.title.trim().length > 0 && form.spec_section.trim().length > 0;
+  const canSubmit =
+    form.title.trim().length > 0 && form.spec_section.trim().length > 0 && !hasProcurementErrors(form);
 
   const handleSubmit = () => {
     setTouched({
@@ -382,6 +431,9 @@ function SubmittalFormModal({
           label={t('submittals.field_date_required', { defaultValue: 'Date Required' })}
           span={2}
           htmlFor={`${idPrefix}-date-required`}
+          hint={t('submittals.date_required_hint', {
+            defaultValue: 'The date the review answer is needed by.',
+          })}
         >
           <input
             id={`${idPrefix}-date-required`}
@@ -413,6 +465,15 @@ function SubmittalFormModal({
           />
         </WideModalField>
       </WideModalSection>
+
+      <SubmittalProcurementFields
+        idPrefix={idPrefix}
+        form={form}
+        type={form.type}
+        onChange={setProcurement}
+        vocabulary={vocabulary}
+        existing={isEdit ? existing : undefined}
+      />
     </WideModal>
   );
 }
@@ -424,18 +485,32 @@ function ApproveModal({
   onClose,
   onSubmit,
   isPending,
+  vocabulary,
 }: {
   submittal: Submittal;
   onClose: () => void;
   onSubmit: (data: ApproveSubmittalPayload) => void;
   isPending: boolean;
+  /** Serves the default mark of each decision; `null` until it answers. */
+  vocabulary: SubmittalVocabulary | null;
 }) {
   const { t } = useTranslation();
   const [decision, setDecision] = useState<ApproveSubmittalPayload['status']>('approved');
   const [comments, setComments] = useState('');
+  // The mark as the reviewer stamped it. Left empty, the server records the
+  // default letter for the decision, which is what the placeholder shows.
+  const [code, setCode] = useState('');
+  const [resubmitForRecord, setResubmitForRecord] = useState(false);
+  const defaultCode = vocabularyEntry(vocabulary?.outcomes, decision)?.short_code ?? '';
+  const decisionHint = outcomeHint(t, decision);
 
   const handleSubmit = () => {
-    onSubmit({ status: decision, comments: comments.trim() || undefined });
+    onSubmit({
+      status: decision,
+      comments: comments.trim() || undefined,
+      code: code.trim() || undefined,
+      resubmit_for_record: decision === 'approved_as_noted' && resubmitForRecord ? true : undefined,
+    });
   };
 
   useEffect(() => {
@@ -502,7 +577,51 @@ function ApproveModal({
                 </button>
               ))}
             </div>
+            {/* What the chosen decision means for ordering, before it is recorded. */}
+            {decisionHint && (
+              <p className="mt-2 text-xs text-content-tertiary" data-testid="submittal-decision-hint">
+                {decisionHint}
+              </p>
+            )}
           </div>
+
+          {/* The mark on the stamp, and the corrected copy an approval as noted may still owe. */}
+          <div className="flex flex-wrap items-end gap-4">
+            <div>
+              <label htmlFor="submittal-review-code" className="block text-sm font-medium text-content-primary mb-1.5">
+                {t('submittals.field_review_code', { defaultValue: 'Review code' })}
+              </label>
+              <input
+                id="submittal-review-code"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                maxLength={20}
+                placeholder={defaultCode}
+                className={inputCls + ' w-24'}
+              />
+            </div>
+            {decision === 'approved_as_noted' && (
+              <label className="flex h-10 cursor-pointer items-center gap-2 text-sm text-content-primary">
+                <input
+                  id="submittal-resubmit-for-record"
+                  type="checkbox"
+                  checked={resubmitForRecord}
+                  onChange={(e) => setResubmitForRecord(e.target.checked)}
+                  className="h-4 w-4 rounded border-border text-oe-blue focus:ring-oe-blue/30"
+                />
+                <span>
+                  {t('submittals.field_resubmit_for_record', {
+                    defaultValue: 'Corrected copy to be resubmitted for record',
+                  })}
+                </span>
+              </label>
+            )}
+          </div>
+          <p className="-mt-2 text-xs text-content-tertiary">
+            {t('submittals.review_code_hint', {
+              defaultValue: 'The mark on the stamp. Leave empty to record the default letter for the decision.',
+            })}
+          </p>
 
           {/* Comments */}
           <div>
@@ -543,6 +662,9 @@ const SubmittalRow = React.memo(function SubmittalRow({
   onReview,
   onEdit,
   onOpenBoqPosition,
+  vocabulary,
+  showDiscipline,
+  showApprovalBy,
 }: {
   submittal: Submittal;
   projectId: string;
@@ -550,9 +672,15 @@ const SubmittalRow = React.memo(function SubmittalRow({
   onReview: (s: Submittal) => void;
   onEdit: (s: Submittal) => void;
   onOpenBoqPosition: (positionId: string) => void;
+  vocabulary: SubmittalVocabulary | null;
+  /** The two columns that only exist once some row of the list fills them. */
+  showDiscipline: boolean;
+  showApprovalBy: boolean;
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
+  // Maker and model as one line under the title; absent on a row without them.
+  const product = [submittal.manufacturer, submittal.model_reference].filter(Boolean).join(' / ');
   const statusCfg = STATUS_CONFIG[submittal.status] ?? STATUS_CONFIG.draft;
   const downloadPdf = useCallback(
     (locale: string) => downloadSubmittalPdf(submittal.id, locale, submittal.submittal_number),
@@ -582,10 +710,32 @@ const SubmittalRow = React.memo(function SubmittalRow({
           {submittal.submittal_number}
         </span>
 
-        {/* Title */}
-        <span className="text-sm text-content-primary truncate flex-1 min-w-0">
-          {submittal.title}
-        </span>
+        {/* Title, with the long-lead flag and the product under it when recorded.
+            A row with neither renders the bare title span it always did. */}
+        {submittal.long_lead || product ? (
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm text-content-primary truncate min-w-0">{submittal.title}</span>
+              <LongLeadMark submittal={submittal} />
+            </div>
+            {product && (
+              <p className="text-2xs text-content-tertiary truncate" title={product}>
+                {product}
+              </p>
+            )}
+          </div>
+        ) : (
+          <span className="text-sm text-content-primary truncate flex-1 min-w-0">
+            {submittal.title}
+          </span>
+        )}
+
+        {/* Discipline */}
+        {showDiscipline && (
+          <span className="w-10 shrink-0 hidden md:block">
+            <DisciplineBadge discipline={submittal.discipline} vocabulary={vocabulary} />
+          </span>
+        )}
 
         {/* Spec Section */}
         <span className="text-xs text-content-tertiary w-20 shrink-0 hidden lg:block font-mono">
@@ -613,19 +763,21 @@ const SubmittalRow = React.memo(function SubmittalRow({
           <ApprovalTargetBadge targetKind="submittal" targetId={submittal.id} />
         </div>
 
-        {/* Ball in Court + days-with-reviewer SLA chip. The chip only
-            renders while the submittal is actively in the reviewer's
-            court (submitted / under_review) and the elapsed time has
-            crossed the neutral threshold — so most rows show just the
-            name. */}
+        {/* The reviewer's code on the current revision; empty until there is one. */}
+        <span className="w-9 shrink-0 flex justify-center">
+          <ReviewCodeChip code={submittal.review_code} outcome={submittal.review_outcome} />
+        </span>
+
+        {/* Ball in Court + the review clock. A submittal with a review
+            period shows the server's days in review and turns red once the
+            server counts it past that period. One without keeps the chip the
+            register always showed, which only appears while the submittal is
+            with the reviewer and past the neutral threshold. */}
         <div className="w-24 shrink-0 hidden md:flex md:flex-col md:items-start md:gap-0.5">
           <span className="text-xs text-content-tertiary truncate w-full">
             {submittal.ball_in_court_name || submittal.ball_in_court || '-'}
           </span>
-          <DaysInCourtBadge
-            dateSubmitted={submittal.date_submitted}
-            status={submittal.status}
-          />
+          <ReviewClock submittal={submittal} />
         </div>
 
         {/* Rev # */}
@@ -642,6 +794,13 @@ const SubmittalRow = React.memo(function SubmittalRow({
             status={submittal.status}
           />
         </div>
+
+        {/* Approval needed by: required on site less the lead time. */}
+        {showApprovalBy && (
+          <div className="text-xs w-24 shrink-0 hidden lg:flex lg:flex-col lg:items-start lg:gap-0.5">
+            <ApprovalNeededBy submittal={submittal} />
+          </div>
+        )}
       </div>
 
       {/* Expanded detail */}
@@ -679,6 +838,11 @@ const SubmittalRow = React.memo(function SubmittalRow({
               <DateDisplay value={submittal.date_required} className="text-xs" />
             </span>
           </div>
+
+          {/* What the reviewer stamped, the product and its dates, the
+              revision chain and the checks. Each block is absent when it has
+              nothing to say. */}
+          <SubmittalRegisterDetail submittal={submittal} vocabulary={vocabulary} />
 
           {/* Linked BOQ items — each id is a live pill that deep-links to
               the BOQ position it covers, closing CONN-13. */}
@@ -929,7 +1093,13 @@ export function SubmittalsPage() {
   const [reviewingSubmittal, setReviewingSubmittal] = useState<Submittal | null>(null);
   const [editingSubmittal, setEditingSubmittal] = useState<Submittal | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<SubmittalStatus | ''>('');
+  // The cut the register is showing (type tab, filters, summary shortcut) and
+  // the order. Every part but `awaiting` travels to the server.
+  const [filters, setFilters] = useState<RegisterFilters>(NO_FILTERS);
+  const [sort, setSort] = useState<RegisterSort | null>(null);
+  const statusFilter = filters.status;
+  const filtersActive = hasActiveFilter(filters);
+  const vocabulary = useSubmittalVocabulary();
 
   // Strip the deep-link params once consumed so a reload / back-button does
   // not re-open the create modal. Keeps the source container id in a ref so
@@ -969,43 +1139,66 @@ export function SubmittalsPage() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['submittals', projectId, statusFilter],
-    queryFn: () =>
-      fetchSubmittals({
-        project_id: projectId,
-        status: statusFilter || undefined,
-      }),
+    queryKey: ['submittals', projectId, toListFilters(projectId, filters, sort)],
+    queryFn: () => fetchSubmittals(toListFilters(projectId, filters, sort)),
+    enabled: !!projectId,
+    refetchOnWindowFocus: true,
+    // A filter or a sort click asks the server again. The rows on screen stay
+    // until the answer arrives, so the table (and the heading just clicked)
+    // is not swapped for a skeleton. Another project's rows are never kept.
+    placeholderData: (previous, previousQuery) =>
+      previousQuery?.queryKey[1] === projectId ? previous : undefined,
+  });
+
+  // The counts above the register, for the whole project as of today. Keyed
+  // under ['submittals'] so every save, submission and review refreshes them
+  // with the list. `null` (no answer, or not a summary) falls back to the
+  // four tiles counted from the rows on screen.
+  const { data: summary = null } = useQuery({
+    queryKey: ['submittals', 'summary', projectId],
+    queryFn: () => fetchSubmittalSummary(projectId),
     enabled: !!projectId,
     refetchOnWindowFocus: true,
   });
 
-  // The register is exported whole (the route takes no filter), so "empty"
-  // means the unfiltered list came back empty, not that a status filter
-  // matched nothing.
-  const registerEmpty = !statusFilter && !isLoading && !isError && submittals.length === 0;
-  const exportTargets = useMemo(
-    () => [
-      {
-        id: 'register',
-        download: (format: 'pdf' | 'xlsx', locale: string) =>
-          downloadSubmittalRegister(projectId, format, locale),
-      },
-    ],
-    [projectId],
-  );
+  // "Empty" is about the project's register, not about the cut on screen: a
+  // filter that matches nothing must not disable the export of the rest.
+  const registerEmpty = summary
+    ? summary.total === 0
+    : !hasServerFilter(filters) && !isLoading && !isError && submittals.length === 0;
+
+  // The one cut the list route has no parameter for (see registerView.ts).
+  const cutRows = useMemo(() => applyClientCut(submittals, filters, sort), [submittals, filters, sort]);
 
   // Client-side search
   const filtered = useMemo(() => {
-    if (!searchQuery.trim()) return submittals;
-    const q = searchQuery.toLowerCase();
-    return submittals.filter(
-      (s) =>
-        s.title.toLowerCase().includes(q) ||
-        s.submittal_number.toLowerCase().includes(q) ||
-        (s.spec_section?.toLowerCase().includes(q) ?? false) ||
-        (s.ball_in_court_name?.toLowerCase().includes(q) ?? false),
+    if (!searchQuery.trim()) return cutRows;
+    return cutRows.filter((s) =>
+      matchesSearch(
+        searchQuery,
+        s.title,
+        s.submittal_number,
+        s.spec_section,
+        s.ball_in_court_name,
+        s.manufacturer,
+        s.model_reference,
+        s.supplier_name,
+      ),
     );
-  }, [submittals, searchQuery]);
+  }, [cutRows, searchQuery]);
+
+  // The discipline and approval-deadline columns appear once a row of the
+  // list fills them, so a register that never used them keeps its old shape.
+  const showDiscipline = useMemo(() => submittals.some((s) => !!s.discipline), [submittals]);
+  const showApprovalBy = useMemo(
+    () => submittals.some((s) => !!s.approval_needed_by || s.long_lead),
+    [submittals],
+  );
+
+  const typeLabel = useCallback(
+    (type: string) => t(`submittals.type_${type}`, { defaultValue: submittalTypeLabel(type) }),
+    [t],
+  );
 
   // Stats
   const stats = useMemo(() => {
@@ -1154,6 +1347,7 @@ export function SubmittalsPage() {
         spec_section: formData.spec_section || undefined,
         submittal_type: formData.type,
         date_required: formData.date_required || undefined,
+        ...buildProcurementCreate(formData),
         ...(containerId && { metadata: { cde_container_id: containerId } }),
       });
       sourceContainerIdRef.current = '';
@@ -1233,13 +1427,7 @@ export function SubmittalsPage() {
           <>
             <InsightsToggleButton open={insights.open} onClick={insights.toggle} />
             <ModuleGuideButton content={submittalsGuide} />
-            <RegisterExportButton
-              label={t('submittals.export_register', { defaultValue: 'Export register' })}
-              projectId={projectId}
-              empty={registerEmpty}
-              targets={exportTargets}
-              testId="submittals-export"
-            />
+            <SubmittalRegisterExport projectId={projectId} filters={filters} empty={registerEmpty} />
             <Button
               variant="primary"
               size="sm"
@@ -1307,7 +1495,17 @@ export function SubmittalsPage() {
 
       {!projectId && <RequiresProject>{null}</RequiresProject>}
 
-      {/* Stats */}
+      {/* The register header: the summary route's counts, each a shortcut
+          into the rows behind it. Without a summary the four tiles counted
+          from the list stand in. */}
+      {summary ? (
+        <SubmittalRegisterSummary
+          summary={summary}
+          vocabulary={vocabulary}
+          filters={filters}
+          onFilters={setFilters}
+        />
+      ) : (
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="rounded-xl border border-border-light bg-surface-elevated/90 p-4 shadow-xs transition-shadow duration-normal ease-oe hover:shadow-sm animate-card-in">
           <p className="text-2xs font-medium text-content-tertiary uppercase tracking-wide">
@@ -1345,9 +1543,14 @@ export function SubmittalsPage() {
           </p>
         </div>
       </div>
+      )}
+
+      {/* One register, cut by type: the shop drawing register, the material
+          approvals and the method statements are tabs, not pages. */}
+      <SubmittalTypeTabs filters={filters} onFilters={setFilters} summary={summary} typeLabel={typeLabel} />
 
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3">
         {/* Search */}
         <div className="relative flex-1 max-w-sm">
           <Search
@@ -1369,7 +1572,14 @@ export function SubmittalsPage() {
         <div className="relative">
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as SubmittalStatus | '')}
+            onChange={(e) =>
+              setFilters((prev) => ({
+                ...prev,
+                status: e.target.value as SubmittalStatus | '',
+                // A status and the awaiting-review cut answer the same question.
+                awaiting: false,
+              }))
+            }
             aria-label={t('submittals.filter_all', { defaultValue: 'All Statuses' })}
             className="h-10 appearance-none rounded-lg border border-border bg-surface-primary ps-3 pe-9 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue sm:w-48"
           >
@@ -1386,10 +1596,22 @@ export function SubmittalsPage() {
             <ChevronDown size={14} />
           </div>
         </div>
+
+        <SubmittalRegisterFilters
+          filters={filters}
+          onFilters={setFilters}
+          vocabulary={vocabulary}
+          summary={summary}
+          typeLabel={typeLabel}
+        />
       </div>
 
       {/* Table */}
-      <div>
+      <div
+        role="tabpanel"
+        id={`submittals-type-panel-${filters.type || 'all'}`}
+        aria-labelledby={`submittals-type-tab-${filters.type || 'all'}`}
+      >
         {isLoading ? (
           <SkeletonTable rows={5} columns={6} />
         ) : isError ? (
@@ -1398,12 +1620,12 @@ export function SubmittalsPage() {
           <EmptyState
             icon={<FileCheck size={28} strokeWidth={1.5} />}
             title={
-              searchQuery || statusFilter
+              searchQuery || filtersActive
                 ? t('submittals.no_results', { defaultValue: 'No matching submittals' })
                 : t('submittals.no_submittals', { defaultValue: 'No submittals yet' })
             }
             description={
-              searchQuery || statusFilter
+              searchQuery || filtersActive
                 ? t('submittals.no_results_hint', {
                     defaultValue: 'Try adjusting your search or filters',
                   })
@@ -1412,7 +1634,7 @@ export function SubmittalsPage() {
                   })
             }
             action={
-              !searchQuery && !statusFilter
+              !searchQuery && !filtersActive
                 ? {
                     label: t('submittals.new_submittal', { defaultValue: 'New Submittal' }),
                     onClick: () => setShowCreateModal(true),
@@ -1432,21 +1654,54 @@ export function SubmittalsPage() {
               {/* Table header */}
               <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border-light bg-surface-secondary/30 text-2xs font-medium text-content-tertiary uppercase tracking-wider min-w-[640px]">
                 <span className="w-5" />
-                <span className="w-20">#</span>
-                <span className="flex-1">
-                  {t('submittals.col_title', { defaultValue: 'Title' })}
-                </span>
+                <SortableHeader
+                  label="#"
+                  field="submittal_number"
+                  sortable={isServerSortable(vocabulary, 'submittal_number')}
+                  sort={sort}
+                  onSort={setSort}
+                  className="w-20"
+                />
+                <SortableHeader
+                  label={t('submittals.col_title', { defaultValue: 'Title' })}
+                  field="title"
+                  sortable={isServerSortable(vocabulary, 'title')}
+                  sort={sort}
+                  onSort={setSort}
+                  className="flex-1"
+                />
+                {showDiscipline && (
+                  <SortableHeader
+                    label={t('submittals.col_discipline_short', { defaultValue: 'Disc.' })}
+                    field="discipline"
+                    sortable={isServerSortable(vocabulary, 'discipline')}
+                    sort={sort}
+                    onSort={setSort}
+                    className="w-10 hidden md:block"
+                  />
+                )}
                 <span className="w-20 hidden lg:block">
                   {t('submittals.col_spec', { defaultValue: 'Spec' })}
                 </span>
                 <span className="w-24 hidden md:block">
                   {t('submittals.col_type', { defaultValue: 'Type' })}
                 </span>
-                <span className="w-28 text-center">
-                  {t('submittals.col_status', { defaultValue: 'Status' })}
-                </span>
+                <SortableHeader
+                  label={t('submittals.col_status', { defaultValue: 'Status' })}
+                  field="status"
+                  sortable={isServerSortable(vocabulary, 'status')}
+                  sort={sort}
+                  onSort={setSort}
+                  className="w-28 text-center"
+                />
                 <span className="sr-only">
                   {t('submittals.col_pipeline_sr', { defaultValue: 'Pipeline' })}
+                </span>
+                <span
+                  className="w-9 text-center"
+                  title={t('submittals.col_review_code', { defaultValue: 'Review code' })}
+                >
+                  {t('submittals.col_review_code_short', { defaultValue: 'Code' })}
                 </span>
                 <span className="w-24 hidden md:block">
                   {t('submittals.col_bic', { defaultValue: 'Ball in Court' })}
@@ -1454,9 +1709,24 @@ export function SubmittalsPage() {
                 <span className="w-10 text-center hidden sm:block">
                   {t('submittals.col_rev', { defaultValue: 'Rev' })}
                 </span>
-                <span className="w-20 hidden lg:block">
-                  {t('submittals.col_date_required', { defaultValue: 'Required' })}
-                </span>
+                <SortableHeader
+                  label={t('submittals.col_date_required', { defaultValue: 'Required' })}
+                  field="date_required"
+                  sortable={isServerSortable(vocabulary, 'date_required')}
+                  sort={sort}
+                  onSort={setSort}
+                  className="w-20 hidden lg:block"
+                />
+                {showApprovalBy && (
+                  <SortableHeader
+                    label={t('submittals.col_approval_needed_by', { defaultValue: 'Approval needed by' })}
+                    field="required_on_site_date"
+                    sortable={isServerSortable(vocabulary, 'required_on_site_date')}
+                    sort={sort}
+                    onSort={setSort}
+                    className="w-24 hidden lg:block"
+                  />
+                )}
               </div>
 
               {/* Rows */}
@@ -1469,6 +1739,9 @@ export function SubmittalsPage() {
                   onReview={handleReview}
                   onEdit={handleEdit}
                   onOpenBoqPosition={handleOpenBoqPosition}
+                  vocabulary={vocabulary}
+                  showDiscipline={showDiscipline}
+                  showApprovalBy={showApprovalBy}
                 />
               ))}
             </Card>
@@ -1483,6 +1756,7 @@ export function SubmittalsPage() {
           onClose={() => setShowCreateModal(false)}
           onSubmit={handleCreateSubmit}
           isPending={createMut.isPending}
+          vocabulary={vocabulary}
         />
       )}
 
@@ -1493,6 +1767,7 @@ export function SubmittalsPage() {
           onClose={() => setReviewingSubmittal(null)}
           onSubmit={handleApproveSubmit}
           isPending={approveMut.isPending}
+          vocabulary={vocabulary}
         />
       )}
 
@@ -1504,6 +1779,7 @@ export function SubmittalsPage() {
           onClose={() => setEditingSubmittal(null)}
           onSubmit={handleEditSubmit}
           isPending={updateMut.isPending}
+          vocabulary={vocabulary}
         />
       )}
 

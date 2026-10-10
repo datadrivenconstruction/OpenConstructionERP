@@ -13,7 +13,9 @@ is invisible to every mechanism meant to move it along, and it surfaces again
 only when the work it was blocking is already late.
 
 Like ``procurement/validators.py`` this module is deliberately
-**dependency-free**: standard library only, no ORM, no FastAPI, no session. The
+**dependency-free**: standard library only (plus this module's own
+``tracking``, which is standard library only too), no ORM, no FastAPI, no
+session. The
 rule classes in ``app.core.validation.rules`` stay thin wrappers translating a
 :class:`Finding` into a ``RuleResult``, so the checks are unit-testable without
 a database.
@@ -38,6 +40,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import date
 from typing import Any
+
+from app.modules.submittals.schemas import SUBMITTAL_TYPES
+from app.modules.submittals.tracking import approval_late_days, approval_needed_by, effective_outcome
 
 #: Payload key carrying the date the checks should consider "now".
 AS_OF_KEY = "as_of"
@@ -232,3 +237,163 @@ def check_linked_scope_present(submittal: dict[str, Any]) -> list[Finding]:
     if _linked_items(submittal):
         return []
     return [Finding(element_ref=_ref(submittal), details={"linked_boq_item_ids": []})]
+
+
+# ── The register: outcome, revision link, procurement dates ──────────────────
+#
+# These read the columns that make the submittal log a procurement tool: the
+# reviewer's stamp, the review history, required on site and lead time. The
+# arithmetic is the one the API and the printed register use
+# (:mod:`app.modules.submittals.tracking`, also standard library only), so a
+# finding and the figure next to it on the screen cannot disagree.
+
+#: Statuses that are themselves a review decision.
+_DECISION_STATUSES = frozenset({"approved", "approved_as_noted", "revise_and_resubmit", "rejected"})
+#: Statuses in which the current revision has not been answered yet.
+_UNANSWERED_STATUSES = frozenset({"submitted", "under_review"})
+#: Submittal types that offer a product somebody manufactures.
+#: Named one at a time and checked against the module's one list of types, so
+#: a type renamed there fails here at import instead of silently never matching.
+_PRODUCT_DATA = "product_data"
+_SAMPLE = "sample"
+MATERIAL_TYPES = frozenset((_PRODUCT_DATA, _SAMPLE))
+if not MATERIAL_TYPES.issubset(SUBMITTAL_TYPES):  # pragma: no cover - import-time guard
+    raise RuntimeError(f"material types {sorted(MATERIAL_TYPES)} are not all submittal types")
+
+
+def _whole(raw: Any) -> int | None:
+    if raw is None or isinstance(raw, bool):
+        return None
+    try:
+        number = int(raw)
+    except (TypeError, ValueError):
+        return None
+    return number if number >= 0 else None
+
+
+def check_resubmission_linked(submittal: dict[str, Any]) -> list[Finding]:
+    """A resubmission must be traceable to the revision it replaces.
+
+    Revisions are revised in place, so the only trace of revision 1 once
+    revision 2 is in is its entry in ``review_history``: what was stamped on
+    it, when it went in and when it came back. A submittal at revision 2 or
+    later with no entry for the revision before is a resubmission whose
+    reason nobody can read, which happens when the revision number is typed
+    in rather than reached through a review. WARNING: the record is thin, the
+    submittal itself may be perfectly good.
+    """
+    revision = _whole(submittal.get("current_revision"))
+    if revision is None or revision < 2:
+        return []
+    history = submittal.get("review_history")
+    reviewed = (
+        {_whole(entry.get("revision")) for entry in history if isinstance(entry, dict)}
+        if isinstance(history, list)
+        else set()
+    )
+    if revision - 1 in reviewed:
+        return []
+    return [
+        Finding(
+            element_ref=_ref(submittal),
+            params={"revision": str(revision), "previous": str(revision - 1)},
+            details={"current_revision": revision, "reviewed_revisions": sorted(r for r in reviewed if r is not None)},
+        )
+    ]
+
+
+def check_outcome_matches_status(submittal: dict[str, Any]) -> list[Finding]:
+    """The stamp and the workflow status must tell the same story.
+
+    Three ways they cannot: a status that is a decision with a different
+    decision stamped; a document still with the reviewer that already carries
+    a stamp; a closed submittal stamped "revise and resubmit", which the
+    workflow never closes. No stamp at all is not a contradiction: rows from
+    before the stamp was stored have none.
+    """
+    outcome = str(submittal.get("review_outcome") or "").strip()
+    if not outcome:
+        return []
+    status = str(submittal.get("status") or "").strip()
+    contradicts = (
+        (status in _DECISION_STATUSES and status != outcome)
+        or status in _UNANSWERED_STATUSES
+        or (status == "closed" and outcome == "revise_and_resubmit")
+    )
+    if not contradicts:
+        return []
+    return [
+        Finding(
+            element_ref=_ref(submittal),
+            params={"outcome": outcome, "status": status},
+            details={"review_outcome": outcome, "status": status},
+        )
+    ]
+
+
+def check_required_on_site_after_submitted(submittal: dict[str, Any]) -> list[Finding]:
+    """An item cannot be needed on site before its submittal was even filed.
+
+    Measured against ``date_submitted`` only. A draft has no submission date
+    and the planner is still free to set one that works.
+    """
+    on_site = parse_date(submittal.get("required_on_site_date"))
+    submitted = parse_date(submittal.get("date_submitted"))
+    if on_site is None or submitted is None or on_site >= submitted:
+        return []
+    return [
+        Finding(
+            element_ref=_ref(submittal),
+            params={"on_site": on_site.isoformat(), "submitted": submitted.isoformat()},
+            details={"required_on_site_date": on_site.isoformat(), "date_submitted": submitted.isoformat()},
+        )
+    ]
+
+
+def check_long_lead_has_lead_time(submittal: dict[str, Any]) -> list[Finding]:
+    """A long-lead item must say how long the lead is.
+
+    The flag alone moves nothing: the date an approval is needed by is
+    required on site less the lead time, and without the lead time there is
+    no such date, so the one item that most needs chasing drops out of the
+    late list.
+    """
+    if submittal.get("long_lead") is not True or _whole(submittal.get("lead_time_weeks")) is not None:
+        return []
+    return [Finding(element_ref=_ref(submittal), details={"long_lead": True, "lead_time_weeks": None})]
+
+
+def check_approval_needed_by_not_passed(submittal: dict[str, Any]) -> list[Finding]:
+    """Past required on site less lead time, an item not yet approved is already late.
+
+    From that day every further day in review is a day the delivery slips.
+    WARNING, with the number of days: nothing about the submittal is wrong,
+    the programme is.
+    """
+    needed_by = approval_needed_by(submittal.get("required_on_site_date"), submittal.get("lead_time_weeks"))
+    status = submittal.get("status")
+    outcome = effective_outcome(status, submittal.get("review_outcome"))
+    late = approval_late_days(status, outcome, needed_by, submittal.get(AS_OF_KEY))
+    if not late or needed_by is None:
+        return []
+    return [
+        Finding(
+            element_ref=_ref(submittal),
+            params={"days": str(late), "needed_by": needed_by.isoformat()},
+            details={"approval_needed_by": needed_by.isoformat(), "days_late": late, "status": str(status or "")},
+        )
+    ]
+
+
+def check_material_has_manufacturer(submittal: dict[str, Any]) -> list[Finding]:
+    """A material submittal should name who makes the product.
+
+    The reviewer approves a product from a manufacturer, not a description,
+    and the approved-brand list is built from this field. WARNING: a generic
+    material is sometimes submitted before the brand is chosen.
+    """
+    if str(submittal.get("submittal_type") or "") not in MATERIAL_TYPES:
+        return []
+    if str(submittal.get("manufacturer") or "").strip():
+        return []
+    return [Finding(element_ref=_ref(submittal), details={"manufacturer": None})]

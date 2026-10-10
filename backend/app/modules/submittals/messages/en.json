@@ -1,0 +1,28 @@
+{
+  "submittal": {
+    "resubmission_linked": {
+      "fail": "This submittal is at revision {revision}, but no review of revision {previous} is recorded, so nobody can read why it was sent in again",
+      "suggestion": "Reach a new revision through a review marked revise and resubmit, or correct the revision number"
+    },
+    "outcome_matches_status": {
+      "fail": "The reviewer's stamp says {outcome}, but the submittal's status is {status}",
+      "suggestion": "Record the decision through the review action so the stamp and the status move together"
+    },
+    "required_on_site_after_submitted": {
+      "fail": "The item is required on site on {on_site}, before its submittal was filed on {submitted}",
+      "suggestion": "Correct the required on site date, or record that the delivery date is already lost"
+    },
+    "long_lead_has_lead_time": {
+      "fail": "This submittal is marked long lead but has no lead time, so the date its approval is needed by cannot be worked out",
+      "suggestion": "Enter the lead time in weeks from order to delivery on site"
+    },
+    "approval_needed_by_not_passed": {
+      "fail": "Approval was needed by {needed_by} for the item to arrive in time; it is still not approved {days} days later",
+      "suggestion": "Chase the review, or agree a later required on site date with the programme"
+    },
+    "material_has_manufacturer": {
+      "fail": "This material submittal names no manufacturer, so the reviewer has no product to approve",
+      "suggestion": "Enter the manufacturer or brand being offered"
+    }
+  }
+}

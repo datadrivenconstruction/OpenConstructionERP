@@ -3,7 +3,9 @@
 """Submittals API routes.
 
 Endpoints:
-    GET    /                          - List submittals for a project
+    GET    /                          - List submittals for a project (filters, sorting)
+    GET    /summary/                  - Register header counts for a project
+    GET    /vocabulary/               - Types, disciplines and outcome codes with labels
     POST   /                          - Create submittal
     GET    /{submittal_id}            - Get single submittal
     PATCH  /{submittal_id}            - Update submittal
@@ -53,6 +55,10 @@ from app.modules.approval_routes.schemas import (
 )
 from app.modules.approval_routes.service import ApprovalRouteService
 from app.modules.submittals.schemas import (
+    DISCIPLINE_PATTERN,
+    REVIEW_OUTCOME_PATTERN,
+    SUBMITTAL_SORT_FIELDS,
+    SUBMITTAL_TYPE_PATTERN,
     StartApprovalRequest,
     SubmittalApproveRequest,
     SubmittalCreate,
@@ -61,6 +67,7 @@ from app.modules.submittals.schemas import (
     SubmittalUpdate,
 )
 from app.modules.submittals.service import SubmittalService
+from app.modules.submittals.tracking import track
 
 router = APIRouter(tags=["submittals"])
 
@@ -69,6 +76,12 @@ router = APIRouter(tags=["submittals"])
 from app.modules.submittals.export_routes import export_router  # noqa: E402
 
 router.include_router(export_router)
+
+# The register header and the picker vocabularies: static paths too, so they
+# are included before the "/{id}" routes for the same reason.
+from app.modules.submittals.register_routes import register_router  # noqa: E402
+
+router.include_router(register_router)
 logger = logging.getLogger(__name__)
 
 # Magic-byte allow-list for direct submittal-attachment uploads.
@@ -147,10 +160,49 @@ async def _fetch_user_names(
     return out
 
 
+async def _name_map(session: AsyncSession, submittals: Iterable[object]) -> dict[str, str]:
+    """Names for one page of submittals: who holds the ball, and the supplier.
+
+    ``supplier`` holds a contact id or a typed name, like ``submitted_by_org``,
+    so it goes through the shared party lookup. That lookup is skipped when no
+    row names a supplier, which keeps a page of older rows at one query.
+    """
+    rows = list(submittals)
+    names = await _fetch_user_names(session, (getattr(s, "ball_in_court", None) for s in rows))
+    suppliers = [getattr(s, "supplier", None) for s in rows]
+    if any(suppliers):
+        from app.core.party_names import resolve_party_names
+
+        names.update(await resolve_party_names(session, suppliers))
+    return names
+
+
+def _supplier_name(supplier: object, names: dict[str, str]) -> str | None:
+    """The supplier as a name: the resolved contact, or the text as typed."""
+    text = str(supplier or "").strip()
+    if not text:
+        return None
+    if text in names:
+        return names[text]
+    try:
+        uuid.UUID(text)
+    except ValueError:
+        return text
+    return None  # an id nobody answers to; the client shows the raw value
+
+
+def _iso(value: object) -> str | None:
+    return value.isoformat() if value is not None else None  # type: ignore[attr-defined]
+
+
 def _to_response(item: object, name_map: dict[str, str] | None = None) -> SubmittalResponse:
     names = name_map or {}
     ball = str(item.ball_in_court) if item.ball_in_court else None  # type: ignore[attr-defined]
     meta = getattr(item, "metadata_", {}) or {}
+    figures = track(item, SubmittalService._today())
+    supplier = getattr(item, "supplier", None)
+    history = getattr(item, "review_history", None)
+    drawings = getattr(item, "linked_drawing_ids", None)
     return SubmittalResponse(
         id=item.id,  # type: ignore[attr-defined]
         project_id=item.project_id,  # type: ignore[attr-defined]
@@ -173,6 +225,28 @@ def _to_response(item: object, name_map: dict[str, str] | None = None) -> Submit
         metadata=meta,
         description=meta.get("description"),
         review_notes=meta.get("review_notes"),
+        discipline=getattr(item, "discipline", None),
+        manufacturer=getattr(item, "manufacturer", None),
+        model_reference=getattr(item, "model_reference", None),
+        country_of_origin=getattr(item, "country_of_origin", None),
+        supplier=supplier,
+        supplier_name=_supplier_name(supplier, names),
+        review_period_days=getattr(item, "review_period_days", None),
+        required_on_site_date=getattr(item, "required_on_site_date", None),
+        long_lead=getattr(item, "long_lead", False) is True,
+        lead_time_weeks=getattr(item, "lead_time_weeks", None),
+        linked_drawing_ids=[str(d) for d in drawings] if isinstance(drawings, list) else [],
+        review_history=[e for e in history if isinstance(e, dict)] if isinstance(history, list) else [],
+        review_outcome=figures.outcome,
+        review_code=figures.code,
+        may_proceed=figures.may_proceed,
+        resubmit_for_record=figures.resubmit_for_record,
+        days_in_review=figures.days_in_review,
+        review_due_date=_iso(figures.review_due_date),
+        review_overdue_days=figures.review_overdue_days,
+        approval_needed_by=_iso(figures.approval_needed_by),
+        approval_late_days=figures.approval_late_days,
+        submit_by_date=_iso(figures.submit_by_date),
         created_at=item.created_at,  # type: ignore[attr-defined]
         updated_at=item.updated_at,  # type: ignore[attr-defined]
     )
@@ -190,9 +264,24 @@ async def list_submittals(
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
     status_filter: str | None = Query(default=None, alias="status"),
-    type_filter: str | None = Query(default=None, alias="type"),
+    type_filter: str | None = Query(default=None, alias="type", pattern=SUBMITTAL_TYPE_PATTERN),
+    discipline: str | None = Query(default=None, pattern=DISCIPLINE_PATTERN),
+    outcome: str | None = Query(default=None, pattern=REVIEW_OUTCOME_PATTERN),
+    review_code: str | None = Query(default=None, max_length=20),
+    long_lead: bool | None = Query(default=None),
+    review_overdue: bool | None = Query(default=None),
+    approval_late: bool | None = Query(default=None),
+    sort: str | None = Query(default=None, pattern=rf"^({'|'.join(SUBMITTAL_SORT_FIELDS)})$"),
+    order: str = Query(default="desc", pattern="^(asc|desc)$"),
     service: SubmittalService = Depends(_get_service),
 ) -> list[SubmittalResponse]:
+    """List a project's submittals.
+
+    ``type=shop_drawing`` is the shop drawing register and ``type=product_data``
+    the material approval register: one register, filtered. ``outcome`` is the
+    reviewer's decision and ``review_code`` the mark as stamped.
+    ``review_overdue`` and ``approval_late`` are measured as of today.
+    """
     await verify_project_access(project_id, user_id, session)
     submittals, _ = await service.list_submittals(
         project_id,
@@ -200,8 +289,16 @@ async def list_submittals(
         limit=limit,
         status_filter=status_filter,
         submittal_type=type_filter,
+        discipline=discipline,
+        review_outcome=outcome,
+        review_code=review_code,
+        long_lead=long_lead,
+        review_overdue=review_overdue,
+        approval_late=approval_late,
+        sort=sort,
+        descending=order == "desc",
     )
-    name_map = await _fetch_user_names(session, (s.ball_in_court for s in submittals))
+    name_map = await _name_map(session, submittals)
     return [_to_response(s, name_map) for s in submittals]
 
 
@@ -215,7 +312,7 @@ async def create_submittal(
 ) -> SubmittalResponse:
     await verify_project_access(data.project_id, user_id, session)
     submittal = await service.create_submittal(data, user_id=user_id)
-    name_map = await _fetch_user_names(session, [submittal.ball_in_court])
+    name_map = await _name_map(session, [submittal])
     return _to_response(submittal, name_map)
 
 
@@ -232,7 +329,7 @@ async def get_submittal(
 ) -> SubmittalResponse:
     submittal = await service.get_submittal(submittal_id)
     await verify_project_access(submittal.project_id, str(user_id), session)
-    name_map = await _fetch_user_names(session, [submittal.ball_in_court])
+    name_map = await _name_map(session, [submittal])
     return _to_response(submittal, name_map)
 
 
@@ -248,7 +345,7 @@ async def update_submittal(
     existing = await service.get_submittal(submittal_id)
     await verify_project_access(existing.project_id, str(user_id), session)
     submittal = await service.update_submittal(submittal_id, data)
-    name_map = await _fetch_user_names(session, [submittal.ball_in_court])
+    name_map = await _name_map(session, [submittal])
     return _to_response(submittal, name_map)
 
 
@@ -296,7 +393,7 @@ async def submit_submittal(
     existing = await service.get_submittal(submittal_id)
     await verify_project_access(existing.project_id, str(user_id), session)
     submittal = await service.submit_submittal(submittal_id)
-    name_map = await _fetch_user_names(session, [submittal.ball_in_court])
+    name_map = await _name_map(session, [submittal])
     return _to_response(submittal, name_map)
 
 
@@ -329,8 +426,10 @@ async def review_submittal(
         body.status,
         reviewer_id=user_id,
         notes=body.notes,
+        code=body.code,
+        resubmit_for_record=body.resubmit_for_record,
     )
-    name_map = await _fetch_user_names(session, [submittal.ball_in_court])
+    name_map = await _name_map(session, [submittal])
     return _to_response(submittal, name_map)
 
 
@@ -362,8 +461,13 @@ async def approve_submittal(
         )
     existing = await service.get_submittal(submittal_id)
     await verify_project_access(existing.project_id, str(user_id), session)
-    submittal = await service.approve_submittal(submittal_id, approver_id=user_id, notes=body.notes if body else None)
-    name_map = await _fetch_user_names(session, [submittal.ball_in_court])
+    submittal = await service.approve_submittal(
+        submittal_id,
+        approver_id=user_id,
+        notes=body.notes if body else None,
+        code=body.code if body else None,
+    )
+    name_map = await _name_map(session, [submittal])
     return _to_response(submittal, name_map)
 
 

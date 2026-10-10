@@ -63,6 +63,9 @@ class _StubSubmittalRepo:
         limit: int = 50,
         status: str | None = None,
         submittal_type: str | None = None,
+        sort: str | None = None,
+        descending: bool = True,
+        **_filters: Any,
     ) -> tuple[list[Any], int]:
         rows = [r for r in self.rows.values() if r.project_id == project_id]
         if status is not None:

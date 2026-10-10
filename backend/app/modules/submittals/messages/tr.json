@@ -1,0 +1,28 @@
+{
+  "submittal": {
+    "resubmission_linked": {
+      "fail": "Bu onay belgesi {revision}. revizyonda, ancak {previous}. revizyonun incelemesi kayıtlı değil; neden yeniden sunulduğu okunamıyor",
+      "suggestion": "Yeni revizyona \"revize edip yeniden sunun\" kararlı bir incelemeyle ulaşın veya revizyon numarasını düzeltin"
+    },
+    "outcome_matches_status": {
+      "fail": "İnceleyenin kararı {outcome}, ancak onay belgesinin durumu {status}",
+      "suggestion": "Kararı inceleme işlemiyle kaydedin; böylece karar ve durum birlikte ilerler"
+    },
+    "required_on_site_after_submitted": {
+      "fail": "Malzemenin şantiyede gerekli olduğu tarih {on_site}; bu tarih onay belgesinin sunulduğu {submitted} tarihinden önce",
+      "suggestion": "Şantiyede gerekli tarihi düzeltin veya teslim tarihinin kaçırıldığını kayda geçirin"
+    },
+    "long_lead_has_lead_time": {
+      "fail": "Bu onay belgesi uzun temin süreli olarak işaretli, ancak temin süresi girilmemiş; onayın en geç gereken tarihi hesaplanamıyor",
+      "suggestion": "Siparişten şantiyeye teslime kadar geçen temin süresini hafta olarak girin"
+    },
+    "approval_needed_by_not_passed": {
+      "fail": "Malzemenin zamanında gelmesi için onayın en geç {needed_by} tarihinde alınması gerekiyordu; {days} gün geçti ve hâlâ onaylanmadı",
+      "suggestion": "İncelemeyi takip edin veya iş programıyla daha geç bir şantiye tarihi kararlaştırın"
+    },
+    "material_has_manufacturer": {
+      "fail": "Bu malzeme onay belgesinde üretici belirtilmemiş; inceleyenin onaylayacağı bir ürün yok",
+      "suggestion": "Önerilen üreticiyi veya markayı girin"
+    }
+  }
+}

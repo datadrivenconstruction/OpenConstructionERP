@@ -16,6 +16,7 @@ from app.core.validation.engine import ValidationReport, validation_engine
 from app.modules.submittals.models import Submittal
 from app.modules.submittals.repository import SubmittalRepository
 from app.modules.submittals.schemas import SubmittalCreate, SubmittalUpdate
+from app.modules.submittals.tracking import replaces_returned_revision, review_stamp, summarise, track
 
 logger = logging.getLogger(__name__)
 
@@ -162,6 +163,16 @@ class SubmittalService:
                 date_required=data.date_required,
                 date_returned=data.date_returned,
                 linked_boq_item_ids=data.linked_boq_item_ids,
+                discipline=data.discipline,
+                manufacturer=data.manufacturer,
+                model_reference=data.model_reference,
+                country_of_origin=data.country_of_origin,
+                supplier=data.supplier,
+                review_period_days=data.review_period_days,
+                required_on_site_date=data.required_on_site_date,
+                long_lead=data.long_lead,
+                lead_time_weeks=data.lead_time_weeks,
+                linked_drawing_ids=data.linked_drawing_ids,
                 created_by=user_id,
                 metadata_=create_meta,
             )
@@ -225,14 +236,59 @@ class SubmittalService:
         limit: int = 50,
         status_filter: str | None = None,
         submittal_type: str | None = None,
+        discipline: str | None = None,
+        review_outcome: str | None = None,
+        review_code: str | None = None,
+        long_lead: bool | None = None,
+        review_overdue: bool | None = None,
+        approval_late: bool | None = None,
+        sort: str | None = None,
+        descending: bool = True,
+        as_of: str | None = None,
     ) -> tuple[list[Submittal], int]:
-        return await self.repo.list_for_project(
-            project_id,
-            offset=offset,
-            limit=limit,
-            status=status_filter,
-            submittal_type=submittal_type,
-        )
+        """List a project's submittals, filtered and ordered.
+
+        ``review_overdue`` and ``approval_late`` depend on today's date and on
+        arithmetic over stored date strings, so they are applied in Python to
+        the rows the stored filters let through and the page is cut afterwards.
+        Without either, the database filters, orders and pages as before.
+        """
+        stored = {
+            "status": status_filter,
+            "submittal_type": submittal_type,
+            "discipline": discipline,
+            "review_outcome": review_outcome,
+            "review_code": review_code,
+            "long_lead": long_lead,
+        }
+        if review_overdue is None and approval_late is None:
+            return await self.repo.list_for_project(
+                project_id, offset=offset, limit=limit, sort=sort, descending=descending, **stored
+            )
+        today = as_of or self._today()
+        rows = await self.repo.register_rows(project_id, sort=sort, descending=descending, **stored)
+        kept = []
+        for row in rows:
+            figures = track(row, today)
+            if review_overdue is not None and figures.review_overdue != review_overdue:
+                continue
+            if approval_late is not None and figures.approval_late != approval_late:
+                continue
+            kept.append(row)
+        return kept[offset : offset + limit], len(kept)
+
+    @staticmethod
+    def _today() -> str:
+        """Today as the ISO date every derived register figure is measured from."""
+        from datetime import UTC, datetime
+
+        return datetime.now(UTC).date().isoformat()
+
+    async def register_summary(self, project_id: uuid.UUID, *, as_of: str | None = None) -> dict[str, Any]:
+        """The counts shown above a project's register, as of today."""
+        today = as_of or self._today()
+        rows = await self.repo.register_rows(project_id)
+        return {"project_id": project_id, "as_of": today, **summarise(rows, today)}
 
     async def update_submittal(
         self,
@@ -382,8 +438,12 @@ class SubmittalService:
 
         # Revision management: First submit → revision 1; resubmit → previous + 1.
         current_rev = submittal.current_revision or 0
-        if submittal.status == "revise_and_resubmit":
+        if replaces_returned_revision(submittal):
             fields["current_revision"] = current_rev + 1
+            # The stamp belonged to the revision being replaced. It stays in
+            # ``review_history``; the new revision has not been reviewed yet.
+            fields["review_outcome"] = None
+            fields["review_code"] = None
         elif current_rev == 0:
             fields["current_revision"] = 1
 
@@ -494,6 +554,7 @@ class SubmittalService:
         from datetime import UTC, datetime
 
         linked = submittal.linked_boq_item_ids
+        history = getattr(submittal, "review_history", None)
         return {
             "id": str(submittal.id),
             "project_id": str(submittal.project_id),
@@ -507,6 +568,14 @@ class SubmittalService:
             "date_required": submittal.date_required,
             "current_revision": submittal.current_revision,
             "linked_boq_item_ids": list(linked) if isinstance(linked, list) else [],
+            "submittal_type": submittal.submittal_type,
+            "manufacturer": getattr(submittal, "manufacturer", None),
+            "review_outcome": getattr(submittal, "review_outcome", None),
+            "review_period_days": getattr(submittal, "review_period_days", None),
+            "review_history": list(history) if isinstance(history, list) else [],
+            "required_on_site_date": getattr(submittal, "required_on_site_date", None),
+            "long_lead": getattr(submittal, "long_lead", False) is True,
+            "lead_time_weeks": getattr(submittal, "lead_time_weeks", None),
             "as_of": datetime.now(UTC).date().isoformat(),
         }
 
@@ -592,8 +661,19 @@ class SubmittalService:
         new_status: str,
         reviewer_id: str,
         notes: str | None = None,
+        *,
+        code: str | None = None,
+        resubmit_for_record: bool = False,
     ) -> Submittal:
         """Review a submittal (approve, reject, etc.).
+
+        The decision is also stamped on the row (``review_outcome``,
+        ``review_code``) and appended to ``review_history``, so it stays
+        readable after the status moves on. ``code`` is the mark as the
+        reviewer wrote it; without one the default letter for the decision is
+        recorded. ``resubmit_for_record`` marks an approval as noted that still
+        owes a corrected copy: the work may proceed and the copy is attached
+        before the submittal is closed.
 
         Ball-in-court updates depend on the decision:
         - ``approved`` / ``approved_as_noted``: stays with reviewer (done)
@@ -627,6 +707,17 @@ class SubmittalService:
             "date_returned": datetime.now(UTC).strftime("%Y-%m-%d"),
             "ball_in_court": ball,
         }
+        fields.update(
+            review_stamp(
+                submittal,
+                new_status,
+                code=code,
+                reviewer_id=reviewer_id,
+                date_returned=fields["date_returned"],
+                notes=review_notes,
+                resubmit_for_record=resubmit_for_record,
+            )
+        )
         # Persist the reviewer's comments into metadata so they are durable
         # and visible in the audit trail / detail view. We merge into a copy
         # of the existing metadata to avoid clobbering attachments etc.
@@ -724,6 +815,8 @@ class SubmittalService:
         submittal_id: uuid.UUID,
         approver_id: str,
         notes: str | None = None,
+        *,
+        code: str | None = None,
     ) -> Submittal:
         """Final approval of a submittal.
 
@@ -764,6 +857,16 @@ class SubmittalService:
             "ball_in_court": None,
         }
         approve_notes = (notes or "").strip()
+        fields.update(
+            review_stamp(
+                submittal,
+                "approved",
+                code=code,
+                reviewer_id=approver_id,
+                date_returned=fields["date_returned"],
+                notes=approve_notes,
+            )
+        )
         if approve_notes:
             # Merge into a copy of the existing metadata so attachments etc.
             # are not clobbered, mirroring review_submittal.

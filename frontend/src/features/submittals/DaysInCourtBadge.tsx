@@ -23,6 +23,12 @@ import { Hourglass } from 'lucide-react';
 interface Props {
   dateSubmitted: string | null | undefined;
   status: string;
+  /**
+   * The server's own count of days in review, when it sent one. It is
+   * measured on the server's calendar and matches the printed register, so
+   * it is used as given and the date is not subtracted here at all.
+   */
+  days?: number | null;
 }
 
 const IN_COURT = new Set(['submitted', 'under_review']);
@@ -47,12 +53,12 @@ function daysSinceUtc(isoYmd: string): number | null {
   return diff < 0 ? 0 : diff;
 }
 
-export function DaysInCourtBadge({ dateSubmitted, status }: Props) {
+export function DaysInCourtBadge({ dateSubmitted, status, days: serverDays }: Props) {
   const { t } = useTranslation();
 
   if (!dateSubmitted || !IN_COURT.has(status)) return null;
 
-  const days = daysSinceUtc(dateSubmitted);
+  const days = typeof serverDays === 'number' ? serverDays : daysSinceUtc(dateSubmitted);
   if (days === null) return null;
   // Suppress the chip entirely for fast / fresh reviews — the column
   // would otherwise glow with "1d in court" noise on every row.

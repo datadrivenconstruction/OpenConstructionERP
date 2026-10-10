@@ -8,7 +8,7 @@ Tables:
 
 import uuid
 
-from sqlalchemy import JSON, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import JSON, Boolean, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
@@ -44,7 +44,7 @@ class Submittal(Base):
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="draft", index=True)
     ball_in_court: Mapped[str | None] = mapped_column(GUID(), nullable=True)
     current_revision: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
-    submitted_by_org: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    submitted_by_org: Mapped[str | None] = mapped_column(String(255), nullable=True)
     reviewer_id: Mapped[str | None] = mapped_column(GUID(), nullable=True)
     approver_id: Mapped[str | None] = mapped_column(GUID(), nullable=True)
     date_submitted: Mapped[str | None] = mapped_column(String(20), nullable=True)
@@ -53,6 +53,62 @@ class Submittal(Base):
 
     # Linked BOQ item IDs: array of UUID strings
     linked_boq_item_ids: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
+    )
+
+    # ── The register a contractor runs procurement from ──────────────────
+    #
+    # Every column below is nullable or carries a server default, so the boot
+    # heal (``app.core.postgres_migrator``) can add it to a table that already
+    # holds rows. A row from before them reads as "not recorded" throughout.
+
+    # Trade the submittal belongs to. A code from ``tracking.DISCIPLINES`` or
+    # any other lower-case code a project uses; free on the DB side like
+    # ``oe_rfi_rfi.discipline``.
+    discipline: Mapped[str | None] = mapped_column(String(50), nullable=True, index=True)
+    # What is being offered: brand, the manufacturer's own reference, where it
+    # is made (ISO 3166-1 alpha-2) and who sells it. ``supplier`` holds a
+    # contact id or a typed name, the same convention as ``submitted_by_org``.
+    manufacturer: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    model_reference: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    country_of_origin: Mapped[str | None] = mapped_column(String(2), nullable=True)
+    supplier: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
+    # What the reviewer stamped on the current revision. ``status`` says where
+    # the document is in the process and moves on (to ``closed``, or back to
+    # ``submitted`` on a resubmission); the decision and the mark printed on
+    # the stamp have to stay readable after that. ``review_outcome`` is one of
+    # the four review decisions, ``review_code`` the mark as the reviewer
+    # wrote it ("B", "2").
+    review_outcome: Mapped[str | None] = mapped_column(String(50), nullable=True, index=True)
+    review_code: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    # Calendar days the contract gives the reviewer. NULL means not recorded,
+    # and then "overdue for review" is unknown rather than assumed.
+    review_period_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # One entry per finished review cycle (see ``tracking.history_entry``).
+    # Revisions are revised in place, so this is what remains of a replaced
+    # revision and what links a resubmission to it.
+    review_history: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
+    )
+
+    # Procurement: when the item has to be on site and how long it takes to
+    # arrive once ordered. Required on site less the lead time is the last day
+    # an approval is still in time.
+    required_on_site_date: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    long_lead: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")
+    lead_time_weeks: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    # Drawing sheets or documents this submittal is about, by id. A soft link
+    # with no foreign key, like ``oe_rfi_rfi.linked_drawing_ids``. Distinct
+    # from the attachments in ``metadata``, which are the submitted files.
+    linked_drawing_ids: Mapped[list] = mapped_column(  # type: ignore[assignment]
         JSON,
         nullable=False,
         default=list,
