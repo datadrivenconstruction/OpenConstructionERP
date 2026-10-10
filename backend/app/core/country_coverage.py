@@ -267,8 +267,8 @@ def _run(name: str, fn: Probe, country: str) -> DimensionReport:
 # written. It must never stand in for a behavioural question by reading a table
 # the behaviour does not read directly, because behaviour can sit in aliasing
 # layers the table knows nothing about. calendar.schedule_regions is the worked
-# example: sixteen of the eighteen countries on its axis are not keys of the
-# table at all, so a membership test on the table calls sixteen countries
+# example: seventeen of the nineteen countries on its axis are not keys of the
+# table at all, so a membership test on the table calls seventeen countries
 # uncovered while the resolver returns a real calendar for every one of them.
 #
 # Executing the resolver itself is a different act and is allowed. When the
@@ -621,12 +621,12 @@ def _schedule_calendar(country: str) -> DimensionReport:
     not the question a caller asks.
 
     Measured, and stated as a property of the registry rather than of whichever
-    countries someone happened to ask about: of the eighteen countries on
-    ``_CALENDAR_BY_COUNTRY``, sixteen are not keys of ``WORK_CALENDARS`` at all.
-    A membership test on the table calls those sixteen uncovered while the
+    countries someone happened to ask about: of the nineteen countries on
+    ``_CALENDAR_BY_COUNTRY``, seventeen are not keys of ``WORK_CALENDARS`` at all.
+    A membership test on the table calls those seventeen uncovered while the
     resolver returns a real calendar for every one of them. Only ``US`` and
     ``RU`` are spelled the same way in both. Counted over a cohort instead, the
-    same fact comes out as five, or ten, or sixteen depending on who was asked,
+    same fact comes out as five, or ten, or seventeen depending on who was asked,
     which is how a number like this goes stale with nobody having edited it.
 
     Hence: no reading of the table as a proxy, ever. What the probe does when
