@@ -16,11 +16,9 @@ permissions:
   contents: read
 
 env:
-  # REHEARSAL: 18.3.0 -> 18.4.0 to prove the harness on all three OSes before the tag.
-  # For the real check set OLD 18.4.0, NEW 18.5.0 and REHEARSAL to ''.
-  OLD_VERSION: '18.3.0'
-  NEW_VERSION: '18.4.0'
-  REHEARSAL: '1'
+  OLD_VERSION: '18.4.0'
+  NEW_VERSION: '18.5.0'
+  REHEARSAL: ''
   PYTHONUTF8: '1'
 
 jobs:
@@ -51,7 +49,7 @@ jobs:
           if [ -x "$T/venv/Scripts/python.exe" ]; then echo "VPY=$T/venv/Scripts/python.exe" >> "$GITHUB_ENV"; else echo "VPY=$T/venv/bin/python" >> "$GITHUB_ENV"; fi
       - name: Wait until PyPI serves the new version
         run: |
-          for i in $(seq 1 30); do
+          for i in $(seq 1 90); do
             python -m pip download -q --no-deps -d "$RUNNER_TEMP/dl" "openconstructionerp==$NEW_VERSION" && break
             echo "not on PyPI yet ($i)"; sleep 30
           done
@@ -84,7 +82,7 @@ jobs:
           python $L stop "$VENV" "$DATA"
           "$VPY" -m pip install --upgrade "openconstructionerp==$NEW_VERSION" >"$LOGS/pip-upgrade.log" 2>&1 || { tail -60 "$LOGS/pip-upgrade.log"; exit 1; }
           grep -E "Successfully installed" "$LOGS/pip-upgrade.log" | cut -c1-300
-          "$VPY" -m pip show openconstructionerp | head -2
+          "$VPY" -m pip show openconstructionerp >"$LOGS/pip-show.txt"; head -2 "$LOGS/pip-show.txt"
           rc=0
           python $L start "$VENV" "$DATA" "$LOGS/serve-new.log"
           python $P wait --timeout 1800 --label upgraded --timing-file "$LOGS/timings.jsonl" || { tail -120 "$LOGS/serve-new.log"; python $L stop "$VENV" "$DATA"; exit 1; }
