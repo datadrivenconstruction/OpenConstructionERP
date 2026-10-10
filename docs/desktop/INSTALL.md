@@ -45,7 +45,7 @@ chmod +x OpenConstructionERP*.AppImage
 
 ## First launch
 
-The very first time you open the app it sets up its local database, and that takes a little while, usually somewhere between 40 and 90 seconds. While it works you will see a branded loading screen telling you the setup is in progress. This is normal and it only happens once. Please let it finish without closing the window. Every launch after this one starts quickly.
+The very first time you open the app it sets up its local database, and that takes a little while, usually a minute or two. While it works you will see a branded loading screen telling you the setup is in progress. This is normal and it only happens once. Please let it finish without closing the window. Every launch after this one starts quickly.
 
 ## Sign in
 
