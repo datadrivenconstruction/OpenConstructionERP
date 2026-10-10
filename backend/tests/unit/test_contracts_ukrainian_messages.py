@@ -34,7 +34,7 @@ def _fields(template: str) -> list[tuple[str, str, str | None]]:
 def test_ukrainian_contracts_preserve_every_message_and_formatter_contract() -> None:
     en = _flatten(json.loads((MESSAGES / "en.json").read_text(encoding="utf-8")))
     it = _flatten(json.loads((MESSAGES / "uk.json").read_text(encoding="utf-8")))
-    assert len(en) == 75
+    assert len(en) == 104
     assert it.keys() == en.keys()
     for key, source in en.items():
         assert isinstance(it[key], str) and it[key].strip(), key

@@ -1607,6 +1607,31 @@ PAYMENT_PLAN_RULES: tuple[type[ValidationRule], ...] = (
 )
 
 
+async def _claim_project(session: Any, source_id: Any) -> Any:
+    """The project that owns a progress claim, for the statutory tax lines."""
+    from app.modules.contracts.service import ContractsService  # noqa: PLC0415
+
+    return await ContractsService(session).claim_project_id(source_id)
+
+
+def _register_claim_as_tax_source() -> None:
+    """Tell the tax module that a progress claim belongs to this module.
+
+    The statutory tax lines are filed on a document by its id, and refuse
+    every kind of document nobody has claimed. Without this a claim's taxes
+    could be neither stored nor read. The tax module is optional, so its
+    absence is not an error: there are then no tax lines to guard.
+    """
+    try:
+        from app.modules.tax_withholding.source_owners import register_source_owner  # noqa: PLC0415
+    except ModuleNotFoundError as exc:
+        if exc.name not in {"app.modules.tax_withholding", "app.modules.tax_withholding.source_owners"}:
+            raise
+        logger.info("contracts: no tax module on this install, progress claims not registered as a tax source")
+        return
+    register_source_owner("progress_claim", _claim_project)
+
+
 def register_contracts_validation_rules() -> None:
     """Register the contracts rules with the platform rule registry."""
     rule_registry.register(ContractPartyRolesRule(), [CONTRACTS_RULE_SET])
@@ -1621,6 +1646,14 @@ def register_contracts_validation_rules() -> None:
         rule_registry.register(rule_class(), [RETENTION_RELEASE_RULE_SET])
     for rule_class in PAYMENT_PLAN_RULES:
         rule_registry.register(rule_class(), [PAYMENT_PLAN_RULE_SET])
+    # The payment certificate has its own rule set and its own file. It is
+    # registered from here because this is the one registration the module's
+    # startup already calls, so the gate at certification cannot find the set
+    # missing on an install where everything else of this module is loaded.
+    from app.modules.contracts.hakedis_rules import register_hakedis_rules  # noqa: PLC0415
+
+    register_hakedis_rules()
+    _register_claim_as_tax_source()
     logger.debug(
         "contracts: registered 5 contract rules, %d payment application rules, %d retention release rules "
         "and %d payment plan rules",

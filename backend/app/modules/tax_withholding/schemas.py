@@ -759,6 +759,20 @@ class StatutoryCategoryResponse(BaseModel):
         return _serialise_exact(value)
 
 
+class StatutoryCategoryListResponse(BaseModel):
+    """One page of the categories on offer, with how many there are in all.
+
+    ``total`` counts every category the country, date and kind matched, so a
+    picker that received fewer ``items`` than that knows it is not showing
+    them all.
+    """
+
+    items: list[StatutoryCategoryResponse]
+    total: int
+    offset: int = 0
+    limit: int = 200
+
+
 __all__ = [
     "MAX_BANDS",
     "DeductionCreateRequest",
@@ -781,6 +795,7 @@ __all__ = [
     "ReverseChargeSaveResponse",
     "ReverseChargeUpdateRequest",
     "StatutoryCalcResponse",
+    "StatutoryCategoryListResponse",
     "StatutoryCategoryResponse",
     "StatutoryChoice",
     "StatutoryConfirmRequest",

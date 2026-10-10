@@ -15,9 +15,11 @@ No formulas: the totals are the computed totals, the same ones the PDF prints.
 A held line has no number to give; its cell holds the same marker the PDF
 prints, as text, so a sum over the column cannot quietly swallow it as a zero.
 
-Each sheet freezes its header rows, repeats them on every printed page, sets
-its print area and fits its width to one page, and gets the company letterhead
-from :func:`app.core.xlsx_branding.apply_company_header`.
+Each sheet freezes its header rows, repeats them on every printed page, fits
+its width to one page and gets the company letterhead from
+:func:`app.core.xlsx_branding.apply_company_header`. Its print area starts at
+the first row of that letterhead, so the printed sheet says which certificate
+it is.
 """
 
 from __future__ import annotations
@@ -32,7 +34,7 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
 from app.core.currency_registry import minor_units
-from app.core.regional_format import format_date
+from app.core.regional_format import date_format_for_country, format_date
 from app.core.xlsx_branding import apply_company_header
 from app.core.xlsx_text import store_strings_as_text
 from app.modules.contracts.hakedis import (
@@ -42,7 +44,15 @@ from app.modules.contracts.hakedis import (
     printed_summary,
     printed_works,
 )
-from app.modules.contracts.hakedis_layout import HakedisSettings, label, locale_languages, upper_for
+from app.modules.contracts.hakedis_layout import (
+    HakedisSettings,
+    contractor_label_key,
+    currency_label,
+    is_foreign_currency,
+    label,
+    locale_languages,
+    upper_for,
+)
 
 _ALERT = "B91C1C"
 _FILL = PatternFill("solid", fgColor="F3F4F6")
@@ -87,6 +97,40 @@ def _join(parts: tuple[str, ...]) -> str:
     return "\n".join(part for part in parts if part)
 
 
+def _date_number_format(country_code: str) -> str:
+    """The country's date order as a spreadsheet number format (``DD.MM.YYYY`` for Türkiye)."""
+    pattern = date_format_for_country(country_code)
+    return pattern.replace("%d", "DD").replace("%m", "MM").replace("%Y", "YYYY")
+
+
+def _signature_rows(
+    ws: Any,
+    row: int,
+    cert: Certificate,
+    languages: tuple[str, ...],
+    overrides: Any,
+    *,
+    title_column: int,
+    last_column: int,
+) -> int:
+    """One row per signature role: the role, then name, signature and date. Returns the next free row."""
+    contractor = contractor_label_key(cert.inp.signature_roles)
+    for role in cert.inp.signature_roles:
+        key = contractor if role in ("contractor", "subcontractor") else f"role.{role}"
+        title = tuple(upper_for(language, label(key, language, overrides)) for language in languages)
+        ws.cell(row=row, column=title_column, value=_join(title)).font = Font(bold=True)
+        ws.cell(row=row, column=title_column).alignment = _WRAP_TOP
+        captions = " / ".join(
+            " - ".join(label(caption, language, overrides) for language in languages)
+            for caption in ("sign.name", "sign.signature", "sign.date")
+        )
+        ws.cell(row=row, column=title_column + 1, value=captions).alignment = _WRAP_TOP
+        ws.merge_cells(start_row=row, start_column=title_column + 1, end_row=row, end_column=last_column)
+        ws.row_dimensions[row].height = 42
+        row += 1
+    return row
+
+
 def _page_setup(ws: Any, *, landscape: bool, last_column: int, last_row: int, title_rows: str) -> None:
     ws.page_setup.orientation = "landscape" if landscape else "portrait"
     ws.page_setup.paperSize = ws.PAPERSIZE_A4
@@ -124,10 +168,30 @@ def _summary_sheet(
         cell.font = Font(bold=True, color=_ALERT)
         ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=4)
         row += 1
+    currency = currency_label(inp.currency, languages[0], overrides)
+    # The header block is the print model's. Three things are the document's
+    # own: the lira is written "TL", the paid party carries the name it signs
+    # under, and the date of issue is a real date in the country's order.
+    contractor = (words("header.contractor"), words(contractor_label_key(inp.signature_roles)))
+    rows: list[tuple[tuple[str, ...], Any]] = []
     for names, value in header_rows(cert, locale, settings, issue_date):
+        shown: Any = value
+        if names == words("header.currency"):
+            shown = currency
+        elif names == words("header.issue_date") and issue_date is not None:
+            shown = issue_date
+        rows.append((tuple(a.replace(b, c, 1) for a, b, c in zip(names, *contractor, strict=True)), shown))
+        if names == words("header.currency") and is_foreign_currency(inp.country_code, inp.currency):
+            # No rate is an input of the certificate, so none is made up.
+            rows.append((words("fx.title"), " / ".join(words("fx.rate_missing"))))
+    for names, value in rows:
         ws.cell(row=row, column=1, value=_join(names)).font = Font(bold=True)
         ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=2)
-        ws.cell(row=row, column=3, value=value).alignment = _WRAP_TOP
+        cell = ws.cell(row=row, column=3, value=value)
+        cell.alignment = _WRAP_TOP
+        if isinstance(value, date):
+            cell.number_format = _date_number_format(inp.country_code)
+            cell.alignment = Alignment(horizontal="left", vertical="top")
         ws.merge_cells(start_row=row, start_column=3, end_row=row, end_column=4)
         ws.cell(row=row, column=1).alignment = _WRAP_TOP
         row += 1
@@ -143,7 +207,7 @@ def _summary_sheet(
     row += 1
 
     header_row = row
-    ws.cell(row=row, column=3, value=f"{_join(words('header.amount'))} ({inp.currency})")
+    ws.cell(row=row, column=3, value=f"{_join(words('header.amount'))} ({currency})")
     ws.cell(row=row, column=4, value=_join(words("basis.note")))
     for column in range(1, 5):
         cell = ws.cell(row=row, column=column)
@@ -214,18 +278,7 @@ def _summary_sheet(
             row += 1
 
     row += 1
-    for role in cert.inp.signature_roles:
-        title = tuple(upper_for(language, label(f"role.{role}", language, overrides)) for language in languages)
-        ws.cell(row=row, column=2, value=_join(title)).font = Font(bold=True)
-        ws.cell(row=row, column=2).alignment = _WRAP_TOP
-        captions = " / ".join(
-            " - ".join(label(key, language, overrides) for language in languages)
-            for key in ("sign.name", "sign.signature", "sign.date")
-        )
-        ws.cell(row=row, column=3, value=captions).alignment = _WRAP_TOP
-        ws.merge_cells(start_row=row, start_column=3, end_row=row, end_column=4)
-        ws.row_dimensions[row].height = 42
-        row += 1
+    row = _signature_rows(ws, row, cert, languages, overrides, title_column=2, last_column=4)
 
     ws.freeze_panes = ws.cell(row=header_row + 1, column=1)
     _page_setup(ws, landscape=False, last_column=4, last_row=row - 1, title_rows=f"{header_row}:{header_row}")
@@ -283,6 +336,12 @@ def _works_sheet(ws: Any, cert: Certificate, locale: str, settings: HakedisSetti
                     cell.fill = _FILL
         row += 1
 
+    # The printed works list is signed too, so the sheet carries the block.
+    row += 1
+    row = _signature_rows(
+        ws, row, cert, languages, overrides, title_column=title_column, last_column=max(title_column + 1, len(columns))
+    )
+
     ws.freeze_panes = "A3"
     _page_setup(ws, landscape=True, last_column=len(columns), last_row=row - 1, title_rows="1:2")
 
@@ -330,6 +389,10 @@ def render_hakedis_xlsx(
             else None
         )
         apply_company_header(sheet, title=title, subtitle=subtitle, details=details)
+        # The rows written above the table are part of the printed sheet: a
+        # print area set before them would start under the title block and
+        # print a certificate that does not say which one it is.
+        sheet.print_area = f"A1:{get_column_letter(sheet.max_column)}{sheet.max_row}"
 
     out = io.BytesIO()
     workbook.save(out)

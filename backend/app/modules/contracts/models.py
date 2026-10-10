@@ -24,6 +24,7 @@ Tables:
     oe_contracts_retention_release         - retention released at an event, billed on a claim
     oe_contracts_stored_material           - materials delivered but not yet installed
     oe_contracts_stored_material_movement  - deliveries, installs and removals of a stored material
+    oe_contracts_certificate_line          - entered and frozen lines of a payment certificate (hakediş)
 
 Notes:
     * counterparty_id is a plain UUID column (no SQLAlchemy ForeignKey) since
@@ -1383,3 +1384,60 @@ class StoredMaterialMovement(Base):
 
     def __repr__(self) -> str:
         return f"<StoredMaterialMovement {self.kind} {self.quantity} on {self.moved_on}>"
+
+
+class CertificateLine(Base):
+    """One line of a payment certificate (hakediş): entered by a person, or frozen.
+
+    Two kinds of row live here, told apart by ``frozen``.
+
+    A row with ``frozen`` false is what a person entered for one manual line
+    of a certificate that is still being prepared: an amount, a percent of the
+    line's base, or the statement that the line does not apply, with a note.
+
+    A row with ``frozen`` true is written once, when the document is
+    certified: one per summary line with the status, amount and basis the
+    line had at that moment, plus one row keyed ``@document`` whose ``basis``
+    holds everything the document is printed from. A certified certificate is
+    read back from these rows and never computed again, so a rate table, a
+    label or a layout changed afterwards cannot change what was signed.
+
+    ``source_kind`` and ``source_id`` name the document the same way the
+    statutory tax lines do: ``progress_claim`` for a claim of this module,
+    ``sub_payment_application`` for a subcontractor's payment application.
+    ``source_id`` is a plain id for that reason, since the second kind lives
+    in a module this one must load without.
+    """
+
+    __tablename__ = "oe_contracts_certificate_line"
+    __table_args__ = (
+        UniqueConstraint(
+            "source_kind",
+            "source_id",
+            "line_key",
+            "frozen",
+            name="uq_oe_contracts_certificate_line_source_key",
+        ),
+    )
+
+    source_kind: Mapped[str] = mapped_column(String(32), nullable=False)
+    source_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False, index=True)
+    line_key: Mapped[str] = mapped_column(String(64), nullable=False)
+    # value | not_applicable | held
+    calc_status: Mapped[str] = mapped_column(String(24), nullable=False, default="value")
+    amount: Mapped[Decimal | None] = mapped_column(Numeric(18, 4), nullable=True)
+    # A manual line entered as a percent of its base instead of an amount.
+    pct: Mapped[Decimal | None] = mapped_column(Numeric(9, 4), nullable=True)
+    basis: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
+    )
+    note: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    frozen: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
+    entered_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+
+    def __repr__(self) -> str:
+        state = "frozen" if self.frozen else "entered"
+        return f"<CertificateLine {self.source_kind} {self.line_key} {state}>"

@@ -112,6 +112,7 @@ from app.modules.tax_withholding.schemas import (
     ReverseChargeSaveResponse,
     ReverseChargeUpdateRequest,
     StatutoryCalcResponse,
+    StatutoryCategoryListResponse,
     StatutoryCategoryResponse,
     StatutoryChoice,
     StatutoryConfirmRequest,
@@ -127,6 +128,7 @@ from app.modules.tax_withholding.schemas import (
     StatutoryUpsertRequest,
     WithholdingFinding,
 )
+from app.modules.tax_withholding.source_owners import source_belongs_to_project
 from app.modules.tax_withholding.validators import blocking_findings, evaluate_record
 
 router = APIRouter(tags=["tax_withholding"])
@@ -939,6 +941,25 @@ async def _statutory_response(
     )
 
 
+async def _require_owned_source(
+    session: AsyncSession,
+    *,
+    source_kind: str,
+    source_id: uuid.UUID,
+    project_id: uuid.UUID,
+) -> None:
+    """Refuse a document its owning module does not place in ``project_id``.
+
+    The answer is the 404 a stored set under a foreign project gets, so a
+    caller cannot tell an id nobody has from an id that belongs to someone
+    else. See :mod:`app.modules.tax_withholding.source_owners`.
+    """
+    if not await source_belongs_to_project(
+        session, source_kind=source_kind, source_id=source_id, project_id=project_id
+    ):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=_STATUTORY_NOT_FOUND)
+
+
 async def _statutory_or_404(
     session: AsyncSession,
     *,
@@ -949,10 +970,13 @@ async def _statutory_or_404(
 ) -> tuple[StatutoryTaxCalc, list[StatutoryTaxLine]]:
     """The stored set of one document, for a caller who may reach its project.
 
-    Two refusals, both 404. The caller cannot reach the project they named, or
-    the set is filed under a different project than the one they named.
+    Three refusals, all 404. The caller cannot reach the project they named;
+    the module that owns the document does not know it under that project (or
+    no module owns that kind of document on this install); or the set is filed
+    under a different project than the one they named.
     """
     await verify_project_access(project_id, user_id, session)
+    await _require_owned_source(session, source_kind=source_kind, source_id=source_id, project_id=project_id)
     stored = await service.get_statutory(session, source_kind=source_kind, source_id=source_id)
     if stored is None or stored[0].project_id != project_id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=_STATUTORY_NOT_FOUND)
@@ -994,7 +1018,7 @@ async def preview_statutory_taxes(
 
 @router.get(
     "/statutory/categories",
-    response_model=list[StatutoryCategoryResponse],
+    response_model=StatutoryCategoryListResponse,
     dependencies=[Depends(RequirePermission("tax_withholding.statutory_view"))],
 )
 async def list_statutory_categories(
@@ -1002,11 +1026,16 @@ async def list_statutory_categories(
     country: str = Query(..., min_length=2, max_length=2),
     on: date = Query(...),
     kind: StatutoryRowKindLiteral | None = Query(None),
-) -> list[StatutoryCategoryResponse]:
+    offset: int = Query(0, ge=0),
+    limit: int = Query(200, ge=1, le=500),
+) -> StatutoryCategoryListResponse:
     """The categories a person can choose from on one date, with their legal basis.
 
     The date is required. A picker filled for today would offer this year's
     fraction for last year's document.
+
+    Answered as a page: ``total`` is every category that matched, so a caller
+    holding fewer ``items`` can tell, and ask for the rest with ``offset``.
     """
     rows = row_source(country)
     wanted = (kind,) if kind else get_args(StatutoryRowKindLiteral)
@@ -1023,7 +1052,7 @@ async def list_statutory_categories(
                 "message": str(exc),
             },
         ) from exc
-    return [
+    items = [
         StatutoryCategoryResponse(
             country_code=row.country_code,
             kind=row.kind,
@@ -1048,8 +1077,9 @@ async def list_statutory_categories(
             read_date=row.read_date,
             review_status=row.review_status,
         )
-        for row in found
+        for row in found[offset : offset + limit]
     ]
+    return StatutoryCategoryListResponse(items=items, total=len(found), offset=offset, limit=limit)
 
 
 @router.get(
@@ -1090,6 +1120,7 @@ async def save_statutory_taxes(
     recalculated: reopen it with a reason first.
     """
     await verify_project_access(payload.project_id, user_id, session)
+    await _require_owned_source(session, source_kind=source_kind, source_id=source_id, project_id=payload.project_id)
     try:
         calc, lines = await service.upsert_statutory(
             session,

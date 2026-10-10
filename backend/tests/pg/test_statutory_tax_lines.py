@@ -18,11 +18,12 @@ The project boundary. The source document is named by an id from another
 module, so nothing but the stored ``project_id`` says whose it is. Every route
 is asked twice by somebody from another project: once naming a project they
 cannot reach, once naming their own. Both answers must be the 404 the rest of
-the platform gives. That holds for a set that is stored. It does not hide
-whether one exists: the unique key is ``(source_kind, source_id)`` without the
-project, so a PUT naming the caller's own project answers 404 for an id stored
-elsewhere and creates the set for an id nobody has claimed. Closing that needs
-the owning module to say whose document the id is, which this module cannot.
+the platform gives. Whose document an id is, the owning module says: it
+registers a resolver per source kind, and every route asks it before it reads
+or writes. Here a stand-in resolver answers that every document belongs to the
+owner's project, except where a test says otherwise. A kind nobody registered
+for, a document its owner does not know, and a document of another project
+all get the same 404, and none of them leaves a row behind.
 
 Every rate row is synthetic and injected through the router's row source, so a
 correction to a shipped rate cannot break a test in this file.
@@ -94,6 +95,9 @@ class World:
     outsider_id: uuid.UUID
     outsider_project_id: uuid.UUID
     acting: dict
+    #: Documents that belong somewhere other than the owner's project:
+    #: ``None`` for a document the owning module does not know.
+    owned_elsewhere: dict
 
     def act_as(self, user_id: uuid.UUID, role: str = "manager") -> None:
         self.acting.clear()
@@ -104,11 +108,13 @@ class World:
 
 
 @pytest_asyncio.fixture
-async def world(pg_session) -> World:
+async def world(pg_session):
     from app.dependencies import get_current_user_payload, get_session
     from app.modules.projects.models import Project
     from app.modules.tax_withholding import router as tax_router
+    from app.modules.tax_withholding import source_owners
     from app.modules.tax_withholding.permissions import register_tax_withholding_permissions
+    from app.modules.tax_withholding.service import STATUTORY_SOURCE_KINDS
     from app.modules.tax_withholding.validators import register_tax_withholding_rules
     from app.modules.users.models import User
 
@@ -135,15 +141,28 @@ async def world(pg_session) -> World:
     app.dependency_overrides[get_session] = current_session
     app.dependency_overrides[get_current_user_payload] = lambda: dict(acting)
     app.dependency_overrides[tax_router.statutory_row_source] = lambda: lambda country: ROWS
-    return World(
-        session=pg_session,
-        app=app,
-        owner_id=owner.id,
-        project_id=project.id,
-        outsider_id=outsider.id,
-        outsider_project_id=other.id,
-        acting=acting,
-    )
+
+    # Stand in for the modules that own the source documents.
+    owned_elsewhere: dict = {}
+    registered_before = dict(source_owners._resolvers)
+    for kind in STATUTORY_SOURCE_KINDS:
+        source_owners.register_source_owner(
+            kind, lambda _session, source_id: owned_elsewhere.get(source_id, project.id)
+        )
+    try:
+        yield World(
+            session=pg_session,
+            app=app,
+            owner_id=owner.id,
+            project_id=project.id,
+            outsider_id=outsider.id,
+            outsider_project_id=other.id,
+            acting=acting,
+            owned_elsewhere=owned_elsewhere,
+        )
+    finally:
+        source_owners._resolvers.clear()
+        source_owners._resolvers.update(registered_before)
 
 
 def _body(world: World, **changes) -> dict:
@@ -417,11 +436,13 @@ async def test_the_category_picker_lists_the_injected_rows(world: World) -> None
         )
         undated = await client.get(f"{BASE}/categories", params={"country": "XX"})
     assert listed.status_code == 200, listed.text
-    assert [(row["code"], row["numerator"], row["denominator"], row["review_status"]) for row in listed.json()] == [
+    page = listed.json()
+    assert (page["total"], page["offset"], page["limit"]) == (2, 0, 200)
+    assert [(row["code"], row["numerator"], row["denominator"], row["review_status"]) for row in page["items"]] == [
         ("W1", 3, 10, "confirmed"),
         ("W2", 7, 10, "unconfirmed"),
     ]
-    first = listed.json()[0]
+    first = page["items"][0]
     assert first["legal_reference"] == "Synthetic Act art. 1"
     assert first["source_url"] == "https://example.invalid/act/1"
     assert first["conditions"] == {"en": "Synthetic condition"}
@@ -598,3 +619,66 @@ async def test_another_projects_user_cannot_reach_a_document_on_any_route(world:
     assert untouched.json()["project_id"] == str(world.project_id)
     assert untouched.json()["figures"] == saved.json()["figures"]
     assert await _stored_rows(world.session, source_id) == (1, 5)
+
+
+async def test_a_document_cannot_be_claimed_under_a_project_it_does_not_belong_to(world: World) -> None:
+    """The hole this guard closes: an id nobody had filed yet could be taken by any project."""
+    source_id = uuid.uuid4()
+    url = f"{BASE}/progress_claim/{source_id}"
+    world.act_as(world.outsider_id, "manager")
+    async with world.client() as client:
+        # The outsider may write to their own project, and names it. The
+        # document belongs to the other one, so nothing is created.
+        claimed = await client.put(url, json=_body(world, project_id=str(world.outsider_project_id)))
+        assert claimed.status_code == 404, claimed.text
+        assert claimed.json()["detail"] == NOT_FOUND
+        assert await _stored_rows(world.session, source_id) == (0, 0)
+
+        # So the real owner still finds nothing stored, and can file the set.
+        world.act_as(world.owner_id, "manager")
+        saved = await client.put(url, json=_body(world))
+    assert saved.status_code == 200, saved.text
+    assert saved.json()["project_id"] == str(world.project_id)
+    assert await _stored_rows(world.session, source_id) == (1, 5)
+
+
+async def test_a_document_its_owner_does_not_know_is_refused_on_every_route(world: World) -> None:
+    source_id = uuid.uuid4()
+    world.owned_elsewhere[source_id] = None
+    url = f"{BASE}/progress_claim/{source_id}"
+    async with world.client() as client:
+        for method, target, kwargs in _calls(world, url, str(world.project_id)):
+            response = await client.request(method, target, **kwargs)
+            assert response.status_code == 404, (method, target, response.text)
+            assert response.json()["detail"] == NOT_FOUND, (method, target)
+    assert await _stored_rows(world.session, source_id) == (0, 0)
+
+
+async def test_a_source_kind_nobody_owns_is_refused_on_every_route(world: World) -> None:
+    """Fail closed: where the owning module is not installed there is no such document."""
+    from app.modules.tax_withholding import source_owners
+
+    source_owners.unregister_source_owner("invoice")
+    source_id = uuid.uuid4()
+    url = f"{BASE}/invoice/{source_id}"
+    async with world.client() as client:
+        for method, target, kwargs in _calls(world, url, str(world.project_id)):
+            response = await client.request(method, target, **kwargs)
+            assert response.status_code == 404, (method, target, response.text)
+            assert response.json()["detail"] == NOT_FOUND, (method, target)
+    assert await _stored_rows(world.session, source_id) == (0, 0)
+
+
+async def test_a_set_stored_before_its_document_changed_hands_is_unreachable(world: World) -> None:
+    """The stored ``project_id`` alone is not trusted either: the owner is asked on every read."""
+    source_id = uuid.uuid4()
+    url = f"{BASE}/progress_claim/{source_id}"
+    async with world.client() as client:
+        saved = await client.put(url, json=_body(world))
+        assert saved.status_code == 200, saved.text
+        # The owning module now says the document belongs elsewhere.
+        world.owned_elsewhere[source_id] = world.outsider_project_id
+        for method, target, kwargs in _calls(world, url, str(world.project_id)):
+            response = await client.request(method, target, **kwargs)
+            assert response.status_code == 404, (method, target, response.text)
+            assert response.json()["detail"] == NOT_FOUND, (method, target)

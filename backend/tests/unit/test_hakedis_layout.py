@@ -25,8 +25,11 @@ from app.modules.contracts.hakedis_layout import (
     WORKS_COLUMNS,
     WORKS_DEFAULT_COLUMNS,
     SummaryLineDef,
+    contractor_label_key,
+    currency_label,
     evaluation_order,
     has_layout,
+    is_foreign_currency,
     label,
     label_filled,
     label_parts,
@@ -415,3 +418,42 @@ def test_a_sentence_never_prints_a_brace_for_a_missing_parameter() -> None:
     )
     # The page counter is a template its caller fills in later.
     assert label("page.of", "tr") == "Sayfa {page} / {pages}"
+
+
+# ── Words both documents share ────────────────────────────────────────────
+
+
+def test_the_lira_is_written_tl_in_turkish_and_any_other_currency_by_its_code() -> None:
+    assert currency_label("TRY", "tr") == "TL"
+    # English keeps the ISO code, like the other printed documents of the set.
+    assert currency_label("TRY", "en") == "TRY"
+    assert currency_label("EUR", "tr") == "EUR"
+    assert currency_label("EUR", "tr", {"tr": {"currency.EUR": "Avro"}}) == "Avro"
+
+
+def test_the_paid_party_is_named_as_it_signs() -> None:
+    assert contractor_label_key(DEFAULT_SIGNATURE_ROLES["TR"]) == "header.contractor"
+    assert contractor_label_key(("subcontractor", "employer")) == "role.subcontractor"
+    assert label("role.subcontractor", "tr") == "Alt Yüklenici"
+
+
+def test_only_a_currency_other_than_the_countrys_own_is_foreign() -> None:
+    assert not is_foreign_currency("TR", "TRY")
+    assert not is_foreign_currency("tr", " try ")
+    assert is_foreign_currency("TR", "EUR")
+    # A country with no home currency on record makes no claim either way.
+    assert not is_foreign_currency("DE", "EUR")
+    assert not is_foreign_currency(None, "EUR")
+
+
+def test_the_lump_sum_labels_say_what_the_columns_hold() -> None:
+    assert label("col.lump_sum.contract_amount", "tr") == "İş Grubu Sözleşme Bedeli"
+    assert label("col.lump_sum.contract_amount", "en") == "Work Group Contract Amount"
+    assert "A sütunu iş grubunun sözleşme bedelindeki payını" in label("works.weight_note", "tr")
+
+
+def test_a_foreign_currency_certificate_is_told_where_its_lira_equivalent_belongs() -> None:
+    text = label("fx.explanation", "tr", None, currency="EUR")
+    assert text.startswith("Bu hakediş EUR cinsinden düzenlenmiştir")
+    assert "VUK md. 215" in text and "KDV Kanunu md. 26" in text
+    assert label("fx.rate_missing", "en") == "TL equivalent: exchange rate not entered."

@@ -8,6 +8,8 @@ user and module-level permissions registered in :mod:`permissions`.
 
 from __future__ import annotations
 
+import asyncio
+import io
 import logging
 import uuid
 from decimal import Decimal, InvalidOperation
@@ -25,7 +27,9 @@ from fastapi import (
     UploadFile,
     status,
 )
+from fastapi.responses import StreamingResponse
 
+from app.core.content_disposition import attachment_disposition
 from app.core.file_signature import (
     ALLOWED_DOCUMENT_TYPES,
     SIGNATURE_BYTES_REQUIRED,
@@ -40,6 +44,12 @@ from app.dependencies import (
     SessionDep,
     accessible_project_ids,
     verify_project_access,
+)
+from app.modules.contracts.schemas import (
+    HakedisLineInput,
+    HakedisOptionsInput,
+    HakedisResponse,
+    HakedisTaxesInput,
 )
 from app.modules.subcontractors.models import LienWaiver
 from app.modules.subcontractors.repository import PrimeContractReader
@@ -96,7 +106,11 @@ from app.modules.subcontractors.schemas import (
     WorkPackageResponse,
     WorkPackageUpdate,
 )
-from app.modules.subcontractors.service import SubcontractorService, validate_tax_id
+from app.modules.subcontractors.service import (
+    SubcontractorService,
+    register_payment_application_as_tax_source,
+    validate_tax_id,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -1065,6 +1079,169 @@ async def exclude_payment_application_from_claim(
     await _verify_payment_application_project(payment_id, user_id, session, svc)
     entity = await svc.exclude_payment_application(payment_id, user_id=user_id)
     return PaymentApplicationResponse.model_validate(entity)
+
+
+# ── Payment certificate (hakediş) of a pay application ─────────────────
+
+# The statutory tax lines refuse a document kind nobody has claimed. The claim
+# is made here, where the routes that need it are defined, so the two cannot
+# be loaded apart; it is idempotent, and the module's startup hook may make
+# it as well.
+register_payment_application_as_tax_source()
+
+#: The three languages a certificate prints in; ``tr-en`` is both, Turkish first.
+_HAKEDIS_LOCALE = r"^(tr|en|tr-en)$"
+
+
+@router.get(
+    "/payment-applications/{payment_id}/hakedis",
+    response_model=HakedisResponse,
+    summary="Payment certificate (hakediş) of a subcontractor pay application",
+)
+async def get_payment_hakedis(
+    payment_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    locale: str = Query(default="tr", pattern=_HAKEDIS_LOCALE),
+    _perm: None = Depends(RequirePermission("subcontractors.read")),
+) -> HakedisResponse:
+    """Every line of the certificate with its status, amount, basis and reason.
+
+    404 where the agreement has no certificate layout.
+    """
+    svc = SubcontractorService(session)
+    await _verify_payment_application_project(payment_id, user_id, session, svc)
+    return HakedisResponse.model_validate(await svc.hakedis_view(payment_id, locale=locale))
+
+
+@router.get(
+    "/payment-applications/{payment_id}/hakedis/pdf",
+    summary="Export the pay application's payment certificate (hakediş) as PDF",
+    response_description="application/pdf stream",
+)
+async def export_payment_hakedis_pdf(
+    payment_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    locale: str = Query(default="tr", pattern=_HAKEDIS_LOCALE),
+    _perm: None = Depends(RequirePermission("subcontractors.read")),
+) -> StreamingResponse:
+    from app.modules.contracts import hakedis_document
+    from app.modules.contracts.hakedis_pdf import render_hakedis_pdf
+
+    svc = SubcontractorService(session)
+    await _verify_payment_application_project(payment_id, user_id, session, svc)
+    document = await svc.build_hakedis(payment_id, language=hakedis_document.first_language(locale))
+    # ReportLab layout is CPU-bound and synchronous; in a thread it does not
+    # stall every other request on the event loop while the form is drawn.
+    pdf_bytes = await asyncio.to_thread(
+        render_hakedis_pdf,
+        document.cert,
+        locale=locale,
+        settings=document.settings,
+        issue_date=document.issue_date,
+    )
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": attachment_disposition(hakedis_document.file_name(document, "pdf", locale)),
+            "Content-Language": locale.replace("-", ", "),
+        },
+    )
+
+
+@router.get(
+    "/payment-applications/{payment_id}/hakedis/xlsx",
+    summary="Export the pay application's payment certificate (hakediş) as a spreadsheet",
+    response_description="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet stream",
+)
+async def export_payment_hakedis_xlsx(
+    payment_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    locale: str = Query(default="tr", pattern=_HAKEDIS_LOCALE),
+    _perm: None = Depends(RequirePermission("subcontractors.read")),
+) -> StreamingResponse:
+    from app.modules.contracts import hakedis_document
+    from app.modules.contracts.hakedis_xlsx import render_hakedis_xlsx
+
+    svc = SubcontractorService(session)
+    await _verify_payment_application_project(payment_id, user_id, session, svc)
+    document = await svc.build_hakedis(payment_id, language=hakedis_document.first_language(locale))
+    workbook = await asyncio.to_thread(
+        render_hakedis_xlsx,
+        document.cert,
+        locale=locale,
+        settings=document.settings,
+        issue_date=document.issue_date,
+    )
+    return StreamingResponse(
+        io.BytesIO(workbook),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={
+            "Content-Disposition": attachment_disposition(hakedis_document.file_name(document, "xlsx", locale)),
+            "Content-Language": locale.replace("-", ", "),
+        },
+    )
+
+
+@router.put(
+    "/payment-applications/{payment_id}/hakedis/lines/{line_key}",
+    response_model=HakedisResponse,
+    summary="Enter, mark not applicable or clear one manual line of the certificate",
+)
+async def put_payment_hakedis_line(
+    payment_id: uuid.UUID,
+    line_key: str,
+    data: HakedisLineInput,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    locale: str = Query(default="tr", pattern=_HAKEDIS_LOCALE),
+    _perm: None = Depends(RequirePermission("subcontractors.update")),
+) -> HakedisResponse:
+    svc = SubcontractorService(session)
+    await _verify_payment_application_project(payment_id, user_id, session, svc)
+    await svc.save_hakedis_line(payment_id, line_key, data, user_id)
+    return HakedisResponse.model_validate(await svc.hakedis_view(payment_id, locale=locale))
+
+
+@router.put(
+    "/payment-applications/{payment_id}/hakedis/options",
+    response_model=HakedisResponse,
+    summary="State whether this certificate is the final one",
+)
+async def put_payment_hakedis_options(
+    payment_id: uuid.UUID,
+    data: HakedisOptionsInput,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    locale: str = Query(default="tr", pattern=_HAKEDIS_LOCALE),
+    _perm: None = Depends(RequirePermission("subcontractors.update")),
+) -> HakedisResponse:
+    svc = SubcontractorService(session)
+    await _verify_payment_application_project(payment_id, user_id, session, svc)
+    await svc.save_hakedis_options(payment_id, data, user_id)
+    return HakedisResponse.model_validate(await svc.hakedis_view(payment_id, locale=locale))
+
+
+@router.put(
+    "/payment-applications/{payment_id}/hakedis/taxes",
+    response_model=HakedisResponse,
+    summary="Choose the tax categories; the taxes are computed on the certificate's own bases",
+)
+async def put_payment_hakedis_taxes(
+    payment_id: uuid.UUID,
+    data: HakedisTaxesInput,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    locale: str = Query(default="tr", pattern=_HAKEDIS_LOCALE),
+    _perm: None = Depends(RequirePermission("subcontractors.update")),
+) -> HakedisResponse:
+    svc = SubcontractorService(session)
+    await _verify_payment_application_project(payment_id, user_id, session, svc)
+    await svc.save_hakedis_taxes(payment_id, data, user_id)
+    return HakedisResponse.model_validate(await svc.hakedis_view(payment_id, locale=locale))
 
 
 @router.get(

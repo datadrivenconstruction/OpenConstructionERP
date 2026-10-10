@@ -44,6 +44,9 @@ __all__ = [
     "ColumnDef",
     "HakedisSettings",
     "SummaryLineDef",
+    "contractor_label_key",
+    "currency_label",
+    "is_foreign_currency",
     "evaluation_order",
     "has_layout",
     "label",
@@ -392,7 +395,7 @@ _TR: dict[str, str] = {
     "col.lump_sum.code": "Poz No",
     "col.lump_sum.description": "Yapılan İş",
     "col.lump_sum.unit": "Birimi",
-    "col.lump_sum.contract_amount": "Sözleşme Bedeli",
+    "col.lump_sum.contract_amount": "İş Grubu Sözleşme Bedeli",
     "col.lump_sum.cumulative_pct": "Gerçekleşen Toplam İmalat %si",
     "col.lump_sum.cumulative_amount": "Toplam İmalat Tutarı",
     "col.lump_sum.previous_pct": "Önceki Hakediş Toplam İmalat %si",
@@ -401,7 +404,7 @@ _TR: dict[str, str] = {
     "col.lump_sum.period_amount": "Bu Hakediş İmalat Tutarı",
     "works.total": "Toplam",
     "works.subtotal": "Ara Toplam",
-    "works.weight_note": "(*) İş programında belirlenen iş grubu yüzdesi.",
+    "works.weight_note": "(*) İş programında belirlenen iş grubu yüzdesi. A sütunu iş grubunun sözleşme bedelindeki payını, B, D ve F sütunları iş grubunun kendi gerçekleşme yüzdesini gösterir.",
     "works.over_measured_note": "(!) Toplam miktar sözleşme miktarını aşmaktadır.",
     # Signature block
     "role.contractor": "Yüklenici",
@@ -449,6 +452,12 @@ _TR: dict[str, str] = {
     "reason.override_not_allowed": "Ödenecek KDV bir farktır ve elle girilemez. Bunun yerine tevkif edilen KDV'yi değiştirin.",
     "reason.currency_unknown": '"{currency}" para birimi tanınmıyor; tutarlar yuvarlanamıyor.',
     "reason.tax_base_mismatch": "Verginin matrahı ({base}) bu hakedişin matrahı ({expected}) ile uyuşmuyor.",
+    "reason.taxes_stale": "Vergiler {stored} matrahı üzerinden hesaplanmıştı; bu hakedişin matrahı artık {expected}. Vergileri yeniden hesaplayın.",
+    "reason.taxes_outdated": "Vergiler hesaplandıktan sonra hakedişin tarihi, KDV oranı veya damga vergisi matrahı değişti. Vergileri yeniden hesaplayın.",
+    "reason.taxes_not_stored": "Bu hakediş için vergi seçimleri henüz kaydedilmedi.",
+    "reason.taxes_not_confirmed": "Vergi tutarları henüz onaylanmadı.",
+    "reason.stamp_duty_base_unknown": "Damga vergisinin matrahı belirtilmedi.",
+    "reason.previous_not_certified": "Bir önceki hakediş ({number}) henüz onaylanmadığı için toplam tutarı kesinleşmedi.",
     "reason.base_held": "Matrahı oluşturan satır beklemede.",
     "reason.operand_held": "Beklemedeki satırlara bağlı: {operands}.",
     "reason.not_entered": "Tutar girilmedi.",
@@ -463,6 +472,24 @@ _TR: dict[str, str] = {
     "basis.code": "Kod",
     "basis.note": "Not",
     "basis.conditions": "Koşul",
+    # Presentation: the currency as printed, the page furniture, the notes
+    # under the tables and the form references of the standard layout.
+    "footer.generated": "Oluşturulma: {timestamp}",
+    "works.over_complete_note": "(!) Gerçekleşen toplam imalat yüzdesi %100'ü aşmaktadır.",
+    "works.negative_note": "Eksi (-) işaretli değerler, önceki hakedişlere göre yapılan düzeltmeyi (azalışı) gösterir.",
+    "note.number_format": "Tutarlar ve tarihler Türkiye'de kullanılan biçimde yazılmıştır (1.234,56 - GG.AA.YYYY).",
+    "form.reference.summary": "M.Y.H.B.Y. Örnek No: 3/10",
+    # A certificate in a foreign currency. The certificate itself is not a
+    # document of the Tax Procedure Law, so the lira equivalent is owed on the
+    # invoice that follows it, and the certificate says so. Read 2026-10-10:
+    # VUK (Law 213) md. 215/2-a, https://www.mevzuat.gov.tr/MevzuatMetin/1.4.213.pdf
+    # KDV Kanunu (Law 3065) md. 26, https://www.mevzuat.gov.tr/MevzuatMetin/1.5.3065.pdf
+    # KDV Genel Uygulama Tebliği III/A-1.1 (the Central Bank buying rate
+    # published in the Resmî Gazete) and III/C-5.1 (the certificate is not a
+    # VUK document), https://www.mevzuat.gov.tr/File/GeneratePdf?mevzuatNo=19631&mevzuatTur=Teblig&mevzuatTertip=5
+    "fx.title": "TL Karşılığı",
+    "fx.rate_missing": "TL karşılığı: döviz kuru girilmedi.",
+    "fx.explanation": "Bu hakediş {currency} cinsinden düzenlenmiştir; döviz kuru girilmediği için TL karşılığı yazılmamıştır. Faturada TL karşılığı gösterilir (VUK md. 215). KDV, vergiyi doğuran olayın meydana geldiği günkü T.C. Merkez Bankası döviz alış kuru üzerinden TL'ye çevrilir (KDV Kanunu md. 26).",
 }
 
 _EN: dict[str, str] = {
@@ -487,7 +514,7 @@ _EN: dict[str, str] = {
     "header.work_to_date": "Work done up to {date}",
     "header.amount": "Amount",
     "page.number": "Page No.",
-    "page.of": "Page {page} / {pages}",
+    "page.of": "Page {page} of {pages}",
     "line.work_done": "Work Done at Contract Prices",
     "line.price_adjustment": "Price Adjustment",
     "line.total": "Total Amount",
@@ -530,7 +557,7 @@ _EN: dict[str, str] = {
     "col.lump_sum.code": "Item Code",
     "col.lump_sum.description": "Work Item",
     "col.lump_sum.unit": "Unit",
-    "col.lump_sum.contract_amount": "Contract Amount",
+    "col.lump_sum.contract_amount": "Work Group Contract Amount",
     "col.lump_sum.cumulative_pct": "Total Completion %",
     "col.lump_sum.cumulative_amount": "Total Amount to Date",
     "col.lump_sum.previous_pct": "Previous Certificate Completion %",
@@ -539,7 +566,7 @@ _EN: dict[str, str] = {
     "col.lump_sum.period_amount": "This Certificate Amount",
     "works.total": "Total",
     "works.subtotal": "Subtotal",
-    "works.weight_note": "(*) Work group percentage set in the work programme.",
+    "works.weight_note": "(*) Work group percentage set in the work programme. Column A is the group's share of the contract price; columns B, D and F are the group's own completion percentages.",
     "works.over_measured_note": "(!) The total quantity exceeds the contract quantity.",
     "role.contractor": "Contractor",
     "role.prepared_by": "Prepared by (Site Supervision Staff)",
@@ -585,6 +612,12 @@ _EN: dict[str, str] = {
     "reason.override_not_allowed": "Payable VAT is a difference and cannot be entered by hand. Change the withheld VAT instead.",
     "reason.currency_unknown": 'The currency "{currency}" is not known, so amounts cannot be rounded.',
     "reason.tax_base_mismatch": "The tax was computed on {base}, this certificate's base is {expected}.",
+    "reason.taxes_stale": "The taxes were computed on a base of {stored}; this certificate's base is now {expected}. Recalculate the taxes.",
+    "reason.taxes_outdated": "The date of the certificate, the VAT rate or the stamp duty base changed after the taxes were calculated. Recalculate the taxes.",
+    "reason.taxes_not_stored": "No tax choices have been saved for this certificate yet.",
+    "reason.taxes_not_confirmed": "The tax figures have not been confirmed yet.",
+    "reason.stamp_duty_base_unknown": "The base of the stamp duty has not been stated.",
+    "reason.previous_not_certified": "The previous certificate ({number}) has not been certified yet, so its total is not final.",
     "reason.base_held": "The line the base is taken from is held.",
     "reason.operand_held": "Depends on held lines: {operands}.",
     "reason.not_entered": "No amount has been entered.",
@@ -599,6 +632,14 @@ _EN: dict[str, str] = {
     "basis.code": "Code",
     "basis.note": "Note",
     "basis.conditions": "Condition",
+    "footer.generated": "Generated: {timestamp}",
+    "works.over_complete_note": "(!) The total completion exceeds 100%.",
+    "works.negative_note": "Figures with a minus sign (-) are corrections (reductions) against earlier certificates.",
+    "note.number_format": "Amounts and dates are written in Turkish notation (1.234,56 - DD.MM.YYYY).",
+    "form.reference.summary": "M.Y.H.B.Y. Örnek No: 3/10",
+    "fx.title": "Turkish Lira Equivalent",
+    "fx.rate_missing": "TL equivalent: exchange rate not entered.",
+    "fx.explanation": "This certificate is issued in {currency}; no exchange rate has been entered, so no TL equivalent is printed. The invoice shows the TL equivalent (Tax Procedure Law art. 215). VAT is converted to TL at the Central Bank buying rate of the day the taxable event occurs (VAT Law art. 26).",
 }
 
 #: locale -> key -> printed label. Both locales carry exactly the same keys.
@@ -686,6 +727,53 @@ def label_parts(
 ) -> tuple[str, ...]:
     """The label once per language of the locale: two parts for ``tr-en``."""
     return tuple(label(key, language, overrides, **params) for language in locale_languages(locale))
+
+
+def currency_label(
+    currency: str,
+    language: str,
+    overrides: Mapping[str, Mapping[str, str]] | None = None,
+) -> str:
+    """The currency as a document prints it beside an amount.
+
+    A contract's own ``currency.<ISO>`` label wins. Otherwise the rule is the
+    one every printed document of the set follows
+    (:func:`app.core.register_export.printed_currency`): in Turkish the lira
+    prints as "TL", the way every Turkish form and filled certificate writes
+    it, and everything else keeps its ISO code. The stored currency stays the
+    ISO code either way.
+    """
+    key = f"currency.{currency}"
+    text = label(key, language, overrides)
+    if text != key:
+        return text
+    # Imported here: this module is read by code that never draws a page.
+    from app.core.register_export import printed_currency
+
+    return printed_currency(currency, language)
+
+
+def contractor_label_key(signature_roles: Sequence[str]) -> str:
+    """The label key naming the paid party, the same in the header as in the signature block.
+
+    A contract whose signature block is signed by the "subcontractor" names
+    the party that way in the header too: one document, one name.
+    """
+    return "role.subcontractor" if "subcontractor" in signature_roles else "header.contractor"
+
+
+#: The currency a country's certificates are expected in.
+_HOME_CURRENCY: dict[str, str] = {"TR": "TRY"}
+
+
+def is_foreign_currency(country_code: str | None, currency: str | None) -> bool:
+    """Whether a certificate is in a currency other than its country's own.
+
+    Such a certificate says that its lira equivalent is still to be stated;
+    the exchange rate is not an input of the certificate, so none is printed.
+    """
+    home = _HOME_CURRENCY.get((country_code or "").strip().upper())
+    return home is not None and (currency or "").strip().upper() != home
 
 
 # ── Turkish-aware case ────────────────────────────────────────────────────
@@ -855,6 +943,9 @@ class HakedisSettings:
         retention_pct: The percent when the source is ``fixed``.
         advance_recovery_pct: Percent of the base recovered against the
             advance on each certificate, or ``None`` when the amount is typed.
+        advance_amount: The advance paid under the contract, or ``None`` when
+            the contract does not state one. Nothing is computed from it; it
+            is what the recoveries to date are checked against.
         tax_choices: The default choice per tax for a new certificate, keyed
             ``vat_withholding``, ``income_withholding``, ``stamp_duty``. A tax
             not listed is ``unset``: a person still has to decide it.
@@ -868,6 +959,7 @@ class HakedisSettings:
     retention_source: Literal["contract", "fixed", "none"] = "contract"
     retention_pct: Decimal | None = None
     advance_recovery_pct: Decimal | None = None
+    advance_amount: Decimal | None = None
     tax_choices: Mapping[str, Choice] = field(default_factory=dict)
     not_applicable: Mapping[str, str] = field(default_factory=dict)
     signature_roles: tuple[str, ...] = ()
@@ -886,6 +978,7 @@ _TERM_KEYS: frozenset[str] = frozenset(
         "reletter",
         "retention",
         "advance_recovery_pct",
+        "advance_amount",
         "taxes",
         "not_applicable",
         "signature_roles",
@@ -1082,6 +1175,7 @@ def resolve_settings(country_code: str | None, contract_terms: Mapping[str, Any]
     * ``retention``: ``{"source": "contract" | "fixed" | "none", "pct": "5",
       "base": [line keys]}``.
     * ``advance_recovery_pct``: percent of the advance line's base.
+    * ``advance_amount``: the advance paid, which recoveries are checked against.
     * ``taxes``: ``{tax: {"state", "code", "reason"}}`` default choices.
     * ``not_applicable``: ``{manual line key: reason}``.
     * ``signature_roles``: role keys in printed order.
@@ -1157,6 +1251,15 @@ def resolve_settings(country_code: str | None, contract_terms: Mapping[str, Any]
         if advance is None or advance.op != "manual" or not advance.operands:
             raise ValueError("hakedis 'advance_recovery_pct' needs a manual 'advance_recovery' line with a base")
 
+    advance_amount: Decimal | None = None
+    if raw.get("advance_amount") is not None:
+        try:
+            advance_amount = Decimal(str(raw["advance_amount"]))
+        except (InvalidOperation, ValueError) as exc:
+            raise ValueError(f"hakedis 'advance_amount' must be a number, got {raw['advance_amount']!r}") from exc
+        if not advance_amount.is_finite() or advance_amount < 0:
+            raise ValueError(f"hakedis 'advance_amount' must not be negative, got {raw['advance_amount']!r}")
+
     not_applicable_raw = raw.get("not_applicable") or {}
     if not isinstance(not_applicable_raw, Mapping):
         raise ValueError("hakedis 'not_applicable' must be an object of line key to reason")
@@ -1219,6 +1322,7 @@ def resolve_settings(country_code: str | None, contract_terms: Mapping[str, Any]
         retention_source=source,  # type: ignore[arg-type]
         retention_pct=retention_pct if source == "fixed" else None,
         advance_recovery_pct=advance_pct,
+        advance_amount=advance_amount,
         tax_choices=MappingProxyType(_tax_choices(raw.get("taxes"))),
         not_applicable=MappingProxyType(not_applicable),
         signature_roles=roles,

@@ -34,7 +34,7 @@ from app.core.json_merge import merge_metadata
 from app.core.validation.engine import ValidationReport, validation_engine
 from app.core.validation.messages import translate
 from app.core.validation.project_context import with_project_context
-from app.modules.contracts import signing_bridge
+from app.modules.contracts import hakedis, hakedis_document, signing_bridge
 from app.modules.contracts.claim_context import collect_claim_context
 from app.modules.contracts.compliance_packs import (
     DEFAULT_PACK_ID,
@@ -1307,6 +1307,10 @@ class ContractsService:
                     "details": errors,
                 },
             )
+        # A payment certificate configuration is checked where it is written,
+        # so a contract cannot store one that only fails when the first
+        # certificate is opened.
+        hakedis_document.check_terms(await self.project_country(data.project_id), data.terms)
 
         # Resolve the clause template now, not at read time. Storing the code
         # alone would mean "whatever version is current whenever someone looks",
@@ -1556,6 +1560,8 @@ class ContractsService:
                         "details": errors,
                     },
                 )
+            if "terms" in fields:
+                hakedis_document.check_terms(await self.project_country(contract.project_id), terms)
         if "code" in fields:
             if fields["code"] is None or fields["code"] == contract.code:
                 fields.pop("code")
@@ -2021,12 +2027,21 @@ class ContractsService:
         side-effect free: callers decide whether to block or persist based on
         ``report.has_errors``.
         """
+        # Imported here: only a run that reaches a catalogue-backed rule needs it.
+        from app.core.validation.poz_catalogue import with_poz_catalogue_for_rule_sets  # noqa: PLC0415
+
         pack_ids = await self._resolve_compliance_rule_packs(contract.project_id)
         rule_sets = resolve_rule_sets(pack_ids, workflow=workflow)
         lines = await self.line_repo.list_for_contract(contract.id)
         positions = self._contract_lines_as_positions(lines)
         report = await validation_engine.validate(
-            data=await with_project_context(self.session, contract.project_id, {"positions": positions}),
+            # The unit-price base is attached only when these rule sets reach
+            # a rule that reads it; every other run gets the data unchanged.
+            data=await with_poz_catalogue_for_rule_sets(
+                self.session,
+                await with_project_context(self.session, contract.project_id, {"positions": positions}),
+                rule_sets,
+            ),
             rule_sets=rule_sets,
             target_type="contract",
             target_id=str(contract.id),
@@ -3935,6 +3950,12 @@ class ContractsService:
             cert_meta["certified_at"] = now
             cert_meta["certified_by"] = actor_id
             fields["metadata_"] = cert_meta
+            # Where the contract has a payment certificate (hakediş), the
+            # certificate is what is being certified: it has to be complete,
+            # and it is stored now so no later change to a rate, a label or a
+            # layout can restate it. Both happen in this transaction, so a
+            # refusal leaves the claim approved and nothing frozen.
+            await self.certify_hakedis(claim, actor_id)
             # Freeze work completed and stored to date, and retention held,
             # onto the claim. The retention engine writes them whenever it has
             # a schedule of values to work on; a cost-plus or T&M claim has
@@ -6919,6 +6940,353 @@ class ContractsService:
                 "certified_amount": cert.get("certified_amount"),
             },
         }
+
+    # ── Payment certificate (hakediş) ────────────────────────────────────
+
+    #: Claim statuses in which the manual lines and taxes of its certificate
+    #: may still change. The claim's own figures lock when it leaves draft;
+    #: the certificate around them is prepared until it is certified.
+    _HAKEDIS_EDITABLE_STATUSES = frozenset({"draft", "submitted", "approved"})
+    _HAKEDIS_SETTLED_STATUSES = frozenset({"certified", "paid"})
+
+    async def _hakedis_party(self, contract: Contract) -> hakedis.CertificateParty:
+        """The contract's counterparty as the certificate header names it."""
+        entity: Any = None
+        cid = getattr(contract, "counterparty_id", None)
+        if cid is not None:
+            order = (
+                ("subcontractor", "contact")
+                if contract.counterparty_type == "subcontractor"
+                else (
+                    "contact",
+                    "subcontractor",
+                )
+            )
+            for directory in order:
+                try:
+                    if directory == "contact":
+                        from app.modules.contacts.models import Contact  # noqa: PLC0415
+
+                        entity = await self.session.get(Contact, cid)
+                    else:
+                        from app.modules.subcontractors.models import Subcontractor  # noqa: PLC0415
+
+                        entity = await self.session.get(Subcontractor, cid)
+                except Exception:  # noqa: BLE001 - a directory that is not installed names nobody
+                    logger.debug("contracts: %s lookup failed for %s", directory, cid)
+                    entity = None
+                if entity is not None:
+                    break
+        return hakedis_document.party_from_record(entity, fallback_name=await self.resolve_counterparty_name(contract))
+
+    async def hakedis_source(
+        self, claim: ProgressClaim, contract: Contract | None = None, *, language: str = "tr"
+    ) -> hakedis_document.CertificateSource:
+        """One progress claim as the payment certificate reads it.
+
+        The money on every row is the money the claim holds, taken from the
+        same continuation sheet the payment application prints, so the two
+        documents cannot state a different value of work done: previous is
+        what the claims before this one billed on the line, this period what
+        this claim bills. Quantities (or percents) are printed beside them.
+
+        The claims counted as previous are the payment application's own
+        (:meth:`ProgressClaimRepository.prior_claims`).
+        """
+        from app.modules.contracts.aia import bills_without_schedule, sheet_sov_lines  # noqa: PLC0415
+        from app.modules.contracts.sov_adjustments import is_measured_contract  # noqa: PLC0415
+        from app.modules.projects.models import Project  # noqa: PLC0415
+
+        contract = contract or await self.get_contract(claim.contract_id)
+        project = await self.session.get(Project, contract.project_id)
+        country = normalise_country(getattr(project, "country_code", None)) or ""
+        currency = claim.currency or contract.currency or getattr(project, "currency", "") or ""
+        flavour = "unit_price" if is_measured_contract(contract) else "lump_sum"
+
+        application = await self._build_payment_application(claim.id, locale=language, require_aia=False)
+        rows: list[dict[str, Any]] = list(application["lines"])
+        contract_lines = await self.line_repo.list_for_contract(contract.id)
+        claim_lines = await self.claim_line_repo.list_for_claim(claim.id)
+        by_line = {cl.contract_line_id: cl for cl in claim_lines}
+        prior_claims = await self.claim_repo.prior_claims(contract.id, before_claim_id=claim.id)
+
+        def money(value: Any) -> Decimal:
+            return Decimal(str(value or 0))
+
+        lines: list[hakedis.CertificateWorkLine] = []
+        if bills_without_schedule(claim, claim_lines):
+            # Cost of work billed with no schedule behind it: one row, its
+            # money stated and nothing to measure it by.
+            for row in rows:
+                lines.append(
+                    hakedis.CertificateWorkLine(
+                        code=str(row.get("item_number") or contract.code or ""),
+                        description=str(row.get("description") or contract.title or ""),
+                        unit="",
+                        contract_quantity=None,
+                        previous_quantity=None,
+                        period_quantity=None,
+                        unit_price=None,
+                        contract_amount=money(row["scheduled_value"])
+                        if row.get("scheduled_value") is not None
+                        else None,
+                        weight_pct=None,
+                        previous_pct=None,
+                        period_pct=None,
+                        stated_previous_amount=money(row.get("previous_value")),
+                        stated_period_amount=money(row.get("this_period_value")),
+                    )
+                )
+        else:
+            prior_by_line = await self.claim_line_repo.prior_period_value_by_line(contract.id, before_claim_id=claim.id)
+            sov_lines = sheet_sov_lines(contract_lines, by_line, prior_by_line)
+            prior_qty: dict[uuid.UUID, Decimal] = {}
+            prior_pct: dict[uuid.UUID, Decimal] = {}
+            if prior_claims:
+                order = {c.id: position for position, c in enumerate(prior_claims)}
+                earlier = (
+                    (
+                        await self.session.execute(
+                            sa_select(ProgressClaimLine).where(
+                                ProgressClaimLine.progress_claim_id.in_([c.id for c in prior_claims])
+                            )
+                        )
+                    )
+                    .scalars()
+                    .all()
+                )
+                for item in sorted(earlier, key=lambda entry: order.get(entry.progress_claim_id, 0)):
+                    prior_qty[item.contract_line_id] = prior_qty.get(item.contract_line_id, DEC_ZERO) + money(
+                        item.period_completed_qty
+                    )
+                    # Stored as percent to date, so the latest prior claim wins.
+                    if money(item.period_completed_pct) != DEC_ZERO:
+                        prior_pct[item.contract_line_id] = money(item.period_completed_pct)
+            scheduled_total = sum((money(cl.total_value) for cl in sov_lines), DEC_ZERO)
+            for cl, row in zip(sov_lines, rows, strict=False):
+                claim_line = by_line.get(cl.id)
+                previous_value = money(row.get("previous_value"))
+                period_value = money(row.get("this_period_value"))
+                value = money(cl.total_value)
+                if flavour == "unit_price":
+                    lines.append(
+                        hakedis.CertificateWorkLine(
+                            code=cl.code or "",
+                            description=cl.description or "",
+                            unit=cl.unit or "",
+                            contract_quantity=money(cl.quantity),
+                            previous_quantity=prior_qty.get(cl.id, DEC_ZERO),
+                            period_quantity=money(claim_line.period_completed_qty)
+                            if claim_line is not None
+                            else DEC_ZERO,
+                            unit_price=money(cl.unit_rate),
+                            contract_amount=value,
+                            weight_pct=None,
+                            previous_pct=None,
+                            period_pct=None,
+                            section=cl.scope_section or "",
+                            stated_previous_amount=previous_value,
+                            stated_period_amount=period_value,
+                        )
+                    )
+                    continue
+
+                def share(amount: Decimal, of: Decimal = value) -> Decimal | None:
+                    return amount / of * Decimal("100") if of > DEC_ZERO else None
+
+                before = prior_pct.get(cl.id)
+                if before is None:
+                    before = share(previous_value)
+                to_date: Decimal | None = None
+                if claim_line is not None and money(claim_line.period_completed_pct) != DEC_ZERO:
+                    to_date = money(claim_line.period_completed_pct)
+                elif claim_line is None:
+                    to_date = before
+                else:
+                    to_date = share(previous_value + period_value)
+                lines.append(
+                    hakedis.CertificateWorkLine(
+                        code=cl.code or "",
+                        description=cl.description or "",
+                        unit=cl.unit or "",
+                        contract_quantity=None,
+                        previous_quantity=None,
+                        period_quantity=None,
+                        unit_price=None,
+                        contract_amount=value,
+                        weight_pct=share(value, scheduled_total),
+                        previous_pct=before,
+                        period_pct=(to_date - before) if to_date is not None and before is not None else None,
+                        section=cl.scope_section or "",
+                        stated_previous_amount=previous_value,
+                        stated_period_amount=period_value,
+                    )
+                )
+            for row in rows[len(sov_lines) :]:
+                # Money earlier claims billed that no schedule line carries.
+                lines.append(
+                    hakedis.CertificateWorkLine(
+                        code=str(row.get("item_number") or ""),
+                        description=str(row.get("description") or ""),
+                        unit="",
+                        contract_quantity=None,
+                        previous_quantity=None,
+                        period_quantity=None,
+                        unit_price=None,
+                        contract_amount=None,
+                        weight_pct=None,
+                        previous_pct=None,
+                        period_pct=None,
+                        stated_previous_amount=money(row.get("previous_value")),
+                        stated_period_amount=money(row.get("this_period_value")),
+                    )
+                )
+
+        counterparty = await self._hakedis_party(contract)
+        ours = hakedis_document.own_company_party()
+        # A contract with a client is one we are paid under: the taxes on its
+        # certificate are borne by us. Any other counterparty is somebody we
+        # pay, and we are the one withholding.
+        we_are_paid = contract.counterparty_type == "client"
+        period_end = claim.period_to or hakedis_document.as_day(claim.period_end)
+        total_value = money(contract.total_value)
+        return hakedis_document.CertificateSource(
+            kind=hakedis_document.SOURCE_PROGRESS_CLAIM,
+            source_id=claim.id,
+            project_id=contract.project_id,
+            reference=claim.claim_number or "",
+            status=claim.status,
+            editable=claim.status in self._HAKEDIS_EDITABLE_STATUSES,
+            settled=claim.status in self._HAKEDIS_SETTLED_STATUSES,
+            country_code=country,
+            subdivision_code=getattr(project, "subdivision_code", None) or None,
+            currency=currency,
+            flavour=flavour,
+            position=len(prior_claims) + 1,
+            period_start=claim.period_from or hakedis_document.as_day(claim.period_start),
+            period_end=period_end,
+            tax_date=claim.application_date or hakedis_document.as_day(claim.claim_date) or period_end,
+            project_name=str(getattr(project, "name", "") or ""),
+            contract_number=contract.code or "",
+            contract_title=contract.title or "",
+            employer=counterparty if we_are_paid else ours,
+            contractor=ours if we_are_paid else counterparty,
+            lines=tuple(lines),
+            retention_percent=money(contract.retention_percent),
+            terms=contract.terms or {},
+            direction="borne_by_us" if we_are_paid else "withheld_by_us",
+            prior=tuple(
+                hakedis_document.PriorDocument(
+                    source_id=c.id,
+                    reference=c.claim_number or "",
+                    settled=c.status in self._HAKEDIS_SETTLED_STATUSES,
+                )
+                for c in prior_claims
+            ),
+            contract_value=total_value if total_value > DEC_ZERO else None,
+            contract_start=hakedis_document.as_day(contract.start_date),
+            contract_end=hakedis_document.as_day(contract.end_date),
+            stored_gross=money(claim.gross_amount),
+            stored_retention=money(claim.retention_amount),
+        )
+
+    async def _hakedis_claim(self, claim_id: uuid.UUID) -> tuple[ProgressClaim, Contract]:
+        """The claim and its contract, or the ordinary 404 when the contract has no certificate."""
+        claim = await self.claim_repo.get_by_id(claim_id)
+        if claim is None:
+            raise HTTPException(status_code=404, detail=translate("errors.claim_not_found", locale=get_locale()))
+        contract = await self.get_contract(claim.contract_id)
+        if not hakedis_document.hakedis_available(await self.project_country(contract.project_id), contract.terms):
+            raise hakedis_document.not_available()
+        return claim, contract
+
+    async def build_hakedis(self, claim_id: uuid.UUID, *, language: str = "tr") -> hakedis_document.HakedisDocument:
+        """The payment certificate of one progress claim.
+
+        Raises:
+            HTTPException: 404 when the claim does not exist or its contract
+                has no certificate layout; 409 as
+                :func:`hakedis_document.build_document`.
+        """
+        claim, contract = await self._hakedis_claim(claim_id)
+        source = await self.hakedis_source(claim, contract, language=language)
+        return await hakedis_document.build_document(self.session, source, language=language)
+
+    async def hakedis_view(self, claim_id: uuid.UUID, *, locale: str) -> dict[str, Any]:
+        """The certificate as the screen reads it, with the findings of its rule set."""
+        language = hakedis_document.first_language(locale)
+        document = await self.build_hakedis(claim_id, language=language)
+        report = None
+        if not document.frozen:
+            report = await hakedis_document.run_rules(self.session, document, locale=get_locale())
+        return hakedis_document.document_payload(document, locale=locale, report=report)
+
+    async def save_hakedis_line(self, claim_id: uuid.UUID, line_key: str, data: Any, user_id: str | None) -> None:
+        """Store what a person entered for one line of a claim's certificate."""
+        claim, contract = await self._hakedis_claim(claim_id)
+        source = await self.hakedis_source(claim, contract)
+        await hakedis_document.save_line(
+            self.session,
+            source,
+            line_key,
+            state=data.state,
+            amount=data.amount,
+            pct=data.pct,
+            note=data.note or "",
+            user_id=user_id,
+        )
+
+    async def save_hakedis_options(self, claim_id: uuid.UUID, data: Any, user_id: str | None) -> None:
+        """Store whether a claim's certificate is the final one."""
+        claim, contract = await self._hakedis_claim(claim_id)
+        source = await self.hakedis_source(claim, contract)
+        await hakedis_document.save_options(self.session, source, is_final=data.is_final, user_id=user_id)
+
+    async def save_hakedis_taxes(self, claim_id: uuid.UUID, data: Any, user_id: str) -> None:
+        """Have a claim's taxes computed on its certificate's own bases and stored."""
+        claim, contract = await self._hakedis_claim(claim_id)
+        source = await self.hakedis_source(claim, contract)
+        await hakedis_document.save_taxes(
+            self.session,
+            source,
+            choices=data.choices(),
+            buyer_facts=data.buyer_facts(),
+            user_id=user_id,
+        )
+
+    async def certify_hakedis(self, claim: ProgressClaim, actor_id: str | None) -> None:
+        """Check, then freeze, the certificate of a claim that is being certified.
+
+        Does nothing for a contract with no certificate layout, which is every
+        contract outside the countries that have one.
+
+        Raises:
+            HTTPException: 422 ``hakedis_not_ready`` while a line is held, a
+                rule of the set fails or the taxes are not confirmed.
+        """
+        # Read through the repository, not ``get_contract``: a claim whose
+        # contract cannot be found has no certificate to check, and certifying
+        # it must go on exactly as it did before certificates existed.
+        contract = await self.contract_repo.get_by_id(claim.contract_id)
+        if contract is None:
+            return
+        if not hakedis_document.hakedis_available(await self.project_country(contract.project_id), contract.terms):
+            return
+        source = await self.hakedis_source(claim, contract)
+        document = await hakedis_document.enforce_ready(self.session, source, locale=get_locale())
+        await hakedis_document.freeze_document(self.session, source, user_id=actor_id, document=document)
+
+    async def claim_project_id(self, claim_id: uuid.UUID) -> uuid.UUID | None:
+        """The project a progress claim belongs to, or ``None`` when there is no such claim.
+
+        This is what the statutory tax lines ask before they let anyone read
+        or write the taxes filed on a claim.
+        """
+        claim = await self.claim_repo.get_by_id(claim_id)
+        if claim is None:
+            return None
+        contract = await self.contract_repo.get_by_id(claim.contract_id)
+        return contract.project_id if contract is not None else None
 
     # ── Helpers (shared by the depth entities) ───────────────────────────
 

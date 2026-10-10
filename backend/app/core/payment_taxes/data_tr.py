@@ -388,16 +388,28 @@ _STAMP_DUTY: tuple[RateRow, ...] = (
         source_url=_DVK_URL,
         read_date=_READ,
         review_status="confirmed",
+        # Table line IV/1-a taxes payments made by public offices (resmî
+        # daireler) and has no line for a payment between private parties. The
+        # row shape knows one buyer class, the buyers the VAT rules designate,
+        # and the public bodies under Law 5018 head that list. So the row is
+        # closed to a buyer stated not to be designated, and held while nobody
+        # has said. The designated class is wider than the public offices (it
+        # also holds banks and listed companies), which is why the row is still
+        # never preselected and its condition is printed: a designated buyer
+        # that is not a public office must not select it.
+        buyer_scope="designated_only",
         conditions={
             "tr": (
                 "Yalnızca ödemeyi resmî dairenin yaptığı hallerde uygulanır; özel işverenler arasındaki "
-                "hakedişler için kullanılmaz. Resmî hakediş raporunda matrah, avans mahsubu düşülmüş "
-                "hakediş tutarıdır."
+                "hakedişler için kullanılmaz. Alıcının belirlenmiş alıcı olması tek başına yeterli değildir: "
+                "banka veya borsaya kote şirket gibi resmî daire olmayan alıcılar için seçilmez. Resmî hakediş "
+                "raporunda matrah, avans mahsubu düşülmüş hakediş tutarıdır."
             ),
             "en": (
                 "Applies only where the payer is a public office; not for certificates between private "
-                "parties. On the official certificate the base is the certificate amount less the advance "
-                "recovery."
+                "parties. A designated buyer is not enough on its own: do not select it for a buyer that is "
+                "not a public office, such as a bank or a listed company. On the official certificate the "
+                "base is the certificate amount less the advance recovery."
             ),
         },
     ),

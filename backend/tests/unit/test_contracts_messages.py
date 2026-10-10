@@ -24,13 +24,18 @@ import re
 import pytest
 
 from app.core.i18n import SUPPORTED_LOCALES
+from app.modules.contracts import hakedis_rules as contracts_hakedis_rules
 from app.modules.contracts import messages as message_bundle
 from app.modules.contracts import service as contracts_service
 from app.modules.contracts import validators as contracts_validators
 from app.modules.contracts.messages import is_key_present, translate
 
 MESSAGES_DIR = pathlib.Path(str(message_bundle.__file__)).parent
-SOURCES = [pathlib.Path(str(contracts_validators.__file__)), pathlib.Path(str(contracts_service.__file__))]
+SOURCES = [
+    pathlib.Path(str(contracts_validators.__file__)),
+    pathlib.Path(str(contracts_service.__file__)),
+    pathlib.Path(str(contracts_hakedis_rules.__file__)),
+]
 SHIPPED_LOCALES = sorted(path.stem for path in MESSAGES_DIR.glob("*.json"))
 TRANSLATED_LOCALES = [locale for locale in SHIPPED_LOCALES if locale != "en"]
 
@@ -47,6 +52,7 @@ TRANSLATED_LOCALES = [locale for locale in SHIPPED_LOCALES if locale != "en"]
 KEY_PREFIXES = (
     "aia.",
     "compliance_gate.",
+    "hakedis.",
     "pay_application.",
     "payment_plan.",
     "retention_release.",
@@ -93,6 +99,9 @@ def test_the_source_really_yields_the_keys_this_file_then_checks() -> None:
     # The certificate's own labels, so dropping the prefix that carries them
     # fails here rather than showing up as a key nobody asks for.
     assert "aia.g703.billed_not_on_a_schedule_line" in keys
+    # The payment certificate rules live in a file of their own.
+    assert "hakedis.lines_complete.fail" in keys
+    assert "hakedis.previous_unknown.not_certified" in keys
 
 
 @pytest.mark.parametrize("locale", SHIPPED_LOCALES)

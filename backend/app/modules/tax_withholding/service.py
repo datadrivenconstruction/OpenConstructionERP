@@ -66,6 +66,7 @@ from app.modules.tax_withholding.models import (
     WithholdingDeduction,
     WithholdingRegime,
 )
+from app.modules.tax_withholding.source_owners import source_belongs_to_project
 
 logger = logging.getLogger(__name__)
 
@@ -741,6 +742,11 @@ class StoredOverride:
     at: datetime | None
 
 
+#: The certificate tax registry of ``contracts``, imported by name and only
+#: when it is needed, so this module loads on an install without it.
+_CERTIFICATE_REGISTRY = "app.modules.contracts.certificate_taxes"
+
+
 def shipped_rows(country: str) -> Sequence[RateRow]:
     """The statutory rows that ship for one country: the default row source."""
     return rows_for(country)
@@ -1395,6 +1401,13 @@ async def upsert_statutory(
     check_statutory_inputs(inputs)
 
     not_found = StatutoryRefusal("statutory_not_found", "Statutory tax lines not found", http_status=404)
+    # The owning module says whose document this is. Without that, the first
+    # caller to name an unclaimed id would own its taxes, whatever project the
+    # document really belongs to.
+    if not await source_belongs_to_project(
+        session, source_kind=source_kind, source_id=source_id, project_id=project_id
+    ):
+        raise not_found
     calc = await repository.get_statutory_calc(session, source_kind=source_kind, source_id=source_id)
     existing: list[StatutoryTaxLine] = []
     if calc is not None:
@@ -1741,21 +1754,144 @@ async def as_payment_tax_result(
     return result_from_lines(lines)
 
 
+def _certificate_taxes(registry: Any, calc: StatutoryTaxCalc, lines: Sequence[StatutoryTaxLine]) -> Any:
+    """A stored set in the shape the certificate registry defines.
+
+    ``registry`` is the certificate tax module of ``contracts``, handed in
+    rather than imported so this file still loads without it.
+    """
+    inputs = inputs_from_stored(calc, lines)
+    return registry.CertificateTaxes(
+        result=result_from_lines(lines),
+        status=calc.status,
+        net_amount=inputs.net_amount,
+        stamp_duty_base=inputs.stamp_duty_base,
+        stamp_duty_base_same_as_net=inputs.stamp_duty_base_same_as_net,
+        vat_rate_pct=inputs.vat_rate_pct,
+        document_date=inputs.document_date,
+        currency=inputs.currency_code,
+        choices={
+            "vat_withholding": inputs.vat_withholding,
+            "income_withholding": inputs.income_withholding,
+            "stamp_duty": inputs.stamp_duty,
+        },
+        buyer_is_designated=inputs.buyer_is_designated,
+        work_value_incl_vat=inputs.work_value_incl_vat,
+        work_value_note=inputs.work_value_note,
+    )
+
+
 async def certificate_tax_provider(
     session: AsyncSession,
     source_kind: str,
     source_id: uuid.UUID | str,
-) -> PaymentTaxResult | None:
+) -> Any:
     """What this module tells a payment certificate about one document's taxes.
 
     Registered with the certificate tax registry of ``contracts`` when that
     module is installed. ``None`` means nothing usable is stored, and the
-    certificate then holds its tax lines.
+    certificate then holds its tax lines. Otherwise the answer is the result
+    together with the header it was stored under: the certificate needs the
+    status to say whether the figures are confirmed, and the amounts they
+    were computed on to notice that its own amount has moved since.
     """
     if source_kind not in STATUTORY_SOURCE_KINDS:
         return None
     wanted = source_id if isinstance(source_id, uuid.UUID) else uuid.UUID(str(source_id))
-    return await as_payment_tax_result(session, source_kind=source_kind, source_id=wanted)
+    stored = await get_statutory(session, source_kind=source_kind, source_id=wanted)
+    if stored is None:
+        return None
+    calc, lines = stored
+    if calc.status == "void":
+        return None
+    registry = importlib.import_module(_CERTIFICATE_REGISTRY)
+    return _certificate_taxes(registry, calc, lines)
+
+
+async def certificate_tax_writer(
+    session: AsyncSession,
+    request: Any,
+    *,
+    row_source: RowSource | None = None,
+) -> Any:
+    """Compute and store a certificate's taxes on the amounts the certificate states.
+
+    The certificate knows its own amount before VAT and the base of its stamp
+    duty line, so it passes both; a person passes only the choices and the two
+    facts about the buyer. A request without choices keeps the stored ones,
+    which is a recalculation on new amounts.
+
+    The stamp duty base is stated as "the net amount" when the two are equal
+    and as its own amount when they differ. When the certificate cannot say
+    what it is, neither is stated and a selected stamp duty is held.
+
+    Raises:
+        CertificateTaxRefusalError: Whatever :func:`upsert_statutory` refuses,
+            in the registry's own exception so ``contracts`` need not know
+            this module's.
+    """
+    registry = importlib.import_module(_CERTIFICATE_REGISTRY)
+    stored = await get_statutory(session, source_kind=request.source_kind, source_id=request.source_id)
+    previous: StatutoryInputs | None = None
+    if stored is not None and stored[0].project_id == request.project_id:
+        try:
+            previous = inputs_from_stored(*stored)
+        except StatutoryDataError:
+            previous = None
+
+    def choice(name: str) -> Choice:
+        if request.choices is not None:
+            return request.choices.get(name) or Choice("unset")
+        return getattr(previous, name) if previous is not None else Choice("unset")
+
+    keep = request.keep_buyer_facts and previous is not None
+    same_as_net = request.stamp_duty_base is not None and request.stamp_duty_base == request.net_amount
+    inputs = StatutoryInputs(
+        country_code=request.country_code,
+        currency_code=request.currency,
+        document_date=request.document_date,
+        net_amount=request.net_amount,
+        vat_rate_pct=request.vat_rate_pct,
+        buyer_is_designated=previous.buyer_is_designated if keep and previous else request.buyer_is_designated,
+        work_value_incl_vat=previous.work_value_incl_vat if keep and previous else request.work_value_incl_vat,
+        work_value_note=previous.work_value_note if keep and previous else request.work_value_note,
+        stamp_duty_base=None if same_as_net else request.stamp_duty_base,
+        stamp_duty_base_same_as_net=same_as_net,
+        vat_withholding=choice("vat_withholding"),
+        income_withholding=choice("income_withholding"),
+        stamp_duty=choice("stamp_duty"),
+    )
+    try:
+        calc, lines = await upsert_statutory(
+            session,
+            project_id=request.project_id,
+            source_kind=request.source_kind,
+            source_id=request.source_id,
+            inputs=inputs,
+            direction=request.direction,
+            user_id=request.user_id,
+            source_reference=request.source_reference,
+            row_source=row_source or _certificate_row_source,
+        )
+    except StatutoryRefusal as refusal:
+        raise registry.CertificateTaxRefusalError(
+            refusal.code, refusal.message, http_status=refusal.http_status, details=refusal.details
+        ) from refusal
+    return _certificate_taxes(registry, calc, lines)
+
+
+def _certificate_row_source(country: str) -> Sequence[RateRow]:
+    """The rows a certificate's taxes are computed from.
+
+    Looked up through :data:`certificate_rows` on every call, so a test can
+    put synthetic rows in place of the shipped ones for this path as well.
+    """
+    return certificate_rows(country)
+
+
+#: Where a certificate's taxes take their statutory rows from. The shipped
+#: rows; a test replaces it to inject synthetic ones.
+certificate_rows: RowSource = shipped_rows
 
 
 def register_certificate_tax_provider(importer: Callable[[str], Any] = importlib.import_module) -> bool:
@@ -1771,7 +1907,7 @@ def register_certificate_tax_provider(importer: Callable[[str], Any] = importlib
         reading it as "not installed" would print certificates with held tax
         lines and no error anywhere.
     """
-    target = "app.modules.contracts.certificate_taxes"
+    target = _CERTIFICATE_REGISTRY
     try:
         registry = importer(target)
     except ModuleNotFoundError as exc:
@@ -1780,6 +1916,11 @@ def register_certificate_tax_provider(importer: Callable[[str], Any] = importlib
         logger.info("tax_withholding: no certificate tax registry on this install, provider not registered")
         return False
     registry.register_certificate_tax_provider(certificate_tax_provider)
+    # A registry from before certificates could ask for their taxes has no
+    # writer slot; the provider alone is then all there is to register.
+    register_writer = getattr(registry, "register_certificate_tax_writer", None)
+    if register_writer is not None:
+        register_writer(certificate_tax_writer)
     return True
 
 
@@ -1805,6 +1946,7 @@ __all__ = [
     "bands_of",
     "build_tax_input",
     "certificate_tax_provider",
+    "certificate_tax_writer",
     "check_statutory_inputs",
     "clear_statutory_override",
     "compute_deduction",

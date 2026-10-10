@@ -155,5 +155,62 @@
         "suggestion": "Se la norma si applica a questo contratto, verificare manualmente che l'anticipo la rispetti"
       }
     }
+  },
+  "hakedis": {
+    "cumulative_exceeds_contract": {
+      "fail": "I lavori certificati a oggi ammontano a {cumulative}, cioè {over} oltre l'importo contrattuale di {contract}",
+      "suggestion": "Fate prima approvare la variante che copre i lavori in più, oppure correggete le quantità di questo certificato"
+    },
+    "previous_matches_last_certified": {
+      "fail": "Questo certificato riporta {carried} come totale dei certificati precedenti, ma il certificato {reference} è stato certificato per {certified}",
+      "work_fail": "La colonna dei lavori precedenti dell'elenco dà {carried}, ma il certificato {reference} è stato certificato con {certified} di lavori a quella data",
+      "suggestion": "Verificate se tra i due certificati c'è una richiesta che nessuno dei due mostra, poi generate di nuovo questo"
+    },
+    "previous_unknown": {
+      "fail": "Il totale dei certificati precedenti non è noto",
+      "not_certified": "Il certificato precedente {reference} non è ancora certificato, quindi il suo totale non è definitivo",
+      "suggestion": "Certificate prima il certificato precedente. Se è stato certificato prima che i certificati venissero conservati, inserite il suo totale nella riga dei certificati precedenti"
+    },
+    "weights_sum": {
+      "fail": "I pesi delle voci sommano {total}% e non 100%",
+      "suggestion": "Correggete i valori delle voci in modo che le loro quote diano l'intero contratto"
+    },
+    "percent_regressed": {
+      "fail": "La voce {line} è negativa in questo periodo, quindi toglie lavori già certificati",
+      "suggestion": "Lasciatela se corregge una misurazione in eccesso precedente. Altrimenti correggete la quantità o la percentuale di questo certificato"
+    },
+    "income_withholding_single_year": {
+      "fail": "La ritenuta sul reddito è selezionata, ma il contratto va dal {start} al {end}, entro un solo anno solare. La ritenuta riguarda i lavori di costruzione che si estendono su più di un anno solare",
+      "suggestion": "Verificate con il commercialista se i lavori si estendono davvero su più di un anno; in caso contrario segnate la ritenuta sul reddito come non applicabile"
+    },
+    "advance_recovery_exceeds_advance": {
+      "fail": "L'anticipo recuperato a oggi è {recovered}, più dell'anticipo di {advance} che è stato pagato",
+      "unknown": "A oggi sono stati recuperati {recovered} di anticipo, ma il contratto non indica l'anticipo pagato, quindi il recupero non può essere verificato",
+      "suggestion": "Riducete il recupero in questo certificato, oppure indicate l'anticipo pagato nelle impostazioni del certificato del contratto"
+    },
+    "retention_matches_config": {
+      "fail": "Il certificato trattiene {certificate} a garanzia ({percent}% della sua base), ma il documento sottostante trattiene {stored}",
+      "suggestion": "Ricalcolate il documento, oppure correggete l'aliquota della ritenuta o la sua base nelle impostazioni del certificato del contratto, così entrambi mostrano la stessa ritenuta"
+    },
+    "net_payable_negative": {
+      "fail": "L'importo da pagare è {payable}: le detrazioni superano l'importo di questo certificato",
+      "suggestion": "Controllate le detrazioni, soprattutto il recupero dell'anticipo, e riportate al certificato successivo ciò che non può essere detratto ora"
+    },
+    "taxes_stale": {
+      "fail": "Le imposte sono state calcolate prima che questo certificato cambiasse, quindi non gli appartengono più",
+      "suggestion": "Ricalcolate le imposte. Se erano già confermate, riapritele prima e confermatele di nuovo dopo"
+    },
+    "taxes_confirmed": {
+      "fail": "Gli importi delle imposte di questo certificato non sono stati confermati",
+      "suggestion": "Controllate ogni riga d'imposta e confermate le imposte prima di certificare"
+    },
+    "lines_complete": {
+      "fail": "La riga {line} non ha ancora un importo. {reason}",
+      "suggestion": "Inserite l'importo, oppure segnate la riga come non applicabile indicando il motivo"
+    },
+    "work_value_differs": {
+      "fail": "La voce {line} è registrata a {stated} a oggi, ma la sua quantità o percentuale dà {computed}",
+      "suggestion": "Correggete la quantità o l'importo nel documento in modo che le due colonne della riga coincidano"
+    }
   }
 }

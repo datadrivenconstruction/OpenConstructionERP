@@ -36,7 +36,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.payment_taxes import Choice, RateRow, compute_payment_taxes
 from app.modules.projects.models import Project
-from app.modules.tax_withholding import repository, schemas, service
+from app.modules.tax_withholding import repository, schemas, service, source_owners
 from app.modules.tax_withholding.data import REVERSE_CHARGE_RULES, WITHHOLDING_REGIMES
 from app.modules.tax_withholding.models import (
     STATUTORY_LINE_KINDS,
@@ -1314,8 +1314,12 @@ class TestShippedRowsAreListable:
             for row in rows
             if row.effective_from <= on and (row.effective_to is None or on <= row.effective_to)
         }
-        listed = await list_statutory_categories(row_source=service.shipped_rows, country="TR", on=on, kind=None)
+        page = await list_statutory_categories(
+            row_source=service.shipped_rows, country="TR", on=on, kind=None, offset=0, limit=500
+        )
+        listed = page.items
         assert listed
+        assert (page.total, page.offset, page.limit) == (len(listed), 0, 500)
         assert {(c.kind, c.code) for c in listed} == in_force
         assert len({(c.kind, c.code) for c in listed}) == len(listed)
         for category in listed:
@@ -1326,13 +1330,37 @@ class TestShippedRowsAreListable:
             assert dumped["kind"] in {"vat_withholding", "income_withholding", "stamp_duty"}
 
     @pytest.mark.asyncio
+    async def test_a_page_of_categories_says_how_many_there_are_in_all(self):
+        from app.core.payment_taxes import rows_for
+        from app.modules.tax_withholding.router import list_statutory_categories
+
+        on = max(row.effective_from for row in rows_for("TR"))
+
+        async def page(offset: int, limit: int):
+            return await list_statutory_categories(
+                row_source=service.shipped_rows, country="TR", on=on, kind=None, offset=offset, limit=limit
+            )
+
+        everything = await page(0, 500)
+        assert everything.total >= 2, "one category cannot show a page being cut"
+        first = await page(0, 1)
+        rest = await page(1, 500)
+        # A short page still reports the whole count, which is the point of the envelope.
+        assert (len(first.items), first.total, first.limit) == (1, everything.total, 1)
+        assert [(c.kind, c.code) for c in [*first.items, *rest.items]] == [(c.kind, c.code) for c in everything.items]
+        assert (await page(everything.total, 500)).items == []
+
+    @pytest.mark.asyncio
     async def test_no_listed_category_is_refused_as_a_broken_or_ambiguous_row(self):
         from app.core.payment_taxes import rows_for
         from app.modules.tax_withholding.router import list_statutory_categories
 
         rows = rows_for("TR")
         on = max(row.effective_from for row in rows)
-        listed = await list_statutory_categories(row_source=service.shipped_rows, country="TR", on=on, kind=None)
+        page = await list_statutory_categories(
+            row_source=service.shipped_rows, country="TR", on=on, kind=None, offset=0, limit=500
+        )
+        listed = page.items
         assert listed
         idle = Choice("not_applicable", reason="Not the figure under test")
         for category in listed:
@@ -1478,6 +1506,28 @@ class TestStatutorySchemas:
 # ── Statutory tax lines: storage (PostgreSQL) ────────────────────────────────
 
 
+#: Which project each source document of these tests belongs to. A real
+#: document has an owner in its own module; here the first project a document
+#: is saved under is its owner, which is what makes filing it under a second
+#: project a refusal.
+_SOURCE_OWNERS: dict[tuple[str, uuid.UUID], uuid.UUID] = {}
+
+
+@pytest.fixture(autouse=True)
+def _source_owners():
+    """Stand in for the modules that own the source documents."""
+    before = dict(source_owners._resolvers)
+    _SOURCE_OWNERS.clear()
+    for kind in service.STATUTORY_SOURCE_KINDS:
+        source_owners.register_source_owner(
+            kind, lambda _session, source_id, kind=kind: _SOURCE_OWNERS.get((kind, source_id))
+        )
+    yield
+    source_owners._resolvers.clear()
+    source_owners._resolvers.update(before)
+    _SOURCE_OWNERS.clear()
+
+
 async def _stat_setup(session: AsyncSession, tag: str) -> tuple[User, Project]:
     owner = await _user(session, f"{tag}-{uuid.uuid4().hex[:8]}@test.io")
     return owner, await _project(session, owner, name=f"Statutory {tag}")
@@ -1495,6 +1545,7 @@ async def _save(session: AsyncSession, owner: User, project: Project, source_id:
         "row_source": _source(),
     }
     arguments.update(changes)
+    _SOURCE_OWNERS.setdefault((arguments["source_kind"], arguments["source_id"]), project.id)
     return await service.upsert_statutory(session, **arguments)
 
 
@@ -1958,8 +2009,41 @@ class TestCertificateTaxProvider:
         owner, project = await _stat_setup(session, "provider")
         source_id = uuid.uuid4()
         await _save(session, owner, project, source_id)
-        result = await service.certificate_tax_provider(session, "progress_claim", str(source_id))
-        assert result == compute_payment_taxes(service.build_tax_input(_inputs()), _stat_rows())
+        answer = await service.certificate_tax_provider(session, "progress_claim", str(source_id))
+        assert answer.result == compute_payment_taxes(service.build_tax_input(_inputs()), _stat_rows())
+        # And the header the figures were stored under, which is what lets a
+        # certificate notice that its own amount has moved since.
+        assert answer.status == "draft"
+        assert answer.net_amount == _inputs().net_amount
+        assert answer.vat_rate_pct == _inputs().vat_rate_pct
+        assert answer.document_date == _inputs().document_date
+        assert answer.choices["vat_withholding"] == _inputs().vat_withholding
+
+    async def test_a_document_nobody_owns_cannot_be_filed(self, session: AsyncSession):
+        owner, project = await _stat_setup(session, "unowned")
+        source_id = uuid.uuid4()
+        # No owner recorded for this id: the owning module does not know it.
+        with pytest.raises(service.StatutoryRefusal) as caught:
+            await service.upsert_statutory(
+                session,
+                project_id=project.id,
+                source_kind="progress_claim",
+                source_id=source_id,
+                inputs=_inputs(),
+                direction="borne_by_us",
+                user_id=owner.id,
+                row_source=_source(),
+            )
+        assert (caught.value.http_status, caught.value.code) == (404, "statutory_not_found")
+        assert await service.get_statutory(session, source_kind="progress_claim", source_id=source_id) is None
+
+    async def test_a_kind_with_no_owner_module_cannot_be_filed(self, session: AsyncSession):
+        owner, project = await _stat_setup(session, "ownerless")
+        source_id = uuid.uuid4()
+        source_owners.unregister_source_owner("invoice")
+        with pytest.raises(service.StatutoryRefusal) as caught:
+            await _save(session, owner, project, source_id, source_kind="invoice")
+        assert (caught.value.http_status, caught.value.code) == (404, "statutory_not_found")
 
     async def test_the_registry_receives_the_provider(self, session: AsyncSession):
         certificate_taxes = pytest.importorskip("app.modules.contracts.certificate_taxes")

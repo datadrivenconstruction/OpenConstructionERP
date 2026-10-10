@@ -8,6 +8,8 @@ One calculation, so the three documents cannot disagree about a number.
 from __future__ import annotations
 
 from app.core.payment_taxes.calc import (
+    ALL_REASON_KEYS,
+    CONSUMER_REASON_KEYS,
     FIGURE_KINDS,
     REASON_KEYS,
     Choice,
@@ -29,6 +31,8 @@ from app.core.payment_taxes.tables import (
 )
 
 __all__ = [
+    "ALL_REASON_KEYS",
+    "CONSUMER_REASON_KEYS",
     "FIGURE_KINDS",
     "REASON_KEYS",
     "Choice",

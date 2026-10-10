@@ -13,15 +13,18 @@ The fixture and its SYNTHETIC rates are those of ``test_hakedis_math``.
 from __future__ import annotations
 
 import io
+from datetime import date, datetime
 from decimal import Decimal
 from typing import Any
 
 import pytest
 from openpyxl import load_workbook
+from openpyxl.utils import column_index_from_string
 
 from app.modules.contracts.hakedis import Certificate
+from app.modules.contracts.hakedis_layout import resolve_settings
 from app.modules.contracts.hakedis_xlsx import render_hakedis_xlsx
-from tests.unit.test_hakedis_math import BILL, EXPECTED, certify
+from tests.unit.test_hakedis_math import BILL, CONTRACT_TERMS, EXPECTED, certify
 
 D = Decimal
 
@@ -242,3 +245,109 @@ def test_a_description_that_looks_like_a_formula_is_stored_as_text(first: Certif
     row = find_row(works, "M-25.101", column=2)
     assert works.cell(row=row, column=3).value == "=SUM(1;2) boru"
     assert works.cell(row=row, column=3).data_type == "s"
+
+
+# ── The sheet as it prints ────────────────────────────────────────────────
+
+LETTERHEAD = {
+    "legal_name": "Örnek Işıl Mekanik ve Elektrik Tesisat Mühendislik Taahhüt Ltd. Şti.",
+    "address": "Büyükdere Caddesi No: 201, B Blok Kat 4\n34394 Şişli / İstanbul, Türkiye",
+    "registration_line": "Şişli V.D. 9876543210 - Ticaret Sicil No: 123456-5",
+    "phone": "+90 212 555 01 42",
+}
+
+
+@pytest.fixture
+def letterhead(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A firm with a letterhead, whatever this machine's data folder holds."""
+    import app.core.company_profile as company_profile
+    import app.core.pdf_branding as pdf_branding
+    from app.core.pdf_appearance import DEFAULT_APPEARANCE
+
+    profile = company_profile.sanitise(LETTERHEAD)
+    monkeypatch.setattr(company_profile, "read_company_profile", lambda *args, **kwargs: dict(profile))
+    monkeypatch.setattr(pdf_branding, "_read_branding", dict)
+    monkeypatch.setattr(pdf_branding, "_read_appearance", lambda doc_type=None: dict(DEFAULT_APPEARANCE))
+
+
+def print_area(ws: Any) -> tuple[str, int, int]:
+    """The print area as its first cell, its last column number and its last row."""
+    area = ws.print_area if isinstance(ws.print_area, str) else ws.print_area[0]
+    start, end = area.split("!")[-1].replace("$", "").split(":")
+    letters = end.rstrip("0123456789")
+    return start, column_index_from_string(letters), int(end[len(letters) :])
+
+
+def check_the_printed_sheet_starts_at_its_title(summary: Any, works: Any) -> None:
+    for ws in (summary, works):
+        start, last_column, last_row = print_area(ws)
+        # The title block above the table is printed: a sheet that starts under it
+        # does not say which certificate it is.
+        assert start == "A1", ws.title
+        assert last_row == ws.max_row and last_column == ws.max_column, ws.title
+        assert ws.page_setup.paperSize in (9, "9"), "A4"
+        assert ws.page_setup.fitToWidth == 1 and ws.page_setup.fitToHeight == 0
+    header_row = find_row(works, "Sıra No")
+    assert works.print_title_rows == f"${header_row - 1}:${header_row}"
+    assert works.freeze_panes == f"A{header_row + 1}"
+    amount_head = find_row(summary, "Tutar (TL)", column=3)
+    assert summary.print_title_rows == f"${amount_head}:${amount_head}"
+    assert find_row(summary, "HAKEDİŞ RAPORU") < amount_head
+    assert find_row(works, "YAPILAN İŞLER LİSTESİ") < header_row
+
+
+def test_the_print_area_starts_at_the_title_block(book: tuple[Any, Any]) -> None:
+    check_the_printed_sheet_starts_at_its_title(*book)
+
+
+@pytest.mark.usefixtures("letterhead")
+def test_the_print_area_takes_in_the_letterhead(first: Certificate) -> None:
+    summary, works = sheets(first)
+    named = next(
+        row
+        for row in range(1, summary.max_row + 1)
+        if LETTERHEAD["legal_name"] in [cell.value for cell in summary[row]]
+    )
+    assert named < find_row(summary, "HAKEDİŞ RAPORU")
+    check_the_printed_sheet_starts_at_its_title(summary, works)
+
+
+def test_the_header_writes_the_lira_as_tl_and_the_date_of_issue_as_a_date(first: Certificate) -> None:
+    summary, _ = sheets(first, issue_date=date(2026, 8, 3))
+    currency = summary.cell(row=find_row(summary, "Para Birimi"), column=3)
+    assert currency.value == "TL"
+    issued = summary.cell(row=find_row(summary, "Düzenleme Tarihi"), column=3)
+    assert issued.value == datetime(2026, 8, 3)
+    assert issued.number_format == "DD.MM.YYYY"
+    assert not any("TRY" in str(cell) for row in rows_of(summary) for cell in row if cell is not None)
+    # Without the rate nobody entered there is no exchange rate row on a lira certificate.
+    assert not any("TL Karşılığı" in str(row[0]) for row in rows_of(summary))
+
+
+def test_a_foreign_currency_certificate_says_the_lira_equivalent_is_not_stated() -> None:
+    summary, _ = sheets(certify(1, D("0"), currency="EUR"))
+    assert summary.cell(row=find_row(summary, "Para Birimi"), column=3).value == "EUR"
+    held = summary.cell(row=find_row(summary, "TL Karşılığı"), column=3)
+    assert held.value == "TL karşılığı: döviz kuru girilmedi."
+    assert find_row(summary, "Tutar (EUR)", column=3)
+
+
+def test_both_sheets_carry_the_signature_block_and_name_the_party_as_it_signs() -> None:
+    hakedis = dict(CONTRACT_TERMS["hakedis"])
+    hakedis["signature_roles"] = ["subcontractor", "control_engineer", "employer"]
+    settings = resolve_settings("TR", {"hakedis": hakedis})
+    cert = certify(1, D("0"), signature_roles=settings.signature_roles)
+    summary, works = sheets(cert, settings=settings)
+    assert find_row(summary, "Alt Yüklenici - Vergi Dairesi")
+    assert not any(str(row[0]).startswith("Yüklenici") for row in rows_of(summary))
+    for ws in (summary, works):
+        titles = [str(cell) for row in rows_of(ws) for cell in row if cell is not None]
+        for role in ("ALT YÜKLENİCİ", "KONTROL MÜHENDİSİ", "İŞVEREN"):
+            assert role in titles, (ws.title, role)
+        assert any(cell.startswith("Adı Soyadı") and "İmza" in cell and "Tarih" in cell for cell in titles), ws.title
+    # The works list is signed under its total, not above it.
+    total_row = find_row(works, "Toplam", column=3)
+    signature_row = next(
+        row for row in range(1, works.max_row + 1) if "ALT YÜKLENİCİ" in [cell.value for cell in works[row]]
+    )
+    assert signature_row > total_row

@@ -121,6 +121,10 @@ from app.modules.contracts.schemas import (
     GainshareConfigurationCreate,
     GainshareConfigurationResponse,
     GainshareConfigurationUpdate,
+    HakedisLineInput,
+    HakedisOptionsInput,
+    HakedisResponse,
+    HakedisTaxesInput,
     LDClauseCreate,
     LDClauseResponse,
     LDClauseUpdate,
@@ -1577,6 +1581,172 @@ async def export_aia_application_pdf(
             "Content-Language": "en",
         },
     )
+
+
+# ── Payment certificate (hakediş) ────────────────────────────────────────
+
+#: The three languages a certificate prints in; ``tr-en`` is both, Turkish first.
+_HAKEDIS_LOCALE = r"^(tr|en|tr-en)$"
+
+
+@router.get(
+    "/progress-claims/{claim_id}/hakedis",
+    response_model=HakedisResponse,
+    summary="Payment certificate (hakediş) of a progress claim",
+)
+async def get_claim_hakedis(
+    claim_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    locale: str = Query(default="tr", pattern=_HAKEDIS_LOCALE),
+    _perm: None = Depends(RequirePermission("contracts.read")),
+) -> HakedisResponse:
+    """Every line of the certificate with its status, amount, basis and reason.
+
+    404 where the contract has no certificate layout, which is every contract
+    outside the countries that have one unless it configures its own.
+    """
+    await _verify_claim_access(session, claim_id, user_id)
+    payload = await ContractsService(session).hakedis_view(claim_id, locale=locale)
+    return HakedisResponse.model_validate(payload)
+
+
+@router.get(
+    "/progress-claims/{claim_id}/hakedis/pdf",
+    summary="Export the payment certificate (hakediş) as PDF",
+    response_description="application/pdf stream",
+)
+async def export_claim_hakedis_pdf(
+    claim_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    locale: str = Query(default="tr", pattern=_HAKEDIS_LOCALE),
+    _perm: None = Depends(RequirePermission("contracts.read")),
+) -> StreamingResponse:
+    import io
+
+    from app.modules.contracts import hakedis_document
+    from app.modules.contracts.hakedis_pdf import render_hakedis_pdf
+
+    await _verify_claim_access(session, claim_id, user_id)
+    document = await ContractsService(session).build_hakedis(claim_id, language=hakedis_document.first_language(locale))
+    # ReportLab layout is CPU-bound and synchronous; in a thread it does not
+    # stall every other request on the event loop while the form is drawn.
+    pdf_bytes = await asyncio.to_thread(
+        render_hakedis_pdf,
+        document.cert,
+        locale=locale,
+        settings=document.settings,
+        issue_date=document.issue_date,
+    )
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": attachment_disposition(hakedis_document.file_name(document, "pdf", locale)),
+            # The document's language is the one asked for, not the request's.
+            "Content-Language": locale.replace("-", ", "),
+        },
+    )
+
+
+@router.get(
+    "/progress-claims/{claim_id}/hakedis/xlsx",
+    summary="Export the payment certificate (hakediş) as a spreadsheet",
+    response_description="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet stream",
+)
+async def export_claim_hakedis_xlsx(
+    claim_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    locale: str = Query(default="tr", pattern=_HAKEDIS_LOCALE),
+    _perm: None = Depends(RequirePermission("contracts.read")),
+) -> StreamingResponse:
+    import io
+
+    from app.modules.contracts import hakedis_document
+    from app.modules.contracts.hakedis_xlsx import render_hakedis_xlsx
+
+    await _verify_claim_access(session, claim_id, user_id)
+    document = await ContractsService(session).build_hakedis(claim_id, language=hakedis_document.first_language(locale))
+    workbook = await asyncio.to_thread(
+        render_hakedis_xlsx,
+        document.cert,
+        locale=locale,
+        settings=document.settings,
+        issue_date=document.issue_date,
+    )
+    return StreamingResponse(
+        io.BytesIO(workbook),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={
+            "Content-Disposition": attachment_disposition(hakedis_document.file_name(document, "xlsx", locale)),
+            "Content-Language": locale.replace("-", ", "),
+        },
+    )
+
+
+@router.put(
+    "/progress-claims/{claim_id}/hakedis/lines/{line_key}",
+    response_model=HakedisResponse,
+    summary="Enter, mark not applicable or clear one manual line of the certificate",
+)
+async def put_claim_hakedis_line(
+    claim_id: uuid.UUID,
+    line_key: str,
+    data: HakedisLineInput,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    locale: str = Query(default="tr", pattern=_HAKEDIS_LOCALE),
+    _perm: None = Depends(RequirePermission("contracts.update")),
+) -> HakedisResponse:
+    await _verify_claim_access(session, claim_id, user_id)
+    service = ContractsService(session)
+    await service.save_hakedis_line(claim_id, line_key, data, user_id)
+    return HakedisResponse.model_validate(await service.hakedis_view(claim_id, locale=locale))
+
+
+@router.put(
+    "/progress-claims/{claim_id}/hakedis/options",
+    response_model=HakedisResponse,
+    summary="State whether this certificate is the final one",
+)
+async def put_claim_hakedis_options(
+    claim_id: uuid.UUID,
+    data: HakedisOptionsInput,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    locale: str = Query(default="tr", pattern=_HAKEDIS_LOCALE),
+    _perm: None = Depends(RequirePermission("contracts.update")),
+) -> HakedisResponse:
+    await _verify_claim_access(session, claim_id, user_id)
+    service = ContractsService(session)
+    await service.save_hakedis_options(claim_id, data, user_id)
+    return HakedisResponse.model_validate(await service.hakedis_view(claim_id, locale=locale))
+
+
+@router.put(
+    "/progress-claims/{claim_id}/hakedis/taxes",
+    response_model=HakedisResponse,
+    summary="Choose the tax categories; the taxes are computed on the certificate's own bases",
+)
+async def put_claim_hakedis_taxes(
+    claim_id: uuid.UUID,
+    data: HakedisTaxesInput,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    locale: str = Query(default="tr", pattern=_HAKEDIS_LOCALE),
+    _perm: None = Depends(RequirePermission("contracts.update")),
+) -> HakedisResponse:
+    """Store the choices as a draft set of statutory tax lines for this claim.
+
+    The set is confirmed, reopened and overridden through the statutory tax
+    routes, which ask this module whose claim it is before they answer.
+    """
+    await _verify_claim_access(session, claim_id, user_id)
+    service = ContractsService(session)
+    await service.save_hakedis_taxes(claim_id, data, user_id)
+    return HakedisResponse.model_validate(await service.hakedis_view(claim_id, locale=locale))
 
 
 # ── FinalAccount ─────────────────────────────────────────────────────────

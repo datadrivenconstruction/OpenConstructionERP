@@ -49,11 +49,14 @@ RENDERING_ROUTES: dict[str, set[str]] = {
     # the search below finds it through a comment that mentions the PDF export.
     # Listing it here rather than narrowing the search keeps the search broad.
     "modules/boq/router.py": {"export_boq_pdf", "export_boq_excel"},
-    "modules/contracts/router.py": {"export_aia_application_pdf"},
+    "modules/contracts/router.py": {"export_aia_application_pdf", "export_claim_hakedis_pdf"},
     "modules/daily_diary/router.py": {"diary_pdf"},
     "modules/einvoice/router.py": {"generate_invoice"},
     "modules/fieldreports/router.py": {"export_pdf"},
-    "modules/finance/router.py": {"export_invoice_br_pdf", "export_invoice_einvoice"},
+    # ``_export_tr_einvoice`` writes XML, not a PDF; the search finds it through the
+    # sentence that refuses the hybrid PDF. It builds the document in the request and
+    # always writes it in Turkish, so it belongs with the routes that say so.
+    "modules/finance/router.py": {"export_invoice_br_pdf", "export_invoice_einvoice", "_export_tr_einvoice"},
     "modules/forms/router.py": {"export_submission_pdf"},
     "modules/meetings/router.py": {"export_meeting_pdf", "export_minutes_pdf"},
     "modules/methodology/router.py": {"export_methodology_pdf"},
@@ -65,6 +68,7 @@ RENDERING_ROUTES: dict[str, set[str]] = {
     "modules/punchlist/router.py": {"export_pdf"},
     "modules/reporting/router.py": {"download_report"},
     "modules/rfi/router.py": {"export_rfi_pdf"},
+    "modules/subcontractors/router.py": {"export_payment_hakedis_pdf"},
     "modules/tendering/router.py": {
         "export_award_letter_pdf",
         "export_award_record_pdf",

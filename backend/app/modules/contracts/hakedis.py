@@ -125,6 +125,18 @@ class CertificateWorkLine:
 
     A period quantity or percent may be negative: that is how an earlier
     over-measurement is corrected.
+
+    ``stated_previous_amount`` and ``stated_period_amount`` are the amounts
+    the source document already carries for the row: what the certificates
+    before this one billed on it, and what this one bills. A certificate
+    printed from a stored claim has to say what the claim says, because the
+    invoice is raised from the claim; a product worked out again here can
+    differ from it by a rounding step, or by more once a rate was changed
+    between two claims. When both are given they are the row's money, the
+    quantities or percents are printed beside them, and the product they would
+    have given is kept on the result so the difference can be reported. A row
+    with stated amounts needs no quantity, price or percent at all: that is
+    how money billed outside the schedule gets a row.
     """
 
     code: str
@@ -139,6 +151,8 @@ class CertificateWorkLine:
     previous_pct: Decimal | None
     period_pct: Decimal | None
     section: str = ""
+    stated_previous_amount: Decimal | None = None
+    stated_period_amount: Decimal | None = None
 
 
 @dataclass(frozen=True)
@@ -179,6 +193,18 @@ class CertificateInput:
     ``tax_conditions`` is the condition a rate row is subject to, by line key
     and already in the document's language. A figure does not carry it, so
     whoever looked the row up passes it here and it is printed under the line.
+
+    ``tax_status`` says whether a person has signed the tax figures:
+    ``"draft"``, ``"confirmed"``, or empty when the caller does not know. A
+    result cannot say it, and the document has to: with ``"draft"`` it carries
+    a note that the taxes are not confirmed and so prints as a draft. With
+    ``"confirmed"`` a rate that is unconfirmed at its source, or an amount
+    entered by hand, no longer makes the document a draft, because confirming
+    is where a person accepted both.
+
+    ``previous_held_reason`` is the reason printed when
+    ``previous_certified_total`` is ``None``: nobody knows it, or a previous
+    certificate exists and has not been certified yet.
     """
 
     flavour: Literal["unit_price", "lump_sum"]
@@ -202,6 +228,9 @@ class CertificateInput:
     signature_roles: Sequence[str]
     taxes_by_line: Mapping[str, PaymentTaxResult] = field(default_factory=dict)
     tax_conditions: Mapping[str, str] = field(default_factory=dict)
+    tax_status: str = ""
+    previous_held_reason: str = "previous_unknown"
+    previous_held_params: Mapping[str, str] = field(default_factory=dict)
 
 
 # ── Result ────────────────────────────────────────────────────────────────
@@ -231,6 +260,10 @@ class WorkLineResult:
             or the cumulative percent above one hundred. Not blocked here; a
             validation rule reads the flag.
         over_by: By how much, in the unit of the quantity or in percent points.
+        computed_cumulative_amount: What quantity times price, or contract
+            amount times percent, gives for the row to date, where the row's
+            money was stated by its source instead. ``None`` when the row was
+            computed here, or cannot be.
     """
 
     line: CertificateWorkLine
@@ -249,6 +282,7 @@ class WorkLineResult:
     cumulative_amount: Decimal | None
     over_measured: bool = False
     over_by: Decimal | None = None
+    computed_cumulative_amount: Decimal | None = None
 
     # The input's descriptive fields, so a column can be read off the result alone.
     @property
@@ -418,7 +452,63 @@ def _held_row(line: CertificateWorkLine, index: int, reason: str) -> WorkLineRes
     )
 
 
+def _stated_row(line: CertificateWorkLine, index: int, currency: str, flavour: str) -> WorkLineResult | None:
+    """The row whose money its source stated, or ``None`` when it stated none.
+
+    One stated amount without the other is not a statement: the row is then
+    computed like any other, and held if it cannot be.
+    """
+    if line.stated_previous_amount is None or line.stated_period_amount is None:
+        return None
+    previous_amount = _q(line.stated_previous_amount, currency)
+    cumulative_amount = _q(line.stated_previous_amount + line.stated_period_amount, currency)
+    contract_amount = line.contract_amount
+    computed: Decimal | None = None
+    cumulative_quantity: Decimal | None = None
+    cumulative_pct: Decimal | None = None
+    over = False
+    over_by: Decimal | None = None
+    if flavour == "unit_price":
+        if line.previous_quantity is not None and line.period_quantity is not None:
+            cumulative_quantity = line.previous_quantity + line.period_quantity
+            if line.unit_price is not None:
+                computed = _q(cumulative_quantity * line.unit_price, currency)
+            if line.contract_quantity is not None and cumulative_quantity > line.contract_quantity:
+                over, over_by = True, cumulative_quantity - line.contract_quantity
+        if contract_amount is None and line.contract_quantity is not None and line.unit_price is not None:
+            contract_amount = line.contract_quantity * line.unit_price
+    else:
+        if line.previous_pct is not None and line.period_pct is not None:
+            cumulative_pct = line.previous_pct + line.period_pct
+            if line.contract_amount is not None:
+                computed = _share(line.contract_amount, cumulative_pct, currency)
+            if cumulative_pct > DEC_HUNDRED:
+                over, over_by = True, cumulative_pct - DEC_HUNDRED
+    return WorkLineResult(
+        line=line,
+        index=index,
+        status="value",
+        reason="",
+        previous_quantity=line.previous_quantity if flavour == "unit_price" else None,
+        period_quantity=line.period_quantity if flavour == "unit_price" else None,
+        cumulative_quantity=cumulative_quantity,
+        previous_pct=line.previous_pct if flavour == "lump_sum" else None,
+        period_pct=line.period_pct if flavour == "lump_sum" else None,
+        cumulative_pct=cumulative_pct,
+        contract_amount=_q(contract_amount, currency) if contract_amount is not None else None,
+        previous_amount=previous_amount,
+        period_amount=cumulative_amount - previous_amount,
+        cumulative_amount=cumulative_amount,
+        over_measured=over,
+        over_by=over_by,
+        computed_cumulative_amount=computed,
+    )
+
+
 def _unit_price_row(line: CertificateWorkLine, index: int, currency: str) -> WorkLineResult:
+    stated = _stated_row(line, index, currency, "unit_price")
+    if stated is not None:
+        return stated
     missing = [
         name
         for name, value in (
@@ -466,6 +556,9 @@ def _share(contract_amount: Decimal, pct: Decimal, currency: str) -> Decimal:
 
 
 def _lump_sum_row(line: CertificateWorkLine, index: int, currency: str) -> WorkLineResult:
+    stated = _stated_row(line, index, currency, "lump_sum")
+    if stated is not None:
+        return stated
     missing = [
         name
         for name, value in (
@@ -667,7 +760,8 @@ def _evaluate(
                 return _held(defn, "work_line_incomplete", {"source": source}, lines=codes)
             return _value(defn, _totals(rows).cumulative_amount, {"source": source, "lines": str(len(rows))})
         if inp.previous_certified_total is None:
-            return _held(defn, "previous_unknown", {"source": source})
+            why = {str(name): str(value) for name, value in dict(inp.previous_held_params).items()}
+            return _held(defn, inp.previous_held_reason or "previous_unknown", {"source": source}, **why)
         return _value(defn, _q(inp.previous_certified_total, inp.currency), {"source": source})
     if defn.op == "tax":
         return _tax_line(defn, inp, done)
@@ -768,12 +862,20 @@ def document_notes(cert: Certificate) -> tuple[DocumentNote, ...]:
     replaced, gets a note too: the figure is there, but it is not yet settled.
     """
     notes: list[DocumentNote] = []
+    tax_keys = {defn.key for defn in cert.inp.layout if defn.op == "tax"}
+    signed = cert.inp.tax_status == "confirmed"
+    unsigned_noted = False
 
     def add(line: SummaryLine, reason: str, params: Mapping[str, str]) -> None:
         notes.append(DocumentNote(len(notes) + 1, line.key, line.letter, reason, MappingProxyType(dict(params))))
 
     for line in cert.summary:
         basis = line.basis
+        if line.key in tax_keys and line.status != "held" and cert.inp.tax_status == "draft" and not unsigned_noted:
+            # Said once, on the first tax line it applies to: the figures are
+            # there, and nobody has put a name under them yet.
+            add(line, "taxes_not_confirmed", {})
+            unsigned_noted = True
         if line.status == "held":
             reason = basis.get("reason", "")
             if reason in _DERIVED_REASONS:
@@ -781,7 +883,7 @@ def document_notes(cert: Certificate) -> tuple[DocumentNote, ...]:
             prefix = "reason."
             add(line, reason, {name[len(prefix) :]: value for name, value in basis.items() if name.startswith(prefix)})
             continue
-        if line.status == "value":
+        if line.status == "value" and not (signed and line.key in tax_keys):
             if basis.get("review_status") == "unconfirmed":
                 add(line, "unconfirmed_rate", {})
             if basis.get("overridden") == "true":
@@ -856,7 +958,7 @@ def note_text(note: DocumentNote, cert: Certificate, language: str, settings: Ha
 
 
 #: Reason parameters that are amounts, printed in the document's number format.
-_MONEY_PARAMS = ("base", "expected", "work_value", "threshold", "measured", "cap", "computed")
+_MONEY_PARAMS = ("base", "expected", "work_value", "threshold", "measured", "cap", "computed", "stored", "stated")
 
 
 def reason_text(

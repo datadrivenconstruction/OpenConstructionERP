@@ -155,5 +155,62 @@
         "suggestion": "If the statute applies to this contract, check the deposit against it by hand"
       }
     }
+  },
+  "hakedis": {
+    "cumulative_exceeds_contract": {
+      "fail": "Work certified to date is {cumulative}, which is {over} above the contract sum of {contract}",
+      "suggestion": "Have the change order that covers the extra work approved first, or correct the quantities on this certificate"
+    },
+    "previous_matches_last_certified": {
+      "fail": "This certificate carries {carried} as the total of the previous certificates, but certificate {reference} was certified at {certified}",
+      "work_fail": "The previous column of the works list adds up to {carried}, but certificate {reference} was certified with {certified} of work to date",
+      "suggestion": "Check for a claim between the two certificates that neither of them shows, then generate this one again"
+    },
+    "previous_unknown": {
+      "fail": "The total of the previous certificates is not known",
+      "not_certified": "The previous certificate {reference} is not certified yet, so its total is not final",
+      "suggestion": "Certify the previous certificate first. If it was certified before certificates were stored, enter its total on the previous certificates line"
+    },
+    "weights_sum": {
+      "fail": "The weights of the items add up to {total}%, not 100%",
+      "suggestion": "Correct the values of the schedule lines so that their shares add up to the whole contract"
+    },
+    "percent_regressed": {
+      "fail": "Item {line} is negative this period, so it takes back work that was already certified",
+      "suggestion": "Leave it if this corrects an earlier over-measurement. Otherwise correct the quantity or percent on this certificate"
+    },
+    "income_withholding_single_year": {
+      "fail": "Income withholding is selected, but the contract runs from {start} to {end}, within one calendar year. The withholding concerns construction work that spans more than one calendar year",
+      "suggestion": "Check with your accountant whether the work really spans more than one year; if not, mark the income withholding as not applicable"
+    },
+    "advance_recovery_exceeds_advance": {
+      "fail": "The advance recovered to date is {recovered}, more than the advance of {advance} that was paid",
+      "unknown": "{recovered} of advance has been recovered to date, but the contract does not state the advance paid, so the recovery cannot be checked against it",
+      "suggestion": "Lower the recovery on this certificate, or state the advance paid in the contract's certificate settings"
+    },
+    "retention_matches_config": {
+      "fail": "The certificate holds {certificate} in retention ({percent}% of its base), but the document behind it holds {stored}",
+      "suggestion": "Work the document out again, or correct the retention rate or its base in the contract's certificate settings, so both show the same retention"
+    },
+    "net_payable_negative": {
+      "fail": "The amount payable is {payable}: the deductions are larger than the amount of this certificate",
+      "suggestion": "Check the deductions, the advance recovery above all, and carry what cannot be deducted now to the next certificate"
+    },
+    "taxes_stale": {
+      "fail": "The taxes were calculated before this certificate changed, so they no longer belong to it",
+      "suggestion": "Recalculate the taxes. If they were already confirmed, reopen them first and confirm them again afterwards"
+    },
+    "taxes_confirmed": {
+      "fail": "The tax figures of this certificate have not been confirmed",
+      "suggestion": "Check each tax line and confirm the taxes before certifying"
+    },
+    "lines_complete": {
+      "fail": "Line {line} has no figure yet. {reason}",
+      "suggestion": "Enter the amount, or mark the line as not applicable and say why"
+    },
+    "work_value_differs": {
+      "fail": "Item {line} is recorded at {stated} to date, but its quantity or percent gives {computed}",
+      "suggestion": "Correct the quantity or the amount on the document so that the two columns of the row agree"
+    }
   }
 }

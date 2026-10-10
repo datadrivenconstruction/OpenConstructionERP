@@ -236,6 +236,13 @@ def test_a_stamp_duty_row_states_when_it_applies(row: RateRow) -> None:
     # would be offered to a private employer as if it were the default.
     assert row.conditions.get("tr")
     assert row.conditions.get("en")
+    # And the calculation itself refuses a buyer stated to be an ordinary one,
+    # so a private employer who selects the row anyway gets a dash, not a duty.
+    assert row.buyer_scope == "designated_only"
+    private = compute_payment_taxes(_input(row, buyer_is_designated=False), rows_for("TR")).stamp_duty
+    assert (private.status, private.amount, private.reason_key) == ("not_applicable", None, "buyer_not_designated")
+    unstated = compute_payment_taxes(_input(row), rows_for("TR")).stamp_duty
+    assert (unstated.status, unstated.amount, unstated.reason_key) == ("held", None, "buyer_class_unknown")
 
 
 def _probe_dates() -> list[date]:
@@ -314,10 +321,11 @@ def test_every_row_computes_through_the_calculator(row: RateRow) -> None:
     "row", [r for r in ROWS if r.buyer_scope in ("designated_only", "designated_or_work_value")], ids=lambda r: r.code
 )
 def test_a_buyer_condition_is_never_assumed_for_a_shipped_row(row: RateRow) -> None:
-    unknown = compute_payment_taxes(_input(row), rows_for("TR")).vat_withheld
+    figure_of = _CHOICE_FIELD[row.kind][1]
+    unknown = getattr(compute_payment_taxes(_input(row), rows_for("TR")), figure_of)
     assert (unknown.status, unknown.amount, unknown.reason_key) == ("held", None, "buyer_class_unknown")
 
-    ordinary = compute_payment_taxes(_input(row, buyer_is_designated=False), rows_for("TR")).vat_withheld
+    ordinary = getattr(compute_payment_taxes(_input(row, buyer_is_designated=False), rows_for("TR")), figure_of)
     assert ordinary.amount is None
     if row.buyer_scope == "designated_only":
         assert (ordinary.status, ordinary.reason_key) == ("not_applicable", "buyer_not_designated")
@@ -333,6 +341,7 @@ def test_a_document_in_another_currency_is_held_rather_than_capped_in_lira() -> 
     for row in ROWS:
         if row.cap_amount is None:
             continue
-        result = compute_payment_taxes(_input(row, currency="EUR"), rows_for("TR"))
+        # The buyer is stated, so the cap is the only thing left to stop on.
+        result = compute_payment_taxes(_input(row, currency="EUR", buyer_is_designated=True), rows_for("TR"))
         figure = getattr(result, _CHOICE_FIELD[row.kind][1])
         assert (figure.status, figure.reason_key) == ("held", "cap_currency_mismatch")

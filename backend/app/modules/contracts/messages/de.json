@@ -155,5 +155,62 @@
         "suggestion": "Falls die Vorschrift für diesen Vertrag gilt, prüfen Sie die Anzahlung von Hand"
       }
     }
+  },
+  "hakedis": {
+    "cumulative_exceeds_contract": {
+      "fail": "Die bisher bescheinigte Leistung beträgt {cumulative} und liegt damit {over} über der Auftragssumme von {contract}",
+      "suggestion": "Lassen Sie zuerst den Nachtrag genehmigen, der die Mehrleistung abdeckt, oder korrigieren Sie die Mengen dieser Abschlagsbescheinigung"
+    },
+    "previous_matches_last_certified": {
+      "fail": "Diese Bescheinigung führt {carried} als Summe der vorherigen Bescheinigungen, die Bescheinigung {reference} wurde jedoch mit {certified} festgestellt",
+      "work_fail": "Die Spalte der Vorleistungen im Leistungsverzeichnis ergibt {carried}, die Bescheinigung {reference} wurde jedoch mit {certified} Leistung bis dahin festgestellt",
+      "suggestion": "Prüfen Sie, ob zwischen den beiden Bescheinigungen eine Abrechnung liegt, die keine von beiden zeigt, und erzeugen Sie diese dann neu"
+    },
+    "previous_unknown": {
+      "fail": "Die Summe der vorherigen Bescheinigungen ist nicht bekannt",
+      "not_certified": "Die vorherige Bescheinigung {reference} ist noch nicht festgestellt, ihre Summe steht daher nicht fest",
+      "suggestion": "Stellen Sie zuerst die vorherige Bescheinigung fest. Wurde sie festgestellt, bevor Bescheinigungen gespeichert wurden, tragen Sie ihre Summe in der Zeile der vorherigen Bescheinigungen ein"
+    },
+    "weights_sum": {
+      "fail": "Die Gewichte der Positionen ergeben {total} % statt 100 %",
+      "suggestion": "Korrigieren Sie die Werte der Positionen, sodass ihre Anteile den gesamten Vertrag ergeben"
+    },
+    "percent_regressed": {
+      "fail": "Die Position {line} ist in diesem Zeitraum negativ und nimmt damit bereits bescheinigte Leistung zurück",
+      "suggestion": "Belassen Sie es, wenn damit ein früheres Übermaß berichtigt wird. Andernfalls korrigieren Sie Menge oder Prozentsatz in dieser Bescheinigung"
+    },
+    "income_withholding_single_year": {
+      "fail": "Der Einkommensteuerabzug ist gewählt, der Vertrag läuft jedoch vom {start} bis zum {end}, also innerhalb eines Kalenderjahres. Der Abzug betrifft Bauleistungen, die sich über mehr als ein Kalenderjahr erstrecken",
+      "suggestion": "Klären Sie mit Ihrem Steuerberater, ob sich die Leistung tatsächlich über mehr als ein Jahr erstreckt; falls nicht, kennzeichnen Sie den Einkommensteuerabzug als nicht anwendbar"
+    },
+    "advance_recovery_exceeds_advance": {
+      "fail": "Bisher wurden {recovered} der Vorauszahlung verrechnet, mehr als die gezahlte Vorauszahlung von {advance}",
+      "unknown": "Bisher wurden {recovered} der Vorauszahlung verrechnet, der Vertrag nennt die gezahlte Vorauszahlung jedoch nicht, sodass die Verrechnung nicht dagegen geprüft werden kann",
+      "suggestion": "Verringern Sie die Verrechnung in dieser Bescheinigung oder tragen Sie die gezahlte Vorauszahlung in den Bescheinigungseinstellungen des Vertrags ein"
+    },
+    "retention_matches_config": {
+      "fail": "Die Bescheinigung behält {certificate} als Sicherheit ein ({percent} % ihrer Bemessungsgrundlage), der zugrunde liegende Beleg behält jedoch {stored} ein",
+      "suggestion": "Berechnen Sie den Beleg neu oder korrigieren Sie Einbehaltssatz oder Bemessungsgrundlage in den Bescheinigungseinstellungen des Vertrags, damit beide denselben Einbehalt zeigen"
+    },
+    "net_payable_negative": {
+      "fail": "Der auszuzahlende Betrag ist {payable}: Die Abzüge sind größer als der Betrag dieser Bescheinigung",
+      "suggestion": "Prüfen Sie die Abzüge, vor allem die Verrechnung der Vorauszahlung, und übertragen Sie, was jetzt nicht abgezogen werden kann, in die nächste Bescheinigung"
+    },
+    "taxes_stale": {
+      "fail": "Die Steuern wurden berechnet, bevor sich diese Bescheinigung geändert hat, und gehören daher nicht mehr zu ihr",
+      "suggestion": "Berechnen Sie die Steuern neu. Waren sie bereits bestätigt, öffnen Sie sie zuerst wieder und bestätigen Sie sie danach erneut"
+    },
+    "taxes_confirmed": {
+      "fail": "Die Steuerbeträge dieser Bescheinigung sind nicht bestätigt",
+      "suggestion": "Prüfen Sie jede Steuerzeile und bestätigen Sie die Steuern vor der Feststellung"
+    },
+    "lines_complete": {
+      "fail": "Die Zeile {line} hat noch keinen Betrag. {reason}",
+      "suggestion": "Tragen Sie den Betrag ein oder kennzeichnen Sie die Zeile mit Begründung als nicht anwendbar"
+    },
+    "work_value_differs": {
+      "fail": "Die Position {line} ist bisher mit {stated} erfasst, Menge oder Prozentsatz ergeben jedoch {computed}",
+      "suggestion": "Korrigieren Sie Menge oder Betrag im Beleg, damit die beiden Spalten der Zeile übereinstimmen"
+    }
   }
 }

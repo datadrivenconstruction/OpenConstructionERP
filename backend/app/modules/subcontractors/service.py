@@ -1996,27 +1996,54 @@ class SubcontractorService:
         changes = await self._approved_line_amounts(payment_id, lines or [])
         gross, retention, net = _approved_payable(entity, agreement, changes.values())
         await self._assert_billed_claim_unchanged(entity, changes, retention)
-        for line_id, (_claimed, before, after) in changes.items():
-            if after != before:
-                await self.payment_lines.update_fields(line_id, approved_amount=after)
-        # Retention is withheld from what is paid, so the accrual booked at
-        # submission on the claimed gross moves to the approved one. Only an
-        # accrual nothing has been released against, the same rule an edit
-        # while submitted follows.
-        for ledger in await self.retention.list_for_payment_application(payment_id):
-            if ledger.released_amount == 0 and ledger.accrued_amount != retention:
-                await self.retention.update_fields(ledger.id, accrued_amount=retention)
-        approved = await self._transition_payment(
-            payment_id,
-            "finance_approved",
-            extra={
-                "finance_approved_at": datetime.now(UTC),
-                "finance_approved_by": user_id,
-                "approved_gross_amount": gross,
-                "approved_retention_amount": retention,
-                "approved_net_amount": net,
-            },
-        )
+        certificate = await self._hakedis_applies(agreement)
+        if certificate and any(after != claimed for claimed, _before, after in changes.values()):
+            # The certificate, its taxes included, was prepared and confirmed
+            # on the claimed amounts. Approving less would make it a different
+            # document in the same breath it is certified in, with nobody
+            # having seen the new one.
+            raise self._refuse(
+                status.HTTP_409_CONFLICT,
+                "hakedis_amounts_differ",
+                "This payment application has a payment certificate prepared on the claimed amounts. "
+                "Approve it as claimed, or reject it and have it submitted again at the agreed amounts.",
+            )
+
+        async def write_approval() -> PaymentApplication:
+            for line_id, (_claimed, before, after) in changes.items():
+                if after != before:
+                    await self.payment_lines.update_fields(line_id, approved_amount=after)
+            # Retention is withheld from what is paid, so the accrual booked at
+            # submission on the claimed gross moves to the approved one. Only an
+            # accrual nothing has been released against, the same rule an edit
+            # while submitted follows.
+            for ledger in await self.retention.list_for_payment_application(payment_id):
+                if ledger.released_amount == 0 and ledger.accrued_amount != retention:
+                    await self.retention.update_fields(ledger.id, accrued_amount=retention)
+            return await self._transition_payment(
+                payment_id,
+                "finance_approved",
+                extra={
+                    "finance_approved_at": datetime.now(UTC),
+                    "finance_approved_by": user_id,
+                    "approved_gross_amount": gross,
+                    "approved_retention_amount": retention,
+                    "approved_net_amount": net,
+                },
+            )
+
+        if certificate:
+            # Finance approval is where this document stops moving, so it is
+            # where its certificate has to be complete and is stored. The
+            # approval and the certificate's gate share one savepoint: a
+            # certificate that is not ready undoes the approval here and now,
+            # whatever the caller then does with the session, so the
+            # application is never approved with no certificate behind it.
+            async with self.session.begin_nested():
+                approved = await write_approval()
+                await self.certify_hakedis(approved, agreement, user_id)
+        else:
+            approved = await write_approval()
         # What finance approved is a bill we owe: raise it as a payable with
         # the approved retention held from it, so the payables ledger and this
         # module's retention ledger carry the same figure.
@@ -2787,6 +2814,293 @@ class SubcontractorService:
             "prior_claims_total": prior_paid,
             "net_due": net,
         }
+
+    # ── Payment certificate (hakediş) ──────────────────────────────────
+
+    #: Pay application statuses in which its certificate may still change,
+    #: and those in which the application itself no longer does.
+    _HAKEDIS_EDITABLE_STATUSES = frozenset({"submitted", "foreman_approved"})
+    _HAKEDIS_SETTLED_STATUSES = frozenset({"finance_approved", "paid"})
+
+    async def _hakedis_terms(self, agreement: SubcontractAgreement) -> dict[str, Any]:
+        """The certificate configuration of an agreement, in the shape contract terms have.
+
+        The agreement's own ``metadata["hakedis"]`` first; failing that, the
+        configuration of the contract it is linked to. Neither is required:
+        without one the project's country decides.
+        """
+        own = (agreement.metadata_ or {}).get("hakedis") if isinstance(agreement.metadata_, dict) else None
+        if isinstance(own, dict):
+            return {"hakedis": own}
+        if agreement.contract_id is not None:
+            contract = await PrimeContractReader(self.session).get_contract(agreement.contract_id)
+            terms = getattr(contract, "terms", None)
+            if isinstance(terms, dict) and isinstance(terms.get("hakedis"), dict):
+                return {"hakedis": terms["hakedis"]}
+        return {}
+
+    async def _hakedis_project(self, agreement: SubcontractAgreement) -> Any:
+        from app.modules.projects.models import Project  # noqa: PLC0415
+
+        return await self.session.get(Project, agreement.project_id) if agreement.project_id else None
+
+    async def _hakedis_applies(self, agreement: SubcontractAgreement) -> bool:
+        """Whether pay applications under this agreement have a payment certificate."""
+        from app.modules.contracts import hakedis_document  # noqa: PLC0415
+
+        project = await self._hakedis_project(agreement)
+        country = str(getattr(project, "country_code", "") or "").strip().upper()
+        return hakedis_document.hakedis_available(country, await self._hakedis_terms(agreement))
+
+    async def hakedis_source(
+        self, payment: PaymentApplication, agreement: SubcontractAgreement, *, language: str = "tr"
+    ) -> Any:
+        """One pay application as the payment certificate reads it.
+
+        A lump-sum works list with one row per work package: its planned
+        value, what the applications before this one were paid on it, and what
+        this one bills. Money the application's gross carries beyond its lines
+        gets a row of its own, so the list totals to the gross.
+
+        An application that finance has approved is read at its approved
+        amounts, any other at its claimed ones. The applications before this
+        one are every non-rejected application of the agreement that sorts
+        earlier by period end, then by when it was submitted.
+        """
+        from app.modules.contracts import hakedis, hakedis_document  # noqa: PLC0415
+        from app.modules.contracts.messages import translate as contracts_translate  # noqa: PLC0415
+
+        settled_statuses = self._HAKEDIS_SETTLED_STATUSES
+        zero = Decimal("0")
+
+        def money(value: Any) -> Decimal:
+            return Decimal(str(value or 0))
+
+        def gross_of(application: PaymentApplication) -> Decimal:
+            if application.status in settled_statuses and application.approved_gross_amount is not None:
+                return money(application.approved_gross_amount)
+            return money(application.gross_amount)
+
+        def amount_of(line: PaymentApplicationLine, application: PaymentApplication) -> Decimal:
+            return money(line.approved_amount if application.status in settled_statuses else line.claimed_amount)
+
+        def order(application: PaymentApplication) -> tuple[Any, ...]:
+            stamp = application.submitted_at or application.created_at
+            return (
+                application.period_end or date.max,
+                stamp.isoformat() if stamp is not None else "",
+                application.application_number or "",
+                str(application.id),
+            )
+
+        siblings = [
+            item
+            for item in await self.payments.list_for_agreement(agreement.id)
+            if item.status != "rejected" or item.id == payment.id
+        ]
+        earlier = sorted((item for item in siblings if order(item) < order(payment)), key=order)
+
+        previous_by_package: dict[uuid.UUID, Decimal] = {}
+        previous_outside = zero
+        for item in earlier:
+            billed = zero
+            for line in await self.payment_lines.list_for_application(item.id):
+                value = amount_of(line, item)
+                billed += value
+                previous_by_package[line.work_package_id] = previous_by_package.get(line.work_package_id, zero) + value
+            previous_outside += max(gross_of(item) - billed, zero)
+
+        period_by_package: dict[uuid.UUID, Decimal] = {}
+        billed_now = zero
+        for line in await self.payment_lines.list_for_application(payment.id):
+            value = amount_of(line, payment)
+            billed_now += value
+            period_by_package[line.work_package_id] = period_by_package.get(line.work_package_id, zero) + value
+        period_outside = max(gross_of(payment) - billed_now, zero)
+
+        packages = await self.work_packages.list_for_agreement(agreement.id)
+        planned_total = sum((money(package.planned_value) for package in packages), zero)
+        hundred = Decimal("100")
+        lines: list[Any] = []
+        for position, package in enumerate(packages, start=1):
+            planned = money(package.planned_value)
+            previous = previous_by_package.get(package.id, zero)
+            period = period_by_package.get(package.id, zero)
+            lines.append(
+                hakedis.CertificateWorkLine(
+                    code=str(position),
+                    description=package.name or "",
+                    unit="",
+                    contract_quantity=None,
+                    previous_quantity=None,
+                    period_quantity=None,
+                    unit_price=None,
+                    contract_amount=planned,
+                    weight_pct=planned / planned_total * hundred if planned_total > zero else None,
+                    previous_pct=previous / planned * hundred if planned > zero else None,
+                    period_pct=period / planned * hundred if planned > zero else None,
+                    stated_previous_amount=previous,
+                    stated_period_amount=period,
+                )
+            )
+        if previous_outside > zero or period_outside > zero:
+            lines.append(
+                hakedis.CertificateWorkLine(
+                    code="",
+                    description=contracts_translate("aia.g703.billed_not_on_a_schedule_line", locale=language),
+                    unit="",
+                    contract_quantity=None,
+                    previous_quantity=None,
+                    period_quantity=None,
+                    unit_price=None,
+                    contract_amount=None,
+                    weight_pct=None,
+                    previous_pct=None,
+                    period_pct=None,
+                    stated_previous_amount=previous_outside,
+                    stated_period_amount=period_outside,
+                )
+            )
+
+        project = await self._hakedis_project(agreement)
+        subcontractor = await self.subs.get_by_id(agreement.subcontractor_id)
+        settled = payment.status in settled_statuses
+        tax_day = payment.period_end or (payment.submitted_at.date() if payment.submitted_at else None)
+        total_value = money(agreement.total_value)
+        retention = payment.approved_retention_amount if settled else payment.retention_amount
+        return hakedis_document.CertificateSource(
+            kind=hakedis_document.SOURCE_SUB_PAYMENT_APPLICATION,
+            source_id=payment.id,
+            project_id=agreement.project_id,
+            reference=payment.application_number or "",
+            status=payment.status,
+            editable=payment.status in self._HAKEDIS_EDITABLE_STATUSES,
+            settled=settled,
+            country_code=str(getattr(project, "country_code", "") or "").strip().upper(),
+            subdivision_code=getattr(project, "subdivision_code", None) or None,
+            currency=payment.currency or agreement.currency or getattr(project, "currency", "") or "",
+            flavour="lump_sum",
+            position=len(earlier) + 1,
+            period_start=payment.period_start,
+            period_end=payment.period_end,
+            tax_date=tax_day,
+            project_name=str(getattr(project, "name", "") or ""),
+            contract_number=str((agreement.metadata_ or {}).get("agreement_number") or ""),
+            contract_title=agreement.title or "",
+            employer=hakedis_document.own_company_party(),
+            contractor=hakedis_document.party_from_record(subcontractor),
+            lines=tuple(lines),
+            retention_percent=money(agreement.retention_percent),
+            terms=await self._hakedis_terms(agreement),
+            # We pay the subcontractor, so we are the one withholding.
+            direction="withheld_by_us",
+            prior=tuple(
+                hakedis_document.PriorDocument(
+                    source_id=item.id,
+                    reference=item.application_number or "",
+                    settled=item.status in settled_statuses,
+                )
+                for item in earlier
+            ),
+            contract_value=total_value if total_value > zero else None,
+            contract_start=agreement.start_date,
+            contract_end=agreement.end_date,
+            stored_gross=gross_of(payment),
+            stored_retention=money(retention),
+        )
+
+    async def _hakedis_payment(self, payment_id: uuid.UUID) -> tuple[PaymentApplication, SubcontractAgreement]:
+        """The pay application and its agreement, or 404 where there is no certificate for it."""
+        from app.modules.contracts import hakedis_document  # noqa: PLC0415
+
+        payment = await self.payments.get_by_id(payment_id)
+        if payment is None:
+            raise HTTPException(status_code=404, detail="Payment application not found")
+        agreement = await self.agreements.get_by_id(payment.agreement_id)
+        if agreement is None:
+            raise HTTPException(status_code=404, detail=translate("errors.agreement_not_found", locale=get_locale()))
+        if not await self._hakedis_applies(agreement):
+            raise hakedis_document.not_available()
+        return payment, agreement
+
+    async def build_hakedis(self, payment_id: uuid.UUID, *, language: str = "tr") -> Any:
+        """The payment certificate of one subcontractor pay application."""
+        from app.modules.contracts import hakedis_document  # noqa: PLC0415
+
+        payment, agreement = await self._hakedis_payment(payment_id)
+        source = await self.hakedis_source(payment, agreement, language=language)
+        return await hakedis_document.build_document(self.session, source, language=language)
+
+    async def hakedis_view(self, payment_id: uuid.UUID, *, locale: str) -> dict[str, Any]:
+        """The certificate as the screen reads it, with the findings of its rule set."""
+        from app.modules.contracts import hakedis_document  # noqa: PLC0415
+
+        document = await self.build_hakedis(payment_id, language=hakedis_document.first_language(locale))
+        report = None
+        if not document.frozen:
+            report = await hakedis_document.run_rules(self.session, document, locale=get_locale())
+        return hakedis_document.document_payload(document, locale=locale, report=report)
+
+    async def save_hakedis_line(self, payment_id: uuid.UUID, line_key: str, data: Any, user_id: str | None) -> None:
+        """Store what a person entered for one line of a pay application's certificate."""
+        from app.modules.contracts import hakedis_document  # noqa: PLC0415
+
+        payment, agreement = await self._hakedis_payment(payment_id)
+        await hakedis_document.save_line(
+            self.session,
+            await self.hakedis_source(payment, agreement),
+            line_key,
+            state=data.state,
+            amount=data.amount,
+            pct=data.pct,
+            note=data.note or "",
+            user_id=user_id,
+        )
+
+    async def save_hakedis_options(self, payment_id: uuid.UUID, data: Any, user_id: str | None) -> None:
+        """Store whether a pay application's certificate is the final one."""
+        from app.modules.contracts import hakedis_document  # noqa: PLC0415
+
+        payment, agreement = await self._hakedis_payment(payment_id)
+        await hakedis_document.save_options(
+            self.session, await self.hakedis_source(payment, agreement), is_final=data.is_final, user_id=user_id
+        )
+
+    async def save_hakedis_taxes(self, payment_id: uuid.UUID, data: Any, user_id: str) -> None:
+        """Have a pay application's taxes computed on its certificate's own bases and stored."""
+        from app.modules.contracts import hakedis_document  # noqa: PLC0415
+
+        payment, agreement = await self._hakedis_payment(payment_id)
+        await hakedis_document.save_taxes(
+            self.session,
+            await self.hakedis_source(payment, agreement),
+            choices=data.choices(),
+            buyer_facts=data.buyer_facts(),
+            user_id=user_id,
+        )
+
+    async def certify_hakedis(
+        self, payment: PaymentApplication, agreement: SubcontractAgreement, actor_id: str | None
+    ) -> None:
+        """Check, then freeze, the certificate of a pay application finance has just approved.
+
+        Raises:
+            HTTPException: 422 ``hakedis_not_ready`` while a line is held, a
+                rule of the set fails or the taxes are not confirmed.
+        """
+        from app.modules.contracts import hakedis_document  # noqa: PLC0415
+
+        source = await self.hakedis_source(payment, agreement)
+        document = await hakedis_document.enforce_ready(self.session, source, locale=get_locale())
+        await hakedis_document.freeze_document(self.session, source, user_id=actor_id, document=document)
+
+    async def payment_application_project_id(self, payment_id: uuid.UUID) -> uuid.UUID | None:
+        """The project a pay application belongs to, or ``None`` when there is no such application."""
+        payment = await self.payments.get_by_id(payment_id)
+        if payment is None:
+            return None
+        agreement = await self.agreements.get_by_id(payment.agreement_id)
+        return agreement.project_id if agreement is not None else None
 
     # ── Retention ──────────────────────────────────────────────────────
 
@@ -3814,3 +4128,28 @@ def _compute_prequal_score(answers: dict[str, Any]) -> int:
     if counted == 0:
         return 0
     return int(round((yes / counted) * 100))
+
+
+async def _payment_application_project(session: AsyncSession, source_id: uuid.UUID) -> uuid.UUID | None:
+    """The project that owns a pay application, for the statutory tax lines."""
+    return await SubcontractorService(session).payment_application_project_id(source_id)
+
+
+def register_payment_application_as_tax_source() -> bool:
+    """Tell the tax module that a subcontractor pay application belongs to this module.
+
+    The statutory tax lines are filed on a document by its id and refuse every
+    kind of document nobody has claimed, so without this the taxes of a pay
+    application can be neither stored nor read. The tax module is optional:
+    where it is absent there are no tax lines to guard and ``False`` is
+    returned.
+    """
+    try:
+        from app.modules.tax_withholding.source_owners import register_source_owner  # noqa: PLC0415
+    except ModuleNotFoundError as exc:
+        if exc.name not in {"app.modules.tax_withholding", "app.modules.tax_withholding.source_owners"}:
+            raise
+        logger.info("subcontractors: no tax module on this install, pay applications not registered as a tax source")
+        return False
+    register_source_owner("sub_payment_application", _payment_application_project)
+    return True

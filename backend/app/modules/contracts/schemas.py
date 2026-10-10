@@ -1811,3 +1811,105 @@ class SovReconcileExclusion(BaseModel):
     source_key: str = Field(..., min_length=1, max_length=120)
     excluded: bool = True
     reason: str = Field(default="", max_length=500)
+
+
+# == Payment certificate (hakediş) ==========================================
+
+
+class HakedisLineInput(BaseModel):
+    """What a person enters for one manual line of a payment certificate.
+
+    ``state`` is ``value`` with an ``amount`` or a ``pct`` of the line's base,
+    ``not_applicable`` with the reason as ``note``, or ``unset`` to remove the
+    entry so the line is held again.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    state: str = Field(..., pattern=r"^(value|not_applicable|unset)$")
+    amount: Decimal | None = Field(default=None, max_digits=18, decimal_places=4)
+    pct: Decimal | None = Field(default=None, ge=0, le=100)
+    note: str = Field(default="", max_length=2000)
+
+
+class HakedisOptionsInput(BaseModel):
+    """Whether this certificate is the final one. Stated by a person, never inferred."""
+
+    is_final: bool
+
+
+class HakedisTaxChoice(BaseModel):
+    """A person's decision on one tax: a category, not applicable with a reason, or undecided."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    state: str = Field(..., pattern=r"^(selected|not_applicable|unset)$")
+    code: str = Field(default="", max_length=64)
+    reason: str = Field(default="", max_length=500)
+
+
+class HakedisTaxesInput(BaseModel):
+    """The tax choices of one certificate and the two facts about the buyer.
+
+    No amount is sent: the base of every tax is the certificate's own. A field
+    left out keeps its stored value, so an empty body recalculates the taxes
+    on the certificate's current amounts.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    vat_withholding: HakedisTaxChoice | None = None
+    income_withholding: HakedisTaxChoice | None = None
+    stamp_duty: HakedisTaxChoice | None = None
+    buyer_is_designated: bool | None = None
+    work_value_incl_vat: Decimal | None = Field(default=None, ge=0, max_digits=18, decimal_places=4)
+    work_value_note: str | None = Field(default=None, max_length=500)
+
+    def choices(self) -> dict[str, Any]:
+        """The choices that were sent, as the tax calculation reads them; ``None`` for one left out."""
+        from app.core.payment_taxes import Choice  # noqa: PLC0415
+
+        sent: dict[str, Any] = {}
+        for kind in ("vat_withholding", "income_withholding", "stamp_duty"):
+            item = getattr(self, kind)
+            sent[kind] = Choice(item.state, item.code, item.reason) if item is not None else None  # type: ignore[arg-type]
+        return sent
+
+    def buyer_facts(self) -> dict[str, Any]:
+        """The facts about the buyer that were sent, an explicit null included."""
+        names = ("buyer_is_designated", "work_value_incl_vat", "work_value_note")
+        return {name: getattr(self, name) for name in names if name in self.model_fields_set}
+
+
+class HakedisResponse(BaseModel):
+    """A payment certificate as the screen reads it. Every amount is a string.
+
+    The nested objects are documented with the endpoint; they are passed
+    through as built so the screen and the printed document read one model.
+    """
+
+    source_kind: str
+    source_id: UUID
+    project_id: UUID
+    reference: str
+    status: str
+    locale: str
+    locales: list[str]
+    layout_available: bool
+    editable: bool
+    frozen: bool
+    frozen_at: str | None = None
+    is_draft: bool
+    currency: str
+    country_code: str
+    flavour: str
+    header: dict[str, Any]
+    works: dict[str, Any]
+    summary: list[dict[str, Any]]
+    notes: list[dict[str, Any]]
+    taxes: dict[str, Any]
+    options: dict[str, Any]
+    signature_roles: list[dict[str, Any]]
+    carried_total: str | None = None
+    findings: list[dict[str, Any]]
+    can_certify: bool

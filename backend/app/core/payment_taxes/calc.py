@@ -54,6 +54,8 @@ from app.core.currency_registry import CURRENCIES, money_quantum
 from app.core.payment_taxes.tables import BASES, BUYER_SCOPES, OverlappingRowsError, RateRow, lookup
 
 __all__ = [
+    "ALL_REASON_KEYS",
+    "CONSUMER_REASON_KEYS",
     "FIGURE_KINDS",
     "REASON_KEYS",
     "Choice",
@@ -97,6 +99,42 @@ REASON_KEYS: tuple[str, ...] = (
     "override_not_allowed",
     "currency_unknown",
 )
+
+#: Reason keys the calculator itself never emits but that reach the same
+#: screens and the same printed documents, set by whoever consumes its result:
+#: the module that stores the figures of a payment document, and the payment
+#: certificate that prints them among its other lines. They are listed here,
+#: beside the calculator's own, so that one place names every reason a reader
+#: can be shown. A consumer that invents a key outside this tuple fails the
+#: vocabulary test, which reads the consumers' source for the keys they use.
+CONSUMER_REASON_KEYS: tuple[str, ...] = (
+    # Set by the module that stores a document's taxes.
+    "stamp_duty_base_unknown",
+    # Set by the certificate when it cannot take the stored figures as they are.
+    "module_absent",
+    "provider_failed",
+    "missing_figure",
+    "tax_base_mismatch",
+    "taxes_stale",
+    "taxes_outdated",
+    "taxes_not_stored",
+    "taxes_not_confirmed",
+    "unconfirmed_rate",
+    "overridden",
+    # Set by the certificate for its own lines.
+    "base_held",
+    "operand_held",
+    "not_entered",
+    "manual_held",
+    "retention_unknown",
+    "previous_unknown",
+    "previous_not_certified",
+    "work_line_incomplete",
+    "other",
+)
+
+#: Every reason key that can reach a screen or a printed document.
+ALL_REASON_KEYS: tuple[str, ...] = (*REASON_KEYS, *CONSUMER_REASON_KEYS)
 
 _CHOICE_STATES = ("selected", "not_applicable", "unset")
 _OVERRIDE_KEYS = ("vat_computed", "vat_withheld", "vat_payable", "income_withheld", "stamp_duty")

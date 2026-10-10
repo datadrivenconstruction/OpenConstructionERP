@@ -17,6 +17,7 @@ from sqlalchemy.orm.util import identity_key
 from sqlalchemy.sql.elements import ClauseElement
 
 from app.modules.contracts.models import (
+    CertificateLine,
     Contract,
     ContractDocument,
     ContractLine,
@@ -959,3 +960,50 @@ class ContractTemplateRepository(_CRUDBase):
                 }
             )
         return entries
+
+
+class CertificateLineRepository(_CRUDBase):
+    """Entered and frozen lines of a payment certificate, by its source document."""
+
+    model = CertificateLine
+
+    async def list_for_source(self, source_kind: str, source_id: uuid.UUID, *, frozen: bool) -> list[CertificateLine]:
+        """Every entered (or every frozen) row of one document."""
+        result = await self.session.execute(
+            select(CertificateLine).where(
+                CertificateLine.source_kind == source_kind,
+                CertificateLine.source_id == source_id,
+                CertificateLine.frozen.is_(frozen),
+            )
+        )
+        return list(result.scalars().all())
+
+    async def get_line(
+        self, source_kind: str, source_id: uuid.UUID, line_key: str, *, frozen: bool
+    ) -> CertificateLine | None:
+        """One row by its key, or ``None``."""
+        result = await self.session.execute(
+            select(CertificateLine).where(
+                CertificateLine.source_kind == source_kind,
+                CertificateLine.source_id == source_id,
+                CertificateLine.line_key == line_key,
+                CertificateLine.frozen.is_(frozen),
+            )
+        )
+        return result.scalars().first()
+
+    async def frozen_lines_for_sources(
+        self, source_kind: str, source_ids: list[uuid.UUID], line_key: str
+    ) -> dict[uuid.UUID, CertificateLine]:
+        """The frozen row with ``line_key`` of each named document that has one."""
+        if not source_ids:
+            return {}
+        result = await self.session.execute(
+            select(CertificateLine).where(
+                CertificateLine.source_kind == source_kind,
+                CertificateLine.source_id.in_(source_ids),
+                CertificateLine.line_key == line_key,
+                CertificateLine.frozen.is_(True),
+            )
+        )
+        return {row.source_id: row for row in result.scalars().all()}
