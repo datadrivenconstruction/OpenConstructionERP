@@ -280,3 +280,37 @@ def test_the_excluded_advisor_list_is_still_a_different_vocabulary() -> None:
         "ADVISOR_REGION_OPTIONS now names only ids the registry loads, so it is a real mirror "
         "of this id list. Add it to MIRRORS above and delete this test."
     )
+
+
+@pytest.mark.parametrize("market_id,national_id", [("ZH_SHANGHAI", "ZH_CHINA"), ("TR_ISTANBUL", "TR_NATIONAL")])
+def test_the_preset_region_installs_and_searches_its_own_snapshot(market_id: str, national_id: str) -> None:
+    """The v3 snapshot a preset region installs is that region's, and search reads it.
+
+    The vector registry filed the Shanghai and Istanbul snapshots under the
+    national ids and reached them through an alias, so the Turkish card read
+    "National" while it restored the Istanbul catalogue. The market id must
+    reach a row of its own, the national id must reach none, because no
+    national base has a published snapshot, and the collection the install
+    restores into must be the one search reads for the same region.
+    """
+    from app.modules.costs.cwicr_v3_catalogue import _HF_PUBLISHED, get_catalogue
+    from app.modules.costs.qdrant_adapter import country_to_collection
+
+    preset_regions = {region for _pack, region in _presets()}
+    assert market_id in preset_regions, f"no country preset installs {market_id} any more; reread this test"
+
+    row = get_catalogue(market_id)
+    assert row is not None, f"{market_id} reaches no v3 row, so its install answers 404"
+    assert row.region == market_id, f"{market_id} reaches the v3 row filed as {row.region}"
+    assert _HF_PUBLISHED[row.region][1] == market_id, f"{market_id}'s row restores another market's snapshot"
+    assert country_to_collection(market_id) == row.collection
+    assert get_catalogue(national_id) is None, f"{national_id} reaches a v3 snapshot built from another catalogue"
+
+
+def test_no_v3_alias_joins_two_separate_bases() -> None:
+    """An alias is a rename. Two ids the base registry loads separately are not one."""
+    from app.modules.costs.cwicr_v3_catalogue import _REGION_ALIASES
+
+    known = _registry_regions()
+    joined = sorted((old, new) for old, new in _REGION_ALIASES.items() if old in known and new in known)
+    assert not joined, f"{joined} alias one loadable base to another"

@@ -448,12 +448,12 @@ CWICR_V3_CATALOGUES: tuple[CwicrV3Catalogue, ...] = (
     ),
     # ── Asia / MENA ──────────────────────────────────────────────────
     CwicrV3Catalogue(
-        region="ZH_CHINA",
+        region="ZH_SHANGHAI",
         country_iso="CN",
-        city="National",
+        city="Shanghai",
         language="zh",
         currency="CNY",
-        ddc_path="ZH___DDC_CWICR/ZH_CHINA_workitems_costs_resources_EMBEDDINGS_BGEM3_V3_DDC_CWICR.snapshot",
+        ddc_path="ZH___DDC_CWICR/ZH_SHANGHAI_workitems_costs_resources_EMBEDDINGS_BGEM3_V3_DDC_CWICR.snapshot",
         size_mb=420,
         available=False,
     ),
@@ -478,12 +478,12 @@ CWICR_V3_CATALOGUES: tuple[CwicrV3Catalogue, ...] = (
         available=False,
     ),
     CwicrV3Catalogue(
-        region="TR_NATIONAL",
+        region="TR_ISTANBUL",
         country_iso="TR",
-        city="National",
+        city="Istanbul",
         language="tr",
         currency="TRY",
-        ddc_path="TR___DDC_CWICR/TR_NATIONAL_workitems_costs_resources_EMBEDDINGS_BGEM3_V3_DDC_CWICR.snapshot",
+        ddc_path="TR___DDC_CWICR/TR_ISTANBUL_workitems_costs_resources_EMBEDDINGS_BGEM3_V3_DDC_CWICR.snapshot",
         size_mb=420,
         available=False,
     ),
@@ -660,12 +660,14 @@ _HF_PUBLISHED: dict[str, tuple[str, str]] = {
     "GB_LONDON": ("UK", "UK_GBP"),
     "USA_USD": ("US", "USA_USD"),
     "ZA_JOHANNESBURG": ("ZA", "ZA_JOHANNESBURG"),
-    # Published 2026-05-11 with the batch above, under the ids these two
-    # regions were renamed away from - the same shape as CA_TORONTO reusing
-    # ENG_TORONTO. Both were left out when the mapping was first written, so
-    # the cards read "coming soon" for months while the files were live.
-    "ZH_CHINA": ("ZH", "ZH_SHANGHAI"),
-    "TR_NATIONAL": ("TR", "TR_ISTANBUL"),
+    # Published 2026-05-11 with the batch above. Both were left out when the
+    # mapping was first written, so the cards read "coming soon" for months
+    # while the files were live. These are the global-market catalogues, and
+    # the rows carry their own ids: they used to be filed under ZH_CHINA and
+    # TR_NATIONAL, the national Dinge and Birim Fiyat bases, which are
+    # different catalogues with no published snapshot of their own.
+    "ZH_SHANGHAI": ("ZH", "ZH_SHANGHAI"),
+    "TR_ISTANBUL": ("TR", "TR_ISTANBUL"),
     # Newly published 2026-05-14 - folder/stem match the HF tree directly.
     "MN_ULAANBAATAR": ("MN", "MN_ULAANBAATAR"),
     "BG_SOFIA": ("BG", "BG_SOFIA"),
@@ -706,18 +708,12 @@ def _apply_hf_overrides(
 CWICR_V3_CATALOGUES = _apply_hf_overrides(CWICR_V3_CATALOGUES)
 
 
-# ZH_SHANGHAI and TR_ISTANBUL are not old names of ZH_CHINA and TR_NATIONAL;
-# they are the global-market bases, and the national ones are separate bases
-# (see 9bcc6bc03). They point here because the only v3 vector snapshots DDC
-# published for China and Turkey are the global-market ones, which
-# _HF_PUBLISHED files under the national rows, and the collection is chosen
-# by language, so both bases of a country restore into the same one. Dropping
-# these two lines would make the install endpoint answer 404 for the region
-# the onboarding presets install. No national base has a snapshot of its own.
+# Only renames belong here. ZH_SHANGHAI and TR_ISTANBUL used to point at
+# ZH_CHINA and TR_NATIONAL, as though each pair were one base under two names;
+# they are separate bases (see 9bcc6bc03), and the national ones have no v3
+# snapshot, so asking for one finds nothing rather than the other catalogue.
 _REGION_ALIASES: dict[str, str] = {
-    "CN_SHANGHAI": "ZH_CHINA",
-    "ZH_SHANGHAI": "ZH_CHINA",
-    "TR_ISTANBUL": "TR_NATIONAL",
+    "CN_SHANGHAI": "ZH_SHANGHAI",
 }
 
 

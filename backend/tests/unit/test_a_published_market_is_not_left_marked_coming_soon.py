@@ -12,8 +12,9 @@ same mapping and therefore agrees with it by construction.
 The check here reads a second structure that knows nothing about publication
 status: :mod:`app.modules.costs.base_registry`, whose global markets are
 derived from its own family tables and which names the market by the id the
-published file carries (``ZH_SHANGHAI``, ``TR_ISTANBUL``) rather than by the
-platform id the region was later renamed to (``ZH_CHINA``, ``TR_NATIONAL``).
+published file carries (``ZH_SHANGHAI``, ``TR_ISTANBUL``). The v3 rows for those
+two once sat under the national ids ``ZH_CHINA`` and ``TR_NATIONAL``, which name
+different catalogues, and now carry the market ids themselves.
 Two tables written at different times for different jobs, so agreement between
 them is evidence rather than a tautology.
 

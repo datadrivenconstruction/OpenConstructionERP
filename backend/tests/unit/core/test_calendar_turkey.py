@@ -17,7 +17,7 @@ from datetime import date
 
 import pytest
 
-from app.core.calendar import _holidays_tr, is_working_day, resolve_holidays
+from app.core.calendar import _holidays_tr, add_working_days, is_working_day, resolve_holidays
 from app.core.provenance import Source
 from app.modules.schedule.service import get_work_calendar
 
@@ -67,3 +67,11 @@ def test_a_turkish_project_is_scheduled_around_the_feasts(region: str) -> None:
     assert holidays >= _RAMAZAN_2027
     assert holidays >= _KURBAN_2027
     assert not is_working_day(date(2027, 3, 9), "TR")
+
+
+def test_three_working_days_from_the_friday_before_kurban_bayrami_end_after_it() -> None:
+    # Kurban Bayrami 2027 runs Sunday 16 to Wednesday 19 May. Without it the
+    # three days after Friday 14 May are 17-19 May; with it they are 20, 21, 24.
+    start = date(2027, 5, 14)
+    assert add_working_days(start, 3, "XX") == date(2027, 5, 19)
+    assert add_working_days(start, 3, "TR") == date(2027, 5, 24)
